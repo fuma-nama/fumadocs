@@ -94,20 +94,13 @@ function buildAll(
 
       if (node.file.name === 'index') {
         if (!skipIndex) output.unshift(treeNode);
-        continue;
+      } else {
+        output.push(treeNode);
       }
-
-      output.push(treeNode);
     }
 
     if ('children' in node) {
-      const folder = buildFolderNode(node, false, ctx);
-
-      if (folder.children.length === 0 && folder.index) {
-        output.push(folder.index);
-      } else {
-        folders.push(folder);
-      }
+      folders.push(buildFolderNode(node, false, ctx));
     }
   }
 
@@ -193,22 +186,21 @@ function buildFolderNode(
     ctx.localeStorage?.read(metaPath, 'meta') ??
     ctx.storage.read(metaPath, 'meta');
 
-  const indexFile = ctx.storage.read(
-    joinPath(folder.file.path, 'index'),
-    'page',
-  );
+  const indexPath = joinPath(folder.file.path, 'index');
+  const indexFile =
+    ctx.localeStorage?.read(indexPath, 'page') ??
+    ctx.storage.read(indexPath, 'page');
 
   const metadata = meta?.data;
   const isRoot = metadata?.root ?? isGlobalRoot;
   const index = indexFile ? buildFileNode(indexFile, ctx) : undefined;
 
+  const addedNodePaths = new Set<string>();
   let children: PageTree.Node[];
 
   if (!metadata?.pages) {
     children = buildAll(folder.children, ctx, !isRoot);
   } else {
-    const addedNodePaths = new Set<string>();
-
     const resolved = metadata?.pages?.flatMap<
       PageTree.Node | typeof rest | typeof restReversed
     >((item, i) => {
@@ -245,7 +237,10 @@ function buildFolderNode(
     root: metadata?.root,
     defaultOpen: metadata?.defaultOpen,
     description: metadata?.description,
-    index,
+    index:
+      isRoot || (indexFile && !addedNodePaths.has(indexFile.file.path))
+        ? index
+        : undefined,
     children,
     $id: folder.file.path,
     $ref: !ctx.options.noRef

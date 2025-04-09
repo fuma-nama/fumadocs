@@ -567,16 +567,22 @@ test('Loader: Without meta.json', () => {
         "$id": "root",
         "children": [
           {
-            "$id": "hello/index.mdx",
-            "name": "Hello",
-            "type": "page",
-            "url": "/hello",
-          },
-          {
             "$id": "test.mdx",
             "name": "Hello",
             "type": "page",
             "url": "/test",
+          },
+          {
+            "$id": "hello",
+            "children": [],
+            "index": {
+              "$id": "hello/index.mdx",
+              "name": "Hello",
+              "type": "page",
+              "url": "/hello",
+            },
+            "name": "Hello",
+            "type": "folder",
           },
         ],
         "name": "",

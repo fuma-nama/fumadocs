@@ -1,8 +1,9 @@
 'use client';
 
 import { ThemeProvider } from 'next-themes';
-import {
+import React, {
   type ComponentPropsWithoutRef,
+  Fragment,
   lazy,
   type ReactNode,
   useMemo,
