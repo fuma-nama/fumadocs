@@ -11,6 +11,9 @@ export type Node = Item | Separator | Folder;
 
 export interface Item {
   $id?: string;
+  /**
+   * @internal
+   */
   $ref?: {
     file: string;
   };
@@ -34,6 +37,9 @@ export interface Separator {
 
 export interface Folder {
   $id?: string;
+  /**
+   * @internal
+   */
   $ref?: {
     metaFile?: string;
   };

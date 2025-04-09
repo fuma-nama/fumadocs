@@ -69,9 +69,7 @@ export function Operation({
     headNode = (
       <>
         {heading(headingLevel, title, ctx)}
-        {method.description ? (
-          <Markdown key="description" text={method.description} />
-        ) : null}
+        {method.description ? <Markdown text={method.description} /> : null}
       </>
     );
     headingLevel++;

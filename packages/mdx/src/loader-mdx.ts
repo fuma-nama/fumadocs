@@ -88,7 +88,7 @@ export default async function loader(
         source,
         path: filePath,
       },
-      `invalid frontmatter in ${filePath}:`,
+      `invalid frontmatter in ${filePath}`,
     )) as Record<string, unknown>;
   }
 

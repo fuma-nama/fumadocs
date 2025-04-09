@@ -96,10 +96,6 @@ export function RootProvider({
 }: RootProviderProps) {
   let body = children;
 
-  if (i18n) {
-    body = <I18nProvider {...i18n}>{body}</I18nProvider>;
-  }
-
   if (search?.enabled !== false)
     body = (
       <SearchProvider SearchDialog={DefaultSearchDialog} {...search}>
@@ -119,6 +115,10 @@ export function RootProvider({
         {body}
       </ThemeProvider>
     );
+
+  if (i18n) {
+    body = <I18nProvider {...i18n}>{body}</I18nProvider>;
+  }
 
   return (
     <DirectionProvider dir={dir}>

@@ -6,6 +6,7 @@ import type { LoadedConfig } from '@/utils/config';
 export interface RuntimeFile {
   info: FileInfo;
   data: Record<string, unknown>;
+  content: string;
 }
 
 type DocOut<Schema extends StandardSchemaV1> = Omit<

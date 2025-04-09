@@ -3,6 +3,7 @@ import * as fs from 'node:fs/promises';
 import { getConfigHash, loadConfig } from '@/utils/config';
 import { generateJS } from '@/map/generate';
 import { fileCache } from '@/map/file-cache';
+import { ValidationError } from '@/utils/schema';
 
 /**
  * Start a MDX server that builds index and manifest files.
@@ -27,10 +28,18 @@ export async function start(
   async function updateMapFile() {
     console.time(`[MDX] update map file`);
 
-    await fs.writeFile(
-      outPath,
-      await generateJS(configPath, config, outPath, configHash),
-    );
+    try {
+      await fs.writeFile(
+        outPath,
+        await generateJS(configPath, config, outPath, configHash),
+      );
+    } catch (err) {
+      if (err instanceof ValidationError) {
+        err.print();
+      } else {
+        console.error(err);
+      }
+    }
 
     console.timeEnd(`[MDX] update map file`);
   }

@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url';
 import * as path from 'node:path';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
-import { formatError } from '@/utils/schema';
+import { ValidationError } from '@/utils/schema';
 import { generateJS } from '@/map/generate';
 import { defineCollections } from '@/config';
 
@@ -24,14 +24,17 @@ test('format errors', async () => {
     value: 'asfdfsdfsdfsd',
   });
 
-  if (result.issues)
-    expect(formatError('in index.mdx:', result.issues)).toMatchInlineSnapshot(`
+  if (result.issues) {
+    const error = new ValidationError('in index.mdx:', result.issues);
+
+    expect(error.toString()).toMatchInlineSnapshot(`
       "in index.mdx::
         text: Expected string, received number
         obj,key: Required
         obj,value: Expected number, received string
         value: String must contain at most 4 character(s)"
     `);
+  }
 });
 
 const file = path.dirname(fileURLToPath(import.meta.url));

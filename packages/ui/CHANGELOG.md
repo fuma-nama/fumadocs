@@ -1,5 +1,15 @@
 # next-docs-ui
 
+## 15.2.6
+
+### Patch Changes
+
+- b07e98c: Deprecate `DocsCategory`, see https://fumadocs.vercel.app/docs/ui/markdown#further-reading-section
+- Updated dependencies [d49f9ae]
+- Updated dependencies [b07e98c]
+- Updated dependencies [3a4bd88]
+  - fumadocs-core@15.2.6
+
 ## 15.2.5
 
 ### Patch Changes

@@ -118,10 +118,12 @@ export interface LoaderOutput<Config extends LoaderConfig> {
 
   getNodePage: (
     node: PageTree.Item,
+    language?: string,
   ) => Page<Config['source']['pageData']> | undefined;
 
   getNodeMeta: (
     node: PageTree.Folder,
+    language?: string,
   ) => Meta<Config['source']['metaData']> | undefined;
 
   /**
@@ -144,32 +146,33 @@ function indexPages(
   // (locale.slugs -> page)
   pages: Map<string, Page>;
 
-  pathToFile: Map<string, Page | Meta>;
+  getResultFromFile: (file: MetaFile | PageFile) => Page | Meta | undefined;
 } {
   const defaultLanguage = i18n?.defaultLanguage ?? '';
   const map = new Map<string, Page>();
-  const pathToFile = new Map<string, Page | Meta>();
+  const fileMapped = new WeakMap<object, Page | Meta>();
 
   for (const item of storages[defaultLanguage].list()) {
-    if (item.format === 'meta')
-      pathToFile.set(item.file.path, fileToMeta(item));
+    if (item.format === 'meta') {
+      fileMapped.set(item, fileToMeta(item));
+    }
 
     if (item.format === 'page') {
       const page = fileToPage(item, getUrl, defaultLanguage);
-      pathToFile.set(item.file.path, page);
-
+      fileMapped.set(item, page);
       map.set(`${defaultLanguage}.${page.slugs.join('/')}`, page);
+
       if (!i18n) continue;
       const path = joinPath(item.file.dirname, item.file.name);
 
       for (const lang of i18n.languages) {
         if (lang === defaultLanguage) continue;
+        const localizedItem = storages[lang].read(path, 'page');
+        const localizedPage = fileToPage(localizedItem ?? item, getUrl, lang);
 
-        const localizedPage = fileToPage(
-          storages[lang].read(path, 'page') ?? item,
-          getUrl,
-          lang,
-        );
+        if (localizedItem) {
+          fileMapped.set(localizedItem, localizedPage);
+        }
         map.set(`${lang}.${localizedPage.slugs.join('/')}`, localizedPage);
       }
     }
@@ -177,7 +180,9 @@ function indexPages(
 
   return {
     pages: map,
-    pathToFile,
+    getResultFromFile(file) {
+      return fileMapped.get(file);
+    },
   };
 }
 
@@ -332,10 +337,23 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
     getPage(slugs = [], language = options.i18n?.defaultLanguage ?? '') {
       return walker.pages.get(`${language}.${slugs.join('/')}`);
     },
-    getNodeMeta(node) {
-      if (!node.$ref?.metaFile) return;
+    getNodeMeta(node, language = options.i18n?.defaultLanguage ?? '') {
+      const ref = node.$ref?.metaFile;
+      if (!ref) return;
 
-      return walker.pathToFile.get(node.$ref.metaFile) as Meta;
+      const file = storages[language]
+        .list()
+        .find((v) => v.format === 'meta' && v.file.path === ref);
+      if (file) return walker.getResultFromFile(file) as Meta;
+    },
+    getNodePage(node, language = options.i18n?.defaultLanguage ?? '') {
+      const ref = node.$ref?.file;
+      if (!ref) return;
+
+      const file = storages[language]
+        .list()
+        .find((v) => v.format === 'page' && v.file.path === ref);
+      if (file) return walker.getResultFromFile(file) as Page;
     },
     getPageTree(locale) {
       if (options.i18n) {
@@ -345,12 +363,6 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
       }
 
       return this.pageTree;
-    },
-    getNodePage(node) {
-      const ref = node.$ref?.file ?? node.$id;
-      if (!ref) return;
-
-      return walker.pathToFile.get(ref) as Page;
     },
     // @ts-expect-error -- ignore this
     generateParams(slug, lang) {

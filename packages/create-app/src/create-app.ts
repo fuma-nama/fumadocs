@@ -16,13 +16,35 @@ export type Template =
 export interface Options {
   outputDir: string;
   template: Template;
-  tailwindcss: boolean;
+
+  /**
+   * the package manager to use
+   */
   packageManager: PackageManager;
 
+  /**
+   * Create files inside `src`
+   *
+   * (Next.js only)
+   */
   useSrcDir?: boolean;
+
+  /**
+   * Configure Tailwind CSS
+   *
+   * (Next.js only)
+   */
+  tailwindcss: boolean;
+
+  /**
+   * Configure Next.js ESLint plugin
+   *
+   * (Next.js only)
+   */
+  eslint?: boolean;
+
   installDeps?: boolean;
   initializeGit?: boolean;
-  eslint?: boolean;
   log?: (message: string) => void;
 }
 

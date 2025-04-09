@@ -7,15 +7,14 @@ import { type LoadedConfig } from '@/utils/config';
 import type { DocCollection, MetaCollection } from '@/config';
 import { validate } from '@/utils/schema';
 import { fileCache } from '@/map/file-cache';
-import { readFrontmatter } from '@/utils/read-frontmatter';
+import matter from 'gray-matter';
+import type { RuntimeFile } from '@/runtime';
 
-async function readFrontmatterWithCache(file: string) {
-  const cached = fileCache.read('read-frontmatter', file);
+async function readFileWithCache(file: string): Promise<string> {
+  const cached = fileCache.read<string>('read-file', file);
   if (cached) return cached;
 
-  const res = await readFrontmatter(file);
-  fileCache.write('read-frontmatter', file, res);
-  return res;
+  return (await fs.readFile(file)).toString();
 }
 
 export async function generateJS(
@@ -41,36 +40,8 @@ export async function generateJS(
 
   const entries = Array.from(config.collections.entries());
 
-  async function getEntries(
-    collectionName: string,
-    collection: MetaCollection | DocCollection,
-    files: FileInfo[],
-  ) {
+  async function getDocEntries(collectionName: string, files: FileInfo[]) {
     const items = files.map(async (file, i) => {
-      if (collection.type === 'meta') {
-        const cached = fileCache.read<string>('generate-js', file.absolutePath);
-        if (cached) return cached;
-
-        const source = (await fs.readFile(file.absolutePath)).toString();
-        let data = JSON.parse(source);
-
-        if (collection?.schema) {
-          data = await validate(
-            collection.schema,
-            data,
-            {
-              source,
-              path: file.absolutePath,
-            },
-            `invalid data in ${file.absolutePath}:`,
-          );
-        }
-
-        const entry = `{ info: ${JSON.stringify(file)}, data: ${JSON.stringify(data)} }`;
-        fileCache.write('generate-js', file.absolutePath, entry);
-        return entry;
-      }
-
       const importId = `${collectionName}_${i}`;
       lines.unshift(
         getImportCode({
@@ -86,7 +57,33 @@ export async function generateJS(
     return Promise.all(items);
   }
 
-  async function getAsyncEntries(files: FileInfo[]) {
+  async function getMetaEntries(collection: MetaCollection, files: FileInfo[]) {
+    const items = files.map(async (file) => {
+      const source = await readFileWithCache(file.absolutePath).catch(() => '');
+      let data = source.length === 0 ? {} : JSON.parse(source);
+
+      if (collection?.schema) {
+        data = await validate(
+          collection.schema,
+          data,
+          {
+            source,
+            path: file.absolutePath,
+          },
+          `invalid data in ${file.absolutePath}`,
+        );
+      }
+
+      return JSON.stringify({
+        info: file,
+        data,
+      });
+    });
+
+    return Promise.all(items);
+  }
+
+  async function getAsyncEntries(collection: DocCollection, files: FileInfo[]) {
     if (!asyncInit) {
       lines.unshift(
         getImportCode({
@@ -102,10 +99,24 @@ export async function generateJS(
     }
 
     const entries = files.map(async (file) => {
+      const parsed = matter(
+        await readFileWithCache(file.absolutePath).catch(() => ''),
+      );
+
+      if (collection.schema) {
+        parsed.data = (await validate(
+          collection.schema,
+          parsed.data,
+          { path: file.absolutePath, source: parsed.content },
+          `invalid frontmatter in ${file.absolutePath}`,
+        )) as Record<string, unknown>;
+      }
+
       return JSON.stringify({
         info: file,
-        data: await readFrontmatterWithCache(file.absolutePath),
-      });
+        data: parsed.data,
+        content: parsed.content,
+      } satisfies RuntimeFile);
     });
 
     return Promise.all(entries);
@@ -115,19 +126,19 @@ export async function generateJS(
     if (collection.type === 'docs') {
       const docs = await getCollectionFiles(collection.docs);
       const metas = await getCollectionFiles(collection.meta);
-      const metaEntries = (await getEntries(k, collection.meta, metas)).join(
+      const metaEntries = (await getMetaEntries(collection.meta, metas)).join(
         ', ',
       );
 
       if (collection.docs.async) {
-        const docsEntries = (await getAsyncEntries(docs)).join(', ');
+        const docsEntries = (await getAsyncEntries(collection.docs, docs)).join(
+          ', ',
+        );
 
         return `export const ${k} = _runtimeAsync.docs<typeof _source.${k}>([${docsEntries}], [${metaEntries}], "${k}", _sourceConfig)`;
       }
 
-      const docsEntries = (await getEntries(k, collection.docs, docs)).join(
-        ', ',
-      );
+      const docsEntries = (await getDocEntries(k, docs)).join(', ');
 
       return `export const ${k} = _runtime.docs<typeof _source.${k}>([${docsEntries}], [${metaEntries}])`;
     }
@@ -135,10 +146,10 @@ export async function generateJS(
     const files = await getCollectionFiles(collection);
 
     if (collection.type === 'doc' && collection.async) {
-      return `export const ${k} = _runtimeAsync.doc<typeof _source.${k}>([${(await getAsyncEntries(files)).join(', ')}], "${k}", _sourceConfig)`;
+      return `export const ${k} = _runtimeAsync.doc<typeof _source.${k}>([${(await getAsyncEntries(collection, files)).join(', ')}], "${k}", _sourceConfig)`;
     }
 
-    return `export const ${k} = _runtime.${collection.type}<typeof _source.${k}>([${(await getEntries(k, collection, files)).join(', ')}]);`;
+    return `export const ${k} = _runtime.${collection.type}<typeof _source.${k}>([${(await getDocEntries(k, files)).join(', ')}]);`;
   });
 
   const resolvedDeclares = await Promise.all(declares);

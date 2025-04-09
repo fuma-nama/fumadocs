@@ -1,6 +1,6 @@
 {
   "name": "create-fumadocs-app",
-  "version": "15.2.5",
+  "version": "15.2.6",
   "description": "Create a new documentation site with Fumadocs",
   "keywords": [
     "NextJs",
@@ -14,6 +14,8 @@
   "author": "Fuma Nama",
   "type": "module",
   "bin": "./dist/index.js",
+  "module": "./dist/create-app.js",
+  "types": "./dist/create-app.d.ts",
   "files": [
     "template/*",
     "dist/*"
@@ -27,7 +29,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@clack/prompts": "^0.10.0",
+    "@clack/prompts": "^0.10.1",
     "cross-spawn": "^7.0.6",
     "picocolors": "^1.1.1"
   },

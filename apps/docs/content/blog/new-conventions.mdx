@@ -1,0 +1,76 @@
+---
+title: Adding new Conventions
+description: Some changes on the docs.
+date: 2025-04-08
+author: Fuma Nama
+---
+
+## `mdx-component.tsx`
+
+Sometimes there's questions raised by beginners confused about where to add MDX components.
+Although it's simply located in `page.tsx` which shouldn't be difficult to find, I think some kind of conventions may help, so I decided to add back `mdx-components.tsx`.
+
+I love to have fewer files, but considering `create-fumadocs-app` should also act as a starting point for beginners who may not familiar with MDX, it's such more helpful to provide it by default.
+
+### Existing Projects
+
+The convention is optional (only to make the learning curve smoother).
+For existing users, you probably knew how to pass MDX components, and no further change is needed.
+
+But you can still make one:
+
+```tsx title="mdx-components.tsx"
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+import type { MDXComponents } from 'mdx/types';
+
+export function getMDXComponents(components?: MDXComponents): MDXComponents {
+  return {
+    ...defaultMdxComponents,
+    ...components,
+  };
+}
+```
+
+And use it in your MDX component.
+
+```tsx title="page.tsx"
+import { getMDXComponents } from '@/mdx-components';
+
+<MDXContent
+  components={getMDXComponents({
+    // extend it
+  })}
+/>;
+```
+
+## Deprecating `<I18nProvider />`
+
+We now prefer a single `<RootProvider />` for everything, replacing the need of `<I18nProvider />` with a `i18n` prop.
+
+```tsx
+<RootProvider
+  i18n={
+    // i18n provider props
+  }
+>
+  {children}
+</RootProvider>
+```
+
+This allows Root Provider to handle the hierarchy correctly without revealing too much complexity, for example, the correct order should be:
+
+```tsx
+<FrameworkProvider>
+  <ThemesProvider>
+    <I18nProvider>
+      <SidebarProvider>
+        <SearchProvider>{children}</SearchProvider>
+      </SidebarProvider>
+    </I18nProvider>
+  </ThemesProvider>
+</FrameworkProvider>
+```
+
+Changing the hierarchy of different providers may result in problems since they actually rely on each other, now it is all integrated into `<RootProvider />`, including I18n configuration.
+
+The new [Internationalization](/docs/ui/internationalization) guide requires Fumadocs 15.2.3 or above.

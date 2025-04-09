@@ -94,20 +94,13 @@ function buildAll(
 
       if (node.file.name === 'index') {
         if (!skipIndex) output.unshift(treeNode);
-        continue;
+      } else {
+        output.push(treeNode);
       }
-
-      output.push(treeNode);
     }
 
     if ('children' in node) {
-      const folder = buildFolderNode(node, false, ctx);
-
-      if (folder.children.length === 0 && folder.index) {
-        output.push(folder.index);
-      } else {
-        folders.push(folder);
-      }
+      folders.push(buildFolderNode(node, false, ctx));
     }
   }
 
@@ -193,23 +186,21 @@ function buildFolderNode(
     ctx.localeStorage?.read(metaPath, 'meta') ??
     ctx.storage.read(metaPath, 'meta');
 
-  const indexFile = ctx.storage.read(
-    joinPath(folder.file.path, 'index'),
-    'page',
-  );
+  const indexPath = joinPath(folder.file.path, 'index');
+  const indexFile =
+    ctx.localeStorage?.read(indexPath, 'page') ??
+    ctx.storage.read(indexPath, 'page');
 
-  const metadata = meta?.data;
-  const isRoot = metadata?.root ?? isGlobalRoot;
+  const isRoot = meta?.data.root ?? isGlobalRoot;
   const index = indexFile ? buildFileNode(indexFile, ctx) : undefined;
 
+  const addedNodePaths = new Set<string>();
   let children: PageTree.Node[];
 
-  if (!metadata?.pages) {
+  if (!meta?.data.pages) {
     children = buildAll(folder.children, ctx, !isRoot);
   } else {
-    const addedNodePaths = new Set<string>();
-
-    const resolved = metadata?.pages?.flatMap<
+    const resolved = meta.data.pages.flatMap<
       PageTree.Node | typeof rest | typeof restReversed
     >((item, i) => {
       return resolveFolderItem(folder, item, ctx, i, addedNodePaths);
@@ -237,15 +228,18 @@ function buildFolderNode(
   const node: PageTree.Folder = {
     type: 'folder',
     name:
-      metadata?.title ??
+      meta?.data.title ??
       index?.name ??
       // resolve folder groups like (group_name)
       pathToName(group.exec(folder.file.name)?.[1] ?? folder.file.name),
-    icon: ctx.options.resolveIcon?.(metadata?.icon) ?? index?.icon,
-    root: metadata?.root,
-    defaultOpen: metadata?.defaultOpen,
-    description: metadata?.description,
-    index,
+    icon: ctx.options.resolveIcon?.(meta?.data.icon) ?? index?.icon,
+    root: meta?.data.root,
+    defaultOpen: meta?.data.defaultOpen,
+    description: meta?.data.description,
+    index:
+      isRoot || (indexFile && !addedNodePaths.has(indexFile.file.path))
+        ? index
+        : undefined,
     children,
     $id: folder.file.path,
     $ref: !ctx.options.noRef
