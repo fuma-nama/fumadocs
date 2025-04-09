@@ -270,7 +270,7 @@ importers:
         version: 0.2.2(@content-collections/core@0.8.2(typescript@5.8.3))(acorn@8.14.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@content-collections/next':
         specifier: ^0.2.6
-        version: 0.2.6(@content-collections/core@0.8.2(typescript@5.8.3))(next@15.2.4(@babel/core@7.26.10)(@opentelemetry/api@1.9.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))
+        version: 0.2.6(@content-collections/core@0.8.2(typescript@5.8.3))(next@15.2.4(@opentelemetry/api@1.9.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))
       '@types/mdx':
         specifier: ^2.0.13
         version: 2.0.13
@@ -813,7 +813,7 @@ importers:
         version: 0.2.2(@content-collections/core@0.8.2(typescript@5.8.3))(acorn@8.14.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@content-collections/next':
         specifier: ^0.2.6
-        version: 0.2.6(@content-collections/core@0.8.2(typescript@5.8.3))(next@15.2.4(@babel/core@7.26.10)(@opentelemetry/api@1.9.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))
+        version: 0.2.6(@content-collections/core@0.8.2(typescript@5.8.3))(next@15.2.4(@opentelemetry/api@1.9.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))
       '@react-router/dev':
         specifier: ^7.5.0
         version: 7.5.0(@react-router/serve@7.5.0(react-router@7.5.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(typescript@5.8.3))(@types/node@22.14.0)(babel-plugin-macros@3.1.0)(jiti@2.4.2)(lightningcss@1.29.3)(react-router@7.5.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(terser@5.39.0)(tsx@4.19.3)(typescript@5.8.3)(vite@6.2.5(@types/node@22.14.0)(jiti@2.4.2)(lightningcss@1.29.3)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.1))(yaml@2.7.1)
@@ -985,6 +985,9 @@ importers:
       lru-cache:
         specifier: ^11.1.0
         version: 11.1.0
+      picocolors:
+        specifier: ^1.1.1
+        version: 1.1.1
       unist-util-visit:
         specifier: ^5.0.0
         version: 5.0.0
@@ -9910,7 +9913,7 @@ snapshots:
       - acorn
       - supports-color
 
-  '@content-collections/next@0.2.6(@content-collections/core@0.8.2(typescript@5.8.3))(next@15.2.4(@babel/core@7.26.10)(@opentelemetry/api@1.9.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))':
+  '@content-collections/next@0.2.6(@content-collections/core@0.8.2(typescript@5.8.3))(next@15.2.4(@opentelemetry/api@1.9.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))':
     dependencies:
       '@content-collections/core': 0.8.2(typescript@5.8.3)
       '@content-collections/integrations': 0.2.1(@content-collections/core@0.8.2(typescript@5.8.3))

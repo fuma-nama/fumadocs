@@ -1,5 +1,4 @@
 import { createCompiler, type MDXOptions } from '@fumadocs/mdx-remote';
-import * as fs from 'node:fs/promises';
 import type { LoadedConfig } from '@/utils/config';
 import { remarkInclude } from '@/mdx-plugins/remark-include';
 import {
@@ -42,14 +41,14 @@ export const _runtimeAsync: RuntimeAsync = {
   doc(files, collection, config) {
     const init = initCompiler(config, collection);
 
-    return files.map(({ info: file, data: frontmatter }) => {
+    return files.map(({ info: file, data, content }) => {
       return {
-        ...frontmatter,
+        ...data,
         _file: file,
         async load() {
           const compiler = await init;
           const out = await compiler.compile({
-            source: (await fs.readFile(file.absolutePath)).toString(),
+            source: content,
             filePath: file.absolutePath,
           });
 

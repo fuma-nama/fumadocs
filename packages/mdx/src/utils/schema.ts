@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type { CollectionSchema } from '@/config';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
+import picocolors from 'picocolors';
 
 export const metaSchema = z.object({
   title: z.string().optional(),
@@ -21,6 +22,32 @@ export const frontmatterSchema = z.object({
   _openapi: z.object({}).passthrough().optional(),
 });
 
+export class ValidationError extends Error {
+  issues: readonly StandardSchemaV1.Issue[];
+
+  constructor(message: string, issues: readonly StandardSchemaV1.Issue[]) {
+    super(message);
+    this.issues = issues;
+  }
+
+  print() {
+    console.error(
+      [
+        `[MDX] ${this.message}:`,
+        ...this.issues.map((issue) =>
+          picocolors.redBright(
+            `- ${picocolors.bold(issue.path?.join('.') ?? '*')}: ${issue.message}`,
+          ),
+        ),
+      ].join('\n'),
+    );
+  }
+
+  toString() {
+    return `${this.message}:\n${this.issues.map((issue) => `  ${issue.path}: ${issue.message}`).join('\n')}`;
+  }
+}
+
 export async function validate<Schema extends StandardSchemaV1, Context>(
   schema: CollectionSchema<Schema, Context>,
   data: unknown,
@@ -37,18 +64,11 @@ export async function validate<Schema extends StandardSchemaV1, Context>(
     );
 
     if (result.issues) {
-      throw new Error(formatError(errorMessage, result.issues));
+      throw new ValidationError(errorMessage, result.issues);
     }
 
     return result.value;
   }
 
   return data;
-}
-
-export function formatError(
-  message: string,
-  issues: readonly StandardSchemaV1.Issue[],
-): string {
-  return `${message}:\n${issues.map((issue) => `  ${issue.path}: ${issue.message}`).join('\n')}`;
 }
