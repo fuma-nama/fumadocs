@@ -1,8 +1,8 @@
-.fd-codeblock code span {
+.shiki code span {
   color: var(--shiki-light);
 }
 
-.dark .fd-codeblock code span {
+.dark .shiki code span {
   color: var(--shiki-dark);
 }
 
@@ -11,37 +11,37 @@
   font-size: 13px;
 }
 
-.fd-codeblock code .diff.remove {
+.shiki code .diff.remove {
   background-color: var(--fd-diff-remove-color);
   opacity: 0.7;
 }
 
-.fd-codeblock code .diff::before {
+.shiki code .diff::before {
   position: absolute;
   left: 6px;
 }
 
-.fd-codeblock code .diff.remove::before {
+.shiki code .diff.remove::before {
   content: '-';
   color: var(--fd-diff-remove-symbol-color);
 }
 
-.fd-codeblock code .diff.add {
+.shiki code .diff.add {
   background-color: var(--fd-diff-add-color);
 }
 
-.fd-codeblock code .diff.add::before {
+.shiki code .diff.add::before {
   content: '+';
   color: var(--fd-diff-add-symbol-color);
 }
 
-.fd-codeblock code .diff {
+.shiki code .diff {
   margin: 0 -16px;
   padding: 0 16px;
   position: relative;
 }
 
-.fd-codeblock .highlighted {
+.shiki .highlighted {
   margin: 0 -16px;
   padding: 0 16px;
   background-color: color-mix(
@@ -51,7 +51,7 @@
   );
 }
 
-.fd-codeblock .highlighted-word {
+.shiki .highlighted-word {
   padding: 1px 2px;
   margin: -1px -3px;
   border: 1px solid
