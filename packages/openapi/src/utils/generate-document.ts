@@ -6,7 +6,7 @@ import type {
   ApiPageProps,
   OperationItem,
   WebhookItem,
-} from '@/server/api-page';
+} from '@/render/api-page';
 import type { GenerateOptions } from '@/generate';
 import { idToTitle } from '@/utils/id-to-title';
 import type { Document, TagObject } from '@/types';

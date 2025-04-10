@@ -35,6 +35,7 @@ import { createGenerator } from 'fumadocs-typescript';
 import { getPageTreePeers } from 'fumadocs-core/server';
 import { Card, Cards } from 'fumadocs-ui/components/card';
 import { getMDXComponents } from '@/mdx-components';
+import { APIPage } from 'fumadocs-openapi/ui';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -123,7 +124,7 @@ export default async function Page(props: {
             ),
             Wrapper,
             blockquote: Callout as unknown as FC<ComponentProps<'blockquote'>>,
-            APIPage: openapi.APIPage,
+            APIPage: (props) => <APIPage {...openapi.getAPIPageProps(props)} />,
             DocsCategory: ({ url }) => {
               return <DocsCategory url={url ?? page.url} />;
             },

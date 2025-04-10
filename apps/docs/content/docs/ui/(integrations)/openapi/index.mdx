@@ -3,8 +3,6 @@ title: OpenAPI
 description: Generating docs for OpenAPI schema
 ---
 
-You can setup Fumadocs OpenAPI manually, or use Fumadocs CLI.
-
 ## Manual Setup
 
 Install the required packages.
@@ -55,13 +53,14 @@ Add `APIPage` to your MDX Components, so that you can use it in MDX files.
 
 ```tsx title="mdx-components.tsx"
 import defaultComponents from 'fumadocs-ui/mdx';
+import { APIPage } from 'fumadocs-openapi/ui';
 import { openapi } from '@/lib/source';
 import type { MDXComponents } from 'mdx/types';
 
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
     ...defaultComponents,
-    APIPage: openapi.APIPage,
+    APIPage: (props) => <APIPage {...openapi.getAPIPageProps(props)} />,
     ...components,
   };
 }

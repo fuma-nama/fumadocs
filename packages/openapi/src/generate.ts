@@ -7,7 +7,7 @@ import {
 import { idToTitle } from '@/utils/id-to-title';
 import type { OperationObject, PathItemObject } from './types';
 import type { NoReference } from '@/utils/schema';
-import type { OperationItem, WebhookItem } from '@/server/api-page';
+import type { OperationItem, WebhookItem } from '@/render/api-page';
 import { type DocumentInput, processDocument } from '@/utils/process-document';
 
 export interface GenerateOptions {

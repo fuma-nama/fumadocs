@@ -1,5 +1,4 @@
-import { type FC } from 'react';
-import { APIPage, type ApiPageProps } from '@/server/api-page';
+import type { ApiPageProps } from '@/render/api-page';
 import type { DocumentInput } from '@/utils/process-document';
 import { createProxy } from '@/server/proxy';
 
@@ -12,15 +11,18 @@ export interface OpenAPIOptions
 }
 
 export interface OpenAPIServer {
-  APIPage: FC<ApiPageProps>;
+  getAPIPageProps: (from: ApiPageProps) => ApiPageProps;
   createProxy: typeof createProxy;
 }
 
 export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
   return {
     createProxy,
-    APIPage(props) {
-      return <APIPage {...options} {...props} />;
+    getAPIPageProps(props) {
+      return {
+        ...options,
+        ...props,
+      };
     },
   };
 }
