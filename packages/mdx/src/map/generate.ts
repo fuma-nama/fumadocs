@@ -8,7 +8,7 @@ import type { DocCollection, MetaCollection } from '@/config';
 import { validate } from '@/utils/schema';
 import { fileCache } from '@/map/file-cache';
 import matter from 'gray-matter';
-import type { RuntimeFile } from '@/runtime';
+import type { AsyncRuntimeFile } from '@/runtime/types';
 
 async function readFileWithCache(file: string): Promise<string> {
   const cached = fileCache.read<string>('read-file', file);
@@ -116,7 +116,7 @@ export async function generateJS(
         info: file,
         data: parsed.data,
         content: parsed.content,
-      } satisfies RuntimeFile);
+      } satisfies AsyncRuntimeFile);
     });
 
     return Promise.all(entries);

@@ -7,8 +7,6 @@ import { type BaseCollectionEntry } from '@/config';
 import type { VirtualFile } from 'fumadocs-core/source';
 import type { Runtime } from '@/runtime/types';
 
-export type { RuntimeFile } from '@/runtime/types';
-
 export const _runtime: Runtime = {
   doc(files) {
     return files.map((file) => {

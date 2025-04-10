@@ -71,16 +71,16 @@
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "mdast-util-mdx-jsx": "^3.2.0",
-    "next": "^15.2.4",
+    "next": "^15.3.0",
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
     "vfile": "^6.0.3",
-    "webpack": "^5.99.1"
+    "webpack": "^5.99.5"
   },
   "peerDependencies": {
     "@fumadocs/mdx-remote": "^1.2.0",
     "fumadocs-core": "^14.0.0 || ^15.0.0",
-    "next": "14.x.x || 15.x.x"
+    "next": "^15.3.0"
   },
   "peerDependenciesMeta": {
     "@fumadocs/mdx-remote": {

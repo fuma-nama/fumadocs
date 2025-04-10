@@ -41,7 +41,7 @@
     "hast-util-to-jsx-runtime": "^2.3.6",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
-    "shiki": "^3.2.1",
+    "shiki": "^3.2.2",
     "ts-morph": "^25.0.1",
     "unist-util-visit": "^5.0.0"
   },
@@ -52,7 +52,7 @@
     "@types/mdast": "^4.0.3",
     "@types/node": "22.14.0",
     "@types/react": "19.1.0",
-    "@types/react-dom": "19.1.1",
+    "@types/react-dom": "19.1.2",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",

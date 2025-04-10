@@ -41,22 +41,19 @@ export function createMDX({
 
     return {
       ...nextConfig,
-      experimental: {
-        ...nextConfig.experimental,
-        turbo: {
-          ...nextConfig.experimental?.turbo,
-          rules: {
-            ...nextConfig.experimental?.turbo?.rules,
-            // @ts-expect-error -- safe types
-            '*.{md,mdx}': {
-              loaders: [
-                {
-                  loader: 'fumadocs-mdx/loader-mdx',
-                  options: mdxLoaderOptions,
-                },
-              ],
-              as: '*.js',
-            },
+      turbopack: {
+        ...nextConfig?.turbopack,
+        rules: {
+          ...nextConfig?.turbopack?.rules,
+          // @ts-expect-error -- safe
+          '*.{md,mdx}': {
+            loaders: [
+              {
+                loader: 'fumadocs-mdx/loader-mdx',
+                options: mdxLoaderOptions,
+              },
+            ],
+            as: '*.js',
           },
         },
       },
