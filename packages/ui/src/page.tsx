@@ -12,17 +12,17 @@ import {
   Footer,
   type FooterProps,
   LastUpdate,
-  TocPopoverHeader,
+  TocPopover,
   Breadcrumb,
   type BreadcrumbProps,
   PageBody,
   PageArticle,
+  TocPopoverTrigger,
+  TocPopoverContent,
 } from './page-client';
 import {
   Toc,
   TOCItems,
-  TocPopoverTrigger,
-  TocPopoverContent,
   type TOCProps,
   TOCScrollArea,
 } from '@/components/layout/toc';
@@ -153,7 +153,7 @@ export function DocsPage({
       >
         {slot(
           { enabled: tocPopoverEnabled, component: tocPopoverReplace },
-          <TocPopoverHeader className="h-10">
+          <TocPopover className="h-10">
             <TocPopoverTrigger className="w-full" items={toc} />
             <TocPopoverContent>
               {tocPopoverOptions.header}
@@ -166,7 +166,7 @@ export function DocsPage({
               </TOCScrollArea>
               {tocPopoverOptions.footer}
             </TocPopoverContent>
-          </TocPopoverHeader>,
+          </TocPopover>,
           {
             items: toc,
             ...tocPopoverOptions,
