@@ -1,5 +1,41 @@
 # @fuma-docs/openapi
 
+## 8.0.0
+
+### Major Changes
+
+- ff12b53: **Move `APIPage` to `fumadocs-openapi/ui`**
+
+  migrate:
+
+  in your `mdx-components.tsx` (or where you pass MDX components):
+
+  ```tsx
+  import defaultComponents from 'fumadocs-ui/mdx';
+  import { APIPage } from 'fumadocs-openapi/ui';
+  import { openapi } from '@/lib/source';
+  import type { MDXComponents } from 'mdx/types';
+
+  export function getMDXComponents(components?: MDXComponents): MDXComponents {
+    return {
+      ...defaultComponents,
+      // use this instead
+      APIPage: (props) => <APIPage {...openapi.getAPIPageProps(props)} />,
+      ...components,
+    };
+  }
+  ```
+
+  why: Next.js compiles the same module in different layers: route handlers, pages (which include browser bundle), and middleware (Edge Runtime). It avoids compiling React components of `fumadocs-openapi` twice when you reference the OpenAPI server in a route handler.
+
+### Patch Changes
+
+- Updated dependencies [eb18da9]
+- Updated dependencies [085e39f]
+- Updated dependencies [ec85a6c]
+  - fumadocs-ui@15.2.7
+  - fumadocs-core@15.2.7
+
 ## 7.0.14
 
 ### Patch Changes
