@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 15.2.7
+
+### Patch Changes
+
+- ec85a6c: support more options on `remarkStructure`
+
 ## 15.2.6
 
 ### Patch Changes

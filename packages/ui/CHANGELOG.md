@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 15.2.7
+
+### Patch Changes
+
+- eb18da9: Support `searchToggle` option to customise search toggle
+- 085e39f: Fix inline code issues
+- Updated dependencies [ec85a6c]
+  - fumadocs-core@15.2.7
+
 ## 15.2.6
 
 ### Patch Changes
