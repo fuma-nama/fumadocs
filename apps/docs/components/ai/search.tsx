@@ -315,6 +315,7 @@ export default function AISearch(props: DialogProps) {
 
 function Content() {
   const chat = useChat({
+    id: 'search',
     streamProtocol: 'data',
     sendExtraMessageFields: true,
     onResponse(response) {
