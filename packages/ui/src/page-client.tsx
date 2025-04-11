@@ -4,6 +4,7 @@ import {
   type ComponentProps,
   Fragment,
   type HTMLAttributes,
+  ReactNode,
   useEffect,
   useMemo,
   useRef,
@@ -63,10 +64,15 @@ export function TocPopoverTrigger({
         }
         className={cn(open && 'text-fd-primary')}
       />
-      <span className="grid flex-1 *:row-start-1 *:col-start-1">
+      <span
+        className={cn(
+          'grid flex-1 *:row-start-1 *:col-start-1',
+          open && 'text-fd-foreground',
+        )}
+      >
         <span
           className={cn(
-            'truncate text-fd-foreground transition-all',
+            'truncate transition-all',
             showCurrent && 'opacity-0 -translate-y-full',
           )}
         >
