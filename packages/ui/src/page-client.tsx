@@ -16,12 +16,12 @@ import { useI18n } from './contexts/i18n';
 import { useTreeContext, useTreePath } from './contexts/tree';
 import { useSidebar } from '@/contexts/sidebar';
 import type { PageTree, TOCItemType } from 'fumadocs-core/server';
-import { usePathname, createContext } from 'fumadocs-core/framework';
+import { createContext, usePathname } from 'fumadocs-core/framework';
 import {
   type BreadcrumbOptions,
   getBreadcrumbItemsFromPath,
 } from 'fumadocs-core/breadcrumb';
-import { usePageStyles, useNav } from '@/contexts/layout';
+import { useNav, usePageStyles } from '@/contexts/layout';
 import { isActive } from '@/utils/is-active';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 import {
@@ -43,11 +43,12 @@ export function TocPopoverTrigger({
   const { text } = useI18n();
   const { open } = TocPopoverContext.use();
   const active = Primitive.useActiveAnchor();
-  const current = useMemo(() => {
-    return items.find((item) => active === item.url.slice(1));
-  }, [items, active]);
+  const selected = useMemo(
+    () => items.findIndex((item) => active === item.url.slice(1)),
+    [items, active],
+  );
   const path = useTreePath().at(-1);
-  const showCurrent = current !== undefined && !open;
+  const showCurrent = selected !== -1 && !open;
 
   return (
     <CollapsibleTrigger
@@ -58,9 +59,8 @@ export function TocPopoverTrigger({
       )}
     >
       <ProgressCircle
-        value={
-          current ? ((items.indexOf(current) + 1) / items.length) * 100 : 0
-        }
+        value={(selected + 1) / items.length}
+        max={1}
         className={cn(open && 'text-fd-primary')}
       />
       <span
@@ -72,7 +72,7 @@ export function TocPopoverTrigger({
         <span
           className={cn(
             'truncate transition-all',
-            showCurrent && 'opacity-0 -translate-y-full',
+            showCurrent && 'opacity-0 -translate-y-full pointer-events-none',
           )}
         >
           {path?.name ?? text.toc}
@@ -80,10 +80,10 @@ export function TocPopoverTrigger({
         <span
           className={cn(
             'truncate transition-all',
-            !showCurrent && 'opacity-0 translate-y-full',
+            !showCurrent && 'opacity-0 translate-y-full pointer-events-none',
           )}
         >
-          {current?.title}
+          {items[selected]?.title}
         </span>
       </span>
       <ChevronDown
@@ -108,14 +108,14 @@ function clamp(input: number, min: number, max: number): number {
   return input;
 }
 
-export const ProgressCircle = ({
+function ProgressCircle({
   value,
   strokeWidth = 2,
   size = 24,
   min = 0,
   max = 100,
   ...restSvgProps
-}: ProgressCircleProps) => {
+}: ProgressCircleProps) {
   const normalizedValue = clamp(value, min, max);
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -149,7 +149,7 @@ export const ProgressCircle = ({
       />
     </svg>
   );
-};
+}
 
 export function TocPopoverContent(props: ComponentProps<'div'>) {
   return (
