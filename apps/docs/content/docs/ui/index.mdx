@@ -225,17 +225,25 @@ This ensures duplicated pages will not cause errors.
 
 Now, You can add the page to another route group, which isn't a descendant of docs layout.
 
-For example, under your `app` folder:
+For example, to replace `/docs/test`:
 
 <Files>
-  <File name="(home)/docs/page.tsx" />
+  <File name="(home)/docs/test/page.tsx" />
   <Folder name="docs">
     <File name="layout.tsx" />
     <File name="[[...slug]]/page.tsx" />
   </Folder>
 </Files>
 
-will replace the `/docs` page with your `page.tsx`.
+For `/docs`, you need to change the catch-all route to be non-optional:
+
+<Files>
+  <File name="(home)/docs/page.tsx" />
+  <Folder name="docs" defaultOpen>
+    <File name="layout.tsx" />
+    <File name="[...slug]/page.tsx" />
+  </Folder>
+</Files>
 
     </Accordion>
 

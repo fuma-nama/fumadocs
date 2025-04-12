@@ -1,6 +1,6 @@
 ---
-title: Open Graph
-description: Open Graph with Next.js Metadata API
+title: Metadata
+description: Usage with Next.js Metadata API
 ---
 
 ## Introduction
@@ -14,39 +14,6 @@ Make sure to read their [Metadata section](https://nextjs.org/docs/app/building-
 
 For docs pages, Fumadocs has a built-in metadata image generator.
 
-### Auto Setup
-
-<Tabs groupId='package-manager' persist items={['npm', 'pnpm', 'yarn', 'bun']}>
-
-```bash tab="npm"
-npx fumadocs init og-image
-```
-
-```bash tab="pnpm"
-pnpm dlx fumadocs init og-image
-```
-
-```bash tab="yarn"
-yarn fumadocs init og-image
-```
-
-```bash tab="bun"
-bun fumadocs init og-image
-```
-
-</Tabs>
-
-### Manual Setup
-
-```json doc-gen:file
-{
-  "file": "../../examples/next-mdx/lib/metadata.ts",
-  "codeblock": {
-    "meta": "title=\"lib/metadata.ts\""
-  }
-}
-```
-
 You will need a route handler to get started.
 
 ```json doc-gen:file
@@ -58,13 +25,13 @@ You will need a route handler to get started.
 }
 ```
 
-> We need to append `og.png` to the end of slugs so that we can access it via `/docs-og/my-page/og.png`.
+> We need to append `image.png` to the end of slugs so that we can access it via `/docs-og/my-page/image.png`.
 
 In your docs page, add the image to metadata.
 
 ```json doc-gen:file
 {
-  "file": "../../examples/next-mdx/app/docs/[[...slug]]/page.tsx",
+  "file": "../../examples/next-mdx/app/docs/[[...slug]]/page.with-og-image.tsx",
   "codeblock": {
     "meta": "title=\"app/docs/[[...slug]]/page.tsx\""
   }
