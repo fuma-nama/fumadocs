@@ -177,7 +177,7 @@ const vercel = [
 
 export default function Showcase() {
   return (
-    <main className="px-4 py-12 z-[2] w-full max-w-[1400px] mx-auto">
+    <main className="px-4 py-12 z-[2] w-full max-w-[1400px] mx-auto [--color-fd-border:color-mix(in_oklab,var(--color-fd-primary)_30%,transparent)]">
       <div className="relative overflow-hidden border border-dashed p-6">
         <h1 className="mb-4 text-xl font-medium">
           The docs framework designed with care.
@@ -252,10 +252,7 @@ export default function Showcase() {
         {showcases.map((showcase) => (
           <ShowcaseItem key={showcase.url} {...showcase} />
         ))}
-        <div className="absolute text-center bottom-0 inset-x-0 py-4 bg-gradient-to-t from-fd-background">
-          <p className="text-sm text-fd-muted-foreground">
-            Curious the other docs powered by Fumadocs?
-          </p>
+        <div className="absolute text-center bottom-0 inset-x-0 pt-4 bg-gradient-to-t from-fd-background">
           <Link
             href="https://github.com/fuma-nama/fumadocs/discussions/30"
             className={cn(
@@ -269,7 +266,7 @@ export default function Showcase() {
           </Link>
         </div>
       </div>
-      <h2 className="text-lg font-medium mt-12 px-4">
+      <h2 className="text-xl font-medium mt-12 px-4">
         Fumadocs can power your blog, too.
       </h2>
       <div className="mt-6 grid gap-2.5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -288,7 +285,7 @@ function ShowcaseItem({ name, url, image }: ShowcaseObject) {
         href={url}
         target="_blank"
         rel="noreferrer noopener"
-        className="relative flex aspect-[1.91/1] flex-col rounded-lg border transition-all hover:border-fd-primary/30"
+        className="group relative aspect-[1.91/1] border border-dashed"
       >
         <Image
           alt="Preview"
@@ -296,9 +293,9 @@ function ShowcaseItem({ name, url, image }: ShowcaseObject) {
           placeholder="blur"
           fill
           sizes="100vw, (min-width: 750px) 500px"
-          className="rounded-[inherit]"
+          className="transition-all group-hover:brightness-150"
         />
-        <p className="absolute bottom-0 inset-x-0 z-[2] bg-fd-background px-4 py-2 text-sm font-medium rounded-b-[inherit]">
+        <p className="absolute bottom-0 inset-x-0 z-[2] bg-fd-background px-4 py-2 text-sm font-medium">
           {name}
         </p>
       </a>
@@ -310,7 +307,7 @@ function ShowcaseItem({ name, url, image }: ShowcaseObject) {
       href={url}
       target="_blank"
       rel="noreferrer noopener"
-      className="flex aspect-[1.91/1] flex-col rounded-lg border border-dashed p-4 shadow-lg transition-all hover:border-fd-primary/30"
+      className="flex aspect-[1.91/1] flex-col border border-dashed p-4 transition-all hover:bg-fd-accent"
     >
       <p className="font-mono text-xs mb-2 text-fd-muted-foreground">
         {new URL(url).hostname}

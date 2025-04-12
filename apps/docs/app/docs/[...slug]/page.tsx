@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import {
-  DocsPage,
   DocsBody,
-  DocsTitle,
   DocsDescription,
+  DocsPage,
+  DocsTitle,
 } from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
 import {
@@ -19,10 +19,9 @@ import * as Preview from '@/components/preview';
 import { createMetadata } from '@/lib/metadata';
 import { openapi, source } from '@/lib/source';
 import { Wrapper } from '@/components/preview/wrapper';
-import { metadataImage } from '@/lib/metadata-image';
 import { Mermaid } from '@/components/mdx/mermaid';
 import { Rate } from '@/components/rate';
-import { repo, owner, onRateAction } from '@/lib/github';
+import { onRateAction, owner, repo } from '@/lib/github';
 import {
   HoverCard,
   HoverCardContent,
@@ -156,23 +155,30 @@ function DocsCategory({ url }: { url: string }) {
 export async function generateMetadata(props: {
   params: Promise<{ slug: string[] }>;
 }): Promise<Metadata> {
-  const params = await props.params;
-  const page = source.getPage(params.slug);
-
+  const { slug = [] } = await props.params;
+  const page = source.getPage(slug);
   if (!page) notFound();
 
   const description =
     page.data.description ?? 'The library for building documentation sites';
 
-  return createMetadata(
-    metadataImage.withImage(page.slugs, {
-      title: page.data.title,
-      description,
-      openGraph: {
-        url: `/docs/${page.slugs.join('/')}`,
-      },
-    }),
-  );
+  const image = {
+    url: ['/og', ...slug, 'image.png'].join('/'),
+    width: 1200,
+    height: 630,
+  };
+
+  return createMetadata({
+    title: page.data.title,
+    description,
+    openGraph: {
+      url: `/docs/${page.slugs.join('/')}`,
+      images: [image],
+    },
+    twitter: {
+      images: [image],
+    },
+  });
 }
 
 export function generateStaticParams() {
