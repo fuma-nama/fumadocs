@@ -63,7 +63,7 @@ export function remarkHeading({
         }
       }
 
-      let flattened: string | undefined;
+      let flattened: string | null = null;
       if (!id) {
         flattened ??= flattenNode(heading);
 

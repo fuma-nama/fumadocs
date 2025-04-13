@@ -8,12 +8,12 @@ import {
 } from '@shikijs/transformers';
 import type { Processor, Transformer } from 'unified';
 import {
-  type ShikiTransformer,
   type BuiltinTheme,
   bundledLanguages,
+  type ShikiTransformer,
 } from 'shiki';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
-import type { IconOptions, CodeBlockIcon } from './transformer-icon';
+import type { CodeBlockIcon, IconOptions } from './transformer-icon';
 import { transformerIcon } from './transformer-icon';
 import {
   createStyleTransformer,
@@ -41,10 +41,6 @@ const metaValues: MetaValue[] = [
   {
     name: 'tab',
     regex: /tab="(?<value>[^"]+)"/,
-  },
-  {
-    name: 'tab',
-    regex: /tab/,
   },
 ];
 
@@ -192,10 +188,7 @@ function transformerTab(): ShikiTransformer {
             data: {
               _codeblock: true,
             },
-            attributes:
-              value !== ''
-                ? [{ type: 'mdxJsxAttribute', name: 'value', value }]
-                : [],
+            attributes: [{ type: 'mdxJsxAttribute', name: 'value', value }],
             children: root.children,
           } as MdxJsxFlowElement,
         ],
