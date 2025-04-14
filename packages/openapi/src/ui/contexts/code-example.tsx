@@ -119,10 +119,9 @@ export function CodeExample(props: CodeSample) {
     return examples.find((example) => example.key === key)!.data;
   });
 
-  const sample = useMemo(() => {
-    if (props.source) return props;
-    return defaultSamples.find((item) => item.label === props.label);
-  }, [props]);
+  const sample = props.source
+    ? props
+    : defaultSamples.find((item) => item.label === props.label);
 
   useEffect(() => {
     const listener = setData;
@@ -193,9 +192,6 @@ export function useRequestData() {
     () => examples.find((example) => example.key === key)!.data,
     [examples, key],
   );
-  const saveData = useEffectEvent((data: RequestData) => {
-    setData(data);
-  });
 
   return useMemo(
     () => ({
@@ -206,8 +202,8 @@ export function useRequestData() {
       /**
        * Save changes to request data, it won't trigger re-render on the component itself, which makes it safe to call in an effect with `data` as dep
        */
-      saveData,
+      saveData: setData,
     }),
-    [data, saveData],
+    [data, setData],
   );
 }

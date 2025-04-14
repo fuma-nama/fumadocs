@@ -19,6 +19,19 @@ export interface RequestData {
   bodyMediaType?: (typeof supportedMediaTypes)[number];
 }
 
+export const MediaTypeFormatMap = {
+  'application/json': 'json',
+  'application/xml': 'xml',
+  'application/x-www-form-urlencoded': 'url',
+} as const;
+
 export function getUrl(url: string, data: RequestData): string {
   return getPathnameFromInput(url, data.path, data.query);
+}
+
+export function ident(code: string, tab: number = 1) {
+  return code
+    .split('\n')
+    .map((v) => '  '.repeat(tab) + v)
+    .join('\n');
 }

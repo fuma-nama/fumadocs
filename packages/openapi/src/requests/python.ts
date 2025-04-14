@@ -1,6 +1,10 @@
 'use client';
 import { inputToString } from '@/utils/input-to-string';
-import { getUrl, type RequestData } from '@/requests/_shared';
+import {
+  getUrl,
+  MediaTypeFormatMap,
+  type RequestData,
+} from '@/requests/_shared';
 
 export function getSampleRequest(url: string, data: RequestData): string {
   const variables = new Map<string, string>();
@@ -22,12 +26,7 @@ export function getSampleRequest(url: string, data: RequestData): string {
           'data',
           inputToString(
             data.body,
-            (
-              {
-                'application/xml': 'xml',
-                'application/x-www-form-urlencoded': 'url',
-              } as const
-            )[data.bodyMediaType],
+            MediaTypeFormatMap[data.bodyMediaType],
             'python',
           ),
         );
@@ -42,19 +41,19 @@ export function getSampleRequest(url: string, data: RequestData): string {
     variables.set('cookies', JSON.stringify(data.cookie, null, 2));
   }
 
+  const params = [
+    `"${data.method}"`,
+    'url',
+    ...Array.from(variables.keys()).map((k) => `${k}=${k}`),
+  ];
+
   return `import requests
 
 url = ${JSON.stringify(getUrl(url, data))}
 ${Array.from(variables.entries())
   .map(([k, v]) => `${k} = ${v}`)
   .join('\n')}
-response = requests.request("${data.method}", url${
-    variables.size > 0
-      ? `, ${Array.from(variables.keys())
-          .map((k) => `${k}=${k}`)
-          .join(', ')}`
-      : ''
-  })
+response = requests.request(${params.join(', ')})
 
 print(response.text)`;
 }

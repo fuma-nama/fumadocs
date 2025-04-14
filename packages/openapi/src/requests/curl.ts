@@ -1,6 +1,11 @@
 'use client';
 import { inputToString } from '@/utils/input-to-string';
-import { getUrl, type RequestData } from '@/requests/_shared';
+import {
+  getUrl,
+  ident,
+  MediaTypeFormatMap,
+  type RequestData,
+} from '@/requests/_shared';
 
 export function getSampleRequest(url: string, data: RequestData): string {
   const s: string[] = [];
@@ -24,24 +29,17 @@ export function getSampleRequest(url: string, data: RequestData): string {
         s.push(`-F ${key}=${inputToString(value)}`);
       }
     }
-  } else if (data.body) {
+  } else if (data.body && data.bodyMediaType) {
     s.push(`-H "Content-Type: ${data.bodyMediaType}"`);
 
-    if (data.bodyMediaType === 'application/json') {
-      s.push(`-d ${inputToString(data.body, 'json', 'single-quote')}`);
-    } else if (data.bodyMediaType === 'application/xml') {
-      s.push(`-d ${inputToString(data.body, 'xml', 'single-quote')}`);
-    } else {
-      s.push(`-d ${inputToString(data.body, 'url', 'single-quote')}`);
-    }
+    s.push(
+      `-d ${inputToString(
+        data.body,
+        MediaTypeFormatMap[data.bodyMediaType],
+        'single-quote',
+      )}`,
+    );
   }
 
-  return s
-    .flatMap((v, i) =>
-      v
-        .split('\n')
-        .map((line) => (i > 0 ? `  ${line}` : line))
-        .join('\n'),
-    )
-    .join(' \\\n');
+  return s.flatMap((v, i) => ident(v, i > 0 ? 1 : 0)).join(' \\\n');
 }

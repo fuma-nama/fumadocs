@@ -1,6 +1,6 @@
 'use client';
 import { inputToString } from '@/utils/input-to-string';
-import { getUrl, type RequestData } from '@/requests/_shared';
+import { getUrl, ident, type RequestData } from '@/requests/_shared';
 
 export function getSampleRequest(url: string, data: RequestData): string {
   const s: string[] = [];
@@ -47,11 +47,11 @@ export function getSampleRequest(url: string, data: RequestData): string {
       code = inputToString(data.body, 'xml', 'backtick');
     }
 
-    options.set('body', code.replaceAll('\n', '\n  '));
+    options.set('body', code);
   }
 
   const optionsStr = Array.from(options.entries())
-    .map(([k, v]) => `  ${k}: ${v}`)
+    .map(([k, v]) => ident(`${k}: ${v}`))
     .join(',\n');
 
   s.push(`fetch(${JSON.stringify(getUrl(url, data))}, {\n${optionsStr}\n});`);
