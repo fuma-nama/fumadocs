@@ -1,5 +1,12 @@
 import { getPathnameFromInput } from '@/utils/get-pathname-from-input';
 
+export const supportedMediaTypes = [
+  'multipart/form-data',
+  'application/json',
+  'application/xml',
+  'application/x-www-form-urlencoded',
+] as const;
+
 export interface RequestData {
   method: string;
 
@@ -9,10 +16,7 @@ export interface RequestData {
   cookie: Record<string, string>;
   body?: unknown;
 
-  bodyMediaType?:
-    | 'multipart/form-data'
-    | 'application/json'
-    | 'application/xml';
+  bodyMediaType?: (typeof supportedMediaTypes)[number];
 }
 
 export function getUrl(url: string, data: RequestData): string {

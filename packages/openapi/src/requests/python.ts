@@ -6,7 +6,7 @@ export function getSampleRequest(url: string, data: RequestData): string {
   const variables = new Map<string, string>();
   const headers = { ...data.header };
 
-  if (data.body) {
+  if (data.body && data.bodyMediaType) {
     switch (data.bodyMediaType) {
       case 'application/json':
         variables.set('json', JSON.stringify(data.body, null, 2));
@@ -16,11 +16,20 @@ export function getSampleRequest(url: string, data: RequestData): string {
         variables.set('data', JSON.stringify(data.body, null, 2));
         break;
       default:
-        if (data.bodyMediaType) headers['Content-Type'] = data.bodyMediaType;
+        headers['Content-Type'] = data.bodyMediaType;
 
         variables.set(
           'data',
-          inputToString(data.body, data.bodyMediaType, 'python'),
+          inputToString(
+            data.body,
+            (
+              {
+                'application/xml': 'xml',
+                'application/x-www-form-urlencoded': 'url',
+              } as const
+            )[data.bodyMediaType],
+            'python',
+          ),
         );
     }
   }

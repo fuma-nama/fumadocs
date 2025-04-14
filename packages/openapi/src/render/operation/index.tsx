@@ -21,7 +21,7 @@ import {
 } from '@/render/operation/api-example';
 import { MethodLabel } from '@/ui/components/method-label';
 
-import type { RequestData } from '@/requests/_shared';
+import { RequestData, supportedMediaTypes } from '@/requests/_shared';
 
 export interface CodeSample {
   lang: string;
@@ -77,8 +77,15 @@ export function Operation({
 
   if (body) {
     const type = getPreferredType(body.content);
-    if (!type)
-      throw new Error(`No supported media type for body content: ${path}`);
+    if (
+      !type ||
+      !supportedMediaTypes.includes(
+        String(type) as (typeof supportedMediaTypes)[number],
+      )
+    )
+      throw new Error(
+        `No supported media type for body content: ${path}, received: ${type}`,
+      );
 
     bodyNode = (
       <>

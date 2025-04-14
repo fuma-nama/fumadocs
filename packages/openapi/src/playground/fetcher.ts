@@ -106,7 +106,7 @@ export function createBrowserFetcher(): Fetcher {
 export async function createBodyFromValue(
   mediaType: Required<RequestData>['bodyMediaType'],
   value: unknown,
-): Promise<string | FormData> {
+): Promise<BodyInit> {
   if (mediaType === 'application/json') {
     return JSON.stringify(value);
   }
@@ -116,6 +116,17 @@ export async function createBodyFromValue(
       compact: true,
       spaces: 2,
     });
+  }
+
+  if (mediaType === 'application/x-www-form-urlencoded') {
+    if (typeof value !== 'object')
+      throw new Error(`Input value must be object, received: ${typeof value}`);
+
+    const params = new URLSearchParams();
+    for (const key in value) {
+      params.set(key, String(value[key as keyof object]));
+    }
+    return params;
   }
 
   const formData = new FormData();

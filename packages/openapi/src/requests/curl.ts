@@ -26,9 +26,14 @@ export function getSampleRequest(url: string, data: RequestData): string {
     }
   } else if (data.body) {
     s.push(`-H "Content-Type: ${data.bodyMediaType}"`);
-    s.push(
-      `-d ${inputToString(data.body, data.bodyMediaType, 'single-quote')}`,
-    );
+
+    if (data.bodyMediaType === 'application/json') {
+      s.push(`-d ${inputToString(data.body, 'json', 'single-quote')}`);
+    } else if (data.bodyMediaType === 'application/xml') {
+      s.push(`-d ${inputToString(data.body, 'xml', 'single-quote')}`);
+    } else {
+      s.push(`-d ${inputToString(data.body, 'url', 'single-quote')}`);
+    }
   }
 
   return s

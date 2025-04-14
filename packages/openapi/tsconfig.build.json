@@ -6,8 +6,5 @@
     "rootDir": "src",
     "sourceMap": false
   },
-  "tsc-alias": {
-    "resolveFullPaths": true
-  },
   "include": ["./src/**/*"]
 }

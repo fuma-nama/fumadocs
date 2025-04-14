@@ -22,13 +22,10 @@ export function getSampleRequest(url: string, data: RequestData): string {
       JSON.stringify(cookies.map((p) => `${p}=${data.cookie[p]}`).join('; ')),
     );
 
-  if (data.body) {
+  if (data.body && data.bodyMediaType) {
     headers.set('Content-Type', `"${data.bodyMediaType}"`);
 
-    if (
-      data.bodyMediaType === 'multipart/form-data' &&
-      typeof data.body === 'object'
-    ) {
+    if (data.bodyMediaType === 'multipart/form-data') {
       imports.push('mime/multipart', 'bytes');
 
       variables.set('payload', `new(bytes.Buffer)`);
@@ -36,7 +33,7 @@ export function getSampleRequest(url: string, data: RequestData): string {
 
       for (const [key, value] of Object.entries(data.body)) {
         additional.push(
-          `mp.WriteField("${key}", ${inputToString(value, undefined, 'backtick')})`,
+          `mp.WriteField("${key}", ${inputToString(value, 'json', 'backtick')})`,
         );
       }
     } else {
@@ -45,7 +42,13 @@ export function getSampleRequest(url: string, data: RequestData): string {
         'payload',
         `strings.NewReader(${inputToString(
           data.body,
-          data.bodyMediaType,
+          (
+            {
+              'application/json': 'json',
+              'application/xml': 'xml',
+              'application/x-www-form-urlencoded': 'url',
+            } as const
+          )[data.bodyMediaType],
           'backtick',
         ).replaceAll('\n', '\n  ')})`,
       );
