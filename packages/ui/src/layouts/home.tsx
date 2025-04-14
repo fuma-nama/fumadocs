@@ -1,5 +1,5 @@
-import { Fragment, type HTMLAttributes } from 'react';
-import { type NavOptions, replaceOrDefault } from '@/layouts/shared';
+import { Fragment, type HTMLAttributes, useMemo } from 'react';
+import { type NavOptions, slot, slots } from '@/layouts/shared';
 import { cn } from '@/utils/cn';
 import { getLinks, type BaseLayoutProps } from './shared';
 import { NavProvider } from '@/contexts/layout';
@@ -30,9 +30,7 @@ import {
   MenuTrigger,
 } from '@/layouts/home/menu';
 
-export interface HomeLayoutProps
-  extends BaseLayoutProps,
-    HTMLAttributes<HTMLElement> {
+export interface HomeLayoutProps extends BaseLayoutProps {
   nav?: Partial<
     NavOptions & {
       /**
@@ -43,18 +41,19 @@ export interface HomeLayoutProps
   >;
 }
 
-export function HomeLayout(props: HomeLayoutProps) {
+export function HomeLayout(
+  props: HomeLayoutProps & HTMLAttributes<HTMLElement>,
+) {
   const {
     nav,
     links,
     githubUrl,
-    i18n: _i18n,
-    themeSwitch: _themeSwitch,
-    disableThemeSwitch: _disableThemeSwitch,
+    i18n,
+    disableThemeSwitch = false,
+    themeSwitch = { enabled: !disableThemeSwitch },
+    searchToggle,
     ...rest
   } = props;
-
-  const finalLinks = getLinks(links, githubUrl);
 
   return (
     <NavProvider transparentMode={nav?.transparentMode}>
@@ -63,23 +62,36 @@ export function HomeLayout(props: HomeLayoutProps) {
         {...rest}
         className={cn('flex flex-1 flex-col pt-14', rest.className)}
       >
-        {replaceOrDefault(nav, <Header finalLinks={finalLinks} {...props} />, {
-          items: finalLinks,
-        })}
+        {slot(
+          nav,
+          <Header
+            links={links}
+            nav={nav}
+            themeSwitch={themeSwitch}
+            searchToggle={searchToggle}
+            i18n={i18n}
+            githubUrl={githubUrl}
+          />,
+        )}
         {props.children}
       </main>
     </NavProvider>
   );
 }
 
-function Header({
-  nav: { enableSearch = true, ...nav } = {},
+export function Header({
+  nav = {},
   i18n = false,
-  finalLinks,
+  links,
+  githubUrl,
   themeSwitch,
-}: HomeLayoutProps & {
-  finalLinks: LinkItemType[];
-}) {
+  searchToggle,
+}: HomeLayoutProps) {
+  const finalLinks = useMemo(
+    () => getLinks(links, githubUrl),
+    [links, githubUrl],
+  );
+
   const navItems = finalLinks.filter((item) =>
     ['nav', 'all'].includes(item.on ?? 'all'),
   );
@@ -104,16 +116,20 @@ function Header({
           ))}
       </ul>
       <div className="flex flex-row items-center justify-end gap-1.5 flex-1">
-        {enableSearch ? (
-          <>
-            <SearchToggle className="lg:hidden" hideIfDisabled />
-            <LargeSearchToggle
-              className="w-full max-w-[240px] max-lg:hidden"
-              hideIfDisabled
-            />
-          </>
-        ) : null}
-        {replaceOrDefault(
+        {slots(
+          'sm',
+          searchToggle,
+          <SearchToggle className="lg:hidden" hideIfDisabled />,
+        )}
+        {slots(
+          'lg',
+          searchToggle,
+          <LargeSearchToggle
+            className="w-full max-w-[240px] max-lg:hidden"
+            hideIfDisabled
+          />,
+        )}
+        {slot(
           themeSwitch,
           <ThemeToggle className="max-lg:hidden" mode={themeSwitch?.mode} />,
         )}
@@ -157,10 +173,7 @@ function Header({
                   <ChevronDown className="size-3 text-fd-muted-foreground" />
                 </LanguageToggle>
               ) : null}
-              {replaceOrDefault(
-                themeSwitch,
-                <ThemeToggle mode={themeSwitch?.mode} />,
-              )}
+              {slot(themeSwitch, <ThemeToggle mode={themeSwitch?.mode} />)}
             </div>
           </MenuContent>
         </Menu>

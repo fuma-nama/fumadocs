@@ -2,10 +2,6 @@ import * as fs from 'node:fs/promises';
 import path from 'node:path';
 
 export const templates = {
-  'lib/metadata': './examples/next-mdx/lib/metadata.ts',
-  'app/docs-og/[...slug]/route':
-    './examples/next-mdx/app/docs-og/[...slug]/route.tsx',
-
   'lib/i18n': './examples/i18n/lib/i18n.ts',
   middleware: './examples/i18n/middleware.ts',
 

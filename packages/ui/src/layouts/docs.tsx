@@ -12,7 +12,7 @@ import {
   SidebarViewport,
   SidebarPageTree,
 } from '@/components/layout/sidebar';
-import { replaceOrDefault } from '@/layouts/shared';
+import { slot, slots } from '@/layouts/shared';
 import {
   type LinkItemType,
   BaseLinkItem,
@@ -63,23 +63,24 @@ export interface DocsLayoutProps extends BaseLayoutProps {
 }
 
 export function DocsLayout({
-  nav: {
-    enabled: navEnabled = true,
-    component: navReplace,
-    transparentMode,
-    ...nav
-  } = {},
-  themeSwitch,
-  sidebar = {},
+  nav: { transparentMode, ...nav } = {},
+  searchToggle,
+  disableThemeSwitch = false,
+  themeSwitch = { enabled: !disableThemeSwitch },
+  sidebar: { tabs: tabOptions, ...sidebar } = {},
   i18n = false,
   children,
   ...props
 }: DocsLayoutProps): ReactNode {
+  const tabs = useMemo(
+    () => getSidebarTabsFromOptions(tabOptions, props.tree) ?? [],
+    [tabOptions, props.tree],
+  );
   const links = getLinks(props.links ?? [], props.githubUrl);
 
   const variables = cn(
     '[--fd-tocnav-height:36px] md:[--fd-sidebar-width:268px] lg:[--fd-sidebar-width:286px] xl:[--fd-toc-width:286px] xl:[--fd-tocnav-height:0px]',
-    !navReplace && navEnabled
+    !nav.component && nav.enabled !== false
       ? '[--fd-nav-height:calc(var(--spacing)*14)] md:[--fd-nav-height:0px]'
       : undefined,
   );
@@ -92,8 +93,8 @@ export function DocsLayout({
   return (
     <TreeContextProvider tree={props.tree}>
       <NavProvider transparentMode={transparentMode}>
-        {replaceOrDefault(
-          { enabled: navEnabled, component: navReplace },
+        {slot(
+          nav,
           <Navbar className="md:hidden">
             <Link
               href={nav.url ?? '/'}
@@ -104,10 +105,9 @@ export function DocsLayout({
             <div className="flex flex-1 flex-row items-center gap-1">
               {nav.children}
             </div>
-            <SearchToggle hideIfDisabled />
+            {slots('sm', searchToggle, <SearchToggle hideIfDisabled />)}
             <NavbarSidebarTrigger className="-me-2 md:hidden" />
           </Navbar>,
-          nav,
         )}
         <main
           id="nd-docs-layout"
@@ -122,10 +122,9 @@ export function DocsLayout({
             ...props.containerProps?.style,
           }}
         >
-          {replaceOrDefault(
+          {slot(
             sidebar,
             <DocsLayoutSidebar
-              tree={props.tree}
               {...sidebar}
               links={links}
               nav={
@@ -137,6 +136,22 @@ export function DocsLayout({
                     {nav.title}
                   </Link>
                   {nav.children}
+                </>
+              }
+              banner={
+                <>
+                  {tabs.length > 0 ? (
+                    <RootToggle options={tabs} className="-mx-2" />
+                  ) : null}
+                  {slots(
+                    'lg',
+                    searchToggle,
+                    <LargeSearchToggle
+                      hideIfDisabled
+                      className="rounded-lg max-md:hidden"
+                    />,
+                  )}
+                  {sidebar.banner}
                 </>
               }
               footer={
@@ -161,23 +176,15 @@ export function DocsLayout({
 export function DocsLayoutSidebar({
   collapsible = true,
   components,
-  tabs: tabOptions,
-  hideSearch,
-  tree,
   nav,
   links = [],
   footer,
   banner,
   ...props
-}: Partial<SidebarOptions> & {
-  tree: PageTree.Root;
+}: Omit<SidebarOptions, 'tabs'> & {
   links?: LinkItemType[];
   nav?: ReactNode;
 }) {
-  const tabs = useMemo(
-    () => getSidebarTabsFromOptions(tabOptions, tree) ?? [],
-    [tabOptions, tree],
-  );
   const Aside = collapsible ? CollapsibleSidebar : Sidebar;
 
   return (
@@ -205,15 +212,6 @@ export function DocsLayoutSidebar({
             )}
           </div>
           {banner}
-          {tabs.length > 0 ? (
-            <RootToggle options={tabs} className="-mx-2" />
-          ) : null}
-          {!hideSearch ? (
-            <LargeSearchToggle
-              hideIfDisabled
-              className="rounded-lg max-md:hidden"
-            />
-          ) : null}
         </SidebarHeader>
         <SidebarViewport>
           <div className="mb-4 empty:hidden">
@@ -266,7 +264,7 @@ export function DocsLayoutSidebarFooter({
           <LanguageToggleText className="md:hidden" />
         </LanguageToggle>
       ) : null}
-      {replaceOrDefault(
+      {slot(
         themeSwitch,
         <ThemeToggle className="p-0" mode={themeSwitch?.mode} />,
       )}

@@ -67,39 +67,38 @@ function toTab(nodes: Code[]) {
 export function remarkCodeTab(): Transformer<Root, Root> {
   return (tree) => {
     visit(tree, (node) => {
+      if (!('children' in node)) return;
       if (node.type === 'mdxJsxFlowElement' && node.name === 'Tabs') return;
-      if ('children' in node) {
-        let start = -1;
-        let i = 0;
+      let start = -1;
+      let i = 0;
 
-        while (i < node.children.length) {
-          const child = node.children[i];
-          const isSwitcher =
-            child.type === 'code' && child.meta && child.meta.match(TabRegex);
+      while (i < node.children.length) {
+        const child = node.children[i];
+        const isSwitcher =
+          child.type === 'code' && child.meta && child.meta.match(TabRegex);
 
-          if (isSwitcher && start === -1) {
-            start = i;
-          }
-
-          // if switcher code blocks terminated, convert them to tabs
-          const isLast = i === node.children.length - 1;
-          if (start !== -1 && (isLast || !isSwitcher)) {
-            const end = isSwitcher ? i + 1 : i;
-            const targets = node.children.slice(start, end);
-
-            node.children.splice(
-              start,
-              end - start,
-              toTab(targets as Code[]) as RootContent,
-            );
-
-            if (isLast) break;
-            i = start;
-            start = -1;
-          }
-
-          i++;
+        if (isSwitcher && start === -1) {
+          start = i;
         }
+
+        // if switcher code blocks terminated, convert them to tabs
+        const isLast = i === node.children.length - 1;
+        if (start !== -1 && (isLast || !isSwitcher)) {
+          const end = isSwitcher ? i + 1 : i;
+          const targets = node.children.slice(start, end);
+
+          node.children.splice(
+            start,
+            end - start,
+            toTab(targets as Code[]) as RootContent,
+          );
+
+          if (isLast) break;
+          i = start;
+          start = -1;
+        }
+
+        i++;
       }
     });
   };

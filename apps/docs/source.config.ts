@@ -1,7 +1,7 @@
 import {
+  defineCollections,
   defineConfig,
   defineDocs,
-  defineCollections,
   frontmatterSchema,
   metaSchema,
 } from 'fumadocs-mdx/config';
@@ -12,7 +12,10 @@ import { fileGenerator, remarkDocGen, remarkInstall } from 'fumadocs-docgen';
 import { remarkTypeScriptToJavaScript } from 'fumadocs-docgen/remark-ts2js';
 import rehypeKatex from 'rehype-katex';
 import { z } from 'zod';
-import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins';
+import {
+  rehypeCodeDefaultOptions,
+  remarkSteps,
+} from 'fumadocs-core/mdx-plugins';
 import { remarkAutoTypeTable } from 'fumadocs-typescript';
 
 export const docs = defineDocs({
@@ -80,6 +83,7 @@ export default defineConfig({
       ],
     },
     remarkPlugins: [
+      remarkSteps,
       remarkMath,
       remarkAutoTypeTable,
       [remarkInstall, { persist: { id: 'package-manager' } }],

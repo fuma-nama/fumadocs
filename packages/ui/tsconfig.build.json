@@ -5,9 +5,6 @@
     "outDir": "dist",
     "rootDir": "src"
   },
-  "tsc-alias": {
-    "resolveFullPaths": true
-  },
   "include": ["./src/**/*"],
   "exclude": ["./src/_registry"]
 }

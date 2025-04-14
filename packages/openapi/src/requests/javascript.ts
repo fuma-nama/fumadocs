@@ -1,6 +1,6 @@
 'use client';
 import { inputToString } from '@/utils/input-to-string';
-import { getUrl, type RequestData } from '@/requests/_shared';
+import { getUrl, ident, type RequestData } from '@/requests/_shared';
 
 export function getSampleRequest(url: string, data: RequestData): string {
   const s: string[] = [];
@@ -14,40 +14,41 @@ export function getSampleRequest(url: string, data: RequestData): string {
   }
 
   if (Object.keys(headers).length > 0) {
-    options.set(
-      'headers',
-      JSON.stringify(headers, null, 2).replaceAll('\n', '\n  '),
-    );
+    options.set('headers', JSON.stringify(headers, null, 2));
   }
 
-  if (
-    data.bodyMediaType === 'multipart/form-data' &&
-    typeof data.body === 'object' &&
-    data.body
-  ) {
+  if (data.bodyMediaType === 'multipart/form-data' && data.body) {
     s.push(`const formData = new FormData();`);
 
     for (const [key, value] of Object.entries(data.body))
       s.push(`formData.set(${key}, ${inputToString(value)})`);
 
     options.set('body', 'formData');
+  } else if (
+    data.body &&
+    data.bodyMediaType === 'application/x-www-form-urlencoded'
+  ) {
+    options.set(
+      'body',
+      `new URLSearchParams(${JSON.stringify(data.body, null, 2)})`,
+    );
   } else if (data.body) {
     let code: string;
 
     if (data.bodyMediaType === 'application/json') {
       code =
         typeof data.body === 'string'
-          ? inputToString(data.body, data.bodyMediaType, 'backtick')
+          ? inputToString(data.body, 'json', 'backtick')
           : `JSON.stringify(${JSON.stringify(data.body, null, 2)})`;
     } else {
-      code = inputToString(data.body, data.bodyMediaType, 'backtick');
+      code = inputToString(data.body, 'xml', 'backtick');
     }
 
-    options.set('body', code.replaceAll('\n', '\n  '));
+    options.set('body', code);
   }
 
   const optionsStr = Array.from(options.entries())
-    .map(([k, v]) => `  ${k}: ${v}`)
+    .map(([k, v]) => ident(`${k}: ${v}`))
     .join(',\n');
 
   s.push(`fetch(${JSON.stringify(getUrl(url, data))}, {\n${optionsStr}\n});`);

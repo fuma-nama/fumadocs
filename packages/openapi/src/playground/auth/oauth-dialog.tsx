@@ -63,7 +63,7 @@ export function OauthDialog({
         redirect_uri: state.redirect_uri,
         client_id: state.client_id,
         client_secret: state.client_secret,
-      }).toString(),
+      }),
     });
 
     if (!res.ok) throw new Error(await res.text());
@@ -125,7 +125,7 @@ export function OauthDialog({
         body: new URLSearchParams({
           grant_type: 'client_credentials',
           scope: Object.keys(value.scopes).join('+'),
-        }).toString(),
+        }),
       });
     }
   });

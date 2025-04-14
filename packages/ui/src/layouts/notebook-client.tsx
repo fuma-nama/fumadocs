@@ -23,7 +23,7 @@ export function Navbar({
       id="nd-subnav"
       {...props}
       className={cn(
-        'fixed inset-x-0 top-(--fd-banner-height) z-10 px-(--fd-layout-offset) backdrop-blur-lg transition-colors',
+        'fixed inset-x-0 top-(--fd-banner-height) z-10 px-(--fd-layout-offset) backdrop-blur-sm transition-colors',
         (!isTransparent || open) && 'bg-fd-background/80',
         mode === 'auto' &&
           !collapsed &&

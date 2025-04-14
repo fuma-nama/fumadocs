@@ -9,3 +9,4 @@ export * from './remark-heading';
 export * from './remark-admonition';
 export * from './rehype-toc';
 export * from './remark-code-tab';
+export * from './remark-steps';

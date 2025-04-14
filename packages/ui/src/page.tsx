@@ -6,23 +6,23 @@ import {
   type ReactNode,
 } from 'react';
 import { type AnchorProviderProps, AnchorProvider } from 'fumadocs-core/toc';
-import { replaceOrDefault } from '@/layouts/shared';
+import { slot } from '@/layouts/shared';
 import { cn } from './utils/cn';
 import {
   Footer,
   type FooterProps,
   LastUpdate,
-  TocPopoverHeader,
+  TocPopover,
   Breadcrumb,
   type BreadcrumbProps,
   PageBody,
   PageArticle,
+  TocPopoverTrigger,
+  TocPopoverContent,
 } from './page-client';
 import {
   Toc,
   TOCItems,
-  TocPopoverTrigger,
-  TocPopoverContent,
   type TOCProps,
   TOCScrollArea,
 } from '@/components/layout/toc';
@@ -151,9 +151,9 @@ export function DocsPage({
           } as object
         }
       >
-        {replaceOrDefault(
+        {slot(
           { enabled: tocPopoverEnabled, component: tocPopoverReplace },
-          <TocPopoverHeader className="h-10">
+          <TocPopover className="h-10">
             <TocPopoverTrigger className="w-full" items={toc} />
             <TocPopoverContent>
               {tocPopoverOptions.header}
@@ -166,7 +166,7 @@ export function DocsPage({
               </TOCScrollArea>
               {tocPopoverOptions.footer}
             </TocPopoverContent>
-          </TocPopoverHeader>,
+          </TocPopover>,
           {
             items: toc,
             ...tocPopoverOptions,
@@ -179,10 +179,7 @@ export function DocsPage({
             props.article?.className,
           )}
         >
-          {replaceOrDefault(
-            props.breadcrumb,
-            <Breadcrumb {...props.breadcrumb} />,
-          )}
+          {slot(props.breadcrumb, <Breadcrumb {...props.breadcrumb} />)}
           {props.children}
           <div role="none" className="flex-1" />
           <div className="flex flex-row flex-wrap items-center justify-between gap-4 empty:hidden">
@@ -193,13 +190,10 @@ export function DocsPage({
               <LastUpdate date={new Date(props.lastUpdate)} />
             ) : null}
           </div>
-          {replaceOrDefault(
-            props.footer,
-            <Footer items={props.footer?.items} />,
-          )}
+          {slot(props.footer, <Footer items={props.footer?.items} />)}
         </PageArticle>
       </PageBody>
-      {replaceOrDefault(
+      {slot(
         { enabled: tocEnabled, component: tocReplace },
         <Toc>
           {tocOptions.header}

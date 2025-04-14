@@ -13,13 +13,13 @@ Create a new Next.js application with `create-next-app`, and install required pa
 fumadocs-ui fumadocs-core
 ```
 
-### MDX Components
+### 1. MDX Components
 
 <include cwd meta='title="mdx-components.tsx"'>
   ../../examples/next-mdx/mdx-components.tsx
 </include>
 
-### Content Source
+### 2. Content Source
 
 Fumadocs supports different content sources, you can choose one you prefer.
 
@@ -30,7 +30,7 @@ There is a list of officially supported sources:
 
 Make sure to configure the library correctly following their setup guide before continuing, we will import the source adapter using `@/lib/source.ts` in this guide.
 
-### Root Layout
+### 3. Root Layout
 
 Wrap the entire application inside [Root Provider](/docs/ui/layouts/root-provider), and add required styles to `body`.
 
@@ -56,7 +56,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 }
 ```
 
-### Styles
+### 4. Styles
 
 Setup Tailwind CSS v4 on your Next.js app, add the following to `global.css`.
 
@@ -71,7 +71,7 @@ Setup Tailwind CSS v4 on your Next.js app, add the following to `global.css`.
 
 > It doesn't come with a default font, you may choose one from `next/font`.
 
-### Layout
+### 5. Layout
 
 Create a `app/layout.config.tsx` file to put the shared options for our layouts.
 
@@ -97,7 +97,7 @@ Create a folder `/app/docs` for our docs, and give it a proper layout.
 
 > `pageTree` refers to Page Tree, it should be provided by your content source.
 
-### Page
+### 6. Page
 
 Create a catch-all route `/app/docs/[[...slug]]` for docs pages.
 
@@ -112,7 +112,7 @@ It may vary depending on your content source. You should configure static render
 
 </Tabs>
 
-### Search
+### 7. Search
 
 Use the default document search based on Orama.
 
@@ -122,7 +122,7 @@ Use the default document search based on Orama.
 
 Learn more about [Document Search](/docs/headless/search).
 
-### Done
+### 8. Done
 
 You can start the dev server and create MDX files.
 

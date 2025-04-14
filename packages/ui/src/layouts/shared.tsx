@@ -16,12 +16,6 @@ export interface NavOptions extends NavProviderProps {
    */
   url?: string;
 
-  /**
-   * Show/hide search toggle
-   *
-   * Note: Enable/disable search from root provider instead
-   */
-  enableSearch?: boolean;
   children?: ReactNode;
 }
 
@@ -31,6 +25,14 @@ export interface BaseLayoutProps {
     component?: ReactNode;
     mode?: 'light-dark' | 'light-dark-system';
   };
+
+  searchToggle?: Partial<{
+    enabled: boolean;
+    components: Partial<{
+      sm: ReactNode;
+      lg: ReactNode;
+    }>;
+  }>;
 
   /**
    * Remove theme switcher component
@@ -91,7 +93,7 @@ export function getLinks(
   return result;
 }
 
-export function replaceOrDefault(
+export function slot(
   obj:
     | {
         enabled?: boolean;
@@ -105,6 +107,23 @@ export function replaceOrDefault(
   if (obj?.enabled === false) return disabled;
   if (obj?.component !== undefined)
     return <Slot {...customComponentProps}>{obj.component}</Slot>;
+
+  return def;
+}
+
+export function slots<Comp extends Record<string, ReactNode>>(
+  variant: keyof Comp,
+  obj:
+    | {
+        enabled?: boolean;
+        components?: Comp;
+      }
+    | undefined,
+  def: ReactNode,
+): ReactNode {
+  if (obj?.enabled === false) return;
+  if (obj?.components?.[variant] !== undefined)
+    return <Slot>{obj.components[variant]}</Slot>;
 
   return def;
 }

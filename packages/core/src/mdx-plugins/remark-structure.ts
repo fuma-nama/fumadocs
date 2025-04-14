@@ -1,10 +1,14 @@
 import Slugger from 'github-slugger';
-import type { Root } from 'mdast';
+import type { Root, Nodes } from 'mdast';
 import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
 import type { PluggableList, Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
 import { flattenNode } from './remark-utils';
+import type {
+  MdxJsxAttribute,
+  MdxJsxExpressionAttribute,
+} from 'mdast-util-mdx-jsx';
 
 interface Heading {
   id: string;
@@ -28,9 +32,16 @@ export interface StructureOptions {
   /**
    * Types to be scanned as content.
    *
-   * @defaultValue ['paragraph', 'blockquote', 'tableCell']
+   * @defaultValue ['heading', 'paragraph', 'blockquote', 'tableCell', 'mdxJsxFlowElement']
    */
-  types?: string[];
+  types?: string[] | ((node: Nodes) => boolean);
+
+  allowedMdxAttributes?:
+    | string[]
+    | ((
+        node: Nodes,
+        attribute: MdxJsxAttribute | MdxJsxExpressionAttribute,
+      ) => boolean);
 }
 
 declare module 'mdast' {
@@ -50,8 +61,26 @@ const slugger = new Slugger();
  * Attach structured data to VFile, you can access via `vfile.data.structuredData`.
  */
 export function remarkStructure({
-  types = ['paragraph', 'blockquote', 'heading', 'tableCell'],
+  types = [
+    'heading',
+    'paragraph',
+    'blockquote',
+    'tableCell',
+    'mdxJsxFlowElement',
+  ],
+  allowedMdxAttributes = () => true,
 }: StructureOptions = {}): Transformer<Root, Root> {
+  if (Array.isArray(allowedMdxAttributes)) {
+    const arr = allowedMdxAttributes;
+    allowedMdxAttributes = (_node, attribute) =>
+      attribute.type === 'mdxJsxAttribute' && arr.includes(attribute.name);
+  }
+
+  if (Array.isArray(types)) {
+    const arr = types;
+    types = (node) => arr.includes(node.type);
+  }
+
   return (node, file) => {
     slugger.reset();
     const data: StructuredData = { contents: [], headings: [] };
@@ -73,6 +102,7 @@ export function remarkStructure({
 
     visit(node, (element) => {
       if (element.type === 'root') return;
+      if (!types(element)) return;
 
       if (element.type === 'heading') {
         element.data ||= {};
@@ -113,6 +143,11 @@ export function remarkStructure({
                 ? attribute.value
                 : attribute.value?.value;
             if (!valueStr) return [];
+            if (
+              allowedMdxAttributes &&
+              !allowedMdxAttributes(element, attribute)
+            )
+              return [];
 
             return {
               heading: lastHeading,
@@ -127,17 +162,15 @@ export function remarkStructure({
         return;
       }
 
-      if (types.includes(element.type)) {
-        const content = flattenNode(element).trim();
-        if (content.length === 0) return;
+      const content = flattenNode(element).trim();
+      if (content.length === 0) return;
 
-        data.contents.push({
-          heading: lastHeading,
-          content,
-        });
+      data.contents.push({
+        heading: lastHeading,
+        content,
+      });
 
-        return 'skip';
-      }
+      return 'skip';
     });
 
     file.data.structuredData = data;

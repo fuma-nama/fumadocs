@@ -1,6 +1,11 @@
 'use client';
 import { inputToString } from '@/utils/input-to-string';
-import { getUrl, type RequestData } from '@/requests/_shared';
+import {
+  getUrl,
+  ident,
+  MediaTypeFormatMap,
+  type RequestData,
+} from '@/requests/_shared';
 
 export function getSampleRequest(url: string, data: RequestData): string {
   const imports = ['fmt', 'net/http', 'io/ioutil'];
@@ -22,13 +27,10 @@ export function getSampleRequest(url: string, data: RequestData): string {
       JSON.stringify(cookies.map((p) => `${p}=${data.cookie[p]}`).join('; ')),
     );
 
-  if (data.body) {
+  if (data.body && data.bodyMediaType) {
     headers.set('Content-Type', `"${data.bodyMediaType}"`);
 
-    if (
-      data.bodyMediaType === 'multipart/form-data' &&
-      typeof data.body === 'object'
-    ) {
+    if (data.bodyMediaType === 'multipart/form-data') {
       imports.push('mime/multipart', 'bytes');
 
       variables.set('payload', `new(bytes.Buffer)`);
@@ -36,7 +38,7 @@ export function getSampleRequest(url: string, data: RequestData): string {
 
       for (const [key, value] of Object.entries(data.body)) {
         additional.push(
-          `mp.WriteField("${key}", ${inputToString(value, undefined, 'backtick')})`,
+          `mp.WriteField("${key}", ${inputToString(value, 'json', 'backtick')})`,
         );
       }
     } else {
@@ -45,9 +47,9 @@ export function getSampleRequest(url: string, data: RequestData): string {
         'payload',
         `strings.NewReader(${inputToString(
           data.body,
-          data.bodyMediaType,
+          MediaTypeFormatMap[data.bodyMediaType],
           'backtick',
-        ).replaceAll('\n', '\n  ')})`,
+        )})`,
       );
     }
   }
@@ -55,18 +57,20 @@ export function getSampleRequest(url: string, data: RequestData): string {
   return `package main
 
 import (
-${imports.map((v) => `  "${v}"`).join('\n')}
+${ident(imports.map((v) => `"${v}"`).join('\n'))}
 )
 
 func main() {
 ${Array.from(variables.entries())
-  .map(([k, v]) => `  ${k} := ${v}`)
+  .map(([k, v]) => ident(`${k} := ${v}`))
   .join('\n')}
-  ${additional.join('\n  ')}
+${ident(additional.join('\n'))}
   req, _ := http.NewRequest("${data.method}", url, ${variables.has('payload') ? 'payload' : 'nil'})
-  ${Array.from(headers.entries())
+${ident(
+  Array.from(headers.entries())
     .map(([key, value]) => `req.Header.Add("${key}", ${value})`)
-    .join('\n  ')}
+    .join('\n'),
+)}
   res, _ := http.DefaultClient.Do(req)
   defer res.Body.Close()
   body, _ := ioutil.ReadAll(res.Body)

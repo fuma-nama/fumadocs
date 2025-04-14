@@ -6,6 +6,11 @@ import type { LoadedConfig } from '@/utils/config';
 export interface RuntimeFile {
   info: FileInfo;
   data: Record<string, unknown>;
+}
+
+export interface AsyncRuntimeFile {
+  info: FileInfo;
+  data: Record<string, unknown>;
   content: string;
 }
 
@@ -76,12 +81,13 @@ export interface Runtime {
 type AsyncDocOut<Schema extends StandardSchemaV1> =
   StandardSchemaV1.InferOutput<Schema> &
     BaseCollectionEntry & {
+      content: string;
       load: () => Promise<MarkdownProps>;
     };
 
 export interface RuntimeAsync {
   doc: <C>(
-    files: RuntimeFile[],
+    files: AsyncRuntimeFile[],
     collection: string,
     config: LoadedConfig,
   ) => C extends {
@@ -93,7 +99,7 @@ export interface RuntimeAsync {
     ? AsyncDocOut<Schema>[]
     : never;
   docs: <C>(
-    docs: RuntimeFile[],
+    docs: AsyncRuntimeFile[],
     metas: RuntimeFile[],
     collection: string,
     config: LoadedConfig,

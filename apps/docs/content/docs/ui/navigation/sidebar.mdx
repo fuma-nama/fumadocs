@@ -55,7 +55,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 
 ### Sidebar Tabs
 
-A navigation component to switch between tabs.
+A navigation component to switch between tabs, it will be hidden unless one of its items is active.
 
 <div className='flex justify-center items-center *:max-w-[360px] bg-gradient-to-br from-fd-primary/10 rounded-xl border'>
 
@@ -82,9 +82,13 @@ import { DocsLayout } from 'fumadocs-ui/layouts/docs';
   sidebar={{
     tabs: [
       {
-        title: 'Test',
-        description: 'Test Tab',
-        url: '/docs/test',
+        title: 'Components',
+        description: 'Hello World!',
+        // active for `/docs/components` and sub routes like `/docs/components/button`
+        url: '/docs/components',
+
+        // optionally, you can specify a set of urls which activates the item
+        // urls: new Set(['/docs/test', '/docs/components']),
       },
     ],
   }}

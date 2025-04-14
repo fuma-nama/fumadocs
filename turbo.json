@@ -5,7 +5,8 @@
     "NEXT_PUBLIC_ORAMA_API_KEY",
     "GITHUB_APP_PRIVATE_KEY",
     "GITHUB_APP_ID",
-    "GITHUB_TOKEN"
+    "GITHUB_TOKEN",
+    "INKEEP_API_KEY"
   ],
   "ui": "stream",
   "tasks": {

@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  type ComponentProps,
   Fragment,
   type HTMLAttributes,
   useEffect,
@@ -8,24 +9,161 @@ import {
   useRef,
   useState,
 } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import { cn } from '@/utils/cn';
 import { useI18n } from './contexts/i18n';
 import { useTreeContext, useTreePath } from './contexts/tree';
 import { useSidebar } from '@/contexts/sidebar';
-import type { PageTree } from 'fumadocs-core/server';
-import { usePathname } from 'fumadocs-core/framework';
+import type { PageTree, TOCItemType } from 'fumadocs-core/server';
+import { createContext, usePathname } from 'fumadocs-core/framework';
 import {
   type BreadcrumbOptions,
   getBreadcrumbItemsFromPath,
 } from 'fumadocs-core/breadcrumb';
-import { usePageStyles, useNav } from '@/contexts/layout';
+import { useNav, usePageStyles } from '@/contexts/layout';
 import { isActive } from '@/utils/is-active';
-import { TocPopover } from '@/components/layout/toc';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import * as Primitive from 'fumadocs-core/toc';
 
-export function TocPopoverHeader(props: HTMLAttributes<HTMLDivElement>) {
+const TocPopoverContext = createContext<{
+  open: boolean;
+  setOpen: (open: boolean) => void;
+}>('TocPopoverContext');
+
+export function TocPopoverTrigger({
+  items,
+  ...props
+}: ComponentProps<'button'> & { items: TOCItemType[] }) {
+  const { text } = useI18n();
+  const { open } = TocPopoverContext.use();
+  const active = Primitive.useActiveAnchor();
+  const selected = useMemo(
+    () => items.findIndex((item) => active === item.url.slice(1)),
+    [items, active],
+  );
+  const path = useTreePath().at(-1);
+  const showCurrent = selected !== -1 && !open;
+
+  return (
+    <CollapsibleTrigger
+      {...props}
+      className={cn(
+        'flex flex-row items-center text-sm text-fd-muted-foreground gap-2.5 px-4 py-2.5 text-start focus-visible:outline-none [&_svg]:shrink-0 [&_svg]:size-4 md:px-6',
+        props.className,
+      )}
+    >
+      <ProgressCircle
+        value={(selected + 1) / items.length}
+        max={1}
+        className={cn(open && 'text-fd-primary')}
+      />
+      <span
+        className={cn(
+          'grid flex-1 *:row-start-1 *:col-start-1',
+          open && 'text-fd-foreground',
+        )}
+      >
+        <span
+          className={cn(
+            'truncate transition-all',
+            showCurrent && 'opacity-0 -translate-y-full pointer-events-none',
+          )}
+        >
+          {path?.name ?? text.toc}
+        </span>
+        <span
+          className={cn(
+            'truncate transition-all',
+            !showCurrent && 'opacity-0 translate-y-full pointer-events-none',
+          )}
+        >
+          {items[selected]?.title}
+        </span>
+      </span>
+      <ChevronDown
+        className={cn('transition-transform', open && 'rotate-180')}
+      />
+    </CollapsibleTrigger>
+  );
+}
+
+interface ProgressCircleProps
+  extends Omit<React.ComponentProps<'svg'>, 'strokeWidth'> {
+  value: number;
+  strokeWidth?: number;
+  size?: number;
+  min?: number;
+  max?: number;
+}
+
+function clamp(input: number, min: number, max: number): number {
+  if (input < min) return min;
+  if (input > max) return max;
+  return input;
+}
+
+function ProgressCircle({
+  value,
+  strokeWidth = 2,
+  size = 24,
+  min = 0,
+  max = 100,
+  ...restSvgProps
+}: ProgressCircleProps) {
+  const normalizedValue = clamp(value, min, max);
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const progress = (normalizedValue / max) * circumference;
+  const circleProps = {
+    cx: size / 2,
+    cy: size / 2,
+    r: radius,
+    fill: 'none',
+    strokeWidth,
+  };
+
+  return (
+    <svg
+      role="progressbar"
+      viewBox={`0 0 ${size} ${size}`}
+      aria-valuenow={normalizedValue}
+      aria-valuemin={min}
+      aria-valuemax={max}
+      {...restSvgProps}
+    >
+      <circle {...circleProps} className="stroke-current/25" />
+      <circle
+        {...circleProps}
+        stroke="currentColor"
+        strokeDasharray={circumference}
+        strokeDashoffset={circumference - progress}
+        strokeLinecap="round"
+        transform={`rotate(-90 ${size / 2} ${size / 2})`}
+        className="transition-all"
+      />
+    </svg>
+  );
+}
+
+export function TocPopoverContent(props: ComponentProps<'div'>) {
+  return (
+    <CollapsibleContent
+      data-toc-popover=""
+      {...props}
+      className={cn('flex flex-col max-h-[50vh]', props.className)}
+    >
+      {props.children}
+    </CollapsibleContent>
+  );
+}
+
+export function TocPopover(props: HTMLAttributes<HTMLDivElement>) {
   const ref = useRef<HTMLElement>(null);
   const [open, setOpen] = useState(false);
   const sidebar = useSidebar();
@@ -49,26 +187,38 @@ export function TocPopoverHeader(props: HTMLAttributes<HTMLDivElement>) {
 
   return (
     <div
+      {...props}
       className={cn('sticky overflow-visible z-10', tocNav, props.className)}
       style={{
+        ...props.style,
         top: 'calc(var(--fd-banner-height) + var(--fd-nav-height))',
       }}
     >
-      <TocPopover open={open} onOpenChange={setOpen} asChild>
-        <header
-          ref={ref}
-          id="nd-tocnav"
-          {...props}
-          className={cn(
-            'border-b border-fd-foreground/10 backdrop-blur-md transition-colors',
-            (!isTransparent || open) && 'bg-fd-background/80',
-            open && 'shadow-lg',
-            sidebar.open && 'max-md:hidden',
-          )}
-        >
-          {props.children}
-        </header>
-      </TocPopover>
+      <TocPopoverContext.Provider
+        value={useMemo(
+          () => ({
+            open,
+            setOpen,
+          }),
+          [setOpen, open],
+        )}
+      >
+        <Collapsible open={open} onOpenChange={setOpen} asChild>
+          <header
+            ref={ref}
+            id="nd-tocnav"
+            {...props}
+            className={cn(
+              'border-b border-fd-foreground/10 backdrop-blur-sm transition-colors',
+              (!isTransparent || open) && 'bg-fd-background/80',
+              open && 'shadow-lg',
+              sidebar.open && 'max-md:hidden',
+            )}
+          >
+            {props.children}
+          </header>
+        </Collapsible>
+      </TocPopoverContext.Provider>
     </div>
   );
 }
@@ -94,7 +244,7 @@ export function PageArticle(props: HTMLAttributes<HTMLElement>) {
     <article
       {...props}
       className={cn(
-        'flex w-full flex-1 flex-col gap-6 px-4 pt-8 md:px-6 md:pt-12 xl:px-12 xl:mx-auto',
+        'flex w-full flex-1 flex-col gap-6 px-4 md:px-6 pt-8 md:pt-12 xl:px-12 xl:mx-auto',
         article,
         props.className,
       )}

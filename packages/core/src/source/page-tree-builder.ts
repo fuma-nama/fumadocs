@@ -278,7 +278,7 @@ function build(ctx: PageTreeBuilderContext): PageTree.Root {
   const folder = buildFolderNode(root, true, ctx);
 
   return {
-    $id: 'root',
+    $id: ctx.locale ? ctx.locale : 'root',
     name: folder.name,
     children: folder.children,
   };

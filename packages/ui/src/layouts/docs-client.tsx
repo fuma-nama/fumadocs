@@ -19,7 +19,7 @@ export function Navbar(props: HTMLAttributes<HTMLElement>) {
       id="nd-subnav"
       {...props}
       className={cn(
-        'sticky top-(--fd-banner-height) z-30 flex h-14 flex-row items-center border-b border-fd-foreground/10 px-4 backdrop-blur-lg transition-colors',
+        'sticky top-(--fd-banner-height) z-30 flex h-14 items-center px-4 border-b border-fd-foreground/10 transition-colors backdrop-blur-sm md:px-6',
         (!isTransparent || open) && 'bg-fd-background/80',
         props.className,
       )}
@@ -55,7 +55,12 @@ export function CollapsibleControl() {
   if (!collapsed) return;
 
   return (
-    <div className="fixed flex flex-row items-center animate-fd-fade-in rounded-xl p-0.5 border bg-fd-muted text-fd-muted-foreground z-10 top-12 shadow-md max-md:hidden xl:top-4 xl:start-4 max-xl:end-4">
+    <div
+      className="fixed flex flex-row animate-fd-fade-in rounded-xl p-0.5 border bg-fd-muted text-fd-muted-foreground z-10 xl:start-4 max-xl:end-4"
+      style={{
+        top: 'calc(var(--fd-banner-height) + var(--fd-tocnav-height) + var(--spacing) * 4)',
+      }}
+    >
       <SidebarCollapseTrigger
         className={cn(
           buttonVariants({

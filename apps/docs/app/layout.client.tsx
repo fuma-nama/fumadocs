@@ -26,24 +26,16 @@ export function useMode(): string | undefined {
 export function FumadocsIcon(props: React.SVGProps<SVGSVGElement>) {
   const id = useId();
   return (
-    <svg
-      width="80"
-      height="80"
-      viewBox="0 0 180 180"
-      filter={`url(#${id}-shadow)`}
-      {...props}
-    >
-      <circle cx="90" cy="90" r="90" fill={`url(#${id}-iconGradient)`} />
+    <svg width="80" height="80" viewBox="0 0 180 180" {...props}>
+      <circle
+        cx="90"
+        cy="90"
+        r="89"
+        fill={`url(#${id}-iconGradient)`}
+        stroke="var(--color-fd-primary)"
+        strokeWidth="1"
+      />
       <defs>
-        <filter id={`${id}-shadow`} colorInterpolationFilters="sRGB">
-          <feDropShadow
-            dx="0"
-            dy="0"
-            stdDeviation="0.5"
-            floodColor="var(--color-fd-primary)"
-            floodOpacity="1"
-          />
-        </filter>
         <linearGradient
           id={`${id}-iconGradient`}
           gradientTransform="rotate(45)"

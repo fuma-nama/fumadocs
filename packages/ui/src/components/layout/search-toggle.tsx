@@ -34,7 +34,7 @@ export function SearchToggle({
         setOpenSearch(true);
       }}
     >
-      <SearchIcon />
+      <SearchIcon className="p-px" />
     </button>
   );
 }

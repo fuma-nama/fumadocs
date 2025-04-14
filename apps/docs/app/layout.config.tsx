@@ -132,7 +132,7 @@ export const baseOptions: BaseLayoutProps = {
           icon: <Layout />,
           text: 'Layouts',
           description: 'See the available layouts of Fumadocs UI.',
-          url: '/docs/ui/blocks',
+          url: '/docs/ui/layouts/docs',
           menu: {
             className: 'lg:col-start-3',
           },

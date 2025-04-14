@@ -45,6 +45,7 @@ export const _runtimeAsync: RuntimeAsync = {
       return {
         ...data,
         _file: file,
+        content,
         async load() {
           const compiler = await init;
           const out = await compiler.compile({

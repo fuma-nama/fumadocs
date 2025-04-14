@@ -1,6 +1,6 @@
 import { type Document } from '@/types';
 import type { NoReference } from '@/utils/schema';
-import type { OperationItem, WebhookItem } from '@/server/api-page';
+import type { OperationItem, WebhookItem } from '@/render/api-page';
 import type { OpenAPIV3_1 } from 'openapi-types';
 
 export const methodKeys = [

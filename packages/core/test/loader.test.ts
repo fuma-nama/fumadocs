@@ -301,7 +301,7 @@ test('Internationalized Routing', () => {
   expect(removeUndefined(result.pageTree['en'], true), 'Page Tree')
     .toMatchInlineSnapshot(`
       {
-        "$id": "root",
+        "$id": "en",
         "children": [
           {
             "$id": "test.mdx",
@@ -337,7 +337,7 @@ test('Internationalized Routing', () => {
   expect(removeUndefined(result.pageTree['cn'], true), 'Page Tree')
     .toMatchInlineSnapshot(`
       {
-        "$id": "root",
+        "$id": "cn",
         "children": [
           {
             "$id": "test.mdx",
@@ -475,7 +475,7 @@ test('Internationalized Routing: Hide Prefix', () => {
   expect(removeUndefined(result.pageTree['en'], true), 'Page Tree')
     .toMatchInlineSnapshot(`
       {
-        "$id": "root",
+        "$id": "en",
         "children": [
           {
             "$id": "test.mdx",
@@ -504,7 +504,7 @@ test('Internationalized Routing: Hide Prefix', () => {
   expect(removeUndefined(result.pageTree['cn'], true), 'Page Tree')
     .toMatchInlineSnapshot(`
       {
-        "$id": "root",
+        "$id": "cn",
         "children": [
           {
             "$id": "test.mdx",
@@ -715,7 +715,7 @@ test('Internationalized Routing: dir', () => {
   expect(removeUndefined(result.pageTree['en'], true), 'Page Tree')
     .toMatchInlineSnapshot(`
       {
-        "$id": "root",
+        "$id": "en",
         "children": [
           {
             "$id": "test.mdx",
@@ -751,7 +751,7 @@ test('Internationalized Routing: dir', () => {
   expect(removeUndefined(result.pageTree['cn'], true), 'Page Tree')
     .toMatchInlineSnapshot(`
       {
-        "$id": "root",
+        "$id": "cn",
         "children": [
           {
             "$id": "test.mdx",

@@ -52,7 +52,7 @@
 
 .twoslash-popup-docs-tag {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 0.5em;
 }
 
@@ -61,8 +61,8 @@
 }
 
 .twoslash-popup-code {
-  font-size: 14px;
-  display: block !important;
+  font-size: 13px !important;
+  overflow-wrap: anywhere;
 }
 
 .twoslash-popup-code .line {
@@ -74,7 +74,6 @@
   font-size: 14px !important;
   line-height: 20px !important;
   margin-top: 8px !important;
-  color: var(--color-fd-muted-foreground);
 }
 
 /* ===== Hover Info ===== */

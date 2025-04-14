@@ -135,3 +135,5 @@ export function ObjectCollapsible(props: {
     </Collapsible>
   );
 }
+
+export { APIPage, type ApiPageProps } from '@/render/api-page';

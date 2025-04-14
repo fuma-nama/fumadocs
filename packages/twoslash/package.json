@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-twoslash",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "Typescript Twoslash Integration for Fumadocs",
   "keywords": [
     "NextJs",
@@ -13,7 +13,7 @@
   "author": "Fuma Nama",
   "type": "module",
   "exports": {
-    "./twoslash.css": "./dist/twoslash.css",
+    "./twoslash.css": "./styles/twoslash.css",
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
@@ -30,7 +30,8 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
-    "dist/*"
+    "dist/*",
+    "styles/*"
   ],
   "scripts": {
     "build": "tsup",
@@ -40,8 +41,8 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@radix-ui/react-popover": "^1.1.6",
-    "@shikijs/twoslash": "^3.2.1",
+    "@radix-ui/react-popover": "^1.1.7",
+    "@shikijs/twoslash": "^3.2.2",
     "mdast-util-from-markdown": "^2.0.2",
     "mdast-util-gfm": "^3.1.0",
     "mdast-util-to-hast": "^13.2.0",
@@ -55,7 +56,7 @@
     "@types/react": "^19.1.0",
     "eslint-config-custom": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "shiki": "^3.2.1",
+    "shiki": "^3.2.2",
     "tsconfig": "workspace:*"
   },
   "peerDependencies": {

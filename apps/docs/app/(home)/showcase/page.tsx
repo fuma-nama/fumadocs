@@ -4,14 +4,9 @@ import { cn } from '@/lib/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { createMetadata } from '@/lib/metadata';
 import NextFAQ from '@/public/showcases/next-faq.png';
-import Yeecord from '@/public/showcases/yeecord.png';
 import Nuqs from '@/public/showcases/nuqs.jpg';
 import FrameGround from '@/public/showcases/frameground.png';
-import Xlog from '@/public/showcases/xlog.png';
-import Briefkasten from '@/public/showcases/briefkasten.png';
-import Turbo from '@/public/showcases/turbo.png';
 import Million from '@/public/showcases/million.png';
-import Spot from '@/public/spot.png';
 import Hiro from '@/public/showcases/hiro.png';
 import DokPloy from '@/public/showcases/dokploy.png';
 import CodeHike from '@/public/showcases/codehike.png';
@@ -23,9 +18,10 @@ import BetterAuth from '@/public/showcases/better-auth.png';
 import LaunchFast from '@/public/showcases/launchfast.png';
 import ArkType from '@/public/showcases/arktype.png';
 import AssistantUI from '@/public/showcases/assistant-ui.png';
-import TurboStarter from '@/public/showcases/turbostarter.png';
 import VisionUI from '@/public/showcases/vision-ui.png';
-import FlagsSDK from '@/public/showcases/flags-sdk.png';
+import Design from './design.png';
+import Link from 'fumadocs-core/link';
+import MixSpace from '@/public/showcases/mix-space.png';
 
 export const metadata = createMetadata({
   title: 'Showcase',
@@ -41,167 +37,240 @@ interface ShowcaseObject {
   url: string;
 }
 
-export default function Showcase(): React.ReactElement {
-  const showcases: ShowcaseObject[] = [
-    {
-      image: Turbo,
-      name: 'Turbo',
-      url: 'https://turbo.build',
-    },
-    {
-      image: FlagsSDK,
-      name: 'Vercel Flags SDK',
-      url: 'https://flags-sdk.dev',
-    },
-    {
-      image: Million,
-      name: 'Million',
-      url: 'https://million.dev',
-    },
-    {
-      image: BetterAuth,
-      name: 'Better Auth',
-      url: 'https://better-auth.com',
-    },
-    { image: Nuqs, name: 'nuqs', url: 'https://nuqs.47ng.com' },
-    {
-      image: DokPloy,
-      name: 'Dokploy',
-      url: 'https://dokploy.com',
-    },
-    {
-      image: NextFAQ,
-      name: 'Next.js Discord Common Questions',
-      url: 'https://nextjs-faq.com',
-    },
-    {
-      image: ArkType,
-      name: 'Arktype',
-      url: 'https://arktype.io',
-    },
-    {
-      image: Hiro,
-      name: 'Hiro',
-      url: 'https://docs.hiro.so/stacks',
-    },
-    {
-      image: OpenPanel,
-      name: 'OpenPanel',
-      url: 'https://openpanel.dev',
-    },
-    {
-      image: FrameGround,
-      name: 'FrameGround',
-      url: 'https://docs.frameground.tech',
-    },
-    {
-      image: Sunar,
-      name: 'Sunar',
-      url: 'https://sunar.js.org',
-    },
-    {
-      image: Yeecord,
-      name: 'Yeecord Docs',
-      url: 'https://yeecord.com',
-    },
-    {
-      image: Supastarter,
-      name: 'SupaStarter',
-      url: 'https://supastarter.dev',
-    },
-    {
-      image: CodeHike,
-      name: 'CodeHike',
-      url: 'https://codehike.org',
-    },
-    {
-      image: AssistantUI,
-      name: 'assistant-ui',
-      url: 'https://assistant-ui.com',
-    },
-    {
-      image: Expostarter,
-      name: 'ExpoStarter',
-      url: 'https://expostarter.com/docs',
-    },
-    {
-      name: "RUNFUNRUN's Blog",
-      url: 'https://runfunrun.dev',
-    },
-    {
-      image: Briefkasten,
-      name: 'Briefkasten Docs',
-      url: 'https://docs.briefkastenhq.com',
-    },
-    {
-      image: Xlog,
-      name: 'xlog.systems',
-      url: 'https://www.xlog.systems',
-    },
-    {
-      image: VisionUI,
-      name: 'Vision UI',
-      url: 'https://vision.uing.dev',
-    },
-    {
-      image: TurboStarter,
-      name: 'TurboStarter',
-      url: 'https://turbostarter.dev',
-    },
-    {
-      name: 'Rehooks',
-      url: 'https://rehooks.pyr33x.ir',
-    },
-    {
-      name: 'Typelytics',
-      url: 'https://typelytics.rhyssul.com',
-    },
-    {
-      image: LaunchFast,
-      name: 'LaunchFast',
-      url: 'https://www.launchfa.st',
-    },
-    {
-      name: 'Swellchain',
-      url: 'https://build.swellnetwork.io',
-    },
-  ];
+const showcases: ShowcaseObject[] = [
+  {
+    image: Million,
+    name: 'Million',
+    url: 'https://million.dev',
+  },
+  {
+    image: BetterAuth,
+    name: 'Better Auth',
+    url: 'https://better-auth.com',
+  },
+  {
+    name: 'Zod',
+    url: 'https://v4.zod.dev',
+  },
+  { image: Nuqs, name: 'nuqs', url: 'https://nuqs.47ng.com' },
+  {
+    image: DokPloy,
+    name: 'Dokploy',
+    url: 'https://dokploy.com',
+  },
+  {
+    image: NextFAQ,
+    name: 'Next.js Discord Common Questions',
+    url: 'https://nextjs-faq.com',
+  },
+  {
+    image: ArkType,
+    name: 'Arktype',
+    url: 'https://arktype.io',
+  },
+  {
+    image: Hiro,
+    name: 'Hiro',
+    url: 'https://docs.hiro.so/stacks',
+  },
+  {
+    image: OpenPanel,
+    name: 'OpenPanel',
+    url: 'https://openpanel.dev',
+  },
+  {
+    image: FrameGround,
+    name: 'FrameGround',
+    url: 'https://docs.frameground.tech',
+  },
+  {
+    image: Sunar,
+    name: 'Sunar',
+    url: 'https://sunar.js.org',
+  },
+  {
+    image: VisionUI,
+    name: 'Vision UI',
+    url: 'https://vision.uing.dev',
+  },
+  {
+    image: MixSpace,
+    name: 'MixSpace',
+    url: 'https://mx-space.js.org',
+  },
+  {
+    image: CodeHike,
+    name: 'CodeHike',
+    url: 'https://codehike.org',
+  },
+  {
+    image: AssistantUI,
+    name: 'assistant-ui',
+    url: 'https://assistant-ui.com',
+  },
+  {
+    image: LaunchFast,
+    name: 'LaunchFast',
+    url: 'https://www.launchfa.st',
+  },
+  {
+    image: Supastarter,
+    name: 'SupaStarter',
+    url: 'https://supastarter.dev',
+  },
+  {
+    image: Expostarter,
+    name: 'ExpoStarter',
+    url: 'https://expostarter.com/docs',
+  },
+  {
+    name: 'TurboStarter',
+    url: 'https://turbostarter.dev',
+  },
+  {
+    name: 'Dirstarter',
+    url: 'https://dirstarter.com',
+  },
+  {
+    name: 'Rehooks',
+    url: 'https://rehooks.pyr33x.ir',
+  },
+  {
+    name: 'Typelytics',
+    url: 'https://typelytics.rhyssul.com',
+  },
+  {
+    name: 'Swellchain',
+    url: 'https://build.swellnetwork.io',
+  },
+  {
+    name: 'ESLint React',
+    url: 'https://eslint-react.xyz',
+  },
+];
 
+const blogs: ShowcaseObject[] = [
+  {
+    name: "RUNFUNRUN's Blog",
+    url: 'https://runfunrun.dev',
+  },
+  {
+    name: 'xlog.systems',
+    url: 'https://www.xlog.systems',
+  },
+];
+
+const vercel = [
+  {
+    name: 'Turbo',
+    url: 'https://turbo.build',
+  },
+  {
+    name: 'Flags SDK',
+    url: 'https://flags-sdk.dev',
+  },
+  {
+    name: 'Chat SDK',
+    url: 'https://chat-sdk.dev',
+  },
+];
+
+export default function Showcase() {
   return (
-    <main className="pb-16 z-[2]">
-      <div className="absolute inset-0 z-[-1] select-none overflow-hidden opacity-30">
-        <Image
-          alt="spot"
-          src={Spot}
-          sizes="100vw"
-          className="size-full min-w-[800px] max-w-fd-container"
-          priority
-        />
-      </div>
-      <div className="container my-12 text-center">
-        <h1 className="mb-4 text-3xl font-semibold leading-snug md:text-5xl md:leading-snug">
-          Cool Websites
-          <br />
-          Made with Fumadocs
+    <main className="px-4 py-12 z-[2] w-full max-w-[1400px] mx-auto [--color-fd-border:color-mix(in_oklab,var(--color-fd-primary)_30%,transparent)]">
+      <div className="relative overflow-hidden border border-dashed p-6">
+        <h1 className="mb-4 text-xl font-medium">
+          The docs framework designed with care.
         </h1>
         <p className="text-fd-muted-foreground">
-          Nice open-source projects powered by Fumadocs
+          A list of beautiful open-source projects with their docs powered by
+          Fumadocs.
         </p>
         <div className="mt-6">
           <a
             href="https://github.com/fuma-nama/fumadocs/discussions/30"
             target="_blank"
             rel="noreferrer noopener"
-            className={cn(buttonVariants())}
+            className={cn(
+              buttonVariants({
+                variant: 'outline',
+              }),
+            )}
           >
             <PlusIcon className="me-2 size-4" />
-            Add Your Own
+            Suggest Yours
           </a>
         </div>
+        <span className="absolute text-xs left-6 bottom-6 text-fd-muted-foreground font-mono">
+          Showcases
+        </span>
+        <Image
+          src={Design}
+          alt="preview"
+          priority
+          className="ml-auto w-[600px] min-w-[600px] -mt-12 -mb-18 pointer-events-none select-none"
+        />
       </div>
 
-      <div className="container mt-12 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="flex gap-4 border border-dashed p-6 mt-6">
+        <svg
+          aria-label="Vercel logomark"
+          height="64"
+          role="img"
+          viewBox="0 0 74 64"
+          className="size-6 mt-1"
+        >
+          <path
+            d="M37.5896 0.25L74.5396 64.25H0.639648L37.5896 0.25Z"
+            fill="currentColor"
+          />
+        </svg>
+        <div>
+          <h2 className="text-sm font-medium mb-2">
+            Fumadocs powers the docs of Vercel open source SDKs.
+          </h2>
+          <div className="flex items-center gap-2 -mx-1.5">
+            {vercel.map((item) => (
+              <Link
+                key={item.url}
+                href={item.url}
+                className={cn(
+                  buttonVariants({
+                    variant: 'link',
+                    size: 'xs',
+                  }),
+                  'text-fd-muted-foreground',
+                )}
+              >
+                {item.name}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="relative mt-6 grid gap-2.5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {showcases.map((showcase) => (
+          <ShowcaseItem key={showcase.url} {...showcase} />
+        ))}
+        <div className="absolute text-center bottom-0 inset-x-0 pt-4 bg-gradient-to-t from-fd-background">
+          <Link
+            href="https://github.com/fuma-nama/fumadocs/discussions/30"
+            className={cn(
+              buttonVariants({
+                size: 'sm',
+                variant: 'link',
+              }),
+            )}
+          >
+            See all of our showcases.
+          </Link>
+        </div>
+      </div>
+      <h2 className="text-xl font-medium mt-12 px-4">
+        Fumadocs can power your blog, too.
+      </h2>
+      <div className="mt-6 grid gap-2.5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {blogs.map((showcase) => (
           <ShowcaseItem key={showcase.url} {...showcase} />
         ))}
       </div>
@@ -209,18 +278,14 @@ export default function Showcase(): React.ReactElement {
   );
 }
 
-function ShowcaseItem({
-  name,
-  url,
-  image,
-}: ShowcaseObject): React.ReactElement {
+function ShowcaseItem({ name, url, image }: ShowcaseObject) {
   if (image) {
     return (
       <a
         href={url}
         target="_blank"
         rel="noreferrer noopener"
-        className="relative flex aspect-[1.91/1] flex-col overflow-hidden rounded-2xl border transition-all hover:border-fd-primary/30"
+        className="group relative aspect-[1.91/1] border border-dashed"
       >
         <Image
           alt="Preview"
@@ -228,8 +293,9 @@ function ShowcaseItem({
           placeholder="blur"
           fill
           sizes="100vw, (min-width: 750px) 500px"
+          className="transition-all group-hover:brightness-150"
         />
-        <p className="z-[2] mt-auto bg-black/50 p-4 text-sm font-medium text-white backdrop-blur-sm">
+        <p className="absolute bottom-0 inset-x-0 z-[2] bg-fd-background px-4 py-2 text-sm font-medium">
           {name}
         </p>
       </a>
@@ -241,19 +307,12 @@ function ShowcaseItem({
       href={url}
       target="_blank"
       rel="noreferrer noopener"
-      className="flex aspect-[1.91/1] flex-col rounded-2xl border border-transparent p-8 text-center shadow-fd-primary/20 transition-all hover:shadow-fd-primary/30"
-      style={{
-        backgroundImage:
-          'radial-gradient(closest-side at center, var(--color-fd-background) 89%, transparent 90%),' +
-          'conic-gradient(from 0deg, var(--color-fd-background) 120deg, var(--color-fd-primary), var(--color-fd-background) 240deg),' +
-          'linear-gradient(to right bottom, black, rgb(200,200,200), black)',
-        backgroundOrigin: 'border-box',
-        boxShadow: 'inset 0px 12px 28px 4px var(--tw-shadow-color)',
-        backgroundClip: 'padding-box, padding-box, border-box',
-      }}
+      className="flex aspect-[1.91/1] flex-col border border-dashed p-4 transition-all hover:bg-fd-accent"
     >
-      <p className="mb-6 text-fd-muted-foreground">{new URL(url).hostname}</p>
-      <p className="text-3xl font-semibold">{name}</p>
+      <p className="font-mono text-xs mb-2 text-fd-muted-foreground">
+        {new URL(url).hostname}
+      </p>
+      <p className="text-xl font-medium">{name}</p>
     </a>
   );
 }

@@ -13,6 +13,8 @@ import { fileURLToPath } from 'node:url';
 import remarkMdx from 'remark-mdx';
 import remarkGfm from 'remark-gfm';
 import { createProcessor } from '@mdx-js/mdx';
+import * as fs from 'node:fs/promises';
+import { remarkSteps } from '@/mdx-plugins/remark-steps';
 
 const cwd = path.dirname(fileURLToPath(import.meta.url));
 
@@ -65,6 +67,18 @@ test('Remark Image', async () => {
 
   await expect(result).toMatchFileSnapshot(
     path.resolve(cwd, './fixtures/remark-image.output.json'),
+  );
+});
+
+test('Remark Steps', async () => {
+  const content = await fs.readFile(
+    path.resolve(cwd, './fixtures/remark-steps.md'),
+  );
+  const processor = remark().use(remarkSteps).use(remarkMdx);
+  const result = await processor.process(content);
+
+  await expect(result.value).toMatchFileSnapshot(
+    path.resolve(cwd, './fixtures/remark-steps.output.md'),
   );
 });
 
