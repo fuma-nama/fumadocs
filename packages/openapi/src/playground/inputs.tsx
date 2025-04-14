@@ -6,7 +6,12 @@ import {
   useState,
 } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
-import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
+import {
+  Controller,
+  useController,
+  useFieldArray,
+  useFormContext,
+} from 'react-hook-form';
 import {
   Select,
   SelectContent,
@@ -78,6 +83,31 @@ export function ObjectInput({
         />
       ) : null}
     </div>
+  );
+}
+
+export function JsonInput({ fieldName }: { fieldName: string }) {
+  const controller = useController({
+    name: fieldName,
+  });
+  const [value, setValue] = useState(() =>
+    JSON.stringify(controller.field.value, null, 2),
+  );
+
+  return (
+    <textarea
+      {...controller.field}
+      value={value}
+      className="w-full h-[400px] resize-none rounded-lg border p-2 bg-fd-secondary text-fd-secondary-foreground focus-visible:outline-none"
+      onChange={(v) => {
+        setValue(v.target.value);
+        try {
+          controller.field.onChange(JSON.parse(v.target.value));
+        } catch {
+          // ignore
+        }
+      }}
+    />
   );
 }
 

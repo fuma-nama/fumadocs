@@ -14,10 +14,7 @@ export function getSampleRequest(url: string, data: RequestData): string {
   }
 
   if (Object.keys(headers).length > 0) {
-    options.set(
-      'headers',
-      JSON.stringify(headers, null, 2).replaceAll('\n', '\n  '),
-    );
+    options.set('headers', JSON.stringify(headers, null, 2));
   }
 
   if (data.bodyMediaType === 'multipart/form-data' && data.body) {

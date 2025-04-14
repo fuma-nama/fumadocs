@@ -101,16 +101,15 @@ const SelectItem = forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      'flex select-none flex-row items-center rounded-md py-1.5 pe-2 ps-6 text-[13px] outline-none focus:bg-fd-accent focus:text-fd-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+      'flex select-none flex-row items-center rounded-md py-1.5 px-2 text-[13px] outline-none focus:bg-fd-accent focus:text-fd-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
       className,
     )}
     {...props}
   >
-    <SelectPrimitive.ItemIndicator className="absolute start-2">
-      <Check className="size-4" />
-    </SelectPrimitive.ItemIndicator>
-
     <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
+    <SelectPrimitive.ItemIndicator className="ms-auto">
+      <Check className="size-3.5 text-fd-primary" />
+    </SelectPrimitive.ItemIndicator>
   </SelectPrimitive.Item>
 ));
 SelectItem.displayName = SelectPrimitive.Item.displayName;

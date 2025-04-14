@@ -1,33 +1,33 @@
 'use client';
 import {
-  type ReactElement,
-  type HTMLAttributes,
-  useMemo,
-  useRef,
-  useEffect,
+  createContext,
   type FC,
   Fragment,
+  type HTMLAttributes,
+  type ReactElement,
   type ReactNode,
   type RefObject,
-  createContext,
   useContext,
+  useEffect,
+  useMemo,
+  useRef,
   useState,
 } from 'react';
+import type {
+  ControllerFieldState,
+  ControllerRenderProps,
+  FieldPath,
+  UseFormStateReturn,
+} from 'react-hook-form';
 import {
   Controller,
   FormProvider,
   useForm,
   useFormContext,
 } from 'react-hook-form';
-import type {
-  FieldPath,
-  UseFormStateReturn,
-  ControllerFieldState,
-  ControllerRenderProps,
-} from 'react-hook-form';
 import { useApiContext, useServerSelectContext } from '@/ui/contexts/api';
 import type { FetchResult } from '@/playground/fetcher';
-import { FieldSet, ObjectInput } from './inputs';
+import { FieldSet, JsonInput, ObjectInput } from './inputs';
 import type {
   PrimitiveRequestField,
   ReferenceSchema,
@@ -55,6 +55,7 @@ import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 import type { RequestData } from '@/requests/_shared';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from 'fumadocs-ui/utils/cn';
+import { cva } from 'class-variance-authority';
 
 interface FormValues {
   authorization:
@@ -245,7 +246,7 @@ export default function Client({
           <form
             {...rest}
             className={cn(
-              'not-prose flex flex-col rounded-xl border p-3 gap-3 shadow-md overflow-hidden',
+              'not-prose flex flex-col rounded-xl border p-3 gap-4 shadow-md overflow-hidden bg-fd-card text-fd-card-foreground',
               rest.className,
             )}
             onSubmit={onSubmit}
@@ -396,17 +397,59 @@ function FormBody({
       })}
 
       {body ? (
-        <CollapsiblePanel title="Body">
-          {fields.body ? (
-            renderCustomField('body', body, fields.body)
-          ) : body.type === 'object' ? (
-            <ObjectInput field={body} fieldName="body" />
-          ) : (
-            <FieldSet field={body} fieldName="body" />
-          )}
-        </CollapsiblePanel>
+        fields.body ? (
+          <CollapsiblePanel title="Body">
+            {renderCustomField('body', body, fields.body)}
+          </CollapsiblePanel>
+        ) : (
+          <BodyInput field={body} />
+        )
       ) : null}
     </>
+  );
+}
+
+const bodyTypeVariants = cva(
+  'p-1 rounded-lg font-medium text-xs transition-colors',
+  {
+    variants: {
+      active: {
+        true: 'bg-fd-primary/10 text-fd-primary',
+        false: 'text-fd-muted-foreground',
+      },
+    },
+  },
+);
+
+function BodyInput({ field }: { field: RequestSchema }) {
+  const [isJson, setIsJson] = useState(false);
+
+  return (
+    <CollapsiblePanel title="Body">
+      <div className="grid grid-cols-2 border bg-fd-muted rounded-lg">
+        <button
+          className={cn(bodyTypeVariants({ active: !isJson }))}
+          onClick={() => setIsJson(false)}
+          type="button"
+        >
+          Simple
+        </button>
+        <button
+          className={cn(bodyTypeVariants({ active: isJson }))}
+          onClick={() => setIsJson(true)}
+          type="button"
+        >
+          JSON Mode
+        </button>
+      </div>
+      {isJson ? (
+        <JsonInput fieldName="body" />
+      ) : field.type === 'object' ? (
+        <ObjectInput field={field} fieldName="body" />
+      ) : (
+        <FieldSet field={field} fieldName="body" />
+      )}
+    </CollapsiblePanel>
   );
 }
 
@@ -546,20 +589,17 @@ function CollapsiblePanel({
   title,
   children,
   ...props
-}: HTMLAttributes<HTMLDivElement> & {
+}: Omit<HTMLAttributes<HTMLDivElement>, 'title'> & {
   title: ReactNode;
 }) {
   return (
-    <Collapsible
-      {...props}
-      className="rounded-xl bg-fd-card border text-fd-card-foreground"
-    >
-      <CollapsibleTrigger className="group w-full inline-flex items-center gap-2 p-3 text-sm font-medium">
+    <Collapsible {...props} className="border-b -m-2 last:border-b-0">
+      <CollapsibleTrigger className="group w-full flex items-center gap-2 p-2 text-sm font-medium">
         {title}
-        <ChevronDown className="ms-auto size-4 text-fd-muted-foreground group-data-[state=open]:rotate-180" />
+        <ChevronDown className="ms-auto size-3.5 text-fd-muted-foreground group-data-[state=open]:rotate-180" />
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div className="flex flex-col gap-3 p-3">{children}</div>
+        <div className="flex flex-col gap-3 p-2">{children}</div>
       </CollapsibleContent>
     </Collapsible>
   );
