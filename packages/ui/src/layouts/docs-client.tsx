@@ -55,7 +55,12 @@ export function CollapsibleControl() {
   if (!collapsed) return;
 
   return (
-    <div className="fixed flex flex-row items-center animate-fd-fade-in rounded-xl p-0.5 border bg-fd-muted text-fd-muted-foreground z-10 top-12 shadow-md max-md:hidden xl:top-4 xl:start-4 max-xl:end-4">
+    <div
+      className="fixed flex flex-row animate-fd-fade-in rounded-xl p-0.5 border bg-fd-muted text-fd-muted-foreground z-10 xl:start-4 max-xl:end-4"
+      style={{
+        top: 'calc(var(--fd-banner-height) + var(--fd-tocnav-height) + var(--spacing) * 4)',
+      }}
+    >
       <SidebarCollapseTrigger
         className={cn(
           buttonVariants({
