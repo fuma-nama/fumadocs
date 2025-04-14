@@ -1,5 +1,15 @@
 # fumadocs-twoslash
 
+## 3.1.1
+
+### Patch Changes
+
+- 085e39f: Fix inline code issues
+- Updated dependencies [eb18da9]
+- Updated dependencies [085e39f]
+- Updated dependencies [4d50bcf]
+  - fumadocs-ui@15.2.7
+
 ## 3.1.0
 
 ### Minor Changes

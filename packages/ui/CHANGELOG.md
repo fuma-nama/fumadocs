@@ -1,5 +1,16 @@
 # next-docs-ui
 
+## 15.2.7
+
+### Patch Changes
+
+- eb18da9: Support `searchToggle` option to customise search toggle
+- 085e39f: Fix inline code issues
+- 4d50bcf: fix banner overlapping with collapsible control
+- Updated dependencies [ec85a6c]
+- Updated dependencies [e1a61bf]
+  - fumadocs-core@15.2.7
+
 ## 15.2.6
 
 ### Patch Changes

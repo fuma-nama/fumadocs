@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 15.2.7
+
+### Patch Changes
+
+- b8485e1: Enable TypeScript declaration generation in tsup config
+
 ## 15.2.6
 
 ### Patch Changes

@@ -1,5 +1,17 @@
 # next-docs-mdx
 
+## 11.6.0
+
+### Minor Changes
+
+- 7fcf612: Require Next.js 15.3.0 or above
+
+### Patch Changes
+
+- Updated dependencies [ec85a6c]
+- Updated dependencies [e1a61bf]
+  - fumadocs-core@15.2.7
+
 ## 11.5.8
 
 ### Patch Changes

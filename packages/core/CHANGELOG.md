@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 15.2.7
+
+### Patch Changes
+
+- ec85a6c: support more options on `remarkStructure`
+- e1a61bf: Support `remarkSteps` plugin
+
 ## 15.2.6
 
 ### Patch Changes
