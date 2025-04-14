@@ -38,7 +38,7 @@ export function ThemeToggle({
   }, []);
 
   const container = cn(
-    'inline-flex items-center rounded-full border p-1',
+    'inline-flex items-center rounded-full border p-1 hover:cursor-pointer',
     className,
   );
 
