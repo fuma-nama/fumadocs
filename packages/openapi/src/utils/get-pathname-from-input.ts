@@ -9,6 +9,8 @@ export function getPathnameFromInput(
 
     if (typeof paramValue === 'string' && paramValue.length > 0)
       pathname = pathname.replace(`{${key}}`, paramValue);
+    else if (typeof paramValue === 'number')
+      pathname = pathname.replace(`{${key}}`, paramValue.toString());
   }
 
   const searchParams = new URLSearchParams();
@@ -17,6 +19,8 @@ export function getPathnameFromInput(
 
     if (typeof paramValue === 'string' && paramValue.length > 0)
       searchParams.append(key, paramValue);
+    else if (typeof paramValue === 'number')
+      searchParams.append(key, paramValue.toString());
   }
 
   return searchParams.size > 0 ? `${pathname}?${searchParams}` : pathname;

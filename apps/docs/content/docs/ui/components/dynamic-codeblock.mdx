@@ -6,13 +6,15 @@ preview: dynamicCodeBlock
 
 ## Usage
 
+### Client Component
+
 ```tsx
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
 
 <DynamicCodeBlock lang="ts" code='console.log("Hello World")' />;
 ```
 
-This component, different from the MDX [`CodeBlock`](/docs/ui/mdx/codeblock) component, can be used without MDX.
+Unlike the MDX [`CodeBlock`](/docs/ui/mdx/codeblock) component, this is a client component that can be used without MDX.
 It highlights the code with Shiki and use the default component to render it.
 
 Features:
@@ -20,7 +22,7 @@ Features:
 - Can be pre-rendered on server
 - load languages and themes on browser lazily
 
-### Options
+#### Options
 
 ```tsx
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
@@ -34,9 +36,15 @@ import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
       dark: 'github-dark',
     },
     components: {
-      // add/override components
+      // override components (e.g. `pre` and `code`)
     },
-    // or Shiki options
+    // other Shiki options
   }}
 />;
 ```
+
+### Server Component
+
+For a server component equivalent, you can use the built-in utility from core:
+
+<include>./server-codeblock.tsx</include>

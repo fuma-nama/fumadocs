@@ -6,7 +6,7 @@
   "pages": [
     "---Guide---",
     "index",
-    "...",
+    "performance",
     "---Configuration---",
     "collections",
     "global",
@@ -16,6 +16,7 @@
     "include",
     "last-modified",
     "manifest",
-    "async"
+    "async",
+    "..."
   ]
 }

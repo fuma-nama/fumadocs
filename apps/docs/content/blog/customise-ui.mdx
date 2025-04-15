@@ -1,0 +1,73 @@
+---
+title: Rethink how we customise UI
+description: Deep dive on how Fumadocs UI is designed
+author: Fuma Nama
+date: 2025-04-15
+---
+
+## The Problem
+
+Making a docs framework isn't challenging, the hardest problem is how I can make it perfect for everyone, from the perspective of users and developers.
+Undoubtedly, this is **a dilemma** for all framework, or even library authors — You cannot write generic code that works out-of-the-box, there's no piece of software that is straight usable while being generic.
+
+For example, headless UI libraries like **Radix UI** gave us the concept of generic UI components: bare UI primitives that we can customise according to our anesthetics.
+However, you'll need time to tune them, these primitives are unusable without further customisations.
+
+Yep it's 2025, **Shadcn UI** had led a "revolution" on Web Development. It's a great combination of headless UI and styled defaults that takes the extra step away!
+But our problem remains unsolved, it might be preposterous that it becomes "unstyled" again when a vast majority of new sites adopted Shadcn UI.
+
+Personally, I felt overwhelmed by nearly identical, ubiquitous flat designs that is obviously one of the default Shadcn UI styles. It has nothing to do with Shadcn UI, but the rest of developers who don't actually care about aesthetics and uniqueness.
+Eventually, **Shadcn-like design became the default styles**, so once again, we will need to do a bit more to make it look stylish.
+
+### What should we do?
+
+As a docs framework started from **"being flexible"**, Fumadocs must be customisable, tuned to meet developer's preference.
+We will need to take customisation seriously if DX is what we aim. And most importantly, **it should encourage developers with a sense of beauty to customise.**
+
+## The Solution
+
+Typically, there's two types of developers:
+
+### those who wants a docs that just works
+
+Fumadocs need to be opinionated by default such that it is immediately usable, and we only have to offer simplest options to change details. (e.g. colors, overriding components).
+
+Most developers have no desire to install dozens of components just to change a tiny detail, that made the Shadcn approach suboptimal.
+
+### those who needs the perfect docs tailored to their preferences
+
+The kernel of Fumadocs, or the spirit we're pursuing is the latter one. I crafted Fumadocs CLI, a version of Shadcn UI dedicated for Fumadocs, the whole solution is now simplified into a single command:
+
+```package-install
+npx @fumadocs/cli customise
+```
+
+It considered for two types of needs:
+
+- Customise the default styles when the exposed options are inadequate.
+- Roll their own layout from scratch.
+
+The first one is self-evident, people will always have their absurd needs that's not even considered by us.
+We can install the original components, so it's simply identical to the default UI which they've been using.
+
+The latter one is simpler, we can offer the minimal template they can start customising from.
+
+This methodology inspired by ejection brings some nice advantages:
+
+#### Don't break anything when you upgrade Fumadocs
+
+Fumadocs need to be opinionated. Hence, we need to iterate the UI frequently which apparently will break people's hacky customisations.
+The charm of Fumadocs CLI is that once you've installed the layout, it stays the same forever regardless of future iterations on Fumadocs UI.
+
+It gives the courage for Fumadocs UI to iterate, and developers to customise unburnt by the fear of upgrading dependencies.
+
+#### Looks Clean
+
+Just like Shadcn UI and Radix UI, Fumadocs UI has a core package (`fumadocs-core`), most generic logic will be abstracted by core.
+
+## What is Next?
+
+The innovation of Shadcn UI is amazing, yet, I believe there's more problems Fumadocs can solve.
+
+See [Flags SDK](https://flags-sdk.dev/frameworks/next) and [BetterAuth](https://www.better-auth.com/docs/introduction), you can't tell at the first glance if they're powered by Fumadocs.
+I hope it can continue to be a breakable framework known for how customisable it is.
