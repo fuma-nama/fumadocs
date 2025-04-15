@@ -22,6 +22,7 @@ import VisionUI from '@/public/showcases/vision-ui.png';
 import Design from './design.png';
 import Link from 'fumadocs-core/link';
 import MixSpace from '@/public/showcases/mix-space.png';
+import TurboStarter from '@/public/showcases/turbostarter.png';
 
 export const metadata = createMetadata({
   title: 'Showcase',
@@ -124,6 +125,7 @@ const showcases: ShowcaseObject[] = [
     url: 'https://expostarter.com/docs',
   },
   {
+    image: TurboStarter,
     name: 'TurboStarter',
     url: 'https://turbostarter.dev',
   },
