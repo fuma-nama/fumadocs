@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 8.0.1
+
+### Patch Changes
+
+- 5a6bf83: fix(#1717): add number type stringify for getPathnameFromInput
+
 ## 8.0.0
 
 ### Major Changes
