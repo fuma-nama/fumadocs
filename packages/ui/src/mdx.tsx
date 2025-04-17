@@ -22,6 +22,7 @@ function Image(
     <FrameworkImage
       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 900px"
       {...props}
+      src={props.src as unknown as string}
       className={cn('rounded-lg', props.className)}
     />
   );

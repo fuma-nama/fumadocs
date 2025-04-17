@@ -274,7 +274,7 @@ export const DEFAULT: Config = {
       h1: {
         color: 'var(--tw-prose-headings)',
         fontWeight: '800',
-        fontSize: em(36, 16),
+        fontSize: 'var(--text-3xl)',
         marginTop: '0',
         marginBottom: em(32, 36),
         lineHeight: round(40 / 36),
@@ -375,6 +375,7 @@ export const DEFAULT: Config = {
       },
       'h1 code': {
         color: 'inherit',
+        fontSize: 'var(--text-2xl)',
       },
       'h2 code': {
         color: 'inherit',

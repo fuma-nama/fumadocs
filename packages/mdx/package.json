@@ -60,14 +60,14 @@
     "lru-cache": "^11.1.0",
     "picocolors": "^1.1.1",
     "unist-util-visit": "^5.0.0",
-    "zod": "^3.24.2"
+    "zod": "^3.24.3"
   },
   "devDependencies": {
     "@fumadocs/mdx-remote": "workspace:*",
     "@types/cross-spawn": "^6.0.6",
     "@types/mdast": "^4.0.3",
     "@types/mdx": "^2.0.13",
-    "@types/react": "^19.1.0",
+    "@types/react": "^19.1.2",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "mdast-util-mdx-jsx": "^3.2.0",

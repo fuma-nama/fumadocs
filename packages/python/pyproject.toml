@@ -1,0 +1,20 @@
+[project]
+name = "fumapy"
+version = "0.1.0"
+description = "Extract API documentation from source code and docstrings. For the python API extension for FumaDocs."
+
+authors = [
+    { name = "florez", email = "florez@ethz.ch" },
+    { name = 'fuma-nama' }
+]
+requires-python = ">=3.10"
+dependencies = [
+    "griffe",
+]
+
+[project.scripts]
+fumapy-generate = "fumapy:generate"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

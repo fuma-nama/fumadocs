@@ -1,0 +1,8 @@
+@source '../dist/**/*.js';
+
+@theme inline {
+  --color-fdpy-func: oklch(79.2% 0.209 151.711);
+  --color-fdpy-class: red;
+  --color-fdpy-attribute: oklch(74% 0.238 322.16);
+  --color-fdpy-method: blue;
+}
