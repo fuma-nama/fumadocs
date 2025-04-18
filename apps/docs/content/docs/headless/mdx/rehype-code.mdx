@@ -11,7 +11,7 @@ Add the rehype plugin.
 
 ```ts title="MDX Compiler"
 import { compile } from '@mdx-js/mdx';
-import { rehypeCode } from 'fumadocs-docgen';
+import { rehypeCode } from 'fumadocs-core/mdx-plugins';
 
 await compile('...', {
   rehypePlugins: [rehypeCode],
