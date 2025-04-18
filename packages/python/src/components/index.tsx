@@ -176,3 +176,5 @@ export async function InlineCode({
     },
   });
 }
+
+export { Tab, Tabs } from 'fumadocs-ui/components/tabs';
