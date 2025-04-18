@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 15.2.8
+
+### Patch Changes
+
+- 4fad539: fix TOC relative position
+- a673ef4: Make `@source` in `global.css` optional
+  - fumadocs-core@15.2.8
+
 ## 15.2.7
 
 ### Patch Changes

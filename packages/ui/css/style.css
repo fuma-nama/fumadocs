@@ -6,8 +6,4 @@
   body {
     @apply flex flex-col min-h-screen;
   }
-
-  button {
-    cursor: pointer;
-  }
 }

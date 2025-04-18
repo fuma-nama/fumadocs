@@ -1,0 +1,6 @@
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+@import 'fumadocs-python/preset.css';
+
+@source '../node_modules/fumadocs-ui/dist/**/*.js';

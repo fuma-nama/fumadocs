@@ -1,6 +1,7 @@
 @import './shiki.css';
 @import './animations.css';
 
+@source '../dist/**/*.js';
 @plugin '../dist/theme/typography/index.js';
 
 @theme {

@@ -1,35 +1,24 @@
 'use client';
-import { Share } from 'lucide-react';
-import {
-  TooltipContent,
-  Tooltip,
-  TooltipTrigger,
-} from '@radix-ui/react-tooltip';
-import { useState } from 'react';
+import { Check, Share } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { buttonVariants } from '@/components/ui/button';
+import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 
 export function Control({ url }: { url: string }): React.ReactElement {
-  const [open, setOpen] = useState(false);
-  const onClick = (): void => {
-    setOpen(true);
+  const [isChecked, onCopy] = useCopyButton(() => {
     void navigator.clipboard.writeText(`${window.location.origin}${url}`);
-  };
+  });
 
   return (
-    <Tooltip open={open} onOpenChange={setOpen}>
-      <TooltipTrigger
-        className={cn(
-          buttonVariants({ className: 'gap-2', variant: 'secondary' }),
-        )}
-        onClick={onClick}
-      >
-        <Share className="size-4" />
-        Share Post
-      </TooltipTrigger>
-      <TooltipContent className="rounded-lg border bg-fd-popover p-2 text-sm text-fd-popover-foreground">
-        Copied
-      </TooltipContent>
-    </Tooltip>
+    <button
+      type="button"
+      className={cn(
+        buttonVariants({ className: 'gap-2', variant: 'secondary' }),
+      )}
+      onClick={onCopy}
+    >
+      {isChecked ? <Check className="size-4" /> : <Share className="size-4" />}
+      {isChecked ? 'Copied URL' : 'Share Post'}
+    </button>
   );
 }

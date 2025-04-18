@@ -78,7 +78,7 @@ export function TOCScrollArea({
       <ScrollViewport
         ref={viewRef}
         className={cn(
-          'min-h-0 text-sm',
+          'relative min-h-0 text-sm',
           isMenu &&
             '[mask-image:linear-gradient(to_bottom,transparent,white_16px,white_calc(100%-16px),transparent)] px-4 md:px-6 py-2',
         )}
@@ -97,10 +97,10 @@ export function TOCItems({ items }: { items: TOCItemType[] }) {
   if (items.length === 0) return <TocItemsEmpty />;
 
   return (
-    <div className="relative">
+    <>
       <TocThumb
         containerRef={containerRef}
-        className="absolute start-0 mt-(--fd-top) h-(--fd-height) w-px bg-fd-primary transition-all"
+        className="absolute top-(--fd-top) h-(--fd-height) w-px bg-fd-primary transition-all"
       />
       <div
         ref={containerRef}
@@ -110,7 +110,7 @@ export function TOCItems({ items }: { items: TOCItemType[] }) {
           <TOCItem key={item.url} item={item} />
         ))}
       </div>
-    </div>
+    </>
   );
 }
 

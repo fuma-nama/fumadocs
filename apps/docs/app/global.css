@@ -6,7 +6,6 @@
 @source ".";
 @source "../components";
 @source "../content";
-@source '../node_modules/fumadocs-ui/dist/**/*.js';
 @source '../node_modules/fumadocs-openapi/dist/**/*.js';
 @plugin 'tailwindcss-animate';
 

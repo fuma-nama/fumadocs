@@ -40,16 +40,16 @@
     "estree-util-to-js": "^2.0.0",
     "estree-util-value-to-estree": "^3.3.3",
     "npm-to-yarn": "^3.0.1",
-    "oxc-transform": "^0.63.0",
+    "oxc-transform": "^0.64.0",
     "unist-util-visit": "^5.0.0",
-    "zod": "^3.24.2"
+    "zod": "^3.24.3"
   },
   "devDependencies": {
     "@mdx-js/mdx": "^3.1.0",
     "@types/estree": "^1.0.7",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.3",
-    "@types/node": "22.14.0",
+    "@types/node": "22.14.1",
     "eslint-config-custom": "workspace:*",
     "mdast-util-mdx-jsx": "^3.2.0",
     "remark": "^15.0.0",

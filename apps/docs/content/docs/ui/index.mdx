@@ -164,26 +164,6 @@ See [Customisation Guide](/docs/ui/customisation).
 Some common questions you may encounter.
 
 <Accordions>
-    <Accordion id='fix-monorepo-styling' title="How to fix stylings not being applied in Monorepo?">
-
-Sometimes, `fumadocs-ui` is not installed in the workspace of your Tailwind CSS configuration file. (e.g. a monorepo setup).
-
-You have to ensure the `fumadocs-ui` package is scanned by Tailwind CSS, and give a correct relative path to `@source`.
-
-For example, add `../../` to point to the `node_modules` folder in root workspace.
-
-        ```css
-        @import 'tailwindcss';
-        @import 'fumadocs-ui/css/neutral.css';
-        @import 'fumadocs-ui/css/preset.css';
-
-        /* [!code --] */
-        @source '../node_modules/fumadocs-ui/dist/**/*.js';
-        /* [!code ++] */
-        @source '../../../node_modules/fumadocs-ui/dist/**/*.js';
-        ```
-
-    </Accordion>
     <Accordion id='change-base-url' title="How to change the base route of /docs?">
 
 You can change the base route of docs (e.g. from `/docs/page` to `/info/page`).

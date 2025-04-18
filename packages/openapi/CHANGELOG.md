@@ -1,5 +1,20 @@
 # @fuma-docs/openapi
 
+## 8.0.2
+
+### Patch Changes
+
+- Updated dependencies [4fad539]
+- Updated dependencies [a673ef4]
+  - fumadocs-ui@15.2.8
+  - fumadocs-core@15.2.8
+
+## 8.0.1
+
+### Patch Changes
+
+- 5a6bf83: fix(#1717): add number type stringify for getPathnameFromInput
+
 ## 8.0.0
 
 ### Major Changes
