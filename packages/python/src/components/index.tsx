@@ -87,6 +87,7 @@ export function PyAttribute(props: {
 export function PyParameter(props: {
   name: string;
   type?: string;
+  value?: string;
   children?: ReactNode;
 }) {
   return (
@@ -109,13 +110,20 @@ export function PyParameter(props: {
         )}
       </div>
       <div className="text-fd-muted-foreground prose-no-margin mt-4 empty:hidden">
+        {props.value ? (
+          <InlineCode
+            lang="python"
+            code={`= ${props.value}`}
+            className="not-prose text-xs"
+          />
+        ) : null}
         {props.children}
       </div>
     </figure>
   );
 }
 
-export function SourceCode({ children }: { children: ReactNode }) {
+export function PySourceCode({ children }: { children: ReactNode }) {
   return (
     <Collapsible className="my-6">
       <CollapsibleTrigger
@@ -155,7 +163,7 @@ export function PyFunctionReturn({
   );
 }
 
-export async function InlineCode({
+async function InlineCode({
   lang,
   code,
   ...rest
@@ -163,7 +171,7 @@ export async function InlineCode({
   lang: string;
   code: string;
 }) {
-  return await highlight(code, {
+  return highlight(code, {
     lang,
     components: {
       pre: (props) => (

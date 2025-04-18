@@ -141,7 +141,7 @@ function convertFunction(func: FunctionInterface) {
       func.description ? encodeText(func.description) : null,
       convertDoc(func.docstring ?? []),
       func.source.length > 0
-        ? element('SourceCode', undefined, codeblock('python', func.source))
+        ? element('PySourceCode', undefined, codeblock('python', func.source))
         : null,
       func.parameters.length > 0
         ? element(
@@ -173,17 +173,10 @@ function convertParameter(param: ParameterInterface) {
         ? param.description
         : convertDoc(param.description),
     );
-  if (param.value)
-    lines.push(
-      element('InlineCode', {
-        lang: 'python',
-        code: param.value,
-      }),
-    );
 
   return element(
     'PyParameter',
-    { name: param.name, type: param.annotation },
+    { name: param.name, type: param.annotation, value: param.value },
     lines.join('\n'),
   );
 }
