@@ -3,7 +3,6 @@
 @import 'fumadocs-ui/css/preset.css';
 @import 'fumadocs-python/preset.css';
 
-@source '../node_modules/fumadocs-ui/dist/**/*.js';
 @source '../node_modules/fumadocs-openapi/dist/**/*.js';
 
 :root {

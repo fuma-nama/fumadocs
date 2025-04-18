@@ -17,7 +17,8 @@
   "files": [
     "dist/*",
     "fumapy",
-    "styles"
+    "styles",
+    "pyproject.toml"
   ],
   "exports": {
     "./preset.css": "./styles/preset.css",
