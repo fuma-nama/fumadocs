@@ -6,8 +6,8 @@ import {
   SidebarCollapseTrigger,
   SidebarFooter,
   SidebarHeader,
-  SidebarViewport,
   SidebarPageTree,
+  SidebarViewport,
 } from '@/components/layout/sidebar';
 import { TreeContextProvider } from '@/contexts/tree';
 import { cn } from '@/utils/cn';
@@ -36,9 +36,9 @@ import {
   SidebarLayoutTab,
 } from './notebook-client';
 import {
+  NavProvider,
   type PageStyles,
   StylesProvider,
-  NavProvider,
 } from '@/contexts/layout';
 import { type Option, RootToggle } from '@/components/layout/root-toggle';
 import Link from 'fumadocs-core/link';
@@ -154,7 +154,7 @@ export function DocsLayout({
               {nav.children}
               {sidebarBanner}
               {tabMode === 'sidebar' && tabs.length > 0 ? (
-                <RootToggle options={tabs} className="-mx-2" />
+                <RootToggle options={tabs} />
               ) : null}
             </SidebarHeader>
             <SidebarViewport>
@@ -306,7 +306,7 @@ function DocsNavbar({
             searchToggle,
             <SearchToggle hideIfDisabled className="md:hidden" />,
           )}
-          <NavbarSidebarTrigger className="md:hidden" />
+          <NavbarSidebarTrigger className="-me-1.5 md:hidden" />
           {links
             .filter((item) => item.type === 'icon')
             .map((item, i) => (
