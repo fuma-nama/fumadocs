@@ -15,7 +15,6 @@ import Sunar from '@/public/showcases/sunar.png';
 import OpenPanel from '@/public/showcases/openpanel.png';
 import Supastarter from '@/public/showcases/supastarter.png';
 import BetterAuth from '@/public/showcases/better-auth.png';
-import LaunchFast from '@/public/showcases/launchfast.png';
 import ArkType from '@/public/showcases/arktype.png';
 import AssistantUI from '@/public/showcases/assistant-ui.png';
 import VisionUI from '@/public/showcases/vision-ui.png';
@@ -108,11 +107,6 @@ const showcases: ShowcaseObject[] = [
     image: AssistantUI,
     name: 'assistant-ui',
     url: 'https://assistant-ui.com',
-  },
-  {
-    image: LaunchFast,
-    name: 'LaunchFast',
-    url: 'https://www.launchfa.st',
   },
   {
     image: Supastarter,
