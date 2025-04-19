@@ -1,13 +1,13 @@
 ---
 title: Manual Installation
-description: Create a new fumadocs project from scratch.
+description: Add Fumadocs to existing projects.
 ---
 
-> Read the [Quick Start](/docs/ui) guide first for basic concept.
+Before continuing, make sure:
+
+- Next.js 15 and Tailwind CSS 4 are configured.
 
 ## Getting Started
-
-Create a new Next.js application with `create-next-app`, and install required packages.
 
 ```package-install
 fumadocs-ui fumadocs-core
@@ -21,14 +21,54 @@ fumadocs-ui fumadocs-core
 
 ### 2. Content Source
 
-Fumadocs supports different content sources, you can choose one you prefer.
+Fumadocs supports different content sources, there's how you configure Fumadocs MDX:
 
-There is a list of officially supported sources:
+```package-install
+fumadocs-mdx @types/mdx
+```
 
-- [Setup Fumadocs MDX](/docs/mdx)
-- [Setup Content Collections](/docs/headless/content-collections)
+```js title="next.config.mjs"
+import { createMDX } from 'fumadocs-mdx/next';
 
-Make sure to configure the library correctly following their setup guide before continuing, we will import the source adapter using `@/lib/source.ts` in this guide.
+const withMDX = createMDX();
+
+/** @type {import('next').NextConfig} */
+const config = {
+  reactStrictMode: true,
+};
+
+export default withMDX(config);
+```
+
+```ts title="source.config.ts"
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  dir: 'content/docs',
+});
+```
+
+Add a `postinstall` script to generate types:
+
+```json title="package.json"
+{
+  "scripts": {
+    "postinstall": "fumadocs-mdx"
+  }
+}
+```
+
+Finally, to access your content:
+
+```ts title="lib/source.ts"
+import { docs } from '@/.source';
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  baseUrl: '/docs',
+  source: docs.toFumadocsSource(),
+});
+```
 
 ### 3. Root Layout
 
@@ -58,7 +98,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 
 ### 4. Styles
 
-Setup Tailwind CSS v4 on your Next.js app, add the following to `global.css`.
+Add the following to `global.css`.
 
 ```css title="Tailwind CSS"
 @import 'tailwindcss';
@@ -99,7 +139,6 @@ Create a folder `/app/docs` for our docs, and give it a proper layout.
 Create a catch-all route `/app/docs/[[...slug]]` for docs pages.
 
 In the page, wrap your content in the [Page](/docs/ui/layouts/page) component.
-It may vary depending on your content source. You should configure static rendering with `generateStaticParams` and metadata with `generateMetadata`.
 
 <Tabs groupId='content-source' items={['Fumadocs MDX', 'Content Collections']}>
 

@@ -40,10 +40,8 @@
 
 @utility fd-steps {
   counter-reset: step;
-  border-left-width: 1px;
-  margin-left: 1rem;
-  padding-left: 1.75rem;
   position: relative;
+  @apply pl-6 ml-2 border-l sm:ml-4 sm:pl-7;
 }
 
 @utility fd-step {
@@ -52,16 +50,13 @@
     color: var(--color-fd-secondary-foreground);
     content: counter(step);
     counter-increment: step;
-    border-radius: 9999px;
     justify-content: center;
     align-items: center;
-    width: 2rem;
-    height: 2rem;
     font-size: 0.875rem;
     line-height: 1.25rem;
     display: flex;
     position: absolute;
-    left: -1rem;
+    @apply size-8 -start-4 rounded-full;
   }
 }
 
