@@ -16,17 +16,9 @@
 
     content
   </div>
-</div>
-
-<div className="fd-steps">
-  <div className="fd-step">
-    ## New: First
-
-    content
-  </div>
 
   <div className="fd-step">
-    ## New: Second
+    ## Third
 
     content
   </div>
