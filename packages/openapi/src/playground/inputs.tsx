@@ -98,7 +98,7 @@ export function JsonInput({ fieldName }: { fieldName: string }) {
     <textarea
       {...controller.field}
       value={value}
-      className="w-full h-[400px] resize-none rounded-lg border p-2 bg-fd-secondary text-fd-secondary-foreground focus-visible:outline-none"
+      className="w-full h-[300px] text-[13px] font-mono resize-none rounded-lg border p-2 bg-fd-secondary text-fd-secondary-foreground focus-visible:outline-none"
       onChange={(v) => {
         setValue(v.target.value);
         try {

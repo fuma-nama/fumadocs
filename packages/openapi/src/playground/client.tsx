@@ -246,12 +246,12 @@ export default function Client({
           <form
             {...rest}
             className={cn(
-              'not-prose flex flex-col rounded-xl border p-3 gap-4 shadow-md overflow-hidden bg-fd-card text-fd-card-foreground',
+              'not-prose flex flex-col rounded-xl border shadow-md overflow-hidden bg-fd-card text-fd-card-foreground',
               rest.className,
             )}
             onSubmit={onSubmit}
           >
-            <div className="flex flex-row items-center gap-2 text-sm">
+            <div className="flex flex-row items-center gap-2 text-sm p-3 pb-0">
               <MethodLabel>{method}</MethodLabel>
               <Route route={route} className="flex-1" />
               <button
@@ -593,8 +593,8 @@ function CollapsiblePanel({
   title: ReactNode;
 }) {
   return (
-    <Collapsible {...props} className="border-b -m-2 last:border-b-0">
-      <CollapsibleTrigger className="group w-full flex items-center gap-2 p-2 text-sm font-medium">
+    <Collapsible {...props} className="border-b last:border-b-0">
+      <CollapsibleTrigger className="group w-full flex items-center gap-2 p-3 text-sm font-medium">
         {title}
         <ChevronDown className="ms-auto size-3.5 text-fd-muted-foreground group-data-[state=open]:rotate-180" />
       </CollapsibleTrigger>
