@@ -1,9 +1,9 @@
 {
-  "name": "root",
+  "name": "fumadocs-root",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "turbo run build",
+    "build": "turbo run build --filter=./packages/*",
     "clean": "turbo run clean",
     "dev": "turbo run dev",
     "dev:all": "turbo run dev --filter=!./examples/*",
