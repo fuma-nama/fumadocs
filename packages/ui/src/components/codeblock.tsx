@@ -2,9 +2,9 @@
 import { Check, Copy } from 'lucide-react';
 import {
   type ButtonHTMLAttributes,
+  forwardRef,
   type HTMLAttributes,
   type ReactNode,
-  forwardRef,
   useCallback,
   useRef,
 } from 'react';
@@ -90,13 +90,13 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
         ref={ref}
         {...props}
         className={cn(
-          'not-prose group fd-codeblock relative my-6 overflow-hidden rounded-lg border bg-fd-secondary/50 text-sm',
+          'not-prose group fd-codeblock relative my-4 overflow-hidden rounded-lg border bg-fd-secondary/50 text-sm',
           keepBackground && 'bg-(--shiki-light-bg) dark:bg-(--shiki-dark-bg)',
           props.className,
         )}
       >
         {title ? (
-          <div className="flex flex-row items-center gap-2 border-b bg-fd-muted px-4 py-1.5">
+          <div className="flex items-center gap-2 border-b bg-fd-muted px-4 py-1.5">
             {icon ? (
               <div
                 className="text-fd-muted-foreground [&_svg]:size-3.5"

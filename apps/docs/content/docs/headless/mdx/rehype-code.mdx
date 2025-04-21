@@ -11,10 +11,10 @@ Add the rehype plugin.
 
 ```ts title="MDX Compiler"
 import { compile } from '@mdx-js/mdx';
-import { remarkInstall } from 'fumadocs-docgen';
+import { rehypeCode } from 'fumadocs-core/mdx-plugins';
 
 await compile('...', {
-  remarkPlugins: [remarkInstall],
+  rehypePlugins: [rehypeCode],
 });
 ```
 

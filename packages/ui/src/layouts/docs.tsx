@@ -1,22 +1,22 @@
 import type { PageTree } from 'fumadocs-core/server';
-import { type ReactNode, type HTMLAttributes, useMemo } from 'react';
+import { type HTMLAttributes, type ReactNode, useMemo } from 'react';
 import { Languages, SidebarIcon } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import {
   CollapsibleSidebar,
   Sidebar,
+  SidebarCollapseTrigger,
   SidebarFooter,
   SidebarHeader,
-  SidebarCollapseTrigger,
-  SidebarViewport,
   SidebarPageTree,
+  SidebarViewport,
 } from '@/components/layout/sidebar';
 import { slot, slots } from '@/layouts/shared';
 import {
-  type LinkItemType,
   BaseLinkItem,
   type IconItemType,
+  type LinkItemType,
 } from '@/layouts/links';
 import { RootToggle } from '@/components/layout/root-toggle';
 import { type BaseLayoutProps, getLinks } from './shared';
@@ -42,9 +42,9 @@ import {
   type SidebarOptions,
 } from '@/layouts/docs/shared';
 import {
+  NavProvider,
   type PageStyles,
   StylesProvider,
-  NavProvider,
 } from '@/contexts/layout';
 import Link from 'fumadocs-core/link';
 
@@ -140,9 +140,7 @@ export function DocsLayout({
               }
               banner={
                 <>
-                  {tabs.length > 0 ? (
-                    <RootToggle options={tabs} className="-mx-2" />
-                  ) : null}
+                  {tabs.length > 0 ? <RootToggle options={tabs} /> : null}
                   {slots(
                     'lg',
                     searchToggle,
@@ -195,7 +193,7 @@ export function DocsLayoutSidebar({
         className={cn('md:ps-(--fd-layout-offset)', props.className)}
       >
         <SidebarHeader>
-          <div className="flex flex-row pt-1 max-md:hidden">
+          <div className="flex flex-row py-1.5 max-md:hidden">
             {nav}
             {collapsible && (
               <SidebarCollapseTrigger
@@ -204,7 +202,7 @@ export function DocsLayoutSidebar({
                     color: 'ghost',
                     size: 'icon-sm',
                   }),
-                  'ms-auto mb-auto text-fd-muted-foreground max-md:hidden',
+                  'ms-auto mb-auto -my-1.5 text-fd-muted-foreground max-md:hidden',
                 )}
               >
                 <SidebarIcon />

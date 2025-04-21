@@ -45,21 +45,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 }
 ```
 
-### Prefix
-
-Fumadocs UI has its own colors, animations, and utilities.
-By default, it adds a `fd-` prefix to avoid conflicts with Shadcn UI or your own CSS variables.
-
-You can use them without the prefix by adding some aliases:
-
-```css title="Tailwind CSS"
-@theme {
-  --color-primary: var(--color-fd-primary);
-}
-```
-
-> You can use it with CSS media queries for responsive design.
-
 ### Layout Width
 
 Customise the max width of docs layout with CSS Variables.
@@ -74,17 +59,15 @@ Customise the max width of docs layout with CSS Variables.
 
 ## Tailwind CSS Preset
 
-The Tailwind CSS preset introduces new colors and extra utilities including `fd-steps`.
+Fumadocs UI adds its own colors, animations, and utilities with Tailwind CSS preset.
 
-### Themes
+### Colors
 
 It comes with many themes out-of-the-box, you can pick one you prefer.
 
 ```css
 @import 'fumadocs-ui/css/<theme>.css';
-
-/* Example */
-@import 'fumadocs-ui/css/black.css';
+@import 'fumadocs-ui/css/preset.css';
 ```
 
 <Tabs items={['neutral', 'black', 'vitepress', 'dusk', 'catppuccin', 'ocean', 'purple']}>
@@ -133,9 +116,7 @@ It comes with many themes out-of-the-box, you can pick one you prefer.
 
 </Tabs>
 
-### Colors
-
-The design system was inspired by [Shadcn UI](https://ui.shadcn.com), you can easily customize the colors using CSS variables.
+The design system was inspired by [Shadcn UI](https://ui.shadcn.com), you can also customize the colors using CSS variables.
 
 ```css title="global.css"
 :root {
@@ -145,6 +126,15 @@ The design system was inspired by [Shadcn UI](https://ui.shadcn.com), you can ea
 .dark {
   --color-fd-background: hsl(0, 0%, 0%);
 }
+```
+
+For Shadcn UI, you can use the `shadcn` preset instead.
+It uses colors from your Shadcn UI theme.
+
+```css
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/shadcn.css';
+@import 'fumadocs-ui/css/preset.css';
 ```
 
 ### Typography

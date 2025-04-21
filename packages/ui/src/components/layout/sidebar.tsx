@@ -184,7 +184,7 @@ export function SidebarHeader(props: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       {...props}
-      className={cn('flex flex-col gap-2 px-4 empty:hidden', props.className)}
+      className={cn('flex flex-col gap-3 px-4 empty:hidden', props.className)}
     >
       {props.children}
     </div>

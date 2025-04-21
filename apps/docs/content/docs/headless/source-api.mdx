@@ -26,15 +26,20 @@ export const source = loader({
 });
 ```
 
-### Base URL
+### URL
 
-The loader generates a URL for each page, you can override the default base URL.
+You can override the base URL, or specify a function to generate URL for each page.
 
 ```ts
 import { loader } from 'fumadocs-core/source';
 
 loader({
   baseUrl: '/docs',
+  // or you can customise it with function
+  url(slugs, locale) {
+    if (locale) return '/' + [locale, 'docs', ...slugs].join('/');
+    return '/' + ['docs', ...slugs].join('/');
+  },
 });
 ```
 

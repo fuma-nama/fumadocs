@@ -74,7 +74,6 @@ export function remarkSteps({
       if (parent.data && '_fd_step' in parent.data) return 'skip';
 
       let startIdx = -1;
-      let lastNumber = 0;
       let i = 0;
 
       const onEnd = () => {
@@ -114,12 +113,8 @@ export function remarkSteps({
           continue;
         }
 
-        const num = Number(match[1]);
         head.value = match[2];
-
-        if (startIdx !== -1 && num !== lastNumber + 1) onEnd();
         if (startIdx === -1) startIdx = i;
-        lastNumber = num;
       }
 
       onEnd();

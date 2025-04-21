@@ -1,12 +1,12 @@
 import type * as PageTree from '@/server/page-tree';
 import type { I18nConfig } from '@/i18n';
 import {
-  loadFiles,
-  type LoadOptions,
-  type VirtualFile,
-  type Transformer,
-  loadFilesI18n,
   type I18nLoadOptions,
+  loadFiles,
+  loadFilesI18n,
+  type LoadOptions,
+  type Transformer,
+  type VirtualFile,
 } from './load-files';
 import type { MetaData, PageData, UrlFn } from './types';
 import type { BuildPageTreeOptions } from './page-tree-builder';
@@ -100,7 +100,7 @@ export interface LoaderOutput<Config extends LoaderConfig> {
   _i18n?: I18nConfig;
 
   /**
-   * Get list of pages from language, empty if language hasn't specified
+   * Get list of pages from language
    *
    * @param language - If empty, the default language will be used
    */
@@ -109,6 +109,8 @@ export interface LoaderOutput<Config extends LoaderConfig> {
   getLanguages: () => LanguageEntry<Config['source']['pageData']>[];
 
   /**
+   * Get page with slugs
+   *
    * @param language - If empty, the default language will be used
    */
   getPage: (
@@ -128,6 +130,9 @@ export interface LoaderOutput<Config extends LoaderConfig> {
 
   /**
    * generate static params for Next.js SSG
+   *
+   * @param slug - customise parameter name for slugs
+   * @param lang - customise parameter name for lang
    */
   generateParams: <
     TSlug extends string = 'slug',

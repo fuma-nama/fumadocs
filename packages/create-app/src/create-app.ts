@@ -5,7 +5,7 @@ import { versions as localVersions } from '@/versions';
 import versionPkg from '../../create-app-versions/package.json';
 import type { PackageManager } from './auto-install';
 import { autoInstall } from './auto-install';
-import { sourceDir, cwd } from './constants';
+import { cwd, sourceDir } from './constants';
 
 export type Template =
   | '+next+content-collections'
@@ -99,14 +99,6 @@ export async function create(options: Options): Promise<void> {
       defaultRename,
     );
 
-    if (options.useSrcDir) {
-      const cssPath = path.join(dest, 'src/app/global.css');
-
-      await fs.writeFile(
-        cssPath,
-        (await fs.readFile(cssPath)).toString().replace('../', '../../'),
-      );
-    }
     log('Configured Tailwind CSS');
   }
 

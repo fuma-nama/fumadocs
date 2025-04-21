@@ -12,11 +12,7 @@ content
 
 content
 
-## 1. New: First
-
-content
-
-## 2. New: Second
+## 1. Third
 
 content
 

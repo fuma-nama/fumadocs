@@ -104,8 +104,28 @@ import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 ```
 
 <Callout title="Want further customisations?">
-  You can specify more props to the [Docs Layout](/docs/ui/layouts/docs)
-  component.
+
+You can specify a `banner` to the [Docs Layout](/docs/ui/layouts/docs) component.
+
+```tsx
+import { DocsLayout, type DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
+import type { ReactNode } from 'react';
+import { baseOptions } from '@/app/layout.config';
+import { source } from '@/lib/source';
+
+const docsOptions: DocsLayoutProps = {
+  ...baseOptions,
+  tree: source.pageTree,
+  sidebar: {
+    banner: <div>Hello World</div>,
+  },
+};
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return <DocsLayout {...docsOptions}>{children}</DocsLayout>;
+}
+```
+
 </Callout>
 
 #### Decoration

@@ -15,18 +15,13 @@ export async function start(
   configPath: string,
   outDir: string,
 ): Promise<void> {
-  // delete previous output
-  void fs.rm(path.resolve(outDir, `index.js`), { force: true });
-  void fs.rm(path.resolve(outDir, `index.d.ts`), { force: true });
-
   // init
-  await fs.mkdir(outDir, { recursive: true });
   let configHash = await getConfigHash(configPath);
   let config = await loadConfig(configPath, configHash, true);
   const outPath = path.resolve(outDir, `index.ts`);
 
   async function updateMapFile() {
-    console.time(`[MDX] update map file`);
+    const start = Date.now();
 
     try {
       await fs.writeFile(
@@ -41,14 +36,14 @@ export async function start(
       }
     }
 
-    console.timeEnd(`[MDX] update map file`);
+    console.log(`[MDX] updated map file in ${Date.now() - start}ms`);
   }
 
   await updateMapFile();
 
   if (dev) {
     const { watcher } = await import('@/map/watcher');
-    const instance = watcher(configPath, config);
+    const instance = watcher(configPath, config, [outPath]);
 
     instance.on('ready', () => {
       console.log('[MDX] started dev server');
