@@ -90,7 +90,7 @@ export async function customise(resolver: Resolver, config: Config) {
         picocolors.dim('---'),
         'Open your `layout.tsx` files, replace the imports of components:',
         picocolors.greenBright(
-          '`fumadocs-ui/layouts/docs` -> `@/components/layouts/docs`',
+          '`fumadocs-ui/layouts/docs` -> `@/components/layouts/notebook`',
         ),
         pageAdded
           ? picocolors.greenBright(
