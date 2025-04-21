@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 15.2.9
+
+### Patch Changes
+
+- e72af4b: Improve layout
+- ea0f468: Fix relative file href with hash
+- 7f3c30e: Add `shadcn.css` preset
+  - fumadocs-core@15.2.9
+
 ## 15.2.8
 
 ### Patch Changes
