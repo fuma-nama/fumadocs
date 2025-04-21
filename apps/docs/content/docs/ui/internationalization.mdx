@@ -62,7 +62,14 @@ Create a middleware that redirects users to appropriate locale.
 
 See [Middleware](/docs/headless/internationalization#middleware) for customisable options.
 
-> Note that this is optional, you can also use your own middleware or the one provided by i18n libraries.
+<Callout title="Custom Middleware">
+
+    The default middleware is optional, you can instead use your own middleware or the one provided by i18n libraries.
+
+    When using custom middleware, make sure the locale is correctly passed to Fumadocs.
+    You may also want to [customise page URLs](/docs/headless/source-api#url) from `loader()`.
+
+</Callout>
 
 ### Routing
 
@@ -185,6 +192,19 @@ export default async function Page({
   source.getPages(lang); // [!code ++]
 }
 ```
+
+<Callout title={<>Using another name for <code>lang</code> dynamic segment?</>}>
+
+If you're using another name like `app/[locale]`, you also need to update `generateStaticParams()` in docs page:
+
+```tsx
+export function generateStaticParams() {
+  return source.generateParams(); // [!code --]
+  return source.generateParams('slug', 'locale'); // [!code ++] new param name
+}
+```
+
+</Callout>
 
 ### Search
 

@@ -54,8 +54,8 @@ export const Callout = forwardRef<HTMLDivElement, CalloutProps>(
             error: <CircleX className="size-5 fill-red-500 text-fd-card" />,
           }[type]}
         <div className="min-w-0 flex-1">
-          {title ? <p className="not-prose mb-2 font-medium">{title}</p> : null}
-          <div className="text-fd-muted-foreground prose-no-margin">
+          {title ? <p className="font-medium !my-0">{title}</p> : null}
+          <div className="text-fd-muted-foreground prose-no-margin mt-2 empty:hidden">
             {children}
           </div>
         </div>
