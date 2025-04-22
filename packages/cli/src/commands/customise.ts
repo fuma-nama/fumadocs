@@ -1,4 +1,4 @@
-import { cancel, group, intro, select, confirm, log } from '@clack/prompts';
+import { cancel, confirm, group, intro, log, select } from '@clack/prompts';
 import picocolors from 'picocolors';
 import { add, type Resolver } from '@/commands/add';
 import type { Config } from '@/config';
