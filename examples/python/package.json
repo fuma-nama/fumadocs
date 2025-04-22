@@ -12,11 +12,12 @@
   "dependencies": {
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
-    "fumadocs-ui": "workspace:*",
     "fumadocs-python": "workspace:*",
+    "fumadocs-ui": "workspace:*",
     "next": "15.3.1",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "shiki": "^3.2.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.3",
