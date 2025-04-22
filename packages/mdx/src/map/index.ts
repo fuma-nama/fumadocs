@@ -21,7 +21,7 @@ export async function start(
   const outPath = path.resolve(outDir, `index.ts`);
 
   async function updateMapFile() {
-    const start = Date.now();
+    const start = performance.now();
 
     try {
       await fs.writeFile(
@@ -36,7 +36,7 @@ export async function start(
       }
     }
 
-    console.log(`[MDX] updated map file in ${Date.now() - start}ms`);
+    console.log(`[MDX] updated map file in ${performance.now() - start}ms`);
   }
 
   await updateMapFile();

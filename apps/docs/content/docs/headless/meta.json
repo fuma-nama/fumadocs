@@ -6,12 +6,12 @@
   "pages": [
     "---Guide---",
     "index",
-    "internationalization",
     "search",
     "---Writing---",
     "page-conventions",
     "---API References---",
     "page-tree",
+    "internationalization",
     "components",
     "utils",
     "mdx",

@@ -96,12 +96,12 @@ Customise folders by creating a `meta.json` file in the folder.
 
 By default, folder items are sorted alphabetically.
 
-You can control the order of items using `pages`, items are not included unless they are listed inside.
+You can add or control the order of items using `pages`, items are not included unless they are listed inside.
 
 ```json title="meta.json"
 {
   "title": "Name of Folder",
-  "pages": ["guide", "components", "./nested/page"]
+  "pages": ["guide", "components", "---My Separator---", "./nested/page"]
 }
 ```
 
@@ -111,14 +111,6 @@ You can control the order of items using `pages`, items are not included unless 
   <File name="components.mdx" />
   <File name="nested/page.mdx" />
 </Files>
-
-#### Separator
-
-```json title="meta.json"
-{
-  "pages": ["guide", "---My Separator---", "components"]
-}
-```
 
 #### Rest
 
@@ -179,13 +171,11 @@ Marks the folder as a root folder, only items in the opened root folder will be 
 }
 ```
 
-For example, when you are in a root folder called `framework`, the other folders (e.g. `headless`) are not shown on the sidebar and other navigation elements.
-
-Index pages will also be hidden unless it is listed in the `pages` property.
+For example, when you are opening a root folder `framework`, the other folders (e.g. `headless`) are not shown on the sidebar and other navigation elements.
 
 <Files>
   <Folder name="framework" defaultOpen>
-    <File name="index.mdx (hidden)" className="opacity-50" />
+    <File name="index.mdx" />
     <File
       name="current-page.mdx"
       className="!text-fd-primary !bg-fd-primary/10"
