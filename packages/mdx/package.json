@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-mdx",
-  "version": "11.6.0",
+  "version": "11.6.1",
   "description": "The built-in source for Fumadocs",
   "keywords": [
     "NextJs",
@@ -75,7 +75,7 @@
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
     "vfile": "^6.0.3",
-    "webpack": "^5.99.5"
+    "webpack": "^5.99.6"
   },
   "peerDependencies": {
     "@fumadocs/mdx-remote": "^1.2.0",

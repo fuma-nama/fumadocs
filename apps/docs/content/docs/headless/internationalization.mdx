@@ -1,7 +1,6 @@
 ---
 title: Internationalization
 description: Support multiple languages in your documentation
-icon: Globe
 ---
 
 ## Introduction
@@ -20,31 +19,9 @@ You can define a config to share between utilities.
 }
 ```
 
-### Middleware
+### Hide Locale Prefix
 
-Redirects users to appropriate locale.
-
-```json doc-gen:file
-{
-  "file": "../../examples/i18n/middleware.ts",
-  "codeblock": {
-    "lang": "ts",
-    "meta": "title=\"middleware.ts\""
-  }
-}
-```
-
-You can also customise the i18n middleware from `i18n.ts`.
-
-#### Hide Locale Prefix
-
-To hide the locale prefix, for example, use `/` instead of `/en`, use the `hideLocale` option.
-
-| Mode             | Description                                        |
-| ---------------- | -------------------------------------------------- |
-| `always`         | Always hide the prefix, detect locale from cookies |
-| `default-locale` | Only hide the default locale                       |
-| `never`          | Never hide the prefix (default)                    |
+To hide the locale prefix (e.g. `/en/page` -> `/page`), use the `hideLocale` option.
 
 ```ts
 import type { I18nConfig } from 'fumadocs-core/i18n';
@@ -56,9 +33,32 @@ export const i18n: I18nConfig = {
 };
 ```
 
-> It uses `NextResponse.rewrite` to hide locale prefixes.
+| Mode             | Description                                        |
+| ---------------- | -------------------------------------------------- |
+| `always`         | Always hide the prefix, detect locale from cookies |
+| `default-locale` | Only hide the default locale                       |
+| `never`          | Never hide the prefix (default)                    |
 
-It's **not recommended** to use `always`.
-On this mode, locale is stored as a cookie, read and set on the middleware.
+<Callout type='warn' title={<>Using <code>always</code></>}>
 
-This may cause undesired cache problems on your hosting platform, and need to pay extra attention on SEO to ensure search engines can index your pages correctly.
+On `always` mode, locale is stored as a cookie (set by the middleware), which isn't optimal for static sites.
+
+This may cause undesired cache problems, and need to pay extra attention on SEO to ensure search engines can index your pages correctly.
+
+</Callout>
+
+### Middleware
+
+Redirects users to appropriate locale, it can be customised from `i18n.ts`.
+
+```json doc-gen:file
+{
+  "file": "../../examples/i18n/middleware.ts",
+  "codeblock": {
+    "lang": "ts",
+    "meta": "title=\"middleware.ts\""
+  }
+}
+```
+
+> When `hideLocale` is enabled, it uses `NextResponse.rewrite` to hide locale prefixes.

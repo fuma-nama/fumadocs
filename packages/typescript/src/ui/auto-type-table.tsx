@@ -36,6 +36,7 @@ export async function AutoTypeTable({
             description: await renderMarkdown(entry.description),
             default: entry.tags.default || entry.tags.defaultValue,
             required: entry.required,
+            deprecated: entry.deprecated,
           },
         ] as const,
     );

@@ -2,4 +2,4 @@
 'fumadocs-ui': patch
 ---
 
-Improve layout
+Fix callout margin

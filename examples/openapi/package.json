@@ -10,7 +10,7 @@
     "types:check": "fumadocs-mdx && tsc --noEmit"
   },
   "dependencies": {
-    "@scalar/api-client-react": "^1.2.22",
+    "@scalar/api-client-react": "^1.2.23",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-openapi": "workspace:*",
@@ -18,7 +18,7 @@
     "next": "15.3.1",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "shiki": "^3.2.2",
+    "shiki": "^3.3.0",
     "zod": "^3.24.3"
   },
   "devDependencies": {

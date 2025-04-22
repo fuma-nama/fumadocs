@@ -18,7 +18,12 @@ export function createRelativeLink(
     // resolve relative href
     if (href && href.startsWith('.')) {
       const target = source.getPageByHref(href, { dir: page.file.dirname });
-      if (target) href = target.page.url;
+
+      if (target) {
+        href = target.hash
+          ? `${target.page.url}#${target.hash}`
+          : target.page.url;
+      }
     }
 
     return <OverrideLink href={href} {...props} />;

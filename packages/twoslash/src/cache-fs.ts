@@ -40,7 +40,7 @@ export interface TwoslashTypesCache {
 export function createFileSystemTypesCache(
   options: FileSystemTypeResultCacheOptions = {},
 ): TwoslashTypesCache {
-  const dir = resolve(process.cwd(), options.dir ?? '.next/cache/twoslash');
+  const dir = resolve(options.dir ?? '.next/cache/twoslash');
 
   return {
     init() {

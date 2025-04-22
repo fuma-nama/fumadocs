@@ -47,7 +47,12 @@ export const registry: Registry = {
     },
     {
       name: 'layouts/notebook',
-      files: ['layouts/notebook.tsx'],
+      files: [
+        {
+          in: 'layouts/notebook.tsx',
+          out: 'components:layouts/docs.tsx',
+        },
+      ],
       unlisted: true,
       mapImportPath: importMap,
     },

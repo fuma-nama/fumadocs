@@ -25,6 +25,7 @@ export interface DocEntry {
   type: string;
   tags: Record<string, string>;
   required: boolean;
+  deprecated: boolean;
 }
 
 interface EntryContext {
@@ -205,6 +206,9 @@ function getDocEntry(
     tags,
     type: typeName,
     required: !prop.isOptional(),
+    deprecated: prop
+      .getJsDocTags()
+      .some((tag) => tag.getName() === 'deprecated'),
   };
 
   transform?.call(context, entry, subType, prop);
