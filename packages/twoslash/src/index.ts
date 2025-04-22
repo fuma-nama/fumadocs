@@ -6,8 +6,8 @@ import { defaultHandlers, toHast } from 'mdast-util-to-hast';
 import type { ShikiTransformer, ShikiTransformerContextCommon } from 'shiki';
 import {
   createTransformerFactory,
-  type TransformerTwoslashIndexOptions,
   rendererRich,
+  type TransformerTwoslashIndexOptions,
 } from '@shikijs/twoslash';
 import {
   createTwoslasher,
@@ -86,7 +86,7 @@ export function transformerTwoslash({
       },
       popupTypes: {
         tagName: 'div',
-        class: 'twoslash fd-codeblock prose-no-margin',
+        class: 'twoslash shiki fd-codeblock prose-no-margin',
         children: (v) => {
           if (
             v.length === 1 &&
