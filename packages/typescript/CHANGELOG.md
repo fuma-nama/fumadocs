@@ -1,5 +1,11 @@
 # fumadocs-typescript
 
+## 4.0.3
+
+### Patch Changes
+
+- 3a5595a: Support deprecated properties in Type Table
+
 ## 4.0.2
 
 ### Patch Changes

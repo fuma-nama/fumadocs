@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 15.2.10
+
+### Patch Changes
+
+- 3a5595a: Support deprecated properties in Type Table
+- 8c9fc1f: Fix callout margin
+  - fumadocs-core@15.2.10
+
 ## 15.2.9
 
 ### Patch Changes
