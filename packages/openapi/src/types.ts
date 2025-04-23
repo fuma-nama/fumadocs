@@ -82,6 +82,8 @@ export interface RenderContext {
 
   /**
    * Show full response schema instead of only example response & Typescript definitions
+   *
+   * @default true
    */
   showResponseSchema?: boolean;
 }

@@ -2,7 +2,6 @@ import type { MethodInformation, RenderContext } from '@/types';
 import { type ReactNode } from 'react';
 import { Markdown } from '@/render/markdown';
 import { type CodeSample } from '@/render/operation/index';
-import { getTypescriptSchema } from '@/utils/get-typescript-schema';
 import { CodeBlock } from '@/render/codeblock';
 import {
   CodeExample,
@@ -177,50 +176,26 @@ function ResponseTabs({
   operation: NoReference<MethodInformation>;
   ctx: RenderContext;
 }) {
-  const { renderer, generateTypeScriptSchema, schema } = ctx;
+  const { renderer } = ctx;
   if (!operation.responses) return null;
 
   async function renderResponse(code: string) {
-    const response =
-      operation.responses && code in operation.responses
-        ? operation.responses[code]
-        : null;
-
-    const media = getPreferredType(response?.content ?? {});
+    const response = operation.responses?.[code];
+    const media = response?.content ? getPreferredType(response.content) : null;
     const responseOfType = media ? response?.content?.[media] : null;
 
-    const description =
-      operation.responses?.[code].description ??
-      responseOfType?.schema?.description ??
-      '';
-
-    let ts: string | undefined;
-    if (generateTypeScriptSchema) {
-      ts = await generateTypeScriptSchema(operation, code);
-    } else if (
-      generateTypeScriptSchema === undefined &&
-      responseOfType?.schema
-    ) {
-      ts = await getTypescriptSchema(
-        responseOfType?.schema,
-        schema.dereferenceMap,
-      );
-    }
-
-    const values: string[] = [];
-    let exampleSlot: ReactNode;
-
+    let slot: ReactNode = 'Empty';
     if (responseOfType?.examples) {
-      exampleSlot = Object.entries(responseOfType.examples).map(
-        ([key, sample], i) => {
-          const title = sample?.summary ?? `Example ${i + 1}`;
+      const values: string[] = [];
+
+      const children = Object.entries(responseOfType.examples).map(
+        ([key, sample]) => {
+          const title = sample?.summary ?? `Example ${key}`;
 
           values.push(title);
           return (
             <renderer.ResponseType key={key} label={title}>
-              {sample?.description ? (
-                <Markdown text={sample.description} />
-              ) : null}
+              {sample?.description && <Markdown text={sample.description} />}
               <CodeBlock
                 lang="json"
                 code={JSON.stringify(sample.value, null, 2)}
@@ -230,39 +205,27 @@ function ResponseTabs({
           );
         },
       );
-    } else if (responseOfType?.example || responseOfType?.schema) {
-      values.push('Response');
 
-      exampleSlot = (
-        <renderer.ResponseType label="Response">
-          <CodeBlock
-            lang="json"
-            code={JSON.stringify(
-              responseOfType.example ?? sample(responseOfType.schema as object),
-              null,
-              2,
-            )}
-            ctx={ctx}
-          />
-        </renderer.ResponseType>
+      slot = (
+        <renderer.ResponseTypes defaultValue={values[0]}>
+          {children}
+        </renderer.ResponseTypes>
+      );
+    } else if (responseOfType?.example || responseOfType?.schema) {
+      slot = (
+        <CodeBlock
+          lang="json"
+          code={JSON.stringify(
+            responseOfType.example ?? sample(responseOfType.schema as object),
+            null,
+            2,
+          )}
+          ctx={ctx}
+        />
       );
     }
 
-    return (
-      <renderer.Response value={code}>
-        {description ? <Markdown text={description} /> : null}
-        {exampleSlot ? (
-          <renderer.ResponseTypes defaultValue={values[0]}>
-            {exampleSlot}
-            {ts ? (
-              <renderer.ResponseType label="TypeScript">
-                <CodeBlock lang="ts" code={ts} ctx={ctx} />
-              </renderer.ResponseType>
-            ) : null}
-          </renderer.ResponseTypes>
-        ) : null}
-      </renderer.Response>
-    );
+    return <renderer.Response value={code}>{slot}</renderer.Response>;
   }
 
   const codes = Object.keys(operation.responses);
