@@ -28,6 +28,7 @@ test('class members', () => {
         "description": "",
         "entries": [
           {
+            "deprecated": false,
             "description": "",
             "name": "test",
             "required": true,
@@ -35,6 +36,7 @@ test('class members', () => {
             "type": "string",
           },
           {
+            "deprecated": false,
             "description": "",
             "name": "age",
             "required": true,
@@ -68,6 +70,7 @@ test('interface members', () => {
         "description": "",
         "entries": [
           {
+            "deprecated": false,
             "description": "",
             "name": "#name",
             "required": true,
@@ -75,6 +78,7 @@ test('interface members', () => {
             "type": "string",
           },
           {
+            "deprecated": false,
             "description": "",
             "name": "age",
             "required": true,

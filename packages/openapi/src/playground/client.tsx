@@ -599,7 +599,7 @@ function CollapsiblePanel({
         <ChevronDown className="ms-auto size-3.5 text-fd-muted-foreground group-data-[state=open]:rotate-180" />
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div className="flex flex-col gap-3 p-2">{children}</div>
+        <div className="flex flex-col gap-3 p-3 pt-1">{children}</div>
       </CollapsibleContent>
     </Collapsible>
   );

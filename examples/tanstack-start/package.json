@@ -11,7 +11,7 @@
   "dependencies": {
     "@fumadocs/mdx-remote": "workspace:*",
     "@tanstack/react-router": "^1.116.0",
-    "@tanstack/react-start": "^1.116.1",
+    "@tanstack/react-start": "^1.116.2",
     "fast-glob": "^3.3.3",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
@@ -24,10 +24,10 @@
     "@tailwindcss/vite": "^4.1.4",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
-    "@vitejs/plugin-react": "^4.4.0",
+    "@vitejs/plugin-react": "^4.4.1",
     "tailwindcss": "^4.1.4",
     "typescript": "^5.8.3",
-    "vite": "^6.3.1",
+    "vite": "^6.3.2",
     "vite-tsconfig-paths": "^5.1.4"
   }
 }

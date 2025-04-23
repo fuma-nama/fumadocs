@@ -3,11 +3,11 @@ import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import {
   API,
-  Root,
-  APIInfo,
   APIExample,
-  Property,
+  APIInfo,
   ObjectCollapsible,
+  Property,
+  Root,
 } from '@/ui';
 import type { RenderContext, ServerObject } from '@/types';
 import { APIPlayground, type APIPlaygroundProps } from '@/playground';
@@ -110,7 +110,9 @@ export function createRenders(
       </APIInfo>
     ),
     APIExample,
-    Responses: Tabs,
+    Responses: (props) => (
+      <Tabs {...props} groupId="fumadocs_openapi_responses" />
+    ),
     Response: Tab,
     ResponseTypes: (props) => (
       <Accordions

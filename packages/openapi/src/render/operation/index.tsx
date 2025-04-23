@@ -20,8 +20,10 @@ import {
   getAPIExamples,
 } from '@/render/operation/api-example';
 import { MethodLabel } from '@/ui/components/method-label';
-
-import { RequestData, supportedMediaTypes } from '@/requests/_shared';
+import { type RequestData, supportedMediaTypes } from '@/requests/_shared';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { CodeBlock } from '@/render/codeblock';
+import { getTypescriptSchema } from '@/utils/get-typescript-schema';
 
 export interface CodeSample {
   lang: string;
@@ -110,38 +112,27 @@ export function Operation({
     );
   }
 
-  if (method.responses && ctx.showResponseSchema) {
+  if (method.responses && ctx.showResponseSchema !== false) {
+    const statuses = Object.keys(method.responses);
+
     responseNode = (
       <>
         {heading(headingLevel, 'Response Body', ctx)}
 
-        {Object.entries(method.responses).map(([status, response]) => {
-          if (!response.content) return;
-
-          const mediaType = getPreferredType(response.content);
-          if (!mediaType) return null;
-
-          const content = response.content[mediaType];
-          if (!content.schema) return null;
-
-          return (
-            <Fragment key={status}>
-              {heading(headingLevel + 1, status, ctx)}
-              <Markdown text={response.description} />
-
-              <Schema
-                name="response"
-                schema={content.schema}
-                ctx={{
-                  render: ctx,
-                  writeOnly: false,
-                  readOnly: true,
-                  required: true,
-                }}
-              />
-            </Fragment>
-          );
-        })}
+        <Tabs
+          items={statuses}
+          groupId="fumadocs_openapi_responses"
+          className="bg-transparent"
+        >
+          {statuses.map((status) => (
+            <ResponseTab
+              key={status}
+              status={status}
+              operation={method}
+              ctx={ctx}
+            />
+          ))}
+        </Tabs>
       </>
     );
   }
@@ -242,6 +233,57 @@ export function Operation({
   } else {
     return info;
   }
+}
+
+async function ResponseTab({
+  status,
+  operation,
+  ctx,
+}: {
+  status: string;
+  operation: MethodInformation;
+  ctx: RenderContext;
+}) {
+  const response = operation.responses![status];
+  const { generateTypeScriptSchema, schema } = ctx;
+  const mediaType = response.content
+    ? getPreferredType(response.content)
+    : null;
+  const responseOfType = mediaType ? response.content?.[mediaType] : null;
+
+  const description =
+    responseOfType?.schema?.description ?? response.description ?? '';
+
+  let ts: string | undefined;
+  if (generateTypeScriptSchema) {
+    ts = await generateTypeScriptSchema(operation, status);
+  } else if (generateTypeScriptSchema === undefined && responseOfType?.schema) {
+    ts = await getTypescriptSchema(
+      responseOfType?.schema,
+      schema.dereferenceMap,
+    );
+  }
+
+  return (
+    <Tab value={status}>
+      <Markdown text={description} />
+
+      {responseOfType?.schema && (
+        <Schema
+          name="response"
+          schema={responseOfType.schema}
+          ctx={{
+            render: ctx,
+            writeOnly: false,
+            readOnly: true,
+            required: true,
+          }}
+        />
+      )}
+
+      {ts && <CodeBlock lang="ts" code={ts} ctx={ctx} className="mt-4" />}
+    </Tab>
+  );
 }
 
 function WebhookCallback({

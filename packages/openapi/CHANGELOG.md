@@ -1,5 +1,30 @@
 # @fuma-docs/openapi
 
+## 8.1.0
+
+### Minor Changes
+
+- bb515b7: Display Response in a separate section
+
+### Patch Changes
+
+- 540027e: **Support `fumadocs-openapi/css/preset.css` for Tailwind CSS**
+
+  We highly recommend to use the following instead:
+
+  ```css
+  @import 'tailwindcss';
+  @import 'fumadocs-ui/css/neutral.css';
+  @import 'fumadocs-ui/css/preset.css';
+  /* do this */
+  @import 'fumadocs-openapi/css/preset.css';
+  ```
+
+- Updated dependencies [3a5595a]
+- Updated dependencies [8c9fc1f]
+  - fumadocs-ui@15.2.10
+  - fumadocs-core@15.2.10
+
 ## 8.0.3
 
 ### Patch Changes

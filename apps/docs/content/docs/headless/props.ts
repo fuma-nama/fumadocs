@@ -12,6 +12,7 @@ export type StructureOptions = MDX.StructureOptions;
 export type BreadcrumbItem = Breadcrumb.BreadcrumbItem;
 
 export type SidebarProviderProps = Sidebar.SidebarProviderProps;
+export type SidebarContentProps = Sidebar.SidebarContentProps<ElementType>;
 export type SidebarTriggerProps = Sidebar.SidebarTriggerProps<ElementType>;
 
 export type ScrollProviderProps = TOC.ScrollProviderProps;

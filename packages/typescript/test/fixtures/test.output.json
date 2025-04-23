@@ -8,7 +8,8 @@
         "description": "",
         "tags": {},
         "type": "string",
-        "required": true
+        "required": true,
+        "deprecated": false
       },
       {
         "name": "age",
@@ -17,7 +18,8 @@
           "defaultValue": "4"
         },
         "type": "number",
-        "required": false
+        "required": false,
+        "deprecated": false
       }
     ]
   },
@@ -30,7 +32,8 @@
         "description": "",
         "tags": {},
         "type": "string",
-        "required": true
+        "required": true,
+        "deprecated": false
       },
       {
         "name": "age",
@@ -39,14 +42,16 @@
           "defaultValue": "4"
         },
         "type": "number",
-        "required": false
+        "required": false,
+        "deprecated": false
       },
       {
         "name": "generic",
         "description": "",
         "tags": {},
         "type": "GenericType<string, string, string>",
-        "required": true
+        "required": true,
+        "deprecated": false
       }
     ]
   },
@@ -62,7 +67,8 @@
           "defaultValue": "Henry"
         },
         "type": "string",
-        "required": true
+        "required": true,
+        "deprecated": false
       },
       {
         "name": "age",
@@ -72,7 +78,8 @@
           "remarks": "`timestamp`\nReturned by API"
         },
         "type": "timestamp",
-        "required": true
+        "required": true,
+        "deprecated": false
       }
     ]
   }

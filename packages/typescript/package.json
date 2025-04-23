@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-typescript",
-  "version": "4.0.2",
+  "version": "4.0.3",
   "description": "Typescript Integration for Fumadocs",
   "keywords": [
     "NextJs",
@@ -41,7 +41,7 @@
     "hast-util-to-jsx-runtime": "^2.3.6",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
-    "shiki": "^3.2.2",
+    "shiki": "^3.3.0",
     "ts-morph": "^25.0.1",
     "unist-util-visit": "^5.0.0"
   },
