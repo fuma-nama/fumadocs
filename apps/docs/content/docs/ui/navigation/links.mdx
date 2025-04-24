@@ -7,7 +7,13 @@ description: Customise the shared navigation links on all layouts.
 
 Fumadocs allows adding additional links to your layouts with a `links` prop, like linking to your "showcase" page.
 
-![Nav](/docs/nav.png)
+<div className="not-prose grid gap-2 *:border max-sm:*:last:hidden sm:grid-cols-[2fr_1fr]">
+
+<>![Nav](/docs/nav-layout-home.png)</>
+
+<>![Nav](/docs/nav-layout-docs.png)</>
+
+</div>
 
 ```tsx tab="Shared Options" title="app/layout.config.tsx"
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
@@ -70,6 +76,8 @@ export const baseOptions: BaseLayoutProps = {
       icon: <BookIcon />,
       text: 'Blog',
       url: '/blog',
+      // secondary items will be displayed differently on navbar
+      secondary: false,
     },
   ],
 };
@@ -94,24 +102,6 @@ export const baseOptions: BaseLayoutProps = {
       text: 'Blog',
       url: '/blog',
       active: 'nested-url',
-    },
-  ],
-};
-```
-
-#### Secondary
-
-Set the item as secondary, secondary items will be displayed differently on navbar.
-
-```tsx title="app/layout.config.tsx"
-import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
-
-export const baseOptions: BaseLayoutProps = {
-  links: [
-    {
-      text: 'Blog',
-      url: '/blog',
-      secondary: true,
     },
   ],
 };
