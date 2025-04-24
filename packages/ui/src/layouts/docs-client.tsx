@@ -72,7 +72,7 @@ export function CollapsibleControl() {
       >
         <SidebarIcon />
       </SidebarCollapseTrigger>
-      <SearchToggle size="icon-sm" className="rounded-lg" />
+      <SearchToggle size="icon-sm" className="rounded-lg" hideIfDisabled />
     </div>
   );
 }
