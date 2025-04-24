@@ -41,7 +41,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@radix-ui/react-popover": "^1.1.10",
+    "@radix-ui/react-popover": "^1.1.11",
     "@shikijs/twoslash": "^3.3.0",
     "mdast-util-from-markdown": "^2.0.2",
     "mdast-util-gfm": "^3.1.0",
