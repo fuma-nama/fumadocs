@@ -90,12 +90,10 @@ export async function generateFiles(options: Config): Promise<void> {
     if (result.pathItem.summary) {
       file = getFilename(result.pathItem.summary);
     } else if (result.type === 'operation') {
-      file = result.operation.operationId
-        ? getFilename(result.operation.operationId)
-        : join(
-            getOutputPathFromRoute(result.item.path),
-            result.item.method.toLowerCase(),
-          );
+      file = join(
+        getOutputPathFromRoute(result.item.path),
+        result.item.method.toLowerCase(),
+      );
     } else {
       file = getFilename(result.item.name);
     }
