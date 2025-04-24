@@ -19,23 +19,6 @@ const keys: {
 interface Context {
   readOnly: boolean;
   writeOnly: boolean;
-
-  required: boolean;
-
-  /**
-   * Render the full object
-   *
-   * @defaultValue true
-   * */
-  parseObject?: boolean;
-
-  /**
-   * Parse binary format string to be files
-   *
-   * @defaultValue false
-   */
-  allowFile?: boolean;
-
   stack?: ParsedSchema[];
 
   render: RenderContext;
@@ -52,10 +35,21 @@ function isObject(schema: ParsedSchema): boolean {
 export function Schema({
   name,
   schema,
+  required = false,
+  parseObject = true,
   ctx,
 }: {
   name: string;
+  required?: boolean;
   schema: NoReference<ParsedSchema>;
+
+  /**
+   * Render the full object
+   *
+   * @defaultValue true
+   * */
+  parseObject?: boolean;
+
   ctx: Context;
 }): ReactNode {
   if (
@@ -64,9 +58,10 @@ export function Schema({
   )
     return null;
 
-  const parseObject = ctx.parseObject ?? true;
-  const stack = ctx.stack ?? [];
-  const { renderer } = ctx.render;
+  const {
+    render: { renderer },
+    stack = [],
+  } = ctx;
 
   // object type
   if (
@@ -85,10 +80,10 @@ export function Schema({
         <Schema
           name="[key: string]"
           schema={additionalProperties}
+          parseObject={false}
           ctx={{
             ...ctx,
-            required: false,
-            parseObject: false,
+            stack: [schema, ...stack],
           }}
         />
       );
@@ -101,10 +96,11 @@ export function Schema({
             key={key}
             name={key}
             schema={value}
+            parseObject={false}
+            required={schema.required?.includes(key) ?? false}
             ctx={{
               ...ctx,
-              required: schema.required?.includes(key) ?? false,
-              parseObject: false,
+              stack: [schema, ...stack],
             }}
           />
         );
@@ -121,7 +117,14 @@ export function Schema({
 
   if (schema.allOf && parseObject) {
     return (
-      <Schema name={name} schema={combineSchema(schema.allOf)} ctx={ctx} />
+      <Schema
+        name={name}
+        schema={combineSchema(schema.allOf)}
+        ctx={{
+          ...ctx,
+          stack: [schema, ...stack],
+        }}
+      />
     );
   }
 
@@ -155,8 +158,6 @@ export function Schema({
           schema={schema}
           ctx={{
             ...ctx,
-            parseObject: true,
-            required: false,
             stack: [schema, ...stack],
           }}
         />
@@ -186,8 +187,6 @@ export function Schema({
             ctx={{
               ...ctx,
               stack: [schema, ...stack],
-              parseObject: true,
-              required: false,
             }}
           />
         </renderer.ObjectCollapsible>
@@ -199,7 +198,7 @@ export function Schema({
     <renderer.Property
       name={name}
       type={getSchemaType(schema, ctx)}
-      required={ctx.required}
+      required={required}
       deprecated={schema.deprecated}
     >
       {schema.description ? <Markdown text={schema.description} /> : null}
@@ -271,8 +270,7 @@ function getSchemaType(
     // otherwise unknown
   }
 
-  if (schema.type === 'string' && schema.format === 'binary' && ctx.allowFile)
-    return 'file';
+  if (schema.type === 'string' && schema.format === 'binary') return 'file';
 
   if (schema.type && Array.isArray(schema.type)) {
     const nonNullTypes = schema.type.filter((v) => v !== 'null');
