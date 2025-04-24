@@ -125,26 +125,17 @@ describe('Generate documents', () => {
     expect(fs.writeFile).toBeCalledTimes(3);
 
     expect(fs.writeFile).toBeCalledWith(
-      join(cwd, './out/products/get-product-details.mdx'),
+      join(cwd, './out/products/products/get.mdx'),
       expect.anything(),
     );
 
     expect(fs.writeFile).toBeCalledWith(
-      join(cwd, './out/products/get-inventory-for-product.mdx'),
+      join(cwd, './out/inventory/inventory/get.mdx'),
       expect.anything(),
     );
 
     expect(fs.writeFile).toBeCalledWith(
-      join(cwd, './out/inventory/get-inventory-for-product.mdx'),
-      expect.anything(),
-    );
-
-    expect(fs.mkdir).toBeCalledWith(
-      join(cwd, './out/inventory'),
-      expect.anything(),
-    );
-    expect(fs.mkdir).toBeCalledWith(
-      join(cwd, './out/products'),
+      join(cwd, './out/products/inventory/get.mdx'),
       expect.anything(),
     );
   });

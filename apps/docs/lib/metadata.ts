@@ -6,7 +6,7 @@ export function createMetadata(override: Metadata): Metadata {
     openGraph: {
       title: override.title ?? undefined,
       description: override.description ?? undefined,
-      url: 'https://fumadocs.vercel.app',
+      url: 'https://fumadocs.dev',
       images: '/banner.png',
       siteName: 'Fumadocs',
       ...override.openGraph,

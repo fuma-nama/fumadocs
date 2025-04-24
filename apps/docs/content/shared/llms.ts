@@ -11,7 +11,7 @@ export const revalidate = false;
 
 const processor = remark()
   .use(remarkMdx)
-  // https://fumadocs.vercel.app/docs/mdx/include
+  // https://fumadocs.dev/docs/mdx/include
   .use(remarkInclude)
   // gfm styles
   .use(remarkGfm)

@@ -100,12 +100,11 @@ export function Operation({
         <Schema
           name="body"
           schema={body.content[type].schema ?? {}}
+          required={body.required}
           ctx={{
             readOnly: method.method === 'GET',
             writeOnly: method.method !== 'GET',
-            required: body.required ?? false,
             render: ctx,
-            allowFile: type === 'multipart/form-data',
           }}
         />
       </>
@@ -156,11 +155,11 @@ export function Operation({
                   (param.deprecated ?? false) ||
                   (param.schema?.deprecated ?? false),
               }}
+              parseObject={false}
+              required={param.required}
               ctx={{
-                parseObject: false,
                 readOnly: method.method === 'GET',
                 writeOnly: method.method !== 'GET',
-                required: param.required ?? false,
                 render: ctx,
               }}
             />
@@ -272,11 +271,11 @@ async function ResponseTab({
         <Schema
           name="response"
           schema={responseOfType.schema}
+          required
           ctx={{
             render: ctx,
             writeOnly: false,
             readOnly: true,
-            required: true,
           }}
         />
       )}

@@ -19,7 +19,7 @@ Please note that you must have Tailwind CSS v4 configured.
 @import 'tailwindcss';
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
-/* [!code highlight] */
+/* [!code ++] */
 @import 'fumadocs-openapi/css/preset.css';
 ```
 
@@ -33,10 +33,9 @@ import { loader } from 'fumadocs-core/source';
 
 export const source = loader({
   pageTree: {
-    // adds a badge to each page item in page tree
+    // [!code ++] adds a badge to each page item in page tree
     attachFile,
   },
-  // other props
 });
 
 export const openapi = createOpenAPI({
@@ -75,6 +74,9 @@ import { generateFiles } from 'fumadocs-openapi';
 void generateFiles({
   input: ['./unkey.json'], // the OpenAPI schemas
   output: './content/docs',
+  // we recommend to enable it
+  // make sure your endpoint description doesn't break MDX syntax.
+  includeDescription: true,
 });
 ```
 
