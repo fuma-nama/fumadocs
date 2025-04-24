@@ -2,11 +2,12 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join, parse } from 'node:path';
 import fg from 'fast-glob';
 import {
-  generatePages,
+  generateAll,
   type GenerateOptions,
   type GeneratePageOutput,
+  generatePages,
+  generateTags,
 } from './generate';
-import { generateAll, generateTags } from './generate';
 
 export interface Config extends GenerateOptions {
   /**
@@ -195,12 +196,7 @@ function getOutputPathFromRoute(path: string): string {
 }
 
 function getFilename(s: string): string {
-  return s
-    .replace(/[A-Z]/g, (match, idx: number) =>
-      idx === 0 ? match : `-${match.toLowerCase()}`,
-    )
-    .replace(/\s+/g, '-')
-    .toLowerCase();
+  return s.replace(/\s+/g, '-').toLowerCase();
 }
 
 async function write(path: string, content: string): Promise<void> {

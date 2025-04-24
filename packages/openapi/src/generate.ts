@@ -31,7 +31,9 @@ export interface GenerateOptions {
   ) => Record<string, unknown>;
 
   /**
-   * Add description to document body
+   * Add description to document body.
+   *
+   * We recommend but don't enable it by default because some OpenAPI schemas have invalid description that breaks MDX syntax.
    *
    * @defaultValue false
    */

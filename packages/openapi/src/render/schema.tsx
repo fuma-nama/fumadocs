@@ -167,7 +167,7 @@ export function Schema({
     const mentionedObjectTypes = [
       ...(schema.anyOf ?? schema.oneOf ?? []),
       ...(schema.not ? [schema.not] : []),
-      ...(schema.type === 'array' ? [schema.items] : []),
+      ...(schema.type === 'array' && schema.items ? [schema.items] : []),
     ].filter((s) => isComplexType(s) && !stack.includes(s));
 
     footer = mentionedObjectTypes.map((s, idx) => {
@@ -240,7 +240,7 @@ function getSchemaType(
   if (schema.title) return schema.title;
 
   if (schema.type === 'array')
-    return `array<${getSchemaType(schema.items, ctx)}>`;
+    return `array<${schema.items ? getSchemaType(schema.items, ctx) : 'unknown'}>`;
 
   if (schema.oneOf)
     return schema.oneOf
