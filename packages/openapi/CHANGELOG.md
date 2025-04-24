@@ -1,5 +1,13 @@
 # @fuma-docs/openapi
 
+## 8.1.1
+
+### Patch Changes
+
+- 4dbb7fb: tolerate array schema without `items` type
+- 2625723: Fix infinite rendering on schema
+- bd280c8: Change generated file paths for documents
+
 ## 8.1.0
 
 ### Minor Changes
