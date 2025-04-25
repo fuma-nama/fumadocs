@@ -29,7 +29,7 @@ import { useApiContext, useServerSelectContext } from '@/ui/contexts/api';
 import type { FetchResult } from '@/playground/fetcher';
 import { FieldSet, JsonInput, ObjectInput } from './inputs';
 import type {
-  PrimitiveRequestField,
+  ParameterField,
   ReferenceSchema,
   RequestSchema,
 } from '@/playground/index';
@@ -89,7 +89,7 @@ export type ClientProps = HTMLAttributes<HTMLFormElement> & {
   authorization?: Security & {
     persistentId: string;
   };
-  parameters?: PrimitiveRequestField[];
+  parameters?: ParameterField[];
   body?: RequestSchema & {
     mediaType: string;
   };
@@ -101,8 +101,8 @@ export type ClientProps = HTMLAttributes<HTMLFormElement> & {
 
   fields?: {
     parameter?: CustomField<
-      `${PrimitiveRequestField['in']}.${string}`,
-      PrimitiveRequestField
+      `${ParameterField['in']}.${string}`,
+      ParameterField
     >;
     auth?: CustomField<'authorization', RequestSchema>;
     body?: CustomField<'body', RequestSchema>;

@@ -482,6 +482,7 @@ function ArrayInput({
 } & HTMLAttributes<HTMLDivElement>) {
   const { references } = useSchemaContext();
   const items = resolve(field.items, references);
+  const name = fieldName.split('.').at(-1) ?? '';
   const { fields, append, remove } = useFieldArray({
     name: fieldName,
   });
@@ -493,7 +494,7 @@ function ArrayInput({
           key={item.id}
           name={
             <span className="text-fd-muted-foreground">
-              {fieldName.split('.').at(-1)}[{index}]
+              {name}[{index}]
             </span>
           }
           field={items}
