@@ -1,5 +1,15 @@
 # next-docs-ui
 
+## 15.2.11
+
+### Patch Changes
+
+- d4d1ba7: Fix sidebar collapsible control search button still visible with search disabled
+- 4e62b41: Bundle `lucide-react` as part of library
+- 07cd690: Support separators without name
+- Updated dependencies [07cd690]
+  - fumadocs-core@15.2.11
+
 ## 15.2.10
 
 ### Patch Changes
