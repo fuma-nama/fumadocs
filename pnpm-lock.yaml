@@ -1177,9 +1177,6 @@ importers:
       js-yaml:
         specifier: ^4.1.0
         version: 4.1.0
-      lucide-react:
-        specifier: ^0.503.0
-        version: 0.503.0(react@19.1.0)
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -1250,9 +1247,6 @@ importers:
       js-yaml:
         specifier: ^4.1.0
         version: 4.1.0
-      lucide-react:
-        specifier: ^0.503.0
-        version: 0.503.0(react@19.1.0)
     devDependencies:
       '@types/js-yaml':
         specifier: ^4.0.9
@@ -1272,6 +1266,9 @@ importers:
       fumadocs-ui:
         specifier: workspace:*
         version: link:../ui
+      lucide-react:
+        specifier: ^0.503.0
+        version: 0.503.0(react@19.1.0)
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
@@ -1438,9 +1435,6 @@ importers:
       lodash.merge:
         specifier: ^4.6.2
         version: 4.6.2
-      lucide-react:
-        specifier: ^0.503.0
-        version: 0.503.0(react@19.1.0)
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)

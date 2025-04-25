@@ -1,14 +1,20 @@
 'use client';
 
-import { FileText, Hash, Loader2, SearchIcon, Text } from 'lucide-react';
 import {
-  useMemo,
-  type ReactNode,
-  useEffect,
-  useState,
+  FileText,
+  Hash,
+  LoaderCircle,
+  Search as SearchIcon,
+  Text,
+} from 'lucide-react';
+import {
   type ButtonHTMLAttributes,
-  useCallback,
   type HTMLAttributes,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
 } from 'react';
 import { useI18n } from '@/contexts/i18n';
 import { cn } from '@/utils/cn';
@@ -221,7 +227,7 @@ function SearchResults({
 function LoadingIndicator({ isLoading }: { isLoading: boolean }) {
   return (
     <div className="relative size-4">
-      <Loader2
+      <LoaderCircle
         className={cn(
           'absolute size-full animate-spin text-fd-primary transition-opacity',
           !isLoading && 'opacity-0',

@@ -1,6 +1,6 @@
 import type { PageTree } from 'fumadocs-core/server';
 import { type HTMLAttributes, type ReactNode, useMemo } from 'react';
-import { Languages, SidebarIcon } from 'lucide-react';
+import { Languages, Sidebar as SidebarIcon } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import {
