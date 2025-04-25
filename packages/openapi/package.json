@@ -76,7 +76,7 @@
   "devDependencies": {
     "@scalar/api-client-react": "^1.2.26",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "22.14.1",
+    "@types/node": "22.15.2",
     "@types/openapi-sampler": "^1.0.3",
     "@types/react": "^19.1.2",
     "eslint-config-custom": "workspace:*",
