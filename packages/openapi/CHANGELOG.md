@@ -1,5 +1,17 @@
 # @fuma-docs/openapi
 
+## 8.1.2
+
+### Patch Changes
+
+- 2d18405: Support array type in parameters
+- 4e62b41: Bundle `lucide-react` as part of library
+- Updated dependencies [d4d1ba7]
+- Updated dependencies [4e62b41]
+- Updated dependencies [07cd690]
+  - fumadocs-ui@15.2.11
+  - fumadocs-core@15.2.11
+
 ## 8.1.1
 
 ### Patch Changes

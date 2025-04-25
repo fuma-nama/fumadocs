@@ -1,6 +1,6 @@
 'use client';
 
-import { InfoIcon } from 'lucide-react';
+import { Info as InfoIcon } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import { cva } from 'class-variance-authority';
 import { cn } from '@/utils/cn';

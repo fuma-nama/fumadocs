@@ -42,7 +42,7 @@
   },
   "devDependencies": {
     "@types/mdx": "^2.0.13",
-    "@types/node": "22.14.1",
+    "@types/node": "22.15.2",
     "@types/react": "^19.1.2",
     "eslint-config-custom": "workspace:*",
     "fast-glob": "^3.3.3",

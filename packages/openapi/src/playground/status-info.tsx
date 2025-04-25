@@ -1,4 +1,4 @@
-import { CircleCheckIcon, CircleXIcon } from 'lucide-react';
+import { CircleCheck, CircleX } from 'lucide-react';
 
 interface StatusInfo {
   description: string;
@@ -7,22 +7,22 @@ interface StatusInfo {
 }
 
 const statusMap: Record<number, StatusInfo> = {
-  400: { description: 'Bad Request', color: 'text-red-500', icon: CircleXIcon },
+  400: { description: 'Bad Request', color: 'text-red-500', icon: CircleX },
   401: {
     description: 'Unauthorized',
     color: 'text-red-500',
-    icon: CircleXIcon,
+    icon: CircleX,
   },
-  403: { description: 'Forbidden', color: 'text-red-500', icon: CircleXIcon },
+  403: { description: 'Forbidden', color: 'text-red-500', icon: CircleX },
   404: {
     description: 'Not Found',
     color: 'text-fd-muted-foreground',
-    icon: CircleXIcon,
+    icon: CircleX,
   },
   500: {
     description: 'Internal Server Error',
     color: 'text-red-500',
-    icon: CircleXIcon,
+    icon: CircleX,
   },
 };
 
@@ -35,17 +35,17 @@ export function getStatusInfo(status: number): StatusInfo {
     return {
       description: 'Successful',
       color: 'text-green-500',
-      icon: CircleCheckIcon,
+      icon: CircleCheck,
     };
   }
 
   if (status >= 400) {
-    return { description: 'Error', color: 'text-red-500', icon: CircleXIcon };
+    return { description: 'Error', color: 'text-red-500', icon: CircleX };
   }
 
   return {
     description: 'No Description',
     color: 'text-fd-muted-foreground',
-    icon: CircleXIcon,
+    icon: CircleX,
   };
 }

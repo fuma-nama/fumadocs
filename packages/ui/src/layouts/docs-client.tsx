@@ -1,6 +1,6 @@
 'use client';
 
-import { Menu, SidebarIcon, X } from 'lucide-react';
+import { Menu, Sidebar as SidebarIcon, X } from 'lucide-react';
 import { type ButtonHTMLAttributes, type HTMLAttributes } from 'react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
@@ -72,7 +72,7 @@ export function CollapsibleControl() {
       >
         <SidebarIcon />
       </SidebarCollapseTrigger>
-      <SearchToggle size="icon-sm" className="rounded-lg" />
+      <SearchToggle size="icon-sm" className="rounded-lg" hideIfDisabled />
     </div>
   );
 }

@@ -12,7 +12,7 @@ import {
 import { TreeContextProvider } from '@/contexts/tree';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
-import { ChevronDown, Languages, SidebarIcon } from 'lucide-react';
+import { ChevronDown, Languages, Sidebar as SidebarIcon } from 'lucide-react';
 import { BaseLinkItem, type LinkItemType } from '@/layouts/links';
 import { LanguageToggle } from '@/components/layout/language-toggle';
 import { ThemeToggle } from '@/components/layout/theme-toggle';

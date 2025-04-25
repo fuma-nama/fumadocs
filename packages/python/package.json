@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-python",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "The built-in Python docgen for Fumadocs",
   "keywords": [
     "NextJs",
@@ -40,12 +40,13 @@
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^22.14.1",
+    "@types/node": "^22.15.2",
     "@types/react": "^19.1.2",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "tsconfig": "workspace:*"
+    "tsconfig": "workspace:*",
+    "lucide-react": "^0.503.0"
   },
   "peerDependencies": {
     "fumadocs-core": "15.x.x",
@@ -56,7 +57,6 @@
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
-    "js-yaml": "^4.1.0",
-    "lucide-react": "^0.503.0"
+    "js-yaml": "^4.1.0"
   }
 }

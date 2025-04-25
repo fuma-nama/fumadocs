@@ -12,20 +12,16 @@ import { getSecurities } from '@/utils/get-security';
 import { type ClientProps } from './client';
 import { ClientLazy } from '@/playground/client.lazy';
 
-interface BaseRequestField {
-  name: string;
-  description?: string;
-}
-
 interface BaseSchema {
   description?: string;
   isRequired: boolean;
 }
 
-export type PrimitiveRequestField = BaseRequestField &
-  PrimitiveSchema & {
-    in: 'cookie' | 'header' | 'query' | 'path';
-  };
+export type ParameterField = (PrimitiveSchema | ArraySchema) & {
+  name: string;
+  description?: string;
+  in: 'cookie' | 'header' | 'query' | 'path';
+};
 
 interface PrimitiveSchema extends BaseSchema {
   type: 'boolean' | 'string' | 'number';
@@ -198,7 +194,7 @@ function getIdFromSchema(
 function parameterToField(
   v: NoReference<ParameterObject>,
   ctx: Context,
-): PrimitiveRequestField {
+): ParameterField {
   const allowed = ['header', 'cookie', 'query', 'path'] as const;
 
   if (!allowed.includes(v.in as (typeof allowed)[number]))

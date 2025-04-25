@@ -31,7 +31,7 @@ export interface Separator {
   $id?: string;
 
   type: 'separator';
-  name: ReactNode;
+  name?: ReactNode;
   icon?: ReactElement;
 }
 

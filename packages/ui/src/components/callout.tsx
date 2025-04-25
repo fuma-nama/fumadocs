@@ -1,4 +1,4 @@
-import { AlertTriangle, CircleX, Info } from 'lucide-react';
+import { CircleX, Info, TriangleAlert } from 'lucide-react';
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { cn } from '@/utils/cn';
 import { cva } from 'class-variance-authority';
@@ -20,7 +20,7 @@ type CalloutProps = Omit<
 };
 
 const calloutVariants = cva(
-  'my-6 flex flex-row gap-2 rounded-lg border border-s-2 bg-fd-card p-3 text-sm text-fd-card-foreground shadow-md',
+  'my-4 flex flex-row gap-2 rounded-lg border border-s-2 bg-fd-card p-3 text-sm text-fd-card-foreground shadow-md',
   {
     variants: {
       type: {
@@ -49,7 +49,7 @@ export const Callout = forwardRef<HTMLDivElement, CalloutProps>(
           {
             info: <Info className="size-5 fill-blue-500 text-fd-card" />,
             warn: (
-              <AlertTriangle className="size-5 fill-orange-500 text-fd-card" />
+              <TriangleAlert className="size-5 fill-orange-500 text-fd-card" />
             ),
             error: <CircleX className="size-5 fill-red-500 text-fd-card" />,
           }[type]}

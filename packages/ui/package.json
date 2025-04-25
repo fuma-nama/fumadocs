@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-ui",
-  "version": "15.2.10",
+  "version": "15.2.11",
   "description": "The framework for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
@@ -61,6 +61,10 @@
     "./utils/*": {
       "import": "./dist/utils/*.js",
       "types": "./dist/utils/*.d.ts"
+    },
+    "./internal/icons": {
+      "import": "./dist/icons.js",
+      "types": "./dist/icons.d.ts"
     }
   },
   "files": [
@@ -90,7 +94,6 @@
     "class-variance-authority": "^0.7.1",
     "fumadocs-core": "workspace:*",
     "lodash.merge": "^4.6.2",
-    "lucide-react": "^0.503.0",
     "next-themes": "^0.4.6",
     "postcss-selector-parser": "^7.1.0",
     "react-medium-image-zoom": "^5.2.14",
