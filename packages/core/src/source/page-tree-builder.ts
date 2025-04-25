@@ -57,7 +57,7 @@ export interface PageTreeBuilder {
 
 const group = /^\((?<name>.+)\)$/;
 const link = /^(?:\[(?<icon>[^\]]+)])?\[(?<name>[^\]]+)]\((?<url>[^)]+)\)$/;
-const separator = /^---(?:\[(?<icon>[^\]]+)])?(?<name>.+)---$/;
+const separator = /^---(?:\[(?<icon>[^\]]+)])?(?<name>.+)---|^---$/;
 const rest = '...' as const;
 const restReversed = 'z...a' as const;
 const extractPrefix = '...';
