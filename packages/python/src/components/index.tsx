@@ -10,7 +10,7 @@ import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { ChevronRight } from 'lucide-react';
 import { highlight } from 'fumadocs-core/highlight';
 
-const cardVariants = cva('bg-fd-card rounded-lg text-sm my-6 p-3');
+const cardVariants = cva('bg-fd-card rounded-lg text-sm my-6 p-3 border');
 const badgeVariants = cva(
   'text-xs font-medium border p-1 rounded-lg not-prose',
   {
@@ -91,12 +91,9 @@ export function PyParameter(props: {
   children?: ReactNode;
 }) {
   return (
-    <figure
+    <div
       data-parameter=""
-      className={cn(
-        cardVariants(),
-        'bg-fd-secondary border shadow-lg !my-0 rounded-none first:rounded-t-lg last:rounded-b-lg',
-      )}
+      className="bg-fd-secondary rounded-lg text-sm p-3 border shadow-md rounded-none first:rounded-t-lg last:rounded-b-lg"
     >
       <div className="flex flex-wrap gap-2 items-center font-mono text-fd-foreground">
         <code className={cn(badgeVariants({ color: 'primary' }))}>param</code>
@@ -119,7 +116,7 @@ export function PyParameter(props: {
         ) : null}
         {props.children}
       </div>
-    </figure>
+    </div>
   );
 }
 

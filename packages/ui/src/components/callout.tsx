@@ -20,7 +20,7 @@ type CalloutProps = Omit<
 };
 
 const calloutVariants = cva(
-  'my-6 flex flex-row gap-2 rounded-lg border border-s-2 bg-fd-card p-3 text-sm text-fd-card-foreground shadow-md',
+  'my-4 flex flex-row gap-2 rounded-lg border border-s-2 bg-fd-card p-3 text-sm text-fd-card-foreground shadow-md',
   {
     variants: {
       type: {
