@@ -22,7 +22,11 @@ export function createFileSystemTypesCache(
 
   return {
     init() {
-      fs.mkdirSync(dir, { recursive: true });
+      try {
+        fs.mkdirSync(dir, { recursive: true });
+      } catch {
+        // skip
+      }
     },
     read(code) {
       const hash = createHash('SHA256').update(code).digest('hex').slice(0, 12);

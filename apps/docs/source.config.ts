@@ -17,7 +17,6 @@ import {
   remarkSteps,
 } from 'fumadocs-core/mdx-plugins';
 import { remarkAutoTypeTable } from 'fumadocs-typescript';
-import fs from 'node:fs';
 
 export const docs = defineDocs({
   docs: {
@@ -62,12 +61,7 @@ export default defineConfig({
       transformers: [
         ...(rehypeCodeDefaultOptions.transformers ?? []),
         transformerTwoslash({
-          typesCache: createFileSystemTypesCache({
-            // make it work on vercel
-            dir: fs.existsSync('_next')
-              ? '_next/static/twoslash'
-              : '.next/static/twoslash',
-          }),
+          typesCache: createFileSystemTypesCache(),
         }),
         {
           name: 'transformers:remove-notation-escape',
