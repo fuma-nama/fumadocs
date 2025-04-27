@@ -6,9 +6,9 @@ import {
   type SearchAPI,
 } from '@/search/server';
 import {
+  type InferPageType,
   type LoaderConfig,
   type LoaderOutput,
-  type InferPageType,
   type Page,
 } from '@/source';
 import { type StructuredData } from '@/mdx-plugins';
@@ -35,15 +35,41 @@ function pageToIndex(page: Page): AdvancedIndex {
   };
 }
 
-type Options = Omit<AdvancedOptions, 'language' | 'indexes'> & {
+interface Options<Page = unknown> extends Omit<AdvancedOptions, 'indexes'> {
   localeMap?: LocaleMap<Partial<AdvancedOptions>>;
-};
+  buildIndex?: (page: Page) => AdvancedIndex;
+}
 
 export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
   source: S,
-  pageToIndexFn: (page: InferPageType<S>) => AdvancedIndex = pageToIndex,
-  options: Options = {},
+  options?: Options<InferPageType<S>>,
+): SearchAPI;
+
+/**
+ * @deprecated Use `createFromSource(source, options)` instead.
+ */
+export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
+  source: S,
+  pageToIndexFn?: (page: InferPageType<S>) => AdvancedIndex,
+  options?: Omit<Options, 'buildIndex'>,
+): SearchAPI;
+
+export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
+  source: S,
+  _buildIndexOrOptions:
+    | ((page: InferPageType<S>) => AdvancedIndex)
+    | Options<InferPageType<S>> = pageToIndex,
+  _options?: Omit<Options, 'buildIndex'>,
 ): SearchAPI {
+  const options: Options<InferPageType<S>> = {
+    ...(typeof _buildIndexOrOptions === 'function'
+      ? {
+          buildIndex: _buildIndexOrOptions,
+        }
+      : _buildIndexOrOptions),
+    ..._options,
+  };
+
   if (source._i18n) {
     return createI18nSearchAPI('advanced', {
       ...options,
@@ -51,7 +77,7 @@ export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
       indexes: source.getLanguages().flatMap((entry) => {
         return entry.pages.map((page) => {
           return {
-            ...pageToIndexFn(page as InferPageType<S>),
+            ...(options.buildIndex ?? pageToIndex)(page as InferPageType<S>),
             locale: entry.language,
           };
         });
@@ -62,7 +88,7 @@ export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
   return createSearchAPI('advanced', {
     ...options,
     indexes: source.getPages().map((page) => {
-      return pageToIndexFn(page as InferPageType<S>);
+      return (options.buildIndex ?? pageToIndex)(page as InferPageType<S>);
     }),
   });
 }

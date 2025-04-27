@@ -115,32 +115,19 @@ export const { GET } = createSearchAPI('simple', {
 
 ## Internationalization
 
-- `createFromSource()`:
+```ts title="lib/source.ts" tab="createFromSource"
+import { i18n } from '@/lib/i18n';
+import { loader } from 'fumadocs-core/source';
 
-  Configure i18n on source object (in `loader` function).
+// You only need i18n option on source object.
+export const source = loader({
+  i18n, // [!code highlight]
+});
+```
 
-  ```ts title="lib/source.ts"
-  import { i18n } from '@/lib/i18n';
-  import { loader } from 'fumadocs-core/source';
-
-  export const source = loader({
-    i18n, // [!code highlight]
-  });
-  ```
-
-- `createSearchAPI()`:
-
-  Use `createI18nSearchAPI` for i18n functionality.
-
-  ```json doc-gen:file
-  {
-    "file": "../../examples/i18n/app/api/search/route-full.ts",
-    "codeblock": {
-      "lang": "ts",
-      "meta": "title=\"app/api/search/route.ts\""
-    }
-  }
-  ```
+<include cwd meta='title="app/api/search/route.ts" tab="createI18nSearchAPI"'>
+  ../../examples/i18n/app/api/search/route-full.ts
+</include>
 
 ### Update Search Client
 
@@ -230,13 +217,13 @@ with Fumadocs UI.
 
 ## Headless
 
-You can host the search server on Express or Elysia, without Next.js.
+You can host the search server on other backend such as Express and Elysia.
 
 ```ts
 import { initAdvancedSearch } from 'fumadocs-core/search/server';
 
 const server = initAdvancedSearch({
-  // options
+  // you still have to pass indexes
 });
 
 server.search('query', {
