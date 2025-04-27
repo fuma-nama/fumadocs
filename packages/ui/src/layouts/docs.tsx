@@ -1,6 +1,6 @@
 import type { PageTree } from 'fumadocs-core/server';
 import { type HTMLAttributes, type ReactNode, useMemo } from 'react';
-import { Languages, SidebarIcon } from 'lucide-react';
+import { Languages, Sidebar as SidebarIcon } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import {
@@ -12,7 +12,7 @@ import {
   SidebarPageTree,
   SidebarViewport,
 } from '@/components/layout/sidebar';
-import { slot, slots } from '@/layouts/shared';
+import { omit, slot, slots } from '@/layouts/shared';
 import {
   BaseLinkItem,
   type IconItemType,
@@ -32,10 +32,6 @@ import {
 import { TreeContextProvider } from '@/contexts/tree';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 import {
-  LargeSearchToggle,
-  SearchToggle,
-} from '@/components/layout/search-toggle';
-import {
   getSidebarTabsFromOptions,
   layoutVariables,
   SidebarLinkItem,
@@ -47,6 +43,10 @@ import {
   StylesProvider,
 } from '@/contexts/layout';
 import Link from 'fumadocs-core/link';
+import {
+  LargeSearchToggle,
+  SearchToggle,
+} from '@/components/layout/search-toggle';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
@@ -64,17 +64,17 @@ export interface DocsLayoutProps extends BaseLayoutProps {
 
 export function DocsLayout({
   nav: { transparentMode, ...nav } = {},
+  sidebar = {},
   searchToggle,
   disableThemeSwitch = false,
   themeSwitch = { enabled: !disableThemeSwitch },
-  sidebar: { tabs: tabOptions, ...sidebar } = {},
   i18n = false,
   children,
   ...props
 }: DocsLayoutProps): ReactNode {
   const tabs = useMemo(
-    () => getSidebarTabsFromOptions(tabOptions, props.tree) ?? [],
-    [tabOptions, props.tree],
+    () => getSidebarTabsFromOptions(sidebar.tabs, props.tree) ?? [],
+    [sidebar.tabs, props.tree],
   );
   const links = getLinks(props.links ?? [], props.githubUrl);
 
@@ -125,7 +125,7 @@ export function DocsLayout({
           {slot(
             sidebar,
             <DocsLayoutSidebar
-              {...sidebar}
+              {...omit(sidebar, 'enabled', 'component', 'tabs')}
               links={links}
               nav={
                 <>

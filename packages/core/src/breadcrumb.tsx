@@ -66,7 +66,7 @@ export function getBreadcrumbItemsFromPath(
   let items: BreadcrumbItem[] = [];
 
   path.forEach((item, i) => {
-    if (item.type === 'separator' && includeSeparator) {
+    if (item.type === 'separator' && item.name && includeSeparator) {
       items.push({
         name: item.name,
       });

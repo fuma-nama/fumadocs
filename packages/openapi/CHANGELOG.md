@@ -1,5 +1,50 @@
 # @fuma-docs/openapi
 
+## 8.1.2
+
+### Patch Changes
+
+- 2d18405: Support array type in parameters
+- 4e62b41: Bundle `lucide-react` as part of library
+- Updated dependencies [d4d1ba7]
+- Updated dependencies [4e62b41]
+- Updated dependencies [07cd690]
+  - fumadocs-ui@15.2.11
+  - fumadocs-core@15.2.11
+
+## 8.1.1
+
+### Patch Changes
+
+- 4dbb7fb: tolerate array schema without `items` type
+- 2625723: Fix infinite rendering on schema
+- bd280c8: Change generated file paths for documents
+
+## 8.1.0
+
+### Minor Changes
+
+- bb515b7: Display Response in a separate section
+
+### Patch Changes
+
+- 540027e: **Support `fumadocs-openapi/css/preset.css` for Tailwind CSS**
+
+  We highly recommend to use the following instead:
+
+  ```css
+  @import 'tailwindcss';
+  @import 'fumadocs-ui/css/neutral.css';
+  @import 'fumadocs-ui/css/preset.css';
+  /* do this */
+  @import 'fumadocs-openapi/css/preset.css';
+  ```
+
+- Updated dependencies [3a5595a]
+- Updated dependencies [8c9fc1f]
+  - fumadocs-ui@15.2.10
+  - fumadocs-core@15.2.10
+
 ## 8.0.3
 
 ### Patch Changes

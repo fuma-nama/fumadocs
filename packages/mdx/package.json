@@ -75,7 +75,7 @@
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
     "vfile": "^6.0.3",
-    "webpack": "^5.99.6"
+    "webpack": "^5.99.7"
   },
   "peerDependencies": {
     "@fumadocs/mdx-remote": "^1.2.0",

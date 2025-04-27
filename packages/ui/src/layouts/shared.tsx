@@ -127,3 +127,14 @@ export function slots<Comp extends Record<string, ReactNode>>(
 
   return def;
 }
+
+export function omit<T extends Record<string, unknown>, Keys extends keyof T>(
+  obj: T,
+  ...keys: Keys[]
+): Omit<T, Keys> {
+  const clone = { ...obj };
+  for (const key of keys) {
+    delete clone[key];
+  }
+  return clone;
+}

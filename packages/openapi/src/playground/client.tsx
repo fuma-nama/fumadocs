@@ -29,7 +29,7 @@ import { useApiContext, useServerSelectContext } from '@/ui/contexts/api';
 import type { FetchResult } from '@/playground/fetcher';
 import { FieldSet, JsonInput, ObjectInput } from './inputs';
 import type {
-  PrimitiveRequestField,
+  ParameterField,
   ReferenceSchema,
   RequestSchema,
 } from '@/playground/index';
@@ -44,7 +44,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from 'fumadocs-ui/components/ui/collapsible';
-import { ChevronDown, Loader2 } from 'lucide-react';
+import { ChevronDown, LoaderCircle } from 'lucide-react';
 import type { Security } from '@/utils/get-security';
 import {
   OauthDialog,
@@ -89,7 +89,7 @@ export type ClientProps = HTMLAttributes<HTMLFormElement> & {
   authorization?: Security & {
     persistentId: string;
   };
-  parameters?: PrimitiveRequestField[];
+  parameters?: ParameterField[];
   body?: RequestSchema & {
     mediaType: string;
   };
@@ -101,8 +101,8 @@ export type ClientProps = HTMLAttributes<HTMLFormElement> & {
 
   fields?: {
     parameter?: CustomField<
-      `${PrimitiveRequestField['in']}.${string}`,
-      PrimitiveRequestField
+      `${ParameterField['in']}.${string}`,
+      ParameterField
     >;
     auth?: CustomField<'authorization', RequestSchema>;
     body?: CustomField<'body', RequestSchema>;
@@ -263,7 +263,7 @@ export default function Client({
                 disabled={testQuery.isLoading}
               >
                 {testQuery.isLoading ? (
-                  <Loader2 className="size-4 animate-spin" />
+                  <LoaderCircle className="size-4 animate-spin" />
                 ) : (
                   'Send'
                 )}
@@ -599,7 +599,7 @@ function CollapsiblePanel({
         <ChevronDown className="ms-auto size-3.5 text-fd-muted-foreground group-data-[state=open]:rotate-180" />
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div className="flex flex-col gap-3 p-2">{children}</div>
+        <div className="flex flex-col gap-3 p-3 pt-1">{children}</div>
       </CollapsibleContent>
     </Collapsible>
   );

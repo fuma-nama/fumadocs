@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-typescript",
-  "version": "4.0.2",
+  "version": "4.0.3",
   "description": "Typescript Integration for Fumadocs",
   "keywords": [
     "NextJs",
@@ -50,8 +50,8 @@
     "@types/estree": "^1.0.7",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.3",
-    "@types/node": "22.14.1",
-    "@types/react": "^19.1.2",
+    "@types/node": "22.15.2",
+    "@types/react": "19.1.2",
     "@types/react-dom": "19.1.2",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",

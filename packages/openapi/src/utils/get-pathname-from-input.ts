@@ -5,22 +5,26 @@ export function getPathnameFromInput(
 ): string {
   let pathname = url;
   for (const key in path) {
-    const paramValue = path[key];
+    if (path[key] === '') continue;
 
-    if (typeof paramValue === 'string' && paramValue.length > 0)
-      pathname = pathname.replace(`{${key}}`, paramValue);
-    else if (typeof paramValue === 'number')
-      pathname = pathname.replace(`{${key}}`, paramValue.toString());
+    if (Array.isArray(path[key])) {
+      pathname = pathname.replace(`{${key}}`, path[key].join('/'));
+    } else {
+      pathname = pathname.replace(`{${key}}`, String(path[key]));
+    }
   }
 
   const searchParams = new URLSearchParams();
   for (const key in query) {
-    const paramValue = query[key];
+    if (query[key] === '') continue;
 
-    if (typeof paramValue === 'string' && paramValue.length > 0)
-      searchParams.append(key, paramValue);
-    else if (typeof paramValue === 'number')
-      searchParams.append(key, paramValue.toString());
+    if (Array.isArray(query[key])) {
+      for (const value of query[key]) {
+        searchParams.append(key, String(value));
+      }
+    } else {
+      searchParams.set(key, String(query[key]));
+    }
   }
 
   return searchParams.size > 0 ? `${pathname}?${searchParams}` : pathname;

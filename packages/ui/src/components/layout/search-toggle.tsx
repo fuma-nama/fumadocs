@@ -1,20 +1,23 @@
 'use client';
-import { type ButtonHTMLAttributes } from 'react';
-import { SearchIcon } from 'lucide-react';
+import type { ComponentProps } from 'react';
+import { Search } from 'lucide-react';
 import { useSearchContext } from '@/contexts/search';
 import { useI18n } from '@/contexts/i18n';
 import { cn } from '@/utils/cn';
 import { type ButtonProps, buttonVariants } from '@/components/ui/button';
+
+interface SearchToggleProps
+  extends Omit<ComponentProps<'button'>, 'color'>,
+    ButtonProps {
+  hideIfDisabled?: boolean;
+}
 
 export function SearchToggle({
   hideIfDisabled,
   size = 'icon',
   color = 'ghost',
   ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> &
-  ButtonProps & {
-    hideIfDisabled?: boolean;
-  }) {
+}: SearchToggleProps) {
   const { setOpenSearch, enabled } = useSearchContext();
   if (hideIfDisabled && !enabled) return null;
 
@@ -34,7 +37,7 @@ export function SearchToggle({
         setOpenSearch(true);
       }}
     >
-      <SearchIcon className="p-px" />
+      <Search className="p-px" />
     </button>
   );
 }
@@ -42,7 +45,7 @@ export function SearchToggle({
 export function LargeSearchToggle({
   hideIfDisabled,
   ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & {
+}: ComponentProps<'button'> & {
   hideIfDisabled?: boolean;
 }) {
   const { enabled, hotKey, setOpenSearch } = useSearchContext();
@@ -62,7 +65,7 @@ export function LargeSearchToggle({
         setOpenSearch(true);
       }}
     >
-      <SearchIcon className="ms-1 size-4" />
+      <Search className="ms-1 size-4" />
       {text.search}
       <div className="ms-auto inline-flex gap-0.5">
         {hotKey.map((k, i) => (

@@ -1,5 +1,13 @@
 # next-docs-zeta
 
+## 15.2.11
+
+### Patch Changes
+
+- 07cd690: Support separators without name
+
+## 15.2.10
+
 ## 15.2.9
 
 ## 15.2.8

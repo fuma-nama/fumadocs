@@ -2,4 +2,4 @@
 'fumadocs-ui': patch
 ---
 
-Fix callout margin
+Fix sidebar legacy behaviours

@@ -14,7 +14,28 @@ import {
   type TwoslashExecuteOptions,
   type TwoslashReturn,
 } from 'twoslash';
-import type { TwoslashTypesCache } from '@/cache-fs';
+
+export interface TwoslashTypesCache {
+  /**
+   * Read cached result
+   *
+   * @param code Source code
+   */
+  read: (code: string) => TwoslashReturn | null;
+
+  /**
+   * Save result to cache
+   *
+   * @param code Source code
+   * @param data Twoslash data
+   */
+  write: (code: string, data: TwoslashReturn) => void;
+
+  /**
+   * On initialization
+   */
+  init?: () => void | Promise<void>;
+}
 
 export interface TransformerTwoslashOptions
   extends TransformerTwoslashIndexOptions {
@@ -46,7 +67,7 @@ export function transformerTwoslash({
       return twoslashResult;
     }) as typeof defaultTwoslasher;
     twoslasher.getCacheMap = defaultTwoslasher.getCacheMap;
-    typesCache?.init?.();
+    typesCache.init?.();
   }
 
   const renderer = rendererRich({

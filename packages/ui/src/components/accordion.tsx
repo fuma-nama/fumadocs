@@ -1,16 +1,16 @@
 'use client';
 
-import * as AccordionPrimitive from '@radix-ui/react-accordion';
 import type {
   AccordionMultipleProps,
   AccordionSingleProps,
 } from '@radix-ui/react-accordion';
-import { Check, ChevronRight, LinkIcon } from 'lucide-react';
+import * as AccordionPrimitive from '@radix-ui/react-accordion';
+import { Check, ChevronRight, Link as LinkIcon } from 'lucide-react';
 import {
-  forwardRef,
   type ComponentPropsWithoutRef,
-  useState,
+  forwardRef,
   useEffect,
+  useState,
 } from 'react';
 import { cn } from '@/utils/cn';
 import { useCopyButton } from '@/utils/use-copy-button';
