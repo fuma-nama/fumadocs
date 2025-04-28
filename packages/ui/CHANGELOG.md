@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 15.2.12
+
+### Patch Changes
+
+- b68bb51: Fix sidebar legacy behaviours
+- 127e681: Fix Notebook layout ignores `themeSwitch` and `sidebar.collapsible` on nav mode
+- Updated dependencies [acff667]
+  - fumadocs-core@15.2.12
+
 ## 15.2.11
 
 ### Patch Changes

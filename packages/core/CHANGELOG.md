@@ -1,5 +1,51 @@
 # next-docs-zeta
 
+## 15.2.12
+
+### Patch Changes
+
+- acff667: **Deprecate `createFromSource(source, pageToIndex, options)`**
+
+  Migrate:
+
+  ```ts
+  import { source } from '@/lib/source';
+  import { createFromSource } from 'fumadocs-core/search/server';
+
+  // from
+  export const { GET } = createFromSource(
+    source,
+    (page) => ({
+      title: page.data.title,
+      description: page.data.description,
+      url: page.url,
+      id: page.url,
+      structuredData: page.data.structuredData,
+      // use your desired value, like page.slugs[0]
+      tag: '<value>',
+    }),
+    {
+      // options
+    },
+  );
+
+  // to
+  export const { GET } = createFromSource(source, {
+    buildIndex(page) {
+      return {
+        title: page.data.title,
+        description: page.data.description,
+        url: page.url,
+        id: page.url,
+        structuredData: page.data.structuredData,
+        // use your desired value, like page.slugs[0]
+        tag: '<value>',
+      };
+    },
+    // other options
+  });
+  ```
+
 ## 15.2.11
 
 ### Patch Changes
