@@ -9,12 +9,25 @@ Fumadocs provides many useful extensions to MDX, a markup language. Here is a br
 
 > MDX is not the only supported format of Fumadocs. In fact, you can use any renderers such as `next-mdx-remote` or CMS.
 
-## Markdown
+## MDX
 
-We use GFM (GitHub Flavored Markdown), a superset of Markdown (CommonMark).
-See [GFM Specification](https://github.github.com/gfm).
+We recommend MDX, a superset of Markdown with support of JSX syntax.
+It allows you to import components, and use them right in the document, or even export values.
 
-````md
+See:
+
+- [MDX Syntax](https://mdxjs.com/docs/what-is-mdx/#mdx-syntax).
+- GFM (GitHub Flavored Markdown) is also supported, see [GFM Specification](https://github.github.com/gfm).
+
+````mdx
+---
+title: This is a document
+---
+
+import { Component } from './component';
+
+<Component name="Hello" />
+
 # Heading
 
 ## Heading
@@ -64,19 +77,6 @@ External links will get the default `rel="noreferrer noopener" target="_blank"` 
 
 This also works: https://github.github.com/gfm.
 ```
-
-## MDX
-
-MDX is a superset of Markdown, with support of JSX syntax.
-It allows you to import components, and use them right in the document, or even export values.
-
-```mdx
-import { Component } from './component';
-
-<Component name="Hello" />
-```
-
-see [MDX Syntax](https://mdxjs.com/docs/what-is-mdx/#mdx-syntax) to learn more.
 
 ### Cards
 
@@ -147,37 +147,31 @@ This will show the other pages in the same folder as cards.
 
 ### Callouts
 
-Useful for adding tips/warnings, it is included by default.
-
-```mdx
-<Callout>Hello World</Callout>
-
-<Callout title="Title">Hello World</Callout>
-```
-
-<Callout>Hello World</Callout>
-
-<Callout title="Title">Hello World</Callout>
-
-#### Types
-
-You can specify the type of callout.
+Useful for adding tips/warnings, it is included by default. You can specify the type of callout:
 
 - `info` (default)
 - `warn`
 - `error`
 
 ```mdx
+<Callout>Hello World</Callout>
+
+<Callout title="Title">Hello World</Callout>
+
 <Callout title="Title" type="error">
   Hello World
 </Callout>
 ```
 
+<Callout>Hello World</Callout>
+
+<Callout title="Title">Hello World</Callout>
+
 <Callout title="Title" type="error">
   Hello World
 </Callout>
 
-## Headings
+### Headings
 
 An anchor is automatically applied to each heading, it sanitizes invalid characters like spaces. (e.g. `Hello World` to `hello-world`)
 
@@ -185,7 +179,7 @@ An anchor is automatically applied to each heading, it sanitizes invalid charact
 # Hello `World`
 ```
 
-### TOC Settings
+#### TOC Settings
 
 The table of contents (TOC) will be generated based on headings, you can also customise the effects of headings:
 
@@ -202,7 +196,7 @@ Like headings rendered in a React component:
 <MyComp />
 ```
 
-### Custom Anchor
+#### Custom Anchor
 
 You can add `[#slug]` to customise heading anchors.
 
@@ -218,7 +212,7 @@ You can also chain it with TOC settings like:
 
 To link people to a specific heading, add the heading id to hash fragment: `/page#my-heading-id`.
 
-## Codeblock
+### Codeblock
 
 Syntax Highlighting is supported by default using [Rehype Code](/docs/headless/mdx/rehype-code).
 
@@ -236,47 +230,39 @@ console.log('Hello World');
 ```
 ````
 
-### Highlight Lines
+#### Shiki Transformers
 
-You can highlight specific lines by adding `[!code highlight]`.
+We support some of the [Shiki Transformers](https://shiki.style/packages/transformers), allowing you to highlight/style specific lines.
 
 ````md
 ```tsx
+// highlight a line
 <div>Hello World</div>  // [\!code highlight]
-<div>Hello World</div>
-<div>Goodbye</div>
-<div>Hello World</div>
-```
-````
 
-### Highlight Words
+// highlight a word
+// [\!code word:Fumadocs]
+<div>Fumadocs</div>
 
-You can highlight a specific word by adding `[!code word:<match>]`.
-
-````md
-```js
-// [\!code word:config]
-const config = {
-  reactStrictMode: true,
-};
-```
-````
-
-### Diffs
-
-````mdx
-```ts
+// diff styles
 console.log('hewwo'); // [\!code --]
 console.log('hello'); // [\!code ++]
 ```
 ````
 
-```ts
+```tsx
+// highlight a line
+<div>Hello World</div>  // [!code highlight]
+
+// highlight a word
+// [!code word:Fumadocs]
+<div>Fumadocs</div>
+
+// diff styles:
 console.log('hewwo'); // [!code --]
 console.log('hello'); // [!code ++]
 ```
 
-### Tab Groups
+#### Tab Groups
 
 You can use code blocks with the `<Tab />` component.
 
@@ -302,15 +288,28 @@ console.log('A');
 console.log('B');
 ```
 
-### Using Typescript Twoslash
+#### Using Typescript Twoslash
 
 Write Typescript codeblocks with hover type information and detected types errors.
 
 Not enabled by default. See [Twoslash](/docs/ui/twoslash).
 
+### Include
+
+> This is only available on **Fumadocs MDX**.
+
+Reference another Markdown/MDX or code example file.
+Specify the target file path in `<include>` tag (relative to the MDX file itself).
+
+```mdx title="page.mdx"
+<include>./another.mdx</include>
+```
+
+See [Include](/docs/mdx/include).
+
 ## Optional
 
-Some optional plugins you can enable.
+You can see [a list of plugins](/docs/headless/mdx) provided by Fumadocs.
 
 ### Math Equations
 
@@ -343,7 +342,3 @@ npm i next -D
 ```
 
 To enable, see [Remark Install](/docs/headless/mdx/install).
-
-### More
-
-You can see [a list of plugins](/docs/headless/mdx) provided by Fumadocs.

@@ -1,5 +1,16 @@
 # @fuma-docs/openapi
 
+## 8.1.3
+
+### Patch Changes
+
+- 67070db: Add missing file
+- Updated dependencies [acff667]
+- Updated dependencies [b68bb51]
+- Updated dependencies [127e681]
+  - fumadocs-core@15.2.12
+  - fumadocs-ui@15.2.12
+
 ## 8.1.2
 
 ### Patch Changes
