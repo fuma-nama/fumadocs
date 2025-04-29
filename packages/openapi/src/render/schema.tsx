@@ -1,11 +1,11 @@
 import { type ReactNode } from 'react';
-import { isNullable, NoReference, type ParsedSchema } from '@/utils/schema';
+import { isNullable, type ResolvedSchema } from '@/utils/schema';
 import type { RenderContext } from '@/types';
 import { combineSchema } from '@/utils/combine-schema';
 import { Markdown } from './markdown';
 
 const keys: {
-  [T in keyof ParsedSchema]: string;
+  [T in keyof Exclude<ResolvedSchema, boolean>]: string;
 } = {
   default: 'Default',
   minimum: 'Minimum',
@@ -19,12 +19,14 @@ const keys: {
 interface Context {
   readOnly: boolean;
   writeOnly: boolean;
-  stack?: ParsedSchema[];
+  stack?: ResolvedSchema[];
 
   render: RenderContext;
 }
 
-function isObject(schema: ParsedSchema): boolean {
+function isObject(schema: ResolvedSchema): boolean {
+  if (typeof schema === 'boolean') return false;
+
   return (
     schema.type === 'object' ||
     schema.properties !== undefined ||
@@ -41,7 +43,7 @@ export function Schema({
 }: {
   name: string;
   required?: boolean;
-  schema: NoReference<ParsedSchema>;
+  schema: ResolvedSchema;
 
   /**
    * Render the full object
@@ -52,16 +54,22 @@ export function Schema({
 
   ctx: Context;
 }): ReactNode {
+  const {
+    render: { renderer },
+    stack = [],
+  } = ctx;
+
+  if (schema === true) {
+    return <renderer.Property name={name} type="any" />;
+  } else if (schema === false) {
+    return <renderer.Property name={name} type="never" />;
+  }
+
   if (
     (schema.readOnly === true && !ctx.readOnly) ||
     (schema.writeOnly === true && !ctx.writeOnly)
   )
     return null;
-
-  const {
-    render: { renderer },
-    stack = [],
-  } = ctx;
 
   // object type
   if (
@@ -69,48 +77,52 @@ export function Schema({
     parseObject &&
     (schema.additionalProperties || schema.properties)
   ) {
-    let body: ReactNode = null;
-    let footer: ReactNode = null;
-    const { additionalProperties, properties } = schema;
+    const { additionalProperties, patternProperties, properties } = schema;
 
-    if (additionalProperties === true) {
-      footer = <renderer.Property name="[key: string]" type="any" />;
-    } else if (additionalProperties) {
-      footer = (
-        <Schema
-          name="[key: string]"
-          schema={additionalProperties}
-          parseObject={false}
-          ctx={{
-            ...ctx,
-            stack: [schema, ...stack],
-          }}
-        />
-      );
-    }
-
-    if (properties) {
-      body = Object.entries(properties).map(([key, value]) => {
-        return (
+    return (
+      <div className="flex flex-col gap-4">
+        {properties &&
+          Object.entries(properties).map(([key, value]) => {
+            return (
+              <Schema
+                key={key}
+                name={key}
+                schema={value}
+                parseObject={false}
+                required={schema.required?.includes(key) ?? false}
+                ctx={{
+                  ...ctx,
+                  stack: [schema, ...stack],
+                }}
+              />
+            );
+          })}
+        {patternProperties &&
+          Object.entries(patternProperties).map(([key, value]) => {
+            return (
+              <Schema
+                key={key}
+                name={key}
+                schema={value}
+                parseObject={false}
+                ctx={{
+                  ...ctx,
+                  stack: [schema, ...stack],
+                }}
+              />
+            );
+          })}
+        {additionalProperties && (
           <Schema
-            key={key}
-            name={key}
-            schema={value}
+            name="[key: string]"
+            schema={additionalProperties}
             parseObject={false}
-            required={schema.required?.includes(key) ?? false}
             ctx={{
               ...ctx,
               stack: [schema, ...stack],
             }}
           />
-        );
-      });
-    }
-
-    return (
-      <div className="flex flex-col gap-4">
-        {body}
-        {footer}
+        )}
       </div>
     );
   }
@@ -119,7 +131,7 @@ export function Schema({
     return (
       <Schema
         name={name}
-        schema={combineSchema(schema.allOf)}
+        schema={combineSchema(schema.allOf as ResolvedSchema[])}
         ctx={{
           ...ctx,
           stack: [schema, ...stack],
@@ -138,7 +150,7 @@ export function Schema({
     if (key in schema) {
       fields.push({
         key: value,
-        value: JSON.stringify(schema[key as keyof ParsedSchema]),
+        value: JSON.stringify(schema[key as keyof ResolvedSchema]),
       });
     }
   }
@@ -175,10 +187,11 @@ export function Schema({
         <renderer.ObjectCollapsible
           key={idx}
           name={
-            s.title ??
-            (mentionedObjectTypes.length === 1
-              ? 'Show Attributes'
-              : `Object ${idx + 1}`)
+            typeof s === 'object' && s.title
+              ? s.title
+              : mentionedObjectTypes.length === 1
+                ? 'Show Attributes'
+                : `Object ${idx + 1}`
           }
         >
           <Schema
@@ -219,17 +232,21 @@ export function Schema({
 /**
  * Check if the schema needs another collapsible to explain
  */
-function isComplexType(schema: ParsedSchema): boolean {
+function isComplexType(schema: ResolvedSchema): boolean {
+  if (typeof schema === 'boolean') return false;
   if (schema.anyOf ?? schema.oneOf ?? schema.allOf) return true;
 
   return isObject(schema) || schema.type === 'array';
 }
 
 function getSchemaType(
-  schema: ParsedSchema,
+  schema: ResolvedSchema,
   ctx: Context,
   isRoot = true,
 ): string {
+  if (schema === true) return 'any';
+  else if (schema === false) return 'never';
+
   if (isNullable(schema) && isRoot) {
     const type = getSchemaType(schema, ctx, false);
 
@@ -239,14 +256,30 @@ function getSchemaType(
 
   if (schema.title) return schema.title;
 
+  if (Array.isArray(schema.type)) {
+    return schema.type
+      .map((type) =>
+        getSchemaType(
+          {
+            ...schema,
+            type,
+          },
+          ctx,
+          false,
+        ),
+      )
+      .join(' | ');
+  }
+
   if (schema.type === 'array')
     return `array<${schema.items ? getSchemaType(schema.items, ctx) : 'unknown'}>`;
 
-  if (schema.oneOf)
+  if (schema.oneOf) {
     return schema.oneOf
       .map((one) => getSchemaType(one, ctx, false))
       .filter((v) => v !== 'unknown')
       .join(' | ');
+  }
 
   if (schema.allOf) {
     return schema.allOf
@@ -258,16 +291,15 @@ function getSchemaType(
   if (schema.not) return `not ${getSchemaType(schema.not, ctx, false)}`;
 
   if (schema.anyOf) {
-    const properties = schema.anyOf
+    const union = schema.anyOf
       .map((one) => getSchemaType(one, ctx, false))
       .filter((v) => v !== 'unknown');
 
-    if (properties.length > 1) {
-      return `Any properties in ${properties.join(',')}`;
-    } else if (properties.length === 1) {
-      return properties[0];
+    if (union.length > 1) {
+      return `Any properties in ${union.join(',')}`;
+    } else if (union.length === 1) {
+      return union[0];
     }
-    // otherwise unknown
   }
 
   if (schema.type === 'string' && schema.format === 'binary') return 'file';
@@ -277,7 +309,7 @@ function getSchemaType(
 
     if (nonNullTypes.length > 0) return nonNullTypes.join(' | ');
   } else if (schema.type && schema.type !== 'null') {
-    return schema.type;
+    return schema.type as string;
   }
 
   if (isObject(schema)) return 'object';

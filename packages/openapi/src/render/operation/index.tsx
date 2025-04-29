@@ -6,7 +6,11 @@ import type {
   RenderContext,
   SecurityRequirementObject,
 } from '@/types';
-import { getPreferredType, type NoReference } from '@/utils/schema';
+import {
+  getPreferredType,
+  type NoReference,
+  type ResolvedSchema,
+} from '@/utils/schema';
 import { getSecurities, getSecurityPrefix } from '@/utils/get-security';
 import { idToTitle } from '@/utils/id-to-title';
 import { Markdown } from '../markdown';
@@ -99,7 +103,7 @@ export function Operation({
         {body.description ? <Markdown text={body.description} /> : null}
         <Schema
           name="body"
-          schema={body.content[type].schema ?? {}}
+          schema={(body.content[type].schema ?? {}) as ResolvedSchema}
           required={body.required}
           ctx={{
             readOnly: method.method === 'GET',
@@ -148,13 +152,15 @@ export function Operation({
             <Schema
               key={param.name}
               name={param.name}
-              schema={{
-                ...param.schema,
-                description: param.description ?? param.schema?.description,
-                deprecated:
-                  (param.deprecated ?? false) ||
-                  (param.schema?.deprecated ?? false),
-              }}
+              schema={
+                {
+                  ...param.schema,
+                  description: param.description ?? param.schema?.description,
+                  deprecated:
+                    (param.deprecated ?? false) ||
+                    (param.schema?.deprecated ?? false),
+                } as ResolvedSchema
+              }
               parseObject={false}
               required={param.required}
               ctx={{
@@ -270,7 +276,7 @@ async function ResponseTab({
       {responseOfType?.schema && (
         <Schema
           name="response"
-          schema={responseOfType.schema}
+          schema={responseOfType.schema as ResolvedSchema}
           required
           ctx={{
             render: ctx,

@@ -20,14 +20,18 @@ import {
   SelectValue,
 } from '@/ui/components/select';
 import type { RequestSchema } from '@/playground/index';
-import { resolve } from '@/playground/resolve';
 import { Input, labelVariants } from '@/ui/components/input';
 import { getDefaultValue } from './get-default-values';
 import { useSchemaContext } from './client';
 import { cn } from 'fumadocs-ui/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 
-type FieldOfType<Type> = Extract<RequestSchema, { type: Type }>;
+const anyFields = {
+  type: ['string', 'number', 'boolean', 'array', 'object'],
+  items: true,
+  additionalProperties: true,
+} satisfies RequestSchema;
+
 interface InputHeaderProps {
   name?: ReactNode;
   required?: boolean;
@@ -61,29 +65,46 @@ export function ObjectInput({
   fieldName,
   ...props
 }: {
-  field: FieldOfType<'object'>;
+  field: Exclude<RequestSchema, boolean>;
   fieldName: string;
 } & HTMLAttributes<HTMLDivElement>) {
-  const { references } = useSchemaContext();
-
   return (
     <div {...props} className={cn('flex flex-col gap-6', props.className)}>
-      {Object.entries(field.properties).map(([key, child]) => (
+      {Object.entries(field.properties ?? {}).map(([key, child]) => (
         <FieldSet
           key={key}
           name={key}
-          field={resolve(child, references)}
+          field={child}
           fieldName={`${fieldName}.${key}`}
+          isRequired={field.required?.includes(key)}
         />
       ))}
-      {field.additionalProperties ? (
-        <AdditionalProperties
+      {(field.additionalProperties || field.patternProperties) && (
+        <DynamicProperties
           fieldName={fieldName}
-          type={field.additionalProperties}
+          filterKey={(v) =>
+            !field.properties || !Object.keys(field.properties).includes(v)
+          }
+          getType={(key) => {
+            for (const pattern in field.patternProperties) {
+              if (key.match(RegExp(pattern))) {
+                return fallbackAny(field.patternProperties[pattern]);
+              }
+            }
+
+            if (field.additionalProperties)
+              return fallbackAny(field.additionalProperties);
+
+            return anyFields;
+          }}
         />
-      ) : null}
+      )}
     </div>
   );
+}
+
+function fallbackAny(schema: RequestSchema): Exclude<RequestSchema, boolean> {
+  return typeof schema === 'boolean' || !schema.type ? anyFields : schema;
 }
 
 export function JsonInput({ fieldName }: { fieldName: string }) {
@@ -111,39 +132,33 @@ export function JsonInput({ fieldName }: { fieldName: string }) {
   );
 }
 
-function AdditionalProperties({
+function DynamicProperties({
   fieldName,
-  type,
+  filterKey = () => true,
+  getType = () => anyFields,
 }: {
   fieldName: string;
-  type: boolean | string;
+  filterKey?: (key: string) => boolean;
+  getType: (key: string) => Exclude<RequestSchema, boolean>;
 }) {
   const { control, setValue, getValues } = useFormContext();
-  const { references } = useSchemaContext();
   const [nextName, setNextName] = useState('');
   const [properties, setProperties] = useState<string[]>(() => {
     const value = getValues(fieldName);
-    if (value) return Object.keys(value);
+    if (value) return Object.keys(value).filter(filterKey);
 
     return [];
   });
-
-  const types =
-    typeof type === 'string'
-      ? resolveDynamicTypes(references[type], references)
-      : anyFields;
 
   const onAppend = () => {
     const name = nextName.trim();
     if (name.length === 0) return;
 
     setProperties((p) => {
-      if (p.includes(name)) return p;
+      if (p.includes(name) || !filterKey(name)) return p;
+      const type = getType(name);
 
-      setValue(
-        `${fieldName}.${name}`,
-        getDefaultValue(Object.values(types)[0], references),
-      );
+      setValue(`${fieldName}.${name}`, getDefaultValue(type.type!, type));
       setNextName('');
       return [...p, name];
     });
@@ -155,11 +170,7 @@ function AdditionalProperties({
         <FieldSet
           key={item}
           name={item}
-          field={{
-            type: 'switcher',
-            items: types,
-            isRequired: false,
-          }}
+          field={getType(item)}
           fieldName={`${fieldName}.${item}`}
           toolbar={
             <button
@@ -185,9 +196,7 @@ function AdditionalProperties({
         <Input
           value={nextName}
           placeholder="Enter Property Name"
-          onChange={(e) => {
-            setNextName(e.target.value);
-          }}
+          onChange={(e) => setNextName(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               onAppend();
@@ -207,62 +216,15 @@ function AdditionalProperties({
   );
 }
 
-function resolveDynamicTypes(
-  schema: RequestSchema,
-  references: Record<string, RequestSchema>,
-): Record<string, RequestSchema> {
-  if (schema.type !== 'switcher') return { [schema.type]: schema };
-
-  return Object.fromEntries(
-    Object.entries(schema.items).map(([key, value]) => [
-      key,
-      resolve(value, references),
-    ]),
-  );
-}
-
-const anyFields: Record<string, RequestSchema> = {
-  string: {
-    type: 'string',
-    isRequired: false,
-  },
-  boolean: {
-    type: 'boolean',
-    isRequired: false,
-  },
-  number: {
-    type: 'number',
-    isRequired: false,
-  },
-  object: {
-    type: 'object',
-    properties: {},
-    additionalProperties: true,
-    isRequired: false,
-  },
-};
-
-anyFields.array = {
-  type: 'array',
-  isRequired: false,
-  items: {
-    type: 'switcher',
-    isRequired: false,
-    items: anyFields,
-  },
-};
-
 export function FieldInput({
   field,
   fieldName,
   ...props
 }: HTMLAttributes<HTMLElement> & {
-  field: Exclude<RequestSchema, { type: 'switcher' }>;
+  field: Exclude<RequestSchema, boolean>;
   fieldName: string;
 }) {
   const { control, register } = useFormContext();
-
-  if (field.type === 'null') return null;
 
   if (field.type === 'object') {
     return (
@@ -282,7 +244,7 @@ export function FieldInput({
     return (
       <ArrayInput
         fieldName={fieldName}
-        field={field}
+        items={field.items ?? anyFields}
         {...props}
         className={cn(
           'rounded-lg border border-fd-primary/20 bg-fd-background/50 p-3 shadow-sm',
@@ -292,7 +254,7 @@ export function FieldInput({
     );
   }
 
-  if (field.type === 'file') {
+  if (field.type === 'string' && field.format === 'binary') {
     return (
       <Controller
         control={control}
@@ -337,7 +299,7 @@ export function FieldInput({
             <SelectContent>
               <SelectItem value="true">True</SelectItem>
               <SelectItem value="false">False</SelectItem>
-              {field.isRequired ? null : (
+              {Array.isArray(field.type) && field.type.includes('null') && (
                 <SelectItem value="null">Null</SelectItem>
               )}
             </SelectContent>
@@ -353,7 +315,7 @@ export function FieldInput({
       placeholder="Enter value"
       type={field.type === 'string' ? 'text' : 'number'}
       {...register(fieldName, {
-        valueAsNumber: field.type === 'number',
+        valueAsNumber: field.type === 'number' || field.type === 'integer',
       })}
       {...props}
     />
@@ -361,60 +323,52 @@ export function FieldInput({
 }
 
 export function FieldSet({
-  field,
+  field: _field,
   fieldName,
   toolbar,
   name,
+  isRequired,
   ...props
 }: HTMLAttributes<HTMLElement> & {
+  isRequired?: boolean;
   name?: ReactNode;
   field: RequestSchema;
   fieldName: string;
   toolbar?: ReactNode;
 }) {
   const form = useFormContext();
-  const { references, dynamic } = useSchemaContext();
+  const { dynamic } = useSchemaContext();
+  const field = fallbackAny(_field);
   const [type, setType] = useState<string>(() => {
-    if (field.type !== 'switcher') return '';
+    if (!Array.isArray(field.type)) return '';
+
     const d = dynamic.current.get(fieldName);
-    const items = Object.keys(field.items);
-
-    if (d?.type === 'field') {
-      // schemas are passed from server components, object references are maintained
-      const cached = items.find((item) => d.schema === field.items[item]);
-
-      if (cached) return cached;
+    if (d?.type === 'field' && field.type.includes(d.selected)) {
+      return d.selected;
     }
 
     const value = form.getValues(fieldName);
-    let type: string = typeof value;
-
+    let out = null;
     if (Array.isArray(value)) {
-      type = 'array';
+      out = 'array';
     } else if (value instanceof File) {
-      type = 'file';
+      out = 'file';
     } else if (value === null) {
-      type = 'null';
+      out = 'null';
     }
 
-    return items.find((item) => field.items[item].type === type) ?? items[0];
+    return field.type.includes(out) ? out : field.type[0];
   });
 
-  if (field.type === 'null') return null;
+  if (_field === false) return null;
 
-  if (field.type === 'switcher') {
-    const child = resolve(field.items[type], references);
-
+  if (Array.isArray(field.type)) {
     return (
       <fieldset
         {...props}
         className={cn('flex flex-col gap-1.5', props.className)}
       >
-        <FieldHeader
-          name={name}
-          htmlFor={fieldName}
-          required={field.isRequired}
-        >
+        <FieldHeader name={name} htmlFor={fieldName} required={isRequired}>
           <select
             value={type}
             onChange={(e) => {
@@ -424,16 +378,13 @@ export function FieldSet({
               setType(value);
               dynamic.current.set(fieldName, {
                 type: 'field',
-                schema: field.items[value],
+                selected: value,
               });
-              form.setValue(
-                fieldName,
-                getDefaultValue(field.items[value], references),
-              );
+              form.setValue(fieldName, getDefaultValue(value, field));
             }}
             className="text-xs"
           >
-            {Object.keys(field.items).map((item) => (
+            {field.type.map((item) => (
               <option key={item} value={item}>
                 {item}
               </option>
@@ -442,11 +393,13 @@ export function FieldSet({
           {toolbar}
         </FieldHeader>
         <p className="text-xs text-fd-muted-foreground">{field.description}</p>
-        {child.type === 'switcher' ? (
-          <FieldSet field={child} fieldName={fieldName} />
-        ) : (
-          <FieldInput field={child} fieldName={fieldName} />
-        )}
+        <FieldInput
+          field={{
+            ...field,
+            type,
+          }}
+          fieldName={fieldName}
+        />
       </fieldset>
     );
   }
@@ -459,8 +412,8 @@ export function FieldSet({
       <FieldHeader
         htmlFor={fieldName}
         name={name}
-        required={field.isRequired}
-        type={field.type}
+        required={isRequired}
+        type={String(field.type)}
       >
         {toolbar}
       </FieldHeader>
@@ -471,17 +424,12 @@ export function FieldSet({
 
 function ArrayInput({
   fieldName,
-  field,
+  items,
   ...props
 }: {
   fieldName: string;
-  field: {
-    description?: string;
-    items: RequestSchema | string;
-  };
+  items: RequestSchema;
 } & HTMLAttributes<HTMLDivElement>) {
-  const { references } = useSchemaContext();
-  const items = resolve(field.items, references);
   const name = fieldName.split('.').at(-1) ?? '';
   const { fields, append, remove } = useFieldArray({
     name: fieldName,
@@ -528,7 +476,9 @@ function ArrayInput({
           }),
         )}
         onClick={() => {
-          append(getDefaultValue(items, references));
+          const itemType = fallbackAny(items);
+
+          append(getDefaultValue(itemType.type!, itemType));
         }}
       >
         <Plus className="size-4" />

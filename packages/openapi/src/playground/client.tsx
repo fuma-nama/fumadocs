@@ -28,11 +28,7 @@ import {
 import { useApiContext, useServerSelectContext } from '@/ui/contexts/api';
 import type { FetchResult } from '@/playground/fetcher';
 import { FieldSet, JsonInput, ObjectInput } from './inputs';
-import type {
-  ParameterField,
-  ReferenceSchema,
-  RequestSchema,
-} from '@/playground/index';
+import type { ParameterField, RequestSchema } from '@/playground/index';
 import { getStatusInfo } from './status-info';
 import { getUrl } from '@/utils/server-url';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
@@ -56,6 +52,7 @@ import type { RequestData } from '@/requests/_shared';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from 'fumadocs-ui/utils/cn';
 import { cva } from 'class-variance-authority';
+import { resolve } from '@/playground/resolve';
 
 interface FormValues {
   authorization:
@@ -90,11 +87,12 @@ export type ClientProps = HTMLAttributes<HTMLFormElement> & {
     persistentId: string;
   };
   parameters?: ParameterField[];
-  body?: RequestSchema & {
+  body?: {
+    schema: RequestSchema;
     mediaType: string;
   };
   /**
-   * Resolver for reference schemas you've passed
+   * Resolver for $ref schemas you've passed
    */
   references: Record<string, RequestSchema>;
   proxyUrl?: string;
@@ -114,7 +112,6 @@ export type ClientProps = HTMLAttributes<HTMLFormElement> & {
 };
 
 interface SchemaContextType {
-  references: Record<string, RequestSchema>;
   dynamic: RefObject<Map<string, DynamicField>>;
 }
 
@@ -125,7 +122,7 @@ export type DynamicField =
     }
   | {
       type: 'field';
-      schema: RequestSchema | ReferenceSchema;
+      selected: string;
     };
 
 const SchemaContext = createContext<SchemaContextType | undefined>(undefined);
@@ -156,8 +153,8 @@ export default function Client({
   route,
   method = 'GET',
   authorization,
-  parameters,
-  body,
+  parameters: _parameters,
+  body: _body,
   fields,
   references,
   proxyUrl,
@@ -165,10 +162,15 @@ export default function Client({
   ...rest
 }: ClientProps) {
   const { server } = useServerSelectContext();
-
   const dynamicRef = useRef(new Map<string, DynamicField>());
   const requestData = useRequestData();
   const authInfo = usePersistentAuthInfo(authorization);
+  const parameters = useMemo(
+    () => resolve(_parameters, references),
+    [_parameters, references],
+  );
+  const body = useMemo(() => resolve(_body, references), [_body, references]);
+
   const defaultValues: FormValues = useMemo(
     () => ({
       authorization: authInfo.info,
@@ -237,10 +239,7 @@ export default function Client({
   return (
     <FormProvider {...form}>
       <SchemaContext.Provider
-        value={useMemo(
-          () => ({ references: references, dynamic: dynamicRef }),
-          [references],
-        )}
+        value={useMemo(() => ({ dynamic: dynamicRef }), [])}
       >
         <AuthProvider authorization={authorization}>
           <form
@@ -306,21 +305,18 @@ function FormBody({
       authorization.type === 'http' && authorization.scheme === 'basic'
         ? {
             type: 'object',
-            isRequired: true,
+            required: ['username', 'password'],
             properties: {
               username: {
                 type: 'string',
-                isRequired: true,
               },
               password: {
                 type: 'string',
-                isRequired: true,
               },
             },
           }
         : {
             type: 'string',
-            isRequired: true,
             description: 'The Authorization access token',
           };
 
@@ -333,6 +329,7 @@ function FormBody({
           fieldName="authorization"
           name="Authorization"
           field={schema}
+          isRequired
         />
         {authorization?.type === 'oauth2' && (
           <OauthDialogTrigger
@@ -352,7 +349,7 @@ function FormBody({
 
   return (
     <>
-      {servers.length > 1 ? (
+      {servers.length > 0 ? (
         <CollapsiblePanel title="Server URL">
           <ServerSelect
             server={server}
@@ -399,10 +396,10 @@ function FormBody({
       {body ? (
         fields.body ? (
           <CollapsiblePanel title="Body">
-            {renderCustomField('body', body, fields.body)}
+            {renderCustomField('body', body.schema, fields.body)}
           </CollapsiblePanel>
         ) : (
-          <BodyInput field={body} />
+          <BodyInput field={body.schema} />
         )
       ) : null}
     </>
@@ -444,7 +441,7 @@ function BodyInput({ field }: { field: RequestSchema }) {
       </div>
       {isJson ? (
         <JsonInput fieldName="body" />
-      ) : field.type === 'object' ? (
+      ) : typeof field === 'object' && field.type === 'object' ? (
         <ObjectInput field={field} fieldName="body" />
       ) : (
         <FieldSet field={field} fieldName="body" />

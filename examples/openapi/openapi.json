@@ -325,7 +325,7 @@
         "type": "object"
       },
       "V1EncryptRequestBody": {
-        "additionalProperties": false,
+        "additionalProperties": true,
         "properties": {
           "$schema": {
             "description": "A URL to the JSON Schema for this object.",
@@ -341,6 +341,11 @@
           },
           "keyring": {
             "description": "The keyring to use for encryption.",
+            "type": "string"
+          }
+        },
+        "patternProperties": {
+          "test\\s.+": {
             "type": "string"
           }
         },
@@ -546,7 +551,7 @@
     "title": "Unkey API",
     "version": "1.0.0"
   },
-  "openapi": "3.0.0",
+  "openapi": "3.1.0",
   "paths": {
     "/v0/events": {
       "post": {

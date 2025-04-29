@@ -15,7 +15,6 @@ async function generate() {
     // input files
     input: ['./openapi.json'],
     output: out,
-    groupBy: 'tag',
   });
 }
 

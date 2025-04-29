@@ -1,18 +1,24 @@
-import { type ReferenceSchema, type RequestSchema } from '@/playground/index';
+import { type RequestSchema } from '@/playground/index';
 
 /**
  * Resolve reference
  */
-export function resolve(
-  schema: RequestSchema | ReferenceSchema | string,
+export function resolve<T>(
+  schema: T,
   references: Record<string, RequestSchema>,
-): RequestSchema {
-  if (typeof schema === 'string') return references[schema];
-  if (schema.type !== 'ref') return schema;
+): T {
+  if (!schema || typeof schema !== 'object') return schema;
 
-  return {
-    ...references[schema.schema],
-    description: schema.description,
-    isRequired: schema.isRequired,
-  };
+  if (Array.isArray(schema))
+    return schema.map((item) => resolve(item, references)) as T;
+
+  if ('$ref' in schema && schema.$ref) {
+    return resolve(references[schema.$ref as string], references) as T;
+  }
+
+  for (const key in schema) {
+    schema[key] = resolve(schema[key], references);
+  }
+
+  return schema;
 }
