@@ -188,8 +188,11 @@ function getOutputPathFromRoute(path: string): string {
     path
       .replaceAll('.', '/')
       .split('/')
-      .filter((v) => !v.startsWith('{') && !v.endsWith('}'))
-      .at(-1) ?? ''
+      .map((v) => {
+        if (v.startsWith('{') && v.endsWith('}')) return v.slice(1, -1);
+        return v;
+      })
+      .join('/') ?? ''
   );
 }
 
