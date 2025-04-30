@@ -273,6 +273,24 @@
                 }
               },
               {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "test": {
+                        "description": "A URL to the JSON Schema for this object.",
+                        "example": "https://api.unkey.dev/schemas/V1EncryptBulkRequestBody.json",
+                        "format": "uri",
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ]
+              },
+              {
                 "items": {
                   "type": "string"
                 },

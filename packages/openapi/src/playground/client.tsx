@@ -636,23 +636,28 @@ function writeAuthHeader(
   }
 }
 
-// TODO: Make it handle nested `oneOf`, currently it allows only one value of `oneOf` per field name.
+/**
+ * A hook to store dynamic info of a field, such as selected schema of `oneOf`.
+ *
+ * @param fieldName - field name of form.
+ * @param schema - The JSON Schema to generate initial values.
+ * @param depth - The depth to avoid duplicated field name with same schema (e.g. nested `oneOf`).
+ */
 export function useFieldInfo(
   fieldName: string,
   schema: Exclude<RequestSchema, boolean>,
+  depth: number,
 ): {
   info: FieldInfo;
   updateInfo: (value: Partial<FieldInfo>) => void;
 } {
-  const ctx = useContext(SchemaContext);
-  if (!ctx) throw new Error('Missing provider');
-
-  const { fieldInfoMap } = ctx;
+  const keyName = `${fieldName}:${depth}`;
+  const { fieldInfoMap } = useContext(SchemaContext)!;
   const [_, trigger] = useState(0);
   const form = useFormContext();
   const value = form.getValues(fieldName as 'body');
 
-  const info = fieldInfoMap.get(fieldName) ?? {
+  const info = fieldInfoMap.get(keyName) ?? {
     oneOf: -1,
   };
 
@@ -675,12 +680,12 @@ export function useFieldInfo(
     if (info.oneOf === -1) info.oneOf = 0;
   }
 
-  fieldInfoMap.set(fieldName, info);
+  fieldInfoMap.set(keyName, info);
 
   return {
     info,
     updateInfo: useEffectEvent((value) => {
-      const prev = fieldInfoMap.get(fieldName);
+      const prev = fieldInfoMap.get(keyName);
       if (!prev) return;
 
       const updated = {
@@ -694,7 +699,7 @@ export function useFieldInfo(
       )
         return;
 
-      fieldInfoMap.set(fieldName, updated);
+      fieldInfoMap.set(keyName, updated);
       form.setValue(
         fieldName,
         getDefaultValue(

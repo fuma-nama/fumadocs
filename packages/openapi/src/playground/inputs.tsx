@@ -342,16 +342,18 @@ export function FieldSet({
   toolbar,
   name,
   isRequired,
+  depth = 0,
   ...props
 }: HTMLAttributes<HTMLElement> & {
   isRequired?: boolean;
   name?: ReactNode;
   field: RequestSchema;
   fieldName: string;
+  depth?: number;
   toolbar?: ReactNode;
 }) {
   const field = fallbackAny(_field);
-  const { info, updateInfo } = useFieldInfo(fieldName, field);
+  const { info, updateInfo } = useFieldInfo(fieldName, field, depth);
 
   if (_field === false) return null;
 
@@ -364,6 +366,7 @@ export function FieldSet({
         fieldName={fieldName}
         isRequired={isRequired}
         field={fallbackAny(field.oneOf[info.oneOf])}
+        depth={depth + 1}
         toolbar={
           <>
             <select
