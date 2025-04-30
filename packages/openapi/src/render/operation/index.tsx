@@ -26,8 +26,8 @@ import {
 import { MethodLabel } from '@/ui/components/method-label';
 import { type RequestData, supportedMediaTypes } from '@/requests/_shared';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
-import { CodeBlock } from '@/render/codeblock';
 import { getTypescriptSchema } from '@/utils/get-typescript-schema';
+import { CopyResponseTypeScript } from '@/ui/client';
 
 export interface CodeSample {
   lang: string;
@@ -286,7 +286,7 @@ async function ResponseTab({
         />
       )}
 
-      {ts && <CodeBlock lang="ts" code={ts} ctx={ctx} className="mt-4" />}
+      {ts && <CopyResponseTypeScript code={ts} />}
     </Tab>
   );
 }
