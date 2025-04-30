@@ -3,6 +3,7 @@ import {
   type HTMLAttributes,
   type LabelHTMLAttributes,
   type ReactNode,
+  useMemo,
   useState,
 } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
@@ -22,9 +23,11 @@ import {
 import type { RequestSchema } from '@/playground/index';
 import { Input, labelVariants } from '@/ui/components/input';
 import { getDefaultValue } from './get-default-values';
-import { useSchemaContext } from './client';
+import { useFieldInfo } from './client';
 import { cn } from 'fumadocs-ui/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
+import { combineSchema } from '@/utils/combine-schema';
+import { schemaToString } from '@/utils/schema-to-string';
 
 const anyFields = {
   type: ['string', 'number', 'boolean', 'array', 'object'],
@@ -53,7 +56,9 @@ function FieldHeader({
       {required ? <span className="text-red-500">*</span> : null}
       <div className="flex-1" />
       {type ? (
-        <code className="text-xs text-fd-muted-foreground">{type}</code>
+        <code data-type className="text-xs text-fd-muted-foreground">
+          {type}
+        </code>
       ) : null}
       {props.children}
     </label>
@@ -61,13 +66,19 @@ function FieldHeader({
 }
 
 export function ObjectInput({
-  field,
+  field: _field,
   fieldName,
   ...props
 }: {
   field: Exclude<RequestSchema, boolean>;
   fieldName: string;
 } & HTMLAttributes<HTMLDivElement>) {
+  const field = useMemo(() => {
+    return fallbackAny(
+      combineSchema([_field, ...(_field.allOf ?? []), ...(_field.anyOf ?? [])]),
+    );
+  }, [_field]);
+
   return (
     <div {...props} className={cn('flex flex-col gap-6', props.className)}>
       {Object.entries(field.properties ?? {}).map(([key, child]) => (
@@ -104,7 +115,7 @@ export function ObjectInput({
 }
 
 function fallbackAny(schema: RequestSchema): Exclude<RequestSchema, boolean> {
-  return typeof schema === 'boolean' || !schema.type ? anyFields : schema;
+  return typeof schema === 'boolean' ? anyFields : schema;
 }
 
 export function JsonInput({ fieldName }: { fieldName: string }) {
@@ -158,7 +169,7 @@ function DynamicProperties({
       if (p.includes(name) || !filterKey(name)) return p;
       const type = getType(name);
 
-      setValue(`${fieldName}.${name}`, getDefaultValue(type.type!, type));
+      setValue(`${fieldName}.${name}`, getDefaultValue(type));
       setNextName('');
       return [...p, name];
     });
@@ -178,8 +189,8 @@ function DynamicProperties({
               aria-label="Remove Item"
               className={cn(
                 buttonVariants({
-                  color: 'secondary',
-                  size: 'sm',
+                  color: 'ghost',
+                  className: 'p-1',
                 }),
               )}
               onClick={() => {
@@ -192,7 +203,7 @@ function DynamicProperties({
           }
         />
       ))}
-      <div className="flex flex-row gap-1">
+      <div className="flex gap-2">
         <Input
           value={nextName}
           placeholder="Enter Property Name"
@@ -206,7 +217,10 @@ function DynamicProperties({
         />
         <button
           type="button"
-          className={cn(buttonVariants({ color: 'secondary' }))}
+          className={cn(
+            buttonVariants({ color: 'secondary', size: 'sm' }),
+            'px-4',
+          )}
           onClick={onAppend}
         >
           New
@@ -219,9 +233,11 @@ function DynamicProperties({
 export function FieldInput({
   field,
   fieldName,
+  isRequired,
   ...props
 }: HTMLAttributes<HTMLElement> & {
   field: Exclude<RequestSchema, boolean>;
+  isRequired?: boolean;
   fieldName: string;
 }) {
   const { control, register } = useFormContext();
@@ -299,9 +315,7 @@ export function FieldInput({
             <SelectContent>
               <SelectItem value="true">True</SelectItem>
               <SelectItem value="false">False</SelectItem>
-              {Array.isArray(field.type) && field.type.includes('null') && (
-                <SelectItem value="null">Null</SelectItem>
-              )}
+              {!isRequired && <SelectItem value="null">Null</SelectItem>}
             </SelectContent>
           </Select>
         )}
@@ -336,31 +350,43 @@ export function FieldSet({
   fieldName: string;
   toolbar?: ReactNode;
 }) {
-  const form = useFormContext();
-  const { dynamic } = useSchemaContext();
   const field = fallbackAny(_field);
-  const [type, setType] = useState<string>(() => {
-    if (!Array.isArray(field.type)) return '';
-
-    const d = dynamic.current.get(fieldName);
-    if (d?.type === 'field' && field.type.includes(d.selected)) {
-      return d.selected;
-    }
-
-    const value = form.getValues(fieldName);
-    let out = null;
-    if (Array.isArray(value)) {
-      out = 'array';
-    } else if (value instanceof File) {
-      out = 'file';
-    } else if (value === null) {
-      out = 'null';
-    }
-
-    return field.type.includes(out) ? out : field.type[0];
-  });
+  const { info, updateInfo } = useFieldInfo(fieldName, field);
 
   if (_field === false) return null;
+
+  if (field.oneOf) {
+    return (
+      <FieldSet
+        {...props}
+        className={cn(props.className, '[&>label>[data-type]]:hidden')}
+        name={name}
+        fieldName={fieldName}
+        isRequired={isRequired}
+        field={fallbackAny(field.oneOf[info.oneOf])}
+        toolbar={
+          <>
+            <select
+              className="text-xs font-mono"
+              value={info.oneOf}
+              onChange={(e) => {
+                updateInfo({
+                  oneOf: Number(e.target.value),
+                });
+              }}
+            >
+              {field.oneOf.map((item, i) => (
+                <option key={i} value={i}>
+                  {schemaToString(item)}
+                </option>
+              ))}
+            </select>
+            {toolbar}
+          </>
+        }
+      />
+    );
+  }
 
   if (Array.isArray(field.type)) {
     return (
@@ -370,19 +396,13 @@ export function FieldSet({
       >
         <FieldHeader name={name} htmlFor={fieldName} required={isRequired}>
           <select
-            value={type}
+            className="text-xs font-mono"
+            value={info.selectedType}
             onChange={(e) => {
-              const value = e.target.value;
-              if (value === type) return;
-
-              setType(value);
-              dynamic.current.set(fieldName, {
-                type: 'field',
-                selected: value,
+              updateInfo({
+                selectedType: e.target.value,
               });
-              form.setValue(fieldName, getDefaultValue(value, field));
             }}
-            className="text-xs"
           >
             {field.type.map((item) => (
               <option key={item} value={item}>
@@ -393,13 +413,16 @@ export function FieldSet({
           {toolbar}
         </FieldHeader>
         <p className="text-xs text-fd-muted-foreground">{field.description}</p>
-        <FieldInput
-          field={{
-            ...field,
-            type,
-          }}
-          fieldName={fieldName}
-        />
+        {info.selectedType && (
+          <FieldInput
+            isRequired={isRequired}
+            field={{
+              ...field,
+              type: info.selectedType,
+            }}
+            fieldName={fieldName}
+          />
+        )}
       </fieldset>
     );
   }
@@ -413,11 +436,11 @@ export function FieldSet({
         htmlFor={fieldName}
         name={name}
         required={isRequired}
-        type={String(field.type)}
+        type={field.oneOf ? undefined : schemaToString(field)}
       >
         {toolbar}
       </FieldHeader>
-      <FieldInput field={field} fieldName={fieldName} />
+      <FieldInput field={field} fieldName={fieldName} isRequired={isRequired} />
     </fieldset>
   );
 }
@@ -453,13 +476,11 @@ function ArrayInput({
               aria-label="Remove Item"
               className={cn(
                 buttonVariants({
-                  color: 'secondary',
-                  size: 'sm',
+                  color: 'ghost',
+                  className: 'p-1',
                 }),
               )}
-              onClick={() => {
-                remove(index);
-              }}
+              onClick={() => remove(index)}
             >
               <Trash2 className="size-4" />
             </button>
@@ -478,7 +499,7 @@ function ArrayInput({
         onClick={() => {
           const itemType = fallbackAny(items);
 
-          append(getDefaultValue(itemType.type!, itemType));
+          append(getDefaultValue(itemType));
         }}
       >
         <Plus className="size-4" />

@@ -22,9 +22,6 @@ export default function ServerSelect({
   onVariablesChanged: (value: Record<string, string>) => void;
 }) {
   const { servers } = useApiContext();
-
-  if (servers.length <= 1) return null;
-
   const schema = server
     ? servers.find((item) => item.url === server.url)
     : null;

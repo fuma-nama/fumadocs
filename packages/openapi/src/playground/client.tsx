@@ -4,13 +4,12 @@ import {
   type FC,
   Fragment,
   type HTMLAttributes,
+  lazy,
   type ReactElement,
   type ReactNode,
-  type RefObject,
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react';
 import type {
@@ -42,10 +41,6 @@ import {
 } from 'fumadocs-ui/components/ui/collapsible';
 import { ChevronDown, LoaderCircle } from 'lucide-react';
 import type { Security } from '@/utils/get-security';
-import {
-  OauthDialog,
-  OauthDialogTrigger,
-} from '@/playground/auth/oauth-dialog';
 import { useRequestData } from '@/ui/contexts/code-example';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 import type { RequestData } from '@/requests/_shared';
@@ -53,6 +48,8 @@ import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from 'fumadocs-ui/utils/cn';
 import { cva } from 'class-variance-authority';
 import { resolve } from '@/playground/resolve';
+import { Ajv2020 } from 'ajv/dist/2020';
+import { getDefaultValue } from '@/playground/get-default-values';
 
 interface FormValues {
   authorization:
@@ -112,26 +109,20 @@ export type ClientProps = HTMLAttributes<HTMLFormElement> & {
 };
 
 interface SchemaContextType {
-  dynamic: RefObject<Map<string, DynamicField>>;
+  fieldInfoMap: Map<string, FieldInfo>;
 }
 
-export type DynamicField =
-  | {
-      type: 'object';
-      properties: string[];
-    }
-  | {
-      type: 'field';
-      selected: string;
-    };
+interface FieldInfo {
+  selectedType?: string;
+  oneOf: number;
+}
+
+const ajv = new Ajv2020({
+  validateSchema: false,
+  strict: false,
+});
 
 const SchemaContext = createContext<SchemaContextType | undefined>(undefined);
-
-export function useSchemaContext(): SchemaContextType {
-  const ctx = useContext(SchemaContext);
-  if (!ctx) throw new Error('Missing provider');
-  return ctx;
-}
 
 function toRequestData(
   method: string,
@@ -162,8 +153,8 @@ export default function Client({
   ...rest
 }: ClientProps) {
   const { server } = useServerSelectContext();
-  const dynamicRef = useRef(new Map<string, DynamicField>());
   const requestData = useRequestData();
+  const fieldInfoMap = useMemo(() => new Map<string, FieldInfo>(), []);
   const authInfo = usePersistentAuthInfo(authorization);
   const parameters = useMemo(
     () => resolve(_parameters, references),
@@ -203,6 +194,7 @@ export default function Client({
   });
 
   useEffect(() => {
+    fieldInfoMap.clear();
     form.reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- update default value
   }, [defaultValues]);
@@ -239,45 +231,49 @@ export default function Client({
   return (
     <FormProvider {...form}>
       <SchemaContext.Provider
-        value={useMemo(() => ({ dynamic: dynamicRef }), [])}
+        value={useMemo(
+          () => ({
+            fieldInfoMap,
+          }),
+          [fieldInfoMap],
+        )}
       >
-        <AuthProvider authorization={authorization}>
-          <form
-            {...rest}
-            className={cn(
-              'not-prose flex flex-col rounded-xl border shadow-md overflow-hidden bg-fd-card text-fd-card-foreground',
-              rest.className,
-            )}
-            onSubmit={onSubmit}
-          >
-            <div className="flex flex-row items-center gap-2 text-sm p-3 pb-0">
-              <MethodLabel>{method}</MethodLabel>
-              <Route route={route} className="flex-1" />
-              <button
-                type="submit"
-                className={cn(
-                  buttonVariants({ color: 'primary', size: 'sm' }),
-                  'px-3 py-1.5',
-                )}
-                disabled={testQuery.isLoading}
-              >
-                {testQuery.isLoading ? (
-                  <LoaderCircle className="size-4 animate-spin" />
-                ) : (
-                  'Send'
-                )}
-              </button>
-            </div>
+        <form
+          {...rest}
+          className={cn(
+            'not-prose flex flex-col rounded-xl border shadow-md overflow-hidden bg-fd-card text-fd-card-foreground',
+            rest.className,
+          )}
+          onSubmit={onSubmit}
+        >
+          <div className="flex flex-row items-center gap-2 text-sm p-3 pb-0">
+            <MethodLabel>{method}</MethodLabel>
+            <Route route={route} className="flex-1" />
+            <button
+              type="submit"
+              className={cn(
+                buttonVariants({ color: 'primary', size: 'sm' }),
+                'px-3 py-1.5',
+              )}
+              disabled={testQuery.isLoading}
+            >
+              {testQuery.isLoading ? (
+                <LoaderCircle className="size-4 animate-spin" />
+              ) : (
+                'Send'
+              )}
+            </button>
+          </div>
 
-            <FormBody
-              body={body}
-              fields={fields}
-              parameters={parameters}
-              authorization={authorization}
-            />
-            {testQuery.data ? <ResultDisplay data={testQuery.data} /> : null}
-          </form>
-        </AuthProvider>
+          <FormBody
+            body={body}
+            fields={fields}
+            parameters={parameters}
+            authorization={authorization}
+          />
+          {testQuery.data ? <ResultDisplay data={testQuery.data} /> : null}
+          {authorization && <AuthFooter authorization={authorization} />}
+        </form>
       </SchemaContext.Provider>
     </FormProvider>
   );
@@ -324,26 +320,12 @@ function FormBody({
       return renderCustomField('authorization', schema, fields.auth);
 
     return (
-      <>
-        <FieldSet
-          fieldName="authorization"
-          name="Authorization"
-          field={schema}
-          isRequired
-        />
-        {authorization?.type === 'oauth2' && (
-          <OauthDialogTrigger
-            type="button"
-            className={cn(
-              buttonVariants({
-                color: 'secondary',
-              }),
-            )}
-          >
-            Open
-          </OauthDialogTrigger>
-        )}
-      </>
+      <FieldSet
+        fieldName="authorization"
+        name="Authorization"
+        field={schema}
+        isRequired
+      />
     );
   }
 
@@ -371,22 +353,22 @@ function FormBody({
             {param.map((field) => {
               const fieldName = `${type}.${field.name}` as const;
 
-              if (!fields?.parameter) {
-                return (
-                  <FieldSet
-                    key={fieldName}
-                    name={field.name}
-                    fieldName={fieldName}
-                    field={field}
-                  />
+              if (fields?.parameter) {
+                return renderCustomField(
+                  fieldName,
+                  field.schema,
+                  fields.parameter,
+                  field.name,
                 );
               }
 
-              return renderCustomField(
-                fieldName,
-                field,
-                fields.parameter,
-                field.name,
+              return (
+                <FieldSet
+                  key={fieldName}
+                  name={field.name}
+                  fieldName={fieldName}
+                  field={field.schema}
+                />
               );
             })}
           </CollapsiblePanel>
@@ -441,7 +423,9 @@ function BodyInput({ field }: { field: RequestSchema }) {
       </div>
       {isJson ? (
         <JsonInput fieldName="body" />
-      ) : typeof field === 'object' && field.type === 'object' ? (
+      ) : typeof field === 'object' &&
+        field.type === 'object' &&
+        !field.oneOf ? (
         <ObjectInput field={field} fieldName="body" />
       ) : (
         <FieldSet field={field} fieldName="body" />
@@ -466,15 +450,20 @@ function renderCustomField(
   );
 }
 
-function AuthProvider({
-  authorization,
-  children,
-}: {
-  authorization?: Security;
-  children: ReactNode;
-}) {
+const OauthDialog = lazy(() =>
+  import('./auth/oauth-dialog').then((mod) => ({
+    default: mod.OauthDialog,
+  })),
+);
+const OauthDialogTrigger = lazy(() =>
+  import('./auth/oauth-dialog').then((mod) => ({
+    default: mod.OauthDialogTrigger,
+  })),
+);
+
+function AuthFooter({ authorization }: { authorization: Security }) {
   const form = useFormContext();
-  if (!authorization || authorization.type !== 'oauth2') return children;
+  if (authorization.type !== 'oauth2') return;
 
   // only the first one, so it looks simpler :)
   const flow = Object.keys(authorization.flows)[0];
@@ -485,7 +474,16 @@ function AuthProvider({
       scheme={authorization}
       setToken={(token) => form.setValue('authorization', `Bearer ${token}`)}
     >
-      {children}
+      <OauthDialogTrigger
+        type="button"
+        className={cn(
+          buttonVariants({
+            color: 'secondary',
+          }),
+        )}
+      >
+        Auth Settings
+      </OauthDialogTrigger>
     </OauthDialog>
   );
 }
@@ -523,7 +521,7 @@ function DefaultResultDisplay({ data }: { data: FetchResult }) {
   const { shikiOptions } = useApiContext();
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border bg-fd-card p-4">
+    <div className="flex flex-col gap-3 border-t p-3">
       <div className="inline-flex items-center gap-1.5 text-sm font-medium text-fd-foreground">
         <statusInfo.icon className={cn('size-4', statusInfo.color)} />
         {statusInfo.description}
@@ -636,4 +634,79 @@ function writeAuthHeader(
   if (typeof input === 'string') {
     header.Authorization = input;
   }
+}
+
+// TODO: Make it handle nested `oneOf`, currently it allows only one value of `oneOf` per field name.
+export function useFieldInfo(
+  fieldName: string,
+  schema: Exclude<RequestSchema, boolean>,
+): {
+  info: FieldInfo;
+  updateInfo: (value: Partial<FieldInfo>) => void;
+} {
+  const ctx = useContext(SchemaContext);
+  if (!ctx) throw new Error('Missing provider');
+
+  const { fieldInfoMap } = ctx;
+  const [_, trigger] = useState(0);
+  const form = useFormContext();
+  const value = form.getValues(fieldName as 'body');
+
+  const info = fieldInfoMap.get(fieldName) ?? {
+    oneOf: -1,
+  };
+
+  // update info if needed
+  if (!info.selectedType && Array.isArray(schema.type)) {
+    info.selectedType =
+      schema.type.find((type) =>
+        ajv.validate(
+          {
+            ...schema,
+            type,
+          },
+          value,
+        ),
+      ) ?? schema.type[0];
+  }
+
+  if (info.oneOf === -1 && schema.oneOf) {
+    info.oneOf = schema.oneOf.findIndex((item) => ajv.validate(item, value));
+    if (info.oneOf === -1) info.oneOf = 0;
+  }
+
+  fieldInfoMap.set(fieldName, info);
+
+  return {
+    info,
+    updateInfo: useEffectEvent((value) => {
+      const prev = fieldInfoMap.get(fieldName);
+      if (!prev) return;
+
+      const updated = {
+        ...prev,
+        ...value,
+      };
+
+      if (
+        updated.oneOf === prev.oneOf &&
+        updated.selectedType === prev.selectedType
+      )
+        return;
+
+      fieldInfoMap.set(fieldName, updated);
+      form.setValue(
+        fieldName,
+        getDefaultValue(
+          schema.oneOf && updated.oneOf !== -1
+            ? schema.oneOf[updated.oneOf]
+            : {
+                ...schema,
+                type: value.selectedType ?? schema.type,
+              },
+        ),
+      );
+      trigger((prev) => prev + 1);
+    }),
+  };
 }

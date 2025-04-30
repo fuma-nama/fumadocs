@@ -1153,9 +1153,9 @@ importers:
       '@scalar/openapi-parser':
         specifier: 0.10.16
         version: 0.10.16
-      ajv-draft-04:
-        specifier: ^1.0.0
-        version: 1.0.0(ajv@8.17.1)
+      ajv:
+        specifier: ^8.17.1
+        version: 8.17.1
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1

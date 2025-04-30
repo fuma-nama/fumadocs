@@ -256,6 +256,34 @@
           "keyring": {
             "description": "The keyring to use for encryption.",
             "type": "string"
+          },
+          "test": {
+            "oneOf": [
+              {
+                "type": "object",
+                "required": ["keyring", "data"],
+                "properties": {
+                  "$schema": {
+                    "description": "A URL to the JSON Schema for this object.",
+                    "example": "https://api.unkey.dev/schemas/V1EncryptBulkRequestBody.json",
+                    "format": "uri",
+                    "readOnly": true,
+                    "type": "string"
+                  }
+                }
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 1000,
+                "minItems": 1,
+                "type": ["array"]
+              },
+              {
+                "type": "string"
+              }
+            ]
           }
         },
         "required": ["keyring", "encrypted"],
@@ -280,16 +308,21 @@
         "type": "object"
       },
       "V1EncryptBulkRequestBody": {
-        "additionalProperties": false,
-        "properties": {
-          "$schema": {
-            "description": "A URL to the JSON Schema for this object.",
-            "example": "https://api.unkey.dev/schemas/V1EncryptBulkRequestBody.json",
-            "format": "uri",
-            "readOnly": true,
-            "type": "string"
+        "oneOf": [
+          {
+            "type": "object",
+            "required": ["keyring", "data"],
+            "properties": {
+              "$schema": {
+                "description": "A URL to the JSON Schema for this object.",
+                "example": "https://api.unkey.dev/schemas/V1EncryptBulkRequestBody.json",
+                "format": "uri",
+                "readOnly": true,
+                "type": "string"
+              }
+            }
           },
-          "data": {
+          {
             "items": {
               "type": "string"
             },
@@ -297,12 +330,10 @@
             "minItems": 1,
             "type": ["array"]
           },
-          "keyring": {
+          {
             "type": "string"
           }
-        },
-        "required": ["keyring", "data"],
-        "type": "object"
+        ]
       },
       "V1EncryptBulkResponseBody": {
         "additionalProperties": false,

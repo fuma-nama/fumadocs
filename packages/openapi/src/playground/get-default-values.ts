@@ -1,22 +1,19 @@
-import type { JSONSchema } from 'json-schema-typed';
 import type { RequestSchema } from '@/playground/index';
 
-export function getDefaultValue(
-  type: JSONSchema.TypeValue,
-  schema?: RequestSchema,
-): unknown {
-  if (Array.isArray(type)) return getDefaultValue(type[0], schema);
+export function getDefaultValue(schema: RequestSchema): unknown {
+  if (typeof schema === 'boolean') return null;
+
+  const type = schema.type;
+  if (Array.isArray(type))
+    return getDefaultValue({
+      ...schema,
+      type: type[0],
+    });
 
   if (type === 'object' && typeof schema === 'object')
     return Object.fromEntries(
       Object.entries(schema.properties ?? {}).map(([key, prop]) => {
-        return [
-          key,
-          getDefaultValue(
-            typeof prop === 'object' ? (prop.type ?? 'string') : 'string',
-            prop,
-          ),
-        ];
+        return [key, getDefaultValue(prop)];
       }),
     );
 

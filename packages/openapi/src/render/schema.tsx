@@ -1,8 +1,9 @@
 import { type ReactNode } from 'react';
-import { isNullable, type ResolvedSchema } from '@/utils/schema';
+import { type ResolvedSchema } from '@/utils/schema';
 import type { RenderContext } from '@/types';
 import { combineSchema } from '@/utils/combine-schema';
 import { Markdown } from './markdown';
+import { schemaToString } from '@/utils/schema-to-string';
 
 const keys: {
   [T in keyof Exclude<ResolvedSchema, boolean>]: string;
@@ -22,16 +23,6 @@ interface Context {
   stack?: ResolvedSchema[];
 
   render: RenderContext;
-}
-
-function isObject(schema: ResolvedSchema): boolean {
-  if (typeof schema === 'boolean') return false;
-
-  return (
-    schema.type === 'object' ||
-    schema.properties !== undefined ||
-    schema.additionalProperties !== undefined
-  );
 }
 
 export function Schema({
@@ -73,7 +64,7 @@ export function Schema({
 
   // object type
   if (
-    isObject(schema) &&
+    schema.type === 'object' &&
     parseObject &&
     (schema.additionalProperties || schema.properties)
   ) {
@@ -162,7 +153,7 @@ export function Schema({
     });
   }
 
-  if (isObject(schema) && !parseObject && !stack.includes(schema)) {
+  if (schema.type === 'object' && !parseObject && !stack.includes(schema)) {
     footer = (
       <renderer.ObjectCollapsible name="Show Attributes">
         <Schema
@@ -210,7 +201,7 @@ export function Schema({
   return (
     <renderer.Property
       name={name}
-      type={getSchemaType(schema, ctx)}
+      type={schemaToString(schema)}
       required={required}
       deprecated={schema.deprecated}
     >
@@ -236,83 +227,5 @@ function isComplexType(schema: ResolvedSchema): boolean {
   if (typeof schema === 'boolean') return false;
   if (schema.anyOf ?? schema.oneOf ?? schema.allOf) return true;
 
-  return isObject(schema) || schema.type === 'array';
-}
-
-function getSchemaType(
-  schema: ResolvedSchema,
-  ctx: Context,
-  isRoot = true,
-): string {
-  if (schema === true) return 'any';
-  else if (schema === false) return 'never';
-
-  if (isNullable(schema) && isRoot) {
-    const type = getSchemaType(schema, ctx, false);
-
-    // null if schema only contains `nullable`
-    return type === 'unknown' ? 'null' : `${type} | null`;
-  }
-
-  if (schema.title) return schema.title;
-
-  if (Array.isArray(schema.type)) {
-    return schema.type
-      .map((type) =>
-        getSchemaType(
-          {
-            ...schema,
-            type,
-          },
-          ctx,
-          false,
-        ),
-      )
-      .join(' | ');
-  }
-
-  if (schema.type === 'array')
-    return `array<${schema.items ? getSchemaType(schema.items, ctx) : 'unknown'}>`;
-
-  if (schema.oneOf) {
-    return schema.oneOf
-      .map((one) => getSchemaType(one, ctx, false))
-      .filter((v) => v !== 'unknown')
-      .join(' | ');
-  }
-
-  if (schema.allOf) {
-    return schema.allOf
-      .map((one) => getSchemaType(one, ctx, false))
-      .filter((v) => v !== 'unknown')
-      .join(' & ');
-  }
-
-  if (schema.not) return `not ${getSchemaType(schema.not, ctx, false)}`;
-
-  if (schema.anyOf) {
-    const union = schema.anyOf
-      .map((one) => getSchemaType(one, ctx, false))
-      .filter((v) => v !== 'unknown');
-
-    if (union.length > 1) {
-      return `Any properties in ${union.join(',')}`;
-    } else if (union.length === 1) {
-      return union[0];
-    }
-  }
-
-  if (schema.type === 'string' && schema.format === 'binary') return 'file';
-
-  if (schema.type && Array.isArray(schema.type)) {
-    const nonNullTypes = schema.type.filter((v) => v !== 'null');
-
-    if (nonNullTypes.length > 0) return nonNullTypes.join(' | ');
-  } else if (schema.type && schema.type !== 'null') {
-    return schema.type as string;
-  }
-
-  if (isObject(schema)) return 'object';
-
-  return 'unknown';
+  return schema.type === 'object' || schema.type === 'array';
 }
