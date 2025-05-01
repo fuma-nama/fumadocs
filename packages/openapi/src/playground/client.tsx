@@ -24,14 +24,13 @@ import {
 } from 'react-hook-form';
 import { useApiContext, useServerSelectContext } from '@/ui/contexts/api';
 import type { FetchResult } from '@/playground/fetcher';
-import { FieldSet, JsonInput, ObjectInput } from './inputs';
+import { FieldSet, JsonInput } from './inputs';
 import type { ParameterField, RequestSchema } from '@/playground/index';
 import { getStatusInfo } from './status-info';
 import { getUrl } from '@/utils/server-url';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
 import { MethodLabel } from '@/ui/components/method-label';
 import { useQuery } from '@/utils/use-query';
-import ServerSelect from '@/ui/server-select';
 import {
   Collapsible,
   CollapsibleContent,
@@ -44,7 +43,6 @@ import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 import type { RequestData } from '@/requests/_shared';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from 'fumadocs-ui/utils/cn';
-import { cva } from 'class-variance-authority';
 import {
   type FieldInfo,
   SchemaProvider,
@@ -123,6 +121,8 @@ function toRequestData(
     query: value.query,
   };
 }
+
+const ServerSelect = lazy(() => import('@/ui/server-select'));
 
 export default function Client({
   route,
@@ -217,6 +217,7 @@ export default function Client({
           )}
           onSubmit={onSubmit}
         >
+          <ServerSelect />
           <div className="flex flex-row items-center gap-2 text-sm p-3 pb-0">
             <MethodLabel>{method}</MethodLabel>
             <Route route={route} className="flex-1" />
@@ -235,7 +236,6 @@ export default function Client({
               )}
             </button>
           </div>
-
           <FormBody
             body={body}
             fields={fields}
@@ -259,8 +259,6 @@ function FormBody({
   fields = {},
   body,
 }: Pick<ClientProps, 'parameters' | 'authorization' | 'body' | 'fields'>) {
-  const { servers } = useApiContext();
-  const { server, setServer, setServerVariables } = useServerSelectContext();
   const params = useMemo(() => {
     return paramTypes.map((param) => parameters.filter((v) => v.in === param));
   }, [parameters]);
@@ -301,16 +299,6 @@ function FormBody({
 
   return (
     <>
-      {servers.length > 0 ? (
-        <CollapsiblePanel title="Server URL">
-          <ServerSelect
-            server={server}
-            onServerChanged={setServer}
-            onVariablesChanged={setServerVariables}
-          />
-        </CollapsiblePanel>
-      ) : null}
-
       {params.map((param, i) => {
         const name = paramNames[i];
         const type = paramTypes[i];
@@ -358,48 +346,49 @@ function FormBody({
   );
 }
 
-const bodyTypeVariants = cva(
-  'p-1 rounded-lg font-medium text-xs transition-colors',
-  {
-    variants: {
-      active: {
-        true: 'bg-fd-primary/10 text-fd-primary',
-        false: 'text-fd-muted-foreground',
-      },
-    },
-  },
-);
-
 function BodyInput({ field: _field }: { field: RequestSchema }) {
   const field = useResolvedSchema(_field);
   const [isJson, setIsJson] = useState(false);
 
   return (
     <CollapsiblePanel title="Body">
-      <div className="grid grid-cols-2 border bg-fd-muted rounded-lg">
-        <button
-          className={cn(bodyTypeVariants({ active: !isJson }))}
-          onClick={() => setIsJson(false)}
-          type="button"
-        >
-          Simple
-        </button>
-        <button
-          className={cn(bodyTypeVariants({ active: isJson }))}
-          onClick={() => setIsJson(true)}
-          type="button"
-        >
-          JSON Mode
-        </button>
-      </div>
       {isJson ? (
-        <JsonInput fieldName="body" />
-      ) : typeof field === 'object' &&
-        field.type === 'object' &&
-        !field.oneOf ? (
-        <ObjectInput field={field} fieldName="body" />
+        <>
+          <button
+            className={cn(
+              buttonVariants({
+                color: 'secondary',
+                size: 'sm',
+                className: 'p-2',
+              }),
+            )}
+            onClick={() => setIsJson(false)}
+            type="button"
+          >
+            Close JSON Editor
+          </button>
+          <JsonInput fieldName="body" />
+        </>
       ) : (
-        <FieldSet field={field} fieldName="body" />
+        <FieldSet
+          field={field}
+          fieldName="body"
+          name={
+            <button
+              className={cn(
+                buttonVariants({
+                  color: 'secondary',
+                  size: 'sm',
+                  className: 'p-2',
+                }),
+              )}
+              onClick={() => setIsJson(true)}
+              type="button"
+            >
+              Open JSON Editor
+            </button>
+          }
+        />
       )}
     </CollapsiblePanel>
   );

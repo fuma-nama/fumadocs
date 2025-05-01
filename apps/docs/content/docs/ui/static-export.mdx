@@ -24,32 +24,32 @@ Since the search functionality is powered by remote servers, static export works
 
 ### Built-in Search
 
-The default search config of Orama Search uses route handlers, which is not supported by static export.
+You can enable static mode:
 
-Instead, you can build the search indexes statically following the [Orama Search](/docs/headless/search/orama#static-export) guide.
-And enable static mode on search client from Root Provider:
+1. You can build the search indexes statically using [`staticGET`](/docs/headless/search/orama#static-export).
+2. Enable static mode on search client from Root Provider:
 
-```tsx title="app/layout.tsx"
-import { RootProvider } from 'fumadocs-ui/provider';
-import type { ReactNode } from 'react';
+   ```tsx title="app/layout.tsx"
+   import { RootProvider } from 'fumadocs-ui/provider';
+   import type { ReactNode } from 'react';
 
-export default function RootLayout({ children }: { children: ReactNode }) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body>
-        <RootProvider
-          search={{
-            options: {
-              type: 'static', // [!code highlight]
-            },
-          }}
-        >
-          {children}
-        </RootProvider>
-      </body>
-    </html>
-  );
-}
-```
+   export default function RootLayout({ children }: { children: ReactNode }) {
+     return (
+       <html lang="en" suppressHydrationWarning>
+         <body>
+           <RootProvider
+             search={{
+               options: {
+                 type: 'static', // [!code highlight]
+               },
+             }}
+           >
+             {children}
+           </RootProvider>
+         </body>
+       </html>
+     );
+   }
+   ```
 
 This allows the route handler to be statically cached into a single file, and search will be computed on browser instead.

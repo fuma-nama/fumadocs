@@ -49,8 +49,11 @@ function FieldHeader({
       {...props}
       className={cn('w-full inline-flex items-center gap-1', props.className)}
     >
-      <span className={cn(labelVariants())}>{name}</span>
-      {required ? <span className="text-red-500">*</span> : null}
+      <span className={cn(labelVariants())}>
+        {name}
+        {required ? <span className="text-red-400/80 mx-1">*</span> : null}
+      </span>
+
       <div className="flex-1" />
       {type ? (
         <code data-type={true} className="text-xs text-fd-muted-foreground">

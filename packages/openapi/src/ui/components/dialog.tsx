@@ -4,6 +4,7 @@ import * as React from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import { cn } from 'fumadocs-ui/utils/cn';
+import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 
 const Dialog = DialogPrimitive.Root;
 
@@ -37,15 +38,20 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        'fixed left-1/2 top-1/2 z-50 grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 border bg-fd-popover p-6 shadow-lg duration-200 data-[state=open]:animate-fd-dialog-in data-[state=closed]:animate-fd-dialog-out sm:rounded-lg',
+        'fixed left-1/2 top-1/2 z-50 grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 border bg-fd-popover p-4 shadow-lg rounded-xl duration-200 data-[state=open]:animate-fd-dialog-in data-[state=closed]:animate-fd-dialog-out focus-visible:outline-none',
         className,
       )}
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className="absolute end-4 top-4 rounded-sm opacity-70 ring-offset-fd-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-fd-accent data-[state=open]:text-fd-muted-foreground">
-        <X className="size-4" />
-        <span className="sr-only">Close</span>
+      <DialogPrimitive.Close
+        aria-label="Close"
+        className={cn(
+          buttonVariants({ size: 'icon-sm', color: 'ghost' }),
+          'absolute end-2 top-2 text-fd-muted-foreground/70',
+        )}
+      >
+        <X />
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>
   </DialogPortal>
@@ -57,10 +63,7 @@ const DialogHeader = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn(
-      'flex flex-col space-y-1.5 text-center sm:text-start',
-      className,
-    )}
+    className={cn('flex flex-col gap-1.5 text-center sm:text-start', className)}
     {...props}
   />
 );
