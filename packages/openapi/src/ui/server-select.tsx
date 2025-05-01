@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from '@/ui/components/select';
 import { Input, labelVariants } from '@/ui/components/input';
-import { type HTMLAttributes, useState } from 'react';
+import { type HTMLAttributes, useEffect, useState } from 'react';
 import { cn } from 'fumadocs-ui/utils/cn';
 import {
   Dialog,
@@ -31,16 +31,22 @@ export default function ServerSelect(props: HTMLAttributes<HTMLDivElement>) {
   const { servers } = useApiContext();
   const { server, setServer } = useServerSelectContext();
   const [open, setOpen] = useState(false);
-  if (servers.length <= 0) return;
+  const [isMounted, setIsMounted] = useState(false);
 
-  const serverUrl = server
-    ? getUrl(server.url, server.variables)
-    : window.location.origin;
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (servers.length <= 0) return;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger className="text-xs p-3 py-2 bg-fd-muted text-fd-muted-foreground transition-colors truncate hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:outline-none">
-        {serverUrl}
+        {isMounted
+          ? server
+            ? getUrl(server.url, server.variables)
+            : window.location.origin
+          : 'loading...'}
       </DialogTrigger>
       <DialogContent {...props}>
         <DialogHeader>

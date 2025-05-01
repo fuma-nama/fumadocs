@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react';
-import { type ResolvedSchema } from '@/utils/schema';
+import type { ParsedSchema, ResolvedSchema } from '@/utils/schema';
 import type { RenderContext } from '@/types';
 import { combineSchema } from '@/utils/combine-schema';
 import { Markdown } from './markdown';
@@ -62,12 +62,44 @@ export function Schema({
   )
     return null;
 
+  if (Array.isArray(schema.type) && schema.type.length === 1) {
+    return (
+      <Schema
+        name={name}
+        required={required}
+        parseObject={parseObject}
+        schema={{
+          ...schema,
+          type: schema.type[0],
+        }}
+        ctx={{
+          ...ctx,
+          stack: [schema, ...stack],
+        }}
+      />
+    );
+  }
+
+  if (schema.allOf || schema.anyOf) {
+    return (
+      <Schema
+        name={name}
+        parseObject={parseObject}
+        required={required}
+        schema={combineSchema([
+          ...(schema.allOf ?? []),
+          ...(schema.anyOf ?? []),
+        ])}
+        ctx={{
+          ...ctx,
+          stack: [schema, ...stack],
+        }}
+      />
+    );
+  }
+
   // object type
-  if (
-    schema.type === 'object' &&
-    parseObject &&
-    (schema.additionalProperties || schema.properties)
-  ) {
+  if (schema.type === 'object' && parseObject) {
     const { additionalProperties, patternProperties, properties } = schema;
 
     return (
@@ -118,19 +150,6 @@ export function Schema({
     );
   }
 
-  if (schema.allOf && parseObject) {
-    return (
-      <Schema
-        name={name}
-        schema={combineSchema(schema.allOf as ResolvedSchema[])}
-        ctx={{
-          ...ctx,
-          stack: [schema, ...stack],
-        }}
-      />
-    );
-  }
-
   let footer: ReactNode;
   const fields: {
     key: string;
@@ -167,11 +186,24 @@ export function Schema({
       </renderer.ObjectCollapsible>
     );
   } else {
-    const mentionedObjectTypes = [
-      ...(schema.anyOf ?? schema.oneOf ?? []),
-      ...(schema.not ? [schema.not] : []),
-      ...(schema.type === 'array' && schema.items ? [schema.items] : []),
-    ].filter((s) => isComplexType(s) && !stack.includes(s));
+    let mentionedObjectTypes: ParsedSchema[] = [];
+    if (Array.isArray(schema.type)) {
+      mentionedObjectTypes.push(
+        ...schema.type.map((type) => ({
+          ...schema,
+          type,
+        })),
+      );
+    }
+
+    if (schema.oneOf) mentionedObjectTypes.push(...schema.oneOf);
+    if (schema.not) mentionedObjectTypes.push(schema.not);
+    if (schema.type === 'array' && schema.items)
+      mentionedObjectTypes.push(schema.items);
+
+    mentionedObjectTypes = mentionedObjectTypes.filter(
+      (s) => isComplexType(s) && !stack.includes(s),
+    );
 
     footer = (
       <div className="flex flex-col gap-2">

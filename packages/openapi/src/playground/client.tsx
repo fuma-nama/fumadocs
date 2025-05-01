@@ -353,11 +353,11 @@ function BodyInput({ field: _field }: { field: RequestSchema }) {
   return (
     <CollapsiblePanel title="Body">
       {isJson ? (
-        <>
+        <JsonInput fieldName="body">
           <button
             className={cn(
               buttonVariants({
-                color: 'secondary',
+                color: 'ghost',
                 size: 'sm',
                 className: 'p-2',
               }),
@@ -367,8 +367,7 @@ function BodyInput({ field: _field }: { field: RequestSchema }) {
           >
             Close JSON Editor
           </button>
-          <JsonInput fieldName="body" />
-        </>
+        </JsonInput>
       ) : (
         <FieldSet
           field={field}

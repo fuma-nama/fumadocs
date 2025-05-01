@@ -274,7 +274,7 @@ async function ResponseTab({
   return (
     <Tab value={status}>
       <Markdown text={description} />
-
+      {ts && <CopyResponseTypeScript code={ts} />}
       {responseOfType?.schema && (
         <Schema
           name="response"
@@ -287,8 +287,6 @@ async function ResponseTab({
           }}
         />
       )}
-
-      {ts && <CopyResponseTypeScript code={ts} />}
     </Tab>
   );
 }

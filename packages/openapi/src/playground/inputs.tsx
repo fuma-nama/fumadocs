@@ -111,7 +111,13 @@ export function ObjectInput({
   );
 }
 
-export function JsonInput({ fieldName }: { fieldName: string }) {
+export function JsonInput({
+  fieldName,
+  children,
+}: {
+  fieldName: string;
+  children: ReactNode;
+}) {
   const controller = useController({
     name: fieldName,
   });
@@ -120,19 +126,22 @@ export function JsonInput({ fieldName }: { fieldName: string }) {
   );
 
   return (
-    <textarea
-      {...controller.field}
-      value={value}
-      className="w-full h-[300px] text-[13px] font-mono resize-none rounded-lg border p-2 bg-fd-secondary text-fd-secondary-foreground focus-visible:outline-none"
-      onChange={(v) => {
-        setValue(v.target.value);
-        try {
-          controller.field.onChange(JSON.parse(v.target.value));
-        } catch {
-          // ignore
-        }
-      }}
-    />
+    <div className="rounded-lg border bg-fd-secondary text-fd-secondary-foreground">
+      {children}
+      <textarea
+        {...controller.field}
+        value={value}
+        className="p-2 w-full h-[240px] text-[13px] font-mono resize-none focus-visible:outline-none"
+        onChange={(v) => {
+          setValue(v.target.value);
+          try {
+            controller.field.onChange(JSON.parse(v.target.value));
+          } catch {
+            // ignore
+          }
+        }}
+      />
+    </div>
   );
 }
 
