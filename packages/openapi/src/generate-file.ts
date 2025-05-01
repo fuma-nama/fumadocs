@@ -1,5 +1,5 @@
 import { mkdir, writeFile } from 'node:fs/promises';
-import { dirname, join, parse } from 'node:path';
+import * as path from 'node:path';
 import fg from 'fast-glob';
 import {
   generateAll,
@@ -59,7 +59,6 @@ export async function generateFiles(options: Config): Promise<void> {
     groupBy = 'none',
     cwd = process.cwd(),
   } = options;
-  const outputDir = join(cwd, output);
   const urlInputs: string[] = [];
   const fileInputs: string[] = [];
 
@@ -90,7 +89,7 @@ export async function generateFiles(options: Config): Promise<void> {
     if (result.pathItem.summary) {
       file = getFilename(result.pathItem.summary);
     } else if (result.type === 'operation') {
-      file = join(
+      file = path.join(
         getOutputPathFromRoute(result.item.path),
         result.item.method.toLowerCase(),
       );
@@ -111,10 +110,10 @@ export async function generateFiles(options: Config): Promise<void> {
       }
 
       for (const tag of tags) {
-        outPaths.push(join(outputDir, getFilename(tag), `${file}.mdx`));
+        outPaths.push(path.join(getFilename(tag), `${file}.mdx`));
       }
     } else {
-      outPaths.push(join(outputDir, `${file}.mdx`));
+      outPaths.push(`${file}.mdx`);
     }
 
     return outPaths;
@@ -130,11 +129,15 @@ export async function generateFiles(options: Config): Promise<void> {
   }
 
   async function generateFromDocument(pathOrUrl: string) {
+    const outputDir = path.join(cwd, output);
+
     if (per === 'file') {
-      let filename = isUrl(pathOrUrl) ? 'index' : parse(pathOrUrl).name;
+      let filename = isUrl(pathOrUrl)
+        ? 'index'
+        : path.basename(pathOrUrl, path.extname(pathOrUrl));
       if (nameFn) filename = nameFn('file', filename);
 
-      const outPath = join(outputDir, `${filename}.mdx`);
+      const outPath = path.join(outputDir, `${filename}.mdx`);
 
       const result = await generateAll(pathOrUrl, options);
       await write(outPath, result);
@@ -143,22 +146,39 @@ export async function generateFiles(options: Config): Promise<void> {
 
     if (per === 'operation') {
       const results = await generatePages(pathOrUrl, options);
+      const mapping = new Map<string, GeneratePageOutput>();
 
       for (const result of results) {
         const outputPaths = getOutputPaths(result);
-        await Promise.all(
-          outputPaths.map(async (outPath) => {
-            await write(outPath, result.content);
+        for (const outputPath of outputPaths) {
+          mapping.set(outputPath, result);
+        }
+      }
 
-            if (groupBy === 'route' && result.pathItem.summary) {
-              await writeMetafile(join(dirname(outPath), 'meta.json'), {
-                title: result.pathItem.summary,
-              });
-            }
-          }),
+      for (const [key, output] of mapping.entries()) {
+        let outputPath = key;
+        const isSharedDir = Array.from(mapping.keys()).some(
+          (item) =>
+            item !== outputPath &&
+            path.dirname(item) === path.dirname(outputPath),
         );
 
-        console.log(`Generated: ${outputPaths.join(', ')}`);
+        if (!isSharedDir && path.dirname(outputPath).length > 0) {
+          outputPath = path.join(path.dirname(outputPath) + '.mdx');
+        }
+
+        await write(path.join(outputDir, outputPath), output.content);
+
+        if (groupBy === 'route' && output.pathItem.summary) {
+          await writeMetafile(
+            path.join(outputDir, path.dirname(outputPath), 'meta.json'),
+            {
+              title: output.pathItem.summary,
+            },
+          );
+        }
+
+        console.log(`Generated: ${outputPath}`);
       }
     }
 
@@ -169,7 +189,7 @@ export async function generateFiles(options: Config): Promise<void> {
         let tagName = result.tag;
         tagName = nameFn?.('tag', tagName) ?? getFilename(tagName);
 
-        const outPath = join(outputDir, `${tagName}.mdx`);
+        const outPath = path.join(outputDir, `${tagName}.mdx`);
         await write(outPath, result.content);
         console.log(`Generated: ${outPath}`);
       }
@@ -186,10 +206,14 @@ function isUrl(input: string): boolean {
 function getOutputPathFromRoute(path: string): string {
   return (
     path
-      .replaceAll('.', '/')
+      .toLowerCase()
+      .replaceAll('.', '-')
       .split('/')
-      .filter((v) => !v.startsWith('{') && !v.endsWith('}'))
-      .at(-1) ?? ''
+      .map((v) => {
+        if (v.startsWith('{') && v.endsWith('}')) return v.slice(1, -1);
+        return v;
+      })
+      .join('/') ?? ''
   );
 }
 
@@ -197,7 +221,7 @@ function getFilename(s: string): string {
   return s.replace(/\s+/g, '-').toLowerCase();
 }
 
-async function write(path: string, content: string): Promise<void> {
-  await mkdir(dirname(path), { recursive: true });
-  await writeFile(path, content);
+async function write(file: string, content: string): Promise<void> {
+  await mkdir(path.dirname(file), { recursive: true });
+  await writeFile(file, content);
 }

@@ -239,15 +239,7 @@
         "type": "object"
       },
       "V1DecryptRequestBody": {
-        "additionalProperties": false,
         "properties": {
-          "$schema": {
-            "description": "A URL to the JSON Schema for this object.",
-            "example": "https://api.unkey.dev/schemas/V1DecryptRequestBody.json",
-            "format": "uri",
-            "readOnly": true,
-            "type": "string"
-          },
           "encrypted": {
             "description": "The encrypted base64 string.",
             "minLength": 1,
@@ -256,9 +248,44 @@
           "keyring": {
             "description": "The keyring to use for encryption.",
             "type": "string"
+          },
+          "test": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/V1DecryptRequestBody"
+              },
+              {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "test": {
+                        "description": "A URL to the JSON Schema for this object.",
+                        "example": "https://api.unkey.dev/schemas/V1EncryptBulkRequestBody.json",
+                        "format": "uri",
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ]
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 1000,
+                "minItems": 1,
+                "type": ["array"]
+              },
+              {
+                "type": "string"
+              }
+            ]
           }
         },
-        "required": ["keyring", "encrypted"],
         "type": "object"
       },
       "V1DecryptResponseBody": {
@@ -280,16 +307,21 @@
         "type": "object"
       },
       "V1EncryptBulkRequestBody": {
-        "additionalProperties": false,
-        "properties": {
-          "$schema": {
-            "description": "A URL to the JSON Schema for this object.",
-            "example": "https://api.unkey.dev/schemas/V1EncryptBulkRequestBody.json",
-            "format": "uri",
-            "readOnly": true,
-            "type": "string"
+        "oneOf": [
+          {
+            "type": "object",
+            "required": ["keyring", "data"],
+            "properties": {
+              "$schema": {
+                "description": "A URL to the JSON Schema for this object.",
+                "example": "https://api.unkey.dev/schemas/V1EncryptBulkRequestBody.json",
+                "format": "uri",
+                "readOnly": true,
+                "type": "string"
+              }
+            }
           },
-          "data": {
+          {
             "items": {
               "type": "string"
             },
@@ -297,12 +329,10 @@
             "minItems": 1,
             "type": ["array"]
           },
-          "keyring": {
+          {
             "type": "string"
           }
-        },
-        "required": ["keyring", "data"],
-        "type": "object"
+        ]
       },
       "V1EncryptBulkResponseBody": {
         "additionalProperties": false,
@@ -325,7 +355,7 @@
         "type": "object"
       },
       "V1EncryptRequestBody": {
-        "additionalProperties": false,
+        "additionalProperties": true,
         "properties": {
           "$schema": {
             "description": "A URL to the JSON Schema for this object.",
@@ -341,6 +371,11 @@
           },
           "keyring": {
             "description": "The keyring to use for encryption.",
+            "type": "string"
+          }
+        },
+        "patternProperties": {
+          "test\\s.+": {
             "type": "string"
           }
         },
@@ -546,7 +581,7 @@
     "title": "Unkey API",
     "version": "1.0.0"
   },
-  "openapi": "3.0.0",
+  "openapi": "3.1.0",
   "paths": {
     "/v0/events": {
       "post": {

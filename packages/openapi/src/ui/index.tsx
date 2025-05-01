@@ -60,7 +60,7 @@ export function API({ children, ...props }: HTMLAttributes<HTMLDivElement>) {
       style={
         {
           '--fd-api-info-top':
-            'calc(var(--fd-nav-height) + var(--fd-banner-height) + var(--fd-tocnav-height, 0px))',
+            'calc(12px + var(--fd-nav-height) + var(--fd-banner-height) + var(--fd-tocnav-height, 0px))',
           ...props.style,
         } as object
       }

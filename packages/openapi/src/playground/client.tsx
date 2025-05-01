@@ -1,16 +1,13 @@
 'use client';
 import {
-  createContext,
   type FC,
   Fragment,
   type HTMLAttributes,
+  lazy,
   type ReactElement,
   type ReactNode,
-  type RefObject,
-  useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react';
 import type {
@@ -27,18 +24,13 @@ import {
 } from 'react-hook-form';
 import { useApiContext, useServerSelectContext } from '@/ui/contexts/api';
 import type { FetchResult } from '@/playground/fetcher';
-import { FieldSet, JsonInput, ObjectInput } from './inputs';
-import type {
-  ParameterField,
-  ReferenceSchema,
-  RequestSchema,
-} from '@/playground/index';
+import { FieldSet, JsonInput } from './inputs';
+import type { ParameterField, RequestSchema } from '@/playground/index';
 import { getStatusInfo } from './status-info';
 import { getUrl } from '@/utils/server-url';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
 import { MethodLabel } from '@/ui/components/method-label';
 import { useQuery } from '@/utils/use-query';
-import ServerSelect from '@/ui/server-select';
 import {
   Collapsible,
   CollapsibleContent,
@@ -46,16 +38,16 @@ import {
 } from 'fumadocs-ui/components/ui/collapsible';
 import { ChevronDown, LoaderCircle } from 'lucide-react';
 import type { Security } from '@/utils/get-security';
-import {
-  OauthDialog,
-  OauthDialogTrigger,
-} from '@/playground/auth/oauth-dialog';
 import { useRequestData } from '@/ui/contexts/code-example';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 import type { RequestData } from '@/requests/_shared';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from 'fumadocs-ui/utils/cn';
-import { cva } from 'class-variance-authority';
+import {
+  type FieldInfo,
+  SchemaProvider,
+  useResolvedSchema,
+} from '@/playground/schema';
 
 interface FormValues {
   authorization:
@@ -90,11 +82,12 @@ export type ClientProps = HTMLAttributes<HTMLFormElement> & {
     persistentId: string;
   };
   parameters?: ParameterField[];
-  body?: RequestSchema & {
+  body?: {
+    schema: RequestSchema;
     mediaType: string;
   };
   /**
-   * Resolver for reference schemas you've passed
+   * Resolver for $ref schemas you've passed
    */
   references: Record<string, RequestSchema>;
   proxyUrl?: string;
@@ -113,29 +106,6 @@ export type ClientProps = HTMLAttributes<HTMLFormElement> & {
   }>;
 };
 
-interface SchemaContextType {
-  references: Record<string, RequestSchema>;
-  dynamic: RefObject<Map<string, DynamicField>>;
-}
-
-export type DynamicField =
-  | {
-      type: 'object';
-      properties: string[];
-    }
-  | {
-      type: 'field';
-      schema: RequestSchema | ReferenceSchema;
-    };
-
-const SchemaContext = createContext<SchemaContextType | undefined>(undefined);
-
-export function useSchemaContext(): SchemaContextType {
-  const ctx = useContext(SchemaContext);
-  if (!ctx) throw new Error('Missing provider');
-  return ctx;
-}
-
 function toRequestData(
   method: string,
   mediaType: string | undefined,
@@ -152,6 +122,8 @@ function toRequestData(
   };
 }
 
+const ServerSelect = lazy(() => import('@/ui/server-select'));
+
 export default function Client({
   route,
   method = 'GET',
@@ -165,9 +137,8 @@ export default function Client({
   ...rest
 }: ClientProps) {
   const { server } = useServerSelectContext();
-
-  const dynamicRef = useRef(new Map<string, DynamicField>());
   const requestData = useRequestData();
+  const fieldInfoMap = useMemo(() => new Map<string, FieldInfo>(), []);
   const authInfo = usePersistentAuthInfo(authorization);
   const defaultValues: FormValues = useMemo(
     () => ({
@@ -201,6 +172,7 @@ export default function Client({
   });
 
   useEffect(() => {
+    fieldInfoMap.clear();
     form.reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- update default value
   }, [defaultValues]);
@@ -236,50 +208,44 @@ export default function Client({
 
   return (
     <FormProvider {...form}>
-      <SchemaContext.Provider
-        value={useMemo(
-          () => ({ references: references, dynamic: dynamicRef }),
-          [references],
-        )}
-      >
-        <AuthProvider authorization={authorization}>
-          <form
-            {...rest}
-            className={cn(
-              'not-prose flex flex-col rounded-xl border shadow-md overflow-hidden bg-fd-card text-fd-card-foreground',
-              rest.className,
-            )}
-            onSubmit={onSubmit}
-          >
-            <div className="flex flex-row items-center gap-2 text-sm p-3 pb-0">
-              <MethodLabel>{method}</MethodLabel>
-              <Route route={route} className="flex-1" />
-              <button
-                type="submit"
-                className={cn(
-                  buttonVariants({ color: 'primary', size: 'sm' }),
-                  'px-3 py-1.5',
-                )}
-                disabled={testQuery.isLoading}
-              >
-                {testQuery.isLoading ? (
-                  <LoaderCircle className="size-4 animate-spin" />
-                ) : (
-                  'Send'
-                )}
-              </button>
-            </div>
-
-            <FormBody
-              body={body}
-              fields={fields}
-              parameters={parameters}
-              authorization={authorization}
-            />
-            {testQuery.data ? <ResultDisplay data={testQuery.data} /> : null}
-          </form>
-        </AuthProvider>
-      </SchemaContext.Provider>
+      <SchemaProvider fieldInfoMap={fieldInfoMap} references={references}>
+        <form
+          {...rest}
+          className={cn(
+            'not-prose flex flex-col rounded-xl border shadow-md overflow-hidden bg-fd-card text-fd-card-foreground',
+            rest.className,
+          )}
+          onSubmit={onSubmit}
+        >
+          <ServerSelect />
+          <div className="flex flex-row items-center gap-2 text-sm p-3 pb-0">
+            <MethodLabel>{method}</MethodLabel>
+            <Route route={route} className="flex-1" />
+            <button
+              type="submit"
+              className={cn(
+                buttonVariants({ color: 'primary', size: 'sm' }),
+                'px-3 py-1.5',
+              )}
+              disabled={testQuery.isLoading}
+            >
+              {testQuery.isLoading ? (
+                <LoaderCircle className="size-4 animate-spin" />
+              ) : (
+                'Send'
+              )}
+            </button>
+          </div>
+          <FormBody
+            body={body}
+            fields={fields}
+            parameters={parameters}
+            authorization={authorization}
+          />
+          {testQuery.data ? <ResultDisplay data={testQuery.data} /> : null}
+          {authorization && <AuthFooter authorization={authorization} />}
+        </form>
+      </SchemaProvider>
     </FormProvider>
   );
 }
@@ -290,12 +256,9 @@ const paramTypes = ['header', 'cookie', 'query', 'path'] as const;
 function FormBody({
   authorization,
   parameters = [],
-  body,
   fields = {},
+  body,
 }: Pick<ClientProps, 'parameters' | 'authorization' | 'body' | 'fields'>) {
-  const { servers } = useApiContext();
-  const { server, setServer, setServerVariables } = useServerSelectContext();
-
   const params = useMemo(() => {
     return paramTypes.map((param) => parameters.filter((v) => v.in === param));
   }, [parameters]);
@@ -306,21 +269,18 @@ function FormBody({
       authorization.type === 'http' && authorization.scheme === 'basic'
         ? {
             type: 'object',
-            isRequired: true,
+            required: ['username', 'password'],
             properties: {
               username: {
                 type: 'string',
-                isRequired: true,
               },
               password: {
                 type: 'string',
-                isRequired: true,
               },
             },
           }
         : {
             type: 'string',
-            isRequired: true,
             description: 'The Authorization access token',
           };
 
@@ -328,40 +288,17 @@ function FormBody({
       return renderCustomField('authorization', schema, fields.auth);
 
     return (
-      <>
-        <FieldSet
-          fieldName="authorization"
-          name="Authorization"
-          field={schema}
-        />
-        {authorization?.type === 'oauth2' && (
-          <OauthDialogTrigger
-            type="button"
-            className={cn(
-              buttonVariants({
-                color: 'secondary',
-              }),
-            )}
-          >
-            Open
-          </OauthDialogTrigger>
-        )}
-      </>
+      <FieldSet
+        fieldName="authorization"
+        name="Authorization"
+        field={schema}
+        isRequired
+      />
     );
   }
 
   return (
     <>
-      {servers.length > 1 ? (
-        <CollapsiblePanel title="Server URL">
-          <ServerSelect
-            server={server}
-            onServerChanged={setServer}
-            onVariablesChanged={setServerVariables}
-          />
-        </CollapsiblePanel>
-      ) : null}
-
       {params.map((param, i) => {
         const name = paramNames[i];
         const type = paramTypes[i];
@@ -374,22 +311,22 @@ function FormBody({
             {param.map((field) => {
               const fieldName = `${type}.${field.name}` as const;
 
-              if (!fields?.parameter) {
-                return (
-                  <FieldSet
-                    key={fieldName}
-                    name={field.name}
-                    fieldName={fieldName}
-                    field={field}
-                  />
+              if (fields?.parameter) {
+                return renderCustomField(
+                  fieldName,
+                  field.schema,
+                  fields.parameter,
+                  field.name,
                 );
               }
 
-              return renderCustomField(
-                fieldName,
-                field,
-                fields.parameter,
-                field.name,
+              return (
+                <FieldSet
+                  key={fieldName}
+                  name={field.name}
+                  fieldName={fieldName}
+                  field={field.schema}
+                />
               );
             })}
           </CollapsiblePanel>
@@ -399,55 +336,58 @@ function FormBody({
       {body ? (
         fields.body ? (
           <CollapsiblePanel title="Body">
-            {renderCustomField('body', body, fields.body)}
+            {renderCustomField('body', body.schema, fields.body)}
           </CollapsiblePanel>
         ) : (
-          <BodyInput field={body} />
+          <BodyInput field={body.schema} />
         )
       ) : null}
     </>
   );
 }
 
-const bodyTypeVariants = cva(
-  'p-1 rounded-lg font-medium text-xs transition-colors',
-  {
-    variants: {
-      active: {
-        true: 'bg-fd-primary/10 text-fd-primary',
-        false: 'text-fd-muted-foreground',
-      },
-    },
-  },
-);
-
-function BodyInput({ field }: { field: RequestSchema }) {
+function BodyInput({ field: _field }: { field: RequestSchema }) {
+  const field = useResolvedSchema(_field);
   const [isJson, setIsJson] = useState(false);
 
   return (
     <CollapsiblePanel title="Body">
-      <div className="grid grid-cols-2 border bg-fd-muted rounded-lg">
-        <button
-          className={cn(bodyTypeVariants({ active: !isJson }))}
-          onClick={() => setIsJson(false)}
-          type="button"
-        >
-          Simple
-        </button>
-        <button
-          className={cn(bodyTypeVariants({ active: isJson }))}
-          onClick={() => setIsJson(true)}
-          type="button"
-        >
-          JSON Mode
-        </button>
-      </div>
       {isJson ? (
-        <JsonInput fieldName="body" />
-      ) : field.type === 'object' ? (
-        <ObjectInput field={field} fieldName="body" />
+        <JsonInput fieldName="body">
+          <button
+            className={cn(
+              buttonVariants({
+                color: 'ghost',
+                size: 'sm',
+                className: 'p-2',
+              }),
+            )}
+            onClick={() => setIsJson(false)}
+            type="button"
+          >
+            Close JSON Editor
+          </button>
+        </JsonInput>
       ) : (
-        <FieldSet field={field} fieldName="body" />
+        <FieldSet
+          field={field}
+          fieldName="body"
+          name={
+            <button
+              className={cn(
+                buttonVariants({
+                  color: 'secondary',
+                  size: 'sm',
+                  className: 'p-2',
+                }),
+              )}
+              onClick={() => setIsJson(true)}
+              type="button"
+            >
+              Open JSON Editor
+            </button>
+          }
+        />
       )}
     </CollapsiblePanel>
   );
@@ -469,15 +409,20 @@ function renderCustomField(
   );
 }
 
-function AuthProvider({
-  authorization,
-  children,
-}: {
-  authorization?: Security;
-  children: ReactNode;
-}) {
+const OauthDialog = lazy(() =>
+  import('./auth/oauth-dialog').then((mod) => ({
+    default: mod.OauthDialog,
+  })),
+);
+const OauthDialogTrigger = lazy(() =>
+  import('./auth/oauth-dialog').then((mod) => ({
+    default: mod.OauthDialogTrigger,
+  })),
+);
+
+function AuthFooter({ authorization }: { authorization: Security }) {
   const form = useFormContext();
-  if (!authorization || authorization.type !== 'oauth2') return children;
+  if (authorization.type !== 'oauth2') return;
 
   // only the first one, so it looks simpler :)
   const flow = Object.keys(authorization.flows)[0];
@@ -488,7 +433,16 @@ function AuthProvider({
       scheme={authorization}
       setToken={(token) => form.setValue('authorization', `Bearer ${token}`)}
     >
-      {children}
+      <OauthDialogTrigger
+        type="button"
+        className={cn(
+          buttonVariants({
+            color: 'secondary',
+          }),
+        )}
+      >
+        Auth Settings
+      </OauthDialogTrigger>
     </OauthDialog>
   );
 }
@@ -526,7 +480,7 @@ function DefaultResultDisplay({ data }: { data: FetchResult }) {
   const { shikiOptions } = useApiContext();
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border bg-fd-card p-4">
+    <div className="flex flex-col gap-3 border-t p-3">
       <div className="inline-flex items-center gap-1.5 text-sm font-medium text-fd-foreground">
         <statusInfo.icon className={cn('size-4', statusInfo.color)} />
         {statusInfo.description}

@@ -1,34 +1,30 @@
-import type { ReferenceSchema, RequestSchema } from '@/playground/index';
-import { resolve } from '@/playground/resolve';
+import type { RequestSchema } from '@/playground/index';
 
-export function getDefaultValue(
-  item: RequestSchema | ReferenceSchema,
-  references: Record<string, RequestSchema>,
-): unknown {
-  if (item.type === 'ref')
-    return getDefaultValue(resolve(item, references), references);
-  if (item.type === 'object')
+export function getDefaultValue(schema: RequestSchema): unknown {
+  if (typeof schema === 'boolean') return null;
+
+  const type = schema.type;
+  if (Array.isArray(type))
+    return getDefaultValue({
+      ...schema,
+      type: type[0],
+    });
+
+  if (type === 'object' && typeof schema === 'object')
     return Object.fromEntries(
-      Object.entries(item.properties).map(([key, prop]) => [
-        key,
-        getDefaultValue(
-          prop.type === 'ref' ? references[prop.schema] : prop,
-          references,
-        ),
-      ]),
+      Object.entries(schema.properties ?? {}).map(([key, prop]) => {
+        return [key, getDefaultValue(prop)];
+      }),
     );
 
-  if (item.type === 'array') return [];
-  if (item.type === 'null') return null;
-  if (item.type === 'switcher') {
-    const first = Object.values(item.items).at(0);
-    if (!first) return '';
+  if (type === 'array') return [];
+  if (type === 'null') return null;
+  if (type === 'string') {
+    if (typeof schema === 'object' && schema.format === 'binary')
+      return undefined;
 
-    return getDefaultValue(resolve(first, references), references);
+    return '';
   }
-
-  if (item.type === 'file') return undefined;
-  if (item.type === 'string') return '';
-  if (item.type === 'number') return 0;
-  if (item.type === 'boolean') return false;
+  if (type === 'number' || type === 'integer') return 0;
+  if (type === 'boolean') return false;
 }

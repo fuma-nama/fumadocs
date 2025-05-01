@@ -1,5 +1,5 @@
-import type { ReferenceObject } from '@/types';
-import type { OpenAPIV3_1 } from 'openapi-types';
+import { type JSONSchema } from 'json-schema-typed/draft-2020-12';
+import { ReferenceObject } from '@/types';
 
 export type NoReference<T> = T extends (infer I)[]
   ? NoReference<I>[]
@@ -11,7 +11,14 @@ export type NoReference<T> = T extends (infer I)[]
         }
       : T;
 
-export type ParsedSchema = OpenAPIV3_1.SchemaObject;
+type NoReferenceJSONSchema<T> = T extends (infer I)[]
+  ? NoReference<I>[]
+  : T extends { $ref?: string }
+    ? Omit<T, '$ref'>
+    : T;
+
+export type ParsedSchema = JSONSchema;
+export type ResolvedSchema = NoReferenceJSONSchema<ParsedSchema>;
 
 export function getPreferredType<B extends Record<string, unknown>>(
   body: B,
@@ -21,10 +28,9 @@ export function getPreferredType<B extends Record<string, unknown>>(
   return Object.keys(body)[0];
 }
 
-export function isNullable(
-  schema: NoReference<ParsedSchema>,
-  includeOneOf = true,
-): boolean {
+export function isNullable(schema: ParsedSchema, includeOneOf = true): boolean {
+  if (typeof schema === 'boolean') return false;
+
   if (Array.isArray(schema.type) && schema.type.includes('null')) return true;
   if (includeOneOf && (schema.anyOf || schema.oneOf)) {
     if (schema.anyOf?.some((item) => isNullable(item))) return true;
