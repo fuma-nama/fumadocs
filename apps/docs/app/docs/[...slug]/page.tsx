@@ -12,7 +12,7 @@ import {
   type ReactElement,
   type ReactNode,
 } from 'react';
-import { Popup, PopupContent, PopupTrigger } from 'fumadocs-twoslash/ui';
+import * as Twoslash from 'fumadocs-twoslash/ui';
 import { Callout } from 'fumadocs-ui/components/callout';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
 import * as Preview from '@/components/preview';
@@ -85,6 +85,7 @@ export default async function Page(props: {
         {preview ? <PreviewRenderer preview={preview} /> : null}
         <Mdx
           components={getMDXComponents({
+            ...Twoslash,
             a: ({ href, ...props }) => {
               const found = source.getPageByHref(href ?? '', {
                 dir: page.file.dirname,
@@ -113,9 +114,6 @@ export default async function Page(props: {
                 </HoverCard>
               );
             },
-            Popup,
-            PopupContent,
-            PopupTrigger,
             Mermaid,
             TypeTable,
             AutoTypeTable: (props) => (

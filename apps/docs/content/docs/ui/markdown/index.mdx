@@ -5,13 +5,13 @@ description: How to write documents
 
 ## Introduction
 
-Fumadocs provides many useful extensions to MDX, a markup language. Here is a brief introduction to the default MDX syntax of Fumadocs UI.
+Fumadocs provides many useful extensions to MDX, a markup language. Here is a brief introduction to the default MDX syntax of Fumadocs.
 
 > MDX is not the only supported format of Fumadocs. In fact, you can use any renderers such as `next-mdx-remote` or CMS.
 
 ## MDX
 
-We recommend MDX, a superset of Markdown with support of JSX syntax.
+We recommend MDX, a superset of Markdown with JSX syntax.
 It allows you to import components, and use them right in the document, or even export values.
 
 See:
@@ -288,48 +288,28 @@ console.log('A');
 console.log('B');
 ```
 
-#### Using Typescript Twoslash
-
-Write Typescript codeblocks with hover type information and detected types errors.
-
-Not enabled by default. See [Twoslash](/docs/ui/twoslash).
-
 ### Include
 
 > This is only available on **Fumadocs MDX**.
 
-Reference another Markdown/MDX or code example file.
+Reference another file (can also be a Markdown/MDX document).
 Specify the target file path in `<include>` tag (relative to the MDX file itself).
 
 ```mdx title="page.mdx"
 <include>./another.mdx</include>
 ```
 
-See [Include](/docs/mdx/include).
+See [other usages](/docs/mdx/include).
 
-## Optional
+## Additional Features
 
-You can see [a list of plugins](/docs/headless/mdx) provided by Fumadocs.
+You may be interested:
 
-### Math Equations
-
-Write math equations with TeX.
-
-````md
-```math
-f(x) = x * e^{2 pi i \xi x}
-```
-````
-
-```math
-f(x) = x * e^{2 pi i \xi x}
-```
-
-To enable, see [Math Integration](/docs/ui/math).
+<DocsCategory />
 
 ### Package Install
 
-Generate code blocks for installing packages via package managers (JS/Node.js).
+Generate commands for installing packages via package managers.
 
 ````md
 ```package-install

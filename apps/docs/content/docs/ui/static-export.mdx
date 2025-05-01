@@ -13,8 +13,16 @@ Fumadocs is fully compatible with Next.js static export, allowing you to export 
  */
 const nextConfig = {
   output: 'export',
+
+  // Optional: Change links `/me` -> `/me/` and emit `/me.html` -> `/me/index.html`
+  // trailingSlash: true,
+
+  // Optional: Prevent automatic `/me` -> `/me/`, instead preserve `href`
+  // skipTrailingSlashRedirect: true,
 };
 ```
+
+See [Next.js docs](https://nextjs.org/docs/app/guides/static-exports) for limitations and details.
 
 ## Search
 
@@ -24,9 +32,9 @@ Since the search functionality is powered by remote servers, static export works
 
 ### Built-in Search
 
-You can enable static mode:
+You need to:
 
-1. You can build the search indexes statically using [`staticGET`](/docs/headless/search/orama#static-export).
+1. Build the search indexes statically using [`staticGET`](/docs/headless/search/orama#static-export).
 2. Enable static mode on search client from Root Provider:
 
    ```tsx title="app/layout.tsx"
