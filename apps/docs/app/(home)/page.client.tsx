@@ -1,13 +1,13 @@
 'use client';
 
 import {
+  Fragment,
+  type HTMLAttributes,
+  type HTMLProps,
+  type ReactElement,
+  type ReactNode,
   useEffect,
   useState,
-  Fragment,
-  type ReactElement,
-  type HTMLAttributes,
-  type ReactNode,
-  type HTMLProps,
 } from 'react';
 import { TerminalIcon } from 'lucide-react';
 import Link from 'next/link';
@@ -134,7 +134,6 @@ export function WhyInteractive(props: {
   typeTable: ReactNode;
   codeblockMdx: ReactNode;
 }) {
-  const [autoActive, setAutoActive] = useState(true);
   const [active, setActive] = useState(0);
   const duration = 1000 * 8;
   const items = [
@@ -146,20 +145,12 @@ export function WhyInteractive(props: {
     'Flexible',
   ];
 
-  useEffect(() => {
-    if (!autoActive) return;
-    const timer = setTimeout(() => {
-      setActive((prev) => (prev + 1) % items.length);
-    }, duration);
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [active, autoActive, duration, items.length]);
-
   return (
-    <div id="why-interactive" className="flex flex-col gap-6 md:flex-row">
-      <div className="flex flex-col mt-1.5 border h-fit">
+    <div
+      id="why-interactive"
+      className="flex flex-col rounded-xl overflow-hidden shadow-lg border md:flex-row md:min-h-[500px]"
+    >
+      <div className="flex flex-col bg-fd-card">
         {items.map((item, i) => (
           <button
             key={item}
@@ -173,30 +164,16 @@ export function WhyInteractive(props: {
             }}
             type="button"
             className={cn(
-              'inline-flex flex-col text-nowrap py-1.5 text-start text-sm text-fd-muted-foreground font-medium px-2',
+              'text-nowrap px-4 py-2 text-start text-sm text-fd-muted-foreground font-medium first:pt-3 last:pb-3',
               i === active
-                ? 'text-fd-primary-foreground bg-fd-primary'
+                ? 'text-fd-primary bg-fd-primary/10'
                 : 'hover:text-fd-accent-foreground/80',
             )}
             onClick={() => {
-              if (active === i) setAutoActive((prev) => !prev);
-              else {
-                setAutoActive(false);
-                setActive(i);
-              }
+              setActive(i);
             }}
           >
             {item}
-            {i === active && autoActive ? (
-              <div
-                className="animate-[why-interactive-x] bg-fd-primary-foreground h-1"
-                style={{
-                  animationDuration: `${duration.toString()}ms`,
-                  animationTimingFunction: 'linear',
-                  animationFillMode: 'forwards',
-                }}
-              />
-            ) : null}
           </button>
         ))}
       </div>
@@ -213,7 +190,7 @@ export function WhyInteractive(props: {
         }`}
       </style>
 
-      <div className="flex-1">
+      <div className="flex-1 p-6 bg-fd-background">
         {active === 0 ? (
           <WhyPanel>
             <h3 className="mb-4 text-lg font-semibold">
@@ -384,7 +361,7 @@ export function PreviewImages() {
   const [active, setActive] = useState(0);
 
   return (
-    <div className="mt-12 -mb-40 min-w-[800px] lg:-mb-18 xl:min-w-[1100px] xl:-mx-24">
+    <div className="mt-12 min-w-[800px] xl:min-w-[1100px] overflow-hidden xl:-mx-12 dark:[mask-image:linear-gradient(to_top,transparent,white_40px)]">
       <div className="absolute flex flex-row left-1/2 -translate-1/2 bottom-4 z-[2] p-1 rounded-full bg-fd-card border shadow-xl dark:shadow-fd-background">
         <div
           role="none"
@@ -411,7 +388,7 @@ export function PreviewImages() {
         alt="preview"
         priority
         className={cn(
-          'w-full select-none duration-1000 animate-in fade-in slide-in-from-bottom-12 dark:[mask-image:linear-gradient(to_bottom,white_70%,transparent_90%)]',
+          'w-full select-none duration-1000 animate-in fade-in -mb-60 slide-in-from-bottom-12 lg:-mb-40',
           active !== 0 && 'hidden',
         )}
       />
@@ -421,7 +398,7 @@ export function PreviewImages() {
           alt="preview"
           priority
           className={cn(
-            'w-full select-none duration-1000 animate-in fade-in slide-in-from-bottom-12 dark:[mask-image:linear-gradient(to_bottom,white_70%,transparent_90%)]',
+            'w-full select-none duration-1000 animate-in fade-in -mb-60 slide-in-from-bottom-12 lg:-mb-40',
             active !== 1 && 'hidden',
           )}
         />
