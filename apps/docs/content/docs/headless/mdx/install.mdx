@@ -88,21 +88,36 @@ my-package
 
 When using with Fumadocs UI, you can enable persistent with the `persist` option.
 
-```ts
+```ts title="source.config.ts" tab="Fumadocs MDX"
+import { remarkInstall } from 'fumadocs-docgen';
+import { defineConfig } from 'fumadocs-mdx/config';
+
+const remarkInstallOptions = {
+  persist: {
+    id: 'some-id',
+  },
+};
+
+export default defineConfig({
+  mdxOptions: {
+    remarkPlugins: [[remarkInstall, remarkInstallOptions]],
+  },
+});
+```
+
+```ts tab="MDX Compiler"
+import { compile } from '@mdx-js/mdx';
 import { remarkInstall } from 'fumadocs-docgen';
 
-const config = {
-  remarkPlugins: [
-    [
-      remarkInstall,
-      {
-        persist: {
-          id: 'some-id',
-        },
-      },
-    ],
-  ],
+const remarkInstallOptions = {
+  persist: {
+    id: 'some-id',
+  },
 };
+
+await compile('...', {
+  remarkPlugins: [[remarkInstall, remarkInstallOptions]],
+});
 ```
 
 This will instead generate:
