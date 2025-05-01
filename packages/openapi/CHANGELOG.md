@@ -1,5 +1,13 @@
 # @fuma-docs/openapi
 
+## 8.1.4
+
+### Patch Changes
+
+- 8c67955: Fix duplications with `generateFiles`
+- 4b1502e: Improve response type UX
+- 47670c8: Support more JSON schema features
+
 ## 8.1.3
 
 ### Patch Changes
