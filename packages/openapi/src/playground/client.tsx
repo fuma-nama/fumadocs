@@ -1,13 +1,11 @@
 'use client';
 import {
-  createContext,
   type FC,
   Fragment,
   type HTMLAttributes,
   lazy,
   type ReactElement,
   type ReactNode,
-  useContext,
   useEffect,
   useMemo,
   useState,
@@ -47,9 +45,11 @@ import type { RequestData } from '@/requests/_shared';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from 'fumadocs-ui/utils/cn';
 import { cva } from 'class-variance-authority';
-import { resolve } from '@/playground/resolve';
-import { Ajv2020 } from 'ajv/dist/2020';
-import { getDefaultValue } from '@/playground/get-default-values';
+import {
+  type FieldInfo,
+  SchemaProvider,
+  useResolvedSchema,
+} from '@/playground/schema';
 
 interface FormValues {
   authorization:
@@ -108,22 +108,6 @@ export type ClientProps = HTMLAttributes<HTMLFormElement> & {
   }>;
 };
 
-interface SchemaContextType {
-  fieldInfoMap: Map<string, FieldInfo>;
-}
-
-interface FieldInfo {
-  selectedType?: string;
-  oneOf: number;
-}
-
-const ajv = new Ajv2020({
-  validateSchema: false,
-  strict: false,
-});
-
-const SchemaContext = createContext<SchemaContextType | undefined>(undefined);
-
 function toRequestData(
   method: string,
   mediaType: string | undefined,
@@ -144,8 +128,8 @@ export default function Client({
   route,
   method = 'GET',
   authorization,
-  parameters: _parameters,
-  body: _body,
+  parameters,
+  body,
   fields,
   references,
   proxyUrl,
@@ -156,12 +140,6 @@ export default function Client({
   const requestData = useRequestData();
   const fieldInfoMap = useMemo(() => new Map<string, FieldInfo>(), []);
   const authInfo = usePersistentAuthInfo(authorization);
-  const parameters = useMemo(
-    () => resolve(_parameters, references),
-    [_parameters, references],
-  );
-  const body = useMemo(() => resolve(_body, references), [_body, references]);
-
   const defaultValues: FormValues = useMemo(
     () => ({
       authorization: authInfo.info,
@@ -230,14 +208,7 @@ export default function Client({
 
   return (
     <FormProvider {...form}>
-      <SchemaContext.Provider
-        value={useMemo(
-          () => ({
-            fieldInfoMap,
-          }),
-          [fieldInfoMap],
-        )}
-      >
+      <SchemaProvider fieldInfoMap={fieldInfoMap} references={references}>
         <form
           {...rest}
           className={cn(
@@ -274,7 +245,7 @@ export default function Client({
           {testQuery.data ? <ResultDisplay data={testQuery.data} /> : null}
           {authorization && <AuthFooter authorization={authorization} />}
         </form>
-      </SchemaContext.Provider>
+      </SchemaProvider>
     </FormProvider>
   );
 }
@@ -285,12 +256,11 @@ const paramTypes = ['header', 'cookie', 'query', 'path'] as const;
 function FormBody({
   authorization,
   parameters = [],
-  body,
   fields = {},
+  body,
 }: Pick<ClientProps, 'parameters' | 'authorization' | 'body' | 'fields'>) {
   const { servers } = useApiContext();
   const { server, setServer, setServerVariables } = useServerSelectContext();
-
   const params = useMemo(() => {
     return paramTypes.map((param) => parameters.filter((v) => v.in === param));
   }, [parameters]);
@@ -400,7 +370,8 @@ const bodyTypeVariants = cva(
   },
 );
 
-function BodyInput({ field }: { field: RequestSchema }) {
+function BodyInput({ field: _field }: { field: RequestSchema }) {
+  const field = useResolvedSchema(_field);
   const [isJson, setIsJson] = useState(false);
 
   return (
@@ -634,84 +605,4 @@ function writeAuthHeader(
   if (typeof input === 'string') {
     header.Authorization = input;
   }
-}
-
-/**
- * A hook to store dynamic info of a field, such as selected schema of `oneOf`.
- *
- * @param fieldName - field name of form.
- * @param schema - The JSON Schema to generate initial values.
- * @param depth - The depth to avoid duplicated field name with same schema (e.g. nested `oneOf`).
- */
-export function useFieldInfo(
-  fieldName: string,
-  schema: Exclude<RequestSchema, boolean>,
-  depth: number,
-): {
-  info: FieldInfo;
-  updateInfo: (value: Partial<FieldInfo>) => void;
-} {
-  const keyName = `${fieldName}:${depth}`;
-  const { fieldInfoMap } = useContext(SchemaContext)!;
-  const [_, trigger] = useState(0);
-  const form = useFormContext();
-  const value = form.getValues(fieldName as 'body');
-
-  const info = fieldInfoMap.get(keyName) ?? {
-    oneOf: -1,
-  };
-
-  // update info if needed
-  if (!info.selectedType && Array.isArray(schema.type)) {
-    info.selectedType =
-      schema.type.find((type) =>
-        ajv.validate(
-          {
-            ...schema,
-            type,
-          },
-          value,
-        ),
-      ) ?? schema.type[0];
-  }
-
-  if (info.oneOf === -1 && schema.oneOf) {
-    info.oneOf = schema.oneOf.findIndex((item) => ajv.validate(item, value));
-    if (info.oneOf === -1) info.oneOf = 0;
-  }
-
-  fieldInfoMap.set(keyName, info);
-
-  return {
-    info,
-    updateInfo: useEffectEvent((value) => {
-      const prev = fieldInfoMap.get(keyName);
-      if (!prev) return;
-
-      const updated = {
-        ...prev,
-        ...value,
-      };
-
-      if (
-        updated.oneOf === prev.oneOf &&
-        updated.selectedType === prev.selectedType
-      )
-        return;
-
-      fieldInfoMap.set(keyName, updated);
-      form.setValue(
-        fieldName,
-        getDefaultValue(
-          schema.oneOf && updated.oneOf !== -1
-            ? schema.oneOf[updated.oneOf]
-            : {
-                ...schema,
-                type: value.selectedType ?? schema.type,
-              },
-        ),
-      );
-      trigger((prev) => prev + 1);
-    }),
-  };
 }

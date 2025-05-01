@@ -58,16 +58,16 @@ export async function APIPlayground({
     parameters: method.parameters?.map((v) => ({
       name: v.name,
       in: v.in as ParameterField['in'],
-      schema: writeReferences(v.schema ?? true, context) as ParsedSchema,
+      schema: writeReferences((v.schema ?? true) as ParsedSchema, context),
       description: v.description,
     })),
     body:
       bodyContent && mediaType
         ? ({
             schema: writeReferences(
-              bodyContent[mediaType].schema,
+              bodyContent[mediaType].schema as ParsedSchema,
               context,
-            ) as ParsedSchema,
+            ),
             mediaType,
           } as ClientProps['body'])
         : undefined,
@@ -80,33 +80,46 @@ export async function APIPlayground({
 }
 
 function writeReferences(
-  schema: unknown,
+  schema: ParsedSchema,
   ctx: Context,
-  stack: WeakMap<object, string> = new WeakMap(),
-): unknown {
+  stack: WeakMap<object, object> = new WeakMap(),
+): RequestSchema {
   if (typeof schema !== 'object' || !schema) return schema;
-
   if (stack.has(schema)) {
-    const id = stack.get(schema)!;
-    ctx.references[id] = schema;
+    const out = stack.get(schema)!;
+    const id = ctx.nextId();
+    ctx.references[id] = out;
 
     return {
       $ref: id,
     };
   }
 
-  stack.set(schema, ctx.nextId());
+  const output = { ...schema };
+  stack.set(schema, output);
 
-  if (Array.isArray(schema)) {
-    return schema.map((item) => writeReferences(item, ctx, stack));
+  for (const name of ['items', 'additionalProperties'] as const) {
+    if (!output[name]) continue;
+    output[name] = writeReferences(output[name], ctx, stack);
   }
 
-  const v: Record<string, unknown> = {};
-  for (const key in schema) {
-    v[key] = writeReferences(schema[key as keyof object], ctx, stack);
+  for (const name of ['oneOf', 'allOf', 'anyOf'] as const) {
+    if (!output[name]) continue;
+    output[name] = output[name].map((item) =>
+      writeReferences(item, ctx, stack),
+    );
   }
 
-  return v;
+  for (const name of ['properties', 'patternProperties'] as const) {
+    if (!output[name]) continue;
+    output[name] = { ...output[name] };
+
+    for (const key in output[name]) {
+      output[name][key] = writeReferences(output[name][key], ctx, stack);
+    }
+  }
+
+  return output;
 }
 
 function getAuthorizationField(

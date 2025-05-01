@@ -173,29 +173,30 @@ export function Schema({
       ...(schema.type === 'array' && schema.items ? [schema.items] : []),
     ].filter((s) => isComplexType(s) && !stack.includes(s));
 
-    footer = mentionedObjectTypes.map((s, idx) => {
-      return (
-        <renderer.ObjectCollapsible
-          key={idx}
-          name={
-            typeof s === 'object' && s.title
-              ? s.title
-              : mentionedObjectTypes.length === 1
-                ? 'Show Attributes'
-                : `Object ${idx + 1}`
-          }
-        >
-          <Schema
-            name="element"
-            schema={s}
-            ctx={{
-              ...ctx,
-              stack: [schema, ...stack],
-            }}
-          />
-        </renderer.ObjectCollapsible>
-      );
-    });
+    footer = (
+      <div className="flex flex-col gap-2">
+        {mentionedObjectTypes.map((s, idx) => {
+          let title = typeof s === 'object' ? s.title : null;
+          title ??=
+            mentionedObjectTypes.length === 1
+              ? 'Show Attributes'
+              : `Object ${idx + 1}`;
+
+          return (
+            <renderer.ObjectCollapsible key={idx} name={title}>
+              <Schema
+                name="element"
+                schema={s}
+                ctx={{
+                  ...ctx,
+                  stack: [schema, ...stack],
+                }}
+              />
+            </renderer.ObjectCollapsible>
+          );
+        })}
+      </div>
+    );
   }
 
   return (

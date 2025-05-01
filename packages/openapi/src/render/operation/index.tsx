@@ -96,9 +96,11 @@ export function Operation({
     bodyNode = (
       <>
         {heading(headingLevel, 'Request Body', ctx)}
-        <div className="mb-8 flex flex-row items-center justify-between gap-2">
+        <div className="mb-4 p-3 bg-fd-card rounded-xl border flex flex-row items-center justify-between gap-2">
           <code>{type}</code>
-          <span>{body.required ? 'Required' : 'Optional'}</span>
+          <span className="text-xs">
+            {body.required ? 'Required' : 'Optional'}
+          </span>
         </div>
         {body.description ? <Markdown text={body.description} /> : null}
         <Schema

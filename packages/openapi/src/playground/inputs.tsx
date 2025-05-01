@@ -3,7 +3,6 @@ import {
   type HTMLAttributes,
   type LabelHTMLAttributes,
   type ReactNode,
-  useMemo,
   useState,
 } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
@@ -23,17 +22,15 @@ import {
 import type { RequestSchema } from '@/playground/index';
 import { Input, labelVariants } from '@/ui/components/input';
 import { getDefaultValue } from './get-default-values';
-import { useFieldInfo } from './client';
 import { cn } from 'fumadocs-ui/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { combineSchema } from '@/utils/combine-schema';
 import { schemaToString } from '@/utils/schema-to-string';
-
-const anyFields = {
-  type: ['string', 'number', 'boolean', 'array', 'object'],
-  items: true,
-  additionalProperties: true,
-} satisfies RequestSchema;
+import {
+  anyFields,
+  useFieldInfo,
+  useResolvedSchema,
+} from '@/playground/schema';
 
 interface InputHeaderProps {
   name?: ReactNode;
@@ -56,7 +53,7 @@ function FieldHeader({
       {required ? <span className="text-red-500">*</span> : null}
       <div className="flex-1" />
       {type ? (
-        <code data-type className="text-xs text-fd-muted-foreground">
+        <code data-type={true} className="text-xs text-fd-muted-foreground">
           {type}
         </code>
       ) : null}
@@ -73,11 +70,9 @@ export function ObjectInput({
   field: Exclude<RequestSchema, boolean>;
   fieldName: string;
 } & HTMLAttributes<HTMLDivElement>) {
-  const field = useMemo(() => {
-    return fallbackAny(
-      combineSchema([_field, ...(_field.allOf ?? []), ...(_field.anyOf ?? [])]),
-    );
-  }, [_field]);
+  const field = useResolvedSchema(
+    combineSchema([_field, ...(_field.allOf ?? []), ...(_field.anyOf ?? [])]),
+  );
 
   return (
     <div {...props} className={cn('flex flex-col gap-6', props.className)}>
@@ -99,12 +94,11 @@ export function ObjectInput({
           getType={(key) => {
             for (const pattern in field.patternProperties) {
               if (key.match(RegExp(pattern))) {
-                return fallbackAny(field.patternProperties[pattern]);
+                return field.patternProperties[pattern];
               }
             }
 
-            if (field.additionalProperties)
-              return fallbackAny(field.additionalProperties);
+            if (field.additionalProperties) return field.additionalProperties;
 
             return anyFields;
           }}
@@ -112,10 +106,6 @@ export function ObjectInput({
       )}
     </div>
   );
-}
-
-function fallbackAny(schema: RequestSchema): Exclude<RequestSchema, boolean> {
-  return typeof schema === 'boolean' ? anyFields : schema;
 }
 
 export function JsonInput({ fieldName }: { fieldName: string }) {
@@ -150,7 +140,7 @@ function DynamicProperties({
 }: {
   fieldName: string;
   filterKey?: (key: string) => boolean;
-  getType: (key: string) => Exclude<RequestSchema, boolean>;
+  getType: (key: string) => RequestSchema;
 }) {
   const { control, setValue, getValues } = useFormContext();
   const [nextName, setNextName] = useState('');
@@ -352,10 +342,30 @@ export function FieldSet({
   depth?: number;
   toolbar?: ReactNode;
 }) {
-  const field = fallbackAny(_field);
+  const field = useResolvedSchema(_field);
+  const [show, setShow] = useState(
+    () =>
+      typeof _field !== 'object' ||
+      !_field.$ref ||
+      (field.type !== 'object' && !field.allOf && !field.oneOf && !field.anyOf),
+  );
   const { info, updateInfo } = useFieldInfo(fieldName, field, depth);
 
   if (_field === false) return null;
+  if (!show) {
+    return (
+      <FieldHeader {...props} name={name} required={isRequired}>
+        {toolbar}
+        <button
+          type="button"
+          className={cn(buttonVariants({ size: 'sm' }))}
+          onClick={() => setShow(true)}
+        >
+          Show
+        </button>
+      </FieldHeader>
+    );
+  }
 
   if (field.oneOf) {
     return (
@@ -365,7 +375,7 @@ export function FieldSet({
         name={name}
         fieldName={fieldName}
         isRequired={isRequired}
-        field={fallbackAny(field.oneOf[info.oneOf])}
+        field={field.oneOf[info.oneOf]}
         depth={depth + 1}
         toolbar={
           <>
@@ -416,16 +426,14 @@ export function FieldSet({
           {toolbar}
         </FieldHeader>
         <p className="text-xs text-fd-muted-foreground">{field.description}</p>
-        {info.selectedType && (
-          <FieldInput
-            isRequired={isRequired}
-            field={{
-              ...field,
-              type: info.selectedType,
-            }}
-            fieldName={fieldName}
-          />
-        )}
+        <FieldInput
+          isRequired={isRequired}
+          field={{
+            ...field,
+            type: info.selectedType,
+          }}
+          fieldName={fieldName}
+        />
       </fieldset>
     );
   }
@@ -443,7 +451,17 @@ export function FieldSet({
       >
         {toolbar}
       </FieldHeader>
-      <FieldInput field={field} fieldName={fieldName} isRequired={isRequired} />
+      {show ? (
+        <FieldInput
+          field={field}
+          fieldName={fieldName}
+          isRequired={isRequired}
+        />
+      ) : (
+        <div>
+          <button onClick={() => setShow((prev) => !prev)}>Show</button>
+        </div>
+      )}
     </fieldset>
   );
 }
@@ -500,9 +518,7 @@ function ArrayInput({
           }),
         )}
         onClick={() => {
-          const itemType = fallbackAny(items);
-
-          append(getDefaultValue(itemType));
+          append(getDefaultValue(items));
         }}
       >
         <Plus className="size-4" />
