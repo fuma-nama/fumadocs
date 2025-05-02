@@ -1,7 +1,7 @@
 import type { DereferenceMap, Document } from '@/types';
 import type { NoReference } from '@/utils/schema';
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
-import { load, dereference, upgrade } from '@scalar/openapi-parser';
+import { dereference, load, upgrade } from '@scalar/openapi-parser';
 import { fetchUrls } from '@scalar/openapi-parser/plugins/fetch-urls';
 import { readFiles } from '@scalar/openapi-parser/plugins/read-files';
 
