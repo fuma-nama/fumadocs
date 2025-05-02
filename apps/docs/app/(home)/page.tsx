@@ -36,6 +36,7 @@ import { NetlifyLogo, VercelLogo } from './icons';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
 import { owner, repo } from '@/lib/github';
 import { Marquee } from '@/app/(home)/marquee';
+import ArchImg from './arch.png';
 
 const badgeVariants = cva(
   'inline-flex size-7 items-center justify-center rounded-full bg-fd-primary font-medium text-fd-primary-foreground',
@@ -79,6 +80,7 @@ export default function Page() {
               Built for developers.
             </h2>
           </div>
+          <Architecture />
           <Features />
           <Highlights />
           <Why />
@@ -90,19 +92,14 @@ export default function Page() {
   );
 }
 
-/*
-import ArchImg from './arch.png';
-
 function Architecture() {
   return (
-    <div className="flex flex-col gap-4 border-x border-t px-8 py-16 md:py-24 lg:flex-row md:px-12">
-      <div className="shrink-0 flex-1 text-start">
+    <div className="flex flex-col gap-4 border-x border-t p-8 md:px-12 lg:flex-row">
+      <div className="text-start">
         <p className="px-2 py-1 text-sm font-mono bg-fd-primary text-fd-primary-foreground font-bold w-fit mb-4">
           Designed with Love
         </p>
-        <h2 className="text-xl font-semibold mb-4 sm:text-2xl">
-          A breakable framework.
-        </h2>
+        <h2 className="text-2xl font-semibold mb-4">A breakable framework.</h2>
         <p className="text-fd-muted-foreground mb-6">
           Fumadocs makes it easy to build beautiful docs, write content, and
           transform content into data for your React.js framework.
@@ -111,16 +108,15 @@ function Architecture() {
       <Image
         src={ArchImg}
         alt="Architecture"
-        className="md:-mt-20 ms-auto w-full max-w-[450px] invert dark:invert-0"
+        className="mx-auto -my-16 w-full max-w-[400px] invert dark:invert-0 lg:mx-0"
       />
     </div>
   );
 }
- */
 
 async function Why() {
   return (
-    <div className="relative overflow-hidden border-x border-t px-4 py-12 bg-radial-[at_50%_75%] from-pink-500/50 via-fd-background to-90% md:py-16">
+    <div className="relative overflow-hidden border-x border-t p-4 bg-radial-[circle_at_50%_100%] from-pink-400/30 via-fd-background to-90%">
       <WhyInteractive
         typeTable={
           <TypeTable
@@ -409,9 +405,7 @@ const feedback = [
     avatar: 'https://avatars.githubusercontent.com/u/124599',
     user: 'shadcn',
     role: 'Creator of Shadcn UI',
-    message: `I'm using fumadocs by @fuma_nama. It's excellent.
-
-You know how you end up rebuilding a full docs site every time you start a new project? 
+    message: `You know how you end up rebuilding a full docs site every time you start a new project? 
 
 Fumadocs fixes this by giving you all the right blocks that you compose together.
 
@@ -429,6 +423,12 @@ Like headless docs to build exactly what you need.`,
     role: 'Creator of Million.js',
     message: 'fumadocs is the best Next.js docs framework',
   },
+  {
+    avatar: 'https://avatars.githubusercontent.com/u/10645823',
+    user: 'David Blass',
+    role: 'Creator of Arktype',
+    message: `I'd have no shot building @arktypeio docs that looked half this good without it😍`,
+  },
 ];
 
 function Feedback() {
@@ -437,13 +437,13 @@ function Feedback() {
       <div
         className="absolute inset-x-0 top-0 z-[-1] h-24 opacity-10 duration-1000 animate-in fade-in"
         style={{
-          maskImage: 'linear-gradient(to bottom,transparent,white)',
+          maskImage: 'linear-gradient(to top,transparent,white)',
           backgroundImage:
             'linear-gradient(to right, #4ebfff, transparent, #e92a67)',
         }}
       />
       <div className="flex flex-row gap-6 justify-between px-6 mb-6 items-center">
-        <p className="md:text-lg font-medium">
+        <p className="text-sm font-medium md:text-lg">
           Trusted by awesome teams and developers
         </p>
         <Link
@@ -457,7 +457,7 @@ function Feedback() {
         {feedback.map((item) => (
           <div
             key={item.user}
-            className="flex flex-col rounded-xl border bg-fd-card p-4 shadow-lg w-[450px]"
+            className="flex flex-col rounded-xl border bg-fd-card p-4 shadow-lg w-[300px]"
           >
             <p className="text-sm whitespace-pre-wrap">{item.message}</p>
 

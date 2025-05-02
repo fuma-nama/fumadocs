@@ -33,6 +33,14 @@ const config: NextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/docs/:path*.mdx',
+        destination: '/llms.txt/:path*',
+      },
+    ];
+  },
   async redirects() {
     return [
       {

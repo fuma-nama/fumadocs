@@ -12,7 +12,7 @@ const docsOptions: DocsLayoutProps = {
     tabs: {
       transform(option, node) {
         const meta = source.getNodeMeta(node);
-        if (!meta) return option;
+        if (!meta || !node.icon) return option;
 
         const color = `var(--${meta.file.dirname}-color, var(--color-fd-foreground))`;
 

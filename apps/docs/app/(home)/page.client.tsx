@@ -135,7 +135,6 @@ export function WhyInteractive(props: {
   codeblockMdx: ReactNode;
 }) {
   const [active, setActive] = useState(0);
-  const duration = 1000 * 8;
   const items = [
     'Full-text Search',
     'Design System & Tailwind CSS',
@@ -148,9 +147,9 @@ export function WhyInteractive(props: {
   return (
     <div
       id="why-interactive"
-      className="flex flex-col rounded-xl overflow-hidden shadow-lg border md:flex-row md:min-h-[500px]"
+      className="flex flex-col rounded-xl overflow-hidden shadow-lg border bg-fd-background/70 backdrop-blur-lg md:flex-row md:min-h-[500px]"
     >
-      <div className="flex flex-col bg-fd-card">
+      <div className="flex flex-col bg-fd-card/50">
         {items.map((item, i) => (
           <button
             key={item}
@@ -190,7 +189,7 @@ export function WhyInteractive(props: {
         }`}
       </style>
 
-      <div className="flex-1 p-6 bg-fd-background">
+      <div className="flex-1 p-6">
         {active === 0 ? (
           <WhyPanel>
             <h3 className="mb-4 text-lg font-semibold">
