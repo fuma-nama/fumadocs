@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { DynamicLink } from 'fumadocs-core/dynamic-link';
 
 export default function HomePage() {
   return (
@@ -22,15 +22,15 @@ export default function HomePage() {
       </h1>
       <p>
         You can open{' '}
-        <Link
-          href="/docs"
+        <DynamicLink
+          href="/[lang]/docs"
           style={{
             fontWeight: '600',
             textDecoration: 'underline',
           }}
         >
           /docs
-        </Link>{' '}
+        </DynamicLink>{' '}
         and see the documentation.
       </p>
     </main>
