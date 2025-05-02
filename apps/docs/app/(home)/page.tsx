@@ -116,7 +116,7 @@ function Architecture() {
 
 async function Why() {
   return (
-    <div className="relative overflow-hidden border-x border-t p-4 bg-radial-[circle_at_50%_100%] from-pink-400/30 via-fd-background to-90%">
+    <div className="relative overflow-hidden border-x border-t p-4 bg-radial-[circle_at_50%_100%] from-blue-500/30 via-fd-background via-90%">
       <WhyInteractive
         typeTable={
           <TypeTable
@@ -197,21 +197,15 @@ export function ProductTable() {
 function End() {
   return (
     <div className="flex flex-col border-b border-r md:flex-row *:border-l *:border-t">
-      <div className="flex flex-col min-w-0 flex-1">
-        <h2 className="text-3xl text-center font-extrabold font-mono uppercase text-fd-muted-foreground mt-8 mb-4 lg:text-4xl">
+      <div className="group flex flex-col min-w-0 flex-1 pt-8 **:transition-colors">
+        <h2 className="text-3xl text-center font-extrabold font-mono uppercase text-fd-muted-foreground mb-4 lg:text-4xl group-hover:text-blue-500">
           Build Your Docs
         </h2>
-        <p className="text-center font-mono text-xs text-fd-foreground/60 mb-8">
+        <p className="text-center font-mono text-xs text-fd-foreground/60 mb-8 group-hover:text-blue-500/80">
           light and gorgeous, just like the moon.
         </p>
-        <div className="h-[200px] overflow-hidden p-8 bg-gradient-to-b from-fd-primary/10">
-          <div
-            className="mx-auto size-[500px] rounded-full"
-            style={{
-              backgroundImage:
-                'radial-gradient(circle at 0% 100%, transparent 60%, var(--color-fd-primary))',
-            }}
-          />
+        <div className="h-[200px] overflow-hidden p-8 bg-gradient-to-b from-fd-primary/10 group-hover:from-blue-500/10">
+          <div className="mx-auto bg-radial-[circle_at_0%_100%] from-60% from-transparent to-fd-primary size-[500px] rounded-full group-hover:from-blue-500 group-hover:to-blue-600/10" />
         </div>
       </div>
       <ul className="flex flex-col gap-4 p-6 pt-8">
@@ -362,7 +356,7 @@ function Highlight({
 
 function Hero() {
   return (
-    <div className="relative z-[2] flex flex-col border-x border-t bg-fd-card/80 px-4 pt-12 max-md:text-center md:px-12 md:pt-16 [.uwu_&]:hidden overflow-hidden">
+    <div className="relative z-[2] flex flex-col border-x border-t bg-fd-background/80 px-4 pt-12 max-md:text-center md:px-12 md:pt-16 [.uwu_&]:hidden overflow-hidden">
       <div
         className="absolute inset-0 z-[-1] blur-2xl hidden dark:block"
         style={{
@@ -378,7 +372,7 @@ function Hero() {
           maskImage:
             'linear-gradient(to bottom, transparent, white, transparent)',
           background:
-            'repeating-linear-gradient(65deg, var(--color-blue-300), var(--color-blue-300) 12px, color-mix(in oklab, var(--color-purple-600) 20%, transparent) 20px, transparent 200px)',
+            'repeating-linear-gradient(65deg, var(--color-purple-300), var(--color-purple-300) 12px, color-mix(in oklab, var(--color-blue-600) 30%, transparent) 20px, transparent 200px)',
         }}
       />
       <h1 className="mb-8 text-4xl font-medium md:hidden">Build Your Docs</h1>
@@ -451,15 +445,7 @@ Like headless docs to build exactly what you need.`,
 
 function Feedback() {
   return (
-    <div className="relative border-x border-t py-8">
-      <div
-        className="absolute inset-x-0 top-0 z-[-1] h-24 opacity-10 duration-1000 animate-in fade-in"
-        style={{
-          maskImage: 'linear-gradient(to top,transparent,white)',
-          backgroundImage:
-            'linear-gradient(to right, #4ebfff, transparent, #e92a67)',
-        }}
-      />
+    <div className="relative border-x border-t pt-8">
       <div className="flex flex-row gap-6 justify-between px-6 mb-6 items-center">
         <p className="text-sm font-medium md:text-lg">
           Trusted by awesome teams and developers
@@ -471,11 +457,11 @@ function Feedback() {
           Showcase
         </Link>
       </div>
-      <Marquee className="[mask-image:linear-gradient(to_right,transparent,white_20px,white_calc(100%-20px),transparent)]">
+      <Marquee className="pb-8 [mask-image:linear-gradient(to_right,transparent,white_20px,white_calc(100%-20px),transparent)]">
         {feedback.map((item) => (
           <div
             key={item.user}
-            className="flex flex-col rounded-xl border bg-fd-card p-4 shadow-lg w-[300px]"
+            className="flex flex-col rounded-xl border bg-gradient-to-b from-fd-card p-4 shadow-lg w-[320px]"
           >
             <p className="text-sm whitespace-pre-wrap">{item.message}</p>
 
@@ -561,7 +547,7 @@ Hello World
 function Contributing() {
   return (
     <div className="flex flex-col items-center border-x border-t px-4 py-16 text-center">
-      <Heart className="mb-4" />
+      <Heart fill="currentColor" className="text-pink-500 mb-4" />
       <h2 className="mb-4 text-xl font-semibold sm:text-2xl">
         Made Possible by You.
       </h2>
