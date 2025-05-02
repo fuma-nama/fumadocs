@@ -362,7 +362,25 @@ function Highlight({
 
 function Hero() {
   return (
-    <div className="relative z-[2] flex flex-col border-x border-t bg-fd-card/80 px-4 pt-12 max-md:text-center md:px-12 md:pt-16 [.uwu_&]:hidden max-lg:overflow-hidden">
+    <div className="relative z-[2] flex flex-col border-x border-t bg-fd-card/80 px-4 pt-12 max-md:text-center md:px-12 md:pt-16 [.uwu_&]:hidden overflow-hidden">
+      <div
+        className="absolute inset-0 z-[-1] blur-2xl hidden dark:block"
+        style={{
+          maskImage:
+            'linear-gradient(to bottom, transparent, white, transparent)',
+          background:
+            'repeating-linear-gradient(65deg, var(--color-blue-500), var(--color-blue-500) 12px, color-mix(in oklab, var(--color-blue-600) 30%, transparent) 20px, transparent 200px)',
+        }}
+      />
+      <div
+        className="absolute inset-0 z-[-1] blur-2xl dark:hidden"
+        style={{
+          maskImage:
+            'linear-gradient(to bottom, transparent, white, transparent)',
+          background:
+            'repeating-linear-gradient(65deg, var(--color-blue-300), var(--color-blue-300) 12px, color-mix(in oklab, var(--color-purple-600) 20%, transparent) 20px, transparent 200px)',
+        }}
+      />
       <h1 className="mb-8 text-4xl font-medium md:hidden">Build Your Docs</h1>
       <h1 className="mb-8 max-w-[600px] text-4xl font-medium max-md:hidden">
         Build excellent documentation site with less effort
@@ -415,7 +433,7 @@ Like headless docs to build exactly what you need.`,
     avatar: 'https://avatars.githubusercontent.com/u/35677084',
     user: 'Anthony Shew',
     role: 'Turbo DX at Vercel',
-    message: `A gorgeous documentation framework that composes beautifully into the App Router.`,
+    message: `Major shoutout to @fuma_nama for making fumadocs, a gorgeous documentation framework that composes beautifully into the App Router.`,
   },
   {
     user: 'Aiden Bai',
@@ -427,7 +445,7 @@ Like headless docs to build exactly what you need.`,
     avatar: 'https://avatars.githubusercontent.com/u/10645823',
     user: 'David Blass',
     role: 'Creator of Arktype',
-    message: `I'd have no shot building @arktypeio docs that looked half this good without it😍`,
+    message: `I'd have no shot building @arktypeio docs that looked half this good without it 😍`,
   },
 ];
 
