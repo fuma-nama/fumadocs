@@ -2,5 +2,6 @@
   "title": "OpenAPI Example",
   "description": "A demo for Fumadocs OpenAPI",
   "root": true,
+  "icon": "Terminal",
   "pages": ["index", "...(generated)"]
 }

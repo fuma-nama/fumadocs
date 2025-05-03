@@ -659,22 +659,26 @@ function Features() {
         subheading="Fumadocs CLI"
         heading="The Shadcn UI for docs"
         description="Fumadocs CLI creates interactive components for your docs, offering a rich experience to your users."
-        className="flex flex-col"
       >
-        <div className="grid grid-cols-[1fr_2fr_1fr] flex-1 *:border-fd-foreground/50 *:border-dashed mask-radial-circle mask-radial-from-white">
-          <div className="border-r border-b" />
-          <div className="border-b" />
-          <div className="border-l border-b" />
+        <div className="relative">
+          <div className="grid grid-cols-[1fr_2fr_1fr] h-[220px] *:border-fd-foreground/50 *:border-dashed mask-radial-circle mask-radial-from-white">
+            <div className="border-r border-b" />
+            <div className="border-b" />
+            <div className="border-l border-b" />
 
-          <div className="border-r" />
-          <code className="flex items-center justify-center text-sm">
-            npx @fumadocs/cli add
+            <div className="border-r" />
+            <div className="w-[200px]" />
+            <div className="border-l" />
+
+            <div className="border-r border-t" />
+            <div className="border-t" />
+            <div className="border-l border-t" />
+          </div>
+          <code className="absolute inset-0 flex items-center justify-center">
+            <code className="text-sm text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-fd-foreground font-medium">
+              npx @fumadocs/cli add
+            </code>
           </code>
-          <div className="border-l" />
-
-          <div className="border-r border-t" />
-          <div className="border-t" />
-          <div className="border-l border-t" />
         </div>
       </Feature>
       <Feature
