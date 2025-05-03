@@ -3,12 +3,13 @@ import * as fs from 'node:fs/promises';
 import fg from 'fast-glob';
 import { getTypeFromPath } from '@/utils/get-type-from-path';
 import type { FileInfo } from '@/config/types';
-import { type LoadedConfig } from '@/utils/config';
+import type { LoadedConfig } from '@/utils/config';
 import type { DocCollection, MetaCollection } from '@/config';
 import { validate } from '@/utils/schema';
 import { fileCache } from '@/map/file-cache';
 import matter from 'gray-matter';
 import type { AsyncRuntimeFile } from '@/runtime/types';
+import { load } from 'js-yaml';
 
 async function readFileWithCache(file: string): Promise<string> {
   const cached = fileCache.read<string>('read-file', file);
@@ -60,7 +61,8 @@ export async function generateJS(
   async function getMetaEntries(collection: MetaCollection, files: FileInfo[]) {
     const items = files.map(async (file) => {
       const source = await readFileWithCache(file.absolutePath).catch(() => '');
-      let data = source.length === 0 ? {} : JSON.parse(source);
+      let data =
+        source.length === 0 ? {} : parseMetaEntry(file.absolutePath, source);
 
       if (collection?.schema) {
         data = await validate(
@@ -236,4 +238,18 @@ export function toImportPath(file: string, dir: string): string {
   }
 
   return importPath.replaceAll(path.sep, '/');
+}
+
+function parseMetaEntry(file: string, content: string) {
+  const extname = path.extname(file);
+  try {
+    if (extname === '.json') return JSON.parse(content);
+    if (extname === '.yaml') return load(content);
+  } catch (e) {
+    throw new Error(`Failed to parse meta file: ${file}.`, {
+      cause: e,
+    });
+  }
+
+  throw new Error(`Unknown meta file format: ${extname}, in ${file}.`);
 }

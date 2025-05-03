@@ -19,7 +19,7 @@
         ".source/**",
         "!.contentlayer/.cache/**",
         ".next/**",
-        "content/openapi/**",
+        "content/docs/openapi/**",
         "!.next/cache/**",
         "dist/**",
         "out",

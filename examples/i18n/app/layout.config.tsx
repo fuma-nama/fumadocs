@@ -6,13 +6,14 @@ export function baseOptions(locale: string): BaseLayoutProps {
     i18n,
     nav: {
       title: locale === 'cn' ? 'Chinese Docs' : 'English Docs',
+      url: `/${locale}`,
     },
     githubUrl: 'https://github.com',
     links: [
       {
         type: 'main',
         text: locale === 'cn' ? '文檔' : 'Documentation',
-        url: '/docs',
+        url: `/${locale}/docs`,
       },
     ],
   };

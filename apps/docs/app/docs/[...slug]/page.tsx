@@ -12,7 +12,7 @@ import {
   type ReactElement,
   type ReactNode,
 } from 'react';
-import { Popup, PopupContent, PopupTrigger } from 'fumadocs-twoslash/ui';
+import * as Twoslash from 'fumadocs-twoslash/ui';
 import { Callout } from 'fumadocs-ui/components/callout';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
 import * as Preview from '@/components/preview';
@@ -35,6 +35,7 @@ import { getPageTreePeers } from 'fumadocs-core/server';
 import { Card, Cards } from 'fumadocs-ui/components/card';
 import { getMDXComponents } from '@/mdx-components';
 import { APIPage } from 'fumadocs-openapi/ui';
+import { EditOnGitHub, LLMCopyButton } from './page.client';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -69,22 +70,25 @@ export default async function Page(props: {
         style: 'clerk',
         single: false,
       }}
-      editOnGithub={{
-        repo,
-        owner,
-        sha: 'dev',
-        path,
-      }}
       article={{
         className: 'max-sm:pb-16',
       }}
     >
       <DocsTitle>{page.data.title}</DocsTitle>
-      <DocsDescription>{page.data.description}</DocsDescription>
+      <DocsDescription className="mb-2">
+        {page.data.description}
+      </DocsDescription>
+      <div className="flex flex-row gap-2 items-center">
+        <LLMCopyButton />
+        <EditOnGitHub
+          url={`https://github.com/${owner}/${repo}/blob/dev/${path}`}
+        />
+      </div>
       <DocsBody className="text-fd-foreground/80">
         {preview ? <PreviewRenderer preview={preview} /> : null}
         <Mdx
           components={getMDXComponents({
+            ...Twoslash,
             a: ({ href, ...props }) => {
               const found = source.getPageByHref(href ?? '', {
                 dir: page.file.dirname,
@@ -113,9 +117,6 @@ export default async function Page(props: {
                 </HoverCard>
               );
             },
-            Popup,
-            PopupContent,
-            PopupTrigger,
             Mermaid,
             TypeTable,
             AutoTypeTable: (props) => (

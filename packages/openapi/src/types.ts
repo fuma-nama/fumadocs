@@ -73,9 +73,7 @@ export interface RenderContext {
   /**
    * Generate code samples for endpoint.
    */
-  generateCodeSamples?: (
-    method: NoReference<MethodInformation>,
-  ) => Awaitable<CodeSample[]>;
+  generateCodeSamples?: (method: MethodInformation) => Awaitable<CodeSample[]>;
 
   shikiOptions?: Omit<CodeToHastOptionsCommon, 'lang'> &
     CodeOptionsThemes<BuiltinTheme>;

@@ -1,5 +1,13 @@
 # next-docs-mdx
 
+## 11.6.2
+
+### Patch Changes
+
+- 16c7566: Improve error handling logic on parsing meta entries
+- 7b89faa: Add `page.data.content` to sync mode
+  - fumadocs-core@15.2.13
+
 ## 11.6.1
 
 ### Patch Changes

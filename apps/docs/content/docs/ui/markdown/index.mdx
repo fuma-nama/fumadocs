@@ -5,13 +5,13 @@ description: How to write documents
 
 ## Introduction
 
-Fumadocs provides many useful extensions to MDX, a markup language. Here is a brief introduction to the default MDX syntax of Fumadocs UI.
+Fumadocs provides many useful extensions to MDX, a markup language. Here is a brief introduction to the default MDX syntax of Fumadocs.
 
 > MDX is not the only supported format of Fumadocs. In fact, you can use any renderers such as `next-mdx-remote` or CMS.
 
 ## MDX
 
-We recommend MDX, a superset of Markdown with support of JSX syntax.
+We recommend MDX, a superset of Markdown with JSX syntax.
 It allows you to import components, and use them right in the document, or even export values.
 
 See:
@@ -19,7 +19,7 @@ See:
 - [MDX Syntax](https://mdxjs.com/docs/what-is-mdx/#mdx-syntax).
 - GFM (GitHub Flavored Markdown) is also supported, see [GFM Specification](https://github.github.com/gfm).
 
-````mdx
+```mdx
 ---
 title: This is a document
 ---
@@ -38,10 +38,6 @@ import { Component } from './component';
 
 Hello World, **Bold**, _Italic_, ~~Hidden~~
 
-```js
-console.log('Hello World');
-```
-
 1. First
 2. Second
 3. Third
@@ -56,7 +52,7 @@ console.log('Hello World');
 | Table | Description |
 | ----- | ----------- |
 | Hello | World       |
-````
+```
 
 ### Images
 
@@ -80,47 +76,35 @@ This also works: https://github.github.com/gfm.
 
 ### Cards
 
-Useful for adding links, it is included by default.
-
-```mdx
-<Cards>
-  <Card
-    href="https://nextjs.org/docs/app/building-your-application/data-fetching/fetching-caching-and-revalidating"
-    title="Fetching, Caching, and Revalidating"
-  >
-    Learn more about caching in Next.js
-  </Card>
-  <Card title="href is optional">Learn more about `fetch` in Next.js.</Card>
-</Cards>
-```
-
-<Cards>
-  <Card
-    href="https://nextjs.org/docs/app/building-your-application/data-fetching/fetching-caching-and-revalidating"
-    title="Fetching, Caching, and Revalidating"
-  >
-    Learn more about caching in Next.js
-  </Card>
-  <Card title="href is optional">Learn more about `fetch` in Next.js.</Card>
-</Cards>
-
-#### Icon
-
-You can specify an icon to cards.
+Useful for adding links.
 
 ```mdx
 import { HomeIcon } from 'lucide-react';
 
 <Cards>
+  <Card
+    href="https://nextjs.org/docs/app/building-your-application/data-fetching/fetching-caching-and-revalidating"
+    title="Fetching, Caching, and Revalidating"
+  >
+    Learn more about caching in Next.js
+  </Card>
+  <Card title="href is optional">Learn more about `fetch` in Next.js.</Card>
   <Card icon={<HomeIcon />} href="/" title="Home">
-    Go back to home
+    You can include icons too.
   </Card>
 </Cards>
 ```
 
 <Cards>
-  <Card icon={<HomeIcon />} href="/" title="Go back to home">
-    The home page of Fumadocs.
+  <Card
+    href="https://nextjs.org/docs/app/building-your-application/data-fetching/fetching-caching-and-revalidating"
+    title="Fetching, Caching, and Revalidating"
+  >
+    Learn more about caching in Next.js
+  </Card>
+  <Card title="href is optional">Learn more about `fetch` in Next.js.</Card>
+  <Card icon={<HomeIcon />} href="/" title="Home">
+    You can include icons too.
   </Card>
 </Cards>
 
@@ -234,7 +218,7 @@ console.log('Hello World');
 
 We support some of the [Shiki Transformers](https://shiki.style/packages/transformers), allowing you to highlight/style specific lines.
 
-````md
+````md tab="Input"
 ```tsx
 // highlight a line
 <div>Hello World</div>  // [\!code highlight]
@@ -249,7 +233,7 @@ console.log('hello'); // [\!code ++]
 ```
 ````
 
-```tsx
+```tsx tab="Output"
 // highlight a line
 <div>Hello World</div>  // [!code highlight]
 
@@ -288,56 +272,36 @@ console.log('A');
 console.log('B');
 ```
 
-#### Using Typescript Twoslash
-
-Write Typescript codeblocks with hover type information and detected types errors.
-
-Not enabled by default. See [Twoslash](/docs/ui/twoslash).
-
 ### Include
 
 > This is only available on **Fumadocs MDX**.
 
-Reference another Markdown/MDX or code example file.
+Reference another file (can also be a Markdown/MDX document).
 Specify the target file path in `<include>` tag (relative to the MDX file itself).
 
 ```mdx title="page.mdx"
 <include>./another.mdx</include>
 ```
 
-See [Include](/docs/mdx/include).
+See [other usages](/docs/mdx/include).
 
-## Optional
+## Additional Features
 
-You can see [a list of plugins](/docs/headless/mdx) provided by Fumadocs.
+You may be interested:
 
-### Math Equations
-
-Write math equations with TeX.
-
-````md
-```math
-f(x) = x * e^{2 pi i \xi x}
-```
-````
-
-```math
-f(x) = x * e^{2 pi i \xi x}
-```
-
-To enable, see [Math Integration](/docs/ui/math).
+<DocsCategory />
 
 ### Package Install
 
-Generate code blocks for installing packages via package managers (JS/Node.js).
+Generate commands for installing packages via package managers.
 
-````md
+````md tab="Input"
 ```package-install
 npm i next -D
 ```
 ````
 
-```package-install
+```package-install tab="Output"
 npm i next -D
 ```
 

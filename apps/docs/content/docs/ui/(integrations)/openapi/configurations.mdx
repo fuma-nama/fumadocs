@@ -176,7 +176,11 @@ The server to render pages.
 
 ### Generate Code Samples
 
-Generate custom code samples for each API endpoint.
+Generate custom code samples for each API endpoint. Make sure to install the types package to give you type-safety when customising it:
+
+```package-install
+openapi-types -D
+```
 
 ```ts
 import { createOpenAPI } from 'fumadocs-openapi/server';

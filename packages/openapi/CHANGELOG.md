@@ -1,5 +1,15 @@
 # @fuma-docs/openapi
 
+## 8.1.5
+
+### Patch Changes
+
+- a7ef446: Fix empty directory detection
+- Updated dependencies [b433d93]
+- Updated dependencies [1e07ed8]
+  - fumadocs-ui@15.2.13
+  - fumadocs-core@15.2.13
+
 ## 8.1.4
 
 ### Patch Changes

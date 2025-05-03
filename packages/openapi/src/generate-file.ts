@@ -163,7 +163,7 @@ export async function generateFiles(options: Config): Promise<void> {
             path.dirname(item) === path.dirname(outputPath),
         );
 
-        if (!isSharedDir && path.dirname(outputPath).length > 0) {
+        if (!isSharedDir && path.dirname(outputPath) !== '.') {
           outputPath = path.join(path.dirname(outputPath) + '.mdx');
         }
 

@@ -38,7 +38,26 @@ It applies the [Typography](/docs/ui/theme#typography) styles, wrap your content
 import { DocsBody } from 'fumadocs-ui/page';
 
 <DocsBody>
-  <h1>This heading looks good!</h1>
+  <h2>This heading looks good!</h2>
+</DocsBody>;
+```
+
+### Edit on GitHub
+
+You can also add your own component.
+
+```tsx
+import { DocsBody } from 'fumadocs-ui/page';
+
+<DocsBody>
+  <a
+    href={`https://github.com/fuma-nama/fumadocs/blob/main/${page.file.path}`}
+    rel="noreferrer noopener"
+    target="_blank"
+    className="w-fit border rounded-xl p-2 font-medium text-sm text-fd-secondary-foreground bg-fd-secondary transition-colors hover:text-fd-accent-foreground hover:bg-fd-accent"
+  >
+    Edit on GitHub
+  </a>
 </DocsBody>;
 ```
 
@@ -68,12 +87,14 @@ import { DocsPage } from 'fumadocs-ui/page';
 <DocsPage toc={headings}>...</DocsPage>;
 ```
 
-Customise or disable TOC from your documentation with the `tableOfContent` option.
+You can customise or disable it with the `tableOfContent` option, or with `tableOfContentPopover` on smaller devices.
 
 ```tsx
 import { DocsPage } from 'fumadocs-ui/page';
 
-<DocsPage tableOfContent={options}>...</DocsPage>;
+<DocsPage tableOfContent={options} tableOfContentPopover={options}>
+  ...
+</DocsPage>;
 ```
 
 <AutoTypeTable path="./content/docs/ui/props.ts" name="TOCProps" />
@@ -93,19 +114,6 @@ import { DocsPage } from 'fumadocs-ui/page';
   ...
 </DocsPage>;
 ```
-
-#### Popover Mode
-
-On smaller devices, it is shown on a popover instead.
-Customise it with the `tableOfContentPopover` option.
-
-```tsx
-import { DocsPage } from 'fumadocs-ui/page';
-
-<DocsPage tableOfContentPopover={options}>...</DocsPage>;
-```
-
-<AutoTypeTable path="./content/docs/ui/props.ts" name="TOCPopoverProps" />
 
 ### Last Updated Time
 
@@ -137,30 +145,7 @@ const time = await getGithubLastEdit({
 <DocsPage lastUpdate={new Date(time)} />;
 ```
 
-<Callout type='info' title='Note'>
-
-    You can also specify the last updated time of documents (e.g. using frontmatter).
-    Don't forget to [update the schema type](/docs/mdx/collections#schema) on Fumadocs MDX first.
-
-</Callout>
-
-### Edit on GitHub
-
-Add "Edit on GitHub" button to the page.
-
-```tsx
-import { DocsPage } from 'fumadocs-ui/page';
-
-<DocsPage
-  editOnGithub={{
-    owner: 'fuma-nama',
-    repo: 'fumadocs',
-    sha: 'main',
-    // file path, make sure it's valid
-    path: `content/docs/${page.file.path}`,
-  }}
-/>;
-```
+Or you may specify the updated time in [frontmatter](/docs/mdx/collections#schema).
 
 ### Footer
 

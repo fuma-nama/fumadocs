@@ -74,7 +74,7 @@ export default defineConfig({
               );
 
               const head = lastSpan?.children[0];
-              if (head?.type !== 'text') return;
+              if (head?.type !== 'text') continue;
 
               head.value = head.value.replace(/\[\\!code/g, '[!code');
             }

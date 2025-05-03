@@ -1,24 +1,25 @@
 import type { TableOfContents } from 'fumadocs-core/server';
 import {
   type AnchorHTMLAttributes,
+  type ComponentProps,
   forwardRef,
   type HTMLAttributes,
   type ReactNode,
 } from 'react';
-import { type AnchorProviderProps, AnchorProvider } from 'fumadocs-core/toc';
+import { AnchorProvider, type AnchorProviderProps } from 'fumadocs-core/toc';
 import { slot } from '@/layouts/shared';
 import { cn } from './utils/cn';
 import {
+  Breadcrumb,
+  type BreadcrumbProps,
   Footer,
   type FooterProps,
   LastUpdate,
-  TocPopover,
-  Breadcrumb,
-  type BreadcrumbProps,
-  PageBody,
   PageArticle,
-  TocPopoverTrigger,
+  PageBody,
+  TocPopover,
   TocPopoverContent,
+  TocPopoverTrigger,
 } from './page-client';
 import {
   Toc,
@@ -114,6 +115,7 @@ export interface DocsPageProps {
 export function DocsPage({
   toc = [],
   full = false,
+  editOnGithub,
   tableOfContentPopover: {
     enabled: tocPopoverEnabled,
     component: tocPopoverReplace,
@@ -183,12 +185,14 @@ export function DocsPage({
           {props.children}
           <div role="none" className="flex-1" />
           <div className="flex flex-row flex-wrap items-center justify-between gap-4 empty:hidden">
-            {props.editOnGithub ? (
-              <EditOnGitHub {...props.editOnGithub} />
-            ) : null}
-            {props.lastUpdate ? (
+            {editOnGithub && (
+              <EditOnGitHub
+                href={`https://github.com/${editOnGithub.owner}/${editOnGithub.repo}/blob/${editOnGithub.sha}/${editOnGithub.path.startsWith('/') ? editOnGithub.path.slice(1) : editOnGithub.path}`}
+              />
+            )}
+            {props.lastUpdate && (
               <LastUpdate date={new Date(props.lastUpdate)} />
-            ) : null}
+            )}
           </div>
           {slot(props.footer, <Footer items={props.footer?.items} />)}
         </PageArticle>
@@ -219,31 +223,27 @@ export function DocsPage({
   );
 }
 
-function EditOnGitHub({
-  owner,
-  repo,
-  sha,
-  path,
-  ...props
-}: EditOnGitHubOptions) {
-  const href = `https://github.com/${owner}/${repo}/blob/${sha}/${path.startsWith('/') ? path.slice(1) : path}`;
-
+export function EditOnGitHub(props: ComponentProps<'a'>) {
   return (
     <a
-      href={href}
       target="_blank"
       rel="noreferrer noopener"
       {...props}
       className={cn(
         buttonVariants({
           color: 'secondary',
-          className: 'gap-1.5 text-fd-muted-foreground',
+          size: 'sm',
+          className: 'gap-1.5 not-prose',
         }),
         props.className,
       )}
     >
-      <Edit className="size-3.5" />
-      <I18nLabel label="editOnGithub" />
+      {props.children ?? (
+        <>
+          <Edit className="size-3.5" />
+          <I18nLabel label="editOnGithub" />
+        </>
+      )}
     </a>
   );
 }

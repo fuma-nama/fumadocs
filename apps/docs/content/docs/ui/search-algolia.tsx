@@ -14,8 +14,6 @@ const client = algo(appId, apiKey);
 
 const index = client.initIndex(indexName);
 
-export default function CustomSearchDialog(
-  props: SharedProps,
-): React.ReactElement {
+export default function CustomSearchDialog(props: SharedProps) {
   return <SearchDialog index={index} {...props} showAlgolia />;
 }

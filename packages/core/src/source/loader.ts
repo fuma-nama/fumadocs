@@ -58,6 +58,9 @@ export interface Source<Config extends SourceConfig> {
 }
 
 export interface Page<Data = PageData> {
+  /**
+   * Virtualized file path
+   */
   file: FileInfo;
   slugs: string[];
   url: string;
@@ -67,6 +70,9 @@ export interface Page<Data = PageData> {
 }
 
 export interface Meta<Data = MetaData> {
+  /**
+   * Virtualized file path
+   */
   file: FileInfo;
   data: Data;
 }
