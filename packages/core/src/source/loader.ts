@@ -1,7 +1,6 @@
 import type * as PageTree from '@/server/page-tree';
 import type { I18nConfig } from '@/i18n';
 import {
-  type I18nLoadOptions,
   loadFiles,
   loadFilesI18n,
   type LoadOptions,
@@ -9,8 +8,10 @@ import {
   type VirtualFile,
 } from './load-files';
 import type { MetaData, PageData, UrlFn } from './types';
-import type { BuildPageTreeOptions } from './page-tree-builder';
-import { createPageTreeBuilder } from './page-tree-builder';
+import {
+  type BaseOptions as BasePageTreeBuilderOptions,
+  createPageTreeBuilder,
+} from './page-tree-builder';
 import { type FileInfo } from './path';
 import type { MetaFile, PageFile, Storage } from './file-system';
 import { joinPath } from '@/utils/path';
@@ -25,28 +26,28 @@ export interface SourceConfig {
   metaData: MetaData;
 }
 
-export interface LoaderOptions {
+export interface LoaderOptions<
+  T extends SourceConfig = SourceConfig,
+  I18n extends I18nConfig | undefined = I18nConfig | undefined,
+> {
   baseUrl: string;
 
-  icon?: NonNullable<BuildPageTreeOptions['resolveIcon']>;
+  icon?: NonNullable<BasePageTreeBuilderOptions['resolveIcon']>;
   slugs?: LoadOptions['getSlugs'];
   url?: UrlFn;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Inevitable
-  source: Source<any>;
+  source: Source<T>;
   transformers?: Transformer[];
 
   /**
    * Additional options for page tree builder
    */
-  pageTree?: Partial<Omit<BuildPageTreeOptions, 'storage' | 'getUrl'>>;
+  pageTree?: Partial<BasePageTreeBuilderOptions<T['pageData'], T['metaData']>>;
 
   /**
    * Configure i18n
    */
-  i18n?: I18nConfig & {
-    parser?: I18nLoadOptions['i18n']['parser'];
-  };
+  i18n?: I18n;
 }
 
 export interface Source<Config extends SourceConfig> {
@@ -231,15 +232,17 @@ export function getSlugs(info: FileInfo): string[] {
   );
 }
 
-type InferSourceConfig<T> = T extends Source<infer Config> ? Config : never;
-
-export function loader<Options extends LoaderOptions>(
-  options: Options,
+export function loader<
+  Config extends SourceConfig,
+  I18n extends I18nConfig | undefined = undefined,
+>(
+  options: LoaderOptions<Config, I18n>,
 ): LoaderOutput<{
-  source: InferSourceConfig<Options['source']>;
-  i18n: Options['i18n'] extends I18nConfig ? true : false;
+  source: Config;
+  i18n: I18n extends I18nConfig ? true : false;
 }> {
-  return createOutput(options) as ReturnType<typeof loader<Options>>;
+  // @ts-expect-error -- forced type cast
+  return createOutput(options);
 }
 
 function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
@@ -270,7 +273,7 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
       };
 
   const walker = indexPages(storages, getUrl, options.i18n);
-  const builder = createPageTreeBuilder();
+  const builder = createPageTreeBuilder(getUrl);
   let pageTree: LoaderOutput<LoaderConfig>['pageTree'] | undefined;
 
   return {
@@ -280,7 +283,6 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
         pageTree ??= builder.buildI18n({
           storages,
           resolveIcon: options.icon,
-          getUrl,
           i18n: options.i18n,
           ...options.pageTree,
         }) as unknown as LoaderOutput<LoaderConfig>['pageTree'];
@@ -288,7 +290,6 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
         pageTree ??= builder.build({
           storage: storages[''],
           resolveIcon: options.icon,
-          getUrl,
           ...options.pageTree,
         });
       }

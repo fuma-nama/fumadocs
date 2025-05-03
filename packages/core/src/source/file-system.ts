@@ -1,32 +1,35 @@
 import type { MetaData, PageData } from '@/source/types';
 import {
-  parseFilePath,
-  parseFolderPath,
   type FileInfo,
   type FolderInfo,
+  parseFilePath,
+  parseFolderPath,
 } from './path';
 import { joinPath, splitPath } from '@/utils/path';
 
-export interface MetaFile {
+export interface MetaFile<Data extends MetaData = MetaData> {
   file: FileInfo;
   format: 'meta';
-  data: MetaData;
+  data: Data;
 }
 
-export interface PageFile {
+export interface PageFile<Data extends PageData = PageData> {
   file: FileInfo;
   format: 'page';
   data: {
     slugs: string[];
-    data: PageData;
+    data: Data;
   };
 }
 
-export type File = MetaFile | PageFile;
+type File = MetaFile | PageFile;
 
-export interface Folder {
+export interface Folder<
+  Page extends PageData = PageData,
+  Meta extends MetaData = MetaData,
+> {
   file: FolderInfo;
-  children: (File | Folder)[];
+  children: (MetaFile<Meta> | PageFile<Page> | Folder<Page, Meta>)[];
 }
 
 /**

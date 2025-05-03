@@ -1,9 +1,9 @@
 import type { ReactElement } from 'react';
 import type { I18nConfig } from '@/i18n';
 import type * as PageTree from '../server/page-tree';
-import type { File, Folder, MetaFile, PageFile, Storage } from './file-system';
+import type { Folder, MetaFile, PageFile, Storage } from './file-system';
 import { joinPath } from '@/utils/path';
-import { type UrlFn } from './types';
+import type { MetaData, PageData, UrlFn } from './types';
 
 interface PageTreeBuilderContext {
   storage: Storage;
@@ -12,10 +12,14 @@ interface PageTreeBuilderContext {
   localeStorage?: Storage;
 
   builder: PageTreeBuilder;
-  options: Options;
+  options: BaseOptions;
+  getUrl: UrlFn;
 }
 
-interface Options {
+export interface BaseOptions<
+  Page extends PageData = PageData,
+  Meta extends MetaData = MetaData,
+> {
   /**
    * Remove references to the file path of original nodes (`$ref`)
    *
@@ -23,23 +27,22 @@ interface Options {
    */
   noRef?: boolean;
 
-  attachFile?: (node: PageTree.Item, file?: PageFile) => PageTree.Item;
+  attachFile?: (node: PageTree.Item, file?: PageFile<Page>) => PageTree.Item;
   attachFolder?: (
     node: PageTree.Folder,
-    folder: Folder,
-    meta?: MetaFile,
+    folder: Folder<Page, Meta>,
+    meta?: MetaFile<Meta>,
   ) => PageTree.Folder;
   attachSeparator?: (node: PageTree.Separator) => PageTree.Separator;
 
-  getUrl: UrlFn;
   resolveIcon?: (icon: string | undefined) => ReactElement | undefined;
 }
 
-export interface BuildPageTreeOptions extends Options {
+export interface BuildPageTreeOptions extends BaseOptions {
   storage: Storage;
 }
 
-export interface BuildPageTreeOptionsWithI18n extends Options {
+export interface BuildPageTreeOptionsWithI18n extends BaseOptions {
   storages: Record<string, Storage>;
   i18n: I18nConfig;
 }
@@ -63,7 +66,7 @@ const restReversed = 'z...a' as const;
 const extractPrefix = '...';
 const excludePrefix = '!';
 
-function isPageFile(node: Folder | File): node is PageFile {
+function isPageFile(node: Folder | PageFile | MetaFile): node is PageFile {
   return 'data' in node && node.format === 'page';
 }
 
@@ -74,7 +77,7 @@ function isPageFile(node: Folder | File): node is PageFile {
  * @returns Nodes with specified locale in context (sorted)
  */
 function buildAll(
-  nodes: (Folder | File)[],
+  nodes: (Folder | MetaFile | PageFile)[],
   ctx: PageTreeBuilderContext,
   skipIndex: boolean,
 ): PageTree.Node[] {
@@ -262,7 +265,7 @@ function buildFileNode(
     name: file.data.data.title ?? pathToName(file.file.name),
     description: file.data.data.description,
     icon: ctx.options.resolveIcon?.(file.data.data.icon),
-    url: ctx.options.getUrl(file.data.slugs, ctx.locale),
+    url: ctx.getUrl(file.data.slugs, ctx.locale),
     $ref: !ctx.options.noRef
       ? {
           file: file.file.path,
@@ -284,19 +287,21 @@ function build(ctx: PageTreeBuilderContext): PageTree.Root {
   };
 }
 
-export function createPageTreeBuilder(): PageTreeBuilder {
+export function createPageTreeBuilder(getUrl: UrlFn): PageTreeBuilder {
   return {
     build(options) {
       return build({
         options,
         builder: this,
         storage: options.storage,
+        getUrl,
       });
     },
     buildI18n({ i18n, ...options }) {
       const entries = i18n.languages.map<[string, PageTree.Root]>((lang) => {
         const tree = build({
           options,
+          getUrl,
           builder: this,
           locale: lang,
           storage: options.storages[i18n.defaultLanguage],
