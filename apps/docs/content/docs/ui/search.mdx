@@ -177,19 +177,7 @@ For the setup guide, see [Integrate Algolia Search](/docs/headless/search/algoli
 While generally we recommend building your own search with their client-side
 SDK, you can also plug the built-in dialog interface.
 
-```tsx title="components/search.tsx"
-'use client';
-import algo from 'algoliasearch/lite';
-import type { SharedProps } from 'fumadocs-ui/components/dialog/search';
-import SearchDialog from 'fumadocs-ui/components/dialog/search-algolia';
-
-const client = algo('appId', 'apiKey');
-const index = client.initIndex('indexName');
-
-export default function CustomSearchDialog(props: SharedProps) {
-  return <SearchDialog index={index} {...props} />;
-}
-```
+<include meta='title="components/search.tsx"'>./search-algolia.tsx</include>
 
 1. Replace `appId`, `apiKey` and `indexName` with your desired values.
 
