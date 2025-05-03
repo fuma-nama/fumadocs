@@ -37,5 +37,8 @@ export interface MarkdownProps {
 }
 
 export interface BaseCollectionEntry {
+  /**
+   * Raw file path of collection entry, including absolute path (not normalized).
+   */
   _file: FileInfo;
 }

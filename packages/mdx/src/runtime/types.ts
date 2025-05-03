@@ -14,12 +14,17 @@ export interface AsyncRuntimeFile {
   content: string;
 }
 
-type DocOut<Schema extends StandardSchemaV1> = Omit<
-  MarkdownProps,
-  keyof StandardSchemaV1.InferOutput<Schema>
-> &
-  StandardSchemaV1.InferOutput<Schema> &
-  BaseCollectionEntry;
+type DocOut<Schema extends StandardSchemaV1> = Override<
+  MarkdownProps & {
+    /**
+     * Read the original content of file from file system.
+     */
+    get content(): string;
+  },
+  StandardSchemaV1.InferOutput<Schema> & BaseCollectionEntry
+>;
+
+type Override<A, B> = Omit<A, keyof B> & B;
 
 type MetaOut<Schema extends StandardSchemaV1> =
   StandardSchemaV1.InferOutput<Schema> & BaseCollectionEntry;

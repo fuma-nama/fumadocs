@@ -1,21 +1,27 @@
+import type { VirtualFile } from 'fumadocs-core/source';
 import {
   type MetaData,
   type PageData,
   type Source,
 } from 'fumadocs-core/source';
 import { type BaseCollectionEntry } from '@/config';
-import type { VirtualFile } from 'fumadocs-core/source';
 import type { Runtime } from '@/runtime/types';
+import fs from 'node:fs';
 
 export const _runtime: Runtime = {
   doc(files) {
     return files.map((file) => {
       const { default: body, frontmatter, ...exports } = file.data;
+      let cachedContent: string | undefined;
 
       return {
         body,
         ...exports,
         ...(frontmatter as object),
+        get content() {
+          cachedContent ??= fs.readFileSync(file.info.absolutePath).toString();
+          return cachedContent;
+        },
         _exports: file.data,
         _file: file.info,
       };
