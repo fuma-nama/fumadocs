@@ -1,10 +1,47 @@
 ---
-title: llms.txt
-description: Output docs content for large language models
+title: LLM
+description: Output docs content for large language models.
 ---
 
-Create a route handler, modify it to include other remark plugins.
+## Overview
 
-<include cwd meta='title="app/llms.txt/route.ts"'>
-  ./content/shared/llms.ts
+It's simple in Fumadocs to make your docs site more AI-friendly.
+
+First, make a `getLLMText` function that converts pages into static MDX content:
+
+<include>./get-llm-text.ts</include>
+
+> Modify it to include other remark plugins.
+
+### `llms.txt`
+
+A version of docs for AIs to read.
+
+<include meta='title="app/llms.txt/route.ts"'>./llms.txt.ts</include>
+
+### `*.mdx`
+
+Allow people to append `.mdx` to a page to get its Markdown/MDX content.
+
+Make a route handler to return page content.
+
+<include meta='title="app/llms.mdx/[[...slug]]/route.ts"'>
+  ./llms.mdx.ts
 </include>
+
+And redirect users to that route.
+
+```ts title="next.config.ts"
+import type { NextConfig } from 'next';
+
+const config: NextConfig = {
+  async rewrites() {
+    return [
+      {
+        source: '/docs/:path*.mdx',
+        destination: '/llms.mdx/:path*',
+      },
+    ];
+  },
+};
+```

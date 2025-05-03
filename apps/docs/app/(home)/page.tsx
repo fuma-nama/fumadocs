@@ -116,7 +116,7 @@ function Architecture() {
 
 async function Why() {
   return (
-    <div className="relative overflow-hidden border-x border-t p-4 bg-radial-[circle_at_50%_100%] from-blue-500/30 via-fd-background via-90%">
+    <div className="relative overflow-hidden border-x border-t p-2">
       <WhyInteractive
         typeTable={
           <TypeTable
@@ -149,9 +149,7 @@ export const { GET } = createFromSource(source);`}
             lang="css"
             code={`@import 'tailwindcss';
 @import 'fumadocs-ui/css/neutral.css';
-@import 'fumadocs-ui/css/preset.css';
-
-@source '../node_modules/fumadocs-ui/dist/**/*.js';`}
+@import 'fumadocs-ui/css/preset.css';`}
           />
         }
         codeblockInteractive={
@@ -445,7 +443,7 @@ Like headless docs to build exactly what you need.`,
 
 function Feedback() {
   return (
-    <div className="relative border-x border-t pt-8">
+    <div className="relative border-x border-t pt-8 bg-fd-background">
       <div className="flex flex-row gap-6 justify-between px-6 mb-6 items-center">
         <p className="text-sm font-medium md:text-lg">
           Trusted by awesome teams and developers
@@ -506,7 +504,9 @@ function Introduction(): React.ReactElement {
         <div className="relative flex flex-col">
           <CodeBlock
             lang="mdx"
-            wrapper={{ className: 'absolute inset-x-2 top-0' }}
+            wrapper={{
+              className: 'absolute inset-x-2 top-0 shadow-lg',
+            }}
             code={`---
 title: My Documentation
 ---
@@ -516,7 +516,7 @@ title: My Documentation
 Hello World
 `}
           />
-          <Files className="z-[2] mt-48 shadow-xl">
+          <Files className="z-[2] mt-40 shadow-xl">
             <Folder name="content" defaultOpen>
               <File name="index.mdx" />
               <File name="components.mdx" />
@@ -659,16 +659,23 @@ function Features() {
         subheading="Fumadocs CLI"
         heading="The Shadcn UI for docs"
         description="Fumadocs CLI creates interactive components for your docs, offering a rich experience to your users."
+        className="flex flex-col"
       >
-        <CodeBlock
-          code="npx @fumadocs/cli add"
-          lang="bash"
-          wrapper={{
-            title: 'Terminal',
-            allowCopy: false,
-            className: 'backdrop-blur-sm',
-          }}
-        />
+        <div className="grid grid-cols-[1fr_2fr_1fr] flex-1 *:border-fd-foreground/50 *:border-dashed mask-radial-circle mask-radial-from-white">
+          <div className="border-r border-b" />
+          <div className="border-b" />
+          <div className="border-l border-b" />
+
+          <div className="border-r" />
+          <code className="flex items-center justify-center text-sm">
+            npx @fumadocs/cli add
+          </code>
+          <div className="border-l" />
+
+          <div className="border-r border-t" />
+          <div className="border-t" />
+          <div className="border-l border-t" />
+        </div>
       </Feature>
       <Feature
         icon={CpuIcon}

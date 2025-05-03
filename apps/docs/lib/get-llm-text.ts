@@ -1,7 +1,6 @@
 import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
 import { fileGenerator, remarkDocGen, remarkInstall } from 'fumadocs-docgen';
-import remarkStringify from 'remark-stringify';
 import remarkMdx from 'remark-mdx';
 import { remarkAutoTypeTable } from 'fumadocs-typescript';
 import { remarkInclude } from 'fumadocs-mdx/config';
@@ -13,8 +12,7 @@ const processor = remark()
   .use(remarkGfm)
   .use(remarkAutoTypeTable)
   .use(remarkDocGen, { generators: [fileGenerator()] })
-  .use(remarkInstall)
-  .use(remarkStringify);
+  .use(remarkInstall);
 
 export async function getLLMText(page: Page) {
   const category =
@@ -36,5 +34,5 @@ Source: https://raw.githubusercontent.com/fuma-nama/fumadocs/refs/heads/main/app
 
 ${page.data.description}
         
-${processed}`;
+${processed.value}`;
 }

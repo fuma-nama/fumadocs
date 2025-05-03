@@ -58,8 +58,6 @@ export function CreateAppAnimation() {
   if (tick > timeCommandRun)
     lines.push(
       <Fragment key="command_response">
-        <span className="font-bold">┌ Create Fumadocs App</span>
-        <span>│</span>
         {tick > timeCommandRun + 1 && (
           <>
             <span className="font-bold">◇ Project name</span>
@@ -93,14 +91,14 @@ export function CreateAppAnimation() {
       {tick > timeWindowOpen && (
         <LaunchAppWindow className="absolute bottom-5 right-4 z-10 animate-in fade-in slide-in-from-top-10" />
       )}
-      <pre className="overflow-hidden rounded-xl border text-xs">
+      <pre className="overflow-hidden rounded-xl border text-[13px] shadow-lg">
         <div className="flex flex-row items-center gap-2 border-b px-4 py-2">
           <TerminalIcon className="size-4" />{' '}
           <span className="font-bold">Terminal</span>
           <div className="grow" />
           <div className="size-2 rounded-full bg-red-400" />
         </div>
-        <div className="min-h-[200px] bg-gradient-to-b from-fd-secondary [mask-image:linear-gradient(to_bottom,white,transparent)]">
+        <div className="min-h-[200px] bg-gradient-to-b from-fd-card">
           <code className="grid p-4">{lines}</code>
         </div>
       </pre>
@@ -141,15 +139,14 @@ export function WhyInteractive(props: {
     'Generate from TypeScript & OpenAPI',
     'Interactive Examples',
     'Automation & Server',
-    'Flexible',
   ];
 
   return (
     <div
       id="why-interactive"
-      className="flex flex-col rounded-xl overflow-hidden shadow-lg border bg-fd-background/70 backdrop-blur-lg md:flex-row md:min-h-[500px]"
+      className="flex flex-col-reverse gap-3 md:flex-row md:min-h-[380px]"
     >
-      <div className="flex flex-col bg-fd-card/50">
+      <div className="flex flex-col">
         {items.map((item, i) => (
           <button
             key={item}
@@ -163,9 +160,9 @@ export function WhyInteractive(props: {
             }}
             type="button"
             className={cn(
-              'text-nowrap px-4 py-2 text-start text-sm text-fd-muted-foreground font-medium first:pt-3 last:pb-3',
+              'transition-colors text-nowrap border border-transparent rounded-lg px-3 py-2.5 text-start text-sm text-fd-muted-foreground font-medium',
               i === active
-                ? 'text-fd-primary bg-fd-primary/10'
+                ? 'text-fd-primary bg-fd-primary/10 border-fd-primary/10'
                 : 'hover:text-fd-accent-foreground/80',
             )}
             onClick={() => {
@@ -189,41 +186,22 @@ export function WhyInteractive(props: {
         }`}
       </style>
 
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-4 border border-fd-primary/10 bg-fd-card/40 rounded-lg shadow-lg">
         {active === 0 ? (
           <WhyPanel>
-            <h3 className="mb-4 text-lg font-semibold">
-              Implementing search is difficult, we made it simple.
-            </h3>
+            <h3>We made it simple.</h3>
             <p>
               Fumadocs offers native support for Orama and Algolia Search, it is
-              as easy as plugging a route handler.
+              as easy as plugging a route handler. You can also use your own
+              search modal to allow full control over the search UI.
             </p>
             {props.codeblockSearchRouter}
-            <p className="mb-4 text-fd-muted-foreground">
-              In addition, you can plug your own search modal to allow full
-              control over the search UI.
-            </p>
-            <div className="flex flex-row items-center gap-1.5">
-              <Link
-                href="/docs/headless/search"
-                className={cn(buttonVariants({ variant: 'outline' }))}
-              >
-                Check the docs
-              </Link>
-              <Link
-                href="/docs/ui/search"
-                className={cn(buttonVariants({ variant: 'ghost' }))}
-              >
-                Customise UI?
-              </Link>
-            </div>
           </WhyPanel>
         ) : null}
 
         {active === 1 ? (
           <WhyPanel>
-            <h3 className="mb-4 text-lg font-semibold">Tailwind CSS Plugin</h3>
+            <h3>Tailwind CSS Plugin</h3>
             <p>
               Share the same design system cross the docs and your app with
               Tailwind CSS. Works great with <b>Shadcn UI</b>.
@@ -231,7 +209,7 @@ export function WhyInteractive(props: {
             {props.codeblockTheme}
             <Link
               href="/docs/ui/theme"
-              className={cn(buttonVariants({ variant: 'outline' }))}
+              className={cn(buttonVariants(), 'not-prose')}
             >
               See Themes
             </Link>
@@ -240,23 +218,21 @@ export function WhyInteractive(props: {
 
         {active === 2 ? (
           <WhyPanel>
-            <h3 className="mb-4 text-lg font-semibold">
-              From the source of truth, never repeat yourself again.
-            </h3>
+            <h3>Never repeat yourself again.</h3>
             <p>
               Fumadocs has a smart Type Table component that renders the
-              properties of interface/type automatically, powered by the
-              TypeScript Compiler API.
+              properties of interface/type automatically, from the source of
+              truth, powered by the TypeScript Compiler API.
             </p>
             {props.typeTable}
             <p>
               We also have a built-in OpenAPI playground and docs generator.
             </p>
 
-            <div className="mt-4 flex flex-row items-center gap-1.5">
+            <div className="mt-4 flex flex-row items-center gap-1.5 not-prose">
               <Link
                 href="/docs/ui/components/auto-type-table"
-                className={cn(buttonVariants({ variant: 'outline' }))}
+                className={cn(buttonVariants())}
               >
                 Type Table
               </Link>
@@ -271,9 +247,7 @@ export function WhyInteractive(props: {
         ) : null}
         {active === 3 ? (
           <WhyPanel>
-            <h3 className="mb-4 text-lg font-semibold">
-              Interactive docs with React.
-            </h3>
+            <h3>Interactive docs with React.</h3>
             <p>
               Fumadocs offers many useful components, from File Tree, Tabs, to
               Zoomable Image.
@@ -281,7 +255,7 @@ export function WhyInteractive(props: {
             {props.codeblockInteractive}
             <Link
               href="/docs/ui/components"
-              className={cn(buttonVariants({ variant: 'outline' }))}
+              className={cn(buttonVariants(), 'not-prose')}
             >
               View Components
             </Link>
@@ -289,9 +263,7 @@ export function WhyInteractive(props: {
         ) : null}
         {active === 4 ? (
           <WhyPanel>
-            <h3 className="mb-4 text-lg font-semibold">
-              Connect your content and server.
-            </h3>
+            <h3>Connect your content and server.</h3>
 
             <p>
               React Server Component made it very easy to automate docs. Use
@@ -300,30 +272,6 @@ export function WhyInteractive(props: {
             </p>
 
             {props.codeblockMdx}
-          </WhyPanel>
-        ) : null}
-        {active === 5 ? (
-          <WhyPanel>
-            <h3 className="mb-4 text-lg font-semibold">
-              Your own content source, search solution, everything.
-            </h3>
-            <p>
-              Fumadocs is designed to be flexible, working with any content
-              sources, offering powerful utilities.
-              <br />
-              <br />
-              With our remark plugins, you can parse documents into search
-              indexes, and integrate with different search solutions seamlessly.
-            </p>
-
-            <Link
-              href="/docs/headless/mdx/structure"
-              className={cn(
-                buttonVariants({ className: 'mt-4', variant: 'outline' }),
-              )}
-            >
-              See MDX Plugins
-            </Link>
           </WhyPanel>
         ) : null}
       </div>
@@ -336,7 +284,7 @@ function WhyPanel(props: HTMLProps<HTMLDivElement>) {
     <div
       {...props}
       className={cn(
-        'duration-700 animate-in fade-in slide-in-from-left-4 text-sm',
+        'duration-700 animate-in fade-in text-sm prose',
         props.className,
       )}
     >
