@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 15.2.13
+
+### Patch Changes
+
+- b433d93: Recommend using custom button/link instead for edit on GitHub button
+- 1e07ed8: Support disabling codeblock styles with `.not-fumadocs-codeblock`
+  - fumadocs-core@15.2.13
+
 ## 15.2.12
 
 ### Patch Changes
