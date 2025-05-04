@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 15.2.14
+
+### Patch Changes
+
+- 6ea1718: Fix type inference for `pageTree.attachFile` in `loader()`
+
 ## 15.2.13
 
 ## 15.2.12
