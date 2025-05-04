@@ -1,5 +1,14 @@
 # @fuma-docs/openapi
 
+## 8.1.6
+
+### Patch Changes
+
+- 3e69302: Support media adapter API
+- Updated dependencies [6ea1718]
+  - fumadocs-core@15.2.14
+  - fumadocs-ui@15.2.14
+
 ## 8.1.5
 
 ### Patch Changes
