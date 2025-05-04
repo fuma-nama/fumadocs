@@ -14,11 +14,9 @@ export type ParameterField = {
 export type RequestSchema = ParsedSchema;
 
 interface Context {
-  allowFile: boolean;
   references: Record<string, RequestSchema>;
   registered: WeakMap<Exclude<ParsedSchema, boolean>, string>;
   nextId: () => string;
-  render: RenderContext;
 }
 
 export interface APIPlaygroundProps {
@@ -42,19 +40,18 @@ export async function APIPlayground({
   const mediaType = bodyContent ? getPreferredType(bodyContent) : undefined;
 
   const context: Context = {
-    allowFile: mediaType === 'multipart/form-data',
     references: {},
     nextId() {
       return String(currentId++);
     },
     registered: new WeakMap(),
-    render: ctx,
   };
 
   const props: ClientProps = {
     authorization: getAuthorizationField(method, ctx),
     method: method.method,
     route: path,
+    mediaAdapters: ctx.mediaAdapters,
     parameters: method.parameters?.map((v) => ({
       name: v.name,
       in: v.in as ParameterField['in'],

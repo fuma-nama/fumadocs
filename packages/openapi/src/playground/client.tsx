@@ -48,6 +48,7 @@ import {
   SchemaProvider,
   useResolvedSchema,
 } from '@/playground/schema';
+import type { MediaAdapter } from '@/media/adapter';
 
 interface FormValues {
   authorization:
@@ -104,6 +105,8 @@ export type ClientProps = HTMLAttributes<HTMLFormElement> & {
   components?: Partial<{
     ResultDisplay: FC<{ data: FetchResult }>;
   }>;
+
+  mediaAdapters: Record<string, MediaAdapter>;
 };
 
 function toRequestData(
@@ -116,7 +119,7 @@ function toRequestData(
     method,
     header: value.header,
     body: value.body,
-    bodyMediaType: mediaType as RequestData['bodyMediaType'],
+    bodyMediaType: mediaType,
     cookie: value.cookie,
     query: value.query,
   };
@@ -133,6 +136,7 @@ export default function Client({
   fields,
   references,
   proxyUrl,
+  mediaAdapters,
   components: { ResultDisplay = DefaultResultDisplay } = {},
   ...rest
 }: ClientProps) {
@@ -158,7 +162,7 @@ export default function Client({
 
   const testQuery = useQuery(async (input: FormValues) => {
     const fetcher = await import('./fetcher').then((mod) =>
-      mod.createBrowserFetcher(),
+      mod.createBrowserFetcher(mediaAdapters),
     );
 
     const serverUrl = server

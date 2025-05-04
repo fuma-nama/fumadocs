@@ -24,7 +24,7 @@ import {
   getAPIExamples,
 } from '@/render/operation/api-example';
 import { MethodLabel } from '@/ui/components/method-label';
-import { type RequestData, supportedMediaTypes } from '@/requests/_shared';
+import { type SampleGenerator } from '@/requests/_shared';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import { getTypescriptSchema } from '@/utils/get-typescript-schema';
 import { CopyResponseTypeScript } from '@/ui/client';
@@ -32,10 +32,7 @@ import { CopyResponseTypeScript } from '@/ui/client';
 export interface CodeSample {
   lang: string;
   label: string;
-  source?:
-    | string
-    | ((url: string, data: RequestData) => string | undefined)
-    | false;
+  source?: string | SampleGenerator | false;
 }
 
 const ParamTypes = {
@@ -83,12 +80,7 @@ export function Operation({
 
   if (body) {
     const type = getPreferredType(body.content);
-    if (
-      !type ||
-      !supportedMediaTypes.includes(
-        String(type) as (typeof supportedMediaTypes)[number],
-      )
-    )
+    if (!type || !(type in ctx.mediaAdapters))
       throw new Error(
         `No supported media type for body content: ${path}, received: ${type}`,
       );

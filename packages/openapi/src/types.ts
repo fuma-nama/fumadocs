@@ -9,6 +9,7 @@ import type {
 } from 'shiki';
 import type { NoReference } from '@/utils/schema';
 import type { ProcessedDocument } from '@/utils/process-document';
+import type { MediaAdapter } from '@/media/adapter';
 
 export type Document = V3_1.Document;
 export type OperationObject = V3_1.OperationObject;
@@ -84,4 +85,6 @@ export interface RenderContext {
    * @default true
    */
   showResponseSchema?: boolean;
+
+  mediaAdapters: Record<string, MediaAdapter>;
 }

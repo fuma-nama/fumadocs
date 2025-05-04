@@ -13,10 +13,8 @@ import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 
 export function Root({
   children,
-  baseUrl,
   className,
-  shikiOptions,
-  servers,
+  ctx,
   ...props
 }: RootProps & HTMLAttributes<HTMLDivElement>) {
   return (
@@ -28,9 +26,10 @@ export function Root({
       {...props}
     >
       <ApiProvider
-        servers={servers}
-        shikiOptions={shikiOptions}
-        defaultBaseUrl={baseUrl}
+        mediaAdapters={ctx.mediaAdapters}
+        servers={ctx.servers}
+        shikiOptions={ctx.shikiOptions}
+        defaultBaseUrl={ctx.baseUrl}
       >
         {children}
       </ApiProvider>

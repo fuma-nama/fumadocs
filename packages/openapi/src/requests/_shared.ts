@@ -1,11 +1,13 @@
 import { getPathnameFromInput } from '@/utils/get-pathname-from-input';
+import type { MediaAdapter } from '@/media/adapter';
 
-export const supportedMediaTypes = [
-  'multipart/form-data',
-  'application/json',
-  'application/xml',
-  'application/x-www-form-urlencoded',
-] as const;
+export type SampleGenerator = (
+  url: string,
+  data: RequestData,
+  context: {
+    mediaAdapters: Record<string, MediaAdapter>;
+  },
+) => string;
 
 export interface RequestData {
   method: string;
@@ -16,14 +18,8 @@ export interface RequestData {
   cookie: Record<string, string>;
   body?: unknown;
 
-  bodyMediaType?: (typeof supportedMediaTypes)[number];
+  bodyMediaType?: string;
 }
-
-export const MediaTypeFormatMap = {
-  'application/json': 'json',
-  'application/xml': 'xml',
-  'application/x-www-form-urlencoded': 'url',
-} as const;
 
 export function getUrl(url: string, data: RequestData): string {
   return getPathnameFromInput(url, data.path, data.query);

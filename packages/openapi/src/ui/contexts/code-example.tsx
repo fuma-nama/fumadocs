@@ -111,7 +111,7 @@ export function CodeExampleProvider({
 }
 
 export function CodeExample(props: CodeSample) {
-  const { shikiOptions } = useApiContext();
+  const { shikiOptions, mediaAdapters } = useApiContext();
   const { examples, key, route, addListener, removeListener } =
     useContext(CodeExampleContext)!;
   const { server } = useServerSelectContext();
@@ -139,8 +139,11 @@ export function CodeExample(props: CodeSample) {
     return sample.source(
       `${server ? getUrl(server.url, server.variables) : '/'}${route}`,
       data,
+      {
+        mediaAdapters,
+      },
     );
-  }, [sample, server, route, data]);
+  }, [mediaAdapters, sample, server, route, data]);
 
   if (!code || !sample) return null;
 

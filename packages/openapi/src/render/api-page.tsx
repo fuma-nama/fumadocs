@@ -10,6 +10,7 @@ import {
   type ProcessedDocument,
 } from '@/utils/process-document';
 import { getUrl } from '@/utils/server-url';
+import { defaultAdapters } from '@/media/adapter';
 
 type ApiPageContextProps = Pick<
   Partial<RenderContext>,
@@ -19,6 +20,7 @@ type ApiPageContextProps = Pick<
   | 'proxyUrl'
   | 'showResponseSchema'
   | 'disablePlayground'
+  | 'mediaAdapters'
 >;
 
 export interface ApiPageProps extends ApiPageContextProps {
@@ -63,7 +65,7 @@ export async function APIPage(props: ApiPageProps) {
   const { document } = processed;
 
   return (
-    <ctx.renderer.Root baseUrl={ctx.baseUrl} servers={ctx.servers}>
+    <ctx.renderer.Root ctx={ctx}>
       {operations?.map((item) => {
         const pathItem = document.paths?.[item.path];
         if (!pathItem) return null;
@@ -129,7 +131,7 @@ export async function getContext(
     disablePlayground: options.disablePlayground,
     showResponseSchema: options.showResponseSchema,
     renderer: {
-      ...createRenders(options.shikiOptions),
+      ...createRenders(),
       ...options.renderer,
     },
     shikiOptions: options.shikiOptions,
@@ -144,6 +146,10 @@ export async function getContext(
         : {},
     ),
     servers,
+    mediaAdapters: {
+      ...defaultAdapters,
+      ...options.mediaAdapters,
+    },
     slugger: new Slugger(),
   };
 }
