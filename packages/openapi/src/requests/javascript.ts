@@ -31,11 +31,16 @@ export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
     options.set('body', 'body');
   }
 
-  const optionsStr = Array.from(options.entries())
-    .map(([k, v]) => ident(k === v ? k : `${k}: ${v}`))
-    .join(',\n');
+  const params = [JSON.stringify(getUrl(url, data))];
+  if (options.size > 0) {
+    const str = Array.from(options.entries())
+      .map(([k, v]) => ident(k === v ? k : `${k}: ${v}`))
+      .join(',\n');
 
-  s.push(`fetch(${JSON.stringify(getUrl(url, data))}, {\n${optionsStr}\n});`);
+    params.push(`{\n${str}\n}`);
+  }
+
+  s.push(`fetch(${params.join(', ')})`);
 
   return s.join('\n\n');
 };

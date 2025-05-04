@@ -5,7 +5,7 @@ import { type ElementCompact, js2xml } from 'xml-js';
  */
 export function inputToString(
   value: unknown,
-  format: 'xml' | 'json' | 'url' = 'json',
+  format: 'xml' | 'json' | 'url' | 'ndjson' = 'json',
   multiLine: 'single-quote' | 'backtick' | 'python' | 'none' = 'none',
 ): string {
   const getStr = (v: string) => {
@@ -22,6 +22,14 @@ export function inputToString(
 
   if (format === 'json') {
     return getStr(JSON.stringify(value, null, 2));
+  }
+
+  if (format === 'ndjson') {
+    return getStr(
+      Array.isArray(value)
+        ? value.map((v) => JSON.stringify(v)).join('\n')
+        : JSON.stringify(value, null, 2),
+    );
   }
 
   if (format === 'url') {

@@ -287,6 +287,10 @@ export function FieldInput({
               onChange(e.target.files.item(0));
             }}
             {...props}
+            className={cn(
+              'border rounded-lg bg-fd-background text-fd-muted-foreground p-2 font-medium text-sm',
+              props.className,
+            )}
             {...restField}
           />
         )}

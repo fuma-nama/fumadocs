@@ -45,6 +45,8 @@ export interface MediaAdapter {
 export const defaultAdapters: Record<string, MediaAdapter> = {
   'application/json': adapters.json,
   'application/xml': adapters.xml,
+  'application/x-ndjson': adapters.ndJson,
   'application/x-www-form-urlencoded': adapters.url,
   'multipart/form-data': adapters.formData,
+  'application/octet-stream': adapters.octet,
 };

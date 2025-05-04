@@ -106,7 +106,33 @@ export const formData: MediaAdapter = {
   },
 };
 
-function str(init: unknown, format: 'xml' | 'json' | 'url', ctx: MediaContext) {
+export const ndJson: MediaAdapter = {
+  encode(data) {
+    if (Array.isArray(data.body)) {
+      return data.body.map((v) => JSON.stringify(v)).join('\n');
+    }
+    return JSON.stringify(data.body);
+  },
+  generateExample(data, ctx) {
+    return str(data.body, 'ndjson', ctx);
+  },
+};
+
+export const octet: MediaAdapter = {
+  encode(data) {
+    return data.body as BodyInit;
+  },
+  generateExample() {
+    // not supported
+    return undefined;
+  },
+};
+
+function str(
+  init: unknown,
+  format: 'xml' | 'json' | 'url' | 'ndjson',
+  ctx: MediaContext,
+) {
   if (ctx.lang === 'js') {
     if (format === 'json') {
       return `const body = JSON.stringify(${JSON.stringify(init, null, 2)})`;

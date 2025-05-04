@@ -337,15 +337,15 @@ function FormBody({
         );
       })}
 
-      {body ? (
-        fields.body ? (
-          <CollapsiblePanel title="Body">
-            {renderCustomField('body', body.schema, fields.body)}
-          </CollapsiblePanel>
-        ) : (
-          <BodyInput field={body.schema} />
-        )
-      ) : null}
+      {body && (
+        <CollapsiblePanel title="Body">
+          {fields.body ? (
+            renderCustomField('body', body.schema, fields.body)
+          ) : (
+            <BodyInput field={body.schema} />
+          )}
+        </CollapsiblePanel>
+      )}
     </>
   );
 }
@@ -354,8 +354,11 @@ function BodyInput({ field: _field }: { field: RequestSchema }) {
   const field = useResolvedSchema(_field);
   const [isJson, setIsJson] = useState(false);
 
+  if (field.format === 'binary')
+    return <FieldSet field={field} fieldName="body" />;
+
   return (
-    <CollapsiblePanel title="Body">
+    <>
       {isJson ? (
         <JsonInput fieldName="body">
           <button
@@ -393,7 +396,7 @@ function BodyInput({ field: _field }: { field: RequestSchema }) {
           }
         />
       )}
-    </CollapsiblePanel>
+    </>
   );
 }
 

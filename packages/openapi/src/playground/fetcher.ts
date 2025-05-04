@@ -22,10 +22,7 @@ export function createBrowserFetcher(
   return {
     async fetch(route, options) {
       const headers = new Headers();
-      if (
-        options.bodyMediaType &&
-        options.bodyMediaType !== 'multipart/form-data'
-      )
+      if (options.bodyMediaType)
         headers.append('Content-Type', options.bodyMediaType);
 
       for (const key in options.header) {
@@ -46,9 +43,9 @@ export function createBrowserFetcher(
           document.cookie = [
             `${key}=${value}`,
             'HttpOnly',
-            proxyUrl && proxyUrl.origin !== window.location.origin
-              ? `domain=${proxyUrl.host}`
-              : false,
+            proxyUrl &&
+              proxyUrl.origin !== window.location.origin &&
+              `domain=${proxyUrl.host}`,
             'path=/',
           ]
             .filter(Boolean)
@@ -67,9 +64,12 @@ export function createBrowserFetcher(
       if (options.bodyMediaType && options.body) {
         const adapter = adapters[options.bodyMediaType];
         if (!adapter)
-          throw new Error(
-            `No adapter for ${options.bodyMediaType}, you need to specify one from 'createOpenAPI()'.`,
-          );
+          return {
+            status: 400,
+            type: 'text',
+            data: `[Fumadocs] No adapter for ${options.bodyMediaType}, you need to specify one from 'createOpenAPI()'.`,
+          };
+
         body = await adapter.encode(options);
       }
 
