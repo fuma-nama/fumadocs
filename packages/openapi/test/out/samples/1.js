@@ -8,4 +8,4 @@ fetch("http://localhost:8080/hello_world?search=ai", {
     "cookie": "mode=light"
   },
   body
-});
+})
