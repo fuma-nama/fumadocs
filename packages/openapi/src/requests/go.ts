@@ -1,20 +1,11 @@
 'use client';
-import { inputToString } from '@/utils/input-to-string';
-import {
-  getUrl,
-  ident,
-  MediaTypeFormatMap,
-  type RequestData,
-} from '@/requests/_shared';
+import { getUrl, ident, SampleGenerator } from '@/requests/_shared';
 
-export function getSampleRequest(url: string, data: RequestData): string {
+export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
   const imports = ['fmt', 'net/http', 'io/ioutil'];
   const headers = new Map<string, string>();
   const variables = new Map<string, string>();
   variables.set('url', JSON.stringify(getUrl(url, data)));
-
-  // additional lines before initializing request
-  const additional: string[] = [];
 
   for (const header in data.header) {
     headers.set(header, JSON.stringify(data.header[header]));
@@ -27,31 +18,16 @@ export function getSampleRequest(url: string, data: RequestData): string {
       JSON.stringify(cookies.map((p) => `${p}=${data.cookie[p]}`).join('; ')),
     );
 
-  if (data.body && data.bodyMediaType) {
+  let body: string | undefined;
+
+  if (data.body && data.bodyMediaType && data.bodyMediaType in mediaAdapters) {
     headers.set('Content-Type', `"${data.bodyMediaType}"`);
-
-    if (data.bodyMediaType === 'multipart/form-data') {
-      imports.push('mime/multipart', 'bytes');
-
-      variables.set('payload', `new(bytes.Buffer)`);
-      variables.set('mp', 'multipart.NewWriter(payload)');
-
-      for (const [key, value] of Object.entries(data.body)) {
-        additional.push(
-          `mp.WriteField("${key}", ${inputToString(value, 'json', 'backtick')})`,
-        );
-      }
-    } else {
-      imports.push('strings');
-      variables.set(
-        'payload',
-        `strings.NewReader(${inputToString(
-          data.body,
-          MediaTypeFormatMap[data.bodyMediaType],
-          'backtick',
-        )})`,
-      );
-    }
+    body = mediaAdapters[data.bodyMediaType].generateExample(data, {
+      lang: 'go',
+      addImport(from) {
+        imports.push(from);
+      },
+    });
   }
 
   return `package main
@@ -64,8 +40,8 @@ func main() {
 ${Array.from(variables.entries())
   .map(([k, v]) => ident(`${k} := ${v}`))
   .join('\n')}
-${ident(additional.join('\n'))}
-  req, _ := http.NewRequest("${data.method}", url, ${variables.has('payload') ? 'payload' : 'nil'})
+${body ? ident(body) : ''}
+  req, _ := http.NewRequest("${data.method}", url, ${body ? 'body' : 'nil'})
 ${ident(
   Array.from(headers.entries())
     .map(([key, value]) => `req.Header.Add("${key}", ${value})`)
@@ -78,4 +54,4 @@ ${ident(
   fmt.Println(res)
   fmt.Println(string(body))
 }`;
-}
+};

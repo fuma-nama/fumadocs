@@ -72,7 +72,9 @@ Create a script:
 import { generateFiles } from 'fumadocs-openapi';
 
 void generateFiles({
-  input: ['./unkey.json'], // the OpenAPI schemas
+  // the OpenAPI schema
+  // For Vercel users, we recommend a URL instead.
+  input: ['./unkey.json'],
   output: './content/docs',
   // we recommend to enable it
   // make sure your endpoint description doesn't break MDX syntax.

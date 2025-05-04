@@ -4,6 +4,7 @@ import * as Go from '@/requests/go';
 import * as Curl from '@/requests/curl';
 import * as JS from '@/requests/javascript';
 import type { RequestData } from '@/requests/_shared';
+import { defaultAdapters } from '@/media/adapter';
 
 describe('Code Sample Generators', () => {
   const url = 'http://localhost:8080/{test}';
@@ -27,26 +28,30 @@ describe('Code Sample Generators', () => {
     },
   };
 
+  const context = {
+    mediaAdapters: defaultAdapters,
+  };
+
   test(`Go`, async () => {
-    await expect(Go.getSampleRequest(url, data)).toMatchFileSnapshot(
+    await expect(Go.generator(url, data, context)).toMatchFileSnapshot(
       `./out/samples/1.go`,
     );
   });
 
   test(`Curl`, async () => {
-    await expect(Curl.getSampleRequest(url, data)).toMatchFileSnapshot(
+    await expect(Curl.generator(url, data, context)).toMatchFileSnapshot(
       `./out/samples/1.bash`,
     );
   });
 
   test(`Python`, async () => {
-    await expect(Python.getSampleRequest(url, data)).toMatchFileSnapshot(
+    await expect(Python.generator(url, data, context)).toMatchFileSnapshot(
       `./out/samples/1.py`,
     );
   });
 
   test(`JavaScript`, async () => {
-    await expect(JS.getSampleRequest(url, data)).toMatchFileSnapshot(
+    await expect(JS.generator(url, data, context)).toMatchFileSnapshot(
       `./out/samples/1.js`,
     );
   });

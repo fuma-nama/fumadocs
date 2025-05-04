@@ -7,22 +7,22 @@ import * as Python from '@/requests/python';
 export const defaultSamples: CodeSample[] = [
   {
     label: 'cURL',
-    source: CURL.getSampleRequest,
+    source: CURL.generator,
     lang: 'bash',
   },
   {
     label: 'JavaScript',
-    source: JS.getSampleRequest,
+    source: JS.generator,
     lang: 'js',
   },
   {
     label: 'Go',
-    source: Go.getSampleRequest,
+    source: Go.generator,
     lang: 'go',
   },
   {
     label: 'Python',
-    source: Python.getSampleRequest,
+    source: Python.generator,
     lang: 'python',
   },
 ];

@@ -23,4 +23,11 @@ export interface I18nConfig {
    * @defaultValue 'never'
    */
   hideLocale?: 'always' | 'default-locale' | 'never';
+
+  /**
+   * Used by `loader()`, specify the way to parse i18n file structure.
+   *
+   * @defaultValue 'dot'
+   */
+  parser?: 'dot' | 'dir';
 }

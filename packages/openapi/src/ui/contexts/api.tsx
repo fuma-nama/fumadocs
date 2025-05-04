@@ -8,6 +8,7 @@ import {
   useState,
 } from 'react';
 import type { RenderContext, ServerObject } from '@/types';
+import type { MediaAdapter } from '@/media/adapter';
 
 export interface ApiProviderProps {
   /**
@@ -17,6 +18,7 @@ export interface ApiProviderProps {
 
   servers: ServerObject[];
   shikiOptions: RenderContext['shikiOptions'];
+  mediaAdapters: Record<string, MediaAdapter>;
 
   children?: ReactNode;
 }
@@ -34,10 +36,8 @@ interface ServerSelectType {
   setServerVariables: (value: Record<string, string>) => void;
 }
 
-const ApiContext = createContext<ApiContextType | undefined>(undefined);
-const ServerSelectContext = createContext<ServerSelectType | undefined>(
-  undefined,
-);
+const ApiContext = createContext<ApiContextType | null>(null);
+const ServerSelectContext = createContext<ServerSelectType | null>(null);
 
 export function useApiContext(): ApiContextType {
   const ctx = useContext(ApiContext);

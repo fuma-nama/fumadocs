@@ -1,13 +1,14 @@
 'use client';
 import { inputToString } from '@/utils/input-to-string';
-import {
-  getUrl,
-  ident,
-  MediaTypeFormatMap,
-  type RequestData,
-} from '@/requests/_shared';
+import { getUrl, ident, type SampleGenerator } from '@/requests/_shared';
 
-export function getSampleRequest(url: string, data: RequestData): string {
+const MediaTypeFormatMap = {
+  'application/json': 'json',
+  'application/xml': 'xml',
+  'application/x-www-form-urlencoded': 'url',
+} as const;
+
+export const generator: SampleGenerator = (url, data) => {
   const s: string[] = [];
   s.push(`curl -X ${data.method} "${getUrl(url, data)}"`);
 
@@ -23,23 +24,30 @@ export function getSampleRequest(url: string, data: RequestData): string {
     s.push(`--cookie ${value}`);
   }
 
-  if (data.bodyMediaType === 'multipart/form-data') {
-    if (data.body && typeof data.body === 'object') {
-      for (const [key, value] of Object.entries(data.body)) {
-        s.push(`-F ${key}=${inputToString(value)}`);
-      }
+  if (data.body && data.bodyMediaType === 'multipart/form-data') {
+    if (typeof data.body !== 'object')
+      throw new Error('[CURL] request body must be an object.');
+
+    for (const [key, value] of Object.entries(data.body)) {
+      s.push(`-F ${key}=${inputToString(value)}`);
     }
-  } else if (data.body && data.bodyMediaType) {
+  } else if (
+    data.body &&
+    data.bodyMediaType &&
+    data.bodyMediaType in MediaTypeFormatMap
+  ) {
     s.push(`-H "Content-Type: ${data.bodyMediaType}"`);
 
     s.push(
       `-d ${inputToString(
         data.body,
-        MediaTypeFormatMap[data.bodyMediaType],
+        MediaTypeFormatMap[
+          data.bodyMediaType as keyof typeof MediaTypeFormatMap
+        ],
         'single-quote',
       )}`,
     );
   }
 
   return s.flatMap((v, i) => ident(v, i > 0 ? 1 : 0)).join(' \\\n');
-}
+};

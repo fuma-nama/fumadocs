@@ -15,11 +15,12 @@
       "dependsOn": ["^build"],
       "outputs": [
         ".output",
+        "public/registry",
         ".contentlayer/**",
         ".source/**",
         "!.contentlayer/.cache/**",
         ".next/**",
-        "content/docs/openapi/**",
+        "content/docs/openapi/\\(generated\\)",
         "!.next/cache/**",
         "dist/**",
         "out",

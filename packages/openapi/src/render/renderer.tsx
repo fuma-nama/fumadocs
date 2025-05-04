@@ -9,7 +9,7 @@ import {
   Property,
   Root,
 } from '@/ui';
-import type { RenderContext, ServerObject } from '@/types';
+import type { RenderContext } from '@/types';
 import { APIPlayground, type APIPlaygroundProps } from '@/playground';
 import { CodeExampleSelector } from '@/ui/contexts/code-example.lazy';
 
@@ -64,10 +64,7 @@ export interface ResponseTypeProps {
 }
 
 export interface RootProps {
-  baseUrl?: string;
-  shikiOptions?: RenderContext['shikiOptions'];
-
-  servers: ServerObject[];
+  ctx: RenderContext;
   children: ReactNode;
 }
 
@@ -93,15 +90,9 @@ export interface Renderer {
   APIPlayground: ComponentType<APIPlaygroundProps>;
 }
 
-export function createRenders(
-  shikiOptions: RenderContext['shikiOptions'],
-): Renderer {
+export function createRenders(): Renderer {
   return {
-    Root: (props) => (
-      <Root shikiOptions={shikiOptions} {...props}>
-        {props.children}
-      </Root>
-    ),
+    Root,
     API,
     APIInfo: ({ children, head }) => (
       <APIInfo>
