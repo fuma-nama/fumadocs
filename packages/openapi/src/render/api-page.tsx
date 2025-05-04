@@ -68,10 +68,16 @@ export async function APIPage(props: ApiPageProps) {
     <ctx.renderer.Root ctx={ctx}>
       {operations?.map((item) => {
         const pathItem = document.paths?.[item.path];
-        if (!pathItem) return null;
+        if (!pathItem)
+          throw new Error(
+            `[Fumadocs OpenAPI] Path not found in OpenAPI schema: ${item.path}`,
+          );
 
         const operation = pathItem[item.method];
-        if (!operation) return null;
+        if (!operation)
+          throw new Error(
+            `[Fumadocs OpenAPI] Method ${item.method} not found in operation: ${item.path}`,
+          );
 
         const method = createMethod(item.method, pathItem, operation);
 
@@ -87,10 +93,16 @@ export async function APIPage(props: ApiPageProps) {
       })}
       {webhooks?.map((item) => {
         const webhook = document.webhooks?.[item.name];
-        if (!webhook) return;
+        if (!webhook)
+          throw new Error(
+            `[Fumadocs OpenAPI] Webhook not found in OpenAPI schema: ${item.name}`,
+          );
 
         const hook = webhook[item.method];
-        if (!hook) return;
+        if (!hook)
+          throw new Error(
+            `[Fumadocs OpenAPI] Method ${item.method} not found in webhook: ${item.name}`,
+          );
 
         const method = createMethod(item.method, webhook, hook);
 
