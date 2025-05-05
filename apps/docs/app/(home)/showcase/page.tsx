@@ -5,7 +5,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { createMetadata } from '@/lib/metadata';
 import NextFAQ from '@/public/showcases/next-faq.png';
 import Nuqs from '@/public/showcases/nuqs.jpg';
-import FrameGround from '@/public/showcases/frameground.png';
+import HextaUI from '@/public/showcases/hexta-ui.png';
 import Million from '@/public/showcases/million.png';
 import Hiro from '@/public/showcases/hiro.png';
 import DokPloy from '@/public/showcases/dokploy.png';
@@ -79,9 +79,9 @@ const showcases: ShowcaseObject[] = [
     url: 'https://openpanel.dev',
   },
   {
-    image: FrameGround,
-    name: 'FrameGround',
-    url: 'https://docs.frameground.tech',
+    image: HextaUI,
+    name: 'HextaUI',
+    url: 'https://hextaui.com',
   },
   {
     image: Sunar,
