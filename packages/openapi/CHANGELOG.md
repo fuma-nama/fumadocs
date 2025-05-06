@@ -1,5 +1,15 @@
 # @fuma-docs/openapi
 
+## 8.1.7
+
+### Patch Changes
+
+- 12297de: Lazy load media adapters on client side
+- Updated dependencies [50db874]
+- Updated dependencies [79e75c3]
+  - fumadocs-core@15.2.15
+  - fumadocs-ui@15.2.15
+
 ## 8.1.6
 
 ### Patch Changes
