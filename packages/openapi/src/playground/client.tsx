@@ -48,7 +48,6 @@ import {
   SchemaProvider,
   useResolvedSchema,
 } from '@/playground/schema';
-import type { MediaAdapter } from '@/media/adapter';
 
 interface FormValues {
   authorization:
@@ -105,8 +104,6 @@ export type ClientProps = HTMLAttributes<HTMLFormElement> & {
   components?: Partial<{
     ResultDisplay: FC<{ data: FetchResult }>;
   }>;
-
-  mediaAdapters: Record<string, MediaAdapter>;
 };
 
 function toRequestData(
@@ -136,7 +133,6 @@ export default function Client({
   fields,
   references,
   proxyUrl,
-  mediaAdapters,
   components: { ResultDisplay = DefaultResultDisplay } = {},
   ...rest
 }: ClientProps) {
@@ -144,6 +140,7 @@ export default function Client({
   const requestData = useRequestData();
   const fieldInfoMap = useMemo(() => new Map<string, FieldInfo>(), []);
   const authInfo = usePersistentAuthInfo(authorization);
+  const { mediaAdapters } = useApiContext();
   const defaultValues: FormValues = useMemo(
     () => ({
       authorization: authInfo.info,

@@ -11,7 +11,7 @@ import {
 } from '@/ui';
 import type { RenderContext } from '@/types';
 import { APIPlayground, type APIPlaygroundProps } from '@/playground';
-import { CodeExampleSelector } from '@/ui/contexts/code-example.lazy';
+import { CodeExampleSelector } from '@/ui/lazy';
 
 export interface ResponsesProps {
   items: string[];

@@ -3,10 +3,7 @@ import { type ReactNode } from 'react';
 import { Markdown } from '@/render/markdown';
 import { type CodeSample } from '@/render/operation/index';
 import { CodeBlock } from '@/render/codeblock';
-import {
-  CodeExample,
-  CodeExampleProvider,
-} from '@/ui/contexts/code-example.lazy';
+import { CodeExample, CodeExampleProvider } from '@/ui/lazy';
 import { getPreferredType, type NoReference } from '@/utils/schema';
 import { getRequestData } from '@/render/operation/get-request-data';
 import { sample } from 'openapi-sampler';

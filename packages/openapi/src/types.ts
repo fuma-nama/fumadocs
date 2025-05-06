@@ -86,5 +86,5 @@ export interface RenderContext {
    */
   showResponseSchema?: boolean;
 
-  mediaAdapters: Record<string, MediaAdapter>;
+  mediaAdapters: Record<string, MediaAdapter | true>;
 }

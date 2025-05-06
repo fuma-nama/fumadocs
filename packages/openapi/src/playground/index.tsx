@@ -2,7 +2,7 @@ import type { MethodInformation, RenderContext } from '@/types';
 import { getPreferredType, type ParsedSchema } from '@/utils/schema';
 import { getSecurities } from '@/utils/get-security';
 import { type ClientProps } from './client';
-import { ClientLazy } from '@/playground/client.lazy';
+import { ClientLazy } from '@/ui/lazy';
 
 export type ParameterField = {
   name: string;
@@ -51,7 +51,6 @@ export async function APIPlayground({
     authorization: getAuthorizationField(method, ctx),
     method: method.method,
     route: path,
-    mediaAdapters: ctx.mediaAdapters,
     parameters: method.parameters?.map((v) => ({
       name: v.name,
       in: v.in as ParameterField['in'],

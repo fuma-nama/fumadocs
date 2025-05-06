@@ -7,9 +7,10 @@ import {
   CollapsibleTrigger,
 } from 'fumadocs-ui/components/ui/collapsible';
 import { ChevronDown } from 'lucide-react';
-import { ApiProvider } from '@/ui/contexts/api';
+import { ApiProvider } from '@/ui/lazy';
 import { cn } from 'fumadocs-ui/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
+import type { MediaAdapter } from '@/media/adapter';
 
 export function Root({
   children,
@@ -26,7 +27,13 @@ export function Root({
       {...props}
     >
       <ApiProvider
-        mediaAdapters={ctx.mediaAdapters}
+        mediaAdapters={
+          Object.fromEntries(
+            Object.entries(ctx.mediaAdapters).filter(
+              ([_, v]) => typeof v !== 'boolean',
+            ),
+          ) as Record<string, MediaAdapter>
+        }
         servers={ctx.servers}
         shikiOptions={ctx.shikiOptions}
         defaultBaseUrl={ctx.baseUrl}
