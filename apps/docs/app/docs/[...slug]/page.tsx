@@ -79,7 +79,7 @@ export default async function Page(props: {
         {page.data.description}
       </DocsDescription>
       <div className="flex flex-row gap-2 items-center">
-        <LLMCopyButton />
+        <LLMCopyButton slug={params.slug} />
         <EditOnGitHub
           url={`https://github.com/${owner}/${repo}/blob/dev/${path}`}
         />

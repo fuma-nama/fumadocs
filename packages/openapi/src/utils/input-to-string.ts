@@ -1,4 +1,5 @@
-import { type ElementCompact, js2xml } from 'xml-js';
+// @ts-expect-error -- nothing
+import js2xml from 'xml-js/lib/js2xml';
 
 /**
  * Convert input value to hardcoded string (with quotes)
@@ -47,5 +48,5 @@ export function inputToString(
     return getStr(params.toString());
   }
 
-  return getStr(js2xml(value as ElementCompact, { compact: true, spaces: 2 }));
+  return getStr(js2xml(value, { compact: true, spaces: 2 }));
 }

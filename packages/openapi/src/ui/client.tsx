@@ -5,8 +5,6 @@ import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from 'fumadocs-ui/utils/cn';
 import { Check, Copy } from 'lucide-react';
 
-export { ClientLazy as APIPlayground } from '@/playground/client.lazy';
-
 export function CopyResponseTypeScript({ code }: { code: string }) {
   const [isChecked, onCopy] = useCopyButton(() => {
     void navigator.clipboard.writeText(code);

@@ -10,7 +10,7 @@ import {
   type ProcessedDocument,
 } from '@/utils/process-document';
 import { getUrl } from '@/utils/server-url';
-import { defaultAdapters } from '@/media/adapter';
+import type { defaultAdapters } from '@/media/adapter';
 
 type ApiPageContextProps = Pick<
   Partial<RenderContext>,
@@ -159,7 +159,14 @@ export async function getContext(
     ),
     servers,
     mediaAdapters: {
-      ...defaultAdapters,
+      ...({
+        'application/octet-stream': true,
+        'application/json': true,
+        'multipart/form-data': true,
+        'application/xml': true,
+        'application/x-ndjson': true,
+        'application/x-www-form-urlencoded': true,
+      } satisfies Record<keyof typeof defaultAdapters, true>),
       ...options.mediaAdapters,
     },
     slugger: new Slugger(),

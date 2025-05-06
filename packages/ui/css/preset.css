@@ -13,10 +13,10 @@
   --fd-nav-height: 0px;
   --fd-tocnav-height: 0px;
 
-  --fd-diff-remove-color: rgba(200, 10, 100, 0.12);
-  --fd-diff-remove-symbol-color: rgb(230, 10, 100);
-  --fd-diff-add-color: rgba(14, 180, 100, 0.12);
-  --fd-diff-add-symbol-color: rgb(10, 200, 100);
+  --color-fd-diff-remove: rgba(200, 10, 100, 0.12);
+  --color-fd-diff-remove-symbol: rgb(230, 10, 100);
+  --color-fd-diff-add: rgba(14, 180, 100, 0.12);
+  --color-fd-diff-add-symbol: rgb(10, 200, 100);
 }
 
 @layer base {

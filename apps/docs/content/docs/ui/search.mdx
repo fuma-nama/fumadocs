@@ -11,42 +11,29 @@ See [Document Search](/docs/headless/search).
 
 Open with <kbd>⌘</kbd> <kbd>K</kbd> or <kbd>Ctrl</kbd> <kbd>K</kbd>.
 
-When not specified, it uses the Default [`fetch` Search Client](/docs/headless/search/orama) powered by Orama.
-
-### Custom Links
-
-Add custom link items to search dialog.
-They are shown as fallbacks when the query is empty.
-
-```tsx title="app/layout.tsx"
-import { RootProvider } from 'fumadocs-ui/root-provider';
-
-<RootProvider
-  search={{
-    links: [
-      ['Home', '/'],
-      ['Docs', '/docs'],
-    ],
-  }}
->
-  {children}
-</RootProvider>;
-```
-
 ### Disable Search
 
 To opt-out of document search, disable it from root provider.
 
-```tsx
-import { RootProvider } from 'fumadocs-ui/root-provider';
+```tsx title="app/layout.tsx"
+import { RootProvider } from 'fumadocs-ui/provider';
+import type { ReactNode } from 'react';
 
-<RootProvider
-  search={{
-    enabled: false,
-  }}
->
-  {children}
-</RootProvider>;
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <html>
+      <body>
+        <RootProvider
+          search={{
+            enabled: false, // [!code ++]
+          }}
+        >
+          {children}
+        </RootProvider>
+      </body>
+    </html>
+  );
+}
 ```
 
 ### Hot Keys
@@ -54,7 +41,7 @@ import { RootProvider } from 'fumadocs-ui/root-provider';
 Customise the hot keys to trigger search dialog.
 
 ```tsx
-import { RootProvider } from 'fumadocs-ui/root-provider';
+import { RootProvider } from 'fumadocs-ui/provider';
 
 <RootProvider
   search={{
@@ -70,13 +57,79 @@ import { RootProvider } from 'fumadocs-ui/root-provider';
 </RootProvider>;
 ```
 
-### Tag Filter
+### Replace Search Dialog
 
-Add UI to change filters.
-Make sure to configure [Tag Filter](/docs/headless/search/orama#tag-filter) on search server first.
+Make a `<RootProvider />` wrapper with `use client` directive.
+
+```tsx title="provider.tsx"
+'use client';
+import { RootProvider } from 'fumadocs-ui/provider';
+import type { ReactNode } from 'react';
+
+// for example, using the default `fetch()` client
+import SearchDialog from 'fumadocs-ui/components/dialog/search-default';
+
+export function Provider({ children }: { children: ReactNode }) {
+  return (
+    <RootProvider
+      search={{
+        SearchDialog,
+      }}
+    >
+      {children}
+    </RootProvider>
+  );
+}
+```
+
+Use it instead of your previous Root Provider
+
+```tsx title="app/layout.tsx"
+import { Provider } from './provider';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <Provider>{children}</Provider>
+      </body>
+    </html>
+  );
+}
+```
+
+## Search Client
+
+When not specified, it uses the [`fetch` search client](/docs/headless/search/orama) powered by Orama.
+
+### `fetch`
+
+Handle search with an API endpoint, the search engine is Orama by default, but you may use other engine as well.
+
+You can pass options to the search client:
 
 ```tsx
-import { RootProvider } from 'fumadocs-ui/root-provider';
+import { RootProvider } from 'fumadocs-ui/provider';
+
+<RootProvider
+  search={{
+    options: {
+      // customise the API endpoint
+      api: '/api/search/docs',
+    },
+  }}
+>
+  {children}
+</RootProvider>;
+```
+
+#### Tag Filter
+
+Add UI for filtering results by tags, [configure Tag Filter](/docs/headless/search/orama#tag-filter) on search server and add the following:
+
+```tsx
+import { RootProvider } from 'fumadocs-ui/provider';
 
 <RootProvider
   search={{
@@ -94,81 +147,6 @@ import { RootProvider } from 'fumadocs-ui/root-provider';
   {children}
 </RootProvider>;
 ```
-
-### Search Options
-
-Pass options to the search client, like changing the API endpoint for Orama search server:
-
-```tsx
-import { RootProvider } from 'fumadocs-ui/root-provider';
-
-<RootProvider
-  search={{
-    options: {
-      api: '/api/search/docs',
-    },
-  }}
->
-  {children}
-</RootProvider>;
-```
-
-### Replace Search Dialog
-
-You can replace the default Search Dialog with:
-
-```tsx title="components/search.tsx"
-'use client';
-import SearchDialog from 'fumadocs-ui/components/dialog/search-default';
-import type { SharedProps } from 'fumadocs-ui/components/dialog/search';
-
-export default function CustomDialog(props: SharedProps) {
-  // your own logic here
-  return <SearchDialog {...props} />;
-}
-```
-
-To pass it to the Root Provider, you need a wrapper with `use client` directive.
-
-```tsx title="provider.tsx"
-'use client';
-import { RootProvider } from 'fumadocs-ui/provider';
-import dynamic from 'next/dynamic';
-import type { ReactNode } from 'react';
-
-const SearchDialog = dynamic(() => import('@/components/search')); // lazy load
-
-export function Provider({ children }: { children: ReactNode }) {
-  return (
-    <RootProvider
-      search={{
-        SearchDialog,
-      }}
-    >
-      {children}
-    </RootProvider>
-  );
-}
-```
-
-Use it instead of your previous Root Provider
-
-```tsx title="layout.tsx"
-import { Provider } from './provider';
-import type { ReactNode } from 'react';
-
-export default function Layout({ children }: { children: ReactNode }) {
-  return (
-    <html lang="en">
-      <body>
-        <Provider>{children}</Provider>
-      </body>
-    </html>
-  );
-}
-```
-
-## Other Solutions
 
 ### Algolia
 

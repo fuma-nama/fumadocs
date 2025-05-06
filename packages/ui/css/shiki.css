@@ -1,16 +1,6 @@
-.fd-codeblock pre > * {
-  display: grid;
-  font-size: 13px;
-}
-
 .shiki:not(.not-fumadocs-codeblock *) {
   code span {
     color: var(--shiki-light);
-  }
-
-  code .diff.remove {
-    background-color: var(--fd-diff-remove-color);
-    opacity: 0.7;
   }
 
   code .diff::before {
@@ -18,34 +8,35 @@
     left: 6px;
   }
 
+  code .diff.remove {
+    opacity: 0.7;
+    @apply bg-fd-diff-remove;
+  }
+
   code .diff.remove::before {
     content: '-';
-    color: var(--fd-diff-remove-symbol-color);
+    @apply text-fd-diff-remove-symbol;
   }
 
   code .diff.add {
-    background-color: var(--fd-diff-add-color);
+    @apply bg-fd-diff-add;
   }
 
   code .diff.add::before {
     content: '+';
-    color: var(--fd-diff-add-symbol-color);
+    @apply text-fd-diff-add-symbol;
   }
 
   code .diff {
-    margin: 0 -16px;
-    padding: 0 16px;
-    position: relative;
+    width: calc(100% + 8 * var(--spacing));
+
+    @apply relative inline-block -mx-4 px-4;
   }
 
   .highlighted {
-    margin: 0 -16px;
-    padding: 0 16px;
-    background-color: color-mix(
-      in oklab,
-      var(--color-fd-primary) 10%,
-      transparent
-    );
+    width: calc(100% + 8 * var(--spacing));
+
+    @apply inline-block -mx-4 px-4 bg-fd-primary/10;
   }
 
   .highlighted-word {
