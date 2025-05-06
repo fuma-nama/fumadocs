@@ -8,11 +8,12 @@ import Link from 'fumadocs-core/link';
 
 const cache = new Map<string, string>();
 
-export function LLMCopyButton() {
+export function LLMCopyButton({ slug }: { slug: string[] }) {
   const [isLoading, setLoading] = useState(false);
   const [checked, onClick] = useCopyButton(async () => {
     setLoading(true);
-    const url = window.location.pathname + '.mdx';
+
+    const url = `/llms.mdx/${slug.join('/')}`;
     try {
       const content: string =
         cache.get(url) ?? (await fetch(url).then((res) => res.text()));

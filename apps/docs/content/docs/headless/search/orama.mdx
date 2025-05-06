@@ -8,46 +8,86 @@ Fumadocs supports searching document based on Orama.
 As the built-in search of Fumadocs, It is the default but also recommended
 option since it's easier to setup and totally free.
 
-## Setup
+## Search Server
 
 You can create the search route handler from the source object, or search indexes.
 
 ### From Source
 
-Create a route handler from Source object.
+Create a route handler from source object.
 
-```json doc-gen:file
-{
-  "file": "../../examples/next-mdx/app/api/search/route.ts",
-  "codeblock": {
-    "lang": "ts",
-    "meta": "title=\"app/api/search/route.ts\""
-  }
-}
-```
+<include cwd meta='title="app/api/search/route.ts"'>
+  ../../examples/next-mdx/app/api/search/route.ts
+</include>
 
 ### From Search Indexes
 
 Pass search indexes to the function.
 
-Each index needs a `structuredData` field.
-Usually, it has been provided by your content source (e.g. Fumadocs MDX).
+<Tabs items={['Structured Data', 'Raw Content']}>
 
-```json doc-gen:file
-{
-  "file": "../../examples/next-mdx/app/api/search/route-full.ts",
-  "codeblock": {
-    "lang": "ts",
-    "meta": "title=\"app/api/search/route.ts\""
-  }
-}
+<Tab>
+
+Each index needs a `structuredData` field.
+Usually, it is provided by your content source (e.g. Fumadocs MDX). You can also extract it from Markdown/MDX document using the [Remark Structure](/docs/headless/mdx/structure) plugin.
+
+<include cwd meta='title="app/api/search/route.ts"'>
+  ../../examples/next-mdx/app/api/search/route-full.ts
+</include>
+
+</Tab>
+
+<Tab>
+
+Index with the raw content of document (unrecommended).
+
+```ts title="app/api/search/route.ts"
+import { allDocs } from 'content-collections';
+import { createSearchAPI } from 'fumadocs-core/search/server';
+
+export const { GET } = createSearchAPI('simple', {
+  indexes: allDocs.map((docs) => ({
+    title: docs.title,
+    content: docs.content, // Raw Content
+    url: docs.url,
+  })),
+});
 ```
 
-It can also be processed from Markdown/MDX document using the [Structure](/docs/headless/mdx/structure) remark plugin.
+</Tab>
 
-### Client
+</Tabs>
 
-You can query it using:
+### Special Languages
+
+If your language is not on the Orama [Supported Languages](https://docs.orama.com/open-source/supported-languages#officially-supported-languages) list, you have to configure them manually:
+
+<include cwd meta='title="app/api/search/route.ts" tab="With I18n"'>
+  ../../examples/i18n/app/api/search/route.ts
+</include>
+
+```ts title="app/api/search/route.ts" tab="Without I18n"
+import { source } from '@/lib/source';
+import { createFromSource } from 'fumadocs-core/search/server';
+import { createTokenizer } from '@orama/tokenizers/mandarin';
+
+// example for Mandarin
+export const { GET } = createFromSource(source, {
+  components: {
+    tokenizer: createTokenizer(),
+  },
+  search: {
+    threshold: 0,
+    tolerance: 0,
+  },
+});
+```
+
+See [Orama Docs](https://docs.orama.com/open-source/supported-languages/using-chinese-with-orama) for more details.
+
+## Search Client
+
+You can search documents using:
 
 - **Fumadocs UI**: The built-in [Search UI](/docs/ui/search) supports it out-of-the-box.
 - **Search Client**:
@@ -60,21 +100,15 @@ You can query it using:
   });
   ```
 
-  <AutoTypeTable type='Extract<import("fumadocs-core/search/client").Client, { type: "fetch" }>' />
+  <auto-type-table type='Extract<import("fumadocs-core/search/client").Client, { type: "fetch" }>' />
 
 ### Tag Filter
 
 Support filtering by tag, it's useful for implementing multi-docs similar to this documentation.
 
-```json doc-gen:file
-{
-  "file": "../../examples/next-mdx/app/api/search/route-tag.ts",
-  "codeblock": {
-    "lang": "ts",
-    "meta": "title=\"app/api/search/route.ts\""
-  }
-}
-```
+<include meta='title="app/api/search/route.ts"' cwd>
+  ../../examples/next-mdx/app/api/search/route-tag.ts
+</include>
 
 and update your search client:
 
@@ -95,23 +129,6 @@ and update your search client:
     'tag',
   );
   ```
-
-### Index by Content
-
-Index with the raw content of document (unrecommended).
-
-```ts title="app/api/search/route.ts"
-import { allDocs } from 'content-collections';
-import { createSearchAPI } from 'fumadocs-core/search/server';
-
-export const { GET } = createSearchAPI('simple', {
-  indexes: allDocs.map((docs) => ({
-    title: docs.title,
-    content: docs.content, // Raw Content
-    url: docs.url,
-  })),
-});
-```
 
 ## Internationalization
 
@@ -146,22 +163,6 @@ const { search, setSearch, query } = useDocsSearch(
   locale,
 );
 ```
-
-### Special Languages
-
-If your language is not on the Orama [Supported Languages](https://docs.orama.com/open-source/supported-languages#officially-supported-languages) list, you have to configure them manually:
-
-```json doc-gen:file
-{
-  "file": "../../examples/i18n/app/api/search/route.ts",
-  "codeblock": {
-    "lang": "ts",
-    "meta": "title=\"app/api/search/route.ts\""
-  }
-}
-```
-
-See [Orama Docs](https://docs.orama.com/open-source/supported-languages/using-chinese-with-orama) for more details.
 
 ## Static Export
 
@@ -206,14 +207,6 @@ and update your search clients:
     You should use 3rd party solutions like Algolia for these cases.
 
 </Callout>
-
-## Custom Algorithm
-
-You can port your own search algorithm by returning a list of `SortedResult`
-from your custom `/api/search/route.ts` route handler (API Endpoint). You can also integrate it
-with Fumadocs UI.
-
-<AutoTypeTable path="./content/docs/headless/props.ts" name="SortedResult" />
 
 ## Headless
 

@@ -146,7 +146,8 @@ export function rehypeCode(
           ? (Object.values(options.themes).filter(Boolean) as BuiltinTheme[])
           : [options.theme],
       langs:
-        options.langs ?? (options.lazy ? [] : Object.keys(bundledLanguages)),
+        options.langs ??
+        (options.lazy ? ['ts', 'tsx'] : Object.keys(bundledLanguages)),
     },
   );
 
