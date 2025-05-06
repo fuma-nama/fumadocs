@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 15.2.15
+
+### Patch Changes
+
+- 50db874: Remove placeholder space for codeblocks
+- 79e75c3: Improve default MDX attribute indexing strategy for `remarkStructure`
+
 ## 15.2.14
 
 ### Patch Changes

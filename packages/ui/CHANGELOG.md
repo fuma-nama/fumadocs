@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 15.2.15
+
+### Patch Changes
+
+- 50db874: Remove placeholder space for codeblocks
+- Updated dependencies [50db874]
+- Updated dependencies [79e75c3]
+  - fumadocs-core@15.2.15
+
 ## 15.2.14
 
 ### Patch Changes
