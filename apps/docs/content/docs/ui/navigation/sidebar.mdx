@@ -55,7 +55,9 @@ export default function Layout({ children }: { children: ReactNode }) {
 
 ### Sidebar Tabs
 
-A navigation component to switch between tabs, it will be hidden unless one of its items is active.
+Tabs are folders with tab-like behaviours, only the content of opened tab will be visible.
+
+Fumadocs provide a dropdown component to switch between tabs, it will be hidden unless one of its items is active.
 
 <div className='flex justify-center items-center *:max-w-[360px] bg-gradient-to-br from-fd-primary/10 rounded-xl border'>
 
@@ -63,7 +65,7 @@ A navigation component to switch between tabs, it will be hidden unless one of i
 
 </div>
 
-You can add items from page tree by creating a `meta.json` file ([Root Folder](/docs/ui/page-conventions#root-folder)):
+You can add items by marking folders as [Root Folders](/docs/ui/page-conventions#root-folder), create a `meta.json` file in the folder:
 
 ```json title="content/docs/my-folder/meta.json"
 {
@@ -140,7 +142,7 @@ import { DocsLayout } from 'fumadocs-ui/layouts/docs';
     tabs: {
       transform: (option, node) => ({
         ...option,
-        icon: 'my icon',
+        icon: <MyIcon />,
       }),
     },
   }}
