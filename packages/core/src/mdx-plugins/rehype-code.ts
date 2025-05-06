@@ -15,11 +15,7 @@ import {
 import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
 import type { CodeBlockIcon, IconOptions } from './transformer-icon';
 import { transformerIcon } from './transformer-icon';
-import {
-  createStyleTransformer,
-  defaultThemes,
-  getHighlighter,
-} from '@/highlight/shiki';
+import { defaultThemes, getHighlighter } from '@/highlight/shiki';
 
 interface MetaValue {
   name: string;
@@ -51,7 +47,6 @@ export const rehypeCodeDefaultOptions: RehypeCodeOptions = {
   defaultLanguage: 'plaintext',
   experimentalJSEngine: false,
   transformers: [
-    createStyleTransformer(),
     transformerNotationHighlight({
       matchAlgorithm: 'v3',
     }),

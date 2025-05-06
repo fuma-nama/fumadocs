@@ -7,28 +7,12 @@ import {
   type CodeToHastOptionsCommon,
   type Highlighter,
   type RegexEngine,
-  type ShikiTransformer,
 } from 'shiki';
 import type { BundledTheme } from 'shiki/themes';
 import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import { Fragment, type ReactNode } from 'react';
 import { jsx, jsxs } from 'react/jsx-runtime';
 import type { Root } from 'hast';
-
-export function createStyleTransformer(): ShikiTransformer {
-  return {
-    name: 'rehype-code:styles',
-    line(hast) {
-      if (hast.children.length === 0) {
-        // Keep the empty lines when using grid layout
-        hast.children.push({
-          type: 'text',
-          value: ' ',
-        });
-      }
-    },
-  };
-}
 
 export const defaultThemes = {
   light: 'github-light',
@@ -71,7 +55,6 @@ export async function _highlight(code: string, options: HighlightOptions) {
     lang,
     ...rest,
     ...themes,
-    transformers: [createStyleTransformer(), ...(rest.transformers ?? [])],
     defaultColor: 'themes' in themes ? false : undefined,
   });
 }
