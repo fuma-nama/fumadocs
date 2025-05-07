@@ -56,7 +56,7 @@ export function CollapsibleControl() {
 
   return (
     <div
-      className="fixed flex flex-row animate-fd-fade-in rounded-xl p-0.5 border bg-fd-muted text-fd-muted-foreground z-10 xl:start-4 max-xl:end-4"
+      className="fixed flex shadow-lg animate-fd-fade-in rounded-xl p-0.5 border bg-fd-muted text-fd-muted-foreground z-10 xl:start-4 max-xl:end-4"
       style={{
         top: 'calc(var(--fd-banner-height) + var(--fd-tocnav-height) + var(--spacing) * 4)',
       }}
@@ -66,8 +66,8 @@ export function CollapsibleControl() {
           buttonVariants({
             color: 'ghost',
             size: 'icon-sm',
+            className: 'rounded-lg',
           }),
-          'rounded-lg',
         )}
       >
         <SidebarIcon />

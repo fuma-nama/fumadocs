@@ -75,10 +75,10 @@ export default async function Page(props: {
       }}
     >
       <DocsTitle>{page.data.title}</DocsTitle>
-      <DocsDescription className="mb-2">
+      <DocsDescription className="mb-0">
         {page.data.description}
       </DocsDescription>
-      <div className="flex flex-row gap-2 items-center">
+      <div className="flex flex-row gap-2 items-center mb-4">
         <LLMCopyButton slug={params.slug} />
         <EditOnGitHub
           url={`https://github.com/${owner}/${repo}/blob/dev/${path}`}

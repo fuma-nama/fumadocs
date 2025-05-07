@@ -5,13 +5,13 @@ import type {
   TabsProps as BaseProps,
 } from '@radix-ui/react-tabs';
 import {
-  useMemo,
-  useState,
   createContext,
   useContext,
-  useLayoutEffect,
-  useId,
   useEffect,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useState,
 } from 'react';
 import { cn } from '@/utils/cn';
 import * as Primitive from './ui/tabs';
@@ -186,7 +186,7 @@ export function Tab({ value, className, ...props }: TabProps) {
     <Primitive.TabsContent
       value={v}
       className={cn(
-        'prose-no-margin [&>figure:only-child]:-m-4 [&>figure:only-child]:rounded-none [&>figure:only-child]:border-none',
+        'prose-no-margin [&>figure:only-child]:-m-4 [&>figure:only-child]:border-none',
         className,
       )}
       {...props}

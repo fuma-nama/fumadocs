@@ -366,7 +366,9 @@ export function SidebarFolderContent(props: CollapsibleContentProps) {
           [ctx],
         )}
       >
-        <div className="absolute w-px inset-y-0 bg-fd-border start-3" />
+        {ctx.level === 1 && (
+          <div className="absolute w-px inset-y-0 bg-fd-border start-3" />
+        )}
         {props.children}
       </Context.Provider>
     </CollapsibleContent>

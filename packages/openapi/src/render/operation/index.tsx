@@ -116,11 +116,7 @@ export function Operation({
       <>
         {heading(headingLevel, 'Response Body', ctx)}
 
-        <Tabs
-          items={statuses}
-          groupId="fumadocs_openapi_responses"
-          className="bg-transparent"
-        >
+        <Tabs items={statuses} groupId="fumadocs_openapi_responses">
           {statuses.map((status) => (
             <ResponseTab
               key={status}
