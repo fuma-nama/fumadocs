@@ -35,5 +35,6 @@
   },
   "engines": {
     "node": ">= 18.17.0"
-  }
+  },
+  "packageManager": "pnpm@10.9.0"
 }
