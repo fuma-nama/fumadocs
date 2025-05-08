@@ -14,7 +14,6 @@ import Link from 'fumadocs-core/link';
 import { cn } from '@/utils/cn';
 import { useI18n } from './contexts/i18n';
 import { useTreeContext, useTreePath } from './contexts/tree';
-import { useSidebar } from '@/contexts/sidebar';
 import type { PageTree, TOCItemType } from 'fumadocs-core/server';
 import { createContext, usePathname } from 'fumadocs-core/framework';
 import {
@@ -48,7 +47,7 @@ export function TocPopoverTrigger({
     [items, active],
   );
   const path = useTreePath().at(-1);
-  const showCurrent = selected !== -1 && !open;
+  const showItem = selected !== -1 && !open;
 
   return (
     <CollapsibleTrigger
@@ -63,16 +62,12 @@ export function TocPopoverTrigger({
         max={1}
         className={cn(open && 'text-fd-primary')}
       />
-      <span
-        className={cn(
-          'grid flex-1 *:row-start-1 *:col-start-1',
-          open && 'text-fd-foreground',
-        )}
-      >
+      <span className="grid flex-1 *:row-start-1 *:col-start-1">
         <span
           className={cn(
             'truncate transition-all',
-            showCurrent && 'opacity-0 -translate-y-full pointer-events-none',
+            open && 'text-fd-foreground',
+            showItem && 'opacity-0 -translate-y-full pointer-events-none',
           )}
         >
           {path?.name ?? text.toc}
@@ -80,7 +75,7 @@ export function TocPopoverTrigger({
         <span
           className={cn(
             'truncate transition-all',
-            !showCurrent && 'opacity-0 translate-y-full pointer-events-none',
+            !showItem && 'opacity-0 translate-y-full pointer-events-none',
           )}
         >
           {items[selected]?.title}
@@ -166,7 +161,6 @@ export function TocPopoverContent(props: ComponentProps<'div'>) {
 export function TocPopover(props: HTMLAttributes<HTMLDivElement>) {
   const ref = useRef<HTMLElement>(null);
   const [open, setOpen] = useState(false);
-  const sidebar = useSidebar();
   const { tocNav } = usePageStyles();
   const { isTransparent } = useNav();
 
@@ -209,10 +203,9 @@ export function TocPopover(props: HTMLAttributes<HTMLDivElement>) {
             id="nd-tocnav"
             {...props}
             className={cn(
-              'border-b border-fd-foreground/10 backdrop-blur-sm transition-colors',
+              'border-b backdrop-blur-sm transition-colors',
               (!isTransparent || open) && 'bg-fd-background/80',
               open && 'shadow-lg',
-              sidebar.open && 'max-md:hidden',
             )}
           >
             {props.children}

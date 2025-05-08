@@ -1,16 +1,16 @@
 'use client';
 import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  type ElementType,
-  type ReactNode,
-  type ReactElement,
   type ComponentPropsWithoutRef,
+  createContext,
+  type ElementType,
+  type ReactElement,
+  type ReactNode,
+  useContext,
   useMemo,
+  useState,
 } from 'react';
 import { RemoveScroll } from 'react-remove-scroll';
+import { useMediaQuery } from './utils/use-media-query';
 
 const SidebarContext = createContext<SidebarContextType | null>(null);
 
@@ -105,27 +105,14 @@ export function SidebarList<T extends ElementType = 'aside'>({
   ...props
 }: SidebarContentProps<T>): ReactElement {
   const { open } = useSidebarContext();
-  const [isBlocking, setIsBlocking] = useState(false);
-
-  useEffect(() => {
-    if (!removeScrollOn) return;
-    const mediaQueryList = window.matchMedia(removeScrollOn);
-
-    const handleChange = (): void => {
-      setIsBlocking(mediaQueryList.matches);
-    };
-    handleChange();
-    mediaQueryList.addEventListener('change', handleChange);
-    return () => {
-      mediaQueryList.removeEventListener('change', handleChange);
-    };
-  }, [removeScrollOn]);
+  const isBlocking =
+    useMediaQuery(removeScrollOn ?? '', !removeScrollOn) ?? false;
 
   return (
     <RemoveScroll
       as={as ?? 'aside'}
       data-open={open}
-      enabled={Boolean(isBlocking && open)}
+      enabled={isBlocking && open}
       {...props}
     >
       {props.children}

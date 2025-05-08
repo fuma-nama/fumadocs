@@ -17,7 +17,7 @@ Open http://localhost:3000 with your browser to see the result.
 
 In the project, you can see:
 
-- `lib/source.ts`: Code for content source adapter, [`loader()`](/docs/headless/source-api) provides the interface to access your content.
+- `lib/source.ts`: Code for content source adapter, [`loader()`](https://fumadocs.dev/docs/headless/source-api) provides the interface to access your content.
 - `app/layout.config.tsx`: Shared options for layouts, optional but preferred to keep.
 
 | Route                     | Description                                            |

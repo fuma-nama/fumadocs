@@ -1,7 +1,6 @@
 import { Fragment, type HTMLAttributes, useMemo } from 'react';
 import { type BaseLayoutProps, getLinks, slot, slots } from '@/layouts/shared';
 import {
-  CollapsibleSidebar,
   Sidebar,
   SidebarCollapseTrigger,
   SidebarFooter,
@@ -65,7 +64,6 @@ export function DocsLayout(props: DocsLayoutProps) {
     tabMode = 'sidebar',
     nav: { transparentMode, ...nav } = {},
     sidebar: {
-      collapsible: sidebarCollapsible = true,
       tabs: tabOptions,
       banner: sidebarBanner,
       footer: sidebarFooter,
@@ -83,8 +81,6 @@ export function DocsLayout(props: DocsLayoutProps) {
     () => getSidebarTabsFromOptions(tabOptions, props.tree) ?? [],
     [tabOptions, props.tree],
   );
-
-  const Aside = sidebarCollapsible ? CollapsibleSidebar : Sidebar;
 
   const variables = cn(
     '[--fd-nav-height:calc(var(--spacing)*14)] [--fd-tocnav-height:36px] md:[--fd-sidebar-width:286px] xl:[--fd-toc-width:286px] xl:[--fd-tocnav-height:0px]',
@@ -115,16 +111,15 @@ export function DocsLayout(props: DocsLayoutProps) {
             ...props.containerProps?.style,
           }}
         >
-          <Aside
+          <Sidebar
             {...sidebar}
             className={cn(
               'md:ps-(--fd-layout-offset)',
-              navMode === 'top' ? 'bg-transparent' : 'md:[--fd-nav-height:0px]',
+              navMode === 'top'
+                ? 'md:bg-transparent md:*:pt-2.5'
+                : 'md:[--fd-nav-height:0px] md:*:pt-3.5',
               sidebar.className,
             )}
-            inner={{
-              className: cn(navMode === 'top' ? 'md:pt-2.5' : 'md:pt-3.5'),
-            }}
           >
             <SidebarHeader>
               {navMode === 'auto' && (
@@ -135,14 +130,14 @@ export function DocsLayout(props: DocsLayoutProps) {
                   >
                     {nav.title}
                   </Link>
-                  {sidebarCollapsible && (
+                  {(sidebar.collapsible ?? true) && (
                     <SidebarCollapseTrigger
                       className={cn(
                         buttonVariants({
                           color: 'ghost',
                           size: 'icon-sm',
+                          className: 'text-fd-muted-foreground mb-auto',
                         }),
-                        'text-fd-muted-foreground mb-auto',
                       )}
                     >
                       <SidebarIcon />
@@ -195,7 +190,7 @@ export function DocsLayout(props: DocsLayoutProps) {
               )}
               {sidebarFooter}
             </SidebarFooter>
-          </Aside>
+          </Sidebar>
           <DocsNavbar
             {...props}
             links={links}
@@ -234,7 +229,7 @@ function DocsNavbar({
     <Navbar mode={navMode}>
       <div
         className={cn(
-          'flex flex-row border-b border-fd-foreground/10 px-4 h-14',
+          'flex flex-row border-b px-4 h-14',
           navMode === 'auto' && 'md:px-6',
         )}
       >

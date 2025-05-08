@@ -1,6 +1,5 @@
 import type { TableOfContents } from 'fumadocs-core/server';
 import {
-  type AnchorHTMLAttributes,
   type ComponentProps,
   forwardRef,
   type HTMLAttributes,
@@ -46,7 +45,7 @@ type TableOfContentOptions = Omit<TOCProps, 'items' | 'children'> &
 type TableOfContentPopoverOptions = Omit<TableOfContentOptions, 'single'>;
 
 interface EditOnGitHubOptions
-  extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href' | 'children'> {
+  extends Omit<ComponentProps<'a'>, 'href' | 'children'> {
   owner: string;
   repo: string;
 

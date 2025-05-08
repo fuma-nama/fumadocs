@@ -23,6 +23,7 @@ export default defineConfig({
     'src/search/orama-cloud.ts',
     'src/utils/use-on-change.ts',
     'src/utils/use-effect-event.ts',
+    'src/utils/use-media-query.ts',
     'src/i18n/index.ts',
     'src/highlight/index.ts',
     'src/highlight/client.tsx',

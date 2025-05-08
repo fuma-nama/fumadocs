@@ -1,12 +1,11 @@
 'use client';
 
-import { Menu, Sidebar as SidebarIcon, X } from 'lucide-react';
+import { Menu, Sidebar as SidebarIcon } from 'lucide-react';
 import { type ButtonHTMLAttributes, type HTMLAttributes } from 'react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { useSidebar } from '@/contexts/sidebar';
 import { useNav } from '@/contexts/layout';
-import { SidebarTrigger } from 'fumadocs-core/sidebar';
 import { SidebarCollapseTrigger } from '@/components/layout/sidebar';
 import { SearchToggle } from '@/components/layout/search-toggle';
 
@@ -19,7 +18,7 @@ export function Navbar(props: HTMLAttributes<HTMLElement>) {
       id="nd-subnav"
       {...props}
       className={cn(
-        'sticky top-(--fd-banner-height) z-30 flex h-14 items-center px-4 border-b border-fd-foreground/10 transition-colors backdrop-blur-sm md:px-6',
+        'sticky top-(--fd-banner-height) z-30 flex h-14 items-center px-4 border-b transition-colors backdrop-blur-sm md:px-6',
         (!isTransparent || open) && 'bg-fd-background/80',
         props.className,
       )}
@@ -32,10 +31,10 @@ export function Navbar(props: HTMLAttributes<HTMLElement>) {
 export function NavbarSidebarTrigger(
   props: ButtonHTMLAttributes<HTMLButtonElement>,
 ) {
-  const { open } = useSidebar();
+  const { setOpen } = useSidebar();
 
   return (
-    <SidebarTrigger
+    <button
       {...props}
       className={cn(
         buttonVariants({
@@ -44,9 +43,10 @@ export function NavbarSidebarTrigger(
         }),
         props.className,
       )}
+      onClick={() => setOpen((prev) => !prev)}
     >
-      {open ? <X /> : <Menu />}
-    </SidebarTrigger>
+      <Menu />
+    </button>
   );
 }
 
