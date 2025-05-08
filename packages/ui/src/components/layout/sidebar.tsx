@@ -67,7 +67,7 @@ interface InternalContext {
 }
 
 const itemVariants = cva(
-  'relative flex flex-row items-center gap-2 rounded-md p-2 text-start text-fd-muted-foreground [overflow-wrap:anywhere] md:py-1.5 [&_svg]:size-4 [&_svg]:shrink-0',
+  'relative flex flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground [overflow-wrap:anywhere] md:py-1.5 [&_svg]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       active: {
@@ -105,7 +105,6 @@ export function Sidebar({
   const closeTimeRef = useRef(0);
   // md
   const isMobile = useMediaQuery('(width < 768px)') ?? false;
-  const state = open ? 'open' : 'closed';
 
   useOnChange(collapsed, () => {
     setHover(false);
@@ -113,8 +112,10 @@ export function Sidebar({
   });
 
   if (isMobile) {
+    const state = open ? 'open' : 'closed';
+
     return (
-      <RemoveScroll enabled={open}>
+      <>
         <Presence present={open}>
           <div
             data-state={state}
@@ -123,21 +124,26 @@ export function Sidebar({
           />
         </Presence>
         <Presence present={open}>
-          <aside
-            id="nd-sidebar-mobile"
-            {...props}
-            data-state={state}
-            className={cn(
-              'fixed flex flex-col border-e start-0 inset-y-0 w-[85%] max-w-[380px] z-40 bg-fd-background data-[state=open]:animate-fd-enterFromLeft data-[state=closed]:animate-fd-exitToLeft',
-              props.className,
-            )}
-          >
-            <Context.Provider value={context}>
-              {props.children}
-            </Context.Provider>
-          </aside>
+          {({ present }) => (
+            <RemoveScroll
+              as="aside"
+              enabled={present}
+              id="nd-sidebar-mobile"
+              {...props}
+              data-state={state}
+              className={cn(
+                'fixed flex flex-col border-e start-0 inset-y-0 w-[85%] max-w-[380px] z-40 bg-fd-background data-[state=open]:animate-fd-enterFromLeft data-[state=closed]:animate-fd-exitToLeft',
+                !present && 'invisible',
+                props.className,
+              )}
+            >
+              <Context.Provider value={context}>
+                {props.children}
+              </Context.Provider>
+            </RemoveScroll>
+          )}
         </Presence>
-      </RemoveScroll>
+      </>
     );
   }
 
