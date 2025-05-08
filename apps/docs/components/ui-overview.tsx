@@ -2,10 +2,7 @@ import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 
 export function UiOverview() {
   return (
-    <Tabs
-      items={['Docs Layout', 'Docs Layout (Mobile)']}
-      className="bg-fd-background"
-    >
+    <Tabs items={['Docs Layout', 'Docs Layout (Mobile)']}>
       <Tab
         value="Docs Layout"
         className="not-prose text-sm text-center text-fd-muted-foreground overflow-auto"

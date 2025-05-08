@@ -131,7 +131,7 @@ export function defineDocs<
     // @ts-expect-error -- internal type inferring
     meta: defineCollections({
       type: 'meta',
-      files: ['**/meta.{json,yaml}'],
+      files: ['**/*.{json,yaml}'],
       dir,
       schema: metaSchema,
       ...options?.meta,
