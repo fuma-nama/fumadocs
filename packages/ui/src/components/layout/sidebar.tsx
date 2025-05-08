@@ -128,7 +128,7 @@ export function Sidebar({
             {...props}
             data-state={state}
             className={cn(
-              'fixed flex flex-col ps-1 border-e start-0 inset-y-0 w-[85%] max-w-[380px] z-40 bg-fd-background data-[state=open]:animate-fd-enterFromLeft data-[state=closed]:animate-fd-exitToLeft',
+              'fixed flex flex-col border-e start-0 inset-y-0 w-[85%] max-w-[380px] z-40 bg-fd-background data-[state=open]:animate-fd-enterFromLeft data-[state=closed]:animate-fd-exitToLeft',
               props.className,
             )}
           >
@@ -205,7 +205,7 @@ export function SidebarHeader(props: ComponentProps<'div'>) {
     <div
       {...props}
       className={cn(
-        'flex flex-col gap-3 px-4 max-md:pt-6 max-md:pb-4 empty:hidden',
+        'flex flex-col gap-3 px-4 pt-4 max-md:pt-6 max-md:pb-4 empty:hidden',
         props.className,
       )}
     >
