@@ -18,9 +18,18 @@ Unserializable data such as functions can't be passed to page tree.
 
 ## Conventions
 
-This is the definitions of Page Tree, you may refer to Page Conventions to learn how to structure your folders/pages.
+The type definitions of page tree, for people who want to hardcode/generate it.
+You can also import the type from Fumadocs.
 
-Certain nodes contain a `$ref` property to link to its original page/meta file, they are optional when hardcoding it.
+```ts
+import type { PageTree } from 'fumadocs-core/server';
+
+const tree: PageTree.Root = {
+  // props
+};
+```
+
+Certain nodes contain a `$ref` property, they are internal and not used when hardcoding it.
 
 ### Root
 
@@ -60,12 +69,6 @@ The initial root of page trees.
 
 <AutoTypeTable path="./content/docs/headless/props.ts" name="PageTreeFolder" />
 
-#### As Root
-
-To implement multiple page trees, you can add a `root` property to the folder node.
-This will mark the folder as a root folder, and the nearest root folder of current page will be used as the root of page tree.
-Instead of showing the entire page tree, navigation elements will be restricted within the current root.
-
 ### Separator
 
 A label between items.
@@ -85,15 +88,3 @@ A label between items.
 ## Icons
 
 Icon is a `ReactElement`, supported by pages and folders.
-
-## Type Bindings
-
-You can import the type from server package.
-
-```ts
-import type { PageTree } from 'fumadocs-core/server';
-
-const tree: PageTree.Root = {
-  // props
-};
-```

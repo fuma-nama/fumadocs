@@ -28,7 +28,10 @@ const TabsList = React.forwardRef<
   <TabsPrimitive.List
     ref={ref}
     {...props}
-    className={cn('flex flex-row gap-4 overflow-x-auto px-4', props.className)}
+    className={cn(
+      'flex gap-3.5 text-fd-secondary-foreground overflow-x-auto px-4',
+      props.className,
+    )}
   />
 ));
 TabsList.displayName = 'TabsList';

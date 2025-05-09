@@ -6,6 +6,7 @@ import type {
 } from '@radix-ui/react-tabs';
 import {
   createContext,
+  type ReactNode,
   useContext,
   useEffect,
   useId,
@@ -19,6 +20,7 @@ import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 
 export { Primitive };
 
+type CollectionKey = string | symbol;
 type ChangeListener = (v: string) => void;
 const listeners = new Map<string, ChangeListener[]>();
 
@@ -37,6 +39,8 @@ function removeChangeListener(id: string, listener: ChangeListener): void {
 }
 
 export interface TabsProps extends BaseProps {
+  label?: ReactNode;
+
   /**
    * Identifier for Sharing value of tabs
    */
@@ -62,23 +66,28 @@ export interface TabsProps extends BaseProps {
 const TabsContext = createContext<{
   items: string[];
   valueToIdMap: Map<string, string>;
-  collection: CollectionType;
+  collection: CollectionKey[];
 } | null>(null);
+
+function useTabContext() {
+  const ctx = useContext(TabsContext);
+  if (!ctx) throw new Error('You must wrap your component in <Tabs>');
+  return ctx;
+}
 
 export function Tabs({
   groupId,
   items = [],
   persist = false,
+  label,
   defaultIndex = 0,
   updateAnchor = false,
   ...props
 }: TabsProps) {
   const values = useMemo(() => items.map((item) => toValue(item)), [items]);
   const [value, setValue] = useState(values[defaultIndex]);
-
   const valueToIdMap = useMemo(() => new Map<string, string>(), []);
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- re-reconstruct the collection if items changed
-  const collection = useMemo(() => createCollection(), [items]);
+  const collection = useMemo<CollectionKey[]>(() => [], []);
 
   const onUpdate: ChangeListener = useEffectEvent((v) => {
     if (values.includes(v)) setValue(v);
@@ -136,6 +145,9 @@ export function Tabs({
       className={cn('my-4', props.className)}
     >
       <Primitive.TabsList>
+        {label && (
+          <span className="text-sm font-medium my-auto me-auto">{label}</span>
+        )}
         {values.map((v, i) => (
           <Primitive.TabsTrigger key={v} value={v}>
             {items[i]}
@@ -166,11 +178,11 @@ export type TabProps = Omit<TabsContentProps, 'value'> & {
 };
 
 export function Tab({ value, className, ...props }: TabProps) {
-  const ctx = useContext(TabsContext);
+  const { items, valueToIdMap } = useTabContext();
   const resolvedValue =
     value ??
     // eslint-disable-next-line react-hooks/rules-of-hooks -- `value` is not supposed to change
-    ctx?.items.at(useCollectionIndex());
+    items.at(useCollectionIndex());
   if (!resolvedValue)
     throw new Error(
       'Failed to resolve tab `value`, please pass a `value` prop to the Tab component.',
@@ -178,8 +190,8 @@ export function Tab({ value, className, ...props }: TabProps) {
 
   const v = toValue(resolvedValue);
 
-  if (props.id && ctx) {
-    ctx.valueToIdMap.set(v, props.id);
+  if (props.id) {
+    valueToIdMap.set(v, props.id);
   }
 
   return (
@@ -196,13 +208,6 @@ export function Tab({ value, className, ...props }: TabProps) {
   );
 }
 
-type CollectionKey = string | symbol;
-type CollectionType = ReturnType<typeof createCollection>;
-
-function createCollection() {
-  return [] as CollectionKey[];
-}
-
 /**
  * Inspired by Headless UI.
  *
@@ -211,31 +216,15 @@ function createCollection() {
  */
 function useCollectionIndex() {
   const key = useId();
-  const ctx = useContext(TabsContext);
-  if (!ctx) throw new Error('You must wrap your component in <Tabs>');
-
-  const list = ctx.collection;
-
-  function register() {
-    if (!list.includes(key)) list.push(key);
-  }
-
-  function unregister() {
-    const idx = list.indexOf(key);
-    if (idx !== -1) list.splice(idx, 1);
-  }
-
-  useMemo(() => {
-    // re-order the item to the bottom if registered
-    unregister();
-    register();
-    // eslint-disable-next-line -- register
-  }, [list]);
+  const { collection } = useTabContext();
 
   useEffect(() => {
-    return unregister;
-    // eslint-disable-next-line -- clean up only
-  }, []);
+    return () => {
+      const idx = collection.indexOf(key);
+      if (idx !== -1) collection.splice(idx, 1);
+    };
+  }, [key, collection]);
 
-  return list.indexOf(key);
+  if (!collection.includes(key)) collection.push(key);
+  return collection.indexOf(key);
 }

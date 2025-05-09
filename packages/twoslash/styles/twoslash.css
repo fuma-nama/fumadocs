@@ -1,13 +1,17 @@
 /* ===== Basic ===== */
-:root {
-  --twoslash-error-color: #d45656;
-  --twoslash-error-bg: #d4565620;
-  --twoslash-tag-color: #3772cf;
-  --twoslash-tag-bg: #3772cf20;
-  --twoslash-tag-warn-color: #c37d0d;
-  --twoslash-tag-warn-bg: #c37d0d20;
-  --twoslash-tag-annotate-color: #1ba673;
-  --twoslash-tag-annotate-bg: #1ba67320;
+@theme {
+  --color-twoslash-error-foreground: #d45656;
+  --color-twoslash-error: #d4565620;
+  --color-twoslash-tag-foreground: #3772cf;
+  --color-twoslash-tag: #3772cf20;
+  --color-twoslash-tag-warn-foreground: #c37d0d;
+  --color-twoslash-tag-warn: #c37d0d20;
+  --color-twoslash-tag-annotate-foreground: #1ba673;
+  --color-twoslash-tag-annotate: #1ba67320;
+}
+
+.twoslash .line {
+  display: inline-flex;
 }
 
 .twoslash-meta-line,
@@ -91,14 +95,14 @@
 .twoslash .twoslash-error-line {
   position: relative;
   background-color: var(--twoslash-error-bg);
-  border-left: 3px solid var(--twoslash-error-color);
-  color: var(--twoslash-error-color);
+  border-left: 3px solid var(--color-twoslash-error-foreground);
+  color: var(--color-twoslash-error-foreground);
   padding: 6px 12px;
   margin: 0.2em 0;
 }
 
 .twoslash .twoslash-error {
-  text-decoration: wavy underline var(--twoslash-error-color);
+  text-decoration: wavy underline var(--color-twoslash-error-foreground);
   padding-bottom: 2px;
 }
 
@@ -152,9 +156,9 @@
 /* Custom Tags */
 .twoslash .twoslash-tag-line {
   position: relative;
-  background-color: var(--twoslash-tag-bg);
-  border-left: 3px solid var(--twoslash-tag-color);
-  color: var(--twoslash-tag-color);
+  background-color: var(--color-twoslash-tag);
+  border-left: 3px solid var(--color-twoslash-tag-foreground);
+  color: var(--color-twoslash-tag-foreground);
   padding: 6px 10px;
   margin: 0.2em 0;
   display: flex;
@@ -168,21 +172,21 @@
 }
 
 .twoslash .twoslash-tag-line.twoslash-tag-error-line {
-  background-color: var(--twoslash-error-bg);
-  border-left: 3px solid var(--twoslash-error-color);
-  color: var(--twoslash-error-color);
+  background-color: var(--color-twoslash-error);
+  border-left: 3px solid var(--color-twoslash-error-foreground);
+  color: var(--color-twoslash-error-foreground);
 }
 
 .twoslash .twoslash-tag-line.twoslash-tag-warn-line {
-  background-color: var(--twoslash-tag-warn-bg);
-  border-left: 3px solid var(--twoslash-tag-warn-color);
-  color: var(--twoslash-tag-warn-color);
+  background-color: var(--color-twoslash-tag-warn);
+  border-left: 3px solid var(--color-twoslash-tag-warn-foreground);
+  color: var(--color-twoslash-tag-warn-foreground);
 }
 
 .twoslash .twoslash-tag-line.twoslash-tag-annotate-line {
-  background-color: var(--twoslash-tag-annotate-bg);
-  border-left: 3px solid var(--twoslash-tag-annotate-color);
-  color: var(--twoslash-tag-annotate-color);
+  background-color: var(--color-twoslash-tag-annotate);
+  border-left: 3px solid var(--color-twoslash-tag-annotate-foreground);
+  color: var(--color-twoslash-tag-annotate-foreground);
 }
 
 /* Respect people's wishes to not have animations */

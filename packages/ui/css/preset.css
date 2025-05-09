@@ -83,7 +83,7 @@
 
   @keyframes fd-dialog-in {
     from {
-      transform: scale(0.95);
+      transform: scale(1.06);
       opacity: 0;
     }
     to {
@@ -96,7 +96,7 @@
       transform: scale(1);
     }
     to {
-      transform: scale(0.95);
+      transform: scale(1.06);
       opacity: 0;
     }
   }

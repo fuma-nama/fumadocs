@@ -132,7 +132,7 @@ export function Sidebar({
               {...props}
               data-state={state}
               className={cn(
-                'fixed flex flex-col border-e start-0 inset-y-0 w-[85%] max-w-[380px] z-40 bg-fd-background data-[state=open]:animate-fd-enterFromLeft data-[state=closed]:animate-fd-exitToLeft',
+                'fixed text-[15px] flex flex-col rounded-e-xl border-e start-0 inset-y-0 w-[85%] max-w-[380px] z-40 bg-fd-background data-[state=open]:animate-fd-enterFromLeft data-[state=closed]:animate-fd-exitToLeft',
                 !present && 'invisible',
                 props.className,
               )}
@@ -540,7 +540,7 @@ function PageTreeFolder({
 }
 
 function getOffset(level: number) {
-  return `calc(var(--spacing) * ${(level > 1 ? level : 0) * 2 + 2})`;
+  return `calc(var(--spacing) * ${level > 1 ? (level - 1) * 3 + 3 : 2})`;
 }
 
 function Border({ level, active }: { level: number; active?: boolean }) {
@@ -549,7 +549,7 @@ function Border({ level, active }: { level: number; active?: boolean }) {
   return (
     <div
       className={cn(
-        'absolute w-px inset-y-2 z-[2] start-3',
+        'absolute w-px inset-y-3 z-[2] start-3 md:inset-y-2',
         active && 'bg-fd-primary',
       )}
     />
