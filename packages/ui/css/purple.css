@@ -1,8 +1,8 @@
 @theme {
   --color-fd-background: hsl(256, 100%, 96%);
   --color-fd-primary: hsl(270, 100%, 52%);
-  --color-fd-border: hsl(270, 40%, 80%);
-  --color-fd-accent: hsl(270, 60%, 86%);
+  --color-fd-border: hsla(270, 40%, 80%, 0.5);
+  --color-fd-accent: hsl(270, 40%, 88%);
   --color-fd-accent-foreground: hsl(270, 100%, 20%);
   --color-fd-muted: hsl(256, 60%, 94%);
   --color-fd-muted-foreground: hsl(256, 50%, 50%);
@@ -18,20 +18,20 @@
 }
 
 .dark {
-  --color-fd-background: hsl(256, 60%, 6%);
+  --color-fd-background: hsl(256, 20%, 6%);
   --color-fd-primary: hsl(270, 100%, 86%);
-  --color-fd-border: hsl(270, 100%, 20%);
-  --color-fd-accent: hsl(256, 60%, 26%);
-  --color-fd-accent-foreground: hsl(270, 100%, 86%);
-  --color-fd-muted: hsl(256, 60%, 10%);
+  --color-fd-border: hsla(270, 50%, 40%, 0.3);
+  --color-fd-accent: hsl(256, 23%, 22%);
+  --color-fd-accent-foreground: hsl(270, 40%, 86%);
+  --color-fd-muted: hsl(256, 23%, 10%);
   --color-fd-foreground: hsl(256, 60%, 90%);
   --color-fd-muted-foreground: hsl(256, 50%, 75%);
-  --color-fd-secondary: hsl(270, 100%, 20%);
+  --color-fd-secondary: hsl(270, 23%, 20%);
   --color-fd-secondary-foreground: hsl(256, 60%, 90%);
-  --color-fd-card: hsl(256, 60%, 10%);
+  --color-fd-card: hsl(256, 23%, 10%);
   --color-fd-card-foreground: hsl(256, 60%, 90%);
   --color-fd-popover-foreground: hsl(256, 60%, 90%);
-  --color-fd-popover: hsl(256, 60%, 6%);
+  --color-fd-popover: hsl(256, 23%, 6%);
   --color-fd-primary-foreground: hsl(256, 60%, 6%);
   --color-fd-ring: hsl(270, 100%, 86%);
 }

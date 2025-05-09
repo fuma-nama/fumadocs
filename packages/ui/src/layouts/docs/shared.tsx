@@ -21,7 +21,6 @@ export const layoutVariables = {
 };
 
 export interface SidebarOptions extends SidebarProps {
-  collapsible?: boolean;
   components?: Partial<SidebarComponents>;
 
   /**

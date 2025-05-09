@@ -26,6 +26,12 @@ In the project, you can see:
 | `app/docs`                | The documentation layout and pages.                    |
 | `app/api/search/route.ts` | The Route Handler for search.                          |
 
+### Fumadocs MDX
+
+A `source.config.ts` config file has been included, you can customise different options like frontmatter schema.
+
+Read the [Introduction](https://fumadocs.dev/docs/mdx) for further details.
+
 ## Learn More
 
 To learn more about Next.js and Fumadocs, take a look at the following

@@ -1,5 +1,21 @@
 # next-docs-ui
 
+## 15.3.0
+
+### Minor Changes
+
+- 52b5ad8: **Redesign mobile sidebar**
+
+  Mobile sidebar is now a separate component from the desktop one, with its own id `nd-sidebar-mobile`.
+
+  note to advanced use cases: Fumadocs UI now stopped using `fumadocs-core/sidebar`, avoid using the primitive directly as provider is not used.
+
+### Patch Changes
+
+- abce713: Adjust design (Accordion, Tabs, border color of themes)
+- Updated dependencies [c05dc03]
+  - fumadocs-core@15.3.0
+
 ## 15.2.15
 
 ### Patch Changes

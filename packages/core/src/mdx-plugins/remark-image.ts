@@ -113,11 +113,12 @@ export function remarkImage({
             });
           })
           .catch((e) => {
-            console.error(
-              `[Remark Image] Failed obtain image size for ${url} with public directory ${publicDir}`,
+            throw new Error(
+              `[Remark Image] Failed obtain image size for ${url} (public directory configured as ${publicDir})`,
+              {
+                cause: e,
+              },
             );
-
-            throw e;
           });
 
         promises.push(task);
@@ -217,7 +218,12 @@ async function getImageSize(
     return imageSizeFromFile(isRelative ? path.join(dir, src) : src);
   }
 
-  const buffer = await fetch(url).then((res) => res.arrayBuffer());
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(
+      `[Remark Image] Failed to fetch ${url} (${res.status}): ${await res.text()}`,
+    );
+  }
 
-  return imageSize(new Uint8Array(buffer));
+  return imageSize(new Uint8Array(await res.arrayBuffer()));
 }

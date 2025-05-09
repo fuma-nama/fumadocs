@@ -72,6 +72,7 @@ export function transformerTwoslash({
 
   const renderer = rendererRich({
     classExtra: ignoreClass,
+    queryRendering: 'line',
     renderMarkdown,
     renderMarkdownInline,
     ...options?.rendererRich,

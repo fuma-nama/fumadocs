@@ -4,7 +4,6 @@ import { Languages, Sidebar as SidebarIcon } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import {
-  CollapsibleSidebar,
   Sidebar,
   SidebarCollapseTrigger,
   SidebarFooter,
@@ -183,13 +182,12 @@ export function DocsLayoutSidebar({
   links?: LinkItemType[];
   nav?: ReactNode;
 }) {
-  const Aside = collapsible ? CollapsibleSidebar : Sidebar;
-
   return (
     <>
       {collapsible ? <CollapsibleControl /> : null}
-      <Aside
+      <Sidebar
         {...props}
+        collapsible={collapsible}
         className={cn('md:ps-(--fd-layout-offset)', props.className)}
       >
         <SidebarHeader>
@@ -222,7 +220,7 @@ export function DocsLayoutSidebar({
           <SidebarPageTree components={components} />
         </SidebarViewport>
         <SidebarFooter>{footer}</SidebarFooter>
-      </Aside>
+      </Sidebar>
     </>
   );
 }

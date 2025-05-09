@@ -1,13 +1,12 @@
 'use client';
 import type { PageTree } from 'fumadocs-core/server';
-import { type ReactNode, type ComponentProps, useMemo } from 'react';
+import { type ComponentProps, type ReactNode, useMemo } from 'react';
 import { cn } from '@/utils/cn';
 import { TreeContextProvider, useTreeContext } from 'fumadocs-ui/contexts/tree';
 import Link from 'fumadocs-core/link';
 import { useSearchContext } from 'fumadocs-ui/contexts/search';
 import { useSidebar } from 'fumadocs-ui/contexts/sidebar';
 import { cva } from 'class-variance-authority';
-import * as SidebarPrimitive from 'fumadocs-core/sidebar';
 import { usePathname } from 'fumadocs-core/framework';
 
 export interface DocsLayoutProps {
@@ -85,8 +84,7 @@ function Sidebar() {
   }, [root]);
 
   return (
-    <SidebarPrimitive.SidebarList
-      removeScrollOn="(width < 768px)" // md
+    <aside
       className={cn(
         'fixed flex flex-col shrink-0 p-4 top-14 z-20 text-sm overflow-auto md:sticky md:h-[calc(100dvh-56px)] md:w-[300px]',
         'max-md:inset-x-0 max-md:bottom-0 max-md:bg-fd-background',
@@ -94,7 +92,7 @@ function Sidebar() {
       )}
     >
       {children}
-    </SidebarPrimitive.SidebarList>
+    </aside>
   );
 }
 

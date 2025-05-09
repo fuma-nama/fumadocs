@@ -144,10 +144,6 @@ export function remarkStructure({
 
       if (element.type === 'mdxJsxFlowElement' && element.name) {
         data.contents.push(
-          {
-            heading: lastHeading,
-            content: element.name,
-          },
           ...element.attributes.flatMap((attribute) => {
             const value =
               typeof attribute.value === 'string'

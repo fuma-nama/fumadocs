@@ -20,7 +20,7 @@ const docsOptions: DocsLayoutProps = {
           ...option,
           icon: (
             <div
-              className="rounded-md p-1 shadow-lg ring-2 [&_svg]:size-5"
+              className="rounded-md p-1 shadow-lg ring-2 [&_svg]:size-6.5 md:[&_svg]:size-5"
               style={
                 {
                   color,

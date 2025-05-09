@@ -53,7 +53,7 @@ Although not required, some basic knowledge of Next.js App Router would be usefu
 
 A minimum version of Node.js 18 required, note that Node.js 23.1 might have problems with Next.js production build.
 
-<Tabs groupId='package-manager' persist items={['npm', 'pnpm', 'yarn', 'bun']}>
+<Tabs groupId='package-manager' persist items={['npm', 'pnpm', 'yarn', 'bun']} label='Initialize Fumadocs'>
 
 ```bash tab="npm"
 npm create fumadocs-app
@@ -103,61 +103,6 @@ Run the app in development mode and see http://localhost:3000/docs.
 ```package-install
 npm run dev
 ```
-
-## Explore
-
-In the project, you can see:
-
-- `lib/source.ts`: Code for content source adapter, [`loader()`](/docs/headless/source-api) provides the interface to access your content.
-- `app/layout.config.tsx`: Shared options for layouts, optional but preferred to keep.
-
-| Route                     | Description                                            |
-| ------------------------- | ------------------------------------------------------ |
-| `app/(home)`              | The route group for your landing page and other pages. |
-| `app/docs`                | The documentation layout and pages.                    |
-| `app/api/search/route.ts` | The Route Handler for search.                          |
-
-### Writing Content
-
-For authoring docs, make sure to read:
-
-<Cards>
-  <Card href="/docs/ui/markdown" title="Markdown">
-    Fumadocs has some additional features for authoring content.
-  </Card>
-  <Card href="/docs/ui/navigation" title="Navigation">
-    Learn how to customise navigation links and sidebar items.
-  </Card>
-  <Card href="/docs/ui/page-conventions" title="Routing">
-    Learn how to organise content.
-  </Card>
-</Cards>
-
-### Content Source
-
-Content source handles all your content, like compiling Markdown files and validating frontmatter.
-
-<Tabs items={['Fumadocs MDX', 'Custom Source']}>
-
-    <Tab value='Fumadocs MDX'>
-
-        A `source.config.ts` config file has been included, you can customise different options like frontmatter schema.
-
-        Read the [Introduction](/docs/mdx) for further details.
-
-    </Tab>
-
-    <Tab value='Custom Source'>
-
-        Fumadocs is not Markdown-exclusive. For other sources like Sanity, you can build a [custom content source](/docs/headless/custom-source).
-
-    </Tab>
-
-</Tabs>
-
-### Customise UI
-
-See [Customisation Guide](/docs/ui/customisation).
 
 ## FAQ
 
@@ -227,13 +172,6 @@ For `/docs`, you need to change the catch-all route to be non-optional:
 
     </Accordion>
 
-    <Accordion id='multi-versions' title="How to implement docs with multi-version?">
-        Use a separate deployment for each version.
-
-        On Vercel, this can be done by creating another branch for a specific version on your GitHub repository.
-        To link to the sites of other versions, use the Links API or a custom navigation component.
-    </Accordion>
-
     <Accordion id='multi-docs' title="How to implement multi-docs?">
         We recommend to use [Sidebar Tabs](/docs/ui/navigation/sidebar#sidebar-tabs).
     </Accordion>
@@ -253,18 +191,34 @@ If you find anything confusing, please give your feedback on [Github Discussion]
     description="Learn how to enable static export on your docs"
   />
   <Card
-    href="/docs/ui/search"
-    title="Customise Search"
-    description="Learn how to customise document search"
+    href="/docs/ui/theme"
+    title="Color Themes"
+    description="Add themes to Fumadocs UI"
   />
   <Card
-    href="/docs/ui/theme"
-    title="Theming"
-    description="Add themes to Fumadocs UI"
+    href="/docs/ui/customisation"
+    title="Customise UI"
+    description="A detailed guide on how to customise UI"
   />
   <Card
     href="/docs/ui/components"
     title="Components"
     description="See all available components to enhance your docs"
   />
+</Cards>
+
+### Writing Content
+
+For authoring docs, make sure to read:
+
+<Cards>
+  <Card href="/docs/ui/markdown" title="Markdown">
+    Fumadocs has some additional features for authoring content.
+  </Card>
+  <Card href="/docs/ui/navigation" title="Navigation">
+    Learn how to customise navigation links and sidebar items.
+  </Card>
+  <Card href="/docs/ui/page-conventions" title="Routing">
+    Learn how to organise content.
+  </Card>
 </Cards>

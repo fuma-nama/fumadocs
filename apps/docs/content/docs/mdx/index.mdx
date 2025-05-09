@@ -1,19 +1,17 @@
 ---
 title: Introduction
-description: Learn how to use Fumadocs MDX in your documentation
+description: What is Fumadocs MDX?
 icon: Album
 ---
 
-## Introduction
-
 Fumadocs MDX is the official content source of Fumadocs.
 
-It provides the tool for Next.js to transform content into type-safe data, similar to Contentlayer and Content Collections.
-This library isn't Fumadocs-only, you can use it to handle blog and other contents.
+It provides the tool for Next.js to transform content into type-safe data, similar to Content Collections.
+This library made for Next.js, you can use it to handle blog and other contents.
 
 ## Getting Started
 
-Setup Fumadocs MDX for your Fumadocs application.
+Setup Fumadocs MDX for your Next.js application.
 
 ```package-install
 fumadocs-mdx @types/mdx
@@ -42,35 +40,15 @@ export default withMDX(config);
 
 ### Defining Collections
 
-**Collection** refers to a collection containing a certain type of files, there's two types of collections:
+**Collection** refers to a collection containing a certain type of files, you can define collections by creating a `source.config.ts` file.
 
-- `doc`: Markdown/MDX documents
-- `meta`: JSON files
+Fumadocs MDX transforms collections into arrays of type-safe data, accessible in your app, available collections:
 
-For example, a `doc` collection will include only the `.md` and `.mdx` files:
-
-<Files>
-  <Folder name="folder" defaultOpen>
-    <File name="ui.md" />
-  </Folder>
-  <File name="hello.md" />
-  <File name="index.mdx" />
-  <File
-    name="meta.json"
-    className="opacity-50 cursor-not-allowed"
-    aria-disabled
-  />
-</Files>
-
-Fumadocs MDX transforms collections into arrays of type-safe data, accessible in your Next.js app.
-
-You can define collections by creating a `source.config.ts` file.
-
-<Tabs items={["doc", "meta"]}>
+<Tabs items={["doc", "meta", 'docs']}>
 
     <Tab value='doc'>
 
-        Markdown & MDX content will be compiled into a React Server Component, with other useful properties like **Table of Contents**.
+Compile Markdown & MDX files into a React Server Component, with useful properties like **Table of Contents**.
 
 ```ts title="source.config.ts"
 import { defineCollections } from 'fumadocs-mdx/config';
@@ -85,7 +63,7 @@ export const test = defineCollections({
 
     <Tab value='meta'>
 
-        JSON data will be transformed with `JSON.parse` into an array of objects.
+Transform YAML/JSON files into an array of data.
 
 ```ts title="source.config.ts"
 import { defineCollections } from 'fumadocs-mdx/config';
@@ -97,10 +75,9 @@ export const test = defineCollections({
 ```
 
     </Tab>
+    <Tab value='docs'>
 
-</Tabs>
-
-For Fumadocs to work, you can define a `docs` collection:
+Combination of `meta` and `doc` collections, which is needed for Fumadocs.
 
 ```ts title="source.config.ts"
 import { defineDocs } from 'fumadocs-mdx/config';
@@ -116,16 +93,30 @@ export const docs = defineDocs({
 });
 ```
 
-The `docs` collection combines a `meta` and `doc` collection, which scans through all Markdown, MDX and JSON files under your `content/docs` directory.
-They are needed for Fumadocs to work.
+    </Tab>
+
+</Tabs>
+
+For example, a `doc` collection will transform the `.md` and `.mdx` files:
+
+<Files>
+  <Folder name="folder" defaultOpen>
+    <File name="ui.md" />
+  </Folder>
+  <File name="hello.md" />
+  <File name="index.mdx" />
+  <File
+    name="meta.json"
+    className="opacity-50 cursor-not-allowed"
+    aria-disabled
+  />
+</Files>
 
 ### Output Folder
 
-Once you run `next dev` or `next build`, it generates a `.source` folder in root directory.
+A `.source` folder is generated in root directory when you run `next dev` or `next build`, it contains all output data and types, you should add it to `.gitignore`.
 
-The folder contains all output data and its types, you should add it to `.gitignore`.
-
-The `fumadocs-mdx` command generates types for `.source` folder without running Next.js, you can add it as a post install script to ensure types are always generated when initializing the project.
+The `fumadocs-mdx` command also generates types for `.source` folder, add it as a post install script to ensure types are generated when initializing the project.
 
 ```json title="package.json"
 {
@@ -141,8 +132,7 @@ The `fumadocs-mdx` command generates types for `.source` folder without running 
 
 You can access the collection output from `.source` folder with its original name:
 
-```ts
-// source.config.ts
+```ts tab="source.config.ts"
 import { defineDocs } from 'fumadocs-mdx/config';
 
 export const docs = defineDocs({
@@ -154,17 +144,19 @@ export const docs = defineDocs({
     // options for `meta` collection
   },
 });
+```
 
-// lib/source.ts
+```ts tab="Usage"
 import { docs } from '@/.source';
 
 console.log(docs);
 ```
 
-In this guide, We will import the `.source` folder with `@/.source`, you can also change it to your own import alias.
-Make sure you are importing from `.source` rather than `source.config.ts`.
+> Make sure you are importing from `.source` rather than `source.config.ts`, we will import it with `@/.source` import alias in this guide.
 
-To integrate with Fumadocs, you can use the `toFumadocsSource()` function of `docs` collection output.
+## Integrate with Fumadocs
+
+Create a `docs` collection and use the `toFumadocsSource()` function of its output.
 
 ```ts title="lib/source.ts"
 import { docs } from '@/.source';
@@ -176,19 +168,9 @@ export const source = loader({
 });
 ```
 
-And for other types of collections, the output may different, you can also log them to see the differences.
+> You can do the same for multiple `docs` collections.
 
-### Start Server
-
-```bash
-next dev
-```
-
-A `.source` folder should be created. You can log and see if it is loaded correctly.
-
-### Usage
-
-Generally, you'll interact with Fumadocs MDX through the [Source](/docs/headless/source-api#output) object (output of `loader`).
+Generally, you'll interact with the collection through [`loader()`](/docs/headless/source-api#output).
 
 ```tsx
 import { source } from '@/lib/source';
@@ -231,43 +213,6 @@ These properties are exported from MDX files by default.
 
 Use the [`schema`](/docs/mdx/collections#schema-1) option to pass a validation schema to validate frontmatter and define its output properties.
 
-### Syntax Highlighting
-
-Use [`rehypeCodeOptions`](/docs/mdx/mdx#rehype-plugins) on global or collection-level config.
-
 ### MDX Plugins
 
-For other customisation needs, see [MDX Options](/docs/mdx/mdx).
-
-### Multiple Collections
-
-You can define more collections, see [Collections](/docs/mdx/collections) for available options.
-
-```ts title="source.config.ts"
-import { defineDocs } from 'fumadocs-mdx/config';
-
-export const docs = defineDocs({
-  dir: 'content/docs',
-});
-
-export const blogPosts = defineDocs({
-  dir: 'content/blog',
-});
-```
-
-And use `loader` for a simple way to interact with collection output.
-
-```ts title="lib/source.ts"
-import { docs, blogPosts } from '@/.source';
-import { loader } from 'fumadocs-core/source';
-
-export const source = loader({
-  baseUrl: '/docs',
-  source: docs.toFumadocsSource(),
-});
-
-export const blog = loader({
-  baseUrl: '/blog',
-  source: blogPosts.toFumadocsSource(),
-});
-```
+For other customisation needs such as Syntax Highlighting, see [MDX Options](/docs/mdx/mdx).

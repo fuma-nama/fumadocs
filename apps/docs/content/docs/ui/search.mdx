@@ -3,17 +3,9 @@ title: Search
 description: Implement document search in your docs
 ---
 
-Fumadocs UI provides a good-looking search UI for your docs, the search functionality is instead provided and documented on Fumadocs Core.
-
-See [Document Search](/docs/headless/search).
-
 ## Search UI
 
-Open with <kbd>⌘</kbd> <kbd>K</kbd> or <kbd>Ctrl</kbd> <kbd>K</kbd>.
-
-### Disable Search
-
-To opt-out of document search, disable it from root provider.
+You can customise the search UI from root provider, such as disabling search:
 
 ```tsx title="app/layout.tsx"
 import { RootProvider } from 'fumadocs-ui/provider';
@@ -38,7 +30,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 
 ### Hot Keys
 
-Customise the hot keys to trigger search dialog.
+Customise the hot keys to trigger search dialog, by default it's <kbd>⌘</kbd> <kbd>K</kbd> or <kbd>Ctrl</kbd> <kbd>K</kbd>.
 
 ```tsx
 import { RootProvider } from 'fumadocs-ui/provider';
@@ -59,9 +51,9 @@ import { RootProvider } from 'fumadocs-ui/provider';
 
 ### Replace Search Dialog
 
-Make a `<RootProvider />` wrapper with `use client` directive.
+Make a `<RootProvider />` wrapper with `use client` directive, and use it instead of your previous root provider.
 
-```tsx title="provider.tsx"
+```tsx tab="provider.tsx"
 'use client';
 import { RootProvider } from 'fumadocs-ui/provider';
 import type { ReactNode } from 'react';
@@ -82,9 +74,7 @@ export function Provider({ children }: { children: ReactNode }) {
 }
 ```
 
-Use it instead of your previous Root Provider
-
-```tsx title="app/layout.tsx"
+```tsx tab="app/layout.tsx"
 import { Provider } from './provider';
 import type { ReactNode } from 'react';
 
@@ -99,13 +89,17 @@ export default function Layout({ children }: { children: ReactNode }) {
 }
 ```
 
+## Search Server
+
+The search server/backend is provided and documented on Fumadocs Core, see [available engines](/docs/headless/search).
+
 ## Search Client
 
-When not specified, it uses the [`fetch` search client](/docs/headless/search/orama) powered by Orama.
+You can choose a search client according to your search engine, it defaults to `fetch` client.
 
 ### `fetch`
 
-Handle search with an API endpoint, the search engine is Orama by default, but you may use other engine as well.
+It sends queries to an API endpoint, works with the built-in [Orama search engine](/docs/headless/search/orama).
 
 You can pass options to the search client:
 
