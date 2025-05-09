@@ -12,6 +12,7 @@ import {
 import {
   createTwoslasher,
   type TwoslashExecuteOptions,
+  type TwoslashInstance,
   type TwoslashReturn,
 } from 'twoslash';
 
@@ -42,6 +43,8 @@ export interface TransformerTwoslashOptions
   typesCache?: TwoslashTypesCache;
 }
 
+let cachedInstance: TwoslashInstance | undefined;
+
 // Since some internals of Shiki Twoslash are not documented
 // This is highly inspired by https://github.com/shikijs/shiki/blob/main/packages/vitepress-twoslash
 export function transformerTwoslash({
@@ -49,9 +52,13 @@ export function transformerTwoslash({
   ...options
 }: TransformerTwoslashOptions = {}): ShikiTransformer {
   const ignoreClass = 'nd-copy-ignore';
-  const defaultTwoslasher = createTwoslasher(options.twoslashOptions);
 
-  let twoslasher = defaultTwoslasher;
+  function getInstance() {
+    cachedInstance ??= createTwoslasher(options.twoslashOptions);
+    return cachedInstance;
+  }
+
+  let twoslasher: TwoslashInstance;
   // Wrap twoslasher with cache when `resultCache` is provided
   if (typesCache) {
     twoslasher = ((
@@ -62,12 +69,18 @@ export function transformerTwoslash({
       const cached = typesCache.read(code); // Restore cache
       if (cached) return cached;
 
-      const twoslashResult = defaultTwoslasher(code, extension, options);
+      const instance = getInstance();
+      const twoslashResult = instance(code, extension, options);
       typesCache.write(code, twoslashResult);
       return twoslashResult;
-    }) as typeof defaultTwoslasher;
-    twoslasher.getCacheMap = defaultTwoslasher.getCacheMap;
+    }) as TwoslashInstance;
+
+    twoslasher.getCacheMap = () => {
+      return getInstance().getCacheMap();
+    };
     typesCache.init?.();
+  } else {
+    twoslasher = getInstance();
   }
 
   const renderer = rendererRich({
