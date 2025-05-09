@@ -17,6 +17,9 @@ const config: NextConfig = {
     // Replaced by root workspace command
     ignoreDuringBuilds: true,
   },
+  outputFileTracingIncludes: {
+    '/docs/[...slug]': ['.next/cache/twoslash/*.json'],
+  },
   serverExternalPackages: [
     'ts-morph',
     'typescript',

@@ -211,7 +211,7 @@ export function SidebarHeader(props: ComponentProps<'div'>) {
     <div
       {...props}
       className={cn(
-        'flex flex-col gap-3 px-4 pt-4 max-md:pt-6 max-md:pb-4 empty:hidden',
+        'flex flex-col gap-3 px-4 pt-4 max-md:pt-6 empty:hidden',
         props.className,
       )}
     >
@@ -461,7 +461,10 @@ export function SidebarPageTree(props: {
         if (item.type === 'separator') {
           if (Separator) return <Separator key={i} item={item} />;
           return (
-            <SidebarSeparator key={i} className={cn(i !== 0 && 'mt-6')}>
+            <SidebarSeparator
+              key={i}
+              className={cn(i !== 0 ? 'mt-6' : 'max-md:mt-4')}
+            >
               {item.icon}
               {item.name}
             </SidebarSeparator>
