@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 15.3.0
+
+### Patch Changes
+
+- c05dc03: Improve error message of remark image
+
 ## 15.2.15
 
 ### Patch Changes

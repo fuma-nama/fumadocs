@@ -1,5 +1,14 @@
 # fumadocs-twoslash
 
+## 3.1.2
+
+### Patch Changes
+
+- 81fe2c2: Remove the need for placeholder lines
+- Updated dependencies [52b5ad8]
+- Updated dependencies [abce713]
+  - fumadocs-ui@15.3.0
+
 ## 3.1.1
 
 ### Patch Changes
