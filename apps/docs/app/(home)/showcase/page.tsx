@@ -154,6 +154,10 @@ const blogs: ShowcaseObject[] = [
     name: 'xlog.systems',
     url: 'https://www.xlog.systems',
   },
+  {
+    name: 'stutuer',
+    url: 'https://www.stutuer.tech',
+  },
 ];
 
 const vercel = [
