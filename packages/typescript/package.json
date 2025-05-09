@@ -50,7 +50,7 @@
     "@types/estree": "^1.0.7",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.3",
-    "@types/node": "22.15.2",
+    "@types/node": "22.15.17",
     "@types/react": "19.1.2",
     "@types/react-dom": "19.1.2",
     "eslint-config-custom": "workspace:*",

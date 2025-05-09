@@ -16,7 +16,7 @@
     "@tanstack/react-router": "^1.117.1",
     "@tanstack/react-start": "^1.118.0",
     "@types/mdx": "^2.0.13",
-    "@types/node": "22.15.2",
+    "@types/node": "22.15.17",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react": "^4.4.1",
