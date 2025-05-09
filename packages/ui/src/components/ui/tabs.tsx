@@ -59,7 +59,7 @@ const TabsContent = React.forwardRef<
     ref={ref}
     {...props}
     className={cn(
-      'p-4 text-[15px] bg-fd-background rounded-xl',
+      'p-4 text-[15px] bg-fd-background rounded-xl outline-none',
       props.className,
     )}
   />

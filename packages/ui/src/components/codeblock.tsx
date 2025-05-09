@@ -1,11 +1,10 @@
 'use client';
 import { Check, Copy } from 'lucide-react';
 import {
-  type ButtonHTMLAttributes,
+  type ComponentProps,
   forwardRef,
   type HTMLAttributes,
   type ReactNode,
-  useCallback,
   useRef,
 } from 'react';
 import { cn } from '@/utils/cn';
@@ -48,10 +47,7 @@ export const Pre = forwardRef<HTMLPreElement, HTMLAttributes<HTMLPreElement>>(
     return (
       <pre
         ref={ref}
-        className={cn(
-          'text-[13px] p-4 focus-visible:outline-none *:block *:w-full',
-          className,
-        )}
+        className={cn('text-[13px] p-4 *:block *:w-full', className)}
         {...props}
       >
         {props.children}
@@ -75,9 +71,8 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
     ref,
   ) => {
     const areaRef = useRef<HTMLDivElement>(null);
-    const onCopy = useCallback(() => {
+    const onCopy = () => {
       const pre = areaRef.current?.getElementsByTagName('pre').item(0);
-
       if (!pre) return;
 
       const clone = pre.cloneNode(true) as HTMLElement;
@@ -86,14 +81,14 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
       });
 
       void navigator.clipboard.writeText(clone.textContent ?? '');
-    }, []);
+    };
 
     return (
       <figure
         ref={ref}
         {...props}
         className={cn(
-          'not-prose group fd-codeblock relative my-4 overflow-hidden rounded-lg border bg-fd-card text-sm',
+          'not-prose group relative my-4 overflow-hidden rounded-lg border bg-fd-card text-sm outline-none',
           keepBackground && 'bg-(--shiki-light-bg) dark:bg-(--shiki-dark-bg)',
           props.className,
         )}
@@ -149,7 +144,7 @@ function CopyButton({
   className,
   onCopy,
   ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & {
+}: ComponentProps<'button'> & {
   onCopy: () => void;
 }) {
   const [checked, onClick] = useCopyButton(onCopy);

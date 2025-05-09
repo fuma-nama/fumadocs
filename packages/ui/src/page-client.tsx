@@ -82,7 +82,7 @@ export function TocPopoverTrigger({
         </span>
       </span>
       <ChevronDown
-        className={cn('transition-transform', open && 'rotate-180')}
+        className={cn('opacity-50 transition-transform', open && 'rotate-180')}
       />
     </CollapsibleTrigger>
   );
