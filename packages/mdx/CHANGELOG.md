@@ -1,5 +1,13 @@
 # next-docs-mdx
 
+## 11.6.3
+
+### Patch Changes
+
+- 4de7fe7: Fix `meta.{locale}` file being excluded from `defineDocs`
+- Updated dependencies [c05dc03]
+  - fumadocs-core@15.3.0
+
 ## 11.6.2
 
 ### Patch Changes
