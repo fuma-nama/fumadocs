@@ -1,5 +1,11 @@
 # fumadocs-twoslash
 
+## 3.1.3
+
+### Patch Changes
+
+- 721c927: Lazy load twoslasher
+
 ## 3.1.2
 
 ### Patch Changes
