@@ -461,10 +461,7 @@ export function SidebarPageTree(props: {
         if (item.type === 'separator') {
           if (Separator) return <Separator key={i} item={item} />;
           return (
-            <SidebarSeparator
-              key={i}
-              className={cn(i !== 0 ? 'mt-6' : 'max-md:mt-4')}
-            >
+            <SidebarSeparator key={i} className={cn(i !== 0 && 'mt-6')}>
               {item.icon}
               {item.name}
             </SidebarSeparator>

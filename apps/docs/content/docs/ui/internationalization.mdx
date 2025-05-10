@@ -3,16 +3,16 @@ title: Internationalization
 description: Support multiple languages in your documentation
 ---
 
-<Callout title='Before you get started'>
+## Overview
 
-    Fumadocs is not a full-powered i18n library, it manages only its own components and utilities.
+For Next.js apps, you'll have to configure i18n routing on both Next.js and Fumadocs.
 
-    You can use other libraries like [next-intl](https://github.com/amannn/next-intl) for the rest of your app.
-    Read the [Next.js Docs](https://nextjs.org/docs/app/building-your-application/routing/internationalization) to learn more about implementing I18n in Next.js.
+Fumadocs is not a full-powered i18n library, it's up to you when implementing i18n for Next.js part.
+You can also use other libraries with Fumadocs like [next-intl](https://github.com/amannn/next-intl).
 
-</Callout>
+[Learn more about i18n in Next.js](https://nextjs.org/docs/app/building-your-application/routing/internationalization).
 
-## Manual Setup
+## Setup
 
 Define the i18n configurations in a file, we will import it with `@/ilb/i18n` in this guide.
 
@@ -32,20 +32,6 @@ export const source = loader({
   i18n, // [!code highlight]
   // other options
 });
-```
-
-And update Fumadocs UI layout options.
-
-```tsx title="app/layout.config.tsx"
-import { i18n } from '@/lib/i18n';
-import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
-
-export function baseOptions(locale: string): BaseLayoutProps {
-  return {
-    i18n,
-    // different props based on `locale`
-  };
-}
 ```
 
 ### Middleware
@@ -132,6 +118,19 @@ export default async function RootLayout({
 ### Pass Locale
 
 Pass the locale to Fumadocs in your pages and layouts.
+
+```tsx title="app/layout.config.tsx" tab="Shared Options"
+import { i18n } from '@/lib/i18n';
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+// Fumadocs UI layout options
+export function baseOptions(locale: string): BaseLayoutProps {
+  return {
+    i18n,
+    // different props based on `locale`
+  };
+}
+```
 
 ```tsx title="/app/[lang]/(home)/layout.tsx" tab="Home Layout"
 import type { ReactNode } from 'react';

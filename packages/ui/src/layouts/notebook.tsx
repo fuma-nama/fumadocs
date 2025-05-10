@@ -148,7 +148,7 @@ export function DocsLayout(props: DocsLayoutProps) {
               {nav.children}
               {sidebarBanner}
               {tabMode === 'sidebar' && tabs.length > 0 ? (
-                <RootToggle options={tabs} />
+                <RootToggle className="mb-2" options={tabs} />
               ) : null}
             </SidebarHeader>
             <SidebarViewport>
