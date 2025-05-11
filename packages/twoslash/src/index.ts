@@ -85,7 +85,6 @@ export function transformerTwoslash({
 
   const renderer = rendererRich({
     classExtra: ignoreClass,
-    queryRendering: 'line',
     renderMarkdown,
     renderMarkdownInline,
     ...options?.rendererRich,
@@ -118,6 +117,24 @@ export function transformerTwoslash({
       ],
       popupDocs: {
         class: 'prose twoslash-popup-docs',
+      },
+      queryToken: {
+        class: 'twoslash-query-cursor',
+      },
+      queryCompose: ({ popup, token }) => [token, popup],
+      queryPopup: {
+        tagName: 'div',
+        class: 'twoslash-query',
+        children: (child) => [
+          {
+            tagName: 'div',
+            properties: {
+              className: 'twoslash-query-popup',
+            },
+            type: 'element',
+            children: child,
+          },
+        ],
       },
       popupTypes: {
         tagName: 'div',

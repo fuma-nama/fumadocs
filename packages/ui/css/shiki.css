@@ -5,18 +5,18 @@
 
   code .line {
     min-height: 1em;
-    @apply relative inline-block;
+    @apply relative inline-block w-full;
   }
 
   &[data-line-numbers] code .line {
-    width: calc(100% - 6 * var(--spacing));
+    width: calc(100% - 7 * var(--spacing));
     counter-increment: line;
-    @apply ml-6;
+    @apply ml-7;
 
     &::after {
       position: absolute;
       content: counter(line);
-      @apply top-0 -left-4 text-fd-muted-foreground/60;
+      @apply top-0 -left-5 text-fd-muted-foreground/60;
     }
   }
 

@@ -204,21 +204,69 @@ Syntax Highlighting is supported by default using [Rehype Code](/docs/headless/m
 ```js
 console.log('Hello World');
 ```
-````
 
-You can add a title to the codeblock.
-
-````mdx
 ```js title="My Title"
 console.log('Hello World');
 ```
 ````
 
+#### Line Numbers
+
+````mdx tab="Input"
+```js lineNumbers
+function main() {
+  console.log('Hello World');
+
+  return 0;
+}
+```
+````
+
+```js lineNumbers tab="Output"
+function main() {
+  console.log('Hello World');
+
+  return 0;
+}
+```
+
+You can set the initial value of line numbers.
+
+````mdx tab="Input"
+```js lineNumbers=4
+function main() {
+  console.log('starts from 4');
+
+  return 0;
+}
+```
+````
+
+```js lineNumbers=4 tab="Output"
+function main() {
+  console.log('starts from 4');
+
+  return 0;
+}
+```
+
+It also works with Twoslash and other transformers.
+
+```tsx twoslash lineNumbers
+function main() {
+  const a = '';
+  //    ^?
+  console.log('Hello World'); // [!code highlight]
+
+  return 0;
+}
+```
+
 #### Shiki Transformers
 
 We support some of the [Shiki Transformers](https://shiki.style/packages/transformers), allowing you to highlight/style specific lines.
 
-````md tab="Input" lineNumbers
+````md tab="Input"
 ```tsx
 // highlight a line
 <div>Hello World</div>  // [\!code highlight]
@@ -233,7 +281,7 @@ console.log('hello'); // [\!code ++]
 ```
 ````
 
-```tsx tab="Output" lineNumbers
+```tsx tab="Output"
 // highlight a line
 <div>Hello World</div>  // [!code highlight]
 

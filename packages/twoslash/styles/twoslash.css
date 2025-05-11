@@ -10,12 +10,17 @@
   --color-twoslash-tag-annotate: #1ba67320;
 }
 
-.twoslash-meta-line,
+.twoslash-query-cursor {
+  display: inline-flex;
+  flex-direction: column;
+}
+
+.twoslash-query-popup,
 .twoslash-completion-list {
   position: relative;
   user-select: none;
   display: flex;
-  transform: translateY(8px);
+  margin-top: 8px;
   width: 20rem;
   flex-direction: column;
   white-space: normal;
@@ -30,7 +35,16 @@
   background-color: var(--color-fd-popover);
 }
 
-.twoslash-meta-line:hover,
+.twoslash-query {
+  max-width: 0;
+  overflow: visible;
+}
+
+.twoslash-query-popup {
+  margin-left: -14px;
+}
+
+.twoslash-query-popup:hover,
 .twoslash-completion-list:hover {
   user-select: auto;
 }
@@ -120,7 +134,6 @@
 
 .twoslash-completion-list {
   display: inline-flex;
-  transform: none;
 }
 
 .twoslash-completion-list li {
