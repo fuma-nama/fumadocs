@@ -3,9 +3,26 @@
     color: var(--shiki-light);
   }
 
+  code .line {
+    min-height: 1em;
+    @apply relative inline-block;
+  }
+
+  &[data-line-numbers] code .line {
+    width: calc(100% - 6 * var(--spacing));
+    counter-increment: line;
+    @apply ml-6;
+
+    &::after {
+      position: absolute;
+      content: counter(line);
+      @apply top-0 -left-4 text-fd-muted-foreground/60;
+    }
+  }
+
   code .diff::before {
     position: absolute;
-    left: 6px;
+    left: var(--spacing);
   }
 
   code .diff.remove {
@@ -28,15 +45,11 @@
   }
 
   code .diff {
-    width: calc(100% + 8 * var(--spacing));
-
-    @apply relative inline-block -mx-4 px-4;
+    @apply relative;
   }
 
   .highlighted {
-    width: calc(100% + 8 * var(--spacing));
-
-    @apply inline-block -mx-4 px-4 bg-fd-primary/10;
+    @apply bg-fd-primary/10;
   }
 
   .highlighted-word {

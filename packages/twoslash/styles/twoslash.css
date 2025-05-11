@@ -10,10 +10,6 @@
   --color-twoslash-tag-annotate: #1ba67320;
 }
 
-.twoslash .line {
-  display: inline-flex;
-}
-
 .twoslash-meta-line,
 .twoslash-completion-list {
   position: relative;

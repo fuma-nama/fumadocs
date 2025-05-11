@@ -40,6 +40,16 @@ export type CodeBlockProps = HTMLAttributes<HTMLElement> & {
   keepBackground?: boolean;
 
   viewportProps?: ScrollAreaViewportProps;
+
+  /**
+   * show line numbers
+   */
+  'data-line-numbers'?: boolean;
+
+  /**
+   * @defaultValue 1
+   */
+  'data-line-numbers-start'?: number;
 };
 
 export const Pre = forwardRef<HTMLPreElement, HTMLAttributes<HTMLPreElement>>(
@@ -47,7 +57,7 @@ export const Pre = forwardRef<HTMLPreElement, HTMLAttributes<HTMLPreElement>>(
     return (
       <pre
         ref={ref}
-        className={cn('text-[13px] p-4 *:block *:w-full', className)}
+        className={cn('size-full *:block *:w-full', className)}
         {...props}
       >
         {props.children}
@@ -66,6 +76,7 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
       keepBackground = false,
       icon,
       viewportProps,
+      children,
       ...props
     },
     ref,
@@ -127,9 +138,19 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
         <ScrollArea ref={areaRef} dir="ltr">
           <ScrollViewport
             {...viewportProps}
-            className={cn('max-h-[600px]', viewportProps?.className)}
+            className={cn(
+              'text-[13px] py-3.5 [&_.line]:px-4 max-h-[600px]',
+              props['data-line-numbers'] && '[&_.line]:pl-3',
+              viewportProps?.className,
+            )}
+            style={{
+              counterSet: props['data-line-numbers']
+                ? `line ${Number(props['data-line-numbers-start'] ?? 1) - 1}`
+                : undefined,
+              ...viewportProps?.style,
+            }}
           >
-            {props.children}
+            {children}
           </ScrollViewport>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
