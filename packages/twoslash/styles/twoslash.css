@@ -10,16 +10,16 @@
   --color-twoslash-tag-annotate: #1ba67320;
 }
 
-.twoslash .line {
-  display: inline-flex;
+.twoslash-meta-line {
+  display: flex;
 }
 
-.twoslash-meta-line,
+.twoslash-popup-container,
 .twoslash-completion-list {
   position: relative;
   user-select: none;
   display: flex;
-  transform: translateY(8px);
+  margin-top: 8px;
   width: 20rem;
   flex-direction: column;
   white-space: normal;
@@ -34,7 +34,15 @@
   background-color: var(--color-fd-popover);
 }
 
-.twoslash-meta-line:hover,
+.twoslash-completion-cursor {
+  display: inline-flex;
+  flex-direction: column;
+}
+
+.twoslash-completion-list {
+  margin-right: -20rem;
+}
+
 .twoslash-completion-list:hover {
   user-select: auto;
 }
@@ -107,24 +115,15 @@
 }
 
 /* ===== Completions ===== */
-.twoslash .twoslash-completion-cursor {
-  display: inline-flex;
-  flex-direction: column;
-  max-width: 1px;
-  overflow: visible;
-}
-
 .twoslash-completion-cursor::before {
   width: 1px;
   height: 1.4em;
-  left: -1px;
   content: ' ';
   background-color: var(--color-fd-foreground);
 }
 
 .twoslash-completion-list {
   display: inline-flex;
-  transform: none;
 }
 
 .twoslash-completion-list li {

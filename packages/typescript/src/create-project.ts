@@ -7,7 +7,7 @@ export interface TypescriptConfig {
   basePath?: string;
 }
 
-export function getProject(options: TypescriptConfig = {}): Project {
+export function createProject(options: TypescriptConfig = {}): Project {
   return new Project({
     tsConfigFilePath: options.tsconfigPath ?? './tsconfig.json',
     skipAddingFilesFromTsConfig: true,

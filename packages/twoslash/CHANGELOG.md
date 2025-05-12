@@ -1,5 +1,14 @@
 # fumadocs-twoslash
 
+## 3.1.3
+
+### Patch Changes
+
+- 721c927: Lazy load twoslasher
+- 3372792: Support line numbers in codeblock
+- Updated dependencies [3372792]
+  - fumadocs-ui@15.3.1
+
 ## 3.1.2
 
 ### Patch Changes

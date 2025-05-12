@@ -1,5 +1,6 @@
 import {
   createGenerator,
+  type GeneratorOptions,
   remarkAutoTypeTable,
   type RemarkAutoTypeTableOptions,
 } from '../src';
@@ -7,15 +8,15 @@ import { fileURLToPath } from 'url';
 import { expect, test } from 'vitest';
 import * as path from 'node:path';
 import * as fs from 'node:fs/promises';
-import type { TypescriptConfig } from '@/get-project';
 import { createProcessor } from '@mdx-js/mdx';
 
 const relative = (s: string): string =>
   path.resolve(fileURLToPath(new URL(s, import.meta.url)));
 
-const tsconfig: TypescriptConfig = {
+const tsconfig: GeneratorOptions = {
   tsconfigPath: relative('../tsconfig.json'),
   basePath: relative('../'),
+  cache: false,
 };
 
 const generator = createGenerator(tsconfig);

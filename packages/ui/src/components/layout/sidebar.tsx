@@ -211,7 +211,7 @@ export function SidebarHeader(props: ComponentProps<'div'>) {
     <div
       {...props}
       className={cn(
-        'flex flex-col gap-3 px-4 pt-4 max-md:pt-6 max-md:pb-4 empty:hidden',
+        'flex flex-col gap-3 px-4 pt-4 max-md:pt-6 empty:hidden',
         props.className,
       )}
     >
