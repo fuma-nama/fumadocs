@@ -1,7 +1,11 @@
 import type { Root } from 'mdast';
 import type { Transformer } from 'unified';
-import type { ExpressionStatement, ObjectExpression, Property } from 'estree';
-import type { Program } from 'estree';
+import type {
+  ExpressionStatement,
+  ObjectExpression,
+  Program,
+  Property,
+} from 'estree';
 import { createGenerator, type DocEntry, type Generator } from '@/lib/base';
 import { renderMarkdownToHast } from '@/markdown';
 import { valueToEstree } from 'estree-util-value-to-estree';
@@ -48,8 +52,8 @@ async function mapProperty(
     shorthand: false,
     computed: false,
     key: {
-      type: 'Identifier',
-      name: entry.name,
+      type: 'Literal',
+      value: entry.name,
     },
     kind: 'init',
     value,
