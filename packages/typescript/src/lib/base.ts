@@ -60,12 +60,30 @@ export interface GenerateOptions {
 
 export type Generator = ReturnType<typeof createGenerator>;
 
-export function createGenerator(config?: TypescriptConfig | Project) {
-  const cache = createCache();
+export interface GeneratorOptions extends TypescriptConfig {
+  /**
+   * cache results, note that some options are not marked as dependency.
+   *
+   * @defaultValue fs
+   */
+  cache?: 'fs' | false;
+
+  project?: Project;
+}
+
+export function createGenerator(config?: GeneratorOptions | Project) {
+  const options =
+    config instanceof Project
+      ? {
+          project: config,
+        }
+      : config;
+  const cacheType = options?.cache ?? 'fs';
+  const cache = cacheType === 'fs' ? createCache() : null;
   let instance: Project | undefined;
 
   function getProject() {
-    instance ??= config instanceof Project ? config : createProject(config);
+    instance ??= options?.project ?? createProject(options);
     return instance;
   }
 
@@ -79,12 +97,10 @@ export function createGenerator(config?: TypescriptConfig | Project) {
       options?: GenerateOptions,
     ) {
       const content =
-        file.content ??
-        fs.readFileSync(path.join(process.cwd(), file.path)).toString();
-      if (!options) {
-        const cached = cache.read(`${file.path}:${content}`) as
-          | GeneratedDoc[]
-          | undefined;
+        file.content ?? fs.readFileSync(path.resolve(file.path)).toString();
+      const cacheKey = `${file.path}:${name}:${content}`;
+      if (cache) {
+        const cached = cache.read(cacheKey) as GeneratedDoc[] | undefined;
         if (cached) return cached;
       }
       const sourceFile = getProject().createSourceFile(file.path, content, {
@@ -103,10 +119,7 @@ export function createGenerator(config?: TypescriptConfig | Project) {
         out.push(generate(getProject(), k, d[0], options));
       }
 
-      if (!options) {
-        cache.write(`${file.path}:${content}`, out);
-      }
-
+      cache?.write(cacheKey, out);
       return out;
     },
     generateTypeTable(

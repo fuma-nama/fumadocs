@@ -4,6 +4,11 @@ import path from 'node:path';
 
 export function createCache() {
   const dir = path.join(process.cwd(), '.next/fumadocs-typescript');
+  try {
+    fs.mkdirSync(dir, { recursive: true });
+  } catch {
+    // it fails on Vercel as of 12 May, we can skip it
+  }
 
   return {
     write(input: string, data: unknown) {
