@@ -8,6 +8,10 @@
     @apply relative inline-block w-full;
   }
 
+  &[data-line-numbers] code .twoslash-meta-line {
+    @apply ml-7;
+  }
+
   &[data-line-numbers] code .line {
     width: calc(100% - 7 * var(--spacing));
     counter-increment: line;

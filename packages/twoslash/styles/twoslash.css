@@ -10,12 +10,11 @@
   --color-twoslash-tag-annotate: #1ba67320;
 }
 
-.twoslash-query-cursor {
-  display: inline-flex;
-  flex-direction: column;
+.twoslash-meta-line {
+  display: flex;
 }
 
-.twoslash-query-popup,
+.twoslash-popup-container,
 .twoslash-completion-list {
   position: relative;
   user-select: none;
@@ -35,16 +34,15 @@
   background-color: var(--color-fd-popover);
 }
 
-.twoslash-query {
-  max-width: 0;
-  overflow: visible;
+.twoslash-completion-cursor {
+  display: inline-flex;
+  flex-direction: column;
 }
 
-.twoslash-query-popup {
-  margin-left: -14px;
+.twoslash-completion-list {
+  margin-right: -20rem;
 }
 
-.twoslash-query-popup:hover,
 .twoslash-completion-list:hover {
   user-select: auto;
 }
@@ -117,17 +115,9 @@
 }
 
 /* ===== Completions ===== */
-.twoslash .twoslash-completion-cursor {
-  display: inline-flex;
-  flex-direction: column;
-  max-width: 1px;
-  overflow: visible;
-}
-
 .twoslash-completion-cursor::before {
   width: 1px;
   height: 1.4em;
-  left: -1px;
   content: ' ';
   background-color: var(--color-fd-foreground);
 }

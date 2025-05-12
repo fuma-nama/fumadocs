@@ -3,7 +3,11 @@ import type { Code } from 'mdast';
 import { fromMarkdown } from 'mdast-util-from-markdown';
 import { gfmFromMarkdown } from 'mdast-util-gfm';
 import { defaultHandlers, toHast } from 'mdast-util-to-hast';
-import type { ShikiTransformer, ShikiTransformerContextCommon } from 'shiki';
+import type {
+  ShikiTransformer,
+  ShikiTransformerContext,
+  ShikiTransformerContextCommon,
+} from 'shiki';
 import {
   createTransformerFactory,
   rendererRich,
@@ -85,6 +89,7 @@ export function transformerTwoslash({
 
   const renderer = rendererRich({
     classExtra: ignoreClass,
+    queryRendering: 'line',
     renderMarkdown,
     renderMarkdownInline,
     ...options?.rendererRich,
@@ -117,24 +122,6 @@ export function transformerTwoslash({
       ],
       popupDocs: {
         class: 'prose twoslash-popup-docs',
-      },
-      queryToken: {
-        class: 'twoslash-query-cursor',
-      },
-      queryCompose: ({ popup, token }) => [token, popup],
-      queryPopup: {
-        tagName: 'div',
-        class: 'twoslash-query',
-        children: (child) => [
-          {
-            tagName: 'div',
-            properties: {
-              className: 'twoslash-query-popup',
-            },
-            type: 'element',
-            children: child,
-          },
-        ],
       },
       popupTypes: {
         tagName: 'div',
@@ -169,6 +156,20 @@ export function transformerTwoslash({
     },
   });
 
+  const fn = renderer.lineQuery!;
+  renderer.lineQuery = function (this: ShikiTransformerContext, ...args) {
+    const result = fn.call(this, ...args);
+    // this may break if Shiki updates, need more attention
+    // @ts-expect-error -- extract offset
+    const child = result[0].children[0];
+    // @ts-expect-error -- attend offset as span
+    result[0].children[0] = {
+      type: 'element',
+      tagName: 'span',
+      children: [child],
+    };
+    return result;
+  };
   return createTransformerFactory(
     twoslasher,
     renderer,
