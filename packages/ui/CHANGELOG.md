@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 15.3.1
+
+### Patch Changes
+
+- 3372792: Support line numbers in codeblock
+- Updated dependencies [3372792]
+  - fumadocs-core@15.3.1
+
 ## 15.3.0
 
 ### Minor Changes

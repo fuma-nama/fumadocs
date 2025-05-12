@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 15.3.1
+
+### Patch Changes
+
+- 3372792: Support line numbers in codeblock
+
 ## 15.3.0
 
 ### Patch Changes

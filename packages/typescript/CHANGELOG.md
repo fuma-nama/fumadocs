@@ -1,5 +1,12 @@
 # fumadocs-typescript
 
+## 4.0.4
+
+### Patch Changes
+
+- 6b04eed: Fix errors on special keys
+- a1f3273: Lazy load compiler instance
+
 ## 4.0.3
 
 ### Patch Changes
