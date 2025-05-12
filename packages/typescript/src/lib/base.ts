@@ -5,13 +5,15 @@ import {
   ts,
   type Type,
 } from 'ts-morph';
-import { getProject, type TypescriptConfig } from '@/get-project';
+import { createProject, type TypescriptConfig } from '@/create-project';
 import fs from 'node:fs';
 import {
   type BaseTypeTableProps,
   type GenerateTypeTableOptions,
   getTypeTableOutput,
 } from '@/lib/type-table';
+import { createCache } from '@/lib/cache';
+import path from 'node:path';
 
 export interface GeneratedDoc {
   name: string;
@@ -59,7 +61,13 @@ export interface GenerateOptions {
 export type Generator = ReturnType<typeof createGenerator>;
 
 export function createGenerator(config?: TypescriptConfig | Project) {
-  const project = config instanceof Project ? config : getProject(config);
+  const cache = createCache();
+  let instance: Project | undefined;
+
+  function getProject() {
+    instance ??= config instanceof Project ? config : createProject(config);
+    return instance;
+  }
 
   return {
     generateDocumentation(
@@ -68,15 +76,20 @@ export function createGenerator(config?: TypescriptConfig | Project) {
         content?: string;
       },
       name: string | undefined,
-      options: GenerateOptions = {},
+      options?: GenerateOptions,
     ) {
-      const sourceFile = project.createSourceFile(
-        file.path,
-        file.content ?? fs.readFileSync(file.path).toString(),
-        {
-          overwrite: true,
-        },
-      );
+      const content =
+        file.content ??
+        fs.readFileSync(path.join(process.cwd(), file.path)).toString();
+      if (!options) {
+        const cached = cache.read(`${file.path}:${content}`) as
+          | GeneratedDoc[]
+          | undefined;
+        if (cached) return cached;
+      }
+      const sourceFile = getProject().createSourceFile(file.path, content, {
+        overwrite: true,
+      });
       const out: GeneratedDoc[] = [];
 
       for (const [k, d] of sourceFile.getExportedDeclarations()) {
@@ -87,7 +100,11 @@ export function createGenerator(config?: TypescriptConfig | Project) {
             `export ${k} should not have more than one type declaration.`,
           );
 
-        out.push(generate(project, k, d[0], options));
+        out.push(generate(getProject(), k, d[0], options));
+      }
+
+      if (!options) {
+        cache.write(`${file.path}:${content}`, out);
       }
 
       return out;
@@ -127,7 +144,7 @@ function generate(
   program: Project,
   name: string,
   declaration: ExportedDeclarations,
-  { allowInternal = false, transform }: GenerateOptions,
+  { allowInternal = false, transform }: GenerateOptions = {},
 ): GeneratedDoc {
   const entryContext: EntryContext = {
     transform,

@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url';
 import { expect, test } from 'vitest';
 import * as path from 'node:path';
 import * as fs from 'node:fs/promises';
-import type { TypescriptConfig } from '@/get-project';
+import type { TypescriptConfig } from '@/create-project';
 import { createProcessor } from '@mdx-js/mdx';
 
 const relative = (s: string): string =>
