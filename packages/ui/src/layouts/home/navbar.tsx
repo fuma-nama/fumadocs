@@ -34,7 +34,7 @@ export function Navbar(props: ComponentProps<'div'>) {
         id="nd-nav"
         {...props}
         className={cn(
-          'fixed left-(--fd-nav-left) top-(--fd-banner-height) z-40 box-content w-full max-w-fd-container -translate-x-1/2 border-b transition-colors lg:mt-2 lg:w-[calc(100%-1rem)] lg:rounded-2xl lg:border',
+          'fixed top-(--fd-banner-height) z-40 box-content w-full max-w-fd-container -translate-x-1/2 border-b transition-colors lg:mt-2 lg:[--fd-padding:1rem] lg:rounded-2xl lg:border',
           value.length > 0 ? 'shadow-lg' : 'shadow-sm',
           (!isTransparent || value.length > 0) &&
             'bg-fd-background/80 backdrop-blur-lg',
@@ -42,14 +42,15 @@ export function Navbar(props: ComponentProps<'div'>) {
         )}
         style={
           {
-            '--fd-nav-left':
-              'calc(50% - var(--removed-body-scroll-bar-size,0px) / 2)',
+            width:
+              'calc(100% - var(--fd-padding,0px) - var(--removed-body-scroll-bar-size,0px))',
+            left: 'calc(50% - var(--removed-body-scroll-bar-size,0px) / 2)',
             ...props.style,
           } as object
         }
       >
         <NavigationMenuList
-          className="flex h-14 w-full flex-row items-center px-4 lg:h-12"
+          className="flex h-14 w-full items-center px-4 lg:h-12"
           asChild
         >
           <nav>{props.children}</nav>

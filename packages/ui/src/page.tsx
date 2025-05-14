@@ -1,10 +1,5 @@
 import type { TableOfContents } from 'fumadocs-core/server';
-import {
-  type ComponentProps,
-  forwardRef,
-  type HTMLAttributes,
-  type ReactNode,
-} from 'react';
+import { type ComponentProps, forwardRef, lazy, type ReactNode } from 'react';
 import { AnchorProvider, type AnchorProviderProps } from 'fumadocs-core/toc';
 import { slot } from '@/layouts/shared';
 import { cn } from './utils/cn';
@@ -29,7 +24,8 @@ import {
 import { buttonVariants } from '@/components/ui/button';
 import { Edit, Text } from 'lucide-react';
 import { I18nLabel } from '@/contexts/i18n';
-import ClerkTOCItems from '@/components/layout/toc-clerk';
+
+const ClerkTOCItems = lazy(() => import('@/components/layout/toc-clerk'));
 
 type TableOfContentOptions = Omit<TOCProps, 'items' | 'children'> &
   Pick<AnchorProviderProps, 'single'> & {
@@ -106,8 +102,8 @@ export interface DocsPageProps {
   editOnGithub?: EditOnGitHubOptions;
   lastUpdate?: Date | string | number;
 
-  container?: HTMLAttributes<HTMLDivElement>;
-  article?: HTMLAttributes<HTMLElement>;
+  container?: ComponentProps<'div'>;
+  article?: ComponentProps<'article'>;
   children: ReactNode;
 }
 
@@ -250,20 +246,19 @@ export function EditOnGitHub(props: ComponentProps<'a'>) {
 /**
  * Add typography styles
  */
-export const DocsBody = forwardRef<
-  HTMLDivElement,
-  HTMLAttributes<HTMLDivElement>
->((props, ref) => (
-  <div ref={ref} {...props} className={cn('prose', props.className)}>
-    {props.children}
-  </div>
-));
+export const DocsBody = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
+  (props, ref) => (
+    <div ref={ref} {...props} className={cn('prose', props.className)}>
+      {props.children}
+    </div>
+  ),
+);
 
 DocsBody.displayName = 'DocsBody';
 
 export const DocsDescription = forwardRef<
   HTMLParagraphElement,
-  HTMLAttributes<HTMLParagraphElement>
+  ComponentProps<'p'>
 >((props, ref) => {
   // don't render if no description provided
   if (props.children === undefined) return null;
@@ -281,30 +276,29 @@ export const DocsDescription = forwardRef<
 
 DocsDescription.displayName = 'DocsDescription';
 
-export const DocsTitle = forwardRef<
-  HTMLHeadingElement,
-  HTMLAttributes<HTMLHeadingElement>
->((props, ref) => {
-  return (
-    <h1
-      ref={ref}
-      {...props}
-      className={cn('text-3xl font-semibold', props.className)}
-    >
-      {props.children}
-    </h1>
-  );
-});
+export const DocsTitle = forwardRef<HTMLHeadingElement, ComponentProps<'h1'>>(
+  (props, ref) => {
+    return (
+      <h1
+        ref={ref}
+        {...props}
+        className={cn('text-3xl font-semibold', props.className)}
+      >
+        {props.children}
+      </h1>
+    );
+  },
+);
 
 DocsTitle.displayName = 'DocsTitle';
 
 /**
  * For separate MDX page
  */
-export function withArticle({ children }: { children: ReactNode }): ReactNode {
+export function withArticle(props: ComponentProps<'main'>): ReactNode {
   return (
-    <main className="container py-12">
-      <article className="prose">{children}</article>
+    <main {...props} className={cn('container py-12', props.className)}>
+      <article className="prose">{props.children}</article>
     </main>
   );
 }
