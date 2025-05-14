@@ -154,7 +154,7 @@ export function DocsPage({
             <TocPopoverTrigger className="w-full" items={toc} />
             <TocPopoverContent>
               {tocPopoverOptions.header}
-              <TOCScrollArea isMenu>
+              <TOCScrollArea className="px-4 md:px-6">
                 {tocPopoverOptions.style === 'clerk' ? (
                   <ClerkTOCItems items={toc} />
                 ) : (

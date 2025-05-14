@@ -10,7 +10,6 @@ import {
 import { cn } from '@/utils/cn';
 import { useI18n } from '@/contexts/i18n';
 import { TocThumb } from '@/components/layout/toc-thumb';
-import { ScrollArea, ScrollViewport } from '../ui/scroll-area';
 import { usePageStyles } from '@/contexts/layout';
 
 export interface TOCProps {
@@ -47,7 +46,7 @@ export function Toc(props: HTMLAttributes<HTMLDivElement>) {
         } as object
       }
     >
-      <div className="flex h-full w-(--fd-toc-width) max-w-full flex-col gap-3 pe-4">
+      <div className="flex h-full w-(--fd-toc-width) max-w-full flex-col pe-4">
         {props.children}
       </div>
     </div>
@@ -64,30 +63,22 @@ export function TocItemsEmpty() {
   );
 }
 
-export function TOCScrollArea({
-  isMenu,
-  ...props
-}: ComponentProps<typeof ScrollArea> & { isMenu?: boolean }) {
+export function TOCScrollArea(props: ComponentProps<'div'>) {
   const viewRef = useRef<HTMLDivElement>(null);
 
   return (
-    <ScrollArea
+    <div
       {...props}
-      className={cn('flex flex-col ps-px', props.className)}
+      ref={viewRef}
+      className={cn(
+        'relative min-h-0 text-sm ms-px overflow-auto [scrollbar-width:none] [mask-image:linear-gradient(to_bottom,transparent,white_16px,white_calc(100%-16px),transparent)] py-3',
+        props.className,
+      )}
     >
-      <ScrollViewport
-        ref={viewRef}
-        className={cn(
-          'relative min-h-0 text-sm',
-          isMenu &&
-            '[mask-image:linear-gradient(to_bottom,transparent,white_16px,white_calc(100%-16px),transparent)] px-4 md:px-6 py-2',
-        )}
-      >
-        <Primitive.ScrollProvider containerRef={viewRef}>
-          {props.children}
-        </Primitive.ScrollProvider>
-      </ScrollViewport>
-    </ScrollArea>
+      <Primitive.ScrollProvider containerRef={viewRef}>
+        {props.children}
+      </Primitive.ScrollProvider>
+    </div>
   );
 }
 
