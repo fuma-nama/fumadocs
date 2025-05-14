@@ -98,28 +98,3 @@ export function LayoutTab(item: Option) {
     </Link>
   );
 }
-
-export function SidebarLayoutTab({
-  item,
-  ...props
-}: { item: Option } & HTMLAttributes<HTMLElement>) {
-  const selected = useIsSelected(item);
-
-  return (
-    <Link
-      {...props}
-      className={cn(
-        'flex flex-row items-center px-2 -mx-2 py-1.5 gap-2.5 text-fd-muted-foreground [&_svg]:!size-4.5',
-        selected
-          ? 'text-fd-primary font-medium'
-          : 'hover:text-fd-accent-foreground',
-        props.className,
-      )}
-      data-active={selected}
-      href={item.url}
-    >
-      {item.icon}
-      {item.title}
-    </Link>
-  );
-}
