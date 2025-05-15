@@ -3,6 +3,7 @@ import type { RehypeShikiOptions } from '@shikijs/rehype';
 import rehypeShikiFromHighlighter from '@shikijs/rehype/core';
 import {
   transformerNotationDiff,
+  transformerNotationFocus,
   transformerNotationHighlight,
   transformerNotationWordHighlight,
 } from '@shikijs/transformers';
@@ -69,6 +70,9 @@ export const rehypeCodeDefaultOptions: RehypeCodeOptions = {
       matchAlgorithm: 'v3',
     }),
     transformerNotationDiff({
+      matchAlgorithm: 'v3',
+    }),
+    transformerNotationFocus({
       matchAlgorithm: 'v3',
     }),
   ],
