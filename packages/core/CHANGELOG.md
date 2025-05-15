@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 15.3.2
+
+### Patch Changes
+
+- c25d678: Support Shiki focus notation transformer by default
+
 ## 15.3.1
 
 ### Patch Changes

@@ -12,7 +12,7 @@ Fumadocs provides many useful extensions to MDX, a markup language. Here is a br
 ## MDX
 
 We recommend MDX, a superset of Markdown with JSX syntax.
-It allows you to import components, and use them right in the document, or even export values.
+It allows you to import components, and use them in the document, or even writing JavaScript.
 
 See:
 
@@ -54,13 +54,7 @@ Hello World, **Bold**, _Italic_, ~~Hidden~~
 | Hello | World       |
 ```
 
-### Images
-
 Images are automatically optimized for `next/image`.
-
-```mdx
-![Image](/image.png)
-```
 
 ### Auto Links
 
@@ -134,8 +128,9 @@ This will show the other pages in the same folder as cards.
 Useful for adding tips/warnings, it is included by default. You can specify the type of callout:
 
 - `info` (default)
-- `warn`
+- `warn`/`warning`
 - `error`
+- `success`
 
 ```mdx
 <Callout>Hello World</Callout>
@@ -212,22 +207,20 @@ console.log('Hello World');
 
 #### Line Numbers
 
-````mdx tab="Input"
-```js lineNumbers
-function main() {
-  console.log('Hello World');
+Show line numbers, it also works with Twoslash and other transformers.
 
-  return 0;
-}
+````mdx tab="Input"
+```ts twoslash lineNumbers
+const a = 'Hello World';
+//    ^?
+console.log(a); // [!code highlight]
 ```
 ````
 
-```js lineNumbers tab="Output"
-function main() {
-  console.log('Hello World');
-
-  return 0;
-}
+```ts twoslash lineNumbers tab="Output"
+const a = 'Hello World';
+//    ^?
+console.log(a); // [!code highlight]
 ```
 
 You can set the initial value of line numbers.
@@ -250,18 +243,6 @@ function main() {
 }
 ```
 
-It also works with Twoslash and other transformers.
-
-```tsx twoslash lineNumbers
-function main() {
-  const a = '';
-  //    ^?
-  console.log('Hello World'); // [!code highlight]
-
-  return 0;
-}
-```
-
 #### Shiki Transformers
 
 We support some of the [Shiki Transformers](https://shiki.style/packages/transformers), allowing you to highlight/style specific lines.
@@ -269,7 +250,7 @@ We support some of the [Shiki Transformers](https://shiki.style/packages/transfo
 ````md tab="Input"
 ```tsx
 // highlight a line
-<div>Hello World</div>  // [\!code highlight]
+<div>Hello World</div> // [\!code highlight]
 
 // highlight a word
 // [\!code word:Fumadocs]
@@ -278,12 +259,15 @@ We support some of the [Shiki Transformers](https://shiki.style/packages/transfo
 // diff styles
 console.log('hewwo'); // [\!code --]
 console.log('hello'); // [\!code ++]
+
+// focus
+return new ResizeObserver(() => {}) // [\!code focus]
 ```
 ````
 
 ```tsx tab="Output"
 // highlight a line
-<div>Hello World</div>  // [!code highlight]
+<div>Hello World</div> // [!code highlight]
 
 // highlight a word
 // [!code word:Fumadocs]
@@ -292,6 +276,9 @@ console.log('hello'); // [\!code ++]
 // diff styles:
 console.log('hewwo'); // [!code --]
 console.log('hello'); // [!code ++]
+
+// focus
+return new ResizeObserver(() => {}) // [!code focus]
 ```
 
 #### Tab Groups

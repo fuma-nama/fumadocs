@@ -4,8 +4,18 @@
   }
 
   code .line {
-    min-height: 1em;
-    @apply relative inline-block w-full;
+    line-height: 1.45em;
+    min-height: 1.45em;
+    @apply relative;
+  }
+
+  &.has-focused code .line:not(.focused) {
+    filter: blur(2px);
+    transition: filter 200ms;
+  }
+
+  &.has-focused:hover code .line:not(.focused) {
+    filter: blur(0);
   }
 
   &[data-line-numbers] code .twoslash-meta-line {
@@ -48,25 +58,13 @@
     @apply text-fd-diff-add-symbol;
   }
 
-  code .diff {
-    @apply relative;
-  }
-
   .highlighted {
     @apply bg-fd-primary/10;
   }
 
   .highlighted-word {
-    padding: 1px 2px;
-    margin: -1px -3px;
-    border: 1px solid
-      color-mix(in oklab, var(--color-fd-primary) 50%, transparent);
-    background-color: color-mix(
-      in oklab,
-      var(--color-fd-primary) 10%,
-      transparent
-    );
-    border-radius: 2px;
+    padding: 1px;
+    @apply border -my-px border-fd-primary/30 bg-fd-primary/10 rounded-md font-medium;
   }
 }
 

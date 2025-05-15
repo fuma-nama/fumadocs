@@ -46,6 +46,7 @@ import {
   LargeSearchToggle,
   SearchToggle,
 } from '@/components/layout/search-toggle';
+import { HideIfEmpty } from '@/components/ui/hide-if-empty';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
@@ -190,36 +191,42 @@ export function DocsLayoutSidebar({
         collapsible={collapsible}
         className={cn('md:ps-(--fd-layout-offset)', props.className)}
       >
-        <SidebarHeader>
-          <div className="flex flex-row py-1.5 max-md:hidden">
-            {nav}
-            {collapsible && (
-              <SidebarCollapseTrigger
-                className={cn(
-                  buttonVariants({
-                    color: 'ghost',
-                    size: 'icon-sm',
-                  }),
-                  'ms-auto mb-auto -my-1.5 text-fd-muted-foreground max-md:hidden',
-                )}
-              >
-                <SidebarIcon />
-              </SidebarCollapseTrigger>
-            )}
-          </div>
-          {banner}
-        </SidebarHeader>
+        <HideIfEmpty>
+          <SidebarHeader>
+            <div className="flex py-1.5 max-md:hidden">
+              {nav}
+              {collapsible && (
+                <SidebarCollapseTrigger
+                  className={cn(
+                    buttonVariants({
+                      color: 'ghost',
+                      size: 'icon-sm',
+                    }),
+                    'ms-auto mb-auto -my-1.5 text-fd-muted-foreground max-md:hidden',
+                  )}
+                >
+                  <SidebarIcon />
+                </SidebarCollapseTrigger>
+              )}
+            </div>
+            {banner}
+          </SidebarHeader>
+        </HideIfEmpty>
         <SidebarViewport>
-          <div className="mb-4 empty:hidden">
-            {links
-              .filter((v) => v.type !== 'icon')
-              .map((item, i) => (
-                <SidebarLinkItem key={i} item={item} />
-              ))}
-          </div>
+          {links
+            .filter((v) => v.type !== 'icon')
+            .map((item, i, list) => (
+              <SidebarLinkItem
+                key={i}
+                item={item}
+                className={cn(i === list.length - 1 && 'mb-4')}
+              />
+            ))}
           <SidebarPageTree components={components} />
         </SidebarViewport>
-        <SidebarFooter>{footer}</SidebarFooter>
+        <HideIfEmpty>
+          <SidebarFooter>{footer}</SidebarFooter>
+        </HideIfEmpty>
       </Sidebar>
     </>
   );
@@ -234,37 +241,36 @@ export function DocsLayoutSidebarFooter({
   links?: IconItemType[];
   themeSwitch?: DocsLayoutProps['themeSwitch'];
 }) {
-  // empty footer items
-  if (links.length === 0 && !i18n && themeSwitch?.enabled === false)
-    return null;
-
   return (
-    <div className="flex flex-row items-center">
-      {links.map((item, i) => (
-        <BaseLinkItem
-          key={i}
-          item={item}
-          className={cn(
-            buttonVariants({ size: 'icon', color: 'ghost' }),
-            'text-fd-muted-foreground md:[&_svg]:size-4.5',
-          )}
-          aria-label={item.label}
-        >
-          {item.icon}
-        </BaseLinkItem>
-      ))}
-      <div role="separator" className="flex-1" />
-      {i18n ? (
-        <LanguageToggle className="me-1.5">
-          <Languages className="size-4.5" />
-          <LanguageToggleText className="md:hidden" />
-        </LanguageToggle>
-      ) : null}
-      {slot(
-        themeSwitch,
-        <ThemeToggle className="p-0" mode={themeSwitch?.mode} />,
-      )}
-    </div>
+    <HideIfEmpty>
+      <div className="flex items-center justify-end">
+        <div className="flex items-center flex-1 empty:hidden">
+          {links.map((item, i) => (
+            <BaseLinkItem
+              key={i}
+              item={item}
+              className={cn(
+                buttonVariants({ size: 'icon', color: 'ghost' }),
+                'text-fd-muted-foreground md:[&_svg]:size-4.5',
+              )}
+              aria-label={item.label}
+            >
+              {item.icon}
+            </BaseLinkItem>
+          ))}
+        </div>
+        {i18n ? (
+          <LanguageToggle className="me-1.5">
+            <Languages className="size-4.5" />
+            <LanguageToggleText className="md:hidden" />
+          </LanguageToggle>
+        ) : null}
+        {slot(
+          themeSwitch,
+          <ThemeToggle className="p-0" mode={themeSwitch?.mode} />,
+        )}
+      </div>
+    </HideIfEmpty>
   );
 }
 

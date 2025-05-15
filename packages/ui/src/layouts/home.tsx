@@ -1,7 +1,7 @@
 import { Fragment, type HTMLAttributes, useMemo } from 'react';
 import { type NavOptions, slot, slots } from '@/layouts/shared';
 import { cn } from '@/utils/cn';
-import { getLinks, type BaseLayoutProps } from './shared';
+import { type BaseLayoutProps, getLinks } from './shared';
 import { NavProvider } from '@/contexts/layout';
 import {
   Navbar,
@@ -206,16 +206,19 @@ function NavbarLinkItem({
       } = child.menu ?? {};
 
       return (
-        <NavbarMenuLink key={j} href={child.url} {...rest}>
+        <NavbarMenuLink
+          key={j}
+          href={child.url}
+          external={child.external}
+          {...rest}
+        >
           {rest.children ?? (
             <>
               {banner}
-              <p className="-mb-1 text-sm font-medium">{child.text}</p>
-              {child.description ? (
-                <p className="text-[13px] text-fd-muted-foreground">
-                  {child.description}
-                </p>
-              ) : null}
+              <p className="text-[15px] font-medium">{child.text}</p>
+              <p className="text-sm text-fd-muted-foreground empty:hidden">
+                {child.description}
+              </p>
             </>
           )}
         </NavbarMenuLink>

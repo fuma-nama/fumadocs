@@ -1,5 +1,18 @@
 # @fuma-docs/openapi
 
+## 8.1.10
+
+### Patch Changes
+
+- 623610a: Improve error message
+- Updated dependencies [1753cf1]
+- Updated dependencies [9b38baf]
+- Updated dependencies [8e862e5]
+- Updated dependencies [ac0ab12]
+- Updated dependencies [c25d678]
+  - fumadocs-ui@15.3.2
+  - fumadocs-core@15.3.2
+
 ## 8.1.9
 
 ### Patch Changes

@@ -8,14 +8,8 @@ import {
   useRef,
 } from 'react';
 import { cn } from '@/utils/cn';
-import {
-  ScrollArea,
-  ScrollBar,
-  ScrollViewport,
-} from '@/components/ui/scroll-area';
 import { useCopyButton } from '@/utils/use-copy-button';
 import { buttonVariants } from '@/components/ui/button';
-import type { ScrollAreaViewportProps } from '@radix-ui/react-scroll-area';
 
 export type CodeBlockProps = HTMLAttributes<HTMLElement> & {
   /**
@@ -39,7 +33,7 @@ export type CodeBlockProps = HTMLAttributes<HTMLElement> & {
    */
   keepBackground?: boolean;
 
-  viewportProps?: ScrollAreaViewportProps;
+  viewportProps?: HTMLAttributes<HTMLElement>;
 
   /**
    * show line numbers
@@ -57,7 +51,7 @@ export const Pre = forwardRef<HTMLPreElement, HTMLAttributes<HTMLPreElement>>(
     return (
       <pre
         ref={ref}
-        className={cn('size-full *:block *:w-full', className)}
+        className={cn('min-w-full w-max *:flex *:flex-col', className)}
         {...props}
       >
         {props.children}
@@ -97,6 +91,7 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
     return (
       <figure
         ref={ref}
+        dir="ltr"
         {...props}
         className={cn(
           'not-prose group relative my-4 overflow-hidden rounded-lg border bg-fd-card text-sm outline-none',
@@ -135,25 +130,23 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
             />
           )
         )}
-        <ScrollArea ref={areaRef} dir="ltr">
-          <ScrollViewport
-            {...viewportProps}
-            className={cn(
-              'text-[13px] py-3.5 [&_.line]:px-4 max-h-[600px]',
-              props['data-line-numbers'] && '[&_.line]:pl-3',
-              viewportProps?.className,
-            )}
-            style={{
-              counterSet: props['data-line-numbers']
-                ? `line ${Number(props['data-line-numbers-start'] ?? 1) - 1}`
-                : undefined,
-              ...viewportProps?.style,
-            }}
-          >
-            {children}
-          </ScrollViewport>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
+        <div
+          ref={areaRef}
+          {...viewportProps}
+          className={cn(
+            'text-[13px] py-3.5 overflow-auto [&_.line]:px-4 max-h-[600px] fd-scroll-container',
+            props['data-line-numbers'] && '[&_.line]:pl-3',
+            viewportProps?.className,
+          )}
+          style={{
+            counterSet: props['data-line-numbers']
+              ? `line ${Number(props['data-line-numbers-start'] ?? 1) - 1}`
+              : undefined,
+            ...viewportProps?.style,
+          }}
+        >
+          {children}
+        </div>
       </figure>
     );
   },

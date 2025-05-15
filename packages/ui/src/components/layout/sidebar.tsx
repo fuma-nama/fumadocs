@@ -132,7 +132,7 @@ export function Sidebar({
               {...props}
               data-state={state}
               className={cn(
-                'fixed text-[15px] flex flex-col rounded-e-xl border-e start-0 inset-y-0 w-[85%] max-w-[380px] z-40 bg-fd-background data-[state=open]:animate-fd-enterFromLeft data-[state=closed]:animate-fd-exitToLeft',
+                'fixed text-[15px] flex flex-col py-3 rounded-e-xl border-e start-0 inset-y-0 w-[85%] max-w-[380px] z-40 bg-fd-background data-[state=open]:animate-fd-enterFromLeft data-[state=closed]:animate-fd-exitToLeft',
                 !present && 'invisible',
                 props.className,
               )}
@@ -199,7 +199,7 @@ export function Sidebar({
         );
       }}
     >
-      <div className="flex w-(--fd-sidebar-width) h-full max-w-full flex-col ms-auto border-e">
+      <div className="flex w-(--fd-sidebar-width) h-full max-w-full flex-col pt-1.5 ms-auto border-e">
         <Context.Provider value={context}>{props.children}</Context.Provider>
       </div>
     </aside>
@@ -210,10 +210,7 @@ export function SidebarHeader(props: ComponentProps<'div'>) {
   return (
     <div
       {...props}
-      className={cn(
-        'flex flex-col gap-3 px-4 pt-4 max-md:pt-6 empty:hidden',
-        props.className,
-      )}
+      className={cn('flex flex-col gap-3 px-4 py-2', props.className)}
     >
       {props.children}
     </div>
@@ -224,10 +221,7 @@ export function SidebarFooter(props: ComponentProps<'div'>) {
   return (
     <div
       {...props}
-      className={cn(
-        'flex flex-col border-t px-4 py-3 empty:hidden max-md:pb-6',
-        props.className,
-      )}
+      className={cn('flex flex-col border-t px-4 py-3', props.className)}
     >
       {props.children}
     </div>

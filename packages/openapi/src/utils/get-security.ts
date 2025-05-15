@@ -17,7 +17,10 @@ export function getSecurities(
   const schemas = document.components?.securitySchemes ?? {};
 
   for (const [key, scopes] of Object.entries(requirement)) {
-    if (!(key in schemas)) return [];
+    if (!(key in schemas))
+      throw new Error(
+        `Security scheme with name ${key} is not found, make sure to define referenced schemes.`,
+      );
     const schema = schemas[key];
 
     results.push({

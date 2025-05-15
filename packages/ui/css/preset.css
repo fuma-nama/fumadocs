@@ -227,6 +227,22 @@
   }
 }
 
+@utility fd-scroll-container {
+  &::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 5px;
+    background: var(--color-fd-border);
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
 @utility fd-steps {
   counter-reset: step;
   position: relative;
