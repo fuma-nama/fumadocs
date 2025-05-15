@@ -1,18 +1,14 @@
 import typing as t
-from dataclasses import asdict
 
 import griffe
 
-SimplifiedDocstring = t.NamedTuple(
-    "DocComponents",
-    [
-        ("description", str),
-        ("parameters", list),
-        ("returns", dict),
-        ("attributes", list),
-        ("remainder", list),
-    ],
-)
+
+class SimplifiedDocstring(t.NamedTuple):
+    description: str | None
+    parameters: list[dict[str, str | None]]
+    returns: dict[str, str | None]
+    attributes: list[dict[str, str | None]]
+    remainder: list[griffe.DocstringSection]
 
 
 def simplify_docstring(
