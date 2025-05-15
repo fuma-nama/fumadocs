@@ -1,10 +1,8 @@
-import typing as t
-
 import griffe
 
 
 def build_signature(func: griffe.Function) -> str:
-    parameters: t.List[griffe.Parameter] = func.parameters
+    parameters: list[griffe.Parameter] = func.parameters
 
     s = "("
     positional_only = True
@@ -41,7 +39,7 @@ def build_signature(func: griffe.Function) -> str:
     return s
 
 
-def filter_non_imported(d: t.Dict[str, griffe.Object]) -> dict:
+def filter_non_imported(d: dict[str, griffe.Object]) -> dict:
     return {k: v for k, v in d.items() if not v.is_imported}
 
 
