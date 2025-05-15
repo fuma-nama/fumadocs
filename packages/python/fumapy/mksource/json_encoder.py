@@ -3,6 +3,7 @@ import typing as t
 import griffe
 from _griffe.encoders import _json_encoder_map
 
+
 class CustomEncoder(griffe.JSONEncoder):
     def default(self, obj: t.Any) -> t.Any:
         """Return a serializable representation of the given object.

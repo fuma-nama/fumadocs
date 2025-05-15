@@ -48,9 +48,7 @@ def simplify_docstring(
                 "value": attr.value,
             }
             for attr in parent.attributes.values()
-            if (
-                not attr.is_alias and not attr.is_private
-            )
+            if (not attr.is_alias and not attr.is_private)
         ]
 
     description = None
@@ -146,9 +144,9 @@ def simplify_docstring(
                         {
                             "name": attr.name,
                             "annotation": attr.annotation,
-                            "description": attr.docstring.parsed
-                            if attr.docstring
-                            else None,
+                            "description": (
+                                attr.docstring.parsed if attr.docstring else None
+                            ),
                             "value": attr.value,
                         }
                     )
