@@ -1,5 +1,17 @@
 # next-docs-ui
 
+## 15.3.2
+
+### Patch Changes
+
+- 1753cf1: Fix navbar external items and nav menu scroll
+- 9b38baf: add `success` type to callout
+- 8e862e5: Use native scroll bar for codeblocks and some elements for better performance
+- ac0ab12: Improve performance by reducing usage of `@radix-ui/react-scroll-area`
+- c25d678: Support Shiki focus notation transformer by default
+- Updated dependencies [c25d678]
+  - fumadocs-core@15.3.2
+
 ## 15.3.1
 
 ### Patch Changes
