@@ -4,8 +4,9 @@
   }
 
   code .line {
-    min-height: 1em;
-    @apply relative inline-block w-full;
+    line-height: 1.45em;
+    min-height: 1.45em;
+    @apply relative;
   }
 
   &[data-line-numbers] code .twoslash-meta-line {
@@ -46,10 +47,6 @@
   code .diff.add::before {
     content: '+';
     @apply text-fd-diff-add-symbol;
-  }
-
-  code .diff {
-    @apply relative;
   }
 
   .highlighted {

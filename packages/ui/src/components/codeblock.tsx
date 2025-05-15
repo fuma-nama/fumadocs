@@ -51,7 +51,7 @@ export const Pre = forwardRef<HTMLPreElement, HTMLAttributes<HTMLPreElement>>(
     return (
       <pre
         ref={ref}
-        className={cn('size-full *:block *:w-full', className)}
+        className={cn('min-w-full w-max *:flex *:flex-col', className)}
         {...props}
       >
         {props.children}
@@ -134,7 +134,7 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
           ref={areaRef}
           {...viewportProps}
           className={cn(
-            'text-[13px] py-3.5 overflow-auto [&_.line]:px-4 max-h-[600px] [scrollbar-width:thin]',
+            'text-[13px] py-3.5 overflow-auto [&_.line]:px-4 max-h-[600px] fd-scroll-container',
             props['data-line-numbers'] && '[&_.line]:pl-3',
             viewportProps?.className,
           )}
