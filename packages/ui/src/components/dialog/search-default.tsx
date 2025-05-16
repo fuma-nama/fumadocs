@@ -9,6 +9,7 @@ import {
   type SharedProps,
   type TagItem,
   TagsList,
+  TagsListItem,
 } from './search';
 
 export interface DefaultSearchDialogProps extends SharedProps {
@@ -78,19 +79,18 @@ export default function DefaultSearchDialog({
       results={query.data ?? []}
       {...props}
       footer={
-        tags ? (
-          <>
-            <TagsList
-              tag={tag}
-              onTagChange={setTag}
-              items={tags}
-              allowClear={allowClear}
-            />
-            {props.footer}
-          </>
-        ) : (
-          props.footer
-        )
+        <>
+          {tags && (
+            <TagsList tag={tag} onTagChange={setTag} allowClear={allowClear}>
+              {tags.map((tag) => (
+                <TagsListItem key={tag.value} value={tag.value}>
+                  {tag.name}
+                </TagsListItem>
+              ))}
+            </TagsList>
+          )}
+          {props.footer}
+        </>
       }
     />
   );
