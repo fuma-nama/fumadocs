@@ -53,7 +53,7 @@ export interface TabsProps extends BaseProps {
   updateAnchor?: boolean;
 
   /**
-   * Use simple mode instead of traditional usage as documented in https://radix-ui.com/primitives/docs/components/tabs.
+   * Use simple mode instead of advanced usage as documented in https://radix-ui.com/primitives/docs/components/tabs.
    */
   items?: string[];
 
