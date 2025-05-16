@@ -315,14 +315,17 @@ export function SidebarFolder({
   );
 }
 
-export function SidebarFolderTrigger(props: CollapsibleTriggerProps) {
+export function SidebarFolderTrigger({
+  className,
+  ...props
+}: CollapsibleTriggerProps) {
   const { level } = useInternalContext();
   const { open } = useFolderContext();
 
   return (
     <CollapsibleTrigger
+      className={cn(itemVariants({ active: false }), 'w-full', className)}
       {...props}
-      className={cn(itemVariants({ active: false }), 'w-full')}
       style={{
         paddingInlineStart: getOffset(level),
         ...props.style,
@@ -352,11 +355,14 @@ export function SidebarFolderLink(props: LinkProps) {
       data-active={active}
       className={cn(itemVariants({ active }), 'w-full', props.className)}
       onClick={(e) => {
-        if ((e.target as HTMLElement).hasAttribute('data-icon')) {
-          setOpen((prev) => !prev);
+        if (
+          e.target instanceof HTMLElement &&
+          e.target.hasAttribute('data-icon')
+        ) {
+          setOpen(!open);
           e.preventDefault();
         } else {
-          setOpen((prev) => !active || !prev);
+          setOpen(active ? !open : true);
         }
       }}
       prefetch={prefetch}

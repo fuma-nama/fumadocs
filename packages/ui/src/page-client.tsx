@@ -62,7 +62,7 @@ export function TocPopoverTrigger({
         max={1}
         className={cn(open && 'text-fd-primary')}
       />
-      <span className="grid flex-1 *:row-start-1 *:col-start-1">
+      <span className="grid flex-1 *:my-auto *:row-start-1 *:col-start-1">
         <span
           className={cn(
             'truncate transition-all',
