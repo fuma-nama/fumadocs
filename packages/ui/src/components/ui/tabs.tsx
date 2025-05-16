@@ -29,7 +29,7 @@ const TabsList = React.forwardRef<
     ref={ref}
     {...props}
     className={cn(
-      'flex gap-3.5 text-fd-secondary-foreground overflow-x-auto px-4',
+      'flex gap-3.5 text-fd-secondary-foreground overflow-x-auto px-4 not-prose',
       props.className,
     )}
   />
@@ -44,7 +44,7 @@ const TabsTrigger = React.forwardRef<
     ref={ref}
     {...props}
     className={cn(
-      'whitespace-nowrap text-fd-muted-foreground border-b border-transparent py-2 text-sm font-medium transition-colors hover:text-fd-accent-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-fd-primary data-[state=active]:text-fd-primary',
+      'inline-flex items-center gap-2 whitespace-nowrap text-fd-muted-foreground border-b border-transparent py-2 text-sm font-medium transition-colors [&_svg]:size-4.5 hover:text-fd-accent-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-fd-primary data-[state=active]:text-fd-primary',
       props.className,
     )}
   />
