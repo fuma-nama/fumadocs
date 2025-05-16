@@ -29,7 +29,7 @@ import { i18n } from '@/lib/i18n';
 import { loader } from 'fumadocs-core/source';
 
 export const source = loader({
-  i18n, // [!code highlight]
+  i18n, // [!code ++]
   // other options
 });
 ```
@@ -68,9 +68,9 @@ Note that only English translations are provided by default.
 import { RootProvider } from 'fumadocs-ui/provider';
 import type { Translations } from 'fumadocs-ui/i18n';
 
+// translations
 const cn: Partial<Translations> = {
   search: 'Translated Content',
-  // other translations
 };
 
 // available languages that will be displayed on UI
@@ -100,11 +100,9 @@ export default async function RootLayout({
       <body>
         <RootProvider
           i18n={{
-            locale: lang,
-            // available languages
-            locales,
-            // translations for UI
-            translations: { cn }[lang],
+            locale: lang, // [!code ++]
+            locales, // [!code ++]
+            translations: { cn }[lang], // [!code ++]
           }}
         >
           {children}
@@ -123,10 +121,10 @@ Pass the locale to Fumadocs in your pages and layouts.
 import { i18n } from '@/lib/i18n';
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 
-// Fumadocs UI layout options
+// Make `baseOptions` a function: [!code highlight]
 export function baseOptions(locale: string): BaseLayoutProps {
   return {
-    i18n,
+    i18n, // [!code ++]
     // different props based on `locale`
   };
 }
@@ -146,7 +144,7 @@ export default async function Layout({
 }) {
   const { lang } = await params;
 
-  return <HomeLayout {...baseOptions(lang)}>{children}</HomeLayout>;
+  return <HomeLayout {...baseOptions(lang)}>{children}</HomeLayout>; // [!code highlight]
 }
 ```
 
@@ -166,6 +164,7 @@ export default async function Layout({
   const { lang } = await params;
 
   return (
+    // [!code highlight]
     <DocsLayout {...baseOptions(lang)} tree={source.pageTree[lang]}>
       {children}
     </DocsLayout>

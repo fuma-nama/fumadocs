@@ -21,7 +21,7 @@
   --animate-fd-fade-out: fd-fade-out 300ms ease;
 
   --animate-fd-dialog-in: fd-dialog-in 240ms cubic-bezier(0.16, 1, 0.3, 1);
-  --animate-fd-dialog-out: fd-dialog-out 340ms cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-fd-dialog-out: fd-dialog-out 240ms cubic-bezier(0.16, 1, 0.3, 1);
 
   --animate-fd-popover-in: fd-popover-in 150ms ease;
   --animate-fd-popover-out: fd-popover-out 150ms ease;
@@ -98,7 +98,7 @@
       transform: scale(1);
     }
     to {
-      transform: scale(1.08);
+      transform: scale(1.04);
       opacity: 0;
     }
   }
