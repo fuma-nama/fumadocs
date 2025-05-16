@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 import typing as t
+
 
 class Module(t.TypedDict):
     name: str
@@ -7,21 +9,21 @@ class Module(t.TypedDict):
     filepath: str
     description: str | None
     docstring: Docstring
-    attributes: t.List[Attribute]
-    modules: t.Dict[str, Module]
-    classes: t.Dict[str, Class]
-    functions: t.Dict[str, Function]
-    version: t.Optional[str]
+    attributes: list[Attribute]
+    modules: dict[str, Module]
+    classes: dict[str, Class]
+    functions: dict[str, Function]
+    version: str | None
 
 
 class Class(t.TypedDict):
     name: str
     path: str
     description: str | None
-    parameters: t.List[Parameter]
-    attributes: t.List[Attribute]
+    parameters: list[Parameter]
+    attributes: list[Attribute]
     docstring: Docstring
-    functions: t.Dict[str, Function]
+    functions: dict[str, Function]
     source: str
 
 
@@ -30,18 +32,18 @@ class Function(t.TypedDict):
     path: str
     signature: str
     description: str | None
-    parameters: t.List[Parameter]
-    returns: t.Dict[str, str | None]
+    parameters: list[Parameter]
+    returns: dict[str, str | None]
     docstring: Docstring
     source: str
 
 
 class DocstringSection(t.TypedDict):
     kind: str
-    value: str | t.List[Parameter]
+    value: str | list[Parameter]
 
 
-Docstring = t.List[DocstringSection]
+Docstring = list[DocstringSection]
 
 
 class Parameter(t.TypedDict):
