@@ -75,7 +75,7 @@ export const source = loader({
 
 Wrap the entire application inside [Root Provider](/docs/ui/layouts/root-provider), and add required styles to `body`.
 
-```tsx
+```tsx title="app/layout.tsx"
 import { RootProvider } from 'fumadocs-ui/provider';
 import type { ReactNode } from 'react';
 
@@ -99,9 +99,9 @@ export default function Layout({ children }: { children: ReactNode }) {
 
 ### Styles
 
-Add the following to `global.css`.
+Add the following Tailwind CSS styles to `global.css`.
 
-```css title="Tailwind CSS"
+```css title="global.css"
 @import 'tailwindcss';
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
