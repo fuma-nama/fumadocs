@@ -8,17 +8,8 @@ import {
   compileMDX as baseCompileMDX,
   type Options as MDXOptions,
 } from '@content-collections/mdx';
-import {
-  rehypeCode,
-  remarkGfm,
-  remarkHeading,
-  remarkImage,
-  remarkStructure,
-  type RemarkHeadingOptions,
-  type RehypeCodeOptions,
-  type StructuredData,
-  type RemarkImageOptions,
-} from 'fumadocs-core/mdx-plugins';
+import type { StructuredData } from 'fumadocs-core/mdx-plugins';
+import * as Plugins from 'fumadocs-core/mdx-plugins';
 import type { z as Zod } from 'zod';
 import {
   resolvePlugin,
@@ -38,9 +29,10 @@ export interface TransformOptions
    */
   generateStructuredData?: boolean;
 
-  remarkHeadingOptions?: RemarkHeadingOptions | boolean;
-  rehypeCodeOptions?: RehypeCodeOptions | boolean;
-  remarkImageOptions?: RemarkImageOptions | boolean;
+  remarkHeadingOptions?: Plugins.RemarkHeadingOptions | boolean;
+  rehypeCodeOptions?: Plugins.RehypeCodeOptions | boolean;
+  remarkImageOptions?: Plugins.RemarkImageOptions | boolean;
+  remarkCodeTabOptions?: Plugins.RemarkCodeTabOptions | boolean;
 }
 
 /**
@@ -85,9 +77,10 @@ export async function transformMDX<D extends BaseDoc>(
 > {
   const {
     generateStructuredData = true,
-    rehypeCodeOptions,
-    remarkHeadingOptions,
-    remarkImageOptions,
+    rehypeCodeOptions = true,
+    remarkHeadingOptions = true,
+    remarkImageOptions = true,
+    remarkCodeTabOptions = true,
     ...rest
   } = options;
 
@@ -111,20 +104,22 @@ export async function transformMDX<D extends BaseDoc>(
           ...rest,
           rehypePlugins: resolvePlugins(
             (plugins) => [
-              resolvePlugin(rehypeCode, rehypeCodeOptions ?? true),
+              resolvePlugin(Plugins.rehypeCode, rehypeCodeOptions),
               ...plugins,
             ],
             rest.rehypePlugins,
           ),
           remarkPlugins: resolvePlugins(
             (plugins) => [
-              remarkGfm,
-              resolvePlugin(remarkHeading, remarkHeadingOptions ?? true),
-              resolvePlugin(remarkImage, remarkImageOptions, {
+              Plugins.remarkGfm,
+              resolvePlugin(Plugins.remarkHeading, remarkHeadingOptions),
+              resolvePlugin(Plugins.remarkImage, remarkImageOptions, {
                 useImport: false,
               }),
+              'remarkCodeTab' in Plugins &&
+                resolvePlugin(Plugins.remarkCodeTab, remarkCodeTabOptions),
               ...plugins,
-              generateStructuredData && remarkStructure,
+              generateStructuredData && Plugins.remarkStructure,
               () => {
                 return (_, file) => {
                   data = file.data;
