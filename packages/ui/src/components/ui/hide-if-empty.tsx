@@ -17,7 +17,22 @@ const init = `function isEmpty(node) {
 
   return true;
 }`;
-const isEmpty: (node: HTMLElement) => boolean = eval(`${init}; isEmpty`);
+
+function isEmpty(node: HTMLElement) {
+  for (let i = 0; i < node.childNodes.length; i++) {
+    const child = node.childNodes.item(i);
+    if (child.nodeType === Node.TEXT_NODE) {
+      return false;
+    } else if (
+      child.nodeType === Node.ELEMENT_NODE &&
+      window.getComputedStyle(child as HTMLElement).display !== 'none'
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
 
 /**
  * The built-in CSS `:empty` selector cannot detect if the children is hidden, classes such as `md:hidden` causes it to fail.
