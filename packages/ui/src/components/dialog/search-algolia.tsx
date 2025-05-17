@@ -1,16 +1,17 @@
 'use client';
 
 import {
-  useDocsSearch,
   type AlgoliaOptions,
+  useDocsSearch,
 } from 'fumadocs-core/search/client';
 import { type ReactNode, useState } from 'react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import {
   SearchDialog,
   type SharedProps,
-  TagsList,
   type TagItem,
+  TagsList,
+  TagsListItem,
 } from './search';
 
 export interface AlgoliaSearchDialogProps extends SharedProps {
@@ -68,27 +69,27 @@ export default function AlgoliaSearchDialog({
       isLoading={query.isLoading}
       {...props}
       footer={
-        tags ? (
-          <>
-            <TagsList
-              tag={tag}
-              onTagChange={setTag}
-              items={tags}
-              allowClear={allowClear}
-            >
-              {showAlgolia ? <AlgoliaTitle /> : null}
+        <>
+          {tags ? (
+            <TagsList tag={tag} onTagChange={setTag} allowClear={allowClear}>
+              {tags.map((tag) => (
+                <TagsListItem key={tag.value} value={tag.value}>
+                  {tag.name}
+                </TagsListItem>
+              ))}
+              {showAlgolia && <AlgoliaTitle />}
             </TagsList>
-            {props.footer}
-          </>
-        ) : (
-          props.footer
-        )
+          ) : (
+            showAlgolia && <AlgoliaTitle />
+          )}
+          {props.footer}
+        </>
       }
     />
   );
 }
 
-function AlgoliaTitle(): ReactNode {
+function AlgoliaTitle() {
   return (
     <a
       href="https://algolia.com"

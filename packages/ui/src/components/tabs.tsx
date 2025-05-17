@@ -18,8 +18,6 @@ import { cn } from '@/utils/cn';
 import * as Primitive from './ui/tabs';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 
-export { Primitive };
-
 type CollectionKey = string | symbol;
 type ChangeListener = (v: string) => void;
 const listeners = new Map<string, ChangeListener[]>();
@@ -39,8 +37,6 @@ function removeChangeListener(id: string, listener: ChangeListener): void {
 }
 
 export interface TabsProps extends BaseProps {
-  label?: ReactNode;
-
   /**
    * Identifier for Sharing value of tabs
    */
@@ -50,21 +46,32 @@ export interface TabsProps extends BaseProps {
    * Enable persistent
    */
   persist?: boolean;
-  /**
-   * @defaultValue 0
-   */
-  defaultIndex?: number;
-
-  items?: string[];
 
   /**
    * If true, updates the URL hash based on the tab's id
    */
   updateAnchor?: boolean;
+
+  /**
+   * Use simple mode instead of advanced usage as documented in https://radix-ui.com/primitives/docs/components/tabs.
+   */
+  items?: string[];
+
+  /**
+   * Shortcut for `defaultValue` when `items` is provided.
+   *
+   * @defaultValue 0
+   */
+  defaultIndex?: number;
+
+  /**
+   * Additional label in tabs list when `items` is provided.
+   */
+  label?: ReactNode;
 }
 
 const TabsContext = createContext<{
-  items: string[];
+  items?: string[];
   valueToIdMap: Map<string, string>;
   collection: CollectionKey[];
 } | null>(null);
@@ -75,22 +82,26 @@ function useTabContext() {
   return ctx;
 }
 
+export const TabsList = Primitive.TabsList;
+export const TabsTrigger = Primitive.TabsTrigger;
+
 export function Tabs({
   groupId,
-  items = [],
+  items,
   persist = false,
   label,
   defaultIndex = 0,
   updateAnchor = false,
+  defaultValue = items ? escapeValue(items[defaultIndex]) : undefined,
   ...props
 }: TabsProps) {
-  const values = useMemo(() => items.map((item) => toValue(item)), [items]);
-  const [value, setValue] = useState(values[defaultIndex]);
+  const [value, setValue] = useState(defaultValue);
   const valueToIdMap = useMemo(() => new Map<string, string>(), []);
   const collection = useMemo<CollectionKey[]>(() => [], []);
 
   const onUpdate: ChangeListener = useEffectEvent((v) => {
-    if (values.includes(v)) setValue(v);
+    if (items && !items.some((item) => escapeValue(item) === v)) return;
+    setValue(v);
   });
 
   useLayoutEffect(() => {
@@ -144,16 +155,18 @@ export function Tabs({
       {...props}
       className={cn('my-4', props.className)}
     >
-      <Primitive.TabsList>
-        {label && (
-          <span className="text-sm font-medium my-auto me-auto">{label}</span>
-        )}
-        {values.map((v, i) => (
-          <Primitive.TabsTrigger key={v} value={v}>
-            {items[i]}
-          </Primitive.TabsTrigger>
-        ))}
-      </Primitive.TabsList>
+      {items && (
+        <TabsList>
+          {label && (
+            <span className="text-sm font-medium my-auto me-auto">{label}</span>
+          )}
+          {items.map((item) => (
+            <TabsTrigger key={item} value={escapeValue(item)}>
+              {item}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      )}
       <TabsContext.Provider
         value={useMemo(
           () => ({ items, valueToIdMap, collection }),
@@ -166,37 +179,41 @@ export function Tabs({
   );
 }
 
-function toValue(v: string): string {
-  return v.toLowerCase().replace(/\s/, '-');
-}
-
 export type TabProps = Omit<TabsContentProps, 'value'> & {
   /**
    * Value of tab, detect from index if unspecified.
    */
-  value?: TabsContentProps['value'];
+  value?: string;
 };
 
-export function Tab({ value, className, ...props }: TabProps) {
-  const { items, valueToIdMap } = useTabContext();
-  const resolvedValue =
+export function Tab({ value, ...props }: TabProps) {
+  const { items } = useTabContext();
+  const resolved =
     value ??
     // eslint-disable-next-line react-hooks/rules-of-hooks -- `value` is not supposed to change
-    items.at(useCollectionIndex());
-  if (!resolvedValue)
+    items?.at(useCollectionIndex());
+  if (!resolved)
     throw new Error(
       'Failed to resolve tab `value`, please pass a `value` prop to the Tab component.',
     );
 
-  const v = toValue(resolvedValue);
+  return (
+    <TabsContent value={escapeValue(resolved)} {...props}>
+      {props.children}
+    </TabsContent>
+  );
+}
+
+export function TabsContent({ value, className, ...props }: TabsContentProps) {
+  const { valueToIdMap } = useTabContext();
 
   if (props.id) {
-    valueToIdMap.set(v, props.id);
+    valueToIdMap.set(value, props.id);
   }
 
   return (
     <Primitive.TabsContent
-      value={v}
+      value={value}
       className={cn(
         'prose-no-margin [&>figure:only-child]:-m-4 [&>figure:only-child]:border-none',
         className,
@@ -227,4 +244,8 @@ function useCollectionIndex() {
 
   if (!collection.includes(key)) collection.push(key);
   return collection.indexOf(key);
+}
+
+function escapeValue(v: string): string {
+  return v.toLowerCase().replace(/\s/, '-');
 }

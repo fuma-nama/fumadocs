@@ -27,26 +27,15 @@ REST API integration requires your docs to upload the indexes.
 
 3. Then, using the private API key and index ID from dashboard, create a script to sync search indexes.
 
-   ```json doc-gen:file
-   {
-     "file": "../../examples/next-mdx/scripts/sync-orama-cloud.mjs",
-     "codeblock": {
-       "lang": "js",
-       "meta": "title=\"sync-index.mjs\""
-     }
-   }
-   ```
+   <include cwd meta='title="sync-index.mjs"' lang="js">
+     ../../examples/next-mdx/scripts/sync-orama-cloud.mjs
+   </include>
 
 4. Create a route handler in your Next.js app to export search indexes.
 
-   ```json doc-gen:file
-   {
-     "file": "../../examples/next-mdx/app/static.json/orama-cloud.ts",
-     "codeblock": {
-       "meta": "title=\"app/static.json/route.ts\""
-     }
-   }
-   ```
+   <include cwd meta='title="app/static.json/route.ts"'>
+     ../../examples/next-mdx/app/static.json/orama-cloud.ts
+   </include>
 
 5. Run the script after `next build`.
 

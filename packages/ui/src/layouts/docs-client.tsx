@@ -1,7 +1,7 @@
 'use client';
 
 import { Menu, Sidebar as SidebarIcon } from 'lucide-react';
-import { type ButtonHTMLAttributes, type HTMLAttributes } from 'react';
+import { type ComponentProps } from 'react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { useSidebar } from '@/contexts/sidebar';
@@ -9,7 +9,7 @@ import { useNav } from '@/contexts/layout';
 import { SidebarCollapseTrigger } from '@/components/layout/sidebar';
 import { SearchToggle } from '@/components/layout/search-toggle';
 
-export function Navbar(props: HTMLAttributes<HTMLElement>) {
+export function Navbar(props: ComponentProps<'header'>) {
   const { open } = useSidebar();
   const { isTransparent } = useNav();
 
@@ -28,20 +28,22 @@ export function Navbar(props: HTMLAttributes<HTMLElement>) {
   );
 }
 
-export function NavbarSidebarTrigger(
-  props: ButtonHTMLAttributes<HTMLButtonElement>,
-) {
+export function NavbarSidebarTrigger({
+  className,
+  ...props
+}: ComponentProps<'button'>) {
   const { setOpen } = useSidebar();
 
   return (
     <button
       {...props}
+      aria-label="Open Sidebar"
       className={cn(
         buttonVariants({
           color: 'ghost',
           size: 'icon',
+          className,
         }),
-        props.className,
       )}
       onClick={() => setOpen((prev) => !prev)}
     >

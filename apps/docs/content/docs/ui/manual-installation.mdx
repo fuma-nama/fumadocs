@@ -75,7 +75,7 @@ export const source = loader({
 
 Wrap the entire application inside [Root Provider](/docs/ui/layouts/root-provider), and add required styles to `body`.
 
-```tsx
+```tsx title="app/layout.tsx"
 import { RootProvider } from 'fumadocs-ui/provider';
 import type { ReactNode } from 'react';
 
@@ -99,9 +99,9 @@ export default function Layout({ children }: { children: ReactNode }) {
 
 ### Styles
 
-Add the following to `global.css`.
+Add the following Tailwind CSS styles to `global.css`.
 
-```css title="Tailwind CSS"
+```css title="global.css"
 @import 'tailwindcss';
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
@@ -113,25 +113,15 @@ Add the following to `global.css`.
 
 Create a `app/layout.config.tsx` file to put the shared options for our layouts.
 
-```json doc-gen:file
-{
-  "file": "../../examples/next-mdx/app/layout.config.tsx",
-  "codeblock": {
-    "meta": "title=\"app/layout.config.tsx\""
-  }
-}
-```
+<include cwd meta='title="app/layout.config.tsx"'>
+  ../../examples/next-mdx/app/layout.config.tsx
+</include>
 
 Create a folder `/app/docs` for our docs, and give it a proper layout.
 
-```json doc-gen:file
-{
-  "file": "../../examples/next-mdx/app/docs/layout.tsx",
-  "codeblock": {
-    "meta": "title=\"app/docs/layout.tsx\""
-  }
-}
-```
+<include cwd meta='title="app/docs/layout.tsx"'>
+  ../../examples/next-mdx/app/docs/layout.tsx
+</include>
 
 > `pageTree` refers to Page Tree, it should be provided by your content source.
 

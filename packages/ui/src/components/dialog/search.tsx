@@ -8,8 +8,7 @@ import {
   Text,
 } from 'lucide-react';
 import {
-  type ButtonHTMLAttributes,
-  type HTMLAttributes,
+  type ComponentProps,
   type ReactNode,
   useCallback,
   useEffect,
@@ -29,7 +28,7 @@ import {
 import type { SortedResult } from 'fumadocs-core/server';
 import { cva } from 'class-variance-authority';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
-import { useRouter } from 'fumadocs-core/framework';
+import { createContext, useRouter } from 'fumadocs-core/framework';
 
 export type SearchLink = [name: string, href: string];
 
@@ -37,6 +36,11 @@ type ReactSortedResult = Omit<SortedResult, 'content'> & {
   external?: boolean;
   content: ReactNode;
 };
+
+export interface TagItem {
+  name: string;
+  value: string;
+}
 
 export interface SharedProps {
   open: boolean;
@@ -69,6 +73,7 @@ export function SearchDialog({
   ...props
 }: SearchDialogProps) {
   const { text } = useI18n();
+  const [active, setActive] = useState<string>();
   const defaultItems = useMemo<ReactSortedResult[]>(
     () =>
       links.map(([name, link]) => ({
@@ -94,6 +99,7 @@ export function SearchDialog({
             value={search}
             onChange={(e) => {
               onSearchChange(e.target.value);
+              setActive(undefined);
             }}
             placeholder={text.search}
             className="w-0 flex-1 bg-transparent py-3 text-base placeholder:text-fd-muted-foreground focus-visible:outline-none"
@@ -114,13 +120,15 @@ export function SearchDialog({
         </div>
         {props.results !== 'empty' || defaultItems.length > 0 ? (
           <SearchResults
+            active={active}
+            onActiveChange={setActive}
             items={props.results === 'empty' ? defaultItems : props.results}
             onSelect={() => onOpenChange(false)}
           />
         ) : null}
-        {footer ? (
-          <div className="mt-auto flex flex-col border-t p-3">{footer}</div>
-        ) : null}
+        <div className="mt-auto flex flex-col border-t p-3 empty:hidden">
+          {footer}
+        </div>
       </DialogContent>
     </Dialog>
   );
@@ -134,23 +142,20 @@ const icons = {
 
 function SearchResults({
   items,
+  active = items.at(0)?.id,
+  onActiveChange,
   onSelect,
   ...props
-}: HTMLAttributes<HTMLDivElement> & {
+}: ComponentProps<'div'> & {
+  active?: string;
+  onActiveChange: (active: string | undefined) => void;
+
   items: ReactSortedResult[];
   onSelect?: (value: string) => void;
 }) {
-  const [active, setActive] = useState<string>();
   const { text } = useI18n();
   const router = useRouter();
   const sidebar = useSidebar();
-
-  if (
-    items.length > 0 &&
-    (!active || items.every((item) => item.id !== active))
-  ) {
-    setActive(items[0].id);
-  }
 
   const onOpen = ({ external, url }: ReactSortedResult) => {
     if (external) window.open(url, '_blank')?.focus();
@@ -161,14 +166,15 @@ function SearchResults({
 
   const onKey = useEffectEvent((e: KeyboardEvent) => {
     if (e.key === 'ArrowDown' || e.key == 'ArrowUp') {
-      setActive((cur) => {
-        const idx = items.findIndex((item) => item.id === cur);
-        if (idx === -1) return items.at(0)?.id;
-
-        return items.at(
-          (e.key === 'ArrowDown' ? idx + 1 : idx - 1) % items.length,
-        )?.id;
-      });
+      const idx = items.findIndex((item) => item.id === active);
+      if (idx === -1) {
+        onActiveChange(items.at(0)?.id);
+      } else {
+        onActiveChange(
+          items.at((e.key === 'ArrowDown' ? idx + 1 : idx - 1) % items.length)
+            ?.id,
+        );
+      }
 
       e.preventDefault();
     }
@@ -203,9 +209,8 @@ function SearchResults({
       {items.map((item) => (
         <CommandItem
           key={item.id}
-          value={item.id}
-          active={active}
-          onActiveChange={setActive}
+          active={active === item.id}
+          onPointerMove={() => onActiveChange(item.id)}
           onClick={() => {
             onOpen(item);
           }}
@@ -244,34 +249,29 @@ function LoadingIndicator({ isLoading }: { isLoading: boolean }) {
 }
 
 function CommandItem({
-  active,
-  onActiveChange,
-  value,
+  active = false,
   ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & {
-  value: string;
-  active?: string;
-  onActiveChange: (value: string) => void;
+}: ComponentProps<'button'> & {
+  active?: boolean;
 }) {
   return (
     <button
       ref={useCallback(
         (element: HTMLButtonElement | null) => {
-          if (active === value && element) {
+          if (active && element) {
             element.scrollIntoView({
               block: 'nearest',
             });
           }
         },
-        [active, value],
+        [active],
       )}
       type="button"
-      aria-selected={active === value}
-      onPointerMove={() => onActiveChange(value)}
+      aria-selected={active}
       {...props}
       className={cn(
         'flex min-h-10 select-none flex-row items-center gap-2.5 rounded-lg px-2 text-start text-sm',
-        active === value && 'bg-fd-accent text-fd-accent-foreground',
+        active && 'bg-fd-accent text-fd-accent-foreground',
         props.className,
       )}
     >
@@ -280,19 +280,10 @@ function CommandItem({
   );
 }
 
-export interface TagItem {
-  name: string;
-  value: string | undefined;
-
-  props?: HTMLAttributes<HTMLButtonElement>;
-}
-
-export interface TagsListProps extends HTMLAttributes<HTMLDivElement> {
+export interface TagsListProps extends ComponentProps<'div'> {
   tag?: string;
   onTagChange: (tag: string | undefined) => void;
   allowClear?: boolean;
-
-  items: TagItem[];
 }
 
 const itemVariants = cva(
@@ -306,44 +297,62 @@ const itemVariants = cva(
   },
 );
 
+const TagsListContext = createContext<{
+  value?: string;
+  onValueChange: (value: string | undefined) => void;
+  allowClear: boolean;
+}>('TagsList');
+
 export function TagsList({
   tag,
   onTagChange,
-  items,
-  allowClear,
+  allowClear = false,
   ...props
 }: TagsListProps) {
   return (
     <div
       {...props}
-      className={cn(
-        'flex flex-row items-center gap-1 flex-wrap',
-        props.className,
-      )}
+      className={cn('flex items-center gap-1 flex-wrap', props.className)}
     >
-      {items.map((item) => (
-        <button
-          key={item.value}
-          type="button"
-          data-active={tag === item.value}
-          className={cn(
-            itemVariants({ active: tag === item.value }),
-            item.props?.className,
-          )}
-          onClick={() => {
-            if (tag === item.value && allowClear) {
-              onTagChange(undefined);
-            } else {
-              onTagChange(item.value);
-            }
-          }}
-          tabIndex={-1}
-          {...item.props}
-        >
-          {item.name}
-        </button>
-      ))}
-      {props.children}
+      <TagsListContext.Provider
+        value={useMemo(
+          () => ({
+            value: tag,
+            onValueChange: onTagChange,
+            allowClear,
+          }),
+          [allowClear, onTagChange, tag],
+        )}
+      >
+        {props.children}
+      </TagsListContext.Provider>
     </div>
+  );
+}
+
+export function TagsListItem({
+  value,
+  className,
+  ...props
+}: ComponentProps<'button'> & {
+  value: string;
+}) {
+  const ctx = TagsListContext.use();
+
+  return (
+    <button
+      type="button"
+      data-active={value === ctx.value}
+      className={cn(itemVariants({ active: value === ctx.value, className }))}
+      onClick={() => {
+        ctx.onValueChange(
+          ctx.value === value && ctx.allowClear ? undefined : value,
+        );
+      }}
+      tabIndex={-1}
+      {...props}
+    >
+      {props.children}
+    </button>
   );
 }

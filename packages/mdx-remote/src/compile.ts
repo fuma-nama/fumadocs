@@ -1,9 +1,3 @@
-import type {
-  RehypeCodeOptions,
-  RehypeTocOptions,
-  RemarkHeadingOptions,
-  RemarkImageOptions,
-} from 'fumadocs-core/mdx-plugins';
 import * as Plugins from 'fumadocs-core/mdx-plugins';
 import { type CompileOptions, createProcessor } from '@mdx-js/mdx';
 import type { MDXComponents } from 'mdx/types';
@@ -20,10 +14,10 @@ export type MDXOptions = Omit<
   remarkPlugins?: ResolvePlugins;
   rehypePlugins?: ResolvePlugins;
 
-  remarkHeadingOptions?: RemarkHeadingOptions | false;
-  rehypeCodeOptions?: RehypeCodeOptions | false;
-  rehypeTocOptions?: RehypeTocOptions | false;
-  remarkCodeTabOptions?: false;
+  remarkHeadingOptions?: Plugins.RemarkHeadingOptions | false;
+  rehypeCodeOptions?: Plugins.RehypeCodeOptions | false;
+  rehypeTocOptions?: Plugins.RehypeTocOptions | false;
+  remarkCodeTabOptions?: Plugins.RemarkCodeTabOptions | false;
 
   /**
    * The directory to find image sizes
@@ -33,7 +27,7 @@ export type MDXOptions = Omit<
    */
   imageDir?: string;
 
-  remarkImageOptions?: RemarkImageOptions | false;
+  remarkImageOptions?: Plugins.RemarkImageOptions | false;
 };
 
 export interface CompileMDXOptions {
@@ -64,13 +58,19 @@ export interface CompileMDXResult<TFrontmatter = Record<string, unknown>> {
 }
 
 export function createCompiler(mdxOptions?: MDXOptions) {
-  let format = mdxOptions?.format;
-  if (!format || format === 'detect') format = 'mdx';
+  let instance: ReturnType<typeof createProcessor> | undefined;
 
-  const processor = createProcessor({
-    ...getCompileOptions(mdxOptions),
-    format,
-  });
+  function getProcessor() {
+    if (instance) return instance;
+
+    let format = mdxOptions?.format;
+    if (!format || format === 'detect') format = 'mdx';
+
+    return (instance = createProcessor({
+      ...getCompileOptions(mdxOptions),
+      format,
+    }));
+  }
 
   return {
     async render(
@@ -90,7 +90,7 @@ export function createCompiler(mdxOptions?: MDXOptions) {
      * Compile VFile
      */
     async compileFile(from: Compatible): Promise<VFile> {
-      return processor.process(from);
+      return getProcessor().process(from);
     },
     async compile<Frontmatter extends object = Record<string, unknown>>(
       options: Omit<CompileMDXOptions, 'mdxOptions'>,
@@ -173,10 +173,12 @@ function getCompileOptions({
                 useImport: false,
                 publicDir: imageDir,
                 ...remarkImageOptions,
-              } satisfies RemarkImageOptions,
+              } satisfies Plugins.RemarkImageOptions,
             ]
           : null,
-        remarkCodeTab && remarkCodeTabOptions !== false ? remarkCodeTab : null,
+        remarkCodeTab && remarkCodeTabOptions !== false
+          ? [remarkCodeTab, remarkCodeTabOptions]
+          : null,
         ...v,
       ],
       options.remarkPlugins,

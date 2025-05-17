@@ -67,7 +67,7 @@ export function NavbarMenuContent(props: NavigationMenuContentProps) {
     <NavigationMenuContent
       {...props}
       className={cn(
-        'grid grid-cols-1 gap-3 p-4 md:grid-cols-2 lg:grid-cols-3',
+        'grid grid-cols-1 gap-2 p-4 md:grid-cols-2 lg:grid-cols-3',
         props.className,
       )}
     >

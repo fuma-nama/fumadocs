@@ -1,5 +1,14 @@
 # next-docs-mdx
 
+## 11.6.4
+
+### Patch Changes
+
+- 4ae7b4a: Support MDX in codeblock tab value
+- Updated dependencies [4ae7b4a]
+  - @fumadocs/mdx-remote@1.3.1
+  - fumadocs-core@15.3.3
+
 ## 11.6.3
 
 ### Patch Changes

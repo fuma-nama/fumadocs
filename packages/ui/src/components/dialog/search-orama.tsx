@@ -1,8 +1,8 @@
 'use client';
 
 import {
-  useDocsSearch,
   type OramaCloudOptions,
+  useDocsSearch,
 } from 'fumadocs-core/search/client';
 import { type ReactNode, useState } from 'react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
@@ -11,6 +11,7 @@ import {
   type SharedProps,
   type TagItem,
   TagsList,
+  TagsListItem,
 } from './search';
 
 export interface OramaSearchDialogProps extends SharedProps {
@@ -75,27 +76,27 @@ export default function OramaSearchDialog({
       isLoading={query.isLoading}
       {...props}
       footer={
-        tags ? (
-          <>
-            <TagsList
-              tag={tag}
-              onTagChange={setTag}
-              items={tags}
-              allowClear={allowClear}
-            >
-              {showOrama ? <Label /> : null}
+        <>
+          {tags ? (
+            <TagsList tag={tag} onTagChange={setTag} allowClear={allowClear}>
+              {tags.map((tag) => (
+                <TagsListItem key={tag.value} value={tag.value}>
+                  {tag.name}
+                </TagsListItem>
+              ))}
+              {showOrama && <Label />}
             </TagsList>
-            {props.footer}
-          </>
-        ) : (
-          props.footer
-        )
+          ) : (
+            showOrama && <Label />
+          )}
+          {props.footer}
+        </>
       }
     />
   );
 }
 
-function Label(): ReactNode {
+function Label() {
   return (
     <a
       href="https://orama.com"
