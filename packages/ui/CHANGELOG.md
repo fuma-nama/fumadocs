@@ -1,5 +1,15 @@
 # next-docs-ui
 
+## 15.3.3
+
+### Patch Changes
+
+- 05b3bd9: [Internal] require `TagsListItem` to be used with `TagsList`
+- 39bf088: Support usage with `Tabs` in primitive way
+- e955a98: Hotfix problems with `HideIfEmpty`
+- Updated dependencies [4ae7b4a]
+  - fumadocs-core@15.3.3
+
 ## 15.3.2
 
 ### Patch Changes
