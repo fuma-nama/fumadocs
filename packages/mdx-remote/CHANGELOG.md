@@ -1,5 +1,13 @@
 # @fumadocs/mdx-remote
 
+## 1.3.1
+
+### Patch Changes
+
+- 4ae7b4a: Support MDX in codeblock tab value
+- Updated dependencies [4ae7b4a]
+  - fumadocs-core@15.3.3
+
 ## 1.3.0
 
 ### Minor Changes

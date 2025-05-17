@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 15.3.3
+
+### Patch Changes
+
+- 4ae7b4a: Support MDX in codeblock tab value
+
 ## 15.3.2
 
 ### Patch Changes
