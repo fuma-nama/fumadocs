@@ -1,6 +1,6 @@
 import * as path from 'node:path';
 import { mkdir, writeFile, readFile } from 'node:fs/promises';
-import fg from 'fast-glob';
+import { glob, type GlobOptions } from 'tinyglobby';
 import { generateMDX, type GenerateMDXOptions } from './mdx';
 import type { Generator } from '@/lib/base';
 
@@ -10,7 +10,7 @@ export interface GenerateFilesOptions {
    * Output directory, or a function that returns the output path
    */
   output: string | ((inputPath: string) => string);
-  globOptions?: fg.Options;
+  globOptions?: GlobOptions;
   options?: GenerateMDXOptions;
 
   /**
@@ -23,7 +23,7 @@ export async function generateFiles(
   generator: Generator,
   options: GenerateFilesOptions,
 ): Promise<void> {
-  const files = await fg(options.input, options.globOptions);
+  const files = await glob(options.input, options.globOptions);
 
   const produce = files.map(async (file) => {
     const absolutePath = path.resolve(file);

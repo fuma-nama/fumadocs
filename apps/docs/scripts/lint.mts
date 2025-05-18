@@ -1,4 +1,4 @@
-import fg from 'fast-glob';
+import { glob } from 'tinyglobby';
 import { printErrors, scanURLs, validateFiles } from 'next-validate-link';
 import { createGetUrl, getSlugs, parseFilePath } from 'fumadocs-core/source';
 import { getTableOfContents } from 'fumadocs-core/server';
@@ -23,11 +23,15 @@ async function readFromPath(file: string) {
 
 async function checkLinks() {
   const docsFiles = await Promise.all(
-    await fg('content/docs/**/*.mdx').then((files) => files.map(readFromPath)),
+    await glob('content/docs/**/*.mdx').then((files) =>
+      files.map(readFromPath),
+    ),
   );
 
   const blogFiles = await Promise.all(
-    await fg('content/blog/**/*.mdx').then((files) => files.map(readFromPath)),
+    await glob('content/blog/**/*.mdx').then((files) =>
+      files.map(readFromPath),
+    ),
   );
 
   const docs = docsFiles.map(async (file) => {

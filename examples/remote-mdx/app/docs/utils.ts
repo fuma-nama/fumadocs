@@ -1,6 +1,6 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import FastGlob from 'fast-glob';
+import { glob } from 'tinyglobby';
 
 export interface Frontmatter {
   title: string;
@@ -43,14 +43,24 @@ interface Page {
 }
 
 export async function getPages(): Promise<Page[]> {
-  const files = await FastGlob('content/docs/**/*.mdx');
+  const files = await glob('content/docs/**/*.mdx');
 
   return files.map((file) => {
     const slugs = file.split(path.sep).filter(Boolean).slice(2);
+
+    if (slugs.length === 0) {
+      return {
+        path: file,
+        slug: [],
+      };
+    }
+
     const last = slugs[slugs.length - 1];
 
-    slugs[slugs.length - 1] = last.slice(0, -path.extname(last).length);
-    if (slugs[slugs.length - 1] === 'index') slugs.pop();
+    if (last) {
+      slugs[slugs.length - 1] = last.slice(0, -path.extname(last).length);
+      if (slugs[slugs.length - 1] === 'index') slugs.pop();
+    }
 
     return {
       path: file,

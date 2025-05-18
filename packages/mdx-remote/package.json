@@ -45,8 +45,8 @@
     "@types/node": "22.15.18",
     "@types/react": "^19.1.4",
     "eslint-config-custom": "workspace:*",
-    "fast-glob": "^3.3.3",
     "fumadocs-core": "workspace:*",
+    "tinyglobby": "^0.2.13",
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
     "vfile": "^6.0.3"

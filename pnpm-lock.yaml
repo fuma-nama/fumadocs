@@ -74,12 +74,6 @@ importers:
       '@radix-ui/react-hover-card':
         specifier: ^1.1.13
         version: 1.1.13(@types/react-dom@19.1.5(@types/react@19.1.4))(@types/react@19.1.4)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      '@radix-ui/react-popover':
-        specifier: ^1.1.13
-        version: 1.1.13(@types/react-dom@19.1.5(@types/react@19.1.4))(@types/react@19.1.4)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      '@radix-ui/react-slot':
-        specifier: ^1.2.2
-        version: 1.2.2(@types/react@19.1.4)(react@19.1.0)
       '@radix-ui/react-tooltip':
         specifier: ^1.2.6
         version: 1.2.6(@types/react-dom@19.1.5(@types/react@19.1.4))(@types/react@19.1.4)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -140,9 +134,6 @@ importers:
       oxc-transform:
         specifier: ^0.70.0
         version: 0.70.0
-      phenomenon:
-        specifier: ^1.6.0
-        version: 1.6.0
       react:
         specifier: ^19.1.0
         version: 19.1.0
@@ -219,9 +210,6 @@ importers:
       eslint-config-custom:
         specifier: workspace:*
         version: link:../../packages/eslint-config-custom
-      fast-glob:
-        specifier: ^3.3.3
-        version: 3.3.3
       gray-matter:
         specifier: ^4.0.3
         version: 4.0.3
@@ -237,6 +225,9 @@ importers:
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@4.1.7)
+      tinyglobby:
+        specifier: ^0.2.13
+        version: 0.2.13
       ts-morph:
         specifier: ^25.0.1
         version: 25.0.1
@@ -295,9 +286,6 @@ importers:
 
   examples/i18n:
     dependencies:
-      '@orama/stopwords':
-        specifier: ^3.1.6
-        version: 3.1.7
       '@orama/tokenizers':
         specifier: ^3.1.6
         version: 3.1.7
@@ -372,9 +360,6 @@ importers:
 
   examples/openapi:
     dependencies:
-      '@scalar/api-client-react':
-        specifier: ^1.2.34
-        version: 1.2.34(jwt-decode@4.0.0)(react@19.1.0)(tailwindcss@4.1.7)(typescript@5.8.3)
       fumadocs-core:
         specifier: workspace:*
         version: link:../../packages/core
@@ -396,12 +381,6 @@ importers:
       react-dom:
         specifier: 19.1.0
         version: 19.1.0(react@19.1.0)
-      shiki:
-        specifier: ^3.4.2
-        version: 3.4.2
-      zod:
-        specifier: ^3.24.4
-        version: 3.24.4
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4.1.7
@@ -451,9 +430,6 @@ importers:
       react-dom:
         specifier: ^19.1.0
         version: 19.1.0(react@19.1.0)
-      shiki:
-        specifier: ^3.4.2
-        version: 3.4.2
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4.1.7
@@ -500,9 +476,6 @@ importers:
       gray-matter:
         specifier: ^4.0.3
         version: 4.0.3
-      isbot:
-        specifier: ^5.1.28
-        version: 5.1.28
       react:
         specifier: ^19.1.0
         version: 19.1.0
@@ -552,9 +525,6 @@ importers:
       '@fumadocs/mdx-remote':
         specifier: workspace:*
         version: link:../../packages/mdx-remote
-      fast-glob:
-        specifier: ^3.3.3
-        version: 3.3.3
       fumadocs-core:
         specifier: workspace:*
         version: link:../../packages/core
@@ -570,6 +540,9 @@ importers:
       react-dom:
         specifier: 19.1.0
         version: 19.1.0(react@19.1.0)
+      tinyglobby:
+        specifier: ^0.2.13
+        version: 0.2.13
     devDependencies:
       '@types/mdx':
         specifier: ^2.0.13
@@ -595,9 +568,6 @@ importers:
       '@tanstack/react-start':
         specifier: ^1.120.3
         version: 1.120.5(@tanstack/react-router@1.120.5(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(@types/node@22.15.18)(babel-plugin-macros@3.1.0)(db0@0.3.2)(ioredis@5.6.1)(jiti@2.4.2)(lightningcss@1.30.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(terser@5.39.2)(tsx@4.19.4)(vite@6.3.5(@types/node@22.15.18)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.39.2)(tsx@4.19.4)(yaml@2.8.0))(webpack@5.99.8(esbuild@0.25.4))(yaml@2.8.0)
-      fast-glob:
-        specifier: ^3.3.3
-        version: 3.3.3
       fumadocs-core:
         specifier: workspace:*
         version: link:../../packages/core
@@ -613,6 +583,9 @@ importers:
       react-dom:
         specifier: ^19.1.0
         version: 19.1.0(react@19.1.0)
+      tinyglobby:
+        specifier: ^0.2.13
+        version: 0.2.13
       vinxi:
         specifier: ^0.5.6
         version: 0.5.6(@types/node@22.15.18)(db0@0.3.2)(ioredis@5.6.1)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.39.2)(tsx@4.19.4)(yaml@2.8.0)
@@ -851,9 +824,9 @@ importers:
       eslint-config-custom:
         specifier: workspace:*
         version: link:../eslint-config-custom
-      fast-glob:
-        specifier: ^3.3.3
-        version: 3.3.3
+      tinyglobby:
+        specifier: ^0.2.13
+        version: 0.2.13
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
@@ -905,9 +878,6 @@ importers:
       '@vitejs/plugin-react':
         specifier: ^4.4.1
         version: 4.4.1(vite@6.3.5(@types/node@22.15.18)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.39.2)(tsx@4.19.4)(yaml@2.8.0))
-      fast-glob:
-        specifier: ^3.3.3
-        version: 3.3.3
       gray-matter:
         specifier: ^4.0.3
         version: 4.0.3
@@ -938,6 +908,9 @@ importers:
       tailwindcss:
         specifier: ^4.1.7
         version: 4.1.7
+      tinyglobby:
+        specifier: ^0.2.13
+        version: 0.2.13
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -1031,9 +1004,6 @@ importers:
       estree-util-value-to-estree:
         specifier: ^3.4.0
         version: 3.4.0
-      fast-glob:
-        specifier: ^3.3.3
-        version: 3.3.3
       gray-matter:
         specifier: ^4.0.3
         version: 4.0.3
@@ -1046,6 +1016,9 @@ importers:
       picocolors:
         specifier: ^1.1.1
         version: 1.1.1
+      tinyglobby:
+        specifier: ^0.2.13
+        version: 0.2.13
       unist-util-visit:
         specifier: ^5.0.0
         version: 5.0.0
@@ -1123,12 +1096,12 @@ importers:
       eslint-config-custom:
         specifier: workspace:*
         version: link:../eslint-config-custom
-      fast-glob:
-        specifier: ^3.3.3
-        version: 3.3.3
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
+      tinyglobby:
+        specifier: ^0.2.13
+        version: 0.2.13
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
@@ -1162,9 +1135,6 @@ importers:
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
-      fast-glob:
-        specifier: ^3.3.3
-        version: 3.3.3
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
@@ -1204,6 +1174,9 @@ importers:
       shiki:
         specifier: ^3.4.2
         version: 3.4.2
+      tinyglobby:
+        specifier: ^0.2.13
+        version: 0.2.13
       xml-js:
         specifier: ^1.6.11
         version: 1.6.11
@@ -1338,9 +1311,6 @@ importers:
       estree-util-value-to-estree:
         specifier: ^3.4.0
         version: 3.4.0
-      fast-glob:
-        specifier: ^3.3.3
-        version: 3.3.3
       hast-util-to-estree:
         specifier: ^3.1.3
         version: 3.1.3
@@ -1356,6 +1326,9 @@ importers:
       shiki:
         specifier: ^3.4.2
         version: 3.4.2
+      tinyglobby:
+        specifier: ^0.2.13
+        version: 0.2.13
       ts-morph:
         specifier: ^25.0.1
         version: 25.0.1
@@ -2999,10 +2972,6 @@ packages:
 
   '@orama/orama@3.1.7':
     resolution: {integrity: sha512-6yB0117ZjsgNevZw3LP+bkrZa9mU/POPVaXgzMPOBbBc35w2P3R+1vMMhEfC06kYCpd5bf0jodBaTkYQW5TVeQ==}
-    engines: {node: '>= 20.0.0'}
-
-  '@orama/stopwords@3.1.7':
-    resolution: {integrity: sha512-i96UPZIS7s9WIIFSyUJLML3/+Y43f1iYLbGGu352mLwKZHX1qcXV47VrNCqjB6ePz3uHS1/sqV0dxaxN79ahYw==}
     engines: {node: '>= 20.0.0'}
 
   '@orama/tokenizers@3.1.7':
@@ -8151,9 +8120,6 @@ packages:
   perfect-debounce@1.0.0:
     resolution: {integrity: sha512-xCy9V055GLEqoFaHoC1SoLIaLmWctgCUaBaWxDZ7/Zx4CTyX7cJQLJOok/orfjZAh9kEYpjJa4d0KcJmCbctZA==}
 
-  phenomenon@1.6.0:
-    resolution: {integrity: sha512-7h9/fjPD3qNlgggzm88cY58l9sudZ6Ey+UmZsizfhtawO6E3srZQXywaNm2lBwT72TbpHYRPy7ytIHeBUD/G0A==}
-
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
 
@@ -10216,7 +10182,7 @@ snapshots:
       '@babel/types': 7.27.1
       '@jridgewell/gen-mapping': 0.3.8
       '@jridgewell/trace-mapping': 0.3.25
-      jsesc: 3.1.0
+      jsesc: 3.0.2
 
   '@babel/helper-annotate-as-pure@7.27.1':
     dependencies:
@@ -11790,8 +11756,6 @@ snapshots:
       '@noble/hashes': 1.8.0
 
   '@orama/orama@3.1.7': {}
-
-  '@orama/stopwords@3.1.7': {}
 
   '@orama/tokenizers@3.1.7':
     dependencies:
@@ -13931,7 +13895,7 @@ snapshots:
       consola: 3.4.2
       defu: 6.1.4
       get-port-please: 3.1.2
-      h3: 1.15.3
+      h3: 1.15.2
       http-shutdown: 1.2.2
       jiti: 1.21.7
       mlly: 1.7.4
@@ -18384,8 +18348,6 @@ snapshots:
 
   perfect-debounce@1.0.0: {}
 
-  phenomenon@1.6.0: {}
-
   picocolors@1.1.1: {}
 
   picomatch@2.3.1: {}
@@ -19989,7 +19951,7 @@ snapshots:
       anymatch: 3.1.3
       chokidar: 4.0.3
       destr: 2.0.5
-      h3: 1.15.3
+      h3: 1.15.2
       lru-cache: 10.4.3
       node-fetch-native: 1.6.6
       ofetch: 1.4.1

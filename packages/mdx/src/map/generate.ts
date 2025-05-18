@@ -1,6 +1,6 @@
 import * as path from 'node:path';
 import * as fs from 'node:fs/promises';
-import fg from 'fast-glob';
+import { glob } from 'tinyglobby';
 import { getTypeFromPath } from '@/utils/get-type-from-path';
 import type { FileInfo } from '@/config/types';
 import type { LoadedConfig } from '@/utils/config';
@@ -173,7 +173,7 @@ async function getCollectionFiles(
 
   await Promise.all(
     dirs.map(async (dir) => {
-      const result = await fg(collection.files ?? '**/*', {
+      const result = await glob(collection.files ?? '**/*', {
         cwd: path.resolve(dir),
         absolute: true,
       });
