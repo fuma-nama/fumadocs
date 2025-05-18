@@ -248,7 +248,7 @@ function DocsNavbar({
     <Navbar mode={navMode}>
       <div
         className={cn(
-          'flex flex-row border-b px-4 h-(--fd-nav-height)',
+          'flex border-b px-4 flex-1',
           navMode === 'auto' && 'md:px-6',
         )}
       >

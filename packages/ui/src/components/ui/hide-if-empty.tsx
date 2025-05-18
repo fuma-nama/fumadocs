@@ -2,22 +2,6 @@
 import { Slot } from '@radix-ui/react-slot';
 import { useEffect, useId, useRef, useState } from 'react';
 
-const init = `function isEmpty(node) {
-  for (let i = 0; i < node.childNodes.length; i++) {
-    const child = node.childNodes.item(i);
-    if (child.nodeType === Node.TEXT_NODE) {
-      return false
-    } else if (
-      child.nodeType === Node.ELEMENT_NODE &&
-      window.getComputedStyle(child).display !== 'none'
-    ) {
-      return false
-    }
-  }
-
-  return true;
-}`;
-
 function isEmpty(node: HTMLElement) {
   for (let i = 0; i < node.childNodes.length; i++) {
     const child = node.childNodes.item(i);
@@ -62,23 +46,39 @@ export function HideIfEmpty({ children }: { children: React.ReactNode }) {
   }, []);
 
   const inject = `
-${init}
-const element = document.querySelector('[data-hide-if-empty="${id}"]')
+function isEmpty(node) {
+  for (let i = 0; i < node.childNodes.length; i++) {
+    const child = node.childNodes.item(i);
+    if (child.nodeType === Node.TEXT_NODE) {
+      return false
+    } else if (
+      child.nodeType === Node.ELEMENT_NODE &&
+      window.getComputedStyle(child).display !== 'none'
+    ) {
+      return false
+    }
+  }
+
+  return true;
+}
+
+const element = document.querySelector('[data-fdid="${id}"]')
 if (element) {
   element.setAttribute('data-empty', String(isEmpty(element)))
 }`;
 
   return (
     <>
-      {empty === undefined && <script>{`{ ${inject} }`}</script>}
       <Slot
         ref={ref}
-        data-hide-if-empty={id}
+        data-fdid={id}
         data-empty={empty}
         className="data-[empty=true]:hidden"
+        suppressHydrationWarning
       >
         {children}
       </Slot>
+      {empty === undefined && <script>{`{ ${inject} }`}</script>}
     </>
   );
 }
