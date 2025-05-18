@@ -78,8 +78,7 @@ export async function add(
       const spin = spinner();
       spin.start('Installing dependencies...');
       if (deps.length > 0) await x(manager, ['install', ...deps]);
-      if (devDeps.length > 0)
-        await x(manager, ['install', ...devDeps, '-D']);
+      if (devDeps.length > 0) await x(manager, ['install', ...devDeps, '-D']);
 
       spin.stop('Dependencies installed.');
     }
