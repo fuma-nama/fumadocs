@@ -10,7 +10,7 @@ import {
 } from '@content-collections/mdx';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import * as Plugins from 'fumadocs-core/mdx-plugins';
-import type { z as Zod } from 'zod';
+import { z, z as Zod } from 'zod';
 import {
   resolvePlugin,
   resolvePlugins,
@@ -26,9 +26,11 @@ export interface TransformOptions
    * Generate `structuredData`
    *
    * @defaultValue true
+   * @deprecated use `remarkStructureOptions` instead
    */
   generateStructuredData?: boolean;
 
+  remarkStructureOptions?: Plugins.StructureOptions | boolean;
   remarkHeadingOptions?: Plugins.RemarkHeadingOptions | boolean;
   rehypeCodeOptions?: Plugins.RehypeCodeOptions | boolean;
   remarkImageOptions?: Plugins.RemarkImageOptions | boolean;
@@ -76,7 +78,8 @@ export async function transformMDX<D extends BaseDoc>(
   }
 > {
   const {
-    generateStructuredData = true,
+    generateStructuredData,
+    remarkStructureOptions = generateStructuredData ?? true,
     rehypeCodeOptions = true,
     remarkHeadingOptions = true,
     remarkImageOptions = true,
@@ -119,7 +122,7 @@ export async function transformMDX<D extends BaseDoc>(
               'remarkCodeTab' in Plugins &&
                 resolvePlugin(Plugins.remarkCodeTab, remarkCodeTabOptions),
               ...plugins,
-              generateStructuredData && Plugins.remarkStructure,
+              resolvePlugin(Plugins.remarkStructure, remarkStructureOptions),
               () => {
                 return (_, file) => {
                   data = file.data;
@@ -140,6 +143,25 @@ export async function transformMDX<D extends BaseDoc>(
     },
   );
 }
+
+export const metaSchema = z.object({
+  title: z.string().optional(),
+  pages: z.array(z.string()).optional(),
+  description: z.string().optional(),
+  root: z.boolean().optional(),
+  defaultOpen: z.boolean().optional(),
+  icon: z.string().optional(),
+});
+
+export const frontmatterSchema = z.object({
+  title: z.string(),
+  description: z.string().optional(),
+  icon: z.string().optional(),
+  full: z.boolean().optional(),
+
+  // Fumadocs OpenAPI generated
+  _openapi: z.object({}).passthrough().optional(),
+});
 
 export function createDocSchema(z: typeof Zod) {
   return {
