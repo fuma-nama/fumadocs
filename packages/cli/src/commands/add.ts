@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import { log, confirm, isCancel, outro, spinner, intro } from '@clack/prompts';
 import { type Project } from 'ts-morph';
 import picocolors from 'picocolors';
-import { execa } from 'execa';
+import { x } from 'tinyexec';
 import { createEmptyProject } from '@/utils/typescript';
 import { getPackageManager } from '@/utils/get-package-manager';
 import { type Config, defaultConfig } from '@/config';
@@ -77,9 +77,8 @@ export async function add(
     if (value) {
       const spin = spinner();
       spin.start('Installing dependencies...');
-      if (deps.length > 0) await execa(manager, ['install', ...deps]);
-      if (devDeps.length > 0)
-        await execa(manager, ['install', ...devDeps, '-D']);
+      if (deps.length > 0) await x(manager, ['install', ...deps]);
+      if (devDeps.length > 0) await x(manager, ['install', ...devDeps, '-D']);
 
       spin.stop('Dependencies installed.');
     }

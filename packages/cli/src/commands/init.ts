@@ -10,7 +10,7 @@ import {
   note,
 } from '@clack/prompts';
 import picocolors from 'picocolors';
-import { execa } from 'execa';
+import { x } from 'tinyexec';
 import { getPackageManager } from '@/utils/get-package-manager';
 import { exists } from '@/utils/fs';
 import { isSrc } from '@/utils/is-src';
@@ -130,7 +130,7 @@ export async function init(plugin: Plugin, config: Config = {}): Promise<void> {
     if (value) {
       const spin = spinner();
       spin.start('Installing dependencies');
-      await execa(manager, ['install', ...plugin.dependencies]);
+      await x(manager, ['install', ...plugin.dependencies]);
       spin.stop('Successfully installed.');
     }
   }
