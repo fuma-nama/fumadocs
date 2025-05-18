@@ -2,15 +2,12 @@ import * as OpenAPI from 'fumadocs-openapi';
 import { rimraf } from 'rimraf';
 
 export async function generateDocs() {
-  const outputPath = './content/docs/openapi/generated';
-  const normalizedPath = outputPath.replace(/\\/g, '/');
-
-  await rimraf(normalizedPath);
+  await rimraf('./content/docs/openapi/(generated)');
 
   await Promise.all([
     OpenAPI.generateFiles({
       input: ['./content/docs/openapi/museum.yaml'],
-      output: normalizedPath,
+      output: './content/docs/openapi/(generated)',
       per: 'operation',
     }),
   ]);
