@@ -6,7 +6,6 @@ import {
   createContext,
   type FC,
   Fragment,
-  type HTMLAttributes,
   type ReactNode,
   useContext,
   useMemo,
@@ -115,7 +114,7 @@ export function Sidebar({
     const state = open ? 'open' : 'closed';
 
     return (
-      <>
+      <Context.Provider value={context}>
         <Presence present={open}>
           <div
             data-state={state}
@@ -132,18 +131,16 @@ export function Sidebar({
               {...props}
               data-state={state}
               className={cn(
-                'fixed text-[15px] flex flex-col py-3 rounded-e-xl border-e start-0 inset-y-0 w-[85%] max-w-[380px] z-40 bg-fd-background data-[state=open]:animate-fd-enterFromLeft data-[state=closed]:animate-fd-exitToLeft',
+                'fixed text-[15px] flex flex-col py-2 rounded-e-2xl border-e start-0 inset-y-0 w-[85%] max-w-[380px] z-40 bg-fd-background data-[state=open]:animate-fd-sidebar-in data-[state=closed]:animate-fd-sidebar-out',
                 !present && 'invisible',
                 props.className,
               )}
             >
-              <Context.Provider value={context}>
-                {props.children}
-              </Context.Provider>
+              {props.children}
             </RemoveScroll>
           )}
         </Presence>
-      </>
+      </Context.Provider>
     );
   }
 
@@ -153,7 +150,7 @@ export function Sidebar({
       {...props}
       data-collapsed={collapsed}
       className={cn(
-        'sticky top-(--fd-sidebar-top) z-20 bg-fd-card text-sm h-(--fd-sidebar-height) max-md:hidden',
+        'sticky shrink-0 flex flex-col top-(--fd-sidebar-top) z-20 bg-fd-card text-sm h-(--fd-sidebar-height) border-e max-md:hidden',
         collapsible && [
           'transition-all',
           collapsed &&
@@ -165,7 +162,7 @@ export function Sidebar({
       )}
       style={
         {
-          '--fd-sidebar-offset': 'calc(var(--fd-sidebar-width) - 6px)',
+          '--fd-sidebar-offset': 'calc(var(--fd-sidebar-width) - 12px)',
           '--fd-sidebar-top':
             'calc(var(--fd-banner-height) + var(--fd-nav-height))',
           '--fd-sidebar-height':
@@ -199,9 +196,7 @@ export function Sidebar({
         );
       }}
     >
-      <div className="flex w-(--fd-sidebar-width) h-full max-w-full flex-col pt-1.5 ms-auto border-e">
-        <Context.Provider value={context}>{props.children}</Context.Provider>
-      </div>
+      <Context.Provider value={context}>{props.children}</Context.Provider>
     </aside>
   );
 }
@@ -210,7 +205,7 @@ export function SidebarHeader(props: ComponentProps<'div'>) {
   return (
     <div
       {...props}
-      className={cn('flex flex-col gap-3 px-4 py-2', props.className)}
+      className={cn('flex flex-col gap-3 px-4 pt-4', props.className)}
     >
       {props.children}
     </div>
@@ -234,7 +229,8 @@ export function SidebarViewport(props: ScrollAreaProps) {
       <ScrollViewport
         className="p-4"
         style={{
-          maskImage: 'linear-gradient(to bottom, transparent, white 12px)',
+          maskImage:
+            'linear-gradient(to bottom, transparent, white 12px, white calc(100% - 12px), transparent)',
         }}
       >
         {props.children}
@@ -250,7 +246,7 @@ export function SidebarSeparator(props: ComponentProps<'p'>) {
     <p
       {...props}
       className={cn(
-        'inline-flex items-center gap-2 mb-2 px-2 font-medium empty:mb-0 [&_svg]:size-4 [&_svg]:shrink-0',
+        'inline-flex items-center gap-2 mb-1.5 px-2 font-medium empty:mb-0 [&_svg]:size-4 [&_svg]:shrink-0',
         props.className,
       )}
       style={{
@@ -507,8 +503,9 @@ export function SidebarPageTree(props: {
 function PageTreeFolder({
   item,
   ...props
-}: HTMLAttributes<HTMLElement> & {
+}: {
   item: PageTree.Folder;
+  children: ReactNode;
 }) {
   const { defaultOpenLevel, level } = useInternalContext();
   const path = useTreePath();

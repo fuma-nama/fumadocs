@@ -40,6 +40,9 @@
   --animate-fd-enterFromLeft: fd-enterFromLeft 250ms ease;
   --animate-fd-enterFromRight: fd-enterFromRight 250ms ease;
 
+  --animate-fd-sidebar-in: fd-sidebar-in 250ms ease;
+  --animate-fd-sidebar-out: fd-sidebar-out 250ms ease;
+
   --animate-fd-exitToLeft: fd-exitToLeft 250ms ease;
   --animate-fd-exitToRight: fd-exitToRight 250ms ease;
 
@@ -184,6 +187,18 @@
     to {
       opacity: 0;
       transform: translateX(-200px);
+    }
+  }
+
+  @keyframes fd-sidebar-in {
+    from {
+      transform: translateX(-100%);
+    }
+  }
+
+  @keyframes fd-sidebar-out {
+    to {
+      transform: translateX(-100%);
     }
   }
 

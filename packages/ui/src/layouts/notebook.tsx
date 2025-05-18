@@ -83,10 +83,8 @@ export function DocsLayout(props: DocsLayoutProps) {
   );
 
   const variables = cn(
-    '[--fd-nav-height:calc(var(--spacing)*14)] [--fd-tocnav-height:36px] md:[--fd-sidebar-width:286px] xl:[--fd-toc-width:286px] xl:[--fd-tocnav-height:0px]',
-    tabs.length > 0 &&
-      tabMode === 'navbar' &&
-      'lg:[--fd-nav-height:calc(var(--spacing)*24)]',
+    '[--fd-nav-height:56px] [--fd-tocnav-height:36px] md:[--fd-sidebar-width:286px] md:[--fd-nav-height:64px] xl:[--fd-toc-width:286px] xl:[--fd-tocnav-height:0px]',
+    tabs.length > 0 && tabMode === 'navbar' && 'lg:[--fd-nav-height:104px]',
   );
 
   const pageStyles: PageStyles = {
@@ -95,7 +93,7 @@ export function DocsLayout(props: DocsLayoutProps) {
     page: cn('mt-(--fd-nav-height)'),
   };
 
-  const sidebarHeader = navMode === 'auto' && (
+  const sidebarHeader = (
     <div className="flex justify-between max-md:hidden">
       <Link
         href={nav.url ?? '/'}
@@ -109,7 +107,7 @@ export function DocsLayout(props: DocsLayoutProps) {
             buttonVariants({
               color: 'ghost',
               size: 'icon-sm',
-              className: 'mb-auto text-fd-muted-foreground',
+              className: 'mt-px mb-auto text-fd-muted-foreground',
             }),
           )}
         >
@@ -138,7 +136,7 @@ export function DocsLayout(props: DocsLayoutProps) {
           <Sidebar
             {...sidebar}
             className={cn(
-              'md:ps-(--fd-layout-offset)',
+              'md:w-[calc(var(--fd-sidebar-width)+var(--fd-layout-offset))] md:ps-(--fd-layout-offset)',
               navMode === 'top'
                 ? 'md:bg-transparent'
                 : 'md:[--fd-nav-height:0px]',
@@ -147,7 +145,7 @@ export function DocsLayout(props: DocsLayoutProps) {
           >
             <HideIfEmpty>
               <SidebarHeader>
-                {sidebarHeader}
+                {navMode === 'auto' && sidebarHeader}
                 {nav.children}
                 {sidebarBanner}
                 {tabMode === 'sidebar' && tabs.length > 0 ? (
@@ -250,7 +248,7 @@ function DocsNavbar({
     <Navbar mode={navMode}>
       <div
         className={cn(
-          'flex flex-row border-b px-4 h-14',
+          'flex flex-row border-b px-4 h-(--fd-nav-height)',
           navMode === 'auto' && 'md:px-6',
         )}
       >

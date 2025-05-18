@@ -81,7 +81,7 @@ export function DocsLayout({
   const variables = cn(
     '[--fd-tocnav-height:36px] md:[--fd-sidebar-width:268px] lg:[--fd-sidebar-width:286px] xl:[--fd-toc-width:286px] xl:[--fd-tocnav-height:0px]',
     !nav.component && nav.enabled !== false
-      ? '[--fd-nav-height:calc(var(--spacing)*14)] md:[--fd-nav-height:0px]'
+      ? '[--fd-nav-height:56px] md:[--fd-nav-height:0px]'
       : undefined,
   );
 
@@ -95,16 +95,14 @@ export function DocsLayout({
       <NavProvider transparentMode={transparentMode}>
         {slot(
           nav,
-          <Navbar className="md:hidden">
+          <Navbar className="h-14 md:hidden">
             <Link
               href={nav.url ?? '/'}
               className="inline-flex items-center gap-2.5 font-semibold"
             >
               {nav.title}
             </Link>
-            <div className="flex flex-1 flex-row items-center gap-1">
-              {nav.children}
-            </div>
+            <div className="flex-1">{nav.children}</div>
             {slots('sm', searchToggle, <SearchToggle hideIfDisabled />)}
             <NavbarSidebarTrigger className="-me-2 md:hidden" />
           </Navbar>,
@@ -189,7 +187,10 @@ export function DocsLayoutSidebar({
       <Sidebar
         {...props}
         collapsible={collapsible}
-        className={cn('md:ps-(--fd-layout-offset)', props.className)}
+        className={cn(
+          'md:w-[calc(var(--fd-sidebar-width)+var(--fd-layout-offset))] md:ps-(--fd-layout-offset)',
+          props.className,
+        )}
       >
         <HideIfEmpty>
           <SidebarHeader>
