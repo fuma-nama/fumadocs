@@ -52,6 +52,11 @@ export async function buildFile(
     path: outputPath,
   };
 
+  const importMap = {
+    ...builder.registry.mapImportPath,
+    ...comp.mapImportPath,
+  };
+
   /**
    * Process import paths
    */
@@ -66,8 +71,8 @@ export async function buildFile(
       ? builder.resolveDep(specifier.getLiteralValue()).name
       : path.relative(builder.registryDir, specifiedFile.getFilePath());
 
-    if (comp.mapImportPath && name in comp.mapImportPath) {
-      const resolver = comp.mapImportPath[name];
+    if (name in importMap) {
+      const resolver = importMap[name];
 
       if (typeof resolver === 'string') {
         specifier.setLiteralValue(resolver);

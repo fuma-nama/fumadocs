@@ -42,7 +42,7 @@ export interface Component {
   unlisted?: boolean;
 
   /**
-   * Map imported file paths
+   * Map imported file paths, extended from registry `mapImportPath` if defined.
    */
   mapImportPath?: ImportPathMap;
 }
@@ -78,6 +78,11 @@ export interface Registry {
   packageJson?: string | PackageJson;
 
   components: Component[];
+
+  /**
+   * Map import paths of components
+   */
+  mapImportPath?: ImportPathMap;
   dependencies?: Record<
     string,
     {
