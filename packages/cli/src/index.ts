@@ -3,21 +3,13 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { Command } from 'commander';
 import picocolors from 'picocolors';
-import {
-  isCancel,
-  log,
-  multiselect,
-  outro,
-  select,
-  spinner,
-} from '@clack/prompts';
+import { isCancel, outro, select } from '@clack/prompts';
 import { init } from '@/commands/init';
 import {
-  add,
   localResolver,
   remoteResolver,
   type Resolver,
-} from '@/commands/add';
+} from '@/utils/add/install-component';
 import { initConfig, loadConfig } from '@/config';
 import { plugins } from '@/plugins';
 import {
@@ -26,9 +18,9 @@ import {
   treeToMdx,
 } from '@/commands/file-tree';
 import { runTree } from '@/utils/file-tree/run-tree';
-import { type OutputIndex } from '@/build';
 import packageJson from '../package.json';
 import { customise } from '@/commands/customise';
+import { add } from '@/commands/add';
 
 const program = new Command().option('--config <string>');
 
@@ -37,8 +29,11 @@ program
   .description('CLI to setup Fumadocs, init a config ')
   .version(packageJson.version)
   .action(async () => {
-    await initConfig();
-    console.log(picocolors.green('Initialized a `./cli.json` config file.'));
+    if (await initConfig()) {
+      console.log(picocolors.green('Initialized a `./cli.json` config file.'));
+    } else {
+      console.log(picocolors.redBright('A config file already exists.'));
+    }
   });
 
 program
@@ -83,7 +78,8 @@ program
   });
 
 const dirShortcuts: Record<string, string> = {
-  ':dev': 'https://fumadocs-dev.vercel.app/registry',
+  ':dev': 'https://preview.fumadocs.dev/registry',
+  ':localhost': 'http://localhost:3000/registry',
 };
 
 program
@@ -94,44 +90,7 @@ program
   .action(
     async (input: string[], options: { config?: string; dir?: string }) => {
       const resolver = getResolverFromDir(options.dir);
-      let target = input;
-
-      if (input.length === 0) {
-        const spin = spinner();
-        spin.start('fetching registry');
-        const registry = (await resolver('_registry.json')) as
-          | OutputIndex[]
-          | undefined;
-        spin.stop(picocolors.bold(picocolors.greenBright('registry fetched')));
-
-        if (!registry) {
-          log.error(
-            `Failed to fetch '_registry.json' file from ${options.dir ?? 'registry'}`,
-          );
-          throw new Error(`Failed to fetch registry`);
-        }
-
-        const value = await multiselect({
-          message: 'Select components to install',
-          options: registry.map((item) => ({
-            label: item.name,
-            value: item.name,
-            hint: item.description,
-          })),
-        });
-
-        if (isCancel(value)) {
-          outro('Ended');
-          return;
-        }
-
-        target = value as string[];
-      }
-
-      const loadedConfig = await loadConfig(options.config);
-      for (const name of target) {
-        await add(name, resolver, loadedConfig);
-      }
+      await add(input, resolver, await loadConfig(options.config));
     },
   );
 
@@ -180,7 +139,7 @@ program
   );
 
 function getResolverFromDir(
-  dir: string = 'https://fumadocs.vercel.app/registry',
+  dir: string = 'https://fumadocs.dev/registry',
 ): Resolver {
   if (dir in dirShortcuts) dir = dirShortcuts[dir];
 

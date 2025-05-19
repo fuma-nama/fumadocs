@@ -43,6 +43,21 @@ export async function loadConfig(file = './cli.json'): Promise<Config> {
   }
 }
 
-export async function initConfig(file = './cli.json'): Promise<void> {
+/**
+ * Write new config, skip if a config already exists
+ *
+ * @returns true if the config is created, otherwise false
+ */
+export async function initConfig(file = './cli.json'): Promise<boolean> {
+  if (
+    await fs
+      .stat(file)
+      .then(() => true)
+      .catch(() => false)
+  ) {
+    return false;
+  }
+
   await fs.writeFile(file, JSON.stringify(defaultConfig, null, 2));
+  return true;
 }

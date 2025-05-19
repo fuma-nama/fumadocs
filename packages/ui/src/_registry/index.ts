@@ -10,7 +10,11 @@ const importMap = {
   'contexts/layout.tsx': 'fumadocs-ui/contexts/layout',
   'utils/get-sidebar-tabs.tsx': 'fumadocs-ui/utils/get-sidebar-tabs',
   'utils/use-copy-button.ts': 'fumadocs-ui/utils/use-copy-button',
-};
+  'icons.tsx': {
+    type: 'dependency',
+    name: 'lucide-react',
+  },
+} as const;
 
 const srcDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../');
 

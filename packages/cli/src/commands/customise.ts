@@ -1,7 +1,16 @@
-import { cancel, confirm, group, intro, log, select } from '@clack/prompts';
+import {
+  cancel,
+  confirm,
+  group,
+  intro,
+  log,
+  outro,
+  select,
+} from '@clack/prompts';
 import picocolors from 'picocolors';
-import { add, type Resolver } from '@/commands/add';
+import { type Resolver } from '@/utils/add/install-component';
 import type { Config } from '@/config';
+import { install } from '@/commands/add';
 
 export async function customise(resolver: Resolver, config: Config) {
   intro(picocolors.bgBlack(picocolors.whiteBright('Customise Fumadocs UI')));
@@ -66,26 +75,27 @@ export async function customise(resolver: Resolver, config: Config) {
   );
 
   if (result.target === 'docs') {
+    const targets = [];
     let pageAdded = false;
     if (result.mode === 'minimal') {
-      await add('layouts/docs-min', resolver, config);
+      targets.push('layouts/docs-min');
       pageAdded = true;
     } else {
       if (result.page) {
-        await add('layouts/page', resolver, config);
+        targets.push('layouts/page');
         pageAdded = true;
       }
 
-      await add(
+      targets.push(
         result.mode === 'full-default' ? 'layouts/docs' : 'layouts/notebook',
-        resolver,
-        config,
       );
     }
 
+    await install(targets, resolver, config);
+
+    intro(picocolors.bold('What is Next?'));
     log.info(
       [
-        picocolors.bold('What is Next?'),
         'You can check the installed components in `components/layouts`.',
         picocolors.dim('---'),
         'Open your `layout.tsx` files, replace the imports of components:',
@@ -102,11 +112,11 @@ export async function customise(resolver: Resolver, config: Config) {
   }
 
   if (result.target === 'home') {
-    await add('layouts/home', resolver, config);
+    await install(['layouts/home'], resolver, config);
+    intro(picocolors.bold('What is Next?'));
 
     log.info(
       [
-        picocolors.bold('What is Next?'),
         'You can check the installed components in `components/layouts`.',
         picocolors.dim('---'),
         'Open your `layout.tsx` files, replace the imports of components:',
@@ -116,4 +126,6 @@ export async function customise(resolver: Resolver, config: Config) {
       ].join('\n'),
     );
   }
+
+  outro(picocolors.bold('Have fun!'));
 }

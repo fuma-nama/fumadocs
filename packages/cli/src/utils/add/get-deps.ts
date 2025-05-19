@@ -4,7 +4,7 @@ import { exists } from '@/utils/fs';
 /**
  * Get dependencies from `package.json`
  */
-export async function getDependencies(): Promise<Map<string, string>> {
+export async function getDeps(): Promise<Map<string, string>> {
   const dependencies = new Map<string, string>();
 
   if (!(await exists('package.json'))) return dependencies;
