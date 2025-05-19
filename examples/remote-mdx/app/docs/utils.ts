@@ -55,12 +55,11 @@ export async function getPages(): Promise<Page[]> {
       };
     }
 
-    const last = slugs[slugs.length - 1];
-
-    if (last) {
-      slugs[slugs.length - 1] = last.slice(0, -path.extname(last).length);
-      if (slugs[slugs.length - 1] === 'index') slugs.pop();
-    }
+    slugs[slugs.length - 1] = slugs[slugs.length - 1].slice(
+      0,
+      -path.extname(slugs[slugs.length - 1]).length,
+    );
+    if (slugs[slugs.length - 1] === 'index') slugs.pop();
 
     return {
       path: file,
