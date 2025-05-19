@@ -238,7 +238,7 @@ function createPackageJson(projectName: string, options: Options): object {
         ...pick(versionPkg.dependencies, [
           '@tanstack/react-router',
           '@tanstack/react-start',
-          'fast-glob',
+          'tinyglobby',
           'gray-matter',
           'react',
           'react-dom',

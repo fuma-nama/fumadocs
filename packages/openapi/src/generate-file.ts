@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
-import fg from 'fast-glob';
+import { glob } from 'tinyglobby';
 import {
   generateAll,
   type GenerateOptions,
@@ -71,7 +71,7 @@ export async function generateFiles(options: Config): Promise<void> {
   }
 
   const resolvedInputs = [
-    ...(await fg.glob(fileInputs, { cwd, absolute: false })),
+    ...(await glob(fileInputs, { cwd, absolute: false })),
     ...urlInputs,
   ];
 

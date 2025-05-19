@@ -20,7 +20,7 @@
     "@types/react": "^19.1.4",
     "@types/react-dom": "^19.1.5",
     "@vitejs/plugin-react": "^4.4.1",
-    "fast-glob": "^3.3.3",
+    "tinyglobby": "^0.2.13",
     "gray-matter": "^4.0.3",
     "isbot": "^5.1.28",
     "next": "15.3.2",
