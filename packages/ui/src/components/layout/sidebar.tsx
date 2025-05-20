@@ -165,7 +165,9 @@ export function Sidebar({
             ...['border', 'height', 'top'].map((v) =>
               collapsed ? `${v} step-end 200ms` : `${v} step-start 200ms`,
             ),
-            ...['opacity', 'margin', 'translate'].map((v) => `${v} ease 200ms`),
+            ...['opacity', 'margin', 'translate', 'width'].map(
+              (v) => `${v} ease 200ms`,
+            ),
           ].join(', '),
           '--fd-sidebar-offset': 'calc(100% - 16px)',
           '--fd-sidebar-margin': collapsed ? '0.5rem' : '0px',
