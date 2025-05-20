@@ -1,5 +1,16 @@
 # fumadocs
 
+## 0.2.0
+
+### Minor Changes
+
+- ba35933: Support dynamic import transformation
+
+### Patch Changes
+
+- 1d07c67: Replace `execa` with `tinyexec` & removed unused devDeps
+- ba35933: Improve dep install UI
+
 ## 0.1.1
 
 ### Patch Changes

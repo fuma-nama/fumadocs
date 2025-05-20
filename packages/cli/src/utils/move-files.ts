@@ -3,6 +3,7 @@ import path from 'node:path';
 import { type Project } from 'ts-morph';
 import { isRelative } from '@/utils/fs';
 import {
+  resolveReference,
   toReferencePath,
   transformReferences,
 } from '@/utils/transform-references';
@@ -17,14 +18,14 @@ const transformExtensions = ['.js', '.ts', '.tsx', '.jsx'];
 export async function moveFiles(
   from: string,
   to: string,
-  filter: (file: string) => boolean | Promise<boolean>,
+  filter: (file: string) => boolean,
   project: Project,
   src: boolean,
   /**
    * the original directory to move files from
    */
   originalDir = from,
-): Promise<void> {
+) {
   function isIncluded(file: string) {
     // moving files that can't be refactored will cause issues, e.g. relative paths in CSS file being overlooked
     if (!transformExtensions.includes(path.extname(file))) return false;
@@ -56,34 +57,31 @@ export async function moveFiles(
     });
   }
 
-  if (!stats.isFile() || !(await isIncluded(from))) return;
+  if (!stats.isFile() || !isIncluded(from)) return;
 
   const content = await fs.readFile(from);
   const sourceFile = project.createSourceFile(from, content.toString(), {
     overwrite: true,
   });
 
-  await transformReferences(
-    sourceFile,
-    {
+  transformReferences(sourceFile, (specifier) => {
+    const resolved = resolveReference(specifier, {
       alias: {
         type: 'append',
         dir: src ? 'src' : '',
       },
       relativeTo: path.dirname(from),
-    },
-    async (resolved) => {
-      if (resolved.type !== 'file') return;
-      if (
-        // ignore if the file is also moved
-        isRelative(originalDir, from) &&
-        (await isIncluded(resolved.path))
-      )
-        return;
+    });
+    if (resolved.type !== 'file') return;
+    if (
+      // ignore if the file is also moved
+      isRelative(originalDir, from) &&
+      isIncluded(resolved.path)
+    )
+      return;
 
-      return toReferencePath(to, resolved.path);
-    },
-  );
+    return toReferencePath(to, resolved.path);
+  });
 
   await sourceFile.save();
   await fs.mkdir(path.dirname(to), { recursive: true });

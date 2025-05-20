@@ -6,7 +6,6 @@ import {
   createContext,
   type FC,
   Fragment,
-  type HTMLAttributes,
   type ReactNode,
   useContext,
   useMemo,
@@ -115,7 +114,7 @@ export function Sidebar({
     const state = open ? 'open' : 'closed';
 
     return (
-      <>
+      <Context.Provider value={context}>
         <Presence present={open}>
           <div
             data-state={state}
@@ -132,18 +131,16 @@ export function Sidebar({
               {...props}
               data-state={state}
               className={cn(
-                'fixed text-[15px] flex flex-col py-3 rounded-e-xl border-e start-0 inset-y-0 w-[85%] max-w-[380px] z-40 bg-fd-background data-[state=open]:animate-fd-enterFromLeft data-[state=closed]:animate-fd-exitToLeft',
+                'fixed text-[15px] flex flex-col py-2 rounded-e-2xl border-e start-0 inset-y-0 w-[85%] max-w-[380px] z-40 bg-fd-background data-[state=open]:animate-fd-sidebar-in data-[state=closed]:animate-fd-sidebar-out',
                 !present && 'invisible',
                 props.className,
               )}
             >
-              <Context.Provider value={context}>
-                {props.children}
-              </Context.Provider>
+              {props.children}
             </RemoveScroll>
           )}
         </Presence>
-      </>
+      </Context.Provider>
     );
   }
 
@@ -153,23 +150,28 @@ export function Sidebar({
       {...props}
       data-collapsed={collapsed}
       className={cn(
-        'sticky top-(--fd-sidebar-top) z-20 bg-fd-card text-sm h-(--fd-sidebar-height) max-md:hidden',
-        collapsible && [
-          'transition-all',
-          collapsed &&
-            '-me-(--fd-sidebar-width) -translate-x-(--fd-sidebar-offset) rtl:translate-x-(--fd-sidebar-offset)',
-          collapsed && hover && 'z-50 translate-x-0',
-          collapsed && !hover && 'opacity-0',
+        'sticky shrink-0 flex flex-col items-end top-(--fd-sidebar-top) z-20 bg-fd-card text-sm h-(--fd-sidebar-height) w-(--fd-sidebar-width) *:w-(--fd-sidebar-width) border-e max-md:hidden',
+        collapsed && [
+          'rounded-xl border',
+          hover
+            ? 'z-50 translate-x-2 shadow-lg'
+            : 'opacity-0 -translate-x-(--fd-sidebar-offset) rtl:translate-x-(--fd-sidebar-offset)',
         ],
         props.className,
       )}
       style={
         {
-          '--fd-sidebar-offset': 'calc(var(--fd-sidebar-width) - 6px)',
-          '--fd-sidebar-top':
-            'calc(var(--fd-banner-height) + var(--fd-nav-height))',
+          transition: [
+            ...['border', 'height', 'top'].map((v) =>
+              collapsed ? `${v} step-end 200ms` : `${v} step-start 200ms`,
+            ),
+            ...['opacity', 'margin', 'translate'].map((v) => `${v} ease 200ms`),
+          ].join(', '),
+          '--fd-sidebar-offset': 'calc(100% - 16px)',
+          '--fd-sidebar-margin': collapsed ? '0.5rem' : '0px',
+          '--fd-sidebar-top': `calc(var(--fd-banner-height) + var(--fd-nav-height) + var(--fd-sidebar-margin))`,
           '--fd-sidebar-height':
-            'calc(100dvh - var(--fd-banner-height) - var(--fd-nav-height))',
+            'calc(100dvh - var(--fd-sidebar-top) - var(--fd-sidebar-margin))',
           ...props.style,
         } as object
       }
@@ -199,9 +201,7 @@ export function Sidebar({
         );
       }}
     >
-      <div className="flex w-(--fd-sidebar-width) h-full max-w-full flex-col pt-1.5 ms-auto border-e">
-        <Context.Provider value={context}>{props.children}</Context.Provider>
-      </div>
+      <Context.Provider value={context}>{props.children}</Context.Provider>
     </aside>
   );
 }
@@ -210,7 +210,7 @@ export function SidebarHeader(props: ComponentProps<'div'>) {
   return (
     <div
       {...props}
-      className={cn('flex flex-col gap-3 px-4 py-2', props.className)}
+      className={cn('flex flex-col gap-3 p-4 pb-2', props.className)}
     >
       {props.children}
     </div>
@@ -234,7 +234,8 @@ export function SidebarViewport(props: ScrollAreaProps) {
       <ScrollViewport
         className="p-4"
         style={{
-          maskImage: 'linear-gradient(to bottom, transparent, white 12px)',
+          maskImage:
+            'linear-gradient(to bottom, transparent, white 12px, white calc(100% - 12px), transparent)',
         }}
       >
         {props.children}
@@ -250,7 +251,7 @@ export function SidebarSeparator(props: ComponentProps<'p'>) {
     <p
       {...props}
       className={cn(
-        'inline-flex items-center gap-2 mb-2 px-2 font-medium empty:mb-0 [&_svg]:size-4 [&_svg]:shrink-0',
+        'inline-flex items-center gap-2 mb-1.5 px-2 font-medium empty:mb-0 [&_svg]:size-4 [&_svg]:shrink-0',
         props.className,
       )}
       style={{
@@ -396,7 +397,7 @@ export function SidebarFolderContent(props: CollapsibleContentProps) {
         )}
       >
         {ctx.level === 1 && (
-          <div className="absolute w-px inset-y-0 bg-fd-border start-3" />
+          <div className="absolute w-px inset-y-1 bg-fd-border start-2.5" />
         )}
         {props.children}
       </Context.Provider>
@@ -507,8 +508,9 @@ export function SidebarPageTree(props: {
 function PageTreeFolder({
   item,
   ...props
-}: HTMLAttributes<HTMLElement> & {
+}: {
   item: PageTree.Folder;
+  children: ReactNode;
 }) {
   const { defaultOpenLevel, level } = useInternalContext();
   const path = useTreePath();
@@ -540,7 +542,7 @@ function PageTreeFolder({
 }
 
 function getOffset(level: number) {
-  return `calc(var(--spacing) * ${level > 1 ? (level - 1) * 3 + 3 : 2})`;
+  return `calc(var(--spacing) * ${level > 1 ? level * 3 : 2})`;
 }
 
 function Border({ level, active }: { level: number; active?: boolean }) {
@@ -549,7 +551,7 @@ function Border({ level, active }: { level: number; active?: boolean }) {
   return (
     <div
       className={cn(
-        'absolute w-px inset-y-3 z-[2] start-3 md:inset-y-2',
+        'absolute w-px inset-y-3 z-[2] start-2.5 md:inset-y-2',
         active && 'bg-fd-primary',
       )}
     />

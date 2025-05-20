@@ -6,6 +6,25 @@ import {
   createComponentBuilder,
 } from './component-builder';
 
+export type ImportPathMap = Record<
+  string,
+  | string
+  | {
+      type: 'component';
+      name: string;
+      file: string;
+
+      /**
+       * Registry of the component, refer to the current registry if not specified
+       */
+      registry?: string;
+    }
+  | {
+      type: 'dependency';
+      name: string;
+    }
+>;
+
 export interface Component {
   name: string;
   description?: string;
@@ -23,22 +42,9 @@ export interface Component {
   unlisted?: boolean;
 
   /**
-   * Map imported file paths
+   * Map imported file paths, extended from registry `mapImportPath` if defined.
    */
-  mapImportPath?: Record<
-    string,
-    | string
-    | {
-        type: 'component';
-        name: string;
-        file: string;
-
-        /**
-         * Registry of the component, refer to the current registry if not specified
-         */
-        registry?: string;
-      }
-  >;
+  mapImportPath?: ImportPathMap;
 }
 
 export type NamespaceType = 'components' | 'hooks' | 'lib';
@@ -72,6 +78,11 @@ export interface Registry {
   packageJson?: string | PackageJson;
 
   components: Component[];
+
+  /**
+   * Map import paths of components
+   */
+  mapImportPath?: ImportPathMap;
   dependencies?: Record<
     string,
     {

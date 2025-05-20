@@ -1,5 +1,14 @@
 # next-docs-mdx
 
+## 11.6.5
+
+### Patch Changes
+
+- a6c909b: Removed unused devDependencies and migrated from `fast-glob` to `tinyglobby`
+- Updated dependencies [a6c909b]
+  - @fumadocs/mdx-remote@1.3.2
+  - fumadocs-core@15.3.4
+
 ## 11.6.4
 
 ### Patch Changes

@@ -10,13 +10,30 @@ import {
 import Link from 'fumadocs-core/link';
 import Image from 'next/image';
 import Preview from '@/public/banner.png';
-import { ComponentIcon, Pencil, PlusIcon, Server } from 'lucide-react';
+import { Book, ComponentIcon, Pencil, PlusIcon, Server } from 'lucide-react';
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
     <HomeLayout
       {...baseOptions}
       links={[
+        {
+          type: 'menu',
+          on: 'menu',
+          text: 'Documentation',
+          items: [
+            {
+              text: 'Getting Started',
+              url: '/docs/ui',
+              icon: <Book />,
+            },
+            {
+              text: 'Components',
+              url: '/docs/ui/components',
+              icon: <ComponentIcon />,
+            },
+          ],
+        },
         {
           type: 'custom',
           on: 'nav',

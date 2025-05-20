@@ -52,7 +52,7 @@
   "devDependencies": {
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.3",
-    "@types/node": "22.15.18",
+    "@types/node": "22.15.19",
     "@types/react": "^19.1.4",
     "eslint-config-custom": "workspace:*",
     "fumadocs-ui": "workspace:*",

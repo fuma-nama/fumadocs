@@ -1,5 +1,15 @@
 # @fuma-docs/openapi
 
+## 8.1.12
+
+### Patch Changes
+
+- a6c909b: Removed unused devDependencies and migrated from `fast-glob` to `tinyglobby`
+- Updated dependencies [e0c2a92]
+- Updated dependencies [71fc1a5]
+  - fumadocs-ui@15.3.4
+  - fumadocs-core@15.3.4
+
 ## 8.1.11
 
 ### Patch Changes

@@ -1,5 +1,5 @@
 import * as path from 'node:path';
-import type { SourceFile, StringLiteral } from 'ts-morph';
+import { SourceFile, StringLiteral, ts } from 'ts-morph';
 import type { ComponentBuilder } from '@/build/component-builder';
 import type {
   Component,
@@ -52,13 +52,18 @@ export async function buildFile(
     path: outputPath,
   };
 
+  const importMap = {
+    ...builder.registry.mapImportPath,
+    ...comp.mapImportPath,
+  };
+
   /**
    * Process import paths
    */
-  async function process(
+  function process(
     specifier: StringLiteral,
     getSpecifiedFile: () => SourceFile | undefined,
-  ): Promise<void> {
+  ) {
     let specifiedFile = getSpecifiedFile();
     if (!specifiedFile) return;
 
@@ -66,14 +71,25 @@ export async function buildFile(
       ? builder.resolveDep(specifier.getLiteralValue()).name
       : path.relative(builder.registryDir, specifiedFile.getFilePath());
 
-    if (comp.mapImportPath && name in comp.mapImportPath) {
-      const resolver = comp.mapImportPath[name];
+    if (name in importMap) {
+      const resolver = importMap[name];
 
       if (typeof resolver === 'string') {
         specifier.setLiteralValue(resolver);
         specifiedFile = getSpecifiedFile();
 
         if (!specifiedFile) return;
+      } else if (resolver.type === 'dependency') {
+        const info = builder.resolveDep(resolver.name);
+
+        const value = onReference({
+          type: 'dependency',
+          name: info.name,
+          version: info.version ?? '',
+          isDev: info.type === 'dev',
+        });
+        if (value) out.imports[specifier.getLiteralValue()] = value;
+        return;
       } else {
         const sub = builder.getComponentByName(
           resolver.name,
@@ -133,7 +149,7 @@ export async function buildFile(
   const sourceFile = await builder.createSourceFile(inputPath);
 
   for (const item of sourceFile.getImportDeclarations()) {
-    await process(item.getModuleSpecifier(), () =>
+    process(item.getModuleSpecifier(), () =>
       item.getModuleSpecifierSourceFile(),
     );
   }
@@ -142,7 +158,25 @@ export async function buildFile(
     const specifier = item.getModuleSpecifier();
     if (!specifier) continue;
 
-    await process(specifier, () => item.getModuleSpecifierSourceFile());
+    process(specifier, () => item.getModuleSpecifierSourceFile());
+  }
+
+  // transform async imports
+  const calls = sourceFile.getDescendantsOfKind(ts.SyntaxKind.CallExpression);
+
+  for (const expression of calls) {
+    if (
+      expression.getExpression().isKind(ts.SyntaxKind.ImportKeyword) &&
+      expression.getArguments().length === 1
+    ) {
+      const argument = expression.getArguments()[0];
+
+      if (!argument.isKind(ts.SyntaxKind.StringLiteral)) continue;
+
+      process(argument, () =>
+        argument.getSymbol()?.getDeclarations()[0].getSourceFile(),
+      );
+    }
   }
 
   out.content = sourceFile.getFullText();

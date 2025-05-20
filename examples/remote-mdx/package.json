@@ -8,8 +8,8 @@
     "start": "next start"
   },
   "dependencies": {
+    "tinyglobby": "^0.2.13",
     "@fumadocs/mdx-remote": "workspace:*",
-    "fast-glob": "^3.3.3",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "next": "15.3.2",

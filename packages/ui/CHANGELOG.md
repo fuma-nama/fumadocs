@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 15.3.4
+
+### Patch Changes
+
+- e0c2a92: Improve UI consistency
+- 71fc1a5: Mount all children of tabs by default
+  - fumadocs-core@15.3.4
+
 ## 15.3.3
 
 ### Patch Changes

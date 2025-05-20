@@ -1,5 +1,12 @@
 # @fumadocs/mdx-remote
 
+## 1.3.2
+
+### Patch Changes
+
+- a6c909b: Removed unused devDependencies and migrated from `fast-glob` to `tinyglobby`
+  - fumadocs-core@15.3.4
+
 ## 1.3.1
 
 ### Patch Changes

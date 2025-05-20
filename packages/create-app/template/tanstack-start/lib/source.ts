@@ -7,7 +7,7 @@ import {
 } from 'fumadocs-core/source';
 import matter from 'gray-matter';
 import * as path from 'node:path';
-import FastGlob from 'fast-glob';
+import { globSync } from 'tinyglobby';
 import * as fs from 'node:fs';
 
 let files: [string, string][];
@@ -21,7 +21,7 @@ if (typeof import.meta.glob === 'function') {
     }),
   );
 } else {
-  files = FastGlob.sync('content/docs/**/*').map((file) => {
+  files = globSync('content/docs/**/*').map((file) => {
     return [file, fs.readFileSync(file).toString()];
   });
 }

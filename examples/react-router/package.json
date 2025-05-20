@@ -24,10 +24,10 @@
   "devDependencies": {
     "@react-router/dev": "^7.6.0",
     "@tailwindcss/vite": "^4.1.7",
-    "@types/node": "^22.15.18",
+    "@types/node": "^22.15.19",
     "@types/react": "^19.1.4",
     "@types/react-dom": "^19.1.5",
-    "react-router-devtools": "^5.0.5",
+    "react-router-devtools": "^5.0.6",
     "tailwindcss": "^4.1.7",
     "typescript": "^5.8.3",
     "vite": "^6.3.5",

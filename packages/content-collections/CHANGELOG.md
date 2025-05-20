@@ -1,5 +1,16 @@
 # @fumadocs/content-collections
 
+## 1.2.0
+
+### Minor Changes
+
+- 7b4a505: Add `remarkCodeTab` by default
+
+### Patch Changes
+
+- df244e8: Prepare for Content Collections v1
+  - fumadocs-core@15.3.4
+
 ## 1.1.8
 
 ### Patch Changes

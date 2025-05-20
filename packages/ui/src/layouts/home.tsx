@@ -125,7 +125,7 @@ export function Header({
           'lg',
           searchToggle,
           <LargeSearchToggle
-            className="w-full max-w-[240px] max-lg:hidden"
+            className="w-full rounded-full ps-2.5 max-w-[240px] max-lg:hidden"
             hideIfDisabled
           />,
         )}

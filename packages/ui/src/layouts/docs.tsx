@@ -79,9 +79,9 @@ export function DocsLayout({
   const links = getLinks(props.links ?? [], props.githubUrl);
 
   const variables = cn(
-    '[--fd-tocnav-height:36px] md:[--fd-sidebar-width:268px] lg:[--fd-sidebar-width:286px] xl:[--fd-toc-width:286px] xl:[--fd-tocnav-height:0px]',
+    '[--fd-tocnav-height:36px] md:[--fd-sidebar-width:268px] lg:[--fd-sidebar-width:290px] xl:[--fd-toc-width:290px] xl:[--fd-tocnav-height:0px]',
     !nav.component && nav.enabled !== false
-      ? '[--fd-nav-height:calc(var(--spacing)*14)] md:[--fd-nav-height:0px]'
+      ? '[--fd-nav-height:56px] md:[--fd-nav-height:0px]'
       : undefined,
   );
 
@@ -95,16 +95,14 @@ export function DocsLayout({
       <NavProvider transparentMode={transparentMode}>
         {slot(
           nav,
-          <Navbar className="md:hidden">
+          <Navbar className="h-14 md:hidden">
             <Link
               href={nav.url ?? '/'}
               className="inline-flex items-center gap-2.5 font-semibold"
             >
               {nav.title}
             </Link>
-            <div className="flex flex-1 flex-row items-center gap-1">
-              {nav.children}
-            </div>
+            <div className="flex-1">{nav.children}</div>
             {slots('sm', searchToggle, <SearchToggle hideIfDisabled />)}
             <NavbarSidebarTrigger className="-me-2 md:hidden" />
           </Navbar>,
@@ -146,7 +144,7 @@ export function DocsLayout({
                     searchToggle,
                     <LargeSearchToggle
                       hideIfDisabled
-                      className="rounded-lg max-md:hidden"
+                      className="max-md:hidden"
                     />,
                   )}
                   {sidebar.banner}
@@ -189,11 +187,14 @@ export function DocsLayoutSidebar({
       <Sidebar
         {...props}
         collapsible={collapsible}
-        className={cn('md:ps-(--fd-layout-offset)', props.className)}
+        className={cn(
+          'data-[collapsed=false]:w-[calc(var(--fd-sidebar-width)+var(--fd-layout-offset))] data-[collapsed=true]:me-[calc(var(--fd-layout-offset)-var(--fd-sidebar-width))]',
+          props.className,
+        )}
       >
         <HideIfEmpty>
           <SidebarHeader>
-            <div className="flex py-1.5 max-md:hidden">
+            <div className="flex max-md:hidden">
               {nav}
               {collapsible && (
                 <SidebarCollapseTrigger
@@ -202,7 +203,7 @@ export function DocsLayoutSidebar({
                       color: 'ghost',
                       size: 'icon-sm',
                     }),
-                    'ms-auto mb-auto -my-1.5 text-fd-muted-foreground max-md:hidden',
+                    'ms-auto mb-auto text-fd-muted-foreground max-md:hidden',
                   )}
                 >
                   <SidebarIcon />

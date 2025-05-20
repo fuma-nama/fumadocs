@@ -1,224 +1,80 @@
-import path from 'node:path';
-import fs from 'node:fs/promises';
-import { log, confirm, isCancel, outro, spinner, intro } from '@clack/prompts';
-import { type Project } from 'ts-morph';
-import picocolors from 'picocolors';
-import { execa } from 'execa';
-import { createEmptyProject } from '@/utils/typescript';
-import { getPackageManager } from '@/utils/get-package-manager';
-import { type Config, defaultConfig } from '@/config';
-import { typescriptExtensions } from '@/constants';
-import { getDependencies } from '@/utils/add/get-dependencies';
 import {
-  type NamespaceType,
-  type OutputComponent,
-  type OutputFile,
-} from '@/build';
-import { type Awaitable } from '@/commands/init';
-import { toReferencePath } from '@/utils/transform-references';
+  intro,
+  isCancel,
+  log,
+  multiselect,
+  outro,
+  spinner,
+} from '@clack/prompts';
+import type { OutputComponent, OutputIndex } from '@/build';
+import picocolors from 'picocolors';
+import type { Config } from '@/config';
+import { installComponent, type Resolver } from '@/utils/add/install-component';
+import { installDeps } from '@/utils/add/install-deps';
 
-interface Context {
-  config: Config;
-  project: Project;
+export async function add(input: string[], resolver: Resolver, config: Config) {
+  let target = input;
 
-  resolver: Resolver;
-}
+  if (input.length === 0) {
+    const spin = spinner();
+    spin.start('fetching registry');
+    const registry = (await resolver('_registry.json')) as
+      | OutputIndex[]
+      | undefined;
+    spin.stop(picocolors.bold(picocolors.greenBright('registry fetched')));
 
-export type Resolver = (file: string) => Awaitable<object | undefined>;
+    if (!registry) {
+      log.error(`Failed to fetch '_registry.json' file from registry`);
+      throw new Error(`Failed to fetch registry`);
+    }
 
-/**
- * A set of downloaded files
- */
-const downloadedFiles = new Set<string>();
-
-export async function add(
-  name: string,
-  resolver: Resolver,
-  config: Config = {},
-): Promise<void> {
-  intro(
-    picocolors.bold(
-      picocolors.inverse(picocolors.cyanBright(`Add Component: ${name}`)),
-    ),
-  );
-  const project = createEmptyProject();
-
-  const result = await downloadComponent(name, {
-    project,
-    config,
-    resolver,
-  });
-
-  if (!result) {
-    log.error(`Component: ${name} not found`);
-    process.exit(0);
-  }
-
-  const installed = await getDependencies();
-  const deps = Object.entries(result.dependencies)
-    .filter(([k]) => !installed.has(k))
-    .map(([k, v]) => (v.length === 0 ? k : `${k}@${v}`));
-
-  const devDeps = Object.entries(result.devDependencies)
-    .filter(([k]) => !installed.has(k))
-    .map(([k, v]) => (v.length === 0 ? k : `${k}@${v}`));
-
-  if (deps.length > 0 || devDeps.length > 0) {
-    const manager = await getPackageManager();
-    const value = await confirm({
-      message: `This component requires dependencies (${[...deps, ...devDeps].join(' ')}), install them with ${manager}?`,
+    const value = await multiselect({
+      message: 'Select components to install',
+      options: registry.map((item) => ({
+        label: item.name,
+        value: item.name,
+        hint: item.description,
+      })),
     });
 
     if (isCancel(value)) {
-      outro(picocolors.bold(picocolors.greenBright('Component downloaded')));
-      process.exit(0);
+      outro('Ended');
+      return;
     }
 
-    if (value) {
-      const spin = spinner();
-      spin.start('Installing dependencies...');
-      if (deps.length > 0) await execa(manager, ['install', ...deps]);
-      if (devDeps.length > 0)
-        await execa(manager, ['install', ...devDeps, '-D']);
-
-      spin.stop('Dependencies installed.');
-    }
+    target = value;
   }
 
-  outro(picocolors.bold(picocolors.greenBright('Component installed')));
+  await install(target, resolver, config);
 }
 
-const downloadedComps = new Map<string, OutputComponent>();
-async function downloadComponent(
-  name: string,
-  ctx: Context,
-): Promise<OutputComponent | undefined> {
-  const cached = downloadedComps.get(name);
-  if (cached) return cached;
+export async function install(
+  target: string[],
+  resolver: Resolver,
+  config: Config,
+) {
+  const outputs: OutputComponent[] = [];
 
-  const comp = (await ctx.resolver(`${name}.json`)) as
-    | OutputComponent
-    | undefined;
-  if (!comp) return;
-
-  downloadedComps.set(name, comp);
-
-  for (const file of comp.files) {
-    if (downloadedFiles.has(file.path)) continue;
-
-    const outPath = resolveOutputPath(file.path, ctx.config);
-    const output = typescriptExtensions.includes(path.extname(file.path))
-      ? transformTypeScript(outPath, file, ctx)
-      : file.content;
-
-    let canWrite = true;
-    const requireOverride = await fs
-      .readFile(outPath)
-      .then((res) => res.toString() !== output)
-      .catch(() => false);
-
-    if (requireOverride) {
-      const value = await confirm({
-        message: `Do you want to override ${outPath}?`,
-      });
-
-      if (isCancel(value)) {
-        outro('Ended');
-        process.exit(0);
-      }
-
-      canWrite = value;
-    }
-
-    if (canWrite) {
-      await fs.mkdir(path.dirname(outPath), { recursive: true });
-      await fs.writeFile(outPath, output);
-      log.step(`downloaded ${outPath}`);
-    }
-
-    downloadedFiles.add(file.path);
-  }
-
-  for (const sub of comp.subComponents) {
-    const downloaded = await downloadComponent(sub, ctx);
-    if (!downloaded) continue;
-
-    Object.assign(comp.dependencies, downloaded.dependencies);
-    Object.assign(comp.devDependencies, downloaded.devDependencies);
-  }
-
-  return comp;
-}
-
-function resolveOutputPath(ref: string, config: Config): string {
-  const sep = ref.indexOf(':');
-  if (sep === -1) return ref;
-
-  const namespace = ref.slice(0, sep) as NamespaceType,
-    file = ref.slice(sep + 1);
-
-  if (namespace === 'components') {
-    return path.join(
-      config.aliases?.componentsDir ?? defaultConfig.aliases.componentsDir,
-      file,
+  for (const name of target) {
+    intro(
+      picocolors.bold(
+        picocolors.inverse(picocolors.cyanBright(`Add Component: ${name}`)),
+      ),
     );
-  }
 
-  return path.join(
-    config.aliases?.libDir ?? defaultConfig.aliases.libDir,
-    file,
-  );
-}
-
-function transformTypeScript(
-  filePath: string,
-  file: OutputFile,
-  ctx: Context,
-): string {
-  const sourceFile = ctx.project.createSourceFile(filePath, file.content, {
-    overwrite: true,
-  });
-
-  for (const item of sourceFile.getImportDeclarations()) {
-    const ref = item.getModuleSpecifier().getLiteralValue();
-
-    if (ref in file.imports) {
-      const outputPath = resolveOutputPath(file.imports[ref], ctx.config);
-      item
-        .getModuleSpecifier()
-        .setLiteralValue(toReferencePath(filePath, outputPath));
+    const output = await installComponent(name, resolver, config);
+    if (!output) {
+      log.error(`Failed to install ${name}: not found`);
+      continue;
     }
+
+    outro(picocolors.bold(picocolors.greenBright(`${name} installed`)));
+    outputs.push(output);
   }
 
-  for (const item of sourceFile.getExportDeclarations()) {
-    const specifier = item.getModuleSpecifier();
-    if (!specifier) continue;
-    const ref = specifier.getLiteralValue();
+  intro(picocolors.bold('New Dependencies'));
 
-    if (ref in file.imports) {
-      const outputPath = resolveOutputPath(file.imports[ref], ctx.config);
+  await installDeps(outputs);
 
-      specifier.setLiteralValue(toReferencePath(filePath, outputPath));
-    }
-  }
-
-  return sourceFile.getFullText();
-}
-
-export function remoteResolver(url: string): Resolver {
-  return async (file) => {
-    const res = await fetch(`${url}/${file}`);
-    if (!res.ok) return;
-
-    return res.json();
-  };
-}
-
-export function localResolver(dir: string): Resolver {
-  return async (file) => {
-    return await fs
-      .readFile(path.join(dir, file))
-      .then((res) => JSON.parse(res.toString()) as OutputComponent)
-      .catch(() => undefined);
-  };
+  outro(picocolors.bold(picocolors.greenBright('Successful')));
 }
