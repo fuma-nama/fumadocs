@@ -136,7 +136,7 @@ export function DocsLayout(props: DocsLayoutProps) {
           <Sidebar
             {...sidebar}
             className={cn(
-              'md:w-[calc(var(--fd-sidebar-width)+var(--fd-layout-offset))] md:ps-(--fd-layout-offset)',
+              'data-[collapsed=false]:w-[calc(var(--fd-sidebar-width)+var(--fd-layout-offset))] data-[collapsed=true]:me-[calc(var(--fd-layout-offset)-var(--fd-sidebar-width))]',
               navMode === 'top'
                 ? 'md:bg-transparent'
                 : 'md:[--fd-nav-height:0px]',
@@ -279,8 +279,10 @@ function DocsNavbar({
           <LargeSearchToggle
             hideIfDisabled
             className={cn(
-              'w-full my-auto rounded-xl max-md:hidden',
-              navMode === 'top' ? 'max-w-sm px-2' : 'max-w-[240px]',
+              'w-full my-auto max-md:hidden',
+              navMode === 'top'
+                ? 'rounded-xl max-w-sm ps-2.5'
+                : 'max-w-[240px]',
             )}
           />,
         )}

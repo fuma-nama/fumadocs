@@ -150,23 +150,22 @@ export function Sidebar({
       {...props}
       data-collapsed={collapsed}
       className={cn(
-        'sticky shrink-0 flex flex-col top-(--fd-sidebar-top) z-20 bg-fd-card text-sm h-(--fd-sidebar-height) border-e max-md:hidden',
-        collapsible && [
-          'transition-all',
-          collapsed &&
-            '-me-(--fd-sidebar-width) -translate-x-(--fd-sidebar-offset) rtl:translate-x-(--fd-sidebar-offset)',
-          collapsed && hover && 'z-50 translate-x-0',
-          collapsed && !hover && 'opacity-0',
+        'sticky shrink-0 flex flex-col items-end top-(--fd-sidebar-top) z-20 bg-fd-card text-sm h-(--fd-sidebar-height) w-(--fd-sidebar-width) *:w-(--fd-sidebar-width) border-e max-md:hidden',
+        'transition-[translate,margin,opacity,width] duration-250',
+        collapsed && [
+          'rounded-e-xl',
+          hover
+            ? 'z-50'
+            : 'opacity-0 -translate-x-(--fd-sidebar-offset) rtl:translate-x-(--fd-sidebar-offset)',
         ],
         props.className,
       )}
       style={
         {
-          '--fd-sidebar-offset': 'calc(var(--fd-sidebar-width) - 12px)',
+          '--fd-sidebar-offset': 'calc(100% - 16px)',
           '--fd-sidebar-top':
             'calc(var(--fd-banner-height) + var(--fd-nav-height))',
-          '--fd-sidebar-height':
-            'calc(100dvh - var(--fd-banner-height) - var(--fd-nav-height))',
+          '--fd-sidebar-height': 'calc(100dvh - var(--fd-sidebar-top))',
           ...props.style,
         } as object
       }

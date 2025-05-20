@@ -144,7 +144,7 @@ export function DocsLayout({
                     searchToggle,
                     <LargeSearchToggle
                       hideIfDisabled
-                      className="rounded-lg max-md:hidden"
+                      className="max-md:hidden"
                     />,
                   )}
                   {sidebar.banner}
@@ -188,13 +188,13 @@ export function DocsLayoutSidebar({
         {...props}
         collapsible={collapsible}
         className={cn(
-          'md:w-[calc(var(--fd-sidebar-width)+var(--fd-layout-offset))] md:ps-(--fd-layout-offset)',
+          'data-[collapsed=false]:w-[calc(var(--fd-sidebar-width)+var(--fd-layout-offset))] data-[collapsed=true]:me-[calc(var(--fd-layout-offset)-var(--fd-sidebar-width))]',
           props.className,
         )}
       >
         <HideIfEmpty>
           <SidebarHeader>
-            <div className="flex py-1.5 max-md:hidden">
+            <div className="flex max-md:hidden">
               {nav}
               {collapsible && (
                 <SidebarCollapseTrigger
@@ -203,7 +203,7 @@ export function DocsLayoutSidebar({
                       color: 'ghost',
                       size: 'icon-sm',
                     }),
-                    'ms-auto mb-auto -my-1.5 text-fd-muted-foreground max-md:hidden',
+                    'ms-auto mb-auto text-fd-muted-foreground max-md:hidden',
                   )}
                 >
                   <SidebarIcon />
