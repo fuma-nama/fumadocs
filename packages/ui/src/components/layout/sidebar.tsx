@@ -151,20 +151,27 @@ export function Sidebar({
       data-collapsed={collapsed}
       className={cn(
         'sticky shrink-0 flex flex-col items-end top-(--fd-sidebar-top) z-20 bg-fd-card text-sm h-(--fd-sidebar-height) w-(--fd-sidebar-width) *:w-(--fd-sidebar-width) border-e max-md:hidden',
-        'transition-[translate,margin,opacity,width] duration-200',
         collapsed && [
+          'rounded-xl border',
           hover
-            ? 'z-50'
+            ? 'z-50 translate-x-2 shadow-lg'
             : 'opacity-0 -translate-x-(--fd-sidebar-offset) rtl:translate-x-(--fd-sidebar-offset)',
         ],
         props.className,
       )}
       style={
         {
+          transition: [
+            ...['border', 'height', 'top'].map((v) =>
+              collapsed ? `${v} step-end 200ms` : `${v} step-start 200ms`,
+            ),
+            ...['opacity', 'margin', 'translate'].map((v) => `${v} ease 200ms`),
+          ].join(', '),
           '--fd-sidebar-offset': 'calc(100% - 16px)',
-          '--fd-sidebar-top':
-            'calc(var(--fd-banner-height) + var(--fd-nav-height))',
-          '--fd-sidebar-height': 'calc(100dvh - var(--fd-sidebar-top))',
+          '--fd-sidebar-margin': collapsed ? '0.5rem' : '0px',
+          '--fd-sidebar-top': `calc(var(--fd-banner-height) + var(--fd-nav-height) + var(--fd-sidebar-margin))`,
+          '--fd-sidebar-height':
+            'calc(100dvh - var(--fd-sidebar-top) - var(--fd-sidebar-margin))',
           ...props.style,
         } as object
       }
@@ -535,7 +542,7 @@ function PageTreeFolder({
 }
 
 function getOffset(level: number) {
-  return `calc(var(--spacing) * ${level > 1 ? level * 2.5 : 2})`;
+  return `calc(var(--spacing) * ${level > 1 ? level * 3 : 2})`;
 }
 
 function Border({ level, active }: { level: number; active?: boolean }) {
