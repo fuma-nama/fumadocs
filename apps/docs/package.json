@@ -71,7 +71,7 @@
     "tailwindcss": "^4.1.7",
     "tailwindcss-animate": "^1.0.7",
     "tinyglobby": "^0.2.13",
-    "ts-morph": "^25.0.1",
+    "ts-morph": "^26.0.0",
     "tsconfig": "workspace:*",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3"
