@@ -129,8 +129,8 @@ importers:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       octokit:
-        specifier: ^4.1.3
-        version: 4.1.3
+        specifier: ^5.0.0
+        version: 5.0.0
       oxc-transform:
         specifier: ^0.70.0
         version: 0.70.0
@@ -7889,9 +7889,9 @@ packages:
     resolution: {integrity: sha512-gXah6aZrcUxjWg2zR2MwouP2eHlCBzdV4pygudehaKXSGW4v2AsRQUK+lwwXhii6KFZcunEnmSUoYp5CXibxtA==}
     engines: {node: '>= 0.4'}
 
-  octokit@4.1.3:
-    resolution: {integrity: sha512-PP+EL8h4xPCE9NBo6jXq6I2/EiTXsn1cg9F0IZehHBv/qhuQpyGMFElEB17miWKciuT6vRHiFFiG9+FoXOmg6A==}
-    engines: {node: '>= 18'}
+  octokit@5.0.0:
+    resolution: {integrity: sha512-qgcHWEuoeDiO5zFENCbEY6S9UUEG2yJrFwSfSTYRCG2M54m0noddwjD8G3WdWxy7XFeXcJ03BsNgUI9pOQXaMg==}
+    engines: {node: '>= 20'}
 
   ofetch@1.4.1:
     resolution: {integrity: sha512-QZj2DfGplQAr2oj9KzceK9Hwz6Whxazmn85yYeVuS3u9XTMOGMRx0kO95MQ+vLsj/S/NwBDMMLU5hpxvI6Tklw==}
@@ -18113,7 +18113,7 @@ snapshots:
       define-properties: 1.2.1
       es-object-atoms: 1.1.1
 
-  octokit@4.1.3:
+  octokit@5.0.0:
     dependencies:
       '@octokit/app': 15.1.6
       '@octokit/core': 6.1.5
