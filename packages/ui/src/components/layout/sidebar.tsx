@@ -151,9 +151,8 @@ export function Sidebar({
       data-collapsed={collapsed}
       className={cn(
         'sticky shrink-0 flex flex-col items-end top-(--fd-sidebar-top) z-20 bg-fd-card text-sm h-(--fd-sidebar-height) w-(--fd-sidebar-width) *:w-(--fd-sidebar-width) border-e max-md:hidden',
-        'transition-[translate,margin,opacity,width] duration-250',
+        'transition-[translate,margin,opacity,width] duration-200',
         collapsed && [
-          'rounded-e-xl',
           hover
             ? 'z-50'
             : 'opacity-0 -translate-x-(--fd-sidebar-offset) rtl:translate-x-(--fd-sidebar-offset)',
@@ -391,7 +390,7 @@ export function SidebarFolderContent(props: CollapsibleContentProps) {
         )}
       >
         {ctx.level === 1 && (
-          <div className="absolute w-px inset-y-0 bg-fd-border start-3" />
+          <div className="absolute w-px inset-y-1 bg-fd-border start-2.5" />
         )}
         {props.children}
       </Context.Provider>
@@ -536,7 +535,7 @@ function PageTreeFolder({
 }
 
 function getOffset(level: number) {
-  return `calc(var(--spacing) * ${level > 1 ? (level - 1) * 3 + 3 : 2})`;
+  return `calc(var(--spacing) * ${level > 1 ? level * 2.5 : 2})`;
 }
 
 function Border({ level, active }: { level: number; active?: boolean }) {
@@ -545,7 +544,7 @@ function Border({ level, active }: { level: number; active?: boolean }) {
   return (
     <div
       className={cn(
-        'absolute w-px inset-y-3 z-[2] start-3 md:inset-y-2',
+        'absolute w-px inset-y-3 z-[2] start-2.5 md:inset-y-2',
         active && 'bg-fd-primary',
       )}
     />

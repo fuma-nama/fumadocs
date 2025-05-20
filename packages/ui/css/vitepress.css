@@ -63,14 +63,11 @@
 
 #nd-sidebar {
   background-color: hsl(240, 6%, 97%);
+  border-color: transparent;
 }
 
 .dark #nd-sidebar {
   background-color: hsl(240, 4%, 9%);
-}
-
-#nd-sidebar > div {
-  border-color: transparent;
 }
 
 button[data-search-full] {

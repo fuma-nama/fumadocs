@@ -214,8 +214,9 @@ export function TabsContent({ value, className, ...props }: TabsContentProps) {
   return (
     <Primitive.TabsContent
       value={value}
+      forceMount
       className={cn(
-        'prose-no-margin [&>figure:only-child]:-m-4 [&>figure:only-child]:border-none',
+        'prose-no-margin data-[state=inactive]:hidden [&>figure:only-child]:-m-4 [&>figure:only-child]:border-none',
         className,
       )}
       {...props}
