@@ -1,14 +1,11 @@
-import { resolve } from 'node:path';
 import { getAPIPageItems } from '@/build-routes';
 import {
   type DocumentContext,
   generateDocument,
 } from '@/utils/generate-document';
 import { idToTitle } from '@/utils/id-to-title';
-import type { OperationObject, PathItemObject } from './types';
-import type { NoReference } from '@/utils/schema';
 import type { OperationItem, WebhookItem } from '@/render/api-page';
-import { type DocumentInput, processDocument } from '@/utils/process-document';
+import type { ProcessedDocument } from '@/utils/process-document';
 
 export interface GenerateOptions {
   /**
@@ -60,40 +57,19 @@ export interface GenerateTagOutput {
 export type GeneratePageOutput =
   | {
       type: 'operation';
-      pathItem: NoReference<PathItemObject>;
-      operation: NoReference<OperationObject>;
-
       item: OperationItem;
       content: string;
     }
   | {
       type: 'webhook';
-      pathItem: NoReference<PathItemObject>;
-      operation: NoReference<OperationObject>;
-
       item: WebhookItem;
       content: string;
     };
 
-async function dereference(
-  pathOrDocument: DocumentInput,
-  options: GenerateOptions,
-) {
-  return await processDocument(
-    // resolve paths
-    typeof pathOrDocument === 'string' &&
-      !pathOrDocument.startsWith('http://') &&
-      !pathOrDocument.startsWith('https://')
-      ? resolve(options.cwd ?? process.cwd(), pathOrDocument)
-      : pathOrDocument,
-  ).then((res) => res.document);
-}
-
 export async function generateAll(
-  pathOrDocument: DocumentInput,
+  { document, downloaded }: ProcessedDocument,
   options: GenerateOptions = {},
 ): Promise<string> {
-  const document = await dereference(pathOrDocument, options);
   const items = getAPIPageItems(document);
 
   return generateDocument({
@@ -105,7 +81,7 @@ export async function generateAll(
       operations: items.operations,
       webhooks: items.webhooks,
       hasHead: true,
-      document: pathOrDocument,
+      document: downloaded,
     },
 
     context: {
@@ -115,10 +91,9 @@ export async function generateAll(
 }
 
 export async function generatePages(
-  pathOrDocument: DocumentInput,
+  { document, downloaded }: ProcessedDocument,
   options: GenerateOptions = {},
 ): Promise<GeneratePageOutput[]> {
-  const document = await dereference(pathOrDocument, options);
   const items = getAPIPageItems(document);
   const result: GeneratePageOutput[] = [];
 
@@ -130,15 +105,13 @@ export async function generatePages(
 
     result.push({
       type: 'operation',
-      pathItem,
-      operation,
       item,
       content: generateDocument({
         ...options,
         page: {
           operations: [item],
           hasHead: false,
-          document: pathOrDocument,
+          document: downloaded,
         },
         dereferenced: document,
         title:
@@ -161,15 +134,13 @@ export async function generatePages(
 
     result.push({
       type: 'webhook',
-      pathItem,
-      operation,
       item,
       content: generateDocument({
         ...options,
         page: {
           webhooks: [item],
           hasHead: false,
-          document: pathOrDocument,
+          document: downloaded,
         },
         dereferenced: document,
         title: operation.summary ?? pathItem.summary ?? idToTitle(item.name),
@@ -185,10 +156,9 @@ export async function generatePages(
 }
 
 export async function generateTags(
-  pathOrDocument: DocumentInput,
+  { document, downloaded }: ProcessedDocument,
   options: GenerateOptions = {},
 ): Promise<GenerateTagOutput[]> {
-  const document = await dereference(pathOrDocument, options);
   if (!document.tags) return [];
   const items = getAPIPageItems(document);
 
@@ -210,7 +180,7 @@ export async function generateTags(
       content: generateDocument({
         ...options,
         page: {
-          document: pathOrDocument,
+          document: downloaded,
           operations,
           webhooks,
           hasHead: true,

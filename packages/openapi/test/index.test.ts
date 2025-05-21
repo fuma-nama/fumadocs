@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { idToTitle } from '@/utils/id-to-title';
 import { generateAll, generateFiles, generateTags } from '../src';
+import { processDocument } from '@/utils/process-document';
 
 describe('Utilities', () => {
   test('Operation ID to Title', () => {
@@ -20,17 +21,23 @@ describe('Generate documents', () => {
   });
 
   test('Pet Store', async () => {
-    const result = await generateAll('./fixtures/petstore.yaml', {
-      cwd,
-    });
+    const result = await generateAll(
+      await processDocument(join(cwd, './fixtures/petstore.yaml')),
+      {
+        cwd,
+      },
+    );
 
     await expect(result).toMatchFileSnapshot('./out/petstore.mdx');
   });
 
   test('Museum', async () => {
-    const tags = await generateTags('./fixtures/museum.yaml', {
-      cwd,
-    });
+    const tags = await generateTags(
+      await processDocument(join(cwd, './fixtures/museum.yaml')),
+      {
+        cwd,
+      },
+    );
 
     for (const tag of tags) {
       await expect(tag.content).toMatchFileSnapshot(
@@ -40,7 +47,10 @@ describe('Generate documents', () => {
   });
 
   test('Unkey', async () => {
-    const tags = await generateTags('./fixtures/unkey.json', { cwd });
+    const tags = await generateTags(
+      await processDocument(join(cwd, './fixtures/unkey.json')),
+      { cwd },
+    );
 
     for (const tag of tags) {
       await expect(tag.content).toMatchFileSnapshot(
@@ -105,6 +115,9 @@ describe('Generate documents', () => {
         output: './out',
         per: 'file',
         cwd,
+        name: {
+          algorithm: 'v1',
+        },
       }),
     ).rejects.toThrow(
       'No input files found. Tried resolving: ./fixtures/non-existent-1.yaml, ./fixtures/non-existent-2.yaml',
@@ -117,6 +130,9 @@ describe('Generate documents', () => {
       output: './out',
       per: 'operation',
       groupBy: 'tag',
+      name: {
+        algorithm: 'v1',
+      },
       cwd,
     });
 
