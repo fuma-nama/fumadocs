@@ -154,41 +154,41 @@ async function generateFromDocument(pathOrUrl: string, options: Config) {
     const { algorithm = 'v2' } = options.name ?? {};
 
     nameFn = (output, document) => {
-      if (options.per === 'operation') {
-        const result = output as GeneratePageOutput;
-
-        if (result.type === 'operation') {
-          const operation =
-            document.paths![result.item.path]![result.item.method]!;
-
-          if (algorithm === 'v2' && operation.operationId) {
-            return operation.operationId;
-          }
-
-          return path.join(
-            getOutputPathFromRoute(result.item.path),
-            result.item.method.toLowerCase(),
-          );
-        }
-
-        const hook = document.webhooks![result.item.name][result.item.method]!;
-
-        if (algorithm === 'v2' && hook.operationId) {
-          return hook.operationId;
-        }
-
-        return getFilename(result.item.name);
-      }
-
       if (options.per === 'tag') {
         const result = output as GenerateTagOutput;
 
         return getFilename(result.tag);
       }
 
-      return isUrl(pathOrUrl)
-        ? 'index'
-        : path.basename(pathOrUrl, path.extname(pathOrUrl));
+      if (options.per === 'file') {
+        return isUrl(pathOrUrl)
+          ? 'index'
+          : path.basename(pathOrUrl, path.extname(pathOrUrl));
+      }
+
+      const result = output as GeneratePageOutput;
+
+      if (result.type === 'operation') {
+        const operation =
+          document.paths![result.item.path]![result.item.method]!;
+
+        if (algorithm === 'v2' && operation.operationId) {
+          return operation.operationId;
+        }
+
+        return path.join(
+          getOutputPathFromRoute(result.item.path),
+          result.item.method.toLowerCase(),
+        );
+      }
+
+      const hook = document.webhooks![result.item.name][result.item.method]!;
+
+      if (algorithm === 'v2' && hook.operationId) {
+        return hook.operationId;
+      }
+
+      return getFilename(result.item.name);
     };
   } else {
     nameFn = options.name as typeof nameFn;
@@ -202,33 +202,29 @@ async function generateFromDocument(pathOrUrl: string, options: Config) {
     await writeFile(file, content);
   }
 
-  function getOutputPaths(result: GeneratePageOutput): string[] {
-    if (options.per !== 'operation')
-      throw new Error('only available for per: operation');
-    const outPaths: string[] = [];
+  function getOutputPaths(
+    groupBy: OperationConfig['groupBy'] = 'none',
+    result: GeneratePageOutput,
+  ): string[] {
     const file = nameFn(result, document.document);
-    let tags: string[] | undefined;
 
-    if (result.type === 'operation') {
-      const operation =
-        document.document.paths![result.item.path]![result.item.method]!;
-
-      tags = operation.tags;
-    } else {
-      const hook =
-        document.document.webhooks![result.item.name][result.item.method]!;
-
-      tags = hook.tags;
-    }
-
-    if (options.groupBy === 'route') {
-      outPaths.push(
+    if (groupBy === 'route') {
+      return [
         path.join(
           result.type === 'operation' ? result.item.path : result.item.name,
           result.item.method,
         ) + '.mdx',
-      );
-    } else if (options.groupBy === 'tag') {
+      ];
+    }
+
+    if (groupBy === 'tag') {
+      let tags =
+        result.type === 'operation'
+          ? document.document.paths![result.item.path]![result.item.method]!
+              .tags
+          : document.document.webhooks![result.item.name][result.item.method]!
+              .tags;
+
       if (!tags || tags.length === 0) {
         console.warn(
           'When `groupBy` is set to `tag`, make sure a `tags` is defined for every operation schema.',
@@ -237,14 +233,10 @@ async function generateFromDocument(pathOrUrl: string, options: Config) {
         tags = ['unknown'];
       }
 
-      for (const tag of tags) {
-        outPaths.push(path.join(getFilename(tag), `${file}.mdx`));
-      }
-    } else {
-      outPaths.push(`${file}.mdx`);
+      return tags.map((tag) => path.join(getFilename(tag), `${file}.mdx`));
     }
 
-    return outPaths;
+    return [`${file}.mdx`];
   }
 
   if (options.per === 'file') {
@@ -261,14 +253,21 @@ async function generateFromDocument(pathOrUrl: string, options: Config) {
 
     await write(outPath, result);
     console.log(`Generated: ${outPath}`);
-  }
+  } else if (options.per === 'tag') {
+    const results = await generateTags(document, options);
 
-  if (!options.per || options.per === 'operation') {
+    for (const result of results) {
+      const filename = nameFn(result, document.document);
+      const outPath = path.join(outputDir, `${filename}.mdx`);
+      await write(outPath, result.content);
+      console.log(`Generated: ${outPath}`);
+    }
+  } else {
     const results = await generatePages(document, options);
     const mapping = new Map<string, GeneratePageOutput>();
 
     for (const result of results) {
-      for (const outputPath of getOutputPaths(result)) {
+      for (const outputPath of getOutputPaths(options.groupBy, result)) {
         mapping.set(outputPath, result);
       }
     }
@@ -291,17 +290,6 @@ async function generateFromDocument(pathOrUrl: string, options: Config) {
 
       await write(path.join(outputDir, outputPath), output.content);
       console.log(`Generated: ${outputPath}`);
-    }
-  }
-
-  if (options.per === 'tag') {
-    const results = await generateTags(document, options);
-
-    for (const result of results) {
-      const filename = nameFn(result, document.document);
-      const outPath = path.join(outputDir, `${filename}.mdx`);
-      await write(outPath, result.content);
-      console.log(`Generated: ${outPath}`);
     }
   }
 }
