@@ -48,6 +48,13 @@ export interface Config extends GenerateOptions {
    * @defaultValue 'none'
    */
   groupBy?: 'tag' | 'route' | 'none';
+
+  /**
+   * File name of file for operation
+   * @defaultValue 'method'
+   * @enum ['method', 'operation']
+   */
+  operationFileName?: 'method' | 'operation';
 }
 
 export async function generateFiles(options: Config): Promise<void> {
@@ -58,6 +65,7 @@ export async function generateFiles(options: Config): Promise<void> {
     per = 'operation',
     groupBy = 'none',
     cwd = process.cwd(),
+    operationFileName = 'method',
   } = options;
   const urlInputs: string[] = [];
   const fileInputs: string[] = [];
@@ -89,10 +97,13 @@ export async function generateFiles(options: Config): Promise<void> {
     if (result.pathItem.summary) {
       file = getFilename(result.pathItem.summary);
     } else if (result.type === 'operation') {
-      file = path.join(
-        getOutputPathFromRoute(result.item.path),
-        result.item.method.toLowerCase(),
-      );
+      file =
+        result.operation.operationId && operationFileName !== 'method'
+          ? getFilename(result.operation.operationId)
+          : path.join(
+              getOutputPathFromRoute(result.item.path),
+              result.item.method.toLowerCase(),
+            );
     } else {
       file = getFilename(result.item.name);
     }
@@ -157,14 +168,16 @@ export async function generateFiles(options: Config): Promise<void> {
 
       for (const [key, output] of mapping.entries()) {
         let outputPath = key;
-        const isSharedDir = Array.from(mapping.keys()).some(
-          (item) =>
-            item !== outputPath &&
-            path.dirname(item) === path.dirname(outputPath),
-        );
+        if (groupBy === 'none') {
+          const isSharedDir = Array.from(mapping.keys()).some(
+            (item) =>
+              item !== outputPath &&
+              path.dirname(item) === path.dirname(outputPath),
+          );
 
-        if (!isSharedDir && path.dirname(outputPath) !== '.') {
-          outputPath = path.join(path.dirname(outputPath) + '.mdx');
+          if (!isSharedDir && path.dirname(outputPath) !== '.') {
+            outputPath = path.join(path.dirname(outputPath) + '.mdx');
+          }
         }
 
         await write(path.join(outputDir, outputPath), output.content);
