@@ -1,14 +1,7 @@
 import type { ApiPageProps } from '@/render/api-page';
-import type { DocumentInput } from '@/utils/process-document';
 import { createProxy } from '@/server/proxy';
 
-export interface OpenAPIOptions
-  extends Omit<Partial<ApiPageProps>, 'document'> {
-  /**
-   * @deprecated Pass document to `APIPage` instead
-   */
-  documentOrPath?: DocumentInput;
-}
+export type OpenAPIOptions = Omit<Partial<ApiPageProps>, 'document'>;
 
 export interface OpenAPIServer {
   getAPIPageProps: (from: ApiPageProps) => ApiPageProps;
