@@ -45,27 +45,12 @@ export function HideIfEmpty({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const inject = `
-function isEmpty(node) {
-  for (let i = 0; i < node.childNodes.length; i++) {
-    const child = node.childNodes.item(i);
-    if (child.nodeType === Node.TEXT_NODE) {
-      return false
-    } else if (
-      child.nodeType === Node.ELEMENT_NODE &&
-      window.getComputedStyle(child).display !== 'none'
-    ) {
-      return false
-    }
-  }
-
-  return true;
-}
+  const inject = `{${isEmpty.toString()}
 
 const element = document.querySelector('[data-fdid="${id}"]')
 if (element) {
   element.setAttribute('data-empty', String(isEmpty(element)))
-}`;
+}}`;
 
   return (
     <>
@@ -78,7 +63,14 @@ if (element) {
       >
         {children}
       </Slot>
-      {empty === undefined && <script>{`{ ${inject} }`}</script>}
+      {empty === undefined && (
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html: inject,
+          }}
+        />
+      )}
     </>
   );
 }
