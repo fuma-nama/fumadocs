@@ -17,7 +17,10 @@ export function createRelativeLink(
   return async function RelativeLink({ href, ...props }) {
     // resolve relative href
     if (href && href.startsWith('.')) {
-      const target = source.getPageByHref(href, { dir: page.file.dirname });
+      const target = source.getPageByHref(href, {
+        dir: page.file.dirname,
+        language: page.locale,
+      });
 
       if (target) {
         href = target.hash

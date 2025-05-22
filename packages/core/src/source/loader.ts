@@ -92,6 +92,8 @@ export interface LoaderOutput<Config extends LoaderConfig> {
   getPageByHref: (
     href: string,
     options?: {
+      language?: string;
+
       /**
        * resolve relative file paths in `href` from specified dirname, must be a virtual path.
        */
@@ -299,30 +301,26 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
     set pageTree(v) {
       pageTree = v;
     },
-    getPageByHref(href, { dir = '' } = {}) {
-      const pages = Array.from(walker.pages.values());
+    getPageByHref(href, { dir = '', language } = {}) {
+      const pages = this.getPages(language);
       const [value, hash] = href.split('#', 2);
+      let target;
 
       if (
         value.startsWith('.') &&
         (value.endsWith('.md') || value.endsWith('.mdx'))
       ) {
         const hrefPath = joinPath(dir, value);
-        const target = pages.find((item) => item.file.path === hrefPath);
-
-        if (target)
-          return {
-            page: target,
-            hash,
-          };
+        target = pages.find((item) => item.file.path === hrefPath);
+      } else {
+        target = pages.find((item) => item.url === value);
       }
 
-      const target = pages.find((item) => item.url === value);
-      if (target)
-        return {
-          page: target,
-          hash,
-        };
+      if (!target) return;
+      return {
+        page: target,
+        hash,
+      };
     },
     getPages(language = options.i18n?.defaultLanguage ?? '') {
       const pages: Page[] = [];
