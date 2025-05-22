@@ -20,7 +20,7 @@ const keys: {
 interface Context {
   readOnly: boolean;
   writeOnly: boolean;
-  stack?: ResolvedSchema[];
+  stack?: SchemaStack;
 
   render: RenderContext;
 }
@@ -47,7 +47,7 @@ export function Schema({
 }): ReactNode {
   const {
     render: { renderer },
-    stack = [],
+    stack = schemaStack(),
   } = ctx;
 
   if (schema === true) {
@@ -57,8 +57,8 @@ export function Schema({
   }
 
   if (
-    (schema.readOnly === true && !ctx.readOnly) ||
-    (schema.writeOnly === true && !ctx.writeOnly)
+    (schema.readOnly && !ctx.readOnly) ||
+    (schema.writeOnly && !ctx.writeOnly)
   )
     return null;
 
@@ -74,25 +74,27 @@ export function Schema({
         }}
         ctx={{
           ...ctx,
-          stack: [schema, ...stack],
+          stack: stack.next(schema),
         }}
       />
     );
   }
 
   if (schema.allOf || schema.anyOf) {
+    const arr = ((schema.allOf ?? schema.anyOf) as ParsedSchema[]).filter(
+      (item) => !stack.has(item),
+    );
+    if (arr.length === 0) return;
+
     return (
       <Schema
         name={name}
         parseObject={parseObject}
         required={required}
-        schema={combineSchema([
-          ...(schema.allOf ?? []),
-          ...(schema.anyOf ?? []),
-        ])}
+        schema={combineSchema(arr)}
         ctx={{
           ...ctx,
-          stack: [schema, ...stack],
+          stack: stack.next(schema),
         }}
       />
     );
@@ -100,41 +102,43 @@ export function Schema({
 
   // object type
   if (schema.type === 'object' && parseObject) {
-    const { additionalProperties, patternProperties, properties } = schema;
+    const {
+      additionalProperties,
+      patternProperties = {},
+      properties = {},
+    } = schema;
 
     return (
       <div className="flex flex-col gap-4">
-        {properties &&
-          Object.entries(properties).map(([key, value]) => {
-            return (
-              <Schema
-                key={key}
-                name={key}
-                schema={value}
-                parseObject={false}
-                required={schema.required?.includes(key) ?? false}
-                ctx={{
-                  ...ctx,
-                  stack: [schema, ...stack],
-                }}
-              />
-            );
-          })}
-        {patternProperties &&
-          Object.entries(patternProperties).map(([key, value]) => {
-            return (
-              <Schema
-                key={key}
-                name={key}
-                schema={value}
-                parseObject={false}
-                ctx={{
-                  ...ctx,
-                  stack: [schema, ...stack],
-                }}
-              />
-            );
-          })}
+        {Object.entries(properties).map(([key, value]) => {
+          return (
+            <Schema
+              key={key}
+              name={key}
+              schema={value}
+              parseObject={false}
+              required={schema.required?.includes(key) ?? false}
+              ctx={{
+                ...ctx,
+                stack: stack.next(schema),
+              }}
+            />
+          );
+        })}
+        {Object.entries(patternProperties).map(([key, value]) => {
+          return (
+            <Schema
+              key={key}
+              name={key}
+              schema={value}
+              parseObject={false}
+              ctx={{
+                ...ctx,
+                stack: stack.next(schema),
+              }}
+            />
+          );
+        })}
         {additionalProperties && (
           <Schema
             name="[key: string]"
@@ -142,7 +146,7 @@ export function Schema({
             parseObject={false}
             ctx={{
               ...ctx,
-              stack: [schema, ...stack],
+              stack: stack.next(schema),
             }}
           />
         )}
@@ -172,23 +176,17 @@ export function Schema({
     });
   }
 
-  if (schema.type === 'object' && !parseObject && !stack.includes(schema)) {
-    footer = (
-      <renderer.ObjectCollapsible name="Show Attributes">
-        <Schema
-          name={name}
-          schema={schema}
-          ctx={{
-            ...ctx,
-            stack: [schema, ...stack],
-          }}
-        />
-      </renderer.ObjectCollapsible>
-    );
+  if (schema.type === 'object' && !parseObject) {
+    if (!stack.has(schema))
+      footer = (
+        <renderer.ObjectCollapsible name="Show Attributes">
+          <Schema name={name} schema={schema} ctx={ctx} />
+        </renderer.ObjectCollapsible>
+      );
   } else {
-    let mentionedObjectTypes: ParsedSchema[] = [];
+    let mentionedSchemas: ParsedSchema[] = [];
     if (Array.isArray(schema.type)) {
-      mentionedObjectTypes.push(
+      mentionedSchemas.push(
         ...schema.type.map((type) => ({
           ...schema,
           type,
@@ -196,22 +194,22 @@ export function Schema({
       );
     }
 
-    if (schema.oneOf) mentionedObjectTypes.push(...schema.oneOf);
-    if (schema.not) mentionedObjectTypes.push(schema.not);
+    if (schema.oneOf) mentionedSchemas.push(...schema.oneOf);
+    if (schema.not) mentionedSchemas.push(schema.not);
     if (schema.type === 'array' && schema.items)
-      mentionedObjectTypes.push(schema.items);
+      mentionedSchemas.push(schema.items);
 
-    mentionedObjectTypes = mentionedObjectTypes.filter(
-      (s) => isComplexType(s) && !stack.includes(s),
+    mentionedSchemas = mentionedSchemas.filter(
+      (s) => isComplexType(s) && !stack.has(s),
     );
 
-    if (mentionedObjectTypes.length > 0)
+    if (mentionedSchemas.length > 0) {
       footer = (
         <div className="flex flex-col gap-2">
-          {mentionedObjectTypes.map((s, idx) => {
+          {mentionedSchemas.map((s, idx) => {
             let title = typeof s === 'object' ? s.title : null;
             title ??=
-              mentionedObjectTypes.length === 1
+              mentionedSchemas.length === 1
                 ? 'Show Attributes'
                 : `Object ${idx + 1}`;
 
@@ -222,7 +220,7 @@ export function Schema({
                   schema={s}
                   ctx={{
                     ...ctx,
-                    stack: [schema, ...stack],
+                    stack: stack.next(schema),
                   }}
                 />
               </renderer.ObjectCollapsible>
@@ -230,6 +228,7 @@ export function Schema({
           })}
         </div>
       );
+    }
   }
 
   return (
@@ -254,12 +253,52 @@ export function Schema({
   );
 }
 
+interface SchemaStack {
+  next(...schema: ResolvedSchema[]): SchemaStack;
+  add(schema: ResolvedSchema): void;
+  has(schema: ResolvedSchema): boolean;
+}
+
+function schemaStack(parent?: SchemaStack): SchemaStack {
+  const titles = new Set<string>();
+  const history = new WeakSet();
+
+  return {
+    next(...schemas) {
+      const child = schemaStack(this);
+      for (const item of schemas) {
+        child.add(item);
+      }
+      return child;
+    },
+    add(schema) {
+      if (typeof schema !== 'object') return;
+
+      if (schema.title) titles.add(schema.title);
+      history.add(schema);
+    },
+    has(schema) {
+      if (typeof schema !== 'object') return false;
+      if (parent && parent.has(schema)) return true;
+      if (schema.title && titles.has(schema.title)) return true;
+
+      return history.has(schema);
+    },
+  };
+}
+
 /**
  * Check if the schema needs another collapsible to explain
  */
 function isComplexType(schema: ResolvedSchema): boolean {
   if (typeof schema === 'boolean') return false;
-  if (schema.anyOf ?? schema.oneOf ?? schema.allOf) return true;
+  const arr = schema.anyOf ?? schema.oneOf ?? schema.allOf;
+  if (arr && arr.some(isComplexType)) return true;
 
-  return schema.type === 'object' || schema.type === 'array';
+  return (
+    schema.type === 'object' ||
+    (schema.type === 'array' &&
+      schema.items != null &&
+      isComplexType(schema.items))
+  );
 }

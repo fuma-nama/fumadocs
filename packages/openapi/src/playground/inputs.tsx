@@ -3,6 +3,7 @@ import {
   type HTMLAttributes,
   type LabelHTMLAttributes,
   type ReactNode,
+  useMemo,
   useState,
 } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
@@ -73,9 +74,9 @@ export function ObjectInput({
   field: Exclude<RequestSchema, boolean>;
   fieldName: string;
 } & HTMLAttributes<HTMLDivElement>) {
-  const field = useResolvedSchema(
-    combineSchema([_field, ...(_field.allOf ?? []), ...(_field.anyOf ?? [])]),
-  );
+  const resolved = useResolvedSchema(_field);
+  const field = useMemo(() => combineSchema([resolved]), [resolved]);
+  if (typeof field === 'boolean') return;
 
   return (
     <div {...props} className={cn('flex flex-col gap-6', props.className)}>
@@ -244,7 +245,7 @@ export function FieldInput({
 }) {
   const { control, register } = useFormContext();
 
-  if (field.type === 'object') {
+  if (field.type === 'object' || field.anyOf || field.allOf) {
     return (
       <ObjectInput
         field={field}
@@ -328,6 +329,8 @@ export function FieldInput({
       />
     );
   }
+
+  if (field.type === 'null') return;
 
   return (
     <Input

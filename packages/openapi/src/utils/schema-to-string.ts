@@ -24,6 +24,7 @@ export function schemaToString(schema: ResolvedSchema, isRoot = true): string {
           false,
         ),
       )
+      .filter((v) => v !== 'unknown' && v !== 'null')
       .join(' | ');
   }
 
@@ -33,42 +34,28 @@ export function schemaToString(schema: ResolvedSchema, isRoot = true): string {
   if (schema.oneOf) {
     return schema.oneOf
       .map((one) => schemaToString(one, false))
-      .filter((v) => v !== 'unknown')
+      .filter((v) => v !== 'unknown' && v !== 'null')
       .join(' | ');
   }
 
-  if (schema.allOf) {
-    return schema.allOf
+  const combinedOf = schema.anyOf ?? schema.allOf;
+  if (combinedOf) {
+    return combinedOf
       .map((one) => schemaToString(one, false))
-      .filter((v) => v !== 'unknown')
+      .filter((v) => v !== 'unknown' && v !== 'null')
       .join(' & ');
   }
 
   if (schema.not) return `not ${schemaToString(schema.not, false)}`;
-
-  if (schema.anyOf) {
-    const union = schema.anyOf
-      .map((one) => schemaToString(one, false))
-      .filter((v) => v !== 'unknown');
-
-    if (union.length > 1) {
-      return `Any properties in ${union.join(',')}`;
-    } else if (union.length === 1) {
-      return union[0];
-    }
-  }
-
   if (schema.type === 'string' && schema.format === 'binary') return 'file';
 
   if (schema.type && Array.isArray(schema.type)) {
-    const nonNullTypes = schema.type.filter((v) => v !== 'null');
-
-    if (nonNullTypes.length > 0) return nonNullTypes.join(' | ');
-  } else if (schema.type && schema.type !== 'null') {
-    return schema.type as string;
+    return schema.type.filter((v) => v !== 'null').join(' | ');
   }
 
-  if (typeof schema.type === 'string') return schema.type;
+  if (schema.type) {
+    return schema.type as string;
+  }
 
   return 'unknown';
 }
