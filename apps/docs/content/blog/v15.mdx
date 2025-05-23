@@ -8,16 +8,16 @@ date: 2025-01-24
 ## Overview
 
 The purpose of v15 is mainly to support Tailwind CSS v4.
-Tailwind CSS v4 is a complete redesign of its API and internals, to fully adhere the new CSS-first config style, a breaking change is required.
+Tailwind CSS v4 is a complete redesign of its API and internals, to fully adhere to the new CSS-first config style, a breaking change is required.
 
-Fumadocs v15 has no other significant changes than migrating the config to Tailwind CSS v4.
+Fumadocs v15 has no other significant changes other than migrating the config to Tailwind CSS v4.
 
 ## Breaking Changes
 
 Before making the switch, upgrade your site to Tailwind CSS v4 following their [upgrade guide](https://tailwindcss.com/docs/upgrade-guide).
 You can remove the unused `tailwind.config.js` file and fully rely on the new CSS-first config.
 
-Add `@import` to the presets exported by Fumadocs UI, and include `fumadocs-ui` package into source.
+Add `@import` to the presets exported by Fumadocs UI, and include the `fumadocs-ui` package in the source.
 
 ```css title="Tailwind CSS"
 @import 'tailwindcss';
@@ -55,7 +55,7 @@ Instead of the previous format, it uses `hsl()`:
 
 ### Steps
 
-Previous Tailwind CSS utilities like `steps` & `steps` are renamed to `fd-steps` and `fd-step` to avoid conflicts.
+Previous Tailwind CSS utilities like `steps` & `step` are renamed to `fd-steps` and `fd-step` to avoid conflicts.
 
 ### Typography
 
@@ -63,11 +63,11 @@ Typography utilities including `prose`, `prose-*` modifiers will continue to wor
 
 ## Improvements
 
-v15 also included some minor improvements to the UI and OpenAPI integration.
+v15 also includes some minor improvements to the UI and OpenAPI integration.
 
 ### Code Block Tabs
 
-In the past, you need to write the `<Tabs />` manually when separating code blocks into tabs.
+In the past, you needed to write the `<Tabs />` manually when separating code blocks into tabs.
 
 ````mdx
 <Tabs items={["Tab 1", "Tab 2"]}>
@@ -109,7 +109,7 @@ The rest item `...` in the `pages` property of `meta.json` now supports reversed
 
 ### OpenAPI Playground
 
-v15 improved the playground UI (inspired by the minimalism of Scalar), and brought Scalar API Client support to Fumadocs OpenAPI.
+v15 improves the playground UI (inspired by the minimalism of Scalar), and brought Scalar API Client support to Fumadocs OpenAPI.
 
 You can enable the Scalar API Client using `useScalar` option in `createOpenAPI()`:
 
@@ -156,4 +156,4 @@ export const updatedBlog = blog.map(...)
 
 - remove Manifest API - it was designed to export search indexes, but now it's recommended to implement using route handlers.
 
-- Mention more about our [MDX Remote](/docs/headless/custom-source#mdx-remote) package, it will be the primary solution to handle large docs sites with performance needs that bundler couldn't do, including lazy compilation of MDX files.
+- Mention more about our [MDX Remote](/docs/headless/custom-source#mdx-remote) package, it will be the primary solution to handle large docs sites with performance needs that bundlers couldn't do, including lazy compilation of MDX files.

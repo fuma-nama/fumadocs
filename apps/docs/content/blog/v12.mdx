@@ -11,26 +11,26 @@ Fumadocs v12 mainly aims to improve the UI, prioritizing content and reading exp
 
 ### New UI
 
-After observing large docs sites like https://turbo.build, I found the navbar took too much space on the screen, while it only contains links to Blog, Showcase, GitHub, etc.
+After observing large docs sites like https://turbo.build, I found that the navbar took too much space on the screen, while it only contains links to Blog, Showcase, GitHub, etc.
 They are not necessarily related to the docs, placing them at the top of our screen doesn't bring a better reading experience.
 
-All these links are now moved to sidebar, allowing a clean, minimal view of docs.
+All these links are now moved to the sidebar, allowing a clean, minimal view of the docs.
 
 ![Preview](/blog/v12.png)
 
 I also noticed the docs start to look messy as your content grows. To ameliorate this, the sidebar now includes a border and background by default.
 This helps readers to distinguish navigation elements and content easier.
 
-The sidebar will always be placed at the left of screen, having a bigger space on large viewports.
+The sidebar will always be placed at the left of the screen, having a bigger space on large viewports.
 
-I believe the new UI still has room for improvement. Welcome to report UI issues, or leave a feedback!
+I believe the new UI still has room for improvement. Welcome to report UI issues, or leave feedback!
 
 ### Better Multi Page Trees
 
-We supported multiple page trees at a very early version of Fumadocs. However, it lacks of proper explanations and guides to configure it.
-In the past, you need to implement a navigation element to switch between page trees. And mark the folder as a root folder.
+We supported multiple page trees at a very early version of Fumadocs. However, it lacks proper explanations and guides to configure it.
+In the past, you needed to implement a navigation element to switch between page trees and mark the folder as a root folder.
 
-Now, you can use the `<RootToggle />` component directly, and docs has a better explanation of it.
+Now, you can use the `<RootToggle />` component directly, and the docs has a better explanation of it.
 
 <div className="flex flex-row justify-center mx-auto max-w-[300px]">
   ![Preview](/blog/v12-root-toggle.png)
