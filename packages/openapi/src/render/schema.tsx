@@ -269,14 +269,11 @@ export function Schema({
         </div>
       );
 
-      if (collapsible)
-        return (
-          <renderer.ObjectCollapsible name="Array Item">
-            {children}
-          </renderer.ObjectCollapsible>
-        );
-
-      return children;
+      return (
+        <renderer.ObjectCollapsible name="Array Item">
+          {children}
+        </renderer.ObjectCollapsible>
+      );
     }
   }
 
