@@ -86,7 +86,7 @@ export function getDefaultMDXOptions({
     (v) => [
       rehypeCodeOptions !== false && [plugins.rehypeCode, rehypeCodeOptions],
       ...v,
-      [plugins.rehypeToc],
+      plugins.rehypeToc,
     ],
     mdxOptions.rehypePlugins,
   );

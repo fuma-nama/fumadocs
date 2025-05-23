@@ -48,7 +48,7 @@ export default async function loader(
   }
 
   const mdxOptions =
-    collection?.mdxOptions ?? (await initGlobalMdxOptions(config));
+    collection?.mdxOptions ?? (await loadDefaultOptions(config));
 
   if (collection?.schema) {
     try {
@@ -106,16 +106,12 @@ export default async function loader(
   }
 }
 
-async function initGlobalMdxOptions(config: LoadedConfig) {
-  const globalConfig = config.global;
-  if (!globalConfig) return;
-
+async function loadDefaultOptions(config: LoadedConfig) {
+  const input = config.global?.mdxOptions;
   config._mdx_loader ??= {};
 
   const mdxLoader = config._mdx_loader;
   if (!mdxLoader.cachedOptions) {
-    const input = globalConfig?.mdxOptions;
-
     const { getDefaultMDXOptions } = await import('@/utils/mdx-options');
     mdxLoader.cachedOptions =
       typeof input === 'function'
