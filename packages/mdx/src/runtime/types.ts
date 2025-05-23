@@ -12,6 +12,7 @@ export interface AsyncRuntimeFile {
   info: FileInfo;
   data: Record<string, unknown>;
   content: string;
+  lastModified?: Date;
 }
 
 type DocOut<Schema extends StandardSchemaV1> = Override<

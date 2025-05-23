@@ -30,7 +30,7 @@ export async function start(
       );
     } catch (err) {
       if (err instanceof ValidationError) {
-        err.print();
+        console.error(err.toStringFormatted());
       } else {
         console.error(err);
       }

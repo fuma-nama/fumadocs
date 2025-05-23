@@ -30,21 +30,19 @@ export class ValidationError extends Error {
     this.issues = issues;
   }
 
-  print() {
-    console.error(
-      [
-        `[MDX] ${this.message}:`,
-        ...this.issues.map((issue) =>
-          picocolors.redBright(
-            `- ${picocolors.bold(issue.path?.join('.') ?? '*')}: ${issue.message}`,
-          ),
-        ),
-      ].join('\n'),
-    );
-  }
-
   toString() {
     return `${this.message}:\n${this.issues.map((issue) => `  ${issue.path}: ${issue.message}`).join('\n')}`;
+  }
+
+  toStringFormatted() {
+    return [
+      picocolors.bold(`[MDX] ${this.message}:`),
+      ...this.issues.map((issue) =>
+        picocolors.redBright(
+          `- ${picocolors.bold(issue.path?.join('.') ?? '*')}: ${issue.message}`,
+        ),
+      ),
+    ].join('\n');
   }
 }
 

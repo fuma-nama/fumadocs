@@ -373,16 +373,28 @@ export function FieldSet({
   if (_field === false) return null;
   if (!show) {
     return (
-      <FieldHeader {...props} name={name} required={isRequired}>
-        {toolbar}
+      <fieldset className="flex flex-col gap-1.5">
+        <FieldHeader
+          {...props}
+          name={name}
+          type={schemaToString(field)}
+          required={isRequired}
+        >
+          {toolbar}
+        </FieldHeader>
         <button
           type="button"
-          className={cn(buttonVariants({ size: 'sm' }))}
+          className={cn(
+            buttonVariants({
+              size: 'sm',
+              color: 'secondary',
+            }),
+          )}
           onClick={() => setShow(true)}
         >
           Show
         </button>
-      </FieldHeader>
+      </fieldset>
     );
   }
 
@@ -470,17 +482,7 @@ export function FieldSet({
       >
         {toolbar}
       </FieldHeader>
-      {show ? (
-        <FieldInput
-          field={field}
-          fieldName={fieldName}
-          isRequired={isRequired}
-        />
-      ) : (
-        <div>
-          <button onClick={() => setShow((prev) => !prev)}>Show</button>
-        </div>
-      )}
+      <FieldInput field={field} fieldName={fieldName} isRequired={isRequired} />
     </fieldset>
   );
 }

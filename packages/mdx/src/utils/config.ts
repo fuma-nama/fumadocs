@@ -21,7 +21,7 @@ export interface LoadedConfig {
   global?: GlobalConfig;
 
   _mdx_loader?: {
-    cachedProcessorOptions?: ProcessorOptions;
+    cachedOptions?: ProcessorOptions;
   };
 
   _mdx_async?: {

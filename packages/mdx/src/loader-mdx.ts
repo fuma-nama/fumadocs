@@ -2,34 +2,13 @@ import * as path from 'node:path';
 import { parse } from 'node:querystring';
 import grayMatter from 'gray-matter';
 import { type LoaderContext } from 'webpack';
-import { getConfigHash, loadConfig } from '@/utils/config';
+import { getConfigHash, loadConfig, type LoadedConfig } from '@/utils/config';
 import { buildMDX } from '@/utils/build-mdx';
 import { getGitTimestamp } from './utils/git-timestamp';
-import { validate } from '@/utils/schema';
+import { validate, ValidationError } from '@/utils/schema';
 
 export interface Options {
-  /**
-   * @internal
-   */
-  _ctx: {
-    configPath: string;
-  };
-}
-
-function parseQuery(query: string): {
-  collection?: string;
-  hash?: string;
-} {
-  let collection: string | undefined;
-  let hash: string | undefined;
-  const parsed = parse(query.slice(1));
-
-  if (parsed.collection && typeof parsed.collection === 'string')
-    collection = parsed.collection;
-
-  if (parsed.hash && typeof parsed.hash === 'string') hash = parsed.hash;
-
-  return { collection, hash };
+  configPath: string;
 }
 
 /**
@@ -45,15 +24,18 @@ export default async function loader(
   this.cacheable(true);
   const context = this.context;
   const filePath = this.resourcePath;
-  const { _ctx } = this.getOptions();
+  const { configPath } = this.getOptions();
   const matter = grayMatter(source);
 
   // notice that `resourceQuery` can be missing (e.g. `page.mdx`)
   const {
-    hash: configHash = await getConfigHash(_ctx.configPath),
+    hash: configHash = await getConfigHash(configPath),
     collection: collectionId,
-  } = parseQuery(this.resourceQuery);
-  const config = await loadConfig(_ctx.configPath, configHash);
+  } = parse(this.resourceQuery.slice(1)) as {
+    hash?: string;
+    collection?: string;
+  };
+  const config = await loadConfig(configPath, configHash);
 
   let collection =
     collectionId !== undefined
@@ -65,41 +47,38 @@ export default async function loader(
     collection = undefined;
   }
 
-  let mdxOptions = collection?.mdxOptions;
-
-  if (!mdxOptions) {
-    const { getDefaultMDXOptions } = await import('@/utils/mdx-options');
-    config._mdx_loader ??= {};
-
-    const extendedOptions = config.global?.mdxOptions;
-    config._mdx_loader.cachedProcessorOptions ??=
-      typeof extendedOptions === 'function'
-        ? getDefaultMDXOptions(await extendedOptions())
-        : getDefaultMDXOptions(extendedOptions ?? {});
-
-    mdxOptions = config._mdx_loader.cachedProcessorOptions;
-  }
+  const mdxOptions =
+    collection?.mdxOptions ?? (await initGlobalMdxOptions(config));
 
   if (collection?.schema) {
-    matter.data = (await validate(
-      collection.schema,
-      matter.data,
-      {
-        source,
-        path: filePath,
-      },
-      `invalid frontmatter in ${filePath}`,
-    )) as Record<string, unknown>;
+    try {
+      matter.data = (await validate(
+        collection.schema,
+        matter.data,
+        {
+          source,
+          path: filePath,
+        },
+        `invalid frontmatter in ${filePath}`,
+      )) as Record<string, unknown>;
+    } catch (e) {
+      if (e instanceof ValidationError) {
+        return callback(new Error(e.toStringFormatted()));
+      }
+
+      return callback(e as Error);
+    }
   }
 
   let timestamp: number | undefined;
-  if (config.global?.lastModifiedTime === 'git')
+  if (config.global?.lastModifiedTime === 'git') {
     timestamp = (await getGitTimestamp(filePath))?.getTime();
+  }
 
   try {
     // ensure the line number is correct in dev mode
     const lineOffset = '\n'.repeat(
-      this.mode === 'development' ? lines(source) - lines(matter.content) : 0,
+      this.mode === 'development' ? lines(matter.content) : 0,
     );
 
     const file = await buildMDX(
@@ -125,6 +104,26 @@ export default async function loader(
     error.message = `${fpath}:${error.name}: ${error.message}`;
     callback(error);
   }
+}
+
+async function initGlobalMdxOptions(config: LoadedConfig) {
+  const globalConfig = config.global;
+  if (!globalConfig) return;
+
+  config._mdx_loader ??= {};
+
+  const mdxLoader = config._mdx_loader;
+  if (!mdxLoader.cachedOptions) {
+    const input = globalConfig?.mdxOptions;
+
+    const { getDefaultMDXOptions } = await import('@/utils/mdx-options');
+    mdxLoader.cachedOptions =
+      typeof input === 'function'
+        ? getDefaultMDXOptions(await input())
+        : getDefaultMDXOptions(input ?? {});
+  }
+
+  return mdxLoader.cachedOptions;
 }
 
 function lines(s: string) {
