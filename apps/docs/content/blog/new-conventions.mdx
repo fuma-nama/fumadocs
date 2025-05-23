@@ -7,10 +7,10 @@ author: Fuma Nama
 
 ## `mdx-component.tsx`
 
-Sometimes there's questions raised by beginners confused about where to add MDX components.
-Although it's simply located in `page.tsx` which shouldn't be difficult to find, I think some kind of conventions may help, so I decided to add back `mdx-components.tsx`.
+Sometimes there are questions raised by beginners confused about where to add MDX components.
+Although it's simply located in `page.tsx`, which shouldn't be difficult to find, I think some kind of conventions may help, so I decided to add back `mdx-components.tsx`.
 
-I love to have fewer files, but considering `create-fumadocs-app` should also act as a starting point for beginners who may not familiar with MDX, it's such more helpful to provide it by default.
+I love to have fewer files, but considering `create-fumadocs-app` should also act as a starting point for beginners who may not be familiar with MDX, it's much more helpful to provide it by default.
 
 ### Existing Projects
 
@@ -45,7 +45,7 @@ import { getMDXComponents } from '@/mdx-components';
 
 ## Deprecating `<I18nProvider />`
 
-We now prefer a single `<RootProvider />` for everything, replacing the need of `<I18nProvider />` with a `i18n` prop.
+We now prefer a single `<RootProvider />` for everything, replacing the need for `<I18nProvider />` with a `i18n` prop.
 
 ```tsx
 <RootProvider
