@@ -90,20 +90,19 @@ export function Operation({
         {heading(headingLevel, 'Request Body', ctx)}
         <div className="mb-4 p-3 bg-fd-card rounded-xl border flex flex-row items-center justify-between gap-2">
           <code>{type}</code>
-          <span className="text-xs">
-            {body.required ? 'Required' : 'Optional'}
-          </span>
+          {!body.required && (
+            <span className="text-xs text-fd-muted-foreground">Optional</span>
+          )}
         </div>
         {body.description ? <Markdown text={body.description} /> : null}
         <Schema
           name="body"
+          as="body"
           schema={(body.content[type].schema ?? {}) as ResolvedSchema}
           required={body.required}
-          ctx={{
-            readOnly: method.method === 'GET',
-            writeOnly: method.method !== 'GET',
-            render: ctx,
-          }}
+          readOnly={method.method === 'GET'}
+          writeOnly={method.method !== 'GET'}
+          ctx={ctx}
         />
       </>
     );
@@ -151,13 +150,10 @@ export function Operation({
                     (param.schema?.deprecated ?? false),
                 } as ResolvedSchema
               }
-              parseObject={false}
               required={param.required}
-              ctx={{
-                readOnly: method.method === 'GET',
-                writeOnly: method.method !== 'GET',
-                render: ctx,
-              }}
+              readOnly={method.method === 'GET'}
+              writeOnly={method.method !== 'GET'}
+              ctx={ctx}
             />
           ))}
         </div>
@@ -267,12 +263,9 @@ async function ResponseTab({
         <Schema
           name="response"
           schema={responseOfType.schema as ResolvedSchema}
-          required
-          ctx={{
-            render: ctx,
-            writeOnly: false,
-            readOnly: true,
-          }}
+          as="body"
+          readOnly
+          ctx={ctx}
         />
       )}
     </Tab>

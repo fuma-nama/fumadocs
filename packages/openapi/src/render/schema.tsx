@@ -1,255 +1,334 @@
-import { type ReactNode } from 'react';
-import type { ParsedSchema, ResolvedSchema } from '@/utils/schema';
+import { Fragment, type ReactNode } from 'react';
+import type { ResolvedSchema } from '@/utils/schema';
 import type { RenderContext } from '@/types';
 import { combineSchema } from '@/utils/combine-schema';
 import { Markdown } from './markdown';
 import { schemaToString } from '@/utils/schema-to-string';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from 'fumadocs-ui/components/tabs';
 
-const keys: {
-  [T in keyof Exclude<ResolvedSchema, boolean>]: string;
-} = {
+const keys = {
   default: 'Default',
-  minimum: 'Minimum',
-  maximum: 'Maximum',
-  minLength: 'Minimum length',
-  maxLength: 'Maximum length',
   pattern: 'Pattern',
   format: 'Format',
+  multipleOf: 'Multiple of',
+} satisfies {
+  [T in keyof Exclude<ResolvedSchema, boolean>]: string;
 };
 
 interface Context {
-  readOnly: boolean;
-  writeOnly: boolean;
-  stack?: SchemaStack;
-
-  render: RenderContext;
+  stack: SchemaStack;
 }
 
 export function Schema({
   name,
   schema,
   required = false,
-  parseObject = true,
-  ctx,
+  readOnly = false,
+  writeOnly = false,
+  as = 'property',
+  ctx: { renderer },
 }: {
   name: string;
   required?: boolean;
   schema: ResolvedSchema;
+  as?: 'property' | 'body';
 
-  /**
-   * Render the full object
-   *
-   * @defaultValue true
-   * */
-  parseObject?: boolean;
-
-  ctx: Context;
+  readOnly?: boolean;
+  writeOnly?: boolean;
+  ctx: RenderContext;
 }): ReactNode {
-  const {
-    render: { renderer },
-    stack = schemaStack(),
-  } = ctx;
-
-  if (schema === true) {
-    return <renderer.Property name={name} type="any" />;
-  } else if (schema === false) {
-    return <renderer.Property name={name} type="never" />;
-  }
-
-  if (
-    (schema.readOnly && !ctx.readOnly) ||
-    (schema.writeOnly && !ctx.writeOnly)
-  )
-    return null;
-
-  if (Array.isArray(schema.type) && schema.type.length === 1) {
-    return (
-      <Schema
-        name={name}
-        required={required}
-        parseObject={parseObject}
-        schema={{
+  function propertyBody(
+    schema: Exclude<ResolvedSchema, boolean>,
+    renderPrimitive: (
+      child: Exclude<ResolvedSchema, boolean>,
+      ctx: Context,
+    ) => ReactNode,
+    ctx: Context,
+  ) {
+    if (Array.isArray(schema.type)) {
+      const items = schema.type.flatMap((type) => {
+        const composed = {
           ...schema,
-          type: schema.type[0],
-        }}
-        ctx={{
-          ...ctx,
-          stack: stack.next(schema),
-        }}
-      />
-    );
+          type,
+        };
+        if (!isComplexType(composed)) return [];
+        return composed;
+      });
+      if (items.length === 0) return;
+      if (items.length === 1)
+        return propertyBody(items[0], renderPrimitive, ctx);
+
+      return (
+        <Tabs defaultValue={items[0].type}>
+          <TabsList>
+            {items.map((item) => (
+              <TabsTrigger key={item.type} value={item.type}>
+                {schemaToString(item)}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          {items.map((item) => (
+            <TabsContent key={item.type} value={item.type}>
+              {item.description && <Markdown text={item.description} />}
+              {propertyInfo(item)}
+              {renderPrimitive(item, ctx)}
+            </TabsContent>
+          ))}
+        </Tabs>
+      );
+    }
+
+    if (schema.oneOf) {
+      const oneOf = schema.oneOf.filter((item) =>
+        isComplexType(item),
+      ) as Exclude<ResolvedSchema, boolean>[];
+      if (oneOf.length === 0) return;
+      if (oneOf.length === 1) {
+        return propertyBody(oneOf[0], renderPrimitive, ctx);
+      }
+
+      return (
+        <Tabs defaultValue="0">
+          <TabsList>
+            {oneOf.map((item, i) => (
+              <TabsTrigger key={i} value={i.toString()}>
+                {schemaToString(item)}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          {oneOf.map((item, i) => (
+            <TabsContent key={i} value={i.toString()}>
+              {item.description && <Markdown text={item.description} />}
+              {propertyInfo(item)}
+              {propertyBody(
+                item,
+                (child, ctx) => primitiveBody(child, ctx, false, true),
+                ctx,
+              )}
+            </TabsContent>
+          ))}
+        </Tabs>
+      );
+    }
+
+    const of = schema.allOf ?? schema.anyOf;
+    if (of) {
+      const arr = of.filter((item) => !ctx.stack.has(item));
+      if (arr.length === 0) return;
+      const combined = combineSchema(arr);
+      if (typeof combined === 'boolean') return;
+
+      return renderPrimitive(combined, ctx);
+    }
+
+    return renderPrimitive(schema, ctx);
   }
 
-  if (schema.allOf || schema.anyOf) {
-    const arr = ((schema.allOf ?? schema.anyOf) as ParsedSchema[]).filter(
-      (item) => !stack.has(item),
+  function propertyInfo(schema: Exclude<ResolvedSchema, boolean>) {
+    const fields: {
+      key: string;
+      value: string;
+    }[] = [];
+
+    for (const key in keys) {
+      if (key in schema) {
+        fields.push({
+          key: keys[key as keyof object],
+          value: JSON.stringify(schema[key as keyof ResolvedSchema]),
+        });
+      }
+    }
+
+    let range = getRange(
+      'value',
+      schema.minimum,
+      schema.exclusiveMinimum,
+      schema.maximum,
+      schema.exclusiveMaximum,
     );
-    if (arr.length === 0) return;
+    if (range)
+      fields.push({
+        key: 'Range',
+        value: range,
+      });
 
-    return (
-      <Schema
-        name={name}
-        parseObject={parseObject}
-        required={required}
-        schema={combineSchema(arr)}
-        ctx={{
-          ...ctx,
-          stack: stack.next(schema),
-        }}
-      />
+    range = getRange(
+      'length',
+      schema.minLength,
+      undefined,
+      schema.maxLength,
+      undefined,
     );
-  }
+    if (range)
+      fields.push({
+        key: 'Length',
+        value: range,
+      });
 
-  // object type
-  if (schema.type === 'object' && parseObject) {
-    const {
-      additionalProperties,
-      patternProperties = {},
-      properties = {},
-    } = schema;
+    range = getRange(
+      'properties',
+      schema.minProperties,
+      undefined,
+      schema.maxProperties,
+      undefined,
+    );
+    if (range)
+      fields.push({
+        key: 'Properties',
+        value: range,
+      });
 
+    if (schema.enum) {
+      fields.push({
+        key: 'Value in',
+        value: schema.enum.map((value) => JSON.stringify(value)).join(' | '),
+      });
+    }
+
+    if (fields.length === 0) return;
     return (
-      <div className="flex flex-col gap-4">
-        {Object.entries(properties).map(([key, value]) => {
-          return (
-            <Schema
-              key={key}
-              name={key}
-              schema={value}
-              parseObject={false}
-              required={schema.required?.includes(key) ?? false}
-              ctx={{
-                ...ctx,
-                stack: stack.next(schema),
-              }}
-            />
-          );
-        })}
-        {Object.entries(patternProperties).map(([key, value]) => {
-          return (
-            <Schema
-              key={key}
-              name={key}
-              schema={value}
-              parseObject={false}
-              ctx={{
-                ...ctx,
-                stack: stack.next(schema),
-              }}
-            />
-          );
-        })}
-        {additionalProperties && (
-          <Schema
-            name="[key: string]"
-            schema={additionalProperties}
-            parseObject={false}
-            ctx={{
-              ...ctx,
-              stack: stack.next(schema),
-            }}
-          />
-        )}
+      <div className="flex flex-col gap-2">
+        {fields.map((field) => (
+          <span key={field.key}>
+            {field.key}: <code>{field.value}</code>
+          </span>
+        ))}
       </div>
     );
   }
 
-  let footer: ReactNode;
-  const fields: {
-    key: string;
-    value: string;
-  }[] = [];
+  function primitiveBody(
+    schema: Exclude<ResolvedSchema, boolean>,
+    ctx: Context,
+    collapsible: boolean,
+    nested: boolean,
+  ) {
+    if (schema.type === 'object') {
+      if (ctx.stack.has(schema)) return <p>Recursive</p>;
+      const props = Object.entries(schema.properties ?? {});
+      const patternProps = Object.entries(schema.patternProperties ?? {});
+      const next = {
+        ...ctx,
+        stack: ctx.stack.next(schema),
+      };
 
-  for (const [key, value] of Object.entries(keys)) {
-    if (key in schema) {
-      fields.push({
-        key: value,
-        value: JSON.stringify(schema[key as keyof ResolvedSchema]),
-      });
-    }
-  }
+      if (props.length === 0 && patternProps.length === 0)
+        return <p>Empty Object</p>;
 
-  if (schema.enum) {
-    fields.push({
-      key: 'Value in',
-      value: schema.enum.map((value) => JSON.stringify(value)).join(' | '),
-    });
-  }
+      const children = (
+        <div className="flex flex-col gap-4">
+          {props.map(([key, value]) => (
+            <Fragment key={key}>
+              {property(key, value, next, {
+                required: schema.required?.includes(key) ?? false,
+                nested,
+              })}
+            </Fragment>
+          ))}
+          {patternProps.map(([key, value]) => (
+            <Fragment key={key}>
+              {property(key, value, next, { nested })}
+            </Fragment>
+          ))}
+          {schema.additionalProperties &&
+            property('[key: string]', schema.additionalProperties, next, {
+              nested,
+            })}
+        </div>
+      );
 
-  if (schema.type === 'object' && !parseObject) {
-    if (!stack.has(schema))
-      footer = (
+      if (!collapsible) return children;
+
+      return (
         <renderer.ObjectCollapsible name="Show Attributes">
-          <Schema name={name} schema={schema} ctx={ctx} />
+          {children}
         </renderer.ObjectCollapsible>
       );
-  } else {
-    let mentionedSchemas: ParsedSchema[] = [];
-    if (Array.isArray(schema.type)) {
-      mentionedSchemas.push(
-        ...schema.type.map((type) => ({
-          ...schema,
-          type,
-        })),
-      );
     }
 
-    if (schema.oneOf) mentionedSchemas.push(...schema.oneOf);
-    if (schema.not) mentionedSchemas.push(schema.not);
-    if (schema.type === 'array' && schema.items)
-      mentionedSchemas.push(schema.items);
+    if (schema.type === 'array') {
+      const items = schema.items;
+      if (!items || !isComplexType(items) || ctx.stack.has(items)) return;
 
-    mentionedSchemas = mentionedSchemas.filter(
-      (s) => isComplexType(s) && !stack.has(s),
-    );
-
-    if (mentionedSchemas.length > 0) {
-      footer = (
-        <div className="flex flex-col gap-2">
-          {mentionedSchemas.map((s, idx) => {
-            let title = typeof s === 'object' ? s.title : null;
-            title ??=
-              mentionedSchemas.length === 1
-                ? 'Show Attributes'
-                : `Object ${idx + 1}`;
-
-            return (
-              <renderer.ObjectCollapsible key={idx} name={title}>
-                <Schema
-                  name="element"
-                  schema={s}
-                  ctx={{
-                    ...ctx,
-                    stack: stack.next(schema),
-                  }}
-                />
-              </renderer.ObjectCollapsible>
-            );
-          })}
+      const children = (
+        <div className="flex flex-col gap-4">
+          {items.description && <Markdown text={items.description} />}
+          {propertyBody(
+            items,
+            (child, ctx) => primitiveBody(child, ctx, false, true),
+            {
+              ...ctx,
+              stack: ctx.stack.next(schema),
+            },
+          )}
         </div>
       );
+
+      if (collapsible)
+        return (
+          <renderer.ObjectCollapsible name="Array Item">
+            {children}
+          </renderer.ObjectCollapsible>
+        );
+
+      return children;
     }
   }
 
-  return (
-    <renderer.Property
-      name={name}
-      type={schemaToString(schema)}
-      required={required}
-      deprecated={schema.deprecated}
-    >
-      {schema.description ? <Markdown text={schema.description} /> : null}
-      {fields.length > 0 ? (
-        <div className="flex flex-col gap-2">
-          {fields.map((field) => (
-            <span key={field.key}>
-              {field.key}: <code>{field.value}</code>
-            </span>
-          ))}
-        </div>
-      ) : null}
-      {footer}
-    </renderer.Property>
+  function property(
+    key: string,
+    schema: ResolvedSchema,
+    ctx: Context,
+    props?: {
+      required?: boolean;
+      nested?: boolean;
+    },
+  ) {
+    if (schema === true) {
+      return <renderer.Property name={key} type="any" {...props} />;
+    } else if (schema === false) {
+      return <renderer.Property name={key} type="never" {...props} />;
+    }
+
+    if ((schema.readOnly && !readOnly) || (schema.writeOnly && !writeOnly))
+      return;
+
+    return (
+      <renderer.Property
+        name={key}
+        type={schemaToString(schema)}
+        deprecated={schema.deprecated}
+        {...props}
+      >
+        {schema.description && <Markdown text={schema.description} />}
+        {propertyInfo(schema)}
+        {propertyBody(
+          schema,
+          (child, ctx) => primitiveBody(child, ctx, true, true),
+          ctx,
+        )}
+      </renderer.Property>
+    );
+  }
+
+  const context: Context = {
+    stack: schemaStack(),
+  };
+  if (
+    typeof schema === 'boolean' ||
+    as === 'property' ||
+    !isComplexType(schema)
+  )
+    return property(name, schema, context, { required });
+  return propertyBody(
+    schema,
+    (child, ctx) => primitiveBody(child, ctx, false, false),
+    context,
   );
 }
 
@@ -290,7 +369,9 @@ function schemaStack(parent?: SchemaStack): SchemaStack {
 /**
  * Check if the schema needs another collapsible to explain
  */
-function isComplexType(schema: ResolvedSchema): boolean {
+function isComplexType(
+  schema: ResolvedSchema,
+): schema is Exclude<ResolvedSchema, boolean> {
   if (typeof schema === 'boolean') return false;
   const arr = schema.anyOf ?? schema.oneOf ?? schema.allOf;
   if (arr && arr.some(isComplexType)) return true;
@@ -301,4 +382,27 @@ function isComplexType(schema: ResolvedSchema): boolean {
       schema.items != null &&
       isComplexType(schema.items))
   );
+}
+
+function getRange(
+  value: string,
+  min: number | undefined,
+  exclusiveMin: number | undefined,
+  max: number | undefined,
+  exclusiveMax: number | undefined,
+) {
+  const out = [];
+  if (min) {
+    out.push(`${min} <=`);
+  } else if (exclusiveMin) {
+    out.push(`${exclusiveMin} <`);
+  }
+
+  out.push(value);
+  if (max) {
+    out.push(`<= ${max}`);
+  } else if (exclusiveMax) {
+    out.push(`< ${exclusiveMax}`);
+  }
+  if (out.length > 1) return out.join(' ');
 }

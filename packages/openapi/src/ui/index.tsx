@@ -19,13 +19,7 @@ export function Root({
   ...props
 }: RootProps & HTMLAttributes<HTMLDivElement>) {
   return (
-    <div
-      className={cn(
-        'flex flex-col gap-24 text-sm text-fd-muted-foreground',
-        className,
-      )}
-      {...props}
-    >
+    <div className={cn('flex flex-col gap-24 text-sm', className)} {...props}>
       <ApiProvider
         mediaAdapters={
           Object.fromEntries(
@@ -81,27 +75,31 @@ export function Property({
   type,
   required,
   deprecated,
-  children,
+  nested,
+  ...props
 }: PropertyProps) {
   return (
-    <div className="rounded-xl border bg-fd-card p-3 prose-no-margin">
-      <div className="flex flex-row flex-wrap items-center gap-4 mb-2">
-        <code>{name}</code>
-        {required ? (
-          <Badge color="red" className="text-xs">
-            Required
-          </Badge>
-        ) : null}
-        {deprecated ? (
+    <div
+      className={cn(
+        'text-sm prose-no-margin',
+        nested ? 'py-3' : 'p-3 border rounded-xl bg-fd-card',
+      )}
+    >
+      <div className="flex flex-wrap items-center gap-3 mb-3">
+        <span className="px-1 py-0.5 border rounded-md border-fd-primary/10 bg-fd-primary/10 font-mono text-xs text-fd-primary sm:text-[13px]">
+          {name}
+          {required === false && '?'}
+        </span>
+        <span className="text-xs me-auto font-mono text-fd-muted-foreground">
+          {type}
+        </span>
+        {deprecated && (
           <Badge color="yellow" className="text-xs">
             Deprecated
           </Badge>
-        ) : null}
-        <span className="ms-auto text-xs font-mono text-fd-muted-foreground">
-          {type}
-        </span>
+        )}
       </div>
-      {children}
+      {props.children}
     </div>
   );
 }
@@ -128,15 +126,17 @@ export function ObjectCollapsible(props: {
     <Collapsible {...props}>
       <CollapsibleTrigger
         className={cn(
-          buttonVariants({ color: 'outline', size: 'sm' }),
-          'group rounded-full px-2 py-1.5 text-fd-muted-foreground',
+          buttonVariants({ color: 'secondary', size: 'sm' }),
+          'group px-3 py-2 data-[state=open]:rounded-b-none data-[state=open]:border-b-0',
         )}
       >
         {props.name}
-        <ChevronDown className="size-4 group-data-[state=open]:rotate-180" />
+        <ChevronDown className="size-4 text-fd-muted-foreground group-data-[state=open]:rotate-180" />
       </CollapsibleTrigger>
-      <CollapsibleContent className="-mx-2">
-        <div className="flex flex-col gap-2 p-2">{props.children}</div>
+      <CollapsibleContent className="-me-3">
+        <div className="flex flex-col gap-8 border-s border-y rounded-b-lg px-3">
+          {props.children}
+        </div>
       </CollapsibleContent>
     </Collapsible>
   );
