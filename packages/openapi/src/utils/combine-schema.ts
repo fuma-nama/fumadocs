@@ -30,6 +30,8 @@ export function combineSchema(schema: ParsedSchema[]): ParsedSchema {
     }
 
     for (const key of ['properties', 'patternProperties'] as const) {
+      if (!s[key]) continue;
+
       result[key] ??= {};
       Object.assign(result[key], s[key]);
     }
