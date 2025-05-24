@@ -1,5 +1,15 @@
 # next-docs-mdx
 
+## 11.6.6
+
+### Patch Changes
+
+- cd42e78: Support last modified time on Async Mode
+- Updated dependencies [1b999eb]
+- Updated dependencies [961b67e]
+- Updated dependencies [7d78bc5]
+  - fumadocs-core@15.4.0
+
 ## 11.6.5
 
 ### Patch Changes
