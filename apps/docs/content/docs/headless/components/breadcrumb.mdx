@@ -1,16 +1,15 @@
 ---
 title: Breadcrumb
-description: The navigation component at the top of screen
+description: The navigation component at the top of the screen
 ---
 
-A hook for implementing Breadcrumb in your documentation, it returns the path to
-a page based on the given page tree.
+A hook for implementing Breadcrumb in your documentation. It returns breadcrumb items for a page based on the given page tree.
 
-> If present, the index page of a folder will be used as the item
+> If present, the index page of a folder will be used as the item.
 
 ## Usage
 
-it exports a `useBreadcrumb` hook:
+It exports a `useBreadcrumb` hook:
 
 ```ts twoslash
 declare const tree: any;
@@ -66,7 +65,7 @@ export function Breadcrumb({ tree }: { tree: PageTree.Root }) {
 }
 ```
 
-You can use it by passing the page tree via `tree` in a server component.
+You can use it by passing the page tree via `tree` prop in a server component.
 
 ### Breadcrumb Item
 
