@@ -14,7 +14,7 @@ interface SearchToggleProps
 
 export function SearchToggle({
   hideIfDisabled,
-  size = 'icon',
+  size = 'icon-sm',
   color = 'ghost',
   ...props
 }: SearchToggleProps) {
@@ -37,7 +37,7 @@ export function SearchToggle({
         setOpenSearch(true);
       }}
     >
-      <Search className="p-px" />
+      <Search />
     </button>
   );
 }

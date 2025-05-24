@@ -99,13 +99,6 @@ export function MenuTrigger({
     <NavigationMenuTrigger
       {...props}
       onPointerMove={enableHover ? undefined : (e) => e.preventDefault()}
-      className={cn(
-        buttonVariants({
-          size: 'icon',
-          color: 'ghost',
-        }),
-        props.className,
-      )}
     >
       {props.children}
     </NavigationMenuTrigger>
@@ -118,7 +111,7 @@ export function MenuContent(
   return (
     <NavigationMenuContent
       {...props}
-      className={cn('flex flex-col px-4 pb-4', props.className)}
+      className={cn('flex flex-col p-4', props.className)}
     >
       {props.children}
     </NavigationMenuContent>

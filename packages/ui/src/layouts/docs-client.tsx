@@ -1,6 +1,6 @@
 'use client';
 
-import { Menu, Sidebar as SidebarIcon } from 'lucide-react';
+import { Sidebar as SidebarIcon } from 'lucide-react';
 import { type ComponentProps } from 'react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
@@ -41,13 +41,13 @@ export function NavbarSidebarTrigger({
       className={cn(
         buttonVariants({
           color: 'ghost',
-          size: 'icon',
+          size: 'icon-sm',
           className,
         }),
       )}
       onClick={() => setOpen((prev) => !prev)}
     >
-      <Menu />
+      <SidebarIcon />
     </button>
   );
 }
@@ -74,7 +74,7 @@ export function CollapsibleControl() {
       >
         <SidebarIcon />
       </SidebarCollapseTrigger>
-      <SearchToggle size="icon-sm" className="rounded-lg" hideIfDisabled />
+      <SearchToggle className="rounded-lg" hideIfDisabled />
     </div>
   );
 }

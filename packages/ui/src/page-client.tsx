@@ -3,7 +3,6 @@
 import {
   type ComponentProps,
   Fragment,
-  type HTMLAttributes,
   useEffect,
   useMemo,
   useRef,
@@ -82,7 +81,7 @@ export function TocPopoverTrigger({
         </span>
       </span>
       <ChevronDown
-        className={cn('transition-transform', open && 'rotate-180')}
+        className={cn('transition-transform mx-0.5', open && 'rotate-180')}
       />
     </CollapsibleTrigger>
   );
@@ -158,7 +157,7 @@ export function TocPopoverContent(props: ComponentProps<'div'>) {
   );
 }
 
-export function TocPopover(props: HTMLAttributes<HTMLDivElement>) {
+export function TocPopover(props: ComponentProps<'div'>) {
   const ref = useRef<HTMLElement>(null);
   const [open, setOpen] = useState(false);
   const { tocNav } = usePageStyles();
@@ -216,7 +215,7 @@ export function TocPopover(props: HTMLAttributes<HTMLDivElement>) {
   );
 }
 
-export function PageBody(props: HTMLAttributes<HTMLDivElement>) {
+export function PageBody(props: ComponentProps<'div'>) {
   const { page } = usePageStyles();
 
   return (
@@ -230,7 +229,7 @@ export function PageBody(props: HTMLAttributes<HTMLDivElement>) {
   );
 }
 
-export function PageArticle(props: HTMLAttributes<HTMLElement>) {
+export function PageArticle(props: ComponentProps<'article'>) {
   const { article } = usePageStyles();
 
   return (

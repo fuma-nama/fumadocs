@@ -4,7 +4,7 @@ import { type ButtonHTMLAttributes, type HTMLAttributes } from 'react';
 import { useSidebar } from '@/contexts/sidebar';
 import { useNav } from '@/contexts/layout';
 import { buttonVariants } from '@/components/ui/button';
-import { Menu } from 'lucide-react';
+import { Sidebar as SidebarIcon } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import { usePathname } from 'fumadocs-core/framework';
 import { isActive } from '@/utils/is-active';
@@ -35,9 +35,10 @@ export function Navbar({
   );
 }
 
-export function NavbarSidebarTrigger(
-  props: ButtonHTMLAttributes<HTMLButtonElement>,
-) {
+export function NavbarSidebarTrigger({
+  className,
+  ...props
+}: ButtonHTMLAttributes<HTMLButtonElement>) {
   const { setOpen } = useSidebar();
 
   return (
@@ -46,13 +47,13 @@ export function NavbarSidebarTrigger(
       className={cn(
         buttonVariants({
           color: 'ghost',
-          size: 'icon',
+          size: 'icon-sm',
+          className,
         }),
-        props.className,
       )}
       onClick={() => setOpen((prev) => !prev)}
     >
-      <Menu />
+      <SidebarIcon />
     </button>
   );
 }
