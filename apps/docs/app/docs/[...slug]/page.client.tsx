@@ -15,11 +15,22 @@ export function LLMCopyButton({ slug }: { slug: string[] }) {
 
     const url = `/llms.mdx/${slug.join('/')}`;
     try {
-      const content: string =
-        cache.get(url) ?? (await fetch(url).then((res) => res.text()));
+      const cached = cache.get(url);
 
-      cache.set(url, content);
-      await navigator.clipboard.writeText(content);
+      if (cached) {
+        await navigator.clipboard.writeText(cached);
+      } else {
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            'text/plain': fetch(url).then(async (res) => {
+              const content = await res.text();
+              cache.set(url, content);
+
+              return content;
+            }),
+          }),
+        ]);
+      }
     } finally {
       setLoading(false);
     }
