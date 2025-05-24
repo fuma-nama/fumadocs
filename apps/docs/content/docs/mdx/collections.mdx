@@ -37,19 +37,19 @@ export const metaFiles = defineCollections({
 
 - `type: meta`
 
-  Accept JSON/YAML Files, available options:
+  Accept JSON/YAML files, available options:
 
   <AutoTypeTable path="./content/docs/mdx/props.ts" name="MetaCollection" />
 
 - `type: doc`
 
-  Markdown/MDX Documents, available options:
+  Markdown/MDX documents, available options:
 
   <AutoTypeTable path="./content/docs/mdx/props.ts" name="DocCollection" />
 
 ### `dir`
 
-Directories to scan input files.
+Directories to scan for input files.
 
 ### `schema`
 
@@ -68,10 +68,10 @@ export const blog = defineCollections({
 });
 ```
 
-> [Standard Schema](https://standardschema.dev) compatible libraries, including Zod are supported.
+> [Standard Schema](https://standardschema.dev) compatible libraries, including Zod, are supported.
 
-Note that the validation is done by build time, hence the output must be serializable.
-You can also pass a function and receives the transform context.
+Note that the validation is done at build time, hence the output must be serializable.
+You can also pass a function that receives the transform context.
 
 ```ts
 import { defineCollections } from 'fumadocs-mdx/config';
@@ -94,7 +94,7 @@ export const blog = defineCollections({
 
 ### `mdxOptions`
 
-Customise MDX options on collection level.
+Customise MDX options at the collection level.
 
 ```ts title="source.config.ts"
 import { defineCollections, getDefaultMDXOptions } from 'fumadocs-mdx/config';
@@ -123,7 +123,7 @@ export const blog = defineCollections({
 });
 ```
 
-> This API only available on `doc` type.
+> This API is only available on `doc` type.
 
 ## Define Docs
 

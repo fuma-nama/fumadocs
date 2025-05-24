@@ -5,12 +5,12 @@ description: Customise the Next.js loader
 
 ## Plugin Options
 
-Fumadocs MDX offers loaders and a Fumadocs [Source API](/docs/headless/source-api) adapter to integrate with Fumadocs.
+Fumadocs MDX offers loaders and a Fumadocs [Source API](/docs/headless/source-api) adapter for integration with Fumadocs.
 You can configure the plugin by passing options to `createMDX` in `next.config.mjs`.
 
 ### Config Path
 
-Customise the path of config file.
+Customise the config file path.
 
 ```ts
 import { createMDX } from 'fumadocs-mdx/next';
@@ -22,5 +22,5 @@ const withMDX = createMDX({
 
 ### Development Server
 
-When running in development mode (`next dev`), a file watcher will be started to watch for changes.
+When running in development mode (`next dev`), a file watcher starts to monitor for changes.
 It automatically re-generates the index file in `.source` folder, ensuring Next.js hot reload is working properly.
