@@ -88,7 +88,7 @@ export class Storage {
   }
 
   list(): File[] {
-    return [...this.files.values()];
+    return Array.from(this.files.values());
   }
 
   makeDir(path: string): void {

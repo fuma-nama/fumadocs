@@ -73,22 +73,31 @@ function isPageFile(node: Folder | PageFile | MetaFile): node is PageFile {
 /**
  * @param nodes - All nodes to be built (in default locale)
  * @param ctx - Context
- * @param skipIndex - Skip index
+ * @param filter - filter nodes to be built
+ * @param reversed - return in reversed order
  * @returns Nodes with specified locale in context (sorted)
  */
 function buildAll(
   nodes: (Folder | MetaFile | PageFile)[],
   ctx: PageTreeBuilderContext,
-  skipIndex: boolean,
+  filter?: (node: Folder | MetaFile | PageFile) => boolean,
+  reversed = false,
 ): PageTree.Node[] {
+  const { localeStorage } = ctx;
   const output: PageTree.Node[] = [];
-  const folders: PageTree.Folder[] = [];
 
-  for (const node of [...nodes].sort((a, b) =>
-    a.file.name.localeCompare(b.file.name),
-  )) {
+  for (const node of nodes.toSorted((a, b) => {
+    let result;
+    if (isPageFile(a) && 'children' in b) result = -1;
+    else if ('children' in a && isPageFile(b)) result = 1;
+    else result = a.file.name.localeCompare(b.file.name);
+
+    return reversed ? result * -1 : result;
+  })) {
+    if (filter && !filter(node)) continue;
+
     if (isPageFile(node)) {
-      const localized = ctx.localeStorage?.read(
+      const localized = localeStorage?.read(
         joinPath(node.file.dirname, node.file.name),
         'page',
       );
@@ -96,18 +105,16 @@ function buildAll(
       const treeNode = buildFileNode(localized ?? node, ctx);
 
       if (node.file.name === 'index') {
-        if (!skipIndex) output.unshift(treeNode);
-      } else {
-        output.push(treeNode);
+        output.unshift(treeNode);
+        continue;
       }
-    }
 
-    if ('children' in node) {
-      folders.push(buildFolderNode(node, false, ctx));
+      output.push(treeNode);
+    } else if ('children' in node) {
+      output.push(buildFolderNode(node, false, ctx));
     }
   }
 
-  output.push(...folders);
   return output;
 }
 
@@ -119,17 +126,18 @@ function resolveFolderItem(
   addedNodePaths: Set<string>,
 ): PageTree.Node[] | typeof rest | typeof restReversed {
   if (item === rest || item === restReversed) return item;
+  const { options, storage, localeStorage } = ctx;
 
   let match = separator.exec(item);
   if (match?.groups) {
     const node: PageTree.Separator = {
       $id: `${folder.file.path}#${idx}`,
       type: 'separator',
-      icon: ctx.options.resolveIcon?.(match.groups.icon),
+      icon: options.resolveIcon?.(match.groups.icon),
       name: match.groups.name,
     };
 
-    return [ctx.options.attachSeparator?.(node) ?? node];
+    return [options.attachSeparator?.(node) ?? node];
   }
 
   match = link.exec(item);
@@ -140,17 +148,17 @@ function resolveFolderItem(
 
     const node: PageTree.Item = {
       type: 'page',
-      icon: ctx.options.resolveIcon?.(icon),
+      icon: options.resolveIcon?.(icon),
       name,
       url,
       external: !isRelative,
     };
 
-    return [ctx.options.attachFile?.(node) ?? node];
+    return [options.attachFile?.(node) ?? node];
   }
 
-  const isExcept = item.startsWith(excludePrefix),
-    isExtract = item.startsWith(extractPrefix);
+  const isExcept = item.startsWith(excludePrefix);
+  const isExtract = !isExcept && item.startsWith(extractPrefix);
 
   let filename = item;
   if (isExcept) {
@@ -162,9 +170,9 @@ function resolveFolderItem(
   const path = joinPath(folder.file.path, filename);
 
   const itemNode =
-    ctx.storage.readDir(path) ??
-    ctx.localeStorage?.read(path, 'page') ??
-    ctx.storage.read(path, 'page');
+    storage.readDir(path) ??
+    localeStorage?.read(path, 'page') ??
+    storage.read(path, 'page');
   if (!itemNode) return [];
 
   addedNodePaths.add(itemNode.file.path);
@@ -184,48 +192,55 @@ function buildFolderNode(
   isGlobalRoot: boolean,
   ctx: PageTreeBuilderContext,
 ): PageTree.Folder {
+  const { storage, localeStorage, options } = ctx;
   const metaPath = joinPath(folder.file.path, 'meta');
   const meta =
-    ctx.localeStorage?.read(metaPath, 'meta') ??
-    ctx.storage.read(metaPath, 'meta');
+    localeStorage?.read(metaPath, 'meta') ?? storage.read(metaPath, 'meta');
 
   const indexPath = joinPath(folder.file.path, 'index');
   const indexFile =
-    ctx.localeStorage?.read(indexPath, 'page') ??
-    ctx.storage.read(indexPath, 'page');
+    localeStorage?.read(indexPath, 'page') ?? storage.read(indexPath, 'page');
 
   const isRoot = meta?.data.root ?? isGlobalRoot;
-  const index = indexFile ? buildFileNode(indexFile, ctx) : undefined;
-
-  const addedNodePaths = new Set<string>();
+  let index: PageTree.Item | undefined;
   let children: PageTree.Node[];
 
   if (!meta?.data.pages) {
-    children = buildAll(folder.children, ctx, !isRoot);
+    if (indexFile) index = buildFileNode(indexFile, ctx);
+
+    children = buildAll(folder.children, ctx, (node) => {
+      return node.file.name !== 'index' || isRoot;
+    });
   } else {
+    const addedNodePaths = new Set<string>();
     const resolved = meta.data.pages.flatMap<
       PageTree.Node | typeof rest | typeof restReversed
-    >((item, i) => {
-      return resolveFolderItem(folder, item, ctx, i, addedNodePaths);
-    });
+    >((item, i) => resolveFolderItem(folder, item, ctx, i, addedNodePaths));
 
-    const restNodes = buildAll(
-      folder.children.filter((node) => !addedNodePaths.has(node.file.path)),
-      ctx,
-      !isRoot,
-    );
+    if (indexFile && (isRoot || !addedNodePaths.has(indexFile.file.path))) {
+      index = buildFileNode(indexFile, ctx);
+    }
 
-    const nodes = resolved?.flatMap<PageTree.Node>((item) => {
-      if (item === rest) {
-        return restNodes;
-      } else if (item === restReversed) {
-        return restNodes.reverse();
+    for (let i = 0; i < resolved.length; i++) {
+      if (resolved[i] === rest || resolved[i] === restReversed) {
+        resolved.splice(
+          i,
+          1,
+          ...buildAll(
+            folder.children,
+            ctx,
+            (node) => {
+              if (node.file.name === 'index' && !isRoot) return false;
+              return !addedNodePaths.has(node.file.path);
+            },
+            resolved[i] === restReversed,
+          ),
+        );
+        break;
       }
+    }
 
-      return item;
-    });
-
-    children = nodes ?? restNodes;
+    children = resolved as PageTree.Node[];
   }
 
   const node: PageTree.Folder = {
@@ -235,45 +250,42 @@ function buildFolderNode(
       index?.name ??
       // resolve folder groups like (group_name)
       pathToName(group.exec(folder.file.name)?.[1] ?? folder.file.name),
-    icon: ctx.options.resolveIcon?.(meta?.data.icon) ?? index?.icon,
+    icon: options.resolveIcon?.(meta?.data.icon) ?? index?.icon,
     root: meta?.data.root,
     defaultOpen: meta?.data.defaultOpen,
     description: meta?.data.description,
-    index:
-      isRoot || (indexFile && !addedNodePaths.has(indexFile.file.path))
-        ? index
-        : undefined,
+    index,
     children,
     $id: folder.file.path,
-    $ref: !ctx.options.noRef
+    $ref: !options.noRef
       ? {
           metaFile: meta?.file.path,
         }
       : undefined,
   };
 
-  return ctx.options.attachFolder?.(node, folder, meta) ?? node;
+  return options.attachFolder?.(node, folder, meta) ?? node;
 }
 
 function buildFileNode(
   file: PageFile,
-  ctx: PageTreeBuilderContext,
+  { options, getUrl, locale }: PageTreeBuilderContext,
 ): PageTree.Item {
   const item: PageTree.Item = {
     $id: file.file.path,
     type: 'page',
     name: file.data.data.title ?? pathToName(file.file.name),
     description: file.data.data.description,
-    icon: ctx.options.resolveIcon?.(file.data.data.icon),
-    url: ctx.getUrl(file.data.slugs, ctx.locale),
-    $ref: !ctx.options.noRef
+    icon: options.resolveIcon?.(file.data.data.icon),
+    url: getUrl(file.data.slugs, locale),
+    $ref: !options.noRef
       ? {
           file: file.file.path,
         }
       : undefined,
   };
 
-  return ctx.options.attachFile?.(item, file) ?? item;
+  return options.attachFile?.(item, file) ?? item;
 }
 
 function build(ctx: PageTreeBuilderContext): PageTree.Root {
@@ -281,7 +293,7 @@ function build(ctx: PageTreeBuilderContext): PageTree.Root {
   const folder = buildFolderNode(root, true, ctx);
 
   return {
-    $id: ctx.locale ? ctx.locale : 'root',
+    $id: ctx.locale ?? 'root',
     name: folder.name,
     children: folder.children,
   };
