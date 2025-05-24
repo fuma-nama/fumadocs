@@ -3,13 +3,13 @@ title: Link
 description: A Link component that handles external links
 ---
 
-A component that wraps `next/link` and handles external links in the document.
+A component that wraps `next/link` and automatically handles external links in the document.
 When an external URL is detected, it uses `<a>` instead of the Next.js Link
-Component. `rel` property is automatically generated.
+Component. The `rel` property is automatically generated.
 
 ## Usage
 
-Same as using `<a>`.
+Usage is the same as using `<a>`.
 
 ```mdx
 import Link from 'fumadocs-core/link';
@@ -19,7 +19,7 @@ import Link from 'fumadocs-core/link';
 
 ### External
 
-You can force an URL to be external by passing an `external` prop.
+You can force a URL to be external by passing an `external` prop.
 
 ### Dynamic hrefs
 

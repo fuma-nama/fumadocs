@@ -7,11 +7,11 @@ icon: Album
 Fumadocs MDX is the official content source of Fumadocs.
 
 It provides the tool for Next.js to transform content into type-safe data, similar to Content Collections.
-This library made for Next.js, you can use it to handle blog and other contents.
+This library is made for Next.js, you can use it to handle blog and other contents.
 
 ## Getting Started
 
-Setup Fumadocs MDX for your Next.js application.
+Set up Fumadocs MDX for your Next.js application.
 
 ```package-install
 fumadocs-mdx @types/mdx
@@ -40,9 +40,9 @@ export default withMDX(config);
 
 ### Defining Collections
 
-**Collection** refers to a collection containing a certain type of files, you can define collections by creating a `source.config.ts` file.
+**Collection** refers to a collection containing a certain type of files. You can define collections by creating a `source.config.ts` file.
 
-Fumadocs MDX transforms collections into arrays of type-safe data, accessible in your app, available collections:
+Fumadocs MDX transforms collections into arrays of type-safe data, accessible in your app. Available collections:
 
 <Tabs items={["doc", "meta", 'docs']}>
 
@@ -114,9 +114,9 @@ For example, a `doc` collection will transform the `.md` and `.mdx` files:
 
 ### Output Folder
 
-A `.source` folder is generated in root directory when you run `next dev` or `next build`, it contains all output data and types, you should add it to `.gitignore`.
+A `.source` folder is generated in the root directory when you run `next dev` or `next build`. It contains all output data and types, you should add it to `.gitignore`.
 
-The `fumadocs-mdx` command also generates types for `.source` folder, add it as a post install script to ensure types are generated when initializing the project.
+The `fumadocs-mdx` command also generates types for `.source` folder. Add it as a post install script to ensure types are generated when initializing the project.
 
 ```json title="package.json"
 {
@@ -128,7 +128,7 @@ The `fumadocs-mdx` command also generates types for `.source` folder, add it as 
 
 ### Accessing Collections
 
-**Collection Output** is the generated data of a collection, it can have a different type/shape depending on the collection type and schema.
+**Collection Output** is the generated data of a collection. It can have a different type/shape depending on the collection type and schema.
 
 You can access the collection output from `.source` folder with its original name:
 
@@ -152,7 +152,7 @@ import { docs } from '@/.source';
 console.log(docs);
 ```
 
-> Make sure you are importing from `.source` rather than `source.config.ts`, we will import it with `@/.source` import alias in this guide.
+> Make sure you are importing from `.source` rather than `source.config.ts`. We will import it with `@/.source` import alias in this guide.
 
 ## Integrate with Fumadocs
 

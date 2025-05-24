@@ -22,7 +22,7 @@ await compile('...', {
 
 ### Output
 
-A codeblock wrapped in `<pre />`.
+A codeblock wrapped in `<pre />` element.
 
 ```html
 <pre>
@@ -32,7 +32,7 @@ A codeblock wrapped in `<pre />`.
 
 ### Meta
 
-It parses the `title` meta string, and add it to the `pre` element via attribute.
+It parses the `title` meta string, and adds it to the `pre` element as an attribute.
 
 ````mdx
 ```js title="Title"
@@ -50,7 +50,7 @@ See https://shiki.style/packages/rehype#inline-code.
 
 ### Icon
 
-Add an icon according to the language of codeblock.
+Adds an icon according to the language of the codeblock.
 It outputs HTML, you might need to render it with React `dangerouslySetInnerHTML`.
 
 ```jsx
@@ -61,4 +61,4 @@ Disable or customise icons with the `icon` option.
 
 ### More Options
 
-see [Shiki](https://shiki.style).
+See [Shiki](https://shiki.style).
