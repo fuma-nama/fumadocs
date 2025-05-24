@@ -86,7 +86,7 @@ function buildAll(
   const { localeStorage } = ctx;
   const output: PageTree.Node[] = [];
 
-  for (const node of nodes.toSorted((a, b) => {
+  for (const node of [...nodes].sort((a, b) => {
     let result;
     if (isPageFile(a) && 'children' in b) result = -1;
     else if ('children' in a && isPageFile(b)) result = 1;
