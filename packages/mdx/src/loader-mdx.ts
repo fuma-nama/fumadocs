@@ -78,7 +78,7 @@ export default async function loader(
   try {
     // ensure the line number is correct in dev mode
     const lineOffset = '\n'.repeat(
-      this.mode === 'development' ? lines(matter.content) : 0,
+      this.mode === 'development' ? lines(matter.matter) : 0,
     );
 
     const file = await buildMDX(
