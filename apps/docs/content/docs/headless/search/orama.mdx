@@ -146,23 +146,20 @@ export const source = loader({
   ../../examples/i18n/app/api/search/route-full.ts
 </include>
 
-### Update Search Client
+and update your search clients:
 
-<Callout type="info" title="For Fumadocs UI">
-  You can ignore this, Fumadocs UI handles this when you have i18n configured
-  correctly.
-</Callout>
+- **Fumadocs UI**: No changes needed, Fumadocs UI handles this when you have i18n configured correctly.
+- **Search Client**:
+  Add `locale` to the search client, this will only allow pages with specified locale to be searchable by the user.
 
-Add `locale` to the search client, this will only allow pages with specified locale to be searchable by the user.
-
-```ts
-const { search, setSearch, query } = useDocsSearch(
-  {
-    type: 'fetch',
-  },
-  locale,
-);
-```
+  ```ts
+  const { search, setSearch, query } = useDocsSearch(
+    {
+      type: 'fetch',
+    },
+    locale,
+  );
+  ```
 
 ## Static Export
 
@@ -203,8 +200,7 @@ and update your search clients:
     Static Search requires clients to download the exported search indexes.
     For large docs sites, its size can be really big.
 
-    Especially with i18n (e.g. Chinese tokenizers), the bundle size of tokenizers can exceed ~500MB.
-    You should use 3rd party solutions like Algolia for these cases.
+    You should use cloud solutions like Orama Cloud or Algolia for these cases.
 
 </Callout>
 

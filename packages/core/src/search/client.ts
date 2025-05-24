@@ -77,10 +77,9 @@ export function useDocsSearch(
       }
 
       if (client.type === 'algolia') {
-        const { index, type: _, ...rest } = client;
         const { searchDocs } = await import('./client/algolia');
 
-        return searchDocs(index, debouncedValue, tag, rest);
+        return searchDocs(debouncedValue, tag, locale, client);
       }
 
       if (client.type === 'orama-cloud') {

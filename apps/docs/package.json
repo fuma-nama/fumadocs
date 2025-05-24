@@ -64,7 +64,7 @@
     "@types/node": "22.15.21",
     "@types/react": "^19.1.5",
     "@types/react-dom": "^19.1.5",
-    "algoliasearch": "4.24.0",
+    "algoliasearch": "5.25.0",
     "eslint-config-custom": "workspace:*",
     "gray-matter": "^4.0.3",
     "next-validate-link": "^1.5.2",
