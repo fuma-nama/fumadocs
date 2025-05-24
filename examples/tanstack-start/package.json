@@ -10,8 +10,8 @@
   "private": true,
   "dependencies": {
     "@fumadocs/mdx-remote": "workspace:*",
-    "@tanstack/react-router": "^1.120.3",
-    "@tanstack/react-start": "^1.120.3",
+    "@tanstack/react-router": "^1.120.9",
+    "@tanstack/react-start": "^1.120.9",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "gray-matter": "^4.0.3",
@@ -22,9 +22,9 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.7",
-    "@types/react": "^19.1.4",
+    "@types/react": "^19.1.5",
     "@types/react-dom": "^19.1.5",
-    "@vitejs/plugin-react": "^4.4.1",
+    "@vitejs/plugin-react": "^4.5.0",
     "tailwindcss": "^4.1.7",
     "typescript": "^5.8.3",
     "vite": "^6.3.5",

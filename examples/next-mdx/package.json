@@ -16,12 +16,12 @@
     "react-dom": "19.1.0"
   },
   "devDependencies": {
-    "postcss": "^8.5.3",
-    "tailwindcss": "^4.1.7",
     "@tailwindcss/postcss": "^4.1.7",
     "@types/mdx": "^2.0.13",
-    "@types/react": "^19.1.4",
+    "@types/react": "^19.1.5",
     "@types/react-dom": "^19.1.5",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^4.1.7",
     "typescript": "^5.8.3"
   }
 }
