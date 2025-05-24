@@ -15,7 +15,7 @@ export default defineConfig({
   format: 'esm',
   entry: [
     'src/{toc,link,breadcrumb,sidebar,dynamic-link}.tsx',
-    'src/{server,source,mdx-plugins}/index.ts',
+    'src/{server,source,mdx-plugins,content}/index.ts',
     'src/search/client.ts',
     'src/search/server.ts',
     'src/search/algolia.ts',

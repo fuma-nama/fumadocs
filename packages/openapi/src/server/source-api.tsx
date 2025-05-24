@@ -1,12 +1,16 @@
-import type { BuildPageTreeOptions } from 'fumadocs-core/source';
+import type { FileSystem } from 'fumadocs-core/source';
 import { MethodLabel } from '@/ui/components/method-label';
+import type { PageTree } from 'fumadocs-core/server';
 
 /**
  * Source API Integration
  *
  * Add this to page tree builder options
  */
-export const attachFile: BuildPageTreeOptions['attachFile'] = (node, file) => {
+export const attachFile = (
+  node: PageTree.Item,
+  file: FileSystem.PageFile | undefined,
+): PageTree.Item => {
   if (!file) return node;
   const data = file.data.data as object;
   let method: string | undefined;

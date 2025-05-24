@@ -23,11 +23,9 @@ let jsEngine: Promise<RegexEngine> | undefined;
 function getHighlightOptions(from: HighlightOptions): HighlightOptions {
   if (from.engine) return from;
 
-  if (!jsEngine) {
-    jsEngine = import('shiki/engine/javascript').then((res) =>
-      res.createJavaScriptRegexEngine(),
-    );
-  }
+  jsEngine ??= import('shiki/engine/javascript').then((res) =>
+    res.createJavaScriptRegexEngine(),
+  );
 
   return {
     ...from,
