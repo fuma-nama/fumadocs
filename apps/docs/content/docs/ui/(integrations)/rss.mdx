@@ -14,15 +14,17 @@ import { NextResponse } from 'next/server';
 
 export const revalidate = false;
 
+const baseUrl = 'https://fumadocs.dev';
+
 export function GET() {
   const feed = new Feed({
     title: 'Fumadocs Blog',
-    id: 'https://fumadocs.dev',
-    link: 'https://fumadocs.dev',
+    id: `${baseUrl}/blog`,
+    link: `${baseUrl}/blog`,
     language: 'en',
 
-    image: 'https://fumadocs.dev/banner.png',
-    favicon: 'https://fumadocs.dev/icon.png',
+    image: `${baseUrl}/banner.png`,
+    favicon: `${baseUrl}/icon.png`,
     copyright: 'All rights reserved 2025, Fuma Nama',
   });
 
@@ -31,7 +33,8 @@ export function GET() {
       id: page.url,
       title: page.data.title,
       description: page.data.description,
-      link: page.url,
+      link: `${baseUrl}${page.url}`,
+      date: new Date(page.data.date ?? Date.now()),
 
       author: [
         {
@@ -43,4 +46,23 @@ export function GET() {
 
   return new NextResponse(feed.rss2());
 }
+```
+
+You can add an alternates object to the metadata object with your feed’s title and URL.
+
+```ts title="app/layout.tsx"
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  alternates: {
+    types: {
+      'application/rss+xml': [
+        {
+          title: 'Fumadocs Blog',
+          url: 'https://fumadocs.dev/blog/index.xml',
+        },
+      ],
+    },
+  },
+};
 ```
