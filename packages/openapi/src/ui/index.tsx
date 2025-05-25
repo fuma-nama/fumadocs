@@ -81,11 +81,11 @@ export function Property({
   return (
     <div
       className={cn(
-        'text-sm prose-no-margin',
-        nested ? 'py-3' : 'p-3 border rounded-xl bg-fd-card',
+        'flex flex-col gap-3 text-sm',
+        !nested && 'p-3 border rounded-xl bg-fd-card',
       )}
     >
-      <div className="flex flex-wrap items-center gap-3 mb-3">
+      <div className="flex flex-wrap items-center gap-3 not-prose">
         <span className="px-1 py-0.5 border rounded-md border-fd-primary/10 bg-fd-primary/10 font-mono text-xs text-fd-primary sm:text-[13px]">
           {name}
           {required === false && '?'}
@@ -99,7 +99,7 @@ export function Property({
           </Badge>
         )}
       </div>
-      {props.children}
+      <div className="prose-no-margin empty:hidden">{props.children}</div>
     </div>
   );
 }
@@ -134,7 +134,7 @@ export function ObjectCollapsible(props: {
         <ChevronDown className="size-4 text-fd-muted-foreground group-data-[state=open]:rotate-180" />
       </CollapsibleTrigger>
       <CollapsibleContent className="-me-3">
-        <div className="flex flex-col gap-8 border-s border-y rounded-b-lg px-3">
+        <div className="border-s border-y rounded-b-lg p-3">
           {props.children}
         </div>
       </CollapsibleContent>

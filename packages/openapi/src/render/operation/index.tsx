@@ -23,7 +23,7 @@ import {
   APIExampleProvider,
   getAPIExamples,
 } from '@/render/operation/api-example';
-import { MethodLabel } from '@/ui/components/method-label';
+import { Badge, MethodLabel } from '@/ui/components/method-label';
 import { type SampleGenerator } from '@/requests/_shared';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import { getTypescriptSchema } from '@/utils/get-typescript-schema';
@@ -88,10 +88,16 @@ export function Operation({
     bodyNode = (
       <>
         {heading(headingLevel, 'Request Body', ctx)}
-        <div className="mb-4 p-3 bg-fd-card rounded-xl border flex flex-row items-center justify-between gap-2">
+        <div className="flex justify-between items-center gap-2 mb-4">
           <code>{type}</code>
-          {!body.required && (
-            <span className="text-xs text-fd-muted-foreground">Optional</span>
+          {body.required ? (
+            <Badge color="red" className="text-xs">
+              Required
+            </Badge>
+          ) : (
+            <Badge color="yellow" className="text-xs">
+              Optional
+            </Badge>
           )}
         </div>
         {body.description ? <Markdown text={body.description} /> : null}

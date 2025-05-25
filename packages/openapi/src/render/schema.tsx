@@ -192,11 +192,17 @@ export function Schema({
 
     if (fields.length === 0) return;
     return (
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col border divide-y divide-fd-border bg-fd-muted rounded-lg not-prose">
         {fields.map((field) => (
-          <span key={field.key}>
-            {field.key}: <code>{field.value}</code>
-          </span>
+          <div
+            key={field.key}
+            className="flex items-center text-[13px] px-3 py-2.5 justify-between gap-2"
+          >
+            <span className="font-medium">{field.key}</span>
+            <code className="texxt-xs text-fd-muted-foreground">
+              {field.value}
+            </code>
+          </div>
         ))}
       </div>
     );
