@@ -6,7 +6,7 @@ import {
   Collapsible,
   CollapsibleContent,
 } from 'fumadocs-ui/components/ui/collapsible';
-import { cvb } from '@/lib/cvb.config';
+import { cvb } from '@/lib/cn';
 import { usePathname } from 'next/navigation';
 
 const rateButtonVariants = cvb({

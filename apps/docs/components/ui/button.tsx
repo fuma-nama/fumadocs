@@ -1,4 +1,4 @@
-import { cvb } from '@/lib/cvb.config';
+import { cvb } from '@/lib/cn';
 
 const buttonVariants = cvb({
   base: 'inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-fd-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring disabled:pointer-events-none disabled:opacity-50',

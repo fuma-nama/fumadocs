@@ -56,7 +56,7 @@
     "access": "public"
   },
   "dependencies": {
-    "cvb": "^1.1.1",
+    "cvb": "^1.1.2",
     "js-yaml": "^4.1.0"
   }
 }

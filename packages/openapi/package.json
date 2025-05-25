@@ -58,7 +58,7 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@scalar/openapi-parser": "0.11.1",
     "ajv": "^8.17.1",
-    "cvb": "^1.1.1",
+    "cvb": "^1.1.2",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "github-slugger": "^2.0.0",

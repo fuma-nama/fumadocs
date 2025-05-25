@@ -12,7 +12,7 @@ import {
 } from 'react';
 import { Loader2, RefreshCw, Send, X } from 'lucide-react';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
-import { cx } from '@/lib/cvb.config';
+import { cn } from '@/lib/cn';
 import { buttonVariants } from '../../../../packages/ui/src/components/ui/button';
 import type { Processor } from './markdown-processor';
 import Link from 'fumadocs-core/link';
@@ -87,7 +87,7 @@ function SearchAIInput(props: FormHTMLAttributes<HTMLFormElement>) {
   return (
     <form
       {...props}
-      className={cx(
+      className={cn(
         'flex flex-row items-start rounded-xl border pe-2 bg-fd-popover text-fd-popover-foreground transition-colors shadow-lg',
         isLoading && 'bg-fd-muted',
         props.className,
@@ -183,19 +183,19 @@ function List(props: Omit<HTMLAttributes<HTMLDivElement>, 'dir'>) {
 
 function Input(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
   const ref = useRef<HTMLDivElement>(null);
-  const shared = cx('col-start-1 row-start-1 max-h-60 min-h-12 p-3');
+  const shared = cn('col-start-1 row-start-1 max-h-60 min-h-12 p-3');
 
   return (
     <div className="grid flex-1">
       <textarea
         id="nd-ai-input"
-        className={cx(
+        className={cn(
           shared,
           'resize-none bg-transparent placeholder:text-fd-muted-foreground focus-visible:outline-none',
         )}
         {...props}
       />
-      <div ref={ref} className={cx(shared, 'break-all invisible')}>
+      <div ref={ref} className={cn(shared, 'break-all invisible')}>
         {`${props.value?.toString() ?? ''}\n`}
       </div>
     </div>
@@ -225,7 +225,7 @@ function Message({ message }: { message: Message }) {
   return (
     <div>
       <p
-        className={cx(
+        className={cn(
           'mb-1 text-xs font-medium text-fd-muted-foreground',
           message.role === 'assistant' && 'text-fd-primary',
         )}

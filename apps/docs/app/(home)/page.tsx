@@ -1,4 +1,4 @@
-import { cvb, cx } from '@/lib/cvb.config';
+import { cvb, cn } from '@/lib/cn';
 import {
   BatteryChargingIcon,
   CpuIcon,
@@ -720,7 +720,7 @@ function Feature({
 }): React.ReactElement {
   return (
     <div
-      className={cx('border-l border-t px-6 py-12 md:py-16', className)}
+      className={cn('border-l border-t px-6 py-12 md:py-16', className)}
       {...props}
     >
       <div className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-fd-muted-foreground">

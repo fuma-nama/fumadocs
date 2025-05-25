@@ -1,4 +1,4 @@
-import { cx } from '@/lib/cvb.config';
+import { cn } from '@/lib/cn';
 import type { ComponentProps } from 'react';
 
 interface MarqueeProps extends ComponentProps<'div'> {
@@ -44,7 +44,7 @@ export function Marquee({
   return (
     <div
       {...props}
-      className={cx(
+      className={cn(
         'group flex overflow-hidden p-2 [--duration:40s] [--gap:1rem] [gap:var(--gap)]',
         vertical ? 'flex-col' : 'flex-row',
         className,
@@ -55,7 +55,7 @@ export function Marquee({
         .map((_, i) => (
           <div
             key={i}
-            className={cx(
+            className={cn(
               'flex shrink-0 justify-around [gap:var(--gap)]',
               vertical
                 ? 'animate-marquee-vertical flex-col'

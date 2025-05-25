@@ -1,4 +1,4 @@
-import { cx } from '@/lib/cvb.config';
+import { cn } from '@/lib/cn';
 import { fetchContributors } from '@/lib/get-contributors';
 import Image from 'next/image';
 import type { HTMLAttributes } from 'react';
@@ -24,7 +24,7 @@ export default async function ContributorCounter({
   return (
     <div
       {...props}
-      className={cx('flex flex-col items-center gap-4', props.className)}
+      className={cn('flex flex-col items-center gap-4', props.className)}
     >
       <div className="flex flex-row flex-wrap items-center justify-center md:pe-4">
         {topContributors.map((contributor, i) => (

@@ -87,8 +87,8 @@ importers:
         specifier: ^4.3.15
         version: 4.3.16(react@19.1.0)(zod@3.25.28)
       cvb:
-        specifier: ^1.1.1
-        version: 1.1.1
+        specifier: ^1.1.2
+        version: 1.1.2
       feed:
         specifier: ^5.0.1
         version: 5.0.1
@@ -1142,8 +1142,8 @@ importers:
         specifier: ^8.17.1
         version: 8.17.1
       cvb:
-        specifier: ^1.1.1
-        version: 1.1.1
+        specifier: ^1.1.2
+        version: 1.1.2
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
@@ -1230,8 +1230,8 @@ importers:
   packages/python:
     dependencies:
       cvb:
-        specifier: ^1.1.1
-        version: 1.1.1
+        specifier: ^1.1.2
+        version: 1.1.2
       js-yaml:
         specifier: ^4.1.0
         version: 4.1.0
@@ -1418,8 +1418,8 @@ importers:
         specifier: ^1.1.12
         version: 1.1.12(@types/react-dom@19.1.5(@types/react@19.1.5))(@types/react@19.1.5)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       cvb:
-        specifier: ^1.1.1
-        version: 1.1.1
+        specifier: ^1.1.2
+        version: 1.1.2
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
@@ -5429,8 +5429,8 @@ packages:
       typescript:
         optional: true
 
-  cvb@1.1.1:
-    resolution: {integrity: sha512-zGQwgE5GBEUo0xtlOEGaUVgoLKSrMMafsRc+1Lc5WOQGp+F+FLx/RhMOruUuvV7KTewzzrqMW9Z/eRjlt1Dj6w==}
+  cvb@1.1.2:
+    resolution: {integrity: sha512-UK2UUFzYhuDfvHLZqG8Su9X3ycQn1C2uI+i2wxKIPLsMP179S3jSbHWVZrsc1tGxU5EVZG6mAfxuVzKilkZPZQ==}
     engines: {node: '>=18.0.0'}
 
   cytoscape-cose-bilkent@4.1.0:
@@ -14987,7 +14987,7 @@ snapshots:
     optionalDependencies:
       typescript: 5.8.3
 
-  cvb@1.1.1: {}
+  cvb@1.1.2: {}
 
   cytoscape-cose-bilkent@4.1.0(cytoscape@3.32.0):
     dependencies:
