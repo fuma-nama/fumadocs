@@ -54,7 +54,7 @@ export function Navbar(props: ComponentProps<'div'>) {
         >
           <nav>{props.children}</nav>
         </NavigationMenuList>
-        <NavigationMenuViewport />
+        <NavigationMenuViewport className="text-fd-popover-foreground" />
       </header>
     </NavigationMenu>
   );

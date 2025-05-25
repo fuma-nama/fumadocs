@@ -17,7 +17,6 @@ import {
 } from 'react';
 import { useI18n } from '@/contexts/i18n';
 import { cn } from '@/utils/cn';
-import { useSidebar } from '@/contexts/sidebar';
 import { buttonVariants } from '@/components/ui/button';
 import {
   Dialog,
@@ -155,13 +154,11 @@ function SearchResults({
 }) {
   const { text } = useI18n();
   const router = useRouter();
-  const sidebar = useSidebar();
 
   const onOpen = ({ external, url }: ReactSortedResult) => {
     if (external) window.open(url, '_blank')?.focus();
     else router.push(url);
     onSelect?.(url);
-    sidebar.setOpen(false);
   };
 
   const onKey = useEffectEvent((e: KeyboardEvent) => {
