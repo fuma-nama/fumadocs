@@ -6,7 +6,15 @@ type Proxy = {
   [K in (typeof keys)[number]]: (req: NextRequest) => Promise<Response>;
 };
 
-export function createProxy(allowedUrls?: string[]): Proxy {
+type CreateProxyOptions = {
+  allowedUrls?: string[];
+  overrides?: {
+    request?: RequestInit,
+    response?: ResponseInit;
+  }
+}
+
+export function createProxy({ allowedUrls, overrides = {} }: CreateProxyOptions = {}): Proxy {
   const handlers: Partial<Proxy> = {};
 
   async function handler(req: NextRequest): Promise<Response> {
@@ -32,6 +40,7 @@ export function createProxy(allowedUrls?: string[]): Proxy {
 
     const clonedReq = new Request(url, {
       ...req,
+      ...overrides.request,
       cache: 'no-cache',
       mode: 'cors',
     });
@@ -52,6 +61,11 @@ export function createProxy(allowedUrls?: string[]): Proxy {
     }
 
     const headers = new Headers(res.headers);
+    if (overrides.response.headers) {
+      const overrideHeaders = new Headers(overrides.response.headers);
+      overrideHeaders.forEach((value, key) => headers.set(key, value));
+    }
+
     headers.forEach((_value, originalKey) => {
       const key = originalKey.toLowerCase();
       const notAllowed =
@@ -65,6 +79,7 @@ export function createProxy(allowedUrls?: string[]): Proxy {
 
     return new Response(res.body, {
       ...res,
+      ...overrides.response,
       headers,
     });
   }
