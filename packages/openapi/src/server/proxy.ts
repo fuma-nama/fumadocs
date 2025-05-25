@@ -61,7 +61,7 @@ export function createProxy({ allowedUrls, overrides = {} }: CreateProxyOptions 
     }
 
     const headers = new Headers(res.headers);
-    if (overrides.response.headers) {
+    if (overrides.response?.headers) {
       const overrideHeaders = new Headers(overrides.response.headers);
       overrideHeaders.forEach((value, key) => headers.set(key, value));
     }
