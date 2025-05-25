@@ -1,12 +1,11 @@
 'use client';
 import type { PageTree } from 'fumadocs-core/server';
 import { type ComponentProps, type ReactNode, useMemo } from 'react';
-import { cn } from '@/utils/cn';
+import { cn, cvb } from '@/utils/cn';
 import { TreeContextProvider, useTreeContext } from 'fumadocs-ui/contexts/tree';
 import Link from 'fumadocs-core/link';
 import { useSearchContext } from 'fumadocs-ui/contexts/search';
 import { useSidebar } from 'fumadocs-ui/contexts/sidebar';
-import { cva } from 'class-variance-authority';
 import { usePathname } from 'fumadocs-core/framework';
 
 export interface DocsLayoutProps {
@@ -96,17 +95,15 @@ function Sidebar() {
   );
 }
 
-const linkVariants = cva(
-  'flex items-center gap-2 w-full py-1.5 rounded-lg text-fd-foreground/80 [&_svg]:size-4',
-  {
-    variants: {
-      active: {
-        true: 'text-fd-primary font-medium',
-        false: 'hover:text-fd-accent-foreground',
-      },
+const linkVariants = cvb({
+  base: 'flex items-center gap-2 w-full py-1.5 rounded-lg text-fd-foreground/80 [&_svg]:size-4',
+  variants: {
+    active: {
+      true: 'text-fd-primary font-medium',
+      false: 'hover:text-fd-accent-foreground',
     },
   },
-);
+});
 
 function SidebarItem({
   item,
@@ -153,7 +150,7 @@ function SidebarItem({
           {item.index.name}
         </Link>
       ) : (
-        <p className={cn(linkVariants(), 'text-start')}>
+        <p className={linkVariants({ className: 'text-start' })}>
           {item.icon}
           {item.name}
         </p>

@@ -16,7 +16,7 @@ import {
   useState,
 } from 'react';
 import { useI18n } from '@/contexts/i18n';
-import { cn } from '@/utils/cn';
+import { cn, cvb } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import {
   Dialog,
@@ -25,7 +25,6 @@ import {
   DialogTitle,
 } from '@radix-ui/react-dialog';
 import type { SortedResult } from 'fumadocs-core/server';
-import { cva } from 'class-variance-authority';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 import { createContext, useRouter } from 'fumadocs-core/framework';
 
@@ -107,12 +106,10 @@ export function SearchDialog({
             type="button"
             aria-label="Close Search"
             onClick={() => onOpenChange(false)}
-            className={cn(
-              buttonVariants({
-                color: 'outline',
-                className: 'text-xs p-1.5',
-              }),
-            )}
+            className={buttonVariants({
+              color: 'outline',
+              className: 'text-xs p-1.5',
+            })}
           >
             Esc
           </button>
@@ -283,16 +280,14 @@ export interface TagsListProps extends ComponentProps<'div'> {
   allowClear?: boolean;
 }
 
-const itemVariants = cva(
-  'rounded-md border px-2 py-0.5 text-xs font-medium text-fd-muted-foreground transition-colors',
-  {
-    variants: {
-      active: {
-        true: 'bg-fd-accent text-fd-accent-foreground',
-      },
+const itemVariants = cvb({
+  base: 'rounded-md border px-2 py-0.5 text-xs font-medium text-fd-muted-foreground transition-colors',
+  variants: {
+    active: {
+      true: 'bg-fd-accent text-fd-accent-foreground',
     },
   },
-);
+});
 
 const TagsListContext = createContext<{
   value?: string;
@@ -340,7 +335,7 @@ export function TagsListItem({
     <button
       type="button"
       data-active={value === ctx.value}
-      className={cn(itemVariants({ active: value === ctx.value, className }))}
+      className={itemVariants({ active: value === ctx.value, className })}
       onClick={() => {
         ctx.onValueChange(
           ctx.value === value && ctx.allowClear ? undefined : value,

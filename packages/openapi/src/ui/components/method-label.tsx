@@ -1,8 +1,9 @@
-import { cva, type VariantProps } from 'class-variance-authority';
+import { type VariantProps } from 'cvb';
 import type { HTMLAttributes } from 'react';
-import { cn } from 'fumadocs-ui/utils/cn';
+import { cvb } from 'fumadocs-ui/utils/cn';
 
-export const badgeVariants = cva('font-mono font-medium', {
+export const badgeVariants = cvb({
+  base: 'font-mono font-medium',
   variants: {
     color: {
       green: 'text-green-600 dark:text-green-400',
@@ -39,12 +40,10 @@ export function Badge({
   VariantProps<typeof badgeVariants>) {
   return (
     <span
-      className={cn(
-        badgeVariants({
-          color,
-          className,
-        }),
-      )}
+      className={badgeVariants({
+        color,
+        className,
+      })}
       {...props}
     >
       {props.children}

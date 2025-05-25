@@ -14,7 +14,7 @@ import {
 } from 'react';
 import Link, { type LinkProps } from 'fumadocs-core/link';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
-import { cn } from '@/utils/cn';
+import { cn, cvb } from '@/utils/cn';
 import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
 import { isActive } from '@/utils/is-active';
 import {
@@ -24,7 +24,6 @@ import {
 } from '@/components/ui/collapsible';
 import { type ScrollAreaProps } from '@radix-ui/react-scroll-area';
 import { useSidebar } from '@/contexts/sidebar';
-import { cva } from 'class-variance-authority';
 import type {
   CollapsibleContentProps,
   CollapsibleTriggerProps,
@@ -65,18 +64,16 @@ interface InternalContext {
   level: number;
 }
 
-const itemVariants = cva(
-  'relative flex flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground [overflow-wrap:anywhere] md:py-1.5 [&_svg]:size-4 [&_svg]:shrink-0',
-  {
-    variants: {
-      active: {
-        true: 'bg-fd-primary/10 text-fd-primary',
-        false:
-          'transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none',
-      },
+const itemVariants = cvb({
+  base: 'relative flex flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground [overflow-wrap:anywhere] md:py-1.5 [&_svg]:size-4 [&_svg]:shrink-0',
+  variants: {
+    active: {
+      true: 'bg-fd-primary/10 text-fd-primary',
+      false:
+        'transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none',
     },
   },
-);
+});
 
 const Context = createContext<InternalContext | null>(null);
 const FolderContext = createContext<{
@@ -151,12 +148,13 @@ export function Sidebar({
       data-collapsed={collapsed}
       className={cn(
         'sticky shrink-0 flex flex-col items-end top-(--fd-sidebar-top) z-20 bg-fd-card text-sm h-(--fd-sidebar-height) w-(--fd-sidebar-width) *:w-(--fd-sidebar-width) border-e max-md:hidden',
-        collapsed && [
-          'rounded-xl border',
-          hover
-            ? 'z-50 translate-x-2 shadow-lg'
-            : 'opacity-0 -translate-x-(--fd-sidebar-offset) rtl:translate-x-(--fd-sidebar-offset)',
-        ],
+        collapsed &&
+          `rounded-xl border
+          ${
+            hover
+              ? 'z-50 translate-x-2 shadow-lg'
+              : 'opacity-0 -translate-x-(--fd-sidebar-offset) rtl:translate-x-(--fd-sidebar-offset)'
+          }`,
         props.className,
       )}
       style={
@@ -276,7 +274,7 @@ export function SidebarItem({
     <Link
       {...props}
       data-active={active}
-      className={cn(itemVariants({ active }), props.className)}
+      className={itemVariants({ active, className: props.className })}
       prefetch={prefetch}
       style={{
         paddingInlineStart: getOffset(level),

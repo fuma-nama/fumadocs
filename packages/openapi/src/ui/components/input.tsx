@@ -1,12 +1,11 @@
+import { cn, cvb } from 'fumadocs-ui/utils/cn';
 import * as React from 'react';
-import { cn } from 'fumadocs-ui/utils/cn';
-import { cva } from 'class-variance-authority';
 
 export type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
 
-export const labelVariants = cva(
-  'text-xs font-medium text-fd-foreground/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
-);
+export const labelVariants = cvb({
+  base: 'text-xs font-medium text-fd-foreground/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
+});
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, ...props }, ref) => {

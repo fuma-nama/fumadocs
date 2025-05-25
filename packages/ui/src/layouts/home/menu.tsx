@@ -1,6 +1,6 @@
 'use client';
 import { BaseLinkItem, type LinkItemType } from '@/layouts/links';
-import { cn } from '@/utils/cn';
+import { cn, cvb } from '@/utils/cn';
 import {
   NavigationMenuContent,
   NavigationMenuItem,
@@ -8,11 +8,10 @@ import {
   NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu';
 import Link from 'fumadocs-core/link';
-import { cva } from 'class-variance-authority';
 import { buttonVariants } from '@/components/ui/button';
 import type { ComponentPropsWithoutRef } from 'react';
 
-const menuItemVariants = cva('', {
+const menuItemVariants = cvb({
   variants: {
     variant: {
       main: 'inline-flex items-center gap-2 py-1.5 transition-colors hover:text-fd-popover-foreground/50 data-[active=true]:font-medium data-[active=true]:text-fd-primary [&_svg]:size-4',
@@ -71,10 +70,10 @@ export function MenuLinkItem({
     <NavigationMenuLink asChild>
       <BaseLinkItem
         item={item}
-        className={cn(
-          menuItemVariants({ variant: item.type }),
-          props.className,
-        )}
+        className={menuItemVariants({
+          variant: item.type,
+          className: props.className,
+        })}
         aria-label={item.type === 'icon' ? item.label : undefined}
       >
         {item.icon}

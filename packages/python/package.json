@@ -56,7 +56,7 @@
     "access": "public"
   },
   "dependencies": {
-    "class-variance-authority": "^0.7.1",
+    "cvb": "^1.1.1",
     "js-yaml": "^4.1.0"
   }
 }

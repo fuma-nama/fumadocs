@@ -1,7 +1,6 @@
 import { CircleCheck, CircleX, Info, TriangleAlert } from 'lucide-react';
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
-import { cn } from '@/utils/cn';
-import { cva } from 'class-variance-authority';
+import { cvb } from '@/utils/cn';
 
 type CalloutProps = Omit<
   HTMLAttributes<HTMLDivElement>,
@@ -19,19 +18,17 @@ type CalloutProps = Omit<
   icon?: ReactNode;
 };
 
-const calloutVariants = cva(
-  'my-4 flex gap-2 rounded-lg border border-s-2 bg-fd-card p-3 text-sm text-fd-card-foreground shadow-md',
-  {
-    variants: {
-      type: {
-        info: 'border-s-blue-500/50',
-        warn: 'border-s-orange-500/50',
-        error: 'border-s-red-500/50',
-        success: 'border-s-green-500/50',
-      },
+const calloutVariants = cvb({
+  base: 'my-4 flex gap-2 rounded-lg border border-s-2 bg-fd-card p-3 text-sm text-fd-card-foreground shadow-md',
+  variants: {
+    type: {
+      info: 'border-s-blue-500/50',
+      warn: 'border-s-orange-500/50',
+      error: 'border-s-red-500/50',
+      success: 'border-s-green-500/50',
     },
   },
-);
+});
 
 export const Callout = forwardRef<HTMLDivElement, CalloutProps>(
   ({ className, children, title, type = 'info', icon, ...props }, ref) => {
@@ -40,12 +37,10 @@ export const Callout = forwardRef<HTMLDivElement, CalloutProps>(
     return (
       <div
         ref={ref}
-        className={cn(
-          calloutVariants({
-            type: type,
-          }),
+        className={calloutVariants({
+          type: type,
           className,
-        )}
+        })}
         {...props}
       >
         {icon ??

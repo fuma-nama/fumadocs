@@ -1,21 +1,18 @@
 'use client';
-import { cva } from 'class-variance-authority';
 import { Moon, Sun, Airplay } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { type HTMLAttributes, useLayoutEffect, useState } from 'react';
-import { cn } from '@/utils/cn';
+import { cn, cvb } from '@/utils/cn';
 
-const itemVariants = cva(
-  'size-6.5 rounded-full p-1.5 text-fd-muted-foreground',
-  {
-    variants: {
-      active: {
-        true: 'bg-fd-accent text-fd-accent-foreground',
-        false: 'text-fd-muted-foreground',
-      },
+const itemVariants = cvb({
+  base: 'size-6.5 rounded-full p-1.5 text-fd-muted-foreground',
+  variants: {
+    active: {
+      true: 'bg-fd-accent text-fd-accent-foreground',
+      false: 'text-fd-muted-foreground',
     },
   },
-);
+});
 
 const full = [
   ['light', Sun] as const,
@@ -60,7 +57,7 @@ export function ThemeToggle({
             <Icon
               key={key}
               fill="currentColor"
-              className={cn(itemVariants({ active: value === key }))}
+              className={itemVariants({ active: value === key })}
             />
           );
         })}
@@ -76,7 +73,7 @@ export function ThemeToggle({
         <button
           key={key}
           aria-label={key}
-          className={cn(itemVariants({ active: value === key }))}
+          className={itemVariants({ active: value === key })}
           onClick={() => setTheme(key)}
         >
           <Icon className="size-full" fill="currentColor" />

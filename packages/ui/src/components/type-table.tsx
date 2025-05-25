@@ -2,8 +2,7 @@
 
 import { Info as InfoIcon } from 'lucide-react';
 import Link from 'fumadocs-core/link';
-import { cva } from 'class-variance-authority';
-import { cn } from '@/utils/cn';
+import { cvb } from '@/utils/cn';
 import {
   Popover,
   PopoverContent,
@@ -41,18 +40,16 @@ interface ObjectType {
   deprecated?: boolean;
 }
 
-const field = cva('inline-flex flex-row items-center gap-1');
-const code = cva(
-  'rounded-md bg-fd-secondary p-1 text-fd-secondary-foreground',
-  {
-    variants: {
-      color: {
-        primary: 'bg-fd-primary/10 text-fd-primary',
-        deprecated: 'line-through text-fd-primary/50',
-      },
+const field = cvb({ base: 'inline-flex flex-row items-center gap-1' });
+const code = cvb({
+  base: 'rounded-md bg-fd-secondary p-1 text-fd-secondary-foreground',
+  variants: {
+    color: {
+      primary: 'bg-fd-primary/10 text-fd-primary',
+      deprecated: 'line-through text-fd-primary/50',
     },
   },
-);
+});
 
 export function TypeTable({ type }: { type: Record<string, ObjectType> }) {
   return (
@@ -73,11 +70,9 @@ export function TypeTable({ type }: { type: Record<string, ObjectType> }) {
                 <td>
                   <div className={field()}>
                     <code
-                      className={cn(
-                        code({
-                          color: value.deprecated ? 'deprecated' : 'primary',
-                        }),
-                      )}
+                      className={code({
+                        color: value.deprecated ? 'deprecated' : 'primary',
+                      })}
                     >
                       {key}
                       {!value.required && '?'}

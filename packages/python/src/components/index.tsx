@@ -1,6 +1,5 @@
 import type { ComponentProps, ReactNode } from 'react';
-import { cva } from 'class-variance-authority';
-import { cn } from 'fumadocs-ui/utils/cn';
+import { cn, cvb } from 'fumadocs-ui/utils/cn';
 import {
   Collapsible,
   CollapsibleContent,
@@ -10,21 +9,21 @@ import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { ChevronRight } from 'lucide-react';
 import { highlight } from 'fumadocs-core/highlight';
 
-const cardVariants = cva('bg-fd-card rounded-lg text-sm my-6 p-3 border');
-const badgeVariants = cva(
-  'text-xs font-medium border p-1 rounded-lg not-prose',
-  {
-    variants: {
-      color: {
-        func: 'bg-fdpy-func/10 text-fdpy-func border-fdpy-func/50',
-        attribute:
-          'bg-fdpy-attribute/10 text-fdpy-attribute border-fdpy-attribute/50',
-        class: 'bg-fdpy-class/10 text-fdpy-class border-fdpy-class/50',
-        primary: 'bg-fd-primary/10 text-fd-primary border-fd-primary/10',
-      },
+const cardVariants = cvb({
+  base: 'bg-fd-card rounded-lg text-sm my-6 p-3 border',
+});
+const badgeVariants = cvb({
+  base: 'text-xs font-medium border p-1 rounded-lg not-prose',
+  variants: {
+    color: {
+      func: 'bg-fdpy-func/10 text-fdpy-func border-fdpy-func/50',
+      attribute:
+        'bg-fdpy-attribute/10 text-fdpy-attribute border-fdpy-attribute/50',
+      class: 'bg-fdpy-class/10 text-fdpy-class border-fdpy-class/50',
+      primary: 'bg-fd-primary/10 text-fd-primary border-fd-primary/10',
     },
   },
-);
+});
 
 export function PyFunction(props: {
   name: string;
@@ -32,9 +31,9 @@ export function PyFunction(props: {
   children?: ReactNode;
 }) {
   return (
-    <figure className={cn(cardVariants())}>
+    <figure className={cardVariants()}>
       <div className="flex gap-2 items-center font-mono flex-wrap mb-4">
-        <code className={cn(badgeVariants({ color: 'func' }))}>func</code>
+        <code className={badgeVariants({ color: 'func' })}>func</code>
         {props.name}
         <InlineCode
           lang="python"

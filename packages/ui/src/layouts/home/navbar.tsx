@@ -1,8 +1,8 @@
 'use client';
 import { type ComponentProps, useState } from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
+import { type VariantProps } from 'cvb';
 import Link, { type LinkProps } from 'fumadocs-core/link';
-import { cn } from '@/utils/cn';
+import { cn, cvb } from '@/utils/cn';
 import { BaseLinkItem } from '@/layouts/links';
 import {
   NavigationMenu,
@@ -20,9 +20,9 @@ import type {
 } from '@radix-ui/react-navigation-menu';
 import { buttonVariants } from '@/components/ui/button';
 
-const navItemVariants = cva(
-  'inline-flex items-center gap-1 p-2 text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground data-[active=true]:text-fd-primary [&_svg]:size-4',
-);
+const navItemVariants = cvb({
+  base: 'inline-flex items-center gap-1 p-2 text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground data-[active=true]:text-fd-primary [&_svg]:size-4',
+});
 
 export function Navbar(props: ComponentProps<'div'>) {
   const [value, setValue] = useState('');
@@ -103,7 +103,7 @@ export function NavbarMenuLink(props: LinkProps) {
   );
 }
 
-const linkVariants = cva('', {
+const linkVariants = cvb({
   variants: {
     variant: {
       main: navItemVariants(),
@@ -133,7 +133,7 @@ export function NavbarLink({
         <BaseLinkItem
           {...props}
           item={item}
-          className={cn(linkVariants({ variant }), props.className)}
+          className={linkVariants({ variant, className: props.className })}
         >
           {props.children}
         </BaseLinkItem>

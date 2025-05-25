@@ -1,22 +1,21 @@
 'use client';
 
-import { cva } from 'class-variance-authority';
 import {
   File as FileIcon,
   Folder as FolderIcon,
   FolderOpen,
 } from 'lucide-react';
 import { type HTMLAttributes, type ReactNode, useState } from 'react';
-import { cn } from '@/utils/cn';
+import { cn, cvb } from '@/utils/cn';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from './ui/collapsible';
 
-const itemVariants = cva(
-  'flex flex-row items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-fd-accent hover:text-fd-accent-foreground [&_svg]:size-4',
-);
+const itemVariants = cvb({
+  base: 'flex flex-row items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-fd-accent hover:text-fd-accent-foreground [&_svg]:size-4',
+});
 
 export function Files({
   className,
@@ -57,7 +56,7 @@ export function File({
   ...rest
 }: FileProps): React.ReactElement {
   return (
-    <div className={cn(itemVariants({ className }))} {...rest}>
+    <div className={itemVariants({ className })} {...rest}>
       {icon}
       {name}
     </div>
@@ -73,7 +72,7 @@ export function Folder({
 
   return (
     <Collapsible open={open} onOpenChange={setOpen} {...props}>
-      <CollapsibleTrigger className={cn(itemVariants({ className: 'w-full' }))}>
+      <CollapsibleTrigger className={itemVariants({ className: 'w-full' })}>
         {open ? <FolderOpen /> : <FolderIcon />}
         {name}
       </CollapsibleTrigger>
