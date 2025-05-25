@@ -38,6 +38,11 @@ export function createProxy({ allowedUrls, overrides = {} }: CreateProxyOptions 
       });
     }
 
+    if (overrides.request?.headers) {
+      const overrideHeaders = new Headers(overrides.request.headers);
+      overrideHeaders.forEach((value, key) => req.headers.set(key, value));
+    }
+
     const clonedReq = new Request(url, {
       ...req,
       ...overrides.request,
