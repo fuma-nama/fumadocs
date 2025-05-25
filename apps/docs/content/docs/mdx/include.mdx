@@ -7,13 +7,13 @@ description: Reuse content from other files.
 
 ### Markdown
 
-Specify the target Markdown file path in `<include>` tag (relative to the Markdown file itself).
+Specify the target Markdown file path in the `<include>` tag (relative to the Markdown file itself).
 
 ```mdx title="page.mdx"
 <include>./another.mdx</include>
 ```
 
-This will display the content from target file (e.g. `another.mdx`).
+This will display the content from the target file (e.g. `another.mdx`).
 
 ### CodeBlock
 
@@ -29,7 +29,7 @@ For other types of files, it will become a codeblock:
 
 ### `cwd`
 
-Resolve relative paths from cwd instead of Markdown file:
+Resolve relative paths from cwd instead of the Markdown file:
 
 ```mdx
 <include cwd lang="tsx" meta='title="lib.ts"'>

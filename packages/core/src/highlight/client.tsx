@@ -2,12 +2,12 @@
 import {
   type DependencyList,
   type ReactNode,
+  use,
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
-  use,
   useState,
-  useLayoutEffect,
 } from 'react';
 import {
   _highlight,
@@ -23,11 +23,9 @@ let jsEngine: Promise<RegexEngine> | undefined;
 function getHighlightOptions(from: HighlightOptions): HighlightOptions {
   if (from.engine) return from;
 
-  if (!jsEngine) {
-    jsEngine = import('shiki/engine/javascript').then((res) =>
-      res.createJavaScriptRegexEngine(),
-    );
-  }
+  jsEngine ??= import('shiki/engine/javascript').then((res) =>
+    res.createJavaScriptRegexEngine(),
+  );
 
   return {
     ...from,
@@ -43,12 +41,16 @@ interface Task {
 export function useShiki(
   code: string,
   {
-    defaultValue,
     withPrerenderScript = false,
+    loading,
     ...options
   }: HighlightOptions & {
     withPrerenderScript?: boolean;
-    defaultValue?: ReactNode;
+
+    /**
+     * Displayed before highlighter is loaded.
+     */
+    loading?: ReactNode;
   },
   deps?: DependencyList,
 ): ReactNode {
@@ -64,7 +66,6 @@ export function useShiki(
   });
 
   const [rendered, setRendered] = useState<ReactNode>(() => {
-    if (defaultValue) return defaultValue;
     const element =
       withPrerenderScript && typeof document !== 'undefined'
         ? document.querySelector(`[data-markup-id="${markupId}"]`)
@@ -77,13 +78,7 @@ export function useShiki(
     }
 
     currentTask.current = undefined;
-    const Pre = (options.components?.pre ?? 'pre') as 'pre';
-    const Code = (options.components?.code ?? 'code') as 'code';
-    return (
-      <Pre>
-        <Code>{code}</Code>
-      </Pre>
-    );
+    return loading;
   });
 
   useLayoutEffect(() => {

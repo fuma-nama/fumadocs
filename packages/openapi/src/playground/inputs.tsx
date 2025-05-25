@@ -1,8 +1,10 @@
 'use client';
 import {
+  ComponentProps,
   type HTMLAttributes,
   type LabelHTMLAttributes,
   type ReactNode,
+  useMemo,
   useState,
 } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
@@ -35,13 +37,11 @@ import {
 interface InputHeaderProps {
   name?: ReactNode;
   required?: boolean;
-  type?: string;
 }
 
 function FieldHeader({
   name,
   required = false,
-  type,
   ...props
 }: InputHeaderProps & LabelHTMLAttributes<HTMLLabelElement>) {
   return (
@@ -49,19 +49,23 @@ function FieldHeader({
       {...props}
       className={cn('w-full inline-flex items-center gap-1', props.className)}
     >
-      <span className={cn(labelVariants())}>
+      <span className={cn(labelVariants(), 'me-auto')}>
         {name}
         {required ? <span className="text-red-400/80 mx-1">*</span> : null}
       </span>
-
-      <div className="flex-1" />
-      {type ? (
-        <code data-type={true} className="text-xs text-fd-muted-foreground">
-          {type}
-        </code>
-      ) : null}
       {props.children}
     </label>
+  );
+}
+
+function FieldHeaderCode(props: ComponentProps<'code'>) {
+  return (
+    <code
+      {...props}
+      className={cn('text-xs text-fd-muted-foreground', props.className)}
+    >
+      {props.children}
+    </code>
   );
 }
 
@@ -72,10 +76,10 @@ export function ObjectInput({
 }: {
   field: Exclude<RequestSchema, boolean>;
   fieldName: string;
-} & HTMLAttributes<HTMLDivElement>) {
-  const field = useResolvedSchema(
-    combineSchema([_field, ...(_field.allOf ?? []), ...(_field.anyOf ?? [])]),
-  );
+} & ComponentProps<'div'>) {
+  const resolved = useResolvedSchema(_field);
+  const field = useMemo(() => combineSchema([resolved]), [resolved]);
+  if (typeof field === 'boolean') return;
 
   return (
     <div {...props} className={cn('flex flex-col gap-6', props.className)}>
@@ -179,32 +183,37 @@ function DynamicProperties({
 
   return (
     <>
-      {properties.map((item) => (
-        <FieldSet
-          key={item}
-          name={item}
-          field={getType(item)}
-          fieldName={`${fieldName}.${item}`}
-          toolbar={
-            <button
-              type="button"
-              aria-label="Remove Item"
-              className={cn(
-                buttonVariants({
-                  color: 'ghost',
-                  className: 'p-1',
-                }),
-              )}
-              onClick={() => {
-                setProperties((p) => p.filter((prop) => prop !== item));
-                control.unregister(`${fieldName}.${item}`);
-              }}
-            >
-              <Trash2 className="size-4" />
-            </button>
-          }
-        />
-      ))}
+      {properties.map((item) => {
+        const type = getType(item);
+
+        return (
+          <FieldSet
+            key={item}
+            name={item}
+            field={type}
+            fieldName={`${fieldName}.${item}`}
+            toolbar={
+              <button
+                type="button"
+                aria-label="Remove Item"
+                className={cn(
+                  buttonVariants({
+                    color: 'ghost',
+                    size: 'icon-sm',
+                    className: 'p-1',
+                  }),
+                )}
+                onClick={() => {
+                  setProperties((p) => p.filter((prop) => prop !== item));
+                  control.unregister(`${fieldName}.${item}`);
+                }}
+              >
+                <Trash2 />
+              </button>
+            }
+          />
+        );
+      })}
       <div className="flex gap-2">
         <Input
           value={nextName}
@@ -232,7 +241,7 @@ function DynamicProperties({
   );
 }
 
-export function FieldInput({
+function FieldInput({
   field,
   fieldName,
   isRequired,
@@ -243,34 +252,6 @@ export function FieldInput({
   fieldName: string;
 }) {
   const { control, register } = useFormContext();
-
-  if (field.type === 'object') {
-    return (
-      <ObjectInput
-        field={field}
-        fieldName={fieldName}
-        {...props}
-        className={cn(
-          'rounded-lg border border-fd-primary/20 bg-fd-background/50 p-3 shadow-sm',
-          props.className,
-        )}
-      />
-    );
-  }
-
-  if (field.type === 'array') {
-    return (
-      <ArrayInput
-        fieldName={fieldName}
-        items={field.items ?? anyFields}
-        {...props}
-        className={cn(
-          'rounded-lg border border-fd-primary/20 bg-fd-background/50 p-3 shadow-sm',
-          props.className,
-        )}
-      />
-    );
-  }
 
   if (field.type === 'string' && field.format === 'binary') {
     return (
@@ -329,6 +310,8 @@ export function FieldInput({
     );
   }
 
+  if (field.type === 'null') return;
+
   return (
     <Input
       id={fieldName}
@@ -349,6 +332,7 @@ export function FieldSet({
   name,
   isRequired,
   depth = 0,
+  slotType,
   ...props
 }: HTMLAttributes<HTMLElement> & {
   isRequired?: boolean;
@@ -356,60 +340,73 @@ export function FieldSet({
   field: RequestSchema;
   fieldName: string;
   depth?: number;
+
+  slotType?: ReactNode;
   toolbar?: ReactNode;
 }) {
   const field = useResolvedSchema(_field);
-  const [show, setShow] = useState(
-    () =>
-      typeof _field !== 'object' ||
-      !_field.$ref ||
-      (field.type !== 'object' && !field.allOf && !field.oneOf && !field.anyOf),
-  );
+  const [show, setShow] = useState(false);
   const { info, updateInfo } = useFieldInfo(fieldName, field, depth);
 
   if (_field === false) return null;
-  if (!show) {
+
+  const recursive =
+    typeof _field !== 'boolean' &&
+    _field.$ref &&
+    (field.oneOf || field.type === 'object' || field.allOf || field.anyOf);
+
+  if (recursive && !show) {
     return (
       <FieldHeader {...props} name={name} required={isRequired}>
+        {slotType ?? <FieldHeaderCode>{schemaToString(field)}</FieldHeaderCode>}
         {toolbar}
         <button
           type="button"
-          className={cn(buttonVariants({ size: 'sm' }))}
+          className={cn(
+            buttonVariants({
+              size: 'sm',
+              color: 'secondary',
+            }),
+          )}
           onClick={() => setShow(true)}
         >
-          Show
+          Open
         </button>
       </FieldHeader>
     );
   }
 
   if (field.oneOf) {
+    const showSelect = field.oneOf.length > 1;
+
     return (
       <FieldSet
         {...props}
-        className={cn(props.className, '[&>label>[data-type]]:hidden')}
         name={name}
         fieldName={fieldName}
         isRequired={isRequired}
         field={field.oneOf[info.oneOf]}
         depth={depth + 1}
+        slotType={showSelect ? false : slotType}
         toolbar={
           <>
-            <select
-              className="text-xs font-mono"
-              value={info.oneOf}
-              onChange={(e) => {
-                updateInfo({
-                  oneOf: Number(e.target.value),
-                });
-              }}
-            >
-              {field.oneOf.map((item, i) => (
-                <option key={i} value={i}>
-                  {schemaToString(item)}
-                </option>
-              ))}
-            </select>
+            {showSelect && (
+              <select
+                className="text-xs font-mono"
+                value={info.oneOf}
+                onChange={(e) => {
+                  updateInfo({
+                    oneOf: Number(e.target.value),
+                  });
+                }}
+              >
+                {field.oneOf.map((item, i) => (
+                  <option key={i} value={i}>
+                    {schemaToString(item)}
+                  </option>
+                ))}
+              </select>
+            )}
             {toolbar}
           </>
         }
@@ -418,66 +415,105 @@ export function FieldSet({
   }
 
   if (Array.isArray(field.type)) {
+    const showSelect = field.type.length > 1;
+
+    return (
+      <FieldSet
+        {...props}
+        name={name}
+        fieldName={fieldName}
+        isRequired={isRequired}
+        field={{
+          ...field,
+          type: info.selectedType,
+        }}
+        depth={depth + 1}
+        slotType={showSelect ? false : slotType}
+        toolbar={
+          <>
+            {showSelect && (
+              <select
+                className="text-xs font-mono"
+                value={info.selectedType}
+                onChange={(e) => {
+                  updateInfo({
+                    selectedType: e.target.value,
+                  });
+                }}
+              >
+                {field.type.map((item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
+                ))}
+              </select>
+            )}
+            {toolbar}
+          </>
+        }
+      />
+    );
+  }
+
+  if (field.type === 'object' || field.anyOf || field.allOf) {
     return (
       <fieldset
         {...props}
         className={cn('flex flex-col gap-1.5', props.className)}
       >
-        <FieldHeader name={name} htmlFor={fieldName} required={isRequired}>
-          <select
-            className="text-xs font-mono"
-            value={info.selectedType}
-            onChange={(e) => {
-              updateInfo({
-                selectedType: e.target.value,
-              });
-            }}
-          >
-            {field.type.map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
-          </select>
+        <FieldHeader htmlFor={fieldName} name={name} required={isRequired}>
+          {slotType ?? (
+            <FieldHeaderCode>{schemaToString(field)}</FieldHeaderCode>
+          )}
           {toolbar}
         </FieldHeader>
-        <p className="text-xs text-fd-muted-foreground">{field.description}</p>
-        <FieldInput
-          isRequired={isRequired}
-          field={{
-            ...field,
-            type: info.selectedType,
-          }}
+        <ObjectInput
+          field={field}
           fieldName={fieldName}
+          {...props}
+          className={cn(
+            'rounded-lg border border-fd-primary/20 bg-fd-background/50 p-3 shadow-sm',
+            props.className,
+          )}
         />
       </fieldset>
     );
   }
 
+  if (field.type === 'array') {
+    return (
+      <fieldset
+        {...props}
+        className={cn('flex flex-col gap-1.5', props.className)}
+      >
+        <FieldHeader htmlFor={fieldName} name={name} required={isRequired}>
+          {slotType ?? (
+            <FieldHeaderCode>{schemaToString(field)}</FieldHeaderCode>
+          )}
+          {toolbar}
+        </FieldHeader>
+        <ArrayInput
+          fieldName={fieldName}
+          items={field.items ?? anyFields}
+          {...props}
+          className={cn(
+            'rounded-lg border border-fd-primary/20 bg-fd-background/50 p-3 shadow-sm',
+            props.className,
+          )}
+        />
+      </fieldset>
+    );
+  }
   return (
     <fieldset
       {...props}
       className={cn('flex flex-col gap-1.5', props.className)}
     >
-      <FieldHeader
-        htmlFor={fieldName}
-        name={name}
-        required={isRequired}
-        type={field.oneOf ? undefined : schemaToString(field)}
-      >
+      <FieldHeader htmlFor={fieldName} name={name} required={isRequired}>
+        {slotType ?? <FieldHeaderCode>{schemaToString(field)}</FieldHeaderCode>}
         {toolbar}
       </FieldHeader>
-      {show ? (
-        <FieldInput
-          field={field}
-          fieldName={fieldName}
-          isRequired={isRequired}
-        />
-      ) : (
-        <div>
-          <button onClick={() => setShow((prev) => !prev)}>Show</button>
-        </div>
-      )}
+      <FieldInput field={field} fieldName={fieldName} isRequired={isRequired} />
     </fieldset>
   );
 }
@@ -514,12 +550,13 @@ function ArrayInput({
               className={cn(
                 buttonVariants({
                   color: 'ghost',
+                  size: 'icon-sm',
                   className: 'p-1',
                 }),
               )}
               onClick={() => remove(index)}
             >
-              <Trash2 className="size-4" />
+              <Trash2 />
             </button>
           }
         />
@@ -528,7 +565,7 @@ function ArrayInput({
         type="button"
         className={cn(
           buttonVariants({
-            color: 'outline',
+            color: 'secondary',
             className: 'gap-1.5 py-2',
             size: 'sm',
           }),

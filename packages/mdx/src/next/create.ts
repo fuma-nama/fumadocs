@@ -34,9 +34,7 @@ export function createMDX({
 
   return (nextConfig: NextConfig = {}): NextConfig => {
     const mdxLoaderOptions: MDXLoaderOptions = {
-      _ctx: {
-        configPath,
-      },
+      configPath,
     };
 
     return {

@@ -60,7 +60,9 @@ export function parseFilePath(path: string): FileInfo {
     name,
     path: segments.join('/'),
     ext,
-    flattenedPath: [dirname, name].filter((p) => p.length > 0).join('/'),
+    get flattenedPath() {
+      return [dirname, name].filter((p) => p.length > 0).join('/');
+    },
   };
 }
 

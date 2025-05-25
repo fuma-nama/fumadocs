@@ -302,9 +302,9 @@ function DocsNavbar({
           {slots(
             'sm',
             props.searchToggle,
-            <SearchToggle hideIfDisabled className="md:hidden" />,
+            <SearchToggle hideIfDisabled className="p-2 md:hidden" />,
           )}
-          <NavbarSidebarTrigger className="-me-1.5 md:hidden" />
+          <NavbarSidebarTrigger className="p-2 -me-1.5 md:hidden" />
           {links
             .filter((item) => item.type === 'icon')
             .map((item, i) => (

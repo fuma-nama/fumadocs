@@ -61,15 +61,15 @@ const MDX = page.data.body;
 <MDX components={{ ...defaultMdxComponents }} />;
 ```
 
-This encouraged explicit import of MDX components.
+This encourages explicit import of MDX components.
 
 Previously, `mdx-components.tsx` worked by injecting an import to every compiled Markdown/MDX file.
-It's a little unnecessary because you can always import the components explicitly, or replace default HTML tags like `img` from MDX body's `components` prop.
+It's somewhat unnecessary because you can always import the components explicitly, or replace default HTML tags like `img` from MDX body's `components` prop.
 
 ### Define Collections
 
 Collection is now introduced on source config file (`source.config.ts`).
-It refers to a collection of files/content, like Markdown files, or JSON/YAML files.
+It refers to a collection of files/content, such as Markdown files or JSON/YAML files.
 
 Every collection has its own config, you can have customised Zod schema to validate its data, or collection-level MDX options for content collections.
 
@@ -95,7 +95,7 @@ Now you can generate types using `fumadocs-mdx` command, it's recommended to set
 }
 ```
 
-Starting the development server, a `.source` folder will be generated, it contains all parsed collections/files.
+When starting the development server, a `.source` folder will be generated, it contains all parsed collections/files.
 You can add it to `.gitignore`, it will replace the old `.map` file.
 
 To access the collections, import them from the folder with their original name in `source.config.ts`.
@@ -131,7 +131,7 @@ export const source = loader({
 });
 ```
 
-- we now recommend to export the output of `loader` directly as a single variable.
+- we now recommend exporting the output of `loader` directly as a single variable.
 - schema option is no longer defined in `source.ts`, it's handled by `source.config.ts`.
 - it takes two collections: `docs` (content) and `meta` (`meta.json`).
   You can leave `meta` as an empty array if it is unused, so you can define only a collection for `docs`.

@@ -37,6 +37,7 @@ export interface PropertyProps {
   required?: boolean;
   deprecated?: boolean;
   children?: ReactNode;
+  nested?: boolean;
 }
 
 export interface ObjectCollapsibleProps {

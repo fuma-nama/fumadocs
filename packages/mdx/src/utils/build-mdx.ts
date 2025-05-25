@@ -48,7 +48,7 @@ declare module 'vfile' {
 export async function buildMDX(
   cacheKey: string,
   source: string,
-  options: MDXOptions = {},
+  options: MDXOptions,
 ): Promise<VFile> {
   const { filePath, frontmatter, data, ...rest } = options;
 

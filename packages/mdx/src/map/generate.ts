@@ -10,6 +10,7 @@ import { fileCache } from '@/map/file-cache';
 import matter from 'gray-matter';
 import type { AsyncRuntimeFile } from '@/runtime/types';
 import { load } from 'js-yaml';
+import { getGitTimestamp } from '@/utils/git-timestamp';
 
 async function readFileWithCache(file: string): Promise<string> {
   const cached = fileCache.read<string>('read-file', file);
@@ -114,8 +115,14 @@ export async function generateJS(
         )) as Record<string, unknown>;
       }
 
+      let lastModified: Date | undefined;
+      if (config.global?.lastModifiedTime === 'git') {
+        lastModified = await getGitTimestamp(file.absolutePath);
+      }
+
       return JSON.stringify({
         info: file,
+        lastModified,
         data: parsed.data,
         content: parsed.content,
       } satisfies AsyncRuntimeFile);

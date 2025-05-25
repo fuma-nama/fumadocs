@@ -6,16 +6,15 @@ import type {
 } from 'fumadocs-core/highlight';
 import { useShiki } from 'fumadocs-core/highlight/client';
 import { cn } from '@/utils/cn';
+import { type ComponentProps, useMemo } from 'react';
 
-const components = {
-  pre(props) {
-    return (
-      <CodeBlock {...props} className={cn('my-0', props.className)}>
-        <Pre>{props.children}</Pre>
-      </CodeBlock>
-    );
-  },
-} satisfies HighlightOptionsCommon['components'];
+function pre(props: ComponentProps<'pre'>) {
+  return (
+    <CodeBlock {...props} className={cn('my-0', props.className)}>
+      <Pre>{props.children}</Pre>
+    </CodeBlock>
+  );
+}
 
 export function DynamicCodeBlock({
   lang,
@@ -26,13 +25,33 @@ export function DynamicCodeBlock({
   code: string;
   options?: Omit<HighlightOptionsCommon, 'lang'> & HighlightOptionsThemes;
 }) {
+  const components: HighlightOptionsCommon['components'] = {
+    pre,
+    ...options?.components,
+  };
+  const loading = useMemo(() => {
+    const Pre = (components.pre ?? 'pre') as 'pre';
+    const Code = (components.code ?? 'code') as 'code';
+
+    return (
+      <Pre>
+        <Code>
+          {code.split('\n').map((line, i) => (
+            <span key={i} className="line">
+              {line}
+            </span>
+          ))}
+        </Code>
+      </Pre>
+    );
+    // eslint-disable-next-line -- initial value only
+  }, []);
+
   return useShiki(code, {
     lang,
-    ...options,
-    components: {
-      ...components,
-      ...options?.components,
-    },
+    loading,
     withPrerenderScript: true,
+    ...options,
+    components,
   });
 }

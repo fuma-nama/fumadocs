@@ -5,7 +5,7 @@
   "scripts": {
     "build": "next build",
     "build:docs": "node ./scripts/generate-docs.mjs",
-    "dev": "next dev",
+    "dev": "next dev --turbo",
     "start": "next start",
     "types:check": "fumadocs-mdx && tsc --noEmit"
   },
@@ -16,12 +16,13 @@
     "fumadocs-ui": "workspace:*",
     "next": "15.3.2",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "shiki": "^3.4.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.7",
     "@types/mdx": "^2.0.13",
-    "@types/react": "^19.1.4",
+    "@types/react": "^19.1.5",
     "@types/react-dom": "^19.1.5",
     "postcss": "^8.5.3",
     "rimraf": "^6.0.1",

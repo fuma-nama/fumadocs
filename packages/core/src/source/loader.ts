@@ -92,6 +92,8 @@ export interface LoaderOutput<Config extends LoaderConfig> {
   getPageByHref: (
     href: string,
     options?: {
+      language?: string;
+
       /**
        * resolve relative file paths in `href` from specified dirname, must be a virtual path.
        */
@@ -250,17 +252,18 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
     console.warn('`loader()` now requires a `baseUrl` option to be defined.');
   }
 
-  const { source, slugs: slugsFn = getSlugs } = options;
+  const { source, slugs: slugsFn = getSlugs, i18n } = options;
+  const defaultLanguage = i18n?.defaultLanguage ?? '';
   const getUrl =
     options.url ?? createGetUrl(options.baseUrl ?? '/', options.i18n);
 
   const files =
     typeof source.files === 'function' ? source.files() : source.files;
-  const storages = options.i18n
+  const storages = i18n
     ? loadFilesI18n(files, {
         i18n: {
-          ...options.i18n,
-          parser: options.i18n.parser ?? 'dot',
+          ...i18n,
+          parser: i18n.parser ?? 'dot',
         },
         transformers: options.transformers,
         getSlugs: slugsFn,
@@ -272,18 +275,18 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
         }),
       };
 
-  const walker = indexPages(storages, getUrl, options.i18n);
+  const walker = indexPages(storages, getUrl, i18n);
   const builder = createPageTreeBuilder(getUrl);
   let pageTree: LoaderOutput<LoaderConfig>['pageTree'] | undefined;
 
   return {
-    _i18n: options.i18n,
+    _i18n: i18n,
     get pageTree() {
-      if (options.i18n) {
+      if (i18n) {
         pageTree ??= builder.buildI18n({
           storages,
           resolveIcon: options.icon,
-          i18n: options.i18n,
+          i18n: i18n,
           ...options.pageTree,
         }) as unknown as LoaderOutput<LoaderConfig>['pageTree'];
       } else {
@@ -299,32 +302,28 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
     set pageTree(v) {
       pageTree = v;
     },
-    getPageByHref(href, { dir = '' } = {}) {
-      const pages = Array.from(walker.pages.values());
+    getPageByHref(href, { dir = '', language } = {}) {
+      const pages = this.getPages(language);
       const [value, hash] = href.split('#', 2);
+      let target;
 
       if (
         value.startsWith('.') &&
         (value.endsWith('.md') || value.endsWith('.mdx'))
       ) {
         const hrefPath = joinPath(dir, value);
-        const target = pages.find((item) => item.file.path === hrefPath);
-
-        if (target)
-          return {
-            page: target,
-            hash,
-          };
+        target = pages.find((item) => item.file.path === hrefPath);
+      } else {
+        target = pages.find((item) => item.url === value);
       }
 
-      const target = pages.find((item) => item.url === value);
-      if (target)
-        return {
-          page: target,
-          hash,
-        };
+      if (!target) return;
+      return {
+        page: target,
+        hash,
+      };
     },
-    getPages(language = options.i18n?.defaultLanguage ?? '') {
+    getPages(language = defaultLanguage) {
       const pages: Page[] = [];
 
       for (const key of walker.pages.keys()) {
@@ -346,10 +345,10 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
 
       return list;
     },
-    getPage(slugs = [], language = options.i18n?.defaultLanguage ?? '') {
+    getPage(slugs = [], language = defaultLanguage) {
       return walker.pages.get(`${language}.${slugs.join('/')}`);
     },
-    getNodeMeta(node, language = options.i18n?.defaultLanguage ?? '') {
+    getNodeMeta(node, language = defaultLanguage) {
       const ref = node.$ref?.metaFile;
       if (!ref) return;
 
@@ -358,7 +357,7 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
         .find((v) => v.format === 'meta' && v.file.path === ref);
       if (file) return walker.getResultFromFile(file) as Meta;
     },
-    getNodePage(node, language = options.i18n?.defaultLanguage ?? '') {
+    getNodePage(node, language = defaultLanguage) {
       const ref = node.$ref?.file;
       if (!ref) return;
 
@@ -370,7 +369,7 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
     getPageTree(locale) {
       if (options.i18n) {
         return this.pageTree[
-          (locale ?? options.i18n.defaultLanguage) as keyof typeof pageTree
+          (locale ?? defaultLanguage) as keyof typeof pageTree
         ];
       }
 

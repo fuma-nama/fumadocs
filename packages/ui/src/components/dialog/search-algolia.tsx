@@ -15,8 +15,8 @@ import {
 } from './search';
 
 export interface AlgoliaSearchDialogProps extends SharedProps {
-  index: AlgoliaOptions['index'];
-  searchOptions?: Omit<AlgoliaOptions, 'index'>;
+  searchOptions: AlgoliaOptions;
+
   footer?: ReactNode;
 
   defaultTag?: string;
@@ -38,7 +38,6 @@ export interface AlgoliaSearchDialogProps extends SharedProps {
 }
 
 export default function AlgoliaSearchDialog({
-  index,
   searchOptions,
   tags,
   defaultTag,
@@ -50,7 +49,6 @@ export default function AlgoliaSearchDialog({
   const { search, setSearch, query } = useDocsSearch(
     {
       type: 'algolia',
-      index,
       ...searchOptions,
     },
     undefined,

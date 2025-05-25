@@ -5,7 +5,7 @@ import {
   remarkStructure,
   type StructuredData,
 } from 'fumadocs-core/mdx-plugins';
-import { createMDXSource, _runtime } from '@/runtime/index';
+import { _runtime, createMDXSource } from '@/runtime/index';
 import type { RuntimeAsync } from '@/runtime/types';
 
 async function initCompiler(config: LoadedConfig, collection: string) {
@@ -18,15 +18,20 @@ async function initCompiler(config: LoadedConfig, collection: string) {
 
   if (!mdxOptions) {
     config._mdx_async ??= {};
-    config._mdx_async.cachedMdxOptions ??=
-      typeof config.global?.mdxOptions === 'function'
-        ? await config.global.mdxOptions()
-        : (config.global?.mdxOptions ?? {});
+    const async = config._mdx_async;
+    const globalConfig = config.global;
 
-    mdxOptions = config._mdx_async.cachedMdxOptions;
+    if (globalConfig && !async.cachedMdxOptions) {
+      async.cachedMdxOptions =
+        typeof globalConfig.mdxOptions === 'function'
+          ? await globalConfig.mdxOptions()
+          : globalConfig.mdxOptions;
+    }
+
+    mdxOptions = async.cachedMdxOptions;
   }
 
-  const remarkPlugins = mdxOptions.remarkPlugins ?? [];
+  const remarkPlugins = mdxOptions?.remarkPlugins ?? [];
 
   return createCompiler({
     ...mdxOptions,
@@ -41,7 +46,7 @@ export const _runtimeAsync: RuntimeAsync = {
   doc(files, collection, config) {
     const init = initCompiler(config, collection);
 
-    return files.map(({ info: file, data, content }) => {
+    return files.map(({ info: file, data, content, lastModified }) => {
       return {
         ...data,
         _file: file,
@@ -56,6 +61,7 @@ export const _runtimeAsync: RuntimeAsync = {
           return {
             body: out.body,
             toc: out.toc,
+            lastModified,
             structuredData: out.vfile.data.structuredData as StructuredData,
             _exports: out.exports ?? {},
           };

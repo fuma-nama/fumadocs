@@ -1,5 +1,60 @@
 # next-docs-ui
 
+## 15.4.0
+
+### Minor Changes
+
+- 961b67e: **Bump algolia search to v5**
+
+  This also introduced changes to some APIs since `algoliasearch` v4 and v5 has many differences.
+
+  Now we highly recommend to pass an index name to `sync()`:
+
+  ```ts
+  import { algoliasearch } from 'algoliasearch';
+  import { sync } from 'fumadocs-core/search/algolia';
+  const client = algoliasearch('id', 'key');
+
+  void sync(client, {
+    indexName: 'document',
+    documents: records,
+  });
+  ```
+
+  For search client, pass them to `searchOptions`:
+
+  ```tsx
+  'use client';
+
+  import { liteClient } from 'algoliasearch/lite';
+  import type { SharedProps } from 'fumadocs-ui/components/dialog/search';
+  import SearchDialog from 'fumadocs-ui/components/dialog/search-algolia';
+
+  const client = liteClient(appId, apiKey);
+
+  export default function CustomSearchDialog(props: SharedProps) {
+    return (
+      <SearchDialog
+        searchOptions={{
+          client,
+          indexName: 'document',
+        }}
+        {...props}
+        showAlgolia
+      />
+    );
+  }
+  ```
+
+### Patch Changes
+
+- 092fd04: Fallback to `dangerouslySetInnerHTML` for inlined scripts for backward compatibility
+- 7d78bc5: Improve `createRelativeLink` and `getPageByHref` for i18n usage
+- Updated dependencies [1b999eb]
+- Updated dependencies [961b67e]
+- Updated dependencies [7d78bc5]
+  - fumadocs-core@15.4.0
+
 ## 15.3.4
 
 ### Patch Changes

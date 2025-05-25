@@ -161,12 +161,9 @@ export function Sidebar({
       )}
       style={
         {
-          transition: [
-            ...['border', 'height', 'top'].map((v) =>
-              collapsed ? `${v} step-end 200ms` : `${v} step-start 200ms`,
-            ),
-            ...['opacity', 'margin', 'translate'].map((v) => `${v} ease 200ms`),
-          ].join(', '),
+          transition: ['top', 'opacity', 'margin', 'translate', 'width']
+            .map((v) => `${v} ease 200ms`)
+            .join(', '),
           '--fd-sidebar-offset': 'calc(100% - 16px)',
           '--fd-sidebar-margin': collapsed ? '0.5rem' : '0px',
           '--fd-sidebar-top': `calc(var(--fd-banner-height) + var(--fd-nav-height) + var(--fd-sidebar-margin))`,

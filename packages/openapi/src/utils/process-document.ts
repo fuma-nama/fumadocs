@@ -32,6 +32,12 @@ export async function processDocument(
     plugins: [readFiles(), fetchUrls()],
   });
 
+  if (loaded.errors && loaded.errors.length > 0) {
+    throw new Error(
+      loaded.errors.map((err) => `${err.code}: ${err.message}`).join('\n'),
+    );
+  }
+
   // upgrade
   loaded.specification = upgrade(loaded.specification).specification;
   const { schema: dereferenced } = await dereference(loaded.filesystem, {

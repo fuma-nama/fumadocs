@@ -79,7 +79,7 @@ export function DocsLayout({
   const links = getLinks(props.links ?? [], props.githubUrl);
 
   const variables = cn(
-    '[--fd-tocnav-height:36px] md:[--fd-sidebar-width:268px] lg:[--fd-sidebar-width:290px] xl:[--fd-toc-width:290px] xl:[--fd-tocnav-height:0px]',
+    '[--fd-tocnav-height:36px] md:[--fd-sidebar-width:268px] lg:[--fd-sidebar-width:286px] xl:[--fd-toc-width:286px] xl:[--fd-tocnav-height:0px]',
     !nav.component && nav.enabled !== false
       ? '[--fd-nav-height:56px] md:[--fd-nav-height:0px]'
       : undefined,
@@ -103,8 +103,12 @@ export function DocsLayout({
               {nav.title}
             </Link>
             <div className="flex-1">{nav.children}</div>
-            {slots('sm', searchToggle, <SearchToggle hideIfDisabled />)}
-            <NavbarSidebarTrigger className="-me-2 md:hidden" />
+            {slots(
+              'sm',
+              searchToggle,
+              <SearchToggle className="p-2" hideIfDisabled />,
+            )}
+            <NavbarSidebarTrigger className="p-2 -me-1.5 md:hidden" />
           </Navbar>,
         )}
         <main
@@ -276,4 +280,3 @@ export function DocsLayoutSidebarFooter({
 }
 
 export { CollapsibleControl, Navbar, NavbarSidebarTrigger, type LinkItemType };
-export { getSidebarTabsFromOptions } from './docs/shared';

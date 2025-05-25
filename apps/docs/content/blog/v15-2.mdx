@@ -14,7 +14,7 @@ Fumadocs 15.2 introduces a layer over `fumadocs-core` to extend support to other
 The main focus of Fumadocs is flexibility, I aim to support more frameworks as long as it doesn't change the fundamentals of Fumadocs, like the separation of core and UI package.
 
 The React.js ecosystem is a joy to work with, porting Fumadocs to other frameworks isn't as difficult as I thought.
-It's also my goal to make it works not only for Next.js devs, but also everyone in the ecosystem who is using a SSR-compatible React framework.
+It's also my goal to make it work not only for Next.js devs, but also everyone in the ecosystem who is using a SSR-compatible React framework.
 
 ### Breaking Changes
 
@@ -30,7 +30,7 @@ export function Provider({ children }) {
 }
 ```
 
-If you're using Fumadocs UI, there's no need to change. `RootProvider` included it by default, and allow you to provide your own framework with:
+If you're using Fumadocs UI, there's no need to change. `RootProvider` included it by default, and allows you to provide your own framework with:
 
 ```tsx
 import { RootProvider } from 'fumadocs-ui/provider/base';
@@ -41,13 +41,13 @@ export function Provider({ children }) {
 }
 ```
 
-Please report issues if you found any public APIs are broken unexpectedly.
+Please report issues if you find any public APIs are broken unexpectedly.
 
 ### Compilation Time
 
 15.2 also included some small performance improvements to Fumadocs, the time taken for Turbopack to start dev server and compile its first docs page is about 2-3 seconds.
 
-This change also potentially allowed Fumadocs to run on Vite, production build of minimal React Router setup only takes around 4s on a Macbook.
+This change also potentially allows Fumadocs to run on Vite, production build of minimal React Router setup only takes around 4s on a Macbook.
 
 ## Try it out
 
@@ -67,7 +67,7 @@ pnpm create fumadocs-app
 
 15.2 doesn't support Astro, and probably won't unless better React.js support is provided by Astro.
 
-- `transition:presist` is needed for Fumadocs UI layouts, however this will also affect its children (e.g. MDX content), causing page content to be persisted even after navigation.
+- `transition:persist` is needed for Fumadocs UI layouts, however this will also affect its children (e.g. MDX content), causing page content to be persisted even after navigation.
 - React contexts cannot work across islands, this changes the usage of Fumadocs significantly and hence require a redesign of APIs.
 
 Fumadocs will continue to be Next.js first, the docs won't be changed to generalize usages of other frameworks. Instead, a new docs site will be developed for other frameworks (planned).
