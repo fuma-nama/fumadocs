@@ -12,12 +12,11 @@ import {
 import { TerminalIcon } from 'lucide-react';
 import Link from 'next/link';
 import scrollIntoView from 'scroll-into-view-if-needed';
-import { cn } from '@/lib/cn';
+import { cvb, cx } from '@/lib/cvb.config';
 import { buttonVariants } from '@/components/ui/button';
 import Image from 'next/image';
 import MainImg from './main.png';
 import OpenAPIImg from './openapi.png';
-import { cva } from 'class-variance-authority';
 
 export function CreateAppAnimation() {
   const installCmd = 'npm create fumadocs-app';
@@ -112,7 +111,7 @@ function LaunchAppWindow(
   return (
     <div
       {...props}
-      className={cn(
+      className={cx(
         'overflow-hidden rounded-md border bg-fd-background shadow-xl',
         props.className,
       )}
@@ -159,7 +158,7 @@ export function WhyInteractive(props: {
               });
             }}
             type="button"
-            className={cn(
+            className={cx(
               'transition-colors text-nowrap border border-transparent rounded-lg px-3 py-2.5 text-start text-sm text-fd-muted-foreground font-medium',
               i === active
                 ? 'text-fd-primary bg-fd-primary/10 border-fd-primary/10'
@@ -179,7 +178,7 @@ export function WhyInteractive(props: {
           from {
             width: 0px;
           }
-          
+
           to {
             width: 100%;
           }
@@ -209,7 +208,7 @@ export function WhyInteractive(props: {
             {props.codeblockTheme}
             <Link
               href="/docs/ui/theme"
-              className={cn(buttonVariants(), 'not-prose')}
+              className={cx(buttonVariants(), 'not-prose')}
             >
               See Themes
             </Link>
@@ -232,13 +231,13 @@ export function WhyInteractive(props: {
             <div className="mt-4 flex flex-row items-center gap-1.5 not-prose">
               <Link
                 href="/docs/ui/components/auto-type-table"
-                className={cn(buttonVariants())}
+                className={buttonVariants()}
               >
                 Type Table
               </Link>
               <Link
                 href="/docs/ui/openapi"
-                className={cn(buttonVariants({ variant: 'ghost' }))}
+                className={buttonVariants({ variant: 'ghost' })}
               >
                 OpenAPI Integration
               </Link>
@@ -255,7 +254,7 @@ export function WhyInteractive(props: {
             {props.codeblockInteractive}
             <Link
               href="/docs/ui/components"
-              className={cn(buttonVariants(), 'not-prose')}
+              className={cx(buttonVariants(), 'not-prose')}
             >
               View Components
             </Link>
@@ -283,7 +282,7 @@ function WhyPanel(props: HTMLProps<HTMLDivElement>) {
   return (
     <div
       {...props}
-      className={cn(
+      className={cx(
         'duration-700 animate-in fade-in text-sm prose',
         props.className,
       )}
@@ -293,17 +292,15 @@ function WhyPanel(props: HTMLProps<HTMLDivElement>) {
   );
 }
 
-const previewButtonVariants = cva(
-  'w-20 h-9 text-sm font-medium transition-colors rounded-full',
-  {
-    variants: {
-      active: {
-        true: 'text-fd-primary-foreground',
-        false: 'text-fd-muted-foreground',
-      },
+const previewButtonVariants = cvb({
+  base: 'w-20 h-9 text-sm font-medium transition-colors rounded-full',
+  variants: {
+    active: {
+      true: 'text-fd-primary-foreground',
+      false: 'text-fd-muted-foreground',
     },
   },
-);
+});
 export function PreviewImages() {
   const [active, setActive] = useState(0);
 
@@ -318,13 +315,13 @@ export function PreviewImages() {
           }}
         />
         <button
-          className={cn(previewButtonVariants({ active: active === 0 }))}
+          className={cx(previewButtonVariants({ active: active === 0 }))}
           onClick={() => setActive(0)}
         >
           Docs
         </button>
         <button
-          className={cn(previewButtonVariants({ active: active === 1 }))}
+          className={cx(previewButtonVariants({ active: active === 1 }))}
           onClick={() => setActive(1)}
         >
           OpenAPI
@@ -334,7 +331,7 @@ export function PreviewImages() {
         src={MainImg}
         alt="preview"
         priority
-        className={cn(
+        className={cx(
           'w-full select-none duration-1000 animate-in fade-in -mb-60 slide-in-from-bottom-12 lg:-mb-40',
           active !== 0 && 'hidden',
         )}
@@ -344,7 +341,7 @@ export function PreviewImages() {
           src={OpenAPIImg}
           alt="preview"
           priority
-          className={cn(
+          className={cx(
             'w-full select-none duration-1000 animate-in fade-in -mb-60 slide-in-from-bottom-12 lg:-mb-40',
             active !== 1 && 'hidden',
           )}

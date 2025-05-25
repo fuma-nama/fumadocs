@@ -2,7 +2,6 @@ import { Building2, LibraryIcon } from 'lucide-react';
 import Link, { type LinkProps } from 'next/link';
 import Image from 'next/image';
 import { buttonVariants } from '@/components/ui/button';
-import { cn } from '@/lib/cn';
 import Spot from '@/public/spot.png';
 
 export default function DocsPage(): React.ReactElement {
@@ -37,13 +36,13 @@ export default function DocsPage(): React.ReactElement {
         <a
           href="https://github.com/fuma-nama/fumadocs"
           rel="noreferrer noopener"
-          className={cn(buttonVariants({ size: 'lg' }))}
+          className={buttonVariants({ size: 'lg' })}
         >
           Github
         </a>
         <Link
           href="/showcase"
-          className={cn(buttonVariants({ variant: 'outline', size: 'lg' }))}
+          className={buttonVariants({ variant: 'outline', size: 'lg' })}
         >
           Showcase
         </Link>

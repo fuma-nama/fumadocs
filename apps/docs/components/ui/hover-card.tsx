@@ -3,7 +3,7 @@
 import * as React from 'react';
 import * as HoverCardPrimitive from '@radix-ui/react-hover-card';
 
-import { cn } from '@/lib/cn';
+import { cx } from '@/lib/cvb.config';
 
 const HoverCard = HoverCardPrimitive.Root;
 
@@ -18,7 +18,7 @@ const HoverCardContent = React.forwardRef<
       ref={ref}
       align={align}
       sideOffset={sideOffset}
-      className={cn(
+      className={cx(
         'z-50 w-72 rounded-lg border bg-fd-popover p-4 text-popover-fd-foreground shadow-md outline-none data-[state=open]:animate-fd-popover-in data-[state=closed]:animate-fd-popover-out origin-[--radix-hover-card-content-transform-origin]',
         className,
       )}

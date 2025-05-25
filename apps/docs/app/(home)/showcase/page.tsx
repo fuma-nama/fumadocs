@@ -1,6 +1,5 @@
 import { PlusIcon } from 'lucide-react';
 import Image, { type StaticImageData } from 'next/image';
-import { cn } from '@/lib/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { createMetadata } from '@/lib/metadata';
 import NextFAQ from '@/public/showcases/next-faq.png';
@@ -191,11 +190,9 @@ export default function Showcase() {
             href="https://github.com/fuma-nama/fumadocs/discussions/30"
             target="_blank"
             rel="noreferrer noopener"
-            className={cn(
-              buttonVariants({
-                variant: 'outline',
-              }),
-            )}
+            className={buttonVariants({
+              variant: 'outline',
+            })}
           >
             <PlusIcon className="me-2 size-4" />
             Suggest Yours
@@ -234,13 +231,11 @@ export default function Showcase() {
               <Link
                 key={item.url}
                 href={item.url}
-                className={cn(
-                  buttonVariants({
-                    variant: 'link',
-                    size: 'xs',
-                  }),
-                  'text-fd-muted-foreground',
-                )}
+                className={buttonVariants({
+                  variant: 'link',
+                  size: 'xs',
+                  className: 'text-fd-muted-foreground',
+                })}
               >
                 {item.name}
               </Link>
@@ -255,12 +250,10 @@ export default function Showcase() {
         <div className="absolute text-center bottom-0 inset-x-0 pt-4 bg-gradient-to-t from-fd-background">
           <Link
             href="https://github.com/fuma-nama/fumadocs/discussions/30"
-            className={cn(
-              buttonVariants({
-                size: 'sm',
-                variant: 'link',
-              }),
-            )}
+            className={buttonVariants({
+              size: 'sm',
+              variant: 'link',
+            })}
           >
             See all of our showcases.
           </Link>

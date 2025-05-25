@@ -1,7 +1,7 @@
 'use client';
 import { type ButtonHTMLAttributes, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { cn } from '@/lib/cn';
+import { cx } from '@/lib/cvb.config';
 import { buttonVariants } from '../../../../packages/ui/src/components/ui/button';
 
 // lazy load the dialog
@@ -25,7 +25,7 @@ export function AISearchTrigger(
       <button
         {...props}
         onClick={() => setOpen(true)}
-        className={cn(
+        className={cx(
           buttonVariants({
             color: 'secondary',
           }),

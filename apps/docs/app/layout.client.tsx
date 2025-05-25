@@ -2,7 +2,7 @@
 
 import { useParams } from 'next/navigation';
 import { type ReactNode, useId } from 'react';
-import { cn } from '@/lib/cn';
+import { cx } from '@/lib/cvb.config';
 
 export function Body({
   children,
@@ -12,7 +12,7 @@ export function Body({
   const mode = useMode();
 
   return (
-    <body className={cn(mode, 'relative flex min-h-screen flex-col')}>
+    <body className={cx(mode, 'relative flex min-h-screen flex-col')}>
       {children}
     </body>
   );

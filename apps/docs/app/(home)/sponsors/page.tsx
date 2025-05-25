@@ -7,7 +7,6 @@ import {
   sponsorTiers,
 } from '@/app/(home)/sponsors/data';
 import { buttonVariants } from '@/components/ui/button';
-import { cn } from '@/lib/cn';
 import { getSponsors } from '@/lib/get-sponsors';
 import { owner } from '@/lib/github';
 
@@ -68,12 +67,10 @@ export default async function Page() {
         href="https://github.com/sponsors/fuma-nama"
         rel="noreferrer noopener"
         target="_blank"
-        className={cn(
-          buttonVariants({
-            variant: 'outline',
-            className: 'rounded-full mt-6',
-          }),
-        )}
+        className={buttonVariants({
+          variant: 'outline',
+          className: 'rounded-full mt-6',
+        })}
       >
         Sponsor
       </a>

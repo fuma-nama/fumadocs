@@ -1,7 +1,6 @@
 'use client';
 import { useState } from 'react';
 import { Check, Copy } from 'lucide-react';
-import { cn } from '@/lib/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 import Link from 'fumadocs-core/link';
@@ -39,13 +38,11 @@ export function LLMCopyButton({ slug }: { slug: string[] }) {
   return (
     <button
       disabled={isLoading}
-      className={cn(
-        buttonVariants({
-          variant: 'secondary',
-          size: 'xs',
-          className: 'gap-2',
-        }),
-      )}
+      className={buttonVariants({
+        variant: 'secondary',
+        size: 'xs',
+        className: 'gap-2',
+      })}
       onClick={onClick}
     >
       {checked ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
@@ -57,13 +54,11 @@ export function LLMCopyButton({ slug }: { slug: string[] }) {
 export function EditOnGitHub({ url }: { url: string }) {
   return (
     <Link
-      className={cn(
-        buttonVariants({
-          variant: 'secondary',
-          size: 'xs',
-          className: 'gap-2',
-        }),
-      )}
+      className={buttonVariants({
+        variant: 'secondary',
+        size: 'xs',
+        className: 'gap-2',
+      })}
       href={url}
     >
       <svg

@@ -1,5 +1,4 @@
 'use client';
-import { cn } from '@/lib/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { ThumbsDown, ThumbsUp } from 'lucide-react';
 import { type SyntheticEvent, useEffect, useState } from 'react';
@@ -7,20 +6,18 @@ import {
   Collapsible,
   CollapsibleContent,
 } from 'fumadocs-ui/components/ui/collapsible';
-import { cva } from 'class-variance-authority';
+import { cvb } from '@/lib/cvb.config';
 import { usePathname } from 'next/navigation';
 
-const rateButtonVariants = cva(
-  'inline-flex items-center gap-2 px-3 py-2 rounded-full font-medium border text-sm [&_svg]:size-4 disabled:cursor-not-allowed',
-  {
-    variants: {
-      active: {
-        true: 'bg-fd-accent text-fd-accent-foreground [&_svg]:fill-current',
-        false: 'text-fd-muted-foreground',
-      },
+const rateButtonVariants = cvb({
+  base: 'inline-flex items-center gap-2 px-3 py-2 rounded-full font-medium border text-sm [&_svg]:size-4 disabled:cursor-not-allowed',
+  variants: {
+    active: {
+      true: 'bg-fd-accent text-fd-accent-foreground [&_svg]:fill-current',
+      false: 'text-fd-muted-foreground',
     },
   },
-);
+});
 
 export interface Feedback {
   opinion: 'good' | 'bad';
@@ -84,11 +81,9 @@ export function Rate({
         <p className="text-sm font-medium pe-2">How is this guide?</p>
         <button
           disabled={previous !== null}
-          className={cn(
-            rateButtonVariants({
-              active: (previous?.opinion ?? opinion) === 'good',
-            }),
-          )}
+          className={rateButtonVariants({
+            active: (previous?.opinion ?? opinion) === 'good',
+          })}
           onClick={() => {
             setOpinion('good');
           }}
@@ -98,11 +93,9 @@ export function Rate({
         </button>
         <button
           disabled={previous !== null}
-          className={cn(
-            rateButtonVariants({
-              active: (previous?.opinion ?? opinion) === 'bad',
-            }),
-          )}
+          className={rateButtonVariants({
+            active: (previous?.opinion ?? opinion) === 'bad',
+          })}
           onClick={() => {
             setOpinion('bad');
           }}
@@ -116,12 +109,10 @@ export function Rate({
           <div className="px-3 py-6 flex flex-col items-center gap-3 bg-fd-card text-fd-card-foreground text-sm text-center rounded-xl text-fd-muted-foreground">
             <p>Thank you for your feedback!</p>
             <button
-              className={cn(
-                buttonVariants({
-                  color: 'secondary',
-                }),
-                'text-xs',
-              )}
+              className={buttonVariants({
+                color: 'secondary',
+                className: 'text-xs',
+              })}
               onClick={() => {
                 setOpinion(previous?.opinion);
                 set(url, null);
@@ -147,7 +138,10 @@ export function Rate({
             />
             <button
               type="submit"
-              className={cn(buttonVariants({ color: 'outline' }), 'w-fit px-3')}
+              className={buttonVariants({
+                color: 'outline',
+                className: 'w-fit px-3',
+              })}
             >
               Submit
             </button>

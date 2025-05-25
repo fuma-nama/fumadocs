@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
-import { cn } from '@/lib/cn';
 import { buttonVariants } from '@/components/ui/button';
 
 export function UrlBar() {
@@ -31,11 +30,7 @@ export function WithoutValueTest() {
         ))}
       </Tabs>
       <button
-        className={cn(
-          buttonVariants({
-            variant: 'secondary',
-          }),
-        )}
+        className={buttonVariants({ variant: 'secondary' })}
         onClick={() => setItems(['Item 1', 'Item 3', 'Item 2'])}
       >
         Change Items

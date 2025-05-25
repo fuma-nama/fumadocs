@@ -86,9 +86,9 @@ importers:
       ai:
         specifier: ^4.3.15
         version: 4.3.16(react@19.1.0)(zod@3.25.28)
-      class-variance-authority:
-        specifier: ^0.7.1
-        version: 0.7.1
+      cvb:
+        specifier: ^1.1.1
+        version: 1.1.1
       feed:
         specifier: ^5.0.1
         version: 5.0.1
@@ -5431,6 +5431,10 @@ packages:
     peerDependenciesMeta:
       typescript:
         optional: true
+
+  cvb@1.1.1:
+    resolution: {integrity: sha512-zGQwgE5GBEUo0xtlOEGaUVgoLKSrMMafsRc+1Lc5WOQGp+F+FLx/RhMOruUuvV7KTewzzrqMW9Z/eRjlt1Dj6w==}
+    engines: {node: '>=18.0.0'}
 
   cytoscape-cose-bilkent@4.1.0:
     resolution: {integrity: sha512-wgQlVIUJF13Quxiv5e1gstZ08rnZj2XaLHGoFMYXz7SkNfCDOOteKBE6SYRfA9WxxI/iBc3ajfDoc6hb/MRAHQ==}
@@ -14989,6 +14993,8 @@ snapshots:
       clsx: 2.1.1
     optionalDependencies:
       typescript: 5.8.3
+
+  cvb@1.1.1: {}
 
   cytoscape-cose-bilkent@4.1.0(cytoscape@3.32.0):
     dependencies:

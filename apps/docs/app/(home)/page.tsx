@@ -1,4 +1,4 @@
-import { cva } from 'class-variance-authority';
+import { cvb, cx } from '@/lib/cvb.config';
 import {
   BatteryChargingIcon,
   CpuIcon,
@@ -21,7 +21,6 @@ import { File, Files, Folder } from 'fumadocs-ui/components/files';
 import Link from 'next/link';
 import type { HTMLAttributes, ReactNode } from 'react';
 import Image from 'next/image';
-import { cn } from '@/lib/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { CodeBlock } from '@/components/code-block';
 import { UwuHero } from '@/app/(home)/uwu';
@@ -38,9 +37,9 @@ import { owner, repo } from '@/lib/github';
 import { Marquee } from '@/app/(home)/marquee';
 import ArchImg from './arch.png';
 
-const badgeVariants = cva(
-  'inline-flex size-7 items-center justify-center rounded-full bg-fd-primary font-medium text-fd-primary-foreground',
-);
+const badgeVariants = cvb({
+  base: 'inline-flex size-7 items-center justify-center rounded-full bg-fd-primary font-medium text-fd-primary-foreground',
+});
 
 export default function Page() {
   const gridColor =
@@ -140,7 +139,7 @@ async function Why() {
             lang="ts"
             code={`import { source } from '@/lib/source';
 import { createFromSource } from 'fumadocs-core/search/server';
- 
+
 export const { GET } = createFromSource(source);`}
           />
         }
@@ -156,7 +155,7 @@ export const { GET } = createFromSource(source);`}
           <CodeBlock
             lang="tsx"
             code={`import { File, Folder, Files } from 'fumadocs-ui/components/files';
- 
+
 <Files>
   <Folder name="app" defaultOpen>
     <File name="layout.tsx" />
@@ -174,7 +173,7 @@ export const { GET } = createFromSource(source);`}
 
 export function ProductTable() {
   const products = db.getProducts()
-    
+
   return (
     <ul>
       {products.map(product => <li key={product.key}>{product.name}</li>)}
@@ -237,17 +236,15 @@ function End() {
           </span>
         </li>
         <li className="flex flex-row flex-wrap gap-2 mt-auto">
-          <Link href="/docs" className={cn(buttonVariants())}>
+          <Link href="/docs" className={buttonVariants()}>
             Read docs
           </Link>
           <a
             href="https://stackblitz.com/~/github.com/fuma-nama/fumadocs-ui-template"
             rel="noreferrer noopener"
-            className={cn(
-              buttonVariants({
-                variant: 'outline',
-              }),
-            )}
+            className={buttonVariants({
+              variant: 'outline',
+            })}
           >
             Open Demo
           </a>
@@ -257,9 +254,9 @@ function End() {
   );
 }
 
-const searchItemVariants = cva(
-  'flex flex-row items-center gap-2 rounded-md p-2 text-sm text-fd-popover-foreground',
-);
+const searchItemVariants = cvb({
+  base: 'flex flex-row items-center gap-2 rounded-md p-2 text-sm text-fd-popover-foreground',
+});
 
 function Search(): React.ReactElement {
   return (
@@ -279,11 +276,9 @@ function Search(): React.ReactElement {
           ].map((v, i) => (
             <div
               key={v}
-              className={cn(
-                searchItemVariants({
-                  className: i === 0 ? 'bg-fd-accent' : '',
-                }),
-              )}
+              className={searchItemVariants({
+                className: i === 0 ? 'bg-fd-accent' : '',
+              })}
             >
               <FileTextIcon className="size-4 text-fd-muted-foreground" />
               {v}
@@ -384,9 +379,7 @@ function Hero() {
       <div className="inline-flex items-center gap-3 max-md:mx-auto">
         <Link
           href="/docs/ui"
-          className={cn(
-            buttonVariants({ size: 'lg', className: 'rounded-full' }),
-          )}
+          className={buttonVariants({ size: 'lg', className: 'rounded-full' })}
         >
           Getting Started
         </Link>
@@ -394,13 +387,11 @@ function Hero() {
           href="https://stackblitz.com/~/github.com/fuma-nama/fumadocs-ui-template"
           target="_blank"
           rel="noreferrer noopener"
-          className={cn(
-            buttonVariants({
-              size: 'lg',
-              variant: 'outline',
-              className: 'rounded-full bg-fd-background',
-            }),
-          )}
+          className={buttonVariants({
+            size: 'lg',
+            variant: 'outline',
+            className: 'rounded-full bg-fd-background',
+          })}
         >
           Open Demo
         </a>
@@ -415,7 +406,7 @@ const feedback = [
     avatar: 'https://avatars.githubusercontent.com/u/124599',
     user: 'shadcn',
     role: 'Creator of Shadcn UI',
-    message: `You know how you end up rebuilding a full docs site every time you start a new project? 
+    message: `You know how you end up rebuilding a full docs site every time you start a new project?
 
 Fumadocs fixes this by giving you all the right blocks that you compose together.
 
@@ -450,7 +441,7 @@ function Feedback() {
         </p>
         <Link
           href="/showcase"
-          className={cn(buttonVariants({ variant: 'outline' }))}
+          className={buttonVariants({ variant: 'outline' })}
         >
           Showcase
         </Link>
@@ -488,7 +479,7 @@ function Introduction(): React.ReactElement {
   return (
     <div className="grid grid-cols-1 border-r md:grid-cols-2">
       <div className="flex flex-col gap-2 border-l border-t px-6 py-12 md:py-16">
-        <div className={cn(badgeVariants())}>1</div>
+        <div className={badgeVariants()}>1</div>
         <h3 className="text-xl font-semibold">Create it.</h3>
         <p className="mb-8 text-fd-muted-foreground">
           Initialize a new docs with a command.
@@ -496,7 +487,7 @@ function Introduction(): React.ReactElement {
         <CreateAppAnimation />
       </div>
       <div className="flex flex-col gap-2 border-l border-t px-6 py-12 md:py-16">
-        <div className={cn(badgeVariants())}>2</div>
+        <div className={badgeVariants()}>2</div>
         <h3 className="text-xl font-semibold">Write.</h3>
         <p className="text-fd-muted-foreground">
           Write content, with automation tools & type-safe data validation.
@@ -525,7 +516,7 @@ Hello World
         </div>
       </div>
       <div className="col-span-full flex flex-col items-center gap-2 border-l border-t px-6 py-16 text-center">
-        <div className={cn(badgeVariants())}>3</div>
+        <div className={badgeVariants()}>3</div>
         <h3 className="text-2xl font-semibold">Ship.</h3>
         <p className="text-fd-muted-foreground">
           Deploy your docs easily with Next.js compatible hosting platforms.
@@ -557,14 +548,14 @@ function Contributing() {
       <div className="mb-8 flex flex-row items-center gap-2">
         <Link
           href="/sponsors"
-          className={cn(buttonVariants({ variant: 'outline' }))}
+          className={buttonVariants({ variant: 'outline' })}
         >
           Sponsors
         </Link>
         <a
           href="https://github.com/fuma-nama/fumadocs/graphs/contributors"
           rel="noreferrer noopener"
-          className={cn(buttonVariants({ variant: 'ghost' }))}
+          className={buttonVariants({ variant: 'ghost' })}
         >
           Contributors
         </a>
@@ -603,7 +594,7 @@ function Features() {
               href="https://github.com/fuma-nama/fumadocs-basehub"
               rel="noreferrer noopener"
               target="_blank"
-              className={cn(buttonVariants({ variant: 'outline' }))}
+              className={buttonVariants({ variant: 'outline' })}
             >
               BaseHub CMS example
             </a>
@@ -611,7 +602,7 @@ function Features() {
               href="https://github.com/fuma-nama/fumadocs-sanity"
               rel="noreferrer noopener"
               target="_blank"
-              className={cn(buttonVariants({ variant: 'ghost' }))}
+              className={buttonVariants({ variant: 'ghost' })}
             >
               Sanity example
             </a>
@@ -646,9 +637,7 @@ function Features() {
       >
         <Link
           href="/docs/headless/search/algolia"
-          className={cn(
-            buttonVariants({ variant: 'outline', className: 'mt-4' }),
-          )}
+          className={buttonVariants({ variant: 'outline', className: 'mt-4' })}
         >
           Learn More
         </Link>
@@ -731,7 +720,7 @@ function Feature({
 }): React.ReactElement {
   return (
     <div
-      className={cn('border-l border-t px-6 py-12 md:py-16', className)}
+      className={cx('border-l border-t px-6 py-12 md:py-16', className)}
       {...props}
     >
       <div className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-fd-muted-foreground">

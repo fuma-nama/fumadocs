@@ -12,7 +12,7 @@ import {
 } from 'react';
 import { Loader2, RefreshCw, Send, X } from 'lucide-react';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
-import { cn } from '@/lib/cn';
+import { cx } from '@/lib/cvb.config';
 import { buttonVariants } from '../../../../packages/ui/src/components/ui/button';
 import type { Processor } from './markdown-processor';
 import Link from 'fumadocs-core/link';
@@ -48,12 +48,10 @@ function SearchAIActions() {
       {!isLoading && messages.at(-1)?.role === 'assistant' && (
         <button
           type="button"
-          className={cn(
-            buttonVariants({
-              color: 'secondary',
-            }),
-            'text-fd-muted-foreground rounded-full gap-1.5',
-          )}
+          className={buttonVariants({
+            color: 'secondary',
+            className: 'text-fd-muted-foreground rounded-full gap-1.5',
+          })}
           onClick={() => reload()}
         >
           <RefreshCw className="size-4" />
@@ -62,12 +60,10 @@ function SearchAIActions() {
       )}
       <button
         type="button"
-        className={cn(
-          buttonVariants({
-            color: 'secondary',
-          }),
-          'text-fd-muted-foreground rounded-full',
-        )}
+        className={buttonVariants({
+          color: 'secondary',
+          className: 'text-fd-muted-foreground rounded-full',
+        })}
         onClick={() => setMessages([])}
       >
         Clear Chat
@@ -91,7 +87,7 @@ function SearchAIInput(props: FormHTMLAttributes<HTMLFormElement>) {
   return (
     <form
       {...props}
-      className={cn(
+      className={cx(
         'flex flex-row items-start rounded-xl border pe-2 bg-fd-popover text-fd-popover-foreground transition-colors shadow-lg',
         isLoading && 'bg-fd-muted',
         props.className,
@@ -115,12 +111,10 @@ function SearchAIInput(props: FormHTMLAttributes<HTMLFormElement>) {
       {isLoading ? (
         <button
           type="button"
-          className={cn(
-            buttonVariants({
-              color: 'secondary',
-              className: 'rounded-full mt-2 gap-2',
-            }),
-          )}
+          className={buttonVariants({
+            color: 'secondary',
+            className: 'rounded-full mt-2 gap-2',
+          })}
           onClick={stop}
         >
           <Loader2 className="size-4 animate-spin text-fd-muted-foreground" />
@@ -129,12 +123,10 @@ function SearchAIInput(props: FormHTMLAttributes<HTMLFormElement>) {
       ) : (
         <button
           type="submit"
-          className={cn(
-            buttonVariants({
-              color: 'ghost',
-              className: 'rounded-full mt-2 p-1.5',
-            }),
-          )}
+          className={buttonVariants({
+            color: 'ghost',
+            className: 'rounded-full mt-2 p-1.5',
+          })}
           disabled={input.length === 0}
         >
           <Send className="size-4" />
@@ -191,19 +183,19 @@ function List(props: Omit<HTMLAttributes<HTMLDivElement>, 'dir'>) {
 
 function Input(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
   const ref = useRef<HTMLDivElement>(null);
-  const shared = cn('col-start-1 row-start-1 max-h-60 min-h-12 p-3');
+  const shared = cx('col-start-1 row-start-1 max-h-60 min-h-12 p-3');
 
   return (
     <div className="grid flex-1">
       <textarea
         id="nd-ai-input"
-        className={cn(
+        className={cx(
           shared,
           'resize-none bg-transparent placeholder:text-fd-muted-foreground focus-visible:outline-none',
         )}
         {...props}
       />
-      <div ref={ref} className={cn(shared, 'break-all invisible')}>
+      <div ref={ref} className={cx(shared, 'break-all invisible')}>
         {`${props.value?.toString() ?? ''}\n`}
       </div>
     </div>
@@ -233,7 +225,7 @@ function Message({ message }: { message: Message }) {
   return (
     <div>
       <p
-        className={cn(
+        className={cx(
           'mb-1 text-xs font-medium text-fd-muted-foreground',
           message.role === 'assistant' && 'text-fd-primary',
         )}

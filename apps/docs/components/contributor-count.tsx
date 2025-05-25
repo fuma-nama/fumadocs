@@ -1,7 +1,7 @@
-import type { HTMLAttributes } from 'react';
-import Image from 'next/image';
-import { cn } from '@/lib/cn';
+import { cx } from '@/lib/cvb.config';
 import { fetchContributors } from '@/lib/get-contributors';
+import Image from 'next/image';
+import type { HTMLAttributes } from 'react';
 
 export interface ContributorCounterProps
   extends HTMLAttributes<HTMLDivElement> {
@@ -24,7 +24,7 @@ export default async function ContributorCounter({
   return (
     <div
       {...props}
-      className={cn('flex flex-col items-center gap-4', props.className)}
+      className={cx('flex flex-col items-center gap-4', props.className)}
     >
       <div className="flex flex-row flex-wrap items-center justify-center md:pe-4">
         {topContributors.map((contributor, i) => (
