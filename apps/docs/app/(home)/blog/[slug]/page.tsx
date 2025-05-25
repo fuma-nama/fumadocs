@@ -20,7 +20,7 @@ export default async function Page(props: {
   return (
     <>
       <div
-        className="container rounded-xl border py-12 md:px-8"
+        className="container rounded-xl mt-12 py-12 md:px-8"
         style={{
           backgroundColor: 'black',
           backgroundImage: [

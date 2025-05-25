@@ -1,0 +1,72 @@
+---
+title: Fumadocs OpenAPI v9
+description: Better UI & DX
+date: 2025-05-25
+author: Fuma Nama
+---
+
+## Overview
+
+This breaking change is mainly made to address problems of `generateFiles()` function.
+
+Previously, it was a simple function to generate multiple MDX files/pages from your OpenAPI schema, same as every docs generator.
+We tested it on public OpenAPI schemas such as Unkey, Vercel and examples from Scalar and Swagger's Museum schema.
+
+Since these schemas were written for different docs solutions, or even their custom ones.
+We made `generateFiles()` too complicated to be capable of producing best results for various schema styles, and it's even harder to customise the generated file paths of API docs.
+
+This update also include:
+
+- Better UI for schema & playground body input
+- Improved type-safety for `generateFiles()`
+
+## Breaking Changes
+
+The algorithm for generating file paths is changed:
+
+- `meta.json` will no longer be generated, add as your wanted.
+- `per: operation`: The generated path will be identical to your operation id. If not defined, it takes your endpoint path instead.
+
+### Group By
+
+The behaviour of `groupBy` API is also changed.
+
+| value | output                                                 |
+| ----- | ------------------------------------------------------ |
+| tag   | `{tag}/{operationId ?? endpoint_path}.mdx`             |
+| route | `{endpoint_path}/{method}.mdx` (ignores `name` option) |
+| none  | `{operationId ?? endpoint_path}.mdx` (default)         |
+
+### Customise Output
+
+The usage of `name` option is renewed, it can be used to customise the output path of files.
+
+```ts
+import { generateFiles } from 'fumadocs-openapi';
+
+void generateFiles({
+  name: (output, document) => {
+    // page info
+    console.log(output);
+    // parsed OpenAPI schema
+    console.log(document);
+    return 'my-dir/filename';
+  },
+});
+```
+
+## Migration
+
+You can start using the latest algorithm, or keep the current behaviour with:
+
+```ts
+import { generateFiles } from 'fumadocs-openapi';
+
+void generateFiles({
+  name: {
+    algorithm: 'v1',
+  },
+});
+```
+
+Note that it won't create `meta.json` anymore even with `algorithm` set to `v1`, you can keep your current generated `meta.json` files.
