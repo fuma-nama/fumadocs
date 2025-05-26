@@ -45,7 +45,22 @@ export function HideIfEmpty({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const inject = `{${isEmpty.toString()}
+  const inject = `{
+function isEmpty(node) {
+  for (let i = 0; i < node.childNodes.length; i++) {
+    const child = node.childNodes.item(i);
+    if (child.nodeType === Node.TEXT_NODE) {
+      return false;
+    } else if (
+      child.nodeType === Node.ELEMENT_NODE &&
+      window.getComputedStyle(child).display !== 'none'
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
 
 const element = document.querySelector('[data-fdid="${id}"]')
 if (element) {
