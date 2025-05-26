@@ -135,7 +135,7 @@ function getAuthorizationField(
 
   if (!item) {
     console.warn(
-      `Cannot find suitable security scheme for API Playground from ${JSON.stringify(security, null, 2)}. Only schemes with one requirement are allowed.`,
+      `Cannot find suitable security scheme for API Playground from ${JSON.stringify(security, null, 2)}. Only schemes with one requirement are allowed at the moment.`,
     );
     return;
   }

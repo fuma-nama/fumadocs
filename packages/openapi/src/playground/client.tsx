@@ -185,7 +185,7 @@ export default function Client({
       if (authorization && value.authorization) {
         authInfo.saveInfo(value.authorization);
 
-        writeAuthHeader(
+        writeAuthInfo(
           authorization,
           value.authorization,
           value.header,
@@ -264,35 +264,67 @@ function FormBody({
     return paramTypes.map((param) => parameters.filter((v) => v.in === param));
   }, [parameters]);
 
-  function renderAuth() {
-    if (!authorization) return null;
-    const schema: RequestSchema =
-      authorization.type === 'http' && authorization.scheme === 'basic'
-        ? {
-            type: 'object',
-            required: ['username', 'password'],
-            properties: {
-              username: {
-                type: 'string',
-              },
-              password: {
-                type: 'string',
-              },
+  const auth = useMemo(():
+    | {
+        in: string;
+        field: RequestSchema;
+      }
+    | undefined => {
+    if (!authorization) return;
+
+    if (authorization.type === 'http' && authorization.scheme === 'basic') {
+      return {
+        in: 'header',
+        field: {
+          type: 'object',
+          required: ['username', 'password'],
+          description: authorization.description,
+          properties: {
+            username: {
+              type: 'string',
             },
-          }
-        : {
-            type: 'string',
-            description: 'The Authorization access token',
-          };
+            password: {
+              type: 'string',
+            },
+          },
+        },
+      };
+    } else if (
+      authorization.type === 'http' ||
+      authorization.type === 'oauth2'
+    ) {
+      return {
+        in: 'header',
+        field: {
+          type: 'string',
+          description:
+            authorization.description ?? `The Authorization access token.`,
+        },
+      };
+    } else if (authorization.type === 'apiKey') {
+      return {
+        in: authorization.in,
+        field: {
+          type: 'string',
+          description: authorization.description ?? 'The API key.',
+        },
+      };
+    }
+
+    // TODO: handle OpenID connect
+  }, [authorization]);
+
+  function renderAuth() {
+    if (!auth) return null;
 
     if (fields?.auth)
-      return renderCustomField('authorization', schema, fields.auth);
+      return renderCustomField('authorization', auth.field, fields.auth);
 
     return (
       <FieldSet
         fieldName="authorization"
         name="Authorization"
-        field={schema}
+        field={auth.field}
         isRequired
       />
     );
@@ -303,12 +335,11 @@ function FormBody({
       {params.map((param, i) => {
         const name = paramNames[i];
         const type = paramTypes[i];
-        if (type !== 'header' && param.length === 0) return;
-        if (type === 'header' && !authorization && param.length === 0) return;
+        if ((!auth || type !== auth.in) && param.length === 0) return;
 
         return (
           <CollapsiblePanel key={name} title={name}>
-            {type === 'header' ? renderAuth() : null}
+            {auth && type === auth.in ? renderAuth() : null}
             {param.map((field) => {
               const fieldName = `${type}.${field.name}` as const;
 
@@ -563,7 +594,7 @@ function CollapsiblePanel({
   );
 }
 
-function writeAuthHeader(
+function writeAuthInfo(
   authorization: Security,
   input: FormValues['authorization'],
   header: Record<string, unknown>,

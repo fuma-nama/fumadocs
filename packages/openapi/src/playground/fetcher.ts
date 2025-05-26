@@ -35,24 +35,6 @@ export function createBrowserFetcher(
         ? new URL(options.proxyUrl, window.location.origin)
         : null;
 
-      if (typeof document !== 'undefined') {
-        for (const key in options.cookie) {
-          const value = options.cookie[key];
-          if (!value) continue;
-
-          document.cookie = [
-            `${key}=${value}`,
-            'HttpOnly',
-            proxyUrl &&
-              proxyUrl.origin !== window.location.origin &&
-              `domain=${proxyUrl.host}`,
-            'path=/',
-          ]
-            .filter(Boolean)
-            .join(';');
-        }
-      }
-
       let url = getPathnameFromInput(route, options.path, options.query);
 
       if (proxyUrl) {
@@ -71,6 +53,33 @@ export function createBrowserFetcher(
           };
 
         body = await adapter.encode(options);
+      }
+
+      // cookies
+      for (const key in options.cookie) {
+        const value = options.cookie[key];
+        if (!value) continue;
+
+        const cookie = {
+          [key]: value,
+          domain:
+            proxyUrl && proxyUrl.origin !== window.location.origin
+              ? `domain=${proxyUrl.host}`
+              : undefined,
+          path: '/',
+          'max-age': 30,
+        };
+
+        let str = '';
+        for (const [key, value] of Object.entries(cookie)) {
+          if (value) {
+            if (str.length > 0) str += '; ';
+
+            str += `${key}=${value}`;
+          }
+        }
+
+        document.cookie = str;
       }
 
       return fetch(url, {
