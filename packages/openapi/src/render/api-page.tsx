@@ -59,7 +59,6 @@ export async function APIPage(props: ApiPageProps) {
     webhooks,
     disableCache = process.env.NODE_ENV === 'development',
   } = props;
-
   const processed = await processDocument(props.document, disableCache);
   const ctx = await getContext(processed, props);
   const { document } = processed;

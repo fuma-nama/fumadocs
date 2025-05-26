@@ -28,13 +28,15 @@ export function GET() {
     copyright: 'All rights reserved 2025, Fuma Nama',
   });
 
-  for (const page of source.getPages()) {
+  for (const page of source.getPages().sort((a, b) => {
+    return new Date(b.data.date).getTime() - new Date(a.data.date).getTime();
+  })) {
     feed.addItem({
       id: page.url,
       title: page.data.title,
       description: page.data.description,
       link: `${baseUrl}${page.url}`,
-      date: new Date(page.data.date ?? Date.now()),
+      date: new Date(page.data.date),
 
       author: [
         {

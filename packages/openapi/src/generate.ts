@@ -5,7 +5,10 @@ import {
 } from '@/utils/generate-document';
 import { idToTitle } from '@/utils/id-to-title';
 import type { OperationItem, WebhookItem } from '@/render/api-page';
-import type { ProcessedDocument } from '@/utils/process-document';
+import type {
+  DocumentInput,
+  ProcessedDocument,
+} from '@/utils/process-document';
 
 export interface GenerateOptions {
   /**
@@ -47,6 +50,13 @@ export interface GenerateOptions {
   addGeneratedComment?: boolean | string;
 
   cwd?: string;
+
+  /**
+   * Inline the entire OpenAPI document into the MDX file.
+   *
+   * @defaultValue false
+   */
+  inlineDocument?: boolean;
 }
 
 export interface GenerateTagOutput {
@@ -67,33 +77,38 @@ export type GeneratePageOutput =
     };
 
 export async function generateAll(
-  { document, downloaded }: ProcessedDocument,
+  input: DocumentInput,
+  processed: ProcessedDocument,
   options: GenerateOptions = {},
 ): Promise<string> {
+  const { document } = processed;
   const items = getAPIPageItems(document);
 
-  return generateDocument({
-    ...options,
-    dereferenced: document,
-    title: document.info.title,
-    description: document.info.description,
-    page: {
+  return generateDocument(
+    input,
+    processed,
+    {
       operations: items.operations,
       webhooks: items.webhooks,
       hasHead: true,
-      document: downloaded,
     },
-
-    context: {
+    {
+      ...options,
+      title: document.info.title,
+      description: document.info.description,
+    },
+    {
       type: 'file',
     },
-  });
+  );
 }
 
 export async function generatePages(
-  { document, downloaded }: ProcessedDocument,
+  input: DocumentInput,
+  processed: ProcessedDocument,
   options: GenerateOptions = {},
 ): Promise<GeneratePageOutput[]> {
+  const { document } = processed;
   const items = getAPIPageItems(document);
   const result: GeneratePageOutput[] = [];
 
@@ -106,23 +121,25 @@ export async function generatePages(
     result.push({
       type: 'operation',
       item,
-      content: generateDocument({
-        ...options,
-        page: {
+      content: generateDocument(
+        input,
+        processed,
+        {
           operations: [item],
           hasHead: false,
-          document: downloaded,
         },
-        dereferenced: document,
-        title:
-          operation.summary ??
-          pathItem.summary ??
-          idToTitle(operation.operationId ?? 'unknown'),
-        description: operation.description ?? pathItem.description,
-        context: {
+        {
+          ...options,
+          title:
+            operation.summary ??
+            pathItem.summary ??
+            idToTitle(operation.operationId ?? 'unknown'),
+          description: operation.description ?? pathItem.description,
+        },
+        {
           type: 'operation',
         },
-      }),
+      ),
     });
   }
 
@@ -135,20 +152,22 @@ export async function generatePages(
     result.push({
       type: 'webhook',
       item,
-      content: generateDocument({
-        ...options,
-        page: {
+      content: generateDocument(
+        input,
+        processed,
+        {
           webhooks: [item],
           hasHead: false,
-          document: downloaded,
         },
-        dereferenced: document,
-        title: operation.summary ?? pathItem.summary ?? idToTitle(item.name),
-        description: operation.description ?? pathItem.description,
-        context: {
+        {
+          ...options,
+          title: operation.summary ?? pathItem.summary ?? idToTitle(item.name),
+          description: operation.description ?? pathItem.description,
+        },
+        {
           type: 'operation',
         },
-      }),
+      ),
     });
   }
 
@@ -156,9 +175,11 @@ export async function generatePages(
 }
 
 export async function generateTags(
-  { document, downloaded }: ProcessedDocument,
+  input: DocumentInput,
+  processed: ProcessedDocument,
   options: GenerateOptions = {},
 ): Promise<GenerateTagOutput[]> {
+  const { document } = processed;
   if (!document.tags) return [];
   const items = getAPIPageItems(document);
 
@@ -177,22 +198,24 @@ export async function generateTags(
 
     return {
       tag: tag.name,
-      content: generateDocument({
-        ...options,
-        page: {
-          document: downloaded,
+      content: generateDocument(
+        input,
+        processed,
+        {
           operations,
           webhooks,
           hasHead: true,
         },
-        dereferenced: document,
-        title: displayName,
-        description: tag?.description,
-        context: {
+        {
+          ...options,
+          title: displayName,
+          description: tag?.description,
+        },
+        {
           type: 'tag',
           tag,
         },
-      }),
+      ),
     } satisfies GenerateTagOutput;
   });
 }

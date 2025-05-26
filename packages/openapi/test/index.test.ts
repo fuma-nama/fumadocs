@@ -2,8 +2,9 @@ import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { idToTitle } from '@/utils/id-to-title';
-import { generateAll, generateFiles, generateTags } from '../src';
+import { generateFiles } from '../src';
 import { processDocument } from '@/utils/process-document';
+import { generateAll, generateTags } from '@/generate';
 
 describe('Utilities', () => {
   test('Operation ID to Title', () => {
@@ -22,6 +23,7 @@ describe('Generate documents', () => {
 
   test('Pet Store', async () => {
     const result = await generateAll(
+      './fixtures/petstore.yaml',
       await processDocument(join(cwd, './fixtures/petstore.yaml')),
       {
         cwd,
@@ -33,6 +35,7 @@ describe('Generate documents', () => {
 
   test('Museum', async () => {
     const tags = await generateTags(
+      './fixtures/museum.yaml',
       await processDocument(join(cwd, './fixtures/museum.yaml')),
       {
         cwd,
@@ -48,6 +51,7 @@ describe('Generate documents', () => {
 
   test('Unkey', async () => {
     const tags = await generateTags(
+      './fixtures/unkey.json',
       await processDocument(join(cwd, './fixtures/unkey.json')),
       { cwd },
     );

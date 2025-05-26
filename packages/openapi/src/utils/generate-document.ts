@@ -11,6 +11,10 @@ import type { GenerateOptions } from '@/generate';
 import { idToTitle } from '@/utils/id-to-title';
 import type { Document, TagObject } from '@/types';
 import type { NoReference } from '@/utils/schema';
+import type {
+  DocumentInput,
+  ProcessedDocument,
+} from '@/utils/process-document';
 
 interface StaticData {
   toc: TableOfContents;
@@ -30,13 +34,14 @@ export type DocumentContext =
     };
 
 export function generateDocument(
+  input: DocumentInput,
+  processed: ProcessedDocument,
+  pageProps: Omit<ApiPageProps, 'document'>,
   options: GenerateOptions & {
-    dereferenced: NoReference<Document>;
-    page: ApiPageProps;
     title: string;
     description?: string;
-    context: DocumentContext;
   },
+  context: DocumentContext,
 ): string {
   const {
     frontmatter,
@@ -44,15 +49,15 @@ export function generateDocument(
     addGeneratedComment = true,
   } = options;
   const out: string[] = [];
-  const extend = frontmatter?.(
-    options.title,
-    options.description,
-    options.context,
-  );
+  const extend = frontmatter?.(options.title, options.description, context);
+  const page: ApiPageProps = {
+    ...pageProps,
+    document: options.inlineDocument ? processed.downloaded : input,
+  };
 
   let meta: object | undefined;
-  if (options.page.operations?.length === 1) {
-    const operation = options.page.operations[0];
+  if (page.operations?.length === 1) {
+    const operation = page.operations[0];
 
     meta = {
       method: operation.method.toUpperCase(),
@@ -60,7 +65,7 @@ export function generateDocument(
     };
   }
 
-  const data = generateStaticData(options.dereferenced, options.page);
+  const data = generateStaticData(processed.document, page);
 
   const banner = dump({
     title: options.title,
@@ -100,7 +105,7 @@ export function generateDocument(
 
   if (options.description && includeDescription) out.push(options.description);
 
-  out.push(pageContent(options.page));
+  out.push(pageContent(page));
 
   return out.join('\n\n');
 }

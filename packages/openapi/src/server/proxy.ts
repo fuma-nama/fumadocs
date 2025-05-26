@@ -6,7 +6,20 @@ type Proxy = {
   [K in (typeof keys)[number]]: (req: NextRequest) => Promise<Response>;
 };
 
-export function createProxy(allowedUrls?: string[]): Proxy {
+interface CreateProxyOptions {
+  allowedUrls?: string[];
+
+  /**
+   * Override original request/response with yours
+   */
+  overrides?: {
+    request?: (request: Request) => Request;
+    response?: (response: Response) => Response;
+  };
+}
+
+export function createProxy(options: CreateProxyOptions = {}): Proxy {
+  const { allowedUrls, overrides } = options;
   const handlers: Partial<Proxy> = {};
 
   async function handler(req: NextRequest): Promise<Response> {
@@ -30,11 +43,16 @@ export function createProxy(allowedUrls?: string[]): Proxy {
       });
     }
 
-    const clonedReq = new Request(url, {
+    let clonedReq = new Request(url, {
       ...req,
       cache: 'no-cache',
       mode: 'cors',
     });
+
+    if (overrides?.request) {
+      clonedReq = overrides.request(clonedReq);
+    }
+
     clonedReq.headers.forEach((_value, originalKey) => {
       const key = originalKey.toLowerCase();
       const notAllowed = key === 'origin';
@@ -44,11 +62,15 @@ export function createProxy(allowedUrls?: string[]): Proxy {
       }
     });
 
-    const res = await fetch(clonedReq).catch((e) => new Error(e.toString()));
+    let res = await fetch(clonedReq).catch((e) => new Error(e.toString()));
     if (res instanceof Error) {
       return Response.json(`Failed to proxy request: ${res.message}`, {
         status: 400,
       });
+    }
+
+    if (overrides?.response) {
+      res = overrides.response(res);
     }
 
     const headers = new Headers(res.headers);
