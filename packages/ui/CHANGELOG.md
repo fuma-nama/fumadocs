@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 15.4.1
+
+### Patch Changes
+
+- e72b7b4: hotfix: production source map being ignored
+  - fumadocs-core@15.4.1
+
 ## 15.4.0
 
 ### Minor Changes

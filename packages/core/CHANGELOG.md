@@ -1,5 +1,7 @@
 # next-docs-zeta
 
+## 15.4.1
+
 ## 15.4.0
 
 ### Minor Changes

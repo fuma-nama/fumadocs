@@ -1,5 +1,14 @@
 # @fuma-docs/openapi
 
+## 9.0.2
+
+### Patch Changes
+
+- 0a90cb9: Improve auth handling
+- Updated dependencies [e72b7b4]
+  - fumadocs-ui@15.4.1
+  - fumadocs-core@15.4.1
+
 ## 9.0.1
 
 ### Patch Changes
