@@ -19,16 +19,16 @@ const cache = new Map<string, ProcessedDocument>();
  * process & reference input document to a Fumadocs OpenAPI compatible format
  */
 export async function processDocument(
-  document: DocumentInput,
+  input: DocumentInput,
   disableCache = false,
 ): Promise<ProcessedDocument> {
   const cached =
-    !disableCache && typeof document === 'string' ? cache.get(document) : null;
+    !disableCache && typeof input === 'string' ? cache.get(input) : null;
 
   if (cached) return cached;
 
   const dereferenceMap: DereferenceMap = new Map();
-  const loaded = await load(document, {
+  const loaded = await load(input, {
     plugins: [readFiles(), fetchUrls()],
   });
 
@@ -52,8 +52,8 @@ export async function processDocument(
     downloaded: loaded.specification as Document,
   };
 
-  if (!disableCache && typeof document === 'string') {
-    cache.set(document, processed);
+  if (!disableCache && typeof input === 'string') {
+    cache.set(input, processed);
   }
 
   return processed;

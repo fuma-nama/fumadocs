@@ -240,7 +240,7 @@ async function generateFromDocument(pathOrUrl: string, options: Config) {
   }
 
   if (options.per === 'file') {
-    const result = await generateAll(document, options);
+    const result = await generateAll(pathOrUrl, document, options);
     const filename = nameFn(
       {
         pathOrUrl,
@@ -254,7 +254,7 @@ async function generateFromDocument(pathOrUrl: string, options: Config) {
     await write(outPath, result);
     console.log(`Generated: ${outPath}`);
   } else if (options.per === 'tag') {
-    const results = await generateTags(document, options);
+    const results = await generateTags(pathOrUrl, document, options);
 
     for (const result of results) {
       const filename = nameFn(result, document.document);
@@ -263,7 +263,7 @@ async function generateFromDocument(pathOrUrl: string, options: Config) {
       console.log(`Generated: ${outPath}`);
     }
   } else {
-    const results = await generatePages(document, options);
+    const results = await generatePages(pathOrUrl, document, options);
     const mapping = new Map<string, GeneratePageOutput>();
 
     for (const result of results) {

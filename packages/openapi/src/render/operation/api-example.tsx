@@ -92,7 +92,7 @@ export function getAPIExamples(
       });
     }
 
-    return result;
+    if (result.length > 0) return result;
   }
 
   return [
@@ -137,9 +137,9 @@ export async function APIExample({
         />
       )}
       {generators.length > 0 && (
-        <renderer.Requests items={generators.map((s) => s.label)}>
-          {generators.map((generator) => (
-            <renderer.Request key={generator.label} name={generator.label}>
+        <renderer.Requests items={generators.map((s) => s.label ?? s.lang)}>
+          {generators.map((generator, i) => (
+            <renderer.Request key={i} name={generator.label ?? generator.lang}>
               <CodeExample {...generator} />
             </renderer.Request>
           ))}
@@ -158,11 +158,15 @@ function dedupe(samples: CodeSample[]): CodeSample[] {
   const out: CodeSample[] = [];
 
   for (let i = samples.length - 1; i >= 0; i--) {
-    if (set.has(samples[i].label)) continue;
+    const item = samples[i];
+    if (item.label) {
+      if (set.has(item.label)) continue;
+      set.add(item.label);
+    }
 
-    set.add(samples[i].label);
-    out.unshift(samples[i]);
+    out.unshift(item);
   }
+
   return out;
 }
 

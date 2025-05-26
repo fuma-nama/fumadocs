@@ -31,7 +31,7 @@ import { CopyResponseTypeScript } from '@/ui/client';
 
 export interface CodeSample {
   lang: string;
-  label: string;
+  label?: string;
   source?: string | SampleGenerator | false;
 }
 
