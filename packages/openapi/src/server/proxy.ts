@@ -6,15 +6,20 @@ type Proxy = {
   [K in (typeof keys)[number]]: (req: NextRequest) => Promise<Response>;
 };
 
-type CreateProxyOptions = {
+interface CreateProxyOptions {
   allowedUrls?: string[];
+
+  /**
+   * Override original request/response with yours
+   */
   overrides?: {
-    request?: RequestInit,
-    response?: ResponseInit;
-  }
+    request?: (request: Request) => Request;
+    response?: (response: Response) => Response;
+  };
 }
 
-export function createProxy({ allowedUrls, overrides = {} }: CreateProxyOptions = {}): Proxy {
+export function createProxy(options: CreateProxyOptions = {}): Proxy {
+  const { allowedUrls, overrides } = options;
   const handlers: Partial<Proxy> = {};
 
   async function handler(req: NextRequest): Promise<Response> {
@@ -38,17 +43,16 @@ export function createProxy({ allowedUrls, overrides = {} }: CreateProxyOptions 
       });
     }
 
-    if (overrides.request?.headers) {
-      const overrideHeaders = new Headers(overrides.request.headers);
-      overrideHeaders.forEach((value, key) => req.headers.set(key, value));
-    }
-
-    const clonedReq = new Request(url, {
+    let clonedReq = new Request(url, {
       ...req,
-      ...overrides.request,
       cache: 'no-cache',
       mode: 'cors',
     });
+
+    if (overrides?.request) {
+      clonedReq = overrides.request(clonedReq);
+    }
+
     clonedReq.headers.forEach((_value, originalKey) => {
       const key = originalKey.toLowerCase();
       const notAllowed = key === 'origin';
@@ -58,19 +62,18 @@ export function createProxy({ allowedUrls, overrides = {} }: CreateProxyOptions 
       }
     });
 
-    const res = await fetch(clonedReq).catch((e) => new Error(e.toString()));
+    let res = await fetch(clonedReq).catch((e) => new Error(e.toString()));
     if (res instanceof Error) {
       return Response.json(`Failed to proxy request: ${res.message}`, {
         status: 400,
       });
     }
 
-    const headers = new Headers(res.headers);
-    if (overrides.response?.headers) {
-      const overrideHeaders = new Headers(overrides.response.headers);
-      overrideHeaders.forEach((value, key) => headers.set(key, value));
+    if (overrides?.response) {
+      res = overrides.response(res);
     }
 
+    const headers = new Headers(res.headers);
     headers.forEach((_value, originalKey) => {
       const key = originalKey.toLowerCase();
       const notAllowed =
@@ -84,7 +87,6 @@ export function createProxy({ allowedUrls, overrides = {} }: CreateProxyOptions 
 
     return new Response(res.body, {
       ...res,
-      ...overrides.response,
       headers,
     });
   }
