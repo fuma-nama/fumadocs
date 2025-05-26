@@ -1,5 +1,14 @@
 # @fuma-docs/openapi
 
+## 9.0.1
+
+### Patch Changes
+
+- 2f2ae4d: Disable schema inline on `generateFiles()`
+- 951a1a4: Support overriding request/response from `createProxy()`
+- 2f2ae4d: Support code samples without `label`
+- 2f2ae4d: Hide internal APis since their changes are not documented
+
 ## 9.0.0
 
 ### Major Changes
