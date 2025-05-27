@@ -10,19 +10,19 @@
   },
   "dependencies": {
     "@fumadocs/mdx-remote": "workspace:*",
-    "@react-router/node": "^7.6.0",
-    "@react-router/serve": "^7.6.0",
+    "@react-router/node": "^7.6.1",
+    "@react-router/serve": "^7.6.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "gray-matter": "^4.0.3",
     "isbot": "^5.1.28",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-router": "^7.6.0",
+    "react-router": "^7.6.1",
     "shiki": "^3.4.2"
   },
   "devDependencies": {
-    "@react-router/dev": "^7.6.0",
+    "@react-router/dev": "^7.6.1",
     "@tailwindcss/vite": "^4.1.7",
     "@types/node": "^22.15.21",
     "@types/react": "^19.1.5",

@@ -37,7 +37,7 @@
     "@types/cross-spawn": "^6.0.6",
     "@types/node": "22.15.21",
     "eslint-config-custom": "workspace:*",
-    "tinyglobby": "^0.2.13",
+    "tinyglobby": "^0.2.14",
     "tsconfig": "workspace:*"
   },
   "engines": {

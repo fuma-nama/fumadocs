@@ -38,7 +38,7 @@
   "dependencies": {
     "@mdx-js/mdx": "^3.1.0",
     "gray-matter": "^4.0.3",
-    "zod": "^3.25.28"
+    "zod": "^3.25.30"
   },
   "devDependencies": {
     "@types/mdx": "^2.0.13",
@@ -46,7 +46,7 @@
     "@types/react": "^19.1.5",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
-    "tinyglobby": "^0.2.13",
+    "tinyglobby": "^0.2.14",
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
     "vfile": "^6.0.3"
