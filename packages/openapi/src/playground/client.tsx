@@ -487,13 +487,8 @@ function useAuthInputs(securities?: SecurityEntry[]) {
             password: '',
           },
           mapOutput(out) {
-            if (
-              out &&
-              typeof out === 'object' &&
-              'username' in out &&
-              'password' in out
-            ) {
-              return `Basic ${btoa(`${out.username}:${out.password}`)}`;
+            if (out && typeof out === 'object') {
+              return `Basic ${btoa(`${'username' in out ? out.username : ''}:${'password' in out ? out.password : ''}`)}`;
             }
 
             return out;
