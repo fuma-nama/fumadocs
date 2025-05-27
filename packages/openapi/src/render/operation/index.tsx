@@ -11,7 +11,6 @@ import {
   type NoReference,
   type ResolvedSchema,
 } from '@/utils/schema';
-import { getSecurityPrefix } from '@/utils/get-security';
 import { idToTitle } from '@/utils/id-to-title';
 import { Markdown } from '../markdown';
 import { heading } from '../heading';
@@ -349,7 +348,6 @@ function AuthSection({
               const schema = document.components?.securitySchemes?.[key];
               if (!schema) return;
 
-              const prefix = getSecurityPrefix(schema);
               const scopeElement =
                 scopes.length > 0 ? (
                   <p>
@@ -362,7 +360,11 @@ function AuthSection({
                   <renderer.Property
                     key={key}
                     name="Authorization"
-                    type={prefix ? `${prefix} <token>` : '<token>'}
+                    type={
+                      schema.type === 'http' && schema.scheme === 'basic'
+                        ? `Basic <token>`
+                        : 'Bearer <token>'
+                    }
                     required
                   >
                     {schema.description && (

@@ -1,4 +1,8 @@
-import type { MethodInformation, RenderContext } from '@/types';
+import type {
+  MethodInformation,
+  RenderContext,
+  SecuritySchemeObject,
+} from '@/types';
 import { getPreferredType, type ParsedSchema } from '@/utils/schema';
 import { type ClientProps } from './client';
 import { ClientLazy } from '@/ui/lazy';
@@ -27,6 +31,11 @@ export interface APIPlaygroundProps {
 }
 
 export type { ClientProps, CustomField } from './client';
+
+export type SecurityEntry = SecuritySchemeObject & {
+  scopes: string[];
+  id: string;
+};
 
 export async function APIPlayground({
   path,

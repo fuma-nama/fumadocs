@@ -8,7 +8,6 @@ import {
   type ReactNode,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react';
 import type {
@@ -26,7 +25,11 @@ import {
 import { useApiContext, useServerSelectContext } from '@/ui/contexts/api';
 import type { FetchResult } from '@/playground/fetcher';
 import { FieldSet, JsonInput } from './inputs';
-import type { ParameterField, RequestSchema } from '@/playground/index';
+import type {
+  ParameterField,
+  RequestSchema,
+  SecurityEntry,
+} from '@/playground/index';
 import { getStatusInfo } from './status-info';
 import { getUrl } from '@/utils/server-url';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
@@ -38,8 +41,6 @@ import {
   CollapsibleTrigger,
 } from 'fumadocs-ui/components/ui/collapsible';
 import { ChevronDown, LoaderCircle } from 'lucide-react';
-import type { Security } from '@/utils/get-security';
-import { useRequestData } from '@/ui/contexts/code-example';
 import type { RequestData } from '@/requests/_shared';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from 'fumadocs-ui/utils/cn';
@@ -48,6 +49,12 @@ import {
   SchemaProvider,
   useResolvedSchema,
 } from '@/playground/schema';
+import {
+  useRequestDataUpdater,
+  useRequestInitialData,
+} from '@/ui/contexts/code-example';
+import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
+import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 
 interface FormValues {
   path: Record<string, string>;
@@ -69,11 +76,7 @@ export interface CustomField<TName extends FieldPath<FormValues>, Info> {
   }) => ReactElement;
 }
 
-type SecurityEntry = Security & {
-  id: string;
-};
-
-export type ClientProps = HTMLAttributes<HTMLFormElement> & {
+export interface ClientProps extends HTMLAttributes<HTMLFormElement> {
   route: string;
   method: string;
   parameters?: ParameterField[];
@@ -100,7 +103,9 @@ export type ClientProps = HTMLAttributes<HTMLFormElement> & {
   components?: Partial<{
     ResultDisplay: FC<{ data: FetchResult }>;
   }>;
-};
+}
+
+const AuthPrefix = '__fumadocs_auth';
 
 function toRequestData(
   method: string,
@@ -133,19 +138,22 @@ export default function Client({
   ...rest
 }: ClientProps) {
   const { server } = useServerSelectContext();
-  const requestData = useRequestData();
+  const requestData = useRequestInitialData();
+  const updater = useRequestDataUpdater();
   const fieldInfoMap = useMemo(() => new Map<string, FieldInfo>(), []);
   const { mediaAdapters } = useApiContext();
-  const submitHandler = useRef<SubmitHandler | null>(null);
+  const [securityId, setSecurityId] = useState(0);
+  const { inputs, mapInputs } = useAuthInputs(securities[securityId]);
+
   const defaultValues: FormValues = useMemo(
     () => ({
-      path: requestData.data.path,
-      query: requestData.data.query,
-      header: requestData.data.header,
-      body: requestData.data.body,
-      cookie: requestData.data.cookie,
+      path: requestData.path,
+      query: requestData.query,
+      header: requestData.header,
+      body: requestData.body,
+      cookie: requestData.cookie,
     }),
-    [requestData.data],
+    [requestData],
   );
 
   const form = useForm<FormValues>({
@@ -167,30 +175,81 @@ export default function Client({
     });
   });
 
-  useEffect(() => {
+  function initAuthValues() {
+    for (const item of inputs) {
+      let value = item.defaultValue;
+      const stored = localStorage.getItem(AuthPrefix + item.original.id);
+
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (typeof parsed === typeof item.defaultValue) value = parsed;
+      }
+
+      // @ts-expect-error -- safe
+      form.setValue(item.fieldName, value);
+    }
+  }
+
+  useOnChange(defaultValues, () => {
     fieldInfoMap.clear();
     form.reset(defaultValues);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- update default value
-  }, [defaultValues]);
+    initAuthValues();
+  });
+
+  useOnChange(inputs, (_, previous) => {
+    for (const item of previous) {
+      form.reset(
+        (values) =>
+          manipulateValues(
+            values as unknown as Record<string, unknown>,
+            item.fieldName,
+            () => undefined,
+          ) as unknown as FormValues,
+      );
+    }
+    initAuthValues();
+  });
 
   useEffect(() => {
-    const subscription = form.watch((_value) => {
-      let value = _value as FormValues;
-      if (submitHandler.current) value = submitHandler.current(value);
+    let timer: number | null = null;
 
-      requestData.saveData(toRequestData(method, body?.mediaType, value));
+    const subscription = form.subscribe({
+      formState: {
+        values: true,
+      },
+      callback({ values }) {
+        if (timer) window.clearTimeout(timer);
+        timer = window.setTimeout(
+          () => {
+            for (const item of inputs) {
+              const value = item.fieldName
+                .split('.')
+                .reduce((v, seg) => v[seg as keyof object], values as object);
+
+              if (value) {
+                localStorage.setItem(
+                  AuthPrefix + item.original.id,
+                  JSON.stringify(value),
+                );
+              }
+            }
+
+            updater.setData(
+              toRequestData(method, body?.mediaType, mapInputs(values)),
+            );
+          },
+          timer ? 400 : 0,
+        );
+      },
     });
+    initAuthValues();
 
-    return () => {
-      subscription.unsubscribe();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- mounted only once
+    return () => subscription();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mounted once only
   }, []);
 
   const onSubmit = form.handleSubmit((value) => {
-    if (submitHandler.current) value = submitHandler.current(value);
-
-    testQuery.start(value);
+    testQuery.start(mapInputs(value));
   });
 
   return (
@@ -225,52 +284,33 @@ export default function Client({
           </div>
 
           {securities.length > 0 && (
-            <SecuritiesTabs
-              securities={securities}
-              onSetSubmitHandler={(v) => (submitHandler.current = v)}
-            />
+            <div className="m-3 p-3 border bg-fd-muted rounded-lg">
+              <div className="flex gap-4 items-center justify-between mb-4">
+                <p className="text-sm font-medium">Authorization</p>
+                <select
+                  value={securityId.toString()}
+                  onChange={(e) => setSecurityId(Number(e.target.value))}
+                  className="text-xs font-mono px-2 py-1.5 outline-none"
+                >
+                  {securities.map((security, i) => (
+                    <option key={i} value={i}>
+                      {security.map((item) => item.id).join(' & ')}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex flex-col gap-4">
+                {inputs.map((input) => (
+                  <Fragment key={input.fieldName}>{input.children}</Fragment>
+                ))}
+              </div>
+            </div>
           )}
           <FormBody body={body} fields={fields} parameters={parameters} />
           {testQuery.data ? <ResultDisplay data={testQuery.data} /> : null}
         </form>
       </SchemaProvider>
     </FormProvider>
-  );
-}
-
-function SecuritiesTabs({
-  securities,
-  onSetSubmitHandler,
-}: {
-  securities: SecurityEntry[][];
-  onSetSubmitHandler: (handler: SubmitHandler) => void;
-}) {
-  const [idx, setIdx] = useState(0);
-
-  return (
-    <div className="p-3">
-      <div className="flex items-center mb-4 overflow-auto border bg-fd-muted rounded-full">
-        {securities.map((security, i) => (
-          <button
-            type="button"
-            key={i}
-            onClick={() => setIdx(i)}
-            className={cn(
-              'flex-1 text-xs font-medium font-mono px-2 py-1.5 text-nowrap transition-colors',
-              i === idx
-                ? 'bg-fd-primary/10 text-fd-primary'
-                : 'text-fd-muted-foreground hover:text-fd-accent-foreground',
-            )}
-          >
-            {security.map((item) => item.id).join(' & ')}
-          </button>
-        ))}
-      </div>
-      <AuthInput
-        securities={securities[idx]}
-        onSetSubmitHandler={onSetSubmitHandler}
-      />
-    </div>
   );
 }
 
@@ -383,7 +423,6 @@ function BodyInput({ field: _field }: { field: RequestSchema }) {
   );
 }
 
-type SubmitHandler = (values: FormValues) => FormValues;
 type AuthField = {
   fieldName: string;
   defaultValue: unknown;
@@ -431,16 +470,10 @@ function manipulateValues(
   return root;
 }
 
-function AuthInput({
-  securities,
-  onSetSubmitHandler,
-}: {
-  securities: SecurityEntry[];
-  onSetSubmitHandler: (handler: SubmitHandler) => void;
-}) {
-  const form = useFormContext();
-  const auth = useMemo(() => {
+function useAuthInputs(securities?: SecurityEntry[]) {
+  const inputs = useMemo(() => {
     const result: AuthField[] = [];
+    if (!securities) return result;
 
     for (const security of securities) {
       if (security.type === 'http' && security.scheme === 'basic') {
@@ -502,7 +535,7 @@ function AuthInput({
                     security.description ?? `The Authorization access token.`,
                 }}
               />
-              <AuthFooter authorization={security} />
+              <OAuth authorization={security} />
             </>
           ),
         });
@@ -533,33 +566,8 @@ function AuthInput({
     return result;
   }, [securities]);
 
-  useEffect(() => {
-    const prefix = '__fumadocs_auth';
-
-    for (const item of auth) {
-      const value = localStorage.getItem(prefix + item.original.id);
-
-      form.setValue(item.fieldName, value ? JSON.parse(value) : '');
-    }
-
-    return () => {
-      for (const item of auth) {
-        const v = form.getValues(item.fieldName);
-        if (v) {
-          localStorage.setItem(prefix + item.original.id, JSON.stringify(v));
-        }
-
-        form.reset((values) =>
-          manipulateValues(values, item.fieldName, () => undefined),
-        );
-      }
-    };
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- ignore `form`
-  }, [auth, securities]);
-
-  onSetSubmitHandler((values) => {
-    for (const item of auth) {
+  const mapInputs = useEffectEvent((values: FormValues) => {
+    for (const item of inputs) {
       if (!item.mapOutput) continue;
 
       values = manipulateValues(
@@ -572,13 +580,7 @@ function AuthInput({
     return values;
   });
 
-  return (
-    <div className="flex flex-col gap-4">
-      {auth.map((item) => (
-        <Fragment key={item.fieldName}>{item.children}</Fragment>
-      ))}
-    </div>
-  );
+  return { inputs, mapInputs };
 }
 
 function renderCustomField(
@@ -608,7 +610,7 @@ const OauthDialogTrigger = lazy(() =>
   })),
 );
 
-function AuthFooter({ authorization }: { authorization: Security }) {
+function OAuth({ authorization }: { authorization: SecurityEntry }) {
   const form = useFormContext();
   if (authorization.type !== 'oauth2') return;
 

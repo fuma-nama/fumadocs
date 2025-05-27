@@ -9,6 +9,7 @@ export async function generateDocs() {
       input: ['./museum.yaml'],
       output: './content/docs/openapi/(generated)',
       per: 'operation',
+      includeDescription: true,
     }),
   ]);
 }
