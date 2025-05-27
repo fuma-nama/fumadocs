@@ -1,6 +1,5 @@
 import type { MethodInformation, RenderContext } from '@/types';
 import { getPreferredType, type ParsedSchema } from '@/utils/schema';
-import { getSecurities } from '@/utils/get-security';
 import { type ClientProps } from './client';
 import { ClientLazy } from '@/ui/lazy';
 
@@ -48,7 +47,7 @@ export async function APIPlayground({
   };
 
   const props: ClientProps = {
-    authorization: getAuthorizationField(method, ctx),
+    securities: parseSecurities(method, ctx),
     method: method.method,
     route: path,
     parameters: method.parameters?.map((v) => ({
@@ -118,42 +117,30 @@ function writeReferences(
   return output;
 }
 
-function getAuthorizationField(
+function parseSecurities(
   method: MethodInformation,
   { schema: { document } }: RenderContext,
-): ClientProps['authorization'] {
+): ClientProps['securities'] {
+  const result: ClientProps['securities'] = [];
   const security = method.security ?? document.security ?? [];
-  if (security.length === 0) return;
+  if (security.length === 0) return result;
 
-  let item;
-  for (const requirements of security) {
-    const keys = Object.keys(requirements).length;
+  for (const map of security) {
+    const list: ClientProps['securities'][number] = [];
 
-    if (keys === 0) return;
-    else if (keys === 1) item = requirements;
+    for (const [key, scopes] of Object.entries(map)) {
+      const scheme = document.components?.securitySchemes?.[key];
+      if (!scheme) continue;
+
+      list.push({
+        ...scheme,
+        scopes,
+        id: key,
+      });
+    }
+
+    result.push(list);
   }
 
-  if (!item) {
-    console.warn(
-      `Cannot find suitable security scheme for API Playground from ${JSON.stringify(security, null, 2)}. Only schemes with one requirement are allowed at the moment.`,
-    );
-    return;
-  }
-
-  const scheme = getSecurities(item, document)[0];
-
-  if (scheme.type === 'oauth2') {
-    const flow = Object.keys(scheme.flows).at(0);
-    if (!flow) throw new Error("security scheme's `flows` must not be empty");
-
-    if (flow === 'implicit' || flow === 'password')
-      throw new Error(
-        `OAuth 2.0 flow type: ${flow} is not supported, consider other types like \`authorizationCode\` instead.`,
-      );
-  }
-
-  return {
-    persistentId: Object.keys(item)[0],
-    ...scheme,
-  };
+  return result;
 }

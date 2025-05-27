@@ -8,6 +8,7 @@ import {
   type ReactNode,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import type {
@@ -39,7 +40,6 @@ import {
 import { ChevronDown, LoaderCircle } from 'lucide-react';
 import type { Security } from '@/utils/get-security';
 import { useRequestData } from '@/ui/contexts/code-example';
-import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 import type { RequestData } from '@/requests/_shared';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from 'fumadocs-ui/utils/cn';
@@ -50,12 +50,6 @@ import {
 } from '@/playground/schema';
 
 interface FormValues {
-  authorization:
-    | string
-    | {
-        username: string;
-        password: string;
-      };
   path: Record<string, string>;
   query: Record<string, string>;
   header: Record<string, string>;
@@ -75,13 +69,15 @@ export interface CustomField<TName extends FieldPath<FormValues>, Info> {
   }) => ReactElement;
 }
 
+type SecurityEntry = Security & {
+  id: string;
+};
+
 export type ClientProps = HTMLAttributes<HTMLFormElement> & {
   route: string;
   method: string;
-  authorization?: Security & {
-    persistentId: string;
-  };
   parameters?: ParameterField[];
+  securities: SecurityEntry[][];
   body?: {
     schema: RequestSchema;
     mediaType: string;
@@ -97,7 +93,7 @@ export type ClientProps = HTMLAttributes<HTMLFormElement> & {
       `${ParameterField['in']}.${string}`,
       ParameterField
     >;
-    auth?: CustomField<'authorization', RequestSchema>;
+    auth?: CustomField<FieldPath<FormValues>, RequestSchema>;
     body?: CustomField<'body', RequestSchema>;
   };
 
@@ -127,7 +123,7 @@ const ServerSelect = lazy(() => import('@/ui/server-select'));
 export default function Client({
   route,
   method = 'GET',
-  authorization,
+  securities,
   parameters,
   body,
   fields,
@@ -139,18 +135,17 @@ export default function Client({
   const { server } = useServerSelectContext();
   const requestData = useRequestData();
   const fieldInfoMap = useMemo(() => new Map<string, FieldInfo>(), []);
-  const authInfo = usePersistentAuthInfo(authorization);
   const { mediaAdapters } = useApiContext();
+  const submitHandler = useRef<SubmitHandler | null>(null);
   const defaultValues: FormValues = useMemo(
     () => ({
-      authorization: authInfo.info,
       path: requestData.data.path,
       query: requestData.data.query,
       header: requestData.data.header,
       body: requestData.data.body,
       cookie: requestData.data.cookie,
     }),
-    [authInfo.info, requestData.data],
+    [requestData.data],
   );
 
   const form = useForm<FormValues>({
@@ -180,19 +175,8 @@ export default function Client({
 
   useEffect(() => {
     const subscription = form.watch((_value) => {
-      const value = _value as FormValues;
-
-      if (authorization && value.authorization) {
-        authInfo.saveInfo(value.authorization);
-
-        writeAuthInfo(
-          authorization,
-          value.authorization,
-          value.header,
-          value.query,
-          value.cookie,
-        );
-      }
+      let value = _value as FormValues;
+      if (submitHandler.current) value = submitHandler.current(value);
 
       requestData.saveData(toRequestData(method, body?.mediaType, value));
     });
@@ -204,6 +188,8 @@ export default function Client({
   }, []);
 
   const onSubmit = form.handleSubmit((value) => {
+    if (submitHandler.current) value = submitHandler.current(value);
+
     testQuery.start(value);
   });
 
@@ -237,17 +223,54 @@ export default function Client({
               )}
             </button>
           </div>
-          <FormBody
-            body={body}
-            fields={fields}
-            parameters={parameters}
-            authorization={authorization}
-          />
+
+          {securities.length > 0 && (
+            <SecuritiesTabs
+              securities={securities}
+              onSetSubmitHandler={(v) => (submitHandler.current = v)}
+            />
+          )}
+          <FormBody body={body} fields={fields} parameters={parameters} />
           {testQuery.data ? <ResultDisplay data={testQuery.data} /> : null}
-          {authorization && <AuthFooter authorization={authorization} />}
         </form>
       </SchemaProvider>
     </FormProvider>
+  );
+}
+
+function SecuritiesTabs({
+  securities,
+  onSetSubmitHandler,
+}: {
+  securities: SecurityEntry[][];
+  onSetSubmitHandler: (handler: SubmitHandler) => void;
+}) {
+  const [idx, setIdx] = useState(0);
+
+  return (
+    <div className="p-3">
+      <div className="flex items-center mb-4 overflow-auto border bg-fd-muted rounded-full">
+        {securities.map((security, i) => (
+          <button
+            type="button"
+            key={i}
+            onClick={() => setIdx(i)}
+            className={cn(
+              'flex-1 text-xs font-medium font-mono px-2 py-1.5 text-nowrap transition-colors',
+              i === idx
+                ? 'bg-fd-primary/10 text-fd-primary'
+                : 'text-fd-muted-foreground hover:text-fd-accent-foreground',
+            )}
+          >
+            {security.map((item) => item.id).join(' & ')}
+          </button>
+        ))}
+      </div>
+      <AuthInput
+        securities={securities[idx]}
+        onSetSubmitHandler={onSetSubmitHandler}
+      />
+    </div>
   );
 }
 
@@ -255,91 +278,23 @@ const paramNames = ['Headers', 'Cookies', 'Query', 'Path'] as const;
 const paramTypes = ['header', 'cookie', 'query', 'path'] as const;
 
 function FormBody({
-  authorization,
   parameters = [],
   fields = {},
   body,
-}: Pick<ClientProps, 'parameters' | 'authorization' | 'body' | 'fields'>) {
+}: Pick<ClientProps, 'parameters' | 'body' | 'fields'>) {
   const params = useMemo(() => {
     return paramTypes.map((param) => parameters.filter((v) => v.in === param));
   }, [parameters]);
 
-  const auth = useMemo(():
-    | {
-        in: string;
-        field: RequestSchema;
-      }
-    | undefined => {
-    if (!authorization) return;
-
-    if (authorization.type === 'http' && authorization.scheme === 'basic') {
-      return {
-        in: 'header',
-        field: {
-          type: 'object',
-          required: ['username', 'password'],
-          description: authorization.description,
-          properties: {
-            username: {
-              type: 'string',
-            },
-            password: {
-              type: 'string',
-            },
-          },
-        },
-      };
-    } else if (
-      authorization.type === 'http' ||
-      authorization.type === 'oauth2'
-    ) {
-      return {
-        in: 'header',
-        field: {
-          type: 'string',
-          description:
-            authorization.description ?? `The Authorization access token.`,
-        },
-      };
-    } else if (authorization.type === 'apiKey') {
-      return {
-        in: authorization.in,
-        field: {
-          type: 'string',
-          description: authorization.description ?? 'The API key.',
-        },
-      };
-    }
-
-    // TODO: handle OpenID connect
-  }, [authorization]);
-
-  function renderAuth() {
-    if (!auth) return null;
-
-    if (fields?.auth)
-      return renderCustomField('authorization', auth.field, fields.auth);
-
-    return (
-      <FieldSet
-        fieldName="authorization"
-        name="Authorization"
-        field={auth.field}
-        isRequired
-      />
-    );
-  }
-
   return (
     <>
       {params.map((param, i) => {
+        if (param.length === 0) return;
         const name = paramNames[i];
         const type = paramTypes[i];
-        if ((!auth || type !== auth.in) && param.length === 0) return;
 
         return (
           <CollapsiblePanel key={name} title={name}>
-            {auth && type === auth.in ? renderAuth() : null}
             {param.map((field) => {
               const fieldName = `${type}.${field.name}` as const;
 
@@ -425,6 +380,204 @@ function BodyInput({ field: _field }: { field: RequestSchema }) {
         />
       )}
     </>
+  );
+}
+
+type SubmitHandler = (values: FormValues) => FormValues;
+type AuthField = {
+  fieldName: string;
+  defaultValue: unknown;
+
+  original: SecurityEntry;
+  children: ReactNode;
+
+  mapOutput?: (values: unknown) => unknown;
+};
+
+/**
+ * manipulate values without mutating the original object
+ *
+ * @returns a new manipulated object
+ */
+function manipulateValues(
+  values: Record<string, unknown>,
+  fieldName: string,
+  update: (v: unknown) => unknown,
+): Record<string, unknown> {
+  const root = { ...values };
+  let current = root;
+  const segments = fieldName.split('.');
+
+  for (let i = 0; i < segments.length; i++) {
+    const segment = segments[i];
+
+    if (i !== segments.length - 1) {
+      let v = current[segment] as Record<string, unknown>;
+      v = { ...v };
+
+      current[segment] = v;
+      current = v;
+      continue;
+    }
+
+    const updated = update(current[segment]);
+    if (updated === undefined) {
+      delete current[segment];
+    } else {
+      current[segment] = updated;
+    }
+  }
+
+  return root;
+}
+
+function AuthInput({
+  securities,
+  onSetSubmitHandler,
+}: {
+  securities: SecurityEntry[];
+  onSetSubmitHandler: (handler: SubmitHandler) => void;
+}) {
+  const form = useFormContext();
+  const auth = useMemo(() => {
+    const result: AuthField[] = [];
+
+    for (const security of securities) {
+      if (security.type === 'http' && security.scheme === 'basic') {
+        const fieldName = `header.Authorization`;
+
+        result.push({
+          fieldName,
+          original: security,
+          defaultValue: {
+            username: '',
+            password: '',
+          },
+          mapOutput(out) {
+            if (
+              out &&
+              typeof out === 'object' &&
+              'username' in out &&
+              'password' in out
+            ) {
+              return `Basic ${btoa(`${out.username}:${out.password}`)}`;
+            }
+
+            return out;
+          },
+          children: (
+            <FieldSet
+              name="Authorization (header)"
+              field={{
+                type: 'object',
+                required: ['username', 'password'],
+                description: security.description,
+                properties: {
+                  username: {
+                    type: 'string',
+                  },
+                  password: {
+                    type: 'string',
+                  },
+                },
+              }}
+              fieldName={fieldName}
+            />
+          ),
+        });
+      } else if (security.type === 'http' || security.type === 'oauth2') {
+        const fieldName = 'header.Authorization';
+        result.push({
+          fieldName: fieldName,
+          original: security,
+          defaultValue: 'Bearer ',
+          children: (
+            <>
+              <FieldSet
+                name="Authorization (header)"
+                fieldName={fieldName}
+                field={{
+                  type: 'string',
+                  description:
+                    security.description ?? `The Authorization access token.`,
+                }}
+              />
+              <AuthFooter authorization={security} />
+            </>
+          ),
+        });
+      } else if (security.type === 'apiKey') {
+        const fieldName = `${security.in}.${security.name}`;
+
+        result.push({
+          fieldName,
+          defaultValue: '',
+          original: security,
+          children: (
+            <FieldSet
+              fieldName={fieldName}
+              name={security.name}
+              field={{
+                type: 'string',
+                description:
+                  security.description ?? `The API key in ${security.in}.`,
+              }}
+            />
+          ),
+        });
+      }
+
+      // TODO: handle OpenID connect
+    }
+
+    return result;
+  }, [securities]);
+
+  useEffect(() => {
+    const prefix = '__fumadocs_auth';
+
+    for (const item of auth) {
+      const value = localStorage.getItem(prefix + item.original.id);
+
+      form.setValue(item.fieldName, value ? JSON.parse(value) : '');
+    }
+
+    return () => {
+      for (const item of auth) {
+        const v = form.getValues(item.fieldName);
+        if (v) {
+          localStorage.setItem(prefix + item.original.id, JSON.stringify(v));
+        }
+
+        form.reset((values) =>
+          manipulateValues(values, item.fieldName, () => undefined),
+        );
+      }
+    };
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ignore `form`
+  }, [auth, securities]);
+
+  onSetSubmitHandler((values) => {
+    for (const item of auth) {
+      if (!item.mapOutput) continue;
+
+      values = manipulateValues(
+        values as unknown as Record<string, unknown>,
+        item.fieldName,
+        item.mapOutput,
+      ) as unknown as FormValues;
+    }
+
+    return values;
+  });
+
+  return (
+    <div className="flex flex-col gap-4">
+      {auth.map((item) => (
+        <Fragment key={item.fieldName}>{item.children}</Fragment>
+      ))}
+    </div>
   );
 }
 
@@ -540,40 +693,6 @@ function DefaultResultDisplay({ data }: { data: FetchResult }) {
   );
 }
 
-function usePersistentAuthInfo(authorization?: ClientProps['authorization']) {
-  const key = authorization
-    ? `__fumadocs_auth_${authorization.persistentId}`
-    : null;
-  const [info, setInfo] = useState<FormValues['authorization']>(() => {
-    if (!authorization || authorization.type === 'apiKey') return '';
-    if (authorization.type === 'http' && authorization.scheme === 'basic') {
-      return {
-        username: '',
-        password: '',
-      };
-    }
-
-    return 'Bearer';
-  });
-
-  useEffect(() => {
-    if (!key) return;
-    const item = localStorage.getItem(key);
-
-    if (item) {
-      setInfo(JSON.parse(item));
-    }
-  }, [key]);
-
-  return {
-    info,
-    saveInfo: useEffectEvent((value: FormValues['authorization']) => {
-      if (!key) return;
-      localStorage.setItem(key, JSON.stringify(value));
-    }),
-  };
-}
-
 function CollapsiblePanel({
   title,
   children,
@@ -592,40 +711,4 @@ function CollapsiblePanel({
       </CollapsibleContent>
     </Collapsible>
   );
-}
-
-function writeAuthInfo(
-  authorization: Security,
-  input: FormValues['authorization'],
-  header: Record<string, unknown>,
-  query: Record<string, unknown>,
-  cookie: Record<string, string>,
-) {
-  if (authorization.type === 'apiKey') {
-    if (authorization.in === 'header') {
-      header[authorization.name] = input as string;
-    }
-
-    if (authorization.in === 'query') {
-      query[authorization.name] = input as string;
-    }
-
-    if (authorization.in === 'cookie') {
-      cookie[authorization.name] = input as string;
-    }
-    return;
-  }
-
-  if (
-    authorization.type === 'http' &&
-    authorization.scheme === 'basic' &&
-    typeof input === 'object'
-  ) {
-    header.Authorization = `Basic ${btoa(`${input.username}:${input.password}`)}`;
-    return;
-  }
-
-  if (typeof input === 'string') {
-    header.Authorization = input;
-  }
 }

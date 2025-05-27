@@ -11,7 +11,7 @@ import {
   type NoReference,
   type ResolvedSchema,
 } from '@/utils/schema';
-import { getSecurities, getSecurityPrefix } from '@/utils/get-security';
+import { getSecurityPrefix } from '@/utils/get-security';
 import { idToTitle } from '@/utils/id-to-title';
 import { Markdown } from '../markdown';
 import { heading } from '../heading';
@@ -25,7 +25,13 @@ import {
 } from '@/render/operation/api-example';
 import { Badge, MethodLabel } from '@/ui/components/method-label';
 import { type SampleGenerator } from '@/requests/_shared';
-import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import {
+  Tab,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from 'fumadocs-ui/components/tabs';
 import { getTypescriptSchema } from '@/utils/get-typescript-schema';
 import { CopyResponseTypeScript } from '@/ui/client';
 
@@ -323,63 +329,90 @@ function AuthSection({
   requirements: SecurityRequirementObject[];
   ctx: RenderContext;
 }) {
-  let id = 0;
-  const info: ReactNode[] = [];
-
-  for (const requirement of requirements) {
-    for (const schema of getSecurities(requirement, document)) {
-      const prefix = getSecurityPrefix(schema);
-      const scopeElement =
-        schema.scopes.length > 0 ? (
-          <p>
-            Scope: <code>{schema.scopes.join(', ')}</code>
-          </p>
-        ) : null;
-
-      if (schema.type === 'http' || schema.type === 'oauth2') {
-        info.push(
-          <renderer.Property
-            key={id++}
-            name="Authorization"
-            type={prefix ? `${prefix} <token>` : '<token>'}
-            required
+  return (
+    <Tabs defaultValue="0">
+      <TabsList>
+        {requirements.map((securities, i) => (
+          <TabsTrigger key={i} value={i.toString()}>
+            {Object.keys(securities).join(' & ')}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+      {requirements.map((securities, i) => {
+        return (
+          <TabsContent
+            key={i}
+            value={i.toString()}
+            className="flex flex-col gap-4"
           >
-            {schema.description ? <Markdown text={schema.description} /> : null}
-            <p>
-              In: <code>header</code>
-            </p>
-            {scopeElement}
-          </renderer.Property>,
-        );
-      }
+            {Object.entries(securities).map(([key, scopes]) => {
+              const schema = document.components?.securitySchemes?.[key];
+              if (!schema) return;
 
-      if (schema.type === 'apiKey') {
-        info.push(
-          <renderer.Property key={id++} name={schema.name} type="<token>">
-            {schema.description ? <Markdown text={schema.description} /> : null}
-            <p>
-              In: <code>{schema.in}</code>
-              {scopeElement}
-            </p>
-          </renderer.Property>,
-        );
-      }
+              const prefix = getSecurityPrefix(schema);
+              const scopeElement =
+                scopes.length > 0 ? (
+                  <p>
+                    Scope: <code>{scopes.join(', ')}</code>
+                  </p>
+                ) : null;
 
-      if (schema.type === 'openIdConnect') {
-        info.push(
-          <renderer.Property
-            key={id++}
-            name="OpenID Connect"
-            type="<token>"
-            required
-          >
-            {schema.description ? <Markdown text={schema.description} /> : null}
-            {scopeElement}
-          </renderer.Property>,
-        );
-      }
-    }
-  }
+              if (schema.type === 'http' || schema.type === 'oauth2') {
+                return (
+                  <renderer.Property
+                    key={key}
+                    name="Authorization"
+                    type={prefix ? `${prefix} <token>` : '<token>'}
+                    required
+                  >
+                    {schema.description && (
+                      <Markdown text={schema.description} />
+                    )}
+                    <p>
+                      In: <code>header</code>
+                    </p>
+                    {scopeElement}
+                  </renderer.Property>
+                );
+              }
 
-  return info;
+              if (schema.type === 'apiKey') {
+                return (
+                  <renderer.Property
+                    key={key}
+                    name={schema.name}
+                    type="<token>"
+                  >
+                    {schema.description && (
+                      <Markdown text={schema.description} />
+                    )}
+                    <p>
+                      In: <code>{schema.in}</code>
+                      {scopeElement}
+                    </p>
+                  </renderer.Property>
+                );
+              }
+
+              if (schema.type === 'openIdConnect') {
+                return (
+                  <renderer.Property
+                    key={key}
+                    name="OpenID Connect"
+                    type="<token>"
+                    required
+                  >
+                    {schema.description && (
+                      <Markdown text={schema.description} />
+                    )}
+                    {scopeElement}
+                  </renderer.Property>
+                );
+              }
+            })}
+          </TabsContent>
+        );
+      })}
+    </Tabs>
+  );
 }

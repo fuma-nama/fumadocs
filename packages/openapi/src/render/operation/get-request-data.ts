@@ -2,14 +2,13 @@ import type { MethodInformation, RenderContext } from '@/types';
 import type { ResolvedSchema } from '@/utils/schema';
 import { getPreferredType } from '@/utils/schema';
 import { sample } from 'openapi-sampler';
-import { getSecurities, getSecurityPrefix } from '@/utils/get-security';
 import type { RequestData } from '@/requests/_shared';
 
 export function getRequestData(
   path: string,
   method: MethodInformation,
   sampleKey: string | null,
-  { schema: { document } }: RenderContext,
+  _ctx: RenderContext,
 ): RequestData {
   const result: RequestData = {
     path: {},
@@ -46,16 +45,6 @@ export function getRequestData(
       result.query[param.name] = value;
     } else if (param.in === 'path') {
       result.path[param.name] = value;
-    }
-  }
-
-  const requirements = method.security ?? document.security;
-  if (requirements && requirements.length > 0) {
-    for (const security of getSecurities(requirements[0], document)) {
-      const prefix = getSecurityPrefix(security);
-      const name = security.type === 'apiKey' ? security.name : 'Authorization';
-
-      result.header[name] = prefix ? `${prefix} <token>` : '<token>';
     }
   }
 

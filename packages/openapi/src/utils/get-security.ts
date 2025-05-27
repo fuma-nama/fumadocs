@@ -32,7 +32,9 @@ export function getSecurities(
   return results;
 }
 
-export function getSecurityPrefix(security: Security): string | undefined {
+export function getSecurityPrefix(
+  security: SecuritySchemeObject,
+): string | undefined {
   if (security.type === 'http')
     return {
       basic: 'Basic',
