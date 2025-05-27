@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 15.4.2
+
+### Patch Changes
+
+- 0ab6c7f: Improve performance by using shallow compare on `useOnChange` by default
+
 ## 15.4.1
 
 ## 15.4.0
