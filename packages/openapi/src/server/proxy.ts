@@ -36,7 +36,7 @@ export function createProxy(options: CreateProxyOptions = {}): Proxy {
 
     if (
       allowedUrls &&
-      allowedUrls.every((allowedUrl) => !allowedUrl.startsWith(url))
+      allowedUrls.every((allowedUrl) => !url.startsWith(allowedUrl))
     ) {
       return Response.json('The given `url` query parameter is not allowed', {
         status: 400,
