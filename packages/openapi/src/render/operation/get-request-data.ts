@@ -77,5 +77,6 @@ function generateBody(method: string, schema: ResolvedSchema): unknown {
   return sample(schema as object, {
     skipReadOnly: method !== 'GET',
     skipWriteOnly: method === 'GET',
+    skipNonRequired: true,
   });
 }
