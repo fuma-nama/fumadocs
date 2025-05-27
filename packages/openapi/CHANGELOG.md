@@ -1,5 +1,15 @@
 # @fuma-docs/openapi
 
+## 9.0.3
+
+### Patch Changes
+
+- 5770180: Implement multiple security schemes support
+- d2a2d47: Skip non-required values when generating code examples
+- Updated dependencies [0ab6c7f]
+  - fumadocs-core@15.4.2
+  - fumadocs-ui@15.4.2
+
 ## 9.0.2
 
 ### Patch Changes
