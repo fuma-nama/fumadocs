@@ -33,6 +33,26 @@ export type Client =
 
 let staticClient: StaticClient | undefined;
 
+function isDifferentDeep(a: unknown, b: unknown): boolean {
+  if (Array.isArray(a) && Array.isArray(b)) {
+    return b.length !== a.length || a.some((v, i) => isDifferentDeep(v, b[i]));
+  }
+
+  if (typeof a === 'object' && a && typeof b === 'object' && b) {
+    const aKeys = Object.keys(a);
+    const bKeys = Object.keys(b);
+
+    return (
+      aKeys.length !== bKeys.length ||
+      aKeys.some((key) =>
+        isDifferentDeep(a[key as keyof object], b[key as keyof object]),
+      )
+    );
+  }
+
+  return a !== b;
+}
+
 /**
  * @param client - search client
  * @param locale - Filter with locale
@@ -56,58 +76,62 @@ export function useDocsSearch(
   const debouncedValue = useDebounce(search, delayMs);
   const onStart = useRef<() => void>(undefined);
 
-  useOnChange(key ?? [client, debouncedValue, locale, tag], () => {
-    if (onStart.current) {
-      onStart.current();
-      onStart.current = undefined;
-    }
-
-    setIsLoading(true);
-    let interrupt = false;
-    onStart.current = () => {
-      interrupt = true;
-    };
-
-    async function run(): Promise<SortedResult[] | 'empty'> {
-      if (debouncedValue.length === 0 && !allowEmpty) return 'empty';
-
-      if (client.type === 'fetch') {
-        const { fetchDocs } = await import('./client/fetch');
-        return fetchDocs(debouncedValue, locale, tag, client);
+  useOnChange(
+    key ?? [client, debouncedValue, locale, tag],
+    () => {
+      if (onStart.current) {
+        onStart.current();
+        onStart.current = undefined;
       }
 
-      if (client.type === 'algolia') {
-        const { searchDocs } = await import('./client/algolia');
+      setIsLoading(true);
+      let interrupt = false;
+      onStart.current = () => {
+        interrupt = true;
+      };
 
-        return searchDocs(debouncedValue, tag, locale, client);
+      async function run(): Promise<SortedResult[] | 'empty'> {
+        if (debouncedValue.length === 0 && !allowEmpty) return 'empty';
+
+        if (client.type === 'fetch') {
+          const { fetchDocs } = await import('./client/fetch');
+          return fetchDocs(debouncedValue, locale, tag, client);
+        }
+
+        if (client.type === 'algolia') {
+          const { searchDocs } = await import('./client/algolia');
+
+          return searchDocs(debouncedValue, tag, locale, client);
+        }
+
+        if (client.type === 'orama-cloud') {
+          const { searchDocs } = await import('./client/orama-cloud');
+
+          return searchDocs(debouncedValue, tag, client);
+        }
+
+        const { createStaticClient } = await import('./client/static');
+        if (!staticClient) staticClient = createStaticClient(client);
+
+        return staticClient.search(debouncedValue, locale, tag);
       }
 
-      if (client.type === 'orama-cloud') {
-        const { searchDocs } = await import('./client/orama-cloud');
+      void run()
+        .then((res) => {
+          if (interrupt) return;
 
-        return searchDocs(debouncedValue, tag, client);
-      }
-
-      const { createStaticClient } = await import('./client/static');
-      if (!staticClient) staticClient = createStaticClient(client);
-
-      return staticClient.search(debouncedValue, locale, tag);
-    }
-
-    void run()
-      .then((res) => {
-        if (interrupt) return;
-
-        setError(undefined);
-        setResults(res);
-      })
-      .catch((err: Error) => {
-        setError(err);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  });
+          setError(undefined);
+          setResults(res);
+        })
+        .catch((err: Error) => {
+          setError(err);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    },
+    isDifferentDeep,
+  );
 
   return { search, setSearch, query: { isLoading, data: results, error } };
 }

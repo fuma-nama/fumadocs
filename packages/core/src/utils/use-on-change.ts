@@ -5,18 +5,6 @@ function isDifferent(a: unknown, b: unknown): boolean {
     return b.length !== a.length || a.some((v, i) => isDifferent(v, b[i]));
   }
 
-  if (typeof a === 'object' && a && typeof b === 'object' && b) {
-    const aKeys = Object.keys(a);
-    const bKeys = Object.keys(b);
-
-    return (
-      aKeys.length !== bKeys.length ||
-      aKeys.some((key) =>
-        isDifferent(a[key as keyof object], b[key as keyof object]),
-      )
-    );
-  }
-
   return a !== b;
 }
 
