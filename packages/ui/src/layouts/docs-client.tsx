@@ -28,6 +28,29 @@ export function Navbar(props: ComponentProps<'header'>) {
   );
 }
 
+export function LayoutBody(props: ComponentProps<'main'>) {
+  const { collapsed } = useSidebar();
+
+  return (
+    <main
+      id="nd-docs-layout"
+      {...props}
+      className={cn(
+        'flex flex-1 flex-col transition-[margin]',
+        props.className,
+      )}
+      style={{
+        ...props.style,
+        marginInlineStart: collapsed
+          ? 'max(0px, min(calc(100vw - var(--fd-page-width)), var(--fd-sidebar-width)))'
+          : 'var(--fd-sidebar-width)',
+      }}
+    >
+      {props.children}
+    </main>
+  );
+}
+
 export function NavbarSidebarTrigger({
   className,
   ...props

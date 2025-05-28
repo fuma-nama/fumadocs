@@ -28,6 +28,7 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import * as Primitive from 'fumadocs-core/toc';
+import { useSidebar } from '@/contexts/sidebar';
 
 const TocPopoverContext = createContext<{
   open: boolean;
@@ -160,6 +161,7 @@ export function TocPopoverContent(props: ComponentProps<'div'>) {
 export function TocPopover(props: ComponentProps<'div'>) {
   const ref = useRef<HTMLElement>(null);
   const [open, setOpen] = useState(false);
+  const { collapsed } = useSidebar();
   const { tocNav } = usePageStyles();
   const { isTransparent } = useNav();
 
@@ -181,10 +183,16 @@ export function TocPopover(props: ComponentProps<'div'>) {
   return (
     <div
       {...props}
-      className={cn('sticky overflow-visible z-10', tocNav, props.className)}
+      className={cn(
+        'fixed inset-x-0 top-[calc(var(--fd-banner-height)+var(--fd-nav-height))] overflow-visible z-10',
+        tocNav,
+        props.className,
+      )}
       style={{
         ...props.style,
-        top: 'calc(var(--fd-banner-height) + var(--fd-nav-height))',
+        insetInlineStart: collapsed
+          ? '0px'
+          : 'calc(var(--fd-sidebar-width) + var(--fd-layout-offset))',
       }}
     >
       <TocPopoverContext.Provider
@@ -215,16 +223,28 @@ export function TocPopover(props: ComponentProps<'div'>) {
   );
 }
 
-export function PageBody(props: ComponentProps<'div'>) {
+export function PageBody({
+  className,
+  style,
+  children,
+  ...props
+}: ComponentProps<'div'>) {
   const { page } = usePageStyles();
+  const { collapsed } = useSidebar();
 
   return (
     <div
       id="nd-page"
       {...props}
-      className={cn('flex w-full min-w-0 flex-col', page, props.className)}
+      className={cn(className, page)}
+      style={{
+        maxWidth: collapsed
+          ? 'var(--fd-page-width)'
+          : 'min(var(--fd-page-width),calc(var(--fd-layout-width) - var(--fd-sidebar-width)))',
+        ...style,
+      }}
     >
-      {props.children}
+      {children}
     </div>
   );
 }
@@ -236,7 +256,7 @@ export function PageArticle(props: ComponentProps<'article'>) {
     <article
       {...props}
       className={cn(
-        'flex w-full flex-1 flex-col gap-6 px-4 md:px-6 pt-8 md:pt-12 xl:px-12 xl:mx-auto',
+        'flex min-w-0 w-full flex-col gap-6 px-4 pt-8 md:px-6 md:pt-12 xl:px-12 xl:mx-auto',
         article,
         props.className,
       )}

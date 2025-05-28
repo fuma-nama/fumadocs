@@ -138,9 +138,31 @@ export function DocsPage({
 
   return (
     <AnchorProvider toc={toc} single={tocOptions.single}>
+      {slot(
+        { enabled: tocPopoverEnabled, component: tocPopoverReplace },
+        <TocPopover className="h-10">
+          <TocPopoverTrigger className="w-full" items={toc} />
+          <TocPopoverContent>
+            {tocPopoverOptions.header}
+            <TOCScrollArea className="px-4 md:px-6">
+              {tocPopoverOptions.style === 'clerk' ? (
+                <ClerkTOCItems items={toc} />
+              ) : (
+                <TOCItems items={toc} />
+              )}
+            </TOCScrollArea>
+            {tocPopoverOptions.footer}
+          </TocPopoverContent>
+        </TocPopover>,
+        {
+          items: toc,
+          ...tocPopoverOptions,
+        },
+      )}
+
       <PageBody
         {...props.container}
-        className={cn(props.container?.className)}
+        className={cn('flex flex-1 mx-auto w-full', props.container?.className)}
         style={
           {
             '--fd-tocnav-height': !tocPopoverEnabled ? '0px' : undefined,
@@ -148,34 +170,7 @@ export function DocsPage({
           } as object
         }
       >
-        {slot(
-          { enabled: tocPopoverEnabled, component: tocPopoverReplace },
-          <TocPopover className="h-10">
-            <TocPopoverTrigger className="w-full" items={toc} />
-            <TocPopoverContent>
-              {tocPopoverOptions.header}
-              <TOCScrollArea className="px-4 md:px-6">
-                {tocPopoverOptions.style === 'clerk' ? (
-                  <ClerkTOCItems items={toc} />
-                ) : (
-                  <TOCItems items={toc} />
-                )}
-              </TOCScrollArea>
-              {tocPopoverOptions.footer}
-            </TocPopoverContent>
-          </TocPopover>,
-          {
-            items: toc,
-            ...tocPopoverOptions,
-          },
-        )}
-        <PageArticle
-          {...props.article}
-          className={cn(
-            full || !tocEnabled ? 'max-w-[1120px]' : 'max-w-[860px]',
-            props.article?.className,
-          )}
-        >
+        <PageArticle {...props.article}>
           {slot(props.breadcrumb, <Breadcrumb {...props.breadcrumb} />)}
           {props.children}
           <div role="none" className="flex-1" />
@@ -191,29 +186,29 @@ export function DocsPage({
           </div>
           {slot(props.footer, <Footer items={props.footer?.items} />)}
         </PageArticle>
+        {slot(
+          { enabled: tocEnabled, component: tocReplace },
+          <Toc>
+            {tocOptions.header}
+            <h3 className="inline-flex items-center gap-1.5 text-sm text-fd-muted-foreground">
+              <Text className="size-4" />
+              <I18nLabel label="toc" />
+            </h3>
+            <TOCScrollArea>
+              {tocOptions.style === 'clerk' ? (
+                <ClerkTOCItems items={toc} />
+              ) : (
+                <TOCItems items={toc} />
+              )}
+            </TOCScrollArea>
+            {tocOptions.footer}
+          </Toc>,
+          {
+            items: toc,
+            ...tocOptions,
+          },
+        )}
       </PageBody>
-      {slot(
-        { enabled: tocEnabled, component: tocReplace },
-        <Toc>
-          {tocOptions.header}
-          <h3 className="inline-flex items-center gap-1.5 text-sm text-fd-muted-foreground">
-            <Text className="size-4" />
-            <I18nLabel label="toc" />
-          </h3>
-          <TOCScrollArea>
-            {tocOptions.style === 'clerk' ? (
-              <ClerkTOCItems items={toc} />
-            ) : (
-              <TOCItems items={toc} />
-            )}
-          </TOCScrollArea>
-          {tocOptions.footer}
-        </Toc>,
-        {
-          items: toc,
-          ...tocOptions,
-        },
-      )}
     </AnchorProvider>
   );
 }

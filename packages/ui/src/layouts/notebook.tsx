@@ -22,12 +22,12 @@ import {
 } from '@/components/ui/popover';
 import {
   getSidebarTabsFromOptions,
-  layoutVariables,
   SidebarLinkItem,
   type SidebarOptions,
 } from '@/layouts/docs/shared';
 import type { PageTree } from 'fumadocs-core/server';
 import {
+  LayoutBody,
   LayoutTab,
   LayoutTabs,
   Navbar,
@@ -120,23 +120,13 @@ export function DocsLayout(props: DocsLayoutProps) {
   return (
     <TreeContextProvider tree={props.tree}>
       <NavProvider transparentMode={transparentMode}>
-        <main
-          id="nd-docs-layout"
+        <LayoutBody
           {...props.containerProps}
-          className={cn(
-            'flex w-full flex-1 flex-row pe-(--fd-layout-offset)',
-            variables,
-            props.containerProps?.className,
-          )}
-          style={{
-            ...layoutVariables,
-            ...props.containerProps?.style,
-          }}
+          className={cn(variables, props.containerProps?.className)}
         >
           <Sidebar
             {...sidebar}
             className={cn(
-              'data-[collapsed=false]:w-[calc(var(--fd-sidebar-width)+var(--fd-layout-offset))] data-[collapsed=true]:me-[calc(var(--fd-layout-offset)-var(--fd-sidebar-width))]',
               navMode === 'top'
                 ? 'md:bg-transparent'
                 : 'md:[--fd-nav-height:0px]',
@@ -216,7 +206,7 @@ export function DocsLayout(props: DocsLayoutProps) {
             tabs={tabMode == 'navbar' ? tabs : []}
           />
           <StylesProvider {...pageStyles}>{props.children}</StylesProvider>
-        </main>
+        </LayoutBody>
       </NavProvider>
     </TreeContextProvider>
   );
