@@ -101,25 +101,35 @@ function writeReferences(
 
   const output = { ...schema };
   stack.set(schema, output);
-
-  for (const name of ['items', 'additionalProperties'] as const) {
+  for (const _n in output) {
+    const name = _n as keyof typeof output;
     if (!output[name]) continue;
-    output[name] = writeReferences(output[name], ctx, stack);
-  }
 
-  for (const name of ['oneOf', 'allOf', 'anyOf'] as const) {
-    if (!output[name]) continue;
-    output[name] = output[name].map((item) =>
-      writeReferences(item, ctx, stack),
-    );
-  }
+    switch (name) {
+      case 'oneOf':
+      case 'allOf':
+      case 'anyOf':
+        output[name] = output[name].map((item) =>
+          writeReferences(item, ctx, stack),
+        );
+        continue;
+      case 'items':
+      case 'additionalProperties':
+      case 'not':
+        output[name] = writeReferences(output[name], ctx, stack);
+        continue;
+      case 'properties':
+      case 'patternProperties':
+        output[name] = { ...output[name] };
 
-  for (const name of ['properties', 'patternProperties'] as const) {
-    if (!output[name]) continue;
-    output[name] = { ...output[name] };
-
-    for (const key in output[name]) {
-      output[name][key] = writeReferences(output[name][key], ctx, stack);
+        for (const key in output[name]) {
+          output[name][key] = writeReferences(output[name][key], ctx, stack);
+        }
+        continue;
+      default:
+        if (typeof output[name] === 'object' && !Array.isArray(output[name])) {
+          output[name] = { ...output[name] };
+        }
     }
   }
 
