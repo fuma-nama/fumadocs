@@ -127,13 +127,13 @@ export function ObjectCollapsible(props: {
       <CollapsibleTrigger
         className={cn(
           buttonVariants({ color: 'secondary', size: 'sm' }),
-          'group px-3 py-2 data-[state=open]:rounded-b-none data-[state=open]:border-b-0',
+          'group px-3 py-2 data-[state=open]:rounded-b-none',
         )}
       >
         {props.name}
         <ChevronDown className="size-4 text-fd-muted-foreground group-data-[state=open]:rotate-180" />
       </CollapsibleTrigger>
-      <CollapsibleContent className="-me-3">
+      <CollapsibleContent className="-me-3 -mt-px">
         <div className="border-s border-y rounded-b-lg p-3">
           {props.children}
         </div>

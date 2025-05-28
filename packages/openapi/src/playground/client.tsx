@@ -124,6 +124,16 @@ function toRequestData(
 }
 
 const ServerSelect = lazy(() => import('@/ui/server-select'));
+const OauthDialog = lazy(() =>
+  import('./auth/oauth-dialog').then((mod) => ({
+    default: mod.OauthDialog,
+  })),
+);
+const OauthDialogTrigger = lazy(() =>
+  import('./auth/oauth-dialog').then((mod) => ({
+    default: mod.OauthDialogTrigger,
+  })),
+);
 
 export default function Client({
   route,
@@ -175,39 +185,57 @@ export default function Client({
     });
   });
 
-  function initAuthValues() {
+  function initAuthValues(values: FormValues, inputs: AuthField[]) {
     for (const item of inputs) {
-      let value = item.defaultValue;
-      const stored = localStorage.getItem(AuthPrefix + item.original.id);
+      manipulateValues(values, item.fieldName, () => {
+        const stored = localStorage.getItem(AuthPrefix + item.original.id);
 
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (typeof parsed === typeof item.defaultValue) value = parsed;
-      }
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (typeof parsed === typeof item.defaultValue) return parsed;
+        }
 
-      // @ts-expect-error -- safe
-      form.setValue(item.fieldName, value);
+        return item.defaultValue;
+      });
     }
+
+    return values;
   }
 
   useOnChange(defaultValues, () => {
     fieldInfoMap.clear();
-    form.reset(defaultValues);
-    initAuthValues();
+    form.reset(initAuthValues(defaultValues, inputs));
   });
 
-  useOnChange(inputs, (_, previous) => {
-    for (const item of previous) {
-      form.reset(
-        (values) =>
-          manipulateValues(
-            values as unknown as Record<string, unknown>,
-            item.fieldName,
-            () => undefined,
-          ) as unknown as FormValues,
-      );
+  useOnChange(inputs, (current, previous) => {
+    form.reset((values) => {
+      for (const item of previous) {
+        if (current.some(({ original }) => original.id === item.original.id)) {
+          continue;
+        }
+
+        manipulateValues(values, item.fieldName, () => undefined);
+      }
+
+      return initAuthValues(values, current);
+    });
+  });
+
+  const onUpdateDebounced = useEffectEvent((values: FormValues) => {
+    for (const item of inputs) {
+      const value = item.fieldName
+        .split('.')
+        .reduce((v, seg) => v[seg as keyof object], values as object);
+
+      if (value) {
+        localStorage.setItem(
+          AuthPrefix + item.original.id,
+          JSON.stringify(value),
+        );
+      }
     }
-    initAuthValues();
+
+    updater.setData(toRequestData(method, body?.mediaType, mapInputs(values)));
   });
 
   useEffect(() => {
@@ -220,29 +248,12 @@ export default function Client({
       callback({ values }) {
         if (timer) window.clearTimeout(timer);
         timer = window.setTimeout(
-          () => {
-            for (const item of inputs) {
-              const value = item.fieldName
-                .split('.')
-                .reduce((v, seg) => v[seg as keyof object], values as object);
-
-              if (value) {
-                localStorage.setItem(
-                  AuthPrefix + item.original.id,
-                  JSON.stringify(value),
-                );
-              }
-            }
-
-            updater.setData(
-              toRequestData(method, body?.mediaType, mapInputs(values)),
-            );
-          },
+          () => onUpdateDebounced(values),
           timer ? 400 : 0,
         );
       },
     });
-    initAuthValues();
+    form.reset((values) => initAuthValues(values, inputs));
 
     return () => subscription();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- mounted once only
@@ -284,27 +295,15 @@ export default function Client({
           </div>
 
           {securities.length > 0 && (
-            <div className="m-3 p-3 border bg-fd-muted rounded-lg">
-              <div className="flex gap-4 items-center justify-between mb-4">
-                <p className="text-sm font-medium">Authorization</p>
-                <select
-                  value={securityId.toString()}
-                  onChange={(e) => setSecurityId(Number(e.target.value))}
-                  className="text-xs font-mono px-2 py-1.5 outline-none"
-                >
-                  {securities.map((security, i) => (
-                    <option key={i} value={i}>
-                      {security.map((item) => item.id).join(' & ')}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex flex-col gap-4">
-                {inputs.map((input) => (
-                  <Fragment key={input.fieldName}>{input.children}</Fragment>
-                ))}
-              </div>
-            </div>
+            <SecurityTabs
+              securities={securities}
+              securityId={securityId}
+              setSecurityId={setSecurityId}
+            >
+              {inputs.map((input) => (
+                <Fragment key={input.fieldName}>{input.children}</Fragment>
+              ))}
+            </SecurityTabs>
           )}
           <FormBody body={body} fields={fields} parameters={parameters} />
           {testQuery.data ? <ResultDisplay data={testQuery.data} /> : null}
@@ -312,6 +311,67 @@ export default function Client({
       </SchemaProvider>
     </FormProvider>
   );
+}
+
+function SecurityTabs({
+  securities,
+  setSecurityId,
+  securityId,
+  children,
+}: {
+  securities: SecurityEntry[][];
+  securityId: number;
+  setSecurityId: (value: number) => void;
+  children: ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  const form = useFormContext();
+
+  const result = (
+    <CollapsiblePanel title="Authorization">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+        <select
+          value={securityId.toString()}
+          onChange={(e) => setSecurityId(Number(e.target.value))}
+          className="text-sm font-mono px-2 py-1.5 border rounded-lg bg-fd-muted outline-none"
+        >
+          {securities.map((security, i) => (
+            <option key={i} value={i}>
+              {security.map((item) => item.id).join(' & ')}
+            </option>
+          ))}
+        </select>
+        <div className="flex flex-col gap-4 flex-1">{children}</div>
+      </div>
+    </CollapsiblePanel>
+  );
+
+  for (let i = 0; i < securities.length; i++) {
+    const security = securities[i];
+
+    for (const item of security) {
+      if (item.type === 'oauth2') {
+        return (
+          <OauthDialog
+            scheme={item}
+            scopes={item.scopes}
+            open={open}
+            setOpen={(v) => {
+              setOpen(v);
+              if (v) {
+                setSecurityId(i);
+              }
+            }}
+            setToken={(token) => form.setValue('header.Authorization', token)}
+          >
+            {result}
+          </OauthDialog>
+        );
+      }
+    }
+  }
+
+  return result;
 }
 
 const paramNames = ['Headers', 'Cookies', 'Query', 'Path'] as const;
@@ -423,7 +483,7 @@ function BodyInput({ field: _field }: { field: RequestSchema }) {
   );
 }
 
-type AuthField = {
+interface AuthField {
   fieldName: string;
   defaultValue: unknown;
 
@@ -431,20 +491,21 @@ type AuthField = {
   children: ReactNode;
 
   mapOutput?: (values: unknown) => unknown;
-};
+}
 
 /**
  * manipulate values without mutating the original object
  *
  * @returns a new manipulated object
  */
-function manipulateValues(
-  values: Record<string, unknown>,
+function manipulateValues<T extends object>(
+  values: T,
   fieldName: string,
   update: (v: unknown) => unknown,
-): Record<string, unknown> {
-  const root = { ...values };
-  let current = root;
+  clone = false,
+): T {
+  const root = clone ? { ...values } : values;
+  let current = root as Record<string, unknown>;
   const segments = fieldName.split('.');
 
   for (let i = 0; i < segments.length; i++) {
@@ -452,7 +513,7 @@ function manipulateValues(
 
     if (i !== segments.length - 1) {
       let v = current[segment] as Record<string, unknown>;
-      v = { ...v };
+      if (clone) v = { ...v };
 
       current[segment] = v;
       current = v;
@@ -530,7 +591,20 @@ function useAuthInputs(securities?: SecurityEntry[]) {
                     security.description ?? `The Authorization access token.`,
                 }}
               />
-              <OAuth authorization={security} />
+              {security.type === 'oauth2' && (
+                <OauthDialogTrigger
+                  type="button"
+                  className={cn(
+                    buttonVariants({
+                      size: 'sm',
+                      color: 'primary',
+                      className: 'w-fit',
+                    }),
+                  )}
+                >
+                  Auth Settings
+                </OauthDialogTrigger>
+              )}
             </>
           ),
         });
@@ -565,11 +639,7 @@ function useAuthInputs(securities?: SecurityEntry[]) {
     for (const item of inputs) {
       if (!item.mapOutput) continue;
 
-      values = manipulateValues(
-        values as unknown as Record<string, unknown>,
-        item.fieldName,
-        item.mapOutput,
-      ) as unknown as FormValues;
+      values = manipulateValues(values, item.fieldName, item.mapOutput, true);
     }
 
     return values;
@@ -591,44 +661,6 @@ function renderCustomField(
       render={(props) => field.render({ ...props, info })}
       name={fieldName}
     />
-  );
-}
-
-const OauthDialog = lazy(() =>
-  import('./auth/oauth-dialog').then((mod) => ({
-    default: mod.OauthDialog,
-  })),
-);
-const OauthDialogTrigger = lazy(() =>
-  import('./auth/oauth-dialog').then((mod) => ({
-    default: mod.OauthDialogTrigger,
-  })),
-);
-
-function OAuth({ authorization }: { authorization: SecurityEntry }) {
-  const form = useFormContext();
-  if (authorization.type !== 'oauth2') return;
-
-  // only the first one, so it looks simpler :)
-  const flow = Object.keys(authorization.flows)[0];
-
-  return (
-    <OauthDialog
-      flow={flow as keyof typeof authorization.flows}
-      scheme={authorization}
-      setToken={(token) => form.setValue('authorization', `Bearer ${token}`)}
-    >
-      <OauthDialogTrigger
-        type="button"
-        className={cn(
-          buttonVariants({
-            color: 'secondary',
-          }),
-        )}
-      >
-        Auth Settings
-      </OauthDialogTrigger>
-    </OauthDialog>
   );
 }
 
@@ -665,7 +697,7 @@ function DefaultResultDisplay({ data }: { data: FetchResult }) {
   const { shikiOptions } = useApiContext();
 
   return (
-    <div className="flex flex-col gap-3 border-t p-3">
+    <div className="flex flex-col gap-3 p-3">
       <div className="inline-flex items-center gap-1.5 text-sm font-medium text-fd-foreground">
         <statusInfo.icon className={cn('size-4', statusInfo.color)} />
         {statusInfo.description}

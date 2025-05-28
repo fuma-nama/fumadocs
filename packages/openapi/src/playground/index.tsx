@@ -148,7 +148,7 @@ function parseSecurities(
       });
     }
 
-    result.push(list);
+    if (list.length > 0) result.push(list);
   }
 
   return result;
