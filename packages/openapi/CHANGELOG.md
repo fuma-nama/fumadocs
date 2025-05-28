@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 9.0.4
+
+### Patch Changes
+
+- 9721f6f: Introduce `allowedOrigins` and `filterRequest` options to `createProxy`. Deprecate `allowedUrls` in favour of new APIs.
+
 ## 9.0.3
 
 ### Patch Changes
