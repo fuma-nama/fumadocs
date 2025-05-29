@@ -181,45 +181,38 @@ export function TocPopover(props: ComponentProps<'div'>) {
   }, [onClick]);
 
   return (
-    <div
-      {...props}
-      className={cn(
-        'fixed inset-x-0 top-[calc(var(--fd-banner-height)+var(--fd-nav-height))] overflow-visible z-10',
-        tocNav,
-        props.className,
+    <TocPopoverContext.Provider
+      value={useMemo(
+        () => ({
+          open,
+          setOpen,
+        }),
+        [setOpen, open],
       )}
-      style={{
-        ...props.style,
-        insetInlineStart: collapsed
-          ? '0px'
-          : 'calc(var(--fd-sidebar-width) + var(--fd-layout-offset))',
-      }}
     >
-      <TocPopoverContext.Provider
-        value={useMemo(
-          () => ({
-            open,
-            setOpen,
-          }),
-          [setOpen, open],
-        )}
-      >
-        <Collapsible open={open} onOpenChange={setOpen} asChild>
-          <header
-            ref={ref}
-            id="nd-tocnav"
-            {...props}
-            className={cn(
-              'border-b backdrop-blur-sm transition-colors',
-              (!isTransparent || open) && 'bg-fd-background/80',
-              open && 'shadow-lg',
-            )}
-          >
-            {props.children}
-          </header>
-        </Collapsible>
-      </TocPopoverContext.Provider>
-    </div>
+      <Collapsible open={open} onOpenChange={setOpen} asChild>
+        <header
+          ref={ref}
+          id="nd-tocnav"
+          {...props}
+          className={cn(
+            'fixed inset-x-0 top-[calc(var(--fd-banner-height)+var(--fd-nav-height))] z-10 border-b backdrop-blur-sm transition-colors',
+            (!isTransparent || open) && 'bg-fd-background/80',
+            tocNav,
+            open && 'shadow-lg',
+            props.className,
+          )}
+          style={{
+            ...props.style,
+            insetInlineStart: collapsed
+              ? '0px'
+              : 'calc(var(--fd-sidebar-width) + var(--fd-layout-offset))',
+          }}
+        >
+          {props.children}
+        </header>
+      </Collapsible>
+    </TocPopoverContext.Provider>
   );
 }
 
@@ -238,6 +231,7 @@ export function PageBody({
       {...props}
       className={cn(className, page)}
       style={{
+        paddingTop: 'calc(var(--fd-nav-height) + var(--fd-tocnav-height))',
         maxWidth: collapsed
           ? 'var(--fd-page-width)'
           : 'min(var(--fd-page-width),calc(var(--fd-layout-width) - var(--fd-sidebar-width)))',

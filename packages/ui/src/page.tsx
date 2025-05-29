@@ -140,8 +140,8 @@ export function DocsPage({
     <AnchorProvider toc={toc} single={tocOptions.single}>
       {slot(
         { enabled: tocPopoverEnabled, component: tocPopoverReplace },
-        <TocPopover className="h-10">
-          <TocPopoverTrigger className="w-full" items={toc} />
+        <TocPopover>
+          <TocPopoverTrigger className="w-full h-10" items={toc} />
           <TocPopoverContent>
             {tocPopoverOptions.header}
             <TOCScrollArea className="px-4 md:px-6">

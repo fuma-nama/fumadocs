@@ -90,7 +90,6 @@ export function DocsLayout(props: DocsLayoutProps) {
   const pageStyles: PageStyles = {
     tocNav: cn('xl:hidden'),
     toc: cn('max-xl:hidden'),
-    page: cn('mt-(--fd-nav-height)'),
   };
 
   const sidebarHeader = (
