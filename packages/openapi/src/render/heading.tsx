@@ -4,14 +4,15 @@ import type { RenderContext } from '@/types';
 
 export function heading(
   depth: number,
-  child: string,
+  text: string,
   ctx: RenderContext,
+  children: ReactNode = text,
 ): ReactNode {
-  const id = ctx.slugger.slug(child);
+  const id = ctx.slugger.slug(text);
 
   return (
     <Heading id={id} key={id} as={`h${depth.toString()}` as `h1`}>
-      {child.trim()}
+      {children}
     </Heading>
   );
 }

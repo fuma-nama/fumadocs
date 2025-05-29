@@ -81,16 +81,18 @@ export function Property({
   return (
     <div
       className={cn(
-        'flex flex-col gap-3 text-sm',
-        !nested && 'p-3 border rounded-xl bg-fd-card',
+        'flex flex-col gap-3 p-3 text-sm border-x bg-fd-card border-t last:rounded-b-xl first:rounded-t-xl last:border-b',
+        nested && 'first:rounded-tl-none',
       )}
     >
       <div className="flex flex-wrap items-center gap-3 not-prose">
-        <span className="px-1 py-0.5 border rounded-md border-fd-primary/10 bg-fd-primary/10 font-mono text-xs text-fd-primary sm:text-[13px]">
+        <span className="font-medium font-mono text-fd-primary text-[13px]">
           {name}
-          {required === false && '?'}
+          {required === false && (
+            <span className="text-fd-muted-foreground">?</span>
+          )}
         </span>
-        <span className="text-xs me-auto font-mono text-fd-muted-foreground">
+        <span className="text-[13px] me-auto font-mono text-fd-muted-foreground">
           {type}
         </span>
         {deprecated && (
@@ -126,17 +128,15 @@ export function ObjectCollapsible(props: {
     <Collapsible {...props}>
       <CollapsibleTrigger
         className={cn(
-          buttonVariants({ color: 'secondary', size: 'sm' }),
-          'group px-3 py-2 data-[state=open]:rounded-b-none',
+          buttonVariants({ color: 'outline', size: 'sm' }),
+          'text-fd-muted-foreground group px-3 py-2 data-[state=open]:rounded-b-none',
         )}
       >
         {props.name}
-        <ChevronDown className="size-4 text-fd-muted-foreground group-data-[state=open]:rotate-180" />
+        <ChevronDown className="size-4 group-data-[state=open]:rotate-180" />
       </CollapsibleTrigger>
-      <CollapsibleContent className="-me-3 -mt-px">
-        <div className="border-s border-y rounded-b-lg p-3">
-          {props.children}
-        </div>
+      <CollapsibleContent className="-mt-px *:bg-fd-secondary">
+        {props.children}
       </CollapsibleContent>
     </Collapsible>
   );

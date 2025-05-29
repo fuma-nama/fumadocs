@@ -24,7 +24,7 @@ import {
 } from 'react-hook-form';
 import { useApiContext, useServerSelectContext } from '@/ui/contexts/api';
 import type { FetchResult } from '@/playground/fetcher';
-import { FieldSet, JsonInput } from './inputs';
+import { FieldInput, FieldSet, JsonInput } from './inputs';
 import type {
   ParameterField,
   RequestSchema,
@@ -55,6 +55,14 @@ import {
 } from '@/ui/contexts/code-example';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/ui/components/select';
+import { labelVariants } from '@/ui/components/input';
 
 interface FormValues {
   path: Record<string, string>;
@@ -329,20 +337,22 @@ function SecurityTabs({
 
   const result = (
     <CollapsiblePanel title="Authorization">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-        <select
-          value={securityId.toString()}
-          onChange={(e) => setSecurityId(Number(e.target.value))}
-          className="text-sm font-mono px-2 py-1.5 border rounded-lg bg-fd-muted outline-none"
-        >
+      <Select
+        value={securityId.toString()}
+        onValueChange={(v) => setSecurityId(Number(v))}
+      >
+        <SelectTrigger>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
           {securities.map((security, i) => (
-            <option key={i} value={i}>
+            <SelectItem key={i} value={i.toString()}>
               {security.map((item) => item.id).join(' & ')}
-            </option>
+            </SelectItem>
           ))}
-        </select>
-        <div className="flex flex-col gap-4 flex-1">{children}</div>
-      </div>
+        </SelectContent>
+      </Select>
+      {children}
     </CollapsiblePanel>
   );
 
@@ -574,38 +584,61 @@ function useAuthInputs(securities?: SecurityEntry[]) {
             />
           ),
         });
-      } else if (security.type === 'http' || security.type === 'oauth2') {
+      } else if (security.type === 'oauth2') {
         const fieldName = 'header.Authorization';
+
         result.push({
           fieldName: fieldName,
           original: security,
           defaultValue: 'Bearer ',
           children: (
-            <>
-              <FieldSet
-                name="Authorization (header)"
-                fieldName={fieldName}
-                field={{
-                  type: 'string',
-                  description:
-                    security.description ?? `The Authorization access token.`,
-                }}
-              />
-              {security.type === 'oauth2' && (
+            <fieldset className="flex flex-col gap-2">
+              <label htmlFor={fieldName} className={cn(labelVariants())}>
+                Access Token
+              </label>
+              <div className="flex gap-2">
+                <FieldInput
+                  fieldName={fieldName}
+                  field={{
+                    type: 'string',
+                    description:
+                      security.description ?? `The Authorization access token.`,
+                  }}
+                  className="flex-1"
+                />
+
                 <OauthDialogTrigger
                   type="button"
                   className={cn(
                     buttonVariants({
                       size: 'sm',
-                      color: 'primary',
-                      className: 'w-fit',
+                      color: 'secondary',
                     }),
                   )}
                 >
-                  Auth Settings
+                  Authorize
                 </OauthDialogTrigger>
-              )}
-            </>
+              </div>
+            </fieldset>
+          ),
+        });
+      } else if (security.type === 'http') {
+        const fieldName = 'header.Authorization';
+
+        result.push({
+          fieldName: fieldName,
+          original: security,
+          defaultValue: 'Bearer ',
+          children: (
+            <FieldSet
+              name="Authorization (header)"
+              fieldName={fieldName}
+              field={{
+                type: 'string',
+                description:
+                  security.description ?? `The Authorization access token.`,
+              }}
+            />
           ),
         });
       } else if (security.type === 'apiKey') {

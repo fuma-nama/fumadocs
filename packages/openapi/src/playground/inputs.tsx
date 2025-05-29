@@ -241,7 +241,7 @@ function DynamicProperties({
   );
 }
 
-function FieldInput({
+export function FieldInput({
   field,
   fieldName,
   isRequired,
