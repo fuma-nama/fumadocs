@@ -61,18 +61,18 @@
     "tinyexec": "^1.0.1",
     "tinyglobby": "^0.2.14",
     "unist-util-visit": "^5.0.0",
-    "zod": "^3.25.30"
+    "zod": "^3.25.42"
   },
   "devDependencies": {
     "@fumadocs/mdx-remote": "workspace:*",
     "@types/js-yaml": "^4.0.9",
     "@types/mdast": "^4.0.3",
     "@types/mdx": "^2.0.13",
-    "@types/react": "^19.1.5",
+    "@types/react": "^19.1.6",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "mdast-util-mdx-jsx": "^3.2.0",
-    "next": "^15.3.2",
+    "next": "^15.3.3",
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
     "vfile": "^6.0.3",

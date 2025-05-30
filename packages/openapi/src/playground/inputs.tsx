@@ -261,22 +261,32 @@ export function FieldInput({
       <Controller
         control={control}
         name={fieldName}
-        render={({ field: { value: _, onChange, ...restField } }) => (
-          <input
-            id={fieldName}
-            type="file"
-            multiple={false}
-            onChange={(e) => {
-              if (!e.target.files) return;
-              onChange(e.target.files.item(0));
-            }}
-            {...props}
-            className={cn(
-              'border rounded-lg bg-fd-background text-fd-muted-foreground p-2 font-medium text-sm',
-              props.className,
-            )}
-            {...restField}
-          />
+        render={({ field: { value, onChange, ...restField } }) => (
+          <div {...props}>
+            <label
+              htmlFor={fieldName}
+              className={cn(
+                buttonVariants({
+                  color: 'secondary',
+                  size: 'sm',
+                  className: 'w-full',
+                }),
+              )}
+            >
+              {value ? (value as File).name : 'Upload'}
+            </label>
+            <input
+              id={fieldName}
+              type="file"
+              multiple={false}
+              onChange={(e) => {
+                if (!e.target.files) return;
+                onChange(e.target.files.item(0));
+              }}
+              hidden
+              {...restField}
+            />
+          </div>
         )}
       />
     );
