@@ -570,7 +570,6 @@ function useAuthInputs(securities?: SecurityEntry[]) {
               field={{
                 type: 'object',
                 required: ['username', 'password'],
-                description: security.description,
                 properties: {
                   username: {
                     type: 'string',
@@ -601,8 +600,6 @@ function useAuthInputs(securities?: SecurityEntry[]) {
                   fieldName={fieldName}
                   field={{
                     type: 'string',
-                    description:
-                      security.description ?? `The Authorization access token.`,
                   }}
                   className="flex-1"
                 />
@@ -635,8 +632,6 @@ function useAuthInputs(securities?: SecurityEntry[]) {
               fieldName={fieldName}
               field={{
                 type: 'string',
-                description:
-                  security.description ?? `The Authorization access token.`,
               }}
             />
           ),
@@ -651,18 +646,37 @@ function useAuthInputs(securities?: SecurityEntry[]) {
           children: (
             <FieldSet
               fieldName={fieldName}
-              name={security.name}
+              name={`${security.name} (${security.in})`}
               field={{
                 type: 'string',
-                description:
-                  security.description ?? `The API key in ${security.in}.`,
               }}
             />
           ),
         });
-      }
+      } else {
+        const fieldName = 'header.Authorization';
 
-      // TODO: handle OpenID connect
+        result.push({
+          fieldName,
+          defaultValue: '',
+          original: security,
+          children: (
+            <>
+              <FieldSet
+                name="Authorization (header)"
+                fieldName={fieldName}
+                field={{
+                  type: 'string',
+                }}
+              />
+              <p className="text-fd-muted-foreground text-xs">
+                OpenID Connect is not supported at the moment, you can still set
+                an access token here.
+              </p>
+            </>
+          ),
+        });
+      }
     }
 
     return result;

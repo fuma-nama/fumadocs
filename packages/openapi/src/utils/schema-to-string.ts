@@ -1,4 +1,4 @@
-import { isNullable, type ResolvedSchema } from '@/utils/schema';
+import { type ParsedSchema, type ResolvedSchema } from '@/utils/schema';
 
 export function schemaToString(schema: ResolvedSchema, isRoot = true): string {
   if (schema === true) return 'any';
@@ -58,4 +58,14 @@ export function schemaToString(schema: ResolvedSchema, isRoot = true): string {
   }
 
   return 'unknown';
+}
+
+function isNullable(schema: ParsedSchema): boolean {
+  if (typeof schema === 'boolean') return false;
+
+  if (Array.isArray(schema.type) && schema.type.includes('null')) return true;
+  const combined = schema.anyOf ?? schema.oneOf ?? schema.allOf;
+  if (combined && combined.some(isNullable)) return true;
+
+  return schema.type === 'null';
 }
