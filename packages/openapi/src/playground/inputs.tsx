@@ -1,13 +1,13 @@
 'use client';
 import {
-  ComponentProps,
+  type ComponentProps,
   type HTMLAttributes,
   type LabelHTMLAttributes,
   type ReactNode,
   useMemo,
   useState,
 } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { ChevronDown, Plus, Trash2 } from 'lucide-react';
 import {
   Controller,
   useController,
@@ -49,7 +49,7 @@ function FieldHeader({
       {...props}
       className={cn('w-full inline-flex items-center gap-1', props.className)}
     >
-      <span className={cn(labelVariants(), 'me-auto')}>
+      <span className={cn(labelVariants(), 'font-mono me-auto')}>
         {name}
         {required ? <span className="text-red-400/80 mx-1">*</span> : null}
       </span>
@@ -82,7 +82,10 @@ export function ObjectInput({
   if (typeof field === 'boolean') return;
 
   return (
-    <div {...props} className={cn('flex flex-col gap-6', props.className)}>
+    <div
+      {...props}
+      className={cn('grid grid-cols-1 gap-4 @md:grid-cols-2', props.className)}
+    >
       {Object.entries(field.properties ?? {}).map(([key, child]) => (
         <FieldSet
           key={key}
@@ -199,8 +202,7 @@ function DynamicProperties({
                 className={cn(
                   buttonVariants({
                     color: 'ghost',
-                    size: 'icon-sm',
-                    className: 'p-1',
+                    size: 'icon-xs',
                   }),
                 )}
                 onClick={() => {
@@ -333,6 +335,7 @@ export function FieldSet({
   isRequired,
   depth = 0,
   slotType,
+  collapsible = true,
   ...props
 }: HTMLAttributes<HTMLElement> & {
   isRequired?: boolean;
@@ -343,38 +346,13 @@ export function FieldSet({
 
   slotType?: ReactNode;
   toolbar?: ReactNode;
+  collapsible?: boolean;
 }) {
   const field = useResolvedSchema(_field);
-  const [show, setShow] = useState(false);
+  const [show, setShow] = useState(!collapsible);
   const { info, updateInfo } = useFieldInfo(fieldName, field, depth);
 
   if (_field === false) return null;
-
-  const recursive =
-    typeof _field !== 'boolean' &&
-    _field.$ref &&
-    (field.oneOf || field.type === 'object' || field.allOf || field.anyOf);
-
-  if (recursive && !show) {
-    return (
-      <FieldHeader {...props} name={name} required={isRequired}>
-        {slotType ?? <FieldHeaderCode>{schemaToString(field)}</FieldHeaderCode>}
-        {toolbar}
-        <button
-          type="button"
-          className={cn(
-            buttonVariants({
-              size: 'sm',
-              color: 'secondary',
-            }),
-          )}
-          onClick={() => setShow(true)}
-        >
-          Open
-        </button>
-      </FieldHeader>
-    );
-  }
 
   if (field.oneOf) {
     const showSelect = field.oneOf.length > 1;
@@ -455,27 +433,49 @@ export function FieldSet({
     );
   }
 
+  const showBn = collapsible && (
+    <button
+      type="button"
+      onClick={() => setShow((prev) => !prev)}
+      className={cn(
+        buttonVariants({
+          size: 'icon-xs',
+          color: 'secondary',
+          className: 'text-fd-muted-foreground',
+        }),
+      )}
+    >
+      <ChevronDown className={cn(show && 'rotate-180')} />
+    </button>
+  );
+
   if (field.type === 'object' || field.anyOf || field.allOf) {
     return (
       <fieldset
         {...props}
-        className={cn('flex flex-col gap-1.5', props.className)}
+        className={cn(
+          'flex flex-col gap-1.5 col-span-full @container',
+          props.className,
+        )}
       >
         <FieldHeader htmlFor={fieldName} name={name} required={isRequired}>
           {slotType ?? (
             <FieldHeaderCode>{schemaToString(field)}</FieldHeaderCode>
           )}
           {toolbar}
+          {showBn}
         </FieldHeader>
-        <ObjectInput
-          field={field}
-          fieldName={fieldName}
-          {...props}
-          className={cn(
-            'rounded-lg border border-fd-primary/20 bg-fd-background/50 p-3 shadow-sm',
-            props.className,
-          )}
-        />
+        {show && (
+          <ObjectInput
+            field={field}
+            fieldName={fieldName}
+            {...props}
+            className={cn(
+              'rounded-lg border border-fd-primary/20 bg-fd-background/50 p-2 shadow-sm',
+              props.className,
+            )}
+          />
+        )}
       </fieldset>
     );
   }
@@ -484,23 +484,26 @@ export function FieldSet({
     return (
       <fieldset
         {...props}
-        className={cn('flex flex-col gap-1.5', props.className)}
+        className={cn('flex flex-col gap-1.5 col-span-full', props.className)}
       >
         <FieldHeader htmlFor={fieldName} name={name} required={isRequired}>
           {slotType ?? (
             <FieldHeaderCode>{schemaToString(field)}</FieldHeaderCode>
           )}
           {toolbar}
+          {showBn}
         </FieldHeader>
-        <ArrayInput
-          fieldName={fieldName}
-          items={field.items ?? anyFields}
-          {...props}
-          className={cn(
-            'rounded-lg border border-fd-primary/20 bg-fd-background/50 p-3 shadow-sm',
-            props.className,
-          )}
-        />
+        {show && (
+          <ArrayInput
+            fieldName={fieldName}
+            items={field.items ?? anyFields}
+            {...props}
+            className={cn(
+              'rounded-lg border border-fd-primary/20 bg-fd-background/50 p-2 shadow-sm',
+              props.className,
+            )}
+          />
+        )}
       </fieldset>
     );
   }
@@ -550,8 +553,7 @@ function ArrayInput({
               className={cn(
                 buttonVariants({
                   color: 'ghost',
-                  size: 'icon-sm',
-                  className: 'p-1',
+                  size: 'icon-xs',
                 }),
               )}
               onClick={() => remove(index)}

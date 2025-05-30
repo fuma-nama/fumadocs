@@ -19,11 +19,16 @@ import {
 } from '@/render/operation/api-example';
 import { MethodLabel } from '@/ui/components/method-label';
 import { type SampleGenerator } from '@/requests/_shared';
-import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import { getTypescriptSchema } from '@/utils/get-typescript-schema';
 import { CopyResponseTypeScript } from '@/ui/client';
 import { SelectTab, SelectTabs, SelectTabTrigger } from '@/ui/select-tabs';
-import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+import {
+  AccordionContent,
+  AccordionHeader,
+  AccordionItem,
+  Accordions,
+  AccordionTrigger,
+} from '@/ui/components/accordion';
 
 export interface CodeSample {
   lang: string;
@@ -118,14 +123,11 @@ export function Operation({
       <>
         {heading(headingLevel, 'Response Body', ctx)}
 
-        <Accordions type="multiple" className="bg-fd-background">
+        <Accordions type="multiple">
           {statuses.map((status) => (
-            <ResponseAccordion
-              key={status}
-              status={status}
-              operation={method}
-              ctx={ctx}
-            />
+            <AccordionItem key={status} value={status}>
+              <ResponseAccordion status={status} operation={method} ctx={ctx} />
+            </AccordionItem>
           ))}
         </Accordions>
       </>
@@ -286,13 +288,14 @@ async function ResponseAccordion({
 
   return (
     <SelectTabs defaultValue={contentTypes?.[0][0]}>
-      <Accordion title={status} value={status} className="relative">
+      <AccordionHeader>
+        <AccordionTrigger className="font-mono">{status}</AccordionTrigger>
         {contentTypes && (
-          <SelectTabTrigger
-            items={contentTypes.map((v) => v[0])}
-            className="absolute top-2 end-2"
-          />
+          <SelectTabTrigger items={contentTypes.map((v) => v[0])} />
         )}
+      </AccordionHeader>
+
+      <AccordionContent>
         {response.description && <Markdown text={response.description} />}
         {contentTypes?.map(async ([type, resType]) => {
           const schema = resType.schema;
@@ -308,18 +311,20 @@ async function ResponseAccordion({
             <SelectTab key={type} value={type}>
               {ts && <CopyResponseTypeScript code={ts} />}
               {schema && (
-                <Schema
-                  name="response"
-                  schema={schema as ResolvedSchema}
-                  as="body"
-                  readOnly
-                  ctx={ctx}
-                />
+                <div className="border px-3 rounded-lg my-2 overflow-auto max-h-[400px]">
+                  <Schema
+                    name="response"
+                    schema={schema as ResolvedSchema}
+                    as="body"
+                    readOnly
+                    ctx={ctx}
+                  />
+                </div>
               )}
             </SelectTab>
           );
         })}
-      </Accordion>
+      </AccordionContent>
     </SelectTabs>
   );
 }
@@ -336,31 +341,40 @@ function WebhookCallback({
   const pathItems = Object.entries(callback);
 
   return (
-    <Tabs items={pathItems.map((item) => item[0])}>
+    <Accordions type="single" collapsible>
       {pathItems.map(([path, pathItem]) => {
         const pathNodes = methodKeys.map((method) => {
           const operation = pathItem[method];
           if (!operation) return null;
 
           return (
-            <Operation
+            <div
               key={method}
-              type="webhook"
-              path={path}
-              headingLevel={headingLevel + 1}
-              method={createMethod(method, pathItem, operation)}
-              ctx={ctx}
-            />
+              className="border px-3 my-2 rounded-lg overflow-auto max-h-[800px]"
+            >
+              <Operation
+                type="webhook"
+                path={path}
+                headingLevel={headingLevel + 1}
+                method={createMethod(method, pathItem, operation)}
+                ctx={ctx}
+              />
+            </div>
           );
         });
 
         return (
-          <Tab key={path} value={path}>
-            {pathNodes}
-          </Tab>
+          <AccordionItem key={path} value={path}>
+            <AccordionHeader>
+              <AccordionTrigger className="font-mono">{path}</AccordionTrigger>
+            </AccordionHeader>
+            <AccordionContent>
+              <div>{pathNodes}</div>
+            </AccordionContent>
+          </AccordionItem>
         );
       })}
-    </Tabs>
+    </Accordions>
   );
 }
 

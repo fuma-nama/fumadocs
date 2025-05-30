@@ -196,11 +196,9 @@ export function Schema({
         {fields.map((field) => (
           <div
             key={field.key}
-            className="bg-fd-muted border rounded-lg text-[13px] p-1.5"
+            className="bg-fd-secondary text-fd-secondary-foreground border rounded-lg text-xs p-1.5 shadow-md"
           >
-            <span className="text-fd-foreground font-medium me-2">
-              {field.key}
-            </span>
+            <span className="font-medium me-2">{field.key}</span>
             <code className="text-fd-muted-foreground">{field.value}</code>
           </div>
         ))}

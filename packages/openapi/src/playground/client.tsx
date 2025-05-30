@@ -24,7 +24,7 @@ import {
 } from 'react-hook-form';
 import { useApiContext, useServerSelectContext } from '@/ui/contexts/api';
 import type { FetchResult } from '@/playground/fetcher';
-import { FieldInput, FieldSet, JsonInput } from './inputs';
+import { FieldInput, FieldSet, JsonInput, ObjectInput } from './inputs';
 import type {
   ParameterField,
   RequestSchema,
@@ -472,6 +472,7 @@ function BodyInput({ field: _field }: { field: RequestSchema }) {
         <FieldSet
           field={field}
           fieldName="body"
+          collapsible={false}
           name={
             <button
               className={cn(
@@ -565,11 +566,9 @@ function useAuthInputs(securities?: SecurityEntry[]) {
             return out;
           },
           children: (
-            <FieldSet
-              name="Authorization (header)"
+            <ObjectInput
               field={{
                 type: 'object',
-                required: ['username', 'password'],
                 properties: {
                   username: {
                     type: 'string',
@@ -598,6 +597,7 @@ function useAuthInputs(securities?: SecurityEntry[]) {
               <div className="flex gap-2">
                 <FieldInput
                   fieldName={fieldName}
+                  isRequired
                   field={{
                     type: 'string',
                   }}
@@ -630,6 +630,7 @@ function useAuthInputs(securities?: SecurityEntry[]) {
             <FieldSet
               name="Authorization (header)"
               fieldName={fieldName}
+              isRequired
               field={{
                 type: 'string',
               }}
@@ -647,6 +648,7 @@ function useAuthInputs(securities?: SecurityEntry[]) {
             <FieldSet
               fieldName={fieldName}
               name={`${security.name} (${security.in})`}
+              isRequired
               field={{
                 type: 'string',
               }}
@@ -664,6 +666,7 @@ function useAuthInputs(securities?: SecurityEntry[]) {
             <>
               <FieldSet
                 name="Authorization (header)"
+                isRequired
                 fieldName={fieldName}
                 field={{
                   type: 'string',
