@@ -296,7 +296,11 @@ async function ResponseAccordion({
       </AccordionHeader>
 
       <AccordionContent>
-        {response.description && <Markdown text={response.description} />}
+        {response.description && (
+          <div className="prose-no-margin">
+            <Markdown text={response.description} />
+          </div>
+        )}
         {contentTypes?.map(async ([type, resType]) => {
           const schema = resType.schema;
           let ts: string | undefined;
@@ -308,7 +312,7 @@ async function ResponseAccordion({
           }
 
           return (
-            <SelectTab key={type} value={type}>
+            <SelectTab key={type} value={type} className="mt-2">
               {ts && <CopyResponseTypeScript code={ts} />}
               {schema && (
                 <div className="border px-3 rounded-lg my-2 overflow-auto max-h-[400px]">
@@ -350,7 +354,7 @@ function WebhookCallback({
           return (
             <div
               key={method}
-              className="border px-3 my-2 rounded-lg overflow-auto max-h-[800px]"
+              className="border p-3 my-2 prose-no-margin rounded-lg"
             >
               <Operation
                 type="webhook"
@@ -368,9 +372,7 @@ function WebhookCallback({
             <AccordionHeader>
               <AccordionTrigger className="font-mono">{path}</AccordionTrigger>
             </AccordionHeader>
-            <AccordionContent>
-              <div>{pathNodes}</div>
-            </AccordionContent>
+            <AccordionContent>{pathNodes}</AccordionContent>
           </AccordionItem>
         );
       })}

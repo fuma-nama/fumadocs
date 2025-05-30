@@ -2,7 +2,6 @@
 import {
   type ComponentProps,
   type HTMLAttributes,
-  type LabelHTMLAttributes,
   type ReactNode,
   useMemo,
   useState,
@@ -34,31 +33,33 @@ import {
   useResolvedSchema,
 } from '@/playground/schema';
 
-interface InputHeaderProps {
-  name?: ReactNode;
-  required?: boolean;
-}
-
-function FieldHeader({
-  name,
-  required = false,
-  ...props
-}: InputHeaderProps & LabelHTMLAttributes<HTMLLabelElement>) {
+function FieldLabel(props: ComponentProps<'label'>) {
   return (
     <label
       {...props}
-      className={cn('w-full inline-flex items-center gap-1', props.className)}
+      className={cn('w-full inline-flex items-center gap-0.5', props.className)}
     >
-      <span className={cn(labelVariants(), 'font-mono me-auto')}>
-        {name}
-        {required ? <span className="text-red-400/80 mx-1">*</span> : null}
-      </span>
       {props.children}
     </label>
   );
 }
 
-function FieldHeaderCode(props: ComponentProps<'code'>) {
+function FieldLabelName({
+  required = false,
+  ...props
+}: ComponentProps<'span'> & { required?: boolean }) {
+  return (
+    <span
+      {...props}
+      className={cn(labelVariants(), 'font-mono me-auto', props.className)}
+    >
+      {props.children}
+      {required && <span className="text-red-400/80 mx-1">*</span>}
+    </span>
+  );
+}
+
+function FieldLabelType(props: ComponentProps<'code'>) {
   return (
     <code
       {...props}
@@ -201,7 +202,7 @@ function DynamicProperties({
                 aria-label="Remove Item"
                 className={cn(
                   buttonVariants({
-                    color: 'ghost',
+                    color: 'outline',
                     size: 'icon-xs',
                   }),
                 )}
@@ -440,8 +441,8 @@ export function FieldSet({
       className={cn(
         buttonVariants({
           size: 'icon-xs',
-          color: 'secondary',
-          className: 'text-fd-muted-foreground',
+          color: 'ghost',
+          className: 'text-fd-muted-foreground -ms-1',
         }),
       )}
     >
@@ -458,13 +459,12 @@ export function FieldSet({
           props.className,
         )}
       >
-        <FieldHeader htmlFor={fieldName} name={name} required={isRequired}>
-          {slotType ?? (
-            <FieldHeaderCode>{schemaToString(field)}</FieldHeaderCode>
-          )}
-          {toolbar}
+        <FieldLabel htmlFor={fieldName}>
           {showBn}
-        </FieldHeader>
+          <FieldLabelName required={isRequired}>{name}</FieldLabelName>
+          {slotType ?? <FieldLabelType>{schemaToString(field)}</FieldLabelType>}
+          {toolbar}
+        </FieldLabel>
         {show && (
           <ObjectInput
             field={field}
@@ -486,13 +486,12 @@ export function FieldSet({
         {...props}
         className={cn('flex flex-col gap-1.5 col-span-full', props.className)}
       >
-        <FieldHeader htmlFor={fieldName} name={name} required={isRequired}>
-          {slotType ?? (
-            <FieldHeaderCode>{schemaToString(field)}</FieldHeaderCode>
-          )}
-          {toolbar}
+        <FieldLabel htmlFor={fieldName}>
           {showBn}
-        </FieldHeader>
+          <FieldLabelName required={isRequired}>{name}</FieldLabelName>
+          {slotType ?? <FieldLabelType>{schemaToString(field)}</FieldLabelType>}
+          {toolbar}
+        </FieldLabel>
         {show && (
           <ArrayInput
             fieldName={fieldName}
@@ -512,10 +511,11 @@ export function FieldSet({
       {...props}
       className={cn('flex flex-col gap-1.5', props.className)}
     >
-      <FieldHeader htmlFor={fieldName} name={name} required={isRequired}>
-        {slotType ?? <FieldHeaderCode>{schemaToString(field)}</FieldHeaderCode>}
+      <FieldLabel htmlFor={fieldName}>
+        <FieldLabelName required={isRequired}>{name}</FieldLabelName>
+        {slotType ?? <FieldLabelType>{schemaToString(field)}</FieldLabelType>}
         {toolbar}
-      </FieldHeader>
+      </FieldLabel>
       <FieldInput field={field} fieldName={fieldName} isRequired={isRequired} />
     </fieldset>
   );
@@ -552,7 +552,7 @@ function ArrayInput({
               aria-label="Remove Item"
               className={cn(
                 buttonVariants({
-                  color: 'ghost',
+                  color: 'outline',
                   size: 'icon-xs',
                 }),
               )}

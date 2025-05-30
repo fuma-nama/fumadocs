@@ -126,7 +126,9 @@ export function createRenders(): Renderer {
         <AccordionHeader>
           <AccordionTrigger>{props.label}</AccordionTrigger>
         </AccordionHeader>
-        <AccordionContent>{props.children}</AccordionContent>
+        <AccordionContent className="prose-no-margin">
+          {props.children}
+        </AccordionContent>
       </AccordionItem>
     ),
     Property,
