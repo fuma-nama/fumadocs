@@ -3,8 +3,6 @@ import type { Viewport } from 'next';
 import { baseUrl, createMetadata } from '@/lib/metadata';
 import { Body } from '@/app/layout.client';
 import { Provider } from './provider';
-import { AISearchTrigger } from '@/components/ai';
-import { MessageCircle } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Geist, Geist_Mono } from 'next/font/google';
 
@@ -42,13 +40,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       suppressHydrationWarning
     >
       <Body>
-        <Provider>
-          {children}
-          <AISearchTrigger>
-            <MessageCircle className="size-4" />
-            Ask AI
-          </AISearchTrigger>
-        </Provider>
+        <Provider>{children}</Provider>
       </Body>
     </html>
   );
