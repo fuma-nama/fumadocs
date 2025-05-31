@@ -6,7 +6,6 @@ import type {
 } from '@radix-ui/react-accordion';
 import * as AccordionPrimitive from '@radix-ui/react-accordion';
 import { Check, ChevronRight, Link as LinkIcon } from 'lucide-react';
-import type * as React from 'react';
 import {
   type ComponentPropsWithoutRef,
   forwardRef,
@@ -18,18 +17,7 @@ import {
 import { cn } from '@/utils/cn';
 import { useCopyButton } from '@/utils/use-copy-button';
 import { buttonVariants } from '@/components/ui/button';
-
-function mergeRefs<T>(...refs: React.Ref<T>[]): React.RefCallback<T> {
-  return (value) => {
-    refs.forEach((ref) => {
-      if (typeof ref === 'function') {
-        ref(value);
-      } else if (ref !== null) {
-        ref.current = value;
-      }
-    });
-  };
-}
+import { mergeRefs } from '@/utils/merge-refs';
 
 export const Accordions = forwardRef<
   HTMLDivElement,

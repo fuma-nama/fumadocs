@@ -250,6 +250,12 @@
   }
 }
 
+@variant max-xl {
+  #nd-docs-layout:has([data-toc-popover]) {
+    --fd-tocnav-height: calc(var(--spacing) * 10);
+  }
+}
+
 @utility fd-scroll-container {
   &::-webkit-scrollbar {
     width: 5px;
