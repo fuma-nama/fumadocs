@@ -143,6 +143,10 @@ const showcases: ShowcaseObject[] = [
     name: 'ESLint React',
     url: 'https://eslint-react.xyz',
   },
+  {
+    name: 'nextjs i18n docs',
+    url: 'https://nextjs.im',
+  },
 ];
 
 const blogs: ShowcaseObject[] = [
