@@ -1,6 +1,6 @@
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import type { ReactNode } from 'react';
-import { baseOptions, linkItems } from '@/app/layout.config';
+import { baseOptions, linkItems, logo } from '@/app/layout.config';
 import { source } from '@/lib/source';
 import { LargeSearchToggle } from 'fumadocs-ui/components/layout/search-toggle';
 import { Sparkles } from 'lucide-react';
@@ -36,6 +36,32 @@ export default function Layout({ children }: { children: ReactNode }) {
           ),
         },
       }}
+      nav={{
+        ...baseOptions.nav,
+        title: (
+          <>
+            {logo}
+            <span className="font-medium [.uwu_&]:hidden max-md:hidden">
+              Fumadocs
+            </span>
+          </>
+        ),
+        children: (
+          <AISearchTrigger
+            className={cn(
+              buttonVariants({
+                variant: 'secondary',
+                size: 'sm',
+                className:
+                  'absolute left-1/2 top-1/2 -translate-1/2 text-fd-muted-foreground rounded-full gap-2 md:hidden',
+              }),
+            )}
+          >
+            <Sparkles className="size-4.5 fill-current" />
+            Ask AI
+          </AISearchTrigger>
+        ),
+      }}
       sidebar={{
         tabs: {
           transform(option, node) {
@@ -66,18 +92,6 @@ export default function Layout({ children }: { children: ReactNode }) {
       }}
     >
       {children}
-      <AISearchTrigger
-        className={cn(
-          buttonVariants({
-            variant: 'secondary',
-            className:
-              'fixed left-1/2 -translate-x-1/2 rounded-full text-sm gap-2 shadow-lg bottom-4 md:hidden',
-          }),
-        )}
-      >
-        <Sparkles className="size-4 text-fd-primary fill-current" />
-        Ask AI
-      </AISearchTrigger>
     </DocsLayout>
   );
 }

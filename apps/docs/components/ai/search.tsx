@@ -92,7 +92,7 @@ function SearchAIInput(props: FormHTMLAttributes<HTMLFormElement>) {
     <form
       {...props}
       className={cn(
-        'flex flex-row items-start rounded-xl border pe-2 bg-fd-popover text-fd-popover-foreground transition-colors shadow-lg',
+        'flex items-start pe-2 transition-colors',
         isLoading && 'bg-fd-muted',
         props.className,
       )}
@@ -304,7 +304,7 @@ export default function AISearch(props: DialogProps) {
             e.preventDefault();
           }}
           aria-describedby={undefined}
-          className="fixed bottom-6 left-1/2 z-50 w-[98vw] max-w-[860px] -translate-x-1/2 focus-visible:outline-none data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in"
+          className="fixed flex flex-col-reverse gap-3 md:flex-col max-md:top-12 md:bottom-12 left-1/2 z-50 w-[98vw] max-w-[860px] -translate-x-1/2 focus-visible:outline-none data-[state=closed]:animate-fd-fade-out"
         >
           <Content />
         </DialogContent>
@@ -328,7 +328,7 @@ function Content() {
   return (
     <ChatContext value={chat}>
       {chat.messages.length > 0 && (
-        <List className="bg-fd-popover rounded-xl mb-3 border shadow-lg">
+        <List className="bg-fd-popover rounded-xl border shadow-lg animate-fd-dialog-in duration-600">
           <div className="flex flex-col gap-4 p-3 pb-0">
             {chat.messages.map((item, i) => (
               <Message key={i} message={item} />
@@ -337,27 +337,32 @@ function Content() {
           <SearchAIActions />
         </List>
       )}
-      <SearchAIInput className="rounded-b-none border-b-0" />
-      <div className="flex flex-row gap-2 items-center bg-fd-muted text-fd-muted-foreground px-3 py-1.5 rounded-b-xl border-b border-x shadow-lg">
-        <DialogTitle className="text-xs flex-1">
-          Powered by{' '}
-          <a
-            href="https://inkeep.com"
-            target="_blank"
-            className="font-medium text-fd-popover-foreground"
-            rel="noreferrer noopener"
-          >
-            Inkeep AI
-          </a>
-          . AI can be inaccurate, please verify the information.
-        </DialogTitle>
-        <DialogClose
-          aria-label="Close"
-          tabIndex={-1}
-          className="rounded-full p-1.5 -me-1.5 hover:bg-fd-accent hover:text-fd-accent-foreground"
-        >
-          <X className="size-4" />
-        </DialogClose>
+      <div className="p-2 bg-fd-secondary/50 rounded-xl animate-fd-dialog-in">
+        <div className="rounded-xl overflow-hidden border shadow-lg bg-fd-popover text-fd-popover-foreground">
+          <SearchAIInput />
+          <div className="flex gap-2 items-center text-fd-muted-foreground px-3 py-1.5">
+            <DialogTitle className="text-xs flex-1">
+              Powered by{' '}
+              <a
+                href="https://inkeep.com"
+                target="_blank"
+                className="font-medium text-fd-popover-foreground"
+                rel="noreferrer noopener"
+              >
+                Inkeep AI
+              </a>
+              . AI can be inaccurate, please verify the information.
+            </DialogTitle>
+            <DialogClose
+              aria-label="Close"
+              tabIndex={-1}
+              className={cn(buttonVariants({ size: 'sm', color: 'ghost' }))}
+            >
+              <X className="size-4" />
+              Close Dialog
+            </DialogClose>
+          </div>
+        </div>
       </div>
     </ChatContext>
   );

@@ -3,13 +3,6 @@ import Image, { type StaticImageData } from 'next/image';
 import { cn } from '@/lib/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { createMetadata } from '@/lib/metadata';
-import NextFAQ from '@/public/showcases/next-faq.png';
-import Nuqs from '@/public/showcases/nuqs.jpg';
-import HextaUI from '@/public/showcases/hexta-ui.png';
-import Million from '@/public/showcases/million.png';
-import Hiro from '@/public/showcases/hiro.png';
-import DokPloy from '@/public/showcases/dokploy.png';
-import CodeHike from '@/public/showcases/codehike.png';
 import Expostarter from '@/public/showcases/expostarter.png';
 import Sunar from '@/public/showcases/sunar.png';
 import OpenPanel from '@/public/showcases/openpanel.png';
@@ -32,14 +25,14 @@ export const metadata = createMetadata({
 });
 
 interface ShowcaseObject {
-  image?: StaticImageData;
+  image?: StaticImageData | string;
   name: string;
   url: string;
 }
 
 const showcases: ShowcaseObject[] = [
   {
-    image: Million,
+    image: '/showcases/million.png',
     name: 'Million',
     url: 'https://million.dev',
   },
@@ -52,14 +45,14 @@ const showcases: ShowcaseObject[] = [
     name: 'Zod',
     url: 'https://v4.zod.dev',
   },
-  { image: Nuqs, name: 'nuqs', url: 'https://nuqs.47ng.com' },
+  { image: '/showcases/nuqs.jpg', name: 'nuqs', url: 'https://nuqs.47ng.com' },
   {
-    image: DokPloy,
+    image: '/showcases/dokploy.png',
     name: 'Dokploy',
     url: 'https://dokploy.com',
   },
   {
-    image: NextFAQ,
+    image: '/showcases/next-faq.png',
     name: 'Next.js Discord Common Questions',
     url: 'https://nextjs-faq.com',
   },
@@ -69,7 +62,12 @@ const showcases: ShowcaseObject[] = [
     url: 'https://arktype.io',
   },
   {
-    image: Hiro,
+    image: '/showcases/zen-browser.png',
+    name: 'Zen Browser',
+    url: 'https://docs.zen-browser.app',
+  },
+  {
+    image: '/showcases/hiro.png',
     name: 'Hiro',
     url: 'https://docs.hiro.so/stacks',
   },
@@ -79,7 +77,7 @@ const showcases: ShowcaseObject[] = [
     url: 'https://openpanel.dev',
   },
   {
-    image: HextaUI,
+    image: '/showcases/hexta-ui.png',
     name: 'HextaUI',
     url: 'https://hextaui.com',
   },
@@ -99,7 +97,7 @@ const showcases: ShowcaseObject[] = [
     url: 'https://mx-space.js.org',
   },
   {
-    image: CodeHike,
+    image: '/showcases/codehike.png',
     name: 'CodeHike',
     url: 'https://codehike.org',
   },
@@ -130,10 +128,6 @@ const showcases: ShowcaseObject[] = [
   {
     name: 'Rehooks',
     url: 'https://rehooks.pyr33x.ir',
-  },
-  {
-    name: 'Typelytics',
-    url: 'https://typelytics.rhyssul.com',
   },
   {
     name: 'Swellchain',
@@ -294,10 +288,9 @@ function ShowcaseItem({ name, url, image }: ShowcaseObject) {
         <Image
           alt="Preview"
           src={image}
-          placeholder="blur"
           fill
           sizes="100vw, (min-width: 750px) 500px"
-          className="transition-all group-hover:brightness-150"
+          className="object-cover transition-all group-hover:brightness-150"
         />
         <p className="absolute bottom-0 inset-x-0 z-[2] bg-fd-background px-4 py-2 text-sm font-medium">
           {name}
