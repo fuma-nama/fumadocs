@@ -1,5 +1,16 @@
 # @fuma-docs/openapi
 
+## 9.0.5
+
+### Patch Changes
+
+- 5067efc: Improved support for all OAuth flows
+- Updated dependencies [50f8f7f]
+- Updated dependencies [589d101]
+- Updated dependencies [697d5b4]
+  - fumadocs-ui@15.5.0
+  - fumadocs-core@15.5.0
+
 ## 9.0.4
 
 ### Patch Changes
