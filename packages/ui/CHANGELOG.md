@@ -1,5 +1,40 @@
 # next-docs-ui
 
+## 15.5.0
+
+### Minor Changes
+
+- 589d101: **Move TOC closer to page body on larger viewports**
+
+  Changed layout positioning, all layout components now use `fixed` position.
+
+  This may impact sites that:
+
+  - using custom styling on Fumadocs layouts.
+  - added a custom footer (see below).
+
+  For custom footer, make sure to add them into `<DocsLayout />` instead:
+
+  ```tsx
+  <DocsLayout>
+    {children}
+    <div className="h-[400px] bg-fd-secondary">Hello World</div>
+  </DocsLayout>
+  ```
+
+### Patch Changes
+
+- 50f8f7f: Update Home Layout navbar design
+- 697d5b4: Support specifying a custom `value` for `Accordion`
+  - fumadocs-core@15.5.0
+
+## 15.4.2
+
+### Patch Changes
+
+- Updated dependencies [0ab6c7f]
+  - fumadocs-core@15.4.2
+
 ## 15.4.1
 
 ### Patch Changes

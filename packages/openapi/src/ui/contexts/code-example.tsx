@@ -83,6 +83,9 @@ export function CodeExampleProvider({
   });
 
   const addListener = useEffectEvent((listener: UpdateListener) => {
+    // initial call to listeners to ensure their data is the latest
+    // this is necessary to avoid race conditions between `useEffect()`
+    listener(examples.find((example) => example.key === key)!.data);
     listeners.current.push(listener);
   });
 
@@ -188,25 +191,16 @@ function SelectDisplay({
   );
 }
 
-export function useRequestData() {
-  const { examples, key, setData } = useContext(CodeExampleContext)!;
+export function useRequestInitialData() {
+  const { examples, key } = useContext(CodeExampleContext)!;
 
-  const data = useMemo(
+  return useMemo(
     () => examples.find((example) => example.key === key)!.data,
     [examples, key],
   );
+}
 
-  return useMemo(
-    () => ({
-      /**
-       * initial request data
-       */
-      data,
-      /**
-       * Save changes to request data, it won't trigger re-render on the component itself, which makes it safe to call in an effect with `data` as dep
-       */
-      saveData: setData,
-    }),
-    [data, setData],
-  );
+export function useRequestDataUpdater() {
+  const { setData } = useContext(CodeExampleContext)!;
+  return { setData };
 }

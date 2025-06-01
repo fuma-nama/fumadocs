@@ -10,7 +10,6 @@ import { SidebarCollapseTrigger } from '@/components/layout/sidebar';
 import { SearchToggle } from '@/components/layout/search-toggle';
 
 export function Navbar(props: ComponentProps<'header'>) {
-  const { open } = useSidebar();
   const { isTransparent } = useNav();
 
   return (
@@ -18,13 +17,36 @@ export function Navbar(props: ComponentProps<'header'>) {
       id="nd-subnav"
       {...props}
       className={cn(
-        'sticky top-(--fd-banner-height) z-30 flex items-center px-4 border-b transition-colors backdrop-blur-sm',
-        (!isTransparent || open) && 'bg-fd-background/80',
+        'fixed top-(--fd-banner-height) inset-x-0 z-30 flex items-center px-4 border-b transition-colors backdrop-blur-sm',
+        !isTransparent && 'bg-fd-background/80',
         props.className,
       )}
     >
       {props.children}
     </header>
+  );
+}
+
+export function LayoutBody(props: ComponentProps<'main'>) {
+  const { collapsed } = useSidebar();
+
+  return (
+    <main
+      id="nd-docs-layout"
+      {...props}
+      className={cn(
+        'flex flex-1 flex-col transition-[margin]',
+        props.className,
+      )}
+      style={{
+        ...props.style,
+        marginInlineStart: collapsed
+          ? 'max(0px, min(calc(100vw - var(--fd-page-width)), var(--fd-sidebar-width)))'
+          : 'var(--fd-sidebar-width)',
+      }}
+    >
+      {props.children}
+    </main>
   );
 }
 

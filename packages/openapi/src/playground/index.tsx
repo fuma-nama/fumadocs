@@ -1,6 +1,9 @@
-import type { MethodInformation, RenderContext } from '@/types';
+import type {
+  MethodInformation,
+  RenderContext,
+  SecuritySchemeObject,
+} from '@/types';
 import { getPreferredType, type ParsedSchema } from '@/utils/schema';
-import { getSecurities } from '@/utils/get-security';
 import { type ClientProps } from './client';
 import { ClientLazy } from '@/ui/lazy';
 
@@ -29,6 +32,11 @@ export interface APIPlaygroundProps {
 
 export type { ClientProps, CustomField } from './client';
 
+export type SecurityEntry = SecuritySchemeObject & {
+  scopes: string[];
+  id: string;
+};
+
 export async function APIPlayground({
   path,
   method,
@@ -48,7 +56,7 @@ export async function APIPlayground({
   };
 
   const props: ClientProps = {
-    authorization: getAuthorizationField(method, ctx),
+    securities: parseSecurities(method, ctx),
     method: method.method,
     route: path,
     parameters: method.parameters?.map((v) => ({
@@ -93,67 +101,65 @@ function writeReferences(
 
   const output = { ...schema };
   stack.set(schema, output);
-
-  for (const name of ['items', 'additionalProperties'] as const) {
+  for (const _n in output) {
+    const name = _n as keyof typeof output;
     if (!output[name]) continue;
-    output[name] = writeReferences(output[name], ctx, stack);
-  }
 
-  for (const name of ['oneOf', 'allOf', 'anyOf'] as const) {
-    if (!output[name]) continue;
-    output[name] = output[name].map((item) =>
-      writeReferences(item, ctx, stack),
-    );
-  }
+    switch (name) {
+      case 'oneOf':
+      case 'allOf':
+      case 'anyOf':
+        output[name] = output[name].map((item) =>
+          writeReferences(item, ctx, stack),
+        );
+        continue;
+      case 'items':
+      case 'additionalProperties':
+      case 'not':
+        output[name] = writeReferences(output[name], ctx, stack);
+        continue;
+      case 'properties':
+      case 'patternProperties':
+        output[name] = { ...output[name] };
 
-  for (const name of ['properties', 'patternProperties'] as const) {
-    if (!output[name]) continue;
-    output[name] = { ...output[name] };
-
-    for (const key in output[name]) {
-      output[name][key] = writeReferences(output[name][key], ctx, stack);
+        for (const key in output[name]) {
+          output[name][key] = writeReferences(output[name][key], ctx, stack);
+        }
+        continue;
+      default:
+        if (typeof output[name] === 'object' && !Array.isArray(output[name])) {
+          output[name] = { ...output[name] };
+        }
     }
   }
 
   return output;
 }
 
-function getAuthorizationField(
+function parseSecurities(
   method: MethodInformation,
   { schema: { document } }: RenderContext,
-): ClientProps['authorization'] {
+): ClientProps['securities'] {
+  const result: ClientProps['securities'] = [];
   const security = method.security ?? document.security ?? [];
-  if (security.length === 0) return;
+  if (security.length === 0) return result;
 
-  let item;
-  for (const requirements of security) {
-    const keys = Object.keys(requirements).length;
+  for (const map of security) {
+    const list: ClientProps['securities'][number] = [];
 
-    if (keys === 0) return;
-    else if (keys === 1) item = requirements;
+    for (const [key, scopes] of Object.entries(map)) {
+      const scheme = document.components?.securitySchemes?.[key];
+      if (!scheme) continue;
+
+      list.push({
+        ...scheme,
+        scopes,
+        id: key,
+      });
+    }
+
+    if (list.length > 0) result.push(list);
   }
 
-  if (!item) {
-    console.warn(
-      `Cannot find suitable security scheme for API Playground from ${JSON.stringify(security, null, 2)}. Only schemes with one requirement are allowed at the moment.`,
-    );
-    return;
-  }
-
-  const scheme = getSecurities(item, document)[0];
-
-  if (scheme.type === 'oauth2') {
-    const flow = Object.keys(scheme.flows).at(0);
-    if (!flow) throw new Error("security scheme's `flows` must not be empty");
-
-    if (flow === 'implicit' || flow === 'password')
-      throw new Error(
-        `OAuth 2.0 flow type: ${flow} is not supported, consider other types like \`authorizationCode\` instead.`,
-      );
-  }
-
-  return {
-    persistentId: Object.keys(item)[0],
-    ...scheme,
-  };
+  return result;
 }

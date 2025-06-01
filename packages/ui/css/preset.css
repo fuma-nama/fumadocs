@@ -5,6 +5,7 @@
 
 @theme {
   --spacing-fd-container: 1400px;
+  --fd-page-width: 1200px;
   --fd-sidebar-width: 0px;
   --fd-toc-width: 0px;
   --fd-layout-width: 100vw;
@@ -241,6 +242,17 @@
 
   [data-rmiz-modal-overlay='visible'] {
     background-color: var(--color-fd-background);
+  }
+
+  :root,
+  #nd-docs-layout {
+    --fd-layout-offset: max(calc(50vw - var(--fd-layout-width) / 2), 0px);
+  }
+}
+
+@variant max-xl {
+  #nd-docs-layout:has([data-toc-popover]) {
+    --fd-tocnav-height: calc(var(--spacing) * 10);
   }
 }
 

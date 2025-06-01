@@ -1,6 +1,6 @@
 'use client';
 import { cn } from '@/utils/cn';
-import { type ButtonHTMLAttributes, type HTMLAttributes } from 'react';
+import { type ComponentProps } from 'react';
 import { useSidebar } from '@/contexts/sidebar';
 import { useNav } from '@/contexts/layout';
 import { buttonVariants } from '@/components/ui/button';
@@ -13,7 +13,7 @@ import type { Option } from '@/components/layout/root-toggle';
 export function Navbar({
   mode,
   ...props
-}: HTMLAttributes<HTMLElement> & { mode: 'top' | 'auto' }) {
+}: ComponentProps<'header'> & { mode: 'top' | 'auto' }) {
   const { open, collapsed } = useSidebar();
   const { isTransparent } = useNav();
 
@@ -35,10 +35,33 @@ export function Navbar({
   );
 }
 
+export function LayoutBody(props: ComponentProps<'main'>) {
+  const { collapsed } = useSidebar();
+
+  return (
+    <main
+      id="nd-docs-layout"
+      {...props}
+      className={cn(
+        'flex flex-1 flex-col transition-[margin] fd-notebook-layout',
+        props.className,
+      )}
+      style={{
+        ...props.style,
+        marginInlineStart: collapsed
+          ? 'max(0px, min(calc(100vw - var(--fd-page-width)), var(--fd-sidebar-width)))'
+          : 'var(--fd-sidebar-width)',
+      }}
+    >
+      {props.children}
+    </main>
+  );
+}
+
 export function NavbarSidebarTrigger({
   className,
   ...props
-}: ButtonHTMLAttributes<HTMLButtonElement>) {
+}: ComponentProps<'button'>) {
   const { setOpen } = useSidebar();
 
   return (
@@ -58,7 +81,7 @@ export function NavbarSidebarTrigger({
   );
 }
 
-export function LayoutTabs(props: HTMLAttributes<HTMLElement>) {
+export function LayoutTabs(props: ComponentProps<'div'>) {
   return (
     <div
       {...props}
@@ -72,17 +95,12 @@ export function LayoutTabs(props: HTMLAttributes<HTMLElement>) {
   );
 }
 
-function useIsSelected(item: Option) {
-  const pathname = usePathname();
-
-  return item.urls
-    ? item.urls.has(pathname.endsWith('/') ? pathname.slice(0, -1) : pathname)
-    : isActive(item.url, pathname, true);
-}
-
 export function LayoutTab(item: Option) {
   const { closeOnRedirect } = useSidebar();
-  const selected = useIsSelected(item);
+  const pathname = usePathname();
+  const selected = item.urls
+    ? item.urls.has(pathname.endsWith('/') ? pathname.slice(0, -1) : pathname)
+    : isActive(item.url, pathname, true);
 
   return (
     <Link

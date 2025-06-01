@@ -27,13 +27,3 @@ export function getPreferredType<B extends Record<string, unknown>>(
 
   return Object.keys(body)[0];
 }
-
-export function isNullable(schema: ParsedSchema): boolean {
-  if (typeof schema === 'boolean') return false;
-
-  if (Array.isArray(schema.type) && schema.type.includes('null')) return true;
-  const combined = schema.anyOf ?? schema.oneOf ?? schema.allOf;
-  if (combined && combined.some(isNullable)) return true;
-
-  return schema.type === 'null';
-}

@@ -25,7 +25,7 @@ import {
 import { getUrl } from '@/utils/server-url';
 import { FormProvider, useController, useForm } from 'react-hook-form';
 import type { OpenAPIV3_1 } from 'openapi-types';
-import { buttonVariants } from 'fumadocs-ui/components/ui/button';
+import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 
 export default function ServerSelect(props: HTMLAttributes<HTMLDivElement>) {
   const { servers } = useApiContext();
@@ -62,33 +62,21 @@ export default function ServerSelect(props: HTMLAttributes<HTMLDivElement>) {
           <SelectContent>
             {servers.map((item) => (
               <SelectItem key={item.url} value={item.url}>
-                {item.url}
-                <p className="text-start text-fd-muted-foreground">
-                  {item.description}
-                </p>
+                <code className="text-[13px]">{item.url}</code>
+                <p className="text-fd-muted-foreground">{item.description}</p>
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        {server && (
-          <ServerSelectContent
-            key={server.url}
-            server={server}
-            onClose={() => setOpen(false)}
-          />
+        {server && server.variables && (
+          <ServerSelectContent key={server.url} server={server} />
         )}
       </DialogContent>
     </Dialog>
   );
 }
 
-function ServerSelectContent({
-  server,
-  onClose,
-}: {
-  server: SelectedServer;
-  onClose: () => void;
-}) {
+function ServerSelectContent({ server }: { server: SelectedServer }) {
   const { servers } = useApiContext();
   const { setServerVariables } = useServerSelectContext();
   const schema = servers.find((item) => item.url === server.url);
@@ -96,22 +84,31 @@ function ServerSelectContent({
     defaultValues: server.variables,
   });
 
-  const onSubmit = form.handleSubmit((data) => {
-    setServerVariables(data);
-    onClose();
+  const onChangeDebounced = useEffectEvent((values: Record<string, string>) => {
+    setServerVariables(values);
   });
+
+  useEffect(() => {
+    let timer: number | null = null;
+
+    return form.subscribe({
+      formState: {
+        values: true,
+      },
+      callback({ values }) {
+        if (timer !== null) window.clearTimeout(timer);
+
+        timer = window.setTimeout(() => onChangeDebounced(values), 500);
+      },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `form` shouldn't be included
+  }, []);
 
   if (!schema?.variables) return;
 
   return (
     <FormProvider {...form}>
-      <form
-        className="flex flex-col gap-4"
-        onSubmit={(e) => {
-          void onSubmit(e);
-          e.stopPropagation();
-        }}
-      >
+      <div className="flex flex-col gap-4">
         {Object.entries(schema.variables).map(([key, variable]) => {
           return (
             <fieldset key={key} className="flex flex-col gap-1">
@@ -128,18 +125,7 @@ function ServerSelectContent({
             </fieldset>
           );
         })}
-        <button
-          type="submit"
-          className={cn(
-            buttonVariants({
-              color: 'primary',
-              className: 'mt-2',
-            }),
-          )}
-        >
-          Save
-        </button>
-      </form>
+      </div>
     </FormProvider>
   );
 }
@@ -154,6 +140,7 @@ function Field({
   const { field } = useController({
     name: fieldName,
   });
+
   if (variable.enum) {
     return (
       <Select value={field.value} onValueChange={field.onChange}>

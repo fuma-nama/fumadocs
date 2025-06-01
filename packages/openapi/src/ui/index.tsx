@@ -81,16 +81,20 @@ export function Property({
   return (
     <div
       className={cn(
-        'flex flex-col gap-3 text-sm',
-        !nested && 'p-3 border rounded-xl bg-fd-card',
+        'text-sm border-t',
+        nested
+          ? 'p-3 border-x bg-fd-card last:rounded-b-xl first:rounded-tr-xl last:border-b'
+          : 'py-4 first:border-t-0',
       )}
     >
-      <div className="flex flex-wrap items-center gap-3 not-prose">
-        <span className="px-1 py-0.5 border rounded-md border-fd-primary/10 bg-fd-primary/10 font-mono text-xs text-fd-primary sm:text-[13px]">
+      <div className="flex flex-wrap items-center gap-2 not-prose">
+        <span className="font-medium font-mono text-fd-primary">
           {name}
-          {required === false && '?'}
+          {required === false && (
+            <span className="text-fd-muted-foreground">?</span>
+          )}
         </span>
-        <span className="text-xs me-auto font-mono text-fd-muted-foreground">
+        <span className="me-auto text-xs font-mono text-fd-muted-foreground">
           {type}
         </span>
         {deprecated && (
@@ -99,7 +103,9 @@ export function Property({
           </Badge>
         )}
       </div>
-      <div className="prose-no-margin empty:hidden">{props.children}</div>
+      <div className="prose-no-margin pt-2.5 empty:hidden">
+        {props.children}
+      </div>
     </div>
   );
 }
@@ -127,16 +133,14 @@ export function ObjectCollapsible(props: {
       <CollapsibleTrigger
         className={cn(
           buttonVariants({ color: 'secondary', size: 'sm' }),
-          'group px-3 py-2 data-[state=open]:rounded-b-none data-[state=open]:border-b-0',
+          'group px-3 py-2 data-[state=open]:rounded-b-none',
         )}
       >
         {props.name}
         <ChevronDown className="size-4 text-fd-muted-foreground group-data-[state=open]:rotate-180" />
       </CollapsibleTrigger>
-      <CollapsibleContent className="-me-3">
-        <div className="border-s border-y rounded-b-lg p-3">
-          {props.children}
-        </div>
+      <CollapsibleContent className="-mt-px *:bg-fd-card">
+        {props.children}
       </CollapsibleContent>
     </Collapsible>
   );

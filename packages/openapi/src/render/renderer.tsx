@@ -1,6 +1,12 @@
 import type { ComponentType, ReactNode } from 'react';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
-import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+import {
+  AccordionContent,
+  AccordionHeader,
+  AccordionItem,
+  Accordions,
+  AccordionTrigger,
+} from '@/ui/components/accordion';
 import {
   API,
   APIExample,
@@ -109,14 +115,21 @@ export function createRenders(): Renderer {
     ResponseTypes: (props) => (
       <Accordions
         type="single"
-        className="!-m-4 border-none pt-2"
+        className="pt-2"
         defaultValue={props.defaultValue}
       >
         {props.children}
       </Accordions>
     ),
     ResponseType: (props) => (
-      <Accordion title={props.label}>{props.children}</Accordion>
+      <AccordionItem value={props.label}>
+        <AccordionHeader>
+          <AccordionTrigger>{props.label}</AccordionTrigger>
+        </AccordionHeader>
+        <AccordionContent className="prose-no-margin">
+          {props.children}
+        </AccordionContent>
+      </AccordionItem>
     ),
     Property,
     ObjectCollapsible,

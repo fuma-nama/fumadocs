@@ -33,12 +33,10 @@ function rehypeReact(this: any) {
   };
 }
 
-export async function Markdown({
-  text,
-}: {
-  text: string;
-}): Promise<ReactElement> {
-  const out = await processor.process(text);
+export async function Markdown({ text }: { text: string }) {
+  const out = await processor.process({
+    value: text,
+  });
 
   return out.result as ReactElement;
 }

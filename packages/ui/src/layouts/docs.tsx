@@ -25,6 +25,7 @@ import {
 } from '@/components/layout/language-toggle';
 import {
   CollapsibleControl,
+  LayoutBody,
   Navbar,
   NavbarSidebarTrigger,
 } from '@/layouts/docs-client';
@@ -32,15 +33,10 @@ import { TreeContextProvider } from '@/contexts/tree';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 import {
   getSidebarTabsFromOptions,
-  layoutVariables,
   SidebarLinkItem,
   type SidebarOptions,
 } from '@/layouts/docs/shared';
-import {
-  NavProvider,
-  type PageStyles,
-  StylesProvider,
-} from '@/contexts/layout';
+import { NavProvider } from '@/contexts/layout';
 import Link from 'fumadocs-core/link';
 import {
   LargeSearchToggle,
@@ -79,16 +75,11 @@ export function DocsLayout({
   const links = getLinks(props.links ?? [], props.githubUrl);
 
   const variables = cn(
-    '[--fd-tocnav-height:36px] md:[--fd-sidebar-width:268px] lg:[--fd-sidebar-width:286px] xl:[--fd-toc-width:286px] xl:[--fd-tocnav-height:0px]',
+    'md:[--fd-sidebar-width:268px] lg:[--fd-sidebar-width:286px] xl:[--fd-toc-width:286px]',
     !nav.component && nav.enabled !== false
       ? '[--fd-nav-height:56px] md:[--fd-nav-height:0px]'
       : undefined,
   );
-
-  const pageStyles: PageStyles = {
-    tocNav: cn('xl:hidden'),
-    toc: cn('max-xl:hidden'),
-  };
 
   return (
     <TreeContextProvider tree={props.tree}>
@@ -111,18 +102,9 @@ export function DocsLayout({
             <NavbarSidebarTrigger className="p-2 -me-1.5 md:hidden" />
           </Navbar>,
         )}
-        <main
-          id="nd-docs-layout"
+        <LayoutBody
           {...props.containerProps}
-          className={cn(
-            'flex flex-1 flex-row pe-(--fd-layout-offset)',
-            variables,
-            props.containerProps?.className,
-          )}
-          style={{
-            ...layoutVariables,
-            ...props.containerProps?.style,
-          }}
+          className={cn(variables, props.containerProps?.className)}
         >
           {slot(
             sidebar,
@@ -166,8 +148,8 @@ export function DocsLayout({
               }
             />,
           )}
-          <StylesProvider {...pageStyles}>{children}</StylesProvider>
-        </main>
+          {children}
+        </LayoutBody>
       </NavProvider>
     </TreeContextProvider>
   );
@@ -188,14 +170,7 @@ export function DocsLayoutSidebar({
   return (
     <>
       {collapsible ? <CollapsibleControl /> : null}
-      <Sidebar
-        {...props}
-        collapsible={collapsible}
-        className={cn(
-          'data-[collapsed=false]:w-[calc(var(--fd-sidebar-width)+var(--fd-layout-offset))] data-[collapsed=true]:me-[calc(var(--fd-layout-offset)-var(--fd-sidebar-width))]',
-          props.className,
-        )}
-      >
+      <Sidebar {...props} collapsible={collapsible}>
         <HideIfEmpty>
           <SidebarHeader>
             <div className="flex max-md:hidden">

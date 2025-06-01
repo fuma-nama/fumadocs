@@ -1,10 +1,18 @@
 import type { Metadata } from 'next';
 import {
-  DocsBody,
-  DocsDescription,
-  DocsPage,
-  DocsTitle,
-} from 'fumadocs-ui/page';
+  PageArticle,
+  PageBreadcrumb,
+  PageFooter,
+  PageLastUpdate,
+  PageRoot,
+  PageTOC,
+  PageTOCItems,
+  PageTOCPopover,
+  PageTOCPopoverContent,
+  PageTOCPopoverItems,
+  PageTOCPopoverTrigger,
+  PageTOCTitle,
+} from 'fumadocs-ui/layouts/docs/page';
 import { notFound } from 'next/navigation';
 import {
   type ComponentProps,
@@ -35,7 +43,7 @@ import { getPageTreePeers } from 'fumadocs-core/server';
 import { Card, Cards } from 'fumadocs-ui/components/card';
 import { getMDXComponents } from '@/mdx-components';
 import { APIPage } from 'fumadocs-openapi/ui';
-import { EditOnGitHub, LLMCopyButton } from './page.client';
+import { GitHubLink, LLMCopyButton } from './page.client';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -63,82 +71,99 @@ export default async function Page(props: {
   const { body: Mdx, toc, lastModified } = await page.data.load();
 
   return (
-    <DocsPage
-      toc={toc}
-      full={page.data.full}
-      lastUpdate={lastModified}
-      tableOfContent={{
-        style: 'clerk',
+    <PageRoot
+      toc={{
+        toc,
         single: false,
       }}
-      article={{
-        className: 'max-sm:pb-16',
-      }}
     >
-      <DocsTitle>{page.data.title}</DocsTitle>
-      <DocsDescription className="mb-0">
-        {page.data.description}
-      </DocsDescription>
-      <div className="flex flex-row gap-2 items-center mb-4">
-        <LLMCopyButton slug={params.slug} />
-        <EditOnGitHub
-          url={`https://github.com/${owner}/${repo}/blob/dev/${path}`}
-        />
-      </div>
-      <DocsBody className="text-fd-foreground/80">
-        {preview ? <PreviewRenderer preview={preview} /> : null}
-        <Mdx
-          components={getMDXComponents({
-            ...Twoslash,
-            a: ({ href, ...props }) => {
-              const found = source.getPageByHref(href ?? '', {
-                dir: page.file.dirname,
-              });
+      {toc.length > 0 && (
+        <PageTOCPopover>
+          <PageTOCPopoverTrigger />
+          <PageTOCPopoverContent>
+            <PageTOCPopoverItems />
+          </PageTOCPopoverContent>
+        </PageTOCPopover>
+      )}
+      <PageArticle className="max-md:pb-16">
+        <PageBreadcrumb />
+        <h1 className="text-3xl font-semibold">{page.data.title}</h1>
+        <p className="text-lg text-fd-muted-foreground">
+          {page.data.description}
+        </p>
+        <div className="flex flex-row gap-2 items-center mb-8 border-b pb-6">
+          <LLMCopyButton slug={params.slug} />
+          <GitHubLink
+            url={`https://github.com/${owner}/${repo}/blob/dev/${path}`}
+          />
+        </div>
+        <div className="prose flex-1 text-fd-foreground/80">
+          {preview ? <PreviewRenderer preview={preview} /> : null}
+          <Mdx
+            components={getMDXComponents({
+              ...Twoslash,
+              a: ({ href, ...props }) => {
+                const found = source.getPageByHref(href ?? '', {
+                  dir: page.file.dirname,
+                });
 
-              if (!found) return <Link href={href} {...props} />;
+                if (!found) return <Link href={href} {...props} />;
 
-              return (
-                <HoverCard>
-                  <HoverCardTrigger asChild>
-                    <Link
-                      href={
-                        found.hash
-                          ? `${found.page.url}#${found.hash}`
-                          : found.page.url
-                      }
-                      {...props}
-                    />
-                  </HoverCardTrigger>
-                  <HoverCardContent className="text-sm">
-                    <p className="font-medium">{found.page.data.title}</p>
-                    <p className="text-fd-muted-foreground">
-                      {found.page.data.description}
-                    </p>
-                  </HoverCardContent>
-                </HoverCard>
-              );
-            },
-            Mermaid,
-            TypeTable,
-            AutoTypeTable: (props) => (
-              <AutoTypeTable generator={generator} {...props} />
-            ),
-            Wrapper,
-            blockquote: Callout as unknown as FC<ComponentProps<'blockquote'>>,
-            APIPage: (props) => <APIPage {...openapi.getAPIPageProps(props)} />,
-            DocsCategory: ({ url }) => {
-              return <DocsCategory url={url ?? page.url} />;
-            },
-            UiOverview,
+                return (
+                  <HoverCard>
+                    <HoverCardTrigger asChild>
+                      <Link
+                        href={
+                          found.hash
+                            ? `${found.page.url}#${found.hash}`
+                            : found.page.url
+                        }
+                        {...props}
+                      />
+                    </HoverCardTrigger>
+                    <HoverCardContent className="text-sm">
+                      <p className="font-medium">{found.page.data.title}</p>
+                      <p className="text-fd-muted-foreground">
+                        {found.page.data.description}
+                      </p>
+                    </HoverCardContent>
+                  </HoverCard>
+                );
+              },
+              Mermaid,
+              TypeTable,
+              AutoTypeTable: (props) => (
+                <AutoTypeTable generator={generator} {...props} />
+              ),
+              Wrapper,
+              blockquote: Callout as unknown as FC<
+                ComponentProps<'blockquote'>
+              >,
+              APIPage: (props) => (
+                <APIPage {...openapi.getAPIPageProps(props)} />
+              ),
+              DocsCategory: ({ url }) => {
+                return <DocsCategory url={url ?? page.url} />;
+              },
+              UiOverview,
 
-            ...(await import('@/content/docs/ui/components/tabs.client')),
-            ...(await import('@/content/docs/ui/theme.client')),
-          })}
-        />
-        {page.data.index ? <DocsCategory url={page.url} /> : null}
-      </DocsBody>
-      <Rate onRateAction={onRateAction} />
-    </DocsPage>
+              ...(await import('@/content/docs/ui/components/tabs.client')),
+              ...(await import('@/content/docs/ui/theme.client')),
+            })}
+          />
+          {page.data.index ? <DocsCategory url={page.url} /> : null}
+        </div>
+        <Rate onRateAction={onRateAction} />
+        {lastModified && <PageLastUpdate date={lastModified} />}
+        <PageFooter />
+      </PageArticle>
+      {toc.length > 0 && (
+        <PageTOC>
+          <PageTOCTitle />
+          <PageTOCItems variant="clerk" />
+        </PageTOC>
+      )}
+    </PageRoot>
   );
 }
 

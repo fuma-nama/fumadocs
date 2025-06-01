@@ -150,7 +150,7 @@ export function Sidebar({
       {...props}
       data-collapsed={collapsed}
       className={cn(
-        'sticky shrink-0 flex flex-col items-end top-(--fd-sidebar-top) z-20 bg-fd-card text-sm h-(--fd-sidebar-height) w-(--fd-sidebar-width) *:w-(--fd-sidebar-width) border-e max-md:hidden',
+        'fixed start-0 flex flex-col items-end top-(--fd-sidebar-top) bottom-(--fd-sidebar-margin) z-20 bg-fd-card text-sm border-e max-md:hidden *:w-(--fd-sidebar-width)',
         collapsed && [
           'rounded-xl border',
           hover
@@ -161,15 +161,16 @@ export function Sidebar({
       )}
       style={
         {
-          transition: ['top', 'opacity', 'margin', 'translate', 'width']
-            .map((v) => `${v} ease 200ms`)
+          transition: ['top', 'opacity', 'translate', 'width']
+            .map((v) => `${v} ease 250ms`)
             .join(', '),
+          ...props.style,
           '--fd-sidebar-offset': 'calc(100% - 16px)',
           '--fd-sidebar-margin': collapsed ? '0.5rem' : '0px',
+          width: collapsed
+            ? 'var(--fd-sidebar-width)'
+            : 'calc(var(--fd-sidebar-width) + var(--fd-layout-offset))',
           '--fd-sidebar-top': `calc(var(--fd-banner-height) + var(--fd-nav-height) + var(--fd-sidebar-margin))`,
-          '--fd-sidebar-height':
-            'calc(100dvh - var(--fd-sidebar-top) - var(--fd-sidebar-margin))',
-          ...props.style,
         } as object
       }
       onPointerEnter={(e) => {

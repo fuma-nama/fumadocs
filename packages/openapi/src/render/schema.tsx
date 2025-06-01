@@ -192,16 +192,14 @@ export function Schema({
 
     if (fields.length === 0) return;
     return (
-      <div className="flex flex-col border divide-y divide-fd-border bg-fd-muted rounded-lg not-prose">
+      <div className="flex flex-wrap gap-2 not-prose">
         {fields.map((field) => (
           <div
             key={field.key}
-            className="flex items-center text-[13px] px-3 py-2.5 justify-between gap-2"
+            className="bg-fd-secondary text-fd-secondary-foreground border rounded-lg text-xs p-1.5 shadow-md"
           >
-            <span className="font-medium">{field.key}</span>
-            <code className="texxt-xs text-fd-muted-foreground">
-              {field.value}
-            </code>
+            <span className="font-medium me-2">{field.key}</span>
+            <code className="text-fd-muted-foreground">{field.value}</code>
           </div>
         ))}
       </div>
@@ -227,7 +225,7 @@ export function Schema({
         return <p>Empty Object</p>;
 
       const children = (
-        <div className="flex flex-col gap-4">
+        <>
           {props.map(([key, value]) => (
             <Fragment key={key}>
               {property(key, value, next, {
@@ -245,7 +243,7 @@ export function Schema({
             property('[key: string]', schema.additionalProperties, next, {
               nested,
             })}
-        </div>
+        </>
       );
 
       if (!collapsible) return children;
@@ -261,24 +259,23 @@ export function Schema({
       const items = schema.items;
       if (!items || !isComplexType(items) || ctx.stack.has(items)) return;
 
-      const children = (
-        <div className="flex flex-col gap-4">
-          {items.description && <Markdown text={items.description} />}
-          {propertyBody(
-            items,
-            (child, ctx) => primitiveBody(child, ctx, false, true),
-            {
-              ...ctx,
-              stack: ctx.stack.next(schema),
-            },
-          )}
-        </div>
-      );
-
       return (
-        <renderer.ObjectCollapsible name="Array Item">
-          {children}
-        </renderer.ObjectCollapsible>
+        <>
+          {items.description && (
+            <Markdown text={'Item: ' + items.description} />
+          )}
+
+          <renderer.ObjectCollapsible name="Array Item">
+            {propertyBody(
+              items,
+              (child, ctx) => primitiveBody(child, ctx, false, true),
+              {
+                ...ctx,
+                stack: ctx.stack.next(schema),
+              },
+            )}
+          </renderer.ObjectCollapsible>
+        </>
       );
     }
   }

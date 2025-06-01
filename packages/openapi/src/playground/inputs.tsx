@@ -1,13 +1,12 @@
 'use client';
 import {
-  ComponentProps,
+  type ComponentProps,
   type HTMLAttributes,
-  type LabelHTMLAttributes,
   type ReactNode,
   useMemo,
   useState,
 } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { ChevronDown, Plus, Trash2 } from 'lucide-react';
 import {
   Controller,
   useController,
@@ -34,31 +33,33 @@ import {
   useResolvedSchema,
 } from '@/playground/schema';
 
-interface InputHeaderProps {
-  name?: ReactNode;
-  required?: boolean;
-}
-
-function FieldHeader({
-  name,
-  required = false,
-  ...props
-}: InputHeaderProps & LabelHTMLAttributes<HTMLLabelElement>) {
+function FieldLabel(props: ComponentProps<'label'>) {
   return (
     <label
       {...props}
-      className={cn('w-full inline-flex items-center gap-1', props.className)}
+      className={cn('w-full inline-flex items-center gap-0.5', props.className)}
     >
-      <span className={cn(labelVariants(), 'me-auto')}>
-        {name}
-        {required ? <span className="text-red-400/80 mx-1">*</span> : null}
-      </span>
       {props.children}
     </label>
   );
 }
 
-function FieldHeaderCode(props: ComponentProps<'code'>) {
+function FieldLabelName({
+  required = false,
+  ...props
+}: ComponentProps<'span'> & { required?: boolean }) {
+  return (
+    <span
+      {...props}
+      className={cn(labelVariants(), 'font-mono me-auto', props.className)}
+    >
+      {props.children}
+      {required && <span className="text-red-400/80 mx-1">*</span>}
+    </span>
+  );
+}
+
+function FieldLabelType(props: ComponentProps<'code'>) {
   return (
     <code
       {...props}
@@ -82,7 +83,10 @@ export function ObjectInput({
   if (typeof field === 'boolean') return;
 
   return (
-    <div {...props} className={cn('flex flex-col gap-6', props.className)}>
+    <div
+      {...props}
+      className={cn('grid grid-cols-1 gap-4 @md:grid-cols-2', props.className)}
+    >
       {Object.entries(field.properties ?? {}).map(([key, child]) => (
         <FieldSet
           key={key}
@@ -198,9 +202,8 @@ function DynamicProperties({
                 aria-label="Remove Item"
                 className={cn(
                   buttonVariants({
-                    color: 'ghost',
-                    size: 'icon-sm',
-                    className: 'p-1',
+                    color: 'outline',
+                    size: 'icon-xs',
                   }),
                 )}
                 onClick={() => {
@@ -241,7 +244,7 @@ function DynamicProperties({
   );
 }
 
-function FieldInput({
+export function FieldInput({
   field,
   fieldName,
   isRequired,
@@ -258,22 +261,32 @@ function FieldInput({
       <Controller
         control={control}
         name={fieldName}
-        render={({ field: { value: _, onChange, ...restField } }) => (
-          <input
-            id={fieldName}
-            type="file"
-            multiple={false}
-            onChange={(e) => {
-              if (!e.target.files) return;
-              onChange(e.target.files.item(0));
-            }}
-            {...props}
-            className={cn(
-              'border rounded-lg bg-fd-background text-fd-muted-foreground p-2 font-medium text-sm',
-              props.className,
-            )}
-            {...restField}
-          />
+        render={({ field: { value, onChange, ...restField } }) => (
+          <div {...props}>
+            <label
+              htmlFor={fieldName}
+              className={cn(
+                buttonVariants({
+                  color: 'secondary',
+                  size: 'sm',
+                  className: 'w-full',
+                }),
+              )}
+            >
+              {value ? (value as File).name : 'Upload'}
+            </label>
+            <input
+              id={fieldName}
+              type="file"
+              multiple={false}
+              onChange={(e) => {
+                if (!e.target.files) return;
+                onChange(e.target.files.item(0));
+              }}
+              hidden
+              {...restField}
+            />
+          </div>
         )}
       />
     );
@@ -333,6 +346,7 @@ export function FieldSet({
   isRequired,
   depth = 0,
   slotType,
+  collapsible = true,
   ...props
 }: HTMLAttributes<HTMLElement> & {
   isRequired?: boolean;
@@ -343,38 +357,13 @@ export function FieldSet({
 
   slotType?: ReactNode;
   toolbar?: ReactNode;
+  collapsible?: boolean;
 }) {
   const field = useResolvedSchema(_field);
-  const [show, setShow] = useState(false);
+  const [show, setShow] = useState(!collapsible);
   const { info, updateInfo } = useFieldInfo(fieldName, field, depth);
 
   if (_field === false) return null;
-
-  const recursive =
-    typeof _field !== 'boolean' &&
-    _field.$ref &&
-    (field.oneOf || field.type === 'object' || field.allOf || field.anyOf);
-
-  if (recursive && !show) {
-    return (
-      <FieldHeader {...props} name={name} required={isRequired}>
-        {slotType ?? <FieldHeaderCode>{schemaToString(field)}</FieldHeaderCode>}
-        {toolbar}
-        <button
-          type="button"
-          className={cn(
-            buttonVariants({
-              size: 'sm',
-              color: 'secondary',
-            }),
-          )}
-          onClick={() => setShow(true)}
-        >
-          Open
-        </button>
-      </FieldHeader>
-    );
-  }
 
   if (field.oneOf) {
     const showSelect = field.oneOf.length > 1;
@@ -455,27 +444,48 @@ export function FieldSet({
     );
   }
 
+  const showBn = collapsible && (
+    <button
+      type="button"
+      onClick={() => setShow((prev) => !prev)}
+      className={cn(
+        buttonVariants({
+          size: 'icon-xs',
+          color: 'ghost',
+          className: 'text-fd-muted-foreground -ms-1',
+        }),
+      )}
+    >
+      <ChevronDown className={cn(show && 'rotate-180')} />
+    </button>
+  );
+
   if (field.type === 'object' || field.anyOf || field.allOf) {
     return (
       <fieldset
         {...props}
-        className={cn('flex flex-col gap-1.5', props.className)}
+        className={cn(
+          'flex flex-col gap-1.5 col-span-full @container',
+          props.className,
+        )}
       >
-        <FieldHeader htmlFor={fieldName} name={name} required={isRequired}>
-          {slotType ?? (
-            <FieldHeaderCode>{schemaToString(field)}</FieldHeaderCode>
-          )}
+        <FieldLabel htmlFor={fieldName}>
+          {showBn}
+          <FieldLabelName required={isRequired}>{name}</FieldLabelName>
+          {slotType ?? <FieldLabelType>{schemaToString(field)}</FieldLabelType>}
           {toolbar}
-        </FieldHeader>
-        <ObjectInput
-          field={field}
-          fieldName={fieldName}
-          {...props}
-          className={cn(
-            'rounded-lg border border-fd-primary/20 bg-fd-background/50 p-3 shadow-sm',
-            props.className,
-          )}
-        />
+        </FieldLabel>
+        {show && (
+          <ObjectInput
+            field={field}
+            fieldName={fieldName}
+            {...props}
+            className={cn(
+              'rounded-lg border border-fd-primary/20 bg-fd-background/50 p-2 shadow-sm',
+              props.className,
+            )}
+          />
+        )}
       </fieldset>
     );
   }
@@ -484,23 +494,25 @@ export function FieldSet({
     return (
       <fieldset
         {...props}
-        className={cn('flex flex-col gap-1.5', props.className)}
+        className={cn('flex flex-col gap-1.5 col-span-full', props.className)}
       >
-        <FieldHeader htmlFor={fieldName} name={name} required={isRequired}>
-          {slotType ?? (
-            <FieldHeaderCode>{schemaToString(field)}</FieldHeaderCode>
-          )}
+        <FieldLabel htmlFor={fieldName}>
+          {showBn}
+          <FieldLabelName required={isRequired}>{name}</FieldLabelName>
+          {slotType ?? <FieldLabelType>{schemaToString(field)}</FieldLabelType>}
           {toolbar}
-        </FieldHeader>
-        <ArrayInput
-          fieldName={fieldName}
-          items={field.items ?? anyFields}
-          {...props}
-          className={cn(
-            'rounded-lg border border-fd-primary/20 bg-fd-background/50 p-3 shadow-sm',
-            props.className,
-          )}
-        />
+        </FieldLabel>
+        {show && (
+          <ArrayInput
+            fieldName={fieldName}
+            items={field.items ?? anyFields}
+            {...props}
+            className={cn(
+              'rounded-lg border border-fd-primary/20 bg-fd-background/50 p-2 shadow-sm',
+              props.className,
+            )}
+          />
+        )}
       </fieldset>
     );
   }
@@ -509,10 +521,11 @@ export function FieldSet({
       {...props}
       className={cn('flex flex-col gap-1.5', props.className)}
     >
-      <FieldHeader htmlFor={fieldName} name={name} required={isRequired}>
-        {slotType ?? <FieldHeaderCode>{schemaToString(field)}</FieldHeaderCode>}
+      <FieldLabel htmlFor={fieldName}>
+        <FieldLabelName required={isRequired}>{name}</FieldLabelName>
+        {slotType ?? <FieldLabelType>{schemaToString(field)}</FieldLabelType>}
         {toolbar}
-      </FieldHeader>
+      </FieldLabel>
       <FieldInput field={field} fieldName={fieldName} isRequired={isRequired} />
     </fieldset>
   );
@@ -549,9 +562,8 @@ function ArrayInput({
               aria-label="Remove Item"
               className={cn(
                 buttonVariants({
-                  color: 'ghost',
-                  size: 'icon-sm',
-                  className: 'p-1',
+                  color: 'outline',
+                  size: 'icon-xs',
                 }),
               )}
               onClick={() => remove(index)}

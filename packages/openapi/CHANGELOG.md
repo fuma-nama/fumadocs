@@ -1,5 +1,32 @@
 # @fuma-docs/openapi
 
+## 9.0.5
+
+### Patch Changes
+
+- 5067efc: Improved support for all OAuth flows
+- Updated dependencies [50f8f7f]
+- Updated dependencies [589d101]
+- Updated dependencies [697d5b4]
+  - fumadocs-ui@15.5.0
+  - fumadocs-core@15.5.0
+
+## 9.0.4
+
+### Patch Changes
+
+- 9721f6f: Introduce `allowedOrigins` and `filterRequest` options to `createProxy`. Deprecate `allowedUrls` in favour of new APIs.
+
+## 9.0.3
+
+### Patch Changes
+
+- 5770180: Implement multiple security schemes support
+- d2a2d47: Skip non-required values when generating code examples
+- Updated dependencies [0ab6c7f]
+  - fumadocs-core@15.4.2
+  - fumadocs-ui@15.4.2
+
 ## 9.0.2
 
 ### Patch Changes
