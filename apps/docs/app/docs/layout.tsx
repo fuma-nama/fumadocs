@@ -22,16 +22,15 @@ export default function Layout({ children }: { children: ReactNode }) {
             <div className="flex gap-1.5 max-md:hidden">
               <LargeSearchToggle className="flex-1" />
               <AISearchTrigger
+                aria-label="Ask AI"
                 className={cn(
                   buttonVariants({
                     variant: 'secondary',
                     size: 'xs',
                   }),
-                  'px-2 gap-1.5 rounded-lg',
                 )}
               >
-                <Sparkles className="size-3.5 text-fd-primary fill-current" />
-                Ask
+                <Sparkles className="size-4 text-fd-primary fill-current" />
               </AISearchTrigger>
             </div>
           ),
@@ -71,7 +70,8 @@ export default function Layout({ children }: { children: ReactNode }) {
         className={cn(
           buttonVariants({
             variant: 'secondary',
-            className: 'fixed text-[15px] gap-2 right-4 bottom-4 md:hidden',
+            className:
+              'fixed left-1/2 -translate-x-1/2 rounded-full text-sm gap-2 shadow-lg bottom-4 md:hidden',
           }),
         )}
       >

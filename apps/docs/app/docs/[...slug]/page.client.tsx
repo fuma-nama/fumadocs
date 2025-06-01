@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { Check, Copy } from 'lucide-react';
+import { Copy, CopyCheck } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
@@ -48,7 +48,11 @@ export function LLMCopyButton({ slug }: { slug: string[] }) {
       )}
       onClick={onClick}
     >
-      {checked ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+      {checked ? (
+        <CopyCheck className="size-3.5" />
+      ) : (
+        <Copy className="size-3.5" />
+      )}
       Copy Markdown
     </button>
   );

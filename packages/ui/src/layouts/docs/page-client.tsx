@@ -241,20 +241,6 @@ export function PageRoot({ toc, children, ...props }: RootProps) {
   );
 }
 
-export function PageArticle(props: ComponentProps<'article'>) {
-  return (
-    <article
-      {...props}
-      className={cn(
-        'flex min-w-0 w-full flex-col gap-6 px-4 pt-8 md:px-6 md:pt-12 xl:px-12 xl:mx-auto',
-        props.className,
-      )}
-    >
-      {props.children}
-    </article>
-  );
-}
-
 export function PageLastUpdate({
   date: value,
   ...props
@@ -379,7 +365,7 @@ export type BreadcrumbProps = BreadcrumbOptions & ComponentProps<'div'>;
 export function PageBreadcrumb({
   includeRoot = false,
   includeSeparator,
-  includePage,
+  includePage = false,
   ...props
 }: BreadcrumbProps) {
   const path = useTreePath();

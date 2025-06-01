@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import {
   PageArticle,
   PageBreadcrumb,
+  PageFooter,
   PageLastUpdate,
   PageRoot,
   PageTOC,
@@ -84,7 +85,7 @@ export default async function Page(props: {
           </PageTOCPopoverContent>
         </PageTOCPopover>
       )}
-      <PageArticle className="max-sm:pb-16">
+      <PageArticle className="max-md:pb-16">
         <PageBreadcrumb />
         <h1 className="text-3xl font-semibold">{page.data.title}</h1>
         <p className="text-lg text-fd-muted-foreground">
@@ -96,7 +97,7 @@ export default async function Page(props: {
             url={`https://github.com/${owner}/${repo}/blob/dev/${path}`}
           />
         </div>
-        <div className="prose text-fd-foreground/80">
+        <div className="prose flex-1 text-fd-foreground/80">
           {preview ? <PreviewRenderer preview={preview} /> : null}
           <Mdx
             components={getMDXComponents({
@@ -152,10 +153,9 @@ export default async function Page(props: {
           />
           {page.data.index ? <DocsCategory url={page.url} /> : null}
         </div>
-        <div className="mt-auto">
-          {lastModified && <PageLastUpdate date={new Date(lastModified)} />}
-        </div>
         <Rate onRateAction={onRateAction} />
+        {lastModified && <PageLastUpdate date={lastModified} />}
+        <PageFooter />
       </PageArticle>
       {toc.length > 0 && (
         <PageTOC>

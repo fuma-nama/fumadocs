@@ -3,7 +3,6 @@ import { cn } from '@/utils/cn';
 import {
   type BreadcrumbProps,
   type FooterProps,
-  PageArticle,
   PageBreadcrumb,
   PageFooter,
   PageLastUpdate,
@@ -67,9 +66,22 @@ export function PageTOCPopoverItems({
   );
 }
 
+export function PageArticle(props: ComponentProps<'article'>) {
+  return (
+    <article
+      {...props}
+      className={cn(
+        'flex min-w-0 w-full flex-col gap-6 px-4 pt-8 md:px-6 md:mx-auto xl:pt-12 xl:px-12',
+        props.className,
+      )}
+    >
+      {props.children}
+    </article>
+  );
+}
+
 export {
   PageRoot,
-  PageArticle,
   PageBreadcrumb,
   PageFooter,
   PageLastUpdate,

@@ -130,7 +130,7 @@ export function DocsPage({
   } = {},
   toc = [],
   article,
-  ...props
+  children,
 }: DocsPageProps) {
   const isTocRequired =
     toc.length > 0 ||
@@ -152,7 +152,6 @@ export function DocsPage({
         single: tocOptions.single,
       }}
       {...container}
-      {...props}
     >
       {slot(
         { enabled: tocPopoverEnabled, component: tocPopoverReplace },
@@ -167,7 +166,7 @@ export function DocsPage({
       )}
       <PageArticle {...article}>
         {slot(breadcrumb, <PageBreadcrumb {...breadcrumb} />)}
-        {props.children}
+        {children}
         <div role="none" className="flex-1" />
         <div className="flex flex-row flex-wrap items-center justify-between gap-4 empty:hidden">
           {editOnGithub && (
