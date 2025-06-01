@@ -33,11 +33,7 @@ import {
   Navbar,
   NavbarSidebarTrigger,
 } from './notebook-client';
-import {
-  NavProvider,
-  type PageStyles,
-  StylesProvider,
-} from '@/contexts/layout';
+import { NavProvider } from '@/contexts/layout';
 import { type Option, RootToggle } from '@/components/layout/root-toggle';
 import Link from 'fumadocs-core/link';
 import {
@@ -83,14 +79,9 @@ export function DocsLayout(props: DocsLayoutProps) {
   );
 
   const variables = cn(
-    '[--fd-nav-height:56px] [--fd-tocnav-height:36px] md:[--fd-sidebar-width:286px] md:[--fd-nav-height:64px] xl:[--fd-toc-width:286px] xl:[--fd-tocnav-height:0px]',
+    '[--fd-nav-height:56px] md:[--fd-sidebar-width:286px] md:[--fd-nav-height:64px] xl:[--fd-toc-width:286px]',
     tabs.length > 0 && tabMode === 'navbar' && 'lg:[--fd-nav-height:104px]',
   );
-
-  const pageStyles: PageStyles = {
-    tocNav: cn('xl:hidden'),
-    toc: cn('max-xl:hidden'),
-  };
 
   const sidebarHeader = (
     <div className="flex justify-between max-md:hidden">
@@ -204,7 +195,7 @@ export function DocsLayout(props: DocsLayoutProps) {
             links={links}
             tabs={tabMode == 'navbar' ? tabs : []}
           />
-          <StylesProvider {...pageStyles}>{props.children}</StylesProvider>
+          {props.children}
         </LayoutBody>
       </NavProvider>
     </TreeContextProvider>

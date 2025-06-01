@@ -304,7 +304,7 @@ export default function AISearch(props: DialogProps) {
             e.preventDefault();
           }}
           aria-describedby={undefined}
-          className="fixed bottom-12 left-1/2 z-50 w-[98vw] max-w-[860px] -translate-x-1/2 focus-visible:outline-none data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in"
+          className="fixed bottom-6 left-1/2 z-50 w-[98vw] max-w-[860px] -translate-x-1/2 focus-visible:outline-none data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in"
         >
           <Content />
         </DialogContent>

@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 import type { LinkItemType } from '@/layouts/links';
 import type { NavProviderProps } from '@/contexts/layout';
-import { Slot } from '@radix-ui/react-slot';
 import type { I18nConfig } from 'fumadocs-core/i18n';
 
 export interface NavOptions extends NavProviderProps {
@@ -101,12 +100,9 @@ export function slot(
       }
     | undefined,
   def: ReactNode,
-  customComponentProps?: object,
-  disabled?: ReactNode,
 ): ReactNode {
-  if (obj?.enabled === false) return disabled;
-  if (obj?.component !== undefined)
-    return <Slot {...customComponentProps}>{obj.component}</Slot>;
+  if (obj?.enabled === false) return;
+  if (obj?.component !== undefined) return obj.component;
 
   return def;
 }
@@ -122,8 +118,7 @@ export function slots<Comp extends Record<string, ReactNode>>(
   def: ReactNode,
 ): ReactNode {
   if (obj?.enabled === false) return;
-  if (obj?.components?.[variant] !== undefined)
-    return <Slot>{obj.components[variant]}</Slot>;
+  if (obj?.components?.[variant] !== undefined) return obj.components[variant];
 
   return def;
 }

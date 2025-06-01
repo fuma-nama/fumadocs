@@ -43,7 +43,7 @@ export function LayoutBody(props: ComponentProps<'main'>) {
       id="nd-docs-layout"
       {...props}
       className={cn(
-        'flex flex-1 flex-col transition-[margin]',
+        'flex flex-1 flex-col transition-[margin] fd-notebook-layout',
         props.className,
       )}
       style={{

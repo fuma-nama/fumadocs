@@ -36,11 +36,7 @@ import {
   SidebarLinkItem,
   type SidebarOptions,
 } from '@/layouts/docs/shared';
-import {
-  NavProvider,
-  type PageStyles,
-  StylesProvider,
-} from '@/contexts/layout';
+import { NavProvider } from '@/contexts/layout';
 import Link from 'fumadocs-core/link';
 import {
   LargeSearchToggle,
@@ -79,16 +75,11 @@ export function DocsLayout({
   const links = getLinks(props.links ?? [], props.githubUrl);
 
   const variables = cn(
-    '[--fd-tocnav-height:36px] md:[--fd-sidebar-width:268px] lg:[--fd-sidebar-width:286px] xl:[--fd-toc-width:286px] xl:[--fd-tocnav-height:0px]',
+    'md:[--fd-sidebar-width:268px] lg:[--fd-sidebar-width:286px] xl:[--fd-toc-width:286px]',
     !nav.component && nav.enabled !== false
       ? '[--fd-nav-height:56px] md:[--fd-nav-height:0px]'
       : undefined,
   );
-
-  const pageStyles: PageStyles = {
-    tocNav: cn('xl:hidden'),
-    toc: cn('max-xl:hidden'),
-  };
 
   return (
     <TreeContextProvider tree={props.tree}>
@@ -157,7 +148,7 @@ export function DocsLayout({
               }
             />,
           )}
-          <StylesProvider {...pageStyles}>{children}</StylesProvider>
+          {children}
         </LayoutBody>
       </NavProvider>
     </TreeContextProvider>

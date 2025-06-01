@@ -19,7 +19,10 @@ import {
 <DocsPage>
   <DocsTitle>title</DocsTitle>
   <DocsDescription>description</DocsDescription>
-  <DocsBody>...</DocsBody>
+  <DocsBody>
+    <h2>This heading looks good!</h2>
+    It applies the Typography styles, wrap your content here.
+  </DocsBody>
 </DocsPage>;
 ```
 
@@ -29,18 +32,6 @@ Instead of rendering the title with `DocsTitle` in `page.tsx`, you can put the t
 This will render the title in the MDX body.
 
 </Callout>
-
-### Body
-
-It applies the [Typography](/docs/ui/theme#typography) styles, wrap your content inside.
-
-```tsx
-import { DocsBody } from 'fumadocs-ui/page';
-
-<DocsBody>
-  <h2>This heading looks good!</h2>
-</DocsBody>;
-```
 
 ### Edit on GitHub
 
@@ -125,9 +116,26 @@ import { DocsPage } from 'fumadocs-ui/page';
 <DocsPage lastUpdate={new Date(lastModifiedTime)} />;
 ```
 
-Since you might have different version controls (e.g. Github) or it's from
-remote sources like Sanity, Fumadocs UI doesn't display the last updated time by
+Since you might use different version controls (e.g. Github) or CMS like Sanity, Fumadocs UI doesn't display the last updated time by
 default.
+
+<Tabs items={['Fumadocs MDX', 'GitHub API']}>
+
+    <Tab>
+
+You can enable [`lastModifiedTime`](/docs/mdx/last-modified).
+
+```tsx
+import { DocsPage } from 'fumadocs-ui/page';
+import { source } from '@/lib/source';
+const page = source.getPage(['...']);
+
+<DocsPage lastUpdate={new Date(page.data.lastModified)} />;
+```
+
+    </Tab>
+
+    <Tab>
 
 For Github hosted documents, you can use
 the [`getGithubLastEdit`](/docs/headless/utils/git-last-edit) utility.
@@ -145,7 +153,9 @@ const time = await getGithubLastEdit({
 <DocsPage lastUpdate={new Date(time)} />;
 ```
 
-Or you may specify the updated time in [frontmatter](/docs/mdx/collections#schema).
+    </Tab>
+
+</Tabs>
 
 ### Footer
 

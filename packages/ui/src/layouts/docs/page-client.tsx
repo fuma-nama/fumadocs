@@ -8,18 +8,18 @@ import {
   useRef,
   useState,
 } from 'react';
-import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight } from '@/icons';
 import Link from 'fumadocs-core/link';
 import { cn } from '@/utils/cn';
-import { useI18n } from './contexts/i18n';
-import { useTreeContext, useTreePath } from './contexts/tree';
-import type { PageTree, TOCItemType } from 'fumadocs-core/server';
+import { useI18n } from '../../contexts/i18n';
+import { useTreeContext, useTreePath } from '../../contexts/tree';
+import type { PageTree } from 'fumadocs-core/server';
 import { createContext, usePathname } from 'fumadocs-core/framework';
 import {
   type BreadcrumbOptions,
   getBreadcrumbItemsFromPath,
 } from 'fumadocs-core/breadcrumb';
-import { useNav, usePageStyles } from '@/contexts/layout';
+import { useNav } from '@/contexts/layout';
 import { isActive } from '@/utils/is-active';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 import {
@@ -27,21 +27,20 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import * as Primitive from 'fumadocs-core/toc';
 import { useSidebar } from '@/contexts/sidebar';
+import { TOCProvider, useTOCItems } from '@/components/layout/toc';
+import { type AnchorProviderProps, useActiveAnchor } from 'fumadocs-core/toc';
 
 const TocPopoverContext = createContext<{
   open: boolean;
   setOpen: (open: boolean) => void;
 }>('TocPopoverContext');
 
-export function TocPopoverTrigger({
-  items,
-  ...props
-}: ComponentProps<'button'> & { items: TOCItemType[] }) {
+export function PageTOCPopoverTrigger(props: ComponentProps<'button'>) {
   const { text } = useI18n();
   const { open } = TocPopoverContext.use();
-  const active = Primitive.useActiveAnchor();
+  const items = useTOCItems();
+  const active = useActiveAnchor();
   const selected = useMemo(
     () => items.findIndex((item) => active === item.url.slice(1)),
     [items, active],
@@ -53,12 +52,12 @@ export function TocPopoverTrigger({
     <CollapsibleTrigger
       {...props}
       className={cn(
-        'flex flex-row items-center text-sm text-fd-muted-foreground gap-2.5 px-4 py-2.5 text-start focus-visible:outline-none [&_svg]:shrink-0 [&_svg]:size-4 md:px-6',
+        'flex w-full h-(--fd-tocnav-height) items-center text-sm text-fd-muted-foreground gap-2.5 px-4 py-2.5 text-start focus-visible:outline-none [&_svg]:shrink-0 [&_svg]:size-4 md:px-6',
         props.className,
       )}
     >
       <ProgressCircle
-        value={(selected + 1) / items.length}
+        value={(selected + 1) / Math.max(1, items.length)}
         max={1}
         className={cn(open && 'text-fd-primary')}
       />
@@ -146,23 +145,22 @@ function ProgressCircle({
   );
 }
 
-export function TocPopoverContent(props: ComponentProps<'div'>) {
+export function PageTOCPopoverContent(props: ComponentProps<'div'>) {
   return (
     <CollapsibleContent
       data-toc-popover=""
       {...props}
-      className={cn('flex flex-col max-h-[50vh]', props.className)}
+      className={cn('flex flex-col px-4 max-h-[50vh] md:px-6', props.className)}
     >
       {props.children}
     </CollapsibleContent>
   );
 }
 
-export function TocPopover(props: ComponentProps<'div'>) {
+export function PageTOCPopover(props: ComponentProps<'div'>) {
   const ref = useRef<HTMLElement>(null);
   const [open, setOpen] = useState(false);
   const { collapsed } = useSidebar();
-  const { tocNav } = usePageStyles();
   const { isTransparent } = useNav();
 
   const onClick = useEffectEvent((e: Event) => {
@@ -196,14 +194,14 @@ export function TocPopover(props: ComponentProps<'div'>) {
           id="nd-tocnav"
           {...props}
           className={cn(
-            'fixed inset-x-0 top-[calc(var(--fd-banner-height)+var(--fd-nav-height))] z-10 border-b backdrop-blur-sm transition-colors',
+            'fixed inset-x-0 z-10 border-b backdrop-blur-sm transition-colors xl:hidden',
             (!isTransparent || open) && 'bg-fd-background/80',
-            tocNav,
             open && 'shadow-lg',
             props.className,
           )}
           style={{
             ...props.style,
+            top: 'calc(var(--fd-banner-height) + var(--fd-nav-height))',
             insetInlineStart: collapsed
               ? '0px'
               : 'calc(var(--fd-sidebar-width) + var(--fd-layout-offset))',
@@ -216,68 +214,57 @@ export function TocPopover(props: ComponentProps<'div'>) {
   );
 }
 
-export function PageBody({
-  className,
-  style,
-  children,
-  ...props
-}: ComponentProps<'div'>) {
-  const { page } = usePageStyles();
+export interface RootProps extends ComponentProps<'div'> {
+  toc: Omit<AnchorProviderProps, 'children'>;
+}
+
+export function PageRoot({ toc, children, ...props }: RootProps) {
   const { collapsed } = useSidebar();
 
   return (
-    <div
-      id="nd-page"
-      {...props}
-      className={cn(className, page)}
-      style={{
-        paddingTop: 'calc(var(--fd-nav-height) + var(--fd-tocnav-height))',
-        maxWidth: collapsed
-          ? 'var(--fd-page-width)'
-          : 'min(var(--fd-page-width),calc(var(--fd-layout-width) - var(--fd-sidebar-width)))',
-        ...style,
-      }}
-    >
-      {children}
-    </div>
+    <TOCProvider {...toc}>
+      <div
+        id="nd-page"
+        {...props}
+        className={cn('flex flex-1 mx-auto w-full', props.className)}
+        style={{
+          paddingTop: 'calc(var(--fd-nav-height) + var(--fd-tocnav-height))',
+          maxWidth: collapsed
+            ? 'var(--fd-page-width)'
+            : 'min(var(--fd-page-width),calc(var(--fd-layout-width) - var(--fd-sidebar-width)))',
+          ...props.style,
+        }}
+      >
+        {children}
+      </div>
+    </TOCProvider>
   );
 }
 
-export function PageArticle(props: ComponentProps<'article'>) {
-  const { article } = usePageStyles();
-
-  return (
-    <article
-      {...props}
-      className={cn(
-        'flex min-w-0 w-full flex-col gap-6 px-4 pt-8 md:px-6 md:pt-12 xl:px-12 xl:mx-auto',
-        article,
-        props.className,
-      )}
-    >
-      {props.children}
-    </article>
-  );
-}
-
-export function LastUpdate(props: { date: Date }) {
+export function PageLastUpdate({
+  date: value,
+  ...props
+}: Omit<ComponentProps<'p'>, 'children'> & { date: Date | string }) {
   const { text } = useI18n();
   const [date, setDate] = useState('');
 
   useEffect(() => {
     // to the timezone of client
-    setDate(props.date.toLocaleDateString());
-  }, [props.date]);
+    setDate(new Date(value).toLocaleDateString());
+  }, [value]);
 
   return (
-    <p className="text-sm text-fd-muted-foreground">
+    <p
+      {...props}
+      className={cn('text-sm text-fd-muted-foreground', props.className)}
+    >
       {text.lastUpdate} {date}
     </p>
   );
 }
 
 type Item = Pick<PageTree.Item, 'name' | 'description' | 'url'>;
-export interface FooterProps {
+export interface FooterProps extends ComponentProps<'div'> {
   /**
    * Items including information for the next and previous page
    */
@@ -310,7 +297,7 @@ function scanNavigationList(tree: PageTree.Node[]) {
 
 const listCache = new WeakMap<PageTree.Root, PageTree.Item[]>();
 
-export function Footer({ items }: FooterProps) {
+export function PageFooter({ items, ...props }: FooterProps) {
   const { root } = useTreeContext();
   const pathname = usePathname();
 
@@ -332,9 +319,11 @@ export function Footer({ items }: FooterProps) {
 
   return (
     <div
+      {...props}
       className={cn(
         '@container grid gap-4 pb-6',
         previous && next ? 'grid-cols-2' : 'grid-cols-1',
+        props.className,
       )}
     >
       {previous ? <FooterItem item={previous} index={0} /> : null}
@@ -371,22 +360,34 @@ function FooterItem({ item, index }: { item: Item; index: 0 | 1 }) {
   );
 }
 
-export type BreadcrumbProps = BreadcrumbOptions;
+export type BreadcrumbProps = BreadcrumbOptions & ComponentProps<'div'>;
 
-export function Breadcrumb(options: BreadcrumbProps) {
+export function PageBreadcrumb({
+  includeRoot = false,
+  includeSeparator,
+  includePage = false,
+  ...props
+}: BreadcrumbProps) {
   const path = useTreePath();
   const { root } = useTreeContext();
   const items = useMemo(() => {
     return getBreadcrumbItemsFromPath(root, path, {
-      includePage: options.includePage ?? false,
-      ...options,
+      includePage,
+      includeSeparator,
+      includeRoot,
     });
-  }, [options, path, root]);
+  }, [includePage, includeRoot, includeSeparator, path, root]);
 
   if (items.length === 0) return null;
 
   return (
-    <div className="flex flex-row items-center gap-1.5 text-[15px] text-fd-muted-foreground">
+    <div
+      {...props}
+      className={cn(
+        'flex items-center gap-1.5 text-[15px] text-fd-muted-foreground',
+        props.className,
+      )}
+    >
       {items.map((item, i) => {
         const className = cn(
           'truncate',
@@ -409,6 +410,25 @@ export function Breadcrumb(options: BreadcrumbProps) {
           </Fragment>
         );
       })}
+    </div>
+  );
+}
+
+export function PageTOC(props: ComponentProps<'div'>) {
+  return (
+    <div
+      id="nd-toc"
+      {...props}
+      className={cn('sticky pb-2 pt-12 max-xl:hidden', props.className)}
+      style={{
+        ...props.style,
+        top: 'calc(var(--fd-banner-height) + var(--fd-nav-height))',
+        height: 'calc(100dvh - var(--fd-banner-height) - var(--fd-nav-height))',
+      }}
+    >
+      <div className="flex h-full w-(--fd-toc-width) max-w-full flex-col pe-4">
+        {props.children}
+      </div>
     </div>
   );
 }
