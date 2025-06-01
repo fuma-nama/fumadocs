@@ -81,7 +81,7 @@ export default async function Page(props: {
         <PageTOCPopover>
           <PageTOCPopoverTrigger />
           <PageTOCPopoverContent>
-            <PageTOCPopoverItems variant="clerk" />
+            <PageTOCPopoverItems />
           </PageTOCPopoverContent>
         </PageTOCPopover>
       )}

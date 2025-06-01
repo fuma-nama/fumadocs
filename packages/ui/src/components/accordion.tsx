@@ -80,7 +80,7 @@ export const Accordion = forwardRef<
       <AccordionPrimitive.Item
         ref={ref}
         value={value}
-        className={cn('group/accordion relative scroll-m-20', className)}
+        className={cn('scroll-m-24', className)}
         {...props}
       >
         <AccordionPrimitive.Header
@@ -88,8 +88,8 @@ export const Accordion = forwardRef<
           data-accordion-value={value}
           className="not-prose flex flex-row items-center text-fd-card-foreground font-medium has-focus-visible:bg-fd-accent"
         >
-          <AccordionPrimitive.Trigger className="flex flex-1 items-center gap-2 px-3 py-2.5 text-start focus-visible:outline-none">
-            <ChevronRight className="size-4 shrink-0 text-fd-muted-foreground transition-transform duration-200 group-data-[state=open]/accordion:rotate-90" />
+          <AccordionPrimitive.Trigger className="group flex flex-1 items-center gap-2 px-3 py-2.5 text-start focus-visible:outline-none">
+            <ChevronRight className="size-4 shrink-0 text-fd-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-90" />
             {title}
           </AccordionPrimitive.Trigger>
           {id ? <CopyButton id={id} /> : null}
