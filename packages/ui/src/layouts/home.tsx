@@ -1,7 +1,6 @@
 import { Fragment, type HTMLAttributes, useMemo } from 'react';
-import { type NavOptions, slot, slots } from '@/layouts/shared';
 import { cn } from '@/utils/cn';
-import { type BaseLayoutProps, getLinks } from './shared';
+import { type BaseLayoutProps, getLinks, type NavOptions } from './shared';
 import { NavProvider } from '@/contexts/layout';
 import {
   Navbar,
@@ -46,7 +45,7 @@ export function HomeLayout(
   props: HomeLayoutProps & HTMLAttributes<HTMLElement>,
 ) {
   const {
-    nav,
+    nav = {},
     links,
     githubUrl,
     i18n,
@@ -63,17 +62,17 @@ export function HomeLayout(
         {...rest}
         className={cn('flex flex-1 flex-col pt-14', rest.className)}
       >
-        {slot(
-          nav,
-          <Header
-            links={links}
-            nav={nav}
-            themeSwitch={themeSwitch}
-            searchToggle={searchToggle}
-            i18n={i18n}
-            githubUrl={githubUrl}
-          />,
-        )}
+        {nav.enabled !== false &&
+          (nav.component ?? (
+            <Header
+              links={links}
+              nav={nav}
+              themeSwitch={themeSwitch}
+              searchToggle={searchToggle}
+              i18n={i18n}
+              githubUrl={githubUrl}
+            />
+          ))}
         {props.children}
       </main>
     </NavProvider>
@@ -85,8 +84,8 @@ export function Header({
   i18n = false,
   links,
   githubUrl,
-  themeSwitch,
-  searchToggle,
+  themeSwitch = {},
+  searchToggle = {},
 }: HomeLayoutProps) {
   const finalLinks = useMemo(
     () => getLinks(links, githubUrl),
@@ -117,23 +116,23 @@ export function Header({
           ))}
       </ul>
       <div className="flex flex-row items-center justify-end gap-1.5 flex-1">
-        {slots(
-          'sm',
-          searchToggle,
-          <SearchToggle className="p-2 lg:hidden" hideIfDisabled />,
+        {searchToggle.enabled !== false && (
+          <>
+            {searchToggle.components?.sm ?? (
+              <SearchToggle className="p-2 lg:hidden" hideIfDisabled />
+            )}
+            {searchToggle.components?.lg ?? (
+              <LargeSearchToggle
+                className="w-full rounded-full ps-2.5 max-w-[240px] max-lg:hidden"
+                hideIfDisabled
+              />
+            )}
+          </>
         )}
-        {slots(
-          'lg',
-          searchToggle,
-          <LargeSearchToggle
-            className="w-full rounded-full ps-2.5 max-w-[240px] max-lg:hidden"
-            hideIfDisabled
-          />,
-        )}
-        {slot(
-          themeSwitch,
-          <ThemeToggle className="max-lg:hidden" mode={themeSwitch?.mode} />,
-        )}
+        {themeSwitch.enabled !== false &&
+          (themeSwitch.component ?? (
+            <ThemeToggle className="max-lg:hidden" mode={themeSwitch?.mode} />
+          ))}
         {i18n ? (
           <LanguageToggle className="max-lg:hidden">
             <Languages className="size-5" />
@@ -180,7 +179,10 @@ export function Header({
                   <ChevronDown className="size-3 text-fd-muted-foreground" />
                 </LanguageToggle>
               ) : null}
-              {slot(themeSwitch, <ThemeToggle mode={themeSwitch?.mode} />)}
+              {themeSwitch.enabled !== false &&
+                (themeSwitch.component ?? (
+                  <ThemeToggle mode={themeSwitch?.mode} />
+                ))}
             </div>
           </MenuContent>
         </Menu>

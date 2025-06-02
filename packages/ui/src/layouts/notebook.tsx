@@ -1,5 +1,5 @@
 import { Fragment, type HTMLAttributes, useMemo } from 'react';
-import { type BaseLayoutProps, getLinks, slot, slots } from '@/layouts/shared';
+import { type BaseLayoutProps, getLinks } from '@/layouts/shared';
 import {
   Sidebar,
   SidebarCollapseTrigger,
@@ -40,7 +40,7 @@ import {
   LargeSearchToggle,
   SearchToggle,
 } from '@/components/layout/search-toggle';
-import { HideIfEmpty } from '@/components/ui/hide-if-empty';
+import { HideIfEmpty } from 'fumadocs-core/hide-if-empty';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
@@ -179,13 +179,13 @@ export function DocsLayout(props: DocsLayoutProps) {
                     <Languages className="size-4.5 text-fd-muted-foreground" />
                   </LanguageToggle>
                 ) : null}
-                {slot(
-                  themeSwitch,
-                  <ThemeToggle
-                    className="md:hidden"
-                    mode={themeSwitch?.mode ?? 'light-dark-system'}
-                  />,
-                )}
+                {themeSwitch.enabled !== false &&
+                  (themeSwitch.component ?? (
+                    <ThemeToggle
+                      className="md:hidden"
+                      mode={themeSwitch?.mode ?? 'light-dark-system'}
+                    />
+                  ))}
                 {sidebarFooter}
               </SidebarFooter>
             </HideIfEmpty>
@@ -205,6 +205,8 @@ export function DocsLayout(props: DocsLayoutProps) {
 function DocsNavbar({
   links,
   tabs,
+  searchToggle = {},
+  themeSwitch = {},
   ...props
 }: DocsLayoutProps & {
   links: LinkItemType[];
@@ -253,19 +255,18 @@ function DocsNavbar({
           ) : null}
           {nav}
         </div>
-        {slots(
-          'lg',
-          props.searchToggle,
-          <LargeSearchToggle
-            hideIfDisabled
-            className={cn(
-              'w-full my-auto max-md:hidden',
-              navMode === 'top'
-                ? 'rounded-xl max-w-sm ps-2.5'
-                : 'max-w-[240px]',
-            )}
-          />,
-        )}
+        {searchToggle.enabled !== false &&
+          (searchToggle.components?.lg ?? (
+            <LargeSearchToggle
+              hideIfDisabled
+              className={cn(
+                'w-full my-auto max-md:hidden',
+                navMode === 'top'
+                  ? 'rounded-xl max-w-sm ps-2.5'
+                  : 'max-w-[240px]',
+              )}
+            />
+          ))}
         <div className="flex flex-1 flex-row items-center justify-end">
           <div className="flex flex-row items-center gap-6 px-4 empty:hidden max-lg:hidden">
             {links
@@ -279,11 +280,10 @@ function DocsNavbar({
               ))}
           </div>
           {props.nav?.children}
-          {slots(
-            'sm',
-            props.searchToggle,
-            <SearchToggle hideIfDisabled className="p-2 md:hidden" />,
-          )}
+          {searchToggle.enabled !== false &&
+            (searchToggle.components?.sm ?? (
+              <SearchToggle hideIfDisabled className="p-2 md:hidden" />
+            ))}
           <NavbarSidebarTrigger className="p-2 -me-1.5 md:hidden" />
           {links
             .filter((item) => item.type === 'icon')
@@ -305,13 +305,13 @@ function DocsNavbar({
               <Languages className="size-4.5 text-fd-muted-foreground" />
             </LanguageToggle>
           ) : null}
-          {slot(
-            props.themeSwitch,
-            <ThemeToggle
-              className="ms-2 max-md:hidden"
-              mode={props.themeSwitch?.mode ?? 'light-dark-system'}
-            />,
-          )}
+          {themeSwitch.enabled !== false &&
+            (themeSwitch.component ?? (
+              <ThemeToggle
+                className="ms-2 max-md:hidden"
+                mode={themeSwitch.mode ?? 'light-dark-system'}
+              />
+            ))}
           {sidebarCollapsible && navMode === 'top' ? (
             <SidebarCollapseTrigger
               className={cn(

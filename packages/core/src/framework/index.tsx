@@ -1,6 +1,6 @@
 'use client';
-import React from 'react';
 import type { ComponentProps, FC, ReactNode } from 'react';
+import React from 'react';
 import type { StaticImport } from 'next/dist/shared/lib/get-img-props';
 
 export interface ImageProps extends Omit<ComponentProps<'img'>, 'src'> {
@@ -53,24 +53,22 @@ const FrameworkContext = createContext<Framework>('FrameworkContext', {
 });
 
 export function FrameworkProvider({
+  Link,
+  useRouter,
+  useParams,
+  usePathname,
+  Image,
   children,
-  ...props
 }: Framework & { children: ReactNode }) {
   const framework = React.useMemo(
     () => ({
-      usePathname: props.usePathname,
-      useRouter: props.useRouter,
-      Link: props.Link,
-      Image: props.Image,
-      useParams: props.useParams,
+      usePathname,
+      useRouter,
+      Link,
+      Image,
+      useParams,
     }),
-    [
-      props.Link,
-      props.usePathname,
-      props.useRouter,
-      props.useParams,
-      props.Image,
-    ],
+    [Link, usePathname, useRouter, useParams, Image],
   );
 
   return (

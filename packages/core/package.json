@@ -28,6 +28,10 @@
       "import": "./dist/content/index.js",
       "types": "./dist/content/index.d.ts"
     },
+    "./hide-if-empty": {
+      "import": "./dist/hide-if-empty.js",
+      "types": "./dist/hide-if-empty.d.ts"
+    },
     "./search/*": {
       "import": "./dist/search/*.js",
       "types": "./dist/search/*.d.ts"
