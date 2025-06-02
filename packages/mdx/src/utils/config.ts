@@ -61,11 +61,13 @@ async function compileConfig(configPath: string, outDir: string) {
  * Load config
  *
  * @param configPath - config path
+ * @param outDir - output directory
  * @param hash - hash of config content
  * @param build - By default, it assumes the TypeScript config has been compiled to `.source/source.config.mjs`. Set this `true` to compile the config first.
  */
 export async function loadConfig(
   configPath: string,
+  outDir: string,
   hash: string,
   build = false,
 ): Promise<LoadedConfig> {
@@ -73,9 +75,9 @@ export async function loadConfig(
     return await cache.config;
   }
 
-  if (build) await compileConfig(configPath, '.source');
+  if (build) await compileConfig(configPath, outDir);
 
-  const url = pathToFileURL(path.resolve('.source/source.config.mjs'));
+  const url = pathToFileURL(path.resolve(outDir, 'source.config.mjs'));
 
   const config = import(`${url.href}?hash=${hash}`).then((loaded) => {
     const [err, config] = buildConfig(

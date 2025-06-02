@@ -17,7 +17,7 @@ export async function start(
 ): Promise<void> {
   // init
   let configHash = await getConfigHash(configPath);
-  let config = await loadConfig(configPath, configHash, true);
+  let config = await loadConfig(configPath, outDir, configHash, true);
   const outPath = path.resolve(outDir, `index.ts`);
 
   async function updateMapFile() {
@@ -58,7 +58,7 @@ export async function start(
 
         if (isConfigFile) {
           configHash = await getConfigHash(configPath);
-          config = await loadConfig(configPath, configHash, true);
+          config = await loadConfig(configPath, outDir, configHash, true);
         }
 
         if (event === 'change') fileCache.removeCache(absolutePath);

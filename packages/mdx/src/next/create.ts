@@ -1,4 +1,3 @@
-import path from 'node:path';
 import type { NextConfig } from 'next';
 import type { Configuration } from 'webpack';
 import { findConfigFile } from '@/utils/config';
@@ -10,15 +9,22 @@ export interface CreateMDXOptions {
    * Path to source configuration file
    */
   configPath?: string;
+
+  /**
+   * Directory for output files
+   *
+   * @defaultValue '.source'
+   */
+  outDir?: string;
 }
 
-const outDir = path.resolve('.source');
 const defaultPageExtensions = ['mdx', 'md', 'jsx', 'js', 'tsx', 'ts'];
 
 export { start };
 
 export function createMDX({
   configPath = findConfigFile(),
+  outDir = '.source',
 }: CreateMDXOptions = {}) {
   // Next.js performs multiple iteration on the `next.config.js` file
   // the first time contains the original arguments of `next dev`
@@ -35,6 +41,7 @@ export function createMDX({
   return (nextConfig: NextConfig = {}): NextConfig => {
     const mdxLoaderOptions: MDXLoaderOptions = {
       configPath,
+      outDir,
     };
 
     return {
