@@ -141,11 +141,7 @@ export function Header({
       </div>
       <ul className="flex flex-row items-center">
         {navItems.filter(isSecondary).map((item, i) => (
-          <NavbarLinkItem
-            key={i}
-            item={item}
-            className="-me-1.5 max-lg:hidden"
-          />
+          <NavbarLinkItem key={i} item={item} className="max-lg:hidden" />
         ))}
         <Menu className="lg:hidden">
           <MenuTrigger
