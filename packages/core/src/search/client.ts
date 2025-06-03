@@ -54,12 +54,16 @@ function isDifferentDeep(a: unknown, b: unknown): boolean {
 }
 
 /**
+ * Provide a hook to query different official search clients.
+ *
+ * Note: it will re-query when its parameters changed, make sure to use `useCallback()` on functions passed to this hook.
+ *
  * @param client - search client
  * @param locale - Filter with locale
  * @param tag - Filter with specific tag
  * @param delayMs - The debounced delay for performing a search.
  * @param allowEmpty - still perform search even if query is empty
- * @param key - cache key
+ * @param _key - cache key (deprecated)
  */
 export function useDocsSearch(
   client: Client,
@@ -67,7 +71,7 @@ export function useDocsSearch(
   tag?: string,
   delayMs = 100,
   allowEmpty = false,
-  key?: string,
+  _key?: string,
 ): UseDocsSearch {
   const [search, setSearch] = useState('');
   const [results, setResults] = useState<SortedResult[] | 'empty'>('empty');
@@ -77,7 +81,7 @@ export function useDocsSearch(
   const onStart = useRef<() => void>(undefined);
 
   useOnChange(
-    key ?? [client, debouncedValue, locale, tag],
+    [client, debouncedValue, locale, tag],
     () => {
       if (onStart.current) {
         onStart.current();

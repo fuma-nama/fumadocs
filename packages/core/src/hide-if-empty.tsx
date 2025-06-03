@@ -51,6 +51,7 @@ export function HideIfEmpty({ children }: { children: React.ReactNode }) {
       ...(children.props as object),
       'data-fdid': id,
       'data-empty': empty,
+      suppressHydrationWarning: true,
     } as object);
   } else {
     child =
