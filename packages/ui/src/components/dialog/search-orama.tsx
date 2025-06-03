@@ -4,17 +4,26 @@ import {
   type OramaCloudOptions,
   useDocsSearch,
 } from 'fumadocs-core/search/client';
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useMemo, useState } from 'react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import {
   SearchDialog,
-  type SharedProps,
-  type TagItem,
+  SearchDialogClose,
+  SearchDialogContent,
+  SearchDialogFooter,
+  SearchDialogHeader,
+  SearchDialogInput,
+  SearchDialogInputIcon,
+  SearchDialogList,
+  SearchDialogOverlay,
   TagsList,
   TagsListItem,
 } from './search';
+import type { SortedResult } from 'fumadocs-core/server';
+import type { SearchLink, SharedProps, TagItem } from '@/contexts/search';
 
 export interface OramaSearchDialogProps extends SharedProps {
+  links: SearchLink[];
   client: OramaCloudOptions['client'];
   searchOptions?: OramaCloudOptions['params'];
   index?: OramaCloudOptions['index'];
@@ -45,11 +54,13 @@ export interface OramaSearchDialogProps extends SharedProps {
 export default function OramaSearchDialog({
   client,
   searchOptions,
-  tags,
+  tags = [],
   defaultTag,
   showOrama = false,
   allowClear = false,
   index,
+  footer,
+  links = [],
   ...props
 }: OramaSearchDialogProps): ReactNode {
   const [tag, setTag] = useState(defaultTag);
@@ -64,35 +75,60 @@ export default function OramaSearchDialog({
     tag,
   );
 
+  const defaultItems = useMemo<SortedResult[]>(
+    () =>
+      links.map(([name, link]) => ({
+        type: 'page',
+        id: name,
+        content: name,
+        url: link,
+      })),
+    [links],
+  );
+
   useOnChange(defaultTag, (v) => {
     setTag(v);
   });
+
+  const label = showOrama && <Label />;
 
   return (
     <SearchDialog
       search={search}
       onSearchChange={setSearch}
-      results={query.data ?? []}
       isLoading={query.isLoading}
       {...props}
-      footer={
-        <>
-          {tags ? (
+    >
+      <SearchDialogOverlay />
+      <SearchDialogContent>
+        <SearchDialogHeader>
+          <SearchDialogInputIcon />
+          <SearchDialogInput />
+          <SearchDialogClose />
+        </SearchDialogHeader>
+        {query.data !== 'empty' && query.data && (
+          <SearchDialogList items={query.data} />
+        )}
+        {query.data === 'empty' && defaultItems.length > 0 && (
+          <SearchDialogList items={defaultItems} />
+        )}
+        <SearchDialogFooter>
+          {tags.length > 0 ? (
             <TagsList tag={tag} onTagChange={setTag} allowClear={allowClear}>
               {tags.map((tag) => (
                 <TagsListItem key={tag.value} value={tag.value}>
                   {tag.name}
                 </TagsListItem>
               ))}
-              {showOrama && <Label />}
+              {label}
             </TagsList>
           ) : (
-            showOrama && <Label />
+            label
           )}
-          {props.footer}
-        </>
-      }
-    />
+          {footer}
+        </SearchDialogFooter>
+      </SearchDialogContent>
+    </SearchDialog>
   );
 }
 

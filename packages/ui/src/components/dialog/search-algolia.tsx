@@ -4,18 +4,27 @@ import {
   type AlgoliaOptions,
   useDocsSearch,
 } from 'fumadocs-core/search/client';
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useMemo, useState } from 'react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import {
   SearchDialog,
-  type SharedProps,
-  type TagItem,
+  SearchDialogClose,
+  SearchDialogContent,
+  SearchDialogFooter,
+  SearchDialogHeader,
+  SearchDialogInput,
+  SearchDialogInputIcon,
+  SearchDialogList,
+  SearchDialogOverlay,
   TagsList,
   TagsListItem,
 } from './search';
+import type { SortedResult } from 'fumadocs-core/server';
+import type { SearchLink, SharedProps, TagItem } from '@/contexts/search';
 
 export interface AlgoliaSearchDialogProps extends SharedProps {
   searchOptions: AlgoliaOptions;
+  links?: SearchLink[];
 
   footer?: ReactNode;
 
@@ -39,10 +48,12 @@ export interface AlgoliaSearchDialogProps extends SharedProps {
 
 export default function AlgoliaSearchDialog({
   searchOptions,
-  tags,
+  tags = [],
   defaultTag,
   showAlgolia = false,
   allowClear = false,
+  links = [],
+  footer,
   ...props
 }: AlgoliaSearchDialogProps): ReactNode {
   const [tag, setTag] = useState(defaultTag);
@@ -54,36 +65,60 @@ export default function AlgoliaSearchDialog({
     undefined,
     tag,
   );
+  const defaultItems = useMemo<SortedResult[]>(
+    () =>
+      links.map(([name, link]) => ({
+        type: 'page',
+        id: name,
+        content: name,
+        url: link,
+      })),
+    [links],
+  );
 
   useOnChange(defaultTag, (v) => {
     setTag(v);
   });
 
+  const label = showAlgolia && <AlgoliaTitle />;
+
   return (
     <SearchDialog
       search={search}
       onSearchChange={setSearch}
-      results={query.data ?? []}
       isLoading={query.isLoading}
       {...props}
-      footer={
-        <>
-          {tags ? (
-            <TagsList tag={tag} onTagChange={setTag} allowClear={allowClear}>
-              {tags.map((tag) => (
-                <TagsListItem key={tag.value} value={tag.value}>
-                  {tag.name}
-                </TagsListItem>
-              ))}
-              {showAlgolia && <AlgoliaTitle />}
-            </TagsList>
-          ) : (
-            showAlgolia && <AlgoliaTitle />
-          )}
-          {props.footer}
-        </>
-      }
-    />
+    >
+      <SearchDialogOverlay />
+      <SearchDialogContent>
+        <SearchDialogHeader>
+          <SearchDialogInputIcon />
+          <SearchDialogInput />
+          <SearchDialogClose />
+        </SearchDialogHeader>
+        {query.data !== 'empty' && query.data && (
+          <SearchDialogList items={query.data} />
+        )}
+        {query.data === 'empty' && defaultItems.length > 0 && (
+          <SearchDialogList items={defaultItems} />
+        )}
+      </SearchDialogContent>
+      <SearchDialogFooter>
+        {tags.length > 0 ? (
+          <TagsList tag={tag} onTagChange={setTag} allowClear={allowClear}>
+            {tags.map((tag) => (
+              <TagsListItem key={tag.value} value={tag.value}>
+                {tag.name}
+              </TagsListItem>
+            ))}
+            {label}
+          </TagsList>
+        ) : (
+          label
+        )}
+        {footer}
+      </SearchDialogFooter>
+    </SearchDialog>
   );
 }
 

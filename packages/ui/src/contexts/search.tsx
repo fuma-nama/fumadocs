@@ -6,7 +6,6 @@ import {
   useMemo,
   useState,
 } from 'react';
-import type { SearchLink, SharedProps } from '@/components/dialog/search';
 import { createContext } from 'fumadocs-core/framework';
 
 interface HotKey {
@@ -16,6 +15,18 @@ interface HotKey {
    * Key code or a function determining whether the key is pressed.
    */
   key: string | ((e: KeyboardEvent) => boolean);
+}
+
+export interface SharedProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export type SearchLink = [name: string, href: string];
+
+export interface TagItem {
+  name: string;
+  value: string;
 }
 
 export interface SearchProviderProps {
@@ -48,7 +59,7 @@ export interface SearchProviderProps {
   /**
    * Additional props to the dialog
    */
-  options?: Partial<SharedProps>;
+  options?: Partial<SharedProps & Record<string, unknown>>;
 
   children?: ReactNode;
 }
@@ -129,6 +140,7 @@ export function SearchProvider({
         <SearchDialog
           open={isOpen}
           onOpenChange={setIsOpen}
+          // @ts-expect-error -- insert prop for official UIs
           links={links}
           {...options}
         />

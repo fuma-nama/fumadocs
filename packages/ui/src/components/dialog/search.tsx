@@ -9,13 +9,16 @@ import {
 } from 'lucide-react';
 import {
   type ComponentProps,
+  createContext,
+  Fragment,
   type ReactNode,
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useState,
 } from 'react';
-import { useI18n } from '@/contexts/i18n';
+import { I18nLabel, useI18n } from '@/contexts/i18n';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import {
@@ -27,109 +30,168 @@ import {
 import type { SortedResult } from 'fumadocs-core/server';
 import { cva } from 'class-variance-authority';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
-import { createContext, useRouter } from 'fumadocs-core/framework';
-
-export type SearchLink = [name: string, href: string];
+import { useRouter } from 'fumadocs-core/framework';
+import type { SharedProps } from '@/contexts/search';
+import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 
 type ReactSortedResult = Omit<SortedResult, 'content'> & {
   external?: boolean;
   content: ReactNode;
 };
 
-export interface TagItem {
-  name: string;
-  value: string;
-}
-
-export interface SharedProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-
-  /**
-   * Custom links to be displayed if search is empty
-   */
-  links?: SearchLink[];
-}
-
-interface SearchDialogProps extends SharedProps {
+export interface SearchDialogProps extends SharedProps {
   search: string;
   onSearchChange: (v: string) => void;
   isLoading?: boolean;
-  hideResults?: boolean;
-  results: ReactSortedResult[] | 'empty';
 
-  footer?: ReactNode;
+  children: ReactNode;
 }
+
+const Context = createContext<{
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  search: string;
+  onSearchChange: (v: string) => void;
+
+  isLoading: boolean;
+} | null>(null);
+
+const ListContext = createContext<{
+  active: string | null;
+  setActive: (v: string | null) => void;
+} | null>(null);
+
+const TagsListContext = createContext<{
+  value?: string;
+  onValueChange: (value: string | undefined) => void;
+  allowClear: boolean;
+} | null>(null);
 
 export function SearchDialog({
   open,
   onOpenChange,
-  footer,
-  links = [],
   search,
   onSearchChange,
-  isLoading,
-  ...props
+  isLoading = false,
+  children,
 }: SearchDialogProps) {
-  const { text } = useI18n();
-  const [active, setActive] = useState<string>();
-  const defaultItems = useMemo<ReactSortedResult[]>(
-    () =>
-      links.map(([name, link]) => ({
-        type: 'page',
-        id: name,
-        content: name,
-        url: link,
-      })),
-    [links],
-  );
+  const [active, setActive] = useState<string | null>(null);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogOverlay className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm data-[state=closed]:animate-fd-fade-out data-[state=open]:animate-fd-fade-in" />
-      <DialogContent
-        aria-describedby={undefined}
-        className="fixed left-1/2 top-[10vh] z-50 w-[98vw] max-w-screen-sm -translate-x-1/2 rounded-lg border bg-fd-popover text-fd-popover-foreground shadow-lg data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in"
+      <Context.Provider
+        value={useMemo(
+          () => ({
+            open,
+            onOpenChange,
+            search,
+            onSearchChange,
+            active,
+            setActive,
+            isLoading,
+          }),
+          [active, isLoading, onOpenChange, onSearchChange, open, search],
+        )}
       >
-        <DialogTitle className="hidden">{text.search}</DialogTitle>
-        <div className="flex flex-row items-center gap-2 px-3">
-          <LoadingIndicator isLoading={isLoading ?? false} />
-          <input
-            value={search}
-            onChange={(e) => {
-              onSearchChange(e.target.value);
-              setActive(undefined);
-            }}
-            placeholder={text.search}
-            className="w-0 flex-1 bg-transparent py-3 text-base placeholder:text-fd-muted-foreground focus-visible:outline-none"
-          />
-          <button
-            type="button"
-            aria-label="Close Search"
-            onClick={() => onOpenChange(false)}
-            className={cn(
-              buttonVariants({
-                color: 'outline',
-                className: 'text-xs p-1.5',
-              }),
-            )}
-          >
-            Esc
-          </button>
-        </div>
-        {props.results !== 'empty' || defaultItems.length > 0 ? (
-          <SearchResults
-            active={active}
-            onActiveChange={setActive}
-            items={props.results === 'empty' ? defaultItems : props.results}
-            onSelect={() => onOpenChange(false)}
-          />
-        ) : null}
-        <div className="mt-auto flex flex-col border-t p-3 empty:hidden">
-          {footer}
-        </div>
-      </DialogContent>
+        {children}
+      </Context.Provider>
     </Dialog>
+  );
+}
+
+export function SearchDialogHeader(props: ComponentProps<'div'>) {
+  return (
+    <div
+      {...props}
+      className={cn('flex flex-row items-center gap-2 px-3', props.className)}
+    />
+  );
+}
+
+export function SearchDialogInput(props: ComponentProps<'input'>) {
+  const { text } = useI18n();
+  const { search, onSearchChange } = useSearch();
+
+  return (
+    <input
+      {...props}
+      value={search}
+      onChange={(e) => onSearchChange(e.target.value)}
+      placeholder={text.search}
+      className="w-0 flex-1 bg-transparent py-3 text-base placeholder:text-fd-muted-foreground focus-visible:outline-none"
+    />
+  );
+}
+
+export function SearchDialogClose({
+  children = 'Esc',
+  className,
+  ...props
+}: ComponentProps<'button'>) {
+  const { onOpenChange } = useSearch();
+
+  return (
+    <button
+      type="button"
+      onClick={() => onOpenChange(false)}
+      className={cn(
+        buttonVariants({
+          color: 'outline',
+          className: 'text-xs p-1.5',
+        }),
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+}
+
+export function SearchDialogFooter(props: ComponentProps<'div'>) {
+  return (
+    <div
+      {...props}
+      className={cn(
+        'mt-auto flex flex-col border-t p-3 empty:hidden',
+        props.className,
+      )}
+    />
+  );
+}
+
+export function SearchDialogOverlay(
+  props: ComponentProps<typeof DialogOverlay>,
+) {
+  return (
+    <DialogOverlay
+      {...props}
+      className={cn(
+        'fixed inset-0 z-50 bg-black/30 backdrop-blur-sm data-[state=closed]:animate-fd-fade-out data-[state=open]:animate-fd-fade-in',
+        props.className,
+      )}
+    />
+  );
+}
+
+export function SearchDialogContent({
+  children,
+  ...props
+}: ComponentProps<typeof DialogContent>) {
+  const { text } = useI18n();
+
+  return (
+    <DialogContent
+      aria-describedby={undefined}
+      {...props}
+      className={cn(
+        'fixed left-1/2 top-[10vh] z-50 w-[98vw] max-w-screen-sm -translate-x-1/2 rounded-lg border bg-fd-popover text-fd-popover-foreground shadow-lg data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in',
+        props.className,
+      )}
+    >
+      <DialogTitle className="hidden">{text.search}</DialogTitle>
+      {children}
+    </DialogContent>
   );
 }
 
@@ -139,40 +201,44 @@ const icons = {
   page: <FileText className="size-4 text-fd-muted-foreground" />,
 };
 
-function SearchResults({
+export function SearchDialogList({
   items,
-  active = items.at(0)?.id,
-  onActiveChange,
-  onSelect,
+  Empty = () => (
+    <div className="py-12 text-center text-sm">
+      <I18nLabel label="searchNoResult" />
+    </div>
+  ),
+  Item = (props) => <SearchDialogListItem {...props} />,
   ...props
-}: ComponentProps<'div'> & {
-  active?: string;
-  onActiveChange: (active: string | undefined) => void;
-
+}: Omit<ComponentProps<'div'>, 'children'> & {
   items: ReactSortedResult[];
-  onSelect?: (value: string) => void;
+  /**
+   * Renderer for empty list UI
+   */
+  Empty?: () => ReactNode;
+  /**
+   * Renderer for items
+   */
+  Item?: (props: { item: ReactSortedResult; onClick: () => void }) => ReactNode;
 }) {
-  const { text } = useI18n();
+  const [active, setActive] = useState<string | null>(items.at(0)?.id ?? null);
+  const { onOpenChange } = useSearch();
   const router = useRouter();
 
   const onOpen = ({ external, url }: ReactSortedResult) => {
     if (external) window.open(url, '_blank')?.focus();
     else router.push(url);
-    onSelect?.(url);
+    onOpenChange(false);
   };
 
   const onKey = useEffectEvent((e: KeyboardEvent) => {
     if (e.key === 'ArrowDown' || e.key == 'ArrowUp') {
-      const idx = items.findIndex((item) => item.id === active);
-      if (idx === -1) {
-        onActiveChange(items.at(0)?.id);
-      } else {
-        onActiveChange(
-          items.at((e.key === 'ArrowDown' ? idx + 1 : idx - 1) % items.length)
-            ?.id,
-        );
-      }
+      let idx = items.findIndex((item) => item.id === active);
+      if (idx === -1) idx = 0;
+      else if (e.key === 'ArrowDown') idx++;
+      else idx--;
 
+      setActive(items.at(idx % items.length)?.id ?? null);
       e.preventDefault();
     }
 
@@ -191,6 +257,10 @@ function SearchResults({
     };
   }, [onKey]);
 
+  useOnChange(items, () => {
+    if (items.length > 0) setActive(items[0].id);
+  });
+
   return (
     <div
       {...props}
@@ -199,36 +269,74 @@ function SearchResults({
         props.className,
       )}
     >
-      {items.length === 0 ? (
-        <div className="py-12 text-center text-sm">{text.searchNoResult}</div>
-      ) : null}
+      <ListContext.Provider
+        value={useMemo(
+          () => ({
+            active,
+            setActive,
+          }),
+          [active],
+        )}
+      >
+        {items.length === 0 && Empty()}
 
-      {items.map((item) => (
-        <CommandItem
-          key={item.id}
-          active={active === item.id}
-          onPointerMove={() => onActiveChange(item.id)}
-          onClick={() => {
-            onOpen(item);
-          }}
-        >
-          {item.type !== 'page' ? (
-            <div
-              role="none"
-              className="ms-2 h-full min-h-10 w-px bg-fd-border"
-            />
-          ) : null}
-          {icons[item.type]}
-          <p className="w-0 flex-1 truncate">{item.content}</p>
-        </CommandItem>
-      ))}
+        {items.map((item) => (
+          <Fragment key={item.id}>
+            {Item({ item, onClick: () => onOpen(item) })}
+          </Fragment>
+        ))}
+      </ListContext.Provider>
     </div>
   );
 }
 
-function LoadingIndicator({ isLoading }: { isLoading: boolean }) {
+export function SearchDialogListItem({
+  item,
+  className,
+  children,
+  ...props
+}: ComponentProps<'button'> & {
+  item: ReactSortedResult;
+}) {
+  const { active: activeId, setActive } = useSearchList();
+  const active = item.id === activeId;
+
   return (
-    <div className="relative size-4">
+    <button
+      type="button"
+      ref={useCallback(
+        (element: HTMLButtonElement | null) => {
+          if (active && element) {
+            element.scrollIntoView({
+              block: 'nearest',
+            });
+          }
+        },
+        [active],
+      )}
+      aria-selected={active}
+      className={cn(
+        'flex min-h-10 select-none flex-row items-center gap-2.5 rounded-lg px-2 text-start text-sm',
+        active && 'bg-fd-accent text-fd-accent-foreground',
+        className,
+      )}
+      onPointerMove={() => setActive(item.id)}
+      {...props}
+    >
+      {item.type !== 'page' && (
+        <div role="none" className="ms-2 h-full min-h-10 w-px bg-fd-border" />
+      )}
+      {icons[item.type]}
+      <p className="w-0 flex-1 truncate">{children ?? item.content}</p>
+    </button>
+  );
+}
+
+export function SearchDialogInputIcon(props: ComponentProps<'div'>) {
+  const { isLoading } = useSearch();
+
+  return (
+    <div {...props} className={cn('relative size-4', props.className)}>
       <LoaderCircle
         className={cn(
           'absolute size-full animate-spin text-fd-primary transition-opacity',
@@ -242,38 +350,6 @@ function LoadingIndicator({ isLoading }: { isLoading: boolean }) {
         )}
       />
     </div>
-  );
-}
-
-function CommandItem({
-  active = false,
-  ...props
-}: ComponentProps<'button'> & {
-  active?: boolean;
-}) {
-  return (
-    <button
-      ref={useCallback(
-        (element: HTMLButtonElement | null) => {
-          if (active && element) {
-            element.scrollIntoView({
-              block: 'nearest',
-            });
-          }
-        },
-        [active],
-      )}
-      type="button"
-      aria-selected={active}
-      {...props}
-      className={cn(
-        'flex min-h-10 select-none flex-row items-center gap-2.5 rounded-lg px-2 text-start text-sm',
-        active && 'bg-fd-accent text-fd-accent-foreground',
-        props.className,
-      )}
-    >
-      {props.children}
-    </button>
   );
 }
 
@@ -293,12 +369,6 @@ const itemVariants = cva(
     },
   },
 );
-
-const TagsListContext = createContext<{
-  value?: string;
-  onValueChange: (value: string | undefined) => void;
-  allowClear: boolean;
-}>('TagsList');
 
 export function TagsList({
   tag,
@@ -334,17 +404,16 @@ export function TagsListItem({
 }: ComponentProps<'button'> & {
   value: string;
 }) {
-  const ctx = TagsListContext.use();
+  const { onValueChange, value: selectedValue, allowClear } = useTagsList();
+  const selected = value === selectedValue;
 
   return (
     <button
       type="button"
-      data-active={value === ctx.value}
-      className={cn(itemVariants({ active: value === ctx.value, className }))}
+      data-active={selected}
+      className={cn(itemVariants({ active: selected, className }))}
       onClick={() => {
-        ctx.onValueChange(
-          ctx.value === value && ctx.allowClear ? undefined : value,
-        );
+        onValueChange(selected && allowClear ? undefined : value);
       }}
       tabIndex={-1}
       {...props}
@@ -352,4 +421,22 @@ export function TagsListItem({
       {props.children}
     </button>
   );
+}
+
+export function useSearch() {
+  const ctx = useContext(Context);
+  if (!ctx) throw new Error('Missing <SearchDialog />');
+  return ctx;
+}
+
+export function useTagsList() {
+  const ctx = useContext(TagsListContext);
+  if (!ctx) throw new Error('Missing <TagsList />');
+  return ctx;
+}
+
+export function useSearchList() {
+  const ctx = useContext(ListContext);
+  if (!ctx) throw new Error('Missing <SearchDialogList />');
+  return ctx;
 }
