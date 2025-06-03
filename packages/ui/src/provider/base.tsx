@@ -134,7 +134,7 @@ function I18nProvider({
   ...props
 }: I18nProviderProps) {
   const router = useRouter();
-  const pathname = usePathname();
+  const pathname = decodeURIComponent(usePathname());
   const onChange = useEffectEvent((value: string) => {
     if (onLocaleChange) {
       return onLocaleChange(value);

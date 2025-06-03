@@ -118,7 +118,7 @@ export function searchPath(
   url: string,
 ): PageTree.Node[] | null {
   if (url.endsWith('/')) url = url.slice(0, -1);
-
+  url = decodeURIComponent(url);
   let separator: PageTree.Separator | undefined;
 
   for (const node of nodes) {

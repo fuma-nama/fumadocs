@@ -36,7 +36,7 @@ export function RootToggle({
 } & ComponentProps<'button'>) {
   const [open, setOpen] = useState(false);
   const { closeOnRedirect } = useSidebar();
-  const pathname = usePathname();
+  const pathname = decodeURIComponent(usePathname());
 
   const selected = useMemo(() => {
     return options.findLast((item) =>

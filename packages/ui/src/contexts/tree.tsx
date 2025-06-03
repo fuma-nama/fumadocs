@@ -25,7 +25,7 @@ export function TreeContextProvider(props: {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const tree = useMemo(() => props.tree, [props.tree.$id ?? props.tree]);
   const path = useMemo(
-    () => searchPath(tree.children, pathname) ?? [],
+    () => searchPath(tree.children, decodeURIComponent(pathname)) ?? [],
     [tree, pathname],
   );
 

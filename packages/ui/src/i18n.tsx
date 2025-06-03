@@ -25,7 +25,7 @@ export function I18nProvider({
   onChange?: I18nProviderProps['onLocaleChange'];
 }) {
   const router = useRouter();
-  const pathname = usePathname();
+  const pathname = decodeURIComponent(usePathname());
   const onChange = useEffectEvent((value: string) => {
     if (onLocaleChange) {
       return onLocaleChange(value);

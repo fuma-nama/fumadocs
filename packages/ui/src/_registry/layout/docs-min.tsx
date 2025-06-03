@@ -115,7 +115,7 @@ function SidebarItem({
   item: PageTree.Node;
   children: ReactNode;
 }) {
-  const pathname = usePathname();
+  const pathname = decodeURIComponent(usePathname());
 
   if (item.type === 'page') {
     return (

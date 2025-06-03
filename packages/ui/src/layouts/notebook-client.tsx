@@ -97,7 +97,7 @@ export function LayoutTabs(props: ComponentProps<'div'>) {
 
 export function LayoutTab(item: Option) {
   const { closeOnRedirect } = useSidebar();
-  const pathname = usePathname();
+  const pathname = decodeURIComponent(usePathname());
   const selected = item.urls
     ? item.urls.has(pathname.endsWith('/') ? pathname.slice(0, -1) : pathname)
     : isActive(item.url, pathname, true);
