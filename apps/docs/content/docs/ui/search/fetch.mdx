@@ -1,0 +1,49 @@
+---
+title: fetch
+description: Using the fetch client with Orama search engine.
+---
+
+## Overview
+
+It sends queries to an API endpoint, works with the built-in [Orama search engine](/docs/headless/search/orama).
+
+You can pass options to the search client:
+
+```tsx
+import { RootProvider } from 'fumadocs-ui/provider';
+
+<RootProvider
+  search={{
+    options: {
+      // customise the API endpoint [!code ++]
+      api: '/api/search/docs',
+    },
+  }}
+>
+  {children}
+</RootProvider>;
+```
+
+### Tag Filter
+
+You can add UI for filtering results by tags, [configure Tag Filter](/docs/headless/search/orama#tag-filter) on search server and add the following:
+
+```tsx
+import { RootProvider } from 'fumadocs-ui/provider';
+
+<RootProvider
+  search={{
+    options: {
+      defaultTag: 'value',
+      tags: [
+        {
+          name: 'Tag Name',
+          value: 'value',
+        },
+      ],
+    },
+  }}
+>
+  {children}
+</RootProvider>;
+```

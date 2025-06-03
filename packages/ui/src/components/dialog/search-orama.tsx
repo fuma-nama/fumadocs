@@ -23,7 +23,7 @@ import type { SortedResult } from 'fumadocs-core/server';
 import type { SearchLink, SharedProps, TagItem } from '@/contexts/search';
 
 export interface OramaSearchDialogProps extends SharedProps {
-  links: SearchLink[];
+  links?: SearchLink[];
   client: OramaCloudOptions['client'];
   searchOptions?: OramaCloudOptions['params'];
   index?: OramaCloudOptions['index'];

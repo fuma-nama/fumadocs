@@ -1,0 +1,88 @@
+---
+title: Search
+description: Implement document search in your docs
+---
+
+## Search UI
+
+You can customise the search UI from root provider, such as disabling search:
+
+```tsx title="app/layout.tsx"
+import { RootProvider } from 'fumadocs-ui/provider';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <html>
+      <body>
+        <RootProvider
+          search={{
+            enabled: false, // [!code ++]
+          }}
+        >
+          {children}
+        </RootProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+### Hot Keys
+
+Customise the hot keys to trigger search dialog, by default it's <kbd>⌘</kbd> <kbd>K</kbd> or <kbd>Ctrl</kbd> <kbd>K</kbd>.
+
+```tsx
+import { RootProvider } from 'fumadocs-ui/provider';
+
+<RootProvider
+  search={{
+    hotKey: [
+      {
+        display: 'K',
+        key: 'k', // key code, or a function determining whether the key is pressed
+      },
+    ],
+  }}
+>
+  {children}
+</RootProvider>;
+```
+
+<include>.shared.mdx</include>
+
+## Search Server
+
+The search server/backend is provided and documented on Fumadocs Core, see [available engines](/docs/headless/search).
+
+## Search Client
+
+You can choose a search client according to your search engine, it defaults to `fetch` client.
+
+<DocsCategory />
+
+### Community Integrations
+
+A list of integrations maintained by community.
+
+- [Trieve Search](/docs/headless/search/trieve)
+
+## Built-in UI
+
+If you want to use the built-in search dialog UI instead of building your own,
+you may use the `SearchDialog` component.
+
+```tsx
+import {
+  SearchDialog,
+  type SharedProps,
+} from 'fumadocs-ui/components/dialog/search';
+
+export default function CustomSearchDialog(props: SharedProps) {
+  return <SearchDialog {...props} />;
+}
+```
+
+<Callout type="warn" title="Unstable">
+  It is an internal API, might break during iterations
+</Callout>

@@ -39,6 +39,9 @@ type ReactSortedResult = Omit<SortedResult, 'content'> & {
   content: ReactNode;
 };
 
+// needed for backward compatible since some previous guides referenced it
+export type { SharedProps };
+
 export interface SearchDialogProps extends SharedProps {
   search: string;
   onSearchChange: (v: string) => void;

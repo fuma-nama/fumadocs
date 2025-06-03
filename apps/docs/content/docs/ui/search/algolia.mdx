@@ -1,0 +1,45 @@
+---
+title: Algolia
+description: Using Algolia with Fumadocs UI.
+---
+
+## Overview
+
+For the setup guide, see [Integrate Algolia Search](/docs/headless/search/algolia).
+
+While generally we recommend building your own search with their client-side
+SDK, you can also plug the built-in dialog interface.
+
+## Setup
+
+Replace `appId`, `apiKey` and `indexName` with your desired values.
+
+<include meta='title="components/search.tsx"'>./algolia.tsx</include>
+
+<Callout title="Note" className='mt-4'>
+
+    The built-in implementation doesn't use instant search (their official
+    javascript client).
+
+</Callout>
+
+<include>.shared.mdx</include>
+
+### Tag Filter
+
+You can also configure [Tag Filter](/docs/headless/search/algolia#tag-filter) on the dialog (optional).
+
+```tsx title="components/search.tsx"
+import SearchDialog from 'fumadocs-ui/components/dialog/search-algolia';
+
+<SearchDialog
+  // [!code ++:7]
+  defaultTag="value"
+  tags={[
+    {
+      name: 'Tag Name',
+      value: 'value',
+    },
+  ]}
+/>;
+```
