@@ -223,15 +223,22 @@ export function createGetUrl(baseUrl: string, i18n?: I18nConfig): UrlFn {
   };
 }
 
+/**
+ * Convert file path into slugs, also encode non-ASCII characters, so they can work in pathname
+ */
 export function getSlugs(info: FileInfo): string[] {
-  return [...info.dirname.split('/'), info.name].filter(
-    // filter empty folder names and file groups like (group_name)
-    (v, i, arr) => {
-      if (v.length === 0) return false;
+  const slugs: string[] = [];
 
-      return i === arr.length - 1 ? v !== 'index' : !/^\(.+\)$/.test(v);
-    },
-  );
+  for (const seg of info.dirname.split('/')) {
+    // filter empty names and file groups like (group_name)
+    if (seg.length > 0 && !/^\(.+\)$/.test(seg)) slugs.push(encodeURI(seg));
+  }
+
+  if (info.name !== 'index') {
+    slugs.push(encodeURI(info.name));
+  }
+
+  return slugs;
 }
 
 export function loader<
@@ -326,8 +333,8 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
     getPages(language = defaultLanguage) {
       const pages: Page[] = [];
 
-      for (const key of walker.pages.keys()) {
-        if (key.startsWith(`${language}.`)) pages.push(walker.pages.get(key)!);
+      for (const [key, value] of walker.pages.entries()) {
+        if (key.startsWith(`${language}.`)) pages.push(value);
       }
 
       return pages;
@@ -352,18 +359,14 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
       const ref = node.$ref?.metaFile;
       if (!ref) return;
 
-      const file = storages[language]
-        .list()
-        .find((v) => v.format === 'meta' && v.file.path === ref);
+      const file = storages[language].read(ref, 'meta');
       if (file) return walker.getResultFromFile(file) as Meta;
     },
     getNodePage(node, language = defaultLanguage) {
       const ref = node.$ref?.file;
       if (!ref) return;
 
-      const file = storages[language]
-        .list()
-        .find((v) => v.format === 'page' && v.file.path === ref);
+      const file = storages[language].read(ref, 'page');
       if (file) return walker.getResultFromFile(file) as Page;
     },
     getPageTree(locale) {

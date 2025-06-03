@@ -20,18 +20,16 @@ export function joinPath(...paths: string[]): string {
   const out = [];
   const parsed = paths.flatMap(splitPath);
 
-  while (parsed.length > 0) {
-    switch (parsed[0]) {
+  for (const seg of parsed) {
+    switch (seg) {
       case '..':
         out.pop();
         break;
       case '.':
         break;
       default:
-        out.push(parsed[0]);
+        out.push(seg);
     }
-
-    parsed.shift();
   }
 
   return out.join('/');
