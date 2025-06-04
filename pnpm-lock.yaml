@@ -176,6 +176,9 @@ importers:
       twoslash:
         specifier: ^0.3.1
         version: 0.3.1(typescript@5.8.3)
+      unist-util-visit:
+        specifier: ^5.0.0
+        version: 5.0.0
       zod:
         specifier: ^3.25.42
         version: 3.25.42

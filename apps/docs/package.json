@@ -52,6 +52,7 @@
     "shiki": "^3.4.2",
     "tailwind-merge": "^3.3.0",
     "twoslash": "^0.3.1",
+    "unist-util-visit": "^5.0.0",
     "zod": "^3.25.42"
   },
   "devDependencies": {
