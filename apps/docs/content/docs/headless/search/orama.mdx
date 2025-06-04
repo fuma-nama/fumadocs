@@ -3,16 +3,15 @@ title: Built-in Search
 description: Built-in document search of Fumadocs
 ---
 
-Fumadocs supports searching document based on Orama.
-
-As the built-in search of Fumadocs, It is the default but also recommended
-option since it's easier to setup and totally free.
+Fumadocs supports document search with Orama, It is the default but also the recommended option since it can be self-hosted and totally free.
 
 ## Search Server
 
 You can create the search route handler from the source object, or search indexes.
 
-### From Source
+<Accordions>
+
+    <Accordion title='From Source'>
 
 Create a route handler from source object.
 
@@ -20,43 +19,48 @@ Create a route handler from source object.
   ../../examples/next-mdx/app/api/search/route.ts
 </include>
 
-### From Search Indexes
+    </Accordion>
+    <Accordion title="From Search Indexes">
 
 Pass search indexes to the function.
 
 <Tabs items={['Structured Data', 'Raw Content']}>
 
-<Tab>
+    <Tab>
 
-Each index needs a `structuredData` field.
-Usually, it is provided by your content source (e.g. Fumadocs MDX). You can also extract it from Markdown/MDX document using the [Remark Structure](/docs/headless/mdx/structure) plugin.
+        Each index needs a `structuredData` field.
+        Usually, it is provided by your content source (e.g. Fumadocs MDX). You can also extract it from Markdown/MDX document using the [Remark Structure](/docs/headless/mdx/structure) plugin.
 
-<include cwd meta='title="app/api/search/route.ts"'>
-  ../../examples/next-mdx/app/api/search/route-full.ts
-</include>
+        <include cwd meta='title="app/api/search/route.ts"'>
+            ../../examples/next-mdx/app/api/search/route-full.ts
+        </include>
 
-</Tab>
+    </Tab>
 
-<Tab>
+    <Tab>
 
-Index with the raw content of document (unrecommended).
+        Index with the raw content of document (unrecommended).
 
-```ts title="app/api/search/route.ts"
-import { allDocs } from 'content-collections';
-import { createSearchAPI } from 'fumadocs-core/search/server';
+        ```ts title="app/api/search/route.ts"
+        import { allDocs } from 'content-collections';
+        import { createSearchAPI } from 'fumadocs-core/search/server';
 
-export const { GET } = createSearchAPI('simple', {
-  indexes: allDocs.map((docs) => ({
-    title: docs.title,
-    content: docs.content, // Raw Content
-    url: docs.url,
-  })),
-});
-```
+        export const { GET } = createSearchAPI('simple', {
+        indexes: allDocs.map((docs) => ({
+        title: docs.title,
+        content: docs.content, // Raw Content
+        url: docs.url,
+    })),
+    });
+        ```
 
-</Tab>
+    </Tab>
 
 </Tabs>
+
+    </Accordion>
+
+</Accordions>
 
 ### Special Languages
 
@@ -89,22 +93,24 @@ See [Orama Docs](https://docs.orama.com/open-source/supported-languages/using-ch
 
 You can search documents using:
 
-- **Fumadocs UI**: The built-in [Search UI](/docs/ui/search) supports it out-of-the-box.
+- **Fumadocs UI**: Supported out-of-the-box, see [Search UI](/docs/ui/search/orama) for details.
 - **Search Client**:
 
-  ```ts twoslash
-  import { useDocsSearch } from 'fumadocs-core/search/client';
+```ts twoslash
+import { useDocsSearch } from 'fumadocs-core/search/client';
 
-  const client = useDocsSearch({
-    type: 'fetch',
-  });
-  ```
+const client = useDocsSearch({
+  type: 'fetch',
+});
+```
 
-  <auto-type-table type='Extract<import("fumadocs-core/search/client").Client, { type: "fetch" }>' />
+<auto-type-table type='Extract<import("fumadocs-core/search/client").Client, { type: "fetch" }>' />
+
+## Configurations
 
 ### Tag Filter
 
-Support filtering by tag, it's useful for implementing multi-docs similar to this documentation.
+Support filtering results by tag, it's useful for implementing multi-docs similar to this documentation.
 
 <include meta='title="app/api/search/route.ts"' cwd>
   ../../examples/next-mdx/app/api/search/route-tag.ts
@@ -112,25 +118,23 @@ Support filtering by tag, it's useful for implementing multi-docs similar to thi
 
 and update your search client:
 
-- **Fumadocs UI**:
-  Configure [Tag Filter](/docs/ui/search#tag-filter) on Search UI.
-- **Search Client**:
-  pass a tag to the hook.
+- **Fumadocs UI**: Configure [Tag Filter](/docs/ui/search/orama#tag-filter) on Search UI.
+- **Search Client**: pass a tag to the hook.
 
-  ```ts
-  import { useDocsSearch } from 'fumadocs-core/search/client';
+```ts
+import { useDocsSearch } from 'fumadocs-core/search/client';
 
-  // Pass `tag` in your custom search dialog
-  const client = useDocsSearch(
-    {
-      type: 'fetch',
-    },
-    undefined, // locale code, can be `undefined`
-    'tag',
-  );
-  ```
+// Pass `tag` in your custom search dialog
+const client = useDocsSearch(
+  {
+    type: 'fetch',
+  },
+  undefined, // locale code, can be `undefined`
+  'tag',
+);
+```
 
-## Internationalization
+### Internationalization
 
 ```ts title="lib/source.ts" tab="createFromSource"
 import { i18n } from '@/lib/i18n';
@@ -161,7 +165,7 @@ and update your search clients:
   );
   ```
 
-## Static Export
+### Static Export
 
 To work with Next.js static export, use `staticGET` from search server.
 
@@ -179,11 +183,9 @@ export const { staticGET: GET } = createFromSource(source);
 
 and update your search clients:
 
-- **Fumadocs UI**: See [Static Export](/docs/ui/static-export#built-in-search) guide.
+- **Fumadocs UI**: use [static client](/docs/ui/search/orama#static) on Search UI.
 
-- **Search Client**:
-
-  On your search client, use `static` instead of `fetch`.
+- **Search Client**: use `static` instead of `fetch`.
 
   ```ts
   import { useDocsSearch } from 'fumadocs-core/search/client';
@@ -198,7 +200,7 @@ and update your search clients:
 <Callout type='warn' title="Be Careful">
 
     Static Search requires clients to download the exported search indexes.
-    For large docs sites, its size can be really big.
+    For large docs sites, it can be expensive.
 
     You should use cloud solutions like Orama Cloud or Algolia for these cases.
 

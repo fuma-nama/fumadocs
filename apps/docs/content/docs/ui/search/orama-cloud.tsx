@@ -1,6 +1,5 @@
 'use client';
 
-import { OramaClient } from '@oramacloud/client';
 import {
   SearchDialog,
   SearchDialogClose,
@@ -12,29 +11,19 @@ import {
   SearchDialogList,
   SearchDialogOverlay,
   type SharedProps,
-  TagsList,
-  TagsListItem,
 } from 'fumadocs-ui/components/dialog/search';
 import { useDocsSearch } from 'fumadocs-core/search/client';
-import { useState } from 'react';
-import { useMode } from '@/app/layout.client';
-import { useOnChange } from 'fumadocs-core/utils/use-on-change';
+import { OramaClient } from '@oramacloud/client';
 
 const client = new OramaClient({
-  endpoint: 'https://cloud.orama.run/v1/indexes/docs-fk97oe',
-  api_key: 'oPZjdlFbq5BpR54bV5Vj57RYt83Xosk7',
+  endpoint: 'Endpoint URL',
+  api_key: 'API Key',
 });
 
 export default function CustomSearchDialog(props: SharedProps) {
   const { search, setSearch, query } = useDocsSearch({
     type: 'orama-cloud',
     client,
-  });
-  const mode = useMode();
-  const [tag, setTag] = useState<string | undefined>(mode);
-
-  useOnChange(mode, () => {
-    if (mode) setTag(mode);
   });
 
   return (
@@ -54,13 +43,7 @@ export default function CustomSearchDialog(props: SharedProps) {
         {query.data !== 'empty' && query.data && (
           <SearchDialogList items={query.data} />
         )}
-        <SearchDialogFooter className="flex flex-row">
-          <TagsList tag={tag} onTagChange={setTag}>
-            <TagsListItem value="ui">Framework</TagsListItem>
-            <TagsListItem value="headless">Core</TagsListItem>
-            <TagsListItem value="mdx">MDX</TagsListItem>
-            <TagsListItem value="cli">CLI</TagsListItem>
-          </TagsList>
+        <SearchDialogFooter>
           <a
             href="https://orama.com"
             rel="noreferrer noopener"

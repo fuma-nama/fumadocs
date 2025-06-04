@@ -12,8 +12,8 @@ import {
   SearchDialogContent,
   SearchDialogFooter,
   SearchDialogHeader,
+  SearchDialogIcon,
   SearchDialogInput,
-  SearchDialogInputIcon,
   SearchDialogList,
   SearchDialogOverlay,
   TagsList,
@@ -92,7 +92,7 @@ export default function AlgoliaSearchDialog({
       <SearchDialogOverlay />
       <SearchDialogContent>
         <SearchDialogHeader>
-          <SearchDialogInputIcon />
+          <SearchDialogIcon />
           <SearchDialogInput />
           <SearchDialogClose />
         </SearchDialogHeader>

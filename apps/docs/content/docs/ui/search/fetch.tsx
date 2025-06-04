@@ -1,4 +1,5 @@
 'use client';
+import { useDocsSearch } from 'fumadocs-core/search/client';
 import {
   SearchDialog,
   SearchDialogClose,
@@ -10,19 +11,10 @@ import {
   SearchDialogOverlay,
   type SharedProps,
 } from 'fumadocs-ui/components/dialog/search';
-import { useDocsSearch } from 'fumadocs-core/search/client';
-import { create } from '@orama/orama';
-
-function initOrama() {
-  return create({
-    schema: { _: 'string' },
-  });
-}
 
 export default function DefaultSearchDialog(props: SharedProps) {
   const { search, setSearch, query } = useDocsSearch({
-    type: 'static',
-    initOrama,
+    type: 'fetch',
   });
 
   return (

@@ -10,8 +10,8 @@ import {
   SearchDialogContent,
   SearchDialogFooter,
   SearchDialogHeader,
+  SearchDialogIcon,
   SearchDialogInput,
-  SearchDialogInputIcon,
   SearchDialogList,
   SearchDialogOverlay,
   TagsList,
@@ -103,7 +103,7 @@ export default function DefaultSearchDialog({
       <SearchDialogOverlay />
       <SearchDialogContent>
         <SearchDialogHeader>
-          <SearchDialogInputIcon />
+          <SearchDialogIcon />
           <SearchDialogInput />
           <SearchDialogClose />
         </SearchDialogHeader>

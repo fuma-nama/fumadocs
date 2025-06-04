@@ -41,24 +41,27 @@ REST API integration requires your docs to upload the indexes.
 
 ### Search Client
 
-To search documents on the client side, use [Fumadocs UI Search Dialog](/docs/ui/search#orama-cloud), or make your own implementation.
+To search documents on the client side, consider:
 
-In addition, the headless search client of Fumadocs can handle state management for React.
+- Using [Fumadocs UI search dialog](/docs/ui/search/orama-cloud).
+- Custom search UI using the built-in hook of Fumadocs:
 
-```ts
-import { useDocsSearch } from 'fumadocs-core/search/client';
-import { OramaClient } from '@oramacloud/client';
+  ```ts
+  import { useDocsSearch } from 'fumadocs-core/search/client';
+  import { OramaClient } from '@oramacloud/client';
 
-const client = new OramaClient();
+  const client = new OramaClient();
 
-const { search, setSearch, query } = useDocsSearch({
-  type: 'orama-cloud',
-  client,
-  params: {
-    // search params
-  },
-});
-```
+  const { search, setSearch, query } = useDocsSearch({
+    type: 'orama-cloud',
+    client,
+    params: {
+      // search params
+    },
+  });
+  ```
+
+- Use their search client directly.
 
 ## Web Crawler
 
@@ -88,21 +91,4 @@ const { search, setSearch, query } = useDocsSearch({
 });
 ```
 
-It's same for Fumadocs UI:
-
-```tsx
-'use client';
-
-import { OramaClient } from '@oramacloud/client';
-import type { SharedProps } from 'fumadocs-ui/components/dialog/search';
-import SearchDialog from 'fumadocs-ui/components/dialog/search-orama';
-
-const client = new OramaClient({
-  endpoint: '<endpoint_url>',
-  api_key: '<api_key>',
-});
-
-export default function CustomSearchDialog(props: SharedProps) {
-  return <SearchDialog {...props} index="crawler" client={client} />;
-}
-```
+It's same for Fumadocs UI.

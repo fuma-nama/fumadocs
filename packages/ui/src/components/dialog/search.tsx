@@ -155,10 +155,7 @@ export function SearchDialogFooter(props: ComponentProps<'div'>) {
   return (
     <div
       {...props}
-      className={cn(
-        'mt-auto flex flex-col border-t p-3 empty:hidden',
-        props.className,
-      )}
+      className={cn('mt-auto border-t p-3 empty:hidden', props.className)}
     />
   );
 }
@@ -335,7 +332,7 @@ export function SearchDialogListItem({
   );
 }
 
-export function SearchDialogInputIcon(props: ComponentProps<'div'>) {
+export function SearchDialogIcon(props: ComponentProps<'div'>) {
   const { isLoading } = useSearch();
 
   return (

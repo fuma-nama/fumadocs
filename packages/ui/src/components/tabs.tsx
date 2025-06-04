@@ -1,10 +1,7 @@
 'use client';
 
-import type {
-  TabsContentProps,
-  TabsProps as BaseProps,
-} from '@radix-ui/react-tabs';
 import {
+  type ComponentProps,
   createContext,
   type ReactNode,
   useContext,
@@ -12,11 +9,13 @@ import {
   useId,
   useLayoutEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import { cn } from '@/utils/cn';
 import * as Primitive from './ui/tabs';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
+import { mergeRefs } from '@/utils/merge-refs';
 
 type CollectionKey = string | symbol;
 type ChangeListener = (v: string) => void;
@@ -36,7 +35,7 @@ function removeChangeListener(id: string, listener: ChangeListener): void {
   );
 }
 
-export interface TabsProps extends BaseProps {
+export interface TabsProps extends ComponentProps<typeof Primitive.Tabs> {
   /**
    * Identifier for Sharing value of tabs
    */
@@ -86,6 +85,8 @@ export const TabsList = Primitive.TabsList;
 export const TabsTrigger = Primitive.TabsTrigger;
 
 export function Tabs({
+  ref,
+  className,
   groupId,
   items,
   persist = false,
@@ -95,6 +96,7 @@ export function Tabs({
   defaultValue = items ? escapeValue(items[defaultIndex]) : undefined,
   ...props
 }: TabsProps) {
+  const tabsRef = useRef<HTMLDivElement>(null);
   const [value, setValue] = useState(defaultValue);
   const valueToIdMap = useMemo(() => new Map<string, string>(), []);
   const collection = useMemo<CollectionKey[]>(() => [], []);
@@ -124,6 +126,7 @@ export function Tabs({
     for (const [value, id] of valueToIdMap.entries()) {
       if (id === hash) {
         setValue(value);
+        tabsRef.current?.scrollIntoView();
         break;
       }
     }
@@ -131,6 +134,7 @@ export function Tabs({
 
   return (
     <Primitive.Tabs
+      ref={mergeRefs(ref, tabsRef)}
       value={value}
       onValueChange={(v: string) => {
         if (updateAnchor) {
@@ -152,8 +156,8 @@ export function Tabs({
           setValue(v);
         }
       }}
+      className={cn('my-4', className)}
       {...props}
-      className={cn('my-4', props.className)}
     >
       {items && (
         <TabsList>
@@ -179,12 +183,13 @@ export function Tabs({
   );
 }
 
-export type TabProps = Omit<TabsContentProps, 'value'> & {
+export interface TabProps
+  extends Omit<ComponentProps<typeof Primitive.TabsContent>, 'value'> {
   /**
    * Value of tab, detect from index if unspecified.
    */
   value?: string;
-};
+}
 
 export function Tab({ value, ...props }: TabProps) {
   const { items } = useTabContext();
@@ -204,7 +209,11 @@ export function Tab({ value, ...props }: TabProps) {
   );
 }
 
-export function TabsContent({ value, className, ...props }: TabsContentProps) {
+export function TabsContent({
+  value,
+  className,
+  ...props
+}: ComponentProps<typeof Primitive.TabsContent>) {
   const { valueToIdMap } = useTabContext();
 
   if (props.id) {

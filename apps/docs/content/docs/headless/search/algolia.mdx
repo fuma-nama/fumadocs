@@ -30,7 +30,7 @@ url.
 
 ## Setup
 
-### Install Dependencies
+Install dependencies:
 
 ```package-install
 algoliasearch
@@ -102,7 +102,7 @@ integrate it with your CI/CD pipeline.
 
 You can consider different options for implementing the UI:
 
-- [Fumadocs UI Usage](/docs/ui/search#algolia)
+- Using [Fumadocs UI search dialog](/docs/ui/search/algolia).
 - Build your own using the built-in search client hook:
 
   ```ts twoslash
@@ -117,6 +117,8 @@ You can consider different options for implementing the UI:
     client,
   });
   ```
+
+- Use their official clients directly.
 
 ## Options
 
@@ -138,7 +140,7 @@ void sync(client, {
 
 And update your search client:
 
-- **Fumadocs UI**: Enable [Tag Filter](/docs/ui/search#tag-filter-1) on Search Dialog.
+- **Fumadocs UI**: Enable [Tag Filter](/docs/ui/search/algolia#tag-filter) on Search UI.
 - **Search Client**: You can add the tag filter like:
 
   ```ts

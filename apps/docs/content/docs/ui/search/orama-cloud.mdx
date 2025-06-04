@@ -7,21 +7,8 @@ description: Using Orama Cloud with Fumadocs UI.
 
 For the setup guide, see [Integrate Orama Cloud](/docs/headless/search/orama-cloud).
 
-```tsx title="components/search.tsx"
-'use client';
+Create a search dialog, replace `endpoint` and `api_key` with your desired values.
 
-import { OramaClient } from '@oramacloud/client';
-import type { SharedProps } from 'fumadocs-ui/components/dialog/search';
-import SearchDialog from 'fumadocs-ui/components/dialog/search-orama';
-
-const client = new OramaClient({
-  endpoint: 'endpoint',
-  api_key: 'apiKey',
-});
-
-export default function CustomSearchDialog(props: SharedProps) {
-  return <SearchDialog {...props} client={client} showOrama />;
-}
-```
+<include meta='title="components/search.tsx"'>orama-cloud.tsx</include>
 
 <include>.shared.mdx</include>
