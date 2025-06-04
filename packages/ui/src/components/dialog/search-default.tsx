@@ -61,7 +61,7 @@ export default function DefaultSearchDialog({
   links = [],
   footer,
   ...props
-}: DefaultSearchDialogProps): ReactNode {
+}: DefaultSearchDialogProps) {
   const { locale } = useI18n();
   const [tag, setTag] = useState(defaultTag);
   const { search, setSearch, query } = useDocsSearch(
@@ -69,14 +69,17 @@ export default function DefaultSearchDialog({
       ? {
           type: 'fetch',
           api,
+          locale,
+          tag,
+          delayMs,
         }
       : {
           type: 'static',
           from: api,
+          locale,
+          tag,
+          delayMs,
         },
-    locale,
-    tag,
-    delayMs,
   );
   const defaultItems = useMemo<SortedResult[]>(
     () =>

@@ -21,6 +21,7 @@ import {
 } from './search';
 import type { SortedResult } from 'fumadocs-core/server';
 import type { SearchLink, SharedProps, TagItem } from '@/contexts/search';
+import { useI18n } from '@/contexts/i18n';
 
 export interface AlgoliaSearchDialogProps extends SharedProps {
   searchOptions: AlgoliaOptions;
@@ -55,16 +56,15 @@ export default function AlgoliaSearchDialog({
   links = [],
   footer,
   ...props
-}: AlgoliaSearchDialogProps): ReactNode {
+}: AlgoliaSearchDialogProps) {
   const [tag, setTag] = useState(defaultTag);
-  const { search, setSearch, query } = useDocsSearch(
-    {
-      type: 'algolia',
-      ...searchOptions,
-    },
-    undefined,
+  const { locale } = useI18n();
+  const { search, setSearch, query } = useDocsSearch({
+    type: 'algolia',
     tag,
-  );
+    locale,
+    ...searchOptions,
+  });
   const defaultItems = useMemo<SortedResult[]>(
     () =>
       links.map(([name, link]) => ({

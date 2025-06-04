@@ -11,10 +11,14 @@ import {
   TagsListItem,
 } from 'fumadocs-ui/components/dialog/search';
 import { useState } from 'react';
+import { useDocsSearch } from 'fumadocs-core/search/client';
 
 export default function CustomSearchDialog(props: SharedProps) {
   // [!code ++]
-  const [tag, setTag] = useState<string | undefined>('default-value');
+  const [tag, setTag] = useState<string | undefined>();
+  const { search, setSearch, query } = useDocsSearch({
+    tag, // [!code ++]
+  });
 
   return (
     <SearchDialog>

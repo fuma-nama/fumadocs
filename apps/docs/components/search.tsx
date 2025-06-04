@@ -26,12 +26,13 @@ const client = new OramaClient({
 });
 
 export default function CustomSearchDialog(props: SharedProps) {
+  const mode = useMode();
+  const [tag, setTag] = useState<string | undefined>(mode);
   const { search, setSearch, query } = useDocsSearch({
     type: 'orama-cloud',
     client,
+    tag,
   });
-  const mode = useMode();
-  const [tag, setTag] = useState<string | undefined>(mode);
 
   useOnChange(mode, () => {
     if (mode) setTag(mode);
@@ -55,7 +56,7 @@ export default function CustomSearchDialog(props: SharedProps) {
           <SearchDialogList items={query.data} />
         )}
         <SearchDialogFooter className="flex flex-row">
-          <TagsList tag={tag} onTagChange={setTag}>
+          <TagsList tag={tag} onTagChange={setTag} allowClear>
             <TagsListItem value="ui">Framework</TagsListItem>
             <TagsListItem value="headless">Core</TagsListItem>
             <TagsListItem value="mdx">MDX</TagsListItem>

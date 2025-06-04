@@ -125,13 +125,10 @@ and update your search client:
 import { useDocsSearch } from 'fumadocs-core/search/client';
 
 // Pass `tag` in your custom search dialog
-const client = useDocsSearch(
-  {
-    type: 'fetch',
-  },
-  undefined, // locale code, can be `undefined`
-  'tag',
-);
+const client = useDocsSearch({
+  type: 'fetch',
+  tag: '<value>',
+});
 ```
 
 ### Internationalization
@@ -156,14 +153,14 @@ and update your search clients:
 - **Search Client**:
   Add `locale` to the search client, this will only allow pages with specified locale to be searchable by the user.
 
-  ```ts
-  const { search, setSearch, query } = useDocsSearch(
-    {
-      type: 'fetch',
-    },
-    locale,
-  );
-  ```
+```ts
+import { useDocsSearch } from 'fumadocs-core/search/client';
+
+const { search, setSearch, query } = useDocsSearch({
+  type: 'fetch',
+  locale: 'cn',
+});
+```
 
 ### Static Export
 

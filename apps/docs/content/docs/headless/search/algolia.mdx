@@ -146,11 +146,10 @@ And update your search client:
   ```ts
   import { useDocsSearch } from 'fumadocs-core/search/client';
 
-  const { search, setSearch, query } = useDocsSearch(
-    { ... },
-    undefined,
-    '<your tag value>', // [!code ++]
-  );
+  const { search, setSearch, query } = useDocsSearch({
+    tag: '<your tag value>',
+    // ...
+  });
   ```
 
 The `tag` field is an attribute for faceting. You can also use the filter `tag:value` on Algolia search clients.

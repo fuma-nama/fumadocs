@@ -3,7 +3,7 @@ import { useDebounce } from '@/utils/use-debounce';
 import type { SortedResult } from '@/server/types';
 import { type FetchOptions } from '@/search/client/fetch';
 import { useOnChange } from '@/utils/use-on-change';
-import { type StaticClient, type StaticOptions } from '@/search/client/static';
+import { type StaticOptions } from '@/search/client/static';
 import { type AlgoliaOptions } from '@/search/client/algolia';
 import { type OramaCloudOptions } from '@/search/client/orama-cloud';
 
@@ -31,8 +31,6 @@ export type Client =
       type: 'orama-cloud';
     } & OramaCloudOptions);
 
-let staticClient: StaticClient | undefined;
-
 function isDifferentDeep(a: unknown, b: unknown): boolean {
   if (Array.isArray(a) && Array.isArray(b)) {
     return b.length !== a.length || a.some((v, i) => isDifferentDeep(v, b[i]));
@@ -57,22 +55,53 @@ function isDifferentDeep(a: unknown, b: unknown): boolean {
  * Provide a hook to query different official search clients.
  *
  * Note: it will re-query when its parameters changed, make sure to use `useCallback()` on functions passed to this hook.
- *
- * @param client - search client
- * @param locale - Filter with locale
- * @param tag - Filter with specific tag
- * @param delayMs - The debounced delay for performing a search.
- * @param allowEmpty - still perform search even if query is empty
- * @param _key - cache key (deprecated)
  */
 export function useDocsSearch(
-  client: Client,
-  locale?: string,
-  tag?: string,
-  delayMs = 100,
-  allowEmpty = false,
+  clientOptions: Client & {
+    /**
+     * The debounced delay for performing a search (in ms).
+     * .
+     * @defaultValue 100
+     */
+    delayMs?: number;
+
+    /**
+     * still perform search even if query is empty.
+     *
+     * @defaultValue false
+     */
+    allowEmpty?: boolean;
+  },
+  /**
+   * @deprecated pass to `client` object instead
+   */
+  _locale?: string,
+  /**
+   * @deprecated pass to `client` object instead
+   */
+  _tag?: string,
+  /**
+   * @deprecated pass to `client` object instead
+   */
+  _delayMs = 100,
+  /**
+   * @deprecated pass to `client` object instead
+   */
+  _allowEmpty = false,
+  /**
+   * @deprecated No longer used
+   */
   _key?: string,
 ): UseDocsSearch {
+  // handle deprecated params
+  const {
+    delayMs = _delayMs ?? 100,
+    allowEmpty = _allowEmpty ?? false,
+    ...client
+  } = clientOptions;
+  client.tag ??= _tag;
+  client.locale ??= _locale;
+
   const [search, setSearch] = useState('');
   const [results, setResults] = useState<SortedResult[] | 'empty'>('empty');
   const [error, setError] = useState<Error>();
@@ -81,7 +110,7 @@ export function useDocsSearch(
   const onStart = useRef<() => void>(undefined);
 
   useOnChange(
-    [client, debouncedValue, locale, tag],
+    [client, debouncedValue],
     () => {
       if (onStart.current) {
         onStart.current();
@@ -99,25 +128,25 @@ export function useDocsSearch(
 
         if (client.type === 'fetch') {
           const { fetchDocs } = await import('./client/fetch');
-          return fetchDocs(debouncedValue, locale, tag, client);
+          return fetchDocs(debouncedValue, client);
         }
 
         if (client.type === 'algolia') {
           const { searchDocs } = await import('./client/algolia');
-
-          return searchDocs(debouncedValue, tag, locale, client);
+          return searchDocs(debouncedValue, client);
         }
 
         if (client.type === 'orama-cloud') {
           const { searchDocs } = await import('./client/orama-cloud');
-
-          return searchDocs(debouncedValue, tag, client);
+          return searchDocs(debouncedValue, client);
         }
 
-        const { createStaticClient } = await import('./client/static');
-        if (!staticClient) staticClient = createStaticClient(client);
+        if (client.type === 'static') {
+          const { search } = await import('./client/static');
+          return search(debouncedValue, client);
+        }
 
-        return staticClient.search(debouncedValue, locale, tag);
+        throw new Error('unknown search client');
       }
 
       void run()

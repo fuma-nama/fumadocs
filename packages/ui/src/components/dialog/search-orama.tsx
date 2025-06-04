@@ -21,6 +21,7 @@ import {
 } from './search';
 import type { SortedResult } from 'fumadocs-core/server';
 import type { SearchLink, SharedProps, TagItem } from '@/contexts/search';
+import { useI18n } from '@/contexts/i18n';
 
 export interface OramaSearchDialogProps extends SharedProps {
   links?: SearchLink[];
@@ -62,18 +63,17 @@ export default function OramaSearchDialog({
   footer,
   links = [],
   ...props
-}: OramaSearchDialogProps): ReactNode {
+}: OramaSearchDialogProps) {
+  const { locale } = useI18n();
   const [tag, setTag] = useState(defaultTag);
-  const { search, setSearch, query } = useDocsSearch(
-    {
-      type: 'orama-cloud',
-      client,
-      index,
-      params: searchOptions,
-    },
-    undefined,
+  const { search, setSearch, query } = useDocsSearch({
+    type: 'orama-cloud',
+    client,
+    index,
+    params: searchOptions,
+    locale,
     tag,
-  );
+  });
 
   const defaultItems = useMemo<SortedResult[]>(
     () =>
