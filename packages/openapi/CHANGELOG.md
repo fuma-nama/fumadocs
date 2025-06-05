@@ -1,5 +1,17 @@
 # @fuma-docs/openapi
 
+## 9.0.6
+
+### Patch Changes
+
+- 99e3c95: Consistent URL resolution
+- Updated dependencies [b4916d2]
+- Updated dependencies [8738b9c]
+- Updated dependencies [68526ea]
+- Updated dependencies [a66886b]
+  - fumadocs-core@15.5.1
+  - fumadocs-ui@15.5.1
+
 ## 9.0.5
 
 ### Patch Changes
