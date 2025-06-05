@@ -1,5 +1,6 @@
 'use client';
-import { getUrl, type SampleGenerator } from '@/requests/_shared';
+import { type SampleGenerator } from '@/requests/_shared';
+import { resolveRequestData } from '@/utils/url';
 
 export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
   const headers = { ...data.header };
@@ -30,7 +31,7 @@ export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
 
   return `import requests
 
-url = ${JSON.stringify(getUrl(url, data))}
+url = ${JSON.stringify(resolveRequestData(url, data))}
 ${body ?? ''}
 response = requests.request(${params.join(', ')})
 

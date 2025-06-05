@@ -1,4 +1,3 @@
-import { getPathnameFromInput } from '@/utils/get-pathname-from-input';
 import type { RequestData } from '@/requests/_shared';
 import type { MediaAdapter } from '@/media/adapter';
 
@@ -13,14 +12,19 @@ export interface FetchResult {
 }
 
 export interface Fetcher {
-  fetch: (route: string, options: FetchOptions) => Promise<FetchResult>;
+  /**
+   * This method will not apply the path & search parameters from `options` to given `url`.
+   *
+   * @param url - The full URL of request.
+   */
+  fetch: (url: string, options: FetchOptions) => Promise<FetchResult>;
 }
 
 export function createBrowserFetcher(
   adapters: Record<string, MediaAdapter>,
 ): Fetcher {
   return {
-    async fetch(route, options) {
+    async fetch(url, options) {
       const headers = new Headers();
       if (options.bodyMediaType)
         headers.append('Content-Type', options.bodyMediaType);
@@ -32,10 +36,8 @@ export function createBrowserFetcher(
       }
 
       const proxyUrl = options.proxyUrl
-        ? new URL(options.proxyUrl, window.location.origin)
+        ? new URL(options.proxyUrl, document.baseURI)
         : null;
-
-      let url = getPathnameFromInput(route, options.path, options.query);
 
       if (proxyUrl) {
         proxyUrl.searchParams.append('url', url);

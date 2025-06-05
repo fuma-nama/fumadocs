@@ -1,6 +1,7 @@
 'use client';
 import { inputToString } from '@/utils/input-to-string';
-import { getUrl, ident, type SampleGenerator } from '@/requests/_shared';
+import { ident, type SampleGenerator } from '@/requests/_shared';
+import { resolveRequestData } from '@/utils/url';
 
 const MediaTypeFormatMap = {
   'application/json': 'json',
@@ -10,7 +11,7 @@ const MediaTypeFormatMap = {
 
 export const generator: SampleGenerator = (url, data) => {
   const s: string[] = [];
-  s.push(`curl -X ${data.method} "${getUrl(url, data)}"`);
+  s.push(`curl -X ${data.method} "${resolveRequestData(url, data)}"`);
 
   for (const header in data.header) {
     const value = `${header}: ${data.header[header]}`;

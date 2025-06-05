@@ -31,7 +31,12 @@ import type {
   SecurityEntry,
 } from '@/playground/index';
 import { getStatusInfo } from './status-info';
-import { getUrl } from '@/utils/server-url';
+import {
+  joinURL,
+  resolveRequestData,
+  resolveServerUrl,
+  withBase,
+} from '@/utils/url';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
 import { MethodLabel } from '@/ui/components/method-label';
 import { useQuery } from '@/utils/use-query';
@@ -182,15 +187,21 @@ export default function Client({
     const fetcher = await import('./fetcher').then((mod) =>
       mod.createBrowserFetcher(mediaAdapters),
     );
+    const data = toRequestData(method, body?.mediaType, input);
 
-    const serverUrl = server
-      ? getUrl(server.url, server.variables)
-      : window.location.origin;
-
-    return fetcher.fetch(`${serverUrl}${route}`, {
-      proxyUrl,
-      ...toRequestData(method, body?.mediaType, input),
-    });
+    return fetcher.fetch(
+      joinURL(
+        withBase(
+          server ? resolveServerUrl(server.url, server.variables) : '/',
+          window.location.origin,
+        ),
+        resolveRequestData(route, data),
+      ),
+      {
+        proxyUrl,
+        ...data,
+      },
+    );
   });
 
   function initAuthValues(values: FormValues, inputs: AuthField[]) {

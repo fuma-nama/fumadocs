@@ -9,7 +9,6 @@ import {
   processDocument,
   type ProcessedDocument,
 } from '@/utils/process-document';
-import { getUrl } from '@/utils/server-url';
 import type { defaultAdapters } from '@/media/adapter';
 
 type ApiPageContextProps = Pick<
@@ -110,10 +109,7 @@ export async function APIPage(props: ApiPageProps) {
             type="webhook"
             key={`${item.name}:${item.method}`}
             method={method}
-            ctx={{
-              ...ctx,
-              baseUrl: 'http://localhost:8080',
-            }}
+            ctx={ctx}
             path={`/${item.name}`}
             hasHead={hasHead}
           />
@@ -133,8 +129,7 @@ export async function getContext(
   const servers =
     document.servers && document.servers.length > 0
       ? document.servers
-      : [{ url: 'https://example.com' }];
-  const server = servers[0];
+      : [{ url: '/' }];
 
   return {
     schema,
@@ -148,14 +143,6 @@ export async function getContext(
     shikiOptions: options.shikiOptions,
     generateTypeScriptSchema: options.generateTypeScriptSchema,
     generateCodeSamples: options.generateCodeSamples,
-    baseUrl: getUrl(
-      server.url,
-      server.variables
-        ? Object.fromEntries(
-            Object.entries(server.variables).map(([k, v]) => [k, v.default]),
-          )
-        : {},
-    ),
     servers,
     mediaAdapters: {
       ...({
