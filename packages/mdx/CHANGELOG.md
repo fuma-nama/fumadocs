@@ -1,5 +1,15 @@
 # next-docs-mdx
 
+## 11.6.7
+
+### Patch Changes
+
+- a5c283f: Support `outDir` option on `createMDX()`
+- Updated dependencies [b4916d2]
+- Updated dependencies [8738b9c]
+- Updated dependencies [a66886b]
+  - fumadocs-core@15.5.1
+
 ## 11.6.6
 
 ### Patch Changes

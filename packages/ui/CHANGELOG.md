@@ -1,5 +1,16 @@
 # next-docs-ui
 
+## 15.5.1
+
+### Patch Changes
+
+- b4916d2: Move `hide-if-empty` component to Fumadocs Core
+- 68526ea: Redesign `fumadocs-ui/components/dialog/search` usage to make it composable, and mark it as stable API.
+- Updated dependencies [b4916d2]
+- Updated dependencies [8738b9c]
+- Updated dependencies [a66886b]
+  - fumadocs-core@15.5.1
+
 ## 15.5.0
 
 ### Minor Changes
