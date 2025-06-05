@@ -14,7 +14,7 @@ import {
   type RootProps,
 } from './page-client';
 import { TOCItems, TOCScrollArea } from '@/components/layout/toc';
-import { Text } from '@/icons';
+import { Text } from 'lucide-react';
 import { I18nLabel } from '@/contexts/i18n';
 import ClerkTOCItems from '@/components/layout/toc-clerk';
 

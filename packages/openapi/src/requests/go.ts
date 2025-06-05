@@ -1,11 +1,12 @@
 'use client';
-import { getUrl, ident, SampleGenerator } from '@/requests/_shared';
+import { ident, SampleGenerator } from '@/requests/_shared';
+import { resolveRequestData } from '@/utils/url';
 
 export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
   const imports = ['fmt', 'net/http', 'io/ioutil'];
   const headers = new Map<string, string>();
   const variables = new Map<string, string>();
-  variables.set('url', JSON.stringify(getUrl(url, data)));
+  variables.set('url', JSON.stringify(resolveRequestData(url, data)));
 
   for (const header in data.header) {
     headers.set(header, JSON.stringify(data.header[header]));

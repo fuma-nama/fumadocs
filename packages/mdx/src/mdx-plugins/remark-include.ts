@@ -92,7 +92,9 @@ export function remarkInclude(this: Processor): Transformer<Root, Root> {
               );
             })
             .catch((e) => {
-              console.warn(`failed to read file: ${targetPath}`, e);
+              throw new Error(
+                `failed to read file ${targetPath}\n${e instanceof Error ? e.message : String(e)}`,
+              );
             }),
         );
 

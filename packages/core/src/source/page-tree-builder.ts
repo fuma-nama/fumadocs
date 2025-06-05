@@ -257,35 +257,39 @@ function buildFolderNode(
     index,
     children,
     $id: folder.file.path,
-    $ref: !options.noRef
-      ? {
-          metaFile: meta?.file.path,
-        }
-      : undefined,
+    $ref:
+      !options.noRef && meta
+        ? {
+            metaFile: metaPath,
+          }
+        : undefined,
   };
 
   return options.attachFolder?.(node, folder, meta) ?? node;
 }
 
 function buildFileNode(
-  file: PageFile,
+  page: PageFile,
   { options, getUrl, locale }: PageTreeBuilderContext,
 ): PageTree.Item {
+  const file = page.file;
+  const { slugs, data } = page.data;
+
   const item: PageTree.Item = {
-    $id: file.file.path,
+    $id: file.path,
     type: 'page',
-    name: file.data.data.title ?? pathToName(file.file.name),
-    description: file.data.data.description,
-    icon: options.resolveIcon?.(file.data.data.icon),
-    url: getUrl(file.data.slugs, locale),
+    name: data.title ?? pathToName(file.name),
+    description: data.description,
+    icon: options.resolveIcon?.(data.icon),
+    url: getUrl(slugs, locale),
     $ref: !options.noRef
       ? {
-          file: file.file.path,
+          file: joinPath(file.dirname, file.name),
         }
       : undefined,
   };
 
-  return options.attachFile?.(item, file) ?? item;
+  return options.attachFile?.(item, page) ?? item;
 }
 
 function build(ctx: PageTreeBuilderContext): PageTree.Root {

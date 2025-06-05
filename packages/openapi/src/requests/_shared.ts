@@ -1,4 +1,3 @@
-import { getPathnameFromInput } from '@/utils/get-pathname-from-input';
 import type { MediaAdapter } from '@/media/adapter';
 
 export type SampleGenerator = (
@@ -19,10 +18,6 @@ export interface RequestData {
   body?: unknown;
 
   bodyMediaType?: string;
-}
-
-export function getUrl(url: string, data: RequestData): string {
-  return getPathnameFromInput(url, data.path, data.query);
 }
 
 export function ident(code: string, tab: number = 1) {

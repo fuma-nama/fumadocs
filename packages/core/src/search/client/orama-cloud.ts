@@ -1,5 +1,5 @@
 import type { SortedResult } from '@/server';
-import type { OramaClient, ClientSearchParams } from '@oramacloud/client';
+import type { ClientSearchParams, OramaClient } from '@oramacloud/client';
 import { removeUndefined } from '@/utils/remove-undefined';
 import type { OramaIndex } from '@/search/orama-cloud';
 
@@ -20,15 +20,24 @@ export interface OramaCloudOptions {
    */
   index?: 'default' | 'crawler';
   params?: ClientSearchParams;
+
+  /**
+   * Filter results with specific tag.
+   */
+  tag?: string;
+
+  /**
+   * Filter by locale (unsupported at the moment)
+   */
+  locale?: string;
 }
 
 export async function searchDocs(
   query: string,
-  tag: string | undefined,
   options: OramaCloudOptions,
 ): Promise<SortedResult[]> {
   const list: SortedResult[] = [];
-  const { index = 'default', client, params: extraParams = {} } = options;
+  const { index = 'default', client, params: extraParams = {}, tag } = options;
 
   if (index === 'crawler') {
     const result = await client.search({

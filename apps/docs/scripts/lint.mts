@@ -1,12 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- rehype plugins */
 import { glob } from 'tinyglobby';
 import { printErrors, scanURLs, validateFiles } from 'next-validate-link';
 import { createGetUrl, getSlugs, parseFilePath } from 'fumadocs-core/source';
-import { getTableOfContents } from 'fumadocs-core/server';
+import { TOCItemType } from 'fumadocs-core/server';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import matter from 'gray-matter';
 import { remarkInclude } from 'fumadocs-mdx/config';
 import remarkMdx from 'remark-mdx';
+import { visit } from 'unist-util-visit';
+import { remark } from 'remark';
+import { remarkHeading } from 'fumadocs-core/mdx-plugins';
 
 async function readFromPath(file: string) {
   const content = await fs
@@ -19,6 +23,47 @@ async function readFromPath(file: string) {
     data: parsed.data,
     content: parsed.content,
   };
+}
+
+function remarkIncludeId() {
+  return (tree: any, file: any) => {
+    file.data.ids ??= [];
+    visit(tree, 'mdxJsxFlowElement', (element) => {
+      if (!element.name || !element.attributes) return;
+
+      const attributes = element.attributes as Record<string, unknown>[];
+      const idAttr = attributes.find(
+        (attr) => attr.type === 'mdxJsxAttribute' && attr.name === 'id',
+      );
+
+      if (idAttr) {
+        file.data.ids.push(idAttr.value);
+      }
+    });
+  };
+}
+
+const processor = remark()
+  .use(remarkMdx)
+  .use(remarkInclude)
+  .use(remarkIncludeId)
+  .use(remarkHeading);
+
+async function getHeadings(path: string, content: string) {
+  const ids: string[] = [];
+  const result = await processor.process({
+    path,
+    value: content,
+  });
+
+  if ('toc' in result.data)
+    ids.push(
+      ...(result.data.toc as TOCItemType[]).map((item) => item.url.slice(1)),
+    );
+
+  if ('ids' in result.data) ids.push(...(result.data.ids as string[]));
+
+  return ids;
 }
 
 async function checkLinks() {
@@ -39,15 +84,7 @@ async function checkLinks() {
 
     return {
       value: getSlugs(info),
-      hashes: (
-        await getTableOfContents(
-          {
-            path: file.path,
-            value: file.content,
-          },
-          [remarkMdx, remarkInclude],
-        )
-      ).map((item) => item.url.slice(1)),
+      hashes: await getHeadings(file.path, file.content),
     };
   });
 
@@ -56,15 +93,7 @@ async function checkLinks() {
 
     return {
       value: getSlugs(info)[0],
-      hashes: (
-        await getTableOfContents(
-          {
-            path: file.path,
-            value: file.content,
-          },
-          [remarkMdx, remarkInclude],
-        )
-      ).map((item) => item.url.slice(1)),
+      hashes: await getHeadings(file.path, file.content),
     };
   });
 

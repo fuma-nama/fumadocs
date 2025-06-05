@@ -62,7 +62,7 @@ export function ApiProvider({
   const [server, setServer] = useState<SelectedServer | null>(() => {
     const defaultItem = defaultBaseUrl
       ? servers.find((item) => item.url === defaultBaseUrl)
-      : null;
+      : servers.at(0);
 
     return defaultItem
       ? {

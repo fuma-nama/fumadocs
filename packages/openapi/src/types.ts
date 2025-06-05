@@ -46,7 +46,6 @@ export interface RenderContext {
    */
   disablePlayground?: boolean;
 
-  baseUrl: string;
   servers: ServerObject[];
 
   slugger: Slugger;

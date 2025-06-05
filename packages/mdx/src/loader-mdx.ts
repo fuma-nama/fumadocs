@@ -9,6 +9,7 @@ import { validate, ValidationError } from '@/utils/schema';
 
 export interface Options {
   configPath: string;
+  outDir: string;
 }
 
 /**
@@ -24,7 +25,7 @@ export default async function loader(
   this.cacheable(true);
   const context = this.context;
   const filePath = this.resourcePath;
-  const { configPath } = this.getOptions();
+  const { configPath, outDir } = this.getOptions();
   const matter = grayMatter(source);
 
   // notice that `resourceQuery` can be missing (e.g. `page.mdx`)
@@ -35,7 +36,7 @@ export default async function loader(
     hash?: string;
     collection?: string;
   };
-  const config = await loadConfig(configPath, configHash);
+  const config = await loadConfig(configPath, outDir, configHash);
 
   let collection =
     collectionId !== undefined

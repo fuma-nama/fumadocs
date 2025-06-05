@@ -3,7 +3,6 @@ import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { Edit } from '@/icons';
 import { I18nLabel } from '@/contexts/i18n';
-import { slot } from '@/layouts/shared';
 import {
   type BreadcrumbProps,
   type FooterProps,
@@ -113,14 +112,18 @@ type TableOfContentPopoverOptions = Omit<TableOfContentOptions, 'single'>;
 
 export function DocsPage({
   editOnGithub,
-  breadcrumb,
-  footer,
+  breadcrumb: {
+    enabled: breadcrumbEnabled = true,
+    component: breadcrumb,
+    ...breadcrumbProps
+  } = {},
+  footer = {},
   lastUpdate,
   container,
   full = false,
   tableOfContentPopover: {
     enabled: tocPopoverEnabled,
-    component: tocPopoverReplace,
+    component: tocPopover,
     ...tocPopoverOptions
   } = {},
   tableOfContent: {
@@ -153,19 +156,20 @@ export function DocsPage({
       }}
       {...container}
     >
-      {slot(
-        { enabled: tocPopoverEnabled, component: tocPopoverReplace },
-        <PageTOCPopover>
-          <PageTOCPopoverTrigger />
-          <PageTOCPopoverContent>
-            {tocPopoverOptions.header}
-            <PageTOCPopoverItems variant={tocPopoverOptions.style} />
-            {tocPopoverOptions.footer}
-          </PageTOCPopoverContent>
-        </PageTOCPopover>,
-      )}
+      {tocPopoverEnabled &&
+        (tocPopover ?? (
+          <PageTOCPopover>
+            <PageTOCPopoverTrigger />
+            <PageTOCPopoverContent>
+              {tocPopoverOptions.header}
+              <PageTOCPopoverItems variant={tocPopoverOptions.style} />
+              {tocPopoverOptions.footer}
+            </PageTOCPopoverContent>
+          </PageTOCPopover>
+        ))}
       <PageArticle {...article}>
-        {slot(breadcrumb, <PageBreadcrumb {...breadcrumb} />)}
+        {breadcrumbEnabled &&
+          (breadcrumb ?? <PageBreadcrumb {...breadcrumbProps} />)}
         {children}
         <div role="none" className="flex-1" />
         <div className="flex flex-row flex-wrap items-center justify-between gap-4 empty:hidden">
@@ -176,17 +180,18 @@ export function DocsPage({
           )}
           {lastUpdate && <PageLastUpdate date={new Date(lastUpdate)} />}
         </div>
-        {slot(footer, <PageFooter items={footer?.items} />)}
+        {footer.enabled !== false &&
+          (footer.component ?? <PageFooter items={footer.items} />)}
       </PageArticle>
-      {slot(
-        { enabled: tocEnabled, component: tocReplace },
-        <PageTOC>
-          {tocOptions.header}
-          <PageTOCTitle />
-          <PageTOCItems variant={tocOptions.style} />
-          {tocOptions.footer}
-        </PageTOC>,
-      )}
+      {tocEnabled &&
+        (tocReplace ?? (
+          <PageTOC>
+            {tocOptions.header}
+            <PageTOCTitle />
+            <PageTOCItems variant={tocOptions.style} />
+            {tocOptions.footer}
+          </PageTOC>
+        ))}
     </PageRoot>
   );
 }

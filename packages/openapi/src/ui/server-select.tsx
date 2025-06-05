@@ -22,7 +22,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/ui/components/dialog';
-import { getUrl } from '@/utils/server-url';
+import { resolveServerUrl, withBase } from '@/utils/url';
 import { FormProvider, useController, useForm } from 'react-hook-form';
 import type { OpenAPIV3_1 } from 'openapi-types';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
@@ -43,9 +43,10 @@ export default function ServerSelect(props: HTMLAttributes<HTMLDivElement>) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger className="text-xs p-3 py-2 bg-fd-muted text-fd-muted-foreground transition-colors truncate hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:outline-none">
         {isMounted
-          ? server
-            ? getUrl(server.url, server.variables)
-            : window.location.origin
+          ? withBase(
+              server ? resolveServerUrl(server.url, server.variables) : '/',
+              window.location.origin,
+            )
           : 'loading...'}
       </DialogTrigger>
       <DialogContent {...props}>

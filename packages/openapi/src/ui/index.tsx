@@ -30,7 +30,6 @@ export function Root({
         }
         servers={ctx.servers}
         shikiOptions={ctx.shikiOptions}
-        defaultBaseUrl={ctx.baseUrl}
       >
         {children}
       </ApiProvider>

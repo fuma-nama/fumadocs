@@ -1,3 +1,3 @@
 ![Test](./test.png)
 
-![External](https://picsum.photos/id/237/200/300)
+![External](https://fumadocs.dev/banner.png)

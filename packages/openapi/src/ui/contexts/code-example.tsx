@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from '@/ui/components/select';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
-import { getUrl } from '@/utils/server-url';
+import { joinURL, resolveServerUrl, withBase } from '@/utils/url';
 import type { RequestData } from '@/requests/_shared';
 import { defaultSamples } from '@/requests';
 
@@ -140,7 +140,15 @@ export function CodeExample(props: CodeSample) {
     if (typeof sample.source === 'string') return sample.source;
 
     return sample.source(
-      `${server ? getUrl(server.url, server.variables) : '/'}${route}`,
+      joinURL(
+        withBase(
+          server ? resolveServerUrl(server.url, server.variables) : '/',
+          typeof window !== 'undefined'
+            ? window.location.origin
+            : 'https://loading',
+        ),
+        route,
+      ),
       data,
       {
         mediaAdapters,

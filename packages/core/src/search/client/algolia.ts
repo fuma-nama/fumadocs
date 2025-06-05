@@ -6,6 +6,13 @@ export interface AlgoliaOptions {
   indexName: string;
   client: LiteClient;
 
+  /**
+   * Filter results with specific tag.
+   */
+  tag?: string;
+
+  locale?: string;
+
   onSearch?: (
     query: string,
     tag?: string,
@@ -44,9 +51,7 @@ export function groupResults(hits: Hit<BaseIndex>[]): SortedResult[] {
 
 export async function searchDocs(
   query: string,
-  tag: string | undefined,
-  locale: string | undefined,
-  { indexName, onSearch, client }: AlgoliaOptions,
+  { indexName, onSearch, client, locale, tag }: AlgoliaOptions,
 ): Promise<SortedResult[]> {
   if (query.length > 0) {
     const result = onSearch

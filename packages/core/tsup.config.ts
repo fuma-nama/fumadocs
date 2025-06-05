@@ -14,7 +14,7 @@ export default defineConfig({
   target: 'es2022',
   format: 'esm',
   entry: [
-    'src/{toc,link,breadcrumb,sidebar,dynamic-link}.tsx',
+    'src/{toc,link,breadcrumb,sidebar,dynamic-link,hide-if-empty}.tsx',
     'src/{server,source,mdx-plugins,content}/index.ts',
     'src/search/client.ts',
     'src/search/server.ts',

@@ -1,5 +1,6 @@
 'use client';
-import { getUrl, ident, type SampleGenerator } from '@/requests/_shared';
+import { ident, type SampleGenerator } from '@/requests/_shared';
+import { resolveRequestData } from '@/utils/url';
 
 export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
   const s: string[] = [];
@@ -31,7 +32,7 @@ export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
     options.set('body', 'body');
   }
 
-  const params = [JSON.stringify(getUrl(url, data))];
+  const params = [JSON.stringify(resolveRequestData(url, data))];
   if (options.size > 0) {
     const str = Array.from(options.entries())
       .map(([k, v]) => ident(k === v ? k : `${k}: ${v}`))
