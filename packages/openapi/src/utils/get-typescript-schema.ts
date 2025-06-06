@@ -9,7 +9,7 @@ export async function getTypescriptSchema(
     // re-running on the same schema results in error
     // because it uses `defineProperty` to define internal references
     // we clone the schema to fix this problem
-    schema,
+    JSON.parse(JSON.stringify(schema)),
     'Response',
     {
       $refOptions: false,
