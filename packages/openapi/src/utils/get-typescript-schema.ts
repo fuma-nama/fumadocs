@@ -5,19 +5,12 @@ export async function getTypescriptSchema(
   schema: object,
   dereferenceMap: DereferenceMap,
 ): Promise<string | undefined> {
-  return compile(
-    // re-running on the same schema results in error
-    // because it uses `defineProperty` to define internal references
-    // we clone the schema to fix this problem
-    schema,
-    'Response',
-    {
-      $refOptions: false,
-      schemaToId: dereferenceMap,
-      bannerComment: '',
-      additionalProperties: false,
-      format: true,
-      enableConstEnums: false,
-    },
-  );
+  const cloned = structuredClone({ schema, dereferenceMap });
+  return compile(cloned.schema, 'Response', {
+    $refOptions: false,
+    schemaToId: cloned.dereferenceMap,
+    bannerComment: '',
+    additionalProperties: false,
+    enableConstEnums: false,
+  });
 }

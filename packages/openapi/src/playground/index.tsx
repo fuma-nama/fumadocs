@@ -125,11 +125,6 @@ function writeReferences(
         for (const key in output[name]) {
           output[name][key] = writeReferences(output[name][key], ctx, stack);
         }
-        continue;
-      default:
-        if (typeof output[name] === 'object' && !Array.isArray(output[name])) {
-          output[name] = { ...output[name] };
-        }
     }
   }
 
