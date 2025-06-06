@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 9.0.7
+
+### Patch Changes
+
+- 77461e5: Fix root schema manipulation with TypeScript definition generation
+
 ## 9.0.6
 
 ### Patch Changes
