@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 9.0.8
+
+### Patch Changes
+
+- d435088: fix proxy clone request
+
 ## 9.0.7
 
 ### Patch Changes
