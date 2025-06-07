@@ -119,36 +119,34 @@ export function ObjectInput({
   );
 }
 
-export function JsonInput({
-  fieldName,
-  children,
-}: {
-  fieldName: string;
-  children: ReactNode;
-}) {
+export function JsonInput({ fieldName }: { fieldName: string }) {
   const controller = useController({
     name: fieldName,
   });
+  const [error, setError] = useState<string | null>(null);
   const [value, setValue] = useState(() =>
     JSON.stringify(controller.field.value, null, 2),
   );
 
   return (
-    <div className="rounded-lg border bg-fd-secondary text-fd-secondary-foreground">
-      {children}
+    <div className="flex flex-col bg-fd-secondary text-fd-secondary-foreground overflow-hidden border rounded-lg">
       <textarea
         {...controller.field}
         value={value}
-        className="p-2 w-full h-[240px] text-[13px] font-mono resize-none focus-visible:outline-none"
+        className="p-2 h-[240px] text-sm font-mono resize-none focus-visible:outline-none"
         onChange={(v) => {
           setValue(v.target.value);
           try {
             controller.field.onChange(JSON.parse(v.target.value));
-          } catch {
-            // ignore
+            setError(null);
+          } catch (e) {
+            if (e instanceof Error) setError(e.message);
           }
         }}
       />
+      <p className="p-2 text-xs font-mono border-t text-red-400 empty:hidden">
+        {error}
+      </p>
     </div>
   );
 }

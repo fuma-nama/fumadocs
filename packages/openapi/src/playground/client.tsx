@@ -469,13 +469,13 @@ function BodyInput({ field: _field }: { field: RequestSchema }) {
   return (
     <>
       {isJson ? (
-        <JsonInput fieldName="body">
+        <>
           <button
             className={cn(
               buttonVariants({
-                color: 'ghost',
+                color: 'secondary',
                 size: 'sm',
-                className: 'p-2',
+                className: 'w-fit font-mono p-2',
               }),
             )}
             onClick={() => setIsJson(false)}
@@ -483,7 +483,8 @@ function BodyInput({ field: _field }: { field: RequestSchema }) {
           >
             Close JSON Editor
           </button>
-        </JsonInput>
+          <JsonInput fieldName="body" />
+        </>
       ) : (
         <FieldSet
           field={field}
@@ -495,7 +496,7 @@ function BodyInput({ field: _field }: { field: RequestSchema }) {
                 buttonVariants({
                   color: 'secondary',
                   size: 'sm',
-                  className: 'font-mono p-2',
+                  className: 'p-2',
                 }),
               )}
               onClick={() => setIsJson(true)}

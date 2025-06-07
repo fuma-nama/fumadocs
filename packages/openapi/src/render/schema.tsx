@@ -11,15 +11,6 @@ import {
   TabsTrigger,
 } from 'fumadocs-ui/components/tabs';
 
-const keys = {
-  default: 'Default',
-  pattern: 'Pattern',
-  format: 'Format',
-  multipleOf: 'Multiple of',
-} satisfies {
-  [T in keyof Exclude<ResolvedSchema, boolean>]: string;
-};
-
 interface Context {
   stack: SchemaStack;
 }
@@ -135,13 +126,32 @@ export function Schema({
       value: string;
     }[] = [];
 
-    for (const key in keys) {
-      if (key in schema) {
-        fields.push({
-          key: keys[key as keyof object],
-          value: JSON.stringify(schema[key as keyof ResolvedSchema]),
-        });
-      }
+    if (schema.default) {
+      fields.push({
+        key: 'Default',
+        value: JSON.stringify(schema.default),
+      });
+    }
+
+    if (schema.pattern) {
+      fields.push({
+        key: 'Match',
+        value: schema.pattern,
+      });
+    }
+
+    if (schema.format) {
+      fields.push({
+        key: 'Format',
+        value: schema.format,
+      });
+    }
+
+    if (schema.multipleOf) {
+      fields.push({
+        key: 'Multiple Of',
+        value: String(schema.multipleOf),
+      });
     }
 
     let range = getRange(
@@ -196,7 +206,7 @@ export function Schema({
         {fields.map((field) => (
           <div
             key={field.key}
-            className="bg-fd-secondary text-fd-secondary-foreground border rounded-lg text-xs p-1.5 shadow-md"
+            className="bg-fd-secondary border rounded-lg text-xs p-1.5 shadow-md"
           >
             <span className="font-medium me-2">{field.key}</span>
             <code className="text-fd-muted-foreground">{field.value}</code>
