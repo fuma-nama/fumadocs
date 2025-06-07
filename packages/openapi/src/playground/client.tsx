@@ -358,7 +358,12 @@ function SecurityTabs({
         <SelectContent>
           {securities.map((security, i) => (
             <SelectItem key={i} value={i.toString()}>
-              {security.map((item) => item.id).join(' & ')}
+              {security.map((item) => (
+                <div key={item.id}>
+                  <p className="font-mono font-medium">{item.id}</p>
+                  <p className="text-fd-muted-foreground">{item.description}</p>
+                </div>
+              ))}
             </SelectItem>
           ))}
         </SelectContent>
@@ -490,7 +495,7 @@ function BodyInput({ field: _field }: { field: RequestSchema }) {
                 buttonVariants({
                   color: 'secondary',
                   size: 'sm',
-                  className: 'p-2',
+                  className: 'font-mono p-2',
                 }),
               )}
               onClick={() => setIsJson(true)}
@@ -588,6 +593,7 @@ function useAuthInputs(securities?: SecurityEntry[]) {
                     type: 'string',
                   },
                 },
+                required: ['username', 'password'],
               }}
               fieldName={fieldName}
             />
