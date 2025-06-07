@@ -79,9 +79,10 @@ export function createProxy(options: CreateProxyOptions = {}): Proxy {
     }
 
     let proxied = new Request(parsedUrl, {
-      ...req,
+      method: req.method,
       cache: 'no-cache',
-      mode: 'cors',
+      headers: req.headers,
+      body: await req.arrayBuffer(),
     });
 
     if (overrides?.request) {
