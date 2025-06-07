@@ -42,7 +42,7 @@
     "ts-morph": "^26.0.0"
   },
   "devDependencies": {
-    "@types/node": "22.15.28",
+    "@types/node": "22.15.30",
     "@types/react": "^19.1.6",
     "eslint-config-custom": "workspace:*",
     "tsconfig": "workspace:*",

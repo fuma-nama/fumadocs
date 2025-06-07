@@ -37,12 +37,12 @@
   "devDependencies": {
     "@content-collections/core": "^0.9.0",
     "@content-collections/mdx": "^0.2.2",
-    "@types/node": "22.15.28",
+    "@types/node": "22.15.30",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
-    "zod": "^3.25.42"
+    "zod": "^3.25.56"
   },
   "peerDependencies": {
     "@content-collections/core": "0.x.x",
