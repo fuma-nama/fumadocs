@@ -1,65 +1,64 @@
 import { Fragment } from 'react';
 import Image from 'next/image';
-import {
-  organizationUsers,
-  organizationSponsors,
-  sponsorData,
-  sponsorTiers,
-} from '@/app/(home)/sponsors/data';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/cn';
 import { getSponsors } from '@/lib/get-sponsors';
 import { owner } from '@/lib/github';
+import { organizationAsUserSponsors } from '@/app/(home)/sponsors/data';
+
+const tiers = [
+  {
+    name: 'Platinum Sponsor',
+    min: 1000,
+    color: 'text-purple-600 dark:text-purple-400',
+  },
+  {
+    name: 'Golden Sponsor',
+    min: 225,
+    color: 'text-yellow-600 dark:text-yellow-400',
+  },
+  {
+    name: 'Sliver Sponsor',
+    min: 128,
+    color: 'text-fd-muted-foreground',
+  },
+];
 
 export default async function Page() {
-  const sponsors = await getSponsors(owner, [
-    ...organizationUsers,
-    ...organizationSponsors.map((sponsor) => sponsor.github),
-  ]);
+  const result = await getSponsors(owner);
+
+  const sponsors = result.map((v) => {
+    const entity = organizationAsUserSponsors.find(
+      (entity) => entity.asUser === v.login,
+    );
+    if (entity) {
+      return {
+        login: entity.github,
+        name: entity.label,
+        websiteUrl: entity.url,
+        logo: entity.logo,
+        __typename: 'Organization',
+        tier: v.tier,
+        avatarUrl: undefined,
+      };
+    }
+
+    return {
+      logo: undefined,
+      ...v,
+    };
+  });
 
   return (
     <main className="container flex flex-col items-center py-16 text-center z-[2]">
-      <div
-        className="absolute inset-0 z-[-1]"
-        style={{
-          backgroundImage:
-            'conic-gradient(at 50% 196px, transparent 20%, rgba(200,100,255,0.2) 40%, transparent, rgba(100,140,255,0.3) 60%, transparent 80%)',
-          maskImage:
-            'radial-gradient(circle at 50% 196px, transparent 80px, white 100px, transparent 80%)',
-        }}
-      />
       <Image
         src="/circuit_2.svg"
         alt="circuit"
         width="1231"
         height="536"
-        className="absolute top-16 z-[-1] w-full max-w-[1200px] opacity-10 dark:opacity-30"
+        className="absolute top-16 z-[-1] w-full max-w-[1200px] opacity-0 dark:opacity-20"
       />
-      <svg
-        viewBox="0 0 100 100"
-        className="absolute top-24 z-[-1] max-w-[200px]"
-        style={{
-          maskImage: 'linear-gradient(to bottom,transparent 80%,white 100%)',
-        }}
-      >
-        <circle
-          r="49"
-          cx="50"
-          cy="50"
-          stroke="url(#circle)"
-          fill="none"
-          strokeWidth="1"
-        />
-        <defs>
-          <linearGradient id="circle" y2="1">
-            <stop stopColor="rgb(100,140,255)" />
-            <stop offset="100%" stopColor="rgb(255,100,255)" />
-          </linearGradient>
-        </defs>
-      </svg>
-      <h1 className="bg-gradient-to-b from-fd-foreground from-50% to-fd-muted bg-clip-text text-4xl font-bold text-transparent">
-        Support Fumadocs
-      </h1>
+      <h1 className="text-4xl font-semibold">Support Fumadocs</h1>
       <p className="mt-4 text-sm">
         Your sponsorship means a lot to open-source projects, including
         Fumadocs.
@@ -70,7 +69,6 @@ export default async function Page() {
         target="_blank"
         className={cn(
           buttonVariants({
-            variant: 'outline',
             className: 'rounded-full mt-6',
           }),
         )}
@@ -187,66 +185,59 @@ export default async function Page() {
           Fumadocs
         </text>
       </svg>
-      <h2 className="mt-12 font-mono text-xs">Organization Sponsors</h2>
-      <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-        {[
-          ...organizationSponsors,
-          ...sponsors
-            .filter((sponsor) => sponsor.__typename === 'Organization')
-            .map((sponsor) => ({
-              label: sponsor.name,
-              logo: (
-                <>
-                  <Image
-                    alt="avatar"
-                    src={sponsor.avatarUrl}
-                    unoptimized
-                    width="30"
-                    height="30"
-                    className="rounded-lg"
-                  />
-                  {sponsor.name}
-                </>
-              ),
-              url: getSponsorHref(sponsor.login, sponsor.websiteUrl),
-              tier: sponsorData[sponsor.login] ?? '',
-            })),
-        ]
-          .sort((a, b) => {
-            const idx1 = sponsorTiers.findIndex((tier) => tier.type === a.tier);
-            const idx2 = sponsorTiers.findIndex((tier) => tier.type === b.tier);
-
-            return (
-              (idx1 === -1 ? sponsorTiers.length : idx1) -
-              (idx2 === -1 ? sponsorTiers.length : idx2)
-            );
-          })
+      <h2 className="mt-12 font-mono text-xs mb-7">Organization Sponsors</h2>
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+        {sponsors
+          .filter((sponsor) => sponsor.__typename === 'Organization')
           .map((sponsor) => {
-            const tier = sponsorTiers.find(
-              (tier) => tier.type === sponsor.tier,
+            const tier = tiers.find(
+              (tier) => sponsor.tier.monthlyPriceInDollars >= tier.min,
             );
 
             return (
               <a
-                key={sponsor.label}
-                href={sponsor.url}
+                key={sponsor.name}
+                href={getSponsorHref(sponsor.login, sponsor.websiteUrl)}
                 rel="noreferrer noopener"
                 target="_blank"
-                className="group flex flex-col items-center justify-center rounded-xl p-3 transition-colors hover:bg-fd-primary/10"
+                className="flex flex-col items-center"
               >
-                <div className="inline-flex h-12 items-center gap-2 text-lg grayscale transition-all group-hover:grayscale-0">
-                  {sponsor.logo}
+                <div className="inline-flex h-14 items-center gap-2.5 font-medium text-xl">
+                  {sponsor.logo ?? (
+                    <>
+                      <Image
+                        alt="avatar"
+                        src={sponsor.avatarUrl}
+                        unoptimized
+                        width="38"
+                        height="38"
+                        className="rounded-lg"
+                      />
+                      <p>{sponsor.name}</p>
+                    </>
+                  )}
                 </div>
-                {tier ? (
-                  <p className="text-xs text-fd-muted-foreground">
-                    {tier.label}
-                  </p>
-                ) : null}
+                {tier && (
+                  <p className={cn('text-xs', tier.color)}>{tier.name}</p>
+                )}
               </a>
             );
           })}
       </div>
-
+      <h2 className="mt-12 font-mono text-xs mb-7">Hosting Sponsor</h2>
+      <a href="https://vercel.com" rel="noreferrer noopener">
+        <svg
+          aria-label="Vercel logotype"
+          role="img"
+          viewBox="0 0 283 64"
+          className="w-32"
+        >
+          <path
+            d="M141.68 16.25c-11.04 0-19 7.2-19 18s8.96 18 20 18c6.67 0 12.55-2.64 16.19-7.09l-7.65-4.42c-2.02 2.21-5.09 3.5-8.54 3.5-4.79 0-8.86-2.5-10.37-6.5h28.02c.22-1.12.35-2.28.35-3.5 0-10.79-7.96-17.99-19-17.99zm-9.46 14.5c1.25-3.99 4.67-6.5 9.45-6.5 4.79 0 8.21 2.51 9.45 6.5h-18.9zm117.14-14.5c-11.04 0-19 7.2-19 18s8.96 18 20 18c6.67 0 12.55-2.64 16.19-7.09l-7.65-4.42c-2.02 2.21-5.09 3.5-8.54 3.5-4.79 0-8.86-2.5-10.37-6.5h28.02c.22-1.12.35-2.28.35-3.5 0-10.79-7.96-17.99-19-17.99zm-9.45 14.5c1.25-3.99 4.67-6.5 9.45-6.5 4.79 0 8.21 2.51 9.45 6.5h-18.9zm-39.03 3.5c0 6 3.92 10 10 10 4.12 0 7.21-1.87 8.8-4.92l7.68 4.43c-3.18 5.3-9.14 8.49-16.48 8.49-11.05 0-19-7.2-19-18s7.96-18 19-18c7.34 0 13.29 3.19 16.48 8.49l-7.68 4.43c-1.59-3.05-4.68-4.92-8.8-4.92-6.07 0-10 4-10 10zm82.48-29v46h-9v-46h9zM37.59.25l36.95 64H.64l36.95-64zm92.38 5l-27.71 48-27.71-48h10.39l17.32 30 17.32-30h10.39zm58.91 12v9.69c-1-.29-2.06-.49-3.2-.49-5.81 0-10 4-10 10v14.8h-9v-34h9v9.2c0-5.08 5.91-9.2 13.2-9.2z"
+            fill="currentColor"
+          ></path>
+        </svg>
+      </a>
       <h2 className="mt-12 font-mono text-xs">Individual Sponsors</h2>
       <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
         {sponsors
@@ -261,7 +252,7 @@ export default async function Page() {
             >
               <Image
                 alt="avatar"
-                src={sponsor.avatarUrl}
+                src={sponsor.avatarUrl!}
                 unoptimized
                 width="30"
                 height="30"

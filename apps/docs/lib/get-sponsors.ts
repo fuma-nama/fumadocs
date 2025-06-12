@@ -1,55 +1,87 @@
-interface SponsorEntity {
-  __typename: 'User' | 'Organization';
-  login: string;
-  name: string;
-  avatarUrl: string;
-  websiteUrl?: string;
+import { Octokit } from 'octokit';
+
+export interface Sponsor extends SponsorEntity {
+  tier: Tier;
 }
 
-export async function getSponsors(
-  login: string,
-  excluded: string[],
-): Promise<SponsorEntity[]> {
-  const query = `query {
-  user(login:${JSON.stringify(login)}) {
-    ... on Sponsorable {
-      sponsors(first: 100) {
-        nodes {
-          __typename
-          ... on User { login, name, avatarUrl, websiteUrl }
-          ... on Organization { login, name, avatarUrl, websiteUrl }
-        }
-      }
-    }
+interface SponsorEntity {
+  login: string;
+  avatarUrl: string;
+  websiteUrl: string;
+  name: string;
+  __typename: string;
+}
+
+interface Tier {
+  monthlyPriceInDollars: number;
+  name?: string;
+}
+
+export const revalidate = 60 * 30;
+
+export async function getSponsors(owner: string): Promise<Sponsor[]> {
+  if (!process.env.GITHUB_TOKEN) {
+    throw new Error('GITHUB_TOKEN environment variable is required');
   }
-}`;
-  const headers = new Headers();
-  if (process.env.GITHUB_TOKEN)
-    headers.set('Authorization', `Bearer ${process.env.GITHUB_TOKEN}`);
-  else
-    console.warn(
-      'Highly suggested to add a `GITHUB_TOKEN` environment variable to avoid rate limits.',
-    );
 
-  const res = await fetch('https://api.github.com/graphql', {
-    method: 'POST',
-    body: JSON.stringify({ query }),
-    headers,
-    next: { revalidate: 3600 },
+  const octokit = new Octokit({
+    auth: process.env.GITHUB_TOKEN,
   });
-  if (!res.ok) throw new Error(`Failed to fetch sponsors: ${await res.text()}`);
 
-  const { data } = (await res.json()) as {
-    data: {
+  try {
+    const response = await octokit.graphql<{
       user: {
-        sponsors: {
-          nodes: (SponsorEntity | Record<string, never>)[];
+        sponsorshipsAsMaintainer: {
+          nodes: Array<{
+            sponsorEntity: SponsorEntity;
+            tier: Tier;
+          }>;
         };
       };
-    };
-  };
+    }>(`
+      query {
+        user(login: ${JSON.stringify(owner)}) {
+          sponsorshipsAsMaintainer(first: 100) {
+            nodes {
+              sponsorEntity {
+                __typename
+                ... on User {
+                    login
+                    avatarUrl
+                    name
+                    websiteUrl
+                }
+                ... on Organization {
+                    login
+                    avatarUrl
+                    websiteUrl
+                    name
+                }
+              }
+              tier {
+                monthlyPriceInDollars
+                name
+              }
+            }
+          }
+        }
+      }
+    `);
 
-  return data.user.sponsors.nodes.filter(
-    (sponsor) => 'name' in sponsor && !excluded.includes(sponsor.login),
-  ) as SponsorEntity[];
+    const sponsors = response.user.sponsorshipsAsMaintainer.nodes.map(
+      (node) => ({
+        ...node.sponsorEntity,
+        name: node.sponsorEntity.name || node.sponsorEntity.login,
+        tier: node.tier,
+      }),
+    );
+
+    // Sort sponsors by tier price in descending order
+    return sponsors.sort(
+      (a, b) => b.tier.monthlyPriceInDollars - a.tier.monthlyPriceInDollars,
+    );
+  } catch (error) {
+    console.error('Error fetching sponsors:', error);
+    throw error;
+  }
 }
