@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 9.0.9
+
+### Patch Changes
+
+- 201235f: Fix trailing slashes being normalized
+
 ## 9.0.8
 
 ### Patch Changes
