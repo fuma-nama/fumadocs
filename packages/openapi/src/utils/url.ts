@@ -1,13 +1,11 @@
 import type { RequestData } from '@/requests/_shared';
 
 export function joinURL(base: string, pathname: string): string {
-  pathname = pathname
-    .split('/')
-    .filter((v) => v.length > 0)
-    .join('/');
+  if (pathname.startsWith('/')) pathname = pathname.slice(1);
+  if (base.endsWith('/')) base = base.slice(0, -1);
 
-  if (!base.endsWith('/') && pathname.length > 0) base += '/';
-  return base + pathname;
+  if (pathname.length > 0) return base + '/' + pathname;
+  else return base;
 }
 
 /**
