@@ -116,7 +116,7 @@ export function SearchDialogInput(props: ComponentProps<'input'>) {
       value={search}
       onChange={(e) => onSearchChange(e.target.value)}
       placeholder={text.search}
-      className="w-0 flex-1 bg-transparent py-3 text-lg placeholder:text-fd-muted-foreground focus-visible:outline-none"
+      className="w-0 flex-1 bg-transparent py-3 text-base placeholder:text-fd-muted-foreground focus-visible:outline-none"
     />
   );
 }
@@ -136,8 +136,8 @@ export function SearchDialogClose({
       className={cn(
         buttonVariants({
           color: 'ghost',
-          size: 'icon',
-          className: 'text-fd-muted-foreground -me-1.5',
+          size: 'icon-sm',
+          className: 'text-fd-muted-foreground -me-2',
         }),
         className,
       )}
@@ -152,7 +152,10 @@ export function SearchDialogFooter(props: ComponentProps<'div'>) {
   return (
     <div
       {...props}
-      className={cn('mt-auto border-t p-3 empty:hidden', props.className)}
+      className={cn(
+        'border-t backdrop-brightness-150 p-3 empty:hidden',
+        props.className,
+      )}
     />
   );
 }
@@ -179,7 +182,7 @@ export function SearchDialogContent({
       aria-describedby={undefined}
       {...props}
       className={cn(
-        'fixed left-1/2 top-[10vh] z-50 w-[98vw] max-w-screen-sm -translate-x-1/2 rounded-xl border bg-fd-popover/50 backdrop-blur-sm text-fd-popover-foreground shadow-2xl shadow-black/30 data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in',
+        'fixed left-1/2 top-[10vh] z-50 w-[98vw] max-w-screen-sm -translate-x-1/2 rounded-xl border bg-fd-popover/60 backdrop-blur-sm text-fd-popover-foreground shadow-2xl overflow-hidden shadow-black/20 data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in',
         props.className,
       )}
     >
@@ -284,6 +287,7 @@ export function SearchDialogList({
       ref={ref}
       className={cn(
         'overflow-hidden h-(--fd-animated-height) transition-[height]',
+        items && 'border-t',
         props.className,
       )}
       style={
@@ -295,7 +299,7 @@ export function SearchDialogList({
     >
       <div
         className={cn(
-          'w-full flex flex-col overflow-y-auto max-h-[460px] border-t',
+          'w-full flex flex-col overflow-y-auto max-h-[460px]',
           !items && 'hidden',
         )}
       >
@@ -370,8 +374,8 @@ export function SearchDialogIcon(props: ComponentProps<'svg'>) {
     <SearchIcon
       {...props}
       className={cn(
-        'size-5 text-fd-muted-foreground',
-        isLoading && 'animate-pulse duration-300',
+        'size-4.5 text-fd-muted-foreground',
+        isLoading && 'animate-pulse duration-400',
         props.className,
       )}
     />
