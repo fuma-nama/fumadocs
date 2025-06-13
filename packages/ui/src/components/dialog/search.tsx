@@ -153,7 +153,7 @@ export function SearchDialogFooter(props: ComponentProps<'div'>) {
     <div
       {...props}
       className={cn(
-        'border-t backdrop-brightness-150 p-3 empty:hidden',
+        'border-t backdrop-brightness-130 p-3 empty:hidden',
         props.className,
       )}
     />
@@ -166,7 +166,10 @@ export function SearchDialogOverlay(
   return (
     <DialogOverlay
       {...props}
-      className={cn('fixed inset-0 z-50', props.className)}
+      className={cn(
+        'fixed inset-0 z-50 data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out',
+        props.className,
+      )}
     />
   );
 }

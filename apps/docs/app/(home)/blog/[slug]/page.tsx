@@ -7,6 +7,7 @@ import { createMetadata } from '@/lib/metadata';
 import { buttonVariants } from '@/components/ui/button';
 import { Control } from '@/app/(home)/blog/[slug]/page.client';
 import { getMDXComponents } from '@/mdx-components';
+import path from 'node:path';
 
 export default async function Page(props: {
   params: Promise<{ slug: string }>;
@@ -55,7 +56,10 @@ export default async function Page(props: {
           <div>
             <p className="mb-1 text-sm text-fd-muted-foreground">At</p>
             <p className="font-medium">
-              {new Date(page.data.date ?? page.file.name).toDateString()}
+              {new Date(
+                page.data.date ??
+                  path.basename(page.path, path.extname(page.path)),
+              ).toDateString()}
             </p>
           </div>
           <Control url={page.url} />

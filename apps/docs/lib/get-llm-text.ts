@@ -29,7 +29,7 @@ export async function getLLMText(page: Page) {
 
   return `# ${category}: ${page.data.title}
 URL: ${page.url}
-Source: https://raw.githubusercontent.com/fuma-nama/fumadocs/refs/heads/main/apps/docs/content/docs/${page.file.path}
+Source: https://raw.githubusercontent.com/fuma-nama/fumadocs/refs/heads/main/apps/docs/content/docs/${page.path}
 
 ${page.data.description}
         

@@ -36,7 +36,7 @@ const loader = createServerFn({
 
     const { content, ...rest } = page.data;
     const compiled = await compiler.compileFile({
-      path: path.resolve('content', page.file.path),
+      path: path.resolve('content', page.path),
       value: content,
     });
 

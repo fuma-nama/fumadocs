@@ -23,7 +23,7 @@ export async function loader({ params }: Route.LoaderArgs) {
   if (!page) throw new Error('Not found');
 
   const compiled = await compiler.compileFile({
-    path: path.resolve('content/docs', page.file.path),
+    path: path.resolve('content/docs', page.path),
     value: page.data.content,
   });
 
