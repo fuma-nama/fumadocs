@@ -21,7 +21,7 @@ export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
 
     body = adapter.generateExample(data, {
       lang: 'java',
-      addImport: (specifier) => {
+      addImport(specifier) {
         imports.add(specifier);
       },
     });

@@ -30,6 +30,10 @@ const defaultSamples: CodeSample[] = [
     label: 'Java',
     lang: 'java',
   },
+  {
+    label: 'C#',
+    lang: 'csharp',
+  },
 ];
 
 interface CustomProperty {

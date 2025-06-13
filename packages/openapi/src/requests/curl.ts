@@ -1,13 +1,7 @@
 'use client';
-import { inputToString } from '@/utils/input-to-string';
+import { escapeString, inputToString } from '@/utils/input-to-string';
 import { ident, type SampleGenerator } from '@/requests/_shared';
 import { resolveRequestData } from '@/utils/url';
-
-const MediaTypeFormatMap = {
-  'application/json': 'json',
-  'application/xml': 'xml',
-  'application/x-www-form-urlencoded': 'url',
-} as const;
 
 export const generator: SampleGenerator = (url, data) => {
   const s: string[] = [];
@@ -30,24 +24,20 @@ export const generator: SampleGenerator = (url, data) => {
       throw new Error('[CURL] request body must be an object.');
 
     for (const [key, value] of Object.entries(data.body)) {
-      s.push(`-F ${key}=${inputToString(value)}`);
+      s.push(`-F ${key}=${JSON.stringify(inputToString(value))}`);
     }
-  } else if (
-    data.body &&
-    data.bodyMediaType &&
-    data.bodyMediaType in MediaTypeFormatMap
-  ) {
-    s.push(`-H "Content-Type: ${data.bodyMediaType}"`);
-
-    s.push(
-      `-d ${inputToString(
+  } else if (data.body && data.bodyMediaType) {
+    const escaped = escapeString(
+      inputToString(
         data.body,
-        MediaTypeFormatMap[
-          data.bodyMediaType as keyof typeof MediaTypeFormatMap
-        ],
-        "'",
-      )}`,
+        // @ts-expect-error -- assume the body media type is supported
+        data.bodyMediaType,
+      ),
+      "'",
     );
+
+    s.push(`-H "Content-Type: ${data.bodyMediaType}"`);
+    s.push(`-d ${escaped}`);
   }
 
   return s.flatMap((v, i) => ident(v, i > 0 ? 1 : 0)).join(' \\\n');

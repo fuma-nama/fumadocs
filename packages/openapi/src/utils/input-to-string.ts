@@ -6,30 +6,25 @@ import js2xml from 'xml-js/lib/js2xml';
  */
 export function inputToString(
   value: unknown,
-  format: 'xml' | 'json' | 'url' | 'ndjson' = 'json',
-  delimit?: string,
+  format:
+    | 'application/x-www-form-urlencoded'
+    | 'application/x-ndjson'
+    | 'application/json'
+    | 'application/xml' = 'application/json',
 ): string {
-  const getStr = (v: string) => {
-    if (!delimit) return JSON.stringify(v);
+  if (typeof value === 'string') return value;
 
-    return `${delimit}${v.replaceAll(delimit, `\\${delimit}`)}${delimit}`;
-  };
-
-  if (typeof value === 'string') return getStr(value);
-
-  if (format === 'json') {
-    return getStr(JSON.stringify(value, null, 2));
+  if (format === 'application/json') {
+    return JSON.stringify(value, null, 2);
   }
 
-  if (format === 'ndjson') {
-    return getStr(
-      Array.isArray(value)
-        ? value.map((v) => JSON.stringify(v)).join('\n')
-        : JSON.stringify(value, null, 2),
-    );
+  if (format === 'application/x-ndjson') {
+    return Array.isArray(value)
+      ? value.map((v) => JSON.stringify(v)).join('\n')
+      : JSON.stringify(value, null, 2);
   }
 
-  if (format === 'url') {
+  if (format === 'application/x-www-form-urlencoded') {
     const params = new URLSearchParams();
     if (typeof value !== 'object')
       throw new Error(
@@ -41,8 +36,14 @@ export function inputToString(
         params.set(key, String(value[key as keyof object]));
     }
 
-    return getStr(params.toString());
+    return params.toString();
   }
 
-  return getStr(js2xml(value, { compact: true, spaces: 2 }));
+  return js2xml(value, { compact: true, spaces: 2 });
+}
+
+export function escapeString(str: string, delimit?: string): string {
+  if (!delimit) return JSON.stringify(str);
+
+  return `${delimit}${str.replaceAll(delimit, `\\${delimit}`)}${delimit}`;
 }
