@@ -75,16 +75,16 @@ export default function OramaSearchDialog({
     tag,
   });
 
-  const defaultItems = useMemo<SortedResult[]>(
-    () =>
-      links.map(([name, link]) => ({
-        type: 'page',
-        id: name,
-        content: name,
-        url: link,
-      })),
-    [links],
-  );
+  const defaultItems = useMemo<SortedResult[] | null>(() => {
+    if (links.length === 0) return null;
+
+    return links.map(([name, link]) => ({
+      type: 'page',
+      id: name,
+      content: name,
+      url: link,
+    }));
+  }, [links]);
 
   useOnChange(defaultTag, (v) => {
     setTag(v);
@@ -106,12 +106,9 @@ export default function OramaSearchDialog({
           <SearchDialogInput />
           <SearchDialogClose />
         </SearchDialogHeader>
-        {query.data !== 'empty' && query.data && (
-          <SearchDialogList items={query.data} />
-        )}
-        {query.data === 'empty' && defaultItems.length > 0 && (
-          <SearchDialogList items={defaultItems} />
-        )}
+        <SearchDialogList
+          items={query.data !== 'empty' ? query.data : defaultItems}
+        />
         <SearchDialogFooter>
           {tags.length > 0 ? (
             <TagsList tag={tag} onTagChange={setTag} allowClear={allowClear}>

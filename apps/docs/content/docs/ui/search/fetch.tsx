@@ -34,9 +34,7 @@ export default function DefaultSearchDialog(props: SharedProps) {
           <SearchDialogInput />
           <SearchDialogClose />
         </SearchDialogHeader>
-        {query.data !== 'empty' && query.data && (
-          <SearchDialogList items={query.data} />
-        )}
+        <SearchDialogList items={query.data !== 'empty' ? query.data : null} />
       </SearchDialogContent>
     </SearchDialog>
   );

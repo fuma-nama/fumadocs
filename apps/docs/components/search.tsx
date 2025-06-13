@@ -52,10 +52,8 @@ export default function CustomSearchDialog(props: SharedProps) {
           <SearchDialogInput />
           <SearchDialogClose />
         </SearchDialogHeader>
-        {query.data !== 'empty' && query.data && (
-          <SearchDialogList items={query.data} />
-        )}
-        <SearchDialogFooter className="flex flex-row">
+        <SearchDialogList items={query.data !== 'empty' ? query.data : null} />
+        <SearchDialogFooter className="flex flex-row items-center">
           <TagsList tag={tag} onTagChange={setTag} allowClear>
             <TagsListItem value="ui">Framework</TagsListItem>
             <TagsListItem value="headless">Core</TagsListItem>
@@ -65,7 +63,7 @@ export default function CustomSearchDialog(props: SharedProps) {
           <a
             href="https://orama.com"
             rel="noreferrer noopener"
-            className="ms-auto text-xs text-fd-muted-foreground"
+            className="ms-auto text-xs text-nowrap text-fd-muted-foreground"
           >
             Search powered by Orama
           </a>
