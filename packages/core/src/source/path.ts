@@ -1,5 +1,3 @@
-import { slash, splitPath } from '@/utils/path';
-
 export interface FileInfo {
   /**
    * File path without extension
@@ -42,49 +40,52 @@ export interface FolderInfo {
   dirname: string;
 }
 
-export function parseFilePath(path: string): FileInfo {
-  const segments = splitPath(slash(path));
+export function basename(path: string, ext?: string): string {
+  const idx = path.lastIndexOf('/');
 
-  const dirname = segments.slice(0, -1).join('/');
-  let name = segments.at(-1) ?? '';
-  let ext = '';
+  return path.substring(
+    idx === -1 ? 0 : idx + 1,
+    ext ? path.length - ext.length : path.length,
+  );
+}
 
-  const dotIdx = name.lastIndexOf('.');
+export function extname(path: string): string {
+  const dotIdx = path.lastIndexOf('.');
+
   if (dotIdx !== -1) {
-    ext = name.substring(dotIdx);
-    name = name.substring(0, dotIdx);
+    return path.substring(dotIdx);
   }
 
+  return '';
+}
+
+export function dirname(path: string): string {
+  return path.split('/').slice(0, -1).join('/');
+}
+
+export function parseFilePath(path: string): FileInfo {
+  const ext = extname(path);
+  const name = basename(path, ext);
+  const dir = dirname(path);
+
   return {
-    dirname,
+    dirname: dir,
     name,
-    path: segments.join('/'),
     ext,
+    path,
     get flattenedPath() {
-      return [dirname, name].filter((p) => p.length > 0).join('/');
+      return [dir, name].filter((p) => p.length > 0).join('/');
     },
   };
 }
 
-export function parseFolderPath(path: string): FolderInfo {
-  const segments = splitPath(slash(path));
-  const base = segments.at(-1) ?? '';
-
-  return {
-    dirname: segments.slice(0, -1).join('/'),
-    name: base,
-    path: segments.join('/'),
-  };
-}
-
 /**
- * @param path - Relative path
- * @returns Normalized path, with no trailing/leading slashes
- * @throws Throws error if path starts with `./` or `../`
+ * @deprecated use `dirname` and `basename` directly.
  */
-export function normalizePath(path: string): string {
-  const segments = splitPath(slash(path));
-  if (segments[0] === '.' || segments[0] === '..')
-    throw new Error("It must not start with './' or '../'");
-  return segments.join('/');
+export function parseFolderPath(path: string): FolderInfo {
+  return {
+    dirname: dirname(path),
+    name: basename(path),
+    path,
+  };
 }

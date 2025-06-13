@@ -1,10 +1,10 @@
 import { type MetaData, type PageData } from '@/source/types';
-import { parseFilePath, type FileInfo, normalizePath } from './path';
-import { Storage } from './file-system';
+import { FileSystem } from './file-system';
+import { slash, splitPath } from '@/utils/path';
+import { VirtualFile } from '@/source/loader';
 
 export interface LoadOptions {
   transformers?: Transformer[];
-  getSlugs: (info: FileInfo) => string[];
 }
 
 export interface I18nLoadOptions extends LoadOptions {
@@ -15,50 +15,43 @@ export interface I18nLoadOptions extends LoadOptions {
   };
 }
 
-export interface VirtualFile {
-  /**
-   * Relative path
-   *
-   * @example `docs/page.mdx`
-   */
-  path: string;
-  type: 'page' | 'meta';
+export type ContentStorage = FileSystem<MetaFile | PageFile>;
 
-  /**
-   * Specified Slugs for page
-   */
-  slugs?: string[];
-  data: unknown;
+export interface MetaFile<Data extends MetaData = MetaData> {
+  path: string;
+  absolutePath: string;
+
+  format: 'meta';
+  data: Data;
+}
+
+export interface PageFile<Data extends PageData = PageData> {
+  path: string;
+  absolutePath: string;
+
+  format: 'page';
+  slugs: string[];
+  data: Data;
 }
 
 export type Transformer = (context: {
-  storage: Storage;
+  storage: ContentStorage;
   options: LoadOptions;
 }) => void;
 
 // Virtual files -> Virtual Storage -> Transformers -> Result
-export function loadFiles<O extends LoadOptions>(
+export function loadFiles(
   files: VirtualFile[],
-  options: O,
-): Storage {
+  buildFile: (file: VirtualFile) => MetaFile | PageFile,
+  options: LoadOptions,
+): ContentStorage {
   const { transformers = [] } = options;
-  const storage = new Storage();
+  const storage: ContentStorage = new FileSystem();
 
   for (const file of files) {
     const parsedPath = normalizePath(file.path);
 
-    if (file.type === 'page') {
-      const slugs = file.slugs ?? options.getSlugs(parseFilePath(parsedPath));
-
-      storage.write(parsedPath, file.type, {
-        slugs,
-        data: file.data as PageData,
-      });
-    }
-
-    if (file.type === 'meta') {
-      storage.write(parsedPath, file.type, file.data as MetaData);
-    }
+    storage.write(parsedPath, buildFile(file));
   }
 
   for (const transformer of transformers) {
@@ -73,10 +66,11 @@ export function loadFiles<O extends LoadOptions>(
 
 export function loadFilesI18n(
   files: VirtualFile[],
+  buildFile: (file: VirtualFile) => MetaFile | PageFile,
   options: I18nLoadOptions,
-): Record<string, Storage> {
+): Record<string, ContentStorage> {
   const parser = options.i18n.parser === 'dir' ? dirParser : dotParser;
-  const storages: Record<string, Storage> = {};
+  const storages: Record<string, ContentStorage> = {};
 
   for (const lang of options.i18n.languages) {
     storages[lang] = loadFiles(
@@ -92,6 +86,7 @@ export function loadFilesI18n(
 
         return [];
       }),
+      buildFile,
       options,
     );
   }
@@ -122,4 +117,16 @@ function dotParser(path: string): [string, string?] {
   }
 
   return [path];
+}
+
+/**
+ * @param path - Relative path
+ * @returns Normalized path, with no trailing/leading slashes
+ * @throws Throws error if path starts with `./` or `../`
+ */
+function normalizePath(path: string): string {
+  const segments = splitPath(slash(path));
+  if (segments[0] === '.' || segments[0] === '..')
+    throw new Error("It must not start with './' or '../'");
+  return segments.join('/');
 }

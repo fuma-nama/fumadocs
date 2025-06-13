@@ -81,6 +81,7 @@ export function resolveFiles({ docs, meta }: ResolveOptions): VirtualFile[] {
   for (const entry of docs) {
     outputs.push({
       type: 'page',
+      absolutePath: entry._file.absolutePath,
       path: entry._file.path,
       data: entry,
     });
@@ -89,6 +90,7 @@ export function resolveFiles({ docs, meta }: ResolveOptions): VirtualFile[] {
   for (const entry of meta) {
     outputs.push({
       type: 'meta',
+      absolutePath: entry._file.absolutePath,
       path: entry._file.path,
       data: entry,
     });

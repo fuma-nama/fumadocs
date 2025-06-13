@@ -44,6 +44,7 @@ import { Card, Cards } from 'fumadocs-ui/components/card';
 import { getMDXComponents } from '@/mdx-components';
 import { APIPage } from 'fumadocs-openapi/ui';
 import { GitHubLink, LLMCopyButton } from './page.client';
+import * as path from 'node:path';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -66,7 +67,6 @@ export default async function Page(props: {
 
   if (!page) notFound();
 
-  const path = `apps/docs/content/docs/${page.file.path}`;
   const preview = page.data.preview;
   const { body: Mdx, toc, lastModified } = await page.data.load();
 
@@ -94,7 +94,10 @@ export default async function Page(props: {
         <div className="flex flex-row gap-2 items-center mb-8 border-b pb-6">
           <LLMCopyButton slug={params.slug} />
           <GitHubLink
-            url={`https://github.com/${owner}/${repo}/blob/dev/${path}`}
+            url={`https://github.com/${owner}/${repo}/blob/dev/${path.relative(
+              process.cwd(),
+              page.absolutePath,
+            )}`}
           />
         </div>
         <div className="prose flex-1 text-fd-foreground/80">
@@ -104,7 +107,7 @@ export default async function Page(props: {
               ...Twoslash,
               a: ({ href, ...props }) => {
                 const found = source.getPageByHref(href ?? '', {
-                  dir: page.file.dirname,
+                  dir: path.dirname(page.path),
                 });
 
                 if (!found) return <Link href={href} {...props} />;
