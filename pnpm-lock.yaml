@@ -601,6 +601,9 @@ importers:
       gray-matter:
         specifier: ^4.0.3
         version: 4.0.3
+      lucide-static:
+        specifier: ^0.514.0
+        version: 0.514.0
       react:
         specifier: ^19.0.0
         version: 19.1.0
@@ -6995,6 +6998,9 @@ packages:
     resolution: {integrity: sha512-HXD0OAMd+JM2xCjlwG1EGW9Nuab64dhjO3+MvdyD+pSUeOTBaVAPhQblKIYmmX4RyBYbdzW0VWnJpjJmxWGr6w==}
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
+  lucide-static@0.514.0:
+    resolution: {integrity: sha512-agEEaXa/nFnzw/zZU+V9KD45YA6+ke4uhB3HRBHUd0tr2kw+Ej7sY+jeaAKTmsg3Lis1a4iAjZGfffa8pMwlpw==}
 
   luxon@3.6.1:
     resolution: {integrity: sha512-tJLxrKJhO2ukZ5z0gyjY1zPh3Rh88Ej9P7jNrZiHMUXHae1yvI2imgOZtL1TO8TW6biMMKfTtAOoEJANgtWBMQ==}
@@ -16226,6 +16232,8 @@ snapshots:
   lucide-react@0.514.0(react@19.1.0):
     dependencies:
       react: 19.1.0
+
+  lucide-static@0.514.0: {}
 
   luxon@3.6.1: {}
 

@@ -13,6 +13,7 @@ import { source } from '~/lib/source';
 import path from 'node:path';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import type { PageTree } from 'fumadocs-core/server';
+import { useMemo } from 'react';
 
 const compiler = createCompiler();
 
@@ -47,12 +48,33 @@ const loader = createServerFn({
   });
 
 function Page() {
-  const { compiled, tree, ...data } = Route.useLoaderData();
+  const { compiled, ...data } = Route.useLoaderData();
   const { default: MDX, toc } = executeMdxSync(compiled);
+  const tree = useMemo(() => {
+    function traverse(folder: PageTree.Folder | PageTree.Root) {
+      for (const node of folder.children) {
+        if (node.type === 'page' && typeof node.icon === 'string') {
+          node.icon = (
+            <span
+              dangerouslySetInnerHTML={{
+                __html: node.icon,
+              }}
+            />
+          );
+        }
+
+        if (node.type === 'folder') traverse(node);
+      }
+    }
+
+    const tree = data.tree as PageTree.Root;
+    traverse(tree);
+    return tree;
+  }, [data.tree]);
 
   return (
     <DocsLayout
-      tree={tree as PageTree.Root}
+      tree={tree}
       nav={{
         title: 'Fumadocs Tanstack',
       }}

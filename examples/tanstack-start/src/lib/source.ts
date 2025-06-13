@@ -7,6 +7,7 @@ import {
 } from 'fumadocs-core/source';
 import matter from 'gray-matter';
 import * as path from 'node:path';
+import * as icons from 'lucide-static';
 
 const files = Object.entries(
   import.meta.glob<true, 'raw'>('/content/**/*', {
@@ -54,4 +55,12 @@ export const source = loader({
     metaData: MetaData;
   }>,
   baseUrl: '/docs',
+  // @ts-expect-error -- string
+  icon(icon) {
+    if (!icon) {
+      return;
+    }
+
+    if (icon in icons) return icons[icon as keyof typeof icons];
+  },
 });
