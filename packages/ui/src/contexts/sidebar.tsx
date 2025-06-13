@@ -1,13 +1,12 @@
 'use client';
 import {
-  useState,
-  useMemo,
-  useRef,
   type ReactNode,
   type RefObject,
+  useMemo,
+  useRef,
+  useState,
 } from 'react';
 import { createContext, usePathname } from 'fumadocs-core/framework';
-import { SidebarProvider as BaseProvider } from 'fumadocs-core/sidebar';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 
 interface SidebarContext {
@@ -59,9 +58,7 @@ export function SidebarProvider({
         [open, collapsed],
       )}
     >
-      <BaseProvider open={open} onOpenChange={setOpen}>
-        {children}
-      </BaseProvider>
+      {children}
     </SidebarContext.Provider>
   );
 }

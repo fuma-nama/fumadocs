@@ -1,16 +1,14 @@
 import type { MethodInformation, RenderContext } from '@/types';
-import type { NoReference } from '@/utils/schema';
+import type { ResolvedSchema } from '@/utils/schema';
+import { getPreferredType } from '@/utils/schema';
 import { sample } from 'openapi-sampler';
-import { getPreferredType, type ParsedSchema } from '@/utils/schema';
-import { getSecurities, getSecurityPrefix } from '@/utils/get-security';
-
 import type { RequestData } from '@/requests/_shared';
 
 export function getRequestData(
   path: string,
-  method: NoReference<MethodInformation>,
+  method: MethodInformation,
   sampleKey: string | null,
-  { schema: { document } }: RenderContext,
+  _ctx: RenderContext,
 ): RequestData {
   const result: RequestData = {
     path: {},
@@ -50,16 +48,6 @@ export function getRequestData(
     }
   }
 
-  const requirements = method.security ?? document.security;
-  if (requirements && requirements.length > 0) {
-    for (const security of getSecurities(requirements[0], document)) {
-      const prefix = getSecurityPrefix(security);
-      const name = security.type === 'apiKey' ? security.name : 'Authorization';
-
-      result.header[name] = prefix ? `${prefix} <token>` : '<token>';
-    }
-  }
-
   if (method.requestBody) {
     const body = method.requestBody.content;
     const type = getPreferredType(body);
@@ -75,19 +63,20 @@ export function getRequestData(
     } else if (bodyOfType.example) {
       result.body = bodyOfType.example;
     } else {
-      result.body = generateBody(method.method, bodyOfType?.schema ?? {});
+      result.body = generateBody(
+        method.method,
+        (bodyOfType?.schema ?? {}) as ResolvedSchema,
+      );
     }
   }
 
   return result;
 }
 
-function generateBody(
-  method: string,
-  schema: NoReference<ParsedSchema>,
-): unknown {
+function generateBody(method: string, schema: ResolvedSchema): unknown {
   return sample(schema as object, {
     skipReadOnly: method !== 'GET',
     skipWriteOnly: method === 'GET',
+    skipNonRequired: true,
   });
 }

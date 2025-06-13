@@ -1,17 +1,15 @@
 'use client';
 
-import { Menu, Sidebar as SidebarIcon, X } from 'lucide-react';
-import { type ButtonHTMLAttributes, type HTMLAttributes } from 'react';
+import { Sidebar as SidebarIcon } from 'lucide-react';
+import { type ComponentProps } from 'react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { useSidebar } from '@/contexts/sidebar';
 import { useNav } from '@/contexts/layout';
-import { SidebarTrigger } from 'fumadocs-core/sidebar';
 import { SidebarCollapseTrigger } from '@/components/layout/sidebar';
 import { SearchToggle } from '@/components/layout/search-toggle';
 
-export function Navbar(props: HTMLAttributes<HTMLElement>) {
-  const { open } = useSidebar();
+export function Navbar(props: ComponentProps<'header'>) {
   const { isTransparent } = useNav();
 
   return (
@@ -19,8 +17,8 @@ export function Navbar(props: HTMLAttributes<HTMLElement>) {
       id="nd-subnav"
       {...props}
       className={cn(
-        'sticky top-(--fd-banner-height) z-30 flex h-14 items-center px-4 border-b border-fd-foreground/10 transition-colors backdrop-blur-sm md:px-6',
-        (!isTransparent || open) && 'bg-fd-background/80',
+        'fixed top-(--fd-banner-height) inset-x-0 z-30 flex items-center px-4 border-b transition-colors backdrop-blur-sm',
+        !isTransparent && 'bg-fd-background/80',
         props.className,
       )}
     >
@@ -29,24 +27,50 @@ export function Navbar(props: HTMLAttributes<HTMLElement>) {
   );
 }
 
-export function NavbarSidebarTrigger(
-  props: ButtonHTMLAttributes<HTMLButtonElement>,
-) {
-  const { open } = useSidebar();
+export function LayoutBody(props: ComponentProps<'main'>) {
+  const { collapsed } = useSidebar();
 
   return (
-    <SidebarTrigger
+    <main
+      id="nd-docs-layout"
       {...props}
+      className={cn(
+        'flex flex-1 flex-col transition-[margin]',
+        props.className,
+      )}
+      style={{
+        ...props.style,
+        marginInlineStart: collapsed
+          ? 'max(0px, min(calc(100vw - var(--fd-page-width)), var(--fd-sidebar-width)))'
+          : 'var(--fd-sidebar-width)',
+      }}
+    >
+      {props.children}
+    </main>
+  );
+}
+
+export function NavbarSidebarTrigger({
+  className,
+  ...props
+}: ComponentProps<'button'>) {
+  const { setOpen } = useSidebar();
+
+  return (
+    <button
+      {...props}
+      aria-label="Open Sidebar"
       className={cn(
         buttonVariants({
           color: 'ghost',
-          size: 'icon',
+          size: 'icon-sm',
+          className,
         }),
-        props.className,
       )}
+      onClick={() => setOpen((prev) => !prev)}
     >
-      {open ? <X /> : <Menu />}
-    </SidebarTrigger>
+      <SidebarIcon />
+    </button>
   );
 }
 
@@ -56,7 +80,7 @@ export function CollapsibleControl() {
 
   return (
     <div
-      className="fixed flex flex-row animate-fd-fade-in rounded-xl p-0.5 border bg-fd-muted text-fd-muted-foreground z-10 xl:start-4 max-xl:end-4"
+      className="fixed flex shadow-lg animate-fd-fade-in rounded-xl p-0.5 border bg-fd-muted text-fd-muted-foreground z-10 xl:start-4 max-xl:end-4"
       style={{
         top: 'calc(var(--fd-banner-height) + var(--fd-tocnav-height) + var(--spacing) * 4)',
       }}
@@ -66,13 +90,13 @@ export function CollapsibleControl() {
           buttonVariants({
             color: 'ghost',
             size: 'icon-sm',
+            className: 'rounded-lg',
           }),
-          'rounded-lg',
         )}
       >
         <SidebarIcon />
       </SidebarCollapseTrigger>
-      <SearchToggle size="icon-sm" className="rounded-lg" hideIfDisabled />
+      <SearchToggle className="rounded-lg" hideIfDisabled />
     </div>
   );
 }

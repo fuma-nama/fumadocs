@@ -3,10 +3,7 @@ import { type ReactNode } from 'react';
 import { Markdown } from '@/render/markdown';
 import { type CodeSample } from '@/render/operation/index';
 import { CodeBlock } from '@/render/codeblock';
-import {
-  CodeExample,
-  CodeExampleProvider,
-} from '@/ui/contexts/code-example.lazy';
+import { CodeExample, CodeExampleProvider } from '@/ui/lazy';
 import { getPreferredType, type NoReference } from '@/utils/schema';
 import { getRequestData } from '@/render/operation/get-request-data';
 import { sample } from 'openapi-sampler';
@@ -28,6 +25,14 @@ const defaultSamples: CodeSample[] = [
   {
     label: 'Python',
     lang: 'python',
+  },
+  {
+    label: 'Java',
+    lang: 'java',
+  },
+  {
+    label: 'C#',
+    lang: 'csharp',
   },
 ];
 
@@ -95,7 +100,7 @@ export function getAPIExamples(
       });
     }
 
-    return result;
+    if (result.length > 0) return result;
   }
 
   return [
@@ -140,9 +145,9 @@ export async function APIExample({
         />
       )}
       {generators.length > 0 && (
-        <renderer.Requests items={generators.map((s) => s.label)}>
-          {generators.map((generator) => (
-            <renderer.Request key={generator.label} name={generator.label}>
+        <renderer.Requests items={generators.map((s) => s.label ?? s.lang)}>
+          {generators.map((generator, i) => (
+            <renderer.Request key={i} name={generator.label ?? generator.lang}>
               <CodeExample {...generator} />
             </renderer.Request>
           ))}
@@ -161,11 +166,15 @@ function dedupe(samples: CodeSample[]): CodeSample[] {
   const out: CodeSample[] = [];
 
   for (let i = samples.length - 1; i >= 0; i--) {
-    if (set.has(samples[i].label)) continue;
+    const item = samples[i];
+    if (item.label) {
+      if (set.has(item.label)) continue;
+      set.add(item.label);
+    }
 
-    set.add(samples[i].label);
-    out.unshift(samples[i]);
+    out.unshift(item);
   }
+
   return out;
 }
 

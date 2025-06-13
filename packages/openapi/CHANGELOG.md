@@ -1,5 +1,264 @@
 # @fuma-docs/openapi
 
+## 9.0.9
+
+### Patch Changes
+
+- 201235f: Fix trailing slashes being normalized
+
+## 9.0.8
+
+### Patch Changes
+
+- d435088: fix proxy clone request
+
+## 9.0.7
+
+### Patch Changes
+
+- 77461e5: Fix root schema manipulation with TypeScript definition generation
+
+## 9.0.6
+
+### Patch Changes
+
+- 99e3c95: Consistent URL resolution
+- Updated dependencies [b4916d2]
+- Updated dependencies [8738b9c]
+- Updated dependencies [68526ea]
+- Updated dependencies [a66886b]
+  - fumadocs-core@15.5.1
+  - fumadocs-ui@15.5.1
+
+## 9.0.5
+
+### Patch Changes
+
+- 5067efc: Improved support for all OAuth flows
+- Updated dependencies [50f8f7f]
+- Updated dependencies [589d101]
+- Updated dependencies [697d5b4]
+  - fumadocs-ui@15.5.0
+  - fumadocs-core@15.5.0
+
+## 9.0.4
+
+### Patch Changes
+
+- 9721f6f: Introduce `allowedOrigins` and `filterRequest` options to `createProxy`. Deprecate `allowedUrls` in favour of new APIs.
+
+## 9.0.3
+
+### Patch Changes
+
+- 5770180: Implement multiple security schemes support
+- d2a2d47: Skip non-required values when generating code examples
+- Updated dependencies [0ab6c7f]
+  - fumadocs-core@15.4.2
+  - fumadocs-ui@15.4.2
+
+## 9.0.2
+
+### Patch Changes
+
+- 0a90cb9: Improve auth handling
+- Updated dependencies [e72b7b4]
+  - fumadocs-ui@15.4.1
+  - fumadocs-core@15.4.1
+
+## 9.0.1
+
+### Patch Changes
+
+- 2f2ae4d: Disable schema inline on `generateFiles()`
+- 951a1a4: Support overriding request/response from `createProxy()`
+- 2f2ae4d: Support code samples without `label`
+- 2f2ae4d: Hide internal APis since their changes are not documented
+
+## 9.0.0
+
+### Major Changes
+
+- bdef238: **Redesign `generateFiles`**
+
+  This redesign will finalize the behaviour of `generateFiles` to make it simpler, consistent across different versions of Fumadocs OpenAPI.
+
+  - Abandoned `groupByFolder`, it's deprecated long time ago and can be replaced with `groupBy`.
+  - Improved type safety, `groupBy` is now only available with `per` set to `operation`.
+  - `name` usage changed (see below).
+
+  The `name` option was supposed to designate a output path for generated page. Since `groupBy` was introduced, `name` became somehow useless because its design doesn't work well with `groupBy`.
+
+  **New `name` Design**:
+
+  It now accepts a function:
+
+  ```ts
+  generateFiles({
+    input: ['./content/docs/openapi/museum.yaml'],
+    output: './content/docs/openapi/(generated)',
+    per: 'operation',
+    name: (output, document) => {
+      // page info
+      output.item;
+      // parsed OpenAPI schema
+      document;
+      return 'dir/my-file';
+    },
+  });
+  ```
+
+  You can set `algorithm` to `v1` to keep the behaviour of Fumadocs OpenAPI v8:
+
+  ```ts
+  generateFiles({
+    input: ['./content/docs/openapi/museum.yaml'],
+    output: './content/docs/openapi/(generated)',
+    per: 'operation',
+    name: {
+      algorithm: 'v1',
+    },
+  });
+  ```
+
+  `per: operation`:
+
+  File name will be identical with your `operationId` if defined, otherwise fallback to endpoint path or webhook name.
+
+  ```ts
+  generateFiles({
+    input: ['./content/docs/openapi/museum.yaml'],
+    output: './content/docs/openapi/(generated)',
+    per: 'operation',
+  });
+  ```
+
+  With `per: operation`, you can use `groupBy` to group pages:
+
+  - tag: `{tag}/{file}`
+  - route: `{endpoint}/{method}` (it will ignore the `name` option)
+  - none: `{file}` (default)
+
+  `per: tag | file`:
+
+  They are unchanged.
+
+### Minor Changes
+
+- c945b5f: Mark `mediaAdapters` API stable
+- b0c02a0: Redesign schema display UI
+
+### Patch Changes
+
+- 00a81e1: Improve playground body input
+- 1bcdc84: Fix recursive reference in `anyOf`/`allOf`/`oneOf`
+- Updated dependencies [092fd04]
+- Updated dependencies [1b999eb]
+- Updated dependencies [961b67e]
+- Updated dependencies [7d78bc5]
+  - fumadocs-ui@15.4.0
+  - fumadocs-core@15.4.0
+
+## 8.1.12
+
+### Patch Changes
+
+- a6c909b: Removed unused devDependencies and migrated from `fast-glob` to `tinyglobby`
+- Updated dependencies [e0c2a92]
+- Updated dependencies [71fc1a5]
+  - fumadocs-ui@15.3.4
+  - fumadocs-core@15.3.4
+
+## 8.1.11
+
+### Patch Changes
+
+- Updated dependencies [05b3bd9]
+- Updated dependencies [39bf088]
+- Updated dependencies [4ae7b4a]
+- Updated dependencies [e955a98]
+  - fumadocs-ui@15.3.3
+  - fumadocs-core@15.3.3
+
+## 8.1.10
+
+### Patch Changes
+
+- 623610a: Improve error message
+- Updated dependencies [1753cf1]
+- Updated dependencies [9b38baf]
+- Updated dependencies [8e862e5]
+- Updated dependencies [ac0ab12]
+- Updated dependencies [c25d678]
+  - fumadocs-ui@15.3.2
+  - fumadocs-core@15.3.2
+
+## 8.1.9
+
+### Patch Changes
+
+- Updated dependencies [3372792]
+  - fumadocs-core@15.3.1
+  - fumadocs-ui@15.3.1
+
+## 8.1.8
+
+### Patch Changes
+
+- Updated dependencies [52b5ad8]
+- Updated dependencies [c05dc03]
+- Updated dependencies [abce713]
+  - fumadocs-ui@15.3.0
+  - fumadocs-core@15.3.0
+
+## 8.1.7
+
+### Patch Changes
+
+- 12297de: Lazy load media adapters on client side
+- Updated dependencies [50db874]
+- Updated dependencies [79e75c3]
+  - fumadocs-core@15.2.15
+  - fumadocs-ui@15.2.15
+
+## 8.1.6
+
+### Patch Changes
+
+- 3e69302: Support media adapter API
+- Updated dependencies [6ea1718]
+  - fumadocs-core@15.2.14
+  - fumadocs-ui@15.2.14
+
+## 8.1.5
+
+### Patch Changes
+
+- a7ef446: Fix empty directory detection
+- Updated dependencies [b433d93]
+- Updated dependencies [1e07ed8]
+  - fumadocs-ui@15.2.13
+  - fumadocs-core@15.2.13
+
+## 8.1.4
+
+### Patch Changes
+
+- 8c67955: Fix duplications with `generateFiles`
+- 4b1502e: Improve response type UX
+- 47670c8: Support more JSON schema features
+
+## 8.1.3
+
+### Patch Changes
+
+- 67070db: Add missing file
+- Updated dependencies [acff667]
+- Updated dependencies [b68bb51]
+- Updated dependencies [127e681]
+  - fumadocs-core@15.2.12
+  - fumadocs-ui@15.2.12
+
 ## 8.1.2
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/content-collections",
-  "version": "1.1.8",
+  "version": "1.2.0",
   "description": "The Content Collections adapter for Fumadocs",
   "keywords": [
     "NextJs",
@@ -35,14 +35,14 @@
     "types:check": "tsc --noEmit"
   },
   "devDependencies": {
-    "@content-collections/core": "^0.8.2",
+    "@content-collections/core": "^0.9.0",
     "@content-collections/mdx": "^0.2.2",
-    "@types/node": "22.15.17",
+    "@types/node": "24.0.1",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
-    "zod": "^3.24.3"
+    "zod": "^3.25.63"
   },
   "peerDependencies": {
     "@content-collections/core": "0.x.x",

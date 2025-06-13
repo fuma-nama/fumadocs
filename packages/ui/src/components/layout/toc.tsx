@@ -1,100 +1,66 @@
 'use client';
 import type { TOCItemType } from 'fumadocs-core/server';
 import * as Primitive from 'fumadocs-core/toc';
-import {
-  type ComponentProps,
-  type HTMLAttributes,
-  type ReactNode,
-  useRef,
-} from 'react';
+import { type ComponentProps, createContext, useContext, useRef } from 'react';
 import { cn } from '@/utils/cn';
 import { useI18n } from '@/contexts/i18n';
 import { TocThumb } from '@/components/layout/toc-thumb';
-import { ScrollArea, ScrollViewport } from '../ui/scroll-area';
-import { usePageStyles } from '@/contexts/layout';
+import { mergeRefs } from '@/utils/merge-refs';
 
-export interface TOCProps {
-  /**
-   * Custom content in TOC container, before the main TOC
-   */
-  header?: ReactNode;
+const TOCContext = createContext<TOCItemType[]>([]);
 
-  /**
-   * Custom content in TOC container, after the main TOC
-   */
-  footer?: ReactNode;
-
-  children: ReactNode;
+export function useTOCItems(): TOCItemType[] {
+  return useContext(TOCContext);
 }
 
-export function Toc(props: HTMLAttributes<HTMLDivElement>) {
-  const { toc } = usePageStyles();
-
+export function TOCProvider({
+  toc,
+  children,
+  ...props
+}: ComponentProps<typeof Primitive.AnchorProvider>) {
   return (
-    <div
-      id="nd-toc"
-      {...props}
-      className={cn(
-        'sticky top-[calc(var(--fd-banner-height)+var(--fd-nav-height))] h-(--fd-toc-height) pb-2 pt-12',
-        toc,
-        props.className,
-      )}
-      style={
-        {
-          ...props.style,
-          '--fd-toc-height':
-            'calc(100dvh - var(--fd-banner-height) - var(--fd-nav-height))',
-        } as object
-      }
-    >
-      <div className="flex h-full w-(--fd-toc-width) max-w-full flex-col gap-3 pe-4">
-        {props.children}
-      </div>
-    </div>
-  );
-}
-
-export function TocItemsEmpty() {
-  const { text } = useI18n();
-
-  return (
-    <div className="rounded-lg border bg-fd-card p-3 text-xs text-fd-muted-foreground">
-      {text.tocNoHeadings}
-    </div>
+    <TOCContext value={toc}>
+      <Primitive.AnchorProvider toc={toc} {...props}>
+        {children}
+      </Primitive.AnchorProvider>
+    </TOCContext>
   );
 }
 
 export function TOCScrollArea({
-  isMenu,
+  ref,
+  className,
   ...props
-}: ComponentProps<typeof ScrollArea> & { isMenu?: boolean }) {
+}: ComponentProps<'div'>) {
   const viewRef = useRef<HTMLDivElement>(null);
 
   return (
-    <ScrollArea
+    <div
+      ref={mergeRefs(viewRef, ref)}
+      className={cn(
+        'relative min-h-0 text-sm ms-px overflow-auto [scrollbar-width:none] [mask-image:linear-gradient(to_bottom,transparent,white_16px,white_calc(100%-16px),transparent)] py-3',
+        className,
+      )}
       {...props}
-      className={cn('flex flex-col ps-px', props.className)}
     >
-      <ScrollViewport
-        ref={viewRef}
-        className={cn(
-          'relative min-h-0 text-sm',
-          isMenu &&
-            '[mask-image:linear-gradient(to_bottom,transparent,white_16px,white_calc(100%-16px),transparent)] px-4 md:px-6 py-2',
-        )}
-      >
-        <Primitive.ScrollProvider containerRef={viewRef}>
-          {props.children}
-        </Primitive.ScrollProvider>
-      </ScrollViewport>
-    </ScrollArea>
+      <Primitive.ScrollProvider containerRef={viewRef}>
+        {props.children}
+      </Primitive.ScrollProvider>
+    </div>
   );
 }
 
-export function TOCItems({ items }: { items: TOCItemType[] }) {
+export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const items = useTOCItems();
+  const { text } = useI18n();
 
-  if (items.length === 0) return <TocItemsEmpty />;
+  if (items.length === 0)
+    return (
+      <div className="rounded-lg border bg-fd-card p-3 text-xs text-fd-muted-foreground">
+        {text.tocNoHeadings}
+      </div>
+    );
 
   return (
     <>
@@ -103,8 +69,12 @@ export function TOCItems({ items }: { items: TOCItemType[] }) {
         className="absolute top-(--fd-top) h-(--fd-height) w-px bg-fd-primary transition-all"
       />
       <div
-        ref={containerRef}
-        className="flex flex-col border-s border-fd-foreground/10"
+        ref={mergeRefs(ref, containerRef)}
+        className={cn(
+          'flex flex-col border-s border-fd-foreground/10',
+          className,
+        )}
+        {...props}
       >
         {items.map((item) => (
           <TOCItem key={item.url} item={item} />

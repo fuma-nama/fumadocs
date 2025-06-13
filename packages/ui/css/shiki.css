@@ -1,65 +1,75 @@
-.shiki code span {
-  color: var(--shiki-light);
+.shiki:not(.not-fumadocs-codeblock *) {
+  code span {
+    color: var(--shiki-light);
+  }
+
+  code .line {
+    line-height: 1.45em;
+    min-height: 1.45em;
+    @apply relative;
+  }
+
+  &.has-focused code .line:not(.focused) {
+    filter: blur(2px);
+    transition: filter 200ms;
+  }
+
+  &.has-focused:hover code .line:not(.focused) {
+    filter: blur(0);
+  }
+
+  &[data-line-numbers] code .twoslash-meta-line {
+    @apply ml-7;
+  }
+
+  &[data-line-numbers] code .line {
+    width: calc(100% - 7 * var(--spacing));
+    counter-increment: line;
+    @apply ml-7;
+
+    &::after {
+      position: absolute;
+      content: counter(line);
+      @apply top-0 -left-5 text-fd-muted-foreground/60;
+    }
+  }
+
+  code .diff::before {
+    position: absolute;
+    left: var(--spacing);
+  }
+
+  code .diff.remove {
+    opacity: 0.7;
+    @apply bg-fd-diff-remove;
+  }
+
+  code .diff.remove::before {
+    content: '-';
+    @apply text-fd-diff-remove-symbol;
+  }
+
+  code .diff.add {
+    @apply bg-fd-diff-add;
+  }
+
+  code .diff.add::before {
+    content: '+';
+    @apply text-fd-diff-add-symbol;
+  }
+
+  .highlighted {
+    @apply bg-fd-primary/10;
+  }
+
+  .highlighted-word {
+    padding: 1px;
+    @apply border -my-px border-fd-primary/30 bg-fd-primary/10 rounded-md font-medium;
+  }
 }
 
-.dark .shiki code span {
-  color: var(--shiki-dark);
-}
-
-.fd-codeblock pre > * {
-  display: grid;
-  font-size: 13px;
-}
-
-.shiki code .diff.remove {
-  background-color: var(--fd-diff-remove-color);
-  opacity: 0.7;
-}
-
-.shiki code .diff::before {
-  position: absolute;
-  left: 6px;
-}
-
-.shiki code .diff.remove::before {
-  content: '-';
-  color: var(--fd-diff-remove-symbol-color);
-}
-
-.shiki code .diff.add {
-  background-color: var(--fd-diff-add-color);
-}
-
-.shiki code .diff.add::before {
-  content: '+';
-  color: var(--fd-diff-add-symbol-color);
-}
-
-.shiki code .diff {
-  margin: 0 -16px;
-  padding: 0 16px;
-  position: relative;
-}
-
-.shiki .highlighted {
-  margin: 0 -16px;
-  padding: 0 16px;
-  background-color: color-mix(
-    in oklab,
-    var(--color-fd-primary) 10%,
-    transparent
-  );
-}
-
-.shiki .highlighted-word {
-  padding: 1px 2px;
-  margin: -1px -3px;
-  border: 1px solid
-    color-mix(in oklab, var(--color-fd-primary) 50%, transparent);
-  background-color: color-mix(
-    in oklab,
-    var(--color-fd-primary) 10%,
-    transparent
-  );
-  border-radius: 2px;
+.dark .shiki:not(.not-fumadocs-codeblock *) {
+  code span {
+    color: var(--shiki-dark);
+  }
 }

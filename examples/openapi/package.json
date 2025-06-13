@@ -5,30 +5,28 @@
   "scripts": {
     "build": "next build",
     "build:docs": "node ./scripts/generate-docs.mjs",
-    "dev": "next dev",
+    "dev": "next dev --turbo",
     "start": "next start",
     "types:check": "fumadocs-mdx && tsc --noEmit"
   },
   "dependencies": {
-    "@scalar/api-client-react": "^1.2.26",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-openapi": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "next": "15.3.1",
+    "next": "15.3.3",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "shiki": "^3.3.0",
-    "zod": "^3.24.3"
+    "shiki": "^3.6.0"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.4",
+    "@tailwindcss/postcss": "^4.1.10",
     "@types/mdx": "^2.0.13",
-    "@types/react": "^19.1.2",
-    "@types/react-dom": "^19.1.2",
-    "postcss": "^8.5.3",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "postcss": "^8.5.5",
     "rimraf": "^6.0.1",
-    "tailwindcss": "^4.1.4",
+    "tailwindcss": "^4.1.10",
     "typescript": "^5.8.3"
   }
 }

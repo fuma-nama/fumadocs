@@ -1,12 +1,12 @@
 import { expect, test } from 'vitest';
 import { createCompiler } from '@/compile';
-import Glob from 'fast-glob';
+import { glob } from 'tinyglobby';
 import fs from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const dir = path.dirname(fileURLToPath(import.meta.url));
-const files = await Glob('./fixtures/*.mdx', {
+const files = await glob('./fixtures/*.mdx', {
   cwd: dir,
 });
 

@@ -22,7 +22,8 @@ import { usePathname, useRouter } from 'fumadocs-core/framework';
 
 interface SearchOptions
   extends Omit<SearchProviderProps, 'options' | 'children'> {
-  options?: Partial<DefaultSearchDialogProps> | SearchProviderProps['options'];
+  options?: Partial<DefaultSearchDialogProps>;
+
   /**
    * Enable search functionality
    *

@@ -1,5 +1,5 @@
 import Slugger from 'github-slugger';
-import type { Root, Nodes } from 'mdast';
+import type { Nodes, Root } from 'mdast';
 import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
 import type { PluggableList, Transformer } from 'unified';
@@ -8,6 +8,7 @@ import { flattenNode } from './remark-utils';
 import type {
   MdxJsxAttribute,
   MdxJsxExpressionAttribute,
+  MdxJsxFlowElement,
 } from 'mdast-util-mdx-jsx';
 
 interface Heading {
@@ -36,10 +37,16 @@ export interface StructureOptions {
    */
   types?: string[] | ((node: Nodes) => boolean);
 
+  /**
+   * A list of indexable MDX attributes, either:
+   *
+   * - an array of attribute names.
+   * - a function that determines if attribute should be indexed.
+   */
   allowedMdxAttributes?:
     | string[]
     | ((
-        node: Nodes,
+        node: MdxJsxFlowElement,
         attribute: MdxJsxAttribute | MdxJsxExpressionAttribute,
       ) => boolean);
 }
@@ -68,7 +75,11 @@ export function remarkStructure({
     'tableCell',
     'mdxJsxFlowElement',
   ],
-  allowedMdxAttributes = () => true,
+  allowedMdxAttributes = (node) => {
+    if (!node.name) return false;
+
+    return ['TypeTable', 'Callout'].includes(node.name);
+  },
 }: StructureOptions = {}): Transformer<Root, Root> {
   if (Array.isArray(allowedMdxAttributes)) {
     const arr = allowedMdxAttributes;
@@ -133,16 +144,12 @@ export function remarkStructure({
 
       if (element.type === 'mdxJsxFlowElement' && element.name) {
         data.contents.push(
-          {
-            heading: lastHeading,
-            content: element.name,
-          },
           ...element.attributes.flatMap((attribute) => {
-            const valueStr =
+            const value =
               typeof attribute.value === 'string'
                 ? attribute.value
                 : attribute.value?.value;
-            if (!valueStr) return [];
+            if (!value || value.length === 0) return [];
             if (
               allowedMdxAttributes &&
               !allowedMdxAttributes(element, attribute)
@@ -153,8 +160,8 @@ export function remarkStructure({
               heading: lastHeading,
               content:
                 attribute.type === 'mdxJsxAttribute'
-                  ? `${attribute.name}: ${valueStr}`
-                  : valueStr,
+                  ? `${attribute.name}: ${value}`
+                  : value,
             };
           }),
         );

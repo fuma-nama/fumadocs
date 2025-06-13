@@ -1,91 +1,38 @@
-import type { MetaData, PageData } from '@/source/types';
-import {
-  parseFilePath,
-  parseFolderPath,
-  type FileInfo,
-  type FolderInfo,
-} from './path';
-import { joinPath, splitPath } from '@/utils/path';
-
-export interface MetaFile {
-  file: FileInfo;
-  format: 'meta';
-  data: MetaData;
-}
-
-export interface PageFile {
-  file: FileInfo;
-  format: 'page';
-  data: {
-    slugs: string[];
-    data: PageData;
-  };
-}
-
-export type File = MetaFile | PageFile;
-
-export interface Folder {
-  file: FolderInfo;
-  children: (File | Folder)[];
-}
+import { dirname } from './path';
+import { splitPath } from '@/utils/path';
 
 /**
- * A virtual file system that solves inconsistent behaviours
- *
- * Some source providers may not provide the full file structure, this will cause inconsistent outputs for page builder and other transformers
+ * In memory file system.
  */
-export class Storage {
+export class FileSystem<File> {
   files = new Map<string, File>();
-  folders = new Map<string, Folder>();
-  private rootFolder: Folder = {
-    file: parseFolderPath(''),
-    children: [],
-  };
+  folders = new Map<string, string[]>();
 
   constructor() {
-    this.folders.set('', this.rootFolder);
+    this.folders.set('', []);
+  }
+
+  read(path: string): File | undefined {
+    return this.files.get(path);
   }
 
   /**
-   * @param path - flattened path
-   * @param format - file format
+   * get the direct children of folder (in virtual file path)
    */
-  read<F extends File['format']>(
-    path: string,
-    format: F,
-  ): Extract<File, { format: F }> | undefined {
-    return this.files.get(`${path}.${format}`) as Extract<File, { format: F }>;
-  }
-
-  readDir(path: string): Folder | undefined {
+  readDir(path: string): string[] | undefined {
     return this.folders.get(path);
   }
 
-  root(): Folder {
-    return this.rootFolder;
+  write(path: string, file: File): void {
+    const dir = dirname(path);
+
+    this.makeDir(dir);
+    this.readDir(dir)?.push(path);
+    this.files.set(path, file);
   }
 
-  write<F extends File['format']>(
-    path: string,
-    format: F,
-    data: Extract<File, { format: F }>['data'],
-  ): void {
-    const node = {
-      format,
-      file: parseFilePath(path),
-      data,
-    } as File;
-
-    this.makeDir(node.file.dirname);
-    this.readDir(node.file.dirname)?.children.push(node);
-    this.files.set(
-      joinPath(node.file.dirname, `${node.file.name}.${node.format}`),
-      node,
-    );
-  }
-
-  list(): File[] {
-    return [...this.files.values()];
+  getFiles(): string[] {
+    return Array.from(this.files.keys());
   }
 
   makeDir(path: string): void {
@@ -95,13 +42,8 @@ export class Storage {
       const segment = segments.slice(0, i + 1).join('/');
       if (this.folders.has(segment)) continue;
 
-      const folder: Folder = {
-        file: parseFolderPath(segment),
-        children: [],
-      };
-
-      this.folders.set(folder.file.path, folder);
-      this.readDir(folder.file.dirname)?.children.push(folder);
+      this.folders.set(segment, []);
+      this.readDir(dirname(segment))?.push(path);
     }
   }
 }

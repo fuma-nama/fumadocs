@@ -38,12 +38,10 @@ export function useAnchorObserver(watch: string[], single: boolean): string[] {
     function onScroll(): void {
       const element = document.scrollingElement;
       if (!element) return;
+      const top = element.scrollTop;
 
-      if (element.scrollTop === 0 && single) setActiveAnchor(watch.slice(0, 1));
-      else if (
-        element.scrollTop + element.clientHeight >=
-        element.scrollHeight - 6
-      ) {
+      if (top <= 0 && single) setActiveAnchor(watch.slice(0, 1));
+      else if (top + element.clientHeight >= element.scrollHeight - 6) {
         setActiveAnchor((active) => {
           return active.length > 0 && !single
             ? watch.slice(watch.indexOf(active[0]))

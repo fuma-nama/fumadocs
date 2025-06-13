@@ -1,5 +1,200 @@
 # next-docs-ui
 
+## 15.5.1
+
+### Patch Changes
+
+- b4916d2: Move `hide-if-empty` component to Fumadocs Core
+- 68526ea: Redesign `fumadocs-ui/components/dialog/search` usage to make it composable, and mark it as stable API.
+- Updated dependencies [b4916d2]
+- Updated dependencies [8738b9c]
+- Updated dependencies [a66886b]
+  - fumadocs-core@15.5.1
+
+## 15.5.0
+
+### Minor Changes
+
+- 589d101: **Move TOC closer to page body on larger viewports**
+
+  Changed layout positioning, all layout components now use `fixed` position.
+
+  This may impact sites that:
+
+  - using custom styling on Fumadocs layouts.
+  - added a custom footer (see below).
+
+  For custom footer, make sure to add them into `<DocsLayout />` instead:
+
+  ```tsx
+  <DocsLayout>
+    {children}
+    <div className="h-[400px] bg-fd-secondary">Hello World</div>
+  </DocsLayout>
+  ```
+
+### Patch Changes
+
+- 50f8f7f: Update Home Layout navbar design
+- 697d5b4: Support specifying a custom `value` for `Accordion`
+  - fumadocs-core@15.5.0
+
+## 15.4.2
+
+### Patch Changes
+
+- Updated dependencies [0ab6c7f]
+  - fumadocs-core@15.4.2
+
+## 15.4.1
+
+### Patch Changes
+
+- e72b7b4: hotfix: production source map being ignored
+  - fumadocs-core@15.4.1
+
+## 15.4.0
+
+### Minor Changes
+
+- 961b67e: **Bump algolia search to v5**
+
+  This also introduced changes to some APIs since `algoliasearch` v4 and v5 has many differences.
+
+  Now we highly recommend to pass an index name to `sync()`:
+
+  ```ts
+  import { algoliasearch } from 'algoliasearch';
+  import { sync } from 'fumadocs-core/search/algolia';
+  const client = algoliasearch('id', 'key');
+
+  void sync(client, {
+    indexName: 'document',
+    documents: records,
+  });
+  ```
+
+  For search client, pass them to `searchOptions`:
+
+  ```tsx
+  'use client';
+
+  import { liteClient } from 'algoliasearch/lite';
+  import type { SharedProps } from 'fumadocs-ui/components/dialog/search';
+  import SearchDialog from 'fumadocs-ui/components/dialog/search-algolia';
+
+  const client = liteClient(appId, apiKey);
+
+  export default function CustomSearchDialog(props: SharedProps) {
+    return (
+      <SearchDialog
+        searchOptions={{
+          client,
+          indexName: 'document',
+        }}
+        {...props}
+        showAlgolia
+      />
+    );
+  }
+  ```
+
+### Patch Changes
+
+- 092fd04: Fallback to `dangerouslySetInnerHTML` for inlined scripts for backward compatibility
+- 7d78bc5: Improve `createRelativeLink` and `getPageByHref` for i18n usage
+- Updated dependencies [1b999eb]
+- Updated dependencies [961b67e]
+- Updated dependencies [7d78bc5]
+  - fumadocs-core@15.4.0
+
+## 15.3.4
+
+### Patch Changes
+
+- e0c2a92: Improve UI consistency
+- 71fc1a5: Mount all children of tabs by default
+  - fumadocs-core@15.3.4
+
+## 15.3.3
+
+### Patch Changes
+
+- 05b3bd9: [Internal] require `TagsListItem` to be used with `TagsList`
+- 39bf088: Support usage with `Tabs` in primitive way
+- e955a98: Hotfix problems with `HideIfEmpty`
+- Updated dependencies [4ae7b4a]
+  - fumadocs-core@15.3.3
+
+## 15.3.2
+
+### Patch Changes
+
+- 1753cf1: Fix navbar external items and nav menu scroll
+- 9b38baf: add `success` type to callout
+- 8e862e5: Use native scroll bar for codeblocks and some elements for better performance
+- ac0ab12: Improve performance by reducing usage of `@radix-ui/react-scroll-area`
+- c25d678: Support Shiki focus notation transformer by default
+- Updated dependencies [c25d678]
+  - fumadocs-core@15.3.2
+
+## 15.3.1
+
+### Patch Changes
+
+- 3372792: Support line numbers in codeblock
+- Updated dependencies [3372792]
+  - fumadocs-core@15.3.1
+
+## 15.3.0
+
+### Minor Changes
+
+- 52b5ad8: **Redesign mobile sidebar**
+
+  Mobile sidebar is now a separate component from the desktop one, with its own id `nd-sidebar-mobile`.
+
+  note to advanced use cases: Fumadocs UI now stopped using `fumadocs-core/sidebar`, avoid using the primitive directly as provider is not used.
+
+### Patch Changes
+
+- abce713: Adjust design (Accordion, Tabs, border color of themes)
+- Updated dependencies [c05dc03]
+  - fumadocs-core@15.3.0
+
+## 15.2.15
+
+### Patch Changes
+
+- 50db874: Remove placeholder space for codeblocks
+- Updated dependencies [50db874]
+- Updated dependencies [79e75c3]
+  - fumadocs-core@15.2.15
+
+## 15.2.14
+
+### Patch Changes
+
+- Updated dependencies [6ea1718]
+  - fumadocs-core@15.2.14
+
+## 15.2.13
+
+### Patch Changes
+
+- b433d93: Recommend using custom button/link instead for edit on GitHub button
+- 1e07ed8: Support disabling codeblock styles with `.not-fumadocs-codeblock`
+  - fumadocs-core@15.2.13
+
+## 15.2.12
+
+### Patch Changes
+
+- b68bb51: Fix sidebar legacy behaviours
+- 127e681: Fix Notebook layout ignores `themeSwitch` and `sidebar.collapsible` on nav mode
+- Updated dependencies [acff667]
+  - fumadocs-core@15.2.12
+
 ## 15.2.11
 
 ### Patch Changes

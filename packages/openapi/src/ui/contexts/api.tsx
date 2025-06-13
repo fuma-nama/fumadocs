@@ -8,16 +8,13 @@ import {
   useState,
 } from 'react';
 import type { RenderContext, ServerObject } from '@/types';
+import { defaultAdapters, type MediaAdapter } from '@/media/adapter';
 
-export interface ApiProviderProps {
+export interface ApiProviderProps extends ApiContextType {
   /**
    * Base URL for API requests
    */
   defaultBaseUrl?: string;
-
-  servers: ServerObject[];
-  shikiOptions: RenderContext['shikiOptions'];
-
   children?: ReactNode;
 }
 
@@ -26,7 +23,11 @@ export interface SelectedServer {
   variables: Record<string, string>;
 }
 
-type ApiContextType = Omit<ApiProviderProps, 'children' | 'defaultBaseUrl'>;
+interface ApiContextType {
+  servers: ServerObject[];
+  shikiOptions: RenderContext['shikiOptions'];
+  mediaAdapters: Record<string, MediaAdapter>;
+}
 
 interface ServerSelectType {
   server: SelectedServer | null;
@@ -34,10 +35,8 @@ interface ServerSelectType {
   setServerVariables: (value: Record<string, string>) => void;
 }
 
-const ApiContext = createContext<ApiContextType | undefined>(undefined);
-const ServerSelectContext = createContext<ServerSelectType | undefined>(
-  undefined,
-);
+const ApiContext = createContext<ApiContextType | null>(null);
+const ServerSelectContext = createContext<ServerSelectType | null>(null);
 
 export function useApiContext(): ApiContextType {
   const ctx = useContext(ApiContext);
@@ -56,12 +55,14 @@ export function useServerSelectContext(): ServerSelectType {
 export function ApiProvider({
   defaultBaseUrl,
   children,
-  ...props
+  servers,
+  mediaAdapters,
+  shikiOptions,
 }: ApiProviderProps) {
   const [server, setServer] = useState<SelectedServer | null>(() => {
     const defaultItem = defaultBaseUrl
-      ? props.servers.find((item) => item.url === defaultBaseUrl)
-      : undefined;
+      ? servers.find((item) => item.url === defaultBaseUrl)
+      : servers.at(0);
 
     return defaultItem
       ? {
@@ -86,7 +87,19 @@ export function ApiProvider({
   }, []);
 
   return (
-    <ApiContext.Provider value={props}>
+    <ApiContext.Provider
+      value={useMemo(
+        () => ({
+          shikiOptions,
+          mediaAdapters: {
+            ...defaultAdapters,
+            ...mediaAdapters,
+          },
+          servers,
+        }),
+        [mediaAdapters, servers, shikiOptions],
+      )}
+    >
       <ServerSelectContext.Provider
         value={useMemo(
           () => ({
@@ -101,7 +114,7 @@ export function ApiProvider({
               });
             },
             setServer(value) {
-              const obj = props.servers.find((item) => item.url === value);
+              const obj = servers.find((item) => item.url === value);
               if (!obj) return;
 
               const result: SelectedServer = {
@@ -113,7 +126,7 @@ export function ApiProvider({
               setServer(result);
             },
           }),
-          [server, props.servers],
+          [server, servers],
         )}
       >
         {children}

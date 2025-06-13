@@ -20,7 +20,7 @@ export type DefaultMDXOptions = Omit<
   remarkStructureOptions?: plugins.StructureOptions | false;
   remarkHeadingOptions?: plugins.RemarkHeadingOptions;
   remarkImageOptions?: plugins.RemarkImageOptions | false;
-  remarkCodeTabOptions?: false;
+  remarkCodeTabOptions?: plugins.RemarkCodeTabOptions | false;
   rehypeCodeOptions?: plugins.RehypeCodeOptions | false;
 };
 
@@ -68,8 +68,10 @@ export function getDefaultMDXOptions({
       remarkImageOptions !== false && [plugins.remarkImage, remarkImageOptions],
       // Fumadocs 14 compatibility
       'remarkCodeTab' in plugins &&
-        remarkCodeTabOptions !== false &&
-        plugins.remarkCodeTab,
+        remarkCodeTabOptions !== false && [
+          plugins.remarkCodeTab,
+          remarkCodeTabOptions,
+        ],
       ...v,
       remarkStructureOptions !== false && [
         plugins.remarkStructure,
@@ -84,7 +86,7 @@ export function getDefaultMDXOptions({
     (v) => [
       rehypeCodeOptions !== false && [plugins.rehypeCode, rehypeCodeOptions],
       ...v,
-      [plugins.rehypeToc],
+      plugins.rehypeToc,
     ],
     mdxOptions.rehypePlugins,
   );

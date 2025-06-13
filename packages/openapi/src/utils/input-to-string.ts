@@ -1,30 +1,30 @@
-import { type ElementCompact, js2xml } from 'xml-js';
+// @ts-expect-error -- nothing
+import js2xml from 'xml-js/lib/js2xml';
 
 /**
  * Convert input value to hardcoded string (with quotes)
  */
 export function inputToString(
   value: unknown,
-  format: 'xml' | 'json' | 'url' = 'json',
-  multiLine: 'single-quote' | 'backtick' | 'python' | 'none' = 'none',
+  format:
+    | 'application/x-www-form-urlencoded'
+    | 'application/x-ndjson'
+    | 'application/json'
+    | 'application/xml' = 'application/json',
 ): string {
-  const getStr = (v: string) => {
-    if (multiLine === 'none') return JSON.stringify(v);
+  if (typeof value === 'string') return value;
 
-    const delimit = { backtick: `\``, 'single-quote': `'`, python: `"""` }[
-      multiLine
-    ];
-
-    return `${delimit}${v.replaceAll(delimit, `\\${delimit}`)}${delimit}`;
-  };
-
-  if (typeof value === 'string') return getStr(value);
-
-  if (format === 'json') {
-    return getStr(JSON.stringify(value, null, 2));
+  if (format === 'application/json') {
+    return JSON.stringify(value, null, 2);
   }
 
-  if (format === 'url') {
+  if (format === 'application/x-ndjson') {
+    return Array.isArray(value)
+      ? value.map((v) => JSON.stringify(v)).join('\n')
+      : JSON.stringify(value, null, 2);
+  }
+
+  if (format === 'application/x-www-form-urlencoded') {
     const params = new URLSearchParams();
     if (typeof value !== 'object')
       throw new Error(
@@ -36,8 +36,14 @@ export function inputToString(
         params.set(key, String(value[key as keyof object]));
     }
 
-    return getStr(params.toString());
+    return params.toString();
   }
 
-  return getStr(js2xml(value as ElementCompact, { compact: true, spaces: 2 }));
+  return js2xml(value, { compact: true, spaces: 2 });
+}
+
+export function escapeString(str: string, delimit?: string): string {
+  if (!delimit) return JSON.stringify(str);
+
+  return `${delimit}${str.replaceAll(delimit, `\\${delimit}`)}${delimit}`;
 }

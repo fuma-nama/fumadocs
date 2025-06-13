@@ -1,82 +1,25 @@
 import type {
   MethodInformation,
-  ParameterObject,
   RenderContext,
+  SecuritySchemeObject,
 } from '@/types';
-import {
-  getPreferredType,
-  type NoReference,
-  type ParsedSchema,
-} from '@/utils/schema';
-import { getSecurities } from '@/utils/get-security';
+import { getPreferredType, type ParsedSchema } from '@/utils/schema';
 import { type ClientProps } from './client';
-import { ClientLazy } from '@/playground/client.lazy';
+import { ClientLazy } from '@/ui/lazy';
 
-interface BaseSchema {
-  description?: string;
-  isRequired: boolean;
-}
-
-export type ParameterField = (PrimitiveSchema | ArraySchema) & {
+export type ParameterField = {
   name: string;
   description?: string;
+  schema: ParsedSchema;
   in: 'cookie' | 'header' | 'query' | 'path';
 };
 
-interface PrimitiveSchema extends BaseSchema {
-  type: 'boolean' | 'string' | 'number';
-}
-
-export interface ReferenceSchema extends BaseSchema {
-  type: 'ref';
-  schema: string;
-}
-
-interface ArraySchema extends BaseSchema {
-  type: 'array';
-  /**
-   * Reference to item schema or the schema
-   */
-  items: string | RequestSchema;
-}
-
-interface FileSchema extends BaseSchema {
-  type: 'file';
-}
-
-interface ObjectSchema extends BaseSchema {
-  type: 'object';
-  properties: Record<string, RequestSchema | ReferenceSchema>;
-
-  /**
-   * Reference to schema, or true if it's `any`
-   */
-  additionalProperties?: boolean | string;
-}
-
-interface SwitcherSchema extends BaseSchema {
-  type: 'switcher';
-  items: Record<string, ReferenceSchema | RequestSchema>;
-}
-
-interface NullSchema extends BaseSchema {
-  type: 'null';
-}
-
-export type RequestSchema =
-  | PrimitiveSchema
-  | ArraySchema
-  | ObjectSchema
-  | SwitcherSchema
-  | NullSchema
-  | FileSchema;
+export type RequestSchema = ParsedSchema;
 
 interface Context {
-  allowFile: boolean;
   references: Record<string, RequestSchema>;
-  registered: WeakMap<ParsedSchema, string>;
+  registered: WeakMap<Exclude<ParsedSchema, boolean>, string>;
   nextId: () => string;
-  render: RenderContext;
 }
 
 export interface APIPlaygroundProps {
@@ -89,6 +32,11 @@ export interface APIPlaygroundProps {
 
 export type { ClientProps, CustomField } from './client';
 
+export type SecurityEntry = SecuritySchemeObject & {
+  scopes: string[];
+  id: string;
+};
+
 export async function APIPlayground({
   path,
   method,
@@ -100,31 +48,32 @@ export async function APIPlayground({
   const mediaType = bodyContent ? getPreferredType(bodyContent) : undefined;
 
   const context: Context = {
-    allowFile: mediaType === 'multipart/form-data',
     references: {},
     nextId() {
       return String(currentId++);
     },
     registered: new WeakMap(),
-    render: ctx,
   };
 
-  const bodySchema =
-    bodyContent && mediaType && bodyContent[mediaType].schema
-      ? toSchema(bodyContent[mediaType].schema, true, context)
-      : undefined;
-
   const props: ClientProps = {
-    authorization: getAuthorizationField(method, ctx),
+    securities: parseSecurities(method, ctx),
     method: method.method,
     route: path,
-    parameters: method.parameters?.map((v) => parameterToField(v, context)),
+    parameters: method.parameters?.map((v) => ({
+      name: v.name,
+      in: v.in as ParameterField['in'],
+      schema: writeReferences((v.schema ?? true) as ParsedSchema, context),
+      description: v.description,
+    })),
     body:
-      bodySchema && mediaType
-        ? {
-            ...bodySchema,
-            mediaType: mediaType as string,
-          }
+      bodyContent && mediaType
+        ? ({
+            schema: writeReferences(
+              bodyContent[mediaType].schema as ParsedSchema,
+              context,
+            ),
+            mediaType,
+          } as ClientProps['body'])
         : undefined,
     references: context.references,
     proxyUrl: ctx.proxyUrl,
@@ -134,226 +83,78 @@ export async function APIPlayground({
   return <ClientLazy {...props} />;
 }
 
-function getAuthorizationField(
+function writeReferences(
+  schema: ParsedSchema,
+  ctx: Context,
+  stack: WeakMap<object, object> = new WeakMap(),
+): RequestSchema {
+  if (typeof schema !== 'object' || !schema) return schema;
+  if (stack.has(schema)) {
+    const out = stack.get(schema)!;
+    const id = ctx.nextId();
+    ctx.references[id] = out;
+
+    return {
+      $ref: id,
+    };
+  }
+
+  const output = { ...schema };
+  stack.set(schema, output);
+  for (const _n in output) {
+    const name = _n as keyof typeof output;
+    if (!output[name]) continue;
+
+    switch (name) {
+      case 'oneOf':
+      case 'allOf':
+      case 'anyOf':
+        output[name] = output[name].map((item) =>
+          writeReferences(item, ctx, stack),
+        );
+        continue;
+      case 'items':
+      case 'additionalProperties':
+      case 'not':
+        output[name] = writeReferences(output[name], ctx, stack);
+        continue;
+      case 'properties':
+      case 'patternProperties':
+        output[name] = { ...output[name] };
+
+        for (const key in output[name]) {
+          output[name][key] = writeReferences(output[name][key], ctx, stack);
+        }
+    }
+  }
+
+  return output;
+}
+
+function parseSecurities(
   method: MethodInformation,
   { schema: { document } }: RenderContext,
-): ClientProps['authorization'] {
+): ClientProps['securities'] {
+  const result: ClientProps['securities'] = [];
   const security = method.security ?? document.security ?? [];
-  if (security.length === 0) return;
+  if (security.length === 0) return result;
 
-  let item;
-  for (const requirements of security) {
-    const keys = Object.keys(requirements).length;
+  for (const map of security) {
+    const list: ClientProps['securities'][number] = [];
 
-    if (keys === 0) return;
-    else if (keys === 1) item = requirements;
-  }
+    for (const [key, scopes] of Object.entries(map)) {
+      const scheme = document.components?.securitySchemes?.[key];
+      if (!scheme) continue;
 
-  if (!item) {
-    console.warn(
-      `Cannot find suitable security schema for API Playground from ${JSON.stringify(security, null, 2)}. Only one requirement is allowed`,
-    );
-    return;
-  }
-
-  const scheme = getSecurities(item, document)[0];
-
-  if (scheme.type === 'oauth2') {
-    const flow = Object.keys(scheme.flows).at(0);
-    if (!flow) throw new Error("security scheme's `flows` must not be empty");
-
-    if (flow === 'implicit' || flow === 'password')
-      throw new Error(
-        `OAuth 2.0 flow type: ${flow} is not supported, consider other types like \`authorizationCode\` instead.`,
-      );
-  }
-
-  return {
-    persistentId: Object.keys(item)[0],
-    ...scheme,
-  };
-}
-
-function getIdFromSchema(
-  schema: ParsedSchema,
-  required: boolean,
-  ctx: Context,
-): string {
-  const registered = ctx.registered.get(schema);
-
-  if (registered === undefined) {
-    const id = ctx.nextId();
-    ctx.registered.set(schema, id);
-    ctx.references[id] = toSchema(schema, required, ctx);
-    return id;
-  }
-
-  return registered;
-}
-
-function parameterToField(
-  v: NoReference<ParameterObject>,
-  ctx: Context,
-): ParameterField {
-  const allowed = ['header', 'cookie', 'query', 'path'] as const;
-
-  if (!allowed.includes(v.in as (typeof allowed)[number]))
-    throw new Error(`Unsupported parameter in: "${v.in}"`);
-
-  return {
-    name: v.name,
-    in: v.in as (typeof allowed)[number],
-    ...(toSchema(
-      v.schema ?? { type: 'string' },
-      v.required ?? false,
-      ctx,
-    ) as PrimitiveSchema),
-  };
-}
-
-function toReference(
-  schema: ParsedSchema,
-  required: boolean,
-  ctx: Context,
-): ReferenceSchema {
-  return {
-    type: 'ref',
-    isRequired: required,
-    schema: getIdFromSchema(schema, false, ctx),
-  };
-}
-
-function toSchema(
-  schema: NoReference<ParsedSchema>,
-  required: boolean,
-  ctx: Context,
-): RequestSchema {
-  if (schema.type === 'array') {
-    return {
-      type: 'array',
-      description: schema.description ?? schema.title,
-      isRequired: required,
-      items: getIdFromSchema(schema.items, false, ctx),
-    };
-  }
-
-  if (
-    schema.type === 'object' ||
-    schema.properties !== undefined ||
-    schema.allOf !== undefined
-  ) {
-    const properties: Record<string, ReferenceSchema> = {};
-
-    Object.entries(schema.properties ?? {}).forEach(([key, prop]) => {
-      properties[key] = toReference(
-        prop,
-        schema.required?.includes(key) ?? false,
-        ctx,
-      );
-    });
-
-    schema.allOf?.forEach((c) => {
-      const field = toSchema(c, true, ctx);
-
-      if (field.type === 'object') Object.assign(properties, field.properties);
-    });
-
-    const additional = schema.additionalProperties;
-    let additionalProperties: string | boolean | undefined;
-
-    if (additional && typeof additional === 'object') {
-      if (
-        (!additional.type || additional.type.length === 0) &&
-        !additional.anyOf &&
-        !additional.allOf &&
-        !additional.oneOf
-      ) {
-        additionalProperties = true;
-      } else {
-        additionalProperties = getIdFromSchema(additional, false, ctx);
-      }
-    } else {
-      additionalProperties = additional;
+      list.push({
+        ...scheme,
+        scopes,
+        id: key,
+      });
     }
 
-    return {
-      type: 'object',
-      isRequired: required,
-      description: schema.description ?? schema.title,
-      properties,
-      additionalProperties,
-    };
+    if (list.length > 0) result.push(list);
   }
 
-  if (schema.type === undefined) {
-    const combine = schema.anyOf ?? schema.oneOf;
-
-    if (combine) {
-      return {
-        type: 'switcher',
-        description: schema.description ?? schema.title,
-        items: Object.fromEntries(
-          combine.map((item, idx) => {
-            return [
-              item.title ?? item.type ?? `Item ${idx.toString()}`,
-              toReference(item, true, ctx),
-            ];
-          }),
-        ),
-        isRequired: required,
-      };
-    }
-
-    return {
-      type: 'null',
-      isRequired: false,
-    };
-  }
-
-  if (ctx.allowFile && schema.type === 'string' && schema.format === 'binary') {
-    return {
-      type: 'file',
-      isRequired: required,
-      description: schema.description ?? schema.title,
-    };
-  }
-
-  if (Array.isArray(schema.type)) {
-    const items: Record<string, RequestSchema> = {};
-
-    for (const type of schema.type) {
-      if (type === 'array') {
-        items[type] = {
-          type,
-          items:
-            'items' in schema && schema.items
-              ? toSchema(schema.items, false, ctx)
-              : toSchema({}, required, ctx),
-          isRequired: required,
-        };
-      } else {
-        items[type] = toSchema(
-          {
-            ...schema,
-            type,
-          },
-          required,
-          ctx,
-        );
-      }
-    }
-
-    return {
-      type: 'switcher',
-      description: schema.description ?? schema.title,
-      items,
-      isRequired: required,
-    };
-  }
-
-  return {
-    type: schema.type === 'integer' ? 'number' : schema.type,
-    isRequired: required,
-    description: schema.description ?? schema.title,
-  };
+  return result;
 }

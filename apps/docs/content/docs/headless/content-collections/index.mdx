@@ -41,25 +41,15 @@ export default withContentCollections(config);
 
 To integrate with Fumadocs, add the following to your `content-collections.ts`.
 
-```json doc-gen:file
-{
-  "file": "../../examples/content-collections/content-collections.ts",
-  "codeblock": {
-    "meta": "title=\"content-collections.ts\""
-  }
-}
-```
+<include cwd meta='title="content-collections.ts"'>
+  ../../examples/content-collections/content-collections.ts
+</include>
 
 And pass it to Source API.
 
-```json doc-gen:file
-{
-  "file": "../../examples/content-collections/lib/source.ts",
-  "codeblock": {
-    "meta": "title=\"lib/source.ts\""
-  }
-}
-```
+<include cwd meta='title="lib/source.ts"'>
+  ../../examples/content-collections/lib/source.ts
+</include>
 
 Done! You can access the pages and generated page tree from Source API.
 
@@ -111,7 +101,7 @@ You can also import them in MDX Files, but it is not recommended.
     Content Collections uses `mdx-bundler` to bundle MDX files.
 
     To support importing a package from node modules, Fumadocs added a default value to the `cwd` option of MDX Bundler.
-    It works good, but we still **do not** recommend to import components in MDX files.
+    It works good, but we still **do not** recommend importing components in MDX files.
 
     Reasons:
 

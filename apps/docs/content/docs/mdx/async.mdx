@@ -5,9 +5,9 @@ description: Runtime compilation of content files.
 
 ## Introduction
 
-By default, all Markdown and MDX files need to be pre-compiled first, the same constraint also applies on development server.
+By default, all Markdown and MDX files need to be pre-compiled first. The same constraint also applies to the development server.
 
-This may result in longer dev server start time for large docs sites, you can enable Async Mode on `doc` collections to improve this.
+This may result in longer dev server start times for large docs sites. You can enable Async Mode on `doc` collections to improve this.
 
 ### Setup
 
@@ -42,7 +42,7 @@ export const doc = defineCollections({
 
 ### Usage
 
-Async Mode allows on-demand compilation of Markdown and MDX content, by moving the compilation process from build time to Next.js runtime.
+Async Mode allows on-demand compilation of Markdown and MDX content by moving the compilation process from build time to Next.js runtime.
 
 However, you need to invoke the `load()` async function to load and compile content.
 
@@ -77,11 +77,11 @@ if (page) {
 }
 ```
 
-When using Async Mode, we highly recommend to use 3rd party services to implement search, which usually has a better capability to handle massive amount of content to index.
+When using Async Mode, we highly recommend to use third-party services to implement search, which usually have better capability to handle massive amount of content to index.
 
 ### Constraints
 
 It comes with some limitations on MDX features.
 
-- No import/export allowed in MDX files, for MDX components, pass them from the `components` prop instead.
-- Images must be referenced with URL (e.g. `/images/test.png`). Don't use **file paths** like `./image.png`, you should locate your images in `public` folder, and reference them with URLs.
+- No import/export allowed in MDX files. For MDX components, pass them from the `components` prop instead.
+- Images must be referenced with URL (e.g. `/images/test.png`). Don't use **file paths** like `./image.png`. You should locate your images in the `public` folder and reference them with URLs.

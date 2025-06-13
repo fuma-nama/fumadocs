@@ -1,6 +1,5 @@
-import { getPathnameFromInput } from '@/utils/get-pathname-from-input';
-import { js2xml } from 'xml-js';
-import { RequestData } from '@/requests/_shared';
+import type { RequestData } from '@/requests/_shared';
+import type { MediaAdapter } from '@/media/adapter';
 
 export interface FetchOptions extends RequestData {
   proxyUrl?: string;
@@ -13,17 +12,21 @@ export interface FetchResult {
 }
 
 export interface Fetcher {
-  fetch: (route: string, options: FetchOptions) => Promise<FetchResult>;
+  /**
+   * This method will not apply the path & search parameters from `options` to given `url`.
+   *
+   * @param url - The full URL of request.
+   */
+  fetch: (url: string, options: FetchOptions) => Promise<FetchResult>;
 }
 
-export function createBrowserFetcher(): Fetcher {
+export function createBrowserFetcher(
+  adapters: Record<string, MediaAdapter>,
+): Fetcher {
   return {
-    async fetch(route, options) {
+    async fetch(url, options) {
       const headers = new Headers();
-      if (
-        options.bodyMediaType &&
-        options.bodyMediaType !== 'multipart/form-data'
-      )
+      if (options.bodyMediaType)
         headers.append('Content-Type', options.bodyMediaType);
 
       for (const key in options.header) {
@@ -33,42 +36,59 @@ export function createBrowserFetcher(): Fetcher {
       }
 
       const proxyUrl = options.proxyUrl
-        ? new URL(options.proxyUrl, window.location.origin)
+        ? new URL(options.proxyUrl, document.baseURI)
         : null;
-
-      if (typeof document !== 'undefined') {
-        for (const key in options.cookie) {
-          const value = options.cookie[key];
-          if (!value) continue;
-
-          document.cookie = [
-            `${key}=${value}`,
-            'HttpOnly',
-            proxyUrl && proxyUrl.origin !== window.location.origin
-              ? `domain=${proxyUrl.host}`
-              : false,
-            'path=/',
-          ]
-            .filter(Boolean)
-            .join(';');
-        }
-      }
-
-      let url = getPathnameFromInput(route, options.path, options.query);
 
       if (proxyUrl) {
         proxyUrl.searchParams.append('url', url);
         url = proxyUrl.toString();
       }
 
+      let body: BodyInit | undefined = undefined;
+      if (options.bodyMediaType && options.body) {
+        const adapter = adapters[options.bodyMediaType];
+        if (!adapter)
+          return {
+            status: 400,
+            type: 'text',
+            data: `[Fumadocs] No adapter for ${options.bodyMediaType}, you need to specify one from 'createOpenAPI()'.`,
+          };
+
+        body = await adapter.encode(options);
+      }
+
+      // cookies
+      for (const key in options.cookie) {
+        const value = options.cookie[key];
+        if (!value) continue;
+
+        const cookie = {
+          [key]: value,
+          domain:
+            proxyUrl && proxyUrl.origin !== window.location.origin
+              ? `domain=${proxyUrl.host}`
+              : undefined,
+          path: '/',
+          'max-age': 30,
+        };
+
+        let str = '';
+        for (const [key, value] of Object.entries(cookie)) {
+          if (value) {
+            if (str.length > 0) str += '; ';
+
+            str += `${key}=${value}`;
+          }
+        }
+
+        document.cookie = str;
+      }
+
       return fetch(url, {
         method: options.method,
         cache: 'no-cache',
         headers,
-        body:
-          options.bodyMediaType && options.body
-            ? await createBodyFromValue(options.bodyMediaType, options.body)
-            : undefined,
+        body,
         signal: AbortSignal.timeout(10 * 1000),
       })
         .then(async (res) => {
@@ -98,60 +118,4 @@ export function createBrowserFetcher(): Fetcher {
         });
     },
   };
-}
-
-/**
- * Create request body from value
- */
-export async function createBodyFromValue(
-  mediaType: Required<RequestData>['bodyMediaType'],
-  value: unknown,
-): Promise<BodyInit> {
-  if (mediaType === 'application/json') {
-    return JSON.stringify(value);
-  }
-
-  if (mediaType === 'application/xml') {
-    return js2xml(value as Record<string, unknown>, {
-      compact: true,
-      spaces: 2,
-    });
-  }
-
-  if (mediaType === 'application/x-www-form-urlencoded') {
-    if (typeof value !== 'object')
-      throw new Error(`Input value must be object, received: ${typeof value}`);
-
-    const params = new URLSearchParams();
-    for (const key in value) {
-      params.set(key, String(value[key as keyof object]));
-    }
-    return params;
-  }
-
-  const formData = new FormData();
-
-  if (typeof value !== 'object' || !value) {
-    throw new Error(`Unsupported body type: ${typeof value}, expected: object`);
-  }
-
-  for (const key in value) {
-    const prop: unknown = value[key as keyof object];
-
-    if (typeof prop === 'object' && prop instanceof File) {
-      formData.set(key, prop);
-    }
-
-    if (Array.isArray(prop) && prop.every((item) => item instanceof File)) {
-      for (const item of prop) {
-        formData.append(key, item);
-      }
-    }
-
-    if (prop && !(prop instanceof File)) {
-      formData.set(key, JSON.stringify(prop));
-    }
-  }
-
-  return formData;
 }

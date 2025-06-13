@@ -314,7 +314,6 @@ test('Internationalized Routing', () => {
           },
           {
             "$id": "nested",
-            "$ref": {},
             "children": [
               {
                 "$id": "nested/test.mdx",
@@ -350,9 +349,6 @@ test('Internationalized Routing', () => {
           },
           {
             "$id": "nested",
-            "$ref": {
-              "metaFile": "nested/meta.json",
-            },
             "children": [
               {
                 "$id": "nested/test.mdx",
@@ -364,7 +360,7 @@ test('Internationalized Routing', () => {
                 "url": "/cn/nested/test",
               },
             ],
-            "name": "Nested Chinese",
+            "name": "Nested",
             "type": "folder",
           },
         ],
@@ -378,6 +374,7 @@ test('Internationalized Routing', () => {
         "language": "cn",
         "pages": [
           {
+            "absolutePath": "",
             "data": {
               "title": "Hello Chinese",
             },
@@ -389,12 +386,14 @@ test('Internationalized Routing', () => {
               "path": "test.mdx",
             },
             "locale": "cn",
+            "path": "test.mdx",
             "slugs": [
               "test",
             ],
             "url": "/cn/test",
           },
           {
+            "absolutePath": "",
             "data": {
               "title": "Nested Page Chinese",
             },
@@ -406,6 +405,7 @@ test('Internationalized Routing', () => {
               "path": "nested/test.mdx",
             },
             "locale": "cn",
+            "path": "nested/test.mdx",
             "slugs": [
               "nested",
               "test",
@@ -418,6 +418,7 @@ test('Internationalized Routing', () => {
         "language": "en",
         "pages": [
           {
+            "absolutePath": "",
             "data": {
               "title": "Hello",
             },
@@ -429,12 +430,14 @@ test('Internationalized Routing', () => {
               "path": "test.mdx",
             },
             "locale": "en",
+            "path": "test.mdx",
             "slugs": [
               "test",
             ],
             "url": "/en/test",
           },
           {
+            "absolutePath": "",
             "data": {
               "title": "Nested Page",
             },
@@ -446,6 +449,7 @@ test('Internationalized Routing', () => {
               "path": "nested/test.mdx",
             },
             "locale": "en",
+            "path": "nested/test.mdx",
             "slugs": [
               "nested",
               "test",
@@ -522,7 +526,7 @@ test('Internationalized Routing: Hide Prefix', () => {
                 "url": "/cn/nested/test",
               },
             ],
-            "name": "Nested Chinese",
+            "name": "Nested",
             "type": "folder",
           },
         ],
@@ -728,7 +732,6 @@ test('Internationalized Routing: dir', () => {
           },
           {
             "$id": "nested",
-            "$ref": {},
             "children": [
               {
                 "$id": "nested/test.mdx",
@@ -764,9 +767,6 @@ test('Internationalized Routing: dir', () => {
           },
           {
             "$id": "nested",
-            "$ref": {
-              "metaFile": "nested/meta.json",
-            },
             "children": [
               {
                 "$id": "nested/test.mdx",
@@ -778,7 +778,7 @@ test('Internationalized Routing: dir', () => {
                 "url": "/cn/nested/test",
               },
             ],
-            "name": "Nested Chinese",
+            "name": "Nested",
             "type": "folder",
           },
         ],

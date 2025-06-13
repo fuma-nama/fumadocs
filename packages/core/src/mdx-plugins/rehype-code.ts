@@ -3,6 +3,7 @@ import type { RehypeShikiOptions } from '@shikijs/rehype';
 import rehypeShikiFromHighlighter from '@shikijs/rehype/core';
 import {
   transformerNotationDiff,
+  transformerNotationFocus,
   transformerNotationHighlight,
   transformerNotationWordHighlight,
 } from '@shikijs/transformers';
@@ -15,16 +16,19 @@ import {
 import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
 import type { CodeBlockIcon, IconOptions } from './transformer-icon';
 import { transformerIcon } from './transformer-icon';
-import {
-  createStyleTransformer,
-  defaultThemes,
-  getHighlighter,
-} from '@/highlight/shiki';
+import { defaultThemes, getHighlighter } from '@/highlight/shiki';
 
-interface MetaValue {
-  name: string;
-  regex: RegExp;
-}
+type Meta = Record<string, unknown>;
+
+type MetaValue =
+  | {
+      name: string;
+      regex: RegExp;
+    }
+  | {
+      regex: RegExp;
+      onSet: (map: Meta, match: string[]) => void;
+    };
 
 /**
  * Custom meta string values
@@ -42,6 +46,14 @@ const metaValues: MetaValue[] = [
     name: 'tab',
     regex: /tab="(?<value>[^"]+)"/,
   },
+  {
+    regex: /lineNumbers=(\d+)|lineNumbers/,
+    onSet(map, args) {
+      map['data-line-numbers'] = true;
+      if (args[0] !== undefined)
+        map['data-line-numbers-start'] = Number(args[0]);
+    },
+  },
 ];
 
 export const rehypeCodeDefaultOptions: RehypeCodeOptions = {
@@ -51,7 +63,6 @@ export const rehypeCodeDefaultOptions: RehypeCodeOptions = {
   defaultLanguage: 'plaintext',
   experimentalJSEngine: false,
   transformers: [
-    createStyleTransformer(),
     transformerNotationHighlight({
       matchAlgorithm: 'v3',
     }),
@@ -61,14 +72,21 @@ export const rehypeCodeDefaultOptions: RehypeCodeOptions = {
     transformerNotationDiff({
       matchAlgorithm: 'v3',
     }),
+    transformerNotationFocus({
+      matchAlgorithm: 'v3',
+    }),
   ],
   parseMetaString(meta) {
-    const map: Record<string, string> = {};
+    const map: Meta = {};
 
     for (const value of metaValues) {
       meta = meta.replace(value.regex, (_, ...args) => {
-        const first = args.at(0);
-        map[value.name] = typeof first === 'string' ? first : '';
+        if ('onSet' in value) {
+          value.onSet(map, args);
+        } else {
+          const first = args.at(0);
+          map[value.name] = typeof first === 'string' ? first : '';
+        }
 
         return '';
       });
@@ -151,7 +169,8 @@ export function rehypeCode(
           ? (Object.values(options.themes).filter(Boolean) as BuiltinTheme[])
           : [options.theme],
       langs:
-        options.langs ?? (options.lazy ? [] : Object.keys(bundledLanguages)),
+        options.langs ??
+        (options.lazy ? ['ts', 'tsx'] : Object.keys(bundledLanguages)),
     },
   );
 

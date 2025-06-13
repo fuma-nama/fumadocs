@@ -1,5 +1,14 @@
 # fumadocs-python
 
+## 0.0.2
+
+### Patch Changes
+
+- b0fa6ac: Fix: Add missing dependency for `griffe_typingdoc`
+- Updated dependencies [3372792]
+  - fumadocs-core@15.3.1
+  - fumadocs-ui@15.3.1
+
 ## 0.0.1
 
 ### Patch Changes

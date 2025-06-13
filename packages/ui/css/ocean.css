@@ -18,15 +18,15 @@
 }
 
 .dark {
-  --color-fd-background: hsl(220, 60%, 6%);
+  --color-fd-background: hsl(220, 60%, 8%);
   --color-fd-foreground: hsl(220, 60%, 94.5%);
   --color-fd-muted: hsl(220, 50%, 10%);
   --color-fd-muted-foreground: hsl(220, 30%, 65%);
   --color-fd-popover: hsl(220, 50%, 10%);
   --color-fd-popover-foreground: hsl(220, 60%, 94.5%);
-  --color-fd-card: hsl(220, 50%, 10%);
+  --color-fd-card: hsla(220, 56%, 15%, 0.4);
   --color-fd-card-foreground: hsl(220, 60%, 94.5%);
-  --color-fd-border: hsl(220, 50%, 20%);
+  --color-fd-border: hsla(220, 50%, 50%, 0.2);
   --color-fd-primary: hsl(205, 100%, 85%);
   --color-fd-primary-foreground: hsl(0, 0%, 9%);
   --color-fd-secondary: hsl(220, 50%, 20%);

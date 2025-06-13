@@ -1,22 +1,22 @@
 import * as process from 'node:process';
 import path from 'node:path';
 import {
-  intro,
-  confirm,
-  isCancel,
   cancel,
-  spinner,
+  confirm,
+  intro,
+  isCancel,
   log,
   note,
+  spinner,
 } from '@clack/prompts';
 import picocolors from 'picocolors';
-import { execa } from 'execa';
+import { x } from 'tinyexec';
 import { getPackageManager } from '@/utils/get-package-manager';
 import { exists } from '@/utils/fs';
 import { isSrc } from '@/utils/is-src';
-import { type Config } from '@/config';
+import { type Config, defaultConfig } from '@/config';
 import {
-  getOutputPath,
+  resolveReference,
   toReferencePath,
   transformReferences,
 } from '@/utils/transform-references';
@@ -96,21 +96,18 @@ export async function init(plugin: Plugin, config: Config = {}): Promise<void> {
       overwrite: true,
     });
 
-    await transformReferences(
-      sourceFile,
-      {
+    transformReferences(sourceFile, (specifier) => {
+      const resolved = resolveReference(specifier, {
         alias: {
           type: 'append',
           dir: ctx.src ? 'src' : '',
         },
         relativeTo: path.dirname(file),
-      },
-      (resolved) => {
-        if (resolved.type !== 'file') return;
+      });
 
-        return toReferencePath(file, getOutputPath(resolved.path, ctx));
-      },
-    );
+      if (resolved.type !== 'file') return;
+      return toReferencePath(file, getOutputPath(resolved.path, ctx));
+    });
 
     await sourceFile.save();
   }
@@ -130,7 +127,7 @@ export async function init(plugin: Plugin, config: Config = {}): Promise<void> {
     if (value) {
       const spin = spinner();
       spin.start('Installing dependencies');
-      await execa(manager, ['install', ...plugin.dependencies]);
+      await x(manager, ['install', ...plugin.dependencies]);
       spin.stop('Successfully installed.');
     }
   }
@@ -175,4 +172,33 @@ prettier . --write`,
       log.step(text.text);
     }
   }
+}
+
+/**
+ * Find the transformed output path of input ref.
+ *
+ * extension name of `ref` is optional.
+ */
+function getOutputPath(ref: string, config: Config): string {
+  if (path.isAbsolute(ref)) throw new Error(`path cannot be absolute: ${ref}`);
+
+  if (ref === 'utils/cn' || ref === 'utils/cn.ts') {
+    return config.aliases?.cn ?? defaultConfig.aliases.cn;
+  }
+
+  if (ref.startsWith('components')) {
+    return path.join(
+      config.aliases?.componentsDir ?? defaultConfig.aliases.componentsDir,
+      path.relative('components', ref),
+    );
+  }
+
+  if (ref.startsWith('lib') || ref.startsWith('utils')) {
+    return path.join(
+      config.aliases?.libDir ?? defaultConfig.aliases.libDir,
+      path.relative('lib', ref),
+    );
+  }
+
+  return ref;
 }

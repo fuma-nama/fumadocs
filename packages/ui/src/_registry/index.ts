@@ -2,16 +2,6 @@ import { fileURLToPath } from 'node:url';
 import type { Registry } from '@fumadocs/cli/build';
 import * as path from 'node:path';
 
-const importMap = {
-  'contexts/sidebar.tsx': 'fumadocs-ui/contexts/sidebar',
-  'contexts/search.tsx': 'fumadocs-ui/contexts/search',
-  'contexts/tree.tsx': 'fumadocs-ui/contexts/tree',
-  'contexts/i18n.tsx': 'fumadocs-ui/contexts/i18n',
-  'contexts/layout.tsx': 'fumadocs-ui/contexts/layout',
-  'utils/get-sidebar-tabs.tsx': 'fumadocs-ui/utils/get-sidebar-tabs',
-  'utils/use-copy-button.ts': 'fumadocs-ui/utils/use-copy-button',
-};
-
 const srcDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../');
 
 export const registry: Registry = {
@@ -21,6 +11,20 @@ export const registry: Registry = {
     components: 'components',
     utils: 'lib',
     '': 'components',
+  },
+  mapImportPath: {
+    'contexts/sidebar.tsx': 'fumadocs-ui/contexts/sidebar',
+    'contexts/search.tsx': 'fumadocs-ui/contexts/search',
+    'contexts/tree.tsx': 'fumadocs-ui/contexts/tree',
+    'contexts/i18n.tsx': 'fumadocs-ui/contexts/i18n',
+    'contexts/layout.tsx': 'fumadocs-ui/contexts/layout',
+    'provider/index.tsx': 'fumadocs-ui/provider',
+    'utils/get-sidebar-tabs.tsx': 'fumadocs-ui/utils/get-sidebar-tabs',
+    'utils/use-copy-button.ts': 'fumadocs-ui/utils/use-copy-button',
+    'icons.tsx': {
+      type: 'dependency',
+      name: 'lucide-react',
+    },
   },
   components: [
     {
@@ -36,14 +40,12 @@ export const registry: Registry = {
           out: 'components:layouts/page.tsx',
         },
       ],
-      mapImportPath: importMap,
       unlisted: true,
     },
     {
       name: 'layouts/docs',
       files: ['layouts/docs.tsx'],
       unlisted: true,
-      mapImportPath: importMap,
     },
     {
       name: 'layouts/notebook',
@@ -54,7 +56,6 @@ export const registry: Registry = {
         },
       ],
       unlisted: true,
-      mapImportPath: importMap,
     },
     {
       name: 'layouts/page',
@@ -64,37 +65,45 @@ export const registry: Registry = {
           out: 'components:layouts/page.tsx',
         },
       ],
-      mapImportPath: importMap,
       unlisted: true,
     },
     {
       name: 'layouts/home',
       files: ['layouts/home.tsx'],
-      mapImportPath: importMap,
       unlisted: true,
     },
     {
       name: 'layout/root-toggle',
       description: 'the UI of Sidebar Tabs',
       files: ['components/layout/root-toggle.tsx'],
-      mapImportPath: importMap,
     },
     {
       name: 'layout/language-toggle',
       description: 'Language Select',
       files: ['components/layout/language-toggle.tsx'],
-      mapImportPath: importMap,
     },
-    { name: 'accordion', files: ['components/accordion.tsx'] },
+    {
+      name: 'accordion',
+      files: ['components/accordion.tsx'],
+    },
     {
       name: 'github-info',
       files: ['components/github-info.tsx'],
       description: 'A card to display GitHub repo info',
     },
-    { name: 'banner', files: ['components/banner.tsx'] },
-    { name: 'callout', files: ['components/callout.tsx'] },
+    {
+      name: 'banner',
+      files: ['components/banner.tsx'],
+    },
+    {
+      name: 'callout',
+      files: ['components/callout.tsx'],
+    },
     { name: 'card', files: ['components/card.tsx'] },
-    { name: 'codeblock', files: ['components/codeblock.tsx'] },
+    {
+      name: 'codeblock',
+      files: ['components/codeblock.tsx'],
+    },
     { name: 'files', files: ['components/files.tsx'] },
     { name: 'heading', files: ['components/heading.tsx'] },
     {

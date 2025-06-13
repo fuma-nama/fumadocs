@@ -1,5 +1,20 @@
 # @fumadocs/mdx-remote
 
+## 1.3.2
+
+### Patch Changes
+
+- a6c909b: Removed unused devDependencies and migrated from `fast-glob` to `tinyglobby`
+  - fumadocs-core@15.3.4
+
+## 1.3.1
+
+### Patch Changes
+
+- 4ae7b4a: Support MDX in codeblock tab value
+- Updated dependencies [4ae7b4a]
+  - fumadocs-core@15.3.3
+
 ## 1.3.0
 
 ### Minor Changes

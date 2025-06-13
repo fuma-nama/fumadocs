@@ -1,59 +1,39 @@
 'use client';
-import { inputToString } from '@/utils/input-to-string';
-import {
-  getUrl,
-  MediaTypeFormatMap,
-  type RequestData,
-} from '@/requests/_shared';
+import { type SampleGenerator } from '@/requests/_shared';
+import { resolveRequestData } from '@/utils/url';
 
-export function getSampleRequest(url: string, data: RequestData): string {
-  const variables = new Map<string, string>();
+export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
   const headers = { ...data.header };
+  const params = [`"${data.method}"`, 'url'];
+  let body: string | undefined;
 
-  if (data.body && data.bodyMediaType) {
-    switch (data.bodyMediaType) {
-      case 'application/json':
-        variables.set('json', JSON.stringify(data.body, null, 2));
-        break;
-      case 'multipart/form-data':
-        headers['Content-Type'] = data.bodyMediaType;
-        variables.set('data', JSON.stringify(data.body, null, 2));
-        break;
-      default:
-        headers['Content-Type'] = data.bodyMediaType;
+  if (data.body && data.bodyMediaType && data.bodyMediaType in mediaAdapters) {
+    headers['Content-Type'] = data.bodyMediaType;
 
-        variables.set(
-          'data',
-          inputToString(
-            data.body,
-            MediaTypeFormatMap[data.bodyMediaType],
-            'python',
-          ),
-        );
+    body = mediaAdapters[data.bodyMediaType].generateExample(data, {
+      lang: 'python',
+    });
+
+    if (body && data.bodyMediaType === 'application/json') {
+      params.push('json = body');
+    } else if (body) {
+      params.push('data = body');
     }
   }
 
   if (Object.keys(headers).length > 0) {
-    variables.set('headers', JSON.stringify(headers, null, 2));
+    params.push(`headers = ${JSON.stringify(headers, null, 2)}`);
   }
 
   if (Object.keys(data.cookie).length > 0) {
-    variables.set('cookies', JSON.stringify(data.cookie, null, 2));
+    params.push(`cookies = ${JSON.stringify(data.cookie, null, 2)}`);
   }
-
-  const params = [
-    `"${data.method}"`,
-    'url',
-    ...Array.from(variables.keys()).map((k) => `${k}=${k}`),
-  ];
 
   return `import requests
 
-url = ${JSON.stringify(getUrl(url, data))}
-${Array.from(variables.entries())
-  .map(([k, v]) => `${k} = ${v}`)
-  .join('\n')}
+url = ${JSON.stringify(resolveRequestData(url, data))}
+${body ?? ''}
 response = requests.request(${params.join(', ')})
 
 print(response.text)`;
-}
+};

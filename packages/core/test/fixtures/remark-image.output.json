@@ -107,25 +107,25 @@
             {
               "name": "src",
               "type": "mdxJsxAttribute",
-              "value": "https://picsum.photos/id/237/200/300",
+              "value": "https://fumadocs.dev/banner.png",
             },
             {
               "name": "width",
               "type": "mdxJsxAttribute",
-              "value": "200",
+              "value": "1200",
             },
             {
               "name": "height",
               "type": "mdxJsxAttribute",
-              "value": "300",
+              "value": "630",
             },
           ],
           "name": "img",
           "position": {
             "end": {
-              "column": 50,
+              "column": 45,
               "line": 3,
-              "offset": 70,
+              "offset": 65,
             },
             "start": {
               "column": 1,
@@ -135,14 +135,14 @@
           },
           "title": null,
           "type": "mdxJsxFlowElement",
-          "url": "https://picsum.photos/id/237/200/300",
+          "url": "https://fumadocs.dev/banner.png",
         },
       ],
       "position": {
         "end": {
-          "column": 50,
+          "column": 45,
           "line": 3,
-          "offset": 70,
+          "offset": 65,
         },
         "start": {
           "column": 1,
@@ -157,7 +157,7 @@
     "end": {
       "column": 1,
       "line": 4,
-      "offset": 71,
+      "offset": 66,
     },
     "start": {
       "column": 1,

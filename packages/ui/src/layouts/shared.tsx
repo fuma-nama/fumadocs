@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 import type { LinkItemType } from '@/layouts/links';
 import type { NavProviderProps } from '@/contexts/layout';
-import { Slot } from '@radix-ui/react-slot';
 import type { I18nConfig } from 'fumadocs-core/i18n';
 
 export interface NavOptions extends NavProviderProps {
@@ -91,50 +90,4 @@ export function getLinks(
     ];
 
   return result;
-}
-
-export function slot(
-  obj:
-    | {
-        enabled?: boolean;
-        component?: ReactNode;
-      }
-    | undefined,
-  def: ReactNode,
-  customComponentProps?: object,
-  disabled?: ReactNode,
-): ReactNode {
-  if (obj?.enabled === false) return disabled;
-  if (obj?.component !== undefined)
-    return <Slot {...customComponentProps}>{obj.component}</Slot>;
-
-  return def;
-}
-
-export function slots<Comp extends Record<string, ReactNode>>(
-  variant: keyof Comp,
-  obj:
-    | {
-        enabled?: boolean;
-        components?: Comp;
-      }
-    | undefined,
-  def: ReactNode,
-): ReactNode {
-  if (obj?.enabled === false) return;
-  if (obj?.components?.[variant] !== undefined)
-    return <Slot>{obj.components[variant]}</Slot>;
-
-  return def;
-}
-
-export function omit<T extends Record<string, unknown>, Keys extends keyof T>(
-  obj: T,
-  ...keys: Keys[]
-): Omit<T, Keys> {
-  const clone = { ...obj };
-  for (const key of keys) {
-    delete clone[key];
-  }
-  return clone;
 }

@@ -4,27 +4,36 @@ import { type ParsedSchema } from '@/utils/schema';
  * Combine multiple object schemas into one
  */
 export function combineSchema(schema: ParsedSchema[]): ParsedSchema {
-  const result: ParsedSchema = {
-    type: undefined,
-  };
+  let result: ParsedSchema = {};
+  const types = new Set<string>();
+  const title = new Set<string>();
 
   function add(s: ParsedSchema): void {
-    if (s.type) {
-      result.type ??= [];
-      if (!Array.isArray(result.type)) {
-        result.type = [result.type];
-      }
+    if (typeof s === 'boolean') {
+      result = s;
+      return;
+    }
 
+    if (typeof result === 'boolean') return;
+
+    if (s.title) title.add(s.title);
+    if (s.type) {
       for (const v of Array.isArray(s.type) ? s.type : [s.type]) {
-        if (!result.type.includes(v)) {
-          result.type.push(v);
-        }
+        types.add(v);
       }
     }
 
-    if (s.properties) {
-      result.properties ??= {};
-      Object.assign(result.properties, s.properties);
+    for (const key of ['oneOf', 'required', 'enum'] as const) {
+      if (!s[key]) continue;
+
+      result[key] = [...s[key], ...(result[key] ?? [])];
+    }
+
+    for (const key of ['properties', 'patternProperties'] as const) {
+      if (!s[key]) continue;
+
+      result[key] ??= {};
+      Object.assign(result[key], s[key]);
     }
 
     if (s.additionalProperties === true) {
@@ -37,22 +46,16 @@ export function combineSchema(schema: ParsedSchema[]): ParsedSchema {
       Object.assign(result.additionalProperties, s.additionalProperties);
     }
 
-    if (s.required) {
-      result.required ??= [];
-      result.required.push(...s.required);
-    }
-
-    if (s.enum && s.enum.length > 0) {
-      result.enum ??= [];
-      result.enum.push(...s.enum);
-    }
-
-    if (s.allOf) {
-      s.allOf.forEach(add);
-    }
+    (s.allOf ?? s.anyOf)?.forEach(add);
   }
 
   schema.forEach(add);
+
+  if (title.size > 0) result.title = Array.from(title).join(' & ');
+  if (types.size > 0) {
+    const typeArr = Array.from(types.values());
+    result.type = typeArr.length === 1 ? typeArr[0] : typeArr;
+  }
 
   return result;
 }

@@ -9,7 +9,7 @@ Fumadocs is a docs framework, but it's also a powerful tool to manage content in
 
 ## Overview
 
-This guide helps you to build a blog site with Fumadocs and Fumadocs MDX.
+This guide helps you build a blog site with Fumadocs and Fumadocs MDX.
 
 We will use Fumadocs MDX to manage the content, and implement our own UI with Tailwind CSS & Fumadocs UI.
 
@@ -88,7 +88,7 @@ Colors like `text-fd-muted-foreground` are from the design system of Fumadocs UI
 
 And create a page for blog posts.
 
-Note that blog posts won't have nested slugs like `/slug1/slug2`, we don't need a catch-all route for blog posts.
+Note that blog posts won't have nested slugs like `/slug1/slug2`. We don't need a catch-all route for blog posts.
 
 ```tsx title="app/(home)/blog/[slug]/page.tsx"
 import { notFound } from 'next/navigation';
@@ -165,7 +165,7 @@ export async function generateMetadata(props: {
 
 ### Write Posts
 
-The UI is now completed, you can write some blog posts under the `content/blog` directory, like:
+The UI is now complete, you can write some blog posts under the `content/blog` directory, like:
 
 ```mdx title="content/blog/hello.mdx"
 ---
@@ -179,4 +179,4 @@ date: 2024-12-15
 This is an example!
 ```
 
-Spinning up the development server with `next dev`, you should see the blog posts under `/blog` route.
+After spinning up the development server with `next dev`, you should see the blog posts under `/blog` route.

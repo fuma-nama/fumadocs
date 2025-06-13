@@ -1,9 +1,9 @@
 import type { Nodes } from 'hast';
 import { remark } from 'remark';
 import {
-  remarkGfm,
   rehypeCode,
   type RehypeCodeOptions,
+  remarkGfm,
 } from 'fumadocs-core/mdx-plugins';
 import remarkRehype from 'remark-rehype';
 

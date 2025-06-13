@@ -1,10 +1,25 @@
-import type { Hit, SearchOptions } from '@algolia/client-search';
-import type { SearchIndex } from 'algoliasearch/lite';
 import type { SortedResult } from '@/server/types';
 import type { BaseIndex } from '@/search/algolia';
+import type { Hit, LiteClient, SearchResponse } from 'algoliasearch/lite';
 
-export interface AlgoliaOptions extends SearchOptions {
-  index: SearchIndex;
+export interface AlgoliaOptions {
+  indexName: string;
+  client: LiteClient;
+
+  /**
+   * Filter results with specific tag.
+   */
+  tag?: string;
+
+  locale?: string;
+
+  onSearch?: (
+    query: string,
+    tag?: string,
+    locale?: string,
+  ) => Promise<{
+    results: SearchResponse<BaseIndex>[];
+  }>;
 }
 
 export function groupResults(hits: Hit<BaseIndex>[]): SortedResult[] {
@@ -35,31 +50,29 @@ export function groupResults(hits: Hit<BaseIndex>[]): SortedResult[] {
 }
 
 export async function searchDocs(
-  index: SearchIndex,
   query: string,
-  tag?: string,
-  options?: SearchOptions,
+  { indexName, onSearch, client, locale, tag }: AlgoliaOptions,
 ): Promise<SortedResult[]> {
-  let filters = options?.filters;
-  if (tag) filters = filters ? `tag:${tag} AND (${filters})` : `tag:${tag}`;
+  if (query.length > 0) {
+    const result = onSearch
+      ? await onSearch(query, tag, locale)
+      : await client.searchForHits<BaseIndex>({
+          requests: [
+            {
+              type: 'default',
+              indexName,
+              query,
+              distinct: 5,
+              hitsPerPage: 10,
+              filters: tag ? `tag:${tag}` : undefined,
+            },
+          ],
+        });
 
-  if (query.length === 0) {
-    const result = await index.search<BaseIndex>(query, {
-      distinct: 1,
-      hitsPerPage: 8,
-      ...options,
-      filters,
-    });
-
-    return groupResults(result.hits).filter((hit) => hit.type === 'page');
+    return groupResults(result.results[0].hits).filter(
+      (hit) => hit.type === 'page',
+    );
   }
 
-  const result = await index.search<BaseIndex>(query, {
-    distinct: 5,
-    hitsPerPage: 10,
-    ...options,
-    filters,
-  });
-
-  return groupResults(result.hits);
+  return [];
 }

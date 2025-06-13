@@ -1,15 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- rehype plugins */
 import { type ReactElement } from 'react';
 import {
   rehypeCode,
+  type RehypeCodeOptions,
   remarkGfm,
   remarkImage,
-  type RehypeCodeOptions,
 } from 'fumadocs-core/mdx-plugins';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { remark } from 'remark';
 import remarkRehype from 'remark-rehype';
-import { toJsxRuntime, type Jsx } from 'hast-util-to-jsx-runtime';
-import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
+import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
+import * as JsxRuntime from 'react/jsx-runtime';
 
 const processor = remark()
   .use(remarkGfm)
@@ -18,21 +19,24 @@ const processor = remark()
   .use(rehypeCode, {
     langs: [],
     lazy: true,
-  } satisfies Partial<RehypeCodeOptions>);
+  } satisfies Partial<RehypeCodeOptions>)
+  .use(rehypeReact);
 
-export async function Markdown({
-  text,
-}: {
-  text: string;
-}): Promise<ReactElement> {
-  const nodes = processor.parse({ value: text });
-  const hast = await processor.run(nodes);
+function rehypeReact(this: any) {
+  this.compiler = (tree: any, file: any) => {
+    return toJsxRuntime(tree, {
+      development: false,
+      filePath: file.path,
+      ...JsxRuntime,
+      components: defaultMdxComponents,
+    });
+  };
+}
 
-  return toJsxRuntime(hast, {
-    development: false,
-    jsx: jsx as Jsx,
-    jsxs: jsxs as Jsx,
-    Fragment,
-    components: defaultMdxComponents,
+export async function Markdown({ text }: { text: string }) {
+  const out = await processor.process({
+    value: text,
   });
+
+  return out.result as ReactElement;
 }

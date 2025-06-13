@@ -1,286 +1,418 @@
-import { type ReactNode } from 'react';
-import { isNullable, NoReference, type ParsedSchema } from '@/utils/schema';
+import { Fragment, type ReactNode } from 'react';
+import type { ResolvedSchema } from '@/utils/schema';
 import type { RenderContext } from '@/types';
 import { combineSchema } from '@/utils/combine-schema';
 import { Markdown } from './markdown';
-
-const keys: {
-  [T in keyof ParsedSchema]: string;
-} = {
-  default: 'Default',
-  minimum: 'Minimum',
-  maximum: 'Maximum',
-  minLength: 'Minimum length',
-  maxLength: 'Maximum length',
-  pattern: 'Pattern',
-  format: 'Format',
-};
+import { schemaToString } from '@/utils/schema-to-string';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from 'fumadocs-ui/components/tabs';
 
 interface Context {
-  readOnly: boolean;
-  writeOnly: boolean;
-  stack?: ParsedSchema[];
-
-  render: RenderContext;
-}
-
-function isObject(schema: ParsedSchema): boolean {
-  return (
-    schema.type === 'object' ||
-    schema.properties !== undefined ||
-    schema.additionalProperties !== undefined
-  );
+  stack: SchemaStack;
 }
 
 export function Schema({
   name,
   schema,
   required = false,
-  parseObject = true,
-  ctx,
+  readOnly = false,
+  writeOnly = false,
+  as = 'property',
+  ctx: { renderer },
 }: {
   name: string;
   required?: boolean;
-  schema: NoReference<ParsedSchema>;
+  schema: ResolvedSchema;
+  as?: 'property' | 'body';
 
-  /**
-   * Render the full object
-   *
-   * @defaultValue true
-   * */
-  parseObject?: boolean;
-
-  ctx: Context;
+  readOnly?: boolean;
+  writeOnly?: boolean;
+  ctx: RenderContext;
 }): ReactNode {
-  if (
-    (schema.readOnly === true && !ctx.readOnly) ||
-    (schema.writeOnly === true && !ctx.writeOnly)
-  )
-    return null;
-
-  const {
-    render: { renderer },
-    stack = [],
-  } = ctx;
-
-  // object type
-  if (
-    isObject(schema) &&
-    parseObject &&
-    (schema.additionalProperties || schema.properties)
+  function propertyBody(
+    schema: Exclude<ResolvedSchema, boolean>,
+    renderPrimitive: (
+      child: Exclude<ResolvedSchema, boolean>,
+      ctx: Context,
+    ) => ReactNode,
+    ctx: Context,
   ) {
-    let body: ReactNode = null;
-    let footer: ReactNode = null;
-    const { additionalProperties, properties } = schema;
+    if (Array.isArray(schema.type)) {
+      const items = schema.type.flatMap((type) => {
+        const composed = {
+          ...schema,
+          type,
+        };
+        if (!isComplexType(composed)) return [];
+        return composed;
+      });
+      if (items.length === 0) return;
+      if (items.length === 1)
+        return propertyBody(items[0], renderPrimitive, ctx);
 
-    if (additionalProperties === true) {
-      footer = <renderer.Property name="[key: string]" type="any" />;
-    } else if (additionalProperties) {
-      footer = (
-        <Schema
-          name="[key: string]"
-          schema={additionalProperties}
-          parseObject={false}
-          ctx={{
-            ...ctx,
-            stack: [schema, ...stack],
-          }}
-        />
+      return (
+        <Tabs defaultValue={items[0].type}>
+          <TabsList>
+            {items.map((item) => (
+              <TabsTrigger key={item.type} value={item.type}>
+                {schemaToString(item)}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          {items.map((item) => (
+            <TabsContent key={item.type} value={item.type}>
+              {item.description && <Markdown text={item.description} />}
+              {propertyInfo(item)}
+              {renderPrimitive(item, ctx)}
+            </TabsContent>
+          ))}
+        </Tabs>
       );
     }
 
-    if (properties) {
-      body = Object.entries(properties).map(([key, value]) => {
-        return (
-          <Schema
-            key={key}
-            name={key}
-            schema={value}
-            parseObject={false}
-            required={schema.required?.includes(key) ?? false}
-            ctx={{
-              ...ctx,
-              stack: [schema, ...stack],
-            }}
-          />
-        );
+    if (schema.oneOf) {
+      const oneOf = schema.oneOf.filter((item) =>
+        isComplexType(item),
+      ) as Exclude<ResolvedSchema, boolean>[];
+      if (oneOf.length === 0) return;
+      if (oneOf.length === 1) {
+        return propertyBody(oneOf[0], renderPrimitive, ctx);
+      }
+
+      return (
+        <Tabs defaultValue="0">
+          <TabsList>
+            {oneOf.map((item, i) => (
+              <TabsTrigger key={i} value={i.toString()}>
+                {schemaToString(item)}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          {oneOf.map((item, i) => (
+            <TabsContent key={i} value={i.toString()}>
+              {item.description && <Markdown text={item.description} />}
+              {propertyInfo(item)}
+              {propertyBody(
+                item,
+                (child, ctx) => primitiveBody(child, ctx, false, true),
+                ctx,
+              )}
+            </TabsContent>
+          ))}
+        </Tabs>
+      );
+    }
+
+    const of = schema.allOf ?? schema.anyOf;
+    if (of) {
+      const arr = of.filter((item) => !ctx.stack.has(item));
+      if (arr.length === 0) return;
+      const combined = combineSchema(arr);
+      if (typeof combined === 'boolean') return;
+
+      return renderPrimitive(combined, ctx);
+    }
+
+    return renderPrimitive(schema, ctx);
+  }
+
+  function propertyInfo(schema: Exclude<ResolvedSchema, boolean>) {
+    const fields: {
+      key: string;
+      value: string;
+    }[] = [];
+
+    if (schema.default) {
+      fields.push({
+        key: 'Default',
+        value: JSON.stringify(schema.default),
       });
     }
 
+    if (schema.pattern) {
+      fields.push({
+        key: 'Match',
+        value: schema.pattern,
+      });
+    }
+
+    if (schema.format) {
+      fields.push({
+        key: 'Format',
+        value: schema.format,
+      });
+    }
+
+    if (schema.multipleOf) {
+      fields.push({
+        key: 'Multiple Of',
+        value: String(schema.multipleOf),
+      });
+    }
+
+    let range = getRange(
+      'value',
+      schema.minimum,
+      schema.exclusiveMinimum,
+      schema.maximum,
+      schema.exclusiveMaximum,
+    );
+    if (range)
+      fields.push({
+        key: 'Range',
+        value: range,
+      });
+
+    range = getRange(
+      'length',
+      schema.minLength,
+      undefined,
+      schema.maxLength,
+      undefined,
+    );
+    if (range)
+      fields.push({
+        key: 'Length',
+        value: range,
+      });
+
+    range = getRange(
+      'properties',
+      schema.minProperties,
+      undefined,
+      schema.maxProperties,
+      undefined,
+    );
+    if (range)
+      fields.push({
+        key: 'Properties',
+        value: range,
+      });
+
+    if (schema.enum) {
+      fields.push({
+        key: 'Value in',
+        value: schema.enum.map((value) => JSON.stringify(value)).join(' | '),
+      });
+    }
+
+    if (fields.length === 0) return;
     return (
-      <div className="flex flex-col gap-4">
-        {body}
-        {footer}
+      <div className="flex flex-wrap gap-2 not-prose">
+        {fields.map((field) => (
+          <div
+            key={field.key}
+            className="bg-fd-secondary border rounded-lg text-xs p-1.5 shadow-md"
+          >
+            <span className="font-medium me-2">{field.key}</span>
+            <code className="text-fd-muted-foreground">{field.value}</code>
+          </div>
+        ))}
       </div>
     );
   }
 
-  if (schema.allOf && parseObject) {
-    return (
-      <Schema
-        name={name}
-        schema={combineSchema(schema.allOf)}
-        ctx={{
-          ...ctx,
-          stack: [schema, ...stack],
-        }}
-      />
-    );
-  }
+  function primitiveBody(
+    schema: Exclude<ResolvedSchema, boolean>,
+    ctx: Context,
+    collapsible: boolean,
+    nested: boolean,
+  ) {
+    if (schema.type === 'object') {
+      if (ctx.stack.has(schema)) return <p>Recursive</p>;
+      const props = Object.entries(schema.properties ?? {});
+      const patternProps = Object.entries(schema.patternProperties ?? {});
+      const next = {
+        ...ctx,
+        stack: ctx.stack.next(schema),
+      };
 
-  let footer: ReactNode;
-  const fields: {
-    key: string;
-    value: string;
-  }[] = [];
+      if (props.length === 0 && patternProps.length === 0)
+        return <p>Empty Object</p>;
 
-  for (const [key, value] of Object.entries(keys)) {
-    if (key in schema) {
-      fields.push({
-        key: value,
-        value: JSON.stringify(schema[key as keyof ParsedSchema]),
-      });
+      const children = (
+        <>
+          {props.map(([key, value]) => (
+            <Fragment key={key}>
+              {property(key, value, next, {
+                required: schema.required?.includes(key) ?? false,
+                nested,
+              })}
+            </Fragment>
+          ))}
+          {patternProps.map(([key, value]) => (
+            <Fragment key={key}>
+              {property(key, value, next, { nested })}
+            </Fragment>
+          ))}
+          {schema.additionalProperties &&
+            property('[key: string]', schema.additionalProperties, next, {
+              nested,
+            })}
+        </>
+      );
+
+      if (!collapsible) return children;
+
+      return (
+        <renderer.ObjectCollapsible name="Show Attributes">
+          {children}
+        </renderer.ObjectCollapsible>
+      );
+    }
+
+    if (schema.type === 'array') {
+      const items = schema.items;
+      if (!items || !isComplexType(items) || ctx.stack.has(items)) return;
+
+      return (
+        <>
+          {items.description && (
+            <Markdown text={'Item: ' + items.description} />
+          )}
+
+          <renderer.ObjectCollapsible name="Array Item">
+            {propertyBody(
+              items,
+              (child, ctx) => primitiveBody(child, ctx, false, true),
+              {
+                ...ctx,
+                stack: ctx.stack.next(schema),
+              },
+            )}
+          </renderer.ObjectCollapsible>
+        </>
+      );
     }
   }
 
-  if (schema.enum) {
-    fields.push({
-      key: 'Value in',
-      value: schema.enum.map((value) => JSON.stringify(value)).join(' | '),
-    });
-  }
+  function property(
+    key: string,
+    schema: ResolvedSchema,
+    ctx: Context,
+    props?: {
+      required?: boolean;
+      nested?: boolean;
+    },
+  ) {
+    if (schema === true) {
+      return <renderer.Property name={key} type="any" {...props} />;
+    } else if (schema === false) {
+      return <renderer.Property name={key} type="never" {...props} />;
+    }
 
-  if (isObject(schema) && !parseObject && !stack.includes(schema)) {
-    footer = (
-      <renderer.ObjectCollapsible name="Show Attributes">
-        <Schema
-          name={name}
-          schema={schema}
-          ctx={{
-            ...ctx,
-            stack: [schema, ...stack],
-          }}
-        />
-      </renderer.ObjectCollapsible>
+    if ((schema.readOnly && !readOnly) || (schema.writeOnly && !writeOnly))
+      return;
+
+    return (
+      <renderer.Property
+        name={key}
+        type={schemaToString(schema)}
+        deprecated={schema.deprecated}
+        {...props}
+      >
+        {schema.description && <Markdown text={schema.description} />}
+        {propertyInfo(schema)}
+        {propertyBody(
+          schema,
+          (child, ctx) => primitiveBody(child, ctx, true, true),
+          ctx,
+        )}
+      </renderer.Property>
     );
-  } else {
-    const mentionedObjectTypes = [
-      ...(schema.anyOf ?? schema.oneOf ?? []),
-      ...(schema.not ? [schema.not] : []),
-      ...(schema.type === 'array' && schema.items ? [schema.items] : []),
-    ].filter((s) => isComplexType(s) && !stack.includes(s));
-
-    footer = mentionedObjectTypes.map((s, idx) => {
-      return (
-        <renderer.ObjectCollapsible
-          key={idx}
-          name={
-            s.title ??
-            (mentionedObjectTypes.length === 1
-              ? 'Show Attributes'
-              : `Object ${idx + 1}`)
-          }
-        >
-          <Schema
-            name="element"
-            schema={s}
-            ctx={{
-              ...ctx,
-              stack: [schema, ...stack],
-            }}
-          />
-        </renderer.ObjectCollapsible>
-      );
-    });
   }
 
-  return (
-    <renderer.Property
-      name={name}
-      type={getSchemaType(schema, ctx)}
-      required={required}
-      deprecated={schema.deprecated}
-    >
-      {schema.description ? <Markdown text={schema.description} /> : null}
-      {fields.length > 0 ? (
-        <div className="flex flex-col gap-2">
-          {fields.map((field) => (
-            <span key={field.key}>
-              {field.key}: <code>{field.value}</code>
-            </span>
-          ))}
-        </div>
-      ) : null}
-      {footer}
-    </renderer.Property>
+  const context: Context = {
+    stack: schemaStack(),
+  };
+  if (
+    typeof schema === 'boolean' ||
+    as === 'property' ||
+    !isComplexType(schema)
+  )
+    return property(name, schema, context, { required });
+  return propertyBody(
+    schema,
+    (child, ctx) => primitiveBody(child, ctx, false, false),
+    context,
   );
+}
+
+interface SchemaStack {
+  next(...schema: ResolvedSchema[]): SchemaStack;
+  add(schema: ResolvedSchema): void;
+  has(schema: ResolvedSchema): boolean;
+}
+
+function schemaStack(parent?: SchemaStack): SchemaStack {
+  const titles = new Set<string>();
+  const history = new WeakSet();
+
+  return {
+    next(...schemas) {
+      const child = schemaStack(this);
+      for (const item of schemas) {
+        child.add(item);
+      }
+      return child;
+    },
+    add(schema) {
+      if (typeof schema !== 'object') return;
+
+      if (schema.title) titles.add(schema.title);
+      history.add(schema);
+    },
+    has(schema) {
+      if (typeof schema !== 'object') return false;
+      if (parent && parent.has(schema)) return true;
+      if (schema.title && titles.has(schema.title)) return true;
+
+      return history.has(schema);
+    },
+  };
 }
 
 /**
  * Check if the schema needs another collapsible to explain
  */
-function isComplexType(schema: ParsedSchema): boolean {
-  if (schema.anyOf ?? schema.oneOf ?? schema.allOf) return true;
+function isComplexType(
+  schema: ResolvedSchema,
+): schema is Exclude<ResolvedSchema, boolean> {
+  if (typeof schema === 'boolean') return false;
+  const arr = schema.anyOf ?? schema.oneOf ?? schema.allOf;
+  if (arr && arr.some(isComplexType)) return true;
 
-  return isObject(schema) || schema.type === 'array';
+  return (
+    schema.type === 'object' ||
+    (schema.type === 'array' &&
+      schema.items != null &&
+      isComplexType(schema.items))
+  );
 }
 
-function getSchemaType(
-  schema: ParsedSchema,
-  ctx: Context,
-  isRoot = true,
-): string {
-  if (isNullable(schema) && isRoot) {
-    const type = getSchemaType(schema, ctx, false);
-
-    // null if schema only contains `nullable`
-    return type === 'unknown' ? 'null' : `${type} | null`;
+function getRange(
+  value: string,
+  min: number | undefined,
+  exclusiveMin: number | undefined,
+  max: number | undefined,
+  exclusiveMax: number | undefined,
+) {
+  const out = [];
+  if (min) {
+    out.push(`${min} <=`);
+  } else if (exclusiveMin) {
+    out.push(`${exclusiveMin} <`);
   }
 
-  if (schema.title) return schema.title;
-
-  if (schema.type === 'array')
-    return `array<${schema.items ? getSchemaType(schema.items, ctx) : 'unknown'}>`;
-
-  if (schema.oneOf)
-    return schema.oneOf
-      .map((one) => getSchemaType(one, ctx, false))
-      .filter((v) => v !== 'unknown')
-      .join(' | ');
-
-  if (schema.allOf) {
-    return schema.allOf
-      .map((one) => getSchemaType(one, ctx, false))
-      .filter((v) => v !== 'unknown')
-      .join(' & ');
+  out.push(value);
+  if (max) {
+    out.push(`<= ${max}`);
+  } else if (exclusiveMax) {
+    out.push(`< ${exclusiveMax}`);
   }
-
-  if (schema.not) return `not ${getSchemaType(schema.not, ctx, false)}`;
-
-  if (schema.anyOf) {
-    const properties = schema.anyOf
-      .map((one) => getSchemaType(one, ctx, false))
-      .filter((v) => v !== 'unknown');
-
-    if (properties.length > 1) {
-      return `Any properties in ${properties.join(',')}`;
-    } else if (properties.length === 1) {
-      return properties[0];
-    }
-    // otherwise unknown
-  }
-
-  if (schema.type === 'string' && schema.format === 'binary') return 'file';
-
-  if (schema.type && Array.isArray(schema.type)) {
-    const nonNullTypes = schema.type.filter((v) => v !== 'null');
-
-    if (nonNullTypes.length > 0) return nonNullTypes.join(' | ');
-  } else if (schema.type && schema.type !== 'null') {
-    return schema.type;
-  }
-
-  if (isObject(schema)) return 'object';
-
-  return 'unknown';
+  if (out.length > 1) return out.join(' ');
 }

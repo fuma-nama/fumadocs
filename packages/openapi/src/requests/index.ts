@@ -3,26 +3,38 @@ import * as CURL from '@/requests/curl';
 import * as JS from '@/requests/javascript';
 import * as Go from '@/requests/go';
 import * as Python from '@/requests/python';
+import * as Java from '@/requests/java';
+import * as CSharp from '@/requests/csharp';
 
 export const defaultSamples: CodeSample[] = [
   {
     label: 'cURL',
-    source: CURL.getSampleRequest,
+    source: CURL.generator,
     lang: 'bash',
   },
   {
     label: 'JavaScript',
-    source: JS.getSampleRequest,
+    source: JS.generator,
     lang: 'js',
   },
   {
     label: 'Go',
-    source: Go.getSampleRequest,
+    source: Go.generator,
     lang: 'go',
   },
   {
     label: 'Python',
-    source: Python.getSampleRequest,
+    source: Python.generator,
     lang: 'python',
+  },
+  {
+    label: 'Java',
+    source: Java.generator,
+    lang: 'java',
+  },
+  {
+    label: 'C#',
+    source: CSharp.generator,
+    lang: 'csharp',
   },
 ];

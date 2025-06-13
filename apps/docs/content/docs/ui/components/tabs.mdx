@@ -8,16 +8,35 @@ preview: tabs
 
 ## Usage
 
-Import it in your MDX documents.
+Add MDX components.
+
+```tsx title="mdx-components.tsx"
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+import * as TabsComponents from 'fumadocs-ui/components/tabs';
+import type { MDXComponents } from 'mdx/types';
+
+export function getMDXComponents(components?: MDXComponents): MDXComponents {
+  return {
+    ...defaultMdxComponents,
+    ...TabsComponents, // [!code ++]
+    ...components,
+  };
+}
+```
+
+And use it like:
 
 ```mdx
-import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
-
 <Tabs items={['Javascript', 'Rust']}>
   <Tab value="Javascript">Javascript is weird</Tab>
   <Tab value="Rust">Rust is fast</Tab>
 </Tabs>
 ```
+
+<Tabs items={['Javascript', 'Rust']}>
+  <Tab value="Javascript">Javascript is weird</Tab>
+  <Tab value="Rust">Rust is fast</Tab>
+</Tabs>
 
 ### Without `value`
 
@@ -32,14 +51,10 @@ import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 </Tabs>
 ```
 
-#### Demo with Re-renders
-
 <Tabs items={['Javascript', 'Rust']}>
   <Tab>Javascript is weird</Tab>
   <Tab>Rust is fast</Tab>
 </Tabs>
-
-<WithoutValueTest />
 
 ### Shared Value
 
@@ -130,17 +145,34 @@ to automatically update the URL hash whenever time a new tab is selected:
   </Tab>
 </Tabs>
 
-### Advanced
+## Advanced Usage
 
-You can use the styled Radix UI primitive directly from exported `Primitive`.
+Use it in the Radix UI primitive way, see [Radix UI](https://radix-ui.com/primitives/docs/components/tabs) for more details.
 
 ```mdx
-import { Primitive } from 'fumadocs-ui/components/tabs';
-
-<Primitive.Tabs>
-  <Primitive.TabsList>
-    <Primitive.TabsTrigger />
-  </Primitive.TabsList>
-  <Primitive.TabsContent />
-</Primitive.Tabs>
+<Tabs defaultValue="npm">
+  <TabsList>
+    <TabsTrigger value="npm">
+      <NpmIcon />
+      npm
+    </TabsTrigger>
+  </TabsList>
+  <TabsContent value="npm">Hello World</TabsContent>
+</Tabs>
 ```
+
+<Tabs defaultValue="npm">
+  <TabsList>
+    <TabsTrigger value="npm">
+      <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <title>npm</title>
+        <path
+          fill="currentColor"
+          d="M1.763 0C.786 0 0 .786 0 1.763v20.474C0 23.214.786 24 1.763 24h20.474c.977 0 1.763-.786 1.763-1.763V1.763C24 .786 23.214 0 22.237 0zM5.13 5.323l13.837.019-.009 13.836h-3.464l.01-10.382h-3.456L12.04 19.17H5.113z"
+        />
+      </svg>
+      npm
+    </TabsTrigger>
+  </TabsList>
+  <TabsContent value="npm">Hello World</TabsContent>
+</Tabs>

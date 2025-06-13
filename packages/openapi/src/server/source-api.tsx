@@ -1,14 +1,21 @@
-import type { BuildPageTreeOptions } from 'fumadocs-core/source';
 import { MethodLabel } from '@/ui/components/method-label';
+import type { PageTree } from 'fumadocs-core/server';
+import type { PageFile } from 'fumadocs-core/source';
 
 /**
  * Source API Integration
  *
  * Add this to page tree builder options
  */
-export const attachFile: BuildPageTreeOptions['attachFile'] = (node, file) => {
+export const attachFile = (
+  node: PageTree.Item,
+  file: PageFile | undefined,
+): PageTree.Item => {
   if (!file) return node;
-  const data = file.data.data as object;
+  let data = file.data as object;
+  // backward compatible with older versions with `_openapi` is located in `data.data`
+  if ('data' in data && data.data && typeof data === 'object') data = data.data;
+
   let method: string | undefined;
 
   if ('_openapi' in data && typeof data._openapi === 'object') {

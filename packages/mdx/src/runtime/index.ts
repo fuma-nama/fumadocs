@@ -1,11 +1,14 @@
+import type { VirtualFile } from 'fumadocs-core/source';
 import {
   type MetaData,
   type PageData,
   type Source,
 } from 'fumadocs-core/source';
-import { type BaseCollectionEntry } from '@/config';
-import type { VirtualFile } from 'fumadocs-core/source';
+import { type BaseCollectionEntry, type FileInfo } from '@/config';
 import type { Runtime } from '@/runtime/types';
+import fs from 'node:fs';
+
+const cache = new Map<string, string>();
 
 export const _runtime: Runtime = {
   doc(files) {
@@ -16,8 +19,17 @@ export const _runtime: Runtime = {
         body,
         ...exports,
         ...(frontmatter as object),
-        _exports: file.data,
         _file: file.info,
+        _exports: file.data,
+        get content() {
+          const path = (this as { _file: FileInfo })._file.absolutePath;
+          const cached = cache.get(path);
+          if (cached) return cached;
+
+          const content = fs.readFileSync(path).toString();
+          cache.set(path, content);
+          return content;
+        },
       };
     }) as any;
   },
@@ -75,6 +87,7 @@ export function resolveFiles({ docs, meta }: ResolveOptions): VirtualFile[] {
   for (const entry of docs) {
     outputs.push({
       type: 'page',
+      absolutePath: entry._file.absolutePath,
       path: entry._file.path,
       data: entry,
     });
@@ -83,6 +96,7 @@ export function resolveFiles({ docs, meta }: ResolveOptions): VirtualFile[] {
   for (const entry of meta) {
     outputs.push({
       type: 'meta',
+      absolutePath: entry._file.absolutePath,
       path: entry._file.path,
       data: entry,
     });

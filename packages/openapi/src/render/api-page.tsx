@@ -9,7 +9,7 @@ import {
   processDocument,
   type ProcessedDocument,
 } from '@/utils/process-document';
-import { getUrl } from '@/utils/server-url';
+import type { defaultAdapters } from '@/media/adapter';
 
 type ApiPageContextProps = Pick<
   Partial<RenderContext>,
@@ -19,6 +19,7 @@ type ApiPageContextProps = Pick<
   | 'proxyUrl'
   | 'showResponseSchema'
   | 'disablePlayground'
+  | 'mediaAdapters'
 >;
 
 export interface ApiPageProps extends ApiPageContextProps {
@@ -57,19 +58,24 @@ export async function APIPage(props: ApiPageProps) {
     webhooks,
     disableCache = process.env.NODE_ENV === 'development',
   } = props;
-
   const processed = await processDocument(props.document, disableCache);
   const ctx = await getContext(processed, props);
   const { document } = processed;
 
   return (
-    <ctx.renderer.Root baseUrl={ctx.baseUrl} servers={ctx.servers}>
+    <ctx.renderer.Root ctx={ctx}>
       {operations?.map((item) => {
         const pathItem = document.paths?.[item.path];
-        if (!pathItem) return null;
+        if (!pathItem)
+          throw new Error(
+            `[Fumadocs OpenAPI] Path not found in OpenAPI schema: ${item.path}`,
+          );
 
         const operation = pathItem[item.method];
-        if (!operation) return null;
+        if (!operation)
+          throw new Error(
+            `[Fumadocs OpenAPI] Method ${item.method} not found in operation: ${item.path}`,
+          );
 
         const method = createMethod(item.method, pathItem, operation);
 
@@ -85,10 +91,16 @@ export async function APIPage(props: ApiPageProps) {
       })}
       {webhooks?.map((item) => {
         const webhook = document.webhooks?.[item.name];
-        if (!webhook) return;
+        if (!webhook)
+          throw new Error(
+            `[Fumadocs OpenAPI] Webhook not found in OpenAPI schema: ${item.name}`,
+          );
 
         const hook = webhook[item.method];
-        if (!hook) return;
+        if (!hook)
+          throw new Error(
+            `[Fumadocs OpenAPI] Method ${item.method} not found in webhook: ${item.name}`,
+          );
 
         const method = createMethod(item.method, webhook, hook);
 
@@ -97,10 +109,7 @@ export async function APIPage(props: ApiPageProps) {
             type="webhook"
             key={`${item.name}:${item.method}`}
             method={method}
-            ctx={{
-              ...ctx,
-              baseUrl: 'http://localhost:8080',
-            }}
+            ctx={ctx}
             path={`/${item.name}`}
             hasHead={hasHead}
           />
@@ -120,8 +129,7 @@ export async function getContext(
   const servers =
     document.servers && document.servers.length > 0
       ? document.servers
-      : [{ url: 'https://example.com' }];
-  const server = servers[0];
+      : [{ url: '/' }];
 
   return {
     schema,
@@ -129,21 +137,24 @@ export async function getContext(
     disablePlayground: options.disablePlayground,
     showResponseSchema: options.showResponseSchema,
     renderer: {
-      ...createRenders(options.shikiOptions),
+      ...createRenders(),
       ...options.renderer,
     },
     shikiOptions: options.shikiOptions,
     generateTypeScriptSchema: options.generateTypeScriptSchema,
     generateCodeSamples: options.generateCodeSamples,
-    baseUrl: getUrl(
-      server.url,
-      server.variables
-        ? Object.fromEntries(
-            Object.entries(server.variables).map(([k, v]) => [k, v.default]),
-          )
-        : {},
-    ),
     servers,
+    mediaAdapters: {
+      ...({
+        'application/octet-stream': true,
+        'application/json': true,
+        'multipart/form-data': true,
+        'application/xml': true,
+        'application/x-ndjson': true,
+        'application/x-www-form-urlencoded': true,
+      } satisfies Record<keyof typeof defaultAdapters, true>),
+      ...options.mediaAdapters,
+    },
     slugger: new Slugger(),
   };
 }

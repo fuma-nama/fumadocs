@@ -14,11 +14,11 @@ import { owner, repo } from '@/lib/github';
 import {
   Banner,
   DynamicCodeBlock,
-  InlineTOC,
-  Folder,
-  Files,
   File,
+  Files,
+  Folder,
   ImageZoom,
+  InlineTOC,
 } from '@/components/preview/lazy';
 import BannerImage from '@/public/banner.png';
 
@@ -55,7 +55,7 @@ export function card(): ReactNode {
 export function tabs(): ReactNode {
   return (
     <Wrapper>
-      <div className="space-y-4 rounded-xl bg-fd-background p-4 text-sm">
+      <div className="prose-no-margin">
         <Tabs
           groupId="language"
           persist

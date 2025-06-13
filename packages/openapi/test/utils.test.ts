@@ -26,9 +26,7 @@ describe('Merge object schemas', () => {
             "type": "string",
           },
         },
-        "type": [
-          "object",
-        ],
+        "type": "object",
       }
     `);
   });
@@ -68,9 +66,7 @@ describe('Merge object schemas', () => {
             "type": "string",
           },
         },
-        "type": [
-          "object",
-        ],
+        "type": "object",
       }
     `);
   });
@@ -114,9 +110,7 @@ describe('Merge object schemas', () => {
         "required": [
           "hello",
         ],
-        "type": [
-          "object",
-        ],
+        "type": "object",
       }
     `);
   });
@@ -153,9 +147,7 @@ describe('Merge object schemas', () => {
             "type": "string",
           },
         },
-        "type": [
-          "object",
-        ],
+        "type": "object",
       }
     `);
   });
@@ -210,9 +202,7 @@ describe('Merge object schemas', () => {
             "type": "number",
           },
         },
-        "type": [
-          "object",
-        ],
+        "type": "object",
       }
     `);
   });

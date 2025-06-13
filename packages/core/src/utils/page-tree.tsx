@@ -33,9 +33,10 @@ export function findNeighbour(
 } {
   const { separateRoot = true } = options ?? {};
   const roots = separateRoot ? getPageTreeRoots(tree) : [tree];
-  const lists = roots.map((node) => flattenTree(node.children));
 
-  for (const list of lists) {
+  for (const root of roots) {
+    const list = flattenTree(root.children);
+
     for (let i = 0; i < list.length; i++) {
       if (list[i].url === url) {
         return {

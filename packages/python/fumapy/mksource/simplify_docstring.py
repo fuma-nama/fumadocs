@@ -1,18 +1,14 @@
 import typing as t
-from dataclasses import asdict
 
 import griffe
 
-SimplifiedDocstring = t.NamedTuple(
-    "DocComponents",
-    [
-        ("description", str),
-        ("parameters", list),
-        ("returns", dict),
-        ("attributes", list),
-        ("remainder", list),
-    ],
-)
+
+class SimplifiedDocstring(t.NamedTuple):
+    description: str | None
+    parameters: list[dict[str, str | None]]
+    returns: dict[str, str | None]
+    attributes: list[dict[str, str | None]]
+    remainder: list[griffe.DocstringSection]
 
 
 def simplify_docstring(
@@ -52,9 +48,7 @@ def simplify_docstring(
                 "value": attr.value,
             }
             for attr in parent.attributes.values()
-            if (
-                not attr.is_alias and not attr.is_private
-            )
+            if (not attr.is_alias and not attr.is_private)
         ]
 
     description = None
@@ -150,9 +144,9 @@ def simplify_docstring(
                         {
                             "name": attr.name,
                             "annotation": attr.annotation,
-                            "description": attr.docstring.parsed
-                            if attr.docstring
-                            else None,
+                            "description": (
+                                attr.docstring.parsed if attr.docstring else None
+                            ),
                             "value": attr.value,
                         }
                     )

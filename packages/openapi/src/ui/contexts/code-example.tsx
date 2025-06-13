@@ -2,6 +2,7 @@
 import {
   createContext,
   type HTMLAttributes,
+  type ReactNode,
   useContext,
   useEffect,
   useMemo,
@@ -20,7 +21,7 @@ import {
   SelectValue,
 } from '@/ui/components/select';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
-import { getUrl } from '@/utils/server-url';
+import { joinURL, resolveServerUrl, withBase } from '@/utils/url';
 import type { RequestData } from '@/requests/_shared';
 import { defaultSamples } from '@/requests';
 
@@ -54,7 +55,7 @@ export function CodeExampleProvider({
     data: RequestData;
   }[];
   initialKey?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   const [key, setKey] = useState(initialKey ?? examples[0].key);
   const listeners = useRef<UpdateListener[]>([]);
@@ -83,6 +84,9 @@ export function CodeExampleProvider({
   });
 
   const addListener = useEffectEvent((listener: UpdateListener) => {
+    // initial call to listeners to ensure their data is the latest
+    // this is necessary to avoid race conditions between `useEffect()`
+    listener(examples.find((example) => example.key === key)!.data);
     listeners.current.push(listener);
   });
 
@@ -111,7 +115,7 @@ export function CodeExampleProvider({
 }
 
 export function CodeExample(props: CodeSample) {
-  const { shikiOptions } = useApiContext();
+  const { shikiOptions, mediaAdapters } = useApiContext();
   const { examples, key, route, addListener, removeListener } =
     useContext(CodeExampleContext)!;
   const { server } = useServerSelectContext();
@@ -137,10 +141,21 @@ export function CodeExample(props: CodeSample) {
     if (typeof sample.source === 'string') return sample.source;
 
     return sample.source(
-      `${server ? getUrl(server.url, server.variables) : '/'}${route}`,
+      joinURL(
+        withBase(
+          server ? resolveServerUrl(server.url, server.variables) : '/',
+          typeof window !== 'undefined'
+            ? window.location.origin
+            : 'https://loading',
+        ),
+        route,
+      ),
       data,
+      {
+        mediaAdapters,
+      },
     );
-  }, [sample, server, route, data]);
+  }, [mediaAdapters, sample, server, route, data]);
 
   if (!code || !sample) return null;
 
@@ -185,25 +200,16 @@ function SelectDisplay({
   );
 }
 
-export function useRequestData() {
-  const { examples, key, setData } = useContext(CodeExampleContext)!;
+export function useRequestInitialData() {
+  const { examples, key } = useContext(CodeExampleContext)!;
 
-  const data = useMemo(
+  return useMemo(
     () => examples.find((example) => example.key === key)!.data,
     [examples, key],
   );
+}
 
-  return useMemo(
-    () => ({
-      /**
-       * initial request data
-       */
-      data,
-      /**
-       * Save changes to request data, it won't trigger re-render on the component itself, which makes it safe to call in an effect with `data` as dep
-       */
-      saveData: setData,
-    }),
-    [data, setData],
-  );
+export function useRequestDataUpdater() {
+  const { setData } = useContext(CodeExampleContext)!;
+  return { setData };
 }

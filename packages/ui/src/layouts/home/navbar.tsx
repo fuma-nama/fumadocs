@@ -1,5 +1,5 @@
 'use client';
-import { type ComponentProps, type HTMLAttributes, useState } from 'react';
+import { type ComponentProps, useState } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import Link, { type LinkProps } from 'fumadocs-core/link';
 import { cn } from '@/utils/cn';
@@ -24,7 +24,7 @@ const navItemVariants = cva(
   'inline-flex items-center gap-1 p-2 text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground data-[active=true]:text-fd-primary [&_svg]:size-4',
 );
 
-export function Navbar(props: HTMLAttributes<HTMLElement>) {
+export function Navbar(props: ComponentProps<'div'>) {
   const [value, setValue] = useState('');
   const { isTransparent } = useNav();
 
@@ -34,20 +34,19 @@ export function Navbar(props: HTMLAttributes<HTMLElement>) {
         id="nd-nav"
         {...props}
         className={cn(
-          'fixed left-1/2 top-(--fd-banner-height) z-40 box-content w-full max-w-fd-container -translate-x-1/2 border-b border-fd-foreground/10 transition-colors lg:mt-2 lg:w-[calc(100%-1rem)] lg:rounded-2xl lg:border',
+          'fixed top-(--fd-banner-height) z-40 inset-x-0 backdrop-blur-lg border-b transition-colors *:mx-auto *:max-w-fd-container',
           value.length > 0 ? 'shadow-lg' : 'shadow-sm',
-          (!isTransparent || value.length > 0) &&
-            'bg-fd-background/80 backdrop-blur-lg',
+          (!isTransparent || value.length > 0) && 'bg-fd-background/80',
           props.className,
         )}
       >
         <NavigationMenuList
-          className="flex h-14 w-full flex-row items-center px-4 lg:h-12"
+          className="flex h-14 w-full items-center px-4"
           asChild
         >
           <nav>{props.children}</nav>
         </NavigationMenuList>
-        <NavigationMenuViewport />
+        <NavigationMenuViewport className="text-fd-popover-foreground" />
       </header>
     </NavigationMenu>
   );
@@ -60,7 +59,7 @@ export function NavbarMenuContent(props: NavigationMenuContentProps) {
     <NavigationMenuContent
       {...props}
       className={cn(
-        'grid grid-cols-1 gap-3 px-4 pb-4 md:grid-cols-2 lg:grid-cols-3',
+        'grid grid-cols-1 gap-2 p-4 md:grid-cols-2 lg:grid-cols-3',
         props.className,
       )}
     >

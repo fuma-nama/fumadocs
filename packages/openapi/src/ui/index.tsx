@@ -7,30 +7,29 @@ import {
   CollapsibleTrigger,
 } from 'fumadocs-ui/components/ui/collapsible';
 import { ChevronDown } from 'lucide-react';
-import { ApiProvider } from '@/ui/contexts/api';
+import { ApiProvider } from '@/ui/lazy';
 import { cn } from 'fumadocs-ui/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
+import type { MediaAdapter } from '@/media/adapter';
 
 export function Root({
   children,
-  baseUrl,
   className,
-  shikiOptions,
-  servers,
+  ctx,
   ...props
 }: RootProps & HTMLAttributes<HTMLDivElement>) {
   return (
-    <div
-      className={cn(
-        'flex flex-col gap-24 text-sm text-fd-muted-foreground',
-        className,
-      )}
-      {...props}
-    >
+    <div className={cn('flex flex-col gap-24 text-sm', className)} {...props}>
       <ApiProvider
-        servers={servers}
-        shikiOptions={shikiOptions}
-        defaultBaseUrl={baseUrl}
+        mediaAdapters={
+          Object.fromEntries(
+            Object.entries(ctx.mediaAdapters).filter(
+              ([_, v]) => typeof v !== 'boolean',
+            ),
+          ) as Record<string, MediaAdapter>
+        }
+        servers={ctx.servers}
+        shikiOptions={ctx.shikiOptions}
       >
         {children}
       </ApiProvider>
@@ -60,7 +59,7 @@ export function API({ children, ...props }: HTMLAttributes<HTMLDivElement>) {
       style={
         {
           '--fd-api-info-top':
-            'calc(var(--fd-nav-height) + var(--fd-banner-height) + var(--fd-tocnav-height, 0px))',
+            'calc(12px + var(--fd-nav-height) + var(--fd-banner-height) + var(--fd-tocnav-height, 0px))',
           ...props.style,
         } as object
       }
@@ -75,27 +74,37 @@ export function Property({
   type,
   required,
   deprecated,
-  children,
+  nested,
+  ...props
 }: PropertyProps) {
   return (
-    <div className="rounded-xl border bg-fd-card p-3 prose-no-margin">
-      <div className="flex flex-row flex-wrap items-center gap-4 mb-2">
-        <code>{name}</code>
-        {required ? (
-          <Badge color="red" className="text-xs">
-            Required
-          </Badge>
-        ) : null}
-        {deprecated ? (
+    <div
+      className={cn(
+        'text-sm border-t',
+        nested
+          ? 'p-3 border-x bg-fd-card last:rounded-b-xl first:rounded-tr-xl last:border-b'
+          : 'py-4 first:border-t-0',
+      )}
+    >
+      <div className="flex flex-wrap items-center gap-2 not-prose">
+        <span className="font-medium font-mono text-fd-primary">
+          {name}
+          {required === false && (
+            <span className="text-fd-muted-foreground">?</span>
+          )}
+        </span>
+        <span className="me-auto text-xs font-mono text-fd-muted-foreground">
+          {type}
+        </span>
+        {deprecated && (
           <Badge color="yellow" className="text-xs">
             Deprecated
           </Badge>
-        ) : null}
-        <span className="ms-auto text-xs font-mono text-fd-muted-foreground">
-          {type}
-        </span>
+        )}
       </div>
-      {children}
+      <div className="prose-no-margin pt-2.5 empty:hidden">
+        {props.children}
+      </div>
     </div>
   );
 }
@@ -122,15 +131,15 @@ export function ObjectCollapsible(props: {
     <Collapsible {...props}>
       <CollapsibleTrigger
         className={cn(
-          buttonVariants({ color: 'outline', size: 'sm' }),
-          'group rounded-full px-2 py-1.5 text-fd-muted-foreground',
+          buttonVariants({ color: 'secondary', size: 'sm' }),
+          'group px-3 py-2 data-[state=open]:rounded-b-none',
         )}
       >
         {props.name}
-        <ChevronDown className="size-4 group-data-[state=open]:rotate-180" />
+        <ChevronDown className="size-4 text-fd-muted-foreground group-data-[state=open]:rotate-180" />
       </CollapsibleTrigger>
-      <CollapsibleContent className="-mx-2">
-        <div className="flex flex-col gap-2 p-2">{props.children}</div>
+      <CollapsibleContent className="-mt-px *:bg-fd-card">
+        {props.children}
       </CollapsibleContent>
     </Collapsible>
   );

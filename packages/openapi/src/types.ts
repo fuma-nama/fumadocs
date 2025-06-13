@@ -9,6 +9,7 @@ import type {
 } from 'shiki';
 import type { NoReference } from '@/utils/schema';
 import type { ProcessedDocument } from '@/utils/process-document';
+import type { MediaAdapter } from '@/media/adapter';
 
 export type Document = V3_1.Document;
 export type OperationObject = V3_1.OperationObject;
@@ -45,7 +46,6 @@ export interface RenderContext {
    */
   disablePlayground?: boolean;
 
-  baseUrl: string;
   servers: ServerObject[];
 
   slugger: Slugger;
@@ -73,9 +73,7 @@ export interface RenderContext {
   /**
    * Generate code samples for endpoint.
    */
-  generateCodeSamples?: (
-    method: NoReference<MethodInformation>,
-  ) => Awaitable<CodeSample[]>;
+  generateCodeSamples?: (method: MethodInformation) => Awaitable<CodeSample[]>;
 
   shikiOptions?: Omit<CodeToHastOptionsCommon, 'lang'> &
     CodeOptionsThemes<BuiltinTheme>;
@@ -86,4 +84,6 @@ export interface RenderContext {
    * @default true
    */
   showResponseSchema?: boolean;
+
+  mediaAdapters: Record<string, MediaAdapter | true>;
 }

@@ -9,7 +9,29 @@
 @source "../content";
 @plugin 'tailwindcss-animate';
 
-@theme {
+@theme inline {
+  --default-mono-font-family: var(--font-mono);
+  --animate-marquee: marquee var(--duration) infinite linear;
+  --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(calc(-100% - var(--gap)));
+    }
+  }
+
+  @keyframes marquee-vertical {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(calc(-100% - var(--gap)));
+    }
+  }
+
   @keyframes stroke {
     from {
       stroke-dasharray: 1000;
@@ -21,8 +43,6 @@
   }
 
   --animate-stroke: stroke 5s linear infinite;
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 
   --color-gradient-radial: radial-gradient(circle, var(--tw-gradient-stops));
   --color-repeat-gradient-to-r: repeating-linear-gradient(
@@ -56,29 +76,6 @@ body {
 .dark {
   --headless-color: hsl(250 100% 80%);
   --ui-color: hsl(217 92% 76%);
-}
-
-.uwu {
-  --color-fd-background: hsl(240 80% 94%) !important;
-  --color-fd-popover: hsl(240 80% 94%) !important;
-  --color-fd-primary: hsl(230 90% 72%) !important;
-  --color-fd-border: hsl(230 30% 87%) !important;
-  --color-fd-accent: hsl(250 80% 90%) !important;
-  --color-fd-secondary: hsl(230 40% 94%) !important;
-  --color-fd-muted: hsl(230 80% 92%) !important;
-  --color-fd-card: hsl(230 90% 94%) !important;
-}
-
-.uwu.dark {
-  --color-fd-background: hsl(240 40% 20%) !important;
-  --color-fd-primary: hsl(250 70% 94%) !important;
-  --color-fd-popover: hsl(240 20% 20%) !important;
-  --color-fd-border: hsl(230 30% 30%) !important;
-  --color-fd-muted: hsl(230 30% 36.3%) !important;
-  --color-fd-secondary: hsl(250 30% 36.3%) !important;
-  --color-fd-accent: hsl(250 20% 38.3%) !important;
-  --color-fd-muted-foreground: hsl(230 80% 84%) !important;
-  --color-fd-card: hsl(230 40% 26.3%) !important;
 }
 
 @keyframes circuit_1 {

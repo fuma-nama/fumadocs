@@ -5,6 +5,7 @@ import { createHash } from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import type { TwoslashTypesCache } from '@/index';
+import * as process from 'node:process';
 
 export interface FileSystemTypeResultCacheOptions {
   /**
@@ -13,12 +14,15 @@ export interface FileSystemTypeResultCacheOptions {
    * @default '.next/cache/twoslash'
    */
   dir?: string;
+
+  cwd?: string;
 }
 
 export function createFileSystemTypesCache(
   options: FileSystemTypeResultCacheOptions = {},
 ): TwoslashTypesCache {
-  const dir = path.resolve(options.dir ?? '.next/cache/twoslash');
+  const { cwd = process.cwd() } = options;
+  const dir = path.join(cwd, options.dir ?? '.next/cache/twoslash');
 
   return {
     init() {

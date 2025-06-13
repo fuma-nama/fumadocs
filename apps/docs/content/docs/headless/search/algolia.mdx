@@ -30,7 +30,7 @@ url.
 
 ## Setup
 
-### Install Dependencies
+Install dependencies:
 
 ```package-install
 algoliasearch
@@ -45,33 +45,35 @@ credentials in environment variables.
 
 Export the search indexes from Next.js using a route handler, this way we can access the search indexes after production build:
 
-```json doc-gen:file
-{
-  "file": "../../examples/next-mdx/app/static.json/algolia.ts",
-  "codeblock": {
-    "meta": "title=\"app/static.json/route.ts\""
+```ts title="app/static.json/route.ts"
+import { NextResponse } from 'next/server';
+import { type DocumentRecord } from 'fumadocs-core/search/algolia';
+import { source } from '@/lib/source';
+
+export const revalidate = false;
+
+export function GET() {
+  const results: DocumentRecord[] = [];
+
+  for (const page of source.getPages()) {
+    results.push({
+      _id: page.url,
+      structured: page.data.structuredData,
+      url: page.url,
+      title: page.data.title,
+      description: page.data.description,
+    });
   }
+
+  return NextResponse.json(results);
 }
 ```
 
 Make a script to sync search indexes:
 
-```js title="update-index.mjs"
-import algosearch from 'algoliasearch';
-import { sync } from 'fumadocs-core/search/algolia';
-import * as fs from 'node:fs';
-
-const content = fs.readFileSync('.next/server/app/static.json.body');
-
-/** @type {import('fumadocs-core/search/algolia').DocumentRecord[]} **/
-const indexes = JSON.parse(content.toString());
-
-const client = algosearch('id', 'key');
-
-sync(client, {
-  documents: indexes, // search indexes, can be provided by your content source too [!code highlight]
-});
-```
+<include lang="js" meta='title="update-index.mjs"'>
+  ./sync-algolia.mjs
+</include>
 
 The `sync` function will update the index settings and sync search indexes.
 
@@ -100,22 +102,23 @@ integrate it with your CI/CD pipeline.
 
 You can consider different options for implementing the UI:
 
-- [Fumadocs UI Usage](/docs/ui/search#algolia)
+- Using [Fumadocs UI search dialog](/docs/ui/search/algolia).
 - Build your own using the built-in search client hook:
 
-  ```ts
-  import algosearch from 'algoliasearch';
+  ```ts twoslash
+  import { liteClient } from 'algoliasearch/lite';
   import { useDocsSearch } from 'fumadocs-core/search/client';
 
-  const index = algosearch('id', 'key').initIndex('document');
+  const client = liteClient('id', 'key');
 
   const { search, setSearch, query } = useDocsSearch({
     type: 'algolia',
-    index,
-    distinct: 5,
-    hitsPerPage: 10,
+    indexName: 'document',
+    client,
   });
   ```
+
+- Use their official clients directly.
 
 ## Options
 
@@ -124,59 +127,29 @@ You can consider different options for implementing the UI:
 To configure tag filtering, add a `tag` value to indexes.
 
 ```js
-import algosearch from 'algoliasearch';
 import { sync } from 'fumadocs-core/search/algolia';
 
-const client = algosearch('id', 'key');
-
-sync(client, {
-  documents: indexes.map((index) => ({
+void sync(client, {
+  indexName: 'document',
+  documents: records.map((index) => ({
     ...index,
-    tag: 'value', // [!code highlight]
+    tag: 'value', // [!code ++]
   })),
 });
 ```
 
 And update your search client:
 
-- **Fumadocs UI**: Enable [Tag Filter](/docs/ui/search#tag-filter-1) on Search Dialog.
+- **Fumadocs UI**: Enable [Tag Filter](/docs/ui/search/algolia#tag-filter) on Search UI.
 - **Search Client**: You can add the tag filter like:
 
   ```ts
-  import algosearch from 'algoliasearch';
   import { useDocsSearch } from 'fumadocs-core/search/client';
 
-  const index = algosearch('id', 'key').initIndex('document');
-
-  const { search, setSearch, query } = useDocsSearch(
-    {
-      type: 'algolia',
-      index,
-    },
-    undefined,
-    '<your tag value>',
-  );
+  const { search, setSearch, query } = useDocsSearch({
+    tag: '<your tag value>',
+    // ...
+  });
   ```
 
 The `tag` field is an attribute for faceting. You can also use the filter `tag:value` on Algolia search clients.
-
-### Customise Attributes & Settings
-
-While the default attributes might not suit your case, you can pass `extra_data`
-to index options for adding extra fields to each record.
-
-```js
-import { sync } from 'fumadocs-core/search/algolia';
-
-sync(client, {
-  documents: indexes.map((docs) => ({
-    ...docs,
-    extra_data: {
-      value: 'hello world',
-    },
-  })),
-});
-```
-
-To customize the default index settings, set index settings, and update
-documents with `updateDocuments(...)` separately.

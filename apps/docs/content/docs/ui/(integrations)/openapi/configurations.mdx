@@ -24,17 +24,9 @@ void generateFiles({
 });
 ```
 
-On Next.js server, the schema is dynamically fetched when the `APIPage` component renders.
-
-<Callout type='warn' title='For Vercel'>
-
-    If the schema is passed as a file path, ensure the page **will not** be re-rendered after build.
-
-</Callout>
-
 ### Output
 
-Path to the output directory.
+The output directory.
 
 ```ts
 import { generateFiles } from 'fumadocs-openapi';
@@ -48,11 +40,13 @@ void generateFiles({
 
 Customise how the page is generated, default to `operation`.
 
-| mode      | Generate a page for                 |
-| --------- | ----------------------------------- |
-| tag       | each tag                            |
-| file      | each schema                         |
-| operation | each operation (method of endpoint) |
+> Operation in OpenAPI schema refers to an API endpoint with specific method like `/api/weather:GET`.
+
+| mode      |                             | output                                |
+| --------- | --------------------------- | ------------------------------------- |
+| tag       | operations with same tag    | `{tag_name}.mdx`                      |
+| file      | operations in schema schema | `{file_name}.mdx`                     |
+| operation | each operation              | `{operationId ?? endpoint_path}.mdx`) |
 
 ```ts
 import { generateFiles } from 'fumadocs-openapi';
@@ -66,11 +60,11 @@ void generateFiles({
 
 In `operation` mode, you can group output files with folders.
 
-| Group by | Description                                                  |
-| -------- | ------------------------------------------------------------ |
-| tag      | `{tag}/{page}.mdx` (Each operation can only contain `1` tag) |
-| route    | `{api-endpoint}/{page}.mdx`                                  |
-| none     | `{page}.mdx` (default)                                       |
+| value | output                                                 |
+| ----- | ------------------------------------------------------ |
+| tag   | `{tag}/{operationId ?? endpoint_path}.mdx`             |
+| route | `{endpoint_path}/{method}.mdx` (ignores `name` option) |
+| none  | `{operationId ?? endpoint_path}.mdx` (default)         |
 
 ```ts
 import { generateFiles } from 'fumadocs-openapi';
@@ -83,32 +77,26 @@ void generateFiles({
 
 ### Name
 
-A function that controls the output path of files.
+A function that controls the output path of MDX pages.
 
 ```ts
 import { generateFiles } from 'fumadocs-openapi';
 
 void generateFiles({
-  name: (type, file) => {
-    return; // filename
+  name: (output, document) => {
+    if (output.type === 'operation') {
+      const operation = document.paths![output.item.path]![output.item.method]!;
+      // operation object
+      console.log(operation);
+
+      return 'my-dir/filename';
+    }
+
+    const hook = document.webhooks![output.item.name][output.item.method]!;
+    // webhook object
+    console.log(hook);
+    return 'my-dir/filename';
   },
-});
-```
-
-### Imports
-
-Add additional imports on the top of MDX files.
-
-```ts
-import { generateFiles } from 'fumadocs-openapi';
-
-void generateFiles({
-  imports: [
-    {
-      names: ['Component1', 'Component2'],
-      from: '@/components/ui/api',
-    },
-  ],
 });
 ```
 
@@ -176,7 +164,11 @@ The server to render pages.
 
 ### Generate Code Samples
 
-Generate custom code samples for each API endpoint.
+Generate custom code samples for each API endpoint. Make sure to install the types package to give you type-safety when customising it:
+
+```package-install
+openapi-types -D
+```
 
 ```ts
 import { createOpenAPI } from 'fumadocs-openapi/server';
@@ -264,6 +256,8 @@ full: true
   hasHead={false}
 />
 ```
+
+Unlike using the `generateFiles()` function, this supports revalidation of the OpenAPI schema if given an URL.
 
 | Prop         | Description                               |
 | ------------ | ----------------------------------------- |

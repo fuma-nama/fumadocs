@@ -1,5 +1,18 @@
 # fumadocs-typescript
 
+## 4.0.5
+
+### Patch Changes
+
+- a6c909b: Removed unused devDependencies and migrated from `fast-glob` to `tinyglobby`
+
+## 4.0.4
+
+### Patch Changes
+
+- 6b04eed: Fix errors on special keys
+- a1f3273: Lazy load compiler instance
+
 ## 4.0.3
 
 ### Patch Changes

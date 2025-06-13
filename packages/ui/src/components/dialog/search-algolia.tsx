@@ -1,21 +1,32 @@
 'use client';
 
 import {
-  useDocsSearch,
   type AlgoliaOptions,
+  useDocsSearch,
 } from 'fumadocs-core/search/client';
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useMemo, useState } from 'react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import {
   SearchDialog,
-  type SharedProps,
+  SearchDialogClose,
+  SearchDialogContent,
+  SearchDialogFooter,
+  SearchDialogHeader,
+  SearchDialogIcon,
+  SearchDialogInput,
+  SearchDialogList,
+  SearchDialogOverlay,
   TagsList,
-  type TagItem,
+  TagsListItem,
 } from './search';
+import type { SortedResult } from 'fumadocs-core/server';
+import type { SearchLink, SharedProps, TagItem } from '@/contexts/search';
+import { useI18n } from '@/contexts/i18n';
 
 export interface AlgoliaSearchDialogProps extends SharedProps {
-  index: AlgoliaOptions['index'];
-  searchOptions?: Omit<AlgoliaOptions, 'index'>;
+  searchOptions: AlgoliaOptions;
+  links?: SearchLink[];
+
   footer?: ReactNode;
 
   defaultTag?: string;
@@ -37,58 +48,77 @@ export interface AlgoliaSearchDialogProps extends SharedProps {
 }
 
 export default function AlgoliaSearchDialog({
-  index,
   searchOptions,
-  tags,
+  tags = [],
   defaultTag,
   showAlgolia = false,
   allowClear = false,
+  links = [],
+  footer,
   ...props
-}: AlgoliaSearchDialogProps): ReactNode {
+}: AlgoliaSearchDialogProps) {
   const [tag, setTag] = useState(defaultTag);
-  const { search, setSearch, query } = useDocsSearch(
-    {
-      type: 'algolia',
-      index,
-      ...searchOptions,
-    },
-    undefined,
+  const { locale } = useI18n();
+  const { search, setSearch, query } = useDocsSearch({
+    type: 'algolia',
     tag,
-  );
+    locale,
+    ...searchOptions,
+  });
+  const defaultItems = useMemo<SortedResult[] | null>(() => {
+    if (links.length === 0) return null;
+    return links.map(([name, link]) => ({
+      type: 'page',
+      id: name,
+      content: name,
+      url: link,
+    }));
+  }, [links]);
 
   useOnChange(defaultTag, (v) => {
     setTag(v);
   });
 
+  const label = showAlgolia && <AlgoliaTitle />;
+
   return (
     <SearchDialog
       search={search}
       onSearchChange={setSearch}
-      results={query.data ?? []}
       isLoading={query.isLoading}
       {...props}
-      footer={
-        tags ? (
-          <>
-            <TagsList
-              tag={tag}
-              onTagChange={setTag}
-              items={tags}
-              allowClear={allowClear}
-            >
-              {showAlgolia ? <AlgoliaTitle /> : null}
-            </TagsList>
-            {props.footer}
-          </>
+    >
+      <SearchDialogOverlay />
+      <SearchDialogContent>
+        <SearchDialogHeader>
+          <SearchDialogIcon />
+          <SearchDialogInput />
+          <SearchDialogClose />
+        </SearchDialogHeader>
+        <SearchDialogList
+          items={query.data !== 'empty' ? query.data : defaultItems}
+        />
+      </SearchDialogContent>
+      <SearchDialogFooter>
+        {tags.length > 0 ? (
+          <TagsList tag={tag} onTagChange={setTag} allowClear={allowClear}>
+            {tags.map((tag) => (
+              <TagsListItem key={tag.value} value={tag.value}>
+                {tag.name}
+              </TagsListItem>
+            ))}
+            {label}
+          </TagsList>
         ) : (
-          props.footer
-        )
-      }
-    />
+          label
+        )}
+        {footer}
+      </SearchDialogFooter>
+    </SearchDialog>
   );
 }
 
-function AlgoliaTitle(): ReactNode {
+function AlgoliaTitle() {
   return (
     <a
       href="https://algolia.com"

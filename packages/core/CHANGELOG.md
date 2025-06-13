@@ -1,5 +1,175 @@
 # next-docs-zeta
 
+## 15.5.1
+
+### Patch Changes
+
+- b4916d2: Move `hide-if-empty` component to Fumadocs Core
+- 8738b9c: Always encode generated slugs for non-ASCII characters in `loader()`
+- a66886b: **Deprecate other parameters for `useDocsSearch()`**
+
+  The new usage passes options to a single object, improving the readability:
+
+  ```ts
+  import { useDocsSearch } from 'fumadocs-core/search/client';
+
+  const { search, setSearch, query } = useDocsSearch({
+    type: 'fetch',
+    locale: 'optional',
+    tag: 'optional',
+    delayMs: 100,
+    allowEmpty: false,
+  });
+  ```
+
+## 15.5.0
+
+## 15.4.2
+
+### Patch Changes
+
+- 0ab6c7f: Improve performance by using shallow compare on `useOnChange` by default
+
+## 15.4.1
+
+## 15.4.0
+
+### Minor Changes
+
+- 961b67e: **Bump algolia search to v5**
+
+  This also introduced changes to some APIs since `algoliasearch` v4 and v5 has many differences.
+
+  Now we highly recommend to pass an index name to `sync()`:
+
+  ```ts
+  import { algoliasearch } from 'algoliasearch';
+  import { sync } from 'fumadocs-core/search/algolia';
+  const client = algoliasearch('id', 'key');
+
+  void sync(client, {
+    indexName: 'document',
+    documents: records,
+  });
+  ```
+
+  For search client, pass them to `searchOptions`:
+
+  ```tsx
+  'use client';
+
+  import { liteClient } from 'algoliasearch/lite';
+  import type { SharedProps } from 'fumadocs-ui/components/dialog/search';
+  import SearchDialog from 'fumadocs-ui/components/dialog/search-algolia';
+
+  const client = liteClient(appId, apiKey);
+
+  export default function CustomSearchDialog(props: SharedProps) {
+    return (
+      <SearchDialog
+        searchOptions={{
+          client,
+          indexName: 'document',
+        }}
+        {...props}
+        showAlgolia
+      />
+    );
+  }
+  ```
+
+### Patch Changes
+
+- 1b999eb: Introduce `<Markdown />` component
+- 7d78bc5: Improve `createRelativeLink` and `getPageByHref` for i18n usage
+
+## 15.3.4
+
+## 15.3.3
+
+### Patch Changes
+
+- 4ae7b4a: Support MDX in codeblock tab value
+
+## 15.3.2
+
+### Patch Changes
+
+- c25d678: Support Shiki focus notation transformer by default
+
+## 15.3.1
+
+### Patch Changes
+
+- 3372792: Support line numbers in codeblock
+
+## 15.3.0
+
+### Patch Changes
+
+- c05dc03: Improve error message of remark image
+
+## 15.2.15
+
+### Patch Changes
+
+- 50db874: Remove placeholder space for codeblocks
+- 79e75c3: Improve default MDX attribute indexing strategy for `remarkStructure`
+
+## 15.2.14
+
+### Patch Changes
+
+- 6ea1718: Fix type inference for `pageTree.attachFile` in `loader()`
+
+## 15.2.13
+
+## 15.2.12
+
+### Patch Changes
+
+- acff667: **Deprecate `createFromSource(source, pageToIndex, options)`**
+
+  Migrate:
+
+  ```ts
+  import { source } from '@/lib/source';
+  import { createFromSource } from 'fumadocs-core/search/server';
+
+  // from
+  export const { GET } = createFromSource(
+    source,
+    (page) => ({
+      title: page.data.title,
+      description: page.data.description,
+      url: page.url,
+      id: page.url,
+      structuredData: page.data.structuredData,
+      // use your desired value, like page.slugs[0]
+      tag: '<value>',
+    }),
+    {
+      // options
+    },
+  );
+
+  // to
+  export const { GET } = createFromSource(source, {
+    buildIndex(page) {
+      return {
+        title: page.data.title,
+        description: page.data.description,
+        url: page.url,
+        id: page.url,
+        structuredData: page.data.structuredData,
+        // use your desired value, like page.slugs[0]
+        tag: '<value>',
+      };
+    },
+    // other options
+  });
+  ```
+
 ## 15.2.11
 
 ### Patch Changes

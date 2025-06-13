@@ -1,15 +1,14 @@
 import requests
 
 url = "http://localhost:8080/hello_world?search=ai"
-json = {
+body = {
   "id": "id"
 }
-headers = {
-  "authorization": "Bearer"
-}
-cookies = {
+response = requests.request("GET", url, json = body, headers = {
+  "authorization": "Bearer",
+  "Content-Type": "application/json"
+}, cookies = {
   "mode": "light"
-}
-response = requests.request("GET", url, json=json, headers=headers, cookies=cookies)
+})
 
 print(response.text)

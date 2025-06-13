@@ -1,5 +1,23 @@
 # fumadocs-twoslash
 
+## 3.1.3
+
+### Patch Changes
+
+- 721c927: Lazy load twoslasher
+- 3372792: Support line numbers in codeblock
+- Updated dependencies [3372792]
+  - fumadocs-ui@15.3.1
+
+## 3.1.2
+
+### Patch Changes
+
+- 81fe2c2: Remove the need for placeholder lines
+- Updated dependencies [52b5ad8]
+- Updated dependencies [abce713]
+  - fumadocs-ui@15.3.0
+
 ## 3.1.1
 
 ### Patch Changes

@@ -1,6 +1,5 @@
 import path from 'node:path';
-import fs from 'node:fs';
-import { spawn } from 'cross-spawn';
+import { x } from 'tinyexec';
 
 const cache = new Map<string, Date>();
 
@@ -9,27 +8,23 @@ const cache = new Map<string, Date>();
  *
  * if you are using Vercel, please set `VERCEL_DEEP_CLONE` environment variable to `true`
  */
-export function getGitTimestamp(file: string): Promise<Date | undefined> {
-  const cachedTimestamp = cache.get(file);
-  if (cachedTimestamp) return Promise.resolve(cachedTimestamp);
+export async function getGitTimestamp(file: string): Promise<Date | undefined> {
+  const cached = cache.get(file);
+  if (cached) return cached;
 
-  return new Promise((resolve, reject) => {
-    const cwd = path.dirname(file);
-    if (!fs.existsSync(cwd)) {
-      resolve(undefined);
-      return;
-    }
-    const fileName = path.basename(file);
-    const child = spawn('git', ['log', '-1', '--pretty="%ai"', fileName], {
-      cwd,
-    });
+  try {
+    const out = await x(
+      'git',
+      ['log', '-1', '--pretty="%ai"', path.relative(process.cwd(), file)],
+      {
+        throwOnError: true,
+      },
+    );
 
-    let output: Date | undefined;
-    child.stdout.on('data', (d) => (output = new Date(String(d))));
-    child.on('close', () => {
-      if (output) cache.set(file, output);
-      resolve(output);
-    });
-    child.on('error', reject);
-  });
+    const time = new Date(out.stdout);
+    cache.set(file, time);
+    return time;
+  } catch {
+    return;
+  }
 }

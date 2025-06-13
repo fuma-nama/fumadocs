@@ -16,25 +16,39 @@ For docs pages, Fumadocs has a built-in metadata image generator.
 
 You will need a route handler to get started.
 
-```json doc-gen:file
-{
-  "file": "../../examples/next-mdx/app/docs-og/[...slug]/route.tsx",
-  "codeblock": {
-    "meta": "title=\"app/docs-og/[...slug]/route.tsx\""
-  }
-}
-```
+<include cwd meta='title="app/docs-og/[...slug]/route.tsx"'>
+  ../../examples/next-mdx/app/docs-og/[...slug]/route.tsx
+</include>
 
 > We need to append `image.png` to the end of slugs so that we can access it via `/docs-og/my-page/image.png`.
 
 In your docs page, add the image to metadata.
 
-```json doc-gen:file
-{
-  "file": "../../examples/next-mdx/app/docs/[[...slug]]/page.with-og-image.tsx",
-  "codeblock": {
-    "meta": "title=\"app/docs/[[...slug]]/page.tsx\""
-  }
+```tsx title="app/docs/[[...slug]]/page.tsx"
+import { notFound } from 'next/navigation';
+import { source } from '@/lib/source';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug?: string[] }>;
+}) {
+  const { slug = [] } = await params;
+  const page = source.getPage(slug);
+  if (!page) notFound();
+
+  const image = ['/docs-og', ...slug, 'image.png'].join('/');
+  return {
+    title: page.data.title,
+    description: page.data.description,
+    openGraph: {
+      images: image,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      images: image,
+    },
+  };
 }
 ```
 

@@ -24,7 +24,7 @@ export const baseOptions: BaseLayoutProps = {
 };
 ```
 
-```tsx tab="Docs Layout"
+```tsx tab="Docs Layout" title="app/docs/layout.tsx"
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { baseOptions } from '@/app/layout.config';
 import { source } from '@/lib/source';
@@ -43,7 +43,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 }
 ```
 
-```tsx tab="Home Layout"
+```tsx tab="Home Layout" title="app/(home)/layout.tsx"
 import { HomeLayout } from 'fumadocs-ui/layouts/home';
 import { baseOptions } from '@/app/layout.config';
 import type { ReactNode } from 'react';
@@ -129,40 +129,6 @@ export const baseOptions: BaseLayoutProps = {
 };
 ```
 
-### Navigation Menu
-
-A navigation menu containing link items.
-
-```tsx title="app/layout.config.tsx"
-import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
-
-export const baseOptions: BaseLayoutProps = {
-  links: [
-    {
-      type: 'menu',
-      text: 'Guide',
-      items: [
-        {
-          text: 'Getting Started',
-          description: 'Learn to use Fumadocs',
-          url: '/docs',
-
-          // (optional) Props for Radix UI Navigation Menu item in Home Layout
-          menu: {
-            className: 'row-span-2',
-            // add banner to navigation menu card
-            // can be an image or other elements
-            banner: <div>Banner</div>,
-          },
-        },
-      ],
-    },
-  ],
-};
-```
-
-Note that the `description` field will only be displayed on the navbar in Home Layout.
-
 ### Custom Item
 
 Display a custom component.
@@ -191,4 +157,72 @@ import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 export const baseOptions: BaseLayoutProps = {
   githubUrl: 'https://github.com',
 };
+```
+
+### Normal Menu
+
+A menu containing multiple link items.
+
+```tsx title="app/layout.config.tsx"
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export const baseOptions: BaseLayoutProps = {
+  links: [
+    {
+      type: 'menu',
+      text: 'Guide',
+      items: [
+        {
+          text: 'Getting Started',
+          description: 'Learn to use Fumadocs',
+          url: '/docs',
+        },
+      ],
+    },
+  ],
+};
+```
+
+### Navigation Menu
+
+In Home Layout, you can add navigation menu (fully animated) to the navbar.
+
+![Nav](/docs/nav-layout-menu.png)
+
+```tsx title="app/(home)/layout.tsx"
+import { baseOptions } from '@/app/layout.config';
+import type { ReactNode } from 'react';
+import { HomeLayout } from 'fumadocs-ui/layouts/home';
+import {
+  NavbarMenu,
+  NavbarMenuContent,
+  NavbarMenuLink,
+  NavbarMenuTrigger,
+} from 'fumadocs-ui/layouts/home/navbar';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <HomeLayout
+      {...baseOptions}
+      links={[
+        {
+          type: 'custom',
+          // only displayed on navbar, not mobile menu
+          on: 'nav',
+          children: (
+            <NavbarMenu>
+              <NavbarMenuTrigger>Documentation</NavbarMenuTrigger>
+              <NavbarMenuContent>
+                <NavbarMenuLink href="/docs">Hello World</NavbarMenuLink>
+              </NavbarMenuContent>
+            </NavbarMenu>
+          ),
+        },
+        // other items
+      ]}
+    >
+      {children}
+    </HomeLayout>
+  );
+}
 ```

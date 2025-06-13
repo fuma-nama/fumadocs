@@ -13,13 +13,13 @@ Before continuing, make sure:
 fumadocs-ui fumadocs-core
 ```
 
-### 1. MDX Components
+### MDX Components
 
 <include cwd meta='title="mdx-components.tsx"'>
   ../../examples/next-mdx/mdx-components.tsx
 </include>
 
-### 2. Content Source
+### Content Source
 
 Fumadocs supports different content sources, including Fumadocs MDX and [Content Collections](/docs/headless/content-collections).
 
@@ -29,7 +29,7 @@ Fumadocs MDX is our official content source, you can configure it with:
 fumadocs-mdx @types/mdx
 ```
 
-```js title="next.config.mjs"
+```js tab="next.config.mjs"
 import { createMDX } from 'fumadocs-mdx/next';
 
 const withMDX = createMDX();
@@ -42,7 +42,7 @@ const config = {
 export default withMDX(config);
 ```
 
-```ts title="source.config.ts"
+```ts tab="source.config.ts"
 import { defineDocs } from 'fumadocs-mdx/config';
 
 export const docs = defineDocs({
@@ -50,12 +50,10 @@ export const docs = defineDocs({
 });
 ```
 
-Add a `postinstall` script to generate types:
-
-```json title="package.json"
+```json tab="package.json"
 {
   "scripts": {
-    "postinstall": "fumadocs-mdx"
+    "postinstall": "fumadocs-mdx" // [!code ++]
   }
 }
 ```
@@ -63,6 +61,7 @@ Add a `postinstall` script to generate types:
 Finally, to access your content:
 
 ```ts title="lib/source.ts"
+// .source folder will be generated when you run `next dev`
 import { docs } from '@/.source';
 import { loader } from 'fumadocs-core/source';
 
@@ -72,11 +71,11 @@ export const source = loader({
 });
 ```
 
-### 3. Root Layout
+### Root Layout
 
 Wrap the entire application inside [Root Provider](/docs/ui/layouts/root-provider), and add required styles to `body`.
 
-```tsx
+```tsx title="app/layout.tsx"
 import { RootProvider } from 'fumadocs-ui/provider';
 import type { ReactNode } from 'react';
 
@@ -98,11 +97,11 @@ export default function Layout({ children }: { children: ReactNode }) {
 }
 ```
 
-### 4. Styles
+### Styles
 
-Add the following to `global.css`.
+Add the following Tailwind CSS styles to `global.css`.
 
-```css title="Tailwind CSS"
+```css title="global.css"
 @import 'tailwindcss';
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
@@ -110,33 +109,23 @@ Add the following to `global.css`.
 
 > It doesn't come with a default font, you may choose one from `next/font`.
 
-### 5. Layout
+### Layout
 
 Create a `app/layout.config.tsx` file to put the shared options for our layouts.
 
-```json doc-gen:file
-{
-  "file": "../../examples/next-mdx/app/layout.config.tsx",
-  "codeblock": {
-    "meta": "title=\"app/layout.config.tsx\""
-  }
-}
-```
+<include cwd meta='title="app/layout.config.tsx"'>
+  ../../examples/next-mdx/app/layout.config.tsx
+</include>
 
 Create a folder `/app/docs` for our docs, and give it a proper layout.
 
-```json doc-gen:file
-{
-  "file": "../../examples/next-mdx/app/docs/layout.tsx",
-  "codeblock": {
-    "meta": "title=\"app/docs/layout.tsx\""
-  }
-}
-```
+<include cwd meta='title="app/docs/layout.tsx"'>
+  ../../examples/next-mdx/app/docs/layout.tsx
+</include>
 
 > `pageTree` refers to Page Tree, it should be provided by your content source.
 
-### 6. Page
+### Page
 
 Create a catch-all route `/app/docs/[[...slug]]` for docs pages.
 
@@ -150,7 +139,7 @@ In the page, wrap your content in the [Page](/docs/ui/layouts/page) component.
 
 </Tabs>
 
-### 7. Search
+### Search
 
 Use the default document search based on Orama.
 
@@ -160,7 +149,7 @@ Use the default document search based on Orama.
 
 Learn more about [Document Search](/docs/headless/search).
 
-### 8. Done
+### Done
 
 You can start the dev server and create MDX files.
 
@@ -177,6 +166,10 @@ I love Anime.
 ## Deploying
 
 It should work out-of-the-box with Vercel & Netlify.
+
+### Cloudflare
+
+Use https://opennext.js.org/cloudflare, Fumadocs doesn't work on Edge runtime.
 
 ### Docker Deployment
 

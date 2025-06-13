@@ -1,5 +1,59 @@
 # next-docs-mdx
 
+## 11.6.7
+
+### Patch Changes
+
+- a5c283f: Support `outDir` option on `createMDX()`
+- Updated dependencies [b4916d2]
+- Updated dependencies [8738b9c]
+- Updated dependencies [a66886b]
+  - fumadocs-core@15.5.1
+
+## 11.6.6
+
+### Patch Changes
+
+- cd42e78: Support last modified time on Async Mode
+- Updated dependencies [1b999eb]
+- Updated dependencies [961b67e]
+- Updated dependencies [7d78bc5]
+  - fumadocs-core@15.4.0
+
+## 11.6.5
+
+### Patch Changes
+
+- a6c909b: Removed unused devDependencies and migrated from `fast-glob` to `tinyglobby`
+- Updated dependencies [a6c909b]
+  - @fumadocs/mdx-remote@1.3.2
+  - fumadocs-core@15.3.4
+
+## 11.6.4
+
+### Patch Changes
+
+- 4ae7b4a: Support MDX in codeblock tab value
+- Updated dependencies [4ae7b4a]
+  - @fumadocs/mdx-remote@1.3.1
+  - fumadocs-core@15.3.3
+
+## 11.6.3
+
+### Patch Changes
+
+- 4de7fe7: Fix `meta.{locale}` file being excluded from `defineDocs`
+- Updated dependencies [c05dc03]
+  - fumadocs-core@15.3.0
+
+## 11.6.2
+
+### Patch Changes
+
+- 16c7566: Improve error handling logic on parsing meta entries
+- 7b89faa: Add `page.data.content` to sync mode
+  - fumadocs-core@15.2.13
+
 ## 11.6.1
 
 ### Patch Changes

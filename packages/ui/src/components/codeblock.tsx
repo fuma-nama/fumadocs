@@ -1,22 +1,15 @@
 'use client';
 import { Check, Copy } from 'lucide-react';
 import {
-  type ButtonHTMLAttributes,
+  type ComponentProps,
   forwardRef,
   type HTMLAttributes,
   type ReactNode,
-  useCallback,
   useRef,
 } from 'react';
 import { cn } from '@/utils/cn';
-import {
-  ScrollArea,
-  ScrollBar,
-  ScrollViewport,
-} from '@/components/ui/scroll-area';
 import { useCopyButton } from '@/utils/use-copy-button';
 import { buttonVariants } from '@/components/ui/button';
-import type { ScrollAreaViewportProps } from '@radix-ui/react-scroll-area';
 
 export type CodeBlockProps = HTMLAttributes<HTMLElement> & {
   /**
@@ -40,7 +33,17 @@ export type CodeBlockProps = HTMLAttributes<HTMLElement> & {
    */
   keepBackground?: boolean;
 
-  viewportProps?: ScrollAreaViewportProps;
+  viewportProps?: HTMLAttributes<HTMLElement>;
+
+  /**
+   * show line numbers
+   */
+  'data-line-numbers'?: boolean;
+
+  /**
+   * @defaultValue 1
+   */
+  'data-line-numbers-start'?: number;
 };
 
 export const Pre = forwardRef<HTMLPreElement, HTMLAttributes<HTMLPreElement>>(
@@ -48,7 +51,7 @@ export const Pre = forwardRef<HTMLPreElement, HTMLAttributes<HTMLPreElement>>(
     return (
       <pre
         ref={ref}
-        className={cn('p-4 focus-visible:outline-none', className)}
+        className={cn('min-w-full w-max *:flex *:flex-col', className)}
         {...props}
       >
         {props.children}
@@ -67,14 +70,14 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
       keepBackground = false,
       icon,
       viewportProps,
+      children,
       ...props
     },
     ref,
   ) => {
     const areaRef = useRef<HTMLDivElement>(null);
-    const onCopy = useCallback(() => {
+    const onCopy = () => {
       const pre = areaRef.current?.getElementsByTagName('pre').item(0);
-
       if (!pre) return;
 
       const clone = pre.cloneNode(true) as HTMLElement;
@@ -83,20 +86,21 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
       });
 
       void navigator.clipboard.writeText(clone.textContent ?? '');
-    }, []);
+    };
 
     return (
       <figure
         ref={ref}
+        dir="ltr"
         {...props}
         className={cn(
-          'not-prose group fd-codeblock relative my-4 overflow-hidden rounded-lg border bg-fd-secondary/50 text-sm',
+          'not-prose group relative my-4 overflow-hidden rounded-lg border bg-fd-card text-sm outline-none',
           keepBackground && 'bg-(--shiki-light-bg) dark:bg-(--shiki-dark-bg)',
           props.className,
         )}
       >
         {title ? (
-          <div className="flex items-center gap-2 border-b bg-fd-muted px-4 py-1.5">
+          <div className="flex items-center gap-2 bg-fd-secondary px-4 py-1.5">
             {icon ? (
               <div
                 className="text-fd-muted-foreground [&_svg]:size-3.5"
@@ -126,15 +130,23 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
             />
           )
         )}
-        <ScrollArea ref={areaRef} dir="ltr">
-          <ScrollViewport
-            {...viewportProps}
-            className={cn('max-h-[600px]', viewportProps?.className)}
-          >
-            {props.children}
-          </ScrollViewport>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
+        <div
+          ref={areaRef}
+          {...viewportProps}
+          className={cn(
+            'text-[13px] py-3.5 overflow-auto [&_.line]:px-4 max-h-[600px] fd-scroll-container',
+            props['data-line-numbers'] && '[&_.line]:pl-3',
+            viewportProps?.className,
+          )}
+          style={{
+            counterSet: props['data-line-numbers']
+              ? `line ${Number(props['data-line-numbers-start'] ?? 1) - 1}`
+              : undefined,
+            ...viewportProps?.style,
+          }}
+        >
+          {children}
+        </div>
       </figure>
     );
   },
@@ -146,7 +158,7 @@ function CopyButton({
   className,
   onCopy,
   ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & {
+}: ComponentProps<'button'> & {
   onCopy: () => void;
 }) {
   const [checked, onClick] = useCopyButton(onCopy);

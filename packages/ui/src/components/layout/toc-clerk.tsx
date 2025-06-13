@@ -1,13 +1,21 @@
 'use client';
 import type { TOCItemType } from 'fumadocs-core/server';
 import * as Primitive from 'fumadocs-core/toc';
-import { useEffect, useRef, useState } from 'react';
+import { type ComponentProps, useEffect, useRef, useState } from 'react';
 import { cn } from '@/utils/cn';
 import { TocThumb } from '@/components/layout/toc-thumb';
-import { TocItemsEmpty } from '@/components/layout/toc';
+import { useTOCItems } from '@/components/layout/toc';
+import { mergeRefs } from '@/utils/merge-refs';
+import { useI18n } from '@/contexts/i18n';
 
-export default function ClerkTOCItems({ items }: { items: TOCItemType[] }) {
+export default function ClerkTOCItems({
+  ref,
+  className,
+  ...props
+}: ComponentProps<'div'>) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const items = useTOCItems();
+  const { text } = useI18n();
 
   const [svg, setSvg] = useState<{
     path: string;
@@ -61,7 +69,12 @@ export default function ClerkTOCItems({ items }: { items: TOCItemType[] }) {
     };
   }, [items]);
 
-  if (items.length === 0) return <TocItemsEmpty />;
+  if (items.length === 0)
+    return (
+      <div className="rounded-lg border bg-fd-card p-3 text-xs text-fd-muted-foreground">
+        {text.tocNoHeadings}
+      </div>
+    );
 
   return (
     <>
@@ -85,7 +98,11 @@ export default function ClerkTOCItems({ items }: { items: TOCItemType[] }) {
           />
         </div>
       ) : null}
-      <div className="flex flex-col" ref={containerRef}>
+      <div
+        ref={mergeRefs(containerRef, ref)}
+        className={cn('flex flex-col', className)}
+        {...props}
+      >
         {items.map((item, i) => (
           <TOCItem
             key={item.url}

@@ -9,7 +9,7 @@ function _createMdxContent(props) {
     children: _jsx(_Fragment, {
       children: _jsx(TypeTable, {
         type: {
-          name: {
+          "name": {
             "type": "string",
             "default": "Henry",
             "required": true,
@@ -19,7 +19,7 @@ function _createMdxContent(props) {
               })
             })
           },
-          age: {
+          "age": {
             "type": "timestamp",
             "default": undefined,
             "required": true

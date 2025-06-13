@@ -1,5 +1,37 @@
 # create-next-docs-app
 
+## 15.5.1
+
+## 15.5.0
+
+## 15.4.2
+
+## 15.4.1
+
+## 15.4.0
+
+## 15.3.4
+
+### Patch Changes
+
+- a6c909b: Removed unused devDependencies and migrated from `fast-glob` to `tinyglobby`
+
+## 15.3.3
+
+## 15.3.2
+
+## 15.3.1
+
+## 15.3.0
+
+## 15.2.15
+
+## 15.2.14
+
+## 15.2.13
+
+## 15.2.12
+
 ## 15.2.11
 
 ## 15.2.10

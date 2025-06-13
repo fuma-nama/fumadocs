@@ -1,7 +1,7 @@
 import type { DereferenceMap, Document } from '@/types';
 import type { NoReference } from '@/utils/schema';
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
-import { load, dereference, upgrade } from '@scalar/openapi-parser';
+import { dereference, load, upgrade } from '@scalar/openapi-parser';
 import { fetchUrls } from '@scalar/openapi-parser/plugins/fetch-urls';
 import { readFiles } from '@scalar/openapi-parser/plugins/read-files';
 
@@ -19,18 +19,24 @@ const cache = new Map<string, ProcessedDocument>();
  * process & reference input document to a Fumadocs OpenAPI compatible format
  */
 export async function processDocument(
-  document: DocumentInput,
+  input: DocumentInput,
   disableCache = false,
 ): Promise<ProcessedDocument> {
   const cached =
-    !disableCache && typeof document === 'string' ? cache.get(document) : null;
+    !disableCache && typeof input === 'string' ? cache.get(input) : null;
 
   if (cached) return cached;
 
   const dereferenceMap: DereferenceMap = new Map();
-  const loaded = await load(document, {
+  const loaded = await load(input, {
     plugins: [readFiles(), fetchUrls()],
   });
+
+  if (loaded.errors && loaded.errors.length > 0) {
+    throw new Error(
+      loaded.errors.map((err) => `${err.code}: ${err.message}`).join('\n'),
+    );
+  }
 
   // upgrade
   loaded.specification = upgrade(loaded.specification).specification;
@@ -46,8 +52,8 @@ export async function processDocument(
     downloaded: loaded.specification as Document,
   };
 
-  if (!disableCache && typeof document === 'string') {
-    cache.set(document, processed);
+  if (!disableCache && typeof input === 'string') {
+    cache.set(input, processed);
   }
 
   return processed;

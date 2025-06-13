@@ -1,4 +1,4 @@
-import { type FSWatcher, watch } from 'chokidar';
+import { FSWatcher } from 'chokidar';
 import { type LoadedConfig } from '@/utils/config';
 
 export function watcher(
@@ -6,24 +6,22 @@ export function watcher(
   config: LoadedConfig,
   ignored: string[],
 ): FSWatcher {
-  const deps: string[] = [configPath];
+  const watcher = new FSWatcher({
+    ignoreInitial: true,
+    persistent: true,
+    ignored,
+  });
 
-  function add(dir: string | string[]) {
-    if (Array.isArray(dir)) deps.push(...dir);
-    else deps.push(dir);
-  }
+  watcher.add(configPath);
+
   for (const collection of config.collections.values()) {
     if (collection.type === 'docs') {
-      add(collection.docs.dir);
-      add(collection.meta.dir);
+      watcher.add(collection.docs.dir);
+      watcher.add(collection.meta.dir);
     } else {
-      add(collection.dir);
+      watcher.add(collection.dir);
     }
   }
 
-  return watch(deps, {
-    ignoreInitial: true,
-    ignored,
-    persistent: true,
-  });
+  return watcher;
 }

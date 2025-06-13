@@ -1,6 +1,12 @@
 import type { ComponentType, ReactNode } from 'react';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
-import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+import {
+  AccordionContent,
+  AccordionHeader,
+  AccordionItem,
+  Accordions,
+  AccordionTrigger,
+} from '@/ui/components/accordion';
 import {
   API,
   APIExample,
@@ -9,9 +15,9 @@ import {
   Property,
   Root,
 } from '@/ui';
-import type { RenderContext, ServerObject } from '@/types';
+import type { RenderContext } from '@/types';
 import { APIPlayground, type APIPlaygroundProps } from '@/playground';
-import { CodeExampleSelector } from '@/ui/contexts/code-example.lazy';
+import { CodeExampleSelector } from '@/ui/lazy';
 
 export interface ResponsesProps {
   items: string[];
@@ -37,6 +43,7 @@ export interface PropertyProps {
   required?: boolean;
   deprecated?: boolean;
   children?: ReactNode;
+  nested?: boolean;
 }
 
 export interface ObjectCollapsibleProps {
@@ -64,10 +71,7 @@ export interface ResponseTypeProps {
 }
 
 export interface RootProps {
-  baseUrl?: string;
-  shikiOptions?: RenderContext['shikiOptions'];
-
-  servers: ServerObject[];
+  ctx: RenderContext;
   children: ReactNode;
 }
 
@@ -93,15 +97,9 @@ export interface Renderer {
   APIPlayground: ComponentType<APIPlaygroundProps>;
 }
 
-export function createRenders(
-  shikiOptions: RenderContext['shikiOptions'],
-): Renderer {
+export function createRenders(): Renderer {
   return {
-    Root: (props) => (
-      <Root shikiOptions={shikiOptions} {...props}>
-        {props.children}
-      </Root>
-    ),
+    Root,
     API,
     APIInfo: ({ children, head }) => (
       <APIInfo>
@@ -117,14 +115,21 @@ export function createRenders(
     ResponseTypes: (props) => (
       <Accordions
         type="single"
-        className="!-m-4 border-none pt-2"
+        className="pt-2"
         defaultValue={props.defaultValue}
       >
         {props.children}
       </Accordions>
     ),
     ResponseType: (props) => (
-      <Accordion title={props.label}>{props.children}</Accordion>
+      <AccordionItem value={props.label}>
+        <AccordionHeader>
+          <AccordionTrigger>{props.label}</AccordionTrigger>
+        </AccordionHeader>
+        <AccordionContent className="prose-no-margin">
+          {props.children}
+        </AccordionContent>
+      </AccordionItem>
     ),
     Property,
     ObjectCollapsible,
