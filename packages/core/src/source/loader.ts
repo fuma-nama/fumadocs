@@ -193,27 +193,32 @@ function indexPages(
   storages: Record<string, ContentStorage>,
   getUrl: UrlFn,
   i18n?: I18nConfig,
-): {
-  // (locale.slugs -> page)
-  pages: Map<string, Page>;
+) {
+  const result = {
+    // (locale.slugs -> page)
+    pages: new Map<string, Page>(),
+    // (locale.path -> page)
+    pathToMeta: new Map<string, Meta>(),
+    // (locale.path -> meta)
+    pathToPage: new Map<string, Page>(),
+  };
 
-  getResultFromFile: (file: MetaFile | PageFile) => Page | Meta | undefined;
-} {
   const defaultLanguage = i18n?.defaultLanguage ?? '';
-  const map = new Map<string, Page>();
-  const fileMapped = new WeakMap<object, Page | Meta>();
 
   for (const filePath of storages[defaultLanguage].getFiles()) {
     const item = storages[defaultLanguage].read(filePath)!;
 
     if (item.format === 'meta') {
-      fileMapped.set(item, fileToMeta(item));
+      result.pathToMeta.set(
+        `${defaultLanguage}.${item.path}`,
+        fileToMeta(item),
+      );
     }
 
     if (item.format === 'page') {
       const page = fileToPage(item, getUrl, defaultLanguage);
-      fileMapped.set(item, page);
-      map.set(`${defaultLanguage}.${page.slugs.join('/')}`, page);
+      result.pathToPage.set(`${defaultLanguage}.${item.path}`, page);
+      result.pages.set(`${defaultLanguage}.${page.slugs.join('/')}`, page);
 
       if (!i18n) continue;
 
@@ -227,19 +232,18 @@ function indexPages(
         );
 
         if (localizedItem) {
-          fileMapped.set(localizedItem, localizedPage);
+          result.pathToPage.set(`${lang}.${item.path}`, localizedPage);
         }
-        map.set(`${lang}.${localizedPage.slugs.join('/')}`, localizedPage);
+
+        result.pages.set(
+          `${lang}.${localizedPage.slugs.join('/')}`,
+          localizedPage,
+        );
       }
     }
   }
 
-  return {
-    pages: map,
-    getResultFromFile(file) {
-      return fileMapped.get(file);
-    },
-  };
+  return result;
 }
 
 export function createGetUrl(baseUrl: string, i18n?: I18nConfig): UrlFn {
@@ -417,17 +421,13 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
       const ref = node.$ref?.metaFile;
       if (!ref) return;
 
-      const file = storages[language].read(ref);
-      if (file?.format === 'meta')
-        return walker.getResultFromFile(file) as Meta;
+      return walker.pathToMeta.get(`${language}.${ref}`);
     },
     getNodePage(node, language = defaultLanguage) {
       const ref = node.$ref?.file;
       if (!ref) return;
 
-      const file = storages[language].read(ref);
-      if (file?.format === 'page')
-        return walker.getResultFromFile(file) as Page;
+      return walker.pathToPage.get(`${language}.${ref}`);
     },
     getPageTree(locale) {
       if (options.i18n) {
@@ -461,7 +461,7 @@ function fileToMeta<Data = MetaData>(file: MetaFile): Meta<Data> {
     path: file.path,
     absolutePath: file.absolutePath,
     get file() {
-      return parseFilePath(file.path);
+      return parseFilePath(this.path);
     },
     data: file.data as Data,
   };
@@ -474,7 +474,7 @@ function fileToPage<Data = PageData>(
 ): Page<Data> {
   return {
     get file() {
-      return parseFilePath(file.path);
+      return parseFilePath(this.path);
     },
     absolutePath: file.absolutePath,
     path: file.path,

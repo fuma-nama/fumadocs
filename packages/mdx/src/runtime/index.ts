@@ -4,26 +4,32 @@ import {
   type PageData,
   type Source,
 } from 'fumadocs-core/source';
-import { type BaseCollectionEntry } from '@/config';
+import { type BaseCollectionEntry, type FileInfo } from '@/config';
 import type { Runtime } from '@/runtime/types';
 import fs from 'node:fs';
+
+const cache = new Map<string, string>();
 
 export const _runtime: Runtime = {
   doc(files) {
     return files.map((file) => {
       const { default: body, frontmatter, ...exports } = file.data;
-      let cachedContent: string | undefined;
 
       return {
         body,
         ...exports,
         ...(frontmatter as object),
-        get content() {
-          cachedContent ??= fs.readFileSync(file.info.absolutePath).toString();
-          return cachedContent;
-        },
-        _exports: file.data,
         _file: file.info,
+        _exports: file.data,
+        get content() {
+          const path = (this as { _file: FileInfo })._file.absolutePath;
+          const cached = cache.get(path);
+          if (cached) return cached;
+
+          const content = fs.readFileSync(path).toString();
+          cache.set(path, content);
+          return content;
+        },
       };
     }) as any;
   },
