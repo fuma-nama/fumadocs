@@ -45,7 +45,7 @@ export const generator: SampleGenerator = (url, data) => {
         MediaTypeFormatMap[
           data.bodyMediaType as keyof typeof MediaTypeFormatMap
         ],
-        'single-quote',
+        "'",
       )}`,
     );
   }

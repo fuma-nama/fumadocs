@@ -7,14 +7,10 @@ import js2xml from 'xml-js/lib/js2xml';
 export function inputToString(
   value: unknown,
   format: 'xml' | 'json' | 'url' | 'ndjson' = 'json',
-  multiLine: 'single-quote' | 'backtick' | 'python' | 'none' = 'none',
+  delimit?: string,
 ): string {
   const getStr = (v: string) => {
-    if (multiLine === 'none') return JSON.stringify(v);
-
-    const delimit = { backtick: `\``, 'single-quote': `'`, python: `"""` }[
-      multiLine
-    ];
+    if (!delimit) return JSON.stringify(v);
 
     return `${delimit}${v.replaceAll(delimit, `\\${delimit}`)}${delimit}`;
   };

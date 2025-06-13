@@ -12,11 +12,18 @@ interface JavaScriptContext {
   addImport: (pkg: string, name: string) => void;
 }
 
+interface JavaContext {
+  lang: 'java';
+  addImport: (specifier: string) => void;
+}
+
 export type MediaContext =
+  | JavaContext
   | GoContext
   | JavaScriptContext
   | {
       lang: string;
+
       /**
        * Passed by your custom example generator, for your custom media adapter to receive.
        */
@@ -153,9 +160,15 @@ export const defaultAdapters = {
 
         for (const [key, value] of Object.entries(data.body as object)) {
           s.push(
-            `mp.WriteField("${key}", ${inputToString(value, 'json', 'backtick')})`,
+            `mp.WriteField("${key}", ${inputToString(value, 'json', '`')})`,
           );
         }
+      }
+
+      if (ctx.lang === 'java' && 'addImport' in ctx) {
+        ctx.addImport('java.net.http.HttpRequest.BodyPublishers');
+
+        s.push(`var body = BodyPublishers.ofByteArray(new byte[] { ... })`);
       }
 
       if (s.length > 0) return s.join('\n');
@@ -181,17 +194,22 @@ function str(
     if (format === 'json') {
       return `const body = JSON.stringify(${JSON.stringify(init, null, 2)})`;
     }
-    return `const body = ${inputToString(init, format, 'backtick')}`;
+    return `const body = ${inputToString(init, format, '`')}`;
   }
 
   if (ctx.lang === 'python') {
     if (format === 'json') return `body = ${JSON.stringify(init, null, 2)}`;
-    return `body = ${inputToString(init, format, 'python')}`;
+    return `body = ${inputToString(init, format, '"""')}`;
   }
 
   if (ctx.lang === 'go' && 'addImport' in ctx) {
     ctx.addImport('strings');
 
-    return `body := strings.NewReader(${inputToString(init, format, 'backtick')})`;
+    return `body := strings.NewReader(${inputToString(init, format, '`')})`;
+  }
+
+  if (ctx.lang === 'java' && 'addImport' in ctx) {
+    ctx.addImport('java.net.http.HttpRequest.BodyPublishers');
+    return `var body = BodyPublishers.ofString(${inputToString(init, format, '"""')})`;
   }
 }

@@ -94,10 +94,7 @@ export default async function Page(props: {
         <div className="flex flex-row gap-2 items-center mb-8 border-b pb-6">
           <LLMCopyButton slug={params.slug} />
           <GitHubLink
-            url={`https://github.com/${owner}/${repo}/blob/dev/${path.relative(
-              process.cwd(),
-              page.absolutePath,
-            )}`}
+            url={`https://github.com/${owner}/${repo}/blob/dev/apps/docs/content/docs/${page.path}`}
           />
         </div>
         <div className="prose flex-1 text-fd-foreground/80">
