@@ -57,11 +57,13 @@ export function DocsLayout({
   nav: { transparentMode, ...nav } = {},
   sidebar: {
     tabs: sidebarTabs,
+    footer: sidebarFooter,
+    banner: sidebarBanner,
     enabled: sidebarEnabled = true,
     collapsible: sidebarCollapsible = true,
     component: sidebarComponent,
     components: sidebarComponents,
-    ...sidebar
+    ...sidebarProps
   } = {},
   searchToggle = {},
   disableThemeSwitch = false,
@@ -83,44 +85,10 @@ export function DocsLayout({
       : undefined,
   );
 
-  const sidebarFooter = (
-    <HideIfEmpty>
-      <div className="flex items-center justify-end">
-        <div className="flex items-center flex-1 empty:hidden">
-          {links
-            .filter((item) => item.type === 'icon')
-            .map((item, i) => (
-              <BaseLinkItem
-                key={i}
-                item={item}
-                className={cn(
-                  buttonVariants({ size: 'icon', color: 'ghost' }),
-                  'text-fd-muted-foreground md:[&_svg]:size-4.5',
-                )}
-                aria-label={item.label}
-              >
-                {item.icon}
-              </BaseLinkItem>
-            ))}
-        </div>
-        {i18n ? (
-          <LanguageToggle className="me-1.5">
-            <Languages className="size-4.5" />
-            <LanguageToggleText className="md:hidden" />
-          </LanguageToggle>
-        ) : null}
-        {themeSwitch.enabled !== false &&
-          (themeSwitch.component ?? (
-            <ThemeToggle className="p-0" mode={themeSwitch.mode} />
-          ))}
-      </div>
-    </HideIfEmpty>
-  );
-
-  sidebarComponent ??= (
+  const sidebar = sidebarComponent ?? (
     <>
       {sidebarCollapsible ? <CollapsibleControl /> : null}
-      <Sidebar {...sidebar} collapsible={sidebarCollapsible}>
+      <Sidebar {...sidebarProps} collapsible={sidebarCollapsible}>
         <HideIfEmpty>
           <SidebarHeader>
             <div className="flex max-md:hidden">
@@ -151,7 +119,7 @@ export function DocsLayout({
               (searchToggle.components?.lg ?? (
                 <LargeSearchToggle hideIfDisabled className="max-md:hidden" />
               ))}
-            {sidebar.banner}
+            {sidebarBanner}
           </SidebarHeader>
         </HideIfEmpty>
         <SidebarViewport>
@@ -166,12 +134,39 @@ export function DocsLayout({
             ))}
           <SidebarPageTree components={sidebarComponents} />
         </SidebarViewport>
-        <HideIfEmpty>
-          <SidebarFooter>
-            {sidebarFooter}
-            {sidebar.footer}
-          </SidebarFooter>
-        </HideIfEmpty>
+        <SidebarFooter className="empty:hidden">
+          <HideIfEmpty>
+            <div className="flex items-center justify-end">
+              {links
+                .filter((item) => item.type === 'icon')
+                .map((item, i) => (
+                  <BaseLinkItem
+                    key={i}
+                    item={item}
+                    className={cn(
+                      buttonVariants({ size: 'icon', color: 'ghost' }),
+                      'text-fd-muted-foreground md:[&_svg]:size-4.5',
+                      i === links.length - 1 && 'me-auto',
+                    )}
+                    aria-label={item.label}
+                  >
+                    {item.icon}
+                  </BaseLinkItem>
+                ))}
+              {i18n ? (
+                <LanguageToggle className="me-1.5">
+                  <Languages className="size-4.5" />
+                  <LanguageToggleText className="md:hidden" />
+                </LanguageToggle>
+              ) : null}
+              {themeSwitch.enabled !== false &&
+                (themeSwitch.component ?? (
+                  <ThemeToggle className="p-0" mode={themeSwitch.mode} />
+                ))}
+            </div>
+          </HideIfEmpty>
+          {sidebarFooter}
+        </SidebarFooter>
       </Sidebar>
     </>
   );
@@ -200,7 +195,7 @@ export function DocsLayout({
           {...props.containerProps}
           className={cn(variables, props.containerProps?.className)}
         >
-          {sidebarEnabled && sidebarComponent}
+          {sidebarEnabled && sidebar}
           {children}
         </LayoutBody>
       </NavProvider>
