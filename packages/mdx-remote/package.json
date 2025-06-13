@@ -53,7 +53,12 @@
   },
   "peerDependencies": {
     "fumadocs-core": "^14.0.0 || ^15.0.0",
-    "react": "18.x.x || 19.x.x"
+    "@types/react": "*"
+  },
+  "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    }
   },
   "publishConfig": {
     "access": "public"

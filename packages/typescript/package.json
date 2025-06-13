@@ -61,7 +61,13 @@
     "unified": "^11.0.5"
   },
   "peerDependencies": {
-    "typescript": "*"
+    "typescript": "*",
+    "@types/react": "*"
+  },
+  "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    }
   },
   "publishConfig": {
     "access": "public"

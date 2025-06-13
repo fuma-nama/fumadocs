@@ -137,9 +137,13 @@
     "algoliasearch": "5.x.x",
     "next": "14.x.x || 15.x.x",
     "react": "18.x.x || 19.x.x",
-    "react-dom": "18.x.x || 19.x.x"
+    "react-dom": "18.x.x || 19.x.x",
+    "@types/react": "*"
   },
   "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    },
     "@oramacloud/client": {
       "optional": true
     },

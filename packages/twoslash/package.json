@@ -47,6 +47,7 @@
     "mdast-util-gfm": "^3.1.0",
     "mdast-util-to-hast": "^13.2.0",
     "tailwind-merge": "^3.3.1",
+    "shiki": "^3.6.0",
     "twoslash": "^0.3.1"
   },
   "devDependencies": {
@@ -56,13 +57,17 @@
     "@types/react": "^19.1.8",
     "eslint-config-custom": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "shiki": "^3.6.0",
     "tsconfig": "workspace:*"
   },
   "peerDependencies": {
     "fumadocs-ui": "^15.0.0",
     "react": "18.x.x || 19.x.x",
-    "shiki": "1.x.x || 2.x.x || 3.x.x"
+    "@types/react": "*"
+  },
+  "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    }
   },
   "publishConfig": {
     "access": "public"

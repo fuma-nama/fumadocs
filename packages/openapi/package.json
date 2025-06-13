@@ -92,9 +92,13 @@
     "@scalar/api-client-react": "*",
     "next": "14.x.x || 15.x.x",
     "react": "18.x.x || 19.x.x",
-    "react-dom": "18.x.x || 19.x.x"
+    "react-dom": "18.x.x || 19.x.x",
+    "@types/react": "*"
   },
   "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    },
     "@scalar/api-client-react": {
       "optional": true
     }

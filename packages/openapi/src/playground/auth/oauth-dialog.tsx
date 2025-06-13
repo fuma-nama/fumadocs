@@ -10,7 +10,7 @@ import type { OpenAPIV3_1 } from 'openapi-types';
 import { useForm } from 'react-hook-form';
 import { Input, labelVariants } from '@/ui/components/input';
 import { useQuery } from '@/utils/use-query';
-import { useEffect, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { cn } from 'fumadocs-ui/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import {
@@ -30,7 +30,7 @@ export interface AuthDialogProps {
   open: boolean;
   setOpen: (v: boolean) => void;
   setToken: (token: string) => void;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 interface FormValues {
