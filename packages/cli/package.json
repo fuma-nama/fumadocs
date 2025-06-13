@@ -42,11 +42,11 @@
     "ts-morph": "^26.0.0"
   },
   "devDependencies": {
-    "@types/node": "22.15.30",
-    "@types/react": "^19.1.6",
+    "@types/node": "24.0.1",
+    "@types/react": "^19.1.8",
     "eslint-config-custom": "workspace:*",
     "tsconfig": "workspace:*",
-    "tsx": "^4.19.4"
+    "tsx": "^4.20.2"
   },
   "publishConfig": {
     "access": "public"

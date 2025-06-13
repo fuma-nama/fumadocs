@@ -1,32 +1,30 @@
 import { createFileRoute, notFound } from '@tanstack/react-router';
+import { executeMdxSync } from '@fumadocs/mdx-remote/client';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { source } from '@/lib/source';
 import {
   DocsBody,
   DocsDescription,
   DocsPage,
   DocsTitle,
 } from 'fumadocs-ui/page';
-import { executeMdxSync } from '@fumadocs/mdx-remote/client';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { createServerFn } from '@tanstack/react-start';
-import type { PageTree } from 'fumadocs-core/server';
 import { createCompiler } from '@fumadocs/mdx-remote';
-import * as path from 'node:path';
+import { source } from '~/lib/source';
+import path from 'node:path';
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+import type { PageTree } from 'fumadocs-core/server';
+
+const compiler = createCompiler();
 
 export const Route = createFileRoute('/docs/$')({
   component: Page,
-  async loader({ params }) {
+  loader: async ({ params }) => {
     const slugs = (params._splat ?? '').split('/');
-
     return loader({ data: slugs });
   },
 });
 
-const compiler = createCompiler({
-  development: false,
-});
-
+// a wrapper because we don't want `loader` to be called on client-side
 const loader = createServerFn({
   method: 'GET',
 })
@@ -37,7 +35,7 @@ const loader = createServerFn({
 
     const { content, ...rest } = page.data;
     const compiled = await compiler.compileFile({
-      path: path.resolve('content/docs', page.file.path),
+      path: path.resolve('content', page.file.path),
       value: content,
     });
 
@@ -49,21 +47,25 @@ const loader = createServerFn({
   });
 
 function Page() {
-  const { tree, compiled, ...data } = Route.useLoaderData();
-  const { toc, default: MdxContent } = executeMdxSync(compiled);
+  const { compiled, tree, ...data } = Route.useLoaderData();
+  const { default: MDX, toc } = executeMdxSync(compiled);
 
   return (
     <DocsLayout
-      nav={{
-        title: 'Tanstack Start',
-      }}
       tree={tree as PageTree.Root}
+      nav={{
+        title: 'Fumadocs Tanstack',
+      }}
     >
       <DocsPage toc={toc}>
         <DocsTitle>{data.title}</DocsTitle>
-        <DocsDescription>{data.title}</DocsDescription>
+        <DocsDescription>{data.description}</DocsDescription>
         <DocsBody>
-          <MdxContent components={defaultMdxComponents} />
+          <MDX
+            components={{
+              ...defaultMdxComponents,
+            }}
+          />
         </DocsBody>
       </DocsPage>
     </DocsLayout>

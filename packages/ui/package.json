@@ -99,19 +99,19 @@
     "postcss-selector-parser": "^7.1.0",
     "react-medium-image-zoom": "^5.2.14",
     "react-remove-scroll": "^2.7.1",
-    "tailwind-merge": "^3.3.0"
+    "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",
     "@next/eslint-plugin-next": "^15.3.3",
-    "@tailwindcss/cli": "^4.1.8",
+    "@tailwindcss/cli": "^4.1.10",
     "@types/lodash.merge": "^4.6.9",
-    "@types/react": "^19.1.6",
+    "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "next": "15.3.3",
-    "tailwindcss": "^4.1.8",
+    "tailwindcss": "^4.1.10",
     "tsc-alias": "^1.8.16",
     "tsconfig": "workspace:*"
   },
