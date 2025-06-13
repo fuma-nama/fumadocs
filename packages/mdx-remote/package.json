@@ -41,6 +41,7 @@
     "zod": "^3.25.63"
   },
   "devDependencies": {
+    "react": "^19.1.0",
     "@types/mdx": "^2.0.13",
     "@types/node": "24.0.1",
     "@types/react": "^19.1.8",
@@ -52,8 +53,9 @@
     "vfile": "^6.0.3"
   },
   "peerDependencies": {
-    "fumadocs-core": "^14.0.0 || ^15.0.0",
-    "@types/react": "*"
+    "@types/react": "*",
+    "react": "18.x.x || 19.x.x",
+    "fumadocs-core": "^14.0.0 || ^15.0.0"
   },
   "peerDependenciesMeta": {
     "@types/react": {

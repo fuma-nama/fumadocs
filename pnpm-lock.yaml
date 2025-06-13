@@ -1111,6 +1111,9 @@ importers:
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
+      react:
+        specifier: ^19.1.0
+        version: 19.1.0
       tinyglobby:
         specifier: ^0.2.14
         version: 0.2.14
