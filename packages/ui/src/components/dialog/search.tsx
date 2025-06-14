@@ -137,7 +137,7 @@ export function SearchDialogClose({
         buttonVariants({
           color: 'ghost',
           size: 'icon-sm',
-          className: 'text-fd-muted-foreground -me-2',
+          className: 'text-fd-muted-foreground -me-1.5',
         }),
         className,
       )}
@@ -167,7 +167,7 @@ export function SearchDialogOverlay(
     <DialogOverlay
       {...props}
       className={cn(
-        'fixed inset-0 z-50 data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out',
+        'fixed inset-0 z-50 max-md:backdrop-blur-sm data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out',
         props.className,
       )}
     />
@@ -185,7 +185,7 @@ export function SearchDialogContent({
       aria-describedby={undefined}
       {...props}
       className={cn(
-        'fixed left-1/2 top-[10vh] z-50 w-[98vw] max-w-screen-sm -translate-x-1/2 rounded-xl border bg-fd-popover/60 backdrop-blur-sm text-fd-popover-foreground shadow-2xl overflow-hidden shadow-black/20 data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in',
+        'fixed left-1/2 top-[10vh] z-50 w-[calc(100vw-2*var(--spacing))] max-w-screen-sm -translate-x-1/2 rounded-2xl border bg-fd-popover/50 backdrop-blur-lg text-fd-popover-foreground shadow-2xl overflow-hidden shadow-black/30 data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in',
         props.className,
       )}
     >
@@ -194,12 +194,6 @@ export function SearchDialogContent({
     </DialogContent>
   );
 }
-
-const icons = {
-  text: <Text className="size-4 text-fd-muted-foreground" />,
-  heading: <Hash className="size-4 text-fd-muted-foreground" />,
-  page: <FileText className="size-4 text-fd-muted-foreground" />,
-};
 
 export function SearchDialogList({
   items = null,
@@ -293,12 +287,6 @@ export function SearchDialogList({
         items && 'border-t',
         props.className,
       )}
-      style={
-        {
-          ...props.style,
-          '--fd-animated-height': '0px',
-        } as object
-      }
     >
       <div
         className={cn(
@@ -328,6 +316,12 @@ export function SearchDialogList({
   );
 }
 
+const icons = {
+  text: <Text className="size-4 shrink-0 text-fd-muted-foreground" />,
+  heading: <Hash className="size-4 shrink-0 text-fd-muted-foreground" />,
+  page: <FileText className="size-4 shrink-0" />,
+};
+
 export function SearchDialogListItem({
   item,
   className,
@@ -354,18 +348,26 @@ export function SearchDialogListItem({
       )}
       aria-selected={active}
       className={cn(
-        'flex min-h-10 select-none flex-row items-center gap-2.5 px-3 text-start text-sm',
+        'relative flex select-none flex-row items-center gap-2.5 px-3 py-2 text-start text-sm',
         active && 'bg-fd-accent text-fd-accent-foreground',
+        item.type !== 'page' && 'ps-8',
         className,
       )}
       onPointerMove={() => setActive(item.id)}
       {...props}
     >
       {item.type !== 'page' && (
-        <div role="none" className="ms-2 h-full min-h-10 w-px bg-fd-border" />
+        <div
+          role="none"
+          className="absolute start-5 inset-y-0 w-px bg-fd-border"
+        />
       )}
-      {icons[item.type]}
-      <p className="w-0 flex-1 truncate">{children ?? item.content}</p>
+      {children ?? (
+        <>
+          {icons[item.type]}
+          <p className="min-w-0 truncate">{item.content}</p>
+        </>
+      )}
     </button>
   );
 }
