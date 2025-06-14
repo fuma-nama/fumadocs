@@ -185,7 +185,7 @@ export function SearchDialogContent({
       aria-describedby={undefined}
       {...props}
       className={cn(
-        'fixed left-1/2 top-[10vh] z-50 w-[98vw] max-w-screen-sm -translate-x-1/2 rounded-xl border bg-fd-popover/60 backdrop-blur-sm text-fd-popover-foreground shadow-2xl overflow-hidden shadow-black/20 data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in',
+        'fixed left-1/2 top-[10vh] z-50 w-[98vw] max-w-screen-sm -translate-x-1/2 rounded-xl border bg-fd-popover/60 backdrop-blur-md text-fd-popover-foreground shadow-2xl overflow-hidden shadow-black/20 data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in',
         props.className,
       )}
     >
