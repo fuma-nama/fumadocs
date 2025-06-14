@@ -1,5 +1,20 @@
 # @fuma-docs/openapi
 
+## 9.0.10
+
+### Patch Changes
+
+- 7a45921: Add `absolutePath` and `path` properties to pages, mark `file` as deprecated
+- 1b7bc4b: Add `@types/react` to optional peer dependency to avoid version conflict in monorepos
+- bc7af38: Support C# code example
+- 250ab97: Support Java code example
+- Updated dependencies [b675728]
+- Updated dependencies [7a45921]
+- Updated dependencies [1b7bc4b]
+- Updated dependencies [82fc4c8]
+  - fumadocs-ui@15.5.2
+  - fumadocs-core@15.5.2
+
 ## 9.0.9
 
 ### Patch Changes
