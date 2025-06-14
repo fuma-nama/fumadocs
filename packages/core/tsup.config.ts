@@ -27,5 +27,6 @@ export default defineConfig({
     'src/highlight/index.ts',
     'src/highlight/client.tsx',
     'src/framework/*',
+    'src/mdx-plugins/*',
   ],
 });
