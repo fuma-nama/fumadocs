@@ -60,6 +60,10 @@
       "import": "./dist/mdx-plugins/index.js",
       "types": "./dist/mdx-plugins/index.d.ts"
     },
+    "./mdx-plugins/*": {
+      "import": "./dist/mdx-plugins/*.js",
+      "types": "./dist/mdx-plugins/*.d.ts"
+    },
     "./i18n": {
       "import": "./dist/i18n/index.js",
       "types": "./dist/i18n/index.d.ts"
