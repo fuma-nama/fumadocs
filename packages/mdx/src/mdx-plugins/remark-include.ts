@@ -3,8 +3,8 @@ import { visit } from 'unist-util-visit';
 import type { Code, Root, RootContent } from 'mdast';
 import * as path from 'node:path';
 import * as fs from 'node:fs/promises';
-import matter from 'gray-matter';
 import type { CompilerOptions } from '@/utils/build-mdx';
+import { fumaMatter } from '@/utils/fuma-matter';
 
 function flattenNode(node: RootContent): string {
   if ('children' in node)
@@ -67,6 +67,7 @@ export function remarkInclude(this: Processor): Transformer<Root, Root> {
         queue.push(
           fs
             .readFile(targetPath)
+            .then((buffer) => buffer.toString())
             .then(async (content) => {
               compiler?.addDependency(targetPath);
 
@@ -83,7 +84,7 @@ export function remarkInclude(this: Processor): Transformer<Root, Root> {
                 return;
               }
 
-              const parsed = processor.parse(matter(content).content);
+              const parsed = processor.parse(fumaMatter(content).content);
 
               await update(parsed as Root, targetPath, processor, compiler);
               Object.assign(

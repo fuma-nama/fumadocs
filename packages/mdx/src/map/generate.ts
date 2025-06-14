@@ -7,10 +7,10 @@ import type { LoadedConfig } from '@/utils/config';
 import type { DocCollection, MetaCollection } from '@/config';
 import { validate } from '@/utils/schema';
 import { fileCache } from '@/map/file-cache';
-import matter from 'gray-matter';
 import type { AsyncRuntimeFile } from '@/runtime/types';
 import { load } from 'js-yaml';
 import { getGitTimestamp } from '@/utils/git-timestamp';
+import { fumaMatter } from '@/utils/fuma-matter';
 
 async function readFileWithCache(file: string): Promise<string> {
   const cached = fileCache.read<string>('read-file', file);
@@ -102,17 +102,18 @@ export async function generateJS(
     }
 
     const entries = files.map(async (file) => {
-      const parsed = matter(
+      const parsed = fumaMatter(
         await readFileWithCache(file.absolutePath).catch(() => ''),
       );
+      let data = parsed.data;
 
       if (collection.schema) {
-        parsed.data = (await validate(
+        data = await validate(
           collection.schema,
           parsed.data,
           { path: file.absolutePath, source: parsed.content },
           `invalid frontmatter in ${file.absolutePath}`,
-        )) as Record<string, unknown>;
+        );
       }
 
       let lastModified: Date | undefined;
@@ -123,7 +124,7 @@ export async function generateJS(
       return JSON.stringify({
         info: file,
         lastModified,
-        data: parsed.data,
+        data: data as Record<string, unknown>,
         content: parsed.content,
       } satisfies AsyncRuntimeFile);
     });

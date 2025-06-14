@@ -54,7 +54,6 @@
     "chokidar": "^4.0.3",
     "esbuild": "^0.25.5",
     "estree-util-value-to-estree": "^3.4.0",
-    "gray-matter": "^4.0.3",
     "js-yaml": "^4.1.0",
     "lru-cache": "^11.1.0",
     "picocolors": "^1.1.1",

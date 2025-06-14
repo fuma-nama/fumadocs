@@ -153,7 +153,7 @@ export function SearchDialogFooter(props: ComponentProps<'div'>) {
     <div
       {...props}
       className={cn(
-        'border-t backdrop-brightness-130 p-3 empty:hidden',
+        'border-t bg-fd-secondary/50 p-3 empty:hidden',
         props.className,
       )}
     />
