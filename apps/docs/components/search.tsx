@@ -10,6 +10,7 @@ import {
   SearchDialogIcon,
   SearchDialogInput,
   SearchDialogList,
+  SearchDialogListItem,
   SearchDialogOverlay,
   type SharedProps,
 } from 'fumadocs-ui/components/dialog/search';
@@ -20,7 +21,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from 'fumadocs-ui/components/ui/popover';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, FileText, Hash, TextIcon } from 'lucide-react';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from '@/lib/cn';
 
@@ -28,6 +29,14 @@ const client = new OramaClient({
   endpoint: 'https://cloud.orama.run/v1/indexes/docs-fk97oe',
   api_key: 'oPZjdlFbq5BpR54bV5Vj57RYt83Xosk7',
 });
+
+const icons = {
+  text: <TextIcon className="size-4 shrink-0 text-fd-muted-foreground" />,
+  heading: <Hash className="size-4 shrink-0 text-fd-muted-foreground" />,
+  page: (
+    <FileText className="size-6 bg-fd-secondary outline-2 outline-fd-primary/50 border-fd-primary p-1 -ms-1 rounded-sm border shrink-0" />
+  ),
+};
 
 const items = [
   {
@@ -79,7 +88,25 @@ export default function CustomSearchDialog(props: SharedProps) {
           <SearchDialogInput />
           <SearchDialogClose />
         </SearchDialogHeader>
-        <SearchDialogList items={query.data !== 'empty' ? query.data : null} />
+        <SearchDialogList
+          items={query.data !== 'empty' ? query.data : null}
+          Item={({ item, onClick }) => (
+            <SearchDialogListItem item={item} onClick={onClick}>
+              {icons[item.type]}
+
+              {item.type === 'page' ? (
+                <div className="min-w-0 flex flex-col gap-0.5">
+                  <p className="text-fd-muted-foreground text-xs">
+                    {item.url.split('/').slice(0, -1).join('/')}
+                  </p>
+                  <p className="min-w-0 truncate font-medium">{item.content}</p>
+                </div>
+              ) : (
+                <p className="min-w-0 truncate">{item.content}</p>
+              )}
+            </SearchDialogListItem>
+          )}
+        />
         <SearchDialogFooter className="flex flex-row flex-wrap gap-2 items-center">
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger
