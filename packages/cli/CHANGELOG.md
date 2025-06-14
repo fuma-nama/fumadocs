@@ -1,5 +1,11 @@
 # fumadocs
 
+## 0.2.1
+
+### Patch Changes
+
+- 1b7bc4b: Add `@types/react` to optional peer dependency to avoid version conflict in monorepos
+
 ## 0.2.0
 
 ### Minor Changes

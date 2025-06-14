@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 15.5.2
+
+### Patch Changes
+
+- 7a45921: Add `absolutePath` and `path` properties to pages, mark `file` as deprecated
+- 1b7bc4b: Add `@types/react` to optional peer dependency to avoid version conflict in monorepos
+
 ## 15.5.1
 
 ### Patch Changes
