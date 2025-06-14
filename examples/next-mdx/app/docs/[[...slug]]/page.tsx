@@ -22,6 +22,7 @@ export default async function Page(props: {
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
+        <p>{page.data.content}</p>
         <MDX components={getMDXComponents()} />
       </DocsBody>
     </DocsPage>

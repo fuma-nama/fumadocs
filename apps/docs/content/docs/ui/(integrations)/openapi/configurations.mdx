@@ -84,10 +84,17 @@ import { generateFiles } from 'fumadocs-openapi';
 
 void generateFiles({
   name: (output, document) => {
-    // page info
-    console.log(output);
-    // parsed OpenAPI schema
-    console.log(document);
+    if (output.type === 'operation') {
+      const operation = document.paths![output.item.path]![output.item.method]!;
+      // operation object
+      console.log(operation);
+
+      return 'my-dir/filename';
+    }
+
+    const hook = document.webhooks![output.item.name][output.item.method]!;
+    // webhook object
+    console.log(hook);
     return 'my-dir/filename';
   },
 });

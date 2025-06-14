@@ -1,27 +1,40 @@
 'use client';
-import { inputToString } from '@/utils/input-to-string';
+import { escapeString, inputToString } from '@/utils/input-to-string';
 import type { RequestData } from '@/requests/_shared';
 
-interface GoContext {
+interface BaseContext {
+  /**
+   * Passed by your custom example generator, for your custom media adapter to receive.
+   */
+  customData?: Record<string, unknown>;
+}
+
+interface GoContext extends BaseContext {
   lang: 'go';
   addImport: (name: string) => void;
 }
 
-interface JavaScriptContext {
+interface JavaScriptContext extends BaseContext {
   lang: 'js';
   addImport: (pkg: string, name: string) => void;
 }
 
+interface JavaContext extends BaseContext {
+  lang: 'java';
+  addImport: (specifier: string) => void;
+}
+
+interface CSharpContext extends BaseContext {
+  lang: 'csharp';
+  addImport: (specifier: string) => void;
+}
+
 export type MediaContext =
+  | JavaContext
   | GoContext
   | JavaScriptContext
-  | {
-      lang: string;
-      /**
-       * Passed by your custom example generator, for your custom media adapter to receive.
-       */
-      customData?: Record<string, unknown>;
-    };
+  | CSharpContext
+  | (BaseContext & { lang: string });
 
 export interface MediaAdapter {
   /**
@@ -49,7 +62,7 @@ export const defaultAdapters = {
       return JSON.stringify(data.body);
     },
     generateExample(data, ctx) {
-      return str(data.body, 'json', ctx);
+      return str(data.body, 'application/json', ctx);
     },
   },
   'application/xml': {
@@ -63,7 +76,7 @@ export const defaultAdapters = {
       });
     },
     generateExample(data, ctx) {
-      return str(data.body, 'xml', ctx);
+      return str(data.body, 'application/xml', ctx);
     },
   },
   'application/x-ndjson': {
@@ -74,7 +87,7 @@ export const defaultAdapters = {
       return JSON.stringify(data.body);
     },
     generateExample(data, ctx) {
-      return str(data.body, 'ndjson', ctx);
+      return str(data.body, 'application/x-ndjson', ctx);
     },
   },
   'application/x-www-form-urlencoded': {
@@ -96,7 +109,7 @@ export const defaultAdapters = {
         return `const body = new URLSearchParams(${JSON.stringify(data.body, null, 2)})`;
       }
 
-      return str(data.body, 'url', ctx);
+      return str(data.body, 'application/x-www-form-urlencoded', ctx);
     },
   },
   'multipart/form-data': {
@@ -140,22 +153,37 @@ export const defaultAdapters = {
         s.push(`const body = new FormData();`);
 
         for (const [key, value] of Object.entries(data.body as object)) {
-          s.push(`body.set(${key}, ${inputToString(value)})`);
+          s.push(`body.set(${key}, ${JSON.stringify(inputToString(value))})`);
         }
       }
 
-      if (ctx.lang === 'go' && 'addImport' in ctx) {
-        ctx.addImport('mime/multipart');
-        ctx.addImport('bytes');
+      if (ctx.lang === 'go') {
+        const { addImport } = ctx as GoContext;
+        addImport('mime/multipart');
+        addImport('bytes');
 
         s.push('body := new(bytes.Buffer)');
         s.push('mp := multipart.NewWriter(payload)');
 
         for (const [key, value] of Object.entries(data.body as object)) {
-          s.push(
-            `mp.WriteField("${key}", ${inputToString(value, 'json', 'backtick')})`,
+          const escaped = escapeString(
+            inputToString(value, 'application/json'),
+            '`',
           );
+
+          s.push(`mp.WriteField("${key}", ${escaped})`);
         }
+      }
+
+      if (ctx.lang === 'java') {
+        const { addImport } = ctx as JavaContext;
+        addImport('java.net.http.HttpRequest.BodyPublishers');
+
+        s.push(`var body = BodyPublishers.ofByteArray(new byte[] { ... });`);
+      }
+
+      if (ctx.lang === 'csharp') {
+        s.push(`var body = new MultipartFormDataContent();`);
       }
 
       if (s.length > 0) return s.join('\n');
@@ -174,24 +202,42 @@ export const defaultAdapters = {
 
 function str(
   init: unknown,
-  format: 'xml' | 'json' | 'url' | 'ndjson',
+  mediaType:
+    | 'application/x-www-form-urlencoded'
+    | 'application/x-ndjson'
+    | 'application/json'
+    | 'application/xml',
   ctx: MediaContext,
 ) {
   if (ctx.lang === 'js') {
-    if (format === 'json') {
+    if (mediaType === 'application/json') {
       return `const body = JSON.stringify(${JSON.stringify(init, null, 2)})`;
     }
-    return `const body = ${inputToString(init, format, 'backtick')}`;
+    return `const body = ${escapeString(inputToString(init, mediaType), '`')}`;
   }
 
   if (ctx.lang === 'python') {
-    if (format === 'json') return `body = ${JSON.stringify(init, null, 2)}`;
-    return `body = ${inputToString(init, format, 'python')}`;
+    if (mediaType === 'application/json')
+      return `body = ${JSON.stringify(init, null, 2)}`;
+
+    return `body = ${escapeString(inputToString(init, mediaType), '"""')}`;
   }
 
-  if (ctx.lang === 'go' && 'addImport' in ctx) {
-    ctx.addImport('strings');
+  if (ctx.lang === 'go') {
+    const { addImport } = ctx as GoContext;
+    addImport('strings');
+    return `body := strings.NewReader(${escapeString(inputToString(init, mediaType), '`')})`;
+  }
 
-    return `body := strings.NewReader(${inputToString(init, format, 'backtick')})`;
+  if (ctx.lang === 'java') {
+    const { addImport } = ctx as JavaContext;
+    addImport('java.net.http.HttpRequest.BodyPublishers');
+    return `var body = BodyPublishers.ofString(${escapeString(inputToString(init, mediaType), '"""')});`;
+  }
+
+  if (ctx.lang === 'csharp') {
+    const input = `\n${inputToString(init, mediaType)}\n`;
+
+    return `var body = new StringContent(${escapeString(input, '"""')}, Encoding.UTF8, "${mediaType}");`;
   }
 }

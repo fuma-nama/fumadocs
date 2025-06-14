@@ -13,6 +13,7 @@ import {
 } from '@/source';
 import { type StructuredData } from '@/mdx-plugins';
 import { type LocaleMap } from '@/search/orama/create-i18n';
+import { basename, extname } from '@/source/path';
 
 function pageToIndex(page: Page): AdvancedIndex {
   if (!('structuredData' in page.data)) {
@@ -24,7 +25,7 @@ function pageToIndex(page: Page): AdvancedIndex {
   const structuredData = page.data.structuredData as StructuredData;
 
   return {
-    title: page.data.title ?? page.file.name,
+    title: page.data.title ?? basename(page.path, extname(page.path)),
     description:
       'description' in page.data
         ? (page.data.description as string)

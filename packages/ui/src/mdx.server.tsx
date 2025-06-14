@@ -1,6 +1,7 @@
 import type { LoaderConfig, LoaderOutput, Page } from 'fumadocs-core/source';
 import type { ComponentProps, FC } from 'react';
 import defaultMdxComponents from '@/mdx';
+import * as path from 'node:path';
 
 /**
  * Extend the default Link component to resolve relative file paths in `href`.
@@ -18,7 +19,7 @@ export function createRelativeLink(
     // resolve relative href
     if (href && href.startsWith('.')) {
       const target = source.getPageByHref(href, {
-        dir: page.file.dirname,
+        dir: path.dirname(page.path),
         language: page.locale,
       });
 

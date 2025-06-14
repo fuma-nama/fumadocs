@@ -1,5 +1,50 @@
 # @fuma-docs/openapi
 
+## 9.0.10
+
+### Patch Changes
+
+- 7a45921: Add `absolutePath` and `path` properties to pages, mark `file` as deprecated
+- 1b7bc4b: Add `@types/react` to optional peer dependency to avoid version conflict in monorepos
+- bc7af38: Support C# code example
+- 250ab97: Support Java code example
+- Updated dependencies [b675728]
+- Updated dependencies [7a45921]
+- Updated dependencies [1b7bc4b]
+- Updated dependencies [82fc4c8]
+  - fumadocs-ui@15.5.2
+  - fumadocs-core@15.5.2
+
+## 9.0.9
+
+### Patch Changes
+
+- 201235f: Fix trailing slashes being normalized
+
+## 9.0.8
+
+### Patch Changes
+
+- d435088: fix proxy clone request
+
+## 9.0.7
+
+### Patch Changes
+
+- 77461e5: Fix root schema manipulation with TypeScript definition generation
+
+## 9.0.6
+
+### Patch Changes
+
+- 99e3c95: Consistent URL resolution
+- Updated dependencies [b4916d2]
+- Updated dependencies [8738b9c]
+- Updated dependencies [68526ea]
+- Updated dependencies [a66886b]
+  - fumadocs-core@15.5.1
+  - fumadocs-ui@15.5.1
+
 ## 9.0.5
 
 ### Patch Changes

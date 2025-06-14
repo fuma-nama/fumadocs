@@ -2,6 +2,7 @@ import type { HTMLAttributes } from 'react';
 import type { LoaderConfig, LoaderOutput, Page } from 'fumadocs-core/source';
 import { getPageTreePeers, type PageTree } from 'fumadocs-core/server';
 import { Card, Cards } from '@/components/card';
+import * as path from 'node:path';
 
 /**
  * @deprecated use https://fumadocs.vercel.app/docs/ui/markdown#further-reading-section instead
@@ -37,8 +38,8 @@ export function DocsCategory({
     items = pages
       .filter(
         (item) =>
-          item.file.dirname === page.file.dirname &&
-          item.file.path !== page.file.path,
+          path.dirname(item.path) === path.dirname(page.path) &&
+          item.path !== page.path,
       )
       .map((page) => ({
         type: 'page',

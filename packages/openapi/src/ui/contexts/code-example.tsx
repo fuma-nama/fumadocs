@@ -2,6 +2,7 @@
 import {
   createContext,
   type HTMLAttributes,
+  type ReactNode,
   useContext,
   useEffect,
   useMemo,
@@ -54,7 +55,7 @@ export function CodeExampleProvider({
     data: RequestData;
   }[];
   initialKey?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   const [key, setKey] = useState(initialKey ?? examples[0].key);
   const listeners = useRef<UpdateListener[]>([]);

@@ -1,5 +1,34 @@
 # next-docs-zeta
 
+## 15.5.2
+
+### Patch Changes
+
+- 7a45921: Add `absolutePath` and `path` properties to pages, mark `file` as deprecated
+- 1b7bc4b: Add `@types/react` to optional peer dependency to avoid version conflict in monorepos
+
+## 15.5.1
+
+### Patch Changes
+
+- b4916d2: Move `hide-if-empty` component to Fumadocs Core
+- 8738b9c: Always encode generated slugs for non-ASCII characters in `loader()`
+- a66886b: **Deprecate other parameters for `useDocsSearch()`**
+
+  The new usage passes options to a single object, improving the readability:
+
+  ```ts
+  import { useDocsSearch } from 'fumadocs-core/search/client';
+
+  const { search, setSearch, query } = useDocsSearch({
+    type: 'fetch',
+    locale: 'optional',
+    tag: 'optional',
+    delayMs: 100,
+    allowEmpty: false,
+  });
+  ```
+
 ## 15.5.0
 
 ## 15.4.2

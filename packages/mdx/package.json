@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-mdx",
-  "version": "11.6.6",
+  "version": "11.6.8",
   "description": "The built-in source for Fumadocs",
   "keywords": [
     "NextJs",
@@ -54,21 +54,20 @@
     "chokidar": "^4.0.3",
     "esbuild": "^0.25.5",
     "estree-util-value-to-estree": "^3.4.0",
-    "gray-matter": "^4.0.3",
     "js-yaml": "^4.1.0",
     "lru-cache": "^11.1.0",
     "picocolors": "^1.1.1",
     "tinyexec": "^1.0.1",
     "tinyglobby": "^0.2.14",
     "unist-util-visit": "^5.0.0",
-    "zod": "^3.25.42"
+    "zod": "^3.25.63"
   },
   "devDependencies": {
     "@fumadocs/mdx-remote": "workspace:*",
     "@types/js-yaml": "^4.0.9",
     "@types/mdast": "^4.0.3",
     "@types/mdx": "^2.0.13",
-    "@types/react": "^19.1.6",
+    "@types/react": "^19.1.8",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "mdast-util-mdx-jsx": "^3.2.0",

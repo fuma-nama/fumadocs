@@ -77,16 +77,6 @@ describe('Path utilities', () => {
         "path": "nested/test.01.mdx",
       }
     `);
-
-    expect(parseFilePath('nested\\test.cn.mdx')).toMatchInlineSnapshot(`
-      {
-        "dirname": "nested",
-        "ext": ".mdx",
-        "flattenedPath": "nested/test.cn",
-        "name": "test.cn",
-        "path": "nested/test.cn.mdx",
-      }
-    `);
   });
 
   test('parse folder path', () => {
@@ -99,14 +89,6 @@ describe('Path utilities', () => {
     `);
 
     expect(parseFolderPath('nested/nested')).toMatchInlineSnapshot(`
-      {
-        "dirname": "nested",
-        "name": "nested",
-        "path": "nested/nested",
-      }
-    `);
-
-    expect(parseFolderPath('nested\\nested')).toMatchInlineSnapshot(`
       {
         "dirname": "nested",
         "name": "nested",

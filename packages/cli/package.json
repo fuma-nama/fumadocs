@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/cli",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "The CLI tool for Fumadocs",
   "keywords": [
     "NextJs",
@@ -42,11 +42,10 @@
     "ts-morph": "^26.0.0"
   },
   "devDependencies": {
-    "@types/node": "22.15.28",
-    "@types/react": "^19.1.6",
+    "@types/node": "24.0.1",
     "eslint-config-custom": "workspace:*",
     "tsconfig": "workspace:*",
-    "tsx": "^4.19.4"
+    "tsx": "^4.20.2"
   },
   "publishConfig": {
     "access": "public"

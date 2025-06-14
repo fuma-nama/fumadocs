@@ -26,6 +26,14 @@ const defaultSamples: CodeSample[] = [
     label: 'Python',
     lang: 'python',
   },
+  {
+    label: 'Java',
+    lang: 'java',
+  },
+  {
+    label: 'C#',
+    lang: 'csharp',
+  },
 ];
 
 interface CustomProperty {

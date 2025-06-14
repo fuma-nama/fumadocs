@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-core",
-  "version": "15.5.0",
+  "version": "15.5.2",
   "description": "The library for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
@@ -94,38 +94,38 @@
   "dependencies": {
     "@formatjs/intl-localematcher": "^0.6.1",
     "@orama/orama": "^3.1.6",
-    "@shikijs/rehype": "^3.4.2",
-    "@shikijs/transformers": "^3.4.2",
+    "@shikijs/rehype": "^3.6.0",
+    "@shikijs/transformers": "^3.6.0",
     "github-slugger": "^2.0.0",
     "hast-util-to-estree": "^3.1.3",
     "hast-util-to-jsx-runtime": "^2.3.6",
     "image-size": "^2.0.2",
     "negotiator": "^1.0.0",
-    "react-remove-scroll": "^2.6.3",
+    "react-remove-scroll": "^2.7.1",
     "remark": "^15.0.0",
     "remark-gfm": "^4.0.1",
     "remark-rehype": "^11.1.2",
     "scroll-into-view-if-needed": "^3.1.0",
-    "shiki": "^3.4.2",
+    "shiki": "^3.6.0",
     "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
     "@mdx-js/mdx": "^3.1.0",
     "@oramacloud/client": "^2.1.4",
-    "@tanstack/react-router": "^1.120.12",
+    "@tanstack/react-router": "^1.121.2",
     "@types/estree-jsx": "^1.0.5",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.3",
-    "@types/negotiator": "^0.6.3",
-    "@types/node": "22.15.28",
-    "@types/react": "^19.1.6",
-    "@types/react-dom": "^19.1.5",
-    "algoliasearch": "5.25.0",
+    "@types/negotiator": "^0.6.4",
+    "@types/node": "24.0.1",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "algoliasearch": "5.27.0",
     "eslint-config-custom": "workspace:*",
     "mdast-util-mdx-jsx": "^3.2.0",
     "mdast-util-mdxjs-esm": "^2.0.1",
     "next": "^15.3.3",
-    "react-router": "^7.6.1",
+    "react-router": "^7.6.2",
     "remark-mdx": "^3.1.0",
     "tsconfig": "workspace:*",
     "typescript": "^5.8.3",
@@ -137,9 +137,13 @@
     "algoliasearch": "5.x.x",
     "next": "14.x.x || 15.x.x",
     "react": "18.x.x || 19.x.x",
-    "react-dom": "18.x.x || 19.x.x"
+    "react-dom": "18.x.x || 19.x.x",
+    "@types/react": "*"
   },
   "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    },
     "@oramacloud/client": {
       "optional": true
     },

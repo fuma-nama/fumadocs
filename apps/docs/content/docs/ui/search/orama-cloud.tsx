@@ -43,9 +43,7 @@ export default function CustomSearchDialog(props: SharedProps) {
           <SearchDialogInput />
           <SearchDialogClose />
         </SearchDialogHeader>
-        {query.data !== 'empty' && query.data && (
-          <SearchDialogList items={query.data} />
-        )}
+        <SearchDialogList items={query.data !== 'empty' ? query.data : null} />
         <SearchDialogFooter>
           <a
             href="https://orama.com"

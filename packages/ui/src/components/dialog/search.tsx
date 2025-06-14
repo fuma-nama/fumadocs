@@ -1,12 +1,6 @@
 'use client';
 
-import {
-  FileText,
-  Hash,
-  LoaderCircle,
-  Search as SearchIcon,
-  Text,
-} from 'lucide-react';
+import { FileText, Hash, Search as SearchIcon, Text, X } from 'lucide-react';
 import {
   type ComponentProps,
   createContext,
@@ -16,6 +10,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import { I18nLabel, useI18n } from '@/contexts/i18n';
@@ -127,7 +122,7 @@ export function SearchDialogInput(props: ComponentProps<'input'>) {
 }
 
 export function SearchDialogClose({
-  children = 'Esc',
+  children = <X />,
   className,
   ...props
 }: ComponentProps<'button'>) {
@@ -136,11 +131,13 @@ export function SearchDialogClose({
   return (
     <button
       type="button"
+      aria-label="Close"
       onClick={() => onOpenChange(false)}
       className={cn(
         buttonVariants({
-          color: 'outline',
-          className: 'text-xs p-1.5',
+          color: 'ghost',
+          size: 'icon-sm',
+          className: 'text-fd-muted-foreground -me-2',
         }),
         className,
       )}
@@ -155,7 +152,10 @@ export function SearchDialogFooter(props: ComponentProps<'div'>) {
   return (
     <div
       {...props}
-      className={cn('mt-auto border-t p-3 empty:hidden', props.className)}
+      className={cn(
+        'border-t bg-fd-secondary/50 p-3 empty:hidden',
+        props.className,
+      )}
     />
   );
 }
@@ -167,7 +167,7 @@ export function SearchDialogOverlay(
     <DialogOverlay
       {...props}
       className={cn(
-        'fixed inset-0 z-50 bg-black/30 backdrop-blur-sm data-[state=closed]:animate-fd-fade-out data-[state=open]:animate-fd-fade-in',
+        'fixed inset-0 z-50 data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out',
         props.className,
       )}
     />
@@ -185,7 +185,7 @@ export function SearchDialogContent({
       aria-describedby={undefined}
       {...props}
       className={cn(
-        'fixed left-1/2 top-[10vh] z-50 w-[98vw] max-w-screen-sm -translate-x-1/2 rounded-lg border bg-fd-popover text-fd-popover-foreground shadow-lg data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in',
+        'fixed left-1/2 top-[10vh] z-50 w-[98vw] max-w-screen-sm -translate-x-1/2 rounded-xl border bg-fd-popover/60 backdrop-blur-sm text-fd-popover-foreground shadow-2xl overflow-hidden shadow-black/20 data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in',
         props.className,
       )}
     >
@@ -202,16 +202,16 @@ const icons = {
 };
 
 export function SearchDialogList({
-  items,
+  items = null,
   Empty = () => (
-    <div className="py-12 text-center text-sm">
+    <div className="py-12 text-center text-sm text-fd-muted-foreground">
       <I18nLabel label="searchNoResult" />
     </div>
   ),
   Item = (props) => <SearchDialogListItem {...props} />,
   ...props
 }: Omit<ComponentProps<'div'>, 'children'> & {
-  items: ReactSortedResult[];
+  items: ReactSortedResult[] | null | undefined;
   /**
    * Renderer for empty list UI
    */
@@ -221,7 +221,10 @@ export function SearchDialogList({
    */
   Item?: (props: { item: ReactSortedResult; onClick: () => void }) => ReactNode;
 }) {
-  const [active, setActive] = useState<string | null>(items.at(0)?.id ?? null);
+  const ref = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState<string | null>(() =>
+    items && items.length > 0 ? items[0].id : null,
+  );
   const { onOpenChange } = useSearch();
   const router = useRouter();
 
@@ -232,6 +235,8 @@ export function SearchDialogList({
   };
 
   const onKey = useEffectEvent((e: KeyboardEvent) => {
+    if (!items) return;
+
     if (e.key === 'ArrowDown' || e.key == 'ArrowUp') {
       let idx = items.findIndex((item) => item.id === active);
       if (idx === -1) idx = 0;
@@ -251,41 +256,74 @@ export function SearchDialogList({
   });
 
   useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+
+    const observer = new ResizeObserver(() => {
+      const viewport = element.firstElementChild!;
+
+      element.style.setProperty(
+        '--fd-animated-height',
+        `${viewport.clientHeight}px`,
+      );
+    });
+
+    const viewport = element.firstElementChild;
+    if (viewport) observer.observe(viewport);
+
     window.addEventListener('keydown', onKey);
     return () => {
+      observer.disconnect();
       window.removeEventListener('keydown', onKey);
     };
   }, [onKey]);
 
   useOnChange(items, () => {
-    if (items.length > 0) setActive(items[0].id);
+    if (items && items.length > 0) {
+      setActive(items[0].id);
+    }
   });
 
   return (
     <div
       {...props}
+      ref={ref}
       className={cn(
-        'flex max-h-[460px] flex-col overflow-y-auto border-t p-2',
+        'overflow-hidden h-(--fd-animated-height) transition-[height]',
+        items && 'border-t',
         props.className,
       )}
+      style={
+        {
+          ...props.style,
+          '--fd-animated-height': '0px',
+        } as object
+      }
     >
-      <ListContext.Provider
-        value={useMemo(
-          () => ({
-            active,
-            setActive,
-          }),
-          [active],
+      <div
+        className={cn(
+          'w-full flex flex-col overflow-y-auto max-h-[460px]',
+          !items && 'hidden',
         )}
       >
-        {items.length === 0 && Empty()}
+        <ListContext.Provider
+          value={useMemo(
+            () => ({
+              active,
+              setActive,
+            }),
+            [active],
+          )}
+        >
+          {items?.length === 0 && Empty()}
 
-        {items.map((item) => (
-          <Fragment key={item.id}>
-            {Item({ item, onClick: () => onOpen(item) })}
-          </Fragment>
-        ))}
-      </ListContext.Provider>
+          {items?.map((item) => (
+            <Fragment key={item.id}>
+              {Item({ item, onClick: () => onOpen(item) })}
+            </Fragment>
+          ))}
+        </ListContext.Provider>
+      </div>
     </div>
   );
 }
@@ -316,7 +354,7 @@ export function SearchDialogListItem({
       )}
       aria-selected={active}
       className={cn(
-        'flex min-h-10 select-none flex-row items-center gap-2.5 rounded-lg px-2 text-start text-sm',
+        'flex min-h-10 select-none flex-row items-center gap-2.5 px-3 text-start text-sm',
         active && 'bg-fd-accent text-fd-accent-foreground',
         className,
       )}
@@ -332,24 +370,18 @@ export function SearchDialogListItem({
   );
 }
 
-export function SearchDialogIcon(props: ComponentProps<'div'>) {
+export function SearchDialogIcon(props: ComponentProps<'svg'>) {
   const { isLoading } = useSearch();
 
   return (
-    <div {...props} className={cn('relative size-4', props.className)}>
-      <LoaderCircle
-        className={cn(
-          'absolute size-full animate-spin text-fd-primary transition-opacity',
-          !isLoading && 'opacity-0',
-        )}
-      />
-      <SearchIcon
-        className={cn(
-          'absolute size-full text-fd-muted-foreground transition-opacity',
-          isLoading && 'opacity-0',
-        )}
-      />
-    </div>
+    <SearchIcon
+      {...props}
+      className={cn(
+        'size-4.5 text-fd-muted-foreground',
+        isLoading && 'animate-pulse duration-400',
+        props.className,
+      )}
+    />
   );
 }
 

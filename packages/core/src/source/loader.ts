@@ -1,19 +1,19 @@
 import type * as PageTree from '@/server/page-tree';
 import type { I18nConfig } from '@/i18n';
 import {
+  type ContentStorage,
   loadFiles,
   loadFilesI18n,
-  type LoadOptions,
+  type MetaFile,
+  type PageFile,
   type Transformer,
-  type VirtualFile,
 } from './load-files';
 import type { MetaData, PageData, UrlFn } from './types';
 import {
-  type BaseOptions as BasePageTreeBuilderOptions,
+  type BuildPageTreeOptions,
   createPageTreeBuilder,
 } from './page-tree-builder';
-import { type FileInfo } from './path';
-import type { MetaFile, PageFile, Storage } from './file-system';
+import { type FileInfo, parseFilePath } from './path';
 import { joinPath } from '@/utils/path';
 
 export interface LoaderConfig {
@@ -32,8 +32,8 @@ export interface LoaderOptions<
 > {
   baseUrl: string;
 
-  icon?: NonNullable<BasePageTreeBuilderOptions['resolveIcon']>;
-  slugs?: LoadOptions['getSlugs'];
+  icon?: NonNullable<BuildPageTreeOptions['resolveIcon']>;
+  slugs?: (info: FileInfo) => string[];
   url?: UrlFn;
 
   source: Source<T>;
@@ -42,7 +42,9 @@ export interface LoaderOptions<
   /**
    * Additional options for page tree builder
    */
-  pageTree?: Partial<BasePageTreeBuilderOptions<T['pageData'], T['metaData']>>;
+  pageTree?: Partial<
+    Omit<BuildPageTreeOptions<T['pageData'], T['metaData']>, 'storage'>
+  >;
 
   /**
    * Configure i18n
@@ -58,11 +60,50 @@ export interface Source<Config extends SourceConfig> {
   files: VirtualFile[] | (() => VirtualFile[]);
 }
 
-export interface Page<Data = PageData> {
+interface SharedFileInfo {
   /**
-   * Virtualized file path
+   * Virtualized file path (parsed)
+   *
+   * @deprecated Use `path` instead.
    */
   file: FileInfo;
+
+  /**
+   * Virtualized file path (relative to content directory)
+   *
+   * @example `docs/page.mdx`
+   */
+  path: string;
+
+  /**
+   * Absolute path of the file
+   */
+  absolutePath: string;
+}
+
+export interface VirtualFile {
+  /**
+   * Virtualized path (relative to content directory)
+   *
+   * @example `docs/page.mdx`
+   */
+  path: string;
+
+  /**
+   * Absolute path of the file
+   */
+  absolutePath?: string;
+
+  type: 'page' | 'meta';
+
+  /**
+   * Specified Slugs for page
+   */
+  slugs?: string[];
+  data: unknown;
+}
+
+export interface Page<Data = PageData> extends SharedFileInfo {
   slugs: string[];
   url: string;
   data: Data;
@@ -70,11 +111,7 @@ export interface Page<Data = PageData> {
   locale?: string | undefined;
 }
 
-export interface Meta<Data = MetaData> {
-  /**
-   * Virtualized file path
-   */
-  file: FileInfo;
+export interface Meta<Data = MetaData> extends SharedFileInfo {
   data: Data;
 }
 
@@ -153,51 +190,60 @@ export interface LoaderOutput<Config extends LoaderConfig> {
 }
 
 function indexPages(
-  storages: Record<string, Storage>,
+  storages: Record<string, ContentStorage>,
   getUrl: UrlFn,
   i18n?: I18nConfig,
-): {
-  // (locale.slugs -> page)
-  pages: Map<string, Page>;
+) {
+  const result = {
+    // (locale.slugs -> page)
+    pages: new Map<string, Page>(),
+    // (locale.path -> page)
+    pathToMeta: new Map<string, Meta>(),
+    // (locale.path -> meta)
+    pathToPage: new Map<string, Page>(),
+  };
 
-  getResultFromFile: (file: MetaFile | PageFile) => Page | Meta | undefined;
-} {
   const defaultLanguage = i18n?.defaultLanguage ?? '';
-  const map = new Map<string, Page>();
-  const fileMapped = new WeakMap<object, Page | Meta>();
 
-  for (const item of storages[defaultLanguage].list()) {
+  for (const filePath of storages[defaultLanguage].getFiles()) {
+    const item = storages[defaultLanguage].read(filePath)!;
+
     if (item.format === 'meta') {
-      fileMapped.set(item, fileToMeta(item));
+      result.pathToMeta.set(
+        `${defaultLanguage}.${item.path}`,
+        fileToMeta(item),
+      );
     }
 
     if (item.format === 'page') {
       const page = fileToPage(item, getUrl, defaultLanguage);
-      fileMapped.set(item, page);
-      map.set(`${defaultLanguage}.${page.slugs.join('/')}`, page);
+      result.pathToPage.set(`${defaultLanguage}.${item.path}`, page);
+      result.pages.set(`${defaultLanguage}.${page.slugs.join('/')}`, page);
 
       if (!i18n) continue;
-      const path = joinPath(item.file.dirname, item.file.name);
 
       for (const lang of i18n.languages) {
         if (lang === defaultLanguage) continue;
-        const localizedItem = storages[lang].read(path, 'page');
-        const localizedPage = fileToPage(localizedItem ?? item, getUrl, lang);
+        const localizedItem = storages[lang].read(filePath);
+        const localizedPage = fileToPage(
+          localizedItem?.format === 'page' ? localizedItem : item,
+          getUrl,
+          lang,
+        );
 
         if (localizedItem) {
-          fileMapped.set(localizedItem, localizedPage);
+          result.pathToPage.set(`${lang}.${item.path}`, localizedPage);
         }
-        map.set(`${lang}.${localizedPage.slugs.join('/')}`, localizedPage);
+
+        result.pages.set(
+          `${lang}.${localizedPage.slugs.join('/')}`,
+          localizedPage,
+        );
       }
     }
   }
 
-  return {
-    pages: map,
-    getResultFromFile(file) {
-      return fileMapped.get(file);
-    },
-  };
+  return result;
 }
 
 export function createGetUrl(baseUrl: string, i18n?: I18nConfig): UrlFn {
@@ -266,20 +312,36 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
 
   const files =
     typeof source.files === 'function' ? source.files() : source.files;
+
+  function buildFile(file: VirtualFile): MetaFile | PageFile {
+    if (file.type === 'page') {
+      return {
+        format: 'page',
+        path: file.path,
+        slugs: file.slugs ?? slugsFn(parseFilePath(file.path)),
+        data: file.data as PageData,
+        absolutePath: file.absolutePath ?? '',
+      };
+    }
+
+    return {
+      format: 'meta',
+      path: file.path,
+      absolutePath: file.absolutePath ?? '',
+      data: file.data as MetaData,
+    };
+  }
+
   const storages = i18n
-    ? loadFilesI18n(files, {
+    ? loadFilesI18n(files, buildFile, {
+        ...options,
         i18n: {
           ...i18n,
           parser: i18n.parser ?? 'dot',
         },
-        transformers: options.transformers,
-        getSlugs: slugsFn,
       })
     : {
-        '': loadFiles(files, {
-          transformers: options.transformers,
-          getSlugs: slugsFn,
-        }),
+        '': loadFiles(files, buildFile, options),
       };
 
   const walker = indexPages(storages, getUrl, i18n);
@@ -359,15 +421,13 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
       const ref = node.$ref?.metaFile;
       if (!ref) return;
 
-      const file = storages[language].read(ref, 'meta');
-      if (file) return walker.getResultFromFile(file) as Meta;
+      return walker.pathToMeta.get(`${language}.${ref}`);
     },
     getNodePage(node, language = defaultLanguage) {
       const ref = node.$ref?.file;
       if (!ref) return;
 
-      const file = storages[language].read(ref, 'page');
-      if (file) return walker.getResultFromFile(file) as Page;
+      return walker.pathToPage.get(`${language}.${ref}`);
     },
     getPageTree(locale) {
       if (options.i18n) {
@@ -398,7 +458,11 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
 
 function fileToMeta<Data = MetaData>(file: MetaFile): Meta<Data> {
   return {
-    file: file.file,
+    path: file.path,
+    absolutePath: file.absolutePath,
+    get file() {
+      return parseFilePath(this.path);
+    },
     data: file.data as Data,
   };
 }
@@ -409,10 +473,14 @@ function fileToPage<Data = PageData>(
   locale?: string,
 ): Page<Data> {
   return {
-    file: file.file,
-    url: getUrl(file.data.slugs, locale),
-    slugs: file.data.slugs,
-    data: file.data.data as Data,
+    get file() {
+      return parseFilePath(this.path);
+    },
+    absolutePath: file.absolutePath,
+    path: file.path,
+    url: getUrl(file.slugs, locale),
+    slugs: file.slugs,
+    data: file.data as Data,
     locale,
   };
 }

@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { type ReactNode } from 'react';
 
 const isEmpty = (node: HTMLElement) => {
   for (let i = 0; i < node.childNodes.length; i++) {
@@ -23,7 +23,7 @@ const isEmpty = (node: HTMLElement) => {
  *
  * This can be expensive, please avoid this whenever possible.
  */
-export function HideIfEmpty({ children }: { children: React.ReactNode }) {
+export function HideIfEmpty({ children }: { children: ReactNode }) {
   const id = React.useId();
   const [empty, setEmpty] = React.useState<boolean | undefined>();
 

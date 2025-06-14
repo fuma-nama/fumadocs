@@ -1,5 +1,14 @@
 # @fumadocs/content-collections
 
+## 1.2.1
+
+### Patch Changes
+
+- 1b7bc4b: Add `@types/react` to optional peer dependency to avoid version conflict in monorepos
+- Updated dependencies [7a45921]
+- Updated dependencies [1b7bc4b]
+  - fumadocs-core@15.5.2
+
 ## 1.2.0
 
 ### Minor Changes

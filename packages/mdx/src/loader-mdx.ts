@@ -1,11 +1,11 @@
 import * as path from 'node:path';
 import { parse } from 'node:querystring';
-import grayMatter from 'gray-matter';
 import { type LoaderContext } from 'webpack';
 import { getConfigHash, loadConfig, type LoadedConfig } from '@/utils/config';
 import { buildMDX } from '@/utils/build-mdx';
 import { getGitTimestamp } from './utils/git-timestamp';
 import { validate, ValidationError } from '@/utils/schema';
+import { fumaMatter } from '@/utils/fuma-matter';
 
 export interface Options {
   configPath: string;
@@ -26,7 +26,7 @@ export default async function loader(
   const context = this.context;
   const filePath = this.resourcePath;
   const { configPath, outDir } = this.getOptions();
-  const matter = grayMatter(source);
+  const matter = fumaMatter(source);
 
   // notice that `resourceQuery` can be missing (e.g. `page.mdx`)
   const {
@@ -48,12 +48,13 @@ export default async function loader(
     collection = undefined;
   }
 
+  let data = matter.data;
   const mdxOptions =
     collection?.mdxOptions ?? (await loadDefaultOptions(config));
 
   if (collection?.schema) {
     try {
-      matter.data = (await validate(
+      data = await validate(
         collection.schema,
         matter.data,
         {
@@ -61,7 +62,7 @@ export default async function loader(
           path: filePath,
         },
         `invalid frontmatter in ${filePath}`,
-      )) as Record<string, unknown>;
+      );
     } catch (e) {
       if (e instanceof ValidationError) {
         return callback(new Error(e.toStringFormatted()));
@@ -89,7 +90,7 @@ export default async function loader(
         development: this.mode === 'development',
         ...mdxOptions,
         filePath,
-        frontmatter: matter.data,
+        frontmatter: data as Record<string, unknown>,
         data: {
           lastModified: timestamp,
         },

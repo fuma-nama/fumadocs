@@ -1,5 +1,17 @@
 # fumadocs-python
 
+## 0.0.3
+
+### Patch Changes
+
+- 1b7bc4b: Add `@types/react` to optional peer dependency to avoid version conflict in monorepos
+- Updated dependencies [b675728]
+- Updated dependencies [7a45921]
+- Updated dependencies [1b7bc4b]
+- Updated dependencies [82fc4c8]
+  - fumadocs-ui@15.5.2
+  - fumadocs-core@15.5.2
+
 ## 0.0.2
 
 ### Patch Changes

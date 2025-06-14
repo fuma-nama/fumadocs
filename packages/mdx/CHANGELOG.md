@@ -1,5 +1,27 @@
 # next-docs-mdx
 
+## 11.6.8
+
+### Patch Changes
+
+- 7a45921: Add `absolutePath` and `path` properties to pages, mark `file` as deprecated
+- 1b7bc4b: Add `@types/react` to optional peer dependency to avoid version conflict in monorepos
+- 14e267b: Use custom util to parse frontmatter
+- Updated dependencies [7a45921]
+- Updated dependencies [1b7bc4b]
+  - fumadocs-core@15.5.2
+  - @fumadocs/mdx-remote@1.3.3
+
+## 11.6.7
+
+### Patch Changes
+
+- a5c283f: Support `outDir` option on `createMDX()`
+- Updated dependencies [b4916d2]
+- Updated dependencies [8738b9c]
+- Updated dependencies [a66886b]
+  - fumadocs-core@15.5.1
+
 ## 11.6.6
 
 ### Patch Changes
