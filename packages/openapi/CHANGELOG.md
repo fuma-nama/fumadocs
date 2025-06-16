@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 9.0.12
+
+### Patch Changes
+
+- b1f805a: Parse body optionally in proxy
+
 ## 9.0.11
 
 ### Patch Changes
