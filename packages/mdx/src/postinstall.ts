@@ -15,6 +15,9 @@ export async function postInstall(
   await fs.rm(path.dirname(jsOut), { recursive: true });
 
   await fs.mkdir(path.dirname(jsOut), { recursive: true });
-  await fs.writeFile(jsOut, await generateJS(configPath, config, jsOut, hash));
+  await fs.writeFile(
+    jsOut,
+    await generateJS(configPath, config, { relativeTo: outDir }, hash),
+  );
   console.log('[MDX] types generated');
 }

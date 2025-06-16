@@ -60,10 +60,9 @@ export async function buildMDX(
   const key = `${cacheKey}:${format}`;
   let cached = cache.get(key);
 
-  if (cached === undefined) {
+  if (!cached) {
     cached = createProcessor({
       outputFormat: 'program',
-      development: process.env.NODE_ENV === 'development',
       ...rest,
       remarkPlugins: [remarkInclude, ...(rest.remarkPlugins ?? [])],
       format,

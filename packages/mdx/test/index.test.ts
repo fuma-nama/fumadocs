@@ -68,7 +68,9 @@ for (const { name, collection } of cases) {
         // @ts-expect-error -- test file
         collections: new Map([['docs', collection]]),
       },
-      path.join(file, './fixtures/index-async.output.js'),
+      {
+        relativeTo: path.join(file, './fixtures'),
+      },
       'hash',
     );
 
