@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 15.5.3
+
+### Patch Changes
+
+- 7d1ac21: hotfix paths not being normalized on Windows
+
 ## 15.5.2
 
 ### Patch Changes

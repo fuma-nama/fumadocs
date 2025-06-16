@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-mdx",
-  "version": "11.6.8",
+  "version": "11.6.9",
   "description": "The built-in source for Fumadocs",
   "keywords": [
     "NextJs",
@@ -22,6 +22,11 @@
       "import": "./dist/next/index.js",
       "types": "./dist/next/index.d.ts",
       "require": "./dist/next/index.cjs"
+    },
+    "./vite": {
+      "import": "./dist/vite/index.js",
+      "types": "./dist/vite/index.d.ts",
+      "require": "./dist/vite/index.cjs"
     },
     "./runtime/async": {
       "import": "./dist/runtime/async.js",
@@ -75,14 +80,22 @@
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
     "vfile": "^6.0.3",
+    "vite": "^6.3.5",
     "webpack": "^5.99.9"
   },
   "peerDependencies": {
     "@fumadocs/mdx-remote": "^1.2.0",
     "fumadocs-core": "^14.0.0 || ^15.0.0",
-    "next": "^15.3.0"
+    "next": "^15.3.0",
+    "vite": "6.x.x"
   },
   "peerDependenciesMeta": {
+    "next": {
+      "optional": true
+    },
+    "vite": {
+      "optional": true
+    },
     "@fumadocs/mdx-remote": {
       "optional": true
     }

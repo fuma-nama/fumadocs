@@ -356,14 +356,14 @@ export function SearchDialogListItem({
       onPointerMove={() => setActive(item.id)}
       {...props}
     >
-      {item.type !== 'page' && (
-        <div
-          role="none"
-          className="absolute start-5 inset-y-0 w-px bg-fd-border"
-        />
-      )}
       {children ?? (
         <>
+          {item.type !== 'page' && (
+            <div
+              role="none"
+              className="absolute start-5 inset-y-0 w-px bg-fd-border"
+            />
+          )}
           {icons[item.type]}
           <p className="min-w-0 truncate">{item.content}</p>
         </>

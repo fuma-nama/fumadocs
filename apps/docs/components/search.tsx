@@ -34,7 +34,11 @@ const icons = {
   text: <TextIcon className="size-4 shrink-0 text-fd-muted-foreground" />,
   heading: <Hash className="size-4 shrink-0 text-fd-muted-foreground" />,
   page: (
-    <FileText className="size-6 bg-fd-secondary outline-2 outline-fd-primary/50 border-fd-primary p-1 -ms-1 rounded-sm border shrink-0" />
+    <FileText
+      fill="currentColor"
+      stroke="var(--color-fd-muted)"
+      className="size-6 bg-fd-muted p-0.5 rounded-sm border border-fd-foreground/30 shadow-sm shrink-0"
+    />
   ),
 };
 
@@ -92,15 +96,16 @@ export default function CustomSearchDialog(props: SharedProps) {
           items={query.data !== 'empty' ? query.data : null}
           Item={({ item, onClick }) => (
             <SearchDialogListItem item={item} onClick={onClick}>
+              {item.type !== 'page' && (
+                <div
+                  role="none"
+                  className="absolute start-5.5 inset-y-0 w-px bg-fd-border"
+                />
+              )}
               {icons[item.type]}
 
               {item.type === 'page' ? (
-                <div className="min-w-0 flex flex-col gap-0.5">
-                  <p className="text-fd-muted-foreground text-xs">
-                    {item.url.split('/').slice(0, -1).join('/')}
-                  </p>
-                  <p className="min-w-0 truncate font-medium">{item.content}</p>
-                </div>
+                <p className="min-w-0 truncate font-medium">{item.content}</p>
               ) : (
                 <p className="min-w-0 truncate">{item.content}</p>
               )}

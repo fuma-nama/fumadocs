@@ -26,7 +26,12 @@ export async function start(
     try {
       await fs.writeFile(
         outPath,
-        await generateJS(configPath, config, outPath, configHash),
+        await generateJS(
+          configPath,
+          config,
+          { relativeTo: outDir },
+          configHash,
+        ),
       );
     } catch (err) {
       if (err instanceof ValidationError) {

@@ -51,7 +51,13 @@ export function loadFiles(
   for (const file of files) {
     const parsedPath = normalizePath(file.path);
 
-    storage.write(parsedPath, buildFile(file));
+    storage.write(
+      parsedPath,
+      buildFile({
+        ...file,
+        path: parsedPath,
+      }),
+    );
   }
 
   for (const transformer of transformers) {
