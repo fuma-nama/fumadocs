@@ -1,5 +1,13 @@
 # next-docs-mdx
 
+## 11.6.9
+
+### Patch Changes
+
+- cd86f58: Hotfix Windows EOL being ignored
+- Updated dependencies [7d1ac21]
+  - fumadocs-core@15.5.3
+
 ## 11.6.8
 
 ### Patch Changes
