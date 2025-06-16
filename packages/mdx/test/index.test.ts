@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { ValidationError } from '@/utils/schema';
 import { generateJS } from '@/map/generate';
 import { defineCollections } from '@/config';
+import { fumaMatter } from '@/utils/fuma-matter';
 
 test('format errors', async () => {
   const schema = z.object({
@@ -79,3 +80,49 @@ for (const { name, collection } of cases) {
     );
   });
 }
+
+test('parse frontmatter', () => {
+  expect(
+    fumaMatter(
+      '---\ntitle: hello world\ndescription: I love Fumadocs\n---\nwow looks cool.',
+    ),
+  ).toMatchInlineSnapshot(`
+    {
+      "content": "wow looks cool.",
+      "data": {
+        "description": "I love Fumadocs",
+        "title": "hello world",
+      },
+      "matter": "title: hello world
+    description: I love Fumadocs",
+    }
+  `);
+
+  expect(
+    fumaMatter(
+      '---\r\ntitle: hello world\r\ndescription: I love Fumadocs\r\n---\r\nwow looks cool.',
+    ),
+  ).toMatchInlineSnapshot(`
+    {
+      "content": "wow looks cool.",
+      "data": {
+        "description": "I love Fumadocs",
+        "title": "hello world",
+      },
+      "matter": "title: hello world
+    description: I love Fumadocs",
+    }
+  `);
+
+  expect(fumaMatter('--- \ntitle: hello world\r\n---\r\nwow looks cool.'))
+    .toMatchInlineSnapshot(`
+    {
+      "content": "--- 
+    title: hello world
+    ---
+    wow looks cool.",
+      "data": {},
+      "matter": "",
+    }
+  `);
+});
