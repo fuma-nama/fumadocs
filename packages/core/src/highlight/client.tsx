@@ -3,8 +3,8 @@ import {
   type DependencyList,
   type ReactNode,
   use,
+  useEffect,
   useId,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -15,23 +15,7 @@ import {
   highlight,
   type HighlightOptions,
 } from './shiki';
-import type { RegexEngine } from 'shiki';
 import type { Root } from 'hast';
-
-let jsEngine: Promise<RegexEngine> | undefined;
-
-function getHighlightOptions(from: HighlightOptions): HighlightOptions {
-  if (from.engine) return from;
-
-  jsEngine ??= import('shiki/engine/javascript').then((res) =>
-    res.createJavaScriptRegexEngine(),
-  );
-
-  return {
-    ...from,
-    engine: jsEngine,
-  };
-}
 
 interface Task {
   key: string;
@@ -59,7 +43,11 @@ export function useShiki(
     () => (deps ? JSON.stringify(deps) : `${options.lang}:${code}`),
     [code, deps, options.lang],
   );
-  const shikiOptions = getHighlightOptions(options);
+  const shikiOptions: HighlightOptions = {
+    ...options,
+    engine: options.engine ?? 'js',
+  };
+
   const currentTask = useRef<Task | undefined>({
     key,
     aborted: false,
@@ -81,7 +69,7 @@ export function useShiki(
     return loading;
   });
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (currentTask.current?.key === key) return;
 
     if (currentTask.current) {

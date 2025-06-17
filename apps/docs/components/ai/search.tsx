@@ -1,8 +1,11 @@
 'use client';
 import {
+  Children,
+  type ComponentProps,
   createContext,
   type FormHTMLAttributes,
   type HTMLAttributes,
+  type ReactElement,
   type ReactNode,
   type TextareaHTMLAttributes,
   use,
@@ -14,12 +17,8 @@ import { Loader2, RefreshCw, Send, X } from 'lucide-react';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { cn } from '@/lib/cn';
 import { buttonVariants } from '../../../../packages/ui/src/components/ui/button';
-import type { Processor } from './markdown-processor';
+import { createProcessor, type Processor } from './markdown-processor';
 import Link from 'fumadocs-core/link';
-import {
-  ScrollArea,
-  ScrollViewport,
-} from 'fumadocs-ui/components/ui/scroll-area';
 import {
   Dialog,
   DialogClose,
@@ -32,6 +31,7 @@ import {
 import { type Message, useChat, type UseChatHelpers } from '@ai-sdk/react';
 import type { ProvideLinksToolSchema } from '@/lib/chat/inkeep-qa-schema';
 import type { z } from 'zod';
+import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
 
 const ChatContext = createContext<UseChatHelpers | null>(null);
 function useChatContext() {
@@ -149,8 +149,7 @@ function List(props: Omit<HTMLAttributes<HTMLDivElement>, 'dir'>) {
 
   useEffect(() => {
     if (!containerRef.current) return;
-
-    const observer = new ResizeObserver(() => {
+    function callback() {
       const container = containerRef.current;
       if (!container) return;
 
@@ -158,19 +157,16 @@ function List(props: Omit<HTMLAttributes<HTMLDivElement>, 'dir'>) {
         top: container.scrollHeight,
         behavior: 'instant',
       });
-    });
+    }
 
-    containerRef.current.scrollTop =
-      containerRef.current.scrollHeight - containerRef.current.clientHeight;
+    const observer = new ResizeObserver(callback);
+    callback();
 
-    // after animation
-    setTimeout(() => {
-      const element = containerRef.current?.firstElementChild;
+    const element = containerRef.current?.firstElementChild;
 
-      if (element) {
-        observer.observe(element);
-      }
-    }, 2000);
+    if (element) {
+      observer.observe(element);
+    }
 
     return () => {
       observer.disconnect();
@@ -178,14 +174,16 @@ function List(props: Omit<HTMLAttributes<HTMLDivElement>, 'dir'>) {
   }, []);
 
   return (
-    <ScrollArea {...props}>
-      <ScrollViewport
-        ref={containerRef}
-        className="max-h-[calc(100dvh-240px)] *:!min-w-0 *:!flex *:flex-col"
-      >
-        {props.children}
-      </ScrollViewport>
-    </ScrollArea>
+    <div
+      ref={containerRef}
+      {...props}
+      className={cn(
+        'fd-scroll-container overflow-y-auto max-h-[calc(100dvh-240px)] min-w-0 flex flex-col',
+        props.className,
+      )}
+    >
+      {props.children}
+    </div>
   );
 }
 
@@ -261,33 +259,51 @@ function Message({ message }: { message: Message }) {
   );
 }
 
+function Pre(props: ComponentProps<'pre'>) {
+  const code = Children.only(props.children) as ReactElement;
+  const codeProps = code.props as ComponentProps<'code'>;
+
+  let lang =
+    codeProps.className
+      ?.split(' ')
+      .find((v) => v.startsWith('language-'))
+      ?.slice('language-'.length) ?? 'text';
+
+  if (lang === 'mdx') lang = 'md';
+
+  return (
+    <DynamicCodeBlock lang={lang} code={(codeProps.children ?? '') as string} />
+  );
+}
+
 function Markdown({ text }: { text: string }) {
-  const [currentText, setCurrentText] = useState<string>();
   const [rendered, setRendered] = useState<ReactNode>(map.get(text));
 
-  async function run() {
-    const { createProcessor } = await import('./markdown-processor');
+  useEffect(() => {
+    let aborted = false;
+    async function run() {
+      let result = map.get(text);
+      if (!result) {
+        processor ??= createProcessor();
 
-    processor ??= createProcessor();
-    let result = map.get(text);
+        result = await processor
+          .process(text, {
+            ...defaultMdxComponents,
+            pre: Pre,
+            img: undefined, // use JSX
+          })
+          .catch(() => text);
+      }
 
-    if (!result) {
-      result = await processor
-        .process(text, {
-          ...defaultMdxComponents,
-          img: undefined, // use JSX
-        })
-        .catch(() => text);
+      map.set(text, result);
+      if (!aborted) setRendered(result);
     }
 
-    map.set(text, result);
-    setRendered(result);
-  }
-
-  if (text !== currentText) {
-    setCurrentText(text);
     void run();
-  }
+    return () => {
+      aborted = true;
+    };
+  }, [text]);
 
   return rendered ?? text;
 }
@@ -325,13 +341,15 @@ function Content() {
     },
   });
 
+  const messages = chat.messages.filter((msg) => msg.role !== 'system');
+
   return (
     <ChatContext value={chat}>
-      {chat.messages.length > 0 && (
+      {messages.length > 0 && (
         <List className="bg-fd-popover rounded-xl border shadow-lg animate-fd-dialog-in duration-600">
           <div className="flex flex-col gap-4 p-3 pb-0">
-            {chat.messages.map((item, i) => (
-              <Message key={i} message={item} />
+            {messages.map((item) => (
+              <Message key={item.id} message={item} />
             ))}
           </div>
           <SearchAIActions />
