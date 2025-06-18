@@ -78,11 +78,18 @@ export function createProxy(options: CreateProxyOptions = {}): Proxy {
       );
     }
 
+    const contentLength = req.headers.get('content-length');
+    const hasBody = contentLength && parseInt(contentLength) > 0;
+
     let proxied = new Request(parsedUrl, {
       method: req.method,
       cache: 'no-cache',
       headers: req.headers,
-      body: await req.arrayBuffer(),
+      body:
+        hasBody &&
+        ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method.toUpperCase())
+          ? await req.arrayBuffer()
+          : undefined,
     });
 
     if (overrides?.request) {

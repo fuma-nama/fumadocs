@@ -21,8 +21,10 @@ export const defaultThemes = {
 
 export type HighlightOptionsCommon = CodeToHastOptionsCommon<BundledLanguage> &
   CodeOptionsMeta & {
-    engine?: Awaitable<RegexEngine>;
+    engine?: 'js' | 'oniguruma' | Awaitable<RegexEngine>;
     components?: Partial<Components>;
+
+    fallbackLanguage?: BundledLanguage;
   };
 
 export type HighlightOptionsThemes = CodeOptionsThemes<BundledTheme>;
@@ -33,23 +35,54 @@ export type HighlightOptions = HighlightOptionsCommon &
 const highlighters = new Map<string, Promise<Highlighter>>();
 
 export async function _highlight(code: string, options: HighlightOptions) {
-  const { lang, components: _, engine, ...rest } = options;
+  const {
+    lang: initialLang,
+    fallbackLanguage,
+    components: _,
+    engine,
+    ...rest
+  } = options;
+  let lang = initialLang;
+  let themes: CodeOptionsThemes<BundledTheme>;
+  let themesToLoad;
 
-  let themes: CodeOptionsThemes<BundledTheme> = { themes: defaultThemes };
   if ('theme' in options && options.theme) {
     themes = { theme: options.theme };
-  } else if ('themes' in options && options.themes) {
-    themes = { themes: options.themes };
+    themesToLoad = [themes.theme];
+  } else {
+    themes = {
+      themes:
+        'themes' in options && options.themes ? options.themes : defaultThemes,
+    };
+    themesToLoad = Object.values(themes.themes).filter((v) => v !== undefined);
   }
 
-  const highlighter = await getHighlighter('custom', {
-    engine,
-    langs: [lang],
-    themes:
-      'theme' in themes
-        ? [themes.theme]
-        : Object.values(themes.themes).filter((v) => v !== undefined),
-  });
+  let highlighter;
+  if (typeof engine === 'string') {
+    highlighter = await getHighlighter(engine, {
+      langs: [],
+      themes: themesToLoad,
+    });
+  } else {
+    highlighter = await getHighlighter('custom', {
+      engine,
+      langs: [],
+      themes: themesToLoad,
+    });
+
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(
+        '[Fumadocs `highlight()`] Avoid passing `engine` directly. For custom engines, use `shiki` directly instead.',
+      );
+    }
+  }
+
+  try {
+    await highlighter.loadLanguage(lang as BundledLanguage);
+  } catch {
+    lang = fallbackLanguage ?? 'text';
+    await highlighter.loadLanguage(lang as BundledLanguage);
+  }
 
   return highlighter.codeToHast(code, {
     lang,

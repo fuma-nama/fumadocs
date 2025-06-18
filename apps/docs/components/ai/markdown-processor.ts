@@ -1,30 +1,9 @@
 import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
 import remarkRehype from 'remark-rehype';
-import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
-import rehypeShikiFromHighlighter from '@shikijs/rehype/core';
 import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import { type ReactNode } from 'react';
 import { Fragment, jsx, jsxs } from 'react/jsx-runtime';
-import { createHighlighter } from 'shiki/bundle/web';
-import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
-import type { Root } from 'hast';
-
-interface MetaValue {
-  name: string;
-  regex: RegExp;
-}
-
-/**
- * Custom meta string values
- */
-const metaValues: MetaValue[] = [
-  {
-    name: 'title',
-    regex: /title="(?<value>[^"]*)"/,
-  },
-];
 
 export interface Processor {
   process: (
@@ -34,79 +13,7 @@ export interface Processor {
 }
 
 export function createProcessor(): Processor {
-  function filterMetaString(meta: string): string {
-    let replaced = meta;
-    for (const value of metaValues) {
-      replaced = replaced.replace(value.regex, '');
-    }
-
-    return replaced;
-  }
-
-  const themes = {
-    light: 'vitesse-light',
-    dark: 'vitesse-dark',
-  };
-
-  const rehypeShiki = createHighlighter({
-    langs: [],
-    themes: Object.values(themes),
-    engine: createJavaScriptRegexEngine(),
-  }).then((highlighter) => {
-    return rehypeShikiFromHighlighter(highlighter, {
-      defaultLanguage: 'text',
-      defaultColor: false,
-      themes,
-      lazy: true,
-      parseMetaString(meta) {
-        const map: Record<string, string> = {};
-
-        for (const value of metaValues) {
-          const result = value.regex.exec(meta);
-
-          if (result) {
-            map[value.name] = result[1];
-          }
-        }
-
-        return map;
-      },
-      transformers: [
-        {
-          name: 'pre-process',
-          line(hast) {
-            if (hast.children.length === 0) {
-              // Keep the empty lines when using grid layout
-              hast.children.push({
-                type: 'text',
-                value: ' ',
-              });
-            }
-          },
-          preprocess(_, { meta }) {
-            if (meta) {
-              meta.__raw = filterMetaString(meta.__raw ?? '');
-            }
-          },
-        },
-      ],
-    });
-  });
-
-  const processor = remark()
-    .use(remarkGfm)
-    .use(remarkMath)
-    .use(remarkRehype)
-    .use(rehypeKatex)
-    .use(() => {
-      return async (tree: Root, file) => {
-        const transformer = await rehypeShiki;
-
-        return transformer(tree, file, () => {
-          // do nothing
-        }) as Root;
-      };
-    });
+  const processor = remark().use(remarkGfm).use(remarkRehype);
 
   return {
     async process(content, components) {
