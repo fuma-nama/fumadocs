@@ -3,7 +3,7 @@
   "root": true,
   "pages": [
     "index",
-    "---Subfolder---",
+    "---Separator---",
     {
       "title": "Subfolder",
       "pages": ["../test", "../test2"]
