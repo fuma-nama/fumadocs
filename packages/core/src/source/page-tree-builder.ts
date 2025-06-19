@@ -2,7 +2,7 @@ import type { ReactElement } from 'react';
 import type { I18nConfig } from '@/i18n';
 import type * as PageTree from '../server/page-tree';
 import { joinPath } from '@/utils/path';
-import type { MetaData, PageData, UrlFn } from './types';
+import type { MetaData, PageData, UrlFn, SubfolderMeta } from './types';
 import type { ContentStorage, MetaFile, PageFile } from '@/source/load-files';
 import { basename, extname } from '@/source/path';
 
@@ -103,14 +103,89 @@ function buildAll(
   return output;
 }
 
+function processSubfolderObject(
+  folderPath: string,
+  subfolderMeta: SubfolderMeta,
+  ctx: PageTreeBuilderContext,
+  idx: number,
+  parentRestItems?: Set<string>,
+): PageTree.Folder {
+  const { options } = ctx;
+
+  // Create a virtual folder structure for the subfolder object
+  const children: PageTree.Node[] = [];
+
+  if (subfolderMeta.pages) {
+    // Use parent's restItems if provided, otherwise create our own
+    const restItems =
+      parentRestItems || new Set<string>(ctx.storage.readDir(folderPath) || []);
+    const resolved = subfolderMeta.pages.flatMap<
+      PageTree.Node | typeof rest | typeof restReversed
+    >((pageItem, i) => {
+      if (typeof pageItem === 'string') {
+        return resolveFolderItem(folderPath, pageItem, ctx, i, restItems);
+      } else {
+        // Recursive processing for nested subfolder objects
+        return [
+          processSubfolderObject(folderPath, pageItem, ctx, i, restItems),
+        ];
+      }
+    });
+
+    // Handle rest operators
+    for (let i = 0; i < resolved.length; i++) {
+      const resolvedItem = resolved[i];
+      if (resolvedItem !== rest && resolvedItem !== restReversed) continue;
+
+      const files = ctx.storage.readDir(folderPath) || [];
+      const items = buildAll(
+        files,
+        ctx,
+        (file) => restItems.has(file),
+        resolvedItem === restReversed,
+      );
+
+      resolved.splice(i, 1, ...items);
+      break;
+    }
+
+    children.push(...(resolved as PageTree.Node[]));
+  }
+
+  const node: PageTree.Folder = {
+    type: 'folder',
+    name: subfolderMeta.title || `Subfolder ${idx}`,
+    icon: options.resolveIcon?.(subfolderMeta.icon),
+    defaultOpen: subfolderMeta.defaultOpen,
+    description: subfolderMeta.description,
+    children,
+    $id: `${folderPath}#subfolder-${idx}`,
+  };
+
+  return options.attachFolder?.(node, { children: [] }) ?? node;
+}
+
 function resolveFolderItem(
   folderPath: string,
-  item: string,
+  item: string | SubfolderMeta,
   ctx: PageTreeBuilderContext,
   idx: number,
   restNodePaths: Set<string>,
 ): PageTree.Node[] | typeof rest | typeof restReversed {
   if (item === rest || item === restReversed) return item;
+
+  // Handle subfolder objects
+  if (typeof item === 'object') {
+    const subfolderNode = processSubfolderObject(
+      folderPath,
+      item,
+      ctx,
+      idx,
+      restNodePaths,
+    );
+    return [subfolderNode];
+  }
+
   const { options, resolveName } = ctx;
 
   let match = separator.exec(item);
