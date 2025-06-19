@@ -163,6 +163,7 @@ export function Rate({
           <form className="flex flex-col gap-3" onSubmit={submit}>
             <textarea
               autoFocus
+              required
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               className="border rounded-lg bg-fd-secondary text-fd-secondary-foreground p-3 resize-none focus-visible:outline-none placeholder:text-fd-muted-foreground"
