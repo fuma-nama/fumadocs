@@ -2,7 +2,7 @@ import type { LoaderOutput, Meta, Page } from './loader';
 
 export interface SubfolderMeta {
   title?: string | undefined;
-  icon?: string | undefined; 
+  icon?: string | undefined;
   pages?: (string | SubfolderMeta)[] | undefined;
   defaultOpen?: boolean | undefined;
   description?: string | undefined;
