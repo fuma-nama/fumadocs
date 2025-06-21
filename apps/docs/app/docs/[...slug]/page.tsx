@@ -91,7 +91,7 @@ export default async function Page(props: {
         <p className="text-lg text-fd-muted-foreground">
           {page.data.description}
         </p>
-        <div className="flex flex-row gap-2 items-center mb-8 border-b pb-6">
+        <div className="flex flex-row gap-2 items-center border-b pb-6">
           <LLMCopyButton slug={params.slug} />
           <ViewOptions
             markdownUrl={`${page.url}.mdx`}

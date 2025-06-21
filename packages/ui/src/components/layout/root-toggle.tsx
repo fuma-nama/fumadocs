@@ -57,36 +57,35 @@ export function RootToggle({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      {item ? (
+      {item && (
         <PopoverTrigger
           {...props}
           className={cn(
-            'flex items-center gap-2 rounded-lg pe-2 hover:text-fd-accent-foreground',
+            'flex items-center gap-2 rounded-lg p-2 border bg-fd-secondary/50 text-fd-secondary-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground data-[state=open]:bg-fd-accent',
             props.className,
           )}
         >
           {item}
           <ChevronsUpDown className="size-4 text-fd-muted-foreground" />
         </PopoverTrigger>
-      ) : null}
-      <PopoverContent className="w-(--radix-popover-trigger-width) overflow-hidden p-0">
-        {options.map((item) => (
-          <Link
-            key={item.url}
-            href={item.url}
-            onClick={onClick}
-            {...item.props}
-            className={cn(
-              'flex w-full flex-row items-center gap-2 px-2 py-1.5',
-              selected === item
-                ? 'bg-fd-accent text-fd-accent-foreground'
-                : 'hover:bg-fd-accent/50',
-              item.props?.className,
-            )}
-          >
-            <Item {...item} />
-          </Link>
-        ))}
+      )}
+      <PopoverContent className="flex flex-col gap-2 min-w-(--radix-popover-trigger-width) overflow-hidden p-1">
+        {options
+          .filter((item) => item !== selected)
+          .map((item) => (
+            <Link
+              key={item.url}
+              href={item.url}
+              onClick={onClick}
+              {...item.props}
+              className={cn(
+                'flex w-full items-center gap-2 rounded-lg p-1 hover:bg-fd-accent hover:text-fd-accent-foreground',
+                item.props?.className,
+              )}
+            >
+              <Item {...item} />
+            </Link>
+          ))}
       </PopoverContent>
     </Popover>
   );
@@ -97,12 +96,12 @@ function Item(props: Option) {
     <>
       <>{props.icon}</>
       <div className="flex-1 text-start">
-        <p className="text-[15px] font-medium md:text-sm">{props.title}</p>
-        {props.description ? (
-          <p className="text-sm text-fd-muted-foreground md:text-xs">
-            {props.description}
-          </p>
-        ) : null}
+        <p className="text-[15px] mb-0.5 font-medium md:text-sm">
+          {props.title}
+        </p>
+        <p className="text-sm text-fd-muted-foreground empty:hidden md:text-[13px]">
+          {props.description}
+        </p>
       </div>
     </>
   );

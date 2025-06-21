@@ -1,6 +1,6 @@
 'use client';
 
-import { FileText, Hash, Search as SearchIcon, Text, X } from 'lucide-react';
+import { FileText, Hash, Search as SearchIcon } from 'lucide-react';
 import {
   type ComponentProps,
   createContext,
@@ -28,6 +28,7 @@ import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 import { useRouter } from 'fumadocs-core/framework';
 import type { SharedProps } from '@/contexts/search';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
+import scrollIntoView from 'scroll-into-view-if-needed';
 
 type ReactSortedResult = Omit<SortedResult, 'content'> & {
   external?: boolean;
@@ -101,7 +102,10 @@ export function SearchDialogHeader(props: ComponentProps<'div'>) {
   return (
     <div
       {...props}
-      className={cn('flex flex-row items-center gap-2 px-3', props.className)}
+      className={cn(
+        'flex flex-row items-center gap-2 p-3 pb-2',
+        props.className,
+      )}
     />
   );
 }
@@ -116,13 +120,13 @@ export function SearchDialogInput(props: ComponentProps<'input'>) {
       value={search}
       onChange={(e) => onSearchChange(e.target.value)}
       placeholder={text.search}
-      className="w-0 flex-1 bg-transparent py-3 text-base placeholder:text-fd-muted-foreground focus-visible:outline-none"
+      className="w-0 flex-1 bg-transparent text-lg placeholder:text-fd-muted-foreground/80 focus-visible:outline-none"
     />
   );
 }
 
 export function SearchDialogClose({
-  children = <X />,
+  children = 'ESC',
   className,
   ...props
 }: ComponentProps<'button'>) {
@@ -131,13 +135,12 @@ export function SearchDialogClose({
   return (
     <button
       type="button"
-      aria-label="Close"
       onClick={() => onOpenChange(false)}
       className={cn(
         buttonVariants({
-          color: 'ghost',
-          size: 'icon-sm',
-          className: 'text-fd-muted-foreground -me-1.5',
+          color: 'outline',
+          size: 'sm',
+          className: 'font-mono text-fd-muted-foreground',
         }),
         className,
       )}
@@ -152,10 +155,7 @@ export function SearchDialogFooter(props: ComponentProps<'div'>) {
   return (
     <div
       {...props}
-      className={cn(
-        'border-t bg-fd-secondary/50 p-3 empty:hidden',
-        props.className,
-      )}
+      className={cn('bg-fd-secondary/50 p-3 empty:hidden', props.className)}
     />
   );
 }
@@ -185,7 +185,7 @@ export function SearchDialogContent({
       aria-describedby={undefined}
       {...props}
       className={cn(
-        'fixed left-1/2 top-[10vh] z-50 w-[calc(100vw-2*var(--spacing))] max-w-screen-sm -translate-x-1/2 rounded-2xl border bg-fd-popover/50 backdrop-blur-lg text-fd-popover-foreground shadow-2xl overflow-hidden shadow-black/30 data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in',
+        'fixed divide-y divide-fd-border left-1/2 top-4 md:top-[calc(50%-250px)] z-50 w-[calc(100%-2*var(--spacing))] max-w-screen-sm -translate-x-1/2 rounded-2xl border bg-fd-popover/60 backdrop-blur-xl text-fd-popover-foreground shadow-2xl shadow-black/40 overflow-hidden data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in',
         props.className,
       )}
     >
@@ -284,13 +284,13 @@ export function SearchDialogList({
       ref={ref}
       className={cn(
         'overflow-hidden h-(--fd-animated-height) transition-[height]',
-        items && 'border-t',
+        !items && 'border-b-0',
         props.className,
       )}
     >
       <div
         className={cn(
-          'w-full flex flex-col overflow-y-auto max-h-[460px]',
+          'w-full flex flex-col overflow-y-auto max-h-[460px] p-1',
           !items && 'hidden',
         )}
       >
@@ -317,9 +317,11 @@ export function SearchDialogList({
 }
 
 const icons = {
-  text: <Text className="size-4 shrink-0 text-fd-muted-foreground" />,
+  text: null,
   heading: <Hash className="size-4 shrink-0 text-fd-muted-foreground" />,
-  page: <FileText className="size-4 shrink-0" />,
+  page: (
+    <FileText className="size-6 text-fd-muted-foreground bg-fd-muted border p-0.5 rounded-sm shadow-sm shrink-0" />
+  ),
 };
 
 export function SearchDialogListItem({
@@ -339,8 +341,10 @@ export function SearchDialogListItem({
       ref={useCallback(
         (element: HTMLButtonElement | null) => {
           if (active && element) {
-            element.scrollIntoView({
+            scrollIntoView(element, {
+              scrollMode: 'if-needed',
               block: 'nearest',
+              boundary: element.parentElement,
             });
           }
         },
@@ -348,9 +352,12 @@ export function SearchDialogListItem({
       )}
       aria-selected={active}
       className={cn(
-        'relative flex select-none flex-row items-center gap-2.5 px-3 py-2 text-start text-sm',
-        active && 'bg-fd-accent text-fd-accent-foreground',
+        'relative flex select-none flex-row items-center gap-2 p-2 text-start text-sm rounded-lg',
         item.type !== 'page' && 'ps-8',
+        item.type === 'page' || item.type === 'heading'
+          ? 'font-medium'
+          : 'text-fd-muted-foreground',
+        active && 'bg-fd-accent text-fd-accent-foreground',
         className,
       )}
       onPointerMove={() => setActive(item.id)}
@@ -361,7 +368,7 @@ export function SearchDialogListItem({
           {item.type !== 'page' && (
             <div
               role="none"
-              className="absolute start-5 inset-y-0 w-px bg-fd-border"
+              className="absolute start-4.5 inset-y-0 w-px bg-fd-border"
             />
           )}
           {icons[item.type]}
@@ -379,7 +386,7 @@ export function SearchDialogIcon(props: ComponentProps<'svg'>) {
     <SearchIcon
       {...props}
       className={cn(
-        'size-4.5 text-fd-muted-foreground',
+        'size-5 text-fd-muted-foreground',
         isLoading && 'animate-pulse duration-400',
         props.className,
       )}

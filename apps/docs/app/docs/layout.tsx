@@ -25,12 +25,13 @@ export default function Layout({ children }: { children: ReactNode }) {
                 aria-label="Ask AI"
                 className={cn(
                   buttonVariants({
-                    variant: 'secondary',
+                    variant: 'ghost',
                     size: 'xs',
+                    className: 'text-fd-muted-foreground',
                   }),
                 )}
               >
-                <Sparkles className="size-4 text-fd-primary fill-current" />
+                <Sparkles className="size-4" />
               </AISearchTrigger>
             </div>
           ),
@@ -68,18 +69,17 @@ export default function Layout({ children }: { children: ReactNode }) {
             const meta = source.getNodeMeta(node);
             if (!meta || !node.icon) return option;
 
-            const color = `var(--${meta.file.dirname}-color, var(--color-fd-foreground))`;
+            const color = `var(--${meta.path.split('/')[0]}-color, var(--color-fd-foreground))`;
 
             return {
               ...option,
               icon: (
                 <div
-                  className="rounded-lg p-1.5 shadow-lg ring-2 m-px border [&_svg]:size-6.5 md:[&_svg]:size-5"
+                  className="rounded-lg p-1.5 shadow-lg border [&_svg]:size-6 md:p-1 md:[&_svg]:size-5 md:rounded-md md:mb-auto"
                   style={
                     {
                       color,
-                      borderColor: `color-mix(in oklab, ${color} 50%, transparent)`,
-                      '--tw-ring-color': `color-mix(in oklab, ${color} 20%, transparent)`,
+                      backgroundColor: `color-mix(in oklab, ${color} 10%, transparent)`,
                     } as object
                   }
                 >
