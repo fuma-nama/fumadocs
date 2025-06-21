@@ -1,0 +1,12 @@
+{
+  "title": "Home",
+  "root": true,
+  "pages": [
+    "index",
+    "---Separator---",
+    {
+      "title": "Subfolder",
+      "pages": ["../test", "../test2"]
+    }
+  ]
+}
