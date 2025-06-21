@@ -120,7 +120,7 @@
     "@types/node": "24.0.1",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
-    "algoliasearch": "5.27.0",
+    "algoliasearch": "5.29.0",
     "eslint-config-custom": "workspace:*",
     "mdast-util-mdx-jsx": "^3.2.0",
     "mdast-util-mdxjs-esm": "^2.0.1",
