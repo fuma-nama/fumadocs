@@ -38,15 +38,15 @@
   "dependencies": {
     "@mdx-js/mdx": "^3.1.0",
     "gray-matter": "^4.0.3",
-    "zod": "^3.25.63"
+    "zod": "^3.25.67"
   },
   "devDependencies": {
-    "react": "^19.1.0",
     "@types/mdx": "^2.0.13",
     "@types/node": "24.0.1",
     "@types/react": "^19.1.8",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
+    "react": "^19.1.0",
     "tinyglobby": "^0.2.14",
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
@@ -54,8 +54,8 @@
   },
   "peerDependencies": {
     "@types/react": "*",
-    "react": "18.x.x || 19.x.x",
-    "fumadocs-core": "^14.0.0 || ^15.0.0"
+    "fumadocs-core": "^14.0.0 || ^15.0.0",
+    "react": "18.x.x || 19.x.x"
   },
   "peerDependenciesMeta": {
     "@types/react": {

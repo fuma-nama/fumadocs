@@ -1,4 +1,4 @@
-packages:
-  - packages/*
-  - apps/*
-  - examples/*
+# packages:
+#   - packages/*
+#   - apps/*
+#   - examples/*

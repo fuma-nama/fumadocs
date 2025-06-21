@@ -22,7 +22,7 @@
     "react-router": "^7.5.3"
   },
   "devDependencies": {
-    "@react-router/dev": "^7.5.3",
+    "@react-router/dev": "^7.6.2",
     "@tailwindcss/vite": "^4.1.4",
     "@types/node": "^24.0.1",
     "@types/react": "^19.1.2",
