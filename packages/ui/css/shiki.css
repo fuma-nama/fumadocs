@@ -4,8 +4,7 @@
   }
 
   code .line {
-    line-height: 1.45em;
-    min-height: 1.45em;
+    min-height: 1lh;
     @apply relative;
   }
 

@@ -7,10 +7,10 @@ import type { LoadedConfig } from '@/utils/config';
 import type { DocCollection, MetaCollection } from '@/config';
 import { validate } from '@/utils/schema';
 import { fileCache } from '@/map/file-cache';
-import matter from 'gray-matter';
 import type { AsyncRuntimeFile } from '@/runtime/types';
 import { load } from 'js-yaml';
 import { getGitTimestamp } from '@/utils/git-timestamp';
+import { fumaMatter } from '@/utils/fuma-matter';
 
 async function readFileWithCache(file: string): Promise<string> {
   const cached = fileCache.read<string>('read-file', file);
@@ -19,13 +19,14 @@ async function readFileWithCache(file: string): Promise<string> {
   return (await fs.readFile(file)).toString();
 }
 
+type ImportPathConfig = { relativeTo: string } | { absolute: true };
+
 export async function generateJS(
   configPath: string,
   config: LoadedConfig,
-  outputPath: string,
-  configHash: string,
+  importPath: ImportPathConfig,
+  configHash: string | false = false,
 ): Promise<string> {
-  const outDir = path.dirname(outputPath);
   let asyncInit = false;
   const lines: string[] = [
     getImportCode({
@@ -35,7 +36,7 @@ export async function generateJS(
     }),
     getImportCode({
       type: 'namespace',
-      specifier: toImportPath(configPath, outDir),
+      specifier: toImportPath(configPath, importPath),
       name: '_source',
     }),
   ];
@@ -45,11 +46,16 @@ export async function generateJS(
   async function getDocEntries(collectionName: string, files: FileInfo[]) {
     const items = files.map(async (file, i) => {
       const importId = `${collectionName}_${i}`;
+      const params = [`collection=${collectionName}`];
+      if (configHash) {
+        params.push(`hash=${configHash}`);
+      }
+
       lines.unshift(
         getImportCode({
           type: 'namespace',
           name: importId,
-          specifier: `${toImportPath(file.absolutePath, outDir)}?collection=${collectionName}&hash=${configHash}`,
+          specifier: `${toImportPath(file.absolutePath, importPath)}?${params.join('&')}`,
         }),
       );
 
@@ -102,17 +108,18 @@ export async function generateJS(
     }
 
     const entries = files.map(async (file) => {
-      const parsed = matter(
+      const parsed = fumaMatter(
         await readFileWithCache(file.absolutePath).catch(() => ''),
       );
+      let data = parsed.data;
 
       if (collection.schema) {
-        parsed.data = (await validate(
+        data = await validate(
           collection.schema,
           parsed.data,
           { path: file.absolutePath, source: parsed.content },
           `invalid frontmatter in ${file.absolutePath}`,
-        )) as Record<string, unknown>;
+        );
       }
 
       let lastModified: Date | undefined;
@@ -123,7 +130,7 @@ export async function generateJS(
       return JSON.stringify({
         info: file,
         lastModified,
-        data: parsed.data,
+        data: data as Record<string, unknown>,
         content: parsed.content,
       } satisfies AsyncRuntimeFile);
     });
@@ -216,7 +223,7 @@ type ImportInfo =
       specifier: string;
     };
 
-function getImportCode(info: ImportInfo): string {
+export function getImportCode(info: ImportInfo): string {
   const specifier = JSON.stringify(info.specifier);
 
   if (info.type === 'default') return `import ${info.name} from ${specifier}`;
@@ -233,15 +240,20 @@ function getImportCode(info: ImportInfo): string {
   return `import ${specifier}`;
 }
 
-export function toImportPath(file: string, dir: string): string {
+export function toImportPath(file: string, config: ImportPathConfig): string {
   const ext = path.extname(file);
-  let importPath = path.relative(
-    dir,
-    ext === '.ts' ? file.substring(0, file.length - ext.length) : file,
-  );
+  const filename =
+    ext === '.ts' ? file.substring(0, file.length - ext.length) : file;
+  let importPath;
 
-  if (!path.isAbsolute(importPath) && !importPath.startsWith('.')) {
-    importPath = `./${importPath}`;
+  if ('relativeTo' in config) {
+    importPath = path.relative(config.relativeTo, filename);
+
+    if (!path.isAbsolute(importPath) && !importPath.startsWith('.')) {
+      importPath = `./${importPath}`;
+    }
+  } else {
+    importPath = path.resolve(filename);
   }
 
   return importPath.replaceAll(path.sep, '/');

@@ -2,7 +2,7 @@
 import { cn } from '@/lib/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { ThumbsDown, ThumbsUp } from 'lucide-react';
-import { type SyntheticEvent, useEffect, useState } from 'react';
+import { type SyntheticEvent, useEffect, useState, useTransition } from 'react';
 import {
   Collapsible,
   CollapsibleContent,
@@ -24,53 +24,66 @@ const rateButtonVariants = cva(
 
 export interface Feedback {
   opinion: 'good' | 'bad';
+  url?: string;
   message: string;
 }
 
-function get(url: string): Feedback | null {
-  const item = localStorage.getItem(`docs-feedback-${url}`);
-
-  if (item === null) return null;
-  return JSON.parse(item) as Feedback;
+export interface ActionResponse {
+  githubUrl: string;
 }
 
-function set(url: string, feedback: Feedback | null) {
-  const key = `docs-feedback-${url}`;
-
-  if (feedback) localStorage.setItem(key, JSON.stringify(feedback));
-  else localStorage.removeItem(key);
+interface Result extends Feedback {
+  response?: ActionResponse;
 }
 
 export function Rate({
   onRateAction,
 }: {
-  onRateAction: (url: string, feedback: Feedback) => Promise<void>;
+  onRateAction: (url: string, feedback: Feedback) => Promise<ActionResponse>;
 }) {
   const url = usePathname();
-  const [previous, setPrevious] = useState<Feedback | null>(null);
+  const [previous, setPrevious] = useState<Result | null>(null);
   const [opinion, setOpinion] = useState<'good' | 'bad' | null>(null);
   const [message, setMessage] = useState('');
+  const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
-    setPrevious(get(url));
+    const item = localStorage.getItem(`docs-feedback-${url}`);
+
+    if (item === null) return;
+    setPrevious(JSON.parse(item) as Result);
   }, [url]);
 
+  useEffect(() => {
+    const key = `docs-feedback-${url}`;
+
+    if (previous) localStorage.setItem(key, JSON.stringify(previous));
+    else localStorage.removeItem(key);
+  }, [previous, url]);
+
   function submit(e?: SyntheticEvent) {
-    e?.preventDefault();
     if (opinion == null) return;
 
-    const feedback: Feedback = {
-      opinion,
-      message,
-    };
+    startTransition(async () => {
+      const feedback: Feedback = {
+        opinion,
+        message,
+      };
 
-    void onRateAction(url, feedback);
+      void onRateAction(url, feedback).then((response) => {
+        setPrevious({
+          response,
+          ...feedback,
+        });
+        setMessage('');
+        setOpinion(null);
+      });
+    });
 
-    set(url, feedback);
-    setPrevious(feedback);
-    setMessage('');
-    setOpinion(null);
+    e?.preventDefault();
   }
+
+  const activeOpinion = previous?.opinion ?? opinion;
 
   return (
     <Collapsible
@@ -86,7 +99,7 @@ export function Rate({
           disabled={previous !== null}
           className={cn(
             rateButtonVariants({
-              active: (previous?.opinion ?? opinion) === 'good',
+              active: activeOpinion === 'good',
             }),
           )}
           onClick={() => {
@@ -100,7 +113,7 @@ export function Rate({
           disabled={previous !== null}
           className={cn(
             rateButtonVariants({
-              active: (previous?.opinion ?? opinion) === 'bad',
+              active: activeOpinion === 'bad',
             }),
           )}
           onClick={() => {
@@ -113,28 +126,44 @@ export function Rate({
       </div>
       <CollapsibleContent className="mt-3">
         {previous ? (
-          <div className="px-3 py-6 flex flex-col items-center gap-3 bg-fd-card text-fd-card-foreground text-sm text-center rounded-xl text-fd-muted-foreground">
+          <div className="px-3 py-6 flex flex-col items-center gap-3 bg-fd-card text-fd-muted-foreground text-sm text-center rounded-xl">
             <p>Thank you for your feedback!</p>
-            <button
-              className={cn(
-                buttonVariants({
-                  color: 'secondary',
-                }),
-                'text-xs',
-              )}
-              onClick={() => {
-                setOpinion(previous?.opinion);
-                set(url, null);
-                setPrevious(null);
-              }}
-            >
-              Submit Again?
-            </button>
+            <div className="flex flex-row items-center gap-2">
+              <a
+                href={previous.response?.githubUrl}
+                rel="noreferrer noopener"
+                target="_blank"
+                className={cn(
+                  buttonVariants({
+                    color: 'primary',
+                  }),
+                  'text-xs',
+                )}
+              >
+                View on GitHub
+              </a>
+
+              <button
+                className={cn(
+                  buttonVariants({
+                    color: 'secondary',
+                  }),
+                  'text-xs',
+                )}
+                onClick={() => {
+                  setOpinion(previous.opinion);
+                  setPrevious(null);
+                }}
+              >
+                Submit Again
+              </button>
+            </div>
           </div>
         ) : (
           <form className="flex flex-col gap-3" onSubmit={submit}>
             <textarea
               autoFocus
+              required
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               className="border rounded-lg bg-fd-secondary text-fd-secondary-foreground p-3 resize-none focus-visible:outline-none placeholder:text-fd-muted-foreground"
@@ -148,6 +177,7 @@ export function Rate({
             <button
               type="submit"
               className={cn(buttonVariants({ color: 'outline' }), 'w-fit px-3')}
+              disabled={isPending}
             >
               Submit
             </button>

@@ -1,5 +1,11 @@
 # fumadocs-typescript
 
+## 4.0.6
+
+### Patch Changes
+
+- 1b7bc4b: Add `@types/react` to optional peer dependency to avoid version conflict in monorepos
+
 ## 4.0.5
 
 ### Patch Changes

@@ -82,7 +82,7 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
 
       const clone = pre.cloneNode(true) as HTMLElement;
       clone.querySelectorAll('.nd-copy-ignore').forEach((node) => {
-        node.remove();
+        node.replaceWith('\n');
       });
 
       void navigator.clipboard.writeText(clone.textContent ?? '');
@@ -118,9 +118,7 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
             <figcaption className="flex-1 truncate text-fd-muted-foreground">
               {title}
             </figcaption>
-            {allowCopy ? (
-              <CopyButton className="-me-2" onCopy={onCopy} />
-            ) : null}
+            {allowCopy && <CopyButton className="-me-2" onCopy={onCopy} />}
           </div>
         ) : (
           allowCopy && (

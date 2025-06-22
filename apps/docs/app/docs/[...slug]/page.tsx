@@ -43,7 +43,7 @@ import { getPageTreePeers } from 'fumadocs-core/server';
 import { Card, Cards } from 'fumadocs-ui/components/card';
 import { getMDXComponents } from '@/mdx-components';
 import { APIPage } from 'fumadocs-openapi/ui';
-import { GitHubLink, LLMCopyButton } from './page.client';
+import { LLMCopyButton, ViewOptions } from './page.client';
 import * as path from 'node:path';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
@@ -91,10 +91,11 @@ export default async function Page(props: {
         <p className="text-lg text-fd-muted-foreground">
           {page.data.description}
         </p>
-        <div className="flex flex-row gap-2 items-center mb-8 border-b pb-6">
+        <div className="flex flex-row gap-2 items-center border-b pb-6">
           <LLMCopyButton slug={params.slug} />
-          <GitHubLink
-            url={`https://github.com/${owner}/${repo}/blob/dev/apps/docs/content/docs/${page.path}`}
+          <ViewOptions
+            markdownUrl={`${page.url}.mdx`}
+            githubUrl={`https://github.com/${owner}/${repo}/blob/dev/apps/docs/content/docs/${page.path}`}
           />
         </div>
         <div className="prose flex-1 text-fd-foreground/80">

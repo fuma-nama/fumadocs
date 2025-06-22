@@ -1,11 +1,13 @@
 import * as path from 'node:path';
 import { parse } from 'node:querystring';
-import grayMatter from 'gray-matter';
 import { type LoaderContext } from 'webpack';
-import { getConfigHash, loadConfig, type LoadedConfig } from '@/utils/config';
+import { getConfigHash, loadConfig } from '@/utils/config';
 import { buildMDX } from '@/utils/build-mdx';
 import { getGitTimestamp } from './utils/git-timestamp';
 import { validate, ValidationError } from '@/utils/schema';
+import { fumaMatter } from '@/utils/fuma-matter';
+import { countLines } from '@/utils/count-lines';
+import { loadDefaultOptions } from '@/utils/mdx-options';
 
 export interface Options {
   configPath: string;
@@ -26,7 +28,7 @@ export default async function loader(
   const context = this.context;
   const filePath = this.resourcePath;
   const { configPath, outDir } = this.getOptions();
-  const matter = grayMatter(source);
+  const matter = fumaMatter(source);
 
   // notice that `resourceQuery` can be missing (e.g. `page.mdx`)
   const {
@@ -48,12 +50,13 @@ export default async function loader(
     collection = undefined;
   }
 
+  let data = matter.data;
   const mdxOptions =
     collection?.mdxOptions ?? (await loadDefaultOptions(config));
 
   if (collection?.schema) {
     try {
-      matter.data = (await validate(
+      data = await validate(
         collection.schema,
         matter.data,
         {
@@ -61,7 +64,7 @@ export default async function loader(
           path: filePath,
         },
         `invalid frontmatter in ${filePath}`,
-      )) as Record<string, unknown>;
+      );
     } catch (e) {
       if (e instanceof ValidationError) {
         return callback(new Error(e.toStringFormatted()));
@@ -79,7 +82,7 @@ export default async function loader(
   try {
     // ensure the line number is correct in dev mode
     const lineOffset = '\n'.repeat(
-      this.mode === 'development' ? lines(matter.matter) : 0,
+      this.mode === 'development' ? countLines(matter.matter) : 0,
     );
 
     const file = await buildMDX(
@@ -89,7 +92,7 @@ export default async function loader(
         development: this.mode === 'development',
         ...mdxOptions,
         filePath,
-        frontmatter: matter.data,
+        frontmatter: data as Record<string, unknown>,
         data: {
           lastModified: timestamp,
         },
@@ -105,30 +108,4 @@ export default async function loader(
     error.message = `${fpath}:${error.name}: ${error.message}`;
     callback(error);
   }
-}
-
-async function loadDefaultOptions(config: LoadedConfig) {
-  const input = config.global?.mdxOptions;
-  config._mdx_loader ??= {};
-
-  const mdxLoader = config._mdx_loader;
-  if (!mdxLoader.cachedOptions) {
-    const { getDefaultMDXOptions } = await import('@/utils/mdx-options');
-    mdxLoader.cachedOptions =
-      typeof input === 'function'
-        ? getDefaultMDXOptions(await input())
-        : getDefaultMDXOptions(input ?? {});
-  }
-
-  return mdxLoader.cachedOptions;
-}
-
-function lines(s: string) {
-  let num = 0;
-
-  for (const c of s) {
-    if (c === '\n') num++;
-  }
-
-  return num;
 }

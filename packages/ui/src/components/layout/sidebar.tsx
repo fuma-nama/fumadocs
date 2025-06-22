@@ -32,7 +32,6 @@ import type {
 import type { PageTree } from 'fumadocs-core/server';
 import { useTreeContext, useTreePath } from '@/contexts/tree';
 import { useMediaQuery } from 'fumadocs-core/utils/use-media-query';
-import { RemoveScroll } from 'react-remove-scroll';
 import { Presence } from '@radix-ui/react-presence';
 
 export interface SidebarProps extends ComponentProps<'aside'> {
@@ -66,7 +65,7 @@ interface InternalContext {
 }
 
 const itemVariants = cva(
-  'relative flex flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground [overflow-wrap:anywhere] md:py-1.5 [&_svg]:size-4 [&_svg]:shrink-0',
+  'relative flex flex-row items-center gap-2 rounded-xl p-2 text-start text-fd-muted-foreground [overflow-wrap:anywhere] [&_svg]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       active: {
@@ -118,26 +117,24 @@ export function Sidebar({
         <Presence present={open}>
           <div
             data-state={state}
-            className="fixed z-40 inset-0 bg-black/30 backdrop-blur-sm data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out"
+            className="fixed z-40 inset-0 backdrop-blur-xs data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out"
             onClick={() => setOpen(false)}
           />
         </Presence>
         <Presence present={open}>
           {({ present }) => (
-            <RemoveScroll
-              as="aside"
-              enabled={present}
+            <aside
               id="nd-sidebar-mobile"
               {...props}
               data-state={state}
               className={cn(
-                'fixed text-[15px] flex flex-col py-2 rounded-e-2xl border-e start-0 inset-y-0 w-[85%] max-w-[380px] z-40 bg-fd-background data-[state=open]:animate-fd-sidebar-in data-[state=closed]:animate-fd-sidebar-out',
+                'fixed text-[15px] flex flex-col shadow-lg rounded-2xl border start-2 inset-y-2 w-[85%] max-w-[380px] z-40 bg-fd-background data-[state=open]:animate-fd-sidebar-in data-[state=closed]:animate-fd-sidebar-out',
                 !present && 'invisible',
                 props.className,
               )}
             >
               {props.children}
-            </RemoveScroll>
+            </aside>
           )}
         </Presence>
       </Context.Provider>
@@ -249,7 +246,7 @@ export function SidebarSeparator(props: ComponentProps<'p'>) {
     <p
       {...props}
       className={cn(
-        'inline-flex items-center gap-2 mb-1.5 px-2 font-medium empty:mb-0 [&_svg]:size-4 [&_svg]:shrink-0',
+        'inline-flex items-center gap-2 mb-1.5 px-2 empty:mb-0 [&_svg]:size-4 [&_svg]:shrink-0',
         props.className,
       )}
       style={{

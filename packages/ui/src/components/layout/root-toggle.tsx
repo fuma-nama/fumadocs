@@ -1,5 +1,5 @@
 'use client';
-import { ChevronsUpDown } from 'lucide-react';
+import { Check, ChevronsUpDown } from 'lucide-react';
 import { type ComponentProps, type ReactNode, useMemo, useState } from 'react';
 import Link from 'fumadocs-core/link';
 import { usePathname } from 'fumadocs-core/framework';
@@ -39,13 +39,13 @@ export function RootToggle({
   const pathname = usePathname();
 
   const selected = useMemo(() => {
-    return options.findLast((item) =>
-      item.urls
-        ? item.urls.has(
-            pathname.endsWith('/') ? pathname.slice(0, -1) : pathname,
-          )
-        : isActive(item.url, pathname, true),
-    );
+    const lookup = pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
+
+    return options.findLast((item) => {
+      if (item.urls) return item.urls.has(lookup);
+
+      return isActive(item.url, pathname, true);
+    });
   }, [options, pathname]);
 
   const onClick = () => {
@@ -53,57 +53,69 @@ export function RootToggle({
     setOpen(false);
   };
 
-  const item = selected ? <Item {...selected} /> : placeholder;
+  const item = selected ? (
+    <>
+      <div className="size-9 md:size-5">{selected.icon}</div>
+      <div>
+        <p className="text-sm font-medium">{selected.title}</p>
+        <p className="text-[13px] text-fd-muted-foreground empty:hidden md:hidden">
+          {selected.description}
+        </p>
+      </div>
+    </>
+  ) : (
+    placeholder
+  );
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      {item ? (
+      {item && (
         <PopoverTrigger
           {...props}
           className={cn(
-            'flex items-center gap-2 rounded-lg pe-2 hover:text-fd-accent-foreground',
+            'flex items-center gap-2 rounded-lg p-2 border bg-fd-secondary/50 text-start text-fd-secondary-foreground transition-colors hover:bg-fd-accent data-[state=open]:bg-fd-accent data-[state=open]:text-fd-accent-foreground',
             props.className,
           )}
         >
           {item}
-          <ChevronsUpDown className="size-4 text-fd-muted-foreground" />
+          <ChevronsUpDown className="ms-auto size-4 text-fd-muted-foreground" />
         </PopoverTrigger>
-      ) : null}
-      <PopoverContent className="w-(--radix-popover-trigger-width) overflow-hidden p-0">
-        {options.map((item) => (
-          <Link
-            key={item.url}
-            href={item.url}
-            onClick={onClick}
-            {...item.props}
-            className={cn(
-              'flex w-full flex-row items-center gap-2 px-2 py-1.5',
-              selected === item
-                ? 'bg-fd-accent text-fd-accent-foreground'
-                : 'hover:bg-fd-accent/50',
-              item.props?.className,
-            )}
-          >
-            <Item {...item} />
-          </Link>
-        ))}
+      )}
+      <PopoverContent className="flex flex-col gap-1 min-w-(--radix-popover-trigger-width) overflow-hidden p-1">
+        {options.map((item) => {
+          const isActive = item === selected;
+
+          return (
+            <Link
+              key={item.url}
+              href={item.url}
+              onClick={onClick}
+              {...item.props}
+              className={cn(
+                'flex items-center gap-2 rounded-lg p-1.5 hover:bg-fd-accent hover:text-fd-accent-foreground',
+                item.props?.className,
+              )}
+            >
+              <div className="size-9 md:size-5 md:mt-1 md:mb-auto">
+                {item.icon}
+              </div>
+              <div>
+                <p className="text-sm font-medium">{item.title}</p>
+                <p className="text-[13px] text-fd-muted-foreground empty:hidden">
+                  {item.description}
+                </p>
+              </div>
+
+              <Check
+                className={cn(
+                  'ms-auto size-3.5 text-fd-primary',
+                  !isActive && 'invisible',
+                )}
+              />
+            </Link>
+          );
+        })}
       </PopoverContent>
     </Popover>
-  );
-}
-
-function Item(props: Option) {
-  return (
-    <>
-      <>{props.icon}</>
-      <div className="flex-1 text-start">
-        <p className="text-[15px] font-medium md:text-sm">{props.title}</p>
-        {props.description ? (
-          <p className="text-sm text-fd-muted-foreground md:text-xs">
-            {props.description}
-          </p>
-        ) : null}
-      </div>
-    </>
   );
 }

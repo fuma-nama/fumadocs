@@ -1,5 +1,15 @@
 # fumadocs-twoslash
 
+## 3.1.4
+
+### Patch Changes
+
+- 1b7bc4b: Add `@types/react` to optional peer dependency to avoid version conflict in monorepos
+- Updated dependencies [b675728]
+- Updated dependencies [1b7bc4b]
+- Updated dependencies [82fc4c8]
+  - fumadocs-ui@15.5.2
+
 ## 3.1.3
 
 ### Patch Changes

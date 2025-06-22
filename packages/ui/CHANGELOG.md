@@ -1,5 +1,32 @@
 # next-docs-ui
 
+## 15.5.4
+
+### Patch Changes
+
+- 4a1d3cf: Reduce sidebar intensity
+- 58b7596: Fix copying line breaks with Twoslash codeblocks
+- Updated dependencies [35c3c0b]
+  - fumadocs-core@15.5.4
+
+## 15.5.3
+
+### Patch Changes
+
+- Updated dependencies [7d1ac21]
+  - fumadocs-core@15.5.3
+
+## 15.5.2
+
+### Patch Changes
+
+- b675728: Redesign search dialog style
+- 1b7bc4b: Add `@types/react` to optional peer dependency to avoid version conflict in monorepos
+- 82fc4c8: Avoid direct update to passed props.
+- Updated dependencies [7a45921]
+- Updated dependencies [1b7bc4b]
+  - fumadocs-core@15.5.2
+
 ## 15.5.1
 
 ### Patch Changes
