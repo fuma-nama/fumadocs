@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 15.5.4
+
+### Patch Changes
+
+- 35c3c0b: Support handling duplicated slugs and conflicts such as `dir/index.mdx` vs `dir.mdx`
+
 ## 15.5.3
 
 ### Patch Changes
