@@ -11,7 +11,7 @@ const defaultTransform: GetSidebarTabsOptions['transform'] = (option, node) => {
   return {
     ...option,
     icon: (
-      <div className="rounded-md border bg-fd-secondary p-1 shadow-md [&_svg]:size-5">
+      <div className="size-full [&_svg]:size-full max-md:p-1.5 max-md:rounded-md max-md:border max-md:bg-fd-secondary">
         {node.icon}
       </div>
     ),

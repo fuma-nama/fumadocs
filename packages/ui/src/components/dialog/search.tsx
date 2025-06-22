@@ -120,7 +120,7 @@ export function SearchDialogInput(props: ComponentProps<'input'>) {
       value={search}
       onChange={(e) => onSearchChange(e.target.value)}
       placeholder={text.search}
-      className="w-0 flex-1 bg-transparent text-lg placeholder:text-fd-muted-foreground/80 focus-visible:outline-none"
+      className="w-0 flex-1 bg-transparent text-lg placeholder:text-fd-muted-foreground focus-visible:outline-none"
     />
   );
 }
@@ -167,7 +167,7 @@ export function SearchDialogOverlay(
     <DialogOverlay
       {...props}
       className={cn(
-        'fixed inset-0 z-50 max-md:backdrop-blur-sm data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out',
+        'fixed inset-0 z-50 max-md:backdrop-blur-xs data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out',
         props.className,
       )}
     />
@@ -356,7 +356,7 @@ export function SearchDialogListItem({
         item.type !== 'page' && 'ps-8',
         item.type === 'page' || item.type === 'heading'
           ? 'font-medium'
-          : 'text-fd-muted-foreground',
+          : 'text-fd-popover-foreground/80',
         active && 'bg-fd-accent text-fd-accent-foreground',
         className,
       )}

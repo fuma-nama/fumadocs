@@ -17,10 +17,10 @@
     "version": "changeset version && pnpm install --lockfile-only"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.29.4",
-    "@eslint/js": "^9.28.0",
+    "@changesets/cli": "^2.29.5",
+    "@eslint/js": "^9.29.0",
     "concurrently": "^9.1.2",
-    "eslint": "^9.28.0",
+    "eslint": "^9.29.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "5.2.0",
     "eslint-plugin-tailwindcss": "^3.18.0",
@@ -30,8 +30,8 @@
     "tsup": "8.5.0",
     "turbo": "2.5.4",
     "typescript": "^5.8.3",
-    "typescript-eslint": "^8.34.0",
-    "vitest": "^3.2.3"
+    "typescript-eslint": "^8.34.1",
+    "vitest": "^3.2.4"
   },
   "packageManager": "pnpm@9.14.4",
   "engines": {

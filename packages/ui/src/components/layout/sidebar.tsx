@@ -117,7 +117,7 @@ export function Sidebar({
         <Presence present={open}>
           <div
             data-state={state}
-            className="fixed z-40 inset-0 bg-black/30 backdrop-blur-sm data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out"
+            className="fixed z-40 inset-0 backdrop-blur-xs data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out"
             onClick={() => setOpen(false)}
           />
         </Presence>
@@ -128,7 +128,7 @@ export function Sidebar({
               {...props}
               data-state={state}
               className={cn(
-                'fixed text-[15px] flex flex-col rounded-2xl border start-2 inset-y-2 w-[85%] max-w-[380px] z-40 bg-fd-background data-[state=open]:animate-fd-sidebar-in data-[state=closed]:animate-fd-sidebar-out',
+                'fixed text-[15px] flex flex-col shadow-lg rounded-2xl border start-2 inset-y-2 w-[85%] max-w-[380px] z-40 bg-fd-background data-[state=open]:animate-fd-sidebar-in data-[state=closed]:animate-fd-sidebar-out',
                 !present && 'invisible',
                 props.className,
               )}

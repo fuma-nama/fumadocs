@@ -25,8 +25,8 @@ export default function Layout({ children }: { children: ReactNode }) {
                 aria-label="Ask AI"
                 className={cn(
                   buttonVariants({
-                    variant: 'ghost',
-                    size: 'xs',
+                    variant: 'outline',
+                    size: 'icon',
                     className: 'text-fd-muted-foreground',
                   }),
                 )}
@@ -75,11 +75,11 @@ export default function Layout({ children }: { children: ReactNode }) {
               ...option,
               icon: (
                 <div
-                  className="rounded-lg p-1.5 shadow-lg border [&_svg]:size-6 md:p-1 md:[&_svg]:size-5 md:rounded-md md:mb-auto"
+                  className="[&_svg]:size-full rounded-lg size-full max-md:bg-(--tab-color)/10 max-md:border max-md:p-1.5"
                   style={
                     {
                       color,
-                      backgroundColor: `color-mix(in oklab, ${color} 10%, transparent)`,
+                      '--tab-color': color,
                     } as object
                   }
                 >

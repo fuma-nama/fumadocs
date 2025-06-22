@@ -42,10 +42,10 @@
     "ts-morph": "^26.0.0"
   },
   "devDependencies": {
-    "@types/node": "24.0.1",
+    "@types/node": "24.0.3",
     "eslint-config-custom": "workspace:*",
     "tsconfig": "workspace:*",
-    "tsx": "^4.20.2"
+    "tsx": "^4.20.3"
   },
   "publishConfig": {
     "access": "public"
