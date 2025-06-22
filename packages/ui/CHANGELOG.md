@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 15.5.4
+
+### Patch Changes
+
+- 4a1d3cf: Reduce sidebar intensity
+- 58b7596: Fix copying line breaks with Twoslash codeblocks
+- Updated dependencies [35c3c0b]
+  - fumadocs-core@15.5.4
+
 ## 15.5.3
 
 ### Patch Changes
