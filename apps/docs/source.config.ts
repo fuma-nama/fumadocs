@@ -17,7 +17,7 @@ import {
   remarkSteps,
 } from 'fumadocs-core/mdx-plugins';
 import { remarkAutoTypeTable } from 'fumadocs-typescript';
-import { transformerRemoveNotationEscape } from '@shikijs/transformers';
+import { ElementContent } from 'hast';
 
 export const docs = defineDocs({
   docs: {
@@ -65,7 +65,23 @@ export default defineConfig({
         transformerTwoslash({
           typesCache: createFileSystemTypesCache(),
         }),
-        transformerRemoveNotationEscape(),
+        {
+          name: '@shikijs/transformers:remove-notation-escape',
+          code(hast) {
+            function replace(node: ElementContent): void {
+              if (node.type === 'text') {
+                node.value = node.value.replace('[\\!code', '[!code');
+              } else if ('children' in node) {
+                for (const child of node.children) {
+                  replace(child);
+                }
+              }
+            }
+
+            replace(hast);
+            return hast;
+          },
+        },
       ],
     },
     remarkCodeTabOptions: {

@@ -109,10 +109,9 @@ npm run dev
 Some common questions you may encounter.
 
 <Accordions>
-    <Accordion id='change-base-url' title="How to change the base route of /docs?">
+    <Accordion id='change-base-url' title="How to change the base route of docs?">
 
-You can change the base route of docs (e.g. from `/docs/page` to `/info/page`).
-Since Fumadocs uses Next.js App Router, you can simply rename the route:
+Since Fumadocs uses Next.js App Router, you can change the base route of docs (e.g. from `/docs/page` to `/info/page`) by renaming the route:
 
 <Files>
   <Folder name="app/docs" defaultOpen className="opacity-50" disabled>
@@ -123,14 +122,33 @@ Since Fumadocs uses Next.js App Router, you can simply rename the route:
   </Folder>
 </Files>
 
-And tell Fumadocs to use the new route in `source.ts`:
+And update the base URL of pages in `source.ts`:
 
 ```ts title="lib/source.ts"
 import { loader } from 'fumadocs-core/source';
 
 export const source = loader({
-  baseUrl: '/info',
-  // other options
+  baseUrl: '/info', // [!code highlight]
+});
+```
+
+If you want to remove the entire base route (docs start at `/` instead of `/docs`), it's the same logic.
+
+Make your docs folder a route group.
+
+<Files>
+  <Folder name="app/(docs)" defaultOpen>
+    <File name="layout.tsx" />
+  </Folder>
+</Files>
+
+And update `baseUrl`:
+
+```ts title="lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  baseUrl: '/', // [!code highlight]
 });
 ```
 

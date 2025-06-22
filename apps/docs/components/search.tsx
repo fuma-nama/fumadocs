@@ -10,7 +10,6 @@ import {
   SearchDialogIcon,
   SearchDialogInput,
   SearchDialogList,
-  SearchDialogListItem,
   SearchDialogOverlay,
   type SharedProps,
 } from 'fumadocs-ui/components/dialog/search';
@@ -21,7 +20,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from 'fumadocs-ui/components/ui/popover';
-import { ChevronDown, FileText, Hash, TextIcon } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from '@/lib/cn';
 
@@ -29,18 +28,6 @@ const client = new OramaClient({
   endpoint: 'https://cloud.orama.run/v1/indexes/docs-fk97oe',
   api_key: 'oPZjdlFbq5BpR54bV5Vj57RYt83Xosk7',
 });
-
-const icons = {
-  text: <TextIcon className="size-4 shrink-0 text-fd-muted-foreground" />,
-  heading: <Hash className="size-4 shrink-0 text-fd-muted-foreground" />,
-  page: (
-    <FileText
-      fill="currentColor"
-      stroke="var(--color-fd-muted)"
-      className="size-6 bg-fd-muted p-0.5 rounded-sm border border-fd-foreground/30 shadow-sm shrink-0"
-    />
-  ),
-};
 
 const items = [
   {
@@ -92,26 +79,7 @@ export default function CustomSearchDialog(props: SharedProps) {
           <SearchDialogInput />
           <SearchDialogClose />
         </SearchDialogHeader>
-        <SearchDialogList
-          items={query.data !== 'empty' ? query.data : null}
-          Item={({ item, onClick }) => (
-            <SearchDialogListItem item={item} onClick={onClick}>
-              {item.type !== 'page' && (
-                <div
-                  role="none"
-                  className="absolute start-5.5 inset-y-0 w-px bg-fd-border"
-                />
-              )}
-              {icons[item.type]}
-
-              {item.type === 'page' ? (
-                <p className="min-w-0 truncate font-medium">{item.content}</p>
-              ) : (
-                <p className="min-w-0 truncate">{item.content}</p>
-              )}
-            </SearchDialogListItem>
-          )}
-        />
+        <SearchDialogList items={query.data !== 'empty' ? query.data : null} />
         <SearchDialogFooter className="flex flex-row flex-wrap gap-2 items-center">
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger

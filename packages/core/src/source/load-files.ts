@@ -5,14 +5,7 @@ import { VirtualFile } from '@/source/loader';
 
 export interface LoadOptions {
   transformers?: Transformer[];
-}
-
-export interface I18nLoadOptions extends LoadOptions {
-  i18n: {
-    parser: 'dot' | 'dir';
-    languages: string[];
-    defaultLanguage: string;
-  };
+  buildFiles: (files: VirtualFile[]) => (MetaFile | PageFile)[];
 }
 
 export type ContentStorage = FileSystem<MetaFile | PageFile>;
@@ -42,22 +35,17 @@ export type Transformer = (context: {
 // Virtual files -> Virtual Storage -> Transformers -> Result
 export function loadFiles(
   files: VirtualFile[],
-  buildFile: (file: VirtualFile) => MetaFile | PageFile,
   options: LoadOptions,
 ): ContentStorage {
   const { transformers = [] } = options;
   const storage: ContentStorage = new FileSystem();
+  const normalized: VirtualFile[] = files.map((file) => ({
+    ...file,
+    path: normalizePath(file.path),
+  }));
 
-  for (const file of files) {
-    const parsedPath = normalizePath(file.path);
-
-    storage.write(
-      parsedPath,
-      buildFile({
-        ...file,
-        path: parsedPath,
-      }),
-    );
+  for (const item of options.buildFiles(normalized)) {
+    storage.write(item.path, item);
   }
 
   for (const transformer of transformers) {
@@ -72,18 +60,22 @@ export function loadFiles(
 
 export function loadFilesI18n(
   files: VirtualFile[],
-  buildFile: (file: VirtualFile) => MetaFile | PageFile,
-  options: I18nLoadOptions,
+  options: LoadOptions,
+  i18n: {
+    parser: 'dot' | 'dir';
+    languages: string[];
+    defaultLanguage: string;
+  },
 ): Record<string, ContentStorage> {
-  const parser = options.i18n.parser === 'dir' ? dirParser : dotParser;
+  const parser = i18n.parser === 'dir' ? dirParser : dotParser;
   const storages: Record<string, ContentStorage> = {};
 
-  for (const lang of options.i18n.languages) {
+  for (const lang of i18n.languages) {
     storages[lang] = loadFiles(
       files.flatMap((file) => {
         const [path, locale] = parser(normalizePath(file.path));
 
-        if ((locale ?? options.i18n.defaultLanguage) === lang) {
+        if ((locale ?? i18n.defaultLanguage) === lang) {
           return {
             ...file,
             path,
@@ -92,7 +84,6 @@ export function loadFilesI18n(
 
         return [];
       }),
-      buildFile,
       options,
     );
   }

@@ -94,7 +94,7 @@ export function DocsLayout({
             <div className="flex max-md:hidden">
               <Link
                 href={nav.url ?? '/'}
-                className="inline-flex text-[15px] items-center gap-2.5 font-medium"
+                className="inline-flex text-[15px] items-center gap-2.5 font-medium me-auto"
               >
                 {nav.title}
               </Link>
@@ -106,7 +106,7 @@ export function DocsLayout({
                       color: 'ghost',
                       size: 'icon-sm',
                       className:
-                        'ms-auto mb-auto text-fd-muted-foreground max-md:hidden',
+                        'mb-auto text-fd-muted-foreground max-md:hidden',
                     }),
                   )}
                 >
@@ -114,11 +114,12 @@ export function DocsLayout({
                 </SidebarCollapseTrigger>
               )}
             </div>
-            {tabs.length > 0 && <RootToggle options={tabs} />}
             {searchToggle.enabled !== false &&
               (searchToggle.components?.lg ?? (
                 <LargeSearchToggle hideIfDisabled className="max-md:hidden" />
               ))}
+            {tabs.length > 0 && <RootToggle options={tabs} />}
+
             {sidebarBanner}
           </SidebarHeader>
         </HideIfEmpty>
@@ -139,14 +140,14 @@ export function DocsLayout({
             <div className="flex items-center justify-end">
               {links
                 .filter((item) => item.type === 'icon')
-                .map((item, i) => (
+                .map((item, i, arr) => (
                   <BaseLinkItem
                     key={i}
                     item={item}
                     className={cn(
                       buttonVariants({ size: 'icon', color: 'ghost' }),
                       'text-fd-muted-foreground md:[&_svg]:size-4.5',
-                      i === links.length - 1 && 'me-auto',
+                      i === arr.length - 1 && 'me-auto',
                     )}
                     aria-label={item.label}
                   >

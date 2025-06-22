@@ -1,0 +1,63 @@
+{
+  "$id": "root",
+  "children": [
+    {
+      "$id": "test.mdx",
+      "name": "Hello",
+      "type": "page",
+      "url": "/test",
+    },
+    {
+      "$id": "(nested)",
+      "children": [
+        {
+          "$id": "(nested)/hello.mdx",
+          "name": "Route Group Page",
+          "type": "page",
+          "url": "/hello",
+        },
+      ],
+      "name": "Nested",
+      "type": "folder",
+    },
+    {
+      "$id": "hello",
+      "children": [],
+      "index": {
+        "$id": "hello/index.mdx",
+        "name": "Another hello page",
+        "type": "page",
+        "url": "/hello/index",
+      },
+      "name": "Another hello page",
+      "type": "folder",
+    },
+    {
+      "$id": "nested",
+      "children": [
+        {
+          "$id": "nested/test.mdx",
+          "name": "Nested Page",
+          "type": "page",
+          "url": "/nested/test",
+        },
+      ],
+      "name": "Nested",
+      "type": "folder",
+    },
+    {
+      "external": true,
+      "name": "Text",
+      "type": "page",
+      "url": "https://google.com",
+    },
+    {
+      "external": true,
+      "icon": "Icon",
+      "name": "Text",
+      "type": "page",
+      "url": "https://google.com",
+    },
+  ],
+  "name": "",
+}

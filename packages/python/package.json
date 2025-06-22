@@ -40,18 +40,18 @@
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^24.0.1",
+    "@types/node": "^24.0.3",
     "@types/react": "^19.1.8",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "lucide-react": "^0.514.0",
+    "lucide-react": "^0.522.0",
     "tsconfig": "workspace:*"
   },
   "peerDependencies": {
+    "@types/react": "*",
     "fumadocs-core": "15.x.x",
-    "fumadocs-ui": "15.x.x",
-    "@types/react": "*"
+    "fumadocs-ui": "15.x.x"
   },
   "peerDependenciesMeta": {
     "@types/react": {

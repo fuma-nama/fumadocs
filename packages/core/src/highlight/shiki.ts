@@ -39,7 +39,7 @@ export async function _highlight(code: string, options: HighlightOptions) {
     lang: initialLang,
     fallbackLanguage,
     components: _,
-    engine,
+    engine = 'oniguruma',
     ...rest
   } = options;
   let lang = initialLang;

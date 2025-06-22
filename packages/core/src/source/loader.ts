@@ -13,7 +13,13 @@ import {
   type BuildPageTreeOptions,
   createPageTreeBuilder,
 } from './page-tree-builder';
-import { type FileInfo, parseFilePath } from './path';
+import {
+  basename,
+  dirname,
+  extname,
+  type FileInfo,
+  parseFilePath,
+} from './path';
 import { joinPath } from '@/utils/path';
 
 export interface LoaderConfig {
@@ -269,24 +275,6 @@ export function createGetUrl(baseUrl: string, i18n?: I18nConfig): UrlFn {
   };
 }
 
-/**
- * Convert file path into slugs, also encode non-ASCII characters, so they can work in pathname
- */
-export function getSlugs(info: FileInfo): string[] {
-  const slugs: string[] = [];
-
-  for (const seg of info.dirname.split('/')) {
-    // filter empty names and file groups like (group_name)
-    if (seg.length > 0 && !/^\(.+\)$/.test(seg)) slugs.push(encodeURI(seg));
-  }
-
-  if (info.name !== 'index') {
-    slugs.push(encodeURI(info.name));
-  }
-
-  return slugs;
-}
-
 export function loader<
   Config extends SourceConfig,
   I18n extends I18nConfig | undefined = undefined,
@@ -305,43 +293,83 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
     console.warn('`loader()` now requires a `baseUrl` option to be defined.');
   }
 
-  const { source, slugs: slugsFn = getSlugs, i18n } = options;
+  const {
+    source,
+    baseUrl = '/',
+    i18n,
+    slugs: slugsFn,
+    url: getUrl = createGetUrl(baseUrl ?? '/', i18n),
+    transformers,
+  } = options;
   const defaultLanguage = i18n?.defaultLanguage ?? '';
-  const getUrl =
-    options.url ?? createGetUrl(options.baseUrl ?? '/', options.i18n);
-
   const files =
     typeof source.files === 'function' ? source.files() : source.files;
 
-  function buildFile(file: VirtualFile): MetaFile | PageFile {
-    if (file.type === 'page') {
-      return {
-        format: 'page',
-        path: file.path,
-        slugs: file.slugs ?? slugsFn(parseFilePath(file.path)),
-        data: file.data as PageData,
-        absolutePath: file.absolutePath ?? '',
-      };
+  function buildFiles(files: VirtualFile[]) {
+    const indexFiles: VirtualFile[] = [];
+    const taken = new Set<string>();
+
+    for (const file of files) {
+      if (file.type !== 'page' || file.slugs) continue;
+
+      // for custom slugs function, don't handle conflicting cases like `dir/index.mdx` vs `dir.mdx`
+      if (isIndex(file.path) && !slugsFn) {
+        indexFiles.push(file);
+        continue;
+      }
+
+      file.slugs = slugsFn
+        ? slugsFn(parseFilePath(file.path))
+        : getSlugs(file.path);
+
+      const key = file.slugs.join('/');
+      if (taken.has(key)) throw new Error('Duplicated slugs');
+      taken.add(key);
     }
 
-    return {
-      format: 'meta',
-      path: file.path,
-      absolutePath: file.absolutePath ?? '',
-      data: file.data as MetaData,
-    };
+    for (const file of indexFiles) {
+      file.slugs = getSlugs(file.path);
+
+      if (taken.has(file.slugs.join('/'))) file.slugs.push('index');
+    }
+
+    return files.map((file) => {
+      if (file.type === 'page') {
+        return {
+          format: 'page',
+          path: file.path,
+          slugs: file.slugs!,
+          data: file.data,
+          absolutePath: file.absolutePath ?? '',
+        } as PageFile;
+      }
+
+      return {
+        format: 'meta',
+        path: file.path,
+        absolutePath: file.absolutePath ?? '',
+        data: file.data,
+      } as MetaFile;
+    });
   }
 
   const storages = i18n
-    ? loadFilesI18n(files, buildFile, {
-        ...options,
-        i18n: {
+    ? loadFilesI18n(
+        files,
+        {
+          buildFiles,
+          transformers,
+        },
+        {
           ...i18n,
           parser: i18n.parser ?? 'dot',
         },
-      })
+      )
     : {
-        '': loadFiles(files, buildFile, options),
+        '': loadFiles(files, {
+          transformers,
+          buildFiles,
+        }),
       };
 
   const walker = indexPages(storages, getUrl, i18n);
@@ -372,7 +400,6 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
       pageTree = v;
     },
     getPageByHref(href, { dir = '', language } = {}) {
-      const pages = this.getPages(language);
       const [value, hash] = href.split('#', 2);
       let target;
 
@@ -380,17 +407,18 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
         value.startsWith('.') &&
         (value.endsWith('.md') || value.endsWith('.mdx'))
       ) {
-        const hrefPath = joinPath(dir, value);
-        target = pages.find((item) => item.file.path === hrefPath);
+        const path = joinPath(dir, value);
+
+        target = walker.pathToPage.get(`${language}.${path}`);
       } else {
-        target = pages.find((item) => item.url === value);
+        target = this.getPages(language).find((item) => item.url === value);
       }
 
-      if (!target) return;
-      return {
-        page: target,
-        hash,
-      };
+      if (target)
+        return {
+          page: target,
+          hash,
+        };
     },
     getPages(language = defaultLanguage) {
       const pages: Page[] = [];
@@ -483,4 +511,35 @@ function fileToPage<Data = PageData>(
     data: file.data as Data,
     locale,
   };
+}
+
+const GroupRegex = /^\(.+\)$/;
+
+function isIndex(file: string) {
+  return basename(file, extname(file)) === 'index';
+}
+
+/**
+ * Convert file path into slugs, also encode non-ASCII characters, so they can work in pathname
+ */
+export function getSlugs(file: string | FileInfo): string[] {
+  if (typeof file !== 'string') return getSlugs(file.path);
+
+  const dir = dirname(file);
+  const name = basename(file, extname(file));
+  const slugs: string[] = [];
+
+  for (const seg of dir.split('/')) {
+    // filter empty names and file groups like (group_name)
+    if (seg.length > 0 && !GroupRegex.test(seg)) slugs.push(encodeURI(seg));
+  }
+
+  if (GroupRegex.test(name))
+    throw new Error(`Cannot use folder group in file names: ${file}`);
+
+  if (name !== 'index') {
+    slugs.push(encodeURI(name));
+  }
+
+  return slugs;
 }
