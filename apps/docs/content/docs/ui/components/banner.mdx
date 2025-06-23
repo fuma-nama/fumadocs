@@ -35,6 +35,22 @@ Change the default variant.
 import { Banner } from 'fumadocs-ui/components/banner';
 
 <Banner variant="rainbow">Hello World</Banner>;
+
+// customise colors
+<Banner
+  variant="rainbow"
+  rainbowColors={[
+    'rgba(255,100,0, 0.5)',
+    'rgba(255,100,0, 0.5)',
+    'transparent',
+    'rgba(255,100,0, 0.5)',
+    'transparent',
+    'rgba(255,100,0, 0.5)',
+    'transparent',
+  ]}
+>
+  Hello World
+</Banner>;
 ```
 
 ### Change Layout
