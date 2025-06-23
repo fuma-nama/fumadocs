@@ -45,6 +45,7 @@ import { getMDXComponents } from '@/mdx-components';
 import { APIPage } from 'fumadocs-openapi/ui';
 import { LLMCopyButton, ViewOptions } from './page.client';
 import * as path from 'node:path';
+import { Banner } from 'fumadocs-ui/components/banner';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -131,6 +132,7 @@ export default async function Page(props: {
                   </HoverCard>
                 );
               },
+              Banner,
               Mermaid,
               TypeTable,
               AutoTypeTable: (props) => (

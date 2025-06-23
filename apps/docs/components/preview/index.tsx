@@ -241,16 +241,30 @@ export function banner(): ReactNode {
         </Banner>
 
         <Banner
-          className="z-0"
           id="test-rainbow"
+          className="z-0"
           variant="rainbow"
           changeLayout={false}
         >
           Using the <code>rainbow</code> variant
         </Banner>
 
-        <Banner className="z-0" id="test" changeLayout={false}>
-          Be careful, this banner can be closed
+        <Banner
+          id="test"
+          className="z-0"
+          variant="rainbow"
+          rainbowColors={[
+            'rgba(255,100,0, 0.5)',
+            'rgba(255,100,0, 0.5)',
+            'transparent',
+            'rgba(255,100,0, 0.5)',
+            'transparent',
+            'rgba(255,100,0, 0.5)',
+            'transparent',
+          ]}
+          changeLayout={false}
+        >
+          customise the <code>rainbow</code> variant
         </Banner>
       </div>
     </Wrapper>
