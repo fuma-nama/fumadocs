@@ -86,13 +86,13 @@ export default async function Page(props: {
           </PageTOCPopoverContent>
         </PageTOCPopover>
       )}
-      <PageArticle className="max-md:pb-16">
+      <PageArticle>
         <PageBreadcrumb />
         <h1 className="text-3xl font-semibold">{page.data.title}</h1>
         <p className="text-lg text-fd-muted-foreground">
           {page.data.description}
         </p>
-        <div className="flex flex-row gap-2 items-center border-b pb-6">
+        <div className="flex flex-row gap-2 items-center border-b pt-2 pb-6">
           <LLMCopyButton slug={params.slug} />
           <ViewOptions
             markdownUrl={`${page.url}.mdx`}

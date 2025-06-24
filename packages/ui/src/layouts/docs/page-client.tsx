@@ -384,7 +384,7 @@ export function PageBreadcrumb({
     <div
       {...props}
       className={cn(
-        'flex items-center gap-1.5 text-[15px] text-fd-muted-foreground',
+        'flex items-center gap-1.5 text-sm text-fd-muted-foreground',
         props.className,
       )}
     >

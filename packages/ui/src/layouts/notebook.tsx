@@ -256,7 +256,16 @@ function DocsNavbar({
           {nav}
         </div>
         {searchToggle.enabled !== false &&
-          (searchToggle.components?.lg ?? (
+          (searchToggle.components?.lg ? (
+            <div
+              className={cn(
+                'w-full my-auto max-md:hidden',
+                navMode === 'top' ? 'rounded-xl max-w-sm' : 'max-w-[240px]',
+              )}
+            >
+              {searchToggle.components?.lg}
+            </div>
+          ) : (
             <LargeSearchToggle
               hideIfDisabled
               className={cn(
@@ -327,13 +336,13 @@ function DocsNavbar({
           ) : null}
         </div>
       </div>
-      {tabs.length > 0 ? (
+      {tabs.length > 0 && (
         <LayoutTabs className="px-6 border-b h-10 max-lg:hidden">
           {tabs.map((tab) => (
             <LayoutTab key={tab.url} {...tab} />
           ))}
         </LayoutTabs>
-      ) : null}
+      )}
     </Navbar>
   );
 }
