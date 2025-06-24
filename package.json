@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "turbo run build --filter=./packages/*",
+    "build:pnpm": "pnpm run -r --filter=\"./packages/*\" build ",
     "clean": "turbo run clean",
     "dev": "turbo run dev",
     "dev:all": "turbo run dev --filter=!./examples/*",
