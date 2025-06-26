@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 15.5.5
+
+### Patch Changes
+
+- e9b1c9c: Support `rainbowColors` API in `<Banner />` component
+- d5c9b11: Fix Notebook Layout tab mode `navbar` cannot handle nested tabs
+- Updated dependencies [0d3f76b]
+  - fumadocs-core@15.5.5
+
 ## 15.5.4
 
 ### Patch Changes
@@ -47,7 +56,6 @@
   Changed layout positioning, all layout components now use `fixed` position.
 
   This may impact sites that:
-
   - using custom styling on Fumadocs layouts.
   - added a custom footer (see below).
 
@@ -742,7 +750,6 @@
 ### Minor Changes
 
 - 66c70ec: **Replace official Tailwind CSS typography plugin**
-
   - Other variants like `prose-sm` and `prose-gray` are removed, as it's supposed to only provide support for Fumadocs UI typography styles.
 
 - 05d224c: added the updateAnchor option for the Tabs ui component
@@ -1695,7 +1702,6 @@
 ### Major Changes
 
 - 62b5abb: **New Layout**
-
   - Remove navbar from docs layout, replace it with sidebar.
   - On smaller devices, navbar is always shown.
   - Remove exports of internal components, copying components from the repository is now the preferred way.
