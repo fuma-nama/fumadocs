@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 15.5.5
+
+### Patch Changes
+
+- 0d3f76b: Fix wrong indexing of file system
+
 ## 15.5.4
 
 ### Patch Changes
@@ -1102,7 +1108,6 @@
 - f75287d: **Introduce `fumadocs-docgen` package.**
 
   Offer a better authoring experience for advanced use cases.
-
   - Move `remark-dynamic-content` and `remark-install` plugins to the new package `fumadocs-docgen`.
   - Support Typescript generator by default
 
@@ -1254,7 +1259,6 @@
 ### Major Changes
 
 - 2ea9437: **Migrate to rehype-shikiji**
-
   - Dropped support for inline code syntax highlighting
   - Use notation-based word/line highlighting instead of meta string
 
