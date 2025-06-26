@@ -28,7 +28,6 @@ import {
 import type { PageTree } from 'fumadocs-core/server';
 import {
   LayoutBody,
-  LayoutTab,
   LayoutTabs,
   Navbar,
   NavbarSidebarTrigger,
@@ -118,7 +117,7 @@ export function DocsLayout(props: DocsLayoutProps) {
             {...sidebar}
             className={cn(
               navMode === 'top'
-                ? 'md:bg-transparent'
+                ? 'border-e-0 md:bg-transparent'
                 : 'md:[--fd-nav-height:0px]',
               sidebar.className,
             )}
@@ -337,11 +336,10 @@ function DocsNavbar({
         </div>
       </div>
       {tabs.length > 0 && (
-        <LayoutTabs className="px-6 border-b h-10 max-lg:hidden">
-          {tabs.map((tab) => (
-            <LayoutTab key={tab.url} {...tab} />
-          ))}
-        </LayoutTabs>
+        <LayoutTabs
+          className="px-6 border-b h-10 max-lg:hidden"
+          options={tabs}
+        />
       )}
     </Navbar>
   );
