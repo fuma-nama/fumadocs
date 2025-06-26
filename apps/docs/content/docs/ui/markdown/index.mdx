@@ -285,7 +285,7 @@ return new ResizeObserver(() => {}) // [!code focus]
 
 #### Tab Groups
 
-Make sure to add MDX components first:
+Make sure to add the required MDX components first:
 
 ```tsx title="mdx-components.tsx"
 import defaultMdxComponents from 'fumadocs-ui/mdx';
@@ -319,44 +319,7 @@ console.log('A');
 console.log('B');
 ```
 
-### Include
-
-> This is only available on **Fumadocs MDX**.
-
-Reference another file (can also be a Markdown/MDX document).
-Specify the target file path in `<include>` tag (relative to the MDX file itself).
-
-```mdx title="page.mdx"
-<include>./another.mdx</include>
-```
-
-See [other usages](/docs/mdx/include).
-
-## Additional Features
-
-You may be interested:
-
-<DocsCategory />
-
-### Package Install
-
-Generate commands for installing packages via package managers.
-
-````md tab="Input"
-```package-install
-npm i next -D
-```
-````
-
-```package-install tab="Output"
-npm i next -D
-```
-
-To enable, see [Remark Install](/docs/headless/mdx/install).
-
-### Tab Groups with MDX
-
-You can use MDX inside tab values too, enable it the remark plugin:
+While disabled by default, you use MDX in tab values by configuring the remark plugin:
 
 ```ts tab="Fumadocs MDX" title="source.config.ts"
 import { defineConfig } from 'fumadocs-mdx/config';
@@ -403,3 +366,42 @@ console.log('A');
 ```ts tab="<Rocket /> Tab 2"
 console.log('B');
 ```
+
+### Include
+
+> This is only available on **Fumadocs MDX**.
+
+Reference another file (can also be a Markdown/MDX document).
+Specify the target file path in `<include>` tag (relative to the MDX file itself).
+
+```mdx title="page.mdx"
+<include>./another.mdx</include>
+```
+
+See [other usages of include](/docs/mdx/include).
+
+### Other Components
+
+You can configure & use the [built-in components](/docs/ui/components) in your MDX document, such as Tabs, Accordions and Zoomable Image.
+
+## Additional Features
+
+You may be interested:
+
+<DocsCategory />
+
+### Package Install
+
+Generate commands for installing packages via package managers.
+
+````md tab="Input"
+```package-install
+npm i next -D
+```
+````
+
+```package-install tab="Output"
+npm i next -D
+```
+
+To enable, see [Remark Install](/docs/headless/mdx/install).

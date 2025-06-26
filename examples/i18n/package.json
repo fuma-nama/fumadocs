@@ -8,7 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
-    "@orama/tokenizers": "^3.1.6",
+    "@orama/tokenizers": "^3.1.9",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",

@@ -1,6 +1,6 @@
 'use client';
 import { cn } from '@/utils/cn';
-import { type ComponentProps } from 'react';
+import { type ComponentProps, useMemo } from 'react';
 import { useSidebar } from '@/contexts/sidebar';
 import { useNav } from '@/contexts/layout';
 import { buttonVariants } from '@/components/ui/button';
@@ -81,7 +81,25 @@ export function NavbarSidebarTrigger({
   );
 }
 
-export function LayoutTabs(props: ComponentProps<'div'>) {
+export function LayoutTabs({
+  options,
+  ...props
+}: ComponentProps<'div'> & {
+  options: Option[];
+}) {
+  const pathname = usePathname();
+  const selected = useMemo(() => {
+    const url = pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
+
+    return options.findLast((option) => {
+      if (option.urls) {
+        return option.urls.has(url);
+      }
+
+      return isActive(option.url, pathname, true);
+    });
+  }, [options, pathname]);
+
   return (
     <div
       {...props}
@@ -90,30 +108,33 @@ export function LayoutTabs(props: ComponentProps<'div'>) {
         props.className,
       )}
     >
-      {props.children}
+      {options.map((option) => (
+        <LayoutTab
+          key={option.url}
+          selected={selected === option}
+          option={option}
+        />
+      ))}
     </div>
   );
 }
 
-export function LayoutTab(item: Option) {
-  const { closeOnRedirect } = useSidebar();
-  const pathname = usePathname();
-  const selected = item.urls
-    ? item.urls.has(pathname.endsWith('/') ? pathname.slice(0, -1) : pathname)
-    : isActive(item.url, pathname, true);
-
+function LayoutTab({
+  option,
+  selected = false,
+}: {
+  option: Option;
+  selected?: boolean;
+}) {
   return (
     <Link
       className={cn(
         'inline-flex items-center py-2.5 border-b border-transparent gap-2 text-fd-muted-foreground text-sm text-nowrap',
         selected && 'text-fd-foreground font-medium border-fd-primary',
       )}
-      href={item.url}
-      onClick={() => {
-        closeOnRedirect.current = false;
-      }}
+      href={option.url}
     >
-      {item.title}
+      {option.title}
     </Link>
   );
 }

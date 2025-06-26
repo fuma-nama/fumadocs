@@ -43,7 +43,7 @@ export class FileSystem<File> {
       if (this.folders.has(segment)) continue;
 
       this.folders.set(segment, []);
-      this.readDir(dirname(segment))?.push(path);
+      this.folders.get(dirname(segment))!.push(segment);
     }
   }
 }

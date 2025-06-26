@@ -53,17 +53,17 @@ export default function Layout({ children }: { children: ReactNode }) {
 }
 ```
 
-### Sidebar Tabs
+### Sidebar Tabs (Dropdown)
 
-Tabs are folders with tab-like behaviours, only the content of opened tab will be visible.
-
-Fumadocs provide a dropdown component to switch between tabs, it will be hidden unless one of its items is active.
+Sidebar Tabs are folders with tab-like behaviours, only the content of opened tab will be visible.
 
 <div className='flex justify-center items-center *:max-w-[360px] bg-gradient-to-br from-fd-primary/10 rounded-xl border'>
 
     ![Sidebar Tabs](/docs/sidebar-tabs.png)
 
 </div>
+
+By default, the tab trigger will be displayed as a **Dropdown** component (hidden unless one of its items is active).
 
 You can add items by marking folders as [Root Folders](/docs/ui/page-conventions#root-folder), create a `meta.json` file in the folder:
 

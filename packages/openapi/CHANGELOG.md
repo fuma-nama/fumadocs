@@ -1,5 +1,15 @@
 # @fuma-docs/openapi
 
+## 9.0.14
+
+### Patch Changes
+
+- Updated dependencies [e9b1c9c]
+- Updated dependencies [d5c9b11]
+- Updated dependencies [0d3f76b]
+  - fumadocs-ui@15.5.5
+  - fumadocs-core@15.5.5
+
 ## 9.0.13
 
 ### Patch Changes
@@ -121,7 +131,6 @@
 - bdef238: **Redesign `generateFiles`**
 
   This redesign will finalize the behaviour of `generateFiles` to make it simpler, consistent across different versions of Fumadocs OpenAPI.
-
   - Abandoned `groupByFolder`, it's deprecated long time ago and can be replaced with `groupBy`.
   - Improved type safety, `groupBy` is now only available with `per` set to `operation`.
   - `name` usage changed (see below).
@@ -173,7 +182,6 @@
   ```
 
   With `per: operation`, you can use `groupBy` to group pages:
-
   - tag: `{tag}/{file}`
   - route: `{endpoint}/{method}` (it will ignore the `name` option)
   - none: `{file}` (default)
@@ -1462,7 +1470,6 @@
     hasHead={false}
   />
   ```
-
   - Markdown/MDX content is still supported, but will be processed in the server component (during runtime) instead.
   - Your Remark/Rehype plugins (e.g. Rehype Code) configured in Fumadocs MDX or other source providers, will **not** be shared. Fumadocs OpenAPI uses a separate MDX processor instance.
   - `APIPage` component will fetch the OpenAPI Schema when being rendered. **On Vercel**, if it relies on the file system, ensure the page **will not** be re-rendered after build.
@@ -1748,7 +1755,6 @@
   **migrate:**
 
   Changed the output of MDX files, the new structure requires components:
-
   - Root
   - API
   - APIInfo

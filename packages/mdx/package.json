@@ -80,7 +80,7 @@
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
     "vfile": "^6.0.3",
-    "vite": "^6.3.5",
+    "vite": "^7.0.0",
     "webpack": "^5.99.9"
   },
   "peerDependencies": {
