@@ -9,14 +9,19 @@ import type { SortedResult } from '@/server';
 export async function searchAdvanced(
   db: Orama<typeof advancedSchema>,
   query: string,
-  tag: string | undefined,
+  tag: string | string[] = [],
   extraParams: Partial<
     SearchParams<Orama<typeof advancedSchema>, AdvancedDocument>
   > = {},
 ): Promise<SortedResult[]> {
-  let params: SearchParams<typeof db, AdvancedDocument> = {
+  if (typeof tag === 'string') tag = [tag];
+
+  let params = {
+    ...extraParams,
     where: removeUndefined({
-      tag,
+      tags: {
+        containsAll: tag,
+      },
       ...extraParams.where,
     }),
     groupBy: {
@@ -24,17 +29,14 @@ export async function searchAdvanced(
       maxResult: 8,
       ...extraParams.groupBy,
     },
-  };
+  } as SearchParams<typeof db, AdvancedDocument>;
 
   if (query.length > 0) {
     params = {
       ...params,
       term: query,
-      properties: ['content', 'keywords'],
-      ...extraParams,
-      where: params.where,
-      groupBy: params.groupBy,
-    };
+      properties: ['content'],
+    } as SearchParams<typeof db, AdvancedDocument>;
   }
 
   const result = await search(db, params);

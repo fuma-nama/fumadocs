@@ -12,8 +12,7 @@ export const advancedSchema = {
   content: 'string',
   page_id: 'string',
   type: 'string',
-  keywords: 'string',
-  tag: 'string',
+  tags: 'enum[]',
   url: 'string',
 } as const;
 
@@ -36,6 +35,11 @@ export async function createDB({
 
   const mapTo: PartialSchemaDeep<AdvancedDocument>[] = [];
   items.forEach((page) => {
+    const tags = Array.isArray(page.tag)
+      ? page.tag
+      : page.tag
+        ? [page.tag]
+        : [];
     const data = page.structuredData;
     let id = 0;
 
@@ -44,8 +48,7 @@ export async function createDB({
       page_id: page.id,
       type: 'page',
       content: page.title,
-      keywords: page.keywords,
-      tag: page.tag,
+      tags,
       url: page.url,
     });
 
@@ -53,7 +56,7 @@ export async function createDB({
       mapTo.push({
         id: `${page.id}-${(id++).toString()}`,
         page_id: page.id,
-        tag: page.tag,
+        tags,
         type: 'text',
         url: page.url,
         content: page.description,
@@ -65,7 +68,7 @@ export async function createDB({
         id: `${page.id}-${(id++).toString()}`,
         page_id: page.id,
         type: 'heading',
-        tag: page.tag,
+        tags,
         url: `${page.url}#${heading.id}`,
         content: heading.content,
       });
@@ -75,7 +78,7 @@ export async function createDB({
       mapTo.push({
         id: `${page.id}-${(id++).toString()}`,
         page_id: page.id,
-        tag: page.tag,
+        tags,
         type: 'text',
         url: content.heading ? `${page.url}#${content.heading}` : page.url,
         content: content.content,
