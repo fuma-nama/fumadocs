@@ -23,7 +23,7 @@ const SelectTrigger = forwardRef<
   >
     {children}
     <SelectPrimitive.Icon asChild>
-      <ChevronDown className="ms-auto size-3.5 text-fd-muted-foreground" />
+      <ChevronDown className="ms-auto size-3.5 text-fd-muted-foreground shrink-0" />
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
 ));

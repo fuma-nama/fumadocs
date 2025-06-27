@@ -266,12 +266,22 @@ export function FieldInput({
               className={cn(
                 buttonVariants({
                   color: 'secondary',
-                  size: 'sm',
-                  className: 'w-full',
+                  className: 'w-full h-9 gap-2 truncate',
                 }),
               )}
             >
-              {value ? (value as File).name : 'Upload'}
+              {value instanceof File ? (
+                <>
+                  <span className="text-fd-muted-foreground text-xs">
+                    Selected
+                  </span>
+                  <span className="truncate w-0 flex-1 text-end">
+                    {value.name}
+                  </span>
+                </>
+              ) : (
+                <span className="text-fd-muted-foreground">Upload</span>
+              )}
             </label>
             <input
               id={fieldName}

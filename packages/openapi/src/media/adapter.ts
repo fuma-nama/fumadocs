@@ -166,6 +166,8 @@ export const defaultAdapters = {
         s.push('mp := multipart.NewWriter(payload)');
 
         for (const [key, value] of Object.entries(data.body as object)) {
+          if (!value) continue;
+
           const escaped = escapeString(
             inputToString(value, 'application/json'),
             '`',
