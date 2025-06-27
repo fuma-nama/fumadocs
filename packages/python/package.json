@@ -45,7 +45,7 @@
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "lucide-react": "^0.522.0",
+    "lucide-react": "^0.523.0",
     "tsconfig": "workspace:*"
   },
   "peerDependencies": {

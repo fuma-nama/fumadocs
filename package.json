@@ -20,18 +20,18 @@
   "devDependencies": {
     "@changesets/cli": "^2.29.5",
     "@eslint/js": "^9.29.0",
-    "concurrently": "^9.1.2",
+    "concurrently": "^9.2.0",
     "eslint": "^9.29.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "5.2.0",
     "eslint-plugin-tailwindcss": "^3.18.0",
-    "prettier": "^3.5.3",
+    "prettier": "^3.6.0",
     "prettier-plugin-astro": "^0.14.1",
     "rimraf": "^6.0.1",
     "tsup": "8.5.0",
     "turbo": "2.5.4",
     "typescript": "^5.8.3",
-    "typescript-eslint": "^8.34.1",
+    "typescript-eslint": "^8.35.0",
     "vitest": "^3.2.4"
   },
   "engines": {

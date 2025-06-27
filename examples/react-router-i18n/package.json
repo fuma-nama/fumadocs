@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@fumadocs/mdx-remote": "workspace:*",
-    "@orama/tokenizers": "^3.1.6",
+    "@orama/tokenizers": "^3.1.9",
     "@react-router/node": "^7.5.3",
     "@react-router/serve": "^7.5.3",
     "fumadocs-core": "workspace:*",
@@ -29,7 +29,7 @@
     "@types/react-dom": "^19.1.2",
     "tailwindcss": "^4.1.4",
     "typescript": "^5.8.3",
-    "vite": "^6.3.3",
+    "vite": "^7.0.0",
     "vite-tsconfig-paths": "^5.1.4"
   }
 }

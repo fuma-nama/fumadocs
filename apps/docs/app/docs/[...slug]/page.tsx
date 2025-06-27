@@ -45,6 +45,7 @@ import { getMDXComponents } from '@/mdx-components';
 import { APIPage } from 'fumadocs-openapi/ui';
 import { LLMCopyButton, ViewOptions } from './page.client';
 import * as path from 'node:path';
+import { Banner } from 'fumadocs-ui/components/banner';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -85,13 +86,13 @@ export default async function Page(props: {
           </PageTOCPopoverContent>
         </PageTOCPopover>
       )}
-      <PageArticle className="max-md:pb-16">
+      <PageArticle>
         <PageBreadcrumb />
         <h1 className="text-3xl font-semibold">{page.data.title}</h1>
         <p className="text-lg text-fd-muted-foreground">
           {page.data.description}
         </p>
-        <div className="flex flex-row gap-2 items-center border-b pb-6">
+        <div className="flex flex-row gap-2 items-center border-b pt-2 pb-6">
           <LLMCopyButton slug={params.slug} />
           <ViewOptions
             markdownUrl={`${page.url}.mdx`}
@@ -131,6 +132,7 @@ export default async function Page(props: {
                   </HoverCard>
                 );
               },
+              Banner,
               Mermaid,
               TypeTable,
               AutoTypeTable: (props) => (

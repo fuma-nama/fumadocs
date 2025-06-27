@@ -40,7 +40,7 @@
     "estree-util-to-js": "^2.0.0",
     "estree-util-value-to-estree": "^3.4.0",
     "npm-to-yarn": "^3.0.1",
-    "oxc-transform": "^0.73.2",
+    "oxc-transform": "^0.74.0",
     "unist-util-visit": "^5.0.0",
     "zod": "^3.25.67"
   },

@@ -122,6 +122,11 @@ const showcases: ShowcaseObject[] = [
     url: 'https://turbostarter.dev',
   },
   {
+    image: '/showcases/fashnai.png',
+    name: 'FasnAI',
+    url: 'https://fashn.ai',
+  },
+  {
     name: 'Dirstarter',
     url: 'https://dirstarter.com',
   },
