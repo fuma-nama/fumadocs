@@ -9,9 +9,9 @@ export interface FetchOptions {
   api?: string;
 
   /**
-   * Filter results with specific tag.
+   * Filter results with specific tag(s).
    */
-  tag?: string;
+  tag?: string | string[];
 
   /**
    * Filter by locale
@@ -28,7 +28,7 @@ export async function fetchDocs(
   const params = new URLSearchParams();
   params.set('query', query);
   if (locale) params.set('locale', locale);
-  if (tag) params.set('tag', tag);
+  if (tag) params.set('tag', Array.isArray(tag) ? tag.join(',') : tag);
 
   const key = `${api}?${params}`;
   const cached = cache.get(key);
