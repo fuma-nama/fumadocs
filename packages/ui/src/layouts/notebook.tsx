@@ -123,7 +123,7 @@ export function DocsLayout(props: DocsLayoutProps) {
             )}
           >
             <HideIfEmpty>
-              <SidebarHeader>
+              <SidebarHeader className="data-[empty=true]:hidden">
                 {navMode === 'auto' && sidebarHeader}
                 {nav.children}
                 {sidebarBanner}
@@ -152,7 +152,7 @@ export function DocsLayout(props: DocsLayoutProps) {
               <SidebarPageTree components={sidebarComponents} />
             </SidebarViewport>
             <HideIfEmpty>
-              <SidebarFooter className="flex flex-row items-center justify-end">
+              <SidebarFooter className="flex flex-row items-center justify-end data-[empty=true]:hidden">
                 <div className="flex items-center flex-1 empty:hidden lg:hidden">
                   {links
                     .filter((item) => item.type === 'icon')
@@ -337,7 +337,10 @@ function DocsNavbar({
       </div>
       {tabs.length > 0 && (
         <LayoutTabs
-          className="px-6 border-b h-10 max-lg:hidden"
+          className={cn(
+            'border-b h-10 max-lg:hidden',
+            navMode === 'top' ? 'px-4' : 'px-6',
+          )}
           options={tabs}
         />
       )}

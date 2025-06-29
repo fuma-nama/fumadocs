@@ -90,7 +90,7 @@ export function DocsLayout({
       {sidebarCollapsible ? <CollapsibleControl /> : null}
       <Sidebar {...sidebarProps} collapsible={sidebarCollapsible}>
         <HideIfEmpty>
-          <SidebarHeader>
+          <SidebarHeader className="data-[empty=true]:hidden">
             <div className="flex max-md:hidden">
               <Link
                 href={nav.url ?? '/'}
@@ -135,9 +135,9 @@ export function DocsLayout({
             ))}
           <SidebarPageTree components={sidebarComponents} />
         </SidebarViewport>
-        <SidebarFooter className="empty:hidden">
-          <HideIfEmpty>
-            <div className="flex items-center justify-end">
+        <HideIfEmpty>
+          <SidebarFooter className="data-[empty=true]:hidden">
+            <div className="flex items-center justify-end empty:hidden">
               {links
                 .filter((item) => item.type === 'icon')
                 .map((item, i, arr) => (
@@ -165,9 +165,9 @@ export function DocsLayout({
                   <ThemeToggle className="p-0" mode={themeSwitch.mode} />
                 ))}
             </div>
-          </HideIfEmpty>
-          {sidebarFooter}
-        </SidebarFooter>
+            {sidebarFooter}
+          </SidebarFooter>
+        </HideIfEmpty>
       </Sidebar>
     </>
   );
