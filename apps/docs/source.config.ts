@@ -91,7 +91,7 @@ export default defineConfig({
       remarkSteps,
       remarkMath,
       remarkAutoTypeTable,
-      [remarkInstall, { persist: { id: 'package-manager' } }],
+      [remarkInstall, { mode: 'auto', persist: { id: 'package-manager' } }],
       remarkTypeScriptToJavaScript,
     ],
     rehypePlugins: (v) => [rehypeKatex, ...v],

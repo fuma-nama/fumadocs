@@ -1,4 +1,5 @@
 import type { Expression, Program } from 'estree';
+import type { MdxJsxAttribute } from 'mdast-util-mdx-jsx';
 
 export function createElement(
   name: string,
@@ -16,12 +17,16 @@ export function createElement(
   return element;
 }
 
-export function expressionToAttribute(key: string, value: Expression): object {
+export function expressionToAttribute(
+  key: string,
+  value: Expression,
+): MdxJsxAttribute {
   return {
     type: 'mdxJsxAttribute',
     name: key,
     value: {
       type: 'mdxJsxAttributeValueExpression',
+      value: '',
       data: {
         estree: {
           type: 'Program',
