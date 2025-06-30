@@ -22,7 +22,7 @@
 
   --color-fd-diff-remove: rgba(200, 10, 100, 0.12);
   --color-fd-diff-remove-symbol: rgb(230, 10, 100);
-  --color-fd-diff-add: rgba(14, 180, 100, 0.12);
+  --color-fd-diff-add: rgba(14, 180, 100, 0.1);
   --color-fd-diff-add-symbol: rgb(10, 200, 100);
 
   --animate-fd-fade-in: fd-fade-in 300ms ease;

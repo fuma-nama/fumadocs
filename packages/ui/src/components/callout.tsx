@@ -43,7 +43,7 @@ export const Callout = forwardRef<HTMLDivElement, CalloutProps>(
           } as object
         }
       >
-        <div role="none" className="w-1 bg-(--callout-color)/50 rounded-sm" />
+        <div role="none" className="w-0.5 bg-(--callout-color)/50 rounded-sm" />
         {icon ?? (
           <DefaultIcon className="size-5 -me-0.5 fill-(--callout-color) text-fd-card" />
         )}

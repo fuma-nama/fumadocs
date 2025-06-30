@@ -9,9 +9,9 @@ Fumadocs supports document search with Orama, It is the default but also the rec
 
 You can create the search route handler from the source object, or search indexes.
 
-<Accordions>
+<Tabs items={['From Source', 'From Search Indexes']}>
 
-    <Accordion title='From Source'>
+    <Tab>
 
 Create a route handler from source object.
 
@@ -19,8 +19,8 @@ Create a route handler from source object.
   ../../examples/next-mdx/app/api/search/route.ts
 </include>
 
-    </Accordion>
-    <Accordion title="From Search Indexes">
+    </Tab>
+    <Tab>
 
 Pass search indexes to the function.
 
@@ -58,9 +58,9 @@ export const { GET } = createSearchAPI('simple', {
 
 </Tabs>
 
-    </Accordion>
+    </Tab>
 
-</Accordions>
+</Tabs>
 
 ## Search Client
 
@@ -137,17 +137,20 @@ const { search, setSearch, query } = useDocsSearch({
 
 ### Special Languages
 
-If your language is not on the Orama [Supported Languages](https://docs.orama.com/open-source/supported-languages#officially-supported-languages) list, you have to configure them manually:
+If your language is not on the Orama [Supported Languages](https://docs.orama.com/open-source/supported-languages#officially-supported-languages) list, you will need some extra configurations:
 
-<Accordions>
+```npm
+@orama/tokenizers
+```
 
-    <Accordion title='Fetch mode'>
+<include
+  cwd
+  meta='title="app/api/search/route.ts" tab="createFromSource (i18n enabled)"'
+>
+  ../../examples/i18n/app/api/search/route.ts
+</include>
 
-        <include cwd meta='title="app/api/search/route.ts" tab="With I18n"'>
-            ../../examples/i18n/app/api/search/route.ts
-        </include>
-
-```ts title="app/api/search/route.ts" tab="Without I18n"
+```ts title="app/api/search/route.ts" tab="createFromSource (without i18n)"
 import { source } from '@/lib/source';
 import { createFromSource } from 'fumadocs-core/search/server';
 import { createTokenizer } from '@orama/tokenizers/mandarin';
@@ -164,15 +167,13 @@ export const { GET } = createFromSource(source, {
 });
 ```
 
-    </Accordion>
-    <Accordion title='Static mode'>
-
-You can customise it in the client-side `initOrama()` function.
-
-```tsx
+```tsx tab="Static mode"
 import { useDocsSearch } from 'fumadocs-core/search/client';
 import { createTokenizer } from '@orama/tokenizers/mandarin';
+import { create } from '@orama/orama';
 
+// [!code focus:12]
+// You can customise it in the client-side `initOrama()` function.
 function initOrama(locale?: string) {
   return create({
     schema: { _: 'string' },
@@ -193,10 +194,6 @@ function Search() {
   // ...
 }
 ```
-
-    </Accordion>
-
-</Accordions>
 
 ### Static Export
 
