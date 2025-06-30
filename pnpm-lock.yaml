@@ -796,6 +796,9 @@ importers:
       negotiator:
         specifier: ^1.0.0
         version: 1.0.0
+      npm-to-yarn:
+        specifier: ^3.0.1
+        version: 3.0.1
       react:
         specifier: 18.x.x || 19.x.x
         version: 19.1.0
