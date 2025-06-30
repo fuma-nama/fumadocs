@@ -54,7 +54,7 @@ export default function Page() {
           background: `repeating-linear-gradient(to right, ${gridColor}, ${gridColor} 1px,transparent 1px,transparent 50px), repeating-linear-gradient(to bottom, ${gridColor}, ${gridColor} 1px,transparent 1px,transparent 50px)`,
         }}
       />
-      <main className="container relative max-w-[1100px] px-2 py-4 z-[2] lg:py-8">
+      <main className="container relative max-w-[1100px] px-2 py-4 z-2 lg:py-8">
         <div
           style={{
             background:
@@ -354,7 +354,7 @@ function Highlight({
 
 function Hero() {
   return (
-    <div className="relative z-[2] flex flex-col border-x border-t bg-fd-background/80 px-4 pt-12 max-md:text-center md:px-12 md:pt-16 [.uwu_&]:hidden overflow-hidden">
+    <div className="relative z-2 flex flex-col border-x border-t bg-fd-background/80 px-4 pt-12 max-md:text-center md:px-12 md:pt-16 [.uwu_&]:hidden overflow-hidden">
       <div
         className="absolute inset-0 z-[-1] blur-2xl hidden dark:block"
         style={{
@@ -516,7 +516,7 @@ title: My Documentation
 Hello World
 `}
           />
-          <Files className="z-[2] mt-40 shadow-xl">
+          <Files className="z-2 mt-40 shadow-xl">
             <Folder name="content" defaultOpen>
               <File name="index.mdx" />
               <File name="components.mdx" />
@@ -622,7 +622,7 @@ function Features() {
             sizes="600px"
             className="-mt-16 w-[400px] min-w-[400px] invert pointer-events-none dark:invert-0"
           />
-          <div className="z-[2] mt-[-170px] w-[300px] overflow-hidden rounded-lg border border-fd-foreground/10 shadow-xl backdrop-blur-lg">
+          <div className="z-2 mt-[-170px] w-[300px] overflow-hidden rounded-lg border border-fd-foreground/10 shadow-xl backdrop-blur-lg">
             <div className="flex flex-row items-center gap-2 bg-fd-muted/50 px-4 py-2 text-xs font-medium text-fd-muted-foreground">
               <FileEditIcon className="size-4" />
               MDX Editor

@@ -380,6 +380,20 @@ Specify the target file path in `<include>` tag (relative to the MDX file itself
 
 See [other usages of include](/docs/mdx/include).
 
+### NPM Commands
+
+Useful for generating commands for installing packages with different package managers.
+
+````md tab="Input"
+```npm
+npm i next -D
+```
+````
+
+```npm tab="Output"
+npm i next -D
+```
+
 ### Other Components
 
 You can configure & use the [built-in components](/docs/ui/components) in your MDX document, such as Tabs, Accordions and Zoomable Image.
@@ -389,19 +403,3 @@ You can configure & use the [built-in components](/docs/ui/components) in your M
 You may be interested:
 
 <DocsCategory />
-
-### Package Install
-
-Generate commands for installing packages via package managers.
-
-````md tab="Input"
-```package-install
-npm i next -D
-```
-````
-
-```package-install tab="Output"
-npm i next -D
-```
-
-To enable, see [Remark Install](/docs/headless/mdx/install).

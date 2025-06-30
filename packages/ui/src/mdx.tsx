@@ -11,7 +11,14 @@ import { Card, Cards } from '@/components/card';
 import { Callout } from '@/components/callout';
 import { Heading } from '@/components/heading';
 import { cn } from '@/utils/cn';
-import { CodeBlock, Pre } from '@/components/codeblock';
+import {
+  CodeBlock,
+  CodeBlockTab,
+  CodeBlockTabs,
+  CodeBlockTabsList,
+  CodeBlockTabsTrigger,
+  Pre,
+} from '@/components/codeblock';
 
 function Image(
   props: ImgHTMLAttributes<HTMLImageElement> & {
@@ -37,6 +44,10 @@ function Table(props: TableHTMLAttributes<HTMLTableElement>) {
 }
 
 const defaultMdxComponents = {
+  CodeBlockTab,
+  CodeBlockTabs,
+  CodeBlockTabsList,
+  CodeBlockTabsTrigger,
   pre: (props: HTMLAttributes<HTMLPreElement>) => (
     <CodeBlock {...props}>
       <Pre>{props.children}</Pre>

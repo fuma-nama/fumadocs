@@ -359,9 +359,11 @@ function SecurityTabs({
           {securities.map((security, i) => (
             <SelectItem key={i} value={i.toString()}>
               {security.map((item) => (
-                <div key={item.id}>
+                <div key={item.id} className="max-w-[600px]">
                   <p className="font-mono font-medium">{item.id}</p>
-                  <p className="text-fd-muted-foreground">{item.description}</p>
+                  <p className="text-fd-muted-foreground whitespace-pre-wrap">
+                    {item.description}
+                  </p>
                 </div>
               ))}
             </SelectItem>

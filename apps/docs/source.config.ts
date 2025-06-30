@@ -8,7 +8,6 @@ import {
 import { transformerTwoslash } from 'fumadocs-twoslash';
 import { createFileSystemTypesCache } from 'fumadocs-twoslash/cache-fs';
 import remarkMath from 'remark-math';
-import { remarkInstall } from 'fumadocs-docgen';
 import { remarkTypeScriptToJavaScript } from 'fumadocs-docgen/remark-ts2js';
 import rehypeKatex from 'rehype-katex';
 import { z } from 'zod';
@@ -87,11 +86,15 @@ export default defineConfig({
     remarkCodeTabOptions: {
       parseMdx: true,
     },
+    remarkNpmOptions: {
+      persist: {
+        id: 'package-manager',
+      },
+    },
     remarkPlugins: [
       remarkSteps,
       remarkMath,
       remarkAutoTypeTable,
-      [remarkInstall, { persist: { id: 'package-manager' } }],
       remarkTypeScriptToJavaScript,
     ],
     rehypePlugins: (v) => [rehypeKatex, ...v],

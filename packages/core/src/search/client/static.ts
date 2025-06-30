@@ -18,9 +18,9 @@ export interface StaticOptions {
   initOrama?: (locale?: string) => AnyOrama | Promise<AnyOrama>;
 
   /**
-   * Filter results with specific tag.
+   * Filter results with specific tag(s).
    */
-  tag?: string;
+  tag?: string | string[];
 
   /**
    * Filter by locale (unsupported at the moment)

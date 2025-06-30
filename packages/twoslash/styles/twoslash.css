@@ -201,13 +201,14 @@
   max-width: 380px;
   max-height: 400px;
   overflow: auto;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   border: 1px solid var(--color-fd-border);
   background-color: var(--color-fd-popover);
-  padding: calc(var(--spacing) * 2);
+  padding: calc(var(--spacing) * 3);
   font-size: var(--text-sm);
   color: var(--color-fd-popover-foreground);
   box-shadow: var(--shadow-md);
+  transform-origin: var(--radix-popover-content-transform-origin);
 }
 
 .fd-twoslash-popover[data-state='open'] {

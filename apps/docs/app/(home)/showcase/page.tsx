@@ -180,7 +180,7 @@ const vercel = [
 
 export default function Showcase() {
   return (
-    <main className="px-4 py-12 z-[2] w-full max-w-[1400px] mx-auto [--color-fd-border:color-mix(in_oklab,var(--color-fd-primary)_30%,transparent)]">
+    <main className="px-4 py-12 z-2 w-full max-w-[1400px] mx-auto [--color-fd-border:color-mix(in_oklab,var(--color-fd-primary)_30%,transparent)]">
       <div className="relative overflow-hidden border border-dashed p-6">
         <h1 className="mb-4 text-xl font-medium">
           The docs framework designed with care.
@@ -297,7 +297,7 @@ function ShowcaseItem({ name, url, image }: ShowcaseObject) {
           sizes="100vw, (min-width: 750px) 500px"
           className="object-cover transition-all group-hover:brightness-150"
         />
-        <p className="absolute bottom-0 inset-x-0 z-[2] bg-fd-background px-4 py-2 text-sm font-medium">
+        <p className="absolute bottom-0 inset-x-0 z-2 bg-fd-background px-4 py-2 text-sm font-medium">
           {name}
         </p>
       </a>

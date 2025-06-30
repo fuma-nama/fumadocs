@@ -1,5 +1,6 @@
 'use client';
 
+import * as React from 'react';
 import {
   type ComponentProps,
   createContext,
@@ -7,50 +8,19 @@ import {
   useContext,
   useEffect,
   useId,
-  useLayoutEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react';
 import { cn } from '@/utils/cn';
-import * as Primitive from './ui/tabs';
-import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
-import { mergeRefs } from '@/utils/merge-refs';
+import * as Unstyled from './tabs.unstyled';
 
 type CollectionKey = string | symbol;
-type ChangeListener = (v: string) => void;
-const listeners = new Map<string, ChangeListener[]>();
 
-function addChangeListener(id: string, listener: ChangeListener): void {
-  const list = listeners.get(id) ?? [];
-  list.push(listener);
-  listeners.set(id, list);
-}
-
-function removeChangeListener(id: string, listener: ChangeListener): void {
-  const list = listeners.get(id) ?? [];
-  listeners.set(
-    id,
-    list.filter((item) => item !== listener),
-  );
-}
-
-export interface TabsProps extends ComponentProps<typeof Primitive.Tabs> {
-  /**
-   * Identifier for Sharing value of tabs
-   */
-  groupId?: string;
-
-  /**
-   * Enable persistent
-   */
-  persist?: boolean;
-
-  /**
-   * If true, updates the URL hash based on the tab's id
-   */
-  updateAnchor?: boolean;
-
+export interface TabsProps
+  extends Omit<
+    ComponentProps<typeof Unstyled.Tabs>,
+    'value' | 'onValueChange'
+  > {
   /**
    * Use simple mode instead of advanced usage as documented in https://radix-ui.com/primitives/docs/components/tabs.
    */
@@ -71,7 +41,6 @@ export interface TabsProps extends ComponentProps<typeof Primitive.Tabs> {
 
 const TabsContext = createContext<{
   items?: string[];
-  valueToIdMap: Map<string, string>;
   collection: CollectionKey[];
 } | null>(null);
 
@@ -81,82 +50,60 @@ function useTabContext() {
   return ctx;
 }
 
-export const TabsList = Primitive.TabsList;
-export const TabsTrigger = Primitive.TabsTrigger;
+export const TabsList = React.forwardRef<
+  React.ComponentRef<typeof Unstyled.TabsList>,
+  React.ComponentPropsWithoutRef<typeof Unstyled.TabsList>
+>((props, ref) => (
+  <Unstyled.TabsList
+    ref={ref}
+    {...props}
+    className={cn(
+      'flex gap-3.5 text-fd-secondary-foreground overflow-x-auto px-4 not-prose',
+      props.className,
+    )}
+  />
+));
+TabsList.displayName = 'TabsList';
+
+export const TabsTrigger = React.forwardRef<
+  React.ComponentRef<typeof Unstyled.TabsTrigger>,
+  React.ComponentPropsWithoutRef<typeof Unstyled.TabsTrigger>
+>((props, ref) => (
+  <Unstyled.TabsTrigger
+    ref={ref}
+    {...props}
+    className={cn(
+      'inline-flex items-center gap-2 whitespace-nowrap text-fd-muted-foreground border-b border-transparent py-2 text-sm font-medium transition-colors [&_svg]:size-4 hover:text-fd-accent-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-fd-primary data-[state=active]:text-fd-primary',
+      props.className,
+    )}
+  />
+));
+TabsTrigger.displayName = 'TabsTrigger';
 
 export function Tabs({
   ref,
   className,
-  groupId,
   items,
-  persist = false,
   label,
   defaultIndex = 0,
-  updateAnchor = false,
   defaultValue = items ? escapeValue(items[defaultIndex]) : undefined,
   ...props
 }: TabsProps) {
-  const tabsRef = useRef<HTMLDivElement>(null);
   const [value, setValue] = useState(defaultValue);
-  const valueToIdMap = useMemo(() => new Map<string, string>(), []);
   const collection = useMemo<CollectionKey[]>(() => [], []);
 
-  const onUpdate: ChangeListener = useEffectEvent((v) => {
-    if (items && !items.some((item) => escapeValue(item) === v)) return;
-    setValue(v);
-  });
-
-  useLayoutEffect(() => {
-    if (!groupId) return;
-    const previous = persist
-      ? localStorage.getItem(groupId)
-      : sessionStorage.getItem(groupId);
-
-    if (previous) onUpdate(previous);
-    addChangeListener(groupId, onUpdate);
-    return () => {
-      removeChangeListener(groupId, onUpdate);
-    };
-  }, [groupId, onUpdate, persist]);
-
-  useLayoutEffect(() => {
-    const hash = window.location.hash.slice(1);
-    if (!hash) return;
-
-    for (const [value, id] of valueToIdMap.entries()) {
-      if (id === hash) {
-        setValue(value);
-        tabsRef.current?.scrollIntoView();
-        break;
-      }
-    }
-  }, [valueToIdMap]);
-
   return (
-    <Primitive.Tabs
-      ref={mergeRefs(ref, tabsRef)}
+    <Unstyled.Tabs
+      ref={ref}
+      className={cn(
+        'flex flex-col overflow-hidden rounded-xl border bg-fd-secondary my-4',
+        className,
+      )}
       value={value}
       onValueChange={(v: string) => {
-        if (updateAnchor) {
-          const id = valueToIdMap.get(v);
-
-          if (id) {
-            window.history.replaceState(null, '', `#${id}`);
-          }
-        }
-
-        if (groupId) {
-          listeners.get(groupId)?.forEach((item) => {
-            item(v);
-          });
-
-          if (persist) localStorage.setItem(groupId, v);
-          else sessionStorage.setItem(groupId, v);
-        } else {
-          setValue(v);
-        }
+        if (items && !items.some((item) => escapeValue(item) === v)) return;
+        setValue(v);
       }}
-      className={cn('my-4', className)}
       {...props}
     >
       {items && (
@@ -172,19 +119,16 @@ export function Tabs({
         </TabsList>
       )}
       <TabsContext.Provider
-        value={useMemo(
-          () => ({ items, valueToIdMap, collection }),
-          [valueToIdMap, collection, items],
-        )}
+        value={useMemo(() => ({ items, collection }), [collection, items])}
       >
         {props.children}
       </TabsContext.Provider>
-    </Primitive.Tabs>
+    </Unstyled.Tabs>
   );
 }
 
 export interface TabProps
-  extends Omit<ComponentProps<typeof Primitive.TabsContent>, 'value'> {
+  extends Omit<ComponentProps<typeof Unstyled.TabsContent>, 'value'> {
   /**
    * Value of tab, detect from index if unspecified.
    */
@@ -213,25 +157,19 @@ export function TabsContent({
   value,
   className,
   ...props
-}: ComponentProps<typeof Primitive.TabsContent>) {
-  const { valueToIdMap } = useTabContext();
-
-  if (props.id) {
-    valueToIdMap.set(value, props.id);
-  }
-
+}: ComponentProps<typeof Unstyled.TabsContent>) {
   return (
-    <Primitive.TabsContent
+    <Unstyled.TabsContent
       value={value}
       forceMount
       className={cn(
-        'prose-no-margin data-[state=inactive]:hidden [&>figure:only-child]:-m-4 [&>figure:only-child]:border-none',
+        'p-4 text-[15px] bg-fd-background rounded-xl outline-none prose-no-margin data-[state=inactive]:hidden [&>figure:only-child]:-m-4 [&>figure:only-child]:border-none',
         className,
       )}
       {...props}
     >
       {props.children}
-    </Primitive.TabsContent>
+    </Unstyled.TabsContent>
   );
 }
 
@@ -256,6 +194,9 @@ function useCollectionIndex() {
   return collection.indexOf(key);
 }
 
+/**
+ * only escape whitespaces in values in simple mode
+ */
 function escapeValue(v: string): string {
   return v.toLowerCase().replace(/\s/, '-');
 }

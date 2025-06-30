@@ -1,9 +1,9 @@
 import {
-  type Orama,
-  type SearchParams,
-  save,
   create,
+  type Orama,
   type RawData,
+  save,
+  type SearchParams,
 } from '@orama/orama';
 import type { StructuredData } from '@/mdx-plugins/remark-structure';
 import type { SortedResult } from '@/server/types';
@@ -31,7 +31,7 @@ export type ExportedData =
 export interface SearchServer {
   search: (
     query: string,
-    options?: { locale?: string; tag?: string },
+    options?: { locale?: string; tag?: string | string[] },
   ) => Promise<SortedResult[]>;
 
   /**
@@ -125,12 +125,16 @@ export interface AdvancedIndex {
   title: string;
   description?: string;
 
+  /**
+   * @deprecated No longer used
+   */
   keywords?: string;
 
   /**
    * Required if tag filter is enabled
    */
-  tag?: string;
+  tag?: string | string[];
+
   /**
    * preprocess mdx content with `structure`
    */
