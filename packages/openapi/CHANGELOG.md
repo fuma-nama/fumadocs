@@ -1,5 +1,17 @@
 # @fuma-docs/openapi
 
+## 9.0.15
+
+### Patch Changes
+
+- 504ab2e: Fix minor UI bugs
+- Updated dependencies [d0f8a15]
+- Updated dependencies [84918b8]
+- Updated dependencies [bf15617]
+- Updated dependencies [f8d1709]
+  - fumadocs-core@15.6.0
+  - fumadocs-ui@15.6.0
+
 ## 9.0.14
 
 ### Patch Changes
@@ -1470,6 +1482,7 @@
     hasHead={false}
   />
   ```
+
   - Markdown/MDX content is still supported, but will be processed in the server component (during runtime) instead.
   - Your Remark/Rehype plugins (e.g. Rehype Code) configured in Fumadocs MDX or other source providers, will **not** be shared. Fumadocs OpenAPI uses a separate MDX processor instance.
   - `APIPage` component will fetch the OpenAPI Schema when being rendered. **On Vercel**, if it relies on the file system, ensure the page **will not** be re-rendered after build.

@@ -1,5 +1,27 @@
 # fumadocs-docgen
 
+## 2.1.0
+
+### Minor Changes
+
+- d0f8a15: Enable `remarkNpm` by default, replace `remarkInstall` with it.
+- f8d1709: **Redesigned Codeblock Tabs**
+
+  Instead of relying on `Tabs` component, it supports a dedicated tabs component for codeblocks:
+
+  ```tsx
+  <CodeBlockTabs>
+    <CodeBlockTabsList>
+      <CodeBlockTabsTrigger value="value">Name</CodeBlockTabsTrigger>
+    </CodeBlockTabsList>
+    <CodeBlockTab value="value" asChild>
+      <CodeBlock>...</CodeBlock>
+    </CodeBlockTab>
+  </CodeBlockTabs>
+  ```
+
+  The old usage is not deprecated, you can still use them while Fumadocs' remark plugins will generate codeblock tabs using the new way.
+
 ## 2.0.1
 
 ### Patch Changes

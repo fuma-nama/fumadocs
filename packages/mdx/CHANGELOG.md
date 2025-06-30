@@ -1,5 +1,16 @@
 # next-docs-mdx
 
+## 11.6.10
+
+### Patch Changes
+
+- d0f8a15: Enable `remarkNpm` by default, replace `remarkInstall` with it.
+- Updated dependencies [d0f8a15]
+- Updated dependencies [84918b8]
+- Updated dependencies [f8d1709]
+  - fumadocs-core@15.6.0
+  - @fumadocs/mdx-remote@1.3.4
+
 ## 11.6.9
 
 ### Patch Changes
