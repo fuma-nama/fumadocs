@@ -1,5 +1,15 @@
 # @fumadocs/mdx-remote
 
+## 1.3.4
+
+### Patch Changes
+
+- d0f8a15: Enable `remarkNpm` by default, replace `remarkInstall` with it.
+- Updated dependencies [d0f8a15]
+- Updated dependencies [84918b8]
+- Updated dependencies [f8d1709]
+  - fumadocs-core@15.6.0
+
 ## 1.3.3
 
 ### Patch Changes
