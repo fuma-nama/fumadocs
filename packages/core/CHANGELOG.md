@@ -1,5 +1,31 @@
 # next-docs-zeta
 
+## 15.6.0
+
+### Minor Changes
+
+- f8d1709: **Redesigned Codeblock Tabs**
+
+  Instead of relying on `Tabs` component, it supports a dedicated tabs component for codeblocks:
+
+  ```tsx
+  <CodeBlockTabs>
+    <CodeBlockTabsList>
+      <CodeBlockTabsTrigger value="value">Name</CodeBlockTabsTrigger>
+    </CodeBlockTabsList>
+    <CodeBlockTab value="value" asChild>
+      <CodeBlock>...</CodeBlock>
+    </CodeBlockTab>
+  </CodeBlockTabs>
+  ```
+
+  The old usage is not deprecated, you can still use them while Fumadocs' remark plugins will generate codeblock tabs using the new way.
+
+### Patch Changes
+
+- d0f8a15: Enable `remarkNpm` by default, replace `remarkInstall` with it.
+- 84918b8: Support passing `tag` to search client/server as string array
+
 ## 15.5.5
 
 ### Patch Changes
