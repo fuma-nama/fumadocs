@@ -61,6 +61,7 @@ export type CodeBlockProps = HTMLAttributes<HTMLElement> & {
 
 const TabsContext = createContext<{
   containerRef: RefObject<HTMLDivElement | null>;
+  nested: boolean;
 } | null>(null);
 
 export const Pre = forwardRef<HTMLPreElement, HTMLAttributes<HTMLPreElement>>(
@@ -98,6 +99,10 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
     const isTab = useContext(TabsContext) !== null;
     const areaRef = useRef<HTMLDivElement>(null);
     allowCopy ??= !isTab;
+    const bg = cn(
+      'bg-fd-secondary',
+      keepBackground && 'bg-(--shiki-light-bg) dark:bg-(--shiki-dark-bg)',
+    );
 
     return (
       <figure
@@ -106,10 +111,9 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
         {...props}
         className={cn(
           isTab
-            ? 'mb-1 mx-1 rounded-lg shadow-sm bg-fd-secondary'
+            ? [bg, 'rounded-lg shadow-sm']
             : 'my-4 rounded-xl bg-fd-card p-1',
-          keepBackground && 'bg-(--shiki-light-bg) dark:bg-(--shiki-dark-bg)',
-          'relative border outline-none not-prose overflow-hidden text-sm',
+          'shiki relative border outline-none not-prose overflow-hidden text-sm',
           props.className,
         )}
       >
@@ -146,13 +150,16 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
           ref={areaRef}
           {...viewportProps}
           className={cn(
-            !isTab && 'bg-fd-secondary rounded-lg border',
+            !isTab && [bg, 'rounded-lg border'],
             'text-[13px] py-3.5 overflow-auto max-h-[600px] fd-scroll-container',
             viewportProps.className,
           )}
           style={
             {
-              '--padding-x': 'calc(var(--spacing) * 3)',
+              // space for toolbar
+              '--padding-right': !title
+                ? 'calc(var(--spacing) * 8)'
+                : undefined,
               counterSet: props['data-line-numbers']
                 ? `line ${Number(props['data-line-numbers-start'] ?? 1) - 1}`
                 : undefined,
@@ -210,24 +217,27 @@ function CopyButton({
   );
 }
 
-export function CodeBlockTabs(props: ComponentProps<typeof Tabs>) {
-  const ref = useRef<HTMLDivElement>(null);
+export function CodeBlockTabs({ ref, ...props }: ComponentProps<typeof Tabs>) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const nested = useContext(TabsContext) !== null;
 
   return (
     <Tabs
-      ref={mergeRefs(ref, props.ref)}
+      ref={mergeRefs(containerRef, ref)}
       {...props}
       className={cn(
-        'bg-fd-card my-4 rounded-xl border overflow-hidden',
+        'bg-fd-card p-1 rounded-xl border overflow-hidden',
+        !nested && 'my-4',
         props.className,
       )}
     >
       <TabsContext.Provider
         value={useMemo(
           () => ({
-            containerRef: ref,
+            containerRef,
+            nested,
           }),
-          [],
+          [nested],
         )}
       >
         {props.children}
@@ -237,21 +247,23 @@ export function CodeBlockTabs(props: ComponentProps<typeof Tabs>) {
 }
 
 export function CodeBlockTabsList(props: ComponentProps<typeof TabsList>) {
-  const { containerRef } = useContext(TabsContext)!;
+  const { containerRef, nested } = useContext(TabsContext)!;
 
   return (
     <TabsList
       {...props}
       className={cn(
-        'flex flex-row overflow-x-auto p-1 text-fd-muted-foreground',
+        'flex flex-row overflow-x-auto px-1 -mx-1 text-fd-muted-foreground',
         props.className,
       )}
     >
       {props.children}
-      <CopyButton
-        className="sticky ms-auto right-0 bg-fd-card backdrop-blur-sm"
-        containerRef={containerRef}
-      />
+      {!nested && (
+        <CopyButton
+          className="sticky ms-auto right-0 bg-fd-card backdrop-blur-sm"
+          containerRef={containerRef}
+        />
+      )}
     </TabsList>
   );
 }
@@ -263,7 +275,7 @@ export function CodeBlockTabsTrigger(
     <TabsTrigger
       {...props}
       className={cn(
-        'inline-flex text-sm font-medium transition-colors items-center gap-2 px-3 py-1.5 outline-none rounded-lg hover:text-fd-accent-foreground data-[state=active]:bg-fd-primary/10 data-[state=active]:text-fd-primary [&_svg]:size-3.5',
+        'inline-flex text-sm font-medium items-center gap-2 px-3 py-1.5 outline-none border-b border-transparent hover:text-fd-accent-foreground data-[state=active]:border-fd-primary data-[state=active]:text-fd-primary [&_svg]:size-3.5',
         props.className,
       )}
     />
