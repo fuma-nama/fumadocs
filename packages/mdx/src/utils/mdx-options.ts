@@ -22,6 +22,7 @@ export type DefaultMDXOptions = Omit<
   remarkHeadingOptions?: plugins.RemarkHeadingOptions;
   remarkImageOptions?: plugins.RemarkImageOptions | false;
   remarkCodeTabOptions?: plugins.RemarkCodeTabOptions | false;
+  remarkNpmOptions?: plugins.RemarkNpmOptions | false;
   rehypeCodeOptions?: plugins.RehypeCodeOptions | false;
 };
 
@@ -47,6 +48,7 @@ export function getDefaultMDXOptions({
   remarkHeadingOptions,
   remarkStructureOptions,
   remarkCodeTabOptions,
+  remarkNpmOptions,
   ...mdxOptions
 }: DefaultMDXOptions): ProcessorOptions {
   const mdxExports = [
@@ -67,12 +69,13 @@ export function getDefaultMDXOptions({
         },
       ],
       remarkImageOptions !== false && [plugins.remarkImage, remarkImageOptions],
-      // Fumadocs 14 compatibility
       'remarkCodeTab' in plugins &&
         remarkCodeTabOptions !== false && [
           plugins.remarkCodeTab,
           remarkCodeTabOptions,
         ],
+      'remarkNpm' in plugins &&
+        remarkNpmOptions !== false && [plugins.remarkNpm, remarkNpmOptions],
       ...v,
       remarkStructureOptions !== false && [
         plugins.remarkStructure,

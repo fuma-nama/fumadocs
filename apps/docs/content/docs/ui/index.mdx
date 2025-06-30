@@ -53,8 +53,6 @@ Although not required, some basic knowledge of Next.js App Router would be usefu
 
 A minimum version of Node.js 18 required, note that Node.js 23.1 might have problems with Next.js production build.
 
-<Tabs groupId='package-manager' persist items={['npm', 'pnpm', 'yarn', 'bun']} label='Initialize Fumadocs'>
-
 ```bash tab="npm"
 npm create fumadocs-app
 ```
@@ -70,8 +68,6 @@ yarn create fumadocs-app
 ```bash tab="bun"
 bun create fumadocs-app
 ```
-
-</Tabs>
 
 It will ask you:
 
@@ -100,7 +96,7 @@ title: Hello World
 
 Run the app in development mode and see http://localhost:3000/docs.
 
-```package-install
+```npm
 npm run dev
 ```
 
@@ -195,6 +191,14 @@ For `/docs`, you need to change the catch-all route to be non-optional:
     </Accordion>
 
 </Accordions>
+
+### Upgrade Fumadocs
+
+Make sure to upgrade Fumadocs when you've encountered any problems or trying out new features:
+
+```bash title="pnpm"
+pnpm update -i -r --latest
+```
 
 ## Learn More
 

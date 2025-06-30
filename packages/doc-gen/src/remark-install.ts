@@ -13,9 +13,9 @@ interface PackageManager {
   command: (command: string) => string;
 }
 
-export type RemarkInstallOptions = Partial<{
-  Tabs: string;
-  Tab: string;
+export type RemarkInstallOptions = {
+  Tabs?: string;
+  Tab?: string;
 
   /**
    * Persist Tab value (Fumadocs UI only)
@@ -28,8 +28,8 @@ export type RemarkInstallOptions = Partial<{
       }
     | false;
 
-  packageManagers: PackageManager[];
-}>;
+  packageManagers?: PackageManager[];
+};
 
 /**
  * It generates the following structure from a code block with `package-install` as language
@@ -41,6 +41,8 @@ export type RemarkInstallOptions = Partial<{
  *  ...
  * </Tabs>
  * ```
+ *
+ * @deprecated Use `remarkNpm` from `fumadocs-core/mdx-plugins` instead, it's a drop-in replacement.
  */
 export function remarkInstall({
   Tab = 'Tab',
@@ -90,9 +92,7 @@ export function remarkInstall({
         packageManagers.map(({ command, name }) => ({
           type: 'mdxJsxFlowElement',
           name: Tab,
-          attributes: [
-            { type: 'mdxJsxAttribute', name: 'value', value: name },
-          ].filter(Boolean),
+          attributes: [{ type: 'mdxJsxAttribute', name: 'value', value: name }],
           children: [
             {
               type: 'code',

@@ -1,11 +1,16 @@
 .shiki:not(.not-fumadocs-codeblock *) {
+  --padding-left: calc(var(--spacing) * 3);
+  --padding-right: calc(var(--spacing) * 3);
+
   code span {
     color: var(--shiki-light);
   }
 
   code .line {
+    position: relative;
     min-height: 1lh;
-    @apply relative;
+    padding-left: var(--padding-left);
+    padding-right: var(--padding-right);
   }
 
   &.has-focused code .line:not(.focused) {
@@ -24,6 +29,7 @@
   &[data-line-numbers] code .line {
     width: calc(100% - 7 * var(--spacing));
     counter-increment: line;
+    padding-left: calc(var(--padding-left) - var(--spacing));
     @apply ml-7;
 
     &::after {

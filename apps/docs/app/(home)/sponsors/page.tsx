@@ -50,7 +50,7 @@ export default async function Page() {
   });
 
   return (
-    <main className="container flex flex-col items-center py-16 text-center z-[2]">
+    <main className="container flex flex-col items-center py-16 text-center z-2">
       <Image
         src="/circuit_2.svg"
         alt="circuit"

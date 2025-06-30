@@ -1,7 +1,6 @@
 import { CircleCheck, CircleX, Info, TriangleAlert } from 'lucide-react';
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { cn } from '@/utils/cn';
-import { cva } from 'class-variance-authority';
 
 type CalloutProps = Omit<
   HTMLAttributes<HTMLDivElement>,
@@ -19,47 +18,36 @@ type CalloutProps = Omit<
   icon?: ReactNode;
 };
 
-const calloutVariants = cva(
-  'my-4 flex gap-2 rounded-lg border border-s-2 bg-fd-card p-3 text-sm text-fd-card-foreground shadow-md',
-  {
-    variants: {
-      type: {
-        info: 'border-s-blue-500/50',
-        warn: 'border-s-amber-500/50',
-        error: 'border-s-red-500/50',
-        success: 'border-s-green-500/50',
-      },
-    },
-  },
-);
-
 export const Callout = forwardRef<HTMLDivElement, CalloutProps>(
   ({ className, children, title, type = 'info', icon, ...props }, ref) => {
-    if (type === 'warning') type = 'warn';
+    if (type === 'warn') type = 'warning';
+    const DefaultIcon = {
+      info: Info,
+      warning: TriangleAlert,
+      error: CircleX,
+      success: CircleCheck,
+    }[type];
 
     return (
       <div
         ref={ref}
         className={cn(
-          calloutVariants({
-            type: type,
-          }),
+          'flex gap-2 my-4 rounded-xl border bg-fd-card p-3 ps-1 text-sm text-fd-card-foreground shadow-md',
           className,
         )}
         {...props}
-      >
-        {icon ??
+        style={
           {
-            info: <Info className="size-5 fill-blue-500 text-fd-card" />,
-            warn: (
-              <TriangleAlert className="size-5 fill-amber-500 text-fd-card" />
-            ),
-            error: <CircleX className="size-5 fill-red-500 text-fd-card" />,
-            success: (
-              <CircleCheck className="size-5 fill-green-500 text-fd-card" />
-            ),
-          }[type]}
-        <div className="min-w-0 flex flex-col gap-2 flex-1">
+            '--callout-color': `var(--color-fd-${type})`,
+            ...props.style,
+          } as object
+        }
+      >
+        <div role="none" className="w-0.5 bg-(--callout-color)/50 rounded-sm" />
+        {icon ?? (
+          <DefaultIcon className="size-5 -me-0.5 fill-(--callout-color) text-fd-card" />
+        )}
+        <div className="flex flex-col gap-2 min-w-0 flex-1">
           {title ? <p className="font-medium !my-0">{title}</p> : null}
           <div className="text-fd-muted-foreground prose-no-margin empty:hidden">
             {children}

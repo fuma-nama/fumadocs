@@ -7,7 +7,7 @@ import Spot from '@/public/spot.png';
 
 export default function DocsPage(): React.ReactElement {
   return (
-    <main className="container flex flex-col items-center py-16 text-center z-[2]">
+    <main className="container flex flex-col items-center py-16 text-center z-2">
       <div className="absolute inset-0 z-[-1] overflow-hidden duration-1000 animate-in fade-in [perspective:2000px]">
         <div
           className="absolute bottom-[20%] left-1/2 size-[1200px] origin-bottom bg-fd-primary/30 opacity-30"

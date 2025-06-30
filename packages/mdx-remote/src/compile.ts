@@ -18,6 +18,7 @@ export type MDXOptions = Omit<
   rehypeCodeOptions?: Plugins.RehypeCodeOptions | false;
   rehypeTocOptions?: Plugins.RehypeTocOptions | false;
   remarkCodeTabOptions?: Plugins.RemarkCodeTabOptions | false;
+  remarkNpmOptions?: Plugins.RemarkNpmOptions | false;
 
   /**
    * The directory to find image sizes
@@ -142,6 +143,7 @@ function getCompileOptions({
   rehypeTocOptions,
   remarkHeadingOptions,
   remarkCodeTabOptions,
+  remarkNpmOptions,
   imageDir = './public',
   ...options
 }: MDXOptions = {}): CompileOptions {
@@ -153,6 +155,7 @@ function getCompileOptions({
   const remarkGfm = getPlugin('remarkGfm');
   const remarkHeading = getPlugin('remarkHeading');
   const remarkCodeTab = getPlugin('remarkCodeTab');
+  const remarkNpm = getPlugin('remarkNpm');
   const remarkImage = getPlugin('remarkImage');
   const rehypeCode = getPlugin('rehypeCode');
   const rehypeToc = getPlugin('rehypeToc');
@@ -178,6 +181,9 @@ function getCompileOptions({
           : null,
         remarkCodeTab && remarkCodeTabOptions !== false
           ? [remarkCodeTab, remarkCodeTabOptions]
+          : null,
+        remarkNpm && remarkNpmOptions !== false
+          ? [remarkNpm, remarkNpmOptions]
           : null,
         ...v,
       ],

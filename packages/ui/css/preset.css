@@ -3,6 +3,13 @@
 @source '../dist/**/*.js';
 @plugin '../dist/theme/typography/index.js';
 
+@theme static {
+  --color-fd-info: oklch(62.3% 0.214 259.815);
+  --color-fd-warning: oklch(76.9% 0.188 70.08);
+  --color-fd-error: oklch(63.7% 0.237 25.331);
+  --color-fd-success: oklch(72.3% 0.219 149.579);
+}
+
 @theme {
   --spacing-fd-container: 1400px;
   --fd-page-width: 1200px;
@@ -15,7 +22,7 @@
 
   --color-fd-diff-remove: rgba(200, 10, 100, 0.12);
   --color-fd-diff-remove-symbol: rgb(230, 10, 100);
-  --color-fd-diff-add: rgba(14, 180, 100, 0.12);
+  --color-fd-diff-add: rgba(14, 180, 100, 0.1);
   --color-fd-diff-add-symbol: rgb(10, 200, 100);
 
   --animate-fd-fade-in: fd-fade-in 300ms ease;
@@ -110,14 +117,14 @@
   @keyframes fd-popover-in {
     from {
       opacity: 0;
-      transform: translateY(-12px) scale(0.9);
+      transform: scale(0.7);
     }
   }
 
   @keyframes fd-popover-out {
     to {
       opacity: 0;
-      transform: translateY(-12px) scale(0.9);
+      transform: scale(0.7);
     }
   }
 

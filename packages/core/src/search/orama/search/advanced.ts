@@ -19,9 +19,12 @@ export async function searchAdvanced(
   let params = {
     ...extraParams,
     where: removeUndefined({
-      tags: {
-        containsAll: tag,
-      },
+      tags:
+        tag.length > 0
+          ? {
+              containsAll: tag,
+            }
+          : undefined,
       ...extraParams.where,
     }),
     groupBy: {
