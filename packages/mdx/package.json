@@ -87,7 +87,7 @@
     "@fumadocs/mdx-remote": "^1.2.0",
     "fumadocs-core": "^14.0.0 || ^15.0.0",
     "next": "^15.3.0",
-    "vite": "6.x.x"
+    "vite": "7.x"
   },
   "peerDependenciesMeta": {
     "next": {
