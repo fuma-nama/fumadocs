@@ -144,9 +144,27 @@ export async function transformMDX<D extends BaseDoc>(
   );
 }
 
+interface SubfolderMeta {
+  title?: string;
+  icon?: string;
+  pages?: (string | SubfolderMeta)[];
+  defaultOpen?: boolean;
+  description?: string;
+}
+
+const subfolderMetaSchema: z.ZodType<SubfolderMeta> = z.lazy(() =>
+  z.object({
+    title: z.string().optional(),
+    icon: z.string().optional(),
+    pages: z.array(z.union([z.string(), subfolderMetaSchema])).optional(),
+    defaultOpen: z.boolean().optional(),
+    description: z.string().optional(),
+  }),
+);
+
 export const metaSchema = z.object({
   title: z.string().optional(),
-  pages: z.array(z.string()).optional(),
+  pages: z.array(z.union([z.string(), subfolderMetaSchema])).optional(),
   description: z.string().optional(),
   root: z.boolean().optional(),
   defaultOpen: z.boolean().optional(),
@@ -175,10 +193,20 @@ export function createDocSchema(z: typeof Zod) {
 }
 
 export function createMetaSchema(z: typeof Zod) {
+  const subfolderSchema: z.ZodType<SubfolderMeta> = z.lazy(() =>
+    z.object({
+      title: z.string().optional(),
+      icon: z.string().optional(),
+      pages: z.array(z.union([z.string(), subfolderSchema])).optional(),
+      defaultOpen: z.boolean().optional(),
+      description: z.string().optional(),
+    }),
+  );
+
   return {
     title: z.string().optional(),
     description: z.string().optional(),
-    pages: z.array(z.string()).optional(),
+    pages: z.array(z.union([z.string(), subfolderSchema])).optional(),
     icon: z.string().optional(),
     root: z.boolean().optional(),
     defaultOpen: z.boolean().optional(),

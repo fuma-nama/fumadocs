@@ -3,9 +3,27 @@ import type { CollectionSchema } from '@/config';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import picocolors from 'picocolors';
 
+interface SubfolderMeta {
+  title?: string;
+  icon?: string;
+  pages?: (string | SubfolderMeta)[];
+  defaultOpen?: boolean;
+  description?: string;
+}
+
+const subfolderMetaSchema: z.ZodType<SubfolderMeta> = z.lazy(() =>
+  z.object({
+    title: z.string().optional(),
+    icon: z.string().optional(),
+    pages: z.array(z.union([z.string(), subfolderMetaSchema])).optional(),
+    defaultOpen: z.boolean().optional(),
+    description: z.string().optional(),
+  }),
+);
+
 export const metaSchema = z.object({
   title: z.string().optional(),
-  pages: z.array(z.string()).optional(),
+  pages: z.array(z.union([z.string(), subfolderMetaSchema])).optional(),
   description: z.string().optional(),
   root: z.boolean().optional(),
   defaultOpen: z.boolean().optional(),
