@@ -18,6 +18,7 @@ export default function CustomSearchDialog(props: SharedProps) {
   const [tag, setTag] = useState<string | undefined>();
   const { search, setSearch, query } = useDocsSearch({
     tag, // [!code ++]
+    // other options depending on your search engine
   });
 
   return (

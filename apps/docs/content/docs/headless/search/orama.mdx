@@ -7,7 +7,7 @@ Fumadocs supports document search with Orama, It is the default but also the rec
 
 ## Search Server
 
-You can create the search route handler from the source object, or search indexes.
+Create the search route handler.
 
 <Tabs items={['From Source', 'From Search Indexes']}>
 
@@ -97,102 +97,10 @@ and update your search client:
 ```ts
 import { useDocsSearch } from 'fumadocs-core/search/client';
 
-// Pass `tag` in your custom search dialog
 const client = useDocsSearch({
   type: 'fetch',
-  tag: '<value>',
+  tag: '<value>', // [!code ++]
 });
-```
-
-### Internationalization
-
-```ts title="lib/source.ts" tab="createFromSource"
-import { i18n } from '@/lib/i18n';
-import { loader } from 'fumadocs-core/source';
-
-// You only need i18n option on source object.
-export const source = loader({
-  i18n, // [!code highlight]
-});
-```
-
-<include cwd meta='title="app/api/search/route.ts" tab="createI18nSearchAPI"'>
-  ../../examples/i18n/app/api/search/route-full.ts
-</include>
-
-and update your search clients:
-
-- **Fumadocs UI**: No changes needed, Fumadocs UI handles this when you have i18n configured correctly.
-- **Search Client**:
-  Add `locale` to the search client, this will only allow pages with specified locale to be searchable by the user.
-
-```ts
-import { useDocsSearch } from 'fumadocs-core/search/client';
-
-const { search, setSearch, query } = useDocsSearch({
-  type: 'fetch',
-  locale: 'cn',
-});
-```
-
-### Special Languages
-
-If your language is not on the Orama [Supported Languages](https://docs.orama.com/open-source/supported-languages#officially-supported-languages) list, you will need some extra configurations:
-
-```npm
-@orama/tokenizers
-```
-
-<include
-  cwd
-  meta='title="app/api/search/route.ts" tab="createFromSource (i18n enabled)"'
->
-  ../../examples/i18n/app/api/search/route.ts
-</include>
-
-```ts title="app/api/search/route.ts" tab="createFromSource (without i18n)"
-import { source } from '@/lib/source';
-import { createFromSource } from 'fumadocs-core/search/server';
-import { createTokenizer } from '@orama/tokenizers/mandarin';
-
-// example for Mandarin
-export const { GET } = createFromSource(source, {
-  components: {
-    tokenizer: createTokenizer(),
-  },
-  search: {
-    threshold: 0,
-    tolerance: 0,
-  },
-});
-```
-
-```tsx tab="Static mode"
-import { useDocsSearch } from 'fumadocs-core/search/client';
-import { createTokenizer } from '@orama/tokenizers/mandarin';
-import { create } from '@orama/orama';
-
-// [!code focus:12]
-// You can customise it in the client-side `initOrama()` function.
-function initOrama(locale?: string) {
-  return create({
-    schema: { _: 'string' },
-    components: {
-      // for users with i18n enabled, you can pass it conditionally based on `locale`
-      tokenizer: locale === 'cn' ? createTokenizer() : undefined,
-      // or if all documents are written in Chinese
-      tokenizer: createTokenizer(),
-    },
-  });
-}
-
-function Search() {
-  const client = useDocsSearch({
-    type: 'static',
-    initOrama,
-  });
-  // ...
-}
 ```
 
 ### Static Export
@@ -236,6 +144,112 @@ and update your search clients:
     You should use cloud solutions like Orama Cloud or Algolia for these cases.
 
 </Callout>
+
+### Internationalization
+
+For languages on the Orama [Supported Languages](https://docs.orama.com/open-source/supported-languages#officially-supported-languages) list:
+
+<Tabs items={['Normal', 'Static Export']}>
+
+<Tab>
+
+```ts title="lib/source.ts" tab="createFromSource"
+import { i18n } from '@/lib/i18n';
+import { loader } from 'fumadocs-core/source';
+
+// You only need i18n option on source object.
+export const source = loader({
+  i18n, // [!code highlight]
+});
+```
+
+<include cwd meta='title="app/api/search/route.ts" tab="createI18nSearchAPI"'>
+  ../../examples/i18n/app/api/search/route-full.ts
+</include>
+
+and update your search clients:
+
+- **Fumadocs UI**: No changes needed, Fumadocs UI handles this when you have i18n configured correctly.
+- **Search Client**:
+  Add `locale` to the search client, this will only allow pages with specified locale to be searchable by the user.
+
+```ts
+import { useDocsSearch } from 'fumadocs-core/search/client';
+
+const { search, setSearch, query } = useDocsSearch({
+  type: 'fetch',
+  locale: 'cn',
+});
+```
+
+</Tab>
+
+<Tab>
+
+Update your `initOrama` function.
+
+```tsx title="components/search.tsx"
+import { useDocsSearch } from 'fumadocs-core/search/client';
+import { createTokenizer } from '@orama/tokenizers/mandarin';
+import { create } from '@orama/orama';
+
+// [!code focus:6]
+function initOrama(locale?: string) {
+  return create({
+    schema: { _: 'string' },
+    language: locale === 'ru' ? 'russian' : 'english',
+  });
+}
+
+function Search() {
+  const client = useDocsSearch({
+    type: 'static',
+    initOrama,
+    locale,
+    // ...
+  });
+}
+```
+
+</Tab>
+
+</Tabs>
+
+#### Special Languages
+
+If your language is not on the list, you will need some extra configurations:
+
+```npm
+@orama/tokenizers
+```
+
+<include cwd meta='title="app/api/search/route.ts" tab="createFromSource"'>
+  ../../examples/i18n/app/api/search/route.ts
+</include>
+
+```tsx tab="Static mode" title="components/search.tsx"
+import { useDocsSearch } from 'fumadocs-core/search/client';
+import { createTokenizer } from '@orama/tokenizers/mandarin';
+import { create } from '@orama/orama';
+
+// [!code focus:8]
+function initOrama(locale?: string) {
+  return create({
+    schema: { _: 'string' },
+    components: {
+      tokenizer: locale === 'cn' ? createTokenizer() : undefined,
+    },
+  });
+}
+
+function Search() {
+  const client = useDocsSearch({
+    type: 'static',
+    initOrama,
+  });
+  // ...
+}
+```
 
 ## Headless
 
