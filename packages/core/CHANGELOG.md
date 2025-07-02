@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 15.6.1
+
+### Patch Changes
+
+- 1a902ff: Fix static export map
+
 ## 15.6.0
 
 ### Minor Changes
