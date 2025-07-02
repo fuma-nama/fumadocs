@@ -10,7 +10,10 @@ For Next.js apps, you'll have to configure i18n routing on both Next.js and Fuma
 Fumadocs is not a full-powered i18n library, it's up to you when internationalizing the nest of your app.
 You can also use other libraries with Fumadocs like [next-intl](https://github.com/amannn/next-intl).
 
-[Learn more about i18n in Next.js](https://nextjs.org/docs/app/building-your-application/routing/internationalization).
+<Callout title="New to Next.js?">
+  You can [learn more about i18n in
+  Next.js](https://nextjs.org/docs/app/building-your-application/routing/internationalization).
+</Callout>
 
 ## Setup
 
@@ -20,7 +23,7 @@ Define the i18n configurations in a file, we will import it with `@/ilb/i18n` in
   ../../examples/i18n/lib/i18n.ts
 </include>
 
-> See [available options](/docs/headless/internationalization) for further customisations.
+> See [available options](/docs/headless/internationalization) for i18n config.
 
 Pass it to the source loader.
 
@@ -46,33 +49,45 @@ Create a middleware that redirects users to appropriate locale.
 
     The default middleware is optional, you can also use your own middleware or the one provided by i18n libraries.
 
-    When using custom middleware, make sure its behaviour align with the [`hidePrefix`](/docs/headless/internationalization#hide-locale-prefix) option you set in your i18n config.
+    Make sure its behaviour aligns with the [`hidePrefix`](/docs/headless/internationalization#hide-locale-prefix) option you set in your i18n config.
 
 </Callout>
 
 ### Routing
 
-Create a `/app/[lang]` folder, and move your routes from `/app` folder (e.g. `page.tsx`, `layout.tsx`) to the folder, except route handlers.
+Create a `/app/[lang]` folder, and move your pages/layouts into it, except route handlers.
 
-<Callout title="Common Mistake">
+<Files>
+  <Folder name="app" defaultOpen>
+    <File name="api/search/route.ts" />
+    <Folder name="[lang]" defaultOpen>
+      <File name="layout.tsx" />
+      <File name="(home)/page.tsx" />
+      <File name="..." />
+    </Folder>
+    <File name="layout.config.tsx" />
+  </Folder>
+</Files>
+
+<Callout title="Common Mistake" type="error">
   Did you accidentally find your styles lost? Make sure the import path to
   `global.css` is still correct!
 </Callout>
 
-Provide UI translations and other config to `<RootProvider />`.
-Note that only English translations are provided by default.
+Provide UI translations and other config to `<RootProvider />`, the English translations are used when `translations` is not specified.
 
 ```tsx title="app/[lang]/layout.tsx"
 import { RootProvider } from 'fumadocs-ui/provider';
 import type { Translations } from 'fumadocs-ui/i18n';
 
-// translations [!code ++:3]
+// [!code ++:17]
+// translations
 const cn: Partial<Translations> = {
   search: 'Translated Content',
 };
 
 // available languages that will be displayed on UI
-// make sure `locale` is consistent with your i18n config [!code ++:10]
+// make sure `locale` is consistent with your i18n config
 const locales = [
   {
     name: 'English',
@@ -206,13 +221,8 @@ export function generateStaticParams() {
 
 Configure i18n on your search solution.
 
-- **Built-in Search (Orama):**
-  For [Supported Languages](https://docs.orama.com/open-source/supported-languages#officially-supported-languages), no further changes are needed.
-
-  Otherwise, additional config is required (e.g. Chinese & Japanese). See [Special Languages](/docs/headless/search/orama#special-languages).
-
-- **Cloud Solutions (e.g. Algolia):**
-  They usually have official support for multilingual.
+- **Built-in Search (Orama):** See [Internationalization](/docs/headless/search/orama#internationalization).
+- **Cloud Solutions (e.g. Algolia):** They usually have official support for multilingual.
 
 ## Writing Documents
 

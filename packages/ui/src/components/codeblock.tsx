@@ -257,7 +257,7 @@ export function CodeBlockTabsTrigger({
     <TabsTrigger
       {...props}
       className={cn(
-        'relative group inline-flex text-sm font-medium items-center gap-2 px-2 first:ms-1 py-1.5 hover:text-fd-accent-foreground data-[state=active]:text-fd-primary [&_svg]:size-3.5',
+        'relative group inline-flex text-sm font-medium text-nowrap items-center gap-2 px-2 first:ms-1 py-1.5 hover:text-fd-accent-foreground data-[state=active]:text-fd-primary [&_svg]:size-3.5',
         props.className,
       )}
     >
