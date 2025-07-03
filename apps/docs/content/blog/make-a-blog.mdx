@@ -19,6 +19,7 @@ Define a `blogPosts` collection.
 
 ```ts title="source.config.ts"
 import { defineCollections, frontmatterSchema } from 'fumadocs-mdx/config';
+import { z } from 'zod';
 
 export const blogPosts = defineCollections({
   type: 'doc',
