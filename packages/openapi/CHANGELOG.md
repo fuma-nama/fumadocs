@@ -1,5 +1,12 @@
 # @fuma-docs/openapi
 
+## 9.0.17
+
+### Patch Changes
+
+- 7328590: OpenAPI: Fix non-undefined values not rendering
+- b606d36: support custom slugify function for generate files
+
 ## 9.0.16
 
 ### Patch Changes
