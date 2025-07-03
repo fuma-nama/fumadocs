@@ -126,7 +126,7 @@ export function Schema({
       value: string;
     }[] = [];
 
-    if (schema.default) {
+    if (schema.default !== undefined) {
       fields.push({
         key: 'Default',
         value: JSON.stringify(schema.default),
@@ -402,16 +402,16 @@ function getRange(
   exclusiveMax: number | undefined,
 ) {
   const out = [];
-  if (min) {
+  if (min !== undefined) {
     out.push(`${min} <=`);
-  } else if (exclusiveMin) {
+  } else if (exclusiveMin !== undefined) {
     out.push(`${exclusiveMin} <`);
   }
 
   out.push(value);
-  if (max) {
+  if (max !== undefined) {
     out.push(`<= ${max}`);
-  } else if (exclusiveMax) {
+  } else if (exclusiveMax !== undefined) {
     out.push(`< ${exclusiveMax}`);
   }
   if (out.length > 1) return out.join(' ');
