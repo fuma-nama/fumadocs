@@ -267,25 +267,23 @@ export function Schema({
 
     if (schema.type === 'array') {
       const items = schema.items;
-      if (!items || !isComplexType(items) || ctx.stack.has(items)) return;
+      if (!items || typeof items === 'boolean' || ctx.stack.has(items)) return;
 
       return (
-        <>
-          {items.description && (
-            <Markdown text={'Item: ' + items.description} />
+        <renderer.ObjectCollapsible name="Array Item">
+          <div className="text-sm border-t p-3 border-x prose-no-margin bg-fd-card last:rounded-b-xl first:rounded-tr-xl last:border-b empty:hidden">
+            <Markdown text={items.description ?? 'No Description'} />
+            {propertyInfo(items)}
+          </div>
+          {propertyBody(
+            items,
+            (child, ctx) => primitiveBody(child, ctx, false, true),
+            {
+              ...ctx,
+              stack: ctx.stack.next(schema),
+            },
           )}
-
-          <renderer.ObjectCollapsible name="Array Item">
-            {propertyBody(
-              items,
-              (child, ctx) => primitiveBody(child, ctx, false, true),
-              {
-                ...ctx,
-                stack: ctx.stack.next(schema),
-              },
-            )}
-          </renderer.ObjectCollapsible>
-        </>
+        </renderer.ObjectCollapsible>
       );
     }
   }
@@ -388,9 +386,7 @@ function isComplexType(
 
   return (
     schema.type === 'object' ||
-    (schema.type === 'array' &&
-      schema.items != null &&
-      isComplexType(schema.items))
+    (schema.type === 'array' && schema.items != null)
   );
 }
 
