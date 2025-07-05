@@ -18,6 +18,12 @@ import {
 import type { RenderContext } from '@/types';
 import { APIPlayground, type APIPlaygroundProps } from '@/playground';
 import { CodeExampleSelector } from '@/ui/lazy';
+import {
+  CodeBlockTab,
+  CodeBlockTabs,
+  CodeBlockTabsList,
+  CodeBlockTabsTrigger,
+} from 'fumadocs-ui/components/codeblock';
 
 export interface ResponsesProps {
   items: string[];
@@ -133,12 +139,26 @@ export function createRenders(): Renderer {
     ),
     Property,
     ObjectCollapsible,
-    Requests: (props) => (
-      <Tabs groupId="fumadocs_openapi_requests" {...props} />
+    Requests: ({ items, children }) => (
+      <CodeBlockTabs
+        groupId="fumadocs_openapi_requests"
+        defaultValue={items[0]}
+      >
+        <CodeBlockTabsList>
+          {items.map((item) => (
+            <CodeBlockTabsTrigger key={item} value={item}>
+              {item}
+            </CodeBlockTabsTrigger>
+          ))}
+        </CodeBlockTabsList>
+        {children}
+      </CodeBlockTabs>
     ),
 
     CodeExampleSelector,
-    Request: (props) => <Tab value={props.name}>{props.children}</Tab>,
+    Request: (props) => (
+      <CodeBlockTab value={props.name}>{props.children}</CodeBlockTab>
+    ),
     APIPlayground,
   };
 }

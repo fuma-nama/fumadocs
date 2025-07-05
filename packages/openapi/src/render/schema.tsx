@@ -22,7 +22,7 @@ export function Schema({
   readOnly = false,
   writeOnly = false,
   as = 'property',
-  ctx: { renderer },
+  ctx: renderContext,
 }: {
   name: string;
   required?: boolean;
@@ -33,6 +33,8 @@ export function Schema({
   writeOnly?: boolean;
   ctx: RenderContext;
 }): ReactNode {
+  const { renderer } = renderContext;
+
   function propertyBody(
     schema: Exclude<ResolvedSchema, boolean>,
     renderPrimitive: (
@@ -59,7 +61,7 @@ export function Schema({
           <TabsList>
             {items.map((item) => (
               <TabsTrigger key={item.type} value={item.type}>
-                {schemaToString(item)}
+                {schemaToString(item, renderContext.schema)}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -88,7 +90,7 @@ export function Schema({
           <TabsList>
             {oneOf.map((item, i) => (
               <TabsTrigger key={i} value={i.toString()}>
-                {schemaToString(item)}
+                {schemaToString(item, renderContext.schema)}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -309,7 +311,7 @@ export function Schema({
     return (
       <renderer.Property
         name={key}
-        type={schemaToString(schema)}
+        type={schemaToString(schema, renderContext.schema)}
         deprecated={schema.deprecated}
         {...props}
       >
