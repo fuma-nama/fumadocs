@@ -1,9 +1,8 @@
 import type { DereferenceMap, Document } from '@/types';
 import type { NoReference } from '@/utils/schema';
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
-import { dereference, load, upgrade } from '@scalar/openapi-parser';
-import { fetchUrls } from '@scalar/openapi-parser/plugins/fetch-urls';
-import { readFiles } from '@scalar/openapi-parser/plugins/read-files';
+import { bundle, dereference, upgrade } from '@scalar/openapi-parser';
+import { fetchUrls, readFiles } from '@scalar/openapi-parser/plugins';
 
 export type DocumentInput = string | OpenAPIV3_1.Document | OpenAPIV3.Document;
 
@@ -28,19 +27,14 @@ export async function processDocument(
   if (cached) return cached;
 
   const dereferenceMap: DereferenceMap = new Map();
-  const loaded = await load(input, {
-    plugins: [readFiles(), fetchUrls()],
+  let document = await bundle(input as string, {
+    plugins: [fetchUrls(), readFiles()],
+    treeShake: false,
   });
 
-  if (loaded.errors && loaded.errors.length > 0) {
-    throw new Error(
-      loaded.errors.map((err) => `${err.code}: ${err.message}`).join('\n'),
-    );
-  }
-
   // upgrade
-  loaded.specification = upgrade(loaded.specification).specification;
-  const { schema: dereferenced } = await dereference(loaded.filesystem, {
+  document = upgrade(document).specification;
+  const { schema: dereferenced } = await dereference(document, {
     onDereference({ ref, schema }) {
       dereferenceMap.set(schema, ref);
     },
@@ -49,7 +43,7 @@ export async function processDocument(
   const processed: ProcessedDocument = {
     document: dereferenced as NoReference<Document>,
     dereferenceMap,
-    downloaded: loaded.specification as Document,
+    downloaded: document as Document,
   };
 
   if (!disableCache && typeof input === 'string') {
