@@ -1,5 +1,13 @@
 # @fuma-docs/openapi
 
+## 9.0.18
+
+### Patch Changes
+
+- ae38ed0: Fix Scalar `upgrade()` is somehow ignored
+- a35597e: Use new codeblock tab style
+- 8f69e33: Always display collapsible for array items
+
 ## 9.0.17
 
 ### Patch Changes
