@@ -18,15 +18,12 @@ type CalloutProps = Omit<
   icon?: ReactNode;
 };
 
+const iconClass = 'size-5 -me-0.5 fill-(--callout-color) text-fd-card';
+
 export const Callout = forwardRef<HTMLDivElement, CalloutProps>(
   ({ className, children, title, type = 'info', icon, ...props }, ref) => {
     if (type === 'warn') type = 'warning';
-    const DefaultIcon = {
-      info: Info,
-      warning: TriangleAlert,
-      error: CircleX,
-      success: CircleCheck,
-    }[type];
+    if ((type as unknown) === 'tip') type = 'info';
 
     return (
       <div
@@ -38,17 +35,21 @@ export const Callout = forwardRef<HTMLDivElement, CalloutProps>(
         {...props}
         style={
           {
-            '--callout-color': `var(--color-fd-${type})`,
+            '--callout-color': `var(--color-fd-${type}, var(--color-fd-muted))`,
             ...props.style,
           } as object
         }
       >
         <div role="none" className="w-0.5 bg-(--callout-color)/50 rounded-sm" />
-        {icon ?? (
-          <DefaultIcon className="size-5 -me-0.5 fill-(--callout-color) text-fd-card" />
-        )}
+        {icon ??
+          {
+            info: <Info className={iconClass} />,
+            warning: <TriangleAlert className={iconClass} />,
+            error: <CircleX className={iconClass} />,
+            success: <CircleCheck className={iconClass} />,
+          }[type]}
         <div className="flex flex-col gap-2 min-w-0 flex-1">
-          {title ? <p className="font-medium !my-0">{title}</p> : null}
+          {title && <p className="font-medium !my-0">{title}</p>}
           <div className="text-fd-muted-foreground prose-no-margin empty:hidden">
             {children}
           </div>
