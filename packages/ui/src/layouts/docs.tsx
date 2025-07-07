@@ -189,7 +189,10 @@ export function DocsLayout({
                 (searchToggle.components?.sm ?? (
                   <SearchToggle className="p-2" hideIfDisabled />
                 ))}
-              <NavbarSidebarTrigger className="p-2 -me-1.5 md:hidden" />
+              <NavbarSidebarTrigger
+                className="p-2 -me-1.5 md:hidden"
+                sidebarEnabled={sidebarEnabled}
+              />
             </Navbar>
           ))}
         <LayoutBody

@@ -60,9 +60,12 @@ export function LayoutBody(props: ComponentProps<'main'>) {
 
 export function NavbarSidebarTrigger({
   className,
+  sidebarEnabled = true,
   ...props
-}: ComponentProps<'button'>) {
+}: ComponentProps<'button'> & { sidebarEnabled?: boolean }) {
   const { setOpen } = useSidebar();
+
+  if (!sidebarEnabled) return null;
 
   return (
     <button

@@ -24,7 +24,7 @@ export function DocsLayout({ tree, children }: DocsLayoutProps) {
           </Link>
 
           <SearchToggle />
-          <NavbarSidebarTrigger className="md:hidden" />
+          <NavbarSidebarTrigger className="md:hidden" sidebarEnabled={true} />
         </nav>
       </header>
       <main
@@ -53,8 +53,12 @@ function SearchToggle(props: ComponentProps<'button'>) {
   );
 }
 
-function NavbarSidebarTrigger(props: ComponentProps<'button'>) {
+function NavbarSidebarTrigger(
+  props: ComponentProps<'button'> & { sidebarEnabled?: boolean },
+) {
   const { open, setOpen } = useSidebar();
+
+  if (!props.sidebarEnabled) return null;
 
   return (
     <button
