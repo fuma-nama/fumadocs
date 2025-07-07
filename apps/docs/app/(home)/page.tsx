@@ -305,7 +305,7 @@ function Highlights(): React.ReactElement {
         <MousePointer className="-ml-1 mt-8" />
       </div>
       <Highlight icon={TimerIcon} heading="Light & Fast.">
-        Less Javascript with React Server Component, and optimized images.
+        Less Javascript with React Server Components, and optimized images.
       </Highlight>
       <Highlight icon={LayoutIcon} heading="Accessibility & UX first.">
         Focus on user experience and accessibility.
