@@ -292,10 +292,7 @@ function DocsNavbar({
             (searchToggle.components?.sm ?? (
               <SearchToggle hideIfDisabled className="p-2 md:hidden" />
             ))}
-          <NavbarSidebarTrigger
-            className="p-2 -me-1.5 md:hidden"
-            sidebarEnabled={sidebarCollapsible}
-          />
+          <NavbarSidebarTrigger className="p-2 -me-1.5 md:hidden" />
           {links
             .filter((item) => item.type === 'icon')
             .map((item, i) => (
