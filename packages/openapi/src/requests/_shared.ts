@@ -38,6 +38,16 @@ export interface RequestData {
   bodyMediaType?: string;
 }
 
+const FormDelimiter = {
+  spaceDelimited: ' ',
+  pipeDelimited: '|',
+};
+
+const PathPrefix = {
+  label: '.',
+  matrix: ';',
+};
+
 export function ident(code: string, tab: number = 1) {
   return code
     .split('\n')
@@ -63,15 +73,15 @@ export function encodeRequestData(
   function writeObject(
     parentKey: string,
     value: object,
-    swallow: boolean,
+    deep: boolean,
     output: Record<string, EncodedParameter>,
   ) {
     for (const k in value) {
       const prop: unknown = value[k as keyof object];
       if (prop == null) continue;
 
-      const key = swallow ? k : `${parentKey}[${k}]`;
-      if (swallow || typeof prop !== 'object') {
+      const key = deep ? `${parentKey}[${k}]` : k;
+      if (!deep || typeof prop !== 'object') {
         output[key] = {
           value: String(prop),
         };
@@ -79,7 +89,7 @@ export function encodeRequestData(
         continue;
       }
 
-      writeObject(key, value, swallow, output);
+      writeObject(key, value, deep, output);
     }
   }
 
@@ -96,51 +106,67 @@ export function encodeRequestData(
     }
 
     const explode = field.explode ?? true;
+    let prefix = '';
+    let sep = ',';
+
+    if (field.in === 'path') {
+      const style = field.style ?? 'simple';
+
+      if (style in PathPrefix) {
+        prefix = PathPrefix[style as keyof typeof PathPrefix];
+
+        if (explode) sep = prefix;
+      }
+    }
 
     if (Array.isArray(value)) {
       // header & cookie doesn't support explode for array values
       if (explode && field.in !== 'header' && field.in !== 'cookie') {
         output[key] = {
-          value: value.map(String),
+          value: prefix + value.map(String),
         };
         return output;
       }
 
-      const sep =
-        {
-          spaceDelimited: ' ',
-          pipeDelimited: '|',
-        }[field.style ?? 'form'] ?? ',';
+      if (field.in === 'query') {
+        const style = field.style ?? 'form';
+
+        if (style in FormDelimiter)
+          sep = FormDelimiter[style as keyof typeof FormDelimiter];
+      }
+
       output[key] = {
-        value: value.map(String).join(sep),
+        value: prefix + value.map(String).join(sep),
       };
       return output;
     }
 
     if (typeof value === 'object' && value) {
-      // header uses the original key
-      if (explode && field.in === 'header') {
+      // header & path creates key-value pairs
+      if (explode && (field.in === 'header' || field.in === 'path')) {
         output[key] = {
-          value: Object.entries(value)
-            .map(([k, v]) => `${k}=${v}`)
-            .join(','),
+          value:
+            prefix +
+            Object.entries(value)
+              .map(([k, v]) => `${k}=${v}`)
+              .join(sep),
         };
         return output;
       }
 
       if (explode || field.style === 'deepObject') {
-        writeObject(key, value, explode, output);
+        writeObject(key, value, field.style === 'deepObject', output);
         return output;
       }
 
       output[key] = {
-        value: Object.entries(value).flat().join(','),
+        value: prefix + Object.entries(value).flat().join(sep),
       };
       return output;
     }
 
     output[key] = {
-      value: String(value),
+      value: prefix + String(value),
     };
     return output;
   }
