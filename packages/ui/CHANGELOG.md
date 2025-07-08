@@ -1,5 +1,21 @@
 # next-docs-ui
 
+## 15.6.2
+
+### Patch Changes
+
+- 1e50889: Fix mobile sidebar trigger visibility when sidebar is disabled
+- 353c139: Callout add fallback icons
+- 5844c6f: no longer sort type table properties by default
+  - fumadocs-core@15.6.2
+
+## 15.6.1
+
+### Patch Changes
+
+- Updated dependencies [1a902ff]
+  - fumadocs-core@15.6.1
+
 ## 15.6.0
 
 ### Minor Changes

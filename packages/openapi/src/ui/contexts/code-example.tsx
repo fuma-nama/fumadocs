@@ -21,23 +21,29 @@ import {
   SelectValue,
 } from '@/ui/components/select';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
-import { joinURL, resolveServerUrl, withBase } from '@/utils/url';
-import type { RequestData } from '@/requests/_shared';
+import {
+  joinURL,
+  resolveRequestData,
+  resolveServerUrl,
+  withBase,
+} from '@/utils/url';
+import type { RawRequestData, RequestData } from '@/requests/_shared';
 import { defaultSamples } from '@/requests';
 
-type UpdateListener = (data: RequestData) => void;
+type UpdateListener = (data: RawRequestData, encoded: RequestData) => void;
 
 const CodeExampleContext = createContext<{
   route: string;
   examples: {
     key: string;
-    data: RequestData;
+    data: RawRequestData;
+    encoded: RequestData;
   }[];
 
   key: string;
   setKey: (key: string) => void;
 
-  setData: (data: RequestData) => void;
+  setData: (data: RawRequestData, encoded: RequestData) => void;
 
   addListener: (listener: UpdateListener) => void;
   removeListener: (listener: UpdateListener) => void;
@@ -52,7 +58,8 @@ export function CodeExampleProvider({
   route: string;
   examples: {
     key: string;
-    data: RequestData;
+    data: RawRequestData;
+    encoded: RequestData;
   }[];
   initialKey?: string;
   children: ReactNode;
@@ -60,33 +67,38 @@ export function CodeExampleProvider({
   const [key, setKey] = useState(initialKey ?? examples[0].key);
   const listeners = useRef<UpdateListener[]>([]);
 
-  const setData = useEffectEvent((newData: RequestData) => {
-    for (const example of examples) {
-      if (example.key === key) {
-        // persistent changes
-        example.data = newData;
+  const setData = useEffectEvent(
+    (data: RawRequestData, encoded: RequestData) => {
+      for (const example of examples) {
+        if (example.key === key) {
+          // persistent changes
+          example.data = data;
+          example.encoded = encoded;
+          break;
+        }
       }
-    }
 
-    for (const listener of listeners.current) {
-      listener(newData);
-    }
-  });
+      for (const listener of listeners.current) {
+        listener(data, encoded);
+      }
+    },
+  );
 
   const updateKey = useEffectEvent((newKey: string) => {
-    const data = examples.find((example) => example.key === newKey)?.data;
-    if (!data) return;
+    const example = examples.find((example) => example.key === newKey);
+    if (!example) return;
 
     setKey(newKey);
     for (const listener of listeners.current) {
-      listener(data);
+      listener(example.data, example.encoded);
     }
   });
 
   const addListener = useEffectEvent((listener: UpdateListener) => {
     // initial call to listeners to ensure their data is the latest
     // this is necessary to avoid race conditions between `useEffect()`
-    listener(examples.find((example) => example.key === key)!.data);
+    const example = examples.find((example) => example.key === key)!;
+    listener(example.data, example.encoded);
     listeners.current.push(listener);
   });
 
@@ -120,7 +132,7 @@ export function CodeExample(props: CodeSample) {
     useContext(CodeExampleContext)!;
   const { server } = useServerSelectContext();
   const [data, setData] = useState(() => {
-    return examples.find((example) => example.key === key)!.data;
+    return examples.find((example) => example.key === key)!.encoded;
   });
 
   const sample = props.source
@@ -128,7 +140,7 @@ export function CodeExample(props: CodeSample) {
     : defaultSamples.find((item) => item.label === props.label);
 
   useEffect(() => {
-    const listener = setData;
+    const listener: UpdateListener = (_, encoded) => setData(encoded);
 
     addListener(listener);
     return () => {
@@ -148,7 +160,7 @@ export function CodeExample(props: CodeSample) {
             ? window.location.origin
             : 'https://loading',
         ),
-        route,
+        resolveRequestData(route, data),
       ),
       data,
       {

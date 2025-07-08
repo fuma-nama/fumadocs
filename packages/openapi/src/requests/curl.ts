@@ -1,22 +1,21 @@
 'use client';
 import { escapeString, inputToString } from '@/utils/input-to-string';
 import { ident, type SampleGenerator } from '@/requests/_shared';
-import { resolveRequestData } from '@/utils/url';
 
 export const generator: SampleGenerator = (url, data) => {
   const s: string[] = [];
-  s.push(`curl -X ${data.method} "${resolveRequestData(url, data)}"`);
+  s.push(`curl -X ${data.method} "${url}"`);
 
   for (const header in data.header) {
-    const value = `${header}: ${data.header[header]}`;
+    const value = `${header}: ${data.header[header].value}`;
 
     s.push(`-H "${value}"`);
   }
 
-  for (const cookie in data.cookie) {
-    const value = JSON.stringify(`${cookie}=${data.cookie[cookie]}`);
+  for (const k in data.cookie) {
+    const param = data.cookie[k];
 
-    s.push(`--cookie ${value}`);
+    s.push(`--cookie ${JSON.stringify(`${k}=${param.value}`)}`);
   }
 
   if (data.body && data.bodyMediaType === 'multipart/form-data') {

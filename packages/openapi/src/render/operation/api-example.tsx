@@ -7,7 +7,11 @@ import { CodeExample, CodeExampleProvider } from '@/ui/lazy';
 import { getPreferredType, type NoReference } from '@/utils/schema';
 import { getRequestData } from '@/render/operation/get-request-data';
 import { sample } from 'openapi-sampler';
-import type { RequestData } from '@/requests/_shared';
+import {
+  encodeRequestData,
+  type RawRequestData,
+  type RequestData,
+} from '@/requests/_shared';
 
 const defaultSamples: CodeSample[] = [
   {
@@ -47,7 +51,8 @@ interface CodeExampleItem {
 
   name: string;
   description?: string;
-  data: RequestData;
+  data: RawRequestData;
+  encoded: RequestData;
 }
 
 export function APIExampleProvider({
@@ -67,10 +72,7 @@ export function APIExampleProvider({
     <CodeExampleProvider
       initialKey={exclusiveSampleKey}
       route={route}
-      examples={examples.map((example) => ({
-        key: example.key,
-        data: example.data,
-      }))}
+      examples={examples}
     >
       {children}
     </CodeExampleProvider>
@@ -91,24 +93,36 @@ export function getAPIExamples(
     const result: CodeExampleItem[] = [];
 
     for (const [key, value] of Object.entries(bodyOfType.examples)) {
+      const data = getRequestData(path, method, key, ctx);
+
       result.push({
         key,
         name: value.summary ?? key,
         description: value.description,
-
-        data: getRequestData(path, method, key, ctx),
+        data,
+        encoded: encodeRequestData(
+          data,
+          ctx.mediaAdapters,
+          method.parameters ?? [],
+        ),
       });
     }
 
     if (result.length > 0) return result;
   }
 
+  const data = getRequestData(path, method, null, ctx);
   return [
     {
       key: '_default',
       name: 'Default',
       description: bodyOfType?.schema?.description,
-      data: getRequestData(path, method, null, ctx),
+      data,
+      encoded: encodeRequestData(
+        data,
+        ctx.mediaAdapters,
+        method.parameters ?? [],
+      ),
     },
   ];
 }

@@ -1,15 +1,19 @@
 'use client';
 import { ident, type SampleGenerator } from '@/requests/_shared';
-import { resolveRequestData } from '@/utils/url';
 
 export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
   const s: string[] = [];
   const options = new Map<string, string>();
-  const headers = { ...data.header };
+  const headers: Record<string, string> = {};
 
-  if (Object.keys(data.cookie).length > 0) {
-    headers['cookie'] = Object.entries(data.cookie)
-      .map(([key, value]) => `${key}=${value}`)
+  for (const [k, v] of Object.entries(data.header)) {
+    headers[k] = v.value as string;
+  }
+
+  const cookies = Object.entries(data.cookie);
+  if (cookies.length > 0) {
+    headers['cookie'] = cookies
+      .map(([key, param]) => `${key}=${param.value}`)
       .join('; ');
   }
 
@@ -19,12 +23,15 @@ export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
 
   let body: string | undefined;
   if (data.body && data.bodyMediaType && data.bodyMediaType in mediaAdapters) {
-    body = mediaAdapters[data.bodyMediaType].generateExample(data, {
-      lang: 'js',
-      addImport(from, name) {
-        s.unshift(`import { ${name} } from "${from}"`);
+    body = mediaAdapters[data.bodyMediaType].generateExample(
+      data as { body: unknown },
+      {
+        lang: 'js',
+        addImport(from, name) {
+          s.unshift(`import { ${name} } from "${from}"`);
+        },
       },
-    });
+    );
   }
 
   if (body) {
@@ -32,7 +39,7 @@ export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
     options.set('body', 'body');
   }
 
-  const params = [JSON.stringify(resolveRequestData(url, data))];
+  const params = [JSON.stringify(url)];
   if (options.size > 0) {
     const str = Array.from(options.entries())
       .map(([k, v]) => ident(k === v ? k : `${k}: ${v}`))

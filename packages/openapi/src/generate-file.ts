@@ -110,6 +110,13 @@ interface BaseConfig extends GenerateOptions {
    * Output directory
    */
   output: string;
+
+  /**
+   * Custom function to convert names into file names.
+   *
+   * By default, it only escapes whitespaces and upper case (English) characters
+   */
+  slugify?: (name: string) => string;
 }
 
 export async function generateFiles(options: Config): Promise<void> {
@@ -144,7 +151,7 @@ export async function generateFiles(options: Config): Promise<void> {
 }
 
 async function generateFromDocument(pathOrUrl: string, options: Config) {
-  const { output, cwd = process.cwd() } = options;
+  const { output, cwd = process.cwd(), slugify = defaultSlugify } = options;
   let nameFn: (
     output: GeneratePageOutput | GenerateTagOutput | GenerateFileOutput,
     document: ProcessedDocument['document'],
@@ -157,7 +164,7 @@ async function generateFromDocument(pathOrUrl: string, options: Config) {
       if (options.per === 'tag') {
         const result = output as GenerateTagOutput;
 
-        return getFilename(result.tag);
+        return slugify(result.tag);
       }
 
       if (options.per === 'file') {
@@ -188,7 +195,7 @@ async function generateFromDocument(pathOrUrl: string, options: Config) {
         return hook.operationId;
       }
 
-      return getFilename(result.item.name);
+      return slugify(result.item.name);
     };
   } else {
     nameFn = options.name as typeof nameFn;
@@ -233,7 +240,7 @@ async function generateFromDocument(pathOrUrl: string, options: Config) {
         tags = ['unknown'];
       }
 
-      return tags.map((tag) => path.join(getFilename(tag), `${file}.mdx`));
+      return tags.map((tag) => path.join(slugify(tag), `${file}.mdx`));
     }
 
     return [`${file}.mdx`];
@@ -312,7 +319,7 @@ function getOutputPathFromRoute(path: string): string {
   );
 }
 
-function getFilename(s: string): string {
+function defaultSlugify(s: string): string {
   return s.replace(/\s+/g, '-').toLowerCase();
 }
 

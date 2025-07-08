@@ -1,5 +1,44 @@
 # @fuma-docs/openapi
 
+## 9.1.0
+
+### Minor Changes
+
+- b60c8ed: **Support Parameter Serialization**
+
+  Maybe need to update your code if you've added custom media adapters.
+
+### Patch Changes
+
+- Updated dependencies [1e50889]
+- Updated dependencies [353c139]
+- Updated dependencies [5844c6f]
+  - fumadocs-ui@15.6.2
+  - fumadocs-core@15.6.2
+
+## 9.0.18
+
+### Patch Changes
+
+- ae38ed0: Fix Scalar `upgrade()` is somehow ignored
+- a35597e: Use new codeblock tab style
+- 8f69e33: Always display collapsible for array items
+
+## 9.0.17
+
+### Patch Changes
+
+- 7328590: OpenAPI: Fix non-undefined values not rendering
+- b606d36: support custom slugify function for generate files
+
+## 9.0.16
+
+### Patch Changes
+
+- Updated dependencies [1a902ff]
+  - fumadocs-core@15.6.1
+  - fumadocs-ui@15.6.1
+
 ## 9.0.15
 
 ### Patch Changes

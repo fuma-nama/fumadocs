@@ -30,9 +30,13 @@ export function createBrowserFetcher(
         headers.append('Content-Type', options.bodyMediaType);
 
       for (const key in options.header) {
-        const paramValue = options.header[key];
+        const param = options.header[key];
 
-        if (paramValue.length > 0) headers.append(key, paramValue.toString());
+        if (!Array.isArray(param.value)) {
+          headers.append(key, param.value);
+        } else {
+          headers.append(key, param.value.join(','));
+        }
       }
 
       const proxyUrl = options.proxyUrl
@@ -54,34 +58,19 @@ export function createBrowserFetcher(
             data: `[Fumadocs] No adapter for ${options.bodyMediaType}, you need to specify one from 'createOpenAPI()'.`,
           };
 
-        body = await adapter.encode(options);
+        body = adapter.encode(options as { body: unknown });
       }
 
       // cookies
       for (const key in options.cookie) {
-        const value = options.cookie[key];
-        if (!value) continue;
+        const param = options.cookie[key];
+        const segs: string[] = [`${key}=${param.value}`];
 
-        const cookie = {
-          [key]: value,
-          domain:
-            proxyUrl && proxyUrl.origin !== window.location.origin
-              ? `domain=${proxyUrl.host}`
-              : undefined,
-          path: '/',
-          'max-age': 30,
-        };
+        if (proxyUrl && proxyUrl.origin !== window.location.origin)
+          segs.push(`domain=${proxyUrl.host}`);
+        segs.push('path=/', 'max-age=30');
 
-        let str = '';
-        for (const [key, value] of Object.entries(cookie)) {
-          if (value) {
-            if (str.length > 0) str += '; ';
-
-            str += `${key}=${value}`;
-          }
-        }
-
-        document.cookie = str;
+        document.cookie = segs.join('; ');
       }
 
       return fetch(url, {

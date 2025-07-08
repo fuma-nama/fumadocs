@@ -9,10 +9,7 @@ export function Accordions(props: ComponentProps<typeof Primitive.Root>) {
   return (
     <Primitive.Root
       {...props}
-      className={cn(
-        'divide-y divide-fd-border overflow-hidden',
-        props.className,
-      )}
+      className={cn('divide-y divide-fd-border', props.className)}
     />
   );
 }

@@ -5,12 +5,16 @@ export async function getTypescriptSchema(
   schema: object,
   dereferenceMap: DereferenceMap,
 ): Promise<string | undefined> {
-  const cloned = structuredClone({ schema, dereferenceMap });
-  return compile(cloned.schema, 'Response', {
-    $refOptions: false,
-    schemaToId: cloned.dereferenceMap,
-    bannerComment: '',
-    additionalProperties: false,
-    enableConstEnums: false,
-  });
+  try {
+    const cloned = structuredClone({ schema, dereferenceMap });
+    return await compile(cloned.schema, 'Response', {
+      $refOptions: false,
+      schemaToId: cloned.dereferenceMap,
+      bannerComment: '',
+      additionalProperties: false,
+      enableConstEnums: false,
+    });
+  } catch (e) {
+    console.warn('Failed to generate typescript schema:', e);
+  }
 }

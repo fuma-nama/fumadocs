@@ -129,7 +129,7 @@ export function createI18nSearchAPI<T extends 'simple' | 'advanced'>(
   return createEndpoint({
     async export() {
       const map = await get;
-      const entries = Object.entries(map).map(async ([k, v]) => [
+      const entries = Array.from(map.entries()).map(async ([k, v]) => [
         k,
         await (v as SearchServer).export(),
       ]);

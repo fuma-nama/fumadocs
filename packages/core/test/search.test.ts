@@ -97,4 +97,14 @@ test('Search API I18n', async () => {
   expect(await api.search('English', { locale: 'en' })).toHaveLength(1);
   expect(await api.search('amico', { locale: 'italian' })).toHaveLength(1);
   expect(await api.search('italian', { locale: 'en' })).toHaveLength(0);
+  const exported = await api.export();
+  expect(exported.type).toBe('i18n');
+
+  if (exported.type === 'i18n')
+    expect(Object.keys(exported.data)).toMatchInlineSnapshot(`
+    [
+      "italian",
+      "en",
+    ]
+  `);
 });

@@ -66,49 +66,45 @@ export function TypeTable({ type }: { type: Record<string, ObjectType> }) {
           </tr>
         </thead>
         <tbody>
-          {Object.entries(type)
-            .sort((a) => (a[1].deprecated ? 1 : -1))
-            .map(([key, value]) => (
-              <tr key={key}>
-                <td>
-                  <div className={field()}>
-                    <code
-                      className={cn(
-                        code({
-                          color: value.deprecated ? 'deprecated' : 'primary',
-                        }),
-                      )}
-                    >
-                      {key}
-                      {!value.required && '?'}
-                    </code>
-                    {value.description ? (
-                      <Info>{value.description}</Info>
-                    ) : null}
-                  </div>
-                </td>
-                <td>
-                  <div className={field()}>
-                    <code className={code()}>{value.type}</code>
-                    {value.typeDescription ? (
-                      <Info>{value.typeDescription}</Info>
-                    ) : null}
-                    {value.typeDescriptionLink ? (
-                      <Link href={value.typeDescriptionLink}>
-                        <InfoIcon className="size-4" />
-                      </Link>
-                    ) : null}
-                  </div>
-                </td>
-                <td>
-                  {value.default ? (
-                    <code className={code()}>{value.default}</code>
-                  ) : (
-                    '-'
-                  )}
-                </td>
-              </tr>
-            ))}
+          {Object.entries(type).map(([key, value]) => (
+            <tr key={key}>
+              <td>
+                <div className={field()}>
+                  <code
+                    className={cn(
+                      code({
+                        color: value.deprecated ? 'deprecated' : 'primary',
+                      }),
+                    )}
+                  >
+                    {key}
+                    {!value.required && '?'}
+                  </code>
+                  {value.description ? <Info>{value.description}</Info> : null}
+                </div>
+              </td>
+              <td>
+                <div className={field()}>
+                  <code className={code()}>{value.type}</code>
+                  {value.typeDescription ? (
+                    <Info>{value.typeDescription}</Info>
+                  ) : null}
+                  {value.typeDescriptionLink ? (
+                    <Link href={value.typeDescriptionLink}>
+                      <InfoIcon className="size-4" />
+                    </Link>
+                  ) : null}
+                </div>
+              </td>
+              <td>
+                {value.default ? (
+                  <code className={code()}>{value.default}</code>
+                ) : (
+                  '-'
+                )}
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>

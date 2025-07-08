@@ -9,7 +9,7 @@ import {
   processDocument,
   type ProcessedDocument,
 } from '@/utils/process-document';
-import type { defaultAdapters } from '@/media/adapter';
+import { defaultAdapters } from '@/media/adapter';
 
 type ApiPageContextProps = Pick<
   Partial<RenderContext>,
@@ -145,14 +145,7 @@ export async function getContext(
     generateCodeSamples: options.generateCodeSamples,
     servers,
     mediaAdapters: {
-      ...({
-        'application/octet-stream': true,
-        'application/json': true,
-        'multipart/form-data': true,
-        'application/xml': true,
-        'application/x-ndjson': true,
-        'application/x-www-form-urlencoded': true,
-      } satisfies Record<keyof typeof defaultAdapters, true>),
+      ...defaultAdapters,
       ...options.mediaAdapters,
     },
     slugger: new Slugger(),

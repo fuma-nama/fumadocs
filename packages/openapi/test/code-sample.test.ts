@@ -5,12 +5,12 @@ import * as Curl from '@/requests/curl';
 import * as JS from '@/requests/javascript';
 import type { RequestData } from '@/requests/_shared';
 import { defaultAdapters } from '@/media/adapter';
+import { resolveRequestData } from '@/utils/url';
 
 describe('Code Sample Generators', () => {
-  const url = 'http://localhost:8080/{test}';
   const data: RequestData = {
     path: {
-      test: 'hello_world',
+      test: { value: 'hello_world' },
     },
     body: {
       id: 'id',
@@ -18,15 +18,16 @@ describe('Code Sample Generators', () => {
     bodyMediaType: 'application/json',
     method: 'GET',
     cookie: {
-      mode: 'light',
+      mode: { value: 'light' },
     },
     header: {
-      authorization: 'Bearer',
+      authorization: { value: 'Bearer' },
     },
     query: {
-      search: 'ai',
+      search: { value: 'ai' },
     },
   };
+  const url = resolveRequestData('http://localhost:8080/{test}', data);
 
   const context = {
     mediaAdapters: defaultAdapters,

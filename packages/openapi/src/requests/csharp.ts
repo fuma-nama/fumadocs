@@ -1,6 +1,5 @@
 'use client';
 import type { SampleGenerator } from '@/requests/_shared';
-import { resolveRequestData } from '@/utils/url';
 
 export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
   const s: string[] = [];
@@ -10,12 +9,15 @@ export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
   // Handle request body
   let body: string | undefined;
   if (data.body && data.bodyMediaType && data.bodyMediaType in mediaAdapters) {
-    body = mediaAdapters[data.bodyMediaType].generateExample(data, {
-      lang: 'csharp',
-      addImport(from) {
-        imports.add(from);
+    body = mediaAdapters[data.bodyMediaType].generateExample(
+      data as { body: unknown },
+      {
+        lang: 'csharp',
+        addImport(from) {
+          imports.add(from);
+        },
       },
-    });
+    );
   }
 
   for (const specifier of imports) {
@@ -29,31 +31,36 @@ export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
   }
 
   s.push('var client = new HttpClient();');
+  const headerLines: string[] = [];
+
+  function addHeader(key: string, value: unknown) {
+    headerLines.push(
+      `client.DefaultRequestHeaders.Add("${key}", ${JSON.stringify(value)});`,
+    );
+  }
+  for (const k in headers) {
+    addHeader(k, headers[k].value);
+  }
 
   // Add cookie header if cookies are present
   if (Object.keys(data.cookie).length > 0) {
-    headers['cookie'] = Object.entries(data.cookie)
-      .map(([key, value]) => `${key}=${value}`)
+    const cookie = Object.entries(data.cookie)
+      .map(([key, param]) => `${key}=${param.value}`)
       .join('; ');
-  }
 
-  // Add headers
-  const headerLines = Object.entries(headers).map(
-    ([key, value]) =>
-      `client.DefaultRequestHeaders.Add("${key}", ${JSON.stringify(value)});`,
-  );
+    addHeader('cookie', cookie);
+  }
 
   s.push(...headerLines);
 
   // Build the request
-  const resolvedUrl = resolveRequestData(url, data);
   const method =
     data.method[0].toUpperCase() + data.method.slice(1).toLowerCase() + 'Async';
 
   if (body) {
-    s.push(`var response = await client.${method}("${resolvedUrl}", body);`);
+    s.push(`var response = await client.${method}("${url}", body);`);
   } else {
-    s.push(`var response = await client.${method}("${resolvedUrl}");`);
+    s.push(`var response = await client.${method}("${url}");`);
   }
 
   // Add response handling

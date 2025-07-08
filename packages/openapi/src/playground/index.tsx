@@ -1,15 +1,18 @@
 import type {
   MethodInformation,
+  ParameterObject,
   RenderContext,
   SecuritySchemeObject,
 } from '@/types';
-import { getPreferredType, type ParsedSchema } from '@/utils/schema';
+import {
+  getPreferredType,
+  type NoReference,
+  type ParsedSchema,
+} from '@/utils/schema';
 import { type ClientProps } from './client';
 import { ClientLazy } from '@/ui/lazy';
 
-export type ParameterField = {
-  name: string;
-  description?: string;
+export type ParameterField = NoReference<ParameterObject> & {
   schema: ParsedSchema;
   in: 'cookie' | 'header' | 'query' | 'path';
 };
@@ -59,12 +62,13 @@ export async function APIPlayground({
     securities: parseSecurities(method, ctx),
     method: method.method,
     route: path,
-    parameters: method.parameters?.map((v) => ({
-      name: v.name,
-      in: v.in as ParameterField['in'],
-      schema: writeReferences((v.schema ?? true) as ParsedSchema, context),
-      description: v.description,
-    })),
+    parameters: method.parameters?.map(
+      (v) =>
+        ({
+          ...v,
+          schema: writeReferences((v.schema ?? true) as ParsedSchema, context),
+        }) as ParameterField,
+    ),
     body:
       bodyContent && mediaType
         ? ({

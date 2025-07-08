@@ -5,8 +5,8 @@ body = {
   "id": "id"
 }
 response = requests.request("GET", url, json = body, headers = {
-  "authorization": "Bearer",
-  "Content-Type": "application/json"
+  "Content-Type": "application/json",
+  "authorization": "Bearer"
 }, cookies = {
   "mode": "light"
 })

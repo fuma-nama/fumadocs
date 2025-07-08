@@ -1,6 +1,5 @@
 'use client';
 import { ident, type SampleGenerator } from '@/requests/_shared';
-import { resolveRequestData } from '@/utils/url';
 
 export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
   const s: string[] = [];
@@ -19,7 +18,7 @@ export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
   if (data.body && data.bodyMediaType && data.bodyMediaType in mediaAdapters) {
     const adapter = mediaAdapters[data.bodyMediaType];
 
-    body = adapter.generateExample(data, {
+    body = adapter.generateExample(data as { body: unknown }, {
       lang: 'java',
       addImport(specifier) {
         imports.add(specifier);
@@ -44,13 +43,13 @@ export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
 
   // Build request
   s.push('HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()');
-  s.push(
-    ident(`.uri(URI.create(${JSON.stringify(resolveRequestData(url, data))}))`),
-  );
+  s.push(ident(`.uri(URI.create(${JSON.stringify(url)}))`));
 
   // Add headers
-  for (const [key, value] of Object.entries(headers)) {
-    s.push(ident(`.header(${JSON.stringify(key)}, ${JSON.stringify(value)})`));
+  for (const [key, param] of Object.entries(headers)) {
+    s.push(
+      ident(`.header(${JSON.stringify(key)}, ${JSON.stringify(param.value)})`),
+    );
   }
 
   if (data.bodyMediaType) {
@@ -58,11 +57,13 @@ export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
   }
 
   // Add cookies if present
-  const cookieString = Object.entries(data.cookie)
-    .map(([key, value]) => `${key}=${value}`)
-    .join('; ');
+  const cookies = Object.entries(data.cookie);
 
-  if (cookieString.length > 0) {
+  if (cookies.length > 0) {
+    const cookieString = cookies
+      .map(([key, param]) => `${key}=${param.value}`)
+      .join('; ');
+
     s.push(ident(`.header("Cookie", ${JSON.stringify(cookieString)})`));
   }
 

@@ -22,7 +22,7 @@ export function Schema({
   readOnly = false,
   writeOnly = false,
   as = 'property',
-  ctx: { renderer },
+  ctx: renderContext,
 }: {
   name: string;
   required?: boolean;
@@ -33,6 +33,8 @@ export function Schema({
   writeOnly?: boolean;
   ctx: RenderContext;
 }): ReactNode {
+  const { renderer } = renderContext;
+
   function propertyBody(
     schema: Exclude<ResolvedSchema, boolean>,
     renderPrimitive: (
@@ -59,7 +61,7 @@ export function Schema({
           <TabsList>
             {items.map((item) => (
               <TabsTrigger key={item.type} value={item.type}>
-                {schemaToString(item)}
+                {schemaToString(item, renderContext.schema)}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -88,7 +90,7 @@ export function Schema({
           <TabsList>
             {oneOf.map((item, i) => (
               <TabsTrigger key={i} value={i.toString()}>
-                {schemaToString(item)}
+                {schemaToString(item, renderContext.schema)}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -126,7 +128,7 @@ export function Schema({
       value: string;
     }[] = [];
 
-    if (schema.default) {
+    if (schema.default !== undefined) {
       fields.push({
         key: 'Default',
         value: JSON.stringify(schema.default),
@@ -267,25 +269,23 @@ export function Schema({
 
     if (schema.type === 'array') {
       const items = schema.items;
-      if (!items || !isComplexType(items) || ctx.stack.has(items)) return;
+      if (!items || typeof items === 'boolean' || ctx.stack.has(items)) return;
 
       return (
-        <>
-          {items.description && (
-            <Markdown text={'Item: ' + items.description} />
+        <renderer.ObjectCollapsible name="Array Item">
+          <div className="text-sm border-t p-3 border-x prose-no-margin bg-fd-card last:rounded-b-xl first:rounded-tr-xl last:border-b empty:hidden">
+            <Markdown text={items.description ?? 'No Description'} />
+            {propertyInfo(items)}
+          </div>
+          {propertyBody(
+            items,
+            (child, ctx) => primitiveBody(child, ctx, false, true),
+            {
+              ...ctx,
+              stack: ctx.stack.next(schema),
+            },
           )}
-
-          <renderer.ObjectCollapsible name="Array Item">
-            {propertyBody(
-              items,
-              (child, ctx) => primitiveBody(child, ctx, false, true),
-              {
-                ...ctx,
-                stack: ctx.stack.next(schema),
-              },
-            )}
-          </renderer.ObjectCollapsible>
-        </>
+        </renderer.ObjectCollapsible>
       );
     }
   }
@@ -311,7 +311,7 @@ export function Schema({
     return (
       <renderer.Property
         name={key}
-        type={schemaToString(schema)}
+        type={schemaToString(schema, renderContext.schema)}
         deprecated={schema.deprecated}
         {...props}
       >
@@ -388,9 +388,7 @@ function isComplexType(
 
   return (
     schema.type === 'object' ||
-    (schema.type === 'array' &&
-      schema.items != null &&
-      isComplexType(schema.items))
+    (schema.type === 'array' && schema.items != null)
   );
 }
 
@@ -402,16 +400,16 @@ function getRange(
   exclusiveMax: number | undefined,
 ) {
   const out = [];
-  if (min) {
+  if (min !== undefined) {
     out.push(`${min} <=`);
-  } else if (exclusiveMin) {
+  } else if (exclusiveMin !== undefined) {
     out.push(`${exclusiveMin} <`);
   }
 
   out.push(value);
-  if (max) {
+  if (max !== undefined) {
     out.push(`<= ${max}`);
-  } else if (exclusiveMax) {
+  } else if (exclusiveMax !== undefined) {
     out.push(`< ${exclusiveMax}`);
   }
   if (out.length > 1) return out.join(' ');
