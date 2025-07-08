@@ -10,12 +10,14 @@ import {
 import type { RenderContext, ServerObject } from '@/types';
 import { defaultAdapters, type MediaAdapter } from '@/media/adapter';
 
-export interface ApiProviderProps extends ApiContextType {
+export interface ApiProviderProps
+  extends Omit<ApiContextType, 'mediaAdapters'> {
   /**
    * Base URL for API requests
    */
   defaultBaseUrl?: string;
   children?: ReactNode;
+  mediaAdapters?: Record<string, MediaAdapter>;
 }
 
 export interface SelectedServer {

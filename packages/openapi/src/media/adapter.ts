@@ -1,6 +1,6 @@
-'use client';
 import { escapeString, inputToString } from '@/utils/input-to-string';
-import type { RequestData } from '@/requests/_shared';
+// @ts-expect-error -- untyped
+import { js2xml } from 'xml-js/lib/js2xml';
 
 interface BaseContext {
   /**
@@ -38,14 +38,21 @@ export type MediaContext =
 
 export interface MediaAdapter {
   /**
-   * encode request data into body for `fetch()`.
+   * the same adapter that's passed from a client component.
+   *
+   * It is needed for client-side serialization of values.
+   */
+  client?: MediaAdapter;
+
+  /**
+   * encode data into specified media type for `fetch()`.
    *
    * Return the encoded form of `data.body` property.
    */
-  encode: (data: RequestData) => BodyInit | Promise<BodyInit>;
+  encode: (data: { body: unknown }) => BodyInit;
 
   /**
-   * generate code for usage examples in a given programming language.
+   * generate code example for creating the body in a given programming language.
    *
    * @param data - request data.
    * @param lang - name of programming language.
@@ -53,7 +60,10 @@ export interface MediaAdapter {
    *
    * @returns code that inits a `body` variable, or undefined if not supported (skip example for that language).
    */
-  generateExample: (data: RequestData, ctx: MediaContext) => string | undefined;
+  generateExample: (
+    data: { body: unknown },
+    ctx: MediaContext,
+  ) => string | undefined;
 }
 
 export const defaultAdapters = {
@@ -66,10 +76,7 @@ export const defaultAdapters = {
     },
   },
   'application/xml': {
-    async encode(data) {
-      // @ts-expect-error -- untyped
-      const { js2xml } = await import('xml-js/lib/js2xml');
-
+    encode(data) {
       return js2xml(data.body as Record<string, unknown>, {
         compact: true,
         spaces: 2,
@@ -84,6 +91,7 @@ export const defaultAdapters = {
       if (Array.isArray(data.body)) {
         return data.body.map((v) => JSON.stringify(v)).join('\n');
       }
+
       return JSON.stringify(data.body);
     },
     generateExample(data, ctx) {

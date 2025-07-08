@@ -46,7 +46,7 @@ import {
   CollapsibleTrigger,
 } from 'fumadocs-ui/components/ui/collapsible';
 import { ChevronDown, LoaderCircle } from 'lucide-react';
-import type { RequestData } from '@/requests/_shared';
+import { encodeRequestData, type RequestData } from '@/requests/_shared';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from 'fumadocs-ui/utils/cn';
 import {
@@ -68,13 +68,16 @@ import {
   SelectValue,
 } from '@/ui/components/select';
 import { labelVariants } from '@/ui/components/input';
+import type { ParsedSchema } from '@/utils/schema';
 
 interface FormValues {
-  path: Record<string, string>;
-  query: Record<string, string>;
-  header: Record<string, string>;
-  cookie: Record<string, string>;
+  path: Record<string, unknown>;
+  query: Record<string, unknown>;
+  header: Record<string, unknown>;
+  cookie: Record<string, unknown>;
   body: unknown;
+
+  _encoded?: RequestData;
 }
 
 export interface CustomField<TName extends FieldPath<FormValues>, Info> {
@@ -120,22 +123,6 @@ export interface ClientProps extends HTMLAttributes<HTMLFormElement> {
 
 const AuthPrefix = '__fumadocs_auth';
 
-function toRequestData(
-  method: string,
-  mediaType: string | undefined,
-  value: FormValues,
-): RequestData {
-  return {
-    path: value.path,
-    method,
-    header: value.header,
-    body: value.body,
-    bodyMediaType: mediaType,
-    cookie: value.cookie,
-    query: value.query,
-  };
-}
-
 const ServerSelect = lazy(() => import('@/ui/server-select'));
 const OauthDialog = lazy(() =>
   import('./auth/oauth-dialog').then((mod) => ({
@@ -152,7 +139,7 @@ export default function Client({
   route,
   method = 'GET',
   securities,
-  parameters,
+  parameters = [],
   body,
   fields,
   references,
@@ -187,7 +174,12 @@ export default function Client({
     const fetcher = await import('./fetcher').then((mod) =>
       mod.createBrowserFetcher(mediaAdapters),
     );
-    const data = toRequestData(method, body?.mediaType, input);
+
+    input._encoded ??= encodeRequestData(
+      { ...mapInputs(input), method, bodyMediaType: body?.mediaType },
+      mediaAdapters,
+      parameters,
+    );
 
     return fetcher.fetch(
       joinURL(
@@ -195,11 +187,11 @@ export default function Client({
           server ? resolveServerUrl(server.url, server.variables) : '/',
           window.location.origin,
         ),
-        resolveRequestData(route, data),
+        resolveRequestData(route, input._encoded),
       ),
       {
         proxyUrl,
-        ...data,
+        ...input._encoded,
       },
     );
   });
@@ -254,7 +246,13 @@ export default function Client({
       }
     }
 
-    updater.setData(toRequestData(method, body?.mediaType, mapInputs(values)));
+    const data = {
+      ...mapInputs(values),
+      method,
+      bodyMediaType: body?.mediaType,
+    };
+    values._encoded ??= encodeRequestData(data, mediaAdapters, parameters);
+    updater.setData(data, values._encoded);
   });
 
   useEffect(() => {
@@ -265,6 +263,9 @@ export default function Client({
         values: true,
       },
       callback({ values }) {
+        // remove cached encoded request data
+        delete values._encoded;
+
         if (timer) window.clearTimeout(timer);
         timer = window.setTimeout(
           () => onUpdateDebounced(values),
@@ -425,11 +426,16 @@ function FormBody({
           <CollapsiblePanel key={name} title={name}>
             {param.map((field) => {
               const fieldName = `${type}.${field.name}` as const;
+              const schema = (
+                field.content
+                  ? field.content[Object.keys(field.content)[0]].schema
+                  : field.schema
+              ) as ParsedSchema;
 
               if (fields?.parameter) {
                 return renderCustomField(
                   fieldName,
-                  field.schema,
+                  schema,
                   fields.parameter,
                   field.name,
                 );
@@ -440,7 +446,7 @@ function FormBody({
                   key={fieldName}
                   name={field.name}
                   fieldName={fieldName}
-                  field={field.schema}
+                  field={schema}
                 />
               );
             })}

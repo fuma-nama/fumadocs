@@ -18,16 +18,17 @@ export function Root({
   ctx,
   ...props
 }: RootProps & HTMLAttributes<HTMLDivElement>) {
+  const mediaAdapters: Record<string, MediaAdapter> = {};
+  for (const k in ctx.mediaAdapters) {
+    const adapter = ctx.mediaAdapters[k];
+
+    if (adapter.client) mediaAdapters[k] = adapter.client;
+  }
+
   return (
     <div className={cn('flex flex-col gap-24 text-sm', className)} {...props}>
       <ApiProvider
-        mediaAdapters={
-          Object.fromEntries(
-            Object.entries(ctx.mediaAdapters).filter(
-              ([_, v]) => typeof v !== 'boolean',
-            ),
-          ) as Record<string, MediaAdapter>
-        }
+        mediaAdapters={mediaAdapters}
         servers={ctx.servers}
         shikiOptions={ctx.shikiOptions}
       >

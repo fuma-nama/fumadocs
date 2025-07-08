@@ -36,25 +36,25 @@ export function resolveRequestData(
   { path, query }: RequestData,
 ): string {
   for (const key in path) {
-    if (path[key] === '') continue;
+    const param = path[key];
 
-    if (Array.isArray(path[key])) {
-      pathname = pathname.replace(`{${key}}`, path[key].join('/'));
+    if (Array.isArray(param.value)) {
+      pathname = pathname.replace(`{${key}}`, param.value.join('/'));
     } else {
-      pathname = pathname.replace(`{${key}}`, String(path[key]));
+      pathname = pathname.replace(`{${key}}`, param.value);
     }
   }
 
   const searchParams = new URLSearchParams();
   for (const key in query) {
-    if (Array.isArray(query[key])) {
-      for (const value of query[key]) {
-        if (!query[key]) continue;
+    const param = query[key];
 
-        searchParams.append(key, String(value));
+    if (Array.isArray(param.value)) {
+      for (const item of param.value) {
+        searchParams.append(key, item);
       }
-    } else if (query[key] && query[key] !== '') {
-      searchParams.set(key, String(query[key]));
+    } else {
+      searchParams.append(key, param.value);
     }
   }
 

@@ -2,15 +2,15 @@ import type { MethodInformation, RenderContext } from '@/types';
 import type { ResolvedSchema } from '@/utils/schema';
 import { getPreferredType } from '@/utils/schema';
 import { sample } from 'openapi-sampler';
-import type { RequestData } from '@/requests/_shared';
+import { type RawRequestData } from '@/requests/_shared';
 
 export function getRequestData(
   path: string,
   method: MethodInformation,
   sampleKey: string | null,
   _ctx: RenderContext,
-): RequestData {
-  const result: RequestData = {
+): RawRequestData {
+  const result: RawRequestData = {
     path: {},
     cookie: {},
     header: {},
@@ -55,7 +55,7 @@ export function getRequestData(
       throw new Error(
         `Cannot find body schema for ${path} ${method.method}: missing media type`,
       );
-    result.bodyMediaType = type as RequestData['bodyMediaType'];
+    result.bodyMediaType = type as RawRequestData['bodyMediaType'];
     const bodyOfType = body[type];
 
     if (bodyOfType.examples && sampleKey) {
