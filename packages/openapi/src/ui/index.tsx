@@ -128,7 +128,7 @@ export function ObjectCollapsible(props: {
   children: ReactNode;
 }) {
   return (
-    <Collapsible {...props}>
+    <Collapsible className="my-2" {...props}>
       <CollapsibleTrigger
         className={cn(
           buttonVariants({ color: 'secondary', size: 'sm' }),
