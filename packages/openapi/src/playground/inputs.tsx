@@ -373,8 +373,9 @@ export function FieldSet({
 
   if (_field === false) return null;
 
-  if (field.oneOf) {
-    const showSelect = field.oneOf.length > 1;
+  if (info.unionField) {
+    const union = field[info.unionField]!;
+    const showSelect = union.length > 1;
 
     return (
       <FieldSet
@@ -382,7 +383,7 @@ export function FieldSet({
         name={name}
         fieldName={fieldName}
         isRequired={isRequired}
-        field={field.oneOf[info.oneOf]}
+        field={union[info.oneOf]}
         depth={depth + 1}
         slotType={showSelect ? false : slotType}
         toolbar={
@@ -397,7 +398,7 @@ export function FieldSet({
                   });
                 }}
               >
-                {field.oneOf.map((item, i) => (
+                {union.map((item, i) => (
                   <option key={i} value={i}>
                     {schemaToString(item)}
                   </option>

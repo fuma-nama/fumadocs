@@ -403,57 +403,64 @@ function SecurityTabs({
   return result;
 }
 
-const paramNames = ['Headers', 'Cookies', 'Query', 'Path'] as const;
-const paramTypes = ['header', 'cookie', 'query', 'path'] as const;
+const ParamTypes = ['path', 'header', 'cookie', 'query'] as const;
 
 function FormBody({
   parameters = [],
   fields = {},
   body,
 }: Pick<ClientProps, 'parameters' | 'body' | 'fields'>) {
-  const params = useMemo(() => {
-    return paramTypes.map((param) => parameters.filter((v) => v.in === param));
-  }, [parameters]);
+  const panels = useMemo(() => {
+    return ParamTypes.map((type) => {
+      const items = parameters.filter((v) => v.in === type);
+      if (items.length === 0) return;
+
+      return (
+        <CollapsiblePanel
+          key={type}
+          title={
+            {
+              header: 'Header',
+              cookie: 'Cookies',
+              query: 'Query',
+              path: 'Path',
+            }[type]
+          }
+        >
+          {items.map((field) => {
+            const fieldName = `${type}.${field.name}` as const;
+            const schema = (
+              field.content
+                ? field.content[Object.keys(field.content)[0]].schema
+                : field.schema
+            ) as ParsedSchema;
+
+            if (fields?.parameter) {
+              return renderCustomField(
+                fieldName,
+                schema,
+                fields.parameter,
+                field.name,
+              );
+            }
+
+            return (
+              <FieldSet
+                key={fieldName}
+                name={field.name}
+                fieldName={fieldName}
+                field={schema}
+              />
+            );
+          })}
+        </CollapsiblePanel>
+      );
+    });
+  }, [fields.parameter, parameters]);
 
   return (
     <>
-      {params.map((param, i) => {
-        if (param.length === 0) return;
-        const name = paramNames[i];
-        const type = paramTypes[i];
-
-        return (
-          <CollapsiblePanel key={name} title={name}>
-            {param.map((field) => {
-              const fieldName = `${type}.${field.name}` as const;
-              const schema = (
-                field.content
-                  ? field.content[Object.keys(field.content)[0]].schema
-                  : field.schema
-              ) as ParsedSchema;
-
-              if (fields?.parameter) {
-                return renderCustomField(
-                  fieldName,
-                  schema,
-                  fields.parameter,
-                  field.name,
-                );
-              }
-
-              return (
-                <FieldSet
-                  key={fieldName}
-                  name={field.name}
-                  fieldName={fieldName}
-                  field={schema}
-                />
-              );
-            })}
-          </CollapsiblePanel>
-        );
-      })}
-
+      {panels}
       {body && (
         <CollapsiblePanel title="Body">
           {fields.body ? (
@@ -474,48 +481,47 @@ function BodyInput({ field: _field }: { field: RequestSchema }) {
   if (field.format === 'binary')
     return <FieldSet field={field} fieldName="body" />;
 
+  if (isJson)
+    return (
+      <>
+        <button
+          className={cn(
+            buttonVariants({
+              color: 'secondary',
+              size: 'sm',
+              className: 'w-fit font-mono p-2',
+            }),
+          )}
+          onClick={() => setIsJson(false)}
+          type="button"
+        >
+          Close JSON Editor
+        </button>
+        <JsonInput fieldName="body" />
+      </>
+    );
+
   return (
-    <>
-      {isJson ? (
-        <>
-          <button
-            className={cn(
-              buttonVariants({
-                color: 'secondary',
-                size: 'sm',
-                className: 'w-fit font-mono p-2',
-              }),
-            )}
-            onClick={() => setIsJson(false)}
-            type="button"
-          >
-            Close JSON Editor
-          </button>
-          <JsonInput fieldName="body" />
-        </>
-      ) : (
-        <FieldSet
-          field={field}
-          fieldName="body"
-          collapsible={false}
-          name={
-            <button
-              className={cn(
-                buttonVariants({
-                  color: 'secondary',
-                  size: 'sm',
-                  className: 'p-2',
-                }),
-              )}
-              onClick={() => setIsJson(true)}
-              type="button"
-            >
-              Open JSON Editor
-            </button>
-          }
-        />
-      )}
-    </>
+    <FieldSet
+      field={field}
+      fieldName="body"
+      collapsible={false}
+      name={
+        <button
+          type="button"
+          className={cn(
+            buttonVariants({
+              color: 'secondary',
+              size: 'sm',
+              className: 'p-2',
+            }),
+          )}
+          onClick={() => setIsJson(true)}
+        >
+          Open JSON Editor
+        </button>
+      }
+    />
   );
 }
 

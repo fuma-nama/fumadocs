@@ -4,6 +4,7 @@ import { createContext, ReactNode, useContext, useMemo, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 import { getDefaultValue } from '@/playground/get-default-values';
+import type { ParsedSchema } from '@/utils/schema';
 
 interface SchemaContextType {
   references: Record<string, RequestSchema>;
@@ -11,9 +12,16 @@ interface SchemaContextType {
   ajv: Ajv2020;
 }
 
+type UnionField = 'anyOf' | 'allOf' | 'oneOf';
+
 export interface FieldInfo {
   selectedType?: string;
   oneOf: number;
+
+  /**
+   * The actual field that represents union members.
+   */
+  unionField?: UnionField;
 }
 
 const SchemaContext = createContext<SchemaContextType | undefined>(undefined);
@@ -67,67 +75,96 @@ export function useFieldInfo(
   updateInfo: (value: Partial<FieldInfo>) => void;
 } {
   const { fieldInfoMap, ajv } = useContext(SchemaContext)!;
-  const [_, trigger] = useState(0);
   const form = useFormContext();
   const keyName = `${fieldName}:${depth}`;
   const value = form.getValues(fieldName as 'body');
-  const info = fieldInfoMap.get(keyName) ?? {
-    oneOf: -1,
-  };
-
-  // update info if needed
-  if (!info.selectedType && Array.isArray(schema.type)) {
-    info.selectedType =
-      schema.type.find((type) =>
-        ajv.validate(
-          {
-            ...schema,
-            type,
-          },
-          value,
-        ),
-      ) ?? schema.type[0];
-  }
-
-  if (info.oneOf === -1 && schema.oneOf) {
-    info.oneOf = schema.oneOf.findIndex((item) => {
-      return ajv.validate(item, value);
-    });
-    if (info.oneOf === -1) info.oneOf = 0;
-  }
+  const [info, setInfo] = useState<FieldInfo>(() => {
+    return fieldInfoMap.get(keyName) ?? init();
+  });
 
   fieldInfoMap.set(keyName, info);
+
+  /**
+   * We automatically merge `allOf` | `anyOf` if all members are objects, but it's also possible for them to behave same as a union (`oneOf`).
+   */
+  function isUnion(anyOrAllOf: readonly ParsedSchema[]): boolean {
+    return anyOrAllOf.every((item) => {
+      if (typeof item === 'boolean') return true;
+
+      const u = item.anyOf || item.allOf;
+      return item.type !== 'object' && (!u || isUnion(u));
+    });
+  }
+
+  function getUnion(): [readonly ParsedSchema[], UnionField] | undefined {
+    if (schema.anyOf && isUnion(schema.anyOf)) {
+      return [schema.anyOf, 'anyOf'];
+    }
+
+    if (schema.allOf && isUnion(schema.allOf)) {
+      return [schema.allOf, 'allOf'];
+    }
+
+    if (schema.oneOf) return [schema.oneOf, 'oneOf'];
+  }
+
+  function init(): FieldInfo {
+    const union = getUnion();
+    if (union) {
+      const [members, field] = union;
+
+      let oneOf = members.findIndex((item) => ajv.validate(item, value));
+      if (oneOf === -1) oneOf = 0;
+
+      return {
+        oneOf,
+        unionField: field,
+      };
+    }
+
+    if (Array.isArray(schema.type)) {
+      const types = schema.type;
+
+      return {
+        selectedType:
+          types.find((type) => {
+            schema.type = type;
+            const match = ajv.validate(schema, value);
+            schema.type = types;
+
+            return match;
+          }) ?? types[0],
+        oneOf: -1,
+      };
+    }
+
+    return { oneOf: -1 };
+  }
 
   return {
     info,
     updateInfo: useEffectEvent((value) => {
-      const prev = fieldInfoMap.get(keyName);
-      if (!prev) return;
-
       const updated = {
-        ...prev,
+        ...info,
         ...value,
       };
 
       if (
-        updated.oneOf === prev.oneOf &&
-        updated.selectedType === prev.selectedType
+        updated.oneOf === info.oneOf &&
+        updated.selectedType === info.selectedType
       )
         return;
 
-      fieldInfoMap.set(keyName, updated);
-      form.setValue(
-        fieldName,
-        getDefaultValue(
-          schema.oneOf && updated.oneOf !== -1
-            ? schema.oneOf[updated.oneOf]
-            : {
-                ...schema,
-                type: value.selectedType ?? schema.type,
-              },
-        ),
-      );
-      trigger((prev) => prev + 1);
+      setInfo(updated);
+
+      let valueSchema: ParsedSchema = schema;
+      if (updated.unionField) {
+        valueSchema = schema[updated.unionField]![updated.oneOf];
+      } else if (updated.selectedType) {
+        valueSchema = { ...schema, type: updated.selectedType };
+      }
+
+      form.setValue(fieldName, getDefaultValue(valueSchema));
     }),
   };
 }
