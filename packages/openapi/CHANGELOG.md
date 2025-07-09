@@ -1,5 +1,14 @@
 # @fuma-docs/openapi
 
+## 9.1.1
+
+### Patch Changes
+
+- dd94271: Fix handling of primitive types in `anyOf`/`allOf`
+- Updated dependencies [a2d7940]
+  - fumadocs-ui@15.6.3
+  - fumadocs-core@15.6.3
+
 ## 9.1.0
 
 ### Minor Changes

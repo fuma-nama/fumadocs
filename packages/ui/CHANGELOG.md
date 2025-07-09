@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 15.6.3
+
+### Patch Changes
+
+- a2d7940: Fix layout: remove reserved sidebar space when sidebar is disabled in DocsLayout
+  - fumadocs-core@15.6.3
+
 ## 15.6.2
 
 ### Patch Changes
