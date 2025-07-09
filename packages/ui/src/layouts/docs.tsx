@@ -79,7 +79,9 @@ export function DocsLayout({
   const links = getLinks(props.links ?? [], props.githubUrl);
 
   const variables = cn(
-    'md:[--fd-sidebar-width:268px] lg:[--fd-sidebar-width:286px] xl:[--fd-toc-width:286px]',
+    sidebarEnabled &&
+      'md:[--fd-sidebar-width:268px] lg:[--fd-sidebar-width:286px]',
+    'xl:[--fd-toc-width:286px]',
     !nav.component && nav.enabled !== false
       ? '[--fd-nav-height:56px] md:[--fd-nav-height:0px]'
       : undefined,
