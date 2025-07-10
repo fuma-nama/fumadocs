@@ -137,8 +137,13 @@ export function APIExample({
   ctx: RenderContext;
 }) {
   const renderer = ctx.renderer;
-  const codeSamplesResult = ctx.generateCodeSamples ? ctx.generateCodeSamples(method) : undefined;
-  const generatedSamples = codeSamplesResult instanceof Promise ? use(codeSamplesResult) : (codeSamplesResult ?? []);
+  const codeSamplesResult = ctx.generateCodeSamples
+    ? ctx.generateCodeSamples(method)
+    : undefined;
+  const generatedSamples =
+    codeSamplesResult instanceof Promise
+      ? use(codeSamplesResult)
+      : (codeSamplesResult ?? []);
   const generators = dedupe([
     ...defaultSamples,
     ...generatedSamples,
