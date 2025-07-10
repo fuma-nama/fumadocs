@@ -1,4 +1,5 @@
-import { type HTMLAttributes } from 'react';
+import { use, type HTMLAttributes } from 'react';
+import { cache } from '@/utils/cache';
 import * as Base from 'fumadocs-ui/components/codeblock';
 import type { RenderContext } from '@/types';
 import { highlight } from 'fumadocs-core/highlight';
@@ -10,14 +11,17 @@ export interface CodeBlockProps extends HTMLAttributes<HTMLElement> {
   ctx: RenderContext;
 }
 
-export async function CodeBlock({ code, lang, ctx, ...rest }: CodeBlockProps) {
-  const rendered = await highlight(code, {
+const highlightCached = cache((code: string, lang: string, shikiOptions: any) =>
+  highlight(code, {
     lang,
-    ...ctx.shikiOptions,
+    ...shikiOptions,
     components: {
       pre: (props) => <Base.Pre {...props} />,
     },
-  });
+  }),
+);
+export function CodeBlock({ code, lang, ctx, ...rest }: CodeBlockProps) {
+  const rendered = use(highlightCached(code, lang, ctx.shikiOptions));
 
   return (
     <Base.CodeBlock className={cn('my-0', rest.className)}>

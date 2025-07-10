@@ -19,7 +19,7 @@ import {
 } from '@/render/operation/api-example';
 import { MethodLabel } from '@/ui/components/method-label';
 import { type SampleGenerator } from '@/requests/_shared';
-import { getTypescriptSchema } from '@/utils/get-typescript-schema';
+
 import { CopyResponseTypeScript } from '@/ui/client';
 import { SelectTab, SelectTabs, SelectTabTrigger } from '@/ui/select-tabs';
 import {
@@ -268,7 +268,7 @@ export function Operation({
   }
 }
 
-async function ResponseAccordion({
+function ResponseAccordion({
   status,
   operation,
   ctx,
@@ -307,8 +307,6 @@ async function ResponseAccordion({
 
           if (generateTypeScriptSchema) {
             ts = await generateTypeScriptSchema(operation, status);
-          } else if (generateTypeScriptSchema === undefined && schema) {
-            ts = await getTypescriptSchema(schema, dereferenceMap);
           }
 
           return (

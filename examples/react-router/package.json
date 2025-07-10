@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@fumadocs/mdx-remote": "workspace:*",
+    "fumadocs-openapi": "workspace:*",
     "@react-router/node": "^7.6.3",
     "@react-router/serve": "^7.6.3",
     "fumadocs-core": "workspace:*",

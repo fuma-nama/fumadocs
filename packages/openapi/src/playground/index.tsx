@@ -40,7 +40,7 @@ export type SecurityEntry = SecuritySchemeObject & {
   id: string;
 };
 
-export async function APIPlayground({
+export function APIPlayground({
   path,
   method,
   ctx,

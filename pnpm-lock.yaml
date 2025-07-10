@@ -488,6 +488,9 @@ importers:
       fumadocs-core:
         specifier: workspace:*
         version: link:../../packages/core
+      fumadocs-openapi:
+        specifier: workspace:*
+        version: link:../../packages/openapi
       fumadocs-ui:
         specifier: workspace:*
         version: link:../../packages/ui

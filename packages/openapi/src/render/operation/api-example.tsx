@@ -1,5 +1,5 @@
 import type { MethodInformation, RenderContext } from '@/types';
-import { type ReactNode } from 'react';
+import { use, type ReactNode } from 'react';
 import { Markdown } from '@/render/markdown';
 import { type CodeSample } from '@/render/operation/index';
 import { CodeBlock } from '@/render/codeblock';
@@ -127,7 +127,7 @@ export function getAPIExamples(
   ];
 }
 
-export async function APIExample({
+export function APIExample({
   method,
   examples,
   ctx,
@@ -137,9 +137,11 @@ export async function APIExample({
   ctx: RenderContext;
 }) {
   const renderer = ctx.renderer;
+  const codeSamplesResult = ctx.generateCodeSamples ? ctx.generateCodeSamples(method) : undefined;
+  const generatedSamples = codeSamplesResult instanceof Promise ? use(codeSamplesResult) : (codeSamplesResult ?? []);
   const generators = dedupe([
     ...defaultSamples,
-    ...(ctx.generateCodeSamples ? await ctx.generateCodeSamples(method) : []),
+    ...generatedSamples,
     ...(method['x-codeSamples'] ?? []),
   ]).filter((generator) => generator.source !== false);
 
@@ -162,7 +164,9 @@ export async function APIExample({
         <renderer.Requests items={generators.map((s) => s.label ?? s.lang)}>
           {generators.map((generator, i) => (
             <renderer.Request key={i} name={generator.label ?? generator.lang}>
-              <CodeExample {...generator} />
+              <div className="contents">
+                <CodeExample {...generator} />
+              </div>
             </renderer.Request>
           ))}
         </renderer.Requests>
@@ -202,7 +206,7 @@ function ResponseTabs({
   const { renderer } = ctx;
   if (!operation.responses) return null;
 
-  async function renderResponse(code: string) {
+  function renderResponse(code: string) {
     const response = operation.responses?.[code];
     const media = response?.content ? getPreferredType(response.content) : null;
     const responseOfType = media ? response?.content?.[media] : null;
