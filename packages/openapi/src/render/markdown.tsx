@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- rehype plugins */
 import { use, type ReactElement } from 'react';
-import { cache } from '@/utils/cache';
+import { cache } from 'fumadocs-openapi/utils/cache';
 import {
   rehypeCode,
   type RehypeCodeOptions,

@@ -1,5 +1,5 @@
 import { use, type HTMLAttributes } from 'react';
-import { cache } from '@/utils/cache';
+import { cache } from 'fumadocs-openapi/utils/cache';
 import * as Base from 'fumadocs-ui/components/codeblock';
 import type { RenderContext } from '@/types';
 import { highlight } from 'fumadocs-core/highlight';
