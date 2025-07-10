@@ -38,7 +38,7 @@
       "types": "./dist/server/index.d.ts"
     },
     "./utils/cache": {
-      "react-export": "./dist/utils/cache-rsc.js",
+      "react-server": "./dist/utils/cache-rsc.js",
       "import": "./dist/utils/cache.js",
       "types": "./dist/utils/cache.d.ts"
     },
