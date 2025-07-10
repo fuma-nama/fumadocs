@@ -1,3 +1,4 @@
+import type { Route } from './+types/openapi';
 import { source } from '@/source';
 import { APIPageInner } from 'fumadocs-openapi/ui';
 import { processDocument } from 'fumadocs-openapi/utils/process-document';
@@ -42,13 +43,15 @@ export const loader = async ({}) => {
   return { processed, tree: source.pageTree };
 };
 
-export const Page = ({ loaderData: { processed, tree } }) => {
+export const Page = ({
+  loaderData: { processed, tree },
+}: Route.ComponentProps) => {
   return (
     <DocsLayout
       nav={{
         title: 'React Router',
       }}
-      tree={tree}
+      tree={tree as any}
     >
       <DocsPage>
         <DocsBody>
@@ -61,7 +64,7 @@ export const Page = ({ loaderData: { processed, tree } }) => {
                   path: '/hello',
                 },
               ]}
-              processed={processed}
+              processed={processed as any}
               hasHead={false}
             />
           </Suspense>
