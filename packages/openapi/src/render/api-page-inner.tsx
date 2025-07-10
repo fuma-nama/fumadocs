@@ -3,9 +3,7 @@ import { Operation } from '@/render/operation';
 import { createRenders, type Renderer } from '@/render/renderer';
 import { createMethod } from '@/server/create-method';
 import type { RenderContext } from '@/types';
-import {
-    type ProcessedDocument
-} from '@/utils/process-document';
+import { type ProcessedDocument } from '@/utils/process-document';
 import Slugger from 'github-slugger';
 import type { OpenAPIV3_1 } from 'openapi-types';
 
@@ -54,7 +52,30 @@ type ApiPageContextProps = Pick<
 >;
 
 export interface ApiPageProps extends ApiPageContextProps {
+  hasHead: boolean;
 
+  renderer?: Partial<Renderer>;
+
+  /**
+   * An array of operations
+   */
+  operations?: OperationItem[];
+
+  webhooks?: WebhookItem[];
+
+  /**
+   * By default, it is disabled on dev mode
+   */
+  disableCache?: boolean;
+
+  /**
+   * The OpenAPI document
+   */
+  document?: any;
+}
+
+export interface ApiPagePropsInner extends ApiPageContextProps {
+  processed: ProcessedDocument;
   hasHead: boolean;
 
   renderer?: Partial<Renderer>;
@@ -82,9 +103,7 @@ export interface OperationItem {
   method: OpenAPIV3_1.HttpMethods;
 }
 
-export function APIPageInner(
-  props: ApiPageProps & { processed: ProcessedDocument },
-) {
+export function APIPageInner(props: ApiPagePropsInner) {
   const { operations, hasHead = true, webhooks, processed, ...rest } = props;
   const ctx = getContext(processed, rest);
 

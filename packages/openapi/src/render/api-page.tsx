@@ -1,5 +1,7 @@
 import { DocumentInput, processDocument } from '@/utils/process-document';
-import { APIPageInner, ApiPageProps } from './api-page-inner';
+import { APIPageInner, ApiPageProps, ApiPagePropsInner, OperationItem, WebhookItem } from './api-page-inner';
+
+export type { ApiPageProps, ApiPagePropsInner, OperationItem, WebhookItem };
 
 export async function APIPage(
   props: ApiPageProps & { document: DocumentInput },
