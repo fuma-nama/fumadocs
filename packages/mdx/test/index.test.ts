@@ -30,10 +30,10 @@ test('format errors', async () => {
 
     expect(error.toString()).toMatchInlineSnapshot(`
       "in index.mdx::
-        text: Expected string, received number
-        obj,key: Required
-        obj,value: Expected number, received string
-        value: String must contain at most 4 character(s)"
+        text: Invalid input: expected string, received number
+        obj,key: Invalid input: expected number, received undefined
+        obj,value: Invalid input: expected number, received string
+        value: Too big: expected string to have <=4 characters"
     `);
   }
 });

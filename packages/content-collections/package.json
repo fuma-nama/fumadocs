@@ -35,14 +35,14 @@
     "types:check": "tsc --noEmit"
   },
   "devDependencies": {
-    "@content-collections/core": "^0.9.1",
+    "@content-collections/core": "^0.10.0",
     "@content-collections/mdx": "^0.2.2",
-    "@types/node": "24.0.7",
+    "@types/node": "24.0.12",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
-    "zod": "^3.25.67"
+    "zod": "^4.0.2"
   },
   "peerDependencies": {
     "@content-collections/core": "0.x.x",
