@@ -1,5 +1,4 @@
 import { MethodInformation } from '@/types';
-import { getTypescriptSchema } from '@/utils/get-typescript-schema';
 import { processDocument } from '@/utils/process-document';
 import { NoReference } from '@/utils/schema';
 import { cache } from 'react';
@@ -28,6 +27,9 @@ export async function APIPage(props: ApiPageProps) {
       statusCode: string,
       contentType: string,
     ) => {
+      const { getTypescriptSchema } = await import(
+        '@/utils/get-typescript-schema'
+      );
       const schema =
         operation?.responses?.[statusCode]?.content?.[contentType]?.schema;
       if (!schema) {
