@@ -13,9 +13,7 @@ import { NoReference } from '@/utils/schema';
 
 export type { ApiPageProps, ApiPagePropsInner, OperationItem, WebhookItem };
 
-export async function APIPage(
-  props: ApiPageProps & { document: DocumentInput },
-) {
+export async function APIPage(props: ApiPageProps) {
   const { disableCache = process.env.NODE_ENV === 'development' } = props;
   const processed = await processDocument(props.document, disableCache);
   const generateTypeScriptSchema = cache(

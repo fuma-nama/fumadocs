@@ -3,7 +3,10 @@ import { Operation } from '@/render/operation';
 import { createRenders, type Renderer } from '@/render/renderer';
 import { createMethod } from '@/server/create-method';
 import type { RenderContext } from '@/types';
-import { type ProcessedDocument } from '@/utils/process-document';
+import {
+  DocumentInput,
+  type ProcessedDocument,
+} from '@/utils/process-document';
 import Slugger from 'github-slugger';
 import type { OpenAPIV3_1 } from 'openapi-types';
 
@@ -51,31 +54,16 @@ type ApiPageContextProps = Pick<
   | 'mediaAdapters'
 >;
 
-export interface ApiPageProps extends ApiPageContextProps {
-  hasHead: boolean;
-
-  renderer?: Partial<Renderer>;
-
-  /**
-   * An array of operations
-   */
-  operations?: OperationItem[];
-
-  webhooks?: WebhookItem[];
-
-  /**
-   * By default, it is disabled on dev mode
-   */
-  disableCache?: boolean;
-
+export interface ApiPageProps extends Omit<ApiPagePropsInner, 'processed'> {
   /**
    * The OpenAPI document
    */
-  document?: any;
+  document: DocumentInput;
 }
 
 export interface ApiPagePropsInner extends ApiPageContextProps {
   processed: ProcessedDocument;
+
   hasHead: boolean;
 
   renderer?: Partial<Renderer>;
