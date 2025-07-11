@@ -65,7 +65,7 @@
     "tinyexec": "^1.0.1",
     "tinyglobby": "^0.2.14",
     "unist-util-visit": "^5.0.0",
-    "zod": "^4.0.2"
+    "zod": "^4.0.5"
   },
   "devDependencies": {
     "@fumadocs/mdx-remote": "workspace:*",
@@ -80,7 +80,7 @@
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
     "vfile": "^6.0.3",
-    "vite": "^7.0.3",
+    "vite": "^7.0.4",
     "webpack": "^5.100.0"
   },
   "peerDependencies": {

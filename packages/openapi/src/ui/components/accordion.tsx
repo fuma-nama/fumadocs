@@ -29,7 +29,7 @@ export function AccordionContent(
     <Primitive.Content
       {...props}
       className={cn(
-        'overflow-hidden px-1 data-[state=closed]:animate-fd-accordion-up data-[state=open]:animate-fd-accordion-down',
+        'overflow-hidden data-[state=closed]:animate-fd-accordion-up data-[state=open]:animate-fd-accordion-down',
         props.className,
       )}
     >
