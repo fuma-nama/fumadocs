@@ -1,17 +1,23 @@
-import { DocumentInput, processDocument } from '@/utils/process-document';
+import { MethodInformation } from '@/types';
+import { getTypescriptSchema } from '@/utils/get-typescript-schema';
+import { processDocument } from '@/utils/process-document';
+import { NoReference } from '@/utils/schema';
+import { cache } from 'react';
 import {
-  APIPageInner,
+  APIPageView,
   ApiPageProps,
-  ApiPagePropsInner,
+  ApiPageViewProps,
   OperationItem,
   WebhookItem,
 } from './api-page-inner';
-import { getTypescriptSchema } from '@/utils/get-typescript-schema';
-import { cache } from 'react';
-import { MethodInformation } from '@/types';
-import { NoReference } from '@/utils/schema';
 
-export type { ApiPageProps, ApiPagePropsInner, OperationItem, WebhookItem };
+export type {
+  APIPageView,
+  ApiPageProps,
+  ApiPageViewProps,
+  OperationItem,
+  WebhookItem,
+};
 
 export async function APIPage(props: ApiPageProps) {
   const { disableCache = process.env.NODE_ENV === 'development' } = props;
@@ -31,7 +37,7 @@ export async function APIPage(props: ApiPageProps) {
     },
   );
   return (
-    <APIPageInner
+    <APIPageView
       generateTypeScriptSchema={generateTypeScriptSchema}
       {...props}
       processed={processed}

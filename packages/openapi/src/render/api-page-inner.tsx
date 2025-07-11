@@ -54,14 +54,14 @@ type ApiPageContextProps = Pick<
   | 'mediaAdapters'
 >;
 
-export interface ApiPageProps extends Omit<ApiPagePropsInner, 'processed'> {
+export interface ApiPageProps extends Omit<ApiPageViewProps, 'processed'> {
   /**
    * The OpenAPI document
    */
   document: DocumentInput;
 }
 
-export interface ApiPagePropsInner extends ApiPageContextProps {
+export interface ApiPageViewProps extends ApiPageContextProps {
   processed: ProcessedDocument;
 
   hasHead: boolean;
@@ -91,7 +91,7 @@ export interface OperationItem {
   method: OpenAPIV3_1.HttpMethods;
 }
 
-export function APIPageInner(props: ApiPagePropsInner) {
+export function APIPageView(props: ApiPageViewProps) {
   const { operations, hasHead = true, webhooks, processed, ...rest } = props;
   const ctx = getContext(processed, rest);
 
