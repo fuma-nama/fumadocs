@@ -306,7 +306,7 @@ function ResponseAccordion({
           let ts: string | undefined;
 
           if (generateTypeScriptSchema) {
-            ts = await generateTypeScriptSchema(operation, status);
+            ts = await generateTypeScriptSchema(operation, status, type);
           }
 
           return (
