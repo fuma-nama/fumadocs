@@ -9,7 +9,7 @@ import {
   ApiPageViewProps,
   OperationItem,
   WebhookItem,
-} from './api-page-inner';
+} from './api-page-view';
 
 export type {
   APIPageView,
