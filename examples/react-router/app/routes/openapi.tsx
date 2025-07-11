@@ -1,6 +1,6 @@
 import type { Route } from './+types/openapi';
 import { source } from '@/source';
-import { APIPageInner } from 'fumadocs-openapi/ui';
+import { APIPageView } from 'fumadocs-openapi/ui';
 import { processDocument } from 'fumadocs-openapi/utils/process-document';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { DocsBody, DocsPage } from 'fumadocs-ui/page';
@@ -57,7 +57,7 @@ export const Page = ({
         <DocsBody>
           <h1>OpenAPI example</h1>
           <Suspense fallback={<div>Loading API documentation...</div>}>
-            <APIPageInner
+            <APIPageView
               operations={[
                 {
                   method: 'get' as any,
