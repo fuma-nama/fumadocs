@@ -2,4 +2,4 @@
 'fumadocs-openapi': minor
 ---
 
-Add new component `ApiPageInner` that can be used in non RSC apps
+Add a new component `ApiPageView` that can be used in non RSC apps
