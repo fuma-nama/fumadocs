@@ -1,5 +1,11 @@
 # next-docs-mdx
 
+## 11.6.11
+
+### Patch Changes
+
+- 73e07a5: bump zod to v4
+
 ## 11.6.10
 
 ### Patch Changes

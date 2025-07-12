@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 9.1.2
+
+### Patch Changes
+
+- 742c0a6: fix spacing issues
+
 ## 9.1.1
 
 ### Patch Changes
