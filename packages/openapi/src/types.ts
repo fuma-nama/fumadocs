@@ -67,7 +67,8 @@ export interface RenderContext {
     | ((
         method: NoReference<MethodInformation>,
         statusCode: string,
-      ) => Awaitable<string>)
+        contentType: string,
+      ) => Awaitable<string | undefined>)
     | false;
 
   /**
