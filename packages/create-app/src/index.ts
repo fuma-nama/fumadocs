@@ -1,10 +1,10 @@
+#!/usr/bin/env node
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import packageJson from '../package.json';
-import z from 'zod';
 import {
   cancel,
   confirm,
+  group,
   intro,
   isCancel,
   outro,
@@ -13,88 +13,79 @@ import {
   text,
 } from '@clack/prompts';
 import pc from 'picocolors';
-import { createCli, trpcServer, type TrpcCliMeta } from 'trpc-cli';
-import { getPackageManager, type PackageManager } from './auto-install';
-import { type Template, create } from './create-app';
+import {
+  getPackageManager,
+  managers,
+  type PackageManager,
+} from './auto-install';
+import { create, type Template, templates } from './create-app';
 import { cwd } from './constants';
+import { program } from 'commander';
 
-const t = trpcServer.initTRPC.meta<TrpcCliMeta>().create();
+program.argument('[name]', 'the project name');
+program.option('--src', '(Next.js only) enable `src/` directory');
+program.option('--no-src', '(Next.js only) disable `src/` directory');
 
-const router = t.router({
-  create: t.procedure
-    .meta({
-      default: true,
-      description: 'Create a new documentation site with Fumadocs',
-      examples: [
-        'create-fumadocs-app',
-        'create-fumadocs-app --name my-docs --template +next+fuma-docs-mdx',
-        'create-fumadocs-app --name my-docs --no-install',
-        'create-fumadocs-app --name my-docs --src --eslint',
-      ],
-      negateBooleans: true,
-    })
-    .input(
-      z.object({
-        name: z.string().optional().describe('Project name'),
-        template: z
-          .enum([
-            '+next+fuma-docs-mdx',
-            '+next+content-collections',
-            'react-router',
-            'tanstack-start',
-          ])
-          .optional()
-          .describe('Choose a template'),
-        src: z
-          .boolean()
-          .optional()
-          .describe('Use /src directory (Next.js only)'),
-        eslint: z
-          .boolean()
-          .optional()
-          .describe('Add default ESLint configuration (Next.js only)'),
-        install: z
-          .boolean()
-          .optional()
-          .describe('Install packages automatically'),
-        pm: z
-          .enum(['npm', 'pnpm', 'yarn', 'bun'])
-          .optional()
-          .describe('Package manager to use'),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      const manager = (input.pm as PackageManager) || getPackageManager();
+program.option('--eslint', '(Next.js only) enable ESLint configuration');
+program.option('--no-eslint', '(Next.js only) disable ESLint configuration');
 
-      intro(pc.bgCyan(pc.bold('Create Fumadocs App')));
+program.option('--install', 'Enable installing packages automatically');
+program.option('--no-install', 'Disable installing packages automatically');
 
-      const finalOptions = {
-        name: input.name,
-        template: input.template,
-        src: input.src,
-        eslint: input.eslint,
-        install: input.install,
-      };
+program.option(
+  '--template <name>',
+  `template to choose: ${templates.join(', ')}`,
+  (value) => {
+    if (!templates.includes(value as Template)) {
+      throw new Error(`Invalid template: ${value}.`);
+    }
 
-      if (!finalOptions.name) {
-        const nameResult = await text({
+    return value;
+  },
+);
+
+program.option(
+  '--pm <name>',
+  `package manager to choose: ${managers.join(', ')}`,
+  (value) => {
+    if (!managers.includes(value as PackageManager)) {
+      throw new Error(`Invalid package manager: ${value}.`);
+    }
+
+    return value;
+  },
+);
+
+interface Options {
+  name?: string;
+  src?: boolean;
+  eslint?: boolean;
+  install?: boolean;
+  template?: Template;
+  pm?: PackageManager;
+}
+
+async function main(config: Options): Promise<void> {
+  intro(pc.bgCyan(pc.bold('Create Fumadocs App')));
+  const manager = config.pm ?? getPackageManager();
+
+  const options = await group(
+    {
+      name: () => {
+        if (config.name) return Promise.resolve(config.name);
+
+        return text({
           message: 'Project name',
           placeholder: 'my-app',
           defaultValue: 'my-app',
         });
+      },
+      template: () => {
+        if (config.template) return Promise.resolve(config.template);
 
-        if (isCancel(nameResult)) {
-          cancel('Installation Stopped.');
-          process.exit(0);
-        }
-
-        finalOptions.name = nameResult;
-      }
-
-      if (!finalOptions.template) {
-        const templateResult = await select({
+        return select<Template>({
           message: 'Choose a template',
-          initialValue: '+next+fuma-docs-mdx' as Template,
+          initialValue: '+next+fuma-docs-mdx',
           options: [
             {
               value: '+next+fuma-docs-mdx',
@@ -116,134 +107,113 @@ const router = t.router({
             },
           ],
         });
+      },
+      src: (v) => {
+        if (!v.results.template?.startsWith('+next')) return;
+        if (config.src !== undefined) return Promise.resolve(config.src);
 
-        if (isCancel(templateResult)) {
-          cancel('Installation Stopped.');
-          process.exit(0);
-        }
-
-        finalOptions.template = templateResult;
-      }
-
-      const isNext = finalOptions.template.startsWith('+next');
-
-      if (isNext && finalOptions.src === undefined) {
-        const srcResult = await confirm({
+        return confirm({
           message: 'Use `/src` directory?',
           initialValue: false,
         });
+      },
+      eslint: (v) => {
+        if (!v.results.template?.startsWith('+next')) return;
+        if (config.eslint !== undefined) return Promise.resolve(config.eslint);
 
-        if (isCancel(srcResult)) {
-          cancel('Installation Stopped.');
-          process.exit(0);
-        }
-
-        finalOptions.src = srcResult;
-      }
-
-      if (isNext && finalOptions.eslint === undefined) {
-        const eslintResult = await confirm({
+        return confirm({
           message: 'Add default ESLint configuration?',
           initialValue: false,
         });
+      },
+      installDeps: () => {
+        if (config.install !== undefined)
+          return Promise.resolve(config.install);
 
-        if (isCancel(eslintResult)) {
-          cancel('Installation Stopped.');
-          process.exit(0);
-        }
-
-        finalOptions.eslint = eslintResult;
-      }
-
-      if (finalOptions.install === undefined) {
-        const installResult = await confirm({
+        return confirm({
           message: `Do you want to install packages automatically? (detected as ${manager})`,
-          initialValue: true,
         });
+      },
+    },
+    {
+      onCancel: () => {
+        cancel('Installation Stopped.');
+        process.exit(0);
+      },
+    },
+  );
 
-        if (isCancel(installResult)) {
-          cancel('Installation Stopped.');
-          process.exit(0);
-        }
+  const projectName = options.name.toLowerCase().replace(/\s/, '-');
+  const dest = path.resolve(cwd, projectName);
 
-        finalOptions.install = installResult;
-      }
+  const destDir = await fs.readdir(dest).catch(() => null);
+  if (destDir && destDir.length > 0) {
+    const del = await confirm({
+      message: `directory ${projectName} already exists, do you want to delete its files?`,
+    });
 
-      const projectName = finalOptions.name.toLowerCase().replace(/\s+/g, '-');
-      const dest = path.resolve(cwd, projectName);
+    if (isCancel(del)) {
+      cancel();
+      return;
+    }
 
-      const destDir = await fs.readdir(dest).catch(() => null);
-      if (destDir && destDir.length > 0) {
-        const del = await confirm({
-          message: `directory ${projectName} already exists, do you want to delete its files?`,
-          initialValue: false,
-        });
-
-        if (isCancel(del)) {
-          cancel();
-          return;
-        }
-
-        if (del) {
-          const info = spinner();
-          info.start(`Deleting files in ${projectName}`);
-
-          await Promise.all(
-            destDir.map((item) => {
-              return fs.rm(path.join(dest, item), {
-                recursive: true,
-                force: true,
-              });
-            }),
-          );
-
-          info.stop(`Deleted files in ${projectName}`);
-        }
-      }
-
+    if (del) {
       const info = spinner();
-      info.start(`Generating Project`);
+      info.start(`Deleting files in ${projectName}`);
 
-      await create({
-        packageManager: manager,
-        tailwindcss: true,
-        template: finalOptions.template,
-        outputDir: dest,
-        installDeps: finalOptions.install ?? true,
-        eslint: finalOptions.eslint === true,
-        useSrcDir: finalOptions.src === true,
-        log: (message) => {
-          info.message(message);
-        },
-      });
-
-      info.stop('Project Generated');
-
-      outro(pc.bgGreen(pc.bold('Done')));
-
-      console.log(pc.bold('\nOpen the project'));
-      console.log(pc.cyan(`cd ${projectName}`));
-
-      console.log(pc.bold('\nRun Development Server'));
-      console.log(pc.cyan('npm run dev | pnpm run dev | yarn dev'));
-
-      console.log(
-        pc.bold('\nYou can now open the project and start writing documents'),
+      await Promise.all(
+        destDir.map((item) => {
+          return fs.rm(path.join(dest, item), {
+            recursive: true,
+            force: true,
+          });
+        }),
       );
 
-      return {
-        projectName,
-        template: finalOptions.template,
-        success: true,
-      };
-    }),
-});
+      info.stop(`Deleted files in ${projectName}`);
+    }
+  }
 
-const cli = createCli({
-  router,
-  name: 'create-fumadocs-app',
-  version: packageJson.version,
-  description: 'Create a new documentation site with Fumadocs',
-});
+  const info = spinner();
+  info.start(`Generating Project`);
 
-cli.run();
+  await create({
+    packageManager: manager,
+    tailwindcss: true,
+    template: options.template,
+    outputDir: dest,
+    installDeps: options.installDeps,
+    eslint: options.eslint === true,
+    useSrcDir: options.src === true,
+
+    log: (message) => {
+      info.message(message);
+    },
+  });
+
+  info.stop('Project Generated');
+
+  outro(pc.bgGreen(pc.bold('Done')));
+
+  console.log(pc.bold('\nOpen the project'));
+  console.log(pc.cyan(`cd ${projectName}`));
+
+  console.log(pc.bold('\nRun Development Server'));
+  console.log(pc.cyan('npm run dev | pnpm run dev | yarn dev'));
+
+  console.log(
+    pc.bold('\nYou can now open the project and start writing documents'),
+  );
+
+  process.exit(0);
+}
+
+program.parse();
+
+main({
+  name: program.args[0],
+  ...program.opts(),
+}).catch((e: unknown) => {
+  console.error(e);
+  process.exit(1);
+});

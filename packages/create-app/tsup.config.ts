@@ -26,7 +26,4 @@ export default defineConfig({
   format: 'esm',
   target: 'node18',
   dts: true,
-  banner: {
-    js: '#!/usr/bin/env node',
-  },
 });
