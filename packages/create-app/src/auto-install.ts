@@ -1,6 +1,8 @@
 import { x } from 'tinyexec';
 
-export type PackageManager = 'npm' | 'pnpm' | 'yarn' | 'bun';
+export type PackageManager = (typeof managers)[number];
+
+export const managers = ['npm', 'yarn', 'bun', 'pnpm'] as const;
 
 export function getPackageManager(): PackageManager {
   const userAgent = process.env.npm_config_user_agent ?? '';

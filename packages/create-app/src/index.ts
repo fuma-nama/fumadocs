@@ -13,27 +13,79 @@ import {
   text,
 } from '@clack/prompts';
 import pc from 'picocolors';
-import { getPackageManager } from './auto-install';
-import { type Template, create } from './create-app';
+import {
+  getPackageManager,
+  managers,
+  type PackageManager,
+} from './auto-install';
+import { create, type Template, templates } from './create-app';
 import { cwd } from './constants';
+import { program } from 'commander';
 
-const manager = getPackageManager();
+program.argument('[name]', 'the project name');
+program.option('--src', '(Next.js only) enable `src/` directory');
+program.option('--no-src', '(Next.js only) disable `src/` directory');
 
-async function main(): Promise<void> {
+program.option('--eslint', '(Next.js only) enable ESLint configuration');
+program.option('--no-eslint', '(Next.js only) disable ESLint configuration');
+
+program.option('--install', 'Enable installing packages automatically');
+program.option('--no-install', 'Disable installing packages automatically');
+
+program.option(
+  '--template <name>',
+  `template to choose: ${templates.join(', ')}`,
+  (value) => {
+    if (!templates.includes(value as Template)) {
+      throw new Error(`Invalid template: ${value}.`);
+    }
+
+    return value;
+  },
+);
+
+program.option(
+  '--pm <name>',
+  `package manager to choose: ${managers.join(', ')}`,
+  (value) => {
+    if (!managers.includes(value as PackageManager)) {
+      throw new Error(`Invalid package manager: ${value}.`);
+    }
+
+    return value;
+  },
+);
+
+interface Options {
+  name?: string;
+  src?: boolean;
+  eslint?: boolean;
+  install?: boolean;
+  template?: Template;
+  pm?: PackageManager;
+}
+
+async function main(config: Options): Promise<void> {
   intro(pc.bgCyan(pc.bold('Create Fumadocs App')));
+  const manager = config.pm ?? getPackageManager();
 
   const options = await group(
     {
-      name: () =>
-        text({
+      name: () => {
+        if (config.name) return Promise.resolve(config.name);
+
+        return text({
           message: 'Project name',
           placeholder: 'my-app',
           defaultValue: 'my-app',
-        }),
-      template: () =>
-        select({
+        });
+      },
+      template: () => {
+        if (config.template) return Promise.resolve(config.template);
+
+        return select<Template>({
           message: 'Choose a template',
-          initialValue: '+next+fuma-docs-mdx' as Template,
+          initialValue: '+next+fuma-docs-mdx',
           options: [
             {
               value: '+next+fuma-docs-mdx',
@@ -54,9 +106,11 @@ async function main(): Promise<void> {
               hint: 'Experimental',
             },
           ],
-        }),
+        });
+      },
       src: (v) => {
         if (!v.results.template?.startsWith('+next')) return;
+        if (config.src !== undefined) return Promise.resolve(config.src);
 
         return confirm({
           message: 'Use `/src` directory?',
@@ -65,16 +119,21 @@ async function main(): Promise<void> {
       },
       eslint: (v) => {
         if (!v.results.template?.startsWith('+next')) return;
+        if (config.eslint !== undefined) return Promise.resolve(config.eslint);
 
         return confirm({
           message: 'Add default ESLint configuration?',
           initialValue: false,
         });
       },
-      installDeps: () =>
-        confirm({
+      installDeps: () => {
+        if (config.install !== undefined)
+          return Promise.resolve(config.install);
+
+        return confirm({
           message: `Do you want to install packages automatically? (detected as ${manager})`,
-        }),
+        });
+      },
     },
     {
       onCancel: () => {
@@ -149,7 +208,12 @@ async function main(): Promise<void> {
   process.exit(0);
 }
 
-main().catch((e: unknown) => {
+program.parse();
+
+main({
+  name: program.args[0],
+  ...program.opts(),
+}).catch((e: unknown) => {
   console.error(e);
-  throw e;
+  process.exit(1);
 });

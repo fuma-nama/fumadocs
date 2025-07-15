@@ -7,12 +7,14 @@ import type { PackageManager } from './auto-install';
 import { autoInstall } from './auto-install';
 import { cwd, sourceDir } from './constants';
 
-export type Template =
-  | '+next+content-collections'
-  | '+next+fuma-docs-mdx'
-  | 'react-router'
-  | 'tanstack-start';
+export const templates = [
+  '+next+content-collections',
+  '+next+fuma-docs-mdx',
+  'react-router',
+  'tanstack-start',
+] as const;
 
+export type Template = (typeof templates)[number];
 export interface Options {
   outputDir: string;
   template: Template;

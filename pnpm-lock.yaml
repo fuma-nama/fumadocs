@@ -896,6 +896,9 @@ importers:
       '@clack/prompts':
         specifier: ^0.11.0
         version: 0.11.0
+      commander:
+        specifier: ^14.0.0
+        version: 14.0.0
       picocolors:
         specifier: ^1.1.1
         version: 1.1.1
