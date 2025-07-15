@@ -13,12 +13,6 @@ import type { PageTree } from 'fumadocs-core/server';
 import { createCompiler } from '@fumadocs/mdx-remote';
 import * as path from 'node:path';
 
-export function meta({}: Route.MetaArgs) {
-  return [
-    { title: 'New React Router App' },
-    { name: 'description', content: 'Welcome to React Router!' },
-  ];
-}
 const compiler = createCompiler({
   development: false,
 });
@@ -26,10 +20,10 @@ const compiler = createCompiler({
 export async function loader({ params }: Route.LoaderArgs) {
   const slugs = params['*'].split('/').filter((v) => v.length > 0);
   const page = source.getPage(slugs);
-  if (!page) throw new Error('Not found');
+  if (!page) throw new Response('Not found', { status: 404 });
 
   const compiled = await compiler.compileFile({
-    path: path.resolve('content/docs', page.file.path),
+    path: path.resolve('content/docs', page.path),
     value: page.data.content,
   });
 
@@ -51,6 +45,8 @@ export default function Page(props: Route.ComponentProps) {
       }}
       tree={tree as PageTree.Root}
     >
+      <title>{page.data.title}</title>
+      <meta name="description" content={page.data.description} />
       <DocsPage toc={toc}>
         <DocsTitle>{page.data.title}</DocsTitle>
         <DocsDescription>{page.data.description}</DocsDescription>

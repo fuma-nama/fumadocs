@@ -1,4 +1,4 @@
-import { spawn } from 'cross-spawn';
+import { x } from 'tinyexec';
 
 export type PackageManager = 'npm' | 'pnpm' | 'yarn' | 'bun';
 
@@ -20,27 +20,16 @@ export function getPackageManager(): PackageManager {
   return 'npm';
 }
 
-export function autoInstall(
-  manager: PackageManager,
-  dest: string,
-): Promise<void> {
-  return new Promise((res, reject) => {
-    const installProcess = spawn(manager, ['install'], {
-      stdio: 'ignore',
+export async function autoInstall(manager: PackageManager, dest: string) {
+  await x(manager, ['install'], {
+    throwOnError: true,
+    nodeOptions: {
       env: {
         ...process.env,
         NODE_ENV: 'development',
         DISABLE_OPENCOLLECTIVE: '1',
       },
       cwd: dest,
-    });
-
-    installProcess.on('close', (code) => {
-      if (code !== 0) {
-        reject(new Error('Install failed'));
-      } else {
-        res();
-      }
-    });
+    },
   });
 }

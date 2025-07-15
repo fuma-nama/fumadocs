@@ -1,12 +1,13 @@
-import { type ReactNode } from 'react';
+/// <reference types="vite/client" />
 import {
   createRootRoute,
   HeadContent,
   Outlet,
   Scripts,
 } from '@tanstack/react-router';
+import * as React from 'react';
+import appCss from '~/styles/app.css?url';
 import { RootProvider } from 'fumadocs-ui/provider/base';
-import appCss from '../app.css?url';
 import { TanstackProvider } from 'fumadocs-core/framework/tanstack';
 
 export const Route = createRootRoute({
@@ -36,7 +37,7 @@ function RootComponent() {
   );
 }
 
-function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
+function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html suppressHydrationWarning>
       <head>

@@ -1,4 +1,10 @@
-routeTree.gen.ts
 node_modules
+
+.DS_Store
+.cache
+.vercel
 .output
-.vinxi
+.nitro
+/build/
+
+.tanstack
