@@ -27,6 +27,7 @@ export async function APIPage(props: ApiPageProps) {
       statusCode: string,
       contentType: string,
     ) => {
+      // this import can only be run in the server because it relies on Node.js APIs, use dynamic imports so this module can be imported on the client
       const { getTypescriptSchema } = await import(
         '@/utils/get-typescript-schema'
       );
