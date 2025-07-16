@@ -1,7 +1,7 @@
 import type { Route } from './+types/openapi';
 import { source } from '@/source';
 import { APIPageView } from 'fumadocs-openapi/ui';
-import { processDocument } from 'fumadocs-openapi/utils/process-document';
+import { processDocument } from 'fumadocs-openapi';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { DocsBody, DocsPage } from 'fumadocs-ui/page';
 import { Suspense } from 'react';

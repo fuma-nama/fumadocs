@@ -1,4 +1,4 @@
-import { Fragment, type ReactElement, type ReactNode } from 'react';
+import { Fragment, use, type ReactElement, type ReactNode } from 'react';
 import type {
   CallbackObject,
   MethodInformation,
@@ -29,6 +29,8 @@ import {
   Accordions,
   AccordionTrigger,
 } from '@/ui/components/accordion';
+
+import { ClientSuspense, cache } from '#rsc-apis';
 
 export interface CodeSample {
   lang: string;
@@ -267,7 +269,6 @@ export function Operation({
     return info;
   }
 }
-
 function ResponseAccordion({
   status,
   operation,
@@ -278,10 +279,6 @@ function ResponseAccordion({
   ctx: RenderContext;
 }) {
   const response = operation.responses![status];
-  const {
-    generateTypeScriptSchema,
-    schema: { dereferenceMap },
-  } = ctx;
   const contentTypes = response.content
     ? Object.entries(response.content)
     : null;
@@ -294,40 +291,93 @@ function ResponseAccordion({
           <SelectTabTrigger items={contentTypes.map((v) => v[0])} />
         )}
       </AccordionHeader>
-
       <AccordionContent className="ps-4.5">
         {response.description && (
           <div className="prose-no-margin">
             <Markdown text={response.description} />
           </div>
         )}
-        {contentTypes?.map(async ([type, resType]) => {
-          const schema = resType.schema;
-          let ts: string | undefined;
-
-          if (generateTypeScriptSchema) {
-            ts = await generateTypeScriptSchema(operation, status, type);
-          }
-
-          return (
-            <SelectTab key={type} value={type} className="my-2">
-              {ts && <CopyResponseTypeScript code={ts} />}
-              {schema && (
-                <div className="border px-3 py-2 rounded-lg overflow-auto max-h-[400px]">
-                  <Schema
-                    name="response"
-                    schema={schema as ResolvedSchema}
-                    as="body"
-                    readOnly
-                    ctx={ctx}
-                  />
-                </div>
-              )}
-            </SelectTab>
-          );
-        })}
+        {contentTypes && (
+          <ClientSuspense>
+            <ResponseAccordionContent
+              status={status}
+              operation={operation}
+              ctx={ctx}
+              contentTypes={
+                contentTypes as [
+                  string,
+                  { schema?: ResolvedSchema | undefined },
+                ][]
+              }
+            />
+          </ClientSuspense>
+        )}
       </AccordionContent>
     </SelectTabs>
+  );
+}
+
+const getResponseTypeScriptSchema = cache(
+  async (
+    operation: MethodInformation,
+    status: string,
+    contentTypes: [string, { schema?: ResolvedSchema | undefined }][],
+    generateTypeScriptSchema?: RenderContext['generateTypeScriptSchema'],
+  ) => {
+    if (!generateTypeScriptSchema) {
+      return {};
+    }
+    const results: Record<string, string | undefined> = {};
+    for (const [type] of contentTypes) {
+      results[type] = await generateTypeScriptSchema(operation, status, type);
+    }
+    return results;
+  },
+);
+
+function ResponseAccordionContent({
+  status,
+  operation,
+  ctx,
+  contentTypes,
+}: {
+  status: string;
+  operation: MethodInformation;
+  ctx: RenderContext;
+  contentTypes: [string, { schema?: ResolvedSchema }][];
+}) {
+  const typescriptSchemas = use(
+    getResponseTypeScriptSchema(
+      operation,
+      status,
+      contentTypes,
+      ctx.generateTypeScriptSchema,
+    ),
+  );
+
+  return (
+    <>
+      {contentTypes.map(([type, resType]) => {
+        const schema = resType.schema;
+        const ts = typescriptSchemas ? typescriptSchemas[type] : undefined;
+        return (
+          <SelectTab key={type} value={type} className="my-2">
+            {ts && <CopyResponseTypeScript code={ts} />}
+            {schema && (
+              <div className="border px-3 py-2 rounded-lg overflow-auto max-h-[400px]">
+                <Schema
+                  name="response"
+                  schema={schema}
+                  as="body"
+                  readOnly
+                  ctx={ctx}
+                />
+              </div>
+            )}
+          </SelectTab>
+        );
+      })}
+    </>
   );
 }
 

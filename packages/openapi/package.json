@@ -36,15 +36,13 @@
     "./server": {
       "import": "./dist/server/index.js",
       "types": "./dist/server/index.d.ts"
-    },
-    "./utils/cache": {
-      "react-server": "./dist/utils/cache-rsc.js",
-      "import": "./dist/utils/cache.js",
-      "types": "./dist/utils/cache.d.ts"
-    },
-    "./*": {
-      "import": "./dist/*.js",
-      "types": "./dist/*.d.ts"
+    }
+  },
+  "imports": {
+    "#rsc-apis": {
+      "react-server": "./dist/utils/rsc-apis.js",
+      "import": "./dist/utils/rsc-client-apis.js",
+      "types": "./dist/utils/rsc-apis.d.ts"
     }
   },
   "main": "./dist/index.js",
