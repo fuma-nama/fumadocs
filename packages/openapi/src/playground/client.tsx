@@ -385,20 +385,20 @@ function SecurityTabs({
       if (item.type === 'oauth2') {
         return (
           <Suspense>
-          <OauthDialog
-            scheme={item}
-            scopes={item.scopes}
-            open={open}
-            setOpen={(v) => {
-              setOpen(v);
-              if (v) {
-                setSecurityId(i);
-              }
-            }}
-            setToken={(token) => form.setValue('header.Authorization', token)}
-          >
-            {result}
-          </OauthDialog>
+            <OauthDialog
+              scheme={item}
+              scopes={item.scopes}
+              open={open}
+              setOpen={(v) => {
+                setOpen(v);
+                if (v) {
+                  setSecurityId(i);
+                }
+              }}
+              setToken={(token) => form.setValue('header.Authorization', token)}
+            >
+              {result}
+            </OauthDialog>
           </Suspense>
         );
       }
@@ -640,19 +640,19 @@ function useAuthInputs(securities?: SecurityEntry[]) {
                   }}
                   className="flex-1"
                 />
-<Suspense>
-                <OauthDialogTrigger
-                  type="button"
-                  className={cn(
-                    buttonVariants({
-                      size: 'sm',
-                      color: 'secondary',
-                    }),
-                  )}
-                >
-                  Authorize
-                </OauthDialogTrigger>
-</Suspense>
+                <Suspense>
+                  <OauthDialogTrigger
+                    type="button"
+                    className={cn(
+                      buttonVariants({
+                        size: 'sm',
+                        color: 'secondary',
+                      }),
+                    )}
+                  >
+                    Authorize
+                  </OauthDialogTrigger>
+                </Suspense>
               </div>
             </fieldset>
           ),
