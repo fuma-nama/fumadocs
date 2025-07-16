@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 15.6.4
+
+### Patch Changes
+
+- dca17d7: Improve search dialog consistency
+  - fumadocs-core@15.6.4
+
 ## 15.6.3
 
 ### Patch Changes
