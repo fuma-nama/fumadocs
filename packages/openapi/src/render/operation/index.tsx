@@ -295,7 +295,7 @@ function ResponseAccordion({
         )}
       </AccordionHeader>
 
-      <AccordionContent>
+      <AccordionContent className="ps-4.5">
         {response.description && (
           <div className="prose-no-margin">
             <Markdown text={response.description} />
@@ -310,10 +310,10 @@ function ResponseAccordion({
           }
 
           return (
-            <SelectTab key={type} value={type} className="mt-2">
+            <SelectTab key={type} value={type} className="my-2">
               {ts && <CopyResponseTypeScript code={ts} />}
               {schema && (
-                <div className="border px-3 rounded-lg my-2 overflow-auto max-h-[400px]">
+                <div className="border px-3 py-2 rounded-lg overflow-auto max-h-[400px]">
                   <Schema
                     name="response"
                     schema={schema as ResolvedSchema}

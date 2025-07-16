@@ -15,7 +15,6 @@ import {
 } from 'react';
 import { I18nLabel, useI18n } from '@/contexts/i18n';
 import { cn } from '@/utils/cn';
-import { buttonVariants } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -29,6 +28,7 @@ import { useRouter } from 'fumadocs-core/framework';
 import type { SharedProps } from '@/contexts/search';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import scrollIntoView from 'scroll-into-view-if-needed';
+import { buttonVariants } from '@/components/ui/button';
 
 type ReactSortedResult = Omit<SortedResult, 'content'> & {
   external?: boolean;
@@ -102,10 +102,7 @@ export function SearchDialogHeader(props: ComponentProps<'div'>) {
   return (
     <div
       {...props}
-      className={cn(
-        'flex flex-row items-center gap-2 p-3 pb-2',
-        props.className,
-      )}
+      className={cn('flex flex-row items-center gap-2 p-3', props.className)}
     />
   );
 }
@@ -185,7 +182,8 @@ export function SearchDialogContent({
       aria-describedby={undefined}
       {...props}
       className={cn(
-        'fixed divide-y divide-fd-border left-1/2 top-4 md:top-[calc(50%-250px)] z-50 w-[calc(100%-2*var(--spacing))] max-w-screen-sm -translate-x-1/2 rounded-2xl border bg-fd-popover/60 backdrop-blur-xl text-fd-popover-foreground shadow-2xl shadow-black/40 overflow-hidden data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in',
+        'fixed left-1/2 top-4 md:top-[calc(50%-250px)] z-50 w-[calc(100%-2*var(--spacing))] max-w-screen-sm -translate-x-1/2 rounded-2xl border bg-fd-popover/60 backdrop-blur-xl text-fd-popover-foreground shadow-2xl shadow-black/40 overflow-hidden data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in',
+        '*:border-b *:has-[+:last-child[data-empty=true]]:border-b-0 *:data-[empty=true]:border-b-0 *:last:border-b-0',
         props.className,
       )}
     >
@@ -282,9 +280,9 @@ export function SearchDialogList({
     <div
       {...props}
       ref={ref}
+      data-empty={items === null}
       className={cn(
         'overflow-hidden h-(--fd-animated-height) transition-[height]',
-        !items && 'border-b-0',
         props.className,
       )}
     >

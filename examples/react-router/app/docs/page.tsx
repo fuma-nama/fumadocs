@@ -20,7 +20,7 @@ const compiler = createCompiler({
 export async function loader({ params }: Route.LoaderArgs) {
   const slugs = params['*'].split('/').filter((v) => v.length > 0);
   const page = source.getPage(slugs);
-  if (!page) throw new Error('Not found');
+  if (!page) throw new Response('Not found', { status: 404 });
 
   const compiled = await compiler.compileFile({
     path: path.resolve('content/docs', page.path),
@@ -45,9 +45,9 @@ export default function Page(props: Route.ComponentProps) {
       }}
       tree={tree as PageTree.Root}
     >
+      <title>{page.data.title}</title>
+      <meta name="description" content={page.data.description} />
       <DocsPage toc={toc}>
-        <title>{title}</title>
-        <meta name="description" content={page.data.description} />
         <DocsTitle>{page.data.title}</DocsTitle>
         <DocsDescription>{page.data.description}</DocsDescription>
         <DocsBody>

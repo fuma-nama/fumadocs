@@ -215,7 +215,7 @@ function DynamicProperties({
           />
         );
       })}
-      <div className="flex gap-2">
+      <div className="flex gap-2 col-span-full">
         <Input
           value={nextName}
           placeholder="Enter Property Name"

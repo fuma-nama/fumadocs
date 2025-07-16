@@ -30,12 +30,13 @@
   },
   "dependencies": {
     "@clack/prompts": "^0.11.0",
-    "cross-spawn": "^7.0.6",
-    "picocolors": "^1.1.1"
+    "commander": "^14.0.0",
+    "picocolors": "^1.1.1",
+    "tinyexec": "^1.0.1"
   },
   "devDependencies": {
     "@types/cross-spawn": "^6.0.6",
-    "@types/node": "24.0.12",
+    "@types/node": "24.0.13",
     "eslint-config-custom": "workspace:*",
     "tinyglobby": "^0.2.14",
     "tsconfig": "workspace:*"

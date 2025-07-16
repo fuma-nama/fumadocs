@@ -7,12 +7,14 @@ import type { PackageManager } from './auto-install';
 import { autoInstall } from './auto-install';
 import { cwd, sourceDir } from './constants';
 
-export type Template =
-  | '+next+content-collections'
-  | '+next+fuma-docs-mdx'
-  | 'react-router'
-  | 'tanstack-start';
+export const templates = [
+  '+next+content-collections',
+  '+next+fuma-docs-mdx',
+  'react-router',
+  'tanstack-start',
+] as const;
 
+export type Template = (typeof templates)[number];
 export interface Options {
   outputDir: string;
   template: Template;
@@ -84,50 +86,58 @@ export async function create(options: Options): Promise<void> {
 
   if (isNext) {
     await copy(path.join(sourceDir, `template/+next`), dest, defaultRename);
-  }
 
-  await copy(
-    path.join(sourceDir, `template/${options.template}`),
-    dest,
-    defaultRename,
-  );
-
-  if (isNext && options.tailwindcss) {
     await copy(
-      path.join(sourceDir, `template/+next+tailwindcss`),
+      path.join(sourceDir, `template/${options.template}`),
       dest,
       defaultRename,
     );
 
-    log('Configured Tailwind CSS');
-  }
+    // optional Tailwind CSS configuration
+    if (options.tailwindcss) {
+      await copy(
+        path.join(sourceDir, `template/+next+tailwindcss`),
+        dest,
+        defaultRename,
+      );
 
-  if (isNext && options.eslint) {
-    await copy(
-      path.join(sourceDir, `template/+next+eslint`),
-      dest,
-      defaultRename,
-    );
-    log('Configured ESLint');
-  }
-
-  // update tsconfig.json for src dir
-  if (isNext && options.useSrcDir) {
-    const tsconfigPath = path.join(dest, 'tsconfig.json');
-    const content = (await fs.readFile(tsconfigPath)).toString();
-
-    const config = JSON.parse(content);
-
-    if (config.compilerOptions?.paths) {
-      Object.assign(config.compilerOptions.paths, {
-        '@/*': ['./src/*'],
-      });
+      log('Configured Tailwind CSS');
     }
 
-    await fs.writeFile(tsconfigPath, JSON.stringify(config, null, 2));
+    // optional ESLint configuration
+    if (options.eslint) {
+      await copy(
+        path.join(sourceDir, `template/+next+eslint`),
+        dest,
+        defaultRename,
+      );
+      log('Configured ESLint');
+    }
+
+    // update tsconfig.json for src dir
+    if (options.useSrcDir) {
+      const tsconfigPath = path.join(dest, 'tsconfig.json');
+      const content = (await fs.readFile(tsconfigPath)).toString();
+
+      const config = JSON.parse(content);
+
+      if (config.compilerOptions?.paths) {
+        Object.assign(config.compilerOptions.paths, {
+          '@/*': ['./src/*'],
+        });
+      }
+
+      await fs.writeFile(tsconfigPath, JSON.stringify(config, null, 2));
+    }
+  } else {
+    await copy(
+      path.join(sourceDir, `template/${options.template}`),
+      dest,
+      defaultRename,
+    );
   }
 
-  const packageJson = createPackageJson(projectName, options);
+  const packageJson = await createPackageJson(projectName, dest, options);
   await fs.writeFile(
     path.join(dest, 'package.json'),
     JSON.stringify(packageJson, null, 2),
@@ -137,11 +147,15 @@ export async function create(options: Options): Promise<void> {
   await fs.writeFile(path.join(dest, 'README.md'), readMe);
 
   if (installDeps) {
-    await autoInstall(options.packageManager, dest);
-    log('Installed dependencies');
+    try {
+      await autoInstall(options.packageManager, dest);
+      log('Installed dependencies');
+    } catch (err) {
+      log(`Failed to install dependencies: ${err}`);
+    }
   }
 
-  if (initializeGit && tryGitInit(dest)) {
+  if (initializeGit && (await tryGitInit(dest))) {
     log('Initialized Git repository');
   }
 }
@@ -175,86 +189,36 @@ async function copy(
   }
 }
 
-function createPackageJson(projectName: string, options: Options): object {
-  if (options.template === 'react-router') {
-    return {
-      name: projectName,
-      private: true,
-      type: 'module',
-      scripts: {
-        build: 'react-router build',
-        dev: 'react-router dev',
-        start: 'react-router-serve ./build/server/index.js',
-        typecheck: 'react-router typegen && tsc',
-      },
-      dependencies: {
-        ...pick(localVersions, [
-          '@fumadocs/mdx-remote',
-          'fumadocs-core',
-          'fumadocs-ui',
-        ]),
-        ...pick(versionPkg.dependencies, [
-          '@react-router/node',
-          '@react-router/serve',
-          'gray-matter',
-          'isbot',
-          'react',
-          'react-dom',
-          'react-router',
-          'shiki',
-        ]),
-      },
-      devDependencies: pick(versionPkg.dependencies, [
-        '@react-router/dev',
-        '@tailwindcss/vite',
-        '@types/node',
-        '@types/react',
-        '@types/react-dom',
-        'react-router-devtools',
-        'tailwindcss',
-        'typescript',
-        'vite',
-        'vite-tsconfig-paths',
-      ]),
-    };
+async function createPackageJson(
+  projectName: string,
+  dir: string,
+  options: Options,
+): Promise<object> {
+  function replaceWorkspaceDeps(deps: Record<string, string>) {
+    for (const k in deps) {
+      if (deps[k].startsWith('workspace:') && k in localVersions) {
+        deps[k] = localVersions[k as keyof typeof localVersions];
+      }
+    }
+
+    return deps;
   }
 
-  if (options.template === 'tanstack-start') {
+  if (
+    options.template === 'tanstack-start' ||
+    options.template === 'react-router'
+  ) {
+    const packageJson = JSON.parse(
+      await fs
+        .readFile(path.join(dir, 'package.json'))
+        .then((res) => res.toString()),
+    );
+
     return {
       name: projectName,
-      type: 'module',
-      scripts: {
-        dev: 'vinxi dev',
-        build: 'NODE_ENV=production vinxi build',
-        start: 'vinxi start',
-      },
-      private: true,
-      dependencies: {
-        ...pick(localVersions, [
-          '@fumadocs/mdx-remote',
-          'fumadocs-ui',
-          'fumadocs-core',
-        ]),
-        ...pick(versionPkg.dependencies, [
-          '@tanstack/react-router',
-          '@tanstack/react-start',
-          'tinyglobby',
-          'gray-matter',
-          'react',
-          'react-dom',
-          'vinxi',
-        ]),
-      },
-      devDependencies: pick(versionPkg.dependencies, [
-        '@tailwindcss/vite',
-        '@types/react',
-        '@types/react-dom',
-        '@vitejs/plugin-react',
-        'tailwindcss',
-        'typescript',
-        'vite',
-        'vite-tsconfig-paths',
-      ]),
+      ...packageJson,
+      dependencies: replaceWorkspaceDeps(packageJson.dependencies),
+      devDependencies: replaceWorkspaceDeps(packageJson.devDependencies),
     };
   }
 
