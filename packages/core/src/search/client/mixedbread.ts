@@ -73,7 +73,7 @@ export async function search(
 
   const res = await client.vectorStores.search({
     query,
-    vector_store_ids: [vectorStoreId],
+    vector_store_identifiers: [vectorStoreId],
     top_k: 10,
     filters: {
       key: 'tag',
