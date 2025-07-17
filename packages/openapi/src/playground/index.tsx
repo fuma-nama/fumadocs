@@ -62,13 +62,7 @@ export async function APIPlayground({
     securities: parseSecurities(method, ctx),
     method: method.method,
     route: path,
-    parameters: method.parameters?.map(
-      (v) =>
-        ({
-          ...v,
-          schema: writeReferences((v.schema ?? true) as ParsedSchema, context),
-        }) as ParameterField,
-    ),
+    parameters: method.parameters as ParameterField[],
     body:
       bodyContent && mediaType
         ? ({

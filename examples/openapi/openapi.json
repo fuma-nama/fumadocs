@@ -1,956 +1,1116 @@
 {
-  "components": {
-    "schemas": {
-      "V0EventsRequestBody": {
-        "type": "string",
-        "description": "NDJSON payload of events"
-      },
-      "V0EventsResponseBody": {
-        "type": "object",
-        "properties": {
-          "$schema": {
-            "description": "A URL to the JSON Schema for this object.",
-            "example": "https://api.unkey.dev/schemas/V0EventsResponseBody.json",
-            "format": "uri",
-            "readOnly": true,
-            "type": "string"
-          },
-          "successful_rows": {
-            "type": "integer",
-            "description": "The number of rows that were successfully processed"
-          },
-          "quarantined_rows": {
-            "type": "integer",
-            "description": "The number of rows that were quarantined"
-          }
-        },
-        "required": ["successful_rows", "quarantined_rows"]
-      },
-      "Encrypted": {
-        "additionalProperties": false,
-        "properties": {
-          "encrypted": {
-            "type": "string"
-          },
-          "keyId": {
-            "type": "string"
-          }
-        },
-        "required": ["encrypted", "keyId"],
-        "type": "object"
-      },
-      "ValidationErrorDetail": {
-        "additionalProperties": false,
-        "properties": {
-          "location": {
-            "description": "Where the error occurred, e.g. 'body.items[3].tags' or 'path.thing-id'",
-            "type": "string"
-          },
-          "message": {
-            "description": "Error message text",
-            "type": "string"
-          },
-          "fix": {
-            "description": "A human-readable message describing how to fix the error.",
-            "type": "string"
-          }
-        },
-        "type": "object",
-        "required": ["message", "location"]
-      },
-      "ValidationError": {
-        "additionalProperties": false,
-        "properties": {
-          "requestId": {
-            "description": "A unique id for this request. Please always provide this to support.",
-            "example": "req_123",
-            "type": "string"
-          },
-          "detail": {
-            "description": "A human-readable explanation specific to this occurrence of the problem.",
-            "example": "Property foo is required but is missing.",
-            "type": "string"
-          },
-          "errors": {
-            "description": "Optional list of individual error details",
-            "items": {
-              "$ref": "#/components/schemas/ValidationErrorDetail"
-            },
-            "type": ["array"]
-          },
-          "instance": {
-            "description": "A URI reference that identifies the specific occurrence of the problem.",
-            "example": "https://example.com/error-log/abc123",
-            "format": "uri",
-            "type": "string"
-          },
-          "status": {
-            "description": "HTTP status code",
-            "example": 400,
-            "format": "int",
-            "type": "integer"
-          },
-          "title": {
-            "description": "A short, human-readable summary of the problem type. This value should not change between occurrences of the error.",
-            "example": "Bad Request",
-            "type": "string"
-          },
-          "type": {
-            "default": "about:blank",
-            "description": "A URI reference to human-readable documentation for the error.",
-            "example": "https://example.com/errors/example",
-            "format": "uri",
-            "type": "string"
-          }
-        },
-        "type": "object",
-        "required": [
-          "requestId",
-          "detail",
-          "instance",
-          "status",
-          "title",
-          "type",
-          "errors"
-        ]
-      },
-      "BaseError": {
-        "additionalProperties": false,
-        "properties": {
-          "requestId": {
-            "description": "A unique id for this request. Please always provide this to support.",
-            "example": "req_123",
-            "type": "string"
-          },
-          "detail": {
-            "description": "A human-readable explanation specific to this occurrence of the problem.",
-            "example": "Property foo is required but is missing.",
-            "type": "string"
-          },
-          "instance": {
-            "description": "A URI reference that identifies the specific occurrence of the problem.",
-            "example": "https://example.com/error-log/abc123",
-            "format": "uri",
-            "type": "string"
-          },
-          "status": {
-            "description": "HTTP status code",
-            "example": 400,
-            "format": "int",
-            "type": "integer"
-          },
-          "title": {
-            "description": "A short, human-readable summary of the problem type. This value should not change between occurrences of the error.",
-            "example": "Bad Request",
-            "type": "string"
-          },
-          "type": {
-            "default": "about:blank",
-            "description": "A URI reference to human-readable documentation for the error.",
-            "example": "https://example.com/errors/example",
-            "format": "uri",
-            "type": "string"
-          }
-        },
-        "type": "object",
-        "required": [
-          "requestId",
-          "detail",
-          "instance",
-          "status",
-          "title",
-          "type",
-          "errors"
-        ]
-      },
-      "Item": {
-        "additionalProperties": false,
-        "properties": {
-          "cost": {
-            "default": 1,
-            "description": "The cost of the request.",
-            "format": "int64",
-            "type": "integer"
-          },
-          "duration": {
-            "description": "The duration in milliseconds for the rate limit window.",
-            "format": "int64",
-            "type": "integer"
-          },
-          "identifier": {
-            "description": "The identifier for the rate limit.",
-            "type": "string"
-          },
-          "limit": {
-            "description": "The maximum number of requests allowed.",
-            "format": "int64",
-            "type": "integer"
-          }
-        },
-        "required": ["identifier", "limit", "duration"],
-        "type": "object"
-      },
-      "Lease": {
-        "additionalProperties": false,
-        "properties": {
-          "cost": {
-            "description": "How much to lease.",
-            "format": "int64",
-            "type": "integer"
-          },
-          "timeout": {
-            "description": "The time in milliseconds when the lease will expire. If you do not commit the lease by this time, it will be commited as is.",
-            "format": "int64",
-            "type": "integer"
-          }
-        },
-        "required": ["cost", "timeout"],
-        "type": "object"
-      },
-      "SingleRatelimitResponse": {
-        "additionalProperties": false,
-        "properties": {
-          "current": {
-            "description": "The current number of requests made in the current window.",
-            "format": "int64",
-            "type": "integer"
-          },
-          "limit": {
-            "description": "The maximum number of requests allowed.",
-            "format": "int64",
-            "type": "integer"
-          },
-          "remaining": {
-            "description": "The number of requests remaining in the current window.",
-            "format": "int64",
-            "type": "integer"
-          },
-          "reset": {
-            "description": "The time in milliseconds when the rate limit will reset.",
-            "format": "int64",
-            "type": "integer"
-          },
-          "success": {
-            "description": "Whether the request passed the ratelimit. If false, the request must be blocked.",
-            "type": "boolean"
-          }
-        },
-        "required": ["limit", "remaining", "reset", "success", "current"],
-        "type": "object"
-      },
-      "V1DecryptRequestBody": {
-        "properties": {
-          "encrypted": {
-            "description": "The encrypted base64 string.",
-            "minLength": 1,
-            "type": "string"
-          },
-          "keyring": {
-            "description": "The keyring to use for encryption.",
-            "type": "string"
-          },
-          "test": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/V1DecryptRequestBody"
-              },
-              {
-                "oneOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "test": {
-                        "description": "A URL to the JSON Schema for this object.",
-                        "example": "https://api.unkey.dev/schemas/V1EncryptBulkRequestBody.json",
-                        "format": "uri",
-                        "type": "string"
-                      }
-                    }
-                  },
-                  {
-                    "type": "integer"
-                  }
-                ]
-              },
-              {
-                "items": {
-                  "type": "string"
-                },
-                "maxItems": 1000,
-                "minItems": 1,
-                "type": ["array"]
-              },
-              {
-                "type": "string"
-              }
-            ]
-          }
-        },
-        "type": "object"
-      },
-      "V1DecryptResponseBody": {
-        "additionalProperties": false,
-        "properties": {
-          "$schema": {
-            "description": "A URL to the JSON Schema for this object.",
-            "example": "https://api.unkey.dev/schemas/V1DecryptResponseBody.json",
-            "format": "uri",
-            "readOnly": true,
-            "type": "string"
-          },
-          "plaintext": {
-            "description": "The plaintext value.",
-            "type": "string"
-          }
-        },
-        "required": ["plaintext"],
-        "type": "object"
-      },
-      "V1EncryptBulkRequestBody": {
-        "oneOf": [
-          {
-            "type": "object",
-            "required": ["keyring", "data"],
-            "properties": {
-              "$schema": {
-                "description": "A URL to the JSON Schema for this object.",
-                "example": "https://api.unkey.dev/schemas/V1EncryptBulkRequestBody.json",
-                "format": "uri",
-                "readOnly": true,
-                "type": "string"
-              }
-            }
-          },
-          {
-            "items": {
-              "type": "string"
-            },
-            "maxItems": 1000,
-            "minItems": 1,
-            "type": ["array"]
-          },
-          {
-            "type": "string"
-          }
-        ]
-      },
-      "V1EncryptBulkResponseBody": {
-        "additionalProperties": false,
-        "properties": {
-          "$schema": {
-            "description": "A URL to the JSON Schema for this object.",
-            "example": "https://api.unkey.dev/schemas/V1EncryptBulkResponseBody.json",
-            "format": "uri",
-            "readOnly": true,
-            "type": "string"
-          },
-          "encrypted": {
-            "items": {
-              "$ref": "#/components/schemas/Encrypted"
-            },
-            "type": ["array"]
-          }
-        },
-        "required": ["encrypted"],
-        "type": "object"
-      },
-      "V1EncryptRequestBody": {
-        "additionalProperties": true,
-        "properties": {
-          "$schema": {
-            "description": "A URL to the JSON Schema for this object.",
-            "example": "https://api.unkey.dev/schemas/V1EncryptRequestBody.json",
-            "format": "uri",
-            "readOnly": true,
-            "type": "string"
-          },
-          "data": {
-            "description": "The data to encrypt.",
-            "minLength": 1,
-            "type": "string"
-          },
-          "keyring": {
-            "description": "The keyring to use for encryption.",
-            "type": "string"
-          }
-        },
-        "patternProperties": {
-          "test\\s.+": {
-            "type": "string"
-          }
-        },
-        "required": ["keyring", "data"],
-        "type": "object"
-      },
-      "V1EncryptResponseBody": {
-        "additionalProperties": false,
-        "properties": {
-          "$schema": {
-            "description": "A URL to the JSON Schema for this object.",
-            "example": "https://api.unkey.dev/schemas/V1EncryptResponseBody.json",
-            "format": "uri",
-            "readOnly": true,
-            "type": "string"
-          },
-          "encrypted": {
-            "description": "The encrypted data as base64 encoded string.",
-            "type": "string"
-          },
-          "keyId": {
-            "description": "The ID of the key used for encryption.",
-            "type": "string"
-          }
-        },
-        "required": ["encrypted", "keyId"],
-        "type": "object"
-      },
-      "V1LivenessResponseBody": {
-        "additionalProperties": false,
-        "properties": {
-          "$schema": {
-            "description": "A URL to the JSON Schema for this object.",
-            "example": "https://api.unkey.dev/schemas/V1LivenessResponseBody.json",
-            "format": "uri",
-            "readOnly": true,
-            "type": "string"
-          },
-          "message": {
-            "description": "Whether we're alive or not",
-            "example": "OK",
-            "type": "string"
-          }
-        },
-        "required": ["message"],
-        "type": "object"
-      },
-      "V1RatelimitCommitLeaseRequestBody": {
-        "additionalProperties": false,
-        "properties": {
-          "$schema": {
-            "description": "A URL to the JSON Schema for this object.",
-            "example": "https://api.unkey.dev/schemas/V1RatelimitCommitLeaseRequestBody.json",
-            "format": "uri",
-            "readOnly": true,
-            "type": "string"
-          },
-          "cost": {
-            "description": "The actual cost of the request.",
-            "format": "int64",
-            "type": "integer"
-          },
-          "lease": {
-            "description": "The lease you received from the ratelimit response.",
-            "type": "string"
-          }
-        },
-        "required": ["lease", "cost"],
-        "type": "object"
-      },
-      "V1RatelimitMultiRatelimitRequestBody": {
-        "additionalProperties": false,
-        "properties": {
-          "$schema": {
-            "description": "A URL to the JSON Schema for this object.",
-            "example": "https://api.unkey.dev/schemas/V1RatelimitMultiRatelimitRequestBody.json",
-            "format": "uri",
-            "readOnly": true,
-            "type": "string"
-          },
-          "ratelimits": {
-            "description": "The rate limits to check.",
-            "items": {
-              "$ref": "#/components/schemas/Item"
-            },
-            "type": ["array"]
-          }
-        },
-        "required": ["ratelimits"],
-        "type": "object"
-      },
-      "V1RatelimitMultiRatelimitResponseBody": {
-        "additionalProperties": false,
-        "properties": {
-          "$schema": {
-            "description": "A URL to the JSON Schema for this object.",
-            "example": "https://api.unkey.dev/schemas/V1RatelimitMultiRatelimitResponseBody.json",
-            "format": "uri",
-            "readOnly": true,
-            "type": "string"
-          },
-          "ratelimits": {
-            "description": "The rate limits that were checked.",
-            "items": {
-              "$ref": "#/components/schemas/SingleRatelimitResponse"
-            },
-            "type": ["array"]
-          }
-        },
-        "required": ["ratelimits"],
-        "type": "object"
-      },
-      "V1RatelimitRatelimitRequestBody": {
-        "additionalProperties": false,
-        "properties": {
-          "$schema": {
-            "description": "A URL to the JSON Schema for this object.",
-            "example": "https://api.unkey.dev/schemas/V1RatelimitRatelimitRequestBody.json",
-            "format": "uri",
-            "readOnly": true,
-            "type": "string"
-          },
-          "cost": {
-            "description": "The cost of the request. Defaults to 1 if not provided.",
-            "format": "int64",
-            "type": "integer",
-            "default": 1
-          },
-          "duration": {
-            "description": "The duration in milliseconds for the rate limit window.",
-            "format": "int64",
-            "type": "integer"
-          },
-          "identifier": {
-            "description": "The identifier for the rate limit.",
-            "type": "string"
-          },
-          "lease": {
-            "$ref": "#/components/schemas/Lease",
-            "description": "Reserve an amount of tokens with the option to commit and update later."
-          },
-          "limit": {
-            "description": "The maximum number of requests allowed.",
-            "format": "int64",
-            "type": "integer"
-          }
-        },
-        "required": ["identifier", "limit", "duration"],
-        "type": "object"
-      },
-      "V1RatelimitRatelimitResponseBody": {
-        "additionalProperties": false,
-        "properties": {
-          "$schema": {
-            "description": "A URL to the JSON Schema for this object.",
-            "example": "https://api.unkey.dev/schemas/V1RatelimitRatelimitResponseBody.json",
-            "format": "uri",
-            "readOnly": true,
-            "type": "string"
-          },
-          "current": {
-            "description": "The current number of requests made in the current window.",
-            "format": "int64",
-            "type": "integer"
-          },
-          "lease": {
-            "description": "The lease to use when committing the request.",
-            "type": ["string"]
-          },
-          "limit": {
-            "description": "The maximum number of requests allowed.",
-            "format": "int64",
-            "type": "integer"
-          },
-          "remaining": {
-            "description": "The number of requests remaining in the current window.",
-            "format": "int64",
-            "type": "integer"
-          },
-          "reset": {
-            "description": "The time in milliseconds when the rate limit will reset.",
-            "format": "int64",
-            "type": "integer"
-          },
-          "success": {
-            "description": "Whether the request passed the ratelimit. If false, the request must be blocked.",
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "limit",
-          "remaining",
-          "reset",
-          "success",
-          "current",
-          "lease"
-        ],
-        "type": "object"
-      }
-    }
-  },
-  "info": {
-    "title": "Unkey API",
-    "version": "1.0.0"
-  },
   "openapi": "3.1.0",
-  "paths": {
-    "/v0/events": {
-      "post": {
-        "operationId": "v0.events.create",
-        "summary": "Create events",
-        "description": "Accept NDJSON payload of events and process them",
-        "requestBody": {
-          "content": {
-            "application/x-ndjson": {
-              "schema": {
-                "$ref": "#/components/schemas/V0EventsRequestBody"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/V0EventsResponseBody"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ValidationError"
-                }
-              }
-            }
-          },
-          "500": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BaseError"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "tags": ["events"]
-      }
-    },
-    "/ratelimit.v1.RatelimitService/MultiRatelimit": {
-      "post": {
-        "operationId": "ratelimit.v1.multiRatelimit",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/V1RatelimitMultiRatelimitRequestBody"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/V1RatelimitMultiRatelimitResponseBody"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "400": {
-            "description": "Bad request",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ValidationError"
-                }
-              }
-            }
-          },
-          "500": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BaseError"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "tags": ["ratelimit"]
-      }
-    },
-    "/ratelimit.v1.RatelimitService/Ratelimit": {
-      "post": {
-        "operationId": "ratelimit.v1.ratelimit",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/V1RatelimitRatelimitRequestBody"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/V1RatelimitRatelimitResponseBody"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "400": {
-            "description": "Bad request",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ValidationError"
-                }
-              }
-            }
-          },
-          "500": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BaseError"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "tags": ["ratelimit"]
-      }
-    },
-    "/v1/liveness": {
-      "get": {
-        "description": "This endpoint checks if the service is alive.",
-        "operationId": "liveness",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/V1LivenessResponseBody"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "500": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BaseError"
-                }
-              }
-            },
-            "description": "Internal Server Error"
-          }
-        },
-        "summary": "Liveness check",
-        "tags": ["liveness"]
-      }
-    },
-    "/v1/ratelimit.commitLease": {
-      "post": {
-        "operationId": "v1.ratelimit.commitLease",
-        "requestBody": {
-          "content": {
-            "application/x-www-form-urlencoded": {
-              "schema": {
-                "$ref": "#/components/schemas/V1RatelimitCommitLeaseRequestBody"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "400": {
-            "description": "Bad request",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ValidationError"
-                }
-              }
-            }
-          },
-          "500": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BaseError"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "tags": ["ratelimit"]
-      }
-    },
-    "/vault.v1.VaultService/Decrypt": {
-      "post": {
-        "operationId": "vault.v1.decrypt",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/V1DecryptRequestBody"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/V1DecryptResponseBody"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "400": {
-            "description": "Bad request",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ValidationError"
-                }
-              }
-            }
-          },
-          "500": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BaseError"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "tags": ["vault"]
-      }
-    },
-    "/vault.v1.VaultService/Encrypt": {
-      "post": {
-        "operationId": "vault.v1.encrypt",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/V1EncryptRequestBody"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/V1EncryptResponseBody"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "400": {
-            "description": "Bad request",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ValidationError"
-                }
-              }
-            }
-          },
-          "500": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BaseError"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "tags": ["vault"]
-      }
-    },
-    "/vault.v1.VaultService/EncryptBulk": {
-      "post": {
-        "operationId": "vault.v1.encryptBulk",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/V1EncryptBulkRequestBody"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/V1EncryptBulkResponseBody"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "400": {
-            "description": "Bad request",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ValidationError"
-                }
-              }
-            }
-          },
-          "500": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BaseError"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "tags": ["vault"]
-      }
-    }
+  "info": {
+    "title": "Open Food Facts folksonomy REST API",
+    "description": "\nFolksonomy Engine API allows you to add free property/value pairs to Open Food Facts products.\n\nThe API use the main following variables:\n* **product**: the product number\n* **k**: \"key\", meaning the property or tag\n* **v**: \"value\", the value for a related key\n\n## See also\n\n* [Project page](https://wiki.openfoodfacts.org/Folksonomy_Engine)\n* [Folksonomy Engine github repository](https://github.com/openfoodfacts/folksonomy_engine)\n* [Documented properties](https://wiki.openfoodfacts.org/Folksonomy/Property)\n",
+    "version": "0.1.0"
   },
   "servers": [
     {
-      "url": "https://api.unkey.dev"
+      "url": "https://api.folksonomy.openfoodfacts.org",
+      "description": "Production server"
     },
     {
-      "url": "http://localhost"
+      "url": "http://localhost:8000",
+      "description": "Local development server"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "tags": ["System"],
+        "summary": "Hello",
+        "operationId": "hello__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HelloResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Authentication",
+        "description": "Authentication: provide user/password and get a bearer token in return\n\n- **username**: Open Food Facts user_id (not email)\n- **password**: user password (clear text, but HTTPS encrypted)\n\ntoken is returned, to be used in later requests with usual \"Authorization: bearer token\" headers",
+        "operationId": "authentication_auth_post",
+        "parameters": [
+          {
+            "name": "session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_authentication_auth_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth_by_cookie": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Authentication By Cookie",
+        "description": "Authentication: provide Open Food Facts session cookie and get a bearer token in return\n\n- **session cookie**: Open Food Facts session cookie\n\ntoken is returned, to be used in later requests with usual \"Authorization: bearer token\" headers",
+        "operationId": "authentication_by_cookie_auth_by_cookie_post",
+        "parameters": [
+          {
+            "name": "session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/stats": {
+      "get": {
+        "tags": ["Products"],
+        "summary": "Product Stats",
+        "description": "Get the list of products with tags statistics\n\nThe products list can be limited to some tags (k or k=v)",
+        "operationId": "product_stats_products_stats_get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "owner",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Owner"
+            }
+          },
+          {
+            "name": "k",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "K"
+            }
+          },
+          {
+            "name": "v",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "V"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductStats"
+                  },
+                  "title": "Response Product Stats Products Stats Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products": {
+      "get": {
+        "tags": ["Products"],
+        "summary": "Product List",
+        "description": "Get the list of products matching k or k=v",
+        "operationId": "product_list_products_get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "owner",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Owner"
+            }
+          },
+          {
+            "name": "k",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "K"
+            }
+          },
+          {
+            "name": "v",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "V"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductList"
+                  },
+                  "title": "Response Product List Products Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/product/{product}": {
+      "get": {
+        "tags": ["Product Tags"],
+        "summary": "Product Tags List",
+        "description": "Get a list of existing tags for a product, optionally filtering by specific keys.",
+        "operationId": "product_tags_list_product__product__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "product",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Product"
+            }
+          },
+          {
+            "name": "owner",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Owner"
+            }
+          },
+          {
+            "name": "keys",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated list of keys to filter by. If not provided, all keys are returned.",
+              "title": "Keys"
+            },
+            "description": "Comma-separated list of keys to filter by. If not provided, all keys are returned."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductTag"
+                  },
+                  "title": "Response Product Tags List Product  Product  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/product/{product}/{k}": {
+      "get": {
+        "tags": ["Product Tags"],
+        "summary": "Product Tag",
+        "description": "Get a specific tag or tag hierarchy on a product\n\n- /product/xxx/key returns only the requested key\n- /product/xxx/key* returns the key and subkeys (key:subkey)",
+        "operationId": "product_tag_product__product___k__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "product",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Product"
+            }
+          },
+          {
+            "name": "k",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "K"
+            }
+          },
+          {
+            "name": "owner",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Owner"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductTag"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Product Tags"],
+        "summary": "Product Tag Delete",
+        "description": "Delete a product tag",
+        "operationId": "product_tag_delete_product__product___k__delete",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "product",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Product"
+            }
+          },
+          {
+            "name": "k",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "K"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Version"
+            }
+          },
+          {
+            "name": "owner",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Owner"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/product/{product}/{k}/versions": {
+      "get": {
+        "tags": ["Product Tags"],
+        "summary": "Product Tag List Versions",
+        "description": "Get a list of all versions of a tag for a product",
+        "operationId": "product_tag_list_versions_product__product___k__versions_get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "product",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Product"
+            }
+          },
+          {
+            "name": "k",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "K"
+            }
+          },
+          {
+            "name": "owner",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": "",
+              "title": "Owner"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductTag"
+                  },
+                  "title": "Response Product Tag List Versions Product  Product   K  Versions Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/product": {
+      "put": {
+        "tags": ["Product Tags"],
+        "summary": "Product Tag Update",
+        "description": "Update a product tag\n\n- **product**: which product\n- **k**: which key for the tag\n- **v**: which value to set for the tag\n- **version**: must be equal to previous version + 1\n- **owner**: None or empty for public tags, or your own user_id",
+        "operationId": "product_tag_update_product_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductTag"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": ["Product Tags"],
+        "summary": "Product Tag Add",
+        "description": "Create a new product tag (version=1)\n\n- **product**: which product\n- **k**: which key for the tag\n- **v**: which value to set for the tag\n- **version**: none or empty or 1\n- **owner**: none or empty for public tags, or your own user_id\n\nBe aware it's not possible to create the same tag twice. Though, you can update\na tag and add multiple values the way you want (don't forget to document how); comma\nseparated list is a good option.",
+        "operationId": "product_tag_add_product_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductTag"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/keys": {
+      "get": {
+        "tags": ["Keys & Values"],
+        "summary": "Keys List",
+        "description": "Get the list of keys with statistics, with an optional search filter.\n\nThe keys list can be restricted to private tags from some owner",
+        "operationId": "keys_list_keys_get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": "",
+              "title": "Q"
+            }
+          },
+          {
+            "name": "owner",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Owner"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/KeyStats"
+                  },
+                  "title": "Response Keys List Keys Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/values/{k}": {
+      "get": {
+        "tags": ["Keys & Values"],
+        "summary": "Get Unique Values",
+        "description": "Get the unique values of a given property and the corresponding number of products\n\n- **k**: The property key to get unique values for\n- **owner**: None or empty for public tags, or your own user_id\n- **q**: Filter values by a query string\n- **limit**: Maximum number of values to return (default: 50; max: 1000)",
+        "operationId": "get_unique_values_values__k__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "k",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "K"
+            }
+          },
+          {
+            "name": "owner",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Owner"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Q"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ValueCount"
+                  },
+                  "title": "Response Get Unique Values Values  K  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ping": {
+      "get": {
+        "tags": ["System"],
+        "summary": "Pong",
+        "description": "Check server health",
+        "operationId": "pong_ping_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PingResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Body_authentication_auth_post": {
+        "properties": {
+          "grant_type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^password$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grant Type"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          },
+          "scope": {
+            "type": "string",
+            "title": "Scope",
+            "default": ""
+          },
+          "client_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Id"
+          },
+          "client_secret": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Secret"
+          }
+        },
+        "type": "object",
+        "required": ["username", "password"],
+        "title": "Body_authentication_auth_post"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HelloResponse": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": ["message"],
+        "title": "HelloResponse"
+      },
+      "KeyStats": {
+        "properties": {
+          "k": {
+            "type": "string",
+            "title": "K"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          },
+          "values": {
+            "type": "integer",
+            "title": "Values"
+          }
+        },
+        "type": "object",
+        "required": ["k", "count", "values"],
+        "title": "KeyStats"
+      },
+      "PingResponse": {
+        "properties": {
+          "ping": {
+            "type": "string",
+            "title": "Ping"
+          }
+        },
+        "type": "object",
+        "required": ["ping"],
+        "title": "PingResponse"
+      },
+      "ProductList": {
+        "properties": {
+          "product": {
+            "type": "string",
+            "title": "Product"
+          },
+          "k": {
+            "type": "string",
+            "title": "K"
+          },
+          "v": {
+            "type": "string",
+            "title": "V"
+          }
+        },
+        "type": "object",
+        "required": ["product", "k", "v"],
+        "title": "ProductList"
+      },
+      "ProductStats": {
+        "properties": {
+          "product": {
+            "type": "string",
+            "title": "Product"
+          },
+          "keys": {
+            "type": "integer",
+            "title": "Keys"
+          },
+          "editors": {
+            "type": "integer",
+            "title": "Editors"
+          },
+          "last_edit": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Last Edit"
+          }
+        },
+        "type": "object",
+        "required": ["product", "keys", "editors", "last_edit"],
+        "title": "ProductStats"
+      },
+      "ProductTag": {
+        "properties": {
+          "product": {
+            "type": "string",
+            "title": "Product"
+          },
+          "k": {
+            "type": "string",
+            "title": "K"
+          },
+          "v": {
+            "type": "string",
+            "title": "V"
+          },
+          "owner": {
+            "type": "string",
+            "title": "Owner",
+            "default": ""
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version",
+            "default": 1
+          },
+          "editor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Editor"
+          },
+          "last_edit": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Edit"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": ["product", "k", "v"],
+        "title": "ProductTag"
+      },
+      "TokenResponse": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token"
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type"
+          }
+        },
+        "type": "object",
+        "required": ["access_token", "token_type"],
+        "title": "TokenResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": ["loc", "msg", "type"],
+        "title": "ValidationError"
+      },
+      "ValueCount": {
+        "properties": {
+          "v": {
+            "type": "string",
+            "title": "V"
+          },
+          "product_count": {
+            "type": "integer",
+            "title": "Product Count"
+          }
+        },
+        "type": "object",
+        "required": ["v", "product_count"],
+        "title": "ValueCount"
+      }
+    },
+    "securitySchemes": {
+      "OAuth2PasswordBearer": {
+        "type": "oauth2",
+        "flows": {
+          "password": {
+            "scopes": {},
+            "tokenUrl": "auth"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "System",
+      "description": "System health and general API information"
+    },
+    {
+      "name": "Authentication",
+      "description": "User authentication and authorization endpoints"
+    },
+    {
+      "name": "Products",
+      "description": "Product discovery and statistics"
+    },
+    {
+      "name": "Product Tags",
+      "description": "CRUD operations for product tags and properties"
+    },
+    {
+      "name": "Keys & Values",
+      "description": "Browse available keys and their possible values"
     }
   ]
 }

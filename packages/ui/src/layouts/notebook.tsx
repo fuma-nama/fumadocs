@@ -283,7 +283,7 @@ function DocsNavbar({
                 <NavbarLinkItem
                   key={i}
                   item={item}
-                  className="text-sm text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground"
+                  className="text-sm text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground data-[active=true]:text-fd-primary"
                 />
               ))}
           </div>

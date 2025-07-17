@@ -1,17 +1,17 @@
 import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
-import { remarkInstall } from 'fumadocs-docgen';
 import remarkMdx from 'remark-mdx';
 import { remarkAutoTypeTable } from 'fumadocs-typescript';
 import { remarkInclude } from 'fumadocs-mdx/config';
 import { type Page } from '@/lib/source';
+import { remarkNpm } from 'fumadocs-core/mdx-plugins';
 
 const processor = remark()
   .use(remarkMdx)
   .use(remarkInclude)
   .use(remarkGfm)
   .use(remarkAutoTypeTable)
-  .use(remarkInstall);
+  .use(remarkNpm);
 
 export async function getLLMText(page: Page) {
   const category =

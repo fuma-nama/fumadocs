@@ -1,15 +1,22 @@
 {
+  "include": ["**/*.ts", "**/*.tsx"],
   "compilerOptions": {
+    "strict": true,
+    "esModuleInterop": true,
     "jsx": "react-jsx",
-    "moduleResolution": "Bundler",
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],
-    "types": ["node", "vite/client"],
     "module": "ESNext",
-    "target": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "isolatedModules": true,
+    "resolveJsonModule": true,
     "skipLibCheck": true,
-    "strictNullChecks": true,
+    "target": "ES2022",
+    "allowJs": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
-    }
+      "~/*": ["./src/*"]
+    },
+    "noEmit": true
   }
 }

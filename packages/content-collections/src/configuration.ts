@@ -160,7 +160,7 @@ export const frontmatterSchema = z.object({
   full: z.boolean().optional(),
 
   // Fumadocs OpenAPI generated
-  _openapi: z.object({}).passthrough().optional(),
+  _openapi: z.looseObject({}).optional(),
 });
 
 export function createDocSchema(z: typeof Zod) {
@@ -170,7 +170,7 @@ export function createDocSchema(z: typeof Zod) {
     icon: z.string().optional(),
     full: z.boolean().optional(),
     // Fumadocs OpenAPI generated
-    _openapi: z.record(z.any()).optional(),
+    _openapi: z.record(z.string(), z.any()).optional(),
   };
 }
 

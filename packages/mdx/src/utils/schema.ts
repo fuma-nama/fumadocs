@@ -19,7 +19,7 @@ export const frontmatterSchema = z.object({
   full: z.boolean().optional(),
 
   // Fumadocs OpenAPI generated
-  _openapi: z.object({}).passthrough().optional(),
+  _openapi: z.looseObject({}).optional(),
 });
 
 export class ValidationError extends Error {

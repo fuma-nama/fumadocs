@@ -1,5 +1,14 @@
 # create-next-docs-app
 
+## 15.6.4
+
+### Patch Changes
+
+- a375da3: support passing options
+- a375da3: Update templates
+
+## 15.6.3
+
 ## 15.6.2
 
 ## 15.6.1
