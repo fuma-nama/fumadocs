@@ -2,6 +2,7 @@ import { SortedResult } from '@/server';
 import Mixedbread from '@mixedbread/sdk';
 import { VectorStoreSearchResponse } from '@mixedbread/sdk/resources/vector-stores';
 import removeMd from 'remove-markdown';
+import Slugger from 'github-slugger';
 
 export interface SearchMetadata {
   title?: string;
@@ -9,6 +10,8 @@ export interface SearchMetadata {
   url?: string;
   tag?: string;
 }
+
+const slugger = new Slugger();
 
 export interface MixedbreadOptions {
   /**
@@ -50,18 +53,12 @@ function extractHeadingTitle(text: string): string {
     // Use remove-markdown to convert to plain text and remove colons
     const plainText = removeMd(firstLine, {
       useImgAltText: false,
-    })
-      .replace(/:/g, '')
-      .trim();
+    });
 
     return plainText;
   }
 
   return '';
-}
-
-function convertToKebabCase(text: string): string {
-  return text.toLowerCase().replace(/ /g, '-');
 }
 
 export async function search(
@@ -107,11 +104,13 @@ export async function search(
       item.type === 'text' ? extractHeadingTitle(item.text) : '';
 
     if (headingTitle) {
+      slugger.reset();
+
       results.push({
         id: `${item.file_id}-${item.chunk_index}-text`,
         type: 'heading',
         content: headingTitle,
-        url: `${url}#${convertToKebabCase(headingTitle)}`,
+        url: `${url}#${slugger.slug(headingTitle)}`,
       });
     }
 
