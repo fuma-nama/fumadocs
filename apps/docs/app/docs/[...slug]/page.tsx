@@ -43,7 +43,7 @@ import { getPageTreePeers } from 'fumadocs-core/server';
 import { Card, Cards } from 'fumadocs-ui/components/card';
 import { getMDXComponents } from '@/mdx-components';
 import { APIPage } from 'fumadocs-openapi/ui';
-import { LLMCopyButton, ViewOptions } from './page.client';
+import { LLMCopyButton, ViewOptions } from '@/components/ai/page-actions';
 import * as path from 'node:path';
 import { Banner } from 'fumadocs-ui/components/banner';
 
@@ -93,7 +93,7 @@ export default async function Page(props: {
           {page.data.description}
         </p>
         <div className="flex flex-row gap-2 items-center border-b pt-2 pb-6">
-          <LLMCopyButton slug={params.slug} />
+          <LLMCopyButton markdownUrl={`${page.url}.mdx`} />
           <ViewOptions
             markdownUrl={`${page.url}.mdx`}
             githubUrl={`https://github.com/${owner}/${repo}/blob/dev/apps/docs/content/docs/${page.path}`}
