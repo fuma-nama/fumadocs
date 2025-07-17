@@ -1,7 +1,7 @@
 import { SortedResult } from '@/server';
 import Mixedbread from '@mixedbread/sdk';
 import { VectorStoreSearchResponse } from '@mixedbread/sdk/resources/vector-stores';
-import { marked } from 'marked';
+import removeMd from 'remove-markdown';
 
 export interface SearchMetadata {
   title?: string;
@@ -47,15 +47,10 @@ function extractHeadingTitle(text: string): string {
   const firstLine = lines[0]?.trim();
 
   if (firstLine) {
-    // Remove the hash symbols first
-    const headingText = firstLine.replace(/^#+\s*/, '');
-
-    // Use marked to parse markdown and extract plain text
-    const htmlString = marked.parse(headingText, { async: false });
-
-    // Strip HTML tags to get plain text and remove colons
-    const plainText = htmlString
-      .replace(/<[^>]*>/g, '')
+    // Use remove-markdown to convert to plain text and remove colons
+    const plainText = removeMd(firstLine, {
+      useImgAltText: false,
+    })
       .replace(/:/g, '')
       .trim();
 
