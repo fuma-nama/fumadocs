@@ -65,6 +65,9 @@ importers:
       '@fumadocs/mdx-remote':
         specifier: workspace:*
         version: link:../../packages/mdx-remote
+      '@mixedbread/sdk':
+        specifier: ^0.16.0
+        version: 0.16.0
       '@orama/orama':
         specifier: ^3.1.11
         version: 3.1.11
