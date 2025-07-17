@@ -18,7 +18,4 @@ export default defineConfig({
     }),
     react(),
   ],
-  optimizeDeps: {
-    exclude: ['search-default'],
-  },
 });
