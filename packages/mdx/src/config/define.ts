@@ -97,8 +97,8 @@ export function defineDocs<
    */
   dir?: string | string[];
 
-  docs?: Omit<DocCollection<DocSchema, Async>, 'dir'>;
-  meta?: Omit<MetaCollection<MetaSchema>, 'dir'>;
+  docs?: Omit<DocCollection<DocSchema, Async>, 'dir' | 'type'>;
+  meta?: Omit<MetaCollection<MetaSchema>, 'dir' | 'type'>;
 }): DocsCollection<DocSchema, MetaSchema, Async> {
   if (!options)
     console.warn(

@@ -7,6 +7,7 @@ import type { MdxjsEsm } from 'mdast-util-mdxjs-esm';
 import { joinPath, slash } from '@/utils/path';
 import type { ISizeCalculationResult } from 'image-size/types/interface';
 import { imageSizeFromFile } from 'image-size/fromFile';
+import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
 
 const VALID_BLUR_EXT = ['.jpeg', '.png', '.webp', '.avif', '.jpg'];
 const EXTERNAL_URL_REGEX = /^https?:\/\//;
@@ -18,11 +19,22 @@ export interface RemarkImageOptions {
   publicDir?: string;
 
   /**
-   * Preferred placeholder type
+   * Preferred placeholder type, only available with `useImport` + local images.
    *
    * @defaultValue 'blur'
    */
   placeholder?: 'blur' | 'none';
+
+  /**
+   * Define how to handle errors when fetching image size.
+   *
+   * - `error` (default): throw an error.
+   * - `ignore`: do absolutely nothing (Next.js Image component may complain).
+   * - `hide`: remove that image element.
+   *
+   * @defaultValue 'error'
+   */
+  onError?: 'error' | 'hide' | 'ignore' | ((error: Error) => void);
 
   /**
    * Import images in the file, and let bundlers handle it.
@@ -56,6 +68,7 @@ export function remarkImage({
   placeholder = 'blur',
   external = true,
   useImport = true,
+  onError = 'error',
   publicDir = path.join(process.cwd(), 'public'),
 }: RemarkImageOptions = {}): Transformer<Root, Root> {
   return async (tree, file) => {
@@ -110,15 +123,31 @@ export function remarkImage({
                   value: size.height.toString(),
                 },
               ],
-            });
+              children: [],
+            } satisfies MdxJsxFlowElement);
           })
           .catch((e) => {
-            throw new Error(
-              `[Remark Image] Failed obtain image size for ${url} (public directory configured as ${publicDir})`,
-              {
-                cause: e,
-              },
-            );
+            if (onError === 'hide') {
+              Object.assign(node, {
+                type: 'mdxJsxFlowElement',
+                name: null,
+                attributes: [],
+                children: [],
+              } satisfies MdxJsxFlowElement);
+              return;
+            }
+
+            if (onError === 'ignore') return;
+            if (onError === 'error') {
+              throw new Error(
+                `[Remark Image] Failed obtain image size for ${url} (public directory configured as ${publicDir})`,
+                {
+                  cause: e,
+                },
+              );
+            }
+
+            onError(e);
           });
 
         promises.push(task);
