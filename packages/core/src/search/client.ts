@@ -6,6 +6,7 @@ import { useOnChange } from '@/utils/use-on-change';
 import { type StaticOptions } from '@/search/client/static';
 import { type AlgoliaOptions } from '@/search/client/algolia';
 import { type OramaCloudOptions } from '@/search/client/orama-cloud';
+import { type MixedbreadOptions } from '@/search/client/mixedbread';
 
 interface UseDocsSearch {
   search: string;
@@ -29,7 +30,10 @@ export type Client =
     } & AlgoliaOptions)
   | ({
       type: 'orama-cloud';
-    } & OramaCloudOptions);
+    } & OramaCloudOptions)
+  | ({
+      type: 'mixedbread';
+    } & MixedbreadOptions);
 
 function isDifferentDeep(a: unknown, b: unknown): boolean {
   if (Array.isArray(a) && Array.isArray(b)) {
@@ -143,6 +147,11 @@ export function useDocsSearch(
 
         if (client.type === 'static') {
           const { search } = await import('./client/static');
+          return search(debouncedValue, client);
+        }
+
+        if (client.type === 'mixedbread') {
+          const { search } = await import('./client/mixedbread');
           return search(debouncedValue, client);
         }
 

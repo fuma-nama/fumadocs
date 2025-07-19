@@ -65,6 +65,9 @@ importers:
       '@fumadocs/mdx-remote':
         specifier: workspace:*
         version: link:../../packages/mdx-remote
+      '@mixedbread/sdk':
+        specifier: ^0.16.0
+        version: 0.16.0
       '@orama/orama':
         specifier: ^3.1.11
         version: 3.1.11
@@ -772,6 +775,9 @@ importers:
       '@formatjs/intl-localematcher':
         specifier: ^0.6.1
         version: 0.6.1
+      '@mixedbread/sdk':
+        specifier: ^0.16.0
+        version: 0.16.0
       '@orama/orama':
         specifier: ^3.1.11
         version: 3.1.11
@@ -817,6 +823,9 @@ importers:
       remark-rehype:
         specifier: ^11.1.2
         version: 11.1.2
+      remove-markdown:
+        specifier: ^0.6.2
+        version: 0.6.2
       scroll-into-view-if-needed:
         specifier: ^3.1.0
         version: 3.1.0
@@ -2706,6 +2715,10 @@ packages:
 
   '@mermaid-js/parser@0.6.1':
     resolution: {integrity: sha512-lCQNpV8R4lgsGcjX5667UiuDLk2micCtjtxR1YKbBXvN5w2v+FeLYoHrTSSrjwXdMcDYvE4ZBPvKT31dfeSmmA==}
+
+  '@mixedbread/sdk@0.16.0':
+    resolution: {integrity: sha512-BrcUgvERDZN8cD63FQq90cwsIDYUjJPuD+xgiu0gyT41XrVm3tA4aqWeEwcT5ALGtlwXxfdS+je3TtMNML6TEQ==}
+    hasBin: true
 
   '@mjackson/node-fetch-server@0.2.0':
     resolution: {integrity: sha512-EMlH1e30yzmTpGLQjlFmaDAjyOeZhng1/XCd7DExR8PNAnG/G1tyruZxEoUe11ClnwGhGrtsdnyyUx1frSzjng==}
@@ -8464,6 +8477,9 @@ packages:
   remark@15.0.1:
     resolution: {integrity: sha512-Eht5w30ruCXgFmxVUSlNWQ9iiimq07URKeFS3hNc8cUWy1llX4KDWfyEDZRycMc+znsN9Ux5/tJ/BFdgdOwA3A==}
 
+  remove-markdown@0.6.2:
+    resolution: {integrity: sha512-EijDXJZbzpGbQBd852ViUzcqgpMujthM+SAEHiWCMcZonRbZ+xViWKLJA/vrwbDwYdxrs1aFDjpBhcGrZoJRGA==}
+
   remove-trailing-separator@1.1.0:
     resolution: {integrity: sha512-/hS+Y0u3aOfIETiaiirUFwDBDzmXPvO+jAfKTitUngIPzdKc6Z0LoFjM/CK5PL4C+eKwHohlHAb6H0VFfmmUsw==}
 
@@ -11232,6 +11248,8 @@ snapshots:
   '@mermaid-js/parser@0.6.1':
     dependencies:
       langium: 3.3.1
+
+  '@mixedbread/sdk@0.16.0': {}
 
   '@mjackson/node-fetch-server@0.2.0': {}
 
@@ -18416,6 +18434,8 @@ snapshots:
       unified: 11.0.5
     transitivePeerDependencies:
       - supports-color
+
+  remove-markdown@0.6.2: {}
 
   remove-trailing-separator@1.1.0: {}
 

@@ -1,0 +1,22 @@
+---
+title: Mixedbread
+description: Using Mixedbread with Fumadocs UI.
+---
+
+## Overview
+
+For the setup guide, see [Integrate Mixedbread Search](/docs/headless/search/mixedbread).
+
+## Setup
+
+Create a search dialog, replace `apiKey` and `vectorStoreId` with your desired values.
+
+<include meta='title="components/search.tsx"'>./mixedbread.tsx</include>
+
+<include>.shared.mdx</include>
+
+### Tag Filter
+
+Optionally, you can add UI for filtering results by tags. Configure [Tag Filter](/docs/headless/search/mixedbread#tag-filter) on search server and add the following:
+
+<include>.tag-filter.mdx</include>
