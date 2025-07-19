@@ -22,7 +22,7 @@
     "@vitejs/plugin-react": "^4.6.0",
     "gray-matter": "^4.0.3",
     "isbot": "^5.1.28",
-    "next": "15.4.1",
+    "next": "15.4.2",
     "postcss": "^8.5.6",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
