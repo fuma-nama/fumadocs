@@ -1,8 +1,8 @@
-import type { GlobalConfig } from '@/config/types';
 import type { LoadedConfig } from '@/utils/config';
 import type {
-  DocsCollection,
   DocCollection,
+  DocsCollection,
+  GlobalConfig,
   MetaCollection,
 } from '@/config/define';
 

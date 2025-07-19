@@ -63,10 +63,10 @@ for (const { name, collection } of cases) {
     const out = await generateJS(
       path.join(file, './fixtures/config.ts'),
       {
+        // @ts-expect-error -- test file
         _runtime: {
           files: new Map(),
         },
-        // @ts-expect-error -- test file
         collections: new Map([['docs', collection]]),
       },
       {

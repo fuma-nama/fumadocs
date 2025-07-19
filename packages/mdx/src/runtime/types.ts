@@ -1,7 +1,35 @@
-import type { BaseCollectionEntry, FileInfo, MarkdownProps } from '@/config';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type { MetaData, PageData, Source } from 'fumadocs-core/source';
 import type { LoadedConfig } from '@/utils/config';
+import type { FC } from 'react';
+import type { MDXProps } from 'mdx/types';
+import type { StructuredData } from 'fumadocs-core/mdx-plugins';
+import type { TableOfContents } from 'fumadocs-core/server';
+import type { DocCollection, DocsCollection, MetaCollection } from '@/config';
+
+export interface BaseCollectionEntry {
+  /**
+   * Raw file path of collection entry, including absolute path (not normalized).
+   */
+  _file: FileInfo;
+}
+
+export interface FileInfo {
+  path: string;
+  absolutePath: string;
+}
+
+export interface MarkdownProps {
+  body: FC<MDXProps>;
+  structuredData: StructuredData;
+  toc: TableOfContents;
+  _exports: Record<string, unknown>;
+
+  /**
+   * Only available when `lastModifiedTime` is enabled on MDX loader
+   */
+  lastModified?: Date;
+}
 
 export interface RuntimeFile {
   info: FileInfo;
@@ -31,43 +59,16 @@ type MetaOut<Schema extends StandardSchemaV1> =
   StandardSchemaV1.InferOutput<Schema> & BaseCollectionEntry;
 
 export interface Runtime {
-  doc: <C>(files: RuntimeFile[]) => C extends {
-    type: 'doc';
-    _type: {
-      schema: infer Schema extends StandardSchemaV1;
-    };
-  }
-    ? DocOut<Schema>[]
-    : never;
-  meta: <C>(files: RuntimeFile[]) => C extends {
-    type: 'meta';
-
-    _type: {
-      schema: infer Schema extends StandardSchemaV1;
-    };
-  }
-    ? MetaOut<Schema>[]
-    : never;
+  doc: <C>(
+    files: RuntimeFile[],
+  ) => C extends DocCollection<infer Schema, false> ? DocOut<Schema>[] : never;
+  meta: <C>(
+    files: RuntimeFile[],
+  ) => C extends MetaCollection<infer Schema> ? MetaOut<Schema>[] : never;
   docs: <C>(
     docs: RuntimeFile[],
     metas: RuntimeFile[],
-  ) => C extends {
-    type: 'docs';
-
-    docs: {
-      type: 'doc';
-      _type: {
-        schema: infer DocSchema extends StandardSchemaV1;
-      };
-    };
-
-    meta: {
-      type: 'meta';
-      _type: {
-        schema: infer MetaSchema extends StandardSchemaV1;
-      };
-    };
-  }
+  ) => C extends DocsCollection<infer DocSchema, infer MetaSchema, false>
     ? {
         docs: DocOut<DocSchema>[];
         meta: MetaOut<MetaSchema>[];
@@ -96,12 +97,7 @@ export interface RuntimeAsync {
     files: AsyncRuntimeFile[],
     collection: string,
     config: LoadedConfig,
-  ) => C extends {
-    type: 'doc';
-    _type: {
-      schema: infer Schema extends StandardSchemaV1;
-    };
-  }
+  ) => C extends DocCollection<infer Schema, true>
     ? AsyncDocOut<Schema>[]
     : never;
   docs: <C>(
@@ -109,23 +105,7 @@ export interface RuntimeAsync {
     metas: RuntimeFile[],
     collection: string,
     config: LoadedConfig,
-  ) => C extends {
-    type: 'docs';
-
-    docs: {
-      type: 'doc';
-      _type: {
-        schema: infer DocSchema extends StandardSchemaV1;
-      };
-    };
-
-    meta: {
-      type: 'meta';
-      _type: {
-        schema: infer MetaSchema extends StandardSchemaV1;
-      };
-    };
-  }
+  ) => C extends DocsCollection<infer DocSchema, infer MetaSchema, true>
     ? {
         docs: AsyncDocOut<DocSchema>[];
         meta: MetaOut<MetaSchema>[];

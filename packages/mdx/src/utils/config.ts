@@ -3,9 +3,9 @@ import * as path from 'node:path';
 import type {
   DocCollection,
   DocsCollection,
+  GlobalConfig,
   MetaCollection,
 } from '@/config/define';
-import { type GlobalConfig } from '@/config/types';
 import type { ProcessorOptions } from '@mdx-js/mdx';
 import { pathToFileURL } from 'node:url';
 import { buildConfig } from '@/config/build';
