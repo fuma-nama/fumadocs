@@ -1,5 +1,16 @@
 # next-docs-mdx
 
+## 11.7.0
+
+### Minor Changes
+
+- e5cfa27: Stabilize Vite plugin support
+
+### Patch Changes
+
+- Updated dependencies [658fa96]
+  - fumadocs-core@15.6.5
+
 ## 11.6.11
 
 ### Patch Changes

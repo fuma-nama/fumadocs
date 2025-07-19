@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 15.6.5
+
+### Patch Changes
+
+- 619806d: Fix Vite and Tanstack Router configuration warnings
+
 ## 15.6.4
 
 ### Patch Changes

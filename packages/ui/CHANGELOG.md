@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 15.6.5
+
+### Patch Changes
+
+- Updated dependencies [658fa96]
+  - fumadocs-core@15.6.5
+
 ## 15.6.4
 
 ### Patch Changes
