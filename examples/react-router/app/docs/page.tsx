@@ -18,27 +18,20 @@ export async function loader({ params }: Route.LoaderArgs) {
   if (!page) throw new Response('Not found', { status: 404 });
 
   return {
-    page,
+    path: page.path,
     tree: source.pageTree,
   };
 }
 
 const clientLoader = toClientRenderer(
   docs.doc,
-  (
-    { toc, default: Mdx },
-    {
-      description,
-      title,
-    }: {
-      title?: string;
-      description?: string;
-    },
-  ) => {
+  ({ toc, default: Mdx, frontmatter }) => {
     return (
       <DocsPage toc={toc}>
-        <DocsTitle>{title}</DocsTitle>
-        <DocsDescription>{description}</DocsDescription>
+        <title>{frontmatter.title}</title>
+        <meta name="description" content={frontmatter.description} />
+        <DocsTitle>{frontmatter.title}</DocsTitle>
+        <DocsDescription>{frontmatter.description}</DocsDescription>
         <DocsBody>
           <Mdx components={{ ...defaultMdxComponents }} />
         </DocsBody>
@@ -48,8 +41,8 @@ const clientLoader = toClientRenderer(
 );
 
 export default function Page(props: Route.ComponentProps) {
-  const { tree, page } = props.loaderData;
-  const Content = clientLoader[page.path];
+  const { tree, path } = props.loaderData;
+  const Content = clientLoader[path];
 
   return (
     <DocsLayout
@@ -58,9 +51,7 @@ export default function Page(props: Route.ComponentProps) {
       }}
       tree={tree as PageTree.Root}
     >
-      <title>{page.data.title}</title>
-      <meta name="description" content={page.data.description} />
-      <Content {...page.data} />
+      <Content />
     </DocsLayout>
   );
 }

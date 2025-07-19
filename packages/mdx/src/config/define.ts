@@ -51,12 +51,6 @@ export interface DocsCollection<
   Async extends boolean = boolean,
 > {
   type: 'docs';
-  /**
-   * The directory to scan files
-   *
-   *  @defaultValue 'content/docs'
-   */
-  dir: string | string[];
 
   docs: DocCollection<DocSchema, Async>;
   meta: MetaCollection<MetaSchema>;
@@ -95,9 +89,17 @@ export function defineDocs<
   DocSchema extends StandardSchemaV1 = typeof frontmatterSchema,
   MetaSchema extends StandardSchemaV1 = typeof metaSchema,
   Async extends boolean = false,
->(
-  options?: Partial<DocsCollection<DocSchema, MetaSchema, Async>>,
-): DocsCollection<DocSchema, MetaSchema, Async> {
+>(options?: {
+  /**
+   * The directory to scan files
+   *
+   *  @defaultValue 'content/docs'
+   */
+  dir?: string | string[];
+
+  docs?: Omit<DocCollection<DocSchema, Async>, 'dir'>;
+  meta?: Omit<MetaCollection<MetaSchema>, 'dir'>;
+}): DocsCollection<DocSchema, MetaSchema, Async> {
   if (!options)
     console.warn(
       '[`source.config.ts`] Deprecated: please pass options to `defineDocs()` and specify a `dir`.',
@@ -106,19 +108,17 @@ export function defineDocs<
 
   return {
     type: 'docs',
-    // @ts-expect-error -- internal type inferring
     docs: defineCollections({
       type: 'doc',
       dir,
-      schema: frontmatterSchema,
+      schema: frontmatterSchema as any,
       ...options?.docs,
     }),
-    // @ts-expect-error -- internal type inferring
     meta: defineCollections({
       type: 'meta',
       files: ['**/*.{json,yaml}'],
       dir,
-      schema: metaSchema,
+      schema: metaSchema as any,
       ...options?.meta,
     }),
   };
