@@ -6,6 +6,7 @@ import {
   lazy,
   type ReactElement,
   type ReactNode,
+  Suspense,
   useEffect,
   useMemo,
   useState,
@@ -294,7 +295,9 @@ export default function Client({
           )}
           onSubmit={onSubmit}
         >
-          <ServerSelect />
+          <Suspense>
+            <ServerSelect />
+          </Suspense>
           <div className="flex flex-row items-center gap-2 text-sm p-3 pb-0">
             <MethodLabel>{method}</MethodLabel>
             <Route route={route} className="flex-1" />
@@ -381,20 +384,22 @@ function SecurityTabs({
     for (const item of security) {
       if (item.type === 'oauth2') {
         return (
-          <OauthDialog
-            scheme={item}
-            scopes={item.scopes}
-            open={open}
-            setOpen={(v) => {
-              setOpen(v);
-              if (v) {
-                setSecurityId(i);
-              }
-            }}
-            setToken={(token) => form.setValue('header.Authorization', token)}
-          >
-            {result}
-          </OauthDialog>
+          <Suspense>
+            <OauthDialog
+              scheme={item}
+              scopes={item.scopes}
+              open={open}
+              setOpen={(v) => {
+                setOpen(v);
+                if (v) {
+                  setSecurityId(i);
+                }
+              }}
+              setToken={(token) => form.setValue('header.Authorization', token)}
+            >
+              {result}
+            </OauthDialog>
+          </Suspense>
         );
       }
     }
@@ -635,18 +640,19 @@ function useAuthInputs(securities?: SecurityEntry[]) {
                   }}
                   className="flex-1"
                 />
-
-                <OauthDialogTrigger
-                  type="button"
-                  className={cn(
-                    buttonVariants({
-                      size: 'sm',
-                      color: 'secondary',
-                    }),
-                  )}
-                >
-                  Authorize
-                </OauthDialogTrigger>
+                <Suspense>
+                  <OauthDialogTrigger
+                    type="button"
+                    className={cn(
+                      buttonVariants({
+                        size: 'sm',
+                        color: 'secondary',
+                      }),
+                    )}
+                  >
+                    Authorize
+                  </OauthDialogTrigger>
+                </Suspense>
               </div>
             </fieldset>
           ),

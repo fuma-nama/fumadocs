@@ -1,6 +1,6 @@
 import { escapeString, inputToString } from '@/utils/input-to-string';
 // @ts-expect-error -- untyped
-import { js2xml } from 'xml-js/lib/js2xml';
+import js2xml from 'xml-js/lib/js2xml';
 
 interface BaseContext {
   /**
@@ -77,7 +77,7 @@ export const defaultAdapters = {
   },
   'application/xml': {
     encode(data) {
-      return js2xml(data.body as Record<string, unknown>, {
+      return js2xml.js2xml(data.body as Record<string, unknown>, {
         compact: true,
         spaces: 2,
       });

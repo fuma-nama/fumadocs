@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- rehype plugins */
-import { type ReactElement } from 'react';
+import { use, type ReactElement } from 'react';
+import { cache } from '#rsc-apis';
 import {
   rehypeCode,
   type RehypeCodeOptions,
@@ -11,6 +12,7 @@ import { remark } from 'remark';
 import remarkRehype from 'remark-rehype';
 import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import * as JsxRuntime from 'react/jsx-runtime';
+import { ClientSuspense } from '#rsc-apis';
 
 const processor = remark()
   .use(remarkGfm)
@@ -33,10 +35,19 @@ function rehypeReact(this: any) {
   };
 }
 
-export async function Markdown({ text }: { text: string }) {
-  const out = await processor.process({
-    value: text,
-  });
+const processCached = cache((text: string) =>
+  processor.process({ value: text }),
+);
 
+export function Markdown({ text }: { text: string }) {
+  return (
+    <ClientSuspense>
+      <MarkdownInner text={text} />
+    </ClientSuspense>
+  );
+}
+
+function MarkdownInner({ text }: { text: string }) {
+  const out = use(processCached(text));
   return out.result as ReactElement;
 }
