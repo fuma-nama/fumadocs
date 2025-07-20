@@ -1,6 +1,6 @@
 {
   "name": "create-fumadocs-app",
-  "version": "15.6.4",
+  "version": "15.6.5",
   "description": "Create a new documentation site with Fumadocs",
   "keywords": [
     "NextJs",
@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "@types/cross-spawn": "^6.0.6",
-    "@types/node": "24.0.13",
+    "@types/node": "24.0.15",
     "eslint-config-custom": "workspace:*",
     "tinyglobby": "^0.2.14",
     "tsconfig": "workspace:*"

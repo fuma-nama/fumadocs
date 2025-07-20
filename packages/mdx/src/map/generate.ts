@@ -2,15 +2,19 @@ import * as path from 'node:path';
 import * as fs from 'node:fs/promises';
 import { glob } from 'tinyglobby';
 import { getTypeFromPath } from '@/utils/get-type-from-path';
-import type { FileInfo } from '@/config/types';
 import type { LoadedConfig } from '@/utils/config';
 import type { DocCollection, MetaCollection } from '@/config';
 import { validate } from '@/utils/schema';
 import { fileCache } from '@/map/file-cache';
-import type { AsyncRuntimeFile } from '@/runtime/types';
+import type { AsyncRuntimeFile, FileInfo } from '@/runtime/types';
 import { load } from 'js-yaml';
 import { getGitTimestamp } from '@/utils/git-timestamp';
 import { fumaMatter } from '@/utils/fuma-matter';
+import {
+  getImportCode,
+  type ImportPathConfig,
+  toImportPath,
+} from '@/utils/import-formatter';
 
 async function readFileWithCache(file: string): Promise<string> {
   const cached = fileCache.read<string>('read-file', file);
@@ -18,8 +22,6 @@ async function readFileWithCache(file: string): Promise<string> {
 
   return (await fs.readFile(file)).toString();
 }
-
-type ImportPathConfig = { relativeTo: string } | { absolute: true };
 
 export async function generateJS(
   configPath: string,
@@ -204,59 +206,6 @@ async function getCollectionFiles(
   );
 
   return Array.from(files.values());
-}
-
-type ImportInfo =
-  | { name: string; type: 'default'; specifier: string }
-  | {
-      type: 'named';
-      names: ([string, string] | string)[];
-      specifier: string;
-    }
-  | {
-      type: 'namespace';
-      name: string;
-      specifier: string;
-    }
-  | {
-      type: 'side-effect';
-      specifier: string;
-    };
-
-export function getImportCode(info: ImportInfo): string {
-  const specifier = JSON.stringify(info.specifier);
-
-  if (info.type === 'default') return `import ${info.name} from ${specifier}`;
-  if (info.type === 'namespace')
-    return `import * as ${info.name} from ${specifier}`;
-  if (info.type === 'named') {
-    const names = info.names.map((name) =>
-      Array.isArray(name) ? `${name[0]} as ${name[1]}` : name,
-    );
-
-    return `import { ${names.join(', ')} } from ${specifier}`;
-  }
-
-  return `import ${specifier}`;
-}
-
-export function toImportPath(file: string, config: ImportPathConfig): string {
-  const ext = path.extname(file);
-  const filename =
-    ext === '.ts' ? file.substring(0, file.length - ext.length) : file;
-  let importPath;
-
-  if ('relativeTo' in config) {
-    importPath = path.relative(config.relativeTo, filename);
-
-    if (!path.isAbsolute(importPath) && !importPath.startsWith('.')) {
-      importPath = `./${importPath}`;
-    }
-  } else {
-    importPath = path.resolve(filename);
-  }
-
-  return importPath.replaceAll(path.sep, '/');
 }
 
 function parseMetaEntry(file: string, content: string) {

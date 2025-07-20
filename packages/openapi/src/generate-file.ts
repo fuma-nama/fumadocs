@@ -213,17 +213,18 @@ async function generateFromDocument(pathOrUrl: string, options: Config) {
     groupBy: OperationConfig['groupBy'] = 'none',
     result: GeneratePageOutput,
   ): string[] {
-    const file = nameFn(result, document.document);
-
     if (groupBy === 'route') {
       return [
         path.join(
-          result.type === 'operation' ? result.item.path : result.item.name,
-          result.item.method,
-        ) + '.mdx',
+          getOutputPathFromRoute(
+            result.type === 'operation' ? result.item.path : result.item.name,
+          ),
+          `${result.item.method.toLowerCase()}.mdx`,
+        ),
       ];
     }
 
+    const file = nameFn(result, document.document);
     if (groupBy === 'tag') {
       let tags =
         result.type === 'operation'

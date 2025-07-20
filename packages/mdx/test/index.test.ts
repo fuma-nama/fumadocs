@@ -29,7 +29,7 @@ test('format errors', async () => {
     const error = new ValidationError('in index.mdx:', result.issues);
 
     expect(error.toString()).toMatchInlineSnapshot(`
-      "in index.mdx::
+      "Error: in index.mdx::
         text: Invalid input: expected string, received number
         obj,key: Invalid input: expected number, received undefined
         obj,value: Invalid input: expected number, received string
@@ -63,10 +63,10 @@ for (const { name, collection } of cases) {
     const out = await generateJS(
       path.join(file, './fixtures/config.ts'),
       {
+        // @ts-expect-error -- test file
         _runtime: {
           files: new Map(),
         },
-        // @ts-expect-error -- test file
         collections: new Map([['docs', collection]]),
       },
       {

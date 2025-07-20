@@ -2,7 +2,6 @@ import * as plugins from 'fumadocs-core/mdx-plugins';
 import type { ProcessorOptions } from '@mdx-js/mdx';
 import type { Pluggable } from 'unified';
 import remarkMdxExport from '@/mdx-plugins/remark-exports';
-import type { LoadedConfig } from '@/utils/config';
 
 type ResolvePlugins = Pluggable[] | ((v: Pluggable[]) => Pluggable[]);
 
@@ -100,21 +99,4 @@ export function getDefaultMDXOptions({
     remarkPlugins,
     rehypePlugins,
   };
-}
-
-export async function loadDefaultOptions(
-  config: LoadedConfig,
-): Promise<ProcessorOptions> {
-  const input = config.global?.mdxOptions;
-  config._mdx_loader ??= {};
-
-  const mdxLoader = config._mdx_loader;
-  if (!mdxLoader.cachedOptions) {
-    mdxLoader.cachedOptions =
-      typeof input === 'function'
-        ? getDefaultMDXOptions(await input())
-        : getDefaultMDXOptions(input ?? {});
-  }
-
-  return mdxLoader.cachedOptions;
 }
