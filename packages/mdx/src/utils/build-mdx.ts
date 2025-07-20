@@ -6,12 +6,7 @@ type Processor = ReturnType<typeof createProcessor>;
 
 const cache = new Map<string, Processor>();
 
-export interface MDXOptions extends ProcessorOptions {
-  /**
-   * Name of collection
-   */
-  collection?: string;
-
+interface BuildMDXOptions extends ProcessorOptions {
   /**
    * Specify a file path for source
    */
@@ -41,21 +36,21 @@ declare module 'vfile' {
 }
 
 /**
- * @param cacheKey -- key to cache processor
+ * @param cacheKey - key to cache processor
  * @param source - mdx content
  * @param options - MDX options
  */
 export async function buildMDX(
   cacheKey: string,
   source: string,
-  options: MDXOptions,
+  options: BuildMDXOptions,
 ): Promise<VFile> {
-  const { filePath, frontmatter, data, ...rest } = options;
-
+  const { filePath, frontmatter, data, _compiler, ...rest } = options;
   let format = options.format;
-  if (!format && filePath) {
-    format = filePath.endsWith('.mdx') ? 'mdx' : 'md';
+  if (filePath) {
+    format ??= filePath.endsWith('.mdx') ? 'mdx' : 'md';
   }
+
   format ??= 'mdx';
   const key = `${cacheKey}:${format}`;
   let cached = cache.get(key);
@@ -77,7 +72,7 @@ export async function buildMDX(
     data: {
       ...data,
       frontmatter,
-      _compiler: options._compiler,
+      _compiler,
     },
   });
 }

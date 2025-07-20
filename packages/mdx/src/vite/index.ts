@@ -79,8 +79,7 @@ export default function mdx(config: Record<string, unknown>): Plugin {
         };
       }
 
-      const { loadDefaultOptions } = await import('@/utils/mdx-options');
-      mdxOptions ??= await loadDefaultOptions(loaded);
+      mdxOptions ??= await loaded.getDefaultMDXOptions();
 
       // ensure the line number is correct in dev mode
       const lineOffset = isDevelopment ? countLines(matter.matter) : 0;

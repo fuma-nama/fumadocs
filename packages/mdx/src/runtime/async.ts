@@ -1,4 +1,4 @@
-import { createCompiler, type MDXOptions } from '@fumadocs/mdx-remote';
+import { createCompiler } from '@fumadocs/mdx-remote';
 import type { LoadedConfig } from '@/utils/config';
 import { remarkInclude } from '@/mdx-plugins/remark-include';
 import {
@@ -9,32 +9,36 @@ import { _runtime, createMDXSource } from '@/runtime/index';
 import type { RuntimeAsync } from '@/runtime/types';
 
 async function initCompiler(config: LoadedConfig, collection: string) {
-  let mdxOptions: MDXOptions | undefined;
-
   const col = config.collections.get(collection);
-  if (col?.type === 'doc') mdxOptions = col.mdxOptions as MDXOptions;
-  else if (col?.type === 'docs')
-    mdxOptions = col.docs?.mdxOptions as MDXOptions;
 
-  if (!mdxOptions) {
-    config._mdx_async ??= {};
-    const async = config._mdx_async;
-    const globalConfig = config.global;
-
-    if (globalConfig && !async.cachedMdxOptions) {
-      async.cachedMdxOptions =
-        typeof globalConfig.mdxOptions === 'function'
-          ? await globalConfig.mdxOptions()
-          : globalConfig.mdxOptions;
-    }
-
-    mdxOptions = async.cachedMdxOptions;
+  switch (col?.type) {
+    case 'doc':
+      if (col.mdxOptions)
+        return createCompiler({
+          preset: 'minimal',
+          ...col.mdxOptions,
+        });
+      break;
+    case 'docs':
+      if (col.docs.mdxOptions)
+        return createCompiler({
+          preset: 'minimal',
+          ...col.docs.mdxOptions,
+        });
+      break;
   }
 
-  const remarkPlugins = mdxOptions?.remarkPlugins ?? [];
+  let defaultMdxOptions = config.global?.mdxOptions;
+  if (typeof defaultMdxOptions === 'function')
+    defaultMdxOptions = await defaultMdxOptions();
 
+  if (defaultMdxOptions?.preset === 'minimal') {
+    return createCompiler(defaultMdxOptions);
+  }
+
+  const remarkPlugins = defaultMdxOptions?.remarkPlugins ?? [];
   return createCompiler({
-    ...mdxOptions,
+    ...defaultMdxOptions,
     remarkPlugins: (v) =>
       typeof remarkPlugins === 'function'
         ? [remarkInclude, ...remarkPlugins(v), remarkStructure]

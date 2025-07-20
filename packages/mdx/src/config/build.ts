@@ -5,6 +5,7 @@ import type {
   GlobalConfig,
   MetaCollection,
 } from '@/config/define';
+import type { ProcessorOptions } from '@mdx-js/mdx';
 
 export function buildConfig(
   config: Record<string, unknown>,
@@ -40,11 +41,26 @@ export function buildConfig(
     ];
   }
 
+  let cachedMdxOptions: Promise<ProcessorOptions> | undefined;
   return [
     null,
     {
       global: globalConfig,
       collections,
+      async getDefaultMDXOptions(): Promise<ProcessorOptions> {
+        if (cachedMdxOptions) return cachedMdxOptions;
+
+        const input = this.global?.mdxOptions;
+        async function uncached(): Promise<ProcessorOptions> {
+          const options = typeof input === 'function' ? await input() : input;
+          const { getDefaultMDXOptions } = await import('@/utils/mdx-options');
+
+          if (options?.preset === 'minimal') return options;
+          return getDefaultMDXOptions(options ?? {});
+        }
+
+        return (cachedMdxOptions = uncached());
+      },
     },
   ];
 }

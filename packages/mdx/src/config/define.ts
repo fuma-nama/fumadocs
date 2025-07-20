@@ -1,7 +1,7 @@
-import { type MDXOptions } from '@/utils/build-mdx';
 import { frontmatterSchema, metaSchema } from '@/utils/schema';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type { DefaultMDXOptions } from '@/utils/mdx-options';
+import type { ProcessorOptions } from '@mdx-js/mdx';
 
 export type CollectionSchema<Schema extends StandardSchemaV1, Context> =
   | Schema
@@ -35,7 +35,7 @@ export interface DocCollection<
 > extends BaseCollection {
   type: 'doc';
 
-  mdxOptions?: MDXOptions;
+  mdxOptions?: ProcessorOptions;
 
   /**
    * Load files with async
@@ -56,13 +56,17 @@ export interface DocsCollection<
   meta: MetaCollection<MetaSchema>;
 }
 
+type GlobalConfigMDXOptions =
+  | ({ preset?: 'fumadocs' } & DefaultMDXOptions)
+  | ({
+      preset: 'minimal';
+    } & ProcessorOptions);
+
 export interface GlobalConfig {
   /**
    * Configure global MDX options
    */
-  mdxOptions?:
-    | DefaultMDXOptions
-    | (() => DefaultMDXOptions | Promise<DefaultMDXOptions>);
+  mdxOptions?: GlobalConfigMDXOptions | (() => Promise<GlobalConfigMDXOptions>);
 
   /**
    * Fetch last modified time with specified version control

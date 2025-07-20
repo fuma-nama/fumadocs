@@ -1,6 +1,6 @@
 export * from './define';
 export {
-  loadDefaultOptions,
+  getDefaultMDXOptions,
   type DefaultMDXOptions,
 } from '../utils/mdx-options';
 export { frontmatterSchema, metaSchema } from '../utils/schema';
