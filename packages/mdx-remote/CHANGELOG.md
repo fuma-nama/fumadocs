@@ -1,5 +1,16 @@
 # @fumadocs/mdx-remote
 
+## 1.4.0
+
+### Minor Changes
+
+- f8a58c6: Support `preset: minimal` to disable Fumadocs specific defaults
+
+### Patch Changes
+
+- Updated dependencies [658fa96]
+  - fumadocs-core@15.6.5
+
 ## 1.3.4
 
 ### Patch Changes

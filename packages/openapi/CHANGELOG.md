@@ -1,5 +1,15 @@
 # @fuma-docs/openapi
 
+## 9.1.4
+
+### Patch Changes
+
+- d449bb1: fix `groupBy: route` ignoring curly braces
+- ac33c3c: Add method option and Content-Type header to generated JavaScript code examples
+- Updated dependencies [658fa96]
+  - fumadocs-core@15.6.5
+  - fumadocs-ui@15.6.5
+
 ## 9.1.3
 
 ### Patch Changes

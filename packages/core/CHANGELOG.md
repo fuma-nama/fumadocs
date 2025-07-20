@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 15.6.5
+
+### Patch Changes
+
+- 658fa96: Support custom options for error handling for `remark-image`
+
 ## 15.6.4
 
 ## 15.6.3
