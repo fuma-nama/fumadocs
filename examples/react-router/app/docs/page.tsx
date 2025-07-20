@@ -9,7 +9,7 @@ import {
 import { source } from '@/source';
 import { type PageTree } from 'fumadocs-core/server';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
-import { docs } from '../../content/docs';
+import { docs } from '../../source.generated';
 import { toClientRenderer } from 'fumadocs-mdx/runtime/vite';
 
 export async function loader({ params }: Route.LoaderArgs) {

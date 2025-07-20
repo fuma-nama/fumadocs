@@ -6,12 +6,33 @@ import { countLines } from '@/utils/count-lines';
 import { fumaMatter } from '@/utils/fuma-matter';
 import { validate, ValidationError } from '@/utils/schema';
 import { z } from 'zod';
+import { toImportPath } from '@/utils/import-formatter';
+import type { DocCollection, DocsCollection, MetaCollection } from '@/config';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 
 const fileRegex = /\.(md|mdx)$/;
-
 const onlySchema = z.literal(['frontmatter', 'all']);
 
-export default function mdx(config: Record<string, unknown>): Plugin {
+export interface PluginOptions {
+  /**
+   * Automatically generate index files for accessing files with `import.meta.glob`.
+   *
+   * @defaultValue true
+   */
+  generateIndexFile?: boolean;
+
+  /**
+   * @defaultValue source.config.ts
+   */
+  configPath?: string;
+}
+
+export default function mdx(
+  config: Record<string, unknown>,
+  options: PluginOptions = {},
+): Plugin {
+  const { generateIndexFile = true, configPath = 'source.config.ts' } = options;
   const [err, loaded] = buildConfig(config);
   if (err || !loaded) {
     throw new Error(err);
@@ -21,8 +42,112 @@ export default function mdx(config: Record<string, unknown>): Plugin {
     name: 'fumadocs-mdx',
     // needed, otherwise other plugins will be executed before our `transform`.
     enforce: 'pre',
-    // TODO: need a way to generate .source folder that works for non-RSC based frameworks, currently, we need to dynamic import MDX files using `import.meta.glob`.
-    // at the moment, RR and Tanstack Start has no stable support for RSC yet.
+    async buildStart() {
+      if (!generateIndexFile) return;
+
+      console.log('[Fumadocs MDX] Generating index files');
+      const outdir = process.cwd();
+      const outFile = 'source.generated.ts';
+      const lines = [
+        `import { fromConfig } from 'fumadocs-mdx/runtime/vite';`,
+        `import type * as Config from '${toImportPath(configPath, {
+          relativeTo: outdir,
+        })}';`,
+        '',
+        `export const create = fromConfig<typeof Config>();`,
+      ];
+
+      function filesToGlob(files: string[]) {
+        return files.map((file) => {
+          if (file.startsWith('./')) return file;
+          if (file.startsWith('/')) return `.${file}`;
+
+          return `./${file}`;
+        });
+      }
+
+      function docs(name: string, dir: string, collection: DocsCollection) {
+        const docFiles = collection.docs.files
+          ? filesToGlob(collection.docs.files)
+          : ['./**/*.{mdx,md}'];
+        const metaFiles = collection.meta.files
+          ? filesToGlob(collection.meta.files)
+          : ['./**/*.{yaml,json}'];
+
+        return `export const ${name} = create.docs('${name}', {
+  doc: import.meta.glob(${JSON.stringify(docFiles)}, {
+    query: {
+      collection: '${name}',
+    },
+    base: '${dir}',
+  }),
+  meta: import.meta.glob(${JSON.stringify(metaFiles)}, {
+    query: {
+      collection: '${name}',
+    },
+    base: '${dir}',
+  }),
+});`;
+      }
+
+      function doc(name: string, dir: string, collection: DocCollection) {
+        const files = collection.files
+          ? filesToGlob(collection.files)
+          : ['./**/*.{mdx,md}'];
+
+        return `export const ${name} = create.doc(
+  '${name}',
+  import.meta.glob(${JSON.stringify(files)}, {
+    query: {
+      collection: '${name}',
+    },
+    base: '${dir}',
+  }),
+);`;
+      }
+
+      function meta(name: string, dir: string, collection: MetaCollection) {
+        const files = collection.files
+          ? filesToGlob(collection.files)
+          : ['./**/*.{yaml,json}'];
+
+        return `export const ${name} = create.meta(
+  '${name}',
+  import.meta.glob(${JSON.stringify(files)}, {
+    query: {
+      collection: '${name}',
+    },
+    base: '${dir}',
+  }),
+);`;
+      }
+
+      for (const [name, collection] of loaded.collections.entries()) {
+        let dir = collection.dir;
+
+        if (Array.isArray(dir) && dir.length === 1) {
+          dir = dir[0];
+        } else if (Array.isArray(dir)) {
+          throw new Error(
+            `[Fumadocs MDX] Vite Plugin doesn't support multiple \`dir\` for a collection at the moment.`,
+          );
+        }
+        if (!dir.startsWith('./') && !dir.startsWith('/')) {
+          dir = '/' + dir;
+        }
+
+        lines.push('');
+        if (collection.type === 'docs') {
+          lines.push(docs(name, dir, collection));
+        } else if (collection.type === 'meta') {
+          lines.push(meta(name, dir, collection));
+        } else {
+          lines.push(doc(name, dir, collection));
+        }
+      }
+
+      await fs.writeFile(path.join(outdir, outFile), lines.join('\n'));
+    },
 
     async transform(value, id) {
       const [path, query = ''] = id.split('?');

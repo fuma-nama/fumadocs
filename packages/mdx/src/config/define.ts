@@ -7,6 +7,8 @@ export type CollectionSchema<Schema extends StandardSchemaV1, Context> =
   | Schema
   | ((ctx: Context) => Schema);
 
+export type AnyCollection = DocsCollection | DocCollection | MetaCollection;
+
 export interface BaseCollection {
   /**
    * Directories to scan
@@ -51,6 +53,7 @@ export interface DocsCollection<
   Async extends boolean = boolean,
 > {
   type: 'docs';
+  dir: string;
 
   docs: DocCollection<DocSchema, Async>;
   meta: MetaCollection<MetaSchema>;
@@ -99,7 +102,7 @@ export function defineDocs<
    *
    *  @defaultValue 'content/docs'
    */
-  dir?: string | string[];
+  dir?: string;
 
   docs?: Omit<DocCollection<DocSchema, Async>, 'dir' | 'type'>;
   meta?: Omit<MetaCollection<MetaSchema>, 'dir' | 'type'>;
@@ -112,9 +115,11 @@ export function defineDocs<
 
   return {
     type: 'docs',
+    dir,
     docs: defineCollections({
       type: 'doc',
       dir,
+      files: ['**/*.{md,mdx}'],
       schema: frontmatterSchema as any,
       ...options?.docs,
     }),
