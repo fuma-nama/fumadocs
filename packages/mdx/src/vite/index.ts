@@ -10,6 +10,7 @@ import { toImportPath } from '@/utils/import-formatter';
 import type { DocCollection, DocsCollection, MetaCollection } from '@/config';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { load } from 'js-yaml';
 
 const fileRegex = /\.(md|mdx)$/;
 const onlySchema = z.literal(['frontmatter', 'all']);
@@ -86,6 +87,7 @@ export default function mdx(
       collection: '${name}',
     },
     base: '${dir}',
+    import: 'default',
   }),
 });`;
       }
@@ -118,6 +120,7 @@ export default function mdx(
       collection: '${name}',
     },
     base: '${dir}',
+    import: 'default',
   }),
 );`;
       }
@@ -151,6 +154,51 @@ export default function mdx(
 
     async transform(value, id) {
       const [path, query = ''] = id.split('?');
+      const isJson = path.endsWith('.json');
+      const isYaml = path.endsWith('.yaml');
+
+      if (isJson || isYaml) {
+        const parsed = parse(query) as {
+          collection?: string;
+        };
+
+        const collection = parsed.collection
+          ? loaded.collections.get(parsed.collection)
+          : undefined;
+        if (!collection) return null;
+        let schema;
+        switch (collection.type) {
+          case 'meta':
+            schema = collection.schema;
+            break;
+          case 'docs':
+            schema = collection.meta.schema;
+            break;
+        }
+        if (!schema) return null;
+        let data;
+
+        try {
+          data = isJson ? JSON.parse(value) : load(value);
+        } catch {
+          return null;
+        }
+
+        const out = await validate(
+          schema,
+          data,
+          { path, source: value },
+          `invalid data in ${path}`,
+        );
+
+        return {
+          code: isJson
+            ? JSON.stringify(out)
+            : `export default ${JSON.stringify(out)}`,
+          map: null,
+        };
+      }
+
       if (!fileRegex.test(path)) return;
 
       const matter = fumaMatter(value);

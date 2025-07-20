@@ -15,5 +15,6 @@ export const docs = create.docs('docs', {
       collection: 'docs',
     },
     base: '/content/docs',
+    import: 'default',
   }),
 });

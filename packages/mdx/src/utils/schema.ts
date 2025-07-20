@@ -23,20 +23,21 @@ export const frontmatterSchema = z.object({
 });
 
 export class ValidationError extends Error {
+  title: string;
   issues: readonly StandardSchemaV1.Issue[];
 
   constructor(message: string, issues: readonly StandardSchemaV1.Issue[]) {
-    super(message);
-    this.issues = issues;
-  }
+    super(
+      `${message}:\n${issues.map((issue) => `  ${issue.path}: ${issue.message}`).join('\n')}`,
+    );
 
-  toString() {
-    return `${this.message}:\n${this.issues.map((issue) => `  ${issue.path}: ${issue.message}`).join('\n')}`;
+    this.title = message;
+    this.issues = issues;
   }
 
   toStringFormatted() {
     return [
-      picocolors.bold(`[MDX] ${this.message}:`),
+      picocolors.bold(`[MDX] ${this.title}:`),
       ...this.issues.map((issue) =>
         picocolors.redBright(
           `- ${picocolors.bold(issue.path?.join('.') ?? '*')}: ${issue.message}`,
