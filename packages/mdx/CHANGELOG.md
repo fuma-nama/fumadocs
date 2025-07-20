@@ -1,5 +1,19 @@
 # next-docs-mdx
 
+## 11.7.0
+
+### Minor Changes
+
+- f8a58c6: Support `preset: minimal` to disable Fumadocs specific defaults
+- e5cfa27: Stabilize Vite plugin support
+
+### Patch Changes
+
+- Updated dependencies [658fa96]
+- Updated dependencies [f8a58c6]
+  - fumadocs-core@15.6.5
+  - @fumadocs/mdx-remote@1.4.0
+
 ## 11.6.11
 
 ### Patch Changes
