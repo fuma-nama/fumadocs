@@ -29,7 +29,7 @@ test('format errors', async () => {
     const error = new ValidationError('in index.mdx:', result.issues);
 
     expect(error.toString()).toMatchInlineSnapshot(`
-      "in index.mdx::
+      "Error: in index.mdx::
         text: Invalid input: expected string, received number
         obj,key: Invalid input: expected number, received undefined
         obj,value: Invalid input: expected number, received string
