@@ -1,0 +1,133 @@
+---
+title: Next.js
+description: Use Fumadocs MDX with Next.js
+---
+
+## Setup
+
+Set up Fumadocs MDX for your Next.js application.
+
+```npm
+npm i fumadocs-mdx @types/mdx @types/mdx
+```
+
+Create the configuration file:
+
+```ts title="source.config.ts"
+import { defineDocs, defineConfig } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  dir: 'content/docs',
+});
+
+export default defineConfig();
+```
+
+Add the plugin to Next.js config:
+
+```js title="next.config.mjs"
+import { createMDX } from 'fumadocs-mdx/next';
+
+const withMDX = createMDX({
+  // customise the config file path
+  // configPath: "source.config.ts"
+});
+
+/** @type {import('next').NextConfig} */
+const config = {
+  reactStrictMode: true,
+};
+
+export default withMDX(config);
+```
+
+<Callout title="ESM Only" type='warn' className="mt-4">
+
+    The Next.js config must be a `.mjs` file since Fumadocs is ESM-only.
+
+</Callout>
+
+A `.source` folder will be generated when you run `next dev` or `next build`.
+
+### Accessing Content
+
+You can access the collection output from `.source` folder with its original name:
+
+```ts tab="source.config.ts"
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  dir: 'content/docs',
+  docs: {
+    // options for `doc` collection
+  },
+  meta: {
+    // options for `meta` collection
+  },
+});
+```
+
+```ts tab="Usage"
+import { docs } from '@/.source';
+
+console.log(docs);
+```
+
+The type of output can have a different type/shape depending on the collection type and schema.
+
+> Make sure you are importing from `.source` rather than `source.config.ts`. We will import it with `@/.source` import alias in this guide.
+
+### Integrate with Fumadocs
+
+Create a `docs` collection and use `toFumadocsSource()` on the output.
+
+```ts title="lib/source.ts"
+import { docs } from '@/.source';
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  baseUrl: '/docs',
+  source: docs.toFumadocsSource(),
+});
+```
+
+> You can do the same for multiple `docs` collections.
+
+Generally, you'll interact with the collection through [`loader()`](/docs/headless/source-api#output).
+
+```tsx
+import { source } from '@/lib/source';
+
+const page = source.getPage(['slugs']);
+
+if (page) {
+  // access page data [!code highlight]
+  console.log(page.data);
+
+  // frontmatter properties are also inside [!code highlight]
+  console.log(page.data.title);
+}
+```
+
+To render the page, use `page.data.body` as a component.
+
+```tsx
+import { getMDXComponents } from '@/mdx-components';
+
+const MDX = page.data.body;
+
+// set your MDX components with `components` prop
+return <MDX components={getMDXComponents()} />;
+```
+
+### Integrate with CI
+
+The `fumadocs-mdx` command also generates types for `.source` folder. Add it as a post install script to ensure types are generated when initializing the project.
+
+```json title="package.json"
+{
+  "scripts": {
+    "postinstall": "fumadocs-mdx"
+  }
+}
+```

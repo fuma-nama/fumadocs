@@ -1,9 +1,60 @@
+---
+title: Tanstack Start
+description: Use Fumadocs MDX with Tanstack Start & Router
+---
+
+## Setup
+
+```npm
+npm i fumadocs-mdx fumadocs-core @types/mdx
+```
+
+Create the configuration file:
+
+<include cwd meta='title="source.config.ts"'>
+  ../../examples/tanstack-start/source.config.ts
+</include>
+
+Add the Vite plugin:
+
+<include cwd meta='title="vite.config.ts"'>
+  ../../examples/tanstack-start/vite.config.ts
+</include>
+
+A `source.generated.ts` file will be generated when you run development server or production build.
+
+### Accessing Content
+
+You can import the `source.generated.ts` file directly.
+
+```ts
+import { docs } from './source.generated';
+console.log(docs);
+```
+
+To integrate with Fumadocs, create a docs collection and use:
+
+```ts title="src/lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+import { create, docs } from '../../source.generated';
+
+export const source = loader({
+  source: await create.sourceAsync(docs.doc, docs.meta),
+  baseUrl: '/docs',
+});
+```
+
+### Rendering Content
+
+As Tanstack Start doesn't support RSC at the moment, use `createClientLoader()` to lazy load MDX content as a component on browser.
+
+For example:
+
+```tsx title="src/routes/docs/$.tsx"
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { createServerFn } from '@tanstack/react-start';
 import { source } from '~/lib/source';
-import type { PageTree } from 'fumadocs-core/server';
-import { useMemo } from 'react';
 import { docs } from '../../../source.generated';
 import {
   DocsBody,
@@ -59,14 +110,10 @@ const clientLoader = createClientLoader(docs.doc, {
 function Page() {
   const data = Route.useLoaderData();
   const Content = clientLoader.getComponent(data.path);
-  const tree = useMemo(
-    () => transformPageTree(data.tree as PageTree.Folder),
-    [data.tree],
-  );
 
   return (
     <DocsLayout
-      tree={tree}
+      tree={data.tree}
       nav={{
         title: 'Fumadocs Tanstack',
       }}
@@ -75,30 +122,4 @@ function Page() {
     </DocsLayout>
   );
 }
-
-function transformPageTree(tree: PageTree.Folder): PageTree.Folder {
-  function page(item: PageTree.Item) {
-    if (typeof item.icon !== 'string') return item;
-
-    return {
-      ...item,
-      icon: (
-        <span
-          dangerouslySetInnerHTML={{
-            __html: item.icon,
-          }}
-        />
-      ),
-    };
-  }
-
-  return {
-    ...tree,
-    index: tree.index ? page(tree.index) : undefined,
-    children: tree.children.map((item) => {
-      if (item.type === 'page') return page(item);
-      if (item.type === 'folder') return transformPageTree(item);
-      return item;
-    }),
-  };
-}
+```
