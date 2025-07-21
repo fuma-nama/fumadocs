@@ -6,11 +6,17 @@ import { countLines } from '@/utils/count-lines';
 import { fumaMatter } from '@/utils/fuma-matter';
 import { validate, ValidationError } from '@/utils/schema';
 import { z } from 'zod';
-import { toImportPath } from '@/utils/import-formatter';
-import type { DocCollection, DocsCollection, MetaCollection } from '@/config';
+import { ident, toImportPath } from '@/utils/import-formatter';
+import type {
+  AnyCollection,
+  DocCollection,
+  DocsCollection,
+  MetaCollection,
+} from '@/config';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { load } from 'js-yaml';
+import { getGlobPatterns } from '@/utils/collections';
 
 const fileRegex = /\.(md|mdx)$/;
 const onlySchema = z.literal(['frontmatter', 'all']);
@@ -58,94 +64,31 @@ export default function mdx(
         `export const create = fromConfig<typeof Config>();`,
       ];
 
-      function filesToGlob(files: string[]) {
-        return files.map((file) => {
-          if (file.startsWith('./')) return file;
-          if (file.startsWith('/')) return `.${file}`;
+      function docs(name: string, collection: DocsCollection) {
+        const args = [
+          ident(`doc: ${generateGlob(name, collection.docs)}`),
+          ident(`meta: ${generateGlob(name, collection.meta)}`),
+        ].join(',\n');
 
-          return `./${file}`;
-        });
+        return `export const ${name} = create.docs("${name}", {\n${args}\n});`;
       }
 
-      function docs(name: string, dir: string, collection: DocsCollection) {
-        const docFiles = collection.docs.files
-          ? filesToGlob(collection.docs.files)
-          : ['./**/*.{mdx,md}'];
-        const metaFiles = collection.meta.files
-          ? filesToGlob(collection.meta.files)
-          : ['./**/*.{yaml,json}'];
-
-        return `export const ${name} = create.docs('${name}', {
-  doc: import.meta.glob(${JSON.stringify(docFiles)}, {
-    query: {
-      collection: '${name}',
-    },
-    base: '${dir}',
-  }),
-  meta: import.meta.glob(${JSON.stringify(metaFiles)}, {
-    query: {
-      collection: '${name}',
-    },
-    base: '${dir}',
-    import: 'default',
-  }),
-});`;
+      function doc(name: string, collection: DocCollection) {
+        return `export const ${name} = create.doc("${name}", ${generateGlob(name, collection)});`;
       }
 
-      function doc(name: string, dir: string, collection: DocCollection) {
-        const files = collection.files
-          ? filesToGlob(collection.files)
-          : ['./**/*.{mdx,md}'];
-
-        return `export const ${name} = create.doc(
-  '${name}',
-  import.meta.glob(${JSON.stringify(files)}, {
-    query: {
-      collection: '${name}',
-    },
-    base: '${dir}',
-  }),
-);`;
-      }
-
-      function meta(name: string, dir: string, collection: MetaCollection) {
-        const files = collection.files
-          ? filesToGlob(collection.files)
-          : ['./**/*.{yaml,json}'];
-
-        return `export const ${name} = create.meta(
-  '${name}',
-  import.meta.glob(${JSON.stringify(files)}, {
-    query: {
-      collection: '${name}',
-    },
-    base: '${dir}',
-    import: 'default',
-  }),
-);`;
+      function meta(name: string, collection: MetaCollection) {
+        return `export const ${name} = create.meta("${name}", ${generateGlob(name, collection)});`;
       }
 
       for (const [name, collection] of loaded.collections.entries()) {
-        let dir = collection.dir;
-
-        if (Array.isArray(dir) && dir.length === 1) {
-          dir = dir[0];
-        } else if (Array.isArray(dir)) {
-          throw new Error(
-            `[Fumadocs MDX] Vite Plugin doesn't support multiple \`dir\` for a collection at the moment.`,
-          );
-        }
-        if (!dir.startsWith('./') && !dir.startsWith('/')) {
-          dir = '/' + dir;
-        }
-
         lines.push('');
         if (collection.type === 'docs') {
-          lines.push(docs(name, dir, collection));
+          lines.push(docs(name, collection));
         } else if (collection.type === 'meta') {
-          lines.push(meta(name, dir, collection));
+          lines.push(meta(name, collection));
         } else {
-          lines.push(doc(name, dir, collection));
+          lines.push(doc(name, collection));
         }
       }
 
@@ -279,4 +222,50 @@ export default function mdx(
       };
     },
   };
+}
+
+function generateGlob(
+  name: string,
+  collection: MetaCollection | DocCollection,
+) {
+  const patterns = mapGlobPatterns(getGlobPatterns(collection));
+  const options: Record<string, unknown> = {
+    query: {
+      collection: name,
+    },
+    base: getGlobBase(collection),
+  };
+
+  if (collection.type === 'meta') {
+    options.import = 'default';
+  }
+
+  return `import.meta.glob(${JSON.stringify(patterns)}, ${JSON.stringify(options, null, 2)})`;
+}
+
+function mapGlobPatterns(patterns: string[]) {
+  return patterns.map((file) => {
+    if (file.startsWith('./')) return file;
+    if (file.startsWith('/')) return `.${file}`;
+
+    return `./${file}`;
+  });
+}
+
+function getGlobBase(collection: AnyCollection) {
+  let dir = collection.dir;
+
+  if (Array.isArray(dir)) {
+    if (dir.length !== 1)
+      throw new Error(
+        `[Fumadocs MDX] Vite Plugin doesn't support multiple \`dir\` for a collection at the moment.`,
+      );
+
+    dir = dir[0];
+  }
+
+  if (!dir.startsWith('./') && !dir.startsWith('/')) {
+    return '/' + dir;
+  }
+  return dir;
 }
