@@ -23,7 +23,7 @@ export async function loader({ params }: Route.LoaderArgs) {
   };
 }
 
-const clientLoader = toClientRenderer(
+const renderer = toClientRenderer(
   docs.doc,
   ({ toc, default: Mdx, frontmatter }) => {
     return (
@@ -42,7 +42,7 @@ const clientLoader = toClientRenderer(
 
 export default function Page(props: Route.ComponentProps) {
   const { tree, path } = props.loaderData;
-  const Content = clientLoader[path];
+  const Content = renderer[path];
 
   return (
     <DocsLayout
