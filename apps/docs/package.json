@@ -39,7 +39,7 @@
     "next": "15.4.2",
     "next-themes": "^0.4.6",
     "octokit": "^5.0.3",
-    "oxc-transform": "^0.77.2",
+    "oxc-transform": "^0.77.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "rehype-katex": "^7.0.1",
