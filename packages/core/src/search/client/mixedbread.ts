@@ -75,47 +75,47 @@ export async function search(
     query,
     vector_store_identifiers: [vectorStoreId],
     top_k: 10,
+    filters: {
+      key: 'generated_metadata.tag',
+      operator: 'eq',
+      value: tag,
+    },
     search_options: {
       return_metadata: true,
     },
   });
 
-  const results = (res.data as VectorStoreSearchResult[])
-    .filter((item) => {
-      const metadata = item.generated_metadata;
-      return !tag || metadata.tag === tag;
-    })
-    .flatMap((item) => {
-      const metadata = item.generated_metadata;
+  const results = (res.data as VectorStoreSearchResult[]).flatMap((item) => {
+    const metadata = item.generated_metadata;
 
-      const url = metadata.url || '#';
-      const title = metadata.title || 'Untitled';
+    const url = metadata.url || '#';
+    const title = metadata.title || 'Untitled';
 
-      const chunkResults: SortedResult[] = [
-        {
-          id: `${item.file_id}-${item.chunk_index}-page`,
-          type: 'page',
-          content: title,
-          url,
-        },
-      ];
+    const chunkResults: SortedResult[] = [
+      {
+        id: `${item.file_id}-${item.chunk_index}-page`,
+        type: 'page',
+        content: title,
+        url,
+      },
+    ];
 
-      const headingTitle =
-        item.type === 'text' ? extractHeadingTitle(item.text) : '';
+    const headingTitle =
+      item.type === 'text' ? extractHeadingTitle(item.text) : '';
 
-      if (headingTitle) {
-        slugger.reset();
+    if (headingTitle) {
+      slugger.reset();
 
-        chunkResults.push({
-          id: `${item.file_id}-${item.chunk_index}-heading`,
-          type: 'heading',
-          content: headingTitle,
-          url: `${url}#${slugger.slug(headingTitle)}`,
-        });
-      }
+      chunkResults.push({
+        id: `${item.file_id}-${item.chunk_index}-heading`,
+        type: 'heading',
+        content: headingTitle,
+        url: `${url}#${slugger.slug(headingTitle)}`,
+      });
+    }
 
-      return chunkResults;
-    });
+    return chunkResults;
+  });
 
   return results;
 }
