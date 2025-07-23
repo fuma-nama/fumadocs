@@ -4,15 +4,6 @@ import { VectorStoreSearchResponse } from '@mixedbread/sdk/resources/vector-stor
 import removeMd from 'remove-markdown';
 import Slugger from 'github-slugger';
 
-export interface SearchMetadata {
-  title?: string;
-  description?: string;
-  url?: string;
-  tag?: string;
-}
-
-const slugger = new Slugger();
-
 export interface MixedbreadOptions {
   /**
    * The ID of the vector store to search in
@@ -35,9 +26,18 @@ export interface MixedbreadOptions {
   locale?: string;
 }
 
+export interface SearchMetadata {
+  title?: string;
+  description?: string;
+  url?: string;
+  tag?: string;
+}
+
 type VectorStoreSearchResult = VectorStoreSearchResponse['data'][number] & {
   generated_metadata: SearchMetadata;
 };
+
+const slugger = new Slugger();
 
 function extractHeadingTitle(text: string): string {
   const trimmedText = text.trim();
@@ -75,47 +75,47 @@ export async function search(
     query,
     vector_store_identifiers: [vectorStoreId],
     top_k: 10,
-    filters: {
-      key: 'tag',
-      operator: 'eq',
-      value: tag,
-    },
     search_options: {
       return_metadata: true,
     },
   });
 
-  const results = (res.data as VectorStoreSearchResult[]).flatMap((item) => {
-    const metadata = item.generated_metadata;
+  const results = (res.data as VectorStoreSearchResult[])
+    .filter((item) => {
+      const metadata = item.generated_metadata;
+      return !tag || metadata.tag === tag;
+    })
+    .flatMap((item) => {
+      const metadata = item.generated_metadata;
 
-    const url = metadata.url || '#';
-    const title = metadata.title || 'Untitled';
+      const url = metadata.url || '#';
+      const title = metadata.title || 'Untitled';
 
-    const results: SortedResult[] = [
-      {
-        id: `${item.file_id}-${item.chunk_index}-page`,
-        type: 'page',
-        content: title,
-        url,
-      },
-    ];
+      const chunkResults: SortedResult[] = [
+        {
+          id: `${item.file_id}-${item.chunk_index}-page`,
+          type: 'page',
+          content: title,
+          url,
+        },
+      ];
 
-    const headingTitle =
-      item.type === 'text' ? extractHeadingTitle(item.text) : '';
+      const headingTitle =
+        item.type === 'text' ? extractHeadingTitle(item.text) : '';
 
-    if (headingTitle) {
-      slugger.reset();
+      if (headingTitle) {
+        slugger.reset();
 
-      results.push({
-        id: `${item.file_id}-${item.chunk_index}-text`,
-        type: 'heading',
-        content: headingTitle,
-        url: `${url}#${slugger.slug(headingTitle)}`,
-      });
-    }
+        chunkResults.push({
+          id: `${item.file_id}-${item.chunk_index}-heading`,
+          type: 'heading',
+          content: headingTitle,
+          url: `${url}#${slugger.slug(headingTitle)}`,
+        });
+      }
 
-    return results;
-  });
+      return chunkResults;
+    });
 
   return results;
 }
