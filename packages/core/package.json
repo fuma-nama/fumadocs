@@ -93,7 +93,6 @@
   },
   "dependencies": {
     "@formatjs/intl-localematcher": "^0.6.1",
-    "@mixedbread/sdk": "^0.16.0",
     "@orama/orama": "^3.1.11",
     "@shikijs/rehype": "^3.8.0",
     "@shikijs/transformers": "^3.8.0",
@@ -136,6 +135,7 @@
     "vfile": "^6.0.3"
   },
   "peerDependencies": {
+    "@mixedbread/sdk": ">0.11.0",
     "@oramacloud/client": "1.x.x || 2.x.x",
     "@types/react": "*",
     "algoliasearch": "5.x.x",
@@ -144,6 +144,9 @@
     "react-dom": "18.x.x || 19.x.x"
   },
   "peerDependenciesMeta": {
+    "@mixedbread/sdk": {
+      "optional": true
+    },
     "@types/react": {
       "optional": true
     },
