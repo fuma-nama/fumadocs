@@ -7,10 +7,11 @@ import type { TableOfContents } from 'fumadocs-core/server';
 import { executeMdx, type MdxContent } from '@/render';
 import { pathToFileURL } from 'node:url';
 
-export type MDXOptions = Omit<
+export type FumadocsPresetOptions = Omit<
   CompileOptions,
   'remarkPlugins' | 'rehypePlugins'
 > & {
+  preset?: 'fumadocs';
   remarkPlugins?: ResolvePlugins;
   rehypePlugins?: ResolvePlugins;
 
@@ -31,6 +32,10 @@ export type MDXOptions = Omit<
   remarkImageOptions?: Plugins.RemarkImageOptions | false;
 };
 
+export type CompilerOptions =
+  | (CompileOptions & { preset: 'minimal' })
+  | FumadocsPresetOptions;
+
 export interface CompileMDXOptions {
   source: string;
   /**
@@ -38,7 +43,6 @@ export interface CompileMDXOptions {
    */
   filePath?: string;
 
-  mdxOptions?: MDXOptions;
   components?: MDXComponents;
   scope?: Record<string, unknown>;
 
@@ -58,7 +62,7 @@ export interface CompileMDXResult<TFrontmatter = Record<string, unknown>> {
   exports: Record<string, unknown> | null;
 }
 
-export function createCompiler(mdxOptions?: MDXOptions) {
+export function createCompiler(mdxOptions?: CompilerOptions) {
   let instance: ReturnType<typeof createProcessor> | undefined;
 
   function getProcessor() {
@@ -68,7 +72,9 @@ export function createCompiler(mdxOptions?: MDXOptions) {
     if (!format || format === 'detect') format = 'mdx';
 
     return (instance = createProcessor({
-      ...getCompileOptions(mdxOptions),
+      ...(mdxOptions?.preset === 'minimal'
+        ? mdxOptions
+        : getCompileOptions(mdxOptions)),
       format,
     }));
   }
@@ -94,7 +100,7 @@ export function createCompiler(mdxOptions?: MDXOptions) {
       return getProcessor().process(from);
     },
     async compile<Frontmatter extends object = Record<string, unknown>>(
-      options: Omit<CompileMDXOptions, 'mdxOptions'>,
+      options: CompileMDXOptions,
     ): Promise<CompileMDXResult<Frontmatter>> {
       const { scope = {}, skipRender } = options;
       const { frontmatter, content } = parseFrontmatter(options.source);
@@ -129,15 +135,23 @@ export function createCompiler(mdxOptions?: MDXOptions) {
   };
 }
 
+/**
+ * @deprecated Use `createCompiler()` API instead, this function will always create a new compiler instance.
+ */
 export async function compileMDX<
   Frontmatter extends object = Record<string, unknown>,
->(options: CompileMDXOptions): Promise<CompileMDXResult<Frontmatter>> {
+>(
+  options: CompileMDXOptions & {
+    mdxOptions?: CompilerOptions;
+  },
+): Promise<CompileMDXResult<Frontmatter>> {
   const compiler = createCompiler(options.mdxOptions);
 
   return compiler.compile(options);
 }
 
 function getCompileOptions({
+  preset: _,
   rehypeCodeOptions,
   remarkImageOptions,
   rehypeTocOptions,
@@ -146,7 +160,7 @@ function getCompileOptions({
   remarkNpmOptions,
   imageDir = './public',
   ...options
-}: MDXOptions = {}): CompileOptions {
+}: FumadocsPresetOptions = {}): CompileOptions {
   function getPlugin<K extends keyof typeof Plugins>(
     name: K,
   ): (typeof Plugins)[K] | null {
@@ -203,3 +217,6 @@ function getCompileOptions({
     ),
   };
 }
+
+// backward compatible
+export type { CompilerOptions as MDXOptions };

@@ -14,10 +14,10 @@
     "fumadocs-mdx": "workspace:*",
     "fumadocs-openapi": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "next": "15.4.1",
+    "next": "15.4.3",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "shiki": "^3.8.0"
+    "shiki": "^3.8.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.11",

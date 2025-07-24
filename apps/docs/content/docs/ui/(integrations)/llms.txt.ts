@@ -1,5 +1,5 @@
 import { source } from '@/lib/source';
-import { getLLMText } from './get-llm-text';
+import { getLLMText } from '@/lib/get-llm-text';
 
 // cached forever
 export const revalidate = false;

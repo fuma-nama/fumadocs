@@ -1,11 +1,13 @@
-import { type MDXOptions } from '@/utils/build-mdx';
-import { type GlobalConfig } from '@/config/types';
 import { frontmatterSchema, metaSchema } from '@/utils/schema';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
+import type { DefaultMDXOptions } from '@/utils/mdx-options';
+import type { ProcessorOptions } from '@mdx-js/mdx';
 
 export type CollectionSchema<Schema extends StandardSchemaV1, Context> =
   | Schema
   | ((ctx: Context) => Schema);
+
+export type AnyCollection = DocsCollection | DocCollection | MetaCollection;
 
 export interface BaseCollection {
   /**
@@ -35,7 +37,7 @@ export interface DocCollection<
 > extends BaseCollection {
   type: 'doc';
 
-  mdxOptions?: MDXOptions;
+  mdxOptions?: ProcessorOptions;
 
   /**
    * Load files with async
@@ -51,33 +53,43 @@ export interface DocsCollection<
   Async extends boolean = boolean,
 > {
   type: 'docs';
-  dir: string | string[];
+  dir: string;
 
   docs: DocCollection<DocSchema, Async>;
   meta: MetaCollection<MetaSchema>;
 }
 
-export function defineCollections<
-  T extends 'doc' | 'meta',
-  Schema extends StandardSchemaV1 = StandardSchemaV1<unknown, any>,
-  Async extends boolean = false,
->(
-  options: { type: T } & (T extends 'doc'
-    ? DocCollection<Schema, Async>
-    : MetaCollection<Schema>),
-): {
-  type: T;
+type GlobalConfigMDXOptions =
+  | ({ preset?: 'fumadocs' } & DefaultMDXOptions)
+  | ({
+      preset: 'minimal';
+    } & ProcessorOptions);
 
-  _type: {
-    async: Async;
-    schema: Schema;
-  };
-} {
-  return {
-    // @ts-expect-error -- internal type inferring
-    _type: undefined,
-    ...options,
-  };
+export interface GlobalConfig {
+  /**
+   * Configure global MDX options
+   */
+  mdxOptions?: GlobalConfigMDXOptions | (() => Promise<GlobalConfigMDXOptions>);
+
+  /**
+   * Fetch last modified time with specified version control
+   * @defaultValue 'none'
+   */
+  lastModifiedTime?: 'git' | 'none';
+}
+
+export function defineCollections<
+  Schema extends StandardSchemaV1 = StandardSchemaV1,
+  Async extends boolean = false,
+>(options: DocCollection<Schema, Async>): DocCollection<Schema, Async>;
+export function defineCollections<
+  Schema extends StandardSchemaV1 = StandardSchemaV1,
+>(options: MetaCollection<Schema>): MetaCollection<Schema>;
+
+export function defineCollections(
+  options: DocCollection | MetaCollection,
+): DocCollection | MetaCollection {
+  return options as any;
 }
 
 export function defineDocs<
@@ -90,29 +102,11 @@ export function defineDocs<
    *
    *  @defaultValue 'content/docs'
    */
-  dir?: string | string[];
+  dir?: string;
 
   docs?: Omit<DocCollection<DocSchema, Async>, 'dir' | 'type'>;
   meta?: Omit<MetaCollection<MetaSchema>, 'dir' | 'type'>;
-}): {
-  type: 'docs';
-
-  docs: {
-    type: 'doc';
-    _type: {
-      schema: DocSchema;
-      async: Async;
-    };
-  };
-
-  meta: {
-    type: 'meta';
-    _type: {
-      schema: MetaSchema;
-      async: false;
-    };
-  };
-} {
+}): DocsCollection<DocSchema, MetaSchema, Async> {
   if (!options)
     console.warn(
       '[`source.config.ts`] Deprecated: please pass options to `defineDocs()` and specify a `dir`.',
@@ -121,19 +115,17 @@ export function defineDocs<
 
   return {
     type: 'docs',
-    // @ts-expect-error -- internal type inferring
+    dir,
     docs: defineCollections({
       type: 'doc',
       dir,
-      schema: frontmatterSchema,
+      schema: frontmatterSchema as any,
       ...options?.docs,
     }),
-    // @ts-expect-error -- internal type inferring
     meta: defineCollections({
       type: 'meta',
-      files: ['**/*.{json,yaml}'],
       dir,
-      schema: metaSchema,
+      schema: metaSchema as any,
       ...options?.meta,
     }),
   };

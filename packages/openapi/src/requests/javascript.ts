@@ -6,6 +6,11 @@ export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
   const options = new Map<string, string>();
   const headers: Record<string, string> = {};
 
+  options.set('method', JSON.stringify(data.method));
+  if (data.bodyMediaType) {
+    headers['Content-Type'] = data.bodyMediaType;
+  }
+
   for (const [k, v] of Object.entries(data.header)) {
     headers[k] = v.value as string;
   }

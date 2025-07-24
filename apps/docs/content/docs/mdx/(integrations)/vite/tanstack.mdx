@@ -1,0 +1,125 @@
+---
+title: Tanstack Start
+description: Use Fumadocs MDX with Tanstack Start & Router
+---
+
+## Setup
+
+```npm
+npm i fumadocs-mdx fumadocs-core @types/mdx
+```
+
+Create the configuration file:
+
+<include cwd meta='title="source.config.ts"'>
+  ../../examples/tanstack-start/source.config.ts
+</include>
+
+Add the Vite plugin:
+
+<include cwd meta='title="vite.config.ts"'>
+  ../../examples/tanstack-start/vite.config.ts
+</include>
+
+A `source.generated.ts` file will be generated when you run development server or production build.
+
+### Accessing Content
+
+You can import the `source.generated.ts` file directly.
+
+```ts
+import { docs } from './source.generated';
+console.log(docs);
+```
+
+To integrate with Fumadocs, create a docs collection and use:
+
+```ts title="src/lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+import { create, docs } from '../../source.generated';
+
+export const source = loader({
+  source: await create.sourceAsync(docs.doc, docs.meta),
+  baseUrl: '/docs',
+});
+```
+
+### Rendering Content
+
+As Tanstack Start doesn't support RSC at the moment, use `createClientLoader()` to lazy load MDX content as a component on browser.
+
+For example:
+
+```tsx title="src/routes/docs/$.tsx"
+import { createFileRoute, notFound } from '@tanstack/react-router';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { createServerFn } from '@tanstack/react-start';
+import { source } from '~/lib/source';
+import { docs } from '../../../source.generated';
+import {
+  DocsBody,
+  DocsDescription,
+  DocsPage,
+  DocsTitle,
+} from 'fumadocs-ui/page';
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+import { createClientLoader } from 'fumadocs-mdx/runtime/vite';
+
+export const Route = createFileRoute('/docs/$')({
+  component: Page,
+  loader: async ({ params }) => {
+    const data = await loader({ data: params._splat?.split('/') ?? [] });
+    await clientLoader.preload(data.path);
+    return data;
+  },
+});
+
+const loader = createServerFn({
+  method: 'GET',
+})
+  .validator((slugs: string[]) => slugs)
+  .handler(async ({ data: slugs }) => {
+    const page = source.getPage(slugs);
+    if (!page) throw notFound();
+
+    return {
+      tree: source.pageTree as object,
+      path: page.path,
+    };
+  });
+
+const clientLoader = createClientLoader(docs.doc, {
+  id: 'docs',
+  component({ toc, frontmatter, default: MDX }) {
+    return (
+      <DocsPage toc={toc}>
+        <DocsTitle>{frontmatter.title}</DocsTitle>
+        <DocsDescription>{frontmatter.description}</DocsDescription>
+        <DocsBody>
+          <MDX
+            components={{
+              ...defaultMdxComponents,
+            }}
+          />
+        </DocsBody>
+      </DocsPage>
+    );
+  },
+});
+
+function Page() {
+  const data = Route.useLoaderData();
+  const Content = clientLoader.getComponent(data.path);
+
+  return (
+    <DocsLayout
+      tree={data.tree}
+      nav={{
+        title: 'Fumadocs Tanstack',
+      }}
+    >
+      <Content />
+    </DocsLayout>
+  );
+}
+```

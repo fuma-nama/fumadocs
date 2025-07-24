@@ -3,13 +3,12 @@ import * as path from 'node:path';
 import type {
   DocCollection,
   DocsCollection,
+  GlobalConfig,
   MetaCollection,
 } from '@/config/define';
-import { type GlobalConfig } from '@/config/types';
 import type { ProcessorOptions } from '@mdx-js/mdx';
 import { pathToFileURL } from 'node:url';
 import { buildConfig } from '@/config/build';
-import type { MDXOptions as RemoteMdxOptions } from '@fumadocs/mdx-remote';
 
 export function findConfigFile(): string {
   return path.resolve('source.config.ts');
@@ -20,13 +19,7 @@ export interface LoadedConfig {
 
   global?: GlobalConfig;
 
-  _mdx_loader?: {
-    cachedOptions?: ProcessorOptions;
-  };
-
-  _mdx_async?: {
-    cachedMdxOptions?: RemoteMdxOptions;
-  };
+  getDefaultMDXOptions(): Promise<ProcessorOptions>;
 }
 
 let cache: {

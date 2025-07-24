@@ -9,29 +9,25 @@ You can make your docs site more AI-friendly with dedicated docs content for lar
 
 First, make a `getLLMText` function that converts pages into static MDX content:
 
-<include>./get-llm-text.ts</include>
+<include meta='title="lib/get-llm-text.ts"'>./get-llm-text.ts</include>
 
 > Modify it to include other remark plugins.
 
-### `llms.txt`
+### `llms-full.txt`
 
 A version of docs for AIs to read.
 
-<include meta='title="app/llms.txt/route.ts"'>./llms.txt.ts</include>
+<include meta='title="app/llms-full.txt/route.ts"'>./llms.txt.ts</include>
 
 ### `*.mdx`
 
 Allow people to append `.mdx` to a page to get its Markdown/MDX content.
 
-Make a route handler to return page content.
+You can make a route handler to return page content, and redirect users to that route using middleware.
 
-<include meta='title="app/llms.mdx/[[...slug]]/route.ts"'>
-  ./llms.mdx.ts
-</include>
+<include meta='tab="app/llms.mdx/[[...slug]]/route.ts"'>./llms.mdx.ts</include>
 
-And redirect users to that route.
-
-```ts title="next.config.ts"
+```ts tab="next.config.ts"
 import type { NextConfig } from 'next';
 
 const config: NextConfig = {
@@ -46,6 +42,28 @@ const config: NextConfig = {
 };
 ```
 
+### Page Actions
+
+Common page actions for AI, require `*.mdx` to be implemented first.
+
+![AI Page Actions](/docs/ai-page-actions.png)
+
+```npm
+npx @fumadocs/cli add ai-page-actions
+```
+
+Use it in your docs page like:
+
+```tsx title="app/docs/[[...slug]]/page.tsx"
+<div className="flex flex-row gap-2 items-center border-b pt-2 pb-6">
+  <LLMCopyButton markdownUrl={`${page.url}.mdx`} />
+  <ViewOptions
+    markdownUrl={`${page.url}.mdx`}
+    githubUrl={`https://github.com/${owner}/${repo}/blob/dev/apps/docs/content/docs/${page.path}`}
+  />
+</div>
+```
+
 ## AI Search
 
 ![AI Search](/docs/ai-search.png)
@@ -53,7 +71,7 @@ const config: NextConfig = {
 You can install the AI search dialog using Fumadocs CLI:
 
 ```package-install
-npx @fumadocs/cli add
+npx @fumadocs/cli add ai-search
 ```
 
 By default, it's configured for Inkeep AI. Since it's connected via Vercel AI SDK, you can connect to your own AI models easily.

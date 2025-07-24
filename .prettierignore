@@ -12,6 +12,7 @@ apps/docs/shaders/*
 
 out
 .content-collections
+source.generated.ts
 
 apps/docs/content/docs/ui/museum/*.mdx
 !apps/docs/content/docs/ui/museum/index.mdx

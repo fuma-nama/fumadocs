@@ -40,7 +40,7 @@
     "hast-util-to-jsx-runtime": "^2.3.6",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
-    "shiki": "^3.8.0",
+    "shiki": "^3.8.1",
     "tinyglobby": "^0.2.14",
     "ts-morph": "^26.0.0",
     "unist-util-visit": "^5.0.0"
@@ -50,7 +50,7 @@
     "@types/estree": "^1.0.8",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.3",
-    "@types/node": "24.0.13",
+    "@types/node": "24.1.0",
     "@types/react": "19.1.8",
     "@types/react-dom": "19.1.6",
     "eslint-config-custom": "workspace:*",

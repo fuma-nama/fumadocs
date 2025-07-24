@@ -7,36 +7,42 @@ import {
   DocsTitle,
 } from 'fumadocs-ui/page';
 import { source } from '@/source';
+import { type PageTree } from 'fumadocs-core/server';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
-import { executeMdxSync } from '@fumadocs/mdx-remote/client';
-import type { PageTree } from 'fumadocs-core/server';
-import { createCompiler } from '@fumadocs/mdx-remote';
-import * as path from 'node:path';
-
-const compiler = createCompiler({
-  development: false,
-});
+import { docs } from '../../source.generated';
+import { toClientRenderer } from 'fumadocs-mdx/runtime/vite';
 
 export async function loader({ params }: Route.LoaderArgs) {
   const slugs = params['*'].split('/').filter((v) => v.length > 0);
   const page = source.getPage(slugs);
   if (!page) throw new Response('Not found', { status: 404 });
 
-  const compiled = await compiler.compileFile({
-    path: path.resolve('content/docs', page.path),
-    value: page.data.content,
-  });
-
   return {
-    page,
-    compiled: compiled.toString(),
+    path: page.path,
     tree: source.pageTree,
   };
 }
 
+const renderer = toClientRenderer(
+  docs.doc,
+  ({ toc, default: Mdx, frontmatter }) => {
+    return (
+      <DocsPage toc={toc}>
+        <title>{frontmatter.title}</title>
+        <meta name="description" content={frontmatter.description} />
+        <DocsTitle>{frontmatter.title}</DocsTitle>
+        <DocsDescription>{frontmatter.description}</DocsDescription>
+        <DocsBody>
+          <Mdx components={{ ...defaultMdxComponents }} />
+        </DocsBody>
+      </DocsPage>
+    );
+  },
+);
+
 export default function Page(props: Route.ComponentProps) {
-  const { page, compiled, tree } = props.loaderData;
-  const { default: Mdx, toc } = executeMdxSync(compiled);
+  const { tree, path } = props.loaderData;
+  const Content = renderer[path];
 
   return (
     <DocsLayout
@@ -45,15 +51,7 @@ export default function Page(props: Route.ComponentProps) {
       }}
       tree={tree as PageTree.Root}
     >
-      <title>{page.data.title}</title>
-      <meta name="description" content={page.data.description} />
-      <DocsPage toc={toc}>
-        <DocsTitle>{page.data.title}</DocsTitle>
-        <DocsDescription>{page.data.description}</DocsDescription>
-        <DocsBody>
-          <Mdx components={defaultMdxComponents} />
-        </DocsBody>
-      </DocsPage>
+      <Content />
     </DocsLayout>
   );
 }

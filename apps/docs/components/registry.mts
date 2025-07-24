@@ -18,7 +18,7 @@ export const registry: Registry = {
   },
   components: [
     {
-      name: 'search-ai',
+      name: 'ai-search',
       description:
         'Ask AI dialog for your docs, you need to configure Inkeep first',
       files: ['ai/index.tsx', 'ai/search.tsx', '../app/api/chat/route.ts'],
@@ -30,6 +30,11 @@ export const registry: Registry = {
           file: 'components/ui/button.tsx',
         },
       },
+    },
+    {
+      name: 'ai-page-actions',
+      description: 'Common page actions for AI',
+      files: ['ai/page-actions.tsx'],
     },
   ],
   dependencies: {

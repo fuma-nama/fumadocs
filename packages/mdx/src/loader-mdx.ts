@@ -7,7 +7,6 @@ import { getGitTimestamp } from './utils/git-timestamp';
 import { validate, ValidationError } from '@/utils/schema';
 import { fumaMatter } from '@/utils/fuma-matter';
 import { countLines } from '@/utils/count-lines';
-import { loadDefaultOptions } from '@/utils/mdx-options';
 
 export interface Options {
   configPath: string;
@@ -52,7 +51,7 @@ export default async function loader(
 
   let data = matter.data;
   const mdxOptions =
-    collection?.mdxOptions ?? (await loadDefaultOptions(config));
+    collection?.mdxOptions ?? (await config.getDefaultMDXOptions());
 
   if (collection?.schema) {
     try {

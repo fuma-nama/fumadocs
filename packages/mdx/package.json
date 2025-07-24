@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-mdx",
-  "version": "11.6.11",
+  "version": "11.7.0",
   "description": "The built-in source for Fumadocs",
   "keywords": [
     "NextJs",
@@ -32,6 +32,10 @@
       "import": "./dist/runtime/async.js",
       "types": "./dist/runtime/async.d.ts"
     },
+    "./runtime/vite": {
+      "import": "./dist/runtime/vite.js",
+      "types": "./dist/runtime/vite.d.ts"
+    },
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts",
@@ -57,7 +61,7 @@
     "@mdx-js/mdx": "^3.1.0",
     "@standard-schema/spec": "^1.0.0",
     "chokidar": "^4.0.3",
-    "esbuild": "^0.25.6",
+    "esbuild": "^0.25.8",
     "estree-util-value-to-estree": "^3.4.0",
     "js-yaml": "^4.1.0",
     "lru-cache": "^11.1.0",
@@ -65,31 +69,37 @@
     "tinyexec": "^1.0.1",
     "tinyglobby": "^0.2.14",
     "unist-util-visit": "^5.0.0",
-    "zod": "^4.0.5"
+    "zod": "^4.0.8"
   },
   "devDependencies": {
     "@fumadocs/mdx-remote": "workspace:*",
     "@types/js-yaml": "^4.0.9",
     "@types/mdast": "^4.0.3",
     "@types/mdx": "^2.0.13",
+    "@types/node": "^24.1.0",
     "@types/react": "^19.1.8",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "mdast-util-mdx-jsx": "^3.2.0",
-    "next": "^15.4.1",
+    "next": "^15.4.3",
+    "react": "^19.1.0",
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
     "vfile": "^6.0.3",
-    "vite": "^7.0.4",
-    "webpack": "^5.100.1"
+    "vite": "^7.0.5",
+    "webpack": "^5.100.2"
   },
   "peerDependencies": {
-    "@fumadocs/mdx-remote": "^1.2.0",
+    "@fumadocs/mdx-remote": "^1.4.0",
     "fumadocs-core": "^14.0.0 || ^15.0.0",
     "next": "^15.3.0",
-    "vite": "6.x.x"
+    "react": "*",
+    "vite": "6.x.x || 7.x.x"
   },
   "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
     "next": {
       "optional": true
     },

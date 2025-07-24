@@ -42,18 +42,18 @@
   },
   "dependencies": {
     "@radix-ui/react-popover": "^1.1.14",
-    "@shikijs/twoslash": "^3.8.0",
+    "@shikijs/twoslash": "^3.8.1",
     "mdast-util-from-markdown": "^2.0.2",
     "mdast-util-gfm": "^3.1.0",
     "mdast-util-to-hast": "^13.2.0",
-    "shiki": "^3.8.0",
+    "shiki": "^3.8.1",
     "tailwind-merge": "^3.3.1",
-    "twoslash": "^0.3.2"
+    "twoslash": "^0.3.3"
   },
   "devDependencies": {
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.3",
-    "@types/node": "24.0.13",
+    "@types/node": "24.1.0",
     "@types/react": "^19.1.8",
     "eslint-config-custom": "workspace:*",
     "fumadocs-ui": "workspace:*",
