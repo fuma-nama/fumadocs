@@ -76,11 +76,13 @@ export function NavbarSidebarTrigger({
 
 export function CollapsibleControl() {
   const { collapsed } = useSidebar();
-  if (!collapsed) return;
 
   return (
     <div
-      className="fixed flex shadow-lg animate-fd-fade-in rounded-xl p-0.5 border bg-fd-muted text-fd-muted-foreground z-10 xl:start-4 max-xl:end-4"
+      className={cn(
+        'fixed flex shadow-lg transition-opacity rounded-xl p-0.5 border bg-fd-muted text-fd-muted-foreground z-10 max-md:hidden xl:left-4 max-xl:right-4',
+        !collapsed && 'pointer-events-none opacity-0',
+      )}
       style={{
         top: 'calc(var(--fd-banner-height) + var(--fd-tocnav-height) + var(--spacing) * 4)',
       }}

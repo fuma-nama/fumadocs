@@ -89,7 +89,7 @@ export function DocsLayout({
 
   const sidebar = sidebarComponent ?? (
     <>
-      {sidebarCollapsible ? <CollapsibleControl /> : null}
+      {sidebarCollapsible && <CollapsibleControl />}
       <Sidebar {...sidebarProps} collapsible={sidebarCollapsible}>
         <HideIfEmpty>
           <SidebarHeader className="data-[empty=true]:hidden">

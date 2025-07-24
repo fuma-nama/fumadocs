@@ -1,5 +1,5 @@
 'use client';
-import { ChevronDown, ExternalLink } from 'lucide-react';
+import { ChevronDown, ExternalLink, X } from 'lucide-react';
 import { usePathname } from 'fumadocs-core/framework';
 import {
   type ComponentProps,
@@ -33,6 +33,7 @@ import type { PageTree } from 'fumadocs-core/server';
 import { useTreeContext, useTreePath } from '@/contexts/tree';
 import { useMediaQuery } from 'fumadocs-core/utils/use-media-query';
 import { Presence } from '@radix-ui/react-presence';
+import { buttonVariants } from '@/components/ui/button';
 
 export interface SidebarProps extends ComponentProps<'aside'> {
   /**
@@ -65,7 +66,7 @@ interface InternalContext {
 }
 
 const itemVariants = cva(
-  'relative flex flex-row items-center gap-2 rounded-xl p-2 text-start text-fd-muted-foreground [overflow-wrap:anywhere] [&_svg]:size-4 [&_svg]:shrink-0',
+  'relative flex flex-row items-center gap-2 rounded-xl p-2 ps-(--sidebar-item-offset) text-start text-fd-muted-foreground [overflow-wrap:anywhere] [&_svg]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       active: {
@@ -128,11 +129,23 @@ export function Sidebar({
               {...props}
               data-state={state}
               className={cn(
-                'fixed text-[15px] flex flex-col shadow-lg rounded-2xl border start-2 inset-y-2 w-[85%] max-w-[380px] z-40 bg-fd-background data-[state=open]:animate-fd-sidebar-in data-[state=closed]:animate-fd-sidebar-out',
+                'fixed text-[15px] flex flex-col shadow-lg border-s end-0 inset-y-0 w-[85%] max-w-[380px] z-40 bg-fd-background data-[state=open]:animate-fd-sidebar-in data-[state=closed]:animate-fd-sidebar-out',
                 !present && 'invisible',
                 props.className,
               )}
             >
+              <button
+                onClick={() => setOpen(false)}
+                className={cn(
+                  buttonVariants({
+                    color: 'ghost',
+                    size: 'icon',
+                    className: 'mt-3 ms-auto me-4 text-fd-muted-foreground',
+                  }),
+                )}
+              >
+                <X />
+              </button>
               {props.children}
             </aside>
           )}
@@ -205,7 +218,7 @@ export function SidebarHeader(props: ComponentProps<'div'>) {
   return (
     <div
       {...props}
-      className={cn('flex flex-col gap-3 p-4 pb-2', props.className)}
+      className={cn('flex flex-col gap-3 px-4 py-2 md:mt-4', props.className)}
     >
       {props.children}
     </div>
@@ -228,10 +241,13 @@ export function SidebarViewport(props: ScrollAreaProps) {
     <ScrollArea {...props} className={cn('h-full', props.className)}>
       <ScrollViewport
         className="p-4"
-        style={{
-          maskImage:
-            'linear-gradient(to bottom, transparent, white 12px, white calc(100% - 12px), transparent)',
-        }}
+        style={
+          {
+            '--sidebar-item-offset': 'calc(var(--spacing) * 2)',
+            maskImage:
+              'linear-gradient(to bottom, transparent, white 12px, white calc(100% - 12px), transparent)',
+          } as object
+        }
       >
         {props.children}
       </ScrollViewport>
@@ -240,19 +256,13 @@ export function SidebarViewport(props: ScrollAreaProps) {
 }
 
 export function SidebarSeparator(props: ComponentProps<'p'>) {
-  const { level } = useInternalContext();
-
   return (
     <p
       {...props}
       className={cn(
-        'inline-flex items-center gap-2 mb-1.5 px-2 empty:mb-0 [&_svg]:size-4 [&_svg]:shrink-0',
+        'inline-flex items-center gap-2 mb-1.5 px-2 ps-(--sidebar-item-offset) empty:mb-0 [&_svg]:size-4 [&_svg]:shrink-0',
         props.className,
       )}
-      style={{
-        paddingInlineStart: getOffset(level),
-        ...props.style,
-      }}
     >
       {props.children}
     </p>
@@ -268,7 +278,7 @@ export function SidebarItem({
   const pathname = usePathname();
   const active =
     props.href !== undefined && isActive(props.href, pathname, false);
-  const { prefetch, level } = useInternalContext();
+  const { prefetch } = useInternalContext();
 
   return (
     <Link
@@ -276,12 +286,7 @@ export function SidebarItem({
       data-active={active}
       className={cn(itemVariants({ active }), props.className)}
       prefetch={prefetch}
-      style={{
-        paddingInlineStart: getOffset(level),
-        ...props.style,
-      }}
     >
-      <Border level={level} active={active} />
       {icon ?? (props.external ? <ExternalLink /> : null)}
       {props.children}
     </Link>
@@ -315,19 +320,13 @@ export function SidebarFolderTrigger({
   className,
   ...props
 }: CollapsibleTriggerProps) {
-  const { level } = useInternalContext();
   const { open } = useFolderContext();
 
   return (
     <CollapsibleTrigger
       className={cn(itemVariants({ active: false }), 'w-full', className)}
       {...props}
-      style={{
-        paddingInlineStart: getOffset(level),
-        ...props.style,
-      }}
     >
-      <Border level={level} />
       {props.children}
       <ChevronDown
         data-icon
@@ -339,7 +338,7 @@ export function SidebarFolderTrigger({
 
 export function SidebarFolderLink(props: LinkProps) {
   const { open, setOpen } = useFolderContext();
-  const { prefetch, level } = useInternalContext();
+  const { prefetch } = useInternalContext();
 
   const pathname = usePathname();
   const active =
@@ -362,12 +361,7 @@ export function SidebarFolderLink(props: LinkProps) {
         }
       }}
       prefetch={prefetch}
-      style={{
-        paddingInlineStart: getOffset(level),
-        ...props.style,
-      }}
     >
-      <Border level={level} active={active} />
       {props.children}
       <ChevronDown
         data-icon
@@ -379,21 +373,36 @@ export function SidebarFolderLink(props: LinkProps) {
 
 export function SidebarFolderContent(props: CollapsibleContentProps) {
   const ctx = useInternalContext();
+  const level = ctx.level + 1;
 
   return (
-    <CollapsibleContent {...props} className={cn('relative', props.className)}>
+    <CollapsibleContent
+      {...props}
+      className={cn(
+        'relative',
+        level === 2 &&
+          "**:data-[active=true]:before:content-[''] **:data-[active=true]:before:bg-fd-primary **:data-[active=true]:before:absolute **:data-[active=true]:before:w-px **:data-[active=true]:before:inset-y-2.5 **:data-[active=true]:before:start-2.5",
+        props.className,
+      )}
+      style={
+        {
+          '--sidebar-item-offset': `calc(var(--spacing) * ${level > 1 ? level * 3 : 2})`,
+          ...props.style,
+        } as object
+      }
+    >
+      {level === 2 && (
+        <div className="absolute w-px inset-y-1 bg-fd-border start-2.5" />
+      )}
       <Context.Provider
         value={useMemo(
           () => ({
             ...ctx,
-            level: ctx.level + 1,
+            level,
           }),
-          [ctx],
+          [ctx, level],
         )}
       >
-        {ctx.level === 1 && (
-          <div className="absolute w-px inset-y-1 bg-fd-border start-2.5" />
-        )}
         {props.children}
       </Context.Provider>
     </CollapsibleContent>
@@ -420,8 +429,8 @@ export function SidebarCollapseTrigger(props: ComponentProps<'button'>) {
 
 function useFolderContext() {
   const ctx = useContext(FolderContext);
-
   if (!ctx) throw new Error('Missing sidebar folder');
+
   return ctx;
 }
 
@@ -533,22 +542,5 @@ function PageTreeFolder({
       )}
       <SidebarFolderContent>{props.children}</SidebarFolderContent>
     </SidebarFolder>
-  );
-}
-
-function getOffset(level: number) {
-  return `calc(var(--spacing) * ${level > 1 ? level * 3 : 2})`;
-}
-
-function Border({ level, active }: { level: number; active?: boolean }) {
-  if (level <= 1) return null;
-
-  return (
-    <div
-      className={cn(
-        'absolute w-px inset-y-3 z-2 start-2.5 md:inset-y-2',
-        active && 'bg-fd-primary',
-      )}
-    />
   );
 }

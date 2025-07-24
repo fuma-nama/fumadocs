@@ -192,13 +192,13 @@
 
   @keyframes fd-sidebar-in {
     from {
-      transform: translateX(-100%);
+      transform: translateX(100%);
     }
   }
 
   @keyframes fd-sidebar-out {
     to {
-      transform: translateX(-100%);
+      transform: translateX(100%);
     }
   }
 
