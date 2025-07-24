@@ -1,0 +1,92 @@
+---
+title: Mixedbread
+description: Integrate Mixedbread Search with Fumadocs
+---
+
+## Introduction
+
+The Mixedbread Integration uses vector search to provide semantic search capabilities for your documentation. It indexes your documentation content into a vector store, enabling users to search using natural language queries and find relevant content based on meaning rather than just keyword matching.
+
+## Setup
+
+### Get your API Key
+
+1. Sign up at [Mixedbread](https://platform.mixedbread.com)
+2. Navigate to [API Keys](https://platform.mixedbread.com/platform?next=api-keys)
+3. Create a new API key and store it in your environment variables
+
+### Create a Vector Store
+
+To sync your documentation, you'll need to create a vector store:
+
+1. Go to the [Vector Stores](https://platform.mixedbread.com/platform?next=vector-stores) in your Mixedbread dashboard
+2. Create a new vector store for your documentation
+3. Copy the vector store ID
+
+### Sync Documentation
+
+Use the [Mixedbread CLI](https://www.mixedbread.com/cli) to sync your documentation:
+
+Install the CLI:
+
+```package-install
+@mixedbread/cli -D
+```
+
+Configure authentication and sync your documentation:
+
+```bash
+# Configure authentication
+mxbai config keys add YOUR_API_KEY
+
+# Sync your documentation
+mxbai vs sync YOUR_VECTOR_STORE_ID "./content/docs"
+```
+
+The CLI will automatically detect changes in your documentation and update the vector store accordingly.
+
+### Workflow
+
+You can automatically sync your documentation by adding a sync script to your `package.json`:
+
+```json
+{
+  "scripts": {
+    "build": "next build && npm run sync-content",
+    "sync-content": "mxbai vs sync YOUR_VECTOR_STORE_ID './content/docs' --ci"
+  }
+}
+```
+
+## Options
+
+### Tag Filter
+
+To filter search results by tags, add a tag field to your document metadata:
+
+```typescript
+---
+title: Mixedbread
+description: Integrate Mixedbread Search with Fumadocs
+url: /docs/headless/search/mixedbread
+// [!code ++]
+tag: docs
+---
+...
+```
+
+And update your search client:
+
+- **Fumadocs UI**: Enable [Tag Filter](/docs/ui/search/orama#tag-filter) on Search UI.
+- **Search Client**: You can add the tag filter like:
+
+  ```ts
+  import { useDocsSearch } from 'fumadocs-core/search/client';
+
+  const { search, setSearch, query } = useDocsSearch({
+    tag: '<your tag value>',
+    // ...
+  });
+  ```
+
+This allows you to scope searches to specific sections of your documentation.
