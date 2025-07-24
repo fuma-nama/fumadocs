@@ -775,9 +775,6 @@ importers:
       '@formatjs/intl-localematcher':
         specifier: ^0.6.1
         version: 0.6.1
-      '@mixedbread/sdk':
-        specifier: '*'
-        version: 0.16.0
       '@orama/orama':
         specifier: ^3.1.11
         version: 3.1.11
@@ -823,9 +820,6 @@ importers:
       remark-rehype:
         specifier: ^11.1.2
         version: 11.1.2
-      remove-markdown:
-        specifier: ^0.6.2
-        version: 0.6.2
       scroll-into-view-if-needed:
         specifier: ^3.1.0
         version: 3.1.0
@@ -839,6 +833,9 @@ importers:
       '@mdx-js/mdx':
         specifier: ^3.1.0
         version: 3.1.0(acorn@8.15.0)
+      '@mixedbread/sdk':
+        specifier: ^0.16.0
+        version: 0.16.0
       '@oramacloud/client':
         specifier: ^2.1.4
         version: 2.1.4
@@ -887,6 +884,9 @@ importers:
       remark-mdx:
         specifier: ^3.1.0
         version: 3.1.0
+      remove-markdown:
+        specifier: ^0.6.2
+        version: 0.6.2
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
