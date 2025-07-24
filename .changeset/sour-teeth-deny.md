@@ -1,5 +1,5 @@
 ---
-'fumadocs-core': minor
+'fumadocs-core': patcch
 ---
 
 Add mixedbread integration
