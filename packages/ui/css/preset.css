@@ -10,7 +10,12 @@
   --color-fd-success: oklch(72.3% 0.219 149.579);
 }
 
+[dir='rtl'] {
+  --fd-sidebar-mobile-offset: -100%;
+}
+
 @theme {
+  --fd-sidebar-mobile-offset: 100%;
   --spacing-fd-container: 1400px;
   --fd-page-width: 1200px;
   --fd-sidebar-width: 0px;
@@ -53,6 +58,18 @@
 
   --animate-fd-exitToLeft: fd-exitToLeft 250ms ease;
   --animate-fd-exitToRight: fd-exitToRight 250ms ease;
+
+  @keyframes fd-sidebar-in {
+    from {
+      transform: translateX(var(--fd-sidebar-mobile-offset));
+    }
+  }
+
+  @keyframes fd-sidebar-out {
+    to {
+      transform: translateX(var(--fd-sidebar-mobile-offset));
+    }
+  }
 
   @keyframes fd-collapsible-down {
     from {
@@ -187,18 +204,6 @@
     to {
       opacity: 0;
       transform: translateX(-200px);
-    }
-  }
-
-  @keyframes fd-sidebar-in {
-    from {
-      transform: translateX(100%);
-    }
-  }
-
-  @keyframes fd-sidebar-out {
-    to {
-      transform: translateX(100%);
     }
   }
 

@@ -80,7 +80,7 @@ export function CollapsibleControl() {
   return (
     <div
       className={cn(
-        'fixed flex shadow-lg transition-opacity rounded-xl p-0.5 border bg-fd-muted text-fd-muted-foreground z-10 max-md:hidden xl:left-4 max-xl:right-4',
+        'fixed flex shadow-lg transition-opacity rounded-xl p-0.5 border bg-fd-muted text-fd-muted-foreground z-10 max-md:hidden xl:start-4 max-xl:end-4',
         !collapsed && 'pointer-events-none opacity-0',
       )}
       style={{

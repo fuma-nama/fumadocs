@@ -3,7 +3,7 @@ import type { Configuration } from 'webpack';
 import { findConfigFile } from '@/utils/config';
 import { start } from '@/map';
 import { type Options as MDXLoaderOptions } from '../loader-mdx';
-import { version } from 'next/package.json';
+import { readFileSync } from 'node:fs';
 import type { TurbopackOptions } from 'next/dist/server/config-shared';
 
 export interface CreateMDXOptions {
@@ -21,10 +21,21 @@ export interface CreateMDXOptions {
 }
 
 const defaultPageExtensions = ['mdx', 'md', 'jsx', 'js', 'tsx', 'ts'];
-const isTurboExperimental =
-  version.startsWith('15.0.') ||
-  version.startsWith('15.1.') ||
-  version.startsWith('15.2.');
+
+let isTurboExperimental: boolean;
+
+// not a good solution, but works
+try {
+  const content = readFileSync('./node_modules/next/package.json').toString();
+  const version = JSON.parse(content).version as string;
+
+  isTurboExperimental =
+    version.startsWith('15.0.') ||
+    version.startsWith('15.1.') ||
+    version.startsWith('15.2.');
+} catch {
+  isTurboExperimental = false;
+}
 
 export { start };
 
