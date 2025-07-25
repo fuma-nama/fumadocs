@@ -139,8 +139,9 @@ export function Sidebar({
                 className={cn(
                   buttonVariants({
                     color: 'ghost',
-                    size: 'icon',
-                    className: 'mt-3 ms-auto me-4 text-fd-muted-foreground',
+                    size: 'icon-sm',
+                    className:
+                      'mt-3 mb-1 ms-auto me-4 text-fd-muted-foreground',
                   }),
                 )}
               >
@@ -218,7 +219,7 @@ export function SidebarHeader(props: ComponentProps<'div'>) {
   return (
     <div
       {...props}
-      className={cn('flex flex-col gap-3 px-4 py-2 md:mt-4', props.className)}
+      className={cn('flex flex-col gap-3 px-4 pb-2 md:pt-4', props.className)}
     >
       {props.children}
     </div>
