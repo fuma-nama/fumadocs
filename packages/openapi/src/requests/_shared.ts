@@ -96,9 +96,14 @@ export function encodeRequestData(
   function write(
     key: string,
     value: unknown,
-    field: NoReference<ParameterObject>,
     output: Record<string, EncodedParameter> = {},
+    field?: NoReference<ParameterObject>,
   ): Record<string, EncodedParameter> {
+    if (!field) {
+      output[key] = { value: String(value) };
+      return output;
+    }
+
     const encoder = getMediaEncoder(field);
     if (encoder) {
       output[key] = { value: encoder(value) };
@@ -184,9 +189,7 @@ export function encodeRequestData(
       if (value == null) continue;
 
       const field = parameters.find((p) => p.name === k && p.in === type);
-      if (!field) continue;
-
-      write(k, value, field, out);
+      write(k, value, out, field);
     }
 
     result[type] = out;
