@@ -1,6 +1,6 @@
 'use client';
 
-import { Info as InfoIcon } from 'lucide-react';
+import { Info as InfoIcon, Link as LinkIcon } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import { cva } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
@@ -91,7 +91,7 @@ export function TypeTable({ type }: { type: Record<string, ObjectType> }) {
                   ) : null}
                   {value.typeDescriptionLink ? (
                     <Link href={value.typeDescriptionLink}>
-                      <InfoIcon className="size-4" />
+                      <LinkIcon className="size-4 text-fd-muted-foreground" />
                     </Link>
                   ) : null}
                 </div>
