@@ -9,20 +9,20 @@
     "typecheck": "react-router typegen && tsc"
   },
   "dependencies": {
-    "@react-router/node": "^7.7.0",
-    "@react-router/serve": "^7.7.0",
+    "@react-router/node": "^7.7.1",
+    "@react-router/serve": "^7.7.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "isbot": "^5.1.28",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-router": "^7.7.0"
+    "react-router": "^7.7.1"
   },
   "devDependencies": {
-    "@react-router/dev": "^7.7.0",
+    "@react-router/dev": "^7.7.1",
     "@tailwindcss/vite": "^4.1.11",
-    "@types/node": "^24.0.15",
+    "@types/node": "^24.1.0",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "react-router-devtools": "^5.0.6",

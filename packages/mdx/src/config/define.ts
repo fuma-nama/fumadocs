@@ -119,13 +119,11 @@ export function defineDocs<
     docs: defineCollections({
       type: 'doc',
       dir,
-      files: ['**/*.{md,mdx}'],
       schema: frontmatterSchema as any,
       ...options?.docs,
     }),
     meta: defineCollections({
       type: 'meta',
-      files: ['**/*.{json,yaml}'],
       dir,
       schema: metaSchema as any,
       ...options?.meta,

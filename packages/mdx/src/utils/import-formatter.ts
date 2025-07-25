@@ -54,3 +54,10 @@ export function toImportPath(file: string, config: ImportPathConfig): string {
 
   return importPath.replaceAll(path.sep, '/');
 }
+
+export function ident(code: string, tab: number = 1) {
+  return code
+    .split('\n')
+    .map((v) => '  '.repeat(tab) + v)
+    .join('\n');
+}

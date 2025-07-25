@@ -9,15 +9,9 @@ Before continuing, make sure:
 
 ## Getting Started
 
-```package-install
-fumadocs-ui fumadocs-core
+```npm
+npm i fumadocs-ui fumadocs-core
 ```
-
-### MDX Components
-
-<include cwd meta='title="mdx-components.tsx"'>
-  ../../examples/next-mdx/mdx-components.tsx
-</include>
 
 ### Content Source
 
@@ -41,6 +35,10 @@ const config = {
 
 export default withMDX(config);
 ```
+
+<include cwd meta='tab="mdx-components.tsx"'>
+  ../../examples/next-mdx/mdx-components.tsx
+</include>
 
 ```ts tab="source.config.ts"
 import { defineDocs } from 'fumadocs-mdx/config';

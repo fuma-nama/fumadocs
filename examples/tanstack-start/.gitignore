@@ -20,3 +20,4 @@ yarn.lock
 .tanstack
 
 src/routeTree.gen.ts
+source.generated.ts

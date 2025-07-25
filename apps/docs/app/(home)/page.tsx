@@ -605,7 +605,7 @@ function Features() {
               target="_blank"
               className={cn(buttonVariants({ variant: 'outline' }))}
             >
-              BaseHub CMS example
+              BaseHub CMS
             </a>
             <a
               href="https://github.com/fuma-nama/fumadocs-sanity"
@@ -613,7 +613,15 @@ function Features() {
               target="_blank"
               className={cn(buttonVariants({ variant: 'ghost' }))}
             >
-              Sanity example
+              Sanity
+            </a>
+            <a
+              href="https://github.com/MFarabi619/fumadocs-payloadcms"
+              rel="noreferrer noopener"
+              target="_blank"
+              className={cn(buttonVariants({ variant: 'ghost' }))}
+            >
+              Payload CMS
             </a>
           </div>
           <Image

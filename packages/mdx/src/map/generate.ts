@@ -1,7 +1,6 @@
 import * as path from 'node:path';
 import * as fs from 'node:fs/promises';
 import { glob } from 'tinyglobby';
-import { getTypeFromPath } from '@/utils/get-type-from-path';
 import type { LoadedConfig } from '@/utils/config';
 import type { DocCollection, MetaCollection } from '@/config';
 import { validate } from '@/utils/schema';
@@ -15,6 +14,7 @@ import {
   type ImportPathConfig,
   toImportPath,
 } from '@/utils/import-formatter';
+import { getGlobPatterns, isFileSupported } from '@/utils/collections';
 
 async function readFileWithCache(file: string): Promise<string> {
   const cached = fileCache.read<string>('read-file', file);
@@ -186,16 +186,17 @@ async function getCollectionFiles(
   const dirs = Array.isArray(collection.dir)
     ? collection.dir
     : [collection.dir];
+  const patterns = getGlobPatterns(collection);
 
   await Promise.all(
     dirs.map(async (dir) => {
-      const result = await glob(collection.files ?? '**/*', {
+      const result = await glob(patterns, {
         cwd: path.resolve(dir),
         absolute: true,
       });
 
       for (const item of result) {
-        if (getTypeFromPath(item) !== collection.type) continue;
+        if (!isFileSupported(item, collection)) continue;
 
         files.set(item, {
           path: path.relative(dir, item),

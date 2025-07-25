@@ -14,7 +14,7 @@
     "fumadocs-mdx": "workspace:*",
     "fumadocs-openapi": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "next": "15.4.2",
+    "next": "15.4.4",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "shiki": "^3.8.1"

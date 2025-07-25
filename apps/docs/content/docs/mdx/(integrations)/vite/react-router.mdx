@@ -1,0 +1,50 @@
+---
+title: React Router
+description: Use Fumadocs MDX with React Router
+---
+
+## Setup
+
+```npm
+npm i fumadocs-mdx fumadocs-core @types/mdx
+```
+
+Create the configuration file:
+
+<include cwd meta='title="source.config.ts"'>
+  ../../examples/react-router/source.config.ts
+</include>
+
+Add the Vite plugin:
+
+<include cwd meta='title="vite.config.ts"'>
+  ../../examples/react-router/vite.config.ts
+</include>
+
+A `source.generated.ts` file will be generated when you run development server or production build.
+
+### Accessing Content
+
+You can import the `source.generated.ts` file directly.
+
+```ts
+import { docs } from './source.generated';
+console.log(docs);
+```
+
+To integrate with Fumadocs, create a docs collection and use:
+
+<include cwd meta='title="app/source.ts"'>
+  ../../examples/react-router/app/source.ts
+</include>
+
+### Rendering Content
+
+Rendering page content is different because React Router doesn't support RSC at the moment.
+Instead, use `toClientRenderer()` to lazy load MDX content as a component on browser.
+
+For example:
+
+<include cwd meta='title="app/docs/page.tsx"'>
+  ../../examples/react-router/app/docs/page.tsx
+</include>

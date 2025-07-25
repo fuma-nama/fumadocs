@@ -3,6 +3,8 @@ import type { Configuration } from 'webpack';
 import { findConfigFile } from '@/utils/config';
 import { start } from '@/map';
 import { type Options as MDXLoaderOptions } from '../loader-mdx';
+import { readFileSync } from 'node:fs';
+import type { TurbopackOptions } from 'next/dist/server/config-shared';
 
 export interface CreateMDXOptions {
   /**
@@ -19,6 +21,21 @@ export interface CreateMDXOptions {
 }
 
 const defaultPageExtensions = ['mdx', 'md', 'jsx', 'js', 'tsx', 'ts'];
+
+let isTurboExperimental: boolean;
+
+// not a good solution, but works
+try {
+  const content = readFileSync('./node_modules/next/package.json').toString();
+  const version = JSON.parse(content).version as string;
+
+  isTurboExperimental =
+    version.startsWith('15.0.') ||
+    version.startsWith('15.1.') ||
+    version.startsWith('15.2.');
+} catch {
+  isTurboExperimental = false;
+}
 
 export { start };
 
@@ -43,25 +60,26 @@ export function createMDX({
       configPath,
       outDir,
     };
-
-    return {
-      ...nextConfig,
-      turbopack: {
-        ...nextConfig?.turbopack,
-        rules: {
-          ...nextConfig?.turbopack?.rules,
-          // @ts-expect-error -- safe
-          '*.{md,mdx}': {
-            loaders: [
-              {
-                loader: 'fumadocs-mdx/loader-mdx',
-                options: mdxLoaderOptions,
-              },
-            ],
-            as: '*.js',
-          },
+    const turbo: TurbopackOptions = {
+      ...nextConfig.experimental?.turbo,
+      ...nextConfig.turbopack,
+      rules: {
+        ...nextConfig.experimental?.turbo?.rules,
+        ...nextConfig.turbopack?.rules,
+        '*.{md,mdx}': {
+          loaders: [
+            {
+              loader: 'fumadocs-mdx/loader-mdx',
+              options: mdxLoaderOptions as any,
+            },
+          ],
+          as: '*.js',
         },
       },
+    };
+
+    const updated: NextConfig = {
+      ...nextConfig,
       pageExtensions: nextConfig.pageExtensions ?? defaultPageExtensions,
       webpack: (config: Configuration, options) => {
         config.resolve ||= {};
@@ -85,5 +103,13 @@ export function createMDX({
         return nextConfig.webpack?.(config, options) ?? config;
       },
     };
+
+    if (isTurboExperimental) {
+      updated.experimental = { ...updated.experimental, turbo };
+    } else {
+      updated.turbopack = turbo;
+    }
+
+    return updated;
   };
 }

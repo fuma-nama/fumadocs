@@ -1,5 +1,5 @@
 import type { TableOfContents } from 'fumadocs-core/server';
-import { type FC, lazy, type LazyExoticComponent, type ReactNode } from 'react';
+import { createElement, type FC, lazy, type ReactNode } from 'react';
 import type { MDXProps } from 'mdx/types';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { DocCollection, DocsCollection, MetaCollection } from '@/config';
@@ -175,24 +175,93 @@ export function fromConfig<Config>(): {
   };
 }
 
-type ClientLoader<Props> = Record<
-  string,
-  LazyExoticComponent<(props: Props) => ReactNode>
->;
+export interface ClientLoaderOptions<Frontmatter, Props> {
+  /**
+   * Loader ID (usually your collection name)
+   *
+   * The code splitting strategy of frameworks like Tanstack Start may duplicate `createClientLoader()` into different chunks.
+   *
+   * We use loader ID to share cache between multiple instances of client loader.
+   *
+   * @defaultValue ''
+   */
+  id?: string;
 
-export function toClientRenderer<Frontmatter, Props extends object = object>(
+  component: (loaded: CompiledMDXFile<Frontmatter>, props: Props) => ReactNode;
+}
+
+export interface ClientLoader<Frontmatter, Props> {
+  preload: (path: string) => Promise<CompiledMDXFile<Frontmatter>>;
+  /**
+   * Get a component that renders content with `React.lazy`
+   */
+  getComponent: (path: string) => FC<Props>;
+}
+
+const loaderStore = new Map<
+  string,
+  {
+    preloaded: Map<string, CompiledMDXFile<any>>;
+  }
+>();
+
+export function createClientLoader<Frontmatter, Props = object>(
   files: Record<string, () => Promise<CompiledMDXFile<Frontmatter>>>,
-  renderer: (loaded: CompiledMDXFile<Frontmatter>, props: Props) => ReactNode,
-): ClientLoader<Props> {
-  const loader: ClientLoader<Props> = {};
+  options: ClientLoaderOptions<Frontmatter, Props>,
+): ClientLoader<Frontmatter, Props> {
+  const { id = '', component } = options;
+  const store = loaderStore.get(id) ?? {
+    preloaded: new Map(),
+  };
+  loaderStore.set(id, store);
+
+  let renderer;
+
+  return {
+    async preload(path) {
+      const loaded = await files[path]();
+      store.preloaded.set(path, loaded);
+      return loaded;
+    },
+    getComponent(path) {
+      renderer ??= toClientRenderer(files, component, {
+        cache: store.preloaded,
+      });
+      return renderer[path];
+    },
+  };
+}
+
+export interface ClientRendererOptions<Frontmatter> {
+  cache?: Map<string, CompiledMDXFile<Frontmatter>>;
+}
+
+type ClientRenderer<Props> = Record<string, FC<Props>>;
+
+export function toClientRenderer<Frontmatter, Props = object>(
+  files: Record<string, () => Promise<CompiledMDXFile<Frontmatter>>>,
+  component: (loaded: CompiledMDXFile<Frontmatter>, props: Props) => ReactNode,
+  options: ClientRendererOptions<Frontmatter> = {},
+): ClientRenderer<Props> {
+  const { cache } = options;
+  const renderer: ClientRenderer<Props> = {};
 
   for (const k in files) {
-    loader[k] = lazy(async () => {
+    const OnDemand = lazy(async () => {
       const loaded = await files[k]();
-
-      return { default: (props) => renderer(loaded, props) };
+      return { default: (props) => component(loaded, props) };
     });
+
+    if (cache) {
+      renderer[k] = (props: Props) => {
+        const cached = cache.get(k);
+        if (!cached) return createElement(OnDemand, props);
+        return component(cached, props);
+      };
+    } else {
+      renderer[k] = OnDemand;
+    }
   }
 
-  return loader;
+  return renderer;
 }

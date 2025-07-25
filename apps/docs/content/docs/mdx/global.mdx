@@ -19,7 +19,7 @@ export default defineConfig({
 
 ### MDX Options
 
-Customise the MDX processor options for MDX files.
+Customise the default MDX processor options, it accepts the [extended MDX options](/docs/mdx/mdx#extended).
 
 ```ts title="source.config.ts"
 import { defineConfig } from 'fumadocs-mdx/config';
@@ -35,4 +35,15 @@ export default defineConfig({
 });
 ```
 
-Some default options are applied by Fumadocs MDX, see [Extended MDX Options](/docs/mdx/mdx#extended) for available options.
+Some default options are applied by Fumadocs MDX, you can also disable them:
+
+```ts title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    preset: 'minimal',
+    // now it accepts only MDX processor options
+  },
+});
+```
