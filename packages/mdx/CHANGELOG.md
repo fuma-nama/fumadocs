@@ -1,5 +1,14 @@
 # next-docs-mdx
 
+## 11.7.1
+
+### Patch Changes
+
+- f8000f4: Generate config based on Next.js version
+- f45a1b6: Support Tanstack Router/Start via `createClientLoader`
+- Updated dependencies [1b0e9d5]
+  - fumadocs-core@15.6.6
+
 ## 11.7.0
 
 ### Minor Changes

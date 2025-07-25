@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 15.6.6
+
+### Patch Changes
+
+- 1b0e9d5: Add mixedbread integration
+
 ## 15.6.5
 
 ### Patch Changes

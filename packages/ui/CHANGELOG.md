@@ -1,5 +1,15 @@
 # next-docs-ui
 
+## 15.6.6
+
+### Patch Changes
+
+- 2a0b45b: Change sidebar direction
+- 5913cc4: Ignore IME composition to avoid accidental selection
+- 79248f6: Improve type table link icon
+- Updated dependencies [1b0e9d5]
+  - fumadocs-core@15.6.6
+
 ## 15.6.5
 
 ### Patch Changes

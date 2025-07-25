@@ -1,5 +1,17 @@
 # @fuma-docs/openapi
 
+## 9.1.5
+
+### Patch Changes
+
+- ec7b9ed: Fix request serialization stripped auth parameters
+- Updated dependencies [2a0b45b]
+- Updated dependencies [5913cc4]
+- Updated dependencies [1b0e9d5]
+- Updated dependencies [79248f6]
+  - fumadocs-ui@15.6.6
+  - fumadocs-core@15.6.6
+
 ## 9.1.4
 
 ### Patch Changes
