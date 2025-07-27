@@ -23,19 +23,22 @@
   }
 
   &[data-line-numbers] code .twoslash-meta-line {
-    @apply ml-7;
+    padding-left: calc(var(--padding-left) + 7 * var(--spacing));
   }
 
   &[data-line-numbers] code .line {
-    width: calc(100% - 7 * var(--spacing));
     counter-increment: line;
-    padding-left: calc(var(--padding-left) - var(--spacing));
-    @apply ml-7;
+    padding-left: calc(var(--padding-left) + 7 * var(--spacing));
 
     &::after {
       position: absolute;
       content: counter(line);
-      @apply top-0 -left-5 text-fd-muted-foreground/60;
+      color: color-mix(
+        in oklab,
+        var(--fd-counter-color, var(--color-fd-muted-foreground)) 60%,
+        transparent
+      );
+      @apply top-0 left-4;
     }
   }
 
@@ -46,6 +49,7 @@
 
   code .diff.remove {
     opacity: 0.7;
+    --fd-counter-color: var(--color-fd-diff-remove-symbol);
     @apply bg-fd-diff-remove;
   }
 
@@ -55,6 +59,7 @@
   }
 
   code .diff.add {
+    --fd-counter-color: var(--color-fd-diff-add-symbol);
     @apply bg-fd-diff-add;
   }
 
@@ -63,11 +68,12 @@
     @apply text-fd-diff-add-symbol;
   }
 
-  .highlighted {
+  code .highlighted {
+    --fd-counter-color: var(--color-fd-primary);
     @apply bg-fd-primary/10;
   }
 
-  .highlighted-word {
+  code .highlighted-word {
     padding: 1px;
     @apply border -my-px border-fd-primary/30 bg-fd-primary/10 rounded-md font-medium;
   }
