@@ -1,5 +1,33 @@
 'use client';
-import React, { type ReactNode } from 'react';
+import {
+  cloneElement,
+  createContext,
+  isValidElement,
+  type ReactNode,
+  useContext,
+  useEffect,
+  useId,
+  useMemo,
+  useState,
+} from 'react';
+
+const Context = createContext({
+  nonce: undefined as string | undefined,
+});
+
+export function HideIfEmptyProvider({
+  nonce,
+  children,
+}: {
+  nonce?: string;
+  children: ReactNode;
+}) {
+  return (
+    <Context.Provider value={useMemo(() => ({ nonce }), [nonce])}>
+      {children}
+    </Context.Provider>
+  );
+}
 
 const isEmpty = (node: HTMLElement) => {
   for (let i = 0; i < node.childNodes.length; i++) {
@@ -24,38 +52,31 @@ const isEmpty = (node: HTMLElement) => {
  * This can be expensive, please avoid this whenever possible.
  */
 export function HideIfEmpty({ children }: { children: ReactNode }) {
-  const id = React.useId();
-  const [empty, setEmpty] = React.useState<boolean | undefined>();
+  const id = useId();
+  const [empty, setEmpty] = useState<boolean | undefined>();
+  const { nonce } = useContext(Context);
 
-  React.useEffect(() => {
-    const element = document.querySelector(
-      `[data-fdid="${id}"]`,
-    ) as HTMLElement | null;
-    if (!element) return;
-
-    const onUpdate = () => {
+  useEffect(() => {
+    const handleResize = () => {
+      const element = document.querySelector(`[data-fd-if-empty="${id}"]`);
+      if (!element || !(element instanceof HTMLElement)) return;
       setEmpty(isEmpty(element));
     };
 
-    const observer = new ResizeObserver(onUpdate);
-    observer.observe(element);
-    onUpdate();
-    return () => {
-      observer.disconnect();
-    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, [id]);
 
   let child;
-  if (React.isValidElement(children)) {
-    child = React.cloneElement(children, {
+  if (isValidElement(children)) {
+    child = cloneElement(children, {
       ...(children.props as object),
-      'data-fdid': id,
+      'data-fd-if-empty': id,
       'data-empty': empty,
       suppressHydrationWarning: true,
     } as object);
   } else {
-    child =
-      React.Children.count(children) > 1 ? React.Children.only(null) : null;
+    throw new Error('expected to receive a single React element child.');
   }
 
   return (
@@ -63,10 +84,11 @@ export function HideIfEmpty({ children }: { children: ReactNode }) {
       {child}
       {empty === undefined && (
         <script
+          nonce={nonce}
           suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html: `{
-const element = document.querySelector('[data-fdid="${id}"]')
+const element = document.querySelector('[data-fd-if-empty="${id}"]')
 if (element) {
   element.setAttribute('data-empty', String((${isEmpty.toString()})(element)))
 }}`,
