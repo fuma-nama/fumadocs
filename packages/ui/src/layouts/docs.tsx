@@ -33,7 +33,7 @@ import {
   CollapsibleControl,
   LayoutBody,
   Navbar,
-  NavbarSidebarTrigger,
+  SidebarTrigger,
 } from '@/layouts/docs-client';
 import { TreeContextProvider } from '@/contexts/tree';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
@@ -129,19 +129,45 @@ export function DocsLayout({
     const mobile = (
       <SidebarContentMobile {...rest}>
         <HideIfEmpty as={SidebarHeader}>
-          <div className="flex items-center justify-end gap-2 px-0.5 empty:hidden">
-            <IconItemList items={iconLinks} />
+          <div className="flex text-fd-muted-foreground items-center justify-end empty:hidden">
+            {iconLinks.map((item, i) => (
+              <BaseLinkItem
+                key={i}
+                item={item}
+                className={cn(
+                  buttonVariants({
+                    size: 'icon-sm',
+                    color: 'ghost',
+                    className: 'p-2',
+                  }),
+                  i === iconLinks.length - 1 && 'me-auto',
+                )}
+                aria-label={item.label}
+              >
+                {item.icon}
+              </BaseLinkItem>
+            ))}
             {i18n ? (
-              <LanguageToggle className="me-1.5">
+              <LanguageToggle>
                 <Languages className="size-4.5" />
                 <LanguageToggleText />
               </LanguageToggle>
             ) : null}
             {themeSwitch.enabled !== false &&
               (themeSwitch.component ?? (
-                <ThemeToggle className="p-0" mode={themeSwitch.mode} />
+                <ThemeToggle className="p-0 ms-1.5" mode={themeSwitch.mode} />
               ))}
-            <NavbarSidebarTrigger className="text-fd-muted-foreground" />
+            <SidebarTrigger
+              className={cn(
+                buttonVariants({
+                  color: 'ghost',
+                  size: 'icon-sm',
+                  className: 'p-2 ms-1.5',
+                }),
+              )}
+            >
+              <SidebarIcon />
+            </SidebarTrigger>
           </div>
           {tabs.length > 0 && <RootToggle options={tabs} />}
           {banner}
@@ -153,7 +179,7 @@ export function DocsLayout({
 
     const content = (
       <SidebarContent {...rest}>
-        <HideIfEmpty as={SidebarHeader}>
+        <SidebarHeader>
           <div className="flex">
             <Link
               href={nav.url ?? '/'}
@@ -183,19 +209,31 @@ export function DocsLayout({
           {tabs.length > 0 && <RootToggle options={tabs} />}
 
           {banner}
-        </HideIfEmpty>
+        </SidebarHeader>
         {viewport}
         <HideIfEmpty as={SidebarFooter}>
-          <div className="flex items-center justify-end empty:hidden">
-            <IconItemList items={iconLinks} />
+          <div className="flex text-fd-muted-foreground items-center justify-end empty:hidden">
+            {iconLinks.map((item, i) => (
+              <BaseLinkItem
+                key={i}
+                item={item}
+                className={cn(
+                  buttonVariants({ size: 'icon-sm', color: 'ghost' }),
+                  i === iconLinks.length - 1 && 'me-auto',
+                )}
+                aria-label={item.label}
+              >
+                {item.icon}
+              </BaseLinkItem>
+            ))}
             {i18n ? (
-              <LanguageToggle className="me-1.5">
+              <LanguageToggle>
                 <Languages className="size-4.5" />
               </LanguageToggle>
             ) : null}
             {themeSwitch.enabled !== false &&
               (themeSwitch.component ?? (
-                <ThemeToggle className="p-0" mode={themeSwitch.mode} />
+                <ThemeToggle className="p-0 ms-1.5" mode={themeSwitch.mode} />
               ))}
           </div>
           {footer}
@@ -236,7 +274,17 @@ export function DocsLayout({
                   <SearchToggle className="p-2" hideIfDisabled />
                 ))}
               {sidebarEnabled && (
-                <NavbarSidebarTrigger className="p-2 -me-1.5 md:hidden" />
+                <SidebarTrigger
+                  className={cn(
+                    buttonVariants({
+                      color: 'ghost',
+                      size: 'icon-sm',
+                      className: 'p-2',
+                    }),
+                  )}
+                >
+                  <SidebarIcon />
+                </SidebarTrigger>
               )}
             </Navbar>
           ))}
@@ -252,21 +300,4 @@ export function DocsLayout({
   );
 }
 
-function IconItemList({ items }: { items: IconItemType[] }) {
-  return items.map((item, i) => (
-    <BaseLinkItem
-      key={i}
-      item={item}
-      className={cn(
-        buttonVariants({ size: 'icon', color: 'ghost' }),
-        'text-fd-muted-foreground [&_svg]:size-4.5',
-        i === items.length - 1 && 'me-auto',
-      )}
-      aria-label={item.label}
-    >
-      {item.icon}
-    </BaseLinkItem>
-  ));
-}
-
-export { CollapsibleControl, Navbar, NavbarSidebarTrigger, type LinkItemType };
+export { CollapsibleControl, Navbar, SidebarTrigger, type LinkItemType };
