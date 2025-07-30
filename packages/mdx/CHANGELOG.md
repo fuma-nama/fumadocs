@@ -1,5 +1,11 @@
 # next-docs-mdx
 
+## 11.7.2
+
+### Patch Changes
+
+- e75ec55: Support last modified time for Vite
+
 ## 11.7.1
 
 ### Patch Changes
