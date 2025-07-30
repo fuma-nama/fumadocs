@@ -2,9 +2,14 @@ import { readFileSync } from 'node:fs';
 import { generateOGImage } from '@/app/og/[...slug]/og';
 import { source } from '@/lib/source';
 import { notFound } from 'next/navigation';
+import { Renderer } from '@takumi-rs/core';
 
 const font = readFileSync('./app/og/[...slug]/JetBrainsMono-Regular.ttf');
 const fontBold = readFileSync('./app/og/[...slug]/JetBrainsMono-Bold.ttf');
+
+const renderer = new Renderer();
+
+await renderer.loadFontsAsync([font.buffer, fontBold.buffer]);
 
 export async function GET(
   _req: Request,
@@ -15,21 +20,10 @@ export async function GET(
   if (!page) notFound();
 
   return generateOGImage({
+    renderer,
     primaryTextColor: 'rgb(240,240,240)',
     title: page.data.title,
     description: page.data.description,
-    fonts: [
-      {
-        name: 'Mono',
-        data: font,
-        weight: 400,
-      },
-      {
-        name: 'Mono',
-        data: fontBold,
-        weight: 600,
-      },
-    ],
   });
 }
 

@@ -1,30 +1,30 @@
-import { ImageResponse } from 'next/og';
+import { OutputFormat, Renderer } from '@takumi-rs/core';
+import { fromJsx } from '@takumi-rs/helpers';
 import type { ReactElement, ReactNode } from 'react';
-import type { ImageResponseOptions } from 'next/dist/compiled/@vercel/og/types';
 
 interface GenerateProps {
   title: ReactNode;
   description?: ReactNode;
   primaryTextColor?: string;
+  renderer: Renderer;
 }
 
-export function generateOGImage(
-  options: GenerateProps & ImageResponseOptions,
-): ImageResponse {
-  const { title, description, primaryTextColor, ...rest } = options;
+export async function generateOGImage(
+  options: GenerateProps,
+): Promise<Response> {
+  const [component] = await fromJsx(generate(options));
+  
+  const image = await options.renderer.renderAsync(component, {
+    width: 1200,
+    height: 630,
+    format: 'WebP' as OutputFormat.WebP,
+  });
 
-  return new ImageResponse(
-    generate({
-      title,
-      description,
-      primaryTextColor,
-    }),
-    {
-      width: 1200,
-      height: 630,
-      ...rest,
+  return new Response(image, {
+    headers: {
+      'Content-Type': 'image/webp',
     },
-  );
+  });
 }
 
 export function generate({
@@ -38,7 +38,7 @@ export function generate({
         flexDirection: 'column',
         width: '100%',
         height: '100%',
-        color: 'white',
+        color: '#ffffff',
         backgroundColor: 'rgb(10,10,10)',
       }}
     >
@@ -98,8 +98,8 @@ export function generate({
                 id="logo-iconGradient"
                 gradientTransform="rotate(45)"
               >
-                <stop offset="45%" stopColor="black" />
-                <stop offset="100%" stopColor="white" />
+                <stop offset="45%" stopColor="#000000" />
+                <stop offset="100%" stopColor="#ffffff" />
               </linearGradient>
             </defs>
           </svg>

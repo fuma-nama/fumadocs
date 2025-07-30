@@ -193,7 +193,7 @@ export async function generateMetadata(props: {
     page.data.description ?? 'The library for building documentation sites';
 
   const image = {
-    url: ['/og', ...slug, 'image.png'].join('/'),
+    url: ['/og', ...slug, 'image.webp'].join('/'),
     width: 1200,
     height: 630,
   };
