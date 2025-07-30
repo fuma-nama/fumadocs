@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 15.6.7
+
+### Patch Changes
+
+- e9fef34: Move sidebar toolbar to top on mobile view
+- d4a9037: improve codeblock diff styles
+- Updated dependencies [6fa1442]
+  - fumadocs-core@15.6.7
+
 ## 15.6.6
 
 ### Patch Changes
