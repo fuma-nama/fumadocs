@@ -16,7 +16,8 @@ import {
   type GetSidebarTabsOptions,
 } from '@/utils/get-sidebar-tabs';
 
-export interface SidebarOptions extends SidebarProps {
+export interface SidebarOptions
+  extends Pick<SidebarProps, 'defaultOpenLevel' | 'prefetch'> {
   components?: Partial<SidebarComponents>;
 
   /**
@@ -26,6 +27,13 @@ export interface SidebarOptions extends SidebarProps {
 
   banner?: ReactNode;
   footer?: ReactNode;
+
+  /**
+   * Support collapsing the sidebar on desktop mode
+   *
+   * @defaultValue true
+   */
+  collapsible?: boolean;
 }
 
 export function SidebarLinkItem({

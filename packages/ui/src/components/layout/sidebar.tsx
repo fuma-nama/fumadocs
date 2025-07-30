@@ -1,5 +1,5 @@
 'use client';
-import { ChevronDown, ExternalLink, X } from 'lucide-react';
+import { ChevronDown, ExternalLink } from 'lucide-react';
 import { usePathname } from 'fumadocs-core/framework';
 import {
   type ComponentProps,
@@ -33,9 +33,8 @@ import type { PageTree } from 'fumadocs-core/server';
 import { useTreeContext, useTreePath } from '@/contexts/tree';
 import { useMediaQuery } from 'fumadocs-core/utils/use-media-query';
 import { Presence } from '@radix-ui/react-presence';
-import { buttonVariants } from '@/components/ui/button';
 
-export interface SidebarProps extends ComponentProps<'aside'> {
+export interface SidebarProps {
   /**
    * Open folders by default if their level is lower or equal to a specific level
    * (Starting from 1)
@@ -52,11 +51,14 @@ export interface SidebarProps extends ComponentProps<'aside'> {
   prefetch?: boolean;
 
   /**
-   * Support collapsing the sidebar on desktop mode
-   *
-   * @defaultValue true
+   * Children to render
    */
-  collapsible?: boolean;
+  Content: ReactNode;
+
+  /**
+   * Alternative children for mobile
+   */
+  Mobile?: ReactNode;
 }
 
 interface InternalContext {
@@ -87,10 +89,10 @@ const FolderContext = createContext<{
 export function Sidebar({
   defaultOpenLevel = 0,
   prefetch = true,
-  collapsible = true,
-  ...props
+  Mobile,
+  Content,
 }: SidebarProps) {
-  const { open, setOpen, collapsed } = useSidebar();
+  const isMobile = useMediaQuery('(width < 768px)') ?? false;
   const context = useMemo<InternalContext>(() => {
     return {
       defaultOpenLevel,
@@ -99,61 +101,23 @@ export function Sidebar({
     };
   }, [defaultOpenLevel, prefetch]);
 
+  return (
+    <Context.Provider value={context}>
+      {isMobile && Mobile != null ? Mobile : Content}
+    </Context.Provider>
+  );
+}
+
+export function SidebarContent(props: ComponentProps<'aside'>) {
+  const { collapsed } = useSidebar();
   const [hover, setHover] = useState(false);
   const timerRef = useRef(0);
   const closeTimeRef = useRef(0);
-  // md
-  const isMobile = useMediaQuery('(width < 768px)') ?? false;
 
   useOnChange(collapsed, () => {
     setHover(false);
     closeTimeRef.current = Date.now() + 150;
   });
-
-  if (isMobile) {
-    const state = open ? 'open' : 'closed';
-
-    return (
-      <Context.Provider value={context}>
-        <Presence present={open}>
-          <div
-            data-state={state}
-            className="fixed z-40 inset-0 backdrop-blur-xs data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out"
-            onClick={() => setOpen(false)}
-          />
-        </Presence>
-        <Presence present={open}>
-          {({ present }) => (
-            <aside
-              id="nd-sidebar-mobile"
-              {...props}
-              data-state={state}
-              className={cn(
-                'fixed text-[15px] flex flex-col shadow-lg border-s end-0 inset-y-0 w-[85%] max-w-[380px] z-40 bg-fd-background data-[state=open]:animate-fd-sidebar-in data-[state=closed]:animate-fd-sidebar-out',
-                !present && 'invisible',
-                props.className,
-              )}
-            >
-              <button
-                onClick={() => setOpen(false)}
-                className={cn(
-                  buttonVariants({
-                    color: 'ghost',
-                    size: 'icon-sm',
-                    className:
-                      'mt-3 mb-1 ms-auto me-4 text-fd-muted-foreground',
-                  }),
-                )}
-              >
-                <X />
-              </button>
-              {props.children}
-            </aside>
-          )}
-        </Presence>
-      </Context.Provider>
-    );
-  }
 
   return (
     <aside
@@ -164,7 +128,7 @@ export function Sidebar({
         'fixed start-0 flex flex-col items-end top-(--fd-sidebar-top) bottom-(--fd-sidebar-margin) z-20 bg-fd-card text-sm border-e max-md:hidden *:w-(--fd-sidebar-width)',
         collapsed && [
           'rounded-xl border translate-x-(--fd-sidebar-offset) rtl:-translate-x-(--fd-sidebar-offset)',
-          hover ? 'z-50 shadow-lg' : 'opacity-0 ',
+          hover ? 'z-50 shadow-lg' : 'opacity-0',
         ],
         props.className,
       )}
@@ -186,7 +150,6 @@ export function Sidebar({
       }
       onPointerEnter={(e) => {
         if (
-          !collapsible ||
           !collapsed ||
           e.pointerType === 'touch' ||
           closeTimeRef.current > Date.now()
@@ -196,7 +159,7 @@ export function Sidebar({
         setHover(true);
       }}
       onPointerLeave={(e) => {
-        if (!collapsible || !collapsed || e.pointerType === 'touch') return;
+        if (!collapsed || e.pointerType === 'touch') return;
         window.clearTimeout(timerRef.current);
 
         timerRef.current = window.setTimeout(
@@ -210,8 +173,45 @@ export function Sidebar({
         );
       }}
     >
-      <Context.Provider value={context}>{props.children}</Context.Provider>
+      {props.children}
     </aside>
+  );
+}
+
+export function SidebarContentMobile({
+  className,
+  children,
+  ...props
+}: ComponentProps<'aside'>) {
+  const { open, setOpen } = useSidebar();
+  const state = open ? 'open' : 'closed';
+
+  return (
+    <>
+      <Presence present={open}>
+        <div
+          data-state={state}
+          className="fixed z-40 inset-0 backdrop-blur-xs data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out"
+          onClick={() => setOpen(false)}
+        />
+      </Presence>
+      <Presence present={open}>
+        {({ present }) => (
+          <aside
+            id="nd-sidebar-mobile"
+            {...props}
+            data-state={state}
+            className={cn(
+              'fixed text-[15px] flex flex-col shadow-lg border-s end-0 inset-y-0 w-[85%] max-w-[380px] z-40 bg-fd-background data-[state=open]:animate-fd-sidebar-in data-[state=closed]:animate-fd-sidebar-out',
+              !present && 'invisible',
+              className,
+            )}
+          >
+            {children}
+          </aside>
+        )}
+      </Presence>
+    </>
   );
 }
 
@@ -219,7 +219,7 @@ export function SidebarHeader(props: ComponentProps<'div'>) {
   return (
     <div
       {...props}
-      className={cn('flex flex-col gap-3 px-4 pb-2 md:pt-4', props.className)}
+      className={cn('flex flex-col gap-3 p-4 pb-2', props.className)}
     >
       {props.children}
     </div>

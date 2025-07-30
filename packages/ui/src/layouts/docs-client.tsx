@@ -17,7 +17,7 @@ export function Navbar(props: ComponentProps<'header'>) {
       id="nd-subnav"
       {...props}
       className={cn(
-        'fixed top-(--fd-banner-height) inset-x-0 z-30 flex items-center px-4 border-b transition-colors backdrop-blur-sm',
+        'fixed top-(--fd-banner-height) inset-x-0 z-30 flex items-center ps-4 pe-2.5 border-b transition-colors backdrop-blur-sm',
         !isTransparent && 'bg-fd-background/80',
         props.className,
       )}
@@ -50,8 +50,8 @@ export function LayoutBody(props: ComponentProps<'main'>) {
   );
 }
 
-export function NavbarSidebarTrigger({
-  className,
+export function SidebarTrigger({
+  children,
   ...props
 }: ComponentProps<'button'>) {
   const { setOpen } = useSidebar();
@@ -60,16 +60,9 @@ export function NavbarSidebarTrigger({
     <button
       {...props}
       aria-label="Open Sidebar"
-      className={cn(
-        buttonVariants({
-          color: 'ghost',
-          size: 'icon-sm',
-          className,
-        }),
-      )}
       onClick={() => setOpen((prev) => !prev)}
     >
-      <SidebarIcon />
+      {children}
     </button>
   );
 }

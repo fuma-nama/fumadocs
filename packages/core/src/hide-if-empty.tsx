@@ -1,7 +1,39 @@
 'use client';
-import React, { type ReactNode } from 'react';
+import {
+  createContext,
+  type FC,
+  type HTMLAttributes,
+  type ReactNode,
+  useContext,
+  useEffect,
+  useId,
+  useMemo,
+  useState,
+} from 'react';
 
-const isEmpty = (node: HTMLElement) => {
+const Context = createContext({
+  nonce: undefined as string | undefined,
+});
+
+export function HideIfEmptyProvider({
+  nonce,
+  children,
+}: {
+  nonce?: string;
+  children: ReactNode;
+}) {
+  return (
+    <Context.Provider value={useMemo(() => ({ nonce }), [nonce])}>
+      {children}
+    </Context.Provider>
+  );
+}
+
+function getElement(id: string) {
+  return document.querySelector<HTMLElement>(`[data-fd-if-empty="${id}"]`);
+}
+
+function isEmpty(node: HTMLElement) {
   for (let i = 0; i < node.childNodes.length; i++) {
     const child = node.childNodes.item(i);
 
@@ -15,7 +47,7 @@ const isEmpty = (node: HTMLElement) => {
   }
 
   return true;
-};
+}
 
 /**
  * The built-in CSS `:empty` selector cannot detect if the children is hidden, classes such as `md:hidden` causes it to fail.
@@ -23,53 +55,49 @@ const isEmpty = (node: HTMLElement) => {
  *
  * This can be expensive, please avoid this whenever possible.
  */
-export function HideIfEmpty({ children }: { children: ReactNode }) {
-  const id = React.useId();
-  const [empty, setEmpty] = React.useState<boolean | undefined>();
+export function HideIfEmpty<Props extends HTMLAttributes<HTMLElement>>({
+  as: Comp,
+  ...props
+}: Props & {
+  as: FC<Props>;
+}) {
+  const id = useId();
+  const { nonce } = useContext(Context);
+  const [empty, setEmpty] = useState(() => {
+    const element = typeof window !== 'undefined' ? getElement(id) : null;
+    if (element) return isEmpty(element);
+  });
 
-  React.useEffect(() => {
-    const element = document.querySelector(
-      `[data-fdid="${id}"]`,
-    ) as HTMLElement | null;
-    if (!element) return;
-
-    const onUpdate = () => {
-      setEmpty(isEmpty(element));
+  useEffect(() => {
+    const handleResize = () => {
+      const element = getElement(id);
+      if (element) setEmpty(isEmpty(element));
     };
 
-    const observer = new ResizeObserver(onUpdate);
-    observer.observe(element);
-    onUpdate();
-    return () => {
-      observer.disconnect();
-    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, [id]);
 
-  let child;
-  if (React.isValidElement(children)) {
-    child = React.cloneElement(children, {
-      ...(children.props as object),
-      'data-fdid': id,
-      'data-empty': empty,
-      suppressHydrationWarning: true,
-    } as object);
-  } else {
-    child =
-      React.Children.count(children) > 1 ? React.Children.only(null) : null;
-  }
+  const init = (id: string) => {
+    const element = getElement(id);
+    if (element) element.hidden = isEmpty(element);
+
+    const script = document.currentScript;
+    if (script) script.parentNode?.removeChild(script);
+  };
 
   return (
     <>
-      {child}
+      <Comp
+        {...(props as unknown as Props)}
+        data-fd-if-empty={id}
+        hidden={empty ?? false}
+      />
       {empty === undefined && (
         <script
-          suppressHydrationWarning
+          nonce={nonce}
           dangerouslySetInnerHTML={{
-            __html: `{
-const element = document.querySelector('[data-fdid="${id}"]')
-if (element) {
-  element.setAttribute('data-empty', String((${isEmpty.toString()})(element)))
-}}`,
+            __html: `{${getElement};${isEmpty};(${init})("${id}")}`,
           }}
         />
       )}

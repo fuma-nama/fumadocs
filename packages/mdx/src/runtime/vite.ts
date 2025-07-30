@@ -11,19 +11,25 @@ import type {
   VirtualFile,
 } from 'fumadocs-core/source';
 
-export type CompiledMDXFile<Frontmatter> = {
+interface CompiledMDXProperties<Frontmatter> {
   frontmatter: Frontmatter;
+  structuredData: StructuredData;
   toc: TableOfContents;
   default: FC<MDXProps>;
-  structuredData: StructuredData;
-} & Record<string, unknown>;
 
-type MDXFileToPageData<Frontmatter> = Frontmatter & {
-  toc: TableOfContents;
-  default: FC<MDXProps>;
-  structuredData: StructuredData;
-  _exports: Record<string, unknown>;
-};
+  /**
+   * Only available when `lastModifiedTime` is enabled on MDX loader
+   */
+  lastModified?: Date;
+}
+
+export type CompiledMDXFile<Frontmatter> = CompiledMDXProperties<Frontmatter> &
+  Record<string, unknown>;
+
+type MDXFileToPageData<Frontmatter> = Frontmatter &
+  Omit<CompiledMDXProperties<Frontmatter>, 'frontmatter'> & {
+    _exports: Record<string, unknown>;
+  };
 
 type AttachGlobValue<GlobValue, Attach> =
   GlobValue extends () => Promise<unknown> ? () => Promise<Attach> : Attach;
@@ -103,13 +109,14 @@ export function fromConfig<Config>(): {
   function mapPageData<Frontmatter>(
     entry: CompiledMDXFile<Frontmatter>,
   ): MDXFileToPageData<Frontmatter> {
-    const { toc, structuredData } = entry;
+    const { toc, structuredData, lastModified, frontmatter } = entry;
 
     return {
-      ...entry.frontmatter,
+      ...frontmatter,
       default: entry.default,
       toc,
       structuredData,
+      lastModified,
       _exports: entry,
     };
   }

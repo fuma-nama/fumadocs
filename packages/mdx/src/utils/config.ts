@@ -17,7 +17,7 @@ export function findConfigFile(): string {
 export interface LoadedConfig {
   collections: Map<string, DocCollection | MetaCollection | DocsCollection>;
 
-  global?: GlobalConfig;
+  global: GlobalConfig;
 
   getDefaultMDXOptions(): Promise<ProcessorOptions>;
 }
@@ -73,13 +73,10 @@ export async function loadConfig(
   const url = pathToFileURL(path.resolve(outDir, 'source.config.mjs'));
 
   const config = import(`${url.href}?hash=${hash}`).then((loaded) => {
-    const [err, config] = buildConfig(
+    return buildConfig(
       // every call to `loadConfig` will cause the previous cache to be ignored
       loaded as Record<string, unknown>,
     );
-
-    if (err !== null) throw new Error(err);
-    return config;
   });
 
   cache = { config, hash };

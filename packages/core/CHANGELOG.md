@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 15.6.7
+
+### Patch Changes
+
+- 6fa1442: Support to override `<HideIfEmpty />` scripts nonce with `<HideIfEmptyProvider />`
+
 ## 15.6.6
 
 ### Patch Changes
