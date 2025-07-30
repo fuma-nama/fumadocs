@@ -1,4 +1,4 @@
-import type { Plugin } from 'vite';
+import type { Plugin, TransformResult } from 'vite';
 import { buildConfig } from '@/config/build';
 import { buildMDX } from '@/utils/build-mdx';
 import { parse } from 'node:querystring';
@@ -7,18 +7,14 @@ import { fumaMatter } from '@/utils/fuma-matter';
 import { validate, ValidationError } from '@/utils/schema';
 import { z } from 'zod';
 import { ident, toImportPath } from '@/utils/import-formatter';
-import type {
-  AnyCollection,
-  DocCollection,
-  DocsCollection,
-  MetaCollection,
-} from '@/config';
-import fs from 'node:fs/promises';
-import path from 'node:path';
+import type { DocCollection, DocsCollection, MetaCollection } from '@/config';
+import * as fs from 'node:fs/promises';
+import * as path from 'node:path';
 import { load } from 'js-yaml';
-import { getGlobPatterns } from '@/utils/collections';
+import type { SourceMap, TransformPluginContext } from 'rollup';
+import { generateGlob } from '@/vite/generate-glob';
+import { getGitTimestamp } from '@/utils/git-timestamp';
 
-const fileRegex = /\.(md|mdx)$/;
 const onlySchema = z.literal(['frontmatter', 'all']);
 
 export interface PluginOptions {
@@ -40,9 +36,136 @@ export default function mdx(
   options: PluginOptions = {},
 ): Plugin {
   const { generateIndexFile = true, configPath = 'source.config.ts' } = options;
-  const [err, loaded] = buildConfig(config);
-  if (err || !loaded) {
-    throw new Error(err);
+  const loaded = buildConfig(config);
+
+  async function transformMeta(
+    path: string,
+    query: string,
+    value: string,
+  ): Promise<TransformResult | null> {
+    const isJson = path.endsWith('.json');
+    const parsed = parse(query) as {
+      collection?: string;
+    };
+
+    const collection = parsed.collection
+      ? loaded!.collections.get(parsed.collection)
+      : undefined;
+    if (!collection) return null;
+    let schema;
+    switch (collection.type) {
+      case 'meta':
+        schema = collection.schema;
+        break;
+      case 'docs':
+        schema = collection.meta.schema;
+        break;
+    }
+    if (!schema) return null;
+
+    let data;
+    try {
+      data = isJson ? JSON.parse(value) : load(value);
+    } catch {
+      return null;
+    }
+
+    const out = await validate(
+      schema,
+      data,
+      { path, source: value },
+      `invalid data in ${path}`,
+    );
+
+    return {
+      code: isJson
+        ? JSON.stringify(out)
+        : `export default ${JSON.stringify(out)}`,
+      map: null,
+    };
+  }
+
+  async function transformContent(
+    this: TransformPluginContext,
+    file: string,
+    query: string,
+    value: string,
+  ): Promise<TransformResult | null> {
+    const matter = fumaMatter(value);
+    const isDevelopment = this.environment.mode === 'dev';
+    const parsed = parse(query) as {
+      collection?: string;
+      only?: string;
+    };
+
+    const collection = parsed.collection
+      ? loaded.collections.get(parsed.collection)
+      : undefined;
+    const only = parsed.only ? onlySchema.parse(parsed.only) : 'all';
+
+    let schema;
+    let mdxOptions;
+    switch (collection?.type) {
+      case 'doc':
+        mdxOptions = collection.mdxOptions;
+        schema = collection.schema;
+        break;
+      case 'docs':
+        mdxOptions = collection.docs.mdxOptions;
+        schema = collection.docs.schema;
+        break;
+    }
+
+    if (schema) {
+      matter.data = await validate(
+        schema,
+        matter.data,
+        {
+          source: value,
+          path: file,
+        },
+        `invalid frontmatter in ${file}`,
+      );
+    }
+
+    if (only === 'frontmatter') {
+      return {
+        code: `export const frontmatter = ${JSON.stringify(matter.data)}`,
+        map: null,
+      };
+    }
+
+    const data: Record<string, unknown> = {};
+    if (loaded.global.lastModifiedTime === 'git') {
+      data.lastModified = (await getGitTimestamp(file))?.getTime();
+    }
+
+    mdxOptions ??= await loaded.getDefaultMDXOptions();
+
+    // ensure the line number is correct in dev mode
+    const lineOffset = isDevelopment ? countLines(matter.matter) : 0;
+
+    const compiled = await buildMDX(
+      parsed.collection ?? 'global',
+      '\n'.repeat(lineOffset) + matter.content,
+      {
+        development: isDevelopment,
+        ...mdxOptions,
+        data,
+        filePath: file,
+        frontmatter: matter.data as Record<string, unknown>,
+        _compiler: {
+          addDependency: (file) => {
+            this.addWatchFile(file);
+          },
+        },
+      },
+    );
+
+    return {
+      code: String(compiled.value),
+      map: compiled.map as SourceMap,
+    };
   }
 
   return {
@@ -96,176 +219,22 @@ export default function mdx(
     },
 
     async transform(value, id) {
-      const [path, query = ''] = id.split('?');
-      const isJson = path.endsWith('.json');
-      const isYaml = path.endsWith('.yaml');
+      const [file, query = ''] = id.split('?');
+      const ext = path.extname(file);
 
-      if (isJson || isYaml) {
-        const parsed = parse(query) as {
-          collection?: string;
-        };
+      try {
+        if (['.yaml', '.json'].includes(ext))
+          return await transformMeta(file, query, value);
 
-        const collection = parsed.collection
-          ? loaded.collections.get(parsed.collection)
-          : undefined;
-        if (!collection) return null;
-        let schema;
-        switch (collection.type) {
-          case 'meta':
-            schema = collection.schema;
-            break;
-          case 'docs':
-            schema = collection.meta.schema;
-            break;
-        }
-        if (!schema) return null;
-        let data;
-
-        try {
-          data = isJson ? JSON.parse(value) : load(value);
-        } catch {
-          return null;
+        if (['.md', '.mdx'].includes(ext))
+          return await transformContent.call(this, file, query, value);
+      } catch (e) {
+        if (e instanceof ValidationError) {
+          throw new Error(e.toStringFormatted());
         }
 
-        const out = await validate(
-          schema,
-          data,
-          { path, source: value },
-          `invalid data in ${path}`,
-        );
-
-        return {
-          code: isJson
-            ? JSON.stringify(out)
-            : `export default ${JSON.stringify(out)}`,
-          map: null,
-        };
+        throw e;
       }
-
-      if (!fileRegex.test(path)) return;
-
-      const matter = fumaMatter(value);
-      const isDevelopment = this.environment.mode === 'dev';
-      const parsed = parse(query) as {
-        collection?: string;
-        only?: string;
-      };
-
-      const collection = parsed.collection
-        ? loaded.collections.get(parsed.collection)
-        : undefined;
-      const only = parsed.only ? onlySchema.parse(parsed.only) : 'all';
-
-      let schema;
-      let mdxOptions;
-      switch (collection?.type) {
-        case 'doc':
-          mdxOptions = collection.mdxOptions;
-          schema = collection.schema;
-          break;
-        case 'docs':
-          mdxOptions = collection.docs.mdxOptions;
-          schema = collection.docs.schema;
-          break;
-      }
-
-      if (schema) {
-        try {
-          matter.data = await validate(
-            schema,
-            matter.data,
-            {
-              source: value,
-              path,
-            },
-            `invalid frontmatter in ${path}`,
-          );
-        } catch (e) {
-          if (e instanceof ValidationError) {
-            throw new Error(e.toStringFormatted());
-          }
-
-          throw e;
-        }
-      }
-
-      if (only === 'frontmatter') {
-        return {
-          code: `export const frontmatter = ${JSON.stringify(matter.data)}`,
-        };
-      }
-
-      mdxOptions ??= await loaded.getDefaultMDXOptions();
-
-      // ensure the line number is correct in dev mode
-      const lineOffset = isDevelopment ? countLines(matter.matter) : 0;
-
-      const file = await buildMDX(
-        parsed.collection ?? 'global',
-        '\n'.repeat(lineOffset) + matter.content,
-        {
-          development: isDevelopment,
-          ...mdxOptions,
-          filePath: path,
-          frontmatter: matter.data as Record<string, unknown>,
-          _compiler: {
-            addDependency: (file) => {
-              this.addWatchFile(file);
-            },
-          },
-        },
-      );
-
-      return {
-        code: String(file.value),
-        map: file.map,
-      };
     },
   };
-}
-
-function generateGlob(
-  name: string,
-  collection: MetaCollection | DocCollection,
-) {
-  const patterns = mapGlobPatterns(getGlobPatterns(collection));
-  const options: Record<string, unknown> = {
-    query: {
-      collection: name,
-    },
-    base: getGlobBase(collection),
-  };
-
-  if (collection.type === 'meta') {
-    options.import = 'default';
-  }
-
-  return `import.meta.glob(${JSON.stringify(patterns)}, ${JSON.stringify(options, null, 2)})`;
-}
-
-function mapGlobPatterns(patterns: string[]) {
-  return patterns.map((file) => {
-    if (file.startsWith('./')) return file;
-    if (file.startsWith('/')) return `.${file}`;
-
-    return `./${file}`;
-  });
-}
-
-function getGlobBase(collection: AnyCollection) {
-  let dir = collection.dir;
-
-  if (Array.isArray(dir)) {
-    if (dir.length !== 1)
-      throw new Error(
-        `[Fumadocs MDX] Vite Plugin doesn't support multiple \`dir\` for a collection at the moment.`,
-      );
-
-    dir = dir[0];
-  }
-
-  if (!dir.startsWith('./') && !dir.startsWith('/')) {
-    return '/' + dir;
-  }
-  return dir;
 }
