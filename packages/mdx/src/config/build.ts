@@ -28,7 +28,7 @@ export function buildConfig(config: Record<string, unknown>): LoadedConfig {
       }
     }
 
-    if (k === 'default') {
+    if (k === 'default' && v) {
       globalConfig = v as GlobalConfig;
       continue;
     }
@@ -45,7 +45,7 @@ export function buildConfig(config: Record<string, unknown>): LoadedConfig {
     async getDefaultMDXOptions(): Promise<ProcessorOptions> {
       if (cachedMdxOptions) return cachedMdxOptions;
 
-      const input = this.global?.mdxOptions;
+      const input = this.global.mdxOptions;
       async function uncached(): Promise<ProcessorOptions> {
         const options = typeof input === 'function' ? await input() : input;
         const { getDefaultMDXOptions } = await import('@/utils/mdx-options');

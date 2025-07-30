@@ -102,8 +102,7 @@ export async function generateJS(
           specifier: 'fumadocs-mdx/runtime/async',
           names: ['_runtimeAsync', 'buildConfig'],
         }),
-        'const [err, _sourceConfig] = buildConfig(_source)',
-        'if (!_sourceConfig) throw new Error(err)',
+        'const _sourceConfig = buildConfig(_source)',
       );
 
       asyncInit = true;
