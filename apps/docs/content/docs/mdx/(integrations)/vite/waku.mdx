@@ -23,41 +23,43 @@ Create the content source:
   ../../examples/waku/src/source.ts
 </include>
 
-### Provider
-
-Setup the Waku provider:
-
-<include cwd meta='title="src/components/provider.tsx"'>
-  ../../examples/waku/src/components/provider.tsx
-</include>
-
-Use it in your root layout:
-
-<include cwd meta='title="src/pages/_layout.tsx"'>
-  ../../examples/waku/src/pages/docs/_layout.tsx
-</include>
-
 ### Rendering Pages
 
-<include cwd meta='title="src/components/doc.tsx"'>
-  ../../examples/waku/src/components/doc.tsx
-</include>
+Since Waku supports RSC, you can use the exported `default` component directly.
 
-Create a catch-all route for documentation pages:
+```tsx
+import { source } from '@/lib/source';
+import type { PageProps } from 'waku/router';
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+import {
+  DocsBody,
+  DocsDescription,
+  DocsPage,
+  DocsTitle,
+} from 'fumadocs-ui/page';
 
-<include cwd meta='title="src/pages/docs/[...slugs].tsx"'>
-  ../../examples/waku/src/pages/docs/[...slugs].tsx
-</include>
+export default async function DocPage({
+  slugs,
+}: PageProps<'/docs/[...slugs]'>) {
+  const page = source.getPage(slugs);
 
-### Waku Configuration
+  if (!page) {
+    // ...
+  }
 
-Configure Waku for static generation:
-
-<include cwd meta='title="waku.config.ts"'>
-  ../../examples/waku/waku.config.ts
-</include>
-
-## Learn More
-
-- [Waku Documentation](https://waku.gg)
-- [Example Repository](https://github.com/fumadocs/fumadocs/tree/main/examples/waku)
+  const MDX = page.data.default;
+  return (
+    <DocsPage toc={page.data.toc}>
+      <DocsTitle>{page.data.title}</DocsTitle>
+      <DocsDescription>{page.data.description}</DocsDescription>
+      <DocsBody>
+        <MDX
+          components={{
+            ...defaultMdxComponents,
+          }}
+        />
+      </DocsBody>
+    </DocsPage>
+  );
+}
+```
