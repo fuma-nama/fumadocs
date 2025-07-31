@@ -179,6 +179,7 @@ export default function mdx(
       const outdir = process.cwd();
       const outFile = 'source.generated.ts';
       const lines = [
+        '/// <reference types="vite/client" />',
         `import { fromConfig } from 'fumadocs-mdx/runtime/vite';`,
         `import type * as Config from '${toImportPath(configPath, {
           relativeTo: outdir,
