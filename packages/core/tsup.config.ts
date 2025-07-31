@@ -9,6 +9,7 @@ export default defineConfig({
     'react-dom',
     '@tanstack/react-router',
     'react-router',
+    'waku',
   ],
   dts: true,
   target: 'es2022',

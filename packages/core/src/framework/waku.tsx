@@ -11,14 +11,15 @@ const framework: Framework = {
   },
   useParams() {
     const { query } = useRouter();
-    // Waku doesn't expose params directly from useRouter
-    // Instead, we extract them from the query object
-    return Object.fromEntries(
-      Object.entries(query).map(([key, value]) => [
-        key,
-        Array.isArray(value) ? value[0] : value,
-      ]),
-    );
+    return useMemo(() => {
+      const params = new URLSearchParams(query);
+      return Object.fromEntries(
+        Array.from(params.entries()).map(([key, value]) => [
+          key,
+          Array.isArray(value) ? value[0] : value,
+        ]),
+      );
+    }, [query]);
   },
   useRouter() {
     const router = useRouter();
