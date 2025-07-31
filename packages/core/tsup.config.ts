@@ -1,15 +1,7 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  external: [
-    'algoliasearch',
-    'unified',
-    'next',
-    'react',
-    'react-dom',
-    '@tanstack/react-router',
-    'react-router',
-  ],
+  external: ['algoliasearch', 'unified', 'next', 'react', 'react-dom'],
   dts: true,
   target: 'es2022',
   format: 'esm',

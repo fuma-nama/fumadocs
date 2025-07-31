@@ -1,0 +1,65 @@
+---
+title: Waku
+description: Use Fumadocs MDX with Waku
+---
+
+## Setup
+
+Install dependencies:
+
+```npm
+npm i fumadocs-mdx fumadocs-core fumadocs-ui @types/mdx
+```
+
+Create the configuration file:
+
+<include cwd meta='title="source.config.ts"'>
+  ../../examples/waku/source.config.ts
+</include>
+
+Create the content source:
+
+<include cwd meta='title="src/source.ts"'>
+  ../../examples/waku/src/source.ts
+</include>
+
+### Rendering Pages
+
+Since Waku supports RSC, you can use the exported `default` component directly.
+
+```tsx
+import { source } from '@/lib/source';
+import type { PageProps } from 'waku/router';
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+import {
+  DocsBody,
+  DocsDescription,
+  DocsPage,
+  DocsTitle,
+} from 'fumadocs-ui/page';
+
+export default async function DocPage({
+  slugs,
+}: PageProps<'/docs/[...slugs]'>) {
+  const page = source.getPage(slugs);
+
+  if (!page) {
+    // ...
+  }
+
+  const MDX = page.data.default;
+  return (
+    <DocsPage toc={page.data.toc}>
+      <DocsTitle>{page.data.title}</DocsTitle>
+      <DocsDescription>{page.data.description}</DocsDescription>
+      <DocsBody>
+        <MDX
+          components={{
+            ...defaultMdxComponents,
+          }}
+        />
+      </DocsBody>
+    </DocsPage>
+  );
+}
+```
