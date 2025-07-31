@@ -1,16 +1,12 @@
 'use client';
-import { PropsWithChildren } from 'react';
+import type { ReactNode } from 'react';
 import { WakuProvider } from 'fumadocs-core/framework/waku';
 import { RootProvider } from 'fumadocs-ui/provider/base';
-import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { source } from '../source';
 
-export const Provider = ({ children }: PropsWithChildren) => {
+export const Provider = ({ children }: { children: ReactNode }) => {
   return (
     <WakuProvider>
-      <RootProvider>
-        <DocsLayout tree={source.pageTree}>{children}</DocsLayout>
-      </RootProvider>
+      <RootProvider>{children}</RootProvider>
     </WakuProvider>
   );
 };

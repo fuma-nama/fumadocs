@@ -1,10 +1,20 @@
-import { ReactNode } from 'react';
-import { Provider } from '../../components/provider';
+import type { ReactNode } from 'react';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { source } from '../../source';
 
 type RootLayoutProps = { children: ReactNode; path: string };
 
 export default async function RootLayout({ children }: RootLayoutProps) {
-  return <Provider>{children}</Provider>;
+  return (
+    <DocsLayout
+      tree={source.pageTree}
+      nav={{
+        title: 'Waku',
+      }}
+    >
+      {children}
+    </DocsLayout>
+  );
 }
 
 export const getConfig = async () => {

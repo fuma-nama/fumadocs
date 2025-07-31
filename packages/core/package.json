@@ -143,7 +143,10 @@
     "algoliasearch": "5.x.x",
     "next": "14.x.x || 15.x.x",
     "react": "18.x.x || 19.x.x",
-    "react-dom": "18.x.x || 19.x.x"
+    "react-dom": "18.x.x || 19.x.x",
+    "waku": "^0.23.0",
+    "@tanstack/react-router": "1.x.x",
+    "react-router": "7.x.x"
   },
   "peerDependenciesMeta": {
     "@mixedbread/sdk": {
@@ -165,6 +168,15 @@
       "optional": true
     },
     "react-dom": {
+      "optional": true
+    },
+    "waku": {
+      "optional": true
+    },
+    "@tanstack/react-router": {
+      "optional": true
+    },
+    "react-router": {
       "optional": true
     }
   },

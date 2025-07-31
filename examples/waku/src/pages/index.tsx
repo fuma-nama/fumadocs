@@ -5,7 +5,7 @@ export default function Home() {
   return (
     <HomeLayout
       nav={{
-        title: 'Tanstack Start',
+        title: 'Waku',
       }}
       className="text-center py-32 justify-center"
     >

@@ -1,5 +1,5 @@
 {
-  "name": "example-wau",
+  "name": "example-waku",
   "private": true,
   "sideEffects": false,
   "type": "module",
@@ -9,17 +9,12 @@
     "start": "waku start"
   },
   "dependencies": {
-    "@radix-ui/react-slot": "^1.0.2",
-    "class-variance-authority": "^0.7.0",
-    "clsx": "^2.1.0",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "lucide-react": "^0.344.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-server-dom-webpack": "^19.1.1",
-    "tailwind-merge": "^2.2.1",
     "waku": "^0.23.6"
   },
   "devDependencies": {

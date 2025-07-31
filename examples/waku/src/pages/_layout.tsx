@@ -1,11 +1,11 @@
 import '../styles/globals.css';
-
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import { Provider } from '../components/provider';
 
 type RootLayoutProps = { children: ReactNode; path: string };
 
 export default async function RootLayout({ children }: RootLayoutProps) {
-  return <>{children}</>;
+  return <Provider>{children}</Provider>;
 }
 
 export const getConfig = async () => {
