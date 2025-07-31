@@ -1,3 +1,9 @@
 @import 'tailwindcss';
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
