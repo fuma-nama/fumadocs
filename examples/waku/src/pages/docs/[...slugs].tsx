@@ -3,8 +3,10 @@ import { PageProps } from 'waku/router';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { Doc } from '../../components/doc';
 
-export default async function DocPage({ slug }: PageProps<'/docs/[slug]'>) {
-  const page = source.getPage(slug === 'index' ? [] : slug.split('/'));
+export default async function DocPage({
+  slugs,
+}: PageProps<'/docs/[...slugs]'>) {
+  const page = source.getPage(slugs);
 
   if (!page) {
     return (
@@ -38,9 +40,7 @@ export default async function DocPage({ slug }: PageProps<'/docs/[slug]'>) {
 }
 
 export async function getConfig() {
-  const pages = source
-    .getPages()
-    .map((page) => (page.slugs.length === 0 ? 'index' : page.slugs));
+  const pages = source.getPages().map((page) => page.slugs);
 
   return {
     render: 'static' as const,
