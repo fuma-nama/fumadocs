@@ -1,5 +1,12 @@
 # next-docs-mdx
 
+## 11.7.3
+
+### Patch Changes
+
+- 4f8f1d6: Add `vite/client` types in generated file
+- 57224f4: Support last modified time for Vite
+
 ## 11.7.2
 
 ### Patch Changes
