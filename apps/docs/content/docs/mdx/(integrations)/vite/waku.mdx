@@ -1,0 +1,63 @@
+---
+title: Waku
+description: Use Fumadocs MDX with Waku
+---
+
+## Setup
+
+Install dependencies:
+
+```npm
+npm i fumadocs-mdx fumadocs-core fumadocs-ui @types/mdx
+```
+
+Create the configuration file:
+
+<include cwd meta='title="source.config.ts"'>
+  ../../examples/waku/source.config.ts
+</include>
+
+Create the content source:
+
+<include cwd meta='title="src/source.ts"'>
+  ../../examples/waku/src/source.ts
+</include>
+
+### Provider
+
+Setup the Waku provider:
+
+<include cwd meta='title="src/components/provider.tsx"'>
+  ../../examples/waku/src/components/provider.tsx
+</include>
+
+Use it in your root layout:
+
+<include cwd meta='title="src/pages/_layout.tsx"'>
+  ../../examples/waku/src/pages/docs/_layout.tsx
+</include>
+
+### Rendering Pages
+
+<include cwd meta='title="src/components/doc.tsx"'>
+  ../../examples/waku/src/components/doc.tsx
+</include>
+
+Create a catch-all route for documentation pages:
+
+<include cwd meta='title="src/pages/docs/[...slugs].tsx"'>
+  ../../examples/waku/src/pages/docs/[...slugs].tsx
+</include>
+
+### Waku Configuration
+
+Configure Waku for static generation:
+
+<include cwd meta='title="waku.config.ts"'>
+  ../../examples/waku/waku.config.ts
+</include>
+
+## Learn More
+
+- [Waku Documentation](https://waku.gg)
+- [Example Repository](https://github.com/fumadocs/fumadocs/tree/main/examples/waku)

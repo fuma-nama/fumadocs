@@ -13,11 +13,7 @@
     "strict": true,
     "skipLibCheck": true,
     "noUncheckedIndexedAccess": true,
-    "noEmit": true,
-    "baseUrl": "./waku-blog-template",
-    "paths": {
-      "@/*": ["./src/*"]
-    }
+    "noEmit": true
   },
   "exclude": ["node_modules", "dist"]
 }
