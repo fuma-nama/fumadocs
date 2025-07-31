@@ -133,7 +133,8 @@
     "tsconfig": "workspace:*",
     "typescript": "^5.8.3",
     "unified": "^11.0.5",
-    "vfile": "^6.0.3"
+    "vfile": "^6.0.3",
+    "waku": "^0.23.6"
   },
   "peerDependencies": {
     "@mixedbread/sdk": "^0.19.0",
