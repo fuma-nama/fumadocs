@@ -1,7 +1,7 @@
 import type { MethodInformation, RenderContext } from '@/types';
-import dynamic from 'next/dynamic';
+import { lazy } from 'react';
 
-const Client = dynamic(() => import('./client'));
+const Client = lazy(() => import('./client'));
 
 export function APIPlayground({
   path,

@@ -1,9 +1,7 @@
-import type { NextRequest } from 'next/server';
-
 const keys = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD'] as const;
 
 type Proxy = {
-  [K in (typeof keys)[number]]: (req: NextRequest) => Promise<Response>;
+  [K in (typeof keys)[number]]: (req: Request) => Promise<Response>;
 };
 
 interface CreateProxyOptions {
@@ -48,26 +46,23 @@ export function createProxy(options: CreateProxyOptions = {}): Proxy {
   } = options;
   const handlers: Partial<Proxy> = {};
 
-  async function handler(req: NextRequest): Promise<Response> {
-    const url = req.nextUrl.searchParams.get('url');
+  async function handler(req: Request): Promise<Response> {
+    const searchParams = new URL(req.url).searchParams;
+    const url = searchParams.get('url');
 
-    if (!url) {
+    if (!url)
       return Response.json(
         '[Proxy] A `url` query parameter is required for proxy url',
         {
           status: 400,
         },
       );
-    }
 
-    let parsedUrl;
-    try {
-      parsedUrl = new URL(url);
-    } catch {
+    const parsedUrl = URL.parse(url);
+    if (!parsedUrl)
       return Response.json('[Proxy] Invalid `url` parameter value.', {
         status: 400,
       });
-    }
 
     if (allowedOrigins && !allowedOrigins.includes(parsedUrl.origin)) {
       return Response.json(

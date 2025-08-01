@@ -1,18 +1,24 @@
 'use client';
-import dynamic from 'next/dynamic';
+import { lazy } from 'react';
 
-export const CodeExampleProvider = dynamic(() =>
-  import('./contexts/code-example').then((mod) => mod.CodeExampleProvider),
+export const CodeExampleProvider = lazy(() =>
+  import('./contexts/code-example').then((mod) => ({
+    default: mod.CodeExampleProvider,
+  })),
 );
-export const CodeExample = dynamic(() =>
-  import('./contexts/code-example').then((mod) => mod.CodeExample),
+export const CodeExample = lazy(() =>
+  import('./contexts/code-example').then((mod) => ({
+    default: mod.CodeExample,
+  })),
 );
-export const CodeExampleSelector = dynamic(() =>
-  import('./contexts/code-example').then((mod) => mod.CodeExampleSelector),
+export const CodeExampleSelector = lazy(() =>
+  import('./contexts/code-example').then((mod) => ({
+    default: mod.CodeExampleSelector,
+  })),
 );
 
-export const ClientLazy = dynamic(() => import('@/playground/client'));
+export const ClientLazy = lazy(() => import('@/playground/client'));
 
-export const ApiProvider = dynamic(() =>
-  import('./contexts/api').then((mod) => mod.ApiProvider),
+export const ApiProvider = lazy(() =>
+  import('./contexts/api').then((mod) => ({ default: mod.ApiProvider })),
 );

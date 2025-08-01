@@ -1,5 +1,5 @@
-import { type JSONSchema } from 'json-schema-typed/draft-2020-12';
-import { ReferenceObject } from '@/types';
+import type { JSONSchema } from 'json-schema-typed/draft-2020-12';
+import type { ReferenceObject } from '@/types';
 
 export type NoReference<T> = T extends (infer I)[]
   ? NoReference<I>[]
