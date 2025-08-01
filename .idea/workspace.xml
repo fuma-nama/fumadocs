@@ -4,8 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="edacdf1b-58dd-4ffe-9166-8e463dc8fa23" name="Changes" comment="Add Waku example back">
+    <list default="true" id="edacdf1b-58dd-4ffe-9166-8e463dc8fa23" name="Changes" comment="Migrate to AI SDK v5">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/docs/components/ai/search.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/docs/components/ai/search.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/tanstack-start/src/components/not-found.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/examples/tanstack-start/src/components/not-found.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/tanstack-start/src/lib/source.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/tanstack-start/src/routes/__root.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/examples/tanstack-start/src/routes/__root.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/tanstack-start/src/routes/api/search.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/tanstack-start/src/routes/docs/$.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/tanstack-start/src/routes/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/examples/tanstack-start/src/routes/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/tanstack-start/vite.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/examples/tanstack-start/vite.config.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -689,23 +697,7 @@
       <workItem from="1753864861092" duration="12502000" />
       <workItem from="1753941132595" duration="6313000" />
       <workItem from="1754034637804" duration="3426000" />
-      <workItem from="1754038073679" duration="9043000" />
-    </task>
-    <task id="LOCAL-01779" summary="UI: Change sidebar direction for better mobile UX">
-      <option name="closed" value="true" />
-      <created>1753359288611</created>
-      <option name="number" value="01779" />
-      <option name="presentableId" value="LOCAL-01779" />
-      <option name="project" value="LOCAL" />
-      <updated>1753359288611</updated>
-    </task>
-    <task id="LOCAL-01780" summary="OpenAPI: Fix request serialization stripped auth parameters">
-      <option name="closed" value="true" />
-      <created>1753430204778</created>
-      <option name="number" value="01780" />
-      <option name="presentableId" value="LOCAL-01780" />
-      <option name="project" value="LOCAL" />
-      <updated>1753430204779</updated>
+      <workItem from="1754038073679" duration="18005000" />
     </task>
     <task id="LOCAL-01781" summary="MDX: Generate config based on Next.js version">
       <option name="closed" value="true" />
@@ -1083,7 +1075,23 @@
       <option name="project" value="LOCAL" />
       <updated>1754047061491</updated>
     </task>
-    <option name="localTasksCounter" value="1828" />
+    <task id="LOCAL-01828" summary="fix format issues">
+      <option name="closed" value="true" />
+      <created>1754047163895</created>
+      <option name="number" value="01828" />
+      <option name="presentableId" value="LOCAL-01828" />
+      <option name="project" value="LOCAL" />
+      <updated>1754047163895</updated>
+    </task>
+    <task id="LOCAL-01829" summary="Migrate to AI SDK v5">
+      <option name="closed" value="true" />
+      <created>1754054692675</created>
+      <option name="number" value="01829" />
+      <option name="presentableId" value="LOCAL-01829" />
+      <option name="project" value="LOCAL" />
+      <updated>1754054692675</updated>
+    </task>
+    <option name="localTasksCounter" value="1830" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -1134,8 +1142,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
-    <MESSAGE value="OpenAPI: Fix request serialization stripped auth parameters" />
-    <MESSAGE value="MDX: Generate config based on Next.js version" />
     <MESSAGE value="UI: improve sidebar position" />
     <MESSAGE value="UI: improve RTL layout" />
     <MESSAGE value="UI: Improve type table link icon" />
@@ -1159,6 +1165,8 @@
     <MESSAGE value="remove generated files from OpenAPI example" />
     <MESSAGE value="Bump deps" />
     <MESSAGE value="Add Waku example back" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add Waku example back" />
+    <MESSAGE value="fix format issues" />
+    <MESSAGE value="Migrate to AI SDK v5" />
+    <option name="LAST_COMMIT_MESSAGE" value="Migrate to AI SDK v5" />
   </component>
 </project>

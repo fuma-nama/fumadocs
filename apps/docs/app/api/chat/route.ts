@@ -1,10 +1,11 @@
 import { ProvideLinksToolSchema } from '@/lib/chat/inkeep-qa-schema';
-import { createOpenAI } from '@ai-sdk/openai';
-import { streamText } from 'ai';
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
+import { convertToModelMessages, streamText } from 'ai';
 
 export const runtime = 'edge';
 
-const openai = createOpenAI({
+const openai = createOpenAICompatible({
+  name: 'inkeep',
   apiKey: process.env.INKEEP_API_KEY,
   baseURL: 'https://api.inkeep.com/v1',
 });
@@ -13,20 +14,15 @@ export async function POST(req: Request) {
   const reqJson = await req.json();
 
   const result = streamText({
-    model: openai('inkeep-qa-sonnet-3-5'),
+    model: openai('inkeep-qa-sonnet-4'),
     tools: {
       provideLinks: {
-        parameters: ProvideLinksToolSchema,
+        inputSchema: ProvideLinksToolSchema,
       },
     },
-    messages: reqJson.messages.map((message: Record<string, unknown>) => ({
-      role: message.role,
-      content: message.content,
-      name: 'inkeep-qa-user-message',
-      id: message.id,
-    })),
+    messages: convertToModelMessages(reqJson.messages),
     toolChoice: 'auto',
   });
 
-  return result.toDataStreamResponse();
+  return result.toUIMessageStreamResponse();
 }

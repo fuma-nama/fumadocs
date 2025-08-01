@@ -1,12 +1,9 @@
 'use client';
 import {
-  Children,
-  type ComponentProps,
   createContext,
   type FormHTMLAttributes,
   type HTMLAttributes,
-  type ReactElement,
-  type ReactNode,
+  type SyntheticEvent,
   type TextareaHTMLAttributes,
   use,
   useEffect,
@@ -14,10 +11,8 @@ import {
   useState,
 } from 'react';
 import { Loader2, RefreshCw, Send, X } from 'lucide-react';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { cn } from '@/lib/cn';
 import { buttonVariants } from '../../../../packages/ui/src/components/ui/button';
-import { createProcessor, type Processor } from './markdown-processor';
 import Link from 'fumadocs-core/link';
 import {
   Dialog,
@@ -28,18 +23,19 @@ import {
   type DialogProps,
   DialogTitle,
 } from '@radix-ui/react-dialog';
-import { type Message, useChat, type UseChatHelpers } from '@ai-sdk/react';
+import { type UIMessage, useChat, type UseChatHelpers } from '@ai-sdk/react';
 import type { ProvideLinksToolSchema } from '@/lib/chat/inkeep-qa-schema';
 import type { z } from 'zod';
-import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
+import { DefaultChatTransport } from 'ai';
+import { Markdown } from './markdown';
 
-const ChatContext = createContext<UseChatHelpers | null>(null);
+const ChatContext = createContext<UseChatHelpers<UIMessage> | null>(null);
 function useChatContext() {
   return use(ChatContext)!;
 }
 
 function SearchAIActions() {
-  const { messages, status, setMessages, reload } = useChatContext();
+  const { messages, status, setMessages, regenerate } = useChatContext();
   const isLoading = status === 'streaming';
 
   if (messages.length === 0) return null;
@@ -54,7 +50,7 @@ function SearchAIActions() {
             }),
             'text-fd-muted-foreground rounded-full gap-1.5',
           )}
-          onClick={() => reload()}
+          onClick={() => regenerate()}
         >
           <RefreshCw className="size-4" />
           Retry
@@ -77,11 +73,13 @@ function SearchAIActions() {
 }
 
 function SearchAIInput(props: FormHTMLAttributes<HTMLFormElement>) {
-  const { status, input, setInput, handleSubmit, stop } = useChatContext();
+  const { status, sendMessage, stop } = useChatContext();
+  const [input, setInput] = useState('');
   const isLoading = status === 'streaming' || status === 'submitted';
-  const onStart = (e?: React.FormEvent) => {
+  const onStart = (e?: SyntheticEvent) => {
     e?.preventDefault();
-    handleSubmit(e);
+    void sendMessage({ text: input });
+    setInput('');
   };
 
   useEffect(() => {
@@ -107,8 +105,7 @@ function SearchAIInput(props: FormHTMLAttributes<HTMLFormElement>) {
         }}
         onKeyDown={(event) => {
           if (!event.shiftKey && event.key === 'Enter') {
-            onStart();
-            event.preventDefault();
+            onStart(event);
           }
         }}
       />
@@ -208,23 +205,24 @@ function Input(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
   );
 }
 
-let processor: Processor | undefined;
-const map = new Map<string, ReactNode>();
-
 const roleName: Record<string, string> = {
   user: 'you',
   assistant: 'fumadocs',
 };
 
-function Message({ message }: { message: Message }) {
+function Message({ message }: { message: UIMessage }) {
   const { parts } = message;
+  let markdown = '';
   let links: z.infer<typeof ProvideLinksToolSchema>['links'] = [];
 
   for (const part of parts ?? []) {
-    if (part.type !== 'tool-invocation') continue;
+    if (part.type === 'text') {
+      markdown += part.text;
+      continue;
+    }
 
-    if (part.toolInvocation.toolName === 'provideLinks') {
-      links = part.toolInvocation.args.links;
+    if (part.type === 'tool-provideLinks' && part.input) {
+      links = (part.input as z.infer<typeof ProvideLinksToolSchema>).links;
     }
   }
 
@@ -239,7 +237,7 @@ function Message({ message }: { message: Message }) {
         {roleName[message.role] ?? 'unknown'}
       </p>
       <div className="prose text-sm">
-        <Markdown text={message.content} />
+        <Markdown text={markdown} />
       </div>
       {links && links.length > 0 ? (
         <div className="mt-2 flex flex-row flex-wrap items-center gap-1">
@@ -259,61 +257,12 @@ function Message({ message }: { message: Message }) {
   );
 }
 
-function Pre(props: ComponentProps<'pre'>) {
-  const code = Children.only(props.children) as ReactElement;
-  const codeProps = code.props as ComponentProps<'code'>;
-
-  let lang =
-    codeProps.className
-      ?.split(' ')
-      .find((v) => v.startsWith('language-'))
-      ?.slice('language-'.length) ?? 'text';
-
-  if (lang === 'mdx') lang = 'md';
-
-  return (
-    <DynamicCodeBlock lang={lang} code={(codeProps.children ?? '') as string} />
-  );
-}
-
-function Markdown({ text }: { text: string }) {
-  const [rendered, setRendered] = useState<ReactNode>(map.get(text));
-
-  useEffect(() => {
-    let aborted = false;
-    async function run() {
-      let result = map.get(text);
-      if (!result) {
-        processor ??= createProcessor();
-
-        result = await processor
-          .process(text, {
-            ...defaultMdxComponents,
-            pre: Pre,
-            img: undefined, // use JSX
-          })
-          .catch(() => text);
-      }
-
-      map.set(text, result);
-      if (!aborted) setRendered(result);
-    }
-
-    void run();
-    return () => {
-      aborted = true;
-    };
-  }, [text]);
-
-  return rendered ?? text;
-}
-
 export default function AISearch(props: DialogProps) {
   return (
     <Dialog {...props}>
       {props.children}
       <DialogPortal>
-        <DialogOverlay className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm data-[state=closed]:animate-fd-fade-out data-[state=open]:animate-fd-fade-in" />
+        <DialogOverlay className="fixed inset-0 z-50 backdrop-blur-xs data-[state=closed]:animate-fd-fade-out data-[state=open]:animate-fd-fade-in" />
         <DialogContent
           onOpenAutoFocus={(e) => {
             document.getElementById('nd-ai-input')?.focus();
@@ -329,18 +278,17 @@ export default function AISearch(props: DialogProps) {
   );
 }
 
+let cachedMessages: UIMessage[] = [];
 function Content() {
   const chat = useChat({
     id: 'search',
-    streamProtocol: 'data',
-    sendExtraMessageFields: true,
-    onResponse(response) {
-      if (response.status === 401) {
-        console.error(response.statusText);
-      }
-    },
+    messages: cachedMessages,
+    transport: new DefaultChatTransport({
+      api: '/api/chat',
+    }),
   });
 
+  cachedMessages = chat.messages;
   const messages = chat.messages.filter((msg) => msg.role !== 'system');
 
   return (
