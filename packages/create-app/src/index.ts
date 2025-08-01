@@ -32,6 +32,8 @@ program.option('--no-eslint', '(Next.js only) disable ESLint configuration');
 program.option('--install', 'Enable installing packages automatically');
 program.option('--no-install', 'Disable installing packages automatically');
 
+program.option('--no-git', 'Disable auto Git repository initialization');
+
 program.option(
   '--template <name>',
   `template to choose: ${templates.join(', ')}`,
@@ -63,6 +65,7 @@ interface Options {
   install?: boolean;
   template?: Template;
   pm?: PackageManager;
+  git?: boolean;
 }
 
 async function main(config: Options): Promise<void> {
@@ -188,6 +191,7 @@ async function main(config: Options): Promise<void> {
     installDeps: options.installDeps,
     eslint: options.eslint === true,
     useSrcDir: options.src === true,
+    initializeGit: config.git,
 
     log: (message) => {
       info.message(message);

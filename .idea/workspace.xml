@@ -5,12 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="edacdf1b-58dd-4ffe-9166-8e463dc8fa23" name="Changes" comment="re-create example">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/fumadocs.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/prettier.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/create-app/src/git.ts" beforeDir="false" afterPath="$PROJECT_DIR$/packages/create-app/src/git.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/create-app/src/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/packages/create-app/src/index.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -108,7 +105,7 @@
     "nodejs_package_manager_path": "pnpm",
     "prettierjs.PrettierConfiguration.Package": "/Users/xred/dev/fumadocs/node_modules/prettier",
     "run.code.analysis.last.selected.profile": "pProject Default",
-    "settings.editor.selected.configurable": "preferences.sourceCode.XML",
+    "settings.editor.selected.configurable": "actions.on.save",
     "ts.external.directory.path": "/Users/xred/dev/fumadocs/node_modules/typescript/lib",
     "ts.rename.search.for.js.occurrences": "false",
     "vue.rearranger.settings.migration": "true"
@@ -694,14 +691,7 @@
       <workItem from="1753864861092" duration="12502000" />
       <workItem from="1753941132595" duration="6313000" />
       <workItem from="1754034637804" duration="3426000" />
-    </task>
-    <task id="LOCAL-01759" summary="Docs: Improve AI guide">
-      <option name="closed" value="true" />
-      <created>1752752144059</created>
-      <option name="number" value="01759" />
-      <option name="presentableId" value="LOCAL-01759" />
-      <option name="project" value="LOCAL" />
-      <updated>1752752144059</updated>
+      <workItem from="1754038073679" duration="735000" />
     </task>
     <task id="LOCAL-01760" summary="Docs: Improve AI guide">
       <option name="closed" value="true" />
@@ -1087,7 +1077,15 @@
       <option name="project" value="LOCAL" />
       <updated>1754038053245</updated>
     </task>
-    <option name="localTasksCounter" value="1808" />
+    <task id="LOCAL-01808" summary="re-create example">
+      <option name="closed" value="true" />
+      <created>1754038108282</created>
+      <option name="number" value="01808" />
+      <option name="presentableId" value="LOCAL-01808" />
+      <option name="project" value="LOCAL" />
+      <updated>1754038108282</updated>
+    </task>
+    <option name="localTasksCounter" value="1809" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -1138,7 +1136,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
-    <MESSAGE value="CLI: Update Tanstack Start &amp; React Router templates to use Fumadocs MDX" />
     <MESSAGE value="Docs: Rewrite Fumadocs MDX docs" />
     <MESSAGE value="inline deps" />
     <MESSAGE value="bump deps &amp; resolve conflicts" />
@@ -1162,6 +1159,7 @@
     <MESSAGE value="MDX: Add `vite/client` types in generated file" />
     <MESSAGE value="CLI: Add Waku template" />
     <MESSAGE value="CLI: Add Waku template" />
+    <MESSAGE value="Merge remote-tracking branch 'refs/remotes/origin/dev' into dev" />
     <MESSAGE value="re-create example" />
     <option name="LAST_COMMIT_MESSAGE" value="re-create example" />
   </component>

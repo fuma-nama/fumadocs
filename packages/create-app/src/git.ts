@@ -13,7 +13,7 @@ async function isInGitRepository(cwd: string) {
     nodeOptions: { cwd },
   });
 
-  return exitCode !== 0;
+  return exitCode === 0;
 }
 
 async function isDefaultBranchSet(cwd: string) {
@@ -21,7 +21,7 @@ async function isDefaultBranchSet(cwd: string) {
     nodeOptions: { cwd },
   });
 
-  return exitCode !== 0;
+  return exitCode === 0;
 }
 
 export async function tryGitInit(cwd: string): Promise<boolean> {
