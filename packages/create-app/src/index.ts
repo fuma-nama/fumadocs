@@ -97,13 +97,16 @@ async function main(config: Options): Promise<void> {
               label: 'Next.js: Content Collections',
             },
             {
+              value: 'waku',
+              label: 'Waku: Fumadocs MDX',
+            },
+            {
               value: 'react-router',
-              label: 'React Router: MDX Remote',
+              label: 'React Router: Fumadocs MDX (not RSC)',
             },
             {
               value: 'tanstack-start',
-              label: 'Tanstack Start: MDX Remote',
-              hint: 'Experimental',
+              label: 'Tanstack Start: Fumadocs MDX (not RSC)',
             },
           ],
         });
