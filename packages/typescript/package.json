@@ -40,7 +40,7 @@
     "hast-util-to-jsx-runtime": "^2.3.6",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
-    "shiki": "^3.8.1",
+    "shiki": "^3.9.1",
     "tinyglobby": "^0.2.14",
     "ts-morph": "^26.0.0",
     "unist-util-visit": "^5.0.0"
@@ -57,7 +57,7 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "tsconfig": "workspace:*",
-    "typescript": "^5.8.3",
+    "typescript": "^5.9.2",
     "unified": "^11.0.5"
   },
   "peerDependencies": {

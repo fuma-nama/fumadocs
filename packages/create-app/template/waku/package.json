@@ -15,16 +15,16 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-server-dom-webpack": "^19.1.1",
-    "waku": "^0.23.6"
+    "waku": "^0.23.7"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.11",
     "@types/node": "^24.1.0",
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.7",
-    "tailwindcss": "^4.1.11",
-    "@tailwindcss/postcss": "^4.1.11",
     "postcss": "^8.5.6",
-    "typescript": "^5.7.2",
-    "vite": "7.0.5"
+    "tailwindcss": "^4.1.11",
+    "typescript": "^5.9.2",
+    "vite": "^7.0.6"
   }
 }

@@ -1,14 +1,13 @@
 import { defineConfig } from 'waku/config';
 import mdx from 'fumadocs-mdx/vite';
 import * as MdxConfig from './source.config.js';
-import type { UserConfig } from 'vite';
 
 export default defineConfig({
   unstable_viteConfigs: {
     common() {
       return {
-        plugins: [mdx(MdxConfig)],
-      } as UserConfig;
+        plugins: [mdx(MdxConfig) as any],
+      };
     },
   },
 });
