@@ -4,14 +4,23 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="edacdf1b-58dd-4ffe-9166-8e463dc8fa23" name="Changes" comment="CLI: Support `--no-git` option in CLI">
-      <change afterPath="$PROJECT_DIR$/examples/waku-openapi/scripts/generate-docs.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+    <list default="true" id="edacdf1b-58dd-4ffe-9166-8e463dc8fa23" name="Changes" comment="OpenAPI: Fix Waku compatibility &amp; add example">
+      <change afterPath="$PROJECT_DIR$/examples/waku-openapi/content/docs/meta.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/create-app/template/waku/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/create-app/template/waku/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/openapi/src/media/adapter.ts" beforeDir="false" afterPath="$PROJECT_DIR$/packages/openapi/src/media/adapter.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/openapi/src/ui/lazy.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/packages/openapi/src/ui/lazy.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pnpm-lock.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pnpm-lock.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/waku-openapi/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/examples/waku-openapi/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/waku-openapi/content/docs/createCelestialBody.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/waku-openapi/content/docs/createPlanet.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/waku-openapi/content/docs/createUser.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/waku-openapi/content/docs/deletePlanet.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/waku-openapi/content/docs/getAllData.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/waku-openapi/content/docs/getMe.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/waku-openapi/content/docs/getPlanet.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/waku-openapi/content/docs/getToken.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/waku-openapi/content/docs/newplanet.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/waku-openapi/content/docs/test.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/waku-openapi/content/docs/updatePlanet.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/waku-openapi/content/docs/uploadImage.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/waku-openapi/scripts/generate-docs.ts" beforeDir="false" afterPath="$PROJECT_DIR$/examples/waku-openapi/scripts/generate-docs.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -695,23 +704,7 @@
       <workItem from="1753864861092" duration="12502000" />
       <workItem from="1753941132595" duration="6313000" />
       <workItem from="1754034637804" duration="3426000" />
-      <workItem from="1754038073679" duration="7877000" />
-    </task>
-    <task id="LOCAL-01761" summary="Docs: Improve AI guide">
-      <option name="closed" value="true" />
-      <created>1752923899489</created>
-      <option name="number" value="01761" />
-      <option name="presentableId" value="LOCAL-01761" />
-      <option name="project" value="LOCAL" />
-      <updated>1752923899489</updated>
-    </task>
-    <task id="LOCAL-01762" summary="MDX: Stabilize Vite plugin support">
-      <option name="closed" value="true" />
-      <created>1752923918662</created>
-      <option name="number" value="01762" />
-      <option name="presentableId" value="LOCAL-01762" />
-      <option name="project" value="LOCAL" />
-      <updated>1752923918662</updated>
+      <workItem from="1754038073679" duration="8173000" />
     </task>
     <task id="LOCAL-01763" summary="fix types">
       <option name="closed" value="true" />
@@ -1089,7 +1082,23 @@
       <option name="project" value="LOCAL" />
       <updated>1754038849682</updated>
     </task>
-    <option name="localTasksCounter" value="1810" />
+    <task id="LOCAL-01810" summary="OpenAPI: Fix Waku compatibility &amp; add example">
+      <option name="closed" value="true" />
+      <created>1754046016156</created>
+      <option name="number" value="01810" />
+      <option name="presentableId" value="LOCAL-01810" />
+      <option name="project" value="LOCAL" />
+      <updated>1754046016156</updated>
+    </task>
+    <task id="LOCAL-01811" summary="OpenAPI: Fix Waku compatibility &amp; add example">
+      <option name="closed" value="true" />
+      <created>1754046022625</created>
+      <option name="number" value="01811" />
+      <option name="presentableId" value="LOCAL-01811" />
+      <option name="project" value="LOCAL" />
+      <updated>1754046022625</updated>
+    </task>
+    <option name="localTasksCounter" value="1812" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -1140,7 +1149,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
-    <MESSAGE value="inline deps" />
     <MESSAGE value="bump deps &amp; resolve conflicts" />
     <MESSAGE value="Mixedbread integration (#2089)&#10;&#10;* feat: add mixedbread integration&#10;&#10;* chore(release): add changeset&#10;&#10;* docs: add mixedbread integration ui docs&#10;&#10;* feat: update tag filtering and extract title from chunked text&#10;&#10;* feat: improve extractHeadingTitle&#10;&#10;* fix: fix slug generation&#10;&#10;* feat: add a minor adjustment&#10;&#10;* feat: add adjustments&#10;&#10;* chore: make mixedbread sdk optional&#10;&#10;* feat: add metadata filtering&#10;&#10;* inline deps&#10;&#10;* Update sour-teeth-deny.md&#10;&#10;---------&#10;&#10;Co-authored-by: Fuma Nama &lt;god63820869@gmail.com&gt;&#10;Co-authored-by: Fuma Nama &lt;76240755+fuma-nama@users.noreply.github.com&gt;" />
     <MESSAGE value="UI: Change sidebar direction for better mobile UX" />
@@ -1165,6 +1173,7 @@
     <MESSAGE value="Merge remote-tracking branch 'refs/remotes/origin/dev' into dev" />
     <MESSAGE value="re-create example" />
     <MESSAGE value="CLI: Support `--no-git` option in CLI" />
-    <option name="LAST_COMMIT_MESSAGE" value="CLI: Support `--no-git` option in CLI" />
+    <MESSAGE value="OpenAPI: Fix Waku compatibility &amp; add example" />
+    <option name="LAST_COMMIT_MESSAGE" value="OpenAPI: Fix Waku compatibility &amp; add example" />
   </component>
 </project>
