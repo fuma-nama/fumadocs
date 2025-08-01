@@ -23,7 +23,7 @@
     "@radix-ui/react-tooltip": "^1.2.7",
     "@shikijs/rehype": "^3.8.1",
     "@shikijs/transformers": "^3.8.1",
-    "ai": "^4.3.19",
+    "ai": "^5.0.0",
     "class-variance-authority": "^0.7.1",
     "feed": "^5.1.0",
     "fumadocs-core": "workspace:*",
