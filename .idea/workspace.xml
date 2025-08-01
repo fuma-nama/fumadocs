@@ -4,32 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="edacdf1b-58dd-4ffe-9166-8e463dc8fa23" name="Changes" comment="remove generated files from OpenAPI example">
+    <list default="true" id="edacdf1b-58dd-4ffe-9166-8e463dc8fa23" name="Changes" comment="Add Waku example back">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/docs/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/apps/docs/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/content-collections/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/examples/content-collections/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/i18n/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/examples/i18n/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/next-mdx/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/examples/next-mdx/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/openapi/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/examples/openapi/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/python/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/examples/python/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/react-router-i18n/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/examples/react-router-i18n/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/react-router/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/examples/react-router/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/remote-mdx/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/examples/remote-mdx/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/tanstack-start/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/examples/tanstack-start/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/waku-openapi/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/examples/waku-openapi/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/waku-openapi/waku.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/examples/waku-openapi/waku.config.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/core/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/core/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/create-app-versions/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/create-app-versions/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/create-app/template/waku/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/create-app/template/waku/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/create-app/template/waku/waku.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/packages/create-app/template/waku/waku.config.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/doc-gen/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/doc-gen/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/mdx/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/mdx/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/openapi/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/openapi/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/python/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/python/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/twoslash/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/twoslash/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/typescript/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/typescript/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pnpm-lock.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pnpm-lock.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -713,127 +689,7 @@
       <workItem from="1753864861092" duration="12502000" />
       <workItem from="1753941132595" duration="6313000" />
       <workItem from="1754034637804" duration="3426000" />
-      <workItem from="1754038073679" duration="8839000" />
-    </task>
-    <task id="LOCAL-01764" summary="OpenAPI: fix `groupBy: route` ignoring curly braces">
-      <option name="closed" value="true" />
-      <created>1752931751012</created>
-      <option name="number" value="01764" />
-      <option name="presentableId" value="LOCAL-01764" />
-      <option name="project" value="LOCAL" />
-      <updated>1752931751012</updated>
-    </task>
-    <task id="LOCAL-01765" summary="Core: support custom options for error handling for `remark-image`">
-      <option name="closed" value="true" />
-      <created>1752933108636</created>
-      <option name="number" value="01765" />
-      <option name="presentableId" value="LOCAL-01765" />
-      <option name="project" value="LOCAL" />
-      <updated>1752933108636</updated>
-    </task>
-    <task id="LOCAL-01766" summary="Core: support custom options for error handling for `remark-image`">
-      <option name="closed" value="true" />
-      <created>1752933189478</created>
-      <option name="number" value="01766" />
-      <option name="presentableId" value="LOCAL-01766" />
-      <option name="project" value="LOCAL" />
-      <updated>1752933189478</updated>
-    </task>
-    <task id="LOCAL-01767" summary="MDX &amp; MDX Remote: Support `preset: minimal` to disable Fumadocs specific defaults">
-      <option name="closed" value="true" />
-      <created>1753010482702</created>
-      <option name="number" value="01767" />
-      <option name="presentableId" value="LOCAL-01767" />
-      <option name="project" value="LOCAL" />
-      <updated>1753010482702</updated>
-    </task>
-    <task id="LOCAL-01768" summary="MDX: Generate index file for Vite plugin">
-      <option name="closed" value="true" />
-      <created>1753015468260</created>
-      <option name="number" value="01768" />
-      <option name="presentableId" value="LOCAL-01768" />
-      <option name="project" value="LOCAL" />
-      <updated>1753015468260</updated>
-    </task>
-    <task id="LOCAL-01769" summary="MDX: Generate index file for Vite plugin">
-      <option name="closed" value="true" />
-      <created>1753017729330</created>
-      <option name="number" value="01769" />
-      <option name="presentableId" value="LOCAL-01769" />
-      <option name="project" value="LOCAL" />
-      <updated>1753017729330</updated>
-    </task>
-    <task id="LOCAL-01770" summary="MDX: Handle YAML/JSON parse &amp; validation for Vite plugin">
-      <option name="closed" value="true" />
-      <created>1753017883544</created>
-      <option name="number" value="01770" />
-      <option name="presentableId" value="LOCAL-01770" />
-      <option name="project" value="LOCAL" />
-      <updated>1753017883544</updated>
-    </task>
-    <task id="LOCAL-01771" summary="update test snapshots">
-      <option name="closed" value="true" />
-      <created>1753018482885</created>
-      <option name="number" value="01771" />
-      <option name="presentableId" value="LOCAL-01771" />
-      <option name="project" value="LOCAL" />
-      <updated>1753018482885</updated>
-    </task>
-    <task id="LOCAL-01772" summary="clean react router example">
-      <option name="closed" value="true" />
-      <created>1753087960344</created>
-      <option name="number" value="01772" />
-      <option name="presentableId" value="LOCAL-01772" />
-      <option name="project" value="LOCAL" />
-      <updated>1753087960344</updated>
-    </task>
-    <task id="LOCAL-01773" summary="MDX: Support Tanstack Router/Start via `createClientLoader`">
-      <option name="closed" value="true" />
-      <created>1753099245930</created>
-      <option name="number" value="01773" />
-      <option name="presentableId" value="LOCAL-01773" />
-      <option name="project" value="LOCAL" />
-      <updated>1753099245930</updated>
-    </task>
-    <task id="LOCAL-01774" summary="CLI: Update Tanstack Start &amp; React Router templates to use Fumadocs MDX">
-      <option name="closed" value="true" />
-      <created>1753103626052</created>
-      <option name="number" value="01774" />
-      <option name="presentableId" value="LOCAL-01774" />
-      <option name="project" value="LOCAL" />
-      <updated>1753103626052</updated>
-    </task>
-    <task id="LOCAL-01775" summary="Docs: Rewrite Fumadocs MDX docs">
-      <option name="closed" value="true" />
-      <created>1753108868848</created>
-      <option name="number" value="01775" />
-      <option name="presentableId" value="LOCAL-01775" />
-      <option name="project" value="LOCAL" />
-      <updated>1753108868849</updated>
-    </task>
-    <task id="LOCAL-01776" summary="inline deps">
-      <option name="closed" value="true" />
-      <created>1753343648039</created>
-      <option name="number" value="01776" />
-      <option name="presentableId" value="LOCAL-01776" />
-      <option name="project" value="LOCAL" />
-      <updated>1753343648039</updated>
-    </task>
-    <task id="LOCAL-01777" summary="bump deps &amp; resolve conflicts">
-      <option name="closed" value="true" />
-      <created>1753343788152</created>
-      <option name="number" value="01777" />
-      <option name="presentableId" value="LOCAL-01777" />
-      <option name="project" value="LOCAL" />
-      <updated>1753343788152</updated>
-    </task>
-    <task id="LOCAL-01778" summary="Mixedbread integration (#2089)&#10;&#10;* feat: add mixedbread integration&#10;&#10;* chore(release): add changeset&#10;&#10;* docs: add mixedbread integration ui docs&#10;&#10;* feat: update tag filtering and extract title from chunked text&#10;&#10;* feat: improve extractHeadingTitle&#10;&#10;* fix: fix slug generation&#10;&#10;* feat: add a minor adjustment&#10;&#10;* feat: add adjustments&#10;&#10;* chore: make mixedbread sdk optional&#10;&#10;* feat: add metadata filtering&#10;&#10;* inline deps&#10;&#10;* Update sour-teeth-deny.md&#10;&#10;---------&#10;&#10;Co-authored-by: Fuma Nama &lt;god63820869@gmail.com&gt;&#10;Co-authored-by: Fuma Nama &lt;76240755+fuma-nama@users.noreply.github.com&gt;">
-      <option name="closed" value="true" />
-      <created>1753345340856</created>
-      <option name="number" value="01778" />
-      <option name="presentableId" value="LOCAL-01778" />
-      <option name="project" value="LOCAL" />
-      <updated>1753345340856</updated>
+      <workItem from="1754038073679" duration="9043000" />
     </task>
     <task id="LOCAL-01779" summary="UI: Change sidebar direction for better mobile UX">
       <option name="closed" value="true" />
@@ -1107,7 +963,127 @@
       <option name="project" value="LOCAL" />
       <updated>1754046273507</updated>
     </task>
-    <option name="localTasksCounter" value="1813" />
+    <task id="LOCAL-01813" summary="Bump deps">
+      <option name="closed" value="true" />
+      <created>1754046948444</created>
+      <option name="number" value="01813" />
+      <option name="presentableId" value="LOCAL-01813" />
+      <option name="project" value="LOCAL" />
+      <updated>1754046948444</updated>
+    </task>
+    <task id="LOCAL-01814" summary="Add Waku example back">
+      <option name="closed" value="true" />
+      <created>1754047026878</created>
+      <option name="number" value="01814" />
+      <option name="presentableId" value="LOCAL-01814" />
+      <option name="project" value="LOCAL" />
+      <updated>1754047026879</updated>
+    </task>
+    <task id="LOCAL-01815" summary="Add Waku example back">
+      <option name="closed" value="true" />
+      <created>1754047032900</created>
+      <option name="number" value="01815" />
+      <option name="presentableId" value="LOCAL-01815" />
+      <option name="project" value="LOCAL" />
+      <updated>1754047032900</updated>
+    </task>
+    <task id="LOCAL-01816" summary="Add Waku example back">
+      <option name="closed" value="true" />
+      <created>1754047034160</created>
+      <option name="number" value="01816" />
+      <option name="presentableId" value="LOCAL-01816" />
+      <option name="project" value="LOCAL" />
+      <updated>1754047034160</updated>
+    </task>
+    <task id="LOCAL-01817" summary="Add Waku example back">
+      <option name="closed" value="true" />
+      <created>1754047036011</created>
+      <option name="number" value="01817" />
+      <option name="presentableId" value="LOCAL-01817" />
+      <option name="project" value="LOCAL" />
+      <updated>1754047036011</updated>
+    </task>
+    <task id="LOCAL-01818" summary="Add Waku example back">
+      <option name="closed" value="true" />
+      <created>1754047036638</created>
+      <option name="number" value="01818" />
+      <option name="presentableId" value="LOCAL-01818" />
+      <option name="project" value="LOCAL" />
+      <updated>1754047036638</updated>
+    </task>
+    <task id="LOCAL-01819" summary="Add Waku example back">
+      <option name="closed" value="true" />
+      <created>1754047039861</created>
+      <option name="number" value="01819" />
+      <option name="presentableId" value="LOCAL-01819" />
+      <option name="project" value="LOCAL" />
+      <updated>1754047039861</updated>
+    </task>
+    <task id="LOCAL-01820" summary="Add Waku example back">
+      <option name="closed" value="true" />
+      <created>1754047040420</created>
+      <option name="number" value="01820" />
+      <option name="presentableId" value="LOCAL-01820" />
+      <option name="project" value="LOCAL" />
+      <updated>1754047040420</updated>
+    </task>
+    <task id="LOCAL-01821" summary="Add Waku example back">
+      <option name="closed" value="true" />
+      <created>1754047040784</created>
+      <option name="number" value="01821" />
+      <option name="presentableId" value="LOCAL-01821" />
+      <option name="project" value="LOCAL" />
+      <updated>1754047040784</updated>
+    </task>
+    <task id="LOCAL-01822" summary="Add Waku example back">
+      <option name="closed" value="true" />
+      <created>1754047040943</created>
+      <option name="number" value="01822" />
+      <option name="presentableId" value="LOCAL-01822" />
+      <option name="project" value="LOCAL" />
+      <updated>1754047040943</updated>
+    </task>
+    <task id="LOCAL-01823" summary="Add Waku example back">
+      <option name="closed" value="true" />
+      <created>1754047041150</created>
+      <option name="number" value="01823" />
+      <option name="presentableId" value="LOCAL-01823" />
+      <option name="project" value="LOCAL" />
+      <updated>1754047041150</updated>
+    </task>
+    <task id="LOCAL-01824" summary="Add Waku example back">
+      <option name="closed" value="true" />
+      <created>1754047041309</created>
+      <option name="number" value="01824" />
+      <option name="presentableId" value="LOCAL-01824" />
+      <option name="project" value="LOCAL" />
+      <updated>1754047041309</updated>
+    </task>
+    <task id="LOCAL-01825" summary="Add Waku example back">
+      <option name="closed" value="true" />
+      <created>1754047041482</created>
+      <option name="number" value="01825" />
+      <option name="presentableId" value="LOCAL-01825" />
+      <option name="project" value="LOCAL" />
+      <updated>1754047041482</updated>
+    </task>
+    <task id="LOCAL-01826" summary="Add Waku example back">
+      <option name="closed" value="true" />
+      <created>1754047042215</created>
+      <option name="number" value="01826" />
+      <option name="presentableId" value="LOCAL-01826" />
+      <option name="project" value="LOCAL" />
+      <updated>1754047042215</updated>
+    </task>
+    <task id="LOCAL-01827" summary="Add Waku example back">
+      <option name="closed" value="true" />
+      <created>1754047061491</created>
+      <option name="number" value="01827" />
+      <option name="presentableId" value="LOCAL-01827" />
+      <option name="project" value="LOCAL" />
+      <updated>1754047061491</updated>
+    </task>
+    <option name="localTasksCounter" value="1828" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -1158,8 +1134,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
-    <MESSAGE value="Mixedbread integration (#2089)&#10;&#10;* feat: add mixedbread integration&#10;&#10;* chore(release): add changeset&#10;&#10;* docs: add mixedbread integration ui docs&#10;&#10;* feat: update tag filtering and extract title from chunked text&#10;&#10;* feat: improve extractHeadingTitle&#10;&#10;* fix: fix slug generation&#10;&#10;* feat: add a minor adjustment&#10;&#10;* feat: add adjustments&#10;&#10;* chore: make mixedbread sdk optional&#10;&#10;* feat: add metadata filtering&#10;&#10;* inline deps&#10;&#10;* Update sour-teeth-deny.md&#10;&#10;---------&#10;&#10;Co-authored-by: Fuma Nama &lt;god63820869@gmail.com&gt;&#10;Co-authored-by: Fuma Nama &lt;76240755+fuma-nama@users.noreply.github.com&gt;" />
-    <MESSAGE value="UI: Change sidebar direction for better mobile UX" />
     <MESSAGE value="OpenAPI: Fix request serialization stripped auth parameters" />
     <MESSAGE value="MDX: Generate config based on Next.js version" />
     <MESSAGE value="UI: improve sidebar position" />
@@ -1183,6 +1157,8 @@
     <MESSAGE value="CLI: Support `--no-git` option in CLI" />
     <MESSAGE value="OpenAPI: Fix Waku compatibility &amp; add example" />
     <MESSAGE value="remove generated files from OpenAPI example" />
-    <option name="LAST_COMMIT_MESSAGE" value="remove generated files from OpenAPI example" />
+    <MESSAGE value="Bump deps" />
+    <MESSAGE value="Add Waku example back" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add Waku example back" />
   </component>
 </project>
