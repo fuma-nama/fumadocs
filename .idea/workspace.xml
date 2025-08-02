@@ -4,14 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="edacdf1b-58dd-4ffe-9166-8e463dc8fa23" name="Changes" comment="Migrate to AI SDK v5">
+    <list default="true" id="edacdf1b-58dd-4ffe-9166-8e463dc8fa23" name="Changes" comment="fix bugs &amp; add showcase">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/tanstack-start/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/examples/tanstack-start/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/core/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/core/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/create-app-versions/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/create-app-versions/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/create-app/template/tanstack-start/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/create-app/template/tanstack-start/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/openapi/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/openapi/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pnpm-lock.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pnpm-lock.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/docs/components/ai/search.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/docs/components/ai/search.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -696,23 +691,7 @@
       <workItem from="1753941132595" duration="6313000" />
       <workItem from="1754034637804" duration="3426000" />
       <workItem from="1754038073679" duration="19016000" />
-      <workItem from="1754110591578" duration="1407000" />
-    </task>
-    <task id="LOCAL-01782" summary="UI: improve sidebar position">
-      <option name="closed" value="true" />
-      <created>1753451769131</created>
-      <option name="number" value="01782" />
-      <option name="presentableId" value="LOCAL-01782" />
-      <option name="project" value="LOCAL" />
-      <updated>1753451769131</updated>
-    </task>
-    <task id="LOCAL-01783" summary="UI: improve RTL layout">
-      <option name="closed" value="true" />
-      <created>1753457585219</created>
-      <option name="number" value="01783" />
-      <option name="presentableId" value="LOCAL-01783" />
-      <option name="project" value="LOCAL" />
-      <updated>1753457585219</updated>
+      <workItem from="1754110591578" duration="10324000" />
     </task>
     <task id="LOCAL-01784" summary="UI: improve RTL layout">
       <option name="closed" value="true" />
@@ -1090,7 +1069,23 @@
       <option name="project" value="LOCAL" />
       <updated>1754056790941</updated>
     </task>
-    <option name="localTasksCounter" value="1831" />
+    <task id="LOCAL-01831" summary="Upgrade Tanstack Start to fix upstream bugs">
+      <option name="closed" value="true" />
+      <created>1754112293419</created>
+      <option name="number" value="01831" />
+      <option name="presentableId" value="LOCAL-01831" />
+      <option name="project" value="LOCAL" />
+      <updated>1754112293419</updated>
+    </task>
+    <task id="LOCAL-01832" summary="fix bugs &amp; add showcase">
+      <option name="closed" value="true" />
+      <created>1754126209318</created>
+      <option name="number" value="01832" />
+      <option name="presentableId" value="LOCAL-01832" />
+      <option name="project" value="LOCAL" />
+      <updated>1754126209318</updated>
+    </task>
+    <option name="localTasksCounter" value="1833" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -1141,8 +1136,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
-    <MESSAGE value="UI: improve sidebar position" />
-    <MESSAGE value="UI: improve RTL layout" />
     <MESSAGE value="UI: Improve type table link icon" />
     <MESSAGE value="UI: improve codeblock diff styles" />
     <MESSAGE value="Core: Support to override `&lt;HideIfEmpty /&gt;` scripts nonce with `&lt;HideIfEmptyProvider /&gt;`" />
@@ -1166,6 +1159,8 @@
     <MESSAGE value="Add Waku example back" />
     <MESSAGE value="fix format issues" />
     <MESSAGE value="Migrate to AI SDK v5" />
-    <option name="LAST_COMMIT_MESSAGE" value="Migrate to AI SDK v5" />
+    <MESSAGE value="Upgrade Tanstack Start to fix upstream bugs" />
+    <MESSAGE value="fix bugs &amp; add showcase" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix bugs &amp; add showcase" />
   </component>
 </project>

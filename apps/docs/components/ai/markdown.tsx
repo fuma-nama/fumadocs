@@ -10,7 +10,6 @@ import {
   Suspense,
   use,
   useDeferredValue,
-  useMemo,
 } from 'react';
 import { Fragment, jsx, jsxs } from 'react/jsx-runtime';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
@@ -72,6 +71,11 @@ export function Markdown({ text }: { text: string }) {
   );
 }
 
+const cache = new Map<string, Promise<ReactNode>>();
+
 function Renderer({ text }: { text: string }) {
-  return use(useMemo(() => processor.process(text), [text]));
+  const result = cache.get(text) ?? processor.process(text);
+  cache.set(text, result);
+
+  return use(result);
 }

@@ -46,12 +46,12 @@
 
   --color-gradient-radial: radial-gradient(circle, var(--tw-gradient-stops));
   --color-repeat-gradient-to-r: repeating-linear-gradient(
-    to right,
-    var(--tw-gradient-stops)
+          to right,
+          var(--tw-gradient-stops)
   );
   --color-repeat-gradient-to-br: repeating-linear-gradient(
-    to bottom right,
-    var(--tw-gradient-stops)
+          to bottom right,
+          var(--tw-gradient-stops)
   );
 }
 

@@ -1331,8 +1331,8 @@ importers:
         specifier: ^1.2.3
         version: 1.2.3(@types/react@19.1.9)(react@19.1.1)
       '@scalar/openapi-parser':
-        specifier: 0.19.0
-        version: 0.19.0
+        specifier: 0.18.3
+        version: 0.18.3
       ajv:
         specifier: ^8.17.1
         version: 8.17.1
@@ -3985,6 +3985,10 @@ packages:
 
   '@scalar/object-utils@1.2.3':
     resolution: {integrity: sha512-1LW2pHs2jp5ixyK+NdpAyuUlOL+iJ8wQ0P2EgV45vLJ8YeZo5DtxQbKuFyqoaviTYjg2MWs1exavYP/qAaSqyQ==}
+    engines: {node: '>=20'}
+
+  '@scalar/openapi-parser@0.18.3':
+    resolution: {integrity: sha512-j0OM3Y3JTVx50m7r5ogoADe2pT/ewhAnO7knjkcm7b+vjgKRpgjUMhXsYraBemFkqd2dNa1QfTX/mDVv7wEr9A==}
     engines: {node: '>=20'}
 
   '@scalar/openapi-parser@0.19.0':
@@ -12897,6 +12901,16 @@ snapshots:
       just-clone: 6.2.0
       ts-deepmerge: 7.0.3
       type-fest: 4.41.0
+
+  '@scalar/openapi-parser@0.18.3':
+    dependencies:
+      '@scalar/openapi-types': 0.3.7
+      ajv: 8.17.1
+      ajv-draft-04: 1.0.0(ajv@8.17.1)
+      ajv-formats: 3.0.1(ajv@8.17.1)
+      jsonpointer: 5.0.1
+      leven: 4.0.0
+      yaml: 2.8.0
 
   '@scalar/openapi-parser@0.19.0':
     dependencies:

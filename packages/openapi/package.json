@@ -57,7 +57,7 @@
     "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-select": "^2.2.5",
     "@radix-ui/react-slot": "^1.2.3",
-    "@scalar/openapi-parser": "0.19.0",
+    "@scalar/openapi-parser": "0.18.3",
     "ajv": "^8.17.1",
     "class-variance-authority": "^0.7.1",
     "fumadocs-core": "workspace:*",

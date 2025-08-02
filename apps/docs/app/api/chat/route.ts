@@ -20,7 +20,9 @@ export async function POST(req: Request) {
         inputSchema: ProvideLinksToolSchema,
       },
     },
-    messages: convertToModelMessages(reqJson.messages),
+    messages: convertToModelMessages(reqJson.messages, {
+      ignoreIncompleteToolCalls: true,
+    }),
     toolChoice: 'auto',
   });
 
