@@ -1,5 +1,12 @@
 # create-next-docs-app
 
+## 15.6.8
+
+### Patch Changes
+
+- 9f67fb8: Support `--no-git` option in CLI
+- dd4d8fc: Support Waku template
+
 ## 15.6.7
 
 ## 15.6.6
