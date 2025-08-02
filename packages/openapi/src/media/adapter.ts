@@ -1,6 +1,6 @@
 import { escapeString, inputToString } from '@/utils/input-to-string';
 // @ts-expect-error -- untyped
-import { js2xml } from 'xml-js/lib/js2xml';
+import js2xml from 'xml-js/lib/js2xml';
 
 interface BaseContext {
   /**

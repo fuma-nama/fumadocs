@@ -1,0 +1,7 @@
+.DS_Store
+/node_modules/
+
+dist
+source.generated.ts
+src/pages.gen.ts
+content/docs/(generated)/

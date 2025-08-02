@@ -182,7 +182,7 @@ export function SearchDialogContent({
       aria-describedby={undefined}
       {...props}
       className={cn(
-        'fixed left-1/2 top-4 md:top-[calc(50%-250px)] z-50 w-[calc(100%-2*var(--spacing))] max-w-screen-sm -translate-x-1/2 rounded-2xl border bg-fd-popover/60 backdrop-blur-xl text-fd-popover-foreground shadow-2xl shadow-black/40 overflow-hidden data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in',
+        'fixed left-1/2 top-4 md:top-[calc(50%-250px)] z-50 w-[calc(100%-1rem)] max-w-screen-sm -translate-x-1/2 rounded-2xl border bg-fd-popover/80 backdrop-blur-xl text-fd-popover-foreground shadow-2xl shadow-black/50 overflow-hidden data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in',
         '*:border-b *:has-[+:last-child[data-empty=true]]:border-b-0 *:data-[empty=true]:border-b-0 *:last:border-b-0',
         props.className,
       )}

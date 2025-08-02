@@ -1,9 +1,5 @@
 'use client';
-import {
-  type SelectedServer,
-  useApiContext,
-  useServerSelectContext,
-} from '@/ui/contexts/api';
+import { useApiContext, useServerSelectContext } from '@/ui/contexts/api';
 import {
   Select,
   SelectContent,
@@ -24,12 +20,12 @@ import {
 } from '@/ui/components/dialog';
 import { resolveServerUrl, withBase } from '@/utils/url';
 import { FormProvider, useController, useForm } from 'react-hook-form';
-import type { OpenAPIV3_1 } from 'openapi-types';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
+import type { ServerVariableObject } from '@/types';
 
 export default function ServerSelect(props: HTMLAttributes<HTMLDivElement>) {
   const { servers } = useApiContext();
-  const { server, setServer } = useServerSelectContext();
+  const { server, setServer, setServerVariables } = useServerSelectContext();
   const [open, setOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -38,6 +34,9 @@ export default function ServerSelect(props: HTMLAttributes<HTMLDivElement>) {
   }, []);
 
   if (servers.length <= 0) return;
+  const serverSchema = server
+    ? servers.find((obj) => obj.url === server.url)
+    : null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -69,26 +68,33 @@ export default function ServerSelect(props: HTMLAttributes<HTMLDivElement>) {
             ))}
           </SelectContent>
         </Select>
-        {server && server.variables && (
-          <ServerSelectContent key={server.url} server={server} />
+        {server?.variables && serverSchema?.variables && (
+          <ServerSelectContent
+            key={server.url}
+            defaultValues={server.variables}
+            schema={serverSchema.variables}
+            onChange={setServerVariables}
+          />
         )}
       </DialogContent>
     </Dialog>
   );
 }
 
-function ServerSelectContent({ server }: { server: SelectedServer }) {
-  const { servers } = useApiContext();
-  const { setServerVariables } = useServerSelectContext();
-  const schema = servers.find((item) => item.url === server.url);
+function ServerSelectContent({
+  defaultValues,
+  onChange,
+  schema,
+}: {
+  defaultValues: Record<string, string>;
+  onChange: (values: Record<string, string>) => void;
+  schema: Record<string, ServerVariableObject>;
+}) {
   const form = useForm({
-    defaultValues: server.variables,
+    defaultValues,
   });
 
-  const onChangeDebounced = useEffectEvent((values: Record<string, string>) => {
-    setServerVariables(values);
-  });
-
+  const onChangeDebounced = useEffectEvent(onChange);
   useEffect(() => {
     let timer: number | null = null;
 
@@ -105,12 +111,10 @@ function ServerSelectContent({ server }: { server: SelectedServer }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `form` shouldn't be included
   }, []);
 
-  if (!schema?.variables) return;
-
   return (
     <FormProvider {...form}>
       <div className="flex flex-col gap-4">
-        {Object.entries(schema.variables).map(([key, variable]) => {
+        {Object.entries(schema).map(([key, variable]) => {
           return (
             <fieldset key={key} className="flex flex-col gap-1">
               <label className={cn(labelVariants())} htmlFor={key}>
@@ -119,10 +123,7 @@ function ServerSelectContent({ server }: { server: SelectedServer }) {
               <p className="text-xs text-fd-muted-foreground empty:hidden">
                 {variable.description}
               </p>
-              <Field
-                fieldName={key}
-                variable={variable as OpenAPIV3_1.ServerVariableObject}
-              />
+              <Field fieldName={key} variable={variable} />
             </fieldset>
           );
         })}
@@ -135,7 +136,7 @@ function Field({
   fieldName,
   variable,
 }: {
-  variable: OpenAPIV3_1.ServerVariableObject;
+  variable: ServerVariableObject;
   fieldName: string;
 }) {
   const { field } = useController({

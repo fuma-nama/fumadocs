@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-mdx",
-  "version": "11.7.2",
+  "version": "11.7.3",
   "description": "The built-in source for Fumadocs",
   "keywords": [
     "NextJs",
@@ -87,7 +87,7 @@
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
     "vfile": "^6.0.3",
-    "vite": "^7.0.5",
+    "vite": "^7.0.6",
     "webpack": "^5.101.0"
   },
   "peerDependencies": {

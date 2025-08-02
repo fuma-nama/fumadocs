@@ -21,6 +21,7 @@ export type PathItemObject = V3_1.PathItemObject;
 export type TagObject = V3_1.TagObject;
 export type ServerObject = NoReference<V3_1.ServerObject>;
 export type CallbackObject = NoReference<V3_1.CallbackObject>;
+export type ServerVariableObject = NoReference<V3_1.ServerVariableObject>;
 
 export type MethodInformation = NoReference<OperationObject> & {
   method: string;

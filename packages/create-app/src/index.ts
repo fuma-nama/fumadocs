@@ -32,6 +32,8 @@ program.option('--no-eslint', '(Next.js only) disable ESLint configuration');
 program.option('--install', 'Enable installing packages automatically');
 program.option('--no-install', 'Disable installing packages automatically');
 
+program.option('--no-git', 'Disable auto Git repository initialization');
+
 program.option(
   '--template <name>',
   `template to choose: ${templates.join(', ')}`,
@@ -63,6 +65,7 @@ interface Options {
   install?: boolean;
   template?: Template;
   pm?: PackageManager;
+  git?: boolean;
 }
 
 async function main(config: Options): Promise<void> {
@@ -97,13 +100,16 @@ async function main(config: Options): Promise<void> {
               label: 'Next.js: Content Collections',
             },
             {
+              value: 'waku',
+              label: 'Waku: Fumadocs MDX',
+            },
+            {
               value: 'react-router',
-              label: 'React Router: MDX Remote',
+              label: 'React Router: Fumadocs MDX (not RSC)',
             },
             {
               value: 'tanstack-start',
-              label: 'Tanstack Start: MDX Remote',
-              hint: 'Experimental',
+              label: 'Tanstack Start: Fumadocs MDX (not RSC)',
             },
           ],
         });
@@ -185,6 +191,7 @@ async function main(config: Options): Promise<void> {
     installDeps: options.installDeps,
     eslint: options.eslint === true,
     useSrcDir: options.src === true,
+    initializeGit: config.git,
 
     log: (message) => {
       info.message(message);

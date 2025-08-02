@@ -3,7 +3,7 @@ import {
   type ComponentProps,
   createContext,
   type ReactNode,
-  use,
+  useContext,
   useMemo,
   useState,
 } from 'react';
@@ -43,8 +43,8 @@ export function SelectTab({
 }: ComponentProps<'div'> & {
   value: string;
 }) {
-  const { type } = use(Context)!;
-  if (value !== type) return;
+  const ctx = useContext(Context);
+  if (value !== ctx?.type) return;
 
   return <div {...props}>{props.children}</div>;
 }
@@ -53,7 +53,7 @@ export function SelectTabTrigger({
   items,
   ...props
 }: ComponentProps<typeof SelectTrigger> & { items: string[] }) {
-  const { type, setType } = use(Context)!;
+  const { type, setType } = useContext(Context)!;
 
   return (
     <Select value={type ?? ''} onValueChange={setType}>

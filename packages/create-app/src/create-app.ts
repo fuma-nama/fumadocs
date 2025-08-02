@@ -12,6 +12,7 @@ export const templates = [
   '+next+fuma-docs-mdx',
   'react-router',
   'tanstack-start',
+  'waku',
 ] as const;
 
 export type Template = (typeof templates)[number];
@@ -137,7 +138,9 @@ export async function create(options: Options): Promise<void> {
     );
   }
 
-  const packageJson = await createPackageJson(projectName, dest, options);
+  const packageJson = isNext
+    ? await createNextPackageJson(projectName, options)
+    : await createPackageJson(projectName, dest);
   await fs.writeFile(
     path.join(dest, 'package.json'),
     JSON.stringify(packageJson, null, 2),
@@ -189,39 +192,10 @@ async function copy(
   }
 }
 
-async function createPackageJson(
+async function createNextPackageJson(
   projectName: string,
-  dir: string,
   options: Options,
 ): Promise<object> {
-  function replaceWorkspaceDeps(deps: Record<string, string>) {
-    for (const k in deps) {
-      if (deps[k].startsWith('workspace:') && k in localVersions) {
-        deps[k] = localVersions[k as keyof typeof localVersions];
-      }
-    }
-
-    return deps;
-  }
-
-  if (
-    options.template === 'tanstack-start' ||
-    options.template === 'react-router'
-  ) {
-    const packageJson = JSON.parse(
-      await fs
-        .readFile(path.join(dir, 'package.json'))
-        .then((res) => res.toString()),
-    );
-
-    return {
-      name: projectName,
-      ...packageJson,
-      dependencies: replaceWorkspaceDeps(packageJson.dependencies),
-      devDependencies: replaceWorkspaceDeps(packageJson.devDependencies),
-    };
-  }
-
   return {
     name: projectName,
     version: '0.0.0',
@@ -275,6 +249,34 @@ async function createPackageJson(
           }
         : null),
     },
+  };
+}
+
+async function createPackageJson(
+  projectName: string,
+  dir: string,
+): Promise<object> {
+  function replaceWorkspaceDeps(deps: Record<string, string>) {
+    for (const k in deps) {
+      if (deps[k].startsWith('workspace:') && k in localVersions) {
+        deps[k] = localVersions[k as keyof typeof localVersions];
+      }
+    }
+
+    return deps;
+  }
+
+  const packageJson = JSON.parse(
+    await fs
+      .readFile(path.join(dir, 'package.json'))
+      .then((res) => res.toString()),
+  );
+
+  return {
+    name: projectName,
+    ...packageJson,
+    dependencies: replaceWorkspaceDeps(packageJson.dependencies),
+    devDependencies: replaceWorkspaceDeps(packageJson.devDependencies),
   };
 }
 
