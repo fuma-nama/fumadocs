@@ -102,14 +102,18 @@ export const metadataImage = createMetadataImage({
 ```
 
 ```ts title="route.ts"
-import { generateOGImage } from 'fumadocs-ui/og';
+import { generateOGImage, createRenderer } from 'fumadocs-ui/og';
 import { metadataImage } from '@/lib/metadata';
+
+const renderer = createRenderer();
 
 export const GET = metadataImage.createAPI((page) => {
   return generateOGImage({
     title: page.data.title,
     description: page.data.description,
     site: 'My App',
+    renderer,
+  });
   });
 });
 

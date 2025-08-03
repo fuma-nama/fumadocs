@@ -1,15 +1,15 @@
 import { readFileSync } from 'node:fs';
 import { generateOGImage } from '@/app/og/[...slug]/og';
 import { source } from '@/lib/source';
+import { createRenderer } from 'fumadocs-ui/og';
 import { notFound } from 'next/navigation';
-import { Renderer } from '@takumi-rs/core';
 
 const font = readFileSync('./app/og/[...slug]/JetBrainsMono-Regular.ttf');
 const fontBold = readFileSync('./app/og/[...slug]/JetBrainsMono-Bold.ttf');
 
-const renderer = new Renderer();
-
-await renderer.loadFontsAsync([font.buffer, fontBold.buffer]);
+const renderer = createRenderer({
+  fonts: [font.buffer, fontBold.buffer],
+});
 
 export async function GET(
   _req: Request,
@@ -32,6 +32,6 @@ export function generateStaticParams(): {
 }[] {
   return source.generateParams().map((page) => ({
     ...page,
-    slug: [...page.slug, 'image.png'],
+    slug: [...page.slug, 'image.webp'],
   }));
 }

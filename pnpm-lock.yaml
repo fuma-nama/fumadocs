@@ -90,11 +90,11 @@ importers:
         specifier: ^3.8.1
         version: 3.8.1
       '@takumi-rs/core':
-        specifier: ^0.17.0
-        version: 0.17.0
+        specifier: ^0.20.0
+        version: 0.20.0
       '@takumi-rs/helpers':
-        specifier: ^0.17.0
-        version: 0.17.0(react-dom@19.1.0(react@19.1.0))
+        specifier: ^0.20.0
+        version: 0.20.0(react-dom@19.1.0(react@19.1.0))
       ai:
         specifier: ^4.3.19
         version: 4.3.19(react@19.1.0)(zod@4.0.10)
@@ -1511,6 +1511,12 @@ importers:
       '@radix-ui/react-tabs':
         specifier: ^1.1.12
         version: 1.1.12(@types/react-dom@19.1.6(@types/react@19.1.8))(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@takumi-rs/core':
+        specifier: 0.20.0
+        version: 0.20.0
+      '@takumi-rs/helpers':
+        specifier: 0.20.0
+        version: 0.20.0(react-dom@19.1.0(react@19.1.0))
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -4060,44 +4066,47 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7
 
-  '@takumi-rs/core-darwin-arm64@0.17.0':
-    resolution: {integrity: sha512-iqhTJ6OIpc7AJekTnf/NTuypPS7KgwMS0ryHkMBF9YrwBynOG/g+AX2dHh1Fs4qVJ/W+yCS7ShYCEy0Y4ylU8g==, tarball: https://registry.npmjs.org/@takumi-rs/core-darwin-arm64/-/core-darwin-arm64-0.17.0.tgz}
+  '@takumi-rs/core-darwin-arm64@0.20.0':
+    resolution: {integrity: sha512-yQpymGOw7vQ9EedF4mJ/ryZjpAD/EIRrm4slxMXWk8yBCnvCWeV9fq8fTEXKaxjArLXRpmnR50VOBlBbUaMAqw==, tarball: https://registry.npmjs.org/@takumi-rs/core-darwin-arm64/-/core-darwin-arm64-0.20.0.tgz}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [arm64]
     os: [darwin]
 
-  '@takumi-rs/core-linux-arm64-gnu@0.17.0':
-    resolution: {integrity: sha512-0WyxmeYTHTid3YhMyPEo03dlz+g35NEdmrFkuJStGaTidFLDD8E0/LepwsI92n0lN5KoscSaAuKL9/z/hAzFXA==, tarball: https://registry.npmjs.org/@takumi-rs/core-linux-arm64-gnu/-/core-linux-arm64-gnu-0.17.0.tgz}
+  '@takumi-rs/core-linux-arm64-gnu@0.20.0':
+    resolution: {integrity: sha512-JzLGOFm5SQSyaG7Ju4mEXAbUgLR9qUUapYNCOib7/GYRJx7Zq9jq0/UILdtU3r5oOnZi6rY/1wnJ0/8E3B85LQ==, tarball: https://registry.npmjs.org/@takumi-rs/core-linux-arm64-gnu/-/core-linux-arm64-gnu-0.20.0.tgz}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [arm64]
     os: [linux]
 
-  '@takumi-rs/core-linux-arm64-musl@0.17.0':
-    resolution: {integrity: sha512-CdeMyqmkgBQqD9vuEmjElo74BzfzCMlrgYznQMbsd1YiY+ZNEAMkfaf+VPEZ9BIXhd11QEnt0BnRWSChKjLocA==, tarball: https://registry.npmjs.org/@takumi-rs/core-linux-arm64-musl/-/core-linux-arm64-musl-0.17.0.tgz}
+  '@takumi-rs/core-linux-arm64-musl@0.20.0':
+    resolution: {integrity: sha512-osCAWtMhbYQxFnpyliW6yXycOWKNNH0oYicz6ZBSQMJ8o5VwHQ3SaMndKAy9xwI8WYDGL5YmPvOuwgP4Hn+VwA==, tarball: https://registry.npmjs.org/@takumi-rs/core-linux-arm64-musl/-/core-linux-arm64-musl-0.20.0.tgz}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [arm64]
     os: [linux]
 
-  '@takumi-rs/core-linux-x64-gnu@0.17.0':
-    resolution: {integrity: sha512-tYtI0LcI+D4G0Ocala5u/z5ZCereLwORIlMRTo7/G+jB4sKqEyTRjn9fI/0VGWR1lbF9UeG+We4Fq1mSnMctvg==, tarball: https://registry.npmjs.org/@takumi-rs/core-linux-x64-gnu/-/core-linux-x64-gnu-0.17.0.tgz}
+  '@takumi-rs/core-linux-x64-gnu@0.20.0':
+    resolution: {integrity: sha512-z12lYmcyJHiG6bCtqNgHMu941F8rTb4BSMKRvturrG54YGNQ5iIQGbe6b2Cur0sB9w5wQ9rSCXHW7JG+IV37lA==, tarball: https://registry.npmjs.org/@takumi-rs/core-linux-x64-gnu/-/core-linux-x64-gnu-0.20.0.tgz}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [x64]
     os: [linux]
 
-  '@takumi-rs/core-linux-x64-musl@0.17.0':
-    resolution: {integrity: sha512-04bEZnoGglrpghAO4KhoN0PXin0z1sdHdSNX45Li5H4mYfvdQ4YWxAtynq/nDzHpzk0bzvY1RpyNxRKf0S2Vlg==, tarball: https://registry.npmjs.org/@takumi-rs/core-linux-x64-musl/-/core-linux-x64-musl-0.17.0.tgz}
+  '@takumi-rs/core-linux-x64-musl@0.20.0':
+    resolution: {integrity: sha512-e0RETXj4ZxUywfVwYCKpfvG6+vwycW0nVTHgfOOb2QDcJqHOtaFr9/Aua4d6AO0TGsc7xn0LL7/vvUssUH5xRA==, tarball: https://registry.npmjs.org/@takumi-rs/core-linux-x64-musl/-/core-linux-x64-musl-0.20.0.tgz}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [x64]
     os: [linux]
 
-  '@takumi-rs/core@0.17.0':
-    resolution: {integrity: sha512-6sV2Urdr/mzuvN1r+g+Y2+JHf0MQnsnNRf7sxfTgxihNmyC66C9jQLD/O9rl7JK3YcfH5Cv3z40fpvOo2lm8Qw==, tarball: https://registry.npmjs.org/@takumi-rs/core/-/core-0.17.0.tgz}
+  '@takumi-rs/core@0.20.0':
+    resolution: {integrity: sha512-xXhGyC71Yyz4Ew/EOFKzZyWrxlaeV8si3UFeNos0WyvAhx79szlF9U/8pU7K8MR5zTGWTAhEOJgoRiP/Jie+ZQ==, tarball: https://registry.npmjs.org/@takumi-rs/core/-/core-0.20.0.tgz}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
 
-  '@takumi-rs/helpers@0.17.0':
-    resolution: {integrity: sha512-fpUpYEd4rsjsVRmQcgsTMLRDGCG936RGuOEp+wUW1L+RcxwgihmFLiHSs1Mx4GDcvC+YiaPXihWxDL0irRloaQ==, tarball: https://registry.npmjs.org/@takumi-rs/helpers/-/helpers-0.17.0.tgz}
+  '@takumi-rs/helpers@0.20.0':
+    resolution: {integrity: sha512-+cX/qpIKwvA7OveNRUuos1b4XKGhtuz0eyZiSqVH8p7uKUOhDGOrgbgVwig/PlBAxFRMkuFz3cylffNWCnQyvA==, tarball: https://registry.npmjs.org/@takumi-rs/helpers/-/helpers-0.20.0.tgz}
     peerDependencies:
-      react-dom: ^19.1.1
+      react-dom: ^19.0.0
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
 
   '@tanstack/directive-functions-plugin@1.129.7':
     resolution: {integrity: sha512-2VvlVmDvwHOnDAXQQa+gnhDnWPW59JcqePFf1ujOG0QGv+pw1G+JzHpiLZs4Dwr4myMxMGzFp5AWtvF96rpE7Q==, tarball: https://registry.npmjs.org/@tanstack/directive-functions-plugin/-/directive-functions-plugin-1.129.7.tgz}
@@ -12850,31 +12859,31 @@ snapshots:
       tailwindcss: 4.1.11
       vite: 7.0.6(@types/node@24.1.0)(jiti@2.5.1)(lightningcss@1.30.1)(terser@5.43.1)(tsx@4.20.3)(yaml@2.8.0)
 
-  '@takumi-rs/core-darwin-arm64@0.17.0':
+  '@takumi-rs/core-darwin-arm64@0.20.0':
     optional: true
 
-  '@takumi-rs/core-linux-arm64-gnu@0.17.0':
+  '@takumi-rs/core-linux-arm64-gnu@0.20.0':
     optional: true
 
-  '@takumi-rs/core-linux-arm64-musl@0.17.0':
+  '@takumi-rs/core-linux-arm64-musl@0.20.0':
     optional: true
 
-  '@takumi-rs/core-linux-x64-gnu@0.17.0':
+  '@takumi-rs/core-linux-x64-gnu@0.20.0':
     optional: true
 
-  '@takumi-rs/core-linux-x64-musl@0.17.0':
+  '@takumi-rs/core-linux-x64-musl@0.20.0':
     optional: true
 
-  '@takumi-rs/core@0.17.0':
+  '@takumi-rs/core@0.20.0':
     optionalDependencies:
-      '@takumi-rs/core-darwin-arm64': 0.17.0
-      '@takumi-rs/core-linux-arm64-gnu': 0.17.0
-      '@takumi-rs/core-linux-arm64-musl': 0.17.0
-      '@takumi-rs/core-linux-x64-gnu': 0.17.0
-      '@takumi-rs/core-linux-x64-musl': 0.17.0
+      '@takumi-rs/core-darwin-arm64': 0.20.0
+      '@takumi-rs/core-linux-arm64-gnu': 0.20.0
+      '@takumi-rs/core-linux-arm64-musl': 0.20.0
+      '@takumi-rs/core-linux-x64-gnu': 0.20.0
+      '@takumi-rs/core-linux-x64-musl': 0.20.0
 
-  '@takumi-rs/helpers@0.17.0(react-dom@19.1.0(react@19.1.0))':
-    dependencies:
+  '@takumi-rs/helpers@0.20.0(react-dom@19.1.0(react@19.1.0))':
+    optionalDependencies:
       react-dom: 19.1.0(react@19.1.0)
 
   '@tanstack/directive-functions-plugin@1.129.7(vite@7.0.6(@types/node@24.1.0)(jiti@2.5.1)(lightningcss@1.30.1)(terser@5.43.1)(tsx@4.20.3)(yaml@2.8.0))':

@@ -73,7 +73,7 @@ export function createMetadataImage<
     options: any,
   ) => Response | Promise<Response>;
 } {
-  const { filename = 'image.png', imageRoute = '/docs-og' } = options;
+  const { filename = 'image.webp', imageRoute = '/docs-og' } = options;
 
   function getImageMeta(slugs: string[]): ImageMeta {
     return {

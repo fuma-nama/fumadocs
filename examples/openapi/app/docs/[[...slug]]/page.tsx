@@ -42,7 +42,7 @@ export async function generateMetadata(props: {
   const params = await props.params;
   const page = source.getPage(params.slug);
   if (!page) notFound();
-  const image = ['/docs-og', ...(params.slug ?? []), 'image.png'].join('/');
+  const image = ['/docs-og', ...(params.slug ?? []), 'image.webp'].join('/');
 
   return {
     title: page.data.title,

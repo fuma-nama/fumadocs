@@ -13,7 +13,7 @@ export async function generateOGImage(
   options: GenerateProps,
 ): Promise<Response> {
   const [component] = await fromJsx(generate(options));
-  
+
   const image = await options.renderer.renderAsync(component, {
     width: 1200,
     height: 630,

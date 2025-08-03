@@ -1,6 +1,10 @@
-import { ImageResponse } from 'next/og';
 import type { ReactElement, ReactNode } from 'react';
-import type { ImageResponseOptions } from 'next/dist/compiled/@vercel/og/types';
+import { fromJsx } from '@takumi-rs/helpers';
+import {
+  ConstructRendererOptions,
+  OutputFormat,
+  Renderer,
+} from '@takumi-rs/core';
 
 interface GenerateProps {
   title: ReactNode;
@@ -9,36 +13,29 @@ interface GenerateProps {
   primaryColor?: string;
   primaryTextColor?: string;
   site?: ReactNode;
+  renderer: Renderer;
 }
 
-export function generateOGImage(
-  options: GenerateProps & ImageResponseOptions,
-): ImageResponse {
-  const {
-    title,
-    description,
-    icon,
-    site,
-    primaryColor,
-    primaryTextColor,
-    ...rest
-  } = options;
+export function createRenderer(options?: ConstructRendererOptions): Renderer {
+  return new Renderer(options);
+}
 
-  return new ImageResponse(
-    generate({
-      title,
-      description,
-      icon,
-      site,
-      primaryTextColor,
-      primaryColor,
-    }),
-    {
-      width: 1200,
-      height: 630,
-      ...rest,
+export async function generateOGImage(
+  options: GenerateProps,
+): Promise<Response> {
+  const [component] = await fromJsx(generate(options));
+
+  const image = await options.renderer.renderAsync(component, {
+    width: 1200,
+    height: 630,
+    format: 'WebP' as OutputFormat.WebP,
+  });
+
+  return new Response(image, {
+    headers: {
+      'Content-Type': 'image/webp',
     },
-  );
+  });
 }
 
 export function generate({
