@@ -2,3 +2,6 @@ packages:
   - packages/*
   - apps/*
   - examples/*
+
+patchedDependencies:
+  '@takumi-rs/core': patches/@takumi-rs__core.patch

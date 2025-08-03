@@ -1,0 +1,13 @@
+diff --git a/index.js b/index.js
+index a510518a381af49bfc6ca80d7507d9a48bffee15..6d938532ed40d69da9131e43bdb4dd88aa0cf1f6 100644
+--- a/index.js
++++ b/index.js
+@@ -386,7 +386,7 @@ if (!nativeBinding) {
+       `Cannot find native binding. ` +
+         `npm has a bug related to optional dependencies (https://github.com/npm/cli/issues/4828). ` +
+         'Please try `npm i` again after removing both package-lock.json and node_modules directory.',
+-      { cause: loadErrors }
++      { cause: JSON.stringify(loadErrors, (k, v) => v instanceof Error ? (Object.getOwnPropertyNames(v).reduce((o, n) => (o[n] = v[n], o), {})) : v, 2) }   
+     )
+   }
+   throw new Error(`Failed to load native binding`)
