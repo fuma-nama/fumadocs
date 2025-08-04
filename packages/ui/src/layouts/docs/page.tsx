@@ -6,14 +6,13 @@ import {
   PageBreadcrumb,
   PageFooter,
   PageLastUpdate,
-  PageRoot,
   PageTOC,
   PageTOCPopover,
   PageTOCPopoverContent,
   PageTOCPopoverTrigger,
   type RootProps,
 } from './page-client';
-import { TOCItems, TOCScrollArea } from '@/components/layout/toc';
+import { TOCItems, TOCProvider, TOCScrollArea } from '@/components/layout/toc';
 import { Text } from 'lucide-react';
 import { I18nLabel } from '@/contexts/i18n';
 import ClerkTOCItems from '@/components/layout/toc-clerk';
@@ -80,8 +79,24 @@ export function PageArticle(props: ComponentProps<'article'>) {
   );
 }
 
+export function PageRoot({ toc, children, ...props }: RootProps) {
+  return (
+    <TOCProvider {...toc}>
+      <div
+        id="nd-page"
+        {...props}
+        className={cn(
+          'flex flex-1 w-full mx-auto max-w-(--fd-page-width) pt-(--fd-tocnav-height)',
+          props.className,
+        )}
+      >
+        {children}
+      </div>
+    </TOCProvider>
+  );
+}
+
 export {
-  PageRoot,
   PageBreadcrumb,
   PageFooter,
   PageLastUpdate,

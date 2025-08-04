@@ -28,7 +28,7 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { useSidebar } from '@/contexts/sidebar';
-import { TOCProvider, useTOCItems } from '@/components/layout/toc';
+import { useTOCItems } from '@/components/layout/toc';
 import { type AnchorProviderProps, useActiveAnchor } from 'fumadocs-core/toc';
 
 const TocPopoverContext = createContext<{
@@ -52,14 +52,14 @@ export function PageTOCPopoverTrigger(props: ComponentProps<'button'>) {
     <CollapsibleTrigger
       {...props}
       className={cn(
-        'flex w-full h-(--fd-tocnav-height) items-center text-sm text-fd-muted-foreground gap-2.5 px-4 py-2.5 text-start focus-visible:outline-none [&_svg]:shrink-0 [&_svg]:size-4 md:px-6',
+        'flex w-full h-(--fd-tocnav-height) items-center text-sm text-fd-muted-foreground gap-2.5 px-4 py-2.5 text-start focus-visible:outline-none [&_svg]:size-4 md:px-6',
         props.className,
       )}
     >
       <ProgressCircle
         value={(selected + 1) / Math.max(1, items.length)}
         max={1}
-        className={cn(open && 'text-fd-primary')}
+        className={cn('shrink-0', open && 'text-fd-primary')}
       />
       <span className="grid flex-1 *:my-auto *:row-start-1 *:col-start-1">
         <span
@@ -81,7 +81,10 @@ export function PageTOCPopoverTrigger(props: ComponentProps<'button'>) {
         </span>
       </span>
       <ChevronDown
-        className={cn('transition-transform mx-0.5', open && 'rotate-180')}
+        className={cn(
+          'shrink-0 transition-transform mx-0.5',
+          open && 'rotate-180',
+        )}
       />
     </CollapsibleTrigger>
   );
@@ -218,29 +221,6 @@ export interface RootProps extends ComponentProps<'div'> {
   toc: Omit<AnchorProviderProps, 'children'>;
 }
 
-export function PageRoot({ toc, children, ...props }: RootProps) {
-  const { collapsed } = useSidebar();
-
-  return (
-    <TOCProvider {...toc}>
-      <div
-        id="nd-page"
-        {...props}
-        className={cn('flex flex-1 mx-auto w-full', props.className)}
-        style={{
-          paddingTop: 'calc(var(--fd-nav-height) + var(--fd-tocnav-height))',
-          maxWidth: collapsed
-            ? 'var(--fd-page-width)'
-            : 'min(var(--fd-page-width),calc(var(--fd-layout-width) - var(--fd-sidebar-width)))',
-          ...props.style,
-        }}
-      >
-        {children}
-      </div>
-    </TOCProvider>
-  );
-}
-
 export function PageLastUpdate({
   date: value,
   ...props
@@ -295,7 +275,7 @@ function scanNavigationList(tree: PageTree.Node[]) {
   return list;
 }
 
-const listCache = new WeakMap<PageTree.Root, PageTree.Item[]>();
+const listCache = new Map<string, PageTree.Item[]>();
 
 export function PageFooter({ items, ...props }: FooterProps) {
   const { root } = useTreeContext();
@@ -304,9 +284,9 @@ export function PageFooter({ items, ...props }: FooterProps) {
   const { previous, next } = useMemo(() => {
     if (items) return items;
 
-    const cached = listCache.get(root);
+    const cached = listCache.get(root.$id);
     const list = cached ?? scanNavigationList(root.children);
-    listCache.set(root, list);
+    listCache.set(root.$id, list);
 
     const idx = list.findIndex((item) => isActive(item.url, pathname, false));
 
@@ -396,7 +376,7 @@ export function PageBreadcrumb({
 
         return (
           <Fragment key={i}>
-            {i !== 0 && <span className="text-fd-foreground/30">/</span>}
+            {i !== 0 && <ChevronRight className="size-3.5 shrink-0" />}
             {item.url ? (
               <Link
                 href={item.url}

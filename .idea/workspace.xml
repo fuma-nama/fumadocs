@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="edacdf1b-58dd-4ffe-9166-8e463dc8fa23" name="Changes" comment="fix bugs &amp; add showcase">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/docs/components/ai/search.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/docs/components/ai/search.tsx" afterDir="false" />
+    <list default="true" id="edacdf1b-58dd-4ffe-9166-8e463dc8fa23" name="Changes" comment="UI: simplify layout offset logic">
+      <change beforePath="$PROJECT_DIR$/apps/docs/app/docs/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/docs/app/docs/layout.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -691,47 +690,11 @@
       <workItem from="1753941132595" duration="6313000" />
       <workItem from="1754034637804" duration="3426000" />
       <workItem from="1754038073679" duration="19016000" />
-      <workItem from="1754110591578" duration="10324000" />
-    </task>
-    <task id="LOCAL-01784" summary="UI: improve RTL layout">
-      <option name="closed" value="true" />
-      <created>1753458345609</created>
-      <option name="number" value="01784" />
-      <option name="presentableId" value="LOCAL-01784" />
-      <option name="project" value="LOCAL" />
-      <updated>1753458345609</updated>
-    </task>
-    <task id="LOCAL-01785" summary="UI: improve RTL layout">
-      <option name="closed" value="true" />
-      <created>1753458871712</created>
-      <option name="number" value="01785" />
-      <option name="presentableId" value="LOCAL-01785" />
-      <option name="project" value="LOCAL" />
-      <updated>1753458871712</updated>
-    </task>
-    <task id="LOCAL-01786" summary="UI: Improve type table link icon">
-      <option name="closed" value="true" />
-      <created>1753460003717</created>
-      <option name="number" value="01786" />
-      <option name="presentableId" value="LOCAL-01786" />
-      <option name="project" value="LOCAL" />
-      <updated>1753460003717</updated>
-    </task>
-    <task id="LOCAL-01787" summary="UI: Improve type table link icon">
-      <option name="closed" value="true" />
-      <created>1753460016944</created>
-      <option name="number" value="01787" />
-      <option name="presentableId" value="LOCAL-01787" />
-      <option name="project" value="LOCAL" />
-      <updated>1753460016944</updated>
-    </task>
-    <task id="LOCAL-01788" summary="UI: Improve type table link icon">
-      <option name="closed" value="true" />
-      <created>1753460266868</created>
-      <option name="number" value="01788" />
-      <option name="presentableId" value="LOCAL-01788" />
-      <option name="project" value="LOCAL" />
-      <updated>1753460266868</updated>
+      <workItem from="1754110591578" duration="11469000" />
+      <workItem from="1754130248722" duration="3671000" />
+      <workItem from="1754204737729" duration="2422000" />
+      <workItem from="1754274652897" duration="8851000" />
+      <workItem from="1754302800743" duration="8815000" />
     </task>
     <task id="LOCAL-01789" summary="UI: improve codeblock diff styles">
       <option name="closed" value="true" />
@@ -1085,7 +1048,47 @@
       <option name="project" value="LOCAL" />
       <updated>1754126209318</updated>
     </task>
-    <option name="localTasksCounter" value="1833" />
+    <task id="LOCAL-01833" summary="fix bugs &amp; add showcase">
+      <option name="closed" value="true" />
+      <created>1754126967764</created>
+      <option name="number" value="01833" />
+      <option name="presentableId" value="LOCAL-01833" />
+      <option name="project" value="LOCAL" />
+      <updated>1754126967764</updated>
+    </task>
+    <task id="LOCAL-01834" summary="Core: remove waku &amp; tanstack peer dependency temporarily">
+      <option name="closed" value="true" />
+      <created>1754300929054</created>
+      <option name="number" value="01834" />
+      <option name="presentableId" value="LOCAL-01834" />
+      <option name="project" value="LOCAL" />
+      <updated>1754300929054</updated>
+    </task>
+    <task id="LOCAL-01835" summary="UI: fixed root toggle menu size">
+      <option name="closed" value="true" />
+      <created>1754303427696</created>
+      <option name="number" value="01835" />
+      <option name="presentableId" value="LOCAL-01835" />
+      <option name="project" value="LOCAL" />
+      <updated>1754303427696</updated>
+    </task>
+    <task id="LOCAL-01836" summary="UI: simplify layout offset logic">
+      <option name="closed" value="true" />
+      <created>1754312936753</created>
+      <option name="number" value="01836" />
+      <option name="presentableId" value="LOCAL-01836" />
+      <option name="project" value="LOCAL" />
+      <updated>1754312936753</updated>
+    </task>
+    <task id="LOCAL-01837" summary="UI: simplify layout offset logic">
+      <option name="closed" value="true" />
+      <created>1754312963539</created>
+      <option name="number" value="01837" />
+      <option name="presentableId" value="LOCAL-01837" />
+      <option name="project" value="LOCAL" />
+      <updated>1754312963539</updated>
+    </task>
+    <option name="localTasksCounter" value="1838" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -1136,9 +1139,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
-    <MESSAGE value="UI: Improve type table link icon" />
-    <MESSAGE value="UI: improve codeblock diff styles" />
-    <MESSAGE value="Core: Support to override `&lt;HideIfEmpty /&gt;` scripts nonce with `&lt;HideIfEmptyProvider /&gt;`" />
     <MESSAGE value="UI: Move sidebar toolbar to top on mobile view" />
     <MESSAGE value="UI: improve details" />
     <MESSAGE value="React Router: add example pre-render script" />
@@ -1161,6 +1161,9 @@
     <MESSAGE value="Migrate to AI SDK v5" />
     <MESSAGE value="Upgrade Tanstack Start to fix upstream bugs" />
     <MESSAGE value="fix bugs &amp; add showcase" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix bugs &amp; add showcase" />
+    <MESSAGE value="Core: remove waku &amp; tanstack peer dependency temporarily" />
+    <MESSAGE value="UI: fixed root toggle menu size" />
+    <MESSAGE value="UI: simplify layout offset logic" />
+    <option name="LAST_COMMIT_MESSAGE" value="UI: simplify layout offset logic" />
   </component>
 </project>

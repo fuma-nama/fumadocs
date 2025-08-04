@@ -16,6 +16,7 @@ import {
   SidebarFooter,
   SidebarHeader,
   SidebarPageTree,
+  SidebarTrigger,
   SidebarViewport,
 } from '@/components/layout/sidebar';
 import {
@@ -29,12 +30,7 @@ import {
   LanguageToggle,
   LanguageToggleText,
 } from '@/components/layout/language-toggle';
-import {
-  CollapsibleControl,
-  LayoutBody,
-  Navbar,
-  SidebarTrigger,
-} from '@/layouts/docs-client';
+import { CollapsibleControl, LayoutBody, Navbar } from '@/layouts/docs-client';
 import { TreeContextProvider } from '@/contexts/tree';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 import {
@@ -84,14 +80,8 @@ export function DocsLayout({
     [sidebarTabs, props.tree],
   );
   const links = getLinks(props.links ?? [], props.githubUrl);
-
-  const variables = cn(
-    sidebarEnabled &&
-      'md:[--fd-sidebar-width:268px] lg:[--fd-sidebar-width:286px]',
-    'xl:[--fd-toc-width:286px]',
-    !nav.component && nav.enabled !== false
-      ? '[--fd-nav-height:56px] md:[--fd-nav-height:0px]'
-      : undefined,
+  const sidebarVariables = cn(
+    'md:[--fd-sidebar-width:268px] lg:[--fd-sidebar-width:286px]',
   );
 
   function sidebar() {
@@ -290,7 +280,14 @@ export function DocsLayout({
           ))}
         <LayoutBody
           {...props.containerProps}
-          className={cn(variables, props.containerProps?.className)}
+          className={cn(
+            'xl:[--fd-toc-width:286px]',
+            sidebarEnabled && sidebarVariables,
+            !nav.component &&
+              nav.enabled !== false &&
+              '[--fd-nav-height:56px] md:[--fd-nav-height:0px]',
+            props.containerProps?.className,
+          )}
         >
           {sidebarEnabled && sidebar()}
           {children}

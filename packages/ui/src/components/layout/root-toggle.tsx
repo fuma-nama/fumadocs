@@ -55,7 +55,7 @@ export function RootToggle({
 
   const item = selected ? (
     <>
-      <div className="size-9 md:size-5">{selected.icon}</div>
+      <div className="size-9 shrink-0 md:size-5">{selected.icon}</div>
       <div>
         <p className="text-sm font-medium">{selected.title}</p>
         <p className="text-[13px] text-fd-muted-foreground empty:hidden md:hidden">
@@ -78,10 +78,10 @@ export function RootToggle({
           )}
         >
           {item}
-          <ChevronsUpDown className="ms-auto size-4 text-fd-muted-foreground" />
+          <ChevronsUpDown className="shrink-0 ms-auto size-4 text-fd-muted-foreground" />
         </PopoverTrigger>
       )}
-      <PopoverContent className="flex flex-col gap-1 min-w-(--radix-popover-trigger-width) overflow-hidden p-1">
+      <PopoverContent className="flex flex-col gap-1 w-(--radix-popover-trigger-width) overflow-hidden p-1">
         {options.map((item) => {
           const isActive = item === selected;
 
@@ -96,7 +96,7 @@ export function RootToggle({
                 item.props?.className,
               )}
             >
-              <div className="size-9 md:size-5 md:mt-1 md:mb-auto">
+              <div className="shrink-0 size-9 md:mt-1 md:mb-auto md:size-5">
                 {item.icon}
               </div>
               <div>
@@ -108,7 +108,7 @@ export function RootToggle({
 
               <Check
                 className={cn(
-                  'ms-auto size-3.5 text-fd-primary',
+                  'shrink-0 ms-auto size-3.5 text-fd-primary',
                   !isActive && 'invisible',
                 )}
               />
