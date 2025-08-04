@@ -4,9 +4,20 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="edacdf1b-58dd-4ffe-9166-8e463dc8fa23" name="Changes" comment="fix bugs &amp; add showcase">
+    <list default="true" id="edacdf1b-58dd-4ffe-9166-8e463dc8fa23" name="Changes" comment="format">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/docs/components/ai/search.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/docs/components/ai/search.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/docs/app/global.css" beforeDir="false" afterPath="$PROJECT_DIR$/apps/docs/app/global.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/docs/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/apps/docs/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/openapi/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/examples/openapi/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/tanstack-start/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/examples/tanstack-start/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/core/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/core/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/core/tsup.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/packages/core/tsup.config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/create-app-versions/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/create-app-versions/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/doc-gen/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/doc-gen/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/openapi/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/openapi/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/twoslash/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/twoslash/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/typescript/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/typescript/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnpm-lock.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pnpm-lock.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -691,15 +702,10 @@
       <workItem from="1753941132595" duration="6313000" />
       <workItem from="1754034637804" duration="3426000" />
       <workItem from="1754038073679" duration="19016000" />
-      <workItem from="1754110591578" duration="10324000" />
-    </task>
-    <task id="LOCAL-01784" summary="UI: improve RTL layout">
-      <option name="closed" value="true" />
-      <created>1753458345609</created>
-      <option name="number" value="01784" />
-      <option name="presentableId" value="LOCAL-01784" />
-      <option name="project" value="LOCAL" />
-      <updated>1753458345609</updated>
+      <workItem from="1754110591578" duration="11469000" />
+      <workItem from="1754130248722" duration="3671000" />
+      <workItem from="1754204737729" duration="2422000" />
+      <workItem from="1754274652897" duration="8046000" />
     </task>
     <task id="LOCAL-01785" summary="UI: improve RTL layout">
       <option name="closed" value="true" />
@@ -1085,7 +1091,15 @@
       <option name="project" value="LOCAL" />
       <updated>1754126209318</updated>
     </task>
-    <option name="localTasksCounter" value="1833" />
+    <task id="LOCAL-01833" summary="fix bugs &amp; add showcase">
+      <option name="closed" value="true" />
+      <created>1754126967764</created>
+      <option name="number" value="01833" />
+      <option name="presentableId" value="LOCAL-01833" />
+      <option name="project" value="LOCAL" />
+      <updated>1754126967764</updated>
+    </task>
+    <option name="localTasksCounter" value="1834" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

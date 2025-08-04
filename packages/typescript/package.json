@@ -40,7 +40,7 @@
     "hast-util-to-jsx-runtime": "^2.3.6",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
-    "shiki": "^3.9.1",
+    "shiki": "^3.9.2",
     "tinyglobby": "^0.2.14",
     "ts-morph": "^26.0.0",
     "unist-util-visit": "^5.0.0"
