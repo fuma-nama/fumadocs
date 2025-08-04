@@ -13,12 +13,18 @@ import {
   SidebarFooter,
   SidebarHeader,
   SidebarPageTree,
+  SidebarTrigger,
   SidebarViewport,
 } from '@/components/layout/sidebar';
 import { TreeContextProvider } from '@/contexts/tree';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
-import { ChevronDown, Languages, Sidebar as SidebarIcon } from 'lucide-react';
+import {
+  ChevronDown,
+  Languages,
+  Sidebar as SidebarIcon,
+  X,
+} from 'lucide-react';
 import { BaseLinkItem, type LinkItemType } from '@/layouts/links';
 import { LanguageToggle } from '@/components/layout/language-toggle';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
@@ -190,10 +196,21 @@ export function DocsLayout(props: DocsLayoutProps) {
 
     const mobile = (
       <SidebarContentMobile {...rest}>
-        <HideIfEmpty as={SidebarHeader}>
+        <SidebarHeader>
+          <SidebarTrigger
+            className={cn(
+              buttonVariants({
+                size: 'icon-sm',
+                color: 'ghost',
+                className: 'ms-auto text-fd-muted-foreground',
+              }),
+            )}
+          >
+            <X />
+          </SidebarTrigger>
           {banner}
           {rootToggle}
-        </HideIfEmpty>
+        </SidebarHeader>
         {viewport}
         <HideIfEmpty
           as={SidebarFooter}

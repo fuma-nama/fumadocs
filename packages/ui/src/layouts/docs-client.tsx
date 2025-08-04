@@ -35,35 +35,19 @@ export function LayoutBody(props: ComponentProps<'main'>) {
       id="nd-docs-layout"
       {...props}
       className={cn(
-        'flex flex-1 flex-col transition-[margin]',
+        'flex flex-1 flex-col pt-(--fd-nav-height) transition-[padding]',
         props.className,
       )}
       style={{
         ...props.style,
-        marginInlineStart: collapsed
-          ? 'max(0px, min(calc(100vw - var(--fd-page-width)), var(--fd-sidebar-width)))'
-          : 'var(--fd-sidebar-width)',
+        paddingInlineStart: collapsed
+          ? 'min(calc(100vw - var(--fd-page-width)), var(--fd-sidebar-width))'
+          : 'calc(var(--fd-sidebar-width) + var(--fd-layout-offset))',
+        paddingInlineEnd: collapsed ? '0px' : 'var(--fd-layout-offset)',
       }}
     >
       {props.children}
     </main>
-  );
-}
-
-export function SidebarTrigger({
-  children,
-  ...props
-}: ComponentProps<'button'>) {
-  const { setOpen } = useSidebar();
-
-  return (
-    <button
-      {...props}
-      aria-label="Open Sidebar"
-      onClick={() => setOpen((prev) => !prev)}
-    >
-      {children}
-    </button>
   );
 }
 

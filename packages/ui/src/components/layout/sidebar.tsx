@@ -410,6 +410,23 @@ export function SidebarFolderContent(props: CollapsibleContentProps) {
   );
 }
 
+export function SidebarTrigger({
+  children,
+  ...props
+}: ComponentProps<'button'>) {
+  const { setOpen } = useSidebar();
+
+  return (
+    <button
+      {...props}
+      aria-label="Open Sidebar"
+      onClick={() => setOpen((prev) => !prev)}
+    >
+      {children}
+    </button>
+  );
+}
+
 export function SidebarCollapseTrigger(props: ComponentProps<'button'>) {
   const { collapsed, setCollapsed } = useSidebar();
 
