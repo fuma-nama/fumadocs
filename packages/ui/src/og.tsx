@@ -1,5 +1,5 @@
 import type { ReactElement, ReactNode } from 'react';
-import { fromJsx } from '@takumi-rs/helpers';
+import { fromJsx } from '@takumi-rs/helpers/jsx';
 import {
   ConstructRendererOptions,
   OutputFormat,

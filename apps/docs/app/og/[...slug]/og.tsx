@@ -1,5 +1,5 @@
 import { OutputFormat, Renderer } from '@takumi-rs/core';
-import { fromJsx } from '@takumi-rs/helpers';
+import { fromJsx } from '@takumi-rs/helpers/jsx';
 import type { ReactElement, ReactNode } from 'react';
 
 interface GenerateProps {
