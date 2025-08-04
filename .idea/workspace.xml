@@ -4,20 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="edacdf1b-58dd-4ffe-9166-8e463dc8fa23" name="Changes" comment="format">
+    <list default="true" id="edacdf1b-58dd-4ffe-9166-8e463dc8fa23" name="Changes" comment="Core: remove waku &amp; tanstack peer dependency temporarily">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/docs/app/global.css" beforeDir="false" afterPath="$PROJECT_DIR$/apps/docs/app/global.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/docs/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/apps/docs/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/openapi/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/examples/openapi/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/tanstack-start/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/examples/tanstack-start/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/core/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/core/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/core/tsup.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/packages/core/tsup.config.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/create-app-versions/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/create-app-versions/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/doc-gen/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/doc-gen/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/openapi/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/openapi/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/twoslash/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/twoslash/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/typescript/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/typescript/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pnpm-lock.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pnpm-lock.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/docs/content/docs/ui/meta.json" beforeDir="false" afterPath="$PROJECT_DIR$/apps/docs/content/docs/ui/meta.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/ui/src/components/layout/root-toggle.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/packages/ui/src/components/layout/root-toggle.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -705,15 +695,8 @@
       <workItem from="1754110591578" duration="11469000" />
       <workItem from="1754130248722" duration="3671000" />
       <workItem from="1754204737729" duration="2422000" />
-      <workItem from="1754274652897" duration="8046000" />
-    </task>
-    <task id="LOCAL-01785" summary="UI: improve RTL layout">
-      <option name="closed" value="true" />
-      <created>1753458871712</created>
-      <option name="number" value="01785" />
-      <option name="presentableId" value="LOCAL-01785" />
-      <option name="project" value="LOCAL" />
-      <updated>1753458871712</updated>
+      <workItem from="1754274652897" duration="8851000" />
+      <workItem from="1754302800743" duration="487000" />
     </task>
     <task id="LOCAL-01786" summary="UI: Improve type table link icon">
       <option name="closed" value="true" />
@@ -1099,7 +1082,15 @@
       <option name="project" value="LOCAL" />
       <updated>1754126967764</updated>
     </task>
-    <option name="localTasksCounter" value="1834" />
+    <task id="LOCAL-01834" summary="Core: remove waku &amp; tanstack peer dependency temporarily">
+      <option name="closed" value="true" />
+      <created>1754300929054</created>
+      <option name="number" value="01834" />
+      <option name="presentableId" value="LOCAL-01834" />
+      <option name="project" value="LOCAL" />
+      <updated>1754300929054</updated>
+    </task>
+    <option name="localTasksCounter" value="1835" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -1150,7 +1141,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
-    <MESSAGE value="UI: Improve type table link icon" />
     <MESSAGE value="UI: improve codeblock diff styles" />
     <MESSAGE value="Core: Support to override `&lt;HideIfEmpty /&gt;` scripts nonce with `&lt;HideIfEmptyProvider /&gt;`" />
     <MESSAGE value="UI: Move sidebar toolbar to top on mobile view" />
@@ -1175,6 +1165,7 @@
     <MESSAGE value="Migrate to AI SDK v5" />
     <MESSAGE value="Upgrade Tanstack Start to fix upstream bugs" />
     <MESSAGE value="fix bugs &amp; add showcase" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix bugs &amp; add showcase" />
+    <MESSAGE value="Core: remove waku &amp; tanstack peer dependency temporarily" />
+    <option name="LAST_COMMIT_MESSAGE" value="Core: remove waku &amp; tanstack peer dependency temporarily" />
   </component>
 </project>
