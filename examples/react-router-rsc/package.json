@@ -1,17 +1,19 @@
 {
-  "name": "example-react-router",
+  "name": "example-react-router-rsc",
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "react-router build",
-    "dev": "react-router dev",
-    "start": "react-router-serve ./build/server/index.js",
-    "typecheck": "react-router typegen && tsc"
+    "build": "vite build",
+    "dev": "cross-env NODE_ENV=development vite",
+    "start": "cross-env NODE_ENV=production node server.js",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@react-router/node": "^7.7.1",
     "@react-router/serve": "^7.7.1",
+    "@vitejs/plugin-react": "^4.7.0",
     "@vitejs/plugin-rsc": "^0.4.17",
+    "cross-env": "^10.0.0",
     "fumadocs-core": "*",
     "fumadocs-mdx": "*",
     "fumadocs-ui": "*",

@@ -5,7 +5,27 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="edacdf1b-58dd-4ffe-9166-8e463dc8fa23" name="Changes" comment="UI: simplify layout offset logic">
-      <change beforePath="$PROJECT_DIR$/apps/docs/app/docs/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/docs/app/docs/layout.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/react-router-rsc/READMD.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/react-router-rsc/app/docs/client.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/react-router-rsc/app/home/client.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/react-router-rsc/app/mdx-components.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/react-router-rsc/app/root/client.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/react-router-rsc/app/root/route.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/react-router-rsc/app/docs/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/examples/react-router-rsc/app/docs/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/react-router-rsc/app/root.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/react-router-rsc/app/routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/examples/react-router-rsc/app/routes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/react-router-rsc/app/routes/home.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/examples/react-router-rsc/app/home/route.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/react-router-rsc/content/docs/test.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/examples/react-router-rsc/content/docs/test.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/react-router-rsc/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/examples/react-router-rsc/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/react-router-rsc/react-router-vite/entry.rsc.single.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/react-router-rsc/react-router-vite/entry.rsc.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/examples/react-router-rsc/react-router-vite/entry.rsc.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/react-router-rsc/react-router-vite/plugin.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/react-router-rsc/react-router-vite/server-hmr.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/react-router-rsc/source.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/examples/react-router-rsc/source.config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/react-router-rsc/tsconfig.json" beforeDir="false" afterPath="$PROJECT_DIR$/examples/react-router-rsc/tsconfig.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/react-router-rsc/vite.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/examples/react-router-rsc/vite.config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnpm-lock.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pnpm-lock.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -83,37 +103,37 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
-    &quot;Node.js.openapi &gt; generate-file.js.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;dev&quot;,
-    &quot;jsx.switch.disabled&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/xred/dev/fumadocs/packages/create-app/template/waku&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.standard&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.stylelint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.standard&quot;: &quot;&quot;,
-    &quot;node.js.selected.package.stylelint&quot;: &quot;&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;pnpm&quot;,
-    &quot;prettierjs.PrettierConfiguration.Package&quot;: &quot;/Users/xred/dev/fumadocs/node_modules/prettier&quot;,
-    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;actions.on.save&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;/Users/xred/dev/fumadocs/node_modules/typescript/lib&quot;,
-    &quot;ts.rename.search.for.js.occurrences&quot;: &quot;false&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
+    "Node.js.openapi > generate-file.js.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "example-react-router-rsc",
+    "jsx.switch.disabled": "true",
+    "last_opened_file_path": "/Users/xred/dev/fumadocs/packages/create-app/template/waku",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.standard": "true",
+    "node.js.detected.package.stylelint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.standard": "",
+    "node.js.selected.package.stylelint": "",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "pnpm",
+    "prettierjs.PrettierConfiguration.Package": "/Users/xred/dev/fumadocs/node_modules/prettier",
+    "run.code.analysis.last.selected.profile": "pProject Default",
+    "settings.editor.selected.configurable": "actions.on.save",
+    "ts.external.directory.path": "/Users/xred/dev/fumadocs/node_modules/typescript/lib",
+    "ts.rename.search.for.js.occurrences": "false",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File&quot;: [
-      &quot;PLAIN_TEXT&quot;
+  "keyToStringList": {
+    "com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File": [
+      "PLAIN_TEXT"
     ]
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/packages/create-app/template/waku" />
@@ -123,11 +143,11 @@
       <recent name="$PROJECT_DIR$/examples/react-router-i18n" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/examples/react-router-rsc/app" />
+      <recent name="$PROJECT_DIR$/examples/react-router-rsc/app/home" />
       <recent name="$PROJECT_DIR$/apps/docs/content/docs/mdx/(integrations)" />
       <recent name="$PROJECT_DIR$/examples/react-router" />
       <recent name="$PROJECT_DIR$/examples/react-router-i18n/app" />
-      <recent name="$PROJECT_DIR$/apps/docs/content/docs/ui/search" />
-      <recent name="$PROJECT_DIR$/apps/docs/content/docs/ui" />
     </key>
     <key name="es6.move.members.recent.items">
       <recent name="$PROJECT_DIR$/packages/openapi/src/requests/_shared.ts" />

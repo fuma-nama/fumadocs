@@ -5,12 +5,11 @@ import {
   decodeReply,
   loadServerAction,
   renderToReadableStream,
-} from '@vitejs/plugin-rsc/rsc'
-import { unstable_matchRSCServerRequest as matchRSCServerRequest } from 'react-router'
+} from '@vitejs/plugin-rsc/rsc';
+import { unstable_matchRSCServerRequest as matchRSCServerRequest } from 'react-router';
+import { routes } from '@/routes';
 
-import routes from 'virtual:react-router-routes'
-
-export function fetchServer(request: Request) {
+function fetchServer(request: Request) {
   return matchRSCServerRequest({
     // Provide the React Server touchpoints.
     createTemporaryReferenceSet,
@@ -21,17 +20,22 @@ export function fetchServer(request: Request) {
     // The incoming request.
     request,
     // The app routes.
-    routes,
+    routes: routes(),
     // Encode the match with the React Server implementation.
-    generateResponse(match, options) {
-      return new Response(renderToReadableStream(match.payload, options), {
+    generateResponse(match) {
+      return new Response(renderToReadableStream(match.payload), {
         status: match.statusCode,
         headers: match.headers,
-      })
+      });
     },
-  })
+  });
 }
 
-if (import.meta.hot) {
-  import.meta.hot.accept()
+export default async function handler(request: Request) {
+  // Import the generateHTML function from the client environment
+  const ssr = await import.meta.viteRsc.loadModule<
+    typeof import('./entry.ssr')
+  >('ssr', 'index');
+
+  return ssr.generateHTML(request, fetchServer);
 }

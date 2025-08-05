@@ -1,7 +1,28 @@
-import { type RouteConfig, index, route } from '@react-router/dev/routes';
+import type { unstable_RSCRouteConfig as RSCRouteConfig } from 'react-router';
 
-export default [
-  index('routes/home.tsx'),
-  route('docs/*', 'docs/page.tsx'),
-  route('api/search', 'docs/search.ts'),
-] satisfies RouteConfig;
+export function routes() {
+  return [
+    {
+      id: 'root',
+      path: '',
+      lazy: () => import('./root/route'),
+      children: [
+        {
+          id: 'home',
+          index: true,
+          lazy: () => import('./home/route'),
+        },
+        {
+          id: 'docs',
+          path: 'docs/*',
+          lazy: () => import('./docs/page'),
+        },
+      ],
+    },
+    {
+      id: 'search',
+      path: 'api/search',
+      lazy: () => import('./docs/search'),
+    },
+  ] satisfies RSCRouteConfig;
+}
