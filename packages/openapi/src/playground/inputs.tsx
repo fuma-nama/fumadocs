@@ -338,6 +338,7 @@ export function FieldInput({
       id={fieldName}
       placeholder="Enter value"
       type={field.type === 'string' ? 'text' : 'number'}
+      step={field.type === 'number' ? 'any' : undefined}
       {...register(fieldName, {
         valueAsNumber: field.type === 'number' || field.type === 'integer',
       })}
