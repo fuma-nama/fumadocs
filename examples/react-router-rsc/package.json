@@ -1,0 +1,37 @@
+{
+  "name": "example-react-router-rsc",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "dev": "cross-env NODE_ENV=development vite",
+    "start": "cross-env NODE_ENV=production node server.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@react-router/node": "^7.7.1",
+    "@react-router/serve": "^7.7.1",
+    "@vitejs/plugin-react": "^4.7.0",
+    "@vitejs/plugin-rsc": "^0.4.17",
+    "cross-env": "^10.0.0",
+    "fumadocs-core": "*",
+    "fumadocs-mdx": "*",
+    "fumadocs-ui": "*",
+    "isbot": "^5.1.29",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-router": "^7.7.1"
+  },
+  "devDependencies": {
+    "@react-router/dev": "^7.7.1",
+    "@tailwindcss/vite": "^4.1.11",
+    "@types/node": "^24.1.0",
+    "@types/react": "^19.1.9",
+    "@types/react-dom": "^19.1.7",
+    "react-router-devtools": "^5.0.6",
+    "tailwindcss": "^4.1.11",
+    "typescript": "^5.9.2",
+    "vite": "^7.0.6",
+    "vite-tsconfig-paths": "^5.1.4"
+  }
+}
