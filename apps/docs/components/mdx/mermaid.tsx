@@ -20,7 +20,7 @@ function cachePromise<T>(
   key: string,
   setPromise: () => Promise<T>,
 ): Promise<T> {
-  let cached = cache.get(key);
+  const cached = cache.get(key);
   if (cached) return cached as Promise<T>;
 
   const promise = setPromise();
