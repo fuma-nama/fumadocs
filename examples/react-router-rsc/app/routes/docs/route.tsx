@@ -33,13 +33,6 @@ export default function DocsRoute({ loaderData }: {
     <main className="mx-auto max-w-screen-xl px-4 py-8">
       <div className="max-w-4xl mx-auto">
         <article className="prose prose-gray max-w-none">
-          <header className="mb-8">
-            <h1 className="text-4xl font-bold mb-4">{title}</h1>
-            {description && (
-              <p className="text-xl text-gray-600 mb-6">{description}</p>
-            )}
-          </header>
-          
           <div className="prose-content">
             <Suspense fallback={<div className="p-4 animate-pulse bg-gray-100 rounded">Loading content...</div>}>
               <DocsContent path={path} />
