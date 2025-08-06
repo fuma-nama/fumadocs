@@ -1,5 +1,12 @@
 # @fuma-docs/openapi
 
+## 9.1.9
+
+### Patch Changes
+
+- 790494a: fix(ui): Allow decimal values in number inputs
+- 04a73ea: Remove explicit form data `Content-Type`
+
 ## 9.1.8
 
 ### Patch Changes
