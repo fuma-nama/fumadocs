@@ -17,11 +17,11 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-server-dom-webpack": "^19.1.1",
-    "waku": "^0.23.7"
+    "waku": "^0.24.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.11",
-    "@types/node": "^24.1.0",
+    "@types/node": "^24.2.0",
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.7",
     "postcss": "^8.5.6",

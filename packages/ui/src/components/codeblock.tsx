@@ -267,6 +267,5 @@ export function CodeBlockTabsTrigger({
   );
 }
 
-export const CodeBlockTab = (props: ComponentProps<typeof TabsContent>) => (
-  <TabsContent {...props} asChild />
-);
+// TODO: currently Vite RSC plugin has problem with adding `asChild` here, maybe revisit this in future
+export const CodeBlockTab = TabsContent;
