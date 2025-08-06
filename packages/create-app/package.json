@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "@types/cross-spawn": "^6.0.6",
-    "@types/node": "24.1.0",
+    "@types/node": "24.2.0",
     "eslint-config-custom": "workspace:*",
     "tinyglobby": "^0.2.14",
     "tsconfig": "workspace:*"

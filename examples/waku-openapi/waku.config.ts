@@ -3,11 +3,8 @@ import mdx from 'fumadocs-mdx/vite';
 import * as MdxConfig from './source.config.js';
 
 export default defineConfig({
-  unstable_viteConfigs: {
-    common() {
-      return {
-        plugins: [mdx(MdxConfig) as any],
-      };
-    },
+  vite: {
+    // avoid type problems due to Vite version conflicts
+    plugins: [mdx(MdxConfig) as any],
   },
 });
