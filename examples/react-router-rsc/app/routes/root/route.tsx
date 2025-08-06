@@ -2,7 +2,6 @@ import { Outlet } from "react-router";
 
 import { Layout as ClientLayout } from "./client";
 import "./styles.css";
-import "../../fumadocs.css";
 
 export { ErrorBoundary } from "./client";
 

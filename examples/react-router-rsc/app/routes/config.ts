@@ -18,11 +18,6 @@ export function routes() {
           lazy: () => import("./about/route"),
         },
         {
-          id: "docs",
-          path: "docs/*",
-          lazy: () => import("./docs/route"),
-        },
-        {
           id: "article1",
           path: "articles/article1",
           lazy: () => import("./articles/article1/route"),
@@ -36,6 +31,11 @@ export function routes() {
           id: "article3",
           path: "articles/article3",
           lazy: () => import("./articles/article3/route"),
+        },
+        {
+          id: "docs",
+          path: "docs/*",
+          lazy: () => import("./docs/route"),
         },
       ],
     },

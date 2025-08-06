@@ -7,9 +7,9 @@ async function ssg() {
   const vite = await createViteServer({ server: { middlewareMode: true } });
 
   // 2) Load your SSR entry and your RSC handler entry
-  const { generateHTML } = await vite.ssrLoadModule("/src/entry.ssr.tsx");
+  const { generateHTML } = await vite.ssrLoadModule("/app/entry.ssr.tsx");
   const { default: rscHandler } = await vite.ssrLoadModule(
-    "/src/entry.rsc.tsx"
+    "/app/entry.rsc.tsx"
   );
 
   // 3) List all the routes you want pre-rendered
