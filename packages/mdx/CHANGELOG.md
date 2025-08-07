@@ -1,5 +1,11 @@
 # next-docs-mdx
 
+## 11.7.4
+
+### Patch Changes
+
+- a0148f9: Remark Include: Support copying only a section
+
 ## 11.7.3
 
 ### Patch Changes
