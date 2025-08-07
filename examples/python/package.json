@@ -14,7 +14,7 @@
     "fumadocs-mdx": "workspace:*",
     "fumadocs-python": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "next": "15.4.5",
+    "next": "15.4.6",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   },

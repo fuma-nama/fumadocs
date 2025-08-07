@@ -22,8 +22,8 @@ For other types of files, it will become a codeblock:
 ```mdx title="page.mdx"
 <include>./script.ts</include>
 
-<include lang="tsx" meta='title="lib.ts"'>
-  ./script.ts
+<include lang="md" meta='title="lib.md"'>
+  page.md
 </include>
 ```
 
@@ -35,4 +35,24 @@ Resolve relative paths from cwd instead of the Markdown file:
 <include cwd lang="tsx" meta='title="lib.ts"'>
   ./script.ts
 </include>
+```
+
+### Section
+
+For Markdown files, you can copy a section of it:
+
+```mdx title="a.mdx"
+<section id="test">
+
+## Hello World
+
+This is included
+
+</section>
+
+This is not included.
+```
+
+```mdx title="b.mdx"
+<include>a.mdx#test</include>
 ```
