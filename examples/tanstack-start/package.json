@@ -15,18 +15,18 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "lucide-static": "^0.536.0",
+    "lucide-static": "^0.537.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "tailwind-merge": "^3.3.1",
-    "vite": "^7.0.6"
+    "vite": "^7.1.0"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.11",
     "@types/node": "^24.2.0",
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.7",
-    "@vitejs/plugin-react": "^4.7.0",
+    "@vitejs/plugin-react": "^5.0.0",
     "tailwindcss": "^4.1.11",
     "typescript": "^5.9.2",
     "vite-tsconfig-paths": "^5.1.4"

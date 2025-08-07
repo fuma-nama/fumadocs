@@ -81,13 +81,13 @@
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "mdast-util-mdx-jsx": "^3.2.0",
-    "next": "^15.4.5",
+    "next": "^15.4.6",
     "react": "^19.1.1",
     "rollup": "^4.46.2",
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
     "vfile": "^6.0.3",
-    "vite": "^7.0.6",
+    "vite": "^7.1.0",
     "webpack": "^5.101.0"
   },
   "peerDependencies": {
