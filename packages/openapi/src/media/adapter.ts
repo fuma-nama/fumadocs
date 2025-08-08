@@ -134,18 +134,42 @@ export const defaultAdapters = {
       for (const key in body) {
         const prop = body[key];
 
-        if (typeof prop === 'object' && prop instanceof File) {
-          formData.set(key, prop);
-        }
+        if (prop === null || prop === undefined || Number.isNaN(prop)) continue;
 
-        if (Array.isArray(prop) && prop.every((item) => item instanceof File)) {
+        // Arrays (multi-value field)
+        if (Array.isArray(prop)) {
           for (const item of prop) {
-            formData.append(key, item);
+            if (item === null || item === undefined) continue;
+            if (item instanceof File) {
+              formData.append(key, item, item.name);
+            } else if (item instanceof Blob) {
+              formData.append(key, item, 'blob');
+            } else if (typeof item === 'object') {
+              formData.append(key, JSON.stringify(item));
+            } else {
+              formData.append(key, String(item));
+            }
           }
         }
 
-        if (prop && !(prop instanceof File)) {
+        // Single File
+        else if (prop instanceof File) {
+          formData.set(key, prop, prop.name);
+        }
+
+        // Single Blob
+        else if (prop instanceof Blob) {
+          formData.set(key, prop, 'blob');
+        }
+
+        // Any other object (stringify)
+        else if (typeof prop === 'object') {
           formData.set(key, JSON.stringify(prop));
+        }
+
+        // Primitive types
+        else {
+          formData.set(key, String(prop));
         }
       }
 
