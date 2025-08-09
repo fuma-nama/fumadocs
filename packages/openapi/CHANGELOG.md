@@ -1,11 +1,5 @@
 # @fuma-docs/openapi
 
-## 9.1.10
-
-### Patch Changes
-
-- 86c973d: fix(multipart): improve encode logic for multipart/form-data
-
 ## 9.1.9
 
 ### Patch Changes
