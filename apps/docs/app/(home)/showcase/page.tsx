@@ -37,19 +37,50 @@ const showcases: ShowcaseObject[] = [
     url: 'https://million.dev',
   },
   {
+    image: '/showcases/shadcn.png',
+    name: 'shadcn/ui',
+    url: 'https://ui.shadcn.com',
+  },
+  {
     image: BetterAuth,
     name: 'Better Auth',
     url: 'https://better-auth.com',
   },
   {
+    image: '/showcases/better-t-stack.jpeg',
+    name: 'Better T Stack',
+    url: 'https://better-t-stack.dev',
+  },
+  {
+    image: '/showcases/zod.png',
     name: 'Zod',
-    url: 'https://v4.zod.dev',
+    url: 'https://zod.dev',
   },
   { image: '/showcases/nuqs.jpg', name: 'nuqs', url: 'https://nuqs.47ng.com' },
   {
     image: '/showcases/dokploy.png',
     name: 'Dokploy',
     url: 'https://dokploy.com',
+  },
+  {
+    image: '/showcases/ultracite.jpg',
+    name: 'Ultracite',
+    url: 'https://ultracite.ai',
+  },
+  {
+    image: '/showcases/pigsty.jpg',
+    name: 'Pigsty',
+    url: 'https://pgsty.dev',
+  },
+  {
+    image: '/showcases/sim.png',
+    name: 'Sim',
+    url: 'https://sim.ai',
+  },
+  {
+    image: '/showcases/comfydeploy.png',
+    name: 'ComfyDeploy',
+    url: 'https://comfydeploy.com',
   },
   {
     image: '/showcases/next-faq.png',
@@ -72,9 +103,29 @@ const showcases: ShowcaseObject[] = [
     url: 'https://docs.hiro.so/stacks',
   },
   {
+    image: '/showcases/freestyle.png',
+    name: 'Freestyle',
+    url: 'https://freestyle.sh',
+  },
+  {
     image: OpenPanel,
     name: 'OpenPanel',
     url: 'https://openpanel.dev',
+  },
+  {
+    image: '/showcases/animate-ui.png',
+    name: 'Animate UI',
+    url: 'https://animate-ui.com',
+  },
+  {
+    image: '/showcases/kibo-ui.jpg',
+    name: 'Kibo UI',
+    url: 'https://kibo-ui.com',
+  },
+  {
+    image: '/showcases/libra.png',
+    name: 'Libra',
+    url: 'https://libra.dev',
   },
   {
     image: '/showcases/hexta-ui.png',
@@ -92,6 +143,21 @@ const showcases: ShowcaseObject[] = [
     url: 'https://vision.uing.dev',
   },
   {
+    image: '/showcases/yamlresume.png',
+    name: 'YAMLResume',
+    url: 'https://yamlresume.dev',
+  },
+  {
+    image: '/showcases/kaneo.png',
+    name: 'Kaneo',
+    url: 'https://kaneo.app',
+  },
+  {
+    image: '/showcases/axionjs.jpg',
+    name: 'axion/js',
+    url: 'https://axionjs.com',
+  },
+  {
     image: MixSpace,
     name: 'MixSpace',
     url: 'https://mx-space.js.org',
@@ -107,6 +173,11 @@ const showcases: ShowcaseObject[] = [
     url: 'https://assistant-ui.com',
   },
   {
+    image: '/showcases/constatic.png',
+    name: 'Constatic',
+    url: 'https://constatic-docs.vercel.app',
+  },
+  {
     image: Supastarter,
     name: 'SupaStarter',
     url: 'https://supastarter.dev',
@@ -115,6 +186,11 @@ const showcases: ShowcaseObject[] = [
     image: Expostarter,
     name: 'ExpoStarter',
     url: 'https://expostarter.com/docs',
+  },
+  {
+    image: '/showcases/nxjs.png',
+    name: 'nx.js',
+    url: 'https://nxjs.n8.io',
   },
   {
     image: TurboStarter,
@@ -140,6 +216,10 @@ const showcases: ShowcaseObject[] = [
     url: 'https://rehooks.pyr33x.ir',
   },
   {
+    name: 'Sherif',
+    url: 'https://eslint-config-sherif.dev',
+  },
+  {
     name: 'Swellchain',
     url: 'https://build.swellnetwork.io',
   },
@@ -148,8 +228,28 @@ const showcases: ShowcaseObject[] = [
     url: 'https://eslint-react.xyz',
   },
   {
+    name: 'Llamaindex',
+    url: 'https://ts.llamaindex.ai',
+  },
+  {
+    name: 'Nemo',
+    url: 'https://nemo.zanreal.com',
+  },
+  {
+    name: 'Clojure Stack Lite',
+    url: 'https://stack.bogoyavlensky.com',
+  },
+  {
+    name: 'BProgress',
+    url: 'https://bprogress.vercel.app',
+  },
+  {
     name: 'nextjs i18n docs',
     url: 'https://nextjs.im',
+  },
+  {
+    name: 'Yeecord',
+    url: 'https://yeecord.com',
   },
 ];
 
