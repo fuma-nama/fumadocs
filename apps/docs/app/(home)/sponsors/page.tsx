@@ -24,8 +24,6 @@ const tiers = [
   },
 ];
 
-export const revalidate = 6000;
-
 export default async function Page() {
   const result = await getSponsors(owner);
 
