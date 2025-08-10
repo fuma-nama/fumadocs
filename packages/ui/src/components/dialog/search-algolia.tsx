@@ -18,12 +18,13 @@ import {
   SearchDialogOverlay,
   TagsList,
   TagsListItem,
+  type DialogProps,
 } from './search';
 import type { SortedResult } from 'fumadocs-core/server';
-import type { SearchLink, SharedProps, TagItem } from '@/contexts/search';
+import type { SearchLink, TagItem } from '@/contexts/search';
 import { useI18n } from '@/contexts/i18n';
 
-export interface AlgoliaSearchDialogProps extends SharedProps {
+export interface AlgoliaSearchDialogProps extends DialogProps {
   searchOptions: AlgoliaOptions;
   links?: SearchLink[];
 

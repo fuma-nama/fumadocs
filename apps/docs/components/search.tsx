@@ -70,6 +70,7 @@ export default function CustomSearchDialog(props: SharedProps) {
       search={search}
       onSearchChange={setSearch}
       isLoading={query.isLoading}
+      highlightMatches
       {...props}
     >
       <SearchDialogOverlay />
