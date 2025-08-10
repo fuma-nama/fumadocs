@@ -9,21 +9,21 @@
     "start": "node .output/server/index.mjs"
   },
   "dependencies": {
-    "@tanstack/react-router": "^1.130.12",
-    "@tanstack/react-router-devtools": "^1.130.13",
-    "@tanstack/react-start": "^1.130.15",
+    "@tanstack/react-router": "^1.131.2",
+    "@tanstack/react-router-devtools": "^1.131.2",
+    "@tanstack/react-start": "^1.131.2",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "lucide-static": "^0.537.0",
+    "lucide-static": "^0.539.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "tailwind-merge": "^3.3.1",
-    "vite": "^7.1.0"
+    "vite": "^7.1.1"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.11",
-    "@types/node": "^24.2.0",
+    "@types/node": "^24.2.1",
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.7",
     "@vitejs/plugin-react": "^5.0.0",
