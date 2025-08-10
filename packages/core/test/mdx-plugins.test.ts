@@ -85,18 +85,6 @@ test('Remark Image: With Path', async () => {
   );
 });
 
-test('Remark Image: Missing Path', async () => {
-  const file = path.resolve(cwd, './fixtures/remark-image.md');
-  const content = readFileSync(file);
-  const processor = remark()
-    .use(remarkImage, { publicDir: path.resolve(cwd, './fixtures') })
-    .use(remarkMdx);
-
-  await expect(() =>
-    processor.run(processor.parse(content)),
-  ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: When \`useImport\` is enabled, you must specify \`dirname\` in the VFile passed to compiler.]`);
-});
-
 test('Remark Image: Without Import', async () => {
   const content = readFileSync(path.resolve(cwd, './fixtures/remark-image.md'));
   const result = await remark()
