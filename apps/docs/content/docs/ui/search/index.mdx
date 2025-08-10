@@ -32,6 +32,56 @@ export default function Layout({ children }: { children: ReactNode }) {
 
 For further customisations, you can see [Search Client](#search-client).
 
+### Highlight Matches
+
+Enable highlighting of matched query terms in the search results globally via the root provider.
+
+```tsx title="app/layout.tsx"
+import { RootProvider } from 'fumadocs-ui/provider';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <html>
+      <body>
+        <RootProvider
+          search={{
+            highlightMatches: true, // highlight terms from the query
+          }}
+        >
+          {children}
+        </RootProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+You can customize the behavior with `regex` and `color`:
+
+```tsx
+<RootProvider
+  search={{
+    highlightMatches: {
+      // Use a custom regex. Strings can be raw patterns or "/pattern/flags" form.
+      regex: '/\\b(api|auth)\\b/i',
+      // Color accepts Tailwind utility (used as-is) or any CSS color.
+      // e.g. 'text-emerald-500', '#10b981', 'var(--fd-primary)'
+      color: 'text-emerald-500',
+    },
+  }}
+>
+  {children}
+</RootProvider>
+```
+
+Notes:
+
+- If `color` starts with a Tailwind `text-...` class, it is applied as-is.
+- Otherwise, a safe inline style is used (e.g. `#10b981`, `rgb(34 197 94)`, `var(--fd-primary)`) to avoid purge issues with arbitrary classes.
+- This is a global setting. For page-specific overrides, wrap that section in a nested `SearchProvider` with a different `highlightMatches` value.
+- This is not a dialog prop; configure it via the provider.
+
 ### Hot Keys
 
 Customise the hot keys to trigger search dialog, by default it's <kbd>⌘</kbd> <kbd>K</kbd> or <kbd>Ctrl</kbd> <kbd>K</kbd>.

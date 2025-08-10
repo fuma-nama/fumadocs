@@ -18,10 +18,10 @@ if (typeof uwuParam === 'string') {
 }
 
 const item = localStorage.getItem('uwu')
-    
+
 if (item === 'true') {
     document.documentElement.classList.add("uwu")
-}    
+}
 `;
 
 export function Provider({ children }: { children: ReactNode }) {
@@ -29,6 +29,7 @@ export function Provider({ children }: { children: ReactNode }) {
     <RootProvider
       search={{
         SearchDialog,
+        highlightMatches: true,
       }}
     >
       <TooltipProvider>
