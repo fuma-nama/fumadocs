@@ -16,12 +16,12 @@ import {
   SearchDialogOverlay,
   TagsList,
   TagsListItem,
-  type DialogProps,
+  type SharedProps,
 } from './search';
 import type { SortedResult } from 'fumadocs-core/server';
 import type { SearchLink, TagItem } from '@/contexts/search';
 
-export interface DefaultSearchDialogProps extends DialogProps {
+export interface DefaultSearchDialogProps extends SharedProps {
   links?: SearchLink[];
 
   /**
@@ -61,7 +61,6 @@ export default function DefaultSearchDialog({
   allowClear = false,
   links = [],
   footer,
-  highlightMatches = false,
   ...props
 }: DefaultSearchDialogProps) {
   const { locale } = useI18n();
@@ -102,7 +101,6 @@ export default function DefaultSearchDialog({
       search={search}
       onSearchChange={setSearch}
       isLoading={query.isLoading}
-      highlightMatches={highlightMatches}
       {...props}
     >
       <SearchDialogOverlay />

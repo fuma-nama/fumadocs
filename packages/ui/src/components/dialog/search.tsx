@@ -25,16 +25,12 @@ import type { SortedResult } from 'fumadocs-core/server';
 import { cva } from 'class-variance-authority';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 import { useRouter } from 'fumadocs-core/framework';
+import { useSearchContext } from '@/contexts/search';
 import type { SharedProps } from '@/contexts/search';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import scrollIntoView from 'scroll-into-view-if-needed';
 import { buttonVariants } from '@/components/ui/button';
-import {
-  type HighlightMatches,
-  renderHighlighted as renderHighlightedText,
-  resolveHighlightPresentation,
-  resolveHighlightRegex,
-} from './search-highlight';
+import { renderHighlighted as renderHighlightedText, resolveHighlightPresentation, resolveHighlightRegex } from './search-highlight';
 
 type ReactSortedResult = Omit<SortedResult, 'content'> & {
   external?: boolean;
@@ -44,14 +40,7 @@ type ReactSortedResult = Omit<SortedResult, 'content'> & {
 // needed for backward compatible since some previous guides referenced it
 export type { SharedProps };
 
-export interface DialogProps extends SharedProps {
-  /**
-   * Highlight matched query terms inside result text
-   */
-  highlightMatches?: HighlightMatches;
-}
-
-export interface SearchDialogProps extends DialogProps {
+export interface SearchDialogProps extends SharedProps {
   search: string;
   onSearchChange: (v: string) => void;
   isLoading?: boolean;
@@ -66,7 +55,6 @@ const Context = createContext<{
   onSearchChange: (v: string) => void;
 
   isLoading: boolean;
-  highlightMatches: HighlightMatches;
 } | null>(null);
 
 const ListContext = createContext<{
@@ -86,7 +74,6 @@ export function SearchDialog({
   search,
   onSearchChange,
   isLoading = false,
-  highlightMatches = false,
   children,
 }: SearchDialogProps) {
   const [active, setActive] = useState<string | null>(null);
@@ -103,9 +90,8 @@ export function SearchDialog({
             active,
             setActive,
             isLoading,
-            highlightMatches,
           }),
-          [active, highlightMatches, isLoading, onOpenChange, onSearchChange, open, search],
+          [active, isLoading, onOpenChange, onSearchChange, open, search],
         )}
       >
         {children}
@@ -347,7 +333,8 @@ export function SearchDialogListItem({
   item: ReactSortedResult;
 }) {
   const { active: activeId, setActive } = useSearchList();
-  const { search: query, highlightMatches } = useSearch();
+  const { search: query } = useSearch();
+  const { highlightMatches } = useSearchContext();
   const active = item.id === activeId;
 
   function renderHighlighted(content: ReactNode): ReactNode {

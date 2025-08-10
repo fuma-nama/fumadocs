@@ -11,6 +11,7 @@ import { DirectionProvider } from '@radix-ui/react-direction';
 import type { DefaultSearchDialogProps } from '@/components/dialog/search-default';
 import { SidebarProvider } from '@/contexts/sidebar';
 import { SearchProvider, type SearchProviderProps } from '@/contexts/search';
+import type { HighlightMatches } from '@/components/dialog/search-highlight';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 import {
   defaultTranslations,
@@ -30,6 +31,21 @@ interface SearchOptions
    * @defaultValue `true`
    */
   enabled?: boolean;
+
+  /**
+   * Highlight matched query terms inside result text.
+   * Configure it globally at the provider level.
+   * - `true` enables auto token-based highlighting from the query
+   * - pass `{ regex, color }` to customize matching and color
+   *
+   * @example
+   * highlightMatches: true
+   * @example
+   * highlightMatches: { color: 'text-emerald-500' }
+   * @example
+   * highlightMatches: { regex: '/\\b(api|auth)\\b/i', color: '#10b981' }
+   */
+  highlightMatches?: HighlightMatches;
 }
 
 export interface RootProviderProps {

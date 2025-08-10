@@ -7,6 +7,7 @@ import {
   useState,
 } from 'react';
 import { createContext } from 'fumadocs-core/framework';
+import type { HighlightMatches } from '@/components/dialog/search-highlight';
 
 interface HotKey {
   display: ReactNode;
@@ -61,6 +62,11 @@ export interface SearchProviderProps {
    */
   options?: Partial<SharedProps & Record<string, unknown>>;
 
+  /**
+   * Global highlight configuration. Dialogs will use this unless overridden locally.
+   */
+  highlightMatches?: HighlightMatches;
+
   children?: ReactNode;
 }
 
@@ -68,12 +74,18 @@ interface SearchContextType {
   enabled: boolean;
   hotKey: HotKey[];
   setOpenSearch: (value: boolean) => void;
+  /**
+   * Highlight matched query terms inside result text.
+   * Configure globally via provider; dialogs read from context.
+   */
+  highlightMatches: HighlightMatches;
 }
 
 const SearchContext = createContext<SearchContextType>('SearchContext', {
   enabled: false,
   hotKey: [],
   setOpenSearch: () => undefined,
+  highlightMatches: false,
 });
 
 export function useSearchContext(): SearchContextType {
@@ -97,6 +109,7 @@ export function SearchProvider({
   children,
   preload = true,
   options,
+  highlightMatches = false,
   hotKey = [
     {
       key: (e) => e.metaKey || e.ctrlKey,
@@ -132,8 +145,8 @@ export function SearchProvider({
   return (
     <SearchContext.Provider
       value={useMemo(
-        () => ({ enabled: true, hotKey, setOpenSearch: setIsOpen }),
-        [hotKey],
+        () => ({ enabled: true, hotKey, setOpenSearch: setIsOpen, highlightMatches }),
+        [hotKey, highlightMatches],
       )}
     >
       {isOpen !== undefined && (

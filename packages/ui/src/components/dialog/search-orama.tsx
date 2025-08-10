@@ -18,13 +18,13 @@ import {
   SearchDialogOverlay,
   TagsList,
   TagsListItem,
-  type DialogProps,
+  type SharedProps,
 } from './search';
 import type { SortedResult } from 'fumadocs-core/server';
 import type { SearchLink, TagItem } from '@/contexts/search';
 import { useI18n } from '@/contexts/i18n';
 
-export interface OramaSearchDialogProps extends DialogProps {
+export interface OramaSearchDialogProps extends SharedProps {
   links?: SearchLink[];
   client: OramaCloudOptions['client'];
   searchOptions?: OramaCloudOptions['params'];
@@ -63,7 +63,6 @@ export default function OramaSearchDialog({
   index,
   footer,
   links = [],
-  highlightMatches = false,
   ...props
 }: OramaSearchDialogProps) {
   const { locale } = useI18n();
@@ -99,7 +98,6 @@ export default function OramaSearchDialog({
       search={search}
       onSearchChange={setSearch}
       isLoading={query.isLoading}
-      highlightMatches={highlightMatches}
       {...props}
     >
       <SearchDialogOverlay />
