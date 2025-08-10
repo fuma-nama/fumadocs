@@ -150,49 +150,50 @@ export function remarkImage({
         return out;
       }
 
-      if (src.type !== 'url' || external) {
-        const size = await getImageSize(src).catch((e) => {
-          throw new Error(
-            `[Remark Image] Failed obtain image size for ${node.url} (public directory configured as ${publicDir})`,
-            {
-              cause: e,
-            },
-          );
-        });
+      if (src.type === 'url' && !external) return;
 
-        return {
-          type: 'mdxJsxFlowElement',
-          name: 'img',
-          attributes: [
-            {
-              type: 'mdxJsxAttribute',
-              name: 'alt',
-              value: node.alt ?? 'image',
-            },
-            {
-              type: 'mdxJsxAttribute',
-              name: 'src',
-              // `src` doesn't support file paths, we can use `node.url` for files and let the underlying framework handle it
-              value: src.type === 'url' ? src.url.toString() : node.url,
-            },
-            {
-              type: 'mdxJsxAttribute',
-              name: 'width',
-              value: size.width.toString(),
-            },
-            {
-              type: 'mdxJsxAttribute',
-              name: 'height',
-              value: size.height.toString(),
-            },
-          ],
-          children: [],
-        };
-      }
+      const size = await getImageSize(src).catch((e) => {
+        throw new Error(
+          `[Remark Image] Failed obtain image size for ${node.url} (public directory configured as ${publicDir})`,
+          {
+            cause: e,
+          },
+        );
+      });
+
+      return {
+        type: 'mdxJsxFlowElement',
+        name: 'img',
+        attributes: [
+          {
+            type: 'mdxJsxAttribute',
+            name: 'alt',
+            value: node.alt ?? 'image',
+          },
+          {
+            type: 'mdxJsxAttribute',
+            name: 'src',
+            // `src` doesn't support file paths, we can use `node.url` for files and let the underlying framework handle it
+            value: src.type === 'url' ? src.url.toString() : node.url,
+          },
+          {
+            type: 'mdxJsxAttribute',
+            name: 'width',
+            value: size.width.toString(),
+          },
+          {
+            type: 'mdxJsxAttribute',
+            name: 'height',
+            value: size.height.toString(),
+          },
+        ],
+        children: [],
+      };
     }
 
     visit(tree, 'image', (node) => {
-      const src = parseSrc(decodeURI(node.url), publicDir);
+      const src = parseSrc(decodeURI(node.url), publicDir, file.dirname);
+      if (!src) return;
 
       const task = onImage(src, node)
         .catch((e) => {
@@ -256,7 +257,16 @@ function getImportPath(file: string, dir: string): string {
   return relative.startsWith('../') ? relative : `./${relative}`;
 }
 
-function parseSrc(src: string, dir: string): Source {
+/**
+ * @param src - src href
+ * @param publicDir - dir/url to resolve absolute paths
+ * @param dir - dir to resolve relative paths
+ */
+function parseSrc(
+  src: string,
+  publicDir: string,
+  dir?: string,
+): Source | undefined {
   if (src.startsWith('file:///'))
     return { type: 'file', file: fileURLToPath(src) };
 
@@ -267,13 +277,30 @@ function parseSrc(src: string, dir: string): Source {
     };
   }
 
-  if (EXTERNAL_URL_REGEX.test(dir)) {
-    const url = new URL(dir);
-    url.pathname = joinPath(url.pathname, src);
-    return { type: 'url', url };
+  if (src.startsWith('/')) {
+    if (EXTERNAL_URL_REGEX.test(publicDir)) {
+      const url = new URL(publicDir);
+      url.pathname = joinPath(url.pathname, src);
+      return { type: 'url', url };
+    }
+
+    return {
+      type: 'file',
+      file: path.join(publicDir, src),
+    };
   }
 
-  return { type: 'file', file: path.resolve(dir, src) };
+  if (!dir) {
+    console.warn(
+      `[Remark Image] found relative path ${src} but missing 'dirname' in VFile, this image will be skipped for now.`,
+    );
+    return;
+  }
+
+  return {
+    type: 'file',
+    file: path.join(dir, src),
+  };
 }
 
 async function getImageSize(src: Source): Promise<ISizeCalculationResult> {
