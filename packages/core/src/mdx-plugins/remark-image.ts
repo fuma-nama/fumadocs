@@ -1,5 +1,5 @@
 import * as path from 'node:path';
-import type { Root } from 'mdast';
+import type { Image, Root } from 'mdast';
 import type { Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
 import { imageSize } from 'image-size';
@@ -8,6 +8,7 @@ import { joinPath, slash } from '@/utils/path';
 import type { ISizeCalculationResult } from 'image-size/types/interface';
 import { imageSizeFromFile } from 'image-size/fromFile';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
+import { fileURLToPath } from 'node:url';
 
 const VALID_BLUR_EXT = ['.jpeg', '.png', '.webp', '.avif', '.jpg'];
 const EXTERNAL_URL_REGEX = /^https?:\/\//;
@@ -59,7 +60,15 @@ export interface RemarkImageOptions {
   external?: boolean;
 }
 
-// Based on the Nextra: https://github.com/shuding/nextra
+type Source =
+  | {
+      type: 'url';
+      url: URL;
+    }
+  | {
+      type: 'file';
+      file: string;
+    };
 
 /**
  * Turn images into Next.js Image compatible usage.
@@ -75,95 +84,21 @@ export function remarkImage({
     const importsToInject: { variableName: string; importPath: string }[] = [];
     const promises: Promise<void>[] = [];
 
-    function getImportPath(src: string): string {
-      if (!src.startsWith('/')) return src;
-      const to = path.join(publicDir, src);
-
-      if (file.dirname) {
-        const relative = slash(path.relative(file.dirname, to));
-
-        return relative.startsWith('./') ? relative : `./${relative}`;
-      }
-
-      return slash(to);
-    }
-
-    visit(tree, 'image', (node) => {
-      const url = decodeURI(node.url);
-      if (!url) return;
-      const isExternal = EXTERNAL_URL_REGEX.test(url);
-
-      if ((isExternal && external) || !useImport) {
-        const task = getImageSize(url, publicDir)
-          .then((size) => {
-            if (!size.width || !size.height) return;
-
-            Object.assign(node, {
-              type: 'mdxJsxFlowElement',
-              name: 'img',
-              attributes: [
-                {
-                  type: 'mdxJsxAttribute',
-                  name: 'alt',
-                  value: node.alt ?? 'image',
-                },
-                {
-                  type: 'mdxJsxAttribute',
-                  name: 'src',
-                  value: url,
-                },
-                {
-                  type: 'mdxJsxAttribute',
-                  name: 'width',
-                  value: size.width.toString(),
-                },
-                {
-                  type: 'mdxJsxAttribute',
-                  name: 'height',
-                  value: size.height.toString(),
-                },
-              ],
-              children: [],
-            } satisfies MdxJsxFlowElement);
-          })
-          .catch((e) => {
-            if (onError === 'hide') {
-              Object.assign(node, {
-                type: 'mdxJsxFlowElement',
-                name: null,
-                attributes: [],
-                children: [],
-              } satisfies MdxJsxFlowElement);
-              return;
-            }
-
-            if (onError === 'ignore') return;
-            if (onError === 'error') {
-              throw new Error(
-                `[Remark Image] Failed obtain image size for ${url} (public directory configured as ${publicDir})`,
-                {
-                  cause: e,
-                },
-              );
-            }
-
-            onError(e);
-          });
-
-        promises.push(task);
-      } else if (!isExternal) {
-        // Unique variable name for the given static image URL
-        const variableName = `__img${importsToInject.length.toString()}`;
-        const hasBlur =
-          placeholder === 'blur' &&
-          VALID_BLUR_EXT.some((ext) => url.endsWith(ext));
-
-        importsToInject.push({
-          variableName,
-          importPath: getImportPath(url),
+    async function onImage(
+      src: Source,
+      node: Image,
+    ): Promise<MdxJsxFlowElement | undefined> {
+      if ((src.type === 'url' && external) || !useImport) {
+        const size = await getImageSize(src).catch((e) => {
+          throw new Error(
+            `[Remark Image] Failed obtain image size for ${node.url} (public directory configured as ${publicDir})`,
+            {
+              cause: e,
+            },
+          );
         });
 
-        Object.assign(node, {
+        return {
           type: 'mdxJsxFlowElement',
           name: 'img',
           attributes: [
@@ -172,10 +107,50 @@ export function remarkImage({
               name: 'alt',
               value: node.alt ?? 'image',
             },
-            hasBlur && {
+            {
               type: 'mdxJsxAttribute',
-              name: 'placeholder',
-              value: 'blur',
+              name: 'src',
+              // `src` doesn't support file paths, we can use `node.url` for files and let the underlying framework handle it
+              value: src.type === 'url' ? src.url.toString() : node.url,
+            },
+            {
+              type: 'mdxJsxAttribute',
+              name: 'width',
+              value: size.width.toString(),
+            },
+            {
+              type: 'mdxJsxAttribute',
+              name: 'height',
+              value: size.height.toString(),
+            },
+          ],
+          children: [],
+        };
+      }
+
+      if (src.type === 'file') {
+        // Unique variable name for the given static image URL
+        const variableName = `__img${importsToInject.length}`;
+        const hasBlur =
+          placeholder === 'blur' &&
+          VALID_BLUR_EXT.some((ext) => src.file.endsWith(ext));
+
+        importsToInject.push({
+          variableName,
+          importPath: file.dirname
+            ? getImportPath(src.file, file.dirname)
+            : node.url,
+        });
+
+        const out: MdxJsxFlowElement = {
+          children: [],
+          type: 'mdxJsxFlowElement',
+          name: 'img',
+          attributes: [
+            {
+              type: 'mdxJsxAttribute',
+              name: 'alt',
+              value: node.alt ?? 'image',
             },
             {
               type: 'mdxJsxAttribute',
@@ -191,13 +166,54 @@ export function remarkImage({
                         expression: { type: 'Identifier', name: variableName },
                       },
                     ],
+                    type: 'Program',
+                    sourceType: 'script',
                   },
                 },
               },
             },
-          ].filter(Boolean),
-        });
+          ],
+        };
+
+        if (hasBlur) {
+          out.attributes.push({
+            type: 'mdxJsxAttribute',
+            name: 'placeholder',
+            value: 'blur',
+          });
+        }
+
+        return out;
       }
+    }
+
+    visit(tree, 'image', (node) => {
+      const src = parseSrc(decodeURI(node.url), publicDir);
+
+      const task = onImage(src, node)
+        .catch((e) => {
+          // ignore SVG as it is not always needed
+          if (onError === 'ignore' || node.url.endsWith('.svg')) {
+            return;
+          }
+
+          if (onError === 'hide') {
+            return {
+              type: 'mdxJsxFlowElement',
+              name: null,
+              attributes: [],
+              children: [],
+            } satisfies MdxJsxFlowElement;
+          }
+
+          if (onError === 'error') throw e;
+          onError(e);
+        })
+        .then((res) => {
+          if (res) Object.assign(node, res);
+        });
+
+      promises.push(task);
     });
 
     await Promise.all(promises);
@@ -230,27 +246,39 @@ export function remarkImage({
   };
 }
 
-async function getImageSize(
-  src: string,
-  dir: string,
-): Promise<ISizeCalculationResult> {
-  const isRelative = src.startsWith('/') || !path.isAbsolute(src);
-  let url: string;
+function getImportPath(file: string, dir: string): string {
+  const relative = slash(path.relative(dir, file));
+
+  return relative.startsWith('../') ? relative : `./${relative}`;
+}
+
+function parseSrc(src: string, dir: string): Source {
+  if (src.startsWith('file:///'))
+    return { type: 'file', file: fileURLToPath(src) };
 
   if (EXTERNAL_URL_REGEX.test(src)) {
-    url = src;
-  } else if (EXTERNAL_URL_REGEX.test(dir) && isRelative) {
-    const base = new URL(dir);
-    base.pathname = joinPath(base.pathname, src);
-    url = base.toString();
-  } else {
-    return imageSizeFromFile(isRelative ? path.join(dir, src) : src);
+    return {
+      type: 'url',
+      url: new URL(src),
+    };
   }
 
-  const res = await fetch(url);
+  if (EXTERNAL_URL_REGEX.test(dir)) {
+    const url = new URL(dir);
+    url.pathname = joinPath(url.pathname, src);
+    return { type: 'url', url };
+  }
+
+  return { type: 'file', file: path.resolve(dir, src) };
+}
+
+async function getImageSize(src: Source): Promise<ISizeCalculationResult> {
+  if (src.type === 'file') return imageSizeFromFile(src.file);
+
+  const res = await fetch(src.url);
   if (!res.ok) {
     throw new Error(
-      `[Remark Image] Failed to fetch ${url} (${res.status}): ${await res.text()}`,
+      `[Remark Image] Failed to fetch ${src.url} (${res.status}): ${await res.text()}`,
     );
   }
 
