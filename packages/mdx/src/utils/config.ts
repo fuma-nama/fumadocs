@@ -19,7 +19,7 @@ export interface LoadedConfig {
 
   global: GlobalConfig;
 
-  getDefaultMDXOptions(): Promise<ProcessorOptions>;
+  getDefaultMDXOptions(mode?: 'default' | 'remote'): Promise<ProcessorOptions>;
 }
 
 let cache: {

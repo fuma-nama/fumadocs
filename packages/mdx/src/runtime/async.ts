@@ -1,54 +1,26 @@
-import { createCompiler } from '@fumadocs/mdx-remote';
 import type { LoadedConfig } from '@/utils/config';
-import { remarkInclude } from '@/mdx-plugins/remark-include';
-import {
-  remarkStructure,
-  type StructuredData,
-} from 'fumadocs-core/mdx-plugins';
+import { type StructuredData } from 'fumadocs-core/mdx-plugins';
 import { _runtime, createMDXSource } from '@/runtime/index';
 import type { RuntimeAsync } from '@/runtime/types';
+import { buildMDX } from '@/utils/build-mdx';
+import type { ProcessorOptions } from '@mdx-js/mdx';
+import { executeMdx } from '@fumadocs/mdx-remote/client';
+import { pathToFileURL } from 'node:url';
 
-async function initCompiler(config: LoadedConfig, collection: string) {
+async function getOptions(
+  config: LoadedConfig,
+  collection: string,
+): Promise<ProcessorOptions> {
   const col = config.collections.get(collection);
+  if (col?.type === 'doc' && col.mdxOptions) return col.mdxOptions;
+  if (col?.type === 'docs' && col.docs.mdxOptions) return col.docs.mdxOptions;
 
-  switch (col?.type) {
-    case 'doc':
-      if (col.mdxOptions)
-        return createCompiler({
-          preset: 'minimal',
-          ...col.mdxOptions,
-        });
-      break;
-    case 'docs':
-      if (col.docs.mdxOptions)
-        return createCompiler({
-          preset: 'minimal',
-          ...col.docs.mdxOptions,
-        });
-      break;
-  }
-
-  let defaultMdxOptions = config.global?.mdxOptions;
-  if (typeof defaultMdxOptions === 'function')
-    defaultMdxOptions = await defaultMdxOptions();
-
-  if (defaultMdxOptions?.preset === 'minimal') {
-    return createCompiler(defaultMdxOptions);
-  }
-
-  const remarkPlugins = defaultMdxOptions?.remarkPlugins ?? [];
-  return createCompiler({
-    ...defaultMdxOptions,
-    remarkPlugins: (v) =>
-      typeof remarkPlugins === 'function'
-        ? [remarkInclude, ...remarkPlugins(v), remarkStructure]
-        : [remarkInclude, ...v, ...remarkPlugins, remarkStructure],
-  });
+  return config.getDefaultMDXOptions('remote');
 }
 
 export const _runtimeAsync: RuntimeAsync = {
   doc(files, collection, config) {
-    const init = initCompiler(config, collection);
+    const initMdxOptions = getOptions(config, collection);
 
     return files.map(({ info: file, data, content, lastModified }) => {
       return {
@@ -56,18 +28,26 @@ export const _runtimeAsync: RuntimeAsync = {
         _file: file,
         content,
         async load() {
-          const compiler = await init;
-          const out = await compiler.compile({
-            source: content,
+          const mdxOptions = await initMdxOptions;
+          const out = await buildMDX(collection, content, {
+            ...mdxOptions,
+            development: false,
+            frontmatter: data as Record<string, unknown>,
+            data: {
+              lastModified,
+            },
             filePath: file.absolutePath,
+          });
+          const executed = await executeMdx(String(out), {
+            baseUrl: pathToFileURL(file.absolutePath),
           });
 
           return {
-            body: out.body,
-            toc: out.toc,
+            body: executed.default,
+            toc: executed.toc,
             lastModified,
-            structuredData: out.vfile.data.structuredData as StructuredData,
-            _exports: out.exports ?? {},
+            structuredData: out.data.structuredData as StructuredData,
+            _exports: executed,
           };
         },
       };
