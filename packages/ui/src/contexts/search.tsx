@@ -145,7 +145,12 @@ export function SearchProvider({
   return (
     <SearchContext.Provider
       value={useMemo(
-        () => ({ enabled: true, hotKey, setOpenSearch: setIsOpen, highlightMatches }),
+        () => ({
+          enabled: true,
+          hotKey,
+          setOpenSearch: setIsOpen,
+          highlightMatches,
+        }),
         [hotKey, highlightMatches],
       )}
     >

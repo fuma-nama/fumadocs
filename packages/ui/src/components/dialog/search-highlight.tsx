@@ -66,7 +66,12 @@ export function buildAutoRegexFromQuery(q: string): RegExp | null {
   const trimmed = q.trim();
   if (trimmed.length === 0) return null;
   const terms = Array.from(
-    new Set(trimmed.split(/\s+/).map((t) => t.trim()).filter(Boolean)),
+    new Set(
+      trimmed
+        .split(/\s+/)
+        .map((t) => t.trim())
+        .filter(Boolean),
+    ),
   );
   if (terms.length === 0) return null;
   const escaped = terms.map(escapeRegExp).join('|');
@@ -85,9 +90,10 @@ export function resolveHighlightRegex(
   return buildAutoRegexFromQuery(query);
 }
 
-export function resolveHighlightPresentation(
-  highlight: HighlightMatches,
-): { className?: string; style?: CSSProperties } {
+export function resolveHighlightPresentation(highlight: HighlightMatches): {
+  className?: string;
+  style?: CSSProperties;
+} {
   if (typeof highlight === 'object' && highlight.color) {
     const c = highlight.color.trim();
     if (/^text-/.test(c)) {
@@ -113,7 +119,11 @@ export function renderHighlighted(
   );
   return parts.map((part, index) =>
     exactRegex.test(part) ? (
-      <span key={index} className={presentation.className} style={presentation.style}>
+      <span
+        key={index}
+        className={presentation.className}
+        style={presentation.style}
+      >
         {part}
       </span>
     ) : (
@@ -121,5 +131,3 @@ export function renderHighlighted(
     ),
   );
 }
-
-

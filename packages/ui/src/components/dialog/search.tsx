@@ -30,7 +30,11 @@ import type { SharedProps } from '@/contexts/search';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import scrollIntoView from 'scroll-into-view-if-needed';
 import { buttonVariants } from '@/components/ui/button';
-import { renderHighlighted as renderHighlightedText, resolveHighlightPresentation, resolveHighlightRegex } from './search-highlight';
+import {
+  renderHighlighted as renderHighlightedText,
+  resolveHighlightPresentation,
+  resolveHighlightRegex,
+} from './search-highlight';
 
 type ReactSortedResult = Omit<SortedResult, 'content'> & {
   external?: boolean;
