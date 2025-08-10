@@ -88,58 +88,22 @@ export function remarkImage({
       src: Source,
       node: Image,
     ): Promise<MdxJsxFlowElement | undefined> {
-      if ((src.type === 'url' && external) || !useImport) {
-        const size = await getImageSize(src).catch((e) => {
-          throw new Error(
-            `[Remark Image] Failed obtain image size for ${node.url} (public directory configured as ${publicDir})`,
-            {
-              cause: e,
-            },
-          );
-        });
-
-        return {
-          type: 'mdxJsxFlowElement',
-          name: 'img',
-          attributes: [
-            {
-              type: 'mdxJsxAttribute',
-              name: 'alt',
-              value: node.alt ?? 'image',
-            },
-            {
-              type: 'mdxJsxAttribute',
-              name: 'src',
-              // `src` doesn't support file paths, we can use `node.url` for files and let the underlying framework handle it
-              value: src.type === 'url' ? src.url.toString() : node.url,
-            },
-            {
-              type: 'mdxJsxAttribute',
-              name: 'width',
-              value: size.width.toString(),
-            },
-            {
-              type: 'mdxJsxAttribute',
-              name: 'height',
-              value: size.height.toString(),
-            },
-          ],
-          children: [],
-        };
-      }
-
-      if (src.type === 'file') {
+      if (src.type === 'file' && useImport) {
         // Unique variable name for the given static image URL
         const variableName = `__img${importsToInject.length}`;
         const hasBlur =
           placeholder === 'blur' &&
           VALID_BLUR_EXT.some((ext) => src.file.endsWith(ext));
 
+        if (!file.dirname) {
+          throw new Error(
+            'When `useImport` is enabled, you must specify `dirname` in the VFile passed to compiler.',
+          );
+        }
+
         importsToInject.push({
           variableName,
-          importPath: file.dirname
-            ? getImportPath(src.file, file.dirname)
-            : node.url,
+          importPath: getImportPath(src.file, file.dirname),
         });
 
         const out: MdxJsxFlowElement = {
@@ -184,6 +148,46 @@ export function remarkImage({
         }
 
         return out;
+      }
+
+      if (src.type !== 'url' || external) {
+        const size = await getImageSize(src).catch((e) => {
+          throw new Error(
+            `[Remark Image] Failed obtain image size for ${node.url} (public directory configured as ${publicDir})`,
+            {
+              cause: e,
+            },
+          );
+        });
+
+        return {
+          type: 'mdxJsxFlowElement',
+          name: 'img',
+          attributes: [
+            {
+              type: 'mdxJsxAttribute',
+              name: 'alt',
+              value: node.alt ?? 'image',
+            },
+            {
+              type: 'mdxJsxAttribute',
+              name: 'src',
+              // `src` doesn't support file paths, we can use `node.url` for files and let the underlying framework handle it
+              value: src.type === 'url' ? src.url.toString() : node.url,
+            },
+            {
+              type: 'mdxJsxAttribute',
+              name: 'width',
+              value: size.width.toString(),
+            },
+            {
+              type: 'mdxJsxAttribute',
+              name: 'height',
+              value: size.height.toString(),
+            },
+          ],
+          children: [],
+        };
       }
     }
 

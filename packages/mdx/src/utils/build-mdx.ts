@@ -1,5 +1,5 @@
 import { createProcessor, type ProcessorOptions } from '@mdx-js/mdx';
-import type { VFile } from 'vfile';
+import type { DataMap, VFile } from 'vfile';
 import { remarkInclude } from '@/mdx-plugins/remark-include';
 
 type Processor = ReturnType<typeof createProcessor>;
@@ -10,7 +10,7 @@ interface BuildMDXOptions extends ProcessorOptions {
   /**
    * Specify a file path for source
    */
-  filePath?: string;
+  filePath: string;
 
   frontmatter?: Record<string, unknown>;
 
@@ -26,12 +26,18 @@ export interface CompilerOptions {
   addDependency: (file: string) => void;
 }
 
+export type { DataMap };
+
 declare module 'vfile' {
   interface DataMap {
     /**
      * The compiler object from loader
      */
     _compiler?: CompilerOptions;
+
+    _processor?: {
+      getProcessor: (format: 'md' | 'mdx') => Processor;
+    };
   }
 }
 
@@ -46,33 +52,37 @@ export async function buildMDX(
   options: BuildMDXOptions,
 ): Promise<VFile> {
   const { filePath, frontmatter, data, _compiler, ...rest } = options;
-  let format = options.format;
-  if (filePath) {
-    format ??= filePath.endsWith('.mdx') ? 'mdx' : 'md';
+
+  function getProcessor(format: 'md' | 'mdx') {
+    const key = `${cacheKey}:${format}`;
+    let processor = cache.get(key);
+
+    if (!processor) {
+      processor = createProcessor({
+        outputFormat: 'program',
+        ...rest,
+        remarkPlugins: [remarkInclude, ...(rest.remarkPlugins ?? [])],
+        format,
+      });
+
+      cache.set(key, processor);
+    }
+
+    return processor;
   }
 
-  format ??= 'mdx';
-  const key = `${cacheKey}:${format}`;
-  let cached = cache.get(key);
-
-  if (!cached) {
-    cached = createProcessor({
-      outputFormat: 'program',
-      ...rest,
-      remarkPlugins: [remarkInclude, ...(rest.remarkPlugins ?? [])],
-      format,
-    });
-
-    cache.set(key, cached);
-  }
-
-  return cached.process({
+  return getProcessor(
+    (options.format ?? filePath.endsWith('.mdx')) ? 'mdx' : 'md',
+  ).process({
     value: source,
     path: filePath,
     data: {
       ...data,
       frontmatter,
       _compiler,
+      _processor: {
+        getProcessor,
+      },
     },
   });
 }
