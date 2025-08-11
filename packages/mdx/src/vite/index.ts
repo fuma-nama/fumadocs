@@ -4,7 +4,7 @@ import { buildMDX } from '@/utils/build-mdx';
 import { parse } from 'node:querystring';
 import { countLines } from '@/utils/count-lines';
 import { fumaMatter } from '@/utils/fuma-matter';
-import { validate, ValidationError } from '@/utils/schema';
+import { validate, ValidationError } from '@/utils/validation';
 import { z } from 'zod';
 import { ident, toImportPath } from '@/utils/import-formatter';
 import type { DocCollection, DocsCollection, MetaCollection } from '@/config';

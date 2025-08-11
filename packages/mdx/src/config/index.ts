@@ -3,5 +3,5 @@ export {
   getDefaultMDXOptions,
   type DefaultMDXOptions,
 } from '../utils/mdx-options';
-export { frontmatterSchema, metaSchema } from '../utils/schema';
+export * from './zod-4';
 export * from '../mdx-plugins/remark-include';

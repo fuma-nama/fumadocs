@@ -1,7 +1,7 @@
-import { frontmatterSchema, metaSchema } from '@/utils/schema';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type { DefaultMDXOptions } from '@/utils/mdx-options';
 import type { ProcessorOptions } from '@mdx-js/mdx';
+import { frontmatterSchema, metaSchema } from '@/config/zod-4';
 
 export type CollectionSchema<Schema extends StandardSchemaV1, Context> =
   | Schema

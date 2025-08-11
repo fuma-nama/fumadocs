@@ -4,7 +4,7 @@ import { type LoaderContext } from 'webpack';
 import { getConfigHash, loadConfig } from '@/utils/config';
 import { buildMDX } from '@/utils/build-mdx';
 import { getGitTimestamp } from './utils/git-timestamp';
-import { validate, ValidationError } from '@/utils/schema';
+import { validate, ValidationError } from '@/utils/validation';
 import { fumaMatter } from '@/utils/fuma-matter';
 import { countLines } from '@/utils/count-lines';
 

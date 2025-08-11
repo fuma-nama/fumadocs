@@ -18,6 +18,11 @@
       "types": "./dist/config/index.d.ts",
       "require": "./dist/config/index.cjs"
     },
+    "./config/zod-3": {
+      "import": "./dist/config/zod-3.js",
+      "types": "./dist/config/zod-3.d.ts",
+      "require": "./dist/config/zod-3.cjs"
+    },
     "./next": {
       "import": "./dist/next/index.js",
       "types": "./dist/next/index.d.ts",
