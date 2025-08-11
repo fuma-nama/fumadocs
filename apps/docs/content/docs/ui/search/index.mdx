@@ -64,3 +64,24 @@ You can choose & configure the search client according to your search engine, it
 A list of integrations maintained by community.
 
 - [Trieve Search](/docs/headless/search/trieve)
+
+### Highlight Matches
+
+Search integrations can provide `contentWithHighlights` to highlight matches.
+
+After configuring search client UI according to the guides above, you can customise how it is rendered.
+
+```tsx title="components/search.tsx"
+<SearchDialogList
+  items={query.data !== 'empty' ? query.data : null}
+  // [!code highlight:8]
+  Item={(props) => (
+    <SearchDialogListItem
+      {...props}
+      renderHighlights={(highlights) => {
+        // ...
+      }}
+    />
+  )}
+/>
+```

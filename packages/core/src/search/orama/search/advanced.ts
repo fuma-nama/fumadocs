@@ -5,6 +5,7 @@ import {
 } from '@/search/orama/create-db';
 import { removeUndefined } from '@/utils/remove-undefined';
 import type { SortedResult } from '@/server';
+import { createContentHighlighter } from '@/search/shared';
 
 export async function searchAdvanced(
   db: Orama<typeof advancedSchema>,
@@ -42,18 +43,20 @@ export async function searchAdvanced(
     } as SearchParams<typeof db, AdvancedDocument>;
   }
 
+  const highlighter = createContentHighlighter(query);
   const result = await search(db, params);
   const list: SortedResult[] = [];
   for (const item of result.groups ?? []) {
     const pageId = item.values[0] as string;
 
-    const page = await getByID(db, pageId);
+    const page = getByID(db, pageId);
     if (!page) continue;
 
     list.push({
       id: pageId,
       type: 'page',
       content: page.content,
+      contentWithHighlights: highlighter.highlight(page.content),
       url: page.url,
     });
 
@@ -63,6 +66,7 @@ export async function searchAdvanced(
       list.push({
         id: hit.document.id.toString(),
         content: hit.document.content,
+        contentWithHighlights: highlighter.highlight(hit.document.content),
         type: hit.document.type as SortedResult['type'],
         url: hit.document.url,
       });
