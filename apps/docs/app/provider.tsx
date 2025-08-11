@@ -29,7 +29,6 @@ export function Provider({ children }: { children: ReactNode }) {
     <RootProvider
       search={{
         SearchDialog,
-        highlightMatches: true,
       }}
     >
       <TooltipProvider>

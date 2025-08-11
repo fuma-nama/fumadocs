@@ -1,9 +1,10 @@
 import { type Orama, search, type SearchParams } from '@orama/orama';
 import type { SortedResult } from '@/server';
 import {
-  type simpleSchema,
   type SimpleDocument,
+  type simpleSchema,
 } from '@/search/orama/create-db';
+import { createContentHighlighter } from '@/search/shared';
 
 export async function searchSimple(
   db: Orama<typeof simpleSchema>,
@@ -12,6 +13,7 @@ export async function searchSimple(
     SearchParams<Orama<typeof simpleSchema>, SimpleDocument>
   > = {},
 ): Promise<SortedResult[]> {
+  const highlighter = createContentHighlighter(query);
   const result = await search(db, {
     term: query,
     tolerance: 1,
@@ -25,6 +27,7 @@ export async function searchSimple(
   return result.hits.map<SortedResult>((hit) => ({
     type: 'page',
     content: hit.document.title,
+    contentWithHighlights: highlighter.highlight(hit.document.title),
     id: hit.document.url,
     url: hit.document.url,
   }));

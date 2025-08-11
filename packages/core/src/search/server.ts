@@ -6,7 +6,6 @@ import {
   type SearchParams,
 } from '@orama/orama';
 import type { StructuredData } from '@/mdx-plugins/remark-structure';
-import type { SortedResult } from '@/server/types';
 import { createEndpoint } from '@/search/orama/create-endpoint';
 import {
   type AdvancedDocument,
@@ -18,6 +17,7 @@ import {
 } from '@/search/orama/create-db';
 import { searchSimple } from '@/search/orama/search/simple';
 import { searchAdvanced } from '@/search/orama/search/advanced';
+import type { SortedResult } from '@/search/shared';
 
 type SearchType = 'simple' | 'advanced';
 
