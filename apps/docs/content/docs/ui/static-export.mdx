@@ -28,11 +28,10 @@ See [Next.js docs](https://nextjs.org/docs/app/guides/static-exports) for limita
 
 ### Built-in Search
 
-Learn how to 
-- [enable static mode](/docs/ui/search/orama#static) on search client.
-- [enable static indexing](/docs/headless/search/orama#static-export) on search endpoint.
+You will need extra configurations to statically store the search indexes, and search will be computed on browser instead:
 
-This enables the route handler to be statically cached and search will be computed on browser instead.
+1. **Search Client:** [enable static mode](/docs/ui/search/orama#static).
+2. **Search Server:** [output static indexes](/docs/headless/search/orama#static-export).
 
 ### Cloud Solutions
 
