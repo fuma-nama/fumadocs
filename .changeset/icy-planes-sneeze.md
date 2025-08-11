@@ -1,5 +1,8 @@
 ---
-'fumadocs-ui': minor
+'fumadocs-ui': patch
+'fumadocs-core': patch
 ---
 
-Add `highlightMatches` feature for search result highlighting
+Support search result highlighting.
+
+Result nodes now have a `contentWithHighlights` property, you can render it with custom renderer, or a default one provided on Fumadocs UI.
