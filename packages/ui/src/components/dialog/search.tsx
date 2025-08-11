@@ -25,16 +25,11 @@ import type { SortedResult } from 'fumadocs-core/server';
 import { cva } from 'class-variance-authority';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 import { useRouter } from 'fumadocs-core/framework';
-import { useSearchContext } from '@/contexts/search';
 import type { SharedProps } from '@/contexts/search';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import scrollIntoView from 'scroll-into-view-if-needed';
 import { buttonVariants } from '@/components/ui/button';
-import {
-  renderHighlighted as renderHighlightedText,
-  resolveHighlightPresentation,
-  resolveHighlightRegex,
-} from './search-highlight';
+import type { HighlightedText } from 'fumadocs-core/search/server';
 
 type ReactSortedResult = Omit<SortedResult, 'content'> & {
   external?: boolean;
@@ -332,20 +327,14 @@ export function SearchDialogListItem({
   item,
   className,
   children,
+  renderHighlights: render = renderHighlights,
   ...props
 }: ComponentProps<'button'> & {
+  renderHighlights?: typeof renderHighlights;
   item: ReactSortedResult;
 }) {
   const { active: activeId, setActive } = useSearchList();
-  const { search: query } = useSearch();
-  const { highlightMatches } = useSearchContext();
   const active = item.id === activeId;
-
-  function renderHighlighted(content: ReactNode): ReactNode {
-    const regex = resolveHighlightRegex(highlightMatches, query);
-    const presentation = resolveHighlightPresentation(highlightMatches);
-    return renderHighlightedText(content, regex, presentation);
-  }
 
   return (
     <button
@@ -384,7 +373,11 @@ export function SearchDialogListItem({
             />
           )}
           {icons[item.type]}
-          <p className="min-w-0 truncate">{renderHighlighted(item.content)}</p>
+          <p className="min-w-0 truncate">
+            {item.contentWithHighlights
+              ? render(item.contentWithHighlights)
+              : item.content}
+          </p>
         </>
       )}
     </button>
@@ -474,6 +467,20 @@ export function TagsListItem({
       {props.children}
     </button>
   );
+}
+
+function renderHighlights(highlights: HighlightedText[]): ReactNode {
+  return highlights.map((node, i) => {
+    if (node.styles?.highlight) {
+      return (
+        <span key={i} className="text-fd-primary bg-fd-primary/10">
+          {node.content}
+        </span>
+      );
+    }
+
+    return <Fragment key={i}>{node.content}</Fragment>;
+  });
 }
 
 export function useSearch() {

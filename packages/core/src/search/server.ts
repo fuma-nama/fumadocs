@@ -162,3 +162,4 @@ export function initAdvancedSearch(options: AdvancedOptions): SearchServer {
 
 export { createFromSource } from './orama/create-from-source';
 export { createI18nSearchAPI } from './orama/create-i18n';
+export * from './shared';
