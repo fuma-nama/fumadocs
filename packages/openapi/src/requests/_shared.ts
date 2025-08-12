@@ -2,11 +2,12 @@ import type { MediaAdapter } from '@/media/adapter';
 import type { NoReference } from '@/utils/schema';
 import type { ParameterObject } from '@/types';
 
-export type SampleGenerator = (
+export type SampleGenerator<ServerContext = unknown> = (
   url: string,
   data: RequestData,
   context: {
     mediaAdapters: Record<string, MediaAdapter>;
+    server: ServerContext;
   },
 ) => string;
 

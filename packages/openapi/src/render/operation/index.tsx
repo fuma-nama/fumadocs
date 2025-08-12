@@ -30,10 +30,21 @@ import {
   AccordionTrigger,
 } from '@/ui/components/accordion';
 
-export interface CodeSample {
+export interface CodeSample<T = unknown> {
   lang: string;
   label?: string;
-  source?: string | SampleGenerator | false;
+  /**
+   * either:
+   * - code
+   * - a function imported from a file with "use client" directive
+   * - false (disabled)
+   */
+  source?: string | SampleGenerator<T> | false;
+
+  /**
+   * Pass extra context to client-side source generator
+   */
+  serverContext?: T;
 }
 
 const ParamTypes = {

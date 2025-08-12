@@ -28,7 +28,6 @@ import {
   withBase,
 } from '@/utils/url';
 import type { RawRequestData, RequestData } from '@/requests/_shared';
-import { defaultSamples } from '@/requests';
 
 type UpdateListener = (data: RawRequestData, encoded: RequestData) => void;
 
@@ -126,7 +125,7 @@ export function CodeExampleProvider({
   );
 }
 
-export function CodeExample(props: CodeSample) {
+export function CodeExample(sample: CodeSample) {
   const { shikiOptions, mediaAdapters } = useApiContext();
   const { examples, key, route, addListener, removeListener } =
     useContext(CodeExampleContext)!;
@@ -134,10 +133,6 @@ export function CodeExample(props: CodeSample) {
   const [data, setData] = useState(() => {
     return examples.find((example) => example.key === key)!.encoded;
   });
-
-  const sample = props.source
-    ? props
-    : defaultSamples.find((item) => item.label === props.label);
 
   useEffect(() => {
     const listener: UpdateListener = (_, encoded) => setData(encoded);
@@ -149,7 +144,7 @@ export function CodeExample(props: CodeSample) {
   }, [addListener, removeListener]);
 
   const code = useMemo(() => {
-    if (!sample?.source) return;
+    if (!sample.source) return;
     if (typeof sample.source === 'string') return sample.source;
 
     return sample.source(
@@ -164,6 +159,7 @@ export function CodeExample(props: CodeSample) {
       ),
       data,
       {
+        server: sample.serverContext,
         mediaAdapters,
       },
     );
