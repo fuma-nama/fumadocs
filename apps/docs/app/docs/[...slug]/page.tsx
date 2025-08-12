@@ -35,7 +35,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from '@/components/ui/hover-card';
-import Link from 'fumadocs-core/link';
+import Link from 'next/link';
 import { UiOverview } from '@/components/ui-overview';
 import { AutoTypeTable } from 'fumadocs-typescript/ui';
 import { createGenerator } from 'fumadocs-typescript';
