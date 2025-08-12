@@ -6,6 +6,7 @@ import {
   Copy,
   ExternalLinkIcon,
   MessageCircleIcon,
+  SearchIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
@@ -145,6 +146,13 @@ export function ViewOptions({
           q,
         })}`,
         icon: <MessageCircleIcon />,
+      },
+      {
+        title: 'Open in Scira AI',
+        href: `https://scira.ai/?${new URLSearchParams({
+          q,
+        })}`,
+        icon: <SearchIcon />,
       },
     ];
   }, [githubUrl, markdownUrl]);
