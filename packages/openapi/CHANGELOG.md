@@ -1,5 +1,15 @@
 # @fuma-docs/openapi
 
+## 9.1.11
+
+### Patch Changes
+
+- c07af6f: Support `serverContext` & `createCodeSample` for custom `generateCodeSamples()` function
+- Updated dependencies [569bc26]
+- Updated dependencies [817c237]
+  - fumadocs-core@15.6.10
+  - fumadocs-ui@15.6.10
+
 ## 9.1.10
 
 ### Patch Changes

@@ -1,5 +1,14 @@
 # next-docs-zeta
 
+## 15.6.10
+
+### Patch Changes
+
+- 569bc26: Improve `remark-image`: (1) append public URL to output `src` if it is a URL. (2) ignore if failed to obtain SVG size.
+- 817c237: Support search result highlighting.
+
+  Result nodes now have a `contentWithHighlights` property, you can render it with custom renderer, or a default one provided on Fumadocs UI.
+
 ## 15.6.9
 
 ### Patch Changes

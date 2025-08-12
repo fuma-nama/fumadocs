@@ -1,5 +1,17 @@
 # next-docs-ui
 
+## 15.6.10
+
+### Patch Changes
+
+- 817c237: Support search result highlighting.
+
+  Result nodes now have a `contentWithHighlights` property, you can render it with custom renderer, or a default one provided on Fumadocs UI.
+
+- Updated dependencies [569bc26]
+- Updated dependencies [817c237]
+  - fumadocs-core@15.6.10
+
 ## 15.6.9
 
 ### Patch Changes
