@@ -3,8 +3,8 @@ import { visit } from 'unist-util-visit';
 import type { Code, Root, RootContent } from 'mdast';
 import * as path from 'node:path';
 import * as fs from 'node:fs/promises';
-import type { CompilerOptions } from '@/utils/build-mdx';
 import { fumaMatter } from '@/utils/fuma-matter';
+import type { DataMap } from '@/utils/build-mdx';
 
 function flattenNode(node: RootContent): string {
   if ('children' in node)
@@ -53,10 +53,10 @@ export function remarkInclude(this: Processor): Transformer<Root, Root> {
   const TagName = 'include';
 
   async function update(
+    this: Processor,
     tree: Root,
     directory: string,
-    processor: Processor,
-    compiler?: CompilerOptions,
+    data: DataMap,
   ) {
     const queue: Promise<void>[] = [];
 
@@ -103,7 +103,7 @@ export function remarkInclude(this: Processor): Transformer<Root, Root> {
             .readFile(targetPath)
             .then((buffer) => buffer.toString())
             .then(async (content) => {
-              compiler?.addDependency(targetPath);
+              data._compiler?.addDependency(targetPath);
 
               if (asCode) {
                 const lang = params.lang ?? path.extname(file).slice(1);
@@ -118,6 +118,12 @@ export function remarkInclude(this: Processor): Transformer<Root, Root> {
                 return;
               }
 
+              const processor = data._processor
+                ? data._processor.getProcessor(
+                    targetPath.endsWith('.md') ? 'md' : 'mdx',
+                  )
+                : this;
+
               let parsed = processor.parse(fumaMatter(content).content) as Root;
               if (section) {
                 const extracted = extractSection(parsed, section);
@@ -129,11 +135,11 @@ export function remarkInclude(this: Processor): Transformer<Root, Root> {
                 parsed = extracted;
               }
 
-              await update(
+              await update.call(
+                processor as any,
                 parsed,
                 path.dirname(targetPath),
-                processor,
-                compiler,
+                data,
               );
               Object.assign(
                 parent && parent.type === 'paragraph' ? parent : node,
@@ -156,6 +162,6 @@ export function remarkInclude(this: Processor): Transformer<Root, Root> {
   }
 
   return async (tree, file) => {
-    await update(tree, path.dirname(file.path), this, file.data._compiler);
+    await update.call(this, tree, path.dirname(file.path), file.data);
   };
 }

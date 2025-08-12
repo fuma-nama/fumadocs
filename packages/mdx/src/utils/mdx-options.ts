@@ -23,6 +23,8 @@ export type DefaultMDXOptions = Omit<
   remarkCodeTabOptions?: plugins.RemarkCodeTabOptions | false;
   remarkNpmOptions?: plugins.RemarkNpmOptions | false;
   rehypeCodeOptions?: plugins.RehypeCodeOptions | false;
+
+  _withoutBundler?: boolean;
 };
 
 function pluginOption(
@@ -48,6 +50,7 @@ export function getDefaultMDXOptions({
   remarkStructureOptions,
   remarkCodeTabOptions,
   remarkNpmOptions,
+  _withoutBundler = false,
   ...mdxOptions
 }: DefaultMDXOptions): ProcessorOptions {
   const mdxExports = [
@@ -67,7 +70,13 @@ export function getDefaultMDXOptions({
           ...remarkHeadingOptions,
         },
       ],
-      remarkImageOptions !== false && [plugins.remarkImage, remarkImageOptions],
+      remarkImageOptions !== false && [
+        plugins.remarkImage,
+        {
+          ...remarkImageOptions,
+          useImport: _withoutBundler ? false : remarkImageOptions?.useImport,
+        },
+      ],
       'remarkCodeTab' in plugins &&
         remarkCodeTabOptions !== false && [
           plugins.remarkCodeTab,
@@ -96,6 +105,7 @@ export function getDefaultMDXOptions({
 
   return {
     ...mdxOptions,
+    outputFormat: _withoutBundler ? 'function-body' : mdxOptions.outputFormat,
     remarkPlugins,
     rehypePlugins,
   };

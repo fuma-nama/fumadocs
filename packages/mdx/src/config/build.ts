@@ -38,12 +38,13 @@ export function buildConfig(config: Record<string, unknown>): LoadedConfig {
     );
   }
 
-  let cachedMdxOptions: Promise<ProcessorOptions> | undefined;
+  const mdxOptionsCache = new Map<string, Promise<ProcessorOptions>>();
   return {
     global: globalConfig,
     collections,
-    async getDefaultMDXOptions(): Promise<ProcessorOptions> {
-      if (cachedMdxOptions) return cachedMdxOptions;
+    async getDefaultMDXOptions(mode = 'default'): Promise<ProcessorOptions> {
+      const cached = mdxOptionsCache.get(mode);
+      if (cached) return cached;
 
       const input = this.global.mdxOptions;
       async function uncached(): Promise<ProcessorOptions> {
@@ -51,10 +52,15 @@ export function buildConfig(config: Record<string, unknown>): LoadedConfig {
         const { getDefaultMDXOptions } = await import('@/utils/mdx-options');
 
         if (options?.preset === 'minimal') return options;
-        return getDefaultMDXOptions(options ?? {});
+        return getDefaultMDXOptions({
+          ...options,
+          _withoutBundler: mode === 'remote',
+        });
       }
 
-      return (cachedMdxOptions = uncached());
+      const result = uncached();
+      mdxOptionsCache.set(mode, result);
+      return result;
     },
   };
 }

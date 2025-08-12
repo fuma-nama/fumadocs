@@ -26,6 +26,31 @@
       "type": "mdxjsEsm",
     },
     {
+      "data": {
+        "estree": {
+          "body": [
+            {
+              "source": {
+                "type": "Literal",
+                "value": "./remark-image.svg",
+              },
+              "specifiers": [
+                {
+                  "local": {
+                    "name": "__img1",
+                    "type": "Identifier",
+                  },
+                  "type": "ImportDefaultSpecifier",
+                },
+              ],
+              "type": "ImportDeclaration",
+            },
+          ],
+        },
+      },
+      "type": "mdxjsEsm",
+    },
+    {
       "children": [
         {
           "alt": "Test",
@@ -34,11 +59,6 @@
               "name": "alt",
               "type": "mdxJsxAttribute",
               "value": "Test",
-            },
-            {
-              "name": "placeholder",
-              "type": "mdxJsxAttribute",
-              "value": "blur",
             },
             {
               "name": "src",
@@ -55,13 +75,21 @@
                         "type": "ExpressionStatement",
                       },
                     ],
+                    "sourceType": "script",
+                    "type": "Program",
                   },
                 },
                 "type": "mdxJsxAttributeValueExpression",
                 "value": "__img0",
               },
             },
+            {
+              "name": "placeholder",
+              "type": "mdxJsxAttribute",
+              "value": "blur",
+            },
           ],
+          "children": [],
           "name": "img",
           "position": {
             "end": {
@@ -153,12 +181,79 @@
       },
       "type": "paragraph",
     },
+    {
+      "children": [
+        {
+          "alt": "Inline",
+          "attributes": [
+            {
+              "name": "alt",
+              "type": "mdxJsxAttribute",
+              "value": "Inline",
+            },
+            {
+              "name": "src",
+              "type": "mdxJsxAttribute",
+              "value": {
+                "data": {
+                  "estree": {
+                    "body": [
+                      {
+                        "expression": {
+                          "name": "__img1",
+                          "type": "Identifier",
+                        },
+                        "type": "ExpressionStatement",
+                      },
+                    ],
+                    "sourceType": "script",
+                    "type": "Program",
+                  },
+                },
+                "type": "mdxJsxAttributeValueExpression",
+                "value": "__img1",
+              },
+            },
+          ],
+          "children": [],
+          "name": "img",
+          "position": {
+            "end": {
+              "column": 30,
+              "line": 5,
+              "offset": 96,
+            },
+            "start": {
+              "column": 1,
+              "line": 5,
+              "offset": 67,
+            },
+          },
+          "title": null,
+          "type": "mdxJsxFlowElement",
+          "url": "./remark-image.svg",
+        },
+      ],
+      "position": {
+        "end": {
+          "column": 30,
+          "line": 5,
+          "offset": 96,
+        },
+        "start": {
+          "column": 1,
+          "line": 5,
+          "offset": 67,
+        },
+      },
+      "type": "paragraph",
+    },
   ],
   "position": {
     "end": {
       "column": 1,
-      "line": 4,
-      "offset": 66,
+      "line": 6,
+      "offset": 97,
     },
     "start": {
       "column": 1,

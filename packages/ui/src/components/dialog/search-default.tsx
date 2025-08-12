@@ -16,9 +16,10 @@ import {
   SearchDialogOverlay,
   TagsList,
   TagsListItem,
+  type SharedProps,
 } from './search';
 import type { SortedResult } from 'fumadocs-core/server';
-import type { SearchLink, SharedProps, TagItem } from '@/contexts/search';
+import type { SearchLink, TagItem } from '@/contexts/search';
 
 export interface DefaultSearchDialogProps extends SharedProps {
   links?: SearchLink[];

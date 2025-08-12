@@ -85,7 +85,7 @@ export async function search(
     },
   });
 
-  const results = (res.data as VectorStoreSearchResult[]).flatMap((item) => {
+  return (res.data as VectorStoreSearchResult[]).flatMap((item) => {
     const metadata = item.generated_metadata;
 
     const url = metadata.url || '#';
@@ -116,6 +116,4 @@ export async function search(
 
     return chunkResults;
   });
-
-  return results;
 }

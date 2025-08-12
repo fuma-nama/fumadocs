@@ -2,6 +2,7 @@ import type { SortedResult } from '@/server';
 import type { ClientSearchParams, OramaClient } from '@oramacloud/client';
 import { removeUndefined } from '@/utils/remove-undefined';
 import type { OramaIndex } from '@/search/orama-cloud';
+import { createContentHighlighter } from '@/search/shared';
 
 interface CrawlerIndex {
   path: string;
@@ -36,6 +37,7 @@ export async function searchDocs(
   query: string,
   options: OramaCloudOptions,
 ): Promise<SortedResult[]> {
+  const highlighter = createContentHighlighter(query);
   const list: SortedResult[] = [];
   const { index = 'default', client, params: extraParams = {}, tag } = options;
 
@@ -55,28 +57,28 @@ export async function searchDocs(
     });
     if (!result) return list;
 
-    if (index === 'crawler') {
-      for (const hit of result.hits) {
-        const doc = hit.document as unknown as CrawlerIndex;
+    for (const hit of result.hits) {
+      const doc = hit.document as unknown as CrawlerIndex;
 
-        list.push(
-          {
-            id: hit.id,
-            type: 'page',
-            content: doc.title,
-            url: doc.path,
-          },
-          {
-            id: 'page' + hit.id,
-            type: 'text',
-            content: doc.content,
-            url: doc.path,
-          },
-        );
-      }
-
-      return list;
+      list.push(
+        {
+          id: hit.id,
+          type: 'page',
+          content: doc.title,
+          contentWithHighlights: highlighter.highlight(doc.title),
+          url: doc.path,
+        },
+        {
+          id: 'page' + hit.id,
+          type: 'text',
+          content: doc.content,
+          contentWithHighlights: highlighter.highlight(doc.content),
+          url: doc.path,
+        },
+      );
     }
+
+    return list;
   }
 
   const params: ClientSearchParams = {
@@ -107,6 +109,7 @@ export async function searchDocs(
           id: doc.page_id,
           type: 'page',
           content: doc.title,
+          contentWithHighlights: highlighter.highlight(doc.title),
           url: doc.url,
         });
         addedHead = true;
@@ -115,6 +118,7 @@ export async function searchDocs(
       list.push({
         id: doc.id,
         content: doc.content,
+        contentWithHighlights: highlighter.highlight(doc.content),
         type: doc.content === doc.section ? 'heading' : 'text',
         url: doc.section_id ? `${doc.url}#${doc.section_id}` : doc.url,
       });

@@ -29,6 +29,7 @@ import type { SharedProps } from '@/contexts/search';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import scrollIntoView from 'scroll-into-view-if-needed';
 import { buttonVariants } from '@/components/ui/button';
+import type { HighlightedText } from 'fumadocs-core/search/server';
 
 type ReactSortedResult = Omit<SortedResult, 'content'> & {
   external?: boolean;
@@ -326,8 +327,10 @@ export function SearchDialogListItem({
   item,
   className,
   children,
+  renderHighlights: render = renderHighlights,
   ...props
 }: ComponentProps<'button'> & {
+  renderHighlights?: typeof renderHighlights;
   item: ReactSortedResult;
 }) {
   const { active: activeId, setActive } = useSearchList();
@@ -370,7 +373,11 @@ export function SearchDialogListItem({
             />
           )}
           {icons[item.type]}
-          <p className="min-w-0 truncate">{item.content}</p>
+          <p className="min-w-0 truncate">
+            {item.contentWithHighlights
+              ? render(item.contentWithHighlights)
+              : item.content}
+          </p>
         </>
       )}
     </button>
@@ -460,6 +467,20 @@ export function TagsListItem({
       {props.children}
     </button>
   );
+}
+
+function renderHighlights(highlights: HighlightedText[]): ReactNode {
+  return highlights.map((node, i) => {
+    if (node.styles?.highlight) {
+      return (
+        <span key={i} className="text-fd-primary bg-fd-primary/10">
+          {node.content}
+        </span>
+      );
+    }
+
+    return <Fragment key={i}>{node.content}</Fragment>;
+  });
 }
 
 export function useSearch() {

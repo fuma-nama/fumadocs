@@ -40,12 +40,12 @@
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^24.2.0",
+    "@types/node": "^24.2.1",
     "@types/react": "^19.1.9",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "lucide-react": "^0.537.0",
+    "lucide-react": "^0.539.0",
     "tsconfig": "workspace:*"
   },
   "peerDependencies": {

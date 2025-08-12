@@ -7,13 +7,16 @@ description: Reuse content from other files.
 
 ### Markdown
 
-Specify the target Markdown file path in the `<include>` tag (relative to the Markdown file itself).
+To display content from another Markdown/MDX file, specify its path relative to the file itself in the `<include>` tag.
 
 ```mdx title="page.mdx"
 <include>./another.mdx</include>
 ```
 
-This will display the content from the target file (e.g. `another.mdx`).
+<Callout>
+  For Markdown files, you don't need to escape for MDX syntax but note that
+  you'll need `rehypeRaw` for HTML comments & content.
+</Callout>
 
 ### CodeBlock
 

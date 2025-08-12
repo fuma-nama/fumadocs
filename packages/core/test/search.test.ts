@@ -58,12 +58,31 @@ something`,
     [
       {
         "content": "Index",
+        "contentWithHighlights": [
+          {
+            "content": "Index",
+            "type": "text",
+          },
+        ],
         "id": "1",
         "type": "page",
         "url": "/",
       },
       {
         "content": "Hello World",
+        "contentWithHighlights": [
+          {
+            "content": "Hello",
+            "styles": {
+              "highlight": true,
+            },
+            "type": "text",
+          },
+          {
+            "content": " World",
+            "type": "text",
+          },
+        ],
         "id": "1-0",
         "type": "heading",
         "url": "/#hello-world",

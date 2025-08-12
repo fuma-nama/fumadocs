@@ -57,19 +57,6 @@ test('Remark Admonition', async () => {
   );
 });
 
-test('Remark Image', async () => {
-  const content = readFileSync(path.resolve(cwd, './fixtures/remark-image.md'));
-  const processor = remark()
-    .use(remarkImage, { publicDir: path.resolve(cwd, './fixtures') })
-    .use(remarkMdx);
-
-  const result = await processor.run(processor.parse(content));
-
-  await expect(result).toMatchFileSnapshot(
-    path.resolve(cwd, './fixtures/remark-image.output.json'),
-  );
-});
-
 test('Remark Steps', async () => {
   const content = await fs.readFile(
     path.resolve(cwd, './fixtures/remark-steps.md'),

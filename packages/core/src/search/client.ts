@@ -1,12 +1,12 @@
 import { useRef, useState } from 'react';
 import { useDebounce } from '@/utils/use-debounce';
-import type { SortedResult } from '@/server/types';
 import { type FetchOptions } from '@/search/client/fetch';
 import { useOnChange } from '@/utils/use-on-change';
 import { type StaticOptions } from '@/search/client/static';
 import { type AlgoliaOptions } from '@/search/client/algolia';
 import { type OramaCloudOptions } from '@/search/client/orama-cloud';
 import { type MixedbreadOptions } from '@/search/client/mixedbread';
+import type { SortedResult } from '@/search/shared';
 
 interface UseDocsSearch {
   search: string;

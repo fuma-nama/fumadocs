@@ -1,26 +1,6 @@
-import { z } from 'zod';
 import type { CollectionSchema } from '@/config';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import picocolors from 'picocolors';
-
-export const metaSchema = z.object({
-  title: z.string().optional(),
-  pages: z.array(z.string()).optional(),
-  description: z.string().optional(),
-  root: z.boolean().optional(),
-  defaultOpen: z.boolean().optional(),
-  icon: z.string().optional(),
-});
-
-export const frontmatterSchema = z.object({
-  title: z.string(),
-  description: z.string().optional(),
-  icon: z.string().optional(),
-  full: z.boolean().optional(),
-
-  // Fumadocs OpenAPI generated
-  _openapi: z.looseObject({}).optional(),
-});
 
 export class ValidationError extends Error {
   title: string;
