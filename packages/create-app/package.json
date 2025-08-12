@@ -39,7 +39,8 @@
     "@types/node": "24.2.1",
     "eslint-config-custom": "workspace:*",
     "tinyglobby": "^0.2.14",
-    "tsconfig": "workspace:*"
+    "tsconfig": "workspace:*",
+    "typescript": "^5.9.2"
   },
   "engines": {
     "node": ">=18.17.0"

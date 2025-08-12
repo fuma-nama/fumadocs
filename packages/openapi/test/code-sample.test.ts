@@ -31,6 +31,7 @@ describe('Code Sample Generators', () => {
 
   const context = {
     mediaAdapters: defaultAdapters,
+    server: null,
   };
 
   test(`Go`, async () => {

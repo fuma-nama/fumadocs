@@ -1095,6 +1095,9 @@ importers:
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.2
 
   packages/create-app-versions:
     dependencies:
