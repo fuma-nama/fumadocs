@@ -1,5 +1,15 @@
 # next-docs-mdx
 
+## 11.7.5
+
+### Patch Changes
+
+- c17fa03: Support creating a separate processor when `<include />` points to different Markdown format
+- f43f714: Automatic fallback to Zod v3 when app has explicit v3 dependency
+- Updated dependencies [569bc26]
+- Updated dependencies [817c237]
+  - fumadocs-core@15.6.10
+
 ## 11.7.4
 
 ### Patch Changes
