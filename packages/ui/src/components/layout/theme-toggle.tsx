@@ -4,6 +4,7 @@ import { Moon, Sun, Airplay } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { type HTMLAttributes, useLayoutEffect, useState } from 'react';
 import { cn } from '@/utils/cn';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 
 const itemVariants = cva(
   'size-6.5 rounded-full p-1.5 text-fd-muted-foreground',
@@ -26,9 +27,11 @@ const full = [
 export function ThemeToggle({
   className,
   mode = 'light-dark',
+  tooltip = false,
   ...props
 }: HTMLAttributes<HTMLElement> & {
   mode?: 'light-dark' | 'light-dark-system';
+  tooltip?: boolean;
 }) {
   const { setTheme, theme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -50,11 +53,27 @@ export function ThemeToggle({
         className={container}
         aria-label={`Toggle Theme`}
         onClick={() => setTheme(value === 'light' ? 'dark' : 'light')}
-        data-theme-toggle=""
+        data-theme-toggle
         {...props}
       >
         {full.map(([key, Icon]) => {
           if (key === 'system') return;
+
+          if (tooltip) {
+            return (
+              <Tooltip key={key}>
+                <TooltipTrigger asChild>
+                  <Icon
+                    fill="currentColor"
+                    className={cn(itemVariants({ active: value === key }))}
+                  />
+                </TooltipTrigger>
+                <TooltipContent>
+                  {key.charAt(0).toUpperCase() + key.slice(1)} Mode
+                </TooltipContent>
+              </Tooltip>
+            );
+          }
 
           return (
             <Icon
@@ -71,17 +90,35 @@ export function ThemeToggle({
   const value = mounted ? theme : null;
 
   return (
-    <div className={container} data-theme-toggle="" {...props}>
-      {full.map(([key, Icon]) => (
-        <button
-          key={key}
-          aria-label={key}
-          className={cn(itemVariants({ active: value === key }))}
-          onClick={() => setTheme(key)}
-        >
-          <Icon className="size-full" fill="currentColor" />
-        </button>
-      ))}
+    <div className={container} data-theme-toggle {...props}>
+      {full.map(([key, Icon]) => {
+        if (tooltip) {
+          return (
+            <Tooltip key={key}>
+              <TooltipTrigger asChild>
+                <Icon
+                  fill="currentColor"
+                  className={cn(itemVariants({ active: value === key }))}
+                />
+              </TooltipTrigger>
+              <TooltipContent>
+                {key.charAt(0).toUpperCase() + key.slice(1)} Mode
+              </TooltipContent>
+            </Tooltip>
+          );
+        }
+
+        return (
+          <button
+            key={key}
+            aria-label={key}
+            className={cn(itemVariants({ active: value === key }))}
+            onClick={() => setTheme(key)}
+          >
+            <Icon className="size-full" fill="currentColor" />
+          </button>
+        );
+      })}
     </div>
   );
 }

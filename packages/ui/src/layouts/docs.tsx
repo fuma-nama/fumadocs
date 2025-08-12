@@ -70,7 +70,7 @@ export function DocsLayout({
   } = {},
   searchToggle = {},
   disableThemeSwitch = false,
-  themeSwitch = { enabled: !disableThemeSwitch },
+  themeSwitch = { enabled: !disableThemeSwitch, tooltip: false },
   i18n = false,
   children,
   ...props
@@ -145,7 +145,11 @@ export function DocsLayout({
             ) : null}
             {themeSwitch.enabled !== false &&
               (themeSwitch.component ?? (
-                <ThemeToggle className="p-0 ms-1.5" mode={themeSwitch.mode} />
+                <ThemeToggle
+                  className="p-0 ms-1.5"
+                  mode={themeSwitch.mode}
+                  tooltip={themeSwitch.tooltip}
+                />
               ))}
             <SidebarTrigger
               className={cn(
@@ -223,7 +227,11 @@ export function DocsLayout({
             ) : null}
             {themeSwitch.enabled !== false &&
               (themeSwitch.component ?? (
-                <ThemeToggle className="p-0 ms-1.5" mode={themeSwitch.mode} />
+                <ThemeToggle
+                  className="p-0 ms-1.5"
+                  mode={themeSwitch.mode}
+                  tooltip={themeSwitch.tooltip}
+                />
               ))}
           </div>
           {footer}

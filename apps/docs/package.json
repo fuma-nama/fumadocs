@@ -7,7 +7,7 @@
     "build:pre": "tsx ./scripts/pre-build.mts",
     "build:post": "tsx ./scripts/post-build.mts",
     "clean": "rimraf .next",
-    "dev": "next dev --turbo",
+    "dev": "next dev --turbopack",
     "lint": "fumadocs-mdx && tsx ./scripts/lint.mts && eslint .",
     "start": "next start"
   },
