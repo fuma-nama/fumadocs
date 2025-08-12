@@ -20,7 +20,7 @@
     "@content-collections/mdx": "^0.2.2",
     "@content-collections/next": "^0.2.6",
     "@types/mdx": "^2.0.13",
-    "@types/react": "^19.1.9",
+    "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
     "typescript": "^5.9.2"
   }

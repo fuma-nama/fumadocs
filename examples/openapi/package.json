@@ -22,7 +22,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.11",
     "@types/mdx": "^2.0.13",
-    "@types/react": "^19.1.9",
+    "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
     "postcss": "^8.5.6",
     "rimraf": "^6.0.1",
