@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 9.1.12
+
+### Patch Changes
+
+- 8e3c07e: load default examples without lazy loading
+
 ## 9.1.11
 
 ### Patch Changes
