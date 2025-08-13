@@ -22,6 +22,7 @@ export interface BaseLayoutProps {
   themeSwitch?: {
     enabled?: boolean;
     component?: ReactNode;
+    tooltip?: boolean;
     mode?: 'light-dark' | 'light-dark-system';
   };
 

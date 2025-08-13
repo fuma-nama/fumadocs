@@ -74,7 +74,7 @@ export function DocsLayout(props: DocsLayoutProps) {
     sidebar: { tabs: tabOptions, ...sidebarProps } = {},
     i18n = false,
     disableThemeSwitch = false,
-    themeSwitch = { enabled: !disableThemeSwitch },
+    themeSwitch = { enabled: !disableThemeSwitch, tooltip: false },
   } = props;
 
   const navMode = nav.mode ?? 'auto';
@@ -240,7 +240,10 @@ export function DocsLayout(props: DocsLayoutProps) {
           ) : null}
           {themeSwitch.enabled !== false &&
             (themeSwitch.component ?? (
-              <ThemeToggle mode={themeSwitch.mode ?? 'light-dark-system'} />
+              <ThemeToggle
+                mode={themeSwitch.mode ?? 'light-dark-system'}
+                tooltip={themeSwitch.tooltip}
+              />
             ))}
           {footer}
         </HideIfEmpty>
@@ -394,6 +397,7 @@ function DocsNavbar({
               <ThemeToggle
                 className="ms-2 max-md:hidden"
                 mode={themeSwitch.mode ?? 'light-dark-system'}
+                tooltip={themeSwitch.tooltip}
               />
             ))}
           {sidebarCollapsible && navMode === 'top' ? (

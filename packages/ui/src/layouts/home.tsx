@@ -50,7 +50,7 @@ export function HomeLayout(
     githubUrl,
     i18n,
     disableThemeSwitch = false,
-    themeSwitch = { enabled: !disableThemeSwitch },
+    themeSwitch = { enabled: !disableThemeSwitch, tooltip: false },
     searchToggle,
     ...rest
   } = props;
@@ -131,7 +131,11 @@ export function Header({
         )}
         {themeSwitch.enabled !== false &&
           (themeSwitch.component ?? (
-            <ThemeToggle className="max-lg:hidden" mode={themeSwitch?.mode} />
+            <ThemeToggle
+              className="max-lg:hidden"
+              mode={themeSwitch?.mode}
+              tooltip={themeSwitch.tooltip}
+            />
           ))}
         {i18n ? (
           <LanguageToggle className="max-lg:hidden">
@@ -177,7 +181,10 @@ export function Header({
               ) : null}
               {themeSwitch.enabled !== false &&
                 (themeSwitch.component ?? (
-                  <ThemeToggle mode={themeSwitch?.mode} />
+                  <ThemeToggle
+                    mode={themeSwitch?.mode}
+                    tooltip={themeSwitch.tooltip}
+                  />
                 ))}
             </div>
           </MenuContent>
