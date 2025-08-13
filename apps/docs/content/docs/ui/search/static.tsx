@@ -17,7 +17,7 @@ import { useI18n } from 'fumadocs-ui/contexts/i18n';
 function initOrama() {
   return create({
     schema: { _: 'string' },
-    // https://docs.orama.com/open-source/supported-languages
+    // https://docs.orama.com/docs/orama-js/supported-languages
     language: 'english',
   });
 }

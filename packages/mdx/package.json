@@ -82,7 +82,7 @@
     "@types/mdast": "^4.0.3",
     "@types/mdx": "^2.0.13",
     "@types/node": "^24.2.1",
-    "@types/react": "^19.1.9",
+    "@types/react": "^19.1.10",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "mdast-util-mdx-jsx": "^3.2.0",
@@ -92,7 +92,7 @@
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
     "vfile": "^6.0.3",
-    "vite": "^7.1.1",
+    "vite": "^7.1.2",
     "webpack": "^5.101.0"
   },
   "peerDependencies": {

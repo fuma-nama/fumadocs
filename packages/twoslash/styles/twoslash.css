@@ -14,13 +14,12 @@
   display: flex;
 }
 
-.twoslash-popup-container,
 .twoslash-completion-list {
   position: relative;
   user-select: none;
   display: flex;
   margin-top: 8px;
-  width: 20rem;
+  margin-right: -20rem;
   flex-direction: column;
   white-space: normal;
   box-shadow:
@@ -32,15 +31,12 @@
   z-index: 8;
   color: var(--color-fd-popover-foreground);
   background-color: var(--color-fd-popover);
+  width: 20rem;
 }
 
 .twoslash-completion-cursor {
   display: inline-flex;
   flex-direction: column;
-}
-
-.twoslash-completion-list {
-  margin-right: -20rem;
 }
 
 .twoslash-completion-list:hover {
@@ -197,8 +193,8 @@
 
 .fd-twoslash-popover {
   z-index: 50;
-  min-width: 220px;
-  max-width: 380px;
+  min-width: 240px;
+  max-width: min(450px, 96vw);
   max-height: 400px;
   overflow: auto;
   border-radius: var(--radius-xl);

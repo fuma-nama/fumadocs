@@ -51,7 +51,7 @@
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.3",
     "@types/node": "24.2.1",
-    "@types/react": "19.1.9",
+    "@types/react": "19.1.10",
     "@types/react-dom": "19.1.7",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",

@@ -1,5 +1,11 @@
 # fumadocs-twoslash
 
+## 3.1.5
+
+### Patch Changes
+
+- c6153d4: Improve rendered result
+
 ## 3.1.4
 
 ### Patch Changes

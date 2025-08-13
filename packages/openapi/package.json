@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-openapi",
-  "version": "9.1.11",
+  "version": "9.1.12",
   "description": "Generate MDX docs for your OpenAPI spec",
   "keywords": [
     "NextJs",
@@ -79,7 +79,7 @@
     "@types/js-yaml": "^4.0.9",
     "@types/node": "24.2.1",
     "@types/openapi-sampler": "^1.0.3",
-    "@types/react": "^19.1.9",
+    "@types/react": "^19.1.10",
     "eslint-config-custom": "workspace:*",
     "json-schema-typed": "^8.0.1",
     "openapi-types": "^12.1.3",
