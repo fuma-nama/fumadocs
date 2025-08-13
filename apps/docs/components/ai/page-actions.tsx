@@ -210,13 +210,6 @@ export function ViewOptions({
         })}`,
         icon: <MessageCircleIcon />,
       },
-      {
-        title: 'Open in Scira AI',
-        href: `https://scira.ai/?${new URLSearchParams({
-          q,
-        })}`,
-        icon: <SearchIcon />,
-      },
     ];
   }, [githubUrl, markdownUrl]);
 
