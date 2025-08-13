@@ -12,33 +12,7 @@ import {
   type RawRequestData,
   type RequestData,
 } from '@/requests/_shared';
-
-const defaultSamples: CodeSample[] = [
-  {
-    label: 'cURL',
-    lang: 'bash',
-  },
-  {
-    label: 'JavaScript',
-    lang: 'js',
-  },
-  {
-    label: 'Go',
-    lang: 'go',
-  },
-  {
-    label: 'Python',
-    lang: 'python',
-  },
-  {
-    label: 'Java',
-    lang: 'java',
-  },
-  {
-    label: 'C#',
-    lang: 'csharp',
-  },
-];
+import { defaultSamples } from '@/requests';
 
 interface CustomProperty {
   'x-codeSamples'?: CodeSample[];
