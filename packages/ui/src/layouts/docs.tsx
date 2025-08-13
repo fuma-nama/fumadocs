@@ -118,25 +118,26 @@ export function DocsLayout({
 
     const mobile = (
       <SidebarContentMobile {...rest}>
-        <HideIfEmpty as={SidebarHeader}>
-          <div className="flex text-fd-muted-foreground items-center justify-end empty:hidden">
-            {iconLinks.map((item, i) => (
-              <BaseLinkItem
-                key={i}
-                item={item}
-                className={cn(
-                  buttonVariants({
-                    size: 'icon-sm',
-                    color: 'ghost',
-                    className: 'p-2',
-                  }),
-                  i === iconLinks.length - 1 && 'me-auto',
-                )}
-                aria-label={item.label}
-              >
-                {item.icon}
-              </BaseLinkItem>
-            ))}
+        <SidebarHeader>
+          <div className="flex text-fd-muted-foreground items-center gap-1.5">
+            <div className="flex flex-1">
+              {iconLinks.map((item, i) => (
+                <BaseLinkItem
+                  key={i}
+                  item={item}
+                  className={cn(
+                    buttonVariants({
+                      size: 'icon-sm',
+                      color: 'ghost',
+                      className: 'p-2',
+                    }),
+                  )}
+                  aria-label={item.label}
+                >
+                  {item.icon}
+                </BaseLinkItem>
+              ))}
+            </div>
             {i18n ? (
               <LanguageToggle>
                 <Languages className="size-4.5" />
@@ -145,14 +146,14 @@ export function DocsLayout({
             ) : null}
             {themeSwitch.enabled !== false &&
               (themeSwitch.component ?? (
-                <ThemeToggle className="p-0 ms-1.5" mode={themeSwitch.mode} />
+                <ThemeToggle className="p-0" mode={themeSwitch.mode} />
               ))}
             <SidebarTrigger
               className={cn(
                 buttonVariants({
                   color: 'ghost',
                   size: 'icon-sm',
-                  className: 'p-2 ms-1.5',
+                  className: 'p-2',
                 }),
               )}
             >
@@ -161,7 +162,7 @@ export function DocsLayout({
           </div>
           {tabs.length > 0 && <RootToggle options={tabs} />}
           {banner}
-        </HideIfEmpty>
+        </SidebarHeader>
         {viewport}
         <SidebarFooter className="empty:hidden">{footer}</SidebarFooter>
       </SidebarContentMobile>
@@ -223,7 +224,7 @@ export function DocsLayout({
             ) : null}
             {themeSwitch.enabled !== false &&
               (themeSwitch.component ?? (
-                <ThemeToggle className="p-0 ms-1.5" mode={themeSwitch.mode} />
+                <ThemeToggle className="p-0" mode={themeSwitch.mode} />
               ))}
           </div>
           {footer}

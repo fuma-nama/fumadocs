@@ -282,53 +282,46 @@ function DocsNavbar({
   tabs,
   searchToggle = {},
   themeSwitch = {},
+  nav = {},
   ...props
 }: DocsLayoutProps & {
   links: LinkItemType[];
   tabs: Option[];
 }) {
-  const navMode = props.nav?.mode ?? 'auto';
+  const navMode = nav.mode ?? 'auto';
   const sidebarCollapsible = props.sidebar?.collapsible ?? true;
-  const nav = (
-    <Link
-      href={props.nav?.url ?? '/'}
-      className={cn(
-        'inline-flex items-center gap-2.5 font-semibold empty:hidden',
-        navMode === 'auto' && 'md:hidden',
-      )}
-    >
-      {props.nav?.title}
-    </Link>
-  );
 
   return (
     <Navbar mode={navMode}>
       <div
         className={cn(
-          'flex border-b px-4 flex-1',
+          'flex border-b px-2.5 gap-2 flex-1 md:px-4',
           navMode === 'auto' && 'md:px-6',
         )}
       >
-        <div
-          className={cn(
-            'flex flex-row items-center',
-            navMode === 'top' && 'flex-1 pe-4',
-          )}
-        >
-          {sidebarCollapsible && navMode === 'auto' ? (
+        <div className={cn('flex items-center', navMode === 'top' && 'flex-1')}>
+          {sidebarCollapsible && navMode === 'auto' && (
             <SidebarCollapseTrigger
               className={cn(
                 buttonVariants({
                   color: 'ghost',
                   size: 'icon-sm',
                 }),
-                'text-fd-muted-foreground -ms-1.5 me-2 data-[collapsed=false]:hidden max-md:hidden',
+                'text-fd-muted-foreground data-[collapsed=false]:hidden max-md:hidden',
               )}
             >
               <SidebarIcon />
             </SidebarCollapseTrigger>
-          ) : null}
-          {nav}
+          )}
+          <Link
+            href={nav.url ?? '/'}
+            className={cn(
+              'inline-flex items-center gap-2.5 font-semibold empty:hidden',
+              navMode === 'auto' && 'md:hidden',
+            )}
+          >
+            {nav.title}
+          </Link>
         </div>
         {searchToggle.enabled !== false &&
           (searchToggle.components?.lg ? (
@@ -338,7 +331,7 @@ function DocsNavbar({
                 navMode === 'top' ? 'rounded-xl max-w-sm' : 'max-w-[240px]',
               )}
             >
-              {searchToggle.components?.lg}
+              {searchToggle.components.lg}
             </div>
           ) : (
             <LargeSearchToggle
@@ -351,8 +344,8 @@ function DocsNavbar({
               )}
             />
           ))}
-        <div className="flex flex-1 flex-row items-center justify-end">
-          <div className="flex flex-row items-center gap-6 px-4 empty:hidden max-lg:hidden">
+        <div className="flex flex-1 items-center justify-end md:gap-2">
+          <div className="flex items-center gap-6 empty:hidden max-lg:hidden">
             {links
               .filter((item) => item.type !== 'icon')
               .map((item, i) => (
@@ -363,12 +356,7 @@ function DocsNavbar({
                 />
               ))}
           </div>
-          {props.nav?.children}
-          {searchToggle.enabled !== false &&
-            (searchToggle.components?.sm ?? (
-              <SearchToggle hideIfDisabled className="p-2 md:hidden" />
-            ))}
-          <NavbarSidebarTrigger className="p-2 -me-1.5 md:hidden" />
+          {nav.children}
           {links
             .filter((item) => item.type === 'icon')
             .map((item, i) => (
@@ -384,31 +372,39 @@ function DocsNavbar({
                 {item.icon}
               </BaseLinkItem>
             ))}
-          {props.i18n ? (
-            <LanguageToggle className="max-md:hidden">
-              <Languages className="size-4.5 text-fd-muted-foreground" />
-            </LanguageToggle>
-          ) : null}
-          {themeSwitch.enabled !== false &&
-            (themeSwitch.component ?? (
-              <ThemeToggle
-                className="ms-2 max-md:hidden"
-                mode={themeSwitch.mode ?? 'light-dark-system'}
-              />
-            ))}
-          {sidebarCollapsible && navMode === 'top' ? (
-            <SidebarCollapseTrigger
-              className={cn(
-                buttonVariants({
-                  color: 'secondary',
-                  size: 'icon-sm',
-                }),
-                'ms-2 text-fd-muted-foreground rounded-full max-md:hidden',
-              )}
-            >
-              <SidebarIcon />
-            </SidebarCollapseTrigger>
-          ) : null}
+
+          <div className="flex items-center md:hidden">
+            {searchToggle.enabled !== false &&
+              (searchToggle.components?.sm ?? (
+                <SearchToggle hideIfDisabled className="p-2" />
+              ))}
+            <NavbarSidebarTrigger className="p-2" />
+          </div>
+
+          <div className="flex items-center gap-2 max-md:hidden">
+            {props.i18n ? (
+              <LanguageToggle>
+                <Languages className="size-4.5 text-fd-muted-foreground" />
+              </LanguageToggle>
+            ) : null}
+            {themeSwitch.enabled !== false &&
+              (themeSwitch.component ?? (
+                <ThemeToggle mode={themeSwitch.mode ?? 'light-dark-system'} />
+              ))}
+            {sidebarCollapsible && navMode === 'top' && (
+              <SidebarCollapseTrigger
+                className={cn(
+                  buttonVariants({
+                    color: 'secondary',
+                    size: 'icon-sm',
+                  }),
+                  'text-fd-muted-foreground rounded-full',
+                )}
+              >
+                <SidebarIcon />
+              </SidebarCollapseTrigger>
+            )}
+          </div>
         </div>
       </div>
       {tabs.length > 0 && (
