@@ -1,15 +1,21 @@
 import {
-  forwardRef,
-  useState,
-  useRef,
-  useContext,
-  createContext,
-  useMemo,
-  type ReactNode,
-  type ComponentRef,
   type ComponentPropsWithoutRef,
+  type ComponentRef,
+  createContext,
+  forwardRef,
+  type ReactNode,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
 } from 'react';
-import { Popover, PopoverContent, PopoverTrigger } from './popover';
+import {
+  Popover,
+  PopoverContent,
+  PopoverPortal,
+  PopoverTrigger,
+} from '@radix-ui/react-popover';
+import { cn } from '@/ui/cn';
 
 interface PopupContextObject {
   open: boolean;
@@ -69,7 +75,7 @@ function Popup({
 const PopupTrigger = forwardRef<
   ComponentRef<typeof PopoverTrigger>,
   ComponentPropsWithoutRef<typeof PopoverTrigger>
->((props, ref) => {
+>(({ children, ...props }, ref) => {
   const ctx = useContext(PopupContext);
   if (!ctx) throw new Error('Missing Popup Context');
 
@@ -78,8 +84,11 @@ const PopupTrigger = forwardRef<
       ref={ref}
       onPointerEnter={ctx.handleOpen}
       onPointerLeave={ctx.handleClose}
+      asChild
       {...props}
-    />
+    >
+      <span className="twoslash-hover">{children}</span>
+    </PopoverTrigger>
   );
 });
 
@@ -88,25 +97,36 @@ PopupTrigger.displayName = 'PopupTrigger';
 const PopupContent = forwardRef<
   ComponentRef<typeof PopoverContent>,
   ComponentPropsWithoutRef<typeof PopoverContent>
->((props, ref) => {
-  const ctx = useContext(PopupContext);
-  if (!ctx) throw new Error('Missing Popup Context');
+>(
+  (
+    { className, side = 'bottom', align = 'center', sideOffset = 4, ...props },
+    ref,
+  ) => {
+    const ctx = useContext(PopupContext);
+    if (!ctx) throw new Error('Missing Popup Context');
 
-  return (
-    <PopoverContent
-      ref={ref}
-      onPointerEnter={ctx.handleOpen}
-      onPointerLeave={ctx.handleClose}
-      onOpenAutoFocus={(e) => {
-        e.preventDefault();
-      }}
-      onCloseAutoFocus={(e) => {
-        e.preventDefault();
-      }}
-      {...props}
-    />
-  );
-});
+    return (
+      <PopoverPortal>
+        <PopoverContent
+          ref={ref}
+          side={side}
+          align={align}
+          sideOffset={sideOffset}
+          className={cn('fd-twoslash-popover', className)}
+          onPointerEnter={ctx.handleOpen}
+          onPointerLeave={ctx.handleClose}
+          onOpenAutoFocus={(e) => {
+            e.preventDefault();
+          }}
+          onCloseAutoFocus={(e) => {
+            e.preventDefault();
+          }}
+          {...props}
+        />
+      </PopoverPortal>
+    );
+  },
+);
 
 PopupContent.displayName = 'PopupContent';
 
