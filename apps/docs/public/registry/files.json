@@ -1,0 +1,34 @@
+{
+  "name": "files",
+  "files": [
+    {
+      "imports": {
+        "@/utils/cn": "lib:cn.ts",
+        "./ui/collapsible": "components:ui/collapsible.tsx"
+      },
+      "content": "'use client';\n\nimport { cva } from 'class-variance-authority';\nimport {\n  File as FileIcon,\n  Folder as FolderIcon,\n  FolderOpen,\n} from 'lucide-react';\nimport { type HTMLAttributes, type ReactNode, useState } from 'react';\nimport { cn } from '@/utils/cn';\nimport {\n  Collapsible,\n  CollapsibleContent,\n  CollapsibleTrigger,\n} from './ui/collapsible';\n\nconst itemVariants = cva(\n  'flex flex-row items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-fd-accent hover:text-fd-accent-foreground [&_svg]:size-4',\n);\n\nexport function Files({\n  className,\n  ...props\n}: HTMLAttributes<HTMLDivElement>): React.ReactElement {\n  return (\n    <div\n      className={cn('not-prose rounded-md border bg-fd-card p-2', className)}\n      {...props}\n    >\n      {props.children}\n    </div>\n  );\n}\n\nexport interface FileProps extends HTMLAttributes<HTMLDivElement> {\n  name: string;\n  icon?: ReactNode;\n}\n\nexport interface FolderProps extends HTMLAttributes<HTMLDivElement> {\n  name: string;\n\n  disabled?: boolean;\n\n  /**\n   * Open folder by default\n   *\n   * @defaultValue false\n   */\n  defaultOpen?: boolean;\n}\n\nexport function File({\n  name,\n  icon = <FileIcon />,\n  className,\n  ...rest\n}: FileProps): React.ReactElement {\n  return (\n    <div className={cn(itemVariants({ className }))} {...rest}>\n      {icon}\n      {name}\n    </div>\n  );\n}\n\nexport function Folder({\n  name,\n  defaultOpen = false,\n  ...props\n}: FolderProps): React.ReactElement {\n  const [open, setOpen] = useState(defaultOpen);\n\n  return (\n    <Collapsible open={open} onOpenChange={setOpen} {...props}>\n      <CollapsibleTrigger className={cn(itemVariants({ className: 'w-full' }))}>\n        {open ? <FolderOpen /> : <FolderIcon />}\n        {name}\n      </CollapsibleTrigger>\n      <CollapsibleContent>\n        <div className=\"ms-2 flex flex-col border-l ps-2\">{props.children}</div>\n      </CollapsibleContent>\n    </Collapsible>\n  );\n}\n",
+      "path": "components:files.tsx"
+    },
+    {
+      "imports": {},
+      "content": "export { twMerge as cn } from 'tailwind-merge';\n",
+      "path": "lib:cn.ts"
+    },
+    {
+      "imports": {
+        "@/utils/cn": "lib:cn.ts"
+      },
+      "content": "'use client';\nimport * as CollapsiblePrimitive from '@radix-ui/react-collapsible';\nimport { forwardRef, useEffect, useState } from 'react';\nimport { cn } from '@/utils/cn';\n\nconst Collapsible = CollapsiblePrimitive.Root;\n\nconst CollapsibleTrigger = CollapsiblePrimitive.CollapsibleTrigger;\n\nconst CollapsibleContent = forwardRef<\n  HTMLDivElement,\n  React.ComponentPropsWithoutRef<typeof CollapsiblePrimitive.CollapsibleContent>\n>(({ children, ...props }, ref) => {\n  const [mounted, setMounted] = useState(false);\n\n  useEffect(() => {\n    setMounted(true);\n  }, []);\n\n  return (\n    <CollapsiblePrimitive.CollapsibleContent\n      ref={ref}\n      {...props}\n      className={cn(\n        'overflow-hidden',\n        mounted &&\n          'data-[state=closed]:animate-fd-collapsible-up data-[state=open]:animate-fd-collapsible-down',\n        props.className,\n      )}\n    >\n      {children}\n    </CollapsiblePrimitive.CollapsibleContent>\n  );\n});\n\nCollapsibleContent.displayName =\n  CollapsiblePrimitive.CollapsibleContent.displayName;\n\nexport { Collapsible, CollapsibleTrigger, CollapsibleContent };\n",
+      "path": "components:ui/collapsible.tsx"
+    }
+  ],
+  "subComponents": [],
+  "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "lucide-react": "",
+    "react": "",
+    "tailwind-merge": "^3.3.1",
+    "@radix-ui/react-collapsible": "^1.1.11"
+  },
+  "devDependencies": {}
+}

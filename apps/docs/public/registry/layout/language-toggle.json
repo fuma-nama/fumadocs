@@ -1,0 +1,34 @@
+{
+  "name": "layout/language-toggle",
+  "files": [
+    {
+      "imports": {
+        "@/components/ui/popover": "components:ui/popover.tsx",
+        "@/utils/cn": "lib:cn.ts",
+        "@/components/ui/button": "components:ui/button.tsx"
+      },
+      "content": "'use client';\nimport { type ButtonHTMLAttributes, type HTMLAttributes } from 'react';\nimport { useI18n } from 'fumadocs-ui/contexts/i18n';\nimport {\n  Popover,\n  PopoverContent,\n  PopoverTrigger,\n} from '@/components/ui/popover';\nimport { cn } from '@/utils/cn';\nimport { buttonVariants } from '@/components/ui/button';\n\nexport type LanguageSelectProps = ButtonHTMLAttributes<HTMLButtonElement>;\n\nexport function LanguageToggle(props: LanguageSelectProps): React.ReactElement {\n  const context = useI18n();\n  if (!context.locales) throw new Error('Missing `<I18nProvider />`');\n\n  return (\n    <Popover>\n      <PopoverTrigger\n        aria-label={context.text.chooseLanguage}\n        {...props}\n        className={cn(\n          buttonVariants({\n            color: 'ghost',\n            className: 'gap-1.5 p-1.5',\n          }),\n          props.className,\n        )}\n      >\n        {props.children}\n      </PopoverTrigger>\n      <PopoverContent className=\"flex flex-col overflow-hidden p-0\">\n        <p className=\"mb-1 p-2 text-xs font-medium text-fd-muted-foreground\">\n          {context.text.chooseLanguage}\n        </p>\n        {context.locales.map((item) => (\n          <button\n            key={item.locale}\n            type=\"button\"\n            className={cn(\n              'p-2 text-start text-sm',\n              item.locale === context.locale\n                ? 'bg-fd-primary/10 font-medium text-fd-primary'\n                : 'hover:bg-fd-accent hover:text-fd-accent-foreground',\n            )}\n            onClick={() => {\n              context.onChange?.(item.locale);\n            }}\n          >\n            {item.name}\n          </button>\n        ))}\n      </PopoverContent>\n    </Popover>\n  );\n}\n\nexport function LanguageToggleText(\n  props: HTMLAttributes<HTMLSpanElement>,\n): React.ReactElement {\n  const context = useI18n();\n  const text = context.locales?.find(\n    (item) => item.locale === context.locale,\n  )?.name;\n\n  return <span {...props}>{text}</span>;\n}\n",
+      "path": "components:layout/language-toggle.tsx"
+    },
+    {
+      "imports": {
+        "@/utils/cn": "lib:cn.ts"
+      },
+      "content": "'use client';\nimport * as PopoverPrimitive from '@radix-ui/react-popover';\nimport * as React from 'react';\nimport { cn } from '@/utils/cn';\n\nconst Popover = PopoverPrimitive.Root;\n\nconst PopoverTrigger = PopoverPrimitive.Trigger;\n\nconst PopoverContent = React.forwardRef<\n  React.ComponentRef<typeof PopoverPrimitive.Content>,\n  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>\n>(({ className, align = 'center', sideOffset = 4, ...props }, ref) => (\n  <PopoverPrimitive.Portal>\n    <PopoverPrimitive.Content\n      ref={ref}\n      align={align}\n      sideOffset={sideOffset}\n      side=\"bottom\"\n      className={cn(\n        'z-50 origin-(--radix-popover-content-transform-origin) min-w-[240px] max-w-[98vw] rounded-xl border bg-fd-popover/60 backdrop-blur-lg p-2 text-sm text-fd-popover-foreground shadow-lg focus-visible:outline-none data-[state=closed]:animate-fd-popover-out data-[state=open]:animate-fd-popover-in',\n        className,\n      )}\n      {...props}\n    />\n  </PopoverPrimitive.Portal>\n));\nPopoverContent.displayName = PopoverPrimitive.Content.displayName;\n\nconst PopoverClose = PopoverPrimitive.PopoverClose;\n\nexport { Popover, PopoverTrigger, PopoverContent, PopoverClose };\n",
+      "path": "components:ui/popover.tsx"
+    },
+    {
+      "imports": {},
+      "content": "export { twMerge as cn } from 'tailwind-merge';\n",
+      "path": "lib:cn.ts"
+    }
+  ],
+  "subComponents": ["button"],
+  "dependencies": {
+    "react": "",
+    "fumadocs-ui": "",
+    "@radix-ui/react-popover": "^1.1.14",
+    "tailwind-merge": "^3.3.1"
+  },
+  "devDependencies": {}
+}

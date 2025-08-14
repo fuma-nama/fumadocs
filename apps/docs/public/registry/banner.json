@@ -1,0 +1,25 @@
+{
+  "name": "banner",
+  "files": [
+    {
+      "imports": {
+        "@/utils/cn": "lib:cn.ts",
+        "@/components/ui/button": "components:ui/button.tsx"
+      },
+      "content": "'use client';\n\nimport { type HTMLAttributes, useEffect, useState } from 'react';\nimport { X } from 'lucide-react';\nimport { cn } from '@/utils/cn';\nimport { buttonVariants } from '@/components/ui/button';\n\ntype BannerVariant = 'rainbow' | 'normal';\n\nexport function Banner({\n  id,\n  variant = 'normal',\n  changeLayout = true,\n  height = '3rem',\n  rainbowColors = [\n    'rgba(0,149,255,0.56)',\n    'rgba(231,77,255,0.77)',\n    'rgba(255,0,0,0.73)',\n    'rgba(131,255,166,0.66)',\n  ],\n  ...props\n}: HTMLAttributes<HTMLDivElement> & {\n  /**\n   * @defaultValue 3rem\n   */\n  height?: string;\n\n  /**\n   * @defaultValue 'normal'\n   */\n  variant?: BannerVariant;\n\n  /**\n   * For rainbow variant only, customise the colors\n   */\n  rainbowColors?: string[];\n\n  /**\n   * Change Fumadocs layout styles\n   *\n   * @defaultValue true\n   */\n  changeLayout?: boolean;\n}) {\n  const [open, setOpen] = useState(true);\n  const globalKey = id ? `nd-banner-${id}` : null;\n\n  useEffect(() => {\n    if (globalKey) setOpen(localStorage.getItem(globalKey) !== 'true');\n  }, [globalKey]);\n\n  if (!open) return null;\n\n  return (\n    <div\n      id={id}\n      {...props}\n      className={cn(\n        'sticky top-0 z-40 flex flex-row items-center justify-center px-4 text-center text-sm font-medium',\n        variant === 'normal' && 'bg-fd-secondary',\n        variant === 'rainbow' && 'bg-fd-background',\n        !open && 'hidden',\n        props.className,\n      )}\n      style={{\n        height,\n      }}\n    >\n      {changeLayout && open ? (\n        <style>\n          {globalKey\n            ? `:root:not(.${globalKey}) { --fd-banner-height: ${height}; }`\n            : `:root { --fd-banner-height: ${height}; }`}\n        </style>\n      ) : null}\n      {globalKey ? (\n        <style>{`.${globalKey} #${id} { display: none; }`}</style>\n      ) : null}\n      {globalKey ? (\n        <script\n          dangerouslySetInnerHTML={{\n            __html: `if (localStorage.getItem('${globalKey}') === 'true') document.documentElement.classList.add('${globalKey}');`,\n          }}\n        />\n      ) : null}\n\n      {variant === 'rainbow'\n        ? flow({\n            colors: rainbowColors,\n          })\n        : null}\n      {props.children}\n      {id ? (\n        <button\n          type=\"button\"\n          aria-label=\"Close Banner\"\n          onClick={() => {\n            setOpen(false);\n            if (globalKey) localStorage.setItem(globalKey, 'true');\n          }}\n          className={cn(\n            buttonVariants({\n              color: 'ghost',\n              className:\n                'absolute end-2 top-1/2 -translate-y-1/2 text-fd-muted-foreground/50',\n              size: 'icon-sm',\n            }),\n          )}\n        >\n          <X />\n        </button>\n      ) : null}\n    </div>\n  );\n}\n\nconst maskImage =\n  'linear-gradient(to bottom,white,transparent), radial-gradient(circle at top center, white, transparent)';\n\nfunction flow({ colors }: { colors: string[] }) {\n  return (\n    <>\n      <div\n        className=\"absolute inset-0 z-[-1]\"\n        style={\n          {\n            maskImage,\n            maskComposite: 'intersect',\n            animation: 'fd-moving-banner 20s linear infinite',\n            backgroundImage: `repeating-linear-gradient(70deg, ${[...colors, colors[0]].map((color, i) => `${color} ${(i * 50) / colors.length}%`).join(', ')})`,\n            backgroundSize: '200% 100%',\n            filter: 'saturate(2)',\n          } as object\n        }\n      />\n      <style>\n        {`@keyframes fd-moving-banner {\n            from { background-position: 0% 0;  }\n            to { background-position: 100% 0;  }\n         }`}\n      </style>\n    </>\n  );\n}\n",
+      "path": "components:banner.tsx"
+    },
+    {
+      "imports": {},
+      "content": "export { twMerge as cn } from 'tailwind-merge';\n",
+      "path": "lib:cn.ts"
+    }
+  ],
+  "subComponents": ["button"],
+  "dependencies": {
+    "react": "",
+    "lucide-react": "",
+    "tailwind-merge": "^3.3.1"
+  },
+  "devDependencies": {}
+}

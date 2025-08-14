@@ -1,0 +1,41 @@
+{
+  "name": "layout/root-toggle",
+  "files": [
+    {
+      "imports": {
+        "@/utils/cn": "lib:cn.ts",
+        "@/utils/is-active": "lib:is-active.ts",
+        "../ui/popover": "components:ui/popover.tsx"
+      },
+      "content": "'use client';\nimport { Check, ChevronsUpDown } from 'lucide-react';\nimport { type ComponentProps, type ReactNode, useMemo, useState } from 'react';\nimport Link from 'fumadocs-core/link';\nimport { usePathname } from 'fumadocs-core/framework';\nimport { cn } from '@/utils/cn';\nimport { isActive } from '@/utils/is-active';\nimport { useSidebar } from 'fumadocs-ui/contexts/sidebar';\nimport { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';\n\nexport interface Option {\n  /**\n   * Redirect URL of the folder, usually the index page\n   */\n  url: string;\n\n  icon?: ReactNode;\n  title: ReactNode;\n  description?: ReactNode;\n\n  /**\n   * Detect from a list of urls\n   */\n  urls?: Set<string>;\n\n  props?: ComponentProps<'a'>;\n}\n\nexport function RootToggle({\n  options,\n  placeholder,\n  ...props\n}: {\n  placeholder?: ReactNode;\n  options: Option[];\n} & ComponentProps<'button'>) {\n  const [open, setOpen] = useState(false);\n  const { closeOnRedirect } = useSidebar();\n  const pathname = usePathname();\n\n  const selected = useMemo(() => {\n    const lookup = pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;\n\n    return options.findLast((item) => {\n      if (item.urls) return item.urls.has(lookup);\n\n      return isActive(item.url, pathname, true);\n    });\n  }, [options, pathname]);\n\n  const onClick = () => {\n    closeOnRedirect.current = false;\n    setOpen(false);\n  };\n\n  const item = selected ? (\n    <>\n      <div className=\"size-9 shrink-0 md:size-5\">{selected.icon}</div>\n      <div>\n        <p className=\"text-sm font-medium\">{selected.title}</p>\n        <p className=\"text-[13px] text-fd-muted-foreground empty:hidden md:hidden\">\n          {selected.description}\n        </p>\n      </div>\n    </>\n  ) : (\n    placeholder\n  );\n\n  return (\n    <Popover open={open} onOpenChange={setOpen}>\n      {item && (\n        <PopoverTrigger\n          {...props}\n          className={cn(\n            'flex items-center gap-2 rounded-lg p-2 border bg-fd-secondary/50 text-start text-fd-secondary-foreground transition-colors hover:bg-fd-accent data-[state=open]:bg-fd-accent data-[state=open]:text-fd-accent-foreground',\n            props.className,\n          )}\n        >\n          {item}\n          <ChevronsUpDown className=\"shrink-0 ms-auto size-4 text-fd-muted-foreground\" />\n        </PopoverTrigger>\n      )}\n      <PopoverContent className=\"flex flex-col gap-1 w-(--radix-popover-trigger-width) overflow-hidden p-1\">\n        {options.map((item) => {\n          const isActive = item === selected;\n\n          return (\n            <Link\n              key={item.url}\n              href={item.url}\n              onClick={onClick}\n              {...item.props}\n              className={cn(\n                'flex items-center gap-2 rounded-lg p-1.5 hover:bg-fd-accent hover:text-fd-accent-foreground',\n                item.props?.className,\n              )}\n            >\n              <div className=\"shrink-0 size-9 md:mt-1 md:mb-auto md:size-5\">\n                {item.icon}\n              </div>\n              <div>\n                <p className=\"text-sm font-medium\">{item.title}</p>\n                <p className=\"text-[13px] text-fd-muted-foreground empty:hidden\">\n                  {item.description}\n                </p>\n              </div>\n\n              <Check\n                className={cn(\n                  'shrink-0 ms-auto size-3.5 text-fd-primary',\n                  !isActive && 'invisible',\n                )}\n              />\n            </Link>\n          );\n        })}\n      </PopoverContent>\n    </Popover>\n  );\n}\n",
+      "path": "components:layout/root-toggle.tsx"
+    },
+    {
+      "imports": {},
+      "content": "export { twMerge as cn } from 'tailwind-merge';\n",
+      "path": "lib:cn.ts"
+    },
+    {
+      "imports": {},
+      "content": "export function isActive(\n  url: string,\n  pathname: string,\n  nested = true,\n): boolean {\n  if (url.endsWith('/')) url = url.slice(0, -1);\n  if (pathname.endsWith('/')) pathname = pathname.slice(0, -1);\n\n  return url === pathname || (nested && pathname.startsWith(`${url}/`));\n}\n",
+      "path": "lib:is-active.ts"
+    },
+    {
+      "imports": {
+        "@/utils/cn": "lib:cn.ts"
+      },
+      "content": "'use client';\nimport * as PopoverPrimitive from '@radix-ui/react-popover';\nimport * as React from 'react';\nimport { cn } from '@/utils/cn';\n\nconst Popover = PopoverPrimitive.Root;\n\nconst PopoverTrigger = PopoverPrimitive.Trigger;\n\nconst PopoverContent = React.forwardRef<\n  React.ComponentRef<typeof PopoverPrimitive.Content>,\n  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>\n>(({ className, align = 'center', sideOffset = 4, ...props }, ref) => (\n  <PopoverPrimitive.Portal>\n    <PopoverPrimitive.Content\n      ref={ref}\n      align={align}\n      sideOffset={sideOffset}\n      side=\"bottom\"\n      className={cn(\n        'z-50 origin-(--radix-popover-content-transform-origin) min-w-[240px] max-w-[98vw] rounded-xl border bg-fd-popover/60 backdrop-blur-lg p-2 text-sm text-fd-popover-foreground shadow-lg focus-visible:outline-none data-[state=closed]:animate-fd-popover-out data-[state=open]:animate-fd-popover-in',\n        className,\n      )}\n      {...props}\n    />\n  </PopoverPrimitive.Portal>\n));\nPopoverContent.displayName = PopoverPrimitive.Content.displayName;\n\nconst PopoverClose = PopoverPrimitive.PopoverClose;\n\nexport { Popover, PopoverTrigger, PopoverContent, PopoverClose };\n",
+      "path": "components:ui/popover.tsx"
+    }
+  ],
+  "subComponents": [],
+  "dependencies": {
+    "lucide-react": "",
+    "react": "",
+    "fumadocs-core": "",
+    "fumadocs-ui": "",
+    "tailwind-merge": "^3.3.1",
+    "@radix-ui/react-popover": "^1.1.14"
+  },
+  "devDependencies": {}
+}

@@ -3,15 +3,12 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { Command } from 'commander';
 import picocolors from 'picocolors';
-import { isCancel, outro, select } from '@clack/prompts';
-import { init } from '@/commands/init';
 import {
   localResolver,
   remoteResolver,
   type Resolver,
 } from '@/utils/add/install-component';
 import { initConfig, loadConfig } from '@/config';
-import { plugins } from '@/plugins';
 import {
   type JsonTreeNode,
   treeToJavaScript,
@@ -44,37 +41,6 @@ program
   .action(async (options: { config?: string; dir?: string }) => {
     const resolver = getResolverFromDir(options.dir);
     await customise(resolver, await loadConfig(options.config));
-  });
-
-program
-  .command('init')
-  .description('init a new plugin to your docs')
-  .argument('[string]', 'plugin name')
-  .action(async (str: string | undefined, { config }) => {
-    const loadedConfig = await loadConfig(config as string | undefined);
-
-    if (str) {
-      const plugin = str in plugins ? plugins[str] : undefined;
-      if (!plugin) throw new Error(`Plugin not found: ${str}`);
-
-      await init(plugin, loadedConfig);
-      return;
-    }
-
-    const value = await select({
-      message: 'Select components to install',
-      options: Object.keys(plugins).map((c) => ({
-        label: c,
-        value: c,
-      })),
-    });
-
-    if (isCancel(value)) {
-      outro('Ended');
-      return;
-    }
-
-    await init(plugins[value as keyof typeof plugins], loadedConfig);
   });
 
 const dirShortcuts: Record<string, string> = {

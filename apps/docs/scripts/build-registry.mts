@@ -1,10 +1,8 @@
-import { build, writeOutput } from '@fumadocs/cli/build';
+import { build, writeShadcnRegistry } from '@fumadocs/cli/build';
 import { registry } from '@/components/registry.mjs';
+import * as ui from '../../../packages/ui/src/_registry';
 
 export async function buildRegistry() {
-  const out = await build(registry);
-
-  await writeOutput('public/registry', out, {
-    cleanDir: true,
-  });
+  await writeShadcnRegistry('public/r', await build(registry));
+  await writeShadcnRegistry('public/r', await build(ui.registry));
 }

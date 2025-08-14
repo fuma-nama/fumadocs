@@ -10,7 +10,7 @@ import {
 } from 'react';
 import { Loader2, RefreshCw, Send, X } from 'lucide-react';
 import { cn } from '@/lib/cn';
-import { buttonVariants } from '../../../../packages/ui/src/components/ui/button';
+import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import Link from 'fumadocs-core/link';
 import {
   Dialog,

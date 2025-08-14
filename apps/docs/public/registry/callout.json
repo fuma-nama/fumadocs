@@ -1,0 +1,24 @@
+{
+  "name": "callout",
+  "files": [
+    {
+      "imports": {
+        "@/utils/cn": "lib:cn.ts"
+      },
+      "content": "import { CircleCheck, CircleX, Info, TriangleAlert } from 'lucide-react';\nimport { forwardRef, type HTMLAttributes, type ReactNode } from 'react';\nimport { cn } from '@/utils/cn';\n\ntype CalloutProps = Omit<\n  HTMLAttributes<HTMLDivElement>,\n  'title' | 'type' | 'icon'\n> & {\n  title?: ReactNode;\n  /**\n   * @defaultValue info\n   */\n  type?: 'info' | 'warn' | 'error' | 'success' | 'warning';\n\n  /**\n   * Force an icon\n   */\n  icon?: ReactNode;\n};\n\nconst iconClass = 'size-5 -me-0.5 fill-(--callout-color) text-fd-card';\n\nexport const Callout = forwardRef<HTMLDivElement, CalloutProps>(\n  ({ className, children, title, type = 'info', icon, ...props }, ref) => {\n    if (type === 'warn') type = 'warning';\n    if ((type as unknown) === 'tip') type = 'info';\n\n    return (\n      <div\n        ref={ref}\n        className={cn(\n          'flex gap-2 my-4 rounded-xl border bg-fd-card p-3 ps-1 text-sm text-fd-card-foreground shadow-md',\n          className,\n        )}\n        {...props}\n        style={\n          {\n            '--callout-color': `var(--color-fd-${type}, var(--color-fd-muted))`,\n            ...props.style,\n          } as object\n        }\n      >\n        <div role=\"none\" className=\"w-0.5 bg-(--callout-color)/50 rounded-sm\" />\n        {icon ??\n          {\n            info: <Info className={iconClass} />,\n            warning: <TriangleAlert className={iconClass} />,\n            error: <CircleX className={iconClass} />,\n            success: <CircleCheck className={iconClass} />,\n          }[type]}\n        <div className=\"flex flex-col gap-2 min-w-0 flex-1\">\n          {title && <p className=\"font-medium !my-0\">{title}</p>}\n          <div className=\"text-fd-muted-foreground prose-no-margin empty:hidden\">\n            {children}\n          </div>\n        </div>\n      </div>\n    );\n  },\n);\n\nCallout.displayName = 'Callout';\n",
+      "path": "components:callout.tsx"
+    },
+    {
+      "imports": {},
+      "content": "export { twMerge as cn } from 'tailwind-merge';\n",
+      "path": "lib:cn.ts"
+    }
+  ],
+  "subComponents": [],
+  "dependencies": {
+    "lucide-react": "",
+    "react": "",
+    "tailwind-merge": "^3.3.1"
+  },
+  "devDependencies": {}
+}

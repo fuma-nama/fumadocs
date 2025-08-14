@@ -1,60 +1,93 @@
 import * as path from 'node:path';
 import { SourceFile, StringLiteral, ts } from 'ts-morph';
-import type { ComponentBuilder } from '@/build/component-builder';
-import type {
-  Component,
-  OutputComponent,
-  OutputFile,
-} from '@/build/build-registry';
+import { ComponentBuilder } from '@/build/component-builder';
+import { Component, ComponentFile, OutputFile } from '@/build/build-registry';
+
+export type Reference =
+  | {
+      type: 'file';
+      /**
+       * Absolute path
+       */
+      file: string;
+    }
+  | {
+      type: 'dependency';
+      dep: string;
+      specifier: string;
+    }
+  | {
+      type: 'sub-component';
+      resolved:
+        | {
+            type: 'local';
+            component: Component;
+
+            /**
+             * Absolute path
+             */
+            targetFile: string;
+          }
+        | {
+            type: 'remote';
+            component: Component;
+            file: ComponentFile;
+            registryName: string;
+          };
+    };
 
 export async function buildFile(
-  inputPath: string,
-  outputPath: string,
+  file: ComponentFile,
   builder: ComponentBuilder,
   comp: Component,
   /**
-   * Resolve referenced files
+   * write references back to import specifiers
+   *
+   * keep original one if `undefined`
    */
-  onReference: (
-    reference:
-      | {
-          type: 'file';
-          file: string;
-        }
-      | {
-          type: 'dependency';
-          name: string;
-          version: string;
-          isDev: boolean;
-        }
-      | {
-          type: 'sub-component';
-          resolved:
-            | {
-                type: 'local';
-                component: Component;
-                registryName?: string;
-              }
-            | {
-                type: 'remote';
-                component: OutputComponent;
-                registryName: string;
-              };
-
-          targetFile: string;
-          filePath?: string;
-        },
-  ) => string | undefined,
+  writeReference: (reference: Reference) => string | undefined,
 ): Promise<OutputFile> {
-  const out: OutputFile = {
-    imports: {},
-    content: '',
-    path: outputPath,
-  };
+  const sourceFilePath = path.join(builder.registryDir, file.path);
 
-  const importMap = {
-    ...builder.registry.mapImportPath,
-    ...comp.mapImportPath,
+  const defaultResolve = (
+    specifier: string,
+    specified: SourceFile | undefined,
+  ): Reference => {
+    let filePath: string;
+    // non-script file
+    if (specified) {
+      filePath = specified.getFilePath();
+    } else if (specifier.startsWith('./') || specifier.startsWith('../')) {
+      filePath = path.join(path.dirname(sourceFilePath), specifier);
+    } else {
+      throw new Error('Unknown specifier ' + specifier);
+    }
+
+    // outside of registry dir
+    if (path.relative(builder.registryDir, filePath).startsWith('../')) {
+      return {
+        type: 'dependency',
+        dep: builder.getDepFromSpecifier(specifier),
+        specifier,
+      };
+    }
+
+    const sub = builder.getSubComponent(filePath);
+    if (sub) {
+      return {
+        type: 'sub-component',
+        resolved: {
+          type: 'local',
+          component: sub,
+          targetFile: filePath,
+        },
+      };
+    }
+
+    return {
+      type: 'file',
+      file: filePath,
+    };
   };
 
   /**
@@ -64,89 +97,19 @@ export async function buildFile(
     specifier: StringLiteral,
     getSpecifiedFile: () => SourceFile | undefined,
   ) {
-    let specifiedFile = getSpecifiedFile();
-    if (!specifiedFile) return;
+    const onResolve = comp.onResolve ?? builder.registry.onResolve;
 
-    const name = specifiedFile.isInNodeModules()
-      ? builder.resolveDep(specifier.getLiteralValue()).name
-      : path.relative(builder.registryDir, specifiedFile.getFilePath());
+    let resolved = defaultResolve(
+      specifier.getLiteralValue(),
+      getSpecifiedFile(),
+    );
 
-    if (name in importMap) {
-      const resolver = importMap[name];
-
-      if (typeof resolver === 'string') {
-        specifier.setLiteralValue(resolver);
-        specifiedFile = getSpecifiedFile();
-
-        if (!specifiedFile) return;
-      } else if (resolver.type === 'dependency') {
-        const info = builder.resolveDep(resolver.name);
-
-        const value = onReference({
-          type: 'dependency',
-          name: info.name,
-          version: info.version ?? '',
-          isDev: info.type === 'dev',
-        });
-        if (value) out.imports[specifier.getLiteralValue()] = value;
-        return;
-      } else {
-        const sub = builder.getComponentByName(
-          resolver.name,
-          resolver.registry,
-        );
-        if (!sub)
-          throw new Error(`Failed to resolve sub component ${resolver.name}`);
-
-        const value = onReference({
-          type: 'sub-component',
-          resolved: sub,
-          targetFile: resolver.file,
-        });
-
-        if (value) out.imports[specifier.getLiteralValue()] = value;
-        return;
-      }
-    }
-
-    if (specifiedFile.isInNodeModules() || specifiedFile.isDeclarationFile()) {
-      const info = builder.resolveDep(specifier.getLiteralValue());
-
-      const value = onReference({
-        type: 'dependency',
-        name: info.name,
-        version: info.version ?? '',
-        isDev: info.type === 'dev',
-      });
-      if (value) out.imports[specifier.getLiteralValue()] = value;
-      return;
-    }
-
-    const sub = builder.getSubComponent(specifiedFile.getFilePath());
-    if (sub) {
-      const value = onReference({
-        type: 'sub-component',
-        resolved: {
-          type: 'local',
-          component: sub,
-        },
-        targetFile: path.relative(
-          builder.registryDir,
-          specifiedFile.getFilePath(),
-        ),
-      });
-      if (value) out.imports[specifier.getLiteralValue()] = value;
-      return;
-    }
-
-    const value = onReference({
-      type: 'file',
-      file: specifiedFile.getFilePath(),
-    });
-    if (value) out.imports[specifier.getLiteralValue()] = value;
+    if (onResolve) resolved = onResolve(resolved);
+    const out = writeReference(resolved);
+    if (out) specifier.setLiteralValue(out);
   }
 
-  const sourceFile = await builder.createSourceFile(inputPath);
+  const sourceFile = await builder.createSourceFile(sourceFilePath);
 
   for (const item of sourceFile.getImportDeclarations()) {
     process(item.getModuleSpecifier(), () =>
@@ -179,6 +142,10 @@ export async function buildFile(
     }
   }
 
-  out.content = sourceFile.getFullText();
-  return out;
+  return {
+    content: sourceFile.getFullText(),
+    type: file.type,
+    path: file.path,
+    target: file.target,
+  };
 }

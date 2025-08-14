@@ -1,40 +1,26 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import { buildFile } from '@/build/build-file';
+import { buildFile, Reference } from '@/build/build-file';
 import {
   type ComponentBuilder,
   createComponentBuilder,
 } from './component-builder';
+import type { Registry as ShadcnRegistry } from 'shadcn/registry';
+import { componentToShadcn } from '@/build/shadcn';
 
-export type ImportPathMap = Record<
-  string,
-  | string
-  | {
-      type: 'component';
-      name: string;
-      file: string;
+export type OnResolve = (reference: Reference) => Reference;
 
-      /**
-       * Registry of the component, refer to the current registry if not specified
-       */
-      registry?: string;
-    }
-  | {
-      type: 'dependency';
-      name: string;
-    }
->;
+export interface ComponentFile {
+  type: NamespaceType;
+  path: string;
+  target?: string;
+}
 
 export interface Component {
   name: string;
+  title?: string;
   description?: string;
-  files: (
-    | string
-    | {
-        in: string;
-        out: string;
-      }
-  )[];
+  files: ComponentFile[];
 
   /**
    * Don't list the component in registry index file
@@ -42,12 +28,12 @@ export interface Component {
   unlisted?: boolean;
 
   /**
-   * Map imported file paths, extended from registry `mapImportPath` if defined.
+   * Map imported file paths, inherit from registry if not defined.
    */
-  mapImportPath?: ImportPathMap;
+  onResolve?: OnResolve;
 }
 
-export type NamespaceType = 'components' | 'hooks' | 'lib';
+export type NamespaceType = 'components' | 'lib' | 'css' | 'route';
 
 export interface PackageJson {
   dependencies: Record<string, string>;
@@ -55,46 +41,35 @@ export interface PackageJson {
 }
 
 export interface Registry {
+  name: string;
+  homepage: string;
+  packageJson: string | PackageJson;
+  tsconfigPath: string;
+  components: Component[];
+
   /**
-   * The directory of registry, needed to resolve relative paths
+   * The directory of registry, used to resolve relative paths
    */
   dir: string;
 
   /**
-   * Extend on existing registry
-   */
-  on?: Record<
-    string,
-    { type: 'remote'; registry: Output } | { type: 'local'; registry: Registry }
-  >;
-
-  /**
-   * The root directory project, used to resolve config paths
-   */
-  rootDir: string;
-
-  namespaces?: Record<string, NamespaceType>;
-  tsconfigPath?: string;
-  packageJson?: string | PackageJson;
-
-  components: Component[];
-
-  /**
    * Map import paths of components
    */
-  mapImportPath?: ImportPathMap;
-  dependencies?: Record<
-    string,
-    {
-      type: 'runtime' | 'dev';
-      version?: string;
-    }
-  >;
+  onResolve?: OnResolve;
+  /**
+   * When a referenced file is not found in component files, this function is called.
+   */
+  onUnknownFile?: (absolutePath: string) => ComponentFile | undefined;
+
+  dependencies?: Record<string, string | null>;
+  devDependencies?: Record<string, string | null>;
 }
 
 export interface Output {
   index: OutputIndex[];
   components: OutputComponent[];
+
+  shadcn: ShadcnRegistry;
 }
 
 export interface OutputIndex {
@@ -103,16 +78,16 @@ export interface OutputIndex {
 }
 
 export interface OutputFile {
+  type: NamespaceType;
   path: string;
+  target?: string;
   content: string;
-  /**
-   * Import reference path - path in `files`
-   */
-  imports: Record<string, string>;
 }
 
 export interface OutputComponent {
   name: string;
+  title?: string;
+  description?: string;
 
   files: OutputFile[];
 
@@ -125,39 +100,24 @@ export async function build(registry: Registry): Promise<Output> {
   const output: Output = {
     index: [],
     components: [],
+    shadcn: {
+      name: registry.name,
+      items: [],
+      homepage: registry.homepage,
+    },
   };
 
   function readPackageJson() {
-    if (typeof registry.packageJson !== 'string' && registry.packageJson)
-      return registry.packageJson;
+    if (typeof registry.packageJson !== 'string') return registry.packageJson;
 
     return fs
-      .readFile(
-        registry.packageJson
-          ? path.join(registry.dir, registry.packageJson)
-          : path.join(registry.dir, registry.rootDir, 'package.json'),
-      )
+      .readFile(path.join(registry.dir, registry.packageJson))
       .then((res) => JSON.parse(res.toString()) as PackageJson)
       .catch(() => undefined);
   }
 
   const packageJson = await readPackageJson();
   const builder = createComponentBuilder(registry, packageJson);
-
-  const buildExtendRegistries = Object.values(registry.on ?? {}).map(
-    async (schema) => {
-      if (schema.type === 'remote') {
-        return schema.registry;
-      }
-
-      return await build(schema.registry);
-    },
-  );
-
-  for (const built of await Promise.all(buildExtendRegistries)) {
-    output.components.push(...built.components);
-    output.index.push(...built.index);
-  }
 
   const builtComps = await Promise.all(
     registry.components.map((component) => buildComponent(component, builder)),
@@ -170,6 +130,7 @@ export async function build(registry: Registry): Promise<Output> {
       });
     }
 
+    output.shadcn.items.push(componentToShadcn(comp, registry));
     output.components.push(comp);
   }
 
@@ -182,83 +143,70 @@ async function buildComponent(component: Component, builder: ComponentBuilder) {
   const devDependencies = new Map<string, string>();
   const dependencies = new Map<string, string>();
 
-  async function build(
-    file: string | { in: string; out: string },
-  ): Promise<OutputFile[]> {
-    let inputPath;
-    let outputPath;
+  function toImportPath(file: ComponentFile): string {
+    let filePath = file.path;
+    for (const ext of ['.ts', '.tsx']) {
+      if (!filePath.endsWith(ext)) continue;
 
-    if (typeof file === 'string') {
-      let namespace;
-      const parsed = file.split(':', 2);
-      if (parsed.length > 1) {
-        namespace = parsed[0];
-        inputPath = path.join(builder.registryDir, parsed[1]);
-      } else {
-        inputPath = path.join(builder.registryDir, file);
-      }
-
-      outputPath = builder.resolveOutputPath(file, undefined, namespace);
-    } else {
-      inputPath = path.join(builder.registryDir, file.in);
-      outputPath = file.out;
+      filePath = filePath.substring(0, filePath.length - ext.length);
+      break;
     }
 
-    if (processedFiles.has(inputPath)) return [];
-    processedFiles.add(inputPath);
+    if (filePath.startsWith('./')) filePath = filePath.slice(2);
 
-    const queue: string[] = [];
+    return `@/${filePath.replaceAll(path.sep, '/')}`;
+  }
 
-    const result = await buildFile(
-      inputPath,
-      outputPath,
-      builder,
-      component,
-      (reference) => {
-        if (reference.type === 'file') {
-          queue.push(path.relative(builder.registryDir, reference.file));
-          return builder.resolveOutputPath(reference.file);
+  async function build(file: ComponentFile): Promise<OutputFile[]> {
+    if (processedFiles.has(file.path)) return [];
+    processedFiles.add(file.path);
+
+    const queue: ComponentFile[] = [];
+    const result = await buildFile(file, builder, component, (reference) => {
+      if (reference.type === 'file') {
+        const refFile = builder.registry.onUnknownFile?.(reference.file);
+        if (refFile) {
+          queue.push(refFile);
+          return toImportPath(refFile);
         }
 
-        if (reference.type === 'sub-component') {
-          const resolved = reference.resolved;
+        throw new Error(
+          `Unknown file ${reference.file} referenced by ${file.path}`,
+        );
+      }
+
+      if (reference.type === 'sub-component') {
+        const resolved = reference.resolved;
+        if (resolved.component.name !== component.name)
           subComponents.add(resolved.component.name);
 
-          if (resolved.type === 'remote') {
-            return reference.targetFile;
-          }
-
-          for (const childFile of resolved.component.files) {
-            if (
-              typeof childFile === 'string' &&
-              childFile === reference.targetFile
-            ) {
-              return builder.resolveOutputPath(
-                childFile,
-                reference.resolved.registryName,
-              );
-            }
-
-            if (
-              typeof childFile === 'object' &&
-              childFile.in === reference.targetFile
-            ) {
-              return childFile.out;
-            }
-          }
-
-          throw new Error(
-            `Failed to find sub component ${resolved.component.name}'s ${reference.targetFile} referenced by ${inputPath}`,
-          );
+        if (resolved.type === 'remote') {
+          return toImportPath(resolved.file);
         }
 
-        if (reference.type === 'dependency') {
-          if (reference.isDev)
-            devDependencies.set(reference.name, reference.version);
-          else dependencies.set(reference.name, reference.version);
+        const relativeTargetFile = path.relative(
+          builder.registryDir,
+          resolved.targetFile,
+        );
+
+        for (const childFile of resolved.component.files) {
+          if (childFile.path === relativeTargetFile) {
+            return toImportPath(childFile);
+          }
         }
-      },
-    );
+
+        throw new Error(
+          `Failed to find sub component ${resolved.component.name}'s ${resolved.targetFile} referenced by ${file.path}`,
+        );
+      }
+
+      const dep = builder.getDepInfo(reference.dep);
+      if (dep) {
+        const map = dep.type === 'dev' ? devDependencies : dependencies;
+        map.set(dep.name, dep.version ?? '');
+      }
+      return reference.specifier;
+    });
 
     return [result, ...(await Promise.all(queue.map(build))).flat()];
   }
@@ -267,6 +215,8 @@ async function buildComponent(component: Component, builder: ComponentBuilder) {
     component,
     {
       name: component.name,
+      title: component.title,
+      description: component.description,
       files: (await Promise.all(component.files.map(build))).flat(),
       subComponents: Array.from(subComponents),
       dependencies: Object.fromEntries(dependencies),
