@@ -34,14 +34,23 @@ export function getImportCode(info: ImportInfo): string {
   return `import ${specifier}`;
 }
 
-export type ImportPathConfig = { relativeTo: string } | { absolute: true };
+export type ImportPathConfig = ({ relativeTo: string } | { absolute: true }) & {
+  jsExtension?: boolean;
+};
 
 export function toImportPath(file: string, config: ImportPathConfig): string {
   const ext = path.extname(file);
-  const filename =
-    ext === '.ts' ? file.substring(0, file.length - ext.length) + '.js' : file;
-  let importPath;
+  let filename: string;
 
+  if (ext === '.ts' && config.jsExtension) {
+    filename = file.substring(0, file.length - ext.length) + '.js';
+  } else if (ext === '.ts') {
+    filename = file.substring(0, file.length - ext.length);
+  } else {
+    filename = file;
+  }
+
+  let importPath;
   if ('relativeTo' in config) {
     importPath = path.relative(config.relativeTo, filename);
 
