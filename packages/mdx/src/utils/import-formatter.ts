@@ -39,7 +39,7 @@ export type ImportPathConfig = { relativeTo: string } | { absolute: true };
 export function toImportPath(file: string, config: ImportPathConfig): string {
   const ext = path.extname(file);
   const filename =
-    ext === '.ts' ? file.substring(0, file.length - ext.length) : file;
+    ext === '.ts' ? file.substring(0, file.length - ext.length) + '.js' : file;
   let importPath;
 
   if ('relativeTo' in config) {
