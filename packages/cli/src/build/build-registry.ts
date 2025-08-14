@@ -1,14 +1,15 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import { buildFile, Reference } from '@/build/build-file';
+import { buildFile, Reference, SourceReference } from '@/build/build-file';
 import {
   type ComponentBuilder,
   createComponentBuilder,
 } from './component-builder';
 import type { Registry as ShadcnRegistry } from 'shadcn/registry';
 import { componentToShadcn } from '@/build/shadcn';
+import { validateOutput } from '@/build/validate';
 
-export type OnResolve = (reference: Reference) => Reference;
+export type OnResolve = (reference: SourceReference) => Reference;
 
 export interface ComponentFile {
   type: NamespaceType;
@@ -33,7 +34,13 @@ export interface Component {
   onResolve?: OnResolve;
 }
 
-export type NamespaceType = 'components' | 'lib' | 'css' | 'route';
+export type NamespaceType =
+  | 'components'
+  | 'lib'
+  | 'css'
+  | 'route'
+  | 'ui'
+  | 'block';
 
 export interface PackageJson {
   dependencies: Record<string, string>;
@@ -134,6 +141,7 @@ export async function build(registry: Registry): Promise<Output> {
     output.components.push(comp);
   }
 
+  validateOutput(output);
   return output;
 }
 
@@ -163,6 +171,8 @@ async function buildComponent(component: Component, builder: ComponentBuilder) {
 
     const queue: ComponentFile[] = [];
     const result = await buildFile(file, builder, component, (reference) => {
+      if (reference.type === 'custom') return reference.specifier;
+
       if (reference.type === 'file') {
         const refFile = builder.registry.onUnknownFile?.(reference.file);
         if (refFile) {
@@ -180,24 +190,7 @@ async function buildComponent(component: Component, builder: ComponentBuilder) {
         if (resolved.component.name !== component.name)
           subComponents.add(resolved.component.name);
 
-        if (resolved.type === 'remote') {
-          return toImportPath(resolved.file);
-        }
-
-        const relativeTargetFile = path.relative(
-          builder.registryDir,
-          resolved.targetFile,
-        );
-
-        for (const childFile of resolved.component.files) {
-          if (childFile.path === relativeTargetFile) {
-            return toImportPath(childFile);
-          }
-        }
-
-        throw new Error(
-          `Failed to find sub component ${resolved.component.name}'s ${resolved.targetFile} referenced by ${file.path}`,
-        );
+        return toImportPath(resolved.file);
       }
 
       const dep = builder.getDepInfo(reference.dep);

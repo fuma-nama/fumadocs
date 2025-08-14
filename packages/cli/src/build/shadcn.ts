@@ -1,6 +1,5 @@
 import type { OutputComponent, Registry } from '@/build/build-registry';
 import type { RegistryItem } from 'shadcn/registry';
-import path from 'node:path';
 
 function mapDeps(deps: Record<string, string | null>) {
   return Object.entries(deps).map(([k, v]) => {
@@ -18,8 +17,6 @@ export function componentToShadcn(
   comp: OutputComponent,
   registry: Registry,
 ): RegistryItem {
-  const baseDir = path.relative(process.cwd(), registry.dir);
-
   return {
     extends: 'none',
     type: 'registry:block',
@@ -45,12 +42,14 @@ export function componentToShadcn(
             components: 'registry:component',
             lib: 'registry:lib',
             css: 'registry:style',
-            route: 'registry:item',
+            route: 'registry:page',
+            ui: 'registry:ui',
+            block: 'registry:block',
           } as const
         )[file.type],
         content: file.content,
-        path: path.join(baseDir, file.path),
-        target: file.target,
+        path: file.path,
+        target: file.target!,
       };
     }),
   };

@@ -3,31 +3,49 @@ import * as ui from '../../../packages/ui/src/_registry';
 import { fileURLToPath } from 'node:url';
 import * as path from 'node:path';
 
+const baseDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../');
+
+function selectFrom(r: Registry, component: string, filename: string) {
+  const comp = r.components.find((comp) => comp.name === component)!;
+
+  return {
+    component: comp,
+    file: comp.files.find((file) => path.basename(file.path) === filename)!,
+  };
+}
+
 export const registry: Registry = {
-  dir: path.join(path.dirname(fileURLToPath(import.meta.url)), '../'),
+  dir: baseDir,
   homepage: 'http://localhost:3000',
   name: 'fumadocs',
   packageJson: './package.json',
   tsconfigPath: './tsconfig.json',
   onResolve(ref) {
+    if (ref.type === 'file') {
+      const filePath = path.relative(baseDir, ref.file);
+
+      if (filePath === 'lib/cn.ts') {
+        return {
+          type: 'sub-component',
+          resolved: {
+            type: 'remote',
+            registryName: 'fumadocs',
+            ...selectFrom(ui.registry, 'cn', 'cn.ts'),
+          },
+        };
+      }
+    }
+
     if (
       ref.type === 'dependency' &&
       ref.specifier === 'fumadocs-ui/components/ui/button'
     ) {
-      const comp = ui.registry.components.find(
-        (comp) => comp.name === 'button',
-      );
-      if (!comp) throw new Error('no button component found');
-
       return {
         type: 'sub-component',
         resolved: {
           type: 'remote',
           registryName: 'fumadocs',
-          component: comp,
-          file: comp.files.find(
-            (file) => path.basename(file.path) === 'button.tsx',
-          )!,
+          ...selectFrom(ui.registry, 'button', 'button.tsx'),
         },
       };
     }
@@ -54,10 +72,6 @@ export const registry: Registry = {
           path: 'components/ai/markdown.tsx',
         },
         {
-          type: 'lib',
-          path: 'lib/cn.ts',
-        },
-        {
           type: 'route',
           path: 'app/api/chat/route.ts',
           target: 'app/api/chat/route.ts',
@@ -75,10 +89,6 @@ export const registry: Registry = {
         {
           type: 'components',
           path: 'components/ai/page-actions.tsx',
-        },
-        {
-          type: 'lib',
-          path: 'lib/cn.ts',
         },
       ],
     },

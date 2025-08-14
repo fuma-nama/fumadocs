@@ -1,6 +1,7 @@
 import path from 'node:path';
 import {
   type Component,
+  type ComponentFile,
   type PackageJson,
   type Registry,
 } from '@/build/build-registry';
@@ -20,7 +21,7 @@ export function createComponentBuilder(
   const project = new Project({
     tsConfigFilePath: path.join(registry.dir, registry.tsconfigPath),
   });
-  const fileToComponent = new Map<string, Component>();
+  const fileToComponent = new Map<string, [Component, ComponentFile]>();
 
   for (const comp of registry.components) {
     for (const file of comp.files) {
@@ -28,7 +29,7 @@ export function createComponentBuilder(
         console.warn(
           `the same file ${file.path} exists in multiple component, you should make the shared file a separate component.`,
         );
-      fileToComponent.set(file.path, comp);
+      fileToComponent.set(file.path, [comp, file]);
     }
   }
 
@@ -87,12 +88,15 @@ export function createComponentBuilder(
     getComponentByName(name: string): Component | undefined {
       return registry.components.find((comp) => comp.name === name);
     },
-    getSubComponent(file: string): Component | undefined {
+    getSubComponent(file: string) {
       const relativeFile = path.relative(registry.dir, file);
       const comp = fileToComponent.get(relativeFile);
 
       if (!comp) return;
-      return comp;
+      return {
+        component: comp[0],
+        file: comp[1],
+      };
     },
   };
 }

@@ -3,7 +3,7 @@ import { SourceFile, StringLiteral, ts } from 'ts-morph';
 import { ComponentBuilder } from '@/build/component-builder';
 import { Component, ComponentFile, OutputFile } from '@/build/build-registry';
 
-export type Reference =
+export type SourceReference =
   | {
       type: 'file';
       /**
@@ -22,11 +22,7 @@ export type Reference =
         | {
             type: 'local';
             component: Component;
-
-            /**
-             * Absolute path
-             */
-            targetFile: string;
+            file: ComponentFile;
           }
         | {
             type: 'remote';
@@ -34,6 +30,13 @@ export type Reference =
             file: ComponentFile;
             registryName: string;
           };
+    };
+
+export type Reference =
+  | SourceReference
+  | {
+      type: 'custom';
+      specifier: string;
     };
 
 export async function buildFile(
@@ -52,9 +55,8 @@ export async function buildFile(
   const defaultResolve = (
     specifier: string,
     specified: SourceFile | undefined,
-  ): Reference => {
+  ): SourceReference => {
     let filePath: string;
-    // non-script file
     if (specified) {
       filePath = specified.getFilePath();
     } else if (specifier.startsWith('./') || specifier.startsWith('../')) {
@@ -78,8 +80,8 @@ export async function buildFile(
         type: 'sub-component',
         resolved: {
           type: 'local',
-          component: sub,
-          targetFile: filePath,
+          component: sub.component,
+          file: sub.file,
         },
       };
     }
@@ -99,7 +101,7 @@ export async function buildFile(
   ) {
     const onResolve = comp.onResolve ?? builder.registry.onResolve;
 
-    let resolved = defaultResolve(
+    let resolved: Reference = defaultResolve(
       specifier.getLiteralValue(),
       getSpecifiedFile(),
     );

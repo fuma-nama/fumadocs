@@ -14,6 +14,7 @@ const mapToPackage = {
   'utils/use-copy-button.ts': 'fumadocs-ui/utils/use-copy-button',
 };
 
+// TODO: in shadcn cli, the order of files matters when writing import paths on consumer's codebase
 export const registry: Registry = {
   name: 'fumadocs',
   homepage: 'http://localhost:3000',
@@ -63,17 +64,47 @@ export const registry: Registry = {
       description: 'Replace Docs Layout (Minimal)',
       files: [
         {
-          type: 'components',
+          type: 'block',
           path: '_registry/layout/docs-min.tsx',
-          target: 'layouts/docs.tsx',
+          target: 'components/layout/docs.tsx',
         },
         {
-          type: 'components',
+          type: 'block',
           path: '_registry/layout/page-min.tsx',
-          target: 'layouts/page.tsx',
+          target: 'components/layout/page.tsx',
         },
       ],
       unlisted: true,
+    },
+    {
+      name: 'is-active',
+      unlisted: true,
+      files: [
+        {
+          type: 'lib',
+          path: 'utils/is-active.ts',
+        },
+      ],
+    },
+    {
+      name: 'cn',
+      unlisted: true,
+      files: [
+        {
+          type: 'lib',
+          path: 'utils/cn.ts',
+        },
+      ],
+    },
+    {
+      name: 'merge-refs',
+      unlisted: true,
+      files: [
+        {
+          type: 'lib',
+          path: 'utils/merge-refs.ts',
+        },
+      ],
     },
     {
       name: 'layouts/shared',
@@ -82,14 +113,17 @@ export const registry: Registry = {
         {
           type: 'components',
           path: 'layouts/links.tsx',
+          target: 'components/layout/links.tsx',
         },
         {
           type: 'components',
           path: 'layouts/shared.tsx',
+          target: 'components/layout/shared.tsx',
         },
         {
           type: 'components',
           path: 'layouts/docs/shared.tsx',
+          target: 'components/layout/docs/shared.tsx',
         },
         {
           type: 'components',
@@ -109,12 +143,14 @@ export const registry: Registry = {
       name: 'layouts/docs',
       files: [
         {
-          type: 'components',
+          type: 'block',
           path: 'layouts/docs.tsx',
+          target: 'components/layout/docs.tsx',
         },
         {
-          type: 'components',
+          type: 'block',
           path: 'layouts/docs-client.tsx',
+          target: 'components/layout/docs-client.tsx',
         },
       ],
       unlisted: true,
@@ -123,14 +159,14 @@ export const registry: Registry = {
       name: 'layouts/notebook',
       files: [
         {
-          type: 'components',
+          type: 'block',
           path: 'layouts/notebook.tsx',
-          target: 'layouts/docs.tsx',
+          target: 'components/layout/docs.tsx',
         },
         {
-          type: 'components',
+          type: 'block',
           path: 'layouts/notebook-client.tsx',
-          target: 'layouts/docs-client.tsx',
+          target: 'components/layout/docs-client.tsx',
         },
       ],
       unlisted: true,
@@ -140,27 +176,30 @@ export const registry: Registry = {
       files: [
         {
           type: 'components',
-          path: 'page.tsx',
+          path: 'layouts/docs/page.tsx',
+          target: 'components/layout/docs/page.tsx',
+        },
+        {
+          type: 'block',
+          path: 'layouts/docs/page-client.tsx',
+          target: 'components/layout/docs/page-client.tsx',
         },
         {
           type: 'components',
+          path: 'page.tsx',
+          target: 'components/layout/page.tsx',
+        },
+        {
+          type: 'ui',
           path: 'components/layout/toc.tsx',
         },
         {
-          type: 'components',
+          type: 'ui',
           path: 'components/layout/toc-clerk.tsx',
         },
         {
-          type: 'components',
+          type: 'ui',
           path: 'components/layout/toc-thumb.tsx',
-        },
-        {
-          type: 'components',
-          path: 'layouts/docs/page.tsx',
-        },
-        {
-          type: 'components',
-          path: 'layouts/docs/page-client.tsx',
         },
       ],
       unlisted: true,
@@ -169,16 +208,19 @@ export const registry: Registry = {
       name: 'layouts/home',
       files: [
         {
-          type: 'components',
+          type: 'block',
           path: 'layouts/home.tsx',
+          target: 'components/layout/home.tsx',
         },
         {
           type: 'components',
           path: 'layouts/home/navbar.tsx',
+          target: 'components/layout/home/navbar.tsx',
         },
         {
           type: 'components',
           path: 'layouts/home/menu.tsx',
+          target: 'components/layout/home/menu.tsx',
         },
       ],
       unlisted: true,
@@ -273,7 +315,6 @@ export const registry: Registry = {
         {
           type: 'components',
           path: 'components/heading.tsx',
-          target: 'heading.tsx',
         },
       ],
     },
@@ -336,8 +377,18 @@ export const registry: Registry = {
       unlisted: true,
       files: [
         {
-          type: 'components',
+          type: 'ui',
           path: 'components/ui/button.tsx',
+        },
+      ],
+    },
+    {
+      name: 'popover',
+      unlisted: true,
+      files: [
+        {
+          type: 'ui',
+          path: 'components/ui/popover.tsx',
         },
       ],
     },
