@@ -1,9 +1,9 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import picocolors from 'picocolors';
-import { type Output } from '@/build/build-registry';
 import { toShadcnRegistry } from '@/build/shadcn';
 import { validateOutput } from '@/build/validate';
+import type { Output } from '@/registry/schema';
 
 export * from './build-registry';
 export * from './component-builder';

@@ -6,6 +6,12 @@ import {
   createComponentBuilder,
 } from './component-builder';
 import { validateOutput } from '@/build/validate';
+import type {
+  NamespaceType,
+  Output,
+  OutputComponent,
+  OutputFile,
+} from '@/registry/schema';
 
 export type OnResolve = (reference: SourceReference) => Reference;
 
@@ -31,14 +37,6 @@ export interface Component {
    */
   onResolve?: OnResolve;
 }
-
-export type NamespaceType =
-  | 'components'
-  | 'lib'
-  | 'css'
-  | 'route'
-  | 'ui'
-  | 'block';
 
 export interface PackageJson {
   dependencies: Record<string, string>;
@@ -67,37 +65,6 @@ export interface Registry {
 
   dependencies?: Record<string, string | null>;
   devDependencies?: Record<string, string | null>;
-}
-
-export interface Output {
-  name: string;
-  index: OutputIndex[];
-  components: OutputComponent[];
-}
-
-export interface OutputIndex {
-  name: string;
-  title?: string;
-  description?: string;
-}
-
-export interface OutputFile {
-  type: NamespaceType;
-  path: string;
-  target?: string;
-  content: string;
-}
-
-export interface OutputComponent {
-  name: string;
-  title?: string;
-  description?: string;
-
-  files: OutputFile[];
-
-  dependencies: Record<string, string>;
-  devDependencies: Record<string, string>;
-  subComponents: string[];
 }
 
 export async function build(registry: Registry): Promise<Output> {
@@ -141,8 +108,8 @@ export async function build(registry: Registry): Promise<Output> {
 async function buildComponent(component: Component, builder: ComponentBuilder) {
   const processedFiles = new Set<string>();
   const subComponents = new Set<string>();
-  const devDependencies = new Map<string, string>();
-  const dependencies = new Map<string, string>();
+  const devDependencies = new Map<string, string | null>();
+  const dependencies = new Map<string, string | null>();
 
   // see https://github.com/shadcn-ui/ui/blob/396275e46a58333caa1fa0a991bd9bc5237d2ee3/packages/shadcn/src/utils/updaters/update-files.ts#L585
   // to hit the fast-path step, we need to import `target` path first because it's detected from `fileSet`, a set of output file paths
@@ -185,8 +152,9 @@ async function buildComponent(component: Component, builder: ComponentBuilder) {
       const dep = builder.getDepInfo(reference.dep);
       if (dep) {
         const map = dep.type === 'dev' ? devDependencies : dependencies;
-        map.set(dep.name, dep.version ?? '');
+        map.set(dep.name, dep.version);
       }
+
       return reference.specifier;
     });
 

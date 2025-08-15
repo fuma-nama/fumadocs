@@ -1,4 +1,4 @@
-import type { Output, OutputComponent } from '@/build/build-registry';
+import type { Output, OutputComponent } from '@/registry/schema';
 import type { Registry as ShadcnRegistry, RegistryItem } from 'shadcn/registry';
 
 function mapDeps(deps: Record<string, string | null>) {

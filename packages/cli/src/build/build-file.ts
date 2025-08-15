@@ -1,7 +1,8 @@
 import * as path from 'node:path';
 import { SourceFile, StringLiteral, ts } from 'ts-morph';
-import { ComponentBuilder } from '@/build/component-builder';
-import { Component, ComponentFile, OutputFile } from '@/build/build-registry';
+import type { ComponentBuilder } from '@/build/component-builder';
+import type { Component, ComponentFile } from '@/build/build-registry';
+import type { OutputFile } from '@/registry/schema';
 
 export type SourceReference =
   | {

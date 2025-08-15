@@ -5,11 +5,11 @@ import { z } from 'zod';
 
 function createConfigSchema(isSrc: boolean) {
   const defaultAliases = {
-    uiDir: './components',
-    componentsDir: './components/ui',
-    blockDir: './lib',
-    cssDir: './components',
-    libDir: './styles',
+    uiDir: './components/ui',
+    componentsDir: './components',
+    blockDir: './components',
+    cssDir: './styles',
+    libDir: './lib',
   };
 
   return z.object({

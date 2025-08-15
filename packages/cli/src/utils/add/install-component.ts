@@ -4,14 +4,14 @@ import { confirm, isCancel, log, outro } from '@clack/prompts';
 import { createEmptyProject } from '@/utils/typescript';
 import { type LoadedConfig } from '@/config';
 import { typescriptExtensions } from '@/constants';
-import { type OutputComponent, type OutputFile } from '@/build';
 import {
   toImportSpecifier,
   transformReferences,
 } from '@/utils/transform-references';
+import type { OutputComponent, OutputFile } from '@/registry/schema';
+import { validateRegistryComponent } from '@/registry/client';
 
-type Awaitable<T> = T | Promise<T>;
-export type Resolver = (file: string) => Awaitable<object | undefined>;
+export type Resolver = (file: string) => Promise<unknown | undefined>;
 
 type DownloadedComponents = Omit<OutputComponent, 'subComponents'>[];
 
@@ -71,8 +71,8 @@ export function createComponentInstaller(options: {
         const status = await fs
           .readFile(outPath)
           .then((res) => {
-            if (res.toString() !== output) return 'need-update';
-            return 'ignore';
+            if (res.toString() === output) return 'ignore';
+            return 'need-update';
           })
           .catch(() => 'write');
 
@@ -110,12 +110,17 @@ export function createComponentInstaller(options: {
       const cached = downloadedComps.get(name);
       if (cached) return cached;
 
-      const comp = (await resolver(`${name}.json`)) as
-        | OutputComponent
-        | undefined;
-      if (!comp) throw new Error(`component ${name} not found`);
+      const comp = validateRegistryComponent(
+        await resolver(`${name}.json`).then((res) => {
+          if (!res) {
+            log.error(`component ${name} not found`);
+            process.exit(1);
+          }
 
-      const result: DownloadedComponents = [];
+          return res;
+        }),
+      );
+      const result: DownloadedComponents = [comp];
 
       // place it before downloading child components to avoid recursive downloads
       downloadedComps.set(name, result);

@@ -1,4 +1,4 @@
-import type { Output, OutputComponent } from '@/build/build-registry';
+import type { Output, OutputComponent } from '@/registry/schema';
 
 export function validateOutput(registry: Output) {
   function validateComponent(

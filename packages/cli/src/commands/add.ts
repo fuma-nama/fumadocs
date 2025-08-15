@@ -6,7 +6,6 @@ import {
   outro,
   spinner,
 } from '@clack/prompts';
-import type { OutputIndex } from '@/build';
 import picocolors from 'picocolors';
 import {
   type ComponentInstaller,
@@ -15,6 +14,7 @@ import {
 } from '@/utils/add/install-component';
 import { installDeps } from '@/utils/add/install-deps';
 import type { LoadedConfig } from '@/config';
+import { validateRegistryIndex } from '@/registry/client';
 
 export async function add(
   input: string[],
@@ -30,19 +30,22 @@ export async function add(
   if (input.length === 0) {
     const spin = spinner();
     spin.start('fetching registry');
-    const registry = (await resolver('_registry.json')) as
-      | OutputIndex[]
-      | undefined;
-    spin.stop(picocolors.bold(picocolors.greenBright('registry fetched')));
+    const indexes = validateRegistryIndex(
+      await resolver('_registry.json').then((res) => {
+        if (!res) {
+          log.error(`Failed to fetch '_registry.json' file from registry`);
+          process.exit(1);
+        }
 
-    if (!registry) {
-      log.error(`Failed to fetch '_registry.json' file from registry`);
-      throw new Error(`Failed to fetch registry`);
-    }
+        return res;
+      }),
+    );
+
+    spin.stop(picocolors.bold(picocolors.greenBright('registry fetched')));
 
     const value = await multiselect({
       message: 'Select components to install',
-      options: registry.map((item) => ({
+      options: indexes.map((item) => ({
         label: item.title,
         value: item.name,
         hint: item.description,
@@ -80,6 +83,7 @@ export async function install(target: string[], installer: ComponentInstaller) {
       outro(picocolors.bold(picocolors.greenBright(`${name} installed`)));
     } catch (e) {
       log.error(String(e));
+      throw e;
     }
   }
 
