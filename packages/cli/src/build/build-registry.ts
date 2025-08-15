@@ -77,6 +77,7 @@ export interface Output {
 
 export interface OutputIndex {
   name: string;
+  title?: string;
   description?: string;
 }
 
@@ -125,6 +126,7 @@ export async function build(registry: Registry): Promise<Output> {
     if (!input.unlisted) {
       output.index.push({
         name: input.name,
+        title: input.title,
         description: input.description,
       });
     }

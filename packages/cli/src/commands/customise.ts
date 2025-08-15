@@ -8,12 +8,19 @@ import {
   select,
 } from '@clack/prompts';
 import picocolors from 'picocolors';
-import { type Resolver } from '@/utils/add/install-component';
-import type { Config } from '@/config';
+import {
+  createComponentInstaller,
+  type Resolver,
+} from '@/utils/add/install-component';
+import type { LoadedConfig } from '@/config';
 import { install } from '@/commands/add';
 
-export async function customise(resolver: Resolver, config: Config) {
+export async function customise(resolver: Resolver, config: LoadedConfig) {
   intro(picocolors.bgBlack(picocolors.whiteBright('Customise Fumadocs UI')));
+  const installer = createComponentInstaller({
+    resolver,
+    config,
+  });
 
   const result = await group(
     {
@@ -91,7 +98,7 @@ export async function customise(resolver: Resolver, config: Config) {
       );
     }
 
-    await install(targets, resolver, config);
+    await install(targets, installer);
 
     intro(picocolors.bold('What is Next?'));
     log.info(
@@ -112,7 +119,7 @@ export async function customise(resolver: Resolver, config: Config) {
   }
 
   if (result.target === 'home') {
-    await install(['layouts/home'], resolver, config);
+    await install(['layouts/home'], installer);
     intro(picocolors.bold('What is Next?'));
 
     log.info(

@@ -42,7 +42,12 @@ export function validateOutput(registry: Output) {
     }
   }
 
+  const compSet = new Set<string>();
   for (const comp of registry.components) {
+    if (compSet.has(comp.name))
+      throw new Error(`duplicated component name ${comp.name}`);
+    compSet.add(comp.name);
+
     validateComponent(comp);
   }
 }

@@ -8,7 +8,7 @@ import {
   remoteResolver,
   type Resolver,
 } from '@/utils/add/install-component';
-import { initConfig, loadConfig } from '@/config';
+import { createOrLoadConfig, initConfig } from '@/config';
 import {
   type JsonTreeNode,
   treeToJavaScript,
@@ -23,7 +23,7 @@ const program = new Command().option('--config <string>');
 
 program
   .name('fumadocs')
-  .description('CLI to setup Fumadocs, init a config ')
+  .description('CLI to setup Fumadocs, init a config')
   .version(packageJson.version)
   .action(async () => {
     if (await initConfig()) {
@@ -40,7 +40,7 @@ program
   .option('--dir <string>', 'the root url or directory to resolve registry')
   .action(async (options: { config?: string; dir?: string }) => {
     const resolver = getResolverFromDir(options.dir);
-    await customise(resolver, await loadConfig(options.config));
+    await customise(resolver, await createOrLoadConfig(options.config));
   });
 
 const dirShortcuts: Record<string, string> = {
@@ -56,7 +56,7 @@ program
   .action(
     async (input: string[], options: { config?: string; dir?: string }) => {
       const resolver = getResolverFromDir(options.dir);
-      await add(input, resolver, await loadConfig(options.config));
+      await add(input, resolver, await createOrLoadConfig(options.config));
     },
   );
 

@@ -3,19 +3,51 @@ import * as path from 'node:path';
 import picocolors from 'picocolors';
 import { type Output } from '@/build/build-registry';
 import { toShadcnRegistry } from '@/build/shadcn';
+import { validateOutput } from '@/build/validate';
 
 export * from './build-registry';
 export * from './component-builder';
 export * from './shadcn';
 
+export function combineRegistry(...items: Output[]): Output {
+  const out: Output = {
+    index: [],
+    components: [],
+    name: items[0].name,
+  };
+
+  for (const item of items) {
+    out.components.push(...item.components);
+    out.index.push(...item.index);
+  }
+
+  validateOutput(out);
+  return out;
+}
+
 export async function writeShadcnRegistry(
   out: Output,
   options: {
     dir: string;
+    /**
+     * Remove previous outputs
+     *
+     * @defaultValue false
+     */
+    cleanDir?: boolean;
+
     baseUrl: string;
   },
 ) {
-  const { dir, baseUrl } = options;
+  const { dir, cleanDir = false, baseUrl } = options;
+
+  if (cleanDir) {
+    await fs.rm(dir, {
+      recursive: true,
+      force: true,
+    });
+    console.log(picocolors.bold(picocolors.greenBright('Cleaned directory')));
+  }
 
   await Promise.all(
     toShadcnRegistry(out, baseUrl).items.map(async (item) => {
@@ -26,24 +58,7 @@ export async function writeShadcnRegistry(
   );
 }
 
-async function writeFile(
-  file: string,
-  content: string,
-  log = true,
-): Promise<void> {
-  await fs.mkdir(path.dirname(file), { recursive: true });
-  await fs.writeFile(file, content);
-
-  if (log) {
-    const size = (Buffer.byteLength(content) / 1024).toFixed(2);
-
-    console.log(
-      `${picocolors.greenBright('+')} ${path.relative(process.cwd(), file)} ${picocolors.dim(`${size} KB`)}`,
-    );
-  }
-}
-
-export async function writeOutput(
+export async function writeFumadocsRegistry(
   out: Output,
   options: {
     dir: string;
@@ -84,4 +99,21 @@ export async function writeOutput(
 
   write.push(writeIndex());
   await Promise.all(write);
+}
+
+async function writeFile(
+  file: string,
+  content: string,
+  log = true,
+): Promise<void> {
+  await fs.mkdir(path.dirname(file), { recursive: true });
+  await fs.writeFile(file, content);
+
+  if (log) {
+    const size = (Buffer.byteLength(content) / 1024).toFixed(2);
+
+    console.log(
+      `${picocolors.greenBright('+')} ${path.relative(process.cwd(), file)} ${picocolors.dim(`${size} KB`)}`,
+    );
+  }
 }
