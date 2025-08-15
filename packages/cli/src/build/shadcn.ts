@@ -1,5 +1,5 @@
-import type { OutputComponent, Registry } from '@/build/build-registry';
-import type { RegistryItem } from 'shadcn/registry';
+import type { Output, OutputComponent } from '@/build/build-registry';
+import type { Registry as ShadcnRegistry, RegistryItem } from 'shadcn/registry';
 
 function mapDeps(deps: Record<string, string | null>) {
   return Object.entries(deps).map(([k, v]) => {
@@ -10,12 +10,20 @@ function mapDeps(deps: Record<string, string | null>) {
 }
 
 function escapeName(name: string) {
-  return name.replaceAll('/', '-');
+  return name;
 }
 
-export function componentToShadcn(
+export function toShadcnRegistry(out: Output, baseUrl: string): ShadcnRegistry {
+  return {
+    homepage: baseUrl,
+    name: out.name,
+    items: out.components.map((comp) => componentToShadcn(comp, baseUrl)),
+  };
+}
+
+function componentToShadcn(
   comp: OutputComponent,
-  registry: Registry,
+  baseUrl: string,
 ): RegistryItem {
   return {
     extends: 'none',
@@ -30,10 +38,7 @@ export function componentToShadcn(
       if (comp.startsWith('https://') || comp.startsWith('http://'))
         return comp;
 
-      return new URL(
-        `/r/${escapeName(comp)}.json`,
-        registry.homepage,
-      ).toString();
+      return new URL(`/r/${escapeName(comp)}.json`, baseUrl).toString();
     }),
     files: comp.files.map((file) => {
       return {

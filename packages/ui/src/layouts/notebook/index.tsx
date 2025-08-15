@@ -44,7 +44,7 @@ import {
   LayoutTabs,
   Navbar,
   NavbarSidebarTrigger,
-} from './notebook-client';
+} from '@/layouts/notebook/client';
 import { NavProvider } from '@/contexts/layout';
 import { type Option, RootToggle } from '@/components/layout/root-toggle';
 import Link from 'fumadocs-core/link';

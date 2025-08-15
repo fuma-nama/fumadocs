@@ -5,8 +5,6 @@ import {
   type ComponentBuilder,
   createComponentBuilder,
 } from './component-builder';
-import type { Registry as ShadcnRegistry } from 'shadcn/registry';
-import { componentToShadcn } from '@/build/shadcn';
 import { validateOutput } from '@/build/validate';
 
 export type OnResolve = (reference: SourceReference) => Reference;
@@ -49,7 +47,6 @@ export interface PackageJson {
 
 export interface Registry {
   name: string;
-  homepage: string;
   packageJson: string | PackageJson;
   tsconfigPath: string;
   components: Component[];
@@ -73,10 +70,9 @@ export interface Registry {
 }
 
 export interface Output {
+  name: string;
   index: OutputIndex[];
   components: OutputComponent[];
-
-  shadcn: ShadcnRegistry;
 }
 
 export interface OutputIndex {
@@ -105,13 +101,9 @@ export interface OutputComponent {
 
 export async function build(registry: Registry): Promise<Output> {
   const output: Output = {
+    name: registry.name,
     index: [],
     components: [],
-    shadcn: {
-      name: registry.name,
-      items: [],
-      homepage: registry.homepage,
-    },
   };
 
   function readPackageJson() {
@@ -137,7 +129,6 @@ export async function build(registry: Registry): Promise<Output> {
       });
     }
 
-    output.shadcn.items.push(componentToShadcn(comp, registry));
     output.components.push(comp);
   }
 
@@ -151,14 +142,10 @@ async function buildComponent(component: Component, builder: ComponentBuilder) {
   const devDependencies = new Map<string, string>();
   const dependencies = new Map<string, string>();
 
+  // see https://github.com/shadcn-ui/ui/blob/396275e46a58333caa1fa0a991bd9bc5237d2ee3/packages/shadcn/src/utils/updaters/update-files.ts#L585
+  // to hit the fast-path step, we need to import `target` path first because it's detected from `fileSet`, a set of output file paths
   function toImportPath(file: ComponentFile): string {
-    let filePath = file.path;
-    for (const ext of ['.ts', '.tsx']) {
-      if (!filePath.endsWith(ext)) continue;
-
-      filePath = filePath.substring(0, filePath.length - ext.length);
-      break;
-    }
+    let filePath = file.target ?? file.path;
 
     if (filePath.startsWith('./')) filePath = filePath.slice(2);
 

@@ -16,7 +16,6 @@ function selectFrom(r: Registry, component: string, filename: string) {
 
 export const registry: Registry = {
   dir: baseDir,
-  homepage: 'http://localhost:3000',
   name: 'fumadocs',
   packageJson: './package.json',
   tsconfigPath: './tsconfig.json',
@@ -29,7 +28,7 @@ export const registry: Registry = {
           type: 'sub-component',
           resolved: {
             type: 'remote',
-            registryName: 'fumadocs',
+            registryName: ui.registry.name,
             ...selectFrom(ui.registry, 'cn', 'cn.ts'),
           },
         };
@@ -44,7 +43,7 @@ export const registry: Registry = {
         type: 'sub-component',
         resolved: {
           type: 'remote',
-          registryName: 'fumadocs',
+          registryName: ui.registry.name,
           ...selectFrom(ui.registry, 'button', 'button.tsx'),
         },
       };

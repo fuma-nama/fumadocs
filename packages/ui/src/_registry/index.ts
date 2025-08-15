@@ -16,8 +16,7 @@ const mapToPackage = {
 
 // TODO: in shadcn cli, the order of files matters when writing import paths on consumer's codebase
 export const registry: Registry = {
-  name: 'fumadocs',
-  homepage: 'http://localhost:3000',
+  name: 'fumadocs-ui',
   dir: srcDir,
   tsconfigPath: '../tsconfig.json',
   packageJson: '../package.json',
@@ -55,8 +54,6 @@ export const registry: Registry = {
         path: relativePath,
       };
     }
-
-    console.warn(`you forgot to include ${file}!`);
   },
   components: [
     {
@@ -112,6 +109,11 @@ export const registry: Registry = {
       files: [
         {
           type: 'components',
+          path: 'layouts/docs/shared.tsx',
+          target: 'components/layout/docs/shared.tsx',
+        },
+        {
+          type: 'components',
           path: 'layouts/links.tsx',
           target: 'components/layout/links.tsx',
         },
@@ -119,11 +121,6 @@ export const registry: Registry = {
           type: 'components',
           path: 'layouts/shared.tsx',
           target: 'components/layout/shared.tsx',
-        },
-        {
-          type: 'components',
-          path: 'layouts/docs/shared.tsx',
-          target: 'components/layout/docs/shared.tsx',
         },
         {
           type: 'components',
@@ -144,13 +141,13 @@ export const registry: Registry = {
       files: [
         {
           type: 'block',
-          path: 'layouts/docs.tsx',
-          target: 'components/layout/docs.tsx',
+          path: 'layouts/docs/index.tsx',
+          target: 'components/layout/docs/index.tsx',
         },
         {
           type: 'block',
-          path: 'layouts/docs-client.tsx',
-          target: 'components/layout/docs-client.tsx',
+          path: 'layouts/docs/client.tsx',
+          target: 'components/layout/docs/client.tsx',
         },
       ],
       unlisted: true,
@@ -160,13 +157,13 @@ export const registry: Registry = {
       files: [
         {
           type: 'block',
-          path: 'layouts/notebook.tsx',
-          target: 'components/layout/docs.tsx',
+          path: 'layouts/notebook/index.tsx',
+          target: 'components/layout/docs/index.tsx',
         },
         {
           type: 'block',
-          path: 'layouts/notebook-client.tsx',
-          target: 'components/layout/docs-client.tsx',
+          path: 'layouts/notebook/client.tsx',
+          target: 'components/layout/docs/client.tsx',
         },
       ],
       unlisted: true,
@@ -209,8 +206,8 @@ export const registry: Registry = {
       files: [
         {
           type: 'block',
-          path: 'layouts/home.tsx',
-          target: 'components/layout/home.tsx',
+          path: 'layouts/home/index.tsx',
+          target: 'components/layout/home/index.tsx',
         },
         {
           type: 'components',
@@ -396,5 +393,7 @@ export const registry: Registry = {
   dependencies: {
     'fumadocs-core': null,
     'fumadocs-ui': null,
+    'lucide-react': null,
+    react: null,
   },
 };

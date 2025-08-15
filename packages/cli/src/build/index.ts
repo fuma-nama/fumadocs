@@ -2,13 +2,23 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import picocolors from 'picocolors';
 import { type Output } from '@/build/build-registry';
+import { toShadcnRegistry } from '@/build/shadcn';
 
 export * from './build-registry';
 export * from './component-builder';
+export * from './shadcn';
 
-export async function writeShadcnRegistry(dir: string, out: Output) {
+export async function writeShadcnRegistry(
+  out: Output,
+  options: {
+    dir: string;
+    baseUrl: string;
+  },
+) {
+  const { dir, baseUrl } = options;
+
   await Promise.all(
-    out.shadcn.items.map(async (item) => {
+    toShadcnRegistry(out, baseUrl).items.map(async (item) => {
       const file = path.join(dir, `${item.name}.json`);
 
       await writeFile(file, JSON.stringify(item, null, 2));

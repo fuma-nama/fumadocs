@@ -33,6 +33,16 @@ export function createComponentBuilder(
     }
   }
 
+  const deps = {
+    ...packageJson?.dependencies,
+    ...registry.dependencies,
+  };
+
+  const devDeps = {
+    ...packageJson?.devDependencies,
+    ...registry.devDependencies,
+  };
+
   return {
     registryDir: registry.dir,
     registry,
@@ -48,35 +58,21 @@ export function createComponentBuilder(
           version: string | null;
         }
       | undefined {
-      if (registry.dependencies && name in registry.dependencies)
+      if (name in deps)
         return {
           name,
           type: 'runtime',
-          version: registry.dependencies[name],
+          version: deps[name],
         };
 
-      if (registry.devDependencies && name in registry.devDependencies)
+      if (name in devDeps)
         return {
           name,
           type: 'dev',
-          version: registry.devDependencies[name],
+          version: devDeps[name],
         };
 
-      if (packageJson && name in packageJson.devDependencies) {
-        return {
-          type: 'dev',
-          version: packageJson.devDependencies[name],
-          name,
-        };
-      }
-
-      if (packageJson && name in packageJson.dependencies) {
-        return {
-          type: 'runtime',
-          version: packageJson.dependencies[name],
-          name,
-        };
-      }
+      console.warn(`dep info for ${name} cannot be found`);
     },
     async createSourceFile(file: string) {
       const content = await fs.readFile(file);
