@@ -3,15 +3,12 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { Command } from 'commander';
 import picocolors from 'picocolors';
-import { isCancel, outro, select } from '@clack/prompts';
-import { init } from '@/commands/init';
 import {
   localResolver,
   remoteResolver,
   type Resolver,
 } from '@/utils/add/install-component';
-import { initConfig, loadConfig } from '@/config';
-import { plugins } from '@/plugins';
+import { createOrLoadConfig, initConfig } from '@/config';
 import {
   type JsonTreeNode,
   treeToJavaScript,
@@ -26,7 +23,7 @@ const program = new Command().option('--config <string>');
 
 program
   .name('fumadocs')
-  .description('CLI to setup Fumadocs, init a config ')
+  .description('CLI to setup Fumadocs, init a config')
   .version(packageJson.version)
   .action(async () => {
     if (await initConfig()) {
@@ -43,38 +40,7 @@ program
   .option('--dir <string>', 'the root url or directory to resolve registry')
   .action(async (options: { config?: string; dir?: string }) => {
     const resolver = getResolverFromDir(options.dir);
-    await customise(resolver, await loadConfig(options.config));
-  });
-
-program
-  .command('init')
-  .description('init a new plugin to your docs')
-  .argument('[string]', 'plugin name')
-  .action(async (str: string | undefined, { config }) => {
-    const loadedConfig = await loadConfig(config as string | undefined);
-
-    if (str) {
-      const plugin = str in plugins ? plugins[str] : undefined;
-      if (!plugin) throw new Error(`Plugin not found: ${str}`);
-
-      await init(plugin, loadedConfig);
-      return;
-    }
-
-    const value = await select({
-      message: 'Select components to install',
-      options: Object.keys(plugins).map((c) => ({
-        label: c,
-        value: c,
-      })),
-    });
-
-    if (isCancel(value)) {
-      outro('Ended');
-      return;
-    }
-
-    await init(plugins[value as keyof typeof plugins], loadedConfig);
+    await customise(resolver, await createOrLoadConfig(options.config));
   });
 
 const dirShortcuts: Record<string, string> = {
@@ -90,7 +56,7 @@ program
   .action(
     async (input: string[], options: { config?: string; dir?: string }) => {
       const resolver = getResolverFromDir(options.dir);
-      await add(input, resolver, await loadConfig(options.config));
+      await add(input, resolver, await createOrLoadConfig(options.config));
     },
   );
 

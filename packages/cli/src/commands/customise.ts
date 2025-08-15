@@ -8,12 +8,19 @@ import {
   select,
 } from '@clack/prompts';
 import picocolors from 'picocolors';
-import { type Resolver } from '@/utils/add/install-component';
-import type { Config } from '@/config';
+import {
+  createComponentInstaller,
+  type Resolver,
+} from '@/utils/add/install-component';
+import type { LoadedConfig } from '@/config';
 import { install } from '@/commands/add';
 
-export async function customise(resolver: Resolver, config: Config) {
+export async function customise(resolver: Resolver, config: LoadedConfig) {
   intro(picocolors.bgBlack(picocolors.whiteBright('Customise Fumadocs UI')));
+  const installer = createComponentInstaller({
+    resolver,
+    config,
+  });
 
   const result = await group(
     {
@@ -91,41 +98,37 @@ export async function customise(resolver: Resolver, config: Config) {
       );
     }
 
-    await install(targets, resolver, config);
+    await install(targets, installer);
+    const maps: [string, string][] = [
+      ['fumadocs-ui/layouts/docs', '@/components/layout/docs'],
+    ];
 
-    intro(picocolors.bold('What is Next?'));
-    log.info(
-      [
-        'You can check the installed components in `components/layouts`.',
-        picocolors.dim('---'),
-        'Open your `layout.tsx` files, replace the imports of components:',
-        picocolors.greenBright(
-          '`fumadocs-ui/layouts/docs` -> `@/components/layouts/docs`',
-        ),
-        pageAdded
-          ? picocolors.greenBright(
-              '`fumadocs-ui/page` -> `@/components/layouts/page`',
-            )
-          : '',
-      ].join('\n'),
-    );
+    if (pageAdded) {
+      maps.push(['fumadocs-ui/page', '@/components/layout/page']);
+    }
+
+    printNext(...maps);
   }
 
   if (result.target === 'home') {
-    await install(['layouts/home'], resolver, config);
-    intro(picocolors.bold('What is Next?'));
-
-    log.info(
-      [
-        'You can check the installed components in `components/layouts`.',
-        picocolors.dim('---'),
-        'Open your `layout.tsx` files, replace the imports of components:',
-        picocolors.greenBright(
-          '`fumadocs-ui/layouts/home` -> `@/components/layouts/home`',
-        ),
-      ].join('\n'),
-    );
+    await install(['layouts/home'], installer);
+    printNext(['fumadocs-ui/layouts/home', `@/components/layout/home`]);
   }
 
   outro(picocolors.bold('Have fun!'));
+}
+
+function printNext(...maps: [from: string, to: string][]) {
+  intro(picocolors.bold('What is Next?'));
+
+  log.info(
+    [
+      'You can check the installed components in `components`.',
+      picocolors.dim('---'),
+      'Open your `layout.tsx` files, replace the imports of components:',
+      ...maps.map(([from, to]) =>
+        picocolors.greenBright(`"${from}" -> "${to}"`),
+      ),
+    ].join('\n'),
+  );
 }

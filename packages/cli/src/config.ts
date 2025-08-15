@@ -1,63 +1,80 @@
 import fs from 'node:fs/promises';
 import { isSrc } from '@/utils/is-src';
+import path from 'node:path';
+import { z } from 'zod';
 
-export interface Config {
-  aliases?: {
-    /**
-     * Path for importing `cn` utility.
-     *
-     * Can be from Shadcn UI or your own `cn` function (Tailwind CSS supported)
-     */
-    cn?: string;
-    uiDir?: string;
-    componentsDir?: string;
-    libDir?: string;
+function createConfigSchema(isSrc: boolean) {
+  const defaultAliases = {
+    uiDir: './components/ui',
+    componentsDir: './components',
+    blockDir: './components',
+    cssDir: './styles',
+    libDir: './lib',
   };
 
-  commands?: {
-    /**
-     * command to format output code automatically
-     */
-    format?: string;
-  };
+  return z.object({
+    aliases: z
+      .object({
+        uiDir: z.string().default(defaultAliases.uiDir),
+        componentsDir: z.string().default(defaultAliases.uiDir),
+        blockDir: z.string().default(defaultAliases.blockDir),
+        cssDir: z.string().default(defaultAliases.componentsDir),
+        libDir: z.string().default(defaultAliases.libDir),
+      })
+      .default(defaultAliases),
+
+    baseDir: z.string().default(isSrc ? path.resolve('./src') : process.cwd()),
+
+    commands: z
+      .object({
+        /**
+         * command to format output code automatically
+         */
+        format: z.string().optional(),
+      })
+      .default({}),
+  });
 }
 
-const src = await isSrc();
+type ConfigSchema = ReturnType<typeof createConfigSchema>;
 
-export const defaultConfig = {
-  aliases: {
-    cn: src ? './src/lib/utils.ts' : './lib/utils.ts',
-    componentsDir: src ? './src/components' : './components',
-    uiDir: src ? './src/components/ui' : './components/ui',
-    libDir: src ? './src/lib' : './lib',
-  },
-} satisfies Config;
+export type Config = z.input<ConfigSchema>;
 
-export async function loadConfig(file = './cli.json'): Promise<Config> {
-  try {
-    const content = await fs.readFile(file);
+export type LoadedConfig = z.output<ConfigSchema>;
 
-    return JSON.parse(content.toString()) as Config;
-  } catch {
-    return {};
-  }
+export async function createOrLoadConfig(
+  file = './cli.json',
+): Promise<LoadedConfig> {
+  const inited = await initConfig(file);
+  if (inited) return inited;
+
+  const content = (await fs.readFile(file)).toString();
+  const src = await isSrc();
+  const configSchema = createConfigSchema(src);
+
+  return configSchema.parse(JSON.parse(content));
 }
 
 /**
  * Write new config, skip if a config already exists
  *
- * @returns true if the config is created, otherwise false
+ * @returns the created config, `undefined` if not created
  */
-export async function initConfig(file = './cli.json'): Promise<boolean> {
+export async function initConfig(
+  file = './cli.json',
+): Promise<LoadedConfig | undefined> {
   if (
     await fs
       .stat(file)
       .then(() => true)
       .catch(() => false)
   ) {
-    return false;
+    return;
   }
 
+  const src = await isSrc();
+  const defaultConfig = createConfigSchema(src).parse({} satisfies Config);
+
   await fs.writeFile(file, JSON.stringify(defaultConfig, null, 2));
-  return true;
+  return defaultConfig;
 }

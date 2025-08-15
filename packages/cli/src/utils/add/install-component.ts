@@ -1,148 +1,185 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import { confirm, isCancel, log, outro } from '@clack/prompts';
-import { type Project } from 'ts-morph';
 import { createEmptyProject } from '@/utils/typescript';
-import { type Config, defaultConfig } from '@/config';
+import { type LoadedConfig } from '@/config';
 import { typescriptExtensions } from '@/constants';
 import {
-  type NamespaceType,
-  type OutputComponent,
-  type OutputFile,
-} from '@/build';
-import { type Awaitable } from '@/commands/init';
-import {
-  toReferencePath,
+  toImportSpecifier,
   transformReferences,
 } from '@/utils/transform-references';
+import type { OutputComponent, OutputFile } from '@/registry/schema';
+import { validateRegistryComponent } from '@/registry/client';
 
-interface Context {
-  config: Config;
-  project: Project;
+export type Resolver = (file: string) => Promise<unknown | undefined>;
 
+type DownloadedComponents = Omit<OutputComponent, 'subComponents'>[];
+
+export type ComponentInstaller = ReturnType<typeof createComponentInstaller>;
+
+export function createComponentInstaller(options: {
   resolver: Resolver;
-}
-
-export type Resolver = (file: string) => Awaitable<object | undefined>;
-
-/**
- * A set of downloaded files
- */
-const downloadedFiles = new Set<string>();
-
-export async function installComponent(
-  name: string,
-  resolver: Resolver,
-  config: Config = {},
-): Promise<OutputComponent | undefined> {
+  config: LoadedConfig;
+}) {
+  const { config, resolver } = options;
   const project = createEmptyProject();
+  const installedFiles = new Set<string>();
+  const downloadedComps = new Map<string, DownloadedComponents>();
 
-  return downloadComponent(name, {
-    project,
-    config,
-    resolver,
-  });
-}
+  function buildFileList(downloaded: DownloadedComponents): OutputFile[] {
+    const map = new Map<string, OutputFile>();
+    for (const item of downloaded) {
+      for (const file of item.files) {
+        const filePath = file.target ?? file.path;
 
-const downloadedComps = new Map<string, OutputComponent>();
-async function downloadComponent(
-  name: string,
-  ctx: Context,
-): Promise<OutputComponent | undefined> {
-  const cached = downloadedComps.get(name);
-  if (cached) return cached;
+        if (map.has(filePath)) {
+          console.warn(
+            `noticed duplicated output file for ${filePath}, ignoring for now.`,
+          );
+          continue;
+        }
 
-  const comp = (await ctx.resolver(`${name}.json`)) as
-    | OutputComponent
-    | undefined;
-  if (!comp) return;
+        map.set(filePath, file);
+      }
+    }
 
-  downloadedComps.set(name, comp);
+    return Array.from(map.values());
+  }
 
-  for (const file of comp.files) {
-    if (downloadedFiles.has(file.path)) continue;
+  return {
+    async install(name: string) {
+      const downloaded = await this.download(name);
+      const dependencies: Record<string, string | null> = {};
+      const devDependencies: Record<string, string | null> = {};
 
-    const outPath = resolveOutputPath(file.path, ctx.config);
-    const output = typescriptExtensions.includes(path.extname(file.path))
-      ? transformTypeScript(outPath, file, ctx)
-      : file.content;
-
-    let canWrite = true;
-    const requireOverride = await fs
-      .readFile(outPath)
-      .then((res) => res.toString() !== output)
-      .catch(() => false);
-
-    if (requireOverride) {
-      const value = await confirm({
-        message: `Do you want to override ${outPath}?`,
-      });
-
-      if (isCancel(value)) {
-        outro('Ended');
-        process.exit(0);
+      for (const item of downloaded) {
+        Object.assign(dependencies, item.dependencies);
+        Object.assign(devDependencies, item.devDependencies);
       }
 
-      canWrite = value;
-    }
+      const fileList = buildFileList(downloaded);
 
-    if (canWrite) {
-      await fs.mkdir(path.dirname(outPath), { recursive: true });
-      await fs.writeFile(outPath, output);
-      log.step(`downloaded ${outPath}`);
-    }
+      for (const file of fileList) {
+        const filePath = file.target ?? file.path;
+        if (installedFiles.has(filePath)) continue;
 
-    downloadedFiles.add(file.path);
-  }
+        const outPath = this.resolveOutputPath(file);
+        const output = typescriptExtensions.includes(path.extname(filePath))
+          ? this.transform(outPath, file, fileList)
+          : file.content;
 
-  for (const sub of comp.subComponents) {
-    const downloaded = await downloadComponent(sub, ctx);
-    if (!downloaded) continue;
+        const status = await fs
+          .readFile(outPath)
+          .then((res) => {
+            if (res.toString() === output) return 'ignore';
+            return 'need-update';
+          })
+          .catch(() => 'write');
 
-    Object.assign(comp.dependencies, downloaded.dependencies);
-    Object.assign(comp.devDependencies, downloaded.devDependencies);
-  }
+        installedFiles.add(filePath);
+        if (status === 'ignore') continue;
 
-  return comp;
-}
+        if (status === 'need-update') {
+          const override = await confirm({
+            message: `Do you want to override ${outPath}?`,
+            initialValue: false,
+          });
 
-function resolveOutputPath(ref: string, config: Config): string {
-  const sep = ref.indexOf(':');
-  if (sep === -1) return ref;
+          if (isCancel(override)) {
+            outro('Ended');
+            process.exit(0);
+          }
 
-  const namespace = ref.slice(0, sep) as NamespaceType,
-    file = ref.slice(sep + 1);
+          if (!override) continue;
+        }
 
-  if (namespace === 'components') {
-    return path.join(
-      config.aliases?.componentsDir ?? defaultConfig.aliases.componentsDir,
-      file,
-    );
-  }
+        await fs.mkdir(path.dirname(outPath), { recursive: true });
+        await fs.writeFile(outPath, output);
+        log.step(`downloaded ${outPath}`);
+      }
 
-  return path.join(
-    config.aliases?.libDir ?? defaultConfig.aliases.libDir,
-    file,
-  );
-}
+      return {
+        dependencies,
+        devDependencies,
+      };
+    },
+    /**
+     * return a list of components, merged with child components.
+     */
+    async download(name: string): Promise<DownloadedComponents> {
+      const cached = downloadedComps.get(name);
+      if (cached) return cached;
 
-function transformTypeScript(
-  filePath: string,
-  file: OutputFile,
-  ctx: Context,
-): string {
-  const sourceFile = ctx.project.createSourceFile(filePath, file.content, {
-    overwrite: true,
-  });
+      const comp = validateRegistryComponent(
+        await resolver(`${name}.json`).then((res) => {
+          if (!res) {
+            log.error(`component ${name} not found`);
+            process.exit(1);
+          }
 
-  transformReferences(sourceFile, (specifier) => {
-    if (specifier in file.imports) {
-      const outputPath = resolveOutputPath(file.imports[specifier], ctx.config);
-      return toReferencePath(filePath, outputPath);
-    }
-  });
+          return res;
+        }),
+      );
+      const result: DownloadedComponents = [comp];
 
-  return sourceFile.getFullText();
+      // place it before downloading child components to avoid recursive downloads
+      downloadedComps.set(name, result);
+
+      for (const sub of comp.subComponents) {
+        result.push(...(await this.download(sub)));
+      }
+
+      return result;
+    },
+    transform(filePath: string, file: OutputFile, fileList: OutputFile[]) {
+      const sourceFile = project.createSourceFile(filePath, file.content, {
+        overwrite: true,
+      });
+
+      transformReferences(sourceFile, (specifier) => {
+        const prefix = '@/';
+
+        if (specifier.startsWith(prefix)) {
+          const lookup = specifier.substring(prefix.length);
+
+          const target = fileList.find((item) => {
+            const filePath = item.target ?? item.path;
+
+            return filePath === lookup;
+          });
+
+          if (!target) {
+            console.warn(`cannot find the referenced file of ${specifier}`);
+            return specifier;
+          }
+
+          return toImportSpecifier(filePath, this.resolveOutputPath(target));
+        }
+      });
+
+      return sourceFile.getFullText();
+    },
+
+    resolveOutputPath(ref: OutputFile): string {
+      if (ref.target) {
+        return path.join(config.baseDir, ref.target);
+      }
+
+      const base = path.basename(ref.path);
+      const dir = (
+        {
+          components: config.aliases.componentsDir,
+          block: config.aliases.blockDir,
+          ui: config.aliases.uiDir,
+          css: config.aliases.cssDir,
+          lib: config.aliases.libDir,
+          route: './',
+        } as const
+      )[ref.type];
+
+      return path.join(config.baseDir, dir, base);
+    },
+  };
 }
 
 export function remoteResolver(url: string): Resolver {

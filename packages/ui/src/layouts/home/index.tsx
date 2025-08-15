@@ -1,6 +1,10 @@
 import { Fragment, type HTMLAttributes, useMemo } from 'react';
 import { cn } from '@/utils/cn';
-import { type BaseLayoutProps, getLinks, type NavOptions } from './shared';
+import {
+  type BaseLayoutProps,
+  getLinks,
+  type NavOptions,
+} from '@/layouts/shared';
 import { NavProvider } from '@/contexts/layout';
 import {
   Navbar,
