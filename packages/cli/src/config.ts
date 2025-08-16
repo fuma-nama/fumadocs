@@ -1,6 +1,5 @@
 import fs from 'node:fs/promises';
 import { isSrc } from '@/utils/is-src';
-import path from 'node:path';
 import { z } from 'zod';
 
 function createConfigSchema(isSrc: boolean) {
@@ -23,7 +22,7 @@ function createConfigSchema(isSrc: boolean) {
       })
       .default(defaultAliases),
 
-    baseDir: z.string().default(isSrc ? path.resolve('./src') : process.cwd()),
+    baseDir: z.string().default(isSrc ? 'src' : ''),
 
     commands: z
       .object({

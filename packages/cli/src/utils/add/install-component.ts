@@ -11,7 +11,10 @@ import {
 import type { OutputComponent, OutputFile } from '@/registry/schema';
 import { validateRegistryComponent } from '@/registry/client';
 
-export type Resolver = (file: string) => Promise<unknown | undefined>;
+/**
+ * Resolve file, throw error if not found
+ */
+export type Resolver = (file: string) => Promise<unknown>;
 
 type DownloadedComponents = Omit<OutputComponent, 'subComponents'>[];
 
@@ -111,13 +114,10 @@ export function createComponentInstaller(options: {
       if (cached) return cached;
 
       const comp = validateRegistryComponent(
-        await resolver(`${name}.json`).then((res) => {
-          if (!res) {
-            log.error(`component ${name} not found`);
-            process.exit(1);
-          }
-
-          return res;
+        await resolver(`${name}.json`).catch((e) => {
+          log.error(`component ${name} not found:`);
+          log.error(String(e));
+          process.exit(1);
         }),
       );
       const result: DownloadedComponents = [comp];
@@ -185,17 +185,25 @@ export function createComponentInstaller(options: {
 export function remoteResolver(url: string): Resolver {
   return async (file) => {
     const res = await fetch(`${url}/${file}`);
-    if (!res.ok) return;
+    if (!res.ok) {
+      throw new Error(`failed to fetch ${url}/${file}: ${res.statusText}`);
+    }
 
-    return res.json();
+    return await res.json();
   };
 }
 
 export function localResolver(dir: string): Resolver {
   return async (file) => {
+    const filePath = path.join(dir, file);
+
     return await fs
-      .readFile(path.join(dir, file))
-      .then((res) => JSON.parse(res.toString()) as OutputComponent)
-      .catch(() => undefined);
+      .readFile(filePath)
+      .then((res) => JSON.parse(res.toString()))
+      .catch((e) => {
+        throw new Error(`failed to resolve local file "${filePath}"`, {
+          cause: e,
+        });
+      });
   };
 }

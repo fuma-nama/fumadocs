@@ -31,13 +31,9 @@ export async function add(
     const spin = spinner();
     spin.start('fetching registry');
     const indexes = validateRegistryIndex(
-      await resolver('_registry.json').then((res) => {
-        if (!res) {
-          log.error(`Failed to fetch '_registry.json' file from registry`);
-          process.exit(1);
-        }
-
-        return res;
+      await resolver('_registry.json').catch((e) => {
+        log.error(String(e));
+        process.exit(1);
       }),
     );
 
