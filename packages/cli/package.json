@@ -43,11 +43,11 @@
     "zod": "^4.0.17"
   },
   "devDependencies": {
-    "shadcn": "2.9.3-canary.0",
-    "@types/node": "24.2.1",
+    "@types/node": "24.3.0",
     "eslint-config-custom": "workspace:*",
+    "shadcn": "2.10.0",
     "tsconfig": "workspace:*",
-    "tsx": "^4.20.3"
+    "tsx": "^4.20.4"
   },
   "publishConfig": {
     "access": "public"

@@ -41,7 +41,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@radix-ui/react-popover": "^1.1.14",
+    "@radix-ui/react-popover": "^1.1.15",
     "@shikijs/twoslash": "^3.9.2",
     "mdast-util-from-markdown": "^2.0.2",
     "mdast-util-gfm": "^3.1.0",
@@ -53,7 +53,7 @@
   "devDependencies": {
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.3",
-    "@types/node": "24.2.1",
+    "@types/node": "24.3.0",
     "@types/react": "^19.1.10",
     "eslint-config-custom": "workspace:*",
     "fumadocs-ui": "workspace:*",

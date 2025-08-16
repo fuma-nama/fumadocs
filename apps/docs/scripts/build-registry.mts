@@ -20,7 +20,7 @@ export async function buildRegistry() {
     }),
     writeShadcnRegistry(all, {
       dir: 'public/r',
-      baseUrl: 'http://localhost:3000',
+      baseUrl: 'https://fumadocs.dev',
     }),
   ]);
 }
