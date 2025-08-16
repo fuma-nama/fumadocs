@@ -11,23 +11,23 @@
   "dependencies": {
     "@fumadocs/mdx-remote": "workspace:*",
     "@orama/tokenizers": "^3.1.11",
-    "@react-router/node": "^7.8.0",
-    "@react-router/serve": "^7.8.0",
+    "@react-router/node": "^7.8.1",
+    "@react-router/serve": "^7.8.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "gray-matter": "^4.0.3",
     "isbot": "^5.1.29",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "react-router": "^7.8.0"
+    "react-router": "^7.8.1"
   },
   "devDependencies": {
-    "@react-router/dev": "^7.8.0",
-    "@tailwindcss/vite": "^4.1.11",
-    "@types/node": "^24.2.1",
+    "@react-router/dev": "^7.8.1",
+    "@tailwindcss/vite": "^4.1.12",
+    "@types/node": "^24.3.0",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
-    "tailwindcss": "^4.1.11",
+    "tailwindcss": "^4.1.12",
     "typescript": "^5.9.2",
     "vite": "^7.1.2",
     "vite-tsconfig-paths": "^5.1.4"
