@@ -257,7 +257,7 @@ function NavbarLinkItem({
 }
 
 function isSecondary(item: LinkItemType): boolean {
-  return (
-    ('secondary' in item && item.secondary === true) || item.type === 'icon'
-  );
+  if ('secondary' in item && item.secondary != null) return item.secondary;
+
+  return item.type === 'icon';
 }
