@@ -1,5 +1,11 @@
 # fumadocs
 
+## 1.0.0
+
+### Major Changes
+
+- 3f6e948: Redesign installer & fumadocs registry schema
+
 ## 0.2.1
 
 ### Patch Changes

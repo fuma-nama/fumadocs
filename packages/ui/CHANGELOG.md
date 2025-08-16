@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 15.6.11
+
+### Patch Changes
+
+- 6de6ff3: Restrict exports of `layouts` to avoid projects importing internal/unstable APIs
+- f0b1fee: Improve layout component customisation experience by handling RWD automatically
+  - fumadocs-core@15.6.11
+
 ## 15.6.10
 
 ### Patch Changes

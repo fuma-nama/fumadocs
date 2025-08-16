@@ -1,5 +1,14 @@
 # fumadocs-twoslash
 
+## 3.1.6
+
+### Patch Changes
+
+- 51e6687: Fix popup container styles
+- Updated dependencies [6de6ff3]
+- Updated dependencies [f0b1fee]
+  - fumadocs-ui@15.6.11
+
 ## 3.1.5
 
 ### Patch Changes
