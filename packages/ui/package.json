@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-ui",
-  "version": "15.6.10",
+  "version": "15.6.11",
   "description": "The framework for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
@@ -24,9 +24,41 @@
       "import": "./dist/i18n.js",
       "types": "./dist/i18n.d.ts"
     },
-    "./layouts/*": {
-      "import": "./dist/layouts/*.js",
-      "types": "./dist/layouts/*.d.ts"
+    "./layouts/home": {
+      "import": "./dist/layouts/home/index.js",
+      "types": "./dist/layouts/home/index.d.ts"
+    },
+    "./layouts/home/*": {
+      "import": "./dist/layouts/home/*.js",
+      "types": "./dist/layouts/home/*.d.ts"
+    },
+    "./layouts/docs": {
+      "import": "./dist/layouts/docs/index.js",
+      "types": "./dist/layouts/docs/index.d.ts"
+    },
+    "./layouts/docs/page": {
+      "import": "./dist/layouts/docs/page.js",
+      "types": "./dist/layouts/docs/page.d.ts"
+    },
+    "./layouts/docs-client": {
+      "import": "./dist/layouts/docs/client.js",
+      "types": "./dist/layouts/docs/client.d.ts"
+    },
+    "./layouts/notebook": {
+      "import": "./dist/layouts/notebook/index.js",
+      "types": "./dist/layouts/notebook/index.d.ts"
+    },
+    "./layouts/notebook-client": {
+      "import": "./dist/layouts/notebook/client.js",
+      "types": "./dist/layouts/notebook/client.d.ts"
+    },
+    "./layouts/links": {
+      "import": "./dist/layouts/links.js",
+      "types": "./dist/layouts/links.d.ts"
+    },
+    "./layouts/shared": {
+      "import": "./dist/layouts/shared.js",
+      "types": "./dist/layouts/shared.d.ts"
     },
     "./page": {
       "node": "./dist/page.server.js",

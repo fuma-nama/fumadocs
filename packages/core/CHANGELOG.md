@@ -1,5 +1,7 @@
 # next-docs-zeta
 
+## 15.6.11
+
 ## 15.6.10
 
 ### Patch Changes

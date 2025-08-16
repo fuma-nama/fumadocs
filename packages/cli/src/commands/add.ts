@@ -6,32 +6,43 @@ import {
   outro,
   spinner,
 } from '@clack/prompts';
-import type { OutputComponent, OutputIndex } from '@/build';
 import picocolors from 'picocolors';
-import type { Config } from '@/config';
-import { installComponent, type Resolver } from '@/utils/add/install-component';
+import {
+  type ComponentInstaller,
+  createComponentInstaller,
+  type Resolver,
+} from '@/utils/add/install-component';
 import { installDeps } from '@/utils/add/install-deps';
+import type { LoadedConfig } from '@/config';
+import { validateRegistryIndex } from '@/registry/client';
 
-export async function add(input: string[], resolver: Resolver, config: Config) {
+export async function add(
+  input: string[],
+  resolver: Resolver,
+  config: LoadedConfig,
+) {
+  const installer = createComponentInstaller({
+    resolver,
+    config,
+  });
   let target = input;
 
   if (input.length === 0) {
     const spin = spinner();
     spin.start('fetching registry');
-    const registry = (await resolver('_registry.json')) as
-      | OutputIndex[]
-      | undefined;
-    spin.stop(picocolors.bold(picocolors.greenBright('registry fetched')));
+    const indexes = validateRegistryIndex(
+      await resolver('_registry.json').catch((e) => {
+        log.error(String(e));
+        process.exit(1);
+      }),
+    );
 
-    if (!registry) {
-      log.error(`Failed to fetch '_registry.json' file from registry`);
-      throw new Error(`Failed to fetch registry`);
-    }
+    spin.stop(picocolors.bold(picocolors.greenBright('registry fetched')));
 
     const value = await multiselect({
       message: 'Select components to install',
-      options: registry.map((item) => ({
-        label: item.name,
+      options: indexes.map((item) => ({
+        label: item.title,
         value: item.name,
         hint: item.description,
       })),
@@ -45,15 +56,12 @@ export async function add(input: string[], resolver: Resolver, config: Config) {
     target = value;
   }
 
-  await install(target, resolver, config);
+  await install(target, installer);
 }
 
-export async function install(
-  target: string[],
-  resolver: Resolver,
-  config: Config,
-) {
-  const outputs: OutputComponent[] = [];
+export async function install(target: string[], installer: ComponentInstaller) {
+  const dependencies: Record<string, string | null> = {};
+  const devDependencies: Record<string, string | null> = {};
 
   for (const name of target) {
     intro(
@@ -62,19 +70,22 @@ export async function install(
       ),
     );
 
-    const output = await installComponent(name, resolver, config);
-    if (!output) {
-      log.error(`Failed to install ${name}: not found`);
-      continue;
-    }
+    try {
+      const output = await installer.install(name);
 
-    outro(picocolors.bold(picocolors.greenBright(`${name} installed`)));
-    outputs.push(output);
+      Object.assign(dependencies, output.dependencies);
+      Object.assign(devDependencies, output.devDependencies);
+
+      outro(picocolors.bold(picocolors.greenBright(`${name} installed`)));
+    } catch (e) {
+      log.error(String(e));
+      throw e;
+    }
   }
 
   intro(picocolors.bold('New Dependencies'));
 
-  await installDeps(outputs);
+  await installDeps(dependencies, devDependencies);
 
   outro(picocolors.bold(picocolors.greenBright('Successful')));
 }

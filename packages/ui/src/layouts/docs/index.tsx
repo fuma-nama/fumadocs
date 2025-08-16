@@ -25,12 +25,12 @@ import {
   type LinkItemType,
 } from '@/layouts/links';
 import { RootToggle } from '@/components/layout/root-toggle';
-import { type BaseLayoutProps, getLinks } from './shared';
+import { type BaseLayoutProps, getLinks } from '@/layouts/shared';
 import {
   LanguageToggle,
   LanguageToggleText,
 } from '@/components/layout/language-toggle';
-import { CollapsibleControl, LayoutBody, Navbar } from '@/layouts/docs-client';
+import { CollapsibleControl, LayoutBody, Navbar } from '@/layouts/docs/client';
 import { TreeContextProvider } from '@/contexts/tree';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 import {

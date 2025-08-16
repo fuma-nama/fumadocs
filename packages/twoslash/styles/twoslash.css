@@ -14,11 +14,13 @@
   display: flex;
 }
 
-.twoslash-completion-list {
+.twoslash-completion-list,
+.twoslash-popup-container {
   position: relative;
   user-select: none;
   display: flex;
   margin-top: 8px;
+  width: 20rem;
   margin-right: -20rem;
   flex-direction: column;
   white-space: normal;
@@ -31,7 +33,6 @@
   z-index: 8;
   color: var(--color-fd-popover-foreground);
   background-color: var(--color-fd-popover);
-  width: 20rem;
 }
 
 .twoslash-completion-cursor {
