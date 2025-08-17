@@ -119,42 +119,40 @@ export function Header({
             <NavbarLinkItem key={i} item={item} className="text-sm" />
           ))}
       </ul>
-      <div className="flex flex-row items-center justify-end gap-1.5 flex-1">
-        {searchToggle.enabled !== false && (
-          <>
-            {searchToggle.components?.sm ?? (
-              <SearchToggle className="p-2 lg:hidden" hideIfDisabled />
-            )}
-            {searchToggle.components?.lg ?? (
-              <LargeSearchToggle
-                className="w-full rounded-full ps-2.5 max-w-[240px] max-lg:hidden"
-                hideIfDisabled
-              />
-            )}
-          </>
-        )}
-        {themeSwitch.enabled !== false &&
-          (themeSwitch.component ?? (
-            <ThemeToggle className="max-lg:hidden" mode={themeSwitch?.mode} />
+      <div className="flex flex-row items-center justify-end gap-1.5 flex-1 max-lg:hidden">
+        {searchToggle.enabled !== false &&
+          (searchToggle.components?.lg ?? (
+            <LargeSearchToggle
+              className="w-full rounded-full ps-2.5 max-w-[240px]"
+              hideIfDisabled
+            />
           ))}
+        {themeSwitch.enabled !== false &&
+          (themeSwitch.component ?? <ThemeToggle mode={themeSwitch?.mode} />)}
         {i18n ? (
-          <LanguageToggle className="max-lg:hidden">
+          <LanguageToggle>
             <Languages className="size-5" />
           </LanguageToggle>
         ) : null}
+        <div className="flex flex-row items-center empty:hidden">
+          {navItems.filter(isSecondary).map((item, i) => (
+            <NavbarLinkItem key={i} item={item} />
+          ))}
+        </div>
       </div>
-      <ul className="flex flex-row items-center">
-        {navItems.filter(isSecondary).map((item, i) => (
-          <NavbarLinkItem key={i} item={item} className="max-lg:hidden" />
-        ))}
-        <Menu className="lg:hidden">
+      <ul className="flex flex-row items-center ms-auto -me-1.5 lg:hidden">
+        {searchToggle.enabled !== false &&
+          (searchToggle.components?.sm ?? (
+            <SearchToggle className="p-2" hideIfDisabled />
+          ))}
+        <Menu>
           <MenuTrigger
             aria-label="Toggle Menu"
             className={cn(
               buttonVariants({
                 size: 'icon',
                 color: 'ghost',
-                className: 'group -me-1.5',
+                className: 'group',
               }),
             )}
             enableHover={nav.enableHoverToOpen}
