@@ -1,11 +1,15 @@
 import type { Root } from 'mdast';
 import type { Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
-import { installDependenciesCommand } from 'nypm';
+import {
+  installDependenciesCommand,
+  PackageManagerName,
+  packageManagers as packageManagersMap,
+} from 'nypm';
 import type { MdxJsxAttribute, MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
 
 interface PackageManager {
-  name: string;
+  name: PackageManagerName;
 
   /**
    * Convert from npm to another package manager
@@ -35,12 +39,10 @@ const aliases = ['npm', 'package-install'];
  */
 export function remarkNpm({
   persist = false,
-  packageManagers = [
-    { command: (cmd) => `${installDependenciesCommand('npm')} ${cmd}`, name: 'npm' },
-    { command: (cmd) => `${installDependenciesCommand('pnpm')} ${cmd}`, name: 'pnpm' },
-    { command: (cmd) => `${installDependenciesCommand('yarn')} ${cmd}`, name: 'yarn' },
-    { command: (cmd) => `${installDependenciesCommand('bun')} ${cmd}`, name: 'bun' },
-  ],
+  packageManagers = packageManagersMap.map(({ name }) => ({
+    name,
+    command: (cmd) => `${installDependenciesCommand(name)} ${cmd}`,
+  })),
 }: RemarkNpmOptions = {}): Transformer<Root, Root> {
   return (tree) => {
     visit(tree, 'code', (node) => {
