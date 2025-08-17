@@ -8,7 +8,7 @@
     "build:post": "bun ./scripts/post-build.ts",
     "clean": "rimraf .next",
     "dev": "next dev --turbo",
-    "lint": "fumadocs-mdx && tsx ./scripts/lint.mts && eslint .",
+    "lint": "fumadocs-mdx && bun ./scripts/lint.ts && eslint .",
     "start": "next start"
   },
   "dependencies": {

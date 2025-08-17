@@ -30,7 +30,6 @@
     "clean": "rimraf dist",
     "dev": "tsup --watch",
     "lint": "eslint .",
-    "sync": "tsx ./scripts/sync.ts",
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
@@ -46,8 +45,7 @@
     "@types/node": "24.3.0",
     "eslint-config-custom": "workspace:*",
     "shadcn": "2.10.0",
-    "tsconfig": "workspace:*",
-    "tsx": "^4.20.4"
+    "tsconfig": "workspace:*"
   },
   "publishConfig": {
     "access": "public"
