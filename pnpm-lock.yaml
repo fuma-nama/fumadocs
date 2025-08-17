@@ -14,6 +14,9 @@ importers:
       '@eslint/js':
         specifier: ^9.33.0
         version: 9.33.0
+      bun:
+        specifier: ^1.2.20
+        version: 1.2.20
       concurrently:
         specifier: ^9.2.0
         version: 9.2.0
@@ -252,9 +255,6 @@ importers:
       tsconfig:
         specifier: workspace:*
         version: link:../../packages/tsconfig
-      tsx:
-        specifier: ^4.20.4
-        version: 4.20.4
       typescript:
         specifier: ^5.9.2
         version: 5.9.2
@@ -913,9 +913,6 @@ importers:
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
-      tsx:
-        specifier: ^4.20.4
-        version: 4.20.4
 
   packages/content-collections:
     devDependencies:
@@ -3277,6 +3274,61 @@ packages:
   '@oramacloud/client@2.1.4':
     resolution: {integrity: sha512-uNPFs4wq/iOPbggCwTkVNbIr64Vfd7ZS/h+cricXVnzXWocjDTfJ3wLL4lr0qiSu41g8z+eCAGBqJ30RO2O4AA==}
 
+  '@oven/bun-darwin-aarch64@1.2.20':
+    resolution: {integrity: sha512-zygk+yeaww9kBw2JBWwA13KyOKySxbnetms/WyRFaUYhxiuJHkzv1c6/Ou7sIHa9Gbq4fYQEhx88Ywy1wu2oTQ==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@oven/bun-darwin-x64-baseline@1.2.20':
+    resolution: {integrity: sha512-bxXZlLD6DJ8rc/Ht0Cgm0BH1AJVO/axOElXJP42LUUKQ/U4t3OKkFDbFiTPGphcy5teMLkoYl+a2Cz8P9q2gVQ==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@oven/bun-darwin-x64@1.2.20':
+    resolution: {integrity: sha512-k2akVmSvJHuzpwgwIU8ltary7EQbqlbvxgtYlVqYvnqUpRdRbkuJXAZhN5zuDNTftaG4l22Q/bX04tBB8Txmjg==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@oven/bun-linux-aarch64-musl@1.2.20':
+    resolution: {integrity: sha512-zB3aKckyUdKENLP+lm/PoXQPBTthJsY7dhYih+qVT95N29acLO2eWeSHgRkS7Pl2FV+mLJo9LvjRhC8oaSSoOw==}
+    cpu: [aarch64]
+    os: [linux]
+
+  '@oven/bun-linux-aarch64@1.2.20':
+    resolution: {integrity: sha512-g+CzF02RzKgSmuEHNLoDTtiiQR33cEZWcd/tWR+24h92xe5wXuqQsV7vQJLR6e44BWkDOACpTIrfW4UAaHw4Cw==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@oven/bun-linux-x64-baseline@1.2.20':
+    resolution: {integrity: sha512-xtYPn84ur9U7YaS0+rwjs6YMgSv5Z4gMnqPQ1QTLw92nt1v9Cw17YypVab4zUk222o5Y6kS3DRkDdSHBh8uQfA==}
+    cpu: [x64]
+    os: [linux]
+
+  '@oven/bun-linux-x64-musl-baseline@1.2.20':
+    resolution: {integrity: sha512-rANapFZRrgOTeotaf556iIxguyjQbensL6gT3cXZDnXG+aVhv65hSnjqzM7vfHxlzoXbAmoUkJOpce0qEg/HlA==}
+    cpu: [x64]
+    os: [linux]
+
+  '@oven/bun-linux-x64-musl@1.2.20':
+    resolution: {integrity: sha512-XPtQITGbJXgUrMXOJo3IShwQd3awB93ZIh5+4S3DF9Ek/lwXVSuueIIAfnveR/r9JRgEA5+g/1ZHVf1/3qaElg==}
+    cpu: [x64]
+    os: [linux]
+
+  '@oven/bun-linux-x64@1.2.20':
+    resolution: {integrity: sha512-KJZ0zJKadKCD6EI/mBv/0PUysMpd1r4o3WhQ73PjCZx2w95Ka2fSBAIsy9e/rxc07D4LHr26nGyMmC1K8IcS6Q==}
+    cpu: [x64]
+    os: [linux]
+
+  '@oven/bun-windows-x64-baseline@1.2.20':
+    resolution: {integrity: sha512-2291+pyVQ771zd8jgCNJ/jpPBaLJg/X7BWX06M9GpBNmC1tu3Rfr3LaWP8C/XTi80PZJnzNZGeMlcDhRY57y/A==}
+    cpu: [x64]
+    os: [win32]
+
+  '@oven/bun-windows-x64@1.2.20':
+    resolution: {integrity: sha512-Jt4bAf30qG4SvnL6tO4QzZNbMjg5sLZHif22rZLwX7W6rWPAvgqyYdwDSGHN8Kkbe6KqV4DceyKQgRr83sU66Q==}
+    cpu: [x64]
+    os: [win32]
+
   '@oxc-transform/binding-android-arm64@0.82.1':
     resolution: {integrity: sha512-Ox6tS6x+GNuKz1l73eDJplwiJvgQhrXdK1KHCItSq3MgSFBWc3BgaC41xh4mHQrS1pJjHuU+DsRfqxHsgMYqpw==}
     engines: {node: '>=14.0.0'}
@@ -5459,6 +5511,12 @@ packages:
   builtin-modules@3.3.0:
     resolution: {integrity: sha512-zhaCDicdLuWN5UbN5IMnFqNMhNfo919sH85y2/ea+5Yg9TsTkeZxpL+JLbp6cgYFS4sRLp3YV4S6yDuqVWHYOw==}
     engines: {node: '>=6'}
+
+  bun@1.2.20:
+    resolution: {integrity: sha512-1ZGQynT+jPOHLY4IfzSubjbWcXsY2Z+irhW5D8RKC0wQ6KG4MvtgniAYQbSFYINGg8Wb2ydx+WgAG2BdhngAfw==}
+    cpu: [arm64, x64, aarch64]
+    os: [darwin, linux, win32]
+    hasBin: true
 
   bundle-require@5.1.0:
     resolution: {integrity: sha512-3WrrOuZiyaaZPWiEt4G3+IffISVC9HYlWueJEBWED4ZH4aIAC2PnkdnuRrR94M+w6yGWn4AglWtJtBI8YqvgoA==}
@@ -12575,6 +12633,39 @@ snapshots:
       '@orama/orama': 3.1.11
       lodash: 4.17.21
 
+  '@oven/bun-darwin-aarch64@1.2.20':
+    optional: true
+
+  '@oven/bun-darwin-x64-baseline@1.2.20':
+    optional: true
+
+  '@oven/bun-darwin-x64@1.2.20':
+    optional: true
+
+  '@oven/bun-linux-aarch64-musl@1.2.20':
+    optional: true
+
+  '@oven/bun-linux-aarch64@1.2.20':
+    optional: true
+
+  '@oven/bun-linux-x64-baseline@1.2.20':
+    optional: true
+
+  '@oven/bun-linux-x64-musl-baseline@1.2.20':
+    optional: true
+
+  '@oven/bun-linux-x64-musl@1.2.20':
+    optional: true
+
+  '@oven/bun-linux-x64@1.2.20':
+    optional: true
+
+  '@oven/bun-windows-x64-baseline@1.2.20':
+    optional: true
+
+  '@oven/bun-windows-x64@1.2.20':
+    optional: true
+
   '@oxc-transform/binding-android-arm64@0.82.1':
     optional: true
 
@@ -15315,6 +15406,20 @@ snapshots:
       ieee754: 1.2.1
 
   builtin-modules@3.3.0: {}
+
+  bun@1.2.20:
+    optionalDependencies:
+      '@oven/bun-darwin-aarch64': 1.2.20
+      '@oven/bun-darwin-x64': 1.2.20
+      '@oven/bun-darwin-x64-baseline': 1.2.20
+      '@oven/bun-linux-aarch64': 1.2.20
+      '@oven/bun-linux-aarch64-musl': 1.2.20
+      '@oven/bun-linux-x64': 1.2.20
+      '@oven/bun-linux-x64-baseline': 1.2.20
+      '@oven/bun-linux-x64-musl': 1.2.20
+      '@oven/bun-linux-x64-musl-baseline': 1.2.20
+      '@oven/bun-windows-x64': 1.2.20
+      '@oven/bun-windows-x64-baseline': 1.2.20
 
   bundle-require@5.1.0(esbuild@0.25.9):
     dependencies:

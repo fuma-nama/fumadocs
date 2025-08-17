@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "build:docs": "node ./scripts/generate-docs.mjs",
+    "build:docs": "bun ./scripts/generate-docs.ts",
     "dev": "next dev --turbo",
     "start": "next start",
     "types:check": "fumadocs-mdx && tsc --noEmit"

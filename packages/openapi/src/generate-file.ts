@@ -1,6 +1,5 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
-import { resolve } from 'node:path';
 import { glob } from 'tinyglobby';
 import {
   generateAll,
@@ -11,10 +10,10 @@ import {
   generateTags,
 } from './generate';
 import {
-  type DocumentInput,
   processDocument,
   type ProcessedDocument,
 } from '@/utils/process-document';
+import type { OpenAPIServer } from '@/server';
 
 interface GenerateFileOutput {
   /**
@@ -102,9 +101,9 @@ interface BaseName {
 
 interface BaseConfig extends GenerateOptions {
   /**
-   * Schema files
+   * Schema files, or the OpenAPI server object
    */
-  input: string[] | string;
+  input: string[] | string | OpenAPIServer;
 
   /**
    * Output directory
@@ -120,38 +119,52 @@ interface BaseConfig extends GenerateOptions {
 }
 
 export async function generateFiles(options: Config): Promise<void> {
-  const { input, cwd = process.cwd() } = options;
-  const urlInputs: string[] = [];
-  const fileInputs: string[] = [];
+  const { cwd = process.cwd() } = options;
+  const input =
+    typeof options.input === 'string' ? [options.input] : options.input;
+  let schemas: Record<string, ProcessedDocument> = {};
 
-  for (const v of typeof input === 'string' ? [input] : input) {
-    if (isUrl(v)) {
-      urlInputs.push(v);
-    } else {
-      fileInputs.push(v);
+  if (Array.isArray(input)) {
+    const targets: string[] = [];
+
+    for (const item of input) {
+      if (isUrl(item)) {
+        targets.push(item);
+      } else {
+        targets.push(...(await glob(item, { cwd, absolute: true })));
+      }
     }
+
+    await Promise.all(
+      targets.map(async (item) => {
+        schemas[item] = await processDocument(item);
+      }),
+    );
+  } else {
+    schemas = await input.getSchemas();
   }
 
-  const resolvedInputs = [
-    ...(await glob(fileInputs, { cwd, absolute: false })),
-    ...urlInputs,
-  ];
+  const resolvedSchemas = Object.entries(schemas);
 
-  if (resolvedInputs.length === 0) {
-    throw new Error(
-      `No input files found. Tried resolving: ${
-        typeof input === 'string' ? input : input.join(', ')
-      }`,
-    );
+  if (resolvedSchemas.length === 0) {
+    throw new Error('No input files found.');
   }
 
   await Promise.all(
-    resolvedInputs.map((input) => generateFromDocument(input, options)),
+    resolvedSchemas.map(([id, document]) =>
+      generateFromDocument(id, document, options),
+    ),
   );
 }
 
-async function generateFromDocument(pathOrUrl: string, options: Config) {
+async function generateFromDocument(
+  schemaId: string,
+  document: ProcessedDocument,
+  options: Config,
+) {
   const { output, cwd = process.cwd(), slugify = defaultSlugify } = options;
+  const outputDir = path.join(cwd, output);
+
   let nameFn: (
     output: GeneratePageOutput | GenerateTagOutput | GenerateFileOutput,
     document: ProcessedDocument['document'],
@@ -168,9 +181,9 @@ async function generateFromDocument(pathOrUrl: string, options: Config) {
       }
 
       if (options.per === 'file') {
-        return isUrl(pathOrUrl)
+        return isUrl(schemaId)
           ? 'index'
-          : path.basename(pathOrUrl, path.extname(pathOrUrl));
+          : path.basename(schemaId, path.extname(schemaId));
       }
 
       const result = output as GeneratePageOutput;
@@ -200,9 +213,6 @@ async function generateFromDocument(pathOrUrl: string, options: Config) {
   } else {
     nameFn = options.name as typeof nameFn;
   }
-
-  const document = await dereference(pathOrUrl, options);
-  const outputDir = path.join(cwd, output);
 
   async function write(file: string, content: string) {
     await mkdir(path.dirname(file), { recursive: true });
@@ -248,10 +258,10 @@ async function generateFromDocument(pathOrUrl: string, options: Config) {
   }
 
   if (options.per === 'file') {
-    const result = await generateAll(pathOrUrl, document, options);
+    const result = await generateAll(schemaId, document, options);
     const filename = nameFn(
       {
-        pathOrUrl,
+        pathOrUrl: schemaId,
         content: result,
       },
       document.document,
@@ -262,7 +272,7 @@ async function generateFromDocument(pathOrUrl: string, options: Config) {
     await write(outPath, result);
     console.log(`Generated: ${outPath}`);
   } else if (options.per === 'tag') {
-    const results = await generateTags(pathOrUrl, document, options);
+    const results = await generateTags(schemaId, document, options);
 
     for (const result of results) {
       const filename = nameFn(result, document.document);
@@ -271,7 +281,7 @@ async function generateFromDocument(pathOrUrl: string, options: Config) {
       console.log(`Generated: ${outPath}`);
     }
   } else {
-    const results = await generatePages(pathOrUrl, document, options);
+    const results = await generatePages(schemaId, document, options);
     const mapping = new Map<string, GeneratePageOutput>();
 
     for (const result of results) {
@@ -322,18 +332,4 @@ function getOutputPathFromRoute(path: string): string {
 
 function defaultSlugify(s: string): string {
   return s.replace(/\s+/g, '-').toLowerCase();
-}
-
-async function dereference(
-  pathOrDocument: DocumentInput,
-  options: GenerateOptions,
-) {
-  return processDocument(
-    // resolve paths
-    typeof pathOrDocument === 'string' &&
-      !pathOrDocument.startsWith('http://') &&
-      !pathOrDocument.startsWith('https://')
-      ? resolve(options.cwd ?? process.cwd(), pathOrDocument)
-      : pathOrDocument,
-  );
 }

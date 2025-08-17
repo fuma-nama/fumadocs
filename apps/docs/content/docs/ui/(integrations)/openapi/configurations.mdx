@@ -9,12 +9,8 @@ Pass options to the `generateFiles` function.
 
 ### Input
 
-An array of input files.
-Allowed:
-
-- File Paths
-- External URLs
-- Wildcard
+- OpenAPI Server object.
+- anything supported by [`input`](#input-1).
 
 ```ts
 import { generateFiles } from 'fumadocs-openapi';
@@ -40,7 +36,10 @@ void generateFiles({
 
 Customise how the page is generated, default to `operation`.
 
-> Operation in OpenAPI schema refers to an API endpoint with specific method like `/api/weather:GET`.
+<Callout>
+  Operation refers to an API endpoint with specific method like
+  `/api/weather:GET`.
+</Callout>
 
 | mode      |                             | output                                |
 | --------- | --------------------------- | ------------------------------------- |
@@ -162,6 +161,35 @@ tags:
 
 The server to render pages.
 
+### Input
+
+- File Paths (including wildcards)
+- External URLs
+- A function (see below)
+
+```ts tab="Basic"
+import { createOpenAPI } from 'fumadocs-openapi/server';
+
+export const openapi = createOpenAPI({
+  input: ['./unkey.json'],
+});
+```
+
+```ts tab="Function"
+import { createOpenAPI } from 'fumadocs-openapi/server';
+
+export const openapi = createOpenAPI({
+  async input() {
+    return {
+      // [id]: downloaded OpenAPI Schema
+      my_schema: await fetch(
+        'https://registry.scalar.com/@scalar/apis/galaxy/latest?format=json',
+      ).then((res) => res.json()),
+    };
+  },
+});
+```
+
 ### Generate Code Samples
 
 Generate custom code samples for each API endpoint. Make sure to install the types package to give you type-safety when customising it:
@@ -235,32 +263,3 @@ export const openapi = createOpenAPI({
   },
 });
 ```
-
-## Advanced
-
-### Using API Page
-
-> This is not a public API, use it carefully.
-
-To use the `APIPage` component in your MDX files:
-
-```mdx
----
-title: Delete Api
-full: true
----
-
-<APIPage
-  document="./unkey.json"
-  operations={[{ path: '/v1/apis.deleteApi', method: 'post' }]}
-  hasHead={false}
-/>
-```
-
-Unlike using the `generateFiles()` function, this supports revalidation of the OpenAPI schema if given an URL.
-
-| Prop         | Description                               |
-| ------------ | ----------------------------------------- |
-| `document`   | OpenAPI Schema                            |
-| `operations` | Operations (API endpoints) to be rendered |
-| `hasHead`    | Enable to render the heading of operation |

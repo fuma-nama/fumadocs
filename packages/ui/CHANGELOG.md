@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 15.6.12
+
+### Patch Changes
+
+- fe31a72: Fix custom components auto RWD handling for home layout
+  - fumadocs-core@15.6.12
+
 ## 15.6.11
 
 ### Patch Changes

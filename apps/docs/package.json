@@ -4,11 +4,11 @@
   "private": true,
   "scripts": {
     "build": "pnpm build:pre && next build && pnpm build:post",
-    "build:pre": "tsx ./scripts/pre-build.mts",
-    "build:post": "tsx ./scripts/post-build.mts",
+    "build:pre": "bun ./scripts/pre-build.ts",
+    "build:post": "bun ./scripts/post-build.ts",
     "clean": "rimraf .next",
     "dev": "next dev --turbo",
-    "lint": "fumadocs-mdx && tsx ./scripts/lint.mts && eslint .",
+    "lint": "fumadocs-mdx && bun ./scripts/lint.ts && eslint .",
     "start": "next start"
   },
   "dependencies": {
@@ -79,7 +79,6 @@
     "tinyglobby": "^0.2.14",
     "ts-morph": "^26.0.0",
     "tsconfig": "workspace:*",
-    "tsx": "^4.20.4",
     "typescript": "^5.9.2"
   }
 }

@@ -11,10 +11,7 @@ import type { GenerateOptions } from '@/generate';
 import { idToTitle } from '@/utils/id-to-title';
 import type { Document, TagObject } from '@/types';
 import type { NoReference } from '@/utils/schema';
-import type {
-  DocumentInput,
-  ProcessedDocument,
-} from '@/utils/process-document';
+import type { ProcessedDocument } from '@/utils/process-document';
 
 interface StaticData {
   toc: TableOfContents;
@@ -34,7 +31,7 @@ export type DocumentContext =
     };
 
 export function generateDocument(
-  input: DocumentInput,
+  schemaId: string,
   processed: ProcessedDocument,
   pageProps: Omit<ApiPageProps, 'document'>,
   options: GenerateOptions & {
@@ -52,7 +49,7 @@ export function generateDocument(
   const extend = frontmatter?.(options.title, options.description, context);
   const page: ApiPageProps = {
     ...pageProps,
-    document: options.inlineDocument ? processed.downloaded : input,
+    document: schemaId,
   };
 
   let meta: object | undefined;

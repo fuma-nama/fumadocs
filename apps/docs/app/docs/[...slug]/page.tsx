@@ -25,7 +25,7 @@ import { Callout } from 'fumadocs-ui/components/callout';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
 import * as Preview from '@/components/preview';
 import { createMetadata } from '@/lib/metadata';
-import { openapi, source } from '@/lib/source';
+import { source } from '@/lib/source';
 import { Wrapper } from '@/components/preview/wrapper';
 import { Mermaid } from '@/components/mdx/mermaid';
 import { Rate } from '@/components/rate';
@@ -46,6 +46,7 @@ import { APIPage } from 'fumadocs-openapi/ui';
 import { LLMCopyButton, ViewOptions } from '@/components/ai/page-actions';
 import * as path from 'node:path';
 import { Banner } from 'fumadocs-ui/components/banner';
+import { openapi } from '@/lib/openapi';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {

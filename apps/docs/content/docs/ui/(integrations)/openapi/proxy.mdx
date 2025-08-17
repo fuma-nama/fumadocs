@@ -19,7 +19,7 @@ We can use it for executing HTTP requests on the OpenAPI playground, when the ta
 Create a route handler for proxy server.
 
 ```ts title="/api/proxy/route.ts"
-import { openapi } from '@/lib/source';
+import { openapi } from '@/lib/openapi';
 
 export const { GET, HEAD, PUT, POST, PATCH, DELETE } = openapi.createProxy({
   // optional, we recommend to set a list of allowed origins for proxied requests

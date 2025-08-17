@@ -1,13 +1,14 @@
-import { buildRegistry } from '@/scripts/build-registry.mjs';
+import { buildRegistry } from '@/scripts/build-registry';
 import * as OpenAPI from 'fumadocs-openapi';
 import { rimraf } from 'rimraf';
+import { openapi } from '@/lib/openapi';
 
 export async function generateDocs() {
   await rimraf('./content/docs/openapi/(generated)');
 
   await Promise.all([
     OpenAPI.generateFiles({
-      input: ['./scalar.yaml'],
+      input: openapi,
       output: './content/docs/openapi/(generated)',
       per: 'operation',
       includeDescription: true,
