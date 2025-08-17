@@ -16,6 +16,7 @@
       "outputs": [
         ".output",
         "public/registry",
+        "public/r",
         ".contentlayer/**",
         ".source/**",
         "!.contentlayer/.cache/**",
