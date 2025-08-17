@@ -1,5 +1,6 @@
 import * as OpenAPI from 'fumadocs-openapi';
 import { rimraf } from 'rimraf';
+import { openapi } from '@/lib/openapi';
 
 const out = './content/docs/(api)';
 
@@ -12,8 +13,7 @@ async function generate() {
   });
 
   await OpenAPI.generateFiles({
-    // input files
-    input: ['./openapi.json'],
+    input: openapi,
     output: out,
   });
 }

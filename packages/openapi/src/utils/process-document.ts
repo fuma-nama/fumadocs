@@ -4,8 +4,6 @@ import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import { bundle, dereference, upgrade } from '@scalar/openapi-parser';
 import { fetchUrls, readFiles } from '@scalar/openapi-parser/plugins';
 
-export type DocumentInput = string | OpenAPIV3_1.Document | OpenAPIV3.Document;
-
 export type ProcessedDocument = {
   document: NoReference<Document>;
   dereferenceMap: DereferenceMap;
@@ -18,7 +16,7 @@ const cache = new Map<string, ProcessedDocument>();
  * process & reference input document to a Fumadocs OpenAPI compatible format
  */
 export async function processDocument(
-  input: DocumentInput,
+  input: string | OpenAPIV3_1.Document | OpenAPIV3.Document,
   disableCache = false,
 ): Promise<ProcessedDocument> {
   const cached =

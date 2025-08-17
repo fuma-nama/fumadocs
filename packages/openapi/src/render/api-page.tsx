@@ -2,31 +2,18 @@ import Slugger from 'github-slugger';
 import { Operation } from '@/render/operation';
 import type { RenderContext } from '@/types';
 import { createMethod } from '@/server/create-method';
-import { createRenders, type Renderer } from '@/render/renderer';
+import { createRenders } from '@/render/renderer';
 import type { OpenAPIV3_1 } from 'openapi-types';
 import {
-  type DocumentInput,
   processDocument,
   type ProcessedDocument,
 } from '@/utils/process-document';
 import { defaultAdapters } from '@/media/adapter';
+import type { SharedOpenAPIOptions } from '@/server';
 
-type ApiPageContextProps = Pick<
-  Partial<RenderContext>,
-  | 'shikiOptions'
-  | 'generateTypeScriptSchema'
-  | 'generateCodeSamples'
-  | 'proxyUrl'
-  | 'showResponseSchema'
-  | 'disablePlayground'
-  | 'mediaAdapters'
->;
-
-export interface ApiPageProps extends ApiPageContextProps {
-  document: DocumentInput;
+export interface ApiPageProps extends SharedOpenAPIOptions {
+  document: Promise<ProcessedDocument> | string | ProcessedDocument;
   hasHead: boolean;
-
-  renderer?: Partial<Renderer>;
 
   /**
    * An array of operations
@@ -34,11 +21,6 @@ export interface ApiPageProps extends ApiPageContextProps {
   operations?: OperationItem[];
 
   webhooks?: WebhookItem[];
-
-  /**
-   * By default, it is disabled on dev mode
-   */
-  disableCache?: boolean;
 }
 
 export interface WebhookItem {
@@ -52,13 +34,11 @@ export interface OperationItem {
 }
 
 export async function APIPage(props: ApiPageProps) {
-  const {
-    operations,
-    hasHead = true,
-    webhooks,
-    disableCache = process.env.NODE_ENV === 'development',
-  } = props;
-  const processed = await processDocument(props.document, disableCache);
+  const { operations, hasHead = true, webhooks } = props;
+  const processed =
+    typeof props.document === 'string'
+      ? await processDocument(props.document)
+      : await props.document;
   const ctx = await getContext(processed, props);
   const { document } = processed;
 
@@ -121,9 +101,7 @@ export async function APIPage(props: ApiPageProps) {
 
 export async function getContext(
   schema: ProcessedDocument,
-  options: ApiPageContextProps & {
-    renderer?: Partial<Renderer>;
-  } = {},
+  options: SharedOpenAPIOptions = {},
 ): Promise<RenderContext> {
   const document = schema.document;
   const servers =

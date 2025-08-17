@@ -25,10 +25,19 @@ Please note that you must have Tailwind CSS v4 configured.
 
 ### Configure Pages
 
-Create an OpenAPI instance on the server. Fumadocs OpenAPI renders the pages on server-side.
+Create an OpenAPI instance on the server.
+
+```ts title="lib/openapi.ts"
+import { createOpenAPI } from 'fumadocs-openapi/server';
+
+export const openapi = createOpenAPI({
+  // the OpenAPI schema, you can also give it an external URL.
+  input: ['./unkey.json'],
+});
+```
 
 ```ts title="lib/source.ts"
-import { createOpenAPI, attachFile } from 'fumadocs-openapi/server';
+import { attachFile } from 'fumadocs-openapi/server';
 import { loader } from 'fumadocs-core/source';
 
 export const source = loader({
@@ -37,9 +46,6 @@ export const source = loader({
     attachFile,
   },
 });
-
-// [!code ++]
-export const openapi = createOpenAPI();
 ```
 
 Add `APIPage` to your MDX Components, so that you can use it in MDX files.
@@ -47,7 +53,7 @@ Add `APIPage` to your MDX Components, so that you can use it in MDX files.
 ```tsx title="mdx-components.tsx"
 import defaultComponents from 'fumadocs-ui/mdx';
 import { APIPage } from 'fumadocs-openapi/ui';
-import { openapi } from '@/lib/source';
+import { openapi } from '@/lib/openapi';
 import type { MDXComponents } from 'mdx/types';
 
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
@@ -59,7 +65,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
 }
 ```
 
-> It is a React Server Component.
+> `APIPage` is a React Server Component.
 
 ### Generate Files
 
@@ -67,12 +73,12 @@ You can generate MDX files directly from your OpenAPI schema.
 
 Create a script:
 
-```js title="scripts/generate-docs.mjs"
+```js title="scripts/generate-docs.ts"
 import { generateFiles } from 'fumadocs-openapi';
+import { openapi } from '@/lib/openapi';
 
 void generateFiles({
-  // the OpenAPI schema, you can also give it an external URL.
-  input: ['./unkey.json'],
+  input: openapi,
   output: './content/docs',
   // we recommend to enable it
   // make sure your endpoint description doesn't break MDX syntax.
@@ -85,7 +91,7 @@ void generateFiles({
 Generate docs with the script:
 
 ```bash
-node ./scripts/generate-docs.mjs
+bun ./scripts/generate-docs.ts
 ```
 
 ## Features

@@ -252,9 +252,6 @@ importers:
       tsconfig:
         specifier: workspace:*
         version: link:../../packages/tsconfig
-      tsx:
-        specifier: ^4.20.4
-        version: 4.20.4
       typescript:
         specifier: ^5.9.2
         version: 5.9.2

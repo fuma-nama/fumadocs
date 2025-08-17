@@ -5,10 +5,7 @@ import {
 } from '@/utils/generate-document';
 import { idToTitle } from '@/utils/id-to-title';
 import type { OperationItem, WebhookItem } from '@/render/api-page';
-import type {
-  DocumentInput,
-  ProcessedDocument,
-} from '@/utils/process-document';
+import type { ProcessedDocument } from '@/utils/process-document';
 
 export interface GenerateOptions {
   /**
@@ -54,6 +51,7 @@ export interface GenerateOptions {
   /**
    * Inline the entire OpenAPI document into the MDX file.
    *
+   * @deprecated Use the new `input` API on `createOpenAPI()` instead.
    * @defaultValue false
    */
   inlineDocument?: boolean;
@@ -77,7 +75,7 @@ export type GeneratePageOutput =
     };
 
 export async function generateAll(
-  input: DocumentInput,
+  schemaId: string,
   processed: ProcessedDocument,
   options: GenerateOptions = {},
 ): Promise<string> {
@@ -85,7 +83,7 @@ export async function generateAll(
   const items = getAPIPageItems(document);
 
   return generateDocument(
-    input,
+    schemaId,
     processed,
     {
       operations: items.operations,
@@ -104,7 +102,7 @@ export async function generateAll(
 }
 
 export async function generatePages(
-  input: DocumentInput,
+  schemaId: string,
   processed: ProcessedDocument,
   options: GenerateOptions = {},
 ): Promise<GeneratePageOutput[]> {
@@ -122,7 +120,7 @@ export async function generatePages(
       type: 'operation',
       item,
       content: generateDocument(
-        input,
+        schemaId,
         processed,
         {
           operations: [item],
@@ -153,7 +151,7 @@ export async function generatePages(
       type: 'webhook',
       item,
       content: generateDocument(
-        input,
+        schemaId,
         processed,
         {
           webhooks: [item],
@@ -175,7 +173,7 @@ export async function generatePages(
 }
 
 export async function generateTags(
-  input: DocumentInput,
+  schemaId: string,
   processed: ProcessedDocument,
   options: GenerateOptions = {},
 ): Promise<GenerateTagOutput[]> {
@@ -199,7 +197,7 @@ export async function generateTags(
     return {
       tag: tag.name,
       content: generateDocument(
-        input,
+        schemaId,
         processed,
         {
           operations,
