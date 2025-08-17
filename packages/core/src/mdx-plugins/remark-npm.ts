@@ -1,7 +1,7 @@
 import type { Root } from 'mdast';
 import type { Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
-import convert from 'npm-to-yarn';
+import { installDependenciesCommand } from 'nypm';
 import type { MdxJsxAttribute, MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
 
 interface PackageManager {
@@ -36,10 +36,10 @@ const aliases = ['npm', 'package-install'];
 export function remarkNpm({
   persist = false,
   packageManagers = [
-    { command: (cmd) => convert(cmd, 'npm'), name: 'npm' },
-    { command: (cmd) => convert(cmd, 'pnpm'), name: 'pnpm' },
-    { command: (cmd) => convert(cmd, 'yarn'), name: 'yarn' },
-    { command: (cmd) => convert(cmd, 'bun'), name: 'bun' },
+    { command: (cmd) => `${installDependenciesCommand('npm')} ${cmd}`, name: 'npm' },
+    { command: (cmd) => `${installDependenciesCommand('pnpm')} ${cmd}`, name: 'pnpm' },
+    { command: (cmd) => `${installDependenciesCommand('yarn')} ${cmd}`, name: 'yarn' },
+    { command: (cmd) => `${installDependenciesCommand('bun')} ${cmd}`, name: 'bun' },
   ],
 }: RemarkNpmOptions = {}): Transformer<Root, Root> {
   return (tree) => {

@@ -101,7 +101,7 @@
     "hast-util-to-jsx-runtime": "^2.3.6",
     "image-size": "^2.0.2",
     "negotiator": "^1.0.0",
-    "npm-to-yarn": "^3.0.1",
+    "nypm": "^0.6.1",
     "react-remove-scroll": "^2.7.1",
     "remark": "^15.0.0",
     "remark-gfm": "^4.0.1",
