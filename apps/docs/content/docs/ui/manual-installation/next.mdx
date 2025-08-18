@@ -1,40 +1,50 @@
 ---
-title: Manual Installation
-description: Add Fumadocs to existing projects.
+title: Next.js
+description: Setup Fumadocs on Next.js.
 ---
 
-Before continuing, make sure:
+Before continuing, make sure you have configured:
 
-- Next.js 15 and Tailwind CSS 4 are configured.
+- Next.js 15.
+- Tailwind CSS 4.
 
 ## Getting Started
 
 ```npm
-npm i fumadocs-ui fumadocs-core
+npm i fumadocs-ui fumadocs-core fumadocs-mdx @types/mdx
 ```
 
-### Content Source
+<Callout title='Content Source'>
+  Fumadocs supports different content sources, including Fumadocs MDX and [Content Collections](/docs/headless/content-collections).
 
-Fumadocs supports different content sources, including Fumadocs MDX and [Content Collections](/docs/headless/content-collections).
+In this guide, we will use Fumadocs MDX.
 
-Fumadocs MDX is our official content source, you can configure it with:
+</Callout>
 
-```package-install
-fumadocs-mdx @types/mdx
-```
+Update the following files:
 
 ```js tab="next.config.mjs"
 import { createMDX } from 'fumadocs-mdx/next';
-
-const withMDX = createMDX();
 
 /** @type {import('next').NextConfig} */
 const config = {
   reactStrictMode: true,
 };
 
+// [!code ++:2]
+const withMDX = createMDX();
 export default withMDX(config);
 ```
+
+```json tab="package.json"
+{
+  "scripts": {
+    "postinstall": "fumadocs-mdx" // [!code ++]
+  }
+}
+```
+
+Create the following files:
 
 <include cwd meta='tab="mdx-components.tsx"'>
   ../../examples/next-mdx/mdx-components.tsx
@@ -48,17 +58,7 @@ export const docs = defineDocs({
 });
 ```
 
-```json tab="package.json"
-{
-  "scripts": {
-    "postinstall": "fumadocs-mdx" // [!code ++]
-  }
-}
-```
-
-Finally, to access your content:
-
-```ts title="lib/source.ts"
+```ts tab="lib/source.ts"
 // .source folder will be generated when you run `next dev`
 import { docs } from '@/.source';
 import { loader } from 'fumadocs-core/source';
@@ -107,7 +107,7 @@ Add the following Tailwind CSS styles to `global.css`.
 
 > It doesn't come with a default font, you may choose one from `next/font`.
 
-### Layout
+### Routes
 
 Create a `app/layout.config.tsx` file to put the shared options for our layouts.
 
@@ -115,37 +115,21 @@ Create a `app/layout.config.tsx` file to put the shared options for our layouts.
   ../../examples/next-mdx/app/layout.config.tsx
 </include>
 
-Create a folder `/app/docs` for our docs, and give it a proper layout.
+Create the following routes:
 
-<include cwd meta='title="app/docs/layout.tsx"'>
+<include cwd meta='tab="app/docs/layout.tsx"'>
   ../../examples/next-mdx/app/docs/layout.tsx
 </include>
 
-> `pageTree` refers to Page Tree, it should be provided by your content source.
+<include cwd meta='tab="app/docs/[[...slug]]/page.tsx"'>
+  ../../examples/next-mdx/app/docs/[[...slug]]/page.tsx
+</include>
 
-### Page
-
-Create a catch-all route `/app/docs/[[...slug]]` for docs pages.
-
-In the page, wrap your content in the [Page](/docs/ui/layouts/page) component.
-
-<CodeBlockTabs groupId='content-source'>
-
-    <include cwd meta='title="app/docs/[[...slug]]/page.tsx" tab="Fumadocs MDX"'>../../examples/next-mdx/app/docs/[[...slug]]/page.tsx</include>
-
-    <include cwd meta='title="app/docs/[[...slug]]/page.tsx" tab="Content Collections"'>../../examples/content-collections/app/docs/[[...slug]]/page.tsx</include>
-
-</CodeBlockTabs>
-
-### Search
-
-Use the default document search based on Orama.
-
-<include cwd meta='title="app/api/search/route.ts"'>
+<include cwd meta='tab="app/api/search/route.ts"'>
   ../../examples/next-mdx/app/api/search/route.ts
 </include>
 
-Learn more about [Document Search](/docs/headless/search).
+> The search is powered by Orama, learn more about [Document Search](/docs/headless/search).
 
 ### Done
 

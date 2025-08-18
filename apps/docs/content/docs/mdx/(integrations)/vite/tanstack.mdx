@@ -52,17 +52,9 @@ For example:
 
 ```tsx title="src/routes/docs/$.tsx"
 import { createFileRoute, notFound } from '@tanstack/react-router';
-import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { createServerFn } from '@tanstack/react-start';
 import { source } from '~/lib/source';
 import { docs } from '../../../source.generated';
-import {
-  DocsBody,
-  DocsDescription,
-  DocsPage,
-  DocsTitle,
-} from 'fumadocs-ui/page';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { createClientLoader } from 'fumadocs-mdx/runtime/vite';
 
 export const Route = createFileRoute('/docs/$')({
@@ -83,26 +75,18 @@ const loader = createServerFn({
     if (!page) throw notFound();
 
     return {
-      tree: source.pageTree as object,
       path: page.path,
     };
   });
 
 const clientLoader = createClientLoader(docs.doc, {
   id: 'docs',
-  component({ toc, frontmatter, default: MDX }) {
+  component({ frontmatter, default: MDX }) {
     return (
-      <DocsPage toc={toc}>
-        <DocsTitle>{frontmatter.title}</DocsTitle>
-        <DocsDescription>{frontmatter.description}</DocsDescription>
-        <DocsBody>
-          <MDX
-            components={{
-              ...defaultMdxComponents,
-            }}
-          />
-        </DocsBody>
-      </DocsPage>
+      <div className="prose">
+        <h1>{frontmatter.title}</h1>
+        <MDX />
+      </div>
     );
   },
 });
@@ -111,15 +95,6 @@ function Page() {
   const data = Route.useLoaderData();
   const Content = clientLoader.getComponent(data.path);
 
-  return (
-    <DocsLayout
-      tree={data.tree}
-      nav={{
-        title: 'Fumadocs Tanstack',
-      }}
-    >
-      <Content />
-    </DocsLayout>
-  );
+  return <Content />;
 }
 ```
