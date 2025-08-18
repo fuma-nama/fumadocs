@@ -546,9 +546,6 @@ importers:
 
   examples/react-router-i18n:
     dependencies:
-      '@fumadocs/mdx-remote':
-        specifier: workspace:*
-        version: link:../../packages/mdx-remote
       '@orama/tokenizers':
         specifier: ^3.1.11
         version: 3.1.11
@@ -561,12 +558,12 @@ importers:
       fumadocs-core:
         specifier: workspace:*
         version: link:../../packages/core
+      fumadocs-mdx:
+        specifier: workspace:*
+        version: link:../../packages/mdx
       fumadocs-ui:
         specifier: workspace:*
         version: link:../../packages/ui
-      gray-matter:
-        specifier: ^4.0.3
-        version: 4.0.3
       isbot:
         specifier: ^5.1.29
         version: 5.1.29
@@ -595,6 +592,9 @@ importers:
       '@types/react-dom':
         specifier: ^19.1.7
         version: 19.1.7(@types/react@19.1.10)
+      react-router-devtools:
+        specifier: ^5.0.6
+        version: 5.0.6(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@19.1.1(react@19.1.1))(react-router@7.8.1(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1)(vite@7.1.2(@types/node@24.3.0)(jiti@2.5.1)(lightningcss@1.30.1)(terser@5.43.1)(tsx@4.20.4)(yaml@2.8.1))
       tailwindcss:
         specifier: ^4.1.12
         version: 4.1.12

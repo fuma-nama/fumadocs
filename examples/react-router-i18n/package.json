@@ -9,13 +9,12 @@
     "typecheck": "react-router typegen && tsc"
   },
   "dependencies": {
-    "@fumadocs/mdx-remote": "workspace:*",
     "@orama/tokenizers": "^3.1.11",
     "@react-router/node": "^7.8.1",
     "@react-router/serve": "^7.8.1",
     "fumadocs-core": "workspace:*",
+    "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "gray-matter": "^4.0.3",
     "isbot": "^5.1.29",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
@@ -27,6 +26,7 @@
     "@types/node": "^24.3.0",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
+    "react-router-devtools": "^5.0.6",
     "tailwindcss": "^4.1.12",
     "typescript": "^5.9.2",
     "vite": "^7.1.2",
