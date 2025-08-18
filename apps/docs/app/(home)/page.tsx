@@ -14,6 +14,7 @@ import {
   PersonStandingIcon,
   RocketIcon,
   SearchIcon,
+  ServerIcon,
   Terminal,
   TimerIcon,
 } from 'lucide-react';
@@ -80,9 +81,9 @@ export default function Page() {
               Built for developers.
             </h2>
           </div>
-          <Architecture />
           <Features />
           <Highlights />
+          <Architecture />
           <Why />
           <Contributing />
           <End />
@@ -102,7 +103,8 @@ function Architecture() {
         <h2 className="text-2xl font-semibold mb-4">A breakable framework.</h2>
         <p className="text-fd-muted-foreground mb-6">
           Fumadocs makes it easy to build beautiful docs, write content, and
-          transform content into data for your React.js framework.
+          transform content into data for your React.js framework, from Next.js
+          to React Router.
         </p>
       </div>
       <Image
@@ -295,7 +297,7 @@ function Search(): React.ReactElement {
   );
 }
 
-function Highlights(): React.ReactElement {
+function Highlights() {
   return (
     <div className="grid grid-cols-1 border-r md:grid-cols-2 lg:grid-cols-3">
       <div className="col-span-full flex flex-row items-start justify-center border-l border-t p-8 pb-2 text-center">
@@ -305,24 +307,21 @@ function Highlights(): React.ReactElement {
         <MousePointer className="-ml-1 mt-8" />
       </div>
       <Highlight icon={TimerIcon} heading="Light & Fast.">
-        Less Javascript with React Server Components, and optimized images.
+        Powered by React Server Components, images optimized by default.
       </Highlight>
       <Highlight icon={LayoutIcon} heading="Accessibility & UX first.">
         Focus on user experience and accessibility.
       </Highlight>
-      <Highlight icon={RocketIcon} heading="Next.js First.">
-        Powerful documentation site with Next.js, React Router, or Tanstack
+      <Highlight icon={RocketIcon} heading="Framework Agnostic.">
+        Building documentation site with Next.js, React Router, or Tanstack
         Start.
       </Highlight>
-      <Highlight icon={SearchIcon} heading="Syntax Highlighting.">
-        Beautiful syntax highlighter, powered by{' '}
-        <a href="https://shiki.style" rel="noreferrer noopener">
-          Shiki
-        </a>
-        .
+      <Highlight icon={ServerIcon} heading="Server First.">
+        Fumadocs is dynamic, allowing seamless CMS integration & up-to-date
+        content integrated with server.
       </Highlight>
-      <Highlight icon={KeyboardIcon} heading="Automation.">
-        Useful remark/rehype plugins. Typescript Twoslash, OpenAPI docs
+      <Highlight icon={KeyboardIcon} heading="Markdown & MDX.">
+        Syntax highlighting on Shiki, Typescript Twoslash, OpenAPI docs
         generation, and more.
       </Highlight>
       <Highlight icon={PersonStandingIcon} heading="Personalized.">
@@ -375,11 +374,13 @@ function Hero() {
       />
       <h1 className="mb-8 text-4xl font-medium md:hidden">Build Your Docs</h1>
       <h1 className="mb-8 max-w-[600px] text-4xl font-medium max-md:hidden">
-        Build excellent documentation site with less effort
+        Build excellent documentation
+        <br />
+        with less effort
       </h1>
       <p className="mb-8 text-fd-muted-foreground md:max-w-[80%] md:text-xl">
-        Fumadocs is a beautiful documentation framework for Developers, flexible
-        and performant, with everything from Next.js.
+        Fumadocs is a beautiful documentation framework for developers,
+        flexible, performant, running on your React framework.
       </p>
       <div className="inline-flex items-center gap-3 max-md:mx-auto">
         <Link
@@ -402,7 +403,7 @@ function Hero() {
             }),
           )}
         >
-          Open Demo
+          Open StackBlitz
         </a>
       </div>
       <PreviewImages />
@@ -528,7 +529,7 @@ Hello World
         <div className={cn(badgeVariants())}>3</div>
         <h3 className="text-2xl font-semibold">Ship.</h3>
         <p className="text-fd-muted-foreground">
-          Deploy your docs easily with Next.js compatible hosting platforms.
+          Deploy your docs easily with any hosting platforms.
         </p>
 
         <div className="mt-4 flex flex-row flex-wrap items-center gap-8">
