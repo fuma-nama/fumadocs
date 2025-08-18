@@ -1,6 +1,7 @@
 import type { Route } from './+types/home';
 import { HomeLayout } from 'fumadocs-ui/layouts/home';
 import { Link } from 'react-router';
+import { baseOptions } from '@/lib/layout.shared';
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -11,11 +12,7 @@ export function meta({}: Route.MetaArgs) {
 
 export default function Home() {
   return (
-    <HomeLayout
-      nav={{
-        title: 'React Router',
-      }}
-    >
+    <HomeLayout {...baseOptions()}>
       <div className="p-4 flex flex-col items-center justify-center text-center flex-1">
         <h1 className="text-xl font-bold mb-2">Fumadocs on React Router.</h1>
         <p className="text-fd-muted-foreground mb-4">
