@@ -13,6 +13,7 @@ import {
 } from 'fumadocs-ui/page';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { createClientLoader } from 'fumadocs-mdx/runtime/vite';
+import { baseOptions } from '~/lib/layout.shared';
 
 export const Route = createFileRoute('/docs/$')({
   component: Page,
@@ -65,12 +66,7 @@ function Page() {
   );
 
   return (
-    <DocsLayout
-      tree={tree}
-      nav={{
-        title: 'Fumadocs Tanstack',
-      }}
-    >
+    <DocsLayout {...baseOptions()} tree={tree}>
       <Content />
     </DocsLayout>
   );

@@ -1,14 +1,7 @@
 ---
-title: Internationalization
-description: Support multiple languages in your documentation
+title: Next.js
+description: Support i18n routing on your Next.js + Fumadocs app
 ---
-
-## Overview
-
-For Next.js apps, you'll have to configure i18n routing on both Next.js and Fumadocs.
-
-Fumadocs is not a full-powered i18n library, it's up to you when internationalizing the rest of your app.
-You can also use other libraries with Fumadocs like [next-intl](https://github.com/amannn/next-intl).
 
 <Callout title="New to Next.js?">
   You can [learn more about i18n in
@@ -25,18 +18,6 @@ Define the i18n configurations in a file, we will import it with `@/lib/i18n` in
 
 > See [available options](/docs/headless/internationalization) for i18n config.
 
-Pass it to the source loader.
-
-```ts title="lib/source.ts"
-import { i18n } from '@/lib/i18n';
-import { loader } from 'fumadocs-core/source';
-
-export const source = loader({
-  i18n, // [!code ++]
-  // other options
-});
-```
-
 ### Middleware
 
 Create a middleware that redirects users to appropriate locale.
@@ -47,9 +28,9 @@ Create a middleware that redirects users to appropriate locale.
 
 <Callout title="Using your own middleware?">
 
-    The default middleware is optional, you can also use your own middleware or the one provided by i18n libraries.
+The default middleware is optional, you can also use your own middleware or the one provided by i18n libraries.
 
-    Make sure its behaviour aligns with the [`hidePrefix`](/docs/headless/internationalization#hide-locale-prefix) option you set in your i18n config.
+Make sure its behaviour aligns with the [`hidePrefix`](/docs/headless/internationalization#hide-locale-prefix) option you set in your i18n config.
 
 </Callout>
 
@@ -128,13 +109,12 @@ export default async function RootLayout({
 
 ### Pass Locale
 
-Pass the locale to Fumadocs in your pages and layouts.
+Make `baseOptions` a function and add `i18n` into it:
 
-```tsx title="app/layout.config.tsx" tab="Shared Options"
+```tsx title="app/layout.config.tsx"
 import { i18n } from '@/lib/i18n';
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 
-// Make `baseOptions` a function: [!code highlight]
 export function baseOptions(locale: string): BaseLayoutProps {
   return {
     i18n, // [!code ++]
@@ -143,7 +123,19 @@ export function baseOptions(locale: string): BaseLayoutProps {
 }
 ```
 
-```tsx title="/app/[lang]/(home)/layout.tsx" tab="Home Layout"
+Pass the locale to Fumadocs in your pages and layouts.
+
+```ts tab="lib/source.ts"
+import { i18n } from '@/lib/i18n';
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  i18n, // [!code ++]
+  // other options
+});
+```
+
+```tsx tab="Home Layout" title="app/[lang]/(home)/layout.tsx"
 import type { ReactNode } from 'react';
 import { HomeLayout } from 'fumadocs-ui/layouts/home';
 import { baseOptions } from '@/app/layout.config';
@@ -161,7 +153,7 @@ export default async function Layout({
 }
 ```
 
-```tsx title="/app/[lang]/docs/layout.tsx" tab="Docs Layout"
+```tsx tab="Docs Layout" title="app/[lang]/docs/layout.tsx"
 import type { ReactNode } from 'react';
 import { source } from '@/lib/source';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
@@ -185,7 +177,7 @@ export default async function Layout({
 }
 ```
 
-```ts title="page.tsx" tab="Docs Page"
+```ts tab="Docs Page" title="app/[lang]/docs/[[...slug]]/page.tsx"
 import { source } from '@/lib/source';
 
 export default async function Page({
@@ -226,9 +218,9 @@ Configure i18n on your search solution.
 
 ## Writing Documents
 
-<include>../../shared/page-conventions.i18n.mdx</include>
+See [i18n routing](/docs/ui/page-conventions#i18n-routing) to learn how to create pages for specific locales.
 
-## Navigation
+### Navigation
 
 Fumadocs only handles navigation for its own layouts (e.g. sidebar).
 For other places, you can use the `useParams` hook to get the locale from url, and attend it to `href`.

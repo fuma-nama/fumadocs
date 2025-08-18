@@ -34,8 +34,8 @@ console.log(docs);
 
 To integrate with Fumadocs, create a docs collection and use:
 
-<include cwd meta='title="app/source.ts"'>
-  ../../examples/react-router/app/source.ts
+<include cwd meta='title="app/lib/source.ts"'>
+  ../../examples/react-router/app/lib/source.ts
 </include>
 
 ### Rendering Content
@@ -47,7 +47,7 @@ For example:
 
 ```tsx
 import type { Route } from './+types/page';
-import { source } from '@/source';
+import { source } from '@/lib/source';
 import { docs } from '../../source.generated';
 import { toClientRenderer } from 'fumadocs-mdx/runtime/vite';
 
