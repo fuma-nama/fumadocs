@@ -11,9 +11,9 @@ description: A shared convention for organizing your documents
 
 ## Overview
 
-While Next.js handles routing, Fumadocs generates **page slugs** and **sidebar items** (page tree) from your content directory using [`loader()`](/docs/headless/source-api).
+While your React framework handles routing, Fumadocs generates **page slugs** and **sidebar items** (page tree) from your content directory using [`loader()`](/docs/headless/source-api).
 
-You can define folders and pages similar to the file-system based routing of Next.js.
+You can define folders and pages similar to file-system based routing.
 
 <Files>
   <Folder name="content/docs (content directory)" defaultOpen>
@@ -126,59 +126,33 @@ Customise folders by creating a `meta.json` file in the folder.
 
 ### Pages
 
-By default, folder items are sorted alphabetically.
-
-You can add or control the order of items using `pages`, items are not included unless they are listed inside.
+Folder items are sorted alphabetically by default, you can add or control the order of items using `pages`.
 
 ```json title="meta.json"
 {
-  "title": "Name of Folder",
-  "pages": ["guide", "components", "---My Separator---", "./nested/page"]
+  "pages": ["index", "getting-started"]
 }
 ```
 
-<Files>
-  <File name="meta.json" />
-  <File name="guide.mdx" />
-  <File name="components.mdx" />
-  <File name="nested/page.mdx" />
-</Files>
+> When specified, items are not included unless they are listed in `pages`.
 
-#### Rest
+- **Path**: a path to page or folder, like`./nested/page`.
+- **Separator** (`---Label---`): a separator between two sections, use `---[Icon]Label---` to include icons.
+- **Link** (`[Text](url)`): insert links, use `[Icon][Text](url)` to include icons.
 
-Add a `...` item to include remaining pages (sorted alphabetically), or `z...a` for descending order.
+Special Items:
 
-```json title="meta.json"
-{
-  "pages": ["guide", "..."]
-}
-```
-
-You can add `!name` to prevent an item from being included.
-
-```json title="meta.json"
-{
-  "pages": ["guide", "...", "!components"]
-}
-```
-
-#### Extract
-
-You can extract the items from a folder with `...folder_name`.
-
-```json title="meta.json"
-{
-  "pages": ["guide", "...nested"]
-}
-```
-
-#### Link
-
-Use the syntax `[Text](url)` to insert links, or `[Icon][Text](url)` to add icon.
+- **Rest** (`...`): include remaining pages (sorted alphabetically).
+- **Reversed Rest** (`z...a`): reversed **Rest** item,
+- **Extract** (`...folder`): extract the items from a folder.
 
 ```json title="meta.json"
 {
   "pages": [
+    "components",
+    "---My Separator---",
+    "...folder",
+    "...",
     "[Vercel](https://vercel.com)",
     "[Triangle][Vercel](https://vercel.com)"
   ]
@@ -191,6 +165,6 @@ Since Fumadocs doesn't include an icon library, you have to convert the icon nam
 
 You can add an [`icon` handler](/docs/headless/source-api#icons) to `loader()`.
 
-## Internationalization
+## i18n Routing
 
-<include>../../shared/page-conventions.i18n.mdx</include>
+See [Internationalization](/docs/ui/internationalization#writing-documents) guide for details.

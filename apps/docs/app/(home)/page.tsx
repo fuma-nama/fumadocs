@@ -309,12 +309,12 @@ function Highlights() {
       <Highlight icon={TimerIcon} heading="Light & Fast.">
         Powered by React Server Components, images optimized by default.
       </Highlight>
-      <Highlight icon={LayoutIcon} heading="Accessibility & UX first.">
-        Focus on user experience and accessibility.
-      </Highlight>
       <Highlight icon={RocketIcon} heading="Framework Agnostic.">
         Building documentation site with Next.js, React Router, or Tanstack
         Start.
+      </Highlight>
+      <Highlight icon={LayoutIcon} heading="Accessibility & UX first.">
+        Focus on user experience and accessibility.
       </Highlight>
       <Highlight icon={ServerIcon} heading="Server First.">
         Fumadocs is dynamic, allowing seamless CMS integration & up-to-date
