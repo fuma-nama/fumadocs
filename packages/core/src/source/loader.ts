@@ -3,7 +3,6 @@ import type { I18nConfig } from '@/i18n';
 import {
   type ContentStorage,
   loadFiles,
-  loadFilesI18n,
   type MetaFile,
   type PageFile,
   type Transformer,
@@ -213,17 +212,15 @@ function indexPages(
 
   for (const filePath of storages[defaultLanguage].getFiles()) {
     const item = storages[defaultLanguage].read(filePath)!;
+    const path = `${defaultLanguage}.${filePath}`;
 
     if (item.format === 'meta') {
-      result.pathToMeta.set(
-        `${defaultLanguage}.${item.path}`,
-        fileToMeta(item),
-      );
+      result.pathToMeta.set(path, fileToMeta(item));
     }
 
     if (item.format === 'page') {
       const page = fileToPage(item, getUrl, defaultLanguage);
-      result.pathToPage.set(`${defaultLanguage}.${item.path}`, page);
+      result.pathToPage.set(path, page);
       result.pages.set(`${defaultLanguage}.${page.slugs.join('/')}`, page);
 
       if (!i18n) continue;
@@ -238,7 +235,7 @@ function indexPages(
         );
 
         if (localizedItem) {
-          result.pathToPage.set(`${lang}.${item.path}`, localizedPage);
+          result.pathToPage.set(`${lang}.${filePath}`, localizedPage);
         }
 
         result.pages.set(
@@ -299,78 +296,76 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
     i18n,
     slugs: slugsFn,
     url: getUrl = createGetUrl(baseUrl ?? '/', i18n),
-    transformers,
+    transformers = [],
   } = options;
   const defaultLanguage = i18n?.defaultLanguage ?? '';
   const files =
     typeof source.files === 'function' ? source.files() : source.files;
 
-  function buildFiles(files: VirtualFile[]) {
-    const indexFiles: VirtualFile[] = [];
+  const transformerSlugs: Transformer = ({ storage }) => {
+    const indexFiles = new Set<string>();
     const taken = new Set<string>();
 
-    for (const file of files) {
-      if (file.type !== 'page' || file.slugs) continue;
+    for (const path of storage.getFiles()) {
+      const file = storage.read(path);
+      if (!file || file.format !== 'page' || file.slugs) continue;
 
       // for custom slugs function, don't handle conflicting cases like `dir/index.mdx` vs `dir.mdx`
-      if (isIndex(file.path) && !slugsFn) {
-        indexFiles.push(file);
+      if (isIndex(path) && !slugsFn) {
+        indexFiles.add(path);
         continue;
       }
 
-      file.slugs = slugsFn
-        ? slugsFn(parseFilePath(file.path))
-        : getSlugs(file.path);
+      file.slugs = slugsFn ? slugsFn(parseFilePath(path)) : getSlugs(path);
 
       const key = file.slugs.join('/');
       if (taken.has(key)) throw new Error('Duplicated slugs');
       taken.add(key);
     }
 
-    for (const file of indexFiles) {
-      file.slugs = getSlugs(file.path);
+    for (const path of indexFiles) {
+      const file = storage.read(path);
+      if (file?.format !== 'page') continue;
 
+      file.slugs = getSlugs(path);
       if (taken.has(file.slugs.join('/'))) file.slugs.push('index');
     }
+  };
 
-    return files.map((file) => {
-      if (file.type === 'page') {
+  const storages = loadFiles(
+    files,
+    {
+      buildFile(file) {
+        if (file.type === 'page') {
+          return {
+            format: 'page',
+            path: file.path,
+            slugs: file.slugs,
+            data: file.data,
+            absolutePath: file.absolutePath ?? '',
+          } as PageFile;
+        }
+
         return {
-          format: 'page',
+          format: 'meta',
           path: file.path,
-          slugs: file.slugs!,
-          data: file.data,
           absolutePath: file.absolutePath ?? '',
-        } as PageFile;
-      }
-
-      return {
-        format: 'meta',
-        path: file.path,
-        absolutePath: file.absolutePath ?? '',
-        data: file.data,
-      } as MetaFile;
-    });
-  }
-
-  const storages = i18n
-    ? loadFilesI18n(
-        files,
-        {
-          buildFiles,
-          transformers,
-        },
-        {
+          data: file.data,
+        } as MetaFile;
+      },
+      transformers: [transformerSlugs, ...transformers],
+    },
+    i18n
+      ? {
           ...i18n,
           parser: i18n.parser ?? 'dot',
+        }
+      : {
+          defaultLanguage,
+          parser: 'none',
+          languages: [defaultLanguage],
         },
-      )
-    : {
-        '': loadFiles(files, {
-          transformers,
-          buildFiles,
-        }),
-      };
+  );
 
   const walker = indexPages(storages, getUrl, i18n);
   const builder = createPageTreeBuilder(getUrl);

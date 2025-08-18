@@ -1,11 +1,12 @@
 import { type MetaData, type PageData } from '@/source/types';
 import { FileSystem } from './file-system';
-import { slash, splitPath } from '@/utils/path';
-import { VirtualFile } from '@/source/loader';
+import { joinPath, slash, splitPath } from '@/utils/path';
+import { type VirtualFile } from '@/source/loader';
+import { basename, dirname } from '@/source/path';
 
 export interface LoadOptions {
   transformers?: Transformer[];
-  buildFiles: (files: VirtualFile[]) => (MetaFile | PageFile)[];
+  buildFile: (file: VirtualFile) => MetaFile | PageFile;
 }
 
 export type ContentStorage = FileSystem<MetaFile | PageFile>;
@@ -32,88 +33,81 @@ export type Transformer = (context: {
   options: LoadOptions;
 }) => void;
 
+function isLocaleValid(locale: string) {
+  return locale.length > 0 && !/\d+/.test(locale);
+}
+
+const parsers = {
+  dir(path: string): [string, string?] {
+    const [locale, ...segs] = path.split('/');
+
+    if (locale && segs.length > 0 && isLocaleValid(locale))
+      return [segs.join('/'), locale];
+
+    return [path];
+  },
+  dot(path: string): [string, string?] {
+    const dir = dirname(path);
+    const base = basename(path);
+    const parts = base.split('.');
+    if (parts.length < 3) return [path];
+
+    const [locale] = parts.splice(parts.length - 2, 1);
+    if (!isLocaleValid(locale)) return [path];
+
+    return [joinPath(dir, parts.join('.')), locale];
+  },
+  none(path: string): [string, string?] {
+    return [path];
+  },
+};
+
 // Virtual files -> Virtual Storage -> Transformers -> Result
+/**
+ * @returns a map of locale and its content storage.
+ *
+ * in the storage, locale codes are removed from file paths, hence the same file will have same file paths in every storage.
+ */
 export function loadFiles(
   files: VirtualFile[],
   options: LoadOptions,
-): ContentStorage {
-  const { transformers = [] } = options;
-  const storage: ContentStorage = new FileSystem();
-  const normalized: VirtualFile[] = files.map((file) => ({
-    ...file,
-    path: normalizePath(file.path),
-  }));
-
-  for (const item of options.buildFiles(normalized)) {
-    storage.write(item.path, item);
-  }
-
-  for (const transformer of transformers) {
-    transformer({
-      storage,
-      options,
-    });
-  }
-
-  return storage;
-}
-
-export function loadFilesI18n(
-  files: VirtualFile[],
-  options: LoadOptions,
   i18n: {
-    parser: 'dot' | 'dir';
+    parser: keyof typeof parsers;
     languages: string[];
     defaultLanguage: string;
   },
 ): Record<string, ContentStorage> {
-  const parser = i18n.parser === 'dir' ? dirParser : dotParser;
+  const { buildFile, transformers = [] } = options;
+  const parser = parsers[i18n.parser];
   const storages: Record<string, ContentStorage> = {};
+  const normalized = files.map((file) =>
+    buildFile({
+      ...file,
+      path: normalizePath(file.path),
+    }),
+  );
 
   for (const lang of i18n.languages) {
-    storages[lang] = loadFiles(
-      files.flatMap((file) => {
-        const [path, locale] = parser(normalizePath(file.path));
+    const storage: ContentStorage = new FileSystem();
 
-        if ((locale ?? i18n.defaultLanguage) === lang) {
-          return {
-            ...file,
-            path,
-          };
-        }
+    for (const item of normalized) {
+      const [path, locale = i18n.defaultLanguage] = parser(item.path);
 
-        return [];
-      }),
-      options,
-    );
+      if (locale !== lang) continue;
+      storage.write(path, item);
+    }
+
+    for (const transformer of transformers) {
+      transformer({
+        storage,
+        options,
+      });
+    }
+
+    storages[lang] = storage;
   }
 
   return storages;
-}
-
-function dirParser(path: string): [string, string?] {
-  const parsed = path.split('/');
-  if (parsed.length >= 2) return [parsed.slice(1).join('/'), parsed[0]];
-
-  return [path];
-}
-
-function dotParser(path: string): [string, string?] {
-  const segs = path.split('/');
-  if (segs.length === 0) return [path];
-
-  const name = segs[segs.length - 1].split('.');
-  if (name.length >= 3) {
-    const locale = name.splice(name.length - 2, 1)[0];
-
-    if (locale.length > 0 && !/\d+/.test(locale)) {
-      segs[segs.length - 1] = name.join('.');
-
-      return [segs.join('/'), locale];
-    }
-  }
-
-  return [path];
 }
 
 /**
