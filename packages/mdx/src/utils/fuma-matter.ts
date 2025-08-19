@@ -4,6 +4,9 @@
 import { load } from 'js-yaml';
 
 interface Output {
+  /**
+   * The matter section, including the delimiter.
+   */
   matter: string;
   content: string;
   data: unknown;
@@ -22,10 +25,10 @@ export function fumaMatter(input: string): Output {
   }
 
   // get the raw front-matter block
-  output.matter = match[1];
+  output.matter = match[0];
   output.content = input.slice(match[0].length);
 
-  const loaded = load(output.matter);
+  const loaded = load(match[1]);
   output.data = loaded ?? {};
 
   return output;

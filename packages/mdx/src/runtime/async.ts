@@ -26,10 +26,12 @@ export const _runtimeAsync: RuntimeAsync = {
       return {
         ...data,
         _file: file,
-        content,
+        get content() {
+          return `${content.matter}${content.body}`;
+        },
         async load() {
           const mdxOptions = await initMdxOptions;
-          const out = await buildMDX(collection, content, {
+          const out = await buildMDX(collection, content.body, {
             ...mdxOptions,
             development: false,
             frontmatter: data as Record<string, unknown>,

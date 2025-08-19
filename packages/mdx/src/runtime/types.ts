@@ -39,7 +39,7 @@ export interface RuntimeFile {
 export interface AsyncRuntimeFile {
   info: FileInfo;
   data: Record<string, unknown>;
-  content: string;
+  content: { matter: string; body: string };
   lastModified?: Date;
 }
 

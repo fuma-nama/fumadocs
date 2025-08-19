@@ -93,8 +93,11 @@ test('parse frontmatter', () => {
         "description": "I love Fumadocs",
         "title": "hello world",
       },
-      "matter": "title: hello world
-    description: I love Fumadocs",
+      "matter": "---
+    title: hello world
+    description: I love Fumadocs
+    ---
+    ",
     }
   `);
 
@@ -109,8 +112,11 @@ test('parse frontmatter', () => {
         "description": "I love Fumadocs",
         "title": "hello world",
       },
-      "matter": "title: hello world
-    description: I love Fumadocs",
+      "matter": "---
+    title: hello world
+    description: I love Fumadocs
+    ---
+    ",
     }
   `);
 

@@ -132,7 +132,7 @@ export async function generateJS(
         info: file,
         lastModified,
         data: data as Record<string, unknown>,
-        content: parsed.content,
+        content: { body: parsed.content, matter: parsed.matter },
       } satisfies AsyncRuntimeFile);
     });
 
