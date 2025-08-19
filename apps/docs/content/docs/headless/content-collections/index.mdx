@@ -7,36 +7,12 @@ description: Use Content Collections for Fumadocs
 
 ## Setup
 
-Install the required packages.
+Follow their [official guide](https://content-collections.dev/docs) to setup Content Collections for your React framework.
 
-```package-install
-@fumadocs/content-collections @content-collections/core @content-collections/mdx @content-collections/next
-```
+Make sure you have MDX configured:
 
-After the installation, add a path alias for the generated collections to the `tsconfig.json`.
-
-```json
-{
-  "compilerOptions": {
-    "paths": {
-      "@/*": ["./*"],
-      "content-collections": ["./.content-collections/generated"]
-    }
-  }
-}
-```
-
-In the Next.js configuration file, apply the plugin.
-
-```js title="next.config.mjs"
-import { withContentCollections } from '@content-collections/next';
-
-/** @type {import('next').NextConfig} */
-const config = {
-  reactStrictMode: true,
-};
-
-export default withContentCollections(config);
+```npm
+npm i @content-collections/mdx
 ```
 
 To integrate with Fumadocs, add the following to your `content-collections.ts`.
@@ -45,7 +21,7 @@ To integrate with Fumadocs, add the following to your `content-collections.ts`.
   ../../examples/content-collections/content-collections.ts
 </include>
 
-And pass it to Source API.
+And pass it to `loader()`.
 
 <include cwd meta='title="lib/source.ts"'>
   ../../examples/content-collections/lib/source.ts
@@ -92,7 +68,7 @@ To use components from other packages like Fumadocs UI, pass them to your `<MDXC
 import { MDXContent } from '@content-collections/mdx/react';
 import { getMDXComponents } from '@/mdx-components';
 
-<MDXContent code="..." components={getMDXComponents()} />;
+return <MDXContent code={page.data.body} components={getMDXComponents()} />;
 ```
 
 You can also import them in MDX Files, but it is not recommended.
@@ -105,7 +81,7 @@ You can also import them in MDX Files, but it is not recommended.
 
     Reasons:
 
-    - It requires esbuild to bundle these components, while it should be done by the Next.js bundler (for features of Server Components)
+    - It requires esbuild to bundle these components, while it should be done by the framework's bundler (e.g. Vite or Turbopack)
     - You can refactor the import path of components without changing your MDX files.
     - With Remote Sources, it doesn't make sense to add an import in MDX files.
 

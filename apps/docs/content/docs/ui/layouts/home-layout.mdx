@@ -17,19 +17,4 @@ export default function Layout({ children }: { children: ReactNode }) {
 }
 ```
 
-Create a [Route Group](https://nextjs.org/docs/app/building-your-application/routing/route-groups) to share the same layout across multiple pages.
-
-<Files>
-  <Folder name="(home)" defaultOpen>
-    <File name="page.tsx" />
-    <File name="layout.tsx" />
-  </Folder>
-  <Folder name="/docs">
-    <Folder name={'[[..slugs]]'}>
-      <File name="page.tsx" />
-    </Folder>
-    <File name="layout.tsx" />
-  </Folder>
-</Files>
-
 We recommend to customise it from [`baseOptions`](/docs/ui/navigation/links).

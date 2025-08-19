@@ -11,19 +11,14 @@ Thanks to the Twoslash integration of [Shiki](https://github.com/shikijs/shiki),
 fumadocs-twoslash twoslash
 ```
 
-Update your `serverExternalPackages` in Next.js config:
+For Next.js, you need to externalize the following deps:
 
-```js
-import { createMDX } from 'fumadocs-mdx/next';
-
+```js title="next.config.mjs (Next.js)"
 const config = {
   reactStrictMode: true,
+  // [!code ++]
   serverExternalPackages: ['typescript', 'twoslash'],
 };
-
-const withMDX = createMDX();
-
-export default withMDX(config);
 ```
 
 Add to your Shiki transformers.

@@ -1,7 +1,9 @@
 ---
 title: Remark Image
-description: Make images compatible with Next.js Image Optimization
+description: Adding size attributes to images.
 ---
+
+This plugin adds `width` and `height` attributes to your image elements, which is needed for Image Optimization on Next.js and some other frameworks.
 
 ## Usage
 
@@ -26,9 +28,7 @@ Supported:
 
 ### How It Works
 
-It transforms your `![image](/test.png)` into Next.js Image usage, and add required props like `width` and `height`.
-
-By default, it uses **static imports** to import local images, which supports the `placeholder` option of Next.js Image.
+For Next.js, it uses **static imports** to import local images, which supports the `placeholder` option of Next.js Image.
 Next.js can handle image imports with its built-in image loader.
 
 Otherwise, it uses the file system or an HTTP request to download the image and obtain its size.
@@ -65,7 +65,7 @@ Where `./public/hello.png` points to the image in public directory.
 
 ### Example: Without Imports
 
-You can disable Next.js static imports on local images.
+For Next.js, you can disable static imports on local images.
 
 ```ts
 import { remarkImage } from 'fumadocs-core/mdx-plugins';
@@ -131,7 +131,7 @@ export default {
   remarkPlugins: [
     remarkImage,
     {
-      publicDir: 'http://localhost:3000/images',
+      publicDir: 'https://my-cdn.com/images',
     },
   ],
 };

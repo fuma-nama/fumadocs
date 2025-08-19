@@ -59,6 +59,15 @@ export function Root({ children }: { children: ReactNode }) {
 }
 ```
 
+```tsx tab="Waku"
+import type { ReactNode } from 'react';
+import { WakuProvider } from 'fumadocs-core/framework/waku';
+
+export function Root({ children }: { children: ReactNode }) {
+  return <WakuProvider>{children}</WakuProvider>;
+}
+```
+
 It offers simple document searching as well as components for building a
 good docs.
 

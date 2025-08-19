@@ -13,10 +13,11 @@ It exports a `useBreadcrumb` hook:
 
 ```ts twoslash
 declare const tree: any;
-// ---cut---
 import { usePathname } from 'next/navigation';
+// ---cut---
 import { useBreadcrumb } from 'fumadocs-core/breadcrumb';
 
+// obtain `pathname` using the hook provided by your React framework.
 const pathname = usePathname();
 const items = useBreadcrumb(pathname, tree);
 //    ^?
@@ -24,7 +25,7 @@ const items = useBreadcrumb(pathname, tree);
 
 ### Example
 
-A styled example.
+A styled example for Next.js.
 
 ```tsx
 'use client';

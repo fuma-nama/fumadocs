@@ -3,6 +3,11 @@ title: Async Mode
 description: Runtime compilation of content files.
 ---
 
+<Callout title="Next.js Only">
+  At the moment, Async Mode is only a Next.js feature. Vite has native support
+  for lazy compilation, hence it might not be needed at all.
+</Callout>
+
 ## Introduction
 
 By default, all Markdown and MDX files need to be pre-compiled first. The same constraint also applies to the development server.
@@ -42,7 +47,7 @@ export const doc = defineCollections({
 
 ### Usage
 
-Async Mode allows on-demand compilation of Markdown and MDX content by moving the compilation process from build time to Next.js runtime.
+Async Mode allows on-demand compilation of Markdown and MDX content by moving the compilation process from build time to server runtime.
 
 However, you need to invoke the `load()` async function to load and compile content.
 

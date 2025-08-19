@@ -7,13 +7,13 @@ description: A remark plugin to transform TypeScript codeblocks into two tabs of
 
 Install dependencies:
 
-```package-install
-fumadocs-docgen oxc-transform
+```npm
+npm i fumadocs-docgen oxc-transform
 ```
 
-Add `oxc-transform` to `serverExternalPackages` in `next.config.mjs`:
+For Next.js, externalize `oxc-transform`:
 
-```js title="next.config.mjs"
+```js title="next.config.mjs (Next.js)"
 import { createMDX } from 'fumadocs-mdx/next';
 
 /** @type {import('next').NextConfig} */

@@ -131,13 +131,12 @@ You need to override `--fd-nav-height` to the exact height of your custom navbar
 
 ### Disable Prefetching
 
-By default, it uses the Next.js Link component with prefetch enabled.
-When the link component appears into the browser viewport, the content (RSC payload) will be prefetched.
+By default, it uses the `<Link />` component of your React framework with prefetch enabled.
 
-On Vercel, this may cause a high usage of serverless functions and Data Cache.
+On Vercel, prefetch requests may cause a higher usage of serverless functions and Data Cache.
 It can also hit the limits of some other hosting platforms.
 
-You can disable prefetching to reduce the amount of RSC requests.
+You can disable prefetching to reduce the amount of prefetch requests.
 
 ```tsx
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';

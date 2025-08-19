@@ -1,9 +1,15 @@
 ---
-title: Static Export
-description: Enable static export with Fumadocs
+title: Static Build
+description: Output static website with Fumadocs.
 ---
 
 ## Overview
+
+By default, Fumadocs use a server-first approach which always requires a running server to serve.
+
+You can also output a static build by enabling it on your React framework.
+
+### Next.js
 
 Fumadocs is fully compatible with Next.js static export, allowing you to export the app as a static HTML site without a Node.js server.
 
@@ -23,6 +29,65 @@ const nextConfig = {
 ```
 
 See [Next.js docs](https://nextjs.org/docs/app/guides/static-exports) for limitations and details.
+
+### React Router
+
+By configuring pre-rendering on all pages, you can serve the `build/client` directory as a static website.
+
+```ts title="react-router.config.ts"
+import type { Config } from '@react-router/dev/config';
+import { glob } from 'node:fs/promises';
+import { createGetUrl, getSlugs } from 'fumadocs-core/source';
+
+const getUrl = createGetUrl('/docs');
+
+export default {
+  ssr: true,
+  async prerender({ getStaticPaths }) {
+    const paths: string[] = [...getStaticPaths()];
+
+    for await (const entry of glob('**/*.mdx', { cwd: 'content/docs' })) {
+      paths.push(getUrl(getSlugs(entry)));
+    }
+
+    return paths;
+  },
+} satisfies Config;
+```
+
+### Tanstack Start
+
+Tanstack Start has powerful auto pre-rendering that automatically crawl your pages.
+
+```ts title="vite.config.ts"
+import react from '@vitejs/plugin-react';
+import { tanstackStart } from '@tanstack/react-start/plugin/vite';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  server: {
+    port: 3000,
+  },
+  plugins: [
+    // ...other plugins
+    tanstackStart({
+      // [!code ++:4]
+      target: 'static',
+      prerender: {
+        enabled: true,
+      },
+      // if you have any hidden paths that's not visible on UI, you can add them explicitly.
+      pages: [
+        {
+          path: '/docs/test',
+        },
+      ],
+      customViteReactPlugin: true,
+    }),
+    react(),
+  ],
+});
+```
 
 ## Search
 

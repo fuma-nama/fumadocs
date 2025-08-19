@@ -15,7 +15,7 @@ First, make a `getLLMText` function that converts pages into static MDX content:
 
 ### `llms-full.txt`
 
-A version of docs for AIs to read.
+A version of docs for AIs to read. For Next.js:
 
 <include meta='title="app/llms-full.txt/route.ts"'>./llms.txt.ts</include>
 
@@ -23,7 +23,7 @@ A version of docs for AIs to read.
 
 Allow people to append `.mdx` to a page to get its Markdown/MDX content.
 
-You can make a route handler to return page content, and redirect users to that route using middleware.
+On Next.js, you can make a route handler to return page content, and redirect users to that route.
 
 <include meta='tab="app/llms.mdx/[[...slug]]/route.ts"'>./llms.mdx.ts</include>
 
