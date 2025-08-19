@@ -61,8 +61,13 @@
       "types": "./dist/mdx-plugins/index.d.ts"
     },
     "./i18n": {
-      "import": "./dist/i18n/index.js",
-      "types": "./dist/i18n/index.d.ts"
+      "browser": "./dist/i18n/index.js",
+      "import": "./dist/i18n/index.server.js",
+      "types": "./dist/i18n/index.server.d.ts"
+    },
+    "./i18n/middleware": {
+      "import": "./dist/i18n/middleware.js",
+      "types": "./dist/i18n/middleware.d.ts"
     },
     "./highlight": {
       "import": "./dist/highlight/index.js",

@@ -4,7 +4,7 @@ import { createServerFn } from '@tanstack/react-start';
 import { source } from '~/lib/source';
 import type { PageTree } from 'fumadocs-core/server';
 import { useMemo } from 'react';
-import { docs } from '../../../source.generated';
+import { docs } from '../../../../source.generated';
 import {
   DocsBody,
   DocsDescription,
@@ -15,26 +15,31 @@ import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { createClientLoader } from 'fumadocs-mdx/runtime/vite';
 import { baseOptions } from '~/lib/layout.shared';
 
-export const Route = createFileRoute('/docs/$')({
+export const Route = createFileRoute('/$lang/docs/$')({
   component: Page,
   loader: async ({ params }) => {
-    const data = await loader({ data: params._splat?.split('/') ?? [] });
+    const data = await loader({
+      data: {
+        slugs: params._splat?.split('/') ?? [],
+        lang: params.lang,
+      },
+    });
+
     await clientLoader.preload(data.path);
     return data;
   },
 });
 
-// a wrapper because we don't want `loader` to be called on client-side
 const loader = createServerFn({
   method: 'GET',
 })
-  .validator((slugs: string[]) => slugs)
-  .handler(async ({ data: slugs }) => {
-    const page = source.getPage(slugs);
+  .validator((params: { slugs: string[]; lang?: string }) => params)
+  .handler(async ({ data: { slugs, lang } }) => {
+    const page = source.getPage(slugs, lang);
     if (!page) throw notFound();
 
     return {
-      tree: source.pageTree as object,
+      tree: source.getPageTree(lang) as object,
       path: page.path,
     };
   });
@@ -59,6 +64,7 @@ const clientLoader = createClientLoader(docs.doc, {
 });
 
 function Page() {
+  const { lang } = Route.useParams();
   const data = Route.useLoaderData();
   const Content = clientLoader.getComponent(data.path);
   const tree = useMemo(
@@ -67,7 +73,7 @@ function Page() {
   );
 
   return (
-    <DocsLayout {...baseOptions()} tree={tree}>
+    <DocsLayout {...baseOptions(lang)} tree={tree}>
       <Content />
     </DocsLayout>
   );
