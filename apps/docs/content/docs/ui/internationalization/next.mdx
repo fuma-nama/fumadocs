@@ -46,7 +46,6 @@ Create a `/app/[lang]` folder, and move your pages/layouts into it, except route
       <File name="(home)/page.tsx" />
       <File name="..." />
     </Folder>
-    <File name="layout.config.tsx" />
   </Folder>
 </Files>
 
@@ -59,26 +58,21 @@ Provide UI translations and other config to `<RootProvider />`, the English tran
 
 ```tsx title="app/[lang]/layout.tsx"
 import { RootProvider } from 'fumadocs-ui/provider';
-import type { Translations } from 'fumadocs-ui/i18n';
+import { defineI18nUI } from 'fumadocs-ui/i18n';
+import { i18n } from '@/lib/i18n';
 
-// [!code ++:17]
-// translations
-const cn: Partial<Translations> = {
-  search: 'Translated Content',
-};
-
-// available languages that will be displayed on UI
-// make sure `locale` is consistent with your i18n config
-const locales = [
-  {
-    name: 'English',
-    locale: 'en',
+// [!code ++:11]
+const { provider } = defineI18nUI(i18n, {
+  translations: {
+    en: {
+      displayName: 'English',
+    },
+    cn: {
+      displayName: 'Chinese',
+      search: '搜尋文檔',
+    },
   },
-  {
-    name: 'Chinese',
-    locale: 'cn',
-  },
-];
+});
 
 export default async function RootLayout({
   params,
@@ -93,11 +87,8 @@ export default async function RootLayout({
     <html lang={lang}>
       <body>
         <RootProvider
-          i18n={{
-            locale: lang, // [!code ++]
-            locales, // [!code ++]
-            translations: { cn }[lang], // [!code ++]
-          }}
+          // [!code ++]
+          i18n={provider(lang)}
         >
           {children}
         </RootProvider>
@@ -109,9 +100,9 @@ export default async function RootLayout({
 
 ### Pass Locale
 
-Make `baseOptions` a function and add `i18n` into it:
+Add `locale` parameter to `baseOptions()` and add `i18n` into it:
 
-```tsx title="app/layout.config.tsx"
+```tsx title="lib/layout.shared.tsx"
 import { i18n } from '@/lib/i18n';
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 
@@ -138,7 +129,7 @@ export const source = loader({
 ```tsx tab="Home Layout" title="app/[lang]/(home)/layout.tsx"
 import type { ReactNode } from 'react';
 import { HomeLayout } from 'fumadocs-ui/layouts/home';
-import { baseOptions } from '@/app/layout.config';
+import { baseOptions } from '@/lib/layout.shared';
 
 export default async function Layout({
   params,
@@ -157,7 +148,7 @@ export default async function Layout({
 import type { ReactNode } from 'react';
 import { source } from '@/lib/source';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { baseOptions } from '@/app/layout.config';
+import { baseOptions } from '@/lib/layout.shared';
 
 export default async function Layout({
   params,

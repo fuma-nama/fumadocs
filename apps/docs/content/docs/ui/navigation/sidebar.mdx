@@ -112,11 +112,11 @@ You can specify a `banner` to the [Docs Layout](/docs/ui/layouts/docs) component
 ```tsx
 import { DocsLayout, type DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
 import type { ReactNode } from 'react';
-import { baseOptions } from '@/app/layout.config';
+import { baseOptions } from '@/lib/layout.shared';
 import { source } from '@/lib/source';
 
 const docsOptions: DocsLayoutProps = {
-  ...baseOptions,
+  ...baseOptions(),
   tree: source.pageTree,
   sidebar: {
     banner: <div>Hello World</div>,

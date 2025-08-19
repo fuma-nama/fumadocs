@@ -50,16 +50,18 @@ export const logo = (
   </>
 );
 
-export const baseOptions: BaseLayoutProps = {
-  nav: {
-    title: (
-      <>
-        {logo}
-        <span className="font-medium [.uwu_&]:hidden [header_&]:text-[15px]">
-          Fumadocs
-        </span>
-      </>
-    ),
-    transparentMode: 'top',
-  },
-};
+export function baseOptions(): BaseLayoutProps {
+  return {
+    nav: {
+      title: (
+        <>
+          {logo}
+          <span className="font-medium [.uwu_&]:hidden [header_&]:text-[15px]">
+            Fumadocs
+          </span>
+        </>
+      ),
+      transparentMode: 'top',
+    },
+  };
+}

@@ -11,13 +11,13 @@ Enable the notebook layout with `fumadocs-ui/layouts/notebook`, it's a more comp
 
 ```tsx title="layout.tsx"
 import { DocsLayout } from 'fumadocs-ui/layouts/notebook'; // [!code highlight]
-import { baseOptions } from '@/app/layout.config';
+import { baseOptions } from '@/lib/layout.shared';
 import { source } from '@/lib/source';
 import type { ReactNode } from 'react';
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <DocsLayout {...baseOptions} tree={source.pageTree}>
+    <DocsLayout {...baseOptions()} tree={source.pageTree}>
       {children}
     </DocsLayout>
   );
@@ -39,14 +39,14 @@ Configure the style of sidebar tabs.
 
 ```tsx title="layout.tsx"
 import { DocsLayout } from 'fumadocs-ui/layouts/notebook';
-import { baseOptions } from '@/app/layout.config';
+import { baseOptions } from '@/lib/layout.shared';
 import { source } from '@/lib/source';
 import type { ReactNode } from 'react';
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
     <DocsLayout
-      {...baseOptions}
+      {...baseOptions()}
       tabMode="navbar" // [!code ++]
       tree={source.pageTree}
     >
@@ -64,15 +64,17 @@ Configure the style of navbar.
 
 ```tsx title="layout.tsx"
 import { DocsLayout } from 'fumadocs-ui/layouts/notebook';
-import { baseOptions } from '@/app/layout.config';
+import { baseOptions } from '@/lib/layout.shared';
 import { source } from '@/lib/source';
 import type { ReactNode } from 'react';
 
 export default function Layout({ children }: { children: ReactNode }) {
+  const { nav, ...base } = baseOptions();
+
   return (
     <DocsLayout
-      {...baseOptions}
-      nav={{ ...baseOptions.nav, mode: 'top' }} // [!code ++]
+      {...base}
+      nav={{ ...nav, mode: 'top' }} // [!code ++]
       tree={source.pageTree}
     >
       {children}

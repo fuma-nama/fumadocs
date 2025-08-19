@@ -1,6 +1,6 @@
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import type { ReactNode } from 'react';
-import { baseOptions, linkItems, logo } from '@/app/layout.config';
+import { baseOptions, linkItems, logo } from '@/lib/layout.shared';
 import { source } from '@/lib/source';
 import { LargeSearchToggle } from 'fumadocs-ui/components/layout/search-toggle';
 import { Sparkles } from 'lucide-react';
@@ -10,9 +10,11 @@ import { buttonVariants } from '@/components/ui/button';
 import 'katex/dist/katex.min.css';
 
 export default function Layout({ children }: { children: ReactNode }) {
+  const base = baseOptions();
+
   return (
     <DocsLayout
-      {...baseOptions}
+      {...base}
       tree={source.pageTree}
       // just icon items
       links={linkItems.filter((item) => item.type === 'icon')}
@@ -38,7 +40,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         },
       }}
       nav={{
-        ...baseOptions.nav,
+        ...base.nav,
         title: (
           <>
             {logo}
