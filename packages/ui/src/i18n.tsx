@@ -2,11 +2,16 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 import { useMemo } from 'react';
-import { defaultTranslations, I18nContext } from '@/contexts/i18n';
+import {
+  defaultTranslations,
+  I18nContext,
+  type Translations,
+} from '@/contexts/i18n';
 import type { I18nProviderProps } from './provider/base';
+import type { I18nConfig } from 'fumadocs-core/i18n';
 
-export type { I18nProviderProps };
-export { defaultTranslations, type Translations } from './contexts/i18n';
+export type { I18nProviderProps, Translations };
+export { defaultTranslations } from './contexts/i18n';
 
 // TODO: remove next major
 /**
@@ -61,4 +66,28 @@ export function I18nProvider({
       {props.children}
     </I18nContext.Provider>
   );
+}
+
+export function defineI18nUI<Languages extends string>(
+  config: I18nConfig<Languages>,
+  options: {
+    translations: {
+      [K in Languages]?: Partial<Translations> & { displayName?: string };
+    };
+  },
+) {
+  const { translations } = options;
+
+  return {
+    provider(locale: string = config.defaultLanguage): I18nProviderProps {
+      return {
+        locale,
+        translations: translations[locale as Languages],
+        locales: config.languages.map((locale) => ({
+          locale,
+          name: translations[locale]?.displayName ?? locale,
+        })),
+      };
+    },
+  };
 }

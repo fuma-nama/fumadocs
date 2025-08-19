@@ -12,8 +12,9 @@ import {
   type Page,
 } from '@/source';
 import { type StructuredData } from '@/mdx-plugins';
-import { type LocaleMap } from '@/search/orama/create-i18n';
 import { basename, extname } from '@/source/path';
+import type { I18nConfig } from '@/i18n';
+import type { Language } from '@orama/orama';
 
 function pageToIndex(page: Page): AdvancedIndex {
   if (!('structuredData' in page.data)) {
@@ -36,14 +37,21 @@ function pageToIndex(page: Page): AdvancedIndex {
   };
 }
 
-interface Options<Page = unknown> extends Omit<AdvancedOptions, 'indexes'> {
-  localeMap?: LocaleMap<Partial<AdvancedOptions>>;
-  buildIndex?: (page: Page) => AdvancedIndex;
+interface Options<S extends LoaderOutput<LoaderConfig>>
+  extends Omit<AdvancedOptions, 'indexes'> {
+  localeMap?: {
+    [K in S extends LoaderOutput<infer C>
+      ? C['i18n'] extends I18nConfig<infer Languages>
+        ? Languages
+        : string
+      : string]?: Partial<AdvancedOptions> | Language;
+  };
+  buildIndex?: (page: InferPageType<S>) => AdvancedIndex;
 }
 
 export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
   source: S,
-  options?: Options<InferPageType<S>>,
+  options?: Options<S>,
 ): SearchAPI;
 
 /**
@@ -52,17 +60,17 @@ export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
 export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
   source: S,
   pageToIndexFn?: (page: InferPageType<S>) => AdvancedIndex,
-  options?: Omit<Options, 'buildIndex'>,
+  options?: Omit<Options<S>, 'buildIndex'>,
 ): SearchAPI;
 
 export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
   source: S,
   _buildIndexOrOptions:
     | ((page: InferPageType<S>) => AdvancedIndex)
-    | Options<InferPageType<S>> = pageToIndex,
-  _options?: Omit<Options, 'buildIndex'>,
+    | Options<S> = pageToIndex,
+  _options?: Omit<Options<S>, 'buildIndex'>,
 ): SearchAPI {
-  const options: Options<InferPageType<S>> = {
+  const options: Options<S> = {
     ...(typeof _buildIndexOrOptions === 'function'
       ? {
           buildIndex: _buildIndexOrOptions,

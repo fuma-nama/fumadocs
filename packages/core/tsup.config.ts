@@ -19,7 +19,7 @@ export default defineConfig({
     'src/utils/use-on-change.ts',
     'src/utils/use-effect-event.ts',
     'src/utils/use-media-query.ts',
-    'src/i18n/index.ts',
+    'src/i18n/*.ts',
     'src/highlight/index.ts',
     'src/highlight/client.tsx',
     'src/framework/*',

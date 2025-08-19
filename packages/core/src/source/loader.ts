@@ -23,7 +23,7 @@ import { joinPath } from '@/utils/path';
 
 export interface LoaderConfig {
   source: SourceConfig;
-  i18n: boolean;
+  i18n: I18nConfig | undefined;
 }
 
 export interface SourceConfig {
@@ -126,7 +126,7 @@ export interface LanguageEntry<Data = PageData> {
 }
 
 export interface LoaderOutput<Config extends LoaderConfig> {
-  pageTree: Config['i18n'] extends true
+  pageTree: Config['i18n'] extends I18nConfig
     ? Record<string, PageTree.Root>
     : PageTree.Root;
 
@@ -279,7 +279,7 @@ export function loader<
   options: LoaderOptions<Config, I18n>,
 ): LoaderOutput<{
   source: Config;
-  i18n: I18n extends I18nConfig ? true : false;
+  i18n: I18n;
 }> {
   // @ts-expect-error -- forced type cast
   return createOutput(options);
