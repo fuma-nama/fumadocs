@@ -1,16 +1,49 @@
 'use client';
-import { CodeBlock, Pre } from '@/components/codeblock';
+import { CodeBlock, type CodeBlockProps, Pre } from '@/components/codeblock';
 import type {
+  HighlightOptions,
   HighlightOptionsCommon,
   HighlightOptionsThemes,
 } from 'fumadocs-core/highlight';
 import { useShiki } from 'fumadocs-core/highlight/client';
 import { cn } from '@/utils/cn';
-import { type ComponentProps, useMemo } from 'react';
+import {
+  type ComponentProps,
+  createContext,
+  type FC,
+  Suspense,
+  use,
+} from 'react';
 
-function pre(props: ComponentProps<'pre'>) {
+export interface DynamicCodeblockProps {
+  lang: string;
+  code: string;
+  /**
+   * Extra props for the underlying `<CodeBlock />` component.
+   *
+   * Ignored if you defined your own `pre` component in `options.components`.
+   */
+  codeblock?: CodeBlockProps;
+  /**
+   * Wrap in React `<Suspense />` and provide a fallback.
+   *
+   * @defaultValue true
+   */
+  wrapInSuspense?: boolean;
+  options?: Omit<HighlightOptionsCommon, 'lang'> & HighlightOptionsThemes;
+}
+
+const PropsContext = createContext<CodeBlockProps | undefined>(undefined);
+
+function DefaultPre(props: ComponentProps<'pre'>) {
+  const extraProps = use(PropsContext);
+
   return (
-    <CodeBlock {...props} className={cn('my-0', props.className)}>
+    <CodeBlock
+      {...props}
+      {...extraProps}
+      className={cn('my-0', props.className, extraProps?.className)}
+    >
       <Pre>{props.children}</Pre>
     </CodeBlock>
   );
@@ -19,39 +52,65 @@ function pre(props: ComponentProps<'pre'>) {
 export function DynamicCodeBlock({
   lang,
   code,
+  codeblock,
+  options,
+  wrapInSuspense = true,
+}: DynamicCodeblockProps) {
+  const shikiOptions = {
+    lang,
+    ...options,
+    components: {
+      pre: DefaultPre,
+      ...options?.components,
+    },
+  } satisfies HighlightOptions;
+  let children = <Internal code={code} options={shikiOptions} />;
+
+  if (wrapInSuspense)
+    children = (
+      <Suspense
+        fallback={
+          <Placeholder code={code} components={shikiOptions.components} />
+        }
+      >
+        {children}
+      </Suspense>
+    );
+
+  return <PropsContext value={codeblock}>{children}</PropsContext>;
+}
+
+function Placeholder({
+  code,
+  components = {},
+}: {
+  code: string;
+  components: HighlightOptions['components'];
+}) {
+  const { pre: Pre = 'pre', code: Code = 'code' } = components as Record<
+    string,
+    FC
+  >;
+
+  return (
+    <Pre>
+      <Code>
+        {code.split('\n').map((line, i) => (
+          <span key={i} className="line">
+            {line}
+          </span>
+        ))}
+      </Code>
+    </Pre>
+  );
+}
+
+function Internal({
+  code,
   options,
 }: {
-  lang: string;
   code: string;
-  options?: Omit<HighlightOptionsCommon, 'lang'> & HighlightOptionsThemes;
+  options: HighlightOptions;
 }) {
-  const components: HighlightOptionsCommon['components'] = {
-    pre,
-    ...options?.components,
-  };
-  const loading = useMemo(() => {
-    const Pre = (components.pre ?? 'pre') as 'pre';
-    const Code = (components.code ?? 'code') as 'code';
-
-    return (
-      <Pre>
-        <Code>
-          {code.split('\n').map((line, i) => (
-            <span key={i} className="line">
-              {line}
-            </span>
-          ))}
-        </Code>
-      </Pre>
-    );
-    // eslint-disable-next-line -- initial value only
-  }, []);
-
-  return useShiki(code, {
-    lang,
-    loading,
-    withPrerenderScript: true,
-    ...options,
-    components,
-  });
+  return useShiki(code, options);
 }
