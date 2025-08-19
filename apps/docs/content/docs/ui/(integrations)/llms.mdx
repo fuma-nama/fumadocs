@@ -15,9 +15,38 @@ First, make a `getLLMText` function that converts pages into static MDX content:
 
 ### `llms-full.txt`
 
-A version of docs for AIs to read. For Next.js:
+A version of docs for AIs to read.
 
-<include meta='title="app/llms-full.txt/route.ts"'>./llms.txt.ts</include>
+<include meta='tab="Next.js" title="app/llms-full.txt/route.ts"'>
+  ./llms.txt.ts
+</include>
+
+```ts tab="React Router" title="app/routes/llms-full.ts"
+// make sure to include this route in `routes.ts` & pre-rendering!
+import { source } from '@/lib/source';
+import { getLLMText } from '@/lib/get-llm-text';
+
+export async function loader() {
+  const scan = source.getPages().map(getLLMText);
+  const scanned = await Promise.all(scan);
+
+  return new Response(scanned.join('\n\n'));
+}
+```
+
+```ts tab="Tanstack Start" title="src/routes/llms-full[.]txt.ts"
+import { createServerFileRoute } from '@tanstack/react-start/server';
+import { source } from '~/lib/source';
+import { getLLMText } from '~/lib/get-llm-text';
+
+export const ServerRoute = createServerFileRoute('/llms-full.txt').methods({
+  GET: async () => {
+    const scan = source.getPages().map(getLLMText);
+    const scanned = await Promise.all(scan);
+    return new Response(scanned.join('\n\n'));
+  },
+});
+```
 
 ### `*.mdx`
 
