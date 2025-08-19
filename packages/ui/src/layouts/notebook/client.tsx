@@ -105,7 +105,7 @@ export function LayoutTabs({
     <div
       {...props}
       className={cn(
-        'flex flex-row items-center gap-2 overflow-auto',
+        'flex flex-row items-center gap-4 overflow-auto',
         props.className,
       )}
     >
@@ -130,8 +130,8 @@ function LayoutTab({
   return (
     <Link
       className={cn(
-        'inline-flex rounded-full items-center px-2 py-1.5 font-medium gap-2 text-fd-muted-foreground text-sm text-nowrap',
-        selected && 'bg-fd-primary/10 text-fd-primary',
+        'inline-flex border-b border-transparent transition-colors items-center py-1.5 font-medium gap-2 text-fd-muted-foreground text-sm text-nowrap',
+        selected && 'border-fd-primary text-fd-primary',
       )}
       href={option.url}
     >

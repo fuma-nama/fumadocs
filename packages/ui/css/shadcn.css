@@ -16,3 +16,14 @@
   --color-fd-accent-foreground: var(--accent-foreground);
   --color-fd-ring: var(--ring);
 }
+
+#nd-sidebar {
+  background-color: var(--sidebar);
+  color: var(--sidebar-foreground);
+  border-color: var(--sidebar-border);
+
+  --color-fd-accent: var(--sidebar-accent);
+  --color-fd-accent-foreground: var(--sidebar-accent-foreground);
+  --color-fd-ring: var(--sidebar-ring);
+  --color-fd-primary-foreground: var(--sidebar-primary-foreground);
+}
