@@ -1,0 +1,230 @@
+---
+title: React Router
+description: Support i18n routing on your React Router + Fumadocs app.
+---
+
+## Setup
+
+Define the i18n configurations in a file, we will import it with `@/lib/i18n` in this guide.
+
+```ts title="app/lib/i18n.ts"
+import { defineI18n } from 'fumadocs-core/i18n';
+
+export const i18n = defineI18n({
+  defaultLanguage: 'en',
+  languages: ['cn', 'en'],
+});
+```
+
+> See [available options](/docs/headless/internationalization) for i18n config.
+
+### Routing
+
+Add `:lang` prefix to all your pages.
+
+```ts title="app/routes.ts"
+import { route, type RouteConfig } from '@react-router/dev/routes';
+
+export default [
+  // [!code highlight:2]
+  route(':lang', 'routes/home.tsx'),
+  route(':lang/docs/*', 'docs/page.tsx'),
+  route('api/search', 'docs/search.ts'),
+] satisfies RouteConfig;
+```
+
+#### Make locale optional
+
+You can also use `:lang?` prefix, and update the i18n config:
+
+```ts tab="app/lib/i18n.ts"
+import { defineI18n } from 'fumadocs-core/i18n';
+
+export const i18n = defineI18n({
+  defaultLanguage: 'en',
+  languages: ['cn', 'en'],
+  // [!code ++]
+  hideLocale: 'default-locale',
+});
+```
+
+```ts tab="app/routes.ts"
+import { route, type RouteConfig } from '@react-router/dev/routes';
+
+export default [
+  // [!code highlight:2]
+  route(':lang?', 'routes/home.tsx'),
+  route(':lang?/docs/*', 'docs/page.tsx'),
+  route('api/search', 'docs/search.ts'),
+] satisfies RouteConfig;
+```
+
+### Pages
+
+Provide UI translations and other config to `<RootProvider />`, the English translations are used as fallbacks.
+
+```tsx title="app/root.tsx"
+import {
+  Links,
+  Meta,
+  Scripts,
+  ScrollRestoration,
+  useParams,
+} from 'react-router';
+import { RootProvider } from 'fumadocs-ui/provider/base';
+import { ReactRouterProvider } from 'fumadocs-core/framework/react-router';
+import { defineI18nUI } from 'fumadocs-ui/i18n';
+import { i18n } from '@/lib/i18n';
+import './app.css';
+
+// [!code ++:11]
+const { provider } = defineI18nUI(i18n, {
+  translations: {
+    en: {
+      displayName: 'English',
+    },
+    cn: {
+      displayName: 'Chinese',
+      search: '搜尋文檔',
+    },
+  },
+});
+
+export function Layout({ children }: { children: React.ReactNode }) {
+  const { lang = i18n.defaultLanguage } = useParams();
+
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <Meta />
+        <Links />
+      </head>
+      <body className="flex flex-col min-h-screen">
+        <ReactRouterProvider>
+          <RootProvider
+            // [!code ++]
+            i18n={provider(lang)}
+          >
+            {children}
+          </RootProvider>
+        </ReactRouterProvider>
+        <ScrollRestoration />
+        <Scripts />
+      </body>
+    </html>
+  );
+}
+```
+
+### Pass Locale
+
+Add `locale` parameter to `baseOptions()` and include `i18n` in props:
+
+```tsx title="app/lib/layout.shared.tsx"
+import { i18n } from '@/lib/i18n';
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export function baseOptions(locale: string): BaseLayoutProps {
+  return {
+    i18n, // [!code ++]
+    // different props based on `locale`
+  };
+}
+```
+
+Pass the locale to Fumadocs in your pages and layouts.
+
+```ts tab="app/lib/source.ts"
+import { i18n } from '@/lib/i18n';
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  i18n, // [!code ++]
+  // other options
+});
+```
+
+```tsx tab="Home Layout" title="app/routes/home.tsx"
+import type { Route } from './+types/home';
+import { HomeLayout } from 'fumadocs-ui/layouts/home';
+import { baseOptions } from '@/lib/layout.shared';
+
+export default function Home({ params }: Route.ComponentProps) {
+  return (
+    // [!code highlight]
+    <HomeLayout {...baseOptions(params.lang)}></HomeLayout>
+  );
+}
+```
+
+```tsx tab="Docs Page" title="app/docs/page.tsx"
+import type { Route } from './+types/page';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { source } from '@/lib/source';
+import { type PageTree } from 'fumadocs-core/server';
+import { baseOptions } from '@/lib/layout.shared';
+
+export async function loader({ params }: Route.LoaderArgs) {
+  const slugs = params['*'].split('/').filter((v) => v.length > 0);
+  // [!code --]
+  const page = source.getPage(slugs);
+  // [!code ++]
+  const page = source.getPage(slugs, params.lang);
+  if (!page) throw new Response('Not found', { status: 404 });
+
+  return {
+    path: page.path,
+    // [!code --]
+    tree: source.pageTree,
+    // [!code ++]
+    tree: source.getPageTree(params.lang),
+  };
+}
+
+export default function Page({ loaderData, params }: Route.ComponentProps) {
+  const { tree, path } = loaderData;
+
+  return (
+    <DocsLayout
+      // [!code highlight]
+      {...baseOptions(params.lang)}
+      tree={tree as PageTree.Root}
+    ></DocsLayout>
+  );
+}
+```
+
+### Search
+
+Configure i18n on your search solution.
+
+- **Built-in Search (Orama):** See [Internationalization](/docs/headless/search/orama#internationalization).
+- **Cloud Solutions (e.g. Algolia):** They usually have official support for multilingual.
+
+## Writing Documents
+
+See [i18n routing](/docs/ui/page-conventions#i18n-routing) to learn how to create pages for specific locales.
+
+### Navigation
+
+Fumadocs only handles navigation for its own layouts (e.g. sidebar).
+For other places, you can use the `useParams` hook to get the locale from url.
+
+```tsx
+import { Link, useParams } from 'react-router';
+
+const { lang } = useParams();
+
+<Link to={`/${lang}/about`}>About Us</Link>;
+```
+
+In addition, the [`fumadocs-core/dynamic-link`](/docs/headless/components/link#dynamic-hrefs) component supports dynamic hrefs, you can use it to attend the locale prefix.
+It is useful for Markdown/MDX content.
+
+```mdx title="content.mdx"
+import { DynamicLink } from 'fumadocs-core/dynamic-link';
+
+<DynamicLink href="/[lang]/another-page">This is a link</DynamicLink>
+```
