@@ -30,6 +30,12 @@ description: Auto-generated type table
 
 </Wrapper>
 
+<Callout title="Server Component only" type="warn">
+
+You cannot use this in a client component.
+
+</Callout>
+
 It generates a table for your docs based on TypeScript definitions.
 
 ## Usage
@@ -74,12 +80,6 @@ export interface MyInterface {
 ```
 
 The path is relative to your project directory (`cwd`), because `AutoTypeTable` is a React Server Component, it cannot access build-time information like MDX file path.
-
-<Callout title="Server Component only" type="warn">
-
-You cannot use this in a client component.
-
-</Callout>
 
 ### From Type
 

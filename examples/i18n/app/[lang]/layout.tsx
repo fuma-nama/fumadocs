@@ -1,7 +1,6 @@
 import 'fumadocs-ui/style.css';
 import { RootProvider } from 'fumadocs-ui/provider';
 import { Inter } from 'next/font/google';
-import type { ReactNode } from 'react';
 import { defineI18nUI } from 'fumadocs-ui/i18n';
 import { i18n } from '@/lib/i18n';
 
@@ -30,10 +29,7 @@ const { provider } = defineI18nUI(i18n, {
 export default async function Layout({
   params,
   children,
-}: {
-  params: Promise<{ lang: string }>;
-  children: ReactNode;
-}) {
+}: LayoutProps<'/[lang]'>) {
   const { lang } = await params;
   return (
     <html lang={lang} className={inter.className} suppressHydrationWarning>

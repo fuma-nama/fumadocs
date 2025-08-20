@@ -1,5 +1,4 @@
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import type { ReactNode } from 'react';
 import { baseOptions, linkItems, logo } from '@/lib/layout.shared';
 import { source } from '@/lib/source';
 import { LargeSearchToggle } from 'fumadocs-ui/components/layout/search-toggle';
@@ -9,7 +8,7 @@ import { cn } from '@/lib/cn';
 import { buttonVariants } from '@/components/ui/button';
 import 'katex/dist/katex.min.css';
 
-export default function Layout({ children }: { children: ReactNode }) {
+export default function Layout({ children }: LayoutProps<'/docs'>) {
   const base = baseOptions();
 
   return (

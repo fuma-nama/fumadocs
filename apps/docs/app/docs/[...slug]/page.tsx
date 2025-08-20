@@ -14,12 +14,7 @@ import {
   PageTOCTitle,
 } from 'fumadocs-ui/layouts/docs/page';
 import { notFound } from 'next/navigation';
-import {
-  type ComponentProps,
-  type FC,
-  type ReactElement,
-  type ReactNode,
-} from 'react';
+import { type ComponentProps, type FC, type ReactNode } from 'react';
 import * as Twoslash from 'fumadocs-twoslash/ui';
 import { Callout } from 'fumadocs-ui/components/callout';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
@@ -61,9 +56,7 @@ const generator = createGenerator();
 
 export const revalidate = false;
 
-export default async function Page(props: {
-  params: Promise<{ slug: string[] }>;
-}): Promise<ReactElement> {
+export default async function Page(props: PageProps<'/docs/[...slug]'>) {
   const params = await props.params;
   const page = source.getPage(params.slug);
 
@@ -183,9 +176,9 @@ function DocsCategory({ url }: { url: string }) {
   );
 }
 
-export async function generateMetadata(props: {
-  params: Promise<{ slug: string[] }>;
-}): Promise<Metadata> {
+export async function generateMetadata(
+  props: PageProps<'/docs/[...slug]'>,
+): Promise<Metadata> {
   const { slug = [] } = await props.params;
   const page = source.getPage(slug);
   if (!page) notFound();

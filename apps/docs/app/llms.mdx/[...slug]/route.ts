@@ -7,7 +7,7 @@ export const revalidate = false;
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: Promise<{ slug: string[] }> },
+  { params }: RouteContext<'/llms.mdx/[...slug]'>,
 ) {
   const slug = (await params).slug;
   const page = source.getPage(slug);
