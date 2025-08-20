@@ -52,8 +52,7 @@ You can automatically sync your documentation by adding a sync script to your `p
 ```json
 {
   "scripts": {
-    "build": "next build && npm run sync-content",
-    "sync-content": "mxbai vs sync YOUR_VECTOR_STORE_ID './content/docs' --ci"
+    "build": "... && mxbai vs sync YOUR_VECTOR_STORE_ID './content/docs' --ci"
   }
 }
 ```
@@ -64,7 +63,7 @@ You can automatically sync your documentation by adding a sync script to your `p
 
 To filter search results by tags, add a tag field to your document metadata:
 
-```typescript
+```md
 ---
 title: Mixedbread
 description: Integrate Mixedbread Search with Fumadocs
@@ -72,7 +71,6 @@ url: /docs/headless/search/mixedbread
 // [!code ++]
 tag: docs
 ---
-...
 ```
 
 And update your search client:

@@ -43,16 +43,13 @@ credentials in environment variables.
 
 ### Sync Search Indexes
 
-Export the search indexes from Next.js using a route handler, this way we can access the search indexes after production build:
+Pre-render a static route `/static.json` to export search indexes into production build:
 
-```ts title="app/static.json/route.ts"
-import { NextResponse } from 'next/server';
-import { type DocumentRecord } from 'fumadocs-core/search/algolia';
+```ts title="lib/export-search-indexes.ts"
 import { source } from '@/lib/source';
+import type { DocumentRecord } from 'fumadocs-core/search/algolia';
 
-export const revalidate = false;
-
-export function GET() {
+export async function exportSearchIndexes() {
   const results: DocumentRecord[] = [];
 
   for (const page of source.getPages()) {
@@ -65,38 +62,52 @@ export function GET() {
     });
   }
 
-  return NextResponse.json(results);
+  return results;
 }
 ```
 
+<include>.static-route-example.mdx</include>
+
 Make a script to sync search indexes:
 
-<include lang="js" meta='title="update-index.mjs"'>
-  ./sync-algolia.mjs
-</include>
+```ts title="scripts/sync-content.ts" twoslash
+import { algoliasearch } from 'algoliasearch';
+import { sync, DocumentRecord } from 'fumadocs-core/search/algolia';
+import * as fs from 'node:fs';
 
-The `sync` function will update the index settings and sync search indexes.
+// the path of pre-rendered `static.json`, choose one according to your React framework
+const filePath = {
+  next: '.next/server/app/static.json.body',
+  'tanstack-start': '.output/public/static.json',
+  'react-router': 'build/client/static.json',
+}['next'];
+
+const content = fs.readFileSync(filePath);
+
+const records = JSON.parse(content.toString()) as DocumentRecord[];
+
+const client = algoliasearch('id', 'key');
+
+// update the index settings and sync search indexes
+void sync(client, {
+  indexName: 'document',
+  documents: records,
+});
+```
 
 Now run the script after build:
 
 ```json title="package.json"
 {
   "scripts": {
-    "build": "next build && node ./update-index.mjs"
+    "build": "... && bun ./scripts/sync-content.ts"
   }
 }
 ```
 
 ### Workflow
 
-You may make it a script and manually sync with `node ./update-index.mjs`, or
-integrate it with your CI/CD pipeline.
-
-<Callout type="warn" title="Typescript Usage">
-  If you are running the script with [TSX](https://github.com/privatenumber/tsx)
-  or other similar Typescript executors, ensure to name it `.mts` for best ESM
-  compatibility.
-</Callout>
+You may manually upload search indexes with the script, or integrate it with your CI/CD pipeline.
 
 ### Search UI
 
@@ -126,16 +137,27 @@ You can consider different options for implementing the UI:
 
 To configure tag filtering, add a `tag` value to indexes.
 
-```js
-import { sync } from 'fumadocs-core/search/algolia';
+```ts title="lib/export-search-indexes.ts"
+import { source } from '@/lib/source';
+import type { DocumentRecord } from 'fumadocs-core/search/algolia';
 
-void sync(client, {
-  indexName: 'document',
-  documents: records.map((index) => ({
-    ...index,
-    tag: 'value', // [!code ++]
-  })),
-});
+export async function exportSearchIndexes() {
+  const results: DocumentRecord[] = [];
+
+  for (const page of source.getPages()) {
+    results.push({
+      _id: page.url,
+      structured: page.data.structuredData,
+      url: page.url,
+      title: page.data.title,
+      description: page.data.description,
+      // [!code ++]
+      tag: '<your value>',
+    });
+  }
+
+  return results;
+}
 ```
 
 And update your search client:

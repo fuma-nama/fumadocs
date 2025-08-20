@@ -17,6 +17,9 @@ export default defineConfig({
     }),
     tanstackStart({
       customViteReactPlugin: true,
+      prerender: {
+        enabled: true,
+      },
     }),
     react(),
   ],
