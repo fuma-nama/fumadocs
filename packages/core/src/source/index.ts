@@ -1,4 +1,10 @@
-export * from './page-tree-builder';
+export {
+  createPageTreeBuilder,
+  type PageTreeTransformer,
+  type PageTreeBuilder,
+  type PageTreeBuilderContext,
+  type BaseOptions,
+} from './page-tree/builder';
 export * from './loader';
 export { FileSystem } from './file-system';
 

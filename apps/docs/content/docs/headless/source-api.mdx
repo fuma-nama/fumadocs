@@ -193,14 +193,19 @@ import { loader } from 'fumadocs-core/source';
 
 loader({
   pageTree: {
-    attachFile(node, file) {
-      // you can access its file information
-      console.log(file?.data);
-      // JSX nodes are allowed
-      node.name = <>Some JSX Nodes here</>;
+    transformers: [
+      {
+        file(node, file) {
+          // you can access its file information
+          if (file) console.log(file, this.storage.read(file));
 
-      return node;
-    },
+          // JSX nodes are allowed
+          node.name = <>Some JSX Nodes here</>;
+
+          return node;
+        },
+      },
+    ],
   },
 });
 ```

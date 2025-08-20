@@ -1,70 +1,106 @@
 import type { ReactElement } from 'react';
 import type { I18nConfig } from '@/i18n';
-import type * as PageTree from '../server/page-tree';
+import type * as PageTree from '../../server/page-tree';
 import { joinPath } from '@/utils/path';
-import type { MetaData, PageData, UrlFn } from './types';
-import type { ContentStorage, MetaFile, PageFile } from '@/source/load-files';
+import type { MetaData, PageData, UrlFn } from '../types';
+import type { ContentStorage } from '@/source/load-files';
 import { basename, extname } from '@/source/path';
+import {
+  legacyTransformer,
+  type LegacyTransformerOptions,
+} from '@/source/page-tree/legacy';
+import { transformerFallback } from '@/source/page-tree/transformer-fallback';
 
-interface PageTreeBuilderContext {
-  storage: ContentStorage;
-  resolveName: (name: string, format: 'meta' | 'page') => string;
-
-  locale?: string;
-  localeStorage?: ContentStorage;
-
-  builder: PageTreeBuilder;
-  options: BaseOptions;
-  getUrl: UrlFn;
-}
-
-interface BaseOptions<
+export interface PageTreeBuilderContext<
   Page extends PageData = PageData,
   Meta extends MetaData = MetaData,
 > {
+  /**
+   * @internal
+   */
+  resolveName: (name: string, format: 'meta' | 'page') => string;
+  options: BaseOptions<Page, Meta>;
+  transformers: PageTreeTransformer<Page, Meta>[];
+
+  builder: PageTreeBuilder<Page, Meta>;
+  storage: ContentStorage<Page, Meta>;
+
+  locale?: string;
+  localeStorage?: ContentStorage<Page, Meta>;
+  getUrl: UrlFn;
+}
+
+export interface PageTreeTransformer<
+  // eslint-disable-next-line
+  Page extends PageData = any,
+  // eslint-disable-next-line
+  Meta extends MetaData = any,
+> {
+  name?: string;
+
+  file?: (
+    this: PageTreeBuilderContext<Page, Meta>,
+    node: PageTree.Item,
+    filePath?: string,
+  ) => PageTree.Item;
+  folder?: (
+    this: PageTreeBuilderContext<Page, Meta>,
+    node: PageTree.Folder,
+    folderPath: string,
+    metaPath?: string,
+  ) => PageTree.Folder;
+  separator?: (
+    this: PageTreeBuilderContext<Page, Meta>,
+    node: PageTree.Separator,
+  ) => PageTree.Separator;
+  root?: (
+    this: PageTreeBuilderContext<Page, Meta>,
+    node: PageTree.Root,
+  ) => PageTree.Root;
+}
+
+export interface BaseOptions<
+  Page extends PageData = PageData,
+  Meta extends MetaData = MetaData,
+> extends LegacyTransformerOptions<Page, Meta> {
   /**
    * Remove references to the file path of original nodes (`$ref`)
    *
    * @defaultValue false
    */
   noRef?: boolean;
-
-  attachFile?: (node: PageTree.Item, file?: PageFile<Page>) => PageTree.Item;
-  attachFolder?: (
-    node: PageTree.Folder,
-    folder: {
-      children: (PageFile<Page> | MetaFile<Meta>)[];
-    },
-    meta?: MetaFile<Meta>,
-  ) => PageTree.Folder;
-  attachSeparator?: (node: PageTree.Separator) => PageTree.Separator;
-
+  transformers?: PageTreeTransformer<Page, Meta>[];
   resolveIcon?: (icon: string | undefined) => ReactElement | undefined;
 }
 
-export interface BuildPageTreeOptions<
+export interface PageTreeBuilder<
   Page extends PageData = PageData,
   Meta extends MetaData = MetaData,
-> extends BaseOptions<Page, Meta> {
-  storage: ContentStorage;
-}
+> {
+  build: (
+    options: BaseOptions<Page, Meta> & {
+      id?: string;
 
-export interface BuildPageTreeOptionsWithI18n<
-  Page extends PageData = PageData,
-  Meta extends MetaData = MetaData,
-> extends BaseOptions<Page, Meta> {
-  storages: Record<string, ContentStorage>;
-  i18n: I18nConfig;
-}
+      storage: ContentStorage<Page, Meta>;
 
-export interface PageTreeBuilder {
-  build: (options: BuildPageTreeOptions) => PageTree.Root;
+      /**
+       * generate fallback page tree
+       *
+       * @defaultValue true
+       */
+      generateFallback?: boolean;
+    },
+  ) => PageTree.Root;
 
   /**
    * Build page tree and fallback to the default language if the localized page doesn't exist
    */
   buildI18n: (
-    options: BuildPageTreeOptionsWithI18n,
+    options: BaseOptions<Page, Meta> & {
+      id?: string;
+      storages: Record<string, ContentStorage<Page, Meta>>;
+      i18n: I18nConfig;
+    },
   ) => Record<string, PageTree.Root>;
 }
 
@@ -109,20 +145,25 @@ function resolveFolderItem(
   ctx: PageTreeBuilderContext,
   idx: number,
   restNodePaths: Set<string>,
-): PageTree.Node[] | typeof rest | typeof restReversed {
+): PageTree.Node[] | '...' | 'z...a' {
   if (item === rest || item === restReversed) return item;
   const { options, resolveName } = ctx;
 
   let match = separator.exec(item);
   if (match?.groups) {
-    const node: PageTree.Separator = {
+    let node: PageTree.Separator = {
       $id: `${folderPath}#${idx}`,
       type: 'separator',
       icon: options.resolveIcon?.(match.groups.icon),
       name: match.groups.name,
     };
 
-    return [options.attachSeparator?.(node) ?? node];
+    for (const transformer of ctx.transformers) {
+      if (!transformer.separator) continue;
+      node = transformer.separator.call(ctx, node);
+    }
+
+    return [node];
   }
 
   match = link.exec(item);
@@ -131,7 +172,7 @@ function resolveFolderItem(
     const isRelative =
       url.startsWith('/') || url.startsWith('#') || url.startsWith('.');
 
-    const node: PageTree.Item = {
+    let node: PageTree.Item = {
       type: 'page',
       icon: options.resolveIcon?.(icon),
       name,
@@ -139,7 +180,12 @@ function resolveFolderItem(
       external: !isRelative,
     };
 
-    return [options.attachFile?.(node) ?? node];
+    for (const transformer of ctx.transformers) {
+      if (!transformer.file) continue;
+      node = transformer.file.call(ctx, node);
+    }
+
+    return [node];
   }
 
   const isExcept = item.startsWith(excludePrefix);
@@ -171,7 +217,7 @@ function buildFolderNode(
   isGlobalRoot: boolean,
   ctx: PageTreeBuilderContext,
 ): PageTree.Folder | undefined {
-  const { storage, localeStorage, options, resolveName } = ctx;
+  const { storage, localeStorage, options, resolveName, transformers } = ctx;
   const files = storage.readDir(folderPath);
   if (!files) return;
 
@@ -183,12 +229,15 @@ function buildFolderNode(
     meta = undefined;
   }
 
-  const isRoot = meta?.data.root ?? isGlobalRoot;
-  let indexDisabled = false;
+  let indexDisabled = meta?.data.root ?? isGlobalRoot;
   let children: PageTree.Node[];
 
   if (!meta?.data.pages) {
-    children = buildAll(files, ctx, (file) => isRoot || file !== indexPath);
+    children = buildAll(
+      files,
+      ctx,
+      (file) => indexDisabled || file !== indexPath,
+    );
   } else {
     const restItems = new Set<string>(files);
     const resolved = meta.data.pages.flatMap<
@@ -196,7 +245,7 @@ function buildFolderNode(
     >((item, i) => resolveFolderItem(folderPath, item, ctx, i, restItems));
 
     // disable folder index if it is used in `pages`
-    if (!isRoot && !restItems.has(indexPath)) {
+    if (!indexDisabled && !restItems.has(indexPath)) {
       indexDisabled = true;
     }
 
@@ -207,8 +256,7 @@ function buildFolderNode(
       const items = buildAll(
         files,
         ctx,
-        // index files are not included in ... unless it's a root folder
-        (file) => (file !== indexPath || isRoot) && restItems.has(file),
+        (file) => (indexDisabled || file !== indexPath) && restItems.has(file),
         item === restReversed,
       );
 
@@ -227,7 +275,7 @@ function buildFolderNode(
     name = pathToName(group.exec(folderName)?.[1] ?? folderName);
   }
 
-  const node: PageTree.Folder = {
+  let node: PageTree.Folder = {
     type: 'folder',
     name,
     icon: options.resolveIcon?.(meta?.data.icon) ?? index?.icon,
@@ -245,28 +293,24 @@ function buildFolderNode(
         : undefined,
   };
 
-  return (
-    options.attachFolder?.(
-      node,
-      {
-        get children() {
-          return files.flatMap((file) => storage.read(file) ?? []);
-        },
-      },
-      meta,
-    ) ?? node
-  );
+  for (const transformer of transformers) {
+    if (!transformer.folder) continue;
+    node = transformer.folder.call(ctx, node, folderPath, metaPath);
+  }
+
+  return node;
 }
 
 function buildFileNode(
   path: string,
-  { options, getUrl, storage, localeStorage, locale }: PageTreeBuilderContext,
+  ctx: PageTreeBuilderContext,
 ): PageTree.Item | undefined {
+  const { options, getUrl, storage, localeStorage, locale, transformers } = ctx;
   const page = localeStorage?.read(path) ?? storage.read(path);
   if (page?.format !== 'page') return;
 
   const { title, description, icon } = page.data;
-  const item: PageTree.Item = {
+  let item: PageTree.Item = {
     $id: path,
     type: 'page',
     name: title ?? pathToName(basename(path, extname(path))),
@@ -280,20 +324,45 @@ function buildFileNode(
       : undefined,
   };
 
-  return options.attachFile?.(item, page) ?? item;
+  for (const transformer of transformers) {
+    if (!transformer.file) continue;
+    item = transformer.file.call(ctx, item, path);
+  }
+
+  return item;
 }
 
-function build(ctx: PageTreeBuilderContext): PageTree.Root {
+function build(id: string, ctx: PageTreeBuilderContext): PageTree.Root {
   const folder = buildFolderNode('', true, ctx)!;
-
-  return {
-    $id: ctx.locale ?? 'root',
+  let root: PageTree.Root = {
+    $id: id,
     name: folder.name,
     children: folder.children,
   };
+
+  for (const transformer of ctx.transformers) {
+    if (!transformer.root) continue;
+    root = transformer.root.call(ctx, root);
+  }
+
+  return root;
 }
 
 export function createPageTreeBuilder(getUrl: UrlFn): PageTreeBuilder {
+  function getTransformers(options: BaseOptions, generateFallback = true) {
+    const transformers: PageTreeTransformer[] = [legacyTransformer(options)];
+
+    if (options.transformers) {
+      transformers.push(...options.transformers);
+    }
+
+    if (generateFallback) {
+      transformers.push(transformerFallback());
+    }
+
+    return transformers;
+  }
+
   function createFlattenPathResolver(storage: ContentStorage) {
     const map = new Map<string, string>();
     const files = storage.getFiles();
@@ -310,28 +379,31 @@ export function createPageTreeBuilder(getUrl: UrlFn): PageTreeBuilder {
   }
 
   return {
-    build(options) {
-      const resolve = createFlattenPathResolver(options.storage);
+    build({ storage, id, generateFallback, ...options }) {
+      const resolve = createFlattenPathResolver(storage);
 
-      return build({
+      return build(id ?? 'root', {
+        transformers: getTransformers(options, generateFallback),
         options,
         builder: this,
-        storage: options.storage,
+        storage,
         getUrl,
         resolveName(name, format) {
           return resolve(name, format) ?? name;
         },
       });
     },
-    buildI18n({ i18n, ...options }) {
+    buildI18n({ id, i18n, ...options }) {
       const storage = options.storages[i18n.defaultLanguage];
       const resolve = createFlattenPathResolver(storage);
+      const transformers = getTransformers(options);
 
       const entries = i18n.languages.map<[string, PageTree.Root]>((lang) => {
-        const tree = build({
+        const tree = build(id ?? lang ?? 'root', {
+          transformers,
+          builder: this,
           options,
           getUrl,
-          builder: this,
           locale: lang,
           storage,
           localeStorage: options.storages[lang],

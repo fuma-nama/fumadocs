@@ -9,7 +9,10 @@ export interface LoadOptions {
   buildFile: (file: VirtualFile) => MetaFile | PageFile;
 }
 
-export type ContentStorage = FileSystem<MetaFile | PageFile>;
+export type ContentStorage<
+  Page extends PageData = PageData,
+  Meta extends MetaData = MetaData,
+> = FileSystem<MetaFile<Meta> | PageFile<Page>>;
 
 export interface MetaFile<Data extends MetaData = MetaData> {
   path: string;

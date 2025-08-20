@@ -2,7 +2,7 @@ import { createMDXSource } from 'fumadocs-mdx';
 import type { InferMetaType, InferPageType } from 'fumadocs-core/source';
 import { loader } from 'fumadocs-core/source';
 import { icons } from 'lucide-react';
-import { attachFile } from 'fumadocs-openapi/server';
+import { transformerOpenAPI } from 'fumadocs-openapi/server';
 import { createElement } from 'react';
 import { blog as blogPosts, docs } from '@/.source';
 
@@ -14,7 +14,7 @@ export const source = loader({
   },
   source: docs.toFumadocsSource(),
   pageTree: {
-    attachFile,
+    transformers: [transformerOpenAPI()],
   },
 });
 

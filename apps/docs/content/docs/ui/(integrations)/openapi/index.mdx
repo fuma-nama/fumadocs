@@ -42,13 +42,13 @@ export const openapi = createOpenAPI({
 ```
 
 ```ts title="lib/source.ts"
-import { attachFile } from 'fumadocs-openapi/server';
+import { transformerOpenAPI } from 'fumadocs-openapi/server';
 import { loader } from 'fumadocs-core/source';
 
 export const source = loader({
   pageTree: {
     // [!code ++] adds a badge to each page item in page tree
-    attachFile,
+    transformers: [transformerOpenAPI()],
   },
 });
 ```

@@ -8,10 +8,7 @@ import {
   type Transformer,
 } from './load-files';
 import type { MetaData, PageData, UrlFn } from './types';
-import {
-  type BuildPageTreeOptions,
-  createPageTreeBuilder,
-} from './page-tree-builder';
+import { type BaseOptions, createPageTreeBuilder } from './page-tree/builder';
 import {
   basename,
   dirname,
@@ -37,7 +34,7 @@ export interface LoaderOptions<
 > {
   baseUrl: string;
 
-  icon?: NonNullable<BuildPageTreeOptions['resolveIcon']>;
+  icon?: NonNullable<BaseOptions['resolveIcon']>;
   slugs?: (info: FileInfo) => string[];
   url?: UrlFn;
 
@@ -47,9 +44,7 @@ export interface LoaderOptions<
   /**
    * Additional options for page tree builder
    */
-  pageTree?: Partial<
-    Omit<BuildPageTreeOptions<T['pageData'], T['metaData']>, 'storage'>
-  >;
+  pageTree?: Partial<BaseOptions<T['pageData'], T['metaData']>>;
 
   /**
    * Configure i18n
