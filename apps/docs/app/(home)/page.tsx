@@ -317,8 +317,8 @@ function Highlights() {
         Focus on user experience and accessibility.
       </Highlight>
       <Highlight icon={ServerIcon} heading="Server First.">
-        Fumadocs is dynamic, allowing seamless CMS integration & up-to-date
-        content integrated with server.
+        Allowing seamless CMS integration and dynamic content integrated with
+        server.
       </Highlight>
       <Highlight icon={KeyboardIcon} heading="Markdown & MDX.">
         Syntax highlighting on Shiki, Typescript Twoslash, OpenAPI docs

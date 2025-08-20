@@ -3,20 +3,17 @@ title: RSS
 description: Generate a RSS feed for your docs/blog.
 ---
 
-## Overview
+## Setup
 
-You can implement the feed using a route handler like:
+You can create the feed object:
 
-```ts title="app/rss.xml/route.ts"
+```ts title="lib/rss.ts"
 import { Feed } from 'feed';
 import { source } from '@/lib/source';
-import { NextResponse } from 'next/server';
-
-export const revalidate = false;
 
 const baseUrl = 'https://fumadocs.dev';
 
-export function GET() {
+export function getRSS() {
   const feed = new Feed({
     title: 'Fumadocs Blog',
     id: `${baseUrl}/blog`,
@@ -28,15 +25,13 @@ export function GET() {
     copyright: 'All rights reserved 2025, Fuma Nama',
   });
 
-  for (const page of source.getPages().sort((a, b) => {
-    return new Date(b.data.date).getTime() - new Date(a.data.date).getTime();
-  })) {
+  for (const page of source.getPages()) {
     feed.addItem({
       id: page.url,
       title: page.data.title,
       description: page.data.description,
       link: `${baseUrl}${page.url}`,
-      date: new Date(page.data.date),
+      date: new Date(page.data.lastModified),
 
       author: [
         {
@@ -46,9 +41,51 @@ export function GET() {
     });
   }
 
-  return new NextResponse(feed.rss2());
+  return feed.rss2();
 }
 ```
+
+And expose it using a server loader/route handler like:
+
+```ts tab="Next.js" title="app/rss.xml/route.ts"
+import { getRSS } from '@/lib/rss';
+
+export const revalidate = false;
+
+export function GET() {
+  return new Response(getRSS());
+}
+```
+
+```ts tab="React Router"
+// app/routes/rss.ts
+import { getRSS } from '@/lib/rss';
+
+export async function loader() {
+  return new Response(getRSS());
+}
+
+// app/routes.ts
+import { route, type RouteConfig } from '@react-router/dev/routes';
+
+export default [
+  // ...
+  route('rss.xml', 'routes/rss.ts'),
+] satisfies RouteConfig;
+```
+
+```ts tab="Tanstack Start" title="src/routes/rss[.]xml.ts"
+import { createServerFileRoute } from '@tanstack/react-start/server';
+import { getRSS } from '@/lib/rss';
+
+export const ServerRoute = createServerFileRoute('/rss.xml').methods({
+  async GET() {
+    return new Response(getRSS());
+  },
+});
+```
+
+### Next.js Metadata
 
 You can add an alternates object to the metadata object with your feed’s title and URL.
 

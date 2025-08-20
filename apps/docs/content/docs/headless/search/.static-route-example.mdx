@@ -29,7 +29,7 @@ export default [
 ```ts tab="Tanstack Start"
 // src/routes/static[.]json.ts
 import { createServerFileRoute } from '@tanstack/react-start/server';
-import { exportSearchIndexes } from '~/lib/export-search-indexes';
+import { exportSearchIndexes } from '@/lib/export-search-indexes';
 
 export const ServerRoute = createServerFileRoute('/static.json').methods({
   async GET() {

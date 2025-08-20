@@ -36,8 +36,8 @@ export async function loader() {
 
 ```ts tab="Tanstack Start" title="src/routes/llms-full[.]txt.ts"
 import { createServerFileRoute } from '@tanstack/react-start/server';
-import { source } from '~/lib/source';
-import { getLLMText } from '~/lib/get-llm-text';
+import { source } from '@/lib/source';
+import { getLLMText } from '@/lib/get-llm-text';
 
 export const ServerRoute = createServerFileRoute('/llms-full.txt').methods({
   GET: async () => {

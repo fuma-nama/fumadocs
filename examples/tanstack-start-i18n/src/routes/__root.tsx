@@ -7,11 +7,11 @@ import {
   useParams,
 } from '@tanstack/react-router';
 import * as React from 'react';
-import appCss from '~/styles/app.css?url';
+import appCss from '@/styles/app.css?url';
 import { RootProvider } from 'fumadocs-ui/provider/base';
 import { TanstackProvider } from 'fumadocs-core/framework/tanstack';
 import { defineI18nUI } from 'fumadocs-ui/i18n';
-import { i18n } from '~/lib/i18n';
+import { i18n } from '@/lib/i18n';
 
 export const Route = createRootRoute({
   head: () => ({
