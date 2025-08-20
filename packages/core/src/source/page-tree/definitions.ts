@@ -5,6 +5,10 @@ export interface Root {
 
   name: ReactNode;
   children: Node[];
+  /**
+   * Another page tree that won't be displayed unless being opened.
+   */
+  fallback?: Root;
 }
 
 export type Node = Item | Separator | Folder;

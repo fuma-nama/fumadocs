@@ -5,7 +5,7 @@ import type {
   PageFile,
   PageTreeTransformer,
 } from '@/source';
-import type * as PageTree from '@/server/page-tree';
+import type * as PageTree from './definitions';
 
 export interface LegacyTransformerOptions<
   Page extends PageData,

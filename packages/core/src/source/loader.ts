@@ -1,4 +1,4 @@
-import type * as PageTree from '@/server/page-tree';
+import type * as PageTree from '@/source/page-tree/definitions';
 import type { I18nConfig } from '@/i18n';
 import {
   type ContentStorage,

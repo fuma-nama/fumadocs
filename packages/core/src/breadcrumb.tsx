@@ -1,5 +1,5 @@
 import { type ReactNode, useMemo } from 'react';
-import type * as PageTree from '@/server/page-tree';
+import type * as PageTree from '@/source/page-tree/definitions';
 
 export interface BreadcrumbItem {
   name: ReactNode;

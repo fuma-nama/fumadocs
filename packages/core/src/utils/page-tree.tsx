@@ -1,21 +1,21 @@
-import type * as PageTree from '@/server/page-tree';
+import type * as PageTree from '@/source/page-tree/definitions';
 
 /**
  * Flatten tree to an array of page nodes
  */
-export function flattenTree(tree: PageTree.Node[]): PageTree.Item[] {
-  return tree.flatMap((node) => {
-    if (node.type === 'separator') return [];
+export function flattenTree(nodes: PageTree.Node[]): PageTree.Item[] {
+  const out: PageTree.Item[] = [];
+
+  for (const node of nodes) {
     if (node.type === 'folder') {
-      const child = flattenTree(node.children);
-
-      if (node.index) return [node.index, ...child];
-
-      return child;
+      if (node.index) out.push(node.index);
+      out.push(...flattenTree(node.children));
+    } else if (node.type === 'page') {
+      out.push(node);
     }
+  }
 
-    return [node];
-  });
+  return out;
 }
 
 /**
@@ -33,18 +33,17 @@ export function findNeighbour(
 } {
   const { separateRoot = true } = options ?? {};
   const roots = separateRoot ? getPageTreeRoots(tree) : [tree];
+  if (tree.fallback) roots.push(tree.fallback);
 
   for (const root of roots) {
     const list = flattenTree(root.children);
+    const idx = list.findIndex((item) => item.url === url);
+    if (idx === -1) continue;
 
-    for (let i = 0; i < list.length; i++) {
-      if (list[i].url === url) {
-        return {
-          next: list[i + 1],
-          previous: list[i - 1],
-        };
-      }
-    }
+    return {
+      previous: list[idx - 1],
+      next: list[idx + 1],
+    };
   }
 
   return {};
@@ -57,10 +56,7 @@ export function getPageTreeRoots(
     if (child.type !== 'folder') return [];
     const roots = getPageTreeRoots(child);
 
-    if (child.root) {
-      roots.push(child);
-    }
-
+    if (child.root) roots.push(child);
     return roots;
   });
 
@@ -70,6 +66,8 @@ export function getPageTreeRoots(
 
 /**
  * Separate the folder nodes of a root into multiple roots
+ *
+ * @deprecated it's useless
  */
 export function separatePageTree(pageTree: PageTree.Root): PageTree.Root[] {
   return pageTree.children.flatMap((child) => {
@@ -115,5 +113,9 @@ function findParentFromTree(
     if (child.type === 'page' && child.url === url) {
       return node;
     }
+  }
+
+  if ('fallback' in node && node.fallback) {
+    return findParentFromTree(node.fallback, url);
   }
 }

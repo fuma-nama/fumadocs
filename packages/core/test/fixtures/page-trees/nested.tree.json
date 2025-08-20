@@ -59,5 +59,17 @@
       "url": "https://google.com",
     },
   ],
+  "fallback": {
+    "$id": "fallback-root",
+    "children": [
+      {
+        "$id": "hidden.mdx",
+        "name": "Hidden",
+        "type": "page",
+        "url": "/hidden",
+      },
+    ],
+    "name": "",
+  },
   "name": "",
 }

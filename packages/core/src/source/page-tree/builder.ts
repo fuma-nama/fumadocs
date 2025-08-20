@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import type { I18nConfig } from '@/i18n';
-import type * as PageTree from '../../server/page-tree';
+import type * as PageTree from './definitions';
 import { joinPath } from '@/utils/path';
 import type { MetaData, PageData, UrlFn } from '../types';
 import type { ContentStorage } from '@/source/load-files';
