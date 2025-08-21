@@ -37,9 +37,7 @@ export function legacyTransformer<Page extends PageData, Meta extends MetaData>(
   return {
     file(node, file) {
       if (!transformer.attachFile) return node;
-      const content = file
-        ? (this.localeStorage?.read(file) ?? this.storage.read(file))
-        : undefined;
+      const content = file ? this.storage.read(file) : undefined;
 
       return transformer.attachFile(
         node,
@@ -50,17 +48,12 @@ export function legacyTransformer<Page extends PageData, Meta extends MetaData>(
       if (!transformer.attachFolder) return node;
 
       const files = this.storage.readDir(folderPath) ?? [];
-      const meta = metaPath
-        ? (this.localeStorage?.read(metaPath) ?? this.storage.read(metaPath))
-        : undefined;
+      const meta = metaPath ? this.storage.read(metaPath) : undefined;
 
       return transformer.attachFolder(
         node,
         {
-          children: files.flatMap(
-            (file) =>
-              this.localeStorage?.read(file) ?? this.storage.read(file) ?? [],
-          ),
+          children: files.flatMap((file) => this.storage.read(file) ?? []),
         },
         meta?.format === 'meta' ? meta : undefined,
       );

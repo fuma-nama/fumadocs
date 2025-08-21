@@ -189,11 +189,7 @@ export interface LoaderOutput<Config extends LoaderConfig> {
   ) => (Record<TSlug, string[]> & Record<TLang, string>)[];
 }
 
-function indexPages(
-  storages: Record<string, ContentStorage>,
-  getUrl: UrlFn,
-  i18n?: I18nConfig,
-) {
+function indexPages(storages: Record<string, ContentStorage>, getUrl: UrlFn) {
   const result = {
     // (locale.slugs -> page)
     pages: new Map<string, Page>(),
@@ -203,41 +199,19 @@ function indexPages(
     pathToPage: new Map<string, Page>(),
   };
 
-  const defaultLanguage = i18n?.defaultLanguage ?? '';
+  for (const [lang, storage] of Object.entries(storages)) {
+    for (const filePath of storage.getFiles()) {
+      const item = storage.read(filePath)!;
+      const path = `${lang}.${filePath}`;
 
-  for (const filePath of storages[defaultLanguage].getFiles()) {
-    const item = storages[defaultLanguage].read(filePath)!;
-    const path = `${defaultLanguage}.${filePath}`;
-
-    if (item.format === 'meta') {
-      result.pathToMeta.set(path, fileToMeta(item));
-    }
-
-    if (item.format === 'page') {
-      const page = fileToPage(item, getUrl, defaultLanguage);
-      result.pathToPage.set(path, page);
-      result.pages.set(`${defaultLanguage}.${page.slugs.join('/')}`, page);
-
-      if (!i18n) continue;
-
-      for (const lang of i18n.languages) {
-        if (lang === defaultLanguage) continue;
-        const localizedItem = storages[lang].read(filePath);
-        const localizedPage = fileToPage(
-          localizedItem?.format === 'page' ? localizedItem : item,
-          getUrl,
-          lang,
-        );
-
-        if (localizedItem) {
-          result.pathToPage.set(`${lang}.${filePath}`, localizedPage);
-        }
-
-        result.pages.set(
-          `${lang}.${localizedPage.slugs.join('/')}`,
-          localizedPage,
-        );
+      if (item.format === 'meta') {
+        result.pathToMeta.set(path, fileToMeta(item));
+        continue;
       }
+
+      const page = fileToPage(item, getUrl, lang);
+      result.pathToPage.set(path, page);
+      result.pages.set(`${lang}.${page.slugs.join('/')}`, page);
     }
   }
 
@@ -362,32 +336,31 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
         },
   );
 
-  const walker = indexPages(storages, getUrl, i18n);
+  const walker = indexPages(storages, getUrl);
   const builder = createPageTreeBuilder(getUrl);
-  let pageTree: LoaderOutput<LoaderConfig>['pageTree'] | undefined;
+  let pageTree: Record<string, PageTree.Root> | undefined;
 
   return {
     _i18n: i18n,
     get pageTree() {
-      if (i18n) {
-        pageTree ??= builder.buildI18n({
-          storages,
-          resolveIcon: options.icon,
-          i18n: i18n,
-          ...options.pageTree,
-        }) as unknown as LoaderOutput<LoaderConfig>['pageTree'];
-      } else {
-        pageTree ??= builder.build({
-          storage: storages[''],
-          resolveIcon: options.icon,
-          ...options.pageTree,
-        });
-      }
+      pageTree ??= builder.buildI18n({
+        storages,
+        resolveIcon: options.icon,
+        ...options.pageTree,
+      });
 
-      return pageTree;
+      return i18n
+        ? (pageTree as unknown as LoaderOutput<LoaderConfig>['pageTree'])
+        : pageTree[defaultLanguage];
     },
     set pageTree(v) {
-      pageTree = v;
+      if (i18n) {
+        pageTree = v as unknown as Record<string, PageTree.Root>;
+      } else {
+        pageTree = {
+          defaultLanguage: v,
+        };
+      }
     },
     getPageByHref(href, { dir = '', language } = {}) {
       const [value, hash] = href.split('#', 2);

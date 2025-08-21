@@ -12,10 +12,8 @@ export function transformerFallback(): PageTreeTransformer {
       for (const file of this.storage.getFiles()) {
         if (addedFiles.has(file)) continue;
 
-        const content =
-          this.localeStorage?.read(file) ?? this.storage.read(file);
-        if (!content) continue;
-        isolatedStorage.write(file, content);
+        const content = this.storage.read(file);
+        if (content) isolatedStorage.write(file, content);
       }
 
       if (isolatedStorage.getFiles().length === 0) return root;

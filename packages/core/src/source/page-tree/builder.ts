@@ -1,5 +1,4 @@
 import type { ReactElement } from 'react';
-import type { I18nConfig } from '@/i18n';
 import type * as PageTree from './definitions';
 import { joinPath } from '@/utils/path';
 import type { MetaData, PageData, UrlFn } from '../types';
@@ -24,10 +23,10 @@ export interface PageTreeBuilderContext<
 
   builder: PageTreeBuilder<Page, Meta>;
   storage: ContentStorage<Page, Meta>;
-
-  locale?: string;
-  localeStorage?: ContentStorage<Page, Meta>;
   getUrl: UrlFn;
+
+  storages?: Record<string, ContentStorage<Page, Meta>>;
+  locale?: string;
 }
 
 export interface PageTreeTransformer<
@@ -99,7 +98,6 @@ export interface PageTreeBuilder<
     options: BaseOptions<Page, Meta> & {
       id?: string;
       storages: Record<string, ContentStorage<Page, Meta>>;
-      i18n: I18nConfig;
     },
   ) => Record<string, PageTree.Root>;
 }
@@ -217,14 +215,14 @@ function buildFolderNode(
   isGlobalRoot: boolean,
   ctx: PageTreeBuilderContext,
 ): PageTree.Folder | undefined {
-  const { storage, localeStorage, options, resolveName, transformers } = ctx;
+  const { storage, options, resolveName, transformers } = ctx;
   const files = storage.readDir(folderPath);
   if (!files) return;
 
   const metaPath = resolveName(joinPath(folderPath, 'meta'), 'meta');
   const indexPath = resolveName(joinPath(folderPath, 'index'), 'page');
 
-  let meta = localeStorage?.read(metaPath) ?? storage.read(metaPath);
+  let meta = storage.read(metaPath);
   if (meta?.format !== 'meta') {
     meta = undefined;
   }
@@ -305,8 +303,8 @@ function buildFileNode(
   path: string,
   ctx: PageTreeBuilderContext,
 ): PageTree.Item | undefined {
-  const { options, getUrl, storage, localeStorage, locale, transformers } = ctx;
-  const page = localeStorage?.read(path) ?? storage.read(path);
+  const { options, getUrl, storage, locale, transformers } = ctx;
+  const page = storage.read(path);
   if (page?.format !== 'page') return;
 
   const { title, description, icon } = page.data;
@@ -393,29 +391,28 @@ export function createPageTreeBuilder(getUrl: UrlFn): PageTreeBuilder {
         },
       });
     },
-    buildI18n({ id, i18n, ...options }) {
-      const storage = options.storages[i18n.defaultLanguage];
-      const resolve = createFlattenPathResolver(storage);
+    buildI18n({ id, storages, ...options }) {
       const transformers = getTransformers(options);
+      const out: Record<string, PageTree.Root> = {};
 
-      const entries = i18n.languages.map<[string, PageTree.Root]>((lang) => {
-        const tree = build(id ?? lang ?? 'root', {
+      for (const [locale, storage] of Object.entries(storages)) {
+        const resolve = createFlattenPathResolver(storage);
+
+        out[locale] = build(id ?? (locale.length === 0 ? 'root' : locale), {
           transformers,
           builder: this,
           options,
           getUrl,
-          locale: lang,
+          locale,
           storage,
-          localeStorage: options.storages[lang],
+          storages,
           resolveName(name, format) {
             return resolve(name, format) ?? name;
           },
         });
+      }
 
-        return [lang, tree];
-      });
-
-      return Object.fromEntries(entries);
+      return out;
     },
   };
 }

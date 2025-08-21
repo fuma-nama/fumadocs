@@ -90,14 +90,13 @@ export function loadFiles(
     }),
   );
 
-  for (const lang of i18n.languages) {
-    const storage: ContentStorage = new FileSystem();
+  function scan(lang: string, fallback?: ContentStorage): ContentStorage {
+    const storage: ContentStorage = new FileSystem(fallback);
 
     for (const item of normalized) {
       const [path, locale = i18n.defaultLanguage] = parser(item.path);
 
-      if (locale !== lang) continue;
-      storage.write(path, item);
+      if (locale === lang) storage.write(path, item);
     }
 
     for (const transformer of transformers) {
@@ -107,7 +106,13 @@ export function loadFiles(
       });
     }
 
-    storages[lang] = storage;
+    return storage;
+  }
+
+  storages[i18n.defaultLanguage] = scan(i18n.defaultLanguage);
+
+  for (const lang of i18n.languages) {
+    storages[lang] ??= scan(lang, storages[i18n.defaultLanguage]);
   }
 
   return storages;
