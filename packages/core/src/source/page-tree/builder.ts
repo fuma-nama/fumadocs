@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react';
+import type { ReactNode } from 'react';
 import type * as PageTree from './definitions';
 import { joinPath } from '@/utils/path';
 import type { MetaData, PageData, UrlFn } from '../types';
@@ -69,7 +69,7 @@ export interface BaseOptions<
    */
   noRef?: boolean;
   transformers?: PageTreeTransformer<Page, Meta>[];
-  resolveIcon?: (icon: string | undefined) => ReactElement | undefined;
+  resolveIcon?: (icon: string | undefined) => ReactNode | undefined;
 }
 
 export interface PageTreeBuilder<
