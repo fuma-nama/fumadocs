@@ -16,14 +16,21 @@ import { basename, extname } from '@/source/path';
 import type { I18nConfig } from '@/i18n';
 import type { Language } from '@orama/orama';
 
-function pageToIndex(page: Page): AdvancedIndex {
-  if (!('structuredData' in page.data)) {
+type Awaitable<T> = T | Promise<T>;
+
+async function pageToIndex(page: Page): Promise<AdvancedIndex> {
+  let structuredData: StructuredData | undefined;
+
+  if ('structuredData' in page.data) {
+    structuredData = page.data.structuredData as StructuredData;
+  } else if ('load' in page.data && typeof page.data.load === 'function') {
+    structuredData = (await page.data.load()).structuredData;
+  }
+
+  if (!structuredData)
     throw new Error(
       'Cannot find structured data from page, please define the page to index function.',
     );
-  }
-
-  const structuredData = page.data.structuredData as StructuredData;
 
   return {
     title: page.data.title ?? basename(page.path, extname(page.path)),
@@ -46,7 +53,7 @@ interface Options<S extends LoaderOutput<LoaderConfig>>
         : string
       : string]?: Partial<AdvancedOptions> | Language;
   };
-  buildIndex?: (page: InferPageType<S>) => AdvancedIndex;
+  buildIndex?: (page: InferPageType<S>) => Awaitable<AdvancedIndex>;
 }
 
 export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
@@ -59,18 +66,18 @@ export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
  */
 export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
   source: S,
-  pageToIndexFn?: (page: InferPageType<S>) => AdvancedIndex,
+  pageToIndexFn?: (page: InferPageType<S>) => Awaitable<AdvancedIndex>,
   options?: Omit<Options<S>, 'buildIndex'>,
 ): SearchAPI;
 
 export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
   source: S,
   _buildIndexOrOptions:
-    | ((page: InferPageType<S>) => AdvancedIndex)
+    | ((page: InferPageType<S>) => Awaitable<AdvancedIndex>)
     | Options<S> = pageToIndex,
   _options?: Omit<Options<S>, 'buildIndex'>,
 ): SearchAPI {
-  const options: Options<S> = {
+  const { buildIndex = pageToIndex, ...options }: Options<S> = {
     ...(typeof _buildIndexOrOptions === 'function'
       ? {
           buildIndex: _buildIndexOrOptions,
@@ -78,26 +85,49 @@ export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
       : _buildIndexOrOptions),
     ..._options,
   };
+  const i18n = source._i18n;
+  let server: Promise<SearchAPI>;
 
-  if (source._i18n) {
-    return createI18nSearchAPI('advanced', {
-      ...options,
-      i18n: source._i18n,
-      indexes: source.getLanguages().flatMap((entry) => {
-        return entry.pages.map((page) => {
-          return {
-            ...(options.buildIndex ?? pageToIndex)(page as InferPageType<S>),
-            locale: entry.language,
-          };
-        });
-      }),
+  if (i18n) {
+    const indexes = source.getLanguages().flatMap((entry) => {
+      return entry.pages.map(async (page) => ({
+        ...(await buildIndex(page as InferPageType<S>)),
+        locale: entry.language,
+      }));
     });
+
+    server = Promise.all(indexes).then((loaded) =>
+      createI18nSearchAPI('advanced', {
+        ...options,
+        i18n,
+        indexes: loaded,
+      }),
+    );
+  } else {
+    const indexes = source.getPages().map(async (page) => {
+      return buildIndex(page as InferPageType<S>);
+    });
+
+    server = Promise.all(indexes).then((loaded) =>
+      createSearchAPI('advanced', {
+        ...options,
+        indexes: loaded,
+      }),
+    );
   }
 
-  return createSearchAPI('advanced', {
-    ...options,
-    indexes: source.getPages().map((page) => {
-      return (options.buildIndex ?? pageToIndex)(page as InferPageType<S>);
-    }),
-  });
+  return {
+    async export(...args) {
+      return (await server).export(...args);
+    },
+    async GET(...args) {
+      return (await server).GET(...args);
+    },
+    async search(...args) {
+      return (await server).search(...args);
+    },
+    async staticGET(...args) {
+      return (await server).staticGET(...args);
+    },
+  };
 }
