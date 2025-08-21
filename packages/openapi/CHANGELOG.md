@@ -1,5 +1,22 @@
 # @fuma-docs/openapi
 
+## 9.2.1
+
+### Patch Changes
+
+- 2122783: Fix absolute path when `input` is string/array
+- Updated dependencies [514052e]
+- Updated dependencies [e254c65]
+- Updated dependencies [ec75601]
+- Updated dependencies [e785f98]
+- Updated dependencies [0531bf4]
+- Updated dependencies [50eb07f]
+- Updated dependencies [67df155]
+- Updated dependencies [b109d06]
+- Updated dependencies [b99cf51]
+  - fumadocs-core@15.7.0
+  - fumadocs-ui@15.7.0
+
 ## 9.2.0
 
 ### Minor Changes

@@ -1,5 +1,159 @@
 # next-docs-zeta
 
+## 15.7.0
+
+### Minor Changes
+
+- 514052e: **Include locale code into `page.path`**
+
+  Previously when i18n is enabled, `page.path` is not equal to the virtual file paths you passed into `loader()`:
+
+  ```ts
+  const source = loader({
+    source: {
+      files: [
+        {
+          path: 'folder/index.cn.mdx',
+          // ...
+        },
+      ],
+    },
+  });
+
+  console.log(source.getPages('cn'));
+  // path: folder/index.mdx
+  ```
+
+  This can be confusing, the only solution to obtain the original path was `page.absolutePath`.
+
+  From now, the `page.path` will also include the locale code:
+
+  ```ts
+  const source = loader({
+    source: {
+      files: [
+        {
+          path: 'folder/index.cn.mdx',
+          // ...
+        },
+      ],
+    },
+  });
+
+  console.log(source.getPages('cn'));
+  // path: folder/index.cn.mdx
+  ```
+
+  While this change doesn't affect intended API usages, it **may lead to minor bugs** when advanced usage/hacks involved around `page.path`.
+
+- e785f98: **Introduce page tree `fallback` API**
+
+  Page tree is a tree structure.
+
+  Previously, when an item is excluded from page tree, it is isolated entirely that you cannot display it at all.
+
+  With the new fallback API, isolated pages will go into `fallback` page tree instead:
+
+  ```json
+  {
+    "children": [
+      {
+        "type": "page",
+        "name": "Introduction"
+      }
+    ],
+    "fallback": {
+      "children": [
+        {
+          "type": "page",
+          "name": "Hidden Page"
+        }
+      ]
+    }
+  }
+  ```
+
+  Items in `fallback` are invisible unless you've opened its item.
+
+- 0531bf4: **Introduce page tree transformer API**
+
+  You can now define page tree transformer.
+
+  ```ts
+  export const source = loader({
+    // ...
+    pageTree: {
+      transformers: [
+        {
+          root(root) {
+            return root;
+          },
+          file(node, file) {
+            return node;
+          },
+          folder(node, dir, metaPath) {
+            return node;
+          },
+          separator(node) {
+            return node;
+          },
+        },
+      ],
+    },
+  });
+  ```
+
+- 50eb07f: **Support type-safe i18n config**
+
+  ```ts
+  // lib/source.ts
+  import { defineI18n } from 'fumadocs-core/i18n';
+
+  export const i18n = defineI18n({
+    defaultLanguage: 'en',
+    languages: ['en', 'cn'],
+  });
+  ```
+
+  ```tsx
+  // root layout
+  import { defineI18nUI } from 'fumadocs-ui/i18n';
+  import { i18n } from '@/lib/i18n';
+
+  const { provider } = defineI18nUI(i18n, {
+    translations: {
+      cn: {
+        displayName: 'Chinese',
+        search: 'Translated Content',
+      },
+      en: {
+        displayName: 'English',
+      },
+    },
+  });
+
+  function RootLayout({ children }: { children: React.ReactNode }) {
+    return <RootProvider i18n={provider(lang)}>{children}</RootProvider>;
+  }
+  ```
+
+  Although optional, we highly recommend you to refactor the import to i18n middleware:
+
+  ```ts
+  // here!
+  import { createI18nMiddleware } from 'fumadocs-core/i18n/middleware';
+  import { i18n } from '@/lib/i18n';
+
+  export default createI18nMiddleware(i18n);
+  ```
+
+### Patch Changes
+
+- e254c65: Simplify Source API storage management
+- ec75601: Support `ReactNode` for icons in page tree
+- 67df155: `createFromSource` support async `buildIndex` and Fumadocs MDX Async Mode
+- b109d06: Redesign `useShiki` & `<DynamicCodeBlock />` to use React 19 hooks
+
 ## 15.6.12
 
 ## 15.6.11
