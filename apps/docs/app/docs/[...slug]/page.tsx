@@ -31,7 +31,6 @@ import {
   HoverCardTrigger,
 } from '@/components/ui/hover-card';
 import Link from 'fumadocs-core/link';
-import { UiOverview } from '@/components/ui-overview';
 import { AutoTypeTable } from 'fumadocs-typescript/ui';
 import { createGenerator } from 'fumadocs-typescript';
 import { getPageTreePeers } from 'fumadocs-core/server';
@@ -42,6 +41,8 @@ import { LLMCopyButton, ViewOptions } from '@/components/ai/page-actions';
 import * as path from 'node:path';
 import { Banner } from 'fumadocs-ui/components/banner';
 import { openapi } from '@/lib/openapi';
+import { Installation } from '@/components/preview/installation';
+import { Customisation } from '@/components/preview/customisation';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -142,8 +143,8 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
               DocsCategory: ({ url }) => {
                 return <DocsCategory url={url ?? page.url} />;
               },
-              UiOverview,
-
+              Installation,
+              Customisation,
               ...(await import('@/content/docs/ui/components/tabs.client')),
               ...(await import('@/content/docs/ui/theme.client')),
             })}
