@@ -40,16 +40,15 @@ export const _runtimeAsync: RuntimeAsync = {
             },
             filePath: file.absolutePath,
           });
-          const executed = await executeMdx(String(out), {
+          const { default: body, ...rest } = await executeMdx(String(out), {
             baseUrl: pathToFileURL(file.absolutePath),
           });
 
           return {
-            body: executed.default,
-            toc: executed.toc,
-            lastModified,
             structuredData: out.data.structuredData as StructuredData,
-            _exports: executed,
+            body,
+            ...rest,
+            lastModified,
           };
         },
       };

@@ -1,21 +1,27 @@
 import type { AnyCollection, DocCollection, MetaCollection } from '@/config';
 import { getGlobPatterns } from '@/utils/collections';
 
+interface GlobOptions {
+  query: Record<string, string>;
+  base?: string;
+  eager?: boolean;
+  import?: string;
+}
+
 export function generateGlob(
   name: string,
   collection: MetaCollection | DocCollection,
+  globOptions?: Partial<GlobOptions>,
 ) {
   const patterns = mapGlobPatterns(getGlobPatterns(collection));
-  const options: Record<string, unknown> = {
+  const options: GlobOptions = {
+    ...globOptions,
     query: {
+      ...globOptions?.query,
       collection: name,
     },
     base: getGlobBase(collection),
   };
-
-  if (collection.type === 'meta') {
-    options.import = 'default';
-  }
 
   return `import.meta.glob(${JSON.stringify(patterns)}, ${JSON.stringify(options, null, 2)})`;
 }

@@ -6,16 +6,20 @@ import { countLines } from '@/utils/count-lines';
 import { fumaMatter } from '@/utils/fuma-matter';
 import { validate, ValidationError } from '@/utils/validation';
 import { z } from 'zod';
-import { ident, toImportPath } from '@/utils/import-formatter';
-import type { DocCollection, DocsCollection, MetaCollection } from '@/config';
+import { toImportPath } from '@/utils/import-formatter';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { load } from 'js-yaml';
 import type { SourceMap, TransformPluginContext } from 'rollup';
-import { generateGlob } from '@/vite/generate-glob';
 import { getGitTimestamp } from '@/utils/git-timestamp';
+import { doc, docs, meta } from '@/vite/generate';
 
-const onlySchema = z.literal(['frontmatter', 'all']);
+const querySchema = z
+  .object({
+    only: z.literal(['frontmatter', 'all']).default('all'),
+    collection: z.string().optional(),
+  })
+  .loose();
 
 export interface PluginOptions {
   /**
@@ -100,15 +104,11 @@ export default function mdx(
   ): Promise<TransformResult | null> {
     const matter = fumaMatter(value);
     const isDevelopment = this.environment.mode === 'dev';
-    const parsed = parse(query) as {
-      collection?: string;
-      only?: string;
-    };
+    const parsed = querySchema.parse(parse(query));
 
     const collection = parsed.collection
       ? loaded.collections.get(parsed.collection)
       : undefined;
-    const only = parsed.only ? onlySchema.parse(parsed.only) : 'all';
 
     let schema;
     let mdxOptions;
@@ -135,7 +135,7 @@ export default function mdx(
       );
     }
 
-    if (only === 'frontmatter') {
+    if (parsed.only === 'frontmatter') {
       return {
         code: `export const frontmatter = ${JSON.stringify(matter.data)}`,
         map: null,
@@ -199,32 +199,19 @@ export default function mdx(
         `export const create = fromConfig<typeof Config>();`,
       ];
 
-      function docs(name: string, collection: DocsCollection) {
-        const args = [
-          ident(`doc: ${generateGlob(name, collection.docs)}`),
-          ident(`meta: ${generateGlob(name, collection.meta)}`),
-        ].join(',\n');
-
-        return `export const ${name} = create.docs("${name}", {\n${args}\n});`;
-      }
-
-      function doc(name: string, collection: DocCollection) {
-        return `export const ${name} = create.doc("${name}", ${generateGlob(name, collection)});`;
-      }
-
-      function meta(name: string, collection: MetaCollection) {
-        return `export const ${name} = create.meta("${name}", ${generateGlob(name, collection)});`;
-      }
-
       for (const [name, collection] of loaded.collections.entries()) {
-        lines.push('');
+        let body: string;
+
         if (collection.type === 'docs') {
-          lines.push(docs(name, collection));
+          body = docs(name, collection);
         } else if (collection.type === 'meta') {
-          lines.push(meta(name, collection));
+          body = meta(name, collection);
         } else {
-          lines.push(doc(name, collection));
+          body = doc(name, collection);
         }
+
+        lines.push('');
+        lines.push(`export const ${name} = ${body};`);
       }
 
       await fs.writeFile(path.join(outdir, outFile), lines.join('\n'));
