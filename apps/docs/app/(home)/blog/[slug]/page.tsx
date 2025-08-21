@@ -9,9 +9,7 @@ import { Control } from '@/app/(home)/blog/[slug]/page.client';
 import { getMDXComponents } from '@/mdx-components';
 import path from 'node:path';
 
-export default async function Page(props: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function Page(props: PageProps<'/blog/[slug]'>) {
   const params = await props.params;
   const page = blog.getPage([params.slug]);
 
@@ -21,7 +19,7 @@ export default async function Page(props: {
   return (
     <>
       <div
-        className="container rounded-xl mt-12 py-12 md:px-8"
+        className="mx-auto w-full max-w-fd-container rounded-xl mt-12 px-4 py-12 md:px-8"
         style={{
           backgroundColor: 'black',
           backgroundImage: [
@@ -43,7 +41,7 @@ export default async function Page(props: {
           Back
         </Link>
       </div>
-      <article className="container flex flex-col px-0 py-8 lg:flex-row lg:px-4">
+      <article className="flex flex-col mx-auto w-full max-w-fd-container py-8 lg:flex-row">
         <div className="prose min-w-0 flex-1 p-4">
           <InlineTOC items={toc} />
           <Mdx components={getMDXComponents()} />
@@ -69,9 +67,9 @@ export default async function Page(props: {
   );
 }
 
-export async function generateMetadata(props: {
-  params: Promise<{ slug: string }>;
-}): Promise<Metadata> {
+export async function generateMetadata(
+  props: PageProps<'/blog/[slug]'>,
+): Promise<Metadata> {
   const params = await props.params;
   const page = blog.getPage([params.slug]);
 

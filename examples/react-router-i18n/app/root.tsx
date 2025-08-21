@@ -7,12 +7,12 @@ import {
   ScrollRestoration,
   useParams,
 } from 'react-router';
-
+import { RootProvider } from 'fumadocs-ui/provider/base';
+import { ReactRouterProvider } from 'fumadocs-core/framework/react-router';
 import type { Route } from './+types/root';
 import './app.css';
-import { ReactRouterProvider } from 'fumadocs-core/framework/react-router';
-import { RootProvider } from 'fumadocs-ui/provider/base';
-import { i18n } from '~/i18n';
+import type { Translations } from 'fumadocs-ui/i18n';
+import { i18n } from '@/lib/i18n';
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -27,7 +27,24 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
+const cn: Partial<Translations> = {
+  search: 'Translated Content',
+};
+
+const locales = [
+  {
+    name: 'English',
+    locale: 'en',
+  },
+  {
+    name: 'Chinese',
+    locale: 'cn',
+  },
+];
+
 export function Layout({ children }: { children: React.ReactNode }) {
+  const { lang = i18n.defaultLanguage } = useParams();
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -37,36 +54,21 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body className="flex flex-col min-h-screen">
-        <Provider>{children}</Provider>
+        <ReactRouterProvider>
+          <RootProvider
+            i18n={{
+              locale: lang,
+              locales,
+              translations: { cn }[lang],
+            }}
+          >
+            {children}
+          </RootProvider>
+        </ReactRouterProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
     </html>
-  );
-}
-
-function Provider({ children }: { children: React.ReactNode }) {
-  const { lang = i18n.defaultLanguage } = useParams();
-  return (
-    <ReactRouterProvider>
-      <RootProvider
-        i18n={{
-          locale: lang,
-          locales: [
-            {
-              name: 'Chinese',
-              locale: 'cn',
-            },
-            {
-              name: 'English',
-              locale: 'en',
-            },
-          ],
-        }}
-      >
-        {children}
-      </RootProvider>
-    </ReactRouterProvider>
   );
 }
 

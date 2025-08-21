@@ -6,7 +6,8 @@ import {
   DocsPage,
   DocsTitle,
 } from 'fumadocs-ui/page';
-import { source } from '@/source';
+import { source } from '@/lib/source';
+import { baseOptions } from '@/lib/layout.shared';
 import { type PageTree } from 'fumadocs-core/server';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { docs } from '../../source.generated';
@@ -45,12 +46,7 @@ export default function Page(props: Route.ComponentProps) {
   const Content = renderer[path];
 
   return (
-    <DocsLayout
-      nav={{
-        title: 'React Router',
-      }}
-      tree={tree as PageTree.Root}
-    >
+    <DocsLayout {...baseOptions()} tree={tree as PageTree.Root}>
       <Content />
     </DocsLayout>
   );

@@ -1,6 +1,6 @@
 import type { Route } from './+types/search';
 import { createFromSource } from 'fumadocs-core/search/server';
-import { source } from '@/source';
+import { source } from '@/lib/source';
 
 const server = createFromSource(source, {
   language: 'english',

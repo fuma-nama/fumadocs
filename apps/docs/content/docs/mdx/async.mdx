@@ -7,15 +7,9 @@ description: Runtime compilation of content files.
 
 By default, all Markdown and MDX files need to be pre-compiled first. The same constraint also applies to the development server.
 
-This may result in longer dev server start times for large docs sites. You can enable Async Mode on `doc` collections to improve this.
+This may result in longer dev server start times for large docs sites. You can enable Async Mode on docs collections to improve this.
 
-### Setup
-
-Install required dependencies.
-
-```package-install
-@fumadocs/mdx-remote shiki
-```
+## Setup
 
 Enable Async Mode.
 
@@ -25,6 +19,7 @@ import { defineDocs } from 'fumadocs-mdx/config';
 export const docs = defineDocs({
   dir: 'content/docs',
   docs: {
+    // [!code ++]
     async: true,
   },
 });
@@ -36,27 +31,52 @@ import { defineCollections } from 'fumadocs-mdx/config';
 export const doc = defineCollections({
   type: 'doc',
   dir: 'content/docs',
+  // [!code ++]
   async: true,
 });
 ```
 
-### Usage
+### Next.js
 
-Async Mode allows on-demand compilation of Markdown and MDX content by moving the compilation process from build time to Next.js runtime.
+Turbopack doesn't support lazy bundling at the moment, Async Mode works by performing on-demand compilation with MDX Remote.
 
-However, you need to invoke the `load()` async function to load and compile content.
+You need to install extra dependencies:
 
-For example:
+```npm
+npm i @fumadocs/mdx-remote shiki
+```
+
+<Callout title="Constraints" type='warn'>
+
+Async Mode comes with some limitations on MDX features for Next.js.
+
+- **No import/export allowed in MDX files.** For MDX components, pass them from the `components` prop instead.
+- **Images must be referenced with URL (e.g. `/images/test.png`).** Don't use **file paths** like `./image.png`. You should locate your images in the `public` folder and reference them with URLs.
+
+</Callout>
+
+### Vite
+
+Vite has native support for lazy bundling, you only need to update `loader()` after enabling it.
 
 ```tsx title="lib/source.ts"
 import { loader } from 'fumadocs-core/source';
-import { docs } from '@/.source';
+import { docs, create } from '@/.source';
 
 export const source = loader({
   baseUrl: '/docs',
-  source: docs.toFumadocsSource(),
+  // [!code --]
+  source: await create.sourceAsync(docs.doc, docs.meta),
+  // [!code ++]
+  source: await create.sourceLazy(docs.doc, docs.meta),
 });
 ```
+
+## Usage
+
+Frontmatter properties are still available on `page` object, but you need to invoke the `load()` async function to load the compiled content (and its exports).
+
+For example:
 
 ```tsx title="page.tsx"
 import { source } from '@/lib/source';
@@ -78,10 +98,3 @@ if (page) {
 ```
 
 When using Async Mode, we highly recommend to use third-party services to implement search, which usually have better capability to handle massive amount of content to index.
-
-### Constraints
-
-It comes with some limitations on MDX features.
-
-- No import/export allowed in MDX files. For MDX components, pass them from the `components` prop instead.
-- Images must be referenced with URL (e.g. `/images/test.png`). Don't use **file paths** like `./image.png`. You should locate your images in the `public` folder and reference them with URLs.

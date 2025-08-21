@@ -14,8 +14,6 @@ import { createEndpoint } from '@/search/orama/create-endpoint';
 import { type I18nConfig } from '@/i18n';
 import { STEMMERS } from '@/search/orama/_stemmers';
 
-export type LocaleMap<O> = Record<string, Language | O>;
-
 type I18nOptions<O extends SimpleOptions | AdvancedOptions, Idx> = Omit<
   O,
   'language' | 'indexes'
@@ -25,7 +23,7 @@ type I18nOptions<O extends SimpleOptions | AdvancedOptions, Idx> = Omit<
   /**
    * Map locale name from i18n config to Orama compatible `language` or options
    */
-  localeMap?: LocaleMap<Partial<O>>;
+  localeMap?: Record<string, Language | Partial<O> | undefined>;
 
   indexes: WithLocale<Idx>[] | Dynamic<WithLocale<Idx>>;
 };

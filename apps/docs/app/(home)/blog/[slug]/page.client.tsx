@@ -4,7 +4,7 @@ import { cn } from '@/lib/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 
-export function Control({ url }: { url: string }): React.ReactElement {
+export function Control({ url }: { url: string }) {
   const [isChecked, onCopy] = useCopyButton(() => {
     void navigator.clipboard.writeText(`${window.location.origin}${url}`);
   });

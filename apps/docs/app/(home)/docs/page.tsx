@@ -5,7 +5,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/cn';
 import Spot from '@/public/spot.png';
 
-export default function DocsPage(): React.ReactElement {
+export default function DocsPage() {
   return (
     <main className="container flex flex-col items-center py-16 text-center z-2">
       <div className="absolute inset-0 z-[-1] overflow-hidden duration-1000 animate-in fade-in [perspective:2000px]">

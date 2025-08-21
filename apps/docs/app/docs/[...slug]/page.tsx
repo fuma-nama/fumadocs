@@ -14,12 +14,7 @@ import {
   PageTOCTitle,
 } from 'fumadocs-ui/layouts/docs/page';
 import { notFound } from 'next/navigation';
-import {
-  type ComponentProps,
-  type FC,
-  type ReactElement,
-  type ReactNode,
-} from 'react';
+import { type ComponentProps, type FC, type ReactNode } from 'react';
 import * as Twoslash from 'fumadocs-twoslash/ui';
 import { Callout } from 'fumadocs-ui/components/callout';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
@@ -35,8 +30,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from '@/components/ui/hover-card';
-import Link from 'next/link';
-import { UiOverview } from '@/components/ui-overview';
+import Link from 'fumadocs-core/link';
 import { AutoTypeTable } from 'fumadocs-typescript/ui';
 import { createGenerator } from 'fumadocs-typescript';
 import { getPageTreePeers } from 'fumadocs-core/server';
@@ -47,6 +41,8 @@ import { LLMCopyButton, ViewOptions } from '@/components/ai/page-actions';
 import * as path from 'node:path';
 import { Banner } from 'fumadocs-ui/components/banner';
 import { openapi } from '@/lib/openapi';
+import { Installation } from '@/components/preview/installation';
+import { Customisation } from '@/components/preview/customisation';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -61,9 +57,7 @@ const generator = createGenerator();
 
 export const revalidate = false;
 
-export default async function Page(props: {
-  params: Promise<{ slug: string[] }>;
-}): Promise<ReactElement> {
+export default async function Page(props: PageProps<'/docs/[...slug]'>) {
   const params = await props.params;
   const page = source.getPage(params.slug);
 
@@ -149,8 +143,8 @@ export default async function Page(props: {
               DocsCategory: ({ url }) => {
                 return <DocsCategory url={url ?? page.url} />;
               },
-              UiOverview,
-
+              Installation,
+              Customisation,
               ...(await import('@/content/docs/ui/components/tabs.client')),
               ...(await import('@/content/docs/ui/theme.client')),
             })}
@@ -183,9 +177,9 @@ function DocsCategory({ url }: { url: string }) {
   );
 }
 
-export async function generateMetadata(props: {
-  params: Promise<{ slug: string[] }>;
-}): Promise<Metadata> {
+export async function generateMetadata(
+  props: PageProps<'/docs/[...slug]'>,
+): Promise<Metadata> {
   const { slug = [] } = await props.params;
   const page = source.getPage(slug);
   if (!page) notFound();

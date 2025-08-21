@@ -1,6 +1,6 @@
 import { MethodLabel } from '@/ui/components/method-label';
 import type { PageTree } from 'fumadocs-core/server';
-import type { PageFile } from 'fumadocs-core/source';
+import type { PageFile, PageTreeTransformer } from 'fumadocs-core/source';
 
 /**
  * Source API Integration
@@ -39,3 +39,14 @@ export const attachFile = (
 
   return node;
 };
+
+export function transformerOpenAPI(): PageTreeTransformer {
+  return {
+    file(node, file) {
+      if (!file) return node;
+      const content = this.storage.read(file);
+
+      return attachFile(node, content?.format === 'page' ? content : undefined);
+    },
+  };
+}

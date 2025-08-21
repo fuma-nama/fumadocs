@@ -1,0 +1,57 @@
+```ts tab="Next.js" title="app/static.json/route.ts"
+import { exportSearchIndexes } from '@/lib/export-search-indexes';
+
+export const revalidate = false;
+
+export async function GET() {
+  return Response.json(await exportSearchIndexes());
+}
+```
+
+```ts tab="React Router"
+// app/routes/static.ts
+import { exportSearchIndexes } from '@/lib/export-search-indexes';
+
+export async function loader() {
+  return Response.json(await exportSearchIndexes());
+}
+
+// app/routes.ts
+import { route, type RouteConfig } from '@react-router/dev/routes';
+
+export default [
+  // ...
+  // [!code ++]
+  route('static.json', 'routes/static.ts'),
+] satisfies RouteConfig;
+```
+
+```ts tab="Tanstack Start"
+// src/routes/static[.]json.ts
+import { createServerFileRoute } from '@tanstack/react-start/server';
+import { exportSearchIndexes } from '@/lib/export-search-indexes';
+
+export const ServerRoute = createServerFileRoute('/static.json').methods({
+  async GET() {
+    return Response.json(await exportSearchIndexes());
+  },
+});
+
+// vite.config.ts
+import { tanstackStart } from '@tanstack/react-start/plugin/vite';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  plugins: [
+    // ...
+    tanstackStart({
+      customViteReactPlugin: true,
+      prerender: {
+        enabled: true,
+      },
+      // [!code ++] pre-render the static file
+      pages: [{ path: '/static.json' }],
+    }),
+  ],
+});
+```

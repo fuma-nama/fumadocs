@@ -24,10 +24,13 @@ export function TreeContextProvider(props: {
   // using the id here to make sure this never happens
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const tree = useMemo(() => props.tree, [props.tree.$id ?? props.tree]);
-  const path = useMemo(
-    () => searchPath(tree.children, pathname) ?? [],
-    [tree, pathname],
-  );
+  const path = useMemo(() => {
+    let result = searchPath(tree.children, pathname);
+    if (result) return result;
+
+    if (tree.fallback) result = searchPath(tree.fallback.children, pathname);
+    return result ?? [];
+  }, [tree, pathname]);
 
   const root =
     path.findLast((item) => item.type === 'folder' && item.root) ?? tree;

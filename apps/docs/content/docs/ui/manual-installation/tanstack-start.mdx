@@ -1,0 +1,98 @@
+---
+title: Tanstack Start
+description: Setup Fumadocs on Tanstack Start.
+---
+
+## Getting Started
+
+Before continuing, make sure to configure:
+
+- Tailwind CSS 4.
+
+### Installation
+
+```npm
+npm i fumadocs-core fumadocs-ui fumadocs-mdx @types/mdx
+```
+
+Then, [configure Fumadocs MDX](/docs/mdx/vite/tanstack) on your Tanstack Start app.
+Make sure essential files like `lib/source.ts` are created correctly.
+
+### Styles
+
+Add the following to your Tailwind CSS file:
+
+```css title="styles/app.css"
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+```
+
+### Create Pages
+
+Create the following routes:
+
+<include cwd meta='tab="lib/layout.shared.tsx"'>
+  ../../examples/tanstack-start/src/lib/layout.shared.tsx
+</include>
+<include cwd meta='tab="routes/docs/$.tsx"'>
+  ../../examples/tanstack-start/src/routes/docs/$.tsx
+</include>
+<include cwd meta='tab="routes/api/search.ts"'>
+  ../../examples/tanstack-start/src/routes/api/search.ts
+</include>
+
+Wrap your entire app under Fumadocs providers:
+
+```tsx title="__root.tsx"
+import {
+  createRootRoute,
+  HeadContent,
+  Outlet,
+  Scripts,
+} from '@tanstack/react-router';
+import * as React from 'react';
+import { RootProvider } from 'fumadocs-ui/provider/base';
+import { TanstackProvider } from 'fumadocs-core/framework/tanstack';
+
+export const Route = createRootRoute({
+  component: RootComponent,
+});
+
+function RootComponent() {
+  return (
+    <RootDocument>
+      <Outlet />
+    </RootDocument>
+  );
+}
+
+function RootDocument({ children }: { children: React.ReactNode }) {
+  return (
+    <html suppressHydrationWarning>
+      <head>
+        <HeadContent />
+      </head>
+      <body className="flex flex-col min-h-screen">
+        {/* [!code ++:3] */}
+        <TanstackProvider>
+          <RootProvider>{children}</RootProvider>
+        </TanstackProvider>
+        <Scripts />
+      </body>
+    </html>
+  );
+}
+```
+
+### Done
+
+You can start writing documents at `content/docs`:
+
+```mdx title="content/docs/index.mdx"
+---
+title: Hello World
+---
+
+I love Fumadocs
+```

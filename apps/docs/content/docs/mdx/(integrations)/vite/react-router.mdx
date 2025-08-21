@@ -34,17 +34,46 @@ console.log(docs);
 
 To integrate with Fumadocs, create a docs collection and use:
 
-<include cwd meta='title="app/source.ts"'>
-  ../../examples/react-router/app/source.ts
+<include cwd meta='title="app/lib/source.ts"'>
+  ../../examples/react-router/app/lib/source.ts
 </include>
 
 ### Rendering Content
 
-Rendering page content is different because React Router doesn't support RSC at the moment.
+Rendering page content may different because React Router doesn't support RSC at the moment.
 Instead, use `toClientRenderer()` to lazy load MDX content as a component on browser.
 
 For example:
 
-<include cwd meta='title="app/docs/page.tsx"'>
-  ../../examples/react-router/app/docs/page.tsx
-</include>
+```tsx
+import type { Route } from './+types/page';
+import { source } from '@/lib/source';
+import { docs } from '../../source.generated';
+import { toClientRenderer } from 'fumadocs-mdx/runtime/vite';
+
+export async function loader({ params }: Route.LoaderArgs) {
+  const slugs = params['*'].split('/').filter((v) => v.length > 0);
+  const page = source.getPage(slugs);
+  if (!page) throw new Response('Not found', { status: 404 });
+
+  return {
+    path: page.path,
+  };
+}
+
+const renderer = toClientRenderer(docs.doc, ({ default: Mdx, frontmatter }) => {
+  return (
+    <div className="prose">
+      <h1>{frontmatter.title}</h1>
+      <Mdx />
+    </div>
+  );
+});
+
+export default function Page(props: Route.ComponentProps) {
+  const { path } = props.loaderData;
+  const Content = renderer[path];
+
+  return <Content />;
+}
+```

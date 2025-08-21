@@ -17,6 +17,7 @@ export interface Option {
   icon?: ReactNode;
   title: ReactNode;
   description?: ReactNode;
+  unlisted?: boolean;
 
   /**
    * Detect from a list of urls
@@ -83,7 +84,8 @@ export function RootToggle({
       )}
       <PopoverContent className="flex flex-col gap-1 w-(--radix-popover-trigger-width) overflow-hidden p-1">
         {options.map((item) => {
-          const isActive = item === selected;
+          const isActive = selected && item.url === selected.url;
+          if (!isActive && item.unlisted) return;
 
           return (
             <Link

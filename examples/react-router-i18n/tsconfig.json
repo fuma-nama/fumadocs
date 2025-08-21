@@ -8,14 +8,14 @@
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "types": ["node", "vite/client"],
-    "target": "ES2022",
-    "module": "ES2022",
+    "target": "esnext",
+    "module": "esnext",
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
     "rootDirs": [".", "./.react-router/types"],
     "baseUrl": ".",
     "paths": {
-      "~/*": ["./app/*"]
+      "@/*": ["./app/*"]
     },
     "esModuleInterop": true,
     "verbatimModuleSyntax": true,

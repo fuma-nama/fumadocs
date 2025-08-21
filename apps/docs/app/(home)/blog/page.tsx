@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { blog } from '@/lib/source';
 
-export default function Page(): React.ReactElement {
+export default function Page() {
   const posts = [...blog.getPages()].sort(
     (a, b) =>
       new Date(b.data.date ?? b.file.name).getTime() -
@@ -21,7 +21,7 @@ export default function Page(): React.ReactElement {
 </svg>`;
 
   return (
-    <main className="container max-sm:px-0 md:py-12">
+    <main className="mx-auto w-full max-w-fd-container sm:px-4 md:py-12">
       <div
         className="h-[300px] p-8 md:h-[400px] md:p-12"
         style={{

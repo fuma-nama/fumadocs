@@ -1,7 +1,7 @@
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { createServerFn } from '@tanstack/react-start';
-import { source } from '~/lib/source';
+import { source } from '@/lib/source';
 import type { PageTree } from 'fumadocs-core/server';
 import { useMemo } from 'react';
 import { docs } from '../../../source.generated';
@@ -13,6 +13,7 @@ import {
 } from 'fumadocs-ui/page';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { createClientLoader } from 'fumadocs-mdx/runtime/vite';
+import { baseOptions } from '@/lib/layout.shared';
 
 export const Route = createFileRoute('/docs/$')({
   component: Page,
@@ -66,12 +67,7 @@ function Page() {
   );
 
   return (
-    <DocsLayout
-      tree={tree}
-      nav={{
-        title: 'Fumadocs Tanstack',
-      }}
-    >
+    <DocsLayout {...baseOptions()} tree={tree}>
       <Content />
     </DocsLayout>
   );

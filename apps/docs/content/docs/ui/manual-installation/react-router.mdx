@@ -1,0 +1,98 @@
+---
+title: React Router
+description: Setup Fumadocs on React Router.
+---
+
+## Getting Started
+
+Before continuing, make sure to configure:
+
+- Tailwind CSS 4.
+
+### Installation
+
+```npm
+npm i fumadocs-core fumadocs-ui fumadocs-mdx @types/mdx
+```
+
+Then, [configure Fumadocs MDX](/docs/mdx/vite/react-router) on your React Router app.
+Make sure essential files like `lib/source.ts` are created correctly.
+
+### Styles
+
+Add the following to your Tailwind CSS file:
+
+```css title="app/app.css"
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+```
+
+### Create Pages
+
+Update your routes:
+
+```ts title="routes.ts"
+import { type RouteConfig, index, route } from '@react-router/dev/routes';
+
+export default [
+  index('routes/home.tsx'),
+  // [!code ++:2]
+  route('docs/*', 'docs/page.tsx'),
+  route('api/search', 'docs/search.ts'),
+] satisfies RouteConfig;
+```
+
+Create the following files:
+
+<include cwd meta='tab="app/lib/layout.shared.tsx"'>
+  ../../examples/react-router/app/lib/layout.shared.tsx
+</include>
+<include cwd meta='tab="app/docs/page.tsx"'>
+  ../../examples/react-router/app/docs/page.tsx
+</include>
+<include cwd meta='tab="app/docs/search.ts"'>
+  ../../examples/react-router/app/docs/search.ts
+</include>
+
+Wrap your entire app under Fumadocs providers:
+
+```tsx title="root.tsx"
+import { Links, Meta, Scripts, ScrollRestoration } from 'react-router';
+import { RootProvider } from 'fumadocs-ui/provider/base';
+import { ReactRouterProvider } from 'fumadocs-core/framework/react-router';
+import './app.css';
+
+export function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <Meta />
+        <Links />
+      </head>
+      <body className="flex flex-col min-h-screen">
+        {/* [!code ++:3] */}
+        <ReactRouterProvider>
+          <RootProvider>{children}</RootProvider>
+        </ReactRouterProvider>
+        <ScrollRestoration />
+        <Scripts />
+      </body>
+    </html>
+  );
+}
+```
+
+### Done
+
+You can start writing documents at `content/docs`:
+
+```mdx title="content/docs/index.mdx"
+---
+title: Hello World
+---
+
+I love Fumadocs
+```

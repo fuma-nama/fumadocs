@@ -1,0 +1,219 @@
+---
+title: Tanstack Start
+description: Support i18n routing on your Tanstack Start + Fumadocs app.
+---
+
+## Setup
+
+Define the i18n configurations in a file, we will import it with `@/lib/i18n` in this guide.
+
+```ts title="src/lib/i18n.ts"
+import { defineI18n } from 'fumadocs-core/i18n';
+
+export const i18n = defineI18n({
+  defaultLanguage: 'en',
+  languages: ['cn', 'en'],
+});
+```
+
+> See [available options](/docs/headless/internationalization) for i18n config.
+
+### Routing
+
+Create a `$lang` directory under `routes`, and move all pages into it.
+
+<Files>
+  <Folder name="src/routes" defaultOpen>
+    <Folder name="$lang" defaultOpen>
+      <File name="index.tsx" />
+      <File name="docs/$.tsx" />
+    </Folder>
+    <Folder name="api" defaultOpen>
+      <File name="search.ts" />
+    </Folder>
+  </Folder>
+</Files>
+
+Provide UI translations and other config to `<RootProvider />`, the English translations are used as fallbacks.
+
+```tsx title="src/routes/__root.tsx"
+import { HeadContent, Scripts, useParams } from '@tanstack/react-router';
+import * as React from 'react';
+import { RootProvider } from 'fumadocs-ui/provider/base';
+import { TanstackProvider } from 'fumadocs-core/framework/tanstack';
+import { defineI18nUI } from 'fumadocs-ui/i18n';
+import { i18n } from '@/lib/i18n';
+
+// [!code ++:11]
+const { provider } = defineI18nUI(i18n, {
+  translations: {
+    cn: {
+      displayName: 'Chinese',
+      search: 'Translated Content',
+    },
+    en: {
+      displayName: 'English',
+    },
+  },
+});
+
+function RootDocument({ children }: { children: React.ReactNode }) {
+  const { lang } = useParams({ strict: false });
+
+  return (
+    <html suppressHydrationWarning>
+      <head>
+        <HeadContent />
+      </head>
+      <body className="flex flex-col min-h-screen">
+        <TanstackProvider>
+          <RootProvider
+            // [!code ++]
+            i18n={provider(lang)}
+          >
+            {children}
+          </RootProvider>
+        </TanstackProvider>
+        <Scripts />
+      </body>
+    </html>
+  );
+}
+```
+
+### Pass Locale
+
+Add `locale` parameter to `baseOptions()` and include `i18n` in props:
+
+```tsx title="src/lib/layout.shared.tsx"
+import { i18n } from '@/lib/i18n';
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export function baseOptions(locale: string): BaseLayoutProps {
+  return {
+    i18n, // [!code ++]
+    // different props based on `locale`
+  };
+}
+```
+
+Pass the locale to Fumadocs in your pages and layouts.
+
+```ts tab="src/lib/source.ts"
+import { i18n } from '@/lib/i18n';
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  i18n, // [!code ++]
+  // other options
+});
+```
+
+```tsx tab="Home Layout" title="src/routes/$lang/index.tsx"
+import { createFileRoute } from '@tanstack/react-router';
+import { HomeLayout } from 'fumadocs-ui/layouts/home';
+import { baseOptions } from '@/lib/layout.shared';
+
+export const Route = createFileRoute('/$lang/')({
+  component: Home,
+});
+
+function Home() {
+  const { lang } = Route.useParams();
+
+  // [!code highlight]
+  return <HomeLayout {...baseOptions(lang)}></HomeLayout>;
+}
+```
+
+```tsx tab="Docs Page" title="src/routes/$lang/docs/$.tsx"
+import { createFileRoute, notFound } from '@tanstack/react-router';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { createServerFn } from '@tanstack/react-start';
+import { source } from '@/lib/source';
+import { baseOptions } from '@/lib/layout.shared';
+
+export const Route = createFileRoute('/$lang/docs/$')({
+  component: Page,
+  loader: async ({ params }) => {
+    const data = await loader({
+      // [!code ++:4]
+      data: {
+        slugs: params._splat?.split('/') ?? [],
+        lang: params.lang,
+      },
+    });
+
+    await clientLoader.preload(data.path);
+    return data;
+  },
+});
+
+// [!code highlight:13]
+const loader = createServerFn({
+  method: 'GET',
+})
+  .validator((params: { slugs: string[]; lang?: string }) => params)
+  .handler(async ({ data: { slugs, lang } }) => {
+    const page = source.getPage(slugs, lang);
+    if (!page) throw notFound();
+
+    return {
+      tree: source.getPageTree(lang) as object,
+      path: page.path,
+    };
+  });
+
+function Page() {
+  const { lang } = Route.useParams();
+  // ...
+
+  return (
+    // [!code highlight]
+    <DocsLayout {...baseOptions(lang)} tree={tree}>
+      <Content />
+    </DocsLayout>
+  );
+}
+```
+
+### Search
+
+Configure i18n on your search solution.
+
+- **Built-in Search (Orama):** See [Internationalization](/docs/headless/search/orama#internationalization).
+- **Cloud Solutions (e.g. Algolia):** They usually have official support for multilingual.
+
+## Writing Documents
+
+See [i18n routing](/docs/ui/page-conventions#i18n-routing) to learn how to create pages for specific locales.
+
+### Navigation
+
+Fumadocs only handles navigation for its own layouts (e.g. sidebar).
+For other places, you can use the `useParams` hook to get the locale from url.
+
+```tsx
+import { Link, useParams } from '@tanstack/react-router';
+
+const { lang } = useParams({ from: '/$lang/' });
+
+<Link
+  to="/$lang/docs/$"
+  params={{
+    lang,
+    _splat: '',
+  }}
+>
+  Open Docs
+</Link>;
+```
+
+In addition, the [`fumadocs-core/dynamic-link`](/docs/headless/components/link#dynamic-hrefs) component supports dynamic hrefs, you can use it to attend the locale prefix.
+It is useful for Markdown/MDX content.
+
+```mdx title="content.mdx"
+import { DynamicLink } from 'fumadocs-core/dynamic-link';
+
+<DynamicLink href="/[lang]/another-page">This is a link</DynamicLink>
+```

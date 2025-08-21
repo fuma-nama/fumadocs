@@ -1,18 +1,14 @@
-import type * as PageTree from '@/server/page-tree';
+import type * as PageTree from '@/source/page-tree/definitions';
 import type { I18nConfig } from '@/i18n';
 import {
   type ContentStorage,
   loadFiles,
-  loadFilesI18n,
   type MetaFile,
   type PageFile,
   type Transformer,
 } from './load-files';
 import type { MetaData, PageData, UrlFn } from './types';
-import {
-  type BuildPageTreeOptions,
-  createPageTreeBuilder,
-} from './page-tree-builder';
+import { type BaseOptions, createPageTreeBuilder } from './page-tree/builder';
 import {
   basename,
   dirname,
@@ -24,7 +20,7 @@ import { joinPath } from '@/utils/path';
 
 export interface LoaderConfig {
   source: SourceConfig;
-  i18n: boolean;
+  i18n: I18nConfig | undefined;
 }
 
 export interface SourceConfig {
@@ -38,7 +34,7 @@ export interface LoaderOptions<
 > {
   baseUrl: string;
 
-  icon?: NonNullable<BuildPageTreeOptions['resolveIcon']>;
+  icon?: NonNullable<BaseOptions['resolveIcon']>;
   slugs?: (info: FileInfo) => string[];
   url?: UrlFn;
 
@@ -48,9 +44,7 @@ export interface LoaderOptions<
   /**
    * Additional options for page tree builder
    */
-  pageTree?: Partial<
-    Omit<BuildPageTreeOptions<T['pageData'], T['metaData']>, 'storage'>
-  >;
+  pageTree?: Partial<BaseOptions<T['pageData'], T['metaData']>>;
 
   /**
    * Configure i18n
@@ -127,7 +121,7 @@ export interface LanguageEntry<Data = PageData> {
 }
 
 export interface LoaderOutput<Config extends LoaderConfig> {
-  pageTree: Config['i18n'] extends true
+  pageTree: Config['i18n'] extends I18nConfig
     ? Record<string, PageTree.Root>
     : PageTree.Root;
 
@@ -195,11 +189,7 @@ export interface LoaderOutput<Config extends LoaderConfig> {
   ) => (Record<TSlug, string[]> & Record<TLang, string>)[];
 }
 
-function indexPages(
-  storages: Record<string, ContentStorage>,
-  getUrl: UrlFn,
-  i18n?: I18nConfig,
-) {
+function indexPages(storages: Record<string, ContentStorage>, getUrl: UrlFn) {
   const result = {
     // (locale.slugs -> page)
     pages: new Map<string, Page>(),
@@ -209,43 +199,19 @@ function indexPages(
     pathToPage: new Map<string, Page>(),
   };
 
-  const defaultLanguage = i18n?.defaultLanguage ?? '';
+  for (const [lang, storage] of Object.entries(storages)) {
+    for (const filePath of storage.getFiles()) {
+      const item = storage.read(filePath)!;
+      const path = `${lang}.${filePath}`;
 
-  for (const filePath of storages[defaultLanguage].getFiles()) {
-    const item = storages[defaultLanguage].read(filePath)!;
-
-    if (item.format === 'meta') {
-      result.pathToMeta.set(
-        `${defaultLanguage}.${item.path}`,
-        fileToMeta(item),
-      );
-    }
-
-    if (item.format === 'page') {
-      const page = fileToPage(item, getUrl, defaultLanguage);
-      result.pathToPage.set(`${defaultLanguage}.${item.path}`, page);
-      result.pages.set(`${defaultLanguage}.${page.slugs.join('/')}`, page);
-
-      if (!i18n) continue;
-
-      for (const lang of i18n.languages) {
-        if (lang === defaultLanguage) continue;
-        const localizedItem = storages[lang].read(filePath);
-        const localizedPage = fileToPage(
-          localizedItem?.format === 'page' ? localizedItem : item,
-          getUrl,
-          lang,
-        );
-
-        if (localizedItem) {
-          result.pathToPage.set(`${lang}.${item.path}`, localizedPage);
-        }
-
-        result.pages.set(
-          `${lang}.${localizedPage.slugs.join('/')}`,
-          localizedPage,
-        );
+      if (item.format === 'meta') {
+        result.pathToMeta.set(path, fileToMeta(item));
+        continue;
       }
+
+      const page = fileToPage(item, getUrl, lang);
+      result.pathToPage.set(path, page);
+      result.pages.set(`${lang}.${page.slugs.join('/')}`, page);
     }
   }
 
@@ -282,7 +248,7 @@ export function loader<
   options: LoaderOptions<Config, I18n>,
 ): LoaderOutput<{
   source: Config;
-  i18n: I18n extends I18nConfig ? true : false;
+  i18n: I18n;
 }> {
   // @ts-expect-error -- forced type cast
   return createOutput(options);
@@ -299,105 +265,102 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
     i18n,
     slugs: slugsFn,
     url: getUrl = createGetUrl(baseUrl ?? '/', i18n),
-    transformers,
+    transformers = [],
   } = options;
   const defaultLanguage = i18n?.defaultLanguage ?? '';
   const files =
     typeof source.files === 'function' ? source.files() : source.files;
 
-  function buildFiles(files: VirtualFile[]) {
-    const indexFiles: VirtualFile[] = [];
+  const transformerSlugs: Transformer = ({ storage }) => {
+    const indexFiles = new Set<string>();
     const taken = new Set<string>();
 
-    for (const file of files) {
-      if (file.type !== 'page' || file.slugs) continue;
+    for (const path of storage.getFiles()) {
+      const file = storage.read(path);
+      if (!file || file.format !== 'page' || file.slugs) continue;
 
       // for custom slugs function, don't handle conflicting cases like `dir/index.mdx` vs `dir.mdx`
-      if (isIndex(file.path) && !slugsFn) {
-        indexFiles.push(file);
+      if (isIndex(path) && !slugsFn) {
+        indexFiles.add(path);
         continue;
       }
 
-      file.slugs = slugsFn
-        ? slugsFn(parseFilePath(file.path))
-        : getSlugs(file.path);
+      file.slugs = slugsFn ? slugsFn(parseFilePath(path)) : getSlugs(path);
 
       const key = file.slugs.join('/');
       if (taken.has(key)) throw new Error('Duplicated slugs');
       taken.add(key);
     }
 
-    for (const file of indexFiles) {
-      file.slugs = getSlugs(file.path);
+    for (const path of indexFiles) {
+      const file = storage.read(path);
+      if (file?.format !== 'page') continue;
 
+      file.slugs = getSlugs(path);
       if (taken.has(file.slugs.join('/'))) file.slugs.push('index');
     }
+  };
 
-    return files.map((file) => {
-      if (file.type === 'page') {
+  const storages = loadFiles(
+    files,
+    {
+      buildFile(file) {
+        if (file.type === 'page') {
+          return {
+            format: 'page',
+            path: file.path,
+            slugs: file.slugs,
+            data: file.data,
+            absolutePath: file.absolutePath ?? '',
+          } as PageFile;
+        }
+
         return {
-          format: 'page',
+          format: 'meta',
           path: file.path,
-          slugs: file.slugs!,
-          data: file.data,
           absolutePath: file.absolutePath ?? '',
-        } as PageFile;
-      }
-
-      return {
-        format: 'meta',
-        path: file.path,
-        absolutePath: file.absolutePath ?? '',
-        data: file.data,
-      } as MetaFile;
-    });
-  }
-
-  const storages = i18n
-    ? loadFilesI18n(
-        files,
-        {
-          buildFiles,
-          transformers,
-        },
-        {
+          data: file.data,
+        } as MetaFile;
+      },
+      transformers: [transformerSlugs, ...transformers],
+    },
+    i18n
+      ? {
           ...i18n,
           parser: i18n.parser ?? 'dot',
+        }
+      : {
+          defaultLanguage,
+          parser: 'none',
+          languages: [defaultLanguage],
         },
-      )
-    : {
-        '': loadFiles(files, {
-          transformers,
-          buildFiles,
-        }),
-      };
+  );
 
-  const walker = indexPages(storages, getUrl, i18n);
+  const walker = indexPages(storages, getUrl);
   const builder = createPageTreeBuilder(getUrl);
-  let pageTree: LoaderOutput<LoaderConfig>['pageTree'] | undefined;
+  let pageTree: Record<string, PageTree.Root> | undefined;
 
   return {
     _i18n: i18n,
     get pageTree() {
-      if (i18n) {
-        pageTree ??= builder.buildI18n({
-          storages,
-          resolveIcon: options.icon,
-          i18n: i18n,
-          ...options.pageTree,
-        }) as unknown as LoaderOutput<LoaderConfig>['pageTree'];
-      } else {
-        pageTree ??= builder.build({
-          storage: storages[''],
-          resolveIcon: options.icon,
-          ...options.pageTree,
-        });
-      }
+      pageTree ??= builder.buildI18n({
+        storages,
+        resolveIcon: options.icon,
+        ...options.pageTree,
+      });
 
-      return pageTree;
+      return i18n
+        ? (pageTree as unknown as LoaderOutput<LoaderConfig>['pageTree'])
+        : pageTree[defaultLanguage];
     },
     set pageTree(v) {
-      pageTree = v;
+      if (i18n) {
+        pageTree = v as unknown as Record<string, PageTree.Root>;
+      } else {
+        pageTree = {
+          defaultLanguage: v,
+        };
+      }
     },
     getPageByHref(href, { dir = '', language } = {}) {
       const [value, hash] = href.split('#', 2);

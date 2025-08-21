@@ -6,11 +6,12 @@ import {
   DocsPage,
   DocsTitle,
 } from 'fumadocs-ui/page';
-import { source } from '@/source';
+import { source } from '@/lib/source';
 import { type PageTree } from 'fumadocs-core/server';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { docs } from '../../source.generated';
 import { toClientRenderer } from 'fumadocs-mdx/runtime/vite';
+import { baseOptions } from '@/lib/layout.shared';
 
 export async function loader({ params }: Route.LoaderArgs) {
   const slugs = params['*'].split('/').filter((v) => v.length > 0);
@@ -45,12 +46,7 @@ export default function Page(props: Route.ComponentProps) {
   const Content = renderer[path];
 
   return (
-    <DocsLayout
-      nav={{
-        title: 'React Router',
-      }}
-      tree={tree as PageTree.Root}
-    >
+    <DocsLayout {...baseOptions()} tree={tree as PageTree.Root}>
       <Content />
     </DocsLayout>
   );

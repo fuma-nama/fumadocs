@@ -8,8 +8,18 @@ export class FileSystem<File> {
   files = new Map<string, File>();
   folders = new Map<string, string[]>();
 
-  constructor() {
-    this.folders.set('', []);
+  constructor(inherit?: FileSystem<File>) {
+    if (inherit) {
+      for (const [k, v] of inherit.folders) {
+        this.folders.set(k, v);
+      }
+
+      for (const [k, v] of inherit.files) {
+        this.files.set(k, v);
+      }
+    } else {
+      this.folders.set('', []);
+    }
   }
 
   read(path: string): File | undefined {
@@ -24,11 +34,23 @@ export class FileSystem<File> {
   }
 
   write(path: string, file: File): void {
-    const dir = dirname(path);
+    if (this.files.has(path)) {
+      this.files.set(path, file);
+      return;
+    }
 
+    const dir = dirname(path);
     this.makeDir(dir);
     this.readDir(dir)?.push(path);
     this.files.set(path, file);
+  }
+
+  delete(path: string) {
+    return this.files.delete(path);
+  }
+
+  deleteDir(path: string) {
+    return this.folders.delete(path);
   }
 
   getFiles(): string[] {

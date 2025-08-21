@@ -9,35 +9,89 @@ To begin, create an account on Orama Cloud.
 
 REST API integration requires your docs to upload the indexes.
 
-1. Create a new REST API index from Dashboard.
-2. Use the following schema:
+Create a new REST API index from Dashboard using the following schema:
 
-   ```json
-   {
-     "id": "string",
-     "title": "string",
-     "url": "string",
-     "tag": "string",
-     "page_id": "string",
-     "section": "string",
-     "section_id": "string",
-     "content": "string"
-   }
-   ```
+```json
+{
+  "id": "string",
+  "title": "string",
+  "url": "string",
+  "tag": "string",
+  "page_id": "string",
+  "section": "string",
+  "section_id": "string",
+  "content": "string"
+}
+```
 
-3. Then, using the private API key and index ID from dashboard, create a script to sync search indexes.
+Export the search indexes by pre-rendering a static route.
 
-   <include cwd meta='title="sync-index.mjs"' lang="js">
-     ../../examples/next-mdx/scripts/sync-orama-cloud.mjs
-   </include>
+```ts title="lib/export-search-indexes.ts"
+import { source } from '@/lib/source';
+import type { OramaDocument } from 'fumadocs-core/search/orama-cloud';
 
-4. Create a route handler in your Next.js app to export search indexes.
+export async function exportSearchIndexes() {
+  return source.getPages().map((page) => {
+    return {
+      id: page.url,
+      structured: page.data.structuredData,
+      url: page.url,
+      title: page.data.title,
+      description: page.data.description,
+    } satisfies OramaDocument;
+  });
+}
+```
 
-   <include cwd meta='title="app/static.json/route.ts"'>
-     ../../examples/next-mdx/app/static.json/orama-cloud.ts
-   </include>
+<include>.static-route-example.mdx</include>
 
-5. Run the script after `next build`.
+Then, using the private API key and index ID from dashboard, create a script to sync search indexes.
+
+```ts title="scripts/sync-content.ts"
+import { sync, type OramaDocument } from 'fumadocs-core/search/orama-cloud';
+import * as fs from 'node:fs/promises';
+import { CloudManager } from '@oramacloud/client';
+
+// the path of pre-rendered `static.json`, choose one according to your React framework
+const filePath = {
+  next: '.next/server/app/static.json.body',
+  'tanstack-start': '.output/public/static.json',
+  'react-router': 'build/client/static.json',
+}['next'];
+
+async function main() {
+  // private API key [!code highlight]
+  const apiKey = process.env.ORAMA_PRIVATE_API_KEY;
+
+  if (!apiKey) {
+    console.log('no api key for Orama found, skipping');
+    return;
+  }
+
+  const content = await fs.readFile(filePath);
+  const records = JSON.parse(content.toString()) as OramaDocument[];
+  const manager = new CloudManager({ api_key: apiKey });
+
+  await sync(manager, {
+    index: '<index>',
+    documents: records,
+  });
+
+  console.log(`search updated: ${records.length} records`);
+}
+
+void main();
+```
+
+Run the script after production build:
+
+```json title="package.json"
+{
+  "scripts": {
+    "build": "... && bun scripts/sync-content.ts"
+  }
+}
+```
 
 ### Search Client
 

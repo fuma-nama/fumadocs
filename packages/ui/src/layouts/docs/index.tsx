@@ -203,28 +203,27 @@ export function DocsLayout({
         </SidebarHeader>
         {viewport}
         <HideIfEmpty as={SidebarFooter}>
-          <div className="flex text-fd-muted-foreground items-center justify-end empty:hidden">
+          <div className="flex text-fd-muted-foreground items-center empty:hidden">
+            {i18n ? (
+              <LanguageToggle>
+                <Languages className="size-4.5" />
+              </LanguageToggle>
+            ) : null}
             {iconLinks.map((item, i) => (
               <BaseLinkItem
                 key={i}
                 item={item}
                 className={cn(
                   buttonVariants({ size: 'icon-sm', color: 'ghost' }),
-                  i === iconLinks.length - 1 && 'me-auto',
                 )}
                 aria-label={item.label}
               >
                 {item.icon}
               </BaseLinkItem>
             ))}
-            {i18n ? (
-              <LanguageToggle>
-                <Languages className="size-4.5" />
-              </LanguageToggle>
-            ) : null}
             {themeSwitch.enabled !== false &&
               (themeSwitch.component ?? (
-                <ThemeToggle className="p-0" mode={themeSwitch.mode} />
+                <ThemeToggle className="ms-auto p-0" mode={themeSwitch.mode} />
               ))}
           </div>
           {footer}
@@ -282,7 +281,7 @@ export function DocsLayout({
         <LayoutBody
           {...props.containerProps}
           className={cn(
-            'xl:[--fd-toc-width:286px]',
+            'md:[&_#nd-page_article]:pt-12 xl:[--fd-toc-width:286px] xl:[&_#nd-page_article]:px-8',
             sidebarEnabled && sidebarVariables,
             !nav.component &&
               nav.enabled !== false &&

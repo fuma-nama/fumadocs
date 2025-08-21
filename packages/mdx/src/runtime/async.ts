@@ -26,10 +26,12 @@ export const _runtimeAsync: RuntimeAsync = {
       return {
         ...data,
         _file: file,
-        content,
+        get content() {
+          return `${content.matter}${content.body}`;
+        },
         async load() {
           const mdxOptions = await initMdxOptions;
-          const out = await buildMDX(collection, content, {
+          const out = await buildMDX(collection, content.body, {
             ...mdxOptions,
             development: false,
             frontmatter: data as Record<string, unknown>,
@@ -38,16 +40,15 @@ export const _runtimeAsync: RuntimeAsync = {
             },
             filePath: file.absolutePath,
           });
-          const executed = await executeMdx(String(out), {
+          const { default: body, ...rest } = await executeMdx(String(out), {
             baseUrl: pathToFileURL(file.absolutePath),
           });
 
           return {
-            body: executed.default,
-            toc: executed.toc,
-            lastModified,
             structuredData: out.data.structuredData as StructuredData,
-            _exports: executed,
+            body,
+            ...rest,
+            lastModified,
           };
         },
       };

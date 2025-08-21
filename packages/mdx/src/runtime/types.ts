@@ -23,7 +23,6 @@ export interface MarkdownProps {
   body: FC<MDXProps>;
   structuredData: StructuredData;
   toc: TableOfContents;
-  _exports: Record<string, unknown>;
 
   /**
    * Only available when `lastModifiedTime` is enabled on MDX loader
@@ -39,12 +38,17 @@ export interface RuntimeFile {
 export interface AsyncRuntimeFile {
   info: FileInfo;
   data: Record<string, unknown>;
-  content: string;
+  content: { matter: string; body: string };
   lastModified?: Date;
 }
 
 type DocOut<Schema extends StandardSchemaV1> = Override<
   MarkdownProps & {
+    /**
+     * Other exports in the compiled Markdown/MDX file
+     */
+    _exports: Record<string, unknown>;
+
     /**
      * Read the original content of file from file system.
      */
@@ -89,7 +93,7 @@ type AsyncDocOut<Schema extends StandardSchemaV1> =
   StandardSchemaV1.InferOutput<Schema> &
     BaseCollectionEntry & {
       content: string;
-      load: () => Promise<MarkdownProps>;
+      load: () => Promise<MarkdownProps & Record<string, unknown>>;
     };
 
 export interface RuntimeAsync {

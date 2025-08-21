@@ -1,5 +1,24 @@
 # next-docs-mdx
 
+## 11.8.0
+
+### Minor Changes
+
+- cfe2a5c: Support Async Mode for Vite
+
+### Patch Changes
+
+- c8f49d8: Include frontmatter into `page.data.content` by default
+- Updated dependencies [514052e]
+- Updated dependencies [e254c65]
+- Updated dependencies [ec75601]
+- Updated dependencies [e785f98]
+- Updated dependencies [0531bf4]
+- Updated dependencies [50eb07f]
+- Updated dependencies [67df155]
+- Updated dependencies [b109d06]
+  - fumadocs-core@15.7.0
+
 ## 11.7.5
 
 ### Patch Changes

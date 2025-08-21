@@ -19,13 +19,16 @@ const defaultTransform: GetSidebarTabsOptions['transform'] = (option, node) => {
 };
 
 export function getSidebarTabs(
-  pageTree: PageTree.Root,
+  tree: PageTree.Root,
   { transform = defaultTransform }: GetSidebarTabsOptions = {},
 ): Option[] {
-  function findOptions(node: PageTree.Folder): Option[] {
+  function findOptions(
+    node: PageTree.Root | PageTree.Folder,
+    unlisted?: boolean,
+  ): Option[] {
     const results: Option[] = [];
 
-    if (node.root) {
+    if ('root' in node && node.root) {
       const urls = getFolderUrls(node);
 
       if (urls.size > 0) {
@@ -33,6 +36,7 @@ export function getSidebarTabs(
           url: urls.values().next().value ?? '',
           title: node.name,
           icon: node.icon,
+          unlisted,
           description: node.description,
           urls,
         };
@@ -43,13 +47,19 @@ export function getSidebarTabs(
     }
 
     for (const child of node.children) {
-      if (child.type === 'folder') results.push(...findOptions(child));
+      if (child.type === 'folder')
+        results.push(...findOptions(child, unlisted));
     }
 
     return results;
   }
 
-  return findOptions(pageTree as PageTree.Folder);
+  const options = findOptions(tree);
+  if (tree.fallback) {
+    options.push(...findOptions(tree.fallback, true));
+  }
+
+  return options;
 }
 
 function getFolderUrls(

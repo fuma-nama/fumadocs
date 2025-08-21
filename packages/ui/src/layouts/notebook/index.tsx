@@ -295,11 +295,20 @@ function DocsNavbar({
     <Navbar mode={navMode}>
       <div
         className={cn(
-          'flex border-b px-2.5 gap-2 flex-1 md:px-4',
+          'flex border-b px-4 gap-2 flex-1',
           navMode === 'auto' && 'md:px-6',
         )}
       >
-        <div className={cn('flex items-center', navMode === 'top' && 'flex-1')}>
+        <div
+          className={cn(
+            'items-center',
+            navMode === 'top' && 'flex flex-1',
+            navMode === 'auto' && [
+              'hidden max-md:flex',
+              sidebarCollapsible && 'has-data-[collapsed=true]:md:flex',
+            ],
+          )}
+        >
           {sidebarCollapsible && navMode === 'auto' && (
             <SidebarCollapseTrigger
               className={cn(
@@ -316,7 +325,7 @@ function DocsNavbar({
           <Link
             href={nav.url ?? '/'}
             className={cn(
-              'inline-flex items-center gap-2.5 font-semibold empty:hidden',
+              'inline-flex items-center gap-2.5 font-semibold',
               navMode === 'auto' && 'md:hidden',
             )}
           >
@@ -378,7 +387,7 @@ function DocsNavbar({
               (searchToggle.components?.sm ?? (
                 <SearchToggle hideIfDisabled className="p-2" />
               ))}
-            <NavbarSidebarTrigger className="p-2" />
+            <NavbarSidebarTrigger className="p-2 -me-1.5" />
           </div>
 
           <div className="flex items-center gap-2 max-md:hidden">

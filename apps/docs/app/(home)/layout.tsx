@@ -1,6 +1,5 @@
-import type { ReactNode } from 'react';
 import { HomeLayout } from 'fumadocs-ui/layouts/home';
-import { baseOptions, linkItems } from '@/app/layout.config';
+import { baseOptions, linkItems } from '@/lib/layout.shared';
 import {
   NavbarMenu,
   NavbarMenuContent,
@@ -12,10 +11,10 @@ import Image from 'next/image';
 import Preview from '@/public/banner.png';
 import { Book, ComponentIcon, Pencil, PlusIcon, Server } from 'lucide-react';
 
-export default function Layout({ children }: { children: ReactNode }) {
+export default function Layout({ children }: LayoutProps<'/'>) {
   return (
     <HomeLayout
-      {...baseOptions}
+      {...baseOptions()}
       style={
         {
           '--spacing-fd-container': '1120px',

@@ -13,6 +13,9 @@
       },
       {
         "$id": "nested",
+        "$ref": {
+          "metaFile": "nested/meta.json",
+        },
         "children": [
           {
             "$id": "nested/test.mdx",
@@ -24,7 +27,7 @@
             "url": "/cn/nested/test",
           },
         ],
-        "name": "Nested",
+        "name": "Nested Chinese",
         "type": "folder",
       },
     ],
