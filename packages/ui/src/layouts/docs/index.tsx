@@ -281,7 +281,7 @@ export function DocsLayout({
         <LayoutBody
           {...props.containerProps}
           className={cn(
-            'xl:[--fd-toc-width:286px]',
+            'md:[&_#nd-page_article]:pt-12 xl:[--fd-toc-width:286px] xl:[&_#nd-page_article]:px-8',
             sidebarEnabled && sidebarVariables,
             !nav.component &&
               nav.enabled !== false &&

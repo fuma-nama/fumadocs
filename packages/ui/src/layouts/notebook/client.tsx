@@ -131,6 +131,7 @@ function LayoutTab({
     <Link
       className={cn(
         'inline-flex border-b border-transparent transition-colors items-center py-1.5 font-medium gap-2 text-fd-muted-foreground text-sm text-nowrap',
+        option.unlisted && !selected && 'hidden',
         selected && 'border-fd-primary text-fd-primary',
       )}
       href={option.url}
