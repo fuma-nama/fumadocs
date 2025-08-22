@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 15.7.1
+
+### Patch Changes
+
+- b4e6147: Fix sidebar & animation bugs
+- Updated dependencies [195b090]
+- Updated dependencies [e1c84a2]
+  - fumadocs-core@15.7.1
+
 ## 15.7.0
 
 ### Minor Changes
