@@ -1,7 +1,6 @@
 import type { RequestData } from '@/requests/_shared';
 
 export function joinURL(base: string, pathname: string): string {
-  debugger;
   if (pathname.startsWith('/')) pathname = pathname.slice(1);
   if (base.endsWith('/')) base = base.slice(0, -1);
 
