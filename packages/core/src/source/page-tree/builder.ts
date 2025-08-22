@@ -27,6 +27,7 @@ export interface PageTreeBuilderContext<
 
   storages?: Record<string, ContentStorage<Page, Meta>>;
   locale?: string;
+  visitedPages?: Set<string>;
 }
 
 export interface PageTreeTransformer<
@@ -301,9 +302,14 @@ function buildFileNode(
   path: string,
   ctx: PageTreeBuilderContext,
 ): PageTree.Item | undefined {
-  const { options, getUrl, storage, locale, transformers } = ctx;
+  const { options, getUrl, storage, locale, transformers, visitedPages } = ctx;
+
+  if (visitedPages?.has(path)) return;
+
   const page = storage.read(path);
   if (page?.format !== 'page') return;
+
+  visitedPages?.add(path);
 
   const { title, description, icon } = page.data;
   let item: PageTree.Item = {
@@ -400,6 +406,7 @@ export function createPageTreeBuilder(getUrl: UrlFn): PageTreeBuilder {
           locale,
           storage,
           storages,
+          visitedPages: new Set<string>(),
           resolveName(name, format) {
             return resolve(name, format) ?? name;
           },
