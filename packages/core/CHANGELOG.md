@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 15.7.1
+
+### Patch Changes
+
+- 195b090: Support a list of `source` for `loader()` API
+- e1c84a2: Support `fallbackLanguage` for `loader()` i18n API
+
 ## 15.7.0
 
 ### Minor Changes

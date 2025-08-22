@@ -60,7 +60,7 @@
     },
   ],
   "fallback": {
-    "$id": "fallback-root",
+    "$id": "fallback-root-root",
     "children": [
       {
         "$id": "hidden.mdx",
