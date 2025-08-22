@@ -38,7 +38,7 @@ export interface LoaderOptions<
   slugs?: (info: FileInfo) => string[];
   url?: UrlFn;
 
-  source: Source<T>;
+  source: Source<T> | Source<T>[];
   transformers?: Transformer[];
 
   /**
@@ -254,6 +254,20 @@ export function loader<
   return createOutput(options);
 }
 
+function loadSource<T extends SourceConfig>(source: Source<T> | Source<T>[]) {
+  const out: VirtualFile[] = [];
+
+  for (const item of Array.isArray(source) ? source : [source]) {
+    if (typeof item.files === 'function') {
+      out.push(...item.files());
+    } else {
+      out.push(...item.files);
+    }
+  }
+
+  return out;
+}
+
 function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
   if (!options.url && !options.baseUrl) {
     console.warn('`loader()` now requires a `baseUrl` option to be defined.');
@@ -268,8 +282,7 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
     transformers = [],
   } = options;
   const defaultLanguage = i18n?.defaultLanguage ?? '';
-  const files =
-    typeof source.files === 'function' ? source.files() : source.files;
+  const files = loadSource(source);
 
   const transformerSlugs: Transformer = ({ storage }) => {
     const indexFiles = new Set<string>();
