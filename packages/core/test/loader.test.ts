@@ -253,6 +253,46 @@ test('Loader: Rest operator', () => {
     `);
 });
 
+test('Loader: Allow duplicate pages when explicitly referenced twice', () => {
+  const result = loader({
+    baseUrl: '/',
+    pageTree: {
+      noRef: true,
+    },
+    source: {
+      files: [
+        {
+          type: 'meta',
+          path: 'meta.json',
+          data: {
+            pages: ['page1', 'page1', 'page2'],
+          },
+        },
+        {
+          type: 'page',
+          path: 'page1.mdx',
+          data: {
+            title: 'Page 1',
+          },
+        },
+        {
+          type: 'page',
+          path: 'page2.mdx',
+          data: {
+            title: 'Page 2',
+          },
+        },
+      ],
+    },
+  });
+
+  const treeChildren = result.pageTree.children;
+  expect(treeChildren.length).toBe(3);
+  expect(treeChildren[0].$id).toBe('page1.mdx');
+  expect(treeChildren[1].$id).toBe('page1.mdx');
+  expect(treeChildren[2].$id).toBe('page2.mdx');
+});
+
 test('Loader: No duplicate pages when referencing subfolder items and folder', () => {
   const result = loader({
     baseUrl: '/',

@@ -121,9 +121,13 @@ function buildAll(
   );
 
   for (const path of sortedPaths) {
+    if (ctx.visitedPages?.has(path)) continue;
+    
     const fileNode = buildFileNode(path, ctx);
     if (!fileNode) continue;
 
+    ctx.visitedPages?.add(path);
+    
     if (basename(path, extname(path)) === 'index') output.unshift(fileNode);
     else output.push(fileNode);
   }
@@ -206,6 +210,9 @@ function resolveFolderItem(
   }
 
   const fileNode = buildFileNode(path, ctx);
+  if (fileNode) {
+    ctx.visitedPages?.add(path);
+  }
   return fileNode ? [fileNode] : [];
 }
 
@@ -302,14 +309,10 @@ function buildFileNode(
   path: string,
   ctx: PageTreeBuilderContext,
 ): PageTree.Item | undefined {
-  const { options, getUrl, storage, locale, transformers, visitedPages } = ctx;
-
-  if (visitedPages?.has(path)) return;
+  const { options, getUrl, storage, locale, transformers } = ctx;
 
   const page = storage.read(path);
   if (page?.format !== 'page') return;
-
-  visitedPages?.add(path);
 
   const { title, description, icon } = page.data;
   let item: PageTree.Item = {
