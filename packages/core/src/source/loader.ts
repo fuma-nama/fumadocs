@@ -367,7 +367,7 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
         pageTree = v as unknown as Record<string, PageTree.Root>;
       } else {
         pageTree = {
-          defaultLanguage: v,
+          [defaultLanguage]: v,
         };
       }
     },
