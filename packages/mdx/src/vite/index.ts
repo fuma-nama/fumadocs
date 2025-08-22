@@ -1,4 +1,4 @@
-import type { Plugin, TransformResult } from 'vite';
+import type { Environment, Plugin, TransformResult } from 'vite';
 import { buildConfig } from '@/config/build';
 import { buildMDX } from '@/utils/build-mdx';
 import { parse } from 'node:querystring';
@@ -97,7 +97,7 @@ export default function mdx(
   }
 
   async function transformContent(
-    this: TransformPluginContext,
+    this: TransformPluginContext & { environment: Environment },
     file: string,
     query: string,
     value: string,
