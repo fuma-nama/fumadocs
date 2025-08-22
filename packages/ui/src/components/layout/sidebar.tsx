@@ -145,7 +145,7 @@ export function SidebarContent(props: ComponentProps<'aside'>) {
           '--fd-sidebar-top': `calc(var(--fd-banner-height) + var(--fd-nav-height) + var(--fd-sidebar-margin))`,
           width: collapsed
             ? 'var(--fd-sidebar-width)'
-            : 'calc(var(--fd-sidebar-width) + var(--fd-layout-offset))',
+            : 'calc(var(--spacing) + var(--fd-sidebar-width) + var(--fd-layout-offset))',
         } as object
       }
       onPointerEnter={(e) => {
@@ -352,8 +352,8 @@ export function SidebarFolderLink(props: LinkProps) {
       className={cn(itemVariants({ active }), 'w-full', props.className)}
       onClick={(e) => {
         if (
-          e.target instanceof HTMLElement &&
-          e.target.hasAttribute('data-icon')
+          e.target instanceof Element &&
+          e.target.matches('[data-icon], [data-icon] *')
         ) {
           setOpen(!open);
           e.preventDefault();
@@ -373,33 +373,31 @@ export function SidebarFolderLink(props: LinkProps) {
 }
 
 export function SidebarFolderContent(props: CollapsibleContentProps) {
-  const ctx = useInternalContext();
-  const level = ctx.level + 1;
+  const { level, ...ctx } = useInternalContext();
 
   return (
     <CollapsibleContent
       {...props}
       className={cn(
         'relative',
-        level === 2 &&
+        level === 1 && [
+          "before:content-[''] before:absolute before:w-px before:inset-y-1 before:bg-fd-border before:start-2.5",
           "**:data-[active=true]:before:content-[''] **:data-[active=true]:before:bg-fd-primary **:data-[active=true]:before:absolute **:data-[active=true]:before:w-px **:data-[active=true]:before:inset-y-2.5 **:data-[active=true]:before:start-2.5",
+        ],
         props.className,
       )}
       style={
         {
-          '--sidebar-item-offset': `calc(var(--spacing) * ${level > 1 ? level * 3 : 2})`,
+          '--sidebar-item-offset': `calc(var(--spacing) * ${(level + 1) * 3})`,
           ...props.style,
         } as object
       }
     >
-      {level === 2 && (
-        <div className="absolute w-px inset-y-1 bg-fd-border start-2.5" />
-      )}
       <Context.Provider
         value={useMemo(
           () => ({
             ...ctx,
-            level,
+            level: level + 1,
           }),
           [ctx, level],
         )}
