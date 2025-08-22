@@ -2,6 +2,7 @@ import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { idToTitle } from '@/utils/id-to-title';
+import { resolveRequestData } from '@/utils/url';
 import { generateFiles } from '../src';
 import { processDocument } from '@/utils/process-document';
 import { generateAll, generateTags } from '@/generate';
@@ -11,6 +12,158 @@ describe('Utilities', () => {
     expect(idToTitle('getKey')).toBe('Get Key');
     expect(idToTitle('requestId30')).toBe('Request Id30');
     expect(idToTitle('requestId-30')).toBe('Request Id 30');
+  });
+
+  describe('resolveRequestData', () => {
+    test('Standard OpenAPI path with path parameters', () => {
+      const result = resolveRequestData('/api/users/{id}/posts/{postId}', {
+        method: 'GET',
+        path: {
+          id: { value: '123' },
+          postId: { value: '456' },
+        },
+        query: {
+          limit: { value: '10' },
+          offset: { value: '0' },
+        },
+        header: {},
+        cookie: {},
+      });
+      expect(result).toBe('/api/users/123/posts/456?limit=10&offset=0');
+    });
+
+    test('Standard OpenAPI path without query parameters', () => {
+      const result = resolveRequestData('/api/users/{id}', {
+        method: 'GET',
+        path: {
+          id: { value: '123' },
+        },
+        query: {},
+        header: {},
+        cookie: {},
+      });
+      expect(result).toBe('/api/users/123');
+    });
+
+    test('Legacy API path with embedded query parameters', () => {
+      const result = resolveRequestData('/api/legacy?fixed=param&userId={id}', {
+        method: 'GET',
+        path: {
+          id: { value: '123' },
+        },
+        query: {
+          limit: { value: '10' },
+        },
+        header: {},
+        cookie: {},
+      });
+      expect(result).toBe('/api/legacy?fixed=param&userId=123&limit=10');
+    });
+
+    test('Legacy API path with embedded query parameters and parameter replacement', () => {
+      const result = resolveRequestData(
+        '/api/legacy?version={version}&type=user&id={userId}',
+        {
+          method: 'GET',
+          path: {
+            version: { value: 'v2' },
+            userId: { value: '456' },
+          },
+          query: {
+            format: { value: 'json' },
+            include: { value: 'profile' },
+          },
+          header: {},
+          cookie: {},
+        },
+      );
+      expect(result).toBe(
+        '/api/legacy?version=v2&type=user&id=456&format=json&include=profile',
+      );
+    });
+
+    test('Legacy API path with query parameter override', () => {
+      const result = resolveRequestData('/api/legacy?limit=5&userId={id}', {
+        method: 'GET',
+        path: {
+          id: { value: '123' },
+        },
+        query: {
+          limit: { value: '20' }, // Should override the existing limit=5
+        },
+        header: {},
+        cookie: {},
+      });
+      expect(result).toBe('/api/legacy?limit=20&userId=123');
+    });
+
+    test('Array path parameters', () => {
+      const result = resolveRequestData('/api/files/{path}', {
+        method: 'GET',
+        path: {
+          path: { value: ['folder1', 'folder2', 'file.txt'] },
+        },
+        query: {},
+        header: {},
+        cookie: {},
+      });
+      expect(result).toBe('/api/files/folder1/folder2/file.txt');
+    });
+
+    test('Array query parameters', () => {
+      const result = resolveRequestData('/api/search', {
+        method: 'GET',
+        path: {},
+        query: {
+          tags: { value: ['javascript', 'typescript', 'react'] },
+          single: { value: 'value' },
+        },
+        header: {},
+        cookie: {},
+      });
+      expect(result).toBe(
+        '/api/search?tags=javascript&tags=typescript&tags=react&single=value',
+      );
+    });
+
+    test('Legacy API with array query parameters', () => {
+      const result = resolveRequestData('/api/legacy?base=true&userId={id}', {
+        method: 'GET',
+        path: {
+          id: { value: '123' },
+        },
+        query: {
+          categories: { value: ['tech', 'news'] },
+        },
+        header: {},
+        cookie: {},
+      });
+      expect(result).toBe(
+        '/api/legacy?base=true&userId=123&categories=tech&categories=news',
+      );
+    });
+
+    test('Empty path and query parameters', () => {
+      const result = resolveRequestData('/api/simple', {
+        method: 'GET',
+        path: {},
+        query: {},
+        header: {},
+        cookie: {},
+      });
+      expect(result).toBe('/api/simple');
+    });
+
+    test('Legacy API path with only embedded query parameters', () => {
+      const result = resolveRequestData('/api/legacy?version=v1&type=user', {
+        method: 'GET',
+        path: {},
+        query: {},
+        header: {},
+        cookie: {},
+      });
+      expect(result).toBe('/api/legacy?version=v1&type=user');
+    });
   });
 });
 
