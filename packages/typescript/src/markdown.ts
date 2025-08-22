@@ -5,10 +5,12 @@ import {
   type RehypeCodeOptions,
   remarkGfm,
 } from 'fumadocs-core/mdx-plugins';
+import { remarkWikilink } from 'fumadocs-core/mdx-plugins';
 import remarkRehype from 'remark-rehype';
 
 const processor = remark()
   .use(remarkGfm)
+  .use(remarkWikilink)
   .use(remarkRehype)
   .use(rehypeCode, {
     lazy: true,

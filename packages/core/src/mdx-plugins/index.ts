@@ -4,6 +4,7 @@ export {
 } from 'remark-gfm';
 export * from './rehype-code';
 export * from './remark-image';
+export * from './remark-wikilink';
 export * from './remark-structure';
 export * from './remark-heading';
 export * from './remark-admonition';
