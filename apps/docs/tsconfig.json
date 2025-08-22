@@ -8,6 +8,7 @@
   "include": [
     "next-env.d.ts",
     "**/*.ts",
+    "content/**/*.mdx",
     "**/*.mts",
     "**/*.tsx",
     ".next/types/**/*.ts",
