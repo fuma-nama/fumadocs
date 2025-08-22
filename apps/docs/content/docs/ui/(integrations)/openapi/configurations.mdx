@@ -74,6 +74,20 @@ void generateFiles({
 });
 ```
 
+### Generate Index
+
+Generate an index.mdx file with just the API title and description. Uses `info.title` and `info.description` from the OpenAPI document.
+
+```ts
+import { generateFiles } from 'fumadocs-openapi';
+
+void generateFiles({
+  input: ['./petstore.yaml'],
+  output: './content/docs',
+  generateIndex: true,
+});
+```
+
 ### Name
 
 A function that controls the output path of MDX pages.
@@ -82,7 +96,12 @@ A function that controls the output path of MDX pages.
 import { generateFiles } from 'fumadocs-openapi';
 
 void generateFiles({
-  name: (output, document) => {
+  name: (output, document, isIndex) => {
+    // Handle index file generation
+    if (isIndex) {
+      return 'api-overview';
+    }
+
     if (output.type === 'operation') {
       const operation = document.paths![output.item.path]![output.item.method]!;
       // operation object
