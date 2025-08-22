@@ -3,6 +3,7 @@ import * as path from 'node:path';
 import { glob } from 'tinyglobby';
 import {
   generateAll,
+  generateIndexOnly,
   type GenerateOptions,
   type GeneratePageOutput,
   generatePages,
@@ -47,6 +48,7 @@ interface OperationConfig extends BaseConfig {
     | ((
         output: GeneratePageOutput,
         document: ProcessedDocument['document'],
+        isIndex?: boolean,
       ) => string)
     | BaseName;
 }
@@ -64,6 +66,7 @@ interface TagConfig extends BaseConfig {
     | ((
         output: GenerateTagOutput,
         document: ProcessedDocument['document'],
+        isIndex?: boolean,
       ) => string)
     | BaseName;
 }
@@ -81,6 +84,7 @@ interface FileConfig extends BaseConfig {
     | ((
         output: GenerateFileOutput,
         document: ProcessedDocument['document'],
+        isIndex?: boolean,
       ) => string)
     | BaseName;
 }
@@ -116,6 +120,14 @@ interface BaseConfig extends GenerateOptions {
    * By default, it only escapes whitespaces and upper case (English) characters
    */
   slugify?: (name: string) => string;
+
+  /**
+   * Generate an index.mdx file with just the API title and description.
+   * Uses info.title and info.description from the OpenAPI document.
+   *
+   * @defaultValue false
+   */
+  generateIndex?: boolean;
 }
 
 export async function generateFiles(options: Config): Promise<void> {
@@ -168,12 +180,17 @@ async function generateFromDocument(
   let nameFn: (
     output: GeneratePageOutput | GenerateTagOutput | GenerateFileOutput,
     document: ProcessedDocument['document'],
+    isIndex?: boolean,
   ) => string;
 
   if (!options.name || typeof options.name !== 'function') {
     const { algorithm = 'v2' } = options.name ?? {};
 
-    nameFn = (output, document) => {
+    nameFn = (output, document, isIndex) => {
+      if (isIndex) {
+        return 'index';
+      }
+
       if (options.per === 'tag') {
         const result = output as GenerateTagOutput;
 
@@ -309,6 +326,46 @@ async function generateFromDocument(
       await write(path.join(outputDir, outputPath), output.content);
       console.log(`Generated: ${outputPath}`);
     }
+  }
+
+  // Generate index file if requested
+  if (options.generateIndex) {
+    const indexContent = await generateIndexOnly(schemaId, document, options);
+
+    // Create appropriate output object based on current mode for naming function
+    let indexOutput:
+      | GeneratePageOutput
+      | GenerateTagOutput
+      | GenerateFileOutput;
+
+    if (options.per === 'tag') {
+      // For tag mode, create a dummy tag output
+      indexOutput = {
+        tag: 'index',
+        content: indexContent,
+      } as GenerateTagOutput;
+    } else if (options.per === 'file') {
+      // For file mode, use file output format
+      indexOutput = {
+        pathOrUrl: schemaId,
+        content: indexContent,
+      } as GenerateFileOutput;
+    } else {
+      // For operation mode, create a dummy operation output
+      indexOutput = {
+        type: 'operation' as const,
+        item: {
+          path: '/index',
+          method: 'get' as const,
+        },
+        content: indexContent,
+      } as GeneratePageOutput;
+    }
+
+    const filename = nameFn(indexOutput, document.document, true);
+    const indexPath = path.join(outputDir, `${filename}.mdx`);
+    await write(indexPath, indexContent);
+    console.log(`Generated: ${filename}.mdx`);
   }
 }
 
