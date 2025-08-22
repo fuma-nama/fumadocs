@@ -274,13 +274,14 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
   const transformerSlugs: Transformer = ({ storage }) => {
     const indexFiles = new Set<string>();
     const taken = new Set<string>();
+    // for custom slugs function, don't handle conflicting cases like `dir/index.mdx` vs `dir.mdx`
+    const autoIndex = slugsFn === undefined;
 
     for (const path of storage.getFiles()) {
       const file = storage.read(path);
       if (!file || file.format !== 'page' || file.slugs) continue;
 
-      // for custom slugs function, don't handle conflicting cases like `dir/index.mdx` vs `dir.mdx`
-      if (isIndex(path) && !slugsFn) {
+      if (isIndex(path) && autoIndex) {
         indexFiles.add(path);
         continue;
       }
@@ -324,16 +325,11 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
       },
       transformers: [transformerSlugs, ...transformers],
     },
-    i18n
-      ? {
-          ...i18n,
-          parser: i18n.parser ?? 'dot',
-        }
-      : {
-          defaultLanguage,
-          parser: 'none',
-          languages: [defaultLanguage],
-        },
+    i18n ?? {
+      defaultLanguage,
+      parser: 'none',
+      languages: [defaultLanguage],
+    },
   );
 
   const walker = indexPages(storages, getUrl);

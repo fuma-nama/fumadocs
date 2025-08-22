@@ -3,7 +3,7 @@ title: Internationalization
 description: Support multiple languages in your documentation
 ---
 
-## Introduction
+## Define Config
 
 Fumadocs core provides necessary middleware and options for i18n support.
 
@@ -18,13 +18,13 @@ You can define a config to share between utilities.
 To hide the locale prefix (e.g. `/en/page` -> `/page`), use the `hideLocale` option.
 
 ```ts
-import type { I18nConfig } from 'fumadocs-core/i18n';
+import { defineI18n } from 'fumadocs-core/i18n';
 
-export const i18n: I18nConfig = {
+export const i18n = defineI18n({
   defaultLanguage: 'en',
   languages: ['en', 'cn'],
   hideLocale: 'default-locale',
-};
+});
 ```
 
 | Mode             | Description                                        |
@@ -41,7 +41,26 @@ This may cause undesired cache problems, and need to pay extra attention on SEO 
 
 </Callout>
 
-### Middleware
+### Fallback Language
+
+The fallback language to use when translations are missing for a page, default to your `defaultLanguage`.
+
+Supported:
+
+- A language in your `languages` array.
+- When set to `null`, not fallback will be used.
+
+```ts
+import { defineI18n } from 'fumadocs-core/i18n';
+
+export const i18n = defineI18n({
+  languages: ['en', 'cn'],
+  defaultLanguage: 'en',
+  fallbackLanguage: 'cn',
+});
+```
+
+## Middleware
 
 Redirects users to appropriate locale, it can be customised from `i18n.ts`.
 

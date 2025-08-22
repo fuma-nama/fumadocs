@@ -3,6 +3,7 @@ import { FileSystem } from './file-system';
 import { joinPath, slash, splitPath } from '@/utils/path';
 import { type VirtualFile } from '@/source/loader';
 import { basename, dirname } from '@/source/path';
+import type { I18nConfig } from '@/i18n';
 
 export interface LoadOptions {
   transformers?: Transformer[];
@@ -74,14 +75,10 @@ const parsers = {
 export function loadFiles(
   files: VirtualFile[],
   options: LoadOptions,
-  i18n: {
-    parser: keyof typeof parsers;
-    languages: string[];
-    defaultLanguage: string;
-  },
+  i18n: I18nConfig,
 ): Record<string, ContentStorage> {
   const { buildFile, transformers = [] } = options;
-  const parser = parsers[i18n.parser];
+  const parser = parsers[i18n.parser ?? 'dot'];
   const storages: Record<string, ContentStorage> = {};
   const normalized = files.map((file) =>
     buildFile({
@@ -89,9 +86,21 @@ export function loadFiles(
       path: normalizePath(file.path),
     }),
   );
+  const fallbackLang =
+    i18n.fallbackLanguage !== null
+      ? (i18n.fallbackLanguage ?? i18n.defaultLanguage)
+      : null;
 
-  function scan(lang: string, fallback?: ContentStorage): ContentStorage {
-    const storage: ContentStorage = new FileSystem(fallback);
+  function scan(lang: string) {
+    if (storages[lang]) return;
+
+    let storage: ContentStorage;
+    if (fallbackLang && fallbackLang !== lang) {
+      scan(fallbackLang);
+      storage = new FileSystem(storages[fallbackLang]);
+    } else {
+      storage = new FileSystem();
+    }
 
     for (const item of normalized) {
       const [path, locale = i18n.defaultLanguage] = parser(item.path);
@@ -106,15 +115,10 @@ export function loadFiles(
       });
     }
 
-    return storage;
+    storages[lang] = storage;
   }
 
-  storages[i18n.defaultLanguage] = scan(i18n.defaultLanguage);
-
-  for (const lang of i18n.languages) {
-    storages[lang] ??= scan(lang, storages[i18n.defaultLanguage]);
-  }
-
+  for (const lang of i18n.languages) scan(lang);
   return storages;
 }
 
