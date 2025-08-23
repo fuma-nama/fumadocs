@@ -25,12 +25,13 @@ export async function fetchDocs(
   query: string,
   { api = '/api/search', locale, tag }: FetchOptions,
 ): Promise<SortedResult[]> {
-  const params = new URLSearchParams();
-  params.set('query', query);
-  if (locale) params.set('locale', locale);
-  if (tag) params.set('tag', Array.isArray(tag) ? tag.join(',') : tag);
+  const url = new URL(api, window.location.origin);
+  
+  url.searchParams.set('query', query);
+  if (locale) url.searchParams.set('locale', locale);
+  if (tag) url.searchParams.set('tag', Array.isArray(tag) ? tag.join(',') : tag);
 
-  const key = `${api}?${params}`;
+  const key = `${url.pathname}?${url.searchParams}`;
   const cached = cache.get(key);
   if (cached) return cached;
 
