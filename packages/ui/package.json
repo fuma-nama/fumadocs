@@ -53,12 +53,12 @@
       "types": "./dist/layouts/notebook/client.d.ts"
     },
     "./layouts/links": {
-      "import": "./dist/layouts/links.js",
-      "types": "./dist/layouts/links.d.ts"
+      "import": "./dist/layouts/shared/index.js",
+      "types": "./dist/layouts/shared/index.d.ts"
     },
     "./layouts/shared": {
-      "import": "./dist/layouts/shared.js",
-      "types": "./dist/layouts/shared.d.ts"
+      "import": "./dist/layouts/shared/index.js",
+      "types": "./dist/layouts/shared/index.d.ts"
     },
     "./page": {
       "node": "./dist/page.server.js",
