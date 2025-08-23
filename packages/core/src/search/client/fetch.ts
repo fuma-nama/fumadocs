@@ -26,10 +26,11 @@ export async function fetchDocs(
   { api = '/api/search', locale, tag }: FetchOptions,
 ): Promise<SortedResult[]> {
   const url = new URL(api, window.location.origin);
-  
+
   url.searchParams.set('query', query);
   if (locale) url.searchParams.set('locale', locale);
-  if (tag) url.searchParams.set('tag', Array.isArray(tag) ? tag.join(',') : tag);
+  if (tag)
+    url.searchParams.set('tag', Array.isArray(tag) ? tag.join(',') : tag);
 
   const key = `${url.pathname}?${url.searchParams}`;
   const cached = cache.get(key);
