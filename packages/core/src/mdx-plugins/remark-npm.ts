@@ -45,11 +45,16 @@ export function remarkNpm({
   return (tree) => {
     visit(tree, 'code', (node) => {
       if (!node.lang || !aliases.includes(node.lang)) return 'skip';
+      let value = node.value;
 
-      const value =
-        node.value.startsWith('npm') || node.value.startsWith('npx')
-          ? node.value
-          : `npm install ${node.value}`;
+      if (
+        node.lang === 'package-install' &&
+        !value.startsWith('npm') &&
+        !value.startsWith('npx')
+      ) {
+        value = `npm install ${value}`;
+      }
+
       const attributes: MdxJsxAttribute[] = [
         {
           type: 'mdxJsxAttribute',
