@@ -23,7 +23,6 @@ export type DefaultMDXOptions = Omit<
   remarkCodeTabOptions?: plugins.RemarkCodeTabOptions | false;
   remarkNpmOptions?: plugins.RemarkNpmOptions | false;
   rehypeCodeOptions?: plugins.RehypeCodeOptions | false;
-  remarkWikilinkOptions?: plugins.RemarkWikilinkOptions | false;
 
   _withoutBundler?: boolean;
 };
@@ -51,7 +50,6 @@ export function getDefaultMDXOptions({
   remarkStructureOptions,
   remarkCodeTabOptions,
   remarkNpmOptions,
-  remarkWikilinkOptions,
   _withoutBundler = false,
   ...mdxOptions
 }: DefaultMDXOptions): ProcessorOptions {
@@ -65,10 +63,6 @@ export function getDefaultMDXOptions({
   const remarkPlugins = pluginOption(
     (v) => [
       plugins.remarkGfm,
-      remarkWikilinkOptions !== false && [
-        plugins.remarkWikilink,
-        remarkWikilinkOptions,
-      ],
       [
         plugins.remarkHeading,
         {

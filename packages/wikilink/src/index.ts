@@ -101,17 +101,14 @@ function transformTextToNodes(
     const heading = rawHeading?.trim();
 
     let target = rawTarget.trim();
-    // If target is empty (edge-case), keep original text
     if (!target) {
       out.push({ type: 'text', value: full });
       lastIndex = re.lastIndex;
       continue;
     }
 
-    // Normalize segments (slugify when no explicit extension)
     const targetHasExt = hasExtRegex.test(target);
     const segments = target.split('/').map((seg, i, arr) => {
-      // If last segment has extension, keep as-is
       if (i === arr.length - 1 && targetHasExt) return seg;
       return options.slugify(seg);
     });
@@ -135,13 +132,11 @@ function transformTextToNodes(
         alt: alias ?? 'image',
       });
     } else {
-      // Try key map for single-key wikilinks (no slash and no extension)
       if (!targetHasExt && !target.includes('/') && options.keyLinkMap) {
         const mapped =
           options.keyLinkMap[target] ??
           options.keyLinkMap[target.toLowerCase()];
         if (mapped) {
-          // remove .md/.mdx from mapped if present
           let href = mapped.replace(/\.(md|mdx)$/i, '');
           if (heading && heading.length > 0)
             href += `#${options.slugger.slug(heading)}`;
@@ -163,11 +158,9 @@ function transformTextToNodes(
         }
       }
 
-      // If target explicitly ends with .md/.mdx, strip the extension
       if (/\.(md|mdx)$/i.test(target)) {
         target = target.replace(/\.(md|mdx)$/i, '');
       }
-      // Append extension if missing is intentionally skipped to keep clean URLs
 
       let href = target;
       if (heading && heading.length > 0) {
@@ -233,3 +226,4 @@ function normalizeKeyMap(
   }
   return out;
 }
+

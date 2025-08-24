@@ -115,7 +115,6 @@ export async function transformMDX<D extends BaseDoc>(
           remarkPlugins: resolvePlugins(
             (plugins) => [
               Plugins.remarkGfm,
-              Plugins.remarkWikilink,
               resolvePlugin(Plugins.remarkHeading, remarkHeadingOptions),
               resolvePlugin(Plugins.remarkImage, remarkImageOptions, {
                 useImport: false,

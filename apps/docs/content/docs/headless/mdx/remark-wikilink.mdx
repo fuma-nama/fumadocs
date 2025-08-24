@@ -1,0 +1,52 @@
+---
+title: Remark Wikilink
+description: Enable Obsidian-style [[wikilinks]] for links and images.
+---
+
+Optional plugin that converts Obsidian-style wikilinks into standard Markdown links and images.
+
+It is disabled by default. Enable it explicitly by adding the plugin.
+
+## Usage
+
+Enable it by adding the plugin to your remark plugins.
+
+```ts title="Fumadocs MDX" tab="Global Config"
+import { defineConfig } from 'fumadocs-mdx/config';
+import { remarkWikilink } from 'fumadocs-wikilink';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkPlugins: [remarkWikilink],
+  },
+});
+```
+
+```ts title="Fumadocs MDX" tab="Collection Config"
+import { defineCollections, getDefaultMDXOptions } from 'fumadocs-mdx/config';
+import { remarkWikilink } from 'fumadocs-wikilink';
+
+export const docs = defineCollections({
+  type: 'doc',
+  mdxOptions: getDefaultMDXOptions({
+    remarkPlugins: [remarkWikilink],
+  }),
+});
+```
+
+## Automatic Key Map
+
+In this documentation, a key map is generated automatically from the docs:
+
+- Uses frontmatter fields like `title`, `aliases`, and `slug`.
+- Also includes the last path segment of the page as a friendly key.
+
+This lets you write links like:
+
+```mdx
+Use [[UI]] or [[Auto Type Table]].
+```
+
+## Options
+
+<AutoTypeTable path="./content/docs/headless/props.ts" name="RemarkWikilinkOptions" />

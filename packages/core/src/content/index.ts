@@ -1,6 +1,5 @@
 import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
-import { remarkWikilink } from '@/mdx-plugins';
 import remarkRehype from 'remark-rehype';
 import type { VFile } from 'vfile';
 import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
@@ -40,7 +39,6 @@ export async function Markdown({
 }) {
   const processor = remark()
     .use(remarkGfm)
-    .use(remarkWikilink)
     .use(remarkPlugins)
     .use(remarkRehype)
     .use(rehypePlugins)
