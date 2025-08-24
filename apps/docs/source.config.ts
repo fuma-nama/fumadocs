@@ -127,7 +127,8 @@ function buildKeyLinkMapFromDocs(): RemarkWikilinkOptions {
 
       const filePath = path.join(dir, entry.name);
       const base = path.basename(entry.name, '.mdx');
-      const slugs = base === 'index' ? [...segments] : [...segments, encodeURI(base)];
+      const slugs =
+        base === 'index' ? [...segments] : [...segments, encodeURI(base)];
       const url = `/docs/${slugs.join('/')}`;
 
       try {

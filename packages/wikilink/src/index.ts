@@ -226,4 +226,3 @@ function normalizeKeyMap(
   }
   return out;
 }
-

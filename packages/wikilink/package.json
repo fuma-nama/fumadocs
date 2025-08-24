@@ -2,21 +2,22 @@
   "name": "fumadocs-wikilink",
   "version": "0.1.0",
   "description": "Obsidian-style wikilink remark plugin for Fumadocs",
-  "keywords": ["remark", "wikilink", "fumadocs", "mdx"],
+  "keywords": [
+    "remark",
+    "wikilink",
+    "fumadocs",
+    "mdx"
+  ],
   "homepage": "https://fumadocs.vercel.app",
   "repository": "github:fuma-nama/fumadocs",
   "license": "MIT",
   "author": "Fuma Nama",
   "type": "module",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    }
-  },
-  "main": "./dist/index.js",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist/*"],
+  "files": [
+    "dist/*"
+  ],
   "scripts": {
     "build": "tsup",
     "clean": "rimraf dist",
@@ -35,6 +36,7 @@
     "typescript": "^5.9.2",
     "unified": "^11.0.5"
   },
-  "publishConfig": { "access": "public" }
+  "publishConfig": {
+    "access": "public"
+  }
 }
-
