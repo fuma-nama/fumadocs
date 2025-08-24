@@ -33,6 +33,7 @@
     "fumadocs-twoslash": "workspace:^",
     "fumadocs-typescript": "workspace:^",
     "fumadocs-ui": "workspace:*",
+    "fumadocs-wikilink": "workspace:*",
     "hast-util-to-jsx-runtime": "^2.3.6",
     "katex": "^0.16.22",
     "lucide-react": "^0.541.0",

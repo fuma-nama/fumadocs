@@ -52,6 +52,7 @@ export function buildConfig(config: Record<string, unknown>): LoadedConfig {
         const { getDefaultMDXOptions } = await import('@/utils/mdx-options');
 
         if (options?.preset === 'minimal') return options;
+
         return getDefaultMDXOptions({
           ...options,
           _withoutBundler: mode === 'remote',

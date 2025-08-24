@@ -4,6 +4,7 @@ import type * as Server from 'fumadocs-core/server';
 import type * as Sidebar from 'fumadocs-core/sidebar';
 import type { ElementType } from 'react';
 import type * as MDX from 'fumadocs-core/mdx-plugins';
+import type { RemarkWikilinkOptions as WikilinkOpts } from 'fumadocs-wikilink';
 
 export type SortedResult = Server.SortedResult;
 
@@ -26,3 +27,4 @@ export type PageTreeRoot = Server.PageTree.Root;
 export type PageTreeSeparator = Server.PageTree.Separator;
 
 export type RemarkImageOptions = MDX.RemarkImageOptions;
+export type RemarkWikilinkOptions = WikilinkOpts;
