@@ -1,7 +1,10 @@
-import { type Transformer } from 'unified';
-import { type Code, Root } from 'mdast';
+import type { Transformer } from 'unified';
+import type { Root } from 'mdast';
 import { visit } from 'unist-util-visit';
-import { createElement, expressionToAttribute } from '@/utils';
+import {
+  generateCodeBlockTabs,
+  parseCodeBlockAttributes,
+} from 'fumadocs-core/mdx-plugins';
 
 export interface TypeScriptToJavaScriptOptions {
   /**
@@ -19,9 +22,6 @@ export interface TypeScriptToJavaScriptOptions {
    * Transform all TypeScript codeblocks by default, without a trigger
    */
   disableTrigger?: boolean;
-
-  Tabs?: string;
-  Tab?: string;
 }
 
 /**
@@ -41,18 +41,17 @@ export interface TypeScriptToJavaScriptOptions {
 export function remarkTypeScriptToJavaScript({
   persist = false,
   disableTrigger = false,
-  Tab = 'Tab',
-  Tabs = 'Tabs',
 }: TypeScriptToJavaScriptOptions = {}): Transformer<Root> {
   return async (tree, file) => {
     const oxc = await import('oxc-transform');
 
     visit(tree, 'code', (node) => {
-      if (node.lang !== 'ts' && node.lang !== 'tsx') return;
+      const lang = node.lang;
+      if (lang !== 'ts' && lang !== 'tsx') return;
       if (!disableTrigger && !node.meta?.includes('ts2js')) return;
 
       const result = oxc.transform(
-        `${file.path ?? 'test'}.${node.lang}`,
+        `${file.path ?? 'test'}.${lang}`,
         node.value,
         {
           sourcemap: false,
@@ -60,74 +59,49 @@ export function remarkTypeScriptToJavaScript({
         },
       );
 
-      const insert = createElement(
-        Tabs,
-        [
-          ...(typeof persist === 'object'
-            ? [
-                {
-                  type: 'mdxJsxAttribute',
-                  name: 'groupId',
-                  value: persist.id,
-                },
-                {
-                  type: 'mdxJsxAttribute',
-                  name: 'persist',
-                  value: null,
-                },
-              ]
-            : []),
-          expressionToAttribute('items', {
-            type: 'ArrayExpression',
-            elements: ['TypeScript', 'JavaScript'].map((name) => ({
-              type: 'Literal',
-              value: name,
-            })),
-          }),
-        ],
-        [
+      const targetLang = lang === 'tsx' ? 'jsx' : 'js';
+      const meta = parseCodeBlockAttributes(node.meta ?? '', ['ts2js']);
+
+      const replacement = generateCodeBlockTabs({
+        persist,
+        defaultValue: 'js',
+        triggers: [
           {
-            type: 'mdxJsxFlowElement',
-            name: Tab,
-            attributes: [
-              {
-                type: 'mdxJsxAttribute',
-                name: 'value',
-                value: 'TypeScript',
-              },
-            ],
+            value: 'ts',
+            children: [{ type: 'text', value: 'TypeScript' }],
+          },
+          {
+            value: 'js',
+            children: [{ type: 'text', value: 'JavaScript' }],
+          },
+        ],
+        tabs: [
+          {
+            value: 'ts',
             children: [
               {
                 type: 'code',
                 lang: node.lang,
-                meta: node.meta,
+                meta: meta.rest,
                 value: node.value,
-              } satisfies Code,
+              },
             ],
           },
           {
-            type: 'mdxJsxFlowElement',
-            name: Tab,
-            attributes: [
-              {
-                type: 'mdxJsxAttribute',
-                name: 'value',
-                value: 'JavaScript',
-              },
-            ],
+            value: 'js',
             children: [
               {
                 type: 'code',
-                lang: 'jsx',
-                meta: node.meta,
+                lang: targetLang,
+                meta: meta.attributes.ts2js ?? meta.rest,
                 value: result.code,
-              } satisfies Code,
+              },
             ],
           },
         ],
-      );
+      });
 
-      Object.assign(node, insert);
+      Object.assign(node, replacement);
       return 'skip';
     });
   };

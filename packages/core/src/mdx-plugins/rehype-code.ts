@@ -17,44 +17,7 @@ import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
 import type { CodeBlockIcon, IconOptions } from './transformer-icon';
 import { transformerIcon } from './transformer-icon';
 import { defaultThemes, getHighlighter } from '@/highlight/shiki';
-
-type Meta = Record<string, unknown>;
-
-type MetaValue =
-  | {
-      name: string;
-      regex: RegExp;
-    }
-  | {
-      regex: RegExp;
-      onSet: (map: Meta, match: string[]) => void;
-    };
-
-/**
- * Custom meta string values
- */
-const metaValues: MetaValue[] = [
-  {
-    name: 'title',
-    regex: /title="(?<value>[^"]*)"/,
-  },
-  {
-    name: 'custom',
-    regex: /custom="(?<value>[^"]+)"/,
-  },
-  {
-    name: 'tab',
-    regex: /tab="(?<value>[^"]+)"/,
-  },
-  {
-    regex: /lineNumbers=(\d+)|lineNumbers/,
-    onSet(map, args) {
-      map['data-line-numbers'] = true;
-      if (args[0] !== undefined)
-        map['data-line-numbers-start'] = Number(args[0]);
-    },
-  },
-];
+import { parseCodeBlockAttributes } from '@/mdx-plugins/codeblock-utils';
 
 export const rehypeCodeDefaultOptions: RehypeCodeOptions = {
   lazy: true,
@@ -77,25 +40,25 @@ export const rehypeCodeDefaultOptions: RehypeCodeOptions = {
     }),
   ],
   parseMetaString(meta) {
-    const map: Meta = {};
+    const parsed = parseCodeBlockAttributes(meta);
+    const data: Record<string, unknown> = parsed.attributes;
+    parsed.rest = parseLineNumber(parsed.rest, data);
 
-    for (const value of metaValues) {
-      meta = meta.replace(value.regex, (_, ...args) => {
-        if ('onSet' in value) {
-          value.onSet(map, args);
-        } else {
-          const first = args.at(0);
-          map[value.name] = typeof first === 'string' ? first : '';
-        }
-
-        return '';
-      });
-    }
-
-    map.__parsed_raw = meta;
-    return map;
+    data.__parsed_raw = parsed.rest;
+    return data;
   },
 };
+
+function parseLineNumber(str: string, data: Record<string, unknown>) {
+  return str.replace(/lineNumbers=(\d+)|lineNumbers/, (_, ...args) => {
+    data['data-line-numbers'] = true;
+
+    if (args[0] !== undefined)
+      data['data-line-numbers-start'] = Number(args[0]);
+
+    return '';
+  });
+}
 
 export type RehypeCodeOptions = RehypeShikiOptions & {
   /**
@@ -113,7 +76,7 @@ export type RehypeCodeOptions = RehypeShikiOptions & {
    *
    * @defaultValue true
    */
-  tab?: false;
+  tab?: boolean;
 
   /**
    * Enable Shiki's experimental JS engine

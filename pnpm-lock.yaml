@@ -1353,6 +1353,9 @@ importers:
       eslint-config-custom:
         specifier: workspace:*
         version: link:../eslint-config-custom
+      fumadocs-core:
+        specifier: workspace:*
+        version: link:../core
       mdast-util-mdx-jsx:
         specifier: ^3.2.0
         version: 3.2.0

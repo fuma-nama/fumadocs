@@ -37,7 +37,10 @@ export function Installation({ name }: { name: string }) {
       </TabsContent>
 
       <TabsContent value="shadcn">
-        <CodeBlock code={`npx shadcn@latest add ${name}`} lang="bash" />
+        <CodeBlock
+          code={`npx shadcn@latest add https://fumadocs.dev/r/${name}.json`}
+          lang="bash"
+        />
       </TabsContent>
     </Tabs>
   );

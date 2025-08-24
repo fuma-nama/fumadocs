@@ -2,15 +2,23 @@ import type { Root } from 'mdast';
 import type { Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
 import convert from 'npm-to-yarn';
-import type { MdxJsxAttribute, MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
+import {
+  type CodeBlockTabsOptions,
+  generateCodeBlockTabs,
+} from '@/mdx-plugins/codeblock-utils';
 
 interface PackageManager {
   name: string;
 
   /**
+   * Default to `name`
+   */
+  value?: string;
+
+  /**
    * Convert from npm to another package manager
    */
-  command: (command: string) => string;
+  command: (command: string) => string | undefined;
 }
 
 export interface RemarkNpmOptions {
@@ -44,89 +52,47 @@ export function remarkNpm({
 }: RemarkNpmOptions = {}): Transformer<Root, Root> {
   return (tree) => {
     visit(tree, 'code', (node) => {
-      if (!node.lang || !aliases.includes(node.lang)) return 'skip';
-      let value = node.value;
+      if (!node.lang || !aliases.includes(node.lang)) return;
+      let code = node.value;
 
       if (
         node.lang === 'package-install' &&
-        !value.startsWith('npm') &&
-        !value.startsWith('npx')
+        !code.startsWith('npm') &&
+        !code.startsWith('npx')
       ) {
-        value = `npm install ${value}`;
+        code = `npm install ${code}`;
       }
+      const options: CodeBlockTabsOptions = {
+        persist,
+        tabs: [],
+        triggers: [],
+      };
 
-      const attributes: MdxJsxAttribute[] = [
-        {
-          type: 'mdxJsxAttribute',
-          name: 'defaultValue',
-          value: packageManagers[0].name,
-        },
-      ];
+      for (const manager of packageManagers) {
+        const value = manager.value ?? manager.name;
+        const command = manager.command(code);
+        if (!command || command.length === 0) continue;
 
-      if (typeof persist === 'object') {
-        attributes.push(
-          {
-            type: 'mdxJsxAttribute',
-            name: 'groupId',
-            value: persist.id,
-          },
-          {
-            type: 'mdxJsxAttribute',
-            name: 'persist',
-            value: null,
-          },
-        );
-      }
-
-      const children: MdxJsxFlowElement[] = [
-        {
-          type: 'mdxJsxFlowElement',
-          name: 'CodeBlockTabsList',
-          attributes: [],
-          children: packageManagers.map(
-            ({ name }) =>
-              ({
-                type: 'mdxJsxFlowElement',
-                attributes: [
-                  { type: 'mdxJsxAttribute', name: 'value', value: name },
-                ],
-                name: 'CodeBlockTabsTrigger',
-                children: [
-                  {
-                    type: 'text',
-                    value: name,
-                  } as unknown,
-                ],
-              }) as MdxJsxFlowElement,
-          ),
-        },
-      ];
-
-      for (const { name, command } of packageManagers) {
-        children.push({
-          type: 'mdxJsxFlowElement',
-          name: 'CodeBlockTab',
-          attributes: [{ type: 'mdxJsxAttribute', name: 'value', value: name }],
+        options.defaultValue ??= value;
+        options.triggers.push({
+          value,
+          children: [{ type: 'text', value: manager.name }],
+        });
+        options.tabs.push({
+          value,
           children: [
             {
               type: 'code',
               lang: 'bash',
               meta: node.meta,
-              value: command(value),
+              value: command,
             },
           ],
         });
       }
 
-      const tab: MdxJsxFlowElement = {
-        type: 'mdxJsxFlowElement',
-        name: 'CodeBlockTabs',
-        attributes,
-        children,
-      };
-
-      Object.assign(node, tab);
-      return;
+      Object.assign(node, generateCodeBlockTabs(options));
+      return 'skip';
     });
   };
 }
