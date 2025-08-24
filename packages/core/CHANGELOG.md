@@ -1,5 +1,13 @@
 # next-docs-zeta
 
+## 15.7.2
+
+### Patch Changes
+
+- 88b5a4e: Fix duplicate pages in page tree when referencing subpage in meta.json and using `...` or adding the subfolder again
+- 039b24b: Fix failed to update page tree from `loader()`
+- 08eee2b: [`remark-npm`] Enable `npm install` prefix fallback only on old alias
+
 ## 15.7.1
 
 ### Patch Changes

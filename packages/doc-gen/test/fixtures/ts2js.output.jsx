@@ -5,10 +5,12 @@ function _createMdxContent(props) {
     code: "code",
     pre: "pre",
     ...props.components
-  }, {Tab, Tabs} = _components;
-  if (!Tab) _missingMdxReference("Tab", true);
-  if (!Tabs) _missingMdxReference("Tabs", true);
-  return <Tabs items={["TypeScript", "JavaScript"]}><Tab value="TypeScript"><_components.pre><_components.code className="language-tsx">{"import { ReactNode } from 'react';\n\nexport default function Layout({ children }: { children: ReactNode }) {\n  const v: string = 'hello world' as any;\n\n  return (\n    <div>\n      {children} {v}\n    </div>\n  );\n}\n"}</_components.code></_components.pre></Tab><Tab value="JavaScript"><_components.pre><_components.code className="language-jsx">{"export default function Layout({ children }) {\n\tconst v = \"hello world\";\n\treturn <div>\n      {children} {v}\n    </div>;\n}\n\n"}</_components.code></_components.pre></Tab></Tabs>;
+  }, {CodeBlockTab, CodeBlockTabs, CodeBlockTabsList, CodeBlockTabsTrigger} = _components;
+  if (!CodeBlockTab) _missingMdxReference("CodeBlockTab", true);
+  if (!CodeBlockTabs) _missingMdxReference("CodeBlockTabs", true);
+  if (!CodeBlockTabsList) _missingMdxReference("CodeBlockTabsList", true);
+  if (!CodeBlockTabsTrigger) _missingMdxReference("CodeBlockTabsTrigger", true);
+  return <CodeBlockTabs defaultValue="js"><CodeBlockTabsList><CodeBlockTabsTrigger value="ts">{"TypeScript"}</CodeBlockTabsTrigger><CodeBlockTabsTrigger value="js">{"JavaScript"}</CodeBlockTabsTrigger></CodeBlockTabsList><CodeBlockTab value="ts"><_components.pre><_components.code className="language-tsx">{"import { ReactNode } from 'react';\n\nexport default function Layout({ children }: { children: ReactNode }) {\n  const v: string = 'hello world' as any;\n\n  return (\n    <div>\n      {children} {v}\n    </div>\n  );\n}\n"}</_components.code></_components.pre></CodeBlockTab><CodeBlockTab value="js"><_components.pre><_components.code className="language-jsx">{"export default function Layout({ children }) {\n\tconst v = \"hello world\";\n\treturn <div>\n      {children} {v}\n    </div>;\n}\n\n"}</_components.code></_components.pre></CodeBlockTab></CodeBlockTabs>;
 }
 export default function MDXContent(props = {}) {
   const {wrapper: MDXLayout} = props.components || ({});
