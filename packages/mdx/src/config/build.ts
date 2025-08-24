@@ -54,7 +54,7 @@ export function buildConfig(config: Record<string, unknown>): LoadedConfig {
         if (options?.preset === 'minimal') return options;
 
         return getDefaultMDXOptions({
-          ...(options as Parameters<typeof getDefaultMDXOptions>[0]),
+          ...options,
           _withoutBundler: mode === 'remote',
         });
       }
