@@ -11,21 +11,29 @@ import { buttonVariants } from '@/components/ui/button';
 import {
   Sidebar,
   SidebarCollapseTrigger,
+  type SidebarComponents,
   SidebarContent,
   SidebarContentMobile,
+  SidebarFolder,
+  SidebarFolderContent,
+  SidebarFolderLink,
+  SidebarFolderTrigger,
   SidebarFooter,
   SidebarHeader,
+  SidebarItem,
   SidebarPageTree,
+  type SidebarProps,
   SidebarTrigger,
   SidebarViewport,
 } from '@/components/layout/sidebar';
+import { type Option, RootToggle } from '@/components/layout/root-toggle';
 import {
+  type BaseLayoutProps,
   BaseLinkItem,
+  getLinks,
   type IconItemType,
   type LinkItemType,
-} from '@/layouts/links';
-import { RootToggle } from '@/components/layout/root-toggle';
-import { type BaseLayoutProps, getLinks } from '@/layouts/shared';
+} from '@/layouts/shared';
 import {
   LanguageToggle,
   LanguageToggleText,
@@ -33,11 +41,6 @@ import {
 import { CollapsibleControl, LayoutBody, Navbar } from '@/layouts/docs/client';
 import { TreeContextProvider } from '@/contexts/tree';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
-import {
-  getSidebarTabsFromOptions,
-  SidebarLinkItem,
-  type SidebarOptions,
-} from '@/layouts/docs/shared';
 import { NavProvider } from '@/contexts/layout';
 import Link from 'fumadocs-core/link';
 import {
@@ -45,20 +48,43 @@ import {
   SearchToggle,
 } from '@/components/layout/search-toggle';
 import { HideIfEmpty } from 'fumadocs-core/hide-if-empty';
+import {
+  getSidebarTabs,
+  type GetSidebarTabsOptions,
+} from '@/utils/get-sidebar-tabs';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
 
-  sidebar?: SidebarOptions &
-    ComponentProps<'aside'> & {
-      enabled?: boolean;
-      component?: ReactNode;
-    };
+  sidebar?: SidebarOptions;
 
   /**
    * Props for the `div` container
    */
   containerProps?: HTMLAttributes<HTMLDivElement>;
+}
+
+interface SidebarOptions
+  extends ComponentProps<'aside'>,
+    Pick<SidebarProps, 'defaultOpenLevel' | 'prefetch'> {
+  enabled?: boolean;
+  component?: ReactNode;
+  components?: Partial<SidebarComponents>;
+
+  /**
+   * Root Toggle options
+   */
+  tabs?: Option[] | GetSidebarTabsOptions | false;
+
+  banner?: ReactNode;
+  footer?: ReactNode;
+
+  /**
+   * Support collapsing the sidebar on desktop mode
+   *
+   * @defaultValue true
+   */
+  collapsible?: boolean;
 }
 
 export function DocsLayout({
@@ -75,10 +101,18 @@ export function DocsLayout({
   children,
   ...props
 }: DocsLayoutProps) {
-  const tabs = useMemo(
-    () => getSidebarTabsFromOptions(sidebarTabs, props.tree) ?? [],
-    [sidebarTabs, props.tree],
-  );
+  const tabs = useMemo(() => {
+    if (Array.isArray(sidebarTabs)) {
+      return sidebarTabs;
+    }
+    if (typeof sidebarTabs === 'object') {
+      return getSidebarTabs(props.tree, sidebarTabs);
+    }
+    if (sidebarTabs !== false) {
+      return getSidebarTabs(props.tree);
+    }
+    return [];
+  }, [sidebarTabs, props.tree]);
   const links = getLinks(props.links ?? [], props.githubUrl);
   const sidebarVariables = cn(
     'md:[--fd-sidebar-width:268px] lg:[--fd-sidebar-width:286px]',
@@ -203,28 +237,27 @@ export function DocsLayout({
         </SidebarHeader>
         {viewport}
         <HideIfEmpty as={SidebarFooter}>
-          <div className="flex text-fd-muted-foreground items-center justify-end empty:hidden">
+          <div className="flex text-fd-muted-foreground items-center empty:hidden">
+            {i18n ? (
+              <LanguageToggle>
+                <Languages className="size-4.5" />
+              </LanguageToggle>
+            ) : null}
             {iconLinks.map((item, i) => (
               <BaseLinkItem
                 key={i}
                 item={item}
                 className={cn(
                   buttonVariants({ size: 'icon-sm', color: 'ghost' }),
-                  i === iconLinks.length - 1 && 'me-auto',
                 )}
                 aria-label={item.label}
               >
                 {item.icon}
               </BaseLinkItem>
             ))}
-            {i18n ? (
-              <LanguageToggle>
-                <Languages className="size-4.5" />
-              </LanguageToggle>
-            ) : null}
             {themeSwitch.enabled !== false &&
               (themeSwitch.component ?? (
-                <ThemeToggle className="p-0" mode={themeSwitch.mode} />
+                <ThemeToggle className="ms-auto p-0" mode={themeSwitch.mode} />
               ))}
           </div>
           {footer}
@@ -282,7 +315,7 @@ export function DocsLayout({
         <LayoutBody
           {...props.containerProps}
           className={cn(
-            'xl:[--fd-toc-width:286px]',
+            'md:[&_#nd-page_article]:pt-12 xl:[--fd-toc-width:286px] xl:[&_#nd-page_article]:px-8',
             sidebarEnabled && sidebarVariables,
             !nav.component &&
               nav.enabled !== false &&
@@ -295,6 +328,49 @@ export function DocsLayout({
         </LayoutBody>
       </NavProvider>
     </TreeContextProvider>
+  );
+}
+
+function SidebarLinkItem({
+  item,
+  ...props
+}: {
+  item: Exclude<LinkItemType, { type: 'icon' }>;
+  className?: string;
+}) {
+  if (item.type === 'menu')
+    return (
+      <SidebarFolder {...props}>
+        {item.url ? (
+          <SidebarFolderLink href={item.url}>
+            {item.icon}
+            {item.text}
+          </SidebarFolderLink>
+        ) : (
+          <SidebarFolderTrigger>
+            {item.icon}
+            {item.text}
+          </SidebarFolderTrigger>
+        )}
+        <SidebarFolderContent>
+          {item.items.map((child, i) => (
+            <SidebarLinkItem key={i} item={child} />
+          ))}
+        </SidebarFolderContent>
+      </SidebarFolder>
+    );
+
+  if (item.type === 'custom') return <div {...props}>{item.children}</div>;
+
+  return (
+    <SidebarItem
+      href={item.url}
+      icon={item.icon}
+      external={item.external}
+      {...props}
+    >
+      {item.text}
+    </SidebarItem>
   );
 }
 

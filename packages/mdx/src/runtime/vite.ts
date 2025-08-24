@@ -26,66 +26,68 @@ interface CompiledMDXProperties<Frontmatter> {
 export type CompiledMDXFile<Frontmatter> = CompiledMDXProperties<Frontmatter> &
   Record<string, unknown>;
 
-type MDXFileToPageData<Frontmatter> = Frontmatter &
-  Omit<CompiledMDXProperties<Frontmatter>, 'frontmatter'> & {
-    _exports: Record<string, unknown>;
-  };
+type Override<A, B> = Omit<A, keyof B> & B;
 
-type AttachGlobValue<GlobValue, Attach> =
-  GlobValue extends () => Promise<unknown> ? () => Promise<Attach> : Attach;
+type MDXFileToPageData<Frontmatter> = Override<
+  Omit<CompiledMDXProperties<Frontmatter>, 'frontmatter' | 'default'>,
+  Frontmatter & {
+    /**
+     * @deprecated use `body` instead.
+     */
+    default: FC<MDXProps>;
+
+    _exports: Record<string, unknown>;
+    body: FC<MDXProps>;
+  }
+>;
+
+type MDXFileToPageDataLazy<Frontmatter> = Override<
+  Frontmatter,
+  {
+    load: () => Promise<
+      Omit<CompiledMDXFile<Frontmatter>, 'default'> & {
+        body: FC<MDXProps>;
+      }
+    >;
+  }
+>;
+
+interface LazyDocMap<Frontmatter> {
+  head: Record<string, () => Promise<Frontmatter>>;
+  body: Record<string, () => Promise<CompiledMDXFile<Frontmatter>>>;
+}
 
 export function fromConfig<Config>(): {
-  doc: <Name extends keyof Config, GlobValue>(
+  doc: <Name extends keyof Config>(
     name: Name,
-    glob: Record<string, GlobValue>,
-  ) => Config[Name] extends DocCollection<infer Schema>
+    glob: Record<string, () => Promise<unknown>>,
+  ) => Config[Name] extends
+    | DocCollection<infer Schema>
+    | DocsCollection<infer Schema>
     ? Record<
         string,
-        AttachGlobValue<
-          GlobValue,
-          CompiledMDXFile<StandardSchemaV1.InferOutput<Schema>>
-        >
+        () => Promise<CompiledMDXFile<StandardSchemaV1.InferOutput<Schema>>>
       >
     : never;
 
-  meta: <Name extends keyof Config, GlobValue>(
+  docLazy: <Name extends keyof Config>(
     name: Name,
-    glob: Record<string, GlobValue>,
-  ) => Config[Name] extends MetaCollection<infer Schema>
-    ? AttachGlobValue<GlobValue, StandardSchemaV1.InferOutput<Schema>>
+    headGlob: Record<string, () => Promise<unknown>>,
+    bodyGlob: Record<string, () => Promise<unknown>>,
+  ) => Config[Name] extends
+    | DocCollection<infer Schema>
+    | DocsCollection<infer Schema>
+    ? LazyDocMap<StandardSchemaV1.InferOutput<Schema>>
     : never;
 
-  docs: <Name extends keyof Config, DocGlobValue, MetaGlobValue>(
+  meta: <Name extends keyof Config>(
     name: Name,
-    options: {
-      meta: Record<string, MetaGlobValue>;
-      doc: Record<string, DocGlobValue>;
-    },
-  ) => Config[Name] extends DocsCollection<infer DocSchema, infer MetaSchema>
-    ? {
-        doc: Record<
-          string,
-          AttachGlobValue<
-            DocGlobValue,
-            CompiledMDXFile<StandardSchemaV1.InferOutput<DocSchema>>
-          >
-        >;
-        meta: Record<
-          string,
-          AttachGlobValue<
-            MetaGlobValue,
-            StandardSchemaV1.InferOutput<MetaSchema>
-          >
-        >;
-      }
+    glob: Record<string, () => Promise<unknown>>,
+  ) => Config[Name] extends
+    | MetaCollection<infer Schema>
+    | DocsCollection<StandardSchemaV1, infer Schema>
+    ? Record<string, () => Promise<StandardSchemaV1.InferOutput<Schema>>>
     : never;
-  source: <DocOut extends PageData, MetaOut extends MetaData>(
-    doc: Record<string, CompiledMDXFile<DocOut>>,
-    meta: Record<string, MetaOut>,
-  ) => Source<{
-    pageData: MDXFileToPageData<DocOut>;
-    metaData: MetaOut;
-  }>;
 
   sourceAsync: <DocOut extends PageData, MetaOut extends MetaData>(
     doc: Record<string, () => Promise<CompiledMDXFile<DocOut>>>,
@@ -93,6 +95,16 @@ export function fromConfig<Config>(): {
   ) => Promise<
     Source<{
       pageData: MDXFileToPageData<DocOut>;
+      metaData: MetaOut;
+    }>
+  >;
+
+  sourceLazy: <DocOut extends PageData, MetaOut extends MetaData>(
+    doc: LazyDocMap<DocOut>,
+    meta: Record<string, () => Promise<MetaOut>>,
+  ) => Promise<
+    Source<{
+      pageData: MDXFileToPageDataLazy<DocOut>;
       metaData: MetaOut;
     }>
   >;
@@ -114,10 +126,24 @@ export function fromConfig<Config>(): {
     return {
       ...frontmatter,
       default: entry.default,
+      body: entry.default,
       toc,
       structuredData,
       lastModified,
       _exports: entry,
+    };
+  }
+
+  function mapPageDataLazy<Frontmatter>(
+    head: Frontmatter,
+    content: () => Promise<CompiledMDXFile<Frontmatter>>,
+  ): MDXFileToPageDataLazy<Frontmatter> {
+    return {
+      ...head,
+      async load() {
+        const { default: body, ...rest } = await content();
+        return { body, ...rest };
+      },
     };
   }
 
@@ -128,56 +154,51 @@ export function fromConfig<Config>(): {
     meta(_, glob) {
       return normalize(glob) as any;
     },
-    docs(_, { doc, meta }) {
+    docLazy(_, head, body) {
       return {
-        doc: normalize(doc),
-        meta: normalize(meta),
+        head: normalize(head),
+        body: normalize(body),
       } as any;
     },
-    source(doc, meta) {
-      const virtualFiles: VirtualFile[] = [];
-      for (const [file, content] of Object.entries(doc)) {
-        virtualFiles.push({
-          type: 'page',
-          path: file,
-          data: mapPageData(content),
-        });
-      }
-
-      for (const [file, content] of Object.entries(meta)) {
-        virtualFiles.push({
-          type: 'meta',
-          path: file,
-          data: content,
-        });
-      }
-
-      return {
-        files: virtualFiles,
-      };
-    },
     async sourceAsync(doc, meta) {
-      const virtualFiles: VirtualFile[] = [];
+      const virtualFiles: Promise<VirtualFile>[] = [
+        ...Object.entries(doc).map(async ([file, content]) => {
+          return {
+            type: 'page',
+            path: file,
+            data: mapPageData(await content()),
+          } satisfies VirtualFile;
+        }),
+        ...Object.entries(meta).map(async ([file, content]) => {
+          return {
+            type: 'meta',
+            path: file,
+            data: await content(),
+          } satisfies VirtualFile;
+        }),
+      ];
 
-      for (const [file, content] of Object.entries(doc)) {
-        virtualFiles.push({
-          type: 'page',
-          path: file,
-          data: mapPageData(await content()),
-        });
-      }
+      return { files: await Promise.all(virtualFiles) };
+    },
+    async sourceLazy(doc, meta) {
+      const virtualFiles: Promise<VirtualFile>[] = [
+        ...Object.entries(doc.head).map(async ([file, frontmatter]) => {
+          return {
+            type: 'page',
+            path: file,
+            data: mapPageDataLazy(await frontmatter(), doc.body[file]),
+          } satisfies VirtualFile;
+        }),
+        ...Object.entries(meta).map(async ([file, content]) => {
+          return {
+            type: 'meta',
+            path: file,
+            data: await content(),
+          } satisfies VirtualFile;
+        }),
+      ];
 
-      for (const [file, content] of Object.entries(meta)) {
-        virtualFiles.push({
-          type: 'meta',
-          path: file,
-          data: await content(),
-        });
-      }
-
-      return {
-        files: virtualFiles,
-      };
+      return { files: await Promise.all(virtualFiles) };
     },
   };
 }

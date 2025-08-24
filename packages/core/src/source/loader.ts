@@ -38,7 +38,7 @@ export interface LoaderOptions<
   slugs?: (info: FileInfo) => string[];
   url?: UrlFn;
 
-  source: Source<T>;
+  source: Source<T> | Source<T>[];
   transformers?: Transformer[];
 
   /**
@@ -254,6 +254,20 @@ export function loader<
   return createOutput(options);
 }
 
+function loadSource<T extends SourceConfig>(source: Source<T> | Source<T>[]) {
+  const out: VirtualFile[] = [];
+
+  for (const item of Array.isArray(source) ? source : [source]) {
+    if (typeof item.files === 'function') {
+      out.push(...item.files());
+    } else {
+      out.push(...item.files);
+    }
+  }
+
+  return out;
+}
+
 function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
   if (!options.url && !options.baseUrl) {
     console.warn('`loader()` now requires a `baseUrl` option to be defined.');
@@ -268,19 +282,19 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
     transformers = [],
   } = options;
   const defaultLanguage = i18n?.defaultLanguage ?? '';
-  const files =
-    typeof source.files === 'function' ? source.files() : source.files;
+  const files = loadSource(source);
 
   const transformerSlugs: Transformer = ({ storage }) => {
     const indexFiles = new Set<string>();
     const taken = new Set<string>();
+    // for custom slugs function, don't handle conflicting cases like `dir/index.mdx` vs `dir.mdx`
+    const autoIndex = slugsFn === undefined;
 
     for (const path of storage.getFiles()) {
       const file = storage.read(path);
       if (!file || file.format !== 'page' || file.slugs) continue;
 
-      // for custom slugs function, don't handle conflicting cases like `dir/index.mdx` vs `dir.mdx`
-      if (isIndex(path) && !slugsFn) {
+      if (isIndex(path) && autoIndex) {
         indexFiles.add(path);
         continue;
       }
@@ -324,16 +338,11 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
       },
       transformers: [transformerSlugs, ...transformers],
     },
-    i18n
-      ? {
-          ...i18n,
-          parser: i18n.parser ?? 'dot',
-        }
-      : {
-          defaultLanguage,
-          parser: 'none',
-          languages: [defaultLanguage],
-        },
+    i18n ?? {
+      defaultLanguage,
+      parser: 'none',
+      languages: [defaultLanguage],
+    },
   );
 
   const walker = indexPages(storages, getUrl);
@@ -358,7 +367,7 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
         pageTree = v as unknown as Record<string, PageTree.Root>;
       } else {
         pageTree = {
-          defaultLanguage: v,
+          [defaultLanguage]: v,
         };
       }
     },

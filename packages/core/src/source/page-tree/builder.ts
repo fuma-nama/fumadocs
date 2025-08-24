@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react';
+import type { ReactNode } from 'react';
 import type * as PageTree from './definitions';
 import { joinPath } from '@/utils/path';
 import type { MetaData, PageData, UrlFn } from '../types';
@@ -15,7 +15,7 @@ export interface PageTreeBuilderContext<
   Meta extends MetaData = MetaData,
 > {
   /**
-   * @internal
+   * @internal resolve paths without extensions
    */
   resolveName: (name: string, format: 'meta' | 'page') => string;
   options: BaseOptions<Page, Meta>;
@@ -27,6 +27,7 @@ export interface PageTreeBuilderContext<
 
   storages?: Record<string, ContentStorage<Page, Meta>>;
   locale?: string;
+  visitedPages?: Set<string>;
 }
 
 export interface PageTreeTransformer<
@@ -69,7 +70,13 @@ export interface BaseOptions<
    */
   noRef?: boolean;
   transformers?: PageTreeTransformer<Page, Meta>[];
-  resolveIcon?: (icon: string | undefined) => ReactElement | undefined;
+  resolveIcon?: (icon: string | undefined) => ReactNode | undefined;
+  /**
+   * generate fallback page tree
+   *
+   * @defaultValue true
+   */
+  generateFallback?: boolean;
 }
 
 export interface PageTreeBuilder<
@@ -79,15 +86,7 @@ export interface PageTreeBuilder<
   build: (
     options: BaseOptions<Page, Meta> & {
       id?: string;
-
       storage: ContentStorage<Page, Meta>;
-
-      /**
-       * generate fallback page tree
-       *
-       * @defaultValue true
-       */
-      generateFallback?: boolean;
     },
   ) => PageTree.Root;
 
@@ -122,8 +121,12 @@ function buildAll(
   );
 
   for (const path of sortedPaths) {
+    if (ctx.visitedPages?.has(path)) continue;
+
     const fileNode = buildFileNode(path, ctx);
     if (!fileNode) continue;
+
+    ctx.visitedPages?.add(path);
 
     if (basename(path, extname(path)) === 'index') output.unshift(fileNode);
     else output.push(fileNode);
@@ -207,6 +210,9 @@ function resolveFolderItem(
   }
 
   const fileNode = buildFileNode(path, ctx);
+  if (fileNode) {
+    ctx.visitedPages?.add(path);
+  }
   return fileNode ? [fileNode] : [];
 }
 
@@ -304,6 +310,7 @@ function buildFileNode(
   ctx: PageTreeBuilderContext,
 ): PageTree.Item | undefined {
   const { options, getUrl, storage, locale, transformers } = ctx;
+
   const page = storage.read(path);
   if (page?.format !== 'page') return;
 
@@ -347,7 +354,7 @@ function build(id: string, ctx: PageTreeBuilderContext): PageTree.Root {
 }
 
 export function createPageTreeBuilder(getUrl: UrlFn): PageTreeBuilder {
-  function getTransformers(options: BaseOptions, generateFallback = true) {
+  function getTransformers(options: BaseOptions, generateFallback: boolean) {
     const transformers: PageTreeTransformer[] = [legacyTransformer(options)];
 
     if (options.transformers) {
@@ -377,28 +384,24 @@ export function createPageTreeBuilder(getUrl: UrlFn): PageTreeBuilder {
   }
 
   return {
-    build({ storage, id, generateFallback, ...options }) {
-      const resolve = createFlattenPathResolver(storage);
+    build({ storage, id, ...options }) {
+      const key = '';
 
-      return build(id ?? 'root', {
-        transformers: getTransformers(options, generateFallback),
-        options,
-        builder: this,
-        storage,
-        getUrl,
-        resolveName(name, format) {
-          return resolve(name, format) ?? name;
-        },
-      });
+      return this.buildI18n({
+        id,
+        storages: { [key]: storage },
+        ...options,
+      })[key];
     },
-    buildI18n({ id, storages, ...options }) {
-      const transformers = getTransformers(options);
+    buildI18n({ id, storages, generateFallback = true, ...options }) {
+      const transformers = getTransformers(options, generateFallback);
       const out: Record<string, PageTree.Root> = {};
 
       for (const [locale, storage] of Object.entries(storages)) {
         const resolve = createFlattenPathResolver(storage);
+        const branch = locale.length === 0 ? 'root' : locale;
 
-        out[locale] = build(id ?? (locale.length === 0 ? 'root' : locale), {
+        out[locale] = build(id ? `${id}-${branch}` : branch, {
           transformers,
           builder: this,
           options,
@@ -406,6 +409,7 @@ export function createPageTreeBuilder(getUrl: UrlFn): PageTreeBuilder {
           locale,
           storage,
           storages,
+          visitedPages: new Set<string>(),
           resolveName(name, format) {
             return resolve(name, format) ?? name;
           },

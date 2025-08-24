@@ -1,0 +1,102 @@
+---
+title: The early mistake of Fumadocs
+description: What we failed at to deliver better DX.
+author: Fuma Nama
+date: 2025-08-22
+---
+
+## A Mistake
+
+The early mistake of Fumadocs was **Fumadocs CLI being too late and not getting enough mentions on docs**.
+
+To push the CLI approach further like the recent Shadcn CLI support, there's changes we have to made.
+Early adopters will face problems if their customisations went beyond what our abstraction can mitigate.
+
+**For example:** A small CSS change can still breaks hacky CSS customisations, we can only ensure backward compatibility for the ones scoped by CSS selectors, or exposed options:
+
+```css
+#nd-sidebar {
+  /* this will work forever */
+  background-color: red;
+}
+```
+
+For CLI to work better, we need layout components to be entirely independent for modularization. A ideal state is that:
+
+- Normal users can use exposed options, enjoying UI iterations from upstream.
+- Advanced customisations can use Fumadocs CLI, avoiding upstream changes.
+
+Same as the solution described in [this post about UI Customisation](/blog/customise-ui#the-solution).
+
+### A Good Example
+
+For lighter customisations like nuqs did, a PR to migrate from old versions [#1056](https://github.com/47ng/nuqs/pull/1056) can reduce code on user land and migration is simple.
+
+### The Problems
+
+When your hacks is heavier, migration is much harder combined with the tech debt of your codebase.
+
+Some problems I observed:
+
+#### Page Tree API being Neglected
+
+Page tree is actually a crucial idea of Fumadocs, unifying all navigation & linking of docs.
+
+Even in the early days, it's already a robust API supporting features like Root Folder (since v12):
+
+<div className="flex flex-row justify-center mx-auto max-w-[300px]">
+  ![Preview](/blog/v12-root-toggle.png)
+</div>
+
+Some projects didn't rely on our file-based routing nor page tree API, which resulted in a lot of hacks around sidebar & `loader()`.
+
+Its idea is simple:
+
+```txt tab="Server"
+files -> Fumadocs -> page tree
+```
+
+```txt tab="Client"
+page tree -> navigation components (e.g. page footer & sidebar)
+```
+
+Using it properly can already reduce a massive amount of work, we have [a specs for Page Tree](/docs/headless/page-tree) for hardcoded page trees.
+
+#### CSS Variables being Neglected
+
+Fumadocs is using CSS variables for all colors since the beginning, the naming is identical to Shadcn UI which makes customisation easy.
+
+But I noticed some are overriding the Tailwind CSS **classes** rather than **colors**, like:
+
+```css
+#nd-sidebar .color-fd-background\/80 {
+  color: red;
+}
+```
+
+In fact we always support a simpler way:
+
+```css
+#nd-sidebar {
+  --color-fd-foreground: red;
+}
+```
+
+Now we also have a Shadcn UI preset to reuse your colors from main app.
+
+### Early Reflections
+
+I think the CLI approach is correct, it'll be the primary way for advanced customisation.
+
+My future plans:
+
+- **Continue improving Fumadocs CLI:** adding install-time optimization to remove unused files according to your options (e.g. use existing sidebar component instead of installing one).
+- **A better versioning policy:** Reduce abstraction for mitigating upstream changes, instead version the components directly (e.g. creating a new `fumadocs-ui/layouts/v2/page` instead of a major UI change).
+- **Add Fumadocs-native cloud features:** More official integrations like monitoring/analytics feature designed for Fumadocs.
+
+My biggest goal is to build my own dev team or startup, I realized my time is too limited to build the excellent software in my imaginary.
+There's rough edges that I never found time to polish, and too many things to do - even if AI has handled the basic work.
+
+That's all I want to say :)
+
+Welcome for questions (via DM/GitHub), I'm happy to improve rough edges whenever I have time.

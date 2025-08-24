@@ -2,17 +2,30 @@ import {
   type ComponentProps,
   Fragment,
   type HTMLAttributes,
+  type ReactNode,
   useMemo,
 } from 'react';
-import { type BaseLayoutProps, getLinks } from '@/layouts/shared';
+import {
+  type BaseLayoutProps,
+  BaseLinkItem,
+  getLinks,
+  type LinkItemType,
+} from '@/layouts/shared';
 import {
   Sidebar,
   SidebarCollapseTrigger,
+  type SidebarComponents,
   SidebarContent,
   SidebarContentMobile,
+  SidebarFolder,
+  SidebarFolderContent,
+  SidebarFolderLink,
+  SidebarFolderTrigger,
   SidebarFooter,
   SidebarHeader,
+  SidebarItem,
   SidebarPageTree,
+  type SidebarProps,
   SidebarTrigger,
   SidebarViewport,
 } from '@/components/layout/sidebar';
@@ -25,7 +38,6 @@ import {
   Sidebar as SidebarIcon,
   X,
 } from 'lucide-react';
-import { BaseLinkItem, type LinkItemType } from '@/layouts/links';
 import { LanguageToggle } from '@/components/layout/language-toggle';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 import {
@@ -33,11 +45,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import {
-  getSidebarTabsFromOptions,
-  SidebarLinkItem,
-  type SidebarOptions,
-} from '@/layouts/docs/shared';
 import type { PageTree } from 'fumadocs-core/server';
 import {
   LayoutBody,
@@ -53,6 +60,10 @@ import {
   SearchToggle,
 } from '@/components/layout/search-toggle';
 import { HideIfEmpty } from 'fumadocs-core/hide-if-empty';
+import {
+  getSidebarTabs,
+  type GetSidebarTabsOptions,
+} from '@/utils/get-sidebar-tabs';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
@@ -62,9 +73,30 @@ export interface DocsLayoutProps extends BaseLayoutProps {
     mode?: 'top' | 'auto';
   };
 
-  sidebar?: SidebarOptions & ComponentProps<'aside'>;
+  sidebar?: SidebarOptions;
 
   containerProps?: HTMLAttributes<HTMLDivElement>;
+}
+
+interface SidebarOptions
+  extends ComponentProps<'aside'>,
+    Pick<SidebarProps, 'defaultOpenLevel' | 'prefetch'> {
+  components?: Partial<SidebarComponents>;
+
+  /**
+   * Root Toggle options
+   */
+  tabs?: Option[] | GetSidebarTabsOptions | false;
+
+  banner?: ReactNode;
+  footer?: ReactNode;
+
+  /**
+   * Support collapsing the sidebar on desktop mode
+   *
+   * @defaultValue true
+   */
+  collapsible?: boolean;
 }
 
 export function DocsLayout(props: DocsLayoutProps) {
@@ -79,10 +111,21 @@ export function DocsLayout(props: DocsLayoutProps) {
 
   const navMode = nav.mode ?? 'auto';
   const links = getLinks(props.links ?? [], props.githubUrl);
-  const tabs = useMemo(
-    () => getSidebarTabsFromOptions(tabOptions, props.tree) ?? [],
-    [tabOptions, props.tree],
-  );
+  const tabs = useMemo(() => {
+    if (Array.isArray(tabOptions)) {
+      return tabOptions;
+    }
+
+    if (typeof tabOptions === 'object') {
+      return getSidebarTabs(props.tree, tabOptions);
+    }
+
+    if (tabOptions !== false) {
+      return getSidebarTabs(props.tree);
+    }
+
+    return [];
+  }, [tabOptions, props.tree]);
 
   const variables = cn(
     '[--fd-nav-height:56px] md:[--fd-sidebar-width:286px] md:[--fd-nav-height:64px] xl:[--fd-toc-width:286px]',
@@ -470,6 +513,49 @@ function NavbarLinkItem({
     <BaseLinkItem item={item} {...props}>
       {item.text}
     </BaseLinkItem>
+  );
+}
+
+function SidebarLinkItem({
+  item,
+  ...props
+}: {
+  item: Exclude<LinkItemType, { type: 'icon' }>;
+  className?: string;
+}) {
+  if (item.type === 'menu')
+    return (
+      <SidebarFolder {...props}>
+        {item.url ? (
+          <SidebarFolderLink href={item.url}>
+            {item.icon}
+            {item.text}
+          </SidebarFolderLink>
+        ) : (
+          <SidebarFolderTrigger>
+            {item.icon}
+            {item.text}
+          </SidebarFolderTrigger>
+        )}
+        <SidebarFolderContent>
+          {item.items.map((child, i) => (
+            <SidebarLinkItem key={i} item={child} />
+          ))}
+        </SidebarFolderContent>
+      </SidebarFolder>
+    );
+
+  if (item.type === 'custom') return <div {...props}>{item.children}</div>;
+
+  return (
+    <SidebarItem
+      href={item.url}
+      icon={item.icon}
+      external={item.external}
+      {...props}
+    >
+      {item.text}
+    </SidebarItem>
   );
 }
 

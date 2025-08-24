@@ -1,5 +1,4 @@
-import type { ReactNode } from 'react';
-import type { LinkItemType } from '@/layouts/links';
+import type { HTMLAttributes, ReactNode } from 'react';
 import type { NavProviderProps } from '@/contexts/layout';
 import type { I18nConfig } from 'fumadocs-core/i18n';
 
@@ -61,7 +60,96 @@ export interface BaseLayoutProps {
   children?: ReactNode;
 }
 
-export { type LinkItemType };
+interface BaseItem {
+  /**
+   * Restrict where the item is displayed
+   *
+   * @defaultValue 'all'
+   */
+  on?: 'menu' | 'nav' | 'all';
+}
+
+export interface BaseLinkType extends BaseItem {
+  url: string;
+  /**
+   * When the item is marked as active
+   *
+   * @defaultValue 'url'
+   */
+  active?: 'url' | 'nested-url' | 'none';
+  external?: boolean;
+}
+
+export interface MainItemType extends BaseLinkType {
+  type?: 'main';
+  icon?: ReactNode;
+  text: ReactNode;
+  description?: ReactNode;
+}
+
+export interface IconItemType extends BaseLinkType {
+  type: 'icon';
+  /**
+   * `aria-label` of icon button
+   */
+  label?: string;
+  icon: ReactNode;
+  text: ReactNode;
+  /**
+   * @defaultValue true
+   */
+  secondary?: boolean;
+}
+
+export interface ButtonItemType extends BaseLinkType {
+  type: 'button';
+  icon?: ReactNode;
+  text: ReactNode;
+  /**
+   * @defaultValue false
+   */
+  secondary?: boolean;
+}
+
+export interface MenuItemType extends BaseItem {
+  type: 'menu';
+  icon?: ReactNode;
+  text: ReactNode;
+
+  url?: string;
+  items: (
+    | (MainItemType & {
+        /**
+         * Options when displayed on navigation menu
+         */
+        menu?: HTMLAttributes<HTMLElement> & {
+          banner?: ReactNode;
+        };
+      })
+    | CustomItemType
+  )[];
+
+  /**
+   * @defaultValue false
+   */
+  secondary?: boolean;
+}
+
+export interface CustomItemType extends BaseItem {
+  type: 'custom';
+  /**
+   * @defaultValue false
+   */
+  secondary?: boolean;
+  children: ReactNode;
+}
+
+export type LinkItemType =
+  | MainItemType
+  | IconItemType
+  | ButtonItemType
+  | MenuItemType
+  | CustomItemType;
 
 /**
  * Get Links Items with shortcuts
@@ -91,3 +179,5 @@ export function getLinks(
 
   return result;
 }
+
+export { BaseLinkItem } from './client';

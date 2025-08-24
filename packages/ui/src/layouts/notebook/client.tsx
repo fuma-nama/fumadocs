@@ -44,14 +44,14 @@ export function LayoutBody(props: ComponentProps<'main'>) {
       {...props}
       className={cn(
         'flex flex-1 flex-col transition-[padding] pt-(--fd-nav-height) fd-notebook-layout',
+        !collapsed && 'mx-(--fd-layout-offset)',
         props.className,
       )}
       style={{
         ...props.style,
         paddingInlineStart: collapsed
           ? 'min(calc(100vw - var(--fd-page-width)), var(--fd-sidebar-width))'
-          : 'calc(var(--fd-sidebar-width) + var(--fd-layout-offset))',
-        paddingInlineEnd: collapsed ? '0px' : 'var(--fd-layout-offset)',
+          : 'var(--fd-sidebar-width)',
       }}
     >
       {props.children}
@@ -131,6 +131,7 @@ function LayoutTab({
     <Link
       className={cn(
         'inline-flex border-b border-transparent transition-colors items-center py-1.5 font-medium gap-2 text-fd-muted-foreground text-sm text-nowrap',
+        option.unlisted && !selected && 'hidden',
         selected && 'border-fd-primary text-fd-primary',
       )}
       href={option.url}

@@ -1,4 +1,4 @@
-import type { ReactElement, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 export interface Root {
   $id?: string;
@@ -28,7 +28,7 @@ export interface Item {
   external?: boolean;
 
   description?: ReactNode;
-  icon?: ReactElement;
+  icon?: ReactNode;
 }
 
 export interface Separator {
@@ -36,7 +36,7 @@ export interface Separator {
 
   type: 'separator';
   name?: ReactNode;
-  icon?: ReactElement;
+  icon?: ReactNode;
 }
 
 export interface Folder {
@@ -54,6 +54,6 @@ export interface Folder {
   root?: boolean;
   defaultOpen?: boolean;
   index?: Item;
-  icon?: ReactElement;
+  icon?: ReactNode;
   children: Node[];
 }

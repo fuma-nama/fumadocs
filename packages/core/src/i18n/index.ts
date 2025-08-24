@@ -29,7 +29,14 @@ export interface I18nConfig<Languages extends string = string> {
    *
    * @defaultValue 'dot'
    */
-  parser?: 'dot' | 'dir';
+  parser?: 'dot' | 'dir' | 'none';
+
+  /**
+   * the fallback language when the page has no translations available for a given locale.
+   *
+   * Default to ``defaultLanguage`, no fallback when set to `null`.
+   */
+  fallbackLanguage?: Languages | null;
 }
 
 export function defineI18n<Languages extends string>(

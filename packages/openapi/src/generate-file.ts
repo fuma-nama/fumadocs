@@ -126,18 +126,18 @@ export async function generateFiles(options: Config): Promise<void> {
 
   if (Array.isArray(input)) {
     const targets: string[] = [];
+    const patterns: string[] = [];
 
     for (const item of input) {
-      if (isUrl(item)) {
-        targets.push(item);
-      } else {
-        targets.push(...(await glob(item, { cwd, absolute: true })));
-      }
+      if (isUrl(item)) targets.push(item);
+      else patterns.push(item);
     }
+
+    if (patterns.length > 0) targets.push(...(await glob(patterns, { cwd })));
 
     await Promise.all(
       targets.map(async (item) => {
-        schemas[item] = await processDocument(item);
+        schemas[item] = await processDocument(path.join(cwd, item));
       }),
     );
   } else {

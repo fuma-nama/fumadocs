@@ -3,9 +3,9 @@ title: Docs Layout
 description: The layout of documentation
 ---
 
-The layout of documentation pages, it includes a sidebar and mobile-only navbar.
+<Customisation />
 
-> It is a server component, you should not reference it in a client component.
+The layout of documentation pages, it includes a sidebar and mobile-only navbar.
 
 ## Usage
 
@@ -50,7 +50,7 @@ import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 
 ## Nav
 
-A mobile-only navbar, we recommend to customise it from `baseOptions`.
+A mobile-only navbar, the `nav` prop is also reusable on other Fumadocs layouts.
 
 <div className='max-w-[460px] mx-auto'>
 
@@ -59,14 +59,25 @@ A mobile-only navbar, we recommend to customise it from `baseOptions`.
 </div>
 
 ```tsx
-import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { baseOptions } from '@/lib/layout.shared';
+import type { ReactNode } from 'react';
 
-export const baseOptions: BaseLayoutProps = {
-  githubUrl: 'https://github.com/fuma-nama/fumadocs',
-  nav: {
-    title: 'My App',
-  },
-};
+export default function Layout({ children }: { children: ReactNode }) {
+  const base = baseOptions();
+
+  return (
+    <DocsLayout
+      {...base}
+      nav={{
+        ...base.nav,
+        // override
+      }}
+    >
+      {children}
+    </DocsLayout>
+  );
+}
 ```
 
 <AutoTypeTable
