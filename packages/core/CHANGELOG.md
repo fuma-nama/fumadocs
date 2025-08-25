@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 15.7.3
+
+### Patch Changes
+
+- 6d97379: unify remark nodes parsing & improve types
+
 ## 15.7.2
 
 ### Patch Changes

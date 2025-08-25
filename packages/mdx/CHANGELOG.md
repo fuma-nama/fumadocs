@@ -1,5 +1,13 @@
 # next-docs-mdx
 
+## 11.8.1
+
+### Patch Changes
+
+- 5f2ec6e: Fix `remark-mdx-exports` plugin fallback
+- Updated dependencies [6d97379]
+  - fumadocs-core@15.7.3
+
 ## 11.8.0
 
 ### Minor Changes
