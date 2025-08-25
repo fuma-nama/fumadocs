@@ -101,6 +101,32 @@ export async function generateAll(
   );
 }
 
+export async function generateIndexOnly(
+  schemaId: string,
+  processed: ProcessedDocument,
+  options: GenerateOptions = {},
+): Promise<string> {
+  const { document } = processed;
+
+  return generateDocument(
+    schemaId,
+    processed,
+    {
+      operations: [], // Empty - no operations
+      webhooks: [], // Empty - no webhooks
+      hasHead: false, // No operation headings
+    },
+    {
+      ...options,
+      title: document.info.title,
+      description: document.info.description,
+    },
+    {
+      type: 'file',
+    },
+  );
+}
+
 export async function generatePages(
   schemaId: string,
   processed: ProcessedDocument,

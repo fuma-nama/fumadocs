@@ -159,4 +159,124 @@ describe('Generate documents', () => {
       expect.anything(),
     );
   });
+
+  test('Generate Files - with generateIndex option', async () => {
+    await generateFiles({
+      input: ['./fixtures/museum.yaml'],
+      output: './out',
+      per: 'operation',
+      generateIndex: true,
+      cwd,
+    });
+
+    const fs = await import('node:fs/promises');
+
+    // Should generate individual operation files + index file
+    expect(fs.writeFile).toHaveBeenCalledWith(
+      join(cwd, './out/index.mdx'),
+      expect.anything(),
+    );
+
+    // Verify index.mdx is generated in addition to operation files
+    const writeFileCalls = (fs.writeFile as ReturnType<typeof vi.fn>).mock
+      .calls;
+    const indexCall = writeFileCalls.find(
+      (call: unknown[]) =>
+        typeof call[0] === 'string' && call[0].endsWith('index.mdx'),
+    );
+    expect(indexCall).toBeDefined();
+  });
+
+  test('Generate Files - generateIndex with per tag', async () => {
+    await generateFiles({
+      input: ['./fixtures/museum.yaml'],
+      output: './out',
+      per: 'tag',
+      generateIndex: true,
+      cwd,
+    });
+
+    const fs = await import('node:fs/promises');
+
+    // Should generate tag files + index file
+    expect(fs.writeFile).toHaveBeenCalledWith(
+      join(cwd, './out/index.mdx'),
+      expect.anything(),
+    );
+  });
+
+  test('Generate Files - generateIndex with per file', async () => {
+    await generateFiles({
+      input: ['./fixtures/museum.yaml'],
+      output: './out',
+      per: 'file',
+      generateIndex: true,
+      cwd,
+    });
+
+    const fs = await import('node:fs/promises');
+
+    // Should generate the main file + index file
+    expect(fs.writeFile).toHaveBeenCalledWith(
+      join(cwd, './out/index.mdx'),
+      expect.anything(),
+    );
+  });
+
+  test('Generate Files - custom index naming function', async () => {
+    await generateFiles({
+      input: ['./fixtures/museum.yaml'],
+      output: './out',
+      per: 'operation',
+      generateIndex: true,
+      name: (output, document, isIndex) => {
+        if (isIndex) {
+          return 'api-overview';
+        }
+        return 'default-name';
+      },
+      cwd,
+    });
+
+    const fs = await import('node:fs/promises');
+
+    // Should use custom index name
+    expect(fs.writeFile).toHaveBeenCalledWith(
+      join(cwd, './out/api-overview.mdx'),
+      expect.anything(),
+    );
+
+    // Verify the custom naming function was called for index
+    const writeFileCalls = (fs.writeFile as ReturnType<typeof vi.fn>).mock
+      .calls;
+    const indexCall = writeFileCalls.find(
+      (call: unknown[]) =>
+        typeof call[0] === 'string' && call[0].endsWith('api-overview.mdx'),
+    );
+    expect(indexCall).toBeDefined();
+  });
+
+  test('Generate Files - index naming respects per mode', async () => {
+    // Test that index naming works across different per modes
+    await generateFiles({
+      input: ['./fixtures/museum.yaml'],
+      output: './out',
+      per: 'tag',
+      generateIndex: true,
+      name: (output, document, isIndex) => {
+        if (isIndex) {
+          return 'tag-index';
+        }
+        return 'tag-default';
+      },
+      cwd,
+    });
+
+    const fs = await import('node:fs/promises');
+
+    expect(fs.writeFile).toHaveBeenCalledWith(
+      join(cwd, './out/tag-index.mdx'),
+      expect.anything(),
+    );
+  });
 });
