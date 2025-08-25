@@ -56,7 +56,7 @@ export function remarkInclude(this: Processor): Transformer<Root, Root> {
     this: Processor,
     tree: Root,
     directory: string,
-    data: DataMap,
+    data: Partial<DataMap>,
   ) {
     const queue: Promise<void>[] = [];
 

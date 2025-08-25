@@ -1,6 +1,11 @@
 import { createProcessor, type ProcessorOptions } from '@mdx-js/mdx';
 import type { DataMap, VFile } from 'vfile';
 import { remarkInclude } from '@/mdx-plugins/remark-include';
+import type { StructuredData } from 'fumadocs-core/mdx-plugins';
+import type { TableOfContents } from 'fumadocs-core/server';
+import type { FC } from 'react';
+import type { MDXProps } from 'mdx/types';
+import { ExtractedReference } from '@/mdx-plugins/remark-extract';
 
 type Processor = ReturnType<typeof createProcessor>;
 
@@ -24,6 +29,19 @@ interface BuildMDXOptions extends ProcessorOptions {
 
 export interface CompilerOptions {
   addDependency: (file: string) => void;
+}
+
+export interface CompiledMDXProperties<Frontmatter = Record<string, unknown>> {
+  frontmatter: Frontmatter;
+  structuredData: StructuredData;
+  toc: TableOfContents;
+  default: FC<MDXProps>;
+
+  /**
+   * Only available when `lastModifiedTime` is enabled on MDX loader
+   */
+  lastModified?: Date;
+  extractedReferences?: ExtractedReference[];
 }
 
 export type { DataMap };
