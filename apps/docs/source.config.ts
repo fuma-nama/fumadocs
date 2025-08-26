@@ -20,7 +20,6 @@ import { ElementContent } from 'hast';
 
 export const docs = defineDocs({
   docs: {
-    async: true,
     schema: frontmatterSchema.extend({
       preview: z.string().optional(),
       index: z.boolean().default(false),

@@ -14,7 +14,7 @@ import {
   PageTOCTitle,
 } from 'fumadocs-ui/layouts/docs/page';
 import { notFound } from 'next/navigation';
-import { type ComponentProps, type FC, type ReactNode } from 'react';
+import { type ComponentProps, type FC, type ReactNode, Suspense } from 'react';
 import * as Twoslash from 'fumadocs-twoslash/ui';
 import { Callout } from 'fumadocs-ui/components/callout';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
@@ -43,6 +43,8 @@ import { Banner } from 'fumadocs-ui/components/banner';
 import { openapi } from '@/lib/openapi';
 import { Installation } from '@/components/preview/installation';
 import { Customisation } from '@/components/preview/customisation';
+import { GraphComponent } from '@/app/docs/[...slug]/graph-client';
+import { buildGraph } from '@/app/docs/[...slug]/graph';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -64,7 +66,7 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
   if (!page) notFound();
 
   const preview = page.data.preview;
-  const { body: Mdx, toc, lastModified } = await page.data.load();
+  const { body: Mdx, toc, lastModified } = page.data;
 
   return (
     <PageRoot
@@ -158,11 +160,19 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
       {toc.length > 0 && (
         <PageTOC>
           <PageTOCTitle />
+          <Suspense fallback="Loading...">
+            <AsyncGraph />
+          </Suspense>
           <PageTOCItems variant="clerk" />
         </PageTOC>
       )}
     </PageRoot>
   );
+}
+
+async function AsyncGraph() {
+  const graph = await buildGraph();
+  return <GraphComponent graph={graph} />;
 }
 
 function DocsCategory({ url }: { url: string }) {
