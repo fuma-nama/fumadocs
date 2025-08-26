@@ -160,12 +160,14 @@ describe('Generate documents', () => {
     );
   });
 
-  test('Generate Files - with generateIndex option', async () => {
+  test('Generate Files - with index option (string format)', async () => {
     await generateFiles({
       input: ['./fixtures/museum.yaml'],
       output: './out',
       per: 'operation',
-      generateIndex: true,
+      index: {
+        name: 'api-overview',
+      },
       cwd,
     });
 
@@ -173,7 +175,7 @@ describe('Generate documents', () => {
 
     // Should generate individual operation files + index file
     expect(fs.writeFile).toHaveBeenCalledWith(
-      join(cwd, './out/index.mdx'),
+      join(cwd, './out/api-overview.mdx'),
       expect.anything(),
     );
 
@@ -182,17 +184,19 @@ describe('Generate documents', () => {
       .calls;
     const indexCall = writeFileCalls.find(
       (call: unknown[]) =>
-        typeof call[0] === 'string' && call[0].endsWith('index.mdx'),
+        typeof call[0] === 'string' && call[0].endsWith('api-overview.mdx'),
     );
     expect(indexCall).toBeDefined();
   });
 
-  test('Generate Files - generateIndex with per tag', async () => {
+  test('Generate Files - index with per tag', async () => {
     await generateFiles({
       input: ['./fixtures/museum.yaml'],
       output: './out',
       per: 'tag',
-      generateIndex: true,
+      index: {
+        name: 'index',
+      },
       cwd,
     });
 
@@ -205,12 +209,14 @@ describe('Generate documents', () => {
     );
   });
 
-  test('Generate Files - generateIndex with per file', async () => {
+  test('Generate Files - index with per file', async () => {
     await generateFiles({
       input: ['./fixtures/museum.yaml'],
       output: './out',
       per: 'file',
-      generateIndex: true,
+      index: {
+        name: 'index',
+      },
       cwd,
     });
 
@@ -223,60 +229,327 @@ describe('Generate documents', () => {
     );
   });
 
-  test('Generate Files - custom index naming function', async () => {
+  test('Generate Files - index with Record format (individual indexes)', async () => {
     await generateFiles({
-      input: ['./fixtures/museum.yaml'],
+      input: ['./fixtures/museum.yaml', './fixtures/petstore.yaml'],
       output: './out',
-      per: 'operation',
-      generateIndex: true,
-      name: (output, document, isIndex) => {
-        if (isIndex) {
-          return 'api-overview';
-        }
-        return 'default-name';
+      per: 'file',
+      index: {
+        name: {
+          './fixtures/museum.yaml': 'museum-api',
+          './fixtures/petstore.yaml': 'petstore-api',
+        },
       },
       cwd,
     });
 
     const fs = await import('node:fs/promises');
 
-    // Should use custom index name
+    // Should generate separate index files for each input
     expect(fs.writeFile).toHaveBeenCalledWith(
-      join(cwd, './out/api-overview.mdx'),
+      join(cwd, './out/museum-api.mdx'),
+      expect.anything(),
+    );
+    expect(fs.writeFile).toHaveBeenCalledWith(
+      join(cwd, './out/petstore-api.mdx'),
+      expect.anything(),
+    );
+  });
+
+  test('Generate Files - index with Record format (shared index)', async () => {
+    await generateFiles({
+      input: ['./fixtures/museum.yaml', './fixtures/petstore.yaml'],
+      output: './out',
+      per: 'file',
+      index: {
+        name: {
+          './fixtures/museum.yaml': 'shared-api',
+          './fixtures/petstore.yaml': 'shared-api',
+        },
+        url: '/docs/api',
+      },
+      imports: [
+        {
+          names: ['source'],
+          from: '@/lib/source',
+        },
+        {
+          names: ['getPageTreePeers'],
+          from: 'fumadocs-core/server',
+        },
+      ],
+      cwd,
+    });
+
+    const fs = await import('node:fs/promises');
+
+    // Should generate only one shared index file (deduplication)
+    const writeFileCalls = (fs.writeFile as ReturnType<typeof vi.fn>).mock
+      .calls;
+    const sharedIndexCalls = writeFileCalls.filter(
+      (call: unknown[]) =>
+        typeof call[0] === 'string' && call[0].endsWith('shared-api.mdx'),
+    );
+    expect(sharedIndexCalls).toHaveLength(1);
+
+    // Verify the content includes Cards format
+    const [, content] = sharedIndexCalls[0] as [string, string];
+    expect(content).toContain('<Cards>');
+    expect(content).toContain('getPageTreePeers');
+    expect(content).toContain('import { source } from "@/lib/source";');
+  });
+
+  test('Generate Files - index with partial mapping', async () => {
+    await generateFiles({
+      input: ['./fixtures/museum.yaml', './fixtures/petstore.yaml'],
+      output: './out',
+      per: 'file',
+      index: {
+        name: {
+          './fixtures/museum.yaml': 'museum-only',
+          // petstore.yaml intentionally omitted
+        },
+      },
+      cwd,
+    });
+
+    const fs = await import('node:fs/promises');
+
+    // Should generate index only for museum
+    expect(fs.writeFile).toHaveBeenCalledWith(
+      join(cwd, './out/museum-only.mdx'),
       expect.anything(),
     );
 
-    // Verify the custom naming function was called for index
+    // Should not generate index for petstore
+    const writeFileCalls = (fs.writeFile as ReturnType<typeof vi.fn>).mock
+      .calls;
+    const petstoreIndexCall = writeFileCalls.find(
+      (call: unknown[]) =>
+        typeof call[0] === 'string' &&
+        call[0].includes('petstore') &&
+        call[0].endsWith('.mdx'),
+    );
+    // Only the main petstore.mdx file should exist, not an index
+    expect(petstoreIndexCall?.[0]).toMatch(/petstore\.mdx$/);
+  });
+
+  test('Generate Files - with imports configuration', async () => {
+    await generateFiles({
+      input: ['./fixtures/museum.yaml'],
+      output: './out',
+      per: 'file',
+      imports: [
+        {
+          names: ['CustomComponent', 'AnotherComponent'],
+          from: '@/components/custom',
+        },
+        {
+          names: ['utils'],
+          from: '@/lib/utils',
+        },
+      ],
+      cwd,
+    });
+
+    const fs = await import('node:fs/promises');
+
+    // Verify imports are included in generated content
+    const writeFileCalls = (fs.writeFile as ReturnType<typeof vi.fn>).mock
+      .calls;
+    const museumCall = writeFileCalls.find(
+      (call: unknown[]) =>
+        typeof call[0] === 'string' && call[0].endsWith('museum.mdx'),
+    );
+    expect(museumCall).toBeDefined();
+
+    const [, content] = museumCall as [string, string];
+    expect(content).toContain(
+      'import { CustomComponent, AnotherComponent } from "@/components/custom";',
+    );
+    expect(content).toContain('import { utils } from "@/lib/utils";');
+  });
+
+  test('Generate Files - index with title and description (multi-schema)', async () => {
+    await generateFiles({
+      input: ['./fixtures/museum.yaml', './fixtures/petstore.yaml'],
+      output: './out',
+      per: 'file',
+      index: {
+        name: {
+          './fixtures/museum.yaml': 'comprehensive-api',
+          './fixtures/petstore.yaml': 'comprehensive-api',
+        },
+        title: 'Comprehensive API Documentation',
+        description: 'Complete API reference for all endpoints',
+      },
+      cwd,
+    });
+
+    const fs = await import('node:fs/promises');
+
+    // Verify index file is generated with title and description
     const writeFileCalls = (fs.writeFile as ReturnType<typeof vi.fn>).mock
       .calls;
     const indexCall = writeFileCalls.find(
       (call: unknown[]) =>
-        typeof call[0] === 'string' && call[0].endsWith('api-overview.mdx'),
+        typeof call[0] === 'string' &&
+        call[0].endsWith('comprehensive-api.mdx'),
     );
     expect(indexCall).toBeDefined();
+
+    const [, content] = indexCall as [string, string];
+    expect(content).toContain('title: "Comprehensive API Documentation"');
+    expect(content).toContain(
+      'description: "Complete API reference for all endpoints"',
+    );
   });
 
-  test('Generate Files - index naming respects per mode', async () => {
-    // Test that index naming works across different per modes
+  test('Generate Files - Cards format with missing imports (empty content)', async () => {
     await generateFiles({
-      input: ['./fixtures/museum.yaml'],
+      input: ['./fixtures/museum.yaml', './fixtures/petstore.yaml'],
       output: './out',
-      per: 'tag',
-      generateIndex: true,
-      name: (output, document, isIndex) => {
-        if (isIndex) {
-          return 'tag-index';
-        }
-        return 'tag-default';
+      per: 'file',
+      index: {
+        name: {
+          './fixtures/museum.yaml': 'empty-api',
+          './fixtures/petstore.yaml': 'empty-api',
+        },
+        url: '/docs/api',
+        title: 'API Overview',
+        description: 'All available APIs',
       },
+      // No imports provided - should generate empty content
       cwd,
     });
 
     const fs = await import('node:fs/promises');
 
-    expect(fs.writeFile).toHaveBeenCalledWith(
-      join(cwd, './out/tag-index.mdx'),
-      expect.anything(),
+    const writeFileCalls = (fs.writeFile as ReturnType<typeof vi.fn>).mock
+      .calls;
+    const emptyIndexCalls = writeFileCalls.filter(
+      (call: unknown[]) =>
+        typeof call[0] === 'string' && call[0].endsWith('empty-api.mdx'),
     );
+    expect(emptyIndexCalls).toHaveLength(1);
+
+    // Verify empty content (only frontmatter and comment)
+    const [, content] = emptyIndexCalls[0] as [string, string];
+    expect(content).not.toContain('<Cards>');
+    expect(content).not.toContain('<Card title=');
+    expect(content).toContain('title: "API Overview"');
+    expect(content).toContain('description: "All available APIs"');
+    // Should not contain getPageTreePeers since imports are missing
+    expect(content).not.toContain('getPageTreePeers');
+  });
+
+  test('Generate Files - multiple imports with different sources', async () => {
+    await generateFiles({
+      input: ['./fixtures/museum.yaml'],
+      output: './out',
+      per: 'operation',
+      imports: [
+        {
+          names: ['Button', 'Card'],
+          from: '@/components/ui',
+        },
+        {
+          names: ['formatDate'],
+          from: '@/lib/date-utils',
+        },
+        {
+          names: ['API_BASE_URL'],
+          from: '@/constants',
+        },
+      ],
+      cwd,
+    });
+
+    const fs = await import('node:fs/promises');
+
+    // Check that all imports are included in generated files
+    const writeFileCalls = (fs.writeFile as ReturnType<typeof vi.fn>).mock
+      .calls;
+
+    // Find any generated operation file to verify imports
+    const operationCall = writeFileCalls.find(
+      (call: unknown[]) =>
+        typeof call[0] === 'string' &&
+        call[0].includes('/out/') &&
+        call[0].endsWith('.mdx'),
+    );
+    expect(operationCall).toBeDefined();
+
+    const [, content] = operationCall as [string, string];
+    expect(content).toContain(
+      'import { Button, Card } from "@/components/ui";',
+    );
+    expect(content).toContain('import { formatDate } from "@/lib/date-utils";');
+    expect(content).toContain('import { API_BASE_URL } from "@/constants";');
+  });
+
+  test('Generate Files - index with url but partial imports (empty content)', async () => {
+    await generateFiles({
+      input: ['./fixtures/museum.yaml', './fixtures/petstore.yaml'],
+      output: './out',
+      per: 'file',
+      index: {
+        name: {
+          './fixtures/museum.yaml': 'partial-imports-api',
+          './fixtures/petstore.yaml': 'partial-imports-api',
+        },
+        url: '/docs/api',
+      },
+      imports: [
+        {
+          names: ['source'],
+          from: '@/lib/source',
+        },
+        // Missing getPageTreePeers import - should generate empty content
+      ],
+      cwd,
+    });
+
+    const fs = await import('node:fs/promises');
+
+    const writeFileCalls = (fs.writeFile as ReturnType<typeof vi.fn>).mock
+      .calls;
+    const partialImportsCall = writeFileCalls.find(
+      (call: unknown[]) =>
+        typeof call[0] === 'string' &&
+        call[0].endsWith('partial-imports-api.mdx'),
+    );
+    expect(partialImportsCall).toBeDefined();
+
+    const [, content] = partialImportsCall as [string, string];
+    expect(content).not.toContain('<Cards>');
+    expect(content).toContain('import { source } from "@/lib/source";');
+    // Should not contain getPageTreePeers since it's missing
+    expect(content).not.toContain('getPageTreePeers');
+    expect(content).not.toContain('<Card title=');
+  });
+
+  test('Generate Files - empty imports array', async () => {
+    await generateFiles({
+      input: ['./fixtures/museum.yaml'],
+      output: './out',
+      per: 'file',
+      imports: [], // Empty imports array
+      cwd,
+    });
+
+    const fs = await import('node:fs/promises');
+
+    const writeFileCalls = (fs.writeFile as ReturnType<typeof vi.fn>).mock
+      .calls;
+    const museumCall = writeFileCalls.find(
+      (call: unknown[]) =>
+        typeof call[0] === 'string' && call[0].endsWith('museum.mdx'),
+    );
+    expect(museumCall).toBeDefined();
+
+    const [, content] = museumCall as [string, string];
+    // Should not contain any import statements
+    expect(content).not.toMatch(/^import .* from .*/m);
   });
 });

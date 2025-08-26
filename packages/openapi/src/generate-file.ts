@@ -48,7 +48,6 @@ interface OperationConfig extends BaseConfig {
     | ((
         output: GeneratePageOutput,
         document: ProcessedDocument['document'],
-        isIndex?: boolean,
       ) => string)
     | BaseName;
 }
@@ -66,7 +65,6 @@ interface TagConfig extends BaseConfig {
     | ((
         output: GenerateTagOutput,
         document: ProcessedDocument['document'],
-        isIndex?: boolean,
       ) => string)
     | BaseName;
 }
@@ -84,7 +82,6 @@ interface FileConfig extends BaseConfig {
     | ((
         output: GenerateFileOutput,
         document: ProcessedDocument['document'],
-        isIndex?: boolean,
       ) => string)
     | BaseName;
 }
@@ -101,6 +98,33 @@ interface BaseName {
    * @defaultValue v2
    */
   algorithm?: 'v2' | 'v1';
+}
+
+interface IndexConfig {
+  /**
+   * Map input schema IDs to index file names
+   * - string: Use the same index file name for all inputs
+   * - Record<string, string>: Map specific schema IDs to index file names
+   */
+  name: string | Record<string, string>;
+
+  /**
+   * URL path for getPageTreePeers functionality when generating cards
+   * Used when multiple inputs share the same index file
+   */
+  url?: string;
+
+  /**
+   * Title for the generated index file of the schema(s).
+   * Used in frontmatter
+   */
+  title?: string;
+
+  /**
+   * Description for the generated index file of the schema(s).
+   * Used in frontmatter
+   */
+  description?: string;
 }
 
 interface BaseConfig extends GenerateOptions {
@@ -122,12 +146,10 @@ interface BaseConfig extends GenerateOptions {
   slugify?: (name: string) => string;
 
   /**
-   * Generate an index.mdx file with just the API title and description.
-   * Uses info.title and info.description from the OpenAPI document.
-   *
-   * @defaultValue false
+   * Generate index files with custom paths and content.
+   * When multiple inputs share the same index file, generates Cards-based content.
    */
-  generateIndex?: boolean;
+  index?: IndexConfig;
 }
 
 export async function generateFiles(options: Config): Promise<void> {
@@ -162,11 +184,17 @@ export async function generateFiles(options: Config): Promise<void> {
     throw new Error('No input files found.');
   }
 
+  // Generate regular files first
   await Promise.all(
     resolvedSchemas.map(([id, document]) =>
       generateFromDocument(id, document, options),
     ),
   );
+
+  // Generate index files if configured
+  if (options.index) {
+    await generateIndexFiles(resolvedSchemas, options, cwd);
+  }
 }
 
 async function generateFromDocument(
@@ -180,17 +208,12 @@ async function generateFromDocument(
   let nameFn: (
     output: GeneratePageOutput | GenerateTagOutput | GenerateFileOutput,
     document: ProcessedDocument['document'],
-    isIndex?: boolean,
   ) => string;
 
   if (!options.name || typeof options.name !== 'function') {
     const { algorithm = 'v2' } = options.name ?? {};
 
-    nameFn = (output, document, isIndex) => {
-      if (isIndex) {
-        return 'index';
-      }
-
+    nameFn = (output, document) => {
       if (options.per === 'tag') {
         const result = output as GenerateTagOutput;
 
@@ -327,46 +350,6 @@ async function generateFromDocument(
       console.log(`Generated: ${outputPath}`);
     }
   }
-
-  // Generate index file if requested
-  if (options.generateIndex) {
-    const indexContent = await generateIndexOnly(schemaId, document, options);
-
-    // Create appropriate output object based on current mode for naming function
-    let indexOutput:
-      | GeneratePageOutput
-      | GenerateTagOutput
-      | GenerateFileOutput;
-
-    if (options.per === 'tag') {
-      // For tag mode, create a dummy tag output
-      indexOutput = {
-        tag: 'index',
-        content: indexContent,
-      } as GenerateTagOutput;
-    } else if (options.per === 'file') {
-      // For file mode, use file output format
-      indexOutput = {
-        pathOrUrl: schemaId,
-        content: indexContent,
-      } as GenerateFileOutput;
-    } else {
-      // For operation mode, create a dummy operation output
-      indexOutput = {
-        type: 'operation' as const,
-        item: {
-          path: '/index',
-          method: 'get' as const,
-        },
-        content: indexContent,
-      } as GeneratePageOutput;
-    }
-
-    const filename = nameFn(indexOutput, document.document, true);
-    const indexPath = path.join(outputDir, `${filename}.mdx`);
-    await write(indexPath, indexContent);
-    console.log(`Generated: ${filename}.mdx`);
-  }
 }
 
 function isUrl(input: string): boolean {
@@ -385,6 +368,138 @@ function getOutputPathFromRoute(path: string): string {
       })
       .join('/') ?? ''
   );
+}
+
+async function generateIndexFiles(
+  resolvedSchemas: [string, ProcessedDocument][],
+  options: Config,
+  cwd: string,
+): Promise<void> {
+  const { index, output } = options;
+  if (!index) return;
+
+  const outputDir = path.join(cwd, output);
+
+  // Map index filenames to schemas that should contribute to them
+  const indexMap = new Map<
+    string,
+    { schemaId: string; document: ProcessedDocument }[]
+  >();
+
+  // Process each schema to determine which index files it should contribute to
+  for (const [schemaId, document] of resolvedSchemas) {
+    let indexFilename: string | undefined;
+
+    if (typeof index.name === 'string') {
+      // All schemas use the same index file
+      indexFilename = index.name;
+    } else {
+      // Look up specific mapping for this schema
+      // Try exact match first, then try with ./ prefix
+      indexFilename = index.name[schemaId] || index.name[`./${schemaId}`];
+    }
+
+    if (indexFilename) {
+      if (!indexMap.has(indexFilename)) {
+        indexMap.set(indexFilename, []);
+      }
+      indexMap.get(indexFilename)!.push({ schemaId, document });
+    }
+  }
+
+  // Generate each index file
+  for (const [indexFilename, schemas] of indexMap.entries()) {
+    const indexPath = path.join(outputDir, `${indexFilename}.mdx`);
+
+    let content: string;
+
+    if (schemas.length === 1) {
+      // Single schema: use traditional title/description format
+      const { schemaId, document } = schemas[0];
+      content = await generateIndexOnly(schemaId, document, options);
+    } else {
+      // Multiple schemas: use Cards format
+      content = await generateCardsIndexContent(schemas, index, options);
+    }
+
+    await mkdir(path.dirname(indexPath), { recursive: true });
+    await writeFile(indexPath, content);
+    console.log(`Generated: ${indexFilename}.mdx`);
+  }
+}
+
+async function generateCardsIndexContent(
+  schemas: { schemaId: string; document: ProcessedDocument }[],
+  indexConfig: IndexConfig,
+  options: GenerateOptions,
+): Promise<string> {
+  // Build frontmatter
+  const frontmatter: Record<string, unknown> = {};
+
+  frontmatter.title = indexConfig.title;
+  frontmatter.description = indexConfig.description;
+
+  // Build content
+  const parts: string[] = [];
+
+  // Add frontmatter
+  parts.push('---');
+  for (const [key, value] of Object.entries(frontmatter)) {
+    parts.push(`${key}: ${JSON.stringify(value)}`);
+  }
+  parts.push('---');
+
+  if (options.addGeneratedComment !== false) {
+    let commentContent =
+      'This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again.';
+
+    if (typeof options.addGeneratedComment === 'string') {
+      commentContent = options.addGeneratedComment;
+    }
+
+    commentContent = commentContent.replaceAll('/', '\\/');
+    parts.push(`{/* ${commentContent} */}`);
+  }
+
+  const imports = options.imports
+    ?.map(
+      (item) =>
+        `import { ${item.names.join(', ')} } from ${JSON.stringify(item.from)};`,
+    )
+    .join('\n');
+
+  if (imports) {
+    parts.push(imports);
+  }
+
+  // Add Cards content
+  parts.push('');
+
+  const containsSourceImport = options.imports?.some((importObj) =>
+    importObj.names.includes('source'),
+  );
+
+  const containsGetPageTreePeersImport = options.imports?.some((importObj) =>
+    importObj.names.includes('getPageTreePeers'),
+  );
+
+  if (
+    indexConfig.url &&
+    containsSourceImport &&
+    containsGetPageTreePeersImport
+  ) {
+    parts.push('<Cards>');
+    parts.push(
+      `  {getPageTreePeers(source.pageTree, '${indexConfig.url}').map((peer) => (`,
+    );
+    parts.push('    <Card key={peer.url} title={peer.name} href={peer.url}>');
+    parts.push('      {peer.description}');
+    parts.push('    </Card>');
+    parts.push('  ))}');
+    parts.push('</Cards>');
+  }
+
+  return parts.join('\n');
 }
 
 function defaultSlugify(s: string): string {
