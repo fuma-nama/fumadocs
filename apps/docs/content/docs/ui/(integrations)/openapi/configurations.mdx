@@ -74,6 +74,127 @@ void generateFiles({
 });
 ```
 
+### Index
+
+Generate index files with custom paths and content. When multiple inputs share the same index file, generates Cards-based content for navigation.
+`index.name` supports object schema mapping for creating index files for multiple inputs.
+
+#### Basic Index Generation
+
+Generate a simple index file for a single schema:
+
+```ts
+import { generateFiles } from 'fumadocs-openapi';
+
+void generateFiles({
+  input: ['./petstore.yaml'],
+  output: './content/docs',
+  index: {
+    name: 'api-overview',
+    title: 'API Documentation',
+    description: 'Complete API reference',
+  },
+});
+```
+
+#### Multiple Schema Index Files
+
+Map different schemas to separate index files:
+
+```ts
+import { generateFiles } from 'fumadocs-openapi';
+
+void generateFiles({
+  input: ['./petstore.yaml', './museum.yaml'],
+  output: './content/docs',
+  index: {
+    name: {
+      './petstore.yaml': 'petstore-api',
+      './museum.yaml': 'museum-api',
+    },
+  },
+});
+```
+
+#### Shared Index with Cards
+
+Generate a single index file for multiple schemas with Cards navigation:
+
+```ts
+import { generateFiles } from 'fumadocs-openapi';
+
+void generateFiles({
+  input: ['./petstore.yaml', './museum.yaml'],
+  output: './content/docs',
+  index: {
+    name: {
+      './petstore.yaml': 'comprehensive-api',
+      './museum.yaml': 'comprehensive-api',
+    },
+    url: '/docs/api',
+    title: 'API Documentation',
+    description: 'All available APIs',
+  },
+  imports: [
+    {
+      names: ['source'],
+      from: '@/lib/source',
+    },
+    {
+      names: ['getPageTreePeers'],
+      from: 'fumadocs-core/server',
+    },
+  ],
+});
+```
+
+<Callout type="info">
+  For Cards generation to work, you must provide all three requirements: `url`,
+  `source` import, and `getPageTreePeers` import. If any are missing, the index
+  file will contain only frontmatter and imports without Cards content.
+</Callout>
+
+### Imports
+
+Add custom imports to generated MDX files. This is useful for including components, utilities, or other dependencies in your generated documentation.
+
+```ts
+import { generateFiles } from 'fumadocs-openapi';
+
+void generateFiles({
+  input: ['./petstore.yaml'],
+  output: './content/docs',
+  imports: [
+    {
+      names: ['CustomComponent', 'AnotherComponent'],
+      from: '@/components/custom',
+    },
+    {
+      names: ['utils'],
+      from: '@/lib/utils',
+    },
+    {
+      names: ['API_BASE_URL'],
+      from: '@/constants',
+    },
+  ],
+});
+```
+
+This will add the following imports to all generated MDX files:
+
+```ts
+import { CustomComponent, AnotherComponent } from '@/components/custom';
+import { utils } from '@/lib/utils';
+import { API_BASE_URL } from '@/constants';
+```
+
+<Callout type="info">
+  The `imports` configuration is especially important for Cards generation in
+  index files, where you need to import `source` and `getPageTreePeers` for the
+  navigation functionality to work.
+</Callout>
+
 ### Name
 
 A function that controls the output path of MDX pages.
