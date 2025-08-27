@@ -13,6 +13,7 @@ import type { MethodInformation } from '@/types';
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import {
   processDocument,
+  processDocumentCached,
   type ProcessedDocument,
 } from '@/utils/process-document';
 
@@ -80,9 +81,6 @@ export interface OpenAPIOptions extends SharedOpenAPIOptions {
    */
   input?: string[] | (() => Promise<SchemaMap>);
 
-  /**
-   * By default, it is disabled on dev mode
-   */
   disableCache?: boolean;
 }
 
@@ -93,11 +91,7 @@ export interface OpenAPIServer {
 }
 
 export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
-  const {
-    input = [],
-    disableCache = process.env.NODE_ENV === 'development',
-    ...shared
-  } = options;
+  const { input = [], disableCache = false, ...shared } = options;
   let schemas: Promise<ProcessedSchemaMap> | undefined;
 
   async function getSchemas() {
@@ -106,13 +100,13 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
     if (Array.isArray(input)) {
       await Promise.all(
         input.map(async (item) => {
-          out[item] = await processDocument(item, disableCache);
+          out[item] = await processDocument(item);
         }),
       );
     } else {
       await Promise.all(
         Object.entries(await input()).map(async ([k, v]) => {
-          out[k] = await processDocument(v, disableCache);
+          out[k] = await processDocument(v);
         }),
       );
     }
@@ -123,6 +117,8 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
   return {
     createProxy,
     async getSchemas() {
+      if (disableCache) return getSchemas();
+
       return (schemas ??= getSchemas());
     },
     getAPIPageProps({ document, ...props }) {
@@ -132,7 +128,7 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
         document:
           typeof document === 'string'
             ? this.getSchemas().then((map) => {
-                return map[document] ?? processDocument(document, disableCache);
+                return map[document] ?? processDocumentCached(document);
               })
             : document,
       };

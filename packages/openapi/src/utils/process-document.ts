@@ -12,18 +12,25 @@ export type ProcessedDocument = {
 
 const cache = new Map<string, ProcessedDocument>();
 
+export async function processDocumentCached(
+  input: string | OpenAPIV3_1.Document | OpenAPIV3.Document,
+): Promise<ProcessedDocument> {
+  if (typeof input !== 'string') return processDocument(input);
+
+  const cached = cache.get(input);
+  if (cached) return cached;
+  const processed = await processDocument(input);
+
+  cache.set(input, processed);
+  return processed;
+}
+
 /**
  * process & reference input document to a Fumadocs OpenAPI compatible format
  */
 export async function processDocument(
   input: string | OpenAPIV3_1.Document | OpenAPIV3.Document,
-  disableCache = false,
 ): Promise<ProcessedDocument> {
-  const cached =
-    !disableCache && typeof input === 'string' ? cache.get(input) : null;
-
-  if (cached) return cached;
-
   const dereferenceMap: DereferenceMap = new Map();
   let document = await bundle(input as string, {
     plugins: [fetchUrls(), readFiles()],
@@ -38,15 +45,9 @@ export async function processDocument(
     },
   });
 
-  const processed: ProcessedDocument = {
+  return {
     document: dereferenced as NoReference<Document>,
     dereferenceMap,
     downloaded: document as Document,
   };
-
-  if (!disableCache && typeof input === 'string') {
-    cache.set(input, processed);
-  }
-
-  return processed;
 }

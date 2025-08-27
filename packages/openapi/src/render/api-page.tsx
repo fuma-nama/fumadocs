@@ -5,7 +5,7 @@ import { createMethod } from '@/server/create-method';
 import { createRenders } from '@/render/renderer';
 import type { OpenAPIV3_1 } from 'openapi-types';
 import {
-  processDocument,
+  processDocumentCached,
   type ProcessedDocument,
 } from '@/utils/process-document';
 import { defaultAdapters } from '@/media/adapter';
@@ -37,7 +37,7 @@ export async function APIPage(props: ApiPageProps) {
   const { operations, hasHead = true, webhooks } = props;
   const processed =
     typeof props.document === 'string'
-      ? await processDocument(props.document)
+      ? await processDocumentCached(props.document)
       : await props.document;
   const ctx = await getContext(processed, props);
   const { document } = processed;

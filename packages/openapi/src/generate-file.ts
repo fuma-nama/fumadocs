@@ -11,7 +11,7 @@ import {
   generateTags,
 } from './generate';
 import {
-  processDocument,
+  processDocumentCached,
   type ProcessedDocument,
 } from '@/utils/process-document';
 import type { OpenAPIServer } from '@/server';
@@ -194,7 +194,7 @@ export async function generateFilesOnly(
 
     await Promise.all(
       targets.map(async (item) => {
-        schemas[item] = await processDocument(path.join(cwd, item));
+        schemas[item] = await processDocumentCached(path.join(cwd, item));
       }),
     );
   } else {
