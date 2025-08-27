@@ -62,7 +62,11 @@ declare module 'mdast' {
   }
 }
 
-const slugger = new Slugger();
+declare module 'vfile' {
+  interface DataMap {
+    structuredData: StructuredData;
+  }
+}
 
 /**
  * Attach structured data to VFile, you can access via `vfile.data.structuredData`.
@@ -81,6 +85,8 @@ export function remarkStructure({
     return ['TypeTable', 'Callout'].includes(node.name);
   },
 }: StructureOptions = {}): Transformer<Root, Root> {
+  const slugger = new Slugger();
+
   if (Array.isArray(allowedMdxAttributes)) {
     const arr = allowedMdxAttributes;
     allowedMdxAttributes = (_node, attribute) =>
@@ -95,7 +101,7 @@ export function remarkStructure({
   return (node, file) => {
     slugger.reset();
     const data: StructuredData = { contents: [], headings: [] };
-    let lastHeading: string | undefined = '';
+    let lastHeading: string | undefined;
 
     // Fumadocs OpenAPI Generated Structured Data
     if (file.data.frontmatter) {
@@ -198,5 +204,5 @@ export function structure(
     .use(remarkStructure, options)
     .processSync(content);
 
-  return result.data.structuredData as StructuredData;
+  return result.data.structuredData!;
 }

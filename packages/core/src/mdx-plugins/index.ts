@@ -11,3 +11,4 @@ export * from './rehype-toc';
 export * from './remark-code-tab';
 export * from './remark-steps';
 export * from './remark-npm';
+export * from './codeblock-utils';

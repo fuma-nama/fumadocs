@@ -106,7 +106,7 @@ test('Remark Image: `publicDir` with URL', async () => {
   );
   const result = await remark()
     .use(remarkImage, {
-      publicDir: 'https://picsum.photos/id',
+      publicDir: 'https://fumadocs.dev',
       useImport: false,
     })
     .use(remarkMdx)

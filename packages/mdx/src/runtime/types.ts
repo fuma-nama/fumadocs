@@ -1,11 +1,8 @@
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type { MetaData, PageData, Source } from 'fumadocs-core/source';
 import type { LoadedConfig } from '@/utils/config';
-import type { FC } from 'react';
-import type { MDXProps } from 'mdx/types';
-import type { StructuredData } from 'fumadocs-core/mdx-plugins';
-import type { TableOfContents } from 'fumadocs-core/server';
 import type { DocCollection, DocsCollection, MetaCollection } from '@/config';
+import type { CompiledMDXProperties } from '@/utils/build-mdx';
 
 export interface BaseCollectionEntry {
   /**
@@ -19,15 +16,9 @@ export interface FileInfo {
   absolutePath: string;
 }
 
-export interface MarkdownProps {
-  body: FC<MDXProps>;
-  structuredData: StructuredData;
-  toc: TableOfContents;
-
-  /**
-   * Only available when `lastModifiedTime` is enabled on MDX loader
-   */
-  lastModified?: Date;
+interface MarkdownProps
+  extends Omit<CompiledMDXProperties, 'frontmatter' | 'default'> {
+  body: CompiledMDXProperties['default'];
 }
 
 export interface RuntimeFile {

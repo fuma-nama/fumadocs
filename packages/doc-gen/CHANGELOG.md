@@ -1,5 +1,23 @@
 # fumadocs-docgen
 
+## 3.0.0
+
+### Major Changes
+
+- b4474cf: `remarkTypeScriptToJavaScript` now output new `<CodeBlockTabs />` syntax, drop `Tab` and `Tabs` options
+- b4474cf: Make `fumadocs-core` a required peer dep (and must be `^15.7.2`)
+
+### Minor Changes
+
+- b4474cf: [`remarkTypeScriptToJavaScript`] Support overriding output codeblock's meta string
+
+### Patch Changes
+
+- Updated dependencies [88b5a4e]
+- Updated dependencies [039b24b]
+- Updated dependencies [08eee2b]
+  - fumadocs-core@15.7.2
+
 ## 2.1.0
 
 ### Minor Changes

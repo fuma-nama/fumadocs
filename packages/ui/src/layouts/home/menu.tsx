@@ -1,5 +1,5 @@
 'use client';
-import { BaseLinkItem, type LinkItemType } from '@/layouts/links';
+import { BaseLinkItem, type LinkItemType } from '@/layouts/shared';
 import { cn } from '@/utils/cn';
 import {
   NavigationMenuContent,

@@ -252,3 +252,172 @@ test('Loader: Rest operator', () => {
       }
     `);
 });
+
+test('Loader: Allow duplicate pages when explicitly referenced twice', () => {
+  const result = loader({
+    baseUrl: '/',
+    pageTree: {
+      noRef: true,
+    },
+    source: {
+      files: [
+        {
+          type: 'meta',
+          path: 'meta.json',
+          data: {
+            pages: ['page1', 'page1', 'page2'],
+          },
+        },
+        {
+          type: 'page',
+          path: 'page1.mdx',
+          data: {
+            title: 'Page 1',
+          },
+        },
+        {
+          type: 'page',
+          path: 'page2.mdx',
+          data: {
+            title: 'Page 2',
+          },
+        },
+      ],
+    },
+  });
+
+  const treeChildren = result.pageTree.children;
+  expect(treeChildren.length).toBe(3);
+  expect(treeChildren[0].$id).toBe('page1.mdx');
+  expect(treeChildren[1].$id).toBe('page1.mdx');
+  expect(treeChildren[2].$id).toBe('page2.mdx');
+});
+
+test('Loader: No duplicate pages when referencing subfolder items and folder', () => {
+  const result = loader({
+    baseUrl: '/',
+    pageTree: {
+      noRef: true,
+    },
+    source: {
+      files: [
+        {
+          type: 'meta',
+          path: 'meta.json',
+          data: {
+            pages: [
+              'index',
+              'subfolder/page1', // Reference specific page in subfolder
+              'subfolder/page2', // Reference another specific page
+              'other-page',
+              'subfolder', // Reference the entire folder
+            ],
+          },
+        },
+        {
+          type: 'page',
+          path: 'index.mdx',
+          data: {
+            title: 'Home',
+          },
+        },
+        {
+          type: 'page',
+          path: 'other-page.mdx',
+          data: {
+            title: 'Other Page',
+          },
+        },
+        {
+          type: 'page',
+          path: 'subfolder/page1.mdx',
+          data: {
+            title: 'Subfolder Page 1',
+          },
+        },
+        {
+          type: 'page',
+          path: 'subfolder/page2.mdx',
+          data: {
+            title: 'Subfolder Page 2',
+          },
+        },
+        {
+          type: 'page',
+          path: 'subfolder/page3.mdx',
+          data: {
+            title: 'Subfolder Page 3',
+          },
+        },
+      ],
+    },
+  });
+
+  // Check that pages are not duplicated
+  const pages = result.getPages();
+  const pagePaths = pages.map((page) => page.slugs.join('/'));
+
+  // Should have exactly 5 pages total
+  expect(pages.length).toBe(5);
+
+  // Check that each page appears only once
+  const uniquePaths = new Set(pagePaths);
+  expect(uniquePaths.size).toBe(pagePaths.length);
+
+  // Verify all pages are present
+  expect(pagePaths.sort()).toEqual([
+    '', // index
+    'other-page',
+    'subfolder/page1',
+    'subfolder/page2',
+    'subfolder/page3',
+  ]);
+
+  // Check the page tree structure
+  expect(removeUndefined(result.pageTree, true), 'Page Tree')
+    .toMatchInlineSnapshot(`
+      {
+        "$id": "root",
+        "children": [
+          {
+            "$id": "index.mdx",
+            "name": "Home",
+            "type": "page",
+            "url": "/",
+          },
+          {
+            "$id": "subfolder/page1.mdx",
+            "name": "Subfolder Page 1",
+            "type": "page",
+            "url": "/subfolder/page1",
+          },
+          {
+            "$id": "subfolder/page2.mdx",
+            "name": "Subfolder Page 2",
+            "type": "page",
+            "url": "/subfolder/page2",
+          },
+          {
+            "$id": "other-page.mdx",
+            "name": "Other Page",
+            "type": "page",
+            "url": "/other-page",
+          },
+          {
+            "$id": "subfolder",
+            "children": [
+              {
+                "$id": "subfolder/page3.mdx",
+                "name": "Subfolder Page 3",
+                "type": "page",
+                "url": "/subfolder/page3",
+              },
+            ],
+            "name": "Subfolder",
+            "type": "folder",
+          },
+        ],
+        "name": "",
+      }
+    `);
+});

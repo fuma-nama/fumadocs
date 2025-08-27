@@ -15,7 +15,7 @@ export interface PageTreeBuilderContext<
   Meta extends MetaData = MetaData,
 > {
   /**
-   * @internal
+   * @internal resolve paths without extensions
    */
   resolveName: (name: string, format: 'meta' | 'page') => string;
   options: BaseOptions<Page, Meta>;
@@ -27,6 +27,7 @@ export interface PageTreeBuilderContext<
 
   storages?: Record<string, ContentStorage<Page, Meta>>;
   locale?: string;
+  visitedPaths: Set<string>;
 }
 
 export interface PageTreeTransformer<
@@ -70,6 +71,12 @@ export interface BaseOptions<
   noRef?: boolean;
   transformers?: PageTreeTransformer<Page, Meta>[];
   resolveIcon?: (icon: string | undefined) => ReactNode | undefined;
+  /**
+   * generate fallback page tree
+   *
+   * @defaultValue true
+   */
+  generateFallback?: boolean;
 }
 
 export interface PageTreeBuilder<
@@ -79,15 +86,7 @@ export interface PageTreeBuilder<
   build: (
     options: BaseOptions<Page, Meta> & {
       id?: string;
-
       storage: ContentStorage<Page, Meta>;
-
-      /**
-       * generate fallback page tree
-       *
-       * @defaultValue true
-       */
-      generateFallback?: boolean;
     },
   ) => PageTree.Root;
 
@@ -113,28 +112,30 @@ const excludePrefix = '!';
 function buildAll(
   paths: string[],
   ctx: PageTreeBuilderContext,
-  filter?: (path: string) => boolean,
   reversed = false,
 ): PageTree.Node[] {
-  const output: PageTree.Node[] = [];
-  const sortedPaths = (filter ? paths.filter(filter) : [...paths]).sort(
+  const items: PageTree.Item[] = [];
+  const folders: PageTree.Folder[] = [];
+  const sortedPaths = paths.sort(
     (a, b) => a.localeCompare(b) * (reversed ? -1 : 1),
   );
 
   for (const path of sortedPaths) {
+    ctx.visitedPaths.add(path);
+
     const fileNode = buildFileNode(path, ctx);
-    if (!fileNode) continue;
+    if (fileNode) {
+      if (basename(path, extname(path)) === 'index') items.unshift(fileNode);
+      else items.push(fileNode);
 
-    if (basename(path, extname(path)) === 'index') output.unshift(fileNode);
-    else output.push(fileNode);
+      continue;
+    }
+
+    const dirNode = buildFolderNode(path, false, ctx);
+    if (dirNode) folders.push(dirNode);
   }
 
-  for (const dir of sortedPaths) {
-    const dirNode = buildFolderNode(dir, false, ctx);
-    if (dirNode) output.push(dirNode);
-  }
-
-  return output;
+  return [...items, ...folders];
 }
 
 function resolveFolderItem(
@@ -142,7 +143,6 @@ function resolveFolderItem(
   item: string,
   ctx: PageTreeBuilderContext,
   idx: number,
-  restNodePaths: Set<string>,
 ): PageTree.Node[] | '...' | 'z...a' {
   if (item === rest || item === restReversed) return item;
   const { options, resolveName } = ctx;
@@ -197,7 +197,7 @@ function resolveFolderItem(
   }
 
   const path = resolveName(joinPath(folderPath, filename), 'page');
-  restNodePaths.delete(path);
+  ctx.visitedPaths.add(path);
 
   if (isExcept) return [];
 
@@ -227,34 +227,35 @@ function buildFolderNode(
     meta = undefined;
   }
 
-  let indexDisabled = meta?.data.root ?? isGlobalRoot;
+  const isRoot = meta?.data.root ?? isGlobalRoot;
+  let index: PageTree.Item | undefined;
   let children: PageTree.Node[];
 
+  function setIndexIfUnused() {
+    if (isRoot || ctx.visitedPaths.has(indexPath)) return;
+    ctx.visitedPaths.add(indexPath);
+    index = buildFileNode(indexPath, ctx);
+  }
+
   if (!meta?.data.pages) {
+    setIndexIfUnused();
     children = buildAll(
-      files,
+      files.filter((file) => !ctx.visitedPaths.has(file)),
       ctx,
-      (file) => indexDisabled || file !== indexPath,
     );
   } else {
-    const restItems = new Set<string>(files);
     const resolved = meta.data.pages.flatMap<
       PageTree.Node | typeof rest | typeof restReversed
-    >((item, i) => resolveFolderItem(folderPath, item, ctx, i, restItems));
-
-    // disable folder index if it is used in `pages`
-    if (!indexDisabled && !restItems.has(indexPath)) {
-      indexDisabled = true;
-    }
+    >((item, i) => resolveFolderItem(folderPath, item, ctx, i));
+    setIndexIfUnused();
 
     for (let i = 0; i < resolved.length; i++) {
       const item = resolved[i];
       if (item !== rest && item !== restReversed) continue;
 
       const items = buildAll(
-        files,
+        files.filter((file) => !ctx.visitedPaths.has(file)),
         ctx,
-        (file) => (indexDisabled || file !== indexPath) && restItems.has(file),
         item === restReversed,
       );
 
@@ -264,8 +265,6 @@ function buildFolderNode(
 
     children = resolved as PageTree.Node[];
   }
-
-  const index = !indexDisabled ? buildFileNode(indexPath, ctx) : undefined;
 
   let name = meta?.data.title ?? index?.name;
   if (!name) {
@@ -304,6 +303,7 @@ function buildFileNode(
   ctx: PageTreeBuilderContext,
 ): PageTree.Item | undefined {
   const { options, getUrl, storage, locale, transformers } = ctx;
+
   const page = storage.read(path);
   if (page?.format !== 'page') return;
 
@@ -347,7 +347,7 @@ function build(id: string, ctx: PageTreeBuilderContext): PageTree.Root {
 }
 
 export function createPageTreeBuilder(getUrl: UrlFn): PageTreeBuilder {
-  function getTransformers(options: BaseOptions, generateFallback = true) {
+  function getTransformers(options: BaseOptions, generateFallback: boolean) {
     const transformers: PageTreeTransformer[] = [legacyTransformer(options)];
 
     if (options.transformers) {
@@ -377,28 +377,24 @@ export function createPageTreeBuilder(getUrl: UrlFn): PageTreeBuilder {
   }
 
   return {
-    build({ storage, id, generateFallback, ...options }) {
-      const resolve = createFlattenPathResolver(storage);
+    build({ storage, id, ...options }) {
+      const key = '';
 
-      return build(id ?? 'root', {
-        transformers: getTransformers(options, generateFallback),
-        options,
-        builder: this,
-        storage,
-        getUrl,
-        resolveName(name, format) {
-          return resolve(name, format) ?? name;
-        },
-      });
+      return this.buildI18n({
+        id,
+        storages: { [key]: storage },
+        ...options,
+      })[key];
     },
-    buildI18n({ id, storages, ...options }) {
-      const transformers = getTransformers(options);
+    buildI18n({ id, storages, generateFallback = true, ...options }) {
+      const transformers = getTransformers(options, generateFallback);
       const out: Record<string, PageTree.Root> = {};
 
       for (const [locale, storage] of Object.entries(storages)) {
         const resolve = createFlattenPathResolver(storage);
+        const branch = locale.length === 0 ? 'root' : locale;
 
-        out[locale] = build(id ?? (locale.length === 0 ? 'root' : locale), {
+        out[locale] = build(id ? `${id}-${branch}` : branch, {
           transformers,
           builder: this,
           options,
@@ -406,6 +402,7 @@ export function createPageTreeBuilder(getUrl: UrlFn): PageTreeBuilder {
           locale,
           storage,
           storages,
+          visitedPaths: new Set<string>(),
           resolveName(name, format) {
             return resolve(name, format) ?? name;
           },

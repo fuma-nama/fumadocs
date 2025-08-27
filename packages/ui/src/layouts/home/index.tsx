@@ -3,6 +3,7 @@ import { cn } from '@/utils/cn';
 import {
   type BaseLayoutProps,
   getLinks,
+  type LinkItemType,
   type NavOptions,
 } from '@/layouts/shared';
 import { NavProvider } from '@/contexts/layout';
@@ -14,7 +15,6 @@ import {
   NavbarMenuLink,
   NavbarMenuTrigger,
 } from '@/layouts/home/navbar';
-import { type LinkItemType } from '@/layouts/links';
 import {
   LargeSearchToggle,
   SearchToggle,

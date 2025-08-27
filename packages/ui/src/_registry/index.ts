@@ -109,18 +109,13 @@ export const registry: Registry = {
       files: [
         {
           type: 'components',
-          path: 'layouts/docs/shared.tsx',
-          target: 'components/layout/docs/shared.tsx',
+          path: 'layouts/shared/index.tsx',
+          target: 'components/layout/shared/index.tsx',
         },
         {
           type: 'components',
-          path: 'layouts/links.tsx',
-          target: 'components/layout/links.tsx',
-        },
-        {
-          type: 'components',
-          path: 'layouts/shared.tsx',
-          target: 'components/layout/shared.tsx',
+          path: 'layouts/shared/client.tsx',
+          target: 'components/layout/shared/client.tsx',
         },
         {
           type: 'components',
@@ -386,6 +381,26 @@ export const registry: Registry = {
         {
           type: 'ui',
           path: 'components/ui/popover.tsx',
+        },
+      ],
+    },
+    {
+      name: 'scroll-area',
+      unlisted: true,
+      files: [
+        {
+          type: 'ui',
+          path: 'components/ui/scroll-area.tsx',
+        },
+      ],
+    },
+    {
+      name: 'collapsible',
+      unlisted: true,
+      files: [
+        {
+          type: 'ui',
+          path: 'components/ui/collapsible.tsx',
         },
       ],
     },

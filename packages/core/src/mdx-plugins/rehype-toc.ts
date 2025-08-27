@@ -28,8 +28,8 @@ export function rehypeToc(
     }[] = [];
 
     visit(tree, ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'], (element) => {
-      const id = element.properties.id as string | undefined;
-      if (!id) return 'skip';
+      const id = element.properties.id;
+      if (typeof id !== 'string') return 'skip';
       let isTocOnly = false;
 
       const last = element.children.at(-1);
