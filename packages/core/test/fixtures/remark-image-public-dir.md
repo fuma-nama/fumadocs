@@ -1,1 +1,1 @@
-![External](/237/200/300)
+![External](/banner.png)

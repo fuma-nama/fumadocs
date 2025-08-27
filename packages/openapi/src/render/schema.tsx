@@ -43,6 +43,12 @@ export function Schema({
     ) => ReactNode,
     ctx: Context,
   ) {
+    if (ctx.stack.has(schema)) return;
+    const next = {
+      ...ctx,
+      stack: ctx.stack.next(schema),
+    };
+
     if (Array.isArray(schema.type)) {
       const items = schema.type.flatMap((type) => {
         const composed = {
@@ -52,9 +58,10 @@ export function Schema({
         if (!isComplexType(composed)) return [];
         return composed;
       });
+
       if (items.length === 0) return;
       if (items.length === 1)
-        return propertyBody(items[0], renderPrimitive, ctx);
+        return propertyBody(items[0], renderPrimitive, next);
 
       return (
         <Tabs defaultValue={items[0].type}>
@@ -80,9 +87,10 @@ export function Schema({
       const oneOf = schema.oneOf.filter((item) =>
         isComplexType(item),
       ) as Exclude<ResolvedSchema, boolean>[];
-      if (oneOf.length === 0) return;
+      if (oneOf.length === 0 || oneOf.some((item) => ctx.stack.has(item)))
+        return;
       if (oneOf.length === 1) {
-        return propertyBody(oneOf[0], renderPrimitive, ctx);
+        return propertyBody(oneOf[0], renderPrimitive, next);
       }
 
       return (
@@ -101,7 +109,7 @@ export function Schema({
               {propertyBody(
                 item,
                 (child, ctx) => primitiveBody(child, ctx, false, true),
-                ctx,
+                next,
               )}
             </TabsContent>
           ))}
@@ -111,9 +119,10 @@ export function Schema({
 
     const of = schema.allOf ?? schema.anyOf;
     if (of) {
-      const arr = of.filter((item) => !ctx.stack.has(item));
-      if (arr.length === 0) return;
-      const combined = combineSchema(arr);
+      if (of.length === 0) return;
+      if (of.some((item) => typeof item === 'object' && ctx.stack.has(item)))
+        return;
+      const combined = combineSchema(of as ResolvedSchema[]);
       if (typeof combined === 'boolean') return;
 
       return renderPrimitive(combined, ctx);
@@ -224,8 +233,9 @@ export function Schema({
     collapsible: boolean,
     nested: boolean,
   ) {
+    if (ctx.stack.has(schema)) return <p>Recursive</p>;
+
     if (schema.type === 'object') {
-      if (ctx.stack.has(schema)) return <p>Recursive</p>;
       const props = Object.entries(schema.properties ?? {});
       const patternProps = Object.entries(schema.patternProperties ?? {});
       const next = {
@@ -305,6 +315,7 @@ export function Schema({
       return <renderer.Property name={key} type="never" {...props} />;
     }
 
+    if (ctx.stack.has(schema)) return;
     if ((schema.readOnly && !readOnly) || (schema.writeOnly && !writeOnly))
       return;
 
@@ -327,7 +338,7 @@ export function Schema({
   }
 
   const context: Context = {
-    stack: schemaStack(),
+    stack: schemaStack(renderContext),
   };
   if (
     typeof schema === 'boolean' ||
@@ -343,18 +354,28 @@ export function Schema({
 }
 
 interface SchemaStack {
+  history: ResolvedSchema[];
   next(...schema: ResolvedSchema[]): SchemaStack;
   add(schema: ResolvedSchema): void;
-  has(schema: ResolvedSchema): boolean;
+  has(schema: Exclude<ResolvedSchema, boolean>): boolean;
 }
 
-function schemaStack(parent?: SchemaStack): SchemaStack {
-  const titles = new Set<string>();
-  const history = new WeakSet();
+function schemaStack(
+  renderContext: RenderContext,
+  parent?: SchemaStack,
+): SchemaStack {
+  const ids = new Set<string>();
+
+  function getId(schema: ResolvedSchema) {
+    if (typeof schema !== 'object') return;
+
+    return schema.title ?? renderContext.schema.dereferenceMap.get(schema);
+  }
 
   return {
+    history: parent ? [...parent.history] : [],
     next(...schemas) {
-      const child = schemaStack(this);
+      const child = schemaStack(renderContext, this);
       for (const item of schemas) {
         child.add(item);
       }
@@ -363,15 +384,24 @@ function schemaStack(parent?: SchemaStack): SchemaStack {
     add(schema) {
       if (typeof schema !== 'object') return;
 
-      if (schema.title) titles.add(schema.title);
-      history.add(schema);
+      const id = getId(schema);
+      if (id) ids.add(id);
+      this.history.push(schema);
     },
     has(schema) {
-      if (typeof schema !== 'object') return false;
-      if (parent && parent.has(schema)) return true;
-      if (schema.title && titles.has(schema.title)) return true;
+      if (this.history.length > 30) {
+        console.warn(
+          `[Fumadocs OpenAPI] schema depth exceeded 30, this might be unexpected.`,
+        );
+        // stopping at here
+        return true;
+      }
 
-      return history.has(schema);
+      if (parent && parent.has(schema)) return true;
+      const id = getId(schema);
+      if (id) return ids.has(id);
+
+      return this.history.includes(schema);
     },
   };
 }

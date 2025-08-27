@@ -74,6 +74,77 @@ void generateFiles({
 });
 ```
 
+### Index
+
+Generate index files with cards linking to generated pages.
+
+```ts
+import { generateFiles } from 'fumadocs-openapi';
+
+void generateFiles({
+  input: ['./petstore.yaml', './museum.yaml'],
+  output: './content/docs',
+
+  index: {
+    // for generating `href`
+    url: {
+      baseUrl: '/docs',
+      contentDir: './content/docs',
+    },
+    items: [
+      {
+        path: 'index.mdx',
+        // optional: restrict the input files
+        only: ['petstore.yaml'],
+        // optional: set frontmatter
+        description: 'All available pages',
+      },
+    ],
+  },
+});
+```
+
+### Imports
+
+Add custom imports to generated MDX files. This is useful for including components, utilities, or other dependencies in your generated documentation.
+
+```ts
+import { generateFiles } from 'fumadocs-openapi';
+
+void generateFiles({
+  input: ['./petstore.yaml'],
+  output: './content/docs',
+  imports: [
+    {
+      names: ['CustomComponent', 'AnotherComponent'],
+      from: '@/components/custom',
+    },
+    {
+      names: ['utils'],
+      from: '@/lib/utils',
+    },
+    {
+      names: ['API_BASE_URL'],
+      from: '@/constants',
+    },
+  ],
+});
+```
+
+This will add the following imports to all generated MDX files:
+
+```ts
+import { CustomComponent, AnotherComponent } from '@/components/custom';
+import { utils } from '@/lib/utils';
+import { API_BASE_URL } from '@/constants';
+```
+
+<Callout type="info">
+  The `imports` configuration is especially important for Cards generation in
+  index files, where you need to import `source` and `getPageTreePeers` for the
+  navigation functionality to work.
+</Callout>
+
 ### Name
 
 A function that controls the output path of MDX pages.

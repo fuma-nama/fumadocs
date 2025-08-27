@@ -1,7 +1,5 @@
-import type { TableOfContents } from 'fumadocs-core/server';
 import { createElement, type FC, lazy, type ReactNode } from 'react';
 import type { MDXProps } from 'mdx/types';
-import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { DocCollection, DocsCollection, MetaCollection } from '@/config';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type {
@@ -10,18 +8,7 @@ import type {
   Source,
   VirtualFile,
 } from 'fumadocs-core/source';
-
-interface CompiledMDXProperties<Frontmatter> {
-  frontmatter: Frontmatter;
-  structuredData: StructuredData;
-  toc: TableOfContents;
-  default: FC<MDXProps>;
-
-  /**
-   * Only available when `lastModifiedTime` is enabled on MDX loader
-   */
-  lastModified?: Date;
-}
+import type { CompiledMDXProperties } from '@/utils/build-mdx';
 
 export type CompiledMDXFile<Frontmatter> = CompiledMDXProperties<Frontmatter> &
   Record<string, unknown>;
@@ -131,7 +118,7 @@ export function fromConfig<Config>(): {
       structuredData,
       lastModified,
       _exports: entry,
-    };
+    } as MDXFileToPageData<Frontmatter>;
   }
 
   function mapPageDataLazy<Frontmatter>(

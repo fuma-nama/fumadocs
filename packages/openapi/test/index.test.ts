@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { idToTitle } from '@/utils/id-to-title';
-import { generateFiles } from '../src';
+import { generateFilesOnly, type OutputFile } from '@/generate-file';
 import { processDocument } from '@/utils/process-document';
 import { generateAll, generateTags } from '@/generate';
 
@@ -14,15 +14,15 @@ describe('Utilities', () => {
   });
 });
 
-describe('Generate documents', () => {
-  const cwd = fileURLToPath(new URL('./', import.meta.url));
+const cwd = fileURLToPath(new URL('./', import.meta.url));
 
+describe('Generate documents', () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
   test('Pet Store', async () => {
-    const result = await generateAll(
+    const result = generateAll(
       './fixtures/petstore.yaml',
       await processDocument(join(cwd, './fixtures/petstore.yaml')),
       {
@@ -34,7 +34,7 @@ describe('Generate documents', () => {
   });
 
   test('Museum', async () => {
-    const tags = await generateTags(
+    const tags = generateTags(
       './fixtures/museum.yaml',
       await processDocument(join(cwd, './fixtures/museum.yaml')),
       {
@@ -50,7 +50,7 @@ describe('Generate documents', () => {
   });
 
   test('Unkey', async () => {
-    const tags = await generateTags(
+    const tags = generateTags(
       './fixtures/unkey.json',
       await processDocument(join(cwd, './fixtures/unkey.json')),
       { cwd },
@@ -63,44 +63,22 @@ describe('Generate documents', () => {
     }
   });
 
-  vi.mock('node:fs/promises', async (importOriginal) => {
-    return {
-      ...(await importOriginal<typeof import('node:fs/promises')>()),
-      mkdir: vi.fn().mockImplementation(() => {
-        // do nothing
-      }),
-      writeFile: vi.fn().mockImplementation(() => {
-        // do nothing
-      }),
-    };
-  });
-
   test('Generate Files', async () => {
-    await generateFiles({
+    const out = await generateFilesOnly({
       input: ['./fixtures/museum.yaml', './fixtures/petstore.yaml'],
       output: './out',
       per: 'file',
       cwd,
     });
 
-    const fs = await import('node:fs/promises');
-
-    expect(fs.writeFile).toBeCalledTimes(2);
-    expect(fs.writeFile).toBeCalledWith(
-      join(cwd, './out/museum.mdx'),
-      expect.anything(),
+    await expect(stringifyOutput(out)).toMatchFileSnapshot(
+      './out/petstore.json',
     );
-    expect(fs.writeFile).toBeCalledWith(
-      join(cwd, './out/petstore.mdx'),
-      expect.anything(),
-    );
-
-    expect(fs.mkdir).toBeCalledWith(join(cwd, './out'), expect.anything());
   });
 
   test('Generate Files - throws error when no input files found', async () => {
     await expect(
-      generateFiles({
+      generateFilesOnly({
         input: ['./fixtures/non-existent-*.yaml'],
         output: './out',
         per: 'file',
@@ -111,7 +89,7 @@ describe('Generate documents', () => {
     );
 
     await expect(
-      generateFiles({
+      generateFilesOnly({
         input: [
           './fixtures/non-existent-1.yaml',
           './fixtures/non-existent-2.yaml',
@@ -129,7 +107,7 @@ describe('Generate documents', () => {
   });
 
   test('Generate Files - groupBy tag per operation', async () => {
-    await generateFiles({
+    const out = await generateFilesOnly({
       input: ['./fixtures/products.yaml'],
       output: './out',
       per: 'operation',
@@ -140,23 +118,41 @@ describe('Generate documents', () => {
       cwd,
     });
 
-    const fs = await import('node:fs/promises');
-
-    expect(fs.writeFile).toBeCalledTimes(3);
-
-    expect(fs.writeFile).toBeCalledWith(
-      join(cwd, './out/products/products/productid.mdx'),
-      expect.anything(),
+    await expect(stringifyOutput(out)).toMatchFileSnapshot(
+      './out/products-per-tag.json',
     );
+  });
 
-    expect(fs.writeFile).toBeCalledWith(
-      join(cwd, './out/inventory/inventory/productid.mdx'),
-      expect.anything(),
-    );
+  test('Generate Files - with index', async () => {
+    const out = await generateFilesOnly({
+      input: ['./fixtures/products.yaml'],
+      output: './out',
+      per: 'operation',
+      name: {
+        algorithm: 'v1',
+      },
+      index: {
+        url: {
+          baseUrl: '/docs',
+          contentDir: './out',
+        },
+        items: [
+          {
+            description: 'all available pages',
+            path: 'index.mdx',
+            only: ['./fixtures/products.yaml'],
+          },
+        ],
+      },
+      cwd,
+    });
 
-    expect(fs.writeFile).toBeCalledWith(
-      join(cwd, './out/products/inventory/productid.mdx'),
-      expect.anything(),
+    await expect(stringifyOutput(out)).toMatchFileSnapshot(
+      './out/products-with-index.json',
     );
   });
 });
+
+function stringifyOutput(output: OutputFile[]) {
+  return JSON.stringify(output.sort(), null, 2).replaceAll(cwd, '~');
+}

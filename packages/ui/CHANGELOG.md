@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 15.7.3
+
+### Patch Changes
+
+- f6de900: Add `overscroll` to sidebar viewports
+- Updated dependencies [6d97379]
+- Updated dependencies [e776ee5]
+  - fumadocs-core@15.7.3
+
 ## 15.7.2
 
 ### Patch Changes

@@ -15,7 +15,7 @@ interface Options {
 function remarkMdxExport({ values }: Options): Transformer<Root, Root> {
   return (tree, vfile) => {
     for (const name of values) {
-      if (!(name in vfile.data)) return;
+      if (!(name in vfile.data)) continue;
 
       // @ts-expect-error -- It is a node
       tree.children.unshift(getMdastExport(name, vfile.data[name]));

@@ -50,34 +50,31 @@ export function remarkHeading({
     visit(root, 'heading', (heading) => {
       heading.data ||= {};
       heading.data.hProperties ||= {};
+      const props = heading.data.hProperties;
 
-      let id = heading.data.hProperties.id;
       const lastNode = heading.children.at(-1);
-
-      if (!id && lastNode?.type === 'text' && customId) {
+      if (lastNode?.type === 'text' && customId) {
         const match = regex.exec(lastNode.value);
 
         if (match?.[1]) {
-          id = match[1];
+          props.id = match[1];
           lastNode.value = lastNode.value.slice(0, match.index);
         }
       }
 
       let flattened: string | null = null;
-      if (!id) {
+      if (!props.id) {
         flattened ??= flattenNode(heading);
 
-        id = defaultSlug
+        props.id = defaultSlug
           ? defaultSlug(root, heading, flattened)
           : slugger.slug(flattened);
       }
 
-      heading.data.hProperties.id = id;
-
       if (generateToc) {
         toc.push({
           title: flattened ?? flattenNode(heading),
-          url: `#${id}`,
+          url: `#${props.id}`,
           depth: heading.depth,
         });
       }
