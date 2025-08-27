@@ -27,7 +27,7 @@ interface GenerateFileOutput {
   content: string;
 }
 
-interface OutputFile {
+export interface OutputFile {
   path: string;
   content: string;
 }

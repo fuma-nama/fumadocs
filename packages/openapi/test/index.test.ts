@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { idToTitle } from '@/utils/id-to-title';
-import { generateFilesOnly } from '../src';
+import { generateFilesOnly, type OutputFile } from '@/generate-file';
 import { processDocument } from '@/utils/process-document';
 import { generateAll, generateTags } from '@/generate';
 
@@ -14,9 +14,9 @@ describe('Utilities', () => {
   });
 });
 
-describe('Generate documents', () => {
-  const cwd = fileURLToPath(new URL('./', import.meta.url));
+const cwd = fileURLToPath(new URL('./', import.meta.url));
 
+describe('Generate documents', () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -71,7 +71,7 @@ describe('Generate documents', () => {
       cwd,
     });
 
-    await expect(JSON.stringify(out, null, 2)).toMatchFileSnapshot(
+    await expect(stringifyOutput(out)).toMatchFileSnapshot(
       './out/petstore.json',
     );
   });
@@ -118,7 +118,7 @@ describe('Generate documents', () => {
       cwd,
     });
 
-    await expect(JSON.stringify(out, null, 2)).toMatchFileSnapshot(
+    await expect(stringifyOutput(out)).toMatchFileSnapshot(
       './out/products-per-tag.json',
     );
   });
@@ -147,8 +147,12 @@ describe('Generate documents', () => {
       cwd,
     });
 
-    await expect(JSON.stringify(out, null, 2)).toMatchFileSnapshot(
+    await expect(stringifyOutput(out)).toMatchFileSnapshot(
       './out/products-with-index.json',
     );
   });
 });
+
+function stringifyOutput(output: OutputFile[]) {
+  return JSON.stringify(output.sort(), null, 2).replaceAll(cwd, '~');
+}
