@@ -35,6 +35,7 @@ export function resolveRequestData(
   pathname: string,
   { path, query }: RequestData,
 ): string {
+  // First, resolve path parameters in the pathname
   for (const key in path) {
     const param = path[key];
 
@@ -45,18 +46,28 @@ export function resolveRequestData(
     }
   }
 
-  const searchParams = new URLSearchParams();
+  // Check if pathname already contains query parameters (legacy API support)
+  const [pathPart, existingQueryString] = pathname.split('?', 2);
+
+  // Parse existing query parameters from the pathname if they exist
+  const searchParams = new URLSearchParams(existingQueryString || '');
+
+  // Add new query parameters from the RequestData
   for (const key in query) {
     const param = query[key];
 
     if (Array.isArray(param.value)) {
+      // Remove existing parameter first to avoid duplicates
+      searchParams.delete(key);
       for (const item of param.value) {
         searchParams.append(key, item);
       }
     } else {
-      searchParams.append(key, param.value);
+      // Set (replace if exists) the parameter value
+      searchParams.set(key, param.value);
     }
   }
 
-  return searchParams.size > 0 ? `${pathname}?${searchParams}` : pathname;
+  // Return the reconstructed URL
+  return searchParams.size > 0 ? `${pathPart}?${searchParams}` : pathPart;
 }
