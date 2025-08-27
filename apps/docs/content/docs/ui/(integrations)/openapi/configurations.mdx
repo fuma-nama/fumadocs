@@ -76,30 +76,7 @@ void generateFiles({
 
 ### Index
 
-Generate index files with custom paths and content. When multiple inputs share the same index file, generates Cards-based content for navigation.
-`index.name` supports object schema mapping for creating index files for multiple inputs.
-
-#### Basic Index Generation
-
-Generate a simple index file for a single schema:
-
-```ts
-import { generateFiles } from 'fumadocs-openapi';
-
-void generateFiles({
-  input: ['./petstore.yaml'],
-  output: './content/docs',
-  index: {
-    name: 'api-overview',
-    title: 'API Documentation',
-    description: 'Complete API reference',
-  },
-});
-```
-
-#### Multiple Schema Index Files
-
-Map different schemas to separate index files:
+Generate index files with cards linking to generated pages.
 
 ```ts
 import { generateFiles } from 'fumadocs-openapi';
@@ -107,52 +84,25 @@ import { generateFiles } from 'fumadocs-openapi';
 void generateFiles({
   input: ['./petstore.yaml', './museum.yaml'],
   output: './content/docs',
+
   index: {
-    name: {
-      './petstore.yaml': 'petstore-api',
-      './museum.yaml': 'museum-api',
+    // for generating `href`
+    url: {
+      baseUrl: '/docs',
+      contentDir: './content/docs',
     },
+    items: [
+      {
+        path: 'index.mdx',
+        // optional: restrict the input files
+        only: ['petstore.yaml'],
+        // optional: set frontmatter
+        description: 'All available pages',
+      },
+    ],
   },
 });
 ```
-
-#### Shared Index with Cards
-
-Generate a single index file for multiple schemas with Cards navigation:
-
-```ts
-import { generateFiles } from 'fumadocs-openapi';
-
-void generateFiles({
-  input: ['./petstore.yaml', './museum.yaml'],
-  output: './content/docs',
-  index: {
-    name: {
-      './petstore.yaml': 'comprehensive-api',
-      './museum.yaml': 'comprehensive-api',
-    },
-    url: '/docs/api',
-    title: 'API Documentation',
-    description: 'All available APIs',
-  },
-  imports: [
-    {
-      names: ['source'],
-      from: '@/lib/source',
-    },
-    {
-      names: ['getPageTreePeers'],
-      from: 'fumadocs-core/server',
-    },
-  ],
-});
-```
-
-<Callout type="info">
-  For Cards generation to work, you must provide all three requirements: `url`,
-  `source` import, and `getPageTreePeers` import. If any are missing, the index
-  file will contain only frontmatter and imports without Cards content.
-</Callout>
 
 ### Imports
 
