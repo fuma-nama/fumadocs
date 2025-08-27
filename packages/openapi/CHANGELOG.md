@@ -1,5 +1,20 @@
 # @fuma-docs/openapi
 
+## 9.3.0
+
+### Minor Changes
+
+- 22371ce: Support `index` generation in `generateFiles`: create index files to link all generated pages.
+
+### Patch Changes
+
+- 3d3790b: Use schema ID for anti-circular reference
+- Updated dependencies [f6de900]
+- Updated dependencies [6d97379]
+- Updated dependencies [e776ee5]
+  - fumadocs-ui@15.7.3
+  - fumadocs-core@15.7.3
+
 ## 9.2.3
 
 ### Patch Changes
