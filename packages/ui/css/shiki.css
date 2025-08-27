@@ -6,6 +6,11 @@
     color: var(--shiki-light);
   }
 
+  code .line.diff {
+    --padding-left: calc(var(--spacing) * 5);
+    --padding-right: calc(var(--spacing) * 5);
+  }
+
   code .line {
     position: relative;
     min-height: 1lh;
@@ -44,7 +49,7 @@
 
   code .diff::before {
     position: absolute;
-    left: var(--spacing);
+    left: calc(var(--spacing) * 2);
   }
 
   code .diff.remove {
