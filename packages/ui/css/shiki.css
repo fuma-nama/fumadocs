@@ -6,6 +6,11 @@
     color: var(--shiki-light);
   }
 
+  span > code > span {
+    --padding-left: var(--spacing);
+    --padding-right: var(--spacing);
+  }
+
   code .line.diff {
     --padding-left: calc(var(--spacing) * 5);
     --padding-right: calc(var(--spacing) * 5);
