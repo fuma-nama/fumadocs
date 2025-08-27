@@ -2,4 +2,4 @@
 'fumadocs-openapi': minor
 ---
 
-Enhance generateFiles to create an index file for the overall ingested OpenAPI document
+Support `index` generation in `generateFiles`: create index files to link all generated pages.
