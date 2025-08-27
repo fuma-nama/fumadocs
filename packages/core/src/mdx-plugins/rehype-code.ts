@@ -134,6 +134,7 @@ export function rehypeCode(
       langs:
         options.langs ??
         (options.lazy ? ['ts', 'tsx'] : Object.keys(bundledLanguages)),
+      langAlias: options.langAlias,
     },
   );
 
