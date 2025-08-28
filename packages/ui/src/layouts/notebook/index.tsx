@@ -338,8 +338,8 @@ function DocsNavbar({
     <Navbar mode={navMode}>
       <div
         className={cn(
-          'flex border-b px-4 gap-2 flex-1',
-          navMode === 'auto' && 'md:px-6',
+          'flex border-b px-4 gap-2 flex-1 md:px-6',
+          navMode === 'top' && 'ps-7',
         )}
       >
         <div
@@ -450,7 +450,7 @@ function DocsNavbar({
                     color: 'secondary',
                     size: 'icon-sm',
                   }),
-                  'text-fd-muted-foreground rounded-full',
+                  'text-fd-muted-foreground rounded-full -me-1.5',
                 )}
               >
                 <SidebarIcon />
@@ -462,8 +462,8 @@ function DocsNavbar({
       {tabs.length > 0 && (
         <LayoutTabs
           className={cn(
-            'border-b h-10 max-lg:hidden',
-            navMode === 'top' ? 'px-4' : 'px-6',
+            'border-b px-6 h-10 max-lg:hidden',
+            navMode === 'top' && 'ps-7',
           )}
           options={tabs}
         />

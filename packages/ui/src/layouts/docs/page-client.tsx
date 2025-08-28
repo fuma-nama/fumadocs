@@ -391,6 +391,8 @@ export function PageBreadcrumb({
 }
 
 export function PageTOC(props: ComponentProps<'div'>) {
+  const { collapsed } = useSidebar();
+
   return (
     <div
       id="nd-toc"
@@ -399,8 +401,9 @@ export function PageTOC(props: ComponentProps<'div'>) {
       style={{
         ...props.style,
         top: 'calc(var(--fd-banner-height) + var(--fd-nav-height))',
-        insetInlineEnd:
-          'max(var(--fd-layout-offset), calc((100vw - var(--fd-sidebar-width) - var(--fd-page-width))/2))',
+        insetInlineEnd: collapsed
+          ? 'max(0px, calc(50vw - var(--fd-sidebar-width)/2 - var(--fd-page-width)/2))'
+          : 'max(var(--fd-layout-offset), calc(50vw - var(--fd-sidebar-width)/2 - var(--fd-page-width)/2))',
       }}
     >
       <div className="flex h-full w-(--fd-toc-width) max-w-full flex-col pe-4">

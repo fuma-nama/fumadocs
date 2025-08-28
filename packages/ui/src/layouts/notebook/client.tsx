@@ -105,7 +105,7 @@ export function LayoutTabs({
     <div
       {...props}
       className={cn(
-        'flex flex-row items-center gap-4 overflow-auto',
+        'flex flex-row items-end gap-6 overflow-auto',
         props.className,
       )}
     >
@@ -130,7 +130,7 @@ function LayoutTab({
   return (
     <Link
       className={cn(
-        'inline-flex border-b border-transparent transition-colors items-center py-1.5 font-medium gap-2 text-fd-muted-foreground text-sm text-nowrap',
+        'inline-flex border-b-2 border-transparent transition-colors items-center pb-1.5 font-medium gap-2 text-fd-muted-foreground text-sm text-nowrap hover:text-fd-accent-foreground',
         option.unlisted && !selected && 'hidden',
         selected && 'border-fd-primary text-fd-primary',
       )}
