@@ -98,6 +98,9 @@ importers:
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
+      d3-force:
+        specifier: ^3.0.0
+        version: 3.0.0
       feed:
         specifier: ^5.1.0
         version: 5.1.0
@@ -207,6 +210,9 @@ importers:
       '@tailwindcss/postcss':
         specifier: ^4.1.12
         version: 4.1.12
+      '@types/d3-force':
+        specifier: ^3.0.10
+        version: 3.0.10
       '@types/hast':
         specifier: ^3.0.4
         version: 3.0.4
