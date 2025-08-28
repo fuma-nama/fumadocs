@@ -1,5 +1,16 @@
 # @fuma-docs/openapi
 
+## 9.3.1
+
+### Patch Changes
+
+- 585e1b2: Enhance resolveRequestData to support query parameters in path (legacy OpenAPI behavior)
+- e1b61ea: Unify input id and output documents
+- Updated dependencies [302cdc2]
+- Updated dependencies [02d3453]
+  - fumadocs-ui@15.7.4
+  - fumadocs-core@15.7.4
+
 ## 9.3.0
 
 ### Minor Changes
