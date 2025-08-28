@@ -97,10 +97,10 @@ export function CodeBlock({
       dir="ltr"
       {...props}
       className={cn(
-        inTab ? 'rounded-lg bg-fd-secondary' : 'my-4 rounded-xl bg-fd-card',
+        inTab ? 'bg-fd-secondary' : 'my-4 bg-fd-card',
         keepBackground && 'bg-(--shiki-light-bg) dark:bg-(--shiki-dark-bg)',
 
-        'shiki relative border shadow-md outline-none not-prose overflow-hidden text-sm',
+        'shiki relative border shadow-md rounded-xl outline-none not-prose overflow-hidden text-sm',
         props.className,
       )}
     >
@@ -200,8 +200,8 @@ export function CodeBlockTabs({ ref, ...props }: ComponentProps<typeof Tabs>) {
       ref={mergeRefs(containerRef, ref)}
       {...props}
       className={cn(
-        'bg-fd-card p-1 rounded-xl border overflow-hidden',
-        nested ? 'shadow-sm' : '-m-1 my-4',
+        'bg-fd-card rounded-xl border',
+        nested ? 'shadow-sm' : 'my-4',
         props.className,
       )}
     >
@@ -261,4 +261,9 @@ export function CodeBlockTabsTrigger({
 }
 
 // TODO: currently Vite RSC plugin has problem with adding `asChild` here, maybe revisit this in future
-export const CodeBlockTab = TabsContent;
+export function CodeBlockTab({
+  className,
+  ...props
+}: ComponentProps<typeof TabsContent>) {
+  return <TabsContent className={cn('-mx-px -mb-px', className)} {...props} />;
+}
