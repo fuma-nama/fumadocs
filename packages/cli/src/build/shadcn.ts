@@ -1,5 +1,5 @@
 import type { Output, OutputComponent } from '@/registry/schema';
-import type { Registry as ShadcnRegistry, RegistryItem } from 'shadcn/registry';
+import type { Registry as ShadcnRegistry, RegistryItem } from 'shadcn/schema';
 
 function mapDeps(deps: Record<string, string | null>) {
   return Object.entries(deps).map(([k, v]) => {
