@@ -85,7 +85,7 @@ describe('Generate documents', () => {
         cwd,
       }),
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `[Error: No input files found.]`,
+      `[Error: input not found: ./fixtures/non-existent-*.yaml]`,
     );
 
     await expect(
@@ -102,7 +102,7 @@ describe('Generate documents', () => {
         },
       }),
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `[Error: No input files found.]`,
+      `[Error: input not found: ./fixtures/non-existent-1.yaml]`,
     );
   });
 

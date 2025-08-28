@@ -1,5 +1,5 @@
 'use client';
-import { Check, Copy } from 'lucide-react';
+import { Check, Clipboard } from 'lucide-react';
 import {
   type ComponentProps,
   createContext,
@@ -87,13 +87,9 @@ export function CodeBlock({
   ),
   ...props
 }: CodeBlockProps) {
-  const isTab = useContext(TabsContext) !== null;
+  const inTab = useContext(TabsContext) !== null;
   const areaRef = useRef<HTMLDivElement>(null);
-  allowCopy ??= !isTab;
-  const bg = cn(
-    'bg-fd-secondary',
-    keepBackground && 'bg-(--shiki-light-bg) dark:bg-(--shiki-dark-bg)',
-  );
+  allowCopy ??= !inTab;
 
   return (
     <figure
@@ -101,18 +97,15 @@ export function CodeBlock({
       dir="ltr"
       {...props}
       className={cn(
-        isTab ? [bg, 'rounded-lg'] : 'my-4 rounded-xl bg-fd-card p-1',
-        'shiki relative border shadow-sm outline-none not-prose overflow-hidden text-sm',
+        inTab ? 'rounded-lg bg-fd-secondary' : 'my-4 rounded-xl bg-fd-card',
+        keepBackground && 'bg-(--shiki-light-bg) dark:bg-(--shiki-dark-bg)',
+
+        'shiki relative border shadow-md outline-none not-prose overflow-hidden text-sm',
         props.className,
       )}
     >
       {title ? (
-        <div
-          className={cn(
-            'flex text-fd-muted-foreground items-center gap-2 ps-3 h-9.5',
-            isTab && 'border-b',
-          )}
-        >
+        <div className="flex text-fd-muted-foreground items-center gap-2 h-9.5 border-b px-4">
           {typeof icon === 'string' ? (
             <div
               className="[&_svg]:size-3.5"
@@ -125,13 +118,14 @@ export function CodeBlock({
           )}
           <figcaption className="flex-1 truncate">{title}</figcaption>
           {Actions({
+            className: '-me-2',
             children: allowCopy && <CopyButton containerRef={areaRef} />,
           })}
         </div>
       ) : (
         Actions({
           className:
-            'absolute top-1 right-1 z-2 bg-fd-card rounded-bl-lg border-l border-b text-fd-muted-foreground',
+            'absolute top-2 right-2 z-2 backdrop-blur-lg rounded-lg text-fd-muted-foreground',
           children: allowCopy && <CopyButton containerRef={areaRef} />,
         })
       )}
@@ -139,7 +133,6 @@ export function CodeBlock({
         ref={areaRef}
         {...viewportProps}
         className={cn(
-          !isTab && [bg, 'rounded-lg border'],
           'text-[13px] py-3.5 overflow-auto max-h-[600px] fd-scroll-container',
           viewportProps.className,
         )}
@@ -184,7 +177,8 @@ function CopyButton({
       type="button"
       className={cn(
         buttonVariants({
-          className: '[&_svg]:size-3.5 hover:text-fd-accent-foreground',
+          className: 'hover:text-fd-accent-foreground',
+          size: 'icon-xs',
         }),
         className,
       )}
@@ -192,7 +186,7 @@ function CopyButton({
       onClick={onClick}
       {...props}
     >
-      {checked ? <Check /> : <Copy />}
+      {checked ? <Check /> : <Clipboard />}
     </button>
   );
 }
@@ -207,7 +201,7 @@ export function CodeBlockTabs({ ref, ...props }: ComponentProps<typeof Tabs>) {
       {...props}
       className={cn(
         'bg-fd-card p-1 rounded-xl border overflow-hidden',
-        !nested && 'my-4',
+        nested ? 'shadow-sm' : '-m-1 my-4',
         props.className,
       )}
     >
@@ -233,14 +227,14 @@ export function CodeBlockTabsList(props: ComponentProps<typeof TabsList>) {
     <TabsList
       {...props}
       className={cn(
-        'flex flex-row overflow-x-auto px-1 -mx-1 text-fd-muted-foreground',
+        'flex flex-row *:first:ms-2 overflow-x-auto text-fd-muted-foreground',
         props.className,
       )}
     >
       {props.children}
       {!nested && (
         <CopyButton
-          className="sticky ms-auto right-0 bg-fd-card backdrop-blur-sm"
+          className="sticky ms-auto right-2 bg-fd-card backdrop-blur-sm"
           containerRef={containerRef}
         />
       )}
@@ -256,7 +250,7 @@ export function CodeBlockTabsTrigger({
     <TabsTrigger
       {...props}
       className={cn(
-        'relative group inline-flex text-sm font-medium text-nowrap items-center transition-colors gap-2 px-2 first:ms-1 py-1.5 hover:text-fd-accent-foreground data-[state=active]:text-fd-primary [&_svg]:size-3.5',
+        'relative group inline-flex text-sm font-medium text-nowrap items-center transition-colors gap-2 px-2 py-1.5 hover:text-fd-accent-foreground data-[state=active]:text-fd-primary [&_svg]:size-3.5',
         props.className,
       )}
     >

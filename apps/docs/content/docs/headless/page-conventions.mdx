@@ -143,8 +143,9 @@ Folder items are sorted alphabetically by default, you can add or control the or
 Special Items:
 
 - **Rest** (`...`): include remaining pages (sorted alphabetically).
-- **Reversed Rest** (`z...a`): reversed **Rest** item,
+- **Reversed Rest** (`z...a`): reversed **Rest** item.
 - **Extract** (`...folder`): extract the items from a folder.
+- **Except** (`!item`): Exclude an item from `...` or `z...a`.
 
 ```json title="meta.json"
 {
@@ -153,6 +154,8 @@ Special Items:
     "---My Separator---",
     "...folder",
     "...",
+    "!file",
+    "!otherFolder",
     "[Vercel](https://vercel.com)",
     "[Triangle][Vercel](https://vercel.com)"
   ]
