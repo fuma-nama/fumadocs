@@ -42,7 +42,7 @@
     "fumadocs-core": "workspace:*",
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
-    "zod": "^4.1.0"
+    "zod": "^4.1.4"
   },
   "peerDependencies": {
     "@content-collections/core": "0.x.x",
