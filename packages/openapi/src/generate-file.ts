@@ -111,10 +111,19 @@ interface IndexItem {
   path: string;
   title?: string;
   description?: string;
+
   /**
-   * Only include items from specific input schema ids
+   * Specify linked pages:
+   * - items in `inputs` to include all generated pages of a specific schema.
+   * - specific Markdown/MDX files.
    */
-  only?: string[];
+  only?: (string | OutputFile)[];
+}
+
+interface HookContext {
+  files: OutputFile[];
+  readonly generated: Record<string, OutputFile[]>;
+  readonly documents: Record<string, ProcessedDocument>;
 }
 
 interface BaseConfig extends GenerateOptions {
@@ -139,7 +148,7 @@ interface BaseConfig extends GenerateOptions {
    * Generate index files with cards linking to generated pages.
    */
   index?: {
-    items: IndexItem[];
+    items: IndexItem[] | ((ctx: HookContext) => IndexItem[]);
 
     /**
      * Generate URLs for cards
@@ -158,7 +167,10 @@ interface BaseConfig extends GenerateOptions {
   /**
    * Can add/change/remove output files before writing to file system
    **/
-  beforeWrite?: (files: OutputFile[]) => void | Promise<void>;
+  beforeWrite?: (
+    this: HookContext,
+    files: OutputFile[],
+  ) => void | Promise<void>;
 }
 
 export async function generateFiles(options: Config): Promise<void> {
@@ -181,46 +193,59 @@ export async function generateFilesOnly(
     typeof options.input === 'string' ? [options.input] : options.input;
   let schemas: Record<string, ProcessedDocument> = {};
 
-  if (Array.isArray(input)) {
-    const targets: string[] = [];
-    const patterns: string[] = [];
-
-    for (const item of input) {
-      if (isUrl(item)) targets.push(item);
-      else patterns.push(item);
+  async function resolveInput(item: string) {
+    if (isUrl(item)) {
+      schemas[item] = await processDocumentCached(item);
+      return;
     }
 
-    if (patterns.length > 0) targets.push(...(await glob(patterns, { cwd })));
+    const resolved = await glob(item, { cwd, absolute: true });
+    if (resolved.length > 1) {
+      console.warn(
+        'glob patterns in `input` are deprecated, please specify your schemas explicitly.',
+      );
 
-    await Promise.all(
-      targets.map(async (item) => {
-        schemas[item] = await processDocumentCached(path.join(cwd, item));
-      }),
-    );
+      for (let i = 0; i < resolved.length; i++) {
+        schemas[`${item}[${i}]`] = await processDocumentCached(item);
+      }
+    } else if (resolved.length === 1) {
+      schemas[item] = await processDocumentCached(resolved[0]);
+    } else {
+      throw new Error(`input not found: ${item}`);
+    }
+  }
+
+  if (Array.isArray(input)) {
+    await Promise.all(input.map(resolveInput));
   } else {
     schemas = await input.getSchemas();
   }
 
-  const resolvedSchemas = Object.entries(schemas);
-  if (resolvedSchemas.length === 0) {
-    throw new Error('No input files found.');
-  }
-
-  const documentFiles = new Map<string, OutputFile[]>();
+  const generated: Record<string, OutputFile[]> = {};
   const files: OutputFile[] = [];
 
-  for (const [id, schema] of resolvedSchemas) {
+  const entries = Object.entries(schemas);
+  if (entries.length === 0) {
+    throw new Error('No input files found.');
+  }
+  for (const [id, schema] of entries) {
     const result = generateFromDocument(id, schema, options);
     files.push(...result);
-    documentFiles.set(id, result);
+    generated[id] = result;
   }
+
+  const context: HookContext = {
+    files,
+    generated,
+    documents: schemas,
+  };
 
   if (options.index) {
-    files.push(...generateIndexFiles(documentFiles, options));
+    writeIndexFiles(context, options);
   }
 
-  beforeWrite?.(files);
-  return files;
+  await beforeWrite?.call(context, context.files);
+  return context.files;
 }
 
 function generateFromDocument(
@@ -411,13 +436,9 @@ function getOutputPathFromRoute(path: string): string {
   );
 }
 
-function generateIndexFiles(
-  generatedFiles: Map<string, OutputFile[]>,
-  options: Config,
-): OutputFile[] {
-  const files: OutputFile[] = [];
+function writeIndexFiles(context: HookContext, options: Config) {
   const { index, output, cwd = process.cwd() } = options;
-  if (!index) return files;
+  if (!index) return;
 
   const { items, url } = index;
   let urlFn: (path: string) => string;
@@ -430,26 +451,31 @@ function generateIndexFiles(
     urlFn = url;
   }
 
-  function fileContent(item: IndexItem): string {
+  function fileContent(index: IndexItem): string {
+    const generatedPages = context.generated;
     const content: string[] = [];
     content.push('<Cards>');
-    const files: OutputFile[] = [];
-    if (item.only) {
-      for (let id of item.only) {
-        if (id.startsWith('./')) id = id.slice(2);
+    const files = new Map<string, OutputFile>();
+    const only = index.only ?? Object.keys(context.generated);
 
-        const result = generatedFiles.get(id);
-        if (!result)
-          throw new Error(
-            `${id} does not exist on "input", available: ${Array.from(generatedFiles.keys())}.`,
-          );
-        files.push(...result);
+    for (const item of only) {
+      if (typeof item === 'object') {
+        files.set(item.path, item);
+        continue;
       }
-    } else {
-      for (const value of generatedFiles.values()) files.push(...value);
+
+      const result = generatedPages[item];
+      if (!result)
+        throw new Error(
+          `${item} does not exist on "input", available: ${Object.keys(generatedPages).join(', ')}.`,
+        );
+
+      for (const file of result) {
+        files.set(file.path, file);
+      }
     }
 
-    for (const file of files) {
+    for (const file of files.values()) {
       const isContent = file.path.endsWith('.mdx') || file.path.endsWith('.md');
       if (!isContent) continue;
       const { data } = matter(file.content);
@@ -463,8 +489,8 @@ function generateIndexFiles(
     content.push('</Cards>');
     return generateDocument(
       {
-        title: item.title ?? 'Overview',
-        description: item.description,
+        title: index.title ?? 'Overview',
+        description: index.description,
       },
       content.join('\n'),
       options,
@@ -473,17 +499,17 @@ function generateIndexFiles(
 
   const outputDir = path.join(cwd, output);
 
-  for (const item of items) {
-    files.push({
-      path: path.join(
-        outputDir,
-        path.extname(item.path).length === 0 ? `${item.path}.mdx` : item.path,
-      ),
+  for (const item of typeof items === 'function' ? items(context) : items) {
+    const outPath = path.join(
+      outputDir,
+      path.extname(item.path).length === 0 ? `${item.path}.mdx` : item.path,
+    );
+
+    context.files.push({
+      path: outPath,
       content: fileContent(item),
     });
   }
-
-  return files;
 }
 
 function defaultSlugify(s: string): string {
