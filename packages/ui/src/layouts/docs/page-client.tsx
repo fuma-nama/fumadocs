@@ -29,7 +29,7 @@ import {
 } from '@/components/ui/collapsible';
 import { useSidebar } from '@/contexts/sidebar';
 import { useTOCItems } from '@/components/layout/toc';
-import { type AnchorProviderProps, useActiveAnchor } from 'fumadocs-core/toc';
+import { useActiveAnchor } from 'fumadocs-core/toc';
 
 const TocPopoverContext = createContext<{
   open: boolean;
@@ -217,10 +217,6 @@ export function PageTOCPopover(props: ComponentProps<'div'>) {
   );
 }
 
-export interface RootProps extends ComponentProps<'div'> {
-  toc: Omit<AnchorProviderProps, 'children'>;
-}
-
 export function PageLastUpdate({
   date: value,
   ...props
@@ -399,11 +395,12 @@ export function PageTOC(props: ComponentProps<'div'>) {
     <div
       id="nd-toc"
       {...props}
-      className={cn('sticky pb-2 pt-12 max-xl:hidden', props.className)}
+      className={cn('fixed bottom-0 pb-2 pt-12 max-xl:hidden', props.className)}
       style={{
         ...props.style,
         top: 'calc(var(--fd-banner-height) + var(--fd-nav-height))',
-        height: 'calc(100dvh - var(--fd-banner-height) - var(--fd-nav-height))',
+        insetInlineEnd:
+          'max(var(--fd-layout-offset), calc((100vw - var(--fd-sidebar-width) - var(--fd-page-width))/2))',
       }}
     >
       <div className="flex h-full w-(--fd-toc-width) max-w-full flex-col pe-4">
