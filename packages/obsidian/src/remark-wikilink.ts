@@ -3,8 +3,14 @@ import path from 'node:path';
 import type { Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
 import type { InternalContext, VaultFile } from '@/index';
+import matter from 'gray-matter';
+import { slug } from 'github-slugger';
+import { flattenNode } from '@/utils/flatten-node';
 
 const RegexWikilink = /!?\[\[(?<content>([^\]]|\\])+)]]/g;
+const RegexContent =
+  /^(?<name>(?:\\#|\\\||[^#|])+)(?:#(?<heading>(?:\\\||[^|])+))?(?:\|(?<alias>.+))?$/;
+
 function resolveWikilink(
   isMedia: boolean,
   content: string,
@@ -16,20 +22,27 @@ function resolveWikilink(
     return;
   }
 
-  const target = path
-    .join(path.dirname(file.path), content)
-    .replaceAll('\\', '/');
+  const match = RegexContent.exec(content);
+  if (!match?.groups) return;
+  const { name, heading, alias } = match.groups;
+
+  const target = path.join(path.dirname(file.path), name).replaceAll('\\', '/');
+
   const ref =
     contentByName.get(target) ?? files.find((file) => file.path === target);
   if (!ref) return;
 
+  const hrefPath = target.startsWith('../')
+    ? `${target}.mdx`
+    : `./${target}.mdx`;
+
   return {
     type: 'link',
-    url: `${target}.mdx`,
+    url: heading ? `${hrefPath}#${slug(heading)}` : hrefPath,
     children: [
       {
         type: 'text',
-        value: content,
+        value: alias ?? matter(ref.content.toString()).data.title ?? name,
       },
     ],
   };
@@ -42,7 +55,20 @@ export function remarkWikiLink(
     const source = file.data.source;
     if (!source) return;
 
-    visit(tree, 'text', (node) => {
+    visit(tree, ['text', 'heading'], (node) => {
+      if (node.type === 'heading') {
+        const text = flattenNode(node);
+
+        // force the generated heading id for Fumadocs
+        node.children.push({
+          type: 'text',
+          value: ` [#${slug(text)}]`,
+        });
+        return 'skip';
+      }
+
+      if (node.type !== 'text') return;
+
       const text = node.value;
       const child: (Link | Text)[] = [];
       let lastIndex = 0;

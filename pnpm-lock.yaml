@@ -1522,6 +1522,12 @@ importers:
 
   packages/obsidian:
     dependencies:
+      github-slugger:
+        specifier: ^2.0.0
+        version: 2.0.0
+      gray-matter:
+        specifier: ^4.0.3
+        version: 4.0.3
       remark:
         specifier: ^15.0.1
         version: 15.0.1
