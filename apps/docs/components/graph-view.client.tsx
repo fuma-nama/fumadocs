@@ -108,23 +108,26 @@ const GraphViewLazy = lazy(async () => {
       ctx.fillText(node.text, node.x!, node.y! + radius + fontSize);
     };
 
-    const linkColor = useCallback((link: Link) => {
-      const container = containerRef.current;
-      if (!container) return '#999';
-      const style = getComputedStyle(container);
-      const hoverNode = hoveredRef.current;
+    const linkColor = useCallback(
+      (link: Link) => {
+        const container = containerRef.current;
+        if (!container) return '#999';
+        const style = getComputedStyle(container);
+        const hoverNode = hoveredRef.current;
 
-      if (
-        hoverNode &&
-        typeof link.source === 'object' &&
-        typeof link.target === 'object' &&
-        (hoverNode.id === link.source.id || hoverNode.id === link.target.id)
-      ) {
-        return style.getPropertyValue('--color-fd-primary');
-      }
+        if (
+          hoverNode &&
+          typeof link.source === 'object' &&
+          typeof link.target === 'object' &&
+          (hoverNode.id === link.source.id || hoverNode.id === link.target.id)
+        ) {
+          return style.getPropertyValue('--color-fd-primary');
+        }
 
-      return `color-mix(in oklab, ${style.getPropertyValue('--color-fd-foreground')} 40%, transparent)`;
-    }, []);
+        return `color-mix(in oklab, ${style.getPropertyValue('--color-fd-foreground')} 40%, transparent)`;
+      },
+      [containerRef],
+    );
 
     // Enrich nodes with neighbors for hover effects
     const enrichedNodes = useMemo(() => {

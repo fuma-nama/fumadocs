@@ -1,0 +1,47 @@
+{
+  "name": "fumadocs-obsidian",
+  "version": "0.0.0",
+  "description": "Obsidian Integration for Fumadocs",
+  "keywords": [
+    "NextJs",
+    "fumadocs",
+    "Docs",
+    "Obsidian"
+  ],
+  "homepage": "https://fumadocs.dev",
+  "repository": "github:fuma-nama/fumadocs",
+  "license": "MIT",
+  "author": "Fuma Nama",
+  "type": "module",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist/*"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "clean": "rimraf dist",
+    "dev": "tsup --watch",
+    "lint": "eslint .",
+    "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "remark": "^15.0.1",
+    "tinyglobby": "^0.2.14",
+    "unist-util-visit": "^5.0.0"
+  },
+  "devDependencies": {
+    "@mdx-js/mdx": "^3.1.0",
+    "@types/estree": "^1.0.8",
+    "@types/mdast": "^4.0.3",
+    "@types/node": "24.3.0",
+    "eslint-config-custom": "workspace:*",
+    "tsconfig": "workspace:*",
+    "typescript": "^5.9.2",
+    "unified": "^11.0.5",
+    "vfile": "^6.0.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
