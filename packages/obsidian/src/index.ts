@@ -1,9 +1,12 @@
 import path from 'node:path';
-import { remark } from 'remark';
 import { remarkWikiLink } from '@/remark-wikilink';
 import matter from 'gray-matter';
 import { stash } from '@/utils/stash';
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import remarkStringify from 'remark-stringify';
 import remarkMdx from 'remark-mdx';
+import type { Compatible } from 'vfile';
 
 export interface VaultFile {
   /**
@@ -89,7 +92,7 @@ export async function convertVaultFiles(
       return `/${segs.join('/')}`;
     },
   } = options;
-  const output = new Map<string, OutputFile>();
+  const output: OutputFile[] = [];
   const storage = new Map<string, ParsedFile>();
 
   for (const rawFile of rawFiles) {
@@ -127,32 +130,38 @@ export async function convertVaultFiles(
   const context: InternalContext = {
     storage,
   };
-  const processor = remark().use(remarkMdx).use(remarkWikiLink, context);
+
+  const processor = unified().use(remarkParse).use(remarkWikiLink, context);
+  const stringifier = unified().use(remarkStringify).use(remarkMdx);
+
   async function onFile(file: ParsedFile) {
     if (file.format === 'media') {
-      output.set(file.path, {
+      output.push({
         type: 'asset',
-        path: file.path,
+        path: file.outPath,
         content: file.content,
       });
 
       return;
     }
 
-    const result = await processor.process({
+    const vfile: Compatible = {
+      path: file.path,
       value: String(file.content),
       data: {
         source: file,
       },
-    });
+    };
 
-    output.set(file.outPath, {
+    const mdast = await processor.run(processor.parse(vfile), vfile);
+
+    output.push({
       type: 'content',
       path: file.outPath,
-      content: String(result.value),
+      content: stringifier.stringify(mdast),
     });
   }
 
   await Promise.all(Array.from(storage.values()).map(onFile));
-  return Array.from(output.values());
+  return output;
 }
