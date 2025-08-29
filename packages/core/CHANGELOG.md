@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 15.7.5
+
+### Patch Changes
+
+- cedc494: Hotfix URL normalization logic
+
 ## 15.7.4
 
 ## 15.7.3
