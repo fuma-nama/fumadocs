@@ -1,8 +1,25 @@
 import type { PageTree } from 'fumadocs-core/server';
-import type { Option } from '@/components/layout/root-toggle';
+import type { ReactNode } from 'react';
+
+export interface SidebarTab {
+  /**
+   * Redirect URL of the folder, usually the index page
+   */
+  url: string;
+
+  icon?: ReactNode;
+  title: ReactNode;
+  description?: ReactNode;
+
+  /**
+   * Detect from a list of urls
+   */
+  urls?: Set<string>;
+  unlisted?: boolean;
+}
 
 export interface GetSidebarTabsOptions {
-  transform?: (option: Option, node: PageTree.Folder) => Option | null;
+  transform?: (option: SidebarTab, node: PageTree.Folder) => SidebarTab | null;
 }
 
 const defaultTransform: GetSidebarTabsOptions['transform'] = (option, node) => {
@@ -21,18 +38,18 @@ const defaultTransform: GetSidebarTabsOptions['transform'] = (option, node) => {
 export function getSidebarTabs(
   tree: PageTree.Root,
   { transform = defaultTransform }: GetSidebarTabsOptions = {},
-): Option[] {
-  function findOptions(
+): SidebarTab[] {
+  const results: SidebarTab[] = [];
+
+  function scanOptions(
     node: PageTree.Root | PageTree.Folder,
     unlisted?: boolean,
-  ): Option[] {
-    const results: Option[] = [];
-
+  ) {
     if ('root' in node && node.root) {
       const urls = getFolderUrls(node);
 
       if (urls.size > 0) {
-        const option: Option = {
+        const option: SidebarTab = {
           url: urls.values().next().value ?? '',
           title: node.name,
           icon: node.icon,
@@ -47,19 +64,14 @@ export function getSidebarTabs(
     }
 
     for (const child of node.children) {
-      if (child.type === 'folder')
-        results.push(...findOptions(child, unlisted));
+      if (child.type === 'folder') scanOptions(child, unlisted);
     }
-
-    return results;
   }
 
-  const options = findOptions(tree);
-  if (tree.fallback) {
-    options.push(...findOptions(tree.fallback, true));
-  }
+  scanOptions(tree);
+  if (tree.fallback) scanOptions(tree.fallback, true);
 
-  return options;
+  return results;
 }
 
 function getFolderUrls(

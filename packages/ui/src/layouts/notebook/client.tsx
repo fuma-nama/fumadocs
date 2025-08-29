@@ -7,7 +7,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { Sidebar as SidebarIcon } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import { usePathname } from 'fumadocs-core/framework';
-import { isActive } from '@/utils/is-active';
+import { isTabActive } from '@/utils/is-active';
 import type { Option } from '@/components/layout/root-toggle';
 
 export function Navbar({
@@ -90,15 +90,7 @@ export function LayoutTabs({
 }) {
   const pathname = usePathname();
   const selected = useMemo(() => {
-    const url = pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
-
-    return options.findLast((option) => {
-      if (option.urls) {
-        return option.urls.has(url);
-      }
-
-      return isActive(option.url, pathname, true);
-    });
+    return options.findLast((option) => isTabActive(option, pathname));
   }, [options, pathname]);
 
   return (
@@ -121,7 +113,7 @@ export function LayoutTabs({
 }
 
 function LayoutTab({
-  option,
+  option: { title, url, unlisted, props },
   selected = false,
 }: {
   option: Option;
@@ -129,14 +121,16 @@ function LayoutTab({
 }) {
   return (
     <Link
+      href={url}
+      {...props}
       className={cn(
         'inline-flex border-b-2 border-transparent transition-colors items-center pb-1.5 font-medium gap-2 text-fd-muted-foreground text-sm text-nowrap hover:text-fd-accent-foreground',
-        option.unlisted && !selected && 'hidden',
+        unlisted && !selected && 'hidden',
         selected && 'border-fd-primary text-fd-primary',
+        props?.className,
       )}
-      href={option.url}
     >
-      {option.title}
+      {title}
     </Link>
   );
 }

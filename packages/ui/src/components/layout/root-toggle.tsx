@@ -4,26 +4,12 @@ import { type ComponentProps, type ReactNode, useMemo, useState } from 'react';
 import Link from 'fumadocs-core/link';
 import { usePathname } from 'fumadocs-core/framework';
 import { cn } from '@/utils/cn';
-import { isActive } from '@/utils/is-active';
+import { isTabActive } from '@/utils/is-active';
 import { useSidebar } from '@/contexts/sidebar';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import type { SidebarTab } from '@/utils/get-sidebar-tabs';
 
-export interface Option {
-  /**
-   * Redirect URL of the folder, usually the index page
-   */
-  url: string;
-
-  icon?: ReactNode;
-  title: ReactNode;
-  description?: ReactNode;
-  unlisted?: boolean;
-
-  /**
-   * Detect from a list of urls
-   */
-  urls?: Set<string>;
-
+export interface Option extends SidebarTab {
   props?: ComponentProps<'a'>;
 }
 
@@ -40,13 +26,7 @@ export function RootToggle({
   const pathname = usePathname();
 
   const selected = useMemo(() => {
-    const lookup = pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
-
-    return options.findLast((item) => {
-      if (item.urls) return item.urls.has(lookup);
-
-      return isActive(item.url, pathname, true);
-    });
+    return options.findLast((item) => isTabActive(item, pathname));
   }, [options, pathname]);
 
   const onClick = () => {
