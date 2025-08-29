@@ -3,6 +3,7 @@ import { remark } from 'remark';
 import { remarkWikiLink } from '@/remark-wikilink';
 import matter from 'gray-matter';
 import { stash } from '@/utils/stash';
+import remarkMdx from 'remark-mdx';
 
 export interface VaultFile {
   /**
@@ -26,24 +27,38 @@ export interface OutputFile {
   content: string | ArrayBuffer | Buffer<ArrayBufferLike>;
 }
 
+export interface ConvertOptions {
+  /**
+   * generate URL from media file
+   */
+  url?: (mediaFile: VaultFile) => string;
+}
+
 export type ParsedFile = ParsedContentFile | ParsedMediaFile;
 
 export interface ParsedContentFile {
   format: 'content';
   frontmatter: Record<string, unknown>;
   path: string;
+
+  // output path (relative to content directory)
+  outPath: string;
   content: string;
 }
 
 export interface ParsedMediaFile {
   format: 'media';
   path: string;
+
+  // output path (relative to asset directory)
+  outPath: string;
+  url: string;
   content: VaultFile['content'];
 }
 
 declare module 'vfile' {
   interface DataMap {
-    source: VaultFile;
+    source: ParsedContentFile;
   }
 }
 
@@ -56,13 +71,24 @@ export interface InternalContext {
 
 function normalize(filePath: string): string {
   filePath = stash(filePath);
+  if (filePath.startsWith('../'))
+    throw new Error(`${filePath} points outside of vault folder`);
 
   return filePath.startsWith('./') ? filePath.slice(2) : filePath;
 }
 
 export async function convertVaultFiles(
   rawFiles: VaultFile[],
+  options: ConvertOptions = {},
 ): Promise<OutputFile[]> {
+  const {
+    url = (file) => {
+      const segs = normalize(file.path)
+        .split('/')
+        .filter((v) => v.length > 0);
+      return `/${segs.join('/')}`;
+    },
+  } = options;
   const output = new Map<string, OutputFile>();
   const storage = new Map<string, ParsedFile>();
 
@@ -80,6 +106,7 @@ export async function convertVaultFiles(
       const parsed: ParsedFile = {
         format: 'content',
         path: normalizedPath,
+        outPath: normalizedPath.slice(0, -ext.length) + '.mdx',
         frontmatter: data,
         content,
       };
@@ -91,14 +118,16 @@ export async function convertVaultFiles(
     storage.set(normalizedPath, {
       format: 'media',
       path: normalizedPath,
+      outPath: normalizedPath,
       content: file.content,
+      url: url(file),
     });
   }
 
   const context: InternalContext = {
     storage,
   };
-  const processor = remark().use(remarkWikiLink, context);
+  const processor = remark().use(remarkMdx).use(remarkWikiLink, context);
   async function onFile(file: ParsedFile) {
     if (file.format === 'media') {
       output.set(file.path, {
@@ -111,16 +140,15 @@ export async function convertVaultFiles(
     }
 
     const result = await processor.process({
-      path: file.path,
       value: String(file.content),
       data: {
         source: file,
       },
     });
 
-    output.set(file.path, {
+    output.set(file.outPath, {
       type: 'content',
-      path: file.path,
+      path: file.outPath,
       content: String(result.value),
     });
   }

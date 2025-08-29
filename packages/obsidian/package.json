@@ -29,6 +29,7 @@
     "github-slugger": "^2.0.0",
     "gray-matter": "^4.0.3",
     "remark": "^15.0.1",
+    "remark-mdx": "^3.1.0",
     "tinyglobby": "^0.2.14",
     "unist-util-visit": "^5.0.0"
   },
@@ -38,10 +39,15 @@
     "@types/mdast": "^4.0.3",
     "@types/node": "24.3.0",
     "eslint-config-custom": "workspace:*",
+    "fumadocs-core": "workspace:*",
+    "mdast-util-mdx-jsx": "^3.2.0",
     "tsconfig": "workspace:*",
     "typescript": "^5.9.2",
     "unified": "^11.0.5",
     "vfile": "^6.0.3"
+  },
+  "peerDependencies": {
+    "fumadocs-core": "^15.0.0"
   },
   "publishConfig": {
     "access": "public"

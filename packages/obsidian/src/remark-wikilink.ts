@@ -1,11 +1,12 @@
-import type { Link, Root, Text } from 'mdast';
+import type { Root, RootContent } from 'mdast';
 import path from 'node:path';
 import type { Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
-import type { InternalContext, ParsedContentFile, VaultFile } from '@/index';
+import type { InternalContext, ParsedContentFile, ParsedFile } from '@/index';
 import { slug } from 'github-slugger';
 import { flattenNode } from '@/utils/flatten-node';
 import { stash } from '@/utils/stash';
+import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
 
 const RegexWikilink = /!?\[\[(?<content>([^\]]|\\])+)]]/g;
 const RegexContent =
@@ -15,41 +16,32 @@ interface Context extends InternalContext {
   /**
    * a file should create two item in this map, one with extension, and one without.
    */
-  byPath: Map<string, ParsedContentFile>;
+  byPath: Map<string, ParsedFile>;
 
   /**
    * a file should create two item in this map, one with extension, and one without.
    */
-  byName: Map<string, ParsedContentFile>;
+  byName: Map<string, ParsedFile>;
 }
 
 function resolveWikilink(
-  isMedia: boolean,
+  isEmbed: boolean,
   content: string,
-  file: VaultFile,
+  file: ParsedContentFile,
   { byPath, byName }: Context,
-): Link | undefined {
-  if (isMedia) {
-    console.warn('not implemented');
-    return;
-  }
-
+): RootContent | undefined {
   const match = RegexContent.exec(content);
   if (!match?.groups) return;
 
   const { name, heading, alias } = match.groups;
   const dir = path.dirname(file.path);
-  let ref: ParsedContentFile | undefined;
+  let ref: ParsedFile | undefined;
 
   if (name.startsWith('./') || name.startsWith('../')) {
-    const resolved = byPath.get(stash(path.join(dir, name)));
-
-    if (resolved?.format === 'content') ref = resolved;
+    ref = byPath.get(stash(path.join(dir, name)));
   } else {
-    ref = // absolute path
-      byPath.get(name) ??
-      // basic
-      byName.get(name);
+    // absolute path or basic
+    ref = byPath.get(name) ?? byName.get(name);
   }
 
   if (!ref) {
@@ -57,7 +49,37 @@ function resolveWikilink(
     return;
   }
 
-  let href = stash(path.relative(dir, ref.path));
+  if (isEmbed) {
+    if (ref.format === 'content') {
+      let filePath = stash(path.relative(dir, ref.outPath));
+      if (heading) filePath = `${filePath}#${slug(heading)}`;
+
+      return {
+        type: 'mdxJsxFlowElement',
+        name: 'include',
+        attributes: [],
+        children: [
+          {
+            type: 'paragraph',
+            children: [
+              {
+                type: 'text',
+                value: filePath,
+              },
+            ],
+          },
+        ],
+      } satisfies MdxJsxFlowElement;
+    }
+
+    return {
+      type: 'image',
+      url: ref.url,
+      alt: alias ?? name,
+    };
+  }
+
+  let href = stash(path.relative(dir, ref.outPath));
   if (!href.startsWith('../')) href = `./${href}`;
   if (heading) href = `${href}#${slug(heading)}`;
 
@@ -67,7 +89,10 @@ function resolveWikilink(
     children: [
       {
         type: 'text',
-        value: alias ?? ref.frontmatter.title ?? name,
+        value:
+          alias ??
+          (ref.format === 'content' ? ref.frontmatter.title : null) ??
+          name,
       },
     ],
   };
@@ -83,7 +108,6 @@ export function remarkWikiLink(
   };
 
   for (const file of options.storage.values()) {
-    if (file.format !== 'content') continue;
     const parsed = path.parse(file.path);
 
     context.byName.set(parsed.name, file);
@@ -112,22 +136,21 @@ export function remarkWikiLink(
       if (node.type !== 'text') return;
 
       const text = node.value;
-      const child: (Link | Text)[] = [];
+      const child: RootContent[] = [];
       let lastIndex = 0;
       let result: RegExpExecArray | null;
 
       while ((result = RegexWikilink.exec(text))) {
         if (!result.groups) break;
-        const content = result.groups.content;
         const resolved = resolveWikilink(
           result[0].startsWith('!'),
-          content,
+          result.groups.content,
           source,
           context,
         );
         if (!resolved) continue;
 
-        if (lastIndex !== result.index - 1) {
+        if (lastIndex !== result.index) {
           child.push({
             type: 'text',
             value: text.substring(lastIndex, result.index),
