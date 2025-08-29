@@ -154,6 +154,6 @@ export function searchPath(
     return false;
   }
 
-  run(nodes);
-  return items;
+  if (run(nodes)) return items;
+  return null;
 }
