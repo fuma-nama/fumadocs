@@ -1,4 +1,4 @@
-hi [Welcome](./Welcome.mdx)[Welcome](./Welcome.mdx#introduction)
+hi [Welcome](./Welcome.md)[Welcome](./Welcome.md#introduction)
 
 ```ts
 console.log('Hello World');

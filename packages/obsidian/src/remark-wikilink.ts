@@ -2,20 +2,32 @@ import type { Link, Root, Text } from 'mdast';
 import path from 'node:path';
 import type { Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
-import type { InternalContext, VaultFile } from '@/index';
-import matter from 'gray-matter';
+import type { InternalContext, ParsedContentFile, VaultFile } from '@/index';
 import { slug } from 'github-slugger';
 import { flattenNode } from '@/utils/flatten-node';
+import { stash } from '@/utils/stash';
 
 const RegexWikilink = /!?\[\[(?<content>([^\]]|\\])+)]]/g;
 const RegexContent =
   /^(?<name>(?:\\#|\\\||[^#|])+)(?:#(?<heading>(?:\\\||[^|])+))?(?:\|(?<alias>.+))?$/;
 
+interface Context extends InternalContext {
+  /**
+   * a file should create two item in this map, one with extension, and one without.
+   */
+  byPath: Map<string, ParsedContentFile>;
+
+  /**
+   * a file should create two item in this map, one with extension, and one without.
+   */
+  byName: Map<string, ParsedContentFile>;
+}
+
 function resolveWikilink(
   isMedia: boolean,
   content: string,
   file: VaultFile,
-  { contentByName, files }: InternalContext,
+  { byPath, byName }: Context,
 ): Link | undefined {
   if (isMedia) {
     console.warn('not implemented');
@@ -24,33 +36,63 @@ function resolveWikilink(
 
   const match = RegexContent.exec(content);
   if (!match?.groups) return;
+
   const { name, heading, alias } = match.groups;
+  const dir = path.dirname(file.path);
+  let ref: ParsedContentFile | undefined;
 
-  const target = path.join(path.dirname(file.path), name).replaceAll('\\', '/');
+  if (name.startsWith('./') || name.startsWith('../')) {
+    const resolved = byPath.get(stash(path.join(dir, name)));
 
-  const ref =
-    contentByName.get(target) ?? files.find((file) => file.path === target);
-  if (!ref) return;
+    if (resolved?.format === 'content') ref = resolved;
+  } else {
+    ref = // absolute path
+      byPath.get(name) ??
+      // basic
+      byName.get(name);
+  }
 
-  const hrefPath = target.startsWith('../')
-    ? `${target}.mdx`
-    : `./${target}.mdx`;
+  if (!ref) {
+    console.warn(`failed to resolve ${name} wikilink`);
+    return;
+  }
+
+  let href = stash(path.relative(dir, ref.path));
+  if (!href.startsWith('../')) href = `./${href}`;
+  if (heading) href = `${href}#${slug(heading)}`;
 
   return {
     type: 'link',
-    url: heading ? `${hrefPath}#${slug(heading)}` : hrefPath,
+    url: href,
     children: [
       {
         type: 'text',
-        value: alias ?? matter(ref.content.toString()).data.title ?? name,
+        value: alias ?? ref.frontmatter.title ?? name,
       },
     ],
   };
 }
 
 export function remarkWikiLink(
-  context: InternalContext,
+  options: InternalContext,
 ): Transformer<Root, Root> {
+  const context: Context = {
+    ...options,
+    byPath: new Map(),
+    byName: new Map(),
+  };
+
+  for (const file of options.storage.values()) {
+    if (file.format !== 'content') continue;
+    const parsed = path.parse(file.path);
+
+    context.byName.set(parsed.name, file);
+    context.byPath.set(stash(path.join(parsed.dir, parsed.name)), file);
+
+    context.byName.set(parsed.base, file);
+    context.byPath.set(file.path, file);
+  }
+
   return (tree, file) => {
     const source = file.data.source;
     if (!source) return;

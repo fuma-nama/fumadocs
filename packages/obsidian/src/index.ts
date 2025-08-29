@@ -1,6 +1,8 @@
 import path from 'node:path';
 import { remark } from 'remark';
 import { remarkWikiLink } from '@/remark-wikilink';
+import matter from 'gray-matter';
+import { stash } from '@/utils/stash';
 
 export interface VaultFile {
   /**
@@ -24,8 +26,19 @@ export interface OutputFile {
   content: string | ArrayBuffer | Buffer<ArrayBufferLike>;
 }
 
-interface ParsedFile extends VaultFile {
-  format: 'content' | 'media';
+export type ParsedFile = ParsedContentFile | ParsedMediaFile;
+
+export interface ParsedContentFile {
+  format: 'content';
+  frontmatter: Record<string, unknown>;
+  path: string;
+  content: string;
+}
+
+export interface ParsedMediaFile {
+  format: 'media';
+  path: string;
+  content: VaultFile['content'];
 }
 
 declare module 'vfile' {
@@ -35,21 +48,14 @@ declare module 'vfile' {
 }
 
 export interface InternalContext {
-  files: ParsedFile[];
-
   /**
    * get files by full file path
    */
-  mediaFiles: Map<string, ParsedFile>;
-
-  /**
-   * get files by file name (without extension)
-   */
-  contentByName: Map<string, ParsedFile>;
+  storage: Map<string, ParsedFile>;
 }
 
 function normalize(filePath: string): string {
-  filePath = filePath.replaceAll('\\', '/');
+  filePath = stash(filePath);
 
   return filePath.startsWith('./') ? filePath.slice(2) : filePath;
 }
@@ -57,42 +63,48 @@ function normalize(filePath: string): string {
 export async function convertVaultFiles(
   rawFiles: VaultFile[],
 ): Promise<OutputFile[]> {
-  const files: ParsedFile[] = rawFiles.map((file) => {
-    const ext = path.extname(file.path);
-
-    return {
-      ...file,
-      format: ext === '.md' || ext === '.mdx' ? 'content' : 'media',
-      path: normalize(file.path),
-    };
-  });
-
   const output = new Map<string, OutputFile>();
-  const mediaFiles = new Map<string, ParsedFile>();
-  const contentFiles = new Map<string, ParsedFile>();
+  const storage = new Map<string, ParsedFile>();
 
-  for (const file of files) {
-    const ext = path.extname(file.path);
+  for (const rawFile of rawFiles) {
+    scanFile(rawFile);
+  }
 
-    if (file.format === 'content') {
-      contentFiles.set(file.path.slice(0, -ext.length), file);
-    } else {
-      mediaFiles.set(file.path, file);
+  function scanFile(file: VaultFile) {
+    const normalizedPath = normalize(file.path);
+    const ext = path.extname(normalizedPath);
+
+    if (ext === '.md' || ext === '.mdx') {
+      const { data, content } = matter(String(file.content));
+
+      const parsed: ParsedFile = {
+        format: 'content',
+        path: normalizedPath,
+        frontmatter: data,
+        content,
+      };
+
+      storage.set(normalizedPath, parsed);
+      return;
     }
+
+    storage.set(normalizedPath, {
+      format: 'media',
+      path: normalizedPath,
+      content: file.content,
+    });
   }
 
   const context: InternalContext = {
-    files,
-    mediaFiles,
-    contentByName: contentFiles,
+    storage,
   };
   const processor = remark().use(remarkWikiLink, context);
-
-  async function onFile(file: VaultFile) {
-    if (mediaFiles.has(file.path)) {
+  async function onFile(file: ParsedFile) {
+    if (file.format === 'media') {
       output.set(file.path, {
         type: 'asset',
-        ...file,
+        path: file.path,
+        content: file.content,
       });
 
       return;
@@ -113,6 +125,6 @@ export async function convertVaultFiles(
     });
   }
 
-  await Promise.all(files.map(onFile));
+  await Promise.all(Array.from(storage.values()).map(onFile));
   return Array.from(output.values());
 }
