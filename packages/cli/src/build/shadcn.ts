@@ -13,22 +13,53 @@ function escapeName(name: string) {
   return name;
 }
 
-export function toShadcnRegistry(out: Output, baseUrl: string): ShadcnRegistry {
-  return {
+export function toShadcnRegistry(
+  out: Output,
+  baseUrl: string,
+): { registry: ShadcnRegistry; index: ShadcnRegistry } {
+  const registry: ShadcnRegistry = {
     homepage: baseUrl,
     name: out.name,
     items: out.components.map((comp) => componentToShadcn(comp, baseUrl)),
+  };
+
+  return {
+    registry,
+    index: {
+      ...registry,
+      items: out.components.map((comp) =>
+        componentToShadcn(comp, baseUrl, true),
+      ),
+    },
   };
 }
 
 function componentToShadcn(
   comp: OutputComponent,
   baseUrl: string,
+  noFile = false,
 ): RegistryItem {
+  const FileType = {
+    components: 'registry:component',
+    lib: 'registry:lib',
+    css: 'registry:style',
+    route: 'registry:page',
+    ui: 'registry:ui',
+    block: 'registry:block',
+  } as const;
+
+  function onFile(file: OutputComponent['files'][number]) {
+    return {
+      type: FileType[file.type],
+      content: file.content,
+      path: file.path,
+      target: file.target!,
+    };
+  }
+
   return {
     extends: 'none',
     type: 'registry:block',
-
     name: escapeName(comp.name),
     title: comp.title ?? comp.name,
     description: comp.description,
@@ -40,22 +71,6 @@ function componentToShadcn(
 
       return new URL(`/r/${escapeName(comp)}.json`, baseUrl).toString();
     }),
-    files: comp.files.map((file) => {
-      return {
-        type: (
-          {
-            components: 'registry:component',
-            lib: 'registry:lib',
-            css: 'registry:style',
-            route: 'registry:page',
-            ui: 'registry:ui',
-            block: 'registry:block',
-          } as const
-        )[file.type],
-        content: file.content,
-        path: file.path,
-        target: file.target!,
-      };
-    }),
+    files: noFile ? [] : comp.files.map(onFile),
   };
 }
