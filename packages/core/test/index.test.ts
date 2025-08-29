@@ -1,10 +1,14 @@
-import { parseFilePath, parseFolderPath } from '@/source/path';
+import {
+  joinPath,
+  parseFilePath,
+  parseFolderPath,
+  splitPath,
+} from '@/source/path';
 import { describe, expect, test } from 'vitest';
 import type { Root } from '@/source/page-tree/definitions';
 import { findNeighbour } from '@/utils/page-tree';
 import { PageTree } from '../dist/server';
 import { getBreadcrumbItems } from '@/breadcrumb';
-import { joinPath, splitPath } from '@/utils/path';
 
 test('Find Neighbours', () => {
   const tree: Root = {
@@ -119,6 +123,11 @@ test('Breadcrumbs', () => {
     children: [
       {
         type: 'page',
+        name: 'Introduction',
+        url: '/',
+      },
+      {
+        type: 'page',
         name: 'Hello World',
         url: '/docs',
       },
@@ -148,4 +157,13 @@ test('Breadcrumbs', () => {
   expect(getBreadcrumbItems('/docs/folder', tree)).toStrictEqual([
     { name: 'World', url: '/docs/folder' },
   ]);
+
+  expect(getBreadcrumbItems('/', tree)).toMatchInlineSnapshot(`
+    [
+      {
+        "name": "Introduction",
+        "url": "/",
+      },
+    ]
+  `);
 });

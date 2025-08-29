@@ -1,5 +1,6 @@
 import { type ReactNode, useMemo } from 'react';
 import type * as PageTree from '@/source/page-tree/definitions';
+import { normalizeUrl } from '@/utils/normalize-url';
 
 export interface BreadcrumbItem {
   name: ReactNode;
@@ -117,42 +118,42 @@ export function searchPath(
   nodes: PageTree.Node[],
   url: string,
 ): PageTree.Node[] | null {
-  if (url.endsWith('/')) url = url.slice(0, -1);
+  const items: PageTree.Node[] = [];
+  url = normalizeUrl(url);
 
-  let separator: PageTree.Separator | undefined;
+  function run(nodes: PageTree.Node[]): boolean {
+    let separator: PageTree.Separator | undefined;
 
-  for (const node of nodes) {
-    if (node.type === 'separator') separator = node;
+    for (const node of nodes) {
+      if (node.type === 'separator') separator = node;
 
-    if (node.type === 'folder') {
-      if (node.index?.url === url) {
-        const items: PageTree.Node[] = [];
+      if (node.type === 'folder') {
+        if (node.index?.url === url) {
+          if (separator) items.push(separator);
+          items.push(node, node.index);
 
+          return true;
+        }
+
+        if (run(node.children)) {
+          items.unshift(node);
+          if (separator) items.unshift(separator);
+
+          return true;
+        }
+      }
+
+      if (node.type === 'page' && node.url === url) {
         if (separator) items.push(separator);
-        items.push(node, node.index);
+        items.push(node);
 
-        return items;
-      }
-
-      const items = searchPath(node.children, url);
-
-      if (items) {
-        items.unshift(node);
-        if (separator) items.unshift(separator);
-
-        return items;
+        return true;
       }
     }
 
-    if (node.type === 'page' && node.url === url) {
-      const items: PageTree.Node[] = [];
-
-      if (separator) items.push(separator);
-      items.push(node);
-
-      return items;
-    }
+    return false;
   }
 
-  return null;
+  run(nodes);
+  return items;
 }

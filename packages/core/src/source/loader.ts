@@ -14,9 +14,10 @@ import {
   dirname,
   extname,
   type FileInfo,
+  joinPath,
   parseFilePath,
 } from './path';
-import { joinPath } from '@/utils/path';
+import { normalizeUrl } from '@/utils/normalize-url';
 
 export interface LoaderConfig {
   source: SourceConfig;
@@ -278,9 +279,12 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
     baseUrl = '/',
     i18n,
     slugs: slugsFn,
-    url: getUrl = createGetUrl(baseUrl ?? '/', i18n),
+    url: urlFn,
     transformers = [],
   } = options;
+  const getUrl: UrlFn = urlFn
+    ? (...args) => normalizeUrl(urlFn(...args))
+    : createGetUrl(baseUrl, i18n);
   const defaultLanguage = i18n?.defaultLanguage ?? '';
   const files = loadSource(source);
 

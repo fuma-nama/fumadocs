@@ -4,7 +4,6 @@ import type { Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
 import { imageSize } from 'image-size';
 import type { MdxjsEsm } from 'mdast-util-mdxjs-esm';
-import { joinPath, slash } from '@/utils/path';
 import type { ISizeCalculationResult } from 'image-size/types/interface';
 import { imageSizeFromFile } from 'image-size/fromFile';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
@@ -252,7 +251,7 @@ export function remarkImage({
 }
 
 function getImportPath(file: string, dir: string): string {
-  const relative = slash(path.relative(dir, file));
+  const relative = path.relative(dir, file).replaceAll(path.sep, '/');
 
   return relative.startsWith('../') ? relative : `./${relative}`;
 }
@@ -280,7 +279,11 @@ function parseSrc(
   if (src.startsWith('/')) {
     if (EXTERNAL_URL_REGEX.test(publicDir)) {
       const url = new URL(publicDir);
-      url.pathname = joinPath(url.pathname, src);
+      const segs = [...url.pathname.split('/'), ...src.split('/')].filter(
+        (v) => v.length > 0,
+      );
+
+      url.pathname = `/${segs.join('/')}`;
       return { type: 'url', url };
     }
 
