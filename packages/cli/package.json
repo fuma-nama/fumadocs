@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "The CLI tool for Fumadocs",
   "keywords": [
     "NextJs",
@@ -39,12 +39,12 @@
     "picocolors": "^1.1.1",
     "tinyexec": "^1.0.1",
     "ts-morph": "^26.0.0",
-    "zod": "^4.1.0"
+    "zod": "^4.1.4"
   },
   "devDependencies": {
     "@types/node": "24.3.0",
     "eslint-config-custom": "workspace:*",
-    "shadcn": "2.10.0",
+    "shadcn": "3.0.0",
     "tsconfig": "workspace:*"
   },
   "publishConfig": {

@@ -20,7 +20,6 @@ import { ElementContent } from 'hast';
 
 export const docs = defineDocs({
   docs: {
-    async: true,
     schema: frontmatterSchema.extend({
       preview: z.string().optional(),
       index: z.boolean().default(false),
@@ -40,7 +39,6 @@ export const docs = defineDocs({
 export const blog = defineCollections({
   type: 'doc',
   dir: 'content/blog',
-  async: true,
   schema: frontmatterSchema.extend({
     author: z.string(),
     date: z.string().date().or(z.date()),

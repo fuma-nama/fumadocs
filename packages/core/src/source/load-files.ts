@@ -1,8 +1,7 @@
 import { type MetaData, type PageData } from '@/source/types';
 import { FileSystem } from './file-system';
-import { joinPath, slash, splitPath } from '@/utils/path';
 import { type VirtualFile } from '@/source/loader';
-import { basename, dirname } from '@/source/path';
+import { basename, dirname, joinPath, slash, splitPath } from '@/source/path';
 import type { I18nConfig } from '@/i18n';
 
 export interface LoadOptions {

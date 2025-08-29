@@ -51,12 +51,12 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
   if (!page) notFound();
 
   const preview = page.data.preview;
-  const { body: Mdx, toc, lastModified } = await page.data.load();
+  const { body: Mdx, toc, lastModified } = page.data;
 
   return (
     <DocsPage
       toc={toc}
-      lastUpdate={lastModified}
+      lastUpdate={lastModified ? new Date(lastModified) : undefined}
       tableOfContent={{
         style: 'clerk',
       }}

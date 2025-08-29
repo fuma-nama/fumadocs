@@ -12,79 +12,25 @@ import {
   createTransformerFactory,
   rendererRich,
   type TransformerTwoslashIndexOptions,
+  type TwoslashTypesCache,
 } from '@shikijs/twoslash';
-import {
-  createTwoslasher,
-  type TwoslashExecuteOptions,
-  type TwoslashInstance,
-  type TwoslashReturn,
-} from 'twoslash';
+import { createTwoslasher, type TwoslashInstance } from 'twoslash';
 
-export interface TwoslashTypesCache {
-  /**
-   * Read cached result
-   *
-   * @param code Source code
-   */
-  read: (code: string) => TwoslashReturn | null;
+export type { TwoslashTypesCache };
 
-  /**
-   * Save result to cache
-   *
-   * @param code Source code
-   * @param data Twoslash data
-   */
-  write: (code: string, data: TwoslashReturn) => void;
-
-  /**
-   * On initialization
-   */
-  init?: () => void | Promise<void>;
-}
-
-export interface TransformerTwoslashOptions
-  extends TransformerTwoslashIndexOptions {
-  typesCache?: TwoslashTypesCache;
-}
+export type TransformerTwoslashOptions = TransformerTwoslashIndexOptions;
 
 let cachedInstance: TwoslashInstance | undefined;
 
-// Since some internals of Shiki Twoslash are not documented
 // This is highly inspired by https://github.com/shikijs/shiki/blob/main/packages/vitepress-twoslash
-export function transformerTwoslash({
-  typesCache,
-  ...options
-}: TransformerTwoslashOptions = {}): ShikiTransformer {
+export function transformerTwoslash(
+  options: TransformerTwoslashOptions = {},
+): ShikiTransformer {
   const ignoreClass = 'nd-copy-ignore';
 
   function getInstance() {
     cachedInstance ??= createTwoslasher(options.twoslashOptions);
     return cachedInstance;
-  }
-
-  let twoslasher: TwoslashInstance;
-  // Wrap twoslasher with cache when `resultCache` is provided
-  if (typesCache) {
-    twoslasher = ((
-      code: string,
-      extension?: string,
-      options?: TwoslashExecuteOptions,
-    ): TwoslashReturn => {
-      const cached = typesCache.read(code); // Restore cache
-      if (cached) return cached;
-
-      const instance = getInstance();
-      const twoslashResult = instance(code, extension, options);
-      typesCache.write(code, twoslashResult);
-      return twoslashResult;
-    }) as TwoslashInstance;
-
-    twoslasher.getCacheMap = () => {
-      return getInstance().getCacheMap();
-    };
-    typesCache.init?.();
-  } else {
-    twoslasher = getInstance();
   }
 
   const renderer = rendererRich({
@@ -163,7 +109,8 @@ export function transformerTwoslash({
     return result;
   };
   return createTransformerFactory(
-    twoslasher,
+    // lazy load Twoslash instance so it works on serverless platforms
+    ((...args) => getInstance()(...args)) as TwoslashInstance,
     renderer,
   )({
     explicitTrigger: true,

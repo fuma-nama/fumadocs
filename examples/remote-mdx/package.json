@@ -11,15 +11,15 @@
     "@fumadocs/mdx-remote": "workspace:*",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "next": "15.5.0",
+    "next": "15.5.2",
     "react": "19.1.1",
     "react-dom": "19.1.1",
     "tinyglobby": "^0.2.14"
   },
   "devDependencies": {
     "@types/mdx": "^2.0.13",
-    "@types/react": "^19.1.11",
-    "@types/react-dom": "^19.1.7",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.8",
     "typescript": "^5.9.2"
   }
 }

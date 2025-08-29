@@ -232,7 +232,7 @@ export function EditOnGitHub(props: ComponentProps<'a'>) {
  */
 export const DocsBody = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
   (props, ref) => (
-    <div ref={ref} {...props} className={cn('prose', props.className)}>
+    <div ref={ref} {...props} className={cn('prose flex-1', props.className)}>
       {props.children}
     </div>
   ),

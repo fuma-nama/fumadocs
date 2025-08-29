@@ -1,10 +1,9 @@
-import { readFileSync } from 'node:fs';
+import * as fs from 'node:fs/promises';
 import { generateOGImage } from '@/app/og/[...slug]/og';
 import { source } from '@/lib/source';
 import { notFound } from 'next/navigation';
 
-const font = readFileSync('./app/og/[...slug]/JetBrainsMono-Regular.ttf');
-const fontBold = readFileSync('./app/og/[...slug]/JetBrainsMono-Bold.ttf');
+export const revalidate = false;
 
 export async function GET(
   _req: Request,
@@ -13,6 +12,13 @@ export async function GET(
   const { slug } = await params;
   const page = source.getPage(slug.slice(0, -1));
   if (!page) notFound();
+
+  const font = await fs.readFile(
+    './app/og/[...slug]/JetBrainsMono-Regular.ttf',
+  );
+  const fontBold = await fs.readFile(
+    './app/og/[...slug]/JetBrainsMono-Bold.ttf',
+  );
 
   return generateOGImage({
     primaryTextColor: 'rgb(240,240,240)',

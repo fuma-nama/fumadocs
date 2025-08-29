@@ -1,9 +1,8 @@
 import type { ReactNode } from 'react';
 import type * as PageTree from './definitions';
-import { joinPath } from '@/utils/path';
 import type { MetaData, PageData, UrlFn } from '../types';
 import type { ContentStorage } from '@/source/load-files';
-import { basename, extname } from '@/source/path';
+import { basename, extname, joinPath } from '@/source/path';
 import {
   legacyTransformer,
   type LegacyTransformerOptions,
