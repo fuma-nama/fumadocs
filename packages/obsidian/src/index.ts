@@ -7,6 +7,7 @@ import remarkParse from 'remark-parse';
 import remarkStringify from 'remark-stringify';
 import remarkMdx from 'remark-mdx';
 import type { Compatible } from 'vfile';
+import { type Frontmatter, frontmatterSchema } from '@/utils/schema';
 
 export interface VaultFile {
   /**
@@ -41,7 +42,7 @@ export type ParsedFile = ParsedContentFile | ParsedMediaFile;
 
 export interface ParsedContentFile {
   format: 'content';
-  frontmatter: Record<string, unknown>;
+  frontmatter: Frontmatter;
   path: string;
 
   // output path (relative to content directory)
@@ -102,29 +103,29 @@ export async function convertVaultFiles(
   function scanFile(file: VaultFile) {
     const normalizedPath = normalize(file.path);
     const ext = path.extname(normalizedPath);
+    let parsed: ParsedFile;
 
     if (ext === '.md' || ext === '.mdx') {
       const { data, content } = matter(String(file.content));
 
-      const parsed: ParsedFile = {
+      parsed = {
         format: 'content',
         path: normalizedPath,
         outPath: normalizedPath.slice(0, -ext.length) + '.mdx',
-        frontmatter: data,
+        frontmatter: frontmatterSchema.parse(data),
         content,
       };
-
-      storage.set(normalizedPath, parsed);
-      return;
+    } else {
+      parsed = {
+        format: 'media',
+        path: normalizedPath,
+        outPath: normalizedPath,
+        content: file.content,
+        url: url(file),
+      };
     }
 
-    storage.set(normalizedPath, {
-      format: 'media',
-      path: normalizedPath,
-      outPath: normalizedPath,
-      content: file.content,
-      url: url(file),
-    });
+    storage.set(normalizedPath, parsed);
   }
 
   const context: InternalContext = {

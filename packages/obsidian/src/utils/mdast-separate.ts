@@ -1,10 +1,10 @@
-import type { PhrasingContent } from 'mdast';
+import type { RootContent } from 'mdast';
 
 export function separate(
   splitter: RegExp | string,
-  nodes: PhrasingContent[],
-): [title: PhrasingContent[], rest: PhrasingContent[]] | undefined {
-  const title: PhrasingContent[] = [];
+  nodes: RootContent[],
+): [title: RootContent[], rest: RootContent[]] | undefined {
+  const title: RootContent[] = [];
 
   for (let i = 0; i < nodes.length; i++) {
     const node = nodes[i];
@@ -16,13 +16,13 @@ export function separate(
         title.push({
           ...node,
           children: result[0],
-        });
+        } as RootContent);
 
         const rest = nodes.slice(i + 1);
         rest.unshift({
           ...node,
           children: result[1],
-        });
+        } as RootContent);
 
         return [title, rest];
       }

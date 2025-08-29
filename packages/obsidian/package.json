@@ -26,7 +26,6 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "unified": "^11.0.5",
     "github-slugger": "^2.0.0",
     "gray-matter": "^4.0.3",
     "remark": "^15.0.1",
@@ -34,20 +33,22 @@
     "remark-parse": "^11.0.0",
     "remark-stringify": "^11.0.0",
     "tinyglobby": "^0.2.14",
-    "unist-util-visit": "^5.0.0"
+    "unified": "^11.0.5",
+    "unist-util-visit": "^5.0.0",
+    "zod": "^4.1.4"
   },
   "devDependencies": {
-    "vfile": "^6.0.3",
-    "@types/react": "^19.1.12",
     "@types/estree": "^1.0.8",
     "@types/mdast": "^4.0.3",
     "@types/node": "24.3.0",
+    "@types/react": "^19.1.12",
     "eslint-config-custom": "workspace:*",
-    "fumadocs-ui": "workspace:*",
     "fumadocs-core": "workspace:*",
+    "fumadocs-ui": "workspace:*",
     "mdast-util-mdx-jsx": "^3.2.0",
     "tsconfig": "workspace:*",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "vfile": "^6.0.3"
   },
   "peerDependenciesMeta": {
     "@types/react": {
@@ -55,9 +56,9 @@
     }
   },
   "peerDependencies": {
+    "@types/react": "*",
     "fumadocs-core": "^15.0.0",
-    "fumadocs-ui": "^15.0.0",
-    "@types/react": "*"
+    "fumadocs-ui": "^15.0.0"
   },
   "publishConfig": {
     "access": "public"

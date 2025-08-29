@@ -1,4 +1,4 @@
-import type { Blockquote, Root, RootContent } from 'mdast';
+import type { Blockquote, PhrasingContent, Root, RootContent } from 'mdast';
 import path from 'node:path';
 import { Processor, Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
@@ -101,12 +101,7 @@ function resolveWikilink(
     children: [
       {
         type: 'text',
-        value:
-          alias ??
-          (ref.format === 'content'
-            ? (ref.frontmatter.title as string)
-            : null) ??
-          name,
+        value: alias ?? content,
       },
     ],
   };
@@ -128,7 +123,7 @@ function resolveCallout(this: Processor, node: Blockquote) {
   if (rest) {
     body.unshift({
       type: 'paragraph',
-      children: rest,
+      children: rest as PhrasingContent[],
     });
   }
 
@@ -137,7 +132,7 @@ function resolveCallout(this: Processor, node: Blockquote) {
     [
       {
         type: 'paragraph',
-        children: title,
+        children: title as PhrasingContent[],
       },
     ],
     body,
@@ -162,6 +157,12 @@ export function remarkConvert(
 
     context.byName.set(parsed.base, file);
     context.byPath.set(file.path, file);
+
+    if (file.format === 'content' && file.frontmatter?.aliases) {
+      for (const alias of file.frontmatter.aliases) {
+        context.byName.set(alias, file);
+      }
+    }
   }
 
   return (tree, file) => {
