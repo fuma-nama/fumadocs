@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { remarkWikiLink } from '@/remark-wikilink';
+import { remarkConvert } from '@/remark-convert';
 import matter from 'gray-matter';
 import { stash } from '@/utils/stash';
 import { unified } from 'unified';
@@ -131,7 +131,7 @@ export async function convertVaultFiles(
     storage,
   };
 
-  const processor = unified().use(remarkParse).use(remarkWikiLink, context);
+  const processor = unified().use(remarkParse).use(remarkConvert, context);
   const stringifier = unified().use(remarkStringify).use(remarkMdx);
 
   async function onFile(file: ParsedFile) {

@@ -1,16 +1,19 @@
-import type { Root, RootContent } from 'mdast';
+import type { Blockquote, Root, RootContent } from 'mdast';
 import path from 'node:path';
-import type { Transformer } from 'unified';
+import { Processor, Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
 import type { InternalContext, ParsedContentFile, ParsedFile } from '@/index';
 import { slug } from 'github-slugger';
 import { flattenNode } from '@/utils/flatten-node';
 import { stash } from '@/utils/stash';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
+import { separate } from '@/utils/mdast-separate';
+import { createCallout } from '@/utils/mdast-create';
 
 const RegexWikilink = /!?\[\[(?<content>([^\]]|\\])+)]]/g;
 const RegexContent =
   /^(?<name>(?:\\#|\\\||[^#|])+)(?:#(?<heading>(?:\\\||[^|])+))?(?:\|(?<alias>.+))?$/;
+const RegexCalloutHead = /^\[!(?<type>\w+)](?<collapsible>\+)?/;
 
 interface Context extends InternalContext {
   /**
@@ -33,7 +36,11 @@ function resolveWikilink(
   const match = RegexContent.exec(content);
   if (!match?.groups) return;
 
-  const { name, heading, alias } = match.groups;
+  const { name, heading, alias } = match.groups as {
+    name: string;
+    heading?: string;
+    alias?: string;
+  };
   const dir = path.dirname(file.path);
   let ref: ParsedFile | undefined;
 
@@ -72,10 +79,15 @@ function resolveWikilink(
       } satisfies MdxJsxFlowElement;
     }
 
+    if (alias)
+      console.warn(
+        'we do not support specifying image size like `![[image.png|300]].',
+      );
+
     return {
       type: 'image',
       url: ref.url,
-      alt: alias ?? name,
+      alt: name,
     };
   }
 
@@ -91,14 +103,49 @@ function resolveWikilink(
         type: 'text',
         value:
           alias ??
-          (ref.format === 'content' ? ref.frontmatter.title : null) ??
+          (ref.format === 'content'
+            ? (ref.frontmatter.title as string)
+            : null) ??
           name,
       },
     ],
   };
 }
 
-export function remarkWikiLink(
+function resolveCallout(this: Processor, node: Blockquote) {
+  const head = node.children[0];
+  if (!head || head.type !== 'paragraph') return;
+  const textNode = head.children[0];
+  if (!textNode || textNode.type !== 'text') return;
+
+  const match = RegexCalloutHead.exec(textNode.value);
+  if (!match) return;
+
+  textNode.value = textNode.value.slice(match[0].length).trimStart();
+
+  const [title, rest] = separate(/\r?\n/, head.children) ?? [head.children];
+  const body = node.children.slice(1);
+  if (rest) {
+    body.unshift({
+      type: 'paragraph',
+      children: rest,
+    });
+  }
+
+  return createCallout(
+    match[1],
+    [
+      {
+        type: 'paragraph',
+        children: title,
+      },
+    ],
+    body,
+  );
+}
+
+export function remarkConvert(
+  this: Processor,
   options: InternalContext,
 ): Transformer<Root, Root> {
   const context: Context = {
@@ -121,7 +168,7 @@ export function remarkWikiLink(
     const source = file.data.source;
     if (!source) return;
 
-    visit(tree, ['text', 'heading'], (node) => {
+    visit(tree, ['text', 'heading', 'blockquote'], (node) => {
       if (node.type === 'heading') {
         const text = flattenNode(node);
 
@@ -133,6 +180,13 @@ export function remarkWikiLink(
         return 'skip';
       }
 
+      if (node.type === 'blockquote') {
+        const callout = resolveCallout.call(this, node);
+        if (callout) Object.assign(node, callout);
+
+        return;
+      }
+
       if (node.type !== 'text') return;
 
       const text = node.value;
@@ -141,10 +195,9 @@ export function remarkWikiLink(
       let result: RegExpExecArray | null;
 
       while ((result = RegexWikilink.exec(text))) {
-        if (!result.groups) break;
         const resolved = resolveWikilink(
           result[0].startsWith('!'),
-          result.groups.content,
+          result[1],
           source,
           context,
         );

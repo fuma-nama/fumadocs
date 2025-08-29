@@ -1559,12 +1559,18 @@ importers:
       '@types/node':
         specifier: 24.3.0
         version: 24.3.0
+      '@types/react':
+        specifier: ^19.1.12
+        version: 19.1.12
       eslint-config-custom:
         specifier: workspace:*
         version: link:../eslint-config-custom
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
+      fumadocs-ui:
+        specifier: workspace:*
+        version: link:../ui
       mdast-util-mdx-jsx:
         specifier: ^3.2.0
         version: 3.2.0

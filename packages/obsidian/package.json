@@ -38,17 +38,26 @@
   },
   "devDependencies": {
     "vfile": "^6.0.3",
+    "@types/react": "^19.1.12",
     "@types/estree": "^1.0.8",
     "@types/mdast": "^4.0.3",
     "@types/node": "24.3.0",
     "eslint-config-custom": "workspace:*",
+    "fumadocs-ui": "workspace:*",
     "fumadocs-core": "workspace:*",
     "mdast-util-mdx-jsx": "^3.2.0",
     "tsconfig": "workspace:*",
     "typescript": "^5.9.2"
   },
+  "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    }
+  },
   "peerDependencies": {
-    "fumadocs-core": "^15.0.0"
+    "fumadocs-core": "^15.0.0",
+    "fumadocs-ui": "^15.0.0",
+    "@types/react": "*"
   },
   "publishConfig": {
     "access": "public"
