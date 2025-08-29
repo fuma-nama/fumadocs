@@ -204,7 +204,7 @@ export function remarkConvert(
         );
         if (!resolved) continue;
 
-        if (lastIndex !== result.index) {
+        if (lastIndex < result.index) {
           child.push({
             type: 'text',
             value: text.substring(lastIndex, result.index),
@@ -225,7 +225,6 @@ export function remarkConvert(
       Object.assign(node, {
         type: 'root',
         children: child,
-        data: {},
       } satisfies Root);
       return 'skip';
     });

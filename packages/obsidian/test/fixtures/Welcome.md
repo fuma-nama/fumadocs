@@ -17,3 +17,17 @@ When you're ready, delete this note and make the vault your own.
 
 > [!warning] Hello World [[hello world]] **hello**
 > I love Fumadocs.
+
+%% Comment **hidden** %%
+
+%% Comment
+
+**hidden**
+
+```ts
+console.log('Hello World');
+```
+
+CodeBlock %%
+
+Nothing

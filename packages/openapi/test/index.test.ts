@@ -154,5 +154,9 @@ describe('Generate documents', () => {
 });
 
 function stringifyOutput(output: OutputFile[]) {
-  return JSON.stringify(output.sort(), null, 2).replaceAll(cwd, '~');
+  return JSON.stringify(
+    output.sort((a, b) => a.path.localeCompare(b.path)),
+    null,
+    2,
+  ).replaceAll(cwd, '~');
 }

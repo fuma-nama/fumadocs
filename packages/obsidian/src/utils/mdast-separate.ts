@@ -3,53 +3,43 @@ import type { RootContent } from 'mdast';
 export function separate(
   splitter: RegExp | string,
   nodes: RootContent[],
-): [title: RootContent[], rest: RootContent[]] | undefined {
-  const title: RootContent[] = [];
-
+): [before: RootContent[], after: RootContent[]] | undefined {
   for (let i = 0; i < nodes.length; i++) {
     const node = nodes[i];
 
     if (node.type !== 'text' && 'children' in node) {
-      const result = separate(/\r?\n/, node.children);
+      const result = separate(splitter, node.children);
+      if (!result) continue;
 
-      if (result) {
-        title.push({
-          ...node,
-          children: result[0],
-        } as RootContent);
+      const before = nodes.slice(0, i);
+      before.push({
+        ...node,
+        children: result[0],
+      } as RootContent);
 
-        const rest = nodes.slice(i + 1);
-        rest.unshift({
-          ...node,
-          children: result[1],
-        } as RootContent);
+      const after = nodes.slice(i + 1);
+      after.unshift({
+        ...node,
+        children: result[1],
+      } as RootContent);
 
-        return [title, rest];
-      }
-    }
-
-    if (node.type !== 'text') {
-      title.push(node);
-      continue;
+      return [before, after];
     }
 
     if (node.type === 'text') {
-      const [before, after] = node.value.split(splitter, 2);
+      const [left, right] = node.value.split(splitter, 2);
+      if (right === undefined) continue;
 
-      if (!after) {
-        title.push(node);
-        continue;
-      }
-
-      title.push({
+      const before = nodes.slice(0, i);
+      before.push({
         type: 'text',
-        value: before,
+        value: left,
       });
 
-      const rest = nodes.slice(i + 1);
-      if (after.length > 0) rest.push({ type: 'text', value: after });
+      const after = nodes.slice(i + 1);
+      if (right.length > 0) after.unshift({ type: 'text', value: right });
 
-      return [title, rest];
+      return [before, after];
     }
   }
 }
