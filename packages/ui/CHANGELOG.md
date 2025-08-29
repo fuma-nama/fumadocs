@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 15.7.5
+
+### Patch Changes
+
+- cedc494: Hotfix URL normalization logic
+- Updated dependencies [cedc494]
+  - fumadocs-core@15.7.5
+
 ## 15.7.4
 
 ### Patch Changes

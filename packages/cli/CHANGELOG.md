@@ -1,5 +1,11 @@
 # fumadocs
 
+## 1.0.1
+
+### Patch Changes
+
+- c9c27fe: Support Shadcn CLI v3
+
 ## 1.0.0
 
 ### Major Changes
