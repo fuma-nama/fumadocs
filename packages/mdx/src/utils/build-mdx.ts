@@ -57,6 +57,8 @@ declare module 'vfile' {
      * [Fumadocs MDX] The compiler object from loader
      */
     _compiler?: CompilerOptions;
+
+    _getProcessor?: (format: 'md' | 'mdx') => Processor;
   }
 }
 
@@ -99,6 +101,7 @@ export async function buildMDX(
       ...data,
       frontmatter,
       _compiler,
+      _getProcessor: getProcessor,
     },
   });
 }

@@ -8,18 +8,14 @@ import type { DataMap } from '@/utils/build-mdx';
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx-jsx';
 import remarkParse from 'remark-parse';
 import remarkMdx from 'remark-mdx';
-import { remarkGfm, remarkHeading } from 'fumadocs-core/mdx-plugins';
+import { remarkHeading } from 'fumadocs-core/mdx-plugins';
 
 export interface Params {
   lang?: string;
   meta?: string;
 }
 
-const mdProcessor = unified()
-  .use(remarkParse)
-  .use(remarkGfm)
-  .use(remarkHeading);
-const mdxProcessor = mdProcessor.use(remarkMdx);
+const baseProcessor = unified().use(remarkHeading);
 
 function flattenNode(node: RootContent): string {
   if ('children' in node)
@@ -113,8 +109,10 @@ export function remarkInclude(this: Processor): Transformer<Root, Root> {
       } satisfies Code;
     }
 
-    const processor = ext === '.mdx' ? mdxProcessor : mdProcessor;
-    let parsed = await processor.run(
+    const processor = (data._getProcessor ?? getDefaultProcessor)(
+      ext === '.mdx' ? 'mdx' : 'md',
+    );
+    let parsed = await baseProcessor.run(
       processor.parse(fumaMatter(content).content),
     );
 
@@ -182,4 +180,11 @@ export function remarkInclude(this: Processor): Transformer<Root, Root> {
   return async (tree, file) => {
     await update(tree, path.dirname(file.path), file.data);
   };
+}
+
+function getDefaultProcessor(format: 'md' | 'mdx') {
+  const mdProcessor = unified().use(remarkParse);
+
+  if (format === 'md') return mdProcessor;
+  return mdProcessor.use(remarkMdx);
 }
