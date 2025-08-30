@@ -5,7 +5,7 @@ import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { TableOfContents } from 'fumadocs-core/server';
 import type { FC } from 'react';
 import type { MDXProps } from 'mdx/types';
-import { ExtractedReference } from '@/mdx-plugins/remark-extract';
+import type { ExtractedReference } from '@/mdx-plugins/remark-postprocess';
 
 type Processor = ReturnType<typeof createProcessor>;
 
@@ -49,7 +49,12 @@ export type { DataMap };
 declare module 'vfile' {
   interface DataMap {
     /**
-     * The compiler object from loader
+     * [Fumadocs MDX] raw frontmatter, you can modify it
+     */
+    frontmatter?: Record<string, unknown>;
+
+    /**
+     * [Fumadocs MDX] The compiler object from loader
      */
     _compiler?: CompilerOptions;
   }

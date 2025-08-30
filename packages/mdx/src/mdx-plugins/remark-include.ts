@@ -59,7 +59,7 @@ function extractSection(root: Root, section: string): Root | undefined {
       break;
     }
 
-    if (node.type === 'heading' && node.data?.hProperties === section) {
+    if (node.type === 'heading' && node.data?.hProperties?.id === section) {
       nodes = [node];
       continue;
     }
