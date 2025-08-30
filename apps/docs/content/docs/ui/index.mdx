@@ -49,11 +49,11 @@ A command line tool to install UI components and automate things, useful for cus
 
 **[Bun](https://bun.sh):** A JavaScript runtime, we use it for running scripts.
 
-Although not required, some basic knowledge of React.js would be useful for further customisations.
+Some basic knowledge of React.js would be useful for further customisations.
 
 ## Automatic Installation
 
-A minimum version of Node.js 20 required, note that Node.js 23.1 might have problems with Next.js.
+A minimum version of Node.js 20 required.
 
 ```bash tab="npm"
 npm create fumadocs-app
@@ -71,10 +71,10 @@ yarn create fumadocs-app
 bun create fumadocs-app
 ```
 
-It will ask you:
+It will ask you the built-in template to use:
 
-- the React.js framework to use (Next.js recommended).
-- the content source to use.
+- **React.js framework**: Next.js, Waku, React Router, Tanstack Start.
+- **Content source**: Fumadocs MDX.
 
 A new fumadocs app should be initialized. Now you can start hacking!
 
@@ -107,6 +107,14 @@ npm run dev
 Some common questions you may encounter.
 
 <Accordions>
+  <Accordion id='upgrade-fumadocs' title="Getting error with missing APIs or bugs?">
+    Make sure to upgrade Fumadocs when you've encountered any problems or trying out new features:
+
+    ```bash title="pnpm"
+    pnpm update -i -r --latest
+    ```
+
+  </Accordion>
 
   <Accordion id='change-base-url' title="How to change the base route of docs?">
 
@@ -152,6 +160,11 @@ export const source = loader({
 ### For Next.js
 
 <Accordions>
+  <Accordion id='node-23' title="Getting error on production build?">
+
+    Node.js 23.1 might have problems with Next.js, see [#1021](https://github.com/fuma-nama/fumadocs/issues/1021). Make sure to change your Node.js version.
+
+  </Accordion>
   <Accordion id='dynamic-route' title="It uses Dynamic Route, will it be poor in performance?">
 
     Next.js turns dynamic route into static routes when `generateStaticParams` is configured.
@@ -191,14 +204,6 @@ export const source = loader({
 
 </Accordions>
 
-### Upgrade Fumadocs
-
-Make sure to upgrade Fumadocs when you've encountered any problems or trying out new features:
-
-```bash title="pnpm"
-pnpm update -i -r --latest
-```
-
 ## Learn More
 
 New to here? Don't worry, we are welcome for your questions.
@@ -216,7 +221,7 @@ For authoring docs, make sure to read:
   <Card href="/docs/ui/navigation" title="Navigation">
     Learn how to customise navigation links and sidebar items.
   </Card>
-  <Card href="/docs/ui/page-conventions" title="Routing">
+  <Card href="/docs/ui/page-conventions" title="Page Slugs & Page Tree">
     Learn how to organise content.
   </Card>
   <Card

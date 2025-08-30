@@ -2,7 +2,7 @@ import type { Blockquote, PhrasingContent, Root, RootContent } from 'mdast';
 import path from 'node:path';
 import { Processor, Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
-import type { InternalContext, ParsedContentFile, ParsedFile } from '@/index';
+import type { InternalContext, ParsedContentFile, ParsedFile } from '@/convert';
 import { flattenNode } from '@/utils/flatten-node';
 import { stash } from '@/utils/stash';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
@@ -78,12 +78,6 @@ function resolveWikilink(
       console.warn(
         'some features of embed content blocks are not supported yet, use at your own risk.',
       );
-      let filePath = stash(
-        path.relative(path.dirname(file.outPath), ref.outPath),
-      );
-
-      if (heading)
-        filePath += `#${heading.startsWith('^') ? heading : slug(heading)}`;
 
       return {
         type: 'mdxJsxFlowElement',
@@ -95,7 +89,7 @@ function resolveWikilink(
             children: [
               {
                 type: 'text',
-                value: filePath,
+                value: getFileHref(path.dirname(file.outPath), ref, heading),
               },
             ],
           },
@@ -287,6 +281,8 @@ export function remarkConvert(
 }
 
 function getFileHref(dir: string, ref: ParsedFile, heading?: string) {
+  if (ref.format === 'media') return ref.url;
+
   let url = stash(path.relative(dir, ref.outPath));
   if (!url.startsWith('../')) url = `./${url}`;
   if (heading) url += `#${heading.startsWith('^') ? heading : slug(heading)}`;

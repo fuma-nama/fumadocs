@@ -1,194 +1,69 @@
+export * from './convert';
+
+import { glob } from 'tinyglobby';
+import {
+  type ConvertOptions,
+  convertVaultFiles,
+  type OutputFile,
+  type VaultFile,
+} from '@/convert';
 import path from 'node:path';
-import { remarkConvert } from '@/remark-convert';
-import matter from 'gray-matter';
-import { stash } from '@/utils/stash';
-import { unified } from 'unified';
-import remarkParse from 'remark-parse';
-import remarkStringify from 'remark-stringify';
-import remarkMdx from 'remark-mdx';
-import type { Compatible } from 'vfile';
-import { type Frontmatter, frontmatterSchema } from '@/utils/schema';
-import { remarkObsidianComment } from '@/remark-obsidian-comment';
-import { remarkBlockId } from '@/remark-block-id';
+import fs from 'node:fs/promises';
 
-type RenameOutputFn = (originalOutputPath: string, file: VaultFile) => string;
-
-export interface VaultFile {
-  /**
-   * paths relative to vault folder
-   */
-  path: string;
-
-  content: string | ArrayBuffer | Buffer<ArrayBufferLike>;
+export interface ReadFilesOptions {
+  include?: string | string[];
+  dir: string;
 }
 
-export interface OutputFile {
-  type: 'asset' | 'content' | 'custom';
+export async function readVaultFiles(
+  options: ReadFilesOptions,
+): Promise<VaultFile[]> {
+  const { include = '**/*', dir } = options;
+  const paths = await glob(include, { cwd: dir });
 
-  /**
-   * paths relative to target folder, for example:
-   * - `type: asset` relative to `./public`
-   * - `type: content` relative to `./content/docs`.
-   */
-  path: string;
-
-  content: string | ArrayBuffer | Buffer<ArrayBufferLike>;
+  return Promise.all(
+    paths.map(async (file) => ({
+      path: file,
+      content: await fs.readFile(path.join(dir, file)),
+    })),
+  );
 }
 
-export interface ConvertOptions {
-  /**
-   * generate URL from media file
-   */
-  url?: (mediaFile: VaultFile) => string;
-
-  outputPath?: RenameOutputFn | RenameOutputPreset;
+export interface WriteFilesOptions {
+  publicDir?: string;
+  contentDir?: string;
 }
 
-export type ParsedFile = ParsedContentFile | ParsedMediaFile;
+export async function writeVaultFiles(
+  files: OutputFile[],
+  options: WriteFilesOptions = {},
+) {
+  const { publicDir = 'public', contentDir = 'content/docs/vault' } = options;
 
-export interface ParsedContentFile {
-  format: 'content';
-  frontmatter: Frontmatter;
-  path: string;
+  const map = {
+    asset: publicDir,
+    content: contentDir,
+    custom: '',
+  } as const;
 
-  // output path (relative to content directory)
-  outPath: string;
-  content: string;
+  await Promise.all(
+    files.map(async (file) => {
+      const mappedPath = path.join(map[file.type], file.path);
+
+      await fs.mkdir(path.dirname(mappedPath), { recursive: true });
+      await fs.writeFile(mappedPath, file.content);
+    }),
+  );
 }
 
-export interface ParsedMediaFile {
-  format: 'media';
-  path: string;
-
-  // output path (relative to asset directory)
-  outPath: string;
-  url: string;
-  content: VaultFile['content'];
+export interface Options extends ReadFilesOptions {
+  convert?: ConvertOptions;
+  out?: WriteFilesOptions;
 }
 
-declare module 'vfile' {
-  interface DataMap {
-    source: ParsedContentFile;
-  }
-}
+export async function fromVault(options: Options) {
+  const files = await readVaultFiles(options);
+  const converted = await convertVaultFiles(files, options.convert);
 
-export interface InternalContext {
-  /**
-   * get files by full file path
-   */
-  storage: Map<string, ParsedFile>;
-}
-
-function normalize(filePath: string): string {
-  filePath = stash(filePath);
-  if (filePath.startsWith('../'))
-    throw new Error(`${filePath} points outside of vault folder`);
-
-  return filePath.startsWith('./') ? filePath.slice(2) : filePath;
-}
-
-export async function convertVaultFiles(
-  rawFiles: VaultFile[],
-  options: ConvertOptions = {},
-): Promise<OutputFile[]> {
-  const {
-    url = (file) => {
-      const segs = normalize(file.path)
-        .split('/')
-        .filter((v) => v.length > 0);
-      return `/${segs.join('/')}`;
-    },
-  } = options;
-  const outputPath =
-    typeof options.outputPath === 'function'
-      ? options.outputPath
-      : createRenameOutput(options.outputPath ?? 'simple');
-
-  const output: OutputFile[] = [];
-  const storage = new Map<string, ParsedFile>();
-
-  for (const rawFile of rawFiles) {
-    scanFile(rawFile);
-  }
-
-  function scanFile(file: VaultFile) {
-    const normalizedPath = normalize(file.path);
-    const ext = path.extname(normalizedPath);
-    let parsed: ParsedFile;
-
-    if (ext === '.md' || ext === '.mdx') {
-      const { data, content } = matter(String(file.content));
-
-      parsed = {
-        format: 'content',
-        path: normalizedPath,
-        outPath: outputPath(
-          normalizedPath.slice(0, -ext.length) + '.mdx',
-          file,
-        ),
-        frontmatter: frontmatterSchema.parse(data),
-        content,
-      };
-    } else {
-      parsed = {
-        format: 'media',
-        path: normalizedPath,
-        outPath: outputPath(normalizedPath, file),
-        content: file.content,
-        url: url(file),
-      };
-    }
-
-    storage.set(normalizedPath, parsed);
-  }
-
-  const context: InternalContext = {
-    storage,
-  };
-
-  const processor = unified()
-    .use(remarkParse)
-    .use(remarkConvert, context)
-    .use(remarkObsidianComment)
-    .use(remarkBlockId);
-  const stringifier = unified().use(remarkStringify).use(remarkMdx);
-
-  async function onFile(file: ParsedFile) {
-    if (file.format === 'media') {
-      output.push({
-        type: 'asset',
-        path: file.outPath,
-        content: file.content,
-      });
-
-      return;
-    }
-
-    const vfile: Compatible = {
-      path: file.path,
-      value: String(file.content),
-      data: {
-        source: file,
-      },
-    };
-
-    const mdast = await processor.run(processor.parse(vfile), vfile);
-
-    output.push({
-      type: 'content',
-      path: file.outPath,
-      content: stringifier.stringify(mdast),
-    });
-  }
-
-  await Promise.all(Array.from(storage.values()).map(onFile));
-  return output;
-}
-
-type RenameOutputPreset = 'ignore' | 'simple';
-
-function createRenameOutput(preset: RenameOutputPreset): RenameOutputFn {
-  if (preset === 'ignore') return (file) => file;
-
-  return (file) => file.toLowerCase().replaceAll(' ', '-');
+  await writeVaultFiles(converted, options.out);
 }

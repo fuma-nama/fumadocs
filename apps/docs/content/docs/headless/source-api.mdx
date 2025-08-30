@@ -9,8 +9,8 @@ description: Turn a content source into a unified interface
 
 ### What it does?
 
-- Generate page trees based on file system.
-- Assign URL and slugs to each page.
+- Generate [page slugs and page tree](/docs/headless/page-conventions).
+- Assign URL to each page.
 - Output useful utilities to interact with content.
 
 It doesn't rely on the real file system (zero `node:fs` usage), a virtual storage is also allowed.
@@ -214,14 +214,11 @@ loader({
 
 To plug your own content source, create a `Source` object.
 
-It includes a `files` property which is an array of virtual files.
-Each virtual file must contain its file path and corresponding data.
-You can check type definitions for more info.
+Since Source API doesn't rely on file system, file paths only allow special paths like `file.mdx` and `content/file.mdx`.
 
-Since Source API doesn't rely on file system, file paths cannot be absolute or relative (for example, `./file.mdx` and `D://content/file.mdx` are not allowed).
-Instead, pass the file paths like `file.mdx` and `content/file.mdx`.
+Paths like `./file.mdx` and `D://content/file.mdx` are not allowed
 
-```ts
+```ts twoslash
 import { Source } from 'fumadocs-core/source';
 
 export function createMySource(): Source<{
@@ -229,7 +226,25 @@ export function createMySource(): Source<{
   pageData: { title: string; description: string }; // Your custom type
 }> {
   return {
-    files: [],
+    files: [
+      {
+        type: 'page',
+        path: 'folder/index.mdx',
+        data: {
+          title: 'Hello World',
+          // ...
+        },
+      },
+      {
+        type: 'meta',
+        path: 'meta.json',
+        data: {
+          title: 'Docs',
+          pages: ['folder'],
+          // ...
+        },
+      },
+    ],
   };
 }
 ```
