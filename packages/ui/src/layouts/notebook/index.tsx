@@ -481,10 +481,13 @@ function NavbarLinkItem({
       <Popover>
         <PopoverTrigger
           {...props}
-          className={cn('inline-flex items-center gap-1.5', props.className)}
+          asChild
+          className={cn('inline-flex items-center gap-1.5 data-[active=true]:text-fd-primary', props.className)}
         >
-          {item.text}
-          <ChevronDown className="size-3" />
+         <BaseLinkItem item={item}>
+           {item.text}
+           <ChevronDown className="size-3" />
+         </BaseLinkItem>
         </PopoverTrigger>
         <PopoverContent className="flex flex-col">
           {item.items.map((child, i) => {

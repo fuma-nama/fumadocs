@@ -115,7 +115,12 @@ export interface MenuItemType extends BaseItem {
   type: 'menu';
   icon?: ReactNode;
   text: ReactNode;
-
+   /**
+   * When the item is marked as active
+   *
+   * @defaultValue 'url'
+   */
+  active?: 'url' | 'nested-url' | 'none';
   url?: string;
   items: (
     | (MainItemType & {
