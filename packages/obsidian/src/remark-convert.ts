@@ -3,12 +3,13 @@ import path from 'node:path';
 import { Processor, Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
 import type { InternalContext, ParsedContentFile, ParsedFile } from '@/index';
-import { slug } from 'github-slugger';
 import { flattenNode } from '@/utils/flatten-node';
 import { stash } from '@/utils/stash';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
 import { separate } from '@/utils/mdast-separate';
 import { createCallout } from '@/utils/mdast-create';
+import { replace } from '@/utils/mdast-replace';
+import { slug } from 'github-slugger';
 
 const RegexWikilink = /!?\[\[(?<content>([^\]]|\\])+)]]/g;
 const RegexContent =
@@ -74,10 +75,15 @@ function resolveWikilink(
     }
 
     if (ref.format === 'content') {
+      console.warn(
+        'some features of embed content blocks are not supported yet, use at your own risk.',
+      );
       let filePath = stash(
         path.relative(path.dirname(file.outPath), ref.outPath),
       );
-      if (heading) filePath = `${filePath}#${slug(heading)}`;
+
+      if (heading)
+        filePath += `#${heading.startsWith('^') ? heading : slug(heading)}`;
 
       return {
         type: 'mdxJsxFlowElement',
@@ -112,7 +118,7 @@ function resolveWikilink(
   let url: string;
 
   if (isHeading) {
-    url = `#${slug(heading)}`;
+    url = heading!.startsWith('^') ? heading : `#${slug(heading)}`;
   } else {
     const ref = resolveInternalLink(name, file, context);
 
@@ -215,7 +221,7 @@ export function remarkConvert(
 
       if (node.type === 'blockquote') {
         const callout = resolveCallout.call(this, node);
-        if (callout) Object.assign(node, callout);
+        if (callout) replace(node, callout);
 
         return;
       }
@@ -271,7 +277,7 @@ export function remarkConvert(
         });
       }
 
-      Object.assign(node, {
+      replace(node, {
         type: 'root',
         children: child,
       } satisfies Root);
@@ -283,7 +289,7 @@ export function remarkConvert(
 function getFileHref(dir: string, ref: ParsedFile, heading?: string) {
   let url = stash(path.relative(dir, ref.outPath));
   if (!url.startsWith('../')) url = `./${url}`;
-  if (heading) url = `${url}#${slug(heading)}`;
+  if (heading) url += `#${heading.startsWith('^') ? heading : slug(heading)}`;
 
   return url;
 }

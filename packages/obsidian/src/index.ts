@@ -9,6 +9,7 @@ import remarkMdx from 'remark-mdx';
 import type { Compatible } from 'vfile';
 import { type Frontmatter, frontmatterSchema } from '@/utils/schema';
 import { remarkObsidianComment } from '@/remark-obsidian-comment';
+import { remarkBlockId } from '@/remark-block-id';
 
 type RenameOutputFn = (originalOutputPath: string, file: VaultFile) => string;
 
@@ -148,7 +149,8 @@ export async function convertVaultFiles(
   const processor = unified()
     .use(remarkParse)
     .use(remarkConvert, context)
-    .use(remarkObsidianComment);
+    .use(remarkObsidianComment)
+    .use(remarkBlockId);
   const stringifier = unified().use(remarkStringify).use(remarkMdx);
 
   async function onFile(file: ParsedFile) {
