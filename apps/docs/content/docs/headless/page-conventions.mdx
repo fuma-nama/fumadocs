@@ -1,17 +1,14 @@
 ---
-title: Routing
-description: A shared convention for organizing your documents
+title: Page Slugs & Page Tree
+description: Customise generated page slugs and page tree.
 ---
 
-<Callout title='Before reading'>
-
-    This guide only applies for content sources that uses `loader()` API, such as Fumadocs MDX.
-
-</Callout>
+> This guide only applies for content sources that uses `loader()` API, such as **Fumadocs MDX**.
 
 ## Overview
 
-While your React framework handles routing, Fumadocs generates **page slugs** and **sidebar items** (page tree) from your content directory using [`loader()`](/docs/headless/source-api).
+Fumadocs generates **page slugs** and **page tree** (sidebar items) from your content directory using [`loader()`](/docs/headless/source-api),
+the routing functionality will be handled by your React framework.
 
 You can define folders and pages similar to file-system based routing.
 
@@ -24,7 +21,7 @@ You can define folders and pages similar to file-system based routing.
 
 ## File
 
-A [MDX](https://mdxjs.com) or Markdown file, you can customise its frontmatter.
+For [MDX](https://mdxjs.com) & Markdown file, you can customise page information from frontmatter.
 
 ```mdx
 ---
@@ -36,15 +33,19 @@ icon: HomeIcon
 ## Learn More
 ```
 
+Fumadocs detects from the following properties to construct page trees.
+
 | name          | description                           |
 | ------------- | ------------------------------------- |
 | `title`       | The title of page                     |
 | `description` | The description of page               |
 | `icon`        | The name of icon, see [Icons](#icons) |
 
-<Callout title='Fumadocs MDX'>
+<Callout title='Good to Know'>
 
-    You can use the [`schema`](/docs/mdx/collections#schema-1) option to add frontmatter properties.
+Page information is supplied by the content source such as **Fumadocs MDX**.
+
+On Fumadocs MDX, you can specify a [`schema`](/docs/mdx/collections#schema-1) option to customise frontmatter schema.
 
 </Callout>
 
