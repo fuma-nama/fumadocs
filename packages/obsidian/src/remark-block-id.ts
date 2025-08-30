@@ -13,9 +13,9 @@ export function remarkBlockId(): Transformer<Root, Root> {
 
       visit(
         node,
+        ['link', 'text', 'mdxJsxFlowElement'],
         (textNode) => {
-          if (textNode.type === 'link') return 'skip';
-          if (textNode.type !== 'text') return;
+          if (textNode.type !== 'text') return 'skip';
 
           const value = textNode.value;
           const match = Regex.exec(value);

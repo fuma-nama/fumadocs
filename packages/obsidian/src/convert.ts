@@ -10,6 +10,7 @@ import type { Compatible } from 'vfile';
 import { type Frontmatter, frontmatterSchema } from '@/utils/schema';
 import { remarkObsidianComment } from '@/remark-obsidian-comment';
 import { remarkBlockId } from '@/remark-block-id';
+import { dump } from 'js-yaml';
 
 type RenameOutputFn = (originalOutputPath: string, file: VaultFile) => string;
 
@@ -175,11 +176,15 @@ export async function convertVaultFiles(
     };
 
     const mdast = await processor.run(processor.parse(vfile), vfile);
+    const string = stringifier.stringify(mdast);
+    const frontmatter = dump({
+      title: path.basename(file.path, path.extname(file.path)),
+    }).trim();
 
     output.push({
       type: 'content',
       path: file.outPath,
-      content: stringifier.stringify(mdast),
+      content: `---\n${frontmatter}\n---\n${string}`,
     });
   }
 
