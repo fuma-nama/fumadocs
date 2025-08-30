@@ -63,6 +63,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "unified": "^11.0.5",
     "@mdx-js/mdx": "^3.1.0",
     "@standard-schema/spec": "^1.0.0",
     "chokidar": "^4.0.3",
@@ -71,6 +72,8 @@
     "js-yaml": "^4.1.0",
     "lru-cache": "^11.1.0",
     "picocolors": "^1.1.1",
+    "remark-mdx": "^3.1.0",
+    "remark-parse": "^11.0.0",
     "tinyexec": "^1.0.1",
     "tinyglobby": "^0.2.14",
     "unist-util-visit": "^5.0.0",
@@ -90,7 +93,6 @@
     "react": "^19.1.1",
     "rollup": "^4.49.0",
     "tsconfig": "workspace:*",
-    "unified": "^11.0.5",
     "vfile": "^6.0.3",
     "vite": "^7.1.3",
     "webpack": "^5.101.3"

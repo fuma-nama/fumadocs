@@ -52,10 +52,6 @@ declare module 'vfile' {
      * The compiler object from loader
      */
     _compiler?: CompilerOptions;
-
-    _processor?: {
-      getProcessor: (format: 'md' | 'mdx') => Processor;
-    };
   }
 }
 
@@ -98,9 +94,6 @@ export async function buildMDX(
       ...data,
       frontmatter,
       _compiler,
-      _processor: {
-        getProcessor,
-      },
     },
   });
 }
