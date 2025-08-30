@@ -1,8 +1,17 @@
 import path from 'node:path';
-import { remark } from 'remark';
-import { remarkWikiLink } from '@/remark-wikilink';
+import { remarkConvert } from '@/remark-convert';
 import matter from 'gray-matter';
 import { stash } from '@/utils/stash';
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import remarkStringify from 'remark-stringify';
+import remarkMdx from 'remark-mdx';
+import type { Compatible } from 'vfile';
+import { type Frontmatter, frontmatterSchema } from '@/utils/schema';
+import { remarkObsidianComment } from '@/remark-obsidian-comment';
+import { remarkBlockId } from '@/remark-block-id';
+
+type RenameOutputFn = (originalOutputPath: string, file: VaultFile) => string;
 
 export interface VaultFile {
   /**
@@ -26,24 +35,40 @@ export interface OutputFile {
   content: string | ArrayBuffer | Buffer<ArrayBufferLike>;
 }
 
+export interface ConvertOptions {
+  /**
+   * generate URL from media file
+   */
+  url?: (mediaFile: VaultFile) => string;
+
+  outputPath?: RenameOutputFn | RenameOutputPreset;
+}
+
 export type ParsedFile = ParsedContentFile | ParsedMediaFile;
 
 export interface ParsedContentFile {
   format: 'content';
-  frontmatter: Record<string, unknown>;
+  frontmatter: Frontmatter;
   path: string;
+
+  // output path (relative to content directory)
+  outPath: string;
   content: string;
 }
 
 export interface ParsedMediaFile {
   format: 'media';
   path: string;
+
+  // output path (relative to asset directory)
+  outPath: string;
+  url: string;
   content: VaultFile['content'];
 }
 
 declare module 'vfile' {
   interface DataMap {
-    source: VaultFile;
+    source: ParsedContentFile;
   }
 }
 
@@ -56,14 +81,30 @@ export interface InternalContext {
 
 function normalize(filePath: string): string {
   filePath = stash(filePath);
+  if (filePath.startsWith('../'))
+    throw new Error(`${filePath} points outside of vault folder`);
 
   return filePath.startsWith('./') ? filePath.slice(2) : filePath;
 }
 
 export async function convertVaultFiles(
   rawFiles: VaultFile[],
+  options: ConvertOptions = {},
 ): Promise<OutputFile[]> {
-  const output = new Map<string, OutputFile>();
+  const {
+    url = (file) => {
+      const segs = normalize(file.path)
+        .split('/')
+        .filter((v) => v.length > 0);
+      return `/${segs.join('/')}`;
+    },
+  } = options;
+  const outputPath =
+    typeof options.outputPath === 'function'
+      ? options.outputPath
+      : createRenameOutput(options.outputPath ?? 'simple');
+
+  const output: OutputFile[] = [];
   const storage = new Map<string, ParsedFile>();
 
   for (const rawFile of rawFiles) {
@@ -73,58 +114,81 @@ export async function convertVaultFiles(
   function scanFile(file: VaultFile) {
     const normalizedPath = normalize(file.path);
     const ext = path.extname(normalizedPath);
+    let parsed: ParsedFile;
 
     if (ext === '.md' || ext === '.mdx') {
       const { data, content } = matter(String(file.content));
 
-      const parsed: ParsedFile = {
+      parsed = {
         format: 'content',
         path: normalizedPath,
-        frontmatter: data,
+        outPath: outputPath(
+          normalizedPath.slice(0, -ext.length) + '.mdx',
+          file,
+        ),
+        frontmatter: frontmatterSchema.parse(data),
         content,
       };
-
-      storage.set(normalizedPath, parsed);
-      return;
+    } else {
+      parsed = {
+        format: 'media',
+        path: normalizedPath,
+        outPath: outputPath(normalizedPath, file),
+        content: file.content,
+        url: url(file),
+      };
     }
 
-    storage.set(normalizedPath, {
-      format: 'media',
-      path: normalizedPath,
-      content: file.content,
-    });
+    storage.set(normalizedPath, parsed);
   }
 
   const context: InternalContext = {
     storage,
   };
-  const processor = remark().use(remarkWikiLink, context);
+
+  const processor = unified()
+    .use(remarkParse)
+    .use(remarkConvert, context)
+    .use(remarkObsidianComment)
+    .use(remarkBlockId);
+  const stringifier = unified().use(remarkStringify).use(remarkMdx);
+
   async function onFile(file: ParsedFile) {
     if (file.format === 'media') {
-      output.set(file.path, {
+      output.push({
         type: 'asset',
-        path: file.path,
+        path: file.outPath,
         content: file.content,
       });
 
       return;
     }
 
-    const result = await processor.process({
+    const vfile: Compatible = {
       path: file.path,
       value: String(file.content),
       data: {
         source: file,
       },
-    });
+    };
 
-    output.set(file.path, {
+    const mdast = await processor.run(processor.parse(vfile), vfile);
+
+    output.push({
       type: 'content',
-      path: file.path,
-      content: String(result.value),
+      path: file.outPath,
+      content: stringifier.stringify(mdast),
     });
   }
 
   await Promise.all(Array.from(storage.values()).map(onFile));
-  return Array.from(output.values());
+  return output;
+}
+
+type RenameOutputPreset = 'ignore' | 'simple';
+
+function createRenameOutput(preset: RenameOutputPreset): RenameOutputFn {
+  if (preset === 'ignore') return (file) => file;
+
+  return (file) => file.toLowerCase().replaceAll(' ', '-');
 }

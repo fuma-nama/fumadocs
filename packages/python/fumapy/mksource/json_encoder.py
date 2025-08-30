@@ -1,7 +1,13 @@
 import typing as t
-
+from pathlib import Path, PosixPath, WindowsPath
 import griffe
-from _griffe.encoders import _json_encoder_map
+
+_json_encoder_map: dict[type, t.Callable[[t.Any], t.Any]] = {
+    Path: str,
+    PosixPath: str,
+    WindowsPath: str,
+    set: sorted,
+}
 
 
 class CustomEncoder(griffe.JSONEncoder):

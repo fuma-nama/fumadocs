@@ -1531,16 +1531,28 @@ importers:
       remark:
         specifier: ^15.0.1
         version: 15.0.1
+      remark-mdx:
+        specifier: ^3.1.0
+        version: 3.1.0
+      remark-parse:
+        specifier: ^11.0.0
+        version: 11.0.0
+      remark-stringify:
+        specifier: ^11.0.0
+        version: 11.0.0
       tinyglobby:
         specifier: ^0.2.14
         version: 0.2.14
+      unified:
+        specifier: ^11.0.5
+        version: 11.0.5
       unist-util-visit:
         specifier: ^5.0.0
         version: 5.0.0
+      zod:
+        specifier: ^4.1.4
+        version: 4.1.4
     devDependencies:
-      '@mdx-js/mdx':
-        specifier: ^3.1.0
-        version: 3.1.0(acorn@8.15.0)
       '@types/estree':
         specifier: ^1.0.8
         version: 1.0.8
@@ -1550,18 +1562,27 @@ importers:
       '@types/node':
         specifier: 24.3.0
         version: 24.3.0
+      '@types/react':
+        specifier: ^19.1.12
+        version: 19.1.12
       eslint-config-custom:
         specifier: workspace:*
         version: link:../eslint-config-custom
+      fumadocs-core:
+        specifier: workspace:*
+        version: link:../core
+      fumadocs-ui:
+        specifier: workspace:*
+        version: link:../ui
+      mdast-util-mdx-jsx:
+        specifier: ^3.2.0
+        version: 3.2.0
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
       typescript:
         specifier: ^5.9.2
         version: 5.9.2
-      unified:
-        specifier: ^11.0.5
-        version: 11.0.5
       vfile:
         specifier: ^6.0.3
         version: 6.0.3
