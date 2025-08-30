@@ -2,7 +2,7 @@ import type { Blockquote, PhrasingContent, Root, RootContent } from 'mdast';
 import path from 'node:path';
 import { Processor, Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
-import type { InternalContext, ParsedContentFile, ParsedFile } from '@/index';
+import type { InternalContext, ParsedContentFile, ParsedFile } from '@/convert';
 import { flattenNode } from '@/utils/flatten-node';
 import { stash } from '@/utils/stash';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
