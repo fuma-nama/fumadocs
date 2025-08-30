@@ -9,8 +9,8 @@ authors = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "griffe",
-    "griffe_typingdoc"
+    "griffe (>=1.13.0, <2.0.0)",
+    "griffe_typingdoc (>=0.2.8, <1.0.0)"
 ]
 
 [project.scripts]
