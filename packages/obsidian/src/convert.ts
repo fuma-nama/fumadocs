@@ -39,7 +39,7 @@ export interface ConvertOptions {
   /**
    * generate URL from media file
    */
-  url?: (mediaFile: VaultFile) => string;
+  url?: (outputPath: string, mediaFile: VaultFile) => string;
 
   outputPath?: RenameOutputFn | RenameOutputPreset;
 }
@@ -93,7 +93,7 @@ export async function convertVaultFiles(
 ): Promise<OutputFile[]> {
   const {
     url = (file) => {
-      const segs = normalize(file.path)
+      const segs = normalize(file)
         .split('/')
         .filter((v) => v.length > 0);
       return `/${segs.join('/')}`;
@@ -130,12 +130,14 @@ export async function convertVaultFiles(
         content,
       };
     } else {
+      const outPath = outputPath(normalizedPath, file);
+
       parsed = {
         format: 'media',
         path: normalizedPath,
-        outPath: outputPath(normalizedPath, file),
+        outPath,
         content: file.content,
-        url: url(file),
+        url: url(outPath, file),
       };
     }
 
