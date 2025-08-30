@@ -1,5 +1,12 @@
 # next-docs-mdx
 
+## 11.8.2
+
+### Patch Changes
+
+- 9a3c23b: support auto-generated title based on `h1` heading
+- 9cb829c: Support referencing heading in `<include>` without sections
+
 ## 11.8.1
 
 ### Patch Changes

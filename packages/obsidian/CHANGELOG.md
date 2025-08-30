@@ -1,5 +1,12 @@
 # fumadocs-obsidian
 
+## 0.0.2
+
+### Patch Changes
+
+- 533fced: Support built-in `readVaultFiles` & `writeVaultFiles` & `fromVault`.
+- f7353e0: Fix bugs
+
 ## 0.0.1
 
 ### Patch Changes
