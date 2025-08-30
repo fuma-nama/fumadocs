@@ -20,6 +20,9 @@ apps/docs/content/docs/ui/museum/*.mdx
 examples/openapi/content/docs/(api)/**/*.mdx
 !examples/openapi/content/docs/(api)/index.mdx
 
+examples/obsidian/content/docs/vault/**/*
+examples/obsidian/obsidian/Obsidian Vault
+
 apps/docs/content/docs/ui/typescript.mdx
 
 .content-collections/**/*
