@@ -10,6 +10,8 @@ import type { Compatible } from 'vfile';
 import { type Frontmatter, frontmatterSchema } from '@/utils/schema';
 import { remarkObsidianComment } from '@/remark-obsidian-comment';
 
+type RenameOutputFn = (originalOutputPath: string, file: VaultFile) => string;
+
 export interface VaultFile {
   /**
    * paths relative to vault folder
@@ -37,6 +39,8 @@ export interface ConvertOptions {
    * generate URL from media file
    */
   url?: (mediaFile: VaultFile) => string;
+
+  outputPath?: RenameOutputFn | RenameOutputPreset;
 }
 
 export type ParsedFile = ParsedContentFile | ParsedMediaFile;
@@ -94,6 +98,11 @@ export async function convertVaultFiles(
       return `/${segs.join('/')}`;
     },
   } = options;
+  const outputPath =
+    typeof options.outputPath === 'function'
+      ? options.outputPath
+      : createRenameOutput(options.outputPath ?? 'simple');
+
   const output: OutputFile[] = [];
   const storage = new Map<string, ParsedFile>();
 
@@ -112,7 +121,10 @@ export async function convertVaultFiles(
       parsed = {
         format: 'content',
         path: normalizedPath,
-        outPath: normalizedPath.slice(0, -ext.length) + '.mdx',
+        outPath: outputPath(
+          normalizedPath.slice(0, -ext.length) + '.mdx',
+          file,
+        ),
         frontmatter: frontmatterSchema.parse(data),
         content,
       };
@@ -120,7 +132,7 @@ export async function convertVaultFiles(
       parsed = {
         format: 'media',
         path: normalizedPath,
-        outPath: normalizedPath,
+        outPath: outputPath(normalizedPath, file),
         content: file.content,
         url: url(file),
       };
@@ -169,4 +181,12 @@ export async function convertVaultFiles(
 
   await Promise.all(Array.from(storage.values()).map(onFile));
   return output;
+}
+
+type RenameOutputPreset = 'ignore' | 'simple';
+
+function createRenameOutput(preset: RenameOutputPreset): RenameOutputFn {
+  if (preset === 'ignore') return (file) => file;
+
+  return (file) => file.toLowerCase().replaceAll(' ', '-');
 }

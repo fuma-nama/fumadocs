@@ -18,6 +18,10 @@ When you're ready, delete this note and make the vault your own.
 > [!warning] Hello World [[hello world]] **hello**
 > I love Fumadocs.
 
+[[#Introduction!!]]
+
+[Alt](hello%20world.md)
+
 %% Comment **hidden** %%
 
 %% Comment
