@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 15.7.6
+
+### Patch Changes
+
+- dc6d8a0: unify sidebar tabs matching
+  - fumadocs-core@15.7.6
+
 ## 15.7.5
 
 ### Patch Changes

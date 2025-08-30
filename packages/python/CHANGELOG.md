@@ -1,5 +1,14 @@
 # fumadocs-python
 
+## 0.0.4
+
+### Patch Changes
+
+- 73681e1: Force dependency versions
+- Updated dependencies [dc6d8a0]
+  - fumadocs-ui@15.7.6
+  - fumadocs-core@15.7.6
+
 ## 0.0.3
 
 ### Patch Changes
