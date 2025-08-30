@@ -8,14 +8,17 @@ import type { DataMap } from '@/utils/build-mdx';
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx-jsx';
 import remarkParse from 'remark-parse';
 import remarkMdx from 'remark-mdx';
-import { remarkHeading } from 'fumadocs-core/mdx-plugins';
+import { remarkGfm, remarkHeading } from 'fumadocs-core/mdx-plugins';
 
 export interface Params {
   lang?: string;
   meta?: string;
 }
 
-const mdProcessor = unified().use(remarkParse).use(remarkHeading);
+const mdProcessor = unified()
+  .use(remarkParse)
+  .use(remarkGfm)
+  .use(remarkHeading);
 const mdxProcessor = mdProcessor.use(remarkMdx);
 
 function flattenNode(node: RootContent): string {
