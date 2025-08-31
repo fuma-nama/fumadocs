@@ -61,7 +61,7 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
         style: 'clerk',
       }}
     >
-      <h1 className="text-3xl font-semibold">{page.data.title}</h1>
+      <h1 className="text-[1.75em] font-semibold">{page.data.title}</h1>
       <p className="text-lg text-fd-muted-foreground">
         {page.data.description}
       </p>
