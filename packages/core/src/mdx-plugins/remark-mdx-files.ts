@@ -66,6 +66,15 @@ function parseFileTree(code: string) {
 }
 
 function defaultToMDX(node: Node, depth = 0): MdxJsxFlowElement {
+  if (depth === 0) {
+    return {
+      type: 'mdxJsxFlowElement',
+      name: 'Files',
+      attributes: [],
+      children: [defaultToMDX(node, depth + 1)],
+    };
+  }
+
   const attributes: MdxJsxAttribute[] = [
     { type: 'mdxJsxAttribute', name: 'name', value: node.name },
   ];
@@ -79,14 +88,11 @@ function defaultToMDX(node: Node, depth = 0): MdxJsxFlowElement {
     };
   }
 
-  if (depth === 0) {
-    return {
-      type: 'mdxJsxFlowElement',
-      name: 'Files',
-      attributes: [],
-      children: [defaultToMDX(node, depth + 1)],
-    };
-  }
+  attributes.push({
+    type: 'mdxJsxAttribute',
+    name: 'defaultOpen',
+    value: null,
+  });
 
   return {
     type: 'mdxJsxFlowElement',
