@@ -7,6 +7,8 @@ import {
   remarkAdmonition,
   remarkHeading,
   remarkImage,
+  remarkMdxFiles,
+  remarkMdxMermaid,
   remarkStructure,
 } from '@/mdx-plugins';
 import { fileURLToPath } from 'node:url';
@@ -114,6 +116,34 @@ test('Remark Image: `publicDir` with URL', async () => {
 
   await expect(result.value).toMatchFileSnapshot(
     path.resolve(cwd, './fixtures/remark-image-public-dir.output.mdx'),
+  );
+});
+
+test('Remark MDX Files', async () => {
+  const content = readFileSync(
+    path.resolve(cwd, './fixtures/remark-mdx-files.md'),
+  );
+  const result = await remark()
+    .use(remarkMdxFiles)
+    .use(remarkMdx)
+    .process(content);
+
+  await expect(result.value).toMatchFileSnapshot(
+    path.resolve(cwd, './fixtures/remark-mdx-files.output.mdx'),
+  );
+});
+
+test('converts mermaid codeblock to MDX Mermaid component', async () => {
+  const content = readFileSync(
+    path.resolve(cwd, './fixtures/remark-mdx-mermaid.md'),
+  );
+  const result = await remark()
+    .use(remarkMdxMermaid)
+    .use(remarkMdx)
+    .process(content);
+
+  await expect(result.value).toMatchFileSnapshot(
+    path.resolve(cwd, './fixtures/remark-mdx-mermaid.output.mdx'),
   );
 });
 

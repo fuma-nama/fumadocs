@@ -266,7 +266,7 @@ export const DocsTitle = forwardRef<HTMLHeadingElement, ComponentProps<'h1'>>(
       <h1
         ref={ref}
         {...props}
-        className={cn('text-3xl font-semibold', props.className)}
+        className={cn('text-[1.75em] font-semibold', props.className)}
       >
         {props.children}
       </h1>

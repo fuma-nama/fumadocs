@@ -55,7 +55,7 @@ interface BaseDoc {
  * We need to convert interface types to object types.
  *
  * Otherwise, `T extends Serializable? true : false` gives us `false`.
- * Because interface types cannot extend a union type, but `Serializable` is.
+ * Because interface types cannot extend a union type like `Serializable`.
  */
 type InterfaceToObject<T> = T extends object
   ? {
@@ -160,7 +160,7 @@ export const frontmatterSchema = z.object({
   full: z.boolean().optional(),
 
   // Fumadocs OpenAPI generated
-  _openapi: z.looseObject({}).optional(),
+  _openapi: z.record(z.string(), z.any()).optional(),
 });
 
 export function createDocSchema(z: typeof Zod) {

@@ -53,7 +53,7 @@ export const registry: Registry = {
   },
   components: [
     {
-      name: 'ai-search',
+      name: 'ai/search',
       title: 'AI Search (Next.js Only)',
       description:
         'Ask AI dialog for your docs, you need to configure Inkeep first',
@@ -82,12 +82,31 @@ export const registry: Registry = {
       ],
     },
     {
-      name: 'ai-page-actions',
+      name: 'ai/page-actions',
+      title: 'AI Page Actions',
       description: 'Common page actions for AI',
       files: [
         {
           type: 'components',
           path: 'components/ai/page-actions.tsx',
+        },
+      ],
+    },
+    {
+      name: 'og/mono',
+      description: 'Open graph image generation (mono-style)',
+      files: [
+        {
+          type: 'lib',
+          path: 'lib/og/mono.tsx',
+        },
+        {
+          type: 'lib',
+          path: 'lib/og/JetBrainsMono-Bold.ttf',
+        },
+        {
+          type: 'lib',
+          path: 'lib/og/JetBrainsMono-Regular.ttf',
         },
       ],
     },

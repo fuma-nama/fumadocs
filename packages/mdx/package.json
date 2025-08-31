@@ -63,8 +63,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "unified": "^11.0.5",
-    "@mdx-js/mdx": "^3.1.0",
+    "@mdx-js/mdx": "^3.1.1",
     "@standard-schema/spec": "^1.0.0",
     "chokidar": "^4.0.3",
     "esbuild": "^0.25.9",
@@ -72,12 +71,13 @@
     "js-yaml": "^4.1.0",
     "lru-cache": "^11.1.0",
     "picocolors": "^1.1.1",
-    "remark-mdx": "^3.1.0",
+    "remark-mdx": "^3.1.1",
     "remark-parse": "^11.0.0",
     "tinyexec": "^1.0.1",
     "tinyglobby": "^0.2.14",
+    "unified": "^11.0.5",
     "unist-util-visit": "^5.0.0",
-    "zod": "^4.1.4"
+    "zod": "^4.1.5"
   },
   "devDependencies": {
     "@fumadocs/mdx-remote": "workspace:*",
@@ -91,7 +91,7 @@
     "mdast-util-mdx-jsx": "^3.2.0",
     "next": "^15.5.2",
     "react": "^19.1.1",
-    "rollup": "^4.49.0",
+    "rollup": "^4.50.0",
     "tsconfig": "workspace:*",
     "vfile": "^6.0.3",
     "vite": "^7.1.3",

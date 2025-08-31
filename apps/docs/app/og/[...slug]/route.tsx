@@ -1,7 +1,6 @@
-import * as fs from 'node:fs/promises';
-import { generateOGImage } from '@/app/og/[...slug]/og';
 import { source } from '@/lib/source';
 import { notFound } from 'next/navigation';
+import { generateOGImage } from '@/lib/og/mono';
 
 export const revalidate = false;
 
@@ -13,29 +12,9 @@ export async function GET(
   const page = source.getPage(slug.slice(0, -1));
   if (!page) notFound();
 
-  const font = await fs.readFile(
-    './app/og/[...slug]/JetBrainsMono-Regular.ttf',
-  );
-  const fontBold = await fs.readFile(
-    './app/og/[...slug]/JetBrainsMono-Bold.ttf',
-  );
-
   return generateOGImage({
-    primaryTextColor: 'rgb(240,240,240)',
     title: page.data.title,
     description: page.data.description,
-    fonts: [
-      {
-        name: 'Mono',
-        data: font,
-        weight: 400,
-      },
-      {
-        name: 'Mono',
-        data: fontBold,
-        weight: 600,
-      },
-    ],
   });
 }
 
