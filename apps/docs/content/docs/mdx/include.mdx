@@ -42,20 +42,32 @@ Resolve relative paths from cwd instead of the Markdown file:
 
 ### Section
 
-For Markdown files, you can copy a section of it:
+For Markdown files, you can include a section of it:
 
 ```mdx title="a.mdx"
-<section id="test">
-
 ## Hello World
 
-This is included
-
-</section>
+<section id="test">This is included</section>
 
 This is not included.
 ```
 
 ```mdx title="b.mdx"
 <include>a.mdx#test</include>
+```
+
+Or with heading id:
+
+```mdx title="a.mdx"
+## Included Section
+
+I'm here!
+
+## Not Included
+
+Some random text.
+```
+
+```mdx title="b.mdx"
+<include>a.mdx#included-section</include>
 ```
