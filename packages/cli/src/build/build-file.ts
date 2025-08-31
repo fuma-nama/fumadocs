@@ -56,14 +56,16 @@ export async function buildFile(
   const defaultResolve = (
     specifier: string,
     specified: SourceFile | undefined,
-  ): SourceReference => {
+  ): SourceReference | undefined => {
     let filePath: string;
     if (specified) {
       filePath = specified.getFilePath();
     } else if (specifier.startsWith('./') || specifier.startsWith('../')) {
       filePath = path.join(path.dirname(sourceFilePath), specifier);
     } else {
-      throw new Error('Unknown specifier ' + specifier);
+      if (!specifier.startsWith('node:'))
+        console.warn(`Unknown specifier ${specifier}, skipping for now`);
+      return;
     }
 
     // outside of registry dir
@@ -98,15 +100,16 @@ export async function buildFile(
    */
   function process(
     specifier: StringLiteral,
-    getSpecifiedFile: () => SourceFile | undefined,
+    specifiedFile: SourceFile | undefined,
   ) {
     const onResolve = comp.onResolve ?? builder.registry.onResolve;
 
-    let resolved: Reference = defaultResolve(
+    let resolved: Reference | undefined = defaultResolve(
       specifier.getLiteralValue(),
-      getSpecifiedFile(),
+      specifiedFile,
     );
 
+    if (!resolved) return;
     if (onResolve) resolved = onResolve(resolved);
     const out = writeReference(resolved);
     if (out) specifier.setLiteralValue(out);
@@ -115,16 +118,14 @@ export async function buildFile(
   const sourceFile = await builder.createSourceFile(sourceFilePath);
 
   for (const item of sourceFile.getImportDeclarations()) {
-    process(item.getModuleSpecifier(), () =>
-      item.getModuleSpecifierSourceFile(),
-    );
+    process(item.getModuleSpecifier(), item.getModuleSpecifierSourceFile());
   }
 
   for (const item of sourceFile.getExportDeclarations()) {
     const specifier = item.getModuleSpecifier();
     if (!specifier) continue;
 
-    process(specifier, () => item.getModuleSpecifierSourceFile());
+    process(specifier, item.getModuleSpecifierSourceFile());
   }
 
   // transform async imports
@@ -139,7 +140,8 @@ export async function buildFile(
 
       if (!argument.isKind(ts.SyntaxKind.StringLiteral)) continue;
 
-      process(argument, () =>
+      process(
+        argument,
         argument.getSymbol()?.getDeclarations()[0].getSourceFile(),
       );
     }
