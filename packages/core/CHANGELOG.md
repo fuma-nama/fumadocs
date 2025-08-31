@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 15.7.7
+
+### Patch Changes
+
+- 0b53056: Support `remarkMdxMermaid` - convert `mermaid` codeblocks into `<Mermaid />` component
+- 3490285: Support `remarkMdxFiles` - convert `files` codeblocks into `<Files />` component
+
 ## 15.7.6
 
 ## 15.7.5

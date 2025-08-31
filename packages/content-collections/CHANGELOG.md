@@ -1,5 +1,14 @@
 # @fumadocs/content-collections
 
+## 1.2.2
+
+### Patch Changes
+
+- 68c92f9: Fix type issues on v1.2
+- Updated dependencies [0b53056]
+- Updated dependencies [3490285]
+  - fumadocs-core@15.7.7
+
 ## 1.2.1
 
 ### Patch Changes
