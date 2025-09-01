@@ -157,6 +157,33 @@ export const source = loader({
 
 </Accordions>
 
+### For Vite
+
+<Accordions>
+  <Accordion id='vite-context-error' title="Getting error with React contexts?">
+
+There's some weird pre-bundling problems with Vite: [#3910](https://github.com/vitejs/vite/issues/3910).
+Make sure to exclude Fumadocs from pre-bundling and add it to `noExternal`:
+
+```ts title="vite.config.ts"
+import { defineConfig } from 'vite';
+
+// add other Fumadocs deps as needed
+const FumadocsDeps = ['fumadocs-core', 'fumadocs-ui'];
+
+export default defineConfig({
+  resolve: {
+    noExternal: FumadocsDeps,
+  },
+  optimizeDeps: {
+    exclude: FumadocsDeps,
+  },
+});
+```
+
+  </Accordion>
+</Accordions>
+
 ### For Next.js
 
 <Accordions>
