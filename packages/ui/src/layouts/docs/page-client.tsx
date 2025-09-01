@@ -11,8 +11,8 @@ import {
 import { ChevronDown, ChevronLeft, ChevronRight } from '@/icons';
 import Link from 'fumadocs-core/link';
 import { cn } from '@/utils/cn';
-import { useI18n } from '../../contexts/i18n';
-import { useTreeContext, useTreePath } from '../../contexts/tree';
+import { useI18n } from '@/contexts/i18n';
+import { useTreeContext, useTreePath } from '@/contexts/tree';
 import type { PageTree } from 'fumadocs-core/server';
 import { createContext, usePathname } from 'fumadocs-core/framework';
 import {
@@ -197,7 +197,7 @@ export function PageTOCPopover(props: ComponentProps<'div'>) {
           id="nd-tocnav"
           {...props}
           className={cn(
-            'fixed inset-x-0 z-10 border-b backdrop-blur-sm transition-colors xl:hidden',
+            'fixed inset-x-0 z-10 border-b backdrop-blur-sm transition-colors xl:hidden max-xl:on-root:[--fd-tocnav-height:40px]',
             (!isTransparent || open) && 'bg-fd-background/80',
             open && 'shadow-lg',
             props.className,

@@ -285,7 +285,7 @@ export function DocsLayout({
       <NavProvider transparentMode={transparentMode}>
         {nav.enabled !== false &&
           (nav.component ?? (
-            <Navbar className="h-14 md:hidden">
+            <Navbar className="h-(--fd-nav-height) on-root:[--fd-nav-height:56px] md:on-root:[--fd-nav-height:0px] md:hidden">
               <Link
                 href={nav.url ?? '/'}
                 className="inline-flex items-center gap-2.5 font-semibold"
@@ -317,9 +317,6 @@ export function DocsLayout({
           className={cn(
             'md:[&_#nd-page_article]:pt-12 xl:[--fd-toc-width:286px] xl:[&_#nd-page_article]:px-8',
             sidebarEnabled && sidebarVariables,
-            !nav.component &&
-              nav.enabled !== false &&
-              '[--fd-nav-height:56px] md:[--fd-nav-height:0px]',
             props.containerProps?.className,
           )}
         >

@@ -128,11 +128,6 @@ export function DocsLayout(props: DocsLayoutProps) {
     return [];
   }, [tabOptions, props.tree]);
 
-  const variables = cn(
-    '[--fd-nav-height:56px] md:[--fd-sidebar-width:286px] md:[--fd-nav-height:64px] xl:[--fd-toc-width:286px]',
-    tabs.length > 0 && tabMode === 'navbar' && 'lg:[--fd-nav-height:104px]',
-  );
-
   function sidebar() {
     const {
       banner,
@@ -306,7 +301,10 @@ export function DocsLayout(props: DocsLayoutProps) {
       <NavProvider transparentMode={transparentMode}>
         <LayoutBody
           {...props.containerProps}
-          className={cn(variables, props.containerProps?.className)}
+          className={cn(
+            'md:[--fd-sidebar-width:286px] xl:[--fd-toc-width:286px]',
+            props.containerProps?.className,
+          )}
         >
           {sidebar()}
           <DocsNavbar
@@ -336,7 +334,13 @@ function DocsNavbar({
   const sidebarCollapsible = props.sidebar?.collapsible ?? true;
 
   return (
-    <Navbar mode={navMode}>
+    <Navbar
+      mode={navMode}
+      className={cn(
+        'on-root:[--fd-nav-height:56px] md:on-root:[--fd-nav-height:64px]',
+        tabs.length > 0 && 'lg:on-root:[--fd-nav-height:104px]',
+      )}
+    >
       <div
         className={cn(
           'flex border-b px-4 gap-2 flex-1 md:px-6',
