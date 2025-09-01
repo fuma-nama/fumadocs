@@ -8,6 +8,7 @@ import {
 import {
   type BaseLayoutProps,
   BaseLinkItem,
+  type BaseLinkType,
   getLinks,
   type LinkItemType,
 } from '@/layouts/shared';
@@ -481,9 +482,16 @@ function NavbarLinkItem({
       <Popover>
         <PopoverTrigger
           {...props}
-          className={cn('inline-flex items-center gap-1.5', props.className)}
+          className={cn(
+            'inline-flex items-center gap-1.5 has-data-[active=true]:text-fd-primary',
+            props.className,
+          )}
         >
-          {item.text}
+          {item.url ? (
+            <BaseLinkItem item={item as BaseLinkType}>{item.text}</BaseLinkItem>
+          ) : (
+            item.text
+          )}
           <ChevronDown className="size-3" />
         </PopoverTrigger>
         <PopoverContent className="flex flex-col">
@@ -527,7 +535,7 @@ function SidebarLinkItem({
     return (
       <SidebarFolder {...props}>
         {item.url ? (
-          <SidebarFolderLink href={item.url}>
+          <SidebarFolderLink href={item.url} external={item.external}>
             {item.icon}
             {item.text}
           </SidebarFolderLink>

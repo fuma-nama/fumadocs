@@ -342,7 +342,7 @@ function SidebarLinkItem({
     return (
       <SidebarFolder {...props}>
         {item.url ? (
-          <SidebarFolderLink href={item.url}>
+          <SidebarFolderLink href={item.url} external={item.external}>
             {item.icon}
             {item.text}
           </SidebarFolderLink>

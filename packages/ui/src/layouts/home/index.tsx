@@ -235,7 +235,13 @@ function NavbarLinkItem({
     return (
       <NavbarMenu>
         <NavbarMenuTrigger {...props}>
-          {item.url ? <Link href={item.url}>{item.text}</Link> : item.text}
+          {item.url ? (
+            <Link href={item.url} external={item.external}>
+              {item.text}
+            </Link>
+          ) : (
+            item.text
+          )}
         </NavbarMenuTrigger>
         <NavbarMenuContent>{children}</NavbarMenuContent>
       </NavbarMenu>
