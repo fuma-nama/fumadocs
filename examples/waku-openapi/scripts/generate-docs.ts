@@ -1,7 +1,8 @@
 import { generateFiles } from 'fumadocs-openapi';
+import { openapi } from '@/lib/openapi';
 
 void generateFiles({
-  input: ['https://cdn.jsdelivr.net/npm/@scalar/galaxy/dist/latest.yaml'],
+  input: openapi,
   output: './content/docs/(generated)',
   includeDescription: true,
 });
