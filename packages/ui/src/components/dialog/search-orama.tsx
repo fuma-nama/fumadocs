@@ -58,7 +58,7 @@ export default function OramaSearchDialog({
   searchOptions,
   tags = [],
   defaultTag,
-  showOrama = false,
+  showOrama = true,
   allowClear = false,
   index,
   footer,

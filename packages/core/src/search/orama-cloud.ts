@@ -1,4 +1,4 @@
-import type { CloudManager } from '@oramacloud/client';
+import type { AnyObject, OramaCloud } from '@orama/core';
 import type { StructuredData } from '@/mdx-plugins';
 
 export interface SyncOptions {
@@ -84,27 +84,37 @@ export interface OramaIndex {
 }
 
 export async function sync(
-  cloudManager: CloudManager,
+  cloudManager: OramaCloud,
   options: SyncOptions,
 ): Promise<void> {
   const { autoDeploy = true } = options;
-  const index = cloudManager.index(options.index);
+  const index = cloudManager.index.set(options.index);
 
-  await index.snapshot(options.documents.flatMap(toIndex));
-  if (autoDeploy) await index.deploy();
+  // Open a new Orama transaction.
+  // This will create a hidden, temporary empty index we can push new documents to.
+  await index.transaction.open();
+
+  // Insert the documents into the temporary index.
+  await index.transaction.insertDocuments(options.documents.flatMap(toIndex) as unknown as AnyObject[]);
+
+  // Commit the transaction.
+  // This will swap the live index with the temporary index with no downtime.
+  if (autoDeploy) await index.transaction.commit();
 }
 
 export async function syncI18n(
-  cloudManager: CloudManager,
+  cloudManager: OramaCloud,
   options: I18nSyncOptions,
 ): Promise<void> {
   const { autoDeploy = true } = options;
 
   const tasks = options.documents.map(async (document) => {
-    const index = cloudManager.index(options.indexes[document.locale]);
+    const index = cloudManager.index.set(options.indexes[document.locale]);
 
-    await index.snapshot(document.items.flatMap(toIndex));
-    if (autoDeploy) await index.deploy();
+    await index.transaction.open();
+    await index.transaction.insertDocuments(document.items.flatMap(toIndex) as unknown as AnyObject[]);
+
+    if (autoDeploy) await index.transaction.commit();
   });
 
   await Promise.all(tasks);

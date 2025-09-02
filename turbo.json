@@ -11,8 +11,14 @@
   "ui": "stream",
   "tasks": {
     "build": {
-      "env": ["ALGOLIA_API_KEY", "ORAMA_INDEX_ID", "ORAMA_PRIVATE_API_KEY"],
-      "dependsOn": ["^build"],
+      "env": [
+        "ALGOLIA_API_KEY",
+        "ORAMA_DATASOURCE_ID",
+        "ORAMA_PRIVATE_API_KEY"
+      ],
+      "dependsOn": [
+        "^build"
+      ],
       "outputs": [
         ".output",
         "public/registry",

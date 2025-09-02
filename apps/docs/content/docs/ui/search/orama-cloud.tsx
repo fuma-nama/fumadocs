@@ -13,12 +13,12 @@ import {
   type SharedProps,
 } from 'fumadocs-ui/components/dialog/search';
 import { useDocsSearch } from 'fumadocs-core/search/client';
-import { OramaClient } from '@oramacloud/client';
+import { OramaCloud } from '@orama/core';
 import { useI18n } from 'fumadocs-ui/contexts/i18n';
 
-const client = new OramaClient({
-  endpoint: 'Endpoint URL',
-  api_key: 'API Key',
+const client = new OramaCloud({
+  projectId: '',
+  apiKey: ''
 });
 
 export default function CustomSearchDialog(props: SharedProps) {
