@@ -8,6 +8,7 @@ import {
 import {
   type BaseLayoutProps,
   BaseLinkItem,
+  type BaseLinkType,
   getLinks,
   type LinkItemType,
 } from '@/layouts/shared';
@@ -126,11 +127,6 @@ export function DocsLayout(props: DocsLayoutProps) {
 
     return [];
   }, [tabOptions, props.tree]);
-
-  const variables = cn(
-    '[--fd-nav-height:56px] md:[--fd-sidebar-width:286px] md:[--fd-nav-height:64px] xl:[--fd-toc-width:286px]',
-    tabs.length > 0 && tabMode === 'navbar' && 'lg:[--fd-nav-height:104px]',
-  );
 
   function sidebar() {
     const {
@@ -305,7 +301,10 @@ export function DocsLayout(props: DocsLayoutProps) {
       <NavProvider transparentMode={transparentMode}>
         <LayoutBody
           {...props.containerProps}
-          className={cn(variables, props.containerProps?.className)}
+          className={cn(
+            'md:[--fd-sidebar-width:286px] xl:[--fd-toc-width:286px]',
+            props.containerProps?.className,
+          )}
         >
           {sidebar()}
           <DocsNavbar
@@ -335,11 +334,17 @@ function DocsNavbar({
   const sidebarCollapsible = props.sidebar?.collapsible ?? true;
 
   return (
-    <Navbar mode={navMode}>
+    <Navbar
+      mode={navMode}
+      className={cn(
+        'on-root:[--fd-nav-height:56px] md:on-root:[--fd-nav-height:64px]',
+        tabs.length > 0 && 'lg:on-root:[--fd-nav-height:104px]',
+      )}
+    >
       <div
         className={cn(
-          'flex border-b px-4 gap-2 flex-1',
-          navMode === 'auto' && 'md:px-6',
+          'flex border-b px-4 gap-2 flex-1 md:px-6',
+          navMode === 'top' && 'ps-7',
         )}
       >
         <div
@@ -450,7 +455,7 @@ function DocsNavbar({
                     color: 'secondary',
                     size: 'icon-sm',
                   }),
-                  'text-fd-muted-foreground rounded-full',
+                  'text-fd-muted-foreground rounded-full -me-1.5',
                 )}
               >
                 <SidebarIcon />
@@ -462,8 +467,8 @@ function DocsNavbar({
       {tabs.length > 0 && (
         <LayoutTabs
           className={cn(
-            'border-b h-10 max-lg:hidden',
-            navMode === 'top' ? 'px-4' : 'px-6',
+            'border-b px-6 h-10 max-lg:hidden',
+            navMode === 'top' && 'ps-7',
           )}
           options={tabs}
         />
@@ -481,9 +486,16 @@ function NavbarLinkItem({
       <Popover>
         <PopoverTrigger
           {...props}
-          className={cn('inline-flex items-center gap-1.5', props.className)}
+          className={cn(
+            'inline-flex items-center gap-1.5 has-data-[active=true]:text-fd-primary',
+            props.className,
+          )}
         >
-          {item.text}
+          {item.url ? (
+            <BaseLinkItem item={item as BaseLinkType}>{item.text}</BaseLinkItem>
+          ) : (
+            item.text
+          )}
           <ChevronDown className="size-3" />
         </PopoverTrigger>
         <PopoverContent className="flex flex-col">
@@ -527,7 +539,7 @@ function SidebarLinkItem({
     return (
       <SidebarFolder {...props}>
         {item.url ? (
-          <SidebarFolderLink href={item.url}>
+          <SidebarFolderLink href={item.url} external={item.external}>
             {item.icon}
             {item.text}
           </SidebarFolderLink>

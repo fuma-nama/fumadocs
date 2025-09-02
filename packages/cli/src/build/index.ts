@@ -49,13 +49,18 @@ export async function writeShadcnRegistry(
     console.log(picocolors.bold(picocolors.greenBright('Cleaned directory')));
   }
 
-  await Promise.all(
-    toShadcnRegistry(out, baseUrl).items.map(async (item) => {
-      const file = path.join(dir, `${item.name}.json`);
+  const { registry, index } = toShadcnRegistry(out, baseUrl);
+  const write = registry.items.map(async (item) => {
+    const file = path.join(dir, `${item.name}.json`);
 
-      await writeFile(file, JSON.stringify(item, null, 2));
-    }),
+    await writeFile(file, JSON.stringify(item, null, 2));
+  });
+
+  write.push(
+    writeFile(path.join(dir, 'registry.json'), JSON.stringify(index, null, 2)),
   );
+
+  await Promise.all(write);
 }
 
 export async function writeFumadocsRegistry(

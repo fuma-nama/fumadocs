@@ -43,16 +43,10 @@ export function createMDX({
   configPath = findConfigFile(),
   outDir = '.source',
 }: CreateMDXOptions = {}) {
-  // Next.js performs multiple iteration on the `next.config.js` file
-  // the first time contains the original arguments of `next dev`
-  // we only execute on the first iteration
-  const isDev = process.argv.includes('dev');
-  const isBuild = process.argv.includes('build');
-
-  if ((isDev || isBuild) && process.env._FUMADOCS_MDX !== '1') {
+  if (process.env._FUMADOCS_MDX !== '1') {
     process.env._FUMADOCS_MDX = '1';
 
-    void start(isDev, configPath, outDir);
+    void start(process.env.NODE_ENV === 'development', configPath, outDir);
   }
 
   return (nextConfig: NextConfig = {}): NextConfig => {

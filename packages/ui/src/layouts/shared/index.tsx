@@ -111,12 +111,11 @@ export interface ButtonItemType extends BaseLinkType {
   secondary?: boolean;
 }
 
-export interface MenuItemType extends BaseItem {
+export interface MenuItemType extends Partial<BaseLinkType> {
   type: 'menu';
   icon?: ReactNode;
   text: ReactNode;
 
-  url?: string;
   items: (
     | (MainItemType & {
         /**

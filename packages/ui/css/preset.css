@@ -244,19 +244,9 @@
     color: var(--color-fd-foreground);
   }
 
-  [data-rmiz-modal-overlay='visible'] {
-    background-color: var(--color-fd-background);
-  }
-
   :root,
   #nd-docs-layout {
     --fd-layout-offset: max(calc(50vw - var(--fd-layout-width) / 2), 0px);
-  }
-}
-
-@variant max-xl {
-  #nd-docs-layout:has([data-toc-popover]) {
-    --fd-tocnav-height: calc(var(--spacing) * 10);
   }
 }
 
@@ -322,7 +312,14 @@
   margin-inline: auto;
   padding-inline: 1rem;
 
-  @apply 2xl:max-w-[1400px];
+  @apply 2xl:max-w-(--spacing-fd-container);
 }
 
 @variant dark (&:where(.dark, .dark *));
+
+/* Apply styles to :root */
+@custom-variant on-root {
+  :root:has(&) {
+    @slot;
+  }
+}

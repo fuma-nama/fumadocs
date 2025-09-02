@@ -73,7 +73,7 @@ function Page() {
 }
 
 function transformPageTree(tree: PageTree.Folder): PageTree.Folder {
-  function page(item: PageTree.Item) {
+  function transform<T extends PageTree.Item | PageTree.Separator>(item: T) {
     if (typeof item.icon !== 'string') return item;
 
     return {
@@ -90,11 +90,10 @@ function transformPageTree(tree: PageTree.Folder): PageTree.Folder {
 
   return {
     ...tree,
-    index: tree.index ? page(tree.index) : undefined,
+    index: tree.index ? transform(tree.index) : undefined,
     children: tree.children.map((item) => {
-      if (item.type === 'page') return page(item);
       if (item.type === 'folder') return transformPageTree(item);
-      return item;
+      return transform(item);
     }),
   };
 }

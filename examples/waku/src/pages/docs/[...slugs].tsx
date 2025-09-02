@@ -1,4 +1,4 @@
-import { source } from '../../source';
+import { source } from '@/lib/source';
 import { PageProps } from 'waku/router';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import {

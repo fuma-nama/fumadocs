@@ -1,5 +1,36 @@
 # next-docs-zeta
 
+## 15.7.8
+
+### Patch Changes
+
+- f65778d: `Link` improve external link detection by enabling it on any protocols
+- e4c12a3: Add framework adapters to optional peer deps
+
+## 15.7.7
+
+### Patch Changes
+
+- 0b53056: Support `remarkMdxMermaid` - convert `mermaid` codeblocks into `<Mermaid />` component
+- 3490285: Support `remarkMdxFiles` - convert `files` codeblocks into `<Files />` component
+
+## 15.7.6
+
+## 15.7.5
+
+### Patch Changes
+
+- cedc494: Hotfix URL normalization logic
+
+## 15.7.4
+
+## 15.7.3
+
+### Patch Changes
+
+- 6d97379: unify remark nodes parsing & improve types
+- e776ee5: Fix `langAlias` not being passed to Shiki rehype plugin
+
 ## 15.7.2
 
 ### Patch Changes

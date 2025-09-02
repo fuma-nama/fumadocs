@@ -7,7 +7,7 @@ description: How to write documents
 
 Fumadocs provides many useful extensions to MDX, a markup language. Here is a brief introduction to the default MDX syntax of Fumadocs.
 
-> MDX is not the only supported format of Fumadocs. In fact, you can use any renderers such as `next-mdx-remote` or CMS.
+> MDX is not the only supported format of Fumadocs. In fact, you can use any renderers such as headless CMS.
 
 ## MDX
 
@@ -20,15 +20,9 @@ See:
 - GFM (GitHub Flavored Markdown) is also supported, see [GFM Specification](https://github.github.com/gfm).
 
 ```mdx
----
-title: This is a document
----
-
 import { Component } from './component';
 
 <Component name="Hello" />
-
-# Heading
 
 ## Heading
 
@@ -53,6 +47,24 @@ Hello World, **Bold**, _Italic_, ~~Hidden~~
 | ----- | ----------- |
 | Hello | World       |
 ```
+
+### Frontmatter
+
+Fumadocs support YAML-based frontmatter by default, `title` represents the page title (`h1`) in Fumadocs UI.
+
+```mdx
+---
+title: This is a document
+---
+
+...
+```
+
+<Callout title='In Fumadocs MDX'>
+
+You can use the [`schema`](/docs/mdx/collections#schema-1) option to add frontmatter properties.
+
+</Callout>
 
 ### Auto Links
 

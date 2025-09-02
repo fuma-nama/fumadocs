@@ -1,5 +1,13 @@
 # fumadocs-twoslash
 
+## 3.1.7
+
+### Patch Changes
+
+- a76d244: Fix breaking types change from upstream 3.12.0
+- Updated dependencies [cedc494]
+  - fumadocs-ui@15.7.5
+
 ## 3.1.6
 
 ### Patch Changes

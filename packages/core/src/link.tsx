@@ -20,11 +20,10 @@ const Link = forwardRef<HTMLAnchorElement, LinkProps>(
   (
     {
       href = '#',
-      external = !(
-        href.startsWith('/') ||
-        href.startsWith('#') ||
-        href.startsWith('.')
-      ),
+      // any protocol
+      external = href.match(/^\w+:/) ||
+        // protocol relative URL
+        href.startsWith('//'),
       prefetch,
       ...props
     },

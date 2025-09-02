@@ -1,5 +1,4 @@
-import { dirname } from './path';
-import { splitPath } from '@/utils/path';
+import { dirname, splitPath } from './path';
 
 /**
  * In memory file system.

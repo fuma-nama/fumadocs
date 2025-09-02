@@ -1,5 +1,56 @@
 # next-docs-ui
 
+## 15.7.8
+
+### Patch Changes
+
+- ba3382f: Support link item properties in menu items
+- efba995: Enforce the use of `--removed-body-scroll-bar-size` to fixed elements
+- bec3b36: Use `on-root:` to apply CSS variables from child layout components
+- Updated dependencies [f65778d]
+- Updated dependencies [e4c12a3]
+  - fumadocs-core@15.7.8
+
+## 15.7.7
+
+### Patch Changes
+
+- Updated dependencies [0b53056]
+- Updated dependencies [3490285]
+  - fumadocs-core@15.7.7
+
+## 15.7.6
+
+### Patch Changes
+
+- dc6d8a0: unify sidebar tabs matching
+  - fumadocs-core@15.7.6
+
+## 15.7.5
+
+### Patch Changes
+
+- cedc494: Hotfix URL normalization logic
+- Updated dependencies [cedc494]
+  - fumadocs-core@15.7.5
+
+## 15.7.4
+
+### Patch Changes
+
+- 302cdc2: Use `position: fixed` for TOC
+- 02d3453: Make codeblocks flat & improve paddings
+  - fumadocs-core@15.7.4
+
+## 15.7.3
+
+### Patch Changes
+
+- f6de900: Add `overscroll` to sidebar viewports
+- Updated dependencies [6d97379]
+- Updated dependencies [e776ee5]
+  - fumadocs-core@15.7.3
+
 ## 15.7.2
 
 ### Patch Changes

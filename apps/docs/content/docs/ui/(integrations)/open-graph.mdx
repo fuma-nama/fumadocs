@@ -1,18 +1,11 @@
 ---
-title: Metadata
+title: Metadata Image (Next.js)
 description: Usage with Next.js Metadata API.
 ---
 
-> This guide is written for Next.js only.
-
 ## Introduction
 
-Next.js provides an useful set of utilities, allowing a flexible experience with Fumadocs.
-Fumadocs uses the Next.js Metadata API for SEO.
-
-Make sure to read their [Metadata section](https://nextjs.org/docs/app/building-your-application/optimizing/metadata) for the fundamentals of Metadata API.
-
-## Open Graph Image
+> Make sure to read their [Metadata section](https://nextjs.org/docs/app/building-your-application/optimizing/metadata) for the fundamentals of Metadata API.
 
 For docs pages, Fumadocs has a built-in metadata image generator.
 
@@ -54,9 +47,19 @@ export async function generateMetadata({
 }
 ```
 
-### Font
+### Other Presets
 
-You can also customise the font, options for Satori are also available on the built-in generator.
+There's other available styles on Fumadocs CLI, such as `mono`:
+
+```npm
+npx @fumadocs/cli@latest add og/mono
+```
+
+Replaced your old `generateOGImage` with the installed one.
+
+### Customisations
+
+You can specify options for Satori, like adding fonts:
 
 ```ts
 import { generateOGImage } from 'fumadocs-ui/og';

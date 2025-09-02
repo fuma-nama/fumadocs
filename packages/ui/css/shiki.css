@@ -1,6 +1,6 @@
 .shiki:not(.not-fumadocs-codeblock *) {
-  --padding-left: calc(var(--spacing) * 3);
-  --padding-right: calc(var(--spacing) * 3);
+  --padding-left: calc(var(--spacing) * 4);
+  --padding-right: calc(var(--spacing) * 4);
 
   code span {
     color: var(--shiki-light);
@@ -44,7 +44,7 @@
 
   code .diff::before {
     position: absolute;
-    left: var(--spacing);
+    left: calc(var(--spacing) * 1.5);
   }
 
   code .diff.remove {
@@ -70,7 +70,9 @@
 
   code .highlighted {
     --fd-counter-color: var(--color-fd-primary);
-    @apply bg-fd-primary/10;
+    padding-left: calc(var(--padding-left) - 2px);
+
+    @apply border-l-2 border-fd-primary/50 bg-fd-primary/10;
   }
 
   code .highlighted-word {

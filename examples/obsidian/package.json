@@ -1,0 +1,28 @@
+{
+  "name": "example-obsidian",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "bun obsidian/generate.ts && next build",
+    "dev": "bun obsidian/generate.ts && next dev --turbo",
+    "start": "next start"
+  },
+  "dependencies": {
+    "fumadocs-core": "workspace:*",
+    "fumadocs-mdx": "workspace:*",
+    "fumadocs-obsidian": "workspace:*",
+    "fumadocs-ui": "workspace:*",
+    "next": "15.5.2",
+    "react": "19.1.1",
+    "react-dom": "19.1.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.12",
+    "@types/mdx": "^2.0.13",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.12",
+    "typescript": "^5.9.2"
+  }
+}

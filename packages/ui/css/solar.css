@@ -1,0 +1,48 @@
+@import './neutral.css';
+
+@theme {
+  --color-fd-primary: oklch(0.487 0.083 262.691);
+  --color-fd-article: hsl(0, 0%, 97%);
+}
+
+:root {
+  letter-spacing: -0.25px;
+  --fd-layout-width: 1600px;
+  --fd-page-width: 1400px;
+}
+
+.dark {
+  --color-fd-primary: oklch(0.902 0.0461 259.51);
+  --color-fd-article: hsl(0, 0%, 7.04%);
+  --color-fd-background: hsl(0, 0%, 5.04%);
+}
+
+@variant md {
+  #nd-page article {
+    @apply bg-fd-article rounded-xl border shadow-xl my-4;
+  }
+
+  #nd-tocnav,
+  #nd-subnav > div {
+    border: none;
+  }
+
+  .fd-default-layout #nd-page article {
+    @apply mx-4;
+  }
+
+  .fd-notebook-layout #nd-page article {
+    @apply mx-6;
+  }
+}
+
+#nd-sidebar {
+  @apply bg-fd-background;
+}
+
+#nd-sidebar[data-collapsed='false'] {
+  border: none;
+  --color-fd-muted: inherit;
+  --color-fd-secondary: inherit;
+  --color-fd-muted-foreground: inherit;
+}

@@ -43,6 +43,10 @@
   inset: 0;
 }
 
+[data-rmiz-modal-overlay='visible'] {
+  background-color: var(--color-fd-background);
+}
+
 [data-rmiz-modal-overlay='hidden'] {
   background-color: transparent;
 }

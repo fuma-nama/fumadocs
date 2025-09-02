@@ -7,8 +7,6 @@
     "---Guide---",
     "index",
     "search",
-    "---Writing---",
-    "page-conventions",
     "---API References---",
     "page-tree",
     "internationalization",
@@ -17,6 +15,7 @@
     "mdx",
     "---Sources---",
     "source-api",
+    "page-conventions",
     "content-collections/index",
     "contentlayer",
     "custom-source"

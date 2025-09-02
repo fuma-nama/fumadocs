@@ -49,21 +49,21 @@ export default async function loader(
     collection = undefined;
   }
 
-  let data = matter.data;
+  let frontmatter = matter.data as Record<string, unknown>;
   const mdxOptions =
     collection?.mdxOptions ?? (await config.getDefaultMDXOptions());
 
   if (collection?.schema) {
     try {
-      data = await validate(
+      frontmatter = (await validate(
         collection.schema,
-        matter.data,
+        frontmatter,
         {
           source,
           path: filePath,
         },
         `invalid frontmatter in ${filePath}`,
-      );
+      )) as typeof frontmatter;
     } catch (e) {
       if (e instanceof ValidationError) {
         return callback(new Error(e.toStringFormatted()));
@@ -91,7 +91,7 @@ export default async function loader(
         development: this.mode === 'development',
         ...mdxOptions,
         filePath,
-        frontmatter: data as Record<string, unknown>,
+        frontmatter,
         data: {
           lastModified: timestamp,
         },
