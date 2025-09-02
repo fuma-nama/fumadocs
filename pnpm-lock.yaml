@@ -72,8 +72,8 @@ importers:
         specifier: ^0.26.0
         version: 0.26.0
       '@orama/core':
-        specifier: ^1.2.6
-        version: 1.2.6
+        specifier: ^1.2.7
+        version: 1.2.7
       '@orama/orama':
         specifier: ^3.1.12
         version: 3.1.12
@@ -1185,8 +1185,8 @@ importers:
         specifier: ^0.26.0
         version: 0.26.0
       '@orama/core':
-        specifier: ^1.2.6
-        version: 1.2.6
+        specifier: ^1.2.7
+        version: 1.2.7
       '@oramacloud/client':
         specifier: ^2.1.4
         version: 2.1.4
@@ -3542,8 +3542,8 @@ packages:
     resolution: {integrity: sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg==}
     engines: {node: '>=8.0.0'}
 
-  '@orama/core@1.2.6':
-    resolution: {integrity: sha512-YGDHLfIIvnUi6ErIREmk1zStiRKzA2W11HULlvK9/cDmr+4+41fqbtcZ87yh9QopynfWjrAYtmwc6IaSsM8z+g==}
+  '@orama/core@1.2.7':
+    resolution: {integrity: sha512-+T+K/WXwM7QYWfo2o5Hs64wOTGYy+EzLnmEDPqfg8WjVOClZa8j6MI6k6ZA/vSF3n3njsxbXvTz5EW1nzSVYOQ==}
 
   '@orama/cuid2@2.2.3':
     resolution: {integrity: sha512-Lcak3chblMejdlSHgYU2lS2cdOhDpU6vkfIJH4m+YKvqQyLqs1bB8+w6NT1MG5bO12NUK2GFc34Mn2xshMIQ1g==}
@@ -5954,7 +5954,6 @@ packages:
 
   bun@1.2.21:
     resolution: {integrity: sha512-y0lJ02dS90U3PJm+7KAKY8Se95AQvP5Xm77LouUwrpNOHpv59kBG4SK1+9iE1cAhpUaFipq+0EJ56S6MmE3row==}
-    cpu: [arm64, x64, aarch64]
     os: [darwin, linux, win32]
     hasBin: true
 
@@ -13106,7 +13105,7 @@ snapshots:
 
   '@opentelemetry/api@1.9.0': {}
 
-  '@orama/core@1.2.6':
+  '@orama/core@1.2.7':
     dependencies:
       '@orama/cuid2': 2.2.3
       '@orama/oramacore-events-parser': 0.0.5

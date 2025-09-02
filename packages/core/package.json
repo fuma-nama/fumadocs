@@ -118,7 +118,7 @@
   "devDependencies": {
     "@mdx-js/mdx": "^3.1.1",
     "@mixedbread/sdk": "^0.26.0",
-    "@orama/core": "^1.2.6",
+    "@orama/core": "^1.2.7",
     "@oramacloud/client": "^2.1.4",
     "@tanstack/react-router": "^1.131.30",
     "@types/estree-jsx": "^1.0.5",
@@ -144,7 +144,7 @@
   },
   "peerDependencies": {
     "@mixedbread/sdk": "^0.19.0",
-    "@orama/core": "^1.2.6",
+    "@orama/core": "^1.2.7",
     "@types/react": "*",
     "algoliasearch": "5.x.x",
     "next": "14.x.x || 15.x.x",
