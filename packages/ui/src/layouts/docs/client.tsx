@@ -17,7 +17,7 @@ export function Navbar(props: ComponentProps<'header'>) {
       id="nd-subnav"
       {...props}
       className={cn(
-        'fixed top-(--fd-banner-height) inset-x-0 z-30 flex items-center ps-4 pe-2.5 border-b transition-colors backdrop-blur-sm',
+        'fixed top-(--fd-banner-height) left-0 right-(--removed-body-scroll-bar-size,0) z-30 flex items-center ps-4 pe-2.5 border-b transition-colors backdrop-blur-sm',
         !isTransparent && 'bg-fd-background/80',
         props.className,
       )}
@@ -35,7 +35,7 @@ export function LayoutBody(props: ComponentProps<'main'>) {
       id="nd-docs-layout"
       {...props}
       className={cn(
-        'flex flex-1 flex-col pt-(--fd-nav-height) transition-[padding]',
+        'flex flex-1 flex-col pt-(--fd-nav-height) transition-[padding] fd-default-layout',
         !collapsed && 'mx-(--fd-layout-offset)',
         props.className,
       )}

@@ -1,4 +1,10 @@
-import type { Environment, Plugin, TransformResult } from 'vite';
+import {
+  type Environment,
+  mergeConfig,
+  type Plugin,
+  type TransformResult,
+  type UserConfig,
+} from 'vite';
 import { buildConfig } from '@/config/build';
 import { buildMDX } from '@/utils/build-mdx';
 import { parse } from 'node:querystring';
@@ -13,6 +19,8 @@ import { load } from 'js-yaml';
 import type { SourceMap, TransformPluginContext } from 'rollup';
 import { getGitTimestamp } from '@/utils/git-timestamp';
 import { doc, docs, meta } from '@/vite/generate';
+
+const FumadocsDeps = ['fumadocs-core', 'fumadocs-ui', 'fumadocs-openapi'];
 
 const querySchema = z
   .object({
@@ -179,6 +187,17 @@ export default function mdx(
     name: 'fumadocs-mdx',
     // needed, otherwise other plugins will be executed before our `transform`.
     enforce: 'pre',
+    config(config) {
+      return mergeConfig(config, {
+        optimizeDeps: {
+          exclude: FumadocsDeps,
+        },
+        resolve: {
+          noExternal: FumadocsDeps,
+          dedupe: FumadocsDeps,
+        },
+      } satisfies UserConfig);
+    },
     async buildStart() {
       if (!generateIndexFile) return;
 

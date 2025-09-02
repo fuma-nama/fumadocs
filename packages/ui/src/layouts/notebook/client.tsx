@@ -22,7 +22,7 @@ export function Navbar({
       id="nd-subnav"
       {...props}
       className={cn(
-        'fixed flex flex-col inset-x-0 top-(--fd-banner-height) z-10 px-(--fd-layout-offset) h-(--fd-nav-height) backdrop-blur-sm transition-colors',
+        'fixed flex flex-col top-(--fd-banner-height) left-0 right-(--removed-body-scroll-bar-size,0) z-10 px-(--fd-layout-offset) h-(--fd-nav-height) backdrop-blur-sm transition-colors',
         (!isTransparent || open) && 'bg-fd-background/80',
         mode === 'auto' &&
           !collapsed &&

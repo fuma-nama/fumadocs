@@ -71,6 +71,7 @@
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
     "algoliasearch": "5.36.0",
+    "browserslist-config-baseline": "^0.5.0",
     "eslint-config-custom": "workspace:*",
     "gray-matter": "^4.0.3",
     "next-validate-link": "^1.5.2",
@@ -83,5 +84,8 @@
     "ts-morph": "^26.0.0",
     "tsconfig": "workspace:*",
     "typescript": "^5.9.2"
-  }
+  },
+  "browserslist": [
+    "extends browserslist-config-baseline/2024"
+  ]
 }
