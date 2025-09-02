@@ -19,10 +19,7 @@
 
 @variant md {
   #nd-page article {
-    height: calc(
-      100svh - 32px - var(--fd-nav-height) - var(--fd-tocnav-height)
-    );
-    @apply bg-fd-article rounded-xl border shadow-xl overflow-auto fd-scroll-container;
+    @apply bg-fd-article rounded-xl border shadow-xl my-4;
   }
 
   #nd-tocnav,
@@ -31,15 +28,21 @@
   }
 
   .fd-default-layout #nd-page article {
-    @apply mx-4 my-auto;
+    @apply mx-4;
   }
 
   .fd-notebook-layout #nd-page article {
-    @apply mx-6 my-auto;
+    @apply mx-6;
   }
 }
 
+#nd-sidebar {
+  @apply bg-fd-background;
+}
+
 #nd-sidebar[data-collapsed='false'] {
-  background-color: transparent;
   border: none;
+  --color-fd-muted: inherit;
+  --color-fd-secondary: inherit;
+  --color-fd-muted-foreground: inherit;
 }
