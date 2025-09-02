@@ -1,5 +1,16 @@
 # next-docs-ui
 
+## 15.7.8
+
+### Patch Changes
+
+- ba3382f: Support link item properties in menu items
+- efba995: Enforce the use of `--removed-body-scroll-bar-size` to fixed elements
+- bec3b36: Use `on-root:` to apply CSS variables from child layout components
+- Updated dependencies [f65778d]
+- Updated dependencies [e4c12a3]
+  - fumadocs-core@15.7.8
+
 ## 15.7.7
 
 ### Patch Changes
