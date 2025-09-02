@@ -144,7 +144,7 @@
   },
   "peerDependencies": {
     "@mixedbread/sdk": "^0.19.0",
-    "@oramacloud/client": "1.x.x || 2.x.x",
+    "@orama/core": "^1.2.6",
     "@types/react": "*",
     "algoliasearch": "5.x.x",
     "next": "14.x.x || 15.x.x",
@@ -157,9 +157,6 @@
       "optional": true
     },
     "@types/react": {
-      "optional": true
-    },
-    "@oramacloud/client": {
       "optional": true
     },
     "algoliasearch": {
