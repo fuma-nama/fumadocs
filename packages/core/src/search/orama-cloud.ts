@@ -95,7 +95,9 @@ export async function sync(
   await index.transaction.open();
 
   // Insert the documents into the temporary index.
-  await index.transaction.insertDocuments(options.documents.flatMap(toIndex) as unknown as AnyObject[]);
+  await index.transaction.insertDocuments(
+    options.documents.flatMap(toIndex) as unknown as AnyObject[],
+  );
 
   // Commit the transaction.
   // This will swap the live index with the temporary index with no downtime.
@@ -112,7 +114,9 @@ export async function syncI18n(
     const index = cloudManager.index.set(options.indexes[document.locale]);
 
     await index.transaction.open();
-    await index.transaction.insertDocuments(document.items.flatMap(toIndex) as unknown as AnyObject[]);
+    await index.transaction.insertDocuments(
+      document.items.flatMap(toIndex) as unknown as AnyObject[],
+    );
 
     if (autoDeploy) await index.transaction.commit();
   });

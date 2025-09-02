@@ -39,7 +39,12 @@ export async function searchDocs(
 ): Promise<SortedResult[]> {
   const highlighter = createContentHighlighter(query);
   const list: SortedResult[] = [];
-  const { index = 'default', client, params: extraParams = undefined, tag } = options;
+  const {
+    index = 'default',
+    client,
+    params: extraParams = undefined,
+    tag,
+  } = options;
 
   if (index === 'crawler') {
     const result = await client.search({
@@ -47,7 +52,7 @@ export async function searchDocs(
       term: query,
       boost: {
         title: 12,
-        description: 4
+        description: 4,
       },
       where: {
         category: tag
@@ -55,10 +60,10 @@ export async function searchDocs(
               eq: tag.slice(0, 1).toUpperCase() + tag.slice(1),
             }
           : undefined,
-        ...extraParams?.where ?? {},
+        ...(extraParams?.where ?? {}),
       },
       limit: 10,
-      datasources: []
+      datasources: [],
     });
     if (!result) return list;
 
@@ -91,14 +96,14 @@ export async function searchDocs(
     term: query,
     where: removeUndefined({
       tag,
-      ...extraParams?.where ?? {},
+      ...(extraParams?.where ?? {}),
     }),
     groupBy: {
       properties: ['page_id'],
       max_results: 7,
-      ...extraParams?.groupBy ?? {},
+      ...(extraParams?.groupBy ?? {}),
     },
-    datasources: []
+    datasources: [],
   };
 
   const result = await client.search(params);

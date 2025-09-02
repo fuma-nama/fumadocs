@@ -16,9 +16,7 @@
         "ORAMA_DATASOURCE_ID",
         "ORAMA_PRIVATE_API_KEY"
       ],
-      "dependsOn": [
-        "^build"
-      ],
+      "dependsOn": ["^build"],
       "outputs": [
         ".output",
         "public/registry",

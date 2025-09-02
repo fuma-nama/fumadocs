@@ -27,8 +27,8 @@ export async function updateSearchIndexes(): Promise<void> {
 
   const manager = new OramaCloud({
     apiKey,
-    projectId
-  })
+    projectId,
+  });
 
   await sync(manager, {
     index: datasourceId,
