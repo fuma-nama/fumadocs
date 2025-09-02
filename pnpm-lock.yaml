@@ -72,8 +72,8 @@ importers:
         specifier: ^0.26.0
         version: 0.26.0
       '@orama/core':
-        specifier: ^1.2.5
-        version: 1.2.5
+        specifier: ^1.2.6
+        version: 1.2.6
       '@orama/orama':
         specifier: ^3.1.11
         version: 3.1.11
@@ -3377,9 +3377,6 @@ packages:
   '@opentelemetry/api@1.9.0':
     resolution: {integrity: sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg==}
     engines: {node: '>=8.0.0'}
-
-  '@orama/core@1.2.5':
-    resolution: {integrity: sha512-MkgiCUBeKbmcJhBQoxH0oxbfJ1Eyrg9x41VoBj/QJ7HOEneoMXV09+dhBQVpWuvYLOAdP07xeUBpnqONLrRpJw==}
 
   '@orama/core@1.2.6':
     resolution: {integrity: sha512-YGDHLfIIvnUi6ErIREmk1zStiRKzA2W11HULlvK9/cDmr+4+41fqbtcZ87yh9QopynfWjrAYtmwc6IaSsM8z+g==}
@@ -12878,13 +12875,6 @@ snapshots:
   '@open-draft/until@2.1.0': {}
 
   '@opentelemetry/api@1.9.0': {}
-
-  '@orama/core@1.2.5':
-    dependencies:
-      '@orama/cuid2': 2.2.3
-      '@orama/oramacore-events-parser': 0.0.5
-      zod: 3.24.3
-      zod-to-json-schema: 3.24.5(zod@3.24.3)
 
   '@orama/core@1.2.6':
     dependencies:
