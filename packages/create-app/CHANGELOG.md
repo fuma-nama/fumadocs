@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 15.7.8
+
+### Patch Changes
+
+- be40967: Fixed imports for the React Router template.
+
 ## 15.7.7
 
 ## 15.7.6

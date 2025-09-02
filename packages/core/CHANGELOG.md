@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 15.7.8
+
+### Patch Changes
+
+- f65778d: `Link` improve external link detection by enabling it on any protocols
+- e4c12a3: Add framework adapters to optional peer deps
+
 ## 15.7.7
 
 ### Patch Changes
