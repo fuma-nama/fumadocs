@@ -1,5 +1,5 @@
 import type { SortedResult } from '@/server';
-import type { OramaCloud, CloudSearchParams } from '@orama/core';
+import type { OramaCloud, OramaCloudSearchParams } from '@orama/core';
 import { removeUndefined } from '@/utils/remove-undefined';
 import type { OramaIndex } from '@/search/orama-cloud';
 import { createContentHighlighter } from '@/search/shared';
@@ -20,7 +20,7 @@ export interface OramaCloudOptions {
    * You can set it to `crawler` if you use crawler instead of the JSON index with schema provided by Fumadocs
    */
   index?: 'default' | 'crawler';
-  params?: CloudSearchParams;
+  params?: OramaCloudSearchParams;
 
   /**
    * Filter results with specific tag.
@@ -55,9 +55,10 @@ export async function searchDocs(
               eq: tag.slice(0, 1).toUpperCase() + tag.slice(1),
             }
           : undefined,
-        ...extraParams.where,
+        ...extraParams?.where ?? {},
       },
       limit: 10,
+      datasources: []
     });
     if (!result) return list;
 
@@ -85,7 +86,7 @@ export async function searchDocs(
     return list;
   }
 
-  const params: CloudSearchParams = {
+  const params: OramaCloudSearchParams = {
     ...extraParams,
     term: query,
     where: removeUndefined({
@@ -94,9 +95,10 @@ export async function searchDocs(
     }),
     groupBy: {
       properties: ['page_id'],
-      maxResult: 7,
+      max_results: 7,
       ...extraParams?.groupBy ?? {},
     },
+    datasources: []
   };
 
   const result = await client.search(params);

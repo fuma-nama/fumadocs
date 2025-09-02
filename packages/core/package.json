@@ -98,7 +98,7 @@
   },
   "dependencies": {
     "@formatjs/intl-localematcher": "^0.6.1",
-    "@orama/orama": "^3.1.11",
+    "@orama/orama": "^3.1.12",
     "@shikijs/rehype": "^3.11.0",
     "@shikijs/transformers": "^3.11.0",
     "github-slugger": "^2.0.0",

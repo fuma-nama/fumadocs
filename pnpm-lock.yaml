@@ -75,8 +75,8 @@ importers:
         specifier: ^1.2.6
         version: 1.2.6
       '@orama/orama':
-        specifier: ^3.1.11
-        version: 3.1.11
+        specifier: ^3.1.12
+        version: 3.1.12
       '@radix-ui/react-dialog':
         specifier: ^1.1.15
         version: 1.1.15(@types/react-dom@19.1.7(@types/react@19.1.11))(@types/react@19.1.11)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -1060,8 +1060,8 @@ importers:
         specifier: ^0.6.1
         version: 0.6.1
       '@orama/orama':
-        specifier: ^3.1.11
-        version: 3.1.11
+        specifier: ^3.1.12
+        version: 3.1.12
       '@shikijs/rehype':
         specifier: ^3.11.0
         version: 3.11.0
@@ -3386,6 +3386,10 @@ packages:
 
   '@orama/orama@3.1.11':
     resolution: {integrity: sha512-Szki0cgFiXE5F9RLx2lUyEtJllnuCSQ4B8RLDwIjXkVit6qZjoDAxH+xhJs29MjKLDz0tbPLdKFa6QrQ/qoGGA==}
+    engines: {node: '>= 20.0.0'}
+
+  '@orama/orama@3.1.12':
+    resolution: {integrity: sha512-U7PY8FwXHuJ6bNBpbsqe0KLzb91IcJuORDggqHHkFy1waokY5SpWLN9tzB3AOW776awp6s1bjwts9I9Davy3lw==}
     engines: {node: '>= 20.0.0'}
 
   '@orama/oramacore-events-parser@0.0.5':
@@ -12889,6 +12893,8 @@ snapshots:
 
   '@orama/orama@3.1.11': {}
 
+  '@orama/orama@3.1.12': {}
+
   '@orama/oramacore-events-parser@0.0.5': {}
 
   '@orama/tokenizers@3.1.11':
@@ -12898,7 +12904,7 @@ snapshots:
   '@oramacloud/client@2.1.4':
     dependencies:
       '@orama/cuid2': 2.2.3
-      '@orama/orama': 3.1.11
+      '@orama/orama': 3.1.12
       lodash: 4.17.21
 
   '@oven/bun-darwin-aarch64@1.2.20':
