@@ -14,60 +14,19 @@ Before continuing, make sure you have configured:
 npm i fumadocs-ui fumadocs-core fumadocs-mdx @types/mdx
 ```
 
-<Callout title='Content Source'>
-  Fumadocs supports different content sources, including Fumadocs MDX and [Content Collections](/docs/headless/content-collections).
+Configure [Fumadocs MDX](/docs/mdx/next) on your Next.js app, make sure essential files like `lib/source.ts` are created correctly.
 
-In this guide, we will use Fumadocs MDX.
+<Callout title='Good to Know'>
+
+Fumadocs also supports other content sources, including [Content Collections](/docs/headless/content-collections) and headless CMS.
 
 </Callout>
 
-Update the following files:
-
-```js tab="next.config.mjs"
-import { createMDX } from 'fumadocs-mdx/next';
-
-/** @type {import('next').NextConfig} */
-const config = {
-  reactStrictMode: true,
-};
-
-// [!code ++:2]
-const withMDX = createMDX();
-export default withMDX(config);
-```
-
-```json tab="package.json"
-{
-  "scripts": {
-    "postinstall": "fumadocs-mdx" // [!code ++]
-  }
-}
-```
-
 Create the following files:
 
-<include cwd meta='tab="mdx-components.tsx"'>
+<include cwd meta='title="mdx-components.tsx"'>
   ../../examples/next-mdx/mdx-components.tsx
 </include>
-
-```ts tab="source.config.ts"
-import { defineDocs } from 'fumadocs-mdx/config';
-
-export const docs = defineDocs({
-  dir: 'content/docs',
-});
-```
-
-```ts tab="lib/source.ts"
-// .source folder will be generated when you run `next dev`
-import { docs } from '@/.source';
-import { loader } from 'fumadocs-core/source';
-
-export const source = loader({
-  baseUrl: '/docs',
-  source: docs.toFumadocsSource(),
-});
-```
 
 ### Root Layout
 

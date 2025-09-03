@@ -21,18 +21,9 @@ Add the Vite plugin:
   ../../examples/tanstack-start/vite.config.ts
 </include>
 
-A `source.generated.ts` file will be generated when you run development server or production build.
+### Integrate with Fumadocs
 
-### Accessing Content
-
-You can import the `source.generated.ts` file directly.
-
-```ts
-import { docs } from './source.generated';
-console.log(docs);
-```
-
-To integrate with Fumadocs, create a docs collection and use:
+To integrate with Fumadocs, create a `lib/source.ts` file:
 
 ```ts title="src/lib/source.ts"
 import { loader } from 'fumadocs-core/source';
@@ -43,6 +34,14 @@ export const source = loader({
   baseUrl: '/docs',
 });
 ```
+
+The `source.generated.ts` file will be generated when you run development server or production build.
+
+### Done
+
+The configuration is now finished.
+
+## Examples
 
 ### Rendering Content
 
@@ -98,3 +97,10 @@ function Page() {
   return <Content />;
 }
 ```
+
+> As you see, the `source.generated.ts` file can be imported directly:
+>
+> ```ts
+> import { docs } from './source.generated';
+> console.log(docs);
+> ```

@@ -47,39 +47,9 @@ export default withMDX(config);
 
 </Callout>
 
-A `.source` folder will be generated when you run `next dev` or `next build`.
-
-### Accessing Content
-
-You can access the collection output from `.source` folder with its original name:
-
-```ts tab="source.config.ts"
-import { defineDocs } from 'fumadocs-mdx/config';
-
-export const docs = defineDocs({
-  dir: 'content/docs',
-  docs: {
-    // options for `doc` collection
-  },
-  meta: {
-    // options for `meta` collection
-  },
-});
-```
-
-```ts tab="Usage"
-import { docs } from '@/.source';
-
-console.log(docs);
-```
-
-The type of output can have a different type/shape depending on the collection type and schema.
-
-> Make sure you are importing from `.source` rather than `source.config.ts`. We will import it with `@/.source` import alias in this guide.
-
 ### Integrate with Fumadocs
 
-Create a `docs` collection and use `toFumadocsSource()` on the output.
+You can use `toFumadocsSource()` on the `docs` collection output.
 
 ```ts title="lib/source.ts"
 import { docs } from '@/.source';
@@ -91,9 +61,33 @@ export const source = loader({
 });
 ```
 
-> You can do the same for multiple `docs` collections.
+> `.source` will be generated when you run `next dev` or `next build`.
+>
+> Make sure you are importing the `.source` rather than `source.config.ts`.
 
-Generally, you'll interact with the collection through [`loader()`](/docs/headless/source-api#output).
+### Integrate with CI (Optional)
+
+You can run `fumadocs-mdx` to generate the `.source` folder.
+
+Optionally, you can run it in post install to ensure types are generated when initializing the project.
+
+```json title="package.json"
+{
+  "scripts": {
+    "postinstall": "fumadocs-mdx"
+  }
+}
+```
+
+### Done
+
+Have fun!
+
+## Examples
+
+### Accessing Content
+
+Generally, you'll interact with the collections through [`loader()`](/docs/headless/source-api#output), same for multiple `docs` collections.
 
 ```tsx
 import { source } from '@/lib/source';
@@ -120,14 +114,24 @@ const MDX = page.data.body;
 return <MDX components={getMDXComponents()} />;
 ```
 
-### Integrate with CI
+Without using `loader()`, you can also import the `.source` folder using its collection name:
 
-The `fumadocs-mdx` command also generates types for `.source` folder. Add it as a post install script to ensure types are generated when initializing the project.
+```ts tab="source.config.ts"
+import { defineDocs } from 'fumadocs-mdx/config';
 
-```json title="package.json"
-{
-  "scripts": {
-    "postinstall": "fumadocs-mdx"
-  }
-}
+export const docs = defineDocs({
+  dir: 'content/docs',
+  docs: {
+    // options for `doc` collection
+  },
+  meta: {
+    // options for `meta` collection
+  },
+});
+```
+
+```ts tab="Usage"
+import { docs } from '@/.source';
+
+console.log(docs);
 ```

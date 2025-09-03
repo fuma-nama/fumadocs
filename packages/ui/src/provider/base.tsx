@@ -150,7 +150,6 @@ function I18nProvider({
     }
 
     router.push(`/${segments.join('/')}`);
-    router.refresh();
   });
 
   return (

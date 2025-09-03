@@ -1,0 +1,84 @@
+---
+title: Waku
+description: Setup Fumadocs on Waku.
+---
+
+## Getting Started
+
+Before continuing, make sure to configure:
+
+- Tailwind CSS 4.
+
+### Installation
+
+```npm
+npm i fumadocs-core fumadocs-ui fumadocs-mdx @types/mdx
+```
+
+Then, [configure Fumadocs MDX](/docs/mdx/vite/waku) on your Waku app.
+Make sure essential files like `lib/source.ts` are created correctly.
+
+### Styles
+
+Add the following to your Tailwind CSS file:
+
+```css title="src/styles/globals.css"
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+```
+
+### Create Pages
+
+Create a file for sharing layout props:
+
+<include cwd meta='title="src/lib/layout.shared.tsx"'>
+  ../../examples/waku/src/lib/layout.shared.tsx
+</include>
+
+Create the following routes:
+
+<include cwd meta='tab="src/pages/docs/_layout.tsx"'>
+  ../../examples/waku/src/pages/docs/_layout.tsx
+</include>
+<include cwd meta='tab="src/pages/docs/[...slugs].tsx"'>
+  ../../examples/waku/src/pages/docs/[...slugs].tsx
+</include>
+<include cwd meta='tab="src/pages/api/search.ts"'>
+  ../../examples/waku/src/pages/api/search.ts
+</include>
+
+Finally, wrap your entire app under Fumadocs providers:
+
+<include cwd meta='tab="src/components/provider.tsx"'>
+  ../../examples/waku/src/components/provider.tsx
+</include>
+
+```tsx tab="src/pages/_layout.tsx"
+import '@/styles/globals.css';
+import type { ReactNode } from 'react';
+import { Provider } from '@/components/provider';
+
+// [!code ++:3]
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return <Provider>{children}</Provider>;
+}
+
+export const getConfig = async () => {
+  return {
+    render: 'static',
+  };
+};
+```
+
+### Done
+
+You can start writing documents at `content/docs`:
+
+```mdx title="content/docs/index.mdx"
+---
+title: Hello World
+---
+
+I love Fumadocs
+```
