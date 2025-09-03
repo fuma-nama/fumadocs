@@ -144,7 +144,7 @@
   },
   "peerDependencies": {
     "@mixedbread/sdk": "^0.19.0",
-    "@orama/core": "^1.2.7",
+    "@orama/core": "^1.2.0",
     "@types/react": "*",
     "algoliasearch": "5.x.x",
     "next": "14.x.x || 15.x.x",
@@ -155,6 +155,9 @@
     "react-router": "7.x.x"
   },
   "peerDependenciesMeta": {
+    "@orama/core": {
+      "optional": true
+    },
     "@mixedbread/sdk": {
       "optional": true
     },
