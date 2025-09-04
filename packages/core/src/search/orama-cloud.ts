@@ -1,5 +1,10 @@
 import type { AnyObject, OramaCloud } from '@orama/core';
 import type { StructuredData } from '@/mdx-plugins';
+import { createHash } from 'node:crypto';
+
+function hashPageId(id: string): string {
+  return createHash('sha256').update(id).digest('hex').slice(0, 24);
+}
 
 export interface SyncOptions {
   /**
@@ -134,11 +139,13 @@ function toIndex(page: OramaDocument): OramaIndex[] {
     sectionId: string | undefined,
     content: string,
   ): OramaIndex {
+    const pageId = hashPageId(page.id);
+
     return {
-      id: `${page.id}-${(id++).toString()}`,
+      id: `${pageId}-${(id++).toString()}`,
       title: page.title,
       url: page.url,
-      page_id: page.id,
+      page_id: pageId,
       tag: page.tag,
       section,
       section_id: sectionId,

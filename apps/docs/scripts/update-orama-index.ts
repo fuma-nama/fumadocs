@@ -37,3 +37,5 @@ export async function updateSearchIndexes(): Promise<void> {
 
   console.log(`search updated: ${records.length} records`);
 }
+
+await updateSearchIndexes();
