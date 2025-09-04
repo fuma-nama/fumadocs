@@ -26,7 +26,6 @@ async function mapProperty(
   }: RemarkAutoTypeTableOptions,
 ): Promise<Property> {
   const value = valueToEstree({
-    default: entry.tags.default || entry.tags.defaultValue,
     required: entry.required,
   }) as ObjectExpression;
 
@@ -51,6 +50,8 @@ async function mapProperty(
 
   addJsxProperty('type', await renderType(entry.simplifiedType));
   addJsxProperty('typeDescription', await renderType(entry.type));
+  const defaultValue = entry.tags.default ?? entry.tags.defaultValue;
+  if (defaultValue) addJsxProperty('default', await renderType(defaultValue));
 
   if (entry.description) {
     addJsxProperty('description', await renderMarkdown(entry.description));

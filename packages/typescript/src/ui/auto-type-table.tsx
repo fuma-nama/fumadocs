@@ -30,17 +30,21 @@ export async function AutoTypeTable({
   const output = await generator.generateTypeTable(props, options);
 
   return output.map(async (item) => {
-    const entries = item.entries.map(async (entry) => [
-      entry.name,
-      {
-        type: await renderType(entry.simplifiedType),
-        typeDescription: await renderType(entry.type),
-        description: await renderMarkdown(entry.description),
-        default: entry.tags.default || entry.tags.defaultValue,
-        required: entry.required,
-        deprecated: entry.deprecated,
-      } as TypeNode,
-    ]);
+    const entries = item.entries.map(async (entry) => {
+      const defaultValue = entry.tags.default ?? entry.tags.defaultValue;
+
+      return [
+        entry.name,
+        {
+          type: await renderType(entry.simplifiedType),
+          typeDescription: await renderType(entry.type),
+          description: await renderMarkdown(entry.description),
+          default: defaultValue ? await renderType(defaultValue) : undefined,
+          required: entry.required,
+          deprecated: entry.deprecated,
+        } as TypeNode,
+      ];
+    });
 
     return (
       <TypeTable
