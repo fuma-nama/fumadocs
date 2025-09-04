@@ -34,7 +34,10 @@ export type HighlightOptions = HighlightOptionsCommon &
 
 const highlighters = new Map<string, Promise<Highlighter>>();
 
-export async function _highlight(code: string, options: HighlightOptions) {
+export async function highlightHast(
+  code: string,
+  options: HighlightOptions,
+): Promise<Root> {
   const {
     lang: initialLang,
     fallbackLanguage,
@@ -155,5 +158,5 @@ export async function highlight(
   code: string,
   options: HighlightOptions,
 ): Promise<ReactNode> {
-  return _renderHighlight(await _highlight(code, options), options);
+  return _renderHighlight(await highlightHast(code, options), options);
 }

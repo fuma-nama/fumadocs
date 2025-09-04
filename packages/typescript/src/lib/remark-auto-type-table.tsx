@@ -1,4 +1,5 @@
 import type { Root } from 'mdast';
+import type { Nodes } from 'hast';
 import type { Transformer } from 'unified';
 import type {
   ExpressionStatement,
@@ -7,7 +8,7 @@ import type {
   Property,
 } from 'estree';
 import { createGenerator, type DocEntry, type Generator } from '@/lib/base';
-import { renderMarkdownToHast } from '@/markdown';
+import { renderMarkdownToHast, renderTypeToHast } from '@/markdown';
 import { valueToEstree } from 'estree-util-value-to-estree';
 import { visit } from 'unist-util-visit';
 import {
@@ -19,16 +20,18 @@ import { dirname } from 'node:path';
 
 async function mapProperty(
   entry: DocEntry,
-  renderMarkdown: typeof renderMarkdownToHast,
+  {
+    renderMarkdown = renderMarkdownToHast,
+    renderType = renderTypeToHast,
+  }: RemarkAutoTypeTableOptions,
 ): Promise<Property> {
   const value = valueToEstree({
-    type: entry.type,
     default: entry.tags.default || entry.tags.defaultValue,
     required: entry.required,
   }) as ObjectExpression;
 
-  if (entry.description) {
-    const hast = toEstree(await renderMarkdown(entry.description), {
+  function addJsxProperty(key: string, hast: Nodes) {
+    const estree = toEstree(hast, {
       elementAttributeNameCase: 'react',
     }).body[0] as ExpressionStatement;
 
@@ -39,11 +42,18 @@ async function mapProperty(
       computed: false,
       key: {
         type: 'Identifier',
-        name: 'description',
+        name: key,
       },
       kind: 'init',
-      value: hast.expression,
+      value: estree.expression,
     });
+  }
+
+  addJsxProperty('type', await renderType(entry.simplifiedType));
+  addJsxProperty('typeDescription', await renderType(entry.type));
+
+  if (entry.description) {
+    addJsxProperty('description', await renderMarkdown(entry.description));
   }
 
   return {
@@ -72,6 +82,7 @@ export interface RemarkAutoTypeTableOptions {
   outputName?: string;
 
   renderMarkdown?: typeof renderMarkdownToHast;
+  renderType?: typeof renderTypeToHast;
 
   /**
    * Customise type table generation
@@ -91,18 +102,20 @@ export interface RemarkAutoTypeTableOptions {
  *
  * MDX is required to use this plugin.
  */
-export function remarkAutoTypeTable({
-  name = 'auto-type-table',
-  outputName = 'TypeTable',
-  renderMarkdown = renderMarkdownToHast,
-  options = {},
-  remarkStringify = true,
-  generator = createGenerator(),
-}: RemarkAutoTypeTableOptions = {}): Transformer<Root, Root> {
+export function remarkAutoTypeTable(
+  config: RemarkAutoTypeTableOptions = {},
+): Transformer<Root, Root> {
+  const {
+    name = 'auto-type-table',
+    outputName = 'TypeTable',
+    options: generateOptions = {},
+    remarkStringify = true,
+    generator = createGenerator(),
+  } = config;
+
   return async (tree, file) => {
     const queue: Promise<void>[] = [];
-    let basePath = options?.basePath;
-    if (!basePath && file.path) basePath = dirname(file.path);
+    const defaultBasePath = file.path ? dirname(file.path) : undefined;
 
     visit(tree, 'mdxJsxFlowElement', (node) => {
       if (node.name !== name) return;
@@ -121,14 +134,14 @@ export function remarkAutoTypeTable({
         const output = await generator.generateTypeTable(
           props as BaseTypeTableProps,
           {
-            ...options,
-            basePath,
+            ...generateOptions,
+            basePath: generateOptions.basePath ?? defaultBasePath,
           },
         );
 
         const rendered = output.map(async (doc) => {
           const properties = await Promise.all(
-            doc.entries.map((entry) => mapProperty(entry, renderMarkdown)),
+            doc.entries.map((entry) => mapProperty(entry, config)),
           );
 
           return {

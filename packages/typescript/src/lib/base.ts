@@ -14,6 +14,7 @@ import {
 } from '@/lib/type-table';
 import { createCache } from '@/lib/cache';
 import path from 'node:path';
+import { getSimpleForm } from '@/lib/get-simple-form';
 
 export interface GeneratedDoc {
   name: string;
@@ -25,6 +26,8 @@ export interface DocEntry {
   name: string;
   description: string;
   type: string;
+  simplifiedType: string;
+
   tags: Record<string, string>;
   required: boolean;
   deprecated: boolean;
@@ -190,7 +193,6 @@ function getDocEntry(
   context: EntryContext,
 ): DocEntry | undefined {
   const { transform, program } = context;
-
   if (context.type.isClass() && prop.getName().startsWith('#')) {
     return;
   }
@@ -198,32 +200,17 @@ function getDocEntry(
   const subType = program
     .getTypeChecker()
     .getTypeOfSymbolAtLocation(prop, context.declaration);
+  const isOptional = prop.isOptional();
   const tags = Object.fromEntries(
     prop
       .getJsDocTags()
       .map((tag) => [tag.getName(), ts.displayPartsToString(tag.getText())]),
   );
 
-  let typeName = subType.getText(
-    undefined,
-    ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope,
-  );
-
-  if (
-    subType.getAliasSymbol() &&
-    subType.getAliasTypeArguments().length === 0
-  ) {
-    typeName = subType.getAliasSymbol()?.getEscapedName() ?? typeName;
-  }
-
-  if (prop.isOptional() && typeName.endsWith('| undefined')) {
-    typeName = typeName
-      .slice(0, typeName.length - '| undefined'.length)
-      .trimEnd();
-  }
+  let type = getFullType(subType, isOptional);
 
   if ('remarks' in tags) {
-    typeName = /^`(?<name>.+)`/.exec(tags.remarks)?.[1] ?? typeName;
+    type = /^`(?<name>.+)`/.exec(tags.remarks)?.[1] ?? type;
   }
 
   const entry: DocEntry = {
@@ -234,8 +221,9 @@ function getDocEntry(
       ),
     ),
     tags,
-    type: typeName,
-    required: !prop.isOptional(),
+    type,
+    simplifiedType: getSimpleForm(subType, program.getTypeChecker()),
+    required: !isOptional,
     deprecated: prop
       .getJsDocTags()
       .some((tag) => tag.getName() === 'deprecated'),
@@ -244,4 +232,31 @@ function getDocEntry(
   transform?.call(context, entry, subType, prop);
 
   return entry;
+}
+
+function getFullType(type: Type, isOptional: boolean): string {
+  if (type.isUnion() && isOptional) {
+    const t = type.compilerType as ts.UnionType;
+    const originalTypes = t.types;
+
+    t.types = t.types.filter((v) => v.flags !== ts.TypeFlags.Undefined);
+    const result = getFullType(type, false);
+    t.types = originalTypes;
+
+    return result;
+  }
+
+  let typeName = type
+    .getNonNullableType()
+    .getText(
+      undefined,
+      ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope &
+        ts.TypeFormatFlags.NoTruncation,
+    );
+
+  if (type.getAliasSymbol() && type.getAliasTypeArguments().length === 0) {
+    typeName = type.getAliasSymbol()?.getEscapedName() ?? typeName;
+  }
+
+  return typeName;
 }

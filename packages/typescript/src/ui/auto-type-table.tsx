@@ -1,8 +1,8 @@
-import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { type TypeNode, TypeTable } from 'fumadocs-ui/components/type-table';
 import { type Jsx, toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import * as runtime from 'react/jsx-runtime';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
-import { renderMarkdownToHast } from '@/markdown';
+import { renderMarkdownToHast, renderTypeToHast } from '@/markdown';
 import 'server-only';
 import type { ReactNode } from 'react';
 import {
@@ -10,36 +10,37 @@ import {
   type GenerateTypeTableOptions,
 } from '@/lib/type-table';
 import { type Generator } from '@/lib/base';
+import type { Nodes } from 'hast';
 
 export type AutoTypeTableProps = BaseTypeTableProps;
 
 export async function AutoTypeTable({
   generator,
   options = {},
+  renderType = renderTypeDefault,
   renderMarkdown = renderMarkdownDefault,
   ...props
 }: AutoTypeTableProps & {
   generator: Generator;
 
   renderMarkdown?: typeof renderMarkdownDefault;
+  renderType?: typeof renderTypeDefault;
   options?: GenerateTypeTableOptions;
 }) {
   const output = await generator.generateTypeTable(props, options);
 
   return output.map(async (item) => {
-    const entries = item.entries.map(
-      async (entry) =>
-        [
-          entry.name,
-          {
-            type: entry.type,
-            description: await renderMarkdown(entry.description),
-            default: entry.tags.default || entry.tags.defaultValue,
-            required: entry.required,
-            deprecated: entry.deprecated,
-          },
-        ] as const,
-    );
+    const entries = item.entries.map(async (entry) => [
+      entry.name,
+      {
+        type: await renderType(entry.simplifiedType),
+        typeDescription: await renderType(entry.type),
+        description: await renderMarkdown(entry.description),
+        default: entry.tags.default || entry.tags.defaultValue,
+        required: entry.required,
+        deprecated: entry.deprecated,
+      } as TypeNode,
+    ]);
 
     return (
       <TypeTable
@@ -50,11 +51,19 @@ export async function AutoTypeTable({
   });
 }
 
-async function renderMarkdownDefault(md: string): Promise<ReactNode> {
-  return toJsxRuntime(await renderMarkdownToHast(md), {
+function toJsx(hast: Nodes) {
+  return toJsxRuntime(hast, {
     Fragment: runtime.Fragment,
     jsx: runtime.jsx as Jsx,
     jsxs: runtime.jsxs as Jsx,
     components: { ...defaultMdxComponents, img: undefined },
   });
+}
+
+async function renderTypeDefault(type: string): Promise<ReactNode> {
+  return toJsx(await renderTypeToHast(type));
+}
+
+async function renderMarkdownDefault(md: string): Promise<ReactNode> {
+  return toJsx(await renderMarkdownToHast(md));
 }

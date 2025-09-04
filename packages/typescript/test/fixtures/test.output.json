@@ -8,6 +8,7 @@
         "description": "",
         "tags": {},
         "type": "string",
+        "simplifiedType": "string",
         "required": true,
         "deprecated": false
       },
@@ -18,6 +19,7 @@
           "defaultValue": "4"
         },
         "type": "number",
+        "simplifiedType": "number | undefined",
         "required": false,
         "deprecated": false
       }
@@ -32,6 +34,7 @@
         "description": "",
         "tags": {},
         "type": "string",
+        "simplifiedType": "string",
         "required": true,
         "deprecated": false
       },
@@ -42,6 +45,7 @@
           "defaultValue": "4"
         },
         "type": "number",
+        "simplifiedType": "number | undefined",
         "required": false,
         "deprecated": false
       },
@@ -50,6 +54,7 @@
         "description": "",
         "tags": {},
         "type": "GenericType<string, string, string>",
+        "simplifiedType": "object",
         "required": true,
         "deprecated": false
       }
@@ -67,6 +72,7 @@
           "defaultValue": "Henry"
         },
         "type": "string",
+        "simplifiedType": "string",
         "required": true,
         "deprecated": false
       },
@@ -78,6 +84,7 @@
           "remarks": "`timestamp`\nReturned by API"
         },
         "type": "timestamp",
+        "simplifiedType": "number",
         "required": true,
         "deprecated": false
       }
