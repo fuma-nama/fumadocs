@@ -6,7 +6,9 @@ import { type Node, ts } from 'ts-morph';
 import path from 'node:path';
 import { fileURLToPath } from 'url';
 
-const generator = createGenerator();
+const generator = createGenerator({
+  cache: false,
+});
 
 const relative = (s: string): string =>
   path.resolve(fileURLToPath(new URL(s, import.meta.url)));
@@ -40,6 +42,7 @@ test('class members', () => {
             "description": "",
             "name": "test",
             "required": true,
+            "simplifiedType": "string",
             "tags": {},
             "type": "string",
           },
@@ -48,6 +51,7 @@ test('class members', () => {
             "description": "",
             "name": "age",
             "required": true,
+            "simplifiedType": "number",
             "tags": {},
             "type": "number",
           },
@@ -82,6 +86,7 @@ test('interface members', () => {
             "description": "",
             "name": "#name",
             "required": true,
+            "simplifiedType": "string",
             "tags": {},
             "type": "string",
           },
@@ -90,6 +95,7 @@ test('interface members', () => {
             "description": "",
             "name": "age",
             "required": true,
+            "simplifiedType": "number",
             "tags": {},
             "type": "number",
           },
