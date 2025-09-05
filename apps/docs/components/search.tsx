@@ -1,6 +1,6 @@
 'use client';
 
-import { OramaClient } from '@oramacloud/client';
+import { OramaCloud } from '@orama/core';
 import {
   SearchDialog,
   SearchDialogClose,
@@ -24,9 +24,9 @@ import { ChevronDown } from 'lucide-react';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from '@/lib/cn';
 
-const client = new OramaClient({
-  endpoint: 'https://cloud.orama.run/v1/indexes/docs-fk97oe',
-  api_key: 'oPZjdlFbq5BpR54bV5Vj57RYt83Xosk7',
+const client = new OramaCloud({
+  projectId: '4c7dd023-375b-4401-bba8-41288dd87214',
+  apiKey: 'c1_W$axpC8FlCRXPCwE1ZQ_WiB071d3E140yuF$RU9uqIcHRUOliAPtjq8kVG_',
 });
 
 const items = [
@@ -100,6 +100,7 @@ export default function CustomSearchDialog(props: SharedProps) {
                 return (
                   <button
                     key={i}
+                    type="button"
                     onClick={() => {
                       setTag(item.value);
                       setOpen(false);
