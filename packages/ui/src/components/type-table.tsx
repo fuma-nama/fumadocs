@@ -124,7 +124,7 @@ function Item({
         <ChevronDown className="absolute end-2 size-4 text-fd-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div className="grid grid-cols-[1fr_3fr] gap-y-4 text-sm p-3 overflow-auto fd-scroll-container border-t">
+        <div className="grid grid-cols-[1fr_3fr] gap-x-2 gap-y-4 text-sm p-3 overflow-auto fd-scroll-container border-t">
           <div className="text-sm prose col-span-full prose-no-margin empty:hidden">
             {description}
           </div>
