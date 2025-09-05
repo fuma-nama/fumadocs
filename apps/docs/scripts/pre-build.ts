@@ -22,4 +22,5 @@ async function main() {
 
 await main().catch((e) => {
   console.error('Failed to run pre build script', e);
+  process.exit(1);
 });

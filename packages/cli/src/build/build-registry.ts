@@ -60,8 +60,9 @@ export interface Registry {
   onResolve?: OnResolve;
   /**
    * When a referenced file is not found in component files, this function is called.
+   * @returns file, or `false` to mark as external.
    */
-  onUnknownFile?: (absolutePath: string) => ComponentFile | undefined;
+  onUnknownFile?: (absolutePath: string) => ComponentFile | false | undefined;
 
   dependencies?: Record<string, string | null>;
   devDependencies?: Record<string, string | null>;
@@ -135,6 +136,8 @@ async function buildComponent(component: Component, builder: ComponentBuilder) {
           queue.push(refFile);
           return toImportPath(refFile);
         }
+
+        if (refFile === false) return;
 
         throw new Error(
           `Unknown file ${reference.file} referenced by ${file.path}`,
