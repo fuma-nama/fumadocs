@@ -1,11 +1,28 @@
 ### Replace Search Dialog
 
-To use your own search dialog, make a client-side `<RootProvider />` wrapper, and replace the original root provider with it.
+Replace the search dialog with yours from `<RootProvider />`:
+
+```tsx
+import { RootProvider } from 'fumadocs-ui/provider';
+// [!code ++]
+import SearchDialog from '@/components/search';
+import type { ReactNode } from 'react';
+
+<RootProvider
+  // [!code ++:3]
+  search={{
+    SearchDialog,
+  }}
+>
+  {children}
+</RootProvider>;
+```
+
+If it was in a server component, you would need a separate client component for provider to pass functions:
 
 ```tsx tab="provider.tsx"
 'use client';
 import { RootProvider } from 'fumadocs-ui/provider';
-// your custom dialog [!code highlight]
 import SearchDialog from '@/components/search';
 import type { ReactNode } from 'react';
 
@@ -30,6 +47,8 @@ export default function Layout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body>
+        {/* [!code --] */}
+        <RootProvider>{children}</RootProvider>
         {/* [!code ++] */}
         <Provider>{children}</Provider>
       </body>
