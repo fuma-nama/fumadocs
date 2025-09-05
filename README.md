@@ -1,6 +1,11 @@
 ![banner](./apps/docs/public/banner.png)
 
-The framework for building documentation websites in any React.js frameworks (Next.js, Tanstack Start, Waku, React Router).
+The framework for building documentation websites in any React.js frameworks.
+
+**Officially Supported:**
+
+- Next.js
+- Vite: Tanstack Start, Waku, React Router
 
 📘 Learn More: [Documentation](https://fumadocs.vercel.app).
 

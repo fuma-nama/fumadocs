@@ -1,14 +1,8 @@
-import { HomeLayout } from 'fumadocs-ui/layouts/home';
 import { Link } from 'waku';
 
 export default function Home() {
   return (
-    <HomeLayout
-      nav={{
-        title: 'Waku',
-      }}
-      className="text-center py-32 justify-center"
-    >
+    <div className="flex-1 flex flex-col items-center justify-center text-center">
       <h1 className="font-medium text-xl mb-4">Fumadocs on Waku.</h1>
       <Link
         to="/docs"
@@ -16,7 +10,7 @@ export default function Home() {
       >
         Open Docs
       </Link>
-    </HomeLayout>
+    </div>
   );
 }
 

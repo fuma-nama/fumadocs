@@ -1,112 +1,173 @@
 'use client';
 
-import { Info as InfoIcon, Link as LinkIcon } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import { cva } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
+import { type ReactNode, useState } from 'react';
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import type { ReactNode } from 'react';
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 
-export function Info({ children }: { children: ReactNode }): ReactNode {
-  return (
-    <Popover>
-      <PopoverTrigger>
-        <InfoIcon className="size-4" />
-      </PopoverTrigger>
-      <PopoverContent className="prose max-h-[400px] min-w-[220px] max-w-[400px] overflow-auto text-sm prose-no-margin">
-        {children}
-      </PopoverContent>
-    </Popover>
-  );
+export interface ParameterNode {
+  name: string;
+  description: ReactNode;
 }
 
-interface ObjectType {
+export interface TypeNode {
   /**
    * Additional description of the field
    */
   description?: ReactNode;
-  type: string;
-  typeDescription?: ReactNode;
+
   /**
-   * Optional link to the type
+   * type signature (short)
+   */
+  type: ReactNode;
+
+  /**
+   * type signature (full)
+   */
+  typeDescription?: ReactNode;
+
+  /**
+   * Optional `href` for the type
    */
   typeDescriptionLink?: string;
-  default?: string;
+
+  default?: ReactNode;
 
   required?: boolean;
   deprecated?: boolean;
+
+  parameters?: ParameterNode[];
+
+  returns?: ReactNode;
 }
 
-const field = cva('inline-flex flex-row items-center gap-1');
-const code = cva(
-  'rounded-md bg-fd-secondary p-1 text-fd-secondary-foreground',
-  {
-    variants: {
-      color: {
-        primary: 'bg-fd-primary/10 text-fd-primary',
-        deprecated: 'line-through text-fd-primary/50',
-      },
+const keyVariants = cva('text-fd-primary', {
+  variants: {
+    deprecated: {
+      true: 'line-through text-fd-primary/50',
     },
   },
-);
+});
 
-export function TypeTable({ type }: { type: Record<string, ObjectType> }) {
+const fieldVariants = cva('text-fd-muted-foreground not-prose');
+
+export function TypeTable({ type }: { type: Record<string, TypeNode> }) {
   return (
-    <div className="prose my-6 overflow-auto prose-no-margin">
-      <table className="whitespace-nowrap text-sm text-fd-muted-foreground">
-        <thead>
-          <tr>
-            <th className="w-[45%]">Prop</th>
-            <th className="w-[30%]">Type</th>
-            <th className="w-1/4">Default</th>
-          </tr>
-        </thead>
-        <tbody>
-          {Object.entries(type).map(([key, value]) => (
-            <tr key={key}>
-              <td>
-                <div className={field()}>
-                  <code
-                    className={cn(
-                      code({
-                        color: value.deprecated ? 'deprecated' : 'primary',
-                      }),
-                    )}
-                  >
-                    {key}
-                    {!value.required && '?'}
-                  </code>
-                  {value.description ? <Info>{value.description}</Info> : null}
-                </div>
-              </td>
-              <td>
-                <div className={field()}>
-                  <code className={code()}>{value.type}</code>
-                  {value.typeDescription ? (
-                    <Info>{value.typeDescription}</Info>
-                  ) : null}
-                  {value.typeDescriptionLink ? (
-                    <Link href={value.typeDescriptionLink}>
-                      <LinkIcon className="size-4 text-fd-muted-foreground" />
-                    </Link>
-                  ) : null}
-                </div>
-              </td>
-              <td>
-                {value.default ? (
-                  <code className={code()}>{value.default}</code>
-                ) : (
-                  '-'
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="@container flex flex-col p-1 bg-fd-card text-fd-card-foreground rounded-2xl border my-6 text-sm overflow-hidden">
+      <div className="flex font-medium items-center px-3 py-1 not-prose text-fd-muted-foreground">
+        <p className="w-[25%]">Prop</p>
+        <p className="@max-xl:hidden">Type</p>
+      </div>
+      {Object.entries(type).map(([key, value]) => (
+        <Item key={key} name={key} item={value} />
+      ))}
     </div>
+  );
+}
+
+function Item({
+  name,
+  item: {
+    parameters = [],
+    description,
+    required = false,
+    deprecated,
+    typeDescription,
+    default: defaultValue,
+    type,
+    typeDescriptionLink,
+    returns,
+  },
+}: {
+  name: string;
+  item: TypeNode;
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Collapsible
+      open={open}
+      onOpenChange={setOpen}
+      className={cn(
+        'rounded-xl border overflow-hidden transition-all',
+        open
+          ? 'shadow-sm bg-fd-background not-last:mb-2'
+          : 'border-transparent',
+      )}
+    >
+      <CollapsibleTrigger className="relative flex flex-row items-center w-full group text-start px-3 py-2 not-prose hover:bg-fd-accent">
+        <span className="pe-2 min-w-fit font-medium w-[25%]">
+          <code
+            className={cn(
+              keyVariants({
+                deprecated,
+              }),
+            )}
+          >
+            {name}
+            {!required && '?'}
+          </code>
+        </span>
+        {typeDescriptionLink ? (
+          <Link href={typeDescriptionLink} className="underline @max-xl:hidden">
+            {type}
+          </Link>
+        ) : (
+          <span className="@max-xl:hidden">{type}</span>
+        )}
+        <ChevronDown className="absolute end-2 size-4 text-fd-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <div className="grid grid-cols-[1fr_3fr] gap-x-2 gap-y-4 text-sm p-3 overflow-auto fd-scroll-container border-t">
+          <div className="text-sm prose col-span-full prose-no-margin empty:hidden">
+            {description}
+          </div>
+          {typeDescription && (
+            <>
+              <p className={cn(fieldVariants())}>Type</p>
+              <p className="my-auto not-prose">{typeDescription}</p>
+            </>
+          )}
+          {defaultValue && (
+            <>
+              <p className={cn(fieldVariants())}>Default</p>
+              <p className="my-auto not-prose">{defaultValue}</p>
+            </>
+          )}
+          {parameters.length > 0 && (
+            <>
+              <p className={cn(fieldVariants())}>Parameters</p>
+              <div className="flex flex-col gap-2">
+                {parameters.map((param) => (
+                  <div
+                    key={param.name}
+                    className="inline-flex items-center gap-1"
+                  >
+                    <p className="font-medium not-prose">{param.name} -</p>
+                    <div className="text-sm prose prose-no-margin">
+                      {param.description}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+          {returns && (
+            <>
+              <p className={cn(fieldVariants())}>Returns</p>
+              <div className="my-auto text-sm prose prose-no-margin">
+                {returns}
+              </div>
+            </>
+          )}
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }

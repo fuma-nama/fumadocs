@@ -1,10 +1,12 @@
 import { type ShikiTransformer } from 'shiki';
 
-export interface CodeBlockIcon {
-  viewBox: string;
-  fill: string;
-  d: string;
-}
+export type CodeBlockIcon =
+  | {
+      viewBox: string;
+      fill: string;
+      d: string;
+    }
+  | string;
 
 const defaultShortcuts: Record<string, string> = {
   js: 'javascript',
@@ -156,7 +158,10 @@ export function transformerIcon(options: IconOptions = {}): ShikiTransformer {
       const icon = iconName in icons ? icons[iconName] : defaultIcon;
 
       if (icon) {
-        pre.properties.icon = `<svg viewBox="${icon.viewBox}"><path d="${icon.d}" fill="${icon.fill}" /></svg>`;
+        pre.properties.icon =
+          typeof icon === 'string'
+            ? icon
+            : `<svg viewBox="${icon.viewBox}"><path d="${icon.d}" fill="${icon.fill}" /></svg>`;
       }
 
       return pre;

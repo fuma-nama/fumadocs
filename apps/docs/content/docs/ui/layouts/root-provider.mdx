@@ -8,8 +8,22 @@ for search dialog. It should be located at the root layout.
 
 ## Usage
 
-```jsx
+```jsx tab="Next.js"
 import { RootProvider } from 'fumadocs-ui/provider';
+
+export default function Layout({ children }) {
+  return (
+    <html lang="en">
+      <body>
+        <RootProvider>{children}</RootProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+```jsx tab="Others"
+import { RootProvider } from 'fumadocs-ui/provider/base';
 
 export default function Layout({ children }) {
   return (

@@ -5,15 +5,20 @@ description: Auto-generated type table
 
 <Wrapper>
 
-<div className="bg-fd-background p-4 rounded-xl">
-
 <AutoTypeTable name="AutoTypeTableExample" type={`export interface AutoTypeTableExample {
     /**
      * Markdown syntax like links, \`code\` are supported.
      *
      * See https://fumadocs.vercel.app/docs/ui/components/type-table
      */
-    name: string;
+    name: boolean | null;
+
+    /**
+    * @param name - user name.
+    * @param allowNull - is null value allowed.
+    * @returns user ID
+    **/
+    fn: (name: string, allowNull?: boolean) => string
 
     /**
     * We love Shiki.
@@ -21,12 +26,11 @@ description: Auto-generated type table
     * \`\`\`ts
     * console.log("Hello World, powered by Shiki");
     * \`\`\`
+    * @default { a: "test" }
     */
-    options: Partial<{ a: unknown }>;
+    options?: Partial<{ a: unknown }>;
 
 }`} />
-
-</div>
 
 </Wrapper>
 
@@ -40,8 +44,8 @@ It generates a table for your docs based on TypeScript definitions.
 
 ## Usage
 
-```package-install
-fumadocs-typescript
+```npm
+npm i fumadocs-typescript
 ```
 
 Initialize the TypeScript compiler and add it as a MDX component.
@@ -124,19 +128,29 @@ export interface MyInterface {
 }
 ```
 
-### References
+## TypeScript Compiler
 
-<auto-type-table path="../props.ts" name="AutoTypeTableProps" />
+Under the hood, it uses the [Typescript Compiler API](https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API) to extract type information.
+Your `tsconfig.json` file in the current working directory will be loaded.
+
+You can change the compiler settings from [`createGenerator()`](/docs/ui/typescript).
+
+```ts
+import { createGenerator } from 'fumadocs-typescript';
+
+const generator = createGenerator({
+  tsconfigPath: './tsconfig.json',
+  // where to resolve relative paths (normally cwd)
+  basePath: './',
+  // disable file system cache
+  cache: false,
+});
+```
 
 ### File System
 
 It relies on the file system, hence, the page referencing this component must be built in **build time**. Rendering the component on serverless runtime may cause problems.
 
-### Deep Dive
+## References
 
-Under the hood, it uses the [Typescript Compiler API](https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API) to extract type information.
-Your `tsconfig.json` file in the current working directory will be loaded.
-
-To change the compiler settings, pass a `options` prop to the component.
-
-Learn more about [Typescript Docs Generation](/docs/ui/typescript).
+<auto-type-table path="../props.ts" name="AutoTypeTableProps" />

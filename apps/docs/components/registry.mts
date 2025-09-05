@@ -53,6 +53,20 @@ export const registry: Registry = {
   },
   components: [
     {
+      name: 'graph-view',
+      description: 'A graph to display relationships of all pages',
+      files: [
+        {
+          type: 'components',
+          path: 'components/graph-view.tsx',
+        },
+        {
+          type: 'lib',
+          path: 'lib/build-graph.ts',
+        },
+      ],
+    },
+    {
       name: 'ai/search',
       title: 'AI Search (Next.js Only)',
       description:

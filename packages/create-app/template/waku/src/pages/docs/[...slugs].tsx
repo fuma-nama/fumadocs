@@ -1,4 +1,4 @@
-import { source } from '../../source';
+import { source } from '@/lib/source';
 import { PageProps } from 'waku/router';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import {
@@ -24,7 +24,7 @@ export default function DocPage({ slugs }: PageProps<'/docs/[...slugs]'>) {
     );
   }
 
-  const MDX = page.data.default;
+  const MDX = page.data.body;
   return (
     <DocsPage toc={page.data.toc}>
       <DocsTitle>{page.data.title}</DocsTitle>
@@ -41,7 +41,9 @@ export default function DocPage({ slugs }: PageProps<'/docs/[...slugs]'>) {
 }
 
 export async function getConfig() {
-  const pages = source.getPages().map((page) => page.slugs);
+  const pages = source
+    .generateParams()
+    .map((item) => (item.lang ? [item.lang, ...item.slug] : item.slug));
 
   return {
     render: 'static' as const,
