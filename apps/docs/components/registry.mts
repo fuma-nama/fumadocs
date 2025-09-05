@@ -19,6 +19,12 @@ export const registry: Registry = {
   name: 'fumadocs',
   packageJson: './package.json',
   tsconfigPath: './tsconfig.json',
+  onUnknownFile(absolutePath) {
+    const filePath = path.relative(baseDir, absolutePath);
+
+    // source object is external
+    if (filePath === 'lib/source.ts') return false;
+  },
   onResolve(ref) {
     if (ref.type === 'file') {
       const filePath = path.relative(baseDir, ref.file);
