@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 15.7.9
+
+### Patch Changes
+
+- d135efd: `transformerIcon` supports SVG string to extend codeblock icons
+- 4082acc: Expose `highlightHast` API
+
 ## 15.7.8
 
 ### Patch Changes
