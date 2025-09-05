@@ -6,7 +6,7 @@
       {
         "name": "name",
         "description": "",
-        "tags": {},
+        "tags": [],
         "type": "string",
         "simplifiedType": "string",
         "required": true,
@@ -15,11 +15,14 @@
       {
         "name": "age",
         "description": "",
-        "tags": {
-          "defaultValue": "4"
-        },
-        "type": "number",
-        "simplifiedType": "number | undefined",
+        "tags": [
+          {
+            "name": "defaultValue",
+            "text": "4"
+          }
+        ],
+        "type": "number | undefined",
+        "simplifiedType": "number",
         "required": false,
         "deprecated": false
       }
@@ -32,7 +35,7 @@
       {
         "name": "name",
         "description": "",
-        "tags": {},
+        "tags": [],
         "type": "string",
         "simplifiedType": "string",
         "required": true,
@@ -41,18 +44,21 @@
       {
         "name": "age",
         "description": "",
-        "tags": {
-          "defaultValue": "4"
-        },
-        "type": "number",
-        "simplifiedType": "number | undefined",
+        "tags": [
+          {
+            "name": "defaultValue",
+            "text": "4"
+          }
+        ],
+        "type": "number | undefined",
+        "simplifiedType": "number",
         "required": false,
         "deprecated": false
       },
       {
         "name": "generic",
         "description": "",
-        "tags": {},
+        "tags": [],
         "type": "GenericType<string, string, string>",
         "simplifiedType": "object",
         "required": true,
@@ -67,10 +73,16 @@
       {
         "name": "name",
         "description": "The name of player",
-        "tags": {
-          "see": "https://fumadocs.vercel.app",
-          "defaultValue": "Henry"
-        },
+        "tags": [
+          {
+            "name": "see",
+            "text": "https://fumadocs.vercel.app"
+          },
+          {
+            "name": "defaultValue",
+            "text": "Henry"
+          }
+        ],
         "type": "string",
         "simplifiedType": "string",
         "required": true,
@@ -79,12 +91,32 @@
       {
         "name": "age",
         "description": "",
-        "tags": {
-          "example": "```js\nconsole.log(\"Hello World\")\n```",
-          "remarks": "`timestamp`\nReturned by API"
-        },
+        "tags": [
+          {
+            "name": "example",
+            "text": "```js\nconsole.log(\"Hello World\")\n```"
+          },
+          {
+            "name": "remarks",
+            "text": "`timestamp`\nReturned by API"
+          }
+        ],
         "type": "timestamp",
         "simplifiedType": "number",
+        "required": true,
+        "deprecated": false
+      },
+      {
+        "name": "privateValue",
+        "description": "",
+        "tags": [
+          {
+            "name": "internal",
+            "text": ""
+          }
+        ],
+        "type": "string",
+        "simplifiedType": "string",
         "required": true,
         "deprecated": false
       }

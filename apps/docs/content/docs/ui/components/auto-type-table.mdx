@@ -11,7 +11,14 @@ description: Auto-generated type table
      *
      * See https://fumadocs.vercel.app/docs/ui/components/type-table
      */
-    name: string;
+    name: boolean | null;
+
+    /**
+    * @param name - user name.
+    * @param allowNull - is null value allowed.
+    * @returns user ID
+    **/
+    fn: (name: string, allowNull?: boolean) => string
 
     /**
     * We love Shiki.
@@ -21,7 +28,7 @@ description: Auto-generated type table
     * \`\`\`
     * @default { a: "test" }
     */
-    options: Partial<{ a: unknown }>;
+    options?: Partial<{ a: unknown }>;
 
 }`} />
 

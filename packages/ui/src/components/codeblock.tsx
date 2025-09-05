@@ -100,7 +100,7 @@ export function CodeBlock({
         inTab ? 'bg-fd-secondary' : 'my-4 bg-fd-card',
         keepBackground && 'bg-(--shiki-light-bg) dark:bg-(--shiki-dark-bg)',
 
-        'shiki relative border shadow-md rounded-xl outline-none not-prose overflow-hidden text-sm',
+        'shiki relative border shadow-sm rounded-xl outline-none not-prose overflow-hidden text-sm',
         props.className,
       )}
     >
@@ -201,7 +201,7 @@ export function CodeBlockTabs({ ref, ...props }: ComponentProps<typeof Tabs>) {
       {...props}
       className={cn(
         'bg-fd-card rounded-xl border',
-        nested ? 'shadow-sm' : 'my-4',
+        !nested && 'my-4',
         props.className,
       )}
     >

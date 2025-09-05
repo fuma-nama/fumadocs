@@ -28,9 +28,14 @@ export interface DocEntry {
   type: string;
   simplifiedType: string;
 
-  tags: Record<string, string>;
+  tags: RawTag[];
   required: boolean;
   deprecated: boolean;
+}
+
+export interface RawTag {
+  name: string;
+  text: string;
 }
 
 interface EntryContext {
@@ -201,16 +206,21 @@ function getDocEntry(
     .getTypeChecker()
     .getTypeOfSymbolAtLocation(prop, context.declaration);
   const isOptional = prop.isOptional();
-  const tags = Object.fromEntries(
-    prop
-      .getJsDocTags()
-      .map((tag) => [tag.getName(), ts.displayPartsToString(tag.getText())]),
+  const tags = prop.getJsDocTags().map(
+    (tag) =>
+      ({
+        name: tag.getName(),
+        text: ts.displayPartsToString(tag.getText()),
+      }) satisfies RawTag,
   );
 
-  let type = getFullType(subType, isOptional);
+  let type = getFullType(subType);
 
-  if ('remarks' in tags) {
-    type = /^`(?<name>.+)`/.exec(tags.remarks)?.[1] ?? type;
+  for (const tag of tags) {
+    if (tag.name !== 'remarks') continue;
+
+    // replace type with @remarks
+    type = /^`(?<name>.+)`/.exec(tag.text)?.[1] ?? type;
   }
 
   const entry: DocEntry = {
@@ -222,11 +232,13 @@ function getDocEntry(
     ),
     tags,
     type,
-    simplifiedType: getSimpleForm(subType, program.getTypeChecker()),
+    simplifiedType: getSimpleForm(
+      subType,
+      program.getTypeChecker(),
+      isOptional,
+    ),
     required: !isOptional,
-    deprecated: prop
-      .getJsDocTags()
-      .some((tag) => tag.getName() === 'deprecated'),
+    deprecated: tags.some((tag) => tag.name === 'deprecated'),
   };
 
   transform?.call(context, entry, subType, prop);
@@ -234,25 +246,13 @@ function getDocEntry(
   return entry;
 }
 
-function getFullType(type: Type, isOptional: boolean): string {
-  if (type.isUnion() && isOptional) {
-    const t = type.compilerType as ts.UnionType;
-    const originalTypes = t.types;
-
-    t.types = t.types.filter((v) => v.flags !== ts.TypeFlags.Undefined);
-    const result = getFullType(type, false);
-    t.types = originalTypes;
-
-    return result;
-  }
-
-  let typeName = type
-    .getNonNullableType()
-    .getText(
-      undefined,
-      ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope &
-        ts.TypeFormatFlags.NoTruncation,
-    );
+function getFullType(type: Type): string {
+  let typeName = type.getText(
+    undefined,
+    ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope |
+      ts.TypeFormatFlags.NoTruncation |
+      ts.TypeFormatFlags.InTypeAlias,
+  );
 
   if (type.getAliasSymbol() && type.getAliasTypeArguments().length === 0) {
     typeName = type.getAliasSymbol()?.getEscapedName() ?? typeName;

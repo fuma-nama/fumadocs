@@ -4,12 +4,17 @@ import { ChevronDown } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import { cva } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
-import { type ReactNode } from 'react';
+import { type ReactNode, useState } from 'react';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
+
+export interface ParameterNode {
+  name: string;
+  description: ReactNode;
+}
 
 export interface TypeNode {
   /**
@@ -36,6 +41,10 @@ export interface TypeNode {
 
   required?: boolean;
   deprecated?: boolean;
+
+  parameters?: ParameterNode[];
+
+  returns?: ReactNode;
 }
 
 const keyVariants = cva('text-fd-primary', {
@@ -46,10 +55,12 @@ const keyVariants = cva('text-fd-primary', {
   },
 });
 
+const fieldVariants = cva('text-fd-muted-foreground not-prose');
+
 export function TypeTable({ type }: { type: Record<string, TypeNode> }) {
   return (
     <div className="@container flex flex-col p-1 bg-fd-card text-fd-card-foreground rounded-2xl border my-6 text-sm overflow-hidden">
-      <div className="flex flex-row font-medium items-center px-4 py-1 not-prose text-fd-muted-foreground">
+      <div className="flex font-medium items-center px-3 py-1 not-prose text-fd-muted-foreground">
         <p className="w-[25%]">Prop</p>
         <p className="@max-xl:hidden">Type</p>
       </div>
@@ -60,58 +71,99 @@ export function TypeTable({ type }: { type: Record<string, TypeNode> }) {
   );
 }
 
-function Item({ name, item }: { name: string; item: TypeNode }) {
+function Item({
+  name,
+  item: {
+    parameters = [],
+    description,
+    required = false,
+    deprecated,
+    typeDescription,
+    default: defaultValue,
+    type,
+    typeDescriptionLink,
+    returns,
+  },
+}: {
+  name: string;
+  item: TypeNode;
+}) {
+  const [open, setOpen] = useState(false);
+
   return (
-    <Collapsible className="rounded-xl border shadow-sm overflow-hidden transition-all data-[state=open]:bg-fd-muted data-[state=closed]:border-transparent not-last:data-[state=open]:mb-4">
+    <Collapsible
+      open={open}
+      onOpenChange={setOpen}
+      className={cn(
+        'rounded-xl border overflow-hidden transition-all',
+        open
+          ? 'shadow-sm bg-fd-background not-last:mb-2'
+          : 'border-transparent',
+      )}
+    >
       <CollapsibleTrigger className="relative flex flex-row items-center w-full group text-start px-3 py-2 not-prose hover:bg-fd-accent">
         <span className="pe-2 min-w-fit font-medium w-[25%]">
           <code
             className={cn(
               keyVariants({
-                deprecated: item.deprecated,
+                deprecated,
               }),
             )}
           >
             {name}
-            {!item.required && '?'}
+            {!required && '?'}
           </code>
         </span>
-        {item.typeDescriptionLink ? (
-          <Link
-            href={item.typeDescriptionLink}
-            className="underline @max-xl:hidden"
-          >
-            {item.type}
+        {typeDescriptionLink ? (
+          <Link href={typeDescriptionLink} className="underline @max-xl:hidden">
+            {type}
           </Link>
         ) : (
-          <span className="@max-xl:hidden">{item.type}</span>
+          <span className="@max-xl:hidden">{type}</span>
         )}
         <ChevronDown className="absolute end-2 size-4 text-fd-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div className="grid grid-cols-1 gap-y-4 text-sm p-3 overflow-auto fd-scroll-container prose-no-margin @xl:grid-cols-[1fr_3fr]">
-          {item.description && (
+        <div className="grid grid-cols-[1fr_3fr] gap-y-4 text-sm p-3 overflow-auto fd-scroll-container border-t">
+          <div className="text-sm prose col-span-full prose-no-margin empty:hidden">
+            {description}
+          </div>
+          {typeDescription && (
             <>
-              <p className="text-fd-muted-foreground font-medium not-prose">
-                Description
-              </p>
-              <div className="text-sm my-auto prose">{item.description}</div>
+              <p className={cn(fieldVariants())}>Type</p>
+              <p className="my-auto not-prose">{typeDescription}</p>
             </>
           )}
-          {item.typeDescription && (
+          {defaultValue && (
             <>
-              <p className="text-fd-muted-foreground font-medium not-prose">
-                Type
-              </p>
-              <p className="my-auto not-prose">{item.typeDescription}</p>
+              <p className={cn(fieldVariants())}>Default</p>
+              <p className="my-auto not-prose">{defaultValue}</p>
             </>
           )}
-          {item.default && (
+          {parameters.length > 0 && (
             <>
-              <p className="text-fd-muted-foreground font-medium not-prose">
-                Default
-              </p>
-              <p className="my-auto not-prose">{item.default}</p>
+              <p className={cn(fieldVariants())}>Parameters</p>
+              <div className="flex flex-col gap-2">
+                {parameters.map((param) => (
+                  <div
+                    key={param.name}
+                    className="inline-flex items-center gap-1"
+                  >
+                    <p className="font-medium not-prose">{param.name} -</p>
+                    <div className="text-sm prose prose-no-margin">
+                      {param.description}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+          {returns && (
+            <>
+              <p className={cn(fieldVariants())}>Returns</p>
+              <div className="my-auto text-sm prose prose-no-margin">
+                {returns}
+              </div>
             </>
           )}
         </div>

@@ -11,9 +11,7 @@ function _createMdxContent(props) {
     children: _jsx(_Fragment, {
       children: _jsx(TypeTable, {
         type: {
-          "name": {
-            "default": "Henry",
-            "required": true,
+          name: {
             type: _jsx(_components.span, {
               className: "shiki",
               children: _jsx(_components.code, {
@@ -38,15 +36,26 @@ function _createMdxContent(props) {
                 })
               })
             }),
+            required: true,
+            default: _jsx(_components.span, {
+              className: "shiki",
+              children: _jsx(_components.code, {
+                children: _jsx(_components.span, {
+                  style: {
+                    "--shiki-light": "#24292E",
+                    "--shiki-dark": "#E1E4E8"
+                  },
+                  children: "Henry"
+                })
+              })
+            }),
             description: _jsx(_Fragment, {
               children: _jsx(_components.p, {
                 children: "The name of player"
               })
             })
           },
-          "age": {
-            "default": undefined,
-            "required": true,
+          age: {
             type: _jsx(_components.span, {
               className: "shiki",
               children: _jsx(_components.code, {
@@ -70,7 +79,35 @@ function _createMdxContent(props) {
                   children: "timestamp"
                 })
               })
-            })
+            }),
+            required: true
+          },
+          privateValue: {
+            type: _jsx(_components.span, {
+              className: "shiki",
+              children: _jsx(_components.code, {
+                children: _jsx(_components.span, {
+                  style: {
+                    "--shiki-light": "#24292E",
+                    "--shiki-dark": "#E1E4E8"
+                  },
+                  children: "string"
+                })
+              })
+            }),
+            typeDescription: _jsx(_components.span, {
+              className: "shiki",
+              children: _jsx(_components.code, {
+                children: _jsx(_components.span, {
+                  style: {
+                    "--shiki-light": "#24292E",
+                    "--shiki-dark": "#E1E4E8"
+                  },
+                  children: "string"
+                })
+              })
+            }),
+            required: true
           }
         }
       })

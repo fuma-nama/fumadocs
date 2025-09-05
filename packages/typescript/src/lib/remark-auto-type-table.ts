@@ -2,10 +2,10 @@ import type { Root } from 'mdast';
 import type { Nodes } from 'hast';
 import type { Transformer } from 'unified';
 import type {
+  Expression,
   ExpressionStatement,
   ObjectExpression,
   Program,
-  Property,
 } from 'estree';
 import { createGenerator, type DocEntry, type Generator } from '@/lib/base';
 import { renderMarkdownToHast, renderTypeToHast } from '@/markdown';
@@ -17,58 +17,104 @@ import {
 } from '@/lib/type-table';
 import { toEstree } from 'hast-util-to-estree';
 import { dirname } from 'node:path';
+import { type ParameterTag, parseTags } from '@/lib/parse-tags';
 
-async function mapProperty(
-  entry: DocEntry,
+function objectBuilder() {
+  const out: ObjectExpression = {
+    type: 'ObjectExpression',
+    properties: [],
+  };
+
+  return {
+    addExpressionNode(key: string, expression: Expression) {
+      out.properties.push({
+        type: 'Property',
+        method: false,
+        shorthand: false,
+        computed: false,
+        key: {
+          type: 'Identifier',
+          name: key,
+        },
+        kind: 'init',
+        value: expression,
+      });
+    },
+    addJsxProperty(key: string, hast: Nodes) {
+      const estree = toEstree(hast, {
+        elementAttributeNameCase: 'react',
+      }).body[0] as ExpressionStatement;
+
+      this.addExpressionNode(key, estree.expression);
+    },
+    build() {
+      return out;
+    },
+  };
+}
+
+async function buildTypeProp(
+  entries: DocEntry[],
   {
     renderMarkdown = renderMarkdownToHast,
     renderType = renderTypeToHast,
   }: RemarkAutoTypeTableOptions,
-): Promise<Property> {
-  const value = valueToEstree({
-    required: entry.required,
-  }) as ObjectExpression;
+): Promise<ObjectExpression> {
+  async function onItem(entry: DocEntry) {
+    const node = objectBuilder();
+    node.addJsxProperty('type', await renderType(entry.simplifiedType));
+    node.addJsxProperty('typeDescription', await renderType(entry.type));
+    node.addExpressionNode('required', valueToEstree(entry.required));
 
-  function addJsxProperty(key: string, hast: Nodes) {
-    const estree = toEstree(hast, {
-      elementAttributeNameCase: 'react',
-    }).body[0] as ExpressionStatement;
+    const tags = parseTags(entry.tags);
+    if (tags.default)
+      node.addJsxProperty('default', await renderType(tags.default));
 
-    value.properties.push({
-      type: 'Property',
-      method: false,
-      shorthand: false,
-      computed: false,
-      key: {
-        type: 'Identifier',
-        name: key,
-      },
-      kind: 'init',
-      value: estree.expression,
-    });
+    if (tags.returns)
+      node.addJsxProperty('returns', await renderMarkdown(tags.returns));
+
+    if (tags.params) {
+      node.addExpressionNode('parameters', {
+        type: 'ArrayExpression',
+        elements: await Promise.all(tags.params.map(onParam)),
+      });
+    }
+
+    if (entry.description) {
+      node.addJsxProperty(
+        'description',
+        await renderMarkdown(entry.description),
+      );
+    }
+
+    return node.build();
   }
 
-  addJsxProperty('type', await renderType(entry.simplifiedType));
-  addJsxProperty('typeDescription', await renderType(entry.type));
-  const defaultValue = entry.tags.default ?? entry.tags.defaultValue;
-  if (defaultValue) addJsxProperty('default', await renderType(defaultValue));
+  async function onParam(param: ParameterTag) {
+    const node = objectBuilder();
+    node.addExpressionNode('name', valueToEstree(param.name));
+    if (param.description)
+      node.addJsxProperty(
+        'description',
+        await renderMarkdown(param.description),
+      );
 
-  if (entry.description) {
-    addJsxProperty('description', await renderMarkdown(entry.description));
+    return node.build();
   }
 
-  return {
-    type: 'Property',
-    method: false,
-    shorthand: false,
-    computed: false,
-    key: {
-      type: 'Literal',
-      value: entry.name,
-    },
-    kind: 'init',
-    value,
-  };
+  const prop = objectBuilder();
+  const output = await Promise.all(
+    entries.map(async (entry) => ({
+      name: entry.name,
+      node: await onItem(entry),
+    })),
+  );
+
+  for (const node of output) {
+    prop.addExpressionNode(node.name, node.node);
+  }
+
+  return prop.build();
 }
 
 export interface RemarkAutoTypeTableOptions {
@@ -141,10 +187,6 @@ export function remarkAutoTypeTable(
         );
 
         const rendered = output.map(async (doc) => {
-          const properties = await Promise.all(
-            doc.entries.map((entry) => mapProperty(entry, config)),
-          );
-
           return {
             type: 'mdxJsxFlowElement',
             name: outputName,
@@ -162,10 +204,7 @@ export function remarkAutoTypeTable(
                       body: [
                         {
                           type: 'ExpressionStatement',
-                          expression: {
-                            type: 'ObjectExpression',
-                            properties,
-                          },
+                          expression: await buildTypeProp(doc.entries, config),
                         },
                       ],
                     } satisfies Program,

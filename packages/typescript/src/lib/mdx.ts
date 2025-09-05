@@ -2,8 +2,8 @@ import * as path from 'node:path';
 import {
   type DocEntry,
   type GeneratedDoc,
-  type Generator,
   type GenerateOptions,
+  type Generator,
 } from './base';
 
 interface Templates {
@@ -39,8 +39,8 @@ ${doc.description}
 
 ${c.description || 'No Description'}
 
-${Object.entries(c.tags)
-  .map(([tag, value]) => `- ${tag}:\n${replaceJsDocLinks(value)}`)
+${c.tags
+  .map((tag) => `- ${tag.name}:\n${replaceJsDocLinks(tag.text)}`)
   .join('\n')}
 
 </div>`,

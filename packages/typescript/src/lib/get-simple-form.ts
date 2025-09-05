@@ -1,22 +1,35 @@
 import * as ts from 'ts-morph';
 
-function simplifyType(type: ts.Type, checker: ts.TypeChecker): string {
-  // Handle union types
+export function getSimpleForm(
+  type: ts.Type,
+  checker: ts.TypeChecker,
+  noUndefined = false,
+): string {
+  if (type.isUndefined() && noUndefined) return '';
+
+  const alias = type.getAliasSymbol();
+  if (alias && type.getAliasTypeArguments().length === 0) {
+    return alias.getEscapedName();
+  }
+
   if (type.isUnion()) {
     const types: string[] = [];
     for (const t of type.getUnionTypes()) {
-      const str = simplifyType(t, checker);
-      if (str !== 'never') types.unshift(str);
+      const str = getSimpleForm(t, checker, noUndefined);
+      if (str.length > 0 && str !== 'never') types.unshift(str);
     }
 
-    return types.length > 0 ? types.join(' | ') : 'never';
+    return types.length > 0
+      ? // boolean | null will become true | false | null, need to ensure it's still returned as boolean
+        types.join(' | ').replace('true | false', 'boolean')
+      : 'never';
   }
 
-  // Handle intersection types
   if (type.isIntersection()) {
     const types: string[] = [];
     for (const t of type.getIntersectionTypes()) {
-      types.unshift(simplifyType(t, checker));
+      const str = getSimpleForm(t, checker, noUndefined);
+      if (str.length > 0 && str !== 'never') types.unshift(str);
     }
 
     return types.join(' & ');
@@ -25,15 +38,10 @@ function simplifyType(type: ts.Type, checker: ts.TypeChecker): string {
   if (type.isTuple()) {
     const elements = type
       .getTupleElements()
-      .map((t) => simplifyType(t, checker))
+      .map((t) => getSimpleForm(t, checker))
       .join(', ');
 
     return `[${elements}]`;
-  }
-
-  const alias = type.getAliasSymbol();
-  if (alias && type.getAliasTypeArguments().length === 0) {
-    return alias.getEscapedName();
   }
 
   if (type.isArray() || type.isReadonlyArray()) {
@@ -48,9 +56,9 @@ function simplifyType(type: ts.Type, checker: ts.TypeChecker): string {
     return 'object';
   }
 
-  return type.getText();
-}
-
-export function getSimpleForm(type: ts.Type, checker: ts.TypeChecker): string {
-  return simplifyType(type, checker);
+  return type.getText(
+    undefined,
+    ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope |
+      ts.TypeFormatFlags.InTypeAlias,
+  );
 }
