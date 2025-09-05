@@ -1,5 +1,15 @@
 # next-docs-ui
 
+## 15.7.9
+
+### Patch Changes
+
+- 45c7531: Type Table: Support displaying parameters & return types
+- 4082acc: Redesign Type Table
+- Updated dependencies [d135efd]
+- Updated dependencies [4082acc]
+  - fumadocs-core@15.7.9
+
 ## 15.7.8
 
 ### Patch Changes
