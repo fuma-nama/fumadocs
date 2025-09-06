@@ -9,7 +9,43 @@ You can make your docs site more AI-friendly with dedicated docs content for lar
 
 First, make a `getLLMText` function that converts pages into static MDX content:
 
-<include meta='title="lib/get-llm-text.ts"'>./get-llm-text.ts</include>
+<include meta='tab="Next.js" meta='title="app/lib/get-llm-text.ts"'>
+  ./get-llm-text.ts
+</include>
+
+```ts tab="React Router" title="app/routes/llms-full.ts"
+// make sure to include this route in `routes.ts` & pre-rendering!
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import type { InferPageType } from 'fumadocs-core/source';
+import { remarkInclude } from 'fumadocs-mdx/config';
+import { remark } from 'remark';
+import remarkGfm from 'remark-gfm';
+import remarkMdx from 'remark-mdx';
+import type { source } from '@/lib/source';
+
+const processor = remark().use(remarkMdx).use(remarkInclude).use(remarkGfm);
+
+function stripFrontmatter(content: string): string {
+  const frontmatterRegex = /^---\s*\n.*?\n---\s*\n/s;
+  return content.replace(frontmatterRegex, '');
+}
+
+export async function getLLMText(page: InferPageType<typeof source>) {
+  const filepath = join(process.cwd(), 'content', 'docs', page.path);
+  const rawContent = await readFile(filepath, 'utf-8');
+  const content = stripFrontmatter(rawContent);
+  const processed = await processor.process({
+    path: page.path,
+    value: content,
+  });
+
+  return `# ${page.data.title}
+URL: ${page.url}
+
+${processed.value}`;
+}
+```
 
 > Modify it to include other remark plugins.
 
