@@ -12,6 +12,7 @@ import type { Document, TagObject } from '@/types';
 import { dump } from 'js-yaml';
 import type { NoReference } from '@/utils/schema';
 import Slugger from 'github-slugger';
+import { removeUndefined } from '@/utils/remove-undefined';
 
 export interface GenerateOptions {
   /**
@@ -231,7 +232,7 @@ export function generateDocument(
 ): string {
   const { addGeneratedComment = true, imports } = options;
   const out: string[] = [];
-  const banner = dump(frontmatter).trim();
+  const banner = dump(removeUndefined(frontmatter as object)).trimEnd();
   if (banner.length > 0) out.push(`---\n${banner}\n---`);
 
   if (addGeneratedComment) {
