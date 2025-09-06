@@ -62,8 +62,8 @@
     },
     "./i18n": {
       "browser": "./dist/i18n/index.js",
-      "import": "./dist/i18n/index.server.js",
-      "types": "./dist/i18n/index.server.d.ts"
+      "import": "./dist/i18n/legacy.js",
+      "types": "./dist/i18n/legacy.d.ts"
     },
     "./i18n/middleware": {
       "import": "./dist/i18n/middleware.js",
