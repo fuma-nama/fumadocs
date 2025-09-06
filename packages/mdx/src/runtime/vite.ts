@@ -9,6 +9,7 @@ import type {
   VirtualFile,
 } from 'fumadocs-core/source';
 import type { CompiledMDXProperties } from '@/utils/build-mdx';
+import path from 'node:path';
 
 export type CompiledMDXFile<Frontmatter> = CompiledMDXProperties<Frontmatter> &
   Record<string, unknown>;
@@ -39,7 +40,15 @@ type MDXFileToPageDataLazy<Frontmatter> = Override<
   }
 >;
 
+type DocMap<Frontmatter> = Record<
+  string,
+  (() => Promise<CompiledMDXFile<Frontmatter>>) & { base: string }
+>;
+
+type MetaMap<Data> = Record<string, (() => Promise<Data>) & { base: string }>;
+
 interface LazyDocMap<Frontmatter> {
+  base: string;
   head: Record<string, () => Promise<Frontmatter>>;
   body: Record<string, () => Promise<CompiledMDXFile<Frontmatter>>>;
 }
@@ -47,18 +56,17 @@ interface LazyDocMap<Frontmatter> {
 export function fromConfig<Config>(): {
   doc: <Name extends keyof Config>(
     name: Name,
+    base: string,
     glob: Record<string, () => Promise<unknown>>,
   ) => Config[Name] extends
     | DocCollection<infer Schema>
     | DocsCollection<infer Schema>
-    ? Record<
-        string,
-        () => Promise<CompiledMDXFile<StandardSchemaV1.InferOutput<Schema>>>
-      >
+    ? DocMap<StandardSchemaV1.InferOutput<Schema>>
     : never;
 
   docLazy: <Name extends keyof Config>(
     name: Name,
+    base: string,
     headGlob: Record<string, () => Promise<unknown>>,
     bodyGlob: Record<string, () => Promise<unknown>>,
   ) => Config[Name] extends
@@ -69,16 +77,17 @@ export function fromConfig<Config>(): {
 
   meta: <Name extends keyof Config>(
     name: Name,
+    base: string,
     glob: Record<string, () => Promise<unknown>>,
   ) => Config[Name] extends
     | MetaCollection<infer Schema>
     | DocsCollection<StandardSchemaV1, infer Schema>
-    ? Record<string, () => Promise<StandardSchemaV1.InferOutput<Schema>>>
+    ? MetaMap<StandardSchemaV1.InferOutput<Schema>>
     : never;
 
   sourceAsync: <DocOut extends PageData, MetaOut extends MetaData>(
-    doc: Record<string, () => Promise<CompiledMDXFile<DocOut>>>,
-    meta: Record<string, () => Promise<MetaOut>>,
+    doc: DocMap<DocOut>,
+    meta: MetaMap<MetaOut>,
   ) => Promise<
     Source<{
       pageData: MDXFileToPageData<DocOut>;
@@ -88,7 +97,7 @@ export function fromConfig<Config>(): {
 
   sourceLazy: <DocOut extends PageData, MetaOut extends MetaData>(
     doc: LazyDocMap<DocOut>,
-    meta: Record<string, () => Promise<MetaOut>>,
+    meta: MetaMap<MetaOut>,
   ) => Promise<
     Source<{
       pageData: MDXFileToPageDataLazy<DocOut>;
@@ -96,18 +105,20 @@ export function fromConfig<Config>(): {
     }>
   >;
 } {
-  function normalize(entries: Record<string, unknown>) {
-    const out: Record<string, unknown> = {};
+  function normalize<T>(entries: Record<string, T>, base?: string) {
+    const out: Record<string, T> = {};
+
     for (const k in entries) {
       const mappedK = k.startsWith('./') ? k.slice(2) : k;
+
+      if (base) Object.assign(entries[k] as object, { base });
       out[mappedK] = entries[k];
     }
+
     return out;
   }
 
-  function mapPageData<Frontmatter>(
-    entry: CompiledMDXFile<Frontmatter>,
-  ): MDXFileToPageData<Frontmatter> {
+  function mapPageData<Frontmatter>(entry: CompiledMDXFile<Frontmatter>) {
     const { toc, structuredData, lastModified, frontmatter } = entry;
 
     return {
@@ -135,14 +146,15 @@ export function fromConfig<Config>(): {
   }
 
   return {
-    doc(_, glob) {
-      return normalize(glob) as any;
+    doc(_, base, glob) {
+      return normalize(glob, base) as any;
     },
-    meta(_, glob) {
-      return normalize(glob) as any;
+    meta(_, base, glob) {
+      return normalize(glob, base) as any;
     },
-    docLazy(_, head, body) {
+    docLazy(_, base, head, body) {
       return {
+        base,
         head: normalize(head),
         body: normalize(body),
       } as any;
@@ -153,6 +165,7 @@ export function fromConfig<Config>(): {
           return {
             type: 'page',
             path: file,
+            absolutePath: path.join(content.base, file),
             data: mapPageData(await content()),
           } satisfies VirtualFile;
         }),
@@ -160,6 +173,7 @@ export function fromConfig<Config>(): {
           return {
             type: 'meta',
             path: file,
+            absolutePath: path.join(content.base, file),
             data: await content(),
           } satisfies VirtualFile;
         }),
@@ -173,6 +187,7 @@ export function fromConfig<Config>(): {
           return {
             type: 'page',
             path: file,
+            absolutePath: path.join(doc.base, file),
             data: mapPageDataLazy(await frontmatter(), doc.body[file]),
           } satisfies VirtualFile;
         }),
@@ -180,6 +195,7 @@ export function fromConfig<Config>(): {
           return {
             type: 'meta',
             path: file,
+            absolutePath: path.join(content.base, file),
             data: await content(),
           } satisfies VirtualFile;
         }),
@@ -205,12 +221,16 @@ export interface ClientLoaderOptions<Frontmatter, Props> {
   component: (loaded: CompiledMDXFile<Frontmatter>, props: Props) => ReactNode;
 }
 
+type ClientRenderer<Props> = Record<string, FC<Props>>;
+
 export interface ClientLoader<Frontmatter, Props> {
   preload: (path: string) => Promise<CompiledMDXFile<Frontmatter>>;
   /**
    * Get a component that renders content with `React.lazy`
    */
   getComponent: (path: string) => FC<Props>;
+
+  getRenderer: () => ClientRenderer<Props>;
 }
 
 const loaderStore = new Map<
@@ -225,12 +245,31 @@ export function createClientLoader<Frontmatter, Props = object>(
   options: ClientLoaderOptions<Frontmatter, Props>,
 ): ClientLoader<Frontmatter, Props> {
   const { id = '', component } = options;
+  let renderer: ClientRenderer<Props> | undefined;
   const store = loaderStore.get(id) ?? {
     preloaded: new Map(),
   };
   loaderStore.set(id, store);
 
-  let renderer;
+  function getRenderer() {
+    if (renderer) return renderer;
+
+    renderer = {};
+    for (const k in files) {
+      const OnDemand = lazy(async () => {
+        const loaded = await files[k]();
+        return { default: (props) => component(loaded, props) };
+      });
+
+      renderer[k] = (props: Props) => {
+        const cached = store.preloaded.get(k);
+        if (!cached) return createElement(OnDemand, props);
+        return component(cached, props);
+      };
+    }
+
+    return renderer;
+  }
 
   return {
     async preload(path) {
@@ -238,45 +277,16 @@ export function createClientLoader<Frontmatter, Props = object>(
       store.preloaded.set(path, loaded);
       return loaded;
     },
+    getRenderer,
     getComponent(path) {
-      renderer ??= toClientRenderer(files, component, {
-        cache: store.preloaded,
-      });
-      return renderer[path];
+      return getRenderer()[path];
     },
   };
 }
 
-export interface ClientRendererOptions<Frontmatter> {
-  cache?: Map<string, CompiledMDXFile<Frontmatter>>;
-}
-
-type ClientRenderer<Props> = Record<string, FC<Props>>;
-
 export function toClientRenderer<Frontmatter, Props = object>(
   files: Record<string, () => Promise<CompiledMDXFile<Frontmatter>>>,
   component: (loaded: CompiledMDXFile<Frontmatter>, props: Props) => ReactNode,
-  options: ClientRendererOptions<Frontmatter> = {},
 ): ClientRenderer<Props> {
-  const { cache } = options;
-  const renderer: ClientRenderer<Props> = {};
-
-  for (const k in files) {
-    const OnDemand = lazy(async () => {
-      const loaded = await files[k]();
-      return { default: (props) => component(loaded, props) };
-    });
-
-    if (cache) {
-      renderer[k] = (props: Props) => {
-        const cached = cache.get(k);
-        if (!cached) return createElement(OnDemand, props);
-        return component(cached, props);
-      };
-    } else {
-      renderer[k] = OnDemand;
-    }
-  }
-
-  return renderer;
+  return createClientLoader(files, { component }).getRenderer();
 }

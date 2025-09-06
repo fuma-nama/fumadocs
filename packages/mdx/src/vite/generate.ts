@@ -1,9 +1,10 @@
 import type { DocCollection, DocsCollection, MetaCollection } from '@/config';
 import { ident, toImportPath } from '@/utils/import-formatter';
-import { generateGlob } from '@/vite/generate-glob';
+import { generateGlob, getGlobBase } from '@/vite/generate-glob';
 import type { LoadedConfig } from '@/utils/config';
+import { getGlobPatterns } from '@/utils/collections';
 
-export function docs(name: string, collection: DocsCollection) {
+function docs(name: string, collection: DocsCollection) {
   const obj = [
     ident(`doc: ${doc(name, collection.docs)}`),
     ident(`meta: ${meta(name, collection.meta)}`),
@@ -12,22 +13,35 @@ export function docs(name: string, collection: DocsCollection) {
   return `{\n${obj}\n}`;
 }
 
-export function doc(name: string, collection: DocCollection) {
+function doc(name: string, collection: DocCollection) {
+  const patterns = getGlobPatterns(collection);
+  const base = getGlobBase(collection);
+  const docGlob = generateGlob(name, patterns, {
+    base,
+  });
+
   if (collection.async) {
-    return `create.docLazy("${name}", ${generateGlob(name, collection, {
+    const headBlob = generateGlob(name, patterns, {
       query: {
         only: 'frontmatter',
       },
       import: 'frontmatter',
-    })}, ${generateGlob(name, collection)})`;
+      base,
+    });
+
+    return `create.docLazy("${name}", "${base}", ${headBlob}, ${docGlob})`;
   }
 
-  return `create.doc("${name}", ${generateGlob(name, collection)})`;
+  return `create.doc("${name}", "${base}", ${docGlob})`;
 }
 
-export function meta(name: string, collection: MetaCollection) {
-  return `create.meta("${name}", ${generateGlob(name, collection, {
+function meta(name: string, collection: MetaCollection) {
+  const patterns = getGlobPatterns(collection);
+  const base = getGlobBase(collection);
+
+  return `create.meta("${name}", "${base}", ${generateGlob(name, patterns, {
     import: 'default',
+    base,
   })})`;
 }
 
