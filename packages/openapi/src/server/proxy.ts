@@ -119,7 +119,8 @@ export function createProxy(options: CreateProxyOptions = {}): Proxy {
     const headers = new Headers(res.headers);
     headers.forEach((_value, originalKey) => {
       const key = originalKey.toLowerCase();
-      if (key.startsWith('access-control-') || key === 'content-encoding') {
+
+      if (key.startsWith('access-control-')) {
         headers.delete(originalKey);
       }
     });
