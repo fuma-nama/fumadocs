@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 15.7.10
+
+### Patch Changes
+
+- c948f59: Try to workaround legacy i18n middleware under `/i18n` export without breaking changes
+
 ## 15.7.9
 
 ### Patch Changes

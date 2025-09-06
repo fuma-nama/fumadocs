@@ -1,5 +1,15 @@
 # @fuma-docs/openapi
 
+## 9.3.7
+
+### Patch Changes
+
+- 0146178: include content encoding into proxied response
+- 44a560f: Remove undefined values in generated frontmatter
+- Updated dependencies [c948f59]
+  - fumadocs-core@15.7.10
+  - fumadocs-ui@15.7.10
+
 ## 9.3.6
 
 ### Patch Changes
