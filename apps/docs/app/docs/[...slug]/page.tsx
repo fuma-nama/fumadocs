@@ -9,7 +9,7 @@ import { createMetadata } from '@/lib/metadata';
 import { source } from '@/lib/source';
 import { Wrapper } from '@/components/preview/wrapper';
 import { Mermaid } from '@/components/mdx/mermaid';
-import { Rate } from '@/components/rate';
+import { Feedback } from '@/components/feedback';
 import { onRateAction, owner, repo } from '@/lib/github';
 import {
   HoverCard,
@@ -125,7 +125,7 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
         />
         {page.data.index ? <DocsCategory url={page.url} /> : null}
       </div>
-      <Rate onRateAction={onRateAction} />
+      <Feedback onRateAction={onRateAction} />
     </DocsPage>
   );
 }

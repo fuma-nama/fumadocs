@@ -5,6 +5,7 @@ import { remarkAutoTypeTable } from 'fumadocs-typescript';
 import { remarkInclude } from 'fumadocs-mdx/config';
 import { type Page } from '@/lib/source';
 import { remarkNpm } from 'fumadocs-core/mdx-plugins';
+import fs from 'node:fs/promises';
 
 const processor = remark()
   .use(remarkMdx)
@@ -23,8 +24,8 @@ export async function getLLMText(page: Page) {
     }[page.slugs[0]] ?? page.slugs[0];
 
   const processed = await processor.process({
-    path: page.data._file.absolutePath,
-    value: page.data.content,
+    path: page.absolutePath,
+    value: await fs.readFile(page.absolutePath),
   });
 
   return `# ${category}: ${page.data.title}

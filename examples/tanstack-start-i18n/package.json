@@ -9,10 +9,10 @@
     "start": "node .output/server/index.mjs"
   },
   "dependencies": {
-    "@orama/tokenizers": "^3.1.12",
-    "@tanstack/react-router": "^1.131.30",
-    "@tanstack/react-router-devtools": "^1.131.30",
-    "@tanstack/react-start": "^1.131.30",
+    "@orama/tokenizers": "^3.1.13",
+    "@tanstack/react-router": "^1.131.35",
+    "@tanstack/react-router-devtools": "^1.131.35",
+    "@tanstack/react-start": "^1.131.35",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
@@ -20,15 +20,15 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "tailwind-merge": "^3.3.1",
-    "vite": "^7.1.3"
+    "vite": "^7.1.4"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.1.12",
-    "@types/node": "^24.3.0",
+    "@tailwindcss/vite": "^4.1.13",
+    "@types/node": "^24.3.1",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.2",
-    "tailwindcss": "^4.1.12",
+    "tailwindcss": "^4.1.13",
     "typescript": "^5.9.2",
     "vite-tsconfig-paths": "^5.1.4"
   }

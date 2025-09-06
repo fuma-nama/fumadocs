@@ -36,7 +36,7 @@ interface Result extends Feedback {
   response?: ActionResponse;
 }
 
-export function Rate({
+export function Feedback({
   onRateAction,
 }: {
   onRateAction: (url: string, feedback: Feedback) => Promise<ActionResponse>;

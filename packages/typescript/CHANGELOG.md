@@ -1,5 +1,14 @@
 # fumadocs-typescript
 
+## 4.0.8
+
+### Patch Changes
+
+- 0d55667: Enforce `peerDeps` on Fumadocs deps
+- Updated dependencies [c948f59]
+  - fumadocs-core@15.7.10
+  - fumadocs-ui@15.7.10
+
 ## 4.0.7
 
 ### Patch Changes

@@ -96,7 +96,7 @@ async function compileConfig(configPath: string, outDir: string) {
 export async function loadConfig(
   configPath: string,
   outDir: string,
-  hash: string,
+  hash?: string,
   build = false,
 ): Promise<LoadedConfig> {
   if (cache && cache.hash === hash) {
@@ -114,7 +114,7 @@ export async function loadConfig(
     );
   });
 
-  cache = { config, hash };
+  if (hash) cache = { config, hash };
   return await config;
 }
 

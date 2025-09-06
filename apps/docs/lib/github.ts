@@ -1,5 +1,5 @@
 import { App, Octokit } from 'octokit';
-import type { ActionResponse, Feedback } from '@/components/rate';
+import type { ActionResponse, Feedback } from '@/components/feedback';
 
 export const repo = 'fumadocs';
 export const owner = 'fuma-nama';

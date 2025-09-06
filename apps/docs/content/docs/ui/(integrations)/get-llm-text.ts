@@ -4,6 +4,7 @@ import remarkMdx from 'remark-mdx';
 import { remarkInclude } from 'fumadocs-mdx/config';
 import { source } from '@/lib/source';
 import type { InferPageType } from 'fumadocs-core/source';
+import fs from 'node:fs/promises';
 
 const processor = remark()
   .use(remarkMdx)
@@ -13,8 +14,8 @@ const processor = remark()
 
 export async function getLLMText(page: InferPageType<typeof source>) {
   const processed = await processor.process({
-    path: page.data._file.absolutePath,
-    value: page.data.content,
+    path: page.absolutePath,
+    value: await fs.readFile(page.absolutePath),
   });
 
   // note: it doesn't escape frontmatter, it's up to you.

@@ -12,13 +12,12 @@ import { countLines } from '@/utils/count-lines';
 import { fumaMatter } from '@/utils/fuma-matter';
 import { validate, ValidationError } from '@/utils/validation';
 import { z } from 'zod';
-import { toImportPath } from '@/utils/import-formatter';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { load } from 'js-yaml';
 import type { SourceMap, TransformPluginContext } from 'rollup';
 import { getGitTimestamp } from '@/utils/git-timestamp';
-import { doc, docs, meta } from '@/vite/generate';
+import { entry } from '@/vite/generate';
 
 const FumadocsDeps = ['fumadocs-core', 'fumadocs-ui', 'fumadocs-openapi'];
 
@@ -202,38 +201,20 @@ export default function mdx(
       if (!generateIndexFile) return;
 
       console.log('[Fumadocs MDX] Generating index files');
-      const outdir = process.cwd();
+      const outDir = process.cwd();
       const outFile = 'source.generated.ts';
-      const lines = [
-        '/// <reference types="vite/client" />',
-        `import { fromConfig } from 'fumadocs-mdx/runtime/vite';`,
-        `import type * as Config from '${toImportPath(configPath, {
-          relativeTo: outdir,
-          jsExtension:
-            typeof generateIndexFile === 'object'
-              ? generateIndexFile.addJsExtension
-              : undefined,
-        })}';`,
-        '',
-        `export const create = fromConfig<typeof Config>();`,
-      ];
 
-      for (const [name, collection] of loaded.collections.entries()) {
-        let body: string;
-
-        if (collection.type === 'docs') {
-          body = docs(name, collection);
-        } else if (collection.type === 'meta') {
-          body = meta(name, collection);
-        } else {
-          body = doc(name, collection);
-        }
-
-        lines.push('');
-        lines.push(`export const ${name} = ${body};`);
-      }
-
-      await fs.writeFile(path.join(outdir, outFile), lines.join('\n'));
+      await fs.writeFile(
+        path.join(outDir, outFile),
+        entry(
+          configPath,
+          loaded,
+          outDir,
+          typeof generateIndexFile === 'object'
+            ? generateIndexFile.addJsExtension
+            : undefined,
+        ),
+      );
     },
 
     async transform(value, id) {

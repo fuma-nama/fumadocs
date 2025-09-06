@@ -1,5 +1,4 @@
-import type { AnyCollection, DocCollection, MetaCollection } from '@/config';
-import { getGlobPatterns } from '@/utils/collections';
+import type { AnyCollection } from '@/config';
 
 interface GlobOptions {
   query: Record<string, string>;
@@ -10,32 +9,32 @@ interface GlobOptions {
 
 export function generateGlob(
   name: string,
-  collection: MetaCollection | DocCollection,
+  patterns: string[],
   globOptions?: Partial<GlobOptions>,
 ) {
-  const patterns = mapGlobPatterns(getGlobPatterns(collection));
   const options: GlobOptions = {
     ...globOptions,
     query: {
       ...globOptions?.query,
       collection: name,
     },
-    base: getGlobBase(collection),
   };
 
-  return `import.meta.glob(${JSON.stringify(patterns)}, ${JSON.stringify(options, null, 2)})`;
+  return `import.meta.glob(${JSON.stringify(mapGlobPatterns(patterns))}, ${JSON.stringify(options, null, 2)})`;
 }
 
 function mapGlobPatterns(patterns: string[]) {
-  return patterns.map((file) => {
-    if (file.startsWith('./')) return file;
-    if (file.startsWith('/')) return `.${file}`;
-
-    return `./${file}`;
-  });
+  return patterns.map(enforceRelative);
 }
 
-function getGlobBase(collection: AnyCollection) {
+function enforceRelative(file: string) {
+  if (file.startsWith('./')) return file;
+  if (file.startsWith('/')) return `.${file}`;
+
+  return `./${file}`;
+}
+
+export function getGlobBase(collection: AnyCollection) {
   let dir = collection.dir;
 
   if (Array.isArray(dir)) {
@@ -47,8 +46,5 @@ function getGlobBase(collection: AnyCollection) {
     dir = dir[0];
   }
 
-  if (!dir.startsWith('./') && !dir.startsWith('/')) {
-    return '/' + dir;
-  }
-  return dir;
+  return enforceRelative(dir);
 }
