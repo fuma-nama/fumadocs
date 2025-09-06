@@ -37,7 +37,7 @@
   "devDependencies": {
     "@content-collections/core": "^0.11.1",
     "@content-collections/mdx": "^0.2.2",
-    "@types/node": "24.3.0",
+    "@types/node": "24.3.1",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "tsconfig": "workspace:*",
