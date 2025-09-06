@@ -73,6 +73,17 @@ export const registry: Registry = {
       ],
     },
     {
+      name: 'feedback',
+      title: 'Feedback',
+      description: 'Component to send user feedbacks about the docs',
+      files: [
+        {
+          type: 'components',
+          path: 'components/feedback.tsx',
+        },
+      ],
+    },
+    {
       name: 'ai/search',
       title: 'AI Search (Next.js Only)',
       description:
