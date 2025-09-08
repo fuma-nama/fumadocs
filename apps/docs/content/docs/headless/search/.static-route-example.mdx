@@ -45,7 +45,6 @@ export default defineConfig({
   plugins: [
     // ...
     tanstackStart({
-      customViteReactPlugin: true,
       prerender: {
         enabled: true,
       },
@@ -53,5 +52,17 @@ export default defineConfig({
       pages: [{ path: '/static.json' }],
     }),
   ],
+});
+```
+
+```ts tab="Waku" title="pages/api/static.json.ts"
+import { exportSearchIndexes } from '@/lib/export-search-indexes';
+
+export async function GET() {
+  return Response.json(await exportSearchIndexes());
+}
+
+export const getConfig = () => ({
+  render: 'static',
 });
 ```

@@ -3,6 +3,10 @@ title: OpenAPI
 description: Generating docs for OpenAPI schema
 ---
 
+<Callout type="warning" title="Server Component Only">
+  It only works under RSC environments.
+</Callout>
+
 ## Manual Setup
 
 Install the required packages.
@@ -11,14 +15,14 @@ Install the required packages.
 npm i fumadocs-openapi shiki
 ```
 
-<Callout title="For Bun" type="warning">
+<Callout title="For Bun PM" type="warning">
   If you encountered any issues, please check
   [#2223](https://github.com/fuma-nama/fumadocs/issues/2223).
 </Callout>
 
 ### Generate Styles
 
-Please note that you must have Tailwind CSS v4 configured.
+Add the following line:
 
 ```css title="Tailwind CSS"
 @import 'tailwindcss';
@@ -46,8 +50,8 @@ import { transformerOpenAPI } from 'fumadocs-openapi/server';
 import { loader } from 'fumadocs-core/source';
 
 export const source = loader({
+  // [!code ++:3] adds a badge to each page item in page tree
   pageTree: {
-    // [!code ++] adds a badge to each page item in page tree
     transformers: [transformerOpenAPI()],
   },
 });

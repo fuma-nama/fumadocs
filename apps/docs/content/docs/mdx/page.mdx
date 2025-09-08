@@ -62,15 +62,18 @@ export default defineConfig({
 
 ### Other Frameworks
 
-Some frameworks like Tanstack Start require explicit declaration of loaders, it's recommended to import them in your pages instead.
-(Use MDX files as components)
+Some frameworks like Tanstack Start require explicit declaration of loaders, it's recommended to use them as components in your pages instead.
 
 ```tsx title="app/my-page.tsx"
 import MyPage from '@/content/page.mdx';
 import { getMDXComponents } from '@/mdx-components';
 
 export default function Page() {
-  // pass MDX components
-  return <MyPage components={getMDXComponents()} />;
+  return (
+    <div className="prose">
+      {/* pass MDX components and render it */}
+      <MyPage components={getMDXComponents()} />
+    </div>
+  );
 }
 ```

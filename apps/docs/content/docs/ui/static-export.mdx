@@ -3,15 +3,30 @@ title: Static Build
 description: Output static website with Fumadocs.
 ---
 
-## Overview
+## Setup
 
 By default, Fumadocs use a server-first approach which always requires a running server to serve.
 
 You can also output a static build by enabling it on your React framework.
 
+## Search
+
+### Built-in Search
+
+You will need extra configurations to statically store the search indexes, and search will be computed on browser instead:
+
+1. **Search Client:** [enable static mode](/docs/ui/search/orama#static).
+2. **Search Server:** [output static indexes](/docs/headless/search/orama#static-export).
+
+### Cloud Solutions
+
+Since the search functionality is powered by remote servers, static export works without configuration.
+
+## Deployment
+
 ### Next.js
 
-Fumadocs is fully compatible with Next.js static export, allowing you to export the app as a static HTML site without a Node.js server.
+You can enable Next.js static export, it allows you to export the app as a static HTML site without a Node.js server.
 
 ```js title="next.config.mjs"
 /**
@@ -43,6 +58,7 @@ const getUrl = createGetUrl('/docs');
 
 export default {
   ssr: true,
+  // [!code ++:9]
   async prerender({ getStaticPaths }) {
     const paths: string[] = [...getStaticPaths()];
 
@@ -57,47 +73,34 @@ export default {
 
 ### Tanstack Start
 
-Tanstack Start has powerful auto pre-rendering that automatically crawl your pages.
+By configuring pre-rendering, you can serve the statically pre-rendered HTML pages as a static website.
 
 ```ts title="vite.config.ts"
-import react from '@vitejs/plugin-react';
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  server: {
-    port: 3000,
-  },
   plugins: [
     // ...other plugins
     tanstackStart({
-      // [!code ++:4]
+      // Tanstack Router will automatically crawl your pages [!code ++:4]
       target: 'static',
       prerender: {
         enabled: true,
       },
-      // if you have any hidden paths that's not visible on UI, you can add them explicitly.
+      // if you have any hidden paths that's not visible on UI, you can add them explicitly. [!code highlight:5]
       pages: [
         {
           path: '/docs/test',
         },
       ],
-      customViteReactPlugin: true,
     }),
-    react(),
   ],
 });
 ```
 
-## Search
+### Waku
 
-### Built-in Search
+Waku can serve your site statically when all pages are configured with `static` render mode.
 
-You will need extra configurations to statically store the search indexes, and search will be computed on browser instead:
-
-1. **Search Client:** [enable static mode](/docs/ui/search/orama#static).
-2. **Search Server:** [output static indexes](/docs/headless/search/orama#static-export).
-
-### Cloud Solutions
-
-Since the search functionality is powered by remote servers, static export works without configuration.
+See [Deployment](https://waku.gg/#deployment) for details.
