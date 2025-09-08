@@ -262,8 +262,8 @@ importers:
         specifier: ^0.2.14
         version: 0.2.14
       ts-morph:
-        specifier: ^26.0.0
-        version: 26.0.0
+        specifier: ^27.0.0
+        version: 27.0.0
       tsconfig:
         specifier: workspace:*
         version: link:../../packages/tsconfig
@@ -1145,8 +1145,8 @@ importers:
         specifier: ^1.0.1
         version: 1.0.1
       ts-morph:
-        specifier: ^26.0.0
-        version: 26.0.0
+        specifier: ^27.0.0
+        version: 27.0.0
       zod:
         specifier: ^4.1.5
         version: 4.1.5
@@ -1945,8 +1945,8 @@ importers:
         specifier: ^0.2.14
         version: 0.2.14
       ts-morph:
-        specifier: ^26.0.0
-        version: 26.0.0
+        specifier: ^27.0.0
+        version: 27.0.0
       unist-util-visit:
         specifier: ^5.0.0
         version: 5.0.0
@@ -4855,6 +4855,9 @@ packages:
   '@ts-morph/common@0.27.0':
     resolution: {integrity: sha512-Wf29UqxWDpc+i61k3oIOzcUfQt79PIT9y/MWfAGlrkjg6lBC1hwDECLXPVJAhWjiGbfBCxZd65F/LIZF3+jeJQ==}
 
+  '@ts-morph/common@0.28.0':
+    resolution: {integrity: sha512-4w6X/oFmvXcwux6y6ExfM/xSqMHw20cYwFJH+BlYrtGa6nwY9qGq8GXnUs1sVYeF2o/KT3S8hAH6sKBI3VOkBg==}
+
   '@tweenjs/tween.js@25.0.0':
     resolution: {integrity: sha512-XKLA6syeBUaPzx4j3qwMqzzq+V4uo72BnlbOjmuljLrRqdsd3qnzvZZoxvMHZ23ndsRS4aufU6JOZYpCbU6T1A==}
 
@@ -5719,6 +5722,7 @@ packages:
 
   bun@1.2.21:
     resolution: {integrity: sha512-y0lJ02dS90U3PJm+7KAKY8Se95AQvP5Xm77LouUwrpNOHpv59kBG4SK1+9iE1cAhpUaFipq+0EJ56S6MmE3row==}
+    cpu: [arm64, x64, aarch64]
     os: [darwin, linux, win32]
     hasBin: true
 
@@ -9873,6 +9877,9 @@ packages:
 
   ts-morph@26.0.0:
     resolution: {integrity: sha512-ztMO++owQnz8c/gIENcM9XfCEzgoGphTv+nKpYNM1bgsdOVC/jRZuEBf6N+mLLDNg68Kl+GgUZfOySaRiG1/Ug==}
+
+  ts-morph@27.0.0:
+    resolution: {integrity: sha512-xcqelpTR5PCuZMs54qp9DE3t7tPgA2v/P1/qdW4ke5b3Y5liTGTYj6a/twT35EQW/H5okRqp1UOqwNlgg0K0eQ==}
 
   tsc-alias@1.8.16:
     resolution: {integrity: sha512-QjCyu55NFyRSBAl6+MTFwplpFcnm2Pq01rR/uxfqJoLMm6X3O14KEGtaSDZpJYaE1bJBGDjD0eSuiIWPe2T58g==}
@@ -14132,6 +14139,12 @@ snapshots:
       fast-glob: 3.3.3
       minimatch: 10.0.1
       path-browserify: 1.0.1
+
+  '@ts-morph/common@0.28.0':
+    dependencies:
+      minimatch: 10.0.1
+      path-browserify: 1.0.1
+      tinyglobby: 0.2.14
 
   '@tweenjs/tween.js@25.0.0': {}
 
@@ -20329,6 +20342,11 @@ snapshots:
   ts-morph@26.0.0:
     dependencies:
       '@ts-morph/common': 0.27.0
+      code-block-writer: 13.0.3
+
+  ts-morph@27.0.0:
+    dependencies:
+      '@ts-morph/common': 0.28.0
       code-block-writer: 13.0.3
 
   tsc-alias@1.8.16:
