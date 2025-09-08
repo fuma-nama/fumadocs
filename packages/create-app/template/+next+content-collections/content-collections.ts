@@ -1,7 +1,7 @@
 import { defineCollection, defineConfig } from '@content-collections/core';
 import {
-  createMetaSchema,
-  createDocSchema,
+  frontmatterSchema,
+  metaSchema,
   transformMDX,
 } from '@fumadocs/content-collections/configuration';
 
@@ -9,7 +9,7 @@ const docs = defineCollection({
   name: 'docs',
   directory: 'content/docs',
   include: '**/*.mdx',
-  schema: createDocSchema,
+  schema: frontmatterSchema,
   transform: transformMDX,
 });
 
@@ -18,7 +18,7 @@ const metas = defineCollection({
   directory: 'content/docs',
   include: '**/meta.json',
   parser: 'json',
-  schema: createMetaSchema,
+  schema: metaSchema,
 });
 
 export default defineConfig({

@@ -40,11 +40,15 @@ export interface Options {
   tailwindcss: boolean;
 
   /**
-   * Configure Next.js ESLint plugin
-   *
-   * (Next.js only)
+   * @deprecated use `lint` instead.
    */
   eslint?: boolean;
+
+  /**
+   * Configure Lint (Next.js Only)
+   * @defaultValue false
+   */
+  lint?: 'eslint' | 'biome' | false;
 
   installDeps?: boolean;
   initializeGit?: boolean;
@@ -106,13 +110,13 @@ export async function create(options: Options): Promise<void> {
     }
 
     // optional ESLint configuration
-    if (options.eslint) {
+    if (options.lint) {
       await copy(
-        path.join(sourceDir, `template/+next+eslint`),
+        path.join(sourceDir, `template/+next+${options.lint}`),
         dest,
         defaultRename,
       );
-      log('Configured ESLint');
+      log('Configured Linter');
     }
 
     // update tsconfig.json for src dir
@@ -204,28 +208,34 @@ async function createNextPackageJson(
       build: 'next build',
       dev: 'next dev --turbo',
       start: 'next start',
-      ...(options.template === '+next+fuma-docs-mdx'
-        ? {
-            postinstall: 'fumadocs-mdx',
-          }
-        : null),
+      ...(options.template === '+next+fuma-docs-mdx' && {
+        postinstall: 'fumadocs-mdx',
+      }),
+      ...(options.lint &&
+        {
+          eslint: {
+            lint: 'eslint',
+          },
+          biome: { lint: 'biome check', format: 'biome format --write' },
+        }[options.lint]),
     },
     dependencies: {
       ...pick(versionPkg.dependencies, ['next', 'react', 'react-dom']),
       ...pick(localVersions, ['fumadocs-ui', 'fumadocs-core']),
-      ...(options.template === '+next+content-collections'
-        ? {
-            ...pick(versionPkg.dependencies, [
-              '@content-collections/mdx',
-              '@content-collections/core',
-              '@content-collections/next',
-            ]),
-            ...pick(localVersions, ['@fumadocs/content-collections']),
-          }
-        : null),
-      ...(options.template === '+next+fuma-docs-mdx'
-        ? pick(localVersions, ['fumadocs-mdx'])
-        : null),
+      ...{
+        '+next+content-collections': {
+          ...pick(versionPkg.dependencies, [
+            '@content-collections/mdx',
+            '@content-collections/core',
+            '@content-collections/next',
+          ]),
+          ...pick(localVersions, ['@fumadocs/content-collections']),
+        },
+        '+next+fuma-docs-mdx': pick(localVersions, ['fumadocs-mdx']),
+        waku: null,
+        'tanstack-start': null,
+        'react-router': null,
+      }[options.template],
     },
     devDependencies: {
       ...pick(versionPkg.dependencies, [
@@ -235,19 +245,21 @@ async function createNextPackageJson(
         'typescript',
         '@types/mdx',
       ]),
-      ...(options.tailwindcss
-        ? pick(versionPkg.dependencies, [
-            '@tailwindcss/postcss',
-            'tailwindcss',
-            'postcss',
-          ])
-        : null),
-      ...(options.eslint
-        ? {
-            eslint: '^8',
+      ...(options.tailwindcss &&
+        pick(versionPkg.dependencies, [
+          '@tailwindcss/postcss',
+          'tailwindcss',
+          'postcss',
+        ])),
+      ...(options.lint &&
+        {
+          eslint: {
+            eslint: '^9',
             'eslint-config-next': versionPkg.dependencies.next,
-          }
-        : null),
+            '@eslint/eslintrc': '^3',
+          },
+          biome: pick(versionPkg.dependencies, ['@biomejs/biome']),
+        }[options.lint]),
     },
   };
 }
