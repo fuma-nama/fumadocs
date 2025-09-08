@@ -1,4 +1,7 @@
-import { ImageResponse, type ImageResponseOptions } from '@takumi-rs/image-response';
+import {
+  ImageResponse,
+  type ImageResponseOptions,
+} from '@takumi-rs/image-response';
 import type { ReactNode } from 'react';
 import fs from 'node:fs/promises';
 
