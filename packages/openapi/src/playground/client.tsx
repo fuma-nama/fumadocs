@@ -750,8 +750,6 @@ function Route({
   route,
   ...props
 }: HTMLAttributes<HTMLDivElement> & { route: string }) {
-  const segments = route.split('/').filter((part) => part.length > 0);
-
   return (
     <div
       {...props}
@@ -760,9 +758,9 @@ function Route({
         props.className,
       )}
     >
-      {segments.map((part, index) => (
+      {route.split('/').map((part, index) => (
         <Fragment key={index}>
-          <span className="text-fd-muted-foreground">/</span>
+          {index > 0 && <span className="text-fd-muted-foreground">/</span>}
           {part.startsWith('{') && part.endsWith('}') ? (
             <code className="bg-fd-primary/10 text-fd-primary">{part}</code>
           ) : (

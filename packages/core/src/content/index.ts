@@ -1,18 +1,14 @@
 import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
 import remarkRehype from 'remark-rehype';
-import type { VFile } from 'vfile';
+import type { Compatible } from 'vfile';
 import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import type { Root } from 'hast';
 import * as JsxRuntime from 'react/jsx-runtime';
 import type { PluggableList, Processor } from 'unified';
 import type { ReactNode } from 'react';
 
-function rehypeReact(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- processor errors
-  this: Processor<any, any, any, any>,
-  options: MarkdownProps = {},
-) {
+function rehypeReact(this: Processor, options: MarkdownProps = {}) {
   this.compiler = (tree, file) => {
     return toJsxRuntime(tree as Root, {
       development: false,
@@ -23,7 +19,7 @@ function rehypeReact(
   };
 }
 
-interface MarkdownProps {
+export interface MarkdownProps {
   components?: Components;
 }
 
@@ -35,7 +31,7 @@ export async function Markdown({
 }: MarkdownProps & {
   remarkPlugins?: PluggableList;
   rehypePlugins?: PluggableList;
-  children: string | VFile;
+  children: Compatible;
 }) {
   const processor = remark()
     .use(remarkGfm)

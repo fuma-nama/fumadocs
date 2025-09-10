@@ -27,8 +27,8 @@ export function schemaToString(
     else if (schema === false) return 'never';
 
     if (schema.title) return schema.title;
-    const referenceName = ctx?.dereferenceMap.get(schema);
-    if (referenceName) return referenceName.split('/').at(-1)!;
+    const rawRef = ctx?.getRawRef(schema);
+    if (rawRef) return rawRef.split('/').at(-1)!;
 
     if (Array.isArray(schema.type)) {
       const members = new Set();

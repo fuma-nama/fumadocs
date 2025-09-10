@@ -10,9 +10,3 @@ export default function Layout({ children }: { children: ReactNode }) {
     </DocsLayout>
   );
 }
-
-export const getConfig = async () => {
-  return {
-    render: 'static',
-  };
-};

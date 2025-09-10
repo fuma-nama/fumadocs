@@ -54,7 +54,7 @@ interface OperationConfig extends BaseConfig {
   name?:
     | ((
         output: GeneratePageOutput,
-        document: ProcessedDocument['document'],
+        document: ProcessedDocument['dereferenced'],
       ) => string)
     | BaseName;
 }
@@ -71,7 +71,7 @@ interface TagConfig extends BaseConfig {
   name?:
     | ((
         output: GenerateTagOutput,
-        document: ProcessedDocument['document'],
+        document: ProcessedDocument['dereferenced'],
       ) => string)
     | BaseName;
 }
@@ -88,7 +88,7 @@ interface FileConfig extends BaseConfig {
   name?:
     | ((
         output: GenerateFileOutput,
-        document: ProcessedDocument['document'],
+        document: ProcessedDocument['dereferenced'],
       ) => string)
     | BaseName;
 }
@@ -254,13 +254,13 @@ function generateFromDocument(
   options: Config,
 ): OutputFile[] {
   const files: OutputFile[] = [];
-  const { document } = processed;
+  const { dereferenced } = processed;
   const { output, cwd = process.cwd(), slugify = defaultSlugify } = options;
   const outputDir = path.join(cwd, output);
 
   let nameFn: (
     output: GeneratePageOutput | GenerateTagOutput | GenerateFileOutput,
-    document: ProcessedDocument['document'],
+    document: ProcessedDocument['dereferenced'],
   ) => string;
 
   if (!options.name || typeof options.name !== 'function') {
@@ -287,12 +287,12 @@ function generateFromDocument(
       ];
     }
 
-    const file = nameFn(result, document);
+    const file = nameFn(result, dereferenced);
     if (groupBy === 'tag') {
       let tags =
         result.type === 'operation'
-          ? document.paths![result.item.path]![result.item.method]!.tags
-          : document.webhooks![result.item.name][result.item.method]!.tags;
+          ? dereferenced.paths![result.item.path]![result.item.method]!.tags
+          : dereferenced.webhooks![result.item.name][result.item.method]!.tags;
 
       if (!tags || tags.length === 0) {
         console.warn(
@@ -315,7 +315,7 @@ function generateFromDocument(
         pathOrUrl: schemaId,
         content: result,
       },
-      document,
+      dereferenced,
     );
 
     files.push({
@@ -329,7 +329,7 @@ function generateFromDocument(
     const results = generateTags(schemaId, processed, options);
 
     for (const result of results) {
-      const filename = nameFn(result, document);
+      const filename = nameFn(result, dereferenced);
 
       files.push({
         path: path.join(outputDir, `${filename}.mdx`),
@@ -376,7 +376,7 @@ function generateFromDocument(
 function defaultNameFn(
   schemaId: string,
   output: GeneratePageOutput | GenerateTagOutput | GenerateFileOutput,
-  document: ProcessedDocument['document'],
+  document: ProcessedDocument['dereferenced'],
   options: Config,
   algorithm: 'v2' | 'v1' = 'v2',
 ) {

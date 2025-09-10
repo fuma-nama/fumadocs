@@ -55,7 +55,7 @@ const keyVariants = cva('text-fd-primary', {
   },
 });
 
-const fieldVariants = cva('text-fd-muted-foreground not-prose');
+const fieldVariants = cva('text-fd-muted-foreground not-prose pe-2');
 
 export function TypeTable({ type }: { type: Record<string, TypeNode> }) {
   return (
@@ -102,18 +102,17 @@ function Item({
       )}
     >
       <CollapsibleTrigger className="relative flex flex-row items-center w-full group text-start px-3 py-2 not-prose hover:bg-fd-accent">
-        <span className="pe-2 min-w-fit font-medium w-[25%]">
-          <code
-            className={cn(
-              keyVariants({
-                deprecated,
-              }),
-            )}
-          >
-            {name}
-            {!required && '?'}
-          </code>
-        </span>
+        <code
+          className={cn(
+            keyVariants({
+              deprecated,
+              className: 'min-w-fit w-[25%] font-medium',
+            }),
+          )}
+        >
+          {name}
+          {!required && '?'}
+        </code>
         {typeDescriptionLink ? (
           <Link href={typeDescriptionLink} className="underline @max-xl:hidden">
             {type}
@@ -124,7 +123,7 @@ function Item({
         <ChevronDown className="absolute end-2 size-4 text-fd-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div className="grid grid-cols-[1fr_3fr] gap-x-2 gap-y-4 text-sm p-3 overflow-auto fd-scroll-container border-t">
+        <div className="grid grid-cols-[1fr_3fr] gap-y-4 text-sm p-3 overflow-auto fd-scroll-container border-t">
           <div className="text-sm prose col-span-full prose-no-margin empty:hidden">
             {description}
           </div>
@@ -147,9 +146,11 @@ function Item({
                 {parameters.map((param) => (
                   <div
                     key={param.name}
-                    className="inline-flex items-center gap-1"
+                    className="inline-flex items-center flex-wrap gap-1"
                   >
-                    <p className="font-medium not-prose">{param.name} -</p>
+                    <p className="font-medium not-prose text-nowrap">
+                      {param.name} -
+                    </p>
                     <div className="text-sm prose prose-no-margin">
                       {param.description}
                     </div>

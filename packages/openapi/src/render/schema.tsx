@@ -368,8 +368,9 @@ function schemaStack(
 
   function getId(schema: ResolvedSchema) {
     if (typeof schema !== 'object') return;
+    if (schema.title) return schema.title;
 
-    return schema.title ?? renderContext.schema.dereferenceMap.get(schema);
+    return renderContext.schema.getRawRef(schema);
   }
 
   return {

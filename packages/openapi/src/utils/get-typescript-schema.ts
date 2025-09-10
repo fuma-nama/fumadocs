@@ -1,15 +1,13 @@
 import { compile } from '@fumari/json-schema-to-typescript';
-import type { DereferenceMap } from '@/types';
+import type { ProcessedDocument } from '@/utils/process-document';
 
 export async function getTypescriptSchema(
-  schema: object,
-  dereferenceMap: DereferenceMap,
+  processed: ProcessedDocument,
 ): Promise<string | undefined> {
   try {
-    const cloned = structuredClone({ schema, dereferenceMap });
-    return await compile(cloned.schema, 'Response', {
+    const cloned = structuredClone(processed.bundled);
+    return await compile(cloned, 'Response', {
       $refOptions: false,
-      schemaToId: cloned.dereferenceMap,
       bannerComment: '',
       additionalProperties: false,
       enableConstEnums: false,

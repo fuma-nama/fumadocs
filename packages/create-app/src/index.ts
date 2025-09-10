@@ -29,6 +29,9 @@ program.option('--no-src', '(Next.js only) disable `src/` directory');
 program.option('--eslint', '(Next.js only) enable ESLint configuration');
 program.option('--no-eslint', '(Next.js only) disable ESLint configuration');
 
+program.option('--biome', '(Next.js only) enable Biome configuration');
+program.option('--no-biome', '(Next.js only) disable Biome configuration');
+
 program.option('--install', 'Enable installing packages automatically');
 program.option('--no-install', 'Disable installing packages automatically');
 
@@ -62,6 +65,7 @@ interface Options {
   name?: string;
   src?: boolean;
   eslint?: boolean;
+  biome?: boolean;
   install?: boolean;
   template?: Template;
   pm?: PackageManager;
@@ -72,6 +76,8 @@ async function main(config: Options): Promise<void> {
   intro(pc.bgCyan(pc.bold('Create Fumadocs App')));
   const manager = config.pm ?? getPackageManager();
 
+  type SrcOption = boolean;
+  type LintOption = 'biome' | 'eslint' | false;
   const options = await group(
     {
       name: () => {
@@ -114,22 +120,43 @@ async function main(config: Options): Promise<void> {
           ],
         });
       },
-      src: (v) => {
-        if (!v.results.template?.startsWith('+next')) return;
-        if (config.src !== undefined) return Promise.resolve(config.src);
+      src: async (v): Promise<SrcOption | symbol> => {
+        if (!v.results.template?.startsWith('+next')) return false;
+        if (config.src !== undefined) return config.src;
 
         return confirm({
           message: 'Use `/src` directory?',
           initialValue: false,
         });
       },
-      eslint: (v) => {
-        if (!v.results.template?.startsWith('+next')) return;
-        if (config.eslint !== undefined) return Promise.resolve(config.eslint);
+      lint: async (v): Promise<LintOption | symbol> => {
+        if (!v.results.template?.startsWith('+next')) return false;
 
-        return confirm({
-          message: 'Add default ESLint configuration?',
+        if (config.eslint !== undefined) {
+          return config.eslint ? 'eslint' : false;
+        }
+
+        if (config.biome !== undefined) {
+          return config.biome ? 'biome' : false;
+        }
+
+        return select<LintOption>({
+          message: 'Configure linter?',
           initialValue: false,
+          options: [
+            {
+              value: 'eslint',
+              label: 'ESLint',
+            },
+            {
+              value: 'biome',
+              label: 'Biome',
+            },
+            {
+              value: false,
+              label: 'Disabled',
+            },
+          ],
         });
       },
       installDeps: () => {
@@ -189,8 +216,8 @@ async function main(config: Options): Promise<void> {
     template: options.template,
     outputDir: dest,
     installDeps: options.installDeps,
-    eslint: options.eslint === true,
-    useSrcDir: options.src === true,
+    lint: options.lint as LintOption,
+    useSrcDir: options.src as SrcOption,
     initializeGit: config.git,
 
     log: (message) => {

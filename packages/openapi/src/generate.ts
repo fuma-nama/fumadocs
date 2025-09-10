@@ -86,8 +86,8 @@ export function generateAll(
   processed: ProcessedDocument,
   options: GenerateOptions = {},
 ): string {
-  const { document } = processed;
-  const items = getAPIPageItems(document);
+  const { dereferenced } = processed;
+  const items = getAPIPageItems(dereferenced);
 
   return generatePage(
     schemaId,
@@ -99,8 +99,8 @@ export function generateAll(
     },
     {
       ...options,
-      title: document.info.title,
-      description: document.info.description,
+      title: dereferenced.info.title,
+      description: dereferenced.info.description,
     },
     {
       type: 'file',
@@ -113,12 +113,12 @@ export function generatePages(
   processed: ProcessedDocument,
   options: GenerateOptions = {},
 ): GeneratePageOutput[] {
-  const { document } = processed;
-  const items = getAPIPageItems(document);
+  const { dereferenced } = processed;
+  const items = getAPIPageItems(dereferenced);
   const result: GeneratePageOutput[] = [];
 
   for (const item of items.operations) {
-    const pathItem = document.paths?.[item.path];
+    const pathItem = dereferenced.paths?.[item.path];
     if (!pathItem) continue;
     const operation = pathItem[item.method];
     if (!operation) continue;
@@ -149,7 +149,7 @@ export function generatePages(
   }
 
   for (const item of items.webhooks) {
-    const pathItem = document.webhooks?.[item.name];
+    const pathItem = dereferenced.webhooks?.[item.name];
     if (!pathItem) continue;
     const operation = pathItem[item.method];
     if (!operation) continue;
@@ -184,11 +184,11 @@ export function generateTags(
   processed: ProcessedDocument,
   options: GenerateOptions = {},
 ): GenerateTagOutput[] {
-  const { document } = processed;
-  if (!document.tags) return [];
-  const items = getAPIPageItems(document);
+  const { dereferenced } = processed;
+  if (!dereferenced.tags) return [];
+  const items = getAPIPageItems(dereferenced);
 
-  return document.tags.map((tag) => {
+  return dereferenced.tags.map((tag) => {
     const webhooks = items.webhooks.filter(
       (v) => v.tags && v.tags.includes(tag.name),
     );
@@ -306,7 +306,7 @@ function generatePage(
     };
   }
 
-  const data = generateStaticData(processed.document, page);
+  const data = generateStaticData(processed.dereferenced, page);
   const content: string[] = [];
 
   if (options.description && includeDescription)

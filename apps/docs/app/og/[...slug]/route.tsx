@@ -1,6 +1,6 @@
 import { source } from '@/lib/source';
 import { notFound } from 'next/navigation';
-import { generateOGImage } from '@/lib/og/mono';
+import { generateOGImage } from './generate';
 
 export const revalidate = false;
 
@@ -23,6 +23,6 @@ export function generateStaticParams(): {
 }[] {
   return source.generateParams().map((page) => ({
     ...page,
-    slug: [...page.slug, 'image.png'],
+    slug: [...page.slug, 'image.webp'],
   }));
 }

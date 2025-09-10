@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 15.7.11
+
+### Patch Changes
+
+- 9304db9: Improve type table spacing
+- dd7338b: Fix inline code styles
+  - fumadocs-core@15.7.11
+
 ## 15.7.10
 
 ### Patch Changes
