@@ -23,6 +23,8 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@shikijs/rehype": "^3.12.2",
     "@shikijs/transformers": "^3.12.2",
+    "@takumi-rs/core": "^0.29.8",
+    "@takumi-rs/image-response": "^0.29.8",
     "ai": "^5.0.39",
     "class-variance-authority": "^0.7.1",
     "d3-force": "^3.0.0",
