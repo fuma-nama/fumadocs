@@ -1,7 +1,9 @@
-import { ImageResponse } from 'next/og';
+import {
+  ImageResponse,
+  type ImageResponseOptions,
+} from '@takumi-rs/image-response';
 import type { ReactNode } from 'react';
 import fs from 'node:fs/promises';
-import type { ImageResponseOptions } from 'next/server';
 
 export interface GenerateProps {
   title: ReactNode;
@@ -22,6 +24,7 @@ export async function generateOGImage(
       description,
     }),
     {
+      format: 'webp',
       width: 1200,
       height: 630,
       fonts: [

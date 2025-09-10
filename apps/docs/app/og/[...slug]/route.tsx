@@ -1,6 +1,6 @@
 import { source } from '@/lib/source';
 import { notFound } from 'next/navigation';
-import { generateOGImage } from '@/lib/og/mono';
+import { generateOGImage } from './generate';
 
 export const revalidate = false;
 
