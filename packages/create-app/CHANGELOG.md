@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 15.7.11
+
+### Patch Changes
+
+- 5a763d6: Support choosing between Biome and ESLint
+
 ## 15.7.10
 
 ## 15.7.9

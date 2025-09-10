@@ -1,5 +1,15 @@
 # @fuma-docs/openapi
 
+## 9.3.8
+
+### Patch Changes
+
+- e37b291: Migrate to `@scalar/openapi-parser@0.20.3`
+- Updated dependencies [9304db9]
+- Updated dependencies [dd7338b]
+  - fumadocs-ui@15.7.11
+  - fumadocs-core@15.7.11
+
 ## 9.3.7
 
 ### Patch Changes
