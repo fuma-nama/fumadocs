@@ -4,10 +4,9 @@ import type { CodeSample } from '@/render/operation';
 import type { Renderer } from '@/render/renderer';
 import type { NoReference } from '@/utils/schema';
 import type {
-  BuiltinTheme,
-  CodeOptionsThemes,
-  CodeToHastOptionsCommon,
-} from 'shiki';
+  HighlightOptionsCommon,
+  HighlightOptionsThemes,
+} from 'fumadocs-core/highlight';
 import type { MediaAdapter } from '@/media/adapter';
 import type { MethodInformation } from '@/types';
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
@@ -59,8 +58,8 @@ export interface SharedOpenAPIOptions {
    */
   generateCodeSamples?: (method: MethodInformation) => Awaitable<CodeSample[]>;
 
-  shikiOptions?: Omit<CodeToHastOptionsCommon, 'lang'> &
-    CodeOptionsThemes<BuiltinTheme>;
+  shikiOptions?: Omit<HighlightOptionsCommon, 'lang' | 'components'> &
+    HighlightOptionsThemes;
 
   /**
    * Show full response schema instead of only example response & Typescript definitions
