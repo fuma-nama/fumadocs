@@ -40,12 +40,12 @@ export async function APIPage(props: ApiPageProps) {
       ? await processDocumentCached(props.document)
       : await props.document;
   const ctx = await getContext(processed, props);
-  const { document } = processed;
+  const { dereferenced } = processed;
 
   return (
     <ctx.renderer.Root ctx={ctx}>
       {operations?.map((item) => {
-        const pathItem = document.paths?.[item.path];
+        const pathItem = dereferenced.paths?.[item.path];
         if (!pathItem)
           throw new Error(
             `[Fumadocs OpenAPI] Path not found in OpenAPI schema: ${item.path}`,
@@ -70,7 +70,7 @@ export async function APIPage(props: ApiPageProps) {
         );
       })}
       {webhooks?.map((item) => {
-        const webhook = document.webhooks?.[item.name];
+        const webhook = dereferenced.webhooks?.[item.name];
         if (!webhook)
           throw new Error(
             `[Fumadocs OpenAPI] Webhook not found in OpenAPI schema: ${item.name}`,
@@ -103,7 +103,7 @@ export async function getContext(
   schema: ProcessedDocument,
   options: SharedOpenAPIOptions = {},
 ): Promise<RenderContext> {
-  const document = schema.document;
+  const document = schema.dereferenced;
   const servers =
     document.servers && document.servers.length > 0
       ? document.servers
