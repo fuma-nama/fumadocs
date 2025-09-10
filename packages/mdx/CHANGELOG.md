@@ -1,5 +1,11 @@
 # next-docs-mdx
 
+## 11.9.1
+
+### Patch Changes
+
+- 64d0169: hotfix node.js imports at global scope
+
 ## 11.9.0
 
 ### Minor Changes
