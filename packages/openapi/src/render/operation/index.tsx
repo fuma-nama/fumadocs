@@ -70,6 +70,9 @@ export function Operation({
   hasHead?: boolean;
   headingLevel?: number;
 }): ReactElement {
+  const {
+    schema: { dereferenced },
+  } = ctx;
   const body = method.requestBody;
   let headNode: ReactNode = null;
   let bodyNode: ReactNode = null;
@@ -177,14 +180,12 @@ export function Operation({
     );
   });
 
-  const securities = (
-    method.security ??
-    ctx.schema.document.security ??
-    []
-  ).filter((v) => Object.keys(v).length > 0);
+  const securities = (method.security ?? dereferenced.security ?? []).filter(
+    (v) => Object.keys(v).length > 0,
+  );
 
   if (type === 'operation' && securities.length > 0) {
-    const securitySchemes = ctx.schema.document.components?.securitySchemes;
+    const securitySchemes = dereferenced.components?.securitySchemes;
     const names = securities.map((security) =>
       Object.keys(security).join(' & '),
     );
@@ -289,10 +290,7 @@ async function ResponseAccordion({
   ctx: RenderContext;
 }) {
   const response = operation.responses![status];
-  const {
-    generateTypeScriptSchema,
-    schema: { dereferenceMap },
-  } = ctx;
+  const { generateTypeScriptSchema } = ctx;
   const contentTypes = response.content
     ? Object.entries(response.content)
     : null;
@@ -319,7 +317,7 @@ async function ResponseAccordion({
           if (generateTypeScriptSchema) {
             ts = await generateTypeScriptSchema(operation, status);
           } else if (generateTypeScriptSchema === undefined && schema) {
-            ts = await getTypescriptSchema(schema, dereferenceMap);
+            ts = await getTypescriptSchema(ctx.schema);
           }
 
           return (

@@ -57,7 +57,8 @@
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-slot": "^1.2.3",
-    "@scalar/openapi-parser": "0.18.3",
+    "@scalar/json-magic": "^0.4.0",
+    "@scalar/openapi-parser": "0.20.3",
     "ajv": "^8.17.1",
     "class-variance-authority": "^0.7.1",
     "fumadocs-core": "workspace:*",
@@ -71,7 +72,6 @@
     "react-hook-form": "^7.62.0",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
-    "shiki": "^3.12.2",
     "tinyglobby": "^0.2.15",
     "xml-js": "^1.6.11"
   },

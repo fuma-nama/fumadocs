@@ -8,7 +8,7 @@ async function generate() {
   // clean generated files
   await rimraf(out, {
     filter(v) {
-      return !v.endsWith('index.mdx') && !v.endsWith('meta.json');
+      return !v.endsWith('meta.json');
     },
   });
 

@@ -131,17 +131,17 @@ function writeReferences(
 
 function parseSecurities(
   method: MethodInformation,
-  { schema: { document } }: RenderContext,
+  { schema: { dereferenced } }: RenderContext,
 ): ClientProps['securities'] {
   const result: ClientProps['securities'] = [];
-  const security = method.security ?? document.security ?? [];
+  const security = method.security ?? dereferenced.security ?? [];
   if (security.length === 0) return result;
 
   for (const map of security) {
     const list: ClientProps['securities'][number] = [];
 
     for (const [key, scopes] of Object.entries(map)) {
-      const scheme = document.components?.securitySchemes?.[key];
+      const scheme = dereferenced.components?.securitySchemes?.[key];
       if (!scheme) continue;
 
       list.push({

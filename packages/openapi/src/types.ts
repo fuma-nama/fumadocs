@@ -22,11 +22,6 @@ export type MethodInformation = NoReference<OperationObject> & {
   method: string;
 };
 
-/**
- * Dereferenced value and its original `$ref` value
- */
-export type DereferenceMap = Map<unknown, string>;
-
 export interface RenderContext extends SharedOpenAPIOptions {
   renderer: Renderer;
   servers: ServerObject[];
