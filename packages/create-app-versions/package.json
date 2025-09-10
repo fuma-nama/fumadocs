@@ -14,8 +14,8 @@
     "@react-router/serve": "^7.8.2",
     "@tailwindcss/postcss": "^4.1.13",
     "@tailwindcss/vite": "^4.1.13",
-    "@tanstack/react-router": "^1.131.35",
-    "@tanstack/react-start": "^1.131.35",
+    "@tanstack/react-router": "^1.131.36",
+    "@tanstack/react-start": "^1.131.36",
     "@types/mdx": "^2.0.13",
     "@types/node": "24.3.1",
     "@types/react": "^19.1.12",
@@ -31,10 +31,10 @@
     "react-router-devtools": "^5.1.3",
     "shiki": "^3.12.2",
     "tailwindcss": "^4.1.13",
-    "tinyglobby": "^0.2.14",
+    "tinyglobby": "^0.2.15",
     "typescript": "^5.9.2",
     "vinxi": "^0.5.8",
-    "vite": "^7.1.4",
+    "vite": "^7.1.5",
     "vite-tsconfig-paths": "^5.1.4"
   }
 }
