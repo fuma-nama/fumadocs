@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-mdx",
-  "version": "11.9.0",
+  "version": "11.9.1",
   "description": "The built-in source for Fumadocs",
   "keywords": [
     "NextJs",
@@ -38,8 +38,9 @@
       "types": "./dist/runtime/async.d.ts"
     },
     "./runtime/vite": {
-      "import": "./dist/runtime/vite.js",
-      "types": "./dist/runtime/vite.d.ts"
+      "browser": "./dist/runtime/vite/browser.js",
+      "import": "./dist/runtime/vite/server.js",
+      "types": "./dist/runtime/vite/server.d.ts"
     },
     ".": {
       "import": "./dist/index.js",
