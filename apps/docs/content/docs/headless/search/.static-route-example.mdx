@@ -8,26 +8,24 @@ export async function GET() {
 }
 ```
 
-```ts tab="React Router"
-// app/routes/static.ts
+```ts tab="React Router" title="app/routes/static.ts"
 import { exportSearchIndexes } from '@/lib/export-search-indexes';
 
 export async function loader() {
   return Response.json(await exportSearchIndexes());
 }
+```
 
-// app/routes.ts
+```ts tab="React Router" title="app/routes.ts"
 import { route, type RouteConfig } from '@react-router/dev/routes';
 
 export default [
-  // ...
   // [!code ++]
   route('static.json', 'routes/static.ts'),
 ] satisfies RouteConfig;
 ```
 
-```ts tab="Tanstack Start"
-// src/routes/static[.]json.ts
+```ts tab="Tanstack Start" title="src/routes/static[.]json.ts"
 import { createServerFileRoute } from '@tanstack/react-start/server';
 import { exportSearchIndexes } from '@/lib/export-search-indexes';
 
@@ -36,8 +34,9 @@ export const ServerRoute = createServerFileRoute('/static.json').methods({
     return Response.json(await exportSearchIndexes());
   },
 });
+```
 
-// vite.config.ts
+```ts tab="Tanstack Start" title="vite.config.ts"
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import { defineConfig } from 'vite';
 
