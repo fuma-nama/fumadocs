@@ -8,15 +8,13 @@ description: Setup Fumadocs on React Router.
 Before continuing, make sure to configure:
 
 - Tailwind CSS 4.
+- Fumadocs MDX: follow the [setup guide](/docs/mdx/vite/react-router) and create essential files like `lib/source.ts`.
 
 ### Installation
 
 ```npm
-npm i fumadocs-core fumadocs-ui fumadocs-mdx @types/mdx
+npm i fumadocs-core fumadocs-ui
 ```
-
-Then, [configure Fumadocs MDX](/docs/mdx/vite/react-router) on your React Router app.
-Make sure essential files like `lib/source.ts` are created correctly.
 
 ### Styles
 
@@ -24,6 +22,7 @@ Add the following to your Tailwind CSS file:
 
 ```css title="app/app.css"
 @import 'tailwindcss';
+/* [!code ++:2] */
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
 ```

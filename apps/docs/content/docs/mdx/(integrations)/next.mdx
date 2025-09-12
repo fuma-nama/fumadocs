@@ -8,7 +8,7 @@ description: Use Fumadocs MDX with Next.js
 Set up Fumadocs MDX for your Next.js application.
 
 ```npm
-npm i fumadocs-mdx @types/mdx @types/mdx
+npm i fumadocs-mdx @types/mdx
 ```
 
 Create the configuration file:
@@ -49,7 +49,7 @@ export default withMDX(config);
 
 ### Integrate with Fumadocs
 
-You can use `toFumadocsSource()` on the `docs` collection output.
+You can create a `lib/source.ts` file and obtain Fumadocs source from the `docs` collection output.
 
 ```ts title="lib/source.ts"
 import { docs } from '@/.source';
