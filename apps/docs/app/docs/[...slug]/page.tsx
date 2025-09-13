@@ -30,6 +30,7 @@ import { Installation } from '@/components/preview/installation';
 import { Customisation } from '@/components/preview/customisation';
 import { DocsPage } from 'fumadocs-ui/page';
 import { NotFound } from '@/components/not-found';
+import { getSuggestions } from '@/app/docs/[...slug]/suggestions';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -48,7 +49,10 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
   const params = await props.params;
   const page = source.getPage(params.slug);
 
-  if (!page) return <NotFound slug={params.slug} />;
+  if (!page)
+    return (
+      <NotFound getSuggestions={() => getSuggestions(params.slug.join(' '))} />
+    );
 
   const preview = page.data.preview;
   const { body: Mdx, toc, lastModified } = page.data;
