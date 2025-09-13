@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 15.7.12
+
+### Patch Changes
+
+- 846b28a: Support multiple codeblocks in same tab
+- 2b30315: Support `mode` option in search server
+
 ## 15.7.11
 
 ## 15.7.10
