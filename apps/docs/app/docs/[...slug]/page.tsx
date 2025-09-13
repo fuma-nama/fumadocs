@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
 import { type ComponentProps, type FC, type ReactNode } from 'react';
 import * as Twoslash from 'fumadocs-twoslash/ui';
 import { Callout } from 'fumadocs-ui/components/callout';
@@ -30,6 +29,7 @@ import { openapi } from '@/lib/openapi';
 import { Installation } from '@/components/preview/installation';
 import { Customisation } from '@/components/preview/customisation';
 import { DocsPage } from 'fumadocs-ui/page';
+import { NotFound } from '@/components/not-found';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -48,7 +48,7 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
   const params = await props.params;
   const page = source.getPage(params.slug);
 
-  if (!page) notFound();
+  if (!page) return <NotFound slug={params.slug} />;
 
   const preview = page.data.preview;
   const { body: Mdx, toc, lastModified } = page.data;
@@ -147,7 +147,10 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const { slug = [] } = await props.params;
   const page = source.getPage(slug);
-  if (!page) notFound();
+  if (!page)
+    return createMetadata({
+      title: 'Not Found',
+    });
 
   const description =
     page.data.description ?? 'The library for building documentation sites';
