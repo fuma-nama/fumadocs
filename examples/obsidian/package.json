@@ -12,14 +12,14 @@
     "fumadocs-mdx": "workspace:*",
     "fumadocs-obsidian": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "next": "15.5.2",
+    "next": "15.5.3",
     "react": "19.1.1",
     "react-dom": "19.1.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.13",
     "@types/mdx": "^2.0.13",
-    "@types/react": "^19.1.12",
+    "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.13",

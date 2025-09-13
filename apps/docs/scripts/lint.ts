@@ -112,6 +112,11 @@ async function checkLinks() {
   printErrors(
     await validateFiles([...docsFiles, ...blogFiles], {
       scanned,
+      markdown: {
+        components: {
+          Card: { attributes: ['href'] },
+        },
+      },
 
       pathToUrl(value) {
         const info = parseFilePath(path.relative('content/docs', value));
