@@ -42,6 +42,14 @@
       "import": "./dist/runtime/vite/server.js",
       "types": "./dist/runtime/vite/server.d.ts"
     },
+    "./node/loader": {
+      "import": "./dist/node/loader.js",
+      "types": "./dist/node/loader.d.ts"
+    },
+    "./bun": {
+      "import": "./dist/bun/index.js",
+      "types": "./dist/bun/index.d.ts"
+    },
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts",
@@ -82,6 +90,7 @@
   },
   "devDependencies": {
     "@fumadocs/mdx-remote": "workspace:*",
+    "@types/bun": "^1.2.21",
     "@types/js-yaml": "^4.0.9",
     "@types/mdast": "^4.0.3",
     "@types/mdx": "^2.0.13",
