@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 15.7.12
+
+### Patch Changes
+
+- 846b28a: Support multiple codeblocks in same tab
+- Updated dependencies [846b28a]
+- Updated dependencies [2b30315]
+  - fumadocs-core@15.7.12
+
 ## 15.7.11
 
 ### Patch Changes
