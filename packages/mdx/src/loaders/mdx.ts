@@ -7,6 +7,9 @@ import type { SourceMap } from 'rollup';
 import type { Loader } from '@/loaders/adapter';
 import { z } from 'zod';
 import type { ConfigLoader } from '@/loaders/config-loader';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { createHash } from 'node:crypto';
 
 const querySchema = z
   .object({
@@ -21,6 +24,14 @@ const querySchema = z
   })
   .loose();
 
+const cacheEntry = z.object({
+  code: z.string(),
+  map: z.any().optional(),
+  hash: z.string().optional(),
+});
+
+type CacheEntry = z.infer<typeof cacheEntry>;
+
 export function createMdxLoader(configLoader: ConfigLoader): Loader {
   return async ({
     source: value,
@@ -33,6 +44,20 @@ export function createMdxLoader(configLoader: ConfigLoader): Loader {
     const parsed = querySchema.parse(query);
 
     const loaded = await configLoader.getConfig(parsed.hash);
+    const cacheDir = isDevelopment
+      ? undefined
+      : loaded.global.experimentalBuildCache;
+    const cacheKey = `${parsed.hash}_${parsed.collection ?? 'global'}_${generateCacheHash(filePath)}`;
+
+    if (cacheDir) {
+      const cached = await fs
+        .readFile(path.join(cacheDir, cacheKey))
+        .then((content) => cacheEntry.parse(JSON.parse(content.toString())))
+        .catch(() => null);
+
+      if (cached && cached.hash === generateCacheHash(value)) return cached;
+    }
+
     const collection = parsed.collection
       ? loaded.collections.get(parsed.collection)
       : undefined;
@@ -90,9 +115,26 @@ export function createMdxLoader(configLoader: ConfigLoader): Loader {
       },
     );
 
-    return {
+    const out = {
       code: String(compiled.value),
       map: compiled.map as SourceMap,
     };
+
+    if (cacheDir) {
+      await fs.mkdir(cacheDir, { recursive: true });
+      await fs.writeFile(
+        path.join(cacheDir, cacheKey),
+        JSON.stringify({
+          ...out,
+          hash: generateCacheHash(value),
+        } satisfies CacheEntry),
+      );
+    }
+
+    return out;
   };
+}
+
+function generateCacheHash(input: string): string {
+  return createHash('md5').update(input).digest('hex');
 }
