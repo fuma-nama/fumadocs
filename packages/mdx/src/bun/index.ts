@@ -31,7 +31,7 @@ export function createMdxPlugin(options: MdxPluginOptions = {}): BunPlugin {
         )({
           source: content,
           query: parse(query),
-          filePath: args.path,
+          filePath,
           development: false,
           compiler: {
             addDependency() {},
