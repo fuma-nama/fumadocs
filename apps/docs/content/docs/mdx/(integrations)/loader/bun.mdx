@@ -1,0 +1,20 @@
+---
+title: Bun
+description: Access content in Bun.
+---
+
+## Setup
+
+Register the plugin in preload script:
+
+```toml tab="bunfig.toml"
+preload = ["./scripts/preload.ts"]
+```
+
+```ts tab="scripts/preload.ts"
+import { createMdxPlugin } from 'fumadocs-mdx/bun';
+
+Bun.plugin(createMdxPlugin());
+```
+
+Now running any script with Bun will automatically support accessing your content files.

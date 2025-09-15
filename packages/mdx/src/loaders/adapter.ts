@@ -30,6 +30,8 @@ export function toNode(
   filterByPath: (filePath: string) => boolean,
 ): LoadHook {
   return async (url, _context, nextLoad): Promise<LoadFnOutput> => {
+    if (!url.startsWith('file:///')) return nextLoad(url);
+
     const parsedUrl = new URL(url);
     const filePath = fileURLToPath(parsedUrl);
 
@@ -49,6 +51,7 @@ export function toNode(
       return {
         source: result.code,
         format: 'module',
+        shortCircuit: true,
       };
     }
 
