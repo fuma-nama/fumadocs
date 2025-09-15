@@ -167,7 +167,7 @@ const client = useDocsSearch({
 
 ### Static Mode [#static-export]
 
-To support usage without servers, use `staticGET` from search server. For example:
+To support usage with static site, use `staticGET` from search server and make the route static or pre-rendered.
 
 ```ts tab="Next.js" title="app/api/search/route.ts"
 import { source } from '@/lib/source';
@@ -181,6 +181,7 @@ export const { staticGET: GET } = createFromSource(source);
 ```ts tab="React Router" title="app/docs/search.ts"
 import type { Route } from './+types/search';
 
+// make sure this route is pre-rendered in `react-router.config.ts`.
 export async function loader({ request }: Route.LoaderArgs) {
   // [!code highlight]
   return server.staticGET(request);
@@ -193,6 +194,23 @@ import { createServerFileRoute } from '@tanstack/react-start/server';
 export const ServerRoute = createServerFileRoute('/api/search').methods({
   // [!code highlight]
   GET: async ({ request }) => server.staticGET(request),
+});
+```
+
+```ts tab="Tanstack Start" title="vite.config.ts"
+import { tanstackStart } from '@tanstack/react-start/plugin/vite';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  plugins: [
+    tanstackStart({
+      prerender: {
+        enabled: true,
+      },
+      // [!code ++] pre-render the index file
+      pages: [{ path: '/api/search' }],
+    }),
+  ],
 });
 ```
 

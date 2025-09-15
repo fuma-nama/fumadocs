@@ -77,7 +77,7 @@ export function Pre(props: ComponentProps<'pre'>) {
 export function CodeBlock({
   ref,
   title,
-  allowCopy,
+  allowCopy = true,
   keepBackground = false,
   icon,
   viewportProps = {},
@@ -89,7 +89,6 @@ export function CodeBlock({
 }: CodeBlockProps) {
   const inTab = useContext(TabsContext) !== null;
   const areaRef = useRef<HTMLDivElement>(null);
-  allowCopy ??= !inTab;
 
   return (
     <figure
@@ -97,10 +96,12 @@ export function CodeBlock({
       dir="ltr"
       {...props}
       className={cn(
-        inTab ? 'bg-fd-secondary' : 'my-4 bg-fd-card',
+        inTab
+          ? 'bg-fd-secondary -mx-px -mb-px last:rounded-b-xl'
+          : 'my-4 bg-fd-card rounded-xl',
         keepBackground && 'bg-(--shiki-light-bg) dark:bg-(--shiki-dark-bg)',
 
-        'shiki relative border shadow-sm rounded-xl outline-none not-prose overflow-hidden text-sm',
+        'shiki relative border shadow-sm outline-none not-prose overflow-hidden text-sm',
         props.className,
       )}
     >
@@ -221,23 +222,15 @@ export function CodeBlockTabs({ ref, ...props }: ComponentProps<typeof Tabs>) {
 }
 
 export function CodeBlockTabsList(props: ComponentProps<typeof TabsList>) {
-  const { containerRef, nested } = useContext(TabsContext)!;
-
   return (
     <TabsList
       {...props}
       className={cn(
-        'flex flex-row *:first:ms-2 overflow-x-auto text-fd-muted-foreground',
+        'flex flex-row px-2 overflow-x-auto text-fd-muted-foreground',
         props.className,
       )}
     >
       {props.children}
-      {!nested && (
-        <CopyButton
-          className="sticky ms-auto right-2 bg-fd-card backdrop-blur-sm"
-          containerRef={containerRef}
-        />
-      )}
     </TabsList>
   );
 }
@@ -260,10 +253,7 @@ export function CodeBlockTabsTrigger({
   );
 }
 
-// TODO: currently Vite RSC plugin has problem with adding `asChild` here, maybe revisit this in future
-export function CodeBlockTab({
-  className,
-  ...props
-}: ComponentProps<typeof TabsContent>) {
-  return <TabsContent className={cn('-mx-px -mb-px', className)} {...props} />;
+// TODO: currently Vite RSC plugin has problem with `asChild` due to children is automatically wrapped in <Fragment />, maybe revisit this in future
+export function CodeBlockTab(props: ComponentProps<typeof TabsContent>) {
+  return <TabsContent {...props} />;
 }

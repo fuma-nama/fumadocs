@@ -32,10 +32,10 @@ const Tabs = {
     withMdx = false,
     withParent = true,
   ): MdxJsxFlowElement {
-    const names = processTabValue(nodes);
+    const tabs = Array.from(processTabValue(nodes).entries());
 
     if (!withMdx) {
-      const children: MdxJsxFlowElement[] = nodes.map((node, i) => {
+      const children: MdxJsxFlowElement[] = tabs.map(([name, codes]) => {
         return {
           type: 'mdxJsxFlowElement',
           name: 'Tab',
@@ -43,10 +43,10 @@ const Tabs = {
             {
               type: 'mdxJsxAttribute',
               name: 'value',
-              value: names[i],
+              value: name,
             },
           ],
-          children: [node],
+          children: codes,
         };
       });
 
@@ -61,7 +61,7 @@ const Tabs = {
             name: 'items',
             value: {
               type: 'mdxJsxAttributeValueExpression',
-              value: names.join(', '),
+              value: tabs.map(([name]) => name).join(', '),
               data: {
                 estree: {
                   type: 'Program',
@@ -72,7 +72,7 @@ const Tabs = {
                       type: 'ExpressionStatement',
                       expression: {
                         type: 'ArrayExpression',
-                        elements: names.map((name) => ({
+                        elements: tabs.map(([name]) => ({
                           type: 'Literal',
                           value: name,
                         })),
@@ -93,7 +93,7 @@ const Tabs = {
         type: 'mdxJsxFlowElement',
         name: 'TabsList',
         attributes: [],
-        children: names.map((name) => ({
+        children: tabs.map(([name]) => ({
           type: 'mdxJsxFlowElement',
           name: 'TabsTrigger',
           attributes: [
@@ -103,14 +103,11 @@ const Tabs = {
               value: name,
             },
           ],
-          children: [
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- needed
-            mdxToAst(processor, name) as any,
-          ],
+          children: [mdxToAst(processor, name) as unknown as BlockContent],
         })),
       },
-      ...nodes.map(
-        (node, i) =>
+      ...tabs.map(
+        ([name, codes]) =>
           ({
             type: 'mdxJsxFlowElement',
             name: 'TabsContent',
@@ -118,10 +115,10 @@ const Tabs = {
               {
                 type: 'mdxJsxAttribute',
                 name: 'value',
-                value: names[i],
+                value: name,
               },
             ],
-            children: [node],
+            children: codes,
           }) as MdxJsxFlowElement,
       ),
     ];
@@ -135,7 +132,7 @@ const Tabs = {
         {
           type: 'mdxJsxAttribute',
           name: 'defaultValue',
-          value: names[0],
+          value: tabs[0][0],
         },
       ],
       children,
@@ -150,24 +147,24 @@ const CodeBlockTabs = {
     withMdx = false,
     withParent = true,
   ): MdxJsxFlowElement {
-    const names = processTabValue(nodes);
+    const tabs = Array.from(processTabValue(nodes).entries());
+
     const node = generateCodeBlockTabs({
-      defaultValue: names[0],
-      triggers: names.map((name) => ({
+      defaultValue: tabs[0][0],
+      triggers: tabs.map(([name]) => ({
         value: name,
         children: [
           withMdx
-            ? // eslint-disable-next-line @typescript-eslint/no-explicit-any -- needed
-              (mdxToAst(processor, name) as any)
+            ? (mdxToAst(processor, name) as unknown as BlockContent)
             : {
                 type: 'text',
                 value: name,
               },
         ],
       })),
-      tabs: nodes.map((node, i) => ({
-        value: names[i],
-        children: [node],
+      tabs: tabs.map(([name, codes]) => ({
+        value: name,
+        children: codes,
       })),
     });
 
@@ -256,7 +253,16 @@ export function remarkCodeTab(
 }
 
 function processTabValue(nodes: Code[]) {
-  return nodes.map((node, i) => node.data?.tab ?? `Tab ${i + 1}`);
+  const out = new Map<string, Code[]>();
+
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    const name = node.data?.tab ?? `Tab ${i + 1}`;
+    const li = out.get(name) ?? [];
+    li.push(node);
+    out.set(name, li);
+  }
+  return out;
 }
 
 /**

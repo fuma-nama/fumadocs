@@ -21,7 +21,7 @@ Fumadocs also supports other content sources, including [Content Collections](/d
 npm i fumadocs-ui fumadocs-core
 ```
 
-Create the following files:
+Create a file for MDX components:
 
 <include cwd meta='title="mdx-components.tsx"'>
   ../../examples/next-mdx/mdx-components.tsx
@@ -39,7 +39,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        // you can use Tailwind CSS too
+        // you can use Tailwind CSS too [!code ++:8]
         style={{
           display: 'flex',
           flexDirection: 'column',
@@ -59,6 +59,7 @@ Add the following Tailwind CSS styles to `global.css`.
 
 ```css title="global.css"
 @import 'tailwindcss';
+/* [!code ++:2] */
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
 ```

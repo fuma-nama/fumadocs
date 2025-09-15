@@ -1,5 +1,17 @@
 # next-docs-mdx
 
+## 11.10.0
+
+### Minor Changes
+
+- ea13374: Support runtime loaders: Node.js, Bun
+
+### Patch Changes
+
+- Updated dependencies [846b28a]
+- Updated dependencies [2b30315]
+  - fumadocs-core@15.7.12
+
 ## 11.9.1
 
 ### Patch Changes

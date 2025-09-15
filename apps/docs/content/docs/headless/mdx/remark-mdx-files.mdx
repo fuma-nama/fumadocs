@@ -1,0 +1,61 @@
+---
+title: Remark Files
+description: Generate files from codeblocks.
+---
+
+## Introduction
+
+This plugin takes a codeblock like:
+
+````md
+```files
+project
+├── src
+│   ├── index.js
+│   └── utils
+│       └── helper.js
+├── package.json
+```
+````
+
+and convert into:
+
+```mdx
+<Files>
+  <Folder name="project" defaultOpen>
+    <Folder name="src" defaultOpen>
+      <File name="index.js" />
+      <Folder name="utils" defaultOpen>
+        <File name="helper.js" />
+      </Folder>
+    </Folder>
+    <File name="package.json" />
+  </Folder>
+</Files>
+```
+
+## Setup
+
+Add the remark plugin:
+
+```tsx tab="Fumadocs MDX" title="source.config.ts"
+import { remarkMdxFiles } from 'fumadocs-core/mdx-plugins';
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkPlugins: [remarkMdxFiles],
+  },
+});
+```
+
+```ts tab="MDX Compiler"
+import { compile } from '@mdx-js/mdx';
+import { remarkMdxFiles } from 'fumadocs-core/mdx-plugins';
+
+await compile('...', {
+  remarkPlugins: [remarkMdxFiles],
+});
+```
+
+And make sure you have defined `<Files />`, `<Folder />`, `<File />` MDX components.

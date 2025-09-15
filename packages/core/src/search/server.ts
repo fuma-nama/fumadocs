@@ -31,7 +31,11 @@ export type ExportedData =
 export interface SearchServer {
   search: (
     query: string,
-    options?: { locale?: string; tag?: string | string[] },
+    options?: {
+      locale?: string;
+      tag?: string | string[];
+      mode?: 'vector' | 'full';
+    },
   ) => Promise<SortedResult[]>;
 
   /**
@@ -154,8 +158,23 @@ export function initAdvancedSearch(options: AdvancedOptions): SearchServer {
     },
     async search(query, searchOptions) {
       const db = await get;
+      const mode = searchOptions?.mode;
 
-      return searchAdvanced(db, query, searchOptions?.tag, options.search);
+      return searchAdvanced(db, query, searchOptions?.tag, {
+        ...options.search,
+        mode: mode === 'vector' ? 'vector' : 'fulltext',
+      }).catch((err) => {
+        if (mode === 'vector') {
+          throw new Error(
+            'failed to search, make sure you have installed `@orama/plugin-embeddings` according to their docs.',
+            {
+              cause: err,
+            },
+          );
+        }
+
+        throw err;
+      });
     },
   };
 }

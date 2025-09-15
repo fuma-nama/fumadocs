@@ -17,6 +17,7 @@ export function createEndpoint(server: SearchServer): SearchAPI {
         await search(query, {
           tag: url.searchParams.get('tag')?.split(',') ?? undefined,
           locale: url.searchParams.get('locale') ?? undefined,
+          mode: url.searchParams.get('mode') === 'vector' ? 'vector' : 'full',
         }),
       );
     },

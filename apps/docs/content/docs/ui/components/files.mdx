@@ -28,28 +28,23 @@ import { File, Folder, Files } from 'fumadocs-ui/components/files';
 </Files>
 ```
 
-### File
-
-<AutoTypeTable path="./content/docs/ui/props.ts" name="FileProps" />
-
-### Folder
-
-<AutoTypeTable path="./content/docs/ui/props.ts" name="FolderProps" />
-
 ### As CodeBlock
 
-You can convert `files` codeblocks into the MDX usage with the `remarkMdxFiles` remark plugin.
+You can enable [`remark-mdx-files`](/docs/headless/mdx/remark-mdx-files) to define file structure with codeblocks.
 
-```tsx tab="Fumadocs MDX" title="source.config.ts"
+```tsx title="source.config.ts (Fumadocs MDX)"
 import { remarkMdxFiles } from 'fumadocs-core/mdx-plugins';
 import { defineConfig } from 'fumadocs-mdx/config';
 
 export default defineConfig({
   mdxOptions: {
+    // [!code ++]
     remarkPlugins: [remarkMdxFiles],
   },
 });
 ```
+
+it will convert `files` codeblocks into MDX usage, like:
 
 ````md
 ```files
@@ -61,3 +56,11 @@ project
 ├── package.json
 ```
 ````
+
+### File
+
+<AutoTypeTable path="./content/docs/ui/props.ts" name="FileProps" />
+
+### Folder
+
+<AutoTypeTable path="./content/docs/ui/props.ts" name="FolderProps" />

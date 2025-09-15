@@ -11,14 +11,16 @@ export async function searchAdvanced(
   db: Orama<typeof advancedSchema>,
   query: string,
   tag: string | string[] = [],
-  extraParams: Partial<
-    SearchParams<Orama<typeof advancedSchema>, AdvancedDocument>
-  > = {},
+  {
+    mode = 'fulltext',
+    ...override
+  }: Partial<SearchParams<Orama<typeof advancedSchema>, AdvancedDocument>> = {},
 ): Promise<SortedResult[]> {
   if (typeof tag === 'string') tag = [tag];
 
   let params = {
-    ...extraParams,
+    ...override,
+    mode,
     where: removeUndefined({
       tags:
         tag.length > 0
@@ -26,12 +28,12 @@ export async function searchAdvanced(
               containsAll: tag,
             }
           : undefined,
-      ...extraParams.where,
+      ...override.where,
     }),
     groupBy: {
       properties: ['page_id'],
       maxResult: 8,
-      ...extraParams.groupBy,
+      ...override.groupBy,
     },
   } as SearchParams<typeof db, AdvancedDocument>;
 
@@ -39,7 +41,7 @@ export async function searchAdvanced(
     params = {
       ...params,
       term: query,
-      properties: ['content'],
+      properties: mode === 'fulltext' ? ['content'] : ['content', 'embeddings'],
     } as SearchParams<typeof db, AdvancedDocument>;
   }
 

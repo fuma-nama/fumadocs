@@ -14,6 +14,7 @@ export const advancedSchema = {
   type: 'string',
   tags: 'enum[]',
   url: 'string',
+  embeddings: 'vector[512]',
 } as const;
 
 export async function createDB({
