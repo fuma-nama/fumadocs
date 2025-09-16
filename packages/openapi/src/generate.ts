@@ -316,7 +316,7 @@ function generatePage(
   return generateDocument(
     {
       title: options.title,
-      description: !includeDescription ? options.description : undefined,
+      description: includeDescription ? options.description : undefined,
       full: true,
       ...extend,
       _openapi: {
