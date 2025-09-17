@@ -38,6 +38,8 @@ export interface PluginOptions {
   configPath?: string;
 }
 
+export * from './postinstall';
+
 export default function mdx(
   config: Record<string, unknown>,
   options: PluginOptions = {},

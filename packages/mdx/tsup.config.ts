@@ -2,7 +2,7 @@ import { defineConfig } from 'tsup';
 
 export default defineConfig({
   entry: [
-    './src/{index,loader-mdx}.ts',
+    './src/{index,loader-mdx,bin}.ts',
     './src/{config,next,vite,bun}/index.ts',
     './src/node/loader.ts',
     './src/config/zod-3.ts',

@@ -58,11 +58,10 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "bin": "./bin.js",
+  "bin": "./dist/bin.js",
   "files": [
     "dist/*",
-    "loader-mdx.cjs",
-    "bin.js"
+    "loader-mdx.cjs"
   ],
   "scripts": {
     "build": "tsup",
