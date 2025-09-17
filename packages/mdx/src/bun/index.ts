@@ -4,6 +4,7 @@ import { resolvedConfig } from '@/loaders/config-loader';
 import { findConfigFile } from '@/utils/config';
 import { buildConfig } from '@/config/build';
 import { parse } from 'node:querystring';
+import { pathToFileURL } from 'node:url';
 
 export interface MdxPluginOptions {
   configPath?: string;
@@ -13,7 +14,8 @@ export function createMdxPlugin(options: MdxPluginOptions = {}): BunPlugin {
   const { configPath = findConfigFile() } = options;
 
   async function getMdxLoader() {
-    const out = buildConfig(await import(configPath));
+    const importPath = pathToFileURL(configPath).href;
+    const out = buildConfig(await import(importPath));
     return createMdxLoader(resolvedConfig(out));
   }
 

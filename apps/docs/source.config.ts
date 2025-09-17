@@ -17,8 +17,6 @@ import {
 } from 'fumadocs-core/mdx-plugins';
 import { remarkAutoTypeTable } from 'fumadocs-typescript';
 import type { ElementContent } from 'hast';
-import { visit } from 'unist-util-visit';
-import type { Root } from 'mdast';
 
 export const docs = defineDocs({
   docs: {
@@ -43,34 +41,13 @@ export const blog = defineCollections({
   dir: 'content/blog',
   schema: frontmatterSchema.extend({
     author: z.string(),
-    date: z.string().date().or(z.date()),
+    date: z.iso.date().or(z.date()),
   }),
 });
-
-function remarkElementIds() {
-  return (tree: Root, vfile: unknown) => {
-    const file = vfile as { data?: { elementIds?: string[] } };
-    file.data ??= {};
-    file.data.elementIds ??= [];
-
-    visit(tree, 'mdxJsxFlowElement', (element) => {
-      if (!element.name || !element.attributes) return;
-
-      const idAttr = element.attributes.find(
-        (attr) => attr.type === 'mdxJsxAttribute' && attr.name === 'id',
-      );
-
-      if (idAttr && typeof idAttr.value === 'string') {
-        file.data!.elementIds!.push(idAttr.value);
-      }
-    });
-  };
-}
 
 export default defineConfig({
   lastModifiedTime: 'git',
   mdxOptions: {
-    valueToExport: ['elementIds'],
     rehypeCodeOptions: {
       lazy: true,
       experimentalJSEngine: true,
@@ -117,7 +94,6 @@ export default defineConfig({
       remarkMath,
       remarkAutoTypeTable,
       remarkTypeScriptToJavaScript,
-      remarkElementIds,
     ],
     rehypePlugins: (v) => [rehypeKatex, ...v],
   },

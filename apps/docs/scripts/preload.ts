@@ -1,3 +1,6 @@
 import { createMdxPlugin } from 'fumadocs-mdx/bun';
+import { postInstall } from 'fumadocs-mdx/next';
 
-Bun.plugin(createMdxPlugin());
+const configPath = 'source.script.ts';
+await postInstall(configPath);
+Bun.plugin(createMdxPlugin({ configPath }));
