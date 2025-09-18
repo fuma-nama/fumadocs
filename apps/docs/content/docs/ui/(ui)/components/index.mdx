@@ -1,9 +1,15 @@
 ---
-title: MDX
-description: Default MDX Components
+title: Components
+description: Additional components to improve your docs
 ---
 
-## Usage
+## Overview
+
+Additional components that you can use:
+
+<DocsCategory />
+
+### MDX Components
 
 The default MDX components include Cards, Callouts, Code Blocks and Headings.
 
@@ -12,6 +18,8 @@ import defaultMdxComponents from 'fumadocs-ui/mdx';
 ```
 
 ### Relative Link
+
+<Callout type="warn">Server Component only.</Callout>
 
 To support links with relative file path in `href`, override the default `a` component with:
 
@@ -36,6 +44,4 @@ return (
 [My Link](./file.mdx)
 ```
 
-[Example: `../(integrations)/open-graph.mdx`](<../(integrations)/open-graph.mdx>)
-
-<Callout type="warn">Server Component only.</Callout>
+[Example: `../feedback.mdx`](../feedback.mdx)
