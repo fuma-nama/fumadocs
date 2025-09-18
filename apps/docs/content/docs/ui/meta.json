@@ -18,7 +18,6 @@
     "internationalization",
     "navigation",
     "search",
-    "seo",
     "---UI---",
     "...(ui)",
     "---Automation---",
@@ -27,6 +26,7 @@
     "obsidian",
     "openapi",
     "---Others---",
-    "..."
+    "...",
+    "seo"
   ]
 }
