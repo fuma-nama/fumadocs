@@ -1,10 +1,6 @@
 import * as plugins from 'fumadocs-core/mdx-plugins';
 import type { ProcessorOptions } from '@mdx-js/mdx';
 import type { Pluggable } from 'unified';
-import {
-  type PostprocessOptions,
-  remarkPostprocess,
-} from '@/mdx-plugins/remark-postprocess';
 
 type ResolvePlugins = Pluggable[] | ((v: Pluggable[]) => Pluggable[]);
 
@@ -56,14 +52,6 @@ export function getDefaultMDXOptions({
   _withoutBundler = false,
   ...mdxOptions
 }: DefaultMDXOptions): ProcessorOptions {
-  const mdxExports = [
-    'structuredData',
-    'extractedReferences',
-    'frontmatter',
-    'lastModified',
-    ...valueToExport,
-  ];
-
   const remarkPlugins = pluginOption(
     (v) => [
       plugins.remarkGfm,
@@ -93,10 +81,16 @@ export function getDefaultMDXOptions({
         plugins.remarkStructure,
         remarkStructureOptions,
       ],
-      [
-        remarkPostprocess,
-        { injectExports: mdxExports } satisfies PostprocessOptions,
-      ],
+      () => {
+        return (_, file) => {
+          file.data['mdx-export'] ??= [];
+
+          for (const name of valueToExport) {
+            if (name in file.data)
+              file.data['mdx-export'].push({ name, value: file.data[name] });
+          }
+        };
+      },
     ],
     mdxOptions.remarkPlugins,
   );

@@ -2,6 +2,7 @@ import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type { DefaultMDXOptions } from '@/utils/mdx-options';
 import type { ProcessorOptions } from '@mdx-js/mdx';
 import { frontmatterSchema, metaSchema } from '@/config/zod-4';
+import type { PostprocessOptions } from '@/mdx-plugins/remark-postprocess';
 
 export type CollectionSchema<Schema extends StandardSchemaV1, Context> =
   | Schema
@@ -37,6 +38,7 @@ export interface DocCollection<
 > extends BaseCollection {
   type: 'doc';
 
+  postprocess?: PostprocessOptions;
   mdxOptions?: ProcessorOptions;
 
   /**

@@ -10,6 +10,7 @@ import type { ConfigLoader } from '@/loaders/config-loader';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
+import type { DocCollection } from '@/config';
 
 const querySchema = z
   .object({
@@ -62,22 +63,19 @@ export function createMdxLoader(configLoader: ConfigLoader): Loader {
       ? loaded.collections.get(parsed.collection)
       : undefined;
 
-    let schema;
-    let mdxOptions;
+    let docCollection: DocCollection | undefined;
     switch (collection?.type) {
       case 'doc':
-        mdxOptions = collection.mdxOptions;
-        schema = collection.schema;
+        docCollection = collection;
         break;
       case 'docs':
-        mdxOptions = collection.docs.mdxOptions;
-        schema = collection.docs.schema;
+        docCollection = collection.docs;
         break;
     }
 
-    if (schema) {
+    if (docCollection?.schema) {
       matter.data = await validate(
-        schema,
+        docCollection.schema,
         matter.data,
         {
           source: value,
@@ -107,7 +105,8 @@ export function createMdxLoader(configLoader: ConfigLoader): Loader {
       '\n'.repeat(lineOffset) + matter.content,
       {
         development: isDevelopment,
-        ...(mdxOptions ?? (await loaded.getDefaultMDXOptions())),
+        ...(docCollection?.mdxOptions ?? (await loaded.getDefaultMDXOptions())),
+        postprocess: docCollection?.postprocess,
         data,
         filePath,
         frontmatter: matter.data as Record<string, unknown>,

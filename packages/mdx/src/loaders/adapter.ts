@@ -98,7 +98,7 @@ export function toWebpack(loader: Loader): WebpackLoader {
     try {
       const result = await loader({
         filePath: this.resourcePath,
-        query: parse(this.resourceQuery),
+        query: parse(this.resourceQuery.slice(1)),
         source,
         development: this.mode === 'development',
         compiler: this,

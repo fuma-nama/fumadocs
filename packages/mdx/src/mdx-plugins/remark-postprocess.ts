@@ -1,11 +1,16 @@
-import type { Transformer } from 'unified';
+import type { Processor, Transformer } from 'unified';
 import type { Root, RootContent } from 'mdast';
 import { visit } from 'unist-util-visit';
-import { valueToEstree } from 'estree-util-value-to-estree';
+import { toMarkdown } from 'mdast-util-to-markdown';
 
 declare module 'vfile' {
   interface DataMap {
     extractedReferences: ExtractedReference[];
+
+    /**
+     * [Fumadocs MDX] Processed Markdown content before `remark-rehype`.
+     */
+    _markdown?: string;
   }
 }
 
@@ -15,19 +20,19 @@ export interface ExtractedReference {
 
 export interface PostprocessOptions {
   /**
-   * Values to export from `vfile.data`
+   * stringify MDAST and export via `_markdown`.
    */
-  injectExports: string[];
+  includeProcessedMarkdown?: boolean;
 }
 
 /**
- * - write exports
  * - collect references
  * - write frontmatter (auto-title & description)
  */
-export function remarkPostprocess({
-  injectExports,
-}: PostprocessOptions): Transformer<Root, Root> {
+export function remarkPostprocess(
+  this: Processor,
+  { includeProcessedMarkdown = false }: PostprocessOptions = {},
+): Transformer<Root, Root> {
   return (tree, file) => {
     let title: string | undefined;
     const urls: ExtractedReference[] = [];
@@ -53,11 +58,12 @@ export function remarkPostprocess({
     }
 
     file.data.extractedReferences = urls;
-
-    for (const name of injectExports) {
-      if (!(name in file.data)) continue;
-
-      tree.children.unshift(getMdastExport(name, file.data[name]));
+    if (includeProcessedMarkdown) {
+      file.data._markdown = toMarkdown(tree, {
+        ...this.data('settings'),
+        // @ts-expect-error - from https://github.com/remarkjs/remark/blob/main/packages/remark-stringify/lib/index.js
+        extensions: this.data('toMarkdownExtensions') || [],
+      });
     }
   };
 }
@@ -69,44 +75,4 @@ function flattenNode(node: RootContent): string {
   if ('value' in node) return node.value;
 
   return '';
-}
-
-/**
- * MDX.js first converts javascript (with esm support) into mdast nodes with remark-mdx, then handle the other remark plugins
- *
- * Therefore, if we want to inject an export, we must convert the object into AST, then add the mdast node
- */
-function getMdastExport(name: string, value: unknown): RootContent {
-  return {
-    type: 'mdxjsEsm',
-    value: '',
-    data: {
-      estree: {
-        type: 'Program',
-        sourceType: 'module',
-        body: [
-          {
-            type: 'ExportNamedDeclaration',
-            attributes: [],
-            specifiers: [],
-            source: null,
-            declaration: {
-              type: 'VariableDeclaration',
-              kind: 'let',
-              declarations: [
-                {
-                  type: 'VariableDeclarator',
-                  id: {
-                    type: 'Identifier',
-                    name,
-                  },
-                  init: valueToEstree(value),
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-  };
 }

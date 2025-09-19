@@ -5,7 +5,12 @@ import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { TableOfContents } from 'fumadocs-core/server';
 import type { FC } from 'react';
 import type { MDXProps } from 'mdx/types';
-import type { ExtractedReference } from '@/mdx-plugins/remark-postprocess';
+import {
+  type ExtractedReference,
+  type PostprocessOptions,
+  remarkPostprocess,
+} from '@/mdx-plugins/remark-postprocess';
+import { remarkMdxExport } from '@/mdx-plugins/remark-mdx-export';
 
 type Processor = ReturnType<typeof createProcessor>;
 
@@ -25,6 +30,7 @@ interface BuildMDXOptions extends ProcessorOptions {
   data?: Record<string, unknown>;
 
   _compiler?: CompilerOptions;
+  postprocess?: PostprocessOptions;
 }
 
 export interface CompilerOptions {
@@ -42,6 +48,7 @@ export interface CompiledMDXProperties<Frontmatter = Record<string, unknown>> {
    */
   lastModified?: Date;
   extractedReferences?: ExtractedReference[];
+  _markdown?: string;
 }
 
 export type { DataMap };
@@ -82,7 +89,23 @@ export async function buildMDX(
       processor = createProcessor({
         outputFormat: 'program',
         ...rest,
-        remarkPlugins: [remarkInclude, ...(rest.remarkPlugins ?? [])],
+        remarkPlugins: [
+          remarkInclude,
+          ...(rest.remarkPlugins ?? []),
+          [remarkPostprocess, options.postprocess],
+          [
+            remarkMdxExport,
+            {
+              dataNames: [
+                'structuredData',
+                'extractedReferences',
+                'frontmatter',
+                'lastModified',
+                '_markdown',
+              ],
+            },
+          ],
+        ],
         format,
       });
 

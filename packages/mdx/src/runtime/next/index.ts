@@ -4,32 +4,51 @@ import {
   type PageData,
   type Source,
 } from 'fumadocs-core/source';
-import type { BaseCollectionEntry, FileInfo, Runtime } from './types';
-import fs from 'node:fs';
+import type { DocOut, FileInfo, Runtime } from './types';
+import { readFileSync } from 'node:fs';
+import type { CompiledMDXProperties } from '@/utils/build-mdx';
+import { readFile } from 'node:fs/promises';
+import { missingProcessedMarkdown } from '@/runtime/shared';
+
+export interface BaseCollectionEntry {
+  _file: FileInfo;
+}
 
 const cache = new Map<string, string>();
 
 export const _runtime: Runtime = {
   doc(files) {
     return files.map((file) => {
-      const { default: body, frontmatter, ...exports } = file.data;
+      const data = file.data as unknown as CompiledMDXProperties;
+      const filePath = file.info.absolutePath;
 
       return {
-        body,
-        ...exports,
-        ...(frontmatter as object),
         _file: file.info,
-        _exports: file.data,
+        _exports: data as unknown as Record<string, unknown>,
+        body: data.default,
+        lastModified: data.lastModified,
+        toc: data.toc,
+        structuredData: data.structuredData,
+        extractedReferences: data.extractedReferences,
+        ...data.frontmatter,
         get content() {
-          const path = (this as { _file: FileInfo })._file.absolutePath;
-          const cached = cache.get(path);
+          const cached = cache.get(filePath);
           if (cached) return cached;
 
-          const content = fs.readFileSync(path).toString();
-          cache.set(path, content);
+          const content = readFileSync(filePath).toString();
+          cache.set(filePath, content);
           return content;
         },
-      };
+        async getText(type) {
+          console.log(data);
+          if (type === 'raw') {
+            return (await readFile(filePath)).toString();
+          }
+
+          if (typeof data._markdown !== 'string') missingProcessedMarkdown();
+          return data._markdown;
+        },
+      } satisfies DocOut;
     }) as any;
   },
   meta(files) {
@@ -103,3 +122,5 @@ export function resolveFiles({ docs, meta }: ResolveOptions): VirtualFile[] {
 
   return outputs;
 }
+
+export type * from './types';

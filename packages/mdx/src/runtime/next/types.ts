@@ -2,23 +2,14 @@ import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type { MetaData, PageData, Source } from 'fumadocs-core/source';
 import type { LoadedConfig } from '@/utils/config';
 import type { DocCollection, DocsCollection, MetaCollection } from '@/config';
-import type { CompiledMDXProperties } from '@/utils/build-mdx';
-
-export interface BaseCollectionEntry {
-  /**
-   * Raw file path of collection entry, including absolute path (not normalized).
-   */
-  _file: FileInfo;
-}
+import type {
+  AsyncDocCollectionEntry,
+  DocCollectionEntry,
+} from '@/runtime/shared';
 
 export interface FileInfo {
   path: string;
   absolutePath: string;
-}
-
-export interface MarkdownProps
-  extends Omit<CompiledMDXProperties, 'frontmatter' | 'default'> {
-  body: CompiledMDXProperties['default'];
 }
 
 export interface RuntimeFile {
@@ -33,25 +24,15 @@ export interface AsyncRuntimeFile {
   lastModified?: Date;
 }
 
-type DocOut<Schema extends StandardSchemaV1> = Override<
-  MarkdownProps & {
-    /**
-     * Other exports in the compiled Markdown/MDX file
-     */
-    _exports: Record<string, unknown>;
+export type DocOut<Schema extends StandardSchemaV1 = StandardSchemaV1> =
+  DocCollectionEntry<StandardSchemaV1.InferOutput<Schema>> & {
+    _file: FileInfo;
+  };
 
-    /**
-     * Read the original content of file from file system.
-     */
-    get content(): string;
-  },
-  StandardSchemaV1.InferOutput<Schema> & BaseCollectionEntry
->;
-
-type Override<A, B> = Omit<A, keyof B> & B;
-
-type MetaOut<Schema extends StandardSchemaV1> =
-  StandardSchemaV1.InferOutput<Schema> & BaseCollectionEntry;
+export type MetaOut<Schema extends StandardSchemaV1> =
+  StandardSchemaV1.InferOutput<Schema> & {
+    _file: FileInfo;
+  };
 
 export interface Runtime {
   doc: <C>(
@@ -80,12 +61,10 @@ export interface Runtime {
     : never;
 }
 
-type AsyncDocOut<Schema extends StandardSchemaV1> =
-  StandardSchemaV1.InferOutput<Schema> &
-    BaseCollectionEntry & {
-      content: string;
-      load: () => Promise<MarkdownProps & Record<string, unknown>>;
-    };
+export type AsyncDocOut<Schema extends StandardSchemaV1 = StandardSchemaV1> =
+  AsyncDocCollectionEntry<StandardSchemaV1.InferOutput<Schema>> & {
+    _file: FileInfo;
+  };
 
 export interface RuntimeAsync {
   doc: <C>(
