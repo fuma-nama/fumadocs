@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 15.7.13
+
+### Patch Changes
+
+- 982aed6: Fix `source.getPageByHref()` return no result without explicit `language`
+
 ## 15.7.12
 
 ### Patch Changes

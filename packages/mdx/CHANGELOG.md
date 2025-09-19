@@ -1,5 +1,14 @@
 # next-docs-mdx
 
+## 11.10.1
+
+### Patch Changes
+
+- da095ac: Refactor internal export paths
+- 854d4ef: Export `postInstall()` function from `fumadocs-mdx/vite`
+- Updated dependencies [982aed6]
+  - fumadocs-core@15.7.13
+
 ## 11.10.0
 
 ### Minor Changes
