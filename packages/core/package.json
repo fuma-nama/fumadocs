@@ -142,7 +142,7 @@
     "waku": "^0.26.1"
   },
   "peerDependencies": {
-    "@mixedbread/sdk": "^0.19.0",
+    "@mixedbread/sdk": "^0.28.0",
     "@oramacloud/client": "1.x.x || 2.x.x",
     "@tanstack/react-router": "1.x.x",
     "@types/react": "*",
