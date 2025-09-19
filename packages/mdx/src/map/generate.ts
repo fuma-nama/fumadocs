@@ -5,7 +5,7 @@ import type { LoadedConfig } from '@/utils/config';
 import type { DocCollection, MetaCollection } from '@/config';
 import { validate } from '@/utils/validation';
 import { fileCache } from '@/map/file-cache';
-import type { AsyncRuntimeFile, FileInfo } from '@/runtime/types';
+import type { AsyncRuntimeFile, FileInfo } from '@/runtime/next/types';
 import { load } from 'js-yaml';
 import { getGitTimestamp } from '@/utils/git-timestamp';
 import { fumaMatter } from '@/utils/fuma-matter';

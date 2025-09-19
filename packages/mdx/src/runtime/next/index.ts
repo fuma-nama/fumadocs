@@ -4,7 +4,7 @@ import {
   type PageData,
   type Source,
 } from 'fumadocs-core/source';
-import type { BaseCollectionEntry, FileInfo, Runtime } from '@/runtime/types';
+import type { BaseCollectionEntry, FileInfo, Runtime } from './types';
 import fs from 'node:fs';
 
 const cache = new Map<string, string>();

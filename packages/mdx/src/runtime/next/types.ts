@@ -16,7 +16,7 @@ export interface FileInfo {
   absolutePath: string;
 }
 
-interface MarkdownProps
+export interface MarkdownProps
   extends Omit<CompiledMDXProperties, 'frontmatter' | 'default'> {
   body: CompiledMDXProperties['default'];
 }

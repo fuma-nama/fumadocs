@@ -6,7 +6,7 @@ export default defineConfig({
     './src/{config,next,vite,bun}/index.ts',
     './src/node/loader.ts',
     './src/config/zod-3.ts',
-    './src/runtime/async.ts',
+    './src/runtime/next/{index,async}.ts',
     './src/runtime/vite/{browser,server}.ts',
   ],
   format: ['esm', 'cjs'],

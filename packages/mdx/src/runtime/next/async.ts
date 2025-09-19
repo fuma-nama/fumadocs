@@ -1,7 +1,7 @@
 import type { LoadedConfig } from '@/utils/config';
 import { type StructuredData } from 'fumadocs-core/mdx-plugins';
-import { _runtime, createMDXSource } from '@/runtime/index';
-import type { RuntimeAsync } from '@/runtime/types';
+import { _runtime, createMDXSource } from './index';
+import type { RuntimeAsync } from './types';
 import { buildMDX } from '@/utils/build-mdx';
 import type { ProcessorOptions } from '@mdx-js/mdx';
 import { executeMdx } from '@fumadocs/mdx-remote/client';

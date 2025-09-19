@@ -33,9 +33,13 @@
       "types": "./dist/vite/index.d.ts",
       "require": "./dist/vite/index.cjs"
     },
+    ".": {
+      "import": "./dist/runtime/next/index.js",
+      "types": "./dist/runtime/next/index.d.ts"
+    },
     "./runtime/async": {
-      "import": "./dist/runtime/async.js",
-      "types": "./dist/runtime/async.d.ts"
+      "import": "./dist/runtime/next/async.js",
+      "types": "./dist/runtime/next/async.d.ts"
     },
     "./runtime/vite": {
       "browser": "./dist/runtime/vite/browser.js",
@@ -49,11 +53,6 @@
     "./bun": {
       "import": "./dist/bun/index.js",
       "types": "./dist/bun/index.d.ts"
-    },
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts",
-      "require": "./dist/index.cjs"
     }
   },
   "main": "./dist/index.js",
