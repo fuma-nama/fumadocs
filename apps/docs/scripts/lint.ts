@@ -4,8 +4,10 @@ import {
   scanURLs,
   validateFiles,
 } from 'next-validate-link';
-import type { InferPageType } from 'fumadocs-core/source';
+import { InferPageType } from 'fumadocs-core/source';
 import { blog, source } from '@/lib/source';
+
+type AnySource = typeof blog | typeof source;
 
 async function checkLinks() {
   const scanned = await scanURLs({
@@ -33,7 +35,7 @@ async function checkLinks() {
 
   printErrors(
     await validateFiles(
-      [...source.getPages().map(toFile), ...blog.getPages().map(toFile)],
+      [...(await getFiles(source)), ...(await getFiles(blog))],
       {
         scanned,
         markdown: {
@@ -48,9 +50,7 @@ async function checkLinks() {
   );
 }
 
-function getHeadings({
-  data,
-}: InferPageType<typeof source> | InferPageType<typeof blog>) {
+function getHeadings({ data }: InferPageType<AnySource>) {
   const headings = data.toc.map((item) => item.url.slice(1));
   const elementIds = data._exports?.elementIds;
   if (Array.isArray(elementIds)) {
@@ -60,15 +60,18 @@ function getHeadings({
   return headings;
 }
 
-function toFile(
-  page: InferPageType<typeof source> | InferPageType<typeof blog>,
-): FileObject {
-  return {
-    data: page.data,
-    url: page.url,
-    path: page.absolutePath,
-    content: page.data.content,
-  };
+async function getFiles(source: AnySource) {
+  const files: FileObject[] = [];
+  for (const page of source.getPages()) {
+    files.push({
+      data: page.data,
+      url: page.url,
+      path: page.absolutePath,
+      content: await page.data.getText('raw'),
+    });
+  }
+
+  return files;
 }
 
 void checkLinks();
