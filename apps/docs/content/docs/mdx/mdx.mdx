@@ -1,14 +1,13 @@
 ---
-title: Default MDX Config
+title: MDX Presets
 description: Customise the default configurations for MDX processor.
 ---
 
-## Extended MDX Options [#extended]
+Fumadocs MDX provides MDX presets to simplify configurations of features like **syntax highlighting**.
 
-Fumadocs MDX will apply some default MDX options, to make features like **syntax highlighting** work out of the box.
+## Default Preset
 
-To allow overriding the defaults, Fumadocs MDX supports **Extended MDX Options** on top of [`ProcessorOptions`](https://mdxjs.com/packages/mdx/#processoroptions).
-Additional options below:
+This preset is enabled by default. To override the defaults, it accepts an interface inherited from [`ProcessorOptions`](https://mdxjs.com/packages/mdx/#processoroptions):
 
 ### Remark Plugins
 
@@ -147,9 +146,3 @@ export const blog = defineCollections({
   }),
 });
 ```
-
-By default, it includes:
-
-- `toc` for the Remark Heading plugin
-- `structuredData` for the Remark Structure Plugin
-- `frontmatter` for the frontmatter of MDX (using `gray-matter`)

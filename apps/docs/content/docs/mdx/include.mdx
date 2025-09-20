@@ -44,7 +44,7 @@ Resolve relative paths from cwd instead of the Markdown file:
 
 For Markdown files, you can include a section of it:
 
-```mdx title="a.mdx"
+```mdx tab="a.mdx"
 ## Hello World
 
 <section id="test">This is included</section>
@@ -52,13 +52,15 @@ For Markdown files, you can include a section of it:
 This is not included.
 ```
 
-```mdx title="b.mdx"
+```mdx tab="b.mdx"
+Include the content from `a.mdx`:
+
 <include>a.mdx#test</include>
 ```
 
 Or with heading id:
 
-```mdx title="a.mdx"
+```mdx tab="a.mdx"
 ## Included Section
 
 I'm here!
@@ -68,6 +70,8 @@ I'm here!
 Some random text.
 ```
 
-```mdx title="b.mdx"
+```mdx tab="b.mdx"
+Content under the heading:
+
 <include>a.mdx#included-section</include>
 ```
