@@ -76,7 +76,7 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
           githubUrl={`https://github.com/${owner}/${repo}/blob/dev/apps/docs/content/docs/${page.path}`}
         />
       </div>
-      <div className="prose flex-1 text-fd-foreground/80">
+      <div className="prose flex-1 text-fd-foreground/90">
         {preview ? <PreviewRenderer preview={preview} /> : null}
         <Mdx
           components={getMDXComponents({
