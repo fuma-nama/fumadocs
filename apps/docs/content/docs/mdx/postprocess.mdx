@@ -13,7 +13,6 @@ Include the processed Markdown content into static information before being conv
 
 ```ts tab="docs"
 import { defineDocs } from 'fumadocs-mdx/config';
-import { myPlugin } from './remark-plugin';
 
 export default defineDocs({
   docs: {
@@ -27,7 +26,6 @@ export default defineDocs({
 
 ```ts tab="doc"
 import { defineCollections } from 'fumadocs-mdx/config';
-import { myPlugin } from './remark-plugin';
 
 export default defineCollections({
   type: 'doc',

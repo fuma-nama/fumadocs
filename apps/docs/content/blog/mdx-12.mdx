@@ -1,0 +1,95 @@
+---
+title: Fumadocs MDX v12
+description: Runtime improvements & LLM integrations.
+date: 2025-09-20
+author: Fuma Nama
+---
+
+## Overview
+
+Fumadocs MDX v12 mainly aims to unify Fumadocs MDX on Vite and Next.js.
+
+It contains renames to certain APIs (import paths are unaffected), migrations may be necessary.
+
+## Breaking Changes
+
+### Next.js
+
+Removed `content` on page data in favour of `getText()`.
+
+```ts tab="Before"
+import { source } from '@/lib/source';
+
+const page = source.getPage(['...']);
+console.log(page.data.content);
+```
+
+```ts tab="After"
+import { source } from '@/lib/source';
+
+const page = source.getPage(['...']);
+console.log(await page.data.getText('raw'));
+```
+
+API Renames on page data:
+
+- `_file` -> `info`.
+- `_file.absolutePath` -> `info.fullPath`.
+
+```ts tab="Before"
+import { source } from '@/lib/source';
+
+const page = source.getPage(['...']);
+console.log(page._file, page._file.absolutePath);
+```
+
+```ts tab="After"
+import { source } from '@/lib/source';
+
+const page = source.getPage(['...']);
+console.log(page.info, page.info.fullPath);
+```
+
+## Improvements
+
+### Vite
+
+Added APIs for `info` to access raw file info.
+
+```ts
+import { source } from '@/lib/source';
+
+const page = source.getPage(['...']);
+console.log(page.info);
+```
+
+### `getText()`
+
+You can use it to access:
+
+- Raw Markdown content.
+- Processed Markdown before being compiled into HAST (HTML).
+
+This is useful for `llms.txt` generation when used with docs generations tools & remark plugins.
+
+```ts
+import { source } from '@/lib/source';
+
+const page = source.getPage(['...']);
+console.log(await page.data.getText('raw'));
+console.log(await page.data.getText('processed'));
+```
+
+To access processed Markdown content, you need to enable `includeProcessedMarkdown` in collection config.
+
+```ts title="source.config.ts"
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export default defineDocs({
+  docs: {
+    postprocess: {
+      includeProcessedMarkdown: true,
+    },
+  },
+});
+```

@@ -45,7 +45,7 @@ function getHeadings({ data }: InferPageType<typeof source>): string[] {
 
 function getFiles() {
   const promises = source.getPages().map(
-    async (page): FileObject => ({
+    async (page): Promise<FileObject> => ({
       path: page.absolutePath,
       content: await page.data.getText('raw'),
       url: page.url,
