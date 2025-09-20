@@ -1,4 +1,4 @@
-import type { CompiledMDXProperties } from '@/utils/build-mdx';
+import type { CompiledMDXProperties } from '@/mdx/build-mdx';
 
 export type CompiledMDXFile<Frontmatter> = CompiledMDXProperties<Frontmatter> &
   Record<string, unknown>;

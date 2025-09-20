@@ -17,17 +17,28 @@ Hence, they can also be used as a page, or components that you can import.
 
 You can use `page.mdx` instead of `page.tsx` for creating a new page under the app directory.
 
-```mdx title="app/my-page/page.mdx"
+```mdx tab="app/my-page/page.mdx"
 ---
 title: My Page
 ---
 
-{/* this will enable Typography styles of Fumadocs UI */}
-export { withArticle as default } from 'fumadocs-ui/page';
+export { default } from '@/components/layouts/page';
 
 # Hello World
 
 This is my page.
+```
+
+```tsx tab="components/layouts/page.tsx"
+import type { ComponentProps } from 'react';
+
+export default function Content(props: ComponentProps<'main'>) {
+  return (
+    <main className="px-8 py-12">
+      <article className="prose">{props.children}</article>
+    </main>
+  );
+}
 ```
 
 #### MDX Components

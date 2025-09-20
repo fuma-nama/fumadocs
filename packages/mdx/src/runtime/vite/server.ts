@@ -5,11 +5,17 @@ import type {
   Source,
   VirtualFile,
 } from 'fumadocs-core/source';
-import type { CompiledMDXProperties } from '@/utils/build-mdx';
-import type { FC } from 'react';
-import type { MDXProps } from 'mdx/types';
 import { type BaseCreate, fromConfigBase } from '@/runtime/vite/base';
 import * as path from 'node:path';
+import {
+  AsyncDocCollectionEntry,
+  DocCollectionEntry,
+  DocData,
+  FileInfo,
+  MetaCollectionEntry,
+  missingProcessedMarkdown,
+} from '@/runtime/shared';
+import fs from 'node:fs/promises';
 
 // for server-side usage of renderers
 export { createClientLoader, toClientRenderer } from './browser';
@@ -17,40 +23,14 @@ export type { ClientLoader, ClientLoaderOptions } from './browser';
 
 export type { CompiledMDXFile } from './types';
 
-type Override<A, B> = Omit<A, keyof B> & B;
-
-type MDXFileToPageData<Frontmatter> = Override<
-  Omit<CompiledMDXProperties<Frontmatter>, 'frontmatter' | 'default'>,
-  Frontmatter & {
-    /**
-     * @deprecated use `body` instead.
-     */
-    default: FC<MDXProps>;
-
-    _exports: Record<string, unknown>;
-    body: FC<MDXProps>;
-  }
->;
-
-type MDXFileToPageDataLazy<Frontmatter> = Override<
-  Frontmatter,
-  {
-    load: () => Promise<
-      Omit<CompiledMDXFile<Frontmatter>, 'default'> & {
-        body: FC<MDXProps>;
-      }
-    >;
-  }
->;
-
 export interface ServerCreate<Config> extends BaseCreate<Config> {
   sourceAsync: <DocOut extends PageData, MetaOut extends MetaData>(
     doc: DocMap<DocOut>,
     meta: MetaMap<MetaOut>,
   ) => Promise<
     Source<{
-      pageData: MDXFileToPageData<DocOut>;
-      metaData: MetaOut;
+      pageData: DocCollectionEntry<DocOut>;
+      metaData: MetaCollectionEntry<MetaOut>;
     }>
   >;
 
@@ -59,38 +39,81 @@ export interface ServerCreate<Config> extends BaseCreate<Config> {
     meta: MetaMap<MetaOut>,
   ) => Promise<
     Source<{
-      pageData: MDXFileToPageDataLazy<DocOut>;
-      metaData: MetaOut;
+      pageData: AsyncDocCollectionEntry<DocOut>;
+      metaData: MetaCollectionEntry<MetaOut>;
     }>
   >;
 }
 
 export function fromConfig<Config>(): ServerCreate<Config> {
   const base = fromConfigBase<Config>();
-  function mapPageData<Frontmatter>(entry: CompiledMDXFile<Frontmatter>) {
-    const { toc, structuredData, lastModified, frontmatter } = entry;
-
+  function fileInfo(file: string, base: string): FileInfo {
     return {
-      ...frontmatter,
-      default: entry.default,
+      path: file,
+      fullPath: path.join(base, file),
+    };
+  }
+
+  function mapDocData(entry: CompiledMDXFile<any>): DocData {
+    return {
       body: entry.default,
-      toc,
-      structuredData,
-      lastModified,
+      toc: entry.toc,
+      extractedReferences: entry.extractedReferences,
+      structuredData: entry.structuredData,
+      lastModified: entry.lastModified,
       _exports: entry,
-    } as MDXFileToPageData<Frontmatter>;
+    };
+  }
+
+  function mapPageData<Frontmatter>(
+    info: FileInfo,
+    entry: CompiledMDXFile<Frontmatter>,
+  ): DocCollectionEntry<Frontmatter> {
+    return {
+      ...mapDocData(entry),
+      info,
+      async getText(type) {
+        if (type === 'raw') {
+          return (await fs.readFile(info.fullPath)).toString();
+        }
+
+        if (typeof entry._markdown !== 'string') missingProcessedMarkdown();
+        return entry._markdown;
+      },
+      ...entry.frontmatter,
+    };
   }
 
   function mapPageDataLazy<Frontmatter>(
+    info: FileInfo,
     head: Frontmatter,
     content: () => Promise<CompiledMDXFile<Frontmatter>>,
-  ): MDXFileToPageDataLazy<Frontmatter> {
+  ): AsyncDocCollectionEntry<Frontmatter> {
     return {
       ...head,
+      info,
       async load() {
-        const { default: body, ...rest } = await content();
-        return { body, ...rest };
+        return mapDocData(await content());
       },
+      async getText(type) {
+        if (type === 'raw') {
+          return (await fs.readFile(info.fullPath)).toString();
+        }
+
+        const entry = await content();
+        if (typeof entry._markdown !== 'string') missingProcessedMarkdown();
+        return entry._markdown;
+      },
+    };
+  }
+
+  function mapMetaData<Data>(
+    info: FileInfo,
+    content: Data,
+  ): MetaCollectionEntry<Data> {
+    return {
+      info,
+      ...content,
     };
   }
 
@@ -100,19 +123,23 @@ export function fromConfig<Config>(): ServerCreate<Config> {
     async sourceAsync(doc, meta) {
       const virtualFiles: Promise<VirtualFile>[] = [
         ...Object.entries(doc).map(async ([file, content]) => {
+          const info = fileInfo(file, content.base);
+
           return {
             type: 'page',
             path: file,
-            absolutePath: path.join(content.base, file),
-            data: mapPageData(await content()),
+            absolutePath: info.fullPath,
+            data: mapPageData(info, await content()),
           } satisfies VirtualFile;
         }),
         ...Object.entries(meta).map(async ([file, content]) => {
+          const info = fileInfo(file, content.base);
+
           return {
             type: 'meta',
-            path: file,
-            absolutePath: path.join(content.base, file),
-            data: await content(),
+            path: info.path,
+            absolutePath: info.fullPath,
+            data: mapMetaData(info, await content()),
           } satisfies VirtualFile;
         }),
       ];
@@ -122,19 +149,23 @@ export function fromConfig<Config>(): ServerCreate<Config> {
     async sourceLazy(doc, meta) {
       const virtualFiles: Promise<VirtualFile>[] = [
         ...Object.entries(doc.head).map(async ([file, frontmatter]) => {
+          const info = fileInfo(file, doc.base);
+
           return {
             type: 'page',
-            path: file,
-            absolutePath: path.join(doc.base, file),
-            data: mapPageDataLazy(await frontmatter(), doc.body[file]),
+            path: info.path,
+            absolutePath: info.fullPath,
+            data: mapPageDataLazy(info, await frontmatter(), doc.body[file]),
           } satisfies VirtualFile;
         }),
         ...Object.entries(meta).map(async ([file, content]) => {
+          const info = fileInfo(file, content.base);
+
           return {
             type: 'meta',
-            path: file,
-            absolutePath: path.join(content.base, file),
-            data: await content(),
+            path: info.path,
+            absolutePath: info.fullPath,
+            data: mapMetaData(info, await content()),
           } satisfies VirtualFile;
         }),
       ];

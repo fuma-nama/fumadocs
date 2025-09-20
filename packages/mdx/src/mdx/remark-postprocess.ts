@@ -1,13 +1,8 @@
-import type { Transformer } from 'unified';
+import type { Processor, Transformer } from 'unified';
 import type { Root, RootContent } from 'mdast';
 import { visit } from 'unist-util-visit';
+import { toMarkdown } from 'mdast-util-to-markdown';
 import { valueToEstree } from 'estree-util-value-to-estree';
-
-declare module 'vfile' {
-  interface DataMap {
-    extractedReferences: ExtractedReference[];
-  }
-}
 
 export interface ExtractedReference {
   href: string;
@@ -15,19 +10,27 @@ export interface ExtractedReference {
 
 export interface PostprocessOptions {
   /**
-   * Values to export from `vfile.data`
+   * Properties to export from `vfile.data`
    */
-  injectExports: string[];
+  valueToExport?: string[];
+
+  /**
+   * stringify MDAST and export via `_markdown`.
+   */
+  includeProcessedMarkdown?: boolean;
 }
 
 /**
- * - write exports
  * - collect references
  * - write frontmatter (auto-title & description)
  */
-export function remarkPostprocess({
-  injectExports,
-}: PostprocessOptions): Transformer<Root, Root> {
+export function remarkPostprocess(
+  this: Processor,
+  {
+    includeProcessedMarkdown = false,
+    valueToExport = [],
+  }: PostprocessOptions = {},
+): Transformer<Root, Root> {
   return (tree, file) => {
     let title: string | undefined;
     const urls: ExtractedReference[] = [];
@@ -54,21 +57,24 @@ export function remarkPostprocess({
 
     file.data.extractedReferences = urls;
 
-    for (const name of injectExports) {
+    if (includeProcessedMarkdown) {
+      file.data._markdown = toMarkdown(tree, {
+        ...this.data('settings'),
+        // @ts-expect-error - from https://github.com/remarkjs/remark/blob/main/packages/remark-stringify/lib/index.js
+        extensions: this.data('toMarkdownExtensions') || [],
+      });
+    }
+
+    for (const { name, value } of file.data['mdx-export'] ?? []) {
+      tree.children.unshift(getMdastExport(name, value));
+    }
+
+    for (const name of valueToExport) {
       if (!(name in file.data)) continue;
 
       tree.children.unshift(getMdastExport(name, file.data[name]));
     }
   };
-}
-
-function flattenNode(node: RootContent): string {
-  if ('children' in node)
-    return node.children.map((child) => flattenNode(child)).join('');
-
-  if ('value' in node) return node.value;
-
-  return '';
 }
 
 /**
@@ -109,4 +115,13 @@ function getMdastExport(name: string, value: unknown): RootContent {
       },
     },
   };
+}
+
+function flattenNode(node: RootContent): string {
+  if ('children' in node)
+    return node.children.map((child) => flattenNode(child)).join('');
+
+  if ('value' in node) return node.value;
+
+  return '';
 }

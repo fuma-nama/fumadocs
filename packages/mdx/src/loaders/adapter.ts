@@ -1,4 +1,4 @@
-import type { CompilerOptions } from '@/utils/build-mdx';
+import type { CompilerOptions } from '@/mdx/build-mdx';
 import type { LoadFnOutput, LoadHook } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs/promises';
@@ -98,7 +98,7 @@ export function toWebpack(loader: Loader): WebpackLoader {
     try {
       const result = await loader({
         filePath: this.resourcePath,
-        query: parse(this.resourceQuery),
+        query: parse(this.resourceQuery.slice(1)),
         source,
         development: this.mode === 'development',
         compiler: this,

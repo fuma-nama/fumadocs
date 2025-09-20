@@ -1,7 +1,8 @@
 import type { StandardSchemaV1 } from '@standard-schema/spec';
-import type { DefaultMDXOptions } from '@/utils/mdx-options';
+import type { DefaultMDXOptions } from '@/mdx/preset';
 import type { ProcessorOptions } from '@mdx-js/mdx';
 import { frontmatterSchema, metaSchema } from '@/config/zod-4';
+import type { PostprocessOptions } from '@/mdx/remark-postprocess';
 
 export type CollectionSchema<Schema extends StandardSchemaV1, Context> =
   | Schema
@@ -37,6 +38,7 @@ export interface DocCollection<
 > extends BaseCollection {
   type: 'doc';
 
+  postprocess?: PostprocessOptions;
   mdxOptions?: ProcessorOptions;
 
   /**
@@ -103,9 +105,9 @@ export function defineDocs<
   DocSchema extends StandardSchemaV1 = typeof frontmatterSchema,
   MetaSchema extends StandardSchemaV1 = typeof metaSchema,
   Async extends boolean = false,
->(options?: {
+>(options: {
   /**
-   * The directory to scan files
+   * The content directory to scan files
    *
    *  @defaultValue 'content/docs'
    */
@@ -114,11 +116,7 @@ export function defineDocs<
   docs?: Omit<DocCollection<DocSchema, Async>, 'dir' | 'type'>;
   meta?: Omit<MetaCollection<MetaSchema>, 'dir' | 'type'>;
 }): DocsCollection<DocSchema, MetaSchema, Async> {
-  if (!options)
-    console.warn(
-      '[`source.config.ts`] Deprecated: please pass options to `defineDocs()` and specify a `dir`.',
-    );
-  const dir = options?.dir ?? 'content/docs';
+  const dir = options.dir ?? 'content/docs';
 
   return {
     type: 'docs',

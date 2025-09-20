@@ -1,0 +1,34 @@
+---
+title: Validate Links
+description: Ensure your links are correct.
+---
+
+## Setup
+
+You can use [`next-validate-link`](https://next-validate-link.vercel.app) to validate your links in content files.
+
+> This guide is mainly for **Fumadocs MDX**, see the docs of `next-validate-link` for other setups.
+
+Create a script for Bun:
+
+<include meta='title="./scripts/lint.ts"'>./validate-links.example.ts</include>
+
+### Running Lint
+
+To access the `source` object outside of app runtime, you'll need a runtime loader:
+
+```toml tab="bunfig.toml"
+preload = ["./scripts/preload.ts"]
+```
+
+```ts tab="scripts/preload.ts"
+import { createMdxPlugin } from 'fumadocs-mdx/bun';
+
+Bun.plugin(createMdxPlugin());
+```
+
+Run the script to validate links:
+
+```bash
+bun ./scripts/lint.ts
+```

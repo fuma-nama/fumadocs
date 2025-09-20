@@ -123,8 +123,6 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
             },
             Installation,
             Customisation,
-            ...(await import('@/content/docs/ui/components/tabs.client')),
-            ...(await import('@/content/docs/ui/theme.client')),
           })}
         />
         {page.data.index ? <DocsCategory url={page.url} /> : null}

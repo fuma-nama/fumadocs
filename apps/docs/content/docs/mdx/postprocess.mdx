@@ -1,0 +1,46 @@
+---
+title: Postprocess
+description: Include useful information after compilation of content files.
+---
+
+## Configurations
+
+Note that `postprocess` is only available for doc/docs collections.
+
+### Processed Markdown
+
+Include the processed Markdown content into static information before being converted into HTML.
+
+```ts tab="docs"
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export default defineDocs({
+  docs: {
+    postprocess: {
+      // [!code ++]
+      includeProcessedMarkdown: true,
+    },
+  },
+});
+```
+
+```ts tab="doc"
+import { defineCollections } from 'fumadocs-mdx/config';
+
+export default defineCollections({
+  type: 'doc',
+  postprocess: {
+    // [!code ++]
+    includeProcessedMarkdown: true,
+  },
+});
+```
+
+You can obtain the included content with `getText()` (e.g. in Fumadocs):
+
+```ts
+import { source } from '@/lib/source';
+
+const page = source.getPage('...');
+console.log(await page.data.getText('processed'));
+```

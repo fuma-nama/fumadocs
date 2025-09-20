@@ -1,17 +1,3 @@
----
-title: Validate Links
-description: Ensure your links are correct.
----
-
-## Setup
-
-You can use [`next-validate-link`](https://next-validate-link.vercel.app) to validate your links in content files.
-
-> This guide is mainly for **Fumadocs MDX**, see the docs of `next-validate-link` for other setups.
-
-Create a script for Bun:
-
-```ts title="scripts/lint.ts"
 import {
   type FileObject,
   printErrors,
@@ -38,7 +24,7 @@ async function checkLinks() {
   });
 
   printErrors(
-    await validateFiles(source.getPages().map(toFile), {
+    await validateFiles(await getFiles(), {
       scanned,
       // check `href` attributes in different MDX components
       markdown: {
@@ -57,32 +43,17 @@ function getHeadings({ data }: InferPageType<typeof source>): string[] {
   return data.toc.map((item) => item.url.slice(1));
 }
 
-function toFile(page: InferPageType<typeof source>): FileObject {
-  return {
-    data: page.data,
-    url: page.url,
-    path: page.absolutePath,
-    content: page.data.content,
-  };
+function getFiles() {
+  const promises = source.getPages().map(
+    async (page): Promise<FileObject> => ({
+      path: page.absolutePath,
+      content: await page.data.getText('raw'),
+      url: page.url,
+      data: page.data,
+    }),
+  );
+
+  return Promise.all(promises);
 }
 
 void checkLinks();
-```
-
-To access the `source` object outside of app runtime, you'll need a runtime loader:
-
-```toml tab="bunfig.toml"
-preload = ["./scripts/preload.ts"]
-```
-
-```ts tab="scripts/preload.ts"
-import { createMdxPlugin } from 'fumadocs-mdx/bun';
-
-Bun.plugin(createMdxPlugin());
-```
-
-Run the script to validate links:
-
-```bash
-bun ./scripts/lint.ts
-```

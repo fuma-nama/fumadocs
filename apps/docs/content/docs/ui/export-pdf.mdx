@@ -1,0 +1,95 @@
+---
+title: Export PDF
+description: Export docs pages as PDF documents
+---
+
+## Overview
+
+In general, we strongly recommend you to download the entire website (HTML files, etc) for offline browsing.
+
+In case if you want to export the page as a PDF, you can follow this guide.
+
+## Setup
+
+Use Puppeteer to export PDF files.
+
+```ts title="scripts/export-pdf.ts"
+import puppeteer from 'puppeteer';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+
+const browser = await puppeteer.launch();
+const outDir = 'pdfs';
+// update this [!code highlight]
+const urls = ['/docs/ui', '/docs/ui/customisations'];
+
+async function exportPdf(pathname: string) {
+  const page = await browser.newPage();
+  await page.goto('http://localhost:3000' + pathname, {
+    waitUntil: 'networkidle2',
+  });
+
+  await page.pdf({
+    path: path.join(outDir, pathname.slice(1).replaceAll('/', '-') + '.pdf'),
+    width: 950,
+    printBackground: true,
+  });
+
+  console.log(`PDF generated successfully for ${pathname}`);
+  await page.close();
+}
+
+await fs.mkdir(outDir, { recursive: true });
+await Promise.all(urls.map(exportPdf));
+await browser.close();
+```
+
+Add the following to your Tailwind CSS file to disable navigation elements when printing:
+
+```css
+@media print {
+  #nd-docs-layout {
+    --fd-sidebar-width: 0px !important;
+  }
+
+  #nd-sidebar {
+    display: none;
+  }
+}
+```
+
+You can now run the script:
+
+```bash
+bun ./scripts/export-pdf.ts
+```
+
+### Invisible Contents
+
+For invisible contents in accordions/tabs, you may need to temporarily override the MDX components. For example:
+
+```tsx title="mdx-components.tsx"
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+import type { MDXComponents } from 'mdx/types';
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+
+// you may use environment variable here [!code highlight]
+const isPrinting = true;
+
+export function getMDXComponents(components?: MDXComponents) {
+  const PrintingAccordion: typeof Accordion = (props) => (
+    <div>
+      <h3>{props.title}</h3>
+      {props.children}
+    </div>
+  );
+
+  return {
+    ...defaultMdxComponents,
+    // updated accordions:
+    Accordion: isPrinting ? PrintingAccordion : Accordion,
+    Accordions: isPrinting ? 'div' : Accordions,
+    ...components,
+  } satisfies MDXComponents;
+}
+```

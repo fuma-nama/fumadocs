@@ -1,5 +1,19 @@
 # @fuma-docs/openapi
 
+## 9.3.11
+
+### Patch Changes
+
+- 3e7e178: OpenAPI: handle undefined description in index.md generation
+
+## 9.3.10
+
+### Patch Changes
+
+- Updated dependencies [982aed6]
+  - fumadocs-core@15.7.13
+  - fumadocs-ui@15.7.13
+
 ## 9.3.9
 
 ### Patch Changes

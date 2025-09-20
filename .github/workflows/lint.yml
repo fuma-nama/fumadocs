@@ -26,7 +26,7 @@ jobs:
         run: pnpm lint:prettier
 
       - name: Check Types
-        run: pnpm build --filter=./packages/* && pnpm types:check
+        run: pnpm build --filter=./packages/* && pnpm i --frozen-lockfile && pnpm types:check
 
       - name: Run ESLint
         run: pnpm lint

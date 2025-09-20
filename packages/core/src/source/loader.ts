@@ -375,7 +375,7 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
         };
       }
     },
-    getPageByHref(href, { dir = '', language } = {}) {
+    getPageByHref(href, { dir = '', language = defaultLanguage } = {}) {
       const [value, hash] = href.split('#', 2);
       let target;
 

@@ -48,6 +48,11 @@ const showcases: ShowcaseObject[] = [
     url: 'https://better-auth.com',
   },
   {
+    image: '/showcases/c15t.png',
+    name: 'c15t',
+    url: 'https://c15t.com',
+  },
+  {
     image: '/showcases/better-t-stack.jpeg',
     name: 'Better T Stack',
     url: 'https://better-t-stack.dev',

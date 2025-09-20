@@ -49,7 +49,7 @@ export function buildConfig(config: Record<string, unknown>): LoadedConfig {
       const input = this.global.mdxOptions;
       async function uncached(): Promise<ProcessorOptions> {
         const options = typeof input === 'function' ? await input() : input;
-        const { getDefaultMDXOptions } = await import('@/utils/mdx-options');
+        const { getDefaultMDXOptions } = await import('@/mdx/preset');
 
         if (options?.preset === 'minimal') return options;
         return getDefaultMDXOptions({

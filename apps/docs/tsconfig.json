@@ -9,11 +9,8 @@
     "next-env.d.ts",
     "**/*.ts",
     "content/**/*.mdx",
-    "**/*.mts",
     "**/*.tsx",
-    ".next/types/**/*.ts",
-    "next.config.js",
-    "tailwind.config.js"
+    ".next/types/**/*.ts"
   ],
   "exclude": ["node_modules", "eslint.config.mjs"]
 }

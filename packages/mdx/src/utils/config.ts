@@ -9,7 +9,6 @@ import type {
 import type { ProcessorOptions } from '@mdx-js/mdx';
 import { pathToFileURL } from 'node:url';
 import { buildConfig } from '@/config/build';
-import type { Plugin } from 'esbuild';
 
 export function findConfigFile(): string {
   return path.resolve('source.config.ts');
@@ -28,39 +27,6 @@ let cache: {
   config: Promise<LoadedConfig>;
 } | null = null;
 
-async function isZod3() {
-  try {
-    const content = JSON.parse(
-      (await fs.readFile('node_modules/zod/package.json')).toString(),
-    );
-    const version = content.version;
-
-    return typeof version === 'string' && version.startsWith('3.');
-  } catch {
-    return false;
-  }
-}
-
-function createCompatZodPlugin(): Plugin {
-  return {
-    name: 'replace-zod-import',
-    async setup(build) {
-      const usingZod3 = await isZod3();
-      if (!usingZod3) return;
-
-      console.warn(
-        '[Fumadocs MDX] Noticed Zod v3 in your node_modules, we recommend upgrading to Zod v4 for better compatibility.',
-      );
-      build.onResolve({ filter: /^fumadocs-mdx\/config$/ }, () => {
-        return {
-          path: 'fumadocs-mdx/config/zod-3',
-          external: true,
-        };
-      });
-    },
-  };
-}
-
 async function compileConfig(configPath: string, outDir: string) {
   const { build } = await import('esbuild');
 
@@ -73,7 +39,6 @@ async function compileConfig(configPath: string, outDir: string) {
     platform: 'node',
     format: 'esm',
     packages: 'external',
-    plugins: [createCompatZodPlugin()],
     outExtension: {
       '.js': '.mjs',
     },
