@@ -4,7 +4,7 @@ import {
   type PageData,
   type Source,
 } from 'fumadocs-core/source';
-import type { DocOut, Runtime } from './types';
+import type { DocOut, MetaOut, Runtime } from './types';
 import type { CompiledMDXProperties } from '@/mdx/build-mdx';
 import * as fs from 'node:fs/promises';
 import { type FileInfo, missingProcessedMarkdown } from '@/runtime/shared';
@@ -38,9 +38,9 @@ export const _runtime: Runtime = {
   meta(files) {
     return files.map((file) => {
       return {
+        info: file.info,
         ...file.data,
-        _file: file.info,
-      };
+      } satisfies MetaOut;
     }) as any;
   },
   docs(docs, metas) {

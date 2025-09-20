@@ -5,7 +5,7 @@ import type { LoadedConfig } from '@/utils/config';
 import type { DocCollection, MetaCollection } from '@/config';
 import { validate } from '@/utils/validation';
 import { fileCache } from '@/map/file-cache';
-import type { AsyncRuntimeFile, FileInfo } from '@/runtime/next/types';
+import type { AsyncRuntimeFile } from '@/runtime/next/types';
 import { load } from 'js-yaml';
 import { getGitTimestamp } from '@/utils/git-timestamp';
 import { fumaMatter } from '@/utils/fuma-matter';
@@ -15,6 +15,7 @@ import {
   toImportPath,
 } from '@/utils/import-formatter';
 import { getGlobPatterns, isFileSupported } from '@/utils/collections';
+import type { FileInfo } from '@/runtime/shared';
 
 async function readFileWithCache(file: string): Promise<string> {
   const cached = fileCache.read<string>('read-file', file);
@@ -57,7 +58,7 @@ export async function generateJS(
         getImportCode({
           type: 'namespace',
           name: importId,
-          specifier: `${toImportPath(file.absolutePath, importPath)}?${params.join('&')}`,
+          specifier: `${toImportPath(file.fullPath, importPath)}?${params.join('&')}`,
         }),
       );
 
@@ -69,9 +70,9 @@ export async function generateJS(
 
   async function getMetaEntries(collection: MetaCollection, files: FileInfo[]) {
     const items = files.map(async (file) => {
-      const source = await readFileWithCache(file.absolutePath).catch(() => '');
+      const source = await readFileWithCache(file.fullPath).catch(() => '');
       let data =
-        source.length === 0 ? {} : parseMetaEntry(file.absolutePath, source);
+        source.length === 0 ? {} : parseMetaEntry(file.fullPath, source);
 
       if (collection?.schema) {
         data = await validate(
@@ -79,9 +80,9 @@ export async function generateJS(
           data,
           {
             source,
-            path: file.absolutePath,
+            path: file.fullPath,
           },
-          `invalid data in ${file.absolutePath}`,
+          `invalid data in ${file.fullPath}`,
         );
       }
 
@@ -110,7 +111,7 @@ export async function generateJS(
 
     const entries = files.map(async (file) => {
       const parsed = fumaMatter(
-        await readFileWithCache(file.absolutePath).catch(() => ''),
+        await readFileWithCache(file.fullPath).catch(() => ''),
       );
       let data = parsed.data;
 
@@ -118,14 +119,14 @@ export async function generateJS(
         data = await validate(
           collection.schema,
           parsed.data,
-          { path: file.absolutePath, source: parsed.content },
-          `invalid frontmatter in ${file.absolutePath}`,
+          { path: file.fullPath, source: parsed.content },
+          `invalid frontmatter in ${file.fullPath}`,
         );
       }
 
       let lastModified: Date | undefined;
       if (config.global?.lastModifiedTime === 'git') {
-        lastModified = await getGitTimestamp(file.absolutePath);
+        lastModified = await getGitTimestamp(file.fullPath);
       }
 
       return JSON.stringify({
@@ -191,15 +192,15 @@ async function getCollectionFiles(
     dirs.map(async (dir) => {
       const result = await glob(patterns, {
         cwd: path.resolve(dir),
-        absolute: true,
       });
 
       for (const item of result) {
         if (!isFileSupported(item, collection)) continue;
+        const fullPath = path.join(dir, item);
 
-        files.set(item, {
-          path: path.relative(dir, item),
-          absolutePath: item,
+        files.set(fullPath, {
+          path: item,
+          fullPath,
         });
       }
     }),

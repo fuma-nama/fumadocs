@@ -24,9 +24,8 @@ export interface AsyncRuntimeFile {
 export type DocOut<Schema extends StandardSchemaV1 = StandardSchemaV1> =
   DocCollectionEntry<StandardSchemaV1.InferOutput<Schema>>;
 
-export type MetaOut<Schema extends StandardSchemaV1> = MetaCollectionEntry<
-  StandardSchemaV1.InferOutput<Schema>
->;
+export type MetaOut<Schema extends StandardSchemaV1 = StandardSchemaV1> =
+  MetaCollectionEntry<StandardSchemaV1.InferOutput<Schema>>;
 
 export interface Runtime {
   doc: <C>(

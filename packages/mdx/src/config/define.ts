@@ -105,9 +105,9 @@ export function defineDocs<
   DocSchema extends StandardSchemaV1 = typeof frontmatterSchema,
   MetaSchema extends StandardSchemaV1 = typeof metaSchema,
   Async extends boolean = false,
->(options?: {
+>(options: {
   /**
-   * The directory to scan files
+   * The content directory to scan files
    *
    *  @defaultValue 'content/docs'
    */
@@ -116,11 +116,7 @@ export function defineDocs<
   docs?: Omit<DocCollection<DocSchema, Async>, 'dir' | 'type'>;
   meta?: Omit<MetaCollection<MetaSchema>, 'dir' | 'type'>;
 }): DocsCollection<DocSchema, MetaSchema, Async> {
-  if (!options)
-    console.warn(
-      '[`source.config.ts`] Deprecated: please pass options to `defineDocs()` and specify a `dir`.',
-    );
-  const dir = options?.dir ?? 'content/docs';
+  const dir = options.dir ?? 'content/docs';
 
   return {
     type: 'docs',
