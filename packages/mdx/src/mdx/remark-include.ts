@@ -4,11 +4,11 @@ import type { Code, Root, RootContent } from 'mdast';
 import * as path from 'node:path';
 import * as fs from 'node:fs/promises';
 import { fumaMatter } from '@/utils/fuma-matter';
-import type { DataMap } from '@/utils/build-mdx';
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx-jsx';
 import remarkParse from 'remark-parse';
 import remarkMdx from 'remark-mdx';
 import { remarkHeading } from 'fumadocs-core/mdx-plugins';
+import type { DataMap } from 'vfile';
 
 export interface Params {
   lang?: string;

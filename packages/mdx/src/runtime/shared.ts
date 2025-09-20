@@ -2,7 +2,19 @@ import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { TableOfContents } from 'fumadocs-core/server';
 import type { FC } from 'react';
 import type { MDXProps } from 'mdx/types';
-import type { ExtractedReference } from '@/mdx-plugins/remark-postprocess';
+import type { ExtractedReference } from '@/mdx/remark-postprocess';
+
+export interface FileInfo {
+  /**
+   * virtualized path for Source API
+   */
+  path: string;
+
+  /**
+   * the file path in file system
+   */
+  fullPath: string;
+}
 
 export interface DocData {
   /**
@@ -40,11 +52,9 @@ export interface DocData {
 
 export interface DocMethods {
   /**
-   * Read the original content of file from file system.
-   *
-   * @deprecated use `await getText('raw')` instead.
+   * file info
    */
-  get content(): string;
+  info: FileInfo;
 
   /**
    * get document as text.
@@ -54,6 +64,13 @@ export interface DocMethods {
    */
   getText: (type: 'raw' | 'processed') => Promise<string>;
 }
+
+export type MetaCollectionEntry<Data> = Data & {
+  /**
+   * file info
+   */
+  info: FileInfo;
+};
 
 export type DocCollectionEntry<Frontmatter> = Override<
   DocData & DocMethods,

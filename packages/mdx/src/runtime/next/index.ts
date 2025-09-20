@@ -4,26 +4,19 @@ import {
   type PageData,
   type Source,
 } from 'fumadocs-core/source';
-import type { DocOut, FileInfo, Runtime } from './types';
-import { readFileSync } from 'node:fs';
-import type { CompiledMDXProperties } from '@/utils/build-mdx';
-import { readFile } from 'node:fs/promises';
-import { missingProcessedMarkdown } from '@/runtime/shared';
-
-export interface BaseCollectionEntry {
-  _file: FileInfo;
-}
-
-const cache = new Map<string, string>();
+import type { DocOut, Runtime } from './types';
+import type { CompiledMDXProperties } from '@/mdx/build-mdx';
+import * as fs from 'node:fs/promises';
+import { type FileInfo, missingProcessedMarkdown } from '@/runtime/shared';
 
 export const _runtime: Runtime = {
   doc(files) {
     return files.map((file) => {
       const data = file.data as unknown as CompiledMDXProperties;
-      const filePath = file.info.absolutePath;
+      const filePath = file.info.fullPath;
 
       return {
-        _file: file.info,
+        info: file.info,
         _exports: data as unknown as Record<string, unknown>,
         body: data.default,
         lastModified: data.lastModified,
@@ -31,18 +24,9 @@ export const _runtime: Runtime = {
         structuredData: data.structuredData,
         extractedReferences: data.extractedReferences,
         ...data.frontmatter,
-        get content() {
-          const cached = cache.get(filePath);
-          if (cached) return cached;
-
-          const content = readFileSync(filePath).toString();
-          cache.set(filePath, content);
-          return content;
-        },
         async getText(type) {
-          console.log(data);
           if (type === 'raw') {
-            return (await readFile(filePath)).toString();
+            return (await fs.readFile(filePath)).toString();
           }
 
           if (typeof data._markdown !== 'string') missingProcessedMarkdown();
@@ -73,9 +57,13 @@ export const _runtime: Runtime = {
   },
 };
 
+export interface AnyCollectionEntry {
+  info: FileInfo;
+}
+
 export function createMDXSource<
-  Doc extends PageData & BaseCollectionEntry,
-  Meta extends MetaData & BaseCollectionEntry,
+  Doc extends PageData & AnyCollectionEntry,
+  Meta extends MetaData & AnyCollectionEntry,
 >(
   docs: Doc[],
   meta: Meta[] = [],
@@ -93,8 +81,8 @@ export function createMDXSource<
 }
 
 interface ResolveOptions {
-  docs: BaseCollectionEntry[];
-  meta: BaseCollectionEntry[];
+  docs: AnyCollectionEntry[];
+  meta: AnyCollectionEntry[];
 
   rootDir?: string;
 }
@@ -105,8 +93,8 @@ export function resolveFiles({ docs, meta }: ResolveOptions): VirtualFile[] {
   for (const entry of docs) {
     outputs.push({
       type: 'page',
-      absolutePath: entry._file.absolutePath,
-      path: entry._file.path,
+      absolutePath: entry.info.fullPath,
+      path: entry.info.path,
       data: entry,
     });
   }
@@ -114,8 +102,8 @@ export function resolveFiles({ docs, meta }: ResolveOptions): VirtualFile[] {
   for (const entry of meta) {
     outputs.push({
       type: 'meta',
-      absolutePath: entry._file.absolutePath,
-      path: entry._file.path,
+      absolutePath: entry.info.fullPath,
+      path: entry.info.path,
       data: entry,
     });
   }

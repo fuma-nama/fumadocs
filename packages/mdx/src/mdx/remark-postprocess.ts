@@ -2,23 +2,18 @@ import type { Processor, Transformer } from 'unified';
 import type { Root, RootContent } from 'mdast';
 import { visit } from 'unist-util-visit';
 import { toMarkdown } from 'mdast-util-to-markdown';
-
-declare module 'vfile' {
-  interface DataMap {
-    extractedReferences: ExtractedReference[];
-
-    /**
-     * [Fumadocs MDX] Processed Markdown content before `remark-rehype`.
-     */
-    _markdown?: string;
-  }
-}
+import { valueToEstree } from 'estree-util-value-to-estree';
 
 export interface ExtractedReference {
   href: string;
 }
 
 export interface PostprocessOptions {
+  /**
+   * Properties to export from `vfile.data`
+   */
+  valueToExport?: string[];
+
   /**
    * stringify MDAST and export via `_markdown`.
    */
@@ -31,7 +26,10 @@ export interface PostprocessOptions {
  */
 export function remarkPostprocess(
   this: Processor,
-  { includeProcessedMarkdown = false }: PostprocessOptions = {},
+  {
+    includeProcessedMarkdown = false,
+    valueToExport = [],
+  }: PostprocessOptions = {},
 ): Transformer<Root, Root> {
   return (tree, file) => {
     let title: string | undefined;
@@ -58,6 +56,7 @@ export function remarkPostprocess(
     }
 
     file.data.extractedReferences = urls;
+
     if (includeProcessedMarkdown) {
       file.data._markdown = toMarkdown(tree, {
         ...this.data('settings'),
@@ -65,6 +64,56 @@ export function remarkPostprocess(
         extensions: this.data('toMarkdownExtensions') || [],
       });
     }
+
+    for (const { name, value } of file.data['mdx-export'] ?? []) {
+      tree.children.unshift(getMdastExport(name, value));
+    }
+
+    for (const name of valueToExport) {
+      if (!(name in file.data)) continue;
+
+      tree.children.unshift(getMdastExport(name, file.data[name]));
+    }
+  };
+}
+
+/**
+ * MDX.js first converts javascript (with esm support) into mdast nodes with remark-mdx, then handle the other remark plugins
+ *
+ * Therefore, if we want to inject an export, we must convert the object into AST, then add the mdast node
+ */
+function getMdastExport(name: string, value: unknown): RootContent {
+  return {
+    type: 'mdxjsEsm',
+    value: '',
+    data: {
+      estree: {
+        type: 'Program',
+        sourceType: 'module',
+        body: [
+          {
+            type: 'ExportNamedDeclaration',
+            attributes: [],
+            specifiers: [],
+            source: null,
+            declaration: {
+              type: 'VariableDeclaration',
+              kind: 'let',
+              declarations: [
+                {
+                  type: 'VariableDeclarator',
+                  id: {
+                    type: 'Identifier',
+                    name,
+                  },
+                  init: valueToEstree(value),
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
   };
 }
 

@@ -1,6 +1,6 @@
 import { createProcessor, type ProcessorOptions } from '@mdx-js/mdx';
-import type { DataMap, VFile } from 'vfile';
-import { remarkInclude } from '@/mdx-plugins/remark-include';
+import type { VFile } from 'vfile';
+import { remarkInclude } from '@/mdx/remark-include';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { TableOfContents } from 'fumadocs-core/server';
 import type { FC } from 'react';
@@ -9,8 +9,7 @@ import {
   type ExtractedReference,
   type PostprocessOptions,
   remarkPostprocess,
-} from '@/mdx-plugins/remark-postprocess';
-import { remarkMdxExport } from '@/mdx-plugins/remark-mdx-export';
+} from '@/mdx/remark-postprocess';
 
 type Processor = ReturnType<typeof createProcessor>;
 
@@ -51,22 +50,35 @@ export interface CompiledMDXProperties<Frontmatter = Record<string, unknown>> {
   _markdown?: string;
 }
 
-export type { DataMap };
+export interface FumadocsDataMap {
+  /**
+   * [Fumadocs MDX] raw frontmatter, you can modify it
+   */
+  frontmatter?: Record<string, unknown>;
+
+  /**
+   * [Fumadocs MDX] additional ESM exports to write
+   */
+  'mdx-export'?: { name: string; value: unknown }[];
+
+  extractedReferences: ExtractedReference[];
+
+  /**
+   * [Fumadocs MDX] The compiler object from loader
+   */
+  _compiler?: CompilerOptions;
+
+  _getProcessor?: (format: 'md' | 'mdx') => Processor;
+
+  /**
+   * [Fumadocs MDX] Processed Markdown content before `remark-rehype`.
+   */
+  _markdown?: string;
+}
 
 declare module 'vfile' {
-  interface DataMap {
-    /**
-     * [Fumadocs MDX] raw frontmatter, you can modify it
-     */
-    frontmatter?: Record<string, unknown>;
-
-    /**
-     * [Fumadocs MDX] The compiler object from loader
-     */
-    _compiler?: CompilerOptions;
-
-    _getProcessor?: (format: 'md' | 'mdx') => Processor;
-  }
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- extend data map
+  interface DataMap extends FumadocsDataMap {}
 }
 
 /**
@@ -92,18 +104,19 @@ export async function buildMDX(
         remarkPlugins: [
           remarkInclude,
           ...(rest.remarkPlugins ?? []),
-          [remarkPostprocess, options.postprocess],
           [
-            remarkMdxExport,
+            remarkPostprocess,
             {
-              dataNames: [
+              ...options.postprocess,
+              valueToExport: [
+                ...(options.postprocess?.valueToExport ?? []),
                 'structuredData',
                 'extractedReferences',
                 'frontmatter',
                 'lastModified',
                 '_markdown',
               ],
-            },
+            } satisfies PostprocessOptions,
           ],
         ],
         format,

@@ -1,7 +1,7 @@
 import type { LoadedConfig } from '@/utils/config';
 import { _runtime, createMDXSource } from './index';
 import type { AsyncDocOut, RuntimeAsync } from './types';
-import { buildMDX, CompiledMDXProperties } from '@/utils/build-mdx';
+import { buildMDX, CompiledMDXProperties } from '@/mdx/build-mdx';
 import type { ProcessorOptions } from '@mdx-js/mdx';
 import { executeMdx } from '@fumadocs/mdx-remote/client';
 import { pathToFileURL } from 'node:url';
@@ -28,7 +28,7 @@ export const _runtimeAsync: RuntimeAsync = {
     const collection = getDocCollection(config, collectionName);
     const initMdxOptions = getOptions(config, collection);
 
-    return files.map(({ info: file, data, content, lastModified }) => {
+    return files.map(({ info, data, content, lastModified }) => {
       let cachedResult: CompiledMDXProperties | undefined;
 
       async function compileAndLoad() {
@@ -42,10 +42,10 @@ export const _runtimeAsync: RuntimeAsync = {
           data: {
             lastModified,
           },
-          filePath: file.absolutePath,
+          filePath: info.fullPath,
         });
         const result = await executeMdx(String(compiled.value), {
-          baseUrl: pathToFileURL(file.absolutePath),
+          baseUrl: pathToFileURL(info.fullPath),
         });
 
         return (cachedResult = result as CompiledMDXProperties);
@@ -53,10 +53,7 @@ export const _runtimeAsync: RuntimeAsync = {
 
       return {
         ...data,
-        _file: file,
-        get content() {
-          return `${content.matter}${content.body}`;
-        },
+        info,
         async getText(type) {
           if (type === 'raw') {
             return `${content.matter}${content.body}`;

@@ -2,7 +2,7 @@ import { fumaMatter } from '@/utils/fuma-matter';
 import { validate } from '@/utils/validation';
 import { getGitTimestamp } from '@/utils/git-timestamp';
 import { countLines } from '@/utils/count-lines';
-import { buildMDX } from '@/utils/build-mdx';
+import { buildMDX } from '@/mdx/build-mdx';
 import type { SourceMap } from 'rollup';
 import type { Loader } from '@/loaders/adapter';
 import { z } from 'zod';

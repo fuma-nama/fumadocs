@@ -11,6 +11,7 @@ import {
   AsyncDocCollectionEntry,
   DocCollectionEntry,
   DocData,
+  FileInfo,
   missingProcessedMarkdown,
 } from '@/runtime/shared';
 import fs from 'node:fs/promises';
@@ -57,17 +58,15 @@ export function fromConfig<Config>(): ServerCreate<Config> {
   }
 
   function mapPageData<Frontmatter>(
-    filePath: string,
+    info: FileInfo,
     entry: CompiledMDXFile<Frontmatter>,
   ): DocCollectionEntry<Frontmatter> {
     return {
       ...mapDocData(entry),
-      get content(): string {
-        throw new Error('not implemented on Vite.');
-      },
+      info,
       async getText(type) {
         if (type === 'raw') {
-          return (await fs.readFile(filePath)).toString();
+          return (await fs.readFile(info.fullPath)).toString();
         }
 
         if (typeof entry._markdown !== 'string') missingProcessedMarkdown();
@@ -78,21 +77,19 @@ export function fromConfig<Config>(): ServerCreate<Config> {
   }
 
   function mapPageDataLazy<Frontmatter>(
-    filePath: string,
+    info: FileInfo,
     head: Frontmatter,
     content: () => Promise<CompiledMDXFile<Frontmatter>>,
   ): AsyncDocCollectionEntry<Frontmatter> {
     return {
       ...head,
+      info,
       async load() {
         return mapDocData(await content());
       },
-      get content(): string {
-        throw new Error('not implemented on Vite.');
-      },
       async getText(type) {
         if (type === 'raw') {
-          return (await fs.readFile(filePath)).toString();
+          return (await fs.readFile(info.fullPath)).toString();
         }
 
         const entry = await content();
@@ -108,13 +105,16 @@ export function fromConfig<Config>(): ServerCreate<Config> {
     async sourceAsync(doc, meta) {
       const virtualFiles: Promise<VirtualFile>[] = [
         ...Object.entries(doc).map(async ([file, content]) => {
-          const fullPath = path.join(content.base, file);
+          const info: FileInfo = {
+            path: file,
+            fullPath: path.join(content.base, file),
+          };
 
           return {
             type: 'page',
             path: file,
-            absolutePath: fullPath,
-            data: mapPageData(fullPath, await content()),
+            absolutePath: info.fullPath,
+            data: mapPageData(info, await content()),
           } satisfies VirtualFile;
         }),
         ...Object.entries(meta).map(async ([file, content]) => {
@@ -132,17 +132,16 @@ export function fromConfig<Config>(): ServerCreate<Config> {
     async sourceLazy(doc, meta) {
       const virtualFiles: Promise<VirtualFile>[] = [
         ...Object.entries(doc.head).map(async ([file, frontmatter]) => {
-          const fullPath = path.join(doc.base, file);
+          const info: FileInfo = {
+            path: file,
+            fullPath: path.join(doc.base, file),
+          };
 
           return {
             type: 'page',
             path: file,
-            absolutePath: fullPath,
-            data: mapPageDataLazy(
-              fullPath,
-              await frontmatter(),
-              doc.body[file],
-            ),
+            absolutePath: info.fullPath,
+            data: mapPageDataLazy(info, await frontmatter(), doc.body[file]),
           } satisfies VirtualFile;
         }),
         ...Object.entries(meta).map(async ([file, content]) => {

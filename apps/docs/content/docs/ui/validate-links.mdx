@@ -61,7 +61,7 @@ function toFile(page: InferPageType<typeof source>): FileObject {
   return {
     data: page.data,
     url: page.url,
-    path: page.absolutePath,
+    path: page.data.info.fullPath,
     content: page.data.content,
   };
 }

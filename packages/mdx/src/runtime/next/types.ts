@@ -5,12 +5,9 @@ import type { DocCollection, DocsCollection, MetaCollection } from '@/config';
 import type {
   AsyncDocCollectionEntry,
   DocCollectionEntry,
+  FileInfo,
+  MetaCollectionEntry,
 } from '@/runtime/shared';
-
-export interface FileInfo {
-  path: string;
-  absolutePath: string;
-}
 
 export interface RuntimeFile {
   info: FileInfo;
@@ -25,14 +22,11 @@ export interface AsyncRuntimeFile {
 }
 
 export type DocOut<Schema extends StandardSchemaV1 = StandardSchemaV1> =
-  DocCollectionEntry<StandardSchemaV1.InferOutput<Schema>> & {
-    _file: FileInfo;
-  };
+  DocCollectionEntry<StandardSchemaV1.InferOutput<Schema>>;
 
-export type MetaOut<Schema extends StandardSchemaV1> =
-  StandardSchemaV1.InferOutput<Schema> & {
-    _file: FileInfo;
-  };
+export type MetaOut<Schema extends StandardSchemaV1> = MetaCollectionEntry<
+  StandardSchemaV1.InferOutput<Schema>
+>;
 
 export interface Runtime {
   doc: <C>(
@@ -62,9 +56,7 @@ export interface Runtime {
 }
 
 export type AsyncDocOut<Schema extends StandardSchemaV1 = StandardSchemaV1> =
-  AsyncDocCollectionEntry<StandardSchemaV1.InferOutput<Schema>> & {
-    _file: FileInfo;
-  };
+  AsyncDocCollectionEntry<StandardSchemaV1.InferOutput<Schema>>;
 
 export interface RuntimeAsync {
   doc: <C>(
