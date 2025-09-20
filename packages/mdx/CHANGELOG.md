@@ -1,5 +1,26 @@
 # next-docs-mdx
 
+## 12.0.0
+
+### Major Changes
+
+- f11f89d: **[Next.js] Rename APIS**
+
+  On page data:
+  - `_file` -> `info`.
+  - `_file.absolutePath` -> `info.fullPath`.
+
+- effe43d: **Drop support for Zod 3 schemas**
+
+  Zod 3 schemas are still allowed, but you cannot no longer extend on the Zod 4 schemas provided by Fumadocs.
+
+- 2862a10: **[Next.js] Removed `content` on page data in favour of `getText()`.**
+
+### Minor Changes
+
+- 22e0fec: **Support `getText()` & Postprocess API**
+- 2862a10: Unify doc collection entry for both Vite and Next.js integrations
+
 ## 11.10.1
 
 ### Patch Changes
