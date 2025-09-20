@@ -481,8 +481,9 @@ function writeIndexFiles(context: HookContext, options: Config) {
       const { data } = matter(file.content);
       if (typeof data.title !== 'string') continue;
 
+      const descriptionAttr = data.description ? `description=${JSON.stringify(data.description)} ` : '';
       content.push(
-        `<Card href="${urlFn(file.path)}" title=${JSON.stringify(data.title)} description=${JSON.stringify(data.description)} />`,
+        `<Card href="${urlFn(file.path)}" title=${JSON.stringify(data.title)} ${descriptionAttr}/>`,
       );
     }
 
