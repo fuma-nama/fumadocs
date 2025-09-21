@@ -101,6 +101,7 @@ export function createSearchAPI<T extends SearchType>(
 export interface Index {
   title: string;
   description?: string;
+  breadcrumbs?: string[];
   content: string;
   url: string;
   keywords?: string;
@@ -133,6 +134,8 @@ export interface AdvancedIndex {
    * @deprecated No longer used
    */
   keywords?: string;
+
+  breadcrumbs?: string[];
 
   /**
    * Required if tag filter is enabled

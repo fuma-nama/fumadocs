@@ -108,6 +108,7 @@ export async function searchDocs(
           id: doc.page_id,
           type: 'page',
           content: doc.title,
+          breadcrumbs: doc.breadcrumbs,
           contentWithHighlights: highlighter.highlight(doc.title),
           url: doc.url,
         });

@@ -1,6 +1,7 @@
 import { type ReactNode, useMemo } from 'react';
 import type * as PageTree from '@/source/page-tree/definitions';
 import { normalizeUrl } from '@/utils/normalize-url';
+import { findPath } from '@/utils/page-tree';
 
 export interface BreadcrumbItem {
   name: ReactNode;
@@ -118,42 +119,10 @@ export function searchPath(
   nodes: PageTree.Node[],
   url: string,
 ): PageTree.Node[] | null {
-  const items: PageTree.Node[] = [];
-  url = normalizeUrl(url);
+  const normalizedUrl = normalizeUrl(url);
 
-  function run(nodes: PageTree.Node[]): boolean {
-    let separator: PageTree.Separator | undefined;
-
-    for (const node of nodes) {
-      if (node.type === 'separator') separator = node;
-
-      if (node.type === 'folder') {
-        if (node.index?.url === url) {
-          if (separator) items.push(separator);
-          items.push(node, node.index);
-
-          return true;
-        }
-
-        if (run(node.children)) {
-          items.unshift(node);
-          if (separator) items.unshift(separator);
-
-          return true;
-        }
-      }
-
-      if (node.type === 'page' && node.url === url) {
-        if (separator) items.push(separator);
-        items.push(node);
-
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  if (run(nodes)) return items;
-  return null;
+  return findPath(
+    nodes,
+    (node) => node.type === 'page' && node.url === normalizedUrl,
+  );
 }

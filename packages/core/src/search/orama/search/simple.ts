@@ -26,6 +26,7 @@ export async function searchSimple(
   return result.hits.map<SortedResult>((hit) => ({
     type: 'page',
     content: hit.document.title,
+    breadcrumbs: hit.document.breadcrumbs,
     contentWithHighlights: highlighter.highlight(hit.document.title),
     id: hit.document.url,
     url: hit.document.url,

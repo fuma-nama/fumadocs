@@ -1,6 +1,6 @@
 'use client';
 
-import { FileText, Hash, Search as SearchIcon } from 'lucide-react';
+import { ChevronRight, Hash, Search as SearchIcon } from 'lucide-react';
 import {
   type ComponentProps,
   createContext,
@@ -184,7 +184,7 @@ export function SearchDialogContent({
       aria-describedby={undefined}
       {...props}
       className={cn(
-        'fixed left-1/2 top-4 md:top-[calc(50%-250px)] z-50 w-[calc(100%-1rem)] max-w-screen-sm -translate-x-1/2 rounded-2xl border bg-fd-popover/80 backdrop-blur-xl text-fd-popover-foreground shadow-2xl shadow-black/50 overflow-hidden data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in',
+        'fixed left-1/2 top-4 md:top-[calc(50%-250px)] z-50 w-[calc(100%-1rem)] max-w-screen-sm -translate-x-1/2 rounded-xl border bg-fd-popover/80 backdrop-blur-xl text-fd-popover-foreground shadow-2xl shadow-black/50 overflow-hidden data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in',
         '*:border-b *:has-[+:last-child[data-empty=true]]:border-b-0 *:data-[empty=true]:border-b-0 *:last:border-b-0',
         props.className,
       )}
@@ -316,12 +316,8 @@ export function SearchDialogList({
   );
 }
 
-const icons = {
-  text: null,
-  heading: <Hash className="size-4 shrink-0 text-fd-muted-foreground" />,
-  page: (
-    <FileText className="size-6 text-fd-muted-foreground bg-fd-muted border p-0.5 rounded-sm shadow-sm shrink-0" />
-  ),
+const icons: Record<string, ReactNode> = {
+  heading: <Hash className="inline me-1 size-4 text-fd-muted-foreground" />,
 };
 
 export function SearchDialogListItem({
@@ -354,11 +350,7 @@ export function SearchDialogListItem({
       )}
       aria-selected={active}
       className={cn(
-        'relative flex select-none flex-row items-center gap-2 p-2 text-start text-sm rounded-lg',
-        item.type !== 'page' && 'ps-8',
-        item.type === 'page' || item.type === 'heading'
-          ? 'font-medium'
-          : 'text-fd-popover-foreground/80',
+        'relative select-none px-2.5 py-1.5 text-start text-sm rounded-lg',
         active && 'bg-fd-accent text-fd-accent-foreground',
         className,
       )}
@@ -367,14 +359,31 @@ export function SearchDialogListItem({
     >
       {children ?? (
         <>
+          <div className="inline-flex items-center text-fd-muted-foreground text-xs empty:hidden">
+            {item.breadcrumbs?.map((item, i) => (
+              <Fragment key={i}>
+                {i > 0 && <ChevronRight className="size-4" />}
+                {item}
+              </Fragment>
+            ))}
+          </div>
+
           {item.type !== 'page' && (
             <div
               role="none"
-              className="absolute start-4.5 inset-y-0 w-px bg-fd-border"
+              className="absolute start-3 inset-y-0 w-px bg-fd-border"
             />
           )}
-          {icons[item.type]}
-          <p className="min-w-0 truncate">
+          <p
+            className={cn(
+              'min-w-0 truncate',
+              item.type !== 'page' && 'ps-4',
+              item.type === 'page' || item.type === 'heading'
+                ? 'font-medium'
+                : 'text-fd-popover-foreground/80',
+            )}
+          >
+            {icons[item.type]}
             {item.contentWithHighlights
               ? render(item.contentWithHighlights)
               : item.content}
@@ -474,7 +483,7 @@ function renderHighlights(highlights: HighlightedText<ReactNode>[]): ReactNode {
   return highlights.map((node, i) => {
     if (node.styles?.highlight) {
       return (
-        <span key={i} className="text-fd-primary bg-fd-primary/10">
+        <span key={i} className="text-fd-primary underline">
           {node.content}
         </span>
       );

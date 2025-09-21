@@ -119,3 +119,51 @@ function findParentFromTree(
     return findParentFromTree(node.fallback, url);
   }
 }
+
+/**
+ * Search the path of a node in the tree matched by the matcher.
+ *
+ * @returns The path to the target node (from starting root), or null if the page doesn't exist
+ */
+export function findPath(
+  nodes: PageTree.Node[],
+  matcher: (node: PageTree.Node) => boolean,
+  options: {
+    includeSeparator?: boolean;
+  } = {},
+): PageTree.Node[] | null {
+  const { includeSeparator = true } = options;
+
+  function run(nodes: PageTree.Node[]): PageTree.Node[] | undefined {
+    let separator: PageTree.Separator | undefined;
+
+    for (const node of nodes) {
+      if (matcher(node)) {
+        const items: PageTree.Node[] = [];
+        if (separator) items.push(separator);
+        items.push(node);
+
+        return items;
+      }
+
+      if (node.type === 'separator' && includeSeparator) {
+        separator = node;
+        continue;
+      }
+
+      if (node.type === 'folder') {
+        const items =
+          node.index && matcher(node.index) ? [node.index] : run(node.children);
+
+        if (items) {
+          items.unshift(node);
+          if (separator) items.unshift(separator);
+
+          return items;
+        }
+      }
+    }
+  }
+
+  return run(nodes) ?? null;
+}

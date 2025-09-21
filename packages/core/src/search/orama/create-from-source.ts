@@ -15,32 +15,58 @@ import { type StructuredData } from '@/mdx-plugins';
 import { basename, extname } from '@/source/path';
 import type { I18nConfig } from '@/i18n';
 import type { Language } from '@orama/orama';
+import { findPath } from '@/utils/page-tree';
 
 type Awaitable<T> = T | Promise<T>;
 
-async function pageToIndex(page: Page): Promise<AdvancedIndex> {
-  let structuredData: StructuredData | undefined;
-
-  if ('structuredData' in page.data) {
-    structuredData = page.data.structuredData as StructuredData;
-  } else if ('load' in page.data && typeof page.data.load === 'function') {
-    structuredData = (await page.data.load()).structuredData;
+function defaultBuildIndex(source: LoaderOutput<LoaderConfig>) {
+  function isBreadcrumbItem(item: unknown): item is string {
+    return typeof item === 'string' && item.length > 0;
   }
 
-  if (!structuredData)
-    throw new Error(
-      'Cannot find structured data from page, please define the page to index function.',
-    );
+  return async (page: Page): Promise<AdvancedIndex> => {
+    let breadcrumbs: string[] | undefined;
+    let structuredData: StructuredData | undefined;
 
-  return {
-    title: page.data.title ?? basename(page.path, extname(page.path)),
-    description:
-      'description' in page.data
-        ? (page.data.description as string)
-        : undefined,
-    url: page.url,
-    id: page.url,
-    structuredData,
+    if ('structuredData' in page.data) {
+      structuredData = page.data.structuredData as StructuredData;
+    } else if ('load' in page.data && typeof page.data.load === 'function') {
+      structuredData = (await page.data.load()).structuredData;
+    }
+
+    if (!structuredData)
+      throw new Error(
+        'Cannot find structured data from page, please define the page to index function.',
+      );
+
+    const pageTree = source.getPageTree(page.locale);
+    const path = findPath(
+      pageTree.children,
+      (node) => node.type === 'page' && node.url === page.url,
+    );
+    if (path) {
+      breadcrumbs = [];
+      path.pop();
+
+      if (isBreadcrumbItem(pageTree.name)) {
+        breadcrumbs.push(pageTree.name);
+      }
+
+      for (const segment of path) {
+        if (!isBreadcrumbItem(segment.name)) continue;
+
+        breadcrumbs.push(segment.name);
+      }
+    }
+
+    return {
+      title: page.data.title ?? basename(page.path, extname(page.path)),
+      breadcrumbs,
+      description: page.data.description,
+      url: page.url,
+      id: page.url,
+      structuredData,
+    };
   };
 }
 
@@ -72,12 +98,12 @@ export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
 
 export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
   source: S,
-  _buildIndexOrOptions:
+  _buildIndexOrOptions?:
     | ((page: InferPageType<S>) => Awaitable<AdvancedIndex>)
-    | Options<S> = pageToIndex,
+    | Options<S>,
   _options?: Omit<Options<S>, 'buildIndex'>,
 ): SearchAPI {
-  const { buildIndex = pageToIndex, ...options }: Options<S> = {
+  const { buildIndex = defaultBuildIndex(source), ...options }: Options<S> = {
     ...(typeof _buildIndexOrOptions === 'function'
       ? {
           buildIndex: _buildIndexOrOptions,
@@ -85,49 +111,32 @@ export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
       : _buildIndexOrOptions),
     ..._options,
   };
-  const i18n = source._i18n;
-  let server: Promise<SearchAPI>;
 
-  if (i18n) {
-    const indexes = source.getLanguages().flatMap((entry) => {
-      return entry.pages.map(async (page) => ({
-        ...(await buildIndex(page as InferPageType<S>)),
-        locale: entry.language,
-      }));
+  if (source._i18n) {
+    return createI18nSearchAPI('advanced', {
+      ...options,
+      i18n: source._i18n,
+      indexes: async () => {
+        const indexes = source.getLanguages().flatMap((entry) => {
+          return entry.pages.map(async (page) => ({
+            ...(await buildIndex(page as InferPageType<S>)),
+            locale: entry.language,
+          }));
+        });
+
+        return Promise.all(indexes);
+      },
     });
-
-    server = Promise.all(indexes).then((loaded) =>
-      createI18nSearchAPI('advanced', {
-        ...options,
-        i18n,
-        indexes: loaded,
-      }),
-    );
-  } else {
-    const indexes = source.getPages().map(async (page) => {
-      return buildIndex(page as InferPageType<S>);
-    });
-
-    server = Promise.all(indexes).then((loaded) =>
-      createSearchAPI('advanced', {
-        ...options,
-        indexes: loaded,
-      }),
-    );
   }
 
-  return {
-    async export(...args) {
-      return (await server).export(...args);
+  return createSearchAPI('advanced', {
+    ...options,
+    indexes: async () => {
+      const indexes = source
+        .getPages()
+        .map((page) => buildIndex(page as InferPageType<S>));
+
+      return Promise.all(indexes);
     },
-    async GET(...args) {
-      return (await server).GET(...args);
-    },
-    async search(...args) {
-      return (await server).search(...args);
-    },
-    async staticGET(...args) {
-      return (await server).staticGET(...args);
-    },
-  };
+  });
 }

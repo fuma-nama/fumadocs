@@ -33,6 +33,7 @@ export function groupResults(hits: Hit<BaseIndex>[]): SortedResult[] {
       grouped.push({
         id: hit.url,
         type: 'page',
+        breadcrumbs: hit.breadcrumbs,
         url: hit.url,
         content: hit.title,
       });

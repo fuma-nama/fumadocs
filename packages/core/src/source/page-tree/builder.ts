@@ -333,7 +333,7 @@ function build(id: string, ctx: PageTreeBuilderContext): PageTree.Root {
   const folder = buildFolderNode('', true, ctx)!;
   let root: PageTree.Root = {
     $id: id,
-    name: folder.name,
+    name: folder.name || 'Docs',
     children: folder.children,
   };
 

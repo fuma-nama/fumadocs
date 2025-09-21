@@ -57,6 +57,7 @@ export async function searchAdvanced(
       id: pageId,
       type: 'page',
       content: page.content,
+      breadcrumbs: page.breadcrumbs,
       contentWithHighlights: highlighter.highlight(page.content),
       url: page.url,
     });
@@ -67,6 +68,7 @@ export async function searchAdvanced(
       list.push({
         id: hit.document.id.toString(),
         content: hit.document.content,
+        breadcrumbs: hit.document.breadcrumbs,
         contentWithHighlights: highlighter.highlight(hit.document.content),
         type: hit.document.type as SortedResult['type'],
         url: hit.document.url,

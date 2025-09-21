@@ -7,11 +7,22 @@ import {
 } from '@orama/orama';
 import { type AdvancedOptions, type SimpleOptions } from '@/search/server';
 
+export type SimpleDocument = TypedDocument<Orama<typeof simpleSchema>>;
+export const simpleSchema = {
+  url: 'string',
+  title: 'string',
+  breadcrumbs: 'string[]',
+  description: 'string',
+  content: 'string',
+  keywords: 'string',
+} as const;
+
 export type AdvancedDocument = TypedDocument<Orama<typeof advancedSchema>>;
 export const advancedSchema = {
   content: 'string',
   page_id: 'string',
   type: 'string',
+  breadcrumbs: 'string[]',
   tags: 'enum[]',
   url: 'string',
   embeddings: 'vector[512]',
@@ -36,11 +47,8 @@ export async function createDB({
 
   const mapTo: PartialSchemaDeep<AdvancedDocument>[] = [];
   items.forEach((page) => {
-    const tags = Array.isArray(page.tag)
-      ? page.tag
-      : page.tag
-        ? [page.tag]
-        : [];
+    const pageTag = page.tag ?? [];
+    const tags = Array.isArray(pageTag) ? pageTag : [pageTag];
     const data = page.structuredData;
     let id = 0;
 
@@ -49,13 +57,16 @@ export async function createDB({
       page_id: page.id,
       type: 'page',
       content: page.title,
+      breadcrumbs: page.breadcrumbs,
       tags,
       url: page.url,
     });
 
+    const nextId = () => `${page.id}-${id++}`;
+
     if (page.description) {
       mapTo.push({
-        id: `${page.id}-${(id++).toString()}`,
+        id: nextId(),
         page_id: page.id,
         tags,
         type: 'text',
@@ -66,7 +77,7 @@ export async function createDB({
 
     for (const heading of data.headings) {
       mapTo.push({
-        id: `${page.id}-${(id++).toString()}`,
+        id: nextId(),
         page_id: page.id,
         type: 'heading',
         tags,
@@ -77,7 +88,7 @@ export async function createDB({
 
     for (const content of data.contents) {
       mapTo.push({
-        id: `${page.id}-${(id++).toString()}`,
+        id: nextId(),
         page_id: page.id,
         tags,
         type: 'text',
@@ -90,15 +101,6 @@ export async function createDB({
   await insertMultiple(db, mapTo);
   return db;
 }
-
-export type SimpleDocument = TypedDocument<Orama<typeof simpleSchema>>;
-export const simpleSchema = {
-  url: 'string',
-  title: 'string',
-  description: 'string',
-  content: 'string',
-  keywords: 'string',
-} as const;
 
 export async function createDBSimple({
   indexes,
@@ -120,6 +122,7 @@ export async function createDBSimple({
     items.map((page) => ({
       title: page.title,
       description: page.description,
+      breadcrumbs: page.breadcrumbs,
       url: page.url,
       content: page.content,
       keywords: page.keywords,
