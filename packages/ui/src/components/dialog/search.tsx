@@ -33,9 +33,16 @@ import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import scrollIntoView from 'scroll-into-view-if-needed';
 import { buttonVariants } from '@/components/ui/button';
 
-interface ReactSortedResult extends BaseResultType {
-  external?: boolean;
-}
+export type SearchItemType =
+  | (BaseResultType & {
+      external?: boolean;
+    })
+  | {
+      id: string;
+      type: 'action';
+      node: ReactNode;
+      onSelect: () => void;
+    };
 
 // needed for backward compatible since some previous guides referenced it
 export type { SharedProps };
@@ -184,7 +191,7 @@ export function SearchDialogContent({
       aria-describedby={undefined}
       {...props}
       className={cn(
-        'fixed left-1/2 top-4 md:top-[calc(50%-250px)] z-50 w-[calc(100%-1rem)] max-w-screen-sm -translate-x-1/2 rounded-xl border bg-fd-popover/80 backdrop-blur-xl text-fd-popover-foreground shadow-2xl shadow-black/50 overflow-hidden data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in',
+        'fixed left-1/2 top-4 md:top-[calc(50%-250px)] z-50 w-[calc(100%-1rem)] max-w-screen-sm -translate-x-1/2 rounded-xl border bg-fd-popover text-fd-popover-foreground shadow-2xl shadow-black/50 overflow-hidden data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in',
         '*:border-b *:has-[+:last-child[data-empty=true]]:border-b-0 *:data-[empty=true]:border-b-0 *:last:border-b-0',
         props.className,
       )}
@@ -205,7 +212,7 @@ export function SearchDialogList({
   Item = (props) => <SearchDialogListItem {...props} />,
   ...props
 }: Omit<ComponentProps<'div'>, 'children'> & {
-  items: ReactSortedResult[] | null | undefined;
+  items: SearchItemType[] | null | undefined;
   /**
    * Renderer for empty list UI
    */
@@ -213,7 +220,7 @@ export function SearchDialogList({
   /**
    * Renderer for items
    */
-  Item?: (props: { item: ReactSortedResult; onClick: () => void }) => ReactNode;
+  Item?: (props: { item: SearchItemType; onClick: () => void }) => ReactNode;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState<string | null>(() =>
@@ -222,9 +229,15 @@ export function SearchDialogList({
   const { onOpenChange } = useSearch();
   const router = useRouter();
 
-  const onOpen = ({ external, url }: ReactSortedResult) => {
-    if (external) window.open(url, '_blank')?.focus();
-    else router.push(url);
+  const onOpen = (item: SearchItemType) => {
+    if (item.type === 'action') {
+      item.onSelect();
+    } else if (item.external) {
+      window.open(item.url, '_blank')?.focus();
+    } else {
+      router.push(item.url);
+    }
+
     onOpenChange(false);
   };
 
@@ -316,10 +329,6 @@ export function SearchDialogList({
   );
 }
 
-const icons: Record<string, ReactNode> = {
-  heading: <Hash className="inline me-1 size-4 text-fd-muted-foreground" />,
-};
-
 export function SearchDialogListItem({
   item,
   className,
@@ -328,10 +337,50 @@ export function SearchDialogListItem({
   ...props
 }: ComponentProps<'button'> & {
   renderHighlights?: typeof renderHighlights;
-  item: ReactSortedResult;
+  item: SearchItemType;
 }) {
   const { active: activeId, setActive } = useSearchList();
   const active = item.id === activeId;
+
+  if (item.type === 'action') {
+    children ??= item.node;
+  } else {
+    children ??= (
+      <>
+        <div className="inline-flex items-center text-fd-muted-foreground text-xs empty:hidden">
+          {item.breadcrumbs?.map((item, i) => (
+            <Fragment key={i}>
+              {i > 0 && <ChevronRight className="size-4" />}
+              {item}
+            </Fragment>
+          ))}
+        </div>
+
+        {item.type !== 'page' && (
+          <div
+            role="none"
+            className="absolute start-3 inset-y-0 w-px bg-fd-border"
+          />
+        )}
+        <p
+          className={cn(
+            'min-w-0 truncate',
+            item.type !== 'page' && 'ps-4',
+            item.type === 'page' || item.type === 'heading'
+              ? 'font-medium'
+              : 'text-fd-popover-foreground/80',
+          )}
+        >
+          {item.type === 'heading' && (
+            <Hash className="inline me-1 size-4 text-fd-muted-foreground" />
+          )}
+          {item.contentWithHighlights
+            ? render(item.contentWithHighlights)
+            : item.content}
+        </p>
+      </>
+    );
+  }
 
   return (
     <button
@@ -350,46 +399,14 @@ export function SearchDialogListItem({
       )}
       aria-selected={active}
       className={cn(
-        'relative select-none px-2.5 py-1.5 text-start text-sm rounded-lg',
+        'relative select-none px-2.5 py-2 text-start text-sm rounded-lg',
         active && 'bg-fd-accent text-fd-accent-foreground',
         className,
       )}
       onPointerMove={() => setActive(item.id)}
       {...props}
     >
-      {children ?? (
-        <>
-          <div className="inline-flex items-center text-fd-muted-foreground text-xs empty:hidden">
-            {item.breadcrumbs?.map((item, i) => (
-              <Fragment key={i}>
-                {i > 0 && <ChevronRight className="size-4" />}
-                {item}
-              </Fragment>
-            ))}
-          </div>
-
-          {item.type !== 'page' && (
-            <div
-              role="none"
-              className="absolute start-3 inset-y-0 w-px bg-fd-border"
-            />
-          )}
-          <p
-            className={cn(
-              'min-w-0 truncate',
-              item.type !== 'page' && 'ps-4',
-              item.type === 'page' || item.type === 'heading'
-                ? 'font-medium'
-                : 'text-fd-popover-foreground/80',
-            )}
-          >
-            {icons[item.type]}
-            {item.contentWithHighlights
-              ? render(item.contentWithHighlights)
-              : item.content}
-          </p>
-        </>
-      )}
+      {children}
     </button>
   );
 }

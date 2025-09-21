@@ -11,18 +11,22 @@ import {
   SearchDialogInput,
   SearchDialogList,
   SearchDialogOverlay,
+  type SearchItemType,
   type SharedProps,
 } from 'fumadocs-ui/components/dialog/search';
 import { useDocsSearch } from 'fumadocs-core/search/client';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from 'fumadocs-ui/components/ui/popover';
-import { ChevronDown } from 'lucide-react';
+import { ArrowRight, ChevronDown } from 'lucide-react';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from '@/lib/cn';
+import { useTreeContext } from 'fumadocs-ui/contexts/tree';
+import type { PageTree } from 'fumadocs-core/server';
+import { useRouter } from 'next/navigation';
 
 const client = new OramaClient({
   endpoint: 'https://cloud.orama.run/v1/indexes/docs-fk97oe',
@@ -56,6 +60,22 @@ const items = [
   },
 ];
 
+function searchNodes(
+  matcher: (item: PageTree.Item) => boolean,
+  nodes: PageTree.Node[],
+): PageTree.Item | undefined {
+  for (const node of nodes) {
+    if (node.type === 'folder') {
+      if (node.index && matcher(node.index)) return node.index;
+
+      const result = searchNodes(matcher, node.children);
+      if (result) return result;
+    } else if (node.type === 'page' && matcher(node)) {
+      return node;
+    }
+  }
+}
+
 export default function CustomSearchDialog(props: SharedProps) {
   const [open, setOpen] = useState(false);
   const [tag, setTag] = useState<string | undefined>();
@@ -64,6 +84,41 @@ export default function CustomSearchDialog(props: SharedProps) {
     client,
     tag,
   });
+  const { root } = useTreeContext();
+  const router = useRouter();
+  const pageTreeActions = useMemo(() => {
+    const actions: SearchItemType[] = [];
+    if (search.length === 0) return actions;
+
+    const normalized = search.toLowerCase();
+    const result = searchNodes(
+      (item) =>
+        typeof item.name === 'string' &&
+        item.name.toLowerCase().startsWith(normalized),
+      root.children,
+    );
+
+    if (result) {
+      actions.push({
+        id: 'quick-action',
+        type: 'action',
+        node: (
+          <div className="inline-flex items-center gap-2 text-fd-muted-foreground">
+            <ArrowRight className="size-4" />
+            <p>
+              Jump to{' '}
+              <span className="font-medium text-fd-foreground">
+                {result.name}
+              </span>
+            </p>
+          </div>
+        ),
+        onSelect: () => router.push(result.url),
+      });
+    }
+
+    return actions;
+  }, [root.children, router, search]);
 
   return (
     <SearchDialog
@@ -79,7 +134,16 @@ export default function CustomSearchDialog(props: SharedProps) {
           <SearchDialogInput />
           <SearchDialogClose />
         </SearchDialogHeader>
-        <SearchDialogList items={query.data !== 'empty' ? query.data : null} />
+        <SearchDialogList
+          items={
+            query.data !== 'empty' || pageTreeActions.length > 0
+              ? [
+                  ...pageTreeActions,
+                  ...(Array.isArray(query.data) ? query.data : []),
+                ]
+              : null
+          }
+        />
         <SearchDialogFooter className="flex flex-row flex-wrap gap-2 items-center">
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger
