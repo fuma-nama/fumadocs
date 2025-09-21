@@ -4,5 +4,5 @@ export * as PageTree from '../source/page-tree/definitions';
 export * from './git-api';
 export * from './metadata';
 
-// backward compat
-export type { SortedResult } from '../search/shared';
+// TODO: replace this with `fumadocs-core/search`
+export type { SortedResult } from '../search';

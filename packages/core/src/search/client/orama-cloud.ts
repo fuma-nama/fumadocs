@@ -1,8 +1,7 @@
-import type { SortedResult } from '@/server';
 import type { ClientSearchParams, OramaClient } from '@oramacloud/client';
 import { removeUndefined } from '@/utils/remove-undefined';
 import type { OramaIndex } from '@/search/orama-cloud';
-import { createContentHighlighter } from '@/search/shared';
+import { createContentHighlighter, type SortedResult } from '@/search';
 
 interface CrawlerIndex {
   path: string;

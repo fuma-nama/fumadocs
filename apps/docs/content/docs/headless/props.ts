@@ -1,11 +1,12 @@
 import type * as Breadcrumb from 'fumadocs-core/breadcrumb';
 import type * as TOC from 'fumadocs-core/toc';
 import type * as Server from 'fumadocs-core/server';
+import type * as Search from 'fumadocs-core/search';
 import type * as Sidebar from 'fumadocs-core/sidebar';
 import type { ElementType } from 'react';
 import type * as MDX from 'fumadocs-core/mdx-plugins';
 
-export type SortedResult = Server.SortedResult;
+export type SortedResult = Search.SortedResult;
 
 export type StructureOptions = MDX.StructureOptions;
 

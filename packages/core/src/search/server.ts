@@ -17,7 +17,7 @@ import {
 } from '@/search/orama/create-db';
 import { searchSimple } from '@/search/orama/search/simple';
 import { searchAdvanced } from '@/search/orama/search/advanced';
-import type { SortedResult } from '@/search/shared';
+import type { SortedResult } from '@/search';
 
 type SearchType = 'simple' | 'advanced';
 
@@ -181,4 +181,4 @@ export function initAdvancedSearch(options: AdvancedOptions): SearchServer {
 
 export { createFromSource } from './orama/create-from-source';
 export { createI18nSearchAPI } from './orama/create-i18n';
-export * from './shared';
+export * from './index';

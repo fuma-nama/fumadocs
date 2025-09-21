@@ -6,7 +6,7 @@ import { type StaticOptions } from '@/search/client/static';
 import { type AlgoliaOptions } from '@/search/client/algolia';
 import { type OramaCloudOptions } from '@/search/client/orama-cloud';
 import { type MixedbreadOptions } from '@/search/client/mixedbread';
-import type { SortedResult } from '@/search/shared';
+import type { SortedResult } from '@/search';
 
 interface UseDocsSearch {
   search: string;

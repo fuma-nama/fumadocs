@@ -1,6 +1,6 @@
 import type { BaseIndex } from '@/search/algolia';
 import type { Hit, LiteClient, SearchResponse } from 'algoliasearch/lite';
-import { createContentHighlighter, type SortedResult } from '@/search/shared';
+import { createContentHighlighter, type SortedResult } from '@/search';
 
 export interface AlgoliaOptions {
   indexName: string;

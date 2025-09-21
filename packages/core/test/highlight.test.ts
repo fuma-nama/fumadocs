@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { createContentHighlighter } from '@/search/shared';
+import { createContentHighlighter } from '@/search';
 
 test('highlight search results', () => {
   const highlighter = createContentHighlighter('hello world helloworld');

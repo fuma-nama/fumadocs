@@ -21,7 +21,10 @@ import {
   DialogOverlay,
   DialogTitle,
 } from '@radix-ui/react-dialog';
-import type { SortedResult } from 'fumadocs-core/server';
+import type {
+  HighlightedText,
+  ReactSortedResult as BaseResultType,
+} from 'fumadocs-core/search';
 import { cva } from 'class-variance-authority';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 import { useRouter } from 'fumadocs-core/framework';
@@ -29,12 +32,10 @@ import type { SharedProps } from '@/contexts/search';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import scrollIntoView from 'scroll-into-view-if-needed';
 import { buttonVariants } from '@/components/ui/button';
-import type { HighlightedText } from 'fumadocs-core/search/server';
 
-type ReactSortedResult = Omit<SortedResult, 'content'> & {
+interface ReactSortedResult extends BaseResultType {
   external?: boolean;
-  content: ReactNode;
-};
+}
 
 // needed for backward compatible since some previous guides referenced it
 export type { SharedProps };
@@ -469,7 +470,7 @@ export function TagsListItem({
   );
 }
 
-function renderHighlights(highlights: HighlightedText[]): ReactNode {
+function renderHighlights(highlights: HighlightedText<ReactNode>[]): ReactNode {
   return highlights.map((node, i) => {
     if (node.styles?.highlight) {
       return (

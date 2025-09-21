@@ -4,8 +4,7 @@ import {
   type advancedSchema,
 } from '@/search/orama/create-db';
 import { removeUndefined } from '@/utils/remove-undefined';
-import type { SortedResult } from '@/server';
-import { createContentHighlighter } from '@/search/shared';
+import { createContentHighlighter, type SortedResult } from '@/search';
 
 export async function searchAdvanced(
   db: Orama<typeof advancedSchema>,

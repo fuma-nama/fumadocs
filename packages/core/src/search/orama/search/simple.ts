@@ -1,10 +1,9 @@
 import { type Orama, search, type SearchParams } from '@orama/orama';
-import type { SortedResult } from '@/server';
 import {
   type SimpleDocument,
   type simpleSchema,
 } from '@/search/orama/create-db';
-import { createContentHighlighter } from '@/search/shared';
+import { createContentHighlighter, type SortedResult } from '@/search';
 
 export async function searchSimple(
   db: Orama<typeof simpleSchema>,
