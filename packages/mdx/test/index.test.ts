@@ -38,21 +38,20 @@ test('format errors', async () => {
   }
 });
 
-const file = path.dirname(fileURLToPath(import.meta.url));
-
+const dir = path.dirname(fileURLToPath(import.meta.url));
 const cases = [
   {
     name: 'sync',
     collection: defineCollections({
       type: 'doc',
-      dir: path.join(file, './fixtures'),
+      dir: path.join(dir, './fixtures/generate-index'),
     }),
   },
   {
     name: 'async',
     collection: defineCollections({
       type: 'doc',
-      dir: path.join(file, './fixtures'),
+      dir: path.join(dir, './fixtures/generate-index'),
       async: true,
     }),
   },
@@ -61,7 +60,7 @@ const cases = [
 for (const { name, collection } of cases) {
   test(`generate JS index file: ${name}`, async () => {
     const out = await generateJS(
-      path.join(file, './fixtures/config.ts'),
+      path.join(dir, './fixtures/config.ts'),
       {
         // @ts-expect-error -- test file
         _runtime: {
@@ -70,7 +69,7 @@ for (const { name, collection } of cases) {
         collections: new Map([['docs', collection]]),
       },
       {
-        relativeTo: path.join(file, './fixtures'),
+        relativeTo: path.join(dir, './fixtures'),
       },
       'hash',
     );

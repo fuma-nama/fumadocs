@@ -129,7 +129,7 @@ export async function buildMDX(
   }
 
   return getProcessor(
-    (options.format ?? filePath.endsWith('.mdx')) ? 'mdx' : 'md',
+    options.format ?? (filePath.endsWith('.mdx') ? 'mdx' : 'md'),
   ).process({
     value: source,
     path: filePath,

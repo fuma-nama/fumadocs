@@ -1,6 +1,6 @@
 import { type Processor, type Transformer, unified } from 'unified';
 import { visit } from 'unist-util-visit';
-import type { Code, Root, RootContent } from 'mdast';
+import type { Code, Node, Root, RootContent } from 'mdast';
 import * as path from 'node:path';
 import * as fs from 'node:fs/promises';
 import { fumaMatter } from '@/utils/fuma-matter';
@@ -9,13 +9,46 @@ import remarkParse from 'remark-parse';
 import remarkMdx from 'remark-mdx';
 import { remarkHeading } from 'fumadocs-core/mdx-plugins';
 import type { DataMap } from 'vfile';
+import type { Directives } from 'mdast-util-directive';
 
 export interface Params {
   lang?: string;
   meta?: string;
 }
 
-const baseProcessor = unified().use(remarkHeading);
+const ElementLikeTypes: ElementLikeContent['type'][] = [
+  'mdxJsxFlowElement',
+  'mdxJsxTextElement',
+  'containerDirective',
+  'textDirective',
+  'leafDirective',
+];
+type ElementLikeContent = MdxJsxFlowElement | MdxJsxTextElement | Directives;
+
+function isElementLike(node: Node): node is ElementLikeContent {
+  return ElementLikeTypes.includes(node.type as ElementLikeContent['type']);
+}
+
+function parseElementAttributes(
+  element: ElementLikeContent,
+): Record<string, string | null | undefined> {
+  if (Array.isArray(element.attributes)) {
+    const attributes: Record<string, string | null> = {};
+
+    for (const attr of element.attributes) {
+      if (
+        attr.type === 'mdxJsxAttribute' &&
+        (typeof attr.value === 'string' || attr.value === null)
+      ) {
+        attributes[attr.name] = attr.value;
+      }
+    }
+
+    return attributes;
+  }
+
+  return element.attributes ?? {};
+}
 
 function flattenNode(node: RootContent): string {
   if ('children' in node)
@@ -39,34 +72,39 @@ function parseSpecifier(specifier: string): {
   };
 }
 
-// do a swallow extract
 function extractSection(root: Root, section: string): Root | undefined {
   let nodes: RootContent[] | undefined;
+  let capturingHeadingContent = false;
 
-  for (const node of root.children) {
-    if (
-      node.type === 'mdxJsxFlowElement' &&
-      node.name === 'section' &&
-      node.attributes.some(
-        (attr) =>
-          attr.type === 'mdxJsxAttribute' &&
-          attr.name === 'id' &&
-          attr.value === section,
-      )
-    ) {
-      nodes = node.children;
-      break;
+  visit(root, (node) => {
+    if (node.type === 'heading') {
+      if (capturingHeadingContent) {
+        return false;
+      }
+
+      if (node.data?.hProperties?.id === section) {
+        capturingHeadingContent = true;
+        nodes = [node];
+        return 'skip';
+      }
+
+      return;
     }
 
-    if (node.type === 'heading' && node.data?.hProperties?.id === section) {
-      nodes = [node];
-      continue;
+    if (capturingHeadingContent) {
+      nodes?.push(node as RootContent);
+      return 'skip';
     }
 
-    if (!nodes) continue;
-    if (node.type === 'heading') break;
-    nodes.push(node);
-  }
+    if (isElementLike(node) && node.name === 'section') {
+      const attributes = parseElementAttributes(node);
+
+      if (attributes.id === section) {
+        nodes = node.children;
+        return false;
+      }
+    }
+  });
 
   if (nodes)
     return {
@@ -109,70 +147,62 @@ export function remarkInclude(this: Processor): Transformer<Root, Root> {
       } satisfies Code;
     }
 
-    const processor = (data._getProcessor ?? getDefaultProcessor)(
+    const parser = (data._getProcessor ?? getDefaultProcessor)(
       ext === '.mdx' ? 'mdx' : 'md',
     );
-    let parsed = await baseProcessor.run(
-      processor.parse(fumaMatter(content).content),
-    );
+    const parsed = fumaMatter(content);
+    let mdast = parser.parse({
+      path: file,
+      value: parsed.content,
+      data: { frontmatter: parsed.data as Record<string, unknown> },
+    });
 
     if (heading) {
-      const extracted = extractSection(parsed, heading);
+      // parse headings before extraction
+      const extracted = extractSection(
+        await unified().use(remarkHeading).run(mdast),
+        heading,
+      );
       if (!extracted)
         throw new Error(
-          `Cannot find section ${heading} in ${file}, make sure you have encapsulated the section in a <section id="${heading}"> tag.`,
+          `Cannot find section ${heading} in ${file}, make sure you have encapsulated the section in a <section id="${heading}"> tag, or a :::section directive with remark-directive configured.`,
         );
 
-      parsed = extracted;
+      mdast = extracted;
     }
 
-    await update(parsed, path.dirname(file), data);
-
-    return parsed;
+    await update(mdast, path.dirname(file), data);
+    return mdast;
   }
 
   async function update(tree: Root, directory: string, data: Partial<DataMap>) {
     const queue: Promise<void>[] = [];
 
-    visit(
-      tree,
-      ['mdxJsxFlowElement', 'mdxJsxTextElement'],
-      (_node, _, parent) => {
-        const node = _node as MdxJsxFlowElement | MdxJsxTextElement;
-        if (node.name !== TagName) return;
+    visit(tree, ElementLikeTypes, (_node, _, parent) => {
+      const node = _node as ElementLikeContent;
+      if (node.name !== TagName) return;
 
-        const params: Record<string, string | null> = {};
-        const specifier = flattenNode(node);
-        if (specifier.length === 0) return 'skip';
+      const specifier = flattenNode(node);
+      if (specifier.length === 0) return 'skip';
 
-        for (const attr of node.attributes) {
-          if (
-            attr.type === 'mdxJsxAttribute' &&
-            (typeof attr.value === 'string' || attr.value === null)
-          ) {
-            params[attr.name] = attr.value;
-          }
-        }
+      const attributes = parseElementAttributes(node);
+      const { file: relativePath, section } = parseSpecifier(specifier);
+      const file = path.resolve(
+        'cwd' in attributes ? process.cwd() : directory,
+        relativePath,
+      );
 
-        const { file: relativePath, section } = parseSpecifier(specifier);
+      queue.push(
+        embedContent(file, section, attributes, data).then((replace) => {
+          Object.assign(
+            parent && parent.type === 'paragraph' ? parent : node,
+            replace,
+          );
+        }),
+      );
 
-        const file = path.resolve(
-          'cwd' in params ? process.cwd() : directory,
-          relativePath,
-        );
-
-        queue.push(
-          embedContent(file, section, params, data).then((replace) => {
-            Object.assign(
-              parent && parent.type === 'paragraph' ? parent : node,
-              replace,
-            );
-          }),
-        );
-
-        return 'skip';
-      },
-    );
+      return 'skip';
+    });
 
     await Promise.all(queue);
   }

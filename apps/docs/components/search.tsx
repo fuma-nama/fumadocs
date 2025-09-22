@@ -84,7 +84,7 @@ export default function CustomSearchDialog(props: SharedProps) {
     client,
     tag,
   });
-  const { root } = useTreeContext();
+  const { full } = useTreeContext();
   const router = useRouter();
   const pageTreeActions = useMemo(() => {
     const actions: SearchItemType[] = [];
@@ -95,7 +95,7 @@ export default function CustomSearchDialog(props: SharedProps) {
       (item) =>
         typeof item.name === 'string' &&
         item.name.toLowerCase().startsWith(normalized),
-      root.children,
+      full.children,
     );
 
     if (result) {
@@ -118,7 +118,7 @@ export default function CustomSearchDialog(props: SharedProps) {
     }
 
     return actions;
-  }, [root.children, router, search]);
+  }, [full.children, router, search]);
 
   return (
     <SearchDialog
