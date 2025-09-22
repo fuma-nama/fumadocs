@@ -9,6 +9,7 @@ apps/docs/shaders/*
 
 **/test/out/**/*
 **/test/fixtures/*.output.*
+**/test/fixtures/*.out.*
 
 out
 .content-collections

@@ -91,10 +91,6 @@ export const registry: Registry = {
       files: [
         {
           type: 'components',
-          path: 'components/ai/index.tsx',
-        },
-        {
-          type: 'components',
           path: 'components/ai/search.tsx',
         },
         {
