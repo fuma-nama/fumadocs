@@ -1,11 +1,7 @@
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { baseOptions, linkItems, logo } from '@/lib/layout.shared';
 import { source } from '@/lib/source';
-import { LargeSearchToggle } from 'fumadocs-ui/components/layout/search-toggle';
-import { Sparkles } from 'lucide-react';
-import { AISearchTrigger } from '@/components/ai';
-import { cn } from '@/lib/cn';
-import { buttonVariants } from '@/components/ui/button';
+import { AISearchTrigger } from '@/components/ai/search';
 import 'katex/dist/katex.min.css';
 
 export default function Layout({ children }: LayoutProps<'/docs'>) {
@@ -17,27 +13,6 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
       tree={source.pageTree}
       // just icon items
       links={linkItems.filter((item) => item.type === 'icon')}
-      searchToggle={{
-        components: {
-          lg: (
-            <div className="flex gap-1.5 max-md:hidden">
-              <LargeSearchToggle className="flex-1" />
-              <AISearchTrigger
-                aria-label="Ask AI"
-                className={cn(
-                  buttonVariants({
-                    variant: 'outline',
-                    size: 'icon',
-                    className: 'text-fd-muted-foreground',
-                  }),
-                )}
-              >
-                <Sparkles className="size-4" />
-              </AISearchTrigger>
-            </div>
-          ),
-        },
-      }}
       nav={{
         ...base.nav,
         title: (
@@ -47,21 +22,6 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
               Fumadocs
             </span>
           </>
-        ),
-        children: (
-          <AISearchTrigger
-            className={cn(
-              buttonVariants({
-                variant: 'secondary',
-                size: 'sm',
-                className:
-                  'absolute left-1/2 top-1/2 -translate-1/2 text-fd-muted-foreground rounded-full gap-2 md:hidden',
-              }),
-            )}
-          >
-            <Sparkles className="size-4.5 fill-current" />
-            Ask AI
-          </AISearchTrigger>
         ),
       }}
       sidebar={{
@@ -92,6 +52,8 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
       }}
     >
       {children}
+
+      <AISearchTrigger />
     </DocsLayout>
   );
 }
