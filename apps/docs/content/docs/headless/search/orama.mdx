@@ -179,12 +179,10 @@ export const { staticGET: GET } = createFromSource(source);
 ```
 
 ```ts tab="React Router" title="app/docs/search.ts"
-import type { Route } from './+types/search';
-
 // make sure this route is pre-rendered in `react-router.config.ts`.
-export async function loader({ request }: Route.LoaderArgs) {
+export async function loader() {
   // [!code highlight]
-  return server.staticGET(request);
+  return server.staticGET();
 }
 ```
 
@@ -193,7 +191,7 @@ import { createServerFileRoute } from '@tanstack/react-start/server';
 
 export const ServerRoute = createServerFileRoute('/api/search').methods({
   // [!code highlight]
-  GET: async ({ request }) => server.staticGET(request),
+  GET: async () => server.staticGET(),
 });
 ```
 
