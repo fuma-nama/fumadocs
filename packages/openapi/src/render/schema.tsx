@@ -204,6 +204,19 @@ export function Schema({
         value: range,
       });
 
+    range = getRange(
+      'items',
+      schema.minItems,
+      undefined,
+      schema.maxItems,
+      undefined,
+    );
+    if (range)
+      fields.push({
+        key: 'Items',
+        value: range,
+      });
+
     if (schema.enum) {
       fields.push({
         key: 'Value in',
