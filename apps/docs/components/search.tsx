@@ -60,22 +60,6 @@ const items = [
   },
 ];
 
-function searchNodes(
-  matcher: (item: PageTree.Item) => boolean,
-  nodes: PageTree.Node[],
-): PageTree.Item | undefined {
-  for (const node of nodes) {
-    if (node.type === 'folder') {
-      if (node.index && matcher(node.index)) return node.index;
-
-      const result = searchNodes(matcher, node.children);
-      if (result) return result;
-    } else if (node.type === 'page' && matcher(node)) {
-      return node;
-    }
-  }
-}
-
 export default function CustomSearchDialog(props: SharedProps) {
   const [open, setOpen] = useState(false);
   const [tag, setTag] = useState<string | undefined>();
@@ -86,20 +70,29 @@ export default function CustomSearchDialog(props: SharedProps) {
   });
   const { full } = useTreeContext();
   const router = useRouter();
-  const pageTreeActions = useMemo(() => {
-    const actions: SearchItemType[] = [];
-    if (search.length === 0) return actions;
+  const searchMap = useMemo(() => {
+    const map = new Map<string, PageTree.Item>();
+
+    function onNode(node: PageTree.Node) {
+      if (node.type === 'page' && typeof node.name === 'string') {
+        map.set(node.name.toLowerCase(), node);
+      } else if (node.type === 'folder') {
+        if (node.index) onNode(node.index);
+        for (const item of node.children) onNode(item);
+      }
+    }
+
+    for (const item of full.children) onNode(item);
+    return map;
+  }, [full]);
+  const pageTreeAction = useMemo<SearchItemType | undefined>(() => {
+    if (search.length === 0) return;
 
     const normalized = search.toLowerCase();
-    const result = searchNodes(
-      (item) =>
-        typeof item.name === 'string' &&
-        item.name.toLowerCase().startsWith(normalized),
-      full.children,
-    );
+    for (const [k, page] of searchMap) {
+      if (!k.startsWith(normalized)) continue;
 
-    if (result) {
-      actions.push({
+      return {
         id: 'quick-action',
         type: 'action',
         node: (
@@ -108,17 +101,15 @@ export default function CustomSearchDialog(props: SharedProps) {
             <p>
               Jump to{' '}
               <span className="font-medium text-fd-foreground">
-                {result.name}
+                {page.name}
               </span>
             </p>
           </div>
         ),
-        onSelect: () => router.push(result.url),
-      });
+        onSelect: () => router.push(page.url),
+      };
     }
-
-    return actions;
-  }, [full.children, router, search]);
+  }, [router, search, searchMap]);
 
   return (
     <SearchDialog
@@ -136,9 +127,9 @@ export default function CustomSearchDialog(props: SharedProps) {
         </SearchDialogHeader>
         <SearchDialogList
           items={
-            query.data !== 'empty' || pageTreeActions.length > 0
+            query.data !== 'empty' || pageTreeAction
               ? [
-                  ...pageTreeActions,
+                  ...(pageTreeAction ? [pageTreeAction] : []),
                   ...(Array.isArray(query.data) ? query.data : []),
                 ]
               : null
