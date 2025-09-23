@@ -1628,6 +1628,9 @@ importers:
       remark-directive:
         specifier: ^4.0.0
         version: 4.0.0
+      remark-stringify:
+        specifier: ^11.0.0
+        version: 11.0.0
       rollup:
         specifier: ^4.50.1
         version: 4.50.1
