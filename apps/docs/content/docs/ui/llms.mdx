@@ -73,7 +73,7 @@ export const ServerRoute = createServerFileRoute('/llms-full.txt').methods({
 });
 ```
 
-### `*.mdx`
+### `*.mdx` [#mdx-extension]
 
 Allow people to append `.mdx` to a page to get its Markdown/MDX content.
 
@@ -98,7 +98,7 @@ const config: NextConfig = {
 
 ### Page Actions
 
-Common page actions for AI, require `*.mdx` to be implemented first.
+Common page actions for AI, require [`*.mdx`](#mdx-extension) to be implemented first.
 
 ![AI Page Actions](/docs/ai-page-actions.png)
 
@@ -118,7 +118,7 @@ Use it in your docs page like:
 </div>
 ```
 
-## AI Search
+## Ask AI
 
 ![AI Search](/docs/ai-search.png)
 
@@ -128,6 +128,11 @@ You can install the AI search dialog using Fumadocs CLI:
 npx @fumadocs/cli add ai/search
 ```
 
-By default, it's configured for Inkeep AI. Since it's connected via Vercel AI SDK, you can connect to your own AI models easily.
+You can add the trigger component to your root layout.
 
-> Note that Fumadocs doesn't provide the AI model, it's up to you.
+### AI Model
+
+By default, it's configured for Inkeep AI using Vercel AI SDK. Update the configurations in `useChat` and `/api/chat` route to connect to your own AI model instead.
+
+Note that Fumadocs doesn't provide the AI model, it's up to you.
+Your AI model can use the `llms-full.txt` file generated above, or more diversified sources of information when combined with 3rd party solutions.
