@@ -1,4 +1,5 @@
 import * as path from 'node:path';
+import { createHash } from 'node:crypto';
 import * as fs from 'node:fs/promises';
 import { glob } from 'tinyglobby';
 import type { LoadedConfig } from '@/utils/config';
@@ -129,11 +130,14 @@ export async function generateJS(
         lastModified = await getGitTimestamp(file.fullPath);
       }
 
+      const hash = createHash('md5')
+        .update(parsed.matter + parsed.content)
+        .digest('hex');
+
       return JSON.stringify({
-        info: file,
+        info: { ...file, hash },
         lastModified,
         data: data as Record<string, unknown>,
-        content: { body: parsed.content, matter: parsed.matter },
       } satisfies AsyncRuntimeFile);
     });
 

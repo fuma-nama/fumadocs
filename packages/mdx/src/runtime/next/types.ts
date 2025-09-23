@@ -15,9 +15,8 @@ export interface RuntimeFile {
 }
 
 export interface AsyncRuntimeFile {
-  info: FileInfo;
+  info: FileInfo & { hash: string };
   data: Record<string, unknown>;
-  content: { matter: string; body: string };
   lastModified?: Date;
 }
 

@@ -7,6 +7,9 @@ import { executeMdx } from '@fumadocs/mdx-remote/client';
 import { pathToFileURL } from 'node:url';
 import { type DocData, missingProcessedMarkdown } from '@/runtime/shared';
 import type { DocCollection } from '@/config';
+import * as fs from 'node:fs/promises';
+import { fileCache } from '@/map/file-cache';
+import { fumaMatter } from '@/utils/fuma-matter';
 
 function getDocCollection(config: LoadedConfig, collection: string) {
   const col = config.collections.get(collection);
@@ -28,13 +31,15 @@ export const _runtimeAsync: RuntimeAsync = {
     const collection = getDocCollection(config, collectionName);
     const initMdxOptions = getOptions(config, collection);
 
-    return files.map(({ info, data, content, lastModified }) => {
+    return files.map(({ info, data, lastModified }) => {
       let cachedResult: CompiledMDXProperties | undefined;
 
       async function compileAndLoad() {
         if (cachedResult) return cachedResult;
         const mdxOptions = await initMdxOptions;
-        const compiled = await buildMDX(collectionName, content.body, {
+        const raw = await getRaw();
+        const { content } = fumaMatter(raw);
+        const compiled = await buildMDX(collectionName, content, {
           ...mdxOptions,
           development: false,
           frontmatter: data,
@@ -51,12 +56,20 @@ export const _runtimeAsync: RuntimeAsync = {
         return (cachedResult = result as CompiledMDXProperties);
       }
 
+      async function getRaw(): Promise<string> {
+        const cached = fileCache.read<string>('read-file', info.fullPath);
+        if (cached) return cached;
+        const value = (await fs.readFile(info.fullPath)).toString();
+        fileCache.write('read-file', info.fullPath, value);
+        return value;
+      }
+
       return {
         ...data,
         info,
         async getText(type) {
           if (type === 'raw') {
-            return `${content.matter}${content.body}`;
+            return getRaw();
           }
 
           const out = await compileAndLoad();
