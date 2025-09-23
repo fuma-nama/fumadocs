@@ -1,10 +1,12 @@
 'use client';
+import { RemoveScroll } from 'react-remove-scroll';
 import {
   type ComponentProps,
   createContext,
   type SyntheticEvent,
   use,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -20,9 +22,14 @@ import { Markdown } from './markdown';
 import { Presence } from '@radix-ui/react-presence';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 
-const ChatContext = createContext<UseChatHelpers<UIMessage> | null>(null);
+const Context = createContext<{
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  chat: UseChatHelpers<UIMessage>;
+} | null>(null);
+
 function useChatContext() {
-  return use(ChatContext)!;
+  return use(Context)!.chat;
 }
 
 function SearchAIActions() {
@@ -279,93 +286,98 @@ export function AISearchTrigger() {
     return () => window.removeEventListener('keydown', onKeyPress);
   }, [onKeyPress]);
 
-  const messages = chat.messages.filter((msg) => msg.role !== 'system');
-
   return (
-    <ChatContext value={chat}>
-      <Presence present={open}>
-        <div
-          className={cn(
-            'fixed inset-0 bg-fd-background/80 backdrop-blur-sm z-20',
-            open ? 'animate-fd-fade-in' : 'animate-fd-fade-out',
-          )}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              setOpen(false);
-              e.preventDefault();
-            }
-          }}
-        >
-          <button
-            aria-label="Close"
-            tabIndex={-1}
-            className={cn(
-              buttonVariants({
-                size: 'icon-sm',
-                color: 'ghost',
-                className:
-                  'absolute rounded-full top-12 end-12 text-fd-muted-foreground',
-              }),
-            )}
-          >
-            <X />
-          </button>
-
-          <List
-            className="absolute top-0 pt-12 pb-4 left-1/2 -translate-x-1/2 w-full max-w-[600px] max-h-[calc(100vh-8.375rem)] overscroll-contain"
-            style={{
-              maskImage:
-                'linear-gradient(to bottom, transparent, white 5rem, white calc(100% - 2rem), transparent 100%)',
-            }}
-          >
-            <div className="flex flex-col gap-4 p-3">
-              {messages.map((item) => (
-                <Message key={item.id} message={item} />
-              ))}
-            </div>
-          </List>
-        </div>
-      </Presence>
-      <div
-        className={cn(
-          'fixed bottom-2 transition-[width,height] duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] -translate-x-1/2 rounded-2xl border shadow-xl z-20 overflow-hidden',
-          open
-            ? 'w-[600px] max-w-[100vw] bg-fd-popover h-32'
-            : 'w-40 h-10 bg-fd-secondary text-fd-secondary-foreground shadow-fd-background',
-        )}
-        style={{
-          left: 'calc(50% - var(--removed-body-scroll-bar-size,0px)/2)',
-        }}
-      >
-        <Presence present={!open}>
-          <button
-            className={cn(
-              'absolute inset-0 text-center p-2 text-fd-muted-foreground text-sm transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground',
-              !open ? 'animate-fd-fade-in' : 'animate-fd-fade-out bg-fd-accent',
-            )}
-            onClick={() => setOpen(true)}
-          >
-            <SearchIcon className="absolute top-1/2 -translate-y-1/2 size-4.5" />
-            Ask AI
-          </button>
-        </Presence>
+    <Context value={useMemo(() => ({ chat, open, setOpen }), [chat, open])}>
+      <RemoveScroll enabled={open}>
         <Presence present={open}>
           <div
             className={cn(
-              'absolute inset-0 flex flex-col',
+              'fixed inset-0 p-2 right-(--removed-body-scroll-bar-size,0) flex flex-col pb-[8.375rem] items-center bg-fd-background/80 backdrop-blur-sm z-50',
               open ? 'animate-fd-fade-in' : 'animate-fd-fade-out',
             )}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setOpen(false);
+                e.preventDefault();
+              }
+            }}
           >
-            <SearchAIInput className="flex-1" />
-            <div className="flex items-center gap-1.5 p-1">
-              <SearchAIActions />
-              <p className="ms-auto text-xs text-fd-muted-foreground p-1.5">
+            <div className="sticky top-0 flex gap-2 items-center py-2 w-full max-w-[600px]">
+              <p className="text-xs flex-1 text-fd-muted-foreground">
                 Powered by Inkeep AI
               </p>
+              <button
+                aria-label="Close"
+                tabIndex={-1}
+                className={cn(
+                  buttonVariants({
+                    size: 'icon-sm',
+                    color: 'secondary',
+                    className: 'rounded-full',
+                  }),
+                )}
+                onClick={() => setOpen(false)}
+              >
+                <X />
+              </button>
             </div>
+            <List
+              className="py-10 pr-2 w-full max-w-[600px] overscroll-contain"
+              style={{
+                maskImage:
+                  'linear-gradient(to bottom, transparent, white 4rem, white calc(100% - 2rem), transparent 100%)',
+              }}
+            >
+              <div className="flex flex-col gap-4">
+                {chat.messages
+                  .filter((msg) => msg.role !== 'system')
+                  .map((item) => (
+                    <Message key={item.id} message={item} />
+                  ))}
+              </div>
+            </List>
           </div>
         </Presence>
-      </div>
-    </ChatContext>
+        <div
+          className={cn(
+            'fixed bottom-2 transition-[width,height] duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] -translate-x-1/2 rounded-2xl border shadow-xl z-50 overflow-hidden',
+            open
+              ? 'w-[min(600px,90vw)] bg-fd-popover h-32'
+              : 'w-40 h-10 bg-fd-secondary text-fd-secondary-foreground shadow-fd-background',
+          )}
+          style={{
+            left: 'calc(50% - var(--removed-body-scroll-bar-size,0px)/2)',
+          }}
+        >
+          <Presence present={!open}>
+            <button
+              className={cn(
+                'absolute inset-0 text-center p-2 text-fd-muted-foreground text-sm transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground',
+                !open
+                  ? 'animate-fd-fade-in'
+                  : 'animate-fd-fade-out bg-fd-accent',
+              )}
+              onClick={() => setOpen(true)}
+            >
+              <SearchIcon className="absolute top-1/2 -translate-y-1/2 size-4.5" />
+              Ask AI
+            </button>
+          </Presence>
+          <Presence present={open}>
+            <div
+              className={cn(
+                'absolute inset-0 flex flex-col',
+                open ? 'animate-fd-fade-in' : 'animate-fd-fade-out',
+              )}
+            >
+              <SearchAIInput className="flex-1" />
+              <div className="flex items-center gap-1.5 p-1 empty:hidden">
+                <SearchAIActions />
+              </div>
+            </div>
+          </Presence>
+        </div>
+      </RemoveScroll>
+    </Context>
   );
 }
