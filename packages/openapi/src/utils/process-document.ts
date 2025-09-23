@@ -49,7 +49,13 @@ export async function processDocument(
         throw new Error(`Failed to resolve ${node.$ref}`);
       },
     },
-  }).then((v) => upgrade(v).specification);
+  })
+    .then((v) => upgrade(v).specification)
+    .catch((e) => {
+      throw new Error(`[OpenAPI] Failed to resolve input: ${input}`, {
+        cause: e,
+      });
+    });
 
   /**
    * Dereferenced value and its original `$ref` value
