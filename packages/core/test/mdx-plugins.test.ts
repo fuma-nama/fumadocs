@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { remark } from 'remark';
 import {
+  parseCodeBlockAttributes,
   rehypeToc,
   remarkAdmonition,
   remarkHeading,
@@ -159,4 +160,22 @@ test('Rehype Toc', async () => {
   await expect(result.value).toMatchFileSnapshot(
     path.resolve(cwd, './fixtures/rehype-toc.output.js'),
   );
+});
+
+test('parse meta strings', () => {
+  expect(
+    parseCodeBlockAttributes(
+      `title="hello 'world'" tab='hello "world"' twoslash funny:invalid="" 'invalid'name="test"`,
+    ),
+  ).toMatchInlineSnapshot(`
+    {
+      "attributes": {
+        "funny": null,
+        "tab": "hello "world"",
+        "title": "hello 'world'",
+        "twoslash": null,
+      },
+      "rest": "   :invalid="" 'invalid'name="test"",
+    }
+  `);
 });

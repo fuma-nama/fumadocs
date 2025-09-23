@@ -40,7 +40,7 @@ export const rehypeCodeDefaultOptions: RehypeCodeOptions = {
     }),
   ],
   parseMetaString(meta) {
-    const parsed = parseCodeBlockAttributes(meta);
+    const parsed = parseCodeBlockAttributes(meta, ['title', 'tab']);
     const data: Record<string, unknown> = parsed.attributes;
     parsed.rest = parseLineNumber(parsed.rest, data);
 
