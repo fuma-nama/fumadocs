@@ -105,6 +105,11 @@ export async function generateJS(
           names: ['_runtimeAsync', 'buildConfig'],
         }),
         'const _sourceConfig = buildConfig(_source)',
+        getImportCode({
+          type: 'default',
+          name: 'path',
+          specifier: 'node:path',
+        }),
       );
 
       asyncInit = true;
@@ -138,7 +143,10 @@ export async function generateJS(
         info: { ...file, hash },
         lastModified,
         data: data as Record<string, unknown>,
-      } satisfies AsyncRuntimeFile);
+      } satisfies AsyncRuntimeFile).replace(
+        JSON.stringify(file.fullPath),
+        `path.resolve(process.cwd(),${JSON.stringify(file.fullPath)})`,
+      );
     });
 
     return Promise.all(entries);
