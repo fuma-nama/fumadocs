@@ -20,7 +20,6 @@ import type { z } from 'zod';
 import { DefaultChatTransport } from 'ai';
 import { Markdown } from './markdown';
 import { Presence } from '@radix-ui/react-presence';
-import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 
 const Context = createContext<{
   open: boolean;
@@ -269,7 +268,7 @@ export function AISearchTrigger() {
     }),
   });
 
-  const onKeyPress = useEffectEvent((e: KeyboardEvent) => {
+  const onKeyPress = (e: KeyboardEvent) => {
     if (e.key === 'Escape' && open) {
       setOpen(false);
       e.preventDefault();
@@ -279,12 +278,15 @@ export function AISearchTrigger() {
       setOpen(true);
       e.preventDefault();
     }
-  });
+  };
 
+  const onKeyPressRef = useRef(onKeyPress);
+  onKeyPressRef.current = onKeyPress;
   useEffect(() => {
-    window.addEventListener('keydown', onKeyPress);
-    return () => window.removeEventListener('keydown', onKeyPress);
-  }, [onKeyPress]);
+    const listener = (e: KeyboardEvent) => onKeyPressRef.current(e);
+    window.addEventListener('keydown', listener);
+    return () => window.removeEventListener('keydown', listener);
+  }, []);
 
   return (
     <Context value={useMemo(() => ({ chat, open, setOpen }), [chat, open])}>
