@@ -2,7 +2,7 @@ import * as path from 'node:path';
 import * as fs from 'node:fs/promises';
 import { getConfigHash, loadConfig } from '@/loaders/config/load';
 import { generateJS } from '@/next/map/generate';
-import { fileCache } from '@/next/map/file-cache';
+import { removeFileCache } from '@/next/map/file-cache';
 import { ValidationError } from '@/utils/validation';
 
 /**
@@ -66,7 +66,7 @@ export async function start(
           config = await loadConfig(configPath, outDir, configHash, true);
         }
 
-        if (event === 'change') fileCache.removeCache(absolutePath);
+        if (event === 'change') removeFileCache(absolutePath);
 
         await updateMapFile();
       };

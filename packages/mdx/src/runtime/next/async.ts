@@ -7,8 +7,7 @@ import { executeMdx } from '@fumadocs/mdx-remote/client';
 import { pathToFileURL } from 'node:url';
 import { type DocData, missingProcessedMarkdown } from '@/runtime/shared';
 import type { DocCollection } from '@/config';
-import * as fs from 'node:fs/promises';
-import { fileCache } from '@/next/map/file-cache';
+import { readFileWithCache } from '@/next/map/file-cache';
 import { fumaMatter } from '@/utils/fuma-matter';
 
 function getDocCollection(config: LoadedConfig, collection: string) {
@@ -37,7 +36,7 @@ export const _runtimeAsync: RuntimeAsync = {
       async function compileAndLoad() {
         if (cachedResult) return cachedResult;
         const mdxOptions = await initMdxOptions;
-        const raw = await getRaw();
+        const raw = await readFileWithCache(info.fullPath);
         const { content } = fumaMatter(raw);
         const compiled = await buildMDX(collectionName, content, {
           ...mdxOptions,
@@ -56,20 +55,12 @@ export const _runtimeAsync: RuntimeAsync = {
         return (cachedResult = result as CompiledMDXProperties);
       }
 
-      async function getRaw(): Promise<string> {
-        const cached = fileCache.read<string>('read-file', info.fullPath);
-        if (cached) return cached;
-        const value = (await fs.readFile(info.fullPath)).toString();
-        fileCache.write('read-file', info.fullPath, value);
-        return value;
-      }
-
       return {
         ...data,
         info,
         async getText(type) {
           if (type === 'raw') {
-            return getRaw();
+            return readFileWithCache(info.fullPath);
           }
 
           const out = await compileAndLoad();
