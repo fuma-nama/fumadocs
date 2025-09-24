@@ -179,7 +179,8 @@ function CopyButton({
       data-checked={checked || undefined}
       className={cn(
         buttonVariants({
-          className: 'hover:text-fd-accent-foreground data-[checked]:text-fd-accent-foreground',
+          className:
+            'hover:text-fd-accent-foreground data-[checked]:text-fd-accent-foreground',
           size: 'icon-xs',
         }),
         className,
