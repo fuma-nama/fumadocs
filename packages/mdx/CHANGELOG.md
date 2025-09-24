@@ -1,5 +1,19 @@
 # next-docs-mdx
 
+## 12.0.1
+
+### Patch Changes
+
+- af50bc8: Support customising index file output path in Vite
+- 5fc9ee4: Support `remark-directive` for Include API
+- 4b9871d: MDX Async mode: read file content on load
+- Updated dependencies [655bb46]
+- Updated dependencies [d1ae3e8]
+- Updated dependencies [6548a59]
+- Updated dependencies [51268ec]
+- Updated dependencies [51268ec]
+  - fumadocs-core@15.8.0
+
 ## 12.0.0
 
 ### Major Changes

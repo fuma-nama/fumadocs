@@ -1,5 +1,17 @@
 # fumadocs-docgen
 
+## 3.0.1
+
+### Patch Changes
+
+- 655bb46: Support custom `defaultValue` for `remark-ts2js`
+- Updated dependencies [655bb46]
+- Updated dependencies [d1ae3e8]
+- Updated dependencies [6548a59]
+- Updated dependencies [51268ec]
+- Updated dependencies [51268ec]
+  - fumadocs-core@15.8.0
+
 ## 3.0.0
 
 ### Major Changes

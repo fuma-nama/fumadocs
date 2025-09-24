@@ -1,5 +1,23 @@
 # next-docs-zeta
 
+## 15.8.0
+
+### Minor Changes
+
+- d1ae3e8: **Move `SortedResult` and other search-related types to `fumadocs-core/search`**
+
+  This also exposed the search result highlighter API, you may now use it for highlighting results of your own search integration
+
+  Old export will be kept until the next major release.
+
+- 51268ec: Breadcrumbs API: default `includePage` to `false`.
+
+### Patch Changes
+
+- 655bb46: [Internal] `parseCodeBlockAttributes` include null values, restrict `rehype-code` to only parse `title` and `tab` attributes.
+- 6548a59: Support breadcrumbs for Search API
+- 51268ec: Breadcrumbs API: Fix root folders being filtered when `includeRoot` is set to `true`.
+
 ## 15.7.13
 
 ### Patch Changes

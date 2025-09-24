@@ -1,5 +1,19 @@
 # fumadocs-typescript
 
+## 4.0.9
+
+### Patch Changes
+
+- 43cbf32: Fix `@remarks` used for full instead of simplified type form
+- Updated dependencies [655bb46]
+- Updated dependencies [53a0635]
+- Updated dependencies [d1ae3e8]
+- Updated dependencies [6548a59]
+- Updated dependencies [51268ec]
+- Updated dependencies [51268ec]
+  - fumadocs-core@15.8.0
+  - fumadocs-ui@15.8.0
+
 ## 4.0.8
 
 ### Patch Changes

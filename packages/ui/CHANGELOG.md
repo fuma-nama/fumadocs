@@ -1,5 +1,18 @@
 # next-docs-ui
 
+## 15.8.0
+
+### Patch Changes
+
+- 53a0635: Support custom `action` type search item in search dialog
+- 6548a59: Support breadcrumbs for Search API
+- Updated dependencies [655bb46]
+- Updated dependencies [d1ae3e8]
+- Updated dependencies [6548a59]
+- Updated dependencies [51268ec]
+- Updated dependencies [51268ec]
+  - fumadocs-core@15.8.0
+
 ## 15.7.13
 
 ### Patch Changes
