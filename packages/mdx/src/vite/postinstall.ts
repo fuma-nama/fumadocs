@@ -1,7 +1,8 @@
-import { findConfigFile, loadConfig } from '@/utils/config';
+import { loadConfig } from '@/loaders/config/load';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { entry } from '@/vite/generate';
+import { findConfigFile } from '@/loaders/config';
 
 export async function postInstall(
   configPath = findConfigFile(),

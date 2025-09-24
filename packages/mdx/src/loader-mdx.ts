@@ -1,6 +1,6 @@
 import { type LoaderContext } from 'webpack';
 import { createMdxLoader } from '@/loaders/mdx';
-import { dynamicConfig } from '@/loaders/config-loader';
+import { dynamicConfig } from '@/loaders/config';
 import { toWebpack, type WebpackLoader } from '@/loaders/adapter';
 
 export interface Options {

@@ -5,7 +5,7 @@ import {
   type Source,
 } from 'fumadocs-core/source';
 import type { DocOut, MetaOut, Runtime } from './types';
-import type { CompiledMDXProperties } from '@/mdx/build-mdx';
+import type { CompiledMDXProperties } from '@/loaders/mdx/build-mdx';
 import * as fs from 'node:fs/promises';
 import { type FileInfo, missingProcessedMarkdown } from '@/runtime/shared';
 

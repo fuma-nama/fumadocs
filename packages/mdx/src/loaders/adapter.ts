@@ -1,4 +1,4 @@
-import type { CompilerOptions } from '@/mdx/build-mdx';
+import type { CompilerOptions } from '@/loaders/mdx/build-mdx';
 import type { LoadFnOutput, LoadHook } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs/promises';

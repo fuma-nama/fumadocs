@@ -1,7 +1,8 @@
-import { findConfigFile, getConfigHash, loadConfig } from '@/utils/config';
+import { getConfigHash, loadConfig } from '@/loaders/config/load';
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import { generateJS } from '@/map/generate';
+import { generateJS } from '@/next/map/generate';
+import { findConfigFile } from '@/loaders/config';
 
 export * from './create';
 

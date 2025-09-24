@@ -1,8 +1,8 @@
 import type { StandardSchemaV1 } from '@standard-schema/spec';
-import type { DefaultMDXOptions } from '@/mdx/preset';
+import type { DefaultMDXOptions } from '@/loaders/mdx/preset';
 import type { ProcessorOptions } from '@mdx-js/mdx';
 import { frontmatterSchema, metaSchema } from '@/config/zod-4';
-import type { PostprocessOptions } from '@/mdx/remark-postprocess';
+import type { PostprocessOptions } from '@/loaders/mdx/remark-postprocess';
 
 export type CollectionSchema<Schema extends StandardSchemaV1, Context> =
   | Schema

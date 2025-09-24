@@ -1,7 +1,7 @@
 import type { DocCollection, DocsCollection, MetaCollection } from '@/config';
 import { ident, toImportPath } from '@/utils/import-formatter';
 import { generateGlob, getGlobBase } from '@/vite/generate-glob';
-import type { LoadedConfig } from '@/utils/config';
+import type { LoadedConfig } from '@/loaders/config';
 import { getGlobPatterns } from '@/utils/collections';
 
 function docs(name: string, collection: DocsCollection) {

@@ -1,7 +1,7 @@
-import type { LoadedConfig } from '@/utils/config';
+import type { LoadedConfig } from '@/loaders/config';
 import { _runtime, createMDXSource } from './index';
 import type { AsyncDocOut, RuntimeAsync } from './types';
-import { buildMDX, CompiledMDXProperties } from '@/mdx/build-mdx';
+import { buildMDX, CompiledMDXProperties } from '@/loaders/mdx/build-mdx';
 import type { ProcessorOptions } from '@mdx-js/mdx';
 import { executeMdx } from '@fumadocs/mdx-remote/client';
 import { pathToFileURL } from 'node:url';
