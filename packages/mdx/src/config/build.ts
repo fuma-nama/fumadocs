@@ -1,4 +1,4 @@
-import type { LoadedConfig } from '@/utils/config';
+import type { LoadedConfig } from '@/loaders/config';
 import type {
   DocCollection,
   DocsCollection,
@@ -49,7 +49,7 @@ export function buildConfig(config: Record<string, unknown>): LoadedConfig {
       const input = this.global.mdxOptions;
       async function uncached(): Promise<ProcessorOptions> {
         const options = typeof input === 'function' ? await input() : input;
-        const { getDefaultMDXOptions } = await import('@/mdx/preset');
+        const { getDefaultMDXOptions } = await import('@/loaders/mdx/preset');
 
         if (options?.preset === 'minimal') return options;
         return getDefaultMDXOptions({

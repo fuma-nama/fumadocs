@@ -60,7 +60,7 @@ export function remarkPostprocess(
     if (includeProcessedMarkdown) {
       file.data._markdown = toMarkdown(tree, {
         ...this.data('settings'),
-        // @ts-expect-error - from https://github.com/remarkjs/remark/blob/main/packages/remark-stringify/lib/index.js
+        // from https://github.com/remarkjs/remark/blob/main/packages/remark-stringify/lib/index.js
         extensions: this.data('toMarkdownExtensions') || [],
       });
     }

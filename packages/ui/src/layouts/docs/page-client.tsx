@@ -340,9 +340,9 @@ function FooterItem({ item, index }: { item: Item; index: 0 | 1 }) {
 export type BreadcrumbProps = BreadcrumbOptions & ComponentProps<'div'>;
 
 export function PageBreadcrumb({
-  includeRoot = false,
+  includeRoot,
   includeSeparator,
-  includePage = false,
+  includePage,
   ...props
 }: BreadcrumbProps) {
   const path = useTreePath();

@@ -3,7 +3,7 @@ import * as path from 'node:path';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 import { ValidationError } from '@/utils/validation';
-import { generateJS } from '@/map/generate';
+import { generateJS } from '@/next/map/generate';
 import { defineCollections } from '@/config';
 import { fumaMatter } from '@/utils/fuma-matter';
 

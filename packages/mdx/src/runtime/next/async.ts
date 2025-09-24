@@ -1,14 +1,14 @@
-import type { LoadedConfig } from '@/utils/config';
+import type { LoadedConfig } from '@/loaders/config';
 import { _runtime, createMDXSource } from './index';
 import type { AsyncDocOut, RuntimeAsync } from './types';
-import { buildMDX, CompiledMDXProperties } from '@/mdx/build-mdx';
+import { buildMDX, CompiledMDXProperties } from '@/loaders/mdx/build-mdx';
 import type { ProcessorOptions } from '@mdx-js/mdx';
 import { executeMdx } from '@fumadocs/mdx-remote/client';
 import { pathToFileURL } from 'node:url';
 import { type DocData, missingProcessedMarkdown } from '@/runtime/shared';
 import type { DocCollection } from '@/config';
 import * as fs from 'node:fs/promises';
-import { fileCache } from '@/map/file-cache';
+import { fileCache } from '@/next/map/file-cache';
 import { fumaMatter } from '@/utils/fuma-matter';
 
 function getDocCollection(config: LoadedConfig, collection: string) {

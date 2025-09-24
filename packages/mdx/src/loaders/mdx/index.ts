@@ -1,12 +1,11 @@
 import { fumaMatter } from '@/utils/fuma-matter';
 import { validate } from '@/utils/validation';
 import { getGitTimestamp } from '@/utils/git-timestamp';
-import { countLines } from '@/utils/count-lines';
-import { buildMDX } from '@/mdx/build-mdx';
+import { buildMDX } from '@/loaders/mdx/build-mdx';
 import type { SourceMap } from 'rollup';
 import type { Loader } from '@/loaders/adapter';
 import { z } from 'zod';
-import type { ConfigLoader } from '@/loaders/config-loader';
+import type { ConfigLoader } from '@/loaders/config';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
@@ -136,4 +135,14 @@ export function createMdxLoader(configLoader: ConfigLoader): Loader {
 
 function generateCacheHash(input: string): string {
   return createHash('md5').update(input).digest('hex');
+}
+
+function countLines(s: string) {
+  let num = 0;
+
+  for (const c of s) {
+    if (c === '\n') num++;
+  }
+
+  return num;
 }

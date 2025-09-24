@@ -2,7 +2,7 @@ import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { TableOfContents } from 'fumadocs-core/server';
 import type { FC } from 'react';
 import type { MDXProps } from 'mdx/types';
-import type { ExtractedReference } from '@/mdx/remark-postprocess';
+import type { ExtractedReference } from '@/loaders/mdx/remark-postprocess';
 
 export interface FileInfo {
   /**

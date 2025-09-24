@@ -22,8 +22,8 @@ export async function GET(): Promise<Response> {
         url: page.url,
         title: page.data.title,
         description: page.data.description,
-        breadcrumbs: items.flatMap<string>((item) =>
-          typeof item.name === 'string' ? item.name : [],
+        breadcrumbs: items.flatMap<string>((item, i) =>
+          i > 0 && typeof item.name === 'string' ? item.name : [],
         ),
       } satisfies OramaDocument;
     });

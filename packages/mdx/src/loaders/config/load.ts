@@ -1,26 +1,8 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import type {
-  DocCollection,
-  DocsCollection,
-  GlobalConfig,
-  MetaCollection,
-} from '@/config/define';
-import type { ProcessorOptions } from '@mdx-js/mdx';
 import { pathToFileURL } from 'node:url';
 import { buildConfig } from '@/config/build';
-
-export function findConfigFile(): string {
-  return path.resolve('source.config.ts');
-}
-
-export interface LoadedConfig {
-  collections: Map<string, DocCollection | MetaCollection | DocsCollection>;
-
-  global: GlobalConfig;
-
-  getDefaultMDXOptions(mode?: 'default' | 'remote'): Promise<ProcessorOptions>;
-}
+import type { LoadedConfig } from '@/loaders/config';
 
 let cache: {
   hash: string;

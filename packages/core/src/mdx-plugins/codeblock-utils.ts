@@ -91,7 +91,7 @@ export function generateCodeBlockTabs({
 }
 
 export interface CodeBlockAttributes<Name extends string = string> {
-  attributes: Partial<Record<Name, string>>;
+  attributes: Partial<Record<Name, string | null>>;
   rest: string;
 }
 
@@ -103,13 +103,13 @@ export function parseCodeBlockAttributes<Name extends string = string>(
   allowedNames?: Name[],
 ): CodeBlockAttributes<Name> {
   let str = meta;
-  const StringRegex = /(?<=^|\s)(?<name>\w+)=(?:"([^"]*)"|'([^']*)')/g;
-  const attributes: Partial<Record<Name, string>> = {};
+  const StringRegex = /(?<=^|\s)(?<name>\w+)(?:=(?:"([^"]*)"|'([^']*)'))?/g;
+  const attributes: CodeBlockAttributes['attributes'] = {};
 
   str = str.replaceAll(StringRegex, (match, name, value_1, value_2) => {
     if (allowedNames && !allowedNames.includes(name)) return match;
 
-    attributes[name as Name] = value_1 ?? value_2;
+    attributes[name] = value_1 ?? value_2 ?? null;
     return '';
   });
 

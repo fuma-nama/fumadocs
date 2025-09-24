@@ -1,7 +1,7 @@
 import type { NextConfig } from 'next';
 import type { Configuration } from 'webpack';
-import { findConfigFile } from '@/utils/config';
-import { start } from '@/map';
+import { findConfigFile } from '@/loaders/config';
+import { start } from './map';
 import { type Options as MDXLoaderOptions } from '../loader-mdx';
 import { readFileSync } from 'node:fs';
 import type { TurbopackOptions } from 'next/dist/server/config-shared';

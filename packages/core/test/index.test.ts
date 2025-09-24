@@ -154,16 +154,9 @@ test('Breadcrumbs', () => {
     ],
   };
 
-  expect(getBreadcrumbItems('/docs/folder', tree)).toStrictEqual([
-    { name: 'World', url: '/docs/folder' },
-  ]);
+  expect(
+    getBreadcrumbItems('/docs/folder', tree, { includePage: true }),
+  ).toStrictEqual([{ name: 'World', url: '/docs/folder' }]);
 
-  expect(getBreadcrumbItems('/', tree)).toMatchInlineSnapshot(`
-    [
-      {
-        "name": "Introduction",
-        "url": "/",
-      },
-    ]
-  `);
+  expect(getBreadcrumbItems('/invalid', tree)).toMatchInlineSnapshot(`[]`);
 });

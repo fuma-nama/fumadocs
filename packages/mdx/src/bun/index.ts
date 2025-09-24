@@ -1,7 +1,6 @@
 import type { BunPlugin } from 'bun';
 import { createMdxLoader } from '@/loaders/mdx';
-import { resolvedConfig } from '@/loaders/config-loader';
-import { findConfigFile } from '@/utils/config';
+import { findConfigFile, resolvedConfig } from '@/loaders/config';
 import { buildConfig } from '@/config/build';
 import { parse } from 'node:querystring';
 import { pathToFileURL } from 'node:url';
