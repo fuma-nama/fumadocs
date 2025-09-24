@@ -17,3 +17,13 @@ interface GenericType<A, B, C> {
   B: B;
   C: C;
 }
+
+export type Test4<T> = {
+  get prop(): Complicated<T>;
+};
+
+type Complicated<T> = T extends { [K in keyof T]: T[K] }
+  ? {
+      [K in keyof T as Lowercase<string & K>]: T[K];
+    }
+  : never;

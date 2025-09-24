@@ -86,7 +86,8 @@ export function createGenerator(config?: GeneratorOptions | Project) {
           project: config,
         }
       : config;
-  const cacheType = options?.cache ?? 'fs';
+  const cacheType =
+    options?.cache ?? (process.env.NODE_ENV !== 'development' ? 'fs' : false);
   const cache = cacheType === 'fs' ? createCache() : null;
   let instance: Project | undefined;
 
@@ -214,13 +215,18 @@ function getDocEntry(
       }) satisfies RawTag,
   );
 
-  let type = getFullType(subType);
+  let simplifiedType = getSimpleForm(
+    subType,
+    program.getTypeChecker(),
+    isOptional,
+  );
 
-  for (const tag of tags) {
-    if (tag.name !== 'remarks') continue;
+  const remarksTag = tags.find((tag) => tag.name === 'remarks');
+  if (remarksTag) {
+    const match = /^`(?<name>.+)`/.exec(remarksTag.text)?.[1];
 
     // replace type with @remarks
-    type = /^`(?<name>.+)`/.exec(tag.text)?.[1] ?? type;
+    if (match) simplifiedType = match;
   }
 
   const entry: DocEntry = {
@@ -231,12 +237,8 @@ function getDocEntry(
       ),
     ),
     tags,
-    type,
-    simplifiedType: getSimpleForm(
-      subType,
-      program.getTypeChecker(),
-      isOptional,
-    ),
+    type: getFullType(subType),
+    simplifiedType,
     required: !isOptional,
     deprecated: tags.some((tag) => tag.name === 'deprecated'),
   };
@@ -247,16 +249,18 @@ function getDocEntry(
 }
 
 function getFullType(type: Type): string {
-  let typeName = type.getText(
+  const alias = type.getAliasSymbol();
+  if (alias) {
+    return alias
+      .getDeclaredType()
+      .getText(undefined, ts.TypeFormatFlags.NoTruncation);
+  }
+
+  return type.getText(
     undefined,
     ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope |
       ts.TypeFormatFlags.NoTruncation |
+      // we use `InTypeAlias` to force TypeScript to extend generic types like `ExtractParams<T>` into more detailed forms like `T extends string? ExtractParamsFromString<T> : never`.
       ts.TypeFormatFlags.InTypeAlias,
   );
-
-  if (type.getAliasSymbol() && type.getAliasTypeArguments().length === 0) {
-    typeName = type.getAliasSymbol()?.getEscapedName() ?? typeName;
-  }
-
-  return typeName;
 }

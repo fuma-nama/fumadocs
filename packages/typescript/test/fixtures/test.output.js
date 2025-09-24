@@ -64,7 +64,7 @@ function _createMdxContent(props) {
                     "--shiki-light": "#24292E",
                     "--shiki-dark": "#E1E4E8"
                   },
-                  children: "number"
+                  children: "timestamp"
                 })
               })
             }),
@@ -76,7 +76,7 @@ function _createMdxContent(props) {
                     "--shiki-light": "#24292E",
                     "--shiki-dark": "#E1E4E8"
                   },
-                  children: "timestamp"
+                  children: "number"
                 })
               })
             }),

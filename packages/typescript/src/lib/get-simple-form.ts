@@ -8,8 +8,13 @@ export function getSimpleForm(
   if (type.isUndefined() && noUndefined) return '';
 
   const alias = type.getAliasSymbol();
-  if (alias && type.getAliasTypeArguments().length === 0) {
-    return alias.getEscapedName();
+  if (alias) {
+    return alias
+      .getDeclaredType()
+      .getText(
+        undefined,
+        ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope,
+      );
   }
 
   if (type.isUnion()) {
@@ -58,7 +63,6 @@ export function getSimpleForm(
 
   return type.getText(
     undefined,
-    ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope |
-      ts.TypeFormatFlags.InTypeAlias,
+    ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope,
   );
 }

@@ -34,8 +34,10 @@ ${doc.description}
 
 <div className="flex flex-row items-center gap-4">
   <code className="text-sm">${c.name}</code>
-  <code className="text-fd-muted-foreground">{${JSON.stringify(c.type)}}</code>
+  <code className="text-fd-muted-foreground">{${JSON.stringify(c.simplifiedType)}}</code>
 </div>
+
+Full Type: <code className="text-fd-muted-foreground">{${JSON.stringify(c.type)}}</code>
 
 ${c.description || 'No Description'}
 
