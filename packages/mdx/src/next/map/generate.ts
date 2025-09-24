@@ -1,11 +1,10 @@
 import * as path from 'node:path';
-import * as fs from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import { glob } from 'tinyglobby';
 import type { LoadedConfig } from '@/loaders/config';
 import type { DocCollection, MetaCollection } from '@/config';
 import { validate } from '@/utils/validation';
-import { fileCache } from '@/next/map/file-cache';
-import type { AsyncRuntimeFile } from '@/runtime/next/types';
+import { readFileWithCache } from '@/next/map/file-cache';
 import { load } from 'js-yaml';
 import { getGitTimestamp } from '@/utils/git-timestamp';
 import { fumaMatter } from '@/utils/fuma-matter';
@@ -16,13 +15,6 @@ import {
 } from '@/utils/import-formatter';
 import { getGlobPatterns, isFileSupported } from '@/utils/collections';
 import type { FileInfo } from '@/runtime/shared';
-
-async function readFileWithCache(file: string): Promise<string> {
-  const cached = fileCache.read<string>('read-file', file);
-  if (cached) return cached;
-
-  return (await fs.readFile(file)).toString();
-}
 
 export async function generateJS(
   configPath: string,
@@ -104,15 +96,19 @@ export async function generateJS(
           names: ['_runtimeAsync', 'buildConfig'],
         }),
         'const _sourceConfig = buildConfig(_source)',
+        getImportCode({
+          type: 'default',
+          name: 'path',
+          specifier: 'node:path',
+        }),
       );
 
       asyncInit = true;
     }
 
     const entries = files.map(async (file) => {
-      const parsed = fumaMatter(
-        await readFileWithCache(file.fullPath).catch(() => ''),
-      );
+      const content = await readFileWithCache(file.fullPath).catch(() => '');
+      const parsed = fumaMatter(content);
       let data = parsed.data;
 
       if (collection.schema) {
@@ -129,12 +125,16 @@ export async function generateJS(
         lastModified = await getGitTimestamp(file.fullPath);
       }
 
-      return JSON.stringify({
-        info: file,
-        lastModified,
-        data: data as Record<string, unknown>,
-        content: { body: parsed.content, matter: parsed.matter },
-      } satisfies AsyncRuntimeFile);
+      const hash = createHash('md5').update(content).digest('hex');
+      const infoStr: string[] = [];
+      for (const [k, v] of Object.entries({ ...file, hash })) {
+        infoStr.push(`${k}: ${JSON.stringify(v)}`);
+      }
+      infoStr.push(
+        `absolutePath: path.resolve(${JSON.stringify(file.fullPath)})`,
+      );
+
+      return `{ info: { ${infoStr.join(', ')} }, lastModified: ${JSON.stringify(lastModified)}, data: ${JSON.stringify(data)} }`;
     });
 
     return Promise.all(entries);
