@@ -145,7 +145,7 @@ export async function generateJS(
         data: data as Record<string, unknown>,
       } satisfies AsyncRuntimeFile).replace(
         JSON.stringify(file.fullPath),
-        `path.resolve(process.cwd(),${JSON.stringify(file.fullPath)})`,
+        `${JSON.stringify(file.fullPath)},absolutePath:path.resolve(${JSON.stringify(file.fullPath)})`,
       );
     });
 
