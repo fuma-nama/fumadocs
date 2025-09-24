@@ -3,7 +3,7 @@ import type { LoadFnOutput, LoadHook } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs/promises';
 import type { SourceMap, TransformPluginContext } from 'rollup';
-import type { Environment, TransformResult } from 'vite';
+import type { TransformResult } from 'vite';
 import { parse } from 'node:querystring';
 import { ValidationError } from '@/utils/validation';
 import path from 'node:path';
@@ -60,7 +60,7 @@ export function toNode(
 }
 
 export type ViteLoader = (
-  this: TransformPluginContext & { environment: Environment },
+  this: TransformPluginContext,
   file: string,
   query: string,
   value: string,

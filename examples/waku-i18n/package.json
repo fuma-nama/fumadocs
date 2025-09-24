@@ -9,7 +9,7 @@
     "start": "waku start"
   },
   "dependencies": {
-    "@orama/tokenizers": "^3.1.13",
+    "@orama/tokenizers": "^3.1.14",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
@@ -21,12 +21,12 @@
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.13",
     "@types/mdx": "^2.0.13",
-    "@types/node": "^24.3.3",
+    "@types/node": "^24.5.2",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
     "tailwindcss": "^4.1.13",
     "typescript": "^5.9.2",
-    "vite": "^7.1.5",
+    "vite": "^7.1.7",
     "vite-tsconfig-paths": "^5.1.4"
   }
 }
