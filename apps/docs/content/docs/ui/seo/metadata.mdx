@@ -7,45 +7,56 @@ description: Usage with Next.js Metadata API.
 
 ## Metadata Image
 
-Fumadocs has a built-in metadata image generator.
+You can generate metadata images dynamically using `next/og`.
 
-You will need a route handler to get started.
+Add the following under your loader, and define image metadata for pages:
 
-<include cwd meta='title="app/docs-og/[...slug]/route.tsx"'>
-  ../../examples/next-mdx/app/docs-og/[...slug]/route.tsx
-</include>
+```ts tab="lib/source.ts"
+import { type InferPageType } from 'fumadocs-core/source';
 
-> We need to append `image.png` to the end of slugs so that we can access it via `/docs-og/my-page/image.png`.
+// [!code ++:8]
+export function getPageImage(page: InferPageType<typeof source>) {
+  const segments = [...page.slugs, 'image.png'];
 
-In your docs page, add the image to metadata.
+  return {
+    segments,
+    url: `/og/docs/${segments.join('/')}`,
+  };
+}
+```
 
-```tsx title="app/docs/[[...slug]]/page.tsx"
+```tsx tab="app/docs/[[...slug]]/page.tsx"
 import { notFound } from 'next/navigation';
-import { source } from '@/lib/source';
+import { source, getPageImage } from '@/lib/source';
+import type { Metadata } from 'next';
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug?: string[] }>;
-}) {
-  const { slug = [] } = await params;
-  const page = source.getPage(slug);
+export async function generateMetadata(
+  props: PageProps<'/docs/[[...slug]]'>,
+): Promise<Metadata> {
+  const params = await props.params;
+  const page = source.getPage(params.slug);
   if (!page) notFound();
 
-  const image = ['/docs-og', ...slug, 'image.png'].join('/');
   return {
     title: page.data.title,
     description: page.data.description,
     openGraph: {
-      images: image,
-    },
-    twitter: {
-      card: 'summary_large_image',
-      images: image,
+      // [!code ++]
+      images: getPageImage(page).url,
     },
   };
 }
 ```
+
+> We append `image.png` to the end of slugs so that we can access it via `/og/docs/my-page/image.png`.
+
+Finally, create a route handler to generate images at build time:
+
+<include cwd meta='title="app/og/docs/[...slug]/route.tsx"'>
+  ../../examples/next-mdx/app/og/docs/[...slug]/route.tsx
+</include>
+
+You can specify options for Satori (used by `next/og`), see https://github.com/vercel/satori for reference.
 
 ### Other Presets
 
@@ -55,24 +66,4 @@ There's other available styles on Fumadocs CLI, such as `mono`:
 npx @fumadocs/cli@latest add og/mono
 ```
 
-Replaced your old `generateOGImage` with the installed one.
-
-### Customisations
-
-You can specify options for Satori, like adding fonts:
-
-```ts
-import { generateOGImage } from 'fumadocs-ui/og';
-
-generateOGImage({
-  fonts: [
-    {
-      name: 'Roboto',
-      // Use `fs` (Node.js only) or `fetch` to read the font as Buffer/ArrayBuffer and provide `data` here.
-      data: robotoArrayBuffer,
-      weight: 400,
-      style: 'normal',
-    },
-  ],
-});
-```
+Replaced your old `generate` with the installed one.

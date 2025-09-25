@@ -1,7 +1,4 @@
-import {
-  ImageResponse,
-  type ImageResponseOptions,
-} from '@takumi-rs/image-response';
+import { type ImageResponseOptions } from '@takumi-rs/image-response';
 import type { ReactNode } from 'react';
 import fs from 'node:fs/promises';
 
@@ -10,41 +7,30 @@ export interface GenerateProps {
   description?: ReactNode;
 }
 
-const font = await fs.readFile('./lib/og/JetBrainsMono-Regular.ttf');
-const fontBold = await fs.readFile('./lib/og/JetBrainsMono-Bold.ttf');
+const font = fs.readFile('./lib/og/JetBrainsMono-Regular.ttf');
+const fontBold = fs.readFile('./lib/og/JetBrainsMono-Bold.ttf');
 
-export async function generateOGImage(
-  options: GenerateProps & Partial<ImageResponseOptions>,
-): Promise<ImageResponse> {
-  const { title, description, ...rest } = options;
-
-  return new ImageResponse(
-    generate({
-      title,
-      description,
-    }),
-    {
-      format: 'webp',
-      width: 1200,
-      height: 630,
-      fonts: [
-        {
-          name: 'Mono',
-          data: font,
-          weight: 400,
-        },
-        {
-          name: 'Mono',
-          data: fontBold,
-          weight: 600,
-        },
-      ],
-      ...rest,
-    },
-  );
+export async function getImageResponseOptions(): Promise<ImageResponseOptions> {
+  return {
+    format: 'webp',
+    width: 1200,
+    height: 630,
+    fonts: [
+      {
+        name: 'Mono',
+        data: await font,
+        weight: 400,
+      },
+      {
+        name: 'Mono',
+        data: await fontBold,
+        weight: 600,
+      },
+    ],
+  };
 }
 
-function generate({ title, description }: GenerateProps) {
+export function generate({ title, description }: GenerateProps) {
   const siteName = 'Fumadocs';
   const primaryTextColor = 'rgb(240,240,240)';
   const logo = (

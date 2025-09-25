@@ -1,4 +1,3 @@
-import { ImageResponse } from 'next/og';
 import type { ReactNode } from 'react';
 import fs from 'node:fs/promises';
 import type { ImageResponseOptions } from 'next/server';
@@ -6,69 +5,39 @@ import type { ImageResponseOptions } from 'next/server';
 export interface GenerateProps {
   title: ReactNode;
   description?: ReactNode;
+  site?: ReactNode;
+  logo?: ReactNode;
 }
 
-const font = await fs.readFile('./lib/og/JetBrainsMono-Regular.ttf');
-const fontBold = await fs.readFile('./lib/og/JetBrainsMono-Bold.ttf');
+const font = fs.readFile('./lib/og/JetBrainsMono-Regular.ttf');
+const fontBold = fs.readFile('./lib/og/JetBrainsMono-Bold.ttf');
 
-export async function generateOGImage(
-  options: GenerateProps & Partial<ImageResponseOptions>,
-): Promise<ImageResponse> {
-  const { title, description, ...rest } = options;
-
-  return new ImageResponse(
-    generate({
-      title,
-      description,
-    }),
-    {
-      width: 1200,
-      height: 630,
-      fonts: [
-        {
-          name: 'Mono',
-          data: font,
-          weight: 400,
-        },
-        {
-          name: 'Mono',
-          data: fontBold,
-          weight: 600,
-        },
-      ],
-      ...rest,
-    },
-  );
+export async function getImageResponseOptions(): Promise<ImageResponseOptions> {
+  return {
+    width: 1200,
+    height: 630,
+    fonts: [
+      {
+        name: 'Mono',
+        data: await font,
+        weight: 400,
+      },
+      {
+        name: 'Mono',
+        data: await fontBold,
+        weight: 600,
+      },
+    ],
+  };
 }
 
-function generate({ title, description }: GenerateProps) {
-  const siteName = 'Fumadocs';
+export function generate({
+  title,
+  description,
+  logo,
+  site = 'My App',
+}: GenerateProps) {
   const primaryTextColor = 'rgb(240,240,240)';
-  const logo = (
-    <svg
-      width="60"
-      height="60"
-      viewBox="0 0 180 180"
-      filter="url(#logo-shadow)"
-    >
-      <circle cx="90" cy="90" r="86" fill="url(#logo-iconGradient)" />
-      <defs>
-        <filter id="logo-shadow" colorInterpolationFilters="sRGB">
-          <feDropShadow
-            dx="0"
-            dy="0"
-            stdDeviation="4"
-            floodColor="white"
-            floodOpacity="1"
-          />
-        </filter>
-        <linearGradient id="logo-iconGradient" gradientTransform="rotate(45)">
-          <stop offset="45%" stopColor="black" />
-          <stop offset="100%" stopColor="white" />
-        </linearGradient>
-      </defs>
-    </svg>
-  );
 
   return (
     <div
@@ -123,7 +92,7 @@ function generate({ title, description }: GenerateProps) {
               fontWeight: 600,
             }}
           >
-            {siteName}
+            {site}
           </p>
         </div>
       </div>
