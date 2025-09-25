@@ -40,6 +40,7 @@ export interface LoaderOptions<
   url?: UrlFn;
 
   source: Source<T> | Source<T>[];
+  // TODO: solve the overlaps between page tree transformers & storage transformers, like a plugin API?
   transformers?: Transformer[];
 
   /**
@@ -144,15 +145,21 @@ export interface LoaderOutput<Config extends LoaderConfig> {
       }
     | undefined;
 
+  /**
+   * @internal
+   */
   _i18n?: I18nConfig;
 
   /**
-   * Get list of pages from language
+   * Get a list of pages from specified language
    *
-   * @param language - If empty, the default language will be used
+   * @param language - If empty, list pages from all languages.
    */
   getPages: (language?: string) => Page<Config['source']['pageData']>[];
 
+  /**
+   * get each language and its pages, empty if i18n is not enabled.
+   */
   getLanguages: () => LanguageEntry<Config['source']['pageData']>[];
 
   /**
@@ -396,11 +403,13 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
           hash,
         };
     },
-    getPages(language = defaultLanguage) {
+    getPages(language) {
       const pages: Page[] = [];
 
       for (const [key, value] of walker.pages.entries()) {
-        if (key.startsWith(`${language}.`)) pages.push(value);
+        if (language === undefined || key.startsWith(`${language}.`)) {
+          pages.push(value);
+        }
       }
 
       return pages;

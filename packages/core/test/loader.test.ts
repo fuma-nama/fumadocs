@@ -121,7 +121,7 @@ test('Internationalized Routing: Hide Prefix', async () => {
   await expect(removeUndefined(result.pageTree, true)).toMatchFileSnapshot(
     './fixtures/page-trees/i18n-no-prefix.tree.json',
   );
-  expect(result.getPages().length).toBe(2);
+  expect(result.getPages().length).toBe(4);
   expect(result.getPage(['test'])?.url).toBe('/test');
   expect(result.getPage(['test'], 'cn')?.url).toBe('/cn/test');
 });
