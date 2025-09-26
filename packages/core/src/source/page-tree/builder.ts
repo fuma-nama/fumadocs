@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react';
 import type * as PageTree from './definitions';
 import type { MetaData, PageData, UrlFn } from '../types';
 import type { ContentStorage } from '@/source/load-files';
@@ -62,7 +61,6 @@ export interface BaseOptions {
    */
   noRef?: boolean;
   plugins?: LoaderPlugin[];
-  resolveIcon?: (icon: string | undefined) => ReactNode | undefined;
   /**
    * generate fallback page tree
    *
@@ -132,14 +130,14 @@ function resolveFolderItem(
   idx: number,
 ): PageTree.Node[] | '...' | 'z...a' {
   if (item === rest || item === restReversed) return item;
-  const { options, resolveName } = ctx;
+  const { resolveName } = ctx;
 
   let match = separator.exec(item);
   if (match?.groups) {
     let node: PageTree.Separator = {
       $id: `${folderPath}#${idx}`,
       type: 'separator',
-      icon: options.resolveIcon?.(match.groups.icon),
+      icon: match.groups.icon,
       name: match.groups.name,
     };
 
@@ -159,7 +157,7 @@ function resolveFolderItem(
 
     let node: PageTree.Item = {
       type: 'page',
-      icon: options.resolveIcon?.(icon),
+      icon,
       name,
       url,
       external: !isRelative,
@@ -262,7 +260,7 @@ function buildFolderNode(
   let node: PageTree.Folder = {
     type: 'folder',
     name,
-    icon: options.resolveIcon?.(meta?.data.icon) ?? index?.icon,
+    icon: meta?.data.icon ?? index?.icon,
     root: meta?.data.root,
     defaultOpen: meta?.data.defaultOpen,
     description: meta?.data.description,
@@ -300,7 +298,7 @@ function buildFileNode(
     type: 'page',
     name: title ?? pathToName(basename(path, extname(path))),
     description,
-    icon: options.resolveIcon?.(icon),
+    icon,
     url: getUrl(page.slugs, locale),
     $ref: !options.noRef
       ? {

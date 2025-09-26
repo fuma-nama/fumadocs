@@ -24,6 +24,7 @@ import {
   type LegacyLoaderOptions,
   type LegacyPageTreeOptions,
 } from '@/source/plugins/compat';
+import { iconPlugin, type IconResolver } from '@/source/plugins/icon';
 
 export interface LoaderConfig {
   source: SourceConfig;
@@ -49,7 +50,7 @@ export type LoaderOptions<
 interface BaseLoaderOptions<Config extends SourceConfig>
   extends LegacyLoaderOptions {
   baseUrl: string;
-  icon?: NonNullable<BaseOptions['resolveIcon']>;
+  icon?: IconResolver;
   slugs?: (info: FileInfo) => string[];
   url?: UrlFn;
   /**
@@ -294,6 +295,9 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
   const defaultLanguage = i18n?.defaultLanguage ?? '';
   const files = loadSource(source);
   const plugins = [slugsPlugin(slugsFn)];
+  if (options.icon) {
+    plugins.push(iconPlugin(options.icon));
+  }
   if (options.plugins) {
     plugins.push(...buildPlugins(options.plugins));
   }
@@ -340,7 +344,6 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
     get pageTree() {
       pageTree ??= builder.buildI18n({
         storages,
-        resolveIcon: options.icon,
         plugins,
         ...options.pageTree,
       });

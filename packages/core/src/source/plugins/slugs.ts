@@ -1,5 +1,5 @@
 import { type FileInfo, getSlugs, parseFilePath } from '@/source';
-import type { LoaderPlugin } from '@/source/plugins';
+import type { LoaderPlugin } from '@/source/plugins/index';
 import { basename, extname } from '@/source/path';
 
 /**
