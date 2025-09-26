@@ -3,10 +3,11 @@ import { FileSystem } from './file-system';
 import { type VirtualFile } from '@/source/loader';
 import { basename, dirname, joinPath, slash, splitPath } from '@/source/path';
 import type { I18nConfig } from '@/i18n';
+import type { LoaderPlugin } from '@/source/plugins';
 
 export interface LoadOptions {
-  transformers?: Transformer[];
   buildFile: (file: VirtualFile) => MetaFile | PageFile;
+  plugins?: LoaderPlugin[];
 }
 
 export type ContentStorage<
@@ -31,10 +32,7 @@ export interface PageFile<Data extends PageData = PageData> {
   data: Data;
 }
 
-export type Transformer = (context: {
-  storage: ContentStorage;
-  options: LoadOptions;
-}) => void;
+export type Transformer = (context: { storage: ContentStorage }) => void;
 
 function isLocaleValid(locale: string) {
   return locale.length > 0 && !/\d+/.test(locale);
@@ -76,7 +74,7 @@ export function loadFiles(
   options: LoadOptions,
   i18n: I18nConfig,
 ): Record<string, ContentStorage> {
-  const { buildFile, transformers = [] } = options;
+  const { buildFile, plugins = [] } = options;
   const parser = parsers[i18n.parser ?? 'dot'];
   const storages: Record<string, ContentStorage> = {};
   const normalized = files.map((file) =>
@@ -107,11 +105,12 @@ export function loadFiles(
       if (locale === lang) storage.write(path, item);
     }
 
-    for (const transformer of transformers) {
-      transformer({
-        storage,
-        options,
-      });
+    const context = {
+      storage,
+    };
+
+    for (const plugin of plugins) {
+      plugin.transformStorage?.(context);
     }
 
     storages[lang] = storage;

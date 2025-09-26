@@ -46,14 +46,12 @@ export const openapi = createOpenAPI({
 ```
 
 ```ts title="lib/source.ts"
-import { transformerOpenAPI } from 'fumadocs-openapi/server';
+import { openapiPlugin } from 'fumadocs-openapi/server';
 import { loader } from 'fumadocs-core/source';
 
 export const source = loader({
-  // [!code ++:3] adds a badge to each page item in page tree
-  pageTree: {
-    transformers: [transformerOpenAPI()],
-  },
+  // [!code ++] adds a badge to each page item in page tree
+  plugins: [openapiPlugin()],
 });
 ```
 

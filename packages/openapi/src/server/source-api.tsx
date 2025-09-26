@@ -1,11 +1,54 @@
 import { MethodLabel } from '@/ui/components/method-label';
 import type { PageTree } from 'fumadocs-core/server';
-import type { PageFile, PageTreeTransformer } from 'fumadocs-core/source';
+import type {
+  LoaderPlugin,
+  PageFile,
+  PageTreeTransformer,
+} from 'fumadocs-core/source';
 
 /**
- * Source API Integration
+ * Fumadocs Source API integration, pass this to `plugins` array in `loader()`.
+ */
+export function openapiPlugin(): LoaderPlugin {
+  return {
+    transformPageTree: {
+      file(node, filePath) {
+        if (!filePath) return node;
+        const file = this.storage.read(filePath);
+        if (!file || file.format !== 'page') return node;
+
+        const data = file.data;
+        let method: string | undefined;
+
+        if ('_openapi' in data && typeof data._openapi === 'object') {
+          const meta = data._openapi as {
+            method?: string;
+          };
+
+          method = meta.method;
+        }
+
+        if (method) {
+          node.name = (
+            <>
+              {node.name}{' '}
+              <MethodLabel className="ms-auto text-xs text-nowrap">
+                {method}
+              </MethodLabel>
+            </>
+          );
+        }
+
+        return node;
+      },
+    },
+  };
+}
+
+/**
+ * Source API Integration, add this to page tree builder options.
  *
- * Add this to page tree builder options
+ * @deprecated use `openapiPlugin()`
  */
 export const attachFile = (
   node: PageTree.Item,
@@ -40,13 +83,9 @@ export const attachFile = (
   return node;
 };
 
+/**
+ * @deprecated use `openapiPlugin()`
+ */
 export function transformerOpenAPI(): PageTreeTransformer {
-  return {
-    file(node, file) {
-      if (!file) return node;
-      const content = this.storage.read(file);
-
-      return attachFile(node, content?.format === 'page' ? content : undefined);
-    },
-  };
+  return openapiPlugin().transformPageTree!;
 }

@@ -3,11 +3,8 @@ import type * as PageTree from './definitions';
 import type { MetaData, PageData, UrlFn } from '../types';
 import type { ContentStorage } from '@/source/load-files';
 import { basename, extname, joinPath } from '@/source/path';
-import {
-  legacyTransformer,
-  type LegacyTransformerOptions,
-} from '@/source/page-tree/legacy';
 import { transformerFallback } from '@/source/page-tree/transformer-fallback';
+import type { LoaderPlugin } from '@/source/plugins';
 
 export interface PageTreeBuilderContext<
   Page extends PageData = PageData,
@@ -17,10 +14,10 @@ export interface PageTreeBuilderContext<
    * @internal resolve paths without extensions
    */
   resolveName: (name: string, format: 'meta' | 'page') => string;
-  options: BaseOptions<Page, Meta>;
+  options: BaseOptions;
   transformers: PageTreeTransformer<Page, Meta>[];
 
-  builder: PageTreeBuilder<Page, Meta>;
+  builder: PageTreeBuilder;
   storage: ContentStorage<Page, Meta>;
   getUrl: UrlFn;
 
@@ -30,10 +27,8 @@ export interface PageTreeBuilderContext<
 }
 
 export interface PageTreeTransformer<
-  // eslint-disable-next-line
-  Page extends PageData = any,
-  // eslint-disable-next-line
-  Meta extends MetaData = any,
+  Page extends PageData = PageData,
+  Meta extends MetaData = MetaData,
 > {
   name?: string;
 
@@ -58,17 +53,15 @@ export interface PageTreeTransformer<
   ) => PageTree.Root;
 }
 
-export interface BaseOptions<
-  Page extends PageData = PageData,
-  Meta extends MetaData = MetaData,
-> extends LegacyTransformerOptions<Page, Meta> {
+export interface BaseOptions {
+  id?: string;
   /**
    * Remove references to the file path of original nodes (`$ref`)
    *
    * @defaultValue false
    */
   noRef?: boolean;
-  transformers?: PageTreeTransformer<Page, Meta>[];
+  plugins?: LoaderPlugin[];
   resolveIcon?: (icon: string | undefined) => ReactNode | undefined;
   /**
    * generate fallback page tree
@@ -78,14 +71,10 @@ export interface BaseOptions<
   generateFallback?: boolean;
 }
 
-export interface PageTreeBuilder<
-  Page extends PageData = PageData,
-  Meta extends MetaData = MetaData,
-> {
+export interface PageTreeBuilder {
   build: (
-    options: BaseOptions<Page, Meta> & {
-      id?: string;
-      storage: ContentStorage<Page, Meta>;
+    options: BaseOptions & {
+      storage: ContentStorage;
     },
   ) => PageTree.Root;
 
@@ -93,9 +82,8 @@ export interface PageTreeBuilder<
    * Build page tree and fallback to the default language if the localized page doesn't exist
    */
   buildI18n: (
-    options: BaseOptions<Page, Meta> & {
-      id?: string;
-      storages: Record<string, ContentStorage<Page, Meta>>;
+    options: BaseOptions & {
+      storages: Record<string, ContentStorage>;
     },
   ) => Record<string, PageTree.Root>;
 }
@@ -347,10 +335,10 @@ function build(id: string, ctx: PageTreeBuilderContext): PageTree.Root {
 
 export function createPageTreeBuilder(getUrl: UrlFn): PageTreeBuilder {
   function getTransformers(options: BaseOptions, generateFallback: boolean) {
-    const transformers: PageTreeTransformer[] = [legacyTransformer(options)];
+    const transformers: PageTreeTransformer[] = [];
 
-    if (options.transformers) {
-      transformers.push(...options.transformers);
+    for (const plugin of options.plugins ?? []) {
+      if (plugin.transformPageTree) transformers.push(plugin.transformPageTree);
     }
 
     if (generateFallback) {

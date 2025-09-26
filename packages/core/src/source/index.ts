@@ -23,3 +23,4 @@ export {
   parseFilePath,
   parseFolderPath,
 } from './path';
+export type * from './plugins';
