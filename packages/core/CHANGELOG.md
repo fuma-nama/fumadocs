@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 15.8.1
+
+### Patch Changes
+
+- 71bce86: Make `loader().getPages()` to return pages from all languages when locale is not specified
+- f04547f: Publish `plugins` API on `loader()`
+
 ## 15.8.0
 
 ### Minor Changes

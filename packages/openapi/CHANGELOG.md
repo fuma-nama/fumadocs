@@ -1,5 +1,15 @@
 # @fuma-docs/openapi
 
+## 9.3.13
+
+### Patch Changes
+
+- f04547f: Publish `plugins` API on `loader()`
+- Updated dependencies [71bce86]
+- Updated dependencies [f04547f]
+  - fumadocs-core@15.8.1
+  - fumadocs-ui@15.8.1
+
 ## 9.3.12
 
 ### Patch Changes

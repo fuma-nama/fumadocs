@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 15.8.1
+
+### Patch Changes
+
+- eaf06c4: [Next.js] configure `llms-full.txt` and og image generation by default
+
 ## 15.8.0
 
 ## 15.7.13
