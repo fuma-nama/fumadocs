@@ -11,7 +11,7 @@ import type { LoaderPlugin } from '@/source/plugins';
 
 export interface LegacyLoaderOptions {
   /**
-   * @deprecated use `plugins` instead
+   * We recommend you to use `plugins` instead
    */
   transformers?: Transformer[];
 }
@@ -38,8 +38,9 @@ export interface LegacyPageTreeOptions<
    * @deprecated use `plugins` instead
    */
   attachSeparator?: (node: PageTree.Separator) => PageTree.Separator;
+
   /**
-   * @deprecated use `plugins` instead.
+   * We recommend you to use `plugins` instead
    */
   transformers?: PageTreeTransformer<Page, Meta>[];
 }
