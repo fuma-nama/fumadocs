@@ -39,7 +39,7 @@ export interface SourceConfig {
 export type LoaderOptions<
   Config extends SourceConfig = SourceConfig,
   I18n extends I18nConfig | undefined = I18nConfig | undefined,
-> = NoInfer<BaseLoaderOptions<Config>> & {
+> = BaseLoaderOptions<NoInfer<Config>> & {
   source: Source<Config> | Source<Config>[];
   /**
    * Configure i18n

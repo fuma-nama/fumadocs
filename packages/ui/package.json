@@ -138,7 +138,7 @@
     "@next/eslint-plugin-next": "^15.5.4",
     "@tailwindcss/cli": "^4.1.13",
     "@types/lodash.merge": "^4.6.9",
-    "@types/react": "^19.1.13",
+    "@types/react": "^19.1.14",
     "@types/react-dom": "^19.1.9",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",

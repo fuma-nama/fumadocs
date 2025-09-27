@@ -68,7 +68,7 @@ export const Route = createFileRoute('/docs/$')({
 const loader = createServerFn({
   method: 'GET',
 })
-  .validator((slugs: string[]) => slugs)
+  .inputValidator((slugs: string[]) => slugs)
   .handler(async ({ data: slugs }) => {
     const page = source.getPage(slugs);
     if (!page) throw notFound();
