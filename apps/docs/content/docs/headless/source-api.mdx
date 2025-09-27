@@ -160,40 +160,51 @@ import { source } from '@/lib/source';
 const entries = source.getLanguages();
 ```
 
-## Deep Dive
+### Plugins
 
-As mentioned, Source API doesn't rely on real file systems.
-During the process, your input source files will be parsed and form a virtual storage to avoid inconsistent behaviour between different OS.
-
-### Transformer
-
-To perform virtual file-system operations before processing, you can add a transformer.
+You can create loader plugins to hook into the process of page tree & storage generation.
 
 ```ts
 import { loader } from 'fumadocs-core/source';
 
-loader({
-  transformers: [
-    ({ storage }) => {
-      storage.makeDir();
+export const source = loader({
+  plugins: [
+    {
+      transformStorage: ({ storage }) => {},
+      transformPageTree: {
+        // ...
+      },
     },
   ],
 });
 ```
 
-### Page Tree
+#### Storage
+
+During the process, your input source files will be parsed and form a virtual storage to avoid inconsistent behaviour between different OS.
+
+To perform virtual file-system operations before processing, you can hook `transformStorage`.
+
+```ts
+[
+  {
+    transformStorage: ({ storage }) => {
+      storage.read('...');
+    },
+  },
+];
+```
+
+#### Page Tree
 
 The page tree is generated from your file system, some unnecessary information (e.g. unused frontmatter properties) will be filtered.
 
-You can customise it using the `pageTree` option, such as attaching custom properties to nodes, or customising the display name of pages.
+You can customise it using the `transformPageTree`, such as attaching custom properties to nodes, or customising the display name of pages.
 
 ```tsx
-import React from 'react';
-import { loader } from 'fumadocs-core/source';
-
-loader({
-  pageTree: {
-    transformers: [
+[
+  {
+    transformPageTree: [
       {
         file(node, file) {
           // you can access its file information
@@ -207,7 +218,7 @@ loader({
       },
     ],
   },
-});
+];
 ```
 
 ### Custom Source
