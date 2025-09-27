@@ -7,47 +7,27 @@ import {
   DocsTitle,
 } from 'fumadocs-ui/page';
 import { source } from '@/lib/source';
-import { type PageTree } from 'fumadocs-core/server';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
-import { docs } from '../../source.generated';
-import { toClientRenderer } from 'fumadocs-mdx/runtime/vite';
 import { baseOptions } from '@/lib/layout.shared';
 
-export async function loader({ params }: Route.LoaderArgs) {
+export function ServerComponent({ params }: Route.ComponentProps) {
   const slugs = params['*'].split('/').filter((v) => v.length > 0);
   const page = source.getPage(slugs);
   if (!page) throw new Response('Not found', { status: 404 });
 
-  return {
-    path: page.path,
-    tree: source.pageTree,
-  };
-}
-
-const renderer = toClientRenderer(
-  docs.doc,
-  ({ toc, default: Mdx, frontmatter }) => {
-    return (
-      <DocsPage toc={toc}>
-        <title>{frontmatter.title}</title>
-        <meta name="description" content={frontmatter.description} />
-        <DocsTitle>{frontmatter.title}</DocsTitle>
-        <DocsDescription>{frontmatter.description}</DocsDescription>
-        <DocsBody>
-          <Mdx components={{ ...defaultMdxComponents }} />
-        </DocsBody>
-      </DocsPage>
-    );
-  },
-);
-
-export default function Page(props: Route.ComponentProps) {
-  const { tree, path } = props.loaderData;
-  const Content = renderer[path];
+  const { body: MDX } = page.data;
 
   return (
-    <DocsLayout {...baseOptions()} tree={tree as PageTree.Root}>
-      <Content />
+    <DocsLayout {...baseOptions()} tree={source.pageTree}>
+      <DocsPage toc={page.data.toc}>
+        <title>{page.data.title}</title>
+        <meta name="description" content={page.data.description} />
+        <DocsTitle>{page.data.title}</DocsTitle>
+        <DocsDescription>{page.data.description}</DocsDescription>
+        <DocsBody>
+          <MDX components={{ ...defaultMdxComponents }} />
+        </DocsBody>
+      </DocsPage>
     </DocsLayout>
   );
 }

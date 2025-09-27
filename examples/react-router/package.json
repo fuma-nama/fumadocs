@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "@react-router/dev": "^7.9.3",
+    "@vitejs/plugin-rsc": "^0.4.32",
     "@tailwindcss/vite": "^4.1.13",
     "@types/mdx": "^2.0.13",
     "@types/node": "^24.5.2",
