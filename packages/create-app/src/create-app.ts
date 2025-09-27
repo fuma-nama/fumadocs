@@ -26,26 +26,19 @@ export interface Options {
   packageManager: PackageManager;
 
   /**
-   * Create files inside `src`
-   *
-   * (Next.js only)
+   * (Next.js only) Create files inside `src`
+   * @defaultValue false
    */
   useSrcDir?: boolean;
 
   /**
-   * Configure Tailwind CSS
-   *
-   * (Next.js only)
+   * (Next.js only) Configure Tailwind CSS
+   * @defaultValue true
    */
-  tailwindcss: boolean;
+  tailwindcss?: boolean;
 
   /**
-   * @deprecated use `lint` instead.
-   */
-  eslint?: boolean;
-
-  /**
-   * Configure Lint (Next.js Only)
+   * (Next.js Only) Configure Lint
    * @defaultValue false
    */
   lint?: 'eslint' | 'biome' | false;
@@ -55,14 +48,34 @@ export interface Options {
   log?: (message: string) => void;
 }
 
-export async function create(options: Options): Promise<void> {
+function defaults(options: Options): Required<Options> {
+  return {
+    ...options,
+    useSrcDir: options.useSrcDir ?? false,
+    tailwindcss: options.tailwindcss ?? true,
+    lint: options.lint ?? false,
+    initializeGit: options.initializeGit ?? false,
+    installDeps: options.installDeps ?? false,
+    log: console.log,
+  };
+}
+
+export async function create(createOptions: Options): Promise<void> {
+  const options = defaults(createOptions);
   const {
-    installDeps = true,
-    initializeGit = true,
-    log = console.log,
+    outputDir,
+    useSrcDir,
+    log,
+    installDeps,
+    template,
+    lint,
+    initializeGit,
+    packageManager,
+    tailwindcss,
   } = options;
-  const projectName = path.basename(options.outputDir);
-  const dest = path.resolve(cwd, options.outputDir);
+
+  const projectName = path.basename(outputDir);
+  const dest = path.resolve(cwd, outputDir);
   const isNext = options.template.startsWith('+next');
 
   function isRelative(dir: string, file: string) {
@@ -74,7 +87,7 @@ export async function create(options: Options): Promise<void> {
   function defaultRename(file: string): string {
     file = file.replace('example.gitignore', '.gitignore');
 
-    if (!options.useSrcDir || !isNext) {
+    if (!useSrcDir || !isNext) {
       return file;
     }
 
@@ -93,13 +106,13 @@ export async function create(options: Options): Promise<void> {
     await copy(path.join(sourceDir, `template/+next`), dest, defaultRename);
 
     await copy(
-      path.join(sourceDir, `template/${options.template}`),
+      path.join(sourceDir, `template/${template}`),
       dest,
       defaultRename,
     );
 
     // optional Tailwind CSS configuration
-    if (options.tailwindcss) {
+    if (tailwindcss) {
       await copy(
         path.join(sourceDir, `template/+next+tailwindcss`),
         dest,
@@ -110,9 +123,9 @@ export async function create(options: Options): Promise<void> {
     }
 
     // optional ESLint configuration
-    if (options.lint) {
+    if (lint) {
       await copy(
-        path.join(sourceDir, `template/+next+${options.lint}`),
+        path.join(sourceDir, `template/+next+${lint}`),
         dest,
         defaultRename,
       );
@@ -120,7 +133,7 @@ export async function create(options: Options): Promise<void> {
     }
 
     // update tsconfig.json for src dir
-    if (options.useSrcDir) {
+    if (useSrcDir) {
       const tsconfigPath = path.join(dest, 'tsconfig.json');
       const content = (await fs.readFile(tsconfigPath)).toString();
 
@@ -136,7 +149,7 @@ export async function create(options: Options): Promise<void> {
     }
   } else {
     await copy(
-      path.join(sourceDir, `template/${options.template}`),
+      path.join(sourceDir, `template/${template}`),
       dest,
       defaultRename,
     );
@@ -155,7 +168,7 @@ export async function create(options: Options): Promise<void> {
 
   if (installDeps) {
     try {
-      await autoInstall(options.packageManager, dest);
+      await autoInstall(packageManager, dest);
       log('Installed dependencies');
     } catch (err) {
       log(`Failed to install dependencies: ${err}`);
@@ -198,7 +211,7 @@ async function copy(
 
 async function createNextPackageJson(
   projectName: string,
-  options: Options,
+  { template, lint, tailwindcss }: Required<Options>,
 ): Promise<object> {
   return {
     name: projectName,
@@ -208,16 +221,16 @@ async function createNextPackageJson(
       build: 'next build',
       dev: 'next dev --turbo',
       start: 'next start',
-      ...(options.template === '+next+fuma-docs-mdx' && {
+      ...(template === '+next+fuma-docs-mdx' && {
         postinstall: 'fumadocs-mdx',
       }),
-      ...(options.lint &&
+      ...(lint &&
         {
           eslint: {
             lint: 'eslint',
           },
           biome: { lint: 'biome check', format: 'biome format --write' },
-        }[options.lint]),
+        }[lint]),
     },
     dependencies: {
       ...pick(versionPkg.dependencies, ['next', 'react', 'react-dom']),
@@ -235,7 +248,7 @@ async function createNextPackageJson(
         waku: null,
         'tanstack-start': null,
         'react-router': null,
-      }[options.template],
+      }[template],
     },
     devDependencies: {
       ...pick(versionPkg.dependencies, [
@@ -245,13 +258,13 @@ async function createNextPackageJson(
         'typescript',
         '@types/mdx',
       ]),
-      ...(options.tailwindcss &&
+      ...(tailwindcss &&
         pick(versionPkg.dependencies, [
           '@tailwindcss/postcss',
           'tailwindcss',
           'postcss',
         ])),
-      ...(options.lint &&
+      ...(lint &&
         {
           eslint: {
             eslint: '^9',
@@ -259,7 +272,7 @@ async function createNextPackageJson(
             '@eslint/eslintrc': '^3',
           },
           biome: pick(versionPkg.dependencies, ['@biomejs/biome']),
-        }[options.lint]),
+        }[lint]),
     },
   };
 }

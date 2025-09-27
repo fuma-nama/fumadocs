@@ -218,7 +218,7 @@ async function main(config: Options): Promise<void> {
     installDeps: options.installDeps,
     lint: options.lint as LintOption,
     useSrcDir: options.src as SrcOption,
-    initializeGit: config.git,
+    initializeGit: config.git ?? true,
 
     log: (message) => {
       info.message(message);

@@ -1,0 +1,22 @@
+---
+title: create-fumadocs-app
+description: The CLI to create new Fumadocs apps
+---
+
+## Overview
+
+Despite the classical CLI usage, you can also use it in scripts like:
+
+```npm
+npm install create-fumadocs-app
+```
+
+```ts
+import { create } from 'create-fumadocs-app';
+
+await create({
+  outputDir: 'my-app',
+  template: '+next+fuma-docs-mdx',
+  packageManager: 'pnpm',
+});
+```
