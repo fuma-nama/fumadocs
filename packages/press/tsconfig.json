@@ -1,0 +1,10 @@
+{
+  "extends": "tsconfig/react-library.json",
+  "compilerOptions": {
+    "types": ["vite/client"],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "exclude": ["node_modules", "dist", "eslint.config.mjs"]
+}

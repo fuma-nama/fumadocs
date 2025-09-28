@@ -8,20 +8,20 @@ import type {
 import { type BaseCreate, fromConfigBase } from '@/runtime/vite/base';
 import * as path from 'node:path';
 import {
-  AsyncDocCollectionEntry,
-  DocCollectionEntry,
-  DocData,
-  FileInfo,
-  MetaCollectionEntry,
+  type AsyncDocCollectionEntry,
+  type DocCollectionEntry,
+  type DocData,
+  type FileInfo,
+  type MetaCollectionEntry,
   missingProcessedMarkdown,
 } from '@/runtime/shared';
 import fs from 'node:fs/promises';
 
 // for server-side usage of renderers
 export { createClientLoader, toClientRenderer } from './browser';
-export type { ClientLoader, ClientLoaderOptions } from './browser';
 
-export type { CompiledMDXFile } from './types';
+export type { ClientLoader, ClientLoaderOptions } from './browser';
+export type * from './types';
 
 export interface ServerCreate<Config> extends BaseCreate<Config> {
   sourceAsync: <DocOut extends PageData, MetaOut extends MetaData>(

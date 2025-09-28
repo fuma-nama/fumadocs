@@ -5,7 +5,7 @@ import { Card, Cards } from '@/components/card';
 import * as path from 'node:path';
 
 /**
- * @deprecated use https://fumadocs.vercel.app/docs/ui/markdown#further-reading-section instead
+ * @deprecated use https://fumadocs.dev/docs/ui/markdown#further-reading-section instead
  */
 export function DocsCategory({
   page,

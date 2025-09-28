@@ -6,7 +6,7 @@
     "NextJs",
     "Docs"
   ],
-  "homepage": "https://fumadocs.vercel.app",
+  "homepage": "https://fumadocs.dev",
   "repository": "github:fuma-nama/fumadocs",
   "license": "MIT",
   "author": "Fuma Nama",
@@ -29,6 +29,10 @@
       "require": "./dist/vite/index.cjs"
     },
     ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./runtime/next": {
       "import": "./dist/runtime/next/index.js",
       "types": "./dist/runtime/next/index.d.ts"
     },

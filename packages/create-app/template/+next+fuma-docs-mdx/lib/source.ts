@@ -1,7 +1,7 @@
 import { docs } from '@/.source';
 import { type InferPageType, loader } from 'fumadocs-core/source';
 
-// See https://fumadocs.vercel.app/docs/headless/source-api for more info
+// See https://fumadocs.dev/docs/headless/source-api for more info
 export const source = loader({
   baseUrl: '/docs',
   source: docs.toFumadocsSource(),

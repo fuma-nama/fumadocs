@@ -4,4 +4,6 @@ export {
   type DefaultMDXOptions,
 } from '@/loaders/mdx/preset';
 export * from './zod-4';
-export * from '@/loaders/mdx/remark-include';
+export { remarkInclude } from '@/loaders/mdx/remark-include';
+
+export type { PostprocessOptions } from '@/loaders/mdx/remark-postprocess';

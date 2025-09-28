@@ -628,7 +628,7 @@
 
 ### Patch Changes
 
-- b07e98c: Deprecate `DocsCategory`, see https://fumadocs.vercel.app/docs/ui/markdown#further-reading-section
+- b07e98c: Deprecate `DocsCategory`, see https://fumadocs.dev/docs/ui/markdown#further-reading-section
 - Updated dependencies [d49f9ae]
 - Updated dependencies [b07e98c]
 - Updated dependencies [3a4bd88]

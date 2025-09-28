@@ -84,7 +84,7 @@ export type AsyncDocCollectionEntry<Frontmatter> = Override<
   Frontmatter
 >;
 
-type Override<A, B> = Omit<A, keyof B> & B;
+export type Override<A, B> = Omit<A, keyof B> & B;
 
 export function missingProcessedMarkdown(): never {
   throw new Error(
