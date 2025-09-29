@@ -36,17 +36,6 @@ export function planMarkdownRedirect(
     return `${normalizedPath}${markdownExtension}`;
   }
 
-  if (preferred === 'html' && isMarkdownPath) {
-    const withoutExtension = pathname.slice(
-      0,
-      pathname.length - markdownExtension.length,
-    );
-    if (!stripTrailingSlash) return withoutExtension;
-
-    const normalizedPath = removeTrailingSlash(withoutExtension);
-    return normalizedPath.length === 0 ? '/' : normalizedPath;
-  }
-
   return null;
 }
 
