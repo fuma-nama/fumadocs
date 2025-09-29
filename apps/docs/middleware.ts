@@ -9,5 +9,5 @@ export const middleware = createMarkdownMiddleware({
 });
 
 export const config = {
-  matcher: ['/docs/:path*', '/blog/:path*'],
+  matcher: ['/docs/:path*'],
 }
