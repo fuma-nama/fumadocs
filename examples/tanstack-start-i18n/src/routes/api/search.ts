@@ -1,4 +1,4 @@
-import { createServerFileRoute } from '@tanstack/react-start/server';
+import { createFileRoute } from '@tanstack/react-router';
 import { source } from '@/lib/source';
 import { createFromSource } from 'fumadocs-core/search/server';
 import { createTokenizer } from '@orama/tokenizers/mandarin';
@@ -12,6 +12,10 @@ const server = createFromSource(source, {
   },
 });
 
-export const ServerRoute = createServerFileRoute('/api/search').methods({
-  GET: async ({ request }) => server.GET(request),
+export const ServerRoute = createFileRoute('/api/search')({
+  server: {
+    handlers: {
+      GET: async ({ request }) => server.GET(request),
+    },
+  },
 });

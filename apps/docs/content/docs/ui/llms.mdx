@@ -8,7 +8,8 @@ description: Integrate AI functionality to Fumadocs.
 You can make your docs site more AI-friendly with dedicated docs content for large language models.
 
 To begin, make a `getLLMText` function that converts pages into static MDX content.
-This is an example for Fumadocs MDX:
+
+In **Fumadocs MDX**, you can do:
 
 <include meta='title="lib/get-llm-text.ts"'>./get-llm-text.ts</include>
 
@@ -60,31 +61,61 @@ export async function loader() {
 ```
 
 ```ts tab="Tanstack Start" title="src/routes/llms-full[.]txt.ts"
-import { createServerFileRoute } from '@tanstack/react-start/server';
+import { createFileRoute } from '@tanstack/react-router';
 import { source } from '@/lib/source';
 import { getLLMText } from '@/lib/get-llm-text';
 
-export const ServerRoute = createServerFileRoute('/llms-full.txt').methods({
-  GET: async () => {
-    const scan = source.getPages().map(getLLMText);
-    const scanned = await Promise.all(scan);
-    return new Response(scanned.join('\n\n'));
+export const Route = createFileRoute('/llms-full.txt')({
+  server: {
+    handlers: {
+      GET: async () => {
+        const scan = source.getPages().map(getLLMText);
+        const scanned = await Promise.all(scan);
+        return new Response(scanned.join('\n\n'));
+      },
+    },
   },
 });
 ```
 
 ### `*.mdx` [#mdx-extension]
 
-Allow people to append `.mdx` to a page to get its Markdown/MDX content.
+Allow AI agents to get the content of a page as Markdown/MDX, by appending `.mdx` to the end of path.
 
-On Next.js, you can make a route handler to return page content, and redirect users to that route.
+Make a route handler to return page content:
 
-<include meta='tab="app/llms.mdx/[[...slug]]/route.ts"'>./llms.mdx.ts</include>
+```ts tab="Next.js" title="app/llms.mdx/[[...slug]]/route.ts"
+import { getLLMText } from '@/lib/get-llm-text';
+import { source } from '@/lib/source';
+import { notFound } from 'next/navigation';
 
-```ts tab="next.config.ts"
+export const revalidate = false;
+
+export async function GET(
+  _req: Request,
+  { params }: RouteContext<'/llms.mdx/[[...slug]]'>,
+) {
+  const { slug } = await params;
+  const page = source.getPage(slug);
+  if (!page) notFound();
+
+  return new Response(await getLLMText(page), {
+    headers: {
+      'Content-Type': 'text/markdown',
+    },
+  });
+}
+
+export function generateStaticParams() {
+  return source.generateParams();
+}
+```
+
+```ts tab="Next.js" title="next.config.ts"
 import type { NextConfig } from 'next';
 
 const config: NextConfig = {
+  // [!code ++:8]
   async rewrites() {
     return [
       {
@@ -94,6 +125,44 @@ const config: NextConfig = {
     ];
   },
 };
+```
+
+```ts tab="React Router" title="app/llms-mdx.ts"
+import type { Route } from './+types/llms-mdx';
+import { source } from '@/lib/source';
+import { getLLMText } from '@/lib/get-llm-text';
+
+export async function loader({ params }: Route.LoaderArgs) {
+  const slugs = params['*'].split('/').filter((v) => v.length > 0);
+  const page = source.getPage(slugs);
+  if (!page) {
+    return new Response('not found', { status: 404 });
+  }
+
+  return new Response(await getLLMText(page), {
+    headers: {
+      'Content-Type': 'text/markdown',
+    },
+  });
+}
+```
+
+```ts tab="Tanstack Start" title="src/routes/llms-full[.]txt.ts"
+import { createFileRoute } from '@tanstack/react-router';
+import { source } from '@/lib/source';
+import { getLLMText } from '@/lib/get-llm-text';
+
+export const Route = createFileRoute('/llms-full.txt')({
+  server: {
+    handlers: {
+      GET: async () => {
+        const scan = source.getPages().map(getLLMText);
+        const scanned = await Promise.all(scan);
+        return new Response(scanned.join('\n\n'));
+      },
+    },
+  },
+});
 ```
 
 ### Page Actions

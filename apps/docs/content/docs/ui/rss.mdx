@@ -75,12 +75,14 @@ export default [
 ```
 
 ```ts tab="Tanstack Start" title="src/routes/rss[.]xml.ts"
-import { createServerFileRoute } from '@tanstack/react-start/server';
+import { createFileRoute } from '@tanstack/react-router';
 import { getRSS } from '@/lib/rss';
 
-export const ServerRoute = createServerFileRoute('/rss.xml').methods({
-  async GET() {
-    return new Response(getRSS());
+export const Route = createFileRoute('/rss.xml')({
+  server: {
+    handlers: {
+      GET: async () => new Response(getRSS()),
+    },
   },
 });
 ```
