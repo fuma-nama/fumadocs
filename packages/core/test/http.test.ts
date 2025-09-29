@@ -58,22 +58,24 @@ describe('media-preference', () => {
 });
 
 describe('markdown redirect', () => {
-  it('appends markdown extension when preferred', () => {
+  it('builds rewrite target when preferred', () => {
     expect(
       planMarkdownRedirect({
         pathname: '/docs/intro',
         preferred: 'markdown',
-        markdownExtension: '.mdx',
+        target: '/llms.mdx',
+        sourceBase: '/docs',
       }),
-    ).toBe('/docs/intro.mdx');
+    ).toBe('/llms.mdx/intro');
   });
 
-  it('skips redirect when already markdown path', () => {
+  it('skips redirect when slug missing', () => {
     expect(
       planMarkdownRedirect({
-        pathname: '/docs/intro.mdx',
+        pathname: '/docs',
         preferred: 'markdown',
-        markdownExtension: '.mdx',
+        target: '/llms.mdx',
+        sourceBase: '/docs',
       }),
     ).toBeNull();
   });
@@ -83,7 +85,7 @@ describe('markdown redirect', () => {
       planMarkdownRedirect({
         pathname: '/docs/intro.mdx',
         preferred: 'html',
-        markdownExtension: '.mdx',
+        target: '/llms.mdx',
       }),
     ).toBeNull();
   });
@@ -91,9 +93,20 @@ describe('markdown redirect', () => {
   it('respects minSegments', () => {
     expect(
       planMarkdownRedirect({
-        pathname: '/docs',
+        pathname: '/docs/a/b',
         preferred: 'markdown',
-        markdownExtension: '.mdx',
+        target: '/llms.mdx',
+        sourceBase: '/docs',
+        minSegments: 2,
+      }),
+    ).toBe('/llms.mdx/a/b');
+
+    expect(
+      planMarkdownRedirect({
+        pathname: '/docs/a',
+        preferred: 'markdown',
+        target: '/llms.mdx',
+        sourceBase: '/docs',
         minSegments: 2,
       }),
     ).toBeNull();
@@ -104,6 +117,7 @@ describe('markdown redirect', () => {
       planMarkdownRedirect({
         pathname: '/docs/intro',
         preferred: null,
+        target: '/llms.mdx',
       }),
     ).toBeNull();
   });
@@ -113,11 +127,12 @@ describe('markdown redirect', () => {
       headers: headers('text/markdown'),
       pathname: '/docs/intro',
       redirectOptions: {
-        markdownExtension: '.mdx',
+        target: '/llms.mdx',
+        sourceBase: '/docs',
       },
     });
 
-    expect(target).toBe('/docs/intro.mdx');
+    expect(target).toBe('/llms.mdx/intro');
   });
 });
 

@@ -20,16 +20,22 @@ import {
   resolveMarkdownRedirect,
 } from 'fumadocs-core/http';
 
-const preferred = pickPreferredFormat(request.headers);
+const preferred = pickPreferredFormat(new Headers([['accept', 'text/markdown']]));
 const redirectTo = planMarkdownRedirect({
-  pathname: request.url.pathname,
+  pathname: '/docs/intro',
   preferred,
+  target: '/llms.mdx',
+  sourceBase: '/docs',
 });
 
 // Or in a single step:
 const redirect = resolveMarkdownRedirect({
-  headers: request.headers,
-  pathname: request.url.pathname,
+  headers: new Headers([['accept', 'text/markdown']]),
+  pathname: '/docs/intro',
+  redirectOptions: {
+    target: '/llms.mdx',
+    sourceBase: '/docs',
+  },
 });
 ```
 
@@ -44,22 +50,23 @@ pickPreferredFormat(request.headers, {
 
 ## Redirect planner
 
-`planMarkdownRedirect` produces the canonical `pathname` for markdown-aware
-clients. It appends `.mdx` when markdown is preferred and removes the suffix
-when HTML is preferred. You can tweak behaviour via `MarkdownRedirectOptions`:
+`planMarkdownRedirect` produces the canonical pathname for markdown-aware
+clients. By default the middleware will rewrite to the given `target` when
+markdown is preferred, and keep the original path when HTML is preferred.
+`MarkdownRedirectOptions` accepts:
 
-- `markdownExtension` (default `.mdx`)
-- `minSegments` (default `2`, prevents `/docs` → `/docs.mdx`)
-- `stripTrailingSlash`
+- `target` (required) – destination prefix, e.g. `/llms.mdx`.
+- `sourceBase` – optional prefix to strip before appending the slug.
+- `minSegments` – minimal slug length before the redirect triggers (default `1`).
 
 ```ts
 planMarkdownRedirect({
   pathname: '/docs/getting-started',
   preferred: 'markdown',
-  markdownExtension: '.mdx',
-  minSegments: 2,
+  target: '/llms.mdx',
+  sourceBase: '/docs',
 });
-// ➜ '/docs/getting-started.mdx'
+// ➜ '/llms.mdx/getting-started'
 ```
 
 ## Next.js middleware helper
@@ -74,7 +81,8 @@ import { createMarkdownMiddleware } from 'fumadocs-core/http/middleware/next';
 export const middleware = createMarkdownMiddleware({
   resolver: {
     redirectOptions: {
-      markdownExtension: '.mdx',
+      target: '/llms.mdx',
+      sourceBase: '/docs',
     },
   },
 });

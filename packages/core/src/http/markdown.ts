@@ -3,9 +3,14 @@ import type { PreferenceOptions } from './media-preference';
 import { pickPreferredFormat } from './media-preference';
 
 export interface MarkdownRedirectOptions {
-  markdownExtension?: string;
+  /** Destination prefix when markdown is preferred. */
+  target: string;
+
+  /** Optional source prefix to strip before appending slug to `target`. */
+  sourceBase?: string;
+
+  /** Minimum slug length required before redirect triggers. */
   minSegments?: number;
-  stripTrailingSlash?: boolean;
 }
 
 export interface PlanMarkdownRedirectInput extends MarkdownRedirectOptions {
@@ -19,46 +24,35 @@ export function planMarkdownRedirect(
   const {
     pathname,
     preferred,
-    markdownExtension = '.mdx',
-    minSegments = 2,
-    stripTrailingSlash = true,
+    target,
+    sourceBase,
+    minSegments = 1,
   } = input;
 
   if (!preferred) return null;
 
   const segments = extractSegments(pathname);
-  const hasSlug = segments.length >= minSegments;
-  const isMarkdownPath = pathname.endsWith(markdownExtension);
+  const slugSegments = extractSlug(segments, sourceBase);
+  const normalizedTarget = normalizeTarget(target);
+  const hasSlug = slugSegments.length >= minSegments;
 
   if (preferred === 'markdown') {
-    if (!hasSlug || isMarkdownPath) return null;
+    if (!hasSlug) return null;
 
-    const normalizedPath = stripTrailingSlash
-      ? removeTrailingSlash(pathname)
-      : pathname;
-
-    return `${normalizedPath}${markdownExtension}`;
+    const slug = slugSegments.join('/');
+    return slug.length > 0 ? `${normalizedTarget}/${slug}` : normalizedTarget;
   }
 
+  if (preferred === 'html') return null;
+
   return null;
-}
-
-function extractSegments(pathname: string): string[] {
-  return pathname
-    .split('/')
-    .filter((segment) => segment.length > 0);
-}
-
-function removeTrailingSlash(pathname: string): string {
-  if (pathname === '/') return pathname;
-  return pathname.replace(/\/$/, '');
 }
 
 export interface ResolveMarkdownRedirectInput {
   headers: Headers;
   pathname: string;
   preferenceOptions?: PreferenceOptions;
-  redirectOptions?: MarkdownRedirectOptions;
+  redirectOptions: MarkdownRedirectOptions;
 }
 
 export function resolveMarkdownRedirect(
@@ -72,4 +66,25 @@ export function resolveMarkdownRedirect(
     preferred,
     ...input.redirectOptions,
   });
+}
+
+function extractSegments(pathname: string): string[] {
+  return pathname
+    .split('/')
+    .filter((segment) => segment.length > 0);
+}
+
+function extractSlug(segments: string[], sourceBase?: string): string[] {
+  if (!sourceBase) return segments;
+
+  const baseSegments = extractSegments(sourceBase);
+  const matchesBase = baseSegments.every((segment, index) => segments[index] === segment);
+  if (!matchesBase) return segments;
+
+  return segments.slice(baseSegments.length);
+}
+
+function normalizeTarget(target: string): string {
+  if (!target.startsWith('/')) return `/${target.replace(/^\/+/, '')}`;
+  return target.replace(/\/$/, '');
 }

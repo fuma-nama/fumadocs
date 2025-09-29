@@ -1,10 +1,4 @@
 {
   "title": "Utilities",
-  "pages": [
-    "...",
-    {
-      "name": "HTTP Markdown Negotiation",
-      "page": "http-markdown"
-    }
-  ]
+  "pages": ["..."]
 }

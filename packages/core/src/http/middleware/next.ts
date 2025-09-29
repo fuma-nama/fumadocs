@@ -4,11 +4,11 @@ import type { ResolveMarkdownRedirectInput } from '../markdown';
 import { resolveMarkdownRedirect } from '../markdown';
 
 export interface CreateMarkdownMiddlewareOptions {
-  resolver?: Omit<ResolveMarkdownRedirectInput, 'headers' | 'pathname'>;
+  resolver: Omit<ResolveMarkdownRedirectInput, 'headers' | 'pathname'>;
 }
 
 export function createMarkdownMiddleware(
-  options: CreateMarkdownMiddlewareOptions = {},
+  options: CreateMarkdownMiddlewareOptions,
 ) {
   return function markdownMiddleware(request: NextRequest) {
     const redirectPath = resolveMarkdownRedirect({
