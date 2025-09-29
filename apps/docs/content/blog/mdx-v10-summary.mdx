@@ -108,7 +108,7 @@ Now to integrate it with Fumadocs framework, change your `source.ts` from:
 
 ```ts
 import { map } from '@/.map';
-import { createMDXSource } from 'fumadocs-mdx';
+import { createMDXSource } from 'fumadocs-mdx/runtime/next';
 import { loader } from 'fumadocs-core/source';
 
 export const { getPage, getPages, pageTree } = loader({
@@ -122,7 +122,7 @@ to:
 
 ```ts
 import { docs, meta } from '@/.source';
-import { createMDXSource } from 'fumadocs-mdx';
+import { createMDXSource } from 'fumadocs-mdx/runtime/next';
 import { loader } from 'fumadocs-core/source';
 
 export const source = loader({
@@ -171,7 +171,7 @@ For `defineDocs`, see [`schema`](/docs/mdx/collections#schema-1).
 Same as before, you can call `loader` multiple times for different types (e.g. for docs and blog).
 
 ```ts
-import { createMDXSource } from 'fumadocs-mdx';
+import { createMDXSource } from 'fumadocs-mdx/runtime/next';
 import type { InferMetaType, InferPageType } from 'fumadocs-core/source';
 import { loader } from 'fumadocs-core/source';
 import { meta, docs, blog as blogPosts } from '@/.source';

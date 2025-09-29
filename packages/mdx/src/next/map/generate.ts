@@ -27,7 +27,7 @@ export async function generateJS(
     getImportCode({
       type: 'named',
       names: ['_runtime'],
-      specifier: 'fumadocs-mdx',
+      specifier: 'fumadocs-mdx/runtime/next',
     }),
     getImportCode({
       type: 'namespace',
