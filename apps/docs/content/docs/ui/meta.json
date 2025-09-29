@@ -18,15 +18,13 @@
     "internationalization",
     "navigation",
     "search",
+    "(integrations)",
     "---UI---",
     "...(ui)",
     "---Automation---",
     "python",
     "typescript",
     "obsidian",
-    "openapi",
-    "---Others---",
-    "...",
-    "seo"
+    "openapi"
   ]
 }
