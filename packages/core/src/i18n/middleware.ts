@@ -1,8 +1,8 @@
 import { match as matchLocale } from '@formatjs/intl-localematcher';
-import Negotiator from 'negotiator';
 import type { NextMiddleware } from 'next/dist/server/web/types';
 import { type NextRequest, NextResponse } from 'next/server';
 import type { I18nConfig } from '@/i18n';
+import { getNegotiator } from '@/negotiation';
 
 interface MiddlewareOptions extends I18nConfig {
   /**
@@ -18,16 +18,7 @@ function getLocale(
   locales: string[],
   defaultLanguage: string,
 ): string {
-  // Negotiator expects plain object so we need to transform headers
-  const negotiatorHeaders: Record<string, string> = {};
-  request.headers.forEach((value, key) => {
-    negotiatorHeaders[key] = value;
-  });
-
-  // Use negotiator and intl-localematcher to get best locale
-  const languages = new Negotiator({ headers: negotiatorHeaders }).languages(
-    locales,
-  );
+  const languages = getNegotiator(request).languages(locales);
 
   return matchLocale(languages, locales, defaultLanguage);
 }

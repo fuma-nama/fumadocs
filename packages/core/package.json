@@ -32,6 +32,10 @@
       "import": "./dist/hide-if-empty.js",
       "types": "./dist/hide-if-empty.d.ts"
     },
+    "./negotiation": {
+      "import": "./dist/negotiation/index.js",
+      "types": "./dist/negotiation/index.d.ts"
+    },
     "./search": {
       "import": "./dist/search/index.js",
       "types": "./dist/search/index.d.ts"
@@ -111,6 +115,7 @@
     "image-size": "^2.0.2",
     "negotiator": "^1.0.0",
     "npm-to-yarn": "^3.0.1",
+    "path-to-regexp": "^8.3.0",
     "react-remove-scroll": "^2.7.1",
     "remark": "^15.0.0",
     "remark-gfm": "^4.0.1",

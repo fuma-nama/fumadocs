@@ -18,7 +18,8 @@ import { baseOptions } from '@/lib/layout.shared';
 export const Route = createFileRoute('/docs/$')({
   component: Page,
   loader: async ({ params }) => {
-    const data = await loader({ data: params._splat?.split('/') ?? [] });
+    const slugs = params._splat?.split('/') ?? [];
+    const data = await loader({ data: slugs });
     await clientLoader.preload(data.path);
     return data;
   },
