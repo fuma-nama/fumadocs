@@ -13,22 +13,12 @@ regular HTML experience for browsers.
 Import the helpers from `fumadocs-core/http` and plug them into your middleware
 or API routes:
 
-```ts twoslash
+```ts
 import {
   pickPreferredFormat,
-  planMarkdownRedirect,
   resolveMarkdownRedirect,
 } from 'fumadocs-core/http';
 
-const preferred = pickPreferredFormat(new Headers([['accept', 'text/markdown']]));
-const redirectTo = planMarkdownRedirect({
-  pathname: '/docs/intro',
-  preferred,
-  target: '/llms.mdx',
-  sourceBase: '/docs',
-});
-
-// Or in a single step:
 const redirect = resolveMarkdownRedirect({
   headers: new Headers([['accept', 'text/markdown']]),
   pathname: '/docs/intro',

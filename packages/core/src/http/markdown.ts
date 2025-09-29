@@ -1,4 +1,3 @@
-import type { FormatPreference } from './media-preference';
 import type { PreferenceOptions } from './media-preference';
 import { pickPreferredFormat } from './media-preference';
 
@@ -13,41 +12,6 @@ export interface MarkdownRedirectOptions {
   minSegments?: number;
 }
 
-export interface PlanMarkdownRedirectInput extends MarkdownRedirectOptions {
-  pathname: string;
-  preferred: FormatPreference;
-}
-
-export function planMarkdownRedirect(
-  input: PlanMarkdownRedirectInput,
-): string | null {
-  const {
-    pathname,
-    preferred,
-    target,
-    sourceBase,
-    minSegments = 1,
-  } = input;
-
-  if (!preferred) return null;
-
-  const segments = extractSegments(pathname);
-  const slugSegments = extractSlug(segments, sourceBase);
-  const normalizedTarget = normalizeTarget(target);
-  const hasSlug = slugSegments.length >= minSegments;
-
-  if (preferred === 'markdown') {
-    if (!hasSlug) return null;
-
-    const slug = slugSegments.join('/');
-    return slug.length > 0 ? `${normalizedTarget}/${slug}` : normalizedTarget;
-  }
-
-  if (preferred === 'html') return null;
-
-  return null;
-}
-
 export interface ResolveMarkdownRedirectInput {
   headers: Headers;
   pathname: string;
@@ -55,36 +19,39 @@ export interface ResolveMarkdownRedirectInput {
   redirectOptions: MarkdownRedirectOptions;
 }
 
-export function resolveMarkdownRedirect(
-  input: ResolveMarkdownRedirectInput,
-): string | null {
-  const preferred = pickPreferredFormat(input.headers, input.preferenceOptions);
-  if (!preferred) return null;
+export function resolveMarkdownRedirect({
+  headers,
+  pathname,
+  preferenceOptions,
+  redirectOptions,
+}: ResolveMarkdownRedirectInput): string | null {
+  const preferred = pickPreferredFormat(headers, preferenceOptions);
+  if (preferred !== 'markdown') return null;
 
-  return planMarkdownRedirect({
-    pathname: input.pathname,
-    preferred,
-    ...input.redirectOptions,
-  });
-}
-
-function extractSegments(pathname: string): string[] {
-  return pathname
+  const segments = pathname
     .split('/')
     .filter((segment) => segment.length > 0);
-}
 
-function extractSlug(segments: string[], sourceBase?: string): string[] {
-  if (!sourceBase) return segments;
+  const baseSegments = redirectOptions.sourceBase
+    ? redirectOptions.sourceBase
+        .split('/')
+        .filter((segment) => segment.length > 0)
+    : [];
 
-  const baseSegments = extractSegments(sourceBase);
-  const matchesBase = baseSegments.every((segment, index) => segments[index] === segment);
-  if (!matchesBase) return segments;
+  const matchesBase = baseSegments.every(
+    (segment, index) => segments[index] === segment,
+  );
+  const slugSegments = matchesBase
+    ? segments.slice(baseSegments.length)
+    : segments;
 
-  return segments.slice(baseSegments.length);
-}
+  const minSegments = redirectOptions.minSegments ?? 1;
+  if (slugSegments.length < minSegments) return null;
 
-function normalizeTarget(target: string): string {
-  if (!target.startsWith('/')) return `/${target.replace(/^\/+/, '')}`;
-  return target.replace(/\/$/, '');
+  const normalizedTarget = redirectOptions.target.startsWith('/')
+    ? redirectOptions.target.replace(/\/$/, '')
+    : `/${redirectOptions.target.replace(/^\/+|\/$/g, '')}`;
+
+  if (slugSegments.length === 0) return normalizedTarget;
+  return `${normalizedTarget}/${slugSegments.join('/')}`;
 }

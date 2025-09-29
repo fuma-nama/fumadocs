@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import {
   pickPreferredFormat,
   parseAcceptHeader,
-  planMarkdownRedirect,
   resolveMarkdownRedirect,
 } from '@/http';
 
@@ -58,71 +57,7 @@ describe('media-preference', () => {
 });
 
 describe('markdown redirect', () => {
-  it('builds rewrite target when preferred', () => {
-    expect(
-      planMarkdownRedirect({
-        pathname: '/docs/intro',
-        preferred: 'markdown',
-        target: '/llms.mdx',
-        sourceBase: '/docs',
-      }),
-    ).toBe('/llms.mdx/intro');
-  });
-
-  it('skips redirect when slug missing', () => {
-    expect(
-      planMarkdownRedirect({
-        pathname: '/docs',
-        preferred: 'markdown',
-        target: '/llms.mdx',
-        sourceBase: '/docs',
-      }),
-    ).toBeNull();
-  });
-
-  it('skips redirect when html preferred for markdown path', () => {
-    expect(
-      planMarkdownRedirect({
-        pathname: '/docs/intro.mdx',
-        preferred: 'html',
-        target: '/llms.mdx',
-      }),
-    ).toBeNull();
-  });
-
-  it('respects minSegments', () => {
-    expect(
-      planMarkdownRedirect({
-        pathname: '/docs/a/b',
-        preferred: 'markdown',
-        target: '/llms.mdx',
-        sourceBase: '/docs',
-        minSegments: 2,
-      }),
-    ).toBe('/llms.mdx/a/b');
-
-    expect(
-      planMarkdownRedirect({
-        pathname: '/docs/a',
-        preferred: 'markdown',
-        target: '/llms.mdx',
-        sourceBase: '/docs',
-        minSegments: 2,
-      }),
-    ).toBeNull();
-  });
-
-  it('returns null when format not markdown or html', () => {
-    expect(
-      planMarkdownRedirect({
-        pathname: '/docs/intro',
-        preferred: null,
-        target: '/llms.mdx',
-      }),
-    ).toBeNull();
-  });
-
-  it('resolveMarkdownRedirect integrates preference + redirect', () => {
+  it('returns rewrite target when markdown preferred', () => {
     const target = resolveMarkdownRedirect({
       headers: headers('text/markdown'),
       pathname: '/docs/intro',
@@ -133,6 +68,32 @@ describe('markdown redirect', () => {
     });
 
     expect(target).toBe('/llms.mdx/intro');
+  });
+
+  it('respects minSegments', () => {
+    const result = resolveMarkdownRedirect({
+      headers: headers('text/markdown'),
+      pathname: '/docs/a',
+      redirectOptions: {
+        target: '/llms.mdx',
+        sourceBase: '/docs',
+        minSegments: 2,
+      },
+    });
+
+    expect(result).toBeNull();
+  });
+
+  it('returns null when format not markdown', () => {
+    const target = resolveMarkdownRedirect({
+      headers: headers('text/html'),
+      pathname: '/docs/intro',
+      redirectOptions: {
+        target: '/llms.mdx',
+      },
+    });
+
+    expect(target).toBeNull();
   });
 });
 
