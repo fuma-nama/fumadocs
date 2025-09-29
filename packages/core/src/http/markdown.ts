@@ -4,6 +4,7 @@ import { pickPreferredFormat } from './media-preference';
 
 export interface MarkdownRedirectOptions {
   markdownExtension?: string;
+  minSegments?: number;
   stripTrailingSlash?: boolean;
 }
 
@@ -19,15 +20,18 @@ export function planMarkdownRedirect(
     pathname,
     preferred,
     markdownExtension = '.mdx',
+    minSegments = 2,
     stripTrailingSlash = true,
   } = input;
 
   if (!preferred) return null;
 
+  const segments = extractSegments(pathname);
+  const hasSlug = segments.length >= minSegments;
   const isMarkdownPath = pathname.endsWith(markdownExtension);
 
   if (preferred === 'markdown') {
-    if (isMarkdownPath) return null;
+    if (!hasSlug || isMarkdownPath) return null;
 
     const normalizedPath = stripTrailingSlash
       ? removeTrailingSlash(pathname)
@@ -37,6 +41,12 @@ export function planMarkdownRedirect(
   }
 
   return null;
+}
+
+function extractSegments(pathname: string): string[] {
+  return pathname
+    .split('/')
+    .filter((segment) => segment.length > 0);
 }
 
 function removeTrailingSlash(pathname: string): string {
