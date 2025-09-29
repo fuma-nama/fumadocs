@@ -38,7 +38,12 @@ import {
   LanguageToggle,
   LanguageToggleText,
 } from '@/components/layout/language-toggle';
-import { CollapsibleControl, LayoutBody, Navbar } from '@/layouts/docs/client';
+import {
+  CollapsibleControl,
+  LayoutBody,
+  LayoutTabs,
+  Navbar,
+} from '@/layouts/docs/client';
 import { TreeContextProvider } from '@/contexts/tree';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { NavProvider } from '@/contexts/layout';
@@ -57,6 +62,8 @@ export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
 
   sidebar?: SidebarOptions;
+
+  tabMode?: 'top' | 'auto';
 
   /**
    * Props for the `div` container
@@ -95,8 +102,8 @@ export function DocsLayout({
     ...sidebarProps
   } = {},
   searchToggle = {},
-  disableThemeSwitch = false,
-  themeSwitch = { enabled: !disableThemeSwitch },
+  themeSwitch = {},
+  tabMode = 'auto',
   i18n = false,
   children,
   ...props
@@ -231,8 +238,9 @@ export function DocsLayout({
             (searchToggle.components?.lg ?? (
               <LargeSearchToggle hideIfDisabled />
             ))}
-          {tabs.length > 0 && <RootToggle options={tabs} />}
-
+          {tabs.length > 0 && tabMode === 'auto' && (
+            <RootToggle options={tabs} />
+          )}
           {banner}
         </SidebarHeader>
         {viewport}
@@ -321,6 +329,12 @@ export function DocsLayout({
           )}
         >
           {sidebarEnabled && sidebar()}
+          {tabMode === 'top' && tabs.length > 0 && (
+            <LayoutTabs
+              options={tabs}
+              className="sticky top-[calc(var(--fd-nav-height)+var(--fd-tocnav-height))] z-10 bg-fd-background border-b px-6 pt-3 xl:px-8 max-md:hidden"
+            />
+          )}
           {children}
         </LayoutBody>
       </NavProvider>

@@ -1,4 +1,4 @@
-import { PluginOption } from 'vite';
+import type { PluginOption } from 'vite';
 import rsc from '@vitejs/plugin-rsc';
 import tailwindcss from '@tailwindcss/vite';
 import { unstable_reactRouterRSC as reactRouterRSC } from '@react-router/dev/vite';

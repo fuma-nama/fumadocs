@@ -4,5 +4,5 @@ export default defineConfig({
   dts: true,
   target: 'es2022',
   format: 'esm',
-  entry: [],
+  entry: ['src/index.ts'],
 });

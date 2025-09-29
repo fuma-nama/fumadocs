@@ -33,13 +33,6 @@ export interface BaseLayoutProps {
   }>;
 
   /**
-   * Remove theme switcher component
-   *
-   * @deprecated Use `themeSwitch.enabled` instead.
-   */
-  disableThemeSwitch?: boolean;
-
-  /**
    * I18n options
    *
    * @defaultValue false

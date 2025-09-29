@@ -106,8 +106,7 @@ export function DocsLayout(props: DocsLayoutProps) {
     nav: { transparentMode, ...nav } = {},
     sidebar: { tabs: tabOptions, ...sidebarProps } = {},
     i18n = false,
-    disableThemeSwitch = false,
-    themeSwitch = { enabled: !disableThemeSwitch },
+    themeSwitch = {},
   } = props;
 
   const navMode = nav.mode ?? 'auto';

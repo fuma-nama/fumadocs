@@ -1,13 +1,17 @@
 'use client';
 
 import { Sidebar as SidebarIcon } from 'lucide-react';
-import { type ComponentProps } from 'react';
+import { type ComponentProps, useMemo } from 'react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { useSidebar } from '@/contexts/sidebar';
 import { useNav } from '@/contexts/layout';
 import { SidebarCollapseTrigger } from '@/components/layout/sidebar';
 import { SearchToggle } from '@/components/layout/search-toggle';
+import type { Option } from '@/components/layout/root-toggle';
+import { usePathname } from 'fumadocs-core/framework';
+import { isTabActive } from '@/utils/is-active';
+import Link from 'fumadocs-core/link';
 
 export function Navbar(props: ComponentProps<'header'>) {
   const { isTransparent } = useNav();
@@ -77,5 +81,58 @@ export function CollapsibleControl() {
       </SidebarCollapseTrigger>
       <SearchToggle className="rounded-lg" hideIfDisabled />
     </div>
+  );
+}
+
+export function LayoutTabs({
+  options,
+  ...props
+}: ComponentProps<'div'> & {
+  options: Option[];
+}) {
+  const pathname = usePathname();
+  const selected = useMemo(() => {
+    return options.findLast((option) => isTabActive(option, pathname));
+  }, [options, pathname]);
+
+  return (
+    <div
+      {...props}
+      className={cn(
+        'flex flex-row items-end gap-6 overflow-auto',
+        props.className,
+      )}
+    >
+      {options.map((option) => (
+        <LayoutTab
+          key={option.url}
+          selected={selected === option}
+          option={option}
+        />
+      ))}
+    </div>
+  );
+}
+
+function LayoutTab({
+  option: { title, url, unlisted, props },
+  selected = false,
+}: {
+  option: Option;
+  selected?: boolean;
+}) {
+  return (
+    <Link
+      href={url}
+      {...props}
+      className={cn(
+        'inline-flex border-b-2 border-transparent transition-colors items-center pb-1.5 font-medium gap-2 text-fd-muted-foreground text-sm text-nowrap hover:text-fd-accent-foreground',
+        unlisted && !selected && 'hidden',
+        selected && 'border-fd-primary text-fd-primary',
+        props?.className,
+      )}
+    >
+      {title}
+    </Link>
   );
 }
