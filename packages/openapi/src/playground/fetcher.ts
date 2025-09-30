@@ -22,6 +22,7 @@ export interface Fetcher {
 
 export function createBrowserFetcher(
   adapters: Record<string, MediaAdapter>,
+  requestTimeout: number,
 ): Fetcher {
   return {
     async fetch(url, options) {
@@ -81,7 +82,7 @@ export function createBrowserFetcher(
         cache: 'no-cache',
         headers,
         body,
-        signal: AbortSignal.timeout(10 * 1000),
+        signal: AbortSignal.timeout(requestTimeout * 1000),
       })
         .then(async (res) => {
           const contentType = res.headers.get('Content-Type') ?? '';
