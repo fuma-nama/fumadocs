@@ -53,8 +53,7 @@ export function HomeLayout(
     links,
     githubUrl,
     i18n,
-    disableThemeSwitch = false,
-    themeSwitch = { enabled: !disableThemeSwitch },
+    themeSwitch = {},
     searchToggle,
     ...rest
   } = props;
