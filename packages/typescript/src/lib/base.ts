@@ -203,9 +203,7 @@ function getDocEntry(
     return;
   }
 
-  const subType = program
-    .getTypeChecker()
-    .getTypeOfSymbolAtLocation(prop, context.declaration);
+  const subType = prop.getTypeAtLocation(context.declaration);
   const isOptional = prop.isOptional();
   const tags = prop.getJsDocTags().map(
     (tag) =>
@@ -219,6 +217,7 @@ function getDocEntry(
     subType,
     program.getTypeChecker(),
     isOptional,
+    context.declaration,
   );
 
   const remarksTag = tags.find((tag) => tag.name === 'remarks');
@@ -237,7 +236,11 @@ function getDocEntry(
       ),
     ),
     tags,
-    type: getFullType(subType),
+    type: subType.getText(
+      context.declaration,
+      ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope |
+        ts.TypeFormatFlags.NoTruncation,
+    ),
     simplifiedType,
     required: !isOptional,
     deprecated: tags.some((tag) => tag.name === 'deprecated'),
@@ -246,21 +249,4 @@ function getDocEntry(
   transform?.call(context, entry, subType, prop);
 
   return entry;
-}
-
-function getFullType(type: Type): string {
-  const alias = type.getAliasSymbol();
-  if (alias) {
-    return alias
-      .getDeclaredType()
-      .getText(undefined, ts.TypeFormatFlags.NoTruncation);
-  }
-
-  return type.getText(
-    undefined,
-    ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope |
-      ts.TypeFormatFlags.NoTruncation |
-      // we use `InTypeAlias` to force TypeScript to extend generic types like `ExtractParams<T>` into more detailed forms like `T extends string? ExtractParamsFromString<T> : never`.
-      ts.TypeFormatFlags.InTypeAlias,
-  );
 }

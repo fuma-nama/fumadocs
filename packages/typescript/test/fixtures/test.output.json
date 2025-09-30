@@ -134,6 +134,33 @@
         "simplifiedType": "Complicated<T>",
         "required": true,
         "deprecated": false
+      },
+      {
+        "name": "jsx",
+        "description": "",
+        "tags": [],
+        "type": "ReactNode",
+        "simplifiedType": "ReactNode",
+        "required": true,
+        "deprecated": false
+      },
+      {
+        "name": "partial",
+        "description": "",
+        "tags": [],
+        "type": "Partial<Player>",
+        "simplifiedType": "Partial<object>",
+        "required": true,
+        "deprecated": false
+      },
+      {
+        "name": "another",
+        "description": "",
+        "tags": [],
+        "type": "string | number | bigint | boolean | { type: string | React.JSXElementConstructor<any>; props: unknown; key: string | null; } | {} | { children: ReactNode; type: string | React.JSXElementConstructor<any>; props: unknown; key: string | null; } | { then: <TResult1 = AwaitedReactNode, TResult2 = never>(onfulfilled?: ((value: AwaitedReactNode) => TResult1 | PromiseLike<TResult1>) | null | undefined, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null | undefined) => Promise<TResult1 | TResult2>; catch: <TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | null | undefined) => Promise<AwaitedReactNode | TResult>; finally: (onfinally?: (() => void) | null | undefined) => Promise<AwaitedReactNode>; } | null | undefined",
+        "simplifiedType": "object | boolean | bigint | number | string | null | undefined",
+        "required": true,
+        "deprecated": false
       }
     ]
   }
