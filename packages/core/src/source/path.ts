@@ -80,17 +80,6 @@ export function parseFilePath(path: string): FileInfo {
 }
 
 /**
- * @deprecated use `dirname` and `basename` directly.
- */
-export function parseFolderPath(path: string): FolderInfo {
-  return {
-    dirname: dirname(path),
-    name: basename(path),
-    path,
-  };
-}
-
-/**
  * Split path into segments, trailing/leading slashes are removed
  */
 export function splitPath(path: string): string[] {

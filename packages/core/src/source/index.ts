@@ -4,7 +4,7 @@ export {
   type PageTreeBuilder,
   type PageTreeBuilderContext,
   type BaseOptions,
-} from './page-tree/builder';
+} from '@/source/page-tree/builder';
 export * from './loader';
 export { FileSystem } from './file-system';
 
@@ -17,10 +17,5 @@ export {
   type Transformer,
 } from './load-files';
 export type * from './types';
-export {
-  type FileInfo,
-  type FolderInfo,
-  parseFilePath,
-  parseFolderPath,
-} from './path';
+export { type FileInfo, type FolderInfo, parseFilePath } from './path';
 export type * from './plugins';

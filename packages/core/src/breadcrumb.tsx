@@ -1,7 +1,7 @@
 import { type ReactNode, useMemo } from 'react';
-import type * as PageTree from '@/source/page-tree/definitions';
+import type * as PageTree from '@/page-tree/definitions';
 import { normalizeUrl } from '@/utils/normalize-url';
-import { findPath } from '@/utils/page-tree';
+import { findPath } from '@/page-tree/utils';
 
 export interface BreadcrumbItem {
   name: ReactNode;

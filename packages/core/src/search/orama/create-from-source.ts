@@ -15,7 +15,7 @@ import { type StructuredData } from '@/mdx-plugins';
 import { basename, extname } from '@/source/path';
 import type { I18nConfig } from '@/i18n';
 import type { Language } from '@orama/orama';
-import { findPath } from '@/utils/page-tree';
+import { findPath } from '@/page-tree/utils';
 
 type Awaitable<T> = T | Promise<T>;
 

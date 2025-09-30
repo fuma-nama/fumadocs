@@ -1,4 +1,4 @@
-import type * as PageTree from '@/source/page-tree/definitions';
+import type * as PageTree from '@/page-tree/definitions';
 import type { I18nConfig } from '@/i18n';
 import {
   type ContentStorage,
@@ -7,7 +7,10 @@ import {
   type PageFile,
 } from './load-files';
 import type { MetaData, PageData, UrlFn } from './types';
-import { type BaseOptions, createPageTreeBuilder } from './page-tree/builder';
+import {
+  type BaseOptions,
+  createPageTreeBuilder,
+} from '@/source/page-tree/builder';
 import {
   basename,
   dirname,

@@ -13,6 +13,9 @@ interface ImageMeta {
   height: number;
 }
 
+/**
+ * @deprecated Use the SEO features of your own React.js framework instead
+ */
 export function createMetadataImage<
   S extends LoaderOutput<LoaderConfig>,
 >(options: {
