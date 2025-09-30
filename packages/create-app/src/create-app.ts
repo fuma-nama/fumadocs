@@ -233,7 +233,12 @@ async function createNextPackageJson(
         }[lint]),
     },
     dependencies: {
-      ...pick(versionPkg.dependencies, ['next', 'react', 'react-dom']),
+      ...pick(versionPkg.dependencies, [
+        'next',
+        'react',
+        'react-dom',
+        'lucide-react',
+      ]),
       ...pick(localVersions, ['fumadocs-ui', 'fumadocs-core']),
       ...{
         '+next+content-collections': {

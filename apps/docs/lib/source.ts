@@ -1,19 +1,17 @@
 import { createMDXSource } from 'fumadocs-mdx/runtime/next';
-import type { InferMetaType, InferPageType } from 'fumadocs-core/source';
-import { loader } from 'fumadocs-core/source';
-import { icons } from 'lucide-react';
+import {
+  type InferMetaType,
+  type InferPageType,
+  loader,
+} from 'fumadocs-core/source';
 import { openapiPlugin } from 'fumadocs-openapi/server';
-import { createElement } from 'react';
 import { blog as blogPosts, docs } from '@/.source';
+import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 
 export const source = loader({
   baseUrl: '/docs',
-  icon(icon) {
-    if (icon && icon in icons)
-      return createElement(icons[icon as keyof typeof icons]);
-  },
   source: docs.toFumadocsSource(),
-  plugins: [openapiPlugin()],
+  plugins: [lucideIconsPlugin(), openapiPlugin()],
 });
 
 export const blog = loader({

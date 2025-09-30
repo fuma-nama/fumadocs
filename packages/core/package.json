@@ -60,6 +60,10 @@
       "import": "./dist/source/index.js",
       "types": "./dist/source/index.d.ts"
     },
+    "./source/*": {
+      "import": "./dist/source/plugins/*.js",
+      "types": "./dist/source/plugins/*.d.ts"
+    },
     "./utils/*": {
       "import": "./dist/utils/*.js",
       "types": "./dist/utils/*.d.ts"
@@ -146,6 +150,7 @@
     "@types/react-dom": "^19.1.9",
     "algoliasearch": "5.39.0",
     "eslint-config-custom": "workspace:*",
+    "lucide-react": "^0.544.0",
     "mdast-util-mdx-jsx": "^3.2.0",
     "mdast-util-mdxjs-esm": "^2.0.1",
     "next": "^15.5.4",
@@ -168,7 +173,8 @@
     "react": "18.x.x || 19.x.x",
     "react-dom": "18.x.x || 19.x.x",
     "react-router": "7.x.x",
-    "waku": "^0.26.0"
+    "waku": "^0.26.0",
+    "lucide-react": "*"
   },
   "peerDependenciesMeta": {
     "@mixedbread/sdk": {
@@ -199,6 +205,9 @@
       "optional": true
     },
     "@tanstack/react-router": {
+      "optional": true
+    },
+    "lucide-react": {
       "optional": true
     }
   },
