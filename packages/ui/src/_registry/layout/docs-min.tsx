@@ -1,5 +1,5 @@
 'use client';
-import type { PageTree } from 'fumadocs-core/server';
+import type * as PageTree from 'fumadocs-core/page-tree';
 import { type ComponentProps, type ReactNode, useMemo } from 'react';
 import { cn } from '@/utils/cn';
 import { TreeContextProvider, useTreeContext } from 'fumadocs-ui/contexts/tree';

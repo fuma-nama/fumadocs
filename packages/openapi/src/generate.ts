@@ -6,7 +6,7 @@ import type {
   WebhookItem,
 } from '@/render/api-page';
 import type { ProcessedDocument } from '@/utils/process-document';
-import type { TableOfContents } from 'fumadocs-core/server';
+import type { TableOfContents } from 'fumadocs-core/toc';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { Document, TagObject } from '@/types';
 import { dump } from 'js-yaml';

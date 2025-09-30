@@ -1,5 +1,5 @@
 import { MethodLabel } from '@/ui/components/method-label';
-import type { PageTree } from 'fumadocs-core/server';
+import type * as PageTree from 'fumadocs-core/page-tree';
 import type {
   LoaderPlugin,
   PageFile,

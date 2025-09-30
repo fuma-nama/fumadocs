@@ -29,7 +29,7 @@ import type {
   CollapsibleContentProps,
   CollapsibleTriggerProps,
 } from '@radix-ui/react-collapsible';
-import type { PageTree } from 'fumadocs-core/server';
+import type * as PageTree from 'fumadocs-core/page-tree';
 import { useTreeContext, useTreePath } from '@/contexts/tree';
 import { useMediaQuery } from 'fumadocs-core/utils/use-media-query';
 import { Presence } from '@radix-ui/react-presence';

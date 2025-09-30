@@ -2,7 +2,7 @@ import Slugger from 'github-slugger';
 import type { Heading, Root } from 'mdast';
 import type { Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
-import type { TOCItemType } from '@/server/get-toc';
+import type { TOCItemType } from '@/toc';
 import { flattenNode } from '@/mdx-plugins/remark-utils';
 
 const slugger = new Slugger();

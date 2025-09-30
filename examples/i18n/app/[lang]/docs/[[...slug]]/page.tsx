@@ -6,7 +6,6 @@ import {
   DocsTitle,
 } from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
-import { metadataImage } from '@/lib/metadata';
 import { getMDXComponents } from '@/mdx-components';
 import type { Metadata } from 'next';
 
@@ -41,8 +40,8 @@ export async function generateMetadata(
   const page = source.getPage(params.slug, params.lang);
   if (!page) notFound();
 
-  return metadataImage.withImage(page.slugs, {
+  return {
     title: page.data.title,
     description: page.data.description,
-  });
+  };
 }

@@ -1,17 +1,18 @@
 'use client';
-import {
-  type PageTree,
-  type TableOfContents,
-  type TOCItemType,
-} from 'fumadocs-core/server';
+
 import { type ComponentProps, type ReactNode, useMemo } from 'react';
-import { AnchorProvider, useActiveAnchors } from 'fumadocs-core/toc';
+import {
+  AnchorProvider,
+  type TOCItemType,
+  useActiveAnchors,
+} from 'fumadocs-core/toc';
 import { cn } from '@/utils/cn';
 import { useTreeContext } from 'fumadocs-ui/contexts/tree';
 import { Link, usePathname } from 'fumadocs-core/framework';
+import type * as PageTree from 'fumadocs-core/page-tree';
 
 export interface DocsPageProps {
-  toc?: TableOfContents;
+  toc?: TOCItemType[];
 
   children: ReactNode;
 }
