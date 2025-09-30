@@ -1,13 +1,7 @@
-import {
-  joinPath,
-  parseFilePath,
-  parseFolderPath,
-  splitPath,
-} from '@/source/path';
+import { joinPath, parseFilePath, splitPath } from '@/source/path';
 import { describe, expect, test } from 'vitest';
-import type { Root } from '@/source/page-tree/definitions';
-import { findNeighbour } from '@/utils/page-tree';
-import { PageTree } from '../dist/server';
+import type { Root } from '@/page-tree/definitions';
+import { findNeighbour } from '@/page-tree/utils';
 import { getBreadcrumbItems } from '@/breadcrumb';
 
 test('Find Neighbours', () => {
@@ -83,24 +77,6 @@ describe('Path utilities', () => {
     `);
   });
 
-  test('parse folder path', () => {
-    expect(parseFolderPath('')).toMatchInlineSnapshot(`
-      {
-        "dirname": "",
-        "name": "",
-        "path": "",
-      }
-    `);
-
-    expect(parseFolderPath('nested/nested')).toMatchInlineSnapshot(`
-      {
-        "dirname": "nested",
-        "name": "nested",
-        "path": "nested/nested",
-      }
-    `);
-  });
-
   test('resolve paths', () => {
     expect(joinPath('a', 'b')).toBe('a/b');
     expect(joinPath('/a', '')).toBe('a');
@@ -118,7 +94,7 @@ describe('Path utilities', () => {
 });
 
 test('Breadcrumbs', () => {
-  const tree: PageTree.Root = {
+  const tree: Root = {
     name: 'Hello World',
     children: [
       {

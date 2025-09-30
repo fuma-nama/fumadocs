@@ -163,7 +163,7 @@ export default function Home({ params }: Route.ComponentProps) {
 import type { Route } from './+types/page';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { source } from '@/lib/source';
-import { type PageTree } from 'fumadocs-core/server';
+import type * as PageTree from 'fumadocs-core/page-tree';
 import { baseOptions } from '@/lib/layout.shared';
 
 export async function loader({ params }: Route.LoaderArgs) {

@@ -1,4 +1,4 @@
-import type * as PageTree from '@/source/page-tree/definitions';
+import type * as PageTree from '@/page-tree/definitions';
 
 /**
  * Flatten tree to an array of page nodes
@@ -62,23 +62,6 @@ export function getPageTreeRoots(
 
   if (!('type' in pageTree)) result.push(pageTree);
   return result;
-}
-
-/**
- * Separate the folder nodes of a root into multiple roots
- *
- * @deprecated it's useless
- */
-export function separatePageTree(pageTree: PageTree.Root): PageTree.Root[] {
-  return pageTree.children.flatMap((child) => {
-    if (child.type !== 'folder') return [];
-
-    return {
-      name: child.name,
-      url: child.index?.url,
-      children: child.children,
-    };
-  });
 }
 
 /**

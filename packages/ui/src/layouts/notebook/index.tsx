@@ -46,7 +46,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import type { PageTree } from 'fumadocs-core/server';
+import type * as PageTree from 'fumadocs-core/page-tree';
 import {
   LayoutBody,
   LayoutTabs,
@@ -106,8 +106,7 @@ export function DocsLayout(props: DocsLayoutProps) {
     nav: { transparentMode, ...nav } = {},
     sidebar: { tabs: tabOptions, ...sidebarProps } = {},
     i18n = false,
-    disableThemeSwitch = false,
-    themeSwitch = { enabled: !disableThemeSwitch },
+    themeSwitch = {},
   } = props;
 
   const navMode = nav.mode ?? 'auto';

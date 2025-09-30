@@ -2,10 +2,17 @@
 import type { AnchorHTMLAttributes, ReactNode, RefObject } from 'react';
 import { createContext, forwardRef, useContext, useMemo, useRef } from 'react';
 import scrollIntoView from 'scroll-into-view-if-needed';
-import type { TableOfContents } from '@/server/get-toc';
 import { mergeRefs } from '@/utils/merge-refs';
 import { useOnChange } from '@/utils/use-on-change';
 import { useAnchorObserver } from './utils/use-anchor-observer';
+
+export interface TOCItemType {
+  title: ReactNode;
+  url: string;
+  depth: number;
+}
+
+export type TableOfContents = TOCItemType[];
 
 const ActiveAnchorContext = createContext<string[]>([]);
 

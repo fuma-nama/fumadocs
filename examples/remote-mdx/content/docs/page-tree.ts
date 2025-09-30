@@ -1,4 +1,4 @@
-import { PageTree } from 'fumadocs-core/server';
+import type { Root } from 'fumadocs-core/page-tree';
 
 export default {
   name: 'Docs',
@@ -19,4 +19,4 @@ export default {
       url: '/docs/test',
     },
   ],
-} satisfies PageTree.Root;
+} satisfies Root;

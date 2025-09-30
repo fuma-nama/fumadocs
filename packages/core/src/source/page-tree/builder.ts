@@ -1,5 +1,5 @@
-import type * as PageTree from './definitions';
-import type { MetaData, PageData, UrlFn } from '../types';
+import type * as PageTree from '@/page-tree/definitions';
+import type { MetaData, PageData, UrlFn } from '@/source';
 import type { ContentStorage } from '@/source/load-files';
 import { basename, extname, joinPath } from '@/source/path';
 import { transformerFallback } from '@/source/page-tree/transformer-fallback';

@@ -25,7 +25,7 @@ import { ArrowRight, ChevronDown } from 'lucide-react';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from '@/lib/cn';
 import { useTreeContext } from 'fumadocs-ui/contexts/tree';
-import type { PageTree } from 'fumadocs-core/server';
+import type { Item, Node } from 'fumadocs-core/page-tree';
 import { useRouter } from 'next/navigation';
 
 const client = new OramaClient({
@@ -71,9 +71,9 @@ export default function CustomSearchDialog(props: SharedProps) {
   const { full } = useTreeContext();
   const router = useRouter();
   const searchMap = useMemo(() => {
-    const map = new Map<string, PageTree.Item>();
+    const map = new Map<string, Item>();
 
-    function onNode(node: PageTree.Node) {
+    function onNode(node: Node) {
       if (node.type === 'page' && typeof node.name === 'string') {
         map.set(node.name.toLowerCase(), node);
       } else if (node.type === 'folder') {

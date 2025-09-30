@@ -6,7 +6,7 @@ import type {
   PageTreeTransformer,
   Transformer,
 } from '@/source';
-import type * as PageTree from '../page-tree/definitions';
+import type * as PageTree from '@/page-tree/definitions';
 import type { LoaderPlugin } from '@/source/plugins';
 
 export interface LegacyLoaderOptions {

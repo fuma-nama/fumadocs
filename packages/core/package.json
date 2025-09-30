@@ -1,9 +1,9 @@
 {
   "name": "fumadocs-core",
   "version": "15.8.1",
-  "description": "The library for building a documentation website in Next.js",
+  "description": "The library for building a documentation website in any React.js framework",
   "keywords": [
-    "NextJs",
+    "Fumadocs",
     "Docs"
   ],
   "homepage": "https://fumadocs.dev",
@@ -28,6 +28,10 @@
       "import": "./dist/content/index.js",
       "types": "./dist/content/index.d.ts"
     },
+    "./content/*": {
+      "import": "./dist/content/*.js",
+      "types": "./dist/content/*.d.ts"
+    },
     "./hide-if-empty": {
       "import": "./dist/hide-if-empty.js",
       "types": "./dist/hide-if-empty.d.ts"
@@ -35,6 +39,10 @@
     "./negotiation": {
       "import": "./dist/negotiation/index.js",
       "types": "./dist/negotiation/index.d.ts"
+    },
+    "./page-tree": {
+      "import": "./dist/page-tree/index.js",
+      "types": "./dist/page-tree/index.d.ts"
     },
     "./search": {
       "import": "./dist/search/index.js",

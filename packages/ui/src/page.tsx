@@ -19,8 +19,7 @@ import {
   PageTOCPopoverTrigger,
   PageTOCTitle,
 } from '@/layouts/docs/page';
-import type { AnchorProviderProps } from 'fumadocs-core/toc';
-import type { TOCItemType } from 'fumadocs-core/server';
+import type { AnchorProviderProps, TOCItemType } from 'fumadocs-core/toc';
 
 interface EditOnGitHubOptions
   extends Omit<ComponentProps<'a'>, 'href' | 'children'> {

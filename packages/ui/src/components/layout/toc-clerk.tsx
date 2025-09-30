@@ -1,5 +1,4 @@
 'use client';
-import type { TOCItemType } from 'fumadocs-core/server';
 import * as Primitive from 'fumadocs-core/toc';
 import { type ComponentProps, useEffect, useRef, useState } from 'react';
 import { cn } from '@/utils/cn';
@@ -131,7 +130,7 @@ function TOCItem({
   upper = item.depth,
   lower = item.depth,
 }: {
-  item: TOCItemType;
+  item: Primitive.TOCItemType;
   upper?: number;
   lower?: number;
 }) {

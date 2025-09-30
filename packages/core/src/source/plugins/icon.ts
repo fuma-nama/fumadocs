@@ -1,6 +1,6 @@
 import type { LoaderPlugin } from '@/source';
 import type { ReactNode } from 'react';
-import type * as PageTree from '@/source/page-tree/definitions';
+import type * as PageTree from '@/page-tree/definitions';
 
 export type IconResolver = (icon: string | undefined) => ReactNode;
 
