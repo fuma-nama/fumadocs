@@ -1,10 +1,7 @@
 {
   "extends": "tsconfig/react-library.json",
   "compilerOptions": {
-    "types": ["vite/client"],
-    "paths": {
-      "@/*": ["./src/*"]
-    }
+    "types": ["vite/client", "@vitejs/plugin-rsc/types"]
   },
   "exclude": ["node_modules", "dist", "eslint.config.mjs"]
 }

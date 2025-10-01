@@ -5,11 +5,11 @@ import {
   DocsPage,
   DocsTitle,
 } from 'fumadocs-ui/page';
-import { source } from '../lib/source';
+import { source } from '../../lib/source';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
-import { baseOptions } from '../lib/layout.shared';
+import { baseOptions } from '../../lib/layout.shared';
 
-export function ServerComponent({
+export default function ServerComponent({
   params,
 }: {
   params: Record<string, string>;

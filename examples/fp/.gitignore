@@ -1,7 +1,7 @@
-node_modules
-dist
-.env*
-*.tsbuildinfo
-.cache
 .DS_Store
-*.pem
+/node_modules/
+
+# React Router
+/.react-router/
+/build/
+source.generated.ts

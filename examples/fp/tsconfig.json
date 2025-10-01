@@ -1,19 +1,21 @@
 {
+  "include": ["**/*", "**/.server/**/*", "**/.client/**/*"],
   "compilerOptions": {
-    "strict": true,
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "types": ["node", "vite/client"],
     "target": "esnext",
-    "noEmit": true,
-    "isolatedModules": true,
-    "moduleDetection": "force",
-    "downlevelIteration": true,
-    "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./app/*"]
+    },
+    "esModuleInterop": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
     "skipLibCheck": true,
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
-    "jsx": "react-jsx"
-  },
-  "include": ["**/*", ".source/**/*"],
-  "exclude": ["node_modules", "dist"]
+    "strict": true
+  }
 }

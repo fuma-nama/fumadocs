@@ -1,17 +1,12 @@
 import { HomeLayout } from 'fumadocs-ui/layouts/home';
-import { Link, MetaArgs } from 'react-router';
+import { Link } from 'react-router';
 import { baseOptions } from '../lib/layout.shared';
 
-export function meta(_args: MetaArgs) {
-  return [
-    { title: 'New React Router App' },
-    { name: 'description', content: 'Welcome to React Router!' },
-  ];
-}
-
-export function ServerComponent() {
+export default function ServerComponent() {
   return (
     <HomeLayout {...baseOptions()}>
+      <meta name="title" content="Fumapress" />
+      <meta name="description" content="Fumapress" />
       <div className="p-4 flex flex-col items-center justify-center text-center flex-1">
         <h1 className="text-xl font-bold mb-2">Fumadocs on React Router.</h1>
         <p className="text-fd-muted-foreground mb-4">
