@@ -79,14 +79,14 @@ export function generate({ title, description }: GenerateProps) {
           padding: '4rem',
         }}
       >
-        <p
+        <span
           style={{
             fontWeight: 600,
             fontSize: '76px',
           }}
         >
           {title}
-        </p>
+        </span>
         <p
           style={{
             fontSize: '48px',
@@ -106,14 +106,14 @@ export function generate({ title, description }: GenerateProps) {
           }}
         >
           {logo}
-          <p
+          <span
             style={{
               fontSize: '46px',
               fontWeight: 600,
             }}
           >
             {siteName}
-          </p>
+          </span>
         </div>
       </div>
     </div>
