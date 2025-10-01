@@ -7,5 +7,6 @@ export default defineConfig({
   entry: {
     'cli/index': 'src/cli/index.ts',
     vite: 'src/vite/index.ts',
+    index: 'src/index.ts',
   },
 });

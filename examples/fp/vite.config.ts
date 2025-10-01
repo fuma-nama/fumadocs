@@ -1,13 +1,7 @@
 import { defineConfig } from 'vite';
 import { fumapress } from 'fumapress/dist/vite';
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
-  environments: {
-    rsc: {
-      build: {
-        manifest: false,
-      },
-    },
-  },
-  plugins: [fumapress()],
+  plugins: [fumapress(), tailwindcss()],
 });

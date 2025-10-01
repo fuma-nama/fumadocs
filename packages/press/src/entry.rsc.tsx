@@ -10,7 +10,7 @@ import { unstable_matchRSCServerRequest as matchRSCServerRequest } from 'react-r
 
 import { routes } from './routes/config';
 
-function fetchServer(request: Request) {
+async function fetchServer(request: Request) {
   return matchRSCServerRequest({
     // Provide the React Server touchpoints.
     createTemporaryReferenceSet,
@@ -21,7 +21,7 @@ function fetchServer(request: Request) {
     // The incoming request.
     request,
     // The app routes.
-    routes: routes(),
+    routes: await routes(),
     // Encode the match with the React Server implementation.
     generateResponse(match, options) {
       return new Response(renderToReadableStream(match.payload, options), {
