@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-core",
-  "version": "15.8.1",
+  "version": "15.8.2",
   "description": "The library for building a documentation website in any React.js framework",
   "keywords": [
     "Fumadocs",
