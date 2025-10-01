@@ -1,5 +1,19 @@
 # next-docs-ui
 
+## 15.8.2
+
+### Patch Changes
+
+- 90cf1fe: Support `tabMode` on `<DocsLayout />`
+- 6c3bde5: **Prefer importing `<RootProvider />` from `fumadocs-ui/provider/<framework>`**
+  - Old `fumadocs-ui/provider` will be kept, as it's used by majority of previous projects.
+  - New guides & templates will follow the new recommendation.
+
+- Updated dependencies [ad9a004]
+- Updated dependencies [90cf1fe]
+- Updated dependencies [747bdbc]
+  - fumadocs-core@15.8.2
+
 ## 15.8.1
 
 ### Patch Changes
