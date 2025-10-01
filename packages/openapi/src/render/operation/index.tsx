@@ -17,7 +17,7 @@ import {
   APIExampleProvider,
   getAPIExamples,
 } from '@/render/operation/api-example';
-import { MethodLabel } from '@/ui/components/method-label';
+import { Badge, MethodLabel } from '@/ui/components/method-label';
 import { type SampleGenerator } from '@/requests/_shared';
 import { getTypescriptSchema } from '@/utils/get-typescript-schema';
 import { CopyResponseTypeScript } from '@/ui/client';
@@ -87,7 +87,14 @@ export function Operation({
 
     headNode = (
       <>
-        {heading(headingLevel, title, ctx)}
+        <div className="flex items-center gap-2">
+          {heading(headingLevel, title, ctx)}
+          {method.deprecated && (
+            <Badge color="yellow" className="text-xs">
+              Deprecated
+            </Badge>
+          )}
+        </div>
         {method.description ? <Markdown text={method.description} /> : null}
       </>
     );
@@ -251,6 +258,11 @@ export function Operation({
             <code className="flex-1 overflow-auto text-nowrap text-[13px] text-fd-muted-foreground">
               {path}
             </code>
+            {method.deprecated && (
+              <Badge color="yellow" className="text-xs">
+                Deprecated
+              </Badge>
+            )}
           </div>
         ) : (
           <ctx.renderer.APIPlayground path={path} method={method} ctx={ctx} />
