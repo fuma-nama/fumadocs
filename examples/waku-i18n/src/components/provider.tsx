@@ -1,7 +1,6 @@
 'use client';
 import type { ReactNode } from 'react';
-import { WakuProvider } from 'fumadocs-core/framework/waku';
-import { RootProvider } from 'fumadocs-ui/provider/base';
+import { RootProvider } from 'fumadocs-ui/provider/waku';
 import { defineI18nUI } from 'fumadocs-ui/i18n';
 import { i18n } from '@/lib/i18n';
 import { useRouter } from 'waku/router/client';
@@ -22,10 +21,8 @@ export function Provider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   return (
-    <WakuProvider>
-      <RootProvider i18n={provider(router.path.split('/')[1])}>
-        {children}
-      </RootProvider>
-    </WakuProvider>
+    <RootProvider i18n={provider(router.path.split('/')[1])}>
+      {children}
+    </RootProvider>
   );
 }

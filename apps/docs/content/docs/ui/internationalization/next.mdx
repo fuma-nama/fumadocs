@@ -57,7 +57,7 @@ Create a `/app/[lang]` folder, and move your pages/layouts into it, except route
 Provide UI translations and other config to `<RootProvider />`, the English translations are used when `translations` is not specified.
 
 ```tsx title="app/[lang]/layout.tsx"
-import { RootProvider } from 'fumadocs-ui/provider';
+import { RootProvider } from 'fumadocs-ui/provider/next';
 import { defineI18nUI } from 'fumadocs-ui/i18n';
 import { i18n } from '@/lib/i18n';
 

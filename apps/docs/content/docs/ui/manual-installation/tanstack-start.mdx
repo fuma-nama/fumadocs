@@ -51,8 +51,7 @@ import {
   Scripts,
 } from '@tanstack/react-router';
 import * as React from 'react';
-import { RootProvider } from 'fumadocs-ui/provider/base';
-import { TanstackProvider } from 'fumadocs-core/framework/tanstack';
+import { RootProvider } from 'fumadocs-ui/provider/tanstack';
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -73,10 +72,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body className="flex flex-col min-h-screen">
-        {/* [!code ++:3] */}
-        <TanstackProvider>
-          <RootProvider>{children}</RootProvider>
-        </TanstackProvider>
+        {/* [!code ++] */}
+        <RootProvider>{children}</RootProvider>
         <Scripts />
       </body>
     </html>

@@ -1,12 +1,11 @@
 ### Replace Search Dialog
 
-Replace the search dialog with yours from `<RootProvider />`:
+Replace the search dialog with yours from [`<RootProvider />`](/docs/ui/root-provider):
 
 ```tsx
-import { RootProvider } from 'fumadocs-ui/provider';
+import { RootProvider } from 'fumadocs-ui/provider/<framework>';
 // [!code ++]
 import SearchDialog from '@/components/search';
-import type { ReactNode } from 'react';
 
 <RootProvider
   // [!code ++:3]
@@ -22,7 +21,7 @@ If it was in a server component, you would need a separate client component for 
 
 ```tsx tab="provider.tsx"
 'use client';
-import { RootProvider } from 'fumadocs-ui/provider';
+import { RootProvider } from 'fumadocs-ui/provider/<framework>';
 import SearchDialog from '@/components/search';
 import type { ReactNode } from 'react';
 

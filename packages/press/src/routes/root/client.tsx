@@ -8,8 +8,7 @@ import {
   ScrollRestoration,
   useRouteError,
 } from 'react-router';
-import { ReactRouterProvider } from 'fumadocs-core/framework/react-router';
-import { RootProvider } from 'fumadocs-ui/provider/base';
+import { RootProvider } from 'fumadocs-ui/provider/react-router';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -22,9 +21,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body className="flex flex-col min-h-screen">
-        <ReactRouterProvider>
-          <RootProvider>{children}</RootProvider>
-        </ReactRouterProvider>
+        <RootProvider>{children}</RootProvider>
         <ScrollRestoration />
         <Scripts />
       </body>

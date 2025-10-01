@@ -10,7 +10,7 @@ You can customise some configurations from root provider.
 For example, to disable search UI:
 
 ```tsx title="app/layout.tsx"
-import { RootProvider } from 'fumadocs-ui/provider';
+import { RootProvider } from 'fumadocs-ui/provider/<framework>';
 import type { ReactNode } from 'react';
 
 export default function Layout({ children }: { children: ReactNode }) {
@@ -35,7 +35,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 Customise the hot keys to trigger search dialog, by default it's <kbd>⌘</kbd> <kbd>K</kbd> or <kbd>Ctrl</kbd> <kbd>K</kbd>.
 
 ```tsx
-import { RootProvider } from 'fumadocs-ui/provider';
+import { RootProvider } from 'fumadocs-ui/provider/<framework>';
 
 <RootProvider
   search={{

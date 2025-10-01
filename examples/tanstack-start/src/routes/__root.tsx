@@ -1,4 +1,3 @@
-/// <reference types="vite/client" />
 import {
   createRootRoute,
   HeadContent,
@@ -7,8 +6,7 @@ import {
 } from '@tanstack/react-router';
 import * as React from 'react';
 import appCss from '@/styles/app.css?url';
-import { RootProvider } from 'fumadocs-ui/provider/base';
-import { TanstackProvider } from 'fumadocs-core/framework/tanstack';
+import { RootProvider } from 'fumadocs-ui/provider/tanstack';
 
 export const Route = createRootRoute({
   head: () => ({
@@ -44,9 +42,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body className="flex flex-col min-h-screen">
-        <TanstackProvider>
-          <RootProvider>{children}</RootProvider>
-        </TanstackProvider>
+        <RootProvider>{children}</RootProvider>
         <Scripts />
       </body>
     </html>
