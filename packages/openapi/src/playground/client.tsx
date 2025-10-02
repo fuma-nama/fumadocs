@@ -722,7 +722,7 @@ function useAuthInputs(securities?: SecurityEntry[]) {
     return result;
   }, [securities]);
 
-  const mapInputs = useEffectEvent((values: FormValues) => {
+  const mapInputs = (values: FormValues) => {
     for (const item of inputs) {
       if (!item.mapOutput) continue;
 
@@ -730,7 +730,7 @@ function useAuthInputs(securities?: SecurityEntry[]) {
     }
 
     return values;
-  });
+  };
 
   return { inputs, mapInputs };
 }

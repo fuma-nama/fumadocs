@@ -52,14 +52,14 @@
     "@types/estree": "^1.0.8",
     "@types/js-yaml": "^4.0.9",
     "@types/mdast": "^4.0.3",
-    "@types/node": "24.5.2",
-    "@types/react": "^19.1.14",
+    "@types/node": "24.6.2",
+    "@types/react": "^19.2.0",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "mdast-util-mdx-jsx": "^3.2.0",
     "tsconfig": "workspace:*",
-    "typescript": "^5.9.2",
+    "typescript": "^5.9.3",
     "vfile": "^6.0.3"
   },
   "peerDependenciesMeta": {

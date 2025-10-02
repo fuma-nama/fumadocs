@@ -61,7 +61,7 @@ export function TocThumb({
     return () => {
       observer.disconnect();
     };
-  }, [containerRef, onResize]);
+  }, [containerRef]);
 
   useOnChange(active, () => {
     if (!containerRef.current || !thumbRef.current) return;

@@ -20,7 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/ui/components/select';
-import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 import {
   joinURL,
   resolveRequestData,
@@ -33,11 +32,9 @@ type UpdateListener = (data: RawRequestData, encoded: RequestData) => void;
 
 const CodeExampleContext = createContext<{
   route: string;
-  examples: {
-    key: string;
-    data: RawRequestData;
-    encoded: RequestData;
-  }[];
+  getExample: (
+    key: string,
+  ) => { data: RawRequestData; encoded: RequestData } | undefined;
 
   key: string;
   setKey: (key: string) => void;
@@ -65,45 +62,8 @@ export function CodeExampleProvider({
 }) {
   const [key, setKey] = useState(initialKey ?? examples[0].key);
   const listeners = useRef<UpdateListener[]>([]);
-
-  const setData = useEffectEvent(
-    (data: RawRequestData, encoded: RequestData) => {
-      for (const example of examples) {
-        if (example.key === key) {
-          // persistent changes
-          example.data = data;
-          example.encoded = encoded;
-          break;
-        }
-      }
-
-      for (const listener of listeners.current) {
-        listener(data, encoded);
-      }
-    },
-  );
-
-  const updateKey = useEffectEvent((newKey: string) => {
-    const example = examples.find((example) => example.key === newKey);
-    if (!example) return;
-
-    setKey(newKey);
-    for (const listener of listeners.current) {
-      listener(example.data, example.encoded);
-    }
-  });
-
-  const addListener = useEffectEvent((listener: UpdateListener) => {
-    // initial call to listeners to ensure their data is the latest
-    // this is necessary to avoid race conditions between `useEffect()`
-    const example = examples.find((example) => example.key === key)!;
-    listener(example.data, example.encoded);
-    listeners.current.push(listener);
-  });
-
-  const removeListener = useEffectEvent((listener: UpdateListener) => {
-    listeners.current = listeners.current.filter((item) => item !== listener);
-  });
+  const examplesRef = useRef(examples);
+  examplesRef.current = examples;
 
   return (
     <CodeExampleContext
@@ -111,13 +71,50 @@ export function CodeExampleProvider({
         () => ({
           key,
           route,
-          setKey: updateKey,
-          examples,
-          setData,
-          removeListener,
-          addListener,
+          setKey: (newKey: string) => {
+            const example = examplesRef.current.find(
+              (example) => example.key === newKey,
+            );
+            if (!example) return;
+
+            setKey(newKey);
+            for (const listener of listeners.current) {
+              listener(example.data, example.encoded);
+            }
+          },
+          getExample: (key) => {
+            return examplesRef.current.find((example) => example.key === key);
+          },
+          setData: (data, encoded) => {
+            for (const example of examplesRef.current) {
+              if (example.key === key) {
+                // persistent changes
+                example.data = data;
+                example.encoded = encoded;
+                break;
+              }
+            }
+
+            for (const listener of listeners.current) {
+              listener(data, encoded);
+            }
+          },
+          removeListener: (listener) => {
+            listeners.current = listeners.current.filter(
+              (item) => item !== listener,
+            );
+          },
+          addListener: (listener) => {
+            // initial call to listeners to ensure their data is the latest
+            // this is necessary to avoid race conditions between `useEffect()`
+            const example = examplesRef.current.find(
+              (example) => example.key === key,
+            )!;
+            listener(example.data, example.encoded);
+            listeners.current.push(listener);
+          },
         }),
-        [addListener, examples, key, removeListener, route, setData, updateKey],
+        [key, route],
       )}
     >
       {children}
@@ -127,12 +124,10 @@ export function CodeExampleProvider({
 
 export function CodeExample(sample: CodeSample) {
   const { shikiOptions, mediaAdapters } = useApiContext();
-  const { examples, key, route, addListener, removeListener } =
+  const { getExample, key, route, addListener, removeListener } =
     useContext(CodeExampleContext)!;
   const { server } = useServerSelectContext();
-  const [data, setData] = useState(() => {
-    return examples.find((example) => example.key === key)!.encoded;
-  });
+  const [data, setData] = useState(() => getExample(key)!.encoded);
 
   useEffect(() => {
     const listener: UpdateListener = (_, encoded) => setData(encoded);
@@ -209,12 +204,9 @@ function SelectDisplay({
 }
 
 export function useRequestInitialData() {
-  const { examples, key } = useContext(CodeExampleContext)!;
+  const { getExample, key } = useContext(CodeExampleContext)!;
 
-  return useMemo(
-    () => examples.find((example) => example.key === key)!.data,
-    [examples, key],
-  );
+  return getExample(key)!.data;
 }
 
 export function useRequestDataUpdater() {

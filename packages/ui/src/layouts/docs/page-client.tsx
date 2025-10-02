@@ -179,7 +179,7 @@ export function PageTOCPopover(props: ComponentProps<'div'>) {
     return () => {
       window.removeEventListener('click', onClick);
     };
-  }, [onClick]);
+  }, []);
 
   return (
     <TocPopoverContext.Provider

@@ -138,16 +138,16 @@
   },
   "devDependencies": {
     "@mdx-js/mdx": "^3.1.1",
-    "@mixedbread/sdk": "^0.29.0",
+    "@mixedbread/sdk": "^0.31.1",
     "@oramacloud/client": "^2.1.4",
-    "@tanstack/react-router": "^1.132.7",
+    "@tanstack/react-router": "^1.132.31",
     "@types/estree-jsx": "^1.0.5",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.3",
     "@types/negotiator": "^0.6.4",
-    "@types/node": "24.5.2",
-    "@types/react": "^19.1.14",
-    "@types/react-dom": "^19.1.9",
+    "@types/node": "24.6.2",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
     "algoliasearch": "5.39.0",
     "eslint-config-custom": "workspace:*",
     "lucide-react": "^0.544.0",
@@ -158,7 +158,7 @@
     "remark-mdx": "^3.1.1",
     "remove-markdown": "^0.6.2",
     "tsconfig": "workspace:*",
-    "typescript": "^5.9.2",
+    "typescript": "^5.9.3",
     "unified": "^11.0.5",
     "vfile": "^6.0.3",
     "waku": "^0.26.1"
@@ -169,12 +169,12 @@
     "@tanstack/react-router": "1.x.x",
     "@types/react": "*",
     "algoliasearch": "5.x.x",
+    "lucide-react": "*",
     "next": "14.x.x || 15.x.x",
     "react": "18.x.x || 19.x.x",
     "react-dom": "18.x.x || 19.x.x",
     "react-router": "7.x.x",
-    "waku": "^0.26.0",
-    "lucide-react": "*"
+    "waku": "^0.26.0"
   },
   "peerDependenciesMeta": {
     "@mixedbread/sdk": {

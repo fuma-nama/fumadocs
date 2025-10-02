@@ -2,8 +2,7 @@
 // TODO: remove next major
 import type { I18nProviderProps } from '@/provider/base';
 import { usePathname, useRouter } from 'fumadocs-core/framework';
-import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { defaultTranslations, I18nContext } from '@/contexts/i18n';
 
 /**
@@ -23,22 +22,23 @@ export function I18nProvider({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const onChange = useEffectEvent((value: string) => {
-    if (onLocaleChange) {
-      return onLocaleChange(value);
-    }
-    const segments = pathname.split('/').filter((v) => v.length > 0);
+  const onChange =
+    onLocaleChange ??
+    ((value: string) => {
+      const segments = pathname.split('/').filter((v) => v.length > 0);
 
-    // If locale prefix hidden
-    if (segments[0] !== locale) {
-      segments.unshift(value);
-    } else {
-      segments[0] = value;
-    }
+      // If locale prefix hidden
+      if (segments[0] !== locale) {
+        segments.unshift(value);
+      } else {
+        segments[0] = value;
+      }
 
-    router.push(`/${segments.join('/')}`);
-    router.refresh();
-  });
+      router.push(`/${segments.join('/')}`);
+      router.refresh();
+    });
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
 
   return (
     <I18nContext.Provider
@@ -50,9 +50,9 @@ export function I18nProvider({
             ...defaultTranslations,
             ...props.translations,
           },
-          onChange,
+          onChange: (v) => onChangeRef.current(v),
         }),
-        [locale, locales, onChange, props.translations],
+        [locale, locales, props.translations],
       )}
     >
       {props.children}

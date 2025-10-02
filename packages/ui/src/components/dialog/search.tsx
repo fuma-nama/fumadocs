@@ -283,7 +283,7 @@ export function SearchDialogList({
       observer.disconnect();
       window.removeEventListener('keydown', onKey);
     };
-  }, [onKey]);
+  }, []);
 
   useOnChange(items, () => {
     if (items && items.length > 0) {
