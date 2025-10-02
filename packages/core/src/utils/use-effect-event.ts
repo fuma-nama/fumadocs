@@ -11,10 +11,14 @@ type UseEffectEvent = <F extends (...params: never[]) => unknown>(
  * @internal Don't use this, could be deleted anytime.
  */
 export const useEffectEvent: UseEffectEvent =
-  React.useEffectEvent ??
-  (<F extends (...params: never[]) => unknown>(callback: F) => {
-    const ref = React.useRef(callback);
-    ref.current = callback;
+  'useEffectEvent' in React
+    ? { ...React }.useEffectEvent
+    : <F extends (...params: never[]) => unknown>(callback: F) => {
+        const ref = React.useRef(callback);
+        ref.current = callback;
 
-    return React.useCallback(((...params) => ref.current(...params)) as F, []);
-  });
+        return React.useCallback(
+          ((...params) => ref.current(...params)) as F,
+          [],
+        );
+      };
