@@ -1,6 +1,8 @@
 'use client';
 
-export * from './next';
+// TODO: remove this, recommend `fumadocs-ui/provider/next` instead.
+export { RootProvider } from './next';
+
 export { useI18n, I18nLabel } from '@/contexts/i18n';
 export {
   SearchProvider,
