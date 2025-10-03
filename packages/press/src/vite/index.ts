@@ -1,4 +1,9 @@
-import type { Plugin, PluginOption } from 'vite';
+import {
+  mergeConfig,
+  type Plugin,
+  type PluginOption,
+  type UserConfig,
+} from 'vite';
 import react from '@vitejs/plugin-react';
 import rsc from '@vitejs/plugin-rsc';
 import mdx from 'fumadocs-mdx/vite';
@@ -14,7 +19,6 @@ const extnames = ['.js', '.ts', '.jsx', '.tsx'];
 
 export function fumapress(): PluginOption[] {
   return [
-    resolveDir(),
     react(),
     rsc({
       entries: {
@@ -24,28 +28,35 @@ export function fumapress(): PluginOption[] {
       },
     }),
     mdx(MdxConfig, { configPath: mdxConfigPath, generateIndexFile: false }),
+    resolveDir(),
   ];
 }
 
 function resolveDir(): Plugin {
   let configPath: string | null;
   let config: FumapressConfig;
+  let routesPath: string | null;
 
   return {
     name: 'fumapress/resolve-dir',
     enforce: 'pre',
-    async configResolved() {
+    config(config) {
+      return mergeConfig(config, {
+        resolve: {
+          noExternal: ['fumapress'],
+        },
+      } satisfies UserConfig);
+    },
+    async configResolved(v) {
+      console.log(v);
       configPath = await findConfigPath();
       config = await loadConfig(configPath);
+
+      const name = path.join(config.appDir, 'routes');
+      routesPath = (await findFile(extnames.map((ext) => name + ext))) ?? null;
     },
     resolveId(id) {
-      const appDir = 'virtual:app/';
-
-      if (id.startsWith(appDir)) {
-        const name = path.join(config.appDir, id.slice(appDir.length));
-
-        return findFile(extnames.map((ext) => name + ext));
-      }
+      if (id == 'virtual:app/routes') return routesPath;
     },
     configureServer(server) {
       server.watcher.on('change', async (file) => {

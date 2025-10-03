@@ -13,14 +13,14 @@ export async function routes() {
       ...root,
       children: [
         {
-          id: 'home',
-          index: true,
-          lazy: () => import('./home'),
+          id: 'docs',
+          path: '*?',
+          lazy: () => import('./docs/page'),
         },
         {
-          id: 'docs/*',
-          path: 'docs/*',
-          lazy: () => import('./docs/page'),
+          id: 'api/search',
+          path: 'api/search',
+          lazy: () => import('./docs/search'),
         },
       ],
     },

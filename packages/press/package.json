@@ -37,7 +37,8 @@
     "react-dom": "^19.2.0",
     "react-router": "^7.9.3",
     "tinyglobby": "^0.2.15",
-    "vite": "^7.1.8"
+    "vite": "^7.1.8",
+    "zod": "^4.1.11"
   },
   "devDependencies": {
     "@types/mdx": "^2.0.13",
