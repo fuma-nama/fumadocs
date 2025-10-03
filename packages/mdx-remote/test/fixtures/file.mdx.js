@@ -25,24 +25,37 @@ function _createMdxContent(props) {
   const _components = {
     code: "code",
     h2: "h2",
+    p: "p",
     strong: "strong",
     ...props.components
   };
-  return _jsxDEV(_components.h2, {
-    id: "you-found-me",
-    children: ["You ", _jsxDEV(_components.strong, {
-      children: "found"
-    }, undefined, false, {
+  return _jsxDEV(_Fragment, {
+    children: [_jsxDEV(_components.h2, {
+      id: "you-found-me",
+      children: ["You ", _jsxDEV(_components.strong, {
+        children: "found"
+      }, undefined, false, {
+        fileName: "<source.js>",
+        lineNumber: 1,
+        columnNumber: 8
+      }, this), " ", _jsxDEV(_components.code, {
+        children: "me"
+      }, undefined, false, {
+        fileName: "<source.js>",
+        lineNumber: 1,
+        columnNumber: 18
+      }, this), "!"]
+    }, undefined, true, {
       fileName: "<source.js>",
       lineNumber: 1,
-      columnNumber: 8
-    }, this), " ", _jsxDEV(_components.code, {
-      children: "me"
-    }, undefined, false, {
+      columnNumber: 1
+    }, this), "\n", _jsxDEV(_components.p, {
+      children: ["Look at ", custom_scope_variable, "."]
+    }, undefined, true, {
       fileName: "<source.js>",
-      lineNumber: 1,
-      columnNumber: 18
-    }, this), "!"]
+      lineNumber: 3,
+      columnNumber: 1
+    }, this)]
   }, undefined, true, {
     fileName: "<source.js>",
     lineNumber: 1,
