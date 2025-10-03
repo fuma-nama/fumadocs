@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/mdx-remote",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "The remote MDX files adapter for Fumadocs",
   "keywords": [
     "NextJs",

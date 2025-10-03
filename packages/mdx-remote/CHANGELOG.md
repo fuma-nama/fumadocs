@@ -1,5 +1,11 @@
 # @fumadocs/mdx-remote
 
+## 1.4.2
+
+### Patch Changes
+
+- b867d07: Support customise scope variables
+
 ## 1.4.1
 
 ### Patch Changes
