@@ -108,6 +108,9 @@ export function createCompiler(mdxOptions?: CompilerOptions) {
       const file = await this.compileFile({
         value: content,
         path: options.filePath,
+        data: {
+          frontmatter,
+        },
       });
       const compiled = String(file);
       const exports = !skipRender
