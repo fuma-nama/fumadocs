@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 15.8.3
+
+### Patch Changes
+
+- a3a14e7: Bump deps
+- 7b0d839: Hotfix `fumadocs-ui/provider`
+- Updated dependencies [a3a14e7]
+  - fumadocs-core@15.8.3
+
 ## 15.8.2
 
 ### Patch Changes

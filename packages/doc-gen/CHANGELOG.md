@@ -1,5 +1,13 @@
 # fumadocs-docgen
 
+## 3.0.2
+
+### Patch Changes
+
+- a3a14e7: Bump deps
+- Updated dependencies [a3a14e7]
+  - fumadocs-core@15.8.3
+
 ## 3.0.1
 
 ### Patch Changes
