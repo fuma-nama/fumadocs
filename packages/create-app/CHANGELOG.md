@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 15.8.3
+
+### Patch Changes
+
+- a3a14e7: Bump deps
+
 ## 15.8.2
 
 ## 15.8.1

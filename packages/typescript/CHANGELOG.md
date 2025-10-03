@@ -1,5 +1,15 @@
 # fumadocs-typescript
 
+## 4.0.11
+
+### Patch Changes
+
+- a3a14e7: Bump deps
+- Updated dependencies [a3a14e7]
+- Updated dependencies [7b0d839]
+  - fumadocs-core@15.8.3
+  - fumadocs-ui@15.8.3
+
 ## 4.0.10
 
 ### Patch Changes
