@@ -1,10 +1,7 @@
 import { fileURLToPath } from 'node:url';
-import { join } from 'node:path';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { idToTitle } from '@/utils/id-to-title';
 import { generateFilesOnly, type OutputFile } from '@/generate-file';
-import { processDocument } from '@/utils/process-document';
-import { generateAll, generateTags } from '@/generate';
 
 describe('Utilities', () => {
   test('Operation ID to Title', () => {
@@ -21,58 +18,51 @@ describe('Generate documents', () => {
     vi.restoreAllMocks();
   });
 
-  test('Pet Store', async () => {
-    const result = generateAll(
-      './fixtures/petstore.yaml',
-      await processDocument(join(cwd, './fixtures/petstore.yaml')),
-      {
-        cwd,
-      },
-    );
+  test('Pet Store (Per Operation)', async () => {
+    const out = await generateFilesOnly({
+      input: './fixtures/petstore.yaml',
+      cwd,
+      per: 'operation',
+    });
 
-    await expect(result).toMatchFileSnapshot('./out/petstore.mdx');
+    await expect(stringifyOutput(out)).toMatchFileSnapshot(
+      './out/petstore-per-operation.json',
+    );
   });
 
-  test('Museum', async () => {
-    const tags = generateTags(
-      './fixtures/museum.yaml',
-      await processDocument(join(cwd, './fixtures/museum.yaml')),
-      {
-        cwd,
-      },
-    );
+  test('Museum (Per Tag)', async () => {
+    const out = await generateFilesOnly({
+      cwd,
+      input: './fixtures/museum.yaml',
+      per: 'tag',
+    });
 
-    for (const tag of tags) {
-      await expect(tag.content).toMatchFileSnapshot(
-        `./out/museum/${tag.tag.toLowerCase()}.mdx`,
-      );
-    }
+    await expect(stringifyOutput(out)).toMatchFileSnapshot(
+      './out/museum-per-tag.json',
+    );
   });
 
-  test('Unkey', async () => {
-    const tags = generateTags(
-      './fixtures/unkey.json',
-      await processDocument(join(cwd, './fixtures/unkey.json')),
-      { cwd },
-    );
+  test('Unkey (Per File)', async () => {
+    const out = await generateFilesOnly({
+      cwd,
+      input: './fixtures/unkey.json',
+      per: 'file',
+    });
 
-    for (const tag of tags) {
-      await expect(tag.content).toMatchFileSnapshot(
-        `./out/unkey/${tag.tag.toLowerCase()}.mdx`,
-      );
-    }
+    await expect(stringifyOutput(out)).toMatchFileSnapshot(
+      './out/unkey-per-file.json',
+    );
   });
 
   test('Generate Files', async () => {
     const out = await generateFilesOnly({
       input: ['./fixtures/museum.yaml', './fixtures/petstore.yaml'],
-      output: './out',
       per: 'file',
       cwd,
     });
 
     await expect(stringifyOutput(out)).toMatchFileSnapshot(
-      './out/petstore.json',
+      './out/museum+petstore.json',
     );
   });
 
@@ -80,7 +70,6 @@ describe('Generate documents', () => {
     await expect(
       generateFilesOnly({
         input: ['./fixtures/non-existent-*.yaml'],
-        output: './out',
         per: 'file',
         cwd,
       }),
@@ -94,7 +83,6 @@ describe('Generate documents', () => {
           './fixtures/non-existent-1.yaml',
           './fixtures/non-existent-2.yaml',
         ],
-        output: './out',
         per: 'file',
         cwd,
         name: {
@@ -109,7 +97,6 @@ describe('Generate documents', () => {
   test('Generate Files - groupBy tag per operation', async () => {
     const out = await generateFilesOnly({
       input: ['./fixtures/products.yaml'],
-      output: './out',
       per: 'operation',
       groupBy: 'tag',
       name: {
@@ -119,14 +106,13 @@ describe('Generate documents', () => {
     });
 
     await expect(stringifyOutput(out)).toMatchFileSnapshot(
-      './out/products-per-tag.json',
+      './out/products-group-by-tag.json',
     );
   });
 
   test('Generate Files - with index', async () => {
     const out = await generateFilesOnly({
       input: ['./fixtures/products.yaml'],
-      output: './out',
       per: 'operation',
       name: {
         algorithm: 'v1',

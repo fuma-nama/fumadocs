@@ -1,4 +1,3 @@
-import { getAPIPageItems } from '@/build-routes';
 import { idToTitle } from '@/utils/id-to-title';
 import type {
   ApiPageProps,
@@ -13,6 +12,13 @@ import { dump } from 'js-yaml';
 import type { NoReference } from '@/utils/schema';
 import Slugger from 'github-slugger';
 import { removeUndefined } from '@/utils/remove-undefined';
+import type {
+  OutputEntry,
+  OutputOperationEntry,
+  OutputSchemaEntry,
+  OutputTagEntry,
+  OutputWebhookEntry,
+} from '@/utils/schema-to-pages';
 
 export interface GenerateOptions {
   /**
@@ -52,55 +58,41 @@ export interface GenerateOptions {
    * @defaultValue true
    */
   addGeneratedComment?: boolean | string;
-
-  cwd?: string;
-
-  /**
-   * Inline the entire OpenAPI document into the MDX file.
-   *
-   * @deprecated Use the new `input` API on `createOpenAPI()` instead.
-   * @defaultValue false
-   */
-  inlineDocument?: boolean;
 }
 
-export interface GenerateTagOutput {
-  tag: string;
-  content: string;
+export function generateEntry(
+  entry: OutputEntry,
+  processed: ProcessedDocument,
+  options: GenerateOptions = {},
+) {
+  switch (entry.type) {
+    case 'operation':
+      return generateOperationEntry(entry, processed, options);
+    case 'schema':
+      return generateSchemaEntry(entry, processed, options);
+    case 'tag':
+      return generateTagEntry(entry, processed, options);
+    case 'webhook':
+      return generateWebhookEntry(entry, processed, options);
+  }
 }
 
-export type GeneratePageOutput =
-  | {
-      type: 'operation';
-      item: OperationItem;
-      content: string;
-    }
-  | {
-      type: 'webhook';
-      item: WebhookItem;
-      content: string;
-    };
-
-export function generateAll(
-  schemaId: string,
+export function generateSchemaEntry(
+  entry: OutputSchemaEntry,
   processed: ProcessedDocument,
   options: GenerateOptions = {},
 ): string {
-  const { dereferenced } = processed;
-  const items = getAPIPageItems(dereferenced);
-
   return generatePage(
-    schemaId,
+    entry.schemaId,
     processed,
     {
-      operations: items.operations,
-      webhooks: items.webhooks,
+      operations: entry.operations,
+      webhooks: entry.webhooks,
       hasHead: true,
     },
     {
       ...options,
-      title: dereferenced.info.title,
-      description: dereferenced.info.description,
+      ...entry.info,
     },
     {
       type: 'file',
@@ -108,121 +100,72 @@ export function generateAll(
   );
 }
 
-export function generatePages(
-  schemaId: string,
+export function generateOperationEntry(
+  entry: OutputOperationEntry,
   processed: ProcessedDocument,
   options: GenerateOptions = {},
-): GeneratePageOutput[] {
-  const { dereferenced } = processed;
-  const items = getAPIPageItems(dereferenced);
-  const result: GeneratePageOutput[] = [];
-
-  for (const item of items.operations) {
-    const pathItem = dereferenced.paths?.[item.path];
-    if (!pathItem) continue;
-    const operation = pathItem[item.method];
-    if (!operation) continue;
-
-    result.push({
+): string {
+  return generatePage(
+    entry.schemaId,
+    processed,
+    {
+      operations: [entry.item],
+      hasHead: false,
+    },
+    {
+      ...options,
+      ...entry.info,
+    },
+    {
       type: 'operation',
-      item,
-      content: generatePage(
-        schemaId,
-        processed,
-        {
-          operations: [item],
-          hasHead: false,
-        },
-        {
-          ...options,
-          title:
-            operation.summary ??
-            pathItem.summary ??
-            idToTitle(operation.operationId ?? 'unknown'),
-          description: operation.description ?? pathItem.description,
-        },
-        {
-          type: 'operation',
-        },
-      ),
-    });
-  }
-
-  for (const item of items.webhooks) {
-    const pathItem = dereferenced.webhooks?.[item.name];
-    if (!pathItem) continue;
-    const operation = pathItem[item.method];
-    if (!operation) continue;
-
-    result.push({
-      type: 'webhook',
-      item,
-      content: generatePage(
-        schemaId,
-        processed,
-        {
-          webhooks: [item],
-          hasHead: false,
-        },
-        {
-          ...options,
-          title: operation.summary ?? pathItem.summary ?? idToTitle(item.name),
-          description: operation.description ?? pathItem.description,
-        },
-        {
-          type: 'operation',
-        },
-      ),
-    });
-  }
-
-  return result;
+    },
+  );
 }
 
-export function generateTags(
-  schemaId: string,
+export function generateWebhookEntry(
+  entry: OutputWebhookEntry,
   processed: ProcessedDocument,
   options: GenerateOptions = {},
-): GenerateTagOutput[] {
-  const { dereferenced } = processed;
-  if (!dereferenced.tags) return [];
-  const items = getAPIPageItems(dereferenced);
+) {
+  return generatePage(
+    entry.schemaId,
+    processed,
+    {
+      webhooks: [entry.item],
+      hasHead: false,
+    },
+    {
+      ...options,
+      ...entry.info,
+    },
+    {
+      type: 'operation',
+    },
+  );
+}
 
-  return dereferenced.tags.map((tag) => {
-    const webhooks = items.webhooks.filter(
-      (v) => v.tags && v.tags.includes(tag.name),
-    );
-    const operations = items.operations.filter(
-      (v) => v.tags && v.tags.includes(tag.name),
-    );
-
-    const displayName =
-      tag && 'x-displayName' in tag && typeof tag['x-displayName'] === 'string'
-        ? tag['x-displayName']
-        : idToTitle(tag.name);
-
-    return {
-      tag: tag.name,
-      content: generatePage(
-        schemaId,
-        processed,
-        {
-          operations,
-          webhooks,
-          hasHead: true,
-        },
-        {
-          ...options,
-          title: displayName,
-          description: tag?.description,
-        },
-        {
-          type: 'tag',
-          tag,
-        },
-      ),
-    } satisfies GenerateTagOutput;
-  });
+export function generateTagEntry(
+  entry: OutputTagEntry,
+  processed: ProcessedDocument,
+  options: GenerateOptions = {},
+): string {
+  return generatePage(
+    entry.schemaId,
+    processed,
+    {
+      operations: entry.operations,
+      webhooks: entry.webhooks,
+      hasHead: true,
+    },
+    {
+      ...options,
+      ...entry.info,
+    },
+    {
+      type: 'tag',
+      tag: entry.rawTag,
+    },
+  );
 }
 
 export function generateDocument(
