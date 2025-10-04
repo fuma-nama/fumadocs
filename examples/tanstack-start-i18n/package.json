@@ -10,9 +10,9 @@
   },
   "dependencies": {
     "@orama/tokenizers": "^3.1.14",
-    "@tanstack/react-router": "^1.132.31",
-    "@tanstack/react-router-devtools": "^1.132.31",
-    "@tanstack/react-start": "^1.132.31",
+    "@tanstack/react-router": "^1.132.33",
+    "@tanstack/react-router-devtools": "^1.132.33",
+    "@tanstack/react-start": "^1.132.36",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
@@ -20,7 +20,7 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "tailwind-merge": "^3.3.1",
-    "vite": "^7.1.8"
+    "vite": "^7.1.9"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.14",

@@ -90,7 +90,7 @@
     "@fumadocs/mdx-remote": "workspace:*",
     "@types/bun": "^1.2.23",
     "@types/js-yaml": "^4.0.9",
-    "@types/mdast": "^4.0.3",
+    "@types/mdast": "^4.0.4",
     "@types/mdx": "^2.0.13",
     "@types/node": "^24.6.2",
     "@types/react": "^19.2.0",
@@ -103,10 +103,10 @@
     "remark": "^15.0.1",
     "remark-directive": "^4.0.0",
     "remark-stringify": "^11.0.0",
-    "rollup": "^4.52.3",
+    "rollup": "^4.52.4",
     "tsconfig": "workspace:*",
     "vfile": "^6.0.3",
-    "vite": "^7.1.8",
+    "vite": "^7.1.9",
     "webpack": "^5.102.0"
   },
   "peerDependencies": {

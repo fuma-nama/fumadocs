@@ -12,19 +12,13 @@
   "author": "Fuma Nama",
   "type": "module",
   "files": [
-    "src/*",
     "dist/*"
   ],
-  "bin": {
-    "fumapress": "./dist/cli/index.js"
-  },
   "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch",
-    "typecheck": "tsc --noEmit"
+    "build": "zshy",
+    "dev": "bun scripts/dev.ts",
+    "types:check": "tsc --noEmit"
   },
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.4",
     "@vitejs/plugin-rsc": "^0.4.32",
@@ -33,11 +27,9 @@
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "picocolors": "^1.1.1",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
     "react-router": "^7.9.3",
     "tinyglobby": "^0.2.15",
-    "vite": "^7.1.8",
+    "vite": "^7.1.9",
     "zod": "^4.1.11"
   },
   "devDependencies": {
@@ -46,18 +38,53 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "eslint-config-custom": "workspace:*",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
     "tsconfig": "workspace:*",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "zshy": "^0.4.2"
+  },
+  "zshy": {
+    "cjs": false,
+    "module": "./src/index.ts",
+    "bin": {
+      "fumapress": "./src/cli/index.ts"
+    },
+    "exports": {
+      ".": "./src/index.ts",
+      "./*": "./src/*",
+      "./vite": "./src/vite/index.ts"
+    }
   },
   "peerDependencies": {
-    "@types/react": "*"
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "peerDependenciesMeta": {
-    "@types/react": {
+    "react-dom": {
       "optional": true
     }
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./dist/*",
+      "import": "./dist/*"
+    },
+    "./vite": {
+      "types": "./dist/vite/index.d.ts",
+      "import": "./dist/vite/index.js"
+    }
+  },
+  "bin": {
+    "fumapress": "./dist/cli/index.js"
+  },
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts"
 }

@@ -51,7 +51,7 @@
   "devDependencies": {
     "@types/estree": "^1.0.8",
     "@types/js-yaml": "^4.0.9",
-    "@types/mdast": "^4.0.3",
+    "@types/mdast": "^4.0.4",
     "@types/node": "24.6.2",
     "@types/react": "^19.2.0",
     "eslint-config-custom": "workspace:*",

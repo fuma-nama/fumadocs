@@ -12,8 +12,8 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "next": "^15.5.4",
-    "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
   },
   "devDependencies": {
     "@content-collections/core": "^0.11.1",
