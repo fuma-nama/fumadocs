@@ -268,7 +268,7 @@ export function schemaToPages(
   }
 
   for (const webhook of results.webhooks) {
-    const pathItem = dereferenced.paths![webhook.name]!;
+    const pathItem = dereferenced.webhooks![webhook.name]!;
     const operation = pathItem[webhook.method]!;
 
     const entry: OutputWebhookEntry = {
@@ -336,17 +336,16 @@ export function isUrl(schemaId: string): boolean {
 }
 
 function getOutputPathFromRoute(path: string): string {
-  return (
-    path
-      .toLowerCase()
-      .replaceAll('.', '-')
-      .split('/')
-      .map((v) => {
-        if (v.startsWith('{') && v.endsWith('}')) return v.slice(1, -1);
-        return v;
-      })
-      .join('/') ?? ''
-  );
+  return path
+    .toLowerCase()
+    .replaceAll('.', '-')
+    .split('/')
+    .flatMap((v) => {
+      if (v.startsWith('{') && v.endsWith('}')) return v.slice(1, -1);
+      if (v.length === 0) return [];
+      return v;
+    })
+    .join('/');
 }
 
 function defaultSlugify(s: string): string {
