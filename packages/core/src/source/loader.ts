@@ -310,7 +310,7 @@ function resolveConfig({
     plugins: buildPlugins([
       slugsPlugin(slugs),
       icon && iconPlugin(icon),
-      compatPlugin(base, base.pageTree),
+      compatPlugin(base),
       ...plugins,
     ]),
   };
@@ -323,10 +323,14 @@ function resolveConfig({
   return config;
 }
 
-function createOutput(
-  config: ResolvedLoaderConfig,
-): LoaderOutput<LoaderConfig> {
-  const { source, baseUrl = '/', url: urlFn, i18n } = config;
+function createOutput({
+  source,
+  baseUrl = '/',
+  url: urlFn,
+  i18n,
+  plugins = [],
+  pageTree: pageTreeConfig,
+}: ResolvedLoaderConfig): LoaderOutput<LoaderConfig> {
   const getUrl: UrlFn = urlFn
     ? (...args) => normalizeUrl(urlFn(...args))
     : createGetUrl(baseUrl, i18n);
@@ -335,27 +339,25 @@ function createOutput(
 
   const storages = loadFiles(
     files,
-    {
-      buildFile(file) {
-        if (file.type === 'page') {
-          return {
-            format: 'page',
-            path: file.path,
-            slugs: file.slugs,
-            data: file.data,
-            absolutePath: file.absolutePath ?? '',
-          } as PageFile;
-        }
-
+    (file) => {
+      if (file.type === 'page') {
         return {
-          format: 'meta',
+          format: 'page',
           path: file.path,
-          absolutePath: file.absolutePath ?? '',
+          slugs: file.slugs,
           data: file.data,
-        } as MetaFile;
-      },
-      plugins: config.plugins,
+          absolutePath: file.absolutePath ?? '',
+        } as PageFile;
+      }
+
+      return {
+        format: 'meta',
+        path: file.path,
+        absolutePath: file.absolutePath ?? '',
+        data: file.data,
+      } as MetaFile;
     },
+    plugins,
     i18n ?? {
       defaultLanguage,
       parser: 'none',
@@ -372,8 +374,8 @@ function createOutput(
     get pageTree() {
       pageTree ??= builder.buildI18n({
         storages,
-        plugins: config.plugins,
-        ...config.pageTree,
+        plugins,
+        ...pageTreeConfig,
       });
 
       return i18n

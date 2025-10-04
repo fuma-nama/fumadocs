@@ -17,8 +17,8 @@ export interface LegacyLoaderOptions {
 }
 
 export interface LegacyPageTreeOptions<
-  Page extends PageData,
-  Meta extends MetaData,
+  Page extends PageData = PageData,
+  Meta extends MetaData = MetaData,
 > {
   /**
    * @deprecated use `plugins` instead
@@ -48,20 +48,18 @@ export interface LegacyPageTreeOptions<
 /**
  * legacy features compatibility layer
  */
-export function compatPlugin<Page extends PageData, Meta extends MetaData>(
-  loader: LegacyLoaderOptions,
-  pageTreeOptions?: LegacyPageTreeOptions<Page, Meta>,
-): LoaderPlugin<Page, Meta> {
+export function compatPlugin({
+  pageTree,
+  transformers,
+}: LegacyLoaderOptions & { pageTree?: LegacyPageTreeOptions }): LoaderPlugin {
   return {
     name: 'fumadocs:compat',
     config(config) {
-      const plugins = (
-        config.plugins ? [...config.plugins] : []
-      ) as LoaderPlugin<Page, Meta>[];
+      const plugins = config.plugins ? [...config.plugins] : [];
 
-      if (pageTreeOptions) {
+      if (pageTree) {
         const { attachFile, attachSeparator, attachFolder, transformers } =
-          pageTreeOptions;
+          pageTree;
 
         for (const transformer of transformers ?? []) {
           plugins.push(fromPageTreeTransformer(transformer));
@@ -103,15 +101,15 @@ export function compatPlugin<Page extends PageData, Meta extends MetaData>(
         );
       }
 
-      if (loader.transformers) {
-        for (const transformer of loader.transformers) {
+      if (transformers) {
+        for (const transformer of transformers) {
           plugins.push(fromStorageTransformer(transformer));
         }
       }
 
       return {
         ...config,
-        plugins: plugins as LoaderPlugin[],
+        plugins,
       };
     },
   };

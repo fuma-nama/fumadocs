@@ -12,7 +12,6 @@ export {
   loadFiles,
   type PageFile,
   type MetaFile,
-  type LoadOptions,
   type ContentStorage,
   type Transformer,
 } from './load-files';

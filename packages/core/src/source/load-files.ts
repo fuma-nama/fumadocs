@@ -5,11 +5,6 @@ import { basename, dirname, joinPath, slash, splitPath } from '@/source/path';
 import type { I18nConfig } from '@/i18n';
 import type { LoaderPlugin } from '@/source/plugins';
 
-export interface LoadOptions {
-  buildFile: (file: VirtualFile) => MetaFile | PageFile;
-  plugins?: LoaderPlugin[];
-}
-
 export type ContentStorage<
   Page extends PageData = PageData,
   Meta extends MetaData = MetaData,
@@ -71,10 +66,10 @@ const parsers = {
  */
 export function loadFiles(
   files: VirtualFile[],
-  options: LoadOptions,
+  buildFile: (file: VirtualFile) => MetaFile | PageFile,
+  plugins: LoaderPlugin[],
   i18n: I18nConfig,
 ): Record<string, ContentStorage> {
-  const { buildFile, plugins = [] } = options;
   const parser = parsers[i18n.parser ?? 'dot'];
   const storages: Record<string, ContentStorage> = {};
   const normalized = files.map((file) =>
