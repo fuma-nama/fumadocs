@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite';
-import { fumapress } from 'fumapress/dist/vite';
+import { fumapress } from 'fumapress/vite';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({

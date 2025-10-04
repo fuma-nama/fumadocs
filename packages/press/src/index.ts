@@ -1,2 +1,2 @@
-export * from './config/routes';
-export * from './config/global';
+export * from './config/routes.js';
+export * from './config/global.js';

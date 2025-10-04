@@ -1,5 +1,4 @@
 import type * as Vite from 'vite';
-import { createServer } from 'vite';
 
 export interface ViteDevOptions {
   clearScreen?: boolean;
@@ -27,6 +26,7 @@ export async function dev({
   port,
   strictPort,
 }: ViteDevOptions = {}) {
+  const { createServer } = await import('vite');
   const server = await createServer({
     mode,
     configFile,

@@ -1,20 +1,15 @@
-import {
-  mergeConfig,
-  type Plugin,
-  type PluginOption,
-  type UserConfig,
-} from 'vite';
+import { type Plugin, type PluginOption } from 'vite';
 import react from '@vitejs/plugin-react';
 import rsc from '@vitejs/plugin-rsc';
 import mdx from 'fumadocs-mdx/vite';
 import path from 'node:path';
-import * as MdxConfig from '../config/content';
-import { baseDir } from '../constants';
-import { findConfigPath, loadConfig } from '../lib/get-config';
-import type { FumapressConfig } from '../config/global';
-import { findFile } from '../lib/find-file';
+import * as MdxConfig from '../config/content.js';
+import { baseDir } from '../constants.js';
+import { findConfigPath, loadConfig } from '../lib/get-config.js';
+import type { FumapressConfig } from '../config/global.js';
+import { findFile } from '../lib/find-file.js';
 
-const mdxConfigPath = path.join(baseDir, 'src/config/fumadocs-mdx.ts');
+const mdxConfigPath = path.join(baseDir, 'dist/config/fumadocs-mdx.js');
 const extnames = ['.js', '.ts', '.jsx', '.tsx'];
 
 export function fumapress(): PluginOption[] {
@@ -22,33 +17,41 @@ export function fumapress(): PluginOption[] {
     react(),
     rsc({
       entries: {
-        client: path.join(baseDir, 'src/entry.browser.tsx'),
-        rsc: path.join(baseDir, 'src/entry.rsc.tsx'),
-        ssr: path.join(baseDir, 'src/entry.ssr.tsx'),
+        client: path.join(baseDir, 'dist/entry.browser.js'),
+        rsc: path.join(baseDir, 'dist/entry.rsc.js'),
+        ssr: path.join(baseDir, 'dist/entry.ssr.js'),
       },
     }),
-    mdx(MdxConfig, { configPath: mdxConfigPath, generateIndexFile: false }),
-    resolveDir(),
+    mdx(MdxConfig, {
+      configPath: mdxConfigPath,
+      generateIndexFile: false,
+      updateViteConfig: false,
+    }),
+    init(),
   ];
 }
 
-function resolveDir(): Plugin {
+function init(): Plugin {
   let configPath: string | null;
   let config: FumapressConfig;
   let routesPath: string | null;
 
   return {
-    name: 'fumapress/resolve-dir',
+    name: 'fumapress:init',
     enforce: 'pre',
-    config(config) {
-      return mergeConfig(config, {
-        resolve: {
-          noExternal: ['fumapress'],
-        },
-      } satisfies UserConfig);
+    configEnvironment(_name, config) {
+      if (config.optimizeDeps?.include) {
+        config.optimizeDeps.include = config.optimizeDeps.include.map(
+          (entry) => {
+            if (entry.startsWith('@vitejs/plugin-rsc')) {
+              entry = `fumapress > ${entry}`;
+            }
+            return entry;
+          },
+        );
+      }
     },
     async configResolved(v) {
-      console.log(v);
       configPath = await findConfigPath();
       config = await loadConfig(configPath);
 

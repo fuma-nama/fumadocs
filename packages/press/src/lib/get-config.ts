@@ -1,4 +1,4 @@
-import { defineConfig, type FumapressConfig } from '../config/global';
+import { defineConfig, type FumapressConfig } from '../config/global.js';
 import { glob } from 'tinyglobby';
 
 const DefaultConfig = defineConfig({});

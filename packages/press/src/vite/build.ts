@@ -1,4 +1,4 @@
-import { BuildOptions, createBuilder, LogLevel } from 'vite';
+import type { BuildOptions, LogLevel } from 'vite';
 
 export interface ViteBuildOptions {
   assetsInlineLimit?: number;
@@ -26,6 +26,8 @@ export async function viteBuild({
   sourcemapClient,
   sourcemapServer,
 }: ViteBuildOptions = {}) {
+  const { createBuilder } = await import('vite');
+
   try {
     const builder = await createBuilder({
       mode,

@@ -8,7 +8,7 @@ import {
 import { type Page, source } from '../../lib/source';
 import { baseOptions } from '../../lib/layout.shared';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
-import { ReactNode, useMemo } from 'react';
+import { type ReactNode } from 'react';
 import { HomeLayout } from 'fumadocs-ui/layouts/home';
 
 export default function ServerComponent({
@@ -37,7 +37,6 @@ export default function ServerComponent({
 
 function Layout({ page, children }: { page: Page; children: ReactNode }) {
   const layout = page.data.layout;
-  console.log(useMemo(() => 'test', []));
 
   if (layout === 'docs') {
     return (
@@ -48,7 +47,11 @@ function Layout({ page, children }: { page: Page; children: ReactNode }) {
   }
 
   if (layout === 'home') {
-    return <HomeLayout {...baseOptions()}>{children}</HomeLayout>;
+    return (
+      <HomeLayout {...baseOptions()}>
+        <div className="w-full max-w-fd-container mx-auto p-4">{children}</div>
+      </HomeLayout>
+    );
   }
 
   return children;

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { program } from 'commander';
-import { viteBuild } from '../vite/build';
-import { dev } from '../vite/dev';
+import { viteBuild } from '../vite/build.js';
+import { dev } from '../vite/dev.js';
 
 program.command('build').action(async () => {
   await viteBuild();

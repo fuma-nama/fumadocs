@@ -8,7 +8,7 @@ import {
 } from '@vitejs/plugin-rsc/rsc';
 import { unstable_matchRSCServerRequest as matchRSCServerRequest } from 'react-router';
 
-import { routes } from './routes/config';
+import { routes } from './routes/config.js';
 
 async function fetchServer(request: Request) {
   return matchRSCServerRequest({
@@ -35,7 +35,7 @@ async function fetchServer(request: Request) {
 export default async function handler(request: Request) {
   // Import the generateHTML function from the client environment
   const ssr = await import.meta.viteRsc.loadModule<
-    typeof import('./entry.ssr')
+    typeof import('./entry.ssr.js')
   >('ssr', 'index');
 
   return ssr.generateHTML(request, fetchServer);

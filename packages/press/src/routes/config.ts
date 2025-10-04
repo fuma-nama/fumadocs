@@ -1,11 +1,11 @@
 import type { unstable_RSCRouteConfig as RSCRouteConfig } from 'react-router';
+import config from 'virtual:app/routes';
 
 export async function routes() {
-  const { default: config } = await import('virtual:app/routes');
   const root = config.root ?? {
     id: 'root',
     path: '',
-    lazy: () => import('./root'),
+    lazy: () => import('./root/index.js'),
   };
 
   return [
@@ -15,12 +15,12 @@ export async function routes() {
         {
           id: 'docs',
           path: '*?',
-          lazy: () => import('./docs/page'),
+          lazy: () => import('./docs/page.js'),
         },
         {
           id: 'api/search',
           path: 'api/search',
-          lazy: () => import('./docs/search'),
+          lazy: () => import('./docs/search.js'),
         },
       ],
     },

@@ -1,7 +1,7 @@
 /// <reference types="fumadocs-mdx" />
 import { type InferPageType, loader } from 'fumadocs-core/source';
 import { fromConfig } from 'fumadocs-mdx/runtime/vite';
-import type * as Config from '../config/content';
+import type * as Config from '../config/content.js';
 
 export const create = fromConfig<typeof Config>();
 
@@ -31,7 +31,7 @@ export const docs = {
 
 export const source = loader({
   source: await create.sourceAsync(docs.doc, docs.meta),
-  baseUrl: '/docs',
+  baseUrl: '/',
 });
 
 export type Page = InferPageType<typeof source>;

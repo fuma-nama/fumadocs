@@ -37,6 +37,13 @@ export interface PluginOptions {
    * @defaultValue source.config.ts
    */
   configPath?: string;
+
+  /**
+   * Update Vite config to fix module resolution of Fumadocs
+   *
+   * @defaultValue true
+   */
+  updateViteConfig?: boolean;
 }
 
 export * from './postinstall';
@@ -45,7 +52,11 @@ export default function mdx(
   config: Record<string, unknown>,
   options: PluginOptions = {},
 ): Plugin {
-  const { generateIndexFile = true, configPath = 'source.config.ts' } = options;
+  const {
+    generateIndexFile = true,
+    updateViteConfig = true,
+    configPath = 'source.config.ts',
+  } = options;
   const loaded = buildConfig(config);
 
   const mdxLoader = toVite(createMdxLoader(resolvedConfig(loaded)));
@@ -102,6 +113,8 @@ export default function mdx(
     // needed, otherwise other plugins will be executed before our `transform`.
     enforce: 'pre',
     config(config) {
+      if (!updateViteConfig) return config;
+
       return mergeConfig(config, {
         optimizeDeps: {
           exclude: FumadocsDeps,
