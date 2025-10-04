@@ -20,7 +20,7 @@ import {
   parseFilePath,
 } from './path';
 import { normalizeUrl } from '@/utils/normalize-url';
-import { buildPlugins, type LoaderPlugins } from '@/source/plugins';
+import { buildPlugins, type LoaderPlugin } from '@/source/plugins';
 import { slugsPlugin } from '@/source/plugins/slugs';
 import {
   compatPlugin,
@@ -39,29 +39,42 @@ export interface SourceConfig {
   metaData: MetaData;
 }
 
-export type LoaderOptions<
-  Config extends SourceConfig = SourceConfig,
+export interface LoaderOptions<
+  S extends SourceConfig = SourceConfig,
   I18n extends I18nConfig | undefined = I18nConfig | undefined,
-> = BaseLoaderOptions<NoInfer<Config>> & {
-  source: Source<Config> | Source<Config>[];
-  /**
-   * Configure i18n
-   */
-  i18n?: I18n;
-};
-
-interface BaseLoaderOptions<Config extends SourceConfig>
-  extends LegacyLoaderOptions {
-  baseUrl: string;
-  icon?: IconResolver;
-  slugs?: (info: FileInfo) => string[];
-  url?: UrlFn;
+> extends Omit<ResolvedLoaderConfig<S, I18n>, 'plugins' | 'pageTree'>,
+    LegacyLoaderOptions {
   /**
    * Additional options for page tree builder
    */
   pageTree?: Partial<BaseOptions> &
-    LegacyPageTreeOptions<Config['pageData'], Config['metaData']>;
-  plugins?: LoaderPlugins<Config['pageData'], Config['metaData']>;
+    LegacyPageTreeOptions<NoInfer<S>['pageData'], NoInfer<S>['metaData']>;
+
+  plugins?: (
+    | LoaderPlugin<NoInfer<S>['pageData'], NoInfer<S>['metaData']>
+    | undefined
+  )[];
+
+  icon?: IconResolver;
+  slugs?: (info: FileInfo) => string[];
+}
+
+export interface ResolvedLoaderConfig<
+  S extends SourceConfig = SourceConfig,
+  I18n extends I18nConfig | undefined = I18nConfig | undefined,
+> {
+  source: Source<S> | Source<S>[];
+
+  /**
+   * Configure i18n
+   */
+  i18n?: I18n;
+
+  baseUrl: string;
+  url?: UrlFn;
+
+  pageTree?: Partial<BaseOptions>;
+  plugins?: LoaderPlugin<NoInfer<S>['pageData'], NoInfer<S>['metaData']>[];
 }
 
 export interface Source<Config extends SourceConfig> {
@@ -269,7 +282,7 @@ export function loader<
   i18n: I18n;
 }> {
   // @ts-expect-error -- forced type cast
-  return createOutput(options);
+  return createOutput(resolveConfig(options));
 }
 
 function loadSource<T extends SourceConfig>(source: Source<T> | Source<T>[]) {
@@ -286,27 +299,39 @@ function loadSource<T extends SourceConfig>(source: Source<T> | Source<T>[]) {
   return out;
 }
 
-function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
-  if (!options.url && !options.baseUrl) {
-    console.warn('`loader()` now requires a `baseUrl` option to be defined.');
+function resolveConfig({
+  slugs,
+  icon,
+  plugins = [],
+  ...base
+}: LoaderOptions): ResolvedLoaderConfig {
+  let config: ResolvedLoaderConfig = {
+    ...base,
+    plugins: buildPlugins([
+      slugsPlugin(slugs),
+      icon && iconPlugin(icon),
+      compatPlugin(base, base.pageTree),
+      ...plugins,
+    ]),
+  };
+
+  for (const plugin of config.plugins ?? []) {
+    const result = plugin.config?.(config);
+    if (result) config = result;
   }
 
-  const { source, baseUrl = '/', i18n, slugs: slugsFn, url: urlFn } = options;
+  return config;
+}
+
+function createOutput(
+  config: ResolvedLoaderConfig,
+): LoaderOutput<LoaderConfig> {
+  const { source, baseUrl = '/', url: urlFn, i18n } = config;
   const getUrl: UrlFn = urlFn
     ? (...args) => normalizeUrl(urlFn(...args))
     : createGetUrl(baseUrl, i18n);
   const defaultLanguage = i18n?.defaultLanguage ?? '';
   const files = loadSource(source);
-  const plugins = [slugsPlugin(slugsFn)];
-  if (options.icon) {
-    plugins.push(iconPlugin(options.icon));
-  }
-  if (options.plugins) {
-    plugins.push(...buildPlugins(options.plugins));
-  }
-  if (options.pageTree) {
-    plugins.push(...compatPlugin(options, options.pageTree));
-  }
 
   const storages = loadFiles(
     files,
@@ -329,7 +354,7 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
           data: file.data,
         } as MetaFile;
       },
-      plugins,
+      plugins: config.plugins,
     },
     i18n ?? {
       defaultLanguage,
@@ -347,8 +372,8 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
     get pageTree() {
       pageTree ??= builder.buildI18n({
         storages,
-        plugins,
-        ...options.pageTree,
+        plugins: config.plugins,
+        ...config.pageTree,
       });
 
       return i18n
@@ -398,9 +423,9 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
     },
     getLanguages() {
       const list: LanguageEntry[] = [];
-      if (!options.i18n) return list;
+      if (!i18n) return list;
 
-      for (const language of options.i18n.languages) {
+      for (const language of i18n.languages) {
         list.push({
           language,
           pages: this.getPages(language),
@@ -425,7 +450,7 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
       return walker.pathToPage.get(`${language}.${ref}`);
     },
     getPageTree(locale) {
-      if (options.i18n) {
+      if (i18n) {
         return this.pageTree[
           (locale ?? defaultLanguage) as keyof typeof pageTree
         ];
@@ -435,7 +460,7 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
     },
     // @ts-expect-error -- ignore this
     generateParams(slug, lang) {
-      if (options.i18n) {
+      if (i18n) {
         return this.getLanguages().flatMap((entry) =>
           entry.pages.map((page) => ({
             [slug ?? 'slug']: page.slugs,

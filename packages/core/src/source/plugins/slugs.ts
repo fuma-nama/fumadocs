@@ -1,5 +1,5 @@
 import { type FileInfo, getSlugs, parseFilePath } from '@/source';
-import type { LoaderPlugin } from '@/source/plugins/index';
+import type { LoaderPlugin } from '@/source/plugins';
 import { basename, extname } from '@/source/path';
 
 /**
@@ -13,6 +13,7 @@ export function slugsPlugin(
   }
 
   return {
+    name: 'fumadocs:slugs',
     transformStorage({ storage }) {
       const indexFiles = new Set<string>();
       const taken = new Set<string>();

@@ -29,8 +29,6 @@ export interface PageTreeTransformer<
   Page extends PageData = PageData,
   Meta extends MetaData = MetaData,
 > {
-  name?: string;
-
   file?: (
     this: PageTreeBuilderContext<Page, Meta>,
     node: PageTree.Item,

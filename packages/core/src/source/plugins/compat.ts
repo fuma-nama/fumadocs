@@ -50,56 +50,71 @@ export interface LegacyPageTreeOptions<
  */
 export function compatPlugin<Page extends PageData, Meta extends MetaData>(
   loader: LegacyLoaderOptions,
-  {
-    attachFile,
-    attachSeparator,
-    attachFolder,
-    transformers,
-  }: LegacyPageTreeOptions<Page, Meta>,
-) {
-  const chunk: LoaderPlugin<Page, Meta>[] = [];
-  chunk.push({
-    transformPageTree: {
-      file(node, file) {
-        if (!attachFile) return node;
-        const content = file ? this.storage.read(file) : undefined;
+  pageTreeOptions?: LegacyPageTreeOptions<Page, Meta>,
+): LoaderPlugin<Page, Meta> {
+  return {
+    name: 'fumadocs:compat',
+    config(config) {
+      const plugins = (
+        config.plugins ? [...config.plugins] : []
+      ) as LoaderPlugin<Page, Meta>[];
 
-        return attachFile(
-          node,
-          content?.format === 'page' ? content : undefined,
+      if (pageTreeOptions) {
+        const { attachFile, attachSeparator, attachFolder, transformers } =
+          pageTreeOptions;
+
+        for (const transformer of transformers ?? []) {
+          plugins.push(fromPageTreeTransformer(transformer));
+        }
+
+        plugins.push(
+          fromPageTreeTransformer({
+            file(node, file) {
+              if (!attachFile) return node;
+              const content = file ? this.storage.read(file) : undefined;
+
+              return attachFile(
+                node,
+                content?.format === 'page' ? content : undefined,
+              );
+            },
+            folder(node, folderPath, metaPath) {
+              if (!attachFolder) return node;
+
+              const files = this.storage.readDir(folderPath) ?? [];
+              const meta = metaPath ? this.storage.read(metaPath) : undefined;
+
+              return attachFolder(
+                node,
+                {
+                  children: files.flatMap(
+                    (file) => this.storage.read(file) ?? [],
+                  ),
+                },
+                meta?.format === 'meta' ? meta : undefined,
+              );
+            },
+            separator(node) {
+              if (!attachSeparator) return node;
+
+              return attachSeparator(node);
+            },
+          }),
         );
-      },
-      folder(node, folderPath, metaPath) {
-        if (!attachFolder) return node;
+      }
 
-        const files = this.storage.readDir(folderPath) ?? [];
-        const meta = metaPath ? this.storage.read(metaPath) : undefined;
+      if (loader.transformers) {
+        for (const transformer of loader.transformers) {
+          plugins.push(fromStorageTransformer(transformer));
+        }
+      }
 
-        return attachFolder(
-          node,
-          {
-            children: files.flatMap((file) => this.storage.read(file) ?? []),
-          },
-          meta?.format === 'meta' ? meta : undefined,
-        );
-      },
-      separator(node) {
-        if (!attachSeparator) return node;
-
-        return attachSeparator(node);
-      },
+      return {
+        ...config,
+        plugins: plugins as LoaderPlugin[],
+      };
     },
-  });
-
-  for (const transformer of loader.transformers ?? []) {
-    chunk.push(fromStorageTransformer(transformer));
-  }
-
-  for (const transformer of transformers ?? []) {
-    chunk.push(fromPageTreeTransformer(transformer));
-  }
-
-  return chunk;
+  };
 }
 
 function fromPageTreeTransformer<Page extends PageData, Meta extends MetaData>(
