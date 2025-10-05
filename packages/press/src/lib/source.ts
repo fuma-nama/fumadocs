@@ -1,9 +1,9 @@
 /// <reference types="fumadocs-mdx" />
 import { type InferPageType, loader } from 'fumadocs-core/source';
 import { fromConfig } from 'fumadocs-mdx/runtime/vite';
-import type * as Config from '../config/content.js';
+import type { FumadocsMDXConfig } from '../config/content.js';
 
-export const create = fromConfig<typeof Config>();
+export const create = fromConfig<FumadocsMDXConfig>();
 
 export const docs = {
   doc: create.doc(

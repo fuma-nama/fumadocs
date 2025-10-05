@@ -8,9 +8,6 @@
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["./app/*"]
-    },
     "esModuleInterop": true,
     "verbatimModuleSyntax": true,
     "noEmit": true,

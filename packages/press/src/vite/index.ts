@@ -3,16 +3,18 @@ import react from '@vitejs/plugin-react';
 import rsc from '@vitejs/plugin-rsc';
 import mdx from 'fumadocs-mdx/vite';
 import path from 'node:path';
-import * as MdxConfig from '../config/content.js';
+import { createContentConfig } from '../config/content.js';
 import { baseDir } from '../constants.js';
-import { findConfigPath, loadConfig } from '../lib/get-config.js';
-import type { FumapressConfig } from '../config/global.js';
+import { defineConfig, FumapressConfig } from '../config/global.js';
 import { findFile } from '../lib/find-file.js';
 
-const mdxConfigPath = path.join(baseDir, 'dist/config/fumadocs-mdx.js');
 const extnames = ['.js', '.ts', '.jsx', '.tsx'];
 
-export function fumapress(): PluginOption[] {
+export async function fumapress(
+  config: Partial<FumapressConfig> = {},
+): Promise<PluginOption[]> {
+  const resolved = defineConfig(config);
+
   return [
     react(),
     rsc({
@@ -22,18 +24,15 @@ export function fumapress(): PluginOption[] {
         ssr: path.join(baseDir, 'dist/entry.ssr.js'),
       },
     }),
-    mdx(MdxConfig, {
-      configPath: mdxConfigPath,
+    mdx(await createContentConfig(resolved), {
       generateIndexFile: false,
       updateViteConfig: false,
     }),
-    init(),
+    init(null, resolved),
   ];
 }
 
-function init(): Plugin {
-  let configPath: string | null;
-  let config: FumapressConfig;
+function init(configPath: string | null, config: FumapressConfig): Plugin {
   let routesPath: string | null;
 
   return {
@@ -51,10 +50,7 @@ function init(): Plugin {
         );
       }
     },
-    async configResolved(v) {
-      configPath = await findConfigPath();
-      config = await loadConfig(configPath);
-
+    async configResolved() {
       const name = path.join(config.appDir, 'routes');
       routesPath = (await findFile(extnames.map((ext) => name + ext))) ?? null;
     },
