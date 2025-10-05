@@ -3,7 +3,7 @@ export {
   type PageTreeTransformer,
   type PageTreeBuilder,
   type PageTreeBuilderContext,
-  type BaseOptions,
+  type PageTreeOptions,
 } from '@/source/page-tree/builder';
 export * from './loader';
 export { FileSystem } from './file-system';

@@ -33,23 +33,36 @@ export class FileSystem<File> {
   }
 
   write(path: string, file: File): void {
-    if (this.files.has(path)) {
-      this.files.set(path, file);
-      return;
+    if (!this.files.has(path)) {
+      const dir = dirname(path);
+      this.makeDir(dir);
+      this.readDir(dir)?.push(path);
     }
 
-    const dir = dirname(path);
-    this.makeDir(dir);
-    this.readDir(dir)?.push(path);
     this.files.set(path, file);
   }
 
-  delete(path: string) {
-    return this.files.delete(path);
-  }
+  /**
+   * Delete files at specified path.
+   *
+   * @param path - the target path.
+   * @param [recursive=false] - if set to `true`, it will also delete directories.
+   */
+  delete(path: string, recursive = false): boolean {
+    if (this.files.delete(path)) return true;
 
-  deleteDir(path: string) {
-    return this.folders.delete(path);
+    if (recursive) {
+      const folder = this.folders.get(path);
+      if (!folder) return false;
+
+      this.folders.delete(path);
+      for (const child of folder) {
+        this.delete(child);
+      }
+      return true;
+    }
+
+    return false;
   }
 
   getFiles(): string[] {

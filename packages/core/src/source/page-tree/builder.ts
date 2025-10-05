@@ -13,7 +13,7 @@ export interface PageTreeBuilderContext<
    * @internal resolve paths without extensions
    */
   resolveName: (name: string, format: 'meta' | 'page') => string;
-  options: BaseOptions;
+  options: PageTreeOptions;
   transformers: PageTreeTransformer<Page, Meta>[];
 
   builder: PageTreeBuilder;
@@ -50,7 +50,7 @@ export interface PageTreeTransformer<
   ) => PageTree.Root;
 }
 
-export interface BaseOptions {
+export interface PageTreeOptions {
   id?: string;
   /**
    * Remove references to the file path of original nodes (`$ref`)
@@ -58,7 +58,6 @@ export interface BaseOptions {
    * @defaultValue false
    */
   noRef?: boolean;
-  plugins?: LoaderPlugin[];
   /**
    * generate fallback page tree
    *
@@ -68,19 +67,11 @@ export interface BaseOptions {
 }
 
 export interface PageTreeBuilder {
-  build: (
-    options: BaseOptions & {
-      storage: ContentStorage;
-    },
-  ) => PageTree.Root;
+  build: (storage: ContentStorage, options?: PageTreeOptions) => PageTree.Root;
 
-  /**
-   * Build page tree and fallback to the default language if the localized page doesn't exist
-   */
   buildI18n: (
-    options: BaseOptions & {
-      storages: Record<string, ContentStorage>;
-    },
+    storages: Record<string, ContentStorage>,
+    options?: PageTreeOptions,
   ) => Record<string, PageTree.Root>;
 }
 
@@ -220,13 +211,7 @@ function buildFolderNode(
     index = buildFileNode(indexPath, ctx);
   }
 
-  if (!meta?.data.pages) {
-    setIndexIfUnused();
-    children = buildAll(
-      files.filter((file) => !ctx.visitedPaths.has(file)),
-      ctx,
-    );
-  } else {
+  if (meta && meta.data.pages) {
     const resolved = meta.data.pages.flatMap<
       PageTree.Node | typeof rest | typeof restReversed
     >((item, i) => resolveFolderItem(folderPath, item, ctx, i));
@@ -247,6 +232,12 @@ function buildFolderNode(
     }
 
     children = resolved as PageTree.Node[];
+  } else {
+    setIndexIfUnused();
+    children = buildAll(
+      files.filter((file) => !ctx.visitedPaths.has(file)),
+      ctx,
+    );
   }
 
   let name = meta?.data.title ?? index?.name;
@@ -329,11 +320,14 @@ function build(id: string, ctx: PageTreeBuilderContext): PageTree.Root {
   return root;
 }
 
-export function createPageTreeBuilder(getUrl: UrlFn): PageTreeBuilder {
-  function getTransformers(options: BaseOptions, generateFallback: boolean) {
+export function createPageTreeBuilder(
+  getUrl: UrlFn,
+  plugins?: LoaderPlugin[],
+): PageTreeBuilder {
+  function getTransformers(generateFallback: boolean) {
     const transformers: PageTreeTransformer[] = [];
 
-    for (const plugin of options.plugins ?? []) {
+    for (const plugin of plugins ?? []) {
       if (plugin.transformPageTree) transformers.push(plugin.transformPageTree);
     }
 
@@ -360,17 +354,13 @@ export function createPageTreeBuilder(getUrl: UrlFn): PageTreeBuilder {
   }
 
   return {
-    build({ storage, id, ...options }) {
+    build(storage, options) {
       const key = '';
-
-      return this.buildI18n({
-        id,
-        storages: { [key]: storage },
-        ...options,
-      })[key];
+      return this.buildI18n({ [key]: storage }, options)[key];
     },
-    buildI18n({ id, storages, generateFallback = true, ...options }) {
-      const transformers = getTransformers(options, generateFallback);
+    buildI18n(storages, options = {}) {
+      const { id, generateFallback = true } = options;
+      const transformers = getTransformers(generateFallback);
       const out: Record<string, PageTree.Root> = {};
 
       for (const [locale, storage] of Object.entries(storages)) {

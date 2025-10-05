@@ -8,8 +8,8 @@ import {
 } from './load-files';
 import type { MetaData, PageData, UrlFn } from './types';
 import {
-  type BaseOptions,
   createPageTreeBuilder,
+  type PageTreeOptions,
 } from '@/source/page-tree/builder';
 import {
   basename,
@@ -47,7 +47,7 @@ export interface LoaderOptions<
   /**
    * Additional options for page tree builder
    */
-  pageTree?: Partial<BaseOptions> &
+  pageTree?: PageTreeOptions &
     LegacyPageTreeOptions<NoInfer<S>['pageData'], NoInfer<S>['metaData']>;
 
   plugins?: (
@@ -73,7 +73,7 @@ export interface ResolvedLoaderConfig<
   baseUrl: string;
   url?: UrlFn;
 
-  pageTree?: Partial<BaseOptions>;
+  pageTree?: PageTreeOptions;
   plugins?: LoaderPlugin<NoInfer<S>['pageData'], NoInfer<S>['metaData']>[];
 }
 
@@ -366,17 +366,13 @@ function createOutput({
   );
 
   const walker = indexPages(storages, getUrl);
-  const builder = createPageTreeBuilder(getUrl);
+  const builder = createPageTreeBuilder(getUrl, plugins);
   let pageTree: Record<string, PageTree.Root> | undefined;
 
   return {
     _i18n: i18n,
     get pageTree() {
-      pageTree ??= builder.buildI18n({
-        storages,
-        plugins,
-        ...pageTreeConfig,
-      });
+      pageTree ??= builder.buildI18n(storages, pageTreeConfig);
 
       return i18n
         ? (pageTree as unknown as LoaderOutput<LoaderConfig>['pageTree'])
