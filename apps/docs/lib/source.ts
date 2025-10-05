@@ -8,6 +8,7 @@ import { openapiPlugin } from 'fumadocs-openapi/server';
 import { blog as blogPosts, docs } from '@/.source';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 import { openapi } from '@/lib/openapi';
+import { APIPage } from 'fumadocs-openapi/ui';
 
 export const source = loader(docs.toFumadocsSource(), {
   baseUrl: '/docs',
@@ -15,6 +16,7 @@ export const source = loader(docs.toFumadocsSource(), {
     lucideIconsPlugin(),
     await openapiPlugin.withPages({
       from: openapi,
+      APIPage,
       baseDir: 'openapi/(generated)',
     }),
   ],

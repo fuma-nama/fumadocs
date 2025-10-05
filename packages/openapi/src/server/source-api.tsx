@@ -8,9 +8,12 @@ import type {
 } from 'fumadocs-core/source';
 import type { OpenAPIServer } from '@/server/create';
 import type { SchemaToPagesOptions } from '@/utils/schema-to-pages';
+import type { FC } from 'react';
+import type { ApiPageProps } from '@/render/api-page';
 
 export type WithPagesOptions = SchemaToPagesOptions & {
   from: OpenAPIServer;
+  APIPage: FC<ApiPageProps>;
   baseDir?: string;
 };
 
@@ -65,14 +68,15 @@ export function openapiPlugin(): LoaderPlugin {
 /**
  * Generate virtual pages
  */
-openapiPlugin.withPages = async (
-  options: WithPagesOptions,
-): Promise<LoaderPlugin> => {
-  const { from, baseDir = '' } = options;
-
+openapiPlugin.withPages = async ({
+  from,
+  baseDir = '',
+  APIPage,
+  ...base
+}: WithPagesOptions): Promise<LoaderPlugin> => {
   const { serverToPages } = await import('@/utils/schema-to-pages');
   const { toBody } = await import('@/utils/pages/to-body');
-  const entries = await serverToPages(from, options);
+  const entries = await serverToPages(from, base);
   const plugin = openapiPlugin();
   let loaderConfig: ResolvedLoaderConfig;
   plugin.config = (loaded) => {
@@ -102,7 +106,7 @@ openapiPlugin.withPages = async (
                   : undefined,
             },
           },
-          body: toBody(from, page),
+          body: toBody(from, APIPage, page),
         }),
         path: page.path,
         absolutePath: '',
