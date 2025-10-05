@@ -4,8 +4,9 @@ export {
   type PageTreeBuilder,
   type PageTreeBuilderContext,
   type PageTreeOptions,
-} from '@/source/page-tree/builder';
+} from './page-tree/builder';
 export * from './loader';
+export * from './virtual-page';
 export { FileSystem } from './file-system';
 
 export {

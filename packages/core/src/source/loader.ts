@@ -316,7 +316,12 @@ function resolveConfig(
   if (Array.isArray(source)) {
     mergedSource = { files: [] };
     for (const item of source) {
-      mergedSource.files.push(...item.files);
+      mergedSource.files.push(
+        // TODO: remove on v16
+        ...(typeof item.files === 'function'
+          ? (item.files as () => VirtualFile[])()
+          : item.files),
+      );
       mergedSource.fromVirtualMeta ??= item.fromVirtualMeta;
       mergedSource.fromVirtualPage ??= item.fromVirtualPage;
     }

@@ -19,7 +19,9 @@ export interface LoaderPlugin<
   /**
    * receive & replace loader options
    */
-  config?: (config: ResolvedLoaderConfig) => ResolvedLoaderConfig | undefined;
+  config?: (
+    config: ResolvedLoaderConfig,
+  ) => ResolvedLoaderConfig | void | undefined;
 
   /**
    * transform the storage after loading

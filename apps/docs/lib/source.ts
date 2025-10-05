@@ -7,16 +7,21 @@ import {
 import { openapiPlugin } from 'fumadocs-openapi/server';
 import { blog as blogPosts, docs } from '@/.source';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
+import { openapi } from '@/lib/openapi';
 
-export const source = loader({
+export const source = loader(docs.toFumadocsSource(), {
   baseUrl: '/docs',
-  source: docs.toFumadocsSource(),
-  plugins: [lucideIconsPlugin(), openapiPlugin()],
+  plugins: [
+    lucideIconsPlugin(),
+    await openapiPlugin.withPages({
+      from: openapi,
+      baseDir: 'openapi/(generated)',
+    }),
+  ],
 });
 
-export const blog = loader({
+export const blog = loader(createMDXSource(blogPosts), {
   baseUrl: '/blog',
-  source: createMDXSource(blogPosts),
 });
 
 export type Page = InferPageType<typeof source>;

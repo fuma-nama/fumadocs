@@ -7,7 +7,12 @@ import {
 import type { DocOut, MetaOut, Runtime } from './types';
 import type { CompiledMDXProperties } from '@/loaders/mdx/build-mdx';
 import * as fs from 'node:fs/promises';
-import { type FileInfo, missingProcessedMarkdown } from '@/runtime/shared';
+import {
+  type FileInfo,
+  fromVirtualPage,
+  fromVirtualPageLazy,
+  missingProcessedMarkdown,
+} from '@/runtime/shared';
 
 export const _runtime: Runtime = {
   doc(files) {
@@ -67,16 +72,17 @@ export function createMDXSource<
 >(
   docs: Doc[],
   meta: Meta[] = [],
+  lazy = false,
 ): Source<{
   pageData: Doc;
   metaData: Meta;
 }> {
   return {
-    files: () =>
-      resolveFiles({
-        docs,
-        meta,
-      }),
+    files: resolveFiles({
+      docs,
+      meta,
+    }),
+    fromVirtualPage: lazy ? fromVirtualPageLazy : fromVirtualPage,
   };
 }
 

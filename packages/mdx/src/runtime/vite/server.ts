@@ -12,6 +12,8 @@ import {
   type DocCollectionEntry,
   type DocData,
   type FileInfo,
+  fromVirtualPage,
+  fromVirtualPageLazy,
   type MetaCollectionEntry,
   missingProcessedMarkdown,
 } from '@/runtime/shared';
@@ -144,7 +146,10 @@ export function fromConfig<Config>(): ServerCreate<Config> {
         }),
       ];
 
-      return { files: await Promise.all(virtualFiles) };
+      return {
+        files: await Promise.all(virtualFiles),
+        fromVirtualPage: fromVirtualPage,
+      };
     },
     async sourceLazy(doc, meta) {
       const virtualFiles: Promise<VirtualFile>[] = [
@@ -170,7 +175,10 @@ export function fromConfig<Config>(): ServerCreate<Config> {
         }),
       ];
 
-      return { files: await Promise.all(virtualFiles) };
+      return {
+        files: await Promise.all(virtualFiles),
+        fromVirtualPage: fromVirtualPageLazy,
+      };
     },
   };
 }

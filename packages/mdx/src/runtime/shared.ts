@@ -3,6 +3,7 @@ import type { TableOfContents } from 'fumadocs-core/server';
 import type { FC } from 'react';
 import type { MDXProps } from 'mdx/types';
 import type { ExtractedReference } from '@/loaders/mdx/remark-postprocess';
+import type { PageData, VirtualPage } from 'fumadocs-core/source';
 
 export interface FileInfo {
   /**
@@ -90,4 +91,48 @@ export function missingProcessedMarkdown(): never {
   throw new Error(
     "getText('processed') requires `includeProcessedMarkdown` to be enabled in your collection config.",
   );
+}
+
+export function fromVirtualPage<T extends PageData>(
+  page: VirtualPage,
+): DocCollectionEntry<T> {
+  return {
+    ...(page.data as T),
+    body: page.body,
+    _exports: {},
+    info: {
+      path: page.path,
+      fullPath: `virtual:${page.path}`,
+    },
+    toc: [],
+    structuredData: {
+      headings: [],
+      contents: [],
+    },
+    getText: async () => '',
+  } as DocCollectionEntry<T>;
+}
+
+export function fromVirtualPageLazy<T extends PageData>(
+  page: VirtualPage,
+): AsyncDocCollectionEntry<T> {
+  return {
+    ...(page.data as T),
+    info: {
+      path: page.path,
+      fullPath: `virtual:${page.path}`,
+    },
+    getText: async () => '',
+    async load() {
+      return {
+        toc: [],
+        body: page.body,
+        _exports: {},
+        structuredData: {
+          headings: [],
+          contents: [],
+        },
+      };
+    },
+  };
 }
