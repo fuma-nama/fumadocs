@@ -5,12 +5,11 @@ import type {
   RenderContext,
   SecuritySchemeObject,
 } from '@/types';
-import { type ResolvedSchema } from '@/utils/schema';
+import { createMethod, type ResolvedSchema } from '@/utils/schema';
 import { idToTitle } from '@/utils/id-to-title';
 import { Markdown } from '../markdown';
 import { heading } from '../heading';
 import { Schema } from '../schema';
-import { createMethod } from '@/server/create-method';
 import { methodKeys } from '@/build-routes';
 import {
   APIExample,

@@ -1,7 +1,7 @@
 import Slugger from 'github-slugger';
 import { Operation } from '@/render/operation';
 import type { RenderContext } from '@/types';
-import { createMethod } from '@/server/create-method';
+import { createMethod } from '@/utils/schema';
 import { createRenders } from '@/render/renderer';
 import type { OpenAPIV3_1 } from 'openapi-types';
 import {

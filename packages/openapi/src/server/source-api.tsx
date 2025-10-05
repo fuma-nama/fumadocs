@@ -14,6 +14,17 @@ export type WithPagesOptions = SchemaToPagesOptions & {
   baseDir?: string;
 };
 
+declare module 'fumadocs-core/source' {
+  export interface PageData {
+    /**
+     * Added by Fumadocs OpenAPI
+     */
+    _openapi?: {
+      method?: string;
+    };
+  }
+}
+
 /**
  * Fumadocs Source API integration, pass this to `plugins` array in `loader()`.
  */
@@ -31,11 +42,7 @@ export function openapiPlugin(): LoaderPlugin {
         let method: string | undefined;
 
         if ('_openapi' in data && typeof data._openapi === 'object') {
-          const meta = data._openapi as {
-            method?: string;
-          };
-
-          method = meta.method;
+          method = data._openapi.method;
         }
 
         if (method) {
@@ -81,11 +88,20 @@ openapiPlugin.withPages = async (
 
     for (const page of Object.values(entries).flat()) {
       const path = `${baseDir}/${page.path}`;
+
       storage.write(path, {
         format: 'page',
         data: loaderConfig.source.fromVirtualPage({
           path,
-          data: page.info,
+          data: {
+            ...page.info,
+            _openapi: {
+              method:
+                page.type === 'operation' || page.type === 'webhook'
+                  ? page.item.method
+                  : undefined,
+            },
+          },
           body: toBody(from, page),
         }),
         path: page.path,

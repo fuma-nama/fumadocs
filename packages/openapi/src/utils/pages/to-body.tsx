@@ -10,19 +10,11 @@ const APIPageDefault = lazy(() =>
 );
 
 export function toBody(server: OpenAPIServer, entry: OutputEntry): FC<unknown> {
-  return (props) => {
-    const {
-      components: {
-        APIPage = (props: ApiPageProps) => (
-          <APIPageDefault {...server.getAPIPageProps(props)} />
-        ),
-      } = {},
-    } = props as {
-      components?: {
-        APIPage?: FC<ApiPageProps>;
-      };
-    };
+  const APIPage = (props: ApiPageProps) => (
+    <APIPageDefault {...server.getAPIPageProps(props)} />
+  );
 
+  return function body() {
     if (entry.type === 'operation')
       return (
         <APIPage

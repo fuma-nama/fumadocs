@@ -1,5 +1,11 @@
 import type { JSONSchema } from 'json-schema-typed/draft-2020-12';
-import type { ReferenceObject, TagObject } from '@/types';
+import type {
+  MethodInformation,
+  OperationObject,
+  PathItemObject,
+  ReferenceObject,
+  TagObject,
+} from '@/types';
 import { idToTitle } from '@/utils/id-to-title';
 
 export type NoReference<T> = T extends (infer I)[]
@@ -33,4 +39,21 @@ export function getTagDisplayName(tag: TagObject): string {
   return 'x-displayName' in tag && typeof tag['x-displayName'] === 'string'
     ? tag['x-displayName']
     : idToTitle(tag.name);
+}
+
+/**
+ * Summarize method endpoint information
+ */
+export function createMethod(
+  method: string,
+  path: NoReference<PathItemObject>,
+  operation: NoReference<OperationObject>,
+): MethodInformation {
+  return {
+    description: path.description,
+    summary: path.summary,
+    ...operation,
+    parameters: [...(operation.parameters ?? []), ...(path.parameters ?? [])],
+    method: method.toUpperCase(),
+  };
 }
