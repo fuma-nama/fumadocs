@@ -73,19 +73,13 @@ export type MetaCollectionEntry<Data> = Data & {
   info: FileInfo;
 };
 
-export type DocCollectionEntry<Frontmatter> = Override<
-  DocData & DocMethods,
-  Frontmatter
->;
+export type DocCollectionEntry<Frontmatter> = DocData &
+  DocMethods &
+  Frontmatter;
 
-export type AsyncDocCollectionEntry<Frontmatter> = Override<
-  DocMethods & {
-    load: () => Promise<DocData>;
-  },
-  Frontmatter
->;
-
-export type Override<A, B> = Omit<A, keyof B> & B;
+export type AsyncDocCollectionEntry<Frontmatter> = DocMethods & {
+  load: () => Promise<DocData>;
+} & Frontmatter;
 
 export function missingProcessedMarkdown(): never {
   throw new Error(
@@ -110,7 +104,7 @@ export function fromVirtualPage<T extends PageData>(
       contents: [],
     },
     getText: async () => '',
-  } as DocCollectionEntry<T>;
+  };
 }
 
 export function fromVirtualPageLazy<T extends PageData>(
