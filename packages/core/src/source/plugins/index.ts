@@ -32,28 +32,24 @@ export interface LoaderPlugin<
   transformPageTree?: PageTreeTransformer<Page, Meta>;
 }
 
-export function buildPlugins<Page extends PageData, Meta extends MetaData>(
-  plugins: (LoaderPlugin<Page, Meta> | undefined)[],
-): LoaderPlugin<Page, Meta>[] {
-  const out: LoaderPlugin<Page, Meta>[] = [];
+const priorityMap = {
+  pre: 1,
+  default: 0,
+  post: -1,
+};
+
+export function buildPlugins(
+  plugins: (LoaderPlugin | LoaderPlugin[] | undefined)[],
+): LoaderPlugin[] {
+  const flatten: LoaderPlugin[] = [];
 
   for (const plugin of plugins) {
-    if (plugin && plugin.enforce === 'pre') {
-      out.push(plugin);
-    }
+    if (Array.isArray(plugin)) flatten.push(...plugin);
+    else if (plugin) flatten.push(plugin);
   }
 
-  for (const plugin of plugins) {
-    if (plugin && plugin.enforce === undefined) {
-      out.push(plugin);
-    }
-  }
-
-  for (const plugin of plugins) {
-    if (plugin && plugin.enforce === 'post') {
-      out.push(plugin);
-    }
-  }
-
-  return out;
+  return flatten.sort(
+    (a, b) =>
+      priorityMap[b.enforce ?? 'default'] - priorityMap[a.enforce ?? 'default'],
+  );
 }

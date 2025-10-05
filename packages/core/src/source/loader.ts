@@ -28,6 +28,7 @@ import {
   type LegacyPageTreeOptions,
 } from '@/source/plugins/compat';
 import { iconPlugin, type IconResolver } from '@/source/plugins/icon';
+import type { VirtualMeta, VirtualPage } from '@/source/virtual-page';
 
 export interface LoaderConfig {
   source: SourceConfig;
@@ -42,16 +43,20 @@ export interface SourceConfig {
 export interface LoaderOptions<
   S extends SourceConfig = SourceConfig,
   I18n extends I18nConfig | undefined = I18nConfig | undefined,
-> extends Omit<ResolvedLoaderConfig<S, I18n>, 'plugins' | 'pageTree'>,
-    LegacyLoaderOptions {
+> extends LegacyLoaderOptions {
+  baseUrl: string;
+  i18n?: I18n;
+  url?: UrlFn;
+
   /**
    * Additional options for page tree builder
    */
   pageTree?: PageTreeOptions &
-    LegacyPageTreeOptions<NoInfer<S>['pageData'], NoInfer<S>['metaData']>;
+    LegacyPageTreeOptions<S['pageData'], S['metaData']>;
 
   plugins?: (
-    | LoaderPlugin<NoInfer<S>['pageData'], NoInfer<S>['metaData']>
+    | LoaderPlugin<S['pageData'], S['metaData']>
+    | LoaderPlugin<S['pageData'], S['metaData']>[]
     | undefined
   )[];
 
@@ -59,30 +64,19 @@ export interface LoaderOptions<
   slugs?: (info: FileInfo) => string[];
 }
 
-export interface ResolvedLoaderConfig<
-  S extends SourceConfig = SourceConfig,
-  I18n extends I18nConfig | undefined = I18nConfig | undefined,
-> {
-  source: Source<S> | Source<S>[];
+export interface ResolvedLoaderConfig {
+  source: Source;
+  url: UrlFn;
 
-  /**
-   * Configure i18n
-   */
-  i18n?: I18n;
-
-  baseUrl: string;
-  url?: UrlFn;
-
+  plugins?: LoaderPlugin[];
   pageTree?: PageTreeOptions;
-  plugins?: LoaderPlugin<NoInfer<S>['pageData'], NoInfer<S>['metaData']>[];
+  i18n?: I18nConfig | undefined;
 }
 
-export interface Source<Config extends SourceConfig> {
-  /**
-   * @internal
-   */
-  _config?: Config;
-  files: VirtualFile[] | (() => VirtualFile[]);
+export interface Source<Config extends SourceConfig = SourceConfig> {
+  files: VirtualFile[];
+  fromVirtualPage?: (page: VirtualPage) => Config['pageData'];
+  fromVirtualMeta?: (page: VirtualMeta) => Config['metaData'];
 }
 
 interface SharedFileInfo {
@@ -101,7 +95,7 @@ interface SharedFileInfo {
   path: string;
 
   /**
-   * Absolute path of the file
+   * Absolute path of the file (can be empty)
    */
   absolutePath: string;
 }
@@ -138,11 +132,6 @@ export interface Page<Data = PageData> extends SharedFileInfo {
 
 export interface Meta<Data = MetaData> extends SharedFileInfo {
   data: Data;
-}
-
-export interface LanguageEntry<Data = PageData> {
-  language: string;
-  pages: Page<Data>[];
 }
 
 export interface LoaderOutput<Config extends LoaderConfig> {
@@ -183,7 +172,10 @@ export interface LoaderOutput<Config extends LoaderConfig> {
   /**
    * get each language and its pages, empty if i18n is not enabled.
    */
-  getLanguages: () => LanguageEntry<Config['source']['pageData']>[];
+  getLanguages: () => {
+    language: string;
+    pages: Page<Config['source']['pageData']>[];
+  }[];
 
   /**
    * Get page with slugs
@@ -276,37 +268,66 @@ export function loader<
   Config extends SourceConfig,
   I18n extends I18nConfig | undefined = undefined,
 >(
-  options: LoaderOptions<Config, I18n>,
+  source: Source<Config> | Source<Config>[],
+  options: LoaderOptions<NoInfer<Config>, I18n>,
 ): LoaderOutput<{
   source: Config;
   i18n: I18n;
-}> {
-  // @ts-expect-error -- forced type cast
-  return createOutput(resolveConfig(options));
+}>;
+
+export function loader<
+  Config extends SourceConfig,
+  I18n extends I18nConfig | undefined = undefined,
+>(
+  options: LoaderOptions<NoInfer<Config>, I18n> & {
+    source: Source<Config> | Source<Config>[];
+  },
+): LoaderOutput<{
+  source: Config;
+  i18n: I18n;
+}>;
+
+export function loader(
+  ...args:
+    | [
+        LoaderOptions & {
+          source: Source | Source[];
+        },
+      ]
+    | [Source | Source[], LoaderOptions]
+): LoaderOutput<LoaderConfig> {
+  const resolved =
+    args.length === 2
+      ? resolveConfig(args[0], args[1])
+      : resolveConfig(args[0].source, args[0]);
+
+  return createOutput(resolved);
 }
 
-function loadSource<T extends SourceConfig>(source: Source<T> | Source<T>[]) {
-  const out: VirtualFile[] = [];
+function resolveConfig(
+  source: Source | Source[],
+  { slugs, icon, plugins = [], baseUrl, url, ...base }: LoaderOptions,
+): ResolvedLoaderConfig {
+  const getUrl: UrlFn = url
+    ? (...args) => normalizeUrl(url(...args))
+    : createGetUrl(baseUrl, base.i18n);
 
-  for (const item of Array.isArray(source) ? source : [source]) {
-    if (typeof item.files === 'function') {
-      out.push(...item.files());
-    } else {
-      out.push(...item.files);
+  let mergedSource: Source;
+  if (Array.isArray(source)) {
+    mergedSource = { files: [] };
+    for (const item of source) {
+      mergedSource.files.push(...item.files);
+      mergedSource.fromVirtualMeta ??= item.fromVirtualMeta;
+      mergedSource.fromVirtualPage ??= item.fromVirtualPage;
     }
+  } else {
+    mergedSource = source;
   }
 
-  return out;
-}
-
-function resolveConfig({
-  slugs,
-  icon,
-  plugins = [],
-  ...base
-}: LoaderOptions): ResolvedLoaderConfig {
   let config: ResolvedLoaderConfig = {
     ...base,
+    url: getUrl,
+    source: mergedSource,
     plugins: buildPlugins([
       slugsPlugin(slugs),
       icon && iconPlugin(icon),
@@ -324,18 +345,13 @@ function resolveConfig({
 }
 
 function createOutput({
-  source,
-  baseUrl = '/',
-  url: urlFn,
+  source: { files },
+  url: getUrl,
   i18n,
   plugins = [],
   pageTree: pageTreeConfig,
 }: ResolvedLoaderConfig): LoaderOutput<LoaderConfig> {
-  const getUrl: UrlFn = urlFn
-    ? (...args) => normalizeUrl(urlFn(...args))
-    : createGetUrl(baseUrl, i18n);
   const defaultLanguage = i18n?.defaultLanguage ?? '';
-  const files = loadSource(source);
 
   const storages = loadFiles(
     files,
@@ -420,9 +436,12 @@ function createOutput({
       return pages;
     },
     getLanguages() {
-      const list: LanguageEntry[] = [];
-      if (!i18n) return list;
+      const list: {
+        language: string;
+        pages: Page[];
+      }[] = [];
 
+      if (!i18n) return list;
       for (const language of i18n.languages) {
         list.push({
           language,

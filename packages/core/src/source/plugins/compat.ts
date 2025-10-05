@@ -51,68 +51,58 @@ export interface LegacyPageTreeOptions<
 export function compatPlugin({
   pageTree,
   transformers,
-}: LegacyLoaderOptions & { pageTree?: LegacyPageTreeOptions }): LoaderPlugin {
-  return {
-    name: 'fumadocs:compat',
-    config(config) {
-      const plugins = config.plugins ? [...config.plugins] : [];
+}: LegacyLoaderOptions & { pageTree?: LegacyPageTreeOptions }): LoaderPlugin[] {
+  const plugins: LoaderPlugin[] = [];
 
-      if (pageTree) {
-        const { attachFile, attachSeparator, attachFolder, transformers } =
-          pageTree;
+  if (pageTree) {
+    const { attachFile, attachSeparator, attachFolder, transformers } =
+      pageTree;
 
-        for (const transformer of transformers ?? []) {
-          plugins.push(fromPageTreeTransformer(transformer));
-        }
+    for (const transformer of transformers ?? []) {
+      plugins.push(fromPageTreeTransformer(transformer));
+    }
 
-        plugins.push(
-          fromPageTreeTransformer({
-            file(node, file) {
-              if (!attachFile) return node;
-              const content = file ? this.storage.read(file) : undefined;
+    plugins.push(
+      fromPageTreeTransformer({
+        file(node, file) {
+          if (!attachFile) return node;
+          const content = file ? this.storage.read(file) : undefined;
 
-              return attachFile(
-                node,
-                content?.format === 'page' ? content : undefined,
-              );
+          return attachFile(
+            node,
+            content?.format === 'page' ? content : undefined,
+          );
+        },
+        folder(node, folderPath, metaPath) {
+          if (!attachFolder) return node;
+
+          const files = this.storage.readDir(folderPath) ?? [];
+          const meta = metaPath ? this.storage.read(metaPath) : undefined;
+
+          return attachFolder(
+            node,
+            {
+              children: files.flatMap((file) => this.storage.read(file) ?? []),
             },
-            folder(node, folderPath, metaPath) {
-              if (!attachFolder) return node;
+            meta?.format === 'meta' ? meta : undefined,
+          );
+        },
+        separator(node) {
+          if (!attachSeparator) return node;
 
-              const files = this.storage.readDir(folderPath) ?? [];
-              const meta = metaPath ? this.storage.read(metaPath) : undefined;
+          return attachSeparator(node);
+        },
+      }),
+    );
+  }
 
-              return attachFolder(
-                node,
-                {
-                  children: files.flatMap(
-                    (file) => this.storage.read(file) ?? [],
-                  ),
-                },
-                meta?.format === 'meta' ? meta : undefined,
-              );
-            },
-            separator(node) {
-              if (!attachSeparator) return node;
+  if (transformers) {
+    for (const transformer of transformers) {
+      plugins.push(fromStorageTransformer(transformer));
+    }
+  }
 
-              return attachSeparator(node);
-            },
-          }),
-        );
-      }
-
-      if (transformers) {
-        for (const transformer of transformers) {
-          plugins.push(fromStorageTransformer(transformer));
-        }
-      }
-
-      return {
-        ...config,
-        plugins,
-      };
-    },
-  };
+  return plugins;
 }
 
 function fromPageTreeTransformer<Page extends PageData, Meta extends MetaData>(
