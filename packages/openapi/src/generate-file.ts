@@ -3,9 +3,9 @@ import * as path from 'node:path';
 import { glob } from 'tinyglobby';
 import {
   generateDocument,
-  generateEntry,
-  type GenerateOptions,
-} from './generate';
+  type PagesToTextOptions,
+  toText,
+} from './utils/pages/to-text';
 import {
   processDocumentCached,
   type ProcessedDocument,
@@ -54,7 +54,7 @@ interface IndexItem {
   only?: (string | OutputFile)[];
 }
 
-interface GenerateFilesConfig extends GenerateOptions {
+interface GenerateFilesConfig extends PagesToTextOptions {
   cwd?: string;
 
   /**
@@ -155,7 +155,7 @@ export async function generateFilesOnly(
       options as SchemaToPagesOptions,
     ).map<OutputFile>((page) => ({
       path: page.path,
-      content: generateEntry(page, schema, options),
+      content: toText(page, schema, options),
     }));
     files.push(...result);
     generated[id] = result;
@@ -178,7 +178,7 @@ export async function generateFilesOnly(
 function writeIndexFiles(
   context: HookContext,
   options: IndexConfig,
-  generateOptions: GenerateOptions,
+  generateOptions: PagesToTextOptions,
 ) {
   const { items, url } = options;
 

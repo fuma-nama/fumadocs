@@ -12,15 +12,9 @@ import { dump } from 'js-yaml';
 import type { NoReference } from '@/utils/schema';
 import Slugger from 'github-slugger';
 import { removeUndefined } from '@/utils/remove-undefined';
-import type {
-  OutputEntry,
-  OutputOperationEntry,
-  OutputSchemaEntry,
-  OutputTagEntry,
-  OutputWebhookEntry,
-} from '@/utils/schema-to-pages';
+import type { OutputEntry } from '@/utils/schema-to-pages';
 
-export interface GenerateOptions {
+export interface PagesToTextOptions {
   /**
    * Additional imports of your MDX components.
    */
@@ -60,118 +54,86 @@ export interface GenerateOptions {
   addGeneratedComment?: boolean | string;
 }
 
-export function generateEntry(
+export function toText(
   entry: OutputEntry,
   processed: ProcessedDocument,
-  options: GenerateOptions = {},
+  options: PagesToTextOptions = {},
 ) {
   switch (entry.type) {
     case 'operation':
-      return generateOperationEntry(entry, processed, options);
+      return generatePage(
+        entry.schemaId,
+        processed,
+        {
+          operations: [entry.item],
+          hasHead: false,
+        },
+        {
+          ...options,
+          ...entry.info,
+        },
+        {
+          type: 'operation',
+        },
+      );
     case 'schema':
-      return generateSchemaEntry(entry, processed, options);
+      return generatePage(
+        entry.schemaId,
+        processed,
+        {
+          operations: entry.operations,
+          webhooks: entry.webhooks,
+          hasHead: true,
+        },
+        {
+          ...options,
+          ...entry.info,
+        },
+        {
+          type: 'file',
+        },
+      );
     case 'tag':
-      return generateTagEntry(entry, processed, options);
+      return generatePage(
+        entry.schemaId,
+        processed,
+        {
+          operations: entry.operations,
+          webhooks: entry.webhooks,
+          hasHead: true,
+        },
+        {
+          ...options,
+          ...entry.info,
+        },
+        {
+          type: 'tag',
+          tag: entry.rawTag,
+        },
+      );
     case 'webhook':
-      return generateWebhookEntry(entry, processed, options);
+      return generatePage(
+        entry.schemaId,
+        processed,
+        {
+          webhooks: [entry.item],
+          hasHead: false,
+        },
+        {
+          ...options,
+          ...entry.info,
+        },
+        {
+          type: 'operation',
+        },
+      );
   }
-}
-
-export function generateSchemaEntry(
-  entry: OutputSchemaEntry,
-  processed: ProcessedDocument,
-  options: GenerateOptions = {},
-): string {
-  return generatePage(
-    entry.schemaId,
-    processed,
-    {
-      operations: entry.operations,
-      webhooks: entry.webhooks,
-      hasHead: true,
-    },
-    {
-      ...options,
-      ...entry.info,
-    },
-    {
-      type: 'file',
-    },
-  );
-}
-
-export function generateOperationEntry(
-  entry: OutputOperationEntry,
-  processed: ProcessedDocument,
-  options: GenerateOptions = {},
-): string {
-  return generatePage(
-    entry.schemaId,
-    processed,
-    {
-      operations: [entry.item],
-      hasHead: false,
-    },
-    {
-      ...options,
-      ...entry.info,
-    },
-    {
-      type: 'operation',
-    },
-  );
-}
-
-export function generateWebhookEntry(
-  entry: OutputWebhookEntry,
-  processed: ProcessedDocument,
-  options: GenerateOptions = {},
-) {
-  return generatePage(
-    entry.schemaId,
-    processed,
-    {
-      webhooks: [entry.item],
-      hasHead: false,
-    },
-    {
-      ...options,
-      ...entry.info,
-    },
-    {
-      type: 'operation',
-    },
-  );
-}
-
-export function generateTagEntry(
-  entry: OutputTagEntry,
-  processed: ProcessedDocument,
-  options: GenerateOptions = {},
-): string {
-  return generatePage(
-    entry.schemaId,
-    processed,
-    {
-      operations: entry.operations,
-      webhooks: entry.webhooks,
-      hasHead: true,
-    },
-    {
-      ...options,
-      ...entry.info,
-    },
-    {
-      type: 'tag',
-      tag: entry.rawTag,
-    },
-  );
 }
 
 export function generateDocument(
   frontmatter: unknown,
   content: string,
-  options: Pick<GenerateOptions, 'addGeneratedComment' | 'imports'>,
+  options: PagesToTextOptions,
 ): string {
   const { addGeneratedComment = true, imports } = options;
   const out: string[] = [];
@@ -226,7 +188,7 @@ function generatePage(
   schemaId: string,
   processed: ProcessedDocument,
   pageProps: Omit<ApiPageProps, 'document'>,
-  options: GenerateOptions & {
+  options: PagesToTextOptions & {
     title: string;
     description?: string;
   },

@@ -2,46 +2,23 @@ import { MethodLabel } from '@/ui/components/method-label';
 import type * as PageTree from 'fumadocs-core/page-tree';
 import type {
   LoaderPlugin,
-  PageData,
   PageFile,
   PageTreeTransformer,
-  Source,
-  SourceConfig,
+  ResolvedLoaderConfig,
 } from 'fumadocs-core/source';
 import type { OpenAPIServer } from '@/server/create';
-import {
-  type OutputEntry,
-  type SchemaToPagesOptions,
-  serverToPages,
-} from '@/utils/schema-to-pages';
+import type { SchemaToPagesOptions } from '@/utils/schema-to-pages';
 
-export type OpenAPIPluginOptions<Page extends PageData = PageData> =
-  SchemaToPagesOptions & {
-    from: OpenAPIServer;
-    baseDir?: string;
-
-    onPage: (raw: OutputEntry) => Page;
-  };
-
-export function openapiPlugin(): LoaderPlugin;
-
-export function openapiPlugin<S extends SourceConfig | Source<SourceConfig>>(
-  options?: OpenAPIPluginOptions<
-    S extends Source<infer Config>
-      ? Config['pageData']
-      : S extends SourceConfig
-        ? S['pageData']
-        : never
-  >,
-): Promise<LoaderPlugin>;
+export type WithPagesOptions = SchemaToPagesOptions & {
+  from: OpenAPIServer;
+  baseDir?: string;
+};
 
 /**
  * Fumadocs Source API integration, pass this to `plugins` array in `loader()`.
  */
-export function openapiPlugin(
-  autoPages?: OpenAPIPluginOptions,
-): LoaderPlugin | Promise<LoaderPlugin> {
-  const basePlugin: LoaderPlugin = {
+export function openapiPlugin(): LoaderPlugin {
+  return {
     name: 'fumadocs:openapi',
     enforce: 'pre',
     transformPageTree: {
@@ -76,31 +53,50 @@ export function openapiPlugin(
       },
     },
   };
-
-  if (autoPages) {
-    const { from, onPage, baseDir = '' } = autoPages;
-
-    return serverToPages(from, autoPages).then((entries) => {
-      const pages = Object.values(entries).flat();
-
-      basePlugin.transformStorage = ({ storage }) => {
-        for (const page of pages) {
-          storage.write(`${baseDir}/${page.path}`, {
-            format: 'page',
-            data: onPage(page),
-            path: page.path,
-            absolutePath: '',
-            slugs: undefined as unknown as string[],
-          });
-        }
-      };
-
-      return basePlugin;
-    });
-  }
-
-  return basePlugin;
 }
+
+/**
+ * Generate virtual pages
+ */
+openapiPlugin.withPages = async (
+  options: WithPagesOptions,
+): Promise<LoaderPlugin> => {
+  const { from, baseDir = '' } = options;
+
+  const { serverToPages } = await import('@/utils/schema-to-pages');
+  const { toBody } = await import('@/utils/pages/to-body');
+  const entries = await serverToPages(from, options);
+  const plugin = openapiPlugin();
+  let loaderConfig: ResolvedLoaderConfig;
+  plugin.config = (loaded) => {
+    loaderConfig = loaded;
+  };
+
+  plugin.transformStorage = ({ storage }) => {
+    if (!loaderConfig.source.fromVirtualPage) {
+      throw new Error(
+        '[Fumadocs OpenAPI] To generate virtual pages, `fromVirtualPage` must be implemented on your content source.',
+      );
+    }
+
+    for (const page of Object.values(entries).flat()) {
+      const path = `${baseDir}/${page.path}`;
+      storage.write(path, {
+        format: 'page',
+        data: loaderConfig.source.fromVirtualPage({
+          path,
+          data: page.info,
+          body: toBody(from, page),
+        }),
+        path: page.path,
+        absolutePath: '',
+        slugs: undefined as unknown as string[],
+      });
+    }
+  };
+
+  return plugin;
+};
 
 /**
  * Source API Integration, add this to page tree builder options.
