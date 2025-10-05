@@ -21,11 +21,9 @@ import { createGenerator } from 'fumadocs-typescript';
 import { getPageTreePeers } from 'fumadocs-core/page-tree';
 import { Card, Cards } from 'fumadocs-ui/components/card';
 import { getMDXComponents } from '@/mdx-components';
-import { APIPage } from 'fumadocs-openapi/ui';
 import { LLMCopyButton, ViewOptions } from '@/components/ai/page-actions';
 import * as path from 'node:path';
 import { Banner } from 'fumadocs-ui/components/banner';
-import { openapi } from '@/lib/openapi';
 import { Installation } from '@/components/preview/installation';
 import { Customisation } from '@/components/preview/customisation';
 import { DocsPage } from 'fumadocs-ui/page';
@@ -56,6 +54,7 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
 
   const preview = page.data.preview;
   const { body: Mdx, toc, lastModified } = page.data;
+  const isVirtual = page.data.info.fullPath.startsWith('virtual:');
 
   return (
     <DocsPage
@@ -66,16 +65,18 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
       }}
     >
       <h1 className="text-[1.75em] font-semibold">{page.data.title}</h1>
-      <p className="text-lg text-fd-muted-foreground">
+      <p className="text-lg text-fd-muted-foreground mb-2">
         {page.data.description}
       </p>
-      <div className="flex flex-row gap-2 items-center border-b pt-2 pb-6">
-        <LLMCopyButton markdownUrl={`${page.url}.mdx`} />
-        <ViewOptions
-          markdownUrl={`${page.url}.mdx`}
-          githubUrl={`https://github.com/${owner}/${repo}/blob/dev/apps/docs/content/docs/${page.path}`}
-        />
-      </div>
+      {!isVirtual && (
+        <div className="flex flex-row gap-2 items-center border-b pb-6">
+          <LLMCopyButton markdownUrl={`${page.url}.mdx`} />
+          <ViewOptions
+            markdownUrl={`${page.url}.mdx`}
+            githubUrl={`https://github.com/${owner}/${repo}/blob/dev/apps/docs/content/docs/${page.path}`}
+          />
+        </div>
+      )}
       <div className="prose flex-1 text-fd-foreground/90">
         {preview ? <PreviewRenderer preview={preview} /> : null}
         <Mdx
@@ -117,7 +118,6 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
             ),
             Wrapper,
             blockquote: Callout as unknown as FC<ComponentProps<'blockquote'>>,
-            APIPage: (props) => <APIPage {...openapi.getAPIPageProps(props)} />,
             DocsCategory: ({ url }) => {
               return <DocsCategory url={url ?? page.url} />;
             },
@@ -127,7 +127,7 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
         />
         {page.data.index ? <DocsCategory url={page.url} /> : null}
       </div>
-      <Feedback onRateAction={onRateAction} />
+      {!isVirtual && <Feedback onRateAction={onRateAction} />}
     </DocsPage>
   );
 }
