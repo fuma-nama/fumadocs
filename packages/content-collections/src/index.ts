@@ -11,18 +11,29 @@ export function createMDXSource<
   metaData: Meta;
   pageData: Docs;
 }> {
+  type File = VirtualFile<{
+    metaData: Meta;
+    pageData: Docs;
+  }>;
+
   return {
     files: [
-      ...allDocs.map<VirtualFile>((v) => ({
-        type: 'page',
-        data: v,
-        path: v._meta.filePath,
-      })),
-      ...allMetas.map<VirtualFile>((v) => ({
-        type: 'meta',
-        data: v,
-        path: v._meta.filePath,
-      })),
+      ...allDocs.map(
+        (v) =>
+          ({
+            type: 'page',
+            data: v,
+            path: v._meta.filePath,
+          }) satisfies File,
+      ),
+      ...allMetas.map(
+        (v) =>
+          ({
+            type: 'meta',
+            data: v,
+            path: v._meta.filePath,
+          }) satisfies File,
+      ),
     ],
   };
 }

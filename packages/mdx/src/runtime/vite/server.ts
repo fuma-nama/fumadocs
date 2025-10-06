@@ -12,8 +12,6 @@ import {
   type DocCollectionEntry,
   type DocData,
   type FileInfo,
-  fromVirtualPage,
-  fromVirtualPageLazy,
   type MetaCollectionEntry,
   missingProcessedMarkdown,
 } from '@/runtime/shared';
@@ -123,7 +121,7 @@ export function fromConfig<Config>(): ServerCreate<Config> {
     ...base,
 
     async sourceAsync(doc, meta) {
-      const virtualFiles: Promise<VirtualFile>[] = [
+      const virtualFiles = [
         ...Object.entries(doc).map(async ([file, content]) => {
           const info = fileInfo(file, content.base);
 
@@ -148,11 +146,10 @@ export function fromConfig<Config>(): ServerCreate<Config> {
 
       return {
         files: await Promise.all(virtualFiles),
-        fromVirtualPage: fromVirtualPage,
       };
     },
     async sourceLazy(doc, meta) {
-      const virtualFiles: Promise<VirtualFile>[] = [
+      const virtualFiles = [
         ...Object.entries(doc.head).map(async ([file, frontmatter]) => {
           const info = fileInfo(file, doc.base);
 
@@ -177,7 +174,6 @@ export function fromConfig<Config>(): ServerCreate<Config> {
 
       return {
         files: await Promise.all(virtualFiles),
-        fromVirtualPage: fromVirtualPageLazy,
       };
     },
   };

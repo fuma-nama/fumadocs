@@ -1,4 +1,4 @@
-import { dirname, splitPath } from './path';
+import { dirname, splitPath } from '../path';
 
 /**
  * In memory file system.

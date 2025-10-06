@@ -26,20 +26,6 @@ export interface FileInfo {
   dirname: string;
 }
 
-export interface FolderInfo {
-  /**
-   * Original path of folder
-   */
-  path: string;
-
-  /**
-   * folder name
-   */
-  name: string;
-
-  dirname: string;
-}
-
 export function basename(path: string, ext?: string): string {
   const idx = path.lastIndexOf('/');
 

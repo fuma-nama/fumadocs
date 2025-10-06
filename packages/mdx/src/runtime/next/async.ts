@@ -90,7 +90,7 @@ export const _runtimeAsync: RuntimeAsync = {
       docs: parsedDocs,
       meta: parsedMetas,
       toFumadocsSource() {
-        return createMDXSource(parsedDocs, parsedMetas, true);
+        return createMDXSource(parsedDocs, parsedMetas);
       },
     } as any;
   },

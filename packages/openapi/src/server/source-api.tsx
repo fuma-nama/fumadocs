@@ -1,21 +1,17 @@
 import { MethodLabel } from '@/ui/components/method-label';
 import type * as PageTree from 'fumadocs-core/page-tree';
-import type {
+import {
   LoaderPlugin,
+  MetaData,
+  PageData,
   PageFile,
   PageTreeTransformer,
-  ResolvedLoaderConfig,
+  Source,
+  VirtualFile,
 } from 'fumadocs-core/source';
 import type { OpenAPIServer } from '@/server/create';
 import type { SchemaToPagesOptions } from '@/utils/schema-to-pages';
-import type { FC } from 'react';
-import type { ApiPageProps } from '@/render/api-page';
-
-export type WithPagesOptions = SchemaToPagesOptions & {
-  from: OpenAPIServer;
-  APIPage: FC<ApiPageProps>;
-  baseDir?: string;
-};
+import { ApiPageProps } from '@/render/api-page';
 
 declare module 'fumadocs-core/source' {
   export interface PageData {
@@ -65,58 +61,54 @@ export function openapiPlugin(): LoaderPlugin {
   };
 }
 
+interface OpenAPIPageData extends PageData {
+  getAPIPageProps: () => ApiPageProps;
+}
+
 /**
- * Generate virtual pages
+ * Generate virtual pages for Fumadocs Source API
  */
-openapiPlugin.withPages = async ({
-  from,
-  baseDir = '',
-  APIPage,
-  ...base
-}: WithPagesOptions): Promise<LoaderPlugin> => {
+export async function openapiSource(
+  from: OpenAPIServer,
+  options: SchemaToPagesOptions & {
+    baseDir?: string;
+  } = {},
+): Promise<
+  Source<{
+    metaData: MetaData;
+    pageData: OpenAPIPageData;
+  }>
+> {
+  const { baseDir = '' } = options;
   const { serverToPages } = await import('@/utils/schema-to-pages');
   const { toBody } = await import('@/utils/pages/to-body');
-  const entries = await serverToPages(from, base);
-  const plugin = openapiPlugin();
-  let loaderConfig: ResolvedLoaderConfig;
-  plugin.config = (loaded) => {
-    loaderConfig = loaded;
+  const files: VirtualFile<{
+    pageData: OpenAPIPageData;
+    metaData: MetaData;
+  }>[] = [];
+
+  const entries = await serverToPages(from, options);
+  for (const entry of Object.values(entries).flat()) {
+    files.push({
+      type: 'page',
+      path: `${baseDir}/${entry.path}`,
+      data: {
+        ...entry.info,
+        getAPIPageProps: () => toBody(from, entry),
+        _openapi: {
+          method:
+            entry.type === 'operation' || entry.type === 'webhook'
+              ? entry.item.method
+              : undefined,
+        },
+      },
+    });
+  }
+
+  return {
+    files,
   };
-
-  plugin.transformStorage = ({ storage }) => {
-    if (!loaderConfig.source.fromVirtualPage) {
-      throw new Error(
-        '[Fumadocs OpenAPI] To generate virtual pages, `fromVirtualPage` must be implemented on your content source.',
-      );
-    }
-
-    for (const page of Object.values(entries).flat()) {
-      const path = `${baseDir}/${page.path}`;
-
-      storage.write(path, {
-        format: 'page',
-        data: loaderConfig.source.fromVirtualPage({
-          path,
-          data: {
-            ...page.info,
-            _openapi: {
-              method:
-                page.type === 'operation' || page.type === 'webhook'
-                  ? page.item.method
-                  : undefined,
-            },
-          },
-          body: toBody(from, APIPage, page),
-        }),
-        path: page.path,
-        absolutePath: '',
-        slugs: undefined as unknown as string[],
-      });
-    }
-  };
-
-  return plugin;
-};
+}
 
 /**
  * Source API Integration, add this to page tree builder options.

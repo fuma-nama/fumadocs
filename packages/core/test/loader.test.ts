@@ -1,6 +1,5 @@
 import { expect, test } from 'vitest';
-import { createGetUrl, getSlugs, loader } from '@/source/loader';
-import { parseFilePath } from '@/source';
+import { createGetUrl, getSlugs, loader, parseFilePath } from '@/source';
 import type { ReactElement } from 'react';
 import { removeUndefined } from '@/utils/remove-undefined';
 

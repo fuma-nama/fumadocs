@@ -1,24 +1,17 @@
 import type * as PageTree from '@/page-tree/definitions';
 import type { I18nConfig } from '@/i18n';
 import {
+  buildContentStorage,
   type ContentStorage,
-  loadFiles,
   type MetaFile,
   type PageFile,
-} from './load-files';
+} from './storage/content';
 import type { MetaData, PageData, UrlFn } from './types';
 import {
   createPageTreeBuilder,
   type PageTreeOptions,
 } from '@/source/page-tree/builder';
-import {
-  basename,
-  dirname,
-  extname,
-  type FileInfo,
-  joinPath,
-  parseFilePath,
-} from './path';
+import { type FileInfo, joinPath, parseFilePath } from './path';
 import { normalizeUrl } from '@/utils/normalize-url';
 import { buildPlugins, type LoaderPlugin } from '@/source/plugins';
 import { slugsPlugin } from '@/source/plugins/slugs';
@@ -28,7 +21,6 @@ import {
   type LegacyPageTreeOptions,
 } from '@/source/plugins/compat';
 import { iconPlugin, type IconResolver } from '@/source/plugins/icon';
-import type { VirtualMeta, VirtualPage } from '@/source/virtual-page';
 
 export interface LoaderConfig {
   source: SourceConfig;
@@ -74,9 +66,7 @@ export interface ResolvedLoaderConfig {
 }
 
 export interface Source<Config extends SourceConfig = SourceConfig> {
-  files: VirtualFile[];
-  fromVirtualPage?: (page: VirtualPage) => Config['pageData'];
-  fromVirtualMeta?: (page: VirtualMeta) => Config['metaData'];
+  files: VirtualFile<Config>[];
 }
 
 interface SharedFileInfo {
@@ -100,7 +90,7 @@ interface SharedFileInfo {
   absolutePath: string;
 }
 
-export interface VirtualFile {
+export type VirtualFile<Config extends SourceConfig = SourceConfig> = {
   /**
    * Virtualized path (relative to content directory)
    *
@@ -112,15 +102,20 @@ export interface VirtualFile {
    * Absolute path of the file
    */
   absolutePath?: string;
-
-  type: 'page' | 'meta';
-
-  /**
-   * Specified Slugs for page
-   */
-  slugs?: string[];
-  data: unknown;
-}
+} & (
+  | {
+      type: 'page';
+      /**
+       * Specified Slugs for page
+       */
+      slugs?: string[];
+      data: Config['pageData'];
+    }
+  | {
+      type: 'meta';
+      data: Config['metaData'];
+    }
+);
 
 export interface Page<Data = PageData> extends SharedFileInfo {
   slugs: string[];
@@ -322,8 +317,6 @@ function resolveConfig(
           ? (item.files as () => VirtualFile[])()
           : item.files),
       );
-      mergedSource.fromVirtualMeta ??= item.fromVirtualMeta;
-      mergedSource.fromVirtualPage ??= item.fromVirtualPage;
     }
   } else {
     mergedSource = source;
@@ -358,7 +351,7 @@ function createOutput({
 }: ResolvedLoaderConfig): LoaderOutput<LoaderConfig> {
   const defaultLanguage = i18n?.defaultLanguage ?? '';
 
-  const storages = loadFiles(
+  const storages = buildContentStorage(
     files,
     (file) => {
       if (file.type === 'page') {
@@ -527,29 +520,17 @@ function fileToPage<Data = PageData>(
   };
 }
 
-const GroupRegex = /^\(.+\)$/;
-
 /**
- * Convert file path into slugs, also encode non-ASCII characters, so they can work in pathname
+ * map virtual files in source
  */
-export function getSlugs(file: string | FileInfo): string[] {
-  if (typeof file !== 'string') return getSlugs(file.path);
-
-  const dir = dirname(file);
-  const name = basename(file, extname(file));
-  const slugs: string[] = [];
-
-  for (const seg of dir.split('/')) {
-    // filter empty names and file groups like (group_name)
-    if (seg.length > 0 && !GroupRegex.test(seg)) slugs.push(encodeURI(seg));
-  }
-
-  if (GroupRegex.test(name))
-    throw new Error(`Cannot use folder group in file names: ${file}`);
-
-  if (name !== 'index') {
-    slugs.push(encodeURI(name));
-  }
-
-  return slugs;
+export function map<
+  Config extends SourceConfig,
+  $Config extends SourceConfig = Config,
+>(
+  source: Source<Config>,
+  fn: (entry: VirtualFile<Config>) => VirtualFile<$Config>,
+): Source<$Config> {
+  return {
+    files: source.files.map(fn),
+  };
 }

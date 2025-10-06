@@ -1,4 +1,4 @@
-import type { ContentStorage } from '@/source/load-files';
+import type { ContentStorage } from '@/source/storage/content';
 import type { PageTreeTransformer } from '@/source/page-tree/builder';
 import type { MetaData, PageData } from '@/source/types';
 import type { ResolvedLoaderConfig } from '@/source/loader';

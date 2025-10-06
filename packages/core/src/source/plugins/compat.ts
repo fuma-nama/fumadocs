@@ -1,19 +1,23 @@
-import type {
+import {
+  ContentStorage,
   MetaData,
   MetaFile,
   PageData,
   PageFile,
   PageTreeTransformer,
-  Transformer,
 } from '@/source';
 import type * as PageTree from '@/page-tree/definitions';
 import type { LoaderPlugin } from '@/source/plugins';
+
+export type TransformContentStorage = (context: {
+  storage: ContentStorage;
+}) => void;
 
 export interface LegacyLoaderOptions {
   /**
    * We recommend you to use `plugins` instead
    */
-  transformers?: Transformer[];
+  transformers?: TransformContentStorage[];
 }
 
 export interface LegacyPageTreeOptions<
@@ -114,7 +118,7 @@ function fromPageTreeTransformer<Page extends PageData, Meta extends MetaData>(
 }
 
 function fromStorageTransformer<Page extends PageData, Meta extends MetaData>(
-  transformer: Transformer,
+  transformer: TransformContentStorage,
 ): LoaderPlugin<Page, Meta> {
   return {
     transformStorage: transformer,

@@ -27,8 +27,6 @@ export interface PageFile<Data extends PageData = PageData> {
   data: Data;
 }
 
-export type Transformer = (context: { storage: ContentStorage }) => void;
-
 function isLocaleValid(locale: string) {
   return locale.length > 0 && !/\d+/.test(locale);
 }
@@ -58,13 +56,12 @@ const parsers = {
   },
 };
 
-// Virtual files -> Virtual Storage -> Transformers -> Result
 /**
  * @returns a map of locale and its content storage.
  *
  * in the storage, locale codes are removed from file paths, hence the same file will have same file paths in every storage.
  */
-export function loadFiles(
+export function buildContentStorage(
   files: VirtualFile[],
   buildFile: (file: VirtualFile) => MetaFile | PageFile,
   plugins: LoaderPlugin[],

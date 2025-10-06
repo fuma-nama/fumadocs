@@ -6,16 +6,24 @@ export {
   type PageTreeOptions,
 } from './page-tree/builder';
 export * from './loader';
-export * from './virtual-page';
-export { FileSystem } from './file-system';
+export { getSlugs } from './plugins/slugs';
+export { FileSystem } from './storage/file-system';
 
 export {
-  loadFiles,
   type PageFile,
   type MetaFile,
   type ContentStorage,
-  type Transformer,
-} from './load-files';
+} from './storage/content';
 export type * from './types';
-export { type FileInfo, type FolderInfo, parseFilePath } from './path';
+export * as PathUtils from './path';
 export type * from './plugins';
+
+/**
+ * @deprecated
+ */
+export type { TransformContentStorage as Transformer } from './plugins/compat';
+
+/**
+ * @deprecated
+ */
+export { type FileInfo, parseFilePath } from './path';

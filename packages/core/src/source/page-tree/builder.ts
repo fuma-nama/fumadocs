@@ -1,6 +1,6 @@
 import type * as PageTree from '@/page-tree/definitions';
 import type { MetaData, PageData, UrlFn } from '@/source';
-import type { ContentStorage } from '@/source/load-files';
+import type { ContentStorage } from '@/source/storage/content';
 import { basename, extname, joinPath } from '@/source/path';
 import { transformerFallback } from '@/source/page-tree/transformer-fallback';
 import type { LoaderPlugin } from '@/source/plugins';
