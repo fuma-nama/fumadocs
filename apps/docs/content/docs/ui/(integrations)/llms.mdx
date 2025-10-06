@@ -11,7 +11,18 @@ To begin, make a `getLLMText` function that converts pages into static MDX conte
 
 In **Fumadocs MDX**, you can do:
 
-<include meta='title="lib/get-llm-text.ts"'>./get-llm-text.ts</include>
+```ts title="lib/get-llm-text.ts"
+import { source } from '@/lib/source';
+import type { InferPageType } from 'fumadocs-core/source';
+
+export async function getLLMText(page: InferPageType<typeof source>) {
+  const processed = await page.data.getText('processed');
+
+  return `# ${page.data.title} (${page.url})
+
+${processed}`;
+}
+```
 
 It requires `includeProcessedMarkdown` to be enabled:
 

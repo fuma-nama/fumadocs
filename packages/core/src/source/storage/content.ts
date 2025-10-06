@@ -1,6 +1,5 @@
-import { type MetaData, type PageData } from '@/source/types';
-import { FileSystem } from './file-system';
-import { type VirtualFile } from '@/source/loader';
+import type { MetaData, PageData, VirtualFile } from '@/source/types';
+import { FileSystem } from '@/source/storage/file-system';
 import { basename, dirname, joinPath, slash, splitPath } from '@/source/path';
 import type { I18nConfig } from '@/i18n';
 import type { LoaderPlugin } from '@/source/plugins';

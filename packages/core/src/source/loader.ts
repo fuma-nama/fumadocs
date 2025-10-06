@@ -6,7 +6,14 @@ import {
   type MetaFile,
   type PageFile,
 } from './storage/content';
-import type { MetaData, PageData, UrlFn } from './types';
+import type {
+  MetaData,
+  PageData,
+  UrlFn,
+  VirtualFile,
+  VirtualMeta,
+  VirtualPage,
+} from './types';
 import {
   createPageTreeBuilder,
   type PageTreeOptions,
@@ -89,33 +96,6 @@ interface SharedFileInfo {
    */
   absolutePath: string;
 }
-
-export type VirtualFile<Config extends SourceConfig = SourceConfig> = {
-  /**
-   * Virtualized path (relative to content directory)
-   *
-   * @example `docs/page.mdx`
-   */
-  path: string;
-
-  /**
-   * Absolute path of the file
-   */
-  absolutePath?: string;
-} & (
-  | {
-      type: 'page';
-      /**
-       * Specified Slugs for page
-       */
-      slugs?: string[];
-      data: Config['pageData'];
-    }
-  | {
-      type: 'meta';
-      data: Config['metaData'];
-    }
-);
 
 export interface Page<Data = PageData> extends SharedFileInfo {
   slugs: string[];
@@ -263,7 +243,7 @@ export function loader<
   Config extends SourceConfig,
   I18n extends I18nConfig | undefined = undefined,
 >(
-  source: Source<Config> | Source<Config>[],
+  source: Source<Config>,
   options: LoaderOptions<NoInfer<Config>, I18n>,
 ): LoaderOutput<{
   source: Config;
@@ -275,7 +255,7 @@ export function loader<
   I18n extends I18nConfig | undefined = undefined,
 >(
   options: LoaderOptions<NoInfer<Config>, I18n> & {
-    source: Source<Config> | Source<Config>[];
+    source: Source<Config>;
   },
 ): LoaderOutput<{
   source: Config;
@@ -286,10 +266,10 @@ export function loader(
   ...args:
     | [
         LoaderOptions & {
-          source: Source | Source[];
+          source: Source;
         },
       ]
-    | [Source | Source[], LoaderOptions]
+    | [Source, LoaderOptions]
 ): LoaderOutput<LoaderConfig> {
   const resolved =
     args.length === 2
@@ -300,32 +280,17 @@ export function loader(
 }
 
 function resolveConfig(
-  source: Source | Source[],
+  source: Source,
   { slugs, icon, plugins = [], baseUrl, url, ...base }: LoaderOptions,
 ): ResolvedLoaderConfig {
   const getUrl: UrlFn = url
     ? (...args) => normalizeUrl(url(...args))
     : createGetUrl(baseUrl, base.i18n);
 
-  let mergedSource: Source;
-  if (Array.isArray(source)) {
-    mergedSource = { files: [] };
-    for (const item of source) {
-      mergedSource.files.push(
-        // TODO: remove on v16
-        ...(typeof item.files === 'function'
-          ? (item.files as () => VirtualFile[])()
-          : item.files),
-      );
-    }
-  } else {
-    mergedSource = source;
-  }
-
   let config: ResolvedLoaderConfig = {
     ...base,
     url: getUrl,
-    source: mergedSource,
+    source,
     plugins: buildPlugins([
       slugsPlugin(slugs),
       icon && iconPlugin(icon),
@@ -520,17 +485,61 @@ function fileToPage<Data = PageData>(
   };
 }
 
+export type _ConfigUnion_<T extends Record<string, Source>> = {
+  [K in keyof T]: T[K] extends Source<infer Config>
+    ? {
+        pageData: Config['pageData'] & { type: K };
+        metaData: Config['metaData'] & { type: K };
+      }
+    : never;
+}[keyof T];
+
+export function multiple<T extends Record<string, Source>>(sources: T) {
+  const out: Source<_ConfigUnion_<T>> = { files: [] };
+
+  for (const [type, source] of Object.entries(sources)) {
+    for (const file of source.files) {
+      out.files.push({
+        ...file,
+        data: {
+          ...file.data,
+          type,
+        },
+      });
+    }
+  }
+
+  return out;
+}
+
 /**
  * map virtual files in source
  */
-export function map<
-  Config extends SourceConfig,
-  $Config extends SourceConfig = Config,
->(
-  source: Source<Config>,
-  fn: (entry: VirtualFile<Config>) => VirtualFile<$Config>,
-): Source<$Config> {
+export function map<Config extends SourceConfig>(source: Source<Config>) {
   return {
-    files: source.files.map(fn),
+    page<$Page extends PageData>(
+      fn: (entry: VirtualPage<Config['pageData']>) => VirtualPage<$Page>,
+    ): Source<{
+      pageData: $Page;
+      metaData: Config['metaData'];
+    }> {
+      return {
+        files: source.files.map((file) =>
+          file.type === 'page' ? fn(file) : file,
+        ),
+      };
+    },
+    meta<$Meta extends MetaData>(
+      fn: (entry: VirtualMeta<Config['metaData']>) => VirtualMeta<$Meta>,
+    ): Source<{
+      pageData: Config['pageData'];
+      metaData: $Meta;
+    }> {
+      return {
+        files: source.files.map((file) =>
+          file.type === 'meta' ? fn(file) : file,
+        ),
+      };
+    },
   };
 }

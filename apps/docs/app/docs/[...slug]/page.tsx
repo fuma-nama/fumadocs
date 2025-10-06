@@ -26,9 +26,10 @@ import * as path from 'node:path';
 import { Banner } from 'fumadocs-ui/components/banner';
 import { Installation } from '@/components/preview/installation';
 import { Customisation } from '@/components/preview/customisation';
-import { DocsPage } from 'fumadocs-ui/page';
+import { DocsBody, DocsPage } from 'fumadocs-ui/page';
 import { NotFound } from '@/components/not-found';
 import { getSuggestions } from '@/app/docs/[...slug]/suggestions';
+import { APIPage } from 'fumadocs-openapi/ui';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -52,9 +53,19 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
       <NotFound getSuggestions={() => getSuggestions(params.slug.join(' '))} />
     );
 
-  const preview = page.data.preview;
-  const { body: Mdx, toc, lastModified } = page.data;
-  const isVirtual = page.data.info.fullPath.startsWith('virtual:');
+  if (page.data.type === 'openapi') {
+    return (
+      <DocsPage>
+        <h1 className="text-[1.75em] font-semibold">{page.data.title}</h1>
+        <p className="text-fd-muted-foreground mb-6">{page.data.description}</p>
+        <DocsBody>
+          <APIPage {...page.data.getAPIPageProps()} />
+        </DocsBody>
+      </DocsPage>
+    );
+  }
+
+  const { body: Mdx, toc, lastModified, preview } = page.data;
 
   return (
     <DocsPage
@@ -68,15 +79,13 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
       <p className="text-lg text-fd-muted-foreground mb-2">
         {page.data.description}
       </p>
-      {!isVirtual && (
-        <div className="flex flex-row gap-2 items-center border-b pb-6">
-          <LLMCopyButton markdownUrl={`${page.url}.mdx`} />
-          <ViewOptions
-            markdownUrl={`${page.url}.mdx`}
-            githubUrl={`https://github.com/${owner}/${repo}/blob/dev/apps/docs/content/docs/${page.path}`}
-          />
-        </div>
-      )}
+      <div className="flex flex-row gap-2 items-center border-b pb-6">
+        <LLMCopyButton markdownUrl={`${page.url}.mdx`} />
+        <ViewOptions
+          markdownUrl={`${page.url}.mdx`}
+          githubUrl={`https://github.com/${owner}/${repo}/blob/dev/apps/docs/content/docs/${page.path}`}
+        />
+      </div>
       <div className="prose flex-1 text-fd-foreground/90">
         {preview ? <PreviewRenderer preview={preview} /> : null}
         <Mdx
@@ -127,7 +136,7 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
         />
         {page.data.index ? <DocsCategory url={page.url} /> : null}
       </div>
-      {!isVirtual && <Feedback onRateAction={onRateAction} />}
+      <Feedback onRateAction={onRateAction} />
     </DocsPage>
   );
 }

@@ -6,6 +6,8 @@ export function buildGraph(): Graph {
   const graph: Graph = { links: [], nodes: [] };
 
   for (const page of pages) {
+    if (page.data.type === 'openapi') continue;
+
     graph.nodes.push({
       id: page.url,
       url: page.url,

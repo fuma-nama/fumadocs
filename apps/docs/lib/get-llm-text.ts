@@ -1,6 +1,8 @@
 import { type Page } from '@/lib/source';
 
 export async function getLLMText(page: Page) {
+  if (page.data.type === 'openapi') return '';
+
   const category =
     {
       ui: 'Fumadocs Framework',
