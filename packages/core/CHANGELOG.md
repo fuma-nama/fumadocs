@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 15.8.4
+
+### Patch Changes
+
+- ce2be59: Loader Plugin: support `name` & `config` options
+- 31b9494: Support `multiple()` for multiple sources in same `loader()`
+
 ## 15.8.3
 
 ### Patch Changes

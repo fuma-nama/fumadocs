@@ -1,5 +1,14 @@
 # next-docs-mdx
 
+## 12.0.3
+
+### Patch Changes
+
+- a55177c: Remove `Override` type utility on output collection types
+- Updated dependencies [ce2be59]
+- Updated dependencies [31b9494]
+  - fumadocs-core@15.8.4
+
 ## 12.0.2
 
 ### Patch Changes
