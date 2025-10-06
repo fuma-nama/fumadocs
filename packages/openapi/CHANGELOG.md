@@ -1,5 +1,18 @@
 # @fuma-docs/openapi
 
+## 9.5.0
+
+### Minor Changes
+
+- 5cb199f: Support generating virtual pages for Source API
+
+### Patch Changes
+
+- Updated dependencies [ce2be59]
+- Updated dependencies [31b9494]
+  - fumadocs-core@15.8.4
+  - fumadocs-ui@15.8.4
+
 ## 9.4.1
 
 ### Patch Changes
