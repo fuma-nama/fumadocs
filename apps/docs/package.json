@@ -9,7 +9,6 @@
     "clean": "rimraf .next",
     "dev": "next dev --turbo",
     "lint": "fumadocs-mdx && bun ./scripts/lint.ts && eslint .",
-    "types:check": "tsc --noEmit",
     "start": "next start"
   },
   "dependencies": {
