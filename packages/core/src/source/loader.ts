@@ -18,15 +18,10 @@ import {
   createPageTreeBuilder,
   type PageTreeOptions,
 } from '@/source/page-tree/builder';
-import { type FileInfo, joinPath, parseFilePath } from './path';
+import { joinPath } from './path';
 import { normalizeUrl } from '@/utils/normalize-url';
 import { buildPlugins, type LoaderPlugin } from '@/source/plugins';
 import { slugsPlugin } from '@/source/plugins/slugs';
-import {
-  compatPlugin,
-  type LegacyLoaderOptions,
-  type LegacyPageTreeOptions,
-} from '@/source/plugins/compat';
 import { iconPlugin, type IconResolver } from '@/source/plugins/icon';
 
 export interface LoaderConfig {
@@ -42,7 +37,7 @@ export interface SourceConfig {
 export interface LoaderOptions<
   S extends SourceConfig = SourceConfig,
   I18n extends I18nConfig | undefined = I18nConfig | undefined,
-> extends LegacyLoaderOptions {
+> {
   baseUrl: string;
   i18n?: I18n;
   url?: UrlFn;
@@ -50,8 +45,7 @@ export interface LoaderOptions<
   /**
    * Additional options for page tree builder
    */
-  pageTree?: PageTreeOptions &
-    LegacyPageTreeOptions<S['pageData'], S['metaData']>;
+  pageTree?: PageTreeOptions<S['pageData'], S['metaData']>;
 
   plugins?: (
     | LoaderPlugin<S['pageData'], S['metaData']>
@@ -60,7 +54,7 @@ export interface LoaderOptions<
   )[];
 
   icon?: IconResolver;
-  slugs?: (info: FileInfo) => string[];
+  slugs?: (info: { path: string }) => string[];
 }
 
 export interface ResolvedLoaderConfig {
@@ -77,13 +71,6 @@ export interface Source<Config extends SourceConfig = SourceConfig> {
 }
 
 interface SharedFileInfo {
-  /**
-   * Virtualized file path (parsed)
-   *
-   * @deprecated Use `path` instead.
-   */
-  file: FileInfo;
-
   /**
    * Virtualized file path (relative to content directory)
    *
@@ -294,7 +281,6 @@ function resolveConfig(
     plugins: buildPlugins([
       slugsPlugin(slugs),
       icon && iconPlugin(icon),
-      compatPlugin(base),
       ...plugins,
     ]),
   };
@@ -460,9 +446,6 @@ function fileToMeta<Data = MetaData>(file: MetaFile): Meta<Data> {
   return {
     path: file.path,
     absolutePath: file.absolutePath,
-    get file() {
-      return parseFilePath(this.path);
-    },
     data: file.data as Data,
   };
 }
@@ -473,9 +456,6 @@ function fileToPage<Data = PageData>(
   locale?: string,
 ): Page<Data> {
   return {
-    get file() {
-      return parseFilePath(this.path);
-    },
     absolutePath: file.absolutePath,
     path: file.path,
     url: getUrl(file.slugs, locale),

@@ -77,9 +77,8 @@
       "types": "./dist/mdx-plugins/index.d.ts"
     },
     "./i18n": {
-      "browser": "./dist/i18n/index.js",
-      "import": "./dist/i18n/legacy.js",
-      "types": "./dist/i18n/legacy.d.ts"
+      "import": "./dist/i18n/index.js",
+      "types": "./dist/i18n/index.d.ts"
     },
     "./i18n/middleware": {
       "import": "./dist/i18n/middleware.js",

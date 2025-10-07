@@ -50,7 +50,10 @@ export interface PageTreeTransformer<
   ) => PageTree.Root;
 }
 
-export interface PageTreeOptions {
+export interface PageTreeOptions<
+  Page extends PageData = PageData,
+  Meta extends MetaData = MetaData,
+> {
   id?: string;
   /**
    * Remove references to the file path of original nodes (`$ref`)
@@ -64,6 +67,11 @@ export interface PageTreeOptions {
    * @defaultValue true
    */
   generateFallback?: boolean;
+
+  /**
+   * Additional page tree transformers to apply
+   */
+  transformers?: PageTreeTransformer<Page, Meta>[];
 }
 
 export interface PageTreeBuilder {
@@ -324,8 +332,15 @@ export function createPageTreeBuilder(
   getUrl: UrlFn,
   plugins?: LoaderPlugin[],
 ): PageTreeBuilder {
-  function getTransformers(generateFallback: boolean) {
+  function getTransformers({
+    generateFallback = true,
+    ...options
+  }: PageTreeOptions) {
     const transformers: PageTreeTransformer[] = [];
+
+    if (options.transformers) {
+      transformers.push(...options.transformers);
+    }
 
     for (const plugin of plugins ?? []) {
       if (plugin.transformPageTree) transformers.push(plugin.transformPageTree);
@@ -359,15 +374,14 @@ export function createPageTreeBuilder(
       return this.buildI18n({ [key]: storage }, options)[key];
     },
     buildI18n(storages, options = {}) {
-      const { id, generateFallback = true } = options;
-      const transformers = getTransformers(generateFallback);
+      const transformers = getTransformers(options);
       const out: Record<string, PageTree.Root> = {};
 
       for (const [locale, storage] of Object.entries(storages)) {
         const resolve = createFlattenPathResolver(storage);
         const branch = locale.length === 0 ? 'root' : locale;
 
-        out[locale] = build(id ? `${id}-${branch}` : branch, {
+        out[locale] = build(options.id ? `${options.id}-${branch}` : branch, {
           transformers,
           builder: this,
           options,

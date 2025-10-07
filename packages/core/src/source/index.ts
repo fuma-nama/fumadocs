@@ -17,13 +17,3 @@ export {
 export type * from './types';
 export * as PathUtils from './path';
 export type * from './plugins';
-
-/**
- * @deprecated
- */
-export type { TransformContentStorage as Transformer } from './plugins/compat';
-
-/**
- * @deprecated
- */
-export { type FileInfo, parseFilePath } from './path';

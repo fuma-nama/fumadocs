@@ -31,13 +31,6 @@ export interface DocumentRecord {
 export interface SyncOptions {
   /**
    * Index Name for documents.
-   *
-   * @deprecated Use `indexName` instead
-   */
-  document?: string;
-
-  /**
-   * Index Name for documents.
    */
   indexName?: string;
 
@@ -57,7 +50,7 @@ export async function sync(
   client: Algoliasearch,
   options: SyncOptions,
 ): Promise<void> {
-  const { document = 'document', indexName = document, documents } = options;
+  const { indexName = 'document', documents } = options;
   await setIndexSettings(client, indexName);
   await updateDocuments(client, indexName, documents);
 }

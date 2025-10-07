@@ -2,7 +2,7 @@ import { createProcessor, type ProcessorOptions } from '@mdx-js/mdx';
 import type { VFile } from 'vfile';
 import { remarkInclude } from '@/loaders/mdx/remark-include';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
-import type { TableOfContents } from 'fumadocs-core/server';
+import type { TOCItemType } from 'fumadocs-core/toc';
 import type { FC } from 'react';
 import type { MDXProps } from 'mdx/types';
 import {
@@ -39,7 +39,7 @@ export interface CompilerOptions {
 export interface CompiledMDXProperties<Frontmatter = Record<string, unknown>> {
   frontmatter: Frontmatter;
   structuredData: StructuredData;
-  toc: TableOfContents;
+  toc: TOCItemType[];
   default: FC<MDXProps>;
 
   /**

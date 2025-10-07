@@ -1,27 +1,24 @@
 import { expect, test } from 'vitest';
-import { createGetUrl, getSlugs, loader, parseFilePath } from '@/source';
+import { createGetUrl, getSlugs, loader } from '@/source';
 import type { ReactElement } from 'react';
 import { removeUndefined } from '@/utils/remove-undefined';
 
 test('get slugs', () => {
-  expect(getSlugs(parseFilePath('index.mdx'))).toStrictEqual([]);
-  expect(getSlugs(parseFilePath('page.mdx'))).toStrictEqual(['page']);
+  expect(getSlugs('index.mdx')).toStrictEqual([]);
+  expect(getSlugs('page.mdx')).toStrictEqual(['page']);
 
-  expect(getSlugs(parseFilePath('nested/index.mdx'))).toStrictEqual(['nested']);
-  expect(getSlugs(parseFilePath('nested/page.mdx'))).toStrictEqual([
-    'nested',
-    'page',
-  ]);
+  expect(getSlugs('nested/index.mdx')).toStrictEqual(['nested']);
+  expect(getSlugs('nested/page.mdx')).toStrictEqual(['nested', 'page']);
 });
 
 test('get slugs: folder groups', () => {
-  expect(getSlugs(parseFilePath('(nested)/index.mdx'))).toStrictEqual([]);
-  expect(getSlugs(parseFilePath('folder/(nested)/page.mdx'))).toStrictEqual([
+  expect(getSlugs('(nested)/index.mdx')).toStrictEqual([]);
+  expect(getSlugs('folder/(nested)/page.mdx')).toStrictEqual([
     'folder',
     'page',
   ]);
 
-  expect(() => getSlugs(parseFilePath('nested/(page).mdx'))).toThrowError();
+  expect(() => getSlugs('nested/(page).mdx')).toThrowError();
 });
 
 test('Get URL: Empty', () => {

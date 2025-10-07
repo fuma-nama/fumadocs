@@ -1,17 +1,11 @@
 import type { LoaderPlugin } from '@/source/plugins';
-import {
-  basename,
-  dirname,
-  extname,
-  type FileInfo,
-  parseFilePath,
-} from '@/source/path';
+import { basename, dirname, extname } from '@/source/path';
 
 /**
  * Generate slugs for pages if missing
  */
 export function slugsPlugin(
-  slugsFn?: (info: FileInfo) => string[],
+  slugsFn?: (info: { path: string }) => string[],
 ): LoaderPlugin {
   function isIndex(file: string) {
     return basename(file, extname(file)) === 'index';
@@ -34,7 +28,7 @@ export function slugsPlugin(
           continue;
         }
 
-        file.slugs = slugsFn ? slugsFn(parseFilePath(path)) : getSlugs(path);
+        file.slugs = slugsFn ? slugsFn({ path }) : getSlugs(path);
 
         const key = file.slugs.join('/');
         if (taken.has(key)) throw new Error('Duplicated slugs');
@@ -57,9 +51,7 @@ const GroupRegex = /^\(.+\)$/;
 /**
  * Convert file path into slugs, also encode non-ASCII characters, so they can work in pathname
  */
-export function getSlugs(file: string | FileInfo): string[] {
-  if (typeof file !== 'string') return getSlugs(file.path);
-
+export function getSlugs(file: string): string[] {
   const dir = dirname(file);
   const name = basename(file, extname(file));
   const slugs: string[] = [];
