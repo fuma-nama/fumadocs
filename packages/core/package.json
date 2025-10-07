@@ -12,10 +12,6 @@
   "author": "Fuma Nama",
   "type": "module",
   "exports": {
-    "./sidebar": {
-      "import": "./dist/sidebar.js",
-      "types": "./dist/sidebar.d.ts"
-    },
     "./breadcrumb": {
       "import": "./dist/breadcrumb.js",
       "types": "./dist/breadcrumb.d.ts"
@@ -123,7 +119,6 @@
     "negotiator": "^1.0.0",
     "npm-to-yarn": "^3.0.1",
     "path-to-regexp": "^8.3.0",
-    "react-remove-scroll": "^2.7.1",
     "remark": "^15.0.1",
     "remark-gfm": "^4.0.1",
     "remark-rehype": "^11.1.2",
