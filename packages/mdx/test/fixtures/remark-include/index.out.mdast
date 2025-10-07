@@ -1,0 +1,494 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "position": undefined,
+          "type": "text",
+          "value": "Using JSX",
+        },
+      ],
+      "depth": 2,
+      "position": undefined,
+      "type": "heading",
+    },
+    {
+      "children": [
+        {
+          "position": undefined,
+          "type": "text",
+          "value": "Full:",
+        },
+      ],
+      "position": undefined,
+      "type": "paragraph",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "position": undefined,
+              "type": "text",
+              "value": "Hello World [#heading]",
+            },
+          ],
+          "depth": 1,
+          "position": undefined,
+          "type": "heading",
+        },
+        {
+          "children": [
+            {
+              "position": undefined,
+              "type": "text",
+              "value": "Hey there!",
+            },
+          ],
+          "position": undefined,
+          "type": "paragraph",
+        },
+        {
+          "attributes": [
+            {
+              "name": "id",
+              "position": {
+                "end": {
+                  "column": 29,
+                  "line": 5,
+                  "offset": 66,
+                },
+                "start": {
+                  "column": 10,
+                  "line": 5,
+                  "offset": 47,
+                },
+              },
+              "type": "mdxJsxAttribute",
+              "value": "section-in-jsx",
+            },
+          ],
+          "children": [
+            {
+              "children": [
+                {
+                  "position": undefined,
+                  "type": "text",
+                  "value": "This is My Test.",
+                },
+              ],
+              "position": undefined,
+              "type": "paragraph",
+            },
+            {
+              "children": [
+                {
+                  "position": undefined,
+                  "type": "text",
+                  "value": "Nested Heading",
+                },
+              ],
+              "depth": 3,
+              "position": undefined,
+              "type": "heading",
+            },
+            {
+              "lang": "ts",
+              "meta": null,
+              "position": undefined,
+              "type": "code",
+              "value": "console.log('Hello World');",
+            },
+          ],
+          "name": "section",
+          "position": undefined,
+          "type": "mdxJsxFlowElement",
+        },
+        {
+          "attributes": {
+            "id": "section-in-directive",
+          },
+          "children": [
+            {
+              "children": [
+                {
+                  "position": undefined,
+                  "type": "text",
+                  "value": "Heading in Directive",
+                },
+              ],
+              "depth": 3,
+              "position": undefined,
+              "type": "heading",
+            },
+            {
+              "children": [
+                {
+                  "position": undefined,
+                  "type": "text",
+                  "value": "some content inside.",
+                },
+              ],
+              "position": undefined,
+              "type": "paragraph",
+            },
+          ],
+          "name": "section",
+          "position": undefined,
+          "type": "containerDirective",
+        },
+      ],
+      "position": undefined,
+      "type": "root",
+    },
+    {
+      "children": [
+        {
+          "position": undefined,
+          "type": "text",
+          "value": "First Heading:",
+        },
+      ],
+      "position": undefined,
+      "type": "paragraph",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "position": undefined,
+              "type": "text",
+              "value": "Hello World",
+            },
+          ],
+          "data": {
+            "hProperties": {
+              "id": "heading",
+            },
+          },
+          "depth": 1,
+          "position": undefined,
+          "type": "heading",
+        },
+        {
+          "children": [
+            {
+              "position": undefined,
+              "type": "text",
+              "value": "Hey there!",
+            },
+          ],
+          "position": undefined,
+          "type": "paragraph",
+        },
+        {
+          "attributes": [
+            {
+              "name": "id",
+              "position": {
+                "end": {
+                  "column": 29,
+                  "line": 5,
+                  "offset": 66,
+                },
+                "start": {
+                  "column": 10,
+                  "line": 5,
+                  "offset": 47,
+                },
+              },
+              "type": "mdxJsxAttribute",
+              "value": "section-in-jsx",
+            },
+          ],
+          "children": [
+            {
+              "children": [
+                {
+                  "position": undefined,
+                  "type": "text",
+                  "value": "This is My Test.",
+                },
+              ],
+              "position": undefined,
+              "type": "paragraph",
+            },
+            {
+              "children": [
+                {
+                  "position": undefined,
+                  "type": "text",
+                  "value": "Nested Heading",
+                },
+              ],
+              "data": {
+                "hProperties": {
+                  "id": "nested-heading",
+                },
+              },
+              "depth": 3,
+              "position": undefined,
+              "type": "heading",
+            },
+            {
+              "lang": "ts",
+              "meta": null,
+              "position": undefined,
+              "type": "code",
+              "value": "console.log('Hello World');",
+            },
+          ],
+          "name": "section",
+          "position": undefined,
+          "type": "mdxJsxFlowElement",
+        },
+        {
+          "attributes": {
+            "id": "section-in-directive",
+          },
+          "children": [
+            {
+              "children": [
+                {
+                  "position": undefined,
+                  "type": "text",
+                  "value": "Heading in Directive",
+                },
+              ],
+              "data": {
+                "hProperties": {
+                  "id": "heading-in-directive",
+                },
+              },
+              "depth": 3,
+              "position": undefined,
+              "type": "heading",
+            },
+            {
+              "children": [
+                {
+                  "position": undefined,
+                  "type": "text",
+                  "value": "some content inside.",
+                },
+              ],
+              "position": undefined,
+              "type": "paragraph",
+            },
+          ],
+          "name": "section",
+          "position": undefined,
+          "type": "containerDirective",
+        },
+      ],
+      "position": undefined,
+      "type": "root",
+    },
+    {
+      "children": [
+        {
+          "position": undefined,
+          "type": "text",
+          "value": "In JSX:",
+        },
+      ],
+      "position": undefined,
+      "type": "paragraph",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "position": undefined,
+              "type": "text",
+              "value": "This is My Test.",
+            },
+          ],
+          "position": undefined,
+          "type": "paragraph",
+        },
+        {
+          "children": [
+            {
+              "position": undefined,
+              "type": "text",
+              "value": "Nested Heading",
+            },
+          ],
+          "data": {
+            "hProperties": {
+              "id": "nested-heading",
+            },
+          },
+          "depth": 3,
+          "position": undefined,
+          "type": "heading",
+        },
+        {
+          "lang": "ts",
+          "meta": null,
+          "position": undefined,
+          "type": "code",
+          "value": "console.log('Hello World');",
+        },
+      ],
+      "position": undefined,
+      "type": "root",
+    },
+    {
+      "children": [
+        {
+          "position": undefined,
+          "type": "text",
+          "value": "In Directive:",
+        },
+      ],
+      "position": undefined,
+      "type": "paragraph",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "position": undefined,
+              "type": "text",
+              "value": "Heading in Directive",
+            },
+          ],
+          "data": {
+            "hProperties": {
+              "id": "heading-in-directive",
+            },
+          },
+          "depth": 3,
+          "position": undefined,
+          "type": "heading",
+        },
+        {
+          "children": [
+            {
+              "position": undefined,
+              "type": "text",
+              "value": "some content inside.",
+            },
+          ],
+          "position": undefined,
+          "type": "paragraph",
+        },
+      ],
+      "position": undefined,
+      "type": "root",
+    },
+    {
+      "children": [
+        {
+          "position": undefined,
+          "type": "text",
+          "value": "Using Directives",
+        },
+      ],
+      "depth": 2,
+      "position": undefined,
+      "type": "heading",
+    },
+    {
+      "children": [
+        {
+          "position": undefined,
+          "type": "text",
+          "value": "In Directive:",
+        },
+      ],
+      "position": undefined,
+      "type": "paragraph",
+    },
+    {
+      "attributes": {},
+      "children": [
+        {
+          "children": [
+            {
+              "position": undefined,
+              "type": "text",
+              "value": "Heading in Directive",
+            },
+          ],
+          "data": {
+            "hProperties": {
+              "id": "heading-in-directive",
+            },
+          },
+          "depth": 3,
+          "position": undefined,
+          "type": "heading",
+        },
+        {
+          "children": [
+            {
+              "position": undefined,
+              "type": "text",
+              "value": "some content inside.",
+            },
+          ],
+          "position": undefined,
+          "type": "paragraph",
+        },
+      ],
+      "name": "include",
+      "position": undefined,
+      "type": "root",
+    },
+    {
+      "children": [
+        {
+          "position": undefined,
+          "type": "text",
+          "value": "Inline Directive:",
+        },
+      ],
+      "position": undefined,
+      "type": "paragraph",
+    },
+    {
+      "attributes": {},
+      "children": [
+        {
+          "children": [
+            {
+              "position": undefined,
+              "type": "text",
+              "value": "Heading in Directive",
+            },
+          ],
+          "data": {
+            "hProperties": {
+              "id": "heading-in-directive",
+            },
+          },
+          "depth": 3,
+          "position": undefined,
+          "type": "heading",
+        },
+        {
+          "children": [
+            {
+              "position": undefined,
+              "type": "text",
+              "value": "some content inside.",
+            },
+          ],
+          "position": undefined,
+          "type": "paragraph",
+        },
+      ],
+      "name": "include",
+      "position": undefined,
+      "type": "root",
+    },
+  ],
+  "position": undefined,
+  "type": "root",
+}

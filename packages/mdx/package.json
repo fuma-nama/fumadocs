@@ -105,6 +105,7 @@
     "remark-stringify": "^11.0.0",
     "rollup": "^4.52.4",
     "tsconfig": "workspace:*",
+    "unist-util-remove-position": "^5.0.0",
     "vfile": "^6.0.3",
     "vite": "^7.1.9",
     "webpack": "^5.102.0"

@@ -5,8 +5,6 @@ import * as path from 'node:path';
 import * as fs from 'node:fs/promises';
 import { fumaMatter } from '@/utils/fuma-matter';
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx-jsx';
-import remarkParse from 'remark-parse';
-import remarkMdx from 'remark-mdx';
 import { remarkHeading } from 'fumadocs-core/mdx-plugins';
 import type { DataMap } from 'vfile';
 import type { Directives } from 'mdast-util-directive';
@@ -116,12 +114,12 @@ function extractSection(root: Root, section: string): Root | undefined {
 export function remarkInclude(this: Processor): Transformer<Root, Root> {
   const TagName = 'include';
 
-  async function embedContent(
+  const embedContent = async (
     file: string,
     heading: string | undefined,
     params: Params,
     data: Partial<DataMap>,
-  ) {
+  ) => {
     let content: string;
     try {
       content = (await fs.readFile(file)).toString();
@@ -147,15 +145,15 @@ export function remarkInclude(this: Processor): Transformer<Root, Root> {
       } satisfies Code;
     }
 
-    const parser = (data._getProcessor ?? getDefaultProcessor)(
-      ext === '.mdx' ? 'mdx' : 'md',
-    );
+    const parser = data._getProcessor
+      ? data._getProcessor(ext === '.mdx' ? 'mdx' : 'md')
+      : this;
     const parsed = fumaMatter(content);
     let mdast = parser.parse({
       path: file,
       value: parsed.content,
       data: { frontmatter: parsed.data as Record<string, unknown> },
-    });
+    }) as Root;
 
     if (heading) {
       // parse headings before extraction
@@ -173,7 +171,7 @@ export function remarkInclude(this: Processor): Transformer<Root, Root> {
 
     await update(mdast, path.dirname(file), data);
     return mdast;
-  }
+  };
 
   async function update(tree: Root, directory: string, data: Partial<DataMap>) {
     const queue: Promise<void>[] = [];
@@ -210,11 +208,4 @@ export function remarkInclude(this: Processor): Transformer<Root, Root> {
   return async (tree, file) => {
     await update(tree, path.dirname(file.path), file.data);
   };
-}
-
-function getDefaultProcessor(format: 'md' | 'mdx') {
-  const mdProcessor = unified().use(remarkParse);
-
-  if (format === 'md') return mdProcessor;
-  return mdProcessor.use(remarkMdx);
 }

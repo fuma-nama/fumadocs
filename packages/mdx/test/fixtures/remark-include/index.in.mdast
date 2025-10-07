@@ -1,0 +1,204 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "position": undefined,
+          "type": "text",
+          "value": "Using JSX",
+        },
+      ],
+      "depth": 2,
+      "position": undefined,
+      "type": "heading",
+    },
+    {
+      "children": [
+        {
+          "position": undefined,
+          "type": "text",
+          "value": "Full:",
+        },
+      ],
+      "position": undefined,
+      "type": "paragraph",
+    },
+    {
+      "children": [
+        {
+          "attributes": [],
+          "children": [
+            {
+              "position": undefined,
+              "type": "text",
+              "value": "./test.mdx",
+            },
+          ],
+          "name": "include",
+          "position": undefined,
+          "type": "mdxJsxTextElement",
+        },
+      ],
+      "position": undefined,
+      "type": "paragraph",
+    },
+    {
+      "children": [
+        {
+          "position": undefined,
+          "type": "text",
+          "value": "First Heading:",
+        },
+      ],
+      "position": undefined,
+      "type": "paragraph",
+    },
+    {
+      "children": [
+        {
+          "attributes": [],
+          "children": [
+            {
+              "position": undefined,
+              "type": "text",
+              "value": "./test.mdx#heading",
+            },
+          ],
+          "name": "include",
+          "position": undefined,
+          "type": "mdxJsxTextElement",
+        },
+      ],
+      "position": undefined,
+      "type": "paragraph",
+    },
+    {
+      "children": [
+        {
+          "position": undefined,
+          "type": "text",
+          "value": "In JSX:",
+        },
+      ],
+      "position": undefined,
+      "type": "paragraph",
+    },
+    {
+      "children": [
+        {
+          "attributes": [],
+          "children": [
+            {
+              "position": undefined,
+              "type": "text",
+              "value": "./test.mdx#section-in-jsx",
+            },
+          ],
+          "name": "include",
+          "position": undefined,
+          "type": "mdxJsxTextElement",
+        },
+      ],
+      "position": undefined,
+      "type": "paragraph",
+    },
+    {
+      "children": [
+        {
+          "position": undefined,
+          "type": "text",
+          "value": "In Directive:",
+        },
+      ],
+      "position": undefined,
+      "type": "paragraph",
+    },
+    {
+      "children": [
+        {
+          "attributes": [],
+          "children": [
+            {
+              "position": undefined,
+              "type": "text",
+              "value": "./test.mdx#section-in-directive",
+            },
+          ],
+          "name": "include",
+          "position": undefined,
+          "type": "mdxJsxTextElement",
+        },
+      ],
+      "position": undefined,
+      "type": "paragraph",
+    },
+    {
+      "children": [
+        {
+          "position": undefined,
+          "type": "text",
+          "value": "Using Directives",
+        },
+      ],
+      "depth": 2,
+      "position": undefined,
+      "type": "heading",
+    },
+    {
+      "children": [
+        {
+          "position": undefined,
+          "type": "text",
+          "value": "In Directive:",
+        },
+      ],
+      "position": undefined,
+      "type": "paragraph",
+    },
+    {
+      "attributes": {},
+      "children": [
+        {
+          "children": [
+            {
+              "position": undefined,
+              "type": "text",
+              "value": "./test.mdx#section-in-directive",
+            },
+          ],
+          "position": undefined,
+          "type": "paragraph",
+        },
+      ],
+      "name": "include",
+      "position": undefined,
+      "type": "containerDirective",
+    },
+    {
+      "children": [
+        {
+          "position": undefined,
+          "type": "text",
+          "value": "Inline Directive:",
+        },
+      ],
+      "position": undefined,
+      "type": "paragraph",
+    },
+    {
+      "attributes": {},
+      "children": [
+        {
+          "position": undefined,
+          "type": "text",
+          "value": "./test.mdx#section-in-directive",
+        },
+      ],
+      "name": "include",
+      "position": undefined,
+      "type": "leafDirective",
+    },
+  ],
+  "position": undefined,
+  "type": "root",
+}
