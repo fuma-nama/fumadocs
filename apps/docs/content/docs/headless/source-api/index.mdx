@@ -3,17 +3,17 @@ title: loader()
 description: Turn a content source into a unified interface
 ---
 
-## Usage
+## What it does?
 
 `loader()` provides an interface for Fumadocs to integrate with file-system based content sources.
-
-### What it does?
 
 - Generate [page slugs and page tree](/docs/headless/page-conventions).
 - Assign URL to each page.
 - Output useful utilities to interact with content.
 
 It doesn't rely on the real file system (zero `node:fs` usage), a virtual storage is also allowed.
+
+## Usage
 
 You can use it with built-in content sources like Fumadocs MDX.
 
@@ -23,6 +23,7 @@ import { docs } from '@/.source';
 
 export const source = loader({
   source: docs.toFumadocsSource(),
+  baseUrl: '/docs',
 });
 ```
 
@@ -158,112 +159,4 @@ import { source } from '@/lib/source';
 
 // language -> pages
 const entries = source.getLanguages();
-```
-
-### Plugins
-
-You can create loader plugins to extend `loader()` or customise its output.
-
-```ts
-import { loader } from 'fumadocs-core/source';
-
-export const source = loader({
-  plugins: [
-    {
-      transformStorage: ({ storage }) => {},
-      transformPageTree: {
-        // ...
-      },
-    },
-  ],
-});
-```
-
-#### Storage
-
-During the process, your input source files will be parsed and form a virtual storage in memory.
-
-To perform virtual file-system operations before processing, you can hook `transformStorage`.
-
-```ts
-import { loader } from 'fumadocs-core/source';
-
-export const source = loader({
-  plugins: [
-    {
-      transformStorage: ({ storage }) => {
-        storage.read('...');
-      },
-      transformPageTree: {
-        // ...
-      },
-    },
-  ],
-});
-```
-
-#### Page Tree
-
-The page tree is generated from your file system, some unnecessary information (e.g. unused frontmatter properties) will be filtered.
-
-You can customise it using the `transformPageTree`, such as attaching custom properties to nodes, or customising the display name of pages.
-
-```tsx
-import { loader } from 'fumadocs-core/source';
-
-export const source = loader({
-  plugins: [
-    {
-      transformPageTree: {
-        file(node, file) {
-          // access the original (unfiltered) file data
-          if (file) console.log(this.storage.read(file));
-
-          // modify nodes
-          node.name = <>Some JSX Nodes here</>;
-          return node;
-        },
-      },
-    },
-  ],
-});
-```
-
-### Custom Source
-
-To plug your own content source, create a `Source` object.
-
-Since Source API doesn't rely on file system, file paths only allow special paths like `file.mdx` and `content/file.mdx`.
-
-Paths like `./file.mdx` and `D://content/file.mdx` are not allowed
-
-```ts twoslash
-import { Source } from 'fumadocs-core/source';
-
-export function createMySource(): Source<{
-  metaData: { title: string; pages: string[] }; // Your custom type
-  pageData: { title: string; description: string }; // Your custom type
-}> {
-  return {
-    files: [
-      {
-        type: 'page',
-        path: 'folder/index.mdx',
-        data: {
-          title: 'Hello World',
-          // ...
-        },
-      },
-      {
-        type: 'meta',
-        path: 'meta.json',
-        data: {
-          title: 'Docs',
-          pages: ['folder'],
-          // ...
-        },
-      },
-    ],
-  };
-}
 ```

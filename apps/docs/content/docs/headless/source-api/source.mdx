@@ -1,0 +1,78 @@
+---
+title: Source
+description: Setup sources for Loader API
+---
+
+## Overview
+
+`loader()` accepts different content sources based on a `source` interface.
+
+### Multiple Sources
+
+Use `multiple` to combine multiple sources into one.
+
+```ts
+import { loader, multiple } from 'fumadocs-core/source';
+import { openapiPlugin, openapiSource } from 'fumadocs-openapi/server';
+import { blog, docs } from '@/.source';
+import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
+
+export const source = loader(
+  multiple({
+    docs: docs.toFumadocsSource(),
+    openapi: blog.toFumadocsSource(),
+  }),
+  {
+    baseUrl: '/docs',
+  },
+);
+```
+
+To access properties exclusive to each source:
+
+```ts
+const page = source.getPage(['...']);
+
+if (page.data.type === 'docs') {
+  console.log(page.data);
+} else {
+  console.log(page.data);
+}
+```
+
+### Custom Source
+
+To plug your own content source, create a `Source` object.
+
+Since Source API doesn't rely on file system, file paths only allow virtual paths like `file.mdx` and `content/file.mdx`, `./file.mdx` and `D://content/file.mdx` are not allowed.
+
+```ts twoslash
+import { Source } from 'fumadocs-core/source';
+
+export function createMySource(): Source<{
+  metaData: { title: string; pages: string[] }; // Your custom type
+  pageData: { title: string; description?: string }; // Your custom type
+}> {
+  return {
+    files: [
+      {
+        type: 'page',
+        path: 'folder/index.mdx',
+        data: {
+          title: 'Hello World',
+          // ...
+        },
+      },
+      {
+        type: 'meta',
+        path: 'meta.json',
+        data: {
+          title: 'Docs',
+          pages: ['folder'],
+          // ...
+        },
+      },
+    ],
+  };
+}
+```

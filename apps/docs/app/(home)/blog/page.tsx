@@ -1,11 +1,16 @@
 import Link from 'next/link';
 import { blog } from '@/lib/source';
+import { PathUtils } from 'fumadocs-core/source';
+
+function getName(path: string) {
+  return PathUtils.basename(path, PathUtils.extname(path));
+}
 
 export default function Page() {
   const posts = [...blog.getPages()].sort(
     (a, b) =>
-      new Date(b.data.date ?? b.file.name).getTime() -
-      new Date(a.data.date ?? a.file.name).getTime(),
+      new Date(b.data.date ?? getName(b.path)).getTime() -
+      new Date(a.data.date ?? getName(a.path)).getTime(),
   );
 
   const svg = `<svg viewBox='0 0 500 500' xmlns='http://www.w3.org/2000/svg'>
@@ -53,7 +58,7 @@ export default function Page() {
             </p>
 
             <p className="mt-auto pt-4 text-xs text-fd-muted-foreground">
-              {new Date(post.data.date ?? post.file.name).toDateString()}
+              {new Date(post.data.date ?? getName(post.path)).toDateString()}
             </p>
           </Link>
         ))}

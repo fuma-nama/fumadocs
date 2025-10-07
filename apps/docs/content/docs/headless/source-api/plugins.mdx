@@ -1,0 +1,73 @@
+---
+title: Loader Plugins
+description: Extend Loader API
+---
+
+## Overview
+
+You can create loader plugins to extend `loader()` or customise its output.
+
+```ts
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  plugins: [
+    {
+      transformStorage({ storage }) {},
+      transformPageTree: {
+        // ...
+      },
+    },
+  ],
+});
+```
+
+### Storage
+
+During the process, your input source files will be parsed and form a virtual storage in memory.
+
+To perform virtual file-system operations before processing, you can hook `transformStorage`.
+
+```ts
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  plugins: [
+    {
+      transformStorage({ storage }) {
+        storage.read('my/path');
+      },
+      transformPageTree: {
+        // ...
+      },
+    },
+  ],
+});
+```
+
+### Page Tree
+
+The page tree is generated from your file system, some unnecessary information (e.g. unused frontmatter properties) will be filtered.
+
+You can customise it using the `transformPageTree`, such as attaching custom properties to nodes, or customising the display name of pages.
+
+```tsx
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  plugins: [
+    {
+      transformPageTree: {
+        file(node, file) {
+          // access the original (unfiltered) file data
+          if (file) console.log(this.storage.read(file));
+
+          // modify nodes
+          node.name = <>Some JSX Nodes here</>;
+          return node;
+        },
+      },
+    },
+  ],
+});
+```
