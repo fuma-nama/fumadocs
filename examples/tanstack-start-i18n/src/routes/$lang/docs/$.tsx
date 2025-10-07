@@ -2,7 +2,7 @@ import { createFileRoute, notFound } from '@tanstack/react-router';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { createServerFn } from '@tanstack/react-start';
 import { source } from '@/lib/source';
-import type { PageTree } from 'fumadocs-core/server';
+import * as PageTree from 'fumadocs-core/page-tree';
 import { useMemo } from 'react';
 import { docs } from '../../../../source.generated';
 import {

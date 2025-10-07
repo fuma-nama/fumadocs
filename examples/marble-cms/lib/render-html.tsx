@@ -1,11 +1,11 @@
-import type { TableOfContents } from 'fumadocs-core/server';
+import type { TOCItemType } from 'fumadocs-core/toc';
 import Slugger from 'github-slugger';
 import parse, { type DOMNode, domToReact } from 'html-react-parser';
 import { Heading } from 'fumadocs-ui/components/heading';
 import { CodeBlock } from '@/components/code-block';
 
 export function renderFromHtml(content: string) {
-  const toc: TableOfContents = [];
+  const toc: TOCItemType[] = [];
   const slugger = new Slugger();
 
   const node = parse(content, {
