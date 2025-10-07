@@ -52,10 +52,6 @@
       "import": "./dist/search/*.js",
       "types": "./dist/search/*.d.ts"
     },
-    "./server": {
-      "import": "./dist/server/index.js",
-      "types": "./dist/server/index.d.ts"
-    },
     "./source": {
       "import": "./dist/source/index.js",
       "types": "./dist/source/index.d.ts"
