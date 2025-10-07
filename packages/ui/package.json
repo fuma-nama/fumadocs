@@ -61,9 +61,9 @@
       "types": "./dist/layouts/shared/index.d.ts"
     },
     "./page": {
-      "node": "./dist/page.server.js",
+      "node": "./dist/page.js",
       "import": "./dist/page.js",
-      "types": "./dist/page.server.d.ts"
+      "types": "./dist/page.d.ts"
     },
     "./provider": {
       "import": "./dist/provider/index.js",

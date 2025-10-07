@@ -12,19 +12,7 @@ const promises: Record<string, Promise<ReactNode>> = {};
 
 export function useShiki(
   code: string,
-  options: HighlightOptions & {
-    /**
-     * @deprecated no longer pre-rendered using scripts.
-     */
-    withPrerenderScript?: boolean;
-
-    /**
-     * Displayed before highlighter is loaded.
-     *
-     * @deprecated use React `Suspense` fallback instead.
-     */
-    loading?: ReactNode;
-  },
+  options: HighlightOptions,
   deps?: DependencyList,
 ): ReactNode {
   const id = useId();

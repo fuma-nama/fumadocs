@@ -129,12 +129,6 @@ export interface AdvancedIndex {
   id: string;
   title: string;
   description?: string;
-
-  /**
-   * @deprecated No longer used
-   */
-  keywords?: string;
-
   breadcrumbs?: string[];
 
   /**

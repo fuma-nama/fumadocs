@@ -87,30 +87,11 @@ export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
   options?: Options<S>,
 ): SearchAPI;
 
-/**
- * @deprecated Use `createFromSource(source, options)` instead.
- */
 export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
   source: S,
-  pageToIndexFn?: (page: InferPageType<S>) => Awaitable<AdvancedIndex>,
-  options?: Omit<Options<S>, 'buildIndex'>,
-): SearchAPI;
-
-export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
-  source: S,
-  _buildIndexOrOptions?:
-    | ((page: InferPageType<S>) => Awaitable<AdvancedIndex>)
-    | Options<S>,
-  _options?: Omit<Options<S>, 'buildIndex'>,
+  options: Options<S> = {},
 ): SearchAPI {
-  const { buildIndex = defaultBuildIndex(source), ...options }: Options<S> = {
-    ...(typeof _buildIndexOrOptions === 'function'
-      ? {
-          buildIndex: _buildIndexOrOptions,
-        }
-      : _buildIndexOrOptions),
-    ..._options,
-  };
+  const { buildIndex = defaultBuildIndex(source) } = options;
 
   if (source._i18n) {
     return createI18nSearchAPI('advanced', {

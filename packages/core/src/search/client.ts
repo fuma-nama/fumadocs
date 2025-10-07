@@ -76,35 +76,8 @@ export function useDocsSearch(
      */
     allowEmpty?: boolean;
   },
-  /**
-   * @deprecated pass to `client` object instead
-   */
-  _locale?: string,
-  /**
-   * @deprecated pass to `client` object instead
-   */
-  _tag?: string,
-  /**
-   * @deprecated pass to `client` object instead
-   */
-  _delayMs = 100,
-  /**
-   * @deprecated pass to `client` object instead
-   */
-  _allowEmpty = false,
-  /**
-   * @deprecated No longer used
-   */
-  _key?: string,
 ): UseDocsSearch {
-  // handle deprecated params
-  const {
-    delayMs = _delayMs ?? 100,
-    allowEmpty = _allowEmpty ?? false,
-    ...client
-  } = clientOptions;
-  client.tag ??= _tag;
-  client.locale ??= _locale;
+  const { delayMs = 100, allowEmpty = false, ...client } = clientOptions;
 
   const [search, setSearch] = useState('');
   const [results, setResults] = useState<SortedResult[] | 'empty'>('empty');

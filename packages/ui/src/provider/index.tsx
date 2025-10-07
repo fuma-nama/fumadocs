@@ -1,7 +1,15 @@
 'use client';
 
-// TODO: remove this, recommend `fumadocs-ui/provider/next` instead.
-export { RootProvider } from './next';
+console.warn(
+  '`fumadocs-ui/provider` export will be removed on v17, you can import from `fumadocs-ui/provider/next` instead.',
+);
+
+export {
+  /**
+   * @deprecated Import from `fumadocs-ui/provider/next` instead.
+   */
+  RootProvider,
+} from './next';
 
 export { useI18n, I18nLabel } from '@/contexts/i18n';
 export {

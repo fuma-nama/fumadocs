@@ -4,7 +4,6 @@ import type { I18nConfig } from 'fumadocs-core/i18n';
 
 export type { I18nProviderProps, Translations };
 export { defaultTranslations } from './contexts/i18n';
-export { I18nProvider } from './contexts/legacy-i18n';
 
 export function defineI18nUI<Languages extends string>(
   config: I18nConfig<Languages>,

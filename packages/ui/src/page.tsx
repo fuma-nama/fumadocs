@@ -42,14 +42,6 @@ interface EditOnGitHubOptions
 interface BreadcrumbOptions extends BreadcrumbProps {
   enabled: boolean;
   component: ReactNode;
-
-  /**
-   * Show the full path to the current page
-   *
-   * @defaultValue false
-   * @deprecated use `includePage` instead
-   */
-  full?: boolean;
 }
 
 interface FooterOptions extends FooterProps {
