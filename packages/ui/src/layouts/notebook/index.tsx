@@ -1,5 +1,6 @@
 import {
   type ComponentProps,
+  type FC,
   Fragment,
   type HTMLAttributes,
   type ReactNode,
@@ -60,7 +61,6 @@ import {
   LargeSearchToggle,
   SearchToggle,
 } from '@/components/layout/search-toggle';
-import { HideIfEmpty } from 'fumadocs-core/hide-if-empty';
 import {
   getSidebarTabs,
   type GetSidebarTabsOptions,
@@ -89,8 +89,8 @@ interface SidebarOptions
    */
   tabs?: Option[] | GetSidebarTabsOptions | false;
 
-  banner?: ReactNode;
-  footer?: ReactNode;
+  banner?: ReactNode | FC<ComponentProps<typeof SidebarHeader>>;
+  footer?: ReactNode | FC<ComponentProps<typeof SidebarFooter>>;
 
   /**
    * Support collapsing the sidebar on desktop mode
@@ -137,6 +137,24 @@ export function DocsLayout(props: DocsLayoutProps) {
       defaultOpenLevel,
       ...rest
     } = sidebarProps;
+    const Header =
+      typeof banner === 'function'
+        ? banner
+        : (props: ComponentProps<typeof SidebarHeader>) => (
+            <SidebarHeader {...props}>
+              {props.children}
+              {banner}
+            </SidebarHeader>
+          );
+    const Footer =
+      typeof footer === 'function'
+        ? footer
+        : (props: ComponentProps<typeof SidebarFooter>) => (
+            <SidebarFooter {...props}>
+              {props.children}
+              {footer}
+            </SidebarFooter>
+          );
     const iconLinks = links.filter((item) => item.type === 'icon');
 
     const rootToggle = (
@@ -148,30 +166,6 @@ export function DocsLayout(props: DocsLayoutProps) {
           <RootToggle options={tabs} className="lg:hidden" />
         )}
       </>
-    );
-
-    const sidebarNav = (
-      <div className="flex justify-between">
-        <Link
-          href={nav.url ?? '/'}
-          className="inline-flex items-center gap-2.5 font-medium"
-        >
-          {nav.title}
-        </Link>
-        {collapsible && (
-          <SidebarCollapseTrigger
-            className={cn(
-              buttonVariants({
-                color: 'ghost',
-                size: 'icon-sm',
-                className: 'mt-px mb-auto text-fd-muted-foreground',
-              }),
-            )}
-          >
-            <SidebarIcon />
-          </SidebarCollapseTrigger>
-        )}
-      </div>
     );
 
     const viewport = (
@@ -200,16 +194,39 @@ export function DocsLayout(props: DocsLayoutProps) {
           rest.className,
         )}
       >
-        <HideIfEmpty as={SidebarHeader}>
-          {navMode === 'auto' && sidebarNav}
+        <Header className="empty:hidden">
+          {navMode === 'auto' && (
+            <div className="flex justify-between">
+              <Link
+                href={nav.url ?? '/'}
+                className="inline-flex items-center gap-2.5 font-medium"
+              >
+                {nav.title}
+              </Link>
+              {collapsible && (
+                <SidebarCollapseTrigger
+                  className={cn(
+                    buttonVariants({
+                      color: 'ghost',
+                      size: 'icon-sm',
+                      className: 'mt-px mb-auto text-fd-muted-foreground',
+                    }),
+                  )}
+                >
+                  <SidebarIcon />
+                </SidebarCollapseTrigger>
+              )}
+            </div>
+          )}
           {nav.children}
-          {banner}
           {rootToggle}
-        </HideIfEmpty>
+        </Header>
         {viewport}
-        <HideIfEmpty
-          as={SidebarFooter}
-          className="flex flex-row text-fd-muted-foreground items-center"
+        <Footer
+          className={cn(
+            'hidden flex-row text-fd-muted-foreground items-center',
+            iconLinks.length > 0 && 'max-lg:flex',
+          )}
         >
           {iconLinks.map((item, i) => (
             <BaseLinkItem
@@ -227,14 +244,13 @@ export function DocsLayout(props: DocsLayoutProps) {
               {item.icon}
             </BaseLinkItem>
           ))}
-          {footer}
-        </HideIfEmpty>
+        </Footer>
       </SidebarContent>
     );
 
     const mobile = (
       <SidebarContentMobile {...rest}>
-        <SidebarHeader>
+        <Header>
           <SidebarTrigger
             className={cn(
               buttonVariants({
@@ -246,13 +262,15 @@ export function DocsLayout(props: DocsLayoutProps) {
           >
             <X />
           </SidebarTrigger>
-          {banner}
           {rootToggle}
-        </SidebarHeader>
+        </Header>
         {viewport}
-        <HideIfEmpty
-          as={SidebarFooter}
-          className="flex flex-row items-center justify-end"
+        <Footer
+          className={cn(
+            'hidden flex-row items-center justify-end',
+            (i18n || themeSwitch.enabled !== false) && 'flex',
+            iconLinks.length > 0 && 'max-lg:flex',
+          )}
         >
           {iconLinks.map((item, i) => (
             <BaseLinkItem
@@ -271,17 +289,16 @@ export function DocsLayout(props: DocsLayoutProps) {
               {item.icon}
             </BaseLinkItem>
           ))}
-          {i18n ? (
+          {i18n && (
             <LanguageToggle>
               <Languages className="size-4.5 text-fd-muted-foreground" />
             </LanguageToggle>
-          ) : null}
+          )}
           {themeSwitch.enabled !== false &&
             (themeSwitch.component ?? (
               <ThemeToggle mode={themeSwitch.mode ?? 'light-dark-system'} />
             ))}
-          {footer}
-        </HideIfEmpty>
+        </Footer>
       </SidebarContentMobile>
     );
 
@@ -321,16 +338,16 @@ export function DocsLayout(props: DocsLayoutProps) {
 function DocsNavbar({
   links,
   tabs,
+  sidebar: { collapsible: sidebarCollapsible = true } = {},
   searchToggle = {},
   themeSwitch = {},
   nav = {},
-  ...props
+  i18n,
 }: DocsLayoutProps & {
   links: LinkItemType[];
   tabs: Option[];
 }) {
   const navMode = nav.mode ?? 'auto';
-  const sidebarCollapsible = props.sidebar?.collapsible ?? true;
 
   return (
     <Navbar
@@ -438,11 +455,11 @@ function DocsNavbar({
           </div>
 
           <div className="flex items-center gap-2 max-md:hidden">
-            {props.i18n ? (
+            {i18n && (
               <LanguageToggle>
                 <Languages className="size-4.5 text-fd-muted-foreground" />
               </LanguageToggle>
-            ) : null}
+            )}
             {themeSwitch.enabled !== false &&
               (themeSwitch.component ?? (
                 <ThemeToggle mode={themeSwitch.mode ?? 'light-dark-system'} />
