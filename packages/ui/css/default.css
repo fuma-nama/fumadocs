@@ -1,0 +1,33 @@
+/**
+The default theme of Fumadocs
+ */
+@theme {
+  --color-fd-background: transparent;
+  --color-fd-foreground: transparent;
+  --color-fd-muted: transparent;
+  --color-fd-muted-foreground: transparent;
+  --color-fd-popover: transparent;
+  --color-fd-popover-foreground: transparent;
+  --color-fd-card: transparent;
+  --color-fd-card-foreground: transparent;
+  --color-fd-border: transparent;
+  --color-fd-primary: transparent;
+  --color-fd-primary-foreground: transparent;
+  --color-fd-secondary: transparent;
+  --color-fd-secondary-foreground: transparent;
+  --color-fd-accent: transparent;
+  --color-fd-accent-foreground: transparent;
+  --color-fd-ring: transparent;
+  --color-fd-overlay: transparent;
+}
+
+@theme static {
+  --color-fd-info: oklch(62.3% 0.214 259.815);
+  --color-fd-warning: oklch(76.9% 0.188 70.08);
+  --color-fd-error: oklch(63.7% 0.237 25.331);
+  --color-fd-success: oklch(72.3% 0.219 149.579);
+  --color-fd-diff-remove: rgba(200, 10, 100, 0.12);
+  --color-fd-diff-remove-symbol: rgb(230, 10, 100);
+  --color-fd-diff-add: rgba(14, 180, 100, 0.1);
+  --color-fd-diff-add-symbol: rgb(10, 200, 100);
+}

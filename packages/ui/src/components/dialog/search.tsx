@@ -173,7 +173,7 @@ export function SearchDialogOverlay(
     <DialogOverlay
       {...props}
       className={cn(
-        'fixed inset-0 z-50 backdrop-blur-xs data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out',
+        'fixed inset-0 z-50 backdrop-blur-xs bg-fd-overlay data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out',
         props.className,
       )}
     />

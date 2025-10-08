@@ -294,7 +294,7 @@ export function AISearchTrigger() {
         <Presence present={open}>
           <div
             className={cn(
-              'fixed inset-0 p-2 right-(--removed-body-scroll-bar-size,0) flex flex-col pb-[8.375rem] items-center bg-fd-background/80 backdrop-blur-sm z-50',
+              'fixed inset-0 p-2 right-(--removed-body-scroll-bar-size,0) flex flex-col pb-[8.375rem] items-center bg-fd-background/80 backdrop-blur-sm z-30',
               open ? 'animate-fd-fade-in' : 'animate-fd-fade-out',
             )}
             onClick={(e) => {
@@ -342,7 +342,7 @@ export function AISearchTrigger() {
         </Presence>
         <div
           className={cn(
-            'fixed bottom-2 transition-[width,height] duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] -translate-x-1/2 rounded-2xl border shadow-xl z-50 overflow-hidden',
+            'fixed bottom-2 transition-[width,height] duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] -translate-x-1/2 rounded-2xl border shadow-xl overflow-hidden z-30',
             open
               ? 'w-[min(600px,90vw)] bg-fd-popover h-32'
               : 'w-40 h-10 bg-fd-secondary text-fd-secondary-foreground shadow-fd-background',
