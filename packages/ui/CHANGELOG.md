@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 15.8.5
+
+### Patch Changes
+
+- 01fc14a: Drop `fumadocs-core/hide-if-empty` usage, prefer user-side component overrides for precise control
+  - fumadocs-core@15.8.5
+
 ## 15.8.4
 
 ### Patch Changes
