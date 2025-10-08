@@ -31,7 +31,6 @@ import {
   type BaseLayoutProps,
   BaseLinkItem,
   getLinks,
-  type IconItemType,
   type LinkItemType,
 } from '@/layouts/shared';
 import {
@@ -52,7 +51,6 @@ import {
   LargeSearchToggle,
   SearchToggle,
 } from '@/components/layout/search-toggle';
-import { HideIfEmpty } from 'fumadocs-core/hide-if-empty';
 import {
   getSidebarTabs,
   type GetSidebarTabsOptions,
@@ -138,9 +136,7 @@ export function DocsLayout({
     } = sidebarProps;
     if (component) return component;
 
-    const iconLinks = links.filter(
-      (item): item is IconItemType => item.type === 'icon',
-    );
+    const iconLinks = links.filter((item) => item.type === 'icon');
 
     const viewport = (
       <SidebarViewport>
@@ -244,32 +240,40 @@ export function DocsLayout({
           {banner}
         </SidebarHeader>
         {viewport}
-        <HideIfEmpty as={SidebarFooter}>
-          <div className="flex text-fd-muted-foreground items-center empty:hidden">
-            {i18n ? (
-              <LanguageToggle>
-                <Languages className="size-4.5" />
-              </LanguageToggle>
-            ) : null}
-            {iconLinks.map((item, i) => (
-              <BaseLinkItem
-                key={i}
-                item={item}
-                className={cn(
-                  buttonVariants({ size: 'icon-sm', color: 'ghost' }),
-                )}
-                aria-label={item.label}
-              >
-                {item.icon}
-              </BaseLinkItem>
-            ))}
-            {themeSwitch.enabled !== false &&
-              (themeSwitch.component ?? (
-                <ThemeToggle className="ms-auto p-0" mode={themeSwitch.mode} />
+        {(i18n ||
+          iconLinks.length > 0 ||
+          themeSwitch?.enabled !== false ||
+          footer) && (
+          <SidebarFooter>
+            <div className="flex text-fd-muted-foreground items-center empty:hidden">
+              {i18n && (
+                <LanguageToggle>
+                  <Languages className="size-4.5" />
+                </LanguageToggle>
+              )}
+              {iconLinks.map((item, i) => (
+                <BaseLinkItem
+                  key={i}
+                  item={item}
+                  className={cn(
+                    buttonVariants({ size: 'icon-sm', color: 'ghost' }),
+                  )}
+                  aria-label={item.label}
+                >
+                  {item.icon}
+                </BaseLinkItem>
               ))}
-          </div>
-          {footer}
-        </HideIfEmpty>
+              {themeSwitch.enabled !== false &&
+                (themeSwitch.component ?? (
+                  <ThemeToggle
+                    className="ms-auto p-0"
+                    mode={themeSwitch.mode}
+                  />
+                ))}
+            </div>
+            {footer}
+          </SidebarFooter>
+        )}
       </SidebarContent>
     );
 
