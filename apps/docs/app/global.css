@@ -19,6 +19,7 @@
 }
 
 .dark {
+  --color-fd-primary: var(--color-brand);
   --color-brand: #fff383;
   --color-brand-foreground: black;
   --color-brand-200: #fff7c8;

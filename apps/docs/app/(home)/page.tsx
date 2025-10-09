@@ -24,6 +24,7 @@ import type { HTMLAttributes, ReactNode } from 'react';
 
 const tinos = Tinos({
   weight: '400',
+  subsets: ['latin'],
 });
 
 const buttonVariants = cva(
