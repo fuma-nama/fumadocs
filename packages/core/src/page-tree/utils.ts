@@ -83,20 +83,8 @@ export function getPageTreePeers(
     ) as PageTree.Item[];
   }
 
-  // Multiple trees case - extract language from URL and find corresponding tree
+  // Multiple trees case
   const trees = treeOrTrees as Record<string, PageTree.Root>;
-
-  const urlParts = url.split('/').filter(Boolean);
-  const langFromUrl = urlParts[0];
-
-  if (langFromUrl && trees[langFromUrl]) {
-    const parent = findParentFromTree(trees[langFromUrl], url);
-    if (parent) {
-      return parent.children.filter(
-        (item) => item.type === 'page' && item.url !== url,
-      ) as PageTree.Item[];
-    }
-  }
 
   for (const lang in trees) {
     const rootTree = trees[lang];
