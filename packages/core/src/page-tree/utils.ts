@@ -68,15 +68,49 @@ export function getPageTreeRoots(
  * Get other page tree nodes that lives under the same parent
  */
 export function getPageTreePeers(
-  tree: PageTree.Root,
+  treeOrTrees: PageTree.Root | Record<string, PageTree.Root>,
   url: string,
 ): PageTree.Item[] {
-  const parent = findParentFromTree(tree, url);
-  if (!parent) return [];
+  // Check if it's a single tree or multiple trees (i18n)
+  if ('children' in treeOrTrees) {
+    // Single tree case
+    const tree = treeOrTrees as PageTree.Root;
+    const parent = findParentFromTree(tree, url);
+    if (!parent) return [];
 
-  return parent.children.filter(
-    (item) => item.type === 'page' && item.url !== url,
-  ) as PageTree.Item[];
+    return parent.children.filter(
+      (item) => item.type === 'page' && item.url !== url,
+    ) as PageTree.Item[];
+  }
+
+  // Multiple trees case - extract language from URL and find corresponding tree
+  const trees = treeOrTrees as Record<string, PageTree.Root>;
+
+  const urlParts = url.split('/').filter(Boolean);
+  const langFromUrl = urlParts[0];
+
+  if (langFromUrl && trees[langFromUrl]) {
+    const parent = findParentFromTree(trees[langFromUrl], url);
+    if (parent) {
+      return parent.children.filter(
+        (item) => item.type === 'page' && item.url !== url,
+      ) as PageTree.Item[];
+    }
+  }
+
+  for (const lang in trees) {
+    const rootTree = trees[lang];
+    if (rootTree) {
+      const parent = findParentFromTree(rootTree, url);
+      if (parent) {
+        return parent.children.filter(
+          (item) => item.type === 'page' && item.url !== url,
+        ) as PageTree.Item[];
+      }
+    }
+  }
+
+  return [];
 }
 
 function findParentFromTree(
