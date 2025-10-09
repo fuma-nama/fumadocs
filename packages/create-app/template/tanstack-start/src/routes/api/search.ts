@@ -1,4 +1,4 @@
-import { createServerFileRoute } from '@tanstack/react-start/server';
+import { createFileRoute } from '@tanstack/react-router';
 import { source } from '@/lib/source';
 import { createFromSource } from 'fumadocs-core/search/server';
 
@@ -7,6 +7,10 @@ const server = createFromSource(source, {
   language: 'english',
 });
 
-export const ServerRoute = createServerFileRoute('/api/search').methods({
-  GET: async ({ request }) => server.GET(request),
+export const Route = createFileRoute('/api/search')({
+  server: {
+    handlers: {
+      GET: async ({ request }) => server.GET(request),
+    },
+  },
 });
