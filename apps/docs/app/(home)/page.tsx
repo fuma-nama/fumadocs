@@ -4,6 +4,7 @@ import { Tinos } from 'next/font/google';
 import { cn } from '@/lib/cn';
 import Link from 'next/link';
 import SourceImage from '@/public/source.png';
+import ComponentsImage from './components.png';
 import { cva } from 'class-variance-authority';
 import {
   CpuIcon,
@@ -96,7 +97,7 @@ export default function Page() {
           to fit your preferences, works seamlessly with any React.js framework,
           CMS — anything.
         </p>
-        <div className="my-20 p-8 bg-gradient-to-b from-brand-secondary/40 rounded-xl">
+        <div className="my-24 p-8 bg-gradient-to-b from-brand-secondary/40 rounded-xl">
           <h2 className="text-6xl text-center mix-blend-overlay font-tinos">
             Try it out.
           </h2>
@@ -109,7 +110,7 @@ export default function Page() {
           />
         </div>
         <Feedback />
-        <div className="grid grid-cols-2 py-12">
+        <div className="grid grid-cols-2 my-24">
           <PreviewImages />
           <div>
             <h2 className="text-4xl font-tinos my-2">
@@ -257,6 +258,34 @@ export async function DataView() {
             ),
           }}
         />
+        <div className="grid grid-cols-2 items-center my-24">
+          <Image
+            src={ComponentsImage}
+            alt="components"
+            width={1000}
+            className="min-w-0"
+          />
+          <div>
+            <h1 className="font-tinos text-4xl mb-8">
+              Composable & Flexible, by a Engineer.
+            </h1>
+            <p>
+              Separated as <span className="text-brand">Content</span> →{' '}
+              <span className="text-brand">Core</span> →{' '}
+              <span className="text-brand">UI</span>, offering the high
+              composability that engineers love — you can use Fumadocs MDX as a
+              library, without adapting the entire framework.
+            </p>
+            <div className="text-sm mt-8 [mask-image:linear-gradient(to_bottom,white,transparent)]">
+              <p>fumadocs</p>
+              <p>fumadocs-mdx</p>
+              <p>fumadocs-core</p>
+              <p>fumadocs-ui</p>
+              <p>fumadocs-openapi</p>
+              <p>fumadocs-obsidian</p>
+            </div>
+          </div>
+        </div>
         <Features />
       </div>
       <Footer />
@@ -296,7 +325,7 @@ Like headless docs to build exactly what you need.`,
 
 function Feedback() {
   return (
-    <div className="grid grid-cols-1 my-20 lg:grid-cols-2">
+    <div className="grid grid-cols-1 my-24 lg:grid-cols-2">
       <div>
         <h2 className="text-4xl mb-8 font-tinos">A framework people loves.</h2>
         <p>
