@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "next build --turbo",
-    "dev": "next dev --turbo",
+    "build": "next build",
+    "dev": "next dev",
     "start": "next start"
   },
   "dependencies": {
@@ -12,7 +12,7 @@
     "fumadocs-ui": "workspace:*",
     "github-slugger": "^2.0.0",
     "html-react-parser": "^5.2.6",
-    "next": "15.5.4",
+    "next": "16.0.0-beta.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "shiki": "^3.13.0"

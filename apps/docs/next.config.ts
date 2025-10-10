@@ -13,9 +13,8 @@ const config: NextConfig = {
       fullUrl: true,
     },
   },
-  eslint: {
-    // Replaced by root workspace command
-    ignoreDuringBuilds: true,
+  experimental: {
+    turbopackFileSystemCacheForDev: true,
   },
   serverExternalPackages: [
     'ts-morph',

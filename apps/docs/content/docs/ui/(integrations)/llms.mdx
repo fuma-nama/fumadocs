@@ -253,13 +253,13 @@ export const startInstance = createStart(() => {
 
 To serve the Markdown content instead for AI agents, you can leverage the `Accept` header.
 
-```ts title="middleware.ts (Next.js)"
+```ts title="proxy.ts (Next.js)"
 import { NextRequest, NextResponse } from 'next/server';
 import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
 
 const { rewrite: rewriteLLM } = rewritePath('/docs/*path', '/llms.mdx/*path');
 
-export function middleware(request: NextRequest) {
+export default function proxy(request: NextRequest) {
   if (isMarkdownPreferred(request)) {
     const result = rewriteLLM(request.nextUrl.pathname);
 

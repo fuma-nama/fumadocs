@@ -3,7 +3,7 @@ import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
 
 const { rewrite: rewriteLLM } = rewritePath('/docs/*path', '/llms.mdx/*path');
 
-export function middleware(request: NextRequest) {
+export default function proxy(request: NextRequest) {
   if (isMarkdownPreferred(request)) {
     const result = rewriteLLM(request.nextUrl.pathname);
 

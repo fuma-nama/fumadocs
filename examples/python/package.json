@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "pnpm build:docs && next build",
-    "dev": "next dev --turbo",
+    "dev": "next dev",
     "start": "next start",
     "build:docs": "node ./scripts/generate-docs.mjs",
     "python:generate": "pip3 install ./node_modules/fumadocs-python && fumapy-generate httpx"
@@ -14,7 +14,7 @@
     "fumadocs-mdx": "workspace:*",
     "fumadocs-python": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "next": "15.5.4",
+    "next": "16.0.0-beta.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

@@ -3,7 +3,6 @@ import type { Configuration } from 'webpack';
 import { findConfigFile } from '@/loaders/config';
 import { start } from './map';
 import { type Options as MDXLoaderOptions } from '../loader-mdx';
-import { readFileSync } from 'node:fs';
 import type { TurbopackOptions } from 'next/dist/server/config-shared';
 
 export interface CreateMDXOptions {
@@ -21,22 +20,6 @@ export interface CreateMDXOptions {
 }
 
 const defaultPageExtensions = ['mdx', 'md', 'jsx', 'js', 'tsx', 'ts'];
-
-let isTurboExperimental: boolean;
-
-// not a good solution, but works
-try {
-  const content = readFileSync('./node_modules/next/package.json').toString();
-  const version = JSON.parse(content).version as string;
-
-  isTurboExperimental =
-    version.startsWith('15.0.') ||
-    version.startsWith('15.1.') ||
-    version.startsWith('15.2.');
-} catch {
-  isTurboExperimental = false;
-}
-
 export { start };
 
 export function createMDX({
@@ -54,11 +37,9 @@ export function createMDX({
       configPath,
       outDir,
     };
-    const turbo: TurbopackOptions = {
-      ...nextConfig.experimental?.turbo,
+    const turbopack: TurbopackOptions = {
       ...nextConfig.turbopack,
       rules: {
-        ...nextConfig.experimental?.turbo?.rules,
         ...nextConfig.turbopack?.rules,
         '*.{md,mdx}': {
           loaders: [
@@ -72,8 +53,9 @@ export function createMDX({
       },
     };
 
-    const updated: NextConfig = {
+    return {
       ...nextConfig,
+      turbopack,
       pageExtensions: nextConfig.pageExtensions ?? defaultPageExtensions,
       webpack: (config: Configuration, options) => {
         config.resolve ||= {};
@@ -97,13 +79,5 @@ export function createMDX({
         return nextConfig.webpack?.(config, options) ?? config;
       },
     };
-
-    if (isTurboExperimental) {
-      updated.experimental = { ...updated.experimental, turbo };
-    } else {
-      updated.turbopack = turbo;
-    }
-
-    return updated;
   };
 }
