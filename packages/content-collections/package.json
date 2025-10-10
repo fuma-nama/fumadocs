@@ -37,17 +37,17 @@
   "devDependencies": {
     "@content-collections/core": "^0.11.1",
     "@content-collections/mdx": "^0.2.2",
-    "@types/node": "24.6.2",
+    "@types/node": "24.7.1",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
-    "zod": "^4.1.11"
+    "zod": "^4.1.12"
   },
   "peerDependencies": {
     "@content-collections/core": "0.x.x",
     "@content-collections/mdx": "0.x.x",
-    "fumadocs-core": "^14.0.0 || ^15.0.0"
+    "fumadocs-core": "15.x.x || 16.x.x"
   },
   "publishConfig": {
     "access": "public"

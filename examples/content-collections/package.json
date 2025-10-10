@@ -20,8 +20,8 @@
     "@content-collections/mdx": "^0.2.2",
     "@content-collections/next": "^0.2.7",
     "@types/mdx": "^2.0.13",
-    "@types/react": "^19.2.0",
-    "@types/react-dom": "^19.2.0",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.1",
     "typescript": "^5.9.3"
   }
 }

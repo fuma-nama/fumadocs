@@ -49,9 +49,9 @@
     "@types/estree": "^1.0.8",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
-    "@types/node": "24.6.2",
-    "@types/react": "^19.2.0",
-    "@types/react-dom": "^19.2.0",
+    "@types/node": "24.7.1",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.1",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
@@ -61,8 +61,8 @@
   },
   "peerDependencies": {
     "@types/react": "*",
-    "fumadocs-core": "^15.7.0",
-    "fumadocs-ui": "^15.7.0",
+    "fumadocs-core": "^15.7.0 || ^16.0.0",
+    "fumadocs-ui": "^15.7.0 || ^16.0.0",
     "typescript": "*"
   },
   "peerDependenciesMeta": {

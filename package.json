@@ -23,7 +23,7 @@
     "concurrently": "^9.2.1",
     "eslint": "^9.37.0",
     "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-hooks": "6.1.1",
+    "eslint-plugin-react-hooks": "7.0.0",
     "eslint-plugin-tailwindcss": "^3.18.2",
     "prettier": "^3.6.2",
     "prettier-plugin-astro": "^0.14.1",
@@ -31,7 +31,7 @@
     "tsup": "8.5.0",
     "turbo": "2.5.8",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.45.0",
+    "typescript-eslint": "^8.46.0",
     "vitest": "^3.2.4"
   },
   "packageManager": "pnpm@9.15.9",

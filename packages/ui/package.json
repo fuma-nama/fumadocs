@@ -138,8 +138,8 @@
     "@next/eslint-plugin-next": "^15.5.4",
     "@tailwindcss/cli": "^4.1.14",
     "@types/lodash.merge": "^4.6.9",
-    "@types/react": "^19.2.0",
-    "@types/react-dom": "^19.2.0",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.1",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "next": "15.5.4",
@@ -149,10 +149,10 @@
   },
   "peerDependencies": {
     "@types/react": "*",
-    "next": "14.x.x || 15.x.x",
-    "react": "18.x.x || 19.x.x",
-    "react-dom": "18.x.x || 19.x.x",
-    "tailwindcss": "^3.4.14 || ^4.0.0"
+    "next": "16.x.x",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "tailwindcss": "^4.0.0"
   },
   "peerDependenciesMeta": {
     "next": {
