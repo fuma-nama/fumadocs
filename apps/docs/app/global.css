@@ -13,14 +13,20 @@
   --spacing-fd-container: 1600px;
   --color-brand: hsl(55, 100%, 38%);
   --color-brand-foreground: white;
+  --color-brand-secondary: #9b18dc;
+  --color-brand-secondary-foreground: #efccff;
   --color-brand-200: hsl(41, 100%, 50%);
   --color-landing-foreground: #59592a;
   --color-landing-foreground-dark: #e4e2d0;
+
+  --font-tinos: 'Tinos';
 }
 
 .dark {
   --color-fd-primary: var(--color-brand);
   --color-brand: #fff383;
+  --color-brand-secondary: #cc67ff;
+  --color-brand-secondary-foreground: #f5e4ff;
   --color-brand-foreground: black;
   --color-brand-200: #fff7c8;
 }

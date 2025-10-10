@@ -9,7 +9,11 @@ import {
   type RegexEngine,
 } from 'shiki';
 import type { BundledTheme } from 'shiki/themes';
-import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
+import {
+  type Components,
+  type Options as ToJsxOptions,
+  toJsxRuntime,
+} from 'hast-util-to-jsx-runtime';
 import { Fragment, type ReactNode } from 'react';
 import { jsx, jsxs } from 'react/jsx-runtime';
 import type { Root } from 'hast';
@@ -95,13 +99,13 @@ export async function highlightHast(
   });
 }
 
-export function _renderHighlight(hast: Root, options?: HighlightOptions) {
+export function hastToJsx(hast: Root, options?: Partial<ToJsxOptions>) {
   return toJsxRuntime(hast, {
     jsx,
     jsxs,
     development: false,
-    components: options?.components,
     Fragment,
+    ...options,
   });
 }
 
@@ -158,5 +162,7 @@ export async function highlight(
   code: string,
   options: HighlightOptions,
 ): Promise<ReactNode> {
-  return _renderHighlight(await highlightHast(code, options), options);
+  return hastToJsx(await highlightHast(code, options), {
+    components: options.components,
+  });
 }

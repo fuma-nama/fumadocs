@@ -13,9 +13,6 @@ const config: NextConfig = {
       fullUrl: true,
     },
   },
-  experimental: {
-    turbopackFileSystemCacheForDev: true,
-  },
   serverExternalPackages: [
     'ts-morph',
     'typescript',

@@ -19,12 +19,13 @@ import {
 } from 'lucide-react';
 import { Marquee } from '@/app/(home)/marquee';
 import { CodeBlock } from '@/components/code-block';
-import { PreviewImages } from '@/app/(home)/page.client';
+import { PreviewImages, Writing } from '@/app/(home)/page.client';
 import type { HTMLAttributes, ReactNode } from 'react';
 
 const tinos = Tinos({
   weight: '400',
   subsets: ['latin'],
+  variable: '--font-tinos',
 });
 
 const buttonVariants = cva(
@@ -47,7 +48,12 @@ const linkVariants = cva('text-sm hover:underline');
 
 export default function Page() {
   return (
-    <main className="mx-auto w-full max-w-[1400px] text-landing-foreground dark:text-landing-foreground-dark">
+    <main
+      className={cn(
+        'mx-auto w-full max-w-[1400px] text-landing-foreground dark:text-landing-foreground-dark',
+        tinos.variable,
+      )}
+    >
       <div className="grid">
         <Image
           src={Hero}
@@ -56,12 +62,7 @@ export default function Page() {
           priority
         />
         <div className="mt-auto text-landing-foreground-dark p-12 pb-40 col-start-1 row-start-1">
-          <h1
-            className={cn(
-              'text-5xl mb-12 leading-tighter md:text-6xl',
-              tinos.className,
-            )}
-          >
+          <h1 className="text-5xl mb-12 leading-tighter font-tinos md:text-6xl">
             Build the excellent
             <br />
             documentation
@@ -95,13 +96,8 @@ export default function Page() {
           to fit your preferences, works seamlessly with any React.js framework,
           CMS — anything.
         </p>
-        <div className="my-20 p-8 bg-gradient-to-t from-brand/20 rounded-xl">
-          <h2
-            className={cn(
-              'text-6xl text-center mix-blend-overlay',
-              tinos.className,
-            )}
-          >
+        <div className="my-20 p-8 bg-gradient-to-b from-brand-secondary/40 rounded-xl">
+          <h2 className="text-6xl text-center mix-blend-overlay font-tinos">
             Try it out.
           </h2>
           <CodeBlock
@@ -116,7 +112,7 @@ export default function Page() {
         <div className="grid grid-cols-2 py-12">
           <PreviewImages />
           <div>
-            <h2 className={cn('text-4xl mb-8', tinos.className)}>
+            <h2 className="text-4xl font-tinos my-2">
               Minimal aesthetics, with maximum customizability.
             </h2>
             <p>
@@ -126,16 +122,147 @@ export default function Page() {
               Pro designer? Customise it with a single command using Fumadocs
               CLI.
             </p>
-            <CodeBlock code="pnpm dlx @fumadocs/cli customise" lang="bash" />
+            <CodeBlock
+              code="pnpm dlx @fumadocs/cli customise"
+              lang="bash"
+              wrapper={{ className: 'mt-4' }}
+            />
           </div>
         </div>
+        <Writing
+          tabs={{
+            writer: (
+              <div className="grid grid-cols-2 gap-8">
+                <CodeBlock
+                  code={`---
+title: Hello World
+---
+
+## Overview
+
+I love **Fumadocs**!
+
+\`\`\`ts tab="Tab 1"
+console.log("Hello World")
+\`\`\`
+
+\`\`\`ts tab="Tab 2"
+return 0;
+\`\`\``}
+                  lang="mdx"
+                />
+                <div>
+                  <h3 className="text-3xl font-tinos mb-4">
+                    The familiar syntax.
+                  </h3>
+                  <p>
+                    It is just Markdown, with additional features seamlessly
+                    composing into the syntax.
+                  </p>
+                  <ul className="text-xs list-disc list-inside mt-8">
+                    <li>Markdown features, including images</li>
+                    <li>Syntax highlighting (Powered by Shiki)</li>
+                    <li>Codeblock Groups</li>
+                    <li>Callouts</li>
+                    <li>Cards</li>
+                    <li>Custom Heading Anchors</li>
+                    <li>Auto Table of Contents</li>
+                  </ul>
+                </div>
+              </div>
+            ),
+            developer: (
+              <div className="grid grid-cols-2 gap-8">
+                <CodeBlock
+                  code={`---
+title: Hello World
+---
+
+import { Playground } from "@/components/playground";
+
+## Overview
+
+<Playground title="Test" />
+
+This codeblock shows TypeScript information!
+
+\`\`\`ts twoslash
+console.log("Hello World");
+
+// give your code decorations [!code ++]
+const name = "fumadocs";
+\`\`\`
+
+And re-use content:
+
+<include>./another-page.mdx</include>`}
+                  lang="mdx"
+                />
+                <div>
+                  <h3 className="text-3xl font-tinos mb-4">
+                    Extensive but simple.
+                  </h3>
+                  <p>MDX-native for developers authoring content.</p>
+                  <ul className="text-xs list-disc list-inside mt-8">
+                    <li>JavaScript + JSX syntax</li>
+                    <li>Custom Components</li>
+                    <li>Include/Embed Content</li>
+                    <li>Twoslash Integration</li>
+                    <li>Shiki Notations</li>
+                    <li>Extend via remark, rehype plugins</li>
+                  </ul>
+                </div>
+              </div>
+            ),
+            automation: (
+              <div className="grid grid-cols-2 gap-8">
+                <CodeBlock
+                  code={`---
+title: Hello World
+---
+
+import { db } from "@/lib/db";
+
+export async function DataView() {
+  const products = await db.select().from("products");
+  return products.map(product => <div key={product.id}>{product.name}</div>)
+}
+
+<DataView />
+
+<auto-type-table path='./my-file.ts' name='CardProps' />`}
+                  lang="mdx"
+                />
+
+                <div>
+                  <h3 className="text-3xl font-tinos mb-4">
+                    Content, always up-to-date.
+                  </h3>
+                  <p>
+                    Combining the power of MDX and React Server Components, use
+                    the latest data from database, server — anywhere, to be part
+                    of your content.
+                  </p>
+                  <ul className="text-xs list-disc list-inside mt-8">
+                    <li>Works on React Server Components</li>
+                    <li>Display data from database, CMS, anything</li>
+                    <li>
+                      auto-type-table for documenting types based on TypeScript
+                      Compiler
+                    </li>
+                    <li>OpenAPI playground for documenting your APIs</li>
+                  </ul>
+                </div>
+              </div>
+            ),
+          }}
+        />
         <Features />
       </div>
       <Footer />
     </main>
   );
 }
-
 const feedback = [
   {
     avatar: 'https://avatars.githubusercontent.com/u/124599',
@@ -169,11 +296,9 @@ Like headless docs to build exactly what you need.`,
 
 function Feedback() {
   return (
-    <div className="grid grid-cols-1 mt-20 lg:grid-cols-2">
+    <div className="grid grid-cols-1 my-20 lg:grid-cols-2">
       <div>
-        <h2 className={cn('text-4xl mb-8', tinos.className)}>
-          A framework people loves.
-        </h2>
+        <h2 className="text-4xl mb-8 font-tinos">A framework people loves.</h2>
         <p>
           Loved by teams and developers from startups like Unkey, Vercel, Orama
           — evolving everyday to be your favourite docs framework.
@@ -436,7 +561,7 @@ function Feature({
 
 function Footer() {
   return (
-    <footer className="flex flex-col items-center mt-20 bg-brand py-12 text-brand-foreground rounded-full">
+    <footer className="flex flex-col items-center mt-20 bg-brand-secondary py-12 text-brand-secondary-foreground rounded-full">
       <p className="mb-1 text-3xl font-semibold">Fumadocs</p>
       <p className="text-xs">
         Built with <HeartIcon className="inline size-4" /> by{' '}

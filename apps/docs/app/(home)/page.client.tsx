@@ -9,7 +9,7 @@ import {
   useEffect,
   useState,
 } from 'react';
-import { TerminalIcon } from 'lucide-react';
+import { ArrowRight, TerminalIcon } from 'lucide-react';
 import Link from 'next/link';
 import scrollIntoView from 'scroll-into-view-if-needed';
 import { cn } from '@/lib/cn';
@@ -295,7 +295,7 @@ function WhyPanel(props: HTMLProps<HTMLDivElement>) {
 }
 
 const previewButtonVariants = cva(
-  'w-22 h-9 text-sm font-medium transition-colors rounded-full',
+  'w-20 h-8 text-sm font-medium transition-colors rounded-full',
   {
     variants: {
       active: {
@@ -324,12 +324,12 @@ export function PreviewImages() {
 
   return (
     <div className="relative overflow-hidden">
-      <div className="absolute flex flex-row left-1/2 -translate-1/2 bottom-12 z-2 p-1 rounded-full bg-fd-card border shadow-xl dark:shadow-fd-background">
+      <div className="absolute flex flex-row left-1/2 -translate-1/2 bottom-10 z-2 p-0.5 rounded-full bg-fd-card border shadow-xl">
         <div
           role="none"
-          className="absolute bg-fd-primary rounded-full w-22 h-9 transition-transform z-[-1]"
+          className="absolute bg-fd-primary rounded-full w-20 h-8 transition-transform z-[-1]"
           style={{
-            transform: `translateX(calc(var(--spacing) * 22 * ${active}))`,
+            transform: `translateX(calc(var(--spacing) * 20 * ${active}))`,
           }}
         />
         {previews.map((item, i) => (
@@ -354,6 +354,61 @@ export function PreviewImages() {
           )}
         />
       ))}
+    </div>
+  );
+}
+
+const WritingTabs = [
+  {
+    name: 'Writer',
+    value: 'writer',
+  },
+  {
+    name: 'Developer',
+    value: 'developer',
+  },
+  {
+    name: 'Automation',
+    value: 'automation',
+  },
+] as const;
+
+export function Writing({
+  tabs: tabContents,
+}: {
+  tabs: Record<(typeof WritingTabs)[number]['value'], ReactNode>;
+}) {
+  const [tab, setTab] =
+    useState<(typeof WritingTabs)[number]['value']>('writer');
+
+  return (
+    <div className="my-20">
+      <h2 className="text-4xl text-brand mb-8 font-tinos text-center">
+        Anybody can write.
+      </h2>
+      <p className="text-center mb-8 mx-auto w-full max-w-[800px]">
+        Native support for Markdown & MDX, offering intuitive, convenient and
+        extensive syntax for non-dev writers, developers, and AI agents.
+      </p>
+      <div className="flex justify-center items-center gap-4 text-fd-muted-foreground mb-4">
+        {WritingTabs.map((item) => (
+          <Fragment key={item.value}>
+            <ArrowRight className="size-4 first:hidden" />
+            <button
+              className={cn(
+                'text-lg font-medium transition-colors',
+                item.value === tab && 'text-brand',
+              )}
+              onClick={() => setTab(item.value)}
+            >
+              {item.name}
+            </button>
+          </Fragment>
+        ))}
+      </div>
+      <div key={tab} className="animate-fd-fade-in">
+        {tabContents[tab]}
+      </div>
     </div>
   );
 }
