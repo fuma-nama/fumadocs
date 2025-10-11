@@ -82,7 +82,7 @@ export function CreateAppAnimation() {
 
   return (
     <div
-      className="relative"
+      className="relative mt-4 w-full mx-auto max-w-[800px]"
       onMouseEnter={() => {
         if (tick >= timeEnd) {
           setTick(0);
@@ -92,14 +92,14 @@ export function CreateAppAnimation() {
       {tick > timeWindowOpen && (
         <LaunchAppWindow className="absolute bottom-5 right-4 z-10 animate-in fade-in slide-in-from-top-10" />
       )}
-      <pre className="overflow-hidden rounded-xl border text-[13px] shadow-lg">
+      <pre className="overflow-hidden rounded-xl border text-[13px] shadow-lg bg-fd-card">
         <div className="flex flex-row items-center gap-2 border-b px-4 py-2">
           <TerminalIcon className="size-4" />{' '}
           <span className="font-bold">Terminal</span>
           <div className="grow" />
           <div className="size-2 rounded-full bg-red-400" />
         </div>
-        <div className="min-h-[200px] bg-gradient-to-b from-fd-card">
+        <div className="min-h-[200px]">
           <code className="grid p-4">{lines}</code>
         </div>
       </pre>

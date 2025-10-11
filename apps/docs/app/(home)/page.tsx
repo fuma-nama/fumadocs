@@ -20,7 +20,11 @@ import {
 } from 'lucide-react';
 import { Marquee } from '@/app/(home)/marquee';
 import { CodeBlock } from '@/components/code-block';
-import { PreviewImages, Writing } from '@/app/(home)/page.client';
+import {
+  CreateAppAnimation,
+  PreviewImages,
+  Writing,
+} from '@/app/(home)/page.client';
 import type { HTMLAttributes, ReactNode } from 'react';
 
 const tinos = Tinos({
@@ -56,14 +60,17 @@ export default function Page() {
       )}
     >
       <div className="grid">
-        <Image
-          src={Hero}
-          alt="noise"
-          className="pointer-events-none select-none col-start-1 row-start-1"
-          priority
-        />
-        <div className="mt-auto text-landing-foreground-dark p-12 pb-40 col-start-1 row-start-1">
-          <h1 className="text-5xl mb-12 leading-tighter font-tinos md:text-6xl">
+        <div className="overflow-hidden col-start-1 row-start-1">
+          <Image
+            sizes="(max-width: 800px) 800px, (max-width: 1400px) 100vw, 1400px"
+            src={Hero}
+            alt="noise"
+            className="min-w-[800px] pointer-events-none select-none"
+            priority
+          />
+        </div>
+        <div className="mt-auto mb-12 text-landing-foreground-dark p-6 col-start-1 row-start-1 md:p-12 md:mb-40">
+          <h1 className="text-4xl mt-40 mb-12 leading-tighter font-tinos md:text-5xl lg:text-6xl">
             Build the excellent
             <br />
             documentation
@@ -86,8 +93,8 @@ export default function Page() {
           </div>
         </div>
       </div>
-      <div className="px-12">
-        <p className="text-4xl tracking-tight leading-snug font-light">
+      <div className="px-6 md:px-12">
+        <p className="text-2xl tracking-tight leading-snug font-light md:text-4xl">
           Fumadocs is a <span className="text-brand font-medium">React.js</span>{' '}
           documentation framework for{' '}
           <span className="text-brand font-medium">Developers</span>,
@@ -105,12 +112,13 @@ export default function Page() {
             code="pnpm create fumadocs-app"
             lang="bash"
             wrapper={{
-              className: 'mx-auto w-full w-[800px]',
+              className: 'mx-auto w-full max-w-[800px]',
             }}
           />
+          <CreateAppAnimation />
         </div>
         <Feedback />
-        <div className="grid grid-cols-2 my-24">
+        <div className="grid grid-cols-1 my-24 lg:grid-cols-2">
           <PreviewImages />
           <div>
             <h2 className="text-4xl font-tinos my-2">
@@ -133,7 +141,7 @@ export default function Page() {
         <Writing
           tabs={{
             writer: (
-              <div className="grid grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
                 <CodeBlock
                   code={`---
 title: Hello World
@@ -173,7 +181,7 @@ return 0;
               </div>
             ),
             developer: (
-              <div className="grid grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
                 <CodeBlock
                   code={`---
 title: Hello World
@@ -216,7 +224,7 @@ And re-use content:
               </div>
             ),
             automation: (
-              <div className="grid grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
                 <CodeBlock
                   code={`---
 title: Hello World
@@ -258,7 +266,7 @@ export async function DataView() {
             ),
           }}
         />
-        <div className="grid grid-cols-2 items-center my-24">
+        <div className="grid grid-cols-1 items-center my-24 lg:grid-cols-2">
           <Image
             src={ComponentsImage}
             alt="components"
