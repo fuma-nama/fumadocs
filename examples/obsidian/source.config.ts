@@ -3,6 +3,8 @@ import {
   defineDocs,
   frontmatterSchema,
 } from 'fumadocs-mdx/config';
+import { remarkObsidian, RemarkObsidianOptions } from 'fumadocs-obsidian/mdx';
+import { readVaultFiles } from 'fumadocs-obsidian';
 
 export const docs = defineDocs({
   dir: 'content/docs',
@@ -11,4 +13,23 @@ export const docs = defineDocs({
   },
 });
 
-export default defineConfig();
+export default defineConfig({
+  mdxOptions: async () => {
+    const files = await readVaultFiles({
+      dir: 'content/docs',
+    });
+
+    return {
+      remarkPlugins: (plugins) => [
+        [
+          remarkObsidian,
+          {
+            files,
+            outputPath: 'ignore',
+          } satisfies RemarkObsidianOptions,
+        ],
+        ...plugins,
+      ],
+    };
+  },
+});

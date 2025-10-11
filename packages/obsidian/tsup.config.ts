@@ -5,5 +5,5 @@ export default defineConfig({
   dts: true,
   target: 'es6',
   format: 'esm',
-  entry: ['src/index.ts', 'src/ui/index.tsx'],
+  entry: ['src/index.ts', 'src/ui/index.tsx', 'src/mdx/index.ts'],
 });

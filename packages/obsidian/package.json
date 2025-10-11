@@ -26,6 +26,10 @@
     "./ui": {
       "import": "./dist/ui/index.js",
       "types": "./dist/ui/index.d.ts"
+    },
+    "./mdx": {
+      "import": "./dist/mdx/index.js",
+      "types": "./dist/mdx/index.d.ts"
     }
   },
   "scripts": {

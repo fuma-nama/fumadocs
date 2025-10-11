@@ -1,8 +1,7 @@
 import type { Blockquote, PhrasingContent, Root, RootContent } from 'mdast';
 import path from 'node:path';
-import { Processor, Transformer } from 'unified';
+import type { Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
-import type { InternalContext, ParsedContentFile, ParsedFile } from '@/convert';
 import { flattenNode } from '@/utils/flatten-node';
 import { stash } from '@/utils/stash';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
@@ -10,24 +9,25 @@ import { separate } from '@/utils/mdast-separate';
 import { createCallout } from '@/utils/mdast-create';
 import { replace } from '@/utils/mdast-replace';
 import { slug } from 'github-slugger';
+import type {
+  ParsedContentFile,
+  ParsedFile,
+  VaultStorage,
+} from '@/build-storage';
+import type { VaultResolver } from '@/build-resolver';
 
 const RegexWikilink = /!?\[\[(?<content>([^\]]|\\])+)]]/g;
 const RegexContent =
   /^(?<name>(?:\\#|\\\||[^#|])*)(?:#(?<heading>(?:\\\||[^|])+))?(?:\|(?<alias>.+))?$/;
 const RegexCalloutHead = /^\[!(?<type>\w+)](?<collapsible>\+)?/;
 
-interface Context extends InternalContext {
+export interface RemarkConvertOptions {
+  storage: VaultStorage;
+  resolver: VaultResolver;
+}
+
+interface Context extends RemarkConvertOptions {
   sourceFile: ParsedContentFile;
-
-  /**
-   * a file should create two item in this map, one with extension, and one without.
-   */
-  byPath: Map<string, ParsedFile>;
-
-  /**
-   * a file should create two item in this map, one with extension, and one without.
-   */
-  byName: Map<string, ParsedFile>;
 }
 
 declare module 'mdast' {
@@ -46,16 +46,16 @@ function resolveInternalHref(
 
 function resolveInternalPath(
   pathname: string,
-  { byPath, byName, sourceFile }: Context,
+  { resolver, sourceFile }: Context,
 ): ParsedFile | undefined {
   const dir = path.dirname(sourceFile.path);
 
   if (pathname.startsWith('./') || pathname.startsWith('../')) {
-    return byPath.get(stash(path.join(dir, pathname)));
+    return resolver.resolvePath(stash(path.join(dir, pathname)));
   }
 
-  // absolute path or basic
-  return byPath.get(pathname) ?? byName.get(pathname);
+  // absolute path or name
+  return resolver.resolvePath(pathname) ?? resolver.resolveName(pathname);
 }
 
 function resolveWikilink(
@@ -99,11 +99,7 @@ function resolveWikilink(
             children: [
               {
                 type: 'text',
-                value: getFileHref(
-                  path.dirname(context.sourceFile.outPath),
-                  ref,
-                  heading,
-                ),
+                value: getFileHref(ref, context, heading),
               },
             ],
           },
@@ -118,7 +114,7 @@ function resolveWikilink(
 
     return {
       type: 'image',
-      url: ref.url,
+      url: ref.url ?? getFileHref(ref, context, heading),
       alt: name,
     };
   }
@@ -135,7 +131,7 @@ function resolveWikilink(
       return;
     }
 
-    url = getFileHref(path.dirname(context.sourceFile.outPath), ref, heading);
+    url = getFileHref(ref, context, heading);
   }
 
   return {
@@ -153,7 +149,7 @@ function resolveWikilink(
   };
 }
 
-function resolveCallout(this: Processor, node: Blockquote) {
+function resolveCallout(node: Blockquote) {
   const head = node.children[0];
   if (!head || head.type !== 'paragraph') return;
   const textNode = head.children[0];
@@ -185,38 +181,18 @@ function resolveCallout(this: Processor, node: Blockquote) {
   );
 }
 
-export function remarkConvert(
-  this: Processor,
-  options: InternalContext,
-): Transformer<Root, Root> {
-  const byPath = new Map<string, ParsedFile>();
-  const byName = new Map<string, ParsedFile>();
-
-  for (const file of options.storage.values()) {
-    const parsed = path.parse(file.path);
-
-    byName.set(parsed.name, file);
-    byPath.set(stash(path.join(parsed.dir, parsed.name)), file);
-
-    byName.set(parsed.base, file);
-    byPath.set(file.path, file);
-
-    if (file.format === 'content' && file.frontmatter?.aliases) {
-      for (const alias of file.frontmatter.aliases) {
-        byName.set(alias, file);
-      }
-    }
-  }
-
+export function remarkConvert({
+  storage,
+  resolver,
+}: RemarkConvertOptions): Transformer<Root, Root> {
   return (tree, file) => {
-    const source = file.data.source;
-    if (!source) return;
+    const sourceFile = file.data.source;
+    if (!sourceFile) return;
 
     const context: Context = {
-      ...options,
-      sourceFile: source,
-      byPath,
-      byName,
+      resolver,
+      storage,
+      sourceFile,
     };
 
     visit(tree, ['text', 'heading', 'blockquote', 'link', 'image'], (node) => {
@@ -232,7 +208,7 @@ export function remarkConvert(
       }
 
       if (node.type === 'blockquote') {
-        const callout = resolveCallout.call(this, node);
+        const callout = resolveCallout(node);
         if (callout) replace(node, callout);
 
         return;
@@ -252,7 +228,7 @@ export function remarkConvert(
         const [ref, heading] = resolveInternalHref(url, context);
         if (!ref) return 'skip';
 
-        node.url = getFileHref(path.dirname(source.outPath), ref, heading);
+        node.url = getFileHref(ref, context, heading);
         return 'skip';
       }
 
@@ -298,9 +274,10 @@ export function remarkConvert(
   };
 }
 
-function getFileHref(dir: string, ref: ParsedFile, heading?: string) {
-  if (ref.format === 'media') return ref.url;
+function getFileHref(ref: ParsedFile, context: Context, heading?: string) {
+  if (ref.format === 'media' && ref.url) return ref.url;
 
+  const dir = path.dirname(context.sourceFile.outPath);
   let url = stash(path.relative(dir, ref.outPath));
   if (!url.startsWith('../')) url = `./${url}`;
   if (heading) url += `#${getHeadingHash(heading)}`;

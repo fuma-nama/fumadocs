@@ -1,32 +1,26 @@
-export * from './convert';
-
-import { glob } from 'tinyglobby';
+import { type ReadFilesOptions, readVaultFiles } from '@/read-vaults';
 import {
   type ConvertOptions,
   convertVaultFiles,
   type OutputFile,
-  type VaultFile,
 } from '@/convert';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 
-export interface ReadFilesOptions {
-  include?: string | string[];
-  dir: string;
+export * from './convert';
+export * from './read-vaults';
+export type * from './build-storage';
+
+export interface Options extends ReadFilesOptions {
+  convert?: ConvertOptions;
+  out?: WriteFilesOptions;
 }
 
-export async function readVaultFiles(
-  options: ReadFilesOptions,
-): Promise<VaultFile[]> {
-  const { include = '**/*', dir } = options;
-  const paths = await glob(include, { cwd: dir });
+export async function fromVault(options: Options) {
+  const files = await readVaultFiles(options);
+  const converted = await convertVaultFiles(files, options.convert);
 
-  return Promise.all(
-    paths.map(async (file) => ({
-      path: file,
-      content: await fs.readFile(path.join(dir, file)),
-    })),
-  );
+  await writeVaultFiles(converted, options.out);
 }
 
 export interface WriteFilesOptions {
@@ -54,16 +48,4 @@ export async function writeVaultFiles(
       await fs.writeFile(mappedPath, file.content);
     }),
   );
-}
-
-export interface Options extends ReadFilesOptions {
-  convert?: ConvertOptions;
-  out?: WriteFilesOptions;
-}
-
-export async function fromVault(options: Options) {
-  const files = await readVaultFiles(options);
-  const converted = await convertVaultFiles(files, options.convert);
-
-  await writeVaultFiles(converted, options.out);
 }
