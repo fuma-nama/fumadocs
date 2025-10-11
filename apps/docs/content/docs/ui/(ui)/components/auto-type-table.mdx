@@ -61,6 +61,7 @@ const generator = createGenerator();
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
     ...defaultComponents,
+    // [!code ++:3]
     AutoTypeTable: (props) => (
       <AutoTypeTable {...props} generator={generator} />
     ),
@@ -68,6 +69,8 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
   };
 }
 ```
+
+You can now reference `<AutoTypeTable />` in your MDX content.
 
 ### From File
 
@@ -79,7 +82,7 @@ export interface MyInterface {
 }
 ```
 
-```mdx
+```mdx title="content.mdx"
 <AutoTypeTable path="./path/to/file.ts" name="MyInterface" />
 ```
 
@@ -89,9 +92,7 @@ The path is relative to your project directory (`cwd`), because `AutoTypeTable` 
 
 You can specify the type to generate, without an actual TypeScript file.
 
-```mdx
-import { AutoTypeTable } from 'fumadocs-typescript/ui';
-
+```mdx title="content.mdx"
 <AutoTypeTable type="{ hello: string }" />
 ```
 
@@ -101,13 +102,13 @@ When a `path` is given, it shares the same context as the TypeScript file.
 export type A = { hello: string };
 ```
 
-```mdx
+```mdx title="content.mdx"
 <AutoTypeTable path="file.ts" type="A & { world: string }" />
 ```
 
 When `type` has multiple lines, the export statement and `name` prop are required.
 
-```mdx
+```mdx title="content.mdx"
 <AutoTypeTable
   path="file.ts"
   name="B"

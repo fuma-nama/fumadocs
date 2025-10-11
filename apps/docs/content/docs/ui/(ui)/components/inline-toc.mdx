@@ -8,24 +8,29 @@ preview: inlineTOC
 
 ## Usage
 
-Pass TOC items to the component.
+You can use it in your MDX content:
 
-```mdx
+```mdx title="content.mdx"
 import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
 
-<InlineTOC items={toc} />
+<InlineTOC items={toc}>Table of Contents</InlineTOC>
 ```
 
-### Use in Pages
+Or adding it to every page.
 
-You can add inline TOC into every page.
+```tsx title="page.tsx"
+import { DocsPage } from 'fumadocs-ui/page';
+import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
 
-```tsx
-<DocsPage>
-  ...
-  <InlineTOC items={toc} />
-  ...
-</DocsPage>
+export default function Page() {
+  // ...
+  return (
+    <DocsPage>
+      {/* [!code ++] */}
+      <InlineTOC items={page.data.toc}>Table of Contents</InlineTOC>
+    </DocsPage>
+  );
+}
 ```
 
 ## Reference
