@@ -39,7 +39,7 @@ export interface AnchorProviderProps {
   /**
    * Only accept one active item at most
    *
-   * @defaultValue true
+   * @defaultValue false
    */
   single?: boolean;
   children?: ReactNode;
@@ -57,7 +57,7 @@ export interface ScrollProviderProps {
 export function ScrollProvider({
   containerRef,
   children,
-}: ScrollProviderProps): React.ReactElement {
+}: ScrollProviderProps) {
   return (
     <ScrollContext.Provider value={containerRef}>
       {children}
@@ -67,9 +67,9 @@ export function ScrollProvider({
 
 export function AnchorProvider({
   toc,
-  single = true,
+  single = false,
   children,
-}: AnchorProviderProps): React.ReactElement {
+}: AnchorProviderProps) {
   const headings = useMemo(() => {
     return toc.map((item) => item.url.split('#')[1]);
   }, [toc]);

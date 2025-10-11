@@ -327,7 +327,7 @@ export function DocsLayout({
         <LayoutBody
           {...props.containerProps}
           className={cn(
-            'md:[&_#nd-page_article]:pt-12 xl:[--fd-toc-width:286px] xl:[&_#nd-page_article]:px-8',
+            'md:[&_#nd-page_article]:pt-12 xl:[&_#nd-page_article]:px-8',
             sidebarEnabled && sidebarVariables,
             props.containerProps?.className,
           )}

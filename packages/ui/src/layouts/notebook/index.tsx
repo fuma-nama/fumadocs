@@ -318,7 +318,7 @@ export function DocsLayout(props: DocsLayoutProps) {
         <LayoutBody
           {...props.containerProps}
           className={cn(
-            'md:[--fd-sidebar-width:286px] xl:[--fd-toc-width:286px]',
+            'md:[--fd-sidebar-width:286px]',
             props.containerProps?.className,
           )}
         >

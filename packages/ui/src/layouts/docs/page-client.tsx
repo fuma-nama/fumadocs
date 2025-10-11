@@ -400,7 +400,7 @@ export function PageTOC(props: ComponentProps<'div'>) {
       id="nd-toc"
       {...props}
       className={cn(
-        'fixed bottom-0 pt-12 pb-2 pr-(--removed-body-scroll-bar-size,0) max-xl:hidden',
+        'fixed bottom-0 pt-12 pb-2 pr-(--removed-body-scroll-bar-size,0) xl:on-root:[--fd-toc-width:286px] max-xl:hidden',
         props.className,
       )}
       style={{

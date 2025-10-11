@@ -149,10 +149,6 @@ export function DocsPage({
           : false
       }
       {...container}
-      className={cn(
-        !tocEnabled && '[--fd-toc-width:0px]',
-        container?.className,
-      )}
     >
       {tocPopoverEnabled &&
         (tocPopover ?? (
