@@ -17,6 +17,8 @@ const RegexContent =
 const RegexCalloutHead = /^\[!(?<type>\w+)](?<collapsible>\+)?/;
 
 interface Context extends InternalContext {
+  sourceFile: ParsedContentFile;
+
   /**
    * a file should create two item in this map, one with extension, and one without.
    */
@@ -34,25 +36,31 @@ declare module 'mdast' {
   }
 }
 
-function resolveInternalLink(
-  name: string,
-  file: ParsedContentFile,
-  { byPath, byName }: Context,
-) {
-  const dir = path.dirname(file.path);
+function resolveInternalHref(
+  href: string,
+  ctx: Context,
+): [ParsedFile | undefined, hash: string | undefined] {
+  const [name, hash] = href.split('#', 2);
+  return [resolveInternalPath(name, ctx), hash];
+}
 
-  if (name.startsWith('./') || name.startsWith('../')) {
-    return byPath.get(stash(path.join(dir, name)));
+function resolveInternalPath(
+  pathname: string,
+  { byPath, byName, sourceFile }: Context,
+): ParsedFile | undefined {
+  const dir = path.dirname(sourceFile.path);
+
+  if (pathname.startsWith('./') || pathname.startsWith('../')) {
+    return byPath.get(stash(path.join(dir, pathname)));
   }
 
   // absolute path or basic
-  return byPath.get(name) ?? byName.get(name);
+  return byPath.get(pathname) ?? byName.get(pathname);
 }
 
 function resolveWikilink(
   isEmbed: boolean,
   content: string,
-  file: ParsedContentFile,
   context: Context,
 ): RootContent | undefined {
   const match = RegexContent.exec(content);
@@ -64,10 +72,12 @@ function resolveWikilink(
     alias?: string;
   };
 
-  const isHeading = name.length === 0 && heading;
+  const isHeadingOnly = name.length === 0 && heading;
 
   if (isEmbed) {
-    const ref = isHeading ? file : resolveInternalLink(name, file, context);
+    const ref = isHeadingOnly
+      ? context.sourceFile
+      : resolveInternalPath(name, context);
 
     if (!ref) {
       console.warn(`failed to resolve ${name} wikilink`);
@@ -89,7 +99,11 @@ function resolveWikilink(
             children: [
               {
                 type: 'text',
-                value: getFileHref(path.dirname(file.outPath), ref, heading),
+                value: getFileHref(
+                  path.dirname(context.sourceFile.outPath),
+                  ref,
+                  heading,
+                ),
               },
             ],
           },
@@ -111,17 +125,17 @@ function resolveWikilink(
 
   let url: string;
 
-  if (isHeading) {
-    url = heading!.startsWith('^') ? heading : `#${slug(heading)}`;
+  if (isHeadingOnly) {
+    url = `#${getHeadingHash(heading)}`;
   } else {
-    const ref = resolveInternalLink(name, file, context);
+    const ref = resolveInternalPath(name, context);
 
     if (!ref) {
       console.warn(`failed to resolve ${name} wikilink`);
       return;
     }
 
-    url = getFileHref(path.dirname(file.outPath), ref, heading);
+    url = getFileHref(path.dirname(context.sourceFile.outPath), ref, heading);
   }
 
   return {
@@ -175,24 +189,21 @@ export function remarkConvert(
   this: Processor,
   options: InternalContext,
 ): Transformer<Root, Root> {
-  const context: Context = {
-    ...options,
-    byPath: new Map(),
-    byName: new Map(),
-  };
+  const byPath = new Map<string, ParsedFile>();
+  const byName = new Map<string, ParsedFile>();
 
   for (const file of options.storage.values()) {
     const parsed = path.parse(file.path);
 
-    context.byName.set(parsed.name, file);
-    context.byPath.set(stash(path.join(parsed.dir, parsed.name)), file);
+    byName.set(parsed.name, file);
+    byPath.set(stash(path.join(parsed.dir, parsed.name)), file);
 
-    context.byName.set(parsed.base, file);
-    context.byPath.set(file.path, file);
+    byName.set(parsed.base, file);
+    byPath.set(file.path, file);
 
     if (file.format === 'content' && file.frontmatter?.aliases) {
       for (const alias of file.frontmatter.aliases) {
-        context.byName.set(alias, file);
+        byName.set(alias, file);
       }
     }
   }
@@ -201,7 +212,14 @@ export function remarkConvert(
     const source = file.data.source;
     if (!source) return;
 
-    visit(tree, ['text', 'heading', 'blockquote', 'link'], (node) => {
+    const context: Context = {
+      ...options,
+      sourceFile: source,
+      byPath,
+      byName,
+    };
+
+    visit(tree, ['text', 'heading', 'blockquote', 'link', 'image'], (node) => {
       if (node.type === 'heading') {
         const text = flattenNode(node);
 
@@ -220,17 +238,18 @@ export function remarkConvert(
         return;
       }
 
-      if (node.type === 'link') {
-        if (node.data?.isWikiLink) return 'skip';
+      if (node.type === 'link' || node.type === 'image') {
+        if (node.type === 'link' && node.data?.isWikiLink) return 'skip';
 
         const url = decodeURI(node.url);
-        if (url.startsWith('#')) {
-          node.url = `#${slug(url.slice(1))}`;
+        if (node.type === 'link' && url.startsWith('#')) {
+          const heading = url.slice(1);
+          node.url = `#${getHeadingHash(heading)}`;
+
           return 'skip';
         }
 
-        const [name, heading] = url.split('#', 2);
-        const ref = resolveInternalLink(name, source, context);
+        const [ref, heading] = resolveInternalHref(url, context);
         if (!ref) return 'skip';
 
         node.url = getFileHref(path.dirname(source.outPath), ref, heading);
@@ -248,7 +267,6 @@ export function remarkConvert(
         const resolved = resolveWikilink(
           result[0].startsWith('!'),
           result[1],
-          source,
           context,
         );
         if (!resolved) continue;
@@ -285,7 +303,12 @@ function getFileHref(dir: string, ref: ParsedFile, heading?: string) {
 
   let url = stash(path.relative(dir, ref.outPath));
   if (!url.startsWith('../')) url = `./${url}`;
-  if (heading) url += `#${heading.startsWith('^') ? heading : slug(heading)}`;
+  if (heading) url += `#${getHeadingHash(heading)}`;
 
   return url;
+}
+
+function getHeadingHash(heading: string) {
+  // for refs to block Ids, ignore slugify
+  return heading.startsWith('^') ? heading : slug(heading);
 }
