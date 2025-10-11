@@ -3,11 +3,16 @@ title: Next.js
 description: Setup Fumadocs on Next.js.
 ---
 
+## Prerequisite
+
 Before continuing, make sure you have configured:
 
 - Next.js 15.
 - Tailwind CSS 4.
-- Fumadocs MDX: follow the [setup guide](/docs/mdx/next) and create essential files like `lib/source.ts`.
+
+We will use [Fumadocs MDX](/docs/mdx) as a content source, you can configure it first:
+
+<include cwd>content/docs/mdx/(integrations)/next.mdx#setup-section</include>
 
 <Callout title='Good to Know'>
 
@@ -90,7 +95,7 @@ Create the following routes:
 
 > The search is powered by Orama, learn more about [Document Search](/docs/headless/search).
 
-### Done
+### Finish
 
 You can start the dev server and create MDX files.
 

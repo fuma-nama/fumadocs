@@ -7,6 +7,11 @@ description: Use Fumadocs MDX with Next.js
 
 Set up Fumadocs MDX for your Next.js application.
 
+<section id="setup-section">
+<div className="fd-steps [&_h3]:fd-step">
+
+### Installation
+
 ```npm
 npm i fumadocs-mdx @types/mdx
 ```
@@ -28,16 +33,18 @@ Add the plugin to Next.js config:
 ```js title="next.config.mjs"
 import { createMDX } from 'fumadocs-mdx/next';
 
-const withMDX = createMDX({
-  // customise the config file path
-  // configPath: "source.config.ts"
-});
-
 /** @type {import('next').NextConfig} */
 const config = {
   reactStrictMode: true,
 };
 
+// [!code ++:4]
+const withMDX = createMDX({
+  // customise the config file path
+  // configPath: "source.config.ts"
+});
+
+// [!code highlight]
 export default withMDX(config);
 ```
 
@@ -81,7 +88,10 @@ Optionally, you can run it in post install to ensure types are generated when in
 
 ### Done
 
-Have fun!
+You can now write content in `content/docs` folder.
+
+</div>
+</section>
 
 ## Examples
 
