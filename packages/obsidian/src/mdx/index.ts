@@ -2,11 +2,9 @@ import { type Processor, unified } from 'unified';
 import type { Root } from 'mdast';
 import type { VaultFile } from '@/read-vaults';
 import { buildStorage, type ParsedFile } from '@/build-storage';
-import { remarkConvert } from '@/remark-convert';
 import { buildResolver } from '@/build-resolver';
-import { remarkObsidianComment } from '@/remark-obsidian-comment';
-import { remarkBlockId } from '@/remark-block-id';
 import path from 'node:path';
+import { getRemarkPlugins } from '@/remark';
 
 export interface RemarkObsidianOptions {
   files: VaultFile[];
@@ -26,10 +24,7 @@ export function remarkObsidian(
     enforceMdx: false,
   });
   const resolver = buildResolver(storage);
-  const processor = unified()
-    .use(remarkConvert, { storage, resolver })
-    .use(remarkObsidianComment)
-    .use(remarkBlockId);
+  const processor = unified().use(getRemarkPlugins(storage, resolver));
   const relativePathToVault = new Map<string, ParsedFile>();
 
   for (const file of storage.files.values()) {

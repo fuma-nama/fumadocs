@@ -12,6 +12,17 @@ export interface VaultResolver {
    * resolve file by vault path (from root directory)
    */
   resolvePath: (vaultPath: string) => ParsedFile | undefined;
+
+  /**
+   * resolve file by:
+   * 1. relative vault path
+   * 2. full vault path
+   * 3. vault name/alias
+   *
+   * @param name - target
+   * @param fromPath - the path of referencer vault file
+   */
+  resolveAny: (name: string, fromPath: string) => ParsedFile | undefined;
 }
 
 export function buildResolver(storage: VaultStorage): VaultResolver {
@@ -44,5 +55,24 @@ export function buildResolver(storage: VaultStorage): VaultResolver {
     resolvePath(vaultPath: string) {
       return pathToFile.get(vaultPath);
     },
+    resolveAny(name, fromPath) {
+      const dir = path.dirname(fromPath);
+
+      if (name.startsWith('./') || name.startsWith('../')) {
+        return this.resolvePath(stash(path.join(dir, name)));
+      }
+
+      // absolute path or name
+      return this.resolvePath(name) ?? this.resolveName(name);
+    },
   };
+}
+
+export function resolveInternalHref(
+  href: string,
+  sourceFile: ParsedFile,
+  resolver: VaultResolver,
+): [ParsedFile | undefined, hash: string | undefined] {
+  const [name, hash] = href.split('#', 2);
+  return [resolver.resolveAny(name, sourceFile.path), hash];
 }

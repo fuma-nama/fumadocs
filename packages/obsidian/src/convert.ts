@@ -1,12 +1,8 @@
 import path from 'node:path';
-import { remarkConvert } from '@/remark-convert';
 import { unified } from 'unified';
-import remarkParse from 'remark-parse';
 import remarkStringify from 'remark-stringify';
 import remarkMdx from 'remark-mdx';
 import type { Compatible } from 'vfile';
-import { remarkObsidianComment } from '@/remark-obsidian-comment';
-import { remarkBlockId } from '@/remark-block-id';
 import { dump } from 'js-yaml';
 import {
   buildStorage,
@@ -16,6 +12,9 @@ import {
 } from '@/build-storage';
 import { buildResolver } from '@/build-resolver';
 import type { VaultFile } from '@/read-vaults';
+import { getRemarkPlugins } from '@/remark';
+import type { Root } from 'mdast';
+import remarkParse from 'remark-parse';
 
 export interface OutputFile {
   type: 'asset' | 'content' | 'custom';
@@ -48,9 +47,7 @@ export async function convertVaultFiles(
 
   const processor = unified()
     .use(remarkParse)
-    .use(remarkConvert, { resolver, storage })
-    .use(remarkObsidianComment)
-    .use(remarkBlockId);
+    .use(getRemarkPlugins(storage, resolver));
   const stringifier = unified().use(remarkStringify).use(remarkMdx);
 
   async function onFile(file: ParsedFile) {
@@ -73,7 +70,7 @@ export async function convertVaultFiles(
     };
 
     const mdast = await processor.run(processor.parse(vfile), vfile);
-    const string = stringifier.stringify(mdast);
+    const string = stringifier.stringify(mdast as Root);
     const frontmatter = dump({
       title: path.basename(file.path, path.extname(file.path)),
     }).trim();
