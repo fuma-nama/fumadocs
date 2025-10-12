@@ -26,7 +26,12 @@ export default [
     },
     rules: {
       ...hooksPlugin.configs.recommended.rules,
+      // overly aggressive
       'import/no-extraneous-dependencies': 'off',
+      'react-hooks/refs': 'off',
+      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/immutability': 'off',
+      'react-hooks/preserve-manual-memoization': 'off',
       // Next.js routes
       'import/no-default-export': 'off',
 

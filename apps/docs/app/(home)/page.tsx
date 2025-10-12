@@ -9,7 +9,6 @@ import {
   FileEditIcon,
   FileTextIcon,
   HeartIcon,
-  LucideIcon,
   SearchIcon,
 } from 'lucide-react';
 import { Marquee } from '@/app/(home)/marquee';
@@ -20,7 +19,6 @@ import {
   Writing,
 } from '@/app/(home)/page.client';
 import ShadcnImage from './shadcn.png';
-import type { HTMLAttributes, ReactNode } from 'react';
 
 const tinos = Tinos({
   weight: '400',
@@ -505,7 +503,7 @@ function ForEngineers() {
       </div>
       <div className={cn(cardVariants())}>
         <h3
-          className={cn(headingVariants({ variant: 'h3', className: 'mb-8' }))}
+          className={cn(headingVariants({ variant: 'h3', className: 'mb-6' }))}
         >
           Adopts your content.
         </h3>
@@ -598,36 +596,6 @@ function Search() {
           ))}
         </div>
       </div>
-    </div>
-  );
-}
-
-function Feature({
-  className,
-  icon: Icon,
-  heading,
-  subheading,
-  description,
-  ...props
-}: HTMLAttributes<HTMLDivElement> & {
-  icon: LucideIcon;
-  subheading: ReactNode;
-  heading: ReactNode;
-  description: ReactNode;
-}) {
-  return (
-    <div
-      className={cn('p-8 rounded-xl overflow-hidden border', className)}
-      {...props}
-    >
-      <div className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-fd-muted-foreground">
-        <Icon className="size-4" />
-        <p>{subheading}</p>
-      </div>
-      <h2 className="mb-2 text-lg font-semibold">{heading}</h2>
-      <p className="text-fd-muted-foreground">{description}</p>
-
-      {props.children}
     </div>
   );
 }

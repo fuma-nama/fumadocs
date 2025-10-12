@@ -104,6 +104,7 @@ export function DocsLayout({
   tabMode = 'auto',
   i18n = false,
   children,
+  tree,
   ...props
 }: DocsLayoutProps) {
   const tabs = useMemo(() => {
@@ -111,13 +112,13 @@ export function DocsLayout({
       return sidebarTabs;
     }
     if (typeof sidebarTabs === 'object') {
-      return getSidebarTabs(props.tree, sidebarTabs);
+      return getSidebarTabs(tree, sidebarTabs);
     }
     if (sidebarTabs !== false) {
-      return getSidebarTabs(props.tree);
+      return getSidebarTabs(tree);
     }
     return [];
-  }, [sidebarTabs, props.tree]);
+  }, [tree, sidebarTabs]);
   const links = getLinks(props.links ?? [], props.githubUrl);
   const sidebarVariables = cn(
     'md:[--fd-sidebar-width:268px] lg:[--fd-sidebar-width:286px]',
@@ -293,7 +294,7 @@ export function DocsLayout({
   }
 
   return (
-    <TreeContextProvider tree={props.tree}>
+    <TreeContextProvider tree={tree}>
       <NavProvider transparentMode={transparentMode}>
         {nav.enabled !== false &&
           (nav.component ?? (

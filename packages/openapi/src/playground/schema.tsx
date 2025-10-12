@@ -79,37 +79,10 @@ export function useFieldInfo(
   const keyName = `${fieldName}:${depth}`;
   const value = form.getValues(fieldName as 'body');
   const [info, setInfo] = useState<FieldInfo>(() => {
-    return fieldInfoMap.get(keyName) ?? init();
-  });
+    const initialInfo = fieldInfoMap.get(keyName);
+    if (initialInfo) return initialInfo;
 
-  fieldInfoMap.set(keyName, info);
-
-  /**
-   * We automatically merge `allOf` | `anyOf` if all members are objects, but it's also possible for them to behave same as a union (`oneOf`).
-   */
-  function isUnion(anyOrAllOf: readonly ParsedSchema[]): boolean {
-    return anyOrAllOf.every((item) => {
-      if (typeof item === 'boolean') return true;
-
-      const u = item.anyOf || item.allOf;
-      return item.type !== 'object' && (!u || isUnion(u));
-    });
-  }
-
-  function getUnion(): [readonly ParsedSchema[], UnionField] | undefined {
-    if (schema.anyOf && isUnion(schema.anyOf)) {
-      return [schema.anyOf, 'anyOf'];
-    }
-
-    if (schema.allOf && isUnion(schema.allOf)) {
-      return [schema.allOf, 'allOf'];
-    }
-
-    if (schema.oneOf) return [schema.oneOf, 'oneOf'];
-  }
-
-  function init(): FieldInfo {
-    const union = getUnion();
+    const union = getUnion(schema);
     if (union) {
       const [members, field] = union;
 
@@ -139,7 +112,9 @@ export function useFieldInfo(
     }
 
     return { oneOf: -1 };
-  }
+  });
+
+  fieldInfoMap.set(keyName, info);
 
   return {
     info,
@@ -188,4 +163,30 @@ export function fallbackAny(
   schema: RequestSchema,
 ): Exclude<RequestSchema, boolean> {
   return typeof schema === 'boolean' ? anyFields : schema;
+}
+
+/**
+ * We automatically merge `allOf` | `anyOf` if all members are objects, but it's also possible for them to behave same as a union (`oneOf`).
+ */
+function isUnion(anyOrAllOf: readonly ParsedSchema[]): boolean {
+  return anyOrAllOf.every((item) => {
+    if (typeof item === 'boolean') return true;
+
+    const u = item.anyOf || item.allOf;
+    return item.type !== 'object' && (!u || isUnion(u));
+  });
+}
+
+function getUnion(
+  schema: Exclude<RequestSchema, boolean>,
+): [readonly ParsedSchema[], UnionField] | undefined {
+  if (schema.anyOf && isUnion(schema.anyOf)) {
+    return [schema.anyOf, 'anyOf'];
+  }
+
+  if (schema.allOf && isUnion(schema.allOf)) {
+    return [schema.allOf, 'allOf'];
+  }
+
+  if (schema.oneOf) return [schema.oneOf, 'oneOf'];
 }
