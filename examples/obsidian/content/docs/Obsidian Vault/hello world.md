@@ -1,3 +1,7 @@
+---
+title: Hello World
+---
+
 hi [[Welcome]] [[Welcome#Introduction!!]]
 
 ![[Welcome#Introduction!!]]

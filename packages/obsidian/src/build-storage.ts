@@ -19,6 +19,13 @@ export interface VaultStorageOptions {
    * generate URL from media file, default to original file path (normalized)
    */
   url?: (outputPath: string, mediaFile: VaultFile) => string | undefined;
+
+  /**
+   * enforce all Markdown documents to be MDX
+   *
+   * @defaultValue true
+   */
+  enforceMdx?: boolean;
 }
 
 /**
@@ -69,6 +76,7 @@ export function buildStorage(
       return `/${segs.join('/')}`;
     },
     outputPath: outputPathOption = 'simple',
+    enforceMdx = true,
   } = options;
   const getOutputPath =
     typeof outputPathOption === 'function'
@@ -83,26 +91,24 @@ export function buildStorage(
 
   function parseFile(file: VaultFile) {
     const normalizedPath = normalize(file.path);
-    const ext = path.extname(normalizedPath);
+    let outPath = getOutputPath(normalizedPath, file);
     let parsed: ParsedFile;
 
-    if (ext === '.md' || ext === '.mdx') {
+    if (['.md', '.mdx'].includes(path.extname(normalizedPath))) {
       const { data, content } = matter(String(file.content));
+      if (enforceMdx) {
+        outPath = outPath.slice(0, -path.extname(outPath).length) + '.mdx';
+      }
 
       parsed = {
         format: 'content',
         _raw: file._raw,
         path: normalizedPath,
-        outPath: getOutputPath(
-          normalizedPath.slice(0, -ext.length) + '.mdx',
-          file,
-        ),
+        outPath,
         frontmatter: frontmatterSchema.parse(data),
         content,
       };
     } else {
-      const outPath = getOutputPath(normalizedPath, file);
-
       parsed = {
         format: 'media',
         path: normalizedPath,

@@ -16,7 +16,7 @@ export const docs = defineDocs({
 export default defineConfig({
   mdxOptions: async () => {
     const files = await readVaultFiles({
-      dir: 'content/docs',
+      dir: 'content/docs/Obsidian Vault',
     });
 
     return {
@@ -25,7 +25,6 @@ export default defineConfig({
           remarkObsidian,
           {
             files,
-            outputPath: 'ignore',
           } satisfies RemarkObsidianOptions,
         ],
         ...plugins,

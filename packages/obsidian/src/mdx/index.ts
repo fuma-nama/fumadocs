@@ -1,4 +1,4 @@
-import { type Transformer, unified } from 'unified';
+import { type Processor, unified } from 'unified';
 import type { Root } from 'mdast';
 import type { VaultFile } from '@/read-vaults';
 import { buildStorage, type ParsedFile } from '@/build-storage';
@@ -16,15 +16,16 @@ export interface RemarkObsidianOptions {
  * [Experimental] One remark plugin to use Obsidian-style Markdown with Fumadocs
  */
 export function remarkObsidian(
+  this: Processor,
   options: RemarkObsidianOptions,
-): Transformer<Root, Root> {
+) {
   const { files } = options;
   const storage = buildStorage(files, {
     url: () => undefined,
     outputPath: 'ignore',
+    enforceMdx: false,
   });
   const resolver = buildResolver(storage);
-
   const processor = unified()
     .use(remarkConvert, { storage, resolver })
     .use(remarkObsidianComment)
@@ -35,13 +36,18 @@ export function remarkObsidian(
     relativePathToVault.set(path.relative(process.cwd(), file._raw.path), file);
   }
 
-  return (tree, file) => {
+  const parser = this.parser;
+  this.parser = (doc, file) => {
     const relativePath = path.relative(process.cwd(), file.path);
     const vault = relativePathToVault.get(relativePath);
+    const parsed = parser!(doc, file);
 
     if (vault?.format === 'content') {
       file.data.source = vault;
-      return processor.run(tree, file);
+
+      return processor.runSync(parsed as Root, file);
     }
+
+    return parsed;
   };
 }

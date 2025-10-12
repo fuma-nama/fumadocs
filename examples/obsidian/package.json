@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "bun obsidian/generate.ts && next build",
-    "dev": "bun obsidian/generate.ts && next dev",
+    "build": "next build",
+    "dev": "next dev",
     "start": "next start"
   },
   "dependencies": {
