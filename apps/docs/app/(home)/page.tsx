@@ -1,22 +1,16 @@
-import Hero from './hero.svg';
+import Hero from './hero.png';
 import Image from 'next/image';
 import { Tinos } from 'next/font/google';
 import { cn } from '@/lib/cn';
 import Link from 'next/link';
-import SourceImage from '@/public/source.png';
 import ComponentsImage from './components.png';
 import { cva } from 'class-variance-authority';
 import {
-  CpuIcon,
   FileEditIcon,
   FileTextIcon,
   HeartIcon,
-  LayoutIcon,
-  LibraryIcon,
   LucideIcon,
-  PaperclipIcon,
   SearchIcon,
-  Terminal,
 } from 'lucide-react';
 import { Marquee } from '@/app/(home)/marquee';
 import { CodeBlock } from '@/components/code-block';
@@ -25,12 +19,22 @@ import {
   PreviewImages,
   Writing,
 } from '@/app/(home)/page.client';
+import ShadcnImage from './shadcn.png';
 import type { HTMLAttributes, ReactNode } from 'react';
 
 const tinos = Tinos({
   weight: '400',
   subsets: ['latin'],
   variable: '--font-tinos',
+});
+
+const headingVariants = cva('font-tinos', {
+  variants: {
+    variant: {
+      h2: 'text-3xl lg:text-4xl',
+      h3: 'text-3xl',
+    },
+  },
 });
 
 const buttonVariants = cva(
@@ -49,27 +53,38 @@ const buttonVariants = cva(
   },
 );
 
-const linkVariants = cva('text-sm hover:underline');
+const cardVariants = cva('rounded-2xl p-8 bg-origin-border', {
+  variants: {
+    variant: {
+      brand: 'bg-brand text-brand-foreground dark:text-brand-foreground-dark',
+      secondary: 'bg-brand-secondary text-brand-secondary-foreground',
+      default: 'border bg-fd-card',
+    },
+  },
+  defaultVariants: {
+    variant: 'default',
+  },
+});
 
 export default function Page() {
   return (
     <main
       className={cn(
-        'mx-auto w-full max-w-[1400px] text-landing-foreground dark:text-landing-foreground-dark',
+        'text-landing-foreground dark:text-landing-foreground-dark',
         tinos.variable,
       )}
     >
-      <div className="grid">
+      <div className="grid mx-auto w-full max-w-[1400px]">
         <div className="overflow-hidden col-start-1 row-start-1">
           <Image
-            sizes="(max-width: 800px) 800px, (max-width: 1400px) 100vw, 1400px"
+            sizes="(max-width: 800px) 1200px, (max-width: 1400px) 100vw, 1400px"
             src={Hero}
             alt="noise"
-            className="min-w-[800px] pointer-events-none select-none"
+            className="min-w-[1000px] pointer-events-none select-none"
             priority
           />
         </div>
-        <div className="mt-auto mb-12 text-landing-foreground-dark p-6 col-start-1 row-start-1 md:p-12 md:mb-40">
+        <div className="mt-auto mb-[max(100px,min(9vw,150px))] text-landing-foreground-dark p-6 col-start-1 row-start-1 md:p-12">
           <h1 className="text-4xl mt-40 mb-12 leading-tighter font-tinos md:text-5xl lg:text-6xl">
             Build the excellent
             <br />
@@ -93,8 +108,8 @@ export default function Page() {
           </div>
         </div>
       </div>
-      <div className="px-6 md:px-12">
-        <p className="text-2xl tracking-tight leading-snug font-light md:text-4xl">
+      <div className="grid grid-cols-1 gap-8 px-6 mx-auto w-full max-w-[1400px] md:px-12 lg:grid-cols-2">
+        <p className="text-2xl tracking-tight leading-snug font-light col-span-full md:text-4xl">
           Fumadocs is a <span className="text-brand font-medium">React.js</span>{' '}
           documentation framework for{' '}
           <span className="text-brand font-medium">Developers</span>,
@@ -104,7 +119,7 @@ export default function Page() {
           to fit your preferences, works seamlessly with any React.js framework,
           CMS — anything.
         </p>
-        <div className="my-24 p-8 bg-gradient-to-b from-brand-secondary/40 rounded-xl">
+        <div className="p-8 bg-gradient-to-b from-brand-secondary/40 rounded-xl col-span-full">
           <h2 className="text-6xl text-center mix-blend-overlay font-tinos">
             Try it out.
           </h2>
@@ -118,32 +133,60 @@ export default function Page() {
           <CreateAppAnimation />
         </div>
         <Feedback />
-        <div className="grid grid-cols-1 my-24 lg:grid-cols-2">
-          <PreviewImages />
-          <div>
-            <h2 className="text-4xl font-tinos my-2">
-              Minimal aesthetics, with maximum customizability.
-            </h2>
-            <p>
-              Fumadocs offer well-designed themes, with a headless mode to plug
-              your own UI.
-              <br />
-              Pro designer? Customise it with a single command using Fumadocs
-              CLI.
-            </p>
+        <Aesthetics />
+        <AnybodyCanWrite />
+        <ForEngineers />
+        <Features />
+      </div>
+      <Footer />
+    </main>
+  );
+}
+
+function Aesthetics() {
+  return (
+    <>
+      <div
+        className={cn(
+          cardVariants({
+            variant: 'brand',
+          }),
+        )}
+      >
+        <PreviewImages />
+      </div>
+      <div className={cn(cardVariants({ className: 'flex flex-col' }))}>
+        <h2
+          className={cn(headingVariants({ variant: 'h2', className: 'mb-8' }))}
+        >
+          Minimal aesthetics, Maximum customizability.
+        </h2>
+        <p>
+          Fumadocs offer well-designed themes, with a headless mode to plug your
+          own UI.
+        </p>
+        <div className="h-px bg-fd-border mt-auto mb-4" />
+        <p className="text-xs">
+          Pro designer? Customise the theme using Fumadocs CLI.
+        </p>
+        <CodeBlock
+          code="pnpm dlx @fumadocs/cli customise"
+          lang="bash"
+          wrapper={{ className: 'mt-4' }}
+        />
+      </div>
+    </>
+  );
+}
+
+function AnybodyCanWrite() {
+  return (
+    <Writing
+      tabs={{
+        writer: (
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
             <CodeBlock
-              code="pnpm dlx @fumadocs/cli customise"
-              lang="bash"
-              wrapper={{ className: 'mt-4' }}
-            />
-          </div>
-        </div>
-        <Writing
-          tabs={{
-            writer: (
-              <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-                <CodeBlock
-                  code={`---
+              code={`---
 title: Hello World
 ---
 
@@ -158,32 +201,36 @@ console.log("Hello World")
 \`\`\`ts tab="Tab 2"
 return 0;
 \`\`\``}
-                  lang="mdx"
-                />
-                <div>
-                  <h3 className="text-3xl font-tinos mb-4">
-                    The familiar syntax.
-                  </h3>
-                  <p>
-                    It is just Markdown, with additional features seamlessly
-                    composing into the syntax.
-                  </p>
-                  <ul className="text-xs list-disc list-inside mt-8">
-                    <li>Markdown features, including images</li>
-                    <li>Syntax highlighting (Powered by Shiki)</li>
-                    <li>Codeblock Groups</li>
-                    <li>Callouts</li>
-                    <li>Cards</li>
-                    <li>Custom Heading Anchors</li>
-                    <li>Auto Table of Contents</li>
-                  </ul>
-                </div>
-              </div>
-            ),
-            developer: (
-              <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-                <CodeBlock
-                  code={`---
+              lang="mdx"
+            />
+            <div className="max-lg:row-start-1">
+              <h3
+                className={cn(
+                  headingVariants({ variant: 'h3', className: 'my-4' }),
+                )}
+              >
+                The familiar syntax.
+              </h3>
+              <p>
+                It is just Markdown, with additional features seamlessly
+                composing into the syntax.
+              </p>
+              <ul className="text-xs list-disc list-inside mt-8">
+                <li>Markdown features, including images</li>
+                <li>Syntax highlighting (Powered by Shiki)</li>
+                <li>Codeblock Groups</li>
+                <li>Callouts</li>
+                <li>Cards</li>
+                <li>Custom Heading Anchors</li>
+                <li>Auto Table of Contents</li>
+              </ul>
+            </div>
+          </div>
+        ),
+        developer: (
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+            <CodeBlock
+              code={`---
 title: Hello World
 ---
 
@@ -205,28 +252,32 @@ const name = "fumadocs";
 And re-use content:
 
 <include>./another-page.mdx</include>`}
-                  lang="mdx"
-                />
-                <div>
-                  <h3 className="text-3xl font-tinos mb-4">
-                    Extensive but simple.
-                  </h3>
-                  <p>MDX-native for developers authoring content.</p>
-                  <ul className="text-xs list-disc list-inside mt-8">
-                    <li>JavaScript + JSX syntax</li>
-                    <li>Custom Components</li>
-                    <li>Include/Embed Content</li>
-                    <li>Twoslash Integration</li>
-                    <li>Shiki Notations</li>
-                    <li>Extend via remark, rehype plugins</li>
-                  </ul>
-                </div>
-              </div>
-            ),
-            automation: (
-              <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-                <CodeBlock
-                  code={`---
+              lang="mdx"
+            />
+            <div className="max-lg:row-start-1">
+              <h3
+                className={cn(
+                  headingVariants({ variant: 'h3', className: 'my-4' }),
+                )}
+              >
+                Extensive but simple.
+              </h3>
+              <p>MDX-native for developers authoring content.</p>
+              <ul className="text-xs list-disc list-inside mt-8">
+                <li>JavaScript + JSX syntax</li>
+                <li>Custom Components</li>
+                <li>Include/Embed Content</li>
+                <li>Twoslash Integration</li>
+                <li>Shiki Notations</li>
+                <li>Extend via remark, rehype plugins</li>
+              </ul>
+            </div>
+          </div>
+        ),
+        automation: (
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+            <CodeBlock
+              code={`---
 title: Hello World
 ---
 
@@ -240,66 +291,39 @@ export async function DataView() {
 <DataView />
 
 <auto-type-table path='./my-file.ts' name='CardProps' />`}
-                  lang="mdx"
-                />
+              lang="mdx"
+            />
 
-                <div>
-                  <h3 className="text-3xl font-tinos mb-4">
-                    Content, always up-to-date.
-                  </h3>
-                  <p>
-                    Combining the power of MDX and React Server Components, use
-                    the latest data from database, server — anywhere, to be part
-                    of your content.
-                  </p>
-                  <ul className="text-xs list-disc list-inside mt-8">
-                    <li>Works on React Server Components</li>
-                    <li>Display data from database, CMS, anything</li>
-                    <li>
-                      auto-type-table for documenting types based on TypeScript
-                      Compiler
-                    </li>
-                    <li>OpenAPI playground for documenting your APIs</li>
-                  </ul>
-                </div>
-              </div>
-            ),
-          }}
-        />
-        <div className="grid grid-cols-1 items-center my-24 lg:grid-cols-2">
-          <Image
-            src={ComponentsImage}
-            alt="components"
-            width={1000}
-            className="min-w-0"
-          />
-          <div>
-            <h1 className="font-tinos text-4xl mb-8">
-              Composable & Flexible, by a Engineer.
-            </h1>
-            <p>
-              Separated as <span className="text-brand">Content</span> →{' '}
-              <span className="text-brand">Core</span> →{' '}
-              <span className="text-brand">UI</span>, offering the high
-              composability that engineers love — you can use Fumadocs MDX as a
-              library, without adapting the entire framework.
-            </p>
-            <div className="text-sm mt-8 [mask-image:linear-gradient(to_bottom,white,transparent)]">
-              <p>fumadocs</p>
-              <p>fumadocs-mdx</p>
-              <p>fumadocs-core</p>
-              <p>fumadocs-ui</p>
-              <p>fumadocs-openapi</p>
-              <p>fumadocs-obsidian</p>
+            <div className="max-lg:row-start-1">
+              <h3
+                className={cn(
+                  headingVariants({ variant: 'h3', className: 'my-4' }),
+                )}
+              >
+                Content, always up-to-date.
+              </h3>
+              <p>
+                Combining the power of MDX and React Server Components, use the
+                latest data from database, server — anywhere, to be part of your
+                content.
+              </p>
+              <ul className="text-xs list-disc list-inside mt-8">
+                <li>Works on React Server Components</li>
+                <li>Display data from database, CMS, anything</li>
+                <li>
+                  auto-type-table for documenting types based on TypeScript
+                  Compiler
+                </li>
+                <li>OpenAPI playground for documenting your APIs</li>
+              </ul>
             </div>
           </div>
-        </div>
-        <Features />
-      </div>
-      <Footer />
-    </main>
+        ),
+      }}
+    />
   );
 }
+
 const feedback = [
   {
     avatar: 'https://avatars.githubusercontent.com/u/124599',
@@ -333,9 +357,13 @@ Like headless docs to build exactly what you need.`,
 
 function Feedback() {
   return (
-    <div className="grid grid-cols-1 my-24 lg:grid-cols-2">
-      <div>
-        <h2 className="text-4xl mb-8 font-tinos">A framework people loves.</h2>
+    <>
+      <div className={cn(cardVariants())}>
+        <h2
+          className={cn(headingVariants({ variant: 'h2', className: 'mb-8' }))}
+        >
+          A framework people loves.
+        </h2>
         <p>
           Loved by teams and developers from startups like Unkey, Vercel, Orama
           — evolving everyday to be your favourite docs framework.
@@ -351,180 +379,188 @@ function Feedback() {
           Showcase
         </Link>
       </div>
-      <Marquee className="[mask-image:linear-gradient(to_right,transparent,white_20px,white_calc(100%-20px),transparent)]">
-        {feedback.map((item) => (
-          <div
-            key={item.user}
-            className="flex flex-col rounded-xl border bg-gradient-to-b from-fd-card p-4 shadow-lg w-[320px]"
-          >
-            <p className="text-sm whitespace-pre-wrap">{item.message}</p>
+      <div
+        className={cn(
+          cardVariants({
+            variant: 'brand',
+            className: 'relative p-0',
+          }),
+        )}
+      >
+        <div className="absolute inset-0 z-2 inset-shadow-sm inset-shadow-brand rounded-2xl" />
+        <Marquee className="p-8">
+          {feedback.map((item) => (
+            <div
+              key={item.user}
+              className="flex flex-col rounded-xl border bg-fd-card text-landing-foreground dark:text-landing-foreground-dark p-4 shadow-lg w-[320px]"
+            >
+              <p className="text-sm whitespace-pre-wrap">{item.message}</p>
 
-            <div className="mt-auto flex flex-row items-center gap-2 pt-4">
-              <Image
-                src={item.avatar}
-                alt="avatar"
-                width="32"
-                height="32"
-                unoptimized
-                className="size-8 rounded-full"
-              />
-              <div>
-                <p className="text-sm font-medium">{item.user}</p>
-                <p className="text-xs text-fd-muted-foreground">{item.role}</p>
+              <div className="mt-auto flex flex-row items-center gap-2 pt-4">
+                <Image
+                  src={item.avatar}
+                  alt="avatar"
+                  width="32"
+                  height="32"
+                  unoptimized
+                  className="size-8 rounded-full"
+                />
+                <div>
+                  <p className="text-sm font-medium">{item.user}</p>
+                  <p className="text-xs text-fd-muted-foreground">
+                    {item.role}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </Marquee>
-    </div>
+          ))}
+        </Marquee>
+      </div>
+    </>
   );
 }
 
 function Features() {
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-      <Feature
-        icon={PaperclipIcon}
-        subheading="Source Agnostic"
-        heading="Your source. Your choice"
-        description={
-          <>
-            <span className="font-medium text-fd-foreground">
-              Designed to integrate with any content source:{' '}
-            </span>
-            <span>
-              Fumadocs works on MDX, Content Collections, and even your own CMS.
-            </span>
-          </>
-        }
-        className="overflow-hidden"
-        style={{
-          backgroundImage:
-            'radial-gradient(circle at 60% 50%,var(--color-fd-secondary),var(--color-fd-background) 80%)',
-        }}
+    <>
+      <div
+        className={cn(
+          cardVariants(),
+          'flex flex-col bg-gradient-to-b from-fd-card to-neutral-400 dark:to-neutral-950 row-span-2',
+        )}
       >
-        <div className="mt-8 flex flex-col">
-          <div className="flex flex-row w-fit items-center gap-4">
-            <a
-              href="https://github.com/fuma-nama/fumadocs-basehub"
-              rel="noreferrer noopener"
-              target="_blank"
-              className={cn(linkVariants())}
-            >
-              BaseHub CMS
-            </a>
-            <a
-              href="https://github.com/fuma-nama/fumadocs-sanity"
-              rel="noreferrer noopener"
-              target="_blank"
-              className={cn(linkVariants())}
-            >
-              Sanity
-            </a>
-            <a
-              href="https://github.com/MFarabi619/fumadocs-payloadcms"
-              rel="noreferrer noopener"
-              target="_blank"
-              className={cn(linkVariants())}
-            >
-              Payload CMS
-            </a>
-          </div>
-          <Image
-            alt="Source"
-            src={SourceImage}
-            sizes="600px"
-            className="-mt-16 w-[400px] min-w-[400px] invert pointer-events-none dark:invert-0"
-          />
-          <div className="z-2 mt-[-170px] w-[300px] overflow-hidden rounded-lg border border-fd-foreground/10 shadow-xl backdrop-blur-lg">
-            <div className="flex flex-row items-center gap-2 bg-fd-muted/50 px-4 py-2 text-xs font-medium text-fd-muted-foreground">
-              <FileEditIcon className="size-4" />
-              MDX Editor
-            </div>
-            <pre className="p-4 text-[13px]">
-              <code className="grid">
-                <span className="font-medium"># Hello World!</span>
-                <span>This is my first document.</span>
-                <span>{` `}</span>
-                <span className="font-medium">{`<ServerComponent />`}</span>
-              </code>
-            </pre>
-          </div>
-        </div>
-      </Feature>
-      <Feature
-        icon={SearchIcon}
-        subheading="Search Integration"
-        heading="Enhance your search experience."
-        description="Integrate with Orama Search and Algolia Search in your docs easily."
-      >
+        <h3
+          className={cn(headingVariants({ variant: 'h3', className: 'mb-6' }))}
+        >
+          Enhance your <SearchIcon className="inline size-8 text-brand" />{' '}
+          search experience.
+        </h3>
+        <p>
+          Integrate with Orama Search and Algolia Search in your docs easily.
+        </p>
         <Link
           href="/docs/headless/search/algolia"
-          className={cn(buttonVariants({ className: 'mt-4' }))}
+          className={cn(buttonVariants({ className: 'w-fit mt-4' }))}
         >
           Learn More
         </Link>
         <Search />
-      </Feature>
-      <Feature
-        icon={Terminal}
-        subheading="Fumadocs CLI"
-        heading="The Shadcn UI for docs"
-        description="Fumadocs CLI creates interactive components for your docs, offering a rich experience to your users."
+      </div>
+      <div className={cn(cardVariants())}>
+        <h3
+          className={cn(headingVariants({ variant: 'h3', className: 'mb-6' }))}
+        >
+          The Shadcn UI for docs
+        </h3>
+        <p className="text-sm">
+          Fumadocs CLI creates interactive components for your docs, offering a
+          rich experience to your users.
+        </p>
+      </div>
+      <Image src={ShadcnImage} alt="shadcn" className="rounded-2xl" />
+    </>
+  );
+}
+
+function ForEngineers() {
+  return (
+    <>
+      <h2
+        className={cn(
+          headingVariants({
+            variant: 'h2',
+            className: 'text-brand text-center mb-8 col-span-full',
+          }),
+        )}
       >
-        <div className="relative">
-          <div className="grid grid-cols-[1fr_2fr_1fr] h-[220px] *:border-fd-foreground/50 *:border-dashed mask-radial-circle mask-radial-from-white">
-            <div className="border-r border-b" />
-            <div className="border-b" />
-            <div className="border-l border-b" />
-
-            <div className="border-r" />
-            <div className="w-[200px]" />
-            <div className="border-l" />
-
-            <div className="border-r border-t" />
-            <div className="border-t" />
-            <div className="border-l border-t" />
+        Docs For Engineers.
+      </h2>
+      <Image
+        src={ComponentsImage}
+        alt="components"
+        width={1000}
+        className="min-w-0 bg-neutral-950 rounded-2xl border"
+      />
+      <div className={cn(cardVariants())}>
+        <h3
+          className={cn(headingVariants({ variant: 'h3', className: 'mb-8' }))}
+        >
+          A truly composable framework.
+        </h3>
+        <p>
+          Separated as <span className="text-brand">Content</span> →{' '}
+          <span className="text-brand">Core</span> →{' '}
+          <span className="text-brand">UI</span>, offering the high
+          composability that engineers love — you can use Fumadocs as a library,
+          without adapting the entire framework.
+        </p>
+        <div className="text-sm mt-8 [mask-image:linear-gradient(to_bottom,white,transparent)]">
+          <p>fumadocs</p>
+          <p>fumadocs-mdx</p>
+          <p>fumadocs-core</p>
+          <p>fumadocs-ui</p>
+          <p>fumadocs-openapi</p>
+          <p>fumadocs-obsidian</p>
+        </div>
+      </div>
+      <div className={cn(cardVariants())}>
+        <h3
+          className={cn(headingVariants({ variant: 'h3', className: 'mb-8' }))}
+        >
+          Adopts your content.
+        </h3>
+        <p className="mb-8">
+          Designed to integrate with any{' '}
+          <span className="text-brand">content source</span>, Fumadocs works on
+          MDX, Content Collections, and even your own CMS.
+        </p>
+        <div className="flex flex-row w-fit items-center gap-4">
+          {[
+            {
+              href: 'https://github.com/fuma-nama/fumadocs-basehub',
+              text: 'BaseHub CMS',
+            },
+            {
+              href: 'https://github.com/fuma-nama/fumadocs-sanity',
+              text: 'Sanity',
+            },
+            {
+              href: 'https://github.com/MFarabi619/fumadocs-payloadcms',
+              text: 'Payload CMS',
+            },
+          ].map((item) => (
+            <a
+              key={item.href}
+              href={item.href}
+              rel="noreferrer noopener"
+              target="_blank"
+              className="text-sm text-brand hover:underline"
+            >
+              {item.text}
+            </a>
+          ))}
+        </div>
+      </div>
+      <div className={cn(cardVariants({ variant: 'brand' }))}>
+        <div className="w-[300px] m-auto overflow-hidden rounded-xl border shadow-xl bg-fd-card text-fd-card-foreground">
+          <div className="flex flex-row items-center gap-2 bg-fd-muted px-4 py-2 text-xs font-medium text-fd-muted-foreground">
+            <FileEditIcon className="size-4" />
+            MDX Editor
           </div>
-          <code className="absolute inset-0 flex items-center justify-center">
-            <code className="text-sm text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-fd-foreground font-medium">
-              npx @fumadocs/cli add
+          <pre className="p-4 text-[13px]">
+            <code className="grid">
+              <span className="opacity-50">---</span>
+              <span>title: Hello World</span>
+              <span className="opacity-50">---</span>
+              <span className="font-medium"># Hello World!</span>
+              <span>This is my first document.</span>
+              <span>{` `}</span>
+              <span className="font-medium">{`<ServerComponent />`}</span>
             </code>
-          </code>
+          </pre>
         </div>
-      </Feature>
-      <Feature
-        icon={CpuIcon}
-        subheading="Robust"
-        heading="Flexibility that cover your needs."
-        description="Well documented, separated in packages."
-      >
-        <div className="mt-8 flex flex-col gap-4">
-          <Link
-            href="/docs/ui"
-            className="rounded-xl bg-gradient-to-br from-transparent via-fd-primary p-px shadow-lg shadow-fd-primary/20"
-          >
-            <div className="rounded-[inherit] bg-fd-background bg-gradient-to-br from-transparent via-fd-primary/10 p-4 transition-colors hover:bg-fd-muted">
-              <LayoutIcon />
-              <h3 className="font-semibold">Fumadocs UI</h3>
-              <p className="text-sm text-fd-muted-foreground">
-                Default theme of Fumadocs with many useful components.
-              </p>
-            </div>
-          </Link>
-          <Link
-            href="/docs/headless"
-            className="rounded-xl border bg-fd-background p-4 shadow-lg transition-colors hover:bg-fd-muted"
-          >
-            <LibraryIcon />
-            <h3 className="font-semibold">Core</h3>
-            <p className="text-sm text-fd-muted-foreground">
-              Headless library with a useful set of utilities.
-            </p>
-          </Link>
-        </div>
-      </Feature>
-    </div>
+      </div>
+    </>
   );
 }
 
@@ -534,7 +570,7 @@ const searchItemVariants = cva(
 
 function Search() {
   return (
-    <div className="mt-6 rounded-lg bg-gradient-to-b from-fd-border p-px">
+    <div className="mt-auto rounded-lg bg-gradient-to-b from-fd-border p-px">
       <div className="flex select-none flex-col rounded-[inherit] bg-gradient-to-b from-fd-popover">
         <div className="inline-flex items-center gap-2 px-4 py-2 text-sm text-fd-muted-foreground">
           <SearchIcon className="size-4" />

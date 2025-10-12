@@ -61,7 +61,6 @@ export function baseOptions(): BaseLayoutProps {
           </span>
         </>
       ),
-      transparentMode: 'top',
     },
   };
 }
