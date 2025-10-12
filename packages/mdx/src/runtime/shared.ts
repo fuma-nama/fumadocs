@@ -1,7 +1,6 @@
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { TOCItemType } from 'fumadocs-core/toc';
-import type { FC } from 'react';
-import type { MDXProps } from 'mdx/types';
+import type { MDXContent } from 'mdx/types';
 import type { ExtractedReference } from '@/loaders/mdx/remark-postprocess';
 
 export interface FileInfo {
@@ -20,7 +19,7 @@ export interface DocData {
   /**
    * Compiled MDX content (as component)
    */
-  body: FC<MDXProps>;
+  body: MDXContent;
 
   /**
    * table of contents generated from content.

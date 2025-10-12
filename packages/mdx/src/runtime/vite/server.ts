@@ -1,11 +1,17 @@
-import type { CompiledMDXFile, DocMap, LazyDocMap, MetaMap } from './types';
 import type {
   MetaData,
   PageData,
   Source,
   VirtualFile,
 } from 'fumadocs-core/source';
-import { type BaseCreate, fromConfigBase } from '@/runtime/vite/base';
+import {
+  type BaseCreate,
+  type CompiledMDXFile,
+  type DocMap,
+  fromConfigBase,
+  type LazyDocMap,
+  type MetaMap,
+} from '@/runtime/vite/base';
 import * as path from 'node:path';
 import {
   type AsyncDocCollectionEntry,
@@ -17,11 +23,7 @@ import {
 } from '@/runtime/shared';
 import fs from 'node:fs/promises';
 
-// for server-side usage of renderers
-export { createClientLoader, toClientRenderer } from './browser';
-
-export type { ClientLoader, ClientLoaderOptions } from './browser';
-export type * from './types';
+export * from './base';
 
 export interface ServerCreate<Config> extends BaseCreate<Config> {
   sourceAsync: <DocOut extends PageData, MetaOut extends MetaData>(
