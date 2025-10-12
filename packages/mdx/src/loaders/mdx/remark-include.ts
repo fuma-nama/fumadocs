@@ -8,6 +8,7 @@ import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx-jsx';
 import { remarkHeading } from 'fumadocs-core/mdx-plugins';
 import type { DataMap } from 'vfile';
 import type { Directives } from 'mdast-util-directive';
+import { remarkMarkAndUnravel } from '@/loaders/mdx/remark-unravel';
 
 export interface Params {
   lang?: string;
@@ -154,11 +155,12 @@ export function remarkInclude(this: Processor): Transformer<Root, Root> {
       value: parsed.content,
       data: { frontmatter: parsed.data as Record<string, unknown> },
     }) as Root;
+    const baseProcessor = unified().use(remarkMarkAndUnravel);
 
     if (heading) {
       // parse headings before extraction
       const extracted = extractSection(
-        await unified().use(remarkHeading).run(mdast),
+        await baseProcessor.use(remarkHeading).run(mdast),
         heading,
       );
       if (!extracted)
@@ -167,6 +169,8 @@ export function remarkInclude(this: Processor): Transformer<Root, Root> {
         );
 
       mdast = extracted;
+    } else {
+      mdast = await baseProcessor.run(mdast);
     }
 
     await update(mdast, path.dirname(file), data);
