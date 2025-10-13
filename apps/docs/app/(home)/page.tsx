@@ -51,7 +51,7 @@ const buttonVariants = cva(
   },
 );
 
-const cardVariants = cva('rounded-2xl p-8 bg-origin-border', {
+const cardVariants = cva('rounded-2xl p-8 bg-origin-border shadow-lg', {
   variants: {
     variant: {
       brand: 'bg-brand text-brand-foreground dark:text-brand-foreground-dark',
@@ -148,12 +148,13 @@ function Aesthetics() {
         className={cn(
           cardVariants({
             variant: 'brand',
+            className: 'p-0 row-span-2 max-lg:row-start-6',
           }),
         )}
       >
         <PreviewImages />
       </div>
-      <div className={cn(cardVariants({ className: 'flex flex-col' }))}>
+      <div className={cn(cardVariants())}>
         <h2
           className={cn(headingVariants({ variant: 'h2', className: 'mb-8' }))}
         >
@@ -163,10 +164,9 @@ function Aesthetics() {
           Fumadocs offer well-designed themes, with a headless mode to plug your
           own UI.
         </p>
-        <div className="h-px bg-fd-border mt-auto mb-4" />
-        <p className="text-xs">
-          Pro designer? Customise the theme using Fumadocs CLI.
-        </p>
+      </div>
+      <div className={cn(cardVariants())}>
+        <p>Pro designer? Customise the theme using Fumadocs CLI.</p>
         <CodeBlock
           code="pnpm dlx @fumadocs/cli customise"
           lang="bash"
@@ -362,18 +362,11 @@ function Feedback() {
         >
           A framework people loves.
         </h2>
-        <p>
+        <p className="mb-6">
           Loved by teams and developers from startups like Unkey, Vercel, Orama
           — evolving everyday to be your favourite docs framework.
         </p>
-        <Link
-          href="/showcase"
-          className={cn(
-            buttonVariants({
-              className: 'mt-4',
-            }),
-          )}
-        >
+        <Link href="/showcase" className={cn(buttonVariants())}>
           Showcase
         </Link>
       </div>
@@ -385,7 +378,7 @@ function Feedback() {
           }),
         )}
       >
-        <div className="absolute inset-0 z-2 inset-shadow-sm inset-shadow-brand rounded-2xl" />
+        <div className="absolute inset-0 z-2 inset-shadow-[0_10px_60px] inset-shadow-brand rounded-2xl" />
         <Marquee className="p-8">
           {feedback.map((item) => (
             <div
@@ -424,7 +417,7 @@ function Features() {
       <div
         className={cn(
           cardVariants(),
-          'flex flex-col bg-gradient-to-b from-fd-card to-neutral-400 dark:to-neutral-950 row-span-2',
+          'flex flex-col bg-gradient-to-b from-fd-card from-50% to-brand/40 row-span-2',
         )}
       >
         <h3
@@ -433,12 +426,12 @@ function Features() {
           Enhance your <SearchIcon className="inline size-8 text-brand" />{' '}
           search experience.
         </h3>
-        <p>
+        <p className="mb-6">
           Integrate with Orama Search and Algolia Search in your docs easily.
         </p>
         <Link
           href="/docs/headless/search/algolia"
-          className={cn(buttonVariants({ className: 'w-fit mt-4' }))}
+          className={cn(buttonVariants({ className: 'w-fit mb-8' }))}
         >
           Learn More
         </Link>
@@ -563,38 +556,44 @@ function ForEngineers() {
 }
 
 const searchItemVariants = cva(
-  'flex flex-row items-center gap-2 rounded-md p-2 text-sm text-fd-popover-foreground',
+  'rounded-md p-2 text-sm text-fd-popover-foreground',
 );
 
 function Search() {
   return (
-    <div className="mt-auto rounded-lg bg-gradient-to-b from-fd-border p-px">
-      <div className="flex select-none flex-col rounded-[inherit] bg-gradient-to-b from-fd-popover">
-        <div className="inline-flex items-center gap-2 px-4 py-2 text-sm text-fd-muted-foreground">
-          <SearchIcon className="size-4" />
-          Search...
-        </div>
-        <div className="border-t p-2">
-          {[
-            'Getting Started',
-            'Components',
-            'MDX Content',
-            'User Guide',
-            'Javascript SDK',
-          ].map((v, i) => (
-            <div
-              key={v}
-              className={cn(
-                searchItemVariants({
-                  className: i === 0 ? 'bg-fd-accent' : '',
-                }),
-              )}
-            >
+    <div className="flex select-none flex-col mt-auto bg-fd-popover rounded-xl border [mask-image:linear-gradient(to_bottom,white_40%,transparent)]">
+      <div className="inline-flex items-center gap-2 px-4 py-3 text-sm text-fd-muted-foreground">
+        <SearchIcon className="size-4" />
+        Search...
+      </div>
+      <div className="border-t p-2">
+        {[
+          ['Getting Started', 'Use Fumadocs in your project.'],
+          ['Components', 'The UI Components for your docs.'],
+          ['MDX Content', 'Using MDX for content.'],
+          ['User Guide', 'How to use Fumadocs.'],
+          ['Javascript SDK', 'The JavaScript SDK of Fumadocs.'],
+        ].map(([title, description], i) => (
+          <div
+            key={i}
+            className={cn(
+              searchItemVariants({
+                className: i === 0 && 'bg-fd-accent',
+              }),
+            )}
+          >
+            <div className="flex flex-row items-center gap-2">
               <FileTextIcon className="size-4 text-fd-muted-foreground" />
-              {v}
+              <p>{title}</p>
+              {i === 7 && (
+                <p className="ms-auto text-xs text-fd-muted-foreground">Open</p>
+              )}
             </div>
-          ))}
-        </div>
+            <p className="text-xs mt-2 text-fd-muted-foreground ps-6">
+              {description}
+            </p>
+          </div>
+        ))}
       </div>
     </div>
   );
