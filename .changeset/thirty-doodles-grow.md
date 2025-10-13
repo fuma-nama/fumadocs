@@ -2,4 +2,4 @@
 'fumadocs-mdx': patch
 ---
 
-Support `runtime: bun` in Vite index file generation
+Support `runtime: bun` and `runtime: node` in Vite index file generation

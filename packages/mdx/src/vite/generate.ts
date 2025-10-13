@@ -8,18 +8,20 @@ import { ident, toImportPath } from '@/utils/import-formatter';
 import type { LoadedConfig } from '@/loaders/config';
 import { getGlobPatterns } from '@/utils/collections';
 import path from 'node:path';
-
-export interface GlobOptions {
-  query: Record<string, string>;
-  base?: string;
-  import?: string;
-}
+import {
+  generateGlobImport,
+  type GlobImportOptions,
+} from '@/utils/glob-import';
 
 export interface IndexFileOptions {
   /**
-   * Runtime compat fallbacks
+   * Runtime compat fallbacks for Vite specific APIs
+   *
+   * - `bun`: use Bun-specific APIs.
+   * - `node`: use Node.js APIs.
+   * - `false` (default): no fallback.
    */
-  runtime?: 'bun';
+  runtime?: 'bun' | 'node' | false;
 
   /**
    * Output index file path
@@ -73,14 +75,18 @@ export function entry(
   function doc(name: string, collection: DocCollection) {
     const patterns = getGlobPatterns(collection);
     const base = getGlobBase(collection);
-    const docGlob = generateGlob(name, patterns, {
+    const docGlob = generateGlob(patterns, {
+      query: {
+        collection: name,
+      },
       base,
     });
 
     if (collection.async) {
-      const headBlob = generateGlob(name, patterns, {
+      const headBlob = generateGlob(patterns, {
         query: {
           only: 'frontmatter',
+          collection: name,
         },
         import: 'frontmatter',
         base,
@@ -96,27 +102,25 @@ export function entry(
     const patterns = getGlobPatterns(collection);
     const base = getGlobBase(collection);
 
-    return `create.meta("${name}", "${base}", ${generateGlob(name, patterns, {
+    return `create.meta("${name}", "${base}", ${generateGlob(patterns, {
       import: 'default',
       base,
+      query: {
+        collection: name,
+      },
     })})`;
   }
 
-  function generateGlob(
-    name: string,
-    patterns: string[],
-    globOptions?: Partial<GlobOptions>,
-  ) {
-    const options: GlobOptions = {
-      ...globOptions,
-      query: {
-        ...globOptions?.query,
-        collection: name,
-      },
-    };
+  function generateGlob(patterns: string[], options: GlobImportOptions) {
+    patterns = mapGlobPatterns(patterns);
 
-    const fnName = runtime === 'bun' ? 'importMetaGlob' : 'import.meta.glob';
-    return `${fnName}(${JSON.stringify(mapGlobPatterns(patterns))}, ${JSON.stringify(options, null, 2)})`;
+    if (runtime === 'node') {
+      return generateGlobImport(patterns, options);
+    } else {
+      const fnName = runtime === 'bun' ? 'importMetaGlob' : 'import.meta.glob';
+
+      return `${fnName}(${JSON.stringify(patterns)}, ${JSON.stringify(options, null, 2)})`;
+    }
   }
 
   for (const [name, collection] of config.collections.entries()) {
