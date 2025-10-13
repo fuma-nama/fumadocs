@@ -10,7 +10,7 @@ import { validate, ValidationError } from '@/utils/validation';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { load } from 'js-yaml';
-import { entry } from '@/vite/generate';
+import { entry, type IndexFileOptions } from '@/vite/generate';
 import { createMdxLoader } from '@/loaders/mdx';
 import { resolvedConfig } from '@/loaders/config';
 import { toVite } from '@/loaders/adapter';
@@ -23,15 +23,7 @@ export interface PluginOptions {
    *
    * @defaultValue true
    */
-  generateIndexFile?:
-    | boolean
-    | {
-        out?: string;
-        /**
-         * add `.js` extensions to imports, needed for ESM without bundler resolution
-         */
-        addJsExtension?: boolean;
-      };
+  generateIndexFile?: boolean | IndexFileOptions;
 
   /**
    * @defaultValue source.config.ts
@@ -126,15 +118,15 @@ export default function mdx(
       } satisfies UserConfig);
     },
     async buildStart() {
-      if (!generateIndexFile) return;
-      const { out = 'source.generated.ts', addJsExtension } =
-        typeof generateIndexFile === 'object' ? generateIndexFile : {};
+      let indexFileOptions = generateIndexFile;
+      if (!indexFileOptions) return;
+      if (typeof indexFileOptions !== 'object') indexFileOptions = {};
+
+      const { out = 'source.generated.ts' } = indexFileOptions;
 
       console.log('[Fumadocs MDX] Generating index files');
-
-      const dir = path.dirname(out);
-      await fs.mkdir(dir, { recursive: true });
-      await fs.writeFile(out, entry(configPath, loaded, dir, addJsExtension));
+      await fs.mkdir(path.dirname(out), { recursive: true });
+      await fs.writeFile(out, entry(configPath, loaded, indexFileOptions));
     },
 
     async transform(value, id) {

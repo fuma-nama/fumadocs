@@ -55,10 +55,7 @@ export async function loadConfig(
   const url = pathToFileURL(path.resolve(outDir, 'source.config.mjs'));
 
   const config = import(`${url.href}?hash=${hash}`).then((loaded) => {
-    return buildConfig(
-      // every call to `loadConfig` will cause the previous cache to be ignored
-      loaded as Record<string, unknown>,
-    );
+    return buildConfig(loaded as Record<string, unknown>);
   });
 
   if (hash) cache = { config, hash };

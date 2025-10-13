@@ -3,7 +3,7 @@
 import { existsSync } from 'node:fs';
 
 async function start() {
-  const args = process.argv.slice(2);
+  const [configPath] = process.argv.slice(2);
   const isNext =
     existsSync('next.config.js') ||
     existsSync('next.config.mjs') ||
@@ -11,10 +11,10 @@ async function start() {
 
   if (isNext) {
     const { postInstall } = await import('./next');
-    await postInstall(...args);
+    await postInstall(configPath);
   } else {
     const { postInstall } = await import('./vite/postinstall');
-    await postInstall(...args);
+    await postInstall(configPath);
   }
 }
 
