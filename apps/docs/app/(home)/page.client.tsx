@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  ComponentProps,
   Fragment,
   type HTMLAttributes,
   type ReactElement,
@@ -132,7 +133,7 @@ const previewButtonVariants = cva(
     },
   },
 );
-export function PreviewImages() {
+export function PreviewImages(props: ComponentProps<'div'>) {
   const [active, setActive] = useState(0);
   const previews = [
     {
@@ -150,7 +151,7 @@ export function PreviewImages() {
   ];
 
   return (
-    <div className="relative overflow-hidden">
+    <div {...props} className={cn('relative', props.className)}>
       <div className="absolute flex flex-row left-1/2 -translate-1/2 bottom-0 z-2 p-0.5 rounded-full bg-fd-card border shadow-xl">
         <div
           role="none"
