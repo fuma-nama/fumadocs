@@ -7,24 +7,24 @@ description: Output static website with Fumadocs.
 
 By default, Fumadocs use a server-first approach which always requires a running server to serve.
 
-You can also output a static build by enabling it on your React framework.
+You can output a static build by configuring your React framework.
 
-## Search
+### 1. Search
 
-### Built-in Search
+#### Built-in Search
 
-You will need extra configurations to statically store the search indexes, and search will be computed on browser instead:
+1. [Configure Search Server](/docs/headless/search/orama#static-export).
+2. [Configure Search UI/Client](/docs/ui/search/orama#static).
 
-1. **Search Client:** [enable static mode](/docs/ui/search/orama#static).
-2. **Search Server:** [output static indexes](/docs/headless/search/orama#static-export).
+After the configurations, your app will statically store the search indexes, and search will be computed on browser instead.
 
-### Cloud Solutions
+#### Cloud Solutions
 
 Since the search functionality is powered by remote servers, static export works without configuration.
 
-## Deployment
+### 2. Deployment
 
-### Next.js
+#### Next.js
 
 You can enable Next.js static export, it allows you to export the app as a static HTML site without a Node.js server.
 
@@ -45,9 +45,9 @@ const nextConfig = {
 
 See [Next.js docs](https://nextjs.org/docs/app/guides/static-exports) for limitations and details.
 
-### React Router
+#### React Router
 
-By configuring pre-rendering on all pages, you can serve the `build/client` directory as a static website.
+By configuring SPA mode and pre-rendering, you can serve the `build/client` directory as a static website.
 
 ```ts title="react-router.config.ts"
 import type { Config } from '@react-router/dev/config';
@@ -57,7 +57,9 @@ import { createGetUrl, getSlugs } from 'fumadocs-core/source';
 const getUrl = createGetUrl('/docs');
 
 export default {
-  ssr: true,
+  // disable SSR [!code highlight]
+  ssr: false,
+
   // [!code ++:9]
   async prerender({ getStaticPaths }) {
     const paths: string[] = [...getStaticPaths()];
@@ -71,9 +73,9 @@ export default {
 } satisfies Config;
 ```
 
-### Tanstack Start
+#### Tanstack Start
 
-By configuring pre-rendering, you can serve the statically pre-rendered HTML pages as a static website.
+Configure SPA mode and pre-rendering, refer to [SPA Mode](https://tanstack.com/start/latest/docs/framework/react/guide/spa-mode) for deploying SPA apps with Tanstack Start.
 
 ```ts title="vite.config.ts"
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
@@ -83,23 +85,25 @@ export default defineConfig({
   plugins: [
     // ...other plugins
     tanstackStart({
-      // Tanstack Router will automatically crawl your pages [!code ++:4]
-      target: 'static',
-      prerender: {
+      spa: {
         enabled: true,
-      },
-      // if you have any hidden paths that's not visible on UI, you can add them explicitly. [!code highlight:5]
-      pages: [
-        {
-          path: '/docs/test',
+        // Tanstack Router will automatically crawl your pages [!code ++:4]
+        prerender: {
+          enabled: true,
         },
-      ],
+        // if you have any hidden paths that's not visible on UI, you can add them explicitly. [!code highlight:5]
+        pages: [
+          {
+            path: '/docs/test',
+          },
+        ],
+      },
     }),
   ],
 });
 ```
 
-### Waku
+#### Waku
 
 Waku can serve your site statically when all pages are configured with `static` render mode.
 
