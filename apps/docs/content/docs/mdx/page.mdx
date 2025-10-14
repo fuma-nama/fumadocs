@@ -1,11 +1,12 @@
 ---
-title: Use as Page
-description: Use MDX file as a page
+title: Import MDX Files
+description: Importing MDX files directly
+icon: FileUp
 ---
 
 ## Introduction
 
-MDX files will be compiled in JS scripts with exports like:
+MDX files will be compiled into JavaScript with exports like:
 
 - `default`: the main component.
 - `frontmatter`: frontmatter data.
@@ -13,9 +14,27 @@ MDX files will be compiled in JS scripts with exports like:
 
 Hence, they can also be used as a page, or components that you can import.
 
-### Next.js
+### Using as Component
 
-You can use `page.mdx` instead of `page.tsx` for creating a new page under the app directory.
+You can import them as a component:
+
+```tsx title="app/my-page.tsx"
+import MyPage from '@/content/page.mdx';
+import { getMDXComponents } from '@/mdx-components';
+
+export default function Page() {
+  return (
+    <div className="prose">
+      {/* pass MDX components and render it */}
+      <MyPage components={getMDXComponents()} />
+    </div>
+  );
+}
+```
+
+### Using as Page
+
+On Next.js, you can use `page.mdx` instead of `page.tsx` for creating a new page under the app directory.
 
 ```mdx tab="app/my-page/page.mdx"
 ---
@@ -71,20 +90,6 @@ export default defineConfig({
 });
 ```
 
-### Other Frameworks
+#### Other Frameworks?
 
-Some frameworks like Tanstack Start require explicit declaration of loaders, it's recommended to use them as components in your pages instead.
-
-```tsx title="app/my-page.tsx"
-import MyPage from '@/content/page.mdx';
-import { getMDXComponents } from '@/mdx-components';
-
-export default function Page() {
-  return (
-    <div className="prose">
-      {/* pass MDX components and render it */}
-      <MyPage components={getMDXComponents()} />
-    </div>
-  );
-}
-```
+Other frameworks like Tanstack Start require explicit declaration of loaders, it's recommended to use them as components in your pages instead.
