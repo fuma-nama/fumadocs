@@ -22,10 +22,5 @@ export function useShiki(
     return `${id}:${state}`;
   }, [code, deps, id, options.lang]);
 
-  return use(
-    (promises[key] ??= highlight(code, {
-      ...options,
-      engine: options.engine ?? 'js',
-    })),
-  );
+  return use((promises[key] ??= highlight(code, options)));
 }

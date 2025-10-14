@@ -1,12 +1,10 @@
 import {
-  type Awaitable,
   type BundledHighlighterOptions,
   type BundledLanguage,
   type CodeOptionsMeta,
   type CodeOptionsThemes,
   type CodeToHastOptionsCommon,
   type Highlighter,
-  type RegexEngine,
 } from 'shiki';
 import type { BundledTheme } from 'shiki/themes';
 import {
@@ -25,7 +23,12 @@ export const defaultThemes = {
 
 export type HighlightOptionsCommon = CodeToHastOptionsCommon<BundledLanguage> &
   CodeOptionsMeta & {
-    engine?: 'js' | 'oniguruma' | Awaitable<RegexEngine>;
+    /**
+     * The Regex Engine for Shiki
+     *
+     * @defaultValue 'js'
+     */
+    engine?: 'js' | 'oniguruma';
     components?: Partial<Components>;
 
     fallbackLanguage?: BundledLanguage;
@@ -46,7 +49,7 @@ export async function highlightHast(
     lang: initialLang,
     fallbackLanguage,
     components: _,
-    engine = 'oniguruma',
+    engine = 'js',
     ...rest
   } = options;
   let lang = initialLang;
@@ -64,25 +67,10 @@ export async function highlightHast(
     themesToLoad = Object.values(themes.themes).filter((v) => v !== undefined);
   }
 
-  let highlighter;
-  if (typeof engine === 'string') {
-    highlighter = await getHighlighter(engine, {
-      langs: [],
-      themes: themesToLoad,
-    });
-  } else {
-    highlighter = await getHighlighter('custom', {
-      engine,
-      langs: [],
-      themes: themesToLoad,
-    });
-
-    if (process.env.NODE_ENV === 'development') {
-      console.warn(
-        '[Fumadocs `highlight()`] Avoid passing `engine` directly. For custom engines, use `shiki` directly instead.',
-      );
-    }
-  }
+  const highlighter = await getHighlighter(engine, {
+    langs: [],
+    themes: themesToLoad,
+  });
 
   try {
     await highlighter.loadLanguage(lang as BundledLanguage);
@@ -110,14 +98,17 @@ export function hastToJsx(hast: Root, options?: Partial<ToJsxOptions>) {
 }
 
 /**
- * Get Shiki highlighter instance of Fumadocs (mostly for internal use, don't recommend you to use it).
+ * Get Shiki highlighter instance of Fumadocs (mostly for internal use, you should use Shiki directly over this).
  *
- * @param engineType - engine type, the engine specified in `options` will only be effective when this is set to `custom`.
+ * @param engineType - Shiki Regex engine to use.
  * @param options - Shiki options.
  */
 export async function getHighlighter(
-  engineType: 'js' | 'oniguruma' | 'custom',
-  options: BundledHighlighterOptions<BundledLanguage, BundledTheme>,
+  engineType: 'js' | 'oniguruma',
+  options: Omit<
+    BundledHighlighterOptions<BundledLanguage, BundledTheme>,
+    'engine'
+  >,
 ) {
   const { createHighlighter } = await import('shiki');
   let highlighter = highlighters.get(engineType);
@@ -129,12 +120,10 @@ export async function getHighlighter(
       engine = import('shiki/engine/javascript').then((res) =>
         res.createJavaScriptRegexEngine(),
       );
-    } else if (engineType === 'oniguruma' || !options.engine) {
+    } else {
       engine = import('shiki/engine/oniguruma').then((res) =>
         res.createOnigurumaEngine(import('shiki/wasm')),
       );
-    } else {
-      engine = options.engine;
     }
 
     highlighter = createHighlighter({

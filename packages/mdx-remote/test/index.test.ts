@@ -14,7 +14,6 @@ const files = await glob('./fixtures/*.mdx', {
 const compiler = createCompiler({
   development: true,
   rehypeCodeOptions: {
-    experimentalJSEngine: true,
     lazy: true,
     themes: {
       light: 'github-light',
@@ -26,7 +25,6 @@ const compiler = createCompiler({
 const compilerProduction = createCompiler({
   development: false,
   rehypeCodeOptions: {
-    experimentalJSEngine: true,
     lazy: true,
     themes: {
       light: 'github-light',
