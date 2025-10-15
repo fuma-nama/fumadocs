@@ -69,6 +69,18 @@ export interface SharedOpenAPIOptions {
   showResponseSchema?: boolean;
 
   mediaAdapters?: Record<string, MediaAdapter>;
+
+  /**
+   * Customise page content
+   */
+  content?: {
+    /**
+     * Show examples under the generated content of JSON schemas.
+     *
+     * @defaultValue false
+     */
+    showExampleInFields?: boolean;
+  };
 }
 
 export interface OpenAPIOptions extends SharedOpenAPIOptions {

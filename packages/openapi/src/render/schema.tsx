@@ -33,7 +33,8 @@ export function Schema({
   writeOnly?: boolean;
   ctx: RenderContext;
 }): ReactNode {
-  const { renderer } = renderContext;
+  const { renderer, content: { showExampleInFields = false } = {} } =
+    renderContext;
 
   function propertyBody(
     schema: Exclude<ResolvedSchema, boolean>,
@@ -132,37 +133,31 @@ export function Schema({
   }
 
   function propertyInfo(schema: Exclude<ResolvedSchema, boolean>) {
-    const fields: {
-      key: string;
-      value: string;
-    }[] = [];
+    const fields: ReactNode[] = [];
+
+    function field(key: string, value: ReactNode) {
+      return (
+        <div className="bg-fd-secondary border rounded-lg text-xs p-1.5 shadow-md">
+          <span className="font-medium me-2">{key}</span>
+          <code className="text-fd-muted-foreground">{value}</code>
+        </div>
+      );
+    }
 
     if (schema.default !== undefined) {
-      fields.push({
-        key: 'Default',
-        value: JSON.stringify(schema.default),
-      });
+      fields.push(field('Default', JSON.stringify(schema.default)));
     }
 
     if (schema.pattern) {
-      fields.push({
-        key: 'Match',
-        value: schema.pattern,
-      });
+      fields.push(field('Match', schema.pattern));
     }
 
     if (schema.format) {
-      fields.push({
-        key: 'Format',
-        value: schema.format,
-      });
+      fields.push(field('Format', schema.format));
     }
 
     if (schema.multipleOf) {
-      fields.push({
-        key: 'Multiple Of',
-        value: String(schema.multipleOf),
-      });
+      fields.push(field('Multiple Of', schema.multipleOf));
     }
 
     let range = getRange(
@@ -172,11 +167,7 @@ export function Schema({
       schema.maximum,
       schema.exclusiveMaximum,
     );
-    if (range)
-      fields.push({
-        key: 'Range',
-        value: range,
-      });
+    if (range) fields.push(field('Range', range));
 
     range = getRange(
       'length',
@@ -185,11 +176,7 @@ export function Schema({
       schema.maxLength,
       undefined,
     );
-    if (range)
-      fields.push({
-        key: 'Length',
-        value: range,
-      });
+    if (range) fields.push(field('Length', range));
 
     range = getRange(
       'properties',
@@ -198,11 +185,7 @@ export function Schema({
       schema.maxProperties,
       undefined,
     );
-    if (range)
-      fields.push({
-        key: 'Properties',
-        value: range,
-      });
+    if (range) fields.push(field('Properties', range));
 
     range = getRange(
       'items',
@@ -211,30 +194,28 @@ export function Schema({
       schema.maxItems,
       undefined,
     );
-    if (range)
-      fields.push({
-        key: 'Items',
-        value: range,
-      });
+    if (range) fields.push(field('Items', range));
 
     if (schema.enum) {
-      fields.push({
-        key: 'Value in',
-        value: schema.enum.map((value) => JSON.stringify(value)).join(' | '),
-      });
+      fields.push(
+        field(
+          'Value in',
+          schema.enum.map((value) => JSON.stringify(value)).join(' | '),
+        ),
+      );
+    }
+
+    if (showExampleInFields && schema.examples) {
+      for (const example of schema.examples) {
+        fields.push(field('Example', JSON.stringify(example, null, 2)));
+      }
     }
 
     if (fields.length === 0) return;
     return (
       <div className="flex flex-wrap gap-2 not-prose">
-        {fields.map((field) => (
-          <div
-            key={field.key}
-            className="bg-fd-secondary border rounded-lg text-xs p-1.5 shadow-md"
-          >
-            <span className="font-medium me-2">{field.key}</span>
-            <code className="text-fd-muted-foreground">{field.value}</code>
-          </div>
+        {fields.map((field, i) => (
+          <Fragment key={i}>{field}</Fragment>
         ))}
       </div>
     );
