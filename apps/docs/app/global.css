@@ -10,29 +10,31 @@
 @plugin 'tailwindcss-animate';
 
 @theme {
-  --spacing-fd-container: 1600px;
+  --spacing-fd-container: 1436px;
   --color-brand: hsl(55, 100%, 38%);
   --color-brand-foreground: white;
   --color-brand-secondary: #9b18dc;
   --color-brand-secondary-foreground: #efccff;
   --color-brand-200: hsl(41, 100%, 50%);
+
   --color-landing-foreground: #59592a;
-  --color-landing-foreground-dark: #e4e2d0;
+  --color-landing-foreground-200: #a8a866;
 
   --font-tinos: 'Tinos';
 }
 
 .dark {
-  --color-fd-primary: var(--color-brand);
+  --color-landing-foreground: #e4e2d0;
+  --color-landing-foreground-200: #b7af7e;
+
   --color-brand: #fff383;
-  --color-brand-secondary: #cc67ff;
+  --color-brand-secondary: #ad41e7;
   --color-brand-secondary-foreground: #f5e4ff;
   --color-brand-foreground: black;
   --color-brand-200: #fff7c8;
 }
 
 @theme inline {
-  --color-fd-primary: var(--color-brand);
   --default-mono-font-family: var(--font-mono);
   --animate-marquee: marquee var(--duration) infinite linear;
   --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;

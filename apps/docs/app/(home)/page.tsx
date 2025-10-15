@@ -5,11 +5,10 @@ import { cn } from '@/lib/cn';
 import Link from 'next/link';
 import ComponentsImage from './components.png';
 import OpenSourceImage from './open-source.png';
-
+import ContentImage from './content.png';
 import { cva } from 'class-variance-authority';
 import {
   BatteryChargingIcon,
-  FileEditIcon,
   FileTextIcon,
   Heart,
   HeartIcon,
@@ -58,10 +57,10 @@ const buttonVariants = cva(
   },
 );
 
-const cardVariants = cva('rounded-2xl p-8 bg-origin-border shadow-lg', {
+const cardVariants = cva('rounded-2xl text-sm p-6 bg-origin-border shadow-lg', {
   variants: {
     variant: {
-      brand: 'bg-brand text-brand-foreground dark:text-brand-foreground-dark',
+      brand: 'bg-brand text-brand-foreground',
       secondary: 'bg-brand-secondary text-brand-secondary-foreground',
       default: 'border bg-fd-card',
     },
@@ -89,7 +88,7 @@ export default function Page() {
             priority
           />
         </div>
-        <div className="mt-auto mb-[max(100px,min(9vw,150px))] text-landing-foreground-dark p-6 col-start-1 row-start-1 md:p-12">
+        <div className="mt-auto dark text-landing-foreground mb-[max(100px,min(9vw,150px))] p-6 col-start-1 row-start-1 md:p-12">
           <h1 className="text-4xl mt-40 mb-12 leading-tighter font-tinos md:text-5xl lg:text-6xl">
             Build the excellent
             <br />
@@ -141,7 +140,6 @@ export default function Page() {
         <Aesthetics />
         <AnybodyCanWrite />
         <ForEngineers />
-        <Features />
         <OpenSource />
         <Footer />
       </div>
@@ -174,12 +172,13 @@ function Aesthetics() {
           own UI.
         </p>
       </div>
-      <div className={cn(cardVariants())}>
-        <p>Pro designer? Customise the theme using Fumadocs CLI.</p>
+      <div className={cn(cardVariants({ className: 'flex flex-col' }))}>
+        <p className="mb-4">
+          Pro designer? Customise the theme using Fumadocs CLI.
+        </p>
         <CodeBlock
-          code="pnpm dlx @fumadocs/cli customise"
+          code={`pnpm dlx @fumadocs/cli customise\n\n> Choose a layout to customise...`}
           lang="bash"
-          wrapper={{ className: 'mt-4' }}
         />
       </div>
     </>
@@ -396,7 +395,7 @@ function Feedback() {
           {feedback.map((item) => (
             <div
               key={item.user}
-              className="flex flex-col rounded-xl border bg-fd-card text-landing-foreground dark:text-landing-foreground-dark p-4 shadow-lg w-[320px]"
+              className="flex flex-col rounded-xl border bg-fd-card text-landing-foreground p-4 shadow-lg w-[320px]"
             >
               <p className="text-sm whitespace-pre-wrap">{item.message}</p>
 
@@ -424,48 +423,6 @@ function Feedback() {
   );
 }
 
-function Features() {
-  return (
-    <>
-      <div
-        className={cn(
-          cardVariants(),
-          'flex flex-col bg-gradient-to-b from-fd-card from-50% to-brand/40 row-span-2',
-        )}
-      >
-        <h3
-          className={cn(headingVariants({ variant: 'h3', className: 'mb-6' }))}
-        >
-          Enhance your <SearchIcon className="inline size-8 text-brand" />{' '}
-          search experience.
-        </h3>
-        <p className="mb-6">
-          Integrate with Orama Search and Algolia Search in your docs easily.
-        </p>
-        <Link
-          href="/docs/headless/search/algolia"
-          className={cn(buttonVariants({ className: 'w-fit mb-8' }))}
-        >
-          Learn More
-        </Link>
-        <Search />
-      </div>
-      <div className={cn(cardVariants())}>
-        <h3
-          className={cn(headingVariants({ variant: 'h3', className: 'mb-6' }))}
-        >
-          The Shadcn UI for docs
-        </h3>
-        <p>
-          Fumadocs CLI creates interactive components for your docs, offering a
-          rich experience to your users.
-        </p>
-      </div>
-      <Image src={ShadcnImage} alt="shadcn" className="rounded-2xl" />
-    </>
-  );
-}
-
 function ForEngineers() {
   return (
     <>
@@ -479,29 +436,37 @@ function ForEngineers() {
       >
         Docs For Engineers.
       </h2>
-      <div className="relative p-8 rounded-2xl bg-origin-border border overflow-hidden z-2">
+      <div className="grid grid-cols-subgrid gap-4">
+        <div className={cn(cardVariants())}>
+          <h3
+            className={cn(
+              headingVariants({
+                variant: 'h3',
+                className: 'mb-6',
+              }),
+            )}
+          >
+            Framework Agnostic
+          </h3>
+          <p>
+            Official support for Next.js, Tanstack Start, React Router, Waku —
+            portable to any React.js framework.
+          </p>
+        </div>
         <Image
           src={ComponentsImage}
-          alt="components"
+          alt="Framework Agnostic"
           width={1000}
-          className="absolute inset-0 size-full object-cover pointer-events-none -z-1"
+          className="min-w-0 rounded-2xl object-cover pointer-events-none shadow-lg"
         />
-        <h3
-          className={cn(
-            headingVariants({
-              variant: 'h3',
-              className: 'text-yellow-100 mb-6',
-            }),
-          )}
-        >
-          Framework Agnostic
-        </h3>
-        <p className="text-yellow-100">
-          Official support for Next.js, Tanstack Start, React Router, Waku —
-          portable to any React.js framework.
-        </p>
       </div>
-      <div className={cn(cardVariants({ className: 'flex flex-col' }))}>
+      <div
+        className={cn(
+          cardVariants({
+            className: 'flex flex-col',
+          }),
+        )}
+      >
         <h3
           className={cn(headingVariants({ variant: 'h3', className: 'mb-8' }))}
         >
@@ -514,7 +479,7 @@ function ForEngineers() {
           composability that engineers love — you can use Fumadocs as a library,
           without adapting the entire framework.
         </p>
-        <div className="mt-auto flex flex-col gap-2 [mask-image:linear-gradient(to_bottom,white,transparent)]">
+        <div className="mt-auto flex flex-col gap-2 @container [mask-image:linear-gradient(to_bottom,white,transparent)]">
           {[
             {
               name: 'fumadocs-mdx',
@@ -540,10 +505,10 @@ function ForEngineers() {
           ].map((item) => (
             <div
               key={item.name}
-              className="inline-flex text-sm items-center gap-2 p-2 border border-dashed border-neutral-300"
+              className="flex flex-col text-sm gap-2 p-2 border border-dashed border-neutral-300 @lg:flex-row @lg:items-center"
             >
               <p className="font-medium text-nowrap">{item.name}</p>
-              <p className="text-xs flex-1 text-end">{item.description}</p>
+              <p className="text-xs flex-1 @lg:text-end">{item.description}</p>
             </div>
           ))}
         </div>
@@ -586,25 +551,47 @@ function ForEngineers() {
           ))}
         </div>
       </div>
-      <div className={cn(cardVariants({ variant: 'brand' }))}>
-        <div className="w-[300px] m-auto overflow-hidden rounded-xl border shadow-xl bg-fd-card text-fd-card-foreground">
-          <div className="flex flex-row items-center gap-2 bg-fd-muted px-4 py-2 text-xs font-medium text-fd-muted-foreground">
-            <FileEditIcon className="size-4" />
-            MDX Editor
-          </div>
-          <pre className="p-4 text-[13px]">
-            <code className="grid">
-              <span className="opacity-50">---</span>
-              <span>title: Hello World</span>
-              <span className="opacity-50">---</span>
-              <span className="font-medium"># Hello World!</span>
-              <span>This is my first document.</span>
-              <span>{` `}</span>
-              <span className="font-medium">{`<ServerComponent />`}</span>
-            </code>
-          </pre>
-        </div>
+      <Image
+        alt="Content Integration"
+        src={ContentImage}
+        width={1000}
+        className="min-w-0 rounded-2xl object-cover pointer-events-none shadow-lg"
+      />
+      <div
+        className={cn(
+          cardVariants(),
+          'flex flex-col bg-gradient-to-b from-fd-card from-50% to-brand/40 row-span-2',
+        )}
+      >
+        <h3
+          className={cn(headingVariants({ variant: 'h3', className: 'mb-6' }))}
+        >
+          Enhance your <SearchIcon className="inline size-8 text-brand" />{' '}
+          search experience.
+        </h3>
+        <p className="mb-6">
+          Integrate with Orama Search and Algolia Search in your docs easily.
+        </p>
+        <Link
+          href="/docs/headless/search/algolia"
+          className={cn(buttonVariants({ className: 'w-fit mb-8' }))}
+        >
+          Learn More
+        </Link>
+        <Search />
       </div>
+      <div className={cn(cardVariants())}>
+        <h3
+          className={cn(headingVariants({ variant: 'h3', className: 'mb-6' }))}
+        >
+          The shadcn/ui for docs
+        </h3>
+        <p>
+          Fumadocs CLI creates interactive components for your docs, offering a
+          rich experience to your users.
+        </p>
+      </div>
+      <Image src={ShadcnImage} alt="shadcn" className="rounded-2xl" />
     </>
   );
 }
@@ -626,7 +613,6 @@ function Search() {
           ['Components', 'The UI Components for your docs.'],
           ['MDX Content', 'Using MDX for content.'],
           ['User Guide', 'How to use Fumadocs.'],
-          ['Javascript SDK', 'The JavaScript SDK of Fumadocs.'],
         ].map(([title, description], i) => (
           <div
             key={i}

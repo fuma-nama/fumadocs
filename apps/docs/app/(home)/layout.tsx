@@ -110,7 +110,7 @@ export default function Layout({ children }: LayoutProps<'/'>) {
         },
         ...linkItems,
       ]}
-      className="dark:bg-neutral-950 dark:[--color-fd-background:var(--color-neutral-950)]"
+      className="dark:bg-neutral-950 dark:[--color-fd-background:var(--color-neutral-950)] [--color-fd-primary:var(--color-brand)]"
     >
       {children}
     </HomeLayout>
