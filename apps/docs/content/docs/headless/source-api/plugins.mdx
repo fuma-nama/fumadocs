@@ -5,7 +5,25 @@ description: Extend Loader API
 
 ## Overview
 
-You can create loader plugins to extend `loader()` or customise its output.
+Loader plugins can extend `loader()` to customise its output.
+
+A list of built-in plugins:
+
+- **Lucide Icons**: use icons from Lucide React (require `lucide-react` to be installed).
+
+  ```ts
+  import { loader } from 'fumadocs-core/source';
+  import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
+
+  export const source = loader({
+    // ...
+    plugins: [lucideIconsPlugin()],
+  });
+  ```
+
+## Creating Plugins
+
+Each plugin is an object:
 
 ```ts
 import { loader } from 'fumadocs-core/source';

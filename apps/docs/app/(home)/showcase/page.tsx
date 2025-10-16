@@ -292,7 +292,7 @@ const vercel = [
 
 export default function Showcase() {
   return (
-    <main className="px-4 py-12 z-2 w-full max-w-[1400px] mx-auto [--color-fd-border:color-mix(in_oklab,var(--color-fd-primary)_30%,transparent)]">
+    <main className="px-4 py-12 z-2 w-full max-w-[1400px] mx-auto **:border-neutral-400 dark:**:border-neutral-700">
       <div className="relative overflow-hidden border border-dashed p-6">
         <h1 className="mb-4 text-xl font-medium">
           The docs framework designed with care.
@@ -353,8 +353,8 @@ export default function Showcase() {
                   buttonVariants({
                     variant: 'link',
                     size: 'xs',
+                    className: 'text-brand',
                   }),
-                  'text-fd-muted-foreground',
                 )}
               >
                 {item.name}

@@ -15,18 +15,6 @@ export default function Page() {
       new Date(a.data.date ?? getName(a.path)).getTime(),
   );
 
-  const svg = `<svg viewBox='0 0 500 500' xmlns='http://www.w3.org/2000/svg'>
-  <filter id='noiseFilter'>
-    <feTurbulence 
-      type='fractalNoise' 
-      baseFrequency='0.65' 
-      numOctaves='3' 
-      stitchTiles='stitch'/>
-  </filter>
-  
-  <rect width='100%' height='100%' filter='url(#noiseFilter)'/>
-</svg>`;
-
   return (
     <main className="mx-auto w-full max-w-fd-container px-4 pb-12 md:py-12">
       <div className="relative dark z-2 mb-4 aspect-[3.2] p-8 z-2 md:p-12">

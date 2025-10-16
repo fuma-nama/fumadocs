@@ -456,7 +456,7 @@ function ForEngineers() {
         <Image
           src={ComponentsImage}
           alt="Framework Agnostic"
-          width={1000}
+          width={1200}
           className="min-w-0 rounded-2xl object-cover pointer-events-none shadow-lg"
         />
       </div>
@@ -519,12 +519,12 @@ function ForEngineers() {
         >
           Adopts your content.
         </h3>
-        <p className="mb-8">
+        <p className="mb-4">
           Designed to integrate with any{' '}
           <span className="text-brand">content source</span>, Fumadocs works on
           MDX, Content Collections, and even your own CMS.
         </p>
-        <div className="flex flex-row w-fit items-center gap-4">
+        <div className="flex flex-row w-fit items-center gap-4 mb-6">
           {[
             {
               href: 'https://github.com/fuma-nama/fumadocs-basehub',
@@ -550,24 +550,33 @@ function ForEngineers() {
             </a>
           ))}
         </div>
+        <CodeBlock
+          wrapper={{
+            title: 'Fumadocs MDX',
+          }}
+          code={`
+import { loader } from 'fumadocs-core/source';
+import { docs } from '@/.source';
+
+export const source = loader({
+  source: docs.toFumadocsSource(),
+  baseUrl: '/docs',
+});`.trim()}
+          lang="ts"
+        />
       </div>
       <Image
         alt="Content Integration"
         src={ContentImage}
-        width={1000}
+        width={1200}
         className="min-w-0 rounded-2xl object-cover pointer-events-none shadow-lg"
       />
-      <div
-        className={cn(
-          cardVariants(),
-          'flex flex-col bg-gradient-to-b from-fd-card from-50% to-brand/40 row-span-2',
-        )}
-      >
+      <div className={cn(cardVariants(), 'flex flex-col row-span-2')}>
+        <SearchIcon className="size-8 mb-4 text-brand" />
         <h3
           className={cn(headingVariants({ variant: 'h3', className: 'mb-6' }))}
         >
-          Enhance your <SearchIcon className="inline size-8 text-brand" />{' '}
-          search experience.
+          Enhance your search experience.
         </h3>
         <p className="mb-6">
           Integrate with Orama Search and Algolia Search in your docs easily.
@@ -602,7 +611,7 @@ const searchItemVariants = cva(
 
 function Search() {
   return (
-    <div className="flex select-none flex-col mt-auto bg-fd-popover rounded-xl border [mask-image:linear-gradient(to_bottom,white_40%,transparent)] max-md:-mx-4">
+    <div className="flex select-none flex-col mt-auto bg-fd-popover rounded-xl border [mask-image:linear-gradient(to_bottom,white_40%,transparent_90%)] max-md:-mx-4">
       <div className="inline-flex items-center gap-2 px-4 py-3 text-sm text-fd-muted-foreground">
         <SearchIcon className="size-4" />
         Search...
