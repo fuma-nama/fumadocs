@@ -1,0 +1,47 @@
+---
+title: Components
+description: Additional components to improve your docs
+---
+
+## Overview
+
+Additional components that you can use:
+
+<DocsCategory />
+
+### MDX Components
+
+The default MDX components include Cards, Callouts, Code Blocks and Headings.
+
+```ts
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+```
+
+### Relative Link
+
+<Callout type="warn">Server Component only.</Callout>
+
+To support links with relative file path in `href`, override the default `a` component with:
+
+```tsx title="app/docs/[[...slug]]/page.tsx"
+import { createRelativeLink } from 'fumadocs-ui/mdx';
+import { source } from '@/lib/source';
+import { getMDXComponents } from '@/mdx-components';
+
+const page = source.getPage(['...']);
+
+return (
+  <MdxContent
+    components={getMDXComponents({
+      // override the `a` tag
+      a: createRelativeLink(source, page),
+    })}
+  />
+);
+```
+
+```mdx
+[My Link](./file.mdx)
+```
+
+[Example: `../../feedback.mdx`](../../feedback.mdx)

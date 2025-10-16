@@ -13,7 +13,7 @@ import Link from 'fumadocs-core/link';
 import { cn } from '@/utils/cn';
 import { useI18n } from '@/contexts/i18n';
 import { useTreeContext, useTreePath } from '@/contexts/tree';
-import type { PageTree } from 'fumadocs-core/server';
+import type * as PageTree from 'fumadocs-core/page-tree';
 import { createContext, usePathname } from 'fumadocs-core/framework';
 import {
   type BreadcrumbOptions,
@@ -179,7 +179,7 @@ export function PageTOCPopover(props: ComponentProps<'div'>) {
     return () => {
       window.removeEventListener('click', onClick);
     };
-  }, [onClick]);
+  }, []);
 
   return (
     <TocPopoverContext.Provider
@@ -340,9 +340,9 @@ function FooterItem({ item, index }: { item: Item; index: 0 | 1 }) {
 export type BreadcrumbProps = BreadcrumbOptions & ComponentProps<'div'>;
 
 export function PageBreadcrumb({
-  includeRoot = false,
+  includeRoot,
   includeSeparator,
-  includePage = false,
+  includePage,
   ...props
 }: BreadcrumbProps) {
   const path = useTreePath();
@@ -400,7 +400,7 @@ export function PageTOC(props: ComponentProps<'div'>) {
       id="nd-toc"
       {...props}
       className={cn(
-        'fixed bottom-0 pt-12 pb-2 pr-(--removed-body-scroll-bar-size,0) max-xl:hidden',
+        'fixed bottom-0 pt-12 pb-2 pr-(--removed-body-scroll-bar-size,0) xl:on-root:[--fd-toc-width:286px] max-xl:hidden',
         props.className,
       )}
       style={{

@@ -1,12 +1,14 @@
 import type { Config } from '@react-router/dev/config';
-import { glob } from 'node:fs/promises';
-import { createGetUrl, getSlugs } from 'fumadocs-core/source';
-
-const getUrl = createGetUrl('/docs');
+import fs from 'node:fs/promises';
+import type { Info } from './scripts/generate-info';
 
 export default {
   ssr: true,
   async prerender({ getStaticPaths }) {
+    const info: Info = JSON.parse(
+      (await fs.readFile('.react-router/_info')).toString(),
+    );
+
     const paths: string[] = [];
     for (const path of getStaticPaths()) {
       // ignore dynamic document search
@@ -14,10 +16,7 @@ export default {
       paths.push(path);
     }
 
-    for await (const entry of glob('**/*.mdx', { cwd: 'content/docs' })) {
-      paths.push(getUrl(getSlugs(entry)));
-    }
-
+    paths.push(...info.prerender);
     return paths;
   },
 } satisfies Config;

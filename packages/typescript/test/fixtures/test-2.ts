@@ -5,7 +5,7 @@ export interface Player {
   /**
    * The name of player
    *
-   * @see https://fumadocs.vercel.app
+   * @see https://fumadocs.dev
    * @defaultValue Henry
    */
   name: string;

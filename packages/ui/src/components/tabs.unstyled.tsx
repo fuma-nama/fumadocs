@@ -95,7 +95,7 @@ export function Tabs({
     return () => {
       removeChangeListener(groupId, onChange);
     };
-  }, [groupId, onChange, persist]);
+  }, [groupId, persist]);
 
   useLayoutEffect(() => {
     const hash = window.location.hash.slice(1);
@@ -108,7 +108,7 @@ export function Tabs({
         break;
       }
     }
-  }, [onChange, valueToIdMap]);
+  }, [valueToIdMap]);
 
   return (
     <Primitive.Tabs

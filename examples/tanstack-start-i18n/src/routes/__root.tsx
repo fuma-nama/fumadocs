@@ -1,4 +1,3 @@
-/// <reference types="vite/client" />
 import {
   createRootRoute,
   HeadContent,
@@ -8,8 +7,7 @@ import {
 } from '@tanstack/react-router';
 import * as React from 'react';
 import appCss from '@/styles/app.css?url';
-import { RootProvider } from 'fumadocs-ui/provider/base';
-import { TanstackProvider } from 'fumadocs-core/framework/tanstack';
+import { RootProvider } from 'fumadocs-ui/provider/tanstack';
 import { defineI18nUI } from 'fumadocs-ui/i18n';
 import { i18n } from '@/lib/i18n';
 
@@ -61,9 +59,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body className="flex flex-col min-h-screen">
-        <TanstackProvider>
-          <RootProvider i18n={provider(lang)}>{children}</RootProvider>
-        </TanstackProvider>
+        <RootProvider i18n={provider(lang)}>{children}</RootProvider>
         <Scripts />
       </body>
     </html>

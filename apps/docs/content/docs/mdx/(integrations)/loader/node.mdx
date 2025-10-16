@@ -1,0 +1,18 @@
+---
+title: Node.js
+description: Access content in Node.js runtime.
+---
+
+## Setup
+
+Make sure to run the script under ESM environment.
+
+```js title="scripts/example.js"
+import { register } from 'node:module';
+
+register('fumadocs-mdx/node/loader', import.meta.url);
+
+// accessing content
+const { source } = await import('./lib/source');
+console.log(source.getPages());
+```

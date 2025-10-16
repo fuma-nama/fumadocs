@@ -1,0 +1,33 @@
+---
+title: Negotiation
+description: Tiny wrapper for negotiation features.
+---
+
+## Overview
+
+For React.js frameworks supporting middlewares, you can use the Negotiation API of Fumadocs for basic functionalities.
+
+It is a tiny wrapper of `negotiator`.
+
+### Accept Markdown
+
+Serve markdown or HTML depending on the `Accept` header, this can improve the experience for AI agents.
+
+```ts title="proxy.ts (Next.js)"
+import { NextRequest, NextResponse } from 'next/server';
+import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
+
+const { rewrite: rewriteLLM } = rewritePath('/docs/*path', '/llms.mdx/*path');
+
+export default function proxy(request: NextRequest) {
+  if (isMarkdownPreferred(request)) {
+    const result = rewriteLLM(request.nextUrl.pathname);
+
+    if (result) {
+      return NextResponse.rewrite(new URL(result, request.nextUrl));
+    }
+  }
+
+  return NextResponse.next();
+}
+```

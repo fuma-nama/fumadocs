@@ -16,7 +16,7 @@ import {
   remarkSteps,
 } from 'fumadocs-core/mdx-plugins';
 import { remarkAutoTypeTable } from 'fumadocs-typescript';
-import { ElementContent } from 'hast';
+import type { ElementContent } from 'hast';
 
 export const docs = defineDocs({
   docs: {
@@ -28,6 +28,9 @@ export const docs = defineDocs({
        */
       method: z.string().optional(),
     }),
+    postprocess: {
+      includeProcessedMarkdown: true,
+    },
   },
   meta: {
     schema: metaSchema.extend({
@@ -41,7 +44,7 @@ export const blog = defineCollections({
   dir: 'content/blog',
   schema: frontmatterSchema.extend({
     author: z.string(),
-    date: z.string().date().or(z.date()),
+    date: z.iso.date().or(z.date()),
   }),
 });
 
@@ -50,7 +53,6 @@ export default defineConfig({
   mdxOptions: {
     rehypeCodeOptions: {
       lazy: true,
-      experimentalJSEngine: true,
       langs: ['ts', 'js', 'html', 'tsx', 'mdx'],
       inline: 'tailing-curly-colon',
       themes: {

@@ -24,7 +24,7 @@ const generator = createGenerator(tsconfig);
 test('Run', async () => {
   const file = relative('./fixtures/test.ts');
 
-  const result = ['Test1', 'Test2', 'Test3'].flatMap((name) =>
+  const result = ['Test1', 'Test2', 'Test3', 'Test4'].flatMap((name) =>
     generator.generateDocumentation({ path: file }, name),
   );
 

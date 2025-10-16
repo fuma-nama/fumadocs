@@ -1,23 +1,28 @@
-import type * as PageTree from '@/source/page-tree/definitions';
+import type * as PageTree from '@/page-tree/definitions';
 import type { I18nConfig } from '@/i18n';
 import {
+  buildContentStorage,
   type ContentStorage,
-  loadFiles,
   type MetaFile,
   type PageFile,
-  type Transformer,
-} from './load-files';
-import type { MetaData, PageData, UrlFn } from './types';
-import { type BaseOptions, createPageTreeBuilder } from './page-tree/builder';
+} from './storage/content';
+import type {
+  MetaData,
+  PageData,
+  UrlFn,
+  VirtualFile,
+  VirtualMeta,
+  VirtualPage,
+} from './types';
 import {
-  basename,
-  dirname,
-  extname,
-  type FileInfo,
-  joinPath,
-  parseFilePath,
-} from './path';
+  createPageTreeBuilder,
+  type PageTreeOptions,
+} from '@/source/page-tree/builder';
+import { joinPath } from './path';
 import { normalizeUrl } from '@/utils/normalize-url';
+import { buildPlugins, type LoaderPlugin } from '@/source/plugins';
+import { slugsPlugin } from '@/source/plugins/slugs';
+import { iconPlugin, type IconResolver } from '@/source/plugins/icon';
 
 export interface LoaderConfig {
   source: SourceConfig;
@@ -30,45 +35,42 @@ export interface SourceConfig {
 }
 
 export interface LoaderOptions<
-  T extends SourceConfig = SourceConfig,
+  S extends SourceConfig = SourceConfig,
   I18n extends I18nConfig | undefined = I18nConfig | undefined,
 > {
   baseUrl: string;
-
-  icon?: NonNullable<BaseOptions['resolveIcon']>;
-  slugs?: (info: FileInfo) => string[];
+  i18n?: I18n;
   url?: UrlFn;
-
-  source: Source<T> | Source<T>[];
-  transformers?: Transformer[];
 
   /**
    * Additional options for page tree builder
    */
-  pageTree?: Partial<BaseOptions<T['pageData'], T['metaData']>>;
+  pageTree?: PageTreeOptions<S['pageData'], S['metaData']>;
 
-  /**
-   * Configure i18n
-   */
-  i18n?: I18n;
+  plugins?: (
+    | LoaderPlugin<S['pageData'], S['metaData']>
+    | LoaderPlugin<S['pageData'], S['metaData']>[]
+    | undefined
+  )[];
+
+  icon?: IconResolver;
+  slugs?: (info: { path: string }) => string[];
 }
 
-export interface Source<Config extends SourceConfig> {
-  /**
-   * @internal
-   */
-  _config?: Config;
-  files: VirtualFile[] | (() => VirtualFile[]);
+export interface ResolvedLoaderConfig {
+  source: Source;
+  url: UrlFn;
+
+  plugins?: LoaderPlugin[];
+  pageTree?: PageTreeOptions;
+  i18n?: I18nConfig | undefined;
+}
+
+export interface Source<Config extends SourceConfig = SourceConfig> {
+  files: VirtualFile<Config>[];
 }
 
 interface SharedFileInfo {
-  /**
-   * Virtualized file path (parsed)
-   *
-   * @deprecated Use `path` instead.
-   */
-  file: FileInfo;
-
   /**
    * Virtualized file path (relative to content directory)
    *
@@ -77,31 +79,9 @@ interface SharedFileInfo {
   path: string;
 
   /**
-   * Absolute path of the file
+   * Absolute path of the file (can be empty)
    */
   absolutePath: string;
-}
-
-export interface VirtualFile {
-  /**
-   * Virtualized path (relative to content directory)
-   *
-   * @example `docs/page.mdx`
-   */
-  path: string;
-
-  /**
-   * Absolute path of the file
-   */
-  absolutePath?: string;
-
-  type: 'page' | 'meta';
-
-  /**
-   * Specified Slugs for page
-   */
-  slugs?: string[];
-  data: unknown;
 }
 
 export interface Page<Data = PageData> extends SharedFileInfo {
@@ -114,11 +94,6 @@ export interface Page<Data = PageData> extends SharedFileInfo {
 
 export interface Meta<Data = MetaData> extends SharedFileInfo {
   data: Data;
-}
-
-export interface LanguageEntry<Data = PageData> {
-  language: string;
-  pages: Page<Data>[];
 }
 
 export interface LoaderOutput<Config extends LoaderConfig> {
@@ -144,16 +119,25 @@ export interface LoaderOutput<Config extends LoaderConfig> {
       }
     | undefined;
 
+  /**
+   * @internal
+   */
   _i18n?: I18nConfig;
 
   /**
-   * Get list of pages from language
+   * Get a list of pages from specified language
    *
-   * @param language - If empty, the default language will be used
+   * @param language - If empty, list pages from all languages.
    */
   getPages: (language?: string) => Page<Config['source']['pageData']>[];
 
-  getLanguages: () => LanguageEntry<Config['source']['pageData']>[];
+  /**
+   * get each language and its pages, empty if i18n is not enabled.
+   */
+  getLanguages: () => {
+    language: string;
+    pages: Page<Config['source']['pageData']>[];
+  }[];
 
   /**
    * Get page with slugs
@@ -246,102 +230,99 @@ export function loader<
   Config extends SourceConfig,
   I18n extends I18nConfig | undefined = undefined,
 >(
-  options: LoaderOptions<Config, I18n>,
+  source: Source<Config>,
+  options: LoaderOptions<NoInfer<Config>, I18n>,
 ): LoaderOutput<{
   source: Config;
   i18n: I18n;
-}> {
-  // @ts-expect-error -- forced type cast
-  return createOutput(options);
+}>;
+
+export function loader<
+  Config extends SourceConfig,
+  I18n extends I18nConfig | undefined = undefined,
+>(
+  options: LoaderOptions<NoInfer<Config>, I18n> & {
+    source: Source<Config>;
+  },
+): LoaderOutput<{
+  source: Config;
+  i18n: I18n;
+}>;
+
+export function loader(
+  ...args:
+    | [
+        LoaderOptions & {
+          source: Source;
+        },
+      ]
+    | [Source, LoaderOptions]
+): LoaderOutput<LoaderConfig> {
+  const resolved =
+    args.length === 2
+      ? resolveConfig(args[0], args[1])
+      : resolveConfig(args[0].source, args[0]);
+
+  return createOutput(resolved);
 }
 
-function loadSource<T extends SourceConfig>(source: Source<T> | Source<T>[]) {
-  const out: VirtualFile[] = [];
+function resolveConfig(
+  source: Source,
+  { slugs, icon, plugins = [], baseUrl, url, ...base }: LoaderOptions,
+): ResolvedLoaderConfig {
+  const getUrl: UrlFn = url
+    ? (...args) => normalizeUrl(url(...args))
+    : createGetUrl(baseUrl, base.i18n);
 
-  for (const item of Array.isArray(source) ? source : [source]) {
-    if (typeof item.files === 'function') {
-      out.push(...item.files());
-    } else {
-      out.push(...item.files);
-    }
-  }
-
-  return out;
-}
-
-function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
-  if (!options.url && !options.baseUrl) {
-    console.warn('`loader()` now requires a `baseUrl` option to be defined.');
-  }
-
-  const {
+  let config: ResolvedLoaderConfig = {
+    ...base,
+    url: getUrl,
     source,
-    baseUrl = '/',
-    i18n,
-    slugs: slugsFn,
-    url: urlFn,
-    transformers = [],
-  } = options;
-  const getUrl: UrlFn = urlFn
-    ? (...args) => normalizeUrl(urlFn(...args))
-    : createGetUrl(baseUrl, i18n);
-  const defaultLanguage = i18n?.defaultLanguage ?? '';
-  const files = loadSource(source);
-
-  const transformerSlugs: Transformer = ({ storage }) => {
-    const indexFiles = new Set<string>();
-    const taken = new Set<string>();
-    // for custom slugs function, don't handle conflicting cases like `dir/index.mdx` vs `dir.mdx`
-    const autoIndex = slugsFn === undefined;
-
-    for (const path of storage.getFiles()) {
-      const file = storage.read(path);
-      if (!file || file.format !== 'page' || file.slugs) continue;
-
-      if (isIndex(path) && autoIndex) {
-        indexFiles.add(path);
-        continue;
-      }
-
-      file.slugs = slugsFn ? slugsFn(parseFilePath(path)) : getSlugs(path);
-
-      const key = file.slugs.join('/');
-      if (taken.has(key)) throw new Error('Duplicated slugs');
-      taken.add(key);
-    }
-
-    for (const path of indexFiles) {
-      const file = storage.read(path);
-      if (file?.format !== 'page') continue;
-
-      file.slugs = getSlugs(path);
-      if (taken.has(file.slugs.join('/'))) file.slugs.push('index');
-    }
+    plugins: buildPlugins([
+      slugsPlugin(slugs),
+      icon && iconPlugin(icon),
+      ...plugins,
+    ]),
   };
 
-  const storages = loadFiles(
-    files,
-    {
-      buildFile(file) {
-        if (file.type === 'page') {
-          return {
-            format: 'page',
-            path: file.path,
-            slugs: file.slugs,
-            data: file.data,
-            absolutePath: file.absolutePath ?? '',
-          } as PageFile;
-        }
+  for (const plugin of config.plugins ?? []) {
+    const result = plugin.config?.(config);
+    if (result) config = result;
+  }
 
+  return config;
+}
+
+function createOutput({
+  source: { files },
+  url: getUrl,
+  i18n,
+  plugins = [],
+  pageTree: pageTreeConfig,
+}: ResolvedLoaderConfig): LoaderOutput<LoaderConfig> {
+  const defaultLanguage = i18n?.defaultLanguage ?? '';
+
+  const storages = buildContentStorage(
+    files,
+    (file) => {
+      if (file.type === 'page') {
         return {
-          format: 'meta',
+          format: 'page',
           path: file.path,
-          absolutePath: file.absolutePath ?? '',
+          slugs: file.slugs,
           data: file.data,
-        } as MetaFile;
-      },
-      transformers: [transformerSlugs, ...transformers],
+          absolutePath: file.absolutePath ?? '',
+        } as PageFile;
+      }
+
+      return {
+        format: 'meta',
+        path: file.path,
+        absolutePath: file.absolutePath ?? '',
+        data: file.data,
+      } as MetaFile;
     },
+    plugins,
     i18n ?? {
       defaultLanguage,
       parser: 'none',
@@ -350,17 +331,13 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
   );
 
   const walker = indexPages(storages, getUrl);
-  const builder = createPageTreeBuilder(getUrl);
+  const builder = createPageTreeBuilder(getUrl, plugins);
   let pageTree: Record<string, PageTree.Root> | undefined;
 
   return {
     _i18n: i18n,
     get pageTree() {
-      pageTree ??= builder.buildI18n({
-        storages,
-        resolveIcon: options.icon,
-        ...options.pageTree,
-      });
+      pageTree ??= builder.buildI18n(storages, pageTreeConfig);
 
       return i18n
         ? (pageTree as unknown as LoaderOutput<LoaderConfig>['pageTree'])
@@ -375,7 +352,7 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
         };
       }
     },
-    getPageByHref(href, { dir = '', language } = {}) {
+    getPageByHref(href, { dir = '', language = defaultLanguage } = {}) {
       const [value, hash] = href.split('#', 2);
       let target;
 
@@ -396,20 +373,25 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
           hash,
         };
     },
-    getPages(language = defaultLanguage) {
+    getPages(language) {
       const pages: Page[] = [];
 
       for (const [key, value] of walker.pages.entries()) {
-        if (key.startsWith(`${language}.`)) pages.push(value);
+        if (language === undefined || key.startsWith(`${language}.`)) {
+          pages.push(value);
+        }
       }
 
       return pages;
     },
     getLanguages() {
-      const list: LanguageEntry[] = [];
-      if (!options.i18n) return list;
+      const list: {
+        language: string;
+        pages: Page[];
+      }[] = [];
 
-      for (const language of options.i18n.languages) {
+      if (!i18n) return list;
+      for (const language of i18n.languages) {
         list.push({
           language,
           pages: this.getPages(language),
@@ -434,7 +416,7 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
       return walker.pathToPage.get(`${language}.${ref}`);
     },
     getPageTree(locale) {
-      if (options.i18n) {
+      if (i18n) {
         return this.pageTree[
           (locale ?? defaultLanguage) as keyof typeof pageTree
         ];
@@ -444,7 +426,7 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
     },
     // @ts-expect-error -- ignore this
     generateParams(slug, lang) {
-      if (options.i18n) {
+      if (i18n) {
         return this.getLanguages().flatMap((entry) =>
           entry.pages.map((page) => ({
             [slug ?? 'slug']: page.slugs,
@@ -464,9 +446,6 @@ function fileToMeta<Data = MetaData>(file: MetaFile): Meta<Data> {
   return {
     path: file.path,
     absolutePath: file.absolutePath,
-    get file() {
-      return parseFilePath(this.path);
-    },
     data: file.data as Data,
   };
 }
@@ -477,9 +456,6 @@ function fileToPage<Data = PageData>(
   locale?: string,
 ): Page<Data> {
   return {
-    get file() {
-      return parseFilePath(this.path);
-    },
     absolutePath: file.absolutePath,
     path: file.path,
     url: getUrl(file.slugs, locale),
@@ -489,33 +465,61 @@ function fileToPage<Data = PageData>(
   };
 }
 
-const GroupRegex = /^\(.+\)$/;
+export type _ConfigUnion_<T extends Record<string, Source>> = {
+  [K in keyof T]: T[K] extends Source<infer Config>
+    ? {
+        pageData: Config['pageData'] & { type: K };
+        metaData: Config['metaData'] & { type: K };
+      }
+    : never;
+}[keyof T];
 
-function isIndex(file: string) {
-  return basename(file, extname(file)) === 'index';
+export function multiple<T extends Record<string, Source>>(sources: T) {
+  const out: Source<_ConfigUnion_<T>> = { files: [] };
+
+  for (const [type, source] of Object.entries(sources)) {
+    for (const file of source.files) {
+      out.files.push({
+        ...file,
+        data: {
+          ...file.data,
+          type,
+        },
+      });
+    }
+  }
+
+  return out;
 }
 
 /**
- * Convert file path into slugs, also encode non-ASCII characters, so they can work in pathname
+ * map virtual files in source
  */
-export function getSlugs(file: string | FileInfo): string[] {
-  if (typeof file !== 'string') return getSlugs(file.path);
-
-  const dir = dirname(file);
-  const name = basename(file, extname(file));
-  const slugs: string[] = [];
-
-  for (const seg of dir.split('/')) {
-    // filter empty names and file groups like (group_name)
-    if (seg.length > 0 && !GroupRegex.test(seg)) slugs.push(encodeURI(seg));
-  }
-
-  if (GroupRegex.test(name))
-    throw new Error(`Cannot use folder group in file names: ${file}`);
-
-  if (name !== 'index') {
-    slugs.push(encodeURI(name));
-  }
-
-  return slugs;
+export function map<Config extends SourceConfig>(source: Source<Config>) {
+  return {
+    page<$Page extends PageData>(
+      fn: (entry: VirtualPage<Config['pageData']>) => VirtualPage<$Page>,
+    ): Source<{
+      pageData: $Page;
+      metaData: Config['metaData'];
+    }> {
+      return {
+        files: source.files.map((file) =>
+          file.type === 'page' ? fn(file) : file,
+        ),
+      };
+    },
+    meta<$Meta extends MetaData>(
+      fn: (entry: VirtualMeta<Config['metaData']>) => VirtualMeta<$Meta>,
+    ): Source<{
+      pageData: Config['pageData'];
+      metaData: $Meta;
+    }> {
+      return {
+        files: source.files.map((file) =>
+          file.type === 'meta' ? fn(file) : file,
+        ),
+      };
+    },
+  };
 }

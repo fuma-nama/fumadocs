@@ -15,11 +15,6 @@ export default function Layout({ children }: LayoutProps<'/'>) {
   return (
     <HomeLayout
       {...baseOptions()}
-      style={
-        {
-          '--spacing-fd-container': '1120px',
-        } as object
-      }
       links={[
         {
           type: 'menu',
@@ -115,33 +110,9 @@ export default function Layout({ children }: LayoutProps<'/'>) {
         },
         ...linkItems,
       ]}
-      className="dark:bg-neutral-950 dark:[--color-fd-background:var(--color-neutral-950)]"
+      className="dark:bg-neutral-950 dark:[--color-fd-background:var(--color-neutral-950)] [--color-fd-primary:var(--color-brand)]"
     >
       {children}
-      <Footer />
     </HomeLayout>
-  );
-}
-
-function Footer() {
-  return (
-    <footer className="mt-auto border-t bg-fd-card py-12 text-fd-secondary-foreground">
-      <div className="container flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="mb-1 text-sm font-semibold">Fumadocs</p>
-          <p className="text-xs">
-            Built with ❤️ by{' '}
-            <a
-              href="https://fuma-dev.vercel.app"
-              rel="noreferrer noopener"
-              target="_blank"
-              className="font-medium"
-            >
-              Fuma
-            </a>
-          </p>
-        </div>
-      </div>
-    </footer>
   );
 }

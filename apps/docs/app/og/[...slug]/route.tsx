@@ -1,6 +1,7 @@
 import { source } from '@/lib/source';
 import { notFound } from 'next/navigation';
-import { generateOGImage } from '@/lib/og/mono';
+import { generate as MetadataImage, getImageResponseOptions } from './generate';
+import { ImageResponse } from '@takumi-rs/image-response';
 
 export const revalidate = false;
 
@@ -12,10 +13,15 @@ export async function GET(
   const page = source.getPage(slug.slice(0, -1));
   if (!page) notFound();
 
-  return generateOGImage({
-    title: page.data.title,
-    description: page.data.description,
-  });
+  return new ImageResponse(
+    (
+      <MetadataImage
+        title={page.data.title}
+        description={page.data.description}
+      />
+    ),
+    await getImageResponseOptions(),
+  );
 }
 
 export function generateStaticParams(): {
@@ -23,6 +29,6 @@ export function generateStaticParams(): {
 }[] {
   return source.generateParams().map((page) => ({
     ...page,
-    slug: [...page.slug, 'image.png'],
+    slug: [...page.slug, 'image.webp'],
   }));
 }

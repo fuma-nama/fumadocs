@@ -22,7 +22,7 @@ async function getRepoStarsAndForks(
     next: {
       revalidate: 60,
     },
-  });
+  } as RequestInit);
 
   if (!response.ok) {
     const message = await response.text();

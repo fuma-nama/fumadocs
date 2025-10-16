@@ -6,12 +6,12 @@ import {
   lazy,
   type ReactNode,
   useMemo,
+  useRef,
 } from 'react';
 import { DirectionProvider } from '@radix-ui/react-direction';
 import type { DefaultSearchDialogProps } from '@/components/dialog/search-default';
 import { SidebarProvider } from '@/contexts/sidebar';
 import { SearchProvider, type SearchProviderProps } from '@/contexts/search';
-import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 import {
   defaultTranslations,
   I18nContext,
@@ -132,11 +132,12 @@ function I18nProvider({
   locales = [],
   locale,
   onLocaleChange,
-  ...props
+  children,
+  translations,
 }: I18nProviderProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const onChange = useEffectEvent((value: string) => {
+  const onChange = (value: string) => {
     if (onLocaleChange) {
       return onLocaleChange(value);
     }
@@ -150,8 +151,9 @@ function I18nProvider({
     }
 
     router.push(`/${segments.join('/')}`);
-    router.refresh();
-  });
+  };
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
 
   return (
     <I18nContext.Provider
@@ -161,14 +163,14 @@ function I18nProvider({
           locales,
           text: {
             ...defaultTranslations,
-            ...props.translations,
+            ...translations,
           },
-          onChange,
+          onChange: (v) => onChangeRef.current(v),
         }),
-        [locale, locales, onChange, props.translations],
+        [locale, locales, translations],
       )}
     >
-      {props.children}
+      {children}
     </I18nContext.Provider>
   );
 }

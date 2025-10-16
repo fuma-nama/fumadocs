@@ -53,8 +53,7 @@ export function HomeLayout(
     links,
     githubUrl,
     i18n,
-    disableThemeSwitch = false,
-    themeSwitch = { enabled: !disableThemeSwitch },
+    themeSwitch = {},
     searchToggle,
     ...rest
   } = props;
@@ -200,8 +199,9 @@ function NavbarLinkItem({
 
   if (item.type === 'menu') {
     const children = item.items.map((child, j) => {
-      if (child.type === 'custom')
+      if (child.type === 'custom') {
         return <Fragment key={j}>{child.children}</Fragment>;
+      }
 
       const {
         banner = child.icon ? (
@@ -214,7 +214,7 @@ function NavbarLinkItem({
 
       return (
         <NavbarMenuLink
-          key={j}
+          key={`${j}-${child.url}`}
           href={child.url}
           external={child.external}
           {...rest}

@@ -1,5 +1,97 @@
 # next-docs-mdx
 
+## 12.0.3
+
+### Patch Changes
+
+- a55177c: Remove `Override` type utility on output collection types
+- Updated dependencies [ce2be59]
+- Updated dependencies [31b9494]
+  - fumadocs-core@15.8.4
+
+## 12.0.2
+
+### Patch Changes
+
+- a3a14e7: Bump deps
+- Updated dependencies [a3a14e7]
+  - @fumadocs/mdx-remote@1.4.1
+  - fumadocs-core@15.8.3
+
+## 12.0.1
+
+### Patch Changes
+
+- af50bc8: Support customising index file output path in Vite
+- 5fc9ee4: Support `remark-directive` for Include API
+- 4b9871d: MDX Async mode: read file content on load
+- Updated dependencies [655bb46]
+- Updated dependencies [d1ae3e8]
+- Updated dependencies [6548a59]
+- Updated dependencies [51268ec]
+- Updated dependencies [51268ec]
+  - fumadocs-core@15.8.0
+
+## 12.0.0
+
+### Major Changes
+
+- f11f89d: **[Next.js] Rename APIS**
+
+  On page data:
+  - `_file` -> `info`.
+  - `_file.absolutePath` -> `info.fullPath`.
+
+- effe43d: **Drop support for Zod 3 schemas**
+
+  Zod 3 schemas are still allowed, but you cannot no longer extend on the Zod 4 schemas provided by Fumadocs.
+
+- 2862a10: **[Next.js] Removed `content` on page data in favour of `getText()`.**
+
+### Minor Changes
+
+- 22e0fec: **Support `getText()` & Postprocess API**
+- 2862a10: Unify doc collection entry for both Vite and Next.js integrations
+
+## 11.10.1
+
+### Patch Changes
+
+- da095ac: Refactor internal export paths
+- 854d4ef: Export `postInstall()` function from `fumadocs-mdx/vite`
+- Updated dependencies [982aed6]
+  - fumadocs-core@15.7.13
+
+## 11.10.0
+
+### Minor Changes
+
+- ea13374: Support runtime loaders: Node.js, Bun
+
+### Patch Changes
+
+- Updated dependencies [846b28a]
+- Updated dependencies [2b30315]
+  - fumadocs-core@15.7.12
+
+## 11.9.1
+
+### Patch Changes
+
+- 64d0169: hotfix node.js imports at global scope
+
+## 11.9.0
+
+### Minor Changes
+
+- d193152: Support `absolutePath` on Vite
+
+### Patch Changes
+
+- 2566eef: Support postinstall script on Vite
+- Updated dependencies [c948f59]
+  - fumadocs-core@15.7.10
+
 ## 11.8.3
 
 ### Patch Changes

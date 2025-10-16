@@ -1,3 +1,5 @@
+@import './default.css';
+
 @theme {
   --color-fd-background: hsl(0, 0%, 98%);
   --color-fd-foreground: hsl(0, 0%, 3.9%);

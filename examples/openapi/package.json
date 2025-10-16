@@ -5,7 +5,7 @@
   "scripts": {
     "build": "next build",
     "build:docs": "bun ./scripts/generate-docs.ts",
-    "dev": "next dev --turbo",
+    "dev": "next dev",
     "start": "next start",
     "types:check": "fumadocs-mdx && tsc --noEmit"
   },
@@ -14,19 +14,19 @@
     "fumadocs-mdx": "workspace:*",
     "fumadocs-openapi": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "next": "15.5.2",
-    "react": "19.1.1",
-    "react-dom": "19.1.1",
-    "shiki": "^3.12.0"
+    "next": "16.0.0-beta.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "shiki": "^3.13.0"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.12",
+    "@tailwindcss/postcss": "^4.1.14",
     "@types/mdx": "^2.0.13",
-    "@types/react": "^19.1.12",
-    "@types/react-dom": "^19.1.9",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.1",
     "postcss": "^8.5.6",
     "rimraf": "^6.0.1",
-    "tailwindcss": "^4.1.12",
-    "typescript": "^5.9.2"
+    "tailwindcss": "^4.1.14",
+    "typescript": "^5.9.3"
   }
 }

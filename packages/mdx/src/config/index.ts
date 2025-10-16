@@ -2,6 +2,8 @@ export * from './define';
 export {
   getDefaultMDXOptions,
   type DefaultMDXOptions,
-} from '../utils/mdx-options';
+} from '@/loaders/mdx/preset';
 export * from './zod-4';
-export * from '../mdx-plugins/remark-include';
+export { remarkInclude } from '@/loaders/mdx/remark-include';
+
+export type { PostprocessOptions } from '@/loaders/mdx/remark-postprocess';

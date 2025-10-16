@@ -1,5 +1,123 @@
 # @fuma-docs/openapi
 
+## 9.5.0
+
+### Minor Changes
+
+- 5cb199f: Support generating virtual pages for Source API
+
+### Patch Changes
+
+- Updated dependencies [ce2be59]
+- Updated dependencies [31b9494]
+  - fumadocs-core@15.8.4
+  - fumadocs-ui@15.8.4
+
+## 9.4.1
+
+### Patch Changes
+
+- a3a14e7: Bump deps
+- Updated dependencies [a3a14e7]
+- Updated dependencies [7b0d839]
+  - fumadocs-core@15.8.3
+  - fumadocs-ui@15.8.3
+
+## 9.4.0
+
+### Minor Changes
+
+- ac8e67d: OpenAPI: Custom request timeout for API playground
+
+### Patch Changes
+
+- Updated dependencies [90cf1fe]
+- Updated dependencies [ad9a004]
+- Updated dependencies [90cf1fe]
+- Updated dependencies [6c3bde5]
+- Updated dependencies [747bdbc]
+  - fumadocs-ui@15.8.2
+  - fumadocs-core@15.8.2
+
+## 9.3.13
+
+### Patch Changes
+
+- f04547f: Publish `plugins` API on `loader()`
+- Updated dependencies [71bce86]
+- Updated dependencies [f04547f]
+  - fumadocs-core@15.8.1
+  - fumadocs-ui@15.8.1
+
+## 9.3.12
+
+### Patch Changes
+
+- 0bb67d3: Improve error message
+- 46e76eb: Fix `minItems` being ignored
+- Updated dependencies [655bb46]
+- Updated dependencies [53a0635]
+- Updated dependencies [d1ae3e8]
+- Updated dependencies [6548a59]
+- Updated dependencies [51268ec]
+- Updated dependencies [51268ec]
+  - fumadocs-core@15.8.0
+  - fumadocs-ui@15.8.0
+
+## 9.3.11
+
+### Patch Changes
+
+- 3e7e178: OpenAPI: handle undefined description in index.md generation
+
+## 9.3.10
+
+### Patch Changes
+
+- Updated dependencies [982aed6]
+  - fumadocs-core@15.7.13
+  - fumadocs-ui@15.7.13
+
+## 9.3.9
+
+### Patch Changes
+
+- Updated dependencies [846b28a]
+- Updated dependencies [2b30315]
+  - fumadocs-core@15.7.12
+  - fumadocs-ui@15.7.12
+
+## 9.3.8
+
+### Patch Changes
+
+- e37b291: Migrate to `@scalar/openapi-parser@0.20.3`
+- Updated dependencies [9304db9]
+- Updated dependencies [dd7338b]
+  - fumadocs-ui@15.7.11
+  - fumadocs-core@15.7.11
+
+## 9.3.7
+
+### Patch Changes
+
+- 0146178: include content encoding into proxied response
+- 44a560f: Remove undefined values in generated frontmatter
+- Updated dependencies [c948f59]
+  - fumadocs-core@15.7.10
+  - fumadocs-ui@15.7.10
+
+## 9.3.6
+
+### Patch Changes
+
+- Updated dependencies [45c7531]
+- Updated dependencies [d135efd]
+- Updated dependencies [4082acc]
+- Updated dependencies [4082acc]
+  - fumadocs-ui@15.7.9
+  - fumadocs-core@15.7.9
+
 ## 9.3.5
 
 ### Patch Changes

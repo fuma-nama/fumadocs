@@ -19,6 +19,12 @@ export const registry: Registry = {
   name: 'fumadocs',
   packageJson: './package.json',
   tsconfigPath: './tsconfig.json',
+  onUnknownFile(absolutePath) {
+    const filePath = path.relative(baseDir, absolutePath);
+
+    // source object is external
+    if (filePath === 'lib/source.ts') return false;
+  },
   onResolve(ref) {
     if (ref.type === 'file') {
       const filePath = path.relative(baseDir, ref.file);
@@ -53,15 +59,36 @@ export const registry: Registry = {
   },
   components: [
     {
+      name: 'graph-view',
+      description: 'A graph to display relationships of all pages',
+      files: [
+        {
+          type: 'components',
+          path: 'components/graph-view.tsx',
+        },
+        {
+          type: 'lib',
+          path: 'lib/build-graph.ts',
+        },
+      ],
+    },
+    {
+      name: 'feedback',
+      title: 'Feedback',
+      description: 'Component to send user feedbacks about the docs',
+      files: [
+        {
+          type: 'components',
+          path: 'components/feedback.tsx',
+        },
+      ],
+    },
+    {
       name: 'ai/search',
       title: 'AI Search (Next.js Only)',
       description:
         'Ask AI dialog for your docs, you need to configure Inkeep first',
       files: [
-        {
-          type: 'components',
-          path: 'components/ai/index.tsx',
-        },
         {
           type: 'components',
           path: 'components/ai/search.tsx',

@@ -1,13 +1,22 @@
-import type { DereferenceMap, Document } from '@/types';
+import type { Document } from '@/types';
 import type { NoReference } from '@/utils/schema';
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
-import { bundle, dereference, upgrade } from '@scalar/openapi-parser';
-import { fetchUrls, readFiles } from '@scalar/openapi-parser/plugins';
+import { dereference, upgrade } from '@scalar/openapi-parser';
+import { bundle } from '@scalar/json-magic/bundle';
+import { fetchUrls, readFiles } from '@scalar/json-magic/bundle/plugins/node';
 
 export type ProcessedDocument = {
-  document: NoReference<Document>;
-  dereferenceMap: DereferenceMap;
-  downloaded: Document;
+  /**
+   * dereferenced document
+   */
+  dereferenced: NoReference<Document>;
+
+  /**
+   * Get raw object from dereference object
+   */
+  getRawRef: (obj: object) => string | undefined;
+
+  bundled: Document;
 };
 
 const cache = new Map<string, ProcessedDocument>();
@@ -31,23 +40,40 @@ export async function processDocumentCached(
 export async function processDocument(
   input: string | OpenAPIV3_1.Document | OpenAPIV3.Document,
 ): Promise<ProcessedDocument> {
-  const dereferenceMap: DereferenceMap = new Map();
-  let document = await bundle(input as string, {
+  const document = await bundle(input as string, {
     plugins: [fetchUrls(), readFiles()],
-    treeShake: false,
-  });
-
-  // upgrade
-  document = upgrade(document).specification;
-  const { schema: dereferenced } = await dereference(document, {
-    onDereference({ ref, schema }) {
-      dereferenceMap.set(schema, ref);
+    treeShake: true,
+    urlMap: true,
+    hooks: {
+      onResolveError(node) {
+        throw new Error(`Failed to resolve ${node.$ref}`);
+      },
     },
-  });
+  })
+    .then((v) => upgrade(v).specification)
+    .catch((e) => {
+      throw new Error(`[OpenAPI] Failed to resolve input: ${input}`, {
+        cause: e,
+      });
+    });
+
+  /**
+   * Dereferenced value and its original `$ref` value
+   */
+  const dereferenceMap = new WeakMap<object, string>();
 
   return {
-    document: dereferenced as NoReference<Document>,
-    dereferenceMap,
-    downloaded: document as Document,
+    dereferenced: (
+      await dereference(document, {
+        throwOnError: true,
+        onDereference({ schema, ref }) {
+          dereferenceMap.set(schema, ref);
+        },
+      })
+    ).schema as NoReference<Document>,
+    getRawRef(obj) {
+      return dereferenceMap.get(obj);
+    },
+    bundled: document as Document,
   };
 }

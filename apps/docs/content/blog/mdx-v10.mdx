@@ -61,7 +61,7 @@ This model works, but we started to see some problems:
 
   ```ts
   import { loader } from 'fumadocs-core/source';
-  import { createMDXSource } from 'fumadocs-mdx';
+  import { createMDXSource } from 'fumadocs-mdx/runtime/next';
 
   export const source = loader({
     source: createMDXSource(map, {

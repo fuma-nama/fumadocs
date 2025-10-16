@@ -14,7 +14,7 @@ const mapToPackage = {
   'utils/use-copy-button.ts': 'fumadocs-ui/utils/use-copy-button',
 };
 
-// TODO: in shadcn cli, the order of files matters when writing import paths on consumer's codebase
+// in shadcn cli, the order of files matters when writing import paths on consumer's codebase
 export const registry: Registry = {
   name: 'fumadocs-ui',
   dir: srcDir,

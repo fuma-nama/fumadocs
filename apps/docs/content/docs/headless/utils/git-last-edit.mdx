@@ -8,7 +8,7 @@ description: Get the last edit time of a file in Github repository
 Pass your repository name, and the path to file.
 
 ```ts
-import { getGithubLastEdit } from 'fumadocs-core/server';
+import { getGithubLastEdit } from 'fumadocs-core/content/github';
 
 const time = await getGithubLastEdit({
   owner: 'fuma-nama',
@@ -27,7 +27,7 @@ Learn more about
 [Authenticating to the REST API](https://docs.github.com/en/rest/overview/authenticating-to-the-rest-api).
 
 ```ts
-import { getGithubLastEdit } from 'fumadocs-core/server'
+import { getGithubLastEdit } from 'fumadocs-core/content/github'
 
  const time = await getGithubLastEdit({
     ...,

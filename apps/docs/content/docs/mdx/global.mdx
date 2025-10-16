@@ -15,11 +15,11 @@ export default defineConfig({
 });
 ```
 
-<AutoTypeTable path="./content/docs/mdx/props.ts" name="GlobalConfig" />
+<auto-type-table path="./props.ts" name="GlobalConfig" />
 
 ### MDX Options
 
-Customise the default MDX processor options, it accepts the [extended MDX options](/docs/mdx/mdx#extended).
+Customise the [default MDX preset](/docs/mdx/mdx).
 
 ```ts title="source.config.ts"
 import { defineConfig } from 'fumadocs-mdx/config';
@@ -35,7 +35,7 @@ export default defineConfig({
 });
 ```
 
-Some default options are applied by Fumadocs MDX, you can also disable them:
+Or using the minimal preset:
 
 ```ts title="source.config.ts"
 import { defineConfig } from 'fumadocs-mdx/config';

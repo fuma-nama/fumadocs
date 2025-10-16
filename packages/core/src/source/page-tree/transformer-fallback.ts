@@ -5,7 +5,6 @@ export function transformerFallback(): PageTreeTransformer {
   const addedFiles = new Set<string>();
 
   return {
-    name: 'fumadocs:fallback',
     root(root) {
       const isolatedStorage: ContentStorage = new FileSystem();
 
@@ -18,10 +17,9 @@ export function transformerFallback(): PageTreeTransformer {
 
       if (isolatedStorage.getFiles().length === 0) return root;
 
-      root.fallback = this.builder.build({
+      root.fallback = this.builder.build(isolatedStorage, {
         ...this.options,
         id: `fallback-${root.$id ?? ''}`,
-        storage: isolatedStorage,
         generateFallback: false,
       });
 

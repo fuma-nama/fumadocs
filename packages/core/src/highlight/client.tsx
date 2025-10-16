@@ -12,19 +12,7 @@ const promises: Record<string, Promise<ReactNode>> = {};
 
 export function useShiki(
   code: string,
-  options: HighlightOptions & {
-    /**
-     * @deprecated no longer pre-rendered using scripts.
-     */
-    withPrerenderScript?: boolean;
-
-    /**
-     * Displayed before highlighter is loaded.
-     *
-     * @deprecated use React `Suspense` fallback instead.
-     */
-    loading?: ReactNode;
-  },
+  options: HighlightOptions,
   deps?: DependencyList,
 ): ReactNode {
   const id = useId();
@@ -34,10 +22,5 @@ export function useShiki(
     return `${id}:${state}`;
   }, [code, deps, id, options.lang]);
 
-  return use(
-    (promises[key] ??= highlight(code, {
-      ...options,
-      engine: options.engine ?? 'js',
-    })),
-  );
+  return use((promises[key] ??= highlight(code, options)));
 }

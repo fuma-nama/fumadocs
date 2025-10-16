@@ -13,6 +13,6 @@ export function APIPlayground({
   ctx: RenderContext;
 }) {
   return (
-    <Client method={method.method} path={path} spec={ctx.schema.downloaded} />
+    <Client method={method.method} path={path} spec={ctx.schema.bundled} />
   );
 }

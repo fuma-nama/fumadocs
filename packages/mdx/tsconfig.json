@@ -4,6 +4,7 @@
     "paths": {
       "@/*": ["./src/*"]
     },
+    "types": ["remark-stringify", "@types/node"],
     "noEmit": true,
     "lib": ["ESNext"],
     "module": "ESNext",

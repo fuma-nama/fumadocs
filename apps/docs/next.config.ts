@@ -13,16 +13,13 @@ const config: NextConfig = {
       fullUrl: true,
     },
   },
-  eslint: {
-    // Replaced by root workspace command
-    ignoreDuringBuilds: true,
-  },
   serverExternalPackages: [
     'ts-morph',
     'typescript',
     'oxc-transform',
     'twoslash',
     'shiki',
+    '@takumi-rs/core',
   ],
   images: {
     remotePatterns: [

@@ -1,4 +1,4 @@
-import type { TableOfContents } from 'fumadocs-core/server';
+import type { TableOfContents } from 'fumadocs-core/toc';
 import type { MdxContent } from '@/render';
 
 export * from './compile';

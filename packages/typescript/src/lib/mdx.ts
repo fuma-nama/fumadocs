@@ -2,8 +2,8 @@ import * as path from 'node:path';
 import {
   type DocEntry,
   type GeneratedDoc,
-  type Generator,
   type GenerateOptions,
+  type Generator,
 } from './base';
 
 interface Templates {
@@ -34,13 +34,15 @@ ${doc.description}
 
 <div className="flex flex-row items-center gap-4">
   <code className="text-sm">${c.name}</code>
-  <code className="text-fd-muted-foreground">{${JSON.stringify(c.type)}}</code>
+  <code className="text-fd-muted-foreground">{${JSON.stringify(c.simplifiedType)}}</code>
 </div>
+
+Full Type: <code className="text-fd-muted-foreground">{${JSON.stringify(c.type)}}</code>
 
 ${c.description || 'No Description'}
 
-${Object.entries(c.tags)
-  .map(([tag, value]) => `- ${tag}:\n${replaceJsDocLinks(value)}`)
+${c.tags
+  .map((tag) => `- ${tag.name}:\n${replaceJsDocLinks(tag.text)}`)
   .join('\n')}
 
 </div>`,

@@ -1,16 +1,24 @@
 'use client';
-import { useCallback, useRef } from 'react';
+import * as React from 'react';
+
+type UseEffectEvent = <F extends (...params: never[]) => unknown>(
+  callback: F,
+) => F;
 
 /**
- * Don't use this, could be deleted anytime.
+ * Polyfill for React.js 19.2 `useEffectEvent`.
  *
- * @internal
+ * @internal Don't use this, could be deleted anytime.
  */
-export function useEffectEvent<F extends (...params: never[]) => unknown>(
-  callback: F,
-): F {
-  const ref = useRef(callback);
-  ref.current = callback;
+export const useEffectEvent: UseEffectEvent =
+  'useEffectEvent' in React
+    ? { ...React }.useEffectEvent
+    : <F extends (...params: never[]) => unknown>(callback: F) => {
+        const ref = React.useRef(callback);
+        ref.current = callback;
 
-  return useCallback(((...params) => ref.current(...params)) as F, []);
-}
+        return React.useCallback(
+          ((...params) => ref.current(...params)) as F,
+          [],
+        );
+      };

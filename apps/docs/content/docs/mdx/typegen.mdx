@@ -1,0 +1,18 @@
+---
+title: Generate Types
+description: Generate types without running dev/build server
+---
+
+### Overview
+
+You can run `fumadocs-mdx` to generate types & index file (e.g. the `.source` folder in Next.js).
+
+Optionally, you can run it in post install to ensure types are generated when initializing the project.
+
+```json title="package.json"
+{
+  "scripts": {
+    "postinstall": "fumadocs-mdx"
+  }
+}
+```

@@ -1,0 +1,66 @@
+---
+title: Files
+description: Display file structure in your documentation
+preview: 'files'
+---
+
+<Installation name="files" />
+
+## Usage
+
+Wrap file components in `Files`, you can use it in your MDX content, or as a normal React.js component.
+
+```mdx title="content.mdx"
+import { File, Folder, Files } from 'fumadocs-ui/components/files';
+
+<Files>
+  <Folder name="app" defaultOpen>
+    <File name="layout.tsx" />
+    <File name="page.tsx" />
+    <File name="global.css" />
+  </Folder>
+  <Folder name="components">
+    <File name="button.tsx" />
+    <File name="tabs.tsx" />
+    <File name="dialog.tsx" />
+  </Folder>
+  <File name="package.json" />
+</Files>
+```
+
+### As CodeBlock
+
+You can enable [`remark-mdx-files`](/docs/headless/mdx/remark-mdx-files) to define file structure with codeblocks.
+
+```tsx title="source.config.ts (Fumadocs MDX)"
+import { remarkMdxFiles } from 'fumadocs-core/mdx-plugins';
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    // [!code ++]
+    remarkPlugins: [remarkMdxFiles],
+  },
+});
+```
+
+it will convert `files` codeblocks into MDX usage, like:
+
+````md title="content.md"
+```files
+project
+├── src
+│   ├── index.js
+│   └── utils
+│       └── helper.js
+├── package.json
+```
+````
+
+### File
+
+<auto-type-table path="../../props.ts" name="FileProps" />
+
+### Folder
+
+<auto-type-table path="../../props.ts" name="FolderProps" />

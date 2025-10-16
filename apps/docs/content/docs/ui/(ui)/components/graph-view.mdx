@@ -1,0 +1,33 @@
+---
+title: Graph View
+description: A graph of all pages.
+---
+
+import { GraphView } from '@/components/preview/lazy';
+import { buildGraph } from '@/lib/build-graph';
+
+<GraphView graph={buildGraph()} />
+
+## Installation
+
+You can install this from CLI:
+
+<Installation name="graph-view" />
+
+## Usage
+
+You can use it in MDX files or the layout components (e.g. in `page.tsx`):
+
+```tsx title="page.tsx"
+import { GraphView } from '@/components/graph-view';
+import { buildGraph } from '@/lib/build-graph';
+
+export function PageBody() {
+  return (
+    <div>
+      <GraphView graph={buildGraph()} />
+      {/* ... */}
+    </div>
+  );
+}
+```

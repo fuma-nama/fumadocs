@@ -18,6 +18,8 @@ export interface TypeScriptToJavaScriptOptions {
       }
     | false;
 
+  defaultValue?: 'js' | 'ts';
+
   /**
    * Transform all TypeScript codeblocks by default, without a trigger
    */
@@ -40,6 +42,7 @@ export interface TypeScriptToJavaScriptOptions {
  */
 export function remarkTypeScriptToJavaScript({
   persist = false,
+  defaultValue = 'ts',
   disableTrigger = false,
 }: TypeScriptToJavaScriptOptions = {}): Transformer<Root> {
   return async (tree, file) => {
@@ -48,7 +51,9 @@ export function remarkTypeScriptToJavaScript({
     visit(tree, 'code', (node) => {
       const lang = node.lang;
       if (lang !== 'ts' && lang !== 'tsx') return;
-      if (!disableTrigger && !node.meta?.includes('ts2js')) return;
+
+      const meta = parseCodeBlockAttributes(node.meta ?? '', ['ts2js']);
+      if (!disableTrigger && !('ts2js' in meta.attributes)) return;
 
       const result = oxc.transform(
         `${file.path ?? 'test'}.${lang}`,
@@ -60,11 +65,9 @@ export function remarkTypeScriptToJavaScript({
       );
 
       const targetLang = lang === 'tsx' ? 'jsx' : 'js';
-      const meta = parseCodeBlockAttributes(node.meta ?? '', ['ts2js']);
-
       const replacement = generateCodeBlockTabs({
         persist,
-        defaultValue: 'js',
+        defaultValue,
         triggers: [
           {
             value: 'ts',

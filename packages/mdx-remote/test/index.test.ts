@@ -4,6 +4,7 @@ import { glob } from 'tinyglobby';
 import fs from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { parseFrontmatter } from '@/utils';
 
 const dir = path.dirname(fileURLToPath(import.meta.url));
 const files = await glob('./fixtures/*.mdx', {
@@ -13,7 +14,6 @@ const files = await glob('./fixtures/*.mdx', {
 const compiler = createCompiler({
   development: true,
   rehypeCodeOptions: {
-    experimentalJSEngine: true,
     lazy: true,
     themes: {
       light: 'github-light',
@@ -25,7 +25,6 @@ const compiler = createCompiler({
 const compilerProduction = createCompiler({
   development: false,
   rehypeCodeOptions: {
-    experimentalJSEngine: true,
     lazy: true,
     themes: {
       light: 'github-light',
@@ -35,31 +34,45 @@ const compilerProduction = createCompiler({
 });
 
 for (const file of files) {
-  const content = (await fs.readFile(path.join(dir, file))).toString();
+  const raw = (await fs.readFile(path.join(dir, file))).toString();
+  const { frontmatter, content } = parseFrontmatter(raw);
 
   test(`compile: ${file}`, async () => {
-    const out = await compiler.compile({
-      skipRender: true,
-      source: content,
+    const out = await compiler.compileFile({
+      value: content,
+      data: {
+        frontmatter,
+      },
     });
 
-    await expect(out.compiled).toMatchFileSnapshot(`${file}.js`);
-    await expect({
-      toc: out.toc,
-      frontmatter: out.frontmatter,
-    }).toMatchFileSnapshot(`${file}.json`);
+    await expect(String(out)).toMatchFileSnapshot(`${file}.js`);
+    await expect(out.data).toMatchFileSnapshot(`${file}.json`);
   });
 
   test(`compile: ${file} (production)`, async () => {
-    const out = await compilerProduction.compile({
-      skipRender: true,
-      source: content,
+    const out = await compilerProduction.compileFile({
+      value: content,
+      data: {
+        frontmatter,
+      },
     });
 
-    await expect(out.compiled).toMatchFileSnapshot(`${file}.production.js`);
-    await expect({
-      toc: out.toc,
-      frontmatter: out.frontmatter,
-    }).toMatchFileSnapshot(`${file}.json`);
+    await expect(String(out)).toMatchFileSnapshot(`${file}.production.js`);
+    await expect(out.data).toMatchFileSnapshot(`${file}.json`);
+  });
+
+  test(`compile & execute: ${file}`, async () => {
+    const out = await compilerProduction.compile({
+      source: raw,
+      scope: {
+        custom_scope_variable: 'test',
+      },
+    });
+
+    await expect(out.compiled).toMatchFileSnapshot(`${file}.full.js`);
+    expect(out.toc).toBe(out.exports?.toc);
+
+    // no error should be thrown
+    out.body({});
   });
 }

@@ -16,11 +16,11 @@ import {
   SearchDialogInput,
   SearchDialogList,
   SearchDialogOverlay,
+  type SharedProps,
   TagsList,
   TagsListItem,
-  type SharedProps,
 } from './search';
-import type { SortedResult } from 'fumadocs-core/server';
+import type { SortedResult } from 'fumadocs-core/search';
 import type { SearchLink, TagItem } from '@/contexts/search';
 import { useI18n } from '@/contexts/i18n';
 

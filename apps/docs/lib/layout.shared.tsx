@@ -46,7 +46,7 @@ export const logo = (
       aria-label="Fumadocs"
     />
 
-    <FumadocsIcon className="size-5 [.uwu_&]:hidden" fill="currentColor" />
+    <FumadocsIcon className="size-5 [.uwu_&]:hidden" />
   </>
 );
 
@@ -61,7 +61,6 @@ export function baseOptions(): BaseLayoutProps {
           </span>
         </>
       ),
-      transparentMode: 'top',
     },
   };
 }

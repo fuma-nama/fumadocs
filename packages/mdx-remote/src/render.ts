@@ -1,5 +1,5 @@
-import { type MDXComponents } from 'mdx/types';
-import type { TableOfContents } from 'fumadocs-core/server';
+import type { MDXComponents } from 'mdx/types';
+import type { TableOfContents } from 'fumadocs-core/toc';
 import type { FC } from 'react';
 import jsxRuntimeDefault from 'react/jsx-runtime';
 
@@ -11,43 +11,43 @@ interface Options {
   jsxRuntime?: unknown;
 }
 
+const AsyncFunction: new (
+  ...args: string[]
+) => (...args: unknown[]) => Promise<unknown> =
+  Object.getPrototypeOf(executeMdx).constructor;
+
 export async function executeMdx(compiled: string, options: Options = {}) {
+  const { opts: scopeOpts, ...scope } = options.scope ?? {};
   const fullScope = {
-    ...options.scope,
     opts: {
-      ...(options.scope?.opts as object),
+      ...(scopeOpts as object),
       ...(options.jsxRuntime ?? jsxRuntimeDefault),
       baseUrl: options.baseUrl,
     },
+    ...scope,
   };
 
-  const values = Object.values(fullScope);
-  const params = Object.keys(fullScope);
-  params.push(`return (async () => { ${compiled} })()`);
-  const hydrateFn = new Function(...params);
-
-  return (await hydrateFn.apply(hydrateFn, values)) as {
+  const hydrateFn = new AsyncFunction(...Object.keys(fullScope), compiled);
+  return (await hydrateFn.apply(hydrateFn, Object.values(fullScope))) as {
     default: MdxContent;
     toc?: TableOfContents;
   };
 }
 
 export function executeMdxSync(compiled: string, options: Options = {}) {
+  const { opts: scopeOpts, ...scope } = options.scope ?? {};
   const fullScope = {
-    ...options.scope,
     opts: {
-      ...(options.scope?.opts as object),
+      ...(scopeOpts as object),
       ...(options.jsxRuntime ?? jsxRuntimeDefault),
       baseUrl: options.baseUrl,
     },
+    ...scope,
   };
 
-  const values = Object.values(fullScope);
-  const params = Object.keys(fullScope);
-  params.push(`return (() => { ${compiled} })()`);
-  const hydrateFn = new Function(...params);
+  const hydrateFn = new Function(...Object.keys(fullScope), compiled);
 
-  return hydrateFn.apply(hydrateFn, values) as {
+  return hydrateFn.apply(hydrateFn, Object.values(fullScope)) as {
     default: MdxContent;
     toc?: TableOfContents;
   };

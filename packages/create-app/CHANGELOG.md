@@ -1,5 +1,37 @@
 # create-next-docs-app
 
+## 15.8.4
+
+## 15.8.3
+
+### Patch Changes
+
+- a3a14e7: Bump deps
+
+## 15.8.2
+
+## 15.8.1
+
+### Patch Changes
+
+- eaf06c4: [Next.js] configure `llms-full.txt` and og image generation by default
+
+## 15.8.0
+
+## 15.7.13
+
+## 15.7.12
+
+## 15.7.11
+
+### Patch Changes
+
+- 5a763d6: Support choosing between Biome and ESLint
+
+## 15.7.10
+
+## 15.7.9
+
 ## 15.7.8
 
 ### Patch Changes

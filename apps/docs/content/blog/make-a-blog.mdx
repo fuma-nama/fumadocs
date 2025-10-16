@@ -35,7 +35,7 @@ export const blogPosts = defineCollections({
 Parse the output collection in `source.ts`:
 
 ```ts title="lib/source.ts"
-import { createMDXSource } from 'fumadocs-mdx';
+import { createMDXSource } from 'fumadocs-mdx/runtime/next';
 import { loader } from 'fumadocs-core/source';
 import { blogPosts } from '@/.source';
 

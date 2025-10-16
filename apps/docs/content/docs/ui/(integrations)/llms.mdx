@@ -1,5 +1,5 @@
 ---
-title: AI
+title: AI & LLMs
 description: Integrate AI functionality to Fumadocs.
 ---
 
@@ -7,22 +7,67 @@ description: Integrate AI functionality to Fumadocs.
 
 You can make your docs site more AI-friendly with dedicated docs content for large language models.
 
-First, make a `getLLMText` function that converts pages into static MDX content:
+To begin, make a `getLLMText` function that converts pages into static MDX content.
 
-<include meta='title="lib/get-llm-text.ts"'>./get-llm-text.ts</include>
+In **Fumadocs MDX**, you can do:
 
-> Modify it to include other remark plugins.
+```ts title="lib/get-llm-text.ts"
+import { source } from '@/lib/source';
+import type { InferPageType } from 'fumadocs-core/source';
+
+export async function getLLMText(page: InferPageType<typeof source>) {
+  const processed = await page.data.getText('processed');
+
+  return `# ${page.data.title} (${page.url})
+
+${processed}`;
+}
+```
+
+It requires `includeProcessedMarkdown` to be enabled:
+
+```ts title="source.config.ts"
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: {
+    // [!code ++:3]
+    postprocess: {
+      includeProcessedMarkdown: true,
+    },
+  },
+});
+```
 
 ### `llms-full.txt`
 
 A version of docs for AIs to read.
 
-<include meta='tab="Next.js" title="app/llms-full.txt/route.ts"'>
-  ./llms.txt.ts
-</include>
+```ts tab="Next.js" title="app/llms-full.txt/route.ts"
+import { source } from '@/lib/source';
+import { getLLMText } from '@/lib/get-llm-text';
+
+// cached forever
+export const revalidate = false;
+
+export async function GET() {
+  const scan = source.getPages().map(getLLMText);
+  const scanned = await Promise.all(scan);
+
+  return new Response(scanned.join('\n\n'));
+}
+```
+
+```ts tab="React Router" title="app/routes.ts"
+import { index, route, type RouteConfig } from '@react-router/dev/routes';
+
+export default [
+  // [!code ++]
+  route('llms-full.txt', 'routes/llms-full.ts'),
+] satisfies RouteConfig;
+```
 
 ```ts tab="React Router" title="app/routes/llms-full.ts"
-// make sure to include this route in `routes.ts` & pre-rendering!
 import { source } from '@/lib/source';
 import { getLLMText } from '@/lib/get-llm-text';
 
@@ -35,31 +80,61 @@ export async function loader() {
 ```
 
 ```ts tab="Tanstack Start" title="src/routes/llms-full[.]txt.ts"
-import { createServerFileRoute } from '@tanstack/react-start/server';
+import { createFileRoute } from '@tanstack/react-router';
 import { source } from '@/lib/source';
 import { getLLMText } from '@/lib/get-llm-text';
 
-export const ServerRoute = createServerFileRoute('/llms-full.txt').methods({
-  GET: async () => {
-    const scan = source.getPages().map(getLLMText);
-    const scanned = await Promise.all(scan);
-    return new Response(scanned.join('\n\n'));
+export const Route = createFileRoute('/llms-full.txt')({
+  server: {
+    handlers: {
+      GET: async () => {
+        const scan = source.getPages().map(getLLMText);
+        const scanned = await Promise.all(scan);
+        return new Response(scanned.join('\n\n'));
+      },
+    },
   },
 });
 ```
 
-### `*.mdx`
+### `*.mdx` [#mdx-extension]
 
-Allow people to append `.mdx` to a page to get its Markdown/MDX content.
+Allow AI agents to get the content of a page as Markdown/MDX, by appending `.mdx` to the end of path.
 
-On Next.js, you can make a route handler to return page content, and redirect users to that route.
+Make a route handler to return page content, and a middleware to point to it:
 
-<include meta='tab="app/llms.mdx/[[...slug]]/route.ts"'>./llms.mdx.ts</include>
+```ts tab="Next.js" title="app/llms.mdx/[[...slug]]/route.ts"
+import { getLLMText } from '@/lib/get-llm-text';
+import { source } from '@/lib/source';
+import { notFound } from 'next/navigation';
 
-```ts tab="next.config.ts"
+export const revalidate = false;
+
+export async function GET(
+  _req: Request,
+  { params }: RouteContext<'/llms.mdx/[[...slug]]'>,
+) {
+  const { slug } = await params;
+  const page = source.getPage(slug);
+  if (!page) notFound();
+
+  return new Response(await getLLMText(page), {
+    headers: {
+      'Content-Type': 'text/markdown',
+    },
+  });
+}
+
+export function generateStaticParams() {
+  return source.generateParams();
+}
+```
+
+```ts tab="Next.js" title="next.config.ts"
 import type { NextConfig } from 'next';
 
 const config: NextConfig = {
+  // [!code ++:8]
   async rewrites() {
     return [
       {
@@ -71,9 +146,135 @@ const config: NextConfig = {
 };
 ```
 
+```ts tab="React Router" title="app/routes.ts"
+import { index, route, type RouteConfig } from '@react-router/dev/routes';
+
+export default [
+  // [!code ++]
+  route('llms.mdx/*', 'routes/llms-mdx.ts'),
+] satisfies RouteConfig;
+```
+
+```ts tab="React Router" title="app/routes/llms-mdx.ts"
+import type { Route } from './+types/llms-mdx';
+import { source } from '@/lib/source';
+import { getLLMText } from '@/lib/get-llm-text';
+
+export async function loader({ params }: Route.LoaderArgs) {
+  const slugs = params['*'].split('/').filter((v) => v.length > 0);
+  const page = source.getPage(slugs);
+  if (!page) {
+    return new Response('not found', { status: 404 });
+  }
+
+  return new Response(await getLLMText(page), {
+    headers: {
+      'Content-Type': 'text/markdown',
+    },
+  });
+}
+```
+
+```ts tab="React Router" title="app/root.tsx"
+import { rewritePath } from 'fumadocs-core/negotiation';
+import type { Route } from './+types/root';
+
+// [!code ++:20]
+const { rewrite: rewriteLLM } = rewritePath(
+  '/docs{/*path}.mdx',
+  '/llms.mdx{/*path}',
+);
+const serverMiddleware: Route.MiddlewareFunction = async (
+  { request },
+  next,
+) => {
+  const url = new URL(request.url);
+  const path = rewriteLLM(url.pathname);
+  if (path) return Response.redirect(new URL(path, url));
+
+  return next();
+};
+
+export const middleware = [serverMiddleware];
+```
+
+```ts tab="Tanstack Start" title="src/routes/llms[.]mdx.$.ts"
+import { createFileRoute, notFound } from '@tanstack/react-router';
+import { source } from '@/lib/source';
+
+export const Route = createFileRoute('/llms.mdx/$')({
+  server: {
+    handlers: {
+      GET: async ({ params }) => {
+        const slugs = params._splat?.split('/') ?? [];
+        const page = source.getPage(slugs);
+        if (!page) throw notFound();
+
+        return new Response(await page.data.getText('raw'), {
+          headers: {
+            'Content-Type': 'text/markdown',
+          },
+        });
+      },
+    },
+  },
+});
+```
+
+```ts tab="Tanstack Start" title="src/start.ts"
+import { createMiddleware, createStart } from '@tanstack/react-start';
+import { rewritePath } from 'fumadocs-core/negotiation';
+import { redirect } from '@tanstack/react-router';
+
+const { rewrite: rewriteLLM } = rewritePath(
+  '/docs{/*path}.mdx',
+  'llms.mdx{/*path}',
+);
+
+const llmMiddleware = createMiddleware().server(({ next, request }) => {
+  const url = new URL(request.url);
+  const path = rewriteLLM(url.pathname);
+
+  if (path) {
+    throw redirect(new URL(path, url));
+  }
+
+  return next();
+});
+
+export const startInstance = createStart(() => {
+  return {
+    requestMiddleware: [llmMiddleware],
+  };
+});
+```
+
+#### `Accept`
+
+To serve the Markdown content instead for AI agents, you can leverage the `Accept` header.
+
+```ts title="proxy.ts (Next.js)"
+import { NextRequest, NextResponse } from 'next/server';
+import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
+
+const { rewrite: rewriteLLM } = rewritePath('/docs/*path', '/llms.mdx/*path');
+
+export default function proxy(request: NextRequest) {
+  if (isMarkdownPreferred(request)) {
+    const result = rewriteLLM(request.nextUrl.pathname);
+
+    if (result) {
+      return NextResponse.rewrite(new URL(result, request.nextUrl));
+    }
+  }
+
+  return NextResponse.next();
+}
+```
+
 ### Page Actions
 
-Common page actions for AI, require `*.mdx` to be implemented first.
+Common page actions for AI, require [`*.mdx`](#mdx-extension) to be implemented first.
 
 ![AI Page Actions](/docs/ai-page-actions.png)
 
@@ -93,7 +294,7 @@ Use it in your docs page like:
 </div>
 ```
 
-## AI Search
+## Ask AI
 
 ![AI Search](/docs/ai-search.png)
 
@@ -103,6 +304,11 @@ You can install the AI search dialog using Fumadocs CLI:
 npx @fumadocs/cli add ai/search
 ```
 
-By default, it's configured for Inkeep AI. Since it's connected via Vercel AI SDK, you can connect to your own AI models easily.
+You can add the trigger component to your root layout.
 
-> Note that Fumadocs doesn't provide the AI model, it's up to you.
+### AI Model
+
+By default, it's configured for [Inkeep AI](https://inkeep.com) using Vercel AI SDK. Update the configurations in `useChat` and `/api/chat` route to connect to your own AI model instead.
+
+Note that Fumadocs doesn't provide the AI model, it's up to you.
+Your AI model can use the `llms-full.txt` file generated above, or more diversified sources of information when combined with 3rd party solutions.

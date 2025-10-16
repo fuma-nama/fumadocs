@@ -11,7 +11,7 @@ previous page of a given page. It is useful for implementing a footer.
 It requires a page tree and the url of page.
 
 ```ts
-import { findNeighbour } from 'fumadocs-core/server';
+import { findNeighbour } from 'fumadocs-core/page-tree';
 import { pageTree } from '@/lib/source';
 
 const neighbours = findNeighbour(pageTree, '/url/to/page');

@@ -5,7 +5,9 @@ description: Use Fumadocs MDX with Waku
 
 ## Setup
 
-Install dependencies:
+<div className="fd-steps [&_h3]:fd-step">
+
+### Installation
 
 ```npm
 npm i fumadocs-mdx fumadocs-core fumadocs-ui @types/mdx
@@ -17,11 +19,29 @@ Create the configuration file:
   ../../examples/waku/source.config.ts
 </include>
 
-Create the content source:
+Add the Vite plugin:
+
+<include cwd meta='title="vite.config.ts"'>
+  ../../examples/waku/waku.config.ts
+</include>
+
+### Integrate with Fumadocs
+
+Create a `lib/source.ts` file:
 
 <include cwd meta='title="src/lib/source.ts"'>
   ../../examples/waku/src/lib/source.ts
 </include>
+
+The `source.generated.ts` file will be generated when you run development server or production build.
+
+### Done
+
+You can now write content in `content/docs` folder.
+
+</div>
+
+## Examples
 
 ### Rendering Pages
 

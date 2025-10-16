@@ -1,19 +1,8 @@
-import { remark } from 'remark';
-import remarkGfm from 'remark-gfm';
-import remarkMdx from 'remark-mdx';
-import { remarkAutoTypeTable } from 'fumadocs-typescript';
-import { remarkInclude } from 'fumadocs-mdx/config';
 import { type Page } from '@/lib/source';
-import { remarkNpm } from 'fumadocs-core/mdx-plugins';
-
-const processor = remark()
-  .use(remarkMdx)
-  .use(remarkInclude)
-  .use(remarkGfm)
-  .use(remarkAutoTypeTable)
-  .use(remarkNpm);
 
 export async function getLLMText(page: Page) {
+  if (page.data.type === 'openapi') return '';
+
   const category =
     {
       ui: 'Fumadocs Framework',
@@ -22,10 +11,7 @@ export async function getLLMText(page: Page) {
       cli: 'Fumadocs CLI (the CLI tool for automating Fumadocs apps)',
     }[page.slugs[0]] ?? page.slugs[0];
 
-  const processed = await processor.process({
-    path: page.data._file.absolutePath,
-    value: page.data.content,
-  });
+  const processed = await page.data.getText('processed');
 
   return `# ${category}: ${page.data.title}
 URL: ${page.url}
@@ -33,5 +19,5 @@ Source: https://raw.githubusercontent.com/fuma-nama/fumadocs/refs/heads/main/app
 
 ${page.data.description}
         
-${processed.value}`;
+${processed}`;
 }

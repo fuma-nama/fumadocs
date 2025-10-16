@@ -17,24 +17,24 @@
     "version": "changeset version && pnpm install --lockfile-only"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.29.6",
-    "@eslint/js": "^9.34.0",
-    "bun": "^1.2.21",
+    "@changesets/cli": "^2.29.7",
+    "@eslint/js": "^9.37.0",
+    "bun": "^1.2.23",
     "concurrently": "^9.2.1",
-    "eslint": "^9.34.0",
+    "eslint": "^9.37.0",
     "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-hooks": "5.2.0",
+    "eslint-plugin-react-hooks": "7.0.0",
     "eslint-plugin-tailwindcss": "^3.18.2",
     "prettier": "^3.6.2",
     "prettier-plugin-astro": "^0.14.1",
     "rimraf": "^6.0.1",
     "tsup": "8.5.0",
-    "turbo": "2.5.6",
-    "typescript": "^5.9.2",
-    "typescript-eslint": "^8.41.0",
+    "turbo": "2.5.8",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.0",
     "vitest": "^3.2.4"
   },
-  "packageManager": "pnpm@9.14.4",
+  "packageManager": "pnpm@9.15.9",
   "engines": {
     "node": ">= 18.17.0"
   }

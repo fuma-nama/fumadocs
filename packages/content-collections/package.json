@@ -1,13 +1,13 @@
 {
   "name": "@fumadocs/content-collections",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "The Content Collections adapter for Fumadocs",
   "keywords": [
     "NextJs",
     "Docs",
     "Content Collections"
   ],
-  "homepage": "https://fumadocs.vercel.app",
+  "homepage": "https://fumadocs.dev",
   "repository": "github:fuma-nama/fumadocs",
   "license": "MIT",
   "author": "Fuma Nama",
@@ -37,17 +37,17 @@
   "devDependencies": {
     "@content-collections/core": "^0.11.1",
     "@content-collections/mdx": "^0.2.2",
-    "@types/node": "24.3.0",
+    "@types/node": "24.7.1",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
-    "zod": "^4.1.5"
+    "zod": "^4.1.12"
   },
   "peerDependencies": {
     "@content-collections/core": "0.x.x",
     "@content-collections/mdx": "0.x.x",
-    "fumadocs-core": "^14.0.0 || ^15.0.0"
+    "fumadocs-core": "15.x.x || 16.x.x"
   },
   "publishConfig": {
     "access": "public"

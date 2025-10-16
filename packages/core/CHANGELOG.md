@@ -1,5 +1,89 @@
 # next-docs-zeta
 
+## 15.8.4
+
+### Patch Changes
+
+- ce2be59: Loader Plugin: support `name` & `config` options
+- 31b9494: Support `multiple()` for multiple sources in same `loader()`
+
+## 15.8.3
+
+### Patch Changes
+
+- a3a14e7: Bump deps
+
+## 15.8.2
+
+### Patch Changes
+
+- ad9a004: **Deprecate `fumadocs-core/server` export**
+
+  It will be removed on Fumadocs 16, as some APIs under the `/server` export are actually available (and even used) under browser environment.
+
+  A more modularized design will be introduced over the original naming.
+  - **`getGithubLastEdit`:** Moved to `fumadocs-core/content/github`.
+  - **`getTableOfContents`:** Moved to `fumadocs-core/content/toc`.
+  - **`PageTree` and page tree utilities:** Moved to `fumadocs-core/page-tree`.
+  - **`TOCItemType`, `TableOfContents`:** Moved to `fumadocs-core/toc`.
+  - **`createMetadataImage`:** Deprecated, use the Next.js Metadata API instead.
+
+- 90cf1fe: Support Negotiation API
+- 747bdbc: Support lucide react icons plugin for `loader()`
+
+## 15.8.1
+
+### Patch Changes
+
+- 71bce86: Make `loader().getPages()` to return pages from all languages when locale is not specified
+- f04547f: Publish `plugins` API on `loader()`
+
+## 15.8.0
+
+### Minor Changes
+
+- d1ae3e8: **Move `SortedResult` and other search-related types to `fumadocs-core/search`**
+
+  This also exposed the search result highlighter API, you may now use it for highlighting results of your own search integration
+
+  Old export will be kept until the next major release.
+
+- 51268ec: Breadcrumbs API: default `includePage` to `false`.
+
+### Patch Changes
+
+- 655bb46: [Internal] `parseCodeBlockAttributes` include null values, restrict `rehype-code` to only parse `title` and `tab` attributes.
+- 6548a59: Support breadcrumbs for Search API
+- 51268ec: Breadcrumbs API: Fix root folders being filtered when `includeRoot` is set to `true`.
+
+## 15.7.13
+
+### Patch Changes
+
+- 982aed6: Fix `source.getPageByHref()` return no result without explicit `language`
+
+## 15.7.12
+
+### Patch Changes
+
+- 846b28a: Support multiple codeblocks in same tab
+- 2b30315: Support `mode` option in search server
+
+## 15.7.11
+
+## 15.7.10
+
+### Patch Changes
+
+- c948f59: Try to workaround legacy i18n middleware under `/i18n` export without breaking changes
+
+## 15.7.9
+
+### Patch Changes
+
+- d135efd: `transformerIcon` supports SVG string to extend codeblock icons
+- 4082acc: Expose `highlightHast` API
+
 ## 15.7.8
 
 ### Patch Changes

@@ -6,18 +6,23 @@
       {
         "name": "name",
         "description": "",
-        "tags": {},
+        "tags": [],
         "type": "string",
+        "simplifiedType": "string",
         "required": true,
         "deprecated": false
       },
       {
         "name": "age",
         "description": "",
-        "tags": {
-          "defaultValue": "4"
-        },
-        "type": "number",
+        "tags": [
+          {
+            "name": "defaultValue",
+            "text": "4"
+          }
+        ],
+        "type": "number | undefined",
+        "simplifiedType": "number",
         "required": false,
         "deprecated": false
       }
@@ -30,26 +35,32 @@
       {
         "name": "name",
         "description": "",
-        "tags": {},
+        "tags": [],
         "type": "string",
+        "simplifiedType": "string",
         "required": true,
         "deprecated": false
       },
       {
         "name": "age",
         "description": "",
-        "tags": {
-          "defaultValue": "4"
-        },
-        "type": "number",
+        "tags": [
+          {
+            "name": "defaultValue",
+            "text": "4"
+          }
+        ],
+        "type": "number | undefined",
+        "simplifiedType": "number",
         "required": false,
         "deprecated": false
       },
       {
         "name": "generic",
         "description": "",
-        "tags": {},
+        "tags": [],
         "type": "GenericType<string, string, string>",
+        "simplifiedType": "object",
         "required": true,
         "deprecated": false
       }
@@ -62,22 +73,92 @@
       {
         "name": "name",
         "description": "The name of player",
-        "tags": {
-          "see": "https://fumadocs.vercel.app",
-          "defaultValue": "Henry"
-        },
+        "tags": [
+          {
+            "name": "see",
+            "text": "https://fumadocs.dev"
+          },
+          {
+            "name": "defaultValue",
+            "text": "Henry"
+          }
+        ],
         "type": "string",
+        "simplifiedType": "string",
         "required": true,
         "deprecated": false
       },
       {
         "name": "age",
         "description": "",
-        "tags": {
-          "example": "```js\nconsole.log(\"Hello World\")\n```",
-          "remarks": "`timestamp`\nReturned by API"
-        },
-        "type": "timestamp",
+        "tags": [
+          {
+            "name": "example",
+            "text": "```js\nconsole.log(\"Hello World\")\n```"
+          },
+          {
+            "name": "remarks",
+            "text": "`timestamp`\nReturned by API"
+          }
+        ],
+        "type": "number",
+        "simplifiedType": "timestamp",
+        "required": true,
+        "deprecated": false
+      },
+      {
+        "name": "privateValue",
+        "description": "",
+        "tags": [
+          {
+            "name": "internal",
+            "text": ""
+          }
+        ],
+        "type": "string",
+        "simplifiedType": "string",
+        "required": true,
+        "deprecated": false
+      }
+    ]
+  },
+  {
+    "name": "Test4",
+    "description": "",
+    "entries": [
+      {
+        "name": "prop",
+        "description": "",
+        "tags": [],
+        "type": "Complicated<T>",
+        "simplifiedType": "Complicated<T>",
+        "required": true,
+        "deprecated": false
+      },
+      {
+        "name": "jsx",
+        "description": "",
+        "tags": [],
+        "type": "ReactNode",
+        "simplifiedType": "ReactNode",
+        "required": true,
+        "deprecated": false
+      },
+      {
+        "name": "partial",
+        "description": "",
+        "tags": [],
+        "type": "Partial<Player>",
+        "simplifiedType": "Partial<object>",
+        "required": true,
+        "deprecated": false
+      },
+      {
+        "name": "another",
+        "description": "",
+        "tags": [],
+        "type": "string | number | bigint | boolean | { type: string | JSXElementConstructor<any>; props: unknown; key: string | null; } | {} | { children: ReactNode; type: string | JSXElementConstructor<any>; props: unknown; key: string | null; } | { then: <TResult1 = AwaitedReactNode, TResult2 = never>(onfulfilled?: ((value: AwaitedReactNode) => TResult1 | PromiseLike<TResult1>) | null | undefined, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null | undefined) => Promise<TResult1 | TResult2>; catch: <TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | null | undefined) => Promise<AwaitedReactNode | TResult>; finally: (onfinally?: (() => void) | null | undefined) => Promise<AwaitedReactNode>; } | null | undefined",
+        "simplifiedType": "object | boolean | bigint | number | string | null | undefined",
         "required": true,
         "deprecated": false
       }

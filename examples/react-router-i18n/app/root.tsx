@@ -7,8 +7,7 @@ import {
   ScrollRestoration,
   useParams,
 } from 'react-router';
-import { RootProvider } from 'fumadocs-ui/provider/base';
-import { ReactRouterProvider } from 'fumadocs-core/framework/react-router';
+import { RootProvider } from 'fumadocs-ui/provider/react-router';
 import type { Route } from './+types/root';
 import './app.css';
 import type { Translations } from 'fumadocs-ui/i18n';
@@ -54,17 +53,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body className="flex flex-col min-h-screen">
-        <ReactRouterProvider>
-          <RootProvider
-            i18n={{
-              locale: lang,
-              locales,
-              translations: { cn }[lang],
-            }}
-          >
-            {children}
-          </RootProvider>
-        </ReactRouterProvider>
+        <RootProvider
+          i18n={{
+            locale: lang,
+            locales,
+            translations: { cn }[lang],
+          }}
+        >
+          {children}
+        </RootProvider>
         <ScrollRestoration />
         <Scripts />
       </body>

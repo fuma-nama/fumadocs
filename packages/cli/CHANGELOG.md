@@ -1,5 +1,11 @@
 # fumadocs
 
+## 1.0.2
+
+### Patch Changes
+
+- a3a14e7: Bump deps
+
 ## 1.0.1
 
 ### Patch Changes

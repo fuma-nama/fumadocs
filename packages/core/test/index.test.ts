@@ -1,13 +1,7 @@
-import {
-  joinPath,
-  parseFilePath,
-  parseFolderPath,
-  splitPath,
-} from '@/source/path';
+import { joinPath, splitPath } from '@/source/path';
 import { describe, expect, test } from 'vitest';
-import type { Root } from '@/source/page-tree/definitions';
-import { findNeighbour } from '@/utils/page-tree';
-import { PageTree } from '../dist/server';
+import type { Root } from '@/page-tree/definitions';
+import { findNeighbour } from '@/page-tree/utils';
 import { getBreadcrumbItems } from '@/breadcrumb';
 
 test('Find Neighbours', () => {
@@ -41,66 +35,6 @@ test('Find Neighbours', () => {
 });
 
 describe('Path utilities', () => {
-  test('parse file path', () => {
-    expect(parseFilePath('test.mdx')).toMatchInlineSnapshot(`
-      {
-        "dirname": "",
-        "ext": ".mdx",
-        "flattenedPath": "test",
-        "name": "test",
-        "path": "test.mdx",
-      }
-    `);
-
-    expect(parseFilePath('nested/test.mdx')).toMatchInlineSnapshot(`
-      {
-        "dirname": "nested",
-        "ext": ".mdx",
-        "flattenedPath": "nested/test",
-        "name": "test",
-        "path": "nested/test.mdx",
-      }
-    `);
-
-    expect(parseFilePath('nested/test.cn.mdx')).toMatchInlineSnapshot(`
-      {
-        "dirname": "nested",
-        "ext": ".mdx",
-        "flattenedPath": "nested/test.cn",
-        "name": "test.cn",
-        "path": "nested/test.cn.mdx",
-      }
-    `);
-
-    expect(parseFilePath('nested/test.01.mdx')).toMatchInlineSnapshot(`
-      {
-        "dirname": "nested",
-        "ext": ".mdx",
-        "flattenedPath": "nested/test.01",
-        "name": "test.01",
-        "path": "nested/test.01.mdx",
-      }
-    `);
-  });
-
-  test('parse folder path', () => {
-    expect(parseFolderPath('')).toMatchInlineSnapshot(`
-      {
-        "dirname": "",
-        "name": "",
-        "path": "",
-      }
-    `);
-
-    expect(parseFolderPath('nested/nested')).toMatchInlineSnapshot(`
-      {
-        "dirname": "nested",
-        "name": "nested",
-        "path": "nested/nested",
-      }
-    `);
-  });
-
   test('resolve paths', () => {
     expect(joinPath('a', 'b')).toBe('a/b');
     expect(joinPath('/a', '')).toBe('a');
@@ -118,7 +52,7 @@ describe('Path utilities', () => {
 });
 
 test('Breadcrumbs', () => {
-  const tree: PageTree.Root = {
+  const tree: Root = {
     name: 'Hello World',
     children: [
       {
@@ -154,16 +88,9 @@ test('Breadcrumbs', () => {
     ],
   };
 
-  expect(getBreadcrumbItems('/docs/folder', tree)).toStrictEqual([
-    { name: 'World', url: '/docs/folder' },
-  ]);
+  expect(
+    getBreadcrumbItems('/docs/folder', tree, { includePage: true }),
+  ).toStrictEqual([{ name: 'World', url: '/docs/folder' }]);
 
-  expect(getBreadcrumbItems('/', tree)).toMatchInlineSnapshot(`
-    [
-      {
-        "name": "Introduction",
-        "url": "/",
-      },
-    ]
-  `);
+  expect(getBreadcrumbItems('/invalid', tree)).toMatchInlineSnapshot(`[]`);
 });

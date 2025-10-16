@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-docgen",
-  "version": "3.0.0",
+  "version": "3.0.2",
   "description": "Useful remark utilities and plugins",
   "keywords": [
     "NextJs",
@@ -9,7 +9,7 @@
     "mdx",
     "Docs"
   ],
-  "homepage": "https://fumadocs.vercel.app",
+  "homepage": "https://fumadocs.dev",
   "repository": "github:fuma-nama/fumadocs",
   "license": "MIT",
   "author": "Fuma Nama",
@@ -40,25 +40,25 @@
     "estree-util-to-js": "^2.0.0",
     "estree-util-value-to-estree": "^3.4.0",
     "npm-to-yarn": "^3.0.1",
-    "oxc-transform": "^0.85.0",
+    "oxc-transform": "^0.94.0",
     "unist-util-visit": "^5.0.0",
-    "zod": "^4.1.5"
+    "zod": "^4.1.12"
   },
   "peerDependencies": {
-    "fumadocs-core": "^15.7.2"
+    "fumadocs-core": "^15.7.2 || ^16.0.0"
   },
   "devDependencies": {
     "@mdx-js/mdx": "^3.1.1",
     "@types/estree": "^1.0.8",
     "@types/hast": "^3.0.4",
-    "@types/mdast": "^4.0.3",
-    "@types/node": "24.3.0",
+    "@types/mdast": "^4.0.4",
+    "@types/node": "24.7.1",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "mdast-util-mdx-jsx": "^3.2.0",
-    "remark": "^15.0.0",
+    "remark": "^15.0.1",
     "tsconfig": "workspace:*",
-    "typescript": "^5.9.2",
+    "typescript": "^5.9.3",
     "unified": "^11.0.5",
     "vfile": "^6.0.3"
   },

@@ -25,6 +25,10 @@ Create the server from source object.
   ../../examples/tanstack-start/src/routes/api/search.ts
 </include>
 
+<include cwd meta='tab="Waku" title="src/pages/api/search.ts"'>
+  ../../examples/waku/src/pages/api/search.ts
+</include>
+
 ### From Search Indexes
 
 Create the server from search indexes, each index needs a `structuredData` field.
@@ -69,7 +73,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 ```
 
 ```ts tab="Tanstack Start" title="src/routes/api/search.ts"
-import { createServerFileRoute } from '@tanstack/react-start/server';
+import { createFileRoute } from '@tanstack/react-router';
 import { source } from '@/lib/source';
 import { createSearchAPI } from 'fumadocs-core/search/server';
 
@@ -84,8 +88,28 @@ const server = createSearchAPI('advanced', {
   })),
 });
 
-export const ServerRoute = createServerFileRoute('/api/search').methods({
-  GET: async ({ request }) => server.GET(request),
+export const Route = createFileRoute('/api/search')({
+  server: {
+    handlers: {
+      GET: async ({ request }) => server.GET(request),
+    },
+  },
+});
+```
+
+```ts tab="Waku" title="src/pages/api/search.ts"
+import { source } from '@/lib/source';
+import { createSearchAPI } from 'fumadocs-core/search/server';
+
+export const { GET } = createSearchAPI('advanced', {
+  language: 'english',
+  indexes: source.getPages().map((page) => ({
+    title: page.data.title,
+    description: page.data.description,
+    url: page.url,
+    id: page.url,
+    structuredData: page.data.structuredData,
+  })),
 });
 ```
 
@@ -147,34 +171,65 @@ const client = useDocsSearch({
 
 ### Static Mode [#static-export]
 
-To support usage without servers, use `staticGET` from search server. For example:
+To support usage with static site, use `staticGET` from search server and make the route static or pre-rendered.
 
 ```ts tab="Next.js" title="app/api/search/route.ts"
 import { source } from '@/lib/source';
 import { createFromSource } from 'fumadocs-core/search/server';
 
-// it should be cached forever
+// statically cached [!code highlight:2]
 export const revalidate = false;
-
-// [!code highlight]
 export const { staticGET: GET } = createFromSource(source);
 ```
 
 ```ts tab="React Router" title="app/docs/search.ts"
-import type { Route } from './+types/search';
-
-export async function loader({ request }: Route.LoaderArgs) {
+// make sure this route is pre-rendered in `react-router.config.ts`.
+export async function loader() {
   // [!code highlight]
-  return server.staticGET(request);
+  return server.staticGET();
 }
 ```
 
 ```ts tab="Tanstack Start" title="src/routes/api/search.ts"
-import { createServerFileRoute } from '@tanstack/react-start/server';
+import { createFileRoute } from '@tanstack/react-router';
 
-export const ServerRoute = createServerFileRoute('/api/search').methods({
-  // [!code highlight]
-  GET: async ({ request }) => server.staticGET(request),
+export const Route = createFileRoute('/api/search')({
+  server: {
+    handlers: {
+      // [!code highlight]
+      GET: async () => server.staticGET(),
+    },
+  },
+});
+```
+
+```ts tab="Tanstack Start" title="vite.config.ts"
+import { tanstackStart } from '@tanstack/react-start/plugin/vite';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  plugins: [
+    tanstackStart({
+      prerender: {
+        enabled: true,
+      },
+      // [!code ++] pre-render the index file
+      pages: [{ path: '/api/search' }],
+    }),
+  ],
+});
+```
+
+```ts tab="Waku" title="src/pages/api/search.ts"
+import { source } from '@/lib/source';
+import { createFromSource } from 'fumadocs-core/search/server';
+
+// [!code highlight]
+export const { staticGET: GET } = createFromSource(source);
+
+// statically cached [!code highlight:3]
+export const getConfig = async () => ({
+  render: 'static',
 });
 ```
 
@@ -271,7 +326,7 @@ function Search() {
 Chinese and Japanese require additional configurations:
 
 ```npm
-@orama/tokenizers
+npm i @orama/tokenizers
 ```
 
 <include cwd meta='title="app/api/search/route.ts" tab="createFromSource"'>

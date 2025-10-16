@@ -5,6 +5,10 @@ description: Use Fumadocs MDX with Tanstack Start & Router
 
 ## Setup
 
+<div className="fd-steps [&_h3]:fd-step">
+
+### Installation
+
 ```npm
 npm i fumadocs-mdx fumadocs-core @types/mdx
 ```
@@ -21,18 +25,9 @@ Add the Vite plugin:
   ../../examples/tanstack-start/vite.config.ts
 </include>
 
-A `source.generated.ts` file will be generated when you run development server or production build.
+### Integrate with Fumadocs
 
-### Accessing Content
-
-You can import the `source.generated.ts` file directly.
-
-```ts
-import { docs } from './source.generated';
-console.log(docs);
-```
-
-To integrate with Fumadocs, create a docs collection and use:
+To integrate with Fumadocs, create a `lib/source.ts` file:
 
 ```ts title="src/lib/source.ts"
 import { loader } from 'fumadocs-core/source';
@@ -43,6 +38,16 @@ export const source = loader({
   baseUrl: '/docs',
 });
 ```
+
+The `source.generated.ts` file will be generated when you run development server or production build.
+
+### Done
+
+You can now write content in `content/docs` folder.
+
+</div>
+
+## Examples
 
 ### Rendering Content
 
@@ -69,7 +74,7 @@ export const Route = createFileRoute('/docs/$')({
 const loader = createServerFn({
   method: 'GET',
 })
-  .validator((slugs: string[]) => slugs)
+  .inputValidator((slugs: string[]) => slugs)
   .handler(async ({ data: slugs }) => {
     const page = source.getPage(slugs);
     if (!page) throw notFound();
@@ -98,3 +103,10 @@ function Page() {
   return <Content />;
 }
 ```
+
+> As you see, the `source.generated.ts` file can be imported directly:
+>
+> ```ts
+> import { docs } from './source.generated';
+> console.log(docs);
+> ```

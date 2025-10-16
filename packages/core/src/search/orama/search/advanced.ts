@@ -4,21 +4,22 @@ import {
   type advancedSchema,
 } from '@/search/orama/create-db';
 import { removeUndefined } from '@/utils/remove-undefined';
-import type { SortedResult } from '@/server';
-import { createContentHighlighter } from '@/search/shared';
+import { createContentHighlighter, type SortedResult } from '@/search';
 
 export async function searchAdvanced(
   db: Orama<typeof advancedSchema>,
   query: string,
   tag: string | string[] = [],
-  extraParams: Partial<
-    SearchParams<Orama<typeof advancedSchema>, AdvancedDocument>
-  > = {},
+  {
+    mode = 'fulltext',
+    ...override
+  }: Partial<SearchParams<Orama<typeof advancedSchema>, AdvancedDocument>> = {},
 ): Promise<SortedResult[]> {
   if (typeof tag === 'string') tag = [tag];
 
   let params = {
-    ...extraParams,
+    ...override,
+    mode,
     where: removeUndefined({
       tags:
         tag.length > 0
@@ -26,12 +27,12 @@ export async function searchAdvanced(
               containsAll: tag,
             }
           : undefined,
-      ...extraParams.where,
+      ...override.where,
     }),
     groupBy: {
       properties: ['page_id'],
       maxResult: 8,
-      ...extraParams.groupBy,
+      ...override.groupBy,
     },
   } as SearchParams<typeof db, AdvancedDocument>;
 
@@ -39,7 +40,7 @@ export async function searchAdvanced(
     params = {
       ...params,
       term: query,
-      properties: ['content'],
+      properties: mode === 'fulltext' ? ['content'] : ['content', 'embeddings'],
     } as SearchParams<typeof db, AdvancedDocument>;
   }
 
@@ -56,6 +57,7 @@ export async function searchAdvanced(
       id: pageId,
       type: 'page',
       content: page.content,
+      breadcrumbs: page.breadcrumbs,
       contentWithHighlights: highlighter.highlight(page.content),
       url: page.url,
     });
@@ -66,6 +68,7 @@ export async function searchAdvanced(
       list.push({
         id: hit.document.id.toString(),
         content: hit.document.content,
+        breadcrumbs: hit.document.breadcrumbs,
         contentWithHighlights: highlighter.highlight(hit.document.content),
         type: hit.document.type as SortedResult['type'],
         url: hit.document.url,

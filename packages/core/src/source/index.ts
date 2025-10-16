@@ -3,23 +3,17 @@ export {
   type PageTreeTransformer,
   type PageTreeBuilder,
   type PageTreeBuilderContext,
-  type BaseOptions,
+  type PageTreeOptions,
 } from './page-tree/builder';
 export * from './loader';
-export { FileSystem } from './file-system';
+export { getSlugs } from './plugins/slugs';
+export { FileSystem } from './storage/file-system';
 
 export {
-  loadFiles,
   type PageFile,
   type MetaFile,
-  type LoadOptions,
   type ContentStorage,
-  type Transformer,
-} from './load-files';
+} from './storage/content';
 export type * from './types';
-export {
-  type FileInfo,
-  type FolderInfo,
-  parseFilePath,
-  parseFolderPath,
-} from './path';
+export * as PathUtils from './path';
+export type * from './plugins';

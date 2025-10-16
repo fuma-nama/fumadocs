@@ -7,8 +7,13 @@ description: Use Fumadocs MDX with Next.js
 
 Set up Fumadocs MDX for your Next.js application.
 
+<section id="setup-section">
+<div className="fd-steps [&_h3]:fd-step">
+
+### Installation
+
 ```npm
-npm i fumadocs-mdx @types/mdx @types/mdx
+npm i fumadocs-mdx @types/mdx
 ```
 
 Create the configuration file:
@@ -28,16 +33,18 @@ Add the plugin to Next.js config:
 ```js title="next.config.mjs"
 import { createMDX } from 'fumadocs-mdx/next';
 
-const withMDX = createMDX({
-  // customise the config file path
-  // configPath: "source.config.ts"
-});
-
 /** @type {import('next').NextConfig} */
 const config = {
   reactStrictMode: true,
 };
 
+// [!code ++:4]
+const withMDX = createMDX({
+  // customise the config file path
+  // configPath: "source.config.ts"
+});
+
+// [!code highlight]
 export default withMDX(config);
 ```
 
@@ -47,39 +54,9 @@ export default withMDX(config);
 
 </Callout>
 
-A `.source` folder will be generated when you run `next dev` or `next build`.
-
-### Accessing Content
-
-You can access the collection output from `.source` folder with its original name:
-
-```ts tab="source.config.ts"
-import { defineDocs } from 'fumadocs-mdx/config';
-
-export const docs = defineDocs({
-  dir: 'content/docs',
-  docs: {
-    // options for `doc` collection
-  },
-  meta: {
-    // options for `meta` collection
-  },
-});
-```
-
-```ts tab="Usage"
-import { docs } from '@/.source';
-
-console.log(docs);
-```
-
-The type of output can have a different type/shape depending on the collection type and schema.
-
-> Make sure you are importing from `.source` rather than `source.config.ts`. We will import it with `@/.source` import alias in this guide.
-
 ### Integrate with Fumadocs
 
-Create a `docs` collection and use `toFumadocsSource()` on the output.
+You can create a `lib/source.ts` file and obtain Fumadocs source from the `docs` collection output.
 
 ```ts title="lib/source.ts"
 import { docs } from '@/.source';
@@ -91,9 +68,22 @@ export const source = loader({
 });
 ```
 
-> You can do the same for multiple `docs` collections.
+> `.source` will be generated when you run `next dev` or `next build`.
+>
+> Make sure you are importing the `.source` rather than `source.config.ts`.
 
-Generally, you'll interact with the collection through [`loader()`](/docs/headless/source-api#output).
+### Done
+
+You can now write content in `content/docs` folder.
+
+</div>
+</section>
+
+## Examples
+
+### Accessing Content
+
+Generally, you'll interact with the collections through [`loader()`](/docs/headless/source-api#output), same for multiple `docs` collections.
 
 ```tsx
 import { source } from '@/lib/source';
@@ -120,14 +110,24 @@ const MDX = page.data.body;
 return <MDX components={getMDXComponents()} />;
 ```
 
-### Integrate with CI
+Without using `loader()`, you can also import the `.source` folder using its collection name:
 
-The `fumadocs-mdx` command also generates types for `.source` folder. Add it as a post install script to ensure types are generated when initializing the project.
+```ts tab="source.config.ts"
+import { defineDocs } from 'fumadocs-mdx/config';
 
-```json title="package.json"
-{
-  "scripts": {
-    "postinstall": "fumadocs-mdx"
-  }
-}
+export const docs = defineDocs({
+  dir: 'content/docs',
+  docs: {
+    // options for `doc` collection
+  },
+  meta: {
+    // options for `meta` collection
+  },
+});
+```
+
+```ts tab="Usage"
+import { docs } from '@/.source';
+
+console.log(docs);
 ```

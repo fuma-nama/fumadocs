@@ -2,7 +2,7 @@ import { createFileRoute, notFound } from '@tanstack/react-router';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { createServerFn } from '@tanstack/react-start';
 import { source } from '@/lib/source';
-import type { PageTree } from 'fumadocs-core/server';
+import type * as PageTree from 'fumadocs-core/page-tree';
 import { useMemo } from 'react';
 import { docs } from '../../../source.generated';
 import {
@@ -18,7 +18,8 @@ import { baseOptions } from '@/lib/layout.shared';
 export const Route = createFileRoute('/docs/$')({
   component: Page,
   loader: async ({ params }) => {
-    const data = await loader({ data: params._splat?.split('/') ?? [] });
+    const slugs = params._splat?.split('/') ?? [];
+    const data = await loader({ data: slugs });
     await clientLoader.preload(data.path);
     return data;
   },
@@ -27,7 +28,7 @@ export const Route = createFileRoute('/docs/$')({
 const loader = createServerFn({
   method: 'GET',
 })
-  .validator((slugs: string[]) => slugs)
+  .inputValidator((slugs: string[]) => slugs)
   .handler(async ({ data: slugs }) => {
     const page = source.getPage(slugs);
     if (!page) throw notFound();

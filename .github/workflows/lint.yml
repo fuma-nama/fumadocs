@@ -14,7 +14,7 @@ jobs:
       - uses: pnpm/action-setup@v4
 
       - name: Install Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: 'pnpm'
@@ -26,7 +26,7 @@ jobs:
         run: pnpm lint:prettier
 
       - name: Check Types
-        run: pnpm build --filter=./packages/* && pnpm types:check
+        run: pnpm build --filter=./packages/* && pnpm i --frozen-lockfile && pnpm types:check
 
       - name: Run ESLint
         run: pnpm lint

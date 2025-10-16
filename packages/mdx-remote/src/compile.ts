@@ -3,7 +3,7 @@ import { type CompileOptions, createProcessor } from '@mdx-js/mdx';
 import type { MDXComponents } from 'mdx/types';
 import { parseFrontmatter, pluginOption, type ResolvePlugins } from './utils';
 import type { Compatible, VFile } from 'vfile';
-import type { TableOfContents } from 'fumadocs-core/server';
+import type { TableOfContents } from 'fumadocs-core/toc';
 import { executeMdx, type MdxContent } from '@/render';
 import { pathToFileURL } from 'node:url';
 
@@ -108,6 +108,9 @@ export function createCompiler(mdxOptions?: CompilerOptions) {
       const file = await this.compileFile({
         value: content,
         path: options.filePath,
+        data: {
+          frontmatter,
+        },
       });
       const compiled = String(file);
       const exports = !skipRender

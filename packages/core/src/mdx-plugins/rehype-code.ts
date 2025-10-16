@@ -24,7 +24,7 @@ export const rehypeCodeDefaultOptions: RehypeCodeOptions = {
   themes: defaultThemes,
   defaultColor: false,
   defaultLanguage: 'plaintext',
-  experimentalJSEngine: false,
+  engine: 'js',
   transformers: [
     transformerNotationHighlight({
       matchAlgorithm: 'v3',
@@ -40,7 +40,7 @@ export const rehypeCodeDefaultOptions: RehypeCodeOptions = {
     }),
   ],
   parseMetaString(meta) {
-    const parsed = parseCodeBlockAttributes(meta);
+    const parsed = parseCodeBlockAttributes(meta, ['title', 'tab']);
     const data: Record<string, unknown> = parsed.attributes;
     parsed.rest = parseLineNumber(parsed.rest, data);
 
@@ -62,6 +62,13 @@ function parseLineNumber(str: string, data: Record<string, unknown>) {
 
 export type RehypeCodeOptions = RehypeShikiOptions & {
   /**
+   * The regex engine to use.
+   *
+   * @defaultValue 'js'
+   */
+  engine?: 'js' | 'oniguruma';
+
+  /**
    * Filter meta string before processing
    */
   filterMetaString?: (metaString: string) => string;
@@ -77,13 +84,6 @@ export type RehypeCodeOptions = RehypeShikiOptions & {
    * @defaultValue true
    */
   tab?: boolean;
-
-  /**
-   * Enable Shiki's experimental JS engine
-   *
-   * @defaultValue false
-   */
-  experimentalJSEngine?: boolean;
 };
 
 /**
@@ -124,19 +124,16 @@ export function rehypeCode(
     transformers.push(transformerTab());
   }
 
-  const highlighter = getHighlighter(
-    options.experimentalJSEngine ? 'js' : 'oniguruma',
-    {
-      themes:
-        'themes' in options
-          ? (Object.values(options.themes).filter(Boolean) as BuiltinTheme[])
-          : [options.theme],
-      langs:
-        options.langs ??
-        (options.lazy ? ['ts', 'tsx'] : Object.keys(bundledLanguages)),
-      langAlias: options.langAlias,
-    },
-  );
+  const highlighter = getHighlighter(options.engine ?? 'js', {
+    themes:
+      'themes' in options
+        ? (Object.values(options.themes).filter(Boolean) as BuiltinTheme[])
+        : [options.theme],
+    langs:
+      options.langs ??
+      (options.lazy ? ['ts', 'tsx'] : Object.keys(bundledLanguages)),
+    langAlias: options.langAlias,
+  });
 
   const transformer = highlighter.then((loaded) =>
     rehypeShikiFromHighlighter(loaded, {

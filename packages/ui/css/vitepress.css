@@ -1,3 +1,5 @@
+@import './default.css';
+
 @theme {
   --color-fd-muted: hsl(0, 0%, 96.1%);
   --color-fd-popover: hsl(0, 0%, 100%);

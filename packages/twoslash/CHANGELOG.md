@@ -1,5 +1,14 @@
 # fumadocs-twoslash
 
+## 3.1.8
+
+### Patch Changes
+
+- a3a14e7: Bump deps
+- Updated dependencies [a3a14e7]
+- Updated dependencies [7b0d839]
+  - fumadocs-ui@15.8.3
+
 ## 3.1.7
 
 ### Patch Changes

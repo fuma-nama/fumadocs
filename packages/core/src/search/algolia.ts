@@ -9,6 +9,7 @@ export interface DocumentRecord {
 
   title: string;
   description?: string;
+  breadcrumbs?: string[];
 
   /**
    * URL to the page
@@ -30,13 +31,6 @@ export interface DocumentRecord {
 export interface SyncOptions {
   /**
    * Index Name for documents.
-   *
-   * @deprecated Use `indexName` instead
-   */
-  document?: string;
-
-  /**
-   * Index Name for documents.
    */
   indexName?: string;
 
@@ -56,7 +50,7 @@ export async function sync(
   client: Algoliasearch,
   options: SyncOptions,
 ): Promise<void> {
-  const { document = 'document', indexName = document, documents } = options;
+  const { indexName = 'document', documents } = options;
   await setIndexSettings(client, indexName);
   await updateDocuments(client, indexName, documents);
 }
@@ -75,6 +69,7 @@ export async function setIndexSettings(
         'content',
         'url',
         'section_id',
+        'breadcrumbs',
       ],
       searchableAttributes: ['title', 'section', 'content'],
       attributesToSnippet: [],
@@ -95,6 +90,7 @@ function toIndex(page: DocumentRecord): BaseIndex[] {
   ): BaseIndex {
     return {
       objectID: `${page._id}-${(id++).toString()}`,
+      breadcrumbs: page.breadcrumbs,
       title: page.title,
       url: page.url,
       page_id: page._id,
@@ -160,6 +156,8 @@ export interface BaseIndex {
    * Heading (anchor) id
    */
   section_id?: string;
+
+  breadcrumbs?: string[];
 
   content: string;
 }

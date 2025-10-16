@@ -19,8 +19,7 @@ import {
   PageTOCPopoverTrigger,
   PageTOCTitle,
 } from '@/layouts/docs/page';
-import type { AnchorProviderProps } from 'fumadocs-core/toc';
-import type { TOCItemType } from 'fumadocs-core/server';
+import type { AnchorProviderProps, TOCItemType } from 'fumadocs-core/toc';
 
 interface EditOnGitHubOptions
   extends Omit<ComponentProps<'a'>, 'href' | 'children'> {
@@ -43,14 +42,6 @@ interface EditOnGitHubOptions
 interface BreadcrumbOptions extends BreadcrumbProps {
   enabled: boolean;
   component: ReactNode;
-
-  /**
-   * Show the full path to the current page
-   *
-   * @defaultValue false
-   * @deprecated use `includePage` instead
-   */
-  full?: boolean;
 }
 
 interface FooterOptions extends FooterProps {
@@ -158,10 +149,6 @@ export function DocsPage({
           : false
       }
       {...container}
-      className={cn(
-        !tocEnabled && '[--fd-toc-width:0px]',
-        container?.className,
-      )}
     >
       {tocPopoverEnabled &&
         (tocPopover ?? (

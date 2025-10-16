@@ -15,6 +15,7 @@ import Design from './design.png';
 import Link from 'fumadocs-core/link';
 import MixSpace from '@/public/showcases/mix-space.png';
 import TurboStarter from '@/public/showcases/turbostarter.png';
+import Nemo from '@/public/showcases/nemo.png';
 
 export const metadata = createMetadata({
   title: 'Showcase',
@@ -45,6 +46,11 @@ const showcases: ShowcaseObject[] = [
     image: BetterAuth,
     name: 'Better Auth',
     url: 'https://better-auth.com',
+  },
+  {
+    image: '/showcases/c15t.png',
+    name: 'c15t',
+    url: 'https://c15t.com',
   },
   {
     image: '/showcases/better-t-stack.jpeg',
@@ -232,6 +238,7 @@ const showcases: ShowcaseObject[] = [
     url: 'https://ts.llamaindex.ai',
   },
   {
+    image: Nemo,
     name: 'Nemo',
     url: 'https://nemo.zanreal.com',
   },

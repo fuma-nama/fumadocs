@@ -3,7 +3,7 @@ import * as path from 'node:path';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 import { ValidationError } from '@/utils/validation';
-import { generateJS } from '@/map/generate';
+import { generateJS } from '@/next/map/generate';
 import { defineCollections } from '@/config';
 import { fumaMatter } from '@/utils/fuma-matter';
 
@@ -38,21 +38,23 @@ test('format errors', async () => {
   }
 });
 
-const file = path.dirname(fileURLToPath(import.meta.url));
-
+const baseDir = path.relative(
+  process.cwd(),
+  path.dirname(fileURLToPath(import.meta.url)),
+);
 const cases = [
   {
     name: 'sync',
     collection: defineCollections({
       type: 'doc',
-      dir: path.join(file, './fixtures'),
+      dir: path.join(baseDir, './fixtures/generate-index'),
     }),
   },
   {
     name: 'async',
     collection: defineCollections({
       type: 'doc',
-      dir: path.join(file, './fixtures'),
+      dir: path.join(baseDir, './fixtures/generate-index'),
       async: true,
     }),
   },
@@ -61,7 +63,7 @@ const cases = [
 for (const { name, collection } of cases) {
   test(`generate JS index file: ${name}`, async () => {
     const out = await generateJS(
-      path.join(file, './fixtures/config.ts'),
+      path.join(baseDir, './fixtures/config.ts'),
       {
         // @ts-expect-error -- test file
         _runtime: {
@@ -70,7 +72,7 @@ for (const { name, collection } of cases) {
         collections: new Map([['docs', collection]]),
       },
       {
-        relativeTo: path.join(file, './fixtures'),
+        relativeTo: path.join(baseDir, './fixtures'),
       },
       'hash',
     );

@@ -14,6 +14,7 @@ import {
 } from '@/lib/type-table';
 import { createCache } from '@/lib/cache';
 import path from 'node:path';
+import { getSimpleForm } from '@/lib/get-simple-form';
 
 export interface GeneratedDoc {
   name: string;
@@ -25,9 +26,16 @@ export interface DocEntry {
   name: string;
   description: string;
   type: string;
-  tags: Record<string, string>;
+  simplifiedType: string;
+
+  tags: RawTag[];
   required: boolean;
   deprecated: boolean;
+}
+
+export interface RawTag {
+  name: string;
+  text: string;
 }
 
 interface EntryContext {
@@ -78,7 +86,8 @@ export function createGenerator(config?: GeneratorOptions | Project) {
           project: config,
         }
       : config;
-  const cacheType = options?.cache ?? 'fs';
+  const cacheType =
+    options?.cache ?? (process.env.NODE_ENV !== 'development' ? 'fs' : false);
   const cache = cacheType === 'fs' ? createCache() : null;
   let instance: Project | undefined;
 
@@ -190,40 +199,33 @@ function getDocEntry(
   context: EntryContext,
 ): DocEntry | undefined {
   const { transform, program } = context;
-
   if (context.type.isClass() && prop.getName().startsWith('#')) {
     return;
   }
 
-  const subType = program
-    .getTypeChecker()
-    .getTypeOfSymbolAtLocation(prop, context.declaration);
-  const tags = Object.fromEntries(
-    prop
-      .getJsDocTags()
-      .map((tag) => [tag.getName(), ts.displayPartsToString(tag.getText())]),
+  const subType = prop.getTypeAtLocation(context.declaration);
+  const isOptional = prop.isOptional();
+  const tags = prop.getJsDocTags().map(
+    (tag) =>
+      ({
+        name: tag.getName(),
+        text: ts.displayPartsToString(tag.getText()),
+      }) satisfies RawTag,
   );
 
-  let typeName = subType.getText(
-    undefined,
-    ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope,
+  let simplifiedType = getSimpleForm(
+    subType,
+    program.getTypeChecker(),
+    isOptional,
+    context.declaration,
   );
 
-  if (
-    subType.getAliasSymbol() &&
-    subType.getAliasTypeArguments().length === 0
-  ) {
-    typeName = subType.getAliasSymbol()?.getEscapedName() ?? typeName;
-  }
+  const remarksTag = tags.find((tag) => tag.name === 'remarks');
+  if (remarksTag) {
+    const match = /^`(?<name>.+)`/.exec(remarksTag.text)?.[1];
 
-  if (prop.isOptional() && typeName.endsWith('| undefined')) {
-    typeName = typeName
-      .slice(0, typeName.length - '| undefined'.length)
-      .trimEnd();
-  }
-
-  if ('remarks' in tags) {
-    typeName = /^`(?<name>.+)`/.exec(tags.remarks)?.[1] ?? typeName;
+    // replace type with @remarks
+    if (match) simplifiedType = match;
   }
 
   const entry: DocEntry = {
@@ -234,11 +236,14 @@ function getDocEntry(
       ),
     ),
     tags,
-    type: typeName,
-    required: !prop.isOptional(),
-    deprecated: prop
-      .getJsDocTags()
-      .some((tag) => tag.getName() === 'deprecated'),
+    type: subType.getText(
+      context.declaration,
+      ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope |
+        ts.TypeFormatFlags.NoTruncation,
+    ),
+    simplifiedType,
+    required: !isOptional,
+    deprecated: tags.some((tag) => tag.name === 'deprecated'),
   };
 
   transform?.call(context, entry, subType, prop);

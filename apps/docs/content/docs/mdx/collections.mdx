@@ -39,17 +39,13 @@ export const metaFiles = defineCollections({
 
   Accept JSON/YAML files, available options:
 
-  <AutoTypeTable path="./content/docs/mdx/props.ts" name="MetaCollection" />
+  <auto-type-table path="./props.ts" name="MetaCollection" />
 
 - `type: doc`
 
   Markdown/MDX documents, available options:
 
-  <AutoTypeTable path="./content/docs/mdx/props.ts" name="DocCollection" />
-
-### `dir`
-
-Directories to scan for input files.
+  <auto-type-table path="./props.ts" name="DocCollection" />
 
 ### `schema`
 
@@ -96,6 +92,8 @@ export const blog = defineCollections({
 
 Customise MDX options at the collection level.
 
+> This API is only available on `doc` type.
+
 ```ts title="source.config.ts"
 import { defineCollections, getDefaultMDXOptions } from 'fumadocs-mdx/config';
 
@@ -110,7 +108,7 @@ export const blog = defineCollections({
 By design, this will remove all default settings applied by your global config and Fumadocs MDX.
 You have full control over MDX options.
 
-You can use `getDefaultMDXOptions` to apply default configurations, it accepts the [extended MDX Options](/docs/mdx/mdx#extended).
+You can use [`getDefaultMDXOptions`](/docs/mdx/mdx) to apply the default MDX preset.
 
 ```ts title="source.config.ts"
 import { defineCollections, getDefaultMDXOptions } from 'fumadocs-mdx/config';
@@ -118,12 +116,16 @@ import { defineCollections, getDefaultMDXOptions } from 'fumadocs-mdx/config';
 export const blog = defineCollections({
   type: 'doc',
   mdxOptions: getDefaultMDXOptions({
-    // extended mdx options
+    // extend the preset
   }),
 });
 ```
 
+### `postprocess`
+
 > This API is only available on `doc` type.
+
+See [Postprocess](/docs/mdx/postprocess).
 
 ## Define Docs
 
@@ -145,19 +147,19 @@ export const docs = defineDocs({
 
 ### `dir`
 
-Instead of per collection, you should customise `dir` from `defineDocs`:
+Instead of per collection, you should customise content directory from `defineDocs`:
 
 ```ts
 import { defineDocs } from 'fumadocs-mdx/config';
 
 export const docs = defineDocs({
-  dir: 'my/content/dir',
+  dir: 'content/guides',
 });
 ```
 
 ### `schema`
 
-You can extend the default Zod schema of `docs` and `meta`.
+You can extend the default Zod 4 schema of `docs` and `meta`.
 
 ```ts
 import { frontmatterSchema, metaSchema, defineDocs } from 'fumadocs-mdx/config';

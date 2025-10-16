@@ -23,7 +23,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.8,
     },
-    ...source.getPages().map((page) => {
+    ...source.getPages().flatMap((page) => {
+      if (page.data.type === 'openapi') return [];
       const { lastModified } = page.data;
 
       return {

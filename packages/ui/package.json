@@ -1,12 +1,12 @@
 {
   "name": "fumadocs-ui",
-  "version": "15.7.8",
+  "version": "15.8.4",
   "description": "The framework for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
     "Docs"
   ],
-  "homepage": "https://fumadocs.vercel.app",
+  "homepage": "https://fumadocs.dev",
   "repository": "github:fuma-nama/fumadocs",
   "license": "MIT",
   "author": "Fuma Nama",
@@ -61,9 +61,9 @@
       "types": "./dist/layouts/shared/index.d.ts"
     },
     "./page": {
-      "node": "./dist/page.server.js",
+      "node": "./dist/page.js",
       "import": "./dist/page.js",
-      "types": "./dist/page.server.d.ts"
+      "types": "./dist/page.d.ts"
     },
     "./provider": {
       "import": "./dist/provider/index.js",
@@ -129,30 +129,30 @@
     "lodash.merge": "^4.6.2",
     "next-themes": "^0.4.6",
     "postcss-selector-parser": "^7.1.0",
-    "react-medium-image-zoom": "^5.3.0",
+    "react-medium-image-zoom": "^5.4.0",
     "scroll-into-view-if-needed": "^3.1.0",
     "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",
-    "@next/eslint-plugin-next": "^15.5.2",
-    "@tailwindcss/cli": "^4.1.12",
+    "@next/eslint-plugin-next": "16.0.0-beta.0",
+    "@tailwindcss/cli": "^4.1.14",
     "@types/lodash.merge": "^4.6.9",
-    "@types/react": "^19.1.12",
-    "@types/react-dom": "^19.1.9",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.1",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
-    "next": "15.5.2",
-    "tailwindcss": "^4.1.12",
+    "next": "16.0.0-beta.0",
+    "tailwindcss": "^4.1.14",
     "tsc-alias": "^1.8.16",
     "tsconfig": "workspace:*"
   },
   "peerDependencies": {
     "@types/react": "*",
-    "next": "14.x.x || 15.x.x",
-    "react": "18.x.x || 19.x.x",
-    "react-dom": "18.x.x || 19.x.x",
-    "tailwindcss": "^3.4.14 || ^4.0.0"
+    "next": "16.x.x",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "tailwindcss": "^4.0.0"
   },
   "peerDependenciesMeta": {
     "next": {

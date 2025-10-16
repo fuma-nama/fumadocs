@@ -1,0 +1,69 @@
+---
+title: next/og
+description: Usage with Next.js Metadata API.
+---
+
+> Make sure to read their [Metadata section](https://nextjs.org/docs/app/building-your-application/optimizing/metadata) for the fundamentals of Metadata API.
+
+## Metadata Image
+
+You can generate metadata images dynamically using `next/og`.
+
+Add the following under your loader, and define image metadata for pages:
+
+```ts tab="lib/source.ts"
+import { type InferPageType } from 'fumadocs-core/source';
+
+// [!code ++:8]
+export function getPageImage(page: InferPageType<typeof source>) {
+  const segments = [...page.slugs, 'image.png'];
+
+  return {
+    segments,
+    url: `/og/docs/${segments.join('/')}`,
+  };
+}
+```
+
+```tsx tab="app/docs/[[...slug]]/page.tsx"
+import { notFound } from 'next/navigation';
+import { source, getPageImage } from '@/lib/source';
+import type { Metadata } from 'next';
+
+export async function generateMetadata(
+  props: PageProps<'/docs/[[...slug]]'>,
+): Promise<Metadata> {
+  const params = await props.params;
+  const page = source.getPage(params.slug);
+  if (!page) notFound();
+
+  return {
+    title: page.data.title,
+    description: page.data.description,
+    openGraph: {
+      // [!code ++]
+      images: getPageImage(page).url,
+    },
+  };
+}
+```
+
+> We append `image.png` to the end of slugs so that we can access it via `/og/docs/my-page/image.png`.
+
+Finally, create a route handler to generate images at build time:
+
+<include cwd meta='title="app/og/docs/[...slug]/route.tsx"'>
+  ../../examples/next-mdx/app/og/docs/[...slug]/route.tsx
+</include>
+
+You can specify options for Satori (used by `next/og`), see https://github.com/vercel/satori for reference.
+
+### Other Presets
+
+There's other available styles on Fumadocs CLI, such as `mono`:
+
+```npm
+npx @fumadocs/cli@latest add og/mono
+```
+
+Replaced your old `generate` with the installed one.

@@ -5,6 +5,10 @@ description: Use Fumadocs MDX with React Router
 
 ## Setup
 
+<div className="fd-steps [&_h3]:fd-step">
+
+### Installation
+
 ```npm
 npm i fumadocs-mdx fumadocs-core @types/mdx
 ```
@@ -21,27 +25,27 @@ Add the Vite plugin:
   ../../examples/react-router/vite.config.ts
 </include>
 
-A `source.generated.ts` file will be generated when you run development server or production build.
+### Integrate with Fumadocs
 
-### Accessing Content
-
-You can import the `source.generated.ts` file directly.
-
-```ts
-import { docs } from './source.generated';
-console.log(docs);
-```
-
-To integrate with Fumadocs, create a docs collection and use:
+To integrate with Fumadocs, make a `lib/source.ts` file:
 
 <include cwd meta='title="app/lib/source.ts"'>
   ../../examples/react-router/app/lib/source.ts
 </include>
 
+The `source.generated.ts` file will be generated when you run development server or production build.
+
+### Done
+
+You can now write content in `content/docs` folder.
+
+</div>
+
+## Examples
+
 ### Rendering Content
 
-Rendering page content may different because React Router doesn't support RSC at the moment.
-Instead, use `toClientRenderer()` to lazy load MDX content as a component on browser.
+As React Router doesn't support RSC at the moment, use `toClientRenderer()` to lazy load MDX content as a component on browser.
 
 For example:
 
@@ -76,4 +80,11 @@ export default function Page(props: Route.ComponentProps) {
 
   return <Content />;
 }
+```
+
+Note that you can import the `source.generated.ts` file directly, it's useful to access compiled content without `loader()`.
+
+```ts
+import { docs } from './source.generated';
+console.log(docs);
 ```

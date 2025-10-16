@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-obsidian",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Obsidian Integration for Fumadocs",
   "keywords": [
     "NextJs",
@@ -26,6 +26,10 @@
     "./ui": {
       "import": "./dist/ui/index.js",
       "types": "./dist/ui/index.d.ts"
+    },
+    "./mdx": {
+      "import": "./dist/mdx/index.js",
+      "types": "./dist/mdx/index.d.ts"
     }
   },
   "scripts": {
@@ -43,23 +47,23 @@
     "remark-mdx": "^3.1.1",
     "remark-parse": "^11.0.0",
     "remark-stringify": "^11.0.0",
-    "tinyglobby": "^0.2.14",
+    "tinyglobby": "^0.2.15",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.0.0",
-    "zod": "^4.1.5"
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@types/estree": "^1.0.8",
     "@types/js-yaml": "^4.0.9",
-    "@types/mdast": "^4.0.3",
-    "@types/node": "24.3.0",
-    "@types/react": "^19.1.12",
+    "@types/mdast": "^4.0.4",
+    "@types/node": "24.7.1",
+    "@types/react": "^19.2.2",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "mdast-util-mdx-jsx": "^3.2.0",
     "tsconfig": "workspace:*",
-    "typescript": "^5.9.2",
+    "typescript": "^5.9.3",
     "vfile": "^6.0.3"
   },
   "peerDependenciesMeta": {
@@ -69,8 +73,8 @@
   },
   "peerDependencies": {
     "@types/react": "*",
-    "fumadocs-core": "^15.0.0",
-    "fumadocs-ui": "^15.0.0"
+    "fumadocs-core": "^15.0.0 || ^16.0.0",
+    "fumadocs-ui": "^15.0.0 || ^16.0.0"
   },
   "publishConfig": {
     "access": "public"

@@ -53,7 +53,6 @@ For docs page, it's the same logic:
 - Define path params (`slugs`).
 - Fetch page content from path params.
 - Render the content.
-- (Optional) Configure pre-rendering for your framework.
 
 #### Body
 
@@ -78,10 +77,34 @@ export default function Page({ params }: { params: { slug?: string[] } }) {
 }
 ```
 
-#### Pre-rendering (Next.js only)
+### Pre-rendering
 
-Define the [`generateStaticParams`](https://nextjs.org/docs/app/api-reference/functions/generate-static-params) function.
-It should return a list of parameters (`params`) to populate the `[[...slug]]` catch-all route.
+The mechanism for pre-rendering differs depending on your React.js framework.
+
+It's important to pre-render pages (especially the frequently visited ones) to improve initial load time.
+
+<Callout title='In Next.js'>
+
+Define the [`generateStaticParams`](https://nextjs.org/docs/app/api-reference/functions/generate-static-params) function to populate dynamic & catch-all routes.
+
+</Callout>
+
+When pre-rendering pages from a remote source, make sure to optimize repeated reads during the build phase.
+For example, if you're fetching content via GitHub API, it is better to clone the repository content locally for pre-rendering.
+
+```text tab="Before"
+/docs/* -> GET github.com
+/docs/introduction -> GET github.com
+/docs/my-page -> GET github.com
+Error: API Ratelimit
+```
+
+```text tab="After"
+start -> git clone
+/docs/* -> ls
+/docs/introduction -> read file
+/docs/my-page -> read file
+```
 
 ### Document Search
 
@@ -111,10 +134,14 @@ Since it doesn't use a bundler, there's some limitations:
 It's compatible with Server Components. For example:
 
 ```tsx
-import { compileMDX } from '@fumadocs/mdx-remote';
+import { createCompiler } from '@fumadocs/mdx-remote';
 import { getPage } from './my-content-source';
 import { DocsBody, DocsPage } from 'fumadocs-ui/page';
 import { getMDXComponents } from '@/mdx-components';
+
+const compiler = createCompiler({
+  // options
+});
 
 export default async function Page({
   params,
@@ -122,7 +149,7 @@ export default async function Page({
   params: { slug?: string[] };
 }) {
   const page = getPage(params.slug);
-  const compiled = await compileMDX({
+  const compiled = await compiler.compile({
     source: page.content,
   });
 
@@ -138,9 +165,9 @@ export default async function Page({
 }
 ```
 
-#### Images
+### Images
 
 On serverless platforms like Vercel, the original `public` folder (including static assets like images) will be removed after production build.
-`compileMDX` might no longer be able to access local images in `public`.
+The MDX compiler might no longer be able to access local images in `public`.
 
 When referencing images, make sure to use a URL.

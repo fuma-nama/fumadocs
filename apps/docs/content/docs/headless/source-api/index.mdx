@@ -1,0 +1,162 @@
+---
+title: loader()
+description: Turn a content source into a unified interface
+---
+
+## What it does?
+
+`loader()` provides an interface for Fumadocs to integrate with file-system based content sources.
+
+- Generate [page slugs and page tree](/docs/headless/page-conventions).
+- Assign URL to each page.
+- Output useful utilities to interact with content.
+
+It doesn't rely on the real file system (zero `node:fs` usage), a virtual storage is also allowed.
+
+## Usage
+
+You can use it with built-in content sources like Fumadocs MDX.
+
+```ts
+import { loader } from 'fumadocs-core/source';
+import { docs } from '@/.source';
+
+export const source = loader({
+  source: docs.toFumadocsSource(),
+  baseUrl: '/docs',
+});
+```
+
+### URL
+
+You can override the base URL, or specify a function to generate URL for each page.
+
+```ts
+import { loader } from 'fumadocs-core/source';
+
+loader({
+  baseUrl: '/docs',
+  // or you can customise it with function
+  url(slugs, locale) {
+    if (locale) return '/' + [locale, 'docs', ...slugs].join('/');
+    return '/' + ['docs', ...slugs].join('/');
+  },
+});
+```
+
+### Icons
+
+Load the [icon](/docs/headless/page-conventions#icons) property specified by pages and meta files.
+
+```ts
+import { loader } from 'fumadocs-core/source';
+import { icons } from 'lucide-react';
+import { createElement } from 'react';
+
+loader({
+  icon(icon) {
+    if (!icon) {
+      // You may set a default icon
+      return;
+    }
+
+    if (icon in icons) return createElement(icons[icon as keyof typeof icons]);
+  },
+});
+```
+
+### I18n
+
+Pass the `i18n` config to loader.
+
+```ts title="lib/source.ts"
+import { i18n } from '@/lib/i18n';
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  i18n, // [!code highlight]
+});
+```
+
+With i18n enabled, loader will generate a page tree for every locale.
+
+If translations are missing for a page, it fallbacks to [`fallbackLanguage`](/docs/headless/internationalization#fallback-language).
+
+## Output
+
+The loader outputs a source object.
+
+### Get Page
+
+Get page with slugs.
+
+```ts
+import { source } from '@/lib/source';
+
+source.getPage(['slug', 'of', 'page']);
+
+// with i18n
+source.getPage(['slug', 'of', 'page'], 'locale');
+```
+
+### Get Pages
+
+Get a list of page available for locale.
+
+```ts
+import { source } from '@/lib/source';
+
+// from any locale
+source.getPages();
+
+// for a specific locale
+source.getPages('locale');
+```
+
+### Page Tree
+
+```ts
+import { source } from '@/lib/source';
+
+// without i18n
+source.pageTree;
+
+// with i18n
+source.pageTree['locale'];
+```
+
+### Get from Node
+
+The page tree nodes contain references to their original file path.
+You can find their original page or meta file from the tree nodes.
+
+```ts
+import { source } from '@/lib/source';
+
+source.getNodePage(pageNode);
+source.getNodeMeta(folderNode);
+```
+
+### Params
+
+A function to generate output for Next.js `generateStaticParams`.
+The generated parameter names will be `slug: string[]` and `lang: string` (i18n only).
+
+```ts title="app/[[...slug]]/page.tsx"
+import { source } from '@/lib/source';
+
+export function generateStaticParams() {
+  return source.generateParams();
+}
+```
+
+### Language Entries
+
+Get available languages and its pages.
+
+```ts
+import { source } from '@/lib/source';
+
+// language -> pages
+const entries = source.getLanguages();
+```

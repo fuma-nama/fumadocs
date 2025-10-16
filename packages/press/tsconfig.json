@@ -1,0 +1,8 @@
+{
+  "extends": "tsconfig/react-library.json",
+  "compilerOptions": {
+    "types": ["vite/client", "@vitejs/plugin-rsc/types"],
+    "moduleResolution": "Bundler"
+  },
+  "exclude": ["node_modules", "dist", "eslint.config.mjs"]
+}
