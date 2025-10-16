@@ -1,4 +1,4 @@
-import type { ClientSearchParams, OramaClient } from '@oramacloud/client';
+import type { OramaCloud, OramaCloudSearchParams } from '@orama/core';
 import { removeUndefined } from '@/utils/remove-undefined';
 import type { OramaIndex } from '@/search/orama-cloud';
 import { createContentHighlighter, type SortedResult } from '@/search';
@@ -12,14 +12,14 @@ interface CrawlerIndex {
 }
 
 export interface OramaCloudOptions {
-  client: OramaClient;
+  client: OramaCloud;
   /**
    * The type of your index.
    *
    * You can set it to `crawler` if you use crawler instead of the JSON index with schema provided by Fumadocs
    */
   index?: 'default' | 'crawler';
-  params?: ClientSearchParams;
+  params?: Partial<OramaCloudSearchParams>;
 
   /**
    * Filter results with specific tag.
@@ -38,10 +38,11 @@ export async function searchDocs(
 ): Promise<SortedResult[]> {
   const highlighter = createContentHighlighter(query);
   const list: SortedResult[] = [];
-  const { index = 'default', client, params: extraParams = {}, tag } = options;
+  const { index = 'default', client, params: extraParams, tag } = options;
 
   if (index === 'crawler') {
     const result = await client.search({
+      datasources: [],
       ...extraParams,
       term: query,
       where: {
@@ -50,7 +51,7 @@ export async function searchDocs(
               eq: tag.slice(0, 1).toUpperCase() + tag.slice(1),
             }
           : undefined,
-        ...extraParams.where,
+        ...extraParams?.where,
       },
       limit: 10,
     });
@@ -80,17 +81,19 @@ export async function searchDocs(
     return list;
   }
 
-  const params: ClientSearchParams = {
+  const params: OramaCloudSearchParams = {
+    datasources: [],
     ...extraParams,
     term: query,
     where: removeUndefined({
       tag,
-      ...extraParams.where,
+      ...extraParams?.where,
     }),
     groupBy: {
+      // TODO: this was causing error on number of group variants
       properties: ['page_id'],
-      maxResult: 7,
-      ...extraParams.groupBy,
+      max_results: 7,
+      ...extraParams?.groupBy,
     },
   };
 

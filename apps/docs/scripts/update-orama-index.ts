@@ -1,22 +1,18 @@
-import { sync, type OramaDocument } from 'fumadocs-core/search/orama-cloud';
+import { type OramaDocument, sync } from 'fumadocs-core/search/orama-cloud';
 import * as fs from 'node:fs/promises';
-import { CloudManager } from '@oramacloud/client';
+import { DataSourceId, isAdmin, orama } from '@/lib/orama/client';
 
 export async function updateSearchIndexes(): Promise<void> {
-  const apiKey = process.env.ORAMA_PRIVATE_API_KEY;
-
-  if (!apiKey) {
-    console.log('no api key for Orama found, skipping');
+  if (!isAdmin) {
+    console.log('no private API key for Orama found, skipping');
     return;
   }
 
   const content = await fs.readFile('.next/server/app/static.json.body');
   const records = JSON.parse(content.toString()) as OramaDocument[];
 
-  const manager = new CloudManager({ api_key: apiKey });
-
-  await sync(manager, {
-    index: 'twr98yz9itca86121ukrqber',
+  await sync(orama, {
+    index: DataSourceId,
     documents: records,
   });
 

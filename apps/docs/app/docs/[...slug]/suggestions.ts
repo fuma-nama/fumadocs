@@ -1,18 +1,14 @@
-import { OramaClient } from '@oramacloud/client';
 import type { Suggestion } from '@/components/not-found';
-
-const client = new OramaClient({
-  endpoint: 'https://cloud.orama.run/v1/indexes/docs-fk97oe',
-  api_key: 'oPZjdlFbq5BpR54bV5Vj57RYt83Xosk7',
-});
+import { DataSourceId, orama } from '@/lib/orama/client';
 
 export async function getSuggestions(pathname: string): Promise<Suggestion[]> {
-  const results = await client.search({
+  const results = await orama.search({
     term: pathname,
     mode: 'vector',
+    datasources: [DataSourceId],
     groupBy: {
       properties: ['url'],
-      maxResult: 1,
+      max_results: 1,
     },
   });
 
@@ -23,8 +19,8 @@ export async function getSuggestions(pathname: string): Promise<Suggestion[]> {
 
     return {
       id: doc.id,
-      href: doc.document.url,
-      title: doc.document.title,
+      href: doc.document.url as string,
+      title: doc.document.title as string,
     };
   });
 }

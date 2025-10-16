@@ -71,12 +71,12 @@ importers:
       '@mixedbread/sdk':
         specifier: ^0.34.0
         version: 0.34.0
+      '@orama/core':
+        specifier: ^1.2.13
+        version: 1.2.13
       '@orama/orama':
         specifier: ^3.1.15
         version: 3.1.15
-      '@oramacloud/client':
-        specifier: ^2.1.4
-        version: 2.1.4
       '@radix-ui/react-dialog':
         specifier: ^1.1.15
         version: 1.1.15(@types/react-dom@19.2.1(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -1263,9 +1263,9 @@ importers:
       '@mixedbread/sdk':
         specifier: ^0.34.0
         version: 0.34.0
-      '@oramacloud/client':
-        specifier: ^2.1.4
-        version: 2.1.4
+      '@orama/core':
+        specifier: ^1.2.13
+        version: 1.2.13
       '@tanstack/react-router':
         specifier: ^1.132.47
         version: 1.132.47(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -3560,6 +3560,9 @@ packages:
     resolution: {integrity: sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg==}
     engines: {node: '>=8.0.0'}
 
+  '@orama/core@1.2.13':
+    resolution: {integrity: sha512-FNjEFDxPtdLU/ycrpt4z3GMYn3mljTXmyyN7901nMtXWOilZK+lOa4IRUBQBXMcPtxsxfEZVuJuB0CvIo1ugAA==}
+
   '@orama/cuid2@2.2.3':
     resolution: {integrity: sha512-Lcak3chblMejdlSHgYU2lS2cdOhDpU6vkfIJH4m+YKvqQyLqs1bB8+w6NT1MG5bO12NUK2GFc34Mn2xshMIQ1g==}
 
@@ -3567,12 +3570,12 @@ packages:
     resolution: {integrity: sha512-ltjr1WHlY+uqEKE0JG2G6Xn36mSQGmPdPGQedQyipekBdf0iAtp8oL9dckQRX8cP+nUfOZwwPWSu7km8gGciUg==}
     engines: {node: '>= 20.0.0'}
 
+  '@orama/oramacore-events-parser@0.0.5':
+    resolution: {integrity: sha512-yAuSwog+HQBAXgZ60TNKEwu04y81/09mpbYBCmz1RCxnr4ObNY2JnPZI7HmALbjAhLJ8t5p+wc2JHRK93ubO4w==}
+
   '@orama/tokenizers@3.1.15':
     resolution: {integrity: sha512-VFn0eR5bjwtOUc4tB7L+7vlnxBQr4xYdE0ix36/GCfsq0B99HiwOCROAx5EKsi7uqRYG5WBq+r731s1aXsW4Sg==}
     engines: {node: '>= 20.0.0'}
-
-  '@oramacloud/client@2.1.4':
-    resolution: {integrity: sha512-uNPFs4wq/iOPbggCwTkVNbIr64Vfd7ZS/h+cricXVnzXWocjDTfJ3wLL4lr0qiSu41g8z+eCAGBqJ30RO2O4AA==}
 
   '@oven/bun-darwin-aarch64@1.2.23':
     resolution: {integrity: sha512-8ARgq0GDtrYwb8ge9F5xpdZ6q9IxIugeBtdbrVVmWAEuyOlOhzYt/+7gm7xcVZlPmjYmx3D/31bKXJ49mxWI4w==}
@@ -11150,6 +11153,11 @@ packages:
     resolution: {integrity: sha512-zK7YHHz4ZXpW89AHXUPbQVGKI7uvkd3hzusTdotCg1UxyaVtg0zFJSTfW/Dq5f7OBBVnq6cZIaC8Ti4hb6dtCA==}
     engines: {node: '>= 14'}
 
+  zod-to-json-schema@3.24.5:
+    resolution: {integrity: sha512-/AuWwMP+YqiPbsJx5D6TfgRTc4kTLjsh5SOcd4bLsfUg2RcEXrFMJl1DGgdHy2aCfsIA/cr/1JM0xcB2GZji8g==}
+    peerDependencies:
+      zod: ^3.24.1
+
   zod-to-json-schema@3.24.6:
     resolution: {integrity: sha512-h/z3PKvcTcTetyjl1fkj79MHNEjm+HpD6NXheWjzOekY7kV+lwDYnHw+ivHkijnCSMz1yJaWBD9vu/Fcmk+vEg==}
     peerDependencies:
@@ -11163,6 +11171,9 @@ packages:
 
   zod@3.24.1:
     resolution: {integrity: sha512-muH7gBL9sI1nciMZV67X5fTKKBLtwpZ5VBp1vsOQzj1MhrBZ4wlVCm3gedKZWLp0Oyel8sIGfeiz54Su+OVT+A==}
+
+  zod@3.24.3:
+    resolution: {integrity: sha512-HhY1oqzWCQWuUqvBFnsyrtZRhyPeR7SUGv+C4+MsisMuVfSPx8HpwWqH8tRahSlt6M3PiFAcoeFhZAqIXTxoSg==}
 
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
@@ -12882,21 +12893,24 @@ snapshots:
 
   '@opentelemetry/api@1.9.0': {}
 
+  '@orama/core@1.2.13':
+    dependencies:
+      '@orama/cuid2': 2.2.3
+      '@orama/oramacore-events-parser': 0.0.5
+      zod: 3.24.3
+      zod-to-json-schema: 3.24.5(zod@3.24.3)
+
   '@orama/cuid2@2.2.3':
     dependencies:
       '@noble/hashes': 1.8.0
 
   '@orama/orama@3.1.15': {}
 
+  '@orama/oramacore-events-parser@0.0.5': {}
+
   '@orama/tokenizers@3.1.15':
     dependencies:
       '@orama/orama': 3.1.15
-
-  '@oramacloud/client@2.1.4':
-    dependencies:
-      '@orama/cuid2': 2.2.3
-      '@orama/orama': 3.1.15
-      lodash: 4.17.21
 
   '@oven/bun-darwin-aarch64@1.2.23':
     optional: true
@@ -21896,6 +21910,10 @@ snapshots:
       compress-commons: 6.0.2
       readable-stream: 4.7.0
 
+  zod-to-json-schema@3.24.5(zod@3.24.3):
+    dependencies:
+      zod: 3.24.3
+
   zod-to-json-schema@3.24.6(zod@3.25.76):
     dependencies:
       zod: 3.25.76
@@ -21905,6 +21923,8 @@ snapshots:
       zod: 4.1.12
 
   zod@3.24.1: {}
+
+  zod@3.24.3: {}
 
   zod@3.25.76: {}
 

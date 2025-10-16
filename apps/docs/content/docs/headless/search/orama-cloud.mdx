@@ -50,7 +50,7 @@ Then, using the private API key and index ID from dashboard, create a script to 
 ```ts title="scripts/sync-content.ts"
 import { sync, type OramaDocument } from 'fumadocs-core/search/orama-cloud';
 import * as fs from 'node:fs/promises';
-import { CloudManager } from '@oramacloud/client';
+import { OramaCloud } from '@orama/core';
 
 // the path of pre-rendered `static.json`, choose one according to your React framework
 const filePath = {
@@ -61,20 +61,16 @@ const filePath = {
 }['next'];
 
 async function main() {
-  // private API key [!code highlight]
-  const apiKey = process.env.ORAMA_PRIVATE_API_KEY;
-
-  if (!apiKey) {
-    console.log('no api key for Orama found, skipping');
-    return;
-  }
+  const orama = new OramaCloud({
+    projectId: '<project id>',
+    apiKey: '<private api key>',
+  });
 
   const content = await fs.readFile(filePath);
   const records = JSON.parse(content.toString()) as OramaDocument[];
-  const manager = new CloudManager({ api_key: apiKey });
 
-  await sync(manager, {
-    index: '<index>',
+  await sync(orama, {
+    index: '<data source id>',
     documents: records,
   });
 
@@ -103,15 +99,18 @@ To search documents on the client side, consider:
 
   ```ts
   import { useDocsSearch } from 'fumadocs-core/search/client';
-  import { OramaClient } from '@oramacloud/client';
+  import { OramaCloud } from '@orama/core';
 
-  const client = new OramaClient();
+  const client = new OramaCloud({
+    projectId: '<project id>',
+    apiKey: '<read only api key>',
+  });
 
   const { search, setSearch, query } = useDocsSearch({
     type: 'orama-cloud',
     client,
     params: {
-      // search params
+      // optional search params
     },
   });
   ```
@@ -129,11 +128,11 @@ Same as REST API integration, but make sure to set `index` to `crawler`.
 
 ```ts
 import { useDocsSearch } from 'fumadocs-core/search/client';
-import { OramaClient } from '@oramacloud/client';
+import { OramaCloud } from '@orama/core';
 
-const client = new OramaClient({
-  endpoint: '<endpoint_url>',
-  api_key: '<api_key>',
+const client = new OramaCloud({
+  projectId: '<project id>',
+  apiKey: '<read only api key>',
 });
 
 const { search, setSearch, query } = useDocsSearch({

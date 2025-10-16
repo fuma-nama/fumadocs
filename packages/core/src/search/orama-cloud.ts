@@ -1,5 +1,5 @@
-import type { CloudManager } from '@oramacloud/client';
 import type { StructuredData } from '@/mdx-plugins';
+import { type AnyObject, type OramaCloud } from '@orama/core';
 
 export interface SyncOptions {
   /**
@@ -87,27 +87,35 @@ export interface OramaIndex {
 }
 
 export async function sync(
-  cloudManager: CloudManager,
+  orama: OramaCloud,
   options: SyncOptions,
 ): Promise<void> {
   const { autoDeploy = true } = options;
-  const index = cloudManager.index(options.index);
+  const index = orama.index.set(options.index);
+  await index.transaction.open();
 
-  await index.snapshot(options.documents.flatMap(toIndex));
-  if (autoDeploy) await index.deploy();
+  await index.transaction.insertDocuments(
+    options.documents.flatMap(toIndex) as unknown as AnyObject[],
+  );
+
+  if (autoDeploy) await index.transaction.commit();
 }
 
 export async function syncI18n(
-  cloudManager: CloudManager,
+  orama: OramaCloud,
   options: I18nSyncOptions,
 ): Promise<void> {
-  const { autoDeploy = true } = options;
+  const { autoDeploy = true, indexes } = options;
 
   const tasks = options.documents.map(async (document) => {
-    const index = cloudManager.index(options.indexes[document.locale]);
+    const index = orama.index.set(indexes[document.locale]);
+    await index.transaction.open();
 
-    await index.snapshot(document.items.flatMap(toIndex));
-    if (autoDeploy) await index.deploy();
+    await index.transaction.insertDocuments(
+      document.items.flatMap(toIndex) as unknown as AnyObject[],
+    );
+
+    if (autoDeploy) await index.transaction.commit();
   });
 
   await Promise.all(tasks);
@@ -127,6 +135,7 @@ function toIndex(page: OramaDocument): OramaIndex[] {
       id: `${page.id}-${(id++).toString()}`,
       title: page.title,
       url: page.url,
+      // TODO: explicit declare enums
       page_id: page.id,
       tag: page.tag,
       section,
