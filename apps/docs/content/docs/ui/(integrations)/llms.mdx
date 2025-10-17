@@ -312,13 +312,13 @@ Step 1: Add your AI API key to `.env` file:
 INKEEP_API_KEY = 'your-inkeep-api-key';
 ```
 
-Step 2: Import and add the `AISearchTrigger` component to your docs page layout:
+Step 2: Import and add the `AISearchTrigger` component:
 
 ```tsx title="app/docs/[[...slug]]/page.tsx"
 import { AISearchTrigger } from '@/components/search'; // Import the component
 ```
 
-Step 3: Add the `<AISearchTrigger />` component inside your docs page component:
+Step 3: Add the `<AISearchTrigger />` component:
 
 ```tsx title="app/docs/[[...slug]]/page.tsx"
 <DocsPage toc={page.data.toc} full={page.data.full}>
