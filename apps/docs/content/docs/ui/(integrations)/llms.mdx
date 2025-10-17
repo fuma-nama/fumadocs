@@ -306,6 +306,27 @@ npx @fumadocs/cli add ai/search
 
 You can add the trigger component to your root layout.
 
+Step 1: Add your AI API key to `.env` file:
+
+```tsx title=".env"
+INKEEP_API_KEY = 'your-inkeep-api-key';
+```
+
+Step 2: Import and add the `AISearchTrigger` component to your docs page layout:
+
+```tsx title="app/docs/[[...slug]]/page.tsx"
+import { AISearchTrigger } from '@/components/search'; // Import the component
+```
+
+Step 3: Add the `<AISearchTrigger />` component inside your docs page component:
+
+```tsx title="app/docs/[[...slug]]/page.tsx"
+<DocsPage toc={page.data.toc} full={page.data.full}>
+  ... // your existing content
+  <AISearchTrigger /> // Add this line
+</DocsPage>
+```
+
 ### AI Model
 
 By default, it's configured for [Inkeep AI](https://inkeep.com) using Vercel AI SDK. Update the configurations in `useChat` and `/api/chat` route to connect to your own AI model instead.

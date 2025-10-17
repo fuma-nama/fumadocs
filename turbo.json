@@ -22,7 +22,6 @@
         ".source/**",
         "!.contentlayer/.cache/**",
         ".next/**",
-        "content/docs/openapi/\\(generated\\)/**",
         "!.next/cache/**",
         "dist/**",
         "out",
