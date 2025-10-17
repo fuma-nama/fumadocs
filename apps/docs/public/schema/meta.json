@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fumadocs.dev/schema/meta.json",
+  "title": "Fumadocs Meta Configuration",
+  "description": "Schema for Fumadocs meta.json files used to configure folder structure and navigation",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Display name for the folder"
+    },
+    "description": {
+      "type": "string",
+      "description": "The description of the folder (optional)"
+    },
+    "icon": {
+      "type": "string",
+      "description": "The name of icon to display for the folder"
+    },
+    "root": {
+      "type": "boolean",
+      "description": "Marks the folder as a root folder. Only items in opened root folders will be visible in navigation"
+    },
+    "defaultOpen": {
+      "type": "boolean",
+      "description": "Whether to open the folder by default in the sidebar"
+    },
+    "pages": {
+      "type": "array",
+      "description": "Array of folder items to control order and content",
+      "items": {
+        "oneOf": [
+          {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9._/-]+$",
+            "description": "Path to a page or folder (e.g., 'index', 'getting-started', './nested/page')"
+          },
+          {
+            "type": "string",
+            "pattern": "^---.*---$",
+            "description": "Separator between sections (e.g., '---Introduction---', '---[Icon]Label---')"
+          },
+          {
+            "type": "string",
+            "pattern": "^\\[.*\\]\\(.*\\)$",
+            "description": "Link item (e.g., '[Text](url)', '[Icon][Text](url)')"
+          },
+          {
+            "type": "string",
+            "enum": ["...", "z...a"],
+            "description": "Rest items: '...' for remaining pages (sorted alphabetically), 'z...a' for reversed rest"
+          },
+          {
+            "type": "string",
+            "pattern": "^\\.\\.\\.[a-zA-Z0-9._/-]+$",
+            "description": "Extract items from a folder (e.g., '...folder')"
+          },
+          {
+            "type": "string",
+            "pattern": "^![a-zA-Z0-9._/-]+$",
+            "description": "Exclude an item from rest items (e.g., '!file', '!otherFolder')"
+          }
+        ]
+      }
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "title": "Simple folder with pages",
+      "pages": ["index", "getting-started"]
+    },
+    {
+      "title": "Root folder with comprehensive configuration",
+      "description": "The docs framework",
+      "icon": "Building",
+      "root": true,
+      "pages": [
+        "---Introduction---",
+        "index",
+        "what-is-fumadocs",
+        "---Writing---",
+        "page-conventions",
+        "markdown"
+      ]
+    },
+    {
+      "title": "Folder with advanced page organization",
+      "pages": [
+        "components",
+        "---My Separator---",
+        "...folder",
+        "...",
+        "!file",
+        "!otherFolder",
+        "[Vercel](https://vercel.com)",
+        "[Triangle][Vercel](https://vercel.com)"
+      ]
+    },
+    {
+      "root": true
+    }
+  ]
+}
