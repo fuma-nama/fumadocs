@@ -300,36 +300,47 @@ Use it in your docs page like:
 
 You can install the AI search dialog using Fumadocs CLI:
 
-```package-install
+```npm
 npx @fumadocs/cli add ai/search
 ```
 
-You can add the trigger component to your root layout.
-
-Step 1: Add your AI API key to `.env` file:
-
-```tsx title=".env"
-INKEEP_API_KEY = 'your-inkeep-api-key';
-```
-
-Step 2: Import and add the `AISearchTrigger` component:
-
-```tsx title="app/docs/[[...slug]]/page.tsx"
-import { AISearchTrigger } from '@/components/search'; // Import the component
-```
-
-Step 3: Add the `<AISearchTrigger />` component (can be anywhere in the layout, usually at the root layout or docs layout):
-
-```tsx title="app/docs/[[...slug]]/page.tsx"
-<DocsPage toc={page.data.toc} full={page.data.full}>
-  ... // your existing content
-  <AISearchTrigger /> // Add this line
-</DocsPage>
-```
+Then, add the `<AISearchTrigger />` component to your root layout.
 
 ### AI Model
 
-By default, it's configured for [Inkeep AI](https://inkeep.com) using Vercel AI SDK. Update the configurations in `useChat` and `/api/chat` route to connect to your own AI model instead.
+By default, it's configured for [Inkeep AI](https://inkeep.com) using Vercel AI SDK.
+
+To setup for Inkeep AI:
+
+1. Add your Inkeep API key to environment variables:
+
+  ```dotenv
+  INKEEP_API_KEY="..."
+  ```
+
+2. Add the `AISearchTrigger` component to root layout (or anywhere you prefer):
+
+  ```tsx
+  import { AISearchTrigger } from '@/components/search';
+
+  export default function RootLayout({
+    children,
+  }: {
+    children: React.ReactNode;
+  }) {
+    return (
+      <html lang="en">
+        <body>
+          {/* [!code ++] */}
+          <AISearchTrigger />
+          {children}
+        </body>
+      </html>
+    );
+  }
+  ```
+
+To use your own AI models, update the configurations in `useChat` and `/api/chat` route.
 
 Note that Fumadocs doesn't provide the AI model, it's up to you.
 Your AI model can use the `llms-full.txt` file generated above, or more diversified sources of information when combined with 3rd party solutions.
