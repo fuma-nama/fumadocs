@@ -107,15 +107,20 @@ function SearchAIActions() {
   );
 }
 
+const StorageKeyInput = '__ai_search_input';
 function SearchAIInput(props: ComponentProps<'form'>) {
   const { status, sendMessage, stop } = useChatContext();
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState(
+    () => localStorage.getItem(StorageKeyInput) ?? '',
+  );
   const isLoading = status === 'streaming' || status === 'submitted';
   const onStart = (e?: SyntheticEvent) => {
     e?.preventDefault();
     void sendMessage({ text: input });
     setInput('');
   };
+
+  localStorage.setItem(StorageKeyInput, input);
 
   useEffect(() => {
     if (isLoading) document.getElementById('nd-ai-input')?.focus();
@@ -276,7 +281,7 @@ function Message({
       <div className="prose text-sm">
         <Markdown text={markdown} />
       </div>
-      {links && links.length > 0 ? (
+      {links && links.length > 0 && (
         <div className="mt-2 flex flex-row flex-wrap items-center gap-1">
           {links.map((item, i) => (
             <Link
@@ -289,7 +294,7 @@ function Message({
             </Link>
           ))}
         </div>
-      ) : null}
+      )}
     </div>
   );
 }
