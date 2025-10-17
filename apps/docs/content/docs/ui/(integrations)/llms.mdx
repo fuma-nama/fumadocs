@@ -300,15 +300,47 @@ Use it in your docs page like:
 
 You can install the AI search dialog using Fumadocs CLI:
 
-```package-install
+```npm
 npx @fumadocs/cli add ai/search
 ```
 
-You can add the trigger component to your root layout.
+Then, add the `<AISearchTrigger />` component to your root layout.
 
 ### AI Model
 
-By default, it's configured for [Inkeep AI](https://inkeep.com) using Vercel AI SDK. Update the configurations in `useChat` and `/api/chat` route to connect to your own AI model instead.
+By default, it's configured for [Inkeep AI](https://inkeep.com) using Vercel AI SDK.
+
+To setup for Inkeep AI:
+
+1. Add your Inkeep API key to environment variables:
+
+  ```dotenv
+  INKEEP_API_KEY="..."
+  ```
+
+2. Add the `AISearchTrigger` component to root layout (or anywhere you prefer):
+
+  ```tsx
+  import { AISearchTrigger } from '@/components/search';
+
+  export default function RootLayout({
+    children,
+  }: {
+    children: React.ReactNode;
+  }) {
+    return (
+      <html lang="en">
+        <body>
+          {/* [!code ++] */}
+          <AISearchTrigger />
+          {children}
+        </body>
+      </html>
+    );
+  }
+  ```
+
+To use your own AI models, update the configurations in `useChat` and `/api/chat` route.
 
 Note that Fumadocs doesn't provide the AI model, it's up to you.
 Your AI model can use the `llms-full.txt` file generated above, or more diversified sources of information when combined with 3rd party solutions.
