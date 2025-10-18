@@ -314,31 +314,31 @@ To setup for Inkeep AI:
 
 1. Add your Inkeep API key to environment variables:
 
-  ```dotenv
-  INKEEP_API_KEY="..."
-  ```
+   ```dotenv
+   INKEEP_API_KEY="..."
+   ```
 
 2. Add the `AISearchTrigger` component to root layout (or anywhere you prefer):
 
-  ```tsx
-  import { AISearchTrigger } from '@/components/search';
+   ```tsx
+   import { AISearchTrigger } from '@/components/search';
 
-  export default function RootLayout({
-    children,
-  }: {
-    children: React.ReactNode;
-  }) {
-    return (
-      <html lang="en">
-        <body>
-          {/* [!code ++] */}
-          <AISearchTrigger />
-          {children}
-        </body>
-      </html>
-    );
-  }
-  ```
+   export default function RootLayout({
+     children,
+   }: {
+     children: React.ReactNode;
+   }) {
+     return (
+       <html lang="en">
+         <body>
+           {/* [!code ++] */}
+           <AISearchTrigger />
+           {children}
+         </body>
+       </html>
+     );
+   }
+   ```
 
 To use your own AI models, update the configurations in `useChat` and `/api/chat` route.
 
