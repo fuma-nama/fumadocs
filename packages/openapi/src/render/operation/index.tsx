@@ -116,7 +116,7 @@ export function Operation({
               <Schema
                 name="body"
                 as="body"
-                schema={(content.schema ?? {}) as ResolvedSchema}
+                root={(content.schema ?? {}) as ResolvedSchema}
                 required={body.required}
                 readOnly={method.method === 'GET'}
                 writeOnly={method.method !== 'GET'}
@@ -159,7 +159,7 @@ export function Operation({
             <Schema
               key={param.name}
               name={param.name}
-              schema={
+              root={
                 {
                   ...param.schema,
                   description: param.description ?? param.schema?.description,
@@ -326,7 +326,7 @@ async function ResponseAccordion({
                 <div className="border px-3 py-2 rounded-lg overflow-auto max-h-[400px]">
                   <Schema
                     name="response"
-                    schema={schema as ResolvedSchema}
+                    root={schema as ResolvedSchema}
                     as="body"
                     readOnly
                     ctx={ctx}

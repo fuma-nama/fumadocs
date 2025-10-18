@@ -26,7 +26,7 @@ import { getDefaultValue } from './get-default-values';
 import { cn } from 'fumadocs-ui/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { combineSchema } from '@/utils/combine-schema';
-import { schemaToString } from '@/utils/schema-to-string';
+import { FormatFlags, schemaToString } from '@/utils/schema-to-string';
 import {
   anyFields,
   useFieldInfo,
@@ -401,7 +401,7 @@ export function FieldSet({
               >
                 {union.map((item, i) => (
                   <option key={i} value={i}>
-                    {schemaToString(item)}
+                    {schemaToString(item, undefined, FormatFlags.UseAlias)}
                   </option>
                 ))}
               </select>

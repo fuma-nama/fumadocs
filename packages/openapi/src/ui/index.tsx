@@ -1,15 +1,7 @@
-import { type HTMLAttributes, type ReactNode } from 'react';
-import { Badge } from '@/ui/components/method-label';
-import type { PropertyProps, RootProps } from '@/render/renderer';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from 'fumadocs-ui/components/ui/collapsible';
-import { ChevronDown } from 'lucide-react';
+import type { HTMLAttributes } from 'react';
+import type { RootProps } from '@/render/renderer';
 import { ApiProvider } from '@/ui/lazy';
 import { cn } from 'fumadocs-ui/utils/cn';
-import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import type { MediaAdapter } from '@/media/adapter';
 
 export function Root({
@@ -70,46 +62,6 @@ export function API({ children, ...props }: HTMLAttributes<HTMLDivElement>) {
   );
 }
 
-export function Property({
-  name,
-  type,
-  required,
-  deprecated,
-  nested,
-  ...props
-}: PropertyProps) {
-  return (
-    <div
-      className={cn(
-        'text-sm border-t',
-        nested
-          ? 'p-3 border-x bg-fd-card last:rounded-b-xl first:rounded-tr-xl last:border-b'
-          : 'py-4 first:border-t-0',
-      )}
-    >
-      <div className="flex flex-wrap items-center gap-2 not-prose">
-        <span className="font-medium font-mono text-fd-primary">
-          {name}
-          {required === false && (
-            <span className="text-fd-muted-foreground">?</span>
-          )}
-        </span>
-        <span className="me-auto text-xs font-mono text-fd-muted-foreground">
-          {type}
-        </span>
-        {deprecated && (
-          <Badge color="yellow" className="text-xs">
-            Deprecated
-          </Badge>
-        )}
-      </div>
-      <div className="prose-no-margin pt-2.5 empty:hidden">
-        {props.children}
-      </div>
-    </div>
-  );
-}
-
 export function APIExample(props: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
@@ -124,26 +76,5 @@ export function APIExample(props: HTMLAttributes<HTMLDivElement>) {
   );
 }
 
-export function ObjectCollapsible(props: {
-  name: string;
-  children: ReactNode;
-}) {
-  return (
-    <Collapsible className="my-2" {...props}>
-      <CollapsibleTrigger
-        className={cn(
-          buttonVariants({ color: 'secondary', size: 'sm' }),
-          'group px-3 py-2 data-[state=open]:rounded-b-none',
-        )}
-      >
-        {props.name}
-        <ChevronDown className="size-4 text-fd-muted-foreground group-data-[state=open]:rotate-180" />
-      </CollapsibleTrigger>
-      <CollapsibleContent className="-mt-px *:bg-fd-card">
-        {props.children}
-      </CollapsibleContent>
-    </Collapsible>
-  );
-}
-
+export { Property, ObjectCollapsible } from '@/render/schema/ui';
 export { APIPage, type ApiPageProps } from '@/render/api-page';

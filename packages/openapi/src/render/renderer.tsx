@@ -45,7 +45,7 @@ export interface APIInfoProps {
 
 export interface PropertyProps {
   name: string;
-  type: string;
+  type: ReactNode;
   required?: boolean;
   deprecated?: boolean;
   children?: ReactNode;
