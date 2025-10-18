@@ -30,7 +30,7 @@ export function LanguageToggle(props: LanguageSelectProps): React.ReactElement {
       >
         {props.children}
       </PopoverTrigger>
-      <PopoverContent className="flex flex-col overflow-hidden p-0">
+      <PopoverContent className="flex flex-col overflow-x-hidden p-0">
         <p className="mb-1 p-2 text-xs font-medium text-fd-muted-foreground">
           {context.text.chooseLanguage}
         </p>

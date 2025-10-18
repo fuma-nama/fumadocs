@@ -9,7 +9,7 @@ export enum FormatFlags {
 export function schemaToString(
   value: ResolvedSchema,
   ctx?: ProcessedDocument,
-  flags?: FormatFlags,
+  flags: FormatFlags = FormatFlags.None,
 ): string {
   function union(
     union: readonly ResolvedSchema[],
@@ -33,10 +33,7 @@ export function schemaToString(
     return nullable ? `${result} | null` : result;
   }
 
-  function run(
-    schema: ResolvedSchema,
-    flags: FormatFlags = FormatFlags.None,
-  ): string {
+  function run(schema: ResolvedSchema, flags: FormatFlags): string {
     if (schema === true) return 'any';
     else if (schema === false) return 'never';
 
@@ -59,7 +56,7 @@ export function schemaToString(
     }
 
     if (schema.type === 'array')
-      return `array<${schema.items ? run(schema.items) : 'unknown'}>`;
+      return `array<${schema.items ? run(schema.items, flags | FormatFlags.UseAlias) : 'unknown'}>`;
 
     if (schema.oneOf) {
       return union(schema.oneOf, ' | ', flags);
@@ -70,7 +67,7 @@ export function schemaToString(
       return union(combinedOf, ' & ', flags);
     }
 
-    if (schema.not) return `not ${run(schema.not)}`;
+    if (schema.not) return `not ${run(schema.not, flags)}`;
     if (schema.type === 'string' && schema.format === 'binary') return 'file';
 
     if (schema.type && Array.isArray(schema.type)) {

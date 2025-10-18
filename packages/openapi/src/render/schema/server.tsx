@@ -8,7 +8,10 @@ import { combineSchema } from '@/utils/combine-schema';
 export interface FieldBase {
   description?: ReactNode;
   infoTags?: ReactNode[];
+
   typeName: string;
+  aliasName: string;
+
   deprecated?: boolean;
   writeOnly?: boolean;
   readOnly?: boolean;
@@ -18,9 +21,6 @@ export type SchemaRef = FieldBase &
   (
     | {
         type: 'primitive';
-      }
-    | {
-        type: 'any';
       }
     | {
         type: 'object';
@@ -33,7 +33,6 @@ export type SchemaRef = FieldBase &
     | {
         type: 'array';
         item: {
-          description?: ReactNode;
           $type: string;
         };
       }
@@ -158,15 +157,19 @@ export function generateSchemaUI({ ctx, root }: SchemaUIOptions): SchemaUIData {
   }
 
   function base(schema: ResolvedSchema): FieldBase {
-    if (typeof schema === 'boolean')
+    if (typeof schema === 'boolean') {
+      const name = schema ? 'any' : 'never';
       return {
-        typeName: schema ? 'any' : 'never',
+        typeName: name,
+        aliasName: name,
       };
+    }
 
     return {
       description: schema.description && <Markdown text={schema.description} />,
       infoTags: generateInfoTags(schema),
       typeName: schemaToString(schema, ctx.schema),
+      aliasName: schemaToString(schema, ctx.schema, FormatFlags.UseAlias),
       deprecated: schema.deprecated,
       readOnly: schema.readOnly,
       writeOnly: schema.writeOnly,
@@ -177,7 +180,7 @@ export function generateSchemaUI({ ctx, root }: SchemaUIOptions): SchemaUIData {
     if (id in refs) return;
     if (typeof schema === 'boolean') {
       refs[id] = {
-        type: 'any',
+        type: 'primitive',
         ...base(schema),
       };
       return;

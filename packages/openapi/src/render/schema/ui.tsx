@@ -7,7 +7,6 @@ import {
 import { cn } from 'fumadocs-ui/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { ChevronDown } from 'fumadocs-ui/internal/icons';
-import type { PropertyProps } from '@/render/renderer';
 import { Badge } from '@/ui/components/method-label';
 
 export function ObjectCollapsible(props: {
@@ -32,6 +31,17 @@ export function ObjectCollapsible(props: {
   );
 }
 
+export interface PropertyProps {
+  name: ReactNode;
+  type: ReactNode;
+  required?: boolean;
+  deprecated?: boolean;
+  nested?: boolean;
+
+  children?: ReactNode;
+  className?: string;
+}
+
 export function Property({
   name,
   type,
@@ -47,20 +57,25 @@ export function Property({
         nested
           ? 'p-3 border-x bg-fd-card last:rounded-b-xl first:rounded-tr-xl last:border-b'
           : 'py-4 first:border-t-0',
+        props.className,
       )}
     >
-      <div className="flex flex-wrap items-center gap-2 not-prose">
+      <div className="flex flex-wrap items-center gap-3 not-prose">
         <span className="font-medium font-mono text-fd-primary">
           {name}
           {required === false && (
             <span className="text-fd-muted-foreground">?</span>
           )}
         </span>
-        <span className="me-auto text-xs font-mono text-fd-muted-foreground">
-          {type}
-        </span>
+        {typeof type === 'string' ? (
+          <span className="text-sm font-mono text-fd-muted-foreground">
+            {type}
+          </span>
+        ) : (
+          type
+        )}
         {deprecated && (
-          <Badge color="yellow" className="text-xs">
+          <Badge color="yellow" className="ms-auto text-xs">
             Deprecated
           </Badge>
         )}

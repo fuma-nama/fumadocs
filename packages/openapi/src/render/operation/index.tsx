@@ -323,7 +323,7 @@ async function ResponseAccordion({
             <SelectTab key={type} value={type} className="my-2">
               {ts && <CopyResponseTypeScript code={ts} />}
               {schema && (
-                <div className="border px-3 py-2 rounded-lg overflow-auto max-h-[400px]">
+                <div className="border px-3 py-2 rounded-lg overflow-auto max-h-[600px]">
                   <Schema
                     name="response"
                     root={schema as ResolvedSchema}
