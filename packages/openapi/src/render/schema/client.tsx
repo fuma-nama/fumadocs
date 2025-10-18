@@ -4,7 +4,9 @@ import {
   Fragment,
   type ReactNode,
   use,
+  useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -83,27 +85,94 @@ export function SchemaUI({
   const { $root, refs } = useData();
   const schema = refs[$root];
 
-  return (
-    <SchemaUIProperty
-      name={name}
-      $type={$root}
-      variant={as === 'property' || !isExpandable(schema) ? 'default' : 'ghost'}
-      overrides={{
-        required,
-      }}
-    />
-  );
+  if (as === 'property' || !isExpandable(schema)) {
+    return (
+      <SchemaUIProperty
+        name={name}
+        $type={$root}
+        overrides={{
+          required,
+        }}
+      />
+    );
+  }
+
+  return <SchemaUIContent $type={$root} />;
+}
+
+function SchemaUIContent({ $type }: { $type: string }) {
+  const { refs, readOnly, writeOnly } = useData();
+  const schema = refs[$type];
+
+  if ((schema.readOnly && !readOnly) || (schema.writeOnly && !writeOnly))
+    return;
+
+  let child = <></>;
+
+  if (schema.type === 'or' && schema.items.length > 0) {
+    child = (
+      <>
+        {child}
+        <Tabs defaultValue={schema.items[0].$type}>
+          <TabsList>
+            {schema.items.map((item) => (
+              <TabsTrigger key={item.$type} value={item.$type}>
+                {item.name}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          {schema.items.map((item) => (
+            <TabsContent
+              key={item.$type}
+              value={item.$type}
+              forceMount={undefined}
+              className="py-0"
+            >
+              <SchemaUIContent {...item} />
+            </TabsContent>
+          ))}
+        </Tabs>
+      </>
+    );
+  }
+
+  if (schema.type === 'object' && schema.props.length > 0) {
+    child = (
+      <>
+        {child}
+        {schema.props.map((prop) => (
+          <SchemaUIProperty
+            key={prop.name}
+            name={prop.name}
+            $type={prop.$type}
+            overrides={{ required: prop.required }}
+          />
+        ))}
+      </>
+    );
+  }
+
+  if (schema.type === 'array') {
+    child = (
+      <>
+        {child}
+        <ObjectCollapsible name="Array item">
+          <SchemaUIContent $type={schema.item.$type} />
+        </ObjectCollapsible>
+      </>
+    );
+  }
+
+  return child;
 }
 
 function SchemaUIProperty({
   name,
   $type,
-  variant = 'default',
   overrides,
 }: {
   name: ReactNode;
   $type: string;
-  variant?: 'default' | 'ghost';
   overrides?: Partial<PropertyProps>;
 }) {
   const { renderRef } = useProperty();
@@ -114,118 +183,38 @@ function SchemaUIProperty({
     return;
 
   let type: ReactNode = schema.typeName;
-  let child = <></>;
-
-  if (variant === 'default') {
-    child = (
-      <>
-        {schema.description}
-        {schema.infoTags && schema.infoTags.length > 0 && (
-          <div className="flex flex-row gap-2 flex-wrap my-2 empty:hidden">
-            {schema.infoTags.map((tag, i) => (
-              <Fragment key={i}>{tag}</Fragment>
-            ))}
-          </div>
-        )}
-      </>
+  if (schema.type === 'or' && schema.items.length > 0) {
+    type = (
+      <span className={cn(typeVariants(), 'flex flex-row gap-2 items-center')}>
+        {schema.items.map((item, i) => (
+          <Fragment key={item.$type}>
+            {i > 0 && <span>|</span>}
+            {renderRef({
+              pathName: name,
+              text: item.name,
+              $ref: item.$type,
+            })}
+          </Fragment>
+        ))}
+      </span>
     );
   }
 
-  if (schema.type === 'or' && schema.items.length > 0) {
-    if (variant === 'ghost') {
-      child = (
-        <>
-          {child}
-          <Tabs defaultValue={schema.items[0].$type}>
-            <TabsList>
-              {schema.items.map((item) => (
-                <TabsTrigger key={item.$type} value={item.$type}>
-                  {item.name}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-            {schema.items.map((item) => (
-              <TabsContent
-                key={item.$type}
-                value={item.$type}
-                forceMount={undefined}
-                className="py-0"
-              >
-                <SchemaUIProperty variant="ghost" {...item} />
-              </TabsContent>
-            ))}
-          </Tabs>
-        </>
-      );
-    } else {
-      type = (
-        <span
-          className={cn(typeVariants(), 'flex flex-row gap-2 items-center')}
-        >
-          {schema.items.map((item, i) => (
-            <Fragment key={item.$type}>
-              {i > 0 && <span>|</span>}
-              {renderRef({
-                pathName: name,
-                text: item.name,
-                $ref: item.$type,
-              })}
-            </Fragment>
-          ))}
-        </span>
-      );
-    }
-  }
-
   if (schema.type === 'object' && schema.props.length > 0) {
-    if (variant === 'ghost') {
-      child = (
-        <>
-          {child}
-          {schema.props.map((prop) => (
-            <SchemaUIProperty
-              key={prop.name}
-              name={prop.name}
-              $type={prop.$type}
-              overrides={{ required: prop.required }}
-            />
-          ))}
-        </>
-      );
-    } else {
-      type = renderRef({
-        text: schema.aliasName,
-        pathName: name,
-        $ref: $type,
-      });
-    }
+    type = renderRef({
+      text: schema.aliasName,
+      pathName: name,
+      $ref: $type,
+    });
   }
 
   if (schema.type === 'array') {
-    if (variant === 'ghost') {
-      child = (
-        <>
-          {child}
-          <ObjectCollapsible name="Array item">
-            <SchemaUIProperty
-              name="item"
-              $type={schema.item.$type}
-              variant="ghost"
-              overrides={{ nested: true }}
-            />
-          </ObjectCollapsible>
-        </>
-      );
-    } else {
-      type = renderRef({
-        text: schema.aliasName,
-        pathName: name,
-        $ref: schema.item.$type,
-      });
-    }
+    type = renderRef({
+      text: schema.aliasName,
+      pathName: <>{name}[]</>,
+      $ref: schema.item.$type,
+    });
   }
-
-  if (variant === 'ghost') return child;
 
   return (
     <Property
@@ -234,7 +223,14 @@ function SchemaUIProperty({
       deprecated={schema.deprecated}
       {...overrides}
     >
-      {child}
+      {schema.description}
+      {schema.infoTags && schema.infoTags.length > 0 && (
+        <div className="flex flex-row gap-2 flex-wrap my-2 not-prose empty:hidden">
+          {schema.infoTags.map((tag, i) => (
+            <Fragment key={i}>{tag}</Fragment>
+          ))}
+        </div>
+      )}
     </Property>
   );
 }
@@ -244,7 +240,6 @@ function SchemaUIPopover({
 }: {
   initialPath: { name: ReactNode; $ref?: string }[];
 }) {
-  const ctx = useProperty();
   const [path, setPath] = useState(initialPath);
   const ref = useRef<HTMLDivElement>(null);
   const last = path.findLast((item) => item.$ref !== undefined);
@@ -256,6 +251,20 @@ function SchemaUIPopover({
     // reset scroll
     element.parentElement.scrollTop = 0;
   }, [last?.$ref]);
+
+  const context: PropertyContextType = useMemo(
+    () => ({
+      renderRef: (props) => (
+        <LinkRef
+          {...props}
+          onInsert={(name, $ref) => {
+            setPath((path) => [...path, { name, $ref }]);
+          }}
+        />
+      ),
+    }),
+    [],
+  );
 
   if (!last) return;
 
@@ -290,25 +299,9 @@ function SchemaUIPopover({
           );
         })}
       </div>
-      <PropertyContext
-        value={{
-          ...ctx,
-          renderRef: (props) => (
-            <LinkRef
-              {...props}
-              onInsert={(name, $ref) => {
-                setPath((path) => [...path, { name, $ref }]);
-              }}
-            />
-          ),
-        }}
-      >
+      <PropertyContext value={context}>
         <div ref={ref} className="px-2">
-          <SchemaUIProperty
-            name={last.name}
-            $type={last.$ref!}
-            variant="ghost"
-          />
+          <SchemaUIContent $type={last.$ref!} />
         </div>
       </PropertyContext>
     </>
@@ -317,10 +310,8 @@ function SchemaUIPopover({
 
 function RootRef({ text, $ref, pathName }: RenderRefOptions) {
   const { refs } = useData();
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const element = ref.current;
-    if (!element) return;
+  const ref = useCallback((element: HTMLDivElement | null) => {
+    if (!element || element.style.getPropertyValue('--initial-height')) return;
 
     element.style.setProperty('--initial-height', `${element.clientHeight}px`);
   }, []);
