@@ -17,7 +17,7 @@ export interface FieldBase {
   readOnly?: boolean;
 }
 
-export type SchemaRef = FieldBase &
+export type SchemaData = FieldBase &
   (
     | {
         type: 'primitive';
@@ -52,11 +52,11 @@ export interface SchemaUIOptions {
 
 export interface SchemaUIData {
   $root: string;
-  refs: Record<string, SchemaRef>;
+  refs: Record<string, SchemaData>;
 }
 
 export function generateSchemaUI({ ctx, root }: SchemaUIOptions): SchemaUIData {
-  const refs: Record<string, SchemaRef> = {};
+  const refs: Record<string, SchemaData> = {};
   const { content: { showExampleInFields = false } = {} } = ctx;
 
   function generateInfoTags(schema: Exclude<ResolvedSchema, boolean>) {
@@ -187,7 +187,7 @@ export function generateSchemaUI({ ctx, root }: SchemaUIOptions): SchemaUIData {
     }
 
     if (Array.isArray(schema.type)) {
-      const out: SchemaRef = {
+      const out: SchemaData = {
         type: 'or',
         items: [],
         ...base(schema),
@@ -211,7 +211,7 @@ export function generateSchemaUI({ ctx, root }: SchemaUIOptions): SchemaUIData {
     }
 
     if (schema.oneOf) {
-      const out: SchemaRef = {
+      const out: SchemaData = {
         type: 'or',
         items: [],
         ...base(schema),
@@ -238,7 +238,7 @@ export function generateSchemaUI({ ctx, root }: SchemaUIOptions): SchemaUIData {
     }
 
     if (schema.type === 'object') {
-      const out: SchemaRef = {
+      const out: SchemaData = {
         type: 'object',
         props: [],
         ...base(schema),

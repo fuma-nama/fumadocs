@@ -14,7 +14,7 @@ import {
   TabsList,
   TabsTrigger,
 } from 'fumadocs-ui/components/tabs';
-import type { SchemaUIData } from '@/render/schema/server';
+import type { SchemaData, SchemaUIData } from '@/render/schema/server';
 import { ObjectCollapsible, Property, type PropertyProps } from './ui';
 import {
   Popover,
@@ -22,6 +22,7 @@ import {
   PopoverTrigger,
 } from 'fumadocs-ui/components/ui/popover';
 import { cn } from 'fumadocs-ui/utils/cn';
+import { cva } from 'class-variance-authority';
 
 interface DataContextType extends SchemaUIData {
   readOnly?: boolean;
@@ -29,40 +30,26 @@ interface DataContextType extends SchemaUIData {
 }
 
 interface PropertyContextType {
-  renderRef: (text: ReactNode, pathName: ReactNode, $ref: string) => ReactNode;
+  renderRef: (options: RenderRefOptions) => ReactNode;
 }
 
-const PropertyContext = createContext<PropertyContextType>({
-  renderRef(text, pathName, $ref) {
-    return (
-      <Popover>
-        <PopoverTrigger className="font-mono underline text-sm text-fd-muted-foreground hover:text-fd-accent-foreground data-[state=open]:text-fd-accent-foreground">
-          {text}
-        </PopoverTrigger>
-        <PopoverContent
-          className="w-[600px] min-h-(--initial-height,0) max-h-[460px] p-0"
-          ref={(element) => {
-            if (!element || element.style.getPropertyValue('--initial-height'))
-              return;
+interface RenderRefOptions {
+  text: ReactNode;
+  pathName: ReactNode;
+  $ref: string;
+}
 
-            element.style.setProperty(
-              '--initial-height',
-              `${element.clientHeight}px`,
-            );
-          }}
-        >
-          <SchemaUIPopover
-            initialPath={[
-              {
-                name: pathName,
-                $ref: $ref,
-              },
-            ]}
-          />
-        </PopoverContent>
-      </Popover>
-    );
+const typeVariants = cva('text-sm text-fd-muted-foreground font-mono', {
+  variants: {
+    variant: {
+      trigger:
+        'underline hover:text-fd-accent-foreground data-[state=open]:text-fd-accent-foreground',
+    },
   },
+});
+
+const PropertyContext = createContext<PropertyContextType>({
+  renderRef: (props) => <RootRef {...props} />,
 });
 
 const DataContext = createContext<DataContextType | null>(null);
@@ -100,9 +87,7 @@ export function SchemaUI({
     <SchemaUIProperty
       name={name}
       $type={$root}
-      variant={
-        as === 'property' || schema.type === 'primitive' ? 'default' : 'ghost'
-      }
+      variant={as === 'property' || !isExpandable(schema) ? 'default' : 'ghost'}
       overrides={{
         required,
       }}
@@ -174,11 +159,17 @@ function SchemaUIProperty({
       );
     } else {
       type = (
-        <span className="flex flex-row gap-2 items-center font-mono text-sm text-fd-muted-foreground">
+        <span
+          className={cn(typeVariants(), 'flex flex-row gap-2 items-center')}
+        >
           {schema.items.map((item, i) => (
             <Fragment key={item.$type}>
               {i > 0 && <span>|</span>}
-              {renderRef(item.name, name, item.$type)}
+              {renderRef({
+                pathName: name,
+                text: item.name,
+                $ref: item.$type,
+              })}
             </Fragment>
           ))}
         </span>
@@ -202,7 +193,11 @@ function SchemaUIProperty({
         </>
       );
     } else {
-      type = renderRef(schema.aliasName, name, $type);
+      type = renderRef({
+        text: schema.aliasName,
+        pathName: name,
+        $ref: $type,
+      });
     }
   }
 
@@ -222,7 +217,11 @@ function SchemaUIProperty({
         </>
       );
     } else {
-      type = renderRef(schema.aliasName, name, schema.item.$type);
+      type = renderRef({
+        text: schema.aliasName,
+        pathName: name,
+        $ref: schema.item.$type,
+      });
     }
   }
 
@@ -294,22 +293,14 @@ function SchemaUIPopover({
       <PropertyContext
         value={{
           ...ctx,
-          renderRef(text, pathName, $ref) {
-            return (
-              <button
-                className="font-mono underline text-sm text-fd-muted-foreground hover:text-fd-accent-foreground"
-                onClick={() => {
-                  const insert = {
-                    name: pathName,
-                    $ref,
-                  };
-                  setPath((path) => [...path, insert]);
-                }}
-              >
-                {text}
-              </button>
-            );
-          },
+          renderRef: (props) => (
+            <LinkRef
+              {...props}
+              onInsert={(name, $ref) => {
+                setPath((path) => [...path, { name, $ref }]);
+              }}
+            />
+          ),
         }}
       >
         <div ref={ref} className="px-2">
@@ -322,4 +313,69 @@ function SchemaUIPopover({
       </PropertyContext>
     </>
   );
+}
+
+function RootRef({ text, $ref, pathName }: RenderRefOptions) {
+  const { refs } = useData();
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+
+    element.style.setProperty('--initial-height', `${element.clientHeight}px`);
+  }, []);
+
+  if (!isExpandable(refs[$ref])) {
+    return <span className={cn(typeVariants())}>{text}</span>;
+  }
+
+  return (
+    <Popover>
+      <PopoverTrigger className={cn(typeVariants({ variant: 'trigger' }))}>
+        {text}
+      </PopoverTrigger>
+      <PopoverContent
+        ref={ref}
+        className="w-[600px] min-h-(--initial-height,0) max-h-[460px] p-0"
+      >
+        <SchemaUIPopover
+          initialPath={[
+            {
+              name: pathName,
+              $ref: $ref,
+            },
+          ]}
+        />
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function LinkRef({
+  $ref,
+  pathName,
+  onInsert,
+  text,
+}: RenderRefOptions & {
+  onInsert: (name: ReactNode, $ref: string) => void;
+}) {
+  const { refs } = useData();
+  if (!isExpandable(refs[$ref])) {
+    return <span className={cn(typeVariants())}>{text}</span>;
+  }
+
+  return (
+    <button
+      className={cn(typeVariants({ variant: 'trigger' }))}
+      onClick={() => {
+        onInsert(pathName, $ref);
+      }}
+    >
+      {text}
+    </button>
+  );
+}
+
+function isExpandable(schema: SchemaData) {
+  return schema.type !== 'primitive';
 }
