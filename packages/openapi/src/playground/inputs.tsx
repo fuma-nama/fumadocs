@@ -6,13 +6,8 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { ChevronDown, Plus, Trash2 } from 'lucide-react';
-import {
-  Controller,
-  useController,
-  useFieldArray,
-  useFormContext,
-} from 'react-hook-form';
+import { ChevronDown, Plus, Trash2, X } from 'lucide-react';
+import { useController, useFieldArray, useFormContext } from 'react-hook-form';
 import {
   Select,
   SelectContent,
@@ -252,98 +247,98 @@ export function FieldInput({
   isRequired?: boolean;
   fieldName: string;
 }) {
-  const { control, register } = useFormContext();
+  const { control } = useFormContext();
+  const {
+    field: { value, onChange, ...restField },
+  } = useController({
+    control,
+    name: fieldName,
+  });
 
   if (field.type === 'string' && field.format === 'binary') {
     return (
-      <Controller
-        control={control}
-        name={fieldName}
-        render={({ field: { value, onChange, ...restField } }) => (
-          <div {...props}>
-            <label
-              htmlFor={fieldName}
-              className={cn(
-                buttonVariants({
-                  color: 'secondary',
-                  className: 'w-full h-9 gap-2 truncate',
-                }),
-              )}
-            >
-              {value instanceof File ? (
-                <>
-                  <span className="text-fd-muted-foreground text-xs">
-                    Selected
-                  </span>
-                  <span className="truncate w-0 flex-1 text-end">
-                    {value.name}
-                  </span>
-                </>
-              ) : (
-                <span className="text-fd-muted-foreground">Upload</span>
-              )}
-            </label>
-            <input
-              id={fieldName}
-              type="file"
-              multiple={false}
-              onChange={(e) => {
-                if (!e.target.files) return;
-                onChange(e.target.files.item(0));
-              }}
-              hidden
-              {...restField}
-            />
-          </div>
-        )}
-      />
+      <div {...props}>
+        <label
+          htmlFor={fieldName}
+          className={cn(
+            buttonVariants({
+              color: 'secondary',
+              className: 'w-full h-9 gap-2 truncate',
+            }),
+          )}
+        >
+          {value instanceof File ? (
+            <>
+              <span className="text-fd-muted-foreground text-xs">Selected</span>
+              <span className="truncate w-0 flex-1 text-end">{value.name}</span>
+            </>
+          ) : (
+            <span className="text-fd-muted-foreground">Upload</span>
+          )}
+        </label>
+        <input
+          id={fieldName}
+          type="file"
+          multiple={false}
+          onChange={(e) => {
+            if (!e.target.files) return;
+            onChange(e.target.files.item(0));
+          }}
+          hidden
+          {...restField}
+        />
+      </div>
     );
   }
 
   if (field.type === 'boolean') {
     return (
-      <Controller
-        control={control}
-        name={fieldName}
-        render={({ field: { value, onChange, ...restField } }) => (
-          <Select
-            value={String(value)}
-            onValueChange={(value) =>
-              onChange(value === 'null' ? null : value === 'true')
-            }
-            disabled={restField.disabled}
-          >
-            <SelectTrigger
-              id={fieldName}
-              className={props.className}
-              {...restField}
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="true">True</SelectItem>
-              <SelectItem value="false">False</SelectItem>
-              {!isRequired && <SelectItem value="null">Null</SelectItem>}
-            </SelectContent>
-          </Select>
-        )}
-      />
+      <Select
+        value={String(value)}
+        onValueChange={(value) =>
+          onChange(value === 'null' ? null : value === 'true')
+        }
+        disabled={restField.disabled}
+      >
+        <SelectTrigger
+          id={fieldName}
+          className={props.className}
+          {...restField}
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="true">True</SelectItem>
+          <SelectItem value="false">False</SelectItem>
+          {!isRequired && <SelectItem value="null">Null</SelectItem>}
+        </SelectContent>
+      </Select>
     );
   }
 
   if (field.type === 'null') return;
 
   return (
-    <Input
-      id={fieldName}
-      placeholder="Enter value"
-      type={field.type === 'string' ? 'text' : 'number'}
-      step={field.type === 'number' ? 'any' : undefined}
-      {...register(fieldName, {
-        valueAsNumber: field.type === 'number' || field.type === 'integer',
-      })}
-      {...props}
-    />
+    <div {...props} className={cn('flex flex-row gap-2', props.className)}>
+      <Input
+        id={fieldName}
+        placeholder="Enter value"
+        type={field.type === 'string' ? 'text' : 'number'}
+        step={field.type === 'number' ? 'any' : undefined}
+        value={value ?? ''}
+        onChange={onChange}
+        {...restField}
+      />
+      {!isRequired && value !== undefined && (
+        <button
+          type="button"
+          onClick={() => onChange(undefined)}
+          className="text-fd-muted-foreground"
+        >
+          <X className="size-4" />
+        </button>
+      )}
+    </div>
   );
 }
 

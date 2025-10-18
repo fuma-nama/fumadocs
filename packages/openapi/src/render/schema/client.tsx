@@ -1,5 +1,13 @@
 'use client';
-import { createContext, Fragment, type ReactNode, use, useState } from 'react';
+import {
+  createContext,
+  Fragment,
+  type ReactNode,
+  use,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import {
   Tabs,
   TabsContent,
@@ -31,7 +39,18 @@ const PropertyContext = createContext<PropertyContextType>({
         <PopoverTrigger className="font-mono underline text-sm text-fd-muted-foreground hover:text-fd-accent-foreground data-[state=open]:text-fd-accent-foreground">
           {text}
         </PopoverTrigger>
-        <PopoverContent className="w-[600px] h-[400px] p-0">
+        <PopoverContent
+          className="w-[600px] min-h-(--initial-height,0) max-h-[460px] p-0"
+          ref={(element) => {
+            if (!element || element.style.getPropertyValue('--initial-height'))
+              return;
+
+            element.style.setProperty(
+              '--initial-height',
+              `${element.clientHeight}px`,
+            );
+          }}
+        >
           <SchemaUIPopover
             initialPath={[
               {
@@ -145,6 +164,7 @@ function SchemaUIProperty({
                 key={item.$type}
                 value={item.$type}
                 forceMount={undefined}
+                className="py-0"
               >
                 <SchemaUIProperty variant="ghost" {...item} />
               </TabsContent>
@@ -227,7 +247,16 @@ function SchemaUIPopover({
 }) {
   const ctx = useProperty();
   const [path, setPath] = useState(initialPath);
+  const ref = useRef<HTMLDivElement>(null);
   const last = path.findLast((item) => item.$ref !== undefined);
+
+  useEffect(() => {
+    const element = ref.current;
+    if (!element || !element.parentElement) return;
+
+    // reset scroll
+    element.parentElement.scrollTop = 0;
+  }, [last?.$ref]);
 
   if (!last) return;
 
@@ -283,7 +312,7 @@ function SchemaUIPopover({
           },
         }}
       >
-        <div key={last.$ref} className="px-2">
+        <div ref={ref} className="px-2">
           <SchemaUIProperty
             name={last.name}
             $type={last.$ref!}
