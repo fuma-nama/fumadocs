@@ -298,7 +298,7 @@ async function ResponseAccordion({
     <SelectTabs defaultValue={contentTypes?.[0][0]}>
       <AccordionHeader>
         <AccordionTrigger className="font-mono">{status}</AccordionTrigger>
-        {contentTypes && (
+        {contentTypes && contentTypes.length > 0 && (
           <SelectTabTrigger items={contentTypes.map((v) => v[0])} />
         )}
       </AccordionHeader>
