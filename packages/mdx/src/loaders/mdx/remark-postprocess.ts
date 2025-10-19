@@ -3,6 +3,7 @@ import type { Root, RootContent } from 'mdast';
 import { visit } from 'unist-util-visit';
 import { toMarkdown } from 'mdast-util-to-markdown';
 import { valueToEstree } from 'estree-util-value-to-estree';
+import { removePosition } from 'unist-util-remove-position';
 
 export interface ExtractedReference {
   href: string;
@@ -18,6 +19,15 @@ export interface PostprocessOptions {
    * stringify MDAST and export via `_markdown`.
    */
   includeProcessedMarkdown?: boolean;
+
+  /**
+   * store MDAST and export via `_mdast`.
+   */
+  includeMDAST?:
+    | boolean
+    | {
+        removePosition?: boolean;
+      };
 }
 
 /**
@@ -28,6 +38,7 @@ export function remarkPostprocess(
   this: Processor,
   {
     includeProcessedMarkdown = false,
+    includeMDAST = false,
     valueToExport = [],
   }: PostprocessOptions = {},
 ): Transformer<Root, Root> {
@@ -63,6 +74,14 @@ export function remarkPostprocess(
         // from https://github.com/remarkjs/remark/blob/main/packages/remark-stringify/lib/index.js
         extensions: this.data('toMarkdownExtensions') || [],
       });
+    }
+
+    if (includeMDAST) {
+      const options = includeMDAST === true ? {} : includeMDAST;
+
+      file.data._mdast = JSON.stringify(
+        options.removePosition ? removePosition(structuredClone(tree)) : tree,
+      );
     }
 
     for (const { name, value } of file.data['mdx-export'] ?? []) {

@@ -5,10 +5,10 @@ import { buildMDX, CompiledMDXProperties } from '@/loaders/mdx/build-mdx';
 import type { ProcessorOptions } from '@mdx-js/mdx';
 import { executeMdx } from '@fumadocs/mdx-remote/client';
 import { pathToFileURL } from 'node:url';
-import { type DocData, missingProcessedMarkdown } from '@/runtime/shared';
+import { createDocMethods, type DocData } from '@/runtime/shared';
 import type { DocCollection } from '@/config';
-import { readFileWithCache } from '@/next/map/file-cache';
 import { fumaMatter } from '@/utils/fuma-matter';
+import fs from 'node:fs/promises';
 
 function getDocCollection(config: LoadedConfig, collection: string) {
   const col = config.collections.get(collection);
@@ -36,7 +36,8 @@ export const _runtimeAsync: RuntimeAsync = {
       async function compileAndLoad() {
         if (cachedResult) return cachedResult;
         const mdxOptions = await initMdxOptions;
-        const raw = await readFileWithCache(info.fullPath);
+        const raw = (await fs.readFile(info.fullPath)).toString();
+
         const { content } = fumaMatter(raw);
         const compiled = await buildMDX(collectionName, content, {
           ...mdxOptions,
@@ -57,16 +58,7 @@ export const _runtimeAsync: RuntimeAsync = {
 
       return {
         ...data,
-        info,
-        async getText(type) {
-          if (type === 'raw') {
-            return readFileWithCache(info.fullPath);
-          }
-
-          const out = await compileAndLoad();
-          if (typeof out._markdown !== 'string') missingProcessedMarkdown();
-          return out._markdown;
-        },
+        ...createDocMethods(info, () => compileAndLoad()),
         async load() {
           const out = await compileAndLoad();
 

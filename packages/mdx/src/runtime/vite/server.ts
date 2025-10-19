@@ -15,13 +15,12 @@ import {
 import * as path from 'node:path';
 import {
   type AsyncDocCollectionEntry,
+  createDocMethods,
   type DocCollectionEntry,
   type DocData,
   type FileInfo,
   type MetaCollectionEntry,
-  missingProcessedMarkdown,
 } from '@/runtime/shared';
-import fs from 'node:fs/promises';
 
 export * from './base';
 
@@ -73,16 +72,8 @@ export function fromConfig<Config>(): ServerCreate<Config> {
   ): DocCollectionEntry<Frontmatter> {
     return {
       ...mapDocData(entry),
-      info,
-      async getText(type) {
-        if (type === 'raw') {
-          return (await fs.readFile(info.fullPath)).toString();
-        }
-
-        if (typeof entry._markdown !== 'string') missingProcessedMarkdown();
-        return entry._markdown;
-      },
       ...entry.frontmatter,
+      ...createDocMethods(info, async () => entry),
     };
   }
 
@@ -93,18 +84,9 @@ export function fromConfig<Config>(): ServerCreate<Config> {
   ): AsyncDocCollectionEntry<Frontmatter> {
     return {
       ...head,
-      info,
+      ...createDocMethods(info, content),
       async load() {
         return mapDocData(await content());
-      },
-      async getText(type) {
-        if (type === 'raw') {
-          return (await fs.readFile(info.fullPath)).toString();
-        }
-
-        const entry = await content();
-        if (typeof entry._markdown !== 'string') missingProcessedMarkdown();
-        return entry._markdown;
       },
     };
   }

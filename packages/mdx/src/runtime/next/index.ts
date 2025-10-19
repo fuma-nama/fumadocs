@@ -6,17 +6,14 @@ import {
 } from 'fumadocs-core/source';
 import type { DocOut, MetaOut, Runtime } from './types';
 import type { CompiledMDXProperties } from '@/loaders/mdx/build-mdx';
-import * as fs from 'node:fs/promises';
-import { type FileInfo, missingProcessedMarkdown } from '@/runtime/shared';
+import { createDocMethods, type FileInfo } from '@/runtime/shared';
 
 export const _runtime: Runtime = {
   doc(files) {
     return files.map((file) => {
       const data = file.data as unknown as CompiledMDXProperties;
-      const filePath = file.info.fullPath;
 
       return {
-        info: file.info,
         _exports: data as unknown as Record<string, unknown>,
         body: data.default,
         lastModified: data.lastModified,
@@ -24,14 +21,7 @@ export const _runtime: Runtime = {
         structuredData: data.structuredData,
         extractedReferences: data.extractedReferences,
         ...data.frontmatter,
-        async getText(type) {
-          if (type === 'raw') {
-            return (await fs.readFile(filePath)).toString();
-          }
-
-          if (typeof data._markdown !== 'string') missingProcessedMarkdown();
-          return data._markdown;
-        },
+        ...createDocMethods(file.info, () => Promise.resolve(data)),
       } satisfies DocOut;
     }) as any;
   },

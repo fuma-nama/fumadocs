@@ -48,6 +48,7 @@ export interface CompiledMDXProperties<Frontmatter = Record<string, unknown>> {
   lastModified?: Date;
   extractedReferences?: ExtractedReference[];
   _markdown?: string;
+  _mdast?: string;
 }
 
 export interface FumadocsDataMap {
@@ -115,6 +116,7 @@ export async function buildMDX(
                 'frontmatter',
                 'lastModified',
                 '_markdown',
+                '_mdast',
               ],
             } satisfies PostprocessOptions,
           ],
