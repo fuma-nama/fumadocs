@@ -4,12 +4,15 @@ import { visit } from 'unist-util-visit';
 import { toMarkdown } from 'mdast-util-to-markdown';
 import { valueToEstree } from 'estree-util-value-to-estree';
 import { removePosition } from 'unist-util-remove-position';
+import remarkMdx from 'remark-mdx';
 
 export interface ExtractedReference {
   href: string;
 }
 
 export interface PostprocessOptions {
+  _format: 'md' | 'mdx';
+
   /**
    * Properties to export from `vfile.data`
    */
@@ -37,11 +40,20 @@ export interface PostprocessOptions {
 export function remarkPostprocess(
   this: Processor,
   {
+    _format,
     includeProcessedMarkdown = false,
     includeMDAST = false,
     valueToExport = [],
-  }: PostprocessOptions = {},
+  }: PostprocessOptions,
 ): Transformer<Root, Root> {
+  let _stringifyProcessor: Processor | undefined;
+  const getStringifyProcessor = () => {
+    if (_format === 'mdx') return this;
+
+    // force Markdown processor to stringify MDX nodes
+    return (_stringifyProcessor ??= this().use(remarkMdx).freeze());
+  };
+
   return (tree, file) => {
     let title: string | undefined;
     const urls: ExtractedReference[] = [];
@@ -69,10 +81,12 @@ export function remarkPostprocess(
     file.data.extractedReferences = urls;
 
     if (includeProcessedMarkdown) {
+      const processor = getStringifyProcessor();
+
       file.data._markdown = toMarkdown(tree, {
-        ...this.data('settings'),
+        ...processor.data('settings'),
         // from https://github.com/remarkjs/remark/blob/main/packages/remark-stringify/lib/index.js
-        extensions: this.data('toMarkdownExtensions') || [],
+        extensions: processor.data('toMarkdownExtensions') || [],
       });
     }
 

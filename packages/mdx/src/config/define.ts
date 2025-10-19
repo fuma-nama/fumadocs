@@ -38,7 +38,7 @@ export interface DocCollection<
 > extends BaseCollection {
   type: 'doc';
 
-  postprocess?: PostprocessOptions;
+  postprocess?: Partial<PostprocessOptions>;
   mdxOptions?: ProcessorOptions;
 
   /**

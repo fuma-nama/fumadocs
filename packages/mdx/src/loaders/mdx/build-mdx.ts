@@ -29,7 +29,7 @@ interface BuildMDXOptions extends ProcessorOptions {
   data?: Record<string, unknown>;
 
   _compiler?: CompilerOptions;
-  postprocess?: PostprocessOptions;
+  postprocess?: Partial<PostprocessOptions>;
 }
 
 export interface CompilerOptions {
@@ -108,6 +108,7 @@ export async function buildMDX(
           [
             remarkPostprocess,
             {
+              _format: format,
               ...options.postprocess,
               valueToExport: [
                 ...(options.postprocess?.valueToExport ?? []),
