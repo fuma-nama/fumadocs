@@ -290,16 +290,19 @@ async function ResponseAccordion({
 }) {
   const response = operation.responses![status];
   const { generateTypeScriptSchema } = ctx;
-  const contentTypes = response.content
-    ? Object.entries(response.content)
-    : null;
+  const contentTypes = response.content ? Object.entries(response.content) : [];
 
   return (
-    <SelectTabs defaultValue={contentTypes?.[0][0]}>
+    <SelectTabs defaultValue={contentTypes.at(0)?.[0]}>
       <AccordionHeader>
         <AccordionTrigger className="font-mono">{status}</AccordionTrigger>
-        {contentTypes && contentTypes.length > 1 && (
+        {contentTypes.length > 1 && (
           <SelectTabTrigger items={contentTypes.map((v) => v[0])} />
+        )}
+        {contentTypes.length === 1 && (
+          <p className="text-[13px] text-fd-muted-foreground">
+            {contentTypes[0][0]}
+          </p>
         )}
       </AccordionHeader>
 
