@@ -16,9 +16,21 @@ You can see examples to use Fumadocs with a CMS, which allows a nice experience 
 - [Community: Payload CMS by `MFarabi619`](https://github.com/MFarabi619/fumadocs-payloadcms)
 - [Community: Payload CMS by `bapspatil`](https://github.com/bapspatil/fumadocs-payload-template)
 
-For a custom content source implementation, you will need:
+## Building Content Source
 
-### Page Tree
+For a custom content source implementation, there's two ways:
+
+### Using Loader API
+
+Loader API has a file-system-like interface for integrating different content sources.
+
+See [Loader API `source`](/docs/headless/source-api/source) for details.
+
+### Using Low-Level API
+
+For more robust control, you can use lower level APIs directly.
+
+#### 1. Page Tree
 
 You can either hardcode the page tree, or write some code to generate one.
 See [Definitions of Page Tree](/docs/headless/page-tree).
@@ -47,19 +59,15 @@ export default function Layout({ children }: { children: ReactNode }) {
 
 The page tree is like a smarter "sidebar items", they will be referenced everywhere in the UI for navigation elements, such as the page footer.
 
-### Docs Page
+#### 2. Page Content
 
 For docs page, it's the same logic:
 
 - Define path params (`slugs`).
 - Fetch page content from path params.
-- Render the content.
+- Render the content (inside the `DocsPage` component).
 
-#### Body
-
-In the main body of page, find the corresponding page according to the slug and render its content inside the `DocsPage` component.
-
-You also need table of contents, which can be generated with your own implementation, or using the [`getTableOfContents`](/docs/headless/utils/get-toc) utility (Markdown/MDX only).
+You may need table of contents, which can be generated on your own, or using the [`getTableOfContents`](/docs/headless/utils/get-toc) utility (Markdown/MDX only).
 
 ```tsx
 import { DocsPage, DocsBody } from 'fumadocs-ui/page';
@@ -78,7 +86,7 @@ export default function Page({ params }: { params: { slug?: string[] } }) {
 }
 ```
 
-### Pre-rendering
+#### 3. Pre-rendering
 
 The mechanism for pre-rendering differs depending on your React.js framework.
 
@@ -107,14 +115,14 @@ start -> git clone
 /docs/my-page -> read file
 ```
 
-### Document Search
+#### 4. Document Search
 
 This can be difficult considering your content may not be necessarily Markdown/MDX.
-For Markdown and MDX, the built-in [Search API](/docs/headless/search/orama) is adequate for most use cases.
+For Markdown and MDX, the built-in [Search API](/docs/headless/search/orama) + search index usage is adequate for most use cases.
 Otherwise, you will have to bring your own implementation.
 
 We recommend 3rd party solutions like Orama or Algolia Search. They are more flexible than the built-in Search API, and is easier to integrate with remote sources.
-Fumadocs offers a simple [Algolia Search Adapter](/docs/headless/search/algolia), which includes a search client to integrate with Fumadocs UI.
+Fumadocs offers a variant of [Search Integrations](/docs/headless/search).
 
 ## MDX Remote
 
