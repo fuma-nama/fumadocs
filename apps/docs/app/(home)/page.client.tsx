@@ -151,7 +151,7 @@ export function PreviewImages(props: ComponentProps<'div'>) {
   ];
 
   return (
-    <div {...props} className={cn('relative', props.className)}>
+    <div {...props} className={cn('relative grid', props.className)}>
       <div className="absolute flex flex-row left-1/2 -translate-1/2 bottom-0 z-2 p-0.5 rounded-full bg-fd-card border shadow-xl">
         <div
           role="none"
@@ -176,8 +176,10 @@ export function PreviewImages(props: ComponentProps<'div'>) {
           src={item.image}
           alt="preview"
           className={cn(
-            'w-full select-none duration-1000 animate-in fade-in slide-in-from-bottom-12',
-            active !== i && 'hidden',
+            'col-start-1 row-start-1 select-none',
+            active === i
+              ? 'animate-in fade-in slide-in-from-bottom-12 duration-800'
+              : 'invisible',
           )}
         />
       ))}

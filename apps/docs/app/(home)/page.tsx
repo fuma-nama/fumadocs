@@ -4,7 +4,6 @@ import { Tinos } from 'next/font/google';
 import { cn } from '@/lib/cn';
 import Link from 'next/link';
 import ComponentsImage from './components.png';
-import OpenSourceImage from './open-source.png';
 import ContentImage from './content.png';
 import { cva } from 'class-variance-authority';
 import {
@@ -437,6 +436,12 @@ function ForEngineers() {
         Docs For Engineers.
       </h2>
       <div className="grid grid-cols-subgrid gap-4">
+        <Image
+          src={ComponentsImage}
+          alt="Framework Agnostic"
+          width={1200}
+          className="min-w-0 rounded-2xl object-cover pointer-events-none shadow-lg"
+        />
         <div className={cn(cardVariants())}>
           <h3
             className={cn(
@@ -453,12 +458,6 @@ function ForEngineers() {
             portable to any React.js framework.
           </p>
         </div>
-        <Image
-          src={ComponentsImage}
-          alt="Framework Agnostic"
-          width={1200}
-          className="min-w-0 rounded-2xl object-cover pointer-events-none shadow-lg"
-        />
       </div>
       <div
         className={cn(
@@ -681,11 +680,7 @@ function OpenSource() {
         A Framework of Dream.
       </h2>
 
-      <div
-        className={cn(
-          cardVariants({ className: 'flex flex-col col-span-full' }),
-        )}
-      >
+      <div className={cn(cardVariants({ className: 'flex flex-col' }))}>
         <Heart fill="currentColor" className="text-pink-500 mb-4" />
         <h3
           className={cn(
@@ -717,12 +712,6 @@ function OpenSource() {
         </div>
         <ContributorCounter repoOwner={owner} repoName={repo} />
       </div>
-      <Image
-        alt="open-source"
-        src={OpenSourceImage}
-        width={1000}
-        className="min-w-0 rounded-2xl border shadow-lg"
-      />
       <div
         className={cn(
           cardVariants({
@@ -736,7 +725,7 @@ function OpenSource() {
         <p className="text-center font-mono text-xs opacity-50 mb-8">
           light and gorgeous, just like the moon.
         </p>
-        <div className="h-[200px] overflow-hidden p-8 bg-gradient-to-b from-fd-primary/10">
+        <div className="h-[200px] mt-auto overflow-hidden p-8 bg-gradient-to-b from-fd-primary/10">
           <div className="mx-auto bg-radial-[circle_at_0%_100%] from-60% from-transparent to-fd-primary size-[500px] rounded-full" />
         </div>
       </div>
