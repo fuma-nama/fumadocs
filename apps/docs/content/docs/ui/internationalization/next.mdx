@@ -106,6 +106,7 @@ Add `locale` parameter to `baseOptions()` and add `i18n` into it:
 import { i18n } from '@/lib/i18n';
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 
+// [!code highlight]
 export function baseOptions(locale: string): BaseLayoutProps {
   return {
     i18n, // [!code ++]

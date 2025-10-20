@@ -22,7 +22,6 @@ import { getPageTreePeers } from 'fumadocs-core/page-tree';
 import { Card, Cards } from 'fumadocs-ui/components/card';
 import { getMDXComponents } from '@/mdx-components';
 import { LLMCopyButton, ViewOptions } from '@/components/ai/page-actions';
-import * as path from 'node:path';
 import { Banner } from 'fumadocs-ui/components/banner';
 import { Installation } from '@/components/preview/installation';
 import { Customisation } from '@/components/preview/customisation';
@@ -30,6 +29,7 @@ import { DocsBody, DocsPage } from 'fumadocs-ui/page';
 import { NotFound } from '@/components/not-found';
 import { getSuggestions } from '@/app/docs/[...slug]/suggestions';
 import { APIPage } from 'fumadocs-openapi/ui';
+import { PathUtils } from 'fumadocs-core/source';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -93,7 +93,7 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
             ...Twoslash,
             a: ({ href, ...props }) => {
               const found = source.getPageByHref(href ?? '', {
-                dir: path.dirname(page.path),
+                dir: PathUtils.dirname(page.path),
               });
 
               if (!found) return <Link href={href} {...props} />;
