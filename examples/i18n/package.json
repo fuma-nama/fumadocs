@@ -8,7 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
-    "@orama/tokenizers": "^3.1.15",
+    "@orama/tokenizers": "^3.1.16",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
@@ -19,7 +19,7 @@
   "devDependencies": {
     "@types/mdx": "^2.0.13",
     "@types/react": "^19.2.2",
-    "@types/react-dom": "^19.2.1",
+    "@types/react-dom": "^19.2.2",
     "typescript": "^5.9.3"
   }
 }
