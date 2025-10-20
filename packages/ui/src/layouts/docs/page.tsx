@@ -20,6 +20,7 @@ import type { AnchorProviderProps } from 'fumadocs-core/toc';
 export function PageTOCTitle(props: ComponentProps<'h2'>) {
   return (
     <h3
+      id="toc-title"
       {...props}
       className={cn(
         'inline-flex items-center gap-1.5 text-sm text-fd-muted-foreground',
