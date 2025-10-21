@@ -13,7 +13,7 @@ async function start() {
     const { postInstall } = await import('./next');
     await postInstall(configPath);
   } else {
-    const { postInstall } = await import('./vite/postinstall');
+    const { postInstall } = await import('./vite');
     await postInstall(configPath);
   }
 }

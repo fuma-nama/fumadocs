@@ -4,7 +4,7 @@ import { glob } from 'tinyglobby';
 import type { LoadedConfig } from '@/loaders/config';
 import type { DocCollection, MetaCollection } from '@/config';
 import { validate } from '@/utils/validation';
-import { readFileWithCache } from '@/next/map/file-cache';
+import { readFileWithCache } from '@/next/file-cache';
 import { load } from 'js-yaml';
 import { getGitTimestamp } from '@/utils/git-timestamp';
 import { fumaMatter } from '@/utils/fuma-matter';
@@ -15,8 +15,29 @@ import {
 } from '@/utils/import-formatter';
 import { getGlobPatterns, isFileSupported } from '@/utils/collections';
 import type { FileInfo } from '@/runtime/shared';
+import type { Plugin } from '@/plugins/index';
 
-export async function generateJS(
+export default function next(): Plugin {
+  let config: LoadedConfig;
+
+  return {
+    config(v) {
+      config = v;
+    },
+    async emit() {
+      return [
+        {
+          path: 'index.ts',
+          content: await indexFile(this.configPath, config, {
+            relativeTo: this.outDir,
+          }),
+        },
+      ];
+    },
+  };
+}
+
+export async function indexFile(
   configPath: string,
   config: LoadedConfig,
   importPath: ImportPathConfig,

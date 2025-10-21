@@ -7,13 +7,13 @@ import {
 import { buildConfig } from '@/config/build';
 import { parse } from 'node:querystring';
 import { validate, ValidationError } from '@/utils/validation';
-import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { load } from 'js-yaml';
-import { entry, type IndexFileOptions } from '@/vite/generate';
 import { createMdxLoader } from '@/loaders/mdx';
-import { resolvedConfig } from '@/loaders/config';
+import { findConfigFile, resolvedConfig } from '@/loaders/config';
 import { toVite } from '@/loaders/adapter';
+import vite, { type IndexFileOptions } from '@/plugins/vite';
+import { createPluginHandler } from '@/plugins';
 
 const FumadocsDeps = ['fumadocs-core', 'fumadocs-ui', 'fumadocs-openapi'];
 
@@ -36,21 +36,24 @@ export interface PluginOptions {
    * @defaultValue true
    */
   updateViteConfig?: boolean;
+
+  /**
+   * Output directory of generated files
+   *
+   * @defaultValue '.source'
+   */
+  outDir?: string;
 }
 
-export * from './postinstall';
-
-export default function mdx(
+export default async function mdx(
   config: Record<string, unknown>,
-  options: PluginOptions = {},
-): Plugin {
-  const {
-    generateIndexFile = true,
-    updateViteConfig = true,
-    configPath = 'source.config.ts',
-  } = options;
-  const loaded = buildConfig(config);
+  pluginOptions: PluginOptions = {},
+): Promise<Plugin> {
+  const options = applyDefaults(pluginOptions);
+  const { updateViteConfig } = options;
+  const pluginHandler = createVitePluginHandler(options);
 
+  const loaded = await pluginHandler.init(buildConfig(config));
   const mdxLoader = toVite(createMdxLoader(resolvedConfig(loaded)));
 
   async function transformMeta(
@@ -118,17 +121,8 @@ export default function mdx(
       } satisfies UserConfig);
     },
     async buildStart() {
-      let indexFileOptions = generateIndexFile;
-      if (!indexFileOptions) return;
-      if (typeof indexFileOptions !== 'object') indexFileOptions = {};
-
-      const { out = 'source.generated.ts' } = indexFileOptions;
-
-      console.log('[Fumadocs MDX] Generating index files');
-      await fs.mkdir(path.dirname(out), { recursive: true });
-      await fs.writeFile(out, entry(configPath, loaded, indexFileOptions));
+      await pluginHandler.emitAndWrite();
     },
-
     async transform(value, id) {
       const [file, query = ''] = id.split('?');
       const ext = path.extname(file);
@@ -147,5 +141,48 @@ export default function mdx(
         throw e;
       }
     },
+  };
+}
+
+export async function postInstall(
+  configPath = findConfigFile(),
+  pluginOptions: PluginOptions = {},
+) {
+  const { loadConfig } = await import('@/loaders/config/load');
+  const options = applyDefaults(pluginOptions);
+  const pluginHandler = createVitePluginHandler(options);
+
+  await pluginHandler.init(
+    await loadConfig(configPath, options.outDir, undefined, true),
+  );
+
+  await pluginHandler.emitAndWrite();
+  console.log('[MDX] types generated');
+}
+
+function createVitePluginHandler({
+  configPath,
+  outDir,
+  generateIndexFile,
+}: Required<PluginOptions>) {
+  return createPluginHandler(
+    {
+      environment: 'vite',
+      configPath,
+      outDir,
+    },
+    [
+      generateIndexFile !== false &&
+        vite(typeof generateIndexFile === 'object' ? generateIndexFile : {}),
+    ],
+  );
+}
+
+function applyDefaults(options: PluginOptions): Required<PluginOptions> {
+  return {
+    updateViteConfig: options.updateViteConfig ?? true,
+    generateIndexFile: options.generateIndexFile ?? true,
+    configPath: options.configPath ?? 'source.config.ts',
+    outDir: options.outDir ?? '.source',
   };
 }

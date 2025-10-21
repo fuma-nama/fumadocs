@@ -3,9 +3,9 @@ import * as path from 'node:path';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 import { ValidationError } from '@/utils/validation';
-import { generateJS } from '@/next/map/generate';
 import { defineCollections } from '@/config';
 import { fumaMatter } from '@/utils/fuma-matter';
+import { indexFile } from '@/plugins/next';
 
 test('format errors', async () => {
   const schema = z.object({
@@ -62,7 +62,7 @@ const cases = [
 
 for (const { name, collection } of cases) {
   test(`generate JS index file: ${name}`, async () => {
-    const out = await generateJS(
+    const out = await indexFile(
       path.join(baseDir, './fixtures/config.ts'),
       {
         // @ts-expect-error -- test file

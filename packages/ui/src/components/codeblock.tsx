@@ -255,7 +255,6 @@ export function CodeBlockTabsTrigger({
   );
 }
 
-// TODO: currently Vite RSC plugin has problem with `asChild` due to children is automatically wrapped in <Fragment />, maybe revisit this in future
 export function CodeBlockTab(props: ComponentProps<typeof TabsContent>) {
   return <TabsContent {...props} />;
 }

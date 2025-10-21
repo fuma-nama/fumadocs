@@ -7,11 +7,11 @@ import type {
 import { ident, toImportPath } from '@/utils/import-formatter';
 import type { LoadedConfig } from '@/loaders/config';
 import { getGlobPatterns } from '@/utils/collections';
-import path from 'node:path';
 import {
   generateGlobImport,
   type GlobImportOptions,
 } from '@/utils/glob-import';
+import type { Plugin } from '@/plugins';
 
 export interface IndexFileOptions {
   /**
@@ -22,31 +22,39 @@ export interface IndexFileOptions {
    * - `false` (default): no fallback.
    */
   runtime?: 'bun' | 'node' | false;
-
-  /**
-   * Output index file path
-   *
-   * @defaultValue 'source.generated.ts'
-   */
-  out?: string;
-
   /**
    * add `.js` extensions to imports, needed for ESM without bundler resolution
    */
   addJsExtension?: boolean;
 }
 
-export function entry(
+export default function vite(options: IndexFileOptions): Plugin {
+  let config: LoadedConfig;
+
+  return {
+    config(v) {
+      config = v;
+    },
+    emit() {
+      console.log('[Fumadocs MDX] Generating index files');
+
+      return [
+        {
+          path: 'index.ts',
+          content: indexFile(this.configPath, this.outDir, config, options),
+        },
+      ];
+    },
+  };
+}
+
+function indexFile(
   configPath: string,
+  outDir: string,
   config: LoadedConfig,
   options: IndexFileOptions,
 ) {
-  const {
-    out = 'source.generated.ts',
-    addJsExtension = false,
-    runtime,
-  } = options;
-  const outDir = path.dirname(out);
+  const { addJsExtension = false, runtime } = options;
 
   const lines = [
     '/// <reference types="vite/client" />',
