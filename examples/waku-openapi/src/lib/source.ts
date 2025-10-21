@@ -1,5 +1,5 @@
 import { loader } from 'fumadocs-core/source';
-import { create, docs } from '../../source.generated.js';
+import { create, docs } from '@/.source';
 import { openapiPlugin } from 'fumadocs-openapi/server';
 
 export const source = loader({

@@ -25,6 +25,8 @@ Add the Vite plugin:
   ../../examples/react-router/vite.config.ts
 </include>
 
+<include>./.shared.mdx</include>
+
 ### Integrate with Fumadocs
 
 To integrate with Fumadocs, make a `lib/source.ts` file:
@@ -33,7 +35,7 @@ To integrate with Fumadocs, make a `lib/source.ts` file:
   ../../examples/react-router/app/lib/source.ts
 </include>
 
-The `source.generated.ts` file will be generated when you run development server or production build.
+The `.source` folder will be generated when you run development server or production build.
 
 ### Done
 
@@ -52,7 +54,7 @@ For example:
 ```tsx
 import type { Route } from './+types/page';
 import { source } from '@/lib/source';
-import { docs } from '../../source.generated';
+import { docs } from '@/.source';
 import { toClientRenderer } from 'fumadocs-mdx/runtime/vite';
 
 export async function loader({ params }: Route.LoaderArgs) {
@@ -80,11 +82,4 @@ export default function Page(props: Route.ComponentProps) {
 
   return <Content />;
 }
-```
-
-Note that you can import the `source.generated.ts` file directly, it's useful to access compiled content without `loader()`.
-
-```ts
-import { docs } from './source.generated';
-console.log(docs);
 ```

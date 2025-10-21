@@ -25,13 +25,15 @@ Add the Vite plugin:
   ../../examples/tanstack-start/vite.config.ts
 </include>
 
+<include>./.shared.mdx</include>
+
 ### Integrate with Fumadocs
 
 To integrate with Fumadocs, create a `lib/source.ts` file:
 
 ```ts title="src/lib/source.ts"
 import { loader } from 'fumadocs-core/source';
-import { create, docs } from '../../source.generated';
+import { create, docs } from '@/.source';
 
 export const source = loader({
   source: await create.sourceAsync(docs.doc, docs.meta),
@@ -39,7 +41,7 @@ export const source = loader({
 });
 ```
 
-The `source.generated.ts` file will be generated when you run development server or production build.
+The `.source` folder will be generated when you run development server or production build.
 
 ### Done
 
@@ -59,7 +61,7 @@ For example:
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
 import { source } from '@/lib/source';
-import { docs } from '../../../source.generated';
+import { docs } from '@/.source';
 import { createClientLoader } from 'fumadocs-mdx/runtime/vite';
 
 export const Route = createFileRoute('/docs/$')({
@@ -103,10 +105,3 @@ function Page() {
   return <Content />;
 }
 ```
-
-> As you see, the `source.generated.ts` file can be imported directly:
->
-> ```ts
-> import { docs } from './source.generated';
-> console.log(docs);
-> ```

@@ -16,7 +16,8 @@
     "baseUrl": ".",
     "types": ["vite/client"],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@/.source": [".source"]
     },
     "noEmit": true
   }

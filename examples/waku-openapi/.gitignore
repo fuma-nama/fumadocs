@@ -2,6 +2,6 @@
 /node_modules/
 
 dist
-source.generated.ts
+.source
 src/pages.gen.ts
 content/docs/(generated)/

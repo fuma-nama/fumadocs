@@ -12,6 +12,7 @@ import {
   type GlobImportOptions,
 } from '@/utils/glob-import';
 import type { Plugin } from '@/plugins';
+import path from 'node:path';
 
 export interface IndexFileOptions {
   /**
@@ -67,10 +68,6 @@ function indexFile(
     `export const create = fromConfig<typeof Config>();`,
   ];
 
-  if (runtime === 'bun') {
-    lines.push(`import { importMetaGlob } from 'fumadocs-mdx/bun';`);
-  }
-
   function docs(name: string, collection: DocsCollection) {
     const obj = [
       ident(`doc: ${doc(name, collection.docs)}`),
@@ -122,12 +119,17 @@ function indexFile(
   function generateGlob(patterns: string[], options: GlobImportOptions) {
     patterns = mapGlobPatterns(patterns);
 
-    if (runtime === 'node') {
+    if (runtime === 'node' || runtime === 'bun') {
       return generateGlobImport(patterns, options);
     } else {
-      const fnName = runtime === 'bun' ? 'importMetaGlob' : 'import.meta.glob';
-
-      return `${fnName}(${JSON.stringify(patterns)}, ${JSON.stringify(options, null, 2)})`;
+      return `import.meta.glob(${JSON.stringify(patterns)}, ${JSON.stringify(
+        {
+          ...options,
+          base: path.relative(outDir, options.base),
+        },
+        null,
+        2,
+      )})`;
     }
   }
 

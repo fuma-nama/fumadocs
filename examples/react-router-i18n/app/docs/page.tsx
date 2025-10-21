@@ -9,7 +9,7 @@ import {
 import { source } from '@/lib/source';
 import type * as PageTree from 'fumadocs-core/page-tree';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
-import { docs } from '../../source.generated';
+import { docs } from '@/.source';
 import { toClientRenderer } from 'fumadocs-mdx/runtime/vite';
 import { baseOptions } from '@/lib/layout.shared';
 

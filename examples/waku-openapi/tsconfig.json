@@ -15,7 +15,8 @@
     "noUncheckedIndexedAccess": true,
     "noEmit": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@/.source": [".source"]
     }
   },
   "exclude": ["node_modules", "dist"]
