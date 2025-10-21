@@ -60,6 +60,10 @@
     "./bun": {
       "import": "./dist/bun/index.js",
       "types": "./dist/bun/index.d.ts"
+    },
+    "./plugins/*": {
+      "import": "./dist/plugins/*.js",
+      "types": "./dist/plugins/*.d.ts"
     }
   },
   "main": "./dist/index.js",

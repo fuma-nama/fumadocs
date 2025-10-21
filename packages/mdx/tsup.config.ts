@@ -7,6 +7,7 @@ export default defineConfig({
     './src/node/loader.ts',
     './src/runtime/next/{index,async}.ts',
     './src/runtime/vite/{browser,server}.ts',
+    './src/plugins/{index,json-schema}.ts',
   ],
   format: ['esm', 'cjs'],
   external: ['next', 'typescript', 'bun'],
