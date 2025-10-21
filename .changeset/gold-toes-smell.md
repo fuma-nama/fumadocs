@@ -2,4 +2,4 @@
 'fumadocs-ui': patch
 ---
 
-Add showTitle option to tableOfContent and id to style it
+Add a `toc-title` ID to the table of contents heading for styling purposes

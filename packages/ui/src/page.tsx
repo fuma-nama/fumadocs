@@ -97,28 +97,6 @@ type TableOfContentOptions = Pick<AnchorProviderProps, 'single'> & {
    * @defaultValue 'normal'
    */
   style?: 'normal' | 'clerk';
-  /**
-   * Displays a title at the top of the Table of Contents.
-   * The default title is "On this page," but it can be customized with i18n in the RootProvider.
-   * @example
-   * ```ts
-   * import { defaultTranslations } from "fumadocs-ui/i18n";
-   * import { RootProvider } from "fumadocs-ui/provider";
-   * //...
-   * <RootProvider
-   *   i18n={{
-   *     translations: {
-   *       ...defaultTranslations,
-   *       toc: "Table of Contents",
-   *     },
-   *   }}
-   * >
-   *   {children}
-   * </RootProvider>
-   * ```
-   * @default true
-   */
-  showTitle?: boolean;
 };
 
 type TableOfContentPopoverOptions = Omit<TableOfContentOptions, 'single'>;
@@ -142,7 +120,6 @@ export function DocsPage({
   tableOfContent: {
     enabled: tocEnabled,
     component: tocReplace,
-    showTitle = true,
     ...tocOptions
   } = {},
   toc = [],
@@ -203,7 +180,7 @@ export function DocsPage({
         (tocReplace ?? (
           <PageTOC>
             {tocOptions.header}
-            {showTitle && <PageTOCTitle />}
+            <PageTOCTitle />
             <PageTOCItems variant={tocOptions.style} />
             {tocOptions.footer}
           </PageTOC>
