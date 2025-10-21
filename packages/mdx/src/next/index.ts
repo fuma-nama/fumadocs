@@ -8,7 +8,7 @@ import type {
 } from 'next/dist/server/config-shared';
 import { createPluginHandler } from '@/plugins';
 import * as path from 'node:path';
-import { getConfigHash, loadConfig } from '@/loaders/config/load';
+import { loadConfig } from '@/loaders/config/load';
 import { removeFileCache } from '@/next/file-cache';
 import { ValidationError } from '@/utils/validation';
 import next from '@/plugins/next';
@@ -32,15 +32,20 @@ const defaultPageExtensions = ['mdx', 'md', 'jsx', 'js', 'tsx', 'ts'];
 
 export function createMDX(createOptions: CreateMDXOptions = {}) {
   const options = applyDefaults(createOptions);
+  const isDev = process.env.NODE_ENV === 'development';
 
   if (process.env._FUMADOCS_MDX !== '1') {
     process.env._FUMADOCS_MDX = '1';
 
-    void init(process.env.NODE_ENV === 'development', options);
+    void init(isDev, options);
   }
 
   return (nextConfig: NextConfig = {}): NextConfig => {
-    const mdxLoaderOptions: MDXLoaderOptions = options;
+    const mdxLoaderOptions: MDXLoaderOptions = {
+      ...options,
+      isDev,
+    };
+
     const turbopack: TurbopackOptions = {
       ...nextConfig.turbopack,
       rules: {
@@ -91,13 +96,11 @@ async function init(
   options: Required<CreateMDXOptions>,
 ): Promise<void> {
   const pluginHandler = createNextPluginHandler(options);
-  let configHash: string;
   let config: LoadedConfig;
 
   async function updateConfig() {
-    configHash = await getConfigHash(options.configPath);
     config = await pluginHandler.init(
-      await loadConfig(options.configPath, options.outDir, configHash, true),
+      await loadConfig(options.configPath, options.outDir, true),
     );
   }
 
@@ -162,10 +165,7 @@ export async function postInstall(
     outDir,
     configPath,
   });
-  await pluginHandler.init(
-    await loadConfig(configPath, outDir, undefined, true),
-  );
-
+  await pluginHandler.init(await loadConfig(configPath, outDir, true));
   await pluginHandler.emitAndWrite();
   console.log('[MDX] types generated');
 }

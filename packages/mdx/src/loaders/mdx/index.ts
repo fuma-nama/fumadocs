@@ -5,7 +5,7 @@ import { buildMDX } from '@/loaders/mdx/build-mdx';
 import type { SourceMap } from 'rollup';
 import type { Loader } from '@/loaders/adapter';
 import { z } from 'zod';
-import type { ConfigLoader } from '@/loaders/config';
+import type { ConfigLoader, LoadedConfig } from '@/loaders/config';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
@@ -15,12 +15,6 @@ const querySchema = z
   .object({
     only: z.literal(['frontmatter', 'all']).default('all'),
     collection: z.string().optional(),
-    hash: z
-      .string()
-      .describe(
-        'the hash of config, used for revalidation on Turbopack/Webpack.',
-      )
-      .optional(),
   })
   .loose();
 
@@ -31,6 +25,17 @@ const cacheEntry = z.object({
 });
 
 type CacheEntry = z.infer<typeof cacheEntry>;
+
+const hashes = new WeakMap<LoadedConfig, string>();
+
+function getConfigHash(config: LoadedConfig) {
+  let hash = hashes.get(config);
+  if (hash) return hash;
+
+  hash = Date.now().toString();
+  hashes.set(config, hash);
+  return hash;
+}
 
 export function createMdxLoader(configLoader: ConfigLoader): Loader {
   return async ({
@@ -43,7 +48,7 @@ export function createMdxLoader(configLoader: ConfigLoader): Loader {
     const matter = fumaMatter(value);
     const parsed = querySchema.parse(query);
 
-    const loaded = await configLoader.getConfig(parsed.hash);
+    const loaded = await configLoader.getConfig();
     const cacheDir = isDevelopment
       ? undefined
       : loaded.global.experimentalBuildCache;
@@ -100,7 +105,7 @@ export function createMdxLoader(configLoader: ConfigLoader): Loader {
     const lineOffset = isDevelopment ? countLines(matter.matter) : 0;
 
     const compiled = await buildMDX(
-      `${parsed.hash ?? ''}:${parsed.collection ?? 'global'}`,
+      `${getConfigHash(loaded)}:${parsed.collection ?? 'global'}`,
       '\n'.repeat(lineOffset) + matter.content,
       {
         development: isDevelopment,

@@ -1,13 +1,7 @@
-import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { buildConfig } from '@/config/build';
 import type { LoadedConfig } from '@/loaders/config';
-
-let cache: {
-  hash: string;
-  config: Promise<LoadedConfig>;
-} | null = null;
 
 async function compileConfig(configPath: string, outDir: string) {
   const { build } = await import('esbuild');
@@ -37,40 +31,22 @@ async function compileConfig(configPath: string, outDir: string) {
  *
  * @param configPath - config path
  * @param outDir - output directory
- * @param hash - hash of config content
  * @param build - By default, it assumes the TypeScript config has been compiled to `.source/source.config.mjs`. Set this `true` to compile the config first.
  */
 export async function loadConfig(
   configPath: string,
   outDir: string,
-  hash?: string,
   build = false,
 ): Promise<LoadedConfig> {
-  if (cache && cache.hash === hash) {
-    return await cache.config;
-  }
-
   if (build) await compileConfig(configPath, outDir);
 
   const url = pathToFileURL(path.resolve(outDir, 'source.config.mjs'));
+  // always return a new config
+  url.searchParams.set('hash', Date.now().toString());
 
-  const config = import(`${url.href}?hash=${hash}`).then((loaded) => {
-    return buildConfig(loaded as Record<string, unknown>);
-  });
+  const config = import(url.href).then((loaded) =>
+    buildConfig(loaded as Record<string, unknown>),
+  );
 
-  if (hash) cache = { config, hash };
   return await config;
-}
-
-/**
- * Generate hash based on the content of config
- */
-export async function getConfigHash(configPath: string): Promise<string> {
-  const stats = await fs.stat(configPath).catch(() => undefined);
-
-  if (stats) {
-    return stats.mtime.getTime().toString();
-  }
-
-  throw new Error('Cannot find config file');
 }

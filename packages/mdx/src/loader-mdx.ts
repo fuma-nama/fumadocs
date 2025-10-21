@@ -1,11 +1,12 @@
 import { type LoaderContext } from 'webpack';
 import { createMdxLoader } from '@/loaders/mdx';
-import { dynamicConfig } from '@/loaders/config';
+import { dynamicConfig, staticConfig } from '@/loaders/config';
 import { toWebpack, type WebpackLoader } from '@/loaders/adapter';
 
 export interface Options {
   configPath: string;
   outDir: string;
+  isDev: boolean;
 }
 
 let instance: WebpackLoader | undefined;
@@ -20,9 +21,26 @@ export default async function loader(
   source: string,
   callback: LoaderContext<Options>['callback'],
 ): Promise<void> {
+  const { isDev, outDir, configPath } = this.getOptions();
   this.cacheable(true);
-  const { configPath, outDir } = this.getOptions();
-  instance ??= toWebpack(createMdxLoader(dynamicConfig(configPath, outDir)));
+  this.addDependency(configPath);
+
+  instance ??= toWebpack(
+    createMdxLoader(
+      // the config is built on dev server
+      isDev
+        ? dynamicConfig({
+            outDir,
+            configPath,
+            buildConfig: false,
+          })
+        : staticConfig({
+            outDir,
+            configPath,
+            buildConfig: false,
+          }),
+    ),
+  );
 
   await instance.call(this, source, callback);
 }

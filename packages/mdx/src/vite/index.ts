@@ -152,10 +152,7 @@ export async function postInstall(
   const options = applyDefaults(pluginOptions);
   const pluginHandler = createVitePluginHandler(options);
 
-  await pluginHandler.init(
-    await loadConfig(configPath, options.outDir, undefined, true),
-  );
-
+  await pluginHandler.init(await loadConfig(configPath, options.outDir, true));
   await pluginHandler.emitAndWrite();
   console.log('[MDX] types generated');
 }

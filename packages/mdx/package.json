@@ -45,6 +45,14 @@
       "import": "./dist/runtime/vite/server.js",
       "types": "./dist/runtime/vite/server.d.ts"
     },
+    "./runtime/vite.server": {
+      "import": "./dist/runtime/vite/server.js",
+      "types": "./dist/runtime/vite/server.d.ts"
+    },
+    "./runtime/vite.browser": {
+      "import": "./dist/runtime/vite/browser.js",
+      "types": "./dist/runtime/vite/browser.d.ts"
+    },
     "./node/loader": {
       "import": "./dist/node/loader.js",
       "types": "./dist/node/loader.d.ts"
