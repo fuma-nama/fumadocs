@@ -10,9 +10,3 @@ export function getRouter() {
     defaultNotFoundComponent: NotFound,
   });
 }
-
-declare module '@tanstack/react-router' {
-  interface Register {
-    router: ReturnType<typeof getRouter>;
-  }
-}

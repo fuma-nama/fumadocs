@@ -8,3 +8,4 @@ node_modules
 /build/
 
 .tanstack
+.source

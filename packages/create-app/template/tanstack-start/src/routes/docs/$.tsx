@@ -4,7 +4,7 @@ import { createServerFn } from '@tanstack/react-start';
 import { source } from '@/lib/source';
 import type * as PageTree from 'fumadocs-core/page-tree';
 import { useMemo } from 'react';
-import { docs } from '../../../source.generated';
+import { docs } from '@/.source';
 import {
   DocsBody,
   DocsDescription,
