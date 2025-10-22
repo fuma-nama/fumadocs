@@ -83,7 +83,7 @@ We introduced Plugins API, enabling extensible modifications to MDX configuratio
 There's a `json-schema` plugin natively provided by Fumadocs MDX.
 
 ```ts title="source.config.ts"
-import jsonSchema from "fumadocs-mdx/plugins/json-schema"
+import jsonSchema from 'fumadocs-mdx/plugins/json-schema';
 import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
 
 export const docs = defineDocs({
@@ -91,9 +91,8 @@ export const docs = defineDocs({
 });
 
 export default defineConfig({
-  plugins: [jsonSchema()]
+  plugins: [jsonSchema()],
 });
-
 ```
 
 ### Bug Fixes
@@ -126,7 +125,8 @@ The `source.generated.ts` file is now moved to `.source/index.ts`, you are recom
 **Migrate:**
 
 - run dev server/typegen to generate a `.source` folder.
-- import it over the original `source.generated.ts`.
+- import it over the original `source.generated.ts`
+  .
 - note that both docs and `create-fumadocs-app` are updated to `.source` folder.
 
 We also supported index file generation targeting other runtimes like Bun/Node.js.
@@ -146,7 +146,6 @@ export default defineConfig({
     // ...
   ],
 });
-
 ```
 
 ## Fumadocs OpenAPI 9.6
