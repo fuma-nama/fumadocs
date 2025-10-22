@@ -11,6 +11,7 @@ export const templates = [
   '+next+content-collections',
   '+next+fuma-docs-mdx',
   'react-router',
+  'react-router-spa',
   'tanstack-start',
   'waku',
 ] as const;
@@ -253,6 +254,7 @@ async function createNextPackageJson(
         waku: null,
         'tanstack-start': null,
         'react-router': null,
+        'react-router-spa': null,
       }[template],
     },
     devDependencies: {

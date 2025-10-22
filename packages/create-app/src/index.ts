@@ -114,6 +114,11 @@ async function main(config: Options): Promise<void> {
               label: 'React Router: Fumadocs MDX (not RSC)',
             },
             {
+              value: 'react-router-spa',
+              label: 'React Router SPA: Fumadocs MDX (not RSC)',
+              hint: 'SPA mode allows you to host the site statically, compatible with a CDN.',
+            },
+            {
               value: 'tanstack-start',
               label: 'Tanstack Start: Fumadocs MDX (not RSC)',
             },
