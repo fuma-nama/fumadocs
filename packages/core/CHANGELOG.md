@@ -1,5 +1,86 @@
 # next-docs-zeta
 
+## 16.0.0
+
+### Major Changes
+
+- 851897c: **Remove `fumadocs-core/sidebar` API**
+
+  why: no longer used by Fumadocs UI, and the abstraction isn't good enough.
+
+  migrate: The original component is mostly a wrapper of `react-remove-scroll`, you can use Shadcn UI for pre-built sidebars.
+
+- 4049ccc: **Remove `fumadocs-core/server` export**
+  - **`getGithubLastEdit`:** Moved to `fumadocs-core/content/github`.
+  - **`getTableOfContents`:** Moved to `fumadocs-core/content/toc`.
+  - **`PageTree` and page tree utilities:** Moved to `fumadocs-core/page-tree`.
+  - **`TOCItemType`, `TableOfContents`:** Moved to `fumadocs-core/toc`.
+  - **`createMetadataImage`:** Use the Next.js Metadata API instead.
+
+- 429c41a: **Switch to Shiki JavaScript Regex engine by default**
+
+  This is important for Cloudflare Worker compatibility, JavaScript engine is the new default over Oniguruma (WASM).
+  - `rehype-code`: replaced the `experimentalJSEngine` option with `engine: js | oniguruma`.
+  - `fumadocs-core/highlight`: use JS engine by default, drop custom engine support, use Shiki directly instead.
+
+- 5210f18: **Set minimal React.js version to 19.2.0**
+
+  19.2 has multiple crucial updates that can improve Fumadocs' performance, and it should works seamlessly on mainstream React.js frameworks.
+
+  As a consequence, Next.js 16 is now the minimal version when using Fumadocs UI because Next.js always uses the internal canary version of React.js.
+
+- 42f09c3: **Remove deprecated APIs**
+  - `fumadocs-ui/page`:
+    - removed `<DocsCategory />`.
+    - removed `breadcrumbs.full` option from `<DocsPage />`.
+  - `fumadocs-core/search/algolia`: renamed option `document` to `indexName`.
+  - `fumadocs-core/search`:
+    - remove deprecated signature of `createFromSource()`: migrate to newer usage instead.
+      ```ts
+      export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
+        source: S,
+        pageToIndexFn?: (page: InferPageType<S>) => Awaitable<AdvancedIndex>,
+        options?: Omit<Options<S>, 'buildIndex'>,
+      ): SearchAPI;
+      ```
+    - remove deprecated parameters in `useSearch()`, pass them in the client object instead.
+  - `fumadocs-core/highlight`: remove deprecated `withPrerenderScript` and `loading` options from `useShiki()`.
+  - `fumadocs-core/i18n`: removed `createI18nMiddleware`, import from `fumadocs-core/i18n/middleware` instead.
+  - `fumadocs-core/source`:
+    - removed deprecated `transformers`, `pageTree.attach*` options from `loader()`.
+    - removed deprecated `page.file` property.
+    - removed `FileInfo` & `parseFilePath` utilities.
+
+- 55afd8a: _Migrate to New Orama Cloud_
+
+  `@orama/core` is the new version of Orama Cloud client. See [their docs](https://docs.orama.com/docs/cloud/data-sources/rest-APIs/official-SDK/introduction) for details.
+
+  When using Fumadocs' Orama Cloud integration, you need to use the new client instead:
+
+  ```ts
+  import { sync } from 'fumadocs-core/search/orama-cloud';
+  import { OramaCloud } from '@orama/core';
+
+  // update this
+  const orama = new OramaCloud({
+    projectId: '<project id>',
+    apiKey: '<private api key>',
+  });
+
+  await sync(orama, {
+    index: '<data source id>',
+    documents: records,
+  });
+  ```
+
+### Minor Changes
+
+- cbc93e9: Disable `single` by default on `fumadocs-core/toc` API
+
+### Patch Changes
+
+- 230c6bf: let `getPageTreePeers` handle i18n
+
 ## 15.8.4
 
 ### Patch Changes

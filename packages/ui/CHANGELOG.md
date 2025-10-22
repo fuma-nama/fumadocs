@@ -1,5 +1,62 @@
 # next-docs-ui
 
+## 16.0.0
+
+### Major Changes
+
+- 0ed0ca6: **Change `--fd-layout-width` to `1600px` by default**
+
+  This will change the max layout width to `1600px`, you can still change it back with:
+
+  ```css
+  :root {
+    --fd-layout-width: 100vw;
+  }
+  ```
+
+- 5210f18: **Set minimal React.js version to 19.2.0**
+
+  19.2 has multiple crucial updates that can improve Fumadocs' performance, and it should works seamlessly on mainstream React.js frameworks.
+
+  As a consequence, Next.js 16 is now the minimal version when using Fumadocs UI because Next.js always uses the internal canary version of React.js.
+
+- 42f09c3: **Remove deprecated APIs**
+  - `fumadocs-ui/page`:
+    - removed `<DocsCategory />`.
+    - removed `breadcrumbs.full` option from `<DocsPage />`.
+  - `fumadocs-core/search/algolia`: renamed option `document` to `indexName`.
+  - `fumadocs-core/search`:
+    - remove deprecated signature of `createFromSource()`: migrate to newer usage instead.
+      ```ts
+      export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
+        source: S,
+        pageToIndexFn?: (page: InferPageType<S>) => Awaitable<AdvancedIndex>,
+        options?: Omit<Options<S>, 'buildIndex'>,
+      ): SearchAPI;
+      ```
+    - remove deprecated parameters in `useSearch()`, pass them in the client object instead.
+  - `fumadocs-core/highlight`: remove deprecated `withPrerenderScript` and `loading` options from `useShiki()`.
+  - `fumadocs-core/i18n`: removed `createI18nMiddleware`, import from `fumadocs-core/i18n/middleware` instead.
+  - `fumadocs-core/source`:
+    - removed deprecated `transformers`, `pageTree.attach*` options from `loader()`.
+    - removed deprecated `page.file` property.
+    - removed `FileInfo` & `parseFilePath` utilities.
+
+### Patch Changes
+
+- 1494340: Drop `fumadocs-core/hide-if-empty` usage, prefer user-side component overrides for precise control
+- de0ce6d: Add a `toc-title` ID to the table of contents heading for styling purposes
+- 5966e23: Fix root toggle overflow
+- Updated dependencies [230c6bf]
+- Updated dependencies [851897c]
+- Updated dependencies [4049ccc]
+- Updated dependencies [429c41a]
+- Updated dependencies [5210f18]
+- Updated dependencies [cbc93e9]
+- Updated dependencies [42f09c3]
+- Updated dependencies [55afd8a]
+  - fumadocs-core@16.0.0
+
 ## 15.8.4
 
 ### Patch Changes

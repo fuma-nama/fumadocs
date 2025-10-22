@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-python",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "The built-in Python docgen for Fumadocs",
   "keywords": [
     "NextJs",

@@ -1,5 +1,53 @@
 # next-docs-mdx
 
+## 13.0.0
+
+### Major Changes
+
+- 8d0c164: **Move `createMDXSource` and `resolveFiles` from `fumadocs-mdx` to `fumadocs-mdx/runtime/next`**
+- 3caa5cd: **Vite: move `source.generated.ts` to `.source/index.ts`**
+
+  **Why:**
+  - with Fumadocs MDX Plugins, we want to unify the output directory across Vite & Next.js.
+  - `source.generated.ts` looks ugly compared by `.source`.
+
+  **Migrate:**
+  - run dev server/typegen to generate a `.source` folder.
+  - import it over the original `source.generated.ts`.
+  - note that both docs and `create-fumadocs-app` are updated to `.source` folder.
+
+### Minor Changes
+
+- 29ce826: Support JSON Schema plugin (`fumadocs-mdx/plugins/json-schema`)
+- 3caa5cd: **Support Plugins API**
+
+  Fumadocs MDX is mostly a bundler plugin meant to be used with tools like Vite and Turbopack.
+
+  With Fumadocs MDX Plugins, you can extend Fumadocs MDX without worrying the underlying bundler.
+  It is designed for:
+  - Generate files from config (e.g. types, index files, JSON schemas)
+  - Modify received config
+
+### Patch Changes
+
+- 81fa875: Fix `includeProcessedMarkdown` cannot stringify MDX nodes
+- 575cfb8: Include unravel plugin into `remark-include` parsing step, this ensures the parsed results are consistent with normal MDX.js processor output.
+- 1f1c787: Add `useContent` API to client loader for avoiding Lint errors
+- 9051574: Support `postprocess.includeMDAST` option
+- a5df956: Support `runtime: bun` and `runtime: node` in Vite index file generation
+- 5210f18: Support Fumadocs 16 in `peerDependencies`.
+- Updated dependencies [230c6bf]
+- Updated dependencies [851897c]
+- Updated dependencies [4049ccc]
+- Updated dependencies [429c41a]
+- Updated dependencies [5210f18]
+- Updated dependencies [cbc93e9]
+- Updated dependencies [42f09c3]
+- Updated dependencies [55afd8a]
+- Updated dependencies [5210f18]
+  - fumadocs-core@16.0.0
+  - @fumadocs/mdx-remote@1.4.3
+
 ## 12.0.3
 
 ### Patch Changes

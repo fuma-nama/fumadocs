@@ -1,5 +1,11 @@
 # fumadocs
 
+## 1.0.3
+
+### Patch Changes
+
+- 5210f18: Support Fumadocs 16 in `peerDependencies`.
+
 ## 1.0.2
 
 ### Patch Changes
