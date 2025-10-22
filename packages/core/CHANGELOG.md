@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 16.0.1
+
+### Patch Changes
+
+- 45f0c1f: hotfix `<DynamicCodeBlock />` Vite + React 19.2 compat issues
+
 ## 16.0.0
 
 ### Major Changes
