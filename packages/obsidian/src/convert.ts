@@ -15,6 +15,7 @@ import type { VaultFile } from '@/read-vaults';
 import { getRemarkPlugins } from '@/remark';
 import type { Root } from 'mdast';
 import remarkParse from 'remark-parse';
+import { remarkGfm } from 'fumadocs-core/mdx-plugins';
 
 export interface OutputFile {
   type: 'asset' | 'content' | 'custom';
@@ -47,8 +48,9 @@ export async function convertVaultFiles(
 
   const processor = unified()
     .use(remarkParse)
+    .use(remarkGfm)
     .use(getRemarkPlugins(storage, resolver));
-  const stringifier = unified().use(remarkStringify).use(remarkMdx);
+  const stringifier = processor().use(remarkMdx).use(remarkStringify);
 
   async function onFile(file: ParsedFile) {
     if (file.format === 'media') {
