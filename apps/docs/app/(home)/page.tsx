@@ -371,7 +371,7 @@ function Feedback() {
         <h3
           className={cn(headingVariants({ variant: 'h3', className: 'mb-6' }))}
         >
-          A framework people loves.
+          A framework people love.
         </h3>
         <p className="mb-6">
           Loved by teams and developers from startups like Unkey, Vercel, Orama
