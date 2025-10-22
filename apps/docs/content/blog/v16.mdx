@@ -1,0 +1,162 @@
+---
+title: Fumadocs v16
+description: Better framework support, better performance.
+author: Fuma Nama
+date: 2025-10-22
+---
+
+## Overview
+
+We are pleased to announce the release of Fumadocs v16, a significant update that introduces breaking changes designed to refine our API surface, improve compatibility with Vite frameworks, and boost overall performance.
+
+## Major Changes
+
+Fumadocs 16 removed substantial amount of deprecated APIs accumulated since v15.2 Vite support.
+
+- **Removal of the Sidebar API**: The `fumadocs-core/sidebar` module has been deprecated and removed. For sidebar implementations, we recommend adopting pre-built solutions from Shadcn UI.
+
+- **Restructuring of Server-Side Exports**: Exports from `fumadocs-core/server` have been redistributed to more specialized modules:
+  - `getGithubLastEdit` -> `fumadocs-core/content/github`.
+  - `getTableOfContents` -> `fumadocs-core/content/toc`.
+  - `PageTree` and related utilities -> `fumadocs-core/page-tree`.
+  - `TOCItemType` and `TableOfContents` -> `fumadocs-core/toc`.
+  - removed `createMetadataImage` API, use Next.js Metadata API instead.
+
+- **Default Switch to Shiki's JavaScript Regex Engine**: To ensure seamless compatibility with environments like Cloudflare Workers, the JavaScript engine is now the default over the WASM-based Oniguruma. This change affects `rehype-code` (via the `engine` option) and `fumadocs-core/highlight`.
+
+- **Minimum React.js Version Raised to 19.2.0**: React 19.2 brings crucial performance improvements to Fumadocs UI.
+  - **Next.js Projects**: Next.js projects using Fumadocs UI must use Next.js 16 or later, as Next.js uses its own canary channel for React.js.
+
+- `fumadocs-ui/page`:
+  - Removed `<DocsCategory />`.
+  - Removed the `breadcrumbs.full` option in `<DocsPage />`.
+- `fumadocs-core/search/algolia`: The `document` option is renamed to `indexName`.
+- `fumadocs-core/search`: Removed the deprecated `createFromSource()` signature in `useSearch()`.
+- `fumadocs-core/highlight`: Removed `withPrerenderScript` and `loading` options from `useShiki()`.
+- `fumadocs-core/i18n`: Removed `createI18nMiddleware` (import from `fumadocs-core/i18n/middleware` instead).
+- `fumadocs-core/source`:
+  - Removed `transformers`, `pageTree.attach*` options in `loader()`.
+  - Removed the `page.file` property.
+  - Removed internal utilities `FileInfo` and `parseFilePath`.
+
+- **Migration to Orama Cloud's New SDK**: The `@orama/core` package replaces the prior client. Update your synchronization code as follows:
+
+  ```ts
+  import { sync } from 'fumadocs-core/search/orama-cloud';
+  import { OramaCloud } from '@orama/core';
+
+  // [!code highlight:4]
+  const orama = new OramaCloud({
+    projectId: '<project id>',
+    apiKey: '<private api key>',
+  });
+
+  await sync(orama, {
+    index: '<data source id>',
+    documents: records,
+  });
+  ```
+
+  Refer to the [Orama Cloud documentation](https://docs.orama.com/docs/cloud/data-sources/rest-APIs/official-SDK/introduction) for further details.
+
+### Styling Changes
+
+Fumadocs UI has included some aggressive styling changes that you should know about.
+
+- The default `--fd-layout-width` CSS variable is set to `1600px` for optimal content scaling.
+  You can override it if needed.
+
+  ```css
+  :root {
+    --fd-layout-width: 100vw;
+  }
+  ```
+
+## Fumadocs MDX 13
+
+Fumadocs MDX refined its API surface for better cross-framework compatability and flexibility.
+
+### Plugins API
+
+We introduced Plugins API, enabling extensible modifications to MDX configurations without bundler-specific code—ideal for file generation (e.g., types, indexes) or config alterations.
+
+There's a `json-schema` plugin natively provided by Fumadocs MDX.
+
+```ts title="source.config.ts"
+import jsonSchema from "fumadocs-mdx/plugins/json-schema"
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  dir: 'content/docs',
+});
+
+export default defineConfig({
+  plugins: [jsonSchema()]
+});
+
+```
+
+### Bug Fixes
+
+- `remark-include`: fix Markdown stringify logics.
+- `postprocess.includeMDAST` support.
+- (Vite) support `useContent` on client loader for lint avoidance.
+
+### Next.js
+
+`createMDXSource` and `resolveFiles` are now relocated to `fumadocs-mdx/runtime/next`.
+
+This should not affect majority of projects, as `docs.toFumadocsSource()` is now the preferred way.
+
+### Vite
+
+The `source.generated.ts` file is now moved to `.source/index.ts`, you are recommended to import the `.source` folder (with a path alias).
+
+```json title="tsconfig.json"
+{
+  "compilerOptions": {
+    "paths": {
+      // [!code ++]
+      "@/.source": [".source"]
+    }
+  }
+}
+```
+
+**Migrate:**
+
+- run dev server/typegen to generate a `.source` folder.
+- import it over the original `source.generated.ts`.
+- note that both docs and `create-fumadocs-app` are updated to `.source` folder.
+
+We also supported index file generation targeting other runtimes like Bun/Node.js.
+
+```ts title="vite.config.ts"
+import { defineConfig } from 'vite';
+import mdx from 'fumadocs-mdx/vite';
+import * as MdxConfig from './source.config';
+
+export default defineConfig({
+  plugins: [
+    mdx(MdxConfig, {
+      generateIndexFile: {
+        runtime: 'node',
+      },
+    }),
+    // ...
+  ],
+});
+
+```
+
+## Fumadocs OpenAPI 9.6
+
+A redesigned schema UI emphasizes client-side rendering (CSR) for recursive components, reducing bundle sizes and enhancing performance in complex JSON schemas.
+
+![Preview](/blog/v16-openapi.png)
+
+Non-required fields now include a reset button, with support for `content.showExampleInFields`.
+
+## What's Next?
+
+Fumadocs v16 is a new start for Fumadocs. We appreciate your feedback and contributions—please share your experiences on GitHub. Thank you for supporing Fumadocs :)
