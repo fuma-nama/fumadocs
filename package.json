@@ -31,7 +31,7 @@
     "tsup": "8.5.0",
     "turbo": "2.5.8",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.46.1",
+    "typescript-eslint": "^8.46.2",
     "vitest": "^3.2.4"
   },
   "packageManager": "pnpm@10.18.3",
