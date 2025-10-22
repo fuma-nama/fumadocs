@@ -13,6 +13,8 @@ import {
   type FC,
   Suspense,
   use,
+  useDeferredValue,
+  useId,
 } from 'react';
 
 export interface DynamicCodeblockProps {
@@ -56,6 +58,7 @@ export function DynamicCodeBlock({
   options,
   wrapInSuspense = true,
 }: DynamicCodeblockProps) {
+  const id = useId();
   const shikiOptions = {
     lang,
     ...options,
@@ -64,10 +67,18 @@ export function DynamicCodeBlock({
       ...options?.components,
     },
   } satisfies HighlightOptions;
-  let children = <Internal code={code} options={shikiOptions} />;
+
+  const children = (
+    <PropsContext value={codeblock}>
+      <Internal
+        id={id}
+        {...useDeferredValue({ code, options: shikiOptions })}
+      />
+    </PropsContext>
+  );
 
   if (wrapInSuspense)
-    children = (
+    return (
       <Suspense
         fallback={
           <Placeholder code={code} components={shikiOptions.components} />
@@ -77,7 +88,7 @@ export function DynamicCodeBlock({
       </Suspense>
     );
 
-  return <PropsContext value={codeblock}>{children}</PropsContext>;
+  return children;
 }
 
 function Placeholder({
@@ -106,11 +117,13 @@ function Placeholder({
 }
 
 function Internal({
+  id,
   code,
   options,
 }: {
+  id: string;
   code: string;
   options: HighlightOptions;
 }) {
-  return useShiki(code, options);
+  return useShiki(code, options, [id, options.lang, code]);
 }
