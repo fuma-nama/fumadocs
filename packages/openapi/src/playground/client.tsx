@@ -61,7 +61,6 @@ import {
   useRequestInitialData,
 } from '@/ui/contexts/code-example';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
-import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import {
   Select,
   SelectContent,
@@ -203,48 +202,14 @@ export default function Client({
     );
   });
 
-  function initAuthValues(values: FormValues, inputs: AuthField[]) {
-    for (const item of inputs) {
-      const stored = localStorage.getItem(AuthPrefix + item.original.id);
-
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (typeof parsed === typeof item.defaultValue) {
-          set(values, item.fieldName, parsed);
-          continue;
-        }
-      }
-
-      set(values, item.fieldName, item.defaultValue);
-    }
-
-    return values;
-  }
-
-  useOnChange(requestDataKey, () => {
+  const onUpdateDefaults = useEffectEvent(() => {
     fieldInfoMap.clear();
     form.reset(initAuthValues(defaultValues, inputs));
   });
 
-  useOnChange(inputs, (current, previous) => {
-    form.reset((values) => {
-      for (const item of previous) {
-        if (current.some(({ original }) => original.id === item.original.id)) {
-          continue;
-        }
-
-        set(values, item.fieldName, undefined);
-      }
-
-      return initAuthValues(values, current);
-    });
-  });
-
   const onUpdateDebounced = useEffectEvent((values: FormValues) => {
     for (const item of inputs) {
-      const value = item.fieldName
-        .split('.')
-        .reduce((v, seg) => v[seg as keyof object], values as object);
+      const value = get(values, item.fieldName);
 
       if (value) {
         localStorage.setItem(
@@ -264,6 +229,10 @@ export default function Client({
   });
 
   useEffect(() => {
+    onUpdateDefaults();
+  }, [requestDataKey]);
+
+  useEffect(() => {
     let timer: number | null = null;
 
     const subscription = form.subscribe({
@@ -281,11 +250,25 @@ export default function Client({
         );
       },
     });
-    form.reset((values) => initAuthValues(values, inputs));
 
     return () => subscription();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- mounted once only
   }, []);
+
+  useEffect(() => {
+    form.reset((values) => initAuthValues(values, inputs));
+
+    return () => {
+      form.reset((values) => {
+        for (const item of inputs) {
+          set(values, item.fieldName, undefined);
+        }
+
+        return values;
+      });
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mounted once only
+  }, [inputs]);
 
   const onSubmit = form.handleSubmit((value) => {
     testQuery.start(mapInputs(value));
@@ -700,6 +683,24 @@ function useAuthInputs(securities?: SecurityEntry[]) {
   };
 
   return { inputs, mapInputs };
+}
+
+function initAuthValues(values: FormValues, inputs: AuthField[]) {
+  for (const item of inputs) {
+    const stored = localStorage.getItem(AuthPrefix + item.original.id);
+
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (typeof parsed === typeof item.defaultValue) {
+        set(values, item.fieldName, parsed);
+        continue;
+      }
+    }
+
+    set(values, item.fieldName, item.defaultValue);
+  }
+
+  return values;
 }
 
 function renderCustomField(
