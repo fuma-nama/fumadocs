@@ -18,7 +18,7 @@ import NotebookImg from './notebook.png';
 import { cva } from 'class-variance-authority';
 
 export function CreateAppAnimation() {
-  const installCmd = 'npm create fumadocs-app';
+  const installCmd = 'pnpm create fumadocs-app';
   const tickTime = 100;
   const timeCommandEnter = installCmd.length;
   const timeCommandRun = timeCommandEnter + 3;
