@@ -49,28 +49,6 @@ function isEmpty(node: HTMLElement) {
   return true;
 }
 
-function disableAnimation() {
-  const css = document.createElement('style');
-  const nonce = document.currentScript?.nonce;
-  if (nonce) css.setAttribute('nonce', nonce);
-  css.appendChild(
-    document.createTextNode(
-      `*,*::before,*::after{-webkit-transition:none!important;-moz-transition:none!important;-o-transition:none!important;-ms-transition:none!important;transition:none!important}`,
-    ),
-  );
-  document.head.appendChild(css);
-
-  return () => {
-    // Force restyle
-    (() => window.getComputedStyle(document.body))();
-
-    // Wait for next tick before removing
-    setTimeout(() => {
-      document.head.removeChild(css);
-    }, 1);
-  };
-}
-
 /**
  * The built-in CSS `:empty` selector cannot detect if the children is hidden, classes such as `md:hidden` causes it to fail.
  * This component is an enhancement to `empty:hidden` to fix the issue described above.
@@ -103,7 +81,6 @@ export function HideIfEmpty<Props extends HTMLAttributes<HTMLElement>>({
   const init = (id: string) => {
     const element = getElement(id);
     if (element) {
-      disableAnimation();
       element.hidden = isEmpty(element);
     }
   };
@@ -119,7 +96,7 @@ export function HideIfEmpty<Props extends HTMLAttributes<HTMLElement>>({
         suppressHydrationWarning
         nonce={nonce}
         dangerouslySetInnerHTML={{
-          __html: `{${getElement};${isEmpty};${disableAnimation};(${init})("${id}")}`,
+          __html: `{${getElement};${isEmpty};(${init})("${id}")}`,
         }}
       />
     </>
