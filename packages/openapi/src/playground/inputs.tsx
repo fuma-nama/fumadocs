@@ -7,7 +7,12 @@ import {
   useState,
 } from 'react';
 import { ChevronDown, Plus, Trash2, X } from 'lucide-react';
-import { useController, useFieldArray, useFormContext } from 'react-hook-form';
+import {
+  set,
+  useController,
+  useFieldArray,
+  useFormContext,
+} from 'react-hook-form';
 import {
   Select,
   SelectContent,
@@ -247,7 +252,7 @@ export function FieldInput({
   isRequired?: boolean;
   fieldName: string;
 }) {
-  const { control } = useFormContext();
+  const { control, reset } = useFormContext();
   const {
     field: { value, onChange, ...restField },
   } = useController({
@@ -332,7 +337,12 @@ export function FieldInput({
       {!isRequired && value !== undefined && (
         <button
           type="button"
-          onClick={() => onChange(undefined)}
+          onClick={() => {
+            reset((values) => {
+              set(values, fieldName, undefined);
+              return values;
+            });
+          }}
           className="text-fd-muted-foreground"
         >
           <X className="size-4" />

@@ -19,6 +19,8 @@ import type {
 import {
   Controller,
   FormProvider,
+  get,
+  set,
   useForm,
   useFormContext,
 } from 'react-hook-form';
@@ -153,7 +155,7 @@ export default function Client({
   ...rest
 }: ClientProps) {
   const { server } = useServerSelectContext();
-  const requestData = useRequestInitialData();
+  const { key: requestDataKey, data: requestData } = useRequestInitialData();
   const updater = useRequestDataUpdater();
   const fieldInfoMap = useMemo(() => new Map<string, FieldInfo>(), []);
   const { mediaAdapters } = useApiContext();
@@ -203,22 +205,23 @@ export default function Client({
 
   function initAuthValues(values: FormValues, inputs: AuthField[]) {
     for (const item of inputs) {
-      manipulateValues(values, item.fieldName, () => {
-        const stored = localStorage.getItem(AuthPrefix + item.original.id);
+      const stored = localStorage.getItem(AuthPrefix + item.original.id);
 
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (typeof parsed === typeof item.defaultValue) return parsed;
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (typeof parsed === typeof item.defaultValue) {
+          set(values, item.fieldName, parsed);
+          continue;
         }
+      }
 
-        return item.defaultValue;
-      });
+      set(values, item.fieldName, item.defaultValue);
     }
 
     return values;
   }
 
-  useOnChange(defaultValues, () => {
+  useOnChange(requestDataKey, () => {
     fieldInfoMap.clear();
     form.reset(initAuthValues(defaultValues, inputs));
   });
@@ -230,7 +233,7 @@ export default function Client({
           continue;
         }
 
-        manipulateValues(values, item.fieldName, () => undefined);
+        set(values, item.fieldName, undefined);
       }
 
       return initAuthValues(values, current);
@@ -540,44 +543,6 @@ interface AuthField {
   mapOutput?: (values: unknown) => unknown;
 }
 
-/**
- * manipulate values without mutating the original object
- *
- * @returns a new manipulated object
- */
-function manipulateValues<T extends object>(
-  values: T,
-  fieldName: string,
-  update: (v: unknown) => unknown,
-  clone = false,
-): T {
-  const root = clone ? { ...values } : values;
-  let current = root as Record<string, unknown>;
-  const segments = fieldName.split('.');
-
-  for (let i = 0; i < segments.length; i++) {
-    const segment = segments[i];
-
-    if (i !== segments.length - 1) {
-      let v = current[segment] as Record<string, unknown>;
-      if (clone) v = { ...v };
-
-      current[segment] = v;
-      current = v;
-      continue;
-    }
-
-    const updated = update(current[segment]);
-    if (updated === undefined) {
-      delete current[segment];
-    } else {
-      current[segment] = updated;
-    }
-  }
-
-  return root;
-}
-
 function useAuthInputs(securities?: SecurityEntry[]) {
   const inputs = useMemo(() => {
     const result: AuthField[] = [];
@@ -723,13 +688,15 @@ function useAuthInputs(securities?: SecurityEntry[]) {
   }, [securities]);
 
   const mapInputs = (values: FormValues) => {
+    const cloned = structuredClone(values);
+
     for (const item of inputs) {
       if (!item.mapOutput) continue;
 
-      values = manipulateValues(values, item.fieldName, item.mapOutput, true);
+      set(cloned, item.fieldName, item.mapOutput(get(values, item.fieldName)));
     }
 
-    return values;
+    return cloned;
   };
 
   return { inputs, mapInputs };

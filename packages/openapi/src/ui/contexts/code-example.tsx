@@ -206,7 +206,7 @@ function SelectDisplay({
 export function useRequestInitialData() {
   const { getExample, key } = useContext(CodeExampleContext)!;
 
-  return getExample(key)!.data;
+  return { key, data: getExample(key)!.data };
 }
 
 export function useRequestDataUpdater() {
