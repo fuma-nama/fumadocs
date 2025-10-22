@@ -1,5 +1,18 @@
 # fumadocs-twoslash
 
+## 3.1.9
+
+### Patch Changes
+
+- 5210f18: Support Fumadocs 16 in `peerDependencies`.
+- Updated dependencies [1494340]
+- Updated dependencies [de0ce6d]
+- Updated dependencies [0ed0ca6]
+- Updated dependencies [5210f18]
+- Updated dependencies [42f09c3]
+- Updated dependencies [5966e23]
+  - fumadocs-ui@16.0.0
+
 ## 3.1.8
 
 ### Patch Changes

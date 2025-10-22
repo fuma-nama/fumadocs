@@ -1,5 +1,35 @@
 # @fuma-docs/openapi
 
+## 9.6.0
+
+### Minor Changes
+
+- 8ebd28f: _Redesign schema UI to leverage CSR_
+
+  Fumadocs OpenAPI now uses CSR to render recursive components, hugely reducing the size of page for highly nested JSON schemas & improve performance.
+
+- ef9737d: Add reset value button to non-required fields
+
+### Patch Changes
+
+- 21fcc0b: Support `content.showExampleInFields` option
+- 4a36701: avoid render-time form modifications
+- 5210f18: Support Fumadocs 16 in `peerDependencies`.
+- Updated dependencies [1494340]
+- Updated dependencies [230c6bf]
+- Updated dependencies [851897c]
+- Updated dependencies [de0ce6d]
+- Updated dependencies [4049ccc]
+- Updated dependencies [0ed0ca6]
+- Updated dependencies [429c41a]
+- Updated dependencies [5210f18]
+- Updated dependencies [cbc93e9]
+- Updated dependencies [42f09c3]
+- Updated dependencies [55afd8a]
+- Updated dependencies [5966e23]
+  - fumadocs-ui@16.0.0
+  - fumadocs-core@16.0.0
+
 ## 9.5.0
 
 ### Minor Changes

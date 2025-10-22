@@ -1,5 +1,12 @@
 # create-next-docs-app
 
+## 16.0.0
+
+### Patch Changes
+
+- 4c535f3: fix outdated Tanstack Start template
+- 5210f18: Support Fumadocs 16 in `peerDependencies`.
+
 ## 15.8.4
 
 ## 15.8.3
