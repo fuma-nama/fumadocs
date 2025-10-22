@@ -21,9 +21,19 @@ Create the configuration file:
 
 Add the Vite plugin:
 
-<include cwd meta='title="vite.config.ts"'>
-  ../../examples/react-router/vite.config.ts
-</include>
+```ts title="vite.config.ts"
+import { defineConfig } from 'vite';
+import mdx from 'fumadocs-mdx/vite';
+import * as MdxConfig from './source.config';
+
+export default defineConfig({
+  plugins: [
+    // [!code ++]
+    mdx(MdxConfig),
+    // ...
+  ],
+});
+```
 
 <include>./.shared.mdx</include>
 

@@ -54,6 +54,8 @@ export default withMDX(config);
 
 </Callout>
 
+<include>./vite/.shared.mdx</include>
+
 ### Integrate with Fumadocs
 
 You can create a `lib/source.ts` file and obtain Fumadocs source from the `docs` collection output.
@@ -68,9 +70,7 @@ export const source = loader({
 });
 ```
 
-> `.source` will be generated when you run `next dev` or `next build`.
->
-> Make sure you are importing the `.source` rather than `source.config.ts`.
+The `.source` folder will be generated when you run `next dev` or `next build`.
 
 ### Done
 

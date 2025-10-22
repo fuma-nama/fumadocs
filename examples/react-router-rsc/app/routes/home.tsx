@@ -10,7 +10,7 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export default function Home() {
+export function ServerComponent() {
   return (
     <HomeLayout {...baseOptions()}>
       <div className="p-4 flex flex-col items-center justify-center text-center flex-1">
