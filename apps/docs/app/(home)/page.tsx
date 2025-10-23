@@ -89,11 +89,11 @@ export default function Page() {
         </div>
         <div className="mt-auto dark text-landing-foreground mb-[max(100px,min(9vw,150px))] p-6 col-start-1 row-start-1 md:p-12">
           <h1 className="text-4xl mt-40 mb-12 leading-tighter font-tinos md:text-5xl lg:text-6xl">
-            Build the excellent
+            Build excellent
             <br />
             documentation
             <br />
-            in your way.
+            your way.
           </h1>
           <div className="flex flex-col items-start gap-4 md:flex-row md:items-center">
             <Link href="/docs/ui" className={cn(buttonVariants())}>
