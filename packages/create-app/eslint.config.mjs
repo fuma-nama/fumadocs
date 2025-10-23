@@ -8,6 +8,7 @@ export default [
   {
     rules: {
       'import/no-relative-packages': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
 ];

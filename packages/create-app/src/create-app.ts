@@ -1,11 +1,15 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import { copy, tryGitInit } from '@/utils';
-import { versions as localVersions } from '@/versions';
-import versionPkg from '../../create-app-versions/package.json';
+import { copy, pick, tryGitInit } from '@/utils';
 import type { PackageManager } from './auto-install';
 import { autoInstall } from './auto-install';
-import { cwd, sourceDir, TemplateInfo, templates } from './constants';
+import {
+  cwd,
+  depVersions,
+  sourceDir,
+  type TemplateInfo,
+  templates,
+} from './constants';
 
 export type Template = (typeof templates)[number]['value'];
 export interface Options {
@@ -45,20 +49,35 @@ export interface TemplatePluginContext {
   dest: string;
 }
 
+type Awaitable<T> = T | Promise<T>;
+
 export interface TemplatePlugin {
-  afterWrite?: (context: TemplatePluginContext) => Promise<void>;
+  packageJson?: (
+    this: TemplatePluginContext,
+    packageJson: any,
+  ) => Awaitable<void | any>;
+  afterWrite?: (this: TemplatePluginContext) => Awaitable<void>;
+  readme?: (
+    this: TemplatePluginContext,
+    content: string,
+  ) => Awaitable<void | string>;
 }
 
 function defaults(options: Options): Required<Options> {
   return {
     ...options,
     plugins: options.plugins ?? [],
-    useSrcDir: options.useSrcDir ?? false,
+    useSrcDir:
+      options.template.startsWith('+next') && options.useSrcDir === true,
     lint: options.lint ?? false,
     initializeGit: options.initializeGit ?? false,
     installDeps: options.installDeps ?? false,
     log: console.log,
   };
+}
+
+function isRelative(dir: string, file: string) {
+  return !path.relative(dir, file).startsWith(`..${path.sep}`);
 }
 
 export async function create(createOptions: Options): Promise<void> {
@@ -84,71 +103,63 @@ export async function create(createOptions: Options): Promise<void> {
     options,
   };
 
-  function isRelative(dir: string, file: string) {
-    return !path
-      .relative(path.join(dest, dir), file)
-      .startsWith(`..${path.sep}`);
-  }
-
-  function defaultRename(file: string): string {
-    file = file.replace('example.gitignore', '.gitignore');
-
-    if (!useSrcDir || !isNext) {
-      return file;
-    }
-
-    if (
-      path.basename(file) === 'mdx-components.tsx' ||
-      isRelative('app', file) ||
-      isRelative('lib', file)
-    ) {
-      return path.join(dest, 'src', path.relative(dest, file));
-    }
-
-    return file;
-  }
-
   await copy(path.join(sourceDir, `template/${template}`), dest, {
-    rename: defaultRename,
-  });
+    rename(file) {
+      file = file.replace('example.gitignore', '.gitignore');
 
-  if (isNext) {
-    // optional ESLint configuration
-    if (lint) {
-      await copy(path.join(sourceDir, `template/+next+${lint}`), dest, {
-        rename: defaultRename,
-      });
-      log('Configured Linter');
-    }
-
-    // update tsconfig.json for src dir
-    if (useSrcDir) {
-      const tsconfigPath = path.join(dest, 'tsconfig.json');
-      const content = (await fs.readFile(tsconfigPath)).toString();
-
-      const config = JSON.parse(content);
-
-      if (config.compilerOptions?.paths) {
-        Object.assign(config.compilerOptions.paths, {
-          '@/*': ['./src/*'],
-        });
+      if (
+        useSrcDir &&
+        (path.basename(file) === 'mdx-components.tsx' ||
+          isRelative(path.join(dest, 'app'), file) ||
+          isRelative(path.join(dest, 'lib'), file))
+      ) {
+        return path.join(dest, 'src', path.relative(dest, file));
       }
 
-      await fs.writeFile(tsconfigPath, JSON.stringify(config, null, 2));
-    }
+      return file;
+    },
+  });
+
+  // optional ESLint configuration
+  if (isNext && lint) {
+    await copy(path.join(sourceDir, `template/+next+${lint}`), dest);
+    log('Configured Linter');
   }
 
-  const packageJson = await createPackageJson(projectName, dest, options);
+  // update tsconfig.json for src dir
+  if (isNext && useSrcDir) {
+    const tsconfigPath = path.join(dest, 'tsconfig.json');
+    const content = (await fs.readFile(tsconfigPath)).toString();
+    const config = JSON.parse(content);
+
+    if (config.compilerOptions?.paths) {
+      Object.assign(config.compilerOptions.paths, {
+        '@/*': ['./src/*'],
+      });
+    }
+
+    await fs.writeFile(tsconfigPath, JSON.stringify(config, null, 2));
+  }
+
+  let packageJson = await createPackageJson(projectName, dest, options);
+  for (const plugin of plugins) {
+    const result = await plugin.packageJson?.call(pluginContext, packageJson);
+
+    if (result) packageJson = result;
+  }
   await fs.writeFile(
     path.join(dest, 'package.json'),
     JSON.stringify(packageJson, null, 2),
   );
 
-  const readMe = await getReadme(dest, projectName);
-  await fs.writeFile(path.join(dest, 'README.md'), readMe);
+  let readme = await getReadme(dest, projectName);
+  for (const plugin of plugins) {
+    readme = (await plugin.readme?.call(pluginContext, readme)) ?? readme;
+  }
+  await fs.writeFile(path.join(dest, 'README.md'), readme);
 
   for (const plugin of plugins) {
-    await plugin.afterWrite?.(pluginContext);
+    await plugin.afterWrite?.call(pluginContext);
   }
 
   if (installDeps) {
@@ -181,8 +192,8 @@ async function createPackageJson(
   const isNext = template.startsWith('+next');
   function replaceWorkspaceDeps(deps: Record<string, string>) {
     for (const k in deps) {
-      if (deps[k].startsWith('workspace:') && k in localVersions) {
-        deps[k] = localVersions[k as keyof typeof localVersions];
+      if (deps[k].startsWith('workspace:') && k in depVersions) {
+        deps[k] = depVersions[k as keyof typeof depVersions];
       }
     }
 
@@ -222,7 +233,7 @@ async function createPackageJson(
       },
       devDependencies: {
         ...packageJson.devDependencies,
-        ...pick(versionPkg.dependencies, ['@biomejs/biome']),
+        ...pick(depVersions, ['@biomejs/biome']),
       },
     };
   }
@@ -237,26 +248,11 @@ async function createPackageJson(
       devDependencies: {
         ...packageJson.devDependencies,
         eslint: '^9',
-        'eslint-config-next': versionPkg.dependencies.next,
+        'eslint-config-next': depVersions.next,
         '@eslint/eslintrc': '^3',
       },
     };
   }
 
   return packageJson;
-}
-
-function pick<T extends object, K extends keyof T>(
-  obj: T,
-  keys: K[],
-): Pick<T, K> {
-  const result: Partial<T> = {};
-
-  for (const key of keys) {
-    if (key in obj) {
-      result[key] = obj[key];
-    }
-  }
-
-  return result as Pick<T, K>;
 }

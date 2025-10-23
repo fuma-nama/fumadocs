@@ -8,6 +8,7 @@
     "@content-collections/core": "^0.11.1",
     "@content-collections/mdx": "^0.2.2",
     "@content-collections/next": "^0.2.8",
+    "@orama/core": "^1.2.13",
     "@react-router/dev": "^7.9.4",
     "@react-router/node": "^7.9.4",
     "@react-router/serve": "^7.9.4",

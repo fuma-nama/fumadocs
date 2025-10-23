@@ -17,8 +17,8 @@ import { OramaCloud } from '@orama/core';
 import { useI18n } from 'fumadocs-ui/contexts/i18n';
 
 const client = new OramaCloud({
-  projectId: '',
-  apiKey: '',
+  projectId: process.env.NEXT_PUBLIC_ORAMA_DATASOURCE_ID,
+  apiKey: process.env.NEXT_PUBLIC_ORAMA_API_KEY,
 });
 
 export default function CustomSearchDialog(props: SharedProps) {
