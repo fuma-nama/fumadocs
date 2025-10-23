@@ -1,5 +1,14 @@
 # fumadocs-obsidian
 
+## 0.0.5
+
+### Patch Changes
+
+- 845075f: Enable `remark-gfm` by default
+- Updated dependencies [d511232]
+  - fumadocs-core@16.0.2
+  - fumadocs-ui@16.0.2
+
 ## 0.0.4
 
 ### Patch Changes

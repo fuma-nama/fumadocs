@@ -38,7 +38,7 @@ export interface OramaSearchDialogProps extends SharedProps {
   /**
    * Add the "Powered by Orama" label
    *
-   * @defaultValue false
+   * @defaultValue true
    */
   showOrama?: boolean;
 
@@ -58,7 +58,7 @@ export default function OramaSearchDialog({
   searchOptions,
   tags = [],
   defaultTag,
-  showOrama = false,
+  showOrama = true,
   allowClear = false,
   index,
   footer,

@@ -1,6 +1,6 @@
 {
   "name": "create-fumadocs-app",
-  "version": "16.0.0",
+  "version": "16.0.2",
   "description": "Create a new documentation site with Fumadocs",
   "keywords": [
     "NextJs",
@@ -26,7 +26,8 @@
     "dev": "tsup --watch",
     "lint": "eslint .",
     "postpublish": "echo \"Updating template repo\" && bash ./scripts/update-git-repo.sh",
-    "types:check": "tsc --noEmit"
+    "types:check": "tsc --noEmit",
+    "sync": "bun ./scripts/sync.ts"
   },
   "dependencies": {
     "@clack/prompts": "^0.11.0",

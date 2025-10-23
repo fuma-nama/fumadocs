@@ -1,5 +1,20 @@
 # next-docs-ui
 
+## 16.0.2
+
+### Patch Changes
+
+- Updated dependencies [d511232]
+  - fumadocs-core@16.0.2
+
+## 16.0.1
+
+### Patch Changes
+
+- 45f0c1f: hotfix `<DynamicCodeBlock />` Vite + React 19.2 compat issues
+- Updated dependencies [45f0c1f]
+  - fumadocs-core@16.0.1
+
 ## 16.0.0
 
 ### Major Changes
