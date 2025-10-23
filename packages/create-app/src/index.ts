@@ -18,9 +18,10 @@ import {
   managers,
   type PackageManager,
 } from './auto-install';
-import { create, type Template, templates } from './create-app';
-import { cwd } from './constants';
+import { create, type Template } from './create-app';
+import { cwd, templates } from './constants';
 import { program } from 'commander';
+import oramaCloud from '@/plugins/orama-cloud';
 
 program.argument('[name]', 'the project name');
 program.option('--src', '(Next.js only) enable `src/` directory');
@@ -39,9 +40,9 @@ program.option('--no-git', 'Disable auto Git repository initialization');
 
 program.option(
   '--template <name>',
-  `template to choose: ${templates.join(', ')}`,
+  `template to choose: ${templates.map((v) => v.value).join(', ')}`,
   (value) => {
-    if (!templates.includes(value as Template)) {
+    if (!templates.some((item) => item.value === value)) {
       throw new Error(`Invalid template: ${value}.`);
     }
 
@@ -95,30 +96,7 @@ async function main(config: Options): Promise<void> {
         return select<Template>({
           message: 'Choose a template',
           initialValue: '+next+fuma-docs-mdx',
-          options: [
-            {
-              value: '+next+fuma-docs-mdx',
-              label: 'Next.js: Fumadocs MDX',
-              hint: 'recommended',
-            },
-            {
-              value: 'waku',
-              label: 'Waku: Fumadocs MDX',
-            },
-            {
-              value: 'react-router',
-              label: 'React Router: Fumadocs MDX (not RSC)',
-            },
-            {
-              value: 'react-router-spa',
-              label: 'React Router SPA: Fumadocs MDX (not RSC)',
-              hint: 'SPA mode allows you to host the site statically, compatible with a CDN.',
-            },
-            {
-              value: 'tanstack-start',
-              label: 'Tanstack Start: Fumadocs MDX (not RSC)',
-            },
-          ],
+          options: templates,
         });
       },
       src: async (v): Promise<SrcOption | symbol> => {
@@ -156,6 +134,23 @@ async function main(config: Options): Promise<void> {
             {
               value: false,
               label: 'Disabled',
+            },
+          ],
+        });
+      },
+      search: () => {
+        return select({
+          message: 'Choose a search solution?',
+          options: [
+            {
+              value: 'orama' as const,
+              label: 'Default',
+              hint: 'local search powered by Orama, recommended',
+            },
+            {
+              value: 'orama-cloud' as const,
+              label: 'Orama Cloud',
+              hint: '3rd party search solution, signup needed',
             },
           ],
         });
@@ -220,6 +215,7 @@ async function main(config: Options): Promise<void> {
     useSrcDir: options.src as SrcOption,
     initializeGit: config.git ?? true,
 
+    plugins: options.search === 'orama-cloud' ? [oramaCloud] : [],
     log: (message) => {
       info.message(message);
     },

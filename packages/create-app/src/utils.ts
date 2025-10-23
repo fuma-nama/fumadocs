@@ -9,7 +9,7 @@ export async function copy(
     rename?: (s: string) => string;
     filter?: (s: string) => boolean;
     filterDir?: (dir: string) => boolean;
-  },
+  } = {},
 ): Promise<void> {
   const {
     rename = (s) => s,

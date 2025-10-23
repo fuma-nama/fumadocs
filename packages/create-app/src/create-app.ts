@@ -5,17 +5,9 @@ import { versions as localVersions } from '@/versions';
 import versionPkg from '../../create-app-versions/package.json';
 import type { PackageManager } from './auto-install';
 import { autoInstall } from './auto-install';
-import { cwd, sourceDir } from './constants';
+import { cwd, sourceDir, TemplateInfo, templates } from './constants';
 
-export const templates = [
-  '+next+fuma-docs-mdx',
-  'react-router',
-  'react-router-spa',
-  'tanstack-start',
-  'waku',
-] as const;
-
-export type Template = (typeof templates)[number];
+export type Template = (typeof templates)[number]['value'];
 export interface Options {
   outputDir: string;
   template: Template;
@@ -40,11 +32,27 @@ export interface Options {
   installDeps?: boolean;
   initializeGit?: boolean;
   log?: (message: string) => void;
+  plugins?: TemplatePlugin[];
+}
+
+export interface TemplatePluginContext {
+  template: TemplateInfo;
+
+  options: Required<Options>;
+  /**
+   * output directory
+   */
+  dest: string;
+}
+
+export interface TemplatePlugin {
+  afterWrite?: (context: TemplatePluginContext) => Promise<void>;
 }
 
 function defaults(options: Options): Required<Options> {
   return {
     ...options,
+    plugins: options.plugins ?? [],
     useSrcDir: options.useSrcDir ?? false,
     lint: options.lint ?? false,
     initializeGit: options.initializeGit ?? false,
@@ -64,11 +72,17 @@ export async function create(createOptions: Options): Promise<void> {
     lint,
     initializeGit,
     packageManager,
+    plugins,
   } = options;
 
   const projectName = path.basename(outputDir);
   const dest = path.resolve(cwd, outputDir);
   const isNext = options.template.startsWith('+next');
+  const pluginContext: TemplatePluginContext = {
+    template: templates.find((item) => item.value === template)!,
+    dest,
+    options,
+  };
 
   function isRelative(dir: string, file: string) {
     return !path
@@ -94,11 +108,11 @@ export async function create(createOptions: Options): Promise<void> {
     return file;
   }
 
-  if (isNext) {
-    await copy(path.join(sourceDir, `template/${template}`), dest, {
-      rename: defaultRename,
-    });
+  await copy(path.join(sourceDir, `template/${template}`), dest, {
+    rename: defaultRename,
+  });
 
+  if (isNext) {
     // optional ESLint configuration
     if (lint) {
       await copy(path.join(sourceDir, `template/+next+${lint}`), dest, {
@@ -122,10 +136,6 @@ export async function create(createOptions: Options): Promise<void> {
 
       await fs.writeFile(tsconfigPath, JSON.stringify(config, null, 2));
     }
-  } else {
-    await copy(path.join(sourceDir, `template/${template}`), dest, {
-      rename: defaultRename,
-    });
   }
 
   const packageJson = await createPackageJson(projectName, dest, options);
@@ -136,6 +146,10 @@ export async function create(createOptions: Options): Promise<void> {
 
   const readMe = await getReadme(dest, projectName);
   await fs.writeFile(path.join(dest, 'README.md'), readMe);
+
+  for (const plugin of plugins) {
+    await plugin.afterWrite?.(pluginContext);
+  }
 
   if (installDeps) {
     try {
@@ -164,6 +178,7 @@ async function createPackageJson(
   dir: string,
   { template, lint }: Required<Options>,
 ): Promise<object> {
+  const isNext = template.startsWith('+next');
   function replaceWorkspaceDeps(deps: Record<string, string>) {
     for (const k in deps) {
       if (deps[k].startsWith('workspace:') && k in localVersions) {
@@ -187,31 +202,43 @@ async function createPackageJson(
     devDependencies: replaceWorkspaceDeps(packageJson.devDependencies),
   };
 
-  if (template === '+next+fuma-docs-mdx') {
+  if (isNext) {
     packageJson = {
       ...packageJson,
       scripts: {
         ...packageJson.scripts,
         postinstall: 'fumadocs-mdx',
-        ...(lint &&
-          {
-            eslint: {
-              lint: 'eslint',
-            },
-            biome: { lint: 'biome check', format: 'biome format --write' },
-          }[lint]),
+      },
+    };
+  }
+
+  if (isNext && lint === 'biome') {
+    packageJson = {
+      ...packageJson,
+      scripts: {
+        ...packageJson.scripts,
+        lint: 'biome check',
+        format: 'biome format --write',
       },
       devDependencies: {
         ...packageJson.devDependencies,
-        ...(lint &&
-          {
-            eslint: {
-              eslint: '^9',
-              'eslint-config-next': versionPkg.dependencies.next,
-              '@eslint/eslintrc': '^3',
-            },
-            biome: pick(versionPkg.dependencies, ['@biomejs/biome']),
-          }[lint]),
+        ...pick(versionPkg.dependencies, ['@biomejs/biome']),
+      },
+    };
+  }
+
+  if (isNext && lint === 'eslint') {
+    packageJson = {
+      ...packageJson,
+      scripts: {
+        ...packageJson.scripts,
+        lint: 'eslint',
+      },
+      devDependencies: {
+        ...packageJson.devDependencies,
+        eslint: '^9',
+        'eslint-config-next': versionPkg.dependencies.next,
+        '@eslint/eslintrc': '^3',
       },
     };
   }
