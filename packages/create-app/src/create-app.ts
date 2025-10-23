@@ -1,6 +1,6 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import { tryGitInit } from '@/git';
+import { copy, tryGitInit } from '@/utils';
 import { versions as localVersions } from '@/versions';
 import versionPkg from '../../create-app-versions/package.json';
 import type { PackageManager } from './auto-install';
@@ -8,7 +8,6 @@ import { autoInstall } from './auto-install';
 import { cwd, sourceDir } from './constants';
 
 export const templates = [
-  '+next+content-collections',
   '+next+fuma-docs-mdx',
   'react-router',
   'react-router-spa',
@@ -187,27 +186,6 @@ async function getReadme(dest: string, projectName: string): Promise<string> {
     .then((res) => res.toString());
 
   return `# ${projectName}\n\n${template}`;
-}
-
-async function copy(
-  from: string,
-  to: string,
-  rename: (s: string) => string = (s) => s,
-): Promise<void> {
-  const stats = await fs.stat(from);
-
-  if (stats.isDirectory()) {
-    const files = await fs.readdir(from);
-
-    await Promise.all(
-      files.map((file) =>
-        copy(path.join(from, file), rename(path.join(to, file))),
-      ),
-    );
-  } else {
-    await fs.mkdir(path.dirname(to), { recursive: true });
-    await fs.copyFile(from, to);
-  }
 }
 
 async function createNextPackageJson(

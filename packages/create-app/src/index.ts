@@ -102,10 +102,6 @@ async function main(config: Options): Promise<void> {
               hint: 'recommended',
             },
             {
-              value: '+next+content-collections',
-              label: 'Next.js: Content Collections',
-            },
-            {
               value: 'waku',
               label: 'Waku: Fumadocs MDX',
             },

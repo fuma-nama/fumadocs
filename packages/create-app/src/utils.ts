@@ -1,12 +1,27 @@
-import * as fs from 'node:fs/promises';
-import { join } from 'node:path';
+import fs from 'node:fs/promises';
+import path, { join } from 'node:path';
 import { x } from 'tinyexec';
 
-/*
-Initialize a Git repo on the project.
+export async function copy(
+  from: string,
+  to: string,
+  rename: (s: string) => string = (s) => s,
+): Promise<void> {
+  const stats = await fs.stat(from);
 
-Based on https://github.com/vercel/next.js/blob/canary/packages/create-next-app/helpers/git.ts
-*/
+  if (stats.isDirectory()) {
+    const files = await fs.readdir(from);
+
+    await Promise.all(
+      files.map((file) =>
+        copy(path.join(from, file), rename(path.join(to, file))),
+      ),
+    );
+  } else {
+    await fs.mkdir(path.dirname(to), { recursive: true });
+    await fs.copyFile(from, to);
+  }
+}
 
 async function isInGitRepository(cwd: string) {
   const { exitCode } = await x('git', ['rev-parse', '--is-inside-work-tree'], {
@@ -24,6 +39,11 @@ async function isDefaultBranchSet(cwd: string) {
   return exitCode === 0;
 }
 
+/*
+Initialize a Git repo on the project.
+
+Based on https://github.com/vercel/next.js/blob/canary/packages/create-next-app/helpers/git.ts
+*/
 export async function tryGitInit(cwd: string): Promise<boolean> {
   const { exitCode } = await x('git', ['--version']);
   if (exitCode !== 0) return false;
