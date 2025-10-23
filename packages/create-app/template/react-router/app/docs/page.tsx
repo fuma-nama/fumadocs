@@ -7,11 +7,11 @@ import {
   DocsTitle,
 } from 'fumadocs-ui/page';
 import { source } from '@/lib/source';
-import { baseOptions } from '@/lib/layout.shared';
 import type * as PageTree from 'fumadocs-core/page-tree';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { docs } from '@/.source';
 import { toClientRenderer } from 'fumadocs-mdx/runtime/vite';
+import { baseOptions } from '@/lib/layout.shared';
 
 export async function loader({ params }: Route.LoaderArgs) {
   const slugs = params['*'].split('/').filter((v) => v.length > 0);
@@ -20,7 +20,7 @@ export async function loader({ params }: Route.LoaderArgs) {
 
   return {
     path: page.path,
-    tree: source.pageTree,
+    tree: source.getPageTree(),
   };
 }
 
@@ -41,8 +41,8 @@ const renderer = toClientRenderer(
   },
 );
 
-export default function Page(props: Route.ComponentProps) {
-  const { tree, path } = props.loaderData;
+export default function Page({ loaderData }: Route.ComponentProps) {
+  const { tree, path } = loaderData;
   const Content = renderer[path];
 
   return (

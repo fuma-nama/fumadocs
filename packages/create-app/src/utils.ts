@@ -5,19 +5,31 @@ import { x } from 'tinyexec';
 export async function copy(
   from: string,
   to: string,
-  rename: (s: string) => string = (s) => s,
+  options: {
+    rename?: (s: string) => string;
+    filter?: (s: string) => boolean;
+    filterDir?: (dir: string) => boolean;
+  },
 ): Promise<void> {
+  const {
+    rename = (s) => s,
+    filterDir = () => true,
+    filter = () => true,
+  } = options;
   const stats = await fs.stat(from);
 
-  if (stats.isDirectory()) {
+  if (stats.isDirectory() && filterDir(from)) {
     const files = await fs.readdir(from);
 
     await Promise.all(
       files.map((file) =>
-        copy(path.join(from, file), rename(path.join(to, file))),
+        copy(path.join(from, file), path.join(to, file), options),
       ),
     );
-  } else {
+  }
+
+  if (stats.isFile() && filter(from)) {
+    to = rename(to);
     await fs.mkdir(path.dirname(to), { recursive: true });
     await fs.copyFile(from, to);
   }

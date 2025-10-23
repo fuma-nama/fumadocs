@@ -103,32 +103,28 @@ export async function create(createOptions: Options): Promise<void> {
   }
 
   if (isNext) {
-    await copy(path.join(sourceDir, `template/+next`), dest, defaultRename);
+    await copy(path.join(sourceDir, `template/+next`), dest, {
+      rename: defaultRename,
+    });
 
-    await copy(
-      path.join(sourceDir, `template/${template}`),
-      dest,
-      defaultRename,
-    );
+    await copy(path.join(sourceDir, `template/${template}`), dest, {
+      rename: defaultRename,
+    });
 
     // optional Tailwind CSS configuration
     if (tailwindcss) {
-      await copy(
-        path.join(sourceDir, `template/+next+tailwindcss`),
-        dest,
-        defaultRename,
-      );
+      await copy(path.join(sourceDir, `template/+next+tailwindcss`), dest, {
+        rename: defaultRename,
+      });
 
       log('Configured Tailwind CSS');
     }
 
     // optional ESLint configuration
     if (lint) {
-      await copy(
-        path.join(sourceDir, `template/+next+${lint}`),
-        dest,
-        defaultRename,
-      );
+      await copy(path.join(sourceDir, `template/+next+${lint}`), dest, {
+        rename: defaultRename,
+      });
       log('Configured Linter');
     }
 
@@ -148,11 +144,9 @@ export async function create(createOptions: Options): Promise<void> {
       await fs.writeFile(tsconfigPath, JSON.stringify(config, null, 2));
     }
   } else {
-    await copy(
-      path.join(sourceDir, `template/${template}`),
-      dest,
-      defaultRename,
-    );
+    await copy(path.join(sourceDir, `template/${template}`), dest, {
+      rename: defaultRename,
+    });
   }
 
   const packageJson = isNext
