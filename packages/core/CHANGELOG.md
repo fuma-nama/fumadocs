@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 16.0.2
+
+### Patch Changes
+
+- d511232: Fix i18n middleware search params handling
+
 ## 16.0.1
 
 ### Patch Changes
