@@ -1,5 +1,5 @@
 import { match as matchLocale } from '@formatjs/intl-localematcher';
-import type { NextMiddleware } from 'next/dist/server/web/types';
+import type { NextProxy } from 'next/dist/server/web/types';
 import { type NextRequest, NextResponse } from 'next/server';
 import type { I18nConfig } from '@/i18n';
 import { getNegotiator } from '@/negotiation';
@@ -35,38 +35,23 @@ export function createI18nMiddleware({
   defaultLanguage,
   format = defaultFormat,
   hideLocale = 'never',
-}: MiddlewareOptions): NextMiddleware {
-  function getUrl(
-    request: NextRequest,
-    pathname: string,
-    locale?: string,
-  ): URL {
-    if (!locale) {
-      return new URL(
-        pathname.startsWith('/') ? pathname : `/${pathname}`,
-        request.url,
-      );
-    }
-
-    return new URL(
-      format(locale, pathname.startsWith('/') ? pathname.slice(1) : pathname),
-      request.url,
-    );
+}: MiddlewareOptions): NextProxy {
+  function getLocaleUrl(request: NextRequest, locale: string): URL {
+    const next = new URL(request.url);
+    next.pathname = format(locale, forceSlashPrefix(request.nextUrl.pathname));
+    return next;
   }
 
   return (request) => {
-    const inputPath = `${request.nextUrl.pathname}${request.nextUrl.search}`;
-
+    const url = request.nextUrl;
     const pathLocale = languages.find(
       (locale) =>
-        inputPath.startsWith(`/${locale}/`) || inputPath === `/${locale}`,
+        url.pathname.startsWith(`/${locale}/`) || url.pathname === `/${locale}`,
     );
 
     if (!pathLocale) {
       if (hideLocale === 'default-locale') {
-        return NextResponse.rewrite(
-          getUrl(request, inputPath, defaultLanguage),
-        );
+        return NextResponse.rewrite(getLocaleUrl(request, defaultLanguage));
       }
 
       const preferred = getLocale(request, languages, defaultLanguage);
@@ -74,28 +59,32 @@ export function createI18nMiddleware({
       if (hideLocale === 'always') {
         const locale = request.cookies.get(COOKIE)?.value ?? preferred;
 
-        return NextResponse.rewrite(getUrl(request, inputPath, locale));
+        return NextResponse.rewrite(getLocaleUrl(request, locale));
       }
 
-      return NextResponse.redirect(getUrl(request, inputPath, preferred));
+      return NextResponse.redirect(getLocaleUrl(request, preferred));
     }
 
-    if (hideLocale === 'always') {
-      const path = inputPath.slice(`/${pathLocale}`.length);
-
-      const res = NextResponse.redirect(getUrl(request, path));
+    // Remove explicit locale
+    if (
+      hideLocale === 'always' ||
+      (hideLocale === 'default-locale' && pathLocale === defaultLanguage)
+    ) {
+      const res = NextResponse.redirect(
+        new URL(
+          forceSlashPrefix(url.pathname.slice(`/${pathLocale}`.length)),
+          request.url,
+        ),
+      );
       res.cookies.set(COOKIE, pathLocale);
       return res;
     }
 
-    // Remove explicit default locale
-    // (Only possible for default locale)
-    if (hideLocale === 'default-locale' && pathLocale === defaultLanguage) {
-      return NextResponse.redirect(
-        getUrl(request, inputPath.slice(`/${pathLocale}`.length)),
-      );
-    }
-
     return NextResponse.next();
   };
+}
+
+function forceSlashPrefix(v: string) {
+  if (v.startsWith('/')) return v;
+  return '/' + v;
 }
