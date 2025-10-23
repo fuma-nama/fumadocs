@@ -1,5 +1,12 @@
 # create-next-docs-app
 
+## 16.0.2
+
+### Patch Changes
+
+- 91d7509: Support Orama Cloud template
+- d20e90a: Add SPA template for React Router
+
 ## 16.0.1
 
 ## 16.0.0
