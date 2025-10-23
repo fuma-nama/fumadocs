@@ -13,6 +13,7 @@ const templates = [
   'tanstack-start',
   'react-router-spa',
   'waku',
+  ['next-mdx', '+next+fuma-docs-mdx'],
 ];
 
 async function rm(files: string[]) {
@@ -22,54 +23,55 @@ async function rm(files: string[]) {
 async function main() {
   await Promise.all(
     templates.map(async (template) => {
+      template = Array.isArray(template) ? template : [template, template];
+      const inDir = path.join(examplesDir, template[0]);
+      const outDir = path.join(templateDir, template[1]);
+
       await rm(
         await glob(['**/*', '!README.md'], {
-          cwd: path.join(templateDir, template),
+          cwd: outDir,
           absolute: true,
         }),
       );
 
-      await copy(
-        path.join(examplesDir, template),
-        path.join(templateDir, template),
-        {
-          rename(name) {
-            switch (path.basename(name)) {
-              case '.gitignore':
-                return path.join(path.dirname(name), 'example.gitignore');
-              default:
-                return name;
-            }
-          },
-          filterDir(dir) {
-            const base = path.basename(dir);
-
-            switch (base) {
-              case 'node_modules':
-              case 'dist':
-              case 'build':
-                return false;
-              default:
-                return !base.startsWith('.');
-            }
-          },
-          filter(name) {
-            const base = path.basename(name);
-
-            switch (base) {
-              case 'next-env.d.ts':
-              case 'pages.gen.ts':
-              case 'routeTree.gen.ts':
-              case 'README.md':
-                return false;
-              case '.gitignore':
-                return true;
-              default:
-                return !base.startsWith('.');
-            }
-          },
+      await copy(inDir, outDir, {
+        rename(name) {
+          switch (path.basename(name)) {
+            case '.gitignore':
+              return path.join(path.dirname(name), 'example.gitignore');
+            default:
+              return name;
+          }
         },
-      );
+        filterDir(dir) {
+          const base = path.basename(dir);
+
+          switch (base) {
+            case 'node_modules':
+            case 'dist':
+            case 'build':
+              return false;
+            default:
+              return !base.startsWith('.');
+          }
+        },
+        filter(name) {
+          const base = path.basename(name);
+
+          switch (base) {
+            case 'next-env.d.ts':
+            case 'pages.gen.ts':
+            case 'routeTree.gen.ts':
+            case 'README.md':
+            case 'tsconfig.tsbuildinfo':
+              return false;
+            case '.gitignore':
+              return true;
+            default:
+              return !base.startsWith('.');
+          }
+        },
+      });
     }),
   );
 }

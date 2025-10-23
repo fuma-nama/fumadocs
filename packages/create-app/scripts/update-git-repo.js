@@ -16,7 +16,6 @@ fs.readdirSync(repo).forEach((file) => {
 await create({
   outputDir: repo,
   template: '+next+fuma-docs-mdx',
-  tailwindcss: false,
   installDeps: false,
   packageManager: 'npm',
 });

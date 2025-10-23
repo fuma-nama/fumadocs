@@ -1,5 +1,5 @@
 import { RootProvider } from 'fumadocs-ui/provider/next';
-import 'fumadocs-ui/style.css';
+import './global.css';
 import { Inter } from 'next/font/google';
 
 const inter = Inter({
@@ -9,13 +9,7 @@ const inter = Inter({
 export default function Layout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="en" className={inter.className} suppressHydrationWarning>
-      <body
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: '100vh',
-        }}
-      >
+      <body className="flex flex-col min-h-screen">
         <RootProvider>{children}</RootProvider>
       </body>
     </html>

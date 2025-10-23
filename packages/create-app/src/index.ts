@@ -213,7 +213,6 @@ async function main(config: Options): Promise<void> {
 
   await create({
     packageManager: manager,
-    tailwindcss: true,
     template: options.template,
     outputDir: dest,
     installDeps: options.installDeps,

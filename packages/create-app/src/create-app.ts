@@ -32,12 +32,6 @@ export interface Options {
   useSrcDir?: boolean;
 
   /**
-   * (Next.js only) Configure Tailwind CSS
-   * @defaultValue true
-   */
-  tailwindcss?: boolean;
-
-  /**
    * (Next.js Only) Configure Lint
    * @defaultValue false
    */
@@ -52,7 +46,6 @@ function defaults(options: Options): Required<Options> {
   return {
     ...options,
     useSrcDir: options.useSrcDir ?? false,
-    tailwindcss: options.tailwindcss ?? true,
     lint: options.lint ?? false,
     initializeGit: options.initializeGit ?? false,
     installDeps: options.installDeps ?? false,
@@ -71,7 +64,6 @@ export async function create(createOptions: Options): Promise<void> {
     lint,
     initializeGit,
     packageManager,
-    tailwindcss,
   } = options;
 
   const projectName = path.basename(outputDir);
@@ -103,22 +95,9 @@ export async function create(createOptions: Options): Promise<void> {
   }
 
   if (isNext) {
-    await copy(path.join(sourceDir, `template/+next`), dest, {
-      rename: defaultRename,
-    });
-
     await copy(path.join(sourceDir, `template/${template}`), dest, {
       rename: defaultRename,
     });
-
-    // optional Tailwind CSS configuration
-    if (tailwindcss) {
-      await copy(path.join(sourceDir, `template/+next+tailwindcss`), dest, {
-        rename: defaultRename,
-      });
-
-      log('Configured Tailwind CSS');
-    }
 
     // optional ESLint configuration
     if (lint) {
@@ -149,9 +128,7 @@ export async function create(createOptions: Options): Promise<void> {
     });
   }
 
-  const packageJson = isNext
-    ? await createNextPackageJson(projectName, options)
-    : await createPackageJson(projectName, dest);
+  const packageJson = await createPackageJson(projectName, dest, options);
   await fs.writeFile(
     path.join(dest, 'package.json'),
     JSON.stringify(packageJson, null, 2),
@@ -182,83 +159,10 @@ async function getReadme(dest: string, projectName: string): Promise<string> {
   return `# ${projectName}\n\n${template}`;
 }
 
-async function createNextPackageJson(
-  projectName: string,
-  { template, lint, tailwindcss }: Required<Options>,
-): Promise<object> {
-  return {
-    name: projectName,
-    version: '0.0.0',
-    private: true,
-    scripts: {
-      build: 'next build',
-      dev: 'next dev --turbo',
-      start: 'next start',
-      ...(template === '+next+fuma-docs-mdx' && {
-        postinstall: 'fumadocs-mdx',
-      }),
-      ...(lint &&
-        {
-          eslint: {
-            lint: 'eslint',
-          },
-          biome: { lint: 'biome check', format: 'biome format --write' },
-        }[lint]),
-    },
-    dependencies: {
-      ...pick(versionPkg.dependencies, [
-        'next',
-        'react',
-        'react-dom',
-        'lucide-react',
-      ]),
-      ...pick(localVersions, ['fumadocs-ui', 'fumadocs-core']),
-      ...{
-        '+next+content-collections': {
-          ...pick(versionPkg.dependencies, [
-            '@content-collections/mdx',
-            '@content-collections/core',
-            '@content-collections/next',
-          ]),
-          ...pick(localVersions, ['@fumadocs/content-collections']),
-        },
-        '+next+fuma-docs-mdx': pick(localVersions, ['fumadocs-mdx']),
-        waku: null,
-        'tanstack-start': null,
-        'react-router': null,
-        'react-router-spa': null,
-      }[template],
-    },
-    devDependencies: {
-      ...pick(versionPkg.dependencies, [
-        '@types/node',
-        '@types/react',
-        '@types/react-dom',
-        'typescript',
-        '@types/mdx',
-      ]),
-      ...(tailwindcss &&
-        pick(versionPkg.dependencies, [
-          '@tailwindcss/postcss',
-          'tailwindcss',
-          'postcss',
-        ])),
-      ...(lint &&
-        {
-          eslint: {
-            eslint: '^9',
-            'eslint-config-next': versionPkg.dependencies.next,
-            '@eslint/eslintrc': '^3',
-          },
-          biome: pick(versionPkg.dependencies, ['@biomejs/biome']),
-        }[lint]),
-    },
-  };
-}
-
 async function createPackageJson(
   projectName: string,
   dir: string,
+  { template, lint }: Required<Options>,
 ): Promise<object> {
   function replaceWorkspaceDeps(deps: Record<string, string>) {
     for (const k in deps) {
@@ -270,18 +174,49 @@ async function createPackageJson(
     return deps;
   }
 
-  const packageJson = JSON.parse(
+  let packageJson = JSON.parse(
     await fs
       .readFile(path.join(dir, 'package.json'))
       .then((res) => res.toString()),
   );
 
-  return {
+  packageJson = {
     name: projectName,
     ...packageJson,
     dependencies: replaceWorkspaceDeps(packageJson.dependencies),
     devDependencies: replaceWorkspaceDeps(packageJson.devDependencies),
   };
+
+  if (template === '+next+fuma-docs-mdx') {
+    packageJson = {
+      ...packageJson,
+      scripts: {
+        ...packageJson.scripts,
+        postinstall: 'fumadocs-mdx',
+        ...(lint &&
+          {
+            eslint: {
+              lint: 'eslint',
+            },
+            biome: { lint: 'biome check', format: 'biome format --write' },
+          }[lint]),
+      },
+      devDependencies: {
+        ...packageJson.devDependencies,
+        ...(lint &&
+          {
+            eslint: {
+              eslint: '^9',
+              'eslint-config-next': versionPkg.dependencies.next,
+              '@eslint/eslintrc': '^3',
+            },
+            biome: pick(versionPkg.dependencies, ['@biomejs/biome']),
+          }[lint]),
+      },
+    };
+  }
+
+  return packageJson;
 }
 
 function pick<T extends object, K extends keyof T>(
