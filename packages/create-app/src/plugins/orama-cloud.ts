@@ -10,7 +10,7 @@ const oramaCloud: TemplatePlugin = {
       ...packageJson,
       scripts: {
         ...packageJson.scripts,
-        build: `${packageJson.build} && bun scripts/sync-content.ts`,
+        build: `${packageJson.scripts.build} && bun scripts/sync-content.ts`,
       },
       dependencies: {
         ...packageJson.dependencies,
