@@ -138,7 +138,7 @@
     "@types/node": "24.9.1",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
-    "algoliasearch": "5.40.1",
+    "algoliasearch": "5.41.0",
     "eslint-config-custom": "workspace:*",
     "lucide-react": "^0.546.0",
     "mdast-util-mdx-jsx": "^3.2.0",
@@ -154,7 +154,7 @@
     "waku": "^0.26.1"
   },
   "peerDependencies": {
-    "@mixedbread/sdk": "^0.19.0",
+    "@mixedbread/sdk": "^0.35.0",
     "@orama/core": "1.x.x",
     "@tanstack/react-router": "1.x.x",
     "@types/react": "*",
