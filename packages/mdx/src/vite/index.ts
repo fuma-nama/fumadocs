@@ -10,7 +10,7 @@ import { validate, ValidationError } from '@/utils/validation';
 import * as path from 'node:path';
 import { load } from 'js-yaml';
 import { createMdxLoader } from '@/loaders/mdx';
-import { findConfigFile, resolvedConfig } from '@/loaders/config';
+import { findConfigFile } from '@/loaders/config';
 import { toVite } from '@/loaders/adapter';
 import vite, { type IndexFileOptions } from '@/plugins/vite';
 import type { FSWatcher } from 'chokidar';
@@ -54,7 +54,7 @@ export default async function mdx(
   const core = await createViteCore(options).init({
     config: buildConfig(config),
   });
-  const mdxLoader = toVite(createMdxLoader(resolvedConfig(core.getConfig())));
+  const mdxLoader = toVite(createMdxLoader(core.creatConfigLoader()));
 
   async function transformMeta(
     path: string,

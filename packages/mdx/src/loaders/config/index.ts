@@ -7,6 +7,7 @@ import type {
 } from '@/config';
 import type { ProcessorOptions } from '@mdx-js/mdx';
 import fs from 'node:fs/promises';
+import { Core } from '@/core';
 
 export interface ConfigLoader {
   getConfig: () => LoadedConfig | Promise<LoadedConfig>;
@@ -23,57 +24,66 @@ export function findConfigFile(): string {
   return path.resolve('source.config.ts');
 }
 
-export function resolvedConfig(loaded: LoadedConfig): ConfigLoader {
-  return {
-    getConfig() {
-      return loaded;
-    },
-  };
-}
-
 export function staticConfig({
-  outDir,
-  configPath,
+  core,
   buildConfig,
 }: {
-  configPath: string;
-  outDir: string;
+  core: Core;
   buildConfig: boolean;
 }): ConfigLoader {
   let cached: Promise<LoadedConfig> | undefined;
+  async function newConfig() {
+    const { loadConfig } = await import('./load');
+    await core.init({
+      config: loadConfig(
+        core._options.configPath,
+        core._options.outDir,
+        buildConfig,
+      ),
+    });
+
+    return core.getConfig();
+  }
 
   return {
     async getConfig() {
-      if (cached) return cached;
-
-      cached = import('./load').then((mod) =>
-        mod.loadConfig(configPath, outDir, buildConfig),
-      );
-
-      return cached;
+      return (cached ??= newConfig());
     },
   };
 }
 
 export function dynamicConfig({
-  outDir,
-  configPath,
+  core,
   buildConfig,
 }: {
-  configPath: string;
-  outDir: string;
+  core: Core;
   buildConfig: boolean;
 }): ConfigLoader {
   let loaded: { config: Promise<LoadedConfig>; hash: string } | undefined;
 
   async function getConfigHash(): Promise<string> {
-    const stats = await fs.stat(configPath).catch(() => undefined);
+    const stats = await fs
+      .stat(core._options.configPath)
+      .catch(() => undefined);
 
     if (stats) {
       return stats.mtime.getTime().toString();
     }
 
     throw new Error('Cannot find config file');
+  }
+
+  async function newConfig() {
+    const { loadConfig } = await import('./load');
+    await core.init({
+      config: loadConfig(
+        core._options.configPath,
+        core._options.outDir,
+        buildConfig,
+      ),
+    });
+
+    return core.getConfig();
   }
 
   return {
@@ -83,11 +93,8 @@ export function dynamicConfig({
 
       loaded = {
         hash,
-        config: import('./load').then((mod) =>
-          mod.loadConfig(configPath, outDir, buildConfig),
-        ),
+        config: newConfig(),
       };
-
       return loaded.config;
     },
   };

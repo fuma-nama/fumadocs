@@ -26,17 +26,6 @@ const cacheEntry = z.object({
 
 type CacheEntry = z.infer<typeof cacheEntry>;
 
-const hashes = new WeakMap<LoadedConfig, string>();
-
-function getConfigHash(config: LoadedConfig) {
-  let hash = hashes.get(config);
-  if (hash) return hash;
-
-  hash = Date.now().toString();
-  hashes.set(config, hash);
-  return hash;
-}
-
 export function createMdxLoader(configLoader: ConfigLoader): Loader {
   return async ({
     source: value,
@@ -47,24 +36,34 @@ export function createMdxLoader(configLoader: ConfigLoader): Loader {
   }) => {
     const matter = fumaMatter(value);
     const parsed = querySchema.parse(query);
+    const config = await configLoader.getConfig();
 
-    const loaded = await configLoader.getConfig();
-    const cacheDir = isDevelopment
-      ? undefined
-      : loaded.global.experimentalBuildCache;
-    const cacheKey = `${parsed.hash}_${parsed.collection ?? 'global'}_${generateCacheHash(filePath)}`;
+    let after: (() => Promise<void>) | undefined;
 
-    if (cacheDir) {
+    if (!isDevelopment && config.global.experimentalBuildCache) {
+      const cacheDir = config.global.experimentalBuildCache;
+      const cacheKey = `${parsed.hash}_${parsed.collection ?? 'global'}_${generateCacheHash(filePath)}`;
+
       const cached = await fs
         .readFile(path.join(cacheDir, cacheKey))
         .then((content) => cacheEntry.parse(JSON.parse(content.toString())))
         .catch(() => null);
 
       if (cached && cached.hash === generateCacheHash(value)) return cached;
+      after = async () => {
+        await fs.mkdir(cacheDir, { recursive: true });
+        await fs.writeFile(
+          path.join(cacheDir, cacheKey),
+          JSON.stringify({
+            ...out,
+            hash: generateCacheHash(value),
+          } satisfies CacheEntry),
+        );
+      };
     }
 
     const collection = parsed.collection
-      ? loaded.collections.get(parsed.collection)
+      ? config.collections.get(parsed.collection)
       : undefined;
 
     let docCollection: DocCollection | undefined;
@@ -97,7 +96,7 @@ export function createMdxLoader(configLoader: ConfigLoader): Loader {
     }
 
     const data: Record<string, unknown> = {};
-    if (loaded.global.lastModifiedTime === 'git') {
+    if (config.global.lastModifiedTime === 'git') {
       data.lastModified = (await getGitTimestamp(filePath))?.getTime();
     }
 
@@ -105,11 +104,11 @@ export function createMdxLoader(configLoader: ConfigLoader): Loader {
     const lineOffset = isDevelopment ? countLines(matter.matter) : 0;
 
     const compiled = await buildMDX(
-      `${getConfigHash(loaded)}:${parsed.collection ?? 'global'}`,
+      `${getConfigHash(config)}:${parsed.collection ?? 'global'}`,
       '\n'.repeat(lineOffset) + matter.content,
       {
         development: isDevelopment,
-        ...(docCollection?.mdxOptions ?? (await loaded.getDefaultMDXOptions())),
+        ...(docCollection?.mdxOptions ?? (await config.getDefaultMDXOptions())),
         postprocess: docCollection?.postprocess,
         data,
         filePath,
@@ -123,19 +122,20 @@ export function createMdxLoader(configLoader: ConfigLoader): Loader {
       map: compiled.map as SourceMap,
     };
 
-    if (cacheDir) {
-      await fs.mkdir(cacheDir, { recursive: true });
-      await fs.writeFile(
-        path.join(cacheDir, cacheKey),
-        JSON.stringify({
-          ...out,
-          hash: generateCacheHash(value),
-        } satisfies CacheEntry),
-      );
-    }
-
+    await after?.();
     return out;
   };
+}
+
+const hashes = new WeakMap<LoadedConfig, string>();
+
+function getConfigHash(config: LoadedConfig) {
+  let hash = hashes.get(config);
+  if (hash) return hash;
+
+  hash = Date.now().toString();
+  hashes.set(config, hash);
+  return hash;
 }
 
 function generateCacheHash(input: string): string {

@@ -2,6 +2,7 @@ import { type LoaderContext } from 'webpack';
 import { createMdxLoader } from '@/loaders/mdx';
 import { dynamicConfig, staticConfig } from '@/loaders/config';
 import { toWebpack, type WebpackLoader } from '@/loaders/adapter';
+import { createCore } from '@/core';
 
 export interface Options {
   configPath: string;
@@ -25,22 +26,27 @@ export default async function loader(
   this.cacheable(true);
   this.addDependency(configPath);
 
-  instance ??= toWebpack(
-    createMdxLoader(
-      // the config is built on dev server
-      isDev
-        ? dynamicConfig({
-            outDir,
-            configPath,
-            buildConfig: false,
-          })
-        : staticConfig({
-            outDir,
-            configPath,
-            buildConfig: false,
-          }),
-    ),
-  );
+  if (!instance) {
+    const core = createCore({
+      environment: 'webpack',
+      outDir,
+      configPath,
+    });
+
+    instance = toWebpack(
+      createMdxLoader(
+        isDev
+          ? dynamicConfig({
+              core,
+              buildConfig: false,
+            })
+          : staticConfig({
+              core,
+              buildConfig: false,
+            }),
+      ),
+    );
+  }
 
   await instance.call(this, source, callback);
 }

@@ -1,5 +1,5 @@
 import type { LoadedConfig } from '@/loaders/config';
-import type { ServerContext } from '@/core';
+import type { CoreOptions, ServerContext } from '@/core';
 
 type Awaitable<T> = T | Promise<T>;
 
@@ -11,11 +11,7 @@ export interface EmitEntry {
   content: string;
 }
 
-export interface PluginContext {
-  environment: 'next' | 'vite';
-  configPath: string;
-  outDir: string;
-}
+export type PluginContext = CoreOptions;
 
 export interface Plugin {
   /**

@@ -1,21 +1,31 @@
 import type { BunPlugin } from 'bun';
 import { createMdxLoader } from '@/loaders/mdx';
-import { findConfigFile, resolvedConfig } from '@/loaders/config';
+import { findConfigFile } from '@/loaders/config';
 import { buildConfig } from '@/config/build';
 import { parse } from 'node:querystring';
 import { pathToFileURL } from 'node:url';
+import { type CoreOptions, createCore } from '@/core';
 
-export interface MdxPluginOptions {
-  configPath?: string;
-}
+export type MdxPluginOptions = Partial<CoreOptions>;
 
 export function createMdxPlugin(options: MdxPluginOptions = {}): BunPlugin {
-  const { configPath = findConfigFile() } = options;
+  const {
+    environment = 'bun',
+    outDir = '.source',
+    configPath = findConfigFile(),
+  } = options;
 
   async function getMdxLoader() {
     const importPath = pathToFileURL(configPath).href;
-    const out = buildConfig(await import(importPath));
-    return createMdxLoader(resolvedConfig(out));
+    const core = await createCore({
+      environment,
+      outDir,
+      configPath,
+    }).init({
+      config: buildConfig(await import(importPath)),
+    });
+
+    return createMdxLoader(core.creatConfigLoader());
   }
 
   return {

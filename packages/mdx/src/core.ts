@@ -1,15 +1,21 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import type { LoadedConfig } from '@/loaders/config';
-import { EmitEntry, Plugin, PluginContext, PluginOption } from '@/plugins';
+import type { ConfigLoader, LoadedConfig } from '@/loaders/config';
+import type { EmitEntry, Plugin, PluginOption } from '@/plugins';
 import type { FSWatcher } from 'chokidar';
 
 export interface ServerContext {
   watcher?: FSWatcher;
 }
 
+export interface CoreOptions {
+  environment: string;
+  configPath: string;
+  outDir: string;
+}
+
 export function createCore(
-  context: PluginContext,
+  context: CoreOptions,
   defaultPlugins: PluginOption[] = [],
 ) {
   let config: LoadedConfig;
@@ -22,6 +28,7 @@ export function createCore(
   }
 
   return {
+    _options: context,
     async init(options: { config: LoadedConfig | Promise<LoadedConfig> }) {
       config = await options.config;
       plugins = [];
@@ -45,6 +52,13 @@ export function createCore(
     getConfig() {
       return config;
     },
+    creatConfigLoader(): ConfigLoader {
+      return {
+        getConfig() {
+          return config;
+        },
+      };
+    },
     async initServer(server: ServerContext) {
       for (const plugin of plugins) {
         await plugin.configureServer?.call(context, server);
@@ -66,3 +80,5 @@ export function createCore(
     },
   };
 }
+
+export type Core = ReturnType<typeof createCore>;
