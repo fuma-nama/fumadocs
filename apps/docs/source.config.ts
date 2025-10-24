@@ -17,6 +17,7 @@ import {
 } from 'fumadocs-core/mdx-plugins';
 import { remarkAutoTypeTable } from 'fumadocs-typescript';
 import type { ElementContent } from 'hast';
+import jsonSchema from 'fumadocs-mdx/plugins/json-schema';
 
 export const docs = defineDocs({
   docs: {
@@ -50,6 +51,11 @@ export const blog = defineCollections({
 
 export default defineConfig({
   lastModifiedTime: 'git',
+  plugins: [
+    jsonSchema({
+      insert: true,
+    }),
+  ],
   mdxOptions: {
     rehypeCodeOptions: {
       lazy: true,
