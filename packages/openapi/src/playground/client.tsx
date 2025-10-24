@@ -48,7 +48,7 @@ import {
   CollapsibleTrigger,
 } from 'fumadocs-ui/components/ui/collapsible';
 import { ChevronDown, LoaderCircle } from 'lucide-react';
-import { encodeRequestData, type RequestData } from '@/requests/_shared';
+import { encodeRequestData } from '@/requests/media/encode';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from 'fumadocs-ui/utils/cn';
 import {
@@ -70,6 +70,7 @@ import {
 } from '@/ui/components/select';
 import { labelVariants } from '@/ui/components/input';
 import type { ParsedSchema } from '@/utils/schema';
+import type { RequestData } from '@/requests/types';
 
 interface FormValues {
   path: Record<string, unknown>;

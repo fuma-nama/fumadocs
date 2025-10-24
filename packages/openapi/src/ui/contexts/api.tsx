@@ -8,7 +8,7 @@ import {
   useState,
 } from 'react';
 import type { RenderContext, ServerObject } from '@/types';
-import { defaultAdapters, type MediaAdapter } from '@/media/adapter';
+import { defaultAdapters, type MediaAdapter } from '@/requests/media/adapter';
 
 export interface ApiProviderProps
   extends Omit<ApiContextType, 'mediaAdapters'> {

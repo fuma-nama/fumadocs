@@ -7,12 +7,9 @@ import { CodeExample, CodeExampleProvider } from '@/ui/lazy';
 import { getPreferredType, type NoReference } from '@/utils/schema';
 import { getRequestData } from '@/render/operation/get-request-data';
 import { sample } from 'openapi-sampler';
-import {
-  encodeRequestData,
-  type RawRequestData,
-  type RequestData,
-} from '@/requests/_shared';
-import { defaultSamples } from '@/requests';
+import type { RawRequestData, RequestData } from '@/requests/types';
+import { defaultSamples } from '@/requests/generators';
+import { encodeRequestData } from '@/requests/media/encode';
 
 interface CustomProperty {
   'x-codeSamples'?: CodeSample[];

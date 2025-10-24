@@ -26,7 +26,7 @@ import {
   resolveServerUrl,
   withBase,
 } from '@/utils/url';
-import type { RawRequestData, RequestData } from '@/requests/_shared';
+import type { RawRequestData, RequestData } from '@/requests/types';
 
 type UpdateListener = (data: RawRequestData, encoded: RequestData) => void;
 

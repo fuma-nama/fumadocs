@@ -2,11 +2,11 @@ import { describe, expect, test } from 'vitest';
 import { combineSchema } from '@/utils/combine-schema';
 import {
   joinURL,
-  withBase,
-  resolveServerUrl,
   resolveRequestData,
+  resolveServerUrl,
+  withBase,
 } from '@/utils/url';
-import type { RequestData } from '@/requests/_shared';
+import type { RequestData } from '@/requests/types';
 
 describe('Merge object schemas', () => {
   test('Merge single object', () => {

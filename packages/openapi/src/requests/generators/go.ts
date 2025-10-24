@@ -1,5 +1,6 @@
 'use client';
-import { ident, type SampleGenerator } from '@/requests/_shared';
+import { ident } from '@/requests/string-utils';
+import type { SampleGenerator } from '@/requests/types';
 
 export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
   const imports = ['fmt', 'net/http', 'io/ioutil'];

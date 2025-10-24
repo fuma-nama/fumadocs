@@ -1,5 +1,5 @@
 'use client';
-import type { SampleGenerator } from '@/requests/_shared';
+import type { SampleGenerator } from '@/requests/types';
 
 export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
   const s: string[] = [];

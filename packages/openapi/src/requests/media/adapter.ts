@@ -1,4 +1,4 @@
-import { escapeString, inputToString } from '@/utils/input-to-string';
+import { escapeString, inputToString } from '@/requests/string-utils';
 // @ts-expect-error -- untyped
 import js2xml from 'xml-js/lib/js2xml';
 
@@ -251,9 +251,6 @@ function str(
   }
 
   if (ctx.lang === 'python') {
-    if (mediaType === 'application/json')
-      return `body = ${JSON.stringify(init, null, 2)}`;
-
     return `body = ${escapeString(inputToString(init, mediaType), '"""')}`;
   }
 

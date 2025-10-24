@@ -1,10 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import * as Python from '@/requests/python';
-import * as Go from '@/requests/go';
-import * as Curl from '@/requests/curl';
-import * as JS from '@/requests/javascript';
-import type { RequestData } from '@/requests/_shared';
-import { defaultAdapters } from '@/media/adapter';
+import * as Python from '@/requests/generators/python';
+import * as Go from '@/requests/generators/go';
+import * as Curl from '@/requests/generators/curl';
+import * as JS from '@/requests/generators/javascript';
+import type { RequestData } from '@/requests/types';
+import { defaultAdapters } from '@/requests/media/adapter';
 import { resolveRequestData } from '@/utils/url';
 
 describe('Code Sample Generators', () => {

@@ -47,3 +47,10 @@ export function escapeString(str: string, delimit?: string): string {
 
   return `${delimit}${str.replaceAll(delimit, `\\${delimit}`)}${delimit}`;
 }
+
+export function ident(code: string, tab: number = 1) {
+  return code
+    .split('\n')
+    .map((v) => '  '.repeat(tab) + v)
+    .join('\n');
+}

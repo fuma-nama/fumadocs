@@ -3,7 +3,7 @@ import type { default as Slugger } from 'github-slugger';
 import { type Renderer } from '@/render/renderer';
 import type { NoReference } from '@/utils/schema';
 import type { ProcessedDocument } from '@/utils/process-document';
-import type { MediaAdapter } from '@/media/adapter';
+import type { MediaAdapter } from '@/requests/media/adapter';
 import type { SharedOpenAPIOptions } from '@/server';
 
 export type Document = V3_1.Document;

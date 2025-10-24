@@ -17,7 +17,7 @@ import {
   getAPIExamples,
 } from '@/render/operation/api-example';
 import { MethodLabel } from '@/ui/components/method-label';
-import { type SampleGenerator } from '@/requests/_shared';
+import { type SampleGenerator } from '@/requests/types';
 import { getTypescriptSchema } from '@/utils/get-typescript-schema';
 import { CopyResponseTypeScript } from '@/ui/client';
 import { SelectTab, SelectTabs, SelectTabTrigger } from '@/ui/select-tabs';

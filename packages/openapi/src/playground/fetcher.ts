@@ -1,5 +1,5 @@
-import type { RequestData } from '@/requests/_shared';
-import type { MediaAdapter } from '@/media/adapter';
+import type { RequestData } from '@/requests/types';
+import type { MediaAdapter } from '@/requests/media/adapter';
 
 export interface FetchOptions extends RequestData {
   proxyUrl?: string;

@@ -1,10 +1,10 @@
 import type { CodeSample } from '@/render/operation';
-import * as CURL from '@/requests/curl';
-import * as JS from '@/requests/javascript';
-import * as Go from '@/requests/go';
-import * as Python from '@/requests/python';
-import * as Java from '@/requests/java';
-import * as CSharp from '@/requests/csharp';
+import * as CURL from './curl';
+import * as JS from './javascript';
+import * as Go from './go';
+import * as Python from './python';
+import * as Java from './java';
+import * as CSharp from './csharp';
 
 export const defaultSamples: CodeSample[] = [
   {

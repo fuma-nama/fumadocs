@@ -2,7 +2,7 @@ import type { MethodInformation, RenderContext } from '@/types';
 import type { ResolvedSchema } from '@/utils/schema';
 import { getPreferredType } from '@/utils/schema';
 import { sample } from 'openapi-sampler';
-import { type RawRequestData } from '@/requests/_shared';
+import type { RawRequestData } from '@/requests/types';
 
 export function getRequestData(
   path: string,

@@ -1,10 +1,14 @@
 'use client';
-import { type SampleGenerator } from '@/requests/_shared';
+import type { SampleGenerator } from '@/requests/types';
+import { generatePythonObject } from '@/requests/to-python-object';
 
 export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
   const headers: Record<string, string> = {};
+  const imports = new Set<string>();
   const params = [`"${data.method}"`, 'url'];
   let body: string | undefined;
+
+  imports.add('requests');
 
   if (data.body && data.bodyMediaType && data.bodyMediaType in mediaAdapters) {
     headers['Content-Type'] = data.bodyMediaType;
@@ -16,9 +20,7 @@ export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
       },
     );
 
-    if (body && data.bodyMediaType === 'application/json') {
-      params.push('json = body');
-    } else if (body) {
+    if (body) {
       params.push('data = body');
     }
   }
@@ -28,7 +30,7 @@ export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
   }
 
   if (Object.keys(headers).length > 0) {
-    params.push(`headers = ${JSON.stringify(headers, null, 2)}`);
+    params.push(`headers = ${generatePythonObject(headers, imports)}`);
   }
 
   const inputCookies = Object.entries(data.cookie);
@@ -39,10 +41,12 @@ export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
       cookies[k] = v.value as string;
     }
 
-    params.push(`cookies = ${JSON.stringify(cookies, null, 2)}`);
+    params.push(`cookies = ${generatePythonObject(cookies, imports)}`);
   }
 
-  return `import requests
+  return `${Array.from(imports)
+    .map((name) => 'import ' + name)
+    .join('\n')}
 
 url = ${JSON.stringify(url)}
 ${body ?? ''}

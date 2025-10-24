@@ -8,7 +8,7 @@ import {
   processDocumentCached,
   type ProcessedDocument,
 } from '@/utils/process-document';
-import { defaultAdapters } from '@/media/adapter';
+import { defaultAdapters } from '@/requests/media/adapter';
 import type { SharedOpenAPIOptions } from '@/server';
 
 export interface ApiPageProps extends SharedOpenAPIOptions {

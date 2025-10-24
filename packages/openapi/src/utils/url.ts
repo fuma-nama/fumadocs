@@ -1,4 +1,4 @@
-import type { RequestData } from '@/requests/_shared';
+import type { RequestData } from '@/requests/types';
 
 export function joinURL(base: string, pathname: string): string {
   if (pathname.startsWith('/')) pathname = pathname.slice(1);

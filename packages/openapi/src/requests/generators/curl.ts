@@ -1,6 +1,6 @@
 'use client';
-import { escapeString, inputToString } from '@/utils/input-to-string';
-import { ident, type SampleGenerator } from '@/requests/_shared';
+import { escapeString, ident, inputToString } from '@/requests/string-utils';
+import type { SampleGenerator } from '@/requests/types';
 
 export const generator: SampleGenerator = (url, data) => {
   const s: string[] = [];

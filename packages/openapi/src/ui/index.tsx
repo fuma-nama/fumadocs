@@ -2,7 +2,7 @@ import type { HTMLAttributes } from 'react';
 import type { RootProps } from '@/render/renderer';
 import { ApiProvider } from '@/ui/lazy';
 import { cn } from 'fumadocs-ui/utils/cn';
-import type { MediaAdapter } from '@/media/adapter';
+import type { MediaAdapter } from '@/requests/media/adapter';
 
 export function Root({
   children,
