@@ -1,18 +1,18 @@
 import type { NextConfig } from 'next';
 import type { Configuration } from 'webpack';
-import { findConfigFile, type LoadedConfig } from '@/loaders/config';
-import { type Options as MDXLoaderOptions } from '../loader-mdx';
+import { findConfigFile } from '@/loaders/config';
+import { type Options as MDXLoaderOptions } from '@/webpack';
 import type {
   TurbopackLoaderOptions,
   TurbopackOptions,
 } from 'next/dist/server/config-shared';
-import { createPluginHandler } from '@/plugins';
 import * as path from 'node:path';
 import { loadConfig } from '@/loaders/config/load';
 import { removeFileCache } from '@/next/file-cache';
 import { ValidationError } from '@/utils/validation';
 import next from '@/plugins/next';
 import type { EventName } from 'chokidar/handler.js';
+import { createCore } from '@/core';
 
 export interface CreateMDXOptions {
   /**
@@ -95,20 +95,19 @@ async function init(
   dev: boolean,
   options: Required<CreateMDXOptions>,
 ): Promise<void> {
-  const pluginHandler = createNextPluginHandler(options);
-  let config: LoadedConfig;
+  const core = createNextCore(options);
 
   async function updateConfig() {
-    config = await pluginHandler.init(
-      await loadConfig(options.configPath, options.outDir, true),
-    );
+    await core.init({
+      config: loadConfig(options.configPath, options.outDir, true),
+    });
   }
 
   async function emitFiles() {
     const start = performance.now();
 
     try {
-      await pluginHandler.emitAndWrite();
+      await core.emitAndWrite();
     } catch (err) {
       if (err instanceof ValidationError) {
         console.error(err.toStringFormatted());
@@ -117,12 +116,28 @@ async function init(
       }
     }
 
-    console.log(`[MDX] updated map file in ${performance.now() - start}ms`);
+    console.log(`[MDX] updated files in ${performance.now() - start}ms`);
   }
 
   async function devServer() {
-    const { watcher } = await import('@/next/watcher');
-    const instance = watcher(options.configPath, config, [options.outDir]);
+    const { FSWatcher } = await import('chokidar');
+    const watcher = new FSWatcher({
+      ignoreInitial: true,
+      persistent: true,
+      ignored: [options.outDir],
+    });
+
+    watcher.add(options.configPath);
+    for (const collection of core.getConfig().collections.values()) {
+      if (collection.type === 'docs') {
+        watcher.add(collection.docs.dir);
+        watcher.add(collection.meta.dir);
+      } else {
+        watcher.add(collection.dir);
+      }
+    }
+
+    await core.initServer({ watcher });
 
     async function onUpdate(event: EventName, file: string) {
       const absolutePath = path.resolve(file);
@@ -131,43 +146,47 @@ async function init(
       if (absolutePath === path.resolve(options.configPath)) {
         await updateConfig();
         console.log('[MDX] restarting dev server');
-        await instance.close();
+        await watcher.close();
         void devServer();
       }
 
       await emitFiles();
     }
 
-    instance.on('ready', () => {
+    watcher.on('ready', () => {
       console.log('[MDX] started dev server');
     });
 
-    instance.on('all', (event, file) => {
+    watcher.on('all', (event, file) => {
       void onUpdate(event, file);
     });
 
     process.on('exit', () => {
       console.log('[MDX] closing dev server');
-      void instance.close();
+      void watcher.close();
     });
   }
 
   await updateConfig();
   await emitFiles();
-  if (dev) void devServer();
+  if (dev) {
+    await devServer();
+  }
 }
 
 export async function postInstall(
   configPath = findConfigFile(),
   outDir = '.source',
 ) {
-  const pluginHandler = createNextPluginHandler({
+  const core = await createNextCore({
     outDir,
     configPath,
+  }).init({
+    config: loadConfig(configPath, outDir, true),
   });
-  await pluginHandler.init(await loadConfig(configPath, outDir, true));
-  await pluginHandler.emitAndWrite();
-  console.log('[MDX] types generated');
+
+  await core.emitAndWrite();
+  console.log('[MDX] generated');
 }
 
 function applyDefaults(options: CreateMDXOptions): Required<CreateMDXOptions> {
@@ -177,11 +196,8 @@ function applyDefaults(options: CreateMDXOptions): Required<CreateMDXOptions> {
   };
 }
 
-function createNextPluginHandler({
-  outDir,
-  configPath,
-}: Required<CreateMDXOptions>) {
-  return createPluginHandler(
+function createNextCore({ outDir, configPath }: Required<CreateMDXOptions>) {
+  return createCore(
     {
       environment: 'next',
       outDir,

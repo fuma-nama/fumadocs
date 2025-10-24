@@ -13,7 +13,8 @@ import { createMdxLoader } from '@/loaders/mdx';
 import { findConfigFile, resolvedConfig } from '@/loaders/config';
 import { toVite } from '@/loaders/adapter';
 import vite, { type IndexFileOptions } from '@/plugins/vite';
-import { createPluginHandler } from '@/plugins';
+import type { FSWatcher } from 'chokidar';
+import { createCore } from '@/core';
 
 const FumadocsDeps = ['fumadocs-core', 'fumadocs-ui', 'fumadocs-openapi'];
 
@@ -50,11 +51,10 @@ export default async function mdx(
   pluginOptions: PluginOptions = {},
 ): Promise<Plugin> {
   const options = applyDefaults(pluginOptions);
-  const { updateViteConfig } = options;
-  const pluginHandler = createVitePluginHandler(options);
-
-  const loaded = await pluginHandler.init(buildConfig(config));
-  const mdxLoader = toVite(createMdxLoader(resolvedConfig(loaded)));
+  const core = await createViteCore(options).init({
+    config: buildConfig(config),
+  });
+  const mdxLoader = toVite(createMdxLoader(resolvedConfig(core.getConfig())));
 
   async function transformMeta(
     path: string,
@@ -67,7 +67,7 @@ export default async function mdx(
     };
 
     const collection = parsed.collection
-      ? loaded!.collections.get(parsed.collection)
+      ? core.getConfig().collections.get(parsed.collection)
       : undefined;
     if (!collection) return null;
     let schema;
@@ -108,7 +108,7 @@ export default async function mdx(
     // needed, otherwise other plugins will be executed before our `transform`.
     enforce: 'pre',
     config(config) {
-      if (!updateViteConfig) return config;
+      if (!options.updateViteConfig) return config;
 
       return mergeConfig(config, {
         optimizeDeps: {
@@ -121,7 +121,12 @@ export default async function mdx(
       } satisfies UserConfig);
     },
     async buildStart() {
-      await pluginHandler.emitAndWrite();
+      await core.emitAndWrite();
+    },
+    async configureServer(server) {
+      await core.initServer({
+        watcher: server.watcher as unknown as FSWatcher,
+      });
     },
     async transform(value, id) {
       const [file, query = ''] = id.split('?');
@@ -150,19 +155,20 @@ export async function postInstall(
 ) {
   const { loadConfig } = await import('@/loaders/config/load');
   const options = applyDefaults(pluginOptions);
-  const pluginHandler = createVitePluginHandler(options);
+  const core = await createViteCore(options).init({
+    config: loadConfig(configPath, options.outDir, true),
+  });
 
-  await pluginHandler.init(await loadConfig(configPath, options.outDir, true));
-  await pluginHandler.emitAndWrite();
-  console.log('[MDX] types generated');
+  await core.emitAndWrite();
+  console.log('[MDX] generated');
 }
 
-function createVitePluginHandler({
+function createViteCore({
   configPath,
   outDir,
   generateIndexFile,
 }: Required<PluginOptions>) {
-  return createPluginHandler(
+  return createCore(
     {
       environment: 'vite',
       configPath,
