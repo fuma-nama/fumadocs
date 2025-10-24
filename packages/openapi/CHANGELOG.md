@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 9.6.3
+
+### Patch Changes
+
+- cc179fb: Generate Python objects for code examples
+
 ## 9.6.2
 
 ### Patch Changes
