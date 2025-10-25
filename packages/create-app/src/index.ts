@@ -124,16 +124,16 @@ async function main(config: Options): Promise<void> {
           initialValue: false,
           options: [
             {
+              value: false,
+              label: 'Disabled',
+            },
+            {
               value: 'eslint',
               label: 'ESLint',
             },
             {
               value: 'biome',
               label: 'Biome',
-            },
-            {
-              value: false,
-              label: 'Disabled',
             },
           ],
         });

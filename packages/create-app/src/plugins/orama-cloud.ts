@@ -3,6 +3,10 @@ import { copy, pick } from '@/utils';
 import path from 'node:path';
 import { depVersions, sourceDir } from '@/constants';
 import fs from 'node:fs/promises';
+import { createSourceFile } from '@/transform/shared';
+import { addTanstackPrerender } from '@/transform/tanstack-start';
+import { addReactRouterRoute } from '@/transform/react-router';
+import { addSearchDialog } from '@/transform/provider';
 
 const oramaCloud: TemplatePlugin = {
   packageJson(packageJson) {
@@ -30,6 +34,41 @@ See https://fumadocs.dev/docs/headless/search/orama-cloud for integrating Orama 
     const appDir = path.join(dest, options.useSrcDir ? 'src' : '.');
     await copy(path.join(sourceDir, 'template/+orama-cloud/@root'), dest);
     await copy(path.join(sourceDir, 'template/+orama-cloud/@app'), appDir);
+    let providerFilePath: string;
+
+    if (template.value === 'tanstack-start') {
+      await fluent(
+        createSourceFile(path.join(dest, 'vite.config.ts')),
+        (file) => addTanstackPrerender(file, ['/static.json']),
+        (file) => file.save(),
+      );
+
+      providerFilePath = path.join(dest, 'src/routes/__root.tsx');
+    } else if (template.value.startsWith('react-router')) {
+      await fluent(
+        createSourceFile(path.join(dest, 'app/routes.ts')),
+        (file) =>
+          addReactRouterRoute(file, [
+            {
+              path: 'static.json',
+              entry: 'routes/static.ts',
+            },
+          ]),
+        (file) => file.save(),
+      );
+
+      providerFilePath = path.join(dest, 'app/root.tsx');
+    } else if (template.value.startsWith('+next')) {
+      providerFilePath = path.join(appDir, 'app/layout.tsx');
+    } else {
+      providerFilePath = path.join(dest, 'src/components/provider.tsx');
+    }
+
+    await fluent(
+      createSourceFile(providerFilePath),
+      (file) => addSearchDialog(file),
+      (file) => file.save(),
+    );
 
     const filePath = {
       '+next+fuma-docs-mdx': '.next/server/app/static.json.body',
@@ -77,5 +116,16 @@ void main();
     );
   },
 };
+
+async function fluent<T>(
+  value: T | Promise<T>,
+  ...actions: ((value: T) => void | Promise<void>)[]
+): Promise<T> {
+  for (const action of actions) {
+    await action(await value);
+  }
+
+  return value;
+}
 
 export default oramaCloud;

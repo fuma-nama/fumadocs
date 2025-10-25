@@ -11,7 +11,7 @@ import {
   templates,
 } from './constants';
 
-export type Template = (typeof templates)[number]['value'];
+export type Template = TemplateInfo['value'];
 export interface Options {
   outputDir: string;
   template: Template;

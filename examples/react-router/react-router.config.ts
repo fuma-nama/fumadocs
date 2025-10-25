@@ -8,10 +8,11 @@ export default {
   ssr: true,
   async prerender({ getStaticPaths }) {
     const paths: string[] = [];
+    // ignore dynamic document search
+    const excluded = ['/api/search'];
+
     for (const path of getStaticPaths()) {
-      // ignore dynamic document search
-      if (path === '/api/search') continue;
-      paths.push(path);
+      if (!excluded.includes(path)) paths.push(path);
     }
 
     for await (const entry of glob('**/*.mdx', { cwd: 'content/docs' })) {
