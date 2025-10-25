@@ -1,5 +1,8 @@
 import { z } from 'zod';
 
+/**
+ * Zod 4 schema
+ */
 export const metaSchema = z.object({
   title: z.string().optional(),
   pages: z.array(z.string()).optional(),
@@ -9,6 +12,9 @@ export const metaSchema = z.object({
   icon: z.string().optional(),
 });
 
+/**
+ * Zod 4 schema
+ */
 export const frontmatterSchema = z.object({
   title: z.string(),
   description: z.string().optional(),

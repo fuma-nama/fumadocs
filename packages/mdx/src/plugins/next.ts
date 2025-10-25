@@ -1,6 +1,5 @@
 import * as path from 'node:path';
 import { createHash } from 'node:crypto';
-import { glob } from 'tinyglobby';
 import type { LoadedConfig } from '@/loaders/config';
 import type { DocCollection, MetaCollection } from '@/config';
 import { validate } from '@/utils/validation';
@@ -13,16 +12,40 @@ import {
   type ImportPathConfig,
   toImportPath,
 } from '@/utils/import-formatter';
-import { getGlobPatterns, isFileSupported } from '@/utils/collections';
+import { getCollectionFiles } from '@/utils/collections';
 import type { FileInfo } from '@/runtime/shared';
-import type { Plugin } from '@/plugins/index';
+import type { Plugin } from '@/core';
 
 export default function next(): Plugin {
   let config: LoadedConfig;
+  let shouldEmitOnChange = false;
 
   return {
+    name: 'next',
     config(v) {
       config = v;
+
+      // always emit again when async mode enabled
+      shouldEmitOnChange = false;
+      for (const collection of config.collections.values()) {
+        if (
+          (collection.type === 'doc' && collection.async) ||
+          (collection.type === 'docs' && collection.docs.async)
+        ) {
+          shouldEmitOnChange = true;
+        }
+      }
+    },
+    configureServer(server) {
+      if (!server.watcher) return;
+
+      server.watcher.on('all', async () => {
+        if (!shouldEmitOnChange) return;
+
+        await this.core.emitAndWrite({
+          filterPlugin: (plugin) => plugin.name === 'next',
+        });
+      });
     },
     async emit() {
       return [
@@ -198,36 +221,6 @@ export async function indexFile(
     ...lines,
     ...resolvedDeclares,
   ].join('\n');
-}
-
-async function getCollectionFiles(
-  collection: DocCollection | MetaCollection,
-): Promise<FileInfo[]> {
-  const files = new Map<string, FileInfo>();
-  const dirs = Array.isArray(collection.dir)
-    ? collection.dir
-    : [collection.dir];
-  const patterns = getGlobPatterns(collection);
-
-  await Promise.all(
-    dirs.map(async (dir) => {
-      const result = await glob(patterns, {
-        cwd: path.resolve(dir),
-      });
-
-      for (const item of result) {
-        if (!isFileSupported(item, collection)) continue;
-        const fullPath = path.join(dir, item);
-
-        files.set(fullPath, {
-          path: item,
-          fullPath,
-        });
-      }
-    }),
-  );
-
-  return Array.from(files.values());
 }
 
 function parseMetaEntry(file: string, content: string) {

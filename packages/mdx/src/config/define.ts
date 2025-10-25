@@ -3,7 +3,7 @@ import type { DefaultMDXOptions } from '@/loaders/mdx/preset';
 import type { ProcessorOptions } from '@mdx-js/mdx';
 import { frontmatterSchema, metaSchema } from '@/config/zod-4';
 import type { PostprocessOptions } from '@/loaders/mdx/remark-postprocess';
-import type { PluginOption } from '@/plugins';
+import type { PluginOption } from '@/core';
 
 export type CollectionSchema<Schema extends StandardSchemaV1, Context> =
   | Schema

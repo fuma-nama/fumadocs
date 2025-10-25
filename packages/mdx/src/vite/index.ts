@@ -160,7 +160,6 @@ export async function postInstall(
   });
 
   await core.emitAndWrite();
-  console.log('[MDX] generated');
 }
 
 function createViteCore({

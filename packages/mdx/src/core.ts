@@ -1,10 +1,55 @@
+import type { ConfigLoader, LoadedConfig } from '@/loaders/config';
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import type { ConfigLoader, LoadedConfig } from '@/loaders/config';
-import type { EmitEntry, Plugin, PluginOption } from '@/plugins';
 import type { FSWatcher } from 'chokidar';
 
+type Awaitable<T> = T | Promise<T>;
+
+export interface EmitEntry {
+  /**
+   * path relative to output directory
+   */
+  path: string;
+  content: string;
+}
+
+export interface PluginContext extends CoreOptions {
+  core: Core;
+}
+
+export interface Plugin {
+  name?: string;
+
+  /**
+   * on config loaded/updated
+   */
+  config?: (
+    this: PluginContext,
+    config: LoadedConfig,
+  ) => Awaitable<void | LoadedConfig>;
+
+  /**
+   * Generate files (e.g. types, index file, or JSON schemas)
+   */
+  emit?: (this: PluginContext) => Awaitable<EmitEntry[]>;
+
+  /**
+   * Configure Fumadocs dev server
+   */
+  configureServer?: (
+    this: PluginContext,
+    server: ServerContext,
+  ) => Awaitable<void>;
+}
+
+export type PluginOption = Awaitable<Plugin | Plugin[] | false>;
+
 export interface ServerContext {
+  /**
+   * the file watcher, by default all content files are watched, along with other files.
+   *
+   * make sure to filter when listening to events
+   */
   watcher?: FSWatcher;
 }
 
@@ -14,23 +59,35 @@ export interface CoreOptions {
   outDir: string;
 }
 
+export interface EmitOptions {
+  /**
+   * filter the plugins to run emit
+   */
+  filterPlugin?: (plugin: Plugin) => boolean;
+}
+
 export function createCore(
-  context: CoreOptions,
+  options: CoreOptions,
   defaultPlugins: PluginOption[] = [],
 ) {
   let config: LoadedConfig;
   let plugins: Plugin[];
 
-  async function write(entry: EmitEntry) {
-    const file = path.join(context.outDir, entry.path);
-    await fs.mkdir(path.dirname(file), { recursive: true });
-    await fs.writeFile(file, entry.content);
-  }
-
   return {
-    _options: context,
-    async init(options: { config: LoadedConfig | Promise<LoadedConfig> }) {
-      config = await options.config;
+    _options: options,
+    getPluginContext(): PluginContext {
+      return {
+        core: this,
+        ...options,
+      };
+    },
+    /**
+     * Convenient cache store, reset when config changes
+     */
+    cache: new Map<string, unknown>(),
+    async init({ config: newConfig }: { config: Awaitable<LoadedConfig> }) {
+      config = await newConfig;
+      this.cache.clear();
       plugins = [];
 
       for await (const option of [
@@ -43,7 +100,7 @@ export function createCore(
       }
 
       for (const plugin of plugins) {
-        const out = await plugin.config?.call(context, config);
+        const out = await plugin.config?.call(this.getPluginContext(), config);
         if (out) config = out;
       }
 
@@ -61,22 +118,31 @@ export function createCore(
     },
     async initServer(server: ServerContext) {
       for (const plugin of plugins) {
-        await plugin.configureServer?.call(context, server);
+        await plugin.configureServer?.call(this.getPluginContext(), server);
       }
     },
-    async emit(): Promise<EmitEntry[]> {
+    async emitAndWrite({
+      filterPlugin = () => true,
+    }: EmitOptions = {}): Promise<void> {
+      const start = performance.now();
+
       const out = await Promise.all(
         plugins.map((plugin) => {
-          return plugin.emit?.call(context) ?? [];
+          if (!filterPlugin(plugin) || !plugin.emit) return [];
+
+          return plugin.emit.call(this.getPluginContext());
         }),
       );
 
-      return out.flat();
-    },
-    async emitAndWrite(): Promise<void> {
-      const entries = await this.emit();
+      await Promise.all(
+        out.flat().map(async (entry) => {
+          const file = path.join(options.outDir, entry.path);
 
-      await Promise.all(entries.map(write));
+          await fs.mkdir(path.dirname(file), { recursive: true });
+          await fs.writeFile(file, entry.content);
+        }),
+      );
+      console.log(`[MDX] generated files in ${performance.now() - start}ms`);
     },
   };
 }

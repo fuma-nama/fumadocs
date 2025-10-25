@@ -11,7 +11,7 @@ import {
   generateGlobImport,
   type GlobImportOptions,
 } from '@/utils/glob-import';
-import type { Plugin } from '@/plugins';
+import type { Plugin } from '@/core';
 import path from 'node:path';
 
 export interface IndexFileOptions {
@@ -37,8 +37,6 @@ export default function vite(options: IndexFileOptions): Plugin {
       config = v;
     },
     emit() {
-      console.log('[Fumadocs MDX] Generating index files');
-
       return [
         {
           path: 'index.ts',

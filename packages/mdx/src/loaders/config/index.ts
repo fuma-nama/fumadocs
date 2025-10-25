@@ -7,7 +7,7 @@ import type {
 } from '@/config';
 import type { ProcessorOptions } from '@mdx-js/mdx';
 import fs from 'node:fs/promises';
-import { Core } from '@/core';
+import type { Core } from '@/core';
 
 export interface ConfigLoader {
   getConfig: () => LoadedConfig | Promise<LoadedConfig>;

@@ -11,8 +11,7 @@ import { loadConfig } from '@/loaders/config/load';
 import { removeFileCache } from '@/next/file-cache';
 import { ValidationError } from '@/utils/validation';
 import next from '@/plugins/next';
-import type { EventName } from 'chokidar/handler.js';
-import { createCore } from '@/core';
+import { type Core, createCore } from '@/core';
 
 export interface CreateMDXOptions {
   /**
@@ -97,26 +96,11 @@ async function init(
 ): Promise<void> {
   const core = createNextCore(options);
 
-  async function updateConfig() {
+  async function initOrReload() {
     await core.init({
       config: loadConfig(options.configPath, options.outDir, true),
     });
-  }
-
-  async function emitFiles() {
-    const start = performance.now();
-
-    try {
-      await core.emitAndWrite();
-    } catch (err) {
-      if (err instanceof ValidationError) {
-        console.error(err.toStringFormatted());
-      } else {
-        console.error(err);
-      }
-    }
-
-    console.log(`[MDX] updated files in ${performance.now() - start}ms`);
+    await core.emitAndWrite();
   }
 
   async function devServer() {
@@ -137,38 +121,36 @@ async function init(
       }
     }
 
-    await core.initServer({ watcher });
-
-    async function onUpdate(event: EventName, file: string) {
-      const absolutePath = path.resolve(file);
-      if (event === 'change') removeFileCache(absolutePath);
-
-      if (absolutePath === path.resolve(options.configPath)) {
-        await updateConfig();
-        console.log('[MDX] restarting dev server');
-        await watcher.close();
-        void devServer();
-      }
-
-      await emitFiles();
-    }
-
     watcher.on('ready', () => {
       console.log('[MDX] started dev server');
     });
 
-    watcher.on('all', (event, file) => {
-      void onUpdate(event, file);
+    watcher.on('all', async (event, file) => {
+      const absolutePath = path.resolve(file);
+      if (event === 'change') removeFileCache(absolutePath);
+
+      if (absolutePath === path.resolve(options.configPath)) {
+        // skip plugin listeners
+        watcher.removeAllListeners();
+
+        await watcher.close();
+        await initOrReload();
+        console.log('[MDX] restarting dev server');
+        await devServer();
+      }
     });
 
     process.on('exit', () => {
+      if (watcher.closed) return;
+
       console.log('[MDX] closing dev server');
       void watcher.close();
     });
+
+    await core.initServer({ watcher });
   }
 
-  await updateConfig();
-  await emitFiles();
+  await initOrReload();
   if (dev) {
     await devServer();
   }
@@ -186,7 +168,6 @@ export async function postInstall(
   });
 
   await core.emitAndWrite();
-  console.log('[MDX] generated');
 }
 
 function applyDefaults(options: CreateMDXOptions): Required<CreateMDXOptions> {
@@ -196,8 +177,11 @@ function applyDefaults(options: CreateMDXOptions): Required<CreateMDXOptions> {
   };
 }
 
-function createNextCore({ outDir, configPath }: Required<CreateMDXOptions>) {
-  return createCore(
+function createNextCore({
+  outDir,
+  configPath,
+}: Required<CreateMDXOptions>): Core {
+  const core = createCore(
     {
       environment: 'next',
       outDir,
@@ -205,4 +189,19 @@ function createNextCore({ outDir, configPath }: Required<CreateMDXOptions>) {
     },
     [next()],
   );
+
+  return {
+    ...core,
+    async emitAndWrite(...args) {
+      try {
+        await core.emitAndWrite(...args);
+      } catch (err) {
+        if (err instanceof ValidationError) {
+          console.error(err.toStringFormatted());
+        } else {
+          console.error(err);
+        }
+      }
+    },
+  };
 }
