@@ -1,4 +1,5 @@
 import { CallExpression, SourceFile, SyntaxKind } from 'ts-morph';
+import { getCodeValue } from '@/transform/shared';
 
 /**
  * Add path to the `pages` array in tanstack start vite config.
@@ -32,7 +33,7 @@ export function addTanstackPrerender(sourceFile: SourceFile, paths: string[]) {
         ?.getText();
 
       if (value) {
-        existingPaths.add(JSON.parse(value));
+        existingPaths.add(getCodeValue(value));
       }
     }
 

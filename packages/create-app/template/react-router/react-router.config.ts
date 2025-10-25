@@ -8,8 +8,7 @@ export default {
   ssr: true,
   async prerender({ getStaticPaths }) {
     const paths: string[] = [];
-    // ignore dynamic document search
-    const excluded = ['/api/search'];
+    const excluded: string[] = ['/api/search'];
 
     for (const path of getStaticPaths()) {
       if (!excluded.includes(path)) paths.push(path);

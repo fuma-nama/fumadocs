@@ -2,6 +2,11 @@ import fs from 'node:fs/promises';
 import path, { join } from 'node:path';
 import { x } from 'tinyexec';
 
+export async function writeFile(file: string, content: string) {
+  await fs.mkdir(path.dirname(file), { recursive: true });
+  await fs.writeFile(file, content);
+}
+
 export async function copy(
   from: string,
   to: string,

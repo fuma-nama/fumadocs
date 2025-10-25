@@ -13,3 +13,7 @@ export async function createSourceFile(path: string) {
     overwrite: true,
   });
 }
+
+export function getCodeValue(v: string) {
+  return new Function(`return ${v}`)();
+}

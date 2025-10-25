@@ -18,10 +18,9 @@ import {
   managers,
   type PackageManager,
 } from './auto-install';
-import { create, type Template } from './create-app';
+import { create, type Template, TemplatePlugin } from './create-app';
 import { cwd, templates } from './constants';
 import { program } from 'commander';
-import oramaCloud from '@/plugins/orama-cloud';
 
 program.argument('[name]', 'the project name');
 program.option('--src', '(Next.js only) enable `src/` directory');
@@ -205,6 +204,12 @@ async function main(config: Options): Promise<void> {
 
   const info = spinner();
   info.start(`Generating Project`);
+  const plugins: TemplatePlugin[] = [];
+
+  if (options.search === 'orama-cloud') {
+    const { oramaCloud } = await import('./plugins/orama-cloud');
+    plugins.push(oramaCloud());
+  }
 
   await create({
     packageManager: manager,
@@ -214,8 +219,7 @@ async function main(config: Options): Promise<void> {
     lint: options.lint as LintOption,
     useSrcDir: options.src as SrcOption,
     initializeGit: config.git ?? true,
-
-    plugins: options.search === 'orama-cloud' ? [oramaCloud] : [],
+    plugins,
     log: (message) => {
       info.message(message);
     },

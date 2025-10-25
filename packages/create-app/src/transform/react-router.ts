@@ -1,23 +1,34 @@
-import { MethodDeclaration, SourceFile, SyntaxKind } from 'ts-morph';
+import {
+  ArrayLiteralExpression,
+  MethodDeclaration,
+  SourceFile,
+  ts,
+} from 'ts-morph';
+import { getCodeValue } from '@/transform/shared';
+import SyntaxKind = ts.SyntaxKind;
 
 /**
- * Add items to `excluded` in the prerender function
+ * remove items from `excluded` in the prerender function
  */
-export function removeReactRouterPrerender(
+export function removeReactRouterPrerenderExclude(
   sourceFile: SourceFile,
   paths: string[],
 ) {
   const methodBody = getPrerenderMethod(sourceFile)?.getBody();
   if (!methodBody) return;
 
-  const excludedInitializer = methodBody
+  const initializer = methodBody
     .getDescendantsOfKind(SyntaxKind.VariableDeclaration)
     .find((item) => item.getName() === 'excluded')
     ?.getInitializerIfKind(SyntaxKind.ArrayLiteralExpression);
 
-  if (!excludedInitializer) return;
-  for (const path of paths) {
-    excludedInitializer.addElement(JSON.stringify(path));
+  if (!initializer) return;
+  for (const element of initializer.getElements()) {
+    const value = getCodeValue(element.getText());
+
+    if (paths.includes(value)) {
+      initializer.removeElement(element);
+    }
   }
 }
 
@@ -28,17 +39,46 @@ export function addReactRouterRoute(
   sourceFile: SourceFile,
   routes: { path: string; entry: string }[],
 ) {
+  modifyReactRouterRoutes(sourceFile, (arr) => {
+    for (const { path, entry } of routes) {
+      arr.addElement(`route('${path}', '${entry}')`);
+    }
+  });
+}
+
+/**
+ * Remove routes from route config (root level only)
+ */
+export function filterReactRouterRoute(
+  sourceFile: SourceFile,
+  filter: (item: { path: string }) => boolean,
+) {
+  modifyReactRouterRoutes(sourceFile, (arr) => {
+    for (const element of arr.getElements()) {
+      if (
+        !element.isKind(SyntaxKind.CallExpression) ||
+        element.getFirstChildByKind(SyntaxKind.Identifier)?.getText() !==
+          'route' ||
+        filter({
+          path: getCodeValue(element.getArguments()[0].getText()),
+        })
+      )
+        continue;
+
+      arr.removeElement(element);
+    }
+  });
+}
+
+export function modifyReactRouterRoutes(
+  sourceFile: SourceFile,
+  mod: (array: ArrayLiteralExpression) => void,
+) {
   const initializer = sourceFile
     .getDefaultExportSymbol()
     ?.getValueDeclaration()
     ?.getFirstDescendantByKind(SyntaxKind.ArrayLiteralExpression);
-  if (!initializer) {
-    return;
-  }
-
-  for (const { path, entry } of routes) {
-    initializer.addElement(`route('${path}', '${entry}')`);
-  }
+  if (initializer) mod(initializer);
 }
 
 /**
@@ -49,8 +89,7 @@ function getPrerenderMethod(sourceFile: SourceFile): MethodDeclaration | null {
     sourceFile
       .getDefaultExportSymbol()
       ?.getValueDeclaration()
-      ?.asKind(SyntaxKind.VariableDeclaration)
-      ?.getInitializerIfKind(SyntaxKind.ObjectLiteralExpression)
+      ?.getFirstDescendantByKind(SyntaxKind.ObjectLiteralExpression)
       ?.getProperty('prerender')
       ?.asKind(SyntaxKind.MethodDeclaration) ?? null
   );
