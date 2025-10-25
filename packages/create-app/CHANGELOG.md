@@ -1,5 +1,12 @@
 # create-next-docs-app
 
+## 16.0.3
+
+### Patch Changes
+
+- 0ac2f82: Use smarter AST transform for modifying app configs
+- 0ac2f82: fix type info lost on `create`
+
 ## 16.0.2
 
 ### Patch Changes
