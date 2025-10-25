@@ -1,5 +1,14 @@
 # next-docs-mdx
 
+## 13.0.1
+
+### Patch Changes
+
+- 56332df: Support plugins in Webpack loader environment: now plugins can apply changes on MDX options too.
+- 91add4f: Plugin `json-schema`: support inserting `$schema` to JSON files
+- cffd4c2: Lazy update index files on Next.js
+  - fumadocs-core@16.0.3
+
 ## 13.0.0
 
 ### Major Changes
