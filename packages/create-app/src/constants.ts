@@ -41,7 +41,7 @@ export const templates = [
     label: 'Tanstack Start: Fumadocs MDX (not RSC)',
     componentsDir: 'src/components',
   },
-] satisfies TemplateInfo[];
+] as const satisfies TemplateInfo[];
 
 export const depVersions = {
   ...localVersions,
