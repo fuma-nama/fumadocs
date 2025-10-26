@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 16.0.4
+
+### Patch Changes
+
+- 33c4129: Support `CI` environment variable, remove negatives options from CLI usage
+
 ## 16.0.3
 
 ### Patch Changes
