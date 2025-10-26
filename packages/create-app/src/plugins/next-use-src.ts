@@ -1,4 +1,4 @@
-import { TemplatePlugin } from '@/create-app';
+import { TemplatePlugin } from '@/index';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 

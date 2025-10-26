@@ -22,7 +22,7 @@ writeFileSync(
 console.log('Create-Fumadocs-App: versions.json updated');
 
 export default defineConfig({
-  entry: ['./src/index.ts', './src/create-app.ts', './src/plugins/*'],
+  entry: ['./src/bin.ts', './src/index.ts', './src/plugins/*'],
   format: 'esm',
   target: 'node20',
   dts: true,

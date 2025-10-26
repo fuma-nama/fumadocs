@@ -4,6 +4,8 @@ import versionPkg from '../../create-app-versions/package.json';
 
 export const sourceDir = fileURLToPath(new URL(`../`, import.meta.url).href);
 
+export const isCI = Boolean(process.env.CI);
+
 export interface TemplateInfo {
   value:
     | '+next+fuma-docs-mdx'
@@ -13,6 +15,9 @@ export interface TemplateInfo {
     | 'tanstack-start';
   label: string;
   appDir: string;
+  /**
+   * path to root provider, relative to `appDir``
+   */
   rootProviderPath: string;
   hint?: string;
   /**
@@ -33,26 +38,26 @@ export const templates: TemplateInfo[] = [
     value: 'waku',
     label: 'Waku: Fumadocs MDX',
     appDir: 'src',
-    rootProviderPath: 'src/components/provider.tsx',
+    rootProviderPath: 'components/provider.tsx',
   },
   {
     value: 'react-router',
     label: 'React Router: Fumadocs MDX (not RSC)',
     appDir: 'app',
-    rootProviderPath: 'app/root.tsx',
+    rootProviderPath: 'root.tsx',
   },
   {
     value: 'react-router-spa',
     label: 'React Router SPA: Fumadocs MDX (not RSC)',
     hint: 'SPA mode allows you to host the site statically, compatible with a CDN.',
     appDir: 'app',
-    rootProviderPath: 'app/root.tsx',
+    rootProviderPath: 'root.tsx',
   },
   {
     value: 'tanstack-start',
     label: 'Tanstack Start: Fumadocs MDX (not RSC)',
     appDir: 'src',
-    rootProviderPath: 'src/routes/__root.tsx',
+    rootProviderPath: 'routes/__root.tsx',
   },
 ];
 

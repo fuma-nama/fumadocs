@@ -3,23 +3,22 @@
   "version": "16.0.2",
   "description": "Create a new documentation site with Fumadocs",
   "keywords": [
-    "NextJs",
-    "next",
     "react",
-    "Docs"
+    "Docs",
+    "Fumadocs"
   ],
   "homepage": "https://fumadocs.dev",
   "repository": "github:fuma-nama/fumadocs",
   "license": "MIT",
   "author": "Fuma Nama",
   "type": "module",
-  "bin": "./dist/index.js",
-  "module": "./dist/create-app.js",
-  "types": "./dist/create-app.d.ts",
+  "bin": "./dist/bin.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/create-app.js",
-      "types": "./dist/create-app.d.ts"
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     },
     "./plugins/*": {
       "import": "./dist/plugins/*.js",
@@ -47,6 +46,7 @@
     "ts-morph": "^27.0.2"
   },
   "devDependencies": {
+    "@commander-js/extra-typings": "^14.0.0",
     "@types/cross-spawn": "^6.0.6",
     "@types/node": "24.9.1",
     "eslint-config-custom": "workspace:*",

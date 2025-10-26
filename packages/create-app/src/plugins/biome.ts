@@ -1,4 +1,4 @@
-import { TemplatePlugin } from '@/create-app';
+import { TemplatePlugin } from '@/index';
 import { copy, pick } from '@/utils';
 import path from 'node:path';
 import { depVersions, sourceDir } from '@/constants';

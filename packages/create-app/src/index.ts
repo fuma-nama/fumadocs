@@ -1,264 +1,169 @@
-#!/usr/bin/env node
-import fs from 'node:fs/promises';
 import path from 'node:path';
+import fs from 'node:fs/promises';
+import { copy, tryGitInit } from '@/utils';
+import type { PackageManager } from './auto-install';
+import { autoInstall } from './auto-install';
 import {
-  cancel,
-  confirm,
-  group,
-  intro,
-  isCancel,
-  outro,
-  select,
-  spinner,
-  text,
-} from '@clack/prompts';
-import pc from 'picocolors';
-import {
-  getPackageManager,
-  managers,
-  type PackageManager,
-} from './auto-install';
-import { create, type Template, TemplatePlugin } from './create-app';
-import { templates } from './constants';
-import { program } from 'commander';
+  depVersions,
+  sourceDir,
+  type TemplateInfo,
+  templates,
+} from './constants';
 
-program.argument('[name]', 'the project name');
-program.option('--src', '(Next.js only) enable `src/` directory');
-program.option('--no-src', '(Next.js only) disable `src/` directory');
+export type Template = TemplateInfo['value'];
+export interface Options {
+  outputDir: string;
+  template: Template;
 
-program.option('--eslint', '(Next.js only) enable ESLint configuration');
-program.option('--no-eslint', '(Next.js only) disable ESLint configuration');
+  /**
+   * the package manager to use
+   *
+   * @defaultValue 'npm'
+   */
+  packageManager?: PackageManager;
 
-program.option('--biome', '(Next.js only) enable Biome configuration');
-program.option('--no-biome', '(Next.js only) disable Biome configuration');
-
-program.option('--install', 'Enable installing packages automatically');
-program.option('--no-install', 'Disable installing packages automatically');
-
-program.option('--no-git', 'Disable auto Git repository initialization');
-
-program.option(
-  '--template <name>',
-  `template to choose: ${templates.map((v) => v.value).join(', ')}`,
-  (value) => {
-    if (!templates.some((item) => item.value === value)) {
-      throw new Error(`Invalid template: ${value}.`);
-    }
-
-    return value;
-  },
-);
-
-program.option(
-  '--pm <name>',
-  `package manager to choose: ${managers.join(', ')}`,
-  (value) => {
-    if (!managers.includes(value as PackageManager)) {
-      throw new Error(`Invalid package manager: ${value}.`);
-    }
-
-    return value;
-  },
-);
-
-interface Options {
-  name?: string;
-  src?: boolean;
-  eslint?: boolean;
-  biome?: boolean;
-  install?: boolean;
-  template?: Template;
-  pm?: PackageManager;
-  git?: boolean;
+  installDeps?: boolean;
+  initializeGit?: boolean;
+  log?: (message: string) => void;
+  plugins?: TemplatePlugin[];
 }
 
-async function main(config: Options): Promise<void> {
-  intro(pc.bgCyan(pc.bold('Create Fumadocs App')));
-  const manager = config.pm ?? getPackageManager();
+export interface TemplatePluginContext {
+  template: TemplateInfo;
+  log: (message: string) => void;
+  /**
+   * output directory
+   */
+  dest: string;
 
-  type SrcOption = boolean;
-  type LintOption = 'biome' | 'eslint' | false;
-  const options = await group(
-    {
-      name: () => {
-        if (config.name) return Promise.resolve(config.name);
+  /**
+   * output directory for app code (e.g. under `/src`)
+   */
+  appDir: string;
+}
 
-        return text({
-          message: 'Project name',
-          placeholder: 'my-app',
-          defaultValue: 'my-app',
-        });
-      },
-      template: () => {
-        if (config.template) return Promise.resolve(config.template);
+export type PackageJsonType = {
+  name?: string;
+  version?: string;
+  private?: boolean;
+  scripts?: Record<string, string>;
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+} & Record<string, unknown>;
 
-        return select<Template>({
-          message: 'Choose a template',
-          initialValue: '+next+fuma-docs-mdx',
-          options: templates,
-        });
-      },
-      src: async (v): Promise<SrcOption | symbol> => {
-        if (!v.results.template?.startsWith('+next')) return false;
-        if (config.src !== undefined) return config.src;
+type Awaitable<T> = T | Promise<T>;
 
-        return confirm({
-          message: 'Use `/src` directory?',
-          initialValue: false,
-        });
-      },
-      lint: async (v): Promise<LintOption | symbol> => {
-        if (!v.results.template?.startsWith('+next')) return false;
+export interface TemplatePlugin {
+  template?: (
+    this: Pick<TemplatePluginContext, 'dest'>,
+    info: TemplateInfo,
+  ) => Awaitable<void | TemplateInfo>;
+  packageJson?: (
+    this: TemplatePluginContext,
+    packageJson: PackageJsonType,
+  ) => Awaitable<void | PackageJsonType>;
+  afterWrite?: (this: TemplatePluginContext) => Awaitable<void>;
+  readme?: (
+    this: TemplatePluginContext,
+    content: string,
+  ) => Awaitable<void | string>;
+}
 
-        if (config.eslint !== undefined) {
-          return config.eslint ? 'eslint' : false;
-        }
+export async function create(createOptions: Options): Promise<void> {
+  const {
+    outputDir,
+    plugins = [],
+    packageManager = 'npm',
+    initializeGit = false,
+    installDeps = false,
+    log = console.log,
+  } = createOptions;
 
-        if (config.biome !== undefined) {
-          return config.biome ? 'biome' : false;
-        }
-
-        return select<LintOption>({
-          message: 'Configure linter?',
-          initialValue: false,
-          options: [
-            {
-              value: false,
-              label: 'Disabled',
-            },
-            {
-              value: 'eslint',
-              label: 'ESLint',
-            },
-            {
-              value: 'biome',
-              label: 'Biome',
-            },
-          ],
-        });
-      },
-      search: () => {
-        return select({
-          message: 'Choose a search solution?',
-          options: [
-            {
-              value: 'orama' as const,
-              label: 'Default',
-              hint: 'local search powered by Orama, recommended',
-            },
-            {
-              value: 'orama-cloud' as const,
-              label: 'Orama Cloud',
-              hint: '3rd party search solution, signup needed',
-            },
-          ],
-        });
-      },
-      installDeps: () => {
-        if (config.install !== undefined)
-          return Promise.resolve(config.install);
-
-        return confirm({
-          message: `Do you want to install packages automatically? (detected as ${manager})`,
-        });
-      },
-    },
-    {
-      onCancel: () => {
-        cancel('Installation Stopped.');
-        process.exit(0);
-      },
-    },
-  );
-
-  const projectName = options.name.toLowerCase().replace(/\s/, '-');
-  const destDir = await fs.readdir(projectName).catch(() => null);
-  if (destDir && destDir.length > 0) {
-    const del = await confirm({
-      message: `directory ${projectName} already exists, do you want to delete its files?`,
-    });
-
-    if (isCancel(del)) {
-      cancel();
-      return;
-    }
-
-    if (del) {
-      const info = spinner();
-      info.start(`Deleting files in ${projectName}`);
-
-      await Promise.all(
-        destDir.map((item) => {
-          return fs.rm(path.join(projectName, item), {
-            recursive: true,
-            force: true,
-          });
-        }),
-      );
-
-      info.stop(`Deleted files in ${projectName}`);
-    }
+  let template = templates.find(
+    (item) => item.value === createOptions.template,
+  )!;
+  for (const plugin of plugins) {
+    template =
+      (await plugin.template?.call({ dest: outputDir }, template)) ?? template;
   }
 
-  const info = spinner();
-  info.start(`Generating Project`);
-  const plugins: TemplatePlugin[] = [];
+  const appDir = path.join(outputDir, template.appDir);
+  const projectName = path.basename(outputDir);
+  const pluginContext: TemplatePluginContext = {
+    template,
+    dest: outputDir,
+    log,
+    appDir,
+  };
 
-  if (options.src) {
-    const { nextUseSrc } = await import('./plugins/next-use-src');
-    plugins.push(nextUseSrc());
-  }
+  await copy(path.join(sourceDir, 'template', template.value), outputDir, {
+    rename(file) {
+      file = file.replace('example.gitignore', '.gitignore');
 
-  if (options.search === 'orama-cloud') {
-    const { oramaCloud } = await import('./plugins/orama-cloud');
-    plugins.push(oramaCloud());
-  }
-
-  if (options.lint === 'eslint') {
-    const { eslint } = await import('./plugins/eslint');
-    plugins.push(eslint());
-  }
-
-  if (options.lint === 'biome') {
-    const { biome } = await import('./plugins/biome');
-    plugins.push(biome());
-  }
-
-  await create({
-    packageManager: manager,
-    template: options.template,
-    outputDir: projectName,
-    installDeps: options.installDeps,
-    initializeGit: config.git ?? true,
-    plugins,
-    log: (message) => {
-      info.message(message);
+      return template.rename?.(file) ?? file;
     },
   });
 
-  info.stop('Project Generated');
+  const packageJsonPath = path.join(outputDir, 'package.json');
+  let packageJson = await initPackageJson(projectName, packageJsonPath);
+  for (const plugin of plugins) {
+    packageJson =
+      (await plugin.packageJson?.call(pluginContext, packageJson)) ??
+      packageJson;
+  }
+  await fs.writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2));
 
-  outro(pc.bgGreen(pc.bold('Done')));
+  const readmePath = path.join(outputDir, 'README.md');
+  let readme = `# ${projectName}\n\n${await fs.readFile(readmePath)}`;
+  for (const plugin of plugins) {
+    readme = (await plugin.readme?.call(pluginContext, readme)) ?? readme;
+  }
+  await fs.writeFile(readmePath, readme);
 
-  console.log(pc.bold('\nOpen the project'));
-  console.log(pc.cyan(`cd ${projectName}`));
+  for (const plugin of plugins) {
+    await plugin.afterWrite?.call(pluginContext);
+  }
 
-  console.log(pc.bold('\nRun Development Server'));
-  console.log(pc.cyan('npm run dev | pnpm run dev | yarn dev'));
+  if (installDeps) {
+    try {
+      await autoInstall(packageManager, outputDir);
+      log('Installed dependencies');
+    } catch (err) {
+      log(`Failed to install dependencies: ${err}`);
+    }
+  }
 
-  console.log(
-    pc.bold('\nYou can now open the project and start writing documents'),
-  );
-
-  process.exit(0);
+  if (initializeGit && (await tryGitInit(outputDir))) {
+    log('Initialized Git repository');
+  }
 }
 
-program.parse();
+async function initPackageJson(
+  projectName: string,
+  packageJsonPath: string,
+): Promise<PackageJsonType> {
+  function replaceWorkspaceDeps(deps: Record<string, string> = {}) {
+    for (const k in deps) {
+      if (deps[k].startsWith('workspace:') && k in depVersions) {
+        deps[k] = depVersions[k as keyof typeof depVersions];
+      }
+    }
 
-main({
-  name: program.args[0],
-  ...program.opts(),
-}).catch((e: unknown) => {
-  console.error(e);
-  process.exit(1);
-});
+    return deps;
+  }
+
+  const packageJson: PackageJsonType = JSON.parse(
+    (await fs.readFile(packageJsonPath)).toString(),
+  );
+
+  return {
+    ...packageJson,
+    name: projectName,
+    scripts: {
+      ...packageJson.scripts,
+      postinstall: 'fumadocs-mdx',
+    },
+    dependencies: replaceWorkspaceDeps(packageJson.dependencies),
+    devDependencies: replaceWorkspaceDeps(packageJson.devDependencies),
+  };
+}
