@@ -1,11 +1,40 @@
 import { TemplatePlugin } from '@/index';
-import { copy } from '@/utils';
+import { writeFile } from '@/utils';
 import path from 'node:path';
-import { depVersions, sourceDir } from '@/constants';
+import { depVersions } from '@/constants';
+
+const config = `import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { FlatCompat } from '@eslint/eslintrc';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const compat = new FlatCompat({
+  baseDirectory: __dirname,
+});
+
+const eslintConfig = [
+  ...compat.extends('next/core-web-vitals', 'next/typescript'),
+  {
+    ignores: [
+      'node_modules/**',
+      '.next/**',
+      'out/**',
+      'build/**',
+      '.source/**',
+      'next-env.d.ts',
+    ],
+  },
+];
+
+export default eslintConfig;`;
 
 export function eslint(): TemplatePlugin {
   return {
     packageJson(packageJson) {
+      if (this.template.value !== '+next+fuma-docs-mdx') return;
+
       return {
         ...packageJson,
         scripts: {
@@ -21,7 +50,9 @@ export function eslint(): TemplatePlugin {
       };
     },
     async afterWrite() {
-      await copy(path.join(sourceDir, `template/+next+eslint`), this.dest);
+      if (this.template.value !== '+next+fuma-docs-mdx') return;
+
+      await writeFile(path.join(this.dest, 'eslint.config.mjs'), config);
       this.log('Configured ESLint');
     },
   };

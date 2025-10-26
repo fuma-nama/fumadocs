@@ -26,7 +26,7 @@ const command = program
   .addOption(
     new Option(
       '--linter <name>',
-      '(Next.js only) configure a linter/formatter',
+      'configure a linter/formatter, ESLint is currently Next.js only.',
     ).choices(['eslint', 'biome']),
   )
   .addOption(
@@ -85,24 +85,36 @@ async function main(): Promise<void> {
       },
       lint: async ({ results }: { results: { template?: Template } }) => {
         if (config.linter !== undefined) return config.linter;
-        if (isCI || !results.template?.startsWith('+next')) return 'disabled';
+        if (isCI) return 'disabled';
 
         return select({
           message: 'Configure linter?',
-          options: [
-            {
-              value: 'disabled',
-              label: 'Disabled',
-            },
-            {
-              value: 'eslint',
-              label: 'ESLint',
-            },
-            {
-              value: 'biome',
-              label: 'Biome',
-            },
-          ],
+          options:
+            results.template === '+next+fuma-docs-mdx'
+              ? [
+                  {
+                    value: 'disabled',
+                    label: 'Disabled',
+                  },
+                  {
+                    value: 'eslint',
+                    label: 'ESLint',
+                  },
+                  {
+                    value: 'biome',
+                    label: 'Biome',
+                  },
+                ]
+              : [
+                  {
+                    value: 'disabled',
+                    label: 'Disabled',
+                  },
+                  {
+                    value: 'biome',
+                    label: 'Biome',
+                  },
+                ],
         });
       },
       search: async () => {
