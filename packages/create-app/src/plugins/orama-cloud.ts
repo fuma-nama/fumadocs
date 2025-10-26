@@ -7,8 +7,8 @@ import { createSourceFile } from '@/transform/shared';
 import { addTanstackPrerender } from '@/transform/tanstack-start';
 import {
   addReactRouterRoute,
+  filterReactRouterPrerenderArray,
   filterReactRouterRoute,
-  removeReactRouterPrerenderExclude,
 } from '@/transform/react-router';
 import { addSearchDialog } from '@/transform/provider';
 
@@ -19,7 +19,7 @@ export function oramaCloud(): TemplatePlugin {
         ...packageJson,
         scripts: {
           ...packageJson.scripts,
-          build: `${packageJson.scripts.build} && bun scripts/sync-content.ts`,
+          build: `${packageJson.scripts!.build} && bun scripts/sync-content.ts`,
         },
         dependencies: {
           ...packageJson.dependencies,
@@ -35,8 +35,7 @@ This project uses Orama Cloud for 3rd party search solution.
 See https://fumadocs.dev/docs/headless/search/orama-cloud for integrating Orama Cloud to Fumadocs.`;
     },
     async afterWrite() {
-      const { dest, template, options } = this;
-      const appDir = path.join(dest, options.useSrcDir ? 'src' : '.');
+      const { dest, appDir, template } = this;
       await copy(path.join(sourceDir, 'template/+orama-cloud/@root'), dest);
       await copy(path.join(sourceDir, 'template/+orama-cloud/@app'), appDir);
 
@@ -48,18 +47,18 @@ See https://fumadocs.dev/docs/headless/search/orama-cloud for integrating Orama 
             (file) => file.save(),
           ),
           fs
-            .unlink(path.join(dest, 'src/routes/api/search.ts'))
+            .unlink(path.join(appDir, 'routes/api/search.ts'))
             .catch(() => null),
           writeFile(
-            path.join(dest, 'src/routes/static[.]json.ts'),
+            path.join(appDir, 'routes/static[.]json.ts'),
             route.tanstack,
           ),
-          updateRootProvider(path.join(dest, 'src/routes/__root.tsx')),
+          updateRootProvider(path.join(appDir, 'routes/__root.tsx')),
         ]);
       } else if (template.value.startsWith('react-router')) {
         await Promise.all([
           fluent(
-            createSourceFile(path.join(dest, 'app/routes.ts')),
+            createSourceFile(path.join(appDir, 'routes.ts')),
             (file) =>
               filterReactRouterRoute(file, ({ path }) => path !== 'api/search'),
             (file) =>
@@ -73,15 +72,20 @@ See https://fumadocs.dev/docs/headless/search/orama-cloud for integrating Orama 
           ),
           fluent(
             createSourceFile(path.join(dest, 'react-router.config.ts')),
-            (file) => removeReactRouterPrerenderExclude(file, ['/api/search']),
+            (file) =>
+              filterReactRouterPrerenderArray(
+                file,
+                'excluded',
+                (v) => v !== '/api/search',
+              ),
             (file) => file.save(),
           ),
-          fs.unlink(path.join(dest, 'app/docs/search.ts')).catch(() => null),
+          fs.unlink(path.join(appDir, 'docs/search.ts')).catch(() => null),
           writeFile(
-            path.join(dest, 'app/routes/static.ts'),
+            path.join(appDir, 'routes/static.ts'),
             route['react-router'],
           ),
-          updateRootProvider(path.join(dest, 'app/root.tsx')),
+          updateRootProvider(path.join(appDir, 'root.tsx')),
         ]);
       } else if (template.value.startsWith('+next')) {
         await Promise.all([
@@ -93,14 +97,9 @@ See https://fumadocs.dev/docs/headless/search/orama-cloud for integrating Orama 
         ]);
       } else {
         await Promise.all([
-          fs
-            .unlink(path.join(dest, 'src/pages/api/search.ts'))
-            .catch(() => null),
-          writeFile(
-            path.join(dest, 'src/pages/api/static.json.ts'),
-            route.waku,
-          ),
-          updateRootProvider(path.join(dest, 'src/components/provider.tsx')),
+          fs.unlink(path.join(appDir, 'pages/api/search.ts')).catch(() => null),
+          writeFile(path.join(appDir, 'pages/api/static.json.ts'), route.waku),
+          updateRootProvider(path.join(appDir, 'components/provider.tsx')),
         ]);
       }
 

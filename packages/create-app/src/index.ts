@@ -19,7 +19,7 @@ import {
   type PackageManager,
 } from './auto-install';
 import { create, type Template, TemplatePlugin } from './create-app';
-import { cwd, templates } from './constants';
+import { templates } from './constants';
 import { program } from 'commander';
 
 program.argument('[name]', 'the project name');
@@ -172,9 +172,7 @@ async function main(config: Options): Promise<void> {
   );
 
   const projectName = options.name.toLowerCase().replace(/\s/, '-');
-  const dest = path.resolve(cwd, projectName);
-
-  const destDir = await fs.readdir(dest).catch(() => null);
+  const destDir = await fs.readdir(projectName).catch(() => null);
   if (destDir && destDir.length > 0) {
     const del = await confirm({
       message: `directory ${projectName} already exists, do you want to delete its files?`,
@@ -191,7 +189,7 @@ async function main(config: Options): Promise<void> {
 
       await Promise.all(
         destDir.map((item) => {
-          return fs.rm(path.join(dest, item), {
+          return fs.rm(path.join(projectName, item), {
             recursive: true,
             force: true,
           });
@@ -206,18 +204,31 @@ async function main(config: Options): Promise<void> {
   info.start(`Generating Project`);
   const plugins: TemplatePlugin[] = [];
 
+  if (options.src) {
+    const { nextUseSrc } = await import('./plugins/next-use-src');
+    plugins.push(nextUseSrc());
+  }
+
   if (options.search === 'orama-cloud') {
     const { oramaCloud } = await import('./plugins/orama-cloud');
     plugins.push(oramaCloud());
   }
 
+  if (options.lint === 'eslint') {
+    const { eslint } = await import('./plugins/eslint');
+    plugins.push(eslint());
+  }
+
+  if (options.lint === 'biome') {
+    const { biome } = await import('./plugins/biome');
+    plugins.push(biome());
+  }
+
   await create({
     packageManager: manager,
     template: options.template,
-    outputDir: dest,
+    outputDir: projectName,
     installDeps: options.installDeps,
-    lint: options.lint as LintOption,
-    useSrcDir: options.src as SrcOption,
     initializeGit: config.git ?? true,
     plugins,
     log: (message) => {

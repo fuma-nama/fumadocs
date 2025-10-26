@@ -1,10 +1,9 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import { copy, pick, tryGitInit } from '@/utils';
+import { copy, tryGitInit } from '@/utils';
 import type { PackageManager } from './auto-install';
 import { autoInstall } from './auto-install';
 import {
-  cwd,
   depVersions,
   sourceDir,
   type TemplateInfo,
@@ -18,20 +17,10 @@ export interface Options {
 
   /**
    * the package manager to use
+   *
+   * @defaultValue 'npm'
    */
-  packageManager: PackageManager;
-
-  /**
-   * (Next.js only) Create files inside `src`
-   * @defaultValue false
-   */
-  useSrcDir?: boolean;
-
-  /**
-   * (Next.js Only) Configure Lint
-   * @defaultValue false
-   */
-  lint?: 'eslint' | 'biome' | false;
+  packageManager?: PackageManager;
 
   installDeps?: boolean;
   initializeGit?: boolean;
@@ -41,21 +30,38 @@ export interface Options {
 
 export interface TemplatePluginContext {
   template: TemplateInfo;
-
-  options: Required<Options>;
+  log: (message: string) => void;
   /**
    * output directory
    */
   dest: string;
+
+  /**
+   * output directory for app code (e.g. under `/src`)
+   */
+  appDir: string;
 }
+
+export type PackageJsonType = {
+  name?: string;
+  version?: string;
+  private?: boolean;
+  scripts?: Record<string, string>;
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+} & Record<string, unknown>;
 
 type Awaitable<T> = T | Promise<T>;
 
 export interface TemplatePlugin {
+  template?: (
+    this: Pick<TemplatePluginContext, 'dest'>,
+    info: TemplateInfo,
+  ) => Awaitable<void | TemplateInfo>;
   packageJson?: (
     this: TemplatePluginContext,
-    packageJson: any,
-  ) => Awaitable<void | any>;
+    packageJson: PackageJsonType,
+  ) => Awaitable<void | PackageJsonType>;
   afterWrite?: (this: TemplatePluginContext) => Awaitable<void>;
   readme?: (
     this: TemplatePluginContext,
@@ -63,100 +69,56 @@ export interface TemplatePlugin {
   ) => Awaitable<void | string>;
 }
 
-function defaults(options: Options): Required<Options> {
-  return {
-    ...options,
-    plugins: options.plugins ?? [],
-    useSrcDir:
-      options.template.startsWith('+next') && options.useSrcDir === true,
-    lint: options.lint ?? false,
-    initializeGit: options.initializeGit ?? false,
-    installDeps: options.installDeps ?? false,
-    log: console.log,
-  };
-}
-
-function isRelative(dir: string, file: string) {
-  return !path.relative(dir, file).startsWith(`..${path.sep}`);
-}
-
 export async function create(createOptions: Options): Promise<void> {
-  const options = defaults(createOptions);
   const {
     outputDir,
-    useSrcDir,
-    log,
-    installDeps,
-    template,
-    lint,
-    initializeGit,
-    packageManager,
-    plugins,
-  } = options;
+    plugins = [],
+    packageManager = 'npm',
+    initializeGit = false,
+    installDeps = false,
+    log = console.log,
+  } = createOptions;
 
+  let template = templates.find(
+    (item) => item.value === createOptions.template,
+  )!;
+  for (const plugin of plugins) {
+    template =
+      (await plugin.template?.call({ dest: outputDir }, template)) ?? template;
+  }
+
+  const appDir = path.join(outputDir, template.appDir);
   const projectName = path.basename(outputDir);
-  const dest = path.resolve(cwd, outputDir);
-  const isNext = options.template.startsWith('+next');
   const pluginContext: TemplatePluginContext = {
-    template: templates.find((item) => item.value === template)!,
-    dest,
-    options,
+    template,
+    dest: outputDir,
+    log,
+    appDir,
   };
 
-  await copy(path.join(sourceDir, `template/${template}`), dest, {
+  await copy(path.join(sourceDir, 'template', template.value), outputDir, {
     rename(file) {
       file = file.replace('example.gitignore', '.gitignore');
 
-      if (
-        useSrcDir &&
-        (path.basename(file) === 'mdx-components.tsx' ||
-          isRelative(path.join(dest, 'app'), file) ||
-          isRelative(path.join(dest, 'lib'), file))
-      ) {
-        return path.join(dest, 'src', path.relative(dest, file));
-      }
-
-      return file;
+      return template.rename?.(file) ?? file;
     },
   });
 
-  // optional ESLint configuration
-  if (isNext && lint) {
-    await copy(path.join(sourceDir, `template/+next+${lint}`), dest);
-    log('Configured Linter');
-  }
-
-  // update tsconfig.json for src dir
-  if (isNext && useSrcDir) {
-    const tsconfigPath = path.join(dest, 'tsconfig.json');
-    const content = (await fs.readFile(tsconfigPath)).toString();
-    const config = JSON.parse(content);
-
-    if (config.compilerOptions?.paths) {
-      Object.assign(config.compilerOptions.paths, {
-        '@/*': ['./src/*'],
-      });
-    }
-
-    await fs.writeFile(tsconfigPath, JSON.stringify(config, null, 2));
-  }
-
-  let packageJson = await createPackageJson(projectName, dest, options);
+  const packageJsonPath = path.join(outputDir, 'package.json');
+  let packageJson = await initPackageJson(projectName, packageJsonPath);
   for (const plugin of plugins) {
-    const result = await plugin.packageJson?.call(pluginContext, packageJson);
-
-    if (result) packageJson = result;
+    packageJson =
+      (await plugin.packageJson?.call(pluginContext, packageJson)) ??
+      packageJson;
   }
-  await fs.writeFile(
-    path.join(dest, 'package.json'),
-    JSON.stringify(packageJson, null, 2),
-  );
+  await fs.writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2));
 
-  let readme = await getReadme(dest, projectName);
+  const readmePath = path.join(outputDir, 'README.md');
+  let readme = `# ${projectName}\n\n${await fs.readFile(readmePath)}`;
   for (const plugin of plugins) {
     readme = (await plugin.readme?.call(pluginContext, readme)) ?? readme;
   }
-  await fs.writeFile(path.join(dest, 'README.md'), readme);
+  await fs.writeFile(readmePath, readme);
 
   for (const plugin of plugins) {
     await plugin.afterWrite?.call(pluginContext);
@@ -164,33 +126,23 @@ export async function create(createOptions: Options): Promise<void> {
 
   if (installDeps) {
     try {
-      await autoInstall(packageManager, dest);
+      await autoInstall(packageManager, outputDir);
       log('Installed dependencies');
     } catch (err) {
       log(`Failed to install dependencies: ${err}`);
     }
   }
 
-  if (initializeGit && (await tryGitInit(dest))) {
+  if (initializeGit && (await tryGitInit(outputDir))) {
     log('Initialized Git repository');
   }
 }
 
-async function getReadme(dest: string, projectName: string): Promise<string> {
-  const template = await fs
-    .readFile(path.join(dest, 'README.md'))
-    .then((res) => res.toString());
-
-  return `# ${projectName}\n\n${template}`;
-}
-
-async function createPackageJson(
+async function initPackageJson(
   projectName: string,
-  dir: string,
-  { template, lint }: Required<Options>,
-): Promise<object> {
-  const isNext = template.startsWith('+next');
-  function replaceWorkspaceDeps(deps: Record<string, string>) {
+  packageJsonPath: string,
+): Promise<PackageJsonType> {
+  function replaceWorkspaceDeps(deps: Record<string, string> = {}) {
     for (const k in deps) {
       if (deps[k].startsWith('workspace:') && k in depVersions) {
         deps[k] = depVersions[k as keyof typeof depVersions];
@@ -200,59 +152,18 @@ async function createPackageJson(
     return deps;
   }
 
-  let packageJson = JSON.parse(
-    await fs
-      .readFile(path.join(dir, 'package.json'))
-      .then((res) => res.toString()),
+  const packageJson: PackageJsonType = JSON.parse(
+    (await fs.readFile(packageJsonPath)).toString(),
   );
 
-  packageJson = {
-    name: projectName,
+  return {
     ...packageJson,
+    name: projectName,
+    scripts: {
+      ...packageJson.scripts,
+      postinstall: 'fumadocs-mdx',
+    },
     dependencies: replaceWorkspaceDeps(packageJson.dependencies),
     devDependencies: replaceWorkspaceDeps(packageJson.devDependencies),
   };
-
-  if (isNext) {
-    packageJson = {
-      ...packageJson,
-      scripts: {
-        ...packageJson.scripts,
-        postinstall: 'fumadocs-mdx',
-      },
-    };
-  }
-
-  if (isNext && lint === 'biome') {
-    packageJson = {
-      ...packageJson,
-      scripts: {
-        ...packageJson.scripts,
-        lint: 'biome check',
-        format: 'biome format --write',
-      },
-      devDependencies: {
-        ...packageJson.devDependencies,
-        ...pick(depVersions, ['@biomejs/biome']),
-      },
-    };
-  }
-
-  if (isNext && lint === 'eslint') {
-    packageJson = {
-      ...packageJson,
-      scripts: {
-        ...packageJson.scripts,
-        lint: 'eslint',
-      },
-      devDependencies: {
-        ...packageJson.devDependencies,
-        eslint: '^9',
-        'eslint-config-next': depVersions.next,
-        '@eslint/eslintrc': '^3',
-      },
-    };
-  }
-
-  return packageJson;
 }

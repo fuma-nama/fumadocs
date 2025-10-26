@@ -8,25 +8,24 @@ import { getCodeValue } from '@/transform/shared';
 import SyntaxKind = ts.SyntaxKind;
 
 /**
- * remove items from `excluded` in the prerender function
+ * filter items in a specific array initializer in the prerender function
  */
-export function removeReactRouterPrerenderExclude(
+export function filterReactRouterPrerenderArray(
   sourceFile: SourceFile,
-  paths: string[],
+  array: 'paths' | 'excluded',
+  filter: (item: string) => boolean,
 ) {
   const methodBody = getPrerenderMethod(sourceFile)?.getBody();
   if (!methodBody) return;
 
   const initializer = methodBody
     .getDescendantsOfKind(SyntaxKind.VariableDeclaration)
-    .find((item) => item.getName() === 'excluded')
+    .find((item) => item.getName() === array)
     ?.getInitializerIfKind(SyntaxKind.ArrayLiteralExpression);
 
   if (!initializer) return;
   for (const element of initializer.getElements()) {
-    const value = getCodeValue(element.getText());
-
-    if (paths.includes(value)) {
+    if (!filter(getCodeValue(element.getText()))) {
       initializer.removeElement(element);
     }
   }

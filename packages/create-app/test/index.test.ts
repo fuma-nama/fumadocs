@@ -5,8 +5,8 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import {
   addReactRouterRoute,
+  filterReactRouterPrerenderArray,
   filterReactRouterRoute,
-  removeReactRouterPrerenderExclude,
 } from '@/transform/react-router';
 
 const project = new Project({
@@ -64,7 +64,11 @@ test('transform react router routes: filter routes', async () => {
 
 test('transform react router config: remove exclude', async () => {
   const sourceFile = await createSourceFile('fixtures/react-router-config.txt');
-  removeReactRouterPrerenderExclude(sourceFile, ['/api/search']);
+  filterReactRouterPrerenderArray(
+    sourceFile,
+    'excluded',
+    (v) => v !== '/api/search',
+  );
   await expect(sourceFile.getFullText()).toMatchFileSnapshot(
     'fixtures/react-router-config(remove-exclude).output.txt',
   );

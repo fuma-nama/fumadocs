@@ -16,6 +16,16 @@
   "bin": "./dist/index.js",
   "module": "./dist/create-app.js",
   "types": "./dist/create-app.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/create-app.js",
+      "types": "./dist/create-app.d.ts"
+    },
+    "./plugins/*": {
+      "import": "./dist/plugins/*.js",
+      "types": "./dist/plugins/*.d.ts"
+    }
+  },
   "files": [
     "template/*",
     "dist/*"

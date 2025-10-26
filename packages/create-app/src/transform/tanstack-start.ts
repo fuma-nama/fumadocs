@@ -18,6 +18,10 @@ export function addTanstackPrerender(sourceFile: SourceFile, paths: string[]) {
     .getProperty('pages')
     ?.asKind(SyntaxKind.PropertyAssignment);
 
+  function toItem(path: string) {
+    return `{ path: '${path}' }`;
+  }
+
   if (pagesProperty) {
     const initializer = pagesProperty.getInitializerIfKindOrThrow(
       SyntaxKind.ArrayLiteralExpression,
@@ -48,10 +52,6 @@ export function addTanstackPrerender(sourceFile: SourceFile, paths: string[]) {
   }
 }
 
-function toItem(path: string) {
-  return `{ path: '${path}' }`;
-}
-
 /**
  * Find the tanstackStart call expression
  */
@@ -70,9 +70,8 @@ function getTanstackStartCall(
   for (const element of pluginsProperty.getElements()) {
     const expression = element.asKind(SyntaxKind.CallExpression);
     if (
-      expression &&
-      expression.getFirstChildByKind(SyntaxKind.Identifier)?.getText() ===
-        'tanstackStart'
+      expression?.getFirstChildByKind(SyntaxKind.Identifier)?.getText() ===
+      'tanstackStart'
     ) {
       return expression;
     }
