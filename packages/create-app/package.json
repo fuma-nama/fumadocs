@@ -40,13 +40,13 @@
   },
   "dependencies": {
     "@clack/prompts": "^0.11.0",
+    "@commander-js/extra-typings": "^14.0.0",
     "commander": "^14.0.1",
     "picocolors": "^1.1.1",
     "tinyexec": "^1.0.1",
     "ts-morph": "^27.0.2"
   },
   "devDependencies": {
-    "@commander-js/extra-typings": "^14.0.0",
     "@types/cross-spawn": "^6.0.6",
     "@types/node": "24.9.1",
     "eslint-config-custom": "workspace:*",

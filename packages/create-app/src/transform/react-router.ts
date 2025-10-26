@@ -50,16 +50,22 @@ export function addReactRouterRoute(
  */
 export function filterReactRouterRoute(
   sourceFile: SourceFile,
-  filter: (item: { path: string }) => boolean,
+  filter: (item: { path: string; entry: string }) => boolean,
 ) {
   modifyReactRouterRoutes(sourceFile, (arr) => {
     for (const element of arr.getElements()) {
       if (
         !element.isKind(SyntaxKind.CallExpression) ||
         element.getFirstChildByKind(SyntaxKind.Identifier)?.getText() !==
-          'route' ||
+          'route'
+      )
+        continue;
+      const args = element.getArguments();
+
+      if (
         filter({
-          path: getCodeValue(element.getArguments()[0].getText()),
+          path: getCodeValue(args[0].getText()),
+          entry: getCodeValue(args[1].getText()),
         })
       )
         continue;

@@ -1,16 +1,13 @@
-import { TemplatePlugin } from '@/create-app';
+import { TemplatePlugin } from '@/index';
 import { copy, pick, writeFile } from '@/utils';
 import path from 'node:path';
 import { depVersions, sourceDir } from '@/constants';
 import fs from 'node:fs/promises';
-import { createSourceFile } from '@/transform/shared';
-import { addTanstackPrerender } from '@/transform/tanstack-start';
 import {
-  addReactRouterRoute,
-  filterReactRouterPrerenderArray,
-  filterReactRouterRoute,
-} from '@/transform/react-router';
-import { addSearchDialog } from '@/transform/provider';
+  reactRouterRoutes,
+  rootProvider,
+  tanstackStartRoutes,
+} from '@/transform';
 
 export function oramaCloud(): TemplatePlugin {
   return {
@@ -39,67 +36,43 @@ See https://fumadocs.dev/docs/headless/search/orama-cloud for integrating Orama 
       await copy(path.join(sourceDir, 'template/+orama-cloud/@root'), dest);
       await copy(path.join(sourceDir, 'template/+orama-cloud/@app'), appDir);
 
+      await rootProvider(this, (mod) =>
+        mod.addSearchDialog('@/components/search'),
+      );
+
       if (template.value === 'tanstack-start') {
-        await Promise.all([
-          fluent(
-            createSourceFile(path.join(dest, 'vite.config.ts')),
-            (file) => addTanstackPrerender(file, ['/static.json']),
-            (file) => file.save(),
-          ),
-          fs
-            .unlink(path.join(appDir, 'routes/api/search.ts'))
-            .catch(() => null),
-          writeFile(
-            path.join(appDir, 'routes/static[.]json.ts'),
-            route.tanstack,
-          ),
-          updateRootProvider(path.join(appDir, 'routes/__root.tsx')),
-        ]);
+        await tanstackStartRoutes(this, (mod) => {
+          mod.addRoute({
+            path: 'static[.]json.ts',
+            route: '/static.json',
+            code: route.tanstack,
+            prerender: true,
+          });
+          mod.removeRoute({
+            path: 'api/search.ts',
+            route: '/api/search',
+          });
+        });
       } else if (template.value.startsWith('react-router')) {
-        await Promise.all([
-          fluent(
-            createSourceFile(path.join(appDir, 'routes.ts')),
-            (file) =>
-              filterReactRouterRoute(file, ({ path }) => path !== 'api/search'),
-            (file) =>
-              addReactRouterRoute(file, [
-                {
-                  path: 'static.json',
-                  entry: 'routes/static.ts',
-                },
-              ]),
-            (file) => file.save(),
-          ),
-          fluent(
-            createSourceFile(path.join(dest, 'react-router.config.ts')),
-            (file) =>
-              filterReactRouterPrerenderArray(
-                file,
-                'excluded',
-                (v) => v !== '/api/search',
-              ),
-            (file) => file.save(),
-          ),
-          fs.unlink(path.join(appDir, 'docs/search.ts')).catch(() => null),
-          writeFile(
-            path.join(appDir, 'routes/static.ts'),
+        await reactRouterRoutes(this, (mod) => {
+          mod.addRoute(
+            'static.json',
+            'routes/static.ts',
             route['react-router'],
-          ),
-          updateRootProvider(path.join(appDir, 'root.tsx')),
-        ]);
+          );
+          mod.removeRoute('api/search');
+        });
       } else if (template.value.startsWith('+next')) {
         await Promise.all([
           fs
             .unlink(path.join(appDir, 'app/api/search/route.ts'))
             .catch(() => null),
           writeFile(path.join(appDir, 'app/static.json/route.ts'), route.next),
-          updateRootProvider(path.join(appDir, 'app/layout.tsx')),
         ]);
       } else {
         await Promise.all([
           fs.unlink(path.join(appDir, 'pages/api/search.ts')).catch(() => null),
           writeFile(path.join(appDir, 'pages/api/static.json.ts'), route.waku),
-          updateRootProvider(path.join(appDir, 'components/provider.tsx')),
         ]);
       }
 
@@ -141,25 +114,6 @@ void main();`,
       );
     },
   };
-}
-
-async function updateRootProvider(rootPath: string) {
-  await fluent(
-    createSourceFile(rootPath),
-    (file) => addSearchDialog(file),
-    (file) => file.save(),
-  );
-}
-
-async function fluent<T>(
-  value: T | Promise<T>,
-  ...actions: ((value: T) => void | Promise<void>)[]
-): Promise<T> {
-  for (const action of actions) {
-    await action(await value);
-  }
-
-  return value;
 }
 
 const route = {
