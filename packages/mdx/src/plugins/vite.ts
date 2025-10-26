@@ -77,12 +77,12 @@ function indexFile(
 
   function doc(name: string, collection: DocCollection) {
     const patterns = getGlobPatterns(collection);
-    const base = getGlobBase(collection);
+    const dir = getCollectionDir(collection);
     const docGlob = generateGlob(patterns, {
       query: {
         collection: name,
       },
-      base,
+      base: dir,
     });
 
     if (collection.async) {
@@ -92,22 +92,22 @@ function indexFile(
           collection: name,
         },
         import: 'frontmatter',
-        base,
+        base: dir,
       });
 
-      return `create.docLazy("${name}", "${base}", ${headBlob}, ${docGlob})`;
+      return `create.docLazy("${name}", "${dir}", ${headBlob}, ${docGlob})`;
     }
 
-    return `create.doc("${name}", "${base}", ${docGlob})`;
+    return `create.doc("${name}", "${dir}", ${docGlob})`;
   }
 
   function meta(name: string, collection: MetaCollection) {
     const patterns = getGlobPatterns(collection);
-    const base = getGlobBase(collection);
+    const dir = getCollectionDir(collection);
 
-    return `create.meta("${name}", "${base}", ${generateGlob(patterns, {
+    return `create.meta("${name}", "${dir}", ${generateGlob(patterns, {
       import: 'default',
-      base,
+      base: dir,
       query: {
         collection: name,
       },
@@ -115,7 +115,7 @@ function indexFile(
   }
 
   function generateGlob(patterns: string[], options: GlobImportOptions) {
-    patterns = mapGlobPatterns(patterns);
+    patterns = patterns.map(normalizeGlobPath);
 
     if (runtime === 'node' || runtime === 'bun') {
       return generateGlobImport(patterns, options);
@@ -123,7 +123,7 @@ function indexFile(
       return `import.meta.glob(${JSON.stringify(patterns)}, ${JSON.stringify(
         {
           ...options,
-          base: path.relative(outDir, options.base),
+          base: normalizeGlobPath(path.relative(outDir, options.base)),
         },
         null,
         2,
@@ -149,19 +149,19 @@ function indexFile(
   return lines.join('\n');
 }
 
-function mapGlobPatterns(patterns: string[]) {
-  return patterns.map(enforceRelative);
-}
-
-function enforceRelative(file: string) {
+/**
+ * convert into POSIX & relative file paths, such that Vite can accept it.
+ */
+function normalizeGlobPath(file: string) {
+  file = slash(file);
   if (file.startsWith('./')) return file;
   if (file.startsWith('/')) return `.${file}`;
 
   return `./${file}`;
 }
 
-function getGlobBase(collection: AnyCollection) {
-  let dir = collection.dir;
+function getCollectionDir(collection: AnyCollection): string {
+  const dir = collection.dir;
 
   if (Array.isArray(dir)) {
     if (dir.length !== 1)
@@ -169,8 +169,18 @@ function getGlobBase(collection: AnyCollection) {
         `[Fumadocs MDX] Vite Plugin doesn't support multiple \`dir\` for a collection at the moment.`,
       );
 
-    dir = dir[0];
+    return dir[0];
   }
 
-  return enforceRelative(dir);
+  return dir;
+}
+
+function slash(path: string): string {
+  const isExtendedLengthPath = path.startsWith('\\\\?\\');
+
+  if (isExtendedLengthPath) {
+    return path;
+  }
+
+  return path.replaceAll('\\', '/');
 }
