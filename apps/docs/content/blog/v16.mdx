@@ -26,7 +26,9 @@ Fumadocs 16 removed substantial amount of deprecated APIs accumulated since v15.
 
 - **Minimum React.js Version Raised to 19.2.0**: React 19.2 brings crucial performance improvements to Fumadocs UI.
   - **Next.js Projects**: Next.js projects using Fumadocs UI must use Next.js 16 or later, as Next.js uses its own canary channel for React.js.
-
+- **`fumadocs-ui/provider` is removed**:
+  - Use `fumadocs-ui/provider/next` for root provider.
+  - Use individual exports for contexts from `fumadocs-ui/contexts/*`.
 - `fumadocs-ui/page`:
   - Removed `<DocsCategory />`.
   - Removed the `breadcrumbs.full` option in `<DocsPage />`.
@@ -128,6 +130,7 @@ The `source.generated.ts` file is now moved to `.source/index.ts`, you are recom
 - import it over the original `source.generated.ts`
 
   .
+
 - note that both docs and `create-fumadocs-app` are updated to `.source` folder.
 
 We also supported index file generation targeting other runtimes like Bun/Node.js.
