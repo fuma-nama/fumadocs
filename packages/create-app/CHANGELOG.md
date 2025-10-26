@@ -1,5 +1,15 @@
 # create-next-docs-app
 
+## 16.0.3
+
+### Patch Changes
+
+- 4500ce0: Use plugins for `create()` to configure linters & app dir
+- e051a7f: Support Biome for other templates
+- b171be1: Support `CI` environment variable, remove negatives options from CLI usage
+- 0ac2f82: Use smarter AST transform for modifying app configs
+- 0ac2f82: fix type info lost on `create`
+
 ## 16.0.2
 
 ### Patch Changes
