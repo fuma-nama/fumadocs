@@ -1,5 +1,11 @@
 # next-docs-mdx
 
+## 13.0.2
+
+### Patch Changes
+
+- ee4ad3d: Always format file paths into POSIX for Vite
+
 ## 13.0.1
 
 ### Patch Changes
