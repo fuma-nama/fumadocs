@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 16.0.4
+
+### Patch Changes
+
+- 99971c7: Support `external:` to mark links as external in `meta.json`
+
 ## 16.0.3
 
 ## 16.0.2
