@@ -84,7 +84,8 @@ export interface PageTreeBuilder {
 }
 
 const group = /^\((?<name>.+)\)$/;
-const link = /^(?:\[(?<icon>[^\]]+)])?\[(?<name>[^\]]+)]\((?<url>[^)]+)\)$/;
+const link =
+  /^(?<external>external:)?(?:\[(?<icon>[^\]]+)])?\[(?<name>[^\]]+)]\((?<url>[^)]+)\)$/;
 const separator = /^---(?:\[(?<icon>[^\]]+)])?(?<name>.+)---|^---$/;
 const rest = '...' as const;
 const restReversed = 'z...a' as const;
@@ -148,16 +149,14 @@ function resolveFolderItem(
 
   match = link.exec(item);
   if (match?.groups) {
-    const { icon, url, name } = match.groups;
-    const isRelative =
-      url.startsWith('/') || url.startsWith('#') || url.startsWith('.');
+    const { icon, url, name, external } = match.groups;
 
     let node: PageTree.Item = {
       type: 'page',
       icon,
       name,
       url,
-      external: !isRelative,
+      external: external ? true : undefined,
     };
 
     for (const transformer of ctx.transformers) {

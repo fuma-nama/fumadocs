@@ -1,6 +1,6 @@
-import { Source, SourceConfig } from '@/source';
+import type { Source } from '@/source';
 
-export const source: Source<SourceConfig> = {
+export const source: Source = {
   files: [
     {
       type: 'page',

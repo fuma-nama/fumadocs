@@ -1,6 +1,6 @@
-import type { Source, SourceConfig } from '@/source';
+import type { Source } from '@/source';
 
-export const source: Source<SourceConfig> = {
+export const source: Source = {
   files: [
     {
       type: 'page',
@@ -26,6 +26,7 @@ export const source: Source<SourceConfig> = {
           'nested',
           '[Text](https://google.com)',
           '[Icon][Text](https://google.com)',
+          'external:[AI](/llms-full.txt)',
         ],
       },
     },

@@ -25,6 +25,11 @@ export interface Item {
   type: 'page';
   name: ReactNode;
   url: string;
+  /**
+   * Whether the link should be treated as external (e.g. use HTML <a> tag).
+   *
+   * When unspecified, it depends on the value of `url`.
+   */
   external?: boolean;
 
   description?: ReactNode;

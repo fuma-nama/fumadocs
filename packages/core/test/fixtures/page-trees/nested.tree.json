@@ -46,17 +46,21 @@
       "type": "folder",
     },
     {
-      "external": true,
+      "name": "Text",
+      "type": "page",
+      "url": "https://google.com",
+    },
+    {
+      "icon": "Icon",
       "name": "Text",
       "type": "page",
       "url": "https://google.com",
     },
     {
       "external": true,
-      "icon": "Icon",
-      "name": "Text",
+      "name": "AI",
       "type": "page",
-      "url": "https://google.com",
+      "url": "/llms-full.txt",
     },
   ],
   "fallback": {

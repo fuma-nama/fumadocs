@@ -137,16 +137,15 @@ Folder items are sorted alphabetically by default, you can add or control the or
 
 > When specified, items are not included unless they are listed in `pages`.
 
-- **Path**: a path to page or folder, like`./nested/page`.
-- **Separator** (`---Label---`): a separator between two sections, use `---[Icon]Label---` to include icons.
-- **Link** (`[Text](url)`): insert links, use `[Icon][Text](url)` to include icons.
-
-Special Items:
-
-- **Rest** (`...`): include remaining pages (sorted alphabetically).
-- **Reversed Rest** (`z...a`): reversed **Rest** item.
-- **Extract** (`...folder`): extract the items from a folder.
-- **Except** (`!item`): Exclude an item from `...` or `z...a`.
+| Type              | Syntax                                                           | Description                                                                           |
+| ----------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| **Path**          | `./path/to/page`                                                 | a path to page or folder.                                                             |
+| **Separator**     | `---Label---`<br/>`---[Icon]Label---`                            | a separator between two sections (icon supported).                                    |
+| **Link**          | `[Text](url)`<br/>`[Icon][Text](url)`<br/>`external:[Text](url)` | insert links (icon supported)<br/>add a `external:` prefix to mark links as external. |
+| **Rest**          | `...`                                                            | include remaining pages (sorted alphabetically).                                      |
+| **Reversed Rest** | `z...a`                                                          | reversed **Rest** item.                                                               |
+| **Extract**       | `...folder`                                                      | extract the items from a folder.                                                      |
+| **Except**        | `!item`                                                          | Exclude an item from `...` or `z...a`.                                                |
 
 ```json title="meta.json"
 {
