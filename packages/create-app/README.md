@@ -1,6 +1,6 @@
 # Create Fumadocs App
 
-A CLI tool to create new Next.js documentation sites with Fumadocs.
+A CLI tool to create new documentation sites with Fumadocs.
 
 ```bash
 npx create-fumadocs-app

@@ -1,5 +1,5 @@
 import { TemplatePlugin } from '@/index';
-import { writeFile } from '@/utils';
+import { pick, writeFile } from '@/utils';
 import path from 'node:path';
 import { depVersions } from '@/constants';
 
@@ -43,9 +43,8 @@ export function eslint(): TemplatePlugin {
         },
         devDependencies: {
           ...packageJson.devDependencies,
-          eslint: '^9',
-          'eslint-config-next': depVersions.next,
-          '@eslint/eslintrc': '^3',
+          'eslint-config-next': packageJson.dependencies!.next,
+          ...pick(depVersions, ['eslint', '@eslint/eslintrc']),
         },
       };
     },

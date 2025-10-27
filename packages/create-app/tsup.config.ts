@@ -1,25 +1,4 @@
-import { writeFileSync } from 'node:fs';
 import { defineConfig } from 'tsup';
-import contentCollectionsPkg from '../content-collections/package.json';
-import corePkg from '../core/package.json';
-import mdxRemotePkg from '../mdx-remote/package.json';
-import mdxPkg from '../mdx/package.json';
-import uiPkg from '../ui/package.json';
-
-const versions = {
-  'fumadocs-core': corePkg.version,
-  'fumadocs-ui': uiPkg.version,
-  'fumadocs-mdx': mdxPkg.version,
-  '@fumadocs/mdx-remote': mdxRemotePkg.version,
-  '@fumadocs/content-collections': contentCollectionsPkg.version,
-};
-
-writeFileSync(
-  './src/versions.js',
-  `export const versions = ${JSON.stringify(versions)}`,
-);
-
-console.log('Create-Fumadocs-App: versions.json updated');
 
 export default defineConfig({
   entry: ['./src/bin.ts', './src/index.ts', './src/plugins/*'],

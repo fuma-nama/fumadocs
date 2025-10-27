@@ -2,12 +2,17 @@
   "$schema": "https://unpkg.com/@changesets/config@2.3.0/schema.json",
   "changelog": "@changesets/cli/changelog",
   "commit": false,
-  "fixed": [["fumadocs-core", "fumadocs-ui"]],
-  "linked": [],
+  "fixed": [
+    ["fumadocs-core", "fumadocs-ui"],
+    ["create-fumadocs-app", "create-fumadocs-versions"]
+  ],
   "access": "restricted",
   "baseBranch": "dev",
   "updateInternalDependencies": "patch",
-  "privatePackages": { "version": false },
   "bumpVersionsWithWorkspaceProtocolOnly": true,
+  "privatePackages": {
+    "version": true,
+    "tag": false
+  },
   "ignore": ["docs", "example-*"]
 }

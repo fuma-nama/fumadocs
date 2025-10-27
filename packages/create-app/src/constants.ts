@@ -1,5 +1,4 @@
 import { fileURLToPath } from 'node:url';
-import { versions as localVersions } from '@/versions';
 import versionPkg from '../../create-app-versions/package.json';
 
 export const sourceDir = fileURLToPath(new URL(`../`, import.meta.url).href);
@@ -61,7 +60,4 @@ export const templates: TemplateInfo[] = [
   },
 ];
 
-export const depVersions = {
-  ...localVersions,
-  ...versionPkg.dependencies,
-};
+export const depVersions = versionPkg.dependencies;

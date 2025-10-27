@@ -30,7 +30,7 @@
     "dist/*"
   ],
   "scripts": {
-    "build": "tsup",
+    "build": "pnpm run sync && tsup",
     "clean": "rimraf dist",
     "dev": "tsup --watch",
     "lint": "eslint .",
