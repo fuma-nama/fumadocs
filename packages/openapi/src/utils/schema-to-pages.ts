@@ -57,15 +57,20 @@ interface OperationConfig extends BaseConfig {
    * - tag: `{tag}/{file}`
    * - route: `{endpoint}/{method}` (it will ignore the `name` option)
    * - none: `{file}` (default)
+   * - a function that aligns group name (folder path) to each entry
    *
    * @defaultValue 'none'
    */
-  groupBy?: 'tag' | 'route' | 'none';
+  groupBy?:
+    | 'tag'
+    | 'route'
+    | 'none'
+    | ((entry: OutputOperationEntry | OutputWebhookEntry) => string);
 
   /**
    * Specify name for output file
    */
-  name?: NameFn<OutputOperationEntry | OutputWebhookEntry>;
+  name?: NameFn<OutputOperationEntry | OutputWebhookEntry> | NameFnOptions;
 }
 
 interface TagConfig extends BaseConfig {
@@ -77,7 +82,7 @@ interface TagConfig extends BaseConfig {
   /**
    * Specify name for output file
    */
-  name?: NameFn<OutputTagEntry>;
+  name?: NameFn<OutputTagEntry> | NameFnOptions;
 }
 
 interface SchemaConfig extends BaseConfig {
@@ -89,24 +94,27 @@ interface SchemaConfig extends BaseConfig {
   /**
    * Specify name for output file
    */
-  name?: NameFn<OutputSchemaEntry>;
+  name?: NameFn<OutputSchemaEntry> | NameFnOptions;
 }
 
 export type SchemaToPagesOptions = SchemaConfig | TagConfig | OperationConfig;
 
-type NameFn<Entry> =
-  | ((output: Entry, document: ProcessedDocument['dereferenced']) => string)
-  | {
-      /**
-       * The version of algorithm used to generate file paths.
-       *
-       * v1: Fumadocs OpenAPI v8
-       * v2: Fumadocs OpenAPI v9
-       *
-       * @defaultValue v2
-       */
-      algorithm?: 'v2' | 'v1';
-    };
+type NameFn<Entry> = (
+  output: Entry,
+  document: ProcessedDocument['dereferenced'],
+) => string;
+
+interface NameFnOptions {
+  /**
+   * The version of algorithm used to generate file paths.
+   *
+   * v1: Fumadocs OpenAPI v8
+   * v2: Fumadocs OpenAPI v9
+   *
+   * @defaultValue v2
+   */
+  algorithm?: 'v2' | 'v1';
+}
 
 interface BaseConfig {
   /**
@@ -145,16 +153,12 @@ export function schemaToPages(
   const { dereferenced } = processed;
   const { slugify = defaultSlugify } = options;
 
-  let nameFn: (
-    output: OutputEntry,
-    document: ProcessedDocument['dereferenced'],
-  ) => string;
+  let nameFn: NameFn<OutputEntry>;
 
   if (!options.name || typeof options.name !== 'function') {
     const algorithm = options.name?.algorithm;
 
-    nameFn = (out, doc) =>
-      defaultNameFn(schemaId, out, doc, options, algorithm);
+    nameFn = createDefaultNameFn(options, algorithm);
   } else {
     nameFn = options.name as typeof nameFn;
   }
@@ -190,6 +194,10 @@ export function schemaToPages(
       }
 
       return tags.map((tag) => path.join(slugify(tag), `${file}.mdx`));
+    }
+
+    if (typeof groupBy === 'function') {
+      return [path.join(slugify(groupBy(entry)), `${file}.mdx`)];
     }
 
     return [`${file}.mdx`];
@@ -290,45 +298,46 @@ export function schemaToPages(
   return files;
 }
 
-function defaultNameFn(
-  schemaId: string,
-  result: OutputEntry,
-  document: ProcessedDocument['dereferenced'],
+function createDefaultNameFn(
   options: SchemaToPagesOptions,
   algorithm: 'v2' | 'v1' = 'v2',
-) {
+): NameFn<OutputEntry> {
   const { slugify = defaultSlugify } = options;
 
-  if (result.type === 'tag') {
-    return slugify(result.tag);
-  }
-
-  if (result.type === 'schema') {
-    return isUrl(schemaId)
-      ? 'index'
-      : path.basename(schemaId, path.extname(schemaId));
-  }
-
-  if (result.type === 'operation') {
-    const operation = document.paths![result.item.path]![result.item.method]!;
-
-    if (algorithm === 'v2' && operation.operationId) {
-      return operation.operationId;
+  return (result, document) => {
+    if (result.type === 'tag') {
+      return slugify(result.tag);
     }
 
-    return path.join(
-      getOutputPathFromRoute(result.item.path),
-      result.item.method.toLowerCase(),
-    );
-  }
+    if (result.type === 'schema') {
+      const schemaId = result.schemaId;
 
-  const hook = document.webhooks![result.item.name][result.item.method]!;
+      return isUrl(schemaId)
+        ? 'index'
+        : path.basename(schemaId, path.extname(schemaId));
+    }
 
-  if (algorithm === 'v2' && hook.operationId) {
-    return hook.operationId;
-  }
+    if (result.type === 'operation') {
+      const operation = document.paths![result.item.path]![result.item.method]!;
 
-  return slugify(result.item.name);
+      if (algorithm === 'v2' && operation.operationId) {
+        return operation.operationId;
+      }
+
+      return path.join(
+        getOutputPathFromRoute(result.item.path),
+        result.item.method.toLowerCase(),
+      );
+    }
+
+    const hook = document.webhooks![result.item.name][result.item.method]!;
+
+    if (algorithm === 'v2' && hook.operationId) {
+      return hook.operationId;
+    }
+
+    return slugify(result.item.name);
+  };
 }
 
 export function isUrl(schemaId: string): boolean {
