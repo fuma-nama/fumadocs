@@ -24,12 +24,21 @@ export interface ApiPageProps extends SharedOpenAPIOptions {
 }
 
 export interface WebhookItem {
+  /**
+   * webhook name in `webhooks`
+   */
   name: string;
   method: OpenAPIV3_1.HttpMethods;
 }
 
 export interface OperationItem {
+  /**
+   * the path of operation in `paths`
+   */
   path: string;
+  /**
+   * the HTTP method of operation
+   */
   method: OpenAPIV3_1.HttpMethods;
 }
 

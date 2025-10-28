@@ -1,6 +1,6 @@
-import type { OutputEntry } from '@/utils/schema-to-pages';
 import type { ApiPageProps } from '@/render/api-page';
 import type { OpenAPIServer } from '@/server';
+import type { OutputEntry } from '@/utils/pages/builder';
 
 export function toBody(
   server: OpenAPIServer,

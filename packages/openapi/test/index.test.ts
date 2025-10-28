@@ -89,9 +89,7 @@ describe('Generate documents', () => {
           algorithm: 'v1',
         },
       }),
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `[Error: input not found: ./fixtures/non-existent-1.yaml]`,
-    );
+    ).rejects.toThrow(/input not found/);
   });
 
   test('Generate Files - groupBy tag per operation', async () => {

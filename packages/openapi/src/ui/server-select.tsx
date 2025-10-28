@@ -22,6 +22,7 @@ import { resolveServerUrl, withBase } from '@/utils/url';
 import { FormProvider, useController, useForm } from 'react-hook-form';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 import type { ServerVariableObject } from '@/types';
+import type { NoReference } from '@/utils/schema';
 
 export default function ServerSelect(props: HTMLAttributes<HTMLDivElement>) {
   const { servers } = useApiContext();
@@ -88,7 +89,7 @@ function ServerSelectContent({
 }: {
   defaultValues: Record<string, string>;
   onChange: (values: Record<string, string>) => void;
-  schema: Record<string, ServerVariableObject>;
+  schema: Record<string, NoReference<ServerVariableObject>>;
 }) {
   const form = useForm({
     defaultValues,
@@ -136,7 +137,7 @@ function Field({
   fieldName,
   variable,
 }: {
-  variable: ServerVariableObject;
+  variable: NoReference<ServerVariableObject>;
   fieldName: string;
 }) {
   const { field } = useController({

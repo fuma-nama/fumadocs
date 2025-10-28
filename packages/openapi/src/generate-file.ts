@@ -14,10 +14,10 @@ import type { OpenAPIServer } from '@/server';
 import { createGetUrl, getSlugs } from 'fumadocs-core/source';
 import matter from 'gray-matter';
 import {
-  isUrl,
   schemaToPages,
   type SchemaToPagesOptions,
-} from '@/utils/schema-to-pages';
+} from '@/utils/pages/generate';
+import { isUrl } from '@/utils/url';
 
 export interface OutputFile {
   path: string;
@@ -149,14 +149,12 @@ export async function generateFilesOnly(
     throw new Error('No input files found.');
   }
   for (const [id, schema] of entries) {
-    const result = schemaToPages(
-      id,
-      schema,
-      options as SchemaToPagesOptions,
-    ).map<OutputFile>((page) => ({
-      path: page.path,
-      content: toText(page, schema, options),
-    }));
+    const result = (await schemaToPages(id, schema, options)).map<OutputFile>(
+      (page) => ({
+        path: page.path,
+        content: toText(page, schema, options),
+      }),
+    );
     files.push(...result);
     generated[id] = result;
   }

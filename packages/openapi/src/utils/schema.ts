@@ -8,6 +8,15 @@ import type {
 } from '@/types';
 import { idToTitle } from '@/utils/id-to-title';
 
+export const methodKeys = [
+  'get',
+  'post',
+  'patch',
+  'delete',
+  'head',
+  'put',
+] as const;
+
 export type NoReference<T> = T extends (infer I)[]
   ? NoReference<I>[]
   : T extends ReferenceObject

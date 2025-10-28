@@ -12,7 +12,7 @@ import { dump } from 'js-yaml';
 import type { NoReference } from '@/utils/schema';
 import Slugger from 'github-slugger';
 import { removeUndefined } from '@/utils/remove-undefined';
-import type { OutputEntry } from '@/utils/schema-to-pages';
+import type { OutputEntry } from '@/utils/pages/builder';
 
 export interface PagesToTextOptions {
   /**
@@ -76,7 +76,7 @@ export function toText(
           type: 'operation',
         },
       );
-    case 'schema':
+    case 'group':
       return generatePage(
         entry.schemaId,
         processed,

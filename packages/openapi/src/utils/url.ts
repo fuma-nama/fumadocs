@@ -1,5 +1,9 @@
 import type { RequestData } from '@/requests/types';
 
+export function isUrl(schemaId: string): boolean {
+  return schemaId.startsWith('https://') || schemaId.startsWith('http://');
+}
+
 export function joinURL(base: string, pathname: string): string {
   if (pathname.startsWith('/')) pathname = pathname.slice(1);
   if (base.endsWith('/')) base = base.slice(0, -1);

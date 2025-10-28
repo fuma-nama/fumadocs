@@ -1,17 +1,15 @@
 import { MethodLabel } from '@/ui/components/method-label';
-import type * as PageTree from 'fumadocs-core/page-tree';
-import {
+import type {
   LoaderPlugin,
   MetaData,
   PageData,
-  PageFile,
   PageTreeTransformer,
   Source,
   VirtualFile,
 } from 'fumadocs-core/source';
 import type { OpenAPIServer } from '@/server/create';
-import type { SchemaToPagesOptions } from '@/utils/schema-to-pages';
-import { ApiPageProps } from '@/render/api-page';
+import type { SchemaToPagesOptions } from '@/utils/pages/generate';
+import type { ApiPageProps } from '@/render/api-page';
 
 declare module 'fumadocs-core/source' {
   export interface PageData {
@@ -80,7 +78,7 @@ export async function openapiSource(
   }>
 > {
   const { baseDir = '' } = options;
-  const { serverToPages } = await import('@/utils/schema-to-pages');
+  const { serverToPages } = await import('@/utils/pages/generate');
   const { toBody } = await import('@/utils/pages/to-body');
   const files: VirtualFile<{
     pageData: OpenAPIPageData;
@@ -109,44 +107,6 @@ export async function openapiSource(
     files,
   };
 }
-
-/**
- * Source API Integration, add this to page tree builder options.
- *
- * @deprecated use `openapiPlugin()`
- */
-export const attachFile = (
-  node: PageTree.Item,
-  file: PageFile | undefined,
-): PageTree.Item => {
-  if (!file) return node;
-  let data = file.data as object;
-  // backward compatible with older versions with `_openapi` is located in `data.data`
-  if ('data' in data && data.data && typeof data === 'object') data = data.data;
-
-  let method: string | undefined;
-
-  if ('_openapi' in data && typeof data._openapi === 'object') {
-    const meta = data._openapi as {
-      method?: string;
-    };
-
-    method = meta.method;
-  }
-
-  if (method) {
-    node.name = (
-      <>
-        {node.name}{' '}
-        <MethodLabel className="ms-auto text-xs text-nowrap">
-          {method}
-        </MethodLabel>
-      </>
-    );
-  }
-
-  return node;
-};
 
 /**
  * @deprecated use `openapiPlugin()`

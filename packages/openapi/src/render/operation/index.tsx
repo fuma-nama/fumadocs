@@ -5,12 +5,16 @@ import type {
   RenderContext,
   SecuritySchemeObject,
 } from '@/types';
-import { createMethod, type ResolvedSchema } from '@/utils/schema';
+import {
+  createMethod,
+  methodKeys,
+  type NoReference,
+  type ResolvedSchema,
+} from '@/utils/schema';
 import { idToTitle } from '@/utils/id-to-title';
 import { Markdown } from '../markdown';
 import { heading } from '../heading';
 import { Schema } from '../schema';
-import { methodKeys } from '@/build-routes';
 import {
   APIExample,
   APIExampleProvider,
@@ -349,7 +353,7 @@ function WebhookCallback({
   ctx,
   headingLevel,
 }: {
-  callback: CallbackObject;
+  callback: NoReference<CallbackObject>;
   ctx: RenderContext;
   headingLevel: number;
 }) {

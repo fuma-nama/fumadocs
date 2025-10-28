@@ -9,6 +9,7 @@ import {
 } from 'react';
 import type { RenderContext, ServerObject } from '@/types';
 import { defaultAdapters, type MediaAdapter } from '@/requests/media/adapter';
+import type { NoReference } from '@/utils/schema';
 
 export interface ApiProviderProps
   extends Omit<ApiContextType, 'mediaAdapters'> {
@@ -26,7 +27,7 @@ export interface SelectedServer {
 }
 
 interface ApiContextType {
-  servers: ServerObject[];
+  servers: NoReference<ServerObject>[];
   shikiOptions: RenderContext['shikiOptions'];
   mediaAdapters: Record<string, MediaAdapter>;
 }
@@ -137,7 +138,9 @@ export function ApiProvider({
   );
 }
 
-function getDefaultValues(server: ServerObject): Record<string, string> {
+function getDefaultValues(
+  server: NoReference<ServerObject>,
+): Record<string, string> {
   return Object.fromEntries(
     Object.entries(server.variables ?? {}).map(([k, v]) => [k, v.default]),
   );

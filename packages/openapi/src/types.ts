@@ -9,14 +9,13 @@ import type { SharedOpenAPIOptions } from '@/server';
 export type Document = V3_1.Document;
 export type OperationObject = V3_1.OperationObject;
 export type ParameterObject = V3_1.ParameterObject;
-export type SecurityRequirementObject = V3_1.SecurityRequirementObject;
 export type SecuritySchemeObject = V3_1.SecuritySchemeObject;
 export type ReferenceObject = V3_1.ReferenceObject;
 export type PathItemObject = V3_1.PathItemObject;
 export type TagObject = V3_1.TagObject;
-export type ServerObject = NoReference<V3_1.ServerObject>;
-export type CallbackObject = NoReference<V3_1.CallbackObject>;
-export type ServerVariableObject = NoReference<V3_1.ServerVariableObject>;
+export type ServerObject = V3_1.ServerObject;
+export type CallbackObject = V3_1.CallbackObject;
+export type ServerVariableObject = V3_1.ServerVariableObject;
 
 export type MethodInformation = NoReference<OperationObject> & {
   method: string;
@@ -24,7 +23,7 @@ export type MethodInformation = NoReference<OperationObject> & {
 
 export interface RenderContext extends SharedOpenAPIOptions {
   renderer: Renderer;
-  servers: ServerObject[];
+  servers: NoReference<ServerObject>[];
   slugger: Slugger;
 
   /**
