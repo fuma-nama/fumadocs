@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 16.0.5
+
+### Patch Changes
+
+- 8221785: hotfix i18n middleware URL formating
+
 ## 16.0.4
 
 ### Patch Changes
