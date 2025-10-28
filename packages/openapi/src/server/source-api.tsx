@@ -8,7 +8,7 @@ import type {
   VirtualFile,
 } from 'fumadocs-core/source';
 import type { OpenAPIServer } from '@/server/create';
-import type { SchemaToPagesOptions } from '@/utils/pages/generate';
+import type { SchemaToPagesOptions } from '@/utils/pages/preset-auto';
 import type { ApiPageProps } from '@/render/api-page';
 
 declare module 'fumadocs-core/source' {
@@ -78,14 +78,15 @@ export async function openapiSource(
   }>
 > {
   const { baseDir = '' } = options;
-  const { serverToPages } = await import('@/utils/pages/generate');
+  const { createAutoPreset } = await import('@/utils/pages/preset-auto');
+  const { fromServer } = await import('@/utils/pages/builder');
   const { toBody } = await import('@/utils/pages/to-body');
   const files: VirtualFile<{
     pageData: OpenAPIPageData;
     metaData: MetaData;
   }>[] = [];
 
-  const entries = await serverToPages(from, options);
+  const entries = await fromServer(from, createAutoPreset(options));
   for (const entry of Object.values(entries).flat()) {
     files.push({
       type: 'page',

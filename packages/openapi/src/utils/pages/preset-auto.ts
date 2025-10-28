@@ -1,16 +1,13 @@
 import * as path from 'node:path';
 import type { ProcessedDocument } from '@/utils/process-document';
-import type { OpenAPIServer } from '@/server';
-import {
-  type BuilderConfig,
-  fromSchema,
-  fromServer,
-  type OperationOutput,
-  type OutputEntry,
-  type OutputGroup,
-  type PagesBuilder,
-  type TagOutput,
-  type WebhookOutput,
+import type {
+  OperationOutput,
+  OutputEntry,
+  OutputGroup,
+  PagesBuilder,
+  PagesBuilderConfig,
+  TagOutput,
+  WebhookOutput,
 } from '@/utils/pages/builder';
 import { isUrl } from '@/utils/url';
 
@@ -71,7 +68,7 @@ export type SchemaToPagesOptions =
   | OperationConfig
   | ({
       per: 'custom';
-    } & BuilderConfig);
+    } & PagesBuilderConfig);
 
 type NameFn<Entry> = (
   this: PagesBuilder,
@@ -100,22 +97,9 @@ interface BaseConfig {
   slugify?: (name: string) => string;
 }
 
-export async function serverToPages(
-  server: OpenAPIServer,
+export function createAutoPreset(
   options: SchemaToPagesOptions,
-) {
-  return fromServer(server, createAutoPreset(options));
-}
-
-export async function schemaToPages(
-  schemaId: string,
-  processed: ProcessedDocument,
-  options: SchemaToPagesOptions,
-) {
-  return fromSchema(schemaId, processed, createAutoPreset(options));
-}
-
-function createAutoPreset(options: SchemaToPagesOptions): BuilderConfig {
+): PagesBuilderConfig {
   if (options.per === 'custom') return options;
   const {
     slugify = (s) => {

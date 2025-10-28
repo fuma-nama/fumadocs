@@ -54,7 +54,7 @@ export type OutputEntry =
   | WebhookOutput
   | OutputGroup;
 
-export interface BuilderConfig {
+export interface PagesBuilderConfig {
   toPages: (builder: PagesBuilder) => void;
 }
 
@@ -114,7 +114,7 @@ interface ExtractedInfo {
 
 export async function fromServer(
   server: OpenAPIServer,
-  config: BuilderConfig,
+  config: PagesBuilderConfig,
 ): Promise<Record<string, OutputEntry[]>> {
   const schemas = await server.getSchemas();
   const generated: Record<string, OutputEntry[]> = {};
@@ -134,7 +134,7 @@ export async function fromServer(
 export function fromSchema(
   schemaId: string,
   processed: ProcessedDocument,
-  config: BuilderConfig,
+  config: PagesBuilderConfig,
 ): OutputEntry[] {
   const files: OutputEntry[] = [];
   const { toPages } = config;
