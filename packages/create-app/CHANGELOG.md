@@ -1,5 +1,12 @@
 # create-next-docs-app
 
+## 16.0.6
+
+### Patch Changes
+
+- 3668baf: bump deps & update templates
+- eece4f8: Support Tanstack Start SPA
+
 ## 16.0.5
 
 ## 16.0.4
