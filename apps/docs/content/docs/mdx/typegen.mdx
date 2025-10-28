@@ -5,7 +5,7 @@ description: Generate types without running dev/build server
 
 ### Overview
 
-You can run `fumadocs-mdx` to generate types & index file (e.g. the `.source` folder in Next.js).
+You can run `fumadocs-mdx` to generate types & index file (e.g. the `.source` folder).
 
 Optionally, you can run it in post install to ensure types are generated when initializing the project.
 
@@ -17,10 +17,11 @@ Optionally, you can run it in post install to ensure types are generated when in
 }
 ```
 
-If your project uses a custom configuration file or you want to output the generated files to a different directory, you can provide these paths directly as command-line arguments:
+If your project uses a custom path for configuration file or output directory, you can provide them as command arguments:
 
 ```npm
 npx fumadocs-mdx <config-path> <output-dir>
 ```
-<config-path>: Path to your custom Fumadocs MDX configuration file (e.g. lib/fumadocs/source.config.ts).
-<output-dir>: Directory where the generated files should be written (lib/fumadocs/.source).
+
+- `config-path`: Fumadocs MDX config file, default to `source.config.ts`.
+- `output-dir`: Directory of generated files, default to `.source`.
