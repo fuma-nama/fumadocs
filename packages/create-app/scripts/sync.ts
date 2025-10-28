@@ -11,6 +11,7 @@ const templateDir = path.join(dir, '../template');
 const templates = [
   'react-router',
   'tanstack-start',
+  'tanstack-start-spa',
   'react-router-spa',
   'waku',
   ['next-mdx', '+next+fuma-docs-mdx'],

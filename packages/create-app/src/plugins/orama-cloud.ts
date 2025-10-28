@@ -79,6 +79,7 @@ See https://fumadocs.dev/docs/headless/search/orama-cloud for integrating Orama 
       const filePath = {
         '+next+fuma-docs-mdx': '.next/server/app/static.json.body',
         'tanstack-start': '.output/public/static.json',
+        'tanstack-start-spa': 'dist/client/static.json',
         'react-router': 'build/client/static.json',
         'react-router-spa': 'build/client/static.json',
         waku: 'dist/public/static.json',

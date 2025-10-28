@@ -48,12 +48,12 @@ export async function rootProvider(
           name: 'search',
           initializer: '{{ SearchDialog }}',
         });
+        file.addImportDeclaration({
+          moduleSpecifier: specifier,
+          defaultImport: 'SearchDialog',
+        });
+        break;
       }
-
-      file.addImportDeclaration({
-        moduleSpecifier: specifier,
-        defaultImport: 'SearchDialog',
-      });
     },
   });
   await file.save();

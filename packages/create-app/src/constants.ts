@@ -11,7 +11,8 @@ export interface TemplateInfo {
     | 'waku'
     | 'react-router'
     | 'react-router-spa'
-    | 'tanstack-start';
+    | 'tanstack-start'
+    | 'tanstack-start-spa';
   label: string;
   appDir: string;
   /**
@@ -55,6 +56,13 @@ export const templates: TemplateInfo[] = [
   {
     value: 'tanstack-start',
     label: 'Tanstack Start: Fumadocs MDX (not RSC)',
+    appDir: 'src',
+    rootProviderPath: 'routes/__root.tsx',
+  },
+  {
+    value: 'tanstack-start-spa',
+    label: 'Tanstack Start SPA: Fumadocs MDX (not RSC)',
+    hint: 'SPA mode allows you to host the site statically, compatible with a CDN.',
     appDir: 'src',
     rootProviderPath: 'routes/__root.tsx',
   },
