@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 9.7.0
+
+### Minor Changes
+
+- ef73516: Support `per: custom`
+
 ## 9.6.5
 
 ### Patch Changes
