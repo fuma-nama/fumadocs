@@ -27,7 +27,7 @@ const defaultFormat: NonNullable<MiddlewareOptions['format']> = (
   locale,
   path,
 ) => {
-  return `/${locale}/${path}`;
+  return `/${locale}${path}`;
 };
 
 export function createI18nMiddleware({
