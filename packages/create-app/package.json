@@ -41,7 +41,7 @@
   "dependencies": {
     "@clack/prompts": "^0.11.0",
     "@commander-js/extra-typings": "^14.0.0",
-    "commander": "^14.0.1",
+    "commander": "^14.0.2",
     "picocolors": "^1.1.1",
     "tinyexec": "^1.0.1",
     "ts-morph": "^27.0.2"

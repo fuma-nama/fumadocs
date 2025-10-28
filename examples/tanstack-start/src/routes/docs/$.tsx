@@ -73,28 +73,35 @@ function Page() {
   );
 }
 
-function transformPageTree(tree: PageTree.Folder): PageTree.Folder {
-  function transform<T extends PageTree.Item | PageTree.Separator>(item: T) {
-    if (typeof item.icon !== 'string') return item;
+function transformPageTree(root: PageTree.Root): PageTree.Root {
+  function mapNode<T extends PageTree.Node>(item: T): T {
+    if (typeof item.icon === 'string') {
+      item = {
+        ...item,
+        icon: (
+          <span
+            dangerouslySetInnerHTML={{
+              __html: item.icon,
+            }}
+          />
+        ),
+      };
+    }
 
-    return {
-      ...item,
-      icon: (
-        <span
-          dangerouslySetInnerHTML={{
-            __html: item.icon,
-          }}
-        />
-      ),
-    };
+    if (item.type === 'folder') {
+      return {
+        ...item,
+        index: item.index ? mapNode(item.index) : undefined,
+        children: item.children.map(mapNode),
+      };
+    }
+
+    return item;
   }
 
   return {
-    ...tree,
-    index: tree.index ? transform(tree.index) : undefined,
-    children: tree.children.map((item) => {
-      if (item.type === 'folder') return transformPageTree(item);
-      return transform(item);
-    }),
+    ...root,
+    children: root.children.map(mapNode),
+    fallback: root.fallback ? transformPageTree(root.fallback) : undefined,
   };
 }

@@ -49,6 +49,7 @@ async function main() {
           switch (base) {
             case 'node_modules':
             case 'dist':
+            case 'out':
             case 'build':
               return false;
             default:
