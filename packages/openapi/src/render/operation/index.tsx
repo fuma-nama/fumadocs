@@ -32,6 +32,7 @@ import {
   Accordions,
   AccordionTrigger,
 } from '@/ui/components/accordion';
+import { isMediaTypeSupported } from '@/requests/media/adapter';
 
 export interface CodeSample<T = unknown> {
   lang: string;
@@ -111,7 +112,7 @@ export function Operation({
         </div>
         {body.description && <Markdown text={body.description} />}
         {contentTypes.map(([type, content]) => {
-          if (!(type in ctx.mediaAdapters)) {
+          if (!isMediaTypeSupported(type, ctx.mediaAdapters)) {
             throw new Error(`Media type ${type} is not supported (in ${path})`);
           }
 

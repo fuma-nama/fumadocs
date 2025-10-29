@@ -1,4 +1,5 @@
 import type { MediaAdapter } from '@/requests/media/adapter';
+import { resolveMediaAdapter } from '@/requests/media/adapter';
 import type { NoReference } from '@/utils/schema';
 import type { ParameterObject } from '@/types';
 import type { RawRequestData, RequestData } from '@/requests/types';
@@ -125,8 +126,9 @@ function getMediaEncoder(
   if (!field.content) return;
 
   for (const k in field.content) {
-    if (k in adapters) {
-      return (v: unknown) => String(adapters[k].encode({ body: v }));
+    const adapter = resolveMediaAdapter(k, adapters);
+    if (adapter) {
+      return (v: unknown) => String(adapter.encode({ body: v }));
     }
   }
 }

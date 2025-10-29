@@ -1,6 +1,7 @@
 'use client';
 import { ident } from '@/requests/string-utils';
 import type { SampleGenerator } from '@/requests/types';
+import { resolveMediaAdapter } from '@/requests/media/adapter';
 
 export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
   const s: string[] = [];
@@ -16,15 +17,16 @@ export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
 
   // Handle body if present
   let body: string | undefined;
-  if (data.body && data.bodyMediaType && data.bodyMediaType in mediaAdapters) {
-    const adapter = mediaAdapters[data.bodyMediaType];
-
-    body = adapter.generateExample(data as { body: unknown }, {
-      lang: 'java',
-      addImport(specifier) {
-        imports.add(specifier);
-      },
-    });
+  if (data.body && data.bodyMediaType) {
+    const adapter = resolveMediaAdapter(data.bodyMediaType, mediaAdapters);
+    if (adapter) {
+      body = adapter.generateExample(data as { body: unknown }, {
+        lang: 'java',
+        addImport(specifier) {
+          imports.add(specifier);
+        },
+      });
+    }
   }
 
   for (const value of imports.values()) {
