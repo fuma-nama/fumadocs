@@ -1,5 +1,8 @@
 import { fileURLToPath } from 'node:url';
 import versionPkg from '../../create-app-versions/package.json';
+import { version as coreVersion } from '../../core/package.json';
+import { version as uiVersion } from '../../ui/package.json';
+import { version as mdxVersion } from '../../mdx/package.json';
 
 export const sourceDir = fileURLToPath(new URL(`../`, import.meta.url).href);
 
@@ -68,4 +71,9 @@ export const templates: TemplateInfo[] = [
   },
 ];
 
-export const depVersions = versionPkg.dependencies;
+export const depVersions = {
+  ...versionPkg.dependencies,
+  'fumadocs-core': coreVersion,
+  'fumadocs-ui': uiVersion,
+  'fumadocs-mdx': mdxVersion,
+};
