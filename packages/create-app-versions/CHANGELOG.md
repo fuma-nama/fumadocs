@@ -1,5 +1,11 @@
 # create-fumadocs-versions
 
+## 16.0.7
+
+### Patch Changes
+
+- d209ac9: hotfix installer
+
 ## 16.0.6
 
 ### Patch Changes
