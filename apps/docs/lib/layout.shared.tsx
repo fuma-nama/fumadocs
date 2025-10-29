@@ -42,7 +42,7 @@ export const logo = (
       alt="Fumadocs"
       src={Logo}
       sizes="100px"
-      className="hidden w-20 md:w-24 [.uwu_&]:block"
+      className="hidden w-22 [.uwu_&]:block"
       aria-label="Fumadocs"
     />
 

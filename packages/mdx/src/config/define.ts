@@ -73,6 +73,8 @@ export interface GlobalConfig {
 
   /**
    * Configure global MDX options
+   *
+   * @remarks `GlobalConfigMDXOptions`
    */
   mdxOptions?: GlobalConfigMDXOptions | (() => Promise<GlobalConfigMDXOptions>);
 

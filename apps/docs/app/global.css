@@ -1,12 +1,8 @@
-@import 'tailwindcss' source(none);
+@import 'tailwindcss';
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
 @import 'fumadocs-twoslash/twoslash.css';
 @import 'fumadocs-openapi/css/preset.css';
-
-@source ".";
-@source "../components";
-@source "../content";
 @plugin 'tailwindcss-animate';
 
 @theme {
