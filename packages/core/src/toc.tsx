@@ -7,6 +7,7 @@ import {
   useContext,
   useEffect,
   useEffectEvent,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -106,16 +107,18 @@ export function TOCItem({
   const shouldScroll = activeOrder === 0;
   const onActiveChangeEvent = useEffectEvent(onActiveChange);
 
-  useEffect(() => {
-    if (shouldScroll && containerRef.current && anchorRef.current) {
-      scrollIntoView(anchorRef.current, {
+  useLayoutEffect(() => {
+    const anchor = anchorRef.current;
+    const container = containerRef.current;
+
+    if (container && anchor && shouldScroll)
+      scrollIntoView(anchor, {
         behavior: 'smooth',
         block: 'center',
         inline: 'center',
         scrollMode: 'always',
-        boundary: containerRef.current,
+        boundary: container,
       });
-    }
   }, [containerRef, shouldScroll]);
 
   useEffect(() => {
