@@ -100,9 +100,8 @@ export function TOCItem({
   ...props
 }: TOCItemProps) {
   const containerRef = useContext(ScrollContext);
-  const anchors = useActiveAnchors();
   const anchorRef = useRef<HTMLAnchorElement>(null);
-  const activeOrder = anchors.indexOf(props.href.slice(1));
+  const activeOrder = useActiveAnchors().indexOf(props.href.slice(1));
   const isActive = activeOrder !== -1;
   const shouldScroll = activeOrder === 0;
   const onActiveChangeEvent = useEffectEvent(onActiveChange);
@@ -120,7 +119,7 @@ export function TOCItem({
   }, [containerRef, shouldScroll]);
 
   useEffect(() => {
-    onActiveChangeEvent(isActive);
+    return () => onActiveChangeEvent(isActive);
   }, [isActive]);
 
   return (
