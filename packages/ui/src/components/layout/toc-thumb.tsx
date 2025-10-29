@@ -1,7 +1,12 @@
-import { type HTMLAttributes, type RefObject, useEffect, useRef } from 'react';
+import {
+  type HTMLAttributes,
+  type RefObject,
+  useEffect,
+  useEffectEvent,
+  useRef,
+} from 'react';
 import * as Primitive from 'fumadocs-core/toc';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
-import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 
 export type TOCThumb = [top: number, height: number];
 

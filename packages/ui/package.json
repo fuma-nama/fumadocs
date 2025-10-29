@@ -135,14 +135,14 @@
   },
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",
-    "@next/eslint-plugin-next": "16.0.0",
+    "@next/eslint-plugin-next": "16.0.1",
     "@tailwindcss/cli": "^4.1.16",
     "@types/lodash.merge": "^4.6.9",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
-    "next": "16.0.0",
+    "next": "16.0.1",
     "tailwindcss": "^4.1.16",
     "tsc-alias": "^1.8.16",
     "tsconfig": "workspace:*"

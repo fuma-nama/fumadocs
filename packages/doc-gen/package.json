@@ -52,7 +52,7 @@
     "@types/estree": "^1.0.8",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
-    "@types/node": "24.9.1",
+    "@types/node": "24.9.2",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "mdast-util-mdx-jsx": "^3.2.0",

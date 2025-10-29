@@ -9,6 +9,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useEffectEvent,
   useMemo,
   useRef,
   useState,
@@ -26,7 +27,6 @@ import type {
   ReactSortedResult as BaseResultType,
 } from 'fumadocs-core/search';
 import { cva } from 'class-variance-authority';
-import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 import { useRouter } from 'fumadocs-core/framework';
 import type { SharedProps } from '@/contexts/search';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';

@@ -4,6 +4,7 @@ import {
   type ComponentProps,
   createContext,
   useContext,
+  useEffectEvent,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -11,7 +12,6 @@ import {
 } from 'react';
 import * as Primitive from '@radix-ui/react-tabs';
 import { mergeRefs } from '@/utils/merge-refs';
-import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 
 type ChangeListener = (v: string) => void;
 const listeners = new Map<string, ChangeListener[]>();

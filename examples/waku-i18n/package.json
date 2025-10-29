@@ -21,7 +21,7 @@
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.16",
     "@types/mdx": "^2.0.13",
-    "@types/node": "^24.9.1",
+    "@types/node": "^24.9.2",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "tailwindcss": "^4.1.16",

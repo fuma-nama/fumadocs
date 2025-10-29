@@ -2,7 +2,6 @@ import { Ajv2020 } from 'ajv/dist/2020';
 import type { RequestSchema } from '@/playground/index';
 import { createContext, ReactNode, useContext, useMemo, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 import { getDefaultValue } from '@/playground/get-default-values';
 import type { ParsedSchema } from '@/utils/schema';
 
@@ -118,7 +117,7 @@ export function useFieldInfo(
 
   return {
     info,
-    updateInfo: useEffectEvent((value) => {
+    updateInfo: (value) => {
       const updated = {
         ...info,
         ...value,
@@ -140,7 +139,7 @@ export function useFieldInfo(
       }
 
       form.setValue(fieldName, getDefaultValue(valueSchema));
-    }),
+    },
   };
 }
 

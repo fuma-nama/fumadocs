@@ -4,7 +4,7 @@
   "private": true,
   "description": "Used to track dependency versions in create-fumadocs-app",
   "dependencies": {
-    "@biomejs/biome": "^2.3.1",
+    "@biomejs/biome": "^2.3.2",
     "@eslint/eslintrc": "^3.3.1",
     "@orama/core": "^1.2.13",
     "eslint": "^9.38.0",

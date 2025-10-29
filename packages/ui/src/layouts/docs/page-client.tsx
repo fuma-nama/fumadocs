@@ -4,6 +4,7 @@ import {
   type ComponentProps,
   Fragment,
   useEffect,
+  useEffectEvent,
   useMemo,
   useRef,
   useState,
@@ -21,7 +22,6 @@ import {
 } from 'fumadocs-core/breadcrumb';
 import { useNav } from '@/contexts/layout';
 import { isActive } from '@/utils/is-active';
-import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 import {
   Collapsible,
   CollapsibleContent,
