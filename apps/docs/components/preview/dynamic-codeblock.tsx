@@ -16,7 +16,11 @@ export default function Example() {
           className="w-fit bg-transparent px-4 py-2 text-sm focus-visible:outline-none"
         >
           {Object.keys(bundledLanguages).map((lang) => (
-            <option value={lang} key={lang}>
+            <option
+              value={lang}
+              key={lang}
+              className="bg-fd-card text-fd-card-foreground"
+            >
               {lang}
             </option>
           ))}
