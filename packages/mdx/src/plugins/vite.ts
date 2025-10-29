@@ -11,7 +11,7 @@ import {
   generateGlobImport,
   type GlobImportOptions,
 } from '@/utils/glob-import';
-import type { Plugin } from '@/core';
+import type { EmitEntry, Plugin, PluginContext } from '@/core';
 import path from 'node:path';
 
 export interface IndexFileOptions {
@@ -27,9 +27,18 @@ export interface IndexFileOptions {
    * add `.js` extensions to imports, needed for ESM without bundler resolution
    */
   addJsExtension?: boolean;
+
+  /**
+   * Generate entry point for browser environment
+   */
+  browser?: boolean;
 }
 
-export default function vite(options: IndexFileOptions): Plugin {
+export default function vite({
+  index,
+}: {
+  index: IndexFileOptions | boolean;
+}): Plugin {
   let config: LoadedConfig;
 
   return {
@@ -37,27 +46,50 @@ export default function vite(options: IndexFileOptions): Plugin {
       config = v;
     },
     emit() {
-      return [
-        {
-          path: 'index.ts',
-          content: indexFile(this.configPath, this.outDir, config, options),
-        },
-      ];
+      const out: EmitEntry[] = [];
+      if (index === false) return out;
+
+      const indexOptions: IndexFileOptions =
+        typeof index === 'object' ? index : {};
+      const { browser = false } = indexOptions;
+      if (browser) {
+        out.push({
+          path: 'browser.ts',
+          content: indexFile(this, config, indexOptions, 'browser'),
+        });
+      }
+
+      out.push({
+        path: 'index.ts',
+        content: indexFile(
+          this,
+          config,
+          indexOptions,
+          browser ? 'server' : 'all',
+        ),
+      });
+
+      return out;
     },
   };
 }
 
 function indexFile(
-  configPath: string,
-  outDir: string,
+  { configPath, outDir }: PluginContext,
   config: LoadedConfig,
   options: IndexFileOptions,
+  environment: 'all' | 'browser' | 'server',
 ) {
   const { addJsExtension = false, runtime } = options;
+  const runtimePath = {
+    all: 'fumadocs-mdx/runtime/vite',
+    server: 'fumadocs-mdx/runtime/vite.server',
+    browser: 'fumadocs-mdx/runtime/vite.browser',
+  }[environment];
 
   const lines = [
     '/// <reference types="vite/client" />',
-    `import { fromConfig } from 'fumadocs-mdx/runtime/vite';`,
+    `import { fromConfig } from '${runtimePath}';`,
     `import type * as Config from '${toImportPath(configPath, {
       relativeTo: outDir,
       jsExtension: addJsExtension,

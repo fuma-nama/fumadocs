@@ -174,8 +174,9 @@ function createViteCore({
       outDir,
     },
     [
-      generateIndexFile !== false &&
-        vite(typeof generateIndexFile === 'object' ? generateIndexFile : {}),
+      vite({
+        index: generateIndexFile,
+      }),
     ],
   );
 }
