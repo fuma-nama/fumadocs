@@ -26,21 +26,20 @@ export default function next(): Plugin {
       config = v;
 
       // always emit again when async mode enabled
-      shouldEmitOnChange = false;
-      for (const collection of config.collections.values()) {
-        if (
-          (collection.type === 'doc' && collection.async) ||
-          (collection.type === 'docs' && collection.docs.async)
-        ) {
-          shouldEmitOnChange = true;
-        }
-      }
+      shouldEmitOnChange = Array.from(config.collections.values()).some(
+        (collection) => {
+          return (
+            (collection.type === 'doc' && collection.async) ||
+            (collection.type === 'docs' && collection.docs.async)
+          );
+        },
+      );
     },
     configureServer(server) {
       if (!server.watcher) return;
 
-      server.watcher.on('all', async () => {
-        if (!shouldEmitOnChange) return;
+      server.watcher.on('all', async (event) => {
+        if (event === 'change' && !shouldEmitOnChange) return;
 
         await this.core.emitAndWrite({
           filterPlugin: (plugin) => plugin.name === 'next',
