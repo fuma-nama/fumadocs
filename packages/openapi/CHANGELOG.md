@@ -1,5 +1,15 @@
 # @fuma-docs/openapi
 
+## 9.7.2
+
+### Patch Changes
+
+- f0111ba: no longer generate default values for optional params
+- 9845ffc: Support `+variant` media types
+- Updated dependencies [b95b0cf]
+  - fumadocs-core@16.0.6
+  - fumadocs-ui@16.0.6
+
 ## 9.7.1
 
 ### Patch Changes

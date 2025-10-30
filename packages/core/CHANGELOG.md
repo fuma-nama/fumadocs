@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 16.0.6
+
+### Patch Changes
+
+- b95b0cf: improve TOC anchor detection
+
 ## 16.0.5
 
 ### Patch Changes
