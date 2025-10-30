@@ -64,11 +64,16 @@ export function resolveRequestData(
       // Remove existing parameter first to avoid duplicates
       searchParams.delete(key);
       for (const item of param.value) {
-        searchParams.append(key, item);
+        // Only append non-empty values
+        if (item !== '' && item !== null && item !== undefined) {
+          searchParams.append(key, item);
+        }
       }
     } else {
-      // Set (replace if exists) the parameter value
-      searchParams.set(key, param.value);
+      // Only set parameter if value is not empty
+      if (param.value !== '' && param.value !== null && param.value !== undefined) {
+        searchParams.set(key, param.value);
+      }
     }
   }
 

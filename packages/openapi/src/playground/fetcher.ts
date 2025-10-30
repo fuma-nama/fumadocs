@@ -37,9 +37,18 @@ export function createBrowserFetcher(
         const param = options.header[key];
 
         if (!Array.isArray(param.value)) {
-          headers.append(key, param.value);
+          // Only append non-empty header values
+          if (param.value !== '' && param.value !== null && param.value !== undefined) {
+            headers.append(key, param.value);
+          }
         } else {
-          headers.append(key, param.value.join(','));
+          // Filter out empty values from array
+          const nonEmptyValues = param.value.filter(
+            (v) => v !== '' && v !== null && v !== undefined
+          );
+          if (nonEmptyValues.length > 0) {
+            headers.append(key, nonEmptyValues.join(','));
+          }
         }
       }
 
@@ -68,13 +77,17 @@ export function createBrowserFetcher(
       // cookies
       for (const key in options.cookie) {
         const param = options.cookie[key];
-        const segs: string[] = [`${key}=${param.value}`];
+        
+        // Only set non-empty cookie values
+        if (param.value !== '' && param.value !== null && param.value !== undefined) {
+          const segs: string[] = [`${key}=${param.value}`];
 
-        if (proxyUrl && proxyUrl.origin !== window.location.origin)
-          segs.push(`domain=${proxyUrl.host}`);
-        segs.push('path=/', 'max-age=30');
+          if (proxyUrl && proxyUrl.origin !== window.location.origin)
+            segs.push(`domain=${proxyUrl.host}`);
+          segs.push('path=/', 'max-age=30');
 
-        document.cookie = segs.join('; ');
+          document.cookie = segs.join('; ');
+        }
       }
 
       return fetch(url, {
