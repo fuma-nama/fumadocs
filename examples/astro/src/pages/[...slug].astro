@@ -1,0 +1,40 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import { Docs } from '../components/docs';
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+import '../styles/global.css';
+import { source } from '../lib/source';
+import Layout from '../components/layout.astro';
+
+interface Props {
+  page: CollectionEntry<'docs'>;
+}
+
+export async function getStaticPaths() {
+  return source.getPages().map((page) => ({
+    params: { slug: page.slugs.length > 0 ? page.slugs.join('/') : undefined },
+    props: { page: page.data._raw },
+  }));
+}
+
+const { page } = Astro.props;
+const { Content } = await render(page);
+---
+
+<Layout>
+  <title>{page.data.title}</title>
+  <meta name="title" content={page.data.title} />
+  <meta name="description" content={page.data.description} />
+  <Docs
+    tree={source.pageTree}
+    pathname={Astro.url.pathname}
+    params={Astro.params as Record<string, string | string[]>}
+    client:load
+  >
+    <h1 class="font-semibold text-3xl">{page.data.title}</h1>
+    <p class="text-lg text-fd-muted-foreground mb-8">{page.data.description}</p>
+    <div class="prose flex-1">
+      <Content components={{ ...defaultMdxComponents }} />
+    </div>
+  </Docs>
+</Layout>
