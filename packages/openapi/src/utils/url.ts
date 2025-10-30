@@ -71,7 +71,11 @@ export function resolveRequestData(
       }
     } else {
       // Only set parameter if value is not empty
-      if (param.value !== '' && param.value !== null && param.value !== undefined) {
+      if (
+        param.value !== '' &&
+        param.value !== null &&
+        param.value !== undefined
+      ) {
         searchParams.set(key, param.value);
       }
     }

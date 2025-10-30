@@ -38,13 +38,17 @@ export function createBrowserFetcher(
 
         if (!Array.isArray(param.value)) {
           // Only append non-empty header values
-          if (param.value !== '' && param.value !== null && param.value !== undefined) {
+          if (
+            param.value !== '' &&
+            param.value !== null &&
+            param.value !== undefined
+          ) {
             headers.append(key, param.value);
           }
         } else {
           // Filter out empty values from array
           const nonEmptyValues = param.value.filter(
-            (v) => v !== '' && v !== null && v !== undefined
+            (v) => v !== '' && v !== null && v !== undefined,
           );
           if (nonEmptyValues.length > 0) {
             headers.append(key, nonEmptyValues.join(','));
@@ -77,9 +81,13 @@ export function createBrowserFetcher(
       // cookies
       for (const key in options.cookie) {
         const param = options.cookie[key];
-        
+
         // Only set non-empty cookie values
-        if (param.value !== '' && param.value !== null && param.value !== undefined) {
+        if (
+          param.value !== '' &&
+          param.value !== null &&
+          param.value !== undefined
+        ) {
           const segs: string[] = [`${key}=${param.value}`];
 
           if (proxyUrl && proxyUrl.origin !== window.location.origin)
