@@ -100,15 +100,15 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
 
               return (
                 <HoverCard>
-                  <HoverCardTrigger asChild>
-                    <Link
-                      href={
-                        found.hash
-                          ? `${found.page.url}#${found.hash}`
-                          : found.page.url
-                      }
-                      {...props}
-                    />
+                  <HoverCardTrigger
+                    href={
+                      found.hash
+                        ? `${found.page.url}#${found.hash}`
+                        : found.page.url
+                    }
+                    {...props}
+                  >
+                    {props.children}
                   </HoverCardTrigger>
                   <HoverCardContent className="text-sm">
                     <p className="font-medium">{found.page.data.title}</p>

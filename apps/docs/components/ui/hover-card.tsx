@@ -1,13 +1,22 @@
 'use client';
 
+import type { ComponentProps } from 'react';
 import * as React from 'react';
 import * as HoverCardPrimitive from '@radix-ui/react-hover-card';
-
 import { cn } from '@/lib/cn';
+import Link from 'fumadocs-core/link';
 
 const HoverCard = HoverCardPrimitive.Root;
 
-const HoverCardTrigger = HoverCardPrimitive.Trigger;
+function HoverCardTrigger(
+  props: ComponentProps<typeof HoverCardPrimitive.Trigger>,
+) {
+  return (
+    <HoverCardPrimitive.Trigger asChild>
+      <Link {...props} />
+    </HoverCardPrimitive.Trigger>
+  );
+}
 
 const HoverCardContent = React.forwardRef<
   React.ComponentRef<typeof HoverCardPrimitive.Content>,

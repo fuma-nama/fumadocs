@@ -25,6 +25,7 @@ const Link = forwardRef<HTMLAnchorElement, LinkProps>(
         // protocol relative URL
         href.startsWith('//'),
       prefetch,
+      children,
       ...props
     },
     ref,
@@ -38,12 +39,16 @@ const Link = forwardRef<HTMLAnchorElement, LinkProps>(
           target="_blank"
           {...props}
         >
-          {props.children}
+          {children}
         </a>
       );
     }
 
-    return <Base ref={ref} href={href} prefetch={prefetch} {...props} />;
+    return (
+      <Base ref={ref} href={href} prefetch={prefetch} {...props}>
+        {children}
+      </Base>
+    );
   },
 );
 
