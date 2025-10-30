@@ -13,19 +13,14 @@ export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
 
   if (data.body && data.bodyMediaType) {
     const adapter = resolveMediaAdapter(data.bodyMediaType, mediaAdapters);
-    if (adapter) {
-      headers['Content-Type'] = data.bodyMediaType;
+    headers['Content-Type'] = data.bodyMediaType;
 
-      body = adapter.generateExample(
-        data as { body: unknown },
-        {
-          lang: 'python',
-        },
-      );
+    body = adapter?.generateExample(data as { body: unknown }, {
+      lang: 'python',
+    });
 
-      if (body) {
-        params.push('data = body');
-      }
+    if (body) {
+      params.push('data = body');
     }
   }
 

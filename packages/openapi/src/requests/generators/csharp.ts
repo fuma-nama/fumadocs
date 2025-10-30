@@ -11,17 +11,12 @@ export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
   let body: string | undefined;
   if (data.body && data.bodyMediaType) {
     const adapter = resolveMediaAdapter(data.bodyMediaType, mediaAdapters);
-    if (adapter) {
-      body = adapter.generateExample(
-        data as { body: unknown },
-        {
-          lang: 'csharp',
-          addImport(from) {
-            imports.add(from);
-          },
-        },
-      );
-    }
+    body = adapter?.generateExample(data as { body: unknown }, {
+      lang: 'csharp',
+      addImport(from) {
+        imports.add(from);
+      },
+    });
   }
 
   for (const specifier of imports) {

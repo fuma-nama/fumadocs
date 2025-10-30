@@ -27,18 +27,13 @@ export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
 
   if (data.body && data.bodyMediaType) {
     const adapter = resolveMediaAdapter(data.bodyMediaType, mediaAdapters);
-    if (adapter) {
-      headers.set('Content-Type', `"${data.bodyMediaType}"`);
-      body = adapter.generateExample(
-        data as { body: unknown },
-        {
-          lang: 'go',
-          addImport(from) {
-            imports.push(from);
-          },
-        },
-      );
-    }
+    headers.set('Content-Type', `"${data.bodyMediaType}"`);
+    body = adapter?.generateExample(data as { body: unknown }, {
+      lang: 'go',
+      addImport(from) {
+        imports.push(from);
+      },
+    });
   }
 
   return `package main
@@ -49,15 +44,15 @@ ${ident(imports.map((v) => `"${v}"`).join('\n'))}
 
 func main() {
 ${Array.from(variables.entries())
-      .map(([k, v]) => ident(`${k} := ${v}`))
-      .join('\n')}
+  .map(([k, v]) => ident(`${k} := ${v}`))
+  .join('\n')}
 ${body ? ident(body) : ''}
   req, _ := http.NewRequest("${data.method}", url, ${body ? 'body' : 'nil'})
 ${ident(
-        Array.from(headers.entries())
-          .map(([key, value]) => `req.Header.Add("${key}", ${value})`)
-          .join('\n'),
-      )}
+  Array.from(headers.entries())
+    .map(([key, value]) => `req.Header.Add("${key}", ${value})`)
+    .join('\n'),
+)}
   res, _ := http.DefaultClient.Do(req)
   defer res.Body.Close()
   body, _ := ioutil.ReadAll(res.Body)

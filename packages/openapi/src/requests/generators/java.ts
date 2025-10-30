@@ -19,14 +19,12 @@ export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
   let body: string | undefined;
   if (data.body && data.bodyMediaType) {
     const adapter = resolveMediaAdapter(data.bodyMediaType, mediaAdapters);
-    if (adapter) {
-      body = adapter.generateExample(data as { body: unknown }, {
-        lang: 'java',
-        addImport(specifier) {
-          imports.add(specifier);
-        },
-      });
-    }
+    body = adapter?.generateExample(data as { body: unknown }, {
+      lang: 'java',
+      addImport(specifier) {
+        imports.add(specifier);
+      },
+    });
   }
 
   for (const value of imports.values()) {

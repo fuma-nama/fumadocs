@@ -1,5 +1,8 @@
 import type { MediaAdapter } from './adapter';
 
+const VariantMediaTypeRegex =
+  /^(?<dir>[a-zA-Z0-9._-]+)\/(?<content>[a-zA-Z0-9._-]+)\+(?<variant>[a-zA-Z0-9._-]+)$/;
+
 /**
  * Resolve a media adapter for a given media type.
  * Supports exact matches and pattern matching (e.g., +json suffix).
@@ -9,31 +12,24 @@ import type { MediaAdapter } from './adapter';
  * @returns The resolved adapter or undefined if not found
  */
 export function resolveMediaAdapter(
-    mediaType: string,
-    adapters: Record<string, MediaAdapter>,
+  mediaType: string,
+  adapters: Record<string, MediaAdapter>,
 ): MediaAdapter | undefined {
-    // Normalize media type (remove parameters like charset)
-    const normalized = mediaType.split(';')[0].trim().toLowerCase();
+  // Normalize media type (remove parameters like charset)
+  const normalized = mediaType.split(';', 2)[0].trim().toLowerCase();
 
-    // 1. Try exact match first
-    if (normalized in adapters) {
-        return adapters[normalized];
+  if (normalized in adapters) {
+    return adapters[normalized];
+  }
+
+  const match = VariantMediaTypeRegex.exec(normalized);
+  if (match?.groups) {
+    const baseType = `${match.groups.dir}/${match.groups.variant}`;
+
+    if (baseType in adapters) {
+      return adapters[baseType];
     }
-
-    // 2. Try pattern matching for structured syntax suffixes (RFC 6839)
-    // Handle +json, +xml, etc.
-    if (normalized.includes('+')) {
-        const suffix = normalized.substring(normalized.lastIndexOf('+'));
-
-        // Check if we have a base adapter for this suffix
-        // e.g., application/merge-patch+json -> application/json
-        const baseType = `application/${suffix.slice(1)}`;
-        if (baseType in adapters) {
-            return adapters[baseType];
-        }
-    }
-
-    return undefined;
+  }
 }
 
 /**
@@ -44,9 +40,8 @@ export function resolveMediaAdapter(
  * @returns true if the media type is supported
  */
 export function isMediaTypeSupported(
-    mediaType: string,
-    adapters: Record<string, MediaAdapter>,
+  mediaType: string,
+  adapters: Record<string, MediaAdapter>,
 ): boolean {
-    return resolveMediaAdapter(mediaType, adapters) !== undefined;
+  return resolveMediaAdapter(mediaType, adapters) !== undefined;
 }
-
