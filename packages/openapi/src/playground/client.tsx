@@ -203,11 +203,6 @@ export default function Client({
     );
   });
 
-  const onUpdateDefaults = useEffectEvent(() => {
-    fieldInfoMap.clear();
-    form.reset(initAuthValues(defaultValues, inputs));
-  });
-
   const onUpdateDebounced = useEffectEvent((values: FormValues) => {
     for (const item of inputs) {
       const value = get(values, item.fieldName);
@@ -228,10 +223,6 @@ export default function Client({
     values._encoded ??= encodeRequestData(data, mediaAdapters, parameters);
     updater.setData(data, values._encoded);
   });
-
-  useEffect(() => {
-    onUpdateDefaults();
-  }, [requestDataKey]);
 
   useEffect(() => {
     let timer: number | null = null;
@@ -270,6 +261,14 @@ export default function Client({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- mounted once only
   }, [inputs]);
+
+  useEffect(() => {
+    return () => {
+      fieldInfoMap.clear();
+      form.reset(initAuthValues(defaultValues, inputs));
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- for on change
+  }, [requestDataKey]);
 
   const onSubmit = form.handleSubmit((value) => {
     testQuery.start(mapInputs(value));
@@ -757,7 +756,7 @@ function DefaultResultDisplay({ data }: { data: FetchResult }) {
         {statusInfo.description}
       </div>
       <p className="text-sm text-fd-muted-foreground">{data.status}</p>
-      {data.data ? (
+      {data.data !== undefined && (
         <DynamicCodeBlock
           lang={
             typeof data.data === 'string' && data.data.length > 50000
@@ -771,7 +770,7 @@ function DefaultResultDisplay({ data }: { data: FetchResult }) {
           }
           options={shikiOptions}
         />
-      ) : null}
+      )}
     </div>
   );
 }

@@ -252,11 +252,11 @@ export function FieldInput({
   isRequired?: boolean;
   fieldName: string;
 }) {
-  const { control, reset } = useFormContext();
+  const form = useFormContext();
   const {
     field: { value, onChange, ...restField },
   } = useController({
-    control,
+    control: form.control,
     name: fieldName,
   });
 
@@ -338,7 +338,8 @@ export function FieldInput({
         <button
           type="button"
           onClick={() => {
-            reset((values) => {
+            // TODO: react-hook-form `reset()` cannot clear default values
+            form.reset((values) => {
               set(values, fieldName, undefined);
               return values;
             });
