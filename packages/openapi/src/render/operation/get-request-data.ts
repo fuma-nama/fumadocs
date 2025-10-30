@@ -20,31 +20,41 @@ export function getRequestData(
 
   for (const param of method.parameters ?? []) {
     let schema = param.schema;
-    let value;
+    let value: unknown | undefined;
 
     if (!schema && param.content) {
       const type = getPreferredType(param.content);
 
       const content = type ? param.content[type] : undefined;
-      if (!content)
+      if (!content || !content.schema)
         throw new Error(
           `Cannot find parameter schema for ${param.name} in ${path} ${method.method}`,
         );
 
       schema = content.schema;
-      value = content.example ?? param.example ?? sample(schema as object);
+      value = content.example ?? param.example;
     } else {
-      value = param.example ?? sample(schema as object);
+      value = param.example;
     }
 
-    if (param.in === 'cookie') {
-      result.cookie[param.name] = value;
-    } else if (param.in === 'header') {
-      result.header[param.name] = value;
-    } else if (param.in === 'query') {
-      result.query[param.name] = value;
-    } else if (param.in === 'path') {
-      result.path[param.name] = value;
+    if (param.required) {
+      value ??= sample(schema as object);
+    } else if (value === undefined) {
+      continue;
+    }
+
+    switch (param.in) {
+      case 'cookie':
+        result.cookie[param.name] = value;
+        break;
+      case 'header':
+        result.header[param.name] = value;
+        break;
+      case 'query':
+        result.query[param.name] = value;
+        break;
+      default:
+        result.path[param.name] = value;
     }
   }
 

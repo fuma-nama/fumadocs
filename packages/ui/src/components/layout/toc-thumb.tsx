@@ -7,7 +7,7 @@ import {
 } from 'react';
 import { useActiveAnchors } from 'fumadocs-core/toc';
 
-export type TOCThumb = [top: number, height: number];
+type TocThumb = [top: number, height: number];
 
 interface RefProps {
   containerRef: RefObject<HTMLElement | null>;
@@ -38,8 +38,6 @@ function Updater({
     update(thumbRef.current, calc(containerRef.current, active));
   });
 
-  useEffect(() => onPrint(), [active]);
-
   useEffect(() => {
     if (!containerRef.current) return;
     const container = containerRef.current;
@@ -52,10 +50,14 @@ function Updater({
     };
   }, [containerRef]);
 
+  if (containerRef.current && thumbRef.current) {
+    update(thumbRef.current, calc(containerRef.current, active));
+  }
+
   return null;
 }
 
-function calc(container: HTMLElement, active: string[]): TOCThumb {
+function calc(container: HTMLElement, active: string[]): TocThumb {
   if (active.length === 0 || container.clientHeight === 0) {
     return [0, 0];
   }
@@ -80,7 +82,7 @@ function calc(container: HTMLElement, active: string[]): TOCThumb {
   return [upper, lower - upper];
 }
 
-function update(element: HTMLElement, info: TOCThumb): void {
+function update(element: HTMLElement, info: TocThumb): void {
   element.style.setProperty('--fd-top', `${info[0]}px`);
   element.style.setProperty('--fd-height', `${info[1]}px`);
 }
