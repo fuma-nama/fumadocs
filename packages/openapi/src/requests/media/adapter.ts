@@ -1,4 +1,5 @@
 import { escapeString, inputToString } from '@/requests/string-utils';
+export { resolveMediaAdapter, isMediaTypeSupported } from './resolve-adapter';
 // @ts-expect-error -- untyped
 import js2xml from 'xml-js/lib/js2xml';
 

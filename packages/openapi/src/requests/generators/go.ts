@@ -1,6 +1,7 @@
 'use client';
 import { ident } from '@/requests/string-utils';
 import type { SampleGenerator } from '@/requests/types';
+import { resolveMediaAdapter } from '@/requests/media/adapter';
 
 export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
   const imports = ['fmt', 'net/http', 'io/ioutil'];
@@ -24,17 +25,15 @@ export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
 
   let body: string | undefined;
 
-  if (data.body && data.bodyMediaType && data.bodyMediaType in mediaAdapters) {
+  if (data.body && data.bodyMediaType) {
+    const adapter = resolveMediaAdapter(data.bodyMediaType, mediaAdapters);
     headers.set('Content-Type', `"${data.bodyMediaType}"`);
-    body = mediaAdapters[data.bodyMediaType].generateExample(
-      data as { body: unknown },
-      {
-        lang: 'go',
-        addImport(from) {
-          imports.push(from);
-        },
+    body = adapter?.generateExample(data as { body: unknown }, {
+      lang: 'go',
+      addImport(from) {
+        imports.push(from);
       },
-    );
+    });
   }
 
   return `package main

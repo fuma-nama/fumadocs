@@ -1,5 +1,6 @@
 import type { RequestData } from '@/requests/types';
 import type { MediaAdapter } from '@/requests/media/adapter';
+import { resolveMediaAdapter } from '@/requests/media/adapter';
 
 export interface FetchOptions extends RequestData {
   proxyUrl?: string;
@@ -54,7 +55,7 @@ export function createBrowserFetcher(
 
       let body: BodyInit | undefined = undefined;
       if (options.bodyMediaType && options.body) {
-        const adapter = adapters[options.bodyMediaType];
+        const adapter = resolveMediaAdapter(options.bodyMediaType, adapters);
         if (!adapter)
           return {
             status: 400,

@@ -1,6 +1,7 @@
 'use client';
 import type { SampleGenerator } from '@/requests/types';
 import { generatePythonObject } from '@/requests/to-python-object';
+import { resolveMediaAdapter } from '@/requests/media/adapter';
 
 export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
   const headers: Record<string, string> = {};
@@ -10,15 +11,13 @@ export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
 
   imports.add('requests');
 
-  if (data.body && data.bodyMediaType && data.bodyMediaType in mediaAdapters) {
+  if (data.body && data.bodyMediaType) {
+    const adapter = resolveMediaAdapter(data.bodyMediaType, mediaAdapters);
     headers['Content-Type'] = data.bodyMediaType;
 
-    body = mediaAdapters[data.bodyMediaType].generateExample(
-      data as { body: unknown },
-      {
-        lang: 'python',
-      },
-    );
+    body = adapter?.generateExample(data as { body: unknown }, {
+      lang: 'python',
+    });
 
     if (body) {
       params.push('data = body');
