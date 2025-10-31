@@ -10,11 +10,11 @@ import { validate, ValidationError } from '@/utils/validation';
 import * as path from 'node:path';
 import { load } from 'js-yaml';
 import { createMdxLoader } from '@/loaders/mdx';
-import { findConfigFile } from '@/loaders/config';
 import { toVite } from '@/loaders/adapter';
 import vite, { type IndexFileOptions } from '@/plugins/vite';
 import type { FSWatcher } from 'chokidar';
-import { createCore } from '@/core';
+import { createCore, findConfigFile } from '@/core';
+import { createIntegratedConfigLoader } from '@/loaders/config';
 
 const FumadocsDeps = ['fumadocs-core', 'fumadocs-ui', 'fumadocs-openapi'];
 
@@ -54,7 +54,7 @@ export default async function mdx(
   const core = await createViteCore(options).init({
     config: buildConfig(config),
   });
-  const mdxLoader = toVite(createMdxLoader(core.creatConfigLoader()));
+  const mdxLoader = toVite(createMdxLoader(createIntegratedConfigLoader(core)));
 
   async function transformMeta(
     path: string,
@@ -67,7 +67,7 @@ export default async function mdx(
     };
 
     const collection = parsed.collection
-      ? core.getConfig().collections.get(parsed.collection)
+      ? core.getConfig().getCollection(parsed.collection)
       : undefined;
     if (!collection) return null;
     let schema;
@@ -153,7 +153,7 @@ export async function postInstall(
   configPath = findConfigFile(),
   pluginOptions: PluginOptions = {},
 ) {
-  const { loadConfig } = await import('@/loaders/config/load');
+  const { loadConfig } = await import('@/config/load-from-file');
   const options = applyDefaults(pluginOptions);
   const core = await createViteCore(options).init({
     config: loadConfig(configPath, options.outDir, true),

@@ -1,17 +1,16 @@
 import type { NextConfig } from 'next';
 import type { Configuration } from 'webpack';
-import { findConfigFile } from '@/loaders/config';
 import { type Options as MDXLoaderOptions } from '@/webpack';
 import type {
   TurbopackLoaderOptions,
   TurbopackOptions,
 } from 'next/dist/server/config-shared';
 import * as path from 'node:path';
-import { loadConfig } from '@/loaders/config/load';
+import { loadConfig } from '@/config/load-from-file';
 import { removeFileCache } from '@/next/file-cache';
 import { ValidationError } from '@/utils/validation';
 import next from '@/plugins/next';
-import { type Core, createCore } from '@/core';
+import { type Core, createCore, findConfigFile } from '@/core';
 
 export interface CreateMDXOptions {
   /**
@@ -112,7 +111,7 @@ async function init(
     });
 
     watcher.add(options.configPath);
-    for (const collection of core.getConfig().collections.values()) {
+    for (const collection of core.getConfig().collectionList) {
       if (collection.type === 'docs') {
         watcher.add(collection.docs.dir);
         watcher.add(collection.meta.dir);

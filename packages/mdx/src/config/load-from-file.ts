@@ -1,7 +1,7 @@
 import * as path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import type { LoadedConfig } from '@/config/build';
 import { buildConfig } from '@/config/build';
-import type { LoadedConfig } from '@/loaders/config';
 
 async function compileConfig(configPath: string, outDir: string) {
   const { build } = await import('esbuild');

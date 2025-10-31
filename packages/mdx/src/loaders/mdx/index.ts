@@ -5,11 +5,11 @@ import { buildMDX } from '@/loaders/mdx/build-mdx';
 import type { SourceMap } from 'rollup';
 import type { Loader } from '@/loaders/adapter';
 import { z } from 'zod';
-import type { ConfigLoader, LoadedConfig } from '@/loaders/config';
+import type { DocCollectionItem, LoadedConfig } from '@/config/build';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import type { DocCollection } from '@/config';
+import type { ConfigLoader } from '@/loaders/config';
 
 const querySchema = z
   .object({
@@ -63,10 +63,10 @@ export function createMdxLoader(configLoader: ConfigLoader): Loader {
     }
 
     const collection = parsed.collection
-      ? config.collections.get(parsed.collection)
+      ? config.getCollection(parsed.collection)
       : undefined;
 
-    let docCollection: DocCollection | undefined;
+    let docCollection: DocCollectionItem | undefined;
     switch (collection?.type) {
       case 'doc':
         docCollection = collection;

@@ -1,7 +1,7 @@
-import { findConfigFile, staticConfig } from '@/loaders/config';
+import { createCore, findConfigFile } from '@/core';
 import { createMdxLoader } from '@/loaders/mdx';
 import { toNode } from '@/loaders/adapter';
-import { createCore } from '@/core';
+import { createStandaloneConfigLoader } from '@/loaders/config';
 
 const core = createCore({
   environment: 'node',
@@ -11,9 +11,10 @@ const core = createCore({
 
 export const load = toNode(
   createMdxLoader(
-    staticConfig({
+    createStandaloneConfigLoader({
       core,
       buildConfig: true,
+      mode: 'production',
     }),
   ),
   (filePath) => filePath.endsWith('.md') || filePath.endsWith('.mdx'),

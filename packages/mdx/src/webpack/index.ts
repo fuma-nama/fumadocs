@@ -1,8 +1,8 @@
 import { type LoaderContext } from 'webpack';
 import { createMdxLoader } from '@/loaders/mdx';
-import { dynamicConfig, staticConfig } from '@/loaders/config';
 import { toWebpack, type WebpackLoader } from '@/loaders/adapter';
 import { createCore } from '@/core';
+import { createStandaloneConfigLoader } from '@/loaders/config';
 
 export interface Options {
   configPath: string;
@@ -35,15 +35,11 @@ export default async function loader(
 
     instance = toWebpack(
       createMdxLoader(
-        isDev
-          ? dynamicConfig({
-              core,
-              buildConfig: false,
-            })
-          : staticConfig({
-              core,
-              buildConfig: false,
-            }),
+        createStandaloneConfigLoader({
+          core,
+          buildConfig: false,
+          mode: isDev ? 'dev' : 'production',
+        }),
       ),
     );
   }

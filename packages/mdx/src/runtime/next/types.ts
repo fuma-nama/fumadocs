@@ -1,6 +1,6 @@
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type { MetaData, PageData, Source } from 'fumadocs-core/source';
-import type { LoadedConfig } from '@/loaders/config';
+import type { LoadedConfig } from '@/config/build';
 import type { DocCollection, DocsCollection, MetaCollection } from '@/config';
 import type {
   AsyncDocCollectionEntry,

@@ -69,6 +69,7 @@ type GlobalConfigMDXOptions =
     } & ProcessorOptions);
 
 export interface GlobalConfig {
+  collections?: Record<string, AnyCollection>;
   plugins?: PluginOption[];
 
   /**
