@@ -215,7 +215,7 @@ See [i18n routing](/docs/ui/page-conventions#i18n-routing) to learn how to creat
 ### Navigation
 
 Fumadocs only handles navigation for its own layouts (e.g. sidebar).
-For other places, you can use the `useParams` hook to get the locale from url, and attend it to `href`.
+For other places, you can use the `useParams` hook to get the locale from url, and prepend it to `href`.
 
 ```tsx
 import Link from 'next/link';
@@ -226,7 +226,7 @@ const { lang } = useParams();
 return <Link href={`/${lang}/another-page`}>This is a link</Link>;
 ```
 
-In addition, the [`fumadocs-core/dynamic-link`](/docs/headless/components/link#dynamic-hrefs) component supports dynamic hrefs, you can use it to attend the locale prefix.
+In addition, the [`fumadocs-core/dynamic-link`](/docs/headless/components/link#dynamic-hrefs) component supports dynamic hrefs, you can use it to prepend the locale prefix.
 It is useful for Markdown/MDX content.
 
 ```mdx title="content.mdx"
