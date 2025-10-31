@@ -5,10 +5,8 @@ import type {
   LoadedConfig,
   MetaCollectionItem,
 } from '@/config/build';
-import type { MetaCollection } from '@/config';
 import { validate } from '@/utils/validation';
 import { readFileWithCache } from '@/next/file-cache';
-import { load } from 'js-yaml';
 import { getGitTimestamp } from '@/utils/git-timestamp';
 import { fumaMatter } from '@/utils/fuma-matter';
 import {
@@ -18,6 +16,7 @@ import {
 } from '@/utils/import-formatter';
 import type { FileInfo } from '@/runtime/shared';
 import type { Plugin } from '@/core';
+import { load } from 'js-yaml';
 
 export default function next(): Plugin {
   let config: LoadedConfig;
@@ -32,7 +31,8 @@ export default function next(): Plugin {
       shouldEmitOnChange = config.collectionList.some((collection) => {
         return (
           (collection.type === 'doc' && collection.async) ||
-          (collection.type === 'docs' && collection.docs.async)
+          collection.type === 'docs' ||
+          collection.type === 'meta'
         );
       });
     },
@@ -64,7 +64,6 @@ export async function indexFile(
   configPath: string,
   config: LoadedConfig,
   importPath: ImportPathConfig,
-  configHash: string | false = false,
 ): Promise<string> {
   let asyncInit = false;
   const lines: string[] = [
@@ -80,13 +79,10 @@ export async function indexFile(
     }),
   ];
 
-  async function getDocEntries(collectionName: string, files: FileInfo[]) {
-    const items = files.map(async (file, i) => {
-      const importId = `${collectionName}_${i}`;
-      const params = [`collection=${collectionName}`];
-      if (configHash) {
-        params.push(`hash=${configHash}`);
-      }
+  function getDocEntries(collection: DocCollectionItem, files: FileInfo[]) {
+    return files.map((file, i) => {
+      const importId = `d_${collection.name}_${i}`;
+      const params = [`collection=${collection.name}`];
 
       lines.unshift(
         getImportCode({
@@ -98,11 +94,12 @@ export async function indexFile(
 
       return `{ info: ${JSON.stringify(file)}, data: ${importId} }`;
     });
-
-    return Promise.all(items);
   }
 
-  async function getMetaEntries(collection: MetaCollection, files: FileInfo[]) {
+  async function getMetaEntries(
+    collection: MetaCollectionItem,
+    files: FileInfo[],
+  ) {
     const items = files.map(async (file) => {
       const source = await readFileWithCache(file.fullPath).catch(() => '');
       let data =
@@ -202,18 +199,22 @@ export async function indexFile(
         return `export const ${k} = _runtimeAsync.docs<typeof _source.${k}>([${docsEntries}], [${metaEntries}], "${k}", _sourceConfig)`;
       }
 
-      const docsEntries = (await getDocEntries(k, docs)).join(', ');
+      const docsEntries = getDocEntries(collection.docs, docs).join(', ');
 
       return `export const ${k} = _runtime.docs<typeof _source.${k}>([${docsEntries}], [${metaEntries}])`;
     }
 
     const files = await globCollectionFiles(collection);
 
-    if (collection.type === 'doc' && collection.async) {
+    if (collection.type === 'meta') {
+      return `export const ${k} = _runtime.meta<typeof _source.${k}>([${(await getMetaEntries(collection, files)).join(', ')}]);`;
+    }
+
+    if (collection.async) {
       return `export const ${k} = _runtimeAsync.doc<typeof _source.${k}>([${(await getAsyncEntries(collection, files)).join(', ')}], "${k}", _sourceConfig)`;
     }
 
-    return `export const ${k} = _runtime.${collection.type}<typeof _source.${k}>([${(await getDocEntries(k, files)).join(', ')}]);`;
+    return `export const ${k} = _runtime.doc<typeof _source.${k}>([${getDocEntries(collection, files).join(', ')}]);`;
   });
 
   const resolvedDeclares = await Promise.all(declares);
@@ -255,7 +256,7 @@ async function globCollectionFiles(
       });
 
       for (const item of result) {
-        if (collection.isFileSupported(item)) continue;
+        if (!collection.isFileSupported(item)) continue;
         const fullPath = path.join(dir, item);
 
         files.set(fullPath, {

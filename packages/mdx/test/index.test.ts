@@ -6,6 +6,7 @@ import { ValidationError } from '@/utils/validation';
 import { defineCollections } from '@/config';
 import { fumaMatter } from '@/utils/fuma-matter';
 import { indexFile } from '@/plugins/next';
+import { buildConfig } from '@/config/build';
 
 test('format errors', async () => {
   const schema = z.object({
@@ -51,6 +52,13 @@ const cases = [
     }),
   },
   {
+    name: 'sync-meta',
+    collection: defineCollections({
+      type: 'meta',
+      dir: path.join(baseDir, './fixtures/generate-index'),
+    }),
+  },
+  {
     name: 'async',
     collection: defineCollections({
       type: 'doc',
@@ -64,17 +72,12 @@ for (const { name, collection } of cases) {
   test(`generate JS index file: ${name}`, async () => {
     const out = await indexFile(
       path.join(baseDir, './fixtures/config.ts'),
-      {
-        // @ts-expect-error -- test file
-        _runtime: {
-          files: new Map(),
-        },
-        collections: new Map([['docs', collection]]),
-      },
+      buildConfig({
+        docs: collection,
+      }),
       {
         relativeTo: path.join(baseDir, './fixtures'),
       },
-      'hash',
     );
 
     await expect(out.replaceAll(process.cwd(), '$cwd')).toMatchFileSnapshot(

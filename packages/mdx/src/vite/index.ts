@@ -1,20 +1,14 @@
-import {
-  mergeConfig,
-  type Plugin,
-  type TransformResult,
-  type UserConfig,
-} from 'vite';
+import { mergeConfig, type Plugin, type UserConfig } from 'vite';
 import { buildConfig } from '@/config/build';
-import { parse } from 'node:querystring';
-import { validate, ValidationError } from '@/utils/validation';
-import * as path from 'node:path';
-import { load } from 'js-yaml';
+import { ValidationError } from '@/utils/validation';
 import { createMdxLoader } from '@/loaders/mdx';
 import { toVite } from '@/loaders/adapter';
 import vite, { type IndexFileOptions } from '@/plugins/vite';
 import type { FSWatcher } from 'chokidar';
 import { createCore, findConfigFile } from '@/core';
 import { createIntegratedConfigLoader } from '@/loaders/config';
+import { createMetaLoader } from '@/loaders/meta';
+import { mdxLoaderGlob, metaLoaderGlob } from '@/loaders';
 
 const FumadocsDeps = ['fumadocs-core', 'fumadocs-ui', 'fumadocs-openapi'];
 
@@ -54,54 +48,14 @@ export default async function mdx(
   const core = await createViteCore(options).init({
     config: buildConfig(config),
   });
-  const mdxLoader = toVite(createMdxLoader(createIntegratedConfigLoader(core)));
-
-  async function transformMeta(
-    path: string,
-    query: string,
-    value: string,
-  ): Promise<TransformResult | null> {
-    const isJson = path.endsWith('.json');
-    const parsed = parse(query) as {
-      collection?: string;
-    };
-
-    const collection = parsed.collection
-      ? core.getConfig().getCollection(parsed.collection)
-      : undefined;
-    if (!collection) return null;
-    let schema;
-    switch (collection.type) {
-      case 'meta':
-        schema = collection.schema;
-        break;
-      case 'docs':
-        schema = collection.meta.schema;
-        break;
-    }
-    if (!schema) return null;
-
-    let data;
-    try {
-      data = isJson ? JSON.parse(value) : load(value);
-    } catch {
-      return null;
-    }
-
-    const out = await validate(
-      schema,
-      data,
-      { path, source: value },
-      `invalid data in ${path}`,
-    );
-
-    return {
-      code: isJson
-        ? JSON.stringify(out)
-        : `export default ${JSON.stringify(out)}`,
-      map: null,
-    };
-  }
+  const configLoader = createIntegratedConfigLoader(core);
+  const mdxLoader = toVite(createMdxLoader(configLoader));
+  const metaLoader = toVite(
+    createMetaLoader(configLoader, {
+      // vite has built-in plugin for JSON files
+      json: 'json',
+    }),
+  );
 
   return {
     name: 'fumadocs-mdx',
@@ -129,15 +83,16 @@ export default async function mdx(
       });
     },
     async transform(value, id) {
-      const [file, query = ''] = id.split('?');
-      const ext = path.extname(file);
-
       try {
-        if (['.yaml', '.json'].includes(ext))
-          return await transformMeta(file, query, value);
+        if (metaLoaderGlob.test(id)) {
+          const [file, query = ''] = id.split('?', 2);
+          return await metaLoader.call(this, file, query, value);
+        }
 
-        if (['.md', '.mdx'].includes(ext))
+        if (mdxLoaderGlob.test(id)) {
+          const [file, query = ''] = id.split('?', 2);
           return await mdxLoader.call(this, file, query, value);
+        }
       } catch (e) {
         if (e instanceof ValidationError) {
           throw new Error(e.toStringFormatted());
