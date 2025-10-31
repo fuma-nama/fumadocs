@@ -312,6 +312,9 @@ importers:
       fumadocs-core:
         specifier: workspace:*
         version: link:../../packages/core
+      fumadocs-mdx:
+        specifier: workspace:*
+        version: link:../../packages/mdx
       fumadocs-ui:
         specifier: workspace:*
         version: link:../../packages/ui
@@ -1840,6 +1843,9 @@ importers:
       '@types/react':
         specifier: ^19.2.2
         version: 19.2.2
+      astro:
+        specifier: ^5.6.1
+        version: 5.15.2(@types/node@24.9.2)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.52.5)(terser@5.44.0)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
       eslint-config-custom:
         specifier: workspace:*
         version: link:../eslint-config-custom
