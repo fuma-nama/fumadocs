@@ -135,7 +135,7 @@ export function toBun(loader: Loader, test: RegExp) {
       return null;
     });
 
-    build.onLoad({ filter: test, namespace: 'fumadocs-mdx' }, async (args) => {
+    build.onLoad({ filter: test }, async (args) => {
       const content = await Bun.file(args.path).text();
 
       const result = await loader({
