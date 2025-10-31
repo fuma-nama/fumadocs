@@ -122,14 +122,26 @@ export function toWebpack(loader: Loader): WebpackLoader {
 
 export function toBun(loader: Loader, test: RegExp) {
   return (build: Bun.PluginBuilder) => {
-    build.onLoad({ filter: test }, async (args) => {
-      const [filePath, query] = args.path.split('?', 2);
-      const content = await Bun.file(filePath).text();
+    const queryData = new Map<
+      string,
+      Record<string, string | undefined | string[]>
+    >();
+
+    build.onResolve({ filter: test }, (args) => {
+      const [filePath, query = ''] = args.path.split('?', 2);
+
+      // store the query string because `onLoad` striped it
+      queryData.set(filePath, parse(query));
+      return null;
+    });
+
+    build.onLoad({ filter: test, namespace: 'fumadocs-mdx' }, async (args) => {
+      const content = await Bun.file(args.path).text();
 
       const result = await loader({
         source: content,
-        query: parse(query),
-        filePath,
+        query: queryData.get(args.path) ?? {},
+        filePath: args.path,
         development: false,
         compiler: {
           addDependency() {},
