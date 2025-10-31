@@ -1,3 +1,3 @@
 # Fumadocs Twoslash
 
-Use Typescript Twolash in Fumadocs.
+Use Typescript Twoslash in Fumadocs.
