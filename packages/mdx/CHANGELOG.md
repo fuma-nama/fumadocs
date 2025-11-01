@@ -1,5 +1,17 @@
 # next-docs-mdx
 
+## 13.0.4
+
+### Patch Changes
+
+- 27fc4ed: [Internal] improve mutability of `LoadedConfig` for plugins
+- f5bc4aa: Fix Bun missing query strings
+- 61b90c8: Always transform meta files in collection, this includes runtime loaders like Node.js and Bun.
+- d1e43f4: Support re-generating index file when using runtime: bun | node
+- Updated dependencies [f97cd1e]
+- Updated dependencies [f7e15e2]
+  - fumadocs-core@16.0.7
+
 ## 13.0.3
 
 ### Patch Changes
