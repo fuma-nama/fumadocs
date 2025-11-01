@@ -1,12 +1,5 @@
-import type {
-  AnyCollection,
-  DocCollection,
-  DocsCollection,
-  MetaCollection,
-} from '@/config';
 import { ident, toImportPath } from '@/utils/import-formatter';
-import type { LoadedConfig } from '@/loaders/config';
-import { getGlobPatterns } from '@/utils/collections';
+import type { CollectionItem, LoadedConfig } from '@/config/build';
 import {
   generateGlobImport,
   type GlobImportOptions,
@@ -40,19 +33,47 @@ export default function vite({
   index: IndexFileOptions | boolean;
 }): Plugin {
   let config: LoadedConfig;
+  let indexOptions: Required<IndexFileOptions> | false;
+  if (index === false) indexOptions = false;
+  else indexOptions = applyDefaults(index === true ? {} : index);
 
   return {
+    name: 'vite',
     config(v) {
       config = v;
     },
+    configureServer(server) {
+      if (
+        !server.watcher ||
+        indexOptions === false ||
+        indexOptions.runtime === false
+      )
+        return;
+
+      // for bun/node runtimes, alternative import.meta.glob has to be re-generated on update
+      server.watcher.on('all', (event, file) => {
+        if (event === 'change') return;
+        const isUpdated = config.collectionList.some((collection) => {
+          if (collection.type === 'docs')
+            return (
+              collection.docs.hasFile(file) || collection.meta.hasFile(file)
+            );
+
+          return collection.hasFile(file);
+        });
+
+        if (isUpdated) {
+          this.core.emitAndWrite({
+            filterPlugin: (plugin) => plugin.name === 'vite',
+          });
+        }
+      });
+    },
     emit() {
       const out: EmitEntry[] = [];
-      if (index === false) return out;
+      if (indexOptions === false) return out;
 
-      const indexOptions: IndexFileOptions =
-        typeof index === 'object' ? index : {};
-      const { browser = false } = indexOptions;
-      if (browser) {
+      if (indexOptions.browser) {
         out.push({
           path: 'browser.ts',
           content: indexFile(this, config, indexOptions, 'browser'),
@@ -65,7 +86,7 @@ export default function vite({
           this,
           config,
           indexOptions,
-          browser ? 'server' : 'all',
+          indexOptions.browser ? 'server' : 'all',
         ),
       });
 
@@ -74,13 +95,20 @@ export default function vite({
   };
 }
 
+function applyDefaults(options: IndexFileOptions): Required<IndexFileOptions> {
+  return {
+    addJsExtension: options.addJsExtension ?? false,
+    browser: options.browser ?? false,
+    runtime: options.runtime ?? false,
+  };
+}
+
 function indexFile(
   { configPath, outDir }: PluginContext,
   config: LoadedConfig,
-  options: IndexFileOptions,
+  { addJsExtension, runtime }: Required<IndexFileOptions>,
   environment: 'all' | 'browser' | 'server',
 ) {
-  const { addJsExtension = false, runtime } = options;
   const runtimePath = {
     all: 'fumadocs-mdx/runtime/vite',
     server: 'fumadocs-mdx/runtime/vite.server',
@@ -98,52 +126,51 @@ function indexFile(
     `export const create = fromConfig<typeof Config>();`,
   ];
 
-  function docs(name: string, collection: DocsCollection) {
-    const obj = [
-      ident(`doc: ${doc(name, collection.docs)}`),
-      ident(`meta: ${meta(name, collection.meta)}`),
-    ].join(',\n');
+  function generateCollectionGlob(collection: CollectionItem): string {
+    if (collection.type === 'docs') {
+      const obj = [
+        ident(`doc: ${generateCollectionGlob(collection.docs)}`),
+        ident(`meta: ${generateCollectionGlob(collection.meta)}`),
+      ].join(',\n');
 
-    return `{\n${obj}\n}`;
-  }
+      return `{\n${obj}\n}`;
+    }
 
-  function doc(name: string, collection: DocCollection) {
-    const patterns = getGlobPatterns(collection);
     const dir = getCollectionDir(collection);
-    const docGlob = generateGlob(patterns, {
-      query: {
-        collection: name,
-      },
-      base: dir,
-    });
-
-    if (collection.async) {
-      const headBlob = generateGlob(patterns, {
+    if (collection.type === 'doc') {
+      const docGlob = generateGlob(collection.patterns, {
         query: {
-          only: 'frontmatter',
-          collection: name,
+          collection: collection.name,
         },
-        import: 'frontmatter',
         base: dir,
       });
 
-      return `create.docLazy("${name}", "${dir}", ${headBlob}, ${docGlob})`;
+      if (collection.async) {
+        const headBlob = generateGlob(collection.patterns, {
+          query: {
+            only: 'frontmatter',
+            collection: collection.name,
+          },
+          import: 'frontmatter',
+          base: dir,
+        });
+
+        return `create.docLazy("${collection.name}", "${dir}", ${headBlob}, ${docGlob})`;
+      }
+
+      return `create.doc("${collection.name}", "${dir}", ${docGlob})`;
     }
 
-    return `create.doc("${name}", "${dir}", ${docGlob})`;
-  }
-
-  function meta(name: string, collection: MetaCollection) {
-    const patterns = getGlobPatterns(collection);
-    const dir = getCollectionDir(collection);
-
-    return `create.meta("${name}", "${dir}", ${generateGlob(patterns, {
-      import: 'default',
-      base: dir,
-      query: {
-        collection: name,
+    return `create.meta("${collection.name}", "${dir}", ${generateGlob(
+      collection.patterns,
+      {
+        import: 'default',
+        base: dir,
+        query: {
+          collection: collection.name,
+        },
       },
-    })})`;
+    )})`;
   }
 
   function generateGlob(patterns: string[], options: GlobImportOptions) {
@@ -163,19 +190,11 @@ function indexFile(
     }
   }
 
-  for (const [name, collection] of config.collections.entries()) {
-    let body: string;
-
-    if (collection.type === 'docs') {
-      body = docs(name, collection);
-    } else if (collection.type === 'meta') {
-      body = meta(name, collection);
-    } else {
-      body = doc(name, collection);
-    }
-
+  for (const collection of config.collectionList) {
     lines.push('');
-    lines.push(`export const ${name} = ${body};`);
+    lines.push(
+      `export const ${collection.name} = ${generateCollectionGlob(collection)};`,
+    );
   }
 
   return lines.join('\n');
@@ -192,9 +211,7 @@ function normalizeGlobPath(file: string) {
   return `./${file}`;
 }
 
-function getCollectionDir(collection: AnyCollection): string {
-  const dir = collection.dir;
-
+function getCollectionDir({ dir }: CollectionItem): string {
   if (Array.isArray(dir)) {
     if (dir.length !== 1)
       throw new Error(

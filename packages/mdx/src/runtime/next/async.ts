@@ -1,34 +1,24 @@
-import type { LoadedConfig } from '@/loaders/config';
+import type { LoadedConfig } from '@/config/build';
 import { _runtime, createMDXSource } from './index';
 import type { AsyncDocOut, RuntimeAsync } from './types';
 import { buildMDX, CompiledMDXProperties } from '@/loaders/mdx/build-mdx';
-import type { ProcessorOptions } from '@mdx-js/mdx';
 import { executeMdx } from '@fumadocs/mdx-remote/client';
 import { pathToFileURL } from 'node:url';
 import { createDocMethods, type DocData } from '@/runtime/shared';
-import type { DocCollection } from '@/config';
 import { fumaMatter } from '@/utils/fuma-matter';
 import fs from 'node:fs/promises';
 
 function getDocCollection(config: LoadedConfig, collection: string) {
-  const col = config.collections.get(collection);
+  const col = config.getCollection(collection);
   if (col?.type === 'doc' && col.mdxOptions) return col;
   if (col?.type === 'docs' && col.docs.mdxOptions) return col.docs;
-}
-
-async function getOptions(
-  config: LoadedConfig,
-  collection?: DocCollection,
-): Promise<ProcessorOptions> {
-  return (
-    collection?.mdxOptions ?? (await config.getDefaultMDXOptions('remote'))
-  );
 }
 
 export const _runtimeAsync: RuntimeAsync = {
   doc(files, collectionName, config) {
     const collection = getDocCollection(config, collectionName);
-    const initMdxOptions = getOptions(config, collection);
+    const initMdxOptions =
+      collection?.mdxOptions ?? config.getDefaultMDXOptions('remote');
 
     return files.map(({ info, data, lastModified }) => {
       let cachedResult: CompiledMDXProperties | undefined;

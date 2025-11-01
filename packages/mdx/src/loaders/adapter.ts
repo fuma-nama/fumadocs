@@ -23,19 +23,13 @@ export interface LoaderOutput {
   map?: unknown;
 }
 
-export type Loader = (input: LoaderInput) => Promise<LoaderOutput>;
+export type Loader = (input: LoaderInput) => Promise<LoaderOutput | null>;
 
-export function toNode(
-  loader: Loader,
-  filterByPath: (filePath: string) => boolean,
-): LoadHook {
+export function toNode(loader: Loader, test: RegExp): LoadHook {
   return async (url, _context, nextLoad): Promise<LoadFnOutput> => {
-    if (!url.startsWith('file:///')) return nextLoad(url);
-
-    const parsedUrl = new URL(url);
-    const filePath = fileURLToPath(parsedUrl);
-
-    if (filterByPath(filePath)) {
+    if (url.startsWith('file:///') && test.test(url)) {
+      const parsedUrl = new URL(url);
+      const filePath = fileURLToPath(parsedUrl);
       const source = (await fs.readFile(filePath)).toString();
 
       const result = await loader({
@@ -48,11 +42,13 @@ export function toNode(
         },
       });
 
-      return {
-        source: result.code,
-        format: 'module',
-        shortCircuit: true,
-      };
+      if (result) {
+        return {
+          source: result.code,
+          format: 'module',
+          shortCircuit: true,
+        };
+      }
     }
 
     return nextLoad(url);
@@ -80,6 +76,7 @@ export function toVite(loader: Loader): ViteLoader {
       },
     });
 
+    if (result === null) return null;
     return {
       code: result.code,
       map: result.map as SourceMap,
@@ -104,7 +101,11 @@ export function toWebpack(loader: Loader): WebpackLoader {
         compiler: this,
       });
 
-      callback(undefined, result.code, result.map as string);
+      if (result === null) {
+        callback(undefined, source);
+      } else {
+        callback(undefined, result.code, result.map as string);
+      }
     } catch (error) {
       if (error instanceof ValidationError) {
         return callback(new Error(error.toStringFormatted()));
@@ -116,5 +117,49 @@ export function toWebpack(loader: Loader): WebpackLoader {
       error.message = `${fpath}:${error.name}: ${error.message}`;
       callback(error);
     }
+  };
+}
+
+export function toBun(loader: Loader, test: RegExp) {
+  return (build: Bun.PluginBuilder) => {
+    const queryData = new Map<
+      string,
+      Record<string, string | undefined | string[]>
+    >();
+
+    build.onResolve({ filter: test }, (args) => {
+      const [filePath, query = ''] = args.path.split('?', 2);
+
+      // TODO: this isn't working because `args.path` still doesn't include query string
+      queryData.set(filePath, parse(query));
+      return null;
+    });
+
+    build.onLoad({ filter: test }, async (args) => {
+      const content = await Bun.file(args.path).text();
+
+      const result = await loader({
+        source: content,
+        query: queryData.get(args.path) ?? {},
+        filePath: args.path,
+        development: false,
+        compiler: {
+          addDependency() {},
+        },
+      });
+
+      // must return something, no fallback: https://github.com/oven-sh/bun/issues/5303
+      if (result === null) {
+        return {
+          contents: content,
+          loader: args.loader,
+        };
+      }
+
+      return {
+        contents: result.code,
+        loader: 'js',
+      };
+    });
   };
 }

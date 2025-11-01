@@ -1,10 +1,12 @@
 import * as path from 'node:path';
 import { createHash } from 'node:crypto';
-import type { LoadedConfig } from '@/loaders/config';
-import type { DocCollection, MetaCollection } from '@/config';
+import type {
+  DocCollectionItem,
+  LoadedConfig,
+  MetaCollectionItem,
+} from '@/config/build';
 import { validate } from '@/utils/validation';
 import { readFileWithCache } from '@/next/file-cache';
-import { load } from 'js-yaml';
 import { getGitTimestamp } from '@/utils/git-timestamp';
 import { fumaMatter } from '@/utils/fuma-matter';
 import {
@@ -12,9 +14,9 @@ import {
   type ImportPathConfig,
   toImportPath,
 } from '@/utils/import-formatter';
-import { getCollectionFiles } from '@/utils/collections';
 import type { FileInfo } from '@/runtime/shared';
 import type { Plugin } from '@/core';
+import { load } from 'js-yaml';
 
 export default function next(): Plugin {
   let config: LoadedConfig;
@@ -26,14 +28,13 @@ export default function next(): Plugin {
       config = v;
 
       // always emit again when async mode enabled
-      shouldEmitOnChange = Array.from(config.collections.values()).some(
-        (collection) => {
-          return (
-            (collection.type === 'doc' && collection.async) ||
-            (collection.type === 'docs' && collection.docs.async)
-          );
-        },
-      );
+      shouldEmitOnChange = config.collectionList.some((collection) => {
+        return (
+          (collection.type === 'doc' && collection.async) ||
+          collection.type === 'docs' ||
+          collection.type === 'meta'
+        );
+      });
     },
     configureServer(server) {
       if (!server.watcher) return;
@@ -63,7 +64,6 @@ export async function indexFile(
   configPath: string,
   config: LoadedConfig,
   importPath: ImportPathConfig,
-  configHash: string | false = false,
 ): Promise<string> {
   let asyncInit = false;
   const lines: string[] = [
@@ -79,15 +79,10 @@ export async function indexFile(
     }),
   ];
 
-  const entries = Array.from(config.collections.entries());
-
-  async function getDocEntries(collectionName: string, files: FileInfo[]) {
-    const items = files.map(async (file, i) => {
-      const importId = `${collectionName}_${i}`;
-      const params = [`collection=${collectionName}`];
-      if (configHash) {
-        params.push(`hash=${configHash}`);
-      }
+  function getDocEntries(collection: DocCollectionItem, files: FileInfo[]) {
+    return files.map((file, i) => {
+      const importId = `d_${collection.name}_${i}`;
+      const params = [`collection=${collection.name}`];
 
       lines.unshift(
         getImportCode({
@@ -99,11 +94,12 @@ export async function indexFile(
 
       return `{ info: ${JSON.stringify(file)}, data: ${importId} }`;
     });
-
-    return Promise.all(items);
   }
 
-  async function getMetaEntries(collection: MetaCollection, files: FileInfo[]) {
+  async function getMetaEntries(
+    collection: MetaCollectionItem,
+    files: FileInfo[],
+  ) {
     const items = files.map(async (file) => {
       const source = await readFileWithCache(file.fullPath).catch(() => '');
       let data =
@@ -130,7 +126,10 @@ export async function indexFile(
     return Promise.all(items);
   }
 
-  async function getAsyncEntries(collection: DocCollection, files: FileInfo[]) {
+  async function getAsyncEntries(
+    collection: DocCollectionItem,
+    files: FileInfo[],
+  ) {
     if (!asyncInit) {
       lines.unshift(
         getImportCode({
@@ -183,10 +182,11 @@ export async function indexFile(
     return Promise.all(entries);
   }
 
-  const declares = entries.map(async ([k, collection]) => {
+  const declares = config.collectionList.map(async (collection) => {
+    const k = collection.name;
     if (collection.type === 'docs') {
-      const docs = await getCollectionFiles(collection.docs);
-      const metas = await getCollectionFiles(collection.meta);
+      const docs = await globCollectionFiles(collection.docs);
+      const metas = await globCollectionFiles(collection.meta);
       const metaEntries = (await getMetaEntries(collection.meta, metas)).join(
         ', ',
       );
@@ -199,18 +199,22 @@ export async function indexFile(
         return `export const ${k} = _runtimeAsync.docs<typeof _source.${k}>([${docsEntries}], [${metaEntries}], "${k}", _sourceConfig)`;
       }
 
-      const docsEntries = (await getDocEntries(k, docs)).join(', ');
+      const docsEntries = getDocEntries(collection.docs, docs).join(', ');
 
       return `export const ${k} = _runtime.docs<typeof _source.${k}>([${docsEntries}], [${metaEntries}])`;
     }
 
-    const files = await getCollectionFiles(collection);
+    const files = await globCollectionFiles(collection);
 
-    if (collection.type === 'doc' && collection.async) {
+    if (collection.type === 'meta') {
+      return `export const ${k} = _runtime.meta<typeof _source.${k}>([${(await getMetaEntries(collection, files)).join(', ')}]);`;
+    }
+
+    if (collection.async) {
       return `export const ${k} = _runtimeAsync.doc<typeof _source.${k}>([${(await getAsyncEntries(collection, files)).join(', ')}], "${k}", _sourceConfig)`;
     }
 
-    return `export const ${k} = _runtime.${collection.type}<typeof _source.${k}>([${(await getDocEntries(k, files)).join(', ')}]);`;
+    return `export const ${k} = _runtime.doc<typeof _source.${k}>([${getDocEntries(collection, files).join(', ')}]);`;
   });
 
   const resolvedDeclares = await Promise.all(declares);
@@ -234,4 +238,34 @@ function parseMetaEntry(file: string, content: string) {
   }
 
   throw new Error(`Unknown meta file format: ${extname}, in ${file}.`);
+}
+
+async function globCollectionFiles(
+  collection: DocCollectionItem | MetaCollectionItem,
+) {
+  const { glob } = await import('tinyglobby');
+  const files = new Map<string, FileInfo>();
+  const dirs = Array.isArray(collection.dir)
+    ? collection.dir
+    : [collection.dir];
+
+  await Promise.all(
+    dirs.map(async (dir) => {
+      const result = await glob(collection.patterns, {
+        cwd: path.resolve(dir),
+      });
+
+      for (const item of result) {
+        if (!collection.isFileSupported(item)) continue;
+        const fullPath = path.join(dir, item);
+
+        files.set(fullPath, {
+          path: item,
+          fullPath,
+        });
+      }
+    }),
+  );
+
+  return Array.from(files.values());
 }

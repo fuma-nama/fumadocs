@@ -1,7 +1,10 @@
 import type { EmitEntry, Plugin } from '@/core';
-import type { LoadedConfig } from '@/loaders/config';
+import type {
+  DocsCollectionItem,
+  LoadedConfig,
+  MetaCollectionItem,
+} from '@/config/build';
 import { z } from 'zod';
-import { createCollectionMatcher } from '@/utils/collections';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
@@ -34,15 +37,23 @@ export default function jsonSchema({
     },
     configureServer(server) {
       if (!server.watcher || !insert) return;
-      const matcher = createCollectionMatcher(this.core);
 
       server.watcher.on('add', async (file) => {
-        const match = matcher.getFileCollection(file);
-        if (!match || match.collection.type !== 'meta') return;
+        let parent: DocsCollectionItem | undefined;
+        let match: MetaCollectionItem | undefined;
+        for (const collection of config.collectionList) {
+          if (collection.type === 'meta' && collection.hasFile(file)) {
+            match = collection;
+            break;
+          }
+          if (collection.type === 'docs' && collection.meta.hasFile(file)) {
+            parent = collection;
+            match = collection.meta;
+            break;
+          }
+        }
 
-        const { name } = match;
-        const parent = config.collections.get(name);
-
+        if (!match) return;
         let obj: object;
         try {
           const content = (await fs.readFile(file)).toString();
@@ -54,7 +65,7 @@ export default function jsonSchema({
         if ('$schema' in obj) return;
         const schemaPath = path.join(
           this.outDir,
-          getSchemaPath(parent?.type === 'docs' ? `${name}.meta` : name),
+          getSchemaPath(parent ? `${parent.name}.meta` : match.name),
         );
         const updated = {
           $schema: path.relative(path.dirname(file), schemaPath),
@@ -79,17 +90,17 @@ export default function jsonSchema({
         });
       }
 
-      for (const [name, collection] of config.collections) {
+      for (const collection of config.collectionList) {
         if (collection.type === 'docs') {
           if (collection.meta.schema instanceof z.ZodType) {
-            onSchema(`${name}.meta`, collection.meta.schema);
+            onSchema(`${collection.name}.meta`, collection.meta.schema);
           }
 
           if (collection.docs.schema instanceof z.ZodType) {
-            onSchema(`${name}.docs`, collection.docs.schema);
+            onSchema(`${collection.name}.docs`, collection.docs.schema);
           }
         } else if (collection.schema instanceof z.ZodType) {
-          onSchema(name, collection.schema);
+          onSchema(collection.name, collection.schema);
         }
       }
 

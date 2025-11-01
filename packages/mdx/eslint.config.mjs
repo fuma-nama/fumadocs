@@ -8,6 +8,7 @@ export default [
       'test/**/*.output.js',
       'bin.js',
       'loader-mdx.cjs',
+      'loader-meta.cjs',
     ],
   },
   ...library,

@@ -1,4 +1,4 @@
-import type { ConfigLoader, LoadedConfig } from '@/loaders/config';
+import type { LoadedConfig } from '@/config/build';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import type { FSWatcher } from 'chokidar';
@@ -66,6 +66,10 @@ export interface EmitOptions {
   filterPlugin?: (plugin: Plugin) => boolean;
 }
 
+export function findConfigFile(): string {
+  return path.resolve('source.config.ts');
+}
+
 export function createCore(
   options: CoreOptions,
   defaultPlugins: PluginOption[] = [],
@@ -108,13 +112,6 @@ export function createCore(
     },
     getConfig() {
       return config;
-    },
-    creatConfigLoader(): ConfigLoader {
-      return {
-        getConfig() {
-          return config;
-        },
-      };
     },
     async initServer(server: ServerContext) {
       for (const plugin of plugins) {

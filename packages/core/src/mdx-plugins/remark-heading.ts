@@ -3,7 +3,7 @@ import type { Heading, Root } from 'mdast';
 import type { Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
 import type { TOCItemType } from '@/toc';
-import { flattenNode } from '@/mdx-plugins/remark-utils';
+import { flattenNode } from '@/mdx-plugins/mdast-utils';
 
 const slugger = new Slugger();
 

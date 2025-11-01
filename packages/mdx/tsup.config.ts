@@ -3,7 +3,8 @@ import { defineConfig } from 'tsup';
 export default defineConfig({
   entry: [
     './src/{index,bin}.ts',
-    './src/{config,webpack,next,vite,bun}/index.ts',
+    './src/{config,next,vite,bun}/index.ts',
+    './src/webpack/{mdx,meta}.ts',
     './src/node/loader.ts',
     './src/runtime/next/{index,async}.ts',
     './src/runtime/vite/{browser,server}.ts',

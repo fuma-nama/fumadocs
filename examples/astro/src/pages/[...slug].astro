@@ -5,6 +5,7 @@ import defaultMdxComponents from 'fumadocs-ui/mdx';
 import '../styles/global.css';
 import { source } from '../lib/source';
 import Layout from '../components/layout.astro';
+import type { TOCItemType } from 'fumadocs-core/toc';
 
 interface Props {
   page: CollectionEntry<'docs'>;
@@ -18,7 +19,13 @@ export async function getStaticPaths() {
 }
 
 const { page } = Astro.props;
-const { Content } = await render(page);
+const { Content, headings } = await render(page);
+
+const toc: TOCItemType[] = headings.map((heading) => ({
+  depth: heading.depth,
+  title: heading.text,
+  url: '#' + heading.slug,
+}));
 ---
 
 <Layout>
@@ -29,6 +36,7 @@ const { Content } = await render(page);
     tree={source.pageTree}
     pathname={Astro.url.pathname}
     params={Astro.params as Record<string, string | string[]>}
+    page={{ toc }}
     client:load
   >
     <h1 class="font-semibold text-3xl">{page.data.title}</h1>

@@ -1,17 +1,17 @@
 import type { NextConfig } from 'next';
 import type { Configuration } from 'webpack';
-import { findConfigFile } from '@/loaders/config';
-import { type Options as MDXLoaderOptions } from '@/webpack';
+import type { WebpackLoaderOptions } from '@/webpack';
 import type {
   TurbopackLoaderOptions,
   TurbopackOptions,
 } from 'next/dist/server/config-shared';
 import * as path from 'node:path';
-import { loadConfig } from '@/loaders/config/load';
+import { loadConfig } from '@/config/load-from-file';
 import { removeFileCache } from '@/next/file-cache';
 import { ValidationError } from '@/utils/validation';
 import next from '@/plugins/next';
-import { type Core, createCore } from '@/core';
+import { type Core, createCore, findConfigFile } from '@/core';
+import { mdxLoaderGlob } from '@/loaders';
 
 export interface CreateMDXOptions {
   /**
@@ -40,7 +40,7 @@ export function createMDX(createOptions: CreateMDXOptions = {}) {
   }
 
   return (nextConfig: NextConfig = {}): NextConfig => {
-    const mdxLoaderOptions: MDXLoaderOptions = {
+    const loaderOptions: WebpackLoaderOptions = {
       ...options,
       isDev,
     };
@@ -53,7 +53,7 @@ export function createMDX(createOptions: CreateMDXOptions = {}) {
           loaders: [
             {
               loader: 'fumadocs-mdx/loader-mdx',
-              options: mdxLoaderOptions as unknown as TurbopackLoaderOptions,
+              options: loaderOptions as unknown as TurbopackLoaderOptions,
             },
           ],
           as: '*.js',
@@ -72,12 +72,12 @@ export function createMDX(createOptions: CreateMDXOptions = {}) {
         config.module.rules ||= [];
 
         config.module.rules.push({
-          test: /\.mdx?$/,
+          test: mdxLoaderGlob,
           use: [
             options.defaultLoaders.babel,
             {
               loader: 'fumadocs-mdx/loader-mdx',
-              options: mdxLoaderOptions,
+              options: loaderOptions,
             },
           ],
         });
@@ -112,7 +112,7 @@ async function init(
     });
 
     watcher.add(options.configPath);
-    for (const collection of core.getConfig().collections.values()) {
+    for (const collection of core.getConfig().collectionList) {
       if (collection.type === 'docs') {
         watcher.add(collection.docs.dir);
         watcher.add(collection.meta.dir);
