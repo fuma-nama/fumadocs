@@ -130,7 +130,7 @@ export function toBun(loader: Loader, test: RegExp) {
     build.onResolve({ filter: test }, (args) => {
       const [filePath, query = ''] = args.path.split('?', 2);
 
-      // store the query string because `onLoad` striped it
+      // TODO: this isn't working because `args.path` still doesn't include query string
       queryData.set(filePath, parse(query));
       return null;
     });
@@ -148,7 +148,14 @@ export function toBun(loader: Loader, test: RegExp) {
         },
       });
 
-      if (result === null) return;
+      // must return something, no fallback: https://github.com/oven-sh/bun/issues/5303
+      if (result === null) {
+        return {
+          contents: content,
+          loader: args.loader,
+        };
+      }
+
       return {
         contents: result.code,
         loader: 'js',

@@ -33,19 +33,47 @@ export default function vite({
   index: IndexFileOptions | boolean;
 }): Plugin {
   let config: LoadedConfig;
+  let indexOptions: Required<IndexFileOptions> | false;
+  if (index === false) indexOptions = false;
+  else indexOptions = applyDefaults(index === true ? {} : index);
 
   return {
+    name: 'vite',
     config(v) {
       config = v;
     },
+    configureServer(server) {
+      if (
+        !server.watcher ||
+        indexOptions === false ||
+        indexOptions.runtime === false
+      )
+        return;
+
+      // for bun/node runtimes, alternative import.meta.glob has to be re-generated on update
+      server.watcher.on('all', (event, file) => {
+        if (event === 'change') return;
+        const isUpdated = config.collectionList.some((collection) => {
+          if (collection.type === 'docs')
+            return (
+              collection.docs.hasFile(file) || collection.meta.hasFile(file)
+            );
+
+          return collection.hasFile(file);
+        });
+
+        if (isUpdated) {
+          this.core.emitAndWrite({
+            filterPlugin: (plugin) => plugin.name === 'vite',
+          });
+        }
+      });
+    },
     emit() {
       const out: EmitEntry[] = [];
-      if (index === false) return out;
+      if (indexOptions === false) return out;
 
-      const indexOptions: IndexFileOptions =
-        typeof index === 'object' ? index : {};
-      const { browser = false } = indexOptions;
-      if (browser) {
+      if (indexOptions.browser) {
         out.push({
           path: 'browser.ts',
           content: indexFile(this, config, indexOptions, 'browser'),
@@ -58,7 +86,7 @@ export default function vite({
           this,
           config,
           indexOptions,
-          browser ? 'server' : 'all',
+          indexOptions.browser ? 'server' : 'all',
         ),
       });
 
@@ -67,13 +95,20 @@ export default function vite({
   };
 }
 
+function applyDefaults(options: IndexFileOptions): Required<IndexFileOptions> {
+  return {
+    addJsExtension: options.addJsExtension ?? false,
+    browser: options.browser ?? false,
+    runtime: options.runtime ?? false,
+  };
+}
+
 function indexFile(
   { configPath, outDir }: PluginContext,
   config: LoadedConfig,
-  options: IndexFileOptions,
+  { addJsExtension, runtime }: Required<IndexFileOptions>,
   environment: 'all' | 'browser' | 'server',
 ) {
-  const { addJsExtension = false, runtime } = options;
   const runtimePath = {
     all: 'fumadocs-mdx/runtime/vite',
     server: 'fumadocs-mdx/runtime/vite.server',
