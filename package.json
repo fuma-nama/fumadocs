@@ -29,12 +29,12 @@
     "prettier-plugin-astro": "^0.14.1",
     "rimraf": "^6.0.1",
     "tsup": "8.5.0",
-    "turbo": "2.5.8",
+    "turbo": "2.6.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.2",
     "vitest": "^4.0.4"
   },
-  "packageManager": "pnpm@10.18.3",
+  "packageManager": "pnpm@10.20.0",
   "engines": {
     "node": ">= 18.17.0"
   }
