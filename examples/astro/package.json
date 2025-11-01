@@ -13,9 +13,9 @@
   "dependencies": {
     "@astrojs/mdx": "^4.3.9",
     "@astrojs/react": "^4.4.1",
+    "@orama/orama": "^3.1.16",
     "astro": "^5.6.1",
     "fumadocs-core": "workspace:*",
-    "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

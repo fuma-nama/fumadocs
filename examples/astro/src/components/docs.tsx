@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 import { FrameworkProvider } from 'fumadocs-core/framework';
 import { navigate } from 'astro:transitions/client';
 import { RootProvider } from 'fumadocs-ui/provider/base';
+import SearchDialog from './search';
 
 export function Docs({
   tree,
@@ -32,9 +33,12 @@ export function Docs({
         },
       })}
     >
-      <RootProvider theme={{ enabled: false }}>
+      <RootProvider theme={{ enabled: false }} search={{ SearchDialog }}>
         <DocsLayout
           tree={tree}
+          themeSwitch={{
+            enabled: false,
+          }}
           nav={{
             title: 'Fumadocs on Astro',
           }}
