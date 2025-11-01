@@ -4,7 +4,7 @@ import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
 import type { PluggableList, Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
-import { flattenNode } from './remark-utils';
+import { flattenNode, toMdxExport } from './mdast-utils';
 import type {
   MdxJsxAttribute,
   MdxJsxExpressionAttribute,
@@ -49,14 +49,17 @@ export interface StructureOptions {
         node: MdxJsxFlowElement,
         attribute: MdxJsxAttribute | MdxJsxExpressionAttribute,
       ) => boolean);
+
+  /**
+   * export as `structuredData` or specified variable name.
+   */
+  exportAs?: string | boolean;
 }
 
 declare module 'mdast' {
   interface Data {
     /**
-     * Get content of unserializable element
-     *
-     * Needed for `remarkStructure` to generate search index
+     * [Fumadocs] Get content of unserializable element, `remarkStructure` uses it to generate search index.
      */
     _string?: string[];
   }
@@ -64,6 +67,9 @@ declare module 'mdast' {
 
 declare module 'vfile' {
   interface DataMap {
+    /**
+     * [Fumadocs] injected by `remarkStructure`
+     */
     structuredData: StructuredData;
   }
 }
@@ -84,6 +90,7 @@ export function remarkStructure({
 
     return ['TypeTable', 'Callout'].includes(node.name);
   },
+  exportAs = false,
 }: StructureOptions = {}): Transformer<Root, Root> {
   const slugger = new Slugger();
 
@@ -98,7 +105,7 @@ export function remarkStructure({
     types = (node) => arr.includes(node.type);
   }
 
-  return (node, file) => {
+  return (tree, file) => {
     slugger.reset();
     const data: StructuredData = { contents: [], headings: [] };
     let lastHeading: string | undefined;
@@ -117,9 +124,8 @@ export function remarkStructure({
       }
     }
 
-    visit(node, (element) => {
-      if (element.type === 'root') return;
-      if (!types(element)) return;
+    visit(tree, (element) => {
+      if (element.type === 'root' || !types(element)) return;
 
       if (element.type === 'heading') {
         element.data ||= {};
@@ -187,6 +193,14 @@ export function remarkStructure({
     });
 
     file.data.structuredData = data;
+    if (exportAs) {
+      tree.children.unshift(
+        toMdxExport(
+          typeof exportAs === 'string' ? exportAs : 'structuredData',
+          data,
+        ),
+      );
+    }
   };
 }
 
