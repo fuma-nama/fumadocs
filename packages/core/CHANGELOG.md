@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 16.0.7
+
+### Patch Changes
+
+- f97cd1e: Support `exportAs` in `remarkStructure`.
+- f7e15e2: Support `timeout` in remark image options
+
 ## 16.0.6
 
 ### Patch Changes
