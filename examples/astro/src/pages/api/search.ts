@@ -1,12 +1,11 @@
 import type { APIRoute } from 'astro';
 import { createFromSource } from 'fumadocs-core/search/server';
-import { getFullExport, source } from '../../lib/source';
+import { getFullExport, source } from '@/lib/source';
 import { getBreadcrumbItems } from 'fumadocs-core/breadcrumb';
 
 const server = createFromSource(source, {
   async buildIndex(page) {
     const { structuredData } = await getFullExport(page.data._raw);
-    console.log(structuredData);
 
     return {
       id: page.data._raw.id,
