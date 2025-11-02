@@ -55,3 +55,49 @@ export const APIPage = createAPIPage(openapi, {
   },
 });
 ```
+
+2. Remove `disablePlayground` from `createAPIPage()`, use `playground.enabled` instead:
+
+```ts
+// components/api-page.tsx
+import { openapi } from '@/lib/openapi';
+import { createAPIPage } from 'fumadocs-openapi/ui';
+
+export const APIPage = createAPIPage(openapi, {
+  playground: {
+    enabled: false,
+  }
+});
+```
+
+3. Support client config:
+
+```tsx
+// components/api-page.tsx
+import { openapi } from '@/lib/openapi';
+import { createAPIPage } from 'fumadocs-openapi/ui';
+import client from "./api-page.client"
+
+export const APIPage = createAPIPage(openapi, {
+  client,
+});
+```
+
+```tsx
+// components/api-page.client.tsx
+'use client';
+import { defineClientConfig } from 'fumadocs-openapi/ui/client';
+
+export default defineClientConfig({
+  playground: {
+    transformAuthInputs: (inputs) => [
+      ...inputs,
+      {
+        fieldName: 'auth.tests',
+        children: <div>Tests</div>,
+        defaultValue: '',
+      },
+    ],
+  },
+});
+```

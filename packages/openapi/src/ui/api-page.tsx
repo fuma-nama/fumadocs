@@ -11,19 +11,12 @@ import type {
   HighlightOptionsCommon,
   HighlightOptionsThemes,
 } from 'fumadocs-core/highlight';
-import { OpenAPIServer } from '@/server';
+import type { OpenAPIServer } from '@/server';
+import type { APIPageClientOptions } from './client';
 
 type Awaitable<T> = T | Promise<T>;
 
 export interface CreateAPIPageOptions {
-  /**
-   * Disable API Playground
-   *
-   * @defaultValue false
-   * @deprecated Use `playground.enabled` instead
-   */
-  disablePlayground?: boolean;
-
   /**
    * Generate TypeScript definitions from response schema.
    *
@@ -85,6 +78,8 @@ export interface CreateAPIPageOptions {
       ctx: RenderContext;
     }) => ReactNode | Promise<ReactNode>;
   };
+
+  client?: APIPageClientOptions;
 }
 
 export interface ApiPageProps {
@@ -139,7 +134,6 @@ export function createAPIPage(
     const ctx: RenderContext = {
       schema: processed,
       proxyUrl: server.options.proxyUrl,
-      disablePlayground: options.disablePlayground,
       showResponseSchema: options.showResponseSchema,
       renderer: {
         ...createRenders(),

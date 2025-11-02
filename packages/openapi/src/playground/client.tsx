@@ -100,7 +100,9 @@ export interface CustomField<TName extends FieldPath<FormValues>, Info> {
   }) => ReactElement;
 }
 
-export interface ClientProps extends HTMLAttributes<HTMLFormElement> {
+export interface ClientProps
+  extends HTMLAttributes<HTMLFormElement>,
+    PlaygroundClientOptions {
   route: string;
   method: string;
   parameters?: ParameterField[];
@@ -115,25 +117,31 @@ export interface ClientProps extends HTMLAttributes<HTMLFormElement> {
   references: Record<string, RequestSchema>;
   proxyUrl?: string;
 
-  /**
-   * Request timeout in seconds (default: 10s)
-   */
-  requestTimeout?: number;
+  // TODO: redesign `fields`
   fields?: {
     parameter?: CustomField<
       `${ParameterField['in']}.${string}`,
       ParameterField
     >;
-    auth?: CustomField<FieldPath<FormValues>, RequestSchema>;
     body?: CustomField<'body', RequestSchema>;
   };
+}
+
+export interface PlaygroundClientOptions {
+  /**
+   * transform fields for auth-specific parameters (e.g. header)
+   */
+  transformAuthInputs?: (fields: AuthField[]) => AuthField[];
+
+  /**
+   * Request timeout in seconds (default: 10s)
+   */
+  requestTimeout?: number;
 
   components?: Partial<{
     ResultDisplay: FC<{ data: FetchResult }>;
   }>;
 }
-
-const AuthPrefix = '__fumadocs_auth';
 
 const OauthDialog = lazy(() =>
   import('./components/oauth-dialog').then((mod) => ({
@@ -157,6 +165,7 @@ export default function Client({
   proxyUrl,
   components: { ResultDisplay = DefaultResultDisplay } = {},
   requestTimeout = 10,
+  transformAuthInputs,
   ...rest
 }: ClientProps) {
   const { server } = useServerSelectContext();
@@ -165,7 +174,10 @@ export default function Client({
   const fieldInfoMap = useMemo(() => new Map<string, FieldInfo>(), []);
   const { mediaAdapters } = useApiContext();
   const [securityId, setSecurityId] = useState(0);
-  const { inputs, mapInputs } = useAuthInputs(securities[securityId]);
+  const { inputs, mapInputs } = useAuthInputs(
+    securities[securityId],
+    transformAuthInputs,
+  );
 
   const defaultValues: FormValues = useMemo(
     () => ({
@@ -214,7 +226,7 @@ export default function Client({
 
       if (value) {
         localStorage.setItem(
-          AuthPrefix + item.original.id,
+          getAuthFieldStorageKey(item),
           JSON.stringify(value),
         );
       }
@@ -521,17 +533,20 @@ function BodyInput({ field: _field }: { field: RequestSchema }) {
   );
 }
 
-interface AuthField {
+export interface AuthField {
   fieldName: string;
   defaultValue: unknown;
 
-  original: SecurityEntry;
+  original?: SecurityEntry;
   children: ReactNode;
 
   mapOutput?: (values: unknown) => unknown;
 }
 
-function useAuthInputs(securities?: SecurityEntry[]) {
+function useAuthInputs(
+  securities?: SecurityEntry[],
+  transform?: (fields: AuthField[]) => AuthField[],
+) {
   const inputs = useMemo(() => {
     const result: AuthField[] = [];
     if (!securities) return result;
@@ -672,8 +687,8 @@ function useAuthInputs(securities?: SecurityEntry[]) {
       }
     }
 
-    return result;
-  }, [securities]);
+    return transform ? transform(result) : result;
+  }, [securities, transform]);
 
   const mapInputs = (values: FormValues) => {
     const cloned = structuredClone(values);
@@ -690,9 +705,13 @@ function useAuthInputs(securities?: SecurityEntry[]) {
   return { inputs, mapInputs };
 }
 
+function getAuthFieldStorageKey(field: AuthField) {
+  return '__fumadocs_auth' + (field.original?.id ?? field.fieldName);
+}
+
 function initAuthValues(values: FormValues, inputs: AuthField[]) {
   for (const item of inputs) {
-    const stored = localStorage.getItem(AuthPrefix + item.original.id);
+    const stored = localStorage.getItem(getAuthFieldStorageKey(item));
 
     if (stored) {
       const parsed = JSON.parse(stored);

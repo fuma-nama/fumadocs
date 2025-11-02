@@ -29,8 +29,6 @@ export interface APIPlaygroundProps {
   path: string;
   method: MethodInformation;
   ctx: RenderContext;
-
-  client?: Partial<ClientProps>;
 }
 
 export type { ClientProps, CustomField } from './client';
@@ -40,12 +38,7 @@ export type SecurityEntry = SecuritySchemeObject & {
   id: string;
 };
 
-export async function APIPlayground({
-  path,
-  method,
-  ctx,
-  client,
-}: APIPlaygroundProps) {
+export async function APIPlayground({ path, method, ctx }: APIPlaygroundProps) {
   let currentId = 0;
   const bodyContent = method.requestBody?.content;
   const mediaType = bodyContent ? getPreferredType(bodyContent) : undefined;
@@ -75,7 +68,7 @@ export async function APIPlayground({
         : undefined,
     references: context.references,
     proxyUrl: ctx.proxyUrl,
-    ...client,
+    ...ctx.client?.playground,
   };
 
   return <ClientLazy {...props} />;
