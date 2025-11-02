@@ -10,18 +10,18 @@
   },
   "dependencies": {
     "@orama/tokenizers": "^3.1.16",
-    "@react-router/node": "^7.9.4",
-    "@react-router/serve": "^7.9.4",
+    "@react-router/node": "^7.9.5",
+    "@react-router/serve": "^7.9.5",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "isbot": "^5.1.31",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "react-router": "^7.9.4"
+    "react-router": "^7.9.5"
   },
   "devDependencies": {
-    "@react-router/dev": "^7.9.4",
+    "@react-router/dev": "^7.9.5",
     "@tailwindcss/vite": "^4.1.16",
     "@types/mdx": "^2.0.13",
     "@types/node": "^24.9.2",

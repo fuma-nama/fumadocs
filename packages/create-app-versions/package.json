@@ -7,7 +7,7 @@
     "@biomejs/biome": "^2.3.2",
     "@eslint/eslintrc": "^3.3.1",
     "@orama/core": "^1.2.13",
-    "eslint": "^9.38.0",
+    "eslint": "^9.39.0",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*"
