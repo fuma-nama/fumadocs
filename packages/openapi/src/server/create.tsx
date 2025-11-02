@@ -7,9 +7,12 @@ import {
 } from '@/utils/process-document';
 
 /**
- * schema id -> downloaded schema object
+ * schema id -> file path, URL, or downloaded schema object
  */
-type SchemaMap = Record<string, OpenAPIV3_1.Document | OpenAPIV3.Document>;
+type SchemaMap = Record<
+  string,
+  string | OpenAPIV3_1.Document | OpenAPIV3.Document
+>;
 type ProcessedSchemaMap = Record<string, ProcessedDocument>;
 
 export interface OpenAPIOptions {
@@ -19,7 +22,7 @@ export interface OpenAPIOptions {
    * - file path
    * - a function returning records of downloaded schemas.
    */
-  input?: string[] | (() => Promise<SchemaMap>);
+  input?: string[] | (() => SchemaMap | Promise<SchemaMap>);
 
   disableCache?: boolean;
 

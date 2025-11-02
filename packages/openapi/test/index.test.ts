@@ -2,6 +2,8 @@ import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { idToTitle } from '@/utils/id-to-title';
 import { generateFilesOnly, type OutputFile } from '@/generate-file';
+import { createOpenAPI } from '@/server';
+import path from 'node:path';
 
 describe('Utilities', () => {
   test('Operation ID to Title', () => {
@@ -20,8 +22,9 @@ describe('Generate documents', () => {
 
   test('Pet Store (Per Operation)', async () => {
     const out = await generateFilesOnly({
-      input: './fixtures/petstore.yaml',
-      cwd,
+      input: createOpenAPI({
+        input: [path.join(cwd, './fixtures/petstore.yaml')],
+      }),
       per: 'operation',
     });
 
@@ -32,8 +35,9 @@ describe('Generate documents', () => {
 
   test('Museum (Per Tag)', async () => {
     const out = await generateFilesOnly({
-      cwd,
-      input: './fixtures/museum.yaml',
+      input: createOpenAPI({
+        input: [path.join(cwd, './fixtures/museum.yaml')],
+      }),
       per: 'tag',
     });
 
@@ -44,8 +48,9 @@ describe('Generate documents', () => {
 
   test('Unkey (Per File)', async () => {
     const out = await generateFilesOnly({
-      cwd,
-      input: './fixtures/unkey.json',
+      input: createOpenAPI({
+        input: [path.join(cwd, './fixtures/unkey.json')],
+      }),
       per: 'file',
     });
 
@@ -56,9 +61,13 @@ describe('Generate documents', () => {
 
   test('Generate Files', async () => {
     const out = await generateFilesOnly({
-      input: ['./fixtures/museum.yaml', './fixtures/petstore.yaml'],
+      input: createOpenAPI({
+        input: [
+          path.join(cwd, './fixtures/museum.yaml'),
+          path.join(cwd, './fixtures/petstore.yaml'),
+        ],
+      }),
       per: 'file',
-      cwd,
     });
 
     await expect(stringifyOutput(out)).toMatchFileSnapshot(
@@ -69,38 +78,26 @@ describe('Generate documents', () => {
   test('Generate Files - throws error when no input files found', async () => {
     await expect(
       generateFilesOnly({
-        input: ['./fixtures/non-existent-*.yaml'],
+        input: createOpenAPI({
+          input: [path.join(cwd, './fixtures/non-existent.yaml')],
+        }),
         per: 'file',
-        cwd,
       }),
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `[Error: input not found: ./fixtures/non-existent-*.yaml]`,
+      `[Error: [OpenAPI] Failed to resolve input: /Users/xred/dev/fumadocs/packages/openapi/test/fixtures/non-existent.yaml]`,
     );
-
-    await expect(
-      generateFilesOnly({
-        input: [
-          './fixtures/non-existent-1.yaml',
-          './fixtures/non-existent-2.yaml',
-        ],
-        per: 'file',
-        cwd,
-        name: {
-          algorithm: 'v1',
-        },
-      }),
-    ).rejects.toThrow(/input not found/);
   });
 
   test('Generate Files - groupBy tag per operation', async () => {
     const out = await generateFilesOnly({
-      input: ['./fixtures/products.yaml'],
+      input: createOpenAPI({
+        input: [path.join(cwd, './fixtures/products.yaml')],
+      }),
       per: 'operation',
       groupBy: 'tag',
       name: {
         algorithm: 'v1',
       },
-      cwd,
     });
 
     await expect(stringifyOutput(out)).toMatchFileSnapshot(
@@ -110,7 +107,11 @@ describe('Generate documents', () => {
 
   test('Generate Files - with index', async () => {
     const out = await generateFilesOnly({
-      input: ['./fixtures/products.yaml'],
+      input: createOpenAPI({
+        input: () => ({
+          products: path.join(cwd, './fixtures/products.yaml'),
+        }),
+      }),
       per: 'operation',
       name: {
         algorithm: 'v1',
@@ -124,11 +125,10 @@ describe('Generate documents', () => {
           {
             description: 'all available pages',
             path: 'index.mdx',
-            only: ['./fixtures/products.yaml'],
+            only: ['products'],
           },
         ],
       },
-      cwd,
     });
 
     await expect(stringifyOutput(out)).toMatchFileSnapshot(

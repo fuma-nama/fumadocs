@@ -1,15 +1,11 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
-import { glob } from 'tinyglobby';
 import {
   generateDocument,
   type PagesToTextOptions,
   toText,
 } from './utils/pages/to-text';
-import {
-  processDocumentCached,
-  type ProcessedDocument,
-} from '@/utils/process-document';
+import type { ProcessedDocument } from '@/utils/process-document';
 import type { OpenAPIServer } from '@/server';
 import { createGetUrl, getSlugs } from 'fumadocs-core/source';
 import matter from 'gray-matter';
@@ -17,7 +13,6 @@ import {
   createAutoPreset,
   type SchemaToPagesOptions,
 } from '@/utils/pages/preset-auto';
-import { isUrl } from '@/utils/url';
 import { fromSchema } from '@/utils/pages/builder';
 
 export interface OutputFile {
@@ -56,12 +51,10 @@ interface IndexItem {
 }
 
 interface GenerateFilesConfig extends PagesToTextOptions {
-  cwd?: string;
-
   /**
-   * Schema files, or the OpenAPI server object
+   * the OpenAPI server object
    */
-  input: string[] | string | OpenAPIServer;
+  input: OpenAPIServer;
 
   /**
    * Output directory
@@ -92,12 +85,11 @@ interface HookContext {
 
 export async function generateFiles(options: Config): Promise<void> {
   const files = await generateFilesOnly(options);
-  const { output, cwd = process.cwd() } = options;
-  const baseDir = path.join(cwd, output);
+  const { output } = options;
 
   await Promise.all(
     files.map(async (file) => {
-      const filePath = path.join(baseDir, file.path);
+      const filePath = path.join(output, file.path);
 
       await mkdir(path.dirname(filePath), { recursive: true });
       await writeFile(filePath, file.content);
@@ -109,38 +101,8 @@ export async function generateFiles(options: Config): Promise<void> {
 export async function generateFilesOnly(
   options: SchemaToPagesOptions & Omit<GenerateFilesConfig, 'output'>,
 ): Promise<OutputFile[]> {
-  const { cwd = process.cwd(), beforeWrite } = options;
-  const input =
-    typeof options.input === 'string' ? [options.input] : options.input;
-  let schemas: Record<string, ProcessedDocument> = {};
-
-  async function resolveInput(item: string) {
-    if (isUrl(item)) {
-      schemas[item] = await processDocumentCached(item);
-      return;
-    }
-
-    const resolved = await glob(item, { cwd, absolute: true });
-    if (resolved.length > 1) {
-      console.warn(
-        'glob patterns in `input` are deprecated, please specify your schemas explicitly.',
-      );
-
-      for (let i = 0; i < resolved.length; i++) {
-        schemas[`${item}[${i}]`] = await processDocumentCached(item);
-      }
-    } else if (resolved.length === 1) {
-      schemas[item] = await processDocumentCached(resolved[0]);
-    } else {
-      throw new Error(`input not found: ${item}`);
-    }
-  }
-
-  if (Array.isArray(input)) {
-    await Promise.all(input.map(resolveInput));
-  } else {
-    schemas = await input.getSchemas();
-  }
+  const { beforeWrite } = options;
+  const schemas = await options.input.getSchemas();
 
   const generated: Record<string, OutputFile[]> = {};
   const files: OutputFile[] = [];
