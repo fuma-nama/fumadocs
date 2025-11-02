@@ -1,4 +1,9 @@
-import { Fragment, type ReactElement, type ReactNode } from 'react';
+import {
+  ComponentProps,
+  Fragment,
+  type ReactElement,
+  type ReactNode,
+} from 'react';
 import type {
   CallbackObject,
   MethodInformation,
@@ -12,8 +17,8 @@ import {
   type ResolvedSchema,
 } from '@/utils/schema';
 import { idToTitle } from '@/utils/id-to-title';
-import { Markdown } from '../markdown';
-import { heading } from '../heading';
+import { Markdown } from '../components/server/markdown';
+import { heading } from '../components/server/heading';
 import { Schema } from '../schema';
 import {
   APIExample,
@@ -23,8 +28,12 @@ import {
 import { MethodLabel } from '@/ui/components/method-label';
 import { type SampleGenerator } from '@/requests/types';
 import { getTypescriptSchema } from '@/utils/get-typescript-schema';
-import { CopyResponseTypeScript } from '@/ui/client';
-import { SelectTab, SelectTabs, SelectTabTrigger } from '@/ui/select-tabs';
+import {
+  CopyResponseTypeScript,
+  SelectTab,
+  SelectTabs,
+  SelectTabTrigger,
+} from './client';
 import {
   AccordionContent,
   AccordionHeader,
@@ -33,6 +42,7 @@ import {
   AccordionTrigger,
 } from '@/ui/components/accordion';
 import { isMediaTypeSupported } from '@/requests/media/adapter';
+import { cn } from 'fumadocs-ui/utils/cn';
 
 export interface CodeSample<T = unknown> {
   lang: string;
@@ -399,7 +409,6 @@ function WebhookCallback({
 function AuthScheme({
   scheme: schema,
   scopes,
-  ctx: { renderer },
 }: {
   scheme: SecuritySchemeObject;
   scopes: string[];
@@ -414,7 +423,7 @@ function AuthScheme({
 
   if (schema.type === 'http' || schema.type === 'oauth2') {
     return (
-      <renderer.Property
+      <Property
         name="Authorization"
         type={
           schema.type === 'http' && schema.scheme === 'basic'
@@ -428,28 +437,64 @@ function AuthScheme({
           In: <code>header</code>
         </p>
         {scopeElement}
-      </renderer.Property>
+      </Property>
     );
   }
 
   if (schema.type === 'apiKey') {
     return (
-      <renderer.Property name={schema.name} type="<token>">
+      <Property name={schema.name} type="<token>">
         {schema.description && <Markdown text={schema.description} />}
         <p>
           In: <code>{schema.in}</code>
           {scopeElement}
         </p>
-      </renderer.Property>
+      </Property>
     );
   }
 
   if (schema.type === 'openIdConnect') {
     return (
-      <renderer.Property name="OpenID Connect" type="<token>" required>
+      <Property name="OpenID Connect" type="<token>" required>
         {schema.description && <Markdown text={schema.description} />}
         {scopeElement}
-      </renderer.Property>
+      </Property>
     );
   }
+}
+
+function Property({
+  name,
+  type,
+  required = false,
+  ...props
+}: ComponentProps<'div'> & {
+  name: string;
+  type: ReactNode;
+  required?: boolean;
+}) {
+  return (
+    <div
+      className={cn('text-sm border-t py-4 first:border-t-0', props.className)}
+    >
+      <div className="flex flex-wrap items-center gap-3 not-prose">
+        <span className="font-medium font-mono text-fd-primary">
+          {name}
+          {required === false && (
+            <span className="text-fd-muted-foreground">?</span>
+          )}
+        </span>
+        {typeof type === 'string' ? (
+          <span className="text-sm font-mono text-fd-muted-foreground">
+            {type}
+          </span>
+        ) : (
+          type
+        )}
+      </div>
+      <div className="prose-no-margin pt-2.5 empty:hidden">
+        {props.children}
+      </div>
+    </div>
+  );
 }

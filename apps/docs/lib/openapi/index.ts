@@ -3,12 +3,5 @@ import path from 'node:path';
 
 export const openapi = createOpenAPI({
   input: [path.resolve('./scalar.yaml')],
-
   proxyUrl: '/api/proxy',
-  shikiOptions: {
-    themes: {
-      dark: 'vesper',
-      light: 'vitesse-light',
-    },
-  },
 });

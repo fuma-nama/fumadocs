@@ -1,19 +1,95 @@
 import Slugger from 'github-slugger';
-import { Operation } from '@/ui/operation';
-import type { RenderContext } from '@/types';
-import { createMethod } from '@/utils/schema';
+import { CodeSample, Operation } from '@/ui/operation';
+import type { MethodInformation, RenderContext } from '@/types';
+import { createMethod, NoReference } from '@/utils/schema';
 import { createRenders } from '@/ui/renderer';
 import type { OpenAPIV3_1 } from 'openapi-types';
-import {
-  processDocumentCached,
-  type ProcessedDocument,
-} from '@/utils/process-document';
-import { defaultAdapters } from '@/requests/media/adapter';
-import type { SharedOpenAPIOptions } from '@/server';
+import type { ProcessedDocument } from '@/utils/process-document';
+import { defaultAdapters, MediaAdapter } from '@/requests/media/adapter';
+import { FC, ReactNode } from 'react';
+import type {
+  HighlightOptionsCommon,
+  HighlightOptionsThemes,
+} from 'fumadocs-core/highlight';
+import { OpenAPIServer } from '@/server';
 
-export interface ApiPageProps extends SharedOpenAPIOptions {
+type Awaitable<T> = T | Promise<T>;
+
+export interface CreateAPIPageOptions {
+  /**
+   * Disable API Playground
+   *
+   * @defaultValue false
+   * @deprecated Use `playground.enabled` instead
+   */
+  disablePlayground?: boolean;
+
+  /**
+   * Generate TypeScript definitions from response schema.
+   *
+   * Pass `false` to disable it.
+   *
+   * @param method - the operation object
+   * @param statusCode - status code
+   */
+  generateTypeScriptSchema?:
+    | ((
+        method: NoReference<MethodInformation>,
+        statusCode: string,
+      ) => Awaitable<string>)
+    | false;
+
+  /**
+   * Generate code samples for endpoint.
+   */
+  generateCodeSamples?: (method: MethodInformation) => Awaitable<CodeSample[]>;
+
+  shikiOptions?: Omit<HighlightOptionsCommon, 'lang' | 'components'> &
+    HighlightOptionsThemes;
+
+  /**
+   * Show full response schema instead of only example response & Typescript definitions
+   *
+   * @default true
+   */
+  showResponseSchema?: boolean;
+
+  mediaAdapters?: Record<string, MediaAdapter>;
+
+  /**
+   * Customise page content
+   */
+  content?: {
+    /**
+     * Show examples under the generated content of JSON schemas.
+     *
+     * @defaultValue false
+     */
+    showExampleInFields?: boolean;
+  };
+
+  /**
+   * Customise API playground
+   */
+  playground?: {
+    /**
+     * @defaultValue true
+     */
+    enabled?: boolean;
+    /**
+     * replace the server-side renderer
+     */
+    render?: (props: {
+      path: string;
+      method: MethodInformation;
+      ctx: RenderContext;
+    }) => ReactNode | Promise<ReactNode>;
+  };
+}
+
+export interface ApiPageProps {
   document: Promise<ProcessedDocument> | string | ProcessedDocument;
-  hasHead: boolean;
+  hasHead?: boolean;
 
   /**
    * An array of operations
@@ -42,14 +118,56 @@ export interface OperationItem {
   method: OpenAPIV3_1.HttpMethods;
 }
 
-export async function APIPage(props: ApiPageProps) {
-  const { operations, hasHead = true, webhooks } = props;
-  const processed =
-    typeof props.document === 'string'
-      ? await processDocumentCached(props.document)
-      : await props.document;
-  const ctx = await getContext(processed, props);
-  const { dereferenced } = processed;
+export function createAPIPage(
+  server: OpenAPIServer,
+  options: CreateAPIPageOptions = {},
+): FC<ApiPageProps> {
+  return async function APIPageWrapper({ document, ...props }) {
+    let processed: ProcessedDocument;
+    if (typeof document === 'string') {
+      processed = (await server.getSchemas())[document];
+    } else {
+      processed = await document;
+    }
+
+    const { dereferenced } = processed;
+    const servers =
+      dereferenced.servers && dereferenced.servers.length > 0
+        ? dereferenced.servers
+        : [{ url: '/' }];
+
+    const ctx: RenderContext = {
+      schema: processed,
+      proxyUrl: server.options.proxyUrl,
+      disablePlayground: options.disablePlayground,
+      showResponseSchema: options.showResponseSchema,
+      renderer: {
+        ...createRenders(),
+      },
+      shikiOptions: options.shikiOptions,
+      generateTypeScriptSchema: options.generateTypeScriptSchema,
+      generateCodeSamples: options.generateCodeSamples,
+      servers,
+      mediaAdapters: {
+        ...defaultAdapters,
+        ...options.mediaAdapters,
+      },
+      slugger: new Slugger(),
+    };
+
+    return <APIPage {...props} ctx={ctx} />;
+  };
+}
+
+async function APIPage({
+  hasHead = false,
+  operations,
+  webhooks,
+  ctx,
+}: Omit<ApiPageProps, 'document'> & {
+  ctx: RenderContext;
+}) {
+  const { dereferenced } = ctx.schema;
 
   return (
     <ctx.renderer.Root ctx={ctx}>
@@ -106,35 +224,4 @@ export async function APIPage(props: ApiPageProps) {
       })}
     </ctx.renderer.Root>
   );
-}
-
-export async function getContext(
-  schema: ProcessedDocument,
-  options: SharedOpenAPIOptions = {},
-): Promise<RenderContext> {
-  const document = schema.dereferenced;
-  const servers =
-    document.servers && document.servers.length > 0
-      ? document.servers
-      : [{ url: '/' }];
-
-  return {
-    schema,
-    proxyUrl: options.proxyUrl,
-    disablePlayground: options.disablePlayground,
-    showResponseSchema: options.showResponseSchema,
-    renderer: {
-      ...createRenders(),
-      ...options.renderer,
-    },
-    shikiOptions: options.shikiOptions,
-    generateTypeScriptSchema: options.generateTypeScriptSchema,
-    generateCodeSamples: options.generateCodeSamples,
-    servers,
-    mediaAdapters: {
-      ...defaultAdapters,
-      ...options.mediaAdapters,
-    },
-    slugger: new Slugger(),
-  };
 }

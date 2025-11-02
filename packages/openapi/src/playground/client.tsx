@@ -26,7 +26,12 @@ import {
 } from 'react-hook-form';
 import { useApiContext, useServerSelectContext } from '@/ui/contexts/api';
 import type { FetchResult } from '@/playground/fetcher';
-import { FieldInput, FieldSet, JsonInput, ObjectInput } from './inputs';
+import {
+  FieldInput,
+  FieldSet,
+  JsonInput,
+  ObjectInput,
+} from './components/inputs';
 import type {
   ParameterField,
   RequestSchema,
@@ -71,6 +76,7 @@ import {
 import { labelVariants } from '@/ui/components/input';
 import type { ParsedSchema } from '@/utils/schema';
 import type { RequestData } from '@/requests/types';
+import ServerSelect from './components/server-select';
 
 interface FormValues {
   path: Record<string, unknown>;
@@ -129,14 +135,13 @@ export interface ClientProps extends HTMLAttributes<HTMLFormElement> {
 
 const AuthPrefix = '__fumadocs_auth';
 
-const ServerSelect = lazy(() => import('@/ui/server-select'));
 const OauthDialog = lazy(() =>
-  import('./auth/oauth-dialog').then((mod) => ({
+  import('./components/oauth-dialog').then((mod) => ({
     default: mod.OauthDialog,
   })),
 );
 const OauthDialogTrigger = lazy(() =>
-  import('./auth/oauth-dialog').then((mod) => ({
+  import('./components/oauth-dialog').then((mod) => ({
     default: mod.OauthDialogTrigger,
   })),
 );

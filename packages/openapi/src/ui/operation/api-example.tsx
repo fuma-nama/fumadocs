@@ -1,8 +1,8 @@
 import type { MethodInformation, RenderContext } from '@/types';
 import { type ReactNode } from 'react';
-import { Markdown } from '@/ui/markdown';
+import { Markdown } from '@/ui/components/server/markdown';
 import { type CodeSample } from '@/ui/operation/index';
-import { CodeBlock } from '@/ui/codeblock';
+import { CodeBlock } from '@/ui/components/server/codeblock';
 import { CodeExample, CodeExampleProvider } from '@/ui/lazy';
 import { getPreferredType, type NoReference } from '@/utils/schema';
 import { getRequestData } from '@/ui/operation/get-request-data';

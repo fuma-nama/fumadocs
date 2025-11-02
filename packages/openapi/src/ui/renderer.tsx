@@ -7,14 +7,7 @@ import {
   Accordions,
   AccordionTrigger,
 } from '@/ui/components/accordion';
-import {
-  API,
-  APIExample,
-  APIInfo,
-  ObjectCollapsible,
-  Property,
-  Root,
-} from '@/ui';
+import { API, APIExample, APIInfo, Root } from '@/ui';
 import type { RenderContext } from '@/types';
 import { APIPlayground, type APIPlaygroundProps } from '@/playground';
 import { CodeExampleSelector } from '@/ui/lazy';
@@ -95,11 +88,6 @@ export interface Renderer {
   ResponseTypes: ComponentType<{ defaultValue?: string; children: ReactNode }>;
   ResponseType: ComponentType<ResponseTypeProps>;
 
-  /**
-   * Collapsible to show object schemas
-   */
-  ObjectCollapsible: ComponentType<ObjectCollapsibleProps>;
-  Property: ComponentType<PropertyProps>;
   APIPlayground: ComponentType<APIPlaygroundProps>;
 }
 
@@ -137,8 +125,6 @@ export function createRenders(): Renderer {
         </AccordionContent>
       </AccordionItem>
     ),
-    Property,
-    ObjectCollapsible,
     Requests: ({ items, children }) => (
       <CodeBlockTabs
         groupId="fumadocs_openapi_requests"
