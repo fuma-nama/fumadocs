@@ -16,9 +16,9 @@
     "react-dom": "^19.2.0"
   },
   "devDependencies": {
-    "@content-collections/core": "^0.11.1",
+    "@content-collections/core": "^0.12.0",
     "@content-collections/mdx": "^0.2.2",
-    "@content-collections/next": "^0.2.8",
+    "@content-collections/next": "^0.2.9",
     "@types/mdx": "^2.0.13",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",

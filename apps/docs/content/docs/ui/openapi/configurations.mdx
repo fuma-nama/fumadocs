@@ -41,11 +41,11 @@ Customise how the page is generated, default to `operation`.
   `/api/weather:GET`.
 </Callout>
 
-| mode      |                             | output                                |
-| --------- | --------------------------- | ------------------------------------- |
-| tag       | operations with same tag    | `{tag_name}.mdx`                      |
-| file      | operations in schema schema | `{file_name}.mdx`                     |
-| operation | each operation              | `{operationId ?? endpoint_path}.mdx`) |
+| mode      |                                | output                                |
+| --------- | ------------------------------ | ------------------------------------- |
+| tag       | operations with same tag       | `{tag_name}.mdx`                      |
+| file      | operations in same schema file | `{file_name}.mdx`                     |
+| operation | each operation                 | `{operationId ?? endpoint_path}.mdx`) |
 
 ```ts
 import { generateFiles } from 'fumadocs-openapi';
