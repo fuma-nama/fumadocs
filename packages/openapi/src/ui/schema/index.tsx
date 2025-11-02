@@ -1,9 +1,9 @@
-import { generateSchemaUI, type SchemaUIOptions } from '@/render/schema/server';
+import { generateSchemaUI, type SchemaUIOptions } from '@/ui/schema/server';
 import {
   SchemaUI,
   type SchemaUIProps,
   SchemaUIProvider,
-} from '@/render/schema/client';
+} from '@/ui/schema/client';
 
 export function Schema(
   props: SchemaUIOptions &

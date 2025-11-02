@@ -2,7 +2,7 @@ import { type ReactNode } from 'react';
 import type { ResolvedSchema } from '@/utils/schema';
 import type { RenderContext } from '@/types';
 import { FormatFlags, schemaToString } from '@/utils/schema-to-string';
-import { Markdown } from '@/render/markdown';
+import { Markdown } from '@/ui/markdown';
 import { combineSchema } from '@/utils/combine-schema';
 
 export interface FieldBase {

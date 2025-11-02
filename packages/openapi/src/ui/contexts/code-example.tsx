@@ -11,8 +11,8 @@ import {
 } from 'react';
 import { useApiContext, useServerSelectContext } from '@/ui/contexts/api';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
-import type { CodeSample } from '@/render/operation';
-import type { SamplesProps } from '@/render/renderer';
+import type { CodeSample } from '@/ui/operation';
+import type { SamplesProps } from '@/ui/renderer';
 import {
   Select,
   SelectContent,

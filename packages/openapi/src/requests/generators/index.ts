@@ -1,4 +1,4 @@
-import type { CodeSample } from '@/render/operation';
+import type { CodeSample } from '@/ui/operation';
 import * as CURL from './curl';
 import * as JS from './javascript';
 import * as Go from './go';

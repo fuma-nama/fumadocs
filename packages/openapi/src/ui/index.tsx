@@ -1,5 +1,5 @@
 import type { HTMLAttributes } from 'react';
-import type { RootProps } from '@/render/renderer';
+import type { RootProps } from '@/ui/renderer';
 import { ApiProvider } from '@/ui/lazy';
 import { cn } from 'fumadocs-ui/utils/cn';
 import type { MediaAdapter } from '@/requests/media/adapter';
@@ -76,5 +76,5 @@ export function APIExample(props: HTMLAttributes<HTMLDivElement>) {
   );
 }
 
-export { Property, ObjectCollapsible } from '@/render/schema/ui';
-export { APIPage, type ApiPageProps } from '@/render/api-page';
+export { Property, ObjectCollapsible } from '@/ui/schema/ui';
+export { APIPage, type ApiPageProps } from '@/ui/api-page';

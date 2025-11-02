@@ -1,11 +1,11 @@
 import type { MethodInformation, RenderContext } from '@/types';
 import { type ReactNode } from 'react';
-import { Markdown } from '@/render/markdown';
-import { type CodeSample } from '@/render/operation/index';
-import { CodeBlock } from '@/render/codeblock';
+import { Markdown } from '@/ui/markdown';
+import { type CodeSample } from '@/ui/operation/index';
+import { CodeBlock } from '@/ui/codeblock';
 import { CodeExample, CodeExampleProvider } from '@/ui/lazy';
 import { getPreferredType, type NoReference } from '@/utils/schema';
-import { getRequestData } from '@/render/operation/get-request-data';
+import { getRequestData } from '@/ui/operation/get-request-data';
 import { sample } from 'openapi-sampler';
 import type { RawRequestData, RequestData } from '@/requests/types';
 import { defaultSamples } from '@/requests/generators';

@@ -1,20 +1,21 @@
-import type { ApiPageProps } from '@/render/api-page';
+import type { ApiPageProps } from '@/ui/api-page';
 import { createProxy } from '@/server/proxy';
-import type { CodeSample } from '@/render/operation';
-import type { Renderer } from '@/render/renderer';
+import type { CodeSample } from '@/ui/operation';
+import type { Renderer } from '@/ui/renderer';
 import type { NoReference } from '@/utils/schema';
 import type {
   HighlightOptionsCommon,
   HighlightOptionsThemes,
 } from 'fumadocs-core/highlight';
 import type { MediaAdapter } from '@/requests/media/adapter';
-import type { MethodInformation } from '@/types';
+import type { MethodInformation, RenderContext } from '@/types';
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import {
   processDocument,
   processDocumentCached,
   type ProcessedDocument,
 } from '@/utils/process-document';
+import type { ReactNode } from 'react';
 
 type Awaitable<T> = T | Promise<T>;
 /**
@@ -80,6 +81,20 @@ export interface SharedOpenAPIOptions {
      * @defaultValue false
      */
     showExampleInFields?: boolean;
+  };
+
+  /**
+   * Customise API playground
+   */
+  playground?: {
+    /**
+     * replace the server-side renderer
+     */
+    render?: (props: {
+      path: string;
+      method: MethodInformation;
+      ctx: RenderContext;
+    }) => ReactNode | Promise<ReactNode>;
   };
 }
 

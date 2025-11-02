@@ -1,8 +1,8 @@
 import Slugger from 'github-slugger';
-import { Operation } from '@/render/operation';
+import { Operation } from '@/ui/operation';
 import type { RenderContext } from '@/types';
 import { createMethod } from '@/utils/schema';
-import { createRenders } from '@/render/renderer';
+import { createRenders } from '@/ui/renderer';
 import type { OpenAPIV3_1 } from 'openapi-types';
 import {
   processDocumentCached,
