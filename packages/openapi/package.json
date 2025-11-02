@@ -22,8 +22,8 @@
       "types": "./dist/ui/index.d.ts"
     },
     "./ui/client": {
-      "import": "./dist/ui/client.js",
-      "types": "./dist/ui/client.d.ts"
+      "import": "./dist/ui/client/index.js",
+      "types": "./dist/ui/client/index.d.ts"
     },
     "./playground": {
       "import": "./dist/playground/index.js",

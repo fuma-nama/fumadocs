@@ -256,20 +256,20 @@ export function Operation({
     );
   }
 
+  const playgroundEnabled = ctx.playground?.enabled ?? true;
   const info = (
     <ctx.renderer.APIInfo head={headNode} method={method.method} route={path}>
-      {type === 'operation' ? (
-        ctx.disablePlayground ? (
+      {type === 'operation' &&
+        (playgroundEnabled ? (
+          <ctx.renderer.APIPlayground path={path} method={method} ctx={ctx} />
+        ) : (
           <div className="flex flex-row items-center gap-2.5 p-3 rounded-xl border bg-fd-card text-fd-card-foreground not-prose">
             <MethodLabel className="text-xs">{method.method}</MethodLabel>
             <code className="flex-1 overflow-auto text-nowrap text-[13px] text-fd-muted-foreground">
               {path}
             </code>
           </div>
-        ) : (
-          <ctx.renderer.APIPlayground path={path} method={method} ctx={ctx} />
-        )
-      ) : null}
+        ))}
       {authNode}
       {parameterNode}
       {bodyNode}
