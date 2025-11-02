@@ -16,7 +16,7 @@ import {
   TabsList,
   TabsTrigger,
 } from 'fumadocs-ui/components/tabs';
-import type { SchemaData, SchemaUIData } from '@/render/schema/server';
+import type { SchemaData, SchemaUIData } from '@/ui/schema/server';
 import { ObjectCollapsible, Property, type PropertyProps } from './ui';
 import {
   Popover,

@@ -1,9 +1,5 @@
 import { idToTitle } from '@/utils/id-to-title';
-import type {
-  ApiPageProps,
-  OperationItem,
-  WebhookItem,
-} from '@/render/api-page';
+import type { ApiPageProps, OperationItem, WebhookItem } from '@/ui/api-page';
 import type { ProcessedDocument } from '@/utils/process-document';
 import type { TableOfContents } from 'fumadocs-core/toc';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';

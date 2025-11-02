@@ -1,4 +1,4 @@
-import type { ApiPageProps } from '@/render/api-page';
+import type { ApiPageProps } from '@/ui/api-page';
 import type { OpenAPIServer } from '@/server';
 import type { OutputEntry } from '@/utils/pages/builder';
 
