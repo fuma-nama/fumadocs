@@ -22,7 +22,7 @@ import {
 } from '@/ui/components/select';
 import type { RequestSchema } from '@/playground/index';
 import { Input, labelVariants } from '@/ui/components/input';
-import { getDefaultValue } from './get-default-values';
+import { getDefaultValue } from '../get-default-values';
 import { cn } from 'fumadocs-ui/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { combineSchema } from '@/utils/combine-schema';

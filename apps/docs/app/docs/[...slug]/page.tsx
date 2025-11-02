@@ -28,7 +28,7 @@ import { Customisation } from '@/components/preview/customisation';
 import { DocsBody, DocsPage } from 'fumadocs-ui/page';
 import { NotFound } from '@/components/not-found';
 import { getSuggestions } from '@/app/docs/[...slug]/suggestions';
-import { APIPage } from 'fumadocs-openapi/ui';
+import { APIPage } from '@/components/api-page';
 import { PathUtils } from 'fumadocs-core/source';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {

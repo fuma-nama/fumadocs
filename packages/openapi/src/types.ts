@@ -4,7 +4,8 @@ import { type Renderer } from '@/ui/renderer';
 import type { NoReference } from '@/utils/schema';
 import type { ProcessedDocument } from '@/utils/process-document';
 import type { MediaAdapter } from '@/requests/media/adapter';
-import type { SharedOpenAPIOptions } from '@/server';
+import type { OpenAPIOptions } from '@/server';
+import type { CreateAPIPageOptions } from './ui/api-page';
 
 export type Document = V3_1.Document;
 export type OperationObject = V3_1.OperationObject;
@@ -21,7 +22,9 @@ export type MethodInformation = NoReference<OperationObject> & {
   method: string;
 };
 
-export interface RenderContext extends SharedOpenAPIOptions {
+export interface RenderContext
+  extends Pick<OpenAPIOptions, 'proxyUrl'>,
+    CreateAPIPageOptions {
   renderer: Renderer;
   servers: NoReference<ServerObject>[];
   slugger: Slugger;

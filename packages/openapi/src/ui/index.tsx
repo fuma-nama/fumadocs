@@ -76,5 +76,4 @@ export function APIExample(props: HTMLAttributes<HTMLDivElement>) {
   );
 }
 
-export { Property, ObjectCollapsible } from '@/ui/schema/ui';
-export { APIPage, type ApiPageProps } from '@/ui/api-page';
+export * from '@/ui/api-page';

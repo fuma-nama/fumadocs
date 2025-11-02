@@ -93,7 +93,7 @@ export async function openapiSource(
       path: `${baseDir}/${entry.path}`,
       data: {
         ...entry.info,
-        getAPIPageProps: () => toBody(from, entry),
+        getAPIPageProps: () => toBody(entry),
         _openapi: {
           method:
             entry.type === 'operation' || entry.type === 'webhook'
