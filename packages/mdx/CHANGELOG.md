@@ -1,5 +1,11 @@
 # next-docs-mdx
 
+## 13.0.5
+
+### Patch Changes
+
+- ad38466: add support next.config.mts for mdx
+
 ## 13.0.4
 
 ### Patch Changes
