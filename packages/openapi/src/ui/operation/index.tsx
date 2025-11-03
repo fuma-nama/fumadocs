@@ -20,13 +20,8 @@ import { idToTitle } from '@/utils/id-to-title';
 import { Markdown } from '../components/server/markdown';
 import { heading } from '../components/server/heading';
 import { Schema } from '../schema';
-import {
-  APIExample,
-  APIExampleProvider,
-  getAPIExamples,
-} from '@/ui/operation/api-example';
+import { APIExample, getAPIExamples } from '@/ui/operation/api-example';
 import { MethodLabel } from '@/ui/components/method-label';
-import { type SampleGenerator } from '@/requests/types';
 import { getTypescriptSchema } from '@/utils/get-typescript-schema';
 import {
   CopyResponseTypeScript,
@@ -43,23 +38,8 @@ import {
 } from '@/ui/components/accordion';
 import { isMediaTypeSupported } from '@/requests/media/adapter';
 import { cn } from 'fumadocs-ui/utils/cn';
-
-export interface CodeSample<T = unknown> {
-  lang: string;
-  label?: string;
-  /**
-   * either:
-   * - code
-   * - a function imported from a file with "use client" directive
-   * - false (disabled)
-   */
-  source?: string | SampleGenerator<T> | false;
-
-  /**
-   * Pass extra context to client-side source generator
-   */
-  serverContext?: T;
-}
+import { APIPlayground } from '@/playground';
+import { OperationProvider } from '../contexts/operation';
 
 const ParamTypes = {
   path: 'Path Parameters',
@@ -258,10 +238,11 @@ export function Operation({
 
   const playgroundEnabled = ctx.playground?.enabled ?? true;
   const info = (
-    <ctx.renderer.APIInfo head={headNode} method={method.method} route={path}>
+    <div className="min-w-0 flex-1">
+      {headNode}
       {type === 'operation' &&
         (playgroundEnabled ? (
-          <ctx.renderer.APIPlayground path={path} method={method} ctx={ctx} />
+          <APIPlayground path={path} method={method} ctx={ctx} />
         ) : (
           <div className="flex flex-row items-center gap-2.5 p-3 rounded-xl border bg-fd-card text-fd-card-foreground not-prose">
             <MethodLabel className="text-xs">{method.method}</MethodLabel>
@@ -275,23 +256,51 @@ export function Operation({
       {bodyNode}
       {responseNode}
       {callbacksNode}
-    </ctx.renderer.APIInfo>
+    </div>
   );
 
   if (type === 'operation') {
     const examples = getAPIExamples(path, method, ctx);
 
     return (
-      <ctx.renderer.API>
-        <APIExampleProvider route={path} examples={examples} method={method}>
+      <OperationContainer>
+        <OperationProvider
+          defaultExampleId={
+            method['x-exclusiveCodeSample'] ?? method['x-selectedCodeSample']
+          }
+          route={path}
+          examples={examples}
+          client={ctx.client?.operation}
+        >
           {info}
-          <APIExample examples={examples} method={method} ctx={ctx} />
-        </APIExampleProvider>
-      </ctx.renderer.API>
+          <APIExample method={method} ctx={ctx} />
+        </OperationProvider>
+      </OperationContainer>
     );
   } else {
     return info;
   }
+}
+
+function OperationContainer({ children, ...props }: ComponentProps<'div'>) {
+  return (
+    <div
+      {...props}
+      className={cn(
+        'flex flex-col gap-x-6 gap-y-4 xl:flex-row xl:items-start',
+        props.className,
+      )}
+      style={
+        {
+          '--fd-api-info-top':
+            'calc(12px + var(--fd-nav-height) + var(--fd-banner-height) + var(--fd-tocnav-height, 0px))',
+          ...props.style,
+        } as object
+      }
+    >
+      {children}
+    </div>
+  );
 }
 
 async function ResponseAccordion({

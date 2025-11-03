@@ -61,10 +61,7 @@ import {
   SchemaProvider,
   useResolvedSchema,
 } from '@/playground/schema';
-import {
-  useRequestDataUpdater,
-  useRequestInitialData,
-} from '@/ui/contexts/code-example';
+import { useOperationContext } from '@/ui/contexts/operation';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 import {
   Select,
@@ -169,8 +166,11 @@ export default function Client({
   ...rest
 }: ClientProps) {
   const { server } = useServerSelectContext();
-  const { key: requestDataKey, data: requestData } = useRequestInitialData();
-  const updater = useRequestDataUpdater();
+  const {
+    example: exampleId,
+    examples,
+    setExampleData,
+  } = useOperationContext();
   const fieldInfoMap = useMemo(() => new Map<string, FieldInfo>(), []);
   const { mediaAdapters } = useApiContext();
   const [securityId, setSecurityId] = useState(0);
@@ -179,16 +179,19 @@ export default function Client({
     transformAuthInputs,
   );
 
-  const defaultValues: FormValues = useMemo(
-    () => ({
+  const defaultValues: FormValues = useMemo(() => {
+    const requestData = examples.find(
+      (example) => example.id === exampleId,
+    )!.data;
+
+    return {
       path: requestData.path,
       query: requestData.query,
       header: requestData.header,
       body: requestData.body,
       cookie: requestData.cookie,
-    }),
-    [requestData],
-  );
+    };
+  }, [examples, exampleId]);
 
   const form = useForm<FormValues>({
     defaultValues,
@@ -238,7 +241,7 @@ export default function Client({
       bodyMediaType: body?.mediaType,
     };
     values._encoded ??= encodeRequestData(data, mediaAdapters, parameters);
-    updater.setData(data, values._encoded);
+    setExampleData(data, values._encoded);
   });
 
   useEffect(() => {
@@ -265,6 +268,13 @@ export default function Client({
   }, []);
 
   useEffect(() => {
+    form.reset(initAuthValues(defaultValues, inputs));
+
+    return () => fieldInfoMap.clear();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ignore other parts
+  }, [defaultValues]);
+
+  useEffect(() => {
     form.reset((values) => initAuthValues(values, inputs));
 
     return () => {
@@ -276,16 +286,8 @@ export default function Client({
         return values;
       });
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- mounted once only
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ignore other parts
   }, [inputs]);
-
-  useEffect(() => {
-    return () => {
-      fieldInfoMap.clear();
-      form.reset(initAuthValues(defaultValues, inputs));
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- for on change
-  }, [requestDataKey]);
 
   const onSubmit = form.handleSubmit((value) => {
     testQuery.start(mapInputs(value));

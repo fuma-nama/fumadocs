@@ -1,18 +1,20 @@
 import Slugger from 'github-slugger';
-import { CodeSample, Operation } from '@/ui/operation';
+import { Operation } from '@/ui/operation';
 import type { MethodInformation, RenderContext } from '@/types';
 import { createMethod, NoReference } from '@/utils/schema';
-import { createRenders } from '@/ui/renderer';
 import type { OpenAPIV3_1 } from 'openapi-types';
 import type { ProcessedDocument } from '@/utils/process-document';
 import { defaultAdapters, MediaAdapter } from '@/requests/media/adapter';
-import { FC, ReactNode } from 'react';
+import { ComponentProps, FC, ReactNode } from 'react';
 import type {
   HighlightOptionsCommon,
   HighlightOptionsThemes,
 } from 'fumadocs-core/highlight';
 import type { OpenAPIServer } from '@/server';
 import type { APIPageClientOptions } from './client';
+import { cn } from 'fumadocs-ui/utils/cn';
+import type { CodeUsageGenerator, ResponseTab } from './operation/api-example';
+import { ApiProvider } from './contexts/api';
 
 type Awaitable<T> = T | Promise<T>;
 
@@ -33,9 +35,11 @@ export interface CreateAPIPageOptions {
     | false;
 
   /**
-   * Generate code samples for endpoint.
+   * Generate example code usage for endpoints.
    */
-  generateCodeSamples?: (method: MethodInformation) => Awaitable<CodeSample[]>;
+  generateCodeSamples?: (
+    method: MethodInformation,
+  ) => Awaitable<CodeUsageGenerator[]>;
 
   shikiOptions?: Omit<HighlightOptionsCommon, 'lang' | 'components'> &
     HighlightOptionsThemes;
@@ -59,6 +63,28 @@ export interface CreateAPIPageOptions {
      * @defaultValue false
      */
     showExampleInFields?: boolean;
+
+    renderResponseTabs?: (
+      tabs: ResponseTab[],
+      ctx: RenderContext,
+    ) => Awaitable<ReactNode>;
+
+    renderAPIExampleLayout?: (
+      slots: {
+        selector: ReactNode;
+        usageTabs: ReactNode;
+        responseTabs: ReactNode;
+      },
+      ctx: RenderContext,
+    ) => Awaitable<ReactNode>;
+
+    /**
+     * @param generators - codegens for API example usages
+     */
+    renderAPIExampleUsageTabs?: (
+      generators: CodeUsageGenerator<unknown>[],
+      ctx: RenderContext,
+    ) => Awaitable<ReactNode>;
   };
 
   /**
@@ -76,7 +102,7 @@ export interface CreateAPIPageOptions {
       path: string;
       method: MethodInformation;
       ctx: RenderContext;
-    }) => ReactNode | Promise<ReactNode>;
+    }) => Awaitable<ReactNode>;
   };
 
   client?: APIPageClientOptions;
@@ -135,9 +161,6 @@ export function createAPIPage(
       schema: processed,
       proxyUrl: server.options.proxyUrl,
       showResponseSchema: options.showResponseSchema,
-      renderer: {
-        ...createRenders(),
-      },
       shikiOptions: options.shikiOptions,
       generateTypeScriptSchema: options.generateTypeScriptSchema,
       generateCodeSamples: options.generateCodeSamples,
@@ -153,6 +176,32 @@ export function createAPIPage(
   };
 }
 
+function Root({
+  children,
+  className,
+  ctx,
+  ...props
+}: { ctx: RenderContext } & ComponentProps<'div'>) {
+  const mediaAdapters: Record<string, MediaAdapter> = {};
+  for (const k in ctx.mediaAdapters) {
+    const adapter = ctx.mediaAdapters[k];
+
+    if (adapter.client) mediaAdapters[k] = adapter.client;
+  }
+
+  return (
+    <div className={cn('flex flex-col gap-24 text-sm', className)} {...props}>
+      <ApiProvider
+        mediaAdapters={mediaAdapters}
+        servers={ctx.servers}
+        shikiOptions={ctx.shikiOptions}
+      >
+        {children}
+      </ApiProvider>
+    </div>
+  );
+}
+
 async function APIPage({
   hasHead = false,
   operations,
@@ -164,7 +213,7 @@ async function APIPage({
   const { dereferenced } = ctx.schema;
 
   return (
-    <ctx.renderer.Root ctx={ctx}>
+    <Root ctx={ctx}>
       {operations?.map((item) => {
         const pathItem = dereferenced.paths?.[item.path];
         if (!pathItem)
@@ -216,6 +265,6 @@ async function APIPage({
           />
         );
       })}
-    </ctx.renderer.Root>
+    </Root>
   );
 }

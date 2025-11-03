@@ -7,8 +7,10 @@ import { Check, Copy } from 'lucide-react';
 import {
   type ComponentProps,
   createContext,
+  type FC,
   type ReactNode,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from 'react';
@@ -19,6 +21,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/ui/components/select';
+import {
+  type ExampleUpdateListener,
+  useOperationContext,
+} from '../contexts/operation';
+import type { CodeUsageGenerator, APIExampleItem } from './api-example';
+import { useApiContext, useServerSelectContext } from '../contexts/api';
+import {
+  joinURL,
+  withBase,
+  resolveServerUrl,
+  resolveRequestData,
+} from '@/utils/url';
+import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
+
+export interface OperationClientOptions {
+  APIExampleSelector?: FC<{
+    items: APIExampleItem[];
+
+    value: string;
+    onValueChange: (id: string) => void;
+  }>;
+}
 
 export function CopyResponseTypeScript({ code }: { code: string }) {
   const [isChecked, onCopy] = useCopyButton(() => {
@@ -109,5 +133,96 @@ export function SelectTabTrigger({
         ))}
       </SelectContent>
     </Select>
+  );
+}
+
+export function APIExampleSelector() {
+  const {
+    example: key,
+    setExample: setKey,
+    examples,
+    client: { APIExampleSelector: Override } = {},
+  } = useOperationContext();
+
+  if (Override) {
+    return <Override items={examples} value={key} onValueChange={setKey} />;
+  }
+
+  function renderItem(item: APIExampleItem) {
+    return (
+      <div>
+        <span className="font-medium text-sm">{item.name}</span>
+        <span className="text-fd-muted-foreground">{item.description}</span>
+      </div>
+    );
+  }
+
+  if (examples.length === 1) return null;
+  const selected = examples.find((item) => item.id === key);
+  return (
+    <Select value={key} onValueChange={setKey}>
+      <SelectTrigger className="not-prose mb-2">
+        {selected && <SelectValue asChild>{renderItem(selected)}</SelectValue>}
+      </SelectTrigger>
+      <SelectContent>
+        {examples.map((item) => (
+          <SelectItem key={item.id} value={item.id}>
+            {renderItem(item)}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+export function APIExampleUsageTab(sample: CodeUsageGenerator) {
+  const { shikiOptions, mediaAdapters } = useApiContext();
+  const {
+    examples,
+    example: key,
+    route,
+    addListener,
+    removeListener,
+  } = useOperationContext();
+  const { server } = useServerSelectContext();
+  const [data, setData] = useState(
+    () => examples.find((example) => example.id === key)!.encoded,
+  );
+
+  useEffect(() => {
+    const listener: ExampleUpdateListener = (_, encoded) => setData(encoded);
+
+    addListener(listener);
+    return () => {
+      removeListener(listener);
+    };
+  }, [addListener, removeListener]);
+
+  const code = useMemo(() => {
+    if (!sample.source) return;
+    if (typeof sample.source === 'string') return sample.source;
+
+    return sample.source(
+      joinURL(
+        withBase(
+          server ? resolveServerUrl(server.url, server.variables) : '/',
+          typeof window !== 'undefined'
+            ? window.location.origin
+            : 'https://loading',
+        ),
+        resolveRequestData(route, data),
+      ),
+      data,
+      {
+        server: sample.serverContext,
+        mediaAdapters,
+      },
+    );
+  }, [mediaAdapters, sample, server, route, data]);
+
+  if (!code || !sample) return null;
+
+  return (
+    <DynamicCodeBlock lang={sample.lang} code={code} options={shikiOptions} />
   );
 }
