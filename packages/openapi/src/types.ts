@@ -1,11 +1,11 @@
 import type { OpenAPIV3_1 as V3_1 } from 'openapi-types';
 import type { default as Slugger } from 'github-slugger';
-import { type Renderer } from '@/ui/renderer';
 import type { NoReference } from '@/utils/schema';
 import type { ProcessedDocument } from '@/utils/process-document';
 import type { MediaAdapter } from '@/requests/media/adapter';
 import type { OpenAPIOptions } from '@/server';
 import type { CreateAPIPageOptions } from './ui/api-page';
+import type { CodeUsageGenerator } from './ui/operation/api-example';
 
 export type Document = V3_1.Document;
 export type OperationObject = V3_1.OperationObject;
@@ -17,15 +17,18 @@ export type TagObject = V3_1.TagObject;
 export type ServerObject = V3_1.ServerObject;
 export type CallbackObject = V3_1.CallbackObject;
 export type ServerVariableObject = V3_1.ServerVariableObject;
+export type ResponseObject = V3_1.ResponseObject;
 
 export type MethodInformation = NoReference<OperationObject> & {
   method: string;
+  'x-codeSamples'?: CodeUsageGenerator[];
+  'x-selectedCodeSample'?: string;
+  'x-exclusiveCodeSample'?: string;
 };
 
 export interface RenderContext
   extends Pick<OpenAPIOptions, 'proxyUrl'>,
     CreateAPIPageOptions {
-  renderer: Renderer;
   servers: NoReference<ServerObject>[];
   slugger: Slugger;
 

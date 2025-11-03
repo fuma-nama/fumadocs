@@ -11,34 +11,4 @@ function wrap<Props>(V: ComponentType<Props>) {
   };
 }
 
-export const CodeExampleProvider = wrap(
-  lazy(() =>
-    import('./contexts/code-example').then((mod) => ({
-      default: mod.CodeExampleProvider,
-    })),
-  ),
-);
-
-export const CodeExample = wrap(
-  lazy(() =>
-    import('./contexts/code-example').then((mod) => ({
-      default: mod.CodeExample,
-    })),
-  ),
-);
-
-export const CodeExampleSelector = wrap(
-  lazy(() =>
-    import('./contexts/code-example').then((mod) => ({
-      default: mod.CodeExampleSelector,
-    })),
-  ),
-);
-
 export const ClientLazy = wrap(lazy(() => import('@/playground/client')));
-
-export const ApiProvider = wrap(
-  lazy(() =>
-    import('./contexts/api').then((mod) => ({ default: mod.ApiProvider })),
-  ),
-);
