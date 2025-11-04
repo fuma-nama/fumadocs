@@ -194,14 +194,14 @@ export default function PlaygroundClient({
   const defaultValues: FormValues = useMemo(() => {
     const requestData = examples.find(
       (example) => example.id === exampleId,
-    )!.data;
+    )?.data;
 
     return {
-      path: requestData.path,
-      query: requestData.query,
-      header: requestData.header,
-      body: requestData.body,
-      cookie: requestData.cookie,
+      path: requestData?.path ?? {},
+      query: requestData?.query ?? {},
+      header: requestData?.header ?? {},
+      body: requestData?.body ?? {},
+      cookie: requestData?.cookie ?? {},
     };
   }, [examples, exampleId]);
 

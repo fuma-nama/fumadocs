@@ -4,7 +4,6 @@ import {
   rehypeCode,
   type RehypeCodeOptions,
   remarkGfm,
-  remarkImage,
 } from 'fumadocs-core/mdx-plugins';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { remark } from 'remark';
@@ -14,7 +13,6 @@ import * as JsxRuntime from 'react/jsx-runtime';
 
 const processor = remark()
   .use(remarkGfm)
-  .use(remarkImage, { useImport: false })
   .use(remarkRehype)
   .use(rehypeCode, {
     langs: [],

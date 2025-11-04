@@ -37,6 +37,10 @@ export type SecurityEntry = SecuritySchemeObject & {
 };
 
 export async function APIPlayground({ path, method, ctx }: APIPlaygroundProps) {
+  if (ctx.playground?.render) {
+    return ctx.playground.render({ path, method, ctx });
+  }
+
   let currentId = 0;
   const bodyContent = method.requestBody?.content;
   const mediaType = bodyContent ? getPreferredType(bodyContent) : undefined;

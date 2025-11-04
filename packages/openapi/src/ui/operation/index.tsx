@@ -1,9 +1,4 @@
-import {
-  ComponentProps,
-  Fragment,
-  type ReactElement,
-  type ReactNode,
-} from 'react';
+import { type ComponentProps, Fragment, type ReactNode } from 'react';
 import type {
   CallbackObject,
   MethodInformation,
@@ -18,7 +13,6 @@ import {
 } from '@/utils/schema';
 import { idToTitle } from '@/utils/id-to-title';
 import { Markdown } from '../components/server/markdown';
-import { heading } from '../components/server/heading';
 import { Schema } from '../schema';
 import { APIExample, getAPIExamples } from '@/ui/operation/api-example';
 import { MethodLabel } from '@/ui/components/method-label';
@@ -63,7 +57,7 @@ export function Operation({
 
   hasHead?: boolean;
   headingLevel?: number;
-}): ReactElement {
+}) {
   const {
     schema: { dereferenced },
   } = ctx;
@@ -81,7 +75,7 @@ export function Operation({
 
     headNode = (
       <>
-        {heading(headingLevel, title, ctx)}
+        {ctx.renderHeading(headingLevel, title)}
         {method.description ? <Markdown text={method.description} /> : null}
       </>
     );
@@ -94,7 +88,7 @@ export function Operation({
     bodyNode = (
       <SelectTabs defaultValue={contentTypes[0][0]}>
         <div className="flex gap-2 items-end justify-between">
-          {heading(headingLevel, 'Request Body', ctx)}
+          {ctx.renderHeading(headingLevel, 'Request Body')}
           <SelectTabTrigger
             items={contentTypes.map((v) => v[0])}
             className="mb-4"
@@ -129,7 +123,7 @@ export function Operation({
 
     responseNode = (
       <>
-        {heading(headingLevel, 'Response Body', ctx)}
+        {ctx.renderHeading(headingLevel, 'Response Body')}
 
         <Accordions type="multiple">
           {statuses.map((status) => (
@@ -148,7 +142,7 @@ export function Operation({
 
     return (
       <Fragment key={type}>
-        {heading(headingLevel, title, ctx)}
+        {ctx.renderHeading(headingLevel, title)}
         <div className="flex flex-col">
           {params.map((param) => (
             <Schema
@@ -187,7 +181,7 @@ export function Operation({
     authNode = (
       <SelectTabs defaultValue={names[0]}>
         <div className="flex items-end justify-between gap-2">
-          {heading(headingLevel, 'Authorization', ctx)}
+          {ctx.renderHeading(headingLevel, 'Authorization')}
           <SelectTabTrigger items={names} className="mb-4" />
         </div>
         {securities.map((security, i) => (
@@ -217,7 +211,7 @@ export function Operation({
     callbacksNode = (
       <SelectTabs defaultValue={callbacks[0][0]}>
         <div className="flex justify-between gap-2 items-end">
-          {heading(headingLevel, 'Callbacks', ctx)}
+          {ctx.renderHeading(headingLevel, 'Callbacks')}
           <SelectTabTrigger
             items={callbacks.map((v) => v[0])}
             className="mb-4"

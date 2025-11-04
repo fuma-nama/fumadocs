@@ -18,7 +18,7 @@ export type ExampleUpdateListener = (
 const OperationContext = createContext<{
   route: string;
   examples: APIExampleItem[];
-  example: string;
+  example: string | undefined;
   setExample: (id: string) => void;
   setExampleData: (data: RawRequestData, encoded: RequestData) => void;
 
@@ -38,7 +38,7 @@ export function OperationProvider({
   children: ReactNode;
 }) {
   const [example, setExample] = useState(
-    () => defaultExampleId ?? examples[0].id,
+    () => defaultExampleId ?? examples.at(0)?.id,
   );
   const listeners = useRef<ExampleUpdateListener[]>([]);
 
