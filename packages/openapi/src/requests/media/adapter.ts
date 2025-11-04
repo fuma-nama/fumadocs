@@ -39,13 +39,6 @@ export type MediaContext =
 
 export interface MediaAdapter {
   /**
-   * the same adapter that's passed from a client component.
-   *
-   * It is needed for client-side serialization of values.
-   */
-  client?: MediaAdapter;
-
-  /**
    * encode data into specified media type for `fetch()`.
    *
    * Return the encoded form of `data.body` property.

@@ -10,14 +10,11 @@ import {
   useState,
 } from 'react';
 import type { RenderContext, ServerObject } from '@/types';
-import { defaultAdapters } from '@/requests/media/adapter';
+import { defaultAdapters, type MediaAdapter } from '@/requests/media/adapter';
 import type { NoReference } from '@/utils/schema';
 import { useStorageKey } from '../client/storage-key';
 
-type InheritFromContext = Pick<
-  Required<RenderContext>,
-  'servers' | 'mediaAdapters' | 'client'
-> &
+type InheritFromContext = Pick<Required<RenderContext>, 'servers' | 'client'> &
   Pick<RenderContext, 'shikiOptions'>;
 
 export interface ApiProviderProps extends InheritFromContext {
@@ -37,6 +34,8 @@ interface ApiContextType extends InheritFromContext {
    * ref to selected API server (to query)
    */
   serverRef: RefObject<SelectedServer | null>;
+
+  mediaAdapters: Record<string, MediaAdapter>;
 }
 
 interface ServerSelectType {
@@ -66,7 +65,6 @@ export function ApiProvider({
   defaultBaseUrl,
   children,
   servers,
-  mediaAdapters,
   shikiOptions,
   client,
 }: ApiProviderProps & { children: ReactNode }) {
@@ -81,11 +79,11 @@ export function ApiProvider({
           client,
           mediaAdapters: {
             ...defaultAdapters,
-            ...mediaAdapters,
+            ...client.mediaAdapters,
           },
           servers,
         }),
-        [mediaAdapters, servers, client, shikiOptions],
+        [servers, client, shikiOptions],
       )}
     >
       <ServerSelectProvider defaultBaseUrl={defaultBaseUrl}>

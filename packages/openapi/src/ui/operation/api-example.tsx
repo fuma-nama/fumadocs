@@ -175,11 +175,23 @@ export async function APIExample({
     );
   };
 
-  const generators = dedupe([
-    ...defaultSamples,
-    ...(ctx.generateCodeSamples ? await ctx.generateCodeSamples(method) : []),
-    ...(method['x-codeSamples'] ?? []),
-  ]).filter((generator) => generator.source !== false);
+  let generators: CodeUsageGenerator[] = [...defaultSamples];
+  if (ctx.generateCodeSamples) {
+    generators.push(...(await ctx.generateCodeSamples(method)));
+  }
+
+  if (method['x-codeSamples']) {
+    for (const sample of method['x-codeSamples']) {
+      generators.push({
+        ...sample,
+        id: 'id' in sample ? (sample.id as string) : sample.lang,
+      });
+    }
+  }
+
+  generators = dedupe(
+    generators.filter((generator) => generator.source !== false),
+  );
 
   return renderAPIExampleLayout(
     {
@@ -202,7 +214,6 @@ function dedupe(samples: CodeUsageGenerator[]): CodeUsageGenerator[] {
     const item = samples[i];
     if (set.has(item.id)) continue;
     set.add(item.id);
-
     out.unshift(item);
   }
 

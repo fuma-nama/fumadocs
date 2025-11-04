@@ -1,6 +1,7 @@
 'use client';
 import type { PlaygroundClientOptions } from '@/playground/client';
 import type { OperationClientOptions } from '../operation/client';
+import type { MediaAdapter } from '@/requests/media/adapter';
 
 export interface APIPageClientOptions {
   playground?: PlaygroundClientOptions;
@@ -14,10 +15,15 @@ export interface APIPageClientOptions {
    * @defaultValue `fumadocs-openapi-`
    */
   storageKeyPrefix?: string;
+
+  /**
+   * Support other media types (for client-side serialization)
+   */
+  mediaAdapters?: Record<string, MediaAdapter>;
 }
 
 export function defineClientConfig(
-  options: APIPageClientOptions,
+  options: APIPageClientOptions = {},
 ): APIPageClientOptions {
   return options;
 }

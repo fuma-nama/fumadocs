@@ -45,12 +45,15 @@ export interface CreateAPIPageOptions {
     HighlightOptionsThemes;
 
   /**
-   * Show full response schema instead of only example response & Typescript definitions
+   * Show full response schema instead of only example response & Typescript definitions.
    *
    * @default true
    */
   showResponseSchema?: boolean;
 
+  /**
+   * Support other media types (for server-side generation).
+   */
   mediaAdapters?: Record<string, MediaAdapter>;
 
   /**
@@ -182,17 +185,9 @@ function Root({
   ctx,
   ...props
 }: { ctx: RenderContext } & ComponentProps<'div'>) {
-  const mediaAdapters: Record<string, MediaAdapter> = {};
-  for (const k in ctx.mediaAdapters) {
-    const adapter = ctx.mediaAdapters[k];
-
-    if (adapter.client) mediaAdapters[k] = adapter.client;
-  }
-
   return (
     <div className={cn('flex flex-col gap-24 text-sm', className)} {...props}>
       <ApiProvider
-        mediaAdapters={mediaAdapters}
         servers={ctx.servers}
         shikiOptions={ctx.shikiOptions}
         client={ctx.client ?? {}}

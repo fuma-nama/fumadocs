@@ -21,7 +21,7 @@ export type ResponseObject = V3_1.ResponseObject;
 
 export type MethodInformation = NoReference<OperationObject> & {
   method: string;
-  'x-codeSamples'?: CodeUsageGenerator[];
+  'x-codeSamples'?: Omit<CodeUsageGenerator, 'id'>[];
   'x-selectedCodeSample'?: string;
   'x-exclusiveCodeSample'?: string;
 };
