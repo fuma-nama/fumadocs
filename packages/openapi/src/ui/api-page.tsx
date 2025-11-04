@@ -15,6 +15,7 @@ import type { APIPageClientOptions } from './client';
 import { cn } from 'fumadocs-ui/utils/cn';
 import type { CodeUsageGenerator, ResponseTab } from './operation/api-example';
 import { ApiProvider } from './contexts/api';
+import { Heading } from 'fumadocs-ui/components/heading';
 
 type Awaitable<T> = T | Promise<T>;
 
@@ -160,19 +161,26 @@ export function createAPIPage(
         ? dereferenced.servers
         : [{ url: '/' }];
 
+    const slugger = new Slugger();
     const ctx: RenderContext = {
       schema: processed,
       proxyUrl: server.options.proxyUrl,
-      showResponseSchema: options.showResponseSchema,
-      shikiOptions: options.shikiOptions,
-      generateTypeScriptSchema: options.generateTypeScriptSchema,
-      generateCodeSamples: options.generateCodeSamples,
+      ...options,
       servers,
       mediaAdapters: {
         ...defaultAdapters,
         ...options.mediaAdapters,
       },
-      slugger: new Slugger(),
+      slugger,
+      renderHeading(depth, text) {
+        const id = slugger.slug(text);
+
+        return (
+          <Heading id={id} key={id} as={`h${depth}` as `h1`}>
+            {text}
+          </Heading>
+        );
+      },
     };
 
     return <APIPage {...props} ctx={ctx} />;

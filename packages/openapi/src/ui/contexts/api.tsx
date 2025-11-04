@@ -173,7 +173,12 @@ function ServerSelectProvider({
 function getDefaultValues(
   server: NoReference<ServerObject>,
 ): Record<string, string> {
-  return Object.fromEntries(
-    Object.entries(server.variables ?? {}).map(([k, v]) => [k, v.default]),
-  );
+  const out: Record<string, string> = {};
+  if (!server.variables) return out;
+
+  for (const [k, v] of Object.entries(server.variables)) {
+    out[k] = v.default;
+  }
+
+  return out;
 }

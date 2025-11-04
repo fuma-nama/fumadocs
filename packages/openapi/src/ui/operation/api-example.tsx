@@ -182,16 +182,18 @@ export async function APIExample({
 
   if (method['x-codeSamples']) {
     for (const sample of method['x-codeSamples']) {
-      generators.push({
-        ...sample,
-        id: 'id' in sample ? (sample.id as string) : sample.lang,
-      });
+      generators.push(
+        'id' in sample && typeof sample.id === 'string'
+          ? (sample as CodeUsageGenerator)
+          : {
+              id: sample.lang,
+              ...sample,
+            },
+      );
     }
   }
 
-  generators = dedupe(
-    generators.filter((generator) => generator.source !== false),
-  );
+  generators = dedupe(generators);
 
   return renderAPIExampleLayout(
     {
@@ -214,7 +216,7 @@ function dedupe(samples: CodeUsageGenerator[]): CodeUsageGenerator[] {
     const item = samples[i];
     if (set.has(item.id)) continue;
     set.add(item.id);
-    out.unshift(item);
+    if (item.source !== false) out.unshift(item);
   }
 
   return out;

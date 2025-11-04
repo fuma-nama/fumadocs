@@ -9,7 +9,7 @@ import {
   createContext,
   type FC,
   type ReactNode,
-  useContext,
+  use,
   useEffect,
   useMemo,
   useState,
@@ -39,7 +39,7 @@ export interface OperationClientOptions {
   APIExampleSelector?: FC<{
     items: APIExampleItem[];
 
-    value: string;
+    value: string | undefined;
     onValueChange: (id: string) => void;
   }>;
 }
@@ -105,7 +105,7 @@ export function SelectTab({
 }: ComponentProps<'div'> & {
   value: string;
 }) {
-  const ctx = useContext(Context);
+  const ctx = use(Context);
   if (value !== ctx?.type) return;
 
   return <div {...props}>{props.children}</div>;
@@ -115,7 +115,7 @@ export function SelectTabTrigger({
   items,
   ...props
 }: ComponentProps<typeof SelectTrigger> & { items: string[] }) {
-  const { type, setType } = useContext(Context)!;
+  const { type, setType } = use(Context)!;
 
   return (
     <Select value={type ?? ''} onValueChange={setType}>
@@ -176,14 +176,14 @@ export function APIExampleUsageTab(sample: CodeUsageGenerator) {
   const { shikiOptions, mediaAdapters } = useApiContext();
   const {
     examples,
-    example: key,
+    example: selectedExampleId,
     route,
     addListener,
     removeListener,
   } = useOperationContext();
   const { server } = useServerSelectContext();
   const [data, setData] = useState(
-    () => examples.find((example) => example.id === key)!.encoded,
+    () => examples.find((example) => example.id === selectedExampleId)?.encoded,
   );
 
   useEffect(() => {
@@ -196,7 +196,7 @@ export function APIExampleUsageTab(sample: CodeUsageGenerator) {
   }, [addListener, removeListener]);
 
   const code = useMemo(() => {
-    if (!sample.source) return;
+    if (!sample.source || !data) return;
     if (typeof sample.source === 'string') return sample.source;
 
     return sample.source(
