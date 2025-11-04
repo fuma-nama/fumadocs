@@ -15,7 +15,7 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "isbot": "^5.1.31",
+    "isbot": "^5.1.32",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router": "^7.9.5"
@@ -24,7 +24,7 @@
     "@react-router/dev": "^7.9.5",
     "@tailwindcss/vite": "^4.1.16",
     "@types/mdx": "^2.0.13",
-    "@types/node": "^24.9.2",
+    "@types/node": "^24.10.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "react-router-devtools": "^5.1.3",

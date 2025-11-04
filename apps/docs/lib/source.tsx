@@ -28,10 +28,15 @@ function pageTreeCodeTitles(): LoaderPlugin {
   return {
     transformPageTree: {
       file(node) {
-        if (typeof node.name !== 'string') return node;
-
-        if (node.name.endsWith('()') || node.name.match(/^<\w+ \/>$/))
-          node.name = <code className="text-[13px]">{node.name}</code>;
+        if (
+          typeof node.name === 'string' &&
+          (node.name.endsWith('()') || node.name.match(/^<\w+ \/>$/))
+        ) {
+          return {
+            ...node,
+            name: <code className="text-[13px]">{node.name}</code>,
+          };
+        }
         return node;
       },
     },
