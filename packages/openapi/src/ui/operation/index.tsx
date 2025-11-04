@@ -270,7 +270,6 @@ export function Operation({
           }
           route={path}
           examples={examples}
-          client={ctx.client?.operation}
         >
           {info}
           <APIExample method={method} ctx={ctx} />

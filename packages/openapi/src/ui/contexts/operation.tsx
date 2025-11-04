@@ -9,7 +9,6 @@ import {
 } from 'react';
 import type { APIExampleItem } from '@/ui/operation/api-example';
 import type { RawRequestData, RequestData } from '@/requests/types';
-import type { OperationClientOptions } from '../operation/client';
 
 export type ExampleUpdateListener = (
   data: RawRequestData,
@@ -19,8 +18,6 @@ export type ExampleUpdateListener = (
 const OperationContext = createContext<{
   route: string;
   examples: APIExampleItem[];
-  client?: OperationClientOptions;
-
   example: string;
   setExample: (id: string) => void;
   setExampleData: (data: RawRequestData, encoded: RequestData) => void;
@@ -34,12 +31,10 @@ export function OperationProvider({
   examples,
   defaultExampleId,
   children,
-  client,
 }: {
   route: string;
   examples: APIExampleItem[];
   defaultExampleId?: string;
-  client?: OperationClientOptions;
   children: ReactNode;
 }) {
   const [example, setExample] = useState(
@@ -53,7 +48,6 @@ export function OperationProvider({
         () => ({
           example,
           route,
-          client,
           setExample: (newKey: string) => {
             const example = examples.find((example) => example.id === newKey);
             if (!example) return;
@@ -92,7 +86,7 @@ export function OperationProvider({
             listeners.current.push(listener);
           },
         }),
-        [example, route, client, examples],
+        [example, route, examples],
       )}
     >
       {children}
