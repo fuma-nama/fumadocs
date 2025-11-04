@@ -23,7 +23,7 @@ const config = {
 
 Add to your Shiki transformers.
 
-```ts twoslash title="source.config.ts (Fumadocs MDX)"
+```ts title="source.config.ts (Fumadocs MDX)"
 import { defineConfig } from 'fumadocs-mdx/config';
 import { transformerTwoslash } from 'fumadocs-twoslash';
 import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins';
@@ -101,15 +101,6 @@ const a = '123';
 
 console.log(a);
 //      ^^^
-```
-
-```ts twoslash
-import { generateFiles } from 'fumadocs-openapi';
-
-void generateFiles({
-  input: ['./museum.yaml'],
-  output: './content/docs/ui',
-});
 ```
 
 ```ts twoslash
