@@ -27,7 +27,6 @@ import { DocsBody, DocsPage } from 'fumadocs-ui/page';
 import { NotFound } from '@/components/not-found';
 import { getSuggestions } from '@/app/docs/[...slug]/suggestions';
 import { PathUtils } from 'fumadocs-core/source';
-import { AutoTypeTable } from '@/components/auto-type-table';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -119,7 +118,6 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
             Banner,
             Mermaid,
             TypeTable,
-            AutoTypeTable,
             Wrapper,
             blockquote: Callout as unknown as FC<ComponentProps<'blockquote'>>,
             DocsCategory: ({ url }) => {
