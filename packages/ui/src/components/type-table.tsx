@@ -106,7 +106,7 @@ function Item({
           className={cn(
             keyVariants({
               deprecated,
-              className: 'min-w-fit w-[25%] font-medium',
+              className: 'min-w-fit w-[25%] font-medium pe-2',
             }),
           )}
         >

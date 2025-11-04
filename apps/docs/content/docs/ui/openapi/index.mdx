@@ -36,7 +36,7 @@ Add the following line:
 
 Create an OpenAPI instance on the server.
 
-```ts title="lib/openapi.ts"
+```ts tab="lib/openapi.ts"
 import { createOpenAPI } from 'fumadocs-openapi/server';
 
 export const openapi = createOpenAPI({
@@ -45,34 +45,53 @@ export const openapi = createOpenAPI({
 });
 ```
 
-```ts title="lib/source.ts"
+```ts tab="lib/source.ts"
 import { openapiPlugin } from 'fumadocs-openapi/server';
 import { loader } from 'fumadocs-core/source';
 
 export const source = loader({
-  // [!code ++] adds a badge to each page item in page tree
+  // [!code ++] optional: adds a badge to each page item in page tree
   plugins: [openapiPlugin()],
 });
 ```
 
-Add `APIPage` to your MDX Components, so that you can use it in MDX files.
+Create a `APIPage` component:
+
+```tsx tab="components/api-page.tsx"
+import { openapi } from '@/lib/openapi';
+import { createAPIPage } from 'fumadocs-openapi/ui';
+import client from './api-page.client';
+
+export const APIPage = createAPIPage(openapi, {
+  client,
+});
+```
+
+```tsx tab="components/api-page.client.tsx"
+'use client';
+import { defineClientConfig } from 'fumadocs-openapi/ui/client';
+
+export default defineClientConfig({
+  // client-side config
+});
+```
+
+Add the `APIPage` component to your MDX Components.
 
 ```tsx title="mdx-components.tsx"
 import defaultComponents from 'fumadocs-ui/mdx';
-import { APIPage } from 'fumadocs-openapi/ui';
-import { openapi } from '@/lib/openapi';
+import { APIPage } from '@/components/api-page';
 import type { MDXComponents } from 'mdx/types';
 
+// make sure you can use it in MDX files
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
     ...defaultComponents,
-    APIPage: (props) => <APIPage {...openapi.getAPIPageProps(props)} />,
+    APIPage,
     ...components,
   };
 }
 ```
-
-> `APIPage` is a React Server Component.
 
 ### Generate Files
 
