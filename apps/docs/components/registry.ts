@@ -23,7 +23,7 @@ export const registry: Registry = {
     const filePath = path.relative(baseDir, absolutePath);
 
     // source object is external
-    if (filePath === 'lib/source.ts') return false;
+    if (filePath.startsWith('lib/source.')) return false;
   },
   onResolve(ref) {
     if (ref.type === 'file') {
