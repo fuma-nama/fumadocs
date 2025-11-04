@@ -7,13 +7,14 @@ export interface Contributor {
 export async function fetchContributors(
   repoOwner: string,
   repoName: string,
+  baseUrl: string = 'https://api.github.com',
 ): Promise<Contributor[]> {
   const headers = new Headers();
   if (process.env.GITHUB_TOKEN)
     headers.set('Authorization', `Bearer ${process.env.GITHUB_TOKEN}`);
 
   const response = await fetch(
-    `https://api.github.com/repos/${repoOwner}/${repoName}/contributors?per_page=50`,
+    `${baseUrl}/repos/${repoOwner}/${repoName}/contributors?per_page=50`,
     {
       headers,
       next: { revalidate: 1000 * 1000 },
