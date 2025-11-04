@@ -1,7 +1,8 @@
 import { source } from '@/lib/source';
 import { notFound } from 'next/navigation';
 import { generate as MetadataImage, getImageResponseOptions } from './generate';
-import { ImageResponse } from '@takumi-rs/image-response';
+import { ImageResponse } from 'next/og';
+import { getPageImage } from '@/lib/metadata';
 
 export const revalidate = false;
 
@@ -27,8 +28,7 @@ export async function GET(
 export function generateStaticParams(): {
   slug: string[];
 }[] {
-  return source.generateParams().map((page) => ({
-    ...page,
-    slug: [...page.slug, 'image.webp'],
+  return source.getPages().map((page) => ({
+    slug: getPageImage(page).segments,
   }));
 }
