@@ -4,23 +4,21 @@ import {
   Fragment,
   type HTMLAttributes,
   lazy,
-  type ReactElement,
   type ReactNode,
   useEffect,
   useMemo,
   useState,
 } from 'react';
 import type {
-  ControllerFieldState,
-  ControllerRenderProps,
   FieldPath,
-  UseFormStateReturn,
+  UseControllerProps,
+  UseControllerReturn,
 } from 'react-hook-form';
 import {
-  Controller,
   FormProvider,
   get,
   set,
+  useController,
   useForm,
   useFormContext,
 } from 'react-hook-form';
@@ -76,29 +74,20 @@ import type { RequestData } from '@/requests/types';
 import ServerSelect from './components/server-select';
 import { useStorageKey } from '@/ui/client/storage-key';
 
-interface FormValues {
+export interface FormValues {
   path: Record<string, unknown>;
   query: Record<string, unknown>;
   header: Record<string, unknown>;
   cookie: Record<string, unknown>;
   body: unknown;
 
+  /**
+   * Store the cached encoded request data, do not modify it.
+   */
   _encoded?: RequestData;
 }
 
-export interface CustomField<TName extends FieldPath<FormValues>, Info> {
-  render: (props: {
-    /**
-     * Field Info
-     */
-    info: Info;
-    field: ControllerRenderProps<FormValues, TName>;
-    fieldState: ControllerFieldState;
-    formState: UseFormStateReturn<FormValues>;
-  }) => ReactElement;
-}
-
-export interface ClientProps extends HTMLAttributes<HTMLFormElement> {
+export interface PlaygroundClientProps extends HTMLAttributes<HTMLFormElement> {
   route: string;
   method: string;
   parameters?: ParameterField[];
@@ -112,15 +101,6 @@ export interface ClientProps extends HTMLAttributes<HTMLFormElement> {
    */
   references: Record<string, RequestSchema>;
   proxyUrl?: string;
-
-  // TODO: redesign `fields`
-  fields?: {
-    parameter?: CustomField<
-      `${ParameterField['in']}.${string}`,
-      ParameterField
-    >;
-    body?: CustomField<'body', RequestSchema>;
-  };
 }
 
 export interface PlaygroundClientOptions {
@@ -137,6 +117,33 @@ export interface PlaygroundClientOptions {
   components?: Partial<{
     ResultDisplay: FC<{ data: FetchResult }>;
   }>;
+
+  /**
+   * render the paremeter inputs of API endpoint.
+   *
+   * It uses `react-hook-form`, you can use either:
+   * - the library itself, with types from `fumadocs-openapi/playground/client`.
+   * - the `Custom.useController()` from `fumadocs-openapi/playground/client`.
+   *
+   * Recommended types packages: `json-schema-typed`, `openapi-types`.
+   */
+  renderParameterField?: (
+    fieldName: FieldPath<FormValues>,
+    param: ParameterField,
+  ) => ReactNode;
+
+  /**
+   * render the input for API endpoint body.
+   *
+   * @see renderParameterField for customisation tips
+   */
+  renderBodyField?: (
+    fieldName: 'body',
+    info: {
+      schema: RequestSchema;
+      mediaType: string;
+    },
+  ) => ReactNode;
 }
 
 const OauthDialog = lazy(() =>
@@ -150,17 +157,16 @@ const OauthDialogTrigger = lazy(() =>
   })),
 );
 
-export default function Client({
+export default function PlaygroundClient({
   route,
   method = 'GET',
   securities,
   parameters = [],
   body,
-  fields,
   references,
   proxyUrl,
   ...rest
-}: ClientProps) {
+}: PlaygroundClientProps) {
   const {
     example: exampleId,
     examples,
@@ -344,7 +350,7 @@ export default function Client({
               ))}
             </SecurityTabs>
           )}
-          <FormBody body={body} fields={fields} parameters={parameters} />
+          <FormBody body={body} parameters={parameters} />
           {testQuery.data ? <ResultDisplay data={testQuery.data} /> : null}
         </form>
       </SchemaProvider>
@@ -426,9 +432,10 @@ const ParamTypes = ['path', 'header', 'cookie', 'query'] as const;
 
 function FormBody({
   parameters = [],
-  fields = {},
   body,
-}: Pick<ClientProps, 'parameters' | 'body' | 'fields'>) {
+}: Pick<PlaygroundClientProps, 'parameters' | 'body'>) {
+  const { renderParameterField, renderBodyField } =
+    useApiContext().client.playground ?? {};
   const panels = useMemo(() => {
     return ParamTypes.map((type) => {
       const items = parameters.filter((v) => v.in === type);
@@ -448,20 +455,15 @@ function FormBody({
         >
           {items.map((field) => {
             const fieldName = `${type}.${field.name}` as const;
+            if (renderParameterField) {
+              return renderParameterField(fieldName, field);
+            }
+
             const schema = (
               field.content
                 ? field.content[Object.keys(field.content)[0]].schema
                 : field.schema
             ) as ParsedSchema;
-
-            if (fields?.parameter) {
-              return renderCustomField(
-                fieldName,
-                schema,
-                fields.parameter,
-                field.name,
-              );
-            }
 
             return (
               <FieldSet
@@ -475,15 +477,15 @@ function FormBody({
         </CollapsiblePanel>
       );
     });
-  }, [fields.parameter, parameters]);
+  }, [parameters, renderParameterField]);
 
   return (
     <>
       {panels}
       {body && (
         <CollapsiblePanel title="Body">
-          {fields.body ? (
-            renderCustomField('body', body.schema, fields.body)
+          {renderBodyField ? (
+            renderBodyField('body', body)
           ) : (
             <BodyInput field={body.schema} />
           )}
@@ -735,22 +737,6 @@ function useAuthInputs(
   return { inputs, mapInputs, initAuthValues };
 }
 
-function renderCustomField(
-  fieldName: string,
-  info: RequestSchema & { name?: string },
-  field: CustomField<never, never>,
-  key?: string,
-) {
-  return (
-    <Controller
-      key={key}
-      // @ts-expect-error we use string here
-      render={(props) => field.render({ ...props, info })}
-      name={fieldName}
-    />
-  );
-}
-
 function Route({
   route,
   ...props
@@ -826,3 +812,15 @@ function CollapsiblePanel({
     </Collapsible>
   );
 }
+
+// exports for customisations
+export const Custom = {
+  useController<
+    TName extends FieldPath<FormValues> = FieldPath<FormValues>,
+    TTransformedValues = FormValues,
+  >(
+    props: UseControllerProps<FormValues, TName, TTransformedValues>,
+  ): UseControllerReturn<FormValues, TName> {
+    return useController<FormValues, TName, TTransformedValues>(props);
+  },
+};

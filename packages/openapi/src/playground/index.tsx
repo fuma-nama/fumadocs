@@ -9,7 +9,7 @@ import {
   type NoReference,
   type ParsedSchema,
 } from '@/utils/schema';
-import { type ClientProps } from './client';
+import { type PlaygroundClientProps } from './client';
 import { ClientLazy } from '@/ui/lazy';
 
 export type ParameterField = NoReference<ParameterObject> & {
@@ -31,8 +31,6 @@ export interface APIPlaygroundProps {
   ctx: RenderContext;
 }
 
-export type { ClientProps, CustomField } from './client';
-
 export type SecurityEntry = SecuritySchemeObject & {
   scopes: string[];
   id: string;
@@ -51,7 +49,7 @@ export async function APIPlayground({ path, method, ctx }: APIPlaygroundProps) {
     registered: new WeakMap(),
   };
 
-  const props: ClientProps = {
+  const props: PlaygroundClientProps = {
     securities: parseSecurities(method, ctx),
     method: method.method,
     route: path,
@@ -64,7 +62,7 @@ export async function APIPlayground({ path, method, ctx }: APIPlaygroundProps) {
               context,
             ),
             mediaType,
-          } as ClientProps['body'])
+          } as PlaygroundClientProps['body'])
         : undefined,
     references: context.references,
     proxyUrl: ctx.proxyUrl,
@@ -124,13 +122,13 @@ function writeReferences(
 function parseSecurities(
   method: MethodInformation,
   { schema: { dereferenced } }: RenderContext,
-): ClientProps['securities'] {
-  const result: ClientProps['securities'] = [];
+): PlaygroundClientProps['securities'] {
+  const result: PlaygroundClientProps['securities'] = [];
   const security = method.security ?? dereferenced.security ?? [];
   if (security.length === 0) return result;
 
   for (const map of security) {
-    const list: ClientProps['securities'][number] = [];
+    const list: PlaygroundClientProps['securities'][number] = [];
 
     for (const [key, scopes] of Object.entries(map)) {
       const scheme = dereferenced.components?.securitySchemes?.[key];
