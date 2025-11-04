@@ -23,6 +23,7 @@ export function Root({
         mediaAdapters={mediaAdapters}
         servers={ctx.servers}
         shikiOptions={ctx.shikiOptions}
+        storageKey={ctx.storageKey}
       >
         {children}
       </ApiProvider>

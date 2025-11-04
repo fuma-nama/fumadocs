@@ -19,6 +19,12 @@ export interface ApiProviderProps
   defaultBaseUrl?: string;
   children?: ReactNode;
   mediaAdapters?: Record<string, MediaAdapter>;
+  /**
+   * Custom localStorage key for server selection.
+   * 
+   * @defaultValue 'apiBaseUrl'
+   */
+  storageKey?: string;
 }
 
 export interface SelectedServer {
@@ -61,6 +67,7 @@ export function ApiProvider({
   servers,
   mediaAdapters,
   shikiOptions,
+  storageKey = 'apiBaseUrl',
 }: ApiProviderProps) {
   const [server, setServer] = useState<SelectedServer | null>(() => {
     const defaultItem = defaultBaseUrl
@@ -76,7 +83,7 @@ export function ApiProvider({
   });
 
   useEffect(() => {
-    const cached = localStorage.getItem('apiBaseUrl');
+    const cached = localStorage.getItem(storageKey);
     if (!cached) return;
 
     try {
@@ -87,7 +94,7 @@ export function ApiProvider({
     } catch {
       // ignore
     }
-  }, []);
+  }, [storageKey]);
 
   return (
     <ApiContext.Provider
@@ -112,7 +119,7 @@ export function ApiProvider({
                 if (!prev) return null;
 
                 const updated = { ...prev, variables };
-                localStorage.setItem('apiBaseUrl', JSON.stringify(updated));
+                localStorage.setItem(storageKey, JSON.stringify(updated));
                 return updated;
               });
             },
@@ -125,11 +132,11 @@ export function ApiProvider({
                 variables: getDefaultValues(obj),
               };
 
-              localStorage.setItem('apiBaseUrl', JSON.stringify(result));
+              localStorage.setItem(storageKey, JSON.stringify(result));
               setServer(result);
             },
           }),
-          [server, servers],
+          [server, servers, storageKey],
         )}
       >
         {children}
