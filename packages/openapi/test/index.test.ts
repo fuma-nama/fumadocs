@@ -83,9 +83,7 @@ describe('Generate documents', () => {
         }),
         per: 'file',
       }),
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `[Error: [OpenAPI] Failed to resolve input: /Users/xred/dev/fumadocs/packages/openapi/test/fixtures/non-existent.yaml]`,
-    );
+    ).rejects.toThrowError();
   });
 
   test('Generate Files - groupBy tag per operation', async () => {
