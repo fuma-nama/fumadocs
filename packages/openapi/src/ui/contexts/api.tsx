@@ -2,29 +2,29 @@
 import {
   createContext,
   type ReactNode,
-  useContext,
+  type RefObject,
+  use,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import type { RenderContext, ServerObject } from '@/types';
-import { defaultAdapters, type MediaAdapter } from '@/requests/media/adapter';
+import { defaultAdapters } from '@/requests/media/adapter';
 import type { NoReference } from '@/utils/schema';
+import { useStorageKey } from '../client/storage-key';
 
-export interface ApiProviderProps
-  extends Omit<ApiContextType, 'mediaAdapters'> {
+type InheritFromContext = Pick<
+  Required<RenderContext>,
+  'servers' | 'mediaAdapters' | 'client'
+> &
+  Pick<RenderContext, 'shikiOptions'>;
+
+export interface ApiProviderProps extends InheritFromContext {
   /**
    * Base URL for API requests
    */
   defaultBaseUrl?: string;
-  children?: ReactNode;
-  mediaAdapters?: Record<string, MediaAdapter>;
-  /**
-   * Custom localStorage key for server selection.
-   *
-   * @defaultValue 'apiBaseUrl'
-   */
-  storageKey?: string;
 }
 
 export interface SelectedServer {
@@ -32,10 +32,11 @@ export interface SelectedServer {
   variables: Record<string, string>;
 }
 
-interface ApiContextType {
-  servers: NoReference<ServerObject>[];
-  shikiOptions: RenderContext['shikiOptions'];
-  mediaAdapters: Record<string, MediaAdapter>;
+interface ApiContextType extends InheritFromContext {
+  /**
+   * ref to selected API server (to query)
+   */
+  serverRef: RefObject<SelectedServer | null>;
 }
 
 interface ServerSelectType {
@@ -48,14 +49,14 @@ const ApiContext = createContext<ApiContextType | null>(null);
 const ServerSelectContext = createContext<ServerSelectType | null>(null);
 
 export function useApiContext(): ApiContextType {
-  const ctx = useContext(ApiContext);
+  const ctx = use(ApiContext);
   if (!ctx) throw new Error('Component must be used under <ApiProvider />');
 
   return ctx;
 }
 
 export function useServerSelectContext(): ServerSelectType {
-  const ctx = useContext(ServerSelectContext);
+  const ctx = use(ServerSelectContext);
   if (!ctx) throw new Error('Component must be used under <ApiProvider />');
 
   return ctx;
@@ -67,12 +68,45 @@ export function ApiProvider({
   servers,
   mediaAdapters,
   shikiOptions,
-  storageKey = 'apiBaseUrl',
-}: ApiProviderProps) {
+  client,
+}: ApiProviderProps & { children: ReactNode }) {
+  const serverRef = useRef<SelectedServer | null>(null);
+
+  return (
+    <ApiContext
+      value={useMemo(
+        () => ({
+          serverRef,
+          shikiOptions,
+          client,
+          mediaAdapters: {
+            ...defaultAdapters,
+            ...mediaAdapters,
+          },
+          servers,
+        }),
+        [mediaAdapters, servers, client, shikiOptions],
+      )}
+    >
+      <ServerSelectProvider defaultBaseUrl={defaultBaseUrl}>
+        {children}
+      </ServerSelectProvider>
+    </ApiContext>
+  );
+}
+
+function ServerSelectProvider({
+  defaultBaseUrl,
+  children,
+}: Pick<ApiProviderProps, 'defaultBaseUrl'> & {
+  children: ReactNode;
+}) {
+  const { servers, serverRef } = useApiContext();
+  const storageKeys = useStorageKey();
   const [server, setServer] = useState<SelectedServer | null>(() => {
     const defaultItem = defaultBaseUrl
       ? servers.find((item) => item.url === defaultBaseUrl)
-      : servers.at(0);
+      : servers[0];
 
     return defaultItem
       ? {
@@ -81,9 +115,10 @@ export function ApiProvider({
         }
       : null;
   });
+  serverRef.current = server;
 
   useEffect(() => {
-    const cached = localStorage.getItem(storageKey);
+    const cached = localStorage.getItem(storageKeys.of('server-url'));
     if (!cached) return;
 
     try {
@@ -94,54 +129,46 @@ export function ApiProvider({
     } catch {
       // ignore
     }
-  }, [storageKey]);
+  }, [storageKeys]);
 
   return (
-    <ApiContext.Provider
+    <ServerSelectContext
       value={useMemo(
         () => ({
-          shikiOptions,
-          mediaAdapters: {
-            ...defaultAdapters,
-            ...mediaAdapters,
+          server,
+          setServerVariables(variables) {
+            setServer((prev) => {
+              if (!prev) return null;
+
+              const updated = { ...prev, variables };
+              localStorage.setItem(
+                storageKeys.of('server-url'),
+                JSON.stringify(updated),
+              );
+              return updated;
+            });
           },
-          servers,
+          setServer(value) {
+            const obj = servers.find((item) => item.url === value);
+            if (!obj) return;
+
+            const result: SelectedServer = {
+              url: value,
+              variables: getDefaultValues(obj),
+            };
+
+            localStorage.setItem(
+              storageKeys.of('server-url'),
+              JSON.stringify(result),
+            );
+            setServer(result);
+          },
         }),
-        [mediaAdapters, servers, shikiOptions],
+        [server, servers, storageKeys],
       )}
     >
-      <ServerSelectContext.Provider
-        value={useMemo(
-          () => ({
-            server,
-            setServerVariables(variables) {
-              setServer((prev) => {
-                if (!prev) return null;
-
-                const updated = { ...prev, variables };
-                localStorage.setItem(storageKey, JSON.stringify(updated));
-                return updated;
-              });
-            },
-            setServer(value) {
-              const obj = servers.find((item) => item.url === value);
-              if (!obj) return;
-
-              const result: SelectedServer = {
-                url: value,
-                variables: getDefaultValues(obj),
-              };
-
-              localStorage.setItem(storageKey, JSON.stringify(result));
-              setServer(result);
-            },
-          }),
-          [server, servers, storageKey],
-        )}
-      >
-        {children}
-      </ServerSelectContext.Provider>
-    </ApiContext.Provider>
+      {children}
+    </ServerSelectContext>
   );
 }
 
