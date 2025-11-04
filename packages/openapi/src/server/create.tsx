@@ -30,6 +30,15 @@ export interface OpenAPIOptions {
    * The url of proxy to avoid CORS issues
    */
   proxyUrl?: string;
+
+  /**
+   * Custom localStorage key for server selection.
+   *
+   * Useful when using multiple OpenAPI instances to prevent state conflicts.
+   *
+   * @defaultValue 'apiBaseUrl'
+   */
+  storageKey?: string;
 }
 
 export interface OpenAPIServer {
