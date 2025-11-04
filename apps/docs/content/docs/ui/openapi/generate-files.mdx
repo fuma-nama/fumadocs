@@ -3,13 +3,11 @@ title: generateFiles()
 description: Generate pages from OpenAPI schema.
 ---
 
-## Generating Files
-
 The `generateFiles()` function generates MDX files for API documentation.
 
 Note that the page content is still rendered by the `APIpage` component, docs generator only arranges the endpoints/webhooks to render for each page.
 
-### `input`
+## Usage
 
 It takes an OpenAPI instance.
 
@@ -19,17 +17,7 @@ import { openapi } from '@/lib/openapi';
 
 void generateFiles({
   input: openapi,
-});
-```
-
-### `output`
-
-The output directory.
-
-```ts
-import { generateFiles } from 'fumadocs-openapi';
-
-void generateFiles({
+  // The output directory.
   output: '/content/docs',
 });
 ```
@@ -55,6 +43,42 @@ import { generateFiles } from 'fumadocs-openapi';
 
 void generateFiles({
   per: 'tag',
+});
+```
+
+When set to `custom`, you can pass a function to fully customise the generation process:
+
+```ts title="Example" twoslash
+import { generateFiles, OperationOutput } from 'fumadocs-openapi';
+
+void generateFiles({
+  // ---cut-start---
+  input: {} as any,
+  output: {} as any,
+  // ---cut-end---
+  per: 'custom',
+  toPages(builder) {
+    const { dereferenced } = builder.document;
+    const items = builder.extract();
+
+    for (const op of items.operations) {
+      const { pathItem, operation, displayName } =
+        builder.fromExtractedOperation(op)!;
+
+      const entry: OperationOutput = {
+        type: 'operation',
+        schemaId: builder.id,
+        item: op,
+        path: '...',
+        info: {
+          title: displayName,
+          description: operation.description ?? pathItem.description,
+        },
+      };
+
+      builder.create(entry);
+    }
+  },
 });
 ```
 

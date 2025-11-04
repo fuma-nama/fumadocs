@@ -2,6 +2,7 @@ import { createMDXSource } from 'fumadocs-mdx/runtime/next';
 import {
   type InferMetaType,
   type InferPageType,
+  type LoaderPlugin,
   loader,
   multiple,
 } from 'fumadocs-core/source';
@@ -19,9 +20,23 @@ export const source = loader(
   }),
   {
     baseUrl: '/docs',
-    plugins: [lucideIconsPlugin(), openapiPlugin()],
+    plugins: [pageTreeCodeTitles(), lucideIconsPlugin(), openapiPlugin()],
   },
 );
+
+function pageTreeCodeTitles(): LoaderPlugin {
+  return {
+    transformPageTree: {
+      file(node) {
+        if (typeof node.name !== 'string') return node;
+
+        if (node.name.endsWith('()') || node.name.match(/^<\w+ \/>$/))
+          node.name = <code className="text-[13px]">{node.name}</code>;
+        return node;
+      },
+    },
+  };
+}
 
 export const blog = loader(createMDXSource(blogPosts), {
   baseUrl: '/blog',
