@@ -28,9 +28,16 @@ export function transformerTwoslash(
 ): ShikiTransformer {
   const ignoreClass = 'nd-copy-ignore';
 
-  function getInstance() {
-    cachedInstance ??= createTwoslasher(options.twoslashOptions);
-    return cachedInstance;
+  // lazy load Twoslash instance so it works on serverless platforms
+  function lazyInstance(): TwoslashInstance {
+    function get() {
+      return (cachedInstance ??= createTwoslasher(options.twoslashOptions));
+    }
+
+    const wrapper: TwoslashInstance = (...args) => get()(...args);
+
+    wrapper.getCacheMap = () => get().getCacheMap();
+    return wrapper;
   }
 
   const renderer = rendererRich({
@@ -109,8 +116,7 @@ export function transformerTwoslash(
     return result;
   };
   return createTransformerFactory(
-    // lazy load Twoslash instance so it works on serverless platforms
-    ((...args) => getInstance()(...args)) as TwoslashInstance,
+    lazyInstance(),
     renderer,
   )({
     explicitTrigger: true,
