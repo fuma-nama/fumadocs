@@ -138,6 +138,7 @@
     "@next/eslint-plugin-next": "16.0.1",
     "@tailwindcss/cli": "^4.1.16",
     "@types/lodash.merge": "^4.6.9",
+    "@types/node": "^24.10.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "eslint-config-custom": "workspace:*",
