@@ -137,12 +137,9 @@ export function SelectTabTrigger({
 }
 
 export function APIExampleSelector() {
-  const {
-    example: key,
-    setExample: setKey,
-    examples,
-    client: { APIExampleSelector: Override } = {},
-  } = useOperationContext();
+  const { example: key, setExample: setKey, examples } = useOperationContext();
+  const { APIExampleSelector: Override } =
+    useApiContext().client.operation ?? {};
 
   if (Override) {
     return <Override items={examples} value={key} onValueChange={setKey} />;

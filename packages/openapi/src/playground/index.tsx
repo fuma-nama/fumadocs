@@ -68,7 +68,6 @@ export async function APIPlayground({ path, method, ctx }: APIPlaygroundProps) {
         : undefined,
     references: context.references,
     proxyUrl: ctx.proxyUrl,
-    ...ctx.client?.playground,
   };
 
   return <ClientLazy {...props} />;

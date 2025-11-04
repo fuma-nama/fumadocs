@@ -24,7 +24,7 @@ import {
   useForm,
   useFormContext,
 } from 'react-hook-form';
-import { useApiContext, useServerSelectContext } from '@/ui/contexts/api';
+import { useApiContext } from '@/ui/contexts/api';
 import type { FetchResult } from '@/playground/fetcher';
 import {
   FieldInput,
@@ -74,6 +74,7 @@ import { labelVariants } from '@/ui/components/input';
 import type { ParsedSchema } from '@/utils/schema';
 import type { RequestData } from '@/requests/types';
 import ServerSelect from './components/server-select';
+import { useStorageKey } from '@/ui/client/storage-key';
 
 interface FormValues {
   path: Record<string, unknown>;
@@ -97,9 +98,7 @@ export interface CustomField<TName extends FieldPath<FormValues>, Info> {
   }) => ReactElement;
 }
 
-export interface ClientProps
-  extends HTMLAttributes<HTMLFormElement>,
-    PlaygroundClientOptions {
+export interface ClientProps extends HTMLAttributes<HTMLFormElement> {
   route: string;
   method: string;
   parameters?: ParameterField[];
@@ -160,21 +159,28 @@ export default function Client({
   fields,
   references,
   proxyUrl,
-  components: { ResultDisplay = DefaultResultDisplay } = {},
-  requestTimeout = 10,
-  transformAuthInputs,
   ...rest
 }: ClientProps) {
-  const { server } = useServerSelectContext();
   const {
     example: exampleId,
     examples,
     setExampleData,
   } = useOperationContext();
+  const storageKeys = useStorageKey();
   const fieldInfoMap = useMemo(() => new Map<string, FieldInfo>(), []);
-  const { mediaAdapters } = useApiContext();
+  const {
+    mediaAdapters,
+    serverRef,
+    client: {
+      playground: {
+        components: { ResultDisplay = DefaultResultDisplay } = {},
+        requestTimeout = 10,
+        transformAuthInputs,
+      } = {},
+    },
+  } = useApiContext();
   const [securityId, setSecurityId] = useState(0);
-  const { inputs, mapInputs } = useAuthInputs(
+  const { inputs, mapInputs, initAuthValues } = useAuthInputs(
     securities[securityId],
     transformAuthInputs,
   );
@@ -198,6 +204,7 @@ export default function Client({
   });
 
   const testQuery = useQuery(async (input: FormValues) => {
+    const targetServer = serverRef.current;
     const fetcher = await import('./fetcher').then((mod) =>
       mod.createBrowserFetcher(mediaAdapters, requestTimeout),
     );
@@ -211,7 +218,9 @@ export default function Client({
     return fetcher.fetch(
       joinURL(
         withBase(
-          server ? resolveServerUrl(server.url, server.variables) : '/',
+          targetServer
+            ? resolveServerUrl(targetServer.url, targetServer.variables)
+            : '/',
           window.location.origin,
         ),
         resolveRequestData(route, input._encoded),
@@ -229,7 +238,7 @@ export default function Client({
 
       if (value) {
         localStorage.setItem(
-          getAuthFieldStorageKey(item),
+          storageKeys.AuthField(item),
           JSON.stringify(value),
         );
       }
@@ -268,14 +277,14 @@ export default function Client({
   }, []);
 
   useEffect(() => {
-    form.reset(initAuthValues(defaultValues, inputs));
+    form.reset(initAuthValues(defaultValues));
 
     return () => fieldInfoMap.clear();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- ignore other parts
   }, [defaultValues]);
 
   useEffect(() => {
-    form.reset((values) => initAuthValues(values, inputs));
+    form.reset((values) => initAuthValues(values));
 
     return () => {
       form.reset((values) => {
@@ -549,6 +558,7 @@ function useAuthInputs(
   securities?: SecurityEntry[],
   transform?: (fields: AuthField[]) => AuthField[],
 ) {
+  const storageKeys = useStorageKey();
   const inputs = useMemo(() => {
     const result: AuthField[] = [];
     if (!securities) return result;
@@ -704,29 +714,25 @@ function useAuthInputs(
     return cloned;
   };
 
-  return { inputs, mapInputs };
-}
+  const initAuthValues = (values: FormValues) => {
+    for (const item of inputs) {
+      const stored = localStorage.getItem(storageKeys.AuthField(item));
 
-function getAuthFieldStorageKey(field: AuthField) {
-  return '__fumadocs_auth' + (field.original?.id ?? field.fieldName);
-}
-
-function initAuthValues(values: FormValues, inputs: AuthField[]) {
-  for (const item of inputs) {
-    const stored = localStorage.getItem(getAuthFieldStorageKey(item));
-
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      if (typeof parsed === typeof item.defaultValue) {
-        set(values, item.fieldName, parsed);
-        continue;
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (typeof parsed === typeof item.defaultValue) {
+          set(values, item.fieldName, parsed);
+          continue;
+        }
       }
+
+      set(values, item.fieldName, item.defaultValue);
     }
 
-    set(values, item.fieldName, item.defaultValue);
-  }
+    return values;
+  };
 
-  return values;
+  return { inputs, mapInputs, initAuthValues };
 }
 
 function renderCustomField(

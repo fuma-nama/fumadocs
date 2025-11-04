@@ -106,15 +106,6 @@ export interface CreateAPIPageOptions {
   };
 
   client?: APIPageClientOptions;
-
-  /**
-   * Custom localStorage key for server selection.
-   *
-   * Useful when using multiple OpenAPI instances to prevent state conflicts.
-   *
-   * @defaultValue 'apiBaseUrl'
-   */
-  storageKey?: string;
 }
 
 export interface ApiPageProps {
@@ -181,7 +172,7 @@ export function createAPIPage(
       slugger: new Slugger(),
     };
 
-    return <APIPage {...props} ctx={ctx} storageKey={options.storageKey} />;
+    return <APIPage {...props} ctx={ctx} />;
   };
 }
 
@@ -189,9 +180,8 @@ function Root({
   children,
   className,
   ctx,
-  storageKey,
   ...props
-}: { ctx: RenderContext; storageKey?: string } & ComponentProps<'div'>) {
+}: { ctx: RenderContext } & ComponentProps<'div'>) {
   const mediaAdapters: Record<string, MediaAdapter> = {};
   for (const k in ctx.mediaAdapters) {
     const adapter = ctx.mediaAdapters[k];
@@ -205,7 +195,7 @@ function Root({
         mediaAdapters={mediaAdapters}
         servers={ctx.servers}
         shikiOptions={ctx.shikiOptions}
-        storageKey={storageKey}
+        client={ctx.client ?? {}}
       >
         {children}
       </ApiProvider>
@@ -218,15 +208,13 @@ async function APIPage({
   operations,
   webhooks,
   ctx,
-  storageKey,
 }: Omit<ApiPageProps, 'document'> & {
   ctx: RenderContext;
-  storageKey?: string;
 }) {
   const { dereferenced } = ctx.schema;
 
   return (
-    <Root ctx={ctx} storageKey={storageKey}>
+    <Root ctx={ctx}>
       {operations?.map((item) => {
         const pathItem = dereferenced.paths?.[item.path];
         if (!pathItem)
