@@ -16,8 +16,6 @@ import {
   HoverCardTrigger,
 } from '@/components/ui/hover-card';
 import Link from 'fumadocs-core/link';
-import { AutoTypeTable } from 'fumadocs-typescript/ui';
-import { createGenerator } from 'fumadocs-typescript';
 import { getPageTreePeers } from 'fumadocs-core/page-tree';
 import { Card, Cards } from 'fumadocs-ui/components/card';
 import { getMDXComponents } from '@/mdx-components';
@@ -28,8 +26,8 @@ import { Customisation } from '@/components/preview/customisation';
 import { DocsBody, DocsPage } from 'fumadocs-ui/page';
 import { NotFound } from '@/components/not-found';
 import { getSuggestions } from '@/app/docs/[...slug]/suggestions';
-import { APIPage } from '@/components/api-page';
 import { PathUtils } from 'fumadocs-core/source';
+import { AutoTypeTable } from '@/components/auto-type-table';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -39,8 +37,6 @@ function PreviewRenderer({ preview }: { preview: string }): ReactNode {
 
   return null;
 }
-
-const generator = createGenerator();
 
 export const revalidate = false;
 
@@ -54,6 +50,7 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
     );
 
   if (page.data.type === 'openapi') {
+    const { APIPage } = await import('@/components/api-page');
     return (
       <DocsPage>
         <h1 className="text-[1.75em] font-semibold">{page.data.title}</h1>
@@ -122,9 +119,7 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
             Banner,
             Mermaid,
             TypeTable,
-            AutoTypeTable: (props) => (
-              <AutoTypeTable generator={generator} {...props} />
-            ),
+            AutoTypeTable,
             Wrapper,
             blockquote: Callout as unknown as FC<ComponentProps<'blockquote'>>,
             DocsCategory: ({ url }) => {
