@@ -76,7 +76,7 @@ export const APIPage = createAPIPage(openapi, {
 // components/api-page.tsx
 import { openapi } from '@/lib/openapi';
 import { createAPIPage } from 'fumadocs-openapi/ui';
-import client from "./api-page.client"
+import client from './api-page.client';
 
 export const APIPage = createAPIPage(openapi, {
   client,
@@ -99,5 +99,33 @@ export default defineClientConfig({
       },
     ],
   },
+});
+```
+
+4. Prefer client config for `adapter.client`:
+
+Forwarding client-side adapters is also done with `api-page.client.tsx`:
+
+```tsx
+// components/api-page.tsx
+import { openapi } from '@/lib/openapi';
+import { createAPIPage } from 'fumadocs-openapi/ui';
+import { adapters } from './my-media-adapters';
+import client from './api-page.client';
+
+export const APIPage = createAPIPage(openapi, {
+  client,
+  mediaAdapters: adapters,
+});
+```
+
+```tsx
+// components/api-page.client.tsx
+'use client';
+import { defineClientConfig } from 'fumadocs-openapi/ui/client';
+import { adapters } from './my-media-adapters';
+
+export default defineClientConfig({
+  mediaAdapters: adapters,
 });
 ```

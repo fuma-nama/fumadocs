@@ -320,7 +320,7 @@ export default function PlaygroundClient({
           onSubmit={onSubmit}
         >
           <ServerSelect />
-          <div className="flex flex-row items-center gap-2 text-sm p-3 pb-0">
+          <div className="flex flex-row items-center gap-2 text-sm p-3 not-last:pb-0">
             <MethodLabel>{method}</MethodLabel>
             <Route route={route} className="flex-1" />
             <button
