@@ -7,8 +7,10 @@ import {
   type ReactNode,
   type RefObject,
   useContext,
+  useEffect,
   useMemo,
   useRef,
+  useState,
 } from 'react';
 import { cn } from '@/utils/cn';
 import { useCopyButton } from '@/utils/use-copy-button';
@@ -89,6 +91,24 @@ export function CodeBlock({
 }: CodeBlockProps) {
   const inTab = useContext(TabsContext) !== null;
   const areaRef = useRef<HTMLDivElement>(null);
+  const [isScrollable, setIsScrollable] = useState(false);
+
+  useEffect(() => {
+    const element = areaRef.current;
+    if (!element) return;
+
+    const checkScrollable = () => {
+      const hasVerticalScroll = element.scrollHeight > element.clientHeight;
+      const hasHorizontalScroll = element.scrollWidth > element.clientWidth;
+      setIsScrollable(hasVerticalScroll || hasHorizontalScroll);
+    };
+
+    checkScrollable();
+    const observer = new ResizeObserver(checkScrollable);
+    observer.observe(element);
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <figure
@@ -147,6 +167,11 @@ export function CodeBlock({
             ...viewportProps.style,
           } as object
         }
+        {...(isScrollable && {
+          tabIndex: 0,
+          role: 'region',
+          'aria-label': 'Code block (use arrow keys to scroll)',
+        })}
       >
         {children}
       </div>
