@@ -133,11 +133,11 @@ export function Header({
             <Languages className="size-5" />
           </LanguageToggle>
         ) : null}
-        <div className="flex flex-row items-center empty:hidden">
+        <ul className="flex flex-row items-center empty:hidden">
           {navItems.filter(isSecondary).map((item, i) => (
             <NavbarLinkItem key={i} item={item} />
           ))}
-        </div>
+        </ul>
       </div>
       <ul className="flex flex-row items-center ms-auto -me-1.5 lg:hidden">
         {searchToggle.enabled !== false &&
@@ -151,12 +151,12 @@ export function Header({
               buttonVariants({
                 size: 'icon',
                 color: 'ghost',
-                className: 'group',
+                className: 'group [&_svg]:size-5.5',
               }),
             )}
             enableHover={nav.enableHoverToOpen}
           >
-            <ChevronDown className="!size-5.5 transition-transform duration-300 group-data-[state=open]:rotate-180" />
+            <ChevronDown className="transition-transform duration-300 group-data-[state=open]:rotate-180" />
           </MenuTrigger>
           <MenuContent className="sm:flex-row sm:items-center sm:justify-end">
             {menuItems

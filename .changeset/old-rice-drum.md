@@ -1,6 +1,6 @@
 ---
-'fumadocs-core': minor
-'fumadocs-ui': minor
+'fumadocs-core': patch
+'fumadocs-ui': patch
 ---
 
-Add support for using a custom GitHub API base url
+Add support for using a custom GitHub API base URL
