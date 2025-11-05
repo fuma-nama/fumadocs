@@ -90,6 +90,10 @@
 }
 
 .twoslash .twoslash-hover {
+  /* Reset button styles to make it behave like inline text */
+  all: unset;
+
+  /* Restore the original hover indicator styles */
   position: relative;
   transition: border 300ms;
   border-bottom: 1px dotted;
