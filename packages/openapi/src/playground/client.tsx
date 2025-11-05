@@ -8,6 +8,7 @@ import {
   useEffect,
   useMemo,
   useState,
+  useEffectEvent,
 } from 'react';
 import type {
   FieldPath,
@@ -60,7 +61,6 @@ import {
   useResolvedSchema,
 } from '@/playground/schema';
 import { useOperationContext } from '@/ui/contexts/operation';
-import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 import {
   Select,
   SelectContent,

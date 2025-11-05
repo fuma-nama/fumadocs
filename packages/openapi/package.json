@@ -95,8 +95,8 @@
   "peerDependencies": {
     "@scalar/api-client-react": "*",
     "@types/react": "*",
-    "react": "18.x.x || 19.x.x",
-    "react-dom": "18.x.x || 19.x.x"
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
   },
   "peerDependenciesMeta": {
     "@types/react": {

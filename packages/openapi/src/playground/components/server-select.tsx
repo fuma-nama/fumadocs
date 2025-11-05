@@ -8,7 +8,12 @@ import {
   SelectValue,
 } from '@/ui/components/select';
 import { Input, labelVariants } from '@/ui/components/input';
-import { type HTMLAttributes, useEffect, useState } from 'react';
+import {
+  type HTMLAttributes,
+  useEffect,
+  useState,
+  useEffectEvent,
+} from 'react';
 import { cn } from 'fumadocs-ui/utils/cn';
 import {
   Dialog,
@@ -20,7 +25,6 @@ import {
 } from '@/ui/components/dialog';
 import { resolveServerUrl, withBase } from '@/utils/url';
 import { FormProvider, useController, useForm } from 'react-hook-form';
-import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 import type { ServerVariableObject } from '@/types';
 import type { NoReference } from '@/utils/schema';
 
