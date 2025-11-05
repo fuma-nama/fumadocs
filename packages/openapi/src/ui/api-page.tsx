@@ -23,9 +23,9 @@ import { ApiProviderLazy } from './contexts/api.lazy';
 import { Heading } from 'fumadocs-ui/components/heading';
 import {
   rehypeCode,
-  remarkGfm,
   type RehypeCodeOptions,
-} from 'fumadocs-core/mdx-plugins';
+} from 'fumadocs-core/mdx-plugins/rehype-code';
+import { remarkGfm } from 'fumadocs-core/mdx-plugins/remark-gfm';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { remark } from 'remark';
 import remarkRehype from 'remark-rehype';

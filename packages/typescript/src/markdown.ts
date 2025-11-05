@@ -1,10 +1,10 @@
 import type { ElementContent, Nodes } from 'hast';
 import { remark } from 'remark';
+import { remarkGfm } from 'fumadocs-core/mdx-plugins/remark-gfm';
 import {
   rehypeCode,
   type RehypeCodeOptions,
-  remarkGfm,
-} from 'fumadocs-core/mdx-plugins';
+} from 'fumadocs-core/mdx-plugins/rehype-code';
 import remarkRehype from 'remark-rehype';
 import { highlightHast } from 'fumadocs-core/highlight';
 
