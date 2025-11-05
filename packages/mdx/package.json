@@ -94,7 +94,7 @@
     "picocolors": "^1.1.1",
     "picomatch": "^4.0.3",
     "remark-mdx": "^3.1.1",
-    "tinyexec": "^1.0.1",
+    "tinyexec": "^1.0.2",
     "tinyglobby": "^0.2.15",
     "unified": "^11.0.5",
     "unist-util-remove-position": "^5.0.0",
@@ -123,7 +123,7 @@
     "rollup": "^4.52.5",
     "tsconfig": "workspace:*",
     "vfile": "^6.0.3",
-    "vite": "^7.1.12",
+    "vite": "^7.2.0",
     "webpack": "^5.102.1"
   },
   "peerDependencies": {

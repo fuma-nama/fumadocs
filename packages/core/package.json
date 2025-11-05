@@ -129,7 +129,7 @@
   },
   "devDependencies": {
     "@mdx-js/mdx": "^3.1.1",
-    "@mixedbread/sdk": "^0.37.0",
+    "@mixedbread/sdk": "^0.38.0",
     "@orama/core": "^1.2.13",
     "@tanstack/react-router": "^1.134.12",
     "@types/estree-jsx": "^1.0.5",

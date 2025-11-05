@@ -11,6 +11,8 @@ export type ProcessedDocument = {
    */
   dereferenced: NoReference<Document>;
 
+  _internal_idToSchema: () => Map<string, object>;
+
   /**
    * Get raw object from dereference object
    */
@@ -61,18 +63,22 @@ export async function processDocument(
    * Dereferenced value and its original `$ref` value
    */
   const dereferenceMap = new WeakMap<object, string>();
+  const serializable = new Map<string, object>();
 
   return {
-    dereferenced: (
-      await dereference(document, {
-        throwOnError: true,
-        onDereference({ schema, ref }) {
-          dereferenceMap.set(schema, ref);
-        },
-      })
-    ).schema as NoReference<Document>,
+    dereferenced: dereference(document, {
+      throwOnError: true,
+      onDereference({ schema, ref }) {
+        serializable.set(ref, schema);
+        dereferenceMap.set(schema, ref);
+      },
+    }).schema as NoReference<Document>,
     getRawRef(obj) {
       return dereferenceMap.get(obj);
+    },
+
+    _internal_idToSchema() {
+      return serializable;
     },
     bundled: document as Document,
   };

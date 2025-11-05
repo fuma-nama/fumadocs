@@ -52,10 +52,6 @@ When set to `custom`, you can pass a function to fully customise the generation 
 import { generateFiles, OperationOutput } from 'fumadocs-openapi';
 
 void generateFiles({
-  // ---cut-start---
-  input: {} as any,
-  output: {} as any,
-  // ---cut-end---
   per: 'custom',
   toPages(builder) {
     const { dereferenced } = builder.document;
@@ -80,6 +76,15 @@ void generateFiles({
     }
   },
 });
+```
+
+When set to `tag`, adding `x-displayName` to the tag definition can control the title of each page.
+
+```yaml title="openapi.yaml"
+tags:
+  - name: test
+    description: this is a tag.
+    x-displayName: My Test Name
 ```
 
 ### `groupBy`
@@ -216,15 +221,4 @@ void generateFiles({
   // Or disable comments
   addGeneratedComment: false,
 });
-```
-
-### Tag Display Name
-
-Adding `x-displayName` to OpenAPI Schema can control the display name of your tags.
-
-```yaml title="openapi.yaml"
-tags:
-  - name: test
-    description: this is a tag.
-    x-displayName: My Test Name
 ```

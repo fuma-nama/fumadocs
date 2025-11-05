@@ -336,7 +336,7 @@ async function ResponseAccordion({
           if (generateTypeScriptSchema) {
             ts = await generateTypeScriptSchema(operation, status);
           } else if (generateTypeScriptSchema === undefined && schema) {
-            ts = await getTypescriptSchema(ctx.schema);
+            ts = await getTypescriptSchema(schema, ctx);
           }
 
           return (
