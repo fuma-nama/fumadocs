@@ -1,7 +1,8 @@
 'use client';
 import type { PlaygroundClientOptions } from '@/playground/client';
-import type { OperationClientOptions } from '../operation/client';
 import type { MediaAdapter } from '@/requests/media/adapter';
+import type { APIExampleItem } from '../operation/example-panel';
+import type { FC } from 'react';
 
 export interface APIPageClientOptions {
   playground?: PlaygroundClientOptions;
@@ -20,6 +21,15 @@ export interface APIPageClientOptions {
    * Support other media types (for client-side serialization)
    */
   mediaAdapters?: Record<string, MediaAdapter>;
+}
+
+export interface OperationClientOptions {
+  APIExampleSelector?: FC<{
+    items: APIExampleItem[];
+
+    value: string | undefined;
+    onValueChange: (id: string) => void;
+  }>;
 }
 
 export function defineClientConfig(

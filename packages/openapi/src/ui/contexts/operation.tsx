@@ -7,7 +7,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import type { APIExampleItem } from '@/ui/operation/api-example';
+import type { APIExampleItem } from '@/ui/operation/example-panel';
 import type { RawRequestData, RequestData } from '@/requests/types';
 
 export type ExampleUpdateListener = (

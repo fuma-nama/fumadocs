@@ -14,7 +14,7 @@ import {
 import { idToTitle } from '@/utils/id-to-title';
 import { Markdown } from '../components/server/markdown';
 import { Schema } from '../schema';
-import { APIExample, getAPIExamples } from '@/ui/operation/api-example';
+import { APIExample, getAPIExamples } from '@/ui/operation/example-panel';
 import { MethodLabel } from '@/ui/components/method-label';
 import { getTypescriptSchema } from '@/utils/get-typescript-schema';
 import {
@@ -33,7 +33,7 @@ import {
 import { isMediaTypeSupported } from '@/requests/media/adapter';
 import { cn } from 'fumadocs-ui/utils/cn';
 import { APIPlayground } from '@/playground';
-import { OperationProvider } from '../contexts/operation';
+import { OperationProviderLazy } from '../contexts/operation.lazy';
 
 const ParamTypes = {
   path: 'Path Parameters',
@@ -258,7 +258,7 @@ export function Operation({
 
     return (
       <OperationContainer>
-        <OperationProvider
+        <OperationProviderLazy
           defaultExampleId={
             method['x-exclusiveCodeSample'] ?? method['x-selectedCodeSample']
           }
@@ -267,7 +267,7 @@ export function Operation({
         >
           {info}
           <APIExample method={method} ctx={ctx} />
-        </OperationProvider>
+        </OperationProviderLazy>
       </OperationContainer>
     );
   } else {

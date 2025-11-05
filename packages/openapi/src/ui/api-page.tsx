@@ -13,8 +13,11 @@ import type {
 import type { OpenAPIServer } from '@/server';
 import type { APIPageClientOptions } from './client';
 import { cn } from 'fumadocs-ui/utils/cn';
-import type { CodeUsageGenerator, ResponseTab } from './operation/api-example';
-import { ApiProvider } from './contexts/api';
+import type {
+  CodeUsageGenerator,
+  ResponseTab,
+} from './operation/example-panel';
+import { ApiProviderLazy } from './contexts/api.lazy';
 import { Heading } from 'fumadocs-ui/components/heading';
 
 type Awaitable<T> = T | Promise<T>;
@@ -195,13 +198,13 @@ function Root({
 }: { ctx: RenderContext } & ComponentProps<'div'>) {
   return (
     <div className={cn('flex flex-col gap-24 text-sm', className)} {...props}>
-      <ApiProvider
+      <ApiProviderLazy
         servers={ctx.servers}
         shikiOptions={ctx.shikiOptions}
         client={ctx.client ?? {}}
       >
         {children}
-      </ApiProvider>
+      </ApiProviderLazy>
     </div>
   );
 }

@@ -10,7 +10,7 @@ import {
   type ParsedSchema,
 } from '@/utils/schema';
 import { type PlaygroundClientProps } from './client';
-import { ClientLazy } from '@/ui/lazy';
+import { ClientLazy } from './lazy';
 
 export type ParameterField = NoReference<ParameterObject> & {
   schema: ParsedSchema;

@@ -18,7 +18,7 @@ import {
   AccordionItem,
   Accordions,
   AccordionTrigger,
-} from '../components/accordion';
+} from '@/ui/components/accordion';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import {
   CodeBlockTab,
@@ -26,7 +26,7 @@ import {
   CodeBlockTabsList,
   CodeBlockTabsTrigger,
 } from 'fumadocs-ui/components/codeblock';
-import { APIExampleSelector, APIExampleUsageTab } from './client';
+import { APIExampleSelectorLazy, APIExampleUsageTabLazy } from './lazy';
 
 /**
  * Generate code example for given programming language
@@ -168,7 +168,7 @@ export async function APIExample({
         </CodeBlockTabsList>
         {generators.map((item) => (
           <CodeBlockTab key={item.id} value={item.id}>
-            <APIExampleUsageTab {...item} />
+            <APIExampleUsageTabLazy {...item} />
           </CodeBlockTab>
         ))}
       </CodeBlockTabs>
@@ -197,7 +197,9 @@ export async function APIExample({
 
   return renderAPIExampleLayout(
     {
-      selector: method['x-exclusiveCodeSample'] ? null : <APIExampleSelector />,
+      selector: method['x-exclusiveCodeSample'] ? null : (
+        <APIExampleSelectorLazy />
+      ),
       usageTabs: await renderAPIExampleUsageTabs(generators, ctx),
       responseTabs: <ResponseTabs operation={method} ctx={ctx} />,
     },

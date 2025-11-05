@@ -5,7 +5,7 @@ import type { ProcessedDocument } from '@/utils/process-document';
 import type { MediaAdapter } from '@/requests/media/adapter';
 import type { OpenAPIOptions } from '@/server';
 import type { CreateAPIPageOptions } from './ui/api-page';
-import type { CodeUsageGenerator } from './ui/operation/api-example';
+import type { CodeUsageGenerator } from './ui/operation/example-panel';
 import type { ReactNode } from 'react';
 
 export type Document = V3_1.Document;

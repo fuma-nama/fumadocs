@@ -4,11 +4,8 @@ import type { RenderContext } from '@/types';
 import { FormatFlags, schemaToString } from '@/utils/schema-to-string';
 import { Markdown } from '@/ui/components/server/markdown';
 import { combineSchema } from '@/utils/combine-schema';
-import {
-  SchemaUI,
-  type SchemaUIProps,
-  SchemaUIProvider,
-} from '@/ui/schema/client';
+import type { SchemaUIProps } from '@/ui/schema/client';
+import { SchemaUILazy, SchemaUIProviderLazy } from '@/ui/schema/lazy';
 
 export interface FieldBase {
   description?: ReactNode;
@@ -70,15 +67,15 @@ export function Schema(
   const data = generateSchemaUI(props);
 
   return (
-    <SchemaUIProvider
+    <SchemaUIProviderLazy
       value={{
         ...data,
         readOnly: props.readOnly,
         writeOnly: props.writeOnly,
       }}
     >
-      <SchemaUI name={props.name} required={props.required} as={props.as} />
-    </SchemaUIProvider>
+      <SchemaUILazy name={props.name} required={props.required} as={props.as} />
+    </SchemaUIProviderLazy>
   );
 }
 

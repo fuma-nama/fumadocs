@@ -4,7 +4,7 @@ import * as Go from './go';
 import * as Python from './python';
 import * as Java from './java';
 import * as CSharp from './csharp';
-import type { CodeUsageGenerator } from '@/ui/operation/api-example';
+import type { CodeUsageGenerator } from '@/ui/operation/example-panel';
 
 export const defaultSamples: CodeUsageGenerator[] = [
   {
