@@ -2,7 +2,6 @@ import type { ReactNode } from 'react';
 import type { ResolvedSchema } from '@/utils/schema';
 import type { RenderContext } from '@/types';
 import { FormatFlags, schemaToString } from '@/utils/schema-to-string';
-import { Markdown } from '@/ui/components/server/markdown';
 import { combineSchema } from '@/utils/combine-schema';
 import type { SchemaUIProps } from '@/ui/schema/client';
 import { SchemaUILazy, SchemaUIProviderLazy } from '@/ui/schema/lazy';
@@ -190,7 +189,7 @@ function generateSchemaUI({ ctx, root }: SchemaUIOptions): SchemaUIData {
     }
 
     return {
-      description: schema.description && <Markdown text={schema.description} />,
+      description: schema.description && ctx.renderMarkdown(schema.description),
       infoTags: generateInfoTags(schema),
       typeName: schemaToString(schema, ctx.schema),
       aliasName: schemaToString(schema, ctx.schema, FormatFlags.UseAlias),

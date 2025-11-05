@@ -12,7 +12,6 @@ import {
   type ResolvedSchema,
 } from '@/utils/schema';
 import { idToTitle } from '@/utils/id-to-title';
-import { Markdown } from '../components/server/markdown';
 import { Schema } from '../schema';
 import { APIExample, getAPIExamples } from '@/ui/operation/example-panel';
 import { MethodLabel } from '@/ui/components/method-label';
@@ -76,7 +75,7 @@ export function Operation({
     headNode = (
       <>
         {ctx.renderHeading(headingLevel, title)}
-        {method.description ? <Markdown text={method.description} /> : null}
+        {method.description && ctx.renderMarkdown(method.description)}
       </>
     );
     headingLevel++;
@@ -94,7 +93,7 @@ export function Operation({
             className="mb-4"
           />
         </div>
-        {body.description && <Markdown text={body.description} />}
+        {body.description && ctx.renderMarkdown(body.description)}
         {contentTypes.map(([type, content]) => {
           if (!isMediaTypeSupported(type, ctx.mediaAdapters)) {
             throw new Error(`Media type ${type} is not supported (in ${path})`);
@@ -326,7 +325,7 @@ async function ResponseAccordion({
       <AccordionContent className="ps-4.5">
         {response.description && (
           <div className="prose-no-margin">
-            <Markdown text={response.description} />
+            {ctx.renderMarkdown(response.description)}
           </div>
         )}
         {contentTypes?.map(async ([type, resType]) => {
@@ -411,6 +410,7 @@ function WebhookCallback({
 function AuthScheme({
   scheme: schema,
   scopes,
+  ctx,
 }: {
   scheme: SecuritySchemeObject;
   scopes: string[];
@@ -434,7 +434,7 @@ function AuthScheme({
         }
         required
       >
-        {schema.description && <Markdown text={schema.description} />}
+        {schema.description && ctx.renderMarkdown(schema.description)}
         <p>
           In: <code>header</code>
         </p>
@@ -446,7 +446,7 @@ function AuthScheme({
   if (schema.type === 'apiKey') {
     return (
       <Property name={schema.name} type="<token>">
-        {schema.description && <Markdown text={schema.description} />}
+        {schema.description && ctx.renderMarkdown(schema.description)}
         <p>
           In: <code>{schema.in}</code>
           {scopeElement}
@@ -458,7 +458,7 @@ function AuthScheme({
   if (schema.type === 'openIdConnect') {
     return (
       <Property name="OpenID Connect" type="<token>" required>
-        {schema.description && <Markdown text={schema.description} />}
+        {schema.description && ctx.renderMarkdown(schema.description)}
         {scopeElement}
       </Property>
     );

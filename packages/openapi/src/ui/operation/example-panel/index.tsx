@@ -1,7 +1,5 @@
 import type { MethodInformation, RenderContext, ResponseObject } from '@/types';
 import type { ReactNode } from 'react';
-import { Markdown } from '@/ui/components/server/markdown';
-import { CodeBlock } from '@/ui/components/server/codeblock';
 import { getPreferredType, type NoReference } from '@/utils/schema';
 import { getRequestData } from '@/ui/operation/get-request-data';
 import { sample } from 'openapi-sampler';
@@ -293,12 +291,11 @@ function renderResponseTabsDefault(
                 <AccordionTrigger>{example.label}</AccordionTrigger>
               </AccordionHeader>
               <AccordionContent className="prose-no-margin">
-                {example.description && <Markdown text={example.description} />}
-                <CodeBlock
-                  lang="json"
-                  code={JSON.stringify(example.sample, null, 2)}
-                  ctx={ctx}
-                />
+                {example.description && ctx.renderMarkdown(example.description)}
+                {ctx.renderCodeBlock(
+                  'json',
+                  JSON.stringify(example.sample, null, 2),
+                )}
               </AccordionContent>
             </AccordionItem>
           ))}
@@ -309,12 +306,8 @@ function renderResponseTabsDefault(
 
       slot = (
         <>
-          {example.description && <Markdown text={example.description} />}
-          <CodeBlock
-            lang="json"
-            code={JSON.stringify(example.sample, null, 2)}
-            ctx={ctx}
-          />
+          {example.description && ctx.renderMarkdown(example.description)}
+          {ctx.renderCodeBlock('json', JSON.stringify(example.sample, null, 2))}
         </>
       );
     }

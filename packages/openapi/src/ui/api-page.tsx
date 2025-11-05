@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- rehype-react without types */
 import Slugger from 'github-slugger';
 import { Operation } from '@/ui/operation';
 import type { MethodInformation, RenderContext } from '@/types';
@@ -6,9 +7,10 @@ import type { OpenAPIV3_1 } from 'openapi-types';
 import type { ProcessedDocument } from '@/utils/process-document';
 import { defaultAdapters, MediaAdapter } from '@/requests/media/adapter';
 import { ComponentProps, FC, ReactNode } from 'react';
-import type {
-  HighlightOptionsCommon,
-  HighlightOptionsThemes,
+import {
+  highlight,
+  type HighlightOptionsCommon,
+  type HighlightOptionsThemes,
 } from 'fumadocs-core/highlight';
 import type { OpenAPIServer } from '@/server';
 import type { APIPageClientOptions } from './client';
@@ -19,6 +21,17 @@ import type {
 } from './operation/example-panel';
 import { ApiProviderLazy } from './contexts/api.lazy';
 import { Heading } from 'fumadocs-ui/components/heading';
+import {
+  rehypeCode,
+  remarkGfm,
+  type RehypeCodeOptions,
+} from 'fumadocs-core/mdx-plugins';
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+import { remark } from 'remark';
+import remarkRehype from 'remark-rehype';
+import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
+import * as JsxRuntime from 'react/jsx-runtime';
+import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
 
 type Awaitable<T> = T | Promise<T>;
 
@@ -165,6 +178,26 @@ export function createAPIPage(
         : [{ url: '/' }];
 
     const slugger = new Slugger();
+    const processor = remark()
+      .use(remarkGfm)
+      .use(remarkRehype)
+      .use(rehypeCode, {
+        langs: [],
+        lazy: true,
+      } satisfies Partial<RehypeCodeOptions>)
+      .use(rehypeReact);
+
+    function rehypeReact(this: any) {
+      this.compiler = (tree: any, file: any) => {
+        return toJsxRuntime(tree, {
+          development: false,
+          filePath: file.path,
+          ...JsxRuntime,
+          components: defaultMdxComponents,
+        });
+      };
+    }
+
     const ctx: RenderContext = {
       schema: processed,
       proxyUrl: server.options.proxyUrl,
@@ -183,6 +216,24 @@ export function createAPIPage(
             {text}
           </Heading>
         );
+      },
+      async renderMarkdown(text) {
+        const out = await processor.process({
+          value: text,
+        });
+
+        return out.result as ReactNode;
+      },
+      async renderCodeBlock(lang, code) {
+        const rendered = await highlight(code, {
+          lang,
+          ...options.shikiOptions,
+          components: {
+            pre: (props) => <Pre {...props} />,
+          },
+        });
+
+        return <CodeBlock className="my-0">{rendered}</CodeBlock>;
       },
     };
 
