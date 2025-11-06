@@ -87,7 +87,9 @@ const PopupTrigger = forwardRef<
       asChild
       {...props}
     >
-      <button type="button" className="twoslash-hover">{children}</button>
+      <button type="button" className="twoslash-hover">
+        {children}
+      </button>
     </PopoverTrigger>
   );
 });

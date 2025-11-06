@@ -1,0 +1,221 @@
+---
+title: Fumadocs OpenAPI v10
+description: Introducing Fumadocs OpenAPI v10.
+author: Fuma Nama
+date: 2025-11-06
+---
+
+We are pleased to announce the release of Fumadocs OpenAPI v10.
+This major release focuses on enhancing customization capabilities and simplifying API surfaces, it is also an opportunity to drop older/deprecated APIs.
+
+We have introduced multiple breaking changes that require attention during upgrades.
+
+## Breaking Changes
+
+### Redesign of `createOpenAPI` Usage
+
+This redesign separates API page and server concerns, removes `disablePlayground` option in favor of `playground.enabled`, introduces client configuration support, and prefers client configs for adapters.
+
+1. **Isolation of API Page and Server:**
+
+   Previously, all options are located in `createOpenAPI()`.
+
+   ```ts title="lib/openapi.ts"
+   import { createOpenAPI } from 'fumadocs-openapi/server';
+   import path from 'node:path';
+
+   export const openapi = createOpenAPI({
+     input: [path.resolve('./scalar.yaml')],
+     proxyUrl: '/api/proxy',
+     mediaAdapters: {
+       /* adapters */
+     },
+     shikiOptions: {
+       /* options */
+     },
+   });
+   ```
+
+   Now, you need to separate API page components and the server declaration.
+
+   ```ts tab="lib/openapi.ts"
+   import { createOpenAPI } from 'fumadocs-openapi/server';
+   import path from 'node:path';
+
+   export const openapi = createOpenAPI({
+     input: [path.resolve('./scalar.yaml')],
+     proxyUrl: '/api/proxy',
+   });
+   ```
+
+   ```ts tab="components/api-page.tsx"
+   import { openapi } from '@/lib/openapi';
+   import { createAPIPage } from 'fumadocs-openapi/ui';
+
+   export const APIPage = createAPIPage(openapi, {
+     mediaAdapters: {
+       /* adapters */
+     },
+     shikiOptions: {
+       /* options */
+     },
+   });
+   ```
+
+2. **More Options for Playground:**
+   Use `playground.enabled` instead of `disablePlayground`.
+
+   ```typescript title="components/api-page.tsx"
+   export const APIPage = createAPIPage(openapi, {
+     playground: {
+       enabled: false,
+     },
+   });
+   ```
+
+3. **Client Configuration Support:**
+
+   The options are now split into server/client configs, some options are moved to the client-side config,
+
+   ```typescript tab="components/api-page.tsx"
+   import client from './api-page.client';
+
+   export const APIPage = createAPIPage(openapi, {
+     client,
+   });
+   ```
+
+   ```typescript tab="components/api-page.client.tsx"
+   'use client';
+   import { defineClientConfig } from 'fumadocs-openapi/ui/client';
+
+   export default defineClientConfig({
+     playground: {
+       transformAuthInputs: (inputs) => [
+         /* modified inputs */
+       ],
+     },
+   });
+   ```
+
+4. **Client-Side Media Adapters:**
+   Also forward your media adapters via client config.
+
+   ```typescript title="components/api-page.client.tsx"
+   'use client';
+   import { defineClientConfig } from 'fumadocs-openapi/ui/client';
+   import { adapters } from './my-media-adapters';
+
+   export default defineClientConfig({
+     mediaAdapters: adapters,
+   });
+   ```
+
+### Renaming Options
+
+The option `content.showExampleInFields` has been renamed to `schemaUI.showExample`.
+
+### Removal of Centralized `renderer` and `fields` APIs
+
+Fumadocs OpenAPI now prefers per-feature customizations, eliminating the centralized `renderer` API. Custom render functions are now specified directly in the `content` option when creating an API page.
+
+```tsx title="components/api-page.tsx"
+import { openapi } from '@/lib/openapi';
+import { createAPIPage } from 'fumadocs-openapi/ui';
+
+export const APIPage = createAPIPage(openapi, {
+  content: {
+    renderResponseTabs,
+    renderAPIExampleLayout,
+    renderAPIExampleUsageTabs,
+  },
+});
+```
+
+For migrating Playground `fields` options, utilize client-side render APIs:
+
+```tsx title="components/api-page.client.tsx"
+'use client';
+import { defineClientConfig } from 'fumadocs-openapi/ui/client';
+
+export default defineClientConfig({
+  playground: {
+    renderParameterField: (fieldName, field) => {
+      /* custom implementation */
+    },
+  },
+});
+```
+
+Additional layout customizations are available:
+
+```tsx title="components/api-page.tsx"
+import { openapi } from '@/lib/openapi';
+import { createAPIPage } from 'fumadocs-openapi/ui';
+
+export const APIPage = createAPIPage(openapi, {
+  content: {
+    renderResponseTabs: (tabs) => <div>{/* custom tabs */}</div>,
+    renderAPIExampleLayout: ({ selector, usageTabs, responseTabs }) => (
+      <div>{/* custom layout */}</div>
+    ),
+    renderAPIExampleUsageTabs: (generators) => <div>{/* custom tabs */}</div>,
+    renderPageLayout: ({ operations, webhooks }) => (
+      <div>{/* custom page */}</div>
+    ),
+    renderOperationLayout: (slots) => <div>{/* custom operation */}</div>,
+    renderWebhookLayout: ({
+      header,
+      authSchemes,
+      parameters,
+      body,
+      responses,
+      callbacks,
+    }) => <div>{/* custom webhook */}</div>,
+  },
+});
+```
+
+### `generateFiles()` Requires OpenAPI Server
+
+File generation is now handled within the OpenAPI server. The `input` field for `generateFiles` must reference the server instance rather than a string array of file paths.
+
+```ts tab="Before"
+import { openapi } from '@/lib/openapi';
+void generateFiles({
+  input: ['./products.yaml'],
+  output: './content/docs',
+});
+```
+
+```ts tab="After"
+import { generateFiles } from 'fumadocs-openapi';
+import { openapi } from '@/lib/openapi';
+
+void generateFiles({
+  input: openapi,
+  output: './content/docs',
+});
+```
+
+## New Features
+
+### Storage Key Prefix
+
+v10 introduced the `storageKeyPrefix` option to prevent state bleed across multiple OpenAPI instances by isolating `localStorage` keys.
+
+```tsx title="components/api-page.client.tsx"
+'use client';
+import { defineClientConfig } from 'fumadocs-openapi/ui/client';
+
+export default defineClientConfig({
+  storageKeyPrefix: 'fumadocs-openapi-custom-',
+});
+```
+
+## Bug Fixes
+
+- **TypeScript Schema Output Correction:** Resolved incorrect TypeScript schema generation. Code formatting is disabled in this process to enhance performance.
+
+We recommend reviewing your implementation against these changes to leverage the improved flexibility and performance.
+If you encounter issues, welcome to contribute feedback to our GitHub repository.

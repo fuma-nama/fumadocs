@@ -26,6 +26,7 @@ export const linkItems: LinkItemType[] = [
   {
     type: 'icon',
     url: 'https://github.com/fuma-nama/fumadocs',
+    label: 'github',
     text: 'Github',
     icon: (
       <svg role="img" viewBox="0 0 24 24" fill="currentColor">
