@@ -16,7 +16,7 @@ import {
   TabsList,
   TabsTrigger,
 } from 'fumadocs-ui/components/tabs';
-import type { SchemaData, SchemaUIData } from '@/ui/schema';
+import type { SchemaData, SchemaUIGeneratedData } from '@/ui/schema';
 import {
   Collapsible,
   CollapsibleContent,
@@ -33,7 +33,7 @@ import {
 import { cn } from 'fumadocs-ui/utils/cn';
 import { cva } from 'class-variance-authority';
 
-interface DataContextType extends SchemaUIData {
+interface DataContextType extends SchemaUIGeneratedData {
   readOnly?: boolean;
   writeOnly?: boolean;
 }
@@ -63,13 +63,6 @@ const PropertyContext = createContext<PropertyContextType>({
 
 const DataContext = createContext<DataContextType | null>(null);
 
-export function SchemaUIProvider(props: {
-  value: DataContextType;
-  children: ReactNode;
-}) {
-  return <DataContext value={props.value}>{props.children}</DataContext>;
-}
-
 function useData() {
   return use(DataContext)!;
 }
@@ -82,29 +75,47 @@ export interface SchemaUIProps {
   name: string;
   required?: boolean;
   as?: 'property' | 'body';
+
+  readOnly?: boolean;
+  writeOnly?: boolean;
+  generated: SchemaUIGeneratedData;
 }
 
 export function SchemaUI({
   name,
   required = false,
   as = 'property',
+  generated,
+  readOnly,
+  writeOnly,
 }: SchemaUIProps) {
   const { $root, refs } = useData();
   const schema = refs[$root];
+  const context: DataContextType = useMemo(
+    () => ({
+      ...generated,
+      readOnly,
+      writeOnly,
+    }),
+    [generated, readOnly, writeOnly],
+  );
+  const isProperty = as === 'property' || !isExpandable(schema);
 
-  if (as === 'property' || !isExpandable(schema)) {
-    return (
-      <SchemaUIProperty
-        name={name}
-        $type={$root}
-        overrides={{
-          required,
-        }}
-      />
-    );
-  }
-
-  return <SchemaUIContent $type={$root} />;
+  return (
+    <DataContext value={context}>
+      {isProperty ? (
+        <SchemaUIProperty
+          name={name}
+          $type={$root}
+          overrides={{
+            required,
+          }}
+        />
+      ) : (
+        <SchemaUIContent $type={$root} />
+      )}
+    </DataContext>
+  );
 }
 
 function SchemaUIContent({ $type }: { $type: string }) {

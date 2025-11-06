@@ -4,7 +4,7 @@ import type { RenderContext } from '@/types';
 import { FormatFlags, schemaToString } from '@/utils/schema-to-string';
 import { combineSchema } from '@/utils/combine-schema';
 import type { SchemaUIProps } from '@/ui/schema/client';
-import { SchemaUILazy, SchemaUIProviderLazy } from '@/ui/schema/lazy';
+import { SchemaUILazy } from '@/ui/schema/lazy';
 
 export interface FieldBase {
   description?: ReactNode;
@@ -51,36 +51,31 @@ export interface SchemaUIOptions {
   ctx: RenderContext;
 }
 
-export interface SchemaUIData {
+export interface SchemaUIGeneratedData {
   $root: string;
   refs: Record<string, SchemaData>;
 }
 
-export function Schema(
-  props: SchemaUIOptions &
-    SchemaUIProps & {
-      readOnly?: boolean;
-      writeOnly?: boolean;
-    },
-) {
-  const data = generateSchemaUI(props);
+export function Schema({
+  ctx,
+  root,
+  ...props
+}: SchemaUIOptions & Omit<SchemaUIProps, 'generated'>) {
+  if (ctx.schemaUI?.render) {
+    return ctx.schemaUI.render({ root, ...props }, ctx);
+  }
 
   return (
-    <SchemaUIProviderLazy
-      value={{
-        ...data,
-        readOnly: props.readOnly,
-        writeOnly: props.writeOnly,
-      }}
-    >
-      <SchemaUILazy name={props.name} required={props.required} as={props.as} />
-    </SchemaUIProviderLazy>
+    <SchemaUILazy {...props} generated={generateSchemaUI({ ctx, root })} />
   );
 }
 
-function generateSchemaUI({ ctx, root }: SchemaUIOptions): SchemaUIData {
+function generateSchemaUI({
+  ctx,
+  root,
+}: SchemaUIOptions): SchemaUIGeneratedData {
   const refs: Record<string, SchemaData> = {};
-  const { content: { showExampleInFields = false } = {} } = ctx;
+  const { showExample = false } = ctx.schemaUI ?? {};
 
   function generateInfoTags(schema: Exclude<ResolvedSchema, boolean>) {
     const fields: ReactNode[] = [];
@@ -155,7 +150,7 @@ function generateSchemaUI({ ctx, root }: SchemaUIOptions): SchemaUIData {
       );
     }
 
-    if (showExampleInFields && schema.examples) {
+    if (showExample && schema.examples) {
       for (const example of schema.examples) {
         fields.push(field('Example', JSON.stringify(example, null, 2)));
       }

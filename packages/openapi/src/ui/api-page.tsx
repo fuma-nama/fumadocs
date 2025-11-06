@@ -2,11 +2,15 @@
 import Slugger from 'github-slugger';
 import { Operation } from '@/ui/operation';
 import type { MethodInformation, RenderContext } from '@/types';
-import { createMethod, NoReference } from '@/utils/schema';
+import {
+  createMethod,
+  type NoReference,
+  type ResolvedSchema,
+} from '@/utils/schema';
 import type { OpenAPIV3_1 } from 'openapi-types';
 import type { ProcessedDocument } from '@/utils/process-document';
 import { defaultAdapters, MediaAdapter } from '@/requests/media/adapter';
-import { ComponentProps, FC, ReactNode } from 'react';
+import type { ComponentProps, FC, ReactNode } from 'react';
 import {
   highlight,
   type HighlightOptionsCommon,
@@ -32,6 +36,7 @@ import remarkRehype from 'remark-rehype';
 import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import * as JsxRuntime from 'react/jsx-runtime';
 import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
+import type { SchemaUIProps } from './schema/client';
 
 type Awaitable<T> = T | Promise<T>;
 
@@ -77,13 +82,6 @@ export interface CreateAPIPageOptions {
    * Customise page content
    */
   content?: {
-    /**
-     * Show examples under the generated content of JSON schemas.
-     *
-     * @defaultValue false
-     */
-    showExampleInFields?: boolean;
-
     renderResponseTabs?: (
       tabs: ResponseTab[],
       ctx: RenderContext,
@@ -105,6 +103,25 @@ export interface CreateAPIPageOptions {
       generators: CodeUsageGenerator<unknown>[],
       ctx: RenderContext,
     ) => Awaitable<ReactNode>;
+  };
+
+  /**
+   * Info UI for JSON schemas
+   */
+  schemaUI?: {
+    render?: (
+      options: Omit<SchemaUIProps, 'generated'> & {
+        root: ResolvedSchema;
+      },
+      ctx: RenderContext,
+    ) => Awaitable<ReactNode>;
+
+    /**
+     * Show examples under the generated content of JSON schemas.
+     *
+     * @defaultValue false
+     */
+    showExample?: boolean;
   };
 
   /**
