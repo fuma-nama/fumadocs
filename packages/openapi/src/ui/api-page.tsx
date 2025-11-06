@@ -10,7 +10,7 @@ import {
 import type { OpenAPIV3_1 } from 'openapi-types';
 import type { ProcessedDocument } from '@/utils/process-document';
 import { defaultAdapters, MediaAdapter } from '@/requests/media/adapter';
-import type { ComponentProps, FC, ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
 import {
   highlight,
   type HighlightOptionsCommon,
@@ -18,7 +18,6 @@ import {
 } from 'fumadocs-core/highlight';
 import type { OpenAPIServer } from '@/server';
 import type { APIPageClientOptions } from './client';
-import { cn } from 'fumadocs-ui/utils/cn';
 import type {
   CodeUsageGenerator,
   ResponseTab,
@@ -103,6 +102,48 @@ export interface CreateAPIPageOptions {
       generators: CodeUsageGenerator<unknown>[],
       ctx: RenderContext,
     ) => Awaitable<ReactNode>;
+
+    /**
+     * renderer of the entire page's layout (containing all operations & webhooks UI)
+     */
+    renderPageLayout?: (
+      slots: {
+        operations?: {
+          item: OperationItem;
+          children: ReactNode;
+        }[];
+        webhooks?: {
+          item: WebhookItem;
+          children: ReactNode;
+        }[];
+      },
+      ctx: RenderContext,
+    ) => Awaitable<ReactNode>;
+
+    renderOperationLayout?: (
+      slots: {
+        header: ReactNode;
+        apiExample: ReactNode;
+        apiPlayground: ReactNode;
+
+        authSchemes: ReactNode;
+        paremeters: ReactNode;
+        body: ReactNode;
+        responses: ReactNode;
+        callbacks: ReactNode;
+      },
+      ctx: RenderContext,
+      method: MethodInformation,
+    ) => Awaitable<ReactNode>;
+
+    renderWebhookLayout?: (slots: {
+      header: ReactNode;
+      authSchemes: ReactNode;
+      paremeters: ReactNode;
+      body: ReactNode;
+      responses: ReactNode;
+      callbacks: ReactNode;
+    }) => Awaitable<ReactNode>;
   };
 
   /**
@@ -180,6 +221,30 @@ export function createAPIPage(
   server: OpenAPIServer,
   options: CreateAPIPageOptions = {},
 ): FC<ApiPageProps> {
+  let processor: ReturnType<typeof createMarkdownProcessor>;
+
+  function createMarkdownProcessor() {
+    function rehypeReact(this: any) {
+      this.compiler = (tree: any, file: any) => {
+        return toJsxRuntime(tree, {
+          development: false,
+          filePath: file.path,
+          ...JsxRuntime,
+          components: defaultMdxComponents,
+        });
+      };
+    }
+
+    return remark()
+      .use(remarkGfm)
+      .use(remarkRehype)
+      .use(rehypeCode, {
+        langs: [],
+        lazy: true,
+      } satisfies Partial<RehypeCodeOptions>)
+      .use(rehypeReact);
+  }
+
   return async function APIPageWrapper({ document, ...props }) {
     let processed: ProcessedDocument;
     if (typeof document === 'string') {
@@ -195,25 +260,6 @@ export function createAPIPage(
         : [{ url: '/' }];
 
     const slugger = new Slugger();
-    const processor = remark()
-      .use(remarkGfm)
-      .use(remarkRehype)
-      .use(rehypeCode, {
-        langs: [],
-        lazy: true,
-      } satisfies Partial<RehypeCodeOptions>)
-      .use(rehypeReact);
-
-    function rehypeReact(this: any) {
-      this.compiler = (tree: any, file: any) => {
-        return toJsxRuntime(tree, {
-          development: false,
-          filePath: file.path,
-          ...JsxRuntime,
-          components: defaultMdxComponents,
-        });
-      };
-    }
 
     const ctx: RenderContext = {
       schema: processed,
@@ -235,6 +281,8 @@ export function createAPIPage(
         );
       },
       async renderMarkdown(text) {
+        processor ??= createMarkdownProcessor();
+
         const out = await processor.process({
           value: text,
         });
@@ -258,25 +306,6 @@ export function createAPIPage(
   };
 }
 
-function Root({
-  children,
-  className,
-  ctx,
-  ...props
-}: { ctx: RenderContext } & ComponentProps<'div'>) {
-  return (
-    <div className={cn('flex flex-col gap-24 text-sm', className)} {...props}>
-      <ApiProviderLazy
-        servers={ctx.servers}
-        shikiOptions={ctx.shikiOptions}
-        client={ctx.client ?? {}}
-      >
-        {children}
-      </ApiProviderLazy>
-    </div>
-  );
-}
-
 async function APIPage({
   hasHead = false,
   operations,
@@ -286,10 +315,17 @@ async function APIPage({
   ctx: RenderContext;
 }) {
   const { dereferenced } = ctx.schema;
+  let { renderPageLayout } = ctx.content ?? {};
+  renderPageLayout ??= (slots) => (
+    <div className="flex flex-col gap-24 text-sm">
+      {slots.operations?.map((op) => op.children)}
+      {slots.webhooks?.map((op) => op.children)}
+    </div>
+  );
 
-  return (
-    <Root ctx={ctx}>
-      {operations?.map((item) => {
+  const content = await renderPageLayout(
+    {
+      operations: operations?.map((item) => {
         const pathItem = dereferenced.paths?.[item.path];
         if (!pathItem)
           throw new Error(
@@ -304,17 +340,20 @@ async function APIPage({
 
         const method = createMethod(item.method, pathItem, operation);
 
-        return (
-          <Operation
-            key={`${item.path}:${item.method}`}
-            method={method}
-            path={item.path}
-            ctx={ctx}
-            hasHead={hasHead}
-          />
-        );
-      })}
-      {webhooks?.map((item) => {
+        return {
+          item,
+          children: (
+            <Operation
+              key={`${item.path}:${item.method}`}
+              method={method}
+              path={item.path}
+              ctx={ctx}
+              hasHead={hasHead}
+            />
+          ),
+        };
+      }),
+      webhooks: webhooks?.map((item) => {
         const webhook = dereferenced.webhooks?.[item.name];
         if (!webhook)
           throw new Error(
@@ -327,19 +366,31 @@ async function APIPage({
             `[Fumadocs OpenAPI] Method ${item.method} not found in webhook: ${item.name}`,
           );
 
-        const method = createMethod(item.method, webhook, hook);
+        return {
+          item,
+          children: (
+            <Operation
+              type="webhook"
+              key={`${item.name}:${item.method}`}
+              method={createMethod(item.method, webhook, hook)}
+              ctx={ctx}
+              path={`/${item.name}`}
+              hasHead={hasHead}
+            />
+          ),
+        };
+      }),
+    },
+    ctx,
+  );
 
-        return (
-          <Operation
-            type="webhook"
-            key={`${item.name}:${item.method}`}
-            method={method}
-            ctx={ctx}
-            path={`/${item.name}`}
-            hasHead={hasHead}
-          />
-        );
-      })}
-    </Root>
+  return (
+    <ApiProviderLazy
+      servers={ctx.servers}
+      shikiOptions={ctx.shikiOptions}
+      client={ctx.client ?? {}}
+    >
+      {content}
+    </ApiProviderLazy>
   );
 }

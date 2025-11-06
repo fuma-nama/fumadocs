@@ -89,8 +89,7 @@ export function SchemaUI({
   readOnly,
   writeOnly,
 }: SchemaUIProps) {
-  const { $root, refs } = useData();
-  const schema = refs[$root];
+  const schema = generated.refs[generated.$root];
   const context: DataContextType = useMemo(
     () => ({
       ...generated,
@@ -106,13 +105,13 @@ export function SchemaUI({
       {isProperty ? (
         <SchemaUIProperty
           name={name}
-          $type={$root}
+          $type={generated.$root}
           overrides={{
             required,
           }}
         />
       ) : (
-        <SchemaUIContent $type={$root} />
+        <SchemaUIContent $type={generated.$root} />
       )}
     </DataContext>
   );

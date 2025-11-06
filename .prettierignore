@@ -1,6 +1,5 @@
 CHANGELOG.md
 pnpm-lock.yaml
-.changeset/*.md
 .github/**/*.md
 
 packages/create-app/versions.json

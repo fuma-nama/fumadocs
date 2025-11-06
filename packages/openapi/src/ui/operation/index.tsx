@@ -41,7 +41,7 @@ const ParamTypes = {
   cookie: 'Cookie Parameters',
 };
 
-export function Operation({
+export async function Operation({
   type = 'operation',
   path,
   method,
@@ -229,12 +229,43 @@ export function Operation({
     );
   }
 
-  const playgroundEnabled = ctx.playground?.enabled ?? true;
-  const info = (
-    <div className="min-w-0 flex-1">
-      {headNode}
-      {type === 'operation' &&
-        (playgroundEnabled ? (
+  let { renderOperationLayout, renderWebhookLayout } = ctx.content ?? {};
+  if (type === 'operation') {
+    renderOperationLayout ??= (slots) => {
+      return (
+        <div
+          className="flex flex-col gap-x-6 gap-y-4 xl:flex-row xl:items-start"
+          style={
+            {
+              '--fd-api-info-top':
+                'calc(12px + var(--fd-nav-height) + var(--fd-banner-height) + var(--fd-tocnav-height, 0px))',
+            } as object
+          }
+        >
+          <div className="min-w-0 flex-1">
+            {slots.header}
+            {slots.apiPlayground}
+            {slots.authSchemes}
+            {slots.paremeters}
+            {slots.body}
+            {slots.responses}
+            {slots.callbacks}
+          </div>
+          {slots.apiExample}
+        </div>
+      );
+    };
+
+    const playgroundEnabled = ctx.playground?.enabled ?? true;
+    const content = await renderOperationLayout(
+      {
+        header: headNode,
+        authSchemes: authNode,
+        body: bodyNode,
+        callbacks: callbacksNode,
+        paremeters: parameterNode,
+        responses: responseNode,
+        apiPlayground: playgroundEnabled ? (
           <APIPlayground path={path} method={method} ctx={ctx} />
         ) : (
           <div className="flex flex-row items-center gap-2.5 p-3 rounded-xl border bg-fd-card text-fd-card-foreground not-prose">
@@ -243,56 +274,44 @@ export function Operation({
               {path}
             </code>
           </div>
-        ))}
-      {authNode}
-      {parameterNode}
-      {bodyNode}
-      {responseNode}
-      {callbacksNode}
-    </div>
-  );
-
-  if (type === 'operation') {
-    const examples = getAPIExamples(path, method, ctx);
+        ),
+        apiExample: <APIExample method={method} ctx={ctx} />,
+      },
+      ctx,
+      method,
+    );
 
     return (
-      <OperationContainer>
-        <OperationProviderLazy
-          defaultExampleId={
-            method['x-exclusiveCodeSample'] ?? method['x-selectedCodeSample']
-          }
-          route={path}
-          examples={examples}
-        >
-          {info}
-          <APIExample method={method} ctx={ctx} />
-        </OperationProviderLazy>
-      </OperationContainer>
+      <OperationProviderLazy
+        defaultExampleId={
+          method['x-exclusiveCodeSample'] ?? method['x-selectedCodeSample']
+        }
+        route={path}
+        examples={getAPIExamples(path, method, ctx)}
+      >
+        {content}
+      </OperationProviderLazy>
     );
   } else {
-    return info;
+    renderWebhookLayout ??= (slots) => (
+      <div>
+        {slots.header}
+        {slots.authSchemes}
+        {slots.paremeters}
+        {slots.body}
+        {slots.responses}
+        {slots.callbacks}
+      </div>
+    );
+    return renderWebhookLayout({
+      header: headNode,
+      authSchemes: authNode,
+      body: bodyNode,
+      callbacks: callbacksNode,
+      paremeters: parameterNode,
+      responses: responseNode,
+    });
   }
-}
-
-function OperationContainer({ children, ...props }: ComponentProps<'div'>) {
-  return (
-    <div
-      {...props}
-      className={cn(
-        'flex flex-col gap-x-6 gap-y-4 xl:flex-row xl:items-start',
-        props.className,
-      )}
-      style={
-        {
-          '--fd-api-info-top':
-            'calc(12px + var(--fd-nav-height) + var(--fd-banner-height) + var(--fd-tocnav-height, 0px))',
-          ...props.style,
-        } as object
-      }
-    >
-      {children}
-    </div>
-  );
 }
 
 async function ResponseAccordion({
@@ -425,74 +444,62 @@ function AuthScheme({
 
   if (schema.type === 'http' || schema.type === 'oauth2') {
     return (
-      <Property
+      <AuthProperty
         name="Authorization"
         type={
           schema.type === 'http' && schema.scheme === 'basic'
             ? `Basic <token>`
             : 'Bearer <token>'
         }
-        required
       >
         {schema.description && ctx.renderMarkdown(schema.description)}
         <p>
           In: <code>header</code>
         </p>
         {scopeElement}
-      </Property>
+      </AuthProperty>
     );
   }
 
   if (schema.type === 'apiKey') {
     return (
-      <Property name={schema.name} type="<token>">
+      <AuthProperty name={schema.name} type="<token>">
         {schema.description && ctx.renderMarkdown(schema.description)}
         <p>
           In: <code>{schema.in}</code>
           {scopeElement}
         </p>
-      </Property>
+      </AuthProperty>
     );
   }
 
   if (schema.type === 'openIdConnect') {
     return (
-      <Property name="OpenID Connect" type="<token>" required>
+      <AuthProperty name="OpenID Connect" type="<token>">
         {schema.description && ctx.renderMarkdown(schema.description)}
         {scopeElement}
-      </Property>
+      </AuthProperty>
     );
   }
 }
 
-function Property({
+function AuthProperty({
   name,
   type,
-  required = false,
   ...props
 }: ComponentProps<'div'> & {
   name: string;
-  type: ReactNode;
-  required?: boolean;
+  type: string;
 }) {
   return (
     <div
       className={cn('text-sm border-t py-4 first:border-t-0', props.className)}
     >
       <div className="flex flex-wrap items-center gap-3 not-prose">
-        <span className="font-medium font-mono text-fd-primary">
-          {name}
-          {required === false && (
-            <span className="text-fd-muted-foreground">?</span>
-          )}
+        <span className="font-medium font-mono text-fd-primary">{name}</span>
+        <span className="text-sm font-mono text-fd-muted-foreground">
+          {type}
         </span>
-        {typeof type === 'string' ? (
-          <span className="text-sm font-mono text-fd-muted-foreground">
-            {type}
-          </span>
-        ) : (
-          type
-        )}
       </div>
       <div className="prose-no-margin pt-2.5 empty:hidden">
         {props.children}

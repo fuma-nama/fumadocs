@@ -66,7 +66,7 @@ import { createAPIPage } from 'fumadocs-openapi/ui';
 export const APIPage = createAPIPage(openapi, {
   playground: {
     enabled: false,
-  }
+  },
 });
 ```
 
@@ -104,7 +104,7 @@ export default defineClientConfig({
 
 4. Prefer client config for `adapter.client`:
 
-Forwarding client-side adapters is also done with `api-page.client.tsx`:
+Forwarding client-side media adapters is also done with `api-page.client.tsx`:
 
 ```tsx
 // components/api-page.tsx
