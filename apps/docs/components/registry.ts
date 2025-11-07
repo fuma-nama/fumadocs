@@ -1,0 +1,147 @@
+import { type Registry } from '@fumadocs/cli/build';
+import * as ui from '../../../packages/ui/src/_registry';
+import { fileURLToPath } from 'node:url';
+import * as path from 'node:path';
+
+const baseDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../');
+
+function selectFrom(r: Registry, component: string, filename: string) {
+  const comp = r.components.find((comp) => comp.name === component)!;
+
+  return {
+    component: comp,
+    file: comp.files.find((file) => path.basename(file.path) === filename)!,
+  };
+}
+
+export const registry: Registry = {
+  dir: baseDir,
+  name: 'fumadocs',
+  packageJson: './package.json',
+  tsconfigPath: './tsconfig.json',
+  onUnknownFile(absolutePath) {
+    const filePath = path.relative(baseDir, absolutePath);
+
+    // source object is external
+    if (filePath.startsWith('lib/source.')) return false;
+  },
+  onResolve(ref) {
+    if (ref.type === 'file') {
+      const filePath = path.relative(baseDir, ref.file);
+
+      if (filePath === 'lib/cn.ts') {
+        return {
+          type: 'sub-component',
+          resolved: {
+            type: 'remote',
+            registryName: ui.registry.name,
+            ...selectFrom(ui.registry, 'cn', 'cn.ts'),
+          },
+        };
+      }
+    }
+
+    if (
+      ref.type === 'dependency' &&
+      ref.specifier === 'fumadocs-ui/components/ui/button'
+    ) {
+      return {
+        type: 'sub-component',
+        resolved: {
+          type: 'remote',
+          registryName: ui.registry.name,
+          ...selectFrom(ui.registry, 'button', 'button.tsx'),
+        },
+      };
+    }
+
+    return ref;
+  },
+  components: [
+    {
+      name: 'graph-view',
+      description: 'A graph to display relationships of all pages',
+      files: [
+        {
+          type: 'components',
+          path: 'components/graph-view.tsx',
+        },
+        {
+          type: 'lib',
+          path: 'lib/build-graph.ts',
+        },
+      ],
+    },
+    {
+      name: 'feedback',
+      title: 'Feedback',
+      description: 'Component to send user feedbacks about the docs',
+      files: [
+        {
+          type: 'components',
+          path: 'components/feedback.tsx',
+        },
+      ],
+    },
+    {
+      name: 'ai/search',
+      title: 'AI Search (Next.js Only)',
+      description:
+        'Ask AI dialog for your docs, you need to configure Inkeep first',
+      files: [
+        {
+          type: 'components',
+          path: 'components/ai/search.tsx',
+        },
+        {
+          type: 'components',
+          path: 'components/ai/markdown.tsx',
+        },
+        {
+          type: 'route',
+          path: 'app/api/chat/route.ts',
+          target: 'app/api/chat/route.ts',
+        },
+        {
+          type: 'lib',
+          path: 'lib/chat/inkeep-qa-schema.ts',
+        },
+      ],
+    },
+    {
+      name: 'ai/page-actions',
+      title: 'AI Page Actions',
+      description: 'Common page actions for AI',
+      files: [
+        {
+          type: 'components',
+          path: 'components/ai/page-actions.tsx',
+        },
+      ],
+    },
+    {
+      name: 'og/mono',
+      description: 'Open graph image generation (mono-style)',
+      files: [
+        {
+          type: 'lib',
+          path: 'lib/og/mono.tsx',
+        },
+        {
+          type: 'lib',
+          path: 'lib/og/JetBrainsMono-Bold.ttf',
+        },
+        {
+          type: 'lib',
+          path: 'lib/og/JetBrainsMono-Regular.ttf',
+        },
+      ],
+    },
+  ],
+  dependencies: {
+    'fumadocs-core': null,
+    'fumadocs-ui': null,
+    next: null,
+    react: null,
+  },
+};

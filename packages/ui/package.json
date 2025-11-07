@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-ui",
-  "version": "16.0.7",
+  "version": "16.0.8",
   "description": "The framework for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
@@ -28,9 +28,9 @@
       "import": "./dist/layouts/home/index.js",
       "types": "./dist/layouts/home/index.d.ts"
     },
-    "./layouts/home/*": {
-      "import": "./dist/layouts/home/*.js",
-      "types": "./dist/layouts/home/*.d.ts"
+    "./layouts/home/navbar": {
+      "import": "./dist/layouts/home/navbar.js",
+      "types": "./dist/layouts/home/navbar.d.ts"
     },
     "./layouts/docs": {
       "import": "./dist/layouts/docs/index.js",
@@ -122,7 +122,7 @@
     "@radix-ui/react-popover": "^1.1.15",
     "@radix-ui/react-presence": "^1.1.5",
     "@radix-ui/react-scroll-area": "^1.2.10",
-    "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-tabs": "^1.1.13",
     "class-variance-authority": "^0.7.1",
     "fumadocs-core": "workspace:*",
@@ -138,6 +138,7 @@
     "@next/eslint-plugin-next": "16.0.1",
     "@tailwindcss/cli": "^4.1.16",
     "@types/lodash.merge": "^4.6.9",
+    "@types/node": "^24.10.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "eslint-config-custom": "workspace:*",

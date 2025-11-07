@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-obsidian",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Obsidian Integration for Fumadocs",
   "keywords": [
     "NextJs",
@@ -56,7 +56,7 @@
     "@types/estree": "^1.0.8",
     "@types/js-yaml": "^4.0.9",
     "@types/mdast": "^4.0.4",
-    "@types/node": "24.9.2",
+    "@types/node": "24.10.0",
     "@types/react": "^19.2.2",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",

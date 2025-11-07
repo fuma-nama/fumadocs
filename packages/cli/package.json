@@ -37,12 +37,12 @@
     "commander": "^14.0.2",
     "package-manager-detector": "^1.5.0",
     "picocolors": "^1.1.1",
-    "tinyexec": "^1.0.1",
+    "tinyexec": "^1.0.2",
     "ts-morph": "^27.0.2",
     "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@types/node": "24.9.2",
+    "@types/node": "24.10.0",
     "eslint-config-custom": "workspace:*",
     "shadcn": "3.5.0",
     "tsconfig": "workspace:*"

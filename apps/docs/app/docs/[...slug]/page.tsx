@@ -4,7 +4,7 @@ import * as Twoslash from 'fumadocs-twoslash/ui';
 import { Callout } from 'fumadocs-ui/components/callout';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
 import * as Preview from '@/components/preview';
-import { createMetadata } from '@/lib/metadata';
+import { createMetadata, getPageImage } from '@/lib/metadata';
 import { source } from '@/lib/source';
 import { Wrapper } from '@/components/preview/wrapper';
 import { Mermaid } from '@/components/mdx/mermaid';
@@ -16,8 +16,6 @@ import {
   HoverCardTrigger,
 } from '@/components/ui/hover-card';
 import Link from 'fumadocs-core/link';
-import { AutoTypeTable } from 'fumadocs-typescript/ui';
-import { createGenerator } from 'fumadocs-typescript';
 import { getPageTreePeers } from 'fumadocs-core/page-tree';
 import { Card, Cards } from 'fumadocs-ui/components/card';
 import { getMDXComponents } from '@/mdx-components';
@@ -28,7 +26,6 @@ import { Customisation } from '@/components/preview/customisation';
 import { DocsBody, DocsPage } from 'fumadocs-ui/page';
 import { NotFound } from '@/components/not-found';
 import { getSuggestions } from '@/app/docs/[...slug]/suggestions';
-import { APIPage } from 'fumadocs-openapi/ui';
 import { PathUtils } from 'fumadocs-core/source';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
@@ -39,8 +36,6 @@ function PreviewRenderer({ preview }: { preview: string }): ReactNode {
 
   return null;
 }
-
-const generator = createGenerator();
 
 export const revalidate = false;
 
@@ -54,6 +49,7 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
     );
 
   if (page.data.type === 'openapi') {
+    const { APIPage } = await import('@/components/api-page');
     return (
       <DocsPage>
         <h1 className="text-[1.75em] font-semibold">{page.data.title}</h1>
@@ -122,9 +118,6 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
             Banner,
             Mermaid,
             TypeTable,
-            AutoTypeTable: (props) => (
-              <AutoTypeTable generator={generator} {...props} />
-            ),
             Wrapper,
             blockquote: Callout as unknown as FC<ComponentProps<'blockquote'>>,
             DocsCategory: ({ url }) => {
@@ -167,7 +160,7 @@ export async function generateMetadata(
     page.data.description ?? 'The library for building documentation sites';
 
   const image = {
-    url: ['/og', ...slug, 'image.webp'].join('/'),
+    url: getPageImage(page).url,
     width: 1200,
     height: 630,
   };

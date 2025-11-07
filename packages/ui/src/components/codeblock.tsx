@@ -6,7 +6,7 @@ import {
   type HTMLAttributes,
   type ReactNode,
   type RefObject,
-  useContext,
+  use,
   useMemo,
   useRef,
 } from 'react';
@@ -87,7 +87,7 @@ export function CodeBlock({
   ),
   ...props
 }: CodeBlockProps) {
-  const inTab = useContext(TabsContext) !== null;
+  const inTab = use(TabsContext) !== null;
   const areaRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -95,13 +95,14 @@ export function CodeBlock({
       ref={ref}
       dir="ltr"
       {...props}
+      tabIndex={-1}
       className={cn(
         inTab
           ? 'bg-fd-secondary -mx-px -mb-px last:rounded-b-xl'
           : 'my-4 bg-fd-card rounded-xl',
         keepBackground && 'bg-(--shiki-light-bg) dark:bg-(--shiki-dark-bg)',
 
-        'shiki relative border shadow-sm outline-none not-prose overflow-hidden text-sm',
+        'shiki relative border shadow-sm not-prose overflow-hidden text-sm',
         props.className,
       )}
     >
@@ -133,8 +134,10 @@ export function CodeBlock({
       <div
         ref={areaRef}
         {...viewportProps}
+        role="region"
+        tabIndex={0}
         className={cn(
-          'text-[13px] py-3.5 overflow-auto max-h-[600px] fd-scroll-container',
+          'text-[13px] py-3.5 overflow-auto max-h-[600px] fd-scroll-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-fd-ring',
           viewportProps.className,
         )}
         style={
@@ -180,7 +183,7 @@ function CopyButton({
       className={cn(
         buttonVariants({
           className:
-            'hover:text-fd-accent-foreground data-[checked]:text-fd-accent-foreground',
+            'hover:text-fd-accent-foreground data-checked:text-fd-accent-foreground',
           size: 'icon-xs',
         }),
         className,
@@ -196,7 +199,7 @@ function CopyButton({
 
 export function CodeBlockTabs({ ref, ...props }: ComponentProps<typeof Tabs>) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const nested = useContext(TabsContext) !== null;
+  const nested = use(TabsContext) !== null;
 
   return (
     <Tabs
@@ -208,7 +211,7 @@ export function CodeBlockTabs({ ref, ...props }: ComponentProps<typeof Tabs>) {
         props.className,
       )}
     >
-      <TabsContext.Provider
+      <TabsContext
         value={useMemo(
           () => ({
             containerRef,
@@ -218,7 +221,7 @@ export function CodeBlockTabs({ ref, ...props }: ComponentProps<typeof Tabs>) {
         )}
       >
         {props.children}
-      </TabsContext.Provider>
+      </TabsContext>
     </Tabs>
   );
 }

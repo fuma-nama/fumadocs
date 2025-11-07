@@ -11,7 +11,7 @@ export default defineConfig({
   format: 'esm',
   entry: [
     'src/{toc,link,breadcrumb,dynamic-link,hide-if-empty}.tsx',
-    'src/{source,mdx-plugins,page-tree}/index.ts',
+    'src/{source,page-tree}/index.ts',
     'src/{negotiation,content}/*',
     'src/source/plugins/lucide-icons.ts',
     'src/search/{index,client,server,algolia,orama-cloud}.ts',
@@ -21,6 +21,9 @@ export default defineConfig({
     'src/i18n/*.ts',
     'src/highlight/index.ts',
     'src/highlight/client.tsx',
+    'src/mdx-plugins/{index,codeblock-utils}.ts',
+    'src/mdx-plugins/remark-*.ts',
+    'src/mdx-plugins/rehype-*.ts',
     'src/framework/*',
   ],
 });

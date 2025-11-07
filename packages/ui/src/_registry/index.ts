@@ -204,15 +204,17 @@ export const registry: Registry = {
           path: 'layouts/home/index.tsx',
           target: 'components/layout/home/index.tsx',
         },
+        /* optional
         {
           type: 'components',
           path: 'layouts/home/navbar.tsx',
           target: 'components/layout/home/navbar.tsx',
         },
+        */
         {
           type: 'components',
-          path: 'layouts/home/menu.tsx',
-          target: 'components/layout/home/menu.tsx',
+          path: 'layouts/home/client.tsx',
+          target: 'components/layout/home/client.tsx',
         },
       ],
       unlisted: true,

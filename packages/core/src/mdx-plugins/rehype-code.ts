@@ -60,7 +60,17 @@ function parseLineNumber(str: string, data: Record<string, unknown>) {
   });
 }
 
-export type RehypeCodeOptions = RehypeShikiOptions & {
+type DistributiveOmit<T, K extends keyof T> = T extends unknown
+  ? Omit<T, K>
+  : never;
+
+export type RehypeCodeOptions = DistributiveOmit<RehypeShikiOptions, 'lazy'> & {
+  /**
+   * Load languages and themes on-demand.
+   * @defaultValue true
+   */
+  lazy?: boolean;
+
   /**
    * The regex engine to use.
    *

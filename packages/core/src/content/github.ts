@@ -31,6 +31,13 @@ export interface GetGithubLastCommitOptions {
   sha?: string;
 
   /**
+   * Base URL for GitHub API
+   * @default "https://api.github.com"
+   * @link https://docs.github.com/en/get-started/using-github-docs/about-versions-of-github-docs#determining-which-github-product-you-use
+   */
+  baseUrl?: string;
+
+  /**
    * Custom query parameters
    */
   params?: Record<string, string>;
@@ -50,6 +57,7 @@ export async function getGithubLastEdit({
   owner,
   path,
   sha,
+  baseUrl = 'https://api.github.com',
   options = {},
   params: customParams = {},
 }: GetGithubLastCommitOptions): Promise<Date | null> {
@@ -70,7 +78,7 @@ export async function getGithubLastEdit({
   }
 
   const res = await fetch(
-    `https://api.github.com/repos/${owner}/${repo}/commits?${params.toString()}`,
+    `${baseUrl}/repos/${owner}/${repo}/commits?${params.toString()}`,
     {
       cache: 'force-cache',
       ...options,

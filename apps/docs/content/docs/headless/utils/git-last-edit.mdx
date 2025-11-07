@@ -41,3 +41,20 @@ functionality.
 ```ts
 process.env.NODE_ENV === 'development'? null : getGithubLastEdit(...)
 ```
+
+### Custom GitHub Base URL
+
+If you need to access GitHub a instance at a url other than `https://api.github.com`, you can override the base URL:
+
+```ts
+import { getGithubLastEdit } from 'fumadocs-core/content/github';
+
+const time = await getGithubLastEdit({
+  owner: 'your-org',
+  repo: 'your-repo',
+  path: `content/docs/${page.path}`,
+  baseUrl: 'https://api.octocorp.ghe.com', // Your custom GitHub API URL
+});
+```
+
+The `baseUrl` parameter defaults to `'https://api.github.com'` if not specified.

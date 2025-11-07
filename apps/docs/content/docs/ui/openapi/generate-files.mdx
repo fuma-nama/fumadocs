@@ -1,0 +1,224 @@
+---
+title: generateFiles()
+description: Generate pages from OpenAPI schema.
+---
+
+The `generateFiles()` function generates MDX files for API documentation.
+
+Note that the page content is still rendered by the `APIpage` component, docs generator only arranges the endpoints/webhooks to render for each page.
+
+## Usage
+
+It takes an OpenAPI instance.
+
+```ts
+import { generateFiles } from 'fumadocs-openapi';
+import { openapi } from '@/lib/openapi';
+
+void generateFiles({
+  input: openapi,
+  // The output directory.
+  output: '/content/docs',
+});
+```
+
+### `per`
+
+Customise the content of pages, default to `operation`.
+
+<Callout>
+  Operation refers to an API endpoint with specific method like
+  `/api/weather:GET`.
+</Callout>
+
+| mode      | content                        | file path                             |
+| --------- | ------------------------------ | ------------------------------------- |
+| tag       | operations with same tag       | `{tag_name}.mdx`                      |
+| file      | operations in same schema file | `{file_name}.mdx`                     |
+| operation | each operation                 | `{operationId ?? endpoint_path}.mdx`) |
+| custom    | see below                      | N/A                                   |
+
+```ts
+import { generateFiles } from 'fumadocs-openapi';
+
+void generateFiles({
+  per: 'tag',
+});
+```
+
+When set to `custom`, you can pass a function to fully customise the generation process:
+
+```ts title="Example"
+import { generateFiles, OperationOutput } from 'fumadocs-openapi';
+
+void generateFiles({
+  per: 'custom',
+  toPages(builder) {
+    const { dereferenced } = builder.document;
+    const items = builder.extract();
+
+    for (const op of items.operations) {
+      const { pathItem, operation, displayName } =
+        builder.fromExtractedOperation(op)!;
+
+      const entry: OperationOutput = {
+        type: 'operation',
+        schemaId: builder.id,
+        item: op,
+        path: '...',
+        info: {
+          title: displayName,
+          description: operation.description ?? pathItem.description,
+        },
+      };
+
+      builder.create(entry);
+    }
+  },
+});
+```
+
+When set to `tag`, adding `x-displayName` to the tag definition can control the title of each page.
+
+```yaml title="openapi.yaml"
+tags:
+  - name: test
+    description: this is a tag.
+    x-displayName: My Test Name
+```
+
+### `groupBy`
+
+In `operation` mode, you can group output files with folders.
+
+| value          | output                                                 |
+| -------------- | ------------------------------------------------------ |
+| tag            | `{tag}/{operationId ?? endpoint_path}.mdx`             |
+| route          | `{endpoint_path}/{method}.mdx` (ignores `name` option) |
+| none (default) | `{operationId ?? endpoint_path}.mdx`                   |
+
+```ts
+import { generateFiles } from 'fumadocs-openapi';
+
+void generateFiles({
+  per: 'operation',
+  groupBy: 'tag',
+});
+```
+
+### `index`
+
+Generate index files with cards linking to generated pages.
+
+```ts
+import { generateFiles } from 'fumadocs-openapi';
+
+void generateFiles({
+  index: {
+    // for generating `href`
+    url: {
+      baseUrl: '/docs',
+      contentDir: './content/docs',
+    },
+    items: [
+      {
+        path: 'index.mdx',
+        // optional: restrict the input files (identicial to the `input` field in server)
+        only: ['petstore.yaml'],
+        // optional: set frontmatter
+        description: 'All available pages',
+      },
+    ],
+  },
+});
+```
+
+### `imports`
+
+Add custom imports to generated MDX files. This is useful for including components, utilities, or other dependencies in your generated documentation.
+
+```ts
+import { generateFiles } from 'fumadocs-openapi';
+
+void generateFiles({
+  imports: [
+    {
+      names: ['API_BASE_URL'],
+      from: '@/constants',
+    },
+  ],
+});
+```
+
+This will add the following imports to all generated MDX files:
+
+```ts
+import { API_BASE_URL } from '@/constants';
+```
+
+### `name`
+
+A function that controls the output file name of MDX pages.
+
+```ts
+import { generateFiles } from 'fumadocs-openapi';
+
+void generateFiles({
+  name: (output, document) => {
+    if (output.type === 'operation') {
+      const operation = document.paths![output.item.path]![output.item.method]!;
+      // operation object
+      console.log(operation);
+
+      return 'my-dir/filename';
+    }
+
+    const hook = document.webhooks![output.item.name][output.item.method]!;
+    // webhook object
+    console.log(hook);
+    return 'my-dir/filename';
+  },
+});
+```
+
+### `frontmatter`
+
+Customise the frontmatter of MDX files.
+
+By default, it includes:
+
+| property      | description                        |
+| ------------- | ---------------------------------- |
+| `title`       | Page title                         |
+| `description` | Page description                   |
+| `full`        | Always true, added for Fumadocs UI |
+| `_openapi`    | Internal Properties                |
+
+```ts
+import { generateFiles } from 'fumadocs-openapi';
+
+void generateFiles({
+  frontmatter: (title, description) => ({
+    myProperty: 'hello',
+  }),
+});
+```
+
+### `addGeneratedComment`
+
+Add a comment to the top of generated files indicating they are auto-generated.
+
+```ts
+import { generateFiles } from 'fumadocs-openapi';
+
+void generateFiles({
+  // Add default comment
+  addGeneratedComment: true,
+
+  // Or provide a custom comment
+  addGeneratedComment: 'Custom auto-generated comment',
+
+  // Or disable comments
+  addGeneratedComment: false,
+});
+```

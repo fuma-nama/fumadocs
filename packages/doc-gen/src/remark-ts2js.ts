@@ -4,7 +4,7 @@ import { visit } from 'unist-util-visit';
 import {
   generateCodeBlockTabs,
   parseCodeBlockAttributes,
-} from 'fumadocs-core/mdx-plugins';
+} from 'fumadocs-core/mdx-plugins/codeblock-utils';
 
 export interface TypeScriptToJavaScriptOptions {
   /**

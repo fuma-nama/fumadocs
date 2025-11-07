@@ -5,7 +5,7 @@ import {
 import * as fs from 'node:fs/promises';
 import { getPages } from '@/app/docs/utils';
 import { parseFrontmatter } from '@fumadocs/mdx-remote';
-import { structure } from 'fumadocs-core/mdx-plugins';
+import { structure } from 'fumadocs-core/mdx-plugins/remark-structure';
 
 export const { GET } = createSearchAPI('advanced', {
   indexes: async () => {

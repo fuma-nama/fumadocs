@@ -1,108 +1,45 @@
-import type { ApiPageProps } from '@/render/api-page';
 import { createProxy } from '@/server/proxy';
-import type { CodeSample } from '@/render/operation';
-import type { Renderer } from '@/render/renderer';
-import type { NoReference } from '@/utils/schema';
-import type {
-  HighlightOptionsCommon,
-  HighlightOptionsThemes,
-} from 'fumadocs-core/highlight';
-import type { MediaAdapter } from '@/requests/media/adapter';
-import type { MethodInformation } from '@/types';
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import {
   processDocument,
-  processDocumentCached,
   type ProcessedDocument,
 } from '@/utils/process-document';
+import type { CodeUsageGenerator } from '@/ui/operation/example-panel';
 
-type Awaitable<T> = T | Promise<T>;
 /**
- * schema id -> downloaded schema object
+ * schema id -> file path, URL, or downloaded schema object
  */
-type SchemaMap = Record<string, OpenAPIV3_1.Document | OpenAPIV3.Document>;
+type SchemaMap = Record<
+  string,
+  string | OpenAPIV3_1.Document | OpenAPIV3.Document
+>;
 type ProcessedSchemaMap = Record<string, ProcessedDocument>;
 
-export interface SharedOpenAPIOptions {
-  /**
-   * The url of proxy to avoid CORS issues
-   */
-  proxyUrl?: string;
-
-  renderer?: Partial<Renderer>;
-
-  /**
-   * Disable API Playground
-   *
-   * @defaultValue false
-   */
-  disablePlayground?: boolean;
-
-  /**
-   * Generate TypeScript definitions from response schema.
-   *
-   * Pass `false` to disable it.
-   *
-   * @param method - the operation object
-   * @param statusCode - status code
-   */
-  generateTypeScriptSchema?:
-    | ((
-        method: NoReference<MethodInformation>,
-        statusCode: string,
-      ) => Awaitable<string>)
-    | false;
-
-  /**
-   * Generate code samples for endpoint.
-   */
-  generateCodeSamples?: (method: MethodInformation) => Awaitable<CodeSample[]>;
-
-  shikiOptions?: Omit<HighlightOptionsCommon, 'lang' | 'components'> &
-    HighlightOptionsThemes;
-
-  /**
-   * Show full response schema instead of only example response & Typescript definitions
-   *
-   * @default true
-   */
-  showResponseSchema?: boolean;
-
-  mediaAdapters?: Record<string, MediaAdapter>;
-
-  /**
-   * Customise page content
-   */
-  content?: {
-    /**
-     * Show examples under the generated content of JSON schemas.
-     *
-     * @defaultValue false
-     */
-    showExampleInFields?: boolean;
-  };
-}
-
-export interface OpenAPIOptions extends SharedOpenAPIOptions {
+export interface OpenAPIOptions {
   /**
    * Schema files, can be:
    * - URL
    * - file path
    * - a function returning records of downloaded schemas.
    */
-  input?: string[] | (() => Promise<SchemaMap>);
+  input?: string[] | (() => SchemaMap | Promise<SchemaMap>);
 
   disableCache?: boolean;
+
+  /**
+   * The url of proxy to avoid CORS issues
+   */
+  proxyUrl?: string;
 }
 
 export interface OpenAPIServer {
-  getAPIPageProps: (from: ApiPageProps) => ApiPageProps;
   createProxy: typeof createProxy;
   getSchemas: () => Promise<ProcessedSchemaMap>;
+  readonly options: OpenAPIOptions;
 }
 
 export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
-  const { input = [], disableCache = false, ...shared } = options;
+  const { input = [], disableCache = false } = options;
   let schemas: Promise<ProcessedSchemaMap> | undefined;
 
   async function getSchemas() {
@@ -126,27 +63,24 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
   }
 
   return {
+    options,
     createProxy,
     async getSchemas() {
       if (disableCache) return getSchemas();
 
       return (schemas ??= getSchemas());
     },
-    getAPIPageProps({ document, ...props }) {
-      return {
-        ...shared,
-        ...props,
-        document:
-          typeof document === 'string'
-            ? this.getSchemas().then((map) => {
-                return map[document] ?? processDocumentCached(document);
-              })
-            : document,
-      };
-    },
   };
 }
 
-export function createCodeSample<T>(options: CodeSample<T>): CodeSample {
-  return options as CodeSample;
+export function createCodeSample<T>(
+  options: Partial<CodeUsageGenerator<T>>,
+): CodeUsageGenerator {
+  const {
+    lang = 'unknown',
+    id = lang,
+    ...rest
+  } = options as Partial<CodeUsageGenerator>;
+
+  return { id, lang, ...rest };
 }

@@ -1,0 +1,145 @@
+---
+title: <APIPage />
+description: The component for rendering OpenAPI docs content
+---
+
+## Overview
+
+Fumadocs OpenAPI uses a `<APIPage />` component to render page contents.
+
+When customising it, the options are split into server/client configs.
+
+```tsx tab="components/api-page.tsx"
+import { openapi } from '@/lib/openapi';
+import { createAPIPage } from 'fumadocs-openapi/ui';
+import client from './api-page.client';
+
+export const APIPage = createAPIPage(openapi, {
+  client,
+  // server config
+});
+```
+
+```tsx tab="components/api-page.client.tsx"
+'use client';
+import { defineClientConfig } from 'fumadocs-openapi/ui/client';
+
+export default defineClientConfig({
+  // client config
+});
+```
+
+Installing the types packages is highly recommended for advanced customisations:
+
+```package-install
+openapi-types json-schema-typed -D
+```
+
+It gives you a higher level of type-safety.
+
+### Generate Code Samples
+
+Generate custom code samples for each API endpoint.
+
+```ts
+import { openapi } from '@/lib/openapi';
+import { createAPIPage } from 'fumadocs-openapi/ui';
+
+export const APIPage = createAPIPage(openapi, {
+  generateCodeSamples(endpoint) {
+    return [
+      {
+        id: 'js',
+        lang: 'js',
+        label: 'JavaScript SDK',
+        source: "console.log('hello')",
+      },
+      // or to disable the default code samples
+      // set `source: false`
+      {
+        id: 'curl',
+        lang: 'bash',
+        source: false,
+      },
+    ];
+  },
+});
+```
+
+In addition, you can also specify code samples via OpenAPI schema.
+
+```yaml
+paths:
+  /plants:
+    get:
+      x-codeSamples:
+        - lang: js
+          label: JavaScript SDK
+          source: |
+            const planter = require('planter');
+            planter.list({ unwatered: true });
+```
+
+## Media Adapters
+
+You can create a media adapter to support other media types in API pages, a media adapter implements:
+
+- Converting value into `fetch()` body compatible with corresponding media type.
+- Generate code example based on different programming language/tool.
+
+Put your media adapters in a separate file.
+
+```ts title="lib/media-adapters.ts" twoslash
+import type { MediaAdapter } from 'fumadocs-openapi';
+
+export const mediaAdapters: Record<string, MediaAdapter> = {
+  // example: custom `application/json
+  'application/json': {
+    encode(data) {
+      return JSON.stringify(data.body);
+    },
+    // returns code that inits a `body` variable, used for request body
+    generateExample(data, ctx) {
+      if (ctx.lang === 'js') {
+        return `const body = "hello world"`;
+      }
+
+      if (ctx.lang === 'python') {
+        return `body = "hello world"`;
+      }
+
+      if (ctx.lang === 'go' && 'addImport' in ctx) {
+        ctx.addImport('strings');
+
+        return `body := strings.NewReader("hello world")`;
+      }
+    },
+  },
+};
+```
+
+Pass the adapter to both client & server configs.
+
+```tsx tab="components/api-page.tsx"
+import { openapi } from '@/lib/openapi';
+import { createAPIPage } from 'fumadocs-openapi/ui';
+import { mediaAdapters } from '@/lib/media-adapters';
+import client from './api-page.client';
+
+export const APIPage = createAPIPage(openapi, {
+  client,
+  // [!code ++]
+  mediaAdapters,
+});
+```
+
+```tsx tab="components/api-page.client.tsx"
+'use client';
+import { defineClientConfig } from 'fumadocs-openapi/ui/client';
+import { mediaAdapters } from '@/lib/media-adapters';
+
+export default defineClientConfig({
+  // [!code ++]
+  mediaAdapters,
+});
+```

@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-mdx",
-  "version": "13.0.4",
+  "version": "13.0.5",
   "description": "The built-in source for Fumadocs",
   "keywords": [
     "NextJs",
@@ -86,7 +86,7 @@
     "@mdx-js/mdx": "^3.1.1",
     "@standard-schema/spec": "^1.0.0",
     "chokidar": "^4.0.3",
-    "esbuild": "^0.25.11",
+    "esbuild": "^0.25.12",
     "estree-util-value-to-estree": "^3.5.0",
     "js-yaml": "^4.1.0",
     "lru-cache": "^11.2.2",
@@ -94,7 +94,7 @@
     "picocolors": "^1.1.1",
     "picomatch": "^4.0.3",
     "remark-mdx": "^3.1.1",
-    "tinyexec": "^1.0.1",
+    "tinyexec": "^1.0.2",
     "tinyglobby": "^0.2.15",
     "unified": "^11.0.5",
     "unist-util-remove-position": "^5.0.0",
@@ -107,10 +107,10 @@
     "@types/js-yaml": "^4.0.9",
     "@types/mdast": "^4.0.4",
     "@types/mdx": "^2.0.13",
-    "@types/node": "^24.9.2",
+    "@types/node": "^24.10.0",
     "@types/picomatch": "^4.0.2",
     "@types/react": "^19.2.2",
-    "astro": "^5.6.1",
+    "astro": "^5.15.3",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "mdast-util-directive": "^3.1.0",
@@ -123,7 +123,7 @@
     "rollup": "^4.52.5",
     "tsconfig": "workspace:*",
     "vfile": "^6.0.3",
-    "vite": "^7.1.12",
+    "vite": "^7.2.0",
     "webpack": "^5.102.1"
   },
   "peerDependencies": {

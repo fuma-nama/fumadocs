@@ -1,6 +1,6 @@
 import type { ProcessedDocument } from '@/utils/process-document';
 import type { OpenAPIServer } from '@/server';
-import type { OperationItem, WebhookItem } from '@/render/api-page';
+import type { OperationItem, WebhookItem } from '@/ui/api-page';
 import type {
   Document,
   OperationObject,

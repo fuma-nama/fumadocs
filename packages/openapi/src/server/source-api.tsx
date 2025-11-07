@@ -9,7 +9,7 @@ import type {
 } from 'fumadocs-core/source';
 import type { OpenAPIServer } from '@/server/create';
 import type { SchemaToPagesOptions } from '@/utils/pages/preset-auto';
-import type { ApiPageProps } from '@/render/api-page';
+import type { ApiPageProps } from '@/ui/api-page';
 
 declare module 'fumadocs-core/source' {
   export interface PageData {
@@ -93,7 +93,7 @@ export async function openapiSource(
       path: `${baseDir}/${entry.path}`,
       data: {
         ...entry.info,
-        getAPIPageProps: () => toBody(from, entry),
+        getAPIPageProps: () => toBody(entry),
         _openapi: {
           method:
             entry.type === 'operation' || entry.type === 'webhook'

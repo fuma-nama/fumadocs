@@ -6,11 +6,12 @@ async function getRepoStarsAndForks(
   owner: string,
   repo: string,
   token?: string,
+  baseUrl: string = 'https://api.github.com',
 ): Promise<{
   stars: number;
   forks: number;
 }> {
-  const endpoint = `https://api.github.com/repos/${owner}/${repo}`;
+  const endpoint = `${baseUrl}/repos/${owner}/${repo}`;
   const headers = new Headers({
     'Content-Type': 'application/json',
   });
@@ -41,13 +42,15 @@ export async function GithubInfo({
   repo,
   owner,
   token,
+  baseUrl,
   ...props
 }: AnchorHTMLAttributes<HTMLAnchorElement> & {
   owner: string;
   repo: string;
   token?: string;
+  baseUrl?: string;
 }) {
-  const { stars } = await getRepoStarsAndForks(owner, repo, token);
+  const { stars } = await getRepoStarsAndForks(owner, repo, token, baseUrl);
   const humanizedStars = humanizeNumber(stars);
 
   return (

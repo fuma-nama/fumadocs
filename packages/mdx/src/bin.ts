@@ -7,6 +7,7 @@ async function start() {
   const isNext =
     existsSync('next.config.js') ||
     existsSync('next.config.mjs') ||
+    existsSync('next.config.mts') ||
     existsSync('next.config.ts');
 
   if (isNext) {

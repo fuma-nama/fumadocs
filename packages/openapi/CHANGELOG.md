@@ -1,5 +1,258 @@
 # @fuma-docs/openapi
 
+## 10.0.0
+
+### Major Changes
+
+- ccae0ac: Rename option `content.showExampleInFields` to `schemaUI.showExample`.
+- 87cdffa: **Drop `renderer` & `fields` API**
+
+  Fumadocs OpenAPI now expects per-feature customizations, dropping the old centralized `renderer` API.
+
+  ```ts
+  // components/api-page.tsx
+  import { openapi } from '@/lib/openapi';
+  import { createAPIPage } from 'fumadocs-openapi/ui';
+
+  export const APIPage = createAPIPage(openapi, {
+    // e.g. customise render functions
+    content: {
+      renderResponseTabs,
+      renderAPIExampleLayout,
+      renderAPIExampleUsageTabs,
+    },
+  });
+  ```
+
+  For migrating the `fields` option of Playground, you can use `render*` APIs on client configs.
+
+  ```ts
+  // components/api-page.client.tsx
+  'use client';
+  import { defineClientConfig } from 'fumadocs-openapi/ui/client';
+
+  export default defineClientConfig({
+    playground: {
+      renderParameterField: (fieldName, field) => ...
+    }
+  })
+  ```
+
+  You can customise the renderers of different layouts:
+
+  ```tsx
+  // components/api-page.tsx
+  import { openapi } from '@/lib/openapi';
+  import { createAPIPage } from 'fumadocs-openapi/ui';
+
+  export const APIPage = createAPIPage(openapi, {
+    content: {
+      renderResponseTabs: (tabs) => <div></div>,
+      renderAPIExampleLayout: ({ selector, usageTabs, responseTabs }) => (
+        <div></div>
+      ),
+      renderAPIExampleUsageTabs: (generators) => <div></div>,
+      renderPageLayout: ({ operations, webhooks }) => <div></div>,
+      renderOperationLayout: (slots) => <div></div>,
+      renderWebhookLayout: ({
+        header,
+        authSchemes,
+        paremeters,
+        body,
+        responses,
+        callbacks,
+      }) => <div></div>,
+    },
+  });
+  ```
+
+- 40d0fa3: **Expect OpenAPI server to use `generateFiles()`**
+
+  File generation is now part of OpenAPI server, the `input` field requires the server instead of string array.
+
+  Before:
+
+  ```ts
+  import { openapi } from '@/lib/openapi';
+
+  void generateFiles({
+    input: ['./products.yaml'],
+    output: './content/docs',
+  });
+  ```
+
+  After:
+
+  ```ts
+  import { generateFiles } from 'fumadocs-openapi';
+  import { openapi } from '@/lib/openapi';
+
+  void generateFiles({
+    input: openapi,
+    output: './content/docs',
+  });
+  ```
+
+- aa4e1ad: **Redesign `createOpenAPI` usage**
+  1. Isolate API page and API server.
+
+  Before:
+
+  ```ts
+  // lib/openapi.ts
+  import { createOpenAPI } from 'fumadocs-openapi/server';
+  import path from 'node:path';
+
+  export const openapi = createOpenAPI({
+    input: [path.resolve('./scalar.yaml')],
+    proxyUrl: '/api/proxy',
+
+    mediaAdapters: { ... },
+    shikiOptions: {
+      themes: {
+        dark: 'vesper',
+        light: 'vitesse-light',
+      },
+    },
+  });
+  ```
+
+  After:
+
+  ```ts
+  // lib/openapi.ts
+  import { createOpenAPI } from 'fumadocs-openapi/server';
+  import path from 'node:path';
+
+  export const openapi = createOpenAPI({
+    input: [path.resolve('./scalar.yaml')],
+    proxyUrl: '/api/proxy',
+  });
+  ```
+
+  ```ts
+  // components/api-page.tsx
+  import { openapi } from '@/lib/openapi';
+  import { createAPIPage } from 'fumadocs-openapi/ui';
+
+  export const APIPage = createAPIPage(openapi, {
+    mediaAdapters: { ... },
+    shikiOptions: {
+      themes: {
+        dark: 'vesper',
+        light: 'vitesse-light',
+      },
+    },
+  });
+  ```
+
+  2. Remove `disablePlayground` from `createAPIPage()`, use `playground.enabled` instead:
+
+  ```ts
+  // components/api-page.tsx
+  import { openapi } from '@/lib/openapi';
+  import { createAPIPage } from 'fumadocs-openapi/ui';
+
+  export const APIPage = createAPIPage(openapi, {
+    playground: {
+      enabled: false,
+    },
+  });
+  ```
+
+  3. Support client config:
+
+  ```tsx
+  // components/api-page.tsx
+  import { openapi } from '@/lib/openapi';
+  import { createAPIPage } from 'fumadocs-openapi/ui';
+  import client from './api-page.client';
+
+  export const APIPage = createAPIPage(openapi, {
+    client,
+  });
+  ```
+
+  ```tsx
+  // components/api-page.client.tsx
+  'use client';
+  import { defineClientConfig } from 'fumadocs-openapi/ui/client';
+
+  export default defineClientConfig({
+    playground: {
+      transformAuthInputs: (inputs) => [
+        ...inputs,
+        {
+          fieldName: 'auth.tests',
+          children: <div>Tests</div>,
+          defaultValue: '',
+        },
+      ],
+    },
+  });
+  ```
+
+  4. Prefer client config for `adapter.client`:
+
+  Forwarding client-side media adapters is also done with `api-page.client.tsx`:
+
+  ```tsx
+  // components/api-page.tsx
+  import { openapi } from '@/lib/openapi';
+  import { createAPIPage } from 'fumadocs-openapi/ui';
+  import { adapters } from './my-media-adapters';
+  import client from './api-page.client';
+
+  export const APIPage = createAPIPage(openapi, {
+    client,
+    mediaAdapters: adapters,
+  });
+  ```
+
+  ```tsx
+  // components/api-page.client.tsx
+  'use client';
+  import { defineClientConfig } from 'fumadocs-openapi/ui/client';
+  import { adapters } from './my-media-adapters';
+
+  export default defineClientConfig({
+    mediaAdapters: adapters,
+  });
+  ```
+
+### Minor Changes
+
+- 189028a: Add `storageKeyPrefix` option to isolate `localStorage` for multiple API instances
+
+  When using multiple `createOpenAPI()` instances in the same application, the server selection state would bleed between different APIs because they all shared the same storage key prefix.
+  Set a prefix to avoid this.
+
+  **Usage:**
+
+  ```tsx
+  // components/api-page.client.tsx
+  'use client';
+  import { defineClientConfig } from 'fumadocs-openapi/ui/client';
+
+  export default defineClientConfig({
+    storageKeyPrefix: 'fumadocs-openapi-custom-',
+  });
+  ```
+
+### Patch Changes
+
+- c1026b8: Fix TypeScript schema wrong output.
+
+  Note: code formatting has been disabled to improve performance.
+
+- ca09b6a: Core: Support accessing MDX plugins separately at `fumadocs-core/mdx-plugins/*`
+- Updated dependencies [bc97236]
+- Updated dependencies [ca09b6a]
+- Updated dependencies [c0df2c4]
+- Updated dependencies [117ad86]
+  - fumadocs-core@16.0.8
+  - fumadocs-ui@16.0.8
+
 ## 9.7.3
 
 ### Patch Changes
