@@ -1,5 +1,13 @@
 # next-docs-zeta
 
+## 16.0.8
+
+### Patch Changes
+
+- bc97236: Fix `rehypeCode()` tsdoc for `lazy` option
+- ca09b6a: Core: Support accessing MDX plugins separately at `fumadocs-core/mdx-plugins/*`
+- 117ad86: Add support for using a custom GitHub API base URL
+
 ## 16.0.7
 
 ### Patch Changes

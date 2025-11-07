@@ -1,5 +1,17 @@
 # fumadocs-obsidian
 
+## 0.0.6
+
+### Patch Changes
+
+- ca09b6a: Core: Support accessing MDX plugins separately at `fumadocs-core/mdx-plugins/*`
+- Updated dependencies [bc97236]
+- Updated dependencies [ca09b6a]
+- Updated dependencies [c0df2c4]
+- Updated dependencies [117ad86]
+  - fumadocs-core@16.0.8
+  - fumadocs-ui@16.0.8
+
 ## 0.0.5
 
 ### Patch Changes
