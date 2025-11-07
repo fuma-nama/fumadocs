@@ -1,5 +1,15 @@
 # fumadocs-docgen
 
+## 3.0.4
+
+### Patch Changes
+
+- ca09b6a: Core: Support accessing MDX plugins separately at `fumadocs-core/mdx-plugins/*`
+- Updated dependencies [bc97236]
+- Updated dependencies [ca09b6a]
+- Updated dependencies [117ad86]
+  - fumadocs-core@16.0.8
+
 ## 3.0.3
 
 ### Patch Changes
