@@ -7,11 +7,11 @@
 
 @theme {
   --spacing-fd-container: 1436px;
-  --color-brand: hsl(55, 100%, 38%);
+  --color-brand: hsl(26, 73%, 51%);
   --color-brand-foreground: white;
   --color-brand-secondary: #9b18dc;
   --color-brand-secondary-foreground: #efccff;
-  --color-brand-200: hsl(41, 100%, 50%);
+  --color-brand-200: hsl(33, 100%, 50%);
 
   --color-landing-foreground: #59592a;
   --color-landing-foreground-200: #a8a866;
