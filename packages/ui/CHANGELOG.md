@@ -1,5 +1,16 @@
 # next-docs-ui
 
+## 16.0.8
+
+### Patch Changes
+
+- c0df2c4: improve navbar button gaps
+- 117ad86: Add support for using a custom GitHub API base URL
+- Updated dependencies [bc97236]
+- Updated dependencies [ca09b6a]
+- Updated dependencies [117ad86]
+  - fumadocs-core@16.0.8
+
 ## 16.0.7
 
 ### Patch Changes
