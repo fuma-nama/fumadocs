@@ -1,4 +1,3 @@
-import Hero from './hero.png';
 import Image from 'next/image';
 import { Tinos } from 'next/font/google';
 import { cn } from '@/lib/cn';
@@ -24,6 +23,7 @@ import {
 import ShadcnImage from './shadcn.png';
 import ContributorCounter from '@/components/contributor-count';
 import { owner, repo } from '@/lib/github';
+import { Hero } from './hero';
 
 const tinos = Tinos({
   weight: '400',
@@ -41,7 +41,7 @@ const headingVariants = cva('font-tinos', {
 });
 
 const buttonVariants = cva(
-  'inline-flex px-5 py-3 rounded-full font-medium tracking-tight transition-colors',
+  'inline-flex justify-center px-5 py-3 rounded-full font-medium tracking-tight transition-colors',
   {
     variants: {
       variant: {
@@ -77,25 +77,18 @@ export default function Page() {
         tinos.variable,
       )}
     >
-      <div className="grid mx-auto w-full max-w-[1400px]">
-        <div className="overflow-hidden col-start-1 row-start-1">
-          <Image
-            sizes="(max-width: 800px) 1200px, (max-width: 1400px) 100vw, 1400px"
-            src={Hero}
-            alt="noise"
-            className="min-w-[1000px] pointer-events-none select-none"
-            priority
-          />
-        </div>
-        <div className="mt-auto dark text-landing-foreground mb-[max(100px,min(9vw,150px))] p-6 col-start-1 row-start-1 md:p-12">
-          <h1 className="text-4xl mt-40 mb-12 leading-tighter font-tinos md:text-5xl lg:text-6xl">
-            Build excellent
+      <div className="relative flex min-h-[600px] h-[70vh] max-h-[900px] border rounded-2xl overflow-hidden mx-auto w-full max-w-[1400px] bg-origin-border">
+        <Hero />
+        <div className="z-2 p-6 size-full md:p-12">
+          <p className="mt-12 text-xs text-brand font-medium rounded-full p-2 border border-brand w-fit">
+            the React.js docs framework you love.
+          </p>
+          <h1 className="text-4xl mt-4 mb-12 leading-tighter font-medium lg:text-5xl">
+            Build excellent documentations,
             <br />
-            documentation
-            <br />
-            your way.
+            your <span className="text-brand">style</span>.
           </h1>
-          <div className="flex flex-col items-start gap-4 md:flex-row md:items-center">
+          <div className="flex flex-col text-center w-fit gap-4 md:flex-row md:items-center">
             <Link href="/docs/ui" className={cn(buttonVariants())}>
               Getting Started
             </Link>
@@ -107,11 +100,10 @@ export default function Page() {
             >
               Open CodeSandbox
             </a>
-            <p className="text-sm">the React.js docs framework you love.</p>
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-1 gap-8 px-6 pb-6 mx-auto w-full max-w-[1400px] md:px-12 md:pb-12 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-8 mt-12 px-6 pb-6 mx-auto w-full max-w-[1400px] md:px-12 md:pb-12 lg:grid-cols-2">
         <p className="text-2xl tracking-tight leading-snug font-light col-span-full md:text-4xl">
           Fumadocs is a <span className="text-brand font-medium">React.js</span>{' '}
           documentation framework for{' '}
@@ -478,7 +470,7 @@ function ForEngineers() {
           composability that engineers love — you can use Fumadocs as a library,
           without adapting the entire framework.
         </p>
-        <div className="mt-auto flex flex-col gap-2 @container [mask-image:linear-gradient(to_bottom,white,transparent)]">
+        <div className="mt-auto flex flex-col gap-2 @container mask-[linear-gradient(to_bottom,white,transparent)]">
           {[
             {
               name: 'fumadocs-mdx',
@@ -610,7 +602,7 @@ const searchItemVariants = cva(
 
 function Search() {
   return (
-    <div className="flex select-none flex-col mt-auto bg-fd-popover rounded-xl border [mask-image:linear-gradient(to_bottom,white_40%,transparent_90%)] max-md:-mx-4">
+    <div className="flex select-none flex-col mt-auto bg-fd-popover rounded-xl border mask-[linear-gradient(to_bottom,white_40%,transparent_90%)] max-md:-mx-4">
       <div className="inline-flex items-center gap-2 px-4 py-3 text-sm text-fd-muted-foreground">
         <SearchIcon className="size-4" />
         Search...
