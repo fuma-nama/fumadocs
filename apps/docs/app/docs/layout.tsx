@@ -12,7 +12,7 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
       {...base}
       tree={source.pageTree}
       // just icon items
-      links={linkItems.filter((item) => item.type === 'icon')}
+      links={[...linkItems.filter((item) => item.type === 'icon')]}
       nav={{
         ...base.nav,
         title: (

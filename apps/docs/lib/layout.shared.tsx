@@ -43,11 +43,11 @@ export const logo = (
       alt="Fumadocs"
       src={Logo}
       sizes="100px"
-      className="hidden w-22 [.uwu_&]:block"
+      className="hidden w-22 in-[.uwu]:block"
       aria-label="Fumadocs"
     />
 
-    <FumadocsIcon className="size-5 [.uwu_&]:hidden" />
+    <FumadocsIcon className="size-5 in-[.uwu]:hidden" />
   </>
 );
 
@@ -57,7 +57,7 @@ export function baseOptions(): BaseLayoutProps {
       title: (
         <>
           {logo}
-          <span className="font-medium [.uwu_&]:hidden [header_&]:text-[15px]">
+          <span className="font-medium in-[.uwu]:hidden in-[header]:text-[15px]">
             Fumadocs
           </span>
         </>

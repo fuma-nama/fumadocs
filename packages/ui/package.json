@@ -28,9 +28,9 @@
       "import": "./dist/layouts/home/index.js",
       "types": "./dist/layouts/home/index.d.ts"
     },
-    "./layouts/home/*": {
-      "import": "./dist/layouts/home/*.js",
-      "types": "./dist/layouts/home/*.d.ts"
+    "./layouts/home/navbar": {
+      "import": "./dist/layouts/home/navbar.js",
+      "types": "./dist/layouts/home/navbar.d.ts"
     },
     "./layouts/docs": {
       "import": "./dist/layouts/docs/index.js",
