@@ -212,7 +212,7 @@ export function Writing({
 
   return (
     <div className="col-span-full my-20">
-      <h2 className="text-4xl text-brand mb-8 font-tinos text-center">
+      <h2 className="text-4xl text-brand mb-8 text-center font-medium tracking-tight">
         Anybody can write.
       </h2>
       <p className="text-center mb-8 mx-auto w-full max-w-[800px]">

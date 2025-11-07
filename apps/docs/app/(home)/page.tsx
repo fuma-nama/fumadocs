@@ -1,5 +1,4 @@
 import Image from 'next/image';
-import { Tinos } from 'next/font/google';
 import { cn } from '@/lib/cn';
 import Link from 'next/link';
 import ComponentsImage from './components.png';
@@ -25,13 +24,7 @@ import ContributorCounter from '@/components/contributor-count';
 import { owner, repo } from '@/lib/github';
 import { Hero } from './hero';
 
-const tinos = Tinos({
-  weight: '400',
-  subsets: ['latin'],
-  variable: '--font-tinos',
-});
-
-const headingVariants = cva('font-tinos', {
+const headingVariants = cva('font-medium tracking-tight', {
   variants: {
     variant: {
       h2: 'text-3xl lg:text-4xl',
@@ -71,32 +64,33 @@ const cardVariants = cva('rounded-2xl text-sm p-6 bg-origin-border shadow-lg', {
 
 export default function Page() {
   return (
-    <main
-      className={cn(
-        'text-landing-foreground dark:text-landing-foreground-dark',
-        tinos.variable,
-      )}
-    >
+    <main className="text-landing-foreground dark:text-landing-foreground-dark">
       <div className="relative flex min-h-[600px] h-[70vh] max-h-[900px] border rounded-2xl overflow-hidden mx-auto w-full max-w-[1400px] bg-origin-border">
         <Hero />
-        <div className="z-2 p-6 size-full md:p-12">
-          <p className="mt-12 text-xs text-brand font-medium rounded-full p-2 border border-brand w-fit">
+        <div className="flex flex-col z-2 p-6 size-full md:p-12 max-md:items-center max-md:text-center">
+          <p className="mt-12 text-xs text-brand font-medium rounded-full p-2 border border-brand/50 w-fit">
             the React.js docs framework you love.
           </p>
-          <h1 className="text-4xl mt-4 mb-12 leading-tighter font-medium lg:text-5xl">
+          <h1 className="text-4xl my-8 leading-tighter font-medium xl:text-5xl xl:mb-12">
             Build excellent documentations,
             <br />
             your <span className="text-brand">style</span>.
           </h1>
-          <div className="flex flex-col text-center w-fit gap-4 md:flex-row md:items-center">
-            <Link href="/docs/ui" className={cn(buttonVariants())}>
+          <div className="flex flex-row items-center justify-center gap-4 flex-wrap w-fit">
+            <Link
+              href="/docs/ui"
+              className={cn(buttonVariants(), 'max-sm:text-sm')}
+            >
               Getting Started
             </Link>
             <a
               href="https://codesandbox.io/p/sandbox/github/fuma-nama/fumadocs-ui-template"
               target="_blank"
               rel="noreferrer noopener"
-              className={cn(buttonVariants({ variant: 'secondary' }))}
+              className={cn(
+                buttonVariants({ variant: 'secondary' }),
+                'max-sm:text-sm',
+              )}
             >
               Open CodeSandbox
             </a>
@@ -115,7 +109,7 @@ export default function Page() {
           CMS — anything.
         </p>
         <div className="p-8 bg-gradient-to-b from-brand-secondary/40 rounded-xl col-span-full">
-          <h2 className="text-6xl text-center mix-blend-overlay font-tinos">
+          <h2 className="text-6xl text-center mix-blend-overlay">
             Try it out.
           </h2>
           <CodeBlock
