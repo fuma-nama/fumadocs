@@ -4,7 +4,7 @@ import { lazy } from 'react';
 
 const Client = lazy(() => import('./client'));
 
-export function APIPlayground({
+function APIPlayground({
   path,
   method,
   ctx,
@@ -20,6 +20,8 @@ export function APIPlayground({
 
 /**
  * Enable Scalar for API playgrounds by wrapping your options inside.
+ *
+ * Requires `@scalar/api-client-react` to be installed, it imports the styles automatically.
  */
 export function withScalar(
   options: CreateAPIPageOptions = {},

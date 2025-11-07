@@ -9,6 +9,7 @@ import { MethodLabel } from '@/ui/components/method-label';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import type { OpenAPIV3_1 } from 'openapi-types';
+import '@scalar/api-client-react/style.css';
 
 export default function ScalarPlayground({
   path,
@@ -40,9 +41,7 @@ export default function ScalarPlayground({
       <ApiClientModalProvider
         configuration={{
           theme: 'moon',
-          spec: {
-            content: spec,
-          },
+          content: spec,
         }}
       >
         <Trigger path={path} method={method} />
