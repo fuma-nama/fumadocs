@@ -90,7 +90,6 @@ export async function searchDocs(
       ...extraParams?.where,
     }),
     groupBy: {
-      // TODO: this was causing error on number of group variants
       properties: ['page_id'],
       max_results: 7,
       ...extraParams?.groupBy,

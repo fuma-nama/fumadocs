@@ -96,8 +96,8 @@ export default function Page() {
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-1 gap-8 mt-12 px-6 mx-auto w-full max-w-[1400px] md:px-12 lg:grid-cols-2">
-        <p className="text-2xl tracking-tight leading-snug font-light col-span-full md:text-4xl">
+      <div className="grid grid-cols-1 gap-10 mt-12 px-6 mx-auto w-full max-w-[1400px] md:px-12 lg:grid-cols-2">
+        <p className="text-2xl tracking-tight leading-snug font-light col-span-full md:text-3xl xl:text-4xl">
           Fumadocs is a <span className="text-brand font-medium">React.js</span>{' '}
           documentation framework for{' '}
           <span className="text-brand font-medium">Developers</span>,
@@ -410,7 +410,7 @@ function ForEngineers() {
         className={cn(
           headingVariants({
             variant: 'h2',
-            className: 'text-brand text-center mb-8 col-span-full',
+            className: 'text-brand text-center mb-4 col-span-full',
           }),
         )}
       >
@@ -471,7 +471,7 @@ function ForEngineers() {
           </svg>
         </div>
 
-        <AgnosticImage className="absolute inset-0 -z-1 mask-[linear-gradient(to_top,white_30%,transparent_calc(100%-100px))]" />
+        <AgnosticImage className="absolute inset-0 -z-1 mask-[linear-gradient(to_top,white_30%,transparent_calc(100%-120px))]" />
       </div>
       <div
         className={cn(
@@ -518,7 +518,7 @@ function ForEngineers() {
           ].map((item) => (
             <div
               key={item.name}
-              className="flex flex-col text-sm gap-2 p-2 border border-dashed border-neutral-300 @lg:flex-row @lg:items-center"
+              className="flex flex-col text-sm gap-2 p-2 border border-dashed border-brand-secondary @lg:flex-row @lg:items-center last:@max-lg:hidden"
             >
               <p className="font-medium text-nowrap">{item.name}</p>
               <p className="text-xs flex-1 @lg:text-end">{item.description}</p>
@@ -584,8 +584,7 @@ export const source = loader({
         width={1200}
         className="min-w-0 rounded-2xl object-cover pointer-events-none shadow-lg"
       />
-      <div className={cn(cardVariants(), 'flex flex-col row-span-2')}>
-        <SearchIcon className="size-8 mb-4 text-brand" />
+      <div className={cn(cardVariants(), 'flex flex-col max-md:pb-0')}>
         <h3
           className={cn(headingVariants({ variant: 'h3', className: 'mb-6' }))}
         >
@@ -602,18 +601,32 @@ export const source = loader({
         </Link>
         <Search />
       </div>
-      <div className={cn(cardVariants())}>
-        <h3
-          className={cn(headingVariants({ variant: 'h3', className: 'mb-6' }))}
-        >
-          The shadcn/ui for docs
-        </h3>
-        <p>
-          Fumadocs CLI creates interactive components for your docs, offering a
-          rich experience to your users.
-        </p>
+      <div className={cn(cardVariants(), 'flex flex-col p-0 overflow-hidden')}>
+        <div className="p-6 mb-2">
+          <h3
+            className={cn(
+              headingVariants({ variant: 'h3', className: 'mb-6' }),
+            )}
+          >
+            The shadcn/ui for docs
+          </h3>
+          <p className="mb-6">
+            Fumadocs CLI creates interactive components for your docs, offering
+            a rich experience to your users.
+          </p>
+          <Link
+            href="/docs/cli"
+            className={cn(buttonVariants({ className: 'w-fit' }))}
+          >
+            Commands
+          </Link>
+        </div>
+        <Image
+          src={ShadcnImage}
+          alt="shadcn"
+          className="mt-auto flex-1 w-full object-cover"
+        />
       </div>
-      <Image src={ShadcnImage} alt="shadcn" className="rounded-2xl" />
     </>
   );
 }
@@ -638,11 +651,7 @@ function Search() {
         ].map(([title, description], i) => (
           <div
             key={i}
-            className={cn(
-              searchItemVariants({
-                className: i === 0 && 'bg-fd-accent',
-              }),
-            )}
+            className={cn(searchItemVariants(), i === 0 && 'bg-fd-accent')}
           >
             <div className="flex flex-row items-center gap-2">
               <FileTextIcon className="size-4 text-fd-muted-foreground" />
