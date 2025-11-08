@@ -28,7 +28,7 @@ const headingVariants = cva('font-medium tracking-tight', {
   variants: {
     variant: {
       h2: 'text-3xl lg:text-4xl',
-      h3: 'text-3xl',
+      h3: 'text-2xl lg:text-3xl',
     },
   },
 });
@@ -64,7 +64,7 @@ const cardVariants = cva('rounded-2xl text-sm p-6 bg-origin-border shadow-lg', {
 
 export default function Page() {
   return (
-    <main className="text-landing-foreground dark:text-landing-foreground-dark">
+    <main className="text-landing-foreground pt-4 pb-6 dark:text-landing-foreground-dark md:pb-12">
       <div className="relative flex min-h-[600px] h-[70vh] max-h-[900px] border rounded-2xl overflow-hidden mx-auto w-full max-w-[1400px] bg-origin-border">
         <Hero />
         <div className="flex flex-col z-2 p-6 size-full md:p-12 max-md:items-center max-md:text-center">
@@ -97,7 +97,7 @@ export default function Page() {
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-1 gap-8 mt-12 px-6 pb-6 mx-auto w-full max-w-[1400px] md:px-12 md:pb-12 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-8 mt-12 px-6 mx-auto w-full max-w-[1400px] md:px-12 lg:grid-cols-2">
         <p className="text-2xl tracking-tight leading-snug font-light col-span-full md:text-4xl">
           Fumadocs is a <span className="text-brand font-medium">React.js</span>{' '}
           documentation framework for{' '}
@@ -109,7 +109,7 @@ export default function Page() {
           CMS — anything.
         </p>
         <div className="p-8 bg-gradient-to-b from-brand-secondary/40 rounded-xl col-span-full">
-          <h2 className="text-6xl text-center mix-blend-overlay">
+          <h2 className="text-xl text-center mix-blend-overlay font-mono font-bold uppercase mb-2">
             Try it out.
           </h2>
           <CodeBlock
