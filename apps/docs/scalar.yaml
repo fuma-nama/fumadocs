@@ -697,11 +697,8 @@ components:
               examples:
                 - 0.107
             radius:
-              type: number
-              format: float
+              type: boolean
               description: Radius in Earth radii
-              examples:
-                - 0.532
             gravity:
               type: number
               format: float
