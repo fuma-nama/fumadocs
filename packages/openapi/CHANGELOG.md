@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 10.0.1
+
+### Patch Changes
+
+- 2347d33: Fix Scalar integration
+
 ## 10.0.0
 
 ### Major Changes
