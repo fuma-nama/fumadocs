@@ -9,8 +9,8 @@
   --spacing-fd-container: 1436px;
   --color-brand: hsl(26, 73%, 51%);
   --color-brand-foreground: white;
-  --color-brand-secondary: #9b18dc;
-  --color-brand-secondary-foreground: #efccff;
+  --color-brand-secondary: #c6bb58;
+  --color-brand-secondary-foreground: #97890c;
   --color-brand-200: hsl(33, 100%, 50%);
 
   --color-landing-foreground: #59592a;
@@ -22,8 +22,8 @@
   --color-landing-foreground-200: #b7af7e;
 
   --color-brand: #fff383;
-  --color-brand-secondary: #ad41e7;
-  --color-brand-secondary-foreground: #f5e4ff;
+  --color-brand-secondary: #fc7744;
+  --color-brand-secondary-foreground: #521700;
   --color-brand-foreground: black;
   --color-brand-200: #fff7c8;
 }

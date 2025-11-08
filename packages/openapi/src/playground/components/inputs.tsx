@@ -7,12 +7,7 @@ import {
   useState,
 } from 'react';
 import { ChevronDown, Plus, Trash2, X } from 'lucide-react';
-import {
-  set,
-  useController,
-  useFieldArray,
-  useFormContext,
-} from 'react-hook-form';
+import { useController, useFieldArray, useFormContext } from 'react-hook-form';
 import {
   Select,
   SelectContent,
@@ -301,7 +296,7 @@ export function FieldInput({
       <Select
         value={String(value)}
         onValueChange={(value) =>
-          onChange(value === 'null' ? null : value === 'true')
+          onChange(value === 'undefined' ? undefined : value === 'true')
         }
         disabled={restField.disabled}
       >
@@ -315,7 +310,7 @@ export function FieldInput({
         <SelectContent>
           <SelectItem value="true">True</SelectItem>
           <SelectItem value="false">False</SelectItem>
-          {!isRequired && <SelectItem value="null">Null</SelectItem>}
+          {!isRequired && <SelectItem value="undefined">Unset</SelectItem>}
         </SelectContent>
       </Select>
     );
@@ -328,22 +323,20 @@ export function FieldInput({
       <Input
         id={fieldName}
         placeholder="Enter value"
-        type={field.type === 'string' ? 'text' : 'number'}
+        type={field.type === 'number' ? 'number' : 'text'}
         step={field.type === 'number' ? 'any' : undefined}
         value={value ?? ''}
-        onChange={onChange}
+        onChange={(e) =>
+          onChange(
+            field.type === 'number' ? e.target.valueAsNumber : e.target.value,
+          )
+        }
         {...restField}
       />
       {!isRequired && value !== undefined && (
         <button
           type="button"
-          onClick={() => {
-            // TODO: react-hook-form `reset()` cannot clear default values
-            form.reset((values) => {
-              set(values, fieldName, undefined);
-              return values;
-            });
-          }}
+          onClick={() => onChange(undefined)}
           className="text-fd-muted-foreground"
         >
           <X className="size-4" />
