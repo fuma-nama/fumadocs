@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 10.0.2
+
+### Patch Changes
+
+- 6d0ddb9: fix unset values on number & boolean fields
+
 ## 10.0.1
 
 ### Patch Changes
