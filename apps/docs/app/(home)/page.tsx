@@ -7,7 +7,6 @@ import {
   BatteryChargingIcon,
   FileTextIcon,
   Heart,
-  HeartIcon,
   SearchIcon,
   TimerIcon,
 } from 'lucide-react';
@@ -721,8 +720,8 @@ function OpenSource() {
         <p className="text-center font-mono text-xs opacity-50 mb-8">
           light and gorgeous, just like the moon.
         </p>
-        <div className="h-[200px] mt-auto overflow-hidden p-8 bg-gradient-to-b from-fd-primary/10">
-          <div className="mx-auto bg-radial-[circle_at_0%_100%] from-60% from-transparent to-fd-primary size-[500px] rounded-full" />
+        <div className="h-[200px] mt-auto overflow-hidden p-8 bg-gradient-to-b from-brand-secondary/10">
+          <div className="mx-auto bg-radial-[circle_at_0%_100%] from-60% from-transparent to-brand-secondary size-[500px] rounded-full" />
         </div>
       </div>
 

@@ -316,7 +316,7 @@ export function AgnosticImage(props: ComponentProps<typeof MeshGradient>) {
   return (
     <Dithering
       colorBack="#00000000"
-      colorFront={resolvedTheme === 'dark' ? '#fc7744' : '#1E1E1E'}
+      colorFront={resolvedTheme === 'dark' ? '#fc7744' : '#c6bb58'}
       shape="warp"
       type="4x4"
       speed={0.4}
