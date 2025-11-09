@@ -14,6 +14,7 @@ export async function getImageResponseOptions(): Promise<ImageResponseOptions> {
   return {
     width: 1200,
     height: 630,
+    format: 'webp',
     fonts: [
       {
         name: 'Mono',
