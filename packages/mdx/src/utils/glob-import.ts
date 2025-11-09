@@ -1,4 +1,4 @@
-import { globSync } from 'tinyglobby';
+import { glob } from 'tinyglobby';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -8,12 +8,12 @@ export interface GlobImportOptions {
   import?: string;
 }
 
-export function generateGlobImport(
+export async function generateGlobImport(
   patterns: string | string[],
   options: GlobImportOptions,
-) {
+): Promise<string> {
   let code: string = '{';
-  const result = globSync(patterns, {
+  const result = await glob(patterns, {
     cwd: options.base,
   });
 
