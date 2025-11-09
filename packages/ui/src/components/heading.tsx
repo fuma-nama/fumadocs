@@ -24,10 +24,7 @@ export function Heading<T extends Types = 'h1'>({
       <a data-card="" href={`#${props.id}`} className="peer">
         {props.children}
       </a>
-      <Link
-        aria-label="Link to section"
-        className="size-3.5 shrink-0 text-fd-muted-foreground opacity-0 transition-opacity peer-hover:opacity-100"
-      />
+      <Link className="size-3.5 shrink-0 text-fd-muted-foreground opacity-0 transition-opacity peer-hover:opacity-100" />
     </As>
   );
 }
