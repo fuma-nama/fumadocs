@@ -1,7 +1,7 @@
 import { source } from '@/lib/source';
 import { notFound } from 'next/navigation';
 import { generate as MetadataImage, getImageResponseOptions } from './generate';
-import { ImageResponse } from '@takumi-rs/image-response';
+import { ImageResponse } from 'next/og';
 import { getPageImage } from '@/lib/metadata';
 
 export const revalidate = false;
