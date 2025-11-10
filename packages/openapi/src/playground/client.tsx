@@ -327,7 +327,7 @@ export default function PlaygroundClient({
               type="submit"
               className={cn(
                 buttonVariants({ color: 'primary', size: 'sm' }),
-                'px-3 py-1.5',
+                'w-14 py-1.5',
               )}
               disabled={testQuery.isLoading}
             >
@@ -710,7 +710,7 @@ function useAuthInputs(
     for (const item of inputs) {
       if (!item.mapOutput) continue;
 
-      set(cloned, item.fieldName, item.mapOutput(get(values, item.fieldName)));
+      set(cloned, item.fieldName, item.mapOutput(get(cloned, item.fieldName)));
     }
 
     return cloned;
