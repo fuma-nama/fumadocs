@@ -149,16 +149,6 @@ export function fromConfig<Config>() {
     };
   }
 
-  function mapMetaData<Data>(
-    info: FileInfo,
-    content: Data,
-  ): MetaCollectionEntry<Data> {
-    return {
-      info,
-      ...content,
-    };
-  }
-
   return {
     async doc<Name extends keyof Config>(
       _name: Name,
@@ -209,7 +199,10 @@ export function fromConfig<Config>() {
         Object.entries(glob).map(async ([k, v]) => {
           const data = typeof v === 'function' ? await v() : v;
 
-          return mapMetaData(fileInfo(k, base), data);
+          return {
+            info: fileInfo(k, base),
+            ...data,
+          } satisfies MetaCollectionEntry<unknown>;
         }),
       );
 

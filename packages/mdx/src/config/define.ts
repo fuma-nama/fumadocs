@@ -13,9 +13,9 @@ export type AnyCollection = DocsCollection | DocCollection | MetaCollection;
 
 export interface BaseCollection {
   /**
-   * Directories to scan
+   * Directory to scan
    */
-  dir: string | string[];
+  dir: string;
 
   /**
    * what files to include/exclude (glob patterns)
