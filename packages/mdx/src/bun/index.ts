@@ -6,15 +6,20 @@ import { type CoreOptions, createCore, findConfigFile } from '@/core';
 import { createIntegratedConfigLoader } from '@/loaders/config';
 import { createMetaLoader } from '@/loaders/meta';
 import { toBun } from '@/loaders/adapter';
-import { mdxLoaderGlob, metaLoaderGlob } from '@/loaders';
 
-export type MdxPluginOptions = Partial<CoreOptions>;
+export interface MdxPluginOptions extends Partial<CoreOptions> {
+  /**
+   * Skip meta file transformation step
+   */
+  disableMetaFile?: boolean;
+}
 
 export function createMdxPlugin(options: MdxPluginOptions = {}): BunPlugin {
   const {
     environment = 'bun',
     outDir = '.source',
     configPath = findConfigFile(),
+    disableMetaFile = false,
   } = options;
 
   return {
@@ -30,8 +35,8 @@ export function createMdxPlugin(options: MdxPluginOptions = {}): BunPlugin {
       });
 
       const configLoader = createIntegratedConfigLoader(core);
-      toBun(createMdxLoader(configLoader), mdxLoaderGlob)(build);
-      toBun(createMetaLoader(configLoader), metaLoaderGlob)(build);
+      toBun(createMdxLoader(configLoader))(build);
+      if (!disableMetaFile) toBun(createMetaLoader(configLoader))(build);
     },
   };
 }

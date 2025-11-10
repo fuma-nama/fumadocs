@@ -1,5 +1,14 @@
 # @fuma-docs/openapi
 
+## 10.0.3
+
+### Patch Changes
+
+- 9a7fd08: Improve integer fields handling
+- Updated dependencies [2eef888]
+  - fumadocs-ui@16.0.9
+  - fumadocs-core@16.0.9
+
 ## 10.0.2
 
 ### Patch Changes

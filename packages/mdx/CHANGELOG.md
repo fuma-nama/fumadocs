@@ -1,5 +1,12 @@
 # next-docs-mdx
 
+## 13.0.6
+
+### Patch Changes
+
+- 40176ce: Support `disableMetaFile` option in Bun plugin
+  - fumadocs-core@16.0.9
+
 ## 13.0.5
 
 ### Patch Changes

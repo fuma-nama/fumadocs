@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 16.0.9
+
+### Patch Changes
+
+- 2eef888: Remove unnecessary `aria-label` from the link icon in headings
+  - fumadocs-core@16.0.9
+
 ## 16.0.8
 
 ### Patch Changes
