@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import fs from 'node:fs/promises';
-import type { ImageResponseOptions } from 'next/server';
+import type { ImageResponseOptions } from '@takumi-rs/image-response';
 
 export interface GenerateProps {
   title: ReactNode;
@@ -14,6 +14,7 @@ export async function getImageResponseOptions(): Promise<ImageResponseOptions> {
   return {
     width: 1200,
     height: 630,
+    format: 'webp',
     fonts: [
       {
         name: 'Mono',

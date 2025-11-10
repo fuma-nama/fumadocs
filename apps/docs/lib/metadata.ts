@@ -35,7 +35,7 @@ export function createMetadata(override: Metadata): Metadata {
 }
 
 export function getPageImage(page: Page) {
-  const segments = [...page.slugs, 'image.png'];
+  const segments = [...page.slugs, 'image.webp'];
 
   return {
     segments,
