@@ -7,16 +7,18 @@ export interface GenerateProps {
   description?: ReactNode;
 }
 
-const font = fs.readFile('./lib/og/JetBrainsMono-Regular.ttf').then(data => ({
+const font = fs.readFile('./lib/og/JetBrainsMono-Regular.ttf').then((data) => ({
   name: 'Mono',
   data,
   weight: 400,
 }));
-const fontBold = fs.readFile('./lib/og/JetBrainsMono-Bold.ttf').then(data => ({
-  name: 'Mono',
-  data,
-  weight: 600,
-}));
+const fontBold = fs
+  .readFile('./lib/og/JetBrainsMono-Bold.ttf')
+  .then((data) => ({
+    name: 'Mono',
+    data,
+    weight: 600,
+  }));
 
 export async function getImageResponseOptions(): Promise<ImageResponseOptions> {
   return {
