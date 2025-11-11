@@ -150,6 +150,7 @@
     "mdast-util-mdxjs-esm": "^2.0.1",
     "next": "16.0.1",
     "react-router": "^7.9.5",
+    "remark-directive": "^4.0.0",
     "remark-mdx": "^3.1.1",
     "remove-markdown": "^0.6.2",
     "tsconfig": "workspace:*",

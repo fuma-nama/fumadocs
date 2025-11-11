@@ -2,10 +2,8 @@ import * as path from 'node:path';
 import type { Image, Root } from 'mdast';
 import type { Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
-import { imageSize } from 'image-size';
 import type { MdxjsEsm } from 'mdast-util-mdxjs-esm';
 import type { ISizeCalculationResult } from 'image-size/types/interface';
-import { imageSizeFromFile } from 'image-size/fromFile';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
 import { fileURLToPath } from 'node:url';
 
@@ -319,7 +317,10 @@ async function getImageSize(
   src: Source,
   onExternal: ExternalImageOptions,
 ): Promise<ISizeCalculationResult | undefined> {
-  if (src.type === 'file') return imageSizeFromFile(src.file);
+  if (src.type === 'file') {
+    const { imageSizeFromFile } = await import('image-size/fromFile');
+    return imageSizeFromFile(src.file);
+  }
   if (onExternal === false) return;
 
   const { timeout } = typeof onExternal === 'object' ? onExternal : {};
@@ -333,5 +334,6 @@ async function getImageSize(
     );
   }
 
+  const { imageSize } = await import('image-size');
   return imageSize(new Uint8Array(await res.arrayBuffer()));
 }
