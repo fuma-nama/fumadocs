@@ -2,7 +2,7 @@ import type { LoadedConfig } from '@/config/build';
 import type { EmitEntry, Plugin } from '@/core';
 import {
   generateBrowserIndexFile,
-  generateIndexFile,
+  generateServerIndexFile,
   GenerateIndexFileOptions,
 } from '@/utils/generate-index-file';
 
@@ -77,10 +77,7 @@ export default function vite({
         config,
         configPath: this.configPath,
         outDir: this.outDir,
-        target:
-          indexOptions.runtime === 'bun' || indexOptions.runtime === 'node'
-            ? 'node'
-            : 'vite',
+        target: indexOptions.runtime === false ? 'vite' : 'default',
       };
 
       if (indexOptions.browser !== false) {
@@ -92,7 +89,7 @@ export default function vite({
 
       out.push({
         path: 'index.ts',
-        content: await generateIndexFile(generateOptions),
+        content: await generateServerIndexFile(generateOptions),
       });
 
       return out;

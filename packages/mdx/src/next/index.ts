@@ -7,7 +7,6 @@ import type {
 } from 'next/dist/server/config-shared';
 import * as path from 'node:path';
 import { loadConfig } from '@/config/load-from-file';
-import { removeFileCache } from '@/next/file-cache';
 import { ValidationError } from '@/utils/validation';
 import next from '@/plugins/next';
 import { type Core, createCore, findConfigFile } from '@/core';
@@ -125,11 +124,8 @@ async function init(
       console.log('[MDX] started dev server');
     });
 
-    watcher.on('all', async (event, file) => {
-      const absolutePath = path.resolve(file);
-      if (event === 'change') removeFileCache(absolutePath);
-
-      if (absolutePath === path.resolve(options.configPath)) {
+    watcher.on('all', async (_event, file) => {
+      if (path.resolve(file) === path.resolve(options.configPath)) {
         // skip plugin listeners
         watcher.removeAllListeners();
 

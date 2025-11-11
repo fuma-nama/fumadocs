@@ -1,21 +1,27 @@
-import type { LoadedConfig } from '@/config/build';
+import { buildConfig, type DocCollectionItem } from '@/config/build';
 import { buildMDX, type CompiledMDXProperties } from '@/loaders/mdx/build-mdx';
 import { executeMdx } from '@fumadocs/mdx-remote/client';
 import { pathToFileURL } from 'node:url';
 import { fumaMatter } from '@/utils/fuma-matter';
 import fs from 'node:fs/promises';
 import { type FileInfo, fromConfig } from './server';
-import type { DocCollection } from '@/config';
 
 export interface LazyEntry<Data> {
   info: FileInfo;
   data: Data;
   lastModified?: Date;
+  hash?: string;
 }
 
-export function fromConfigDynamic<Config>(config: LoadedConfig) {
+export type CreateDynamic<Config> = ReturnType<
+  typeof fromConfigDynamic<Config>
+>;
+
+export function fromConfigDynamic<Config>(configExports: Config) {
+  const config = buildConfig(configExports as Record<string, unknown>);
   const create = fromConfig<Config>();
-  function getDocCollection(name: string): DocCollection | undefined {
+
+  function getDocCollection(name: string): DocCollectionItem | undefined {
     const collection = config.getCollection(name);
     if (!collection) return;
 
@@ -23,61 +29,72 @@ export function fromConfigDynamic<Config>(config: LoadedConfig) {
     else if (collection.type === 'doc') return collection;
   }
 
+  function convertLazyEntries(
+    collection: DocCollectionItem,
+    entries: LazyEntry<unknown>[],
+  ) {
+    const initMdxOptions =
+      collection.mdxOptions ?? config.getDefaultMDXOptions('remote');
+
+    const head: Record<string, () => unknown> = {};
+    const body: Record<string, () => Promise<unknown>> = {};
+
+    async function compile({ info, lastModified, data }: LazyEntry<unknown>) {
+      const mdxOptions = await initMdxOptions;
+      const raw = (await fs.readFile(info.fullPath)).toString();
+
+      const { content } = fumaMatter(raw);
+      const compiled = await buildMDX(collection.name, content, {
+        ...mdxOptions,
+        development: false,
+        frontmatter: data as Record<string, unknown>,
+        postprocess: collection!.postprocess,
+        data: {
+          lastModified,
+        },
+        filePath: info.fullPath,
+      });
+
+      return (await executeMdx(String(compiled.value), {
+        baseUrl: pathToFileURL(info.fullPath),
+      })) as CompiledMDXProperties;
+    }
+
+    for (const entry of entries) {
+      head[entry.info.path] = () => entry.data;
+      let cachedResult: Promise<CompiledMDXProperties> | undefined;
+      body[entry.info.path] = () => (cachedResult ??= compile(entry));
+    }
+
+    return { head, body };
+  }
+
   return {
     async doc<Name extends keyof Config>(
-      _name: Name,
+      name: Name,
       base: string,
       entries: LazyEntry<unknown>[],
     ) {
-      const name = _name as string;
-      const collection = getDocCollection(name);
-      if (!collection) return [];
+      const collection = getDocCollection(name as string);
+      if (!collection)
+        throw new Error(`the doc collection ${name as string} doesn't exist.`);
 
-      const initMdxOptions =
-        collection.mdxOptions ?? config.getDefaultMDXOptions('remote');
+      const { head, body } = convertLazyEntries(collection, entries);
 
-      const head: Record<string, () => unknown> = {};
-      const body: Record<string, () => Promise<unknown>> = {};
+      return create.docLazy(name, base, head, body);
+    },
+    async docs<Name extends keyof Config>(
+      name: Name,
+      base: string,
+      meta: Record<string, unknown>,
+      entries: LazyEntry<unknown>[],
+    ) {
+      const collection = getDocCollection(name as string);
+      if (!collection)
+        throw new Error(`the doc collection ${name as string} doesn't exist.`);
 
-      function fromEntry({
-        info,
-        data,
-        lastModified,
-      }: LazyEntry<unknown>): () => Promise<unknown> {
-        let cachedResult: CompiledMDXProperties | undefined;
-
-        return async () => {
-          if (cachedResult) return cachedResult;
-          const mdxOptions = await initMdxOptions;
-          const raw = (await fs.readFile(info.fullPath)).toString();
-
-          const { content } = fumaMatter(raw);
-          const compiled = await buildMDX(name, content, {
-            ...mdxOptions,
-            development: false,
-            frontmatter: data as Record<string, unknown>,
-            postprocess: collection!.postprocess,
-            data: {
-              lastModified,
-            },
-            filePath: info.fullPath,
-          });
-          const result = await executeMdx(String(compiled.value), {
-            baseUrl: pathToFileURL(info.fullPath),
-          });
-
-          return (cachedResult = result as CompiledMDXProperties);
-        };
-      }
-
-      for (const entry of entries) {
-        head[entry.info.path] = () => entry.data;
-        body[entry.info.path] = fromEntry(entry);
-      }
-
-      create.docLazy(_name, base, head, body);
+      const docs = convertLazyEntries(collection, entries);
+      return create.docsLazy(name, base, meta, docs.head, docs.body);
     },
   };
 }
-
-export { buildConfig } from '@/config/build';

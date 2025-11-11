@@ -1,6 +1,6 @@
 import type { LoadedConfig } from '@/config/build';
 import type { Plugin } from '@/core';
-import { generateIndexFile } from '@/utils/generate-index-file';
+import { generateServerIndexFile } from '@/utils/generate-index-file';
 
 export default function next(): Plugin {
   let config: LoadedConfig;
@@ -35,12 +35,11 @@ export default function next(): Plugin {
       return [
         {
           path: 'index.ts',
-          // TODO: implement lazy entries for Turbopack, and meta entries validation.
-          content: await generateIndexFile({
+          // TODO: implement meta entries validation.
+          content: await generateServerIndexFile({
             config,
             configPath: this.configPath,
             outDir: this.outDir,
-            target: 'node',
           }),
         },
       ];

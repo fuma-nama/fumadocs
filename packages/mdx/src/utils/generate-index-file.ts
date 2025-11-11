@@ -1,10 +1,22 @@
-import type { LoadedConfig, CollectionItem } from '@/config/build';
+import type {
+  LoadedConfig,
+  CollectionItem,
+  DocCollectionItem,
+  MetaCollectionItem,
+} from '@/config/build';
 import path from 'path';
-import { type GlobImportOptions, generateGlobImport } from './glob-import';
-import { toImportPath, ident } from './import-formatter';
+import { CodeGen, createCodegen, ident } from './codegen/utils';
+import { glob } from 'tinyglobby';
+import { readFileWithCache } from './codegen/cache';
+import { fumaMatter } from './fuma-matter';
+import { validate } from './validation';
+import { getGitTimestamp } from './git-timestamp';
+import { createHash } from 'crypto';
+import type { LazyEntry } from '@/runtime/dynamic';
+import { EmitEntry } from '@/core';
 
 export interface GenerateIndexFileOptions {
-  target: 'node' | 'vite';
+  target?: 'default' | 'vite';
 
   /**
    * add `.js` extensions to imports, needed for ESM without bundler resolution
@@ -16,9 +28,114 @@ export interface GenerateIndexFileOptions {
   configPath: string;
 }
 
-export async function generateIndexFile(
+export async function emitIndexFiles(
+  options: GenerateIndexFileOptions,
+): Promise<EmitEntry[]> {
+  const out: EmitEntry[] = [];
+  out.push({
+    path: 'browser.ts',
+    content: await generateBrowserIndexFile(options),
+  });
+
+  out.push({
+    path: 'dynamic.ts',
+    content: await generateDynamicIndexFile(options),
+  });
+
+  out.push({
+    path: 'index.ts',
+    content: await generateServerIndexFile(options),
+  });
+
+  return out;
+}
+
+export async function generateServerIndexFile(
   options: GenerateIndexFileOptions,
 ): Promise<string> {
+  const {
+    target = 'default',
+    outDir,
+    addJsExtension = false,
+    config,
+    configPath,
+  } = options;
+
+  const codegen = createCodegen({
+    target,
+    outDir,
+    jsExtension: addJsExtension,
+  });
+
+  codegen.lines.push(
+    `import { fromConfig } from 'fumadocs-mdx/runtime/server';`,
+    `import type * as Config from '${codegen.formatImportPath(configPath)}';`,
+    '',
+    `const create = fromConfig<typeof Config>();`,
+  );
+
+  async function generateCollectionObject(
+    collection: CollectionItem,
+  ): Promise<string | undefined> {
+    if (collection.type === 'docs' && collection.docs.dynamic) return;
+
+    if (collection.type === 'docs' && collection.docs.async) {
+      const [metaGlob, headGlob, bodyGlob] = await Promise.all([
+        generateMetaCollectionGlob(codegen, collection.meta, true),
+        generateDocCollectionFrontmatterGlob(codegen, collection.docs, true),
+        generateDocCollectionGlob(codegen, collection.docs),
+      ]);
+
+      return `create.docsLazy("${collection.name}", "${collection.dir}", ${metaGlob}, ${headGlob}, ${bodyGlob})`;
+    }
+
+    if (collection.type === 'docs') {
+      const [metaGlob, docGlob] = await Promise.all([
+        generateMetaCollectionGlob(codegen, collection.meta, true),
+        generateDocCollectionGlob(codegen, collection.docs),
+      ]);
+
+      return `create.docs("${collection.name}", "${collection.dir}", ${metaGlob}, ${docGlob})`;
+    }
+
+    if (collection.type === 'doc' && collection.dynamic) return;
+
+    if (collection.type === 'doc' && collection.async) {
+      const [headGlob, bodyGlob] = await Promise.all([
+        generateDocCollectionFrontmatterGlob(codegen, collection, true),
+        generateDocCollectionGlob(codegen, collection),
+      ]);
+
+      return `create.docLazy("${collection.name}", "${collection.dir}", ${headGlob}, ${bodyGlob})`;
+    }
+
+    if (collection.type === 'doc') {
+      return `create.doc("${collection.name}", "${collection.dir}", ${await generateDocCollectionGlob(
+        codegen,
+        collection,
+        true,
+      )})`;
+    }
+
+    return `create.meta("${collection.name}", "${collection.dir}", ${await generateMetaCollectionGlob(
+      codegen,
+      collection,
+      true,
+    )})`;
+  }
+
+  codegen.pushAsync(
+    config.collectionList.map(async (collection) => {
+      return `\nexport const ${collection.name} = ${await generateCollectionObject(collection)};`;
+    }),
+  );
+
+  return codegen.toString();
+}
+
+export async function generateDynamicIndexFile(
+  options: GenerateIndexFileOptions,
+) {
   const {
     target,
     outDir,
@@ -26,81 +143,90 @@ export async function generateIndexFile(
     config,
     configPath,
   } = options;
-  const runtimePath = 'fumadocs-mdx/runtime/server';
 
-  const lines = [
-    `import { fromConfig } from '${runtimePath}';`,
-    `import type * as Config from '${toImportPath(configPath, {
-      relativeTo: outDir,
-      jsExtension: addJsExtension,
-    })}';`,
+  const codegen = createCodegen({
+    target,
+    outDir,
+    jsExtension: addJsExtension,
+  });
+
+  codegen.lines.push(
+    `import { fromConfigDynamic } from 'fumadocs-mdx/runtime/dynamic';`,
+    `import * as Config from '${codegen.formatImportPath(configPath)}';`,
     '',
-    `export const create = fromConfig<typeof Config>();`,
-  ];
-
-  if (target === 'vite') {
-    lines.unshift('/// <reference types="vite/client" />');
-  }
-
-  async function generateCollectionGlob(
-    collection: CollectionItem,
-  ): Promise<string> {
-    if (collection.type === 'docs') {
-      const [docGlob, metaGlob] = await Promise.all([
-        generateCollectionGlob(collection.docs),
-        generateCollectionGlob(collection.meta),
-      ]);
-      const obj = [ident(`doc: ${docGlob}`), ident(`meta: ${metaGlob}`)].join(
-        ',\n',
-      );
-
-      return `{\n${obj}\n}`;
-    }
-
-    const dir = getCollectionDir(collection);
-    if (collection.type === 'doc') {
-      const docGlob = await generateGlob(options, collection.patterns, {
-        query: {
-          collection: collection.name,
-        },
-        base: dir,
-      });
-
-      if (collection.async) {
-        const headBlob = await generateGlob(options, collection.patterns, {
-          query: {
-            only: 'frontmatter',
-            collection: collection.name,
-          },
-          import: 'frontmatter',
-          base: dir,
-        });
-
-        return `create.docLazy("${collection.name}", "${dir}", ${headBlob}, ${docGlob})`;
-      }
-
-      return `create.doc("${collection.name}", "${dir}", ${docGlob})`;
-    }
-
-    const metaGlob = await generateGlob(options, collection.patterns, {
-      import: 'default',
-      base: dir,
-      query: {
-        collection: collection.name,
-      },
-    });
-    return `create.meta("${collection.name}", "${dir}", ${metaGlob})`;
-  }
-
-  lines.push(
-    ...(await Promise.all(
-      config.collectionList.map(async (collection) => {
-        return `\nexport const ${collection.name} = ${await generateCollectionGlob(collection)};`;
-      }),
-    )),
+    `const create = fromConfigDynamic(Config);`,
   );
 
-  return lines.join('\n');
+  async function onCollection(
+    parent: CollectionItem,
+  ): Promise<string | undefined> {
+    let collection: DocCollectionItem | undefined;
+    if (parent.type === 'doc') collection = parent;
+    else if (parent.type === 'docs') collection = parent.docs;
+
+    if (!collection || !collection.dynamic) return;
+
+    const files = await glob(collection.patterns, {
+      cwd: collection.dir,
+    });
+    const entryPromises = files.map(async (file) => {
+      const fullPath = path.join(collection.dir, file);
+      const content = await readFileWithCache(fullPath).catch(() => '');
+      const parsed = fumaMatter(content);
+      let data = parsed.data;
+
+      if (collection.schema) {
+        data = await validate(
+          collection.schema,
+          parsed.data,
+          { path: fullPath, source: parsed.content },
+          `invalid frontmatter in ${fullPath}`,
+        );
+      }
+
+      let lastModified: Date | undefined;
+      if (config.global?.lastModifiedTime === 'git') {
+        lastModified = await getGitTimestamp(fullPath);
+      }
+
+      const hash = createHash('md5').update(content).digest('hex');
+      const infoStr: string[] = [
+        // make sure it's included in vercel/nft
+        `absolutePath: path.resolve(${JSON.stringify(fullPath)})`,
+      ];
+      for (const [k, v] of Object.entries({
+        info: {
+          fullPath,
+          path: file,
+        },
+        data,
+        lastModified,
+        hash,
+      } satisfies LazyEntry<unknown>)) {
+        infoStr.push(`${k}: ${JSON.stringify(v)}`);
+      }
+
+      return `{ ${infoStr.join(', ')} }`;
+    });
+
+    const entriesStr = (await Promise.all(entryPromises)).join(', ');
+
+    if (parent.type === 'docs') {
+      const metaGlob = await generateMetaCollectionGlob(
+        codegen,
+        parent.meta,
+        true,
+      );
+
+      return `export const ${parent.name} = create.docs("${parent.name}", "${parent.dir}", ${metaGlob}, ${entriesStr})`;
+    }
+
+    return `export const ${collection.name} = create.doc("${collection.name}", "${collection.dir}", ${entriesStr})`;
+  }
+
+  codegen.pushAsync(config.collectionList.map(onCollection));
+
+  return codegen.toString();
 }
 
 export async function generateBrowserIndexFile(
@@ -113,29 +239,26 @@ export async function generateBrowserIndexFile(
     config,
     configPath,
   } = options;
-  const runtimePath = 'fumadocs-mdx/runtime/browser';
+  const codegen = createCodegen({
+    target,
+    outDir,
+    jsExtension: addJsExtension,
+  });
 
-  const lines = [
-    `import { fromConfig } from '${runtimePath}';`,
-    `import type * as Config from '${toImportPath(configPath, {
-      relativeTo: outDir,
-      jsExtension: addJsExtension,
-    })}';`,
+  codegen.lines.push(
+    `import { fromConfig } from 'fumadocs-mdx/runtime/browser';`,
+    `import type * as Config from '${codegen.formatImportPath(configPath)}';`,
     '',
-    `export const create = fromConfig<typeof Config>();`,
-  ];
+    `const create = fromConfig<typeof Config>(Config);`,
+  );
 
-  if (target === 'vite') {
-    lines.unshift('/// <reference types="vite/client" />');
-  }
-
-  async function generateCollectionGlob(
+  async function generateCollectionObject(
     collection: CollectionItem,
   ): Promise<string> {
     if (collection.type === 'docs') {
       const [docGlob, metaGlob] = await Promise.all([
-        generateCollectionGlob(collection.docs),
-        generateCollectionGlob(collection.meta),
+        generateCollectionObject(collection.docs),
+        generateCollectionObject(collection.meta),
       ]);
 
       const obj = [ident(`doc: ${docGlob}`), ident(`meta: ${metaGlob}`)].join(
@@ -145,93 +268,66 @@ export async function generateBrowserIndexFile(
       return `{\n${obj}\n}`;
     }
 
-    const dir = getCollectionDir(collection);
     if (collection.type === 'doc') {
-      const docGlob = await generateGlob(options, collection.patterns, {
-        query: {
-          collection: collection.name,
-        },
-        base: dir,
-      });
-
-      return `create.doc("${collection.name}", ${docGlob})`;
+      return `create.doc("${collection.name}", ${await generateDocCollectionGlob(codegen, collection)})`;
     }
 
-    return `create.meta("${collection.name}", ${await generateGlob(
-      options,
-      collection.patterns,
-      {
-        import: 'default',
-        base: dir,
-        query: {
-          collection: collection.name,
-        },
-      },
+    return `create.meta("${collection.name}", ${await generateMetaCollectionGlob(
+      codegen,
+      collection,
     )})`;
   }
 
-  lines.push(
-    ...(await Promise.all(
-      config.collectionList.map(async (collection) => {
-        return `\nexport const ${collection.name} = ${await generateCollectionGlob(collection)};`;
-      }),
-    )),
+  codegen.pushAsync(
+    config.collectionList.map(async (collection) => {
+      return `\nexport const ${collection.name} = ${await generateCollectionObject(collection)};`;
+    }),
   );
 
-  return lines.join('\n');
+  return codegen.toString();
 }
 
-async function generateGlob(
-  { target, outDir }: GenerateIndexFileOptions,
-  patterns: string[],
-  options: GlobImportOptions,
-): Promise<string> {
-  patterns = patterns.map(normalizeGlobPath);
-
-  if (target === 'node') {
-    return generateGlobImport(patterns, options);
-  }
-
-  return `import.meta.glob(${JSON.stringify(patterns)}, ${JSON.stringify(
-    {
-      ...options,
-      base: normalizeGlobPath(path.relative(outDir, options.base)),
+function generateDocCollectionFrontmatterGlob(
+  codegen: CodeGen,
+  collection: DocCollectionItem,
+  eager = false,
+) {
+  return codegen.generateGlobImport(collection.patterns, {
+    query: {
+      collection: collection.name,
+      only: 'frontmatter',
     },
-    null,
-    2,
-  )})`;
+    import: 'frontmatter',
+    base: collection.dir,
+    eager,
+  });
 }
 
-/**
- * convert into POSIX & relative file paths, such that Vite can accept it.
- */
-function normalizeGlobPath(file: string) {
-  file = slash(file);
-  if (file.startsWith('./')) return file;
-  if (file.startsWith('/')) return `.${file}`;
-
-  return `./${file}`;
+function generateDocCollectionGlob(
+  codegen: CodeGen,
+  collection: DocCollectionItem,
+  eager = false,
+) {
+  return codegen.generateGlobImport(collection.patterns, {
+    query: {
+      collection: collection.name,
+    },
+    base: collection.dir,
+    eager,
+  });
 }
 
-function getCollectionDir({ dir }: CollectionItem): string {
-  if (Array.isArray(dir)) {
-    if (dir.length !== 1)
-      throw new Error(
-        `[Fumadocs MDX] Vite Plugin doesn't support multiple \`dir\` for a collection at the moment.`,
-      );
-
-    return dir[0];
-  }
-
-  return dir;
-}
-
-function slash(path: string): string {
-  const isExtendedLengthPath = path.startsWith('\\\\?\\');
-
-  if (isExtendedLengthPath) {
-    return path;
-  }
-
-  return path.replaceAll('\\', '/');
+function generateMetaCollectionGlob(
+  codegen: CodeGen,
+  collection: MetaCollectionItem,
+  eager = false,
+) {
+  return codegen.generateGlobImport(collection.patterns, {
+    query: {
+      collection: collection.name,
+    },
+    import: 'default',
+    base: collection.dir,
+    eager,
+  });
 }

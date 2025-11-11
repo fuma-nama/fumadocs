@@ -35,7 +35,6 @@ export interface MetaCollection<
 
 export interface DocCollection<
   Schema extends StandardSchemaV1 = StandardSchemaV1,
-  Async extends boolean = boolean,
 > extends BaseCollection {
   type: 'doc';
 
@@ -45,7 +44,12 @@ export interface DocCollection<
   /**
    * Load files with async
    */
-  async?: Async;
+  async?: boolean;
+
+  /**
+   * Compile files on-demand
+   */
+  dynamic?: boolean;
 
   schema?: CollectionSchema<Schema, { path: string; source: string }>;
 }
@@ -53,12 +57,11 @@ export interface DocCollection<
 export interface DocsCollection<
   DocSchema extends StandardSchemaV1 = StandardSchemaV1,
   MetaSchema extends StandardSchemaV1 = StandardSchemaV1,
-  Async extends boolean = boolean,
 > {
   type: 'docs';
   dir: string;
 
-  docs: DocCollection<DocSchema, Async>;
+  docs: DocCollection<DocSchema>;
   meta: MetaCollection<MetaSchema>;
 }
 
@@ -95,8 +98,7 @@ export interface GlobalConfig {
 
 export function defineCollections<
   Schema extends StandardSchemaV1 = StandardSchemaV1,
-  Async extends boolean = false,
->(options: DocCollection<Schema, Async>): DocCollection<Schema, Async>;
+>(options: DocCollection<Schema>): DocCollection<Schema>;
 export function defineCollections<
   Schema extends StandardSchemaV1 = StandardSchemaV1,
 >(options: MetaCollection<Schema>): MetaCollection<Schema>;
@@ -110,7 +112,6 @@ export function defineCollections(
 export function defineDocs<
   DocSchema extends StandardSchemaV1 = typeof frontmatterSchema,
   MetaSchema extends StandardSchemaV1 = typeof metaSchema,
-  Async extends boolean = false,
 >(options: {
   /**
    * The content directory to scan files
@@ -119,9 +120,9 @@ export function defineDocs<
    */
   dir?: string;
 
-  docs?: Omit<DocCollection<DocSchema, Async>, 'dir' | 'type'>;
+  docs?: Omit<DocCollection<DocSchema>, 'dir' | 'type'>;
   meta?: Omit<MetaCollection<MetaSchema>, 'dir' | 'type'>;
-}): DocsCollection<DocSchema, MetaSchema, Async> {
+}): DocsCollection<DocSchema, MetaSchema> {
   const dir = options.dir ?? 'content/docs';
 
   return {

@@ -97,6 +97,30 @@ export type AsyncDocCollectionEntry<Frontmatter> = DocMethods & {
 export type CompiledMDXFile<Frontmatter> = CompiledMDXProperties<Frontmatter> &
   Record<string, unknown>;
 
+export interface DocsCollectionEntry<
+  Frontmatter extends PageData,
+  Meta extends MetaData,
+> {
+  docs: DocCollectionEntry<Frontmatter>[];
+  meta: MetaCollectionEntry<Meta>[];
+  toFumadocsSource: () => Source<{
+    pageData: DocCollectionEntry<Frontmatter>;
+    metaData: MetaCollectionEntry<Meta>;
+  }>;
+}
+
+export interface AsyncDocsCollectionEntry<
+  Frontmatter extends PageData,
+  Meta extends MetaData,
+> {
+  docs: AsyncDocCollectionEntry<Frontmatter>[];
+  meta: MetaCollectionEntry<Meta>[];
+  toFumadocsSource: () => Source<{
+    pageData: AsyncDocCollectionEntry<Frontmatter>;
+    metaData: MetaCollectionEntry<Meta>;
+  }>;
+}
+
 type AwaitableGlobEntries<T> = Record<string, T | (() => Promise<T>)>;
 
 export type ServerCreate<Config> = ReturnType<typeof fromConfig<Config>>;
@@ -124,28 +148,41 @@ export function fromConfig<Config>() {
     };
   }
 
-  function mapPageData<Frontmatter>(
-    info: FileInfo,
-    entry: CompiledMDXFile<Frontmatter>,
-  ): DocCollectionEntry<Frontmatter> {
-    return {
-      ...mapDocData(entry),
-      ...entry.frontmatter,
-      ...createDocMethods(info, () => entry),
-    };
-  }
+  function toFumadocsSource<
+    Page extends DocMethods & PageData,
+    Meta extends MetaMethods & MetaData,
+  >(
+    pages: Page[],
+    metas: Meta[],
+  ): Source<{
+    pageData: Page;
+    metaData: Meta;
+  }> {
+    const files: VirtualFile<{
+      pageData: Page;
+      metaData: Meta;
+    }>[] = [];
 
-  function mapPageDataLazy<Frontmatter>(
-    info: FileInfo,
-    head: Frontmatter,
-    content: () => Promise<CompiledMDXFile<Frontmatter>>,
-  ): AsyncDocCollectionEntry<Frontmatter> {
+    for (const entry of pages) {
+      files.push({
+        type: 'page',
+        path: entry.info.path,
+        absolutePath: entry.info.fullPath,
+        data: entry,
+      });
+    }
+
+    for (const entry of metas) {
+      files.push({
+        type: 'meta',
+        path: entry.info.path,
+        absolutePath: entry.info.fullPath,
+        data: entry,
+      });
+    }
+
     return {
-      ...head,
-      ...createDocMethods(info, content),
-      async load() {
-        return mapDocData(await content());
-      },
+      files,
     };
   }
 
@@ -157,9 +194,14 @@ export function fromConfig<Config>() {
     ) {
       const out = await Promise.all(
         Object.entries(glob).map(async ([k, v]) => {
-          const data = typeof v === 'function' ? await v() : v;
+          const data: CompiledMDXFile<unknown> =
+            typeof v === 'function' ? await v() : v;
 
-          return mapPageData(fileInfo(k, base), data);
+          return {
+            ...mapDocData(data),
+            ...(data.frontmatter as object),
+            ...createDocMethods(fileInfo(k, base), () => data),
+          } satisfies DocCollectionEntry<unknown>;
         }),
       );
 
@@ -180,7 +222,13 @@ export function fromConfig<Config>() {
           const data = typeof v === 'function' ? await v() : v;
           const content = body[k] as () => Promise<CompiledMDXFile<unknown>>;
 
-          return mapPageDataLazy(fileInfo(k, base), data, content);
+          return {
+            ...data,
+            ...createDocMethods(fileInfo(k, base), content),
+            async load() {
+              return mapDocData(await content());
+            },
+          } satisfies AsyncDocCollectionEntry<unknown>;
         }),
       );
 
@@ -213,52 +261,62 @@ export function fromConfig<Config>() {
         : never;
     },
 
-    async sourceAsync<DocOut extends PageData, MetaOut extends MetaData>(
-      doc: DocCollectionEntry<DocOut>[],
-      meta: MetaCollectionEntry<MetaOut>[],
-    ): Promise<
-      Source<{
-        pageData: DocCollectionEntry<DocOut>;
-        metaData: MetaCollectionEntry<MetaOut>;
-      }>
-    > {
-      const files: VirtualFile<{
-        pageData: DocCollectionEntry<DocOut>;
-        metaData: MetaCollectionEntry<MetaOut>;
-      }>[] = [];
+    async docs<Name extends keyof Config>(
+      name: Name,
+      base: string,
+      metaGlob: AwaitableGlobEntries<unknown>,
+      docGlob: AwaitableGlobEntries<unknown>,
+    ) {
+      const entry = {
+        docs: await this.doc(name, base, docGlob),
+        meta: await this.meta(name, base, metaGlob),
+        toFumadocsSource() {
+          return toFumadocsSource(this.docs, this.meta);
+        },
+      } satisfies DocsCollectionEntry<PageData, MetaData>;
 
-      for (const entry of doc) {
-        files.push({
-          type: 'page',
-          path: entry.info.path,
-          absolutePath: entry.info.fullPath,
-          data: entry,
-        });
-      }
-
-      for (const entry of meta) {
-        files.push({
-          type: 'meta',
-          path: entry.info.path,
-          absolutePath: entry.info.fullPath,
-          data: entry,
-        });
-      }
-
-      return {
-        files,
-      };
+      return entry as Config[Name] extends DocsCollection<
+        infer Page,
+        infer Meta
+      >
+        ? StandardSchemaV1.InferOutput<Page> extends PageData
+          ? StandardSchemaV1.InferOutput<Meta> extends MetaData
+            ? DocsCollectionEntry<
+                StandardSchemaV1.InferOutput<Page>,
+                StandardSchemaV1.InferOutput<Meta>
+              >
+            : never
+          : never
+        : never;
     },
-    async sourceLazy<DocOut extends PageData, MetaOut extends MetaData>(
-      doc: AsyncDocCollectionEntry<DocOut>[],
-      meta: MetaCollectionEntry<MetaOut>[],
-    ): Promise<
-      Source<{
-        pageData: AsyncDocCollectionEntry<DocOut>;
-        metaData: MetaCollectionEntry<MetaOut>;
-      }>
-    > {
-      return this.sourceAsync(doc as any, meta);
+    async docsLazy<Name extends keyof Config>(
+      name: Name,
+      base: string,
+      metaGlob: AwaitableGlobEntries<unknown>,
+      docHeadGlob: AwaitableGlobEntries<unknown>,
+      docBodyGlob: Record<string, () => Promise<unknown>>,
+    ) {
+      const entry = {
+        docs: await this.docLazy(name, base, docHeadGlob, docBodyGlob),
+        meta: await this.meta(name, base, metaGlob),
+        toFumadocsSource() {
+          return toFumadocsSource(this.docs, this.meta);
+        },
+      } satisfies AsyncDocsCollectionEntry<PageData, MetaData>;
+
+      return entry as Config[Name] extends DocsCollection<
+        infer Page,
+        infer Meta
+      >
+        ? StandardSchemaV1.InferOutput<Page> extends PageData
+          ? StandardSchemaV1.InferOutput<Meta> extends MetaData
+            ? AsyncDocsCollectionEntry<
+                StandardSchemaV1.InferOutput<Page>,
+                StandardSchemaV1.InferOutput<Meta>
+              >
+            : never
+          : never
+        : never;
     },
   };
 }

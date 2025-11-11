@@ -2,6 +2,7 @@ import type { LoadedConfig } from '@/config/build';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import type { FSWatcher } from 'chokidar';
+import { removeFileCache } from './utils/codegen/cache';
 
 type Awaitable<T> = T | Promise<T>;
 
@@ -114,6 +115,10 @@ export function createCore(
       return config;
     },
     async initServer(server: ServerContext) {
+      server.watcher?.on('all', async (event, file) => {
+        if (event === 'change') removeFileCache(file);
+      });
+
       for (const plugin of plugins) {
         await plugin.configureServer?.call(this.getPluginContext(), server);
       }
