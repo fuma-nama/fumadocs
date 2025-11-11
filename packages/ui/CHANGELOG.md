@@ -1,5 +1,16 @@
 # next-docs-ui
 
+## 16.0.10
+
+### Patch Changes
+
+- 112e8d9: Support `CalloutContainer`, `CalloutTitle` and `CalloutDescription` components.
+
+  They're now MDX components included by default.
+
+- Updated dependencies [733b01e]
+  - fumadocs-core@16.0.10
+
 ## 16.0.9
 
 ### Patch Changes
