@@ -4,7 +4,7 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "types": ["remark-directive"]
+    "types": ["remark-directive", "node"]
   },
   "exclude": ["node_modules", "dist", "eslint.config.mjs"]
 }
