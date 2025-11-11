@@ -43,6 +43,11 @@ export type SchemaData = FieldBase &
           name: string;
           $type: string;
         }[];
+        props: {
+          name: string;
+          $type: string;
+          required: boolean;
+        }[];
       }
   );
 
@@ -208,6 +213,7 @@ function generateSchemaUI({
       const out: SchemaData = {
         type: 'or',
         items: [],
+        props: [],
         ...base(schema),
       };
       refs[id] = out;
@@ -232,6 +238,7 @@ function generateSchemaUI({
       const out: SchemaData = {
         type: 'or',
         items: [],
+        props: [],
         ...base(schema),
       };
       refs[id] = out;
@@ -244,6 +251,17 @@ function generateSchemaUI({
           name: schemaToString(item, ctx.schema, FormatFlags.UseAlias),
           $type,
         });
+      }
+      if (schema.properties) {
+        for (const [key, prop] of Object.entries(schema.properties)) {
+          const $type = getSchemaId(prop);
+          scanRefs($type, prop);
+          out.props.push({
+            $type,
+            name: key,
+            required: schema.required?.includes(key) ?? false,
+          });
+        }
       }
       return;
     }

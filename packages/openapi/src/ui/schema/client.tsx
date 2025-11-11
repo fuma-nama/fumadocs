@@ -145,6 +145,16 @@ function SchemaUIContent({ $type }: { $type: string }) {
               forceMount={undefined}
               className="py-0"
             >
+              {schema.props &&
+                schema.props.length > 0 &&
+                schema.props.map((prop) => (
+                  <SchemaUIProperty
+                    key={prop.name}
+                    name={prop.name}
+                    $type={prop.$type}
+                    overrides={{ required: prop.required }}
+                  />
+                ))}
               <SchemaUIContent {...item} />
             </TabsContent>
           ))}
