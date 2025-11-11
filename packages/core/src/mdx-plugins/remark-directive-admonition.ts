@@ -1,4 +1,9 @@
-import { BlockContent, DefinitionContent, Root } from 'mdast';
+import type {
+  BlockContent,
+  DefinitionContent,
+  PhrasingContent,
+  Root,
+} from 'mdast';
 import type { MdxJsxAttribute, MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
 import { Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
@@ -36,6 +41,7 @@ export function remarkDirectiveAdmonition({
     note: 'info',
     tip: 'info',
     info: 'info',
+    warn: 'warning',
     warning: 'warning',
     danger: 'error',
     success: 'success',
@@ -61,39 +67,42 @@ export function remarkDirectiveAdmonition({
         });
       }
 
-      const titleNodes: (BlockContent | DefinitionContent)[] = [];
+      const titleNodes: PhrasingContent[] = [];
       const descriptionNodes: (BlockContent | DefinitionContent)[] = [];
 
       for (const item of node.children) {
-        if (
-          item.data &&
-          'directiveLabel' in item.data &&
-          item.data.directiveLabel
-        ) {
-          titleNodes.push(item);
+        if (item.type === 'paragraph' && item.data?.directiveLabel) {
+          titleNodes.push(...item.children);
         } else {
           descriptionNodes.push(item);
         }
       }
 
-      Object.assign({
+      const children: MdxJsxFlowElement[] = [];
+
+      if (titleNodes.length > 0) {
+        children.push({
+          type: 'mdxJsxFlowElement',
+          name: CalloutTitle,
+          attributes: [],
+          children: titleNodes as BlockContent[],
+        });
+      }
+
+      if (descriptionNodes.length > 0) {
+        children.push({
+          type: 'mdxJsxFlowElement',
+          name: CalloutDescription,
+          attributes: [],
+          children: descriptionNodes,
+        });
+      }
+
+      Object.assign(node, {
         type: 'mdxJsxFlowElement',
         attributes,
         name: CalloutContainer,
-        children: [
-          titleNodes.length > 0 && {
-            type: 'mdxJsxFlowElement' as const,
-            name: CalloutTitle,
-            attributes: [],
-            children: titleNodes,
-          },
-          descriptionNodes.length > 0 && {
-            type: 'mdxJsxFlowElement' as const,
-            name: CalloutDescription,
-            attributes: [],
-            children: descriptionNodes,
-          },
-        ].filter((v) => v !== false),
+        children,
       } satisfies MdxJsxFlowElement);
     });
   };
