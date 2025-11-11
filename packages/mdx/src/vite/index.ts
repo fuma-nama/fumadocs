@@ -52,7 +52,7 @@ export default async function mdx(
   const metaLoader = toVite(
     createMetaLoader(configLoader, {
       // vite has built-in plugin for JSON files
-      json: 'js',
+      json: 'json',
     }),
   );
 
