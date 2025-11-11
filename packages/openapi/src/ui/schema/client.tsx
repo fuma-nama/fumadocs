@@ -124,7 +124,7 @@ function SchemaUIContent({ $type }: { $type: string }) {
   if ((schema.readOnly && !readOnly) || (schema.writeOnly && !writeOnly))
     return;
 
-  let child = <></>;
+  let child: ReactNode = null;
 
   if (schema.type === 'or' && schema.items.length > 0) {
     child = (
@@ -145,16 +145,6 @@ function SchemaUIContent({ $type }: { $type: string }) {
               forceMount={undefined}
               className="py-0"
             >
-              {schema.props &&
-                schema.props.length > 0 &&
-                schema.props.map((prop) => (
-                  <SchemaUIProperty
-                    key={prop.name}
-                    name={prop.name}
-                    $type={prop.$type}
-                    overrides={{ required: prop.required }}
-                  />
-                ))}
               <SchemaUIContent {...item} />
             </TabsContent>
           ))}

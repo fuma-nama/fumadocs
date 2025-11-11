@@ -43,11 +43,6 @@ export type SchemaData = FieldBase &
           name: string;
           $type: string;
         }[];
-        props: {
-          name: string;
-          $type: string;
-          required: boolean;
-        }[];
       }
   );
 
@@ -213,7 +208,6 @@ function generateSchemaUI({
       const out: SchemaData = {
         type: 'or',
         items: [],
-        props: [],
         ...base(schema),
       };
       refs[id] = out;
@@ -238,30 +232,23 @@ function generateSchemaUI({
       const out: SchemaData = {
         type: 'or',
         items: [],
-        props: [],
         ...base(schema),
       };
       refs[id] = out;
 
       for (const item of schema.oneOf) {
-        const $type = getSchemaId(item);
+        if (typeof item !== 'object') continue;
+        const key = `${id}_extends:${getSchemaId(item)}`;
+        const extended = {
+          ...schema,
+          ...item,
+        };
 
-        scanRefs($type, item);
+        scanRefs(key, extended);
         out.items.push({
-          name: schemaToString(item, ctx.schema, FormatFlags.UseAlias),
-          $type,
+          $type: key,
+          name: schemaToString(extended, ctx.schema, FormatFlags.UseAlias),
         });
-      }
-      if (schema.properties) {
-        for (const [key, prop] of Object.entries(schema.properties)) {
-          const $type = getSchemaId(prop);
-          scanRefs($type, prop);
-          out.props.push({
-            $type,
-            name: key,
-            required: schema.required?.includes(key) ?? false,
-          });
-        }
       }
       return;
     }
