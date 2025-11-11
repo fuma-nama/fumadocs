@@ -124,7 +124,7 @@ function SchemaUIContent({ $type }: { $type: string }) {
   if ((schema.readOnly && !readOnly) || (schema.writeOnly && !writeOnly))
     return;
 
-  let child = <></>;
+  let child: ReactNode = null;
 
   if (schema.type === 'or' && schema.items.length > 0) {
     child = (

@@ -16,6 +16,8 @@ export interface RemarkAdmonitionOptions {
  * Remark Plugin to support Admonition syntax
  *
  * Useful when Migrating from Docusaurus
+ *
+ * @deprecated Use `remarkDirectiveAdmonition` with `remark-directive` configured instead.
  */
 export function remarkAdmonition(
   options: RemarkAdmonitionOptions = {},

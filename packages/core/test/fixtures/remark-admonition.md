@@ -4,7 +4,7 @@ Hello World
 
 :::
 
-:::warn[This is Title]
+:::warning[This is Title]
 
 Warning **this**
 

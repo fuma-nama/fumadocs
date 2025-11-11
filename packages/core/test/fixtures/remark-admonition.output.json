@@ -1,0 +1,203 @@
+{
+  "children": [
+    {
+      "attributes": [
+        {
+          "name": "type",
+          "type": "mdxJsxAttribute",
+          "value": "info",
+        },
+      ],
+      "children": [
+        {
+          "attributes": [],
+          "children": [
+            {
+              "children": [
+                {
+                  "position": {
+                    "end": {
+                      "column": 12,
+                      "line": 3,
+                      "offset": 19,
+                    },
+                    "start": {
+                      "column": 1,
+                      "line": 3,
+                      "offset": 8,
+                    },
+                  },
+                  "type": "text",
+                  "value": "Hello World",
+                },
+              ],
+              "position": {
+                "end": {
+                  "column": 12,
+                  "line": 3,
+                  "offset": 19,
+                },
+                "start": {
+                  "column": 1,
+                  "line": 3,
+                  "offset": 8,
+                },
+              },
+              "type": "paragraph",
+            },
+          ],
+          "name": "CalloutDescription",
+          "type": "mdxJsxFlowElement",
+        },
+      ],
+      "name": "CalloutContainer",
+      "position": {
+        "end": {
+          "column": 4,
+          "line": 5,
+          "offset": 24,
+        },
+        "start": {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "mdxJsxFlowElement",
+    },
+    {
+      "attributes": [
+        {
+          "name": "type",
+          "type": "mdxJsxAttribute",
+          "value": "warning",
+        },
+      ],
+      "children": [
+        {
+          "attributes": [],
+          "children": [
+            {
+              "position": {
+                "end": {
+                  "column": 25,
+                  "line": 7,
+                  "offset": 50,
+                },
+                "start": {
+                  "column": 12,
+                  "line": 7,
+                  "offset": 37,
+                },
+              },
+              "type": "text",
+              "value": "This is Title",
+            },
+          ],
+          "name": "CalloutTitle",
+          "type": "mdxJsxFlowElement",
+        },
+        {
+          "attributes": [],
+          "children": [
+            {
+              "children": [
+                {
+                  "position": {
+                    "end": {
+                      "column": 9,
+                      "line": 9,
+                      "offset": 61,
+                    },
+                    "start": {
+                      "column": 1,
+                      "line": 9,
+                      "offset": 53,
+                    },
+                  },
+                  "type": "text",
+                  "value": "Warning ",
+                },
+                {
+                  "children": [
+                    {
+                      "position": {
+                        "end": {
+                          "column": 15,
+                          "line": 9,
+                          "offset": 67,
+                        },
+                        "start": {
+                          "column": 11,
+                          "line": 9,
+                          "offset": 63,
+                        },
+                      },
+                      "type": "text",
+                      "value": "this",
+                    },
+                  ],
+                  "position": {
+                    "end": {
+                      "column": 17,
+                      "line": 9,
+                      "offset": 69,
+                    },
+                    "start": {
+                      "column": 9,
+                      "line": 9,
+                      "offset": 61,
+                    },
+                  },
+                  "type": "strong",
+                },
+              ],
+              "position": {
+                "end": {
+                  "column": 17,
+                  "line": 9,
+                  "offset": 69,
+                },
+                "start": {
+                  "column": 1,
+                  "line": 9,
+                  "offset": 53,
+                },
+              },
+              "type": "paragraph",
+            },
+          ],
+          "name": "CalloutDescription",
+          "type": "mdxJsxFlowElement",
+        },
+      ],
+      "name": "CalloutContainer",
+      "position": {
+        "end": {
+          "column": 4,
+          "line": 11,
+          "offset": 74,
+        },
+        "start": {
+          "column": 1,
+          "line": 7,
+          "offset": 26,
+        },
+      },
+      "type": "mdxJsxFlowElement",
+    },
+  ],
+  "position": {
+    "end": {
+      "column": 1,
+      "line": 12,
+      "offset": 75,
+    },
+    "start": {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}

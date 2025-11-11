@@ -237,12 +237,17 @@ function generateSchemaUI({
       refs[id] = out;
 
       for (const item of schema.oneOf) {
-        const $type = getSchemaId(item);
+        if (typeof item !== 'object') continue;
+        const key = `${id}_extends:${getSchemaId(item)}`;
+        const extended = {
+          ...schema,
+          ...item,
+        };
 
-        scanRefs($type, item);
+        scanRefs(key, extended);
         out.items.push({
-          name: schemaToString(item, ctx.schema, FormatFlags.UseAlias),
-          $type,
+          $type: key,
+          name: schemaToString(extended, ctx.schema, FormatFlags.UseAlias),
         });
       }
       return;
