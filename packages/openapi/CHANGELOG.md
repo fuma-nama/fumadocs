@@ -1,5 +1,15 @@
 # @fuma-docs/openapi
 
+## 10.0.4
+
+### Patch Changes
+
+- 0ada792: Enhance Schema UI to display inherited properties for `oneOf`.
+- Updated dependencies [112e8d9]
+- Updated dependencies [733b01e]
+  - fumadocs-ui@16.0.10
+  - fumadocs-core@16.0.10
+
 ## 10.0.3
 
 ### Patch Changes

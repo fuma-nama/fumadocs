@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 16.0.10
+
+### Patch Changes
+
+- 733b01e: Support `remarkDirectiveAdmonition`, deprecate `remarkAdmonition` in favor of it.
+
 ## 16.0.9
 
 ## 16.0.8
