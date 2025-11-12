@@ -5,8 +5,10 @@ import {
   useMemo,
   useRef,
   useState,
+  createContext,
+  use,
 } from 'react';
-import { createContext, usePathname } from 'fumadocs-core/framework';
+import { usePathname } from 'fumadocs-core/framework';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 
 interface SidebarContext {
@@ -21,10 +23,16 @@ interface SidebarContext {
   closeOnRedirect: RefObject<boolean>;
 }
 
-const SidebarContext = createContext<SidebarContext>('SidebarContext');
+const SidebarContext = createContext<SidebarContext | null>(null);
 
 export function useSidebar(): SidebarContext {
-  return SidebarContext.use();
+  const ctx = use(SidebarContext);
+  if (!ctx)
+    throw new Error(
+      'Missing SidebarContext, make sure you have wrapped the component in <RootProvider /> and the context is available.',
+    );
+
+  return ctx;
 }
 
 export function SidebarProvider({
@@ -35,7 +43,6 @@ export function SidebarProvider({
   const closeOnRedirect = useRef(true);
   const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
-
   const pathname = usePathname();
 
   useOnChange(pathname, () => {
@@ -46,7 +53,7 @@ export function SidebarProvider({
   });
 
   return (
-    <SidebarContext.Provider
+    <SidebarContext
       value={useMemo(
         () => ({
           open,
@@ -59,6 +66,6 @@ export function SidebarProvider({
       )}
     >
       {children}
-    </SidebarContext.Provider>
+    </SidebarContext>
   );
 }

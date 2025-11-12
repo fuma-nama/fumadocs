@@ -5,8 +5,10 @@ import {
   useEffect,
   useMemo,
   useState,
+  createContext,
+  use,
+  useEffectEvent,
 } from 'react';
-import { createContext } from 'fumadocs-core/framework';
 
 interface HotKey {
   display: ReactNode;
@@ -70,14 +72,14 @@ interface SearchContextType {
   setOpenSearch: (value: boolean) => void;
 }
 
-const SearchContext = createContext<SearchContextType>('SearchContext', {
+const SearchContext = createContext<SearchContextType>({
   enabled: false,
   hotKey: [],
   setOpenSearch: () => undefined,
 });
 
 export function useSearchContext(): SearchContextType {
-  return SearchContext.use();
+  return use(SearchContext);
 }
 
 function MetaOrControl() {
@@ -110,27 +112,26 @@ export function SearchProvider({
   links,
 }: SearchProviderProps) {
   const [isOpen, setIsOpen] = useState(preload ? false : undefined);
+  const onKeyDown = useEffectEvent((e: KeyboardEvent) => {
+    if (
+      hotKey.every((v) =>
+        typeof v.key === 'string' ? e.key === v.key : v.key(e),
+      )
+    ) {
+      setIsOpen(true);
+      e.preventDefault();
+    }
+  });
 
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (
-        hotKey.every((v) =>
-          typeof v.key === 'string' ? e.key === v.key : v.key(e),
-        )
-      ) {
-        setIsOpen(true);
-        e.preventDefault();
-      }
-    };
-
-    window.addEventListener('keydown', handler);
+    window.addEventListener('keydown', onKeyDown);
     return () => {
-      window.removeEventListener('keydown', handler);
+      window.removeEventListener('keydown', onKeyDown);
     };
   }, [hotKey]);
 
   return (
-    <SearchContext.Provider
+    <SearchContext
       value={useMemo(
         () => ({
           enabled: true,
@@ -150,7 +151,7 @@ export function SearchProvider({
         />
       )}
       {children}
-    </SearchContext.Provider>
+    </SearchContext>
   );
 }
 
