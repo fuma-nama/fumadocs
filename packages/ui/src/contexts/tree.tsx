@@ -1,7 +1,7 @@
 'use client';
 import type * as PageTree from 'fumadocs-core/page-tree';
-import { createContext, usePathname } from 'fumadocs-core/framework';
-import { type ReactNode, useMemo, useRef } from 'react';
+import { usePathname } from 'fumadocs-core/framework';
+import { type ReactNode, useMemo, useRef, createContext, use } from 'react';
 import { searchPath } from 'fumadocs-core/breadcrumb';
 
 type MakeRequired<O, K extends keyof O> = Omit<O, K> & Pick<Required<O>, K>;
@@ -11,8 +11,8 @@ interface TreeContextType {
   full: PageTree.Root;
 }
 
-const TreeContext = createContext<TreeContextType>('TreeContext');
-const PathContext = createContext<PageTree.Node[]>('PathContext', []);
+const TreeContext = createContext<TreeContextType | null>(null);
+const PathContext = createContext<PageTree.Node[]>([]);
 
 export function TreeContextProvider(props: {
   tree: PageTree.Root;
@@ -26,11 +26,11 @@ export function TreeContextProvider(props: {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const tree = useMemo(() => props.tree, [props.tree.$id ?? props.tree]);
   const path = useMemo(() => {
-    let result = searchPath(tree.children, pathname);
-    if (result) return result;
-
-    if (tree.fallback) result = searchPath(tree.fallback.children, pathname);
-    return result ?? [];
+    return (
+      searchPath(tree.children, pathname) ??
+      (tree.fallback ? searchPath(tree.fallback.children, pathname) : null) ??
+      []
+    );
   }, [tree, pathname]);
 
   const root =
@@ -38,21 +38,25 @@ export function TreeContextProvider(props: {
   root.$id ??= String(nextIdRef.current++);
 
   return (
-    <TreeContext.Provider
+    <TreeContext
       value={useMemo(
         () => ({ root, full: tree }) as TreeContextType,
         [root, tree],
       )}
     >
-      <PathContext.Provider value={path}>{props.children}</PathContext.Provider>
-    </TreeContext.Provider>
+      <PathContext value={path}>{props.children}</PathContext>
+    </TreeContext>
   );
 }
 
 export function useTreePath(): PageTree.Node[] {
-  return PathContext.use();
+  return use(PathContext);
 }
 
 export function useTreeContext(): TreeContextType {
-  return TreeContext.use('You must wrap this component under <DocsLayout />');
+  const ctx = use(TreeContext);
+
+  if (!ctx)
+    throw new Error('You must wrap this component under <DocsLayout />');
+  return ctx;
 }
