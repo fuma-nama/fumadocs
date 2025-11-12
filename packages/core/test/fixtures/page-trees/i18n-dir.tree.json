@@ -3,7 +3,7 @@
     "$id": "cn",
     "children": [
       {
-        "$id": "test.mdx",
+        "$id": "cn:test.mdx",
         "$ref": {
           "file": "test.mdx",
         },
@@ -12,13 +12,13 @@
         "url": "/cn/test",
       },
       {
-        "$id": "nested",
+        "$id": "cn:nested",
         "$ref": {
           "metaFile": "nested/meta.json",
         },
         "children": [
           {
-            "$id": "nested/test.mdx",
+            "$id": "cn:nested/test.mdx",
             "$ref": {
               "file": "nested/test.mdx",
             },
@@ -37,7 +37,7 @@
     "$id": "en",
     "children": [
       {
-        "$id": "test.mdx",
+        "$id": "en:test.mdx",
         "$ref": {
           "file": "test.mdx",
         },
@@ -46,10 +46,10 @@
         "url": "/en/test",
       },
       {
-        "$id": "nested",
+        "$id": "en:nested",
         "children": [
           {
-            "$id": "nested/test.mdx",
+            "$id": "en:nested/test.mdx",
             "$ref": {
               "file": "nested/test.mdx",
             },

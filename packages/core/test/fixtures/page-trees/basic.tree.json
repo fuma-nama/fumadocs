@@ -2,7 +2,7 @@
   "$id": "root",
   "children": [
     {
-      "$id": "test.mdx",
+      "$id": "root:test.mdx",
       "name": "Hello",
       "type": "page",
       "url": "/test",

@@ -1,8 +1,13 @@
 import type { ReactNode } from 'react';
 
-export interface Root {
+interface INode {
+  /**
+   * ID for the node, unique in all page trees (even across different locales)
+   */
   $id?: string;
+}
 
+export interface Root extends INode {
   name: ReactNode;
   children: Node[];
   /**
@@ -13,8 +18,7 @@ export interface Root {
 
 export type Node = Item | Separator | Folder;
 
-export interface Item {
-  $id?: string;
+export interface Item extends INode {
   /**
    * @internal
    */
@@ -36,16 +40,13 @@ export interface Item {
   icon?: ReactNode;
 }
 
-export interface Separator {
-  $id?: string;
-
+export interface Separator extends INode {
   type: 'separator';
   name?: ReactNode;
   icon?: ReactNode;
 }
 
-export interface Folder {
-  $id?: string;
+export interface Folder extends INode {
   /**
    * @internal
    */

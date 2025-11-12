@@ -3,16 +3,16 @@
     "$id": "cn",
     "children": [
       {
-        "$id": "test.mdx",
+        "$id": "cn:test.mdx",
         "name": "Hello Chinese",
         "type": "page",
         "url": "/cn/test",
       },
       {
-        "$id": "nested",
+        "$id": "cn:nested",
         "children": [
           {
-            "$id": "nested/test.mdx",
+            "$id": "cn:nested/test.mdx",
             "name": "Nested Page Chinese",
             "type": "page",
             "url": "/cn/nested/test",
@@ -28,16 +28,16 @@
     "$id": "en",
     "children": [
       {
-        "$id": "test.mdx",
+        "$id": "en:test.mdx",
         "name": "Hello",
         "type": "page",
         "url": "/test",
       },
       {
-        "$id": "nested",
+        "$id": "en:nested",
         "children": [
           {
-            "$id": "nested/test.mdx",
+            "$id": "en:nested/test.mdx",
             "name": "Nested Page",
             "type": "page",
             "url": "/nested/test",
