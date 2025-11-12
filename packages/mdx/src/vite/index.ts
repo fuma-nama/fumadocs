@@ -8,7 +8,6 @@ import type { FSWatcher } from 'chokidar';
 import { createCore, findConfigFile } from '@/core';
 import { createIntegratedConfigLoader } from '@/loaders/config';
 import { createMetaLoader } from '@/loaders/meta';
-import { mdxLoaderGlob, metaLoaderGlob } from '@/loaders';
 
 const FumadocsDeps = ['fumadocs-core', 'fumadocs-ui', 'fumadocs-openapi'];
 
@@ -84,14 +83,12 @@ export default async function mdx(
     },
     async transform(value, id) {
       try {
-        if (metaLoaderGlob.test(id)) {
-          const [file, query = ''] = id.split('?', 2);
-          return await metaLoader.call(this, file, query, value);
+        if (metaLoader.filter(id)) {
+          return await metaLoader.transform.call(this, value, id);
         }
 
-        if (mdxLoaderGlob.test(id)) {
-          const [file, query = ''] = id.split('?', 2);
-          return await mdxLoader.call(this, file, query, value);
+        if (mdxLoader.filter(id)) {
+          return await mdxLoader.transform.call(this, value, id);
         }
       } catch (e) {
         if (e instanceof ValidationError) {

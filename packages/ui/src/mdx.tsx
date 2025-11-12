@@ -8,7 +8,12 @@ import type {
 } from 'react';
 import { Image as FrameworkImage } from 'fumadocs-core/framework';
 import { Card, Cards } from '@/components/card';
-import { Callout } from '@/components/callout';
+import {
+  Callout,
+  CalloutContainer,
+  CalloutDescription,
+  CalloutTitle,
+} from '@/components/callout';
 import { Heading } from '@/components/heading';
 import { cn } from '@/utils/cn';
 import {
@@ -77,6 +82,9 @@ const defaultMdxComponents = {
   ),
   table: Table,
   Callout,
+  CalloutContainer,
+  CalloutTitle,
+  CalloutDescription,
 };
 
 export const createRelativeLink: typeof import('./mdx.server').createRelativeLink =

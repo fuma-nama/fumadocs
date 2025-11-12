@@ -1,5 +1,20 @@
 # next-docs-mdx
 
+## 13.0.7
+
+### Patch Changes
+
+- 30b1b11: Temporary workaround for `vite:json` plugin conflicts
+- Updated dependencies [733b01e]
+  - fumadocs-core@16.0.10
+
+## 13.0.6
+
+### Patch Changes
+
+- 40176ce: Support `disableMetaFile` option in Bun plugin
+  - fumadocs-core@16.0.9
+
 ## 13.0.5
 
 ### Patch Changes

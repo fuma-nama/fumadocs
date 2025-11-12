@@ -8,14 +8,15 @@ import { parse } from 'node:querystring';
 import { ValidationError } from '@/utils/validation';
 import path from 'node:path';
 import type { LoaderContext } from 'webpack';
+import { readFileSync } from 'node:fs';
 
 export interface LoaderInput {
   development: boolean;
   compiler: CompilerOptions;
 
-  source: string;
   filePath: string;
   query: Record<string, string | string[] | undefined>;
+  getSource: () => string | Promise<string>;
 }
 
 export interface LoaderOutput {
@@ -23,19 +24,46 @@ export interface LoaderOutput {
   map?: unknown;
 }
 
-export type Loader = (input: LoaderInput) => Promise<LoaderOutput | null>;
+type Awaitable<T> = T | Promise<T>;
 
-export function toNode(loader: Loader, test: RegExp): LoadHook {
+export interface Loader {
+  /**
+   * Filter file paths, the input can be either a file URL or file path.
+   *
+   * Must take resource query into consideration.
+   */
+  test?: RegExp;
+
+  /**
+   * Transform input into JavaScript.
+   *
+   * Returns:
+   * - `LoaderOutput`: JavaScript code & source map.
+   * - `null`: skip the loader. Fallback to default behaviour if possible, otherwise the adapter will try workarounds.
+   */
+  load: (input: LoaderInput) => Awaitable<LoaderOutput | null>;
+
+  bun?: {
+    /**
+     * 1. Bun doesn't allow `null` in loaders.
+     * 2. Bun requires sync result to support dynamic require().
+     */
+    loadSync?: (source: string, input: LoaderInput) => Bun.OnLoadResult;
+  };
+}
+
+export function toNode(loader: Loader): LoadHook {
   return async (url, _context, nextLoad): Promise<LoadFnOutput> => {
-    if (url.startsWith('file:///') && test.test(url)) {
+    if (url.startsWith('file:///') && (!loader.test || loader.test.test(url))) {
       const parsedUrl = new URL(url);
       const filePath = fileURLToPath(parsedUrl);
-      const source = (await fs.readFile(filePath)).toString();
 
-      const result = await loader({
+      const result = await loader.load({
         filePath,
         query: Object.fromEntries(parsedUrl.searchParams.entries()),
-        source,
+        async getSource() {
+          return (await fs.readFile(filePath)).toString();
+        },
         development: false,
         compiler: {
           addDependency() {},
@@ -55,32 +83,44 @@ export function toNode(loader: Loader, test: RegExp): LoadHook {
   };
 }
 
-export type ViteLoader = (
-  this: TransformPluginContext,
-  file: string,
-  query: string,
-  value: string,
-) => Promise<TransformResult | null>;
+export interface ViteLoader {
+  filter: (id: string) => boolean;
+
+  transform: (
+    this: TransformPluginContext,
+    value: string,
+    id: string,
+  ) => Promise<TransformResult | null>;
+}
 
 export function toVite(loader: Loader): ViteLoader {
-  return async function (file, query, value) {
-    const result = await loader({
-      filePath: file,
-      query: parse(query),
-      source: value,
-      development: this.environment.mode === 'dev',
-      compiler: {
-        addDependency: (file) => {
-          this.addWatchFile(file);
-        },
-      },
-    });
+  return {
+    filter(id) {
+      return !loader.test || loader.test.test(id);
+    },
+    async transform(value, id) {
+      const [file, query = ''] = id.split('?', 2);
 
-    if (result === null) return null;
-    return {
-      code: result.code,
-      map: result.map as SourceMap,
-    };
+      const result = await loader.load({
+        filePath: file,
+        query: parse(query),
+        getSource() {
+          return value;
+        },
+        development: this.environment.mode === 'dev',
+        compiler: {
+          addDependency: (file) => {
+            this.addWatchFile(file);
+          },
+        },
+      });
+
+      if (result === null) return null;
+      return {
+        code: result.code,
+        map: result.map as SourceMap,
+      };
+    },
   };
 }
 
@@ -90,13 +130,18 @@ export type WebpackLoader = (
   callback: LoaderContext<unknown>['callback'],
 ) => Promise<void>;
 
+/**
+ * need to handle the `test` regex in Webpack config instead.
+ */
 export function toWebpack(loader: Loader): WebpackLoader {
   return async function (source, callback) {
     try {
-      const result = await loader({
+      const result = await loader.load({
         filePath: this.resourcePath,
         query: parse(this.resourceQuery.slice(1)),
-        source,
+        getSource() {
+          return source;
+        },
         development: this.mode === 'development',
         compiler: this,
       });
@@ -120,46 +165,42 @@ export function toWebpack(loader: Loader): WebpackLoader {
   };
 }
 
-export function toBun(loader: Loader, test: RegExp) {
+export function toBun(loader: Loader) {
+  function toResult(output: LoaderOutput | null): Bun.OnLoadResult {
+    // it errors, treat this as an exception
+    if (!output) return;
+
+    return {
+      contents: output.code,
+      loader: 'js',
+    };
+  }
+
   return (build: Bun.PluginBuilder) => {
-    const queryData = new Map<
-      string,
-      Record<string, string | undefined | string[]>
-    >();
-
-    build.onResolve({ filter: test }, (args) => {
+    // avoid using async here, because it will cause dynamic require() to fail
+    build.onLoad({ filter: loader.test ?? /.+/ }, (args) => {
       const [filePath, query = ''] = args.path.split('?', 2);
-
-      // TODO: this isn't working because `args.path` still doesn't include query string
-      queryData.set(filePath, parse(query));
-      return null;
-    });
-
-    build.onLoad({ filter: test }, async (args) => {
-      const content = await Bun.file(args.path).text();
-
-      const result = await loader({
-        source: content,
-        query: queryData.get(args.path) ?? {},
-        filePath: args.path,
+      const input: LoaderInput = {
+        async getSource() {
+          return Bun.file(filePath).text();
+        },
+        query: parse(query),
+        filePath,
         development: false,
         compiler: {
           addDependency() {},
         },
-      });
+      };
 
-      // must return something, no fallback: https://github.com/oven-sh/bun/issues/5303
-      if (result === null) {
-        return {
-          contents: content,
-          loader: args.loader,
-        };
+      if (loader.bun?.loadSync) {
+        return loader.bun.loadSync(readFileSync(filePath).toString(), input);
       }
 
-      return {
-        contents: result.code,
-        loader: 'js',
-      };
+      const result = loader.load(input);
+      if (result instanceof Promise) {
+        return result.then(toResult);
+      }
+      return toResult(result);
     });
   };
 }

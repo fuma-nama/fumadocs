@@ -26,18 +26,21 @@ import { useTheme } from 'next-themes';
 
 export function Hero() {
   const { resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const [showShaders, setShowShaders] = useState(false);
   const [imageReady, setImageReady] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    // apply some delay, otherwise on slower devices, it errors with uniform images not being fully loaded.
+    setTimeout(() => {
+      setShowShaders(true);
+    }, 400);
   }, []);
 
   return (
     <>
-      {mounted && (
+      {showShaders && (
         <GrainGradient
-          className="absolute inset-0 animate-fd-fade-in duration-1000"
+          className="absolute inset-0 animate-fd-fade-in duration-800"
           colors={
             resolvedTheme === 'dark'
               ? ['#39BE1C', '#9c2f05', '#7A2A0000']
@@ -48,10 +51,9 @@ export function Hero() {
           intensity={0.9}
           noise={0.5}
           shape="corners"
-          speed={1}
         />
       )}
-      {mounted && (
+      {showShaders && (
         <Dithering
           width={720}
           height={720}
@@ -63,7 +65,7 @@ export function Hero() {
           size={3}
           speed={0.5}
           rotation={270}
-          className="absolute max-lg:bottom-[-50%] max-lg:left-[-200px] animate-fd-fade-in duration-800 lg:top-[-5%] lg:right-0"
+          className="absolute max-lg:bottom-[-50%] max-lg:left-[-200px] animate-fd-fade-in duration-400 lg:top-[-5%] lg:right-0"
         />
       )}
       <Image

@@ -3,7 +3,8 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "types": ["remark-directive", "node"]
   },
   "exclude": ["node_modules", "dist", "eslint.config.mjs"]
 }

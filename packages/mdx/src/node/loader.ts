@@ -4,7 +4,6 @@ import { toNode } from '@/loaders/adapter';
 import { createStandaloneConfigLoader } from '@/loaders/config';
 import type { LoadHook } from 'node:module';
 import { createMetaLoader } from '@/loaders/meta';
-import { mdxLoaderGlob, metaLoaderGlob } from '@/loaders';
 
 const core = createCore({
   environment: 'node',
@@ -18,8 +17,8 @@ const configLoader = createStandaloneConfigLoader({
   mode: 'production',
 });
 
-const mdxLoader = toNode(createMdxLoader(configLoader), mdxLoaderGlob);
-const metaLoader = toNode(createMetaLoader(configLoader), metaLoaderGlob);
+const mdxLoader = toNode(createMdxLoader(configLoader));
+const metaLoader = toNode(createMetaLoader(configLoader));
 
 export const load: LoadHook = (url, context, nextLoad) => {
   return mdxLoader(url, context, (v, ctx) =>

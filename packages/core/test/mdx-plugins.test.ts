@@ -5,7 +5,7 @@ import { remark } from 'remark';
 import {
   parseCodeBlockAttributes,
   rehypeToc,
-  remarkAdmonition,
+  remarkDirectiveAdmonition,
   remarkHeading,
   remarkImage,
   remarkMdxFiles,
@@ -18,6 +18,7 @@ import remarkGfm from 'remark-gfm';
 import { createProcessor } from '@mdx-js/mdx';
 import * as fs from 'node:fs/promises';
 import { remarkSteps } from '@/mdx-plugins/remark-steps';
+import remarkDirective from 'remark-directive';
 
 const cwd = path.dirname(fileURLToPath(import.meta.url));
 
@@ -50,13 +51,15 @@ test('Remark Admonition', async () => {
   const content = readFileSync(
     path.resolve(cwd, './fixtures/remark-admonition.md'),
   );
-  const result = await remark()
-    .use(remarkAdmonition)
+  const processor = remark()
     .use(remarkMdx)
-    .process(content);
+    .use(remarkDirective)
+    .use(remarkDirectiveAdmonition);
+  let tree = processor.parse(content);
+  tree = await processor.run(tree);
 
-  await expect(result.value).toMatchFileSnapshot(
-    path.resolve(cwd, './fixtures/remark-admonition.output.mdx'),
+  await expect(tree).toMatchFileSnapshot(
+    path.resolve(cwd, './fixtures/remark-admonition.output.json'),
   );
 });
 

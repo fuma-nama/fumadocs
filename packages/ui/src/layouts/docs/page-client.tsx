@@ -5,9 +5,11 @@ import {
   Fragment,
   useEffect,
   useEffectEvent,
+  createContext,
   useMemo,
   useRef,
   useState,
+  use,
 } from 'react';
 import { ChevronDown, ChevronLeft, ChevronRight } from '@/icons';
 import Link from 'fumadocs-core/link';
@@ -15,7 +17,7 @@ import { cn } from '@/utils/cn';
 import { useI18n } from '@/contexts/i18n';
 import { useTreeContext, useTreePath } from '@/contexts/tree';
 import type * as PageTree from 'fumadocs-core/page-tree';
-import { createContext, usePathname } from 'fumadocs-core/framework';
+import { usePathname } from 'fumadocs-core/framework';
 import {
   type BreadcrumbOptions,
   getBreadcrumbItemsFromPath,
@@ -34,11 +36,11 @@ import { useActiveAnchor } from 'fumadocs-core/toc';
 const TocPopoverContext = createContext<{
   open: boolean;
   setOpen: (open: boolean) => void;
-}>('TocPopoverContext');
+} | null>(null);
 
 export function PageTOCPopoverTrigger(props: ComponentProps<'button'>) {
   const { text } = useI18n();
-  const { open } = TocPopoverContext.use();
+  const { open } = use(TocPopoverContext)!;
   const items = useTOCItems();
   const active = useActiveAnchor();
   const selected = useMemo(
@@ -182,7 +184,7 @@ export function PageTOCPopover(props: ComponentProps<'div'>) {
   }, []);
 
   return (
-    <TocPopoverContext.Provider
+    <TocPopoverContext
       value={useMemo(
         () => ({
           open,
@@ -214,7 +216,7 @@ export function PageTOCPopover(props: ComponentProps<'div'>) {
           {props.children}
         </header>
       </Collapsible>
-    </TocPopoverContext.Provider>
+    </TocPopoverContext>
   );
 }
 

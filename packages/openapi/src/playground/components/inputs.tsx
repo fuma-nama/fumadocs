@@ -250,10 +250,13 @@ export function FieldInput({
   const form = useFormContext();
   const {
     field: { value, onChange, ...restField },
+    fieldState,
   } = useController({
     control: form.control,
     name: fieldName,
   });
+
+  if (field.type === 'null') return;
 
   if (field.type === 'string' && field.format === 'binary') {
     return (
@@ -316,27 +319,33 @@ export function FieldInput({
     );
   }
 
-  if (field.type === 'null') return;
+  const isNumber = field.type === 'integer' || field.type === 'number';
 
   return (
     <div {...props} className={cn('flex flex-row gap-2', props.className)}>
       <Input
         id={fieldName}
         placeholder="Enter value"
-        type={field.type === 'number' ? 'number' : 'text'}
-        step={field.type === 'number' ? 'any' : undefined}
+        type={isNumber ? 'number' : 'text'}
+        step={field.type === 'integer' ? 1 : undefined}
         value={value ?? ''}
-        onChange={(e) =>
-          onChange(
-            field.type === 'number' ? e.target.valueAsNumber : e.target.value,
-          )
-        }
+        onChange={(e) => {
+          if (isNumber && !Number.isNaN(e.target.valueAsNumber)) {
+            onChange(e.target.valueAsNumber);
+          } else if (!isNumber) {
+            onChange(e.target.value);
+          }
+        }}
         {...restField}
       />
-      {!isRequired && value !== undefined && (
+      {fieldState.isDirty && (
         <button
           type="button"
-          onClick={() => onChange(undefined)}
+          // TODO: `react-hook-form` doesn't support setting a value to `undefined` (aka remove the value), if there's a default value defined.
+          // the default value is kept by `react-hook-form` internally, we cannot manipulate it.
+          // hence, we can only support resetting to the default value.
+          // perhaps when we migrate to Tanstack Form, we can reconsider this.
+          onClick={() => form.resetField(fieldName)}
           className="text-fd-muted-foreground"
         >
           <X className="size-4" />
@@ -547,7 +556,7 @@ function ArrayInput({
 }: {
   fieldName: string;
   items: RequestSchema;
-} & HTMLAttributes<HTMLDivElement>) {
+} & ComponentProps<'div'>) {
   const name = fieldName.split('.').at(-1) ?? '';
   const { fields, append, remove } = useFieldArray({
     name: fieldName,
@@ -564,6 +573,7 @@ function ArrayInput({
             </span>
           }
           field={items}
+          isRequired
           fieldName={`${fieldName}.${index}`}
           toolbar={
             <button
