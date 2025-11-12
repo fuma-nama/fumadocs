@@ -3,4 +3,4 @@ import { postInstall } from 'fumadocs-mdx/next';
 
 const configPath = 'source.script.ts';
 await postInstall(configPath);
-Bun.plugin(createMdxPlugin({ configPath, disableMetaFile: true }));
+Bun.plugin(createMdxPlugin({ configPath }));
