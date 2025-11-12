@@ -77,8 +77,7 @@ export function createMetaLoader(
       };
     },
     bun: {
-      async fallback({ getSource, filePath }) {
-        const source = await getSource();
+      loadSync(source, { filePath }) {
         const isJson = filePath.endsWith('.json');
         let data: unknown;
         try {

@@ -8,6 +8,7 @@ import { parse } from 'node:querystring';
 import { ValidationError } from '@/utils/validation';
 import path from 'node:path';
 import type { LoaderContext } from 'webpack';
+import { readFileSync } from 'node:fs';
 
 export interface LoaderInput {
   development: boolean;
@@ -22,6 +23,8 @@ export interface LoaderOutput {
   code: string;
   map?: unknown;
 }
+
+type Awaitable<T> = T | Promise<T>;
 
 export interface Loader {
   /**
@@ -38,13 +41,14 @@ export interface Loader {
    * - `LoaderOutput`: JavaScript code & source map.
    * - `null`: skip the loader. Fallback to default behaviour if possible, otherwise the adapter will try workarounds.
    */
-  load: (input: LoaderInput) => Promise<LoaderOutput | null>;
+  load: (input: LoaderInput) => Awaitable<LoaderOutput | null>;
 
   bun?: {
     /**
-     * Bun doesn't allow `null` in loaders, this is used as the fallback.
+     * 1. Bun doesn't allow `null` in loaders.
+     * 2. Bun requires sync result to support dynamic require().
      */
-    fallback?: (input: LoaderInput) => Promise<Bun.OnLoadResult>;
+    loadSync?: (source: string, input: LoaderInput) => Bun.OnLoadResult;
   };
 }
 
@@ -162,8 +166,19 @@ export function toWebpack(loader: Loader): WebpackLoader {
 }
 
 export function toBun(loader: Loader) {
+  function toResult(output: LoaderOutput | null): Bun.OnLoadResult {
+    // it errors, treat this as an exception
+    if (!output) return;
+
+    return {
+      contents: output.code,
+      loader: 'js',
+    };
+  }
+
   return (build: Bun.PluginBuilder) => {
-    build.onLoad({ filter: loader.test ?? /.+/ }, async (args) => {
+    // avoid using async here, because it will cause dynamic require() to fail
+    build.onLoad({ filter: loader.test ?? /.+/ }, (args) => {
       const [filePath, query = ''] = args.path.split('?', 2);
       const input: LoaderInput = {
         async getSource() {
@@ -177,22 +192,15 @@ export function toBun(loader: Loader) {
         },
       };
 
-      const result = await loader.load(input);
-
-      // must return something, no fallback: https://github.com/oven-sh/bun/issues/5303
-      if (result === null) {
-        if (!loader.bun?.fallback) {
-          // it errors, treat this as an exception
-          return;
-        }
-
-        return loader.bun.fallback(input);
+      if (loader.bun?.loadSync) {
+        return loader.bun.loadSync(readFileSync(filePath).toString(), input);
       }
 
-      return {
-        contents: result.code,
-        loader: 'js',
-      };
+      const result = loader.load(input);
+      if (result instanceof Promise) {
+        return result.then(toResult);
+      }
+      return toResult(result);
     });
   };
 }
