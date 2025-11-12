@@ -47,7 +47,15 @@ See [Next.js docs](https://nextjs.org/docs/app/guides/static-exports) for limita
 
 #### React Router
 
-By configuring SPA mode and pre-rendering, you can serve the `build/client` directory as a static website.
+By configuring SPA mode, you can serve the `build/client` directory as a static website.
+
+<Callout type="warning" title="Don't forget to pre-render">
+
+On SPA mode, all your server-side loaders must be pre-rendered.
+
+See [React Router Docs](https://reactrouter.com/how-to/spa) for details.
+
+</Callout>
 
 ```ts title="react-router.config.ts"
 import type { Config } from '@react-router/dev/config';
