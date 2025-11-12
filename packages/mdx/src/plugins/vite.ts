@@ -1,10 +1,6 @@
 import type { LoadedConfig } from '@/config/build';
 import type { EmitEntry, Plugin } from '@/core';
-import {
-  generateBrowserIndexFile,
-  generateServerIndexFile,
-  GenerateIndexFileOptions,
-} from '@/utils/generate-index-file';
+import { emitIndexFiles } from '@/utils/generate-index-file';
 
 export interface IndexFileOptions {
   /**
@@ -73,26 +69,14 @@ export default function vite({
     async emit() {
       const out: EmitEntry[] = [];
       if (indexOptions === false) return out;
-      const generateOptions: GenerateIndexFileOptions = {
+
+      return emitIndexFiles({
         config,
         configPath: this.configPath,
         outDir: this.outDir,
         target: indexOptions.runtime === false ? 'vite' : 'default',
-      };
-
-      if (indexOptions.browser !== false) {
-        out.push({
-          path: 'browser.ts',
-          content: await generateBrowserIndexFile(generateOptions),
-        });
-      }
-
-      out.push({
-        path: 'index.ts',
-        content: await generateServerIndexFile(generateOptions),
+        browser: indexOptions.browser,
       });
-
-      return out;
     },
   };
 }

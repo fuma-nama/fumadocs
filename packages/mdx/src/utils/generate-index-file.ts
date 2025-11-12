@@ -28,26 +28,30 @@ export interface GenerateIndexFileOptions {
   configPath: string;
 }
 
-export async function emitIndexFiles(
-  options: GenerateIndexFileOptions,
-): Promise<EmitEntry[]> {
-  const out: EmitEntry[] = [];
-  out.push({
-    path: 'browser.ts',
-    content: await generateBrowserIndexFile(options),
-  });
+export async function emitIndexFiles({
+  browser,
+  ...options
+}: GenerateIndexFileOptions & { browser?: boolean }): Promise<EmitEntry[]> {
+  const out: Promise<EmitEntry>[] = [
+    generateDynamicIndexFile(options).then((content) => ({
+      path: 'dynamic.ts',
+      content,
+    })),
+    generateServerIndexFile(options).then((content) => ({
+      path: 'index.ts',
+      content,
+    })),
+  ];
 
-  out.push({
-    path: 'dynamic.ts',
-    content: await generateDynamicIndexFile(options),
-  });
+  if (browser !== false)
+    out.push(
+      generateBrowserIndexFile(options).then((content) => ({
+        path: 'browser.ts',
+        content,
+      })),
+    );
 
-  out.push({
-    path: 'index.ts',
-    content: await generateServerIndexFile(options),
-  });
-
-  return out;
+  return await Promise.all(out);
 }
 
 export async function generateServerIndexFile(
@@ -77,56 +81,63 @@ export async function generateServerIndexFile(
   async function generateCollectionObject(
     collection: CollectionItem,
   ): Promise<string | undefined> {
-    if (collection.type === 'docs' && collection.docs.dynamic) return;
+    switch (collection.type) {
+      case 'docs': {
+        if (collection.docs.dynamic) return;
 
-    if (collection.type === 'docs' && collection.docs.async) {
-      const [metaGlob, headGlob, bodyGlob] = await Promise.all([
-        generateMetaCollectionGlob(codegen, collection.meta, true),
-        generateDocCollectionFrontmatterGlob(codegen, collection.docs, true),
-        generateDocCollectionGlob(codegen, collection.docs),
-      ]);
+        if (collection.docs.async) {
+          const [metaGlob, headGlob, bodyGlob] = await Promise.all([
+            generateMetaCollectionGlob(codegen, collection.meta, true),
+            generateDocCollectionFrontmatterGlob(
+              codegen,
+              collection.docs,
+              true,
+            ),
+            generateDocCollectionGlob(codegen, collection.docs),
+          ]);
 
-      return `create.docsLazy("${collection.name}", "${collection.dir}", ${metaGlob}, ${headGlob}, ${bodyGlob})`;
+          return `create.docsLazy("${collection.name}", "${collection.dir}", ${metaGlob}, ${headGlob}, ${bodyGlob})`;
+        }
+
+        const [metaGlob, docGlob] = await Promise.all([
+          generateMetaCollectionGlob(codegen, collection.meta, true),
+          generateDocCollectionGlob(codegen, collection.docs),
+        ]);
+
+        return `create.docs("${collection.name}", "${collection.dir}", ${metaGlob}, ${docGlob})`;
+      }
+      case 'doc':
+        if (collection.dynamic) return;
+
+        if (collection.async) {
+          const [headGlob, bodyGlob] = await Promise.all([
+            generateDocCollectionFrontmatterGlob(codegen, collection, true),
+            generateDocCollectionGlob(codegen, collection),
+          ]);
+
+          return `create.docLazy("${collection.name}", "${collection.dir}", ${headGlob}, ${bodyGlob})`;
+        }
+
+        return `create.doc("${collection.name}", "${collection.dir}", ${await generateDocCollectionGlob(
+          codegen,
+          collection,
+          true,
+        )})`;
+      case 'meta':
+        return `create.meta("${collection.name}", "${collection.dir}", ${await generateMetaCollectionGlob(
+          codegen,
+          collection,
+          true,
+        )})`;
     }
-
-    if (collection.type === 'docs') {
-      const [metaGlob, docGlob] = await Promise.all([
-        generateMetaCollectionGlob(codegen, collection.meta, true),
-        generateDocCollectionGlob(codegen, collection.docs),
-      ]);
-
-      return `create.docs("${collection.name}", "${collection.dir}", ${metaGlob}, ${docGlob})`;
-    }
-
-    if (collection.type === 'doc' && collection.dynamic) return;
-
-    if (collection.type === 'doc' && collection.async) {
-      const [headGlob, bodyGlob] = await Promise.all([
-        generateDocCollectionFrontmatterGlob(codegen, collection, true),
-        generateDocCollectionGlob(codegen, collection),
-      ]);
-
-      return `create.docLazy("${collection.name}", "${collection.dir}", ${headGlob}, ${bodyGlob})`;
-    }
-
-    if (collection.type === 'doc') {
-      return `create.doc("${collection.name}", "${collection.dir}", ${await generateDocCollectionGlob(
-        codegen,
-        collection,
-        true,
-      )})`;
-    }
-
-    return `create.meta("${collection.name}", "${collection.dir}", ${await generateMetaCollectionGlob(
-      codegen,
-      collection,
-      true,
-    )})`;
   }
 
-  codegen.pushAsync(
+  await codegen.pushAsync(
     config.collectionList.map(async (collection) => {
-      return `\nexport const ${collection.name} = ${await generateCollectionObject(collection)};`;
+      const obj = await generateCollectionObject(collection);
+      if (!obj) return;
+
+      return `\nexport const ${collection.name} = ${obj};`;
     }),
   );
 
@@ -157,7 +168,50 @@ export async function generateDynamicIndexFile(
     `const create = fromConfigDynamic(Config);`,
   );
 
-  async function onCollection(
+  async function generateCollectionObjectEntry(
+    collection: DocCollectionItem,
+    file: string,
+  ) {
+    const fullPath = path.join(collection.dir, file);
+    const content = await readFileWithCache(fullPath).catch(() => '');
+    const parsed = fumaMatter(content);
+    let data = parsed.data;
+
+    if (collection.schema) {
+      data = await validate(
+        collection.schema,
+        parsed.data,
+        { path: fullPath, source: parsed.content },
+        `invalid frontmatter in ${fullPath}`,
+      );
+    }
+
+    let lastModified: Date | undefined;
+    if (config.global?.lastModifiedTime === 'git') {
+      lastModified = await getGitTimestamp(fullPath);
+    }
+
+    const hash = createHash('md5').update(content).digest('hex');
+    const infoStr: string[] = [
+      // make sure it's included in vercel/nft
+      `absolutePath: path.resolve(${JSON.stringify(fullPath)})`,
+    ];
+    for (const [k, v] of Object.entries({
+      info: {
+        fullPath,
+        path: file,
+      },
+      data,
+      lastModified,
+      hash,
+    } satisfies LazyEntry<unknown>)) {
+      infoStr.push(`${k}: ${JSON.stringify(v)}`);
+    }
+
+    return `{ ${infoStr.join(', ')} }`;
+  }
+
+  async function generateCollectionObject(
     parent: CollectionItem,
   ): Promise<string | undefined> {
     let collection: DocCollectionItem | undefined;
@@ -169,47 +223,9 @@ export async function generateDynamicIndexFile(
     const files = await glob(collection.patterns, {
       cwd: collection.dir,
     });
-    const entryPromises = files.map(async (file) => {
-      const fullPath = path.join(collection.dir, file);
-      const content = await readFileWithCache(fullPath).catch(() => '');
-      const parsed = fumaMatter(content);
-      let data = parsed.data;
-
-      if (collection.schema) {
-        data = await validate(
-          collection.schema,
-          parsed.data,
-          { path: fullPath, source: parsed.content },
-          `invalid frontmatter in ${fullPath}`,
-        );
-      }
-
-      let lastModified: Date | undefined;
-      if (config.global?.lastModifiedTime === 'git') {
-        lastModified = await getGitTimestamp(fullPath);
-      }
-
-      const hash = createHash('md5').update(content).digest('hex');
-      const infoStr: string[] = [
-        // make sure it's included in vercel/nft
-        `absolutePath: path.resolve(${JSON.stringify(fullPath)})`,
-      ];
-      for (const [k, v] of Object.entries({
-        info: {
-          fullPath,
-          path: file,
-        },
-        data,
-        lastModified,
-        hash,
-      } satisfies LazyEntry<unknown>)) {
-        infoStr.push(`${k}: ${JSON.stringify(v)}`);
-      }
-
-      return `{ ${infoStr.join(', ')} }`;
-    });
-
-    const entriesStr = (await Promise.all(entryPromises)).join(', ');
+    const entries = await Promise.all(
+      files.map((file) => generateCollectionObjectEntry(collection, file)),
+    );
 
     if (parent.type === 'docs') {
       const metaGlob = await generateMetaCollectionGlob(
@@ -218,13 +234,20 @@ export async function generateDynamicIndexFile(
         true,
       );
 
-      return `export const ${parent.name} = create.docs("${parent.name}", "${parent.dir}", ${metaGlob}, ${entriesStr})`;
+      return `create.docs("${parent.name}", "${parent.dir}", ${metaGlob}, ${entries.join(', ')})`;
     }
 
-    return `export const ${collection.name} = create.doc("${collection.name}", "${collection.dir}", ${entriesStr})`;
+    return `create.doc("${collection.name}", "${collection.dir}", ${entries.join(', ')})`;
   }
 
-  codegen.pushAsync(config.collectionList.map(onCollection));
+  await codegen.pushAsync(
+    config.collectionList.map(async (collection) => {
+      const obj = await generateCollectionObject(collection);
+      if (!obj) return;
+
+      return `\nexport const ${collection.name} = ${obj};`;
+    }),
+  );
 
   return codegen.toString();
 }
@@ -254,33 +277,36 @@ export async function generateBrowserIndexFile(
 
   async function generateCollectionObject(
     collection: CollectionItem,
-  ): Promise<string> {
-    if (collection.type === 'docs') {
-      const [docGlob, metaGlob] = await Promise.all([
-        generateCollectionObject(collection.docs),
-        generateCollectionObject(collection.meta),
-      ]);
+  ): Promise<string | undefined> {
+    switch (collection.type) {
+      case 'docs': {
+        if (collection.docs.dynamic) return;
 
-      const obj = [ident(`doc: ${docGlob}`), ident(`meta: ${metaGlob}`)].join(
-        ',\n',
-      );
+        const [docGlob, metaGlob] = await Promise.all([
+          generateCollectionObject(collection.docs),
+          generateCollectionObject(collection.meta),
+        ]);
 
-      return `{\n${obj}\n}`;
+        return `{\n${ident(`doc: ${docGlob},\nmeta: ${metaGlob}`)}\n}`;
+      }
+      case 'doc':
+        if (collection.dynamic) return;
+
+        return `create.doc("${collection.name}", ${await generateDocCollectionGlob(codegen, collection)})`;
+      case 'meta':
+        return `create.meta("${collection.name}", ${await generateMetaCollectionGlob(
+          codegen,
+          collection,
+        )})`;
     }
-
-    if (collection.type === 'doc') {
-      return `create.doc("${collection.name}", ${await generateDocCollectionGlob(codegen, collection)})`;
-    }
-
-    return `create.meta("${collection.name}", ${await generateMetaCollectionGlob(
-      codegen,
-      collection,
-    )})`;
   }
 
-  codegen.pushAsync(
+  await codegen.pushAsync(
     config.collectionList.map(async (collection) => {
-      return `\nexport const ${collection.name} = ${await generateCollectionObject(collection)};`;
+      const obj = await generateCollectionObject(collection);
+      if (!obj) return;
+
+      return `\nexport const ${collection.name} = ${obj};`;
     }),
   );
 

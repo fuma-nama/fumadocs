@@ -1,6 +1,6 @@
 import type { LoadedConfig } from '@/config/build';
 import type { Plugin } from '@/core';
-import { generateServerIndexFile } from '@/utils/generate-index-file';
+import { emitIndexFiles } from '@/utils/generate-index-file';
 
 export default function next(): Plugin {
   let config: LoadedConfig;
@@ -32,17 +32,12 @@ export default function next(): Plugin {
       });
     },
     async emit() {
-      return [
-        {
-          path: 'index.ts',
-          // TODO: implement meta entries validation.
-          content: await generateServerIndexFile({
-            config,
-            configPath: this.configPath,
-            outDir: this.outDir,
-          }),
-        },
-      ];
+      // TODO: implement meta entries validation.
+      return emitIndexFiles({
+        config,
+        configPath: this.configPath,
+        outDir: this.outDir,
+      });
     },
   };
 }
