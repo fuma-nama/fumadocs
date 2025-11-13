@@ -41,6 +41,7 @@ export interface DocsCollectionItem extends DocsCollection {
   name: string;
   meta: MetaCollectionItem;
   docs: DocCollectionItem;
+  hasFile: (filePath: string) => boolean;
 }
 
 const SupportedFormats = {
@@ -58,7 +59,10 @@ export function buildCollection(
       name,
       meta: buildPrimitiveCollection(name, config.meta),
       docs: buildPrimitiveCollection(name, config.docs),
-    };
+      hasFile(filePath) {
+        return this.docs.hasFile(filePath) || this.meta.hasFile(filePath);
+      },
+    } as DocsCollectionItem;
   }
 
   return buildPrimitiveCollection(name, config) as CollectionItem;

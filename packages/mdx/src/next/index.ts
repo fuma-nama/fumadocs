@@ -11,6 +11,7 @@ import { ValidationError } from '@/utils/validation';
 import next from '@/plugins/next';
 import { type Core, createCore, findConfigFile } from '@/core';
 import { mdxLoaderGlob, metaLoaderGlob } from '@/loaders';
+import type { IndexFilePluginOptions } from '@/plugins/index-file';
 
 export interface CreateMDXOptions {
   /**
@@ -24,6 +25,8 @@ export interface CreateMDXOptions {
    * @defaultValue '.source'
    */
   outDir?: string;
+
+  index?: IndexFilePluginOptions;
 }
 
 const defaultPageExtensions = ['mdx', 'md', 'jsx', 'js', 'tsx', 'ts'];
@@ -187,6 +190,7 @@ export async function postInstall(
   outDir = '.source',
 ) {
   const core = await createNextCore({
+    index: {},
     outDir,
     configPath,
   }).init({
@@ -198,22 +202,20 @@ export async function postInstall(
 
 function applyDefaults(options: CreateMDXOptions): Required<CreateMDXOptions> {
   return {
+    index: {},
     outDir: options.outDir ?? '.source',
     configPath: options.configPath ?? findConfigFile(),
   };
 }
 
-function createNextCore({
-  outDir,
-  configPath,
-}: Required<CreateMDXOptions>): Core {
+function createNextCore(options: Required<CreateMDXOptions>): Core {
   const core = createCore(
     {
       environment: 'next',
-      outDir,
-      configPath,
+      outDir: options.outDir,
+      configPath: options.configPath,
     },
-    [next()],
+    [next(options)],
   );
 
   return {

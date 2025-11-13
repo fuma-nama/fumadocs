@@ -1,11 +1,3 @@
-```ts title="dynamic.ts"
-// @ts-nocheck
-import { fromConfigDynamic } from 'fumadocs-mdx/runtime/dynamic';
-import * as Config from './config';
-
-const create = fromConfigDynamic(Config);
-```
-
 ```ts title="index.ts"
 // @ts-nocheck
 import { frontmatter as __fd_glob_1 } from "./generate-index/folder/test.mdx?collection=docs&only=frontmatter"
@@ -16,6 +8,14 @@ import type * as Config from './config';
 const create = fromConfig<typeof Config>();
 
 export const docs = await create.docLazy("docs", "packages/mdx/test/fixtures/generate-index", {"index.mdx": __fd_glob_0, "folder/test.mdx": __fd_glob_1, }, {"index.mdx": () => import("./generate-index/index.mdx?collection=docs"), "folder/test.mdx": () => import("./generate-index/folder/test.mdx?collection=docs"), });
+```
+
+```ts title="dynamic.ts"
+// @ts-nocheck
+import { fromConfigDynamic } from 'fumadocs-mdx/runtime/dynamic';
+import * as Config from './config';
+
+const create = fromConfigDynamic(Config);
 ```
 
 ```ts title="browser.ts"

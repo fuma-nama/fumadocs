@@ -3,21 +3,22 @@ import { buildConfig } from '@/config/build';
 import { ValidationError } from '@/utils/validation';
 import { createMdxLoader } from '@/loaders/mdx';
 import { toVite } from '@/loaders/adapter';
-import vite, { type IndexFileOptions } from '@/plugins/vite';
+import vite from '@/plugins/vite';
 import type { FSWatcher } from 'chokidar';
 import { createCore, findConfigFile } from '@/core';
 import { createIntegratedConfigLoader } from '@/loaders/config';
 import { createMetaLoader } from '@/loaders/meta';
+import { IndexFilePluginOptions } from '@/plugins/index-file';
 
 const FumadocsDeps = ['fumadocs-core', 'fumadocs-ui', 'fumadocs-openapi'];
 
 export interface PluginOptions {
   /**
-   * Automatically generate index files for accessing files with `import.meta.glob`.
+   * Generate index files for accessing content.
    *
    * @defaultValue true
    */
-  generateIndexFile?: boolean | IndexFileOptions;
+  index?: boolean | IndexFilePluginOptions;
 
   /**
    * @defaultValue source.config.ts
@@ -114,29 +115,21 @@ export async function postInstall(
   await core.emitAndWrite();
 }
 
-function createViteCore({
-  configPath,
-  outDir,
-  generateIndexFile,
-}: Required<PluginOptions>) {
+function createViteCore(options: Required<PluginOptions>) {
   return createCore(
     {
       environment: 'vite',
-      configPath,
-      outDir,
+      configPath: options.configPath,
+      outDir: options.outDir,
     },
-    [
-      vite({
-        index: generateIndexFile,
-      }),
-    ],
+    [vite(options)],
   );
 }
 
 function applyDefaults(options: PluginOptions): Required<PluginOptions> {
   return {
     updateViteConfig: options.updateViteConfig ?? true,
-    generateIndexFile: options.generateIndexFile ?? true,
+    index: options.index ?? true,
     configPath: options.configPath ?? 'source.config.ts',
     outDir: options.outDir ?? '.source',
   };

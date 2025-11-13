@@ -5,8 +5,9 @@ import { z } from 'zod';
 import { ValidationError } from '@/utils/validation';
 import { defineCollections } from '@/config';
 import { fumaMatter } from '@/utils/fuma-matter';
-import { emitIndexFiles } from '@/utils/codegen';
 import { buildConfig } from '@/config/build';
+import { createCore } from '@/core';
+import indexFile from '@/plugins/index-file';
 
 test('format errors', async () => {
   const schema = z.object({
@@ -70,20 +71,24 @@ const cases = [
 
 for (const { name, collection } of cases) {
   test(`generate JS index file: ${name}`, async () => {
-    const out = await emitIndexFiles({
-      configPath: path.join(baseDir, './fixtures/config.ts'),
+    const core = createCore(
+      {
+        configPath: path.join(baseDir, './fixtures/config.ts'),
+        environment: 'test',
+        outDir: path.join(baseDir, './fixtures'),
+      },
+      [indexFile()],
+    );
+
+    await core.init({
       config: buildConfig({
         docs: collection,
       }),
-      outDir: path.join(baseDir, './fixtures'),
     });
-
-    const markdown = out
-      .map((entry) => {
-        const content = entry.content.replaceAll(process.cwd(), '$cwd');
-
-        return `\`\`\`ts title="${entry.path}"\n${content}\n\`\`\``;
-      })
+    const markdown = (await core.emit())
+      .map(
+        (entry) => `\`\`\`ts title="${entry.path}"\n${entry.content}\n\`\`\``,
+      )
       .join('\n\n');
 
     await expect(markdown).toMatchFileSnapshot(

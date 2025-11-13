@@ -1,11 +1,3 @@
-```ts title="dynamic.ts"
-// @ts-nocheck
-import { fromConfigDynamic } from 'fumadocs-mdx/runtime/dynamic';
-import * as Config from './config';
-
-const create = fromConfigDynamic(Config);
-```
-
 ```ts title="index.ts"
 // @ts-nocheck
 import * as __fd_glob_1 from "./generate-index/folder/test.mdx?collection=docs"
@@ -16,6 +8,14 @@ import type * as Config from './config';
 const create = fromConfig<typeof Config>();
 
 export const docs = await create.doc("docs", "packages/mdx/test/fixtures/generate-index", {"index.mdx": __fd_glob_0, "folder/test.mdx": __fd_glob_1, });
+```
+
+```ts title="dynamic.ts"
+// @ts-nocheck
+import { fromConfigDynamic } from 'fumadocs-mdx/runtime/dynamic';
+import * as Config from './config';
+
+const create = fromConfigDynamic(Config);
 ```
 
 ```ts title="browser.ts"

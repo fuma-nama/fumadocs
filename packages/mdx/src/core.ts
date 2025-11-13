@@ -111,10 +111,10 @@ export function createCore(
 
       return this;
     },
-    getConfig() {
+    getConfig(): LoadedConfig {
       return config;
     },
-    async initServer(server: ServerContext) {
+    async initServer(server: ServerContext): Promise<void> {
       server.watcher?.on('all', async (event, file) => {
         if (event === 'change') removeFileCache(file);
       });
@@ -123,21 +123,25 @@ export function createCore(
         await plugin.configureServer?.call(this.getPluginContext(), server);
       }
     },
-    async emitAndWrite({
-      filterPlugin = () => true,
-    }: EmitOptions = {}): Promise<void> {
+    async emit({ filterPlugin = () => true }: EmitOptions = {}): Promise<
+      EmitEntry[]
+    > {
+      return (
+        await Promise.all(
+          plugins.map((plugin) => {
+            if (!filterPlugin(plugin) || !plugin.emit) return [];
+
+            return plugin.emit.call(this.getPluginContext());
+          }),
+        )
+      ).flat();
+    },
+    async emitAndWrite(emitOptions?: EmitOptions): Promise<void> {
       const start = performance.now();
-
-      const out = await Promise.all(
-        plugins.map((plugin) => {
-          if (!filterPlugin(plugin) || !plugin.emit) return [];
-
-          return plugin.emit.call(this.getPluginContext());
-        }),
-      );
+      const out = await this.emit(emitOptions);
 
       await Promise.all(
-        out.flat().map(async (entry) => {
+        out.map(async (entry) => {
           const file = path.join(options.outDir, entry.path);
 
           await fs.mkdir(path.dirname(file), { recursive: true });

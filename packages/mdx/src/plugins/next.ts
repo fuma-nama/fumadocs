@@ -1,43 +1,7 @@
-import type { LoadedConfig } from '@/config/build';
-import type { Plugin } from '@/core';
-import { emitIndexFiles } from '@/utils/codegen';
+import type { PluginOption } from '@/core';
+import type { CreateMDXOptions } from '@/next';
+import indexFile from './index-file';
 
-export default function next(): Plugin {
-  let config: LoadedConfig;
-  let shouldEmitOnChange = false;
-
-  return {
-    name: 'next',
-    config(v) {
-      config = v;
-
-      // always emit again when async mode enabled
-      shouldEmitOnChange = config.collectionList.some((collection) => {
-        return (
-          (collection.type === 'doc' && collection.async) ||
-          collection.type === 'docs' ||
-          collection.type === 'meta'
-        );
-      });
-    },
-    configureServer(server) {
-      if (!server.watcher) return;
-
-      server.watcher.on('all', async (event) => {
-        if (event === 'change' && !shouldEmitOnChange) return;
-
-        await this.core.emitAndWrite({
-          filterPlugin: (plugin) => plugin.name === 'next',
-        });
-      });
-    },
-    async emit() {
-      // TODO: implement meta entries validation.
-      return emitIndexFiles({
-        config,
-        configPath: this.configPath,
-        outDir: this.outDir,
-      });
-    },
-  };
+export default function next(config: CreateMDXOptions): PluginOption {
+  return [indexFile(config.index)];
 }
