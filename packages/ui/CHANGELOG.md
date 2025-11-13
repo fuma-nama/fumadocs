@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 16.0.11
+
+### Patch Changes
+
+- 00058c8: Drop framework-side `createContext`
+- Updated dependencies [ff68f69]
+- Updated dependencies [00058c8]
+  - fumadocs-core@16.0.11
+
 ## 16.0.10
 
 ### Patch Changes

@@ -1,5 +1,14 @@
 # next-docs-mdx
 
+## 13.0.8
+
+### Patch Changes
+
+- 58bf979: [Bun Loader] Support dynamic require of meta files
+- Updated dependencies [ff68f69]
+- Updated dependencies [00058c8]
+  - fumadocs-core@16.0.11
+
 ## 13.0.7
 
 ### Patch Changes
