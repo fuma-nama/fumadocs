@@ -68,7 +68,8 @@ export const registry: Registry = {
         },
         {
           type: 'lib',
-          path: 'lib/build-graph.ts',
+          path: 'components/registry/build-graph.ts',
+          target: 'lib/build-graph.ts',
         },
       ],
     },

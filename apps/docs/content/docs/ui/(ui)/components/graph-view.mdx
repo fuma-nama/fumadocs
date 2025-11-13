@@ -6,7 +6,7 @@ description: A graph of all pages.
 import { GraphView } from '@/components/preview/lazy';
 import { buildGraph } from '@/lib/build-graph';
 
-<GraphView graph={buildGraph()} />
+<GraphView graph={await buildGraph()} />
 
 ## Installation
 
