@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 10.0.6
+
+### Patch Changes
+
+- e792e43: hotfix recursive `oneOf` schema UI
+
 ## 10.0.5
 
 ### Patch Changes
