@@ -23,8 +23,19 @@ export function createMetaLoader(
 ): Loader {
   const { json: resolveJson = 'js', yaml: resolveYaml = 'js' } = resolve;
 
-  function stringifyOutput(isJson: boolean, data: unknown) {
-    if (isJson) {
+  function parse(filePath: string, source: string) {
+    try {
+      if (filePath.endsWith('.json')) return JSON.parse(source);
+      if (filePath.endsWith('.yaml')) return load(source);
+    } catch (e) {
+      throw new Error(`invalid data in ${filePath}`, { cause: e });
+    }
+
+    throw new Error('Unknown file type ' + filePath);
+  }
+
+  function stringifyOutput(filePath: string, data: unknown) {
+    if (filePath.endsWith('.json')) {
       return resolveJson === 'json'
         ? JSON.stringify(data)
         : `export default ${JSON.stringify(data)}`;
@@ -44,14 +55,8 @@ export function createMetaLoader(
         : undefined;
       if (!collection) return null;
 
-      const isJson = filePath.endsWith('.json');
       const source = await getSource();
-      let data: unknown;
-      try {
-        data = isJson ? JSON.parse(source) : load(source);
-      } catch (e) {
-        throw new Error(`invalid data in ${filePath}`, { cause: e });
-      }
+      let data = parse(filePath, source);
 
       let schema;
       switch (collection?.type) {
@@ -73,22 +78,14 @@ export function createMetaLoader(
       }
 
       return {
-        code: stringifyOutput(isJson, data),
+        code: stringifyOutput(filePath, data),
       };
     },
     bun: {
       loadSync(source, { filePath }) {
-        const isJson = filePath.endsWith('.json');
-        let data: unknown;
-        try {
-          data = isJson ? JSON.parse(source) : load(source);
-        } catch (e) {
-          throw new Error(`invalid data in ${filePath}`, { cause: e });
-        }
-
         return {
           loader: 'object',
-          exports: data as Record<string, unknown>,
+          exports: parse(filePath, source) as Record<string, unknown>,
         };
       },
     },

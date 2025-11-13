@@ -1,6 +1,6 @@
 import type { LoadedConfig } from '@/config/build';
 import type { EmitEntry, Plugin } from '@/core';
-import { emitIndexFiles } from '@/utils/generate-index-file';
+import { emitIndexFiles } from '@/utils/codegen';
 
 export interface IndexFileOptions {
   /**

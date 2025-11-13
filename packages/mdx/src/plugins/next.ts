@@ -1,6 +1,6 @@
 import type { LoadedConfig } from '@/config/build';
 import type { Plugin } from '@/core';
-import { emitIndexFiles } from '@/utils/generate-index-file';
+import { emitIndexFiles } from '@/utils/codegen';
 
 export default function next(): Plugin {
   let config: LoadedConfig;

@@ -5,15 +5,15 @@ import type {
   MetaCollectionItem,
 } from '@/config/build';
 import path from 'path';
-import { CodeGen, createCodegen, ident } from './codegen/utils';
+import { type CodeGen, createCodegen, ident } from './utils';
 import { glob } from 'tinyglobby';
-import { readFileWithCache } from './codegen/cache';
-import { fumaMatter } from './fuma-matter';
-import { validate } from './validation';
-import { getGitTimestamp } from './git-timestamp';
+import { readFileWithCache } from './cache';
+import { fumaMatter } from '../fuma-matter';
+import { validate } from '../validation';
+import { getGitTimestamp } from '../git-timestamp';
 import { createHash } from 'crypto';
 import type { LazyEntry } from '@/runtime/dynamic';
-import { EmitEntry } from '@/core';
+import type { EmitEntry } from '@/core';
 
 export interface GenerateIndexFileOptions {
   target?: 'default' | 'vite';
@@ -96,15 +96,15 @@ export async function generateServerIndexFile(
             generateDocCollectionGlob(codegen, collection.docs),
           ]);
 
-          return `create.docsLazy("${collection.name}", "${collection.dir}", ${metaGlob}, ${headGlob}, ${bodyGlob})`;
+          return `await create.docsLazy("${collection.name}", "${collection.dir}", ${metaGlob}, ${headGlob}, ${bodyGlob})`;
         }
 
         const [metaGlob, docGlob] = await Promise.all([
           generateMetaCollectionGlob(codegen, collection.meta, true),
-          generateDocCollectionGlob(codegen, collection.docs),
+          generateDocCollectionGlob(codegen, collection.docs, true),
         ]);
 
-        return `create.docs("${collection.name}", "${collection.dir}", ${metaGlob}, ${docGlob})`;
+        return `await create.docs("${collection.name}", "${collection.dir}", ${metaGlob}, ${docGlob})`;
       }
       case 'doc':
         if (collection.dynamic) return;
@@ -115,16 +115,16 @@ export async function generateServerIndexFile(
             generateDocCollectionGlob(codegen, collection),
           ]);
 
-          return `create.docLazy("${collection.name}", "${collection.dir}", ${headGlob}, ${bodyGlob})`;
+          return `await create.docLazy("${collection.name}", "${collection.dir}", ${headGlob}, ${bodyGlob})`;
         }
 
-        return `create.doc("${collection.name}", "${collection.dir}", ${await generateDocCollectionGlob(
+        return `await create.doc("${collection.name}", "${collection.dir}", ${await generateDocCollectionGlob(
           codegen,
           collection,
           true,
         )})`;
       case 'meta':
-        return `create.meta("${collection.name}", "${collection.dir}", ${await generateMetaCollectionGlob(
+        return `await create.meta("${collection.name}", "${collection.dir}", ${await generateMetaCollectionGlob(
           codegen,
           collection,
           true,
@@ -227,17 +227,19 @@ export async function generateDynamicIndexFile(
       files.map((file) => generateCollectionObjectEntry(collection, file)),
     );
 
-    if (parent.type === 'docs') {
-      const metaGlob = await generateMetaCollectionGlob(
-        codegen,
-        parent.meta,
-        true,
-      );
+    switch (parent.type) {
+      case 'docs': {
+        const metaGlob = await generateMetaCollectionGlob(
+          codegen,
+          parent.meta,
+          true,
+        );
 
-      return `create.docs("${parent.name}", "${parent.dir}", ${metaGlob}, ${entries.join(', ')})`;
+        return `await create.docs("${parent.name}", "${parent.dir}", ${metaGlob}, ${entries.join(', ')})`;
+      }
+      case 'doc':
+        return `await create.doc("${collection.name}", "${collection.dir}", ${entries.join(', ')})`;
     }
-
-    return `create.doc("${collection.name}", "${collection.dir}", ${entries.join(', ')})`;
   }
 
   await codegen.pushAsync(

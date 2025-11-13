@@ -10,7 +10,7 @@ import { loadConfig } from '@/config/load-from-file';
 import { ValidationError } from '@/utils/validation';
 import next from '@/plugins/next';
 import { type Core, createCore, findConfigFile } from '@/core';
-import { mdxLoaderGlob } from '@/loaders';
+import { mdxLoaderGlob, metaLoaderGlob } from '@/loaders';
 
 export interface CreateMDXOptions {
   /**
@@ -57,6 +57,24 @@ export function createMDX(createOptions: CreateMDXOptions = {}) {
           ],
           as: '*.js',
         },
+        '*.json': {
+          loaders: [
+            {
+              loader: 'fumadocs-mdx/loader-meta',
+              options: loaderOptions as unknown as TurbopackLoaderOptions,
+            },
+          ],
+          as: '*.json',
+        },
+        '*.yaml': {
+          loaders: [
+            {
+              loader: 'fumadocs-mdx/loader-meta',
+              options: loaderOptions as unknown as TurbopackLoaderOptions,
+            },
+          ],
+          as: '*.js',
+        },
       },
     };
 
@@ -70,16 +88,28 @@ export function createMDX(createOptions: CreateMDXOptions = {}) {
         config.module ||= {};
         config.module.rules ||= [];
 
-        config.module.rules.push({
-          test: mdxLoaderGlob,
-          use: [
-            options.defaultLoaders.babel,
-            {
-              loader: 'fumadocs-mdx/loader-mdx',
-              options: loaderOptions,
-            },
-          ],
-        });
+        config.module.rules.push(
+          {
+            test: mdxLoaderGlob,
+            use: [
+              options.defaultLoaders.babel,
+              {
+                loader: 'fumadocs-mdx/loader-mdx',
+                options: loaderOptions,
+              },
+            ],
+          },
+          {
+            test: metaLoaderGlob,
+            use: [
+              options.defaultLoaders.babel,
+              {
+                loader: 'fumadocs-mdx/loader-meta',
+                options: loaderOptions,
+              },
+            ],
+          },
+        );
 
         config.plugins ||= [];
 

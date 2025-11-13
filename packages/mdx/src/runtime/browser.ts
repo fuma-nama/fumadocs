@@ -47,11 +47,9 @@ export function fromConfig<Config>() {
     ): Config[Name] extends
       | DocCollection<infer Schema>
       | DocsCollection<infer Schema>
-      ? Promise<
-          Record<
-            string,
-            () => Promise<CompiledMDXFile<StandardSchemaV1.InferOutput<Schema>>>
-          >
+      ? Record<
+          string,
+          () => Promise<CompiledMDXFile<StandardSchemaV1.InferOutput<Schema>>>
         >
       : never {
       return glob as any;
@@ -62,9 +60,7 @@ export function fromConfig<Config>() {
     ): Config[Name] extends
       | MetaCollection<infer Schema>
       | DocsCollection<any, infer Schema>
-      ? Promise<
-          Record<string, () => Promise<StandardSchemaV1.InferOutput<Schema>>>
-        >
+      ? Record<string, () => Promise<StandardSchemaV1.InferOutput<Schema>>>
       : never {
       return glob as any;
     },

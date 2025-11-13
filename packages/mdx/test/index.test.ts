@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { ValidationError } from '@/utils/validation';
 import { defineCollections } from '@/config';
 import { fumaMatter } from '@/utils/fuma-matter';
-import { emitIndexFiles } from '@/utils/generate-index-file';
+import { emitIndexFiles } from '@/utils/codegen';
 import { buildConfig } from '@/config/build';
 
 test('format errors', async () => {
