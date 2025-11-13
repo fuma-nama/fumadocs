@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 16.0.11
+
+### Patch Changes
+
+- ff68f69: [Page Tree Builder] Fix node IDs are not unique across different locales
+- 00058c8: Drop framework-side `createContext`
+
 ## 16.0.10
 
 ### Patch Changes

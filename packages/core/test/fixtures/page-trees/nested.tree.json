@@ -2,16 +2,16 @@
   "$id": "root",
   "children": [
     {
-      "$id": "test.mdx",
+      "$id": "root:test.mdx",
       "name": "Hello",
       "type": "page",
       "url": "/test",
     },
     {
-      "$id": "(nested)",
+      "$id": "root:(nested)",
       "children": [
         {
-          "$id": "(nested)/hello.mdx",
+          "$id": "root:(nested)/hello.mdx",
           "name": "Route Group Page",
           "type": "page",
           "url": "/hello",
@@ -21,10 +21,10 @@
       "type": "folder",
     },
     {
-      "$id": "hello",
+      "$id": "root:hello",
       "children": [],
       "index": {
-        "$id": "hello/index.mdx",
+        "$id": "root:hello/index.mdx",
         "name": "Another hello page",
         "type": "page",
         "url": "/hello/index",
@@ -33,10 +33,10 @@
       "type": "folder",
     },
     {
-      "$id": "nested",
+      "$id": "root:nested",
       "children": [
         {
-          "$id": "nested/test.mdx",
+          "$id": "root:nested/test.mdx",
           "name": "Nested Page",
           "type": "page",
           "url": "/nested/test",
@@ -46,17 +46,20 @@
       "type": "folder",
     },
     {
+      "$id": "root:_0",
       "name": "Text",
       "type": "page",
       "url": "https://google.com",
     },
     {
+      "$id": "root:_1",
       "icon": "Icon",
       "name": "Text",
       "type": "page",
       "url": "https://google.com",
     },
     {
+      "$id": "root:_2",
       "external": true,
       "name": "AI",
       "type": "page",
@@ -67,7 +70,7 @@
     "$id": "fallback-root-root",
     "children": [
       {
-        "$id": "hidden.mdx",
+        "$id": "fallback-root-root:hidden.mdx",
         "name": "Hidden",
         "type": "page",
         "url": "/hidden",

@@ -19,13 +19,15 @@ Only Tailwind CSS v4 is supported, the preset will also include source to Fumado
 @import 'fumadocs-ui/css/preset.css';
 ```
 
-For Shadcn UI, you can use the `shadcn` preset to let Fumadocs UI to adopt your Shadcn UI theme.
+For **Shadcn UI**, you can use the `shadcn` preset instead. Fumadocs UI will adopt colors from your Shadcn UI theme.
 
 ```css
 @import 'tailwindcss';
 @import 'fumadocs-ui/css/shadcn.css';
 @import 'fumadocs-ui/css/preset.css';
 ```
+
+See [Colors](#colors) for details.
 
 ### Preflight Changes
 
@@ -73,7 +75,7 @@ Customise the max width of docs layout with CSS Variables.
 
 ### Colors
 
-It comes with many themes out-of-the-box, you can pick one you prefer.
+It comes with many presets out-of-the-box, you can pick one you prefer.
 
 ```css
 @import 'fumadocs-ui/css/<theme>.css';
@@ -132,7 +134,7 @@ It comes with many themes out-of-the-box, you can pick one you prefer.
 
 </Tabs>
 
-The design system was inspired by [Shadcn UI](https://ui.shadcn.com), you can also customize the colors using CSS variables.
+The design system was inspired by [Shadcn UI](https://ui.shadcn.com), you can also customize the colors using [CSS/Theme variables](https://tailwindcss.com/docs/theme).
 
 ```css title="global.css"
 @theme {
@@ -186,5 +188,13 @@ The plugin adds a `prose` class and variants to customise it.
 </div>
 ```
 
-> The plugin works with and only with Fumadocs UI's MDX components, it may conflict with `@tailwindcss/typography`.
-> If you need to use `@tailwindcss/typography` over the default plugin, [set a class name option](https://github.com/tailwindlabs/tailwindcss-typography/blob/main/README.md#changing-the-default-class-name) to avoid conflicts.
+> The plugin is supposed to work with Fumadocs UI's MDX components, it may conflict with `@tailwindcss/typography`.
+>
+> If you need to use `@tailwindcss/typography` over the default plugin, [set a `className` option](https://github.com/tailwindlabs/tailwindcss-typography/blob/main/README.md#changing-the-default-class-name) to avoid conflicts.
+>
+> ```sass
+> @import 'tailwindcss';
+> @plugin "@tailwindcss/typography" {
+>   className: wysiwyg;
+> }
+> ```
