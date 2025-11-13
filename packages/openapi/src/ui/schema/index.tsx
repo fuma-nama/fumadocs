@@ -70,7 +70,7 @@ export function Schema({
   );
 }
 
-function generateSchemaUI({
+export function generateSchemaUI({
   ctx,
   root,
 }: SchemaUIOptions): SchemaUIGeneratedData {
@@ -105,7 +105,7 @@ function generateSchemaUI({
       fields.push(field('Multiple Of', schema.multipleOf));
     }
 
-    let range = getRange(
+    let range = formatRange(
       'value',
       schema.minimum,
       schema.exclusiveMinimum,
@@ -114,7 +114,7 @@ function generateSchemaUI({
     );
     if (range) fields.push(field('Range', range));
 
-    range = getRange(
+    range = formatRange(
       'length',
       schema.minLength,
       undefined,
@@ -123,7 +123,7 @@ function generateSchemaUI({
     );
     if (range) fields.push(field('Length', range));
 
-    range = getRange(
+    range = formatRange(
       'properties',
       schema.minProperties,
       undefined,
@@ -132,7 +132,7 @@ function generateSchemaUI({
     );
     if (range) fields.push(field('Properties', range));
 
-    range = getRange(
+    range = formatRange(
       'items',
       schema.minItems,
       undefined,
@@ -243,6 +243,7 @@ function generateSchemaUI({
           ...schema,
           ...item,
         };
+        delete extended['oneOf'];
 
         scanRefs(key, extended);
         out.items.push({
@@ -324,14 +325,14 @@ function generateSchemaUI({
   };
 }
 
-function getRange(
+function formatRange(
   value: string,
   min: number | undefined,
   exclusiveMin: number | undefined,
   max: number | undefined,
   exclusiveMax: number | undefined,
 ) {
-  const out = [];
+  const out: string[] = [];
   if (min !== undefined) {
     out.push(`${min} <=`);
   } else if (exclusiveMin !== undefined) {
