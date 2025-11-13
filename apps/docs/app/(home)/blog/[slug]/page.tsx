@@ -15,7 +15,7 @@ export default async function Page(props: PageProps<'/blog/[slug]'>) {
   const page = blog.getPage([params.slug]);
 
   if (!page) notFound();
-  const { body: Mdx, toc } = page.data;
+  const { body: Mdx, toc } = await page.data.load();
 
   return (
     <article className="flex flex-col mx-auto w-full max-w-[800px] px-4 py-8">

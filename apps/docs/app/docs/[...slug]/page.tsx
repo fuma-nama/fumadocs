@@ -61,7 +61,7 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
     );
   }
 
-  const { body: Mdx, toc, lastModified, preview } = page.data;
+  const { body: Mdx, toc, lastModified } = await page.data.load();
 
   return (
     <DocsPage
@@ -83,7 +83,7 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
         />
       </div>
       <div className="prose flex-1 text-fd-foreground/90">
-        {preview ? <PreviewRenderer preview={preview} /> : null}
+        {page.data.preview && <PreviewRenderer preview={page.data.preview} />}
         <Mdx
           components={getMDXComponents({
             ...Twoslash,

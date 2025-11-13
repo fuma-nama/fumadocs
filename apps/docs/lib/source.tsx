@@ -1,8 +1,9 @@
-import { createMDXSource } from 'fumadocs-mdx/runtime/next';
 import {
   type InferMetaType,
   type InferPageType,
   type LoaderPlugin,
+  MetaData,
+  Source,
   loader,
   multiple,
 } from 'fumadocs-core/source';
@@ -43,9 +44,21 @@ function pageTreeCodeTitles(): LoaderPlugin {
   };
 }
 
-export const blog = loader(createMDXSource(blogPosts), {
-  baseUrl: '/blog',
-});
+export const blog = loader(
+  {
+    files: blogPosts.map((post) => ({
+      type: 'page',
+      data: post,
+      path: post.info.path,
+    })),
+  } as Source<{
+    metaData: MetaData;
+    pageData: (typeof blogPosts)[number];
+  }>,
+  {
+    baseUrl: '/blog',
+  },
+);
 
 export type Page = InferPageType<typeof source>;
 export type Meta = InferMetaType<typeof source>;

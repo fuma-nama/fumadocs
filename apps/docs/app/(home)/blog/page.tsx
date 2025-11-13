@@ -17,7 +17,7 @@ export default function Page() {
 
   return (
     <main className="mx-auto w-full max-w-fd-container px-4 pb-12 md:py-12">
-      <div className="relative dark z-2 mb-4 aspect-[3.2] p-8 z-2 md:p-12">
+      <div className="relative dark mb-4 aspect-[3.2] p-8 z-2 md:p-12">
         <Image
           src={BannerImage}
           priority
