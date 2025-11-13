@@ -33,14 +33,11 @@ export function fromConfigDynamic<Config>(configExports: Config) {
     collection: DocCollectionItem,
     entries: LazyEntry<unknown>[],
   ) {
-    const initMdxOptions =
-      collection.mdxOptions ?? config.getDefaultMDXOptions('remote');
-
     const head: Record<string, () => unknown> = {};
     const body: Record<string, () => Promise<unknown>> = {};
 
     async function compile({ info, lastModified, data }: LazyEntry<unknown>) {
-      const mdxOptions = await initMdxOptions;
+      const mdxOptions = await config.getMDXOptions(collection, 'runtime');
       const raw = (await fs.readFile(info.fullPath)).toString();
 
       const { content } = fumaMatter(raw);

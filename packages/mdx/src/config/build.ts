@@ -13,7 +13,10 @@ export interface LoadedConfig {
   getCollection(name: string): CollectionItem | undefined;
 
   global: GlobalConfig;
-  getDefaultMDXOptions(mode?: 'default' | 'remote'): Promise<ProcessorOptions>;
+  getMDXOptions(
+    collection?: DocCollectionItem,
+    environment?: 'bundler' | 'runtime',
+  ): ProcessorOptions | Promise<ProcessorOptions>;
 }
 
 export type CollectionItem =
@@ -131,32 +134,43 @@ export function buildConfig(config: Record<string, unknown>): LoadedConfig {
       collections.set(k, buildCollection(k, v));
     }
   }
-
-  const mdxOptionsCache = new Map<string, Promise<ProcessorOptions>>();
+  const mdxOptionsCache = new Map<
+    string,
+    ProcessorOptions | Promise<ProcessorOptions>
+  >();
   return {
     global: loaded,
     collectionList: Array.from(collections.values()),
     getCollection(name: string) {
       return collections.get(name);
     },
-    async getDefaultMDXOptions(mode = 'default'): Promise<ProcessorOptions> {
-      const cached = mdxOptionsCache.get(mode);
+    getMDXOptions(collection, environment = 'bundler') {
+      const key = collection
+        ? `${environment}:${collection.name}`
+        : environment;
+      const cached = mdxOptionsCache.get(key);
       if (cached) return cached;
+      let result: ProcessorOptions | Promise<ProcessorOptions>;
 
-      const input = this.global.mdxOptions;
-      async function uncached(): Promise<ProcessorOptions> {
-        const options = typeof input === 'function' ? await input() : input;
-        const { getDefaultMDXOptions } = await import('@/loaders/mdx/preset');
+      if (collection?.mdxOptions) {
+        const optionsFn = collection.mdxOptions;
+        result = typeof optionsFn === 'function' ? optionsFn() : optionsFn;
+      } else {
+        result = (async () => {
+          const optionsFn = this.global.mdxOptions;
+          const options =
+            typeof optionsFn === 'function' ? await optionsFn() : optionsFn;
 
-        if (options?.preset === 'minimal') return options;
-        return getDefaultMDXOptions({
-          ...options,
-          _withoutBundler: mode === 'remote',
-        });
+          if (options?.preset === 'minimal') return options;
+          const { getDefaultMDXOptions } = await import('@/loaders/mdx/preset');
+          return getDefaultMDXOptions({
+            ...options,
+            _withoutBundler: environment === 'runtime',
+          });
+        })();
       }
 
-      const result = uncached();
-      mdxOptionsCache.set(mode, result);
+      mdxOptionsCache.set(key, result);
       return result;
     },
   };

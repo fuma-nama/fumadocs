@@ -1,7 +1,6 @@
 import { fumaMatter } from '@/utils/fuma-matter';
 import { validate } from '@/utils/validation';
 import { getGitTimestamp } from '@/utils/git-timestamp';
-import { buildMDX } from '@/loaders/mdx/build-mdx';
 import type { SourceMap } from 'rollup';
 import type { Loader } from '@/loaders/adapter';
 import { z } from 'zod';
@@ -37,10 +36,10 @@ export function createMdxLoader(configLoader: ConfigLoader): Loader {
       compiler,
       filePath,
     }) {
+      const config = await configLoader.getConfig();
       const value = await getSource();
       const matter = fumaMatter(value);
       const parsed = querySchema.parse(query);
-      const config = await configLoader.getConfig();
 
       let after: (() => Promise<void>) | undefined;
 
@@ -107,13 +106,13 @@ export function createMdxLoader(configLoader: ConfigLoader): Loader {
       // ensure the line number is correct in dev mode
       const lineOffset = isDevelopment ? countLines(matter.matter) : 0;
 
+      const { buildMDX } = await import('@/loaders/mdx/build-mdx');
       const compiled = await buildMDX(
         `${getConfigHash(config)}:${parsed.collection ?? 'global'}`,
         '\n'.repeat(lineOffset) + matter.content,
         {
           development: isDevelopment,
-          ...(docCollection?.mdxOptions ??
-            (await config.getDefaultMDXOptions())),
+          ...(await config.getMDXOptions(docCollection, 'bundler')),
           postprocess: docCollection?.postprocess,
           data,
           filePath,

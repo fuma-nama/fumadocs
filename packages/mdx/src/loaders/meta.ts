@@ -4,6 +4,7 @@ import { dump, load } from 'js-yaml';
 import { validate } from '@/utils/validation';
 import { z } from 'zod';
 import { metaLoaderGlob } from '.';
+import type { MetaCollectionItem } from '@/config/build';
 
 const querySchema = z
   .object({
@@ -50,27 +51,29 @@ export function createMetaLoader(
     test: metaLoaderGlob,
     async load({ filePath, query, getSource }) {
       const parsed = querySchema.parse(query);
-      const collection = parsed.collection
-        ? (await configLoader.getConfig()).getCollection(parsed.collection)
-        : undefined;
-      if (!collection) return null;
+      if (!parsed.collection) return null;
+
+      const collection = (await configLoader.getConfig()).getCollection(
+        parsed.collection,
+      );
+
+      let metaCollection: MetaCollectionItem;
+      switch (collection?.type) {
+        case 'meta':
+          metaCollection = collection;
+          break;
+        case 'docs':
+          metaCollection = collection.meta;
+          break;
+        default:
+          return null;
+      }
 
       const source = await getSource();
       let data = parse(filePath, source);
-
-      let schema;
-      switch (collection?.type) {
-        case 'meta':
-          schema = collection.schema;
-          break;
-        case 'docs':
-          schema = collection.meta.schema;
-          break;
-      }
-
-      if (schema) {
+      if (metaCollection.schema) {
         data = await validate(
-          schema,
+          metaCollection.schema,
           data,
           { path: filePath, source },
           `invalid data in ${filePath}`,

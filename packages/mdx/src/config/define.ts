@@ -39,7 +39,7 @@ export interface DocCollection<
   type: 'doc';
 
   postprocess?: Partial<PostprocessOptions>;
-  mdxOptions?: ProcessorOptions;
+  mdxOptions?: ProcessorOptions | (() => Promise<ProcessorOptions>);
 
   /**
    * Load files with async

@@ -12,20 +12,24 @@ type AnySource = typeof blog | typeof source;
 async function checkLinks() {
   const scanned = await scanURLs({
     populate: {
-      '(home)/blog/[slug]': blog.getPages().map((page) => ({
-        value: {
-          slug: page.slugs[0],
-        },
-        hashes: getHeadings(page),
-      })),
-      'docs/[...slug]': source.getPages().map((page) => {
-        return {
+      '(home)/blog/[slug]': await Promise.all(
+        blog.getPages().map(async (page) => ({
           value: {
-            slug: page.slugs,
+            slug: page.slugs[0],
           },
-          hashes: getHeadings(page),
-        };
-      }),
+          hashes: await getHeadings(page),
+        })),
+      ),
+      'docs/[...slug]': await Promise.all(
+        source.getPages().map(async (page) => {
+          return {
+            value: {
+              slug: page.slugs,
+            },
+            hashes: await getHeadings(page),
+          };
+        }),
+      ),
     },
   });
 
@@ -50,10 +54,13 @@ async function checkLinks() {
   );
 }
 
-function getHeadings({ data }: InferPageType<AnySource>): string[] {
+async function getHeadings({
+  data,
+}: InferPageType<AnySource>): Promise<string[]> {
   if ('type' in data && data.type === 'openapi') return [];
-  const headings = data.toc.map((item) => item.url.slice(1));
-  const elementIds = data._exports?.elementIds;
+  const { _exports, toc } = await data.load();
+  const headings = toc.map((item) => item.url.slice(1));
+  const elementIds = _exports?.elementIds;
   if (Array.isArray(elementIds)) {
     headings.push(...elementIds);
   }
