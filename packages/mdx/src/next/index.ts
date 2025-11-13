@@ -26,7 +26,7 @@ export interface CreateMDXOptions {
    */
   outDir?: string;
 
-  index?: IndexFilePluginOptions;
+  index?: IndexFilePluginOptions | false;
 }
 
 const defaultPageExtensions = ['mdx', 'md', 'jsx', 'js', 'tsx', 'ts'];

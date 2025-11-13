@@ -23,13 +23,29 @@ export interface IndexFilePluginOptions {
    * add `.js` extensions to imports, needed for ESM without bundler resolution
    */
   addJsExtension?: boolean;
+
+  /**
+   * Generate entry point for browser
+   * @defaultValue true
+   */
   browser?: boolean;
+
+  /**
+   * Generate entry point for dynamic compilation
+   * @defaultValue true
+   */
+  dynamic?: boolean;
 }
 
 export default function indexFile(
   options: IndexFilePluginOptions = {},
 ): Plugin {
-  const { target = 'default', addJsExtension, browser = true } = options;
+  const {
+    target = 'default',
+    addJsExtension,
+    browser = true,
+    dynamic = true,
+  } = options;
   let config: LoadedConfig;
   let dynamicCollections: CollectionItem[];
 
@@ -99,11 +115,15 @@ export default function indexFile(
           'index.ts',
           generateServerIndexFile(makeCodeGen(), config, this.configPath),
         ),
-        toEmitEntry(
-          'dynamic.ts',
-          generateDynamicIndexFile(makeCodeGen(), config, this.configPath),
-        ),
       ];
+
+      if (dynamic)
+        out.push(
+          toEmitEntry(
+            'dynamic.ts',
+            generateDynamicIndexFile(makeCodeGen(), config, this.configPath),
+          ),
+        );
 
       if (browser)
         out.push(
@@ -118,7 +138,7 @@ export default function indexFile(
   };
 }
 
-export async function generateServerIndexFile(
+async function generateServerIndexFile(
   codegen: CodeGen,
   config: LoadedConfig,
   configPath: string,
@@ -196,7 +216,7 @@ export async function generateServerIndexFile(
   return codegen.toString();
 }
 
-export async function generateDynamicIndexFile(
+async function generateDynamicIndexFile(
   codegen: CodeGen,
   config: LoadedConfig,
   configPath: string,
@@ -294,7 +314,7 @@ export async function generateDynamicIndexFile(
   return codegen.toString();
 }
 
-export async function generateBrowserIndexFile(
+async function generateBrowserIndexFile(
   codegen: CodeGen,
   config: LoadedConfig,
   configPath: string,

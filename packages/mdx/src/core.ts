@@ -43,7 +43,7 @@ export interface Plugin {
   ) => Awaitable<void>;
 }
 
-export type PluginOption = Awaitable<Plugin | Plugin[] | false>;
+export type PluginOption = Awaitable<Plugin | PluginOption[] | false>;
 
 export interface ServerContext {
   /**
@@ -71,6 +71,18 @@ export function findConfigFile(): string {
   return path.resolve('source.config.ts');
 }
 
+async function getPlugins(pluginOptions: PluginOption[]): Promise<Plugin[]> {
+  const plugins: Plugin[] = [];
+
+  for await (const option of pluginOptions) {
+    if (!option) continue;
+    if (Array.isArray(option)) plugins.push(...(await getPlugins(option)));
+    else plugins.push(option);
+  }
+
+  return plugins;
+}
+
 export function createCore(
   options: CoreOptions,
   defaultPlugins: PluginOption[] = [],
@@ -93,16 +105,10 @@ export function createCore(
     async init({ config: newConfig }: { config: Awaitable<LoadedConfig> }) {
       config = await newConfig;
       this.cache.clear();
-      plugins = [];
-
-      for await (const option of [
+      plugins = await getPlugins([
         ...defaultPlugins,
         ...(config.global.plugins ?? []),
-      ]) {
-        if (!option) continue;
-        if (Array.isArray(option)) plugins.push(...option);
-        else plugins.push(option);
-      }
+      ]);
 
       for (const plugin of plugins) {
         const out = await plugin.config?.call(this.getPluginContext(), config);
