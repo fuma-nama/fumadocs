@@ -302,7 +302,7 @@ importers:
     dependencies:
       '@astrojs/mdx':
         specifier: ^4.3.9
-        version: 4.3.9(astro@5.15.3(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.53.2)(terser@5.44.1)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1))
+        version: 4.3.9(astro@5.15.3(@types/node@24.10.0)(db0@0.3.4)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.53.2)(terser@5.44.1)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1))
       '@astrojs/react':
         specifier: ^4.4.1
         version: 4.4.1(@types/node@24.10.0)(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1)
@@ -311,7 +311,7 @@ importers:
         version: 3.1.16
       astro:
         specifier: ^5.15.3
-        version: 5.15.3(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.53.2)(terser@5.44.1)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
+        version: 5.15.3(@types/node@24.10.0)(db0@0.3.4)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.53.2)(terser@5.44.1)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
       fumadocs-core:
         specifier: workspace:*
         version: link:../../packages/core
@@ -1123,6 +1123,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: ^5.1.0
         version: 5.1.0(vite@7.2.0(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1))
+      nitro:
+        specifier: 3.0.1-alpha.1
+        version: 3.0.1-alpha.1(chokidar@4.0.3)(lru-cache@11.2.2)(rollup@4.53.2)(vite@7.2.0(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1))
       tailwindcss:
         specifier: ^4.1.16
         version: 4.1.16
@@ -1793,7 +1796,7 @@ importers:
         version: 19.2.2
       astro:
         specifier: ^5.15.3
-        version: 5.15.3(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.52.5)(terser@5.44.1)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
+        version: 5.15.3(@types/node@24.10.0)(db0@0.3.4)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.52.5)(terser@5.44.1)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
       eslint-config-custom:
         specifier: workspace:*
         version: link:../eslint-config-custom
@@ -3861,6 +3864,95 @@ packages:
 
   '@oven/bun-windows-x64@1.3.2':
     resolution: {integrity: sha512-nZJUa5NprPYQ4Ii4cMwtP9PzlJJTp1XhxJ+A9eSn1Jfr6YygVWyN2KLjenyI93IcuBouBAaepDAVZZjH2lFBhg==}
+    cpu: [x64]
+    os: [win32]
+
+  '@oxc-minify/binding-android-arm64@0.96.0':
+    resolution: {integrity: sha512-lzeIEMu/v6Y+La5JSesq4hvyKtKBq84cgQpKYTYM/yGuNk2tfd5Ha31hnC+mTh48lp/5vZH+WBfjVUjjINCfug==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [arm64]
+    os: [android]
+
+  '@oxc-minify/binding-darwin-arm64@0.96.0':
+    resolution: {integrity: sha512-i0LkJAUXb4BeBFrJQbMKQPoxf8+cFEffDyLSb7NEzzKuPcH8qrVsnEItoOzeAdYam8Sr6qCHVwmBNEQzl7PWpw==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@oxc-minify/binding-darwin-x64@0.96.0':
+    resolution: {integrity: sha512-C5vI0WPR+KPIFAD5LMOJk2J8iiT+Nv65vDXmemzXEXouzfEOLYNqnW+u6NSsccpuZHHWAiLyPFkYvKFduveAUQ==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [x64]
+    os: [darwin]
+
+  '@oxc-minify/binding-freebsd-x64@0.96.0':
+    resolution: {integrity: sha512-3//5DNx+xUjVBMLLk2sl6hfe4fwfENJtjVQUBXjxzwPuv8xgZUqASG4cRG3WqG5Qe8dV6SbCI4EgKQFjO4KCZA==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [x64]
+    os: [freebsd]
+
+  '@oxc-minify/binding-linux-arm-gnueabihf@0.96.0':
+    resolution: {integrity: sha512-WXChFKV7VdDk1NePDK1J31cpSvxACAVztJ7f7lJVYBTkH+iz5D0lCqPcE7a9eb7nC3xvz4yk7DM6dA9wlUQkQg==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [arm]
+    os: [linux]
+
+  '@oxc-minify/binding-linux-arm-musleabihf@0.96.0':
+    resolution: {integrity: sha512-7B18glYMX4Z/YoqgE3VRLs/2YhVLxlxNKSgrtsRpuR8xv58xca+hEhiFwZN1Rn+NSMZ29Z33LWD7iYWnqYFvRA==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [arm]
+    os: [linux]
+
+  '@oxc-minify/binding-linux-arm64-gnu@0.96.0':
+    resolution: {integrity: sha512-Yl+KcTldsEJNcaYxxonwAXZ2q3gxIzn3kXYQWgKWdaGIpNhOCWqF+KE5WLsldoh5Ro5SHtomvb8GM6cXrIBMog==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [arm64]
+    os: [linux]
+
+  '@oxc-minify/binding-linux-arm64-musl@0.96.0':
+    resolution: {integrity: sha512-rNqoFWOWaxwMmUY5fspd/h5HfvgUlA3sv9CUdA2MpnHFiyoJNovR7WU8tGh+Yn0qOAs0SNH0a05gIthHig14IA==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [arm64]
+    os: [linux]
+
+  '@oxc-minify/binding-linux-riscv64-gnu@0.96.0':
+    resolution: {integrity: sha512-3paajIuzGnukHwSI3YBjYVqbd72pZd8NJxaayaNFR0AByIm8rmIT5RqFXbq8j2uhtpmNdZRXiu0em1zOmIScWA==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [riscv64]
+    os: [linux]
+
+  '@oxc-minify/binding-linux-s390x-gnu@0.96.0':
+    resolution: {integrity: sha512-9ESrpkB2XG0lQ89JlsxlZa86iQCOs+jkDZLl6O+u5wb7ynUy21bpJJ1joauCOSYIOUlSy3+LbtJLiqi7oSQt5Q==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [s390x]
+    os: [linux]
+
+  '@oxc-minify/binding-linux-x64-gnu@0.96.0':
+    resolution: {integrity: sha512-UMM1jkns+p+WwwmdjC5giI3SfR2BCTga18x3C0cAu6vDVf4W37uTZeTtSIGmwatTBbgiq++Te24/DE0oCdm1iQ==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [x64]
+    os: [linux]
+
+  '@oxc-minify/binding-linux-x64-musl@0.96.0':
+    resolution: {integrity: sha512-8b1naiC7MdP7xeMi7cQ5tb9W1rZAP9Qz/jBRqp1Y5EOZ1yhSGnf1QWuZ/0pCc+XiB9vEHXEY3Aki/H+86m2eOg==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [x64]
+    os: [linux]
+
+  '@oxc-minify/binding-wasm32-wasi@0.96.0':
+    resolution: {integrity: sha512-bjGDjkGzo3GWU9Vg2qiFUrfoo5QxojPNV/2RHTlbIB5FWkkV4ExVjsfyqihFiAuj0NXIZqd2SAiEq9htVd3RFw==}
+    engines: {node: '>=14.0.0'}
+    cpu: [wasm32]
+
+  '@oxc-minify/binding-win32-arm64-msvc@0.96.0':
+    resolution: {integrity: sha512-4L4DlHUT47qMWQuTyUghpncR3NZHWtxvd0G1KgSjVgXf+cXzFdWQCWZZtCU0yrmOoVCNUf4S04IFCJyAe+Ie7A==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [arm64]
+    os: [win32]
+
+  '@oxc-minify/binding-win32-x64-msvc@0.96.0':
+    resolution: {integrity: sha512-T2ijfqZLpV2bgGGocXV4SXTuMoouqN0asYTIm+7jVOLvT5XgDogf3ZvCmiEnSWmxl21+r5wHcs8voU2iUROXAg==}
+    engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [x64]
     os: [win32]
 
@@ -6790,6 +6882,29 @@ packages:
   dayjs@1.11.18:
     resolution: {integrity: sha512-zFBQ7WFRvVRhKcWoUh+ZA1g2HVgUbsZm9sbddh8EC5iv93sui8DVVz1Npvz+r6meo9VKfa8NyLWBsQK1VvIKPA==}
 
+  db0@0.3.4:
+    resolution: {integrity: sha512-RiXXi4WaNzPTHEOu8UPQKMooIbqOEyqA1t7Z6MsdxSCeb8iUC9ko3LcmsLmeUt2SM5bctfArZKkRQggKZz7JNw==}
+    peerDependencies:
+      '@electric-sql/pglite': '*'
+      '@libsql/client': '*'
+      better-sqlite3: '*'
+      drizzle-orm: '*'
+      mysql2: '*'
+      sqlite3: '*'
+    peerDependenciesMeta:
+      '@electric-sql/pglite':
+        optional: true
+      '@libsql/client':
+        optional: true
+      better-sqlite3:
+        optional: true
+      drizzle-orm:
+        optional: true
+      mysql2:
+        optional: true
+      sqlite3:
+        optional: true
+
   debounce@1.2.1:
     resolution: {integrity: sha512-XRRe6Glud4rd/ZGQfiV1ruXSfbvfJedlV9Y6zOlP+2K04vBYiJEte6stfFkCP03aMnY5tsipamumUjL14fofug==}
 
@@ -7555,6 +7670,15 @@ packages:
 
   h3@2.0.0-beta.4:
     resolution: {integrity: sha512-/JdwHUGuHjbBXAVxQN7T7QeI9cVlhsqMKVNFHebZVs9RoEYH85Ogh9O1DEy/1ZiJkmMwa1gNg6bBcGhc1Itjdg==}
+    engines: {node: '>=20.11.1'}
+    peerDependencies:
+      crossws: ^0.4.1
+    peerDependenciesMeta:
+      crossws:
+        optional: true
+
+  h3@2.0.1-rc.5:
+    resolution: {integrity: sha512-qkohAzCab0nLzXNm78tBjZDvtKMTmtygS8BJLT3VPczAQofdqlFXDPkXdLMJN4r05+xqneG8snZJ0HgkERCZTg==}
     engines: {node: '>=20.11.1'}
     peerDependencies:
       crossws: ^0.4.1
@@ -8785,6 +8909,28 @@ packages:
       sass:
         optional: true
 
+  nf3@0.1.10:
+    resolution: {integrity: sha512-bT6FITvXLd8Z9Qbt0NsMz90diyLNK8H4Sp2vZ9IGLrKxsF5djM+F2vQmR6GyvtlP2y47XMZjjVFpPClgMB8USQ==}
+
+  nitro@3.0.1-alpha.1:
+    resolution: {integrity: sha512-U4AxIsXxdkxzkFrK0XAw0e5Qbojk8jQ50MjjRBtBakC4HurTtQoiZvF+lSe382jhuQZCfAyywGWOFa9QzXLFaw==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    hasBin: true
+    peerDependencies:
+      rolldown: '*'
+      rollup: ^4
+      vite: ^7
+      xml2js: ^0.6.2
+    peerDependenciesMeta:
+      rolldown:
+        optional: true
+      rollup:
+        optional: true
+      vite:
+        optional: true
+      xml2js:
+        optional: true
+
   nlcst-to-string@4.0.0:
     resolution: {integrity: sha512-YKLBCcUYKAg0FNlOBT6aI91qFmSiFKiluk655WzPF+DDMA02qIyy8uiRqI8QXtcFpEvll12LpL5MXqEmAZ+dcA==}
 
@@ -8892,6 +9038,9 @@ packages:
   ofetch@1.5.1:
     resolution: {integrity: sha512-2W4oUZlVaqAPAil6FUg/difl6YhqhUR7x2eZY4bQCko22UXg3hptq9KLQdqFClV+Wu85UX7hNtdGTngi/1BxcA==}
 
+  ofetch@2.0.0-alpha.3:
+    resolution: {integrity: sha512-zpYTCs2byOuft65vI3z43Dd6iSdFbOZZLb9/d21aCpx2rGastVU9dOCv0lu4ykc1Ur1anAYjDi3SUvR0vq50JA==}
+
   ohash@2.0.11:
     resolution: {integrity: sha512-RdR9FQrFwNBNXAr4GixM8YaRZRJ5PUWbKYbE5eOsrwAjJW0q2REGcf79oYPsLyskQCZG1PLN+S/K1V00joZAoQ==}
 
@@ -8951,6 +9100,10 @@ packages:
   own-keys@1.0.1:
     resolution: {integrity: sha512-qFOyK5PjiWZd+QQIh+1jhdb9LpxTF0qs7Pm8o5QHYZ0M3vKqSqzsZaEB6oWlxZ+q2sJBMI/Ktgd2N5ZwQoRHfg==}
     engines: {node: '>= 0.4'}
+
+  oxc-minify@0.96.0:
+    resolution: {integrity: sha512-dXeeGrfPJJ4rMdw+NrqiCRtbzVX2ogq//R0Xns08zql2HjV3Zi2SBJ65saqfDaJzd2bcHqvGWH+M44EQCHPAcA==}
+    engines: {node: ^20.19.0 || >=22.12.0}
 
   oxc-transform@0.96.0:
     resolution: {integrity: sha512-dQPNIF+gHpSkmC0+Vg9IktNyhcn28Y8R3eTLyzn52UNymkasLicl3sFAtz7oEVuFmCpgGjaUTKkwk+jW2cHpDQ==}
@@ -9895,6 +10048,11 @@ packages:
     engines: {node: '>=20.16.0'}
     hasBin: true
 
+  srvx@0.9.6:
+    resolution: {integrity: sha512-5L4rT6qQqqb+xcoDoklUgCNdmzqJ6vbcDRwPVGRXewF55IJH0pqh0lQlrJ266ZWTKJ4mfeioqHQJeAYesS+RrQ==}
+    engines: {node: '>=20.16.0'}
+    hasBin: true
+
   stackback@0.0.2:
     resolution: {integrity: sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==}
 
@@ -10386,6 +10544,9 @@ packages:
     resolution: {integrity: sha512-QEg3HPMll0o3t2ourKwOeUAZ159Kn9mx5pnzHRQO8+Wixmh88YdZRiIwat0iNzNNXn0yoEtXJqFpyW7eM8BV7g==}
     engines: {node: '>=20.18.1'}
 
+  unenv@2.0.0-rc.24:
+    resolution: {integrity: sha512-i7qRCmY42zmCwnYlh9H2SvLEypEFGye5iRmEMKjcGi7zk9UquigRjFtTLz0TYqr0ZGLZhaMHl/foy1bZR+Cwlw==}
+
   unicode-properties@1.4.1:
     resolution: {integrity: sha512-CLjCCLQ6UuMxWnbIylkisbRj31qxHPAurvena/0iwSVbQ2G1VY5/HjV0IRabOEbDHlzZlRdCrD4NhB0JtU40Pg==}
 
@@ -10512,6 +10673,80 @@ packages:
       idb-keyval:
         optional: true
       ioredis:
+        optional: true
+      uploadthing:
+        optional: true
+
+  unstorage@2.0.0-alpha.4:
+    resolution: {integrity: sha512-ywXZMZRfrvmO1giJeMTCw6VUn0ALYxVl8pFqJPStiyQUvgJImejtAHrKvXPj4QGJAoS/iLGcVGF6ljN/lkh1bw==}
+    peerDependencies:
+      '@azure/app-configuration': ^1.8.0
+      '@azure/cosmos': ^4.2.0
+      '@azure/data-tables': ^13.3.0
+      '@azure/identity': ^4.6.0
+      '@azure/keyvault-secrets': ^4.9.0
+      '@azure/storage-blob': ^12.26.0
+      '@capacitor/preferences': ^6.0.3 || ^7.0.0
+      '@deno/kv': '>=0.9.0'
+      '@netlify/blobs': ^6.5.0 || ^7.0.0 || ^8.1.0 || ^9.0.0 || ^10.0.0
+      '@planetscale/database': ^1.19.0
+      '@upstash/redis': ^1.34.3
+      '@vercel/blob': '>=0.27.1'
+      '@vercel/functions': ^2.2.12 || ^3.0.0
+      '@vercel/kv': ^1.0.1
+      aws4fetch: ^1.0.20
+      chokidar: ^4.0.3
+      db0: '>=0.2.1'
+      idb-keyval: ^6.2.1
+      ioredis: ^5.4.2
+      lru-cache: ^11.2.2
+      mongodb: ^6.20.0
+      ofetch: '*'
+      uploadthing: ^7.4.4
+    peerDependenciesMeta:
+      '@azure/app-configuration':
+        optional: true
+      '@azure/cosmos':
+        optional: true
+      '@azure/data-tables':
+        optional: true
+      '@azure/identity':
+        optional: true
+      '@azure/keyvault-secrets':
+        optional: true
+      '@azure/storage-blob':
+        optional: true
+      '@capacitor/preferences':
+        optional: true
+      '@deno/kv':
+        optional: true
+      '@netlify/blobs':
+        optional: true
+      '@planetscale/database':
+        optional: true
+      '@upstash/redis':
+        optional: true
+      '@vercel/blob':
+        optional: true
+      '@vercel/functions':
+        optional: true
+      '@vercel/kv':
+        optional: true
+      aws4fetch:
+        optional: true
+      chokidar:
+        optional: true
+      db0:
+        optional: true
+      idb-keyval:
+        optional: true
+      ioredis:
+        optional: true
+      lru-cache:
+        optional: true
+      mongodb:
+        optional: true
+      ofetch:
         optional: true
       uploadthing:
         optional: true
@@ -11248,12 +11483,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@astrojs/mdx@4.3.9(astro@5.15.3(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.53.2)(terser@5.44.1)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1))':
+  '@astrojs/mdx@4.3.9(astro@5.15.3(@types/node@24.10.0)(db0@0.3.4)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.53.2)(terser@5.44.1)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1))':
     dependencies:
       '@astrojs/markdown-remark': 6.3.8
       '@mdx-js/mdx': 3.1.1
       acorn: 8.15.0
-      astro: 5.15.3(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.53.2)(terser@5.44.1)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
+      astro: 5.15.3(@types/node@24.10.0)(db0@0.3.4)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.53.2)(terser@5.44.1)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
       es-module-lexer: 1.7.0
       estree-util-visit: 2.0.0
       hast-util-to-html: 9.0.5
@@ -12886,6 +13121,53 @@ snapshots:
     optional: true
 
   '@oven/bun-windows-x64@1.3.2':
+    optional: true
+
+  '@oxc-minify/binding-android-arm64@0.96.0':
+    optional: true
+
+  '@oxc-minify/binding-darwin-arm64@0.96.0':
+    optional: true
+
+  '@oxc-minify/binding-darwin-x64@0.96.0':
+    optional: true
+
+  '@oxc-minify/binding-freebsd-x64@0.96.0':
+    optional: true
+
+  '@oxc-minify/binding-linux-arm-gnueabihf@0.96.0':
+    optional: true
+
+  '@oxc-minify/binding-linux-arm-musleabihf@0.96.0':
+    optional: true
+
+  '@oxc-minify/binding-linux-arm64-gnu@0.96.0':
+    optional: true
+
+  '@oxc-minify/binding-linux-arm64-musl@0.96.0':
+    optional: true
+
+  '@oxc-minify/binding-linux-riscv64-gnu@0.96.0':
+    optional: true
+
+  '@oxc-minify/binding-linux-s390x-gnu@0.96.0':
+    optional: true
+
+  '@oxc-minify/binding-linux-x64-gnu@0.96.0':
+    optional: true
+
+  '@oxc-minify/binding-linux-x64-musl@0.96.0':
+    optional: true
+
+  '@oxc-minify/binding-wasm32-wasi@0.96.0':
+    dependencies:
+      '@napi-rs/wasm-runtime': 1.0.7
+    optional: true
+
+  '@oxc-minify/binding-win32-arm64-msvc@0.96.0':
+    optional: true
+
+  '@oxc-minify/binding-win32-x64-msvc@0.96.0':
     optional: true
 
   '@oxc-transform/binding-android-arm64@0.96.0':
@@ -15481,7 +15763,7 @@ snapshots:
 
   astring@1.9.0: {}
 
-  astro@5.15.3(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.52.5)(terser@5.44.1)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1):
+  astro@5.15.3(@types/node@24.10.0)(db0@0.3.4)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.52.5)(terser@5.44.1)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1):
     dependencies:
       '@astrojs/compiler': 2.13.0
       '@astrojs/internal-helpers': 0.7.4
@@ -15535,7 +15817,7 @@ snapshots:
       ultrahtml: 1.6.0
       unifont: 0.6.0
       unist-util-visit: 5.0.0
-      unstorage: 1.17.2
+      unstorage: 1.17.2(db0@0.3.4)
       vfile: 6.0.3
       vite: 6.4.1(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1)
       vitefu: 1.1.1(vite@6.4.1(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1))
@@ -15582,7 +15864,7 @@ snapshots:
       - uploadthing
       - yaml
 
-  astro@5.15.3(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.53.2)(terser@5.44.1)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1):
+  astro@5.15.3(@types/node@24.10.0)(db0@0.3.4)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.53.2)(terser@5.44.1)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1):
     dependencies:
       '@astrojs/compiler': 2.13.0
       '@astrojs/internal-helpers': 0.7.4
@@ -15636,7 +15918,7 @@ snapshots:
       ultrahtml: 1.6.0
       unifont: 0.6.0
       unist-util-visit: 5.0.0
-      unstorage: 1.17.2
+      unstorage: 1.17.2(db0@0.3.4)
       vfile: 6.0.3
       vite: 6.4.1(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1)
       vitefu: 1.1.1(vite@6.4.1(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1))
@@ -16173,8 +16455,9 @@ snapshots:
     dependencies:
       uncrypto: 0.1.3
 
-  crossws@0.4.1:
-    optional: true
+  crossws@0.4.1(srvx@0.9.6):
+    optionalDependencies:
+      srvx: 0.9.6
 
   css-select@5.2.2:
     dependencies:
@@ -16424,6 +16707,8 @@ snapshots:
   date-fns@4.1.0: {}
 
   dayjs@1.11.18: {}
+
+  db0@0.3.4: {}
 
   debounce@1.2.1: {}
 
@@ -17411,7 +17696,14 @@ snapshots:
       rou3: 0.7.10
       srvx: 0.8.16
     optionalDependencies:
-      crossws: 0.4.1
+      crossws: 0.4.1(srvx@0.9.6)
+
+  h3@2.0.1-rc.5(crossws@0.4.1(srvx@0.9.6)):
+    dependencies:
+      rou3: 0.7.10
+      srvx: 0.9.6
+    optionalDependencies:
+      crossws: 0.4.1(srvx@0.9.6)
 
   hachure-fill@0.5.2: {}
 
@@ -18990,6 +19282,56 @@ snapshots:
       - '@babel/core'
       - babel-plugin-macros
 
+  nf3@0.1.10: {}
+
+  nitro@3.0.1-alpha.1(chokidar@4.0.3)(lru-cache@11.2.2)(rollup@4.53.2)(vite@7.2.0(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1)):
+    dependencies:
+      consola: 3.4.2
+      crossws: 0.4.1(srvx@0.9.6)
+      db0: 0.3.4
+      h3: 2.0.1-rc.5(crossws@0.4.1(srvx@0.9.6))
+      jiti: 2.6.1
+      nf3: 0.1.10
+      ofetch: 2.0.0-alpha.3
+      ohash: 2.0.11
+      oxc-minify: 0.96.0
+      oxc-transform: 0.96.0
+      srvx: 0.9.6
+      undici: 7.16.0
+      unenv: 2.0.0-rc.24
+      unstorage: 2.0.0-alpha.4(chokidar@4.0.3)(db0@0.3.4)(lru-cache@11.2.2)(ofetch@2.0.0-alpha.3)
+    optionalDependencies:
+      rollup: 4.53.2
+      vite: 7.2.0(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1)
+    transitivePeerDependencies:
+      - '@azure/app-configuration'
+      - '@azure/cosmos'
+      - '@azure/data-tables'
+      - '@azure/identity'
+      - '@azure/keyvault-secrets'
+      - '@azure/storage-blob'
+      - '@capacitor/preferences'
+      - '@deno/kv'
+      - '@electric-sql/pglite'
+      - '@libsql/client'
+      - '@netlify/blobs'
+      - '@planetscale/database'
+      - '@upstash/redis'
+      - '@vercel/blob'
+      - '@vercel/functions'
+      - '@vercel/kv'
+      - aws4fetch
+      - better-sqlite3
+      - chokidar
+      - drizzle-orm
+      - idb-keyval
+      - ioredis
+      - lru-cache
+      - mongodb
+      - mysql2
+      - sqlite3
+      - uploadthing
+
   nlcst-to-string@4.0.0:
     dependencies:
       '@types/nlcst': 2.0.3
@@ -19116,6 +19458,8 @@ snapshots:
       node-fetch-native: 1.6.7
       ufo: 1.6.1
 
+  ofetch@2.0.0-alpha.3: {}
+
   ohash@2.0.11: {}
 
   on-finished@2.3.0:
@@ -19188,6 +19532,24 @@ snapshots:
       get-intrinsic: 1.3.0
       object-keys: 1.1.1
       safe-push-apply: 1.0.0
+
+  oxc-minify@0.96.0:
+    optionalDependencies:
+      '@oxc-minify/binding-android-arm64': 0.96.0
+      '@oxc-minify/binding-darwin-arm64': 0.96.0
+      '@oxc-minify/binding-darwin-x64': 0.96.0
+      '@oxc-minify/binding-freebsd-x64': 0.96.0
+      '@oxc-minify/binding-linux-arm-gnueabihf': 0.96.0
+      '@oxc-minify/binding-linux-arm-musleabihf': 0.96.0
+      '@oxc-minify/binding-linux-arm64-gnu': 0.96.0
+      '@oxc-minify/binding-linux-arm64-musl': 0.96.0
+      '@oxc-minify/binding-linux-riscv64-gnu': 0.96.0
+      '@oxc-minify/binding-linux-s390x-gnu': 0.96.0
+      '@oxc-minify/binding-linux-x64-gnu': 0.96.0
+      '@oxc-minify/binding-linux-x64-musl': 0.96.0
+      '@oxc-minify/binding-wasm32-wasi': 0.96.0
+      '@oxc-minify/binding-win32-arm64-msvc': 0.96.0
+      '@oxc-minify/binding-win32-x64-msvc': 0.96.0
 
   oxc-transform@0.96.0:
     optionalDependencies:
@@ -20458,6 +20820,8 @@ snapshots:
 
   srvx@0.8.16: {}
 
+  srvx@0.9.6: {}
+
   stackback@0.0.2: {}
 
   statuses@2.0.1: {}
@@ -20950,6 +21314,10 @@ snapshots:
 
   undici@7.16.0: {}
 
+  unenv@2.0.0-rc.24:
+    dependencies:
+      pathe: 2.0.3
+
   unicode-properties@1.4.1:
     dependencies:
       base64-js: 1.5.1
@@ -21041,7 +21409,7 @@ snapshots:
       picomatch: 4.0.3
       webpack-virtual-modules: 0.6.2
 
-  unstorage@1.17.2:
+  unstorage@1.17.2(db0@0.3.4):
     dependencies:
       anymatch: 3.1.3
       chokidar: 4.0.3
@@ -21051,6 +21419,15 @@ snapshots:
       node-fetch-native: 1.6.7
       ofetch: 1.5.1
       ufo: 1.6.1
+    optionalDependencies:
+      db0: 0.3.4
+
+  unstorage@2.0.0-alpha.4(chokidar@4.0.3)(db0@0.3.4)(lru-cache@11.2.2)(ofetch@2.0.0-alpha.3):
+    optionalDependencies:
+      chokidar: 4.0.3
+      db0: 0.3.4
+      lru-cache: 11.2.2
+      ofetch: 2.0.0-alpha.3
 
   until-async@3.0.2: {}
 
