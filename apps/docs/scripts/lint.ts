@@ -76,7 +76,7 @@ async function getFiles(source: AnySource) {
     files.push({
       data: page.data,
       url: page.url,
-      path: page.absolutePath,
+      path: page.data.info.fullPath,
       content: await page.data.getText('raw'),
     });
   }

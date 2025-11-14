@@ -50,6 +50,7 @@ export const blog = loader(
       type: 'page',
       data: post,
       path: post.info.path,
+      absolutePath: post.info.fullPath,
     })),
   } as Source<{
     metaData: MetaData;

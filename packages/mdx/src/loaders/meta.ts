@@ -1,4 +1,4 @@
-import type { Loader } from '@/loaders/adapter';
+import type { Loader, LoaderInput } from '@/loaders/adapter';
 import type { ConfigLoader } from '@/loaders/config';
 import { dump, load } from 'js-yaml';
 import { validate } from '@/utils/validation';
@@ -35,29 +35,16 @@ export function createMetaLoader(
     throw new Error('Unknown file type ' + filePath);
   }
 
-  function stringifyOutput(filePath: string, data: unknown) {
-    if (filePath.endsWith('.json')) {
-      return resolveJson === 'json'
-        ? JSON.stringify(data)
-        : `export default ${JSON.stringify(data)}`;
-    } else {
-      return resolveYaml === 'yaml'
-        ? dump(data)
-        : `export default ${JSON.stringify(data)}`;
-    }
-  }
+  function onMeta(source: string, { filePath, query }: LoaderInput) {
+    const parsed = querySchema.safeParse(query);
+    if (!parsed.success || !parsed.data.collection) return null;
+    const collectionName = parsed.data.collection;
 
-  return {
-    test: metaLoaderGlob,
-    async load({ filePath, query, getSource }) {
-      const parsed = querySchema.parse(query);
-      if (!parsed.collection) return null;
+    return async (): Promise<unknown> => {
+      const config = await configLoader.getConfig();
+      const collection = config.getCollection(collectionName);
+      let metaCollection: MetaCollectionItem | undefined;
 
-      const collection = (await configLoader.getConfig()).getCollection(
-        parsed.collection,
-      );
-
-      let metaCollection: MetaCollectionItem;
       switch (collection?.type) {
         case 'meta':
           metaCollection = collection;
@@ -65,14 +52,11 @@ export function createMetaLoader(
         case 'docs':
           metaCollection = collection.meta;
           break;
-        default:
-          return null;
       }
 
-      const source = await getSource();
-      let data = parse(filePath, source);
-      if (metaCollection.schema) {
-        data = await validate(
+      const data = parse(filePath, source);
+      if (metaCollection?.schema) {
+        return validate(
           metaCollection.schema,
           data,
           { path: filePath, source },
@@ -80,16 +64,46 @@ export function createMetaLoader(
         );
       }
 
-      return {
-        code: stringifyOutput(filePath, data),
-      };
+      return data;
+    };
+  }
+
+  return {
+    test: metaLoaderGlob,
+    async load(input) {
+      const result = onMeta(await input.getSource(), input);
+      if (result === null) return null;
+      const data = await result();
+
+      if (input.filePath.endsWith('.json')) {
+        return {
+          code:
+            resolveJson === 'json'
+              ? JSON.stringify(data)
+              : `export default ${JSON.stringify(data)}`,
+        };
+      } else {
+        return {
+          code:
+            resolveYaml === 'yaml'
+              ? dump(data)
+              : `export default ${JSON.stringify(data)}`,
+        };
+      }
     },
     bun: {
-      loadSync(source, { filePath }) {
-        return {
+      load(source, input) {
+        const result = onMeta(source, input);
+        if (result === null)
+          return {
+            loader: 'object',
+            exports: parse(input.filePath, source),
+          };
+
+        return result().then((data) => ({
           loader: 'object',
-          exports: parse(filePath, source) as Record<string, unknown>,
-        };
+          exports: { default: data },
+        }));
       },
     },
   };
