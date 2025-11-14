@@ -67,9 +67,10 @@ export interface EmitOptions {
   filterPlugin?: (plugin: Plugin) => boolean;
 }
 
-export function findConfigFile(): string {
-  return path.resolve('source.config.ts');
-}
+export const _Defaults = {
+  configPath: 'source.config.ts',
+  outDir: '.source',
+};
 
 async function getPlugins(pluginOptions: PluginOption[]): Promise<Plugin[]> {
   const plugins: Plugin[] = [];
@@ -119,6 +120,12 @@ export function createCore(
     },
     getConfig(): LoadedConfig {
       return config;
+    },
+    /**
+     * The file path of compiled config file, the file may not exist (e.g. on Vite, or still compiling)
+     */
+    getCompiledConfigPath(): string {
+      return path.join(options.outDir, 'source.config.mjs');
     },
     async initServer(server: ServerContext): Promise<void> {
       server.watcher?.on('all', async (event, file) => {

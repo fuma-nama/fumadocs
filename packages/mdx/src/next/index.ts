@@ -9,7 +9,7 @@ import * as path from 'node:path';
 import { loadConfig } from '@/config/load-from-file';
 import { ValidationError } from '@/utils/validation';
 import next from '@/plugins/next';
-import { type Core, createCore, findConfigFile } from '@/core';
+import { _Defaults, type Core, createCore } from '@/core';
 import { mdxLoaderGlob, metaLoaderGlob } from '@/loaders';
 import type { IndexFilePluginOptions } from '@/plugins/index-file';
 
@@ -32,18 +32,19 @@ export interface CreateMDXOptions {
 const defaultPageExtensions = ['mdx', 'md', 'jsx', 'js', 'tsx', 'ts'];
 
 export function createMDX(createOptions: CreateMDXOptions = {}) {
-  const options = applyDefaults(createOptions);
+  const core = createNextCore(applyDefaults(createOptions));
   const isDev = process.env.NODE_ENV === 'development';
 
   if (process.env._FUMADOCS_MDX !== '1') {
     process.env._FUMADOCS_MDX = '1';
 
-    void init(isDev, options);
+    void init(isDev, core);
   }
 
   return (nextConfig: NextConfig = {}): NextConfig => {
     const loaderOptions: WebpackLoaderOptions = {
-      ...options,
+      ...core._options,
+      compiledConfigPath: core.getCompiledConfigPath(),
       isDev,
     };
 
@@ -122,15 +123,10 @@ export function createMDX(createOptions: CreateMDXOptions = {}) {
   };
 }
 
-async function init(
-  dev: boolean,
-  options: Required<CreateMDXOptions>,
-): Promise<void> {
-  const core = createNextCore(options);
-
+async function init(dev: boolean, core: Core): Promise<void> {
   async function initOrReload() {
     await core.init({
-      config: loadConfig(options.configPath, options.outDir, true),
+      config: loadConfig(core, true),
     });
     await core.emitAndWrite();
   }
@@ -140,10 +136,10 @@ async function init(
     const watcher = new FSWatcher({
       ignoreInitial: true,
       persistent: true,
-      ignored: [options.outDir],
+      ignored: [core._options.outDir],
     });
 
-    watcher.add(options.configPath);
+    watcher.add(core._options.configPath);
     for (const collection of core.getConfig().collectionList) {
       if (collection.type === 'docs') {
         watcher.add(collection.docs.dir);
@@ -158,7 +154,7 @@ async function init(
     });
 
     watcher.on('all', async (_event, file) => {
-      if (path.resolve(file) === path.resolve(options.configPath)) {
+      if (path.resolve(file) === path.resolve(core._options.configPath)) {
         // skip plugin listeners
         watcher.removeAllListeners();
 
@@ -185,26 +181,19 @@ async function init(
   }
 }
 
-export async function postInstall(
-  configPath = findConfigFile(),
-  outDir = '.source',
-) {
-  const core = await createNextCore({
-    index: {},
-    outDir,
-    configPath,
-  }).init({
-    config: loadConfig(configPath, outDir, true),
+export async function postInstall(options: CreateMDXOptions) {
+  const core = createNextCore(applyDefaults(options));
+  await core.init({
+    config: loadConfig(core, true),
   });
-
   await core.emitAndWrite();
 }
 
 function applyDefaults(options: CreateMDXOptions): Required<CreateMDXOptions> {
   return {
     index: {},
-    outDir: options.outDir ?? '.source',
-    configPath: options.configPath ?? findConfigFile(),
+    outDir: options.outDir ?? _Defaults.outDir,
+    configPath: options.configPath ?? _Defaults.configPath,
   };
 }
 

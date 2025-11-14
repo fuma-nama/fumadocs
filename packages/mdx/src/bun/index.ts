@@ -2,7 +2,7 @@ import type { BunPlugin } from 'bun';
 import { createMdxLoader } from '@/loaders/mdx';
 import { buildConfig } from '@/config/build';
 import { pathToFileURL } from 'node:url';
-import { type CoreOptions, createCore, findConfigFile } from '@/core';
+import { _Defaults, type CoreOptions, createCore } from '@/core';
 import { createIntegratedConfigLoader } from '@/loaders/config';
 import { createMetaLoader } from '@/loaders/meta';
 import { toBun } from '@/loaders/adapter';
@@ -17,8 +17,8 @@ export interface MdxPluginOptions extends Partial<CoreOptions> {
 export function createMdxPlugin(options: MdxPluginOptions = {}): BunPlugin {
   const {
     environment = 'bun',
-    outDir = '.source',
-    configPath = findConfigFile(),
+    outDir = _Defaults.outDir,
+    configPath = _Defaults.configPath,
     disableMetaFile = false,
   } = options;
 

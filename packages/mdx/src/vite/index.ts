@@ -5,7 +5,7 @@ import { createMdxLoader } from '@/loaders/mdx';
 import { toVite } from '@/loaders/adapter';
 import vite from '@/plugins/vite';
 import type { FSWatcher } from 'chokidar';
-import { createCore, findConfigFile } from '@/core';
+import { _Defaults, createCore } from '@/core';
 import { createIntegratedConfigLoader } from '@/loaders/config';
 import { createMetaLoader } from '@/loaders/meta';
 import { IndexFilePluginOptions } from '@/plugins/index-file';
@@ -102,16 +102,13 @@ export default async function mdx(
   };
 }
 
-export async function postInstall(
-  configPath = findConfigFile(),
-  pluginOptions: PluginOptions = {},
-) {
+export async function postInstall(pluginOptions: PluginOptions = {}) {
   const { loadConfig } = await import('@/config/load-from-file');
-  const options = applyDefaults(pluginOptions);
-  const core = await createViteCore(options).init({
-    config: loadConfig(configPath, options.outDir, true),
-  });
+  const core = createViteCore(applyDefaults(pluginOptions));
 
+  await core.init({
+    config: loadConfig(core, true),
+  });
   await core.emitAndWrite();
 }
 
@@ -130,7 +127,7 @@ function applyDefaults(options: PluginOptions): Required<PluginOptions> {
   return {
     updateViteConfig: options.updateViteConfig ?? true,
     index: options.index ?? true,
-    configPath: options.configPath ?? 'source.config.ts',
-    outDir: options.outDir ?? '.source',
+    configPath: options.configPath ?? _Defaults.configPath,
+    outDir: options.outDir ?? _Defaults.outDir,
   };
 }

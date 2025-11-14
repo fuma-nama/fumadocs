@@ -12,9 +12,8 @@ export default async function loader(
   callback: LoaderContext<WebpackLoaderOptions>['callback'],
 ): Promise<void> {
   const options = this.getOptions();
-  const { configPath, isDev } = options;
   this.cacheable(true);
-  this.addDependency(configPath);
+  this.addDependency(options.compiledConfigPath);
 
   if (!instance) {
     instance = toWebpack(
@@ -22,7 +21,7 @@ export default async function loader(
         createStandaloneConfigLoader({
           core: getCore(options),
           buildConfig: false,
-          mode: isDev ? 'dev' : 'production',
+          mode: options.isDev ? 'dev' : 'production',
         }),
       ),
     );

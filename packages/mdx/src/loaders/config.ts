@@ -36,11 +36,7 @@ export function createStandaloneConfigLoader({
   async function newConfig() {
     const { loadConfig } = await import('../config/load-from-file');
     await core.init({
-      config: loadConfig(
-        core._options.configPath,
-        core._options.outDir,
-        buildConfig,
-      ),
+      config: loadConfig(core, buildConfig),
     });
 
     return core.getConfig();

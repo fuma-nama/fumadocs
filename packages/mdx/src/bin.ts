@@ -12,10 +12,10 @@ async function start() {
 
   if (isNext) {
     const { postInstall } = await import('./next');
-    await postInstall(configPath);
+    await postInstall({ configPath });
   } else {
     const { postInstall } = await import('./vite');
-    await postInstall(configPath);
+    await postInstall({ configPath });
   }
 }
 
