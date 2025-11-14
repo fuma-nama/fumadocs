@@ -323,7 +323,7 @@ async function generateBrowserIndexFile(
     `import { fromConfig } from 'fumadocs-mdx/runtime/browser';`,
     `import type * as Config from '${codegen.formatImportPath(configPath)}';`,
     '',
-    `const create = fromConfig<typeof Config>(Config);`,
+    `const create = fromConfig<typeof Config>();`,
   );
 
   async function generateCollectionObject(

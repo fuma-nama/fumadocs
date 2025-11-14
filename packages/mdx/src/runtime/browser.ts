@@ -33,8 +33,6 @@ export interface ClientLoader<Frontmatter, Props> {
    * Get react nodes that renders content with `React.lazy`.
    */
   useContent: (path: string, props: Props) => ReactNode;
-
-  getRenderer: () => Record<string, FC<Props>>;
 }
 
 export type BrowserCreate<Config> = ReturnType<typeof fromConfig<Config>>;
@@ -75,45 +73,58 @@ const loaderStore = new Map<
 >();
 
 export function createClientLoader<Frontmatter, Props extends object = object>(
-  files: Record<string, () => Promise<CompiledMDXFile<Frontmatter>>>,
+  globEntries: Record<string, () => Promise<CompiledMDXFile<Frontmatter>>>,
   options: ClientLoaderOptions<Frontmatter, Props>,
 ): ClientLoader<Frontmatter, Props> {
   const { id = '', component } = options;
-  let renderer: Record<string, FC<Props>> | undefined;
+  const renderers: Record<string, FC<Props>> = {};
+  const loaders = new Map<
+    string,
+    () => Promise<CompiledMDXFile<Frontmatter>>
+  >();
   const store = loaderStore.get(id) ?? {
     preloaded: new Map(),
   };
   loaderStore.set(id, store);
 
-  function getRenderer() {
-    if (renderer) return renderer;
+  for (const k in globEntries) {
+    loaders.set(k.startsWith('./') ? k.slice(2) : k, globEntries[k]);
+  }
 
-    renderer = {};
-    for (const k in files) {
-      const OnDemand = lazy(async () => {
-        const loaded = await files[k]();
-        return { default: (props) => component(loaded, props) };
-      });
+  function getLoader(path: string) {
+    const loader = loaders.get(path);
+    if (!loader)
+      throw new Error(
+        `[createClientLoader] ${path} does not exist in available entries`,
+      );
+    return loader;
+  }
 
-      renderer[k] = (props: Props) => {
-        const cached = store.preloaded.get(k);
-        if (!cached) return createElement(OnDemand, props);
-        return component(cached, props);
-      };
-    }
+  function getRenderer(path: string): FC<Props> {
+    if (path in renderers) return renderers[path];
 
-    return renderer;
+    const loader = getLoader(path);
+    const OnDemand = lazy(async () => {
+      const loaded = await loader();
+      return { default: (props) => component(loaded, props) };
+    });
+
+    renderers[path] = (props) => {
+      const cached = store.preloaded.get(path);
+      if (!cached) return createElement(OnDemand, props);
+      return component(cached, props);
+    };
+    return renderers[path];
   }
 
   return {
     async preload(path) {
-      const loaded = await files[path]();
+      const loaded = await getLoader(path)();
       store.preloaded.set(path, loaded);
       return loaded;
     },
-    getRenderer,
     getComponent(path) {
-      return getRenderer()[path];
+      return getRenderer(path);
     },
     useContent(path, props) {
       const Comp = this.getComponent(path);

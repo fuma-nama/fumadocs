@@ -4,7 +4,7 @@ import { createServerFn } from '@tanstack/react-start';
 import { source } from '@/lib/source';
 import type * as PageTree from 'fumadocs-core/page-tree';
 import { useMemo } from 'react';
-import { docs } from '@/.source';
+import { docs } from '@/.source/browser';
 import {
   DocsBody,
   DocsDescription,
@@ -12,8 +12,8 @@ import {
   DocsTitle,
 } from 'fumadocs-ui/page';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
-import { createClientLoader } from 'fumadocs-mdx/runtime/vite';
 import { baseOptions } from '@/lib/layout.shared';
+import { createClientLoader } from 'fumadocs-mdx/runtime/browser';
 
 export const Route = createFileRoute('/docs/$')({
   component: Page,
