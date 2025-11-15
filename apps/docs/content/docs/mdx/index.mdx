@@ -4,29 +4,13 @@ description: Introducing Fumadocs MDX, the official content source of Fumadocs.
 icon: Album
 ---
 
-## Quick Start
-
-Get started with Fumadocs MDX:
-
-<Cards>
-  <Card title="Next.js" href="/docs/mdx/next">
-    Using Fumadocs MDX with Next.js.
-  </Card>
-  <Card title="React Router" href="/docs/mdx/vite/react-router">
-    Using Fumadocs MDX with React Router 7 or above.
-  </Card>
-  <Card title="Tanstack Start" href="/docs/mdx/vite/tanstack">
-    Using Fumadocs MDX with Tanstack Start/Router.
-  </Card>
-</Cards>
-
 ## Introduction
 
 Fumadocs MDX is a tool to transform content into type-safe data, similar to Content Collections.
 
-It is not a full CMS but rather a content compiler + validator, you can use it to handle blog posts and other contents.
+It is not a full CMS but rather a content processing layer for React frameworks, you can use it to handle blog posts and other contents.
 
-### Defining Collections
+### What is a Collection?
 
 **Collection** refers to a collection containing a certain type of files. You can define collections in the config file (`source.config.ts`).
 
@@ -100,11 +84,23 @@ For example, a `doc` collection will transform the `.md` and `.mdx` files:
   />
 </Files>
 
-### Accessing Collections
+We will cover in [Accessing Collections](/docs/mdx/entry) later on how to access collection outputs.
 
-Collections will be compiled into JavaScript files that your app can access, the output format varies according to the framework you use.
+## Installation
 
-[Get started](#quickstart) with your framework to learn more.
+Configure Fumadocs MDX on:
+
+<Cards>
+  <Card title="Next.js" href="/docs/mdx/next">
+    Using Fumadocs MDX with Next.js.
+  </Card>
+  <Card title="Vite" href="/docs/mdx/vite">
+    Using Fumadocs MDX with Vite.
+  </Card>
+  <Card title="Runtime Loader" href="/docs/mdx/loader">
+    Using Fumadocs MDX with a JavaScript runtime.
+  </Card>
+</Cards>
 
 ## FAQ
 

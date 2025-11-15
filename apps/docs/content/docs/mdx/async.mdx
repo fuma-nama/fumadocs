@@ -1,5 +1,5 @@
 ---
-title: Async/Dynamic
+title: Lazy Loading
 description: Configure lazy loading on collection outputs.
 ---
 
@@ -52,6 +52,31 @@ You need to install extra dependencies:
 ```npm
 npm i @fumadocs/mdx-remote shiki
 ```
+
+```ts tab="Docs Collection"
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  dir: 'content/docs',
+  docs: {
+    // [!code ++]
+    dynamic: true,
+  },
+});
+```
+
+```ts tab="Doc Collection"
+import { defineCollections } from 'fumadocs-mdx/config';
+
+export const doc = defineCollections({
+  type: 'doc',
+  dir: 'content/docs',
+  // [!code ++]
+  dynamic: true,
+});
+```
+
+Then, follow [Dynamic Entry](/docs/mdx/entry/dynamic) to access the collection from dynamic entry instead.
 
 <Callout title="Constraints" type='warn'>
 

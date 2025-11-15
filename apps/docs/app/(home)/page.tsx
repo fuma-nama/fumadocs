@@ -1,10 +1,10 @@
 import Image from 'next/image';
 import { cn } from '@/lib/cn';
 import Link from 'next/link';
-import ContentImage from './content.png';
 import { cva } from 'class-variance-authority';
 import {
   BatteryChargingIcon,
+  FileIcon,
   FileTextIcon,
   Heart,
   SearchIcon,
@@ -18,6 +18,7 @@ import {
   CreateAppAnimation,
   PreviewImages,
   Writing,
+  ContentAdoptionBackground,
 } from '@/app/(home)/page.client';
 import ShadcnImage from './shadcn.png';
 import ContributorCounter from '@/components/contributor-count';
@@ -578,12 +579,47 @@ export const source = loader({
           lang="ts"
         />
       </div>
-      <Image
-        alt="Content Integration"
-        src={ContentImage}
-        width={1200}
-        className="min-w-0 rounded-2xl object-cover pointer-events-none shadow-lg"
-      />
+      <div
+        className={cn(
+          cardVariants({ className: 'relative overflow-hidden min-h-[400px]' }),
+        )}
+      >
+        <ContentAdoptionBackground className="absolute inset-0" />
+        <div className="absolute top-8 left-4 w-[70%] flex flex-col bg-neutral-900/80 backdrop-blur-lg border  text-neutral-200 p-2 rounded-xl shadow-lg shadow-black">
+          <p className="p-2 font-medium border-b mb-2 text-neutral-400">
+            My CMS
+          </p>
+          {['My Page', 'Another Page', 'Components', 'Getting Started'].map(
+            (page) => (
+              <div
+                key={page}
+                className="flex items-center gap-2 p-2 rounded-lg hover:bg-neutral-400/20"
+              >
+                <FileIcon className="stroke-neutral-400 size-4" />
+                <span className="text-sm">{page}</span>
+                <div className="px-3 py-1 font-mono rounded-full bg-brand text-xs text-brand-foreground ms-auto">
+                  Article
+                </div>
+              </div>
+            ),
+          )}
+        </div>
+
+        <div className="absolute bottom-8 right-4 w-[70%] flex flex-col bg-neutral-900 text-neutral-200 rounded-xl rounded-tl-none border shadow-lg shadow-black">
+          <div className="absolute -left-px bottom-full rounded-t-xl px-4 pt-2 pb-1 bg-neutral-900 text-neutral-400 border-t border-x font-medium">
+            MDX Editor
+          </div>
+          <pre className="text-base text-neutral-300 overflow-auto p-4">
+            {`---
+title: Hello World
+---
+
+# Hello World!
+
+This is my first document.`}
+          </pre>
+        </div>
+      </div>
       <div className={cn(cardVariants(), 'flex flex-col max-md:pb-0')}>
         <h3
           className={cn(headingVariants({ variant: 'h3', className: 'mb-6' }))}

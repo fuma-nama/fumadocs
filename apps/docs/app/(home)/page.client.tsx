@@ -326,3 +326,21 @@ export function AgnosticImage(props: ComponentProps<typeof MeshGradient>) {
     />
   );
 }
+
+export function ContentAdoptionBackground(
+  props: ComponentProps<typeof GrainGradient>,
+) {
+  const { resolvedTheme } = useTheme();
+  return (
+    <GrainGradient
+      colors={
+        resolvedTheme === 'dark'
+          ? ['#39BE1C', '#9c2f05', '#7A2A0000']
+          : ['#DF3F00', '#fcfc51', '#ffa057', '#7A2A0020']
+      }
+      colorBack="#1D1004"
+      shape="sphere"
+      {...props}
+    />
+  );
+}

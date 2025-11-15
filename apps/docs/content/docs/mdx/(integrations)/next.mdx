@@ -54,7 +54,7 @@ export default withMDX(config);
 
 </Callout>
 
-<include>./vite/.shared.mdx</include>
+<include>.shared.mdx</include>
 
 ### Integrate with Fumadocs
 
@@ -79,55 +79,13 @@ You can now write content in `content/docs` folder.
 </div>
 </section>
 
-## Examples
+## What is Next?
 
-### Accessing Content
-
-Generally, you'll interact with the collections through [`loader()`](/docs/headless/source-api#output), same for multiple `docs` collections.
-
-```tsx
-import { source } from '@/lib/source';
-
-const page = source.getPage(['slugs']);
-
-if (page) {
-  // access page data [!code highlight]
-  console.log(page.data);
-
-  // frontmatter properties are also inside [!code highlight]
-  console.log(page.data.title);
-}
-```
-
-To render the page, use `page.data.body` as a component.
-
-```tsx
-import { getMDXComponents } from '@/mdx-components';
-
-const MDX = page.data.body;
-
-// set your MDX components with `components` prop
-return <MDX components={getMDXComponents()} />;
-```
-
-Without using `loader()`, you can also import the `.source` folder using its collection name:
-
-```ts tab="source.config.ts"
-import { defineDocs } from 'fumadocs-mdx/config';
-
-export const docs = defineDocs({
-  dir: 'content/docs',
-  docs: {
-    // options for `doc` collection
-  },
-  meta: {
-    // options for `meta` collection
-  },
-});
-```
-
-```ts tab="Usage"
-import { docs } from 'fumadocs-mdx:collections/server';
-
-console.log(docs);
-```
+<Cards>
+  <Card title="Accessing Collections" href="/docs/mdx/entry">
+    Learn how to access collection outputs.
+  </Card>
+  <Card title="Lazy Loading" href="/docs/mdx/async">
+    Hit performance bottleneck? You can try lazy loading.
+  </Card>
+</Cards>
