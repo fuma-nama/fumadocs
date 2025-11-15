@@ -1,4 +1,4 @@
-```ts title="index.ts"
+```ts title="server.ts"
 // @ts-nocheck
 import { frontmatter as __fd_glob_1 } from "./generate-index/folder/test.mdx?collection=docs&only=frontmatter"
 import { frontmatter as __fd_glob_0 } from "./generate-index/index.mdx?collection=docs&only=frontmatter"
@@ -23,7 +23,9 @@ const create = fromConfigDynamic(Config);
 import { fromConfig } from 'fumadocs-mdx/runtime/browser';
 import type * as Config from './config';
 
-const create = fromConfig<typeof Config>(Config);
-
-export const docs = create.doc("docs", {"index.mdx": () => import("./generate-index/index.mdx?collection=docs"), "folder/test.mdx": () => import("./generate-index/folder/test.mdx?collection=docs"), });
+const create = fromConfig<typeof Config>();
+const browserCollections = {
+  docs: create.doc("docs", {"index.mdx": () => import("./generate-index/index.mdx?collection=docs"), "folder/test.mdx": () => import("./generate-index/folder/test.mdx?collection=docs"), }),
+};
+export default browserCollections;
 ```

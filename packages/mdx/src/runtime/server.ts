@@ -148,44 +148,6 @@ export function fromConfig<Config>() {
     };
   }
 
-  function toFumadocsSource<
-    Page extends DocMethods & PageData,
-    Meta extends MetaMethods & MetaData,
-  >(
-    pages: Page[],
-    metas: Meta[],
-  ): Source<{
-    pageData: Page;
-    metaData: Meta;
-  }> {
-    const files: VirtualFile<{
-      pageData: Page;
-      metaData: Meta;
-    }>[] = [];
-
-    for (const entry of pages) {
-      files.push({
-        type: 'page',
-        path: entry.info.path,
-        absolutePath: entry.info.fullPath,
-        data: entry,
-      });
-    }
-
-    for (const entry of metas) {
-      files.push({
-        type: 'meta',
-        path: entry.info.path,
-        absolutePath: entry.info.fullPath,
-        data: entry,
-      });
-    }
-
-    return {
-      files,
-    };
-  }
-
   return {
     async doc<Name extends keyof Config>(
       _name: Name,
@@ -318,6 +280,44 @@ export function fromConfig<Config>() {
           : never
         : never;
     },
+  };
+}
+
+export function toFumadocsSource<
+  Page extends DocMethods & PageData,
+  Meta extends MetaMethods & MetaData,
+>(
+  pages: Page[],
+  metas: Meta[],
+): Source<{
+  pageData: Page;
+  metaData: Meta;
+}> {
+  const files: VirtualFile<{
+    pageData: Page;
+    metaData: Meta;
+  }>[] = [];
+
+  for (const entry of pages) {
+    files.push({
+      type: 'page',
+      path: entry.info.path,
+      absolutePath: entry.info.fullPath,
+      data: entry,
+    });
+  }
+
+  for (const entry of metas) {
+    files.push({
+      type: 'meta',
+      path: entry.info.path,
+      absolutePath: entry.info.fullPath,
+      data: entry,
+    });
+  }
+
+  return {
+    files,
   };
 }
 

@@ -1,11 +1,7 @@
 import { type ReactNode, type FC, lazy, createElement } from 'react';
 import type { CompiledMDXFile } from './server';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
-import type {
-  DocCollection,
-  DocsCollection,
-  MetaCollection,
-} from '@/config/define';
+import type { DocCollection, DocsCollection } from '@/config/define';
 
 export interface ClientLoaderOptions<Frontmatter, Props> {
   /**
@@ -37,30 +33,36 @@ export interface ClientLoader<Frontmatter, Props> {
 
 export type BrowserCreate<Config> = ReturnType<typeof fromConfig<Config>>;
 
+export interface DocCollectionEntry<Frontmatter> {
+  raw: Record<string, () => Promise<CompiledMDXFile<Frontmatter>>>;
+  createClientLoader: <Props extends object>(
+    options: ClientLoaderOptions<Frontmatter, Props>,
+  ) => ClientLoader<Frontmatter, Props>;
+}
+
 export function fromConfig<Config>() {
   return {
     doc<Name extends keyof Config>(
       _name: Name,
       glob: Record<string, () => Promise<unknown>>,
-    ): Config[Name] extends
-      | DocCollection<infer Schema>
-      | DocsCollection<infer Schema>
-      ? Record<
-          string,
-          () => Promise<CompiledMDXFile<StandardSchemaV1.InferOutput<Schema>>>
-        >
-      : never {
-      return glob as any;
-    },
-    meta<Name extends keyof Config>(
-      _name: Name,
-      glob: Record<string, () => Promise<unknown>>,
-    ): Config[Name] extends
-      | MetaCollection<infer Schema>
-      | DocsCollection<any, infer Schema>
-      ? Record<string, () => Promise<StandardSchemaV1.InferOutput<Schema>>>
-      : never {
-      return glob as any;
+    ) {
+      const raw = glob as Record<
+        string,
+        () => Promise<CompiledMDXFile<unknown>>
+      >;
+
+      const out: DocCollectionEntry<unknown> = {
+        raw,
+        createClientLoader(options) {
+          return createClientLoader(raw, options);
+        },
+      };
+
+      return out as Config[Name] extends
+        | DocCollection<infer Schema>
+        | DocsCollection<infer Schema>
+        ? DocCollectionEntry<StandardSchemaV1.InferOutput<Schema>>
+        : never;
     },
   };
 }

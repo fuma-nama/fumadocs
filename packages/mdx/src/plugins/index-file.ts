@@ -91,7 +91,6 @@ export default function indexFile(
     },
     async emit() {
       const globCache = new Map<string, Promise<string[]>>();
-
       const makeCodeGen = () =>
         createCodegen({
           target,
@@ -112,7 +111,7 @@ export default function indexFile(
 
       const out: Promise<EmitEntry>[] = [
         toEmitEntry(
-          'index.ts',
+          'server.ts',
           generateServerIndexFile(makeCodeGen(), config, this.configPath),
         ),
       ];
@@ -333,34 +332,27 @@ async function generateBrowserIndexFile(
       case 'docs': {
         if (collection.docs.dynamic) return;
 
-        const [docGlob, metaGlob] = await Promise.all([
-          generateCollectionObject(collection.docs),
-          generateCollectionObject(collection.meta),
-        ]);
-
-        return `{\n${ident(`doc: ${docGlob},\nmeta: ${metaGlob}`)}\n}`;
+        return generateCollectionObject(collection.docs);
       }
       case 'doc':
         if (collection.dynamic) return;
 
         return `create.doc("${collection.name}", ${await generateDocCollectionGlob(codegen, collection)})`;
-      case 'meta':
-        return `create.meta("${collection.name}", ${await generateMetaCollectionGlob(
-          codegen,
-          collection,
-        )})`;
     }
   }
+
+  codegen.lines.push('const browserCollections = {');
 
   await codegen.pushAsync(
     config.collectionList.map(async (collection) => {
       const obj = await generateCollectionObject(collection);
       if (!obj) return;
 
-      return `\nexport const ${collection.name} = ${obj};`;
+      return ident(`${collection.name}: ${obj},`);
     }),
   );
 
+  codegen.lines.push('};', 'export default browserCollections;');
   return codegen.toString();
 }
 

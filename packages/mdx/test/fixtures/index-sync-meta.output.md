@@ -1,4 +1,4 @@
-```ts title="index.ts"
+```ts title="server.ts"
 // @ts-nocheck
 import { default as __fd_glob_0 } from "./generate-index/meta.json?collection=docs"
 import { fromConfig } from 'fumadocs-mdx/runtime/server';
@@ -22,7 +22,8 @@ const create = fromConfigDynamic(Config);
 import { fromConfig } from 'fumadocs-mdx/runtime/browser';
 import type * as Config from './config';
 
-const create = fromConfig<typeof Config>(Config);
-
-export const docs = create.meta("docs", {"meta.json": () => import("./generate-index/meta.json?collection=docs").then(mod => mod.default), });
+const create = fromConfig<typeof Config>();
+const browserCollections = {
+};
+export default browserCollections;
 ```
