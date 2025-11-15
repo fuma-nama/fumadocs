@@ -44,11 +44,12 @@ export async function fromConfigDynamic<Config>(
     const body: Record<string, () => Promise<unknown>> = {};
 
     async function compile({ info, data }: LazyEntry<unknown>) {
-      const raw = (await fs.readFile(info.fullPath)).toString();
+      let content = (await fs.readFile(info.fullPath)).toString();
+      content = fumaMatter(content).content;
 
       const compiled = await buildMDX(core, collection, {
         filePath: info.fullPath,
-        source: fumaMatter(raw).content,
+        source: content,
         frontmatter: data as Record<string, unknown>,
         isDevelopment: false,
         environment: 'runtime',

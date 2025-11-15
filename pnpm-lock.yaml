@@ -1766,6 +1766,9 @@ importers:
       unist-util-visit:
         specifier: ^5.0.0
         version: 5.0.0
+      vfile:
+        specifier: ^6.0.3
+        version: 6.0.3
       zod:
         specifier: ^4.1.12
         version: 4.1.12
@@ -1830,9 +1833,6 @@ importers:
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
-      vfile:
-        specifier: ^6.0.3
-        version: 6.0.3
       vite:
         specifier: ^7.2.0
         version: 7.2.0(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1)
@@ -6310,7 +6310,6 @@ packages:
 
   bun@1.3.2:
     resolution: {integrity: sha512-x75mPJiEfhO1j4Tfc65+PtW6ZyrAB6yTZInydnjDZXF9u9PRAnr6OK3v0Q9dpDl0dxRHkXlYvJ8tteJxc8t4Sw==}
-    cpu: [arm64, x64]
     os: [darwin, linux, win32]
     hasBin: true
 

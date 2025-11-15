@@ -39,7 +39,7 @@ export interface CompiledMDXProperties<Frontmatter = Record<string, unknown>> {
   default: FC<MDXProps>;
 
   /**
-   * Only available when `lastModifiedTime` is enabled on MDX loader
+   * Added by the `last-modified` plugin.
    */
   lastModified?: Date;
   extractedReferences?: ExtractedReference[];

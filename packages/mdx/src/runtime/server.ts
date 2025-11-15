@@ -50,7 +50,7 @@ export interface DocData {
   /**
    * Last modified date of document file, obtained from version control.
    *
-   * Only available when `lastModifiedTime` is enabled on global config.
+   * Added by the `last-modified` plugin.
    */
   lastModified?: Date;
 

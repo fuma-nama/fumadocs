@@ -121,13 +121,6 @@ export function createCore(
   let config: LoadedConfig;
   let plugins: Plugin[];
 
-  function createPluginContext(): PluginContext {
-    return {
-      core,
-      ...options,
-    };
-  }
-
   const core = {
     _options: options,
     /**
@@ -142,9 +135,8 @@ export function createCore(
         ...(config.global.plugins ?? []),
       ]);
 
-      const ctx = createPluginContext();
       for (const plugin of plugins) {
-        const out = await plugin.config?.call(ctx, config);
+        const out = await plugin.config?.call(pluginContext, config);
         if (out) config = out;
       }
 
@@ -164,22 +156,19 @@ export function createCore(
         if (event === 'change') removeFileCache(file);
       });
 
-      const ctx = createPluginContext();
       for (const plugin of plugins) {
-        await plugin.configureServer?.call(ctx, server);
+        await plugin.configureServer?.call(pluginContext, server);
       }
     },
     async emit({ filterPlugin = () => true }: EmitOptions = {}): Promise<
       EmitEntry[]
     > {
-      const ctx = createPluginContext();
-
       return (
         await Promise.all(
           plugins.map((plugin) => {
             if (!filterPlugin(plugin) || !plugin.emit) return [];
 
-            return plugin.emit.call(ctx);
+            return plugin.emit.call(pluginContext);
           }),
         )
       ).flat();
@@ -216,13 +205,14 @@ export function createCore(
       }
 
       const ctx = {
-        ...createPluginContext(),
+        ...pluginContext,
         filePath,
         collection,
       };
 
       for (const plugin of plugins) {
-        data = (await plugin.metadata?.call(ctx, data)) ?? data;
+        if (plugin.metadata)
+          data = (await plugin.metadata.call(ctx, data)) ?? data;
       }
 
       return data;
@@ -234,18 +224,25 @@ export function createCore(
         file: VFile,
       ): Promise<VFile> {
         const ctx = {
-          ...createPluginContext(),
+          ...pluginContext,
           filePath,
           collection,
         };
 
         for (const plugin of plugins) {
-          file = (await plugin.doc?.vfile?.call(ctx, file)) ?? file;
+          if (plugin.doc?.vfile)
+            file = (await plugin.doc.vfile.call(ctx, file)) ?? file;
         }
 
         return file;
       },
     },
+  };
+
+  // core & core options should be immutable, we can share it across all instances
+  const pluginContext: PluginContext = {
+    core,
+    ...options,
   };
 
   return core;
