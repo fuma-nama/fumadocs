@@ -1,11 +1,6 @@
 import { type ReactNode, useMemo } from 'react';
 import { type Framework, FrameworkProvider } from '@/framework/index';
-import {
-  useParams,
-  Link,
-  useRouter,
-  useLocation,
-} from '@tanstack/react-router';
+import { useParams, Link, useRouter, useMatch } from '@tanstack/react-router';
 
 const framework: Framework = {
   Link({ href, prefetch, ...props }) {
@@ -16,7 +11,7 @@ const framework: Framework = {
     );
   },
   usePathname() {
-    return useLocation().pathname;
+    return useMatch({ strict: false, select: (s) => s.pathname });
   },
   useRouter() {
     const router = useRouter();
