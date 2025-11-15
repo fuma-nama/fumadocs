@@ -64,8 +64,7 @@ For example:
 ```tsx
 import type { Route } from './+types/page';
 import { source } from '@/lib/source';
-import { docs } from '@/.source';
-import { toClientRenderer } from 'fumadocs-mdx/runtime/vite';
+import browserCollections from 'fumadocs-mdx:collections/browser';
 
 export async function loader({ params }: Route.LoaderArgs) {
   const slugs = params['*'].split('/').filter((v) => v.length > 0);
@@ -77,18 +76,20 @@ export async function loader({ params }: Route.LoaderArgs) {
   };
 }
 
-const renderer = toClientRenderer(docs.doc, ({ default: Mdx, frontmatter }) => {
-  return (
-    <div className="prose">
-      <h1>{frontmatter.title}</h1>
-      <Mdx />
-    </div>
-  );
+const clientLoader = browserCollections.docs.createClientLoader({
+  component({ frontmatter, default: MDX }) {
+    return (
+      <div className="prose">
+        <h1>{frontmatter.title}</h1>
+        <MDX />
+      </div>
+    );
+  },
 });
 
 export default function Page(props: Route.ComponentProps) {
   const { path } = props.loaderData;
-  const Content = renderer[path];
+  const Content = clientLoader.getComponent(path);
 
   return <Content />;
 }

@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
-    "start": "node .output/server/index.mjs"
+    "start": "node .output/server/index.mjs",
+    "types:check": "fumadocs-mdx && tsc --noEmit"
   },
   "dependencies": {
     "@tanstack/react-router": "^1.134.12",

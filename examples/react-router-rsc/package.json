@@ -6,7 +6,7 @@
     "build": "react-router build",
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
-    "typecheck": "react-router typegen && tsc"
+    "types:check": "react-router typegen && fumadocs-mdx && tsc --noEmit"
   },
   "dependencies": {
     "@react-router/node": "^7.9.5",

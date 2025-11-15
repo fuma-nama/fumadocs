@@ -5,7 +5,8 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "start": "next start"
+    "start": "next start",
+    "types:check": "fumadocs-mdx && tsc --noEmit"
   },
   "dependencies": {
     "@orama/tokenizers": "^3.1.16",

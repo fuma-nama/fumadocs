@@ -61,7 +61,7 @@ export default withMDX(config);
 You can create a `lib/source.ts` file and obtain Fumadocs source from the `docs` collection output.
 
 ```ts title="lib/source.ts"
-import { docs } from '@/.source';
+import { docs } from 'fumadocs-mdx:collections/server';
 import { loader } from 'fumadocs-core/source';
 
 export const source = loader({
@@ -127,7 +127,7 @@ export const docs = defineDocs({
 ```
 
 ```ts tab="Usage"
-import { docs } from '@/.source';
+import { docs } from 'fumadocs-mdx:collections/server';
 
 console.log(docs);
 ```

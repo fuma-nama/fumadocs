@@ -1,8 +1,10 @@
 {
   "extends": "tsconfig/nextjs.json",
   "compilerOptions": {
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "fumadocs-mdx:collections/*": [".source/*"]
     }
   },
   "include": [

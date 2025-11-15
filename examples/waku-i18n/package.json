@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "waku dev",
     "build": "waku build",
-    "start": "waku start"
+    "start": "waku start",
+    "types:check": "fumadocs-mdx && tsc --noEmit"
   },
   "dependencies": {
     "@orama/tokenizers": "^3.1.16",

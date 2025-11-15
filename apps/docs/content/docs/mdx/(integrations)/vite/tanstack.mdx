@@ -33,10 +33,10 @@ To integrate with Fumadocs, create a `lib/source.ts` file:
 
 ```ts title="src/lib/source.ts"
 import { loader } from 'fumadocs-core/source';
-import { create, docs } from '@/.source';
+import { docs } from 'fumadocs-mdx:collections/server';
 
 export const source = loader({
-  source: await create.sourceAsync(docs.doc, docs.meta),
+  source: docs.toFumadocsSource(),
   baseUrl: '/docs',
 });
 ```
@@ -61,8 +61,7 @@ For example:
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
 import { source } from '@/lib/source';
-import { docs } from '@/.source';
-import { createClientLoader } from 'fumadocs-mdx/runtime/vite';
+import browserCollections from 'fumadocs-mdx:collections/browser';
 
 export const Route = createFileRoute('/docs/$')({
   component: Page,
@@ -86,8 +85,7 @@ const loader = createServerFn({
     };
   });
 
-const clientLoader = createClientLoader(docs.doc, {
-  id: 'docs',
+const clientLoader = browserCollections.docs.createClientLoader({
   component({ frontmatter, default: MDX }) {
     return (
       <div className="prose">

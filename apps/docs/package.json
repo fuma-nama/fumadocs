@@ -6,6 +6,7 @@
     "build": "pnpm build:pre && next build && pnpm build:post",
     "build:pre": "bun ./scripts/pre-build.ts",
     "build:post": "bun ./scripts/post-build.ts",
+    "types:check": "fumadocs-mdx && next typegen && tsc --noEmit",
     "clean": "rimraf .next",
     "dev": "next dev",
     "lint": "fumadocs-mdx && bun ./scripts/lint.ts && eslint .",

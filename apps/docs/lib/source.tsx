@@ -2,13 +2,12 @@ import {
   type InferMetaType,
   type InferPageType,
   type LoaderPlugin,
-  MetaData,
-  Source,
   loader,
   multiple,
 } from 'fumadocs-core/source';
 import { openapiPlugin, openapiSource } from 'fumadocs-openapi/server';
-import { blog as blogPosts, docs } from '@/.source';
+import { blog as blogPosts, docs } from 'fumadocs-mdx:collections/server';
+import { toFumadocsSource } from 'fumadocs-mdx/runtime/server';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 import { openapi } from '@/lib/openapi';
 
@@ -44,22 +43,9 @@ function pageTreeCodeTitles(): LoaderPlugin {
   };
 }
 
-export const blog = loader(
-  {
-    files: blogPosts.map((post) => ({
-      type: 'page',
-      data: post,
-      path: post.info.path,
-      absolutePath: post.info.fullPath,
-    })),
-  } as Source<{
-    metaData: MetaData;
-    pageData: (typeof blogPosts)[number];
-  }>,
-  {
-    baseUrl: '/blog',
-  },
-);
+export const blog = loader(toFumadocsSource(blogPosts, []), {
+  baseUrl: '/blog',
+});
 
 export type Page = InferPageType<typeof source>;
 export type Meta = InferMetaType<typeof source>;

@@ -6,7 +6,7 @@
     "build": "react-router build",
     "dev": "react-router dev",
     "start": "serve ./build/client",
-    "typecheck": "react-router typegen && tsc"
+    "types:check": "react-router typegen && fumadocs-mdx && tsc --noEmit"
   },
   "dependencies": {
     "@orama/orama": "^3.1.16",

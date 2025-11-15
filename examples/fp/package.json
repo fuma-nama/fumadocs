@@ -6,7 +6,7 @@
     "build": "fumapress build",
     "dev": "fumapress dev",
     "start": "fumapress preview",
-    "typecheck": "fumapress typegen && tsc --noEmit"
+    "types:check": "fumapress typegen && tsc --noEmit"
   },
   "dependencies": {
     "fumadocs-core": "workspace:*",

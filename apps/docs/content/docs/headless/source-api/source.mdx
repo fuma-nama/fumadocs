@@ -14,7 +14,7 @@ Use `multiple` to combine multiple sources into one.
 ```ts
 import { loader, multiple } from 'fumadocs-core/source';
 import { openapiPlugin, openapiSource } from 'fumadocs-openapi/server';
-import { blog, docs } from '@/.source';
+import { blog, docs } from 'fumadocs-mdx:collections/server';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 
 export const source = loader(

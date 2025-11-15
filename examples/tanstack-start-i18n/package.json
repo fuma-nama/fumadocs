@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build && tsc --noEmit",
-    "start": "node .output/server/index.mjs"
+    "build": "vite build",
+    "start": "node .output/server/index.mjs",
+    "types:check": "fumadocs-mdx && tsc --noEmit"
   },
   "dependencies": {
     "@orama/tokenizers": "^3.1.16",

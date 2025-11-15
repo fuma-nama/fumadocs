@@ -1,17 +1,17 @@
 ---
-title: Async Mode
-description: Runtime compilation of content files.
+title: Async/Dynamic
+description: Configure lazy loading on collection outputs.
 ---
 
 ## Introduction
 
 By default, all Markdown and MDX files need to be pre-compiled first. The same constraint also applies to the development server.
 
-This may result in longer dev server start times for large docs sites. You can enable Async Mode on docs collections to improve this.
+This may result in longer dev server start times for large docs sites. You can enable Async or Dynamic mode on doc collections to improve this.
 
-## Setup
+## Async Mode
 
-Enable Async Mode.
+Async mode will generate collection outputs using async imports.
 
 ```ts tab="Docs Collection"
 import { defineDocs } from 'fumadocs-mdx/config';
@@ -36,9 +36,16 @@ export const doc = defineCollections({
 });
 ```
 
-### Next.js
+Depending on your bundler, this may reduce compilation time significantly on development server.
 
-Turbopack doesn't support lazy bundling at the moment, Async Mode works by performing on-demand compilation with MDX Remote.
+<Callout title="For Next.js">
+  Turbopack doesn't support lazy bundling at the moment, async mode will only
+  improve server performance.
+</Callout>
+
+## Dynamic Mode
+
+Dynamic mode works by performing on-demand compilation with MDX Remote.
 
 You need to install extra dependencies:
 
@@ -48,29 +55,12 @@ npm i @fumadocs/mdx-remote shiki
 
 <Callout title="Constraints" type='warn'>
 
-Async Mode comes with some limitations on MDX features for Next.js.
+Dynamic mode comes with some limitations on MDX features.
 
 - **No import/export allowed in MDX files.** For MDX components, pass them from the `components` prop instead.
 - **Images must be referenced with URL (e.g. `/images/test.png`).** Don't use **file paths** like `./image.png`. You should locate your images in the `public` folder and reference them with URLs.
 
 </Callout>
-
-### Vite
-
-Vite has native support for lazy bundling, you only need to update `loader()` after enabling it.
-
-```tsx title="lib/source.ts"
-import { loader } from 'fumadocs-core/source';
-import { docs, create } from '@/.source';
-
-export const source = loader({
-  baseUrl: '/docs',
-  // [!code --]
-  source: await create.sourceAsync(docs.doc, docs.meta),
-  // [!code ++]
-  source: await create.sourceLazy(docs.doc, docs.meta),
-});
-```
 
 ## Usage
 
@@ -97,4 +87,4 @@ if (page) {
 }
 ```
 
-When using Async Mode, we highly recommend to use third-party services to implement search, which usually have better capability to handle massive amount of content to index.
+When using Async or Dynamic mode, we highly recommend to use third-party services to implement search, which usually have better capability to handle massive amount of content to index.

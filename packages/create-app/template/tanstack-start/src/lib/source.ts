@@ -1,9 +1,9 @@
 import { loader } from 'fumadocs-core/source';
 import * as icons from 'lucide-static';
-import { create, docs } from '@/.source';
+import { docs } from 'fumadocs-mdx:collections/server';
 
 export const source = loader({
-  source: await create.sourceAsync(docs.doc, docs.meta),
+  source: docs.toFumadocsSource(),
   baseUrl: '/docs',
   icon(icon) {
     if (!icon) {
