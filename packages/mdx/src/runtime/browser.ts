@@ -53,8 +53,8 @@ export function fromConfig<Config>() {
 
       const out: DocCollectionEntry<unknown> = {
         raw,
-        createClientLoader(options) {
-          return createClientLoader(raw, options);
+        createClientLoader({ id = _name as string, ...options }) {
+          return createClientLoader(raw, { id, ...options });
         },
       };
 
@@ -105,9 +105,9 @@ export function createClientLoader<Frontmatter, Props extends object = object>(
   function getRenderer(path: string): FC<Props> {
     if (path in renderers) return renderers[path];
 
-    const loader = getLoader(path);
     const OnDemand = lazy(async () => {
-      const loaded = await loader();
+      const loaded = await getLoader(path)();
+
       return { default: (props) => component(loaded, props) };
     });
 

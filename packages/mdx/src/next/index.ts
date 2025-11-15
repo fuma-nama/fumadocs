@@ -8,10 +8,10 @@ import type {
 import * as path from 'node:path';
 import { loadConfig } from '@/config/load-from-file';
 import { ValidationError } from '@/utils/validation';
-import next from '@/plugins/next';
 import { _Defaults, type Core, createCore } from '@/core';
 import { mdxLoaderGlob, metaLoaderGlob } from '@/loaders';
 import type { IndexFilePluginOptions } from '@/plugins/index-file';
+import indexFile from '@/plugins/index-file';
 
 export interface CreateMDXOptions {
   /**
@@ -204,7 +204,7 @@ function createNextCore(options: Required<CreateMDXOptions>): Core {
       outDir: options.outDir,
       configPath: options.configPath,
     },
-    [next(options)],
+    [options.index && indexFile(options.index)],
   );
 
   return {

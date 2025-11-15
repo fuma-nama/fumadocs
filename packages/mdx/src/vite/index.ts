@@ -3,12 +3,11 @@ import { buildConfig } from '@/config/build';
 import { ValidationError } from '@/utils/validation';
 import { createMdxLoader } from '@/loaders/mdx';
 import { toVite } from '@/loaders/adapter';
-import vite from '@/plugins/vite';
 import type { FSWatcher } from 'chokidar';
 import { _Defaults, createCore } from '@/core';
 import { createIntegratedConfigLoader } from '@/loaders/config';
 import { createMetaLoader } from '@/loaders/meta';
-import { IndexFilePluginOptions } from '@/plugins/index-file';
+import indexFile, { IndexFilePluginOptions } from '@/plugins/index-file';
 
 const FumadocsDeps = ['fumadocs-core', 'fumadocs-ui', 'fumadocs-openapi'];
 
@@ -112,14 +111,26 @@ export async function postInstall(pluginOptions: PluginOptions = {}) {
   await core.emitAndWrite();
 }
 
-function createViteCore(options: Required<PluginOptions>) {
+function createViteCore({
+  index,
+  configPath,
+  outDir,
+}: Required<PluginOptions>) {
+  if (index === true) index = {};
+
   return createCore(
     {
       environment: 'vite',
-      configPath: options.configPath,
-      outDir: options.outDir,
+      configPath,
+      outDir,
     },
-    [vite(options)],
+    [
+      index &&
+        indexFile({
+          ...index,
+          target: index.target ?? 'vite',
+        }),
+    ],
   );
 }
 

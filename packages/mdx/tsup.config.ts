@@ -7,7 +7,7 @@ export default defineConfig({
     './src/webpack/{mdx,meta}.ts',
     './src/node/loader.ts',
     './src/runtime/*.ts',
-    './src/plugins/{index,json-schema}.ts',
+    './src/plugins/*.ts',
   ],
   format: ['esm', 'cjs'],
   external: ['next', 'typescript', 'bun'],

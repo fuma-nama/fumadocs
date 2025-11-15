@@ -18,13 +18,13 @@ export const Route = createFileRoute('/docs/$')({
   component: Page,
   loader: async ({ params }) => {
     const slugs = params._splat?.split('/') ?? [];
-    const data = await loader({ data: slugs });
+    const data = await serverLoader({ data: slugs });
     await clientLoader.preload(data.path);
     return data;
   },
 });
 
-const loader = createServerFn({
+const serverLoader = createServerFn({
   method: 'GET',
 })
   .inputValidator((slugs: string[]) => slugs)
