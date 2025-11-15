@@ -8,6 +8,7 @@ import {
 import { z } from 'zod';
 import type { ElementContent } from 'hast';
 import jsonSchema from 'fumadocs-mdx/plugins/json-schema';
+import lastModified from 'fumadocs-mdx/plugins/last-modified';
 import type { ShikiTransformer } from 'shiki';
 
 export const docs = defineDocs({
@@ -63,11 +64,11 @@ function transformerEscape(): ShikiTransformer {
 }
 
 export default defineConfig({
-  lastModifiedTime: 'git',
   plugins: [
     jsonSchema({
       insert: true,
     }),
+    lastModified(),
   ],
   mdxOptions: async () => {
     const { rehypeCodeDefaultOptions } = await import(

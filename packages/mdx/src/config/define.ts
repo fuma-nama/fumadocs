@@ -83,12 +83,6 @@ export interface GlobalConfig {
   mdxOptions?: GlobalConfigMDXOptions | (() => Promise<GlobalConfigMDXOptions>);
 
   /**
-   * Fetch last modified time with specified version control
-   * @defaultValue 'none'
-   */
-  lastModifiedTime?: 'git' | 'none';
-
-  /**
    * specify a directory to access & store cache (disabled during development mode).
    *
    * The cache will never be updated, delete the cache folder to clean.

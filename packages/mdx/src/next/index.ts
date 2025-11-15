@@ -214,7 +214,7 @@ function createNextCore(options: Required<CreateMDXOptions>): Core {
         await core.emitAndWrite(...args);
       } catch (err) {
         if (err instanceof ValidationError) {
-          console.error(err.toStringFormatted());
+          console.error(await err.toStringFormatted());
         } else {
           console.error(err);
         }

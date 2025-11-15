@@ -1,7 +1,6 @@
 import type { Loader, LoaderInput } from '@/loaders/adapter';
 import type { ConfigLoader } from '@/loaders/config';
 import { dump, load } from 'js-yaml';
-import { validate } from '@/utils/validation';
 import { z } from 'zod';
 import { metaLoaderGlob } from '.';
 import type { MetaCollectionItem } from '@/config/build';
@@ -55,12 +54,12 @@ export function createMetaLoader(
       }
 
       const data = parse(filePath, source);
-      if (metaCollection?.schema) {
-        return validate(
-          metaCollection.schema,
+      if (metaCollection) {
+        return configLoader.core.metadata(
+          metaCollection,
+          filePath,
+          source,
           data,
-          { path: filePath, source },
-          `invalid data in ${filePath}`,
         );
       }
 

@@ -82,7 +82,8 @@
     "unified": "^11.0.5",
     "unist-util-remove-position": "^5.0.0",
     "unist-util-visit": "^5.0.0",
-    "zod": "^4.1.12"
+    "zod": "^4.1.12",
+    "vfile": "^6.0.3"
   },
   "devDependencies": {
     "@fumadocs/mdx-remote": "workspace:*",
@@ -105,7 +106,6 @@
     "remark-stringify": "^11.0.0",
     "rollup": "^4.52.5",
     "tsconfig": "workspace:*",
-    "vfile": "^6.0.3",
     "vite": "^7.2.0",
     "webpack": "^5.102.1"
   },

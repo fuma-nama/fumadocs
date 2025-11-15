@@ -153,7 +153,7 @@ export function toWebpack(loader: Loader): WebpackLoader {
       }
     } catch (error) {
       if (error instanceof ValidationError) {
-        return callback(new Error(error.toStringFormatted()));
+        return callback(new Error(await error.toStringFormatted()));
       }
 
       if (!(error instanceof Error)) throw error;

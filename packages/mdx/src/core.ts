@@ -1,8 +1,14 @@
-import type { LoadedConfig } from '@/config/build';
+import type {
+  DocCollectionItem,
+  LoadedConfig,
+  MetaCollectionItem,
+} from '@/config/build';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import type { FSWatcher } from 'chokidar';
 import { removeFileCache } from './utils/codegen/cache';
+import { validate } from './utils/validation';
+import type { VFile } from 'vfile';
 
 type Awaitable<T> = T | Promise<T>;
 
@@ -41,6 +47,30 @@ export interface Plugin {
     this: PluginContext,
     server: ServerContext,
   ) => Awaitable<void>;
+
+  /**
+   * Transform frontmatter/metadata
+   */
+  metadata?: (
+    this: PluginContext & {
+      collection: DocCollectionItem | MetaCollectionItem;
+      filePath: string;
+    },
+    data: unknown,
+  ) => Awaitable<unknown | void>;
+
+  doc?: {
+    /**
+     * Transform `vfile` on compilation stage
+     */
+    vfile?: (
+      this: PluginContext & {
+        collection: DocCollectionItem;
+        filePath: string;
+      },
+      file: VFile,
+    ) => Awaitable<VFile | void>;
+  };
 }
 
 export type PluginOption = Awaitable<Plugin | PluginOption[] | false>;
@@ -91,14 +121,15 @@ export function createCore(
   let config: LoadedConfig;
   let plugins: Plugin[];
 
-  return {
+  function createPluginContext(): PluginContext {
+    return {
+      core,
+      ...options,
+    };
+  }
+
+  const core = {
     _options: options,
-    getPluginContext(): PluginContext {
-      return {
-        core: this,
-        ...options,
-      };
-    },
     /**
      * Convenient cache store, reset when config changes
      */
@@ -111,8 +142,9 @@ export function createCore(
         ...(config.global.plugins ?? []),
       ]);
 
+      const ctx = createPluginContext();
       for (const plugin of plugins) {
-        const out = await plugin.config?.call(this.getPluginContext(), config);
+        const out = await plugin.config?.call(ctx, config);
         if (out) config = out;
       }
 
@@ -132,19 +164,22 @@ export function createCore(
         if (event === 'change') removeFileCache(file);
       });
 
+      const ctx = createPluginContext();
       for (const plugin of plugins) {
-        await plugin.configureServer?.call(this.getPluginContext(), server);
+        await plugin.configureServer?.call(ctx, server);
       }
     },
     async emit({ filterPlugin = () => true }: EmitOptions = {}): Promise<
       EmitEntry[]
     > {
+      const ctx = createPluginContext();
+
       return (
         await Promise.all(
           plugins.map((plugin) => {
             if (!filterPlugin(plugin) || !plugin.emit) return [];
 
-            return plugin.emit.call(this.getPluginContext());
+            return plugin.emit.call(ctx);
           }),
         )
       ).flat();
@@ -163,7 +198,57 @@ export function createCore(
       );
       console.log(`[MDX] generated files in ${performance.now() - start}ms`);
     },
+    async metadata(
+      collection: DocCollectionItem | MetaCollectionItem,
+      filePath: string,
+      source: string,
+      data: unknown,
+    ) {
+      if (collection.schema) {
+        data = await validate(
+          collection.schema,
+          data,
+          { path: filePath, source },
+          collection.type === 'doc'
+            ? `invalid frontmatter in ${filePath}`
+            : `invalid data in ${filePath}`,
+        );
+      }
+
+      const ctx = {
+        ...createPluginContext(),
+        filePath,
+        collection,
+      };
+
+      for (const plugin of plugins) {
+        data = (await plugin.metadata?.call(ctx, data)) ?? data;
+      }
+
+      return data;
+    },
+    doc: {
+      async vfile(
+        collection: DocCollectionItem,
+        filePath: string,
+        file: VFile,
+      ): Promise<VFile> {
+        const ctx = {
+          ...createPluginContext(),
+          filePath,
+          collection,
+        };
+
+        for (const plugin of plugins) {
+          file = (await plugin.doc?.vfile?.call(ctx, file)) ?? file;
+        }
+
+        return file;
+      },
+    },
   };
+
+  return core;
 }
 
 export type Core = ReturnType<typeof createCore>;

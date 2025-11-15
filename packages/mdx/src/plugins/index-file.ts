@@ -1,4 +1,4 @@
-import type { Plugin } from '@/core';
+import type { Core, Plugin } from '@/core';
 import type {
   LoadedConfig,
   CollectionItem,
@@ -13,8 +13,6 @@ import { createHash } from 'crypto';
 import type { LazyEntry } from '@/runtime/dynamic';
 import type { EmitEntry } from '@/core';
 import { fumaMatter } from '@/utils/fuma-matter';
-import { getGitTimestamp } from '@/utils/git-timestamp';
-import { validate } from '@/utils/validation';
 
 export interface IndexFilePluginOptions {
   target?: 'default' | 'vite';
@@ -120,7 +118,7 @@ export default function indexFile(
         out.push(
           toEmitEntry(
             'dynamic.ts',
-            generateDynamicIndexFile(makeCodeGen(), config, this.configPath),
+            generateDynamicIndexFile(this.core, makeCodeGen()),
           ),
         );
 
@@ -215,16 +213,13 @@ async function generateServerIndexFile(
   return codegen.toString();
 }
 
-async function generateDynamicIndexFile(
-  codegen: CodeGen,
-  config: LoadedConfig,
-  configPath: string,
-) {
+async function generateDynamicIndexFile(core: Core, codegen: CodeGen) {
+  const { configPath } = core._options;
   codegen.lines.push(
     `import { fromConfigDynamic } from 'fumadocs-mdx/runtime/dynamic';`,
     `import * as Config from '${codegen.formatImportPath(configPath)}';`,
     '',
-    `const create = fromConfigDynamic(Config);`,
+    `const create = await fromConfigDynamic(Config);`,
   );
 
   async function generateCollectionObjectEntry(
@@ -234,21 +229,12 @@ async function generateDynamicIndexFile(
     const fullPath = path.join(collection.dir, file);
     const content = await readFileWithCache(fullPath).catch(() => '');
     const parsed = fumaMatter(content);
-    let data = parsed.data;
-
-    if (collection.schema) {
-      data = await validate(
-        collection.schema,
-        parsed.data,
-        { path: fullPath, source: parsed.content },
-        `invalid frontmatter in ${fullPath}`,
-      );
-    }
-
-    let lastModified: Date | undefined;
-    if (config.global?.lastModifiedTime === 'git') {
-      lastModified = await getGitTimestamp(fullPath);
-    }
+    const data = await core.metadata(
+      collection,
+      fullPath,
+      content,
+      parsed.data,
+    );
 
     const hash = createHash('md5').update(content).digest('hex');
     const infoStr: string[] = [
@@ -261,9 +247,8 @@ async function generateDynamicIndexFile(
         path: file,
       },
       data,
-      lastModified,
       hash,
-    } satisfies LazyEntry<unknown>)) {
+    } satisfies LazyEntry)) {
       infoStr.push(`${k}: ${JSON.stringify(v)}`);
     }
 
@@ -302,7 +287,7 @@ async function generateDynamicIndexFile(
   }
 
   await codegen.pushAsync(
-    config.collectionList.map(async (collection) => {
+    core.getConfig().collectionList.map(async (collection) => {
       const obj = await generateCollectionObject(collection);
       if (!obj) return;
 

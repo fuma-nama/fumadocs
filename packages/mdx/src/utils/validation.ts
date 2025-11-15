@@ -1,6 +1,5 @@
 import type { CollectionSchema } from '@/config';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
-import picocolors from 'picocolors';
 
 export class ValidationError extends Error {
   title: string;
@@ -15,7 +14,9 @@ export class ValidationError extends Error {
     this.issues = issues;
   }
 
-  toStringFormatted() {
+  async toStringFormatted() {
+    const picocolors = await import('picocolors');
+
     return [
       picocolors.bold(`[MDX] ${this.title}:`),
       ...this.issues.map((issue) =>

@@ -4,6 +4,7 @@ import type { LoadedConfig } from '@/config/build';
 
 export interface ConfigLoader {
   getConfig: () => LoadedConfig | Promise<LoadedConfig>;
+  core: Core;
 }
 
 export function createStandaloneConfigLoader({
@@ -43,6 +44,7 @@ export function createStandaloneConfigLoader({
   }
 
   return {
+    core,
     async getConfig() {
       const hash = await getConfigHash();
       if (loaded && loaded.hash === hash) return loaded.config;
@@ -61,6 +63,7 @@ export function createStandaloneConfigLoader({
  */
 export function createIntegratedConfigLoader(core: Core): ConfigLoader {
   return {
+    core,
     getConfig() {
       return core.getConfig();
     },

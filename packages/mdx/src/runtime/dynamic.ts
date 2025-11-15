@@ -5,11 +5,12 @@ import { pathToFileURL } from 'node:url';
 import { fumaMatter } from '@/utils/fuma-matter';
 import fs from 'node:fs/promises';
 import { type FileInfo, fromConfig } from './server';
+import { type CoreOptions, createCore } from '@/core';
 
-export interface LazyEntry<Data> {
+export interface LazyEntry<Data = unknown> {
   info: FileInfo;
   data: Data;
-  lastModified?: Date;
+
   hash?: string;
 }
 
@@ -17,12 +18,18 @@ export type CreateDynamic<Config> = ReturnType<
   typeof fromConfigDynamic<Config>
 >;
 
-export function fromConfigDynamic<Config>(configExports: Config) {
-  const config = buildConfig(configExports as Record<string, unknown>);
+export async function fromConfigDynamic<Config>(
+  configExports: Config,
+  coreOptions: CoreOptions,
+) {
+  const core = await createCore(coreOptions).init({
+    config: buildConfig(configExports as Record<string, unknown>),
+  });
+
   const create = fromConfig<Config>();
 
   function getDocCollection(name: string): DocCollectionItem | undefined {
-    const collection = config.getCollection(name);
+    const collection = core.getConfig().getCollection(name);
     if (!collection) return;
 
     if (collection.type === 'docs') return collection.docs;
@@ -36,20 +43,15 @@ export function fromConfigDynamic<Config>(configExports: Config) {
     const head: Record<string, () => unknown> = {};
     const body: Record<string, () => Promise<unknown>> = {};
 
-    async function compile({ info, lastModified, data }: LazyEntry<unknown>) {
-      const mdxOptions = await config.getMDXOptions(collection, 'runtime');
+    async function compile({ info, data }: LazyEntry<unknown>) {
       const raw = (await fs.readFile(info.fullPath)).toString();
 
-      const { content } = fumaMatter(raw);
-      const compiled = await buildMDX(collection.name, content, {
-        ...mdxOptions,
-        development: false,
-        frontmatter: data as Record<string, unknown>,
-        postprocess: collection!.postprocess,
-        data: {
-          lastModified,
-        },
+      const compiled = await buildMDX(core, collection, {
         filePath: info.fullPath,
+        source: fumaMatter(raw).content,
+        frontmatter: data as Record<string, unknown>,
+        isDevelopment: false,
+        environment: 'runtime',
       });
 
       return (await executeMdx(String(compiled.value), {
