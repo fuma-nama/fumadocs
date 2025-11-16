@@ -1,5 +1,88 @@
 # next-docs-mdx
 
+## 14.0.0
+
+### Major Changes
+
+- 7b450d6: **Change `postInstall()` signature to `postInstall({ configPath, outDir, ... })`**
+
+  This allows more options for `postInstall` command.
+
+- a312d3a: **Replace `getDefaultMDXOptions()` with `applyMdxPreset()`**
+
+  This allows Fumadocs MDX to support more presets in the future, and adjust presets for dynamic mode.
+
+  ```ts
+  // source.config.ts
+  import { defineCollections, applyMdxPreset } from 'fumadocs-mdx/config';
+  import { myPlugin } from './remark-plugin';
+
+  export const blog = defineCollections({
+    type: 'doc',
+    mdxOptions: applyMdxPreset({
+      remarkPlugins: [myPlugin],
+      // You can also pass a function to control the order of remark plugins.
+      remarkPlugins: (v) => [myPlugin, ...v],
+    }),
+  });
+  ```
+
+- bc93578: **Replace `lastModifiedTime` option with `lastModified` plugin.**
+
+  If you've `lastModifiedTime` option enabled before, migrate to the plugin instead.
+
+  ```ts
+  // source.config.ts
+  import { defineConfig } from 'fumadocs-mdx/config';
+  import lastModified from 'fumadocs-mdx/plugins/last-modified';
+
+  export default defineConfig({
+    plugins: [lastModified()],
+  });
+  ```
+
+- 2f7e4d8: **Drop support for multiple `dir` in same collection**
+
+  Consider using `files` instead for filtering files.
+
+  ```ts
+  // source.config.ts
+  import { defineDocs } from 'fumadocs-mdx/config';
+
+  export const docs = defineDocs({
+    dir: 'content/guides',
+    docs: {
+      files: ['./i-love-fumadocs/**/*.{md,mdx}'],
+    },
+  });
+  ```
+
+- a312d3a: **No longer generate `extractedReferences` by default**
+
+  You can enable it from `postprocess` option.
+
+  ```ts
+  // source.config.ts
+  import { defineDocs } from 'fumadocs-mdx/config';
+
+  export const docs = defineDocs({
+    docs: {
+      postprocess: {
+        extractLinkReferences: true,
+      },
+    },
+  });
+  ```
+
+- b963021: **[Vite] rename `generateIndexFile` option to `index`**
+
+### Patch Changes
+
+- 97722c6: Fix meta file validation on Bun.
+- b963021: [Internal] Make `index-file` a plugin and optimize re-generations.
+- Updated dependencies [c5c00e9]
+  - fumadocs-core@16.0.12
+
 ## 13.0.8
 
 ### Patch Changes

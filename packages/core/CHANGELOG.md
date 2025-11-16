@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 16.0.12
+
+### Patch Changes
+
+- c5c00e9: Fix `usePathname()` adapter for Tanstack Start
+
 ## 16.0.11
 
 ### Patch Changes
