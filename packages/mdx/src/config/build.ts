@@ -136,11 +136,6 @@ export function buildConfig(config: Record<string, unknown>): LoadedConfig {
     );
   }
 
-  if (loaded.collections) {
-    for (const [k, v] of Object.entries(loaded.collections)) {
-      collections.set(k, buildCollection(k, v));
-    }
-  }
   const mdxOptionsCache = new Map<
     string,
     ProcessorOptions | Promise<ProcessorOptions>

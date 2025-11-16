@@ -10,7 +10,7 @@ You can enable it from `postprocess` option.
 // source.config.ts
 import { defineDocs } from 'fumadocs-mdx/config';
 
-export default defineDocs({
+export const docs = defineDocs({
   docs: {
     postprocess: {
       extractLinkReferences: true,

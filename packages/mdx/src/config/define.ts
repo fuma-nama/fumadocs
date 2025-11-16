@@ -69,7 +69,6 @@ export interface DocsCollection<
 }
 
 export interface GlobalConfig {
-  collections?: Record<string, AnyCollection>;
   plugins?: PluginOption[];
 
   /**

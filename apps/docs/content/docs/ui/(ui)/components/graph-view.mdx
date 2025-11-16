@@ -14,6 +14,21 @@ You can install this from CLI:
 
 <Installation name="graph-view" />
 
+Enable `extractLinkReferences` on Fumadocs MDX.
+
+```ts title="source.config.ts"
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: {
+    postprocess: {
+      // [!code ++]
+      extractLinkReferences: true,
+    },
+  },
+});
+```
+
 ## Usage
 
 You can use it in MDX files or the layout components (e.g. in `page.tsx`):

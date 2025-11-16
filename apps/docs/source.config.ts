@@ -23,6 +23,7 @@ export const docs = defineDocs({
     }),
     postprocess: {
       includeProcessedMarkdown: true,
+      extractLinkReferences: true,
     },
     async: true,
   },

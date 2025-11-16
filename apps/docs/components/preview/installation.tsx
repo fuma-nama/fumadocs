@@ -14,7 +14,7 @@ export function Installation({ name }: { name: string }) {
 
   return (
     <Tabs className="my-6">
-      <TabsList className="flex flex-col gap-3 text-sm items-start p-3 bg-fd-card text-fd-card-foreground rounded-xl border not-prose sm:flex-row">
+      <TabsList className="flex flex-col gap-3 text-sm items-start p-3 mb-2 bg-fd-card text-fd-card-foreground rounded-xl border not-prose sm:flex-row">
         <div className="me-auto">
           <p className="font-medium">Install to your codebase</p>
           <p className="mt-1 text-fd-muted-foreground">
