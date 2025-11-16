@@ -1,5 +1,5 @@
 ---
-'fumadocs-mdx': minor
+'fumadocs-mdx': patch
 ---
 
-Make `index-file` a plugin and optimize re-generations.
+[Internal] Make `index-file` a plugin and optimize re-generations.

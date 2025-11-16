@@ -9,6 +9,7 @@ import { remarkHeading } from 'fumadocs-core/mdx-plugins';
 import type { DataMap } from 'vfile';
 import type { Directives } from 'mdast-util-directive';
 import { remarkMarkAndUnravel } from '@/loaders/mdx/remark-unravel';
+import { flattenNode } from './mdast-utils';
 
 export interface Params {
   lang?: string;
@@ -47,15 +48,6 @@ function parseElementAttributes(
   }
 
   return element.attributes ?? {};
-}
-
-function flattenNode(node: RootContent): string {
-  if ('children' in node)
-    return node.children.map((child) => flattenNode(child)).join('');
-
-  if ('value' in node) return node.value;
-
-  return '';
 }
 
 function parseSpecifier(specifier: string): {

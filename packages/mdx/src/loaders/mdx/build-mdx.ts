@@ -73,6 +73,9 @@ export interface FumadocsDataMap {
    */
   _compiler?: CompilerOptions;
 
+  /**
+   * [Fumadocs MDX] get internal processor, do not use this on user land.
+   */
   _getProcessor?: (format: 'md' | 'mdx') => Processor;
 }
 

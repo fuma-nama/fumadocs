@@ -2,4 +2,4 @@
 'fumadocs-mdx': patch
 ---
 
-fix meta file validation on Bun
+Fix meta file validation on Bun.

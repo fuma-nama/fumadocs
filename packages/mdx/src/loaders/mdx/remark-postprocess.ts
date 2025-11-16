@@ -5,6 +5,7 @@ import { toMarkdown } from 'mdast-util-to-markdown';
 import { valueToEstree } from 'estree-util-value-to-estree';
 import { removePosition } from 'unist-util-remove-position';
 import remarkMdx from 'remark-mdx';
+import { flattenNode } from './mdast-utils';
 
 export interface ExtractedReference {
   href: string;
@@ -62,11 +63,11 @@ export function remarkPostprocess(
   };
 
   return (tree, file) => {
-    file.data.frontmatter ??= {};
-    if (!file.data.frontmatter.title) {
+    const frontmatter = (file.data.frontmatter ??= {});
+    if (!frontmatter.title) {
       visit(tree, 'heading', (node) => {
         if (node.depth === 1) {
-          file.data.frontmatter!.title = flattenNode(node);
+          frontmatter.title = flattenNode(node);
           return false;
         }
       });
@@ -168,13 +169,4 @@ function getMdastExport(name: string, value: unknown): RootContent {
       },
     },
   };
-}
-
-function flattenNode(node: RootContent): string {
-  if ('children' in node)
-    return node.children.map((child) => flattenNode(child)).join('');
-
-  if ('value' in node) return node.value;
-
-  return '';
 }
