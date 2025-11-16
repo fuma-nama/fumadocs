@@ -3,8 +3,8 @@ import { postInstall } from 'fumadocs-mdx/vite';
 
 Bun.plugin(createMdxPlugin());
 
-await postInstall(undefined, {
-  generateIndexFile: {
-    runtime: 'bun',
+await postInstall({
+  index: {
+    target: 'default',
   },
 });

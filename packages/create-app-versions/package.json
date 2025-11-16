@@ -1,10 +1,10 @@
 {
   "name": "create-fumadocs-versions",
-  "version": "16.0.14",
+  "version": "16.0.15",
   "private": true,
   "description": "Used to track dependency versions in create-fumadocs-app",
   "dependencies": {
-    "@biomejs/biome": "^2.3.3",
+    "@biomejs/biome": "^2.3.5",
     "@eslint/eslintrc": "^3.3.1",
     "@orama/core": "^1.2.13",
     "eslint": "^9.39.1",

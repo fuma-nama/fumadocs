@@ -5,19 +5,18 @@ import { getBreadcrumbItems } from 'fumadocs-core/breadcrumb';
 export const revalidate = false;
 
 export async function GET(): Promise<Response> {
-  const results: OramaDocument[] = [];
   const pages = source.getPages();
-  for (const page of pages) {
-    if (page.data.type === 'openapi') continue;
+  const promises = pages.map(async (page) => {
+    if (page.data.type === 'openapi') return;
 
     const items = getBreadcrumbItems(page.url, source.pageTree, {
       includePage: false,
       includeRoot: true,
     });
 
-    results.push({
+    return {
       id: page.url,
-      structured: page.data.structuredData,
+      structured: (await page.data.load()).structuredData,
       tag: page.slugs[0],
       url: page.url,
       title: page.data.title,
@@ -25,8 +24,12 @@ export async function GET(): Promise<Response> {
       breadcrumbs: items.flatMap<string>((item, i) =>
         i > 0 && typeof item.name === 'string' ? item.name : [],
       ),
-    });
-  }
+    } as OramaDocument;
+  });
 
-  return Response.json(results);
+  return Response.json(
+    (await Promise.all(promises)).filter(
+      (v) => v !== undefined,
+    ) as OramaDocument[],
+  );
 }

@@ -19,7 +19,7 @@ You can use it with built-in content sources like Fumadocs MDX.
 
 ```ts
 import { loader } from 'fumadocs-core/source';
-import { docs } from '@/.source';
+import { docs } from 'fumadocs-mdx:collections/server';
 
 export const source = loader({
   source: docs.toFumadocsSource(),

@@ -6,13 +6,28 @@ description: A graph of all pages.
 import { GraphView } from '@/components/preview/lazy';
 import { buildGraph } from '@/lib/build-graph';
 
-<GraphView graph={buildGraph()} />
+<GraphView graph={await buildGraph()} />
 
 ## Installation
 
 You can install this from CLI:
 
 <Installation name="graph-view" />
+
+Enable `extractLinkReferences` on Fumadocs MDX.
+
+```ts title="source.config.ts"
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: {
+    postprocess: {
+      // [!code ++]
+      extractLinkReferences: true,
+    },
+  },
+});
+```
 
 ## Usage
 

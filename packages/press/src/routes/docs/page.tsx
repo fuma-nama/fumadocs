@@ -11,7 +11,7 @@ import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { type ReactNode } from 'react';
 import { HomeLayout } from 'fumadocs-ui/layouts/home';
 
-export default function ServerComponent({
+export default async function ServerComponent({
   params,
 }: {
   params: Partial<Record<string, string>>;
@@ -20,7 +20,7 @@ export default function ServerComponent({
   const page = source.getPage(slugs);
   if (!page) throw new Response('Not found', { status: 404 });
 
-  const { body: MDX } = page.data;
+  const { body: MDX } = await page.data.load();
 
   return (
     <Layout page={page}>
@@ -35,13 +35,15 @@ export default function ServerComponent({
   );
 }
 
-function Layout({ page, children }: { page: Page; children: ReactNode }) {
+async function Layout({ page, children }: { page: Page; children: ReactNode }) {
   const layout = page.data.layout;
 
   if (layout === 'docs') {
+    const { toc } = await page.data.load();
+
     return (
       <DocsLayout {...baseOptions()} tree={source.pageTree}>
-        <DocsPage toc={page.data.toc}>{children}</DocsPage>
+        <DocsPage toc={toc}>{children}</DocsPage>
       </DocsLayout>
     );
   }

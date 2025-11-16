@@ -1,7 +1,14 @@
-import type { LoadedConfig } from '@/config/build';
+import type {
+  DocCollectionItem,
+  LoadedConfig,
+  MetaCollectionItem,
+} from '@/config/build';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import type { FSWatcher } from 'chokidar';
+import { removeFileCache } from './utils/codegen/cache';
+import { validate } from './utils/validation';
+import type { VFile } from 'vfile';
 
 type Awaitable<T> = T | Promise<T>;
 
@@ -15,6 +22,15 @@ export interface EmitEntry {
 
 export interface PluginContext extends CoreOptions {
   core: Core;
+}
+
+export type CompilationContext<Collection> = PluginContext &
+  TransformOptions<Collection>;
+
+export interface TransformOptions<Collection> {
+  collection: Collection;
+  filePath: string;
+  source: string;
 }
 
 export interface Plugin {
@@ -40,9 +56,37 @@ export interface Plugin {
     this: PluginContext,
     server: ServerContext,
   ) => Awaitable<void>;
+
+  meta?: {
+    /**
+     * Transform metadata
+     */
+    transform?: (
+      this: CompilationContext<MetaCollectionItem>,
+      data: unknown,
+    ) => Awaitable<unknown | void>;
+  };
+
+  doc?: {
+    /**
+     * Transform frontmatter
+     */
+    frontmatter?: (
+      this: CompilationContext<DocCollectionItem>,
+      data: Record<string, unknown>,
+    ) => Awaitable<Record<string, unknown> | void>;
+
+    /**
+     * Transform `vfile` on compilation stage
+     */
+    vfile?: (
+      this: CompilationContext<DocCollectionItem>,
+      file: VFile,
+    ) => Awaitable<VFile | void>;
+  };
 }
 
-export type PluginOption = Awaitable<Plugin | Plugin[] | false>;
+export type PluginOption = Awaitable<Plugin | PluginOption[] | false>;
 
 export interface ServerContext {
   /**
@@ -66,8 +110,21 @@ export interface EmitOptions {
   filterPlugin?: (plugin: Plugin) => boolean;
 }
 
-export function findConfigFile(): string {
-  return path.resolve('source.config.ts');
+export const _Defaults = {
+  configPath: 'source.config.ts',
+  outDir: '.source',
+};
+
+async function getPlugins(pluginOptions: PluginOption[]): Promise<Plugin[]> {
+  const plugins: Plugin[] = [];
+
+  for await (const option of pluginOptions) {
+    if (!option) continue;
+    if (Array.isArray(option)) plugins.push(...(await getPlugins(option)));
+    else plugins.push(option);
+  }
+
+  return plugins;
 }
 
 export function createCore(
@@ -77,14 +134,30 @@ export function createCore(
   let config: LoadedConfig;
   let plugins: Plugin[];
 
-  return {
+  async function transformMetadata<T>(
+    {
+      collection,
+      filePath,
+      source,
+    }: TransformOptions<DocCollectionItem | MetaCollectionItem>,
+    data: unknown,
+  ): Promise<T> {
+    if (collection.schema) {
+      data = await validate(
+        collection.schema,
+        data,
+        { path: filePath, source },
+        collection.type === 'doc'
+          ? `invalid frontmatter in ${filePath}`
+          : `invalid data in ${filePath}`,
+      );
+    }
+
+    return data as T;
+  }
+
+  const core = {
     _options: options,
-    getPluginContext(): PluginContext {
-      return {
-        core: this,
-        ...options,
-      };
-    },
     /**
      * Convenient cache store, reset when config changes
      */
@@ -92,47 +165,55 @@ export function createCore(
     async init({ config: newConfig }: { config: Awaitable<LoadedConfig> }) {
       config = await newConfig;
       this.cache.clear();
-      plugins = [];
-
-      for await (const option of [
+      plugins = await getPlugins([
         ...defaultPlugins,
         ...(config.global.plugins ?? []),
-      ]) {
-        if (!option) continue;
-        if (Array.isArray(option)) plugins.push(...option);
-        else plugins.push(option);
-      }
+      ]);
 
       for (const plugin of plugins) {
-        const out = await plugin.config?.call(this.getPluginContext(), config);
+        const out = await plugin.config?.call(pluginContext, config);
         if (out) config = out;
       }
 
       return this;
     },
-    getConfig() {
+    getConfig(): LoadedConfig {
       return config;
     },
-    async initServer(server: ServerContext) {
+    /**
+     * The file path of compiled config file, the file may not exist (e.g. on Vite, or still compiling)
+     */
+    getCompiledConfigPath(): string {
+      return path.join(options.outDir, 'source.config.mjs');
+    },
+    async initServer(server: ServerContext): Promise<void> {
+      server.watcher?.on('all', async (event, file) => {
+        if (event === 'change') removeFileCache(file);
+      });
+
       for (const plugin of plugins) {
-        await plugin.configureServer?.call(this.getPluginContext(), server);
+        await plugin.configureServer?.call(pluginContext, server);
       }
     },
-    async emitAndWrite({
-      filterPlugin = () => true,
-    }: EmitOptions = {}): Promise<void> {
+    async emit({ filterPlugin = () => true }: EmitOptions = {}): Promise<
+      EmitEntry[]
+    > {
+      return (
+        await Promise.all(
+          plugins.map((plugin) => {
+            if (!filterPlugin(plugin) || !plugin.emit) return [];
+
+            return plugin.emit.call(pluginContext);
+          }),
+        )
+      ).flat();
+    },
+    async emitAndWrite(emitOptions?: EmitOptions): Promise<void> {
       const start = performance.now();
-
-      const out = await Promise.all(
-        plugins.map((plugin) => {
-          if (!filterPlugin(plugin) || !plugin.emit) return [];
-
-          return plugin.emit.call(this.getPluginContext());
-        }),
-      );
+      const out = await this.emit(emitOptions);
 
       await Promise.all(
-        out.flat().map(async (entry) => {
+        out.map(async (entry) => {
           const file = path.join(options.outDir, entry.path);
 
           await fs.mkdir(path.dirname(file), { recursive: true });
@@ -141,7 +222,66 @@ export function createCore(
       );
       console.log(`[MDX] generated files in ${performance.now() - start}ms`);
     },
+
+    async transformMeta(
+      options: TransformOptions<MetaCollectionItem>,
+      data: unknown,
+    ): Promise<unknown> {
+      const ctx = {
+        ...pluginContext,
+        ...options,
+      };
+
+      data = await transformMetadata(options, data);
+      for (const plugin of plugins) {
+        if (plugin.meta?.transform)
+          data = (await plugin.meta.transform.call(ctx, data)) ?? data;
+      }
+
+      return data;
+    },
+    async transformFrontmatter(
+      options: TransformOptions<DocCollectionItem>,
+      data: Record<string, unknown>,
+    ): Promise<Record<string, unknown>> {
+      const ctx = {
+        ...pluginContext,
+        ...options,
+      };
+
+      data = await transformMetadata(options, data);
+      for (const plugin of plugins) {
+        if (plugin.doc?.frontmatter)
+          data = (await plugin.doc.frontmatter.call(ctx, data)) ?? data;
+      }
+
+      return data;
+    },
+    async transformVFile(
+      options: TransformOptions<DocCollectionItem>,
+      file: VFile,
+    ): Promise<VFile> {
+      const ctx = {
+        ...pluginContext,
+        ...options,
+      };
+
+      for (const plugin of plugins) {
+        if (plugin.doc?.vfile)
+          file = (await plugin.doc.vfile.call(ctx, file)) ?? file;
+      }
+
+      return file;
+    },
   };
+
+  // core & core options should be immutable, we can share it across all instances
+  const pluginContext: PluginContext = {
+    core,
+    ...options,
+  };
+
+  return core;
 }
 
 export type Core = ReturnType<typeof createCore>;

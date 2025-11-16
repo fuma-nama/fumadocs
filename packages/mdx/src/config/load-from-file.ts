@@ -1,15 +1,15 @@
-import * as path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type { LoadedConfig } from '@/config/build';
 import { buildConfig } from '@/config/build';
+import type { Core } from '@/core';
 
-async function compileConfig(configPath: string, outDir: string) {
+async function compileConfig(core: Core) {
   const { build } = await import('esbuild');
 
   const transformed = await build({
-    entryPoints: [{ in: configPath, out: 'source.config' }],
+    entryPoints: [{ in: core._options.configPath, out: 'source.config' }],
     bundle: true,
-    outdir: outDir,
+    outdir: core._options.outDir,
     target: 'node20',
     write: true,
     platform: 'node',
@@ -29,18 +29,15 @@ async function compileConfig(configPath: string, outDir: string) {
 /**
  * Load config
  *
- * @param configPath - config path
- * @param outDir - output directory
- * @param build - By default, it assumes the TypeScript config has been compiled to `.source/source.config.mjs`. Set this `true` to compile the config first.
+ * @param build - By default, it assumes the config file has been compiled. Set this `true` to compile the config first.
  */
 export async function loadConfig(
-  configPath: string,
-  outDir: string,
+  core: Core,
   build = false,
 ): Promise<LoadedConfig> {
-  if (build) await compileConfig(configPath, outDir);
+  if (build) await compileConfig(core);
 
-  const url = pathToFileURL(path.resolve(outDir, 'source.config.mjs'));
+  const url = pathToFileURL(core.getCompiledConfigPath());
   // always return a new config
   url.searchParams.set('hash', Date.now().toString());
 

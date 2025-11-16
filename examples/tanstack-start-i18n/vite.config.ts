@@ -4,6 +4,7 @@ import { defineConfig } from 'vite';
 import tsConfigPaths from 'vite-tsconfig-paths';
 import tailwindcss from '@tailwindcss/vite';
 import mdx from 'fumadocs-mdx/vite';
+import { i18n } from './src/lib/i18n';
 
 export default defineConfig({
   server: {
@@ -19,6 +20,15 @@ export default defineConfig({
       prerender: {
         enabled: true,
       },
+      pages: [
+        ...i18n.languages.map((lang) => ({
+          path: `/${lang}`,
+        })),
+        {
+          path: '/',
+          prerender: { enabled: false },
+        },
+      ],
     }),
     react(),
   ],

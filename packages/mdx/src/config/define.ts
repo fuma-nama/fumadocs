@@ -1,9 +1,10 @@
 import type { StandardSchemaV1 } from '@standard-schema/spec';
-import type { DefaultMDXOptions } from '@/loaders/mdx/preset';
+import type { MDXPresetOptions } from '@/config/preset';
 import type { ProcessorOptions } from '@mdx-js/mdx';
 import { frontmatterSchema, metaSchema } from '@/config/zod-4';
 import type { PostprocessOptions } from '@/loaders/mdx/remark-postprocess';
 import type { PluginOption } from '@/core';
+import type { BuildEnvironment } from './build';
 
 export type CollectionSchema<Schema extends StandardSchemaV1, Context> =
   | Schema
@@ -13,9 +14,9 @@ export type AnyCollection = DocsCollection | DocCollection | MetaCollection;
 
 export interface BaseCollection {
   /**
-   * Directories to scan
+   * Directory to scan
    */
-  dir: string | string[];
+  dir: string;
 
   /**
    * what files to include/exclude (glob patterns)
@@ -35,17 +36,23 @@ export interface MetaCollection<
 
 export interface DocCollection<
   Schema extends StandardSchemaV1 = StandardSchemaV1,
-  Async extends boolean = boolean,
 > extends BaseCollection {
   type: 'doc';
 
   postprocess?: Partial<PostprocessOptions>;
-  mdxOptions?: ProcessorOptions;
+  mdxOptions?:
+    | ProcessorOptions
+    | ((environment: BuildEnvironment) => Promise<ProcessorOptions>);
 
   /**
    * Load files with async
    */
-  async?: Async;
+  async?: boolean;
+
+  /**
+   * Compile files on-demand
+   */
+  dynamic?: boolean;
 
   schema?: CollectionSchema<Schema, { path: string; source: string }>;
 }
@@ -53,37 +60,23 @@ export interface DocCollection<
 export interface DocsCollection<
   DocSchema extends StandardSchemaV1 = StandardSchemaV1,
   MetaSchema extends StandardSchemaV1 = StandardSchemaV1,
-  Async extends boolean = boolean,
 > {
   type: 'docs';
   dir: string;
 
-  docs: DocCollection<DocSchema, Async>;
+  docs: DocCollection<DocSchema>;
   meta: MetaCollection<MetaSchema>;
 }
 
-type GlobalConfigMDXOptions =
-  | ({ preset?: 'fumadocs' } & DefaultMDXOptions)
-  | ({
-      preset: 'minimal';
-    } & ProcessorOptions);
-
 export interface GlobalConfig {
-  collections?: Record<string, AnyCollection>;
   plugins?: PluginOption[];
 
   /**
    * Configure global MDX options
    *
-   * @remarks `GlobalConfigMDXOptions`
+   * @remarks `MDXPresetOptions`
    */
-  mdxOptions?: GlobalConfigMDXOptions | (() => Promise<GlobalConfigMDXOptions>);
-
-  /**
-   * Fetch last modified time with specified version control
-   * @defaultValue 'none'
-   */
-  lastModifiedTime?: 'git' | 'none';
+  mdxOptions?: MDXPresetOptions | (() => Promise<MDXPresetOptions>);
 
   /**
    * specify a directory to access & store cache (disabled during development mode).
@@ -95,8 +88,7 @@ export interface GlobalConfig {
 
 export function defineCollections<
   Schema extends StandardSchemaV1 = StandardSchemaV1,
-  Async extends boolean = false,
->(options: DocCollection<Schema, Async>): DocCollection<Schema, Async>;
+>(options: DocCollection<Schema>): DocCollection<Schema>;
 export function defineCollections<
   Schema extends StandardSchemaV1 = StandardSchemaV1,
 >(options: MetaCollection<Schema>): MetaCollection<Schema>;
@@ -110,7 +102,6 @@ export function defineCollections(
 export function defineDocs<
   DocSchema extends StandardSchemaV1 = typeof frontmatterSchema,
   MetaSchema extends StandardSchemaV1 = typeof metaSchema,
-  Async extends boolean = false,
 >(options: {
   /**
    * The content directory to scan files
@@ -119,9 +110,9 @@ export function defineDocs<
    */
   dir?: string;
 
-  docs?: Omit<DocCollection<DocSchema, Async>, 'dir' | 'type'>;
+  docs?: Omit<DocCollection<DocSchema>, 'dir' | 'type'>;
   meta?: Omit<MetaCollection<MetaSchema>, 'dir' | 'type'>;
-}): DocsCollection<DocSchema, MetaSchema, Async> {
+}): DocsCollection<DocSchema, MetaSchema> {
   const dir = options.dir ?? 'content/docs';
 
   return {

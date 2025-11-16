@@ -7,13 +7,19 @@ import type {
   MetaCollection,
 } from '@/config/define';
 import picomatch from 'picomatch';
+import { applyMdxPreset } from '@/config/preset';
+
+export type BuildEnvironment = 'bundler' | 'runtime';
 
 export interface LoadedConfig {
   collectionList: CollectionItem[];
   getCollection(name: string): CollectionItem | undefined;
 
   global: GlobalConfig;
-  getDefaultMDXOptions(mode?: 'default' | 'remote'): Promise<ProcessorOptions>;
+  getMDXOptions(
+    collection?: DocCollectionItem,
+    environment?: BuildEnvironment,
+  ): ProcessorOptions | Promise<ProcessorOptions>;
 }
 
 export type CollectionItem =
@@ -38,6 +44,7 @@ export interface DocsCollectionItem extends DocsCollection {
   name: string;
   meta: MetaCollectionItem;
   docs: DocCollectionItem;
+  hasFile: (filePath: string) => boolean;
 }
 
 const SupportedFormats = {
@@ -55,7 +62,10 @@ export function buildCollection(
       name,
       meta: buildPrimitiveCollection(name, config.meta),
       docs: buildPrimitiveCollection(name, config.docs),
-    };
+      hasFile(filePath) {
+        return this.docs.hasFile(filePath) || this.meta.hasFile(filePath);
+      },
+    } as DocsCollectionItem;
   }
 
   return buildPrimitiveCollection(name, config) as CollectionItem;
@@ -126,37 +136,39 @@ export function buildConfig(config: Record<string, unknown>): LoadedConfig {
     );
   }
 
-  if (loaded.collections) {
-    for (const [k, v] of Object.entries(loaded.collections)) {
-      collections.set(k, buildCollection(k, v));
-    }
-  }
-
-  const mdxOptionsCache = new Map<string, Promise<ProcessorOptions>>();
+  const mdxOptionsCache = new Map<
+    string,
+    ProcessorOptions | Promise<ProcessorOptions>
+  >();
   return {
     global: loaded,
     collectionList: Array.from(collections.values()),
     getCollection(name: string) {
       return collections.get(name);
     },
-    async getDefaultMDXOptions(mode = 'default'): Promise<ProcessorOptions> {
-      const cached = mdxOptionsCache.get(mode);
+    getMDXOptions(collection, environment = 'bundler') {
+      const key = collection
+        ? `${environment}:${collection.name}`
+        : environment;
+      const cached = mdxOptionsCache.get(key);
       if (cached) return cached;
+      let result: ProcessorOptions | Promise<ProcessorOptions>;
 
-      const input = this.global.mdxOptions;
-      async function uncached(): Promise<ProcessorOptions> {
-        const options = typeof input === 'function' ? await input() : input;
-        const { getDefaultMDXOptions } = await import('@/loaders/mdx/preset');
+      if (collection?.mdxOptions) {
+        const optionsFn = collection.mdxOptions;
+        result =
+          typeof optionsFn === 'function' ? optionsFn(environment) : optionsFn;
+      } else {
+        result = (async () => {
+          const optionsFn = this.global.mdxOptions;
+          const options =
+            typeof optionsFn === 'function' ? await optionsFn() : optionsFn;
 
-        if (options?.preset === 'minimal') return options;
-        return getDefaultMDXOptions({
-          ...options,
-          _withoutBundler: mode === 'remote',
-        });
+          return applyMdxPreset(options)(environment);
+        })();
       }
 
-      const result = uncached();
-      mdxOptionsCache.set(mode, result);
+      mdxOptionsCache.set(key, result);
       return result;
     },
   };

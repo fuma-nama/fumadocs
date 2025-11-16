@@ -48,7 +48,7 @@ export interface Loader {
      * 1. Bun doesn't allow `null` in loaders.
      * 2. Bun requires sync result to support dynamic require().
      */
-    loadSync?: (source: string, input: LoaderInput) => Bun.OnLoadResult;
+    load?: (source: string, input: LoaderInput) => Awaitable<Bun.OnLoadResult>;
   };
 }
 
@@ -153,7 +153,7 @@ export function toWebpack(loader: Loader): WebpackLoader {
       }
     } catch (error) {
       if (error instanceof ValidationError) {
-        return callback(new Error(error.toStringFormatted()));
+        return callback(new Error(await error.toStringFormatted()));
       }
 
       if (!(error instanceof Error)) throw error;
@@ -192,8 +192,8 @@ export function toBun(loader: Loader) {
         },
       };
 
-      if (loader.bun?.loadSync) {
-        return loader.bun.loadSync(readFileSync(filePath).toString(), input);
+      if (loader.bun?.load) {
+        return loader.bun.load(readFileSync(filePath).toString(), input);
       }
 
       const result = loader.load(input);

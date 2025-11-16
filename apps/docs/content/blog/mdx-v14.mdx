@@ -1,0 +1,200 @@
+---
+title: Fumadocs MDX 14
+description: Performance Improvements & API redesign.
+author: Fuma Nama
+date: 2025-11-16
+---
+
+We are pleased to announce Fumadocs MDX 14. This update introduces several major enhancements designed to:
+
+- Improve flexibility, taking the plugin approach further.
+- Improve performance & memory consumption.
+- Improve browser/dynamic compilation suport.
+
+## Major Changes
+
+### Entry Files
+
+Fumadocs MDX now generates multiple entry files in `.source` folder.
+
+You can add/update the path aliases in `tsconfig.json` for new entry files.
+
+```json title="tsconfig.json"
+{
+  "compilerOptions": {
+    "paths": {
+      // [!code ++]
+      "fumadocs-mdx:collections/*": [".source/*"]
+    }
+  }
+}
+```
+
+Import your collections from the entry files instead of `@/.source`:
+
+```ts
+// ordinary collections
+import { docs } from 'fumadocs-mdx:collections/server';
+// collections in dynamic mode
+import { docs } from 'fumadocs-mdx:collections/dynamic';
+// non-RSC environment
+import browserCollections from 'fumadocs-mdx:collections/browser';
+```
+
+### Async & Dynamic Mode
+
+On Next.js, **Async Mode** now aligns with the behaviour on Vite to generate async imports. This enables server-side chunking to improve memory usage.
+
+```ts title="source.config.ts"
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  dir: 'content/docs',
+  docs: {
+    // This no longer forces dynamic compilation! [!code ++]
+    async: true,
+  },
+});
+```
+
+Instead, we introduced a `dynamic` option to enable dynamic compilation. This is available for both Vite and Next.js.
+
+```ts title="source.config.ts"
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  dir: 'content/docs',
+  docs: {
+    // [!code ++]
+    dynamic: true,
+  },
+});
+```
+
+By enabling Async or Dynamic modes, the relevant collections are considered lazy-loaded, offering a `load()` function to load compiled properties.
+
+### Updated Signature for `postInstall()`
+
+It now accepts the framework plugin options, you can customise more properties:
+
+```ts tab="Before"
+import { postInstall } from 'fumadocs-mdx/next';
+// or
+import { postInstall } from 'fumadocs-mdx/vite';
+
+postInstall('source.config.ts');
+```
+
+```ts tab="After"
+import { postInstall } from 'fumadocs-mdx/next';
+// or
+import { postInstall } from 'fumadocs-mdx/vite';
+
+postInstall({ configPath: 'source.config.ts' });
+```
+
+### `getDefaultMDXOptions()` -> `applyMdxPreset()`
+
+To support a broader range of presets and accommodate dynamic modes, `getDefaultMDXOptions()` has been renamed to `applyMdxPreset()`.
+
+```ts title="source.config.ts" tab="Before"
+import { defineCollections, getDefaultMDXOptions } from 'fumadocs-mdx/config';
+import { myPlugin } from './remark-plugin';
+
+export const blog = defineCollections({
+  type: 'doc',
+  mdxOptions: getDefaultMDXOptions({
+    remarkPlugins: [myPlugin],
+    // Alternatively, use a function to customize plugin order:
+    remarkPlugins: (v) => [myPlugin, ...v],
+  }),
+});
+```
+
+```ts title="source.config.ts" tab="After"
+import { defineCollections, applyMdxPreset } from 'fumadocs-mdx/config';
+import { myPlugin } from './remark-plugin';
+
+export const blog = defineCollections({
+  type: 'doc',
+  mdxOptions: applyMdxPreset({
+    remarkPlugins: [myPlugin],
+    // Alternatively, use a function to customize plugin order:
+    remarkPlugins: (v) => [myPlugin, ...v],
+  }),
+});
+```
+
+### Introduction of `lastModified` Plugin
+
+The `lastModifiedTime` option has been replaced by a dedicated `lastModified` plugin. This shift promotes a plugin-based architecture for better extensibility.
+
+```ts title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+import lastModified from 'fumadocs-mdx/plugins/last-modified';
+
+export default defineConfig({
+  // [!code ++]
+  plugins: [lastModified()],
+});
+```
+
+### Removal of Multiple `dir` Support
+
+Support for specifying multiple directories in a single collection has been discontinued. Instead, utilize the `files` property to filter and include specific files.
+
+```ts title="source.config.ts"
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  dir: 'content/guides',
+  docs: {
+    files: ['./i-love-fumadocs/**/*.{md,mdx}'],
+  },
+});
+```
+
+### Disabling Default Generation of `extractedReferences`
+
+The automatic generation of `extractedReferences` is no longer enabled by default. To retain this functionality, explicitly activate it via the `postprocess` option.
+
+```ts title="source.config.ts"
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  dir: 'content/docs',
+  docs: {
+    postprocess: {
+      // [!code ++]
+      extractLinkReferences: true,
+    },
+  },
+});
+```
+
+### Vite: `generateIndexFile` -> `index`
+
+The `generateIndexFile` option of our Vite plugin has been renamed to `index`.
+
+```ts title="vite.config.ts"
+import { defineConfig } from 'vite';
+import mdx from 'fumadocs-mdx/vite';
+import * as MdxConfig from './source.config';
+
+export default defineConfig({
+  plugins: [
+    mdx(MdxConfig, {
+      index: {
+        // options
+      },
+    }),
+  ],
+});
+```
+
+## Patch Changes
+
+- Resolved an issue with meta file validation when using Bun.
+- Introduced optimizations to reduce unnecessary entry files re-generations.
+
+Thank you for your continued support of Fumadocs. If you encounter any issues during the update, welcome to reach out through our GitHub Discussions.

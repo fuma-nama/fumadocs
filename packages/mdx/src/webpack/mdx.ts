@@ -1,9 +1,8 @@
 import { type LoaderContext } from 'webpack';
 import { createMdxLoader } from '@/loaders/mdx';
 import { toWebpack, type WebpackLoader } from '@/loaders/adapter';
-import { createCore } from '@/core';
 import { createStandaloneConfigLoader } from '@/loaders/config';
-import type { WebpackLoaderOptions } from '@/webpack';
+import { getCore, type WebpackLoaderOptions } from '@/webpack';
 
 let instance: WebpackLoader | undefined;
 
@@ -12,23 +11,17 @@ export default async function loader(
   source: string,
   callback: LoaderContext<WebpackLoaderOptions>['callback'],
 ): Promise<void> {
-  const { isDev, outDir, configPath } = this.getOptions();
+  const options = this.getOptions();
   this.cacheable(true);
-  this.addDependency(configPath);
+  this.addDependency(options.compiledConfigPath);
 
   if (!instance) {
-    const core = createCore({
-      environment: 'webpack',
-      outDir,
-      configPath,
-    });
-
     instance = toWebpack(
       createMdxLoader(
         createStandaloneConfigLoader({
-          core,
+          core: getCore(options),
           buildConfig: false,
-          mode: isDev ? 'dev' : 'production',
+          mode: options.isDev ? 'dev' : 'production',
         }),
       ),
     );

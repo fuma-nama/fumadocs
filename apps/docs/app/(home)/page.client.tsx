@@ -16,13 +16,23 @@ import MainImg from './main.png';
 import OpenAPIImg from './openapi.png';
 import NotebookImg from './notebook.png';
 import { cva } from 'class-variance-authority';
-import {
-  MeshGradient,
-  Dithering,
-  GrainGradient,
-} from '@paper-design/shaders-react';
 import HeroImage from './hero-preview.jpeg';
 import { useTheme } from 'next-themes';
+import dynamic from 'next/dynamic';
+
+const GrainGradient = dynamic(
+  () => import('@paper-design/shaders-react').then((mod) => mod.GrainGradient),
+  {
+    ssr: false,
+  },
+);
+
+const Dithering = dynamic(
+  () => import('@paper-design/shaders-react').then((mod) => mod.Dithering),
+  {
+    ssr: false,
+  },
+);
 
 export function Hero() {
   const { resolvedTheme } = useTheme();
@@ -313,7 +323,7 @@ export function Writing({
   );
 }
 
-export function AgnosticImage(props: ComponentProps<typeof MeshGradient>) {
+export function AgnosticImage(props: ComponentProps<typeof Dithering>) {
   const { resolvedTheme } = useTheme();
   return (
     <Dithering
@@ -322,6 +332,25 @@ export function AgnosticImage(props: ComponentProps<typeof MeshGradient>) {
       shape="warp"
       type="4x4"
       speed={0.4}
+      {...props}
+    />
+  );
+}
+
+export function ContentAdoptionBackground(
+  props: ComponentProps<typeof GrainGradient>,
+) {
+  const { resolvedTheme } = useTheme();
+
+  return (
+    <GrainGradient
+      colors={
+        resolvedTheme === 'dark'
+          ? ['#39BE1C', '#9c2f05', '#7A2A0000']
+          : ['#DF3F00', '#fcfc51', '#ffa057', '#7A2A0020']
+      }
+      colorBack="#1D1004"
+      shape="sphere"
       {...props}
     />
   );

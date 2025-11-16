@@ -30,3 +30,4 @@ packages/mdx-remote/test/fixtures/**/*.js
 packages/mdx-remote/test/fixtures/**/*.json
 packages/core/test/fixtures/page-trees/**/*.json
 build/
+routeTree.gen.ts

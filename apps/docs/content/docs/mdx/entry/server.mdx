@@ -1,0 +1,62 @@
+---
+title: Server Entry
+description: Accessing collection outputs from server.
+---
+
+## Usage
+
+While you can access the collections directly from entry file, we suggest using it with [`loader()`](/docs/headless/source-api#output).
+
+```ts tab="Docs (Meta + Doc)"
+import { docs } from 'fumadocs-mdx:collections/server';
+import { loader } from 'fumadocs-core/source';
+
+// raw collection
+console.log(docs);
+
+export const source = loader({
+  baseUrl: '/docs',
+  source: docs.toFumadocsSource(),
+});
+```
+
+```ts tab="Doc"
+import { blogPosts } from 'fumadocs-mdx:collections/server';
+import { toFumadocsSource } from 'fumadocs-mdx/runtime/server';
+import { loader } from 'fumadocs-core/source';
+
+// raw collection
+console.log(blogPosts);
+
+export const blog = loader({
+  baseUrl: '/blog',
+  source: toFumadocsSource(blogPosts, []),
+});
+```
+
+## Examples
+
+```tsx
+import { source } from '@/lib/source';
+
+const page = source.getPage(['slugs']);
+
+if (page) {
+  // access page data [!code highlight]
+  console.log(page.data);
+
+  // frontmatter properties are also available [!code highlight]
+  console.log(page.data.title);
+}
+```
+
+To render the page (on RSC), use `page.data.body` as a component.
+
+```tsx
+import { getMDXComponents } from '@/mdx-components';
+
+const MDX = page.data.body;
+
+// set your MDX components with `components` prop
+return <MDX components={getMDXComponents()} />;
+```

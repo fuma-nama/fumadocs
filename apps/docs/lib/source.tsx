@@ -1,4 +1,3 @@
-import { createMDXSource } from 'fumadocs-mdx/runtime/next';
 import {
   type InferMetaType,
   type InferPageType,
@@ -7,7 +6,8 @@ import {
   multiple,
 } from 'fumadocs-core/source';
 import { openapiPlugin, openapiSource } from 'fumadocs-openapi/server';
-import { blog as blogPosts, docs } from '@/.source';
+import { blog as blogPosts, docs } from 'fumadocs-mdx:collections/server';
+import { toFumadocsSource } from 'fumadocs-mdx/runtime/server';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 import { openapi } from '@/lib/openapi';
 
@@ -43,7 +43,7 @@ function pageTreeCodeTitles(): LoaderPlugin {
   };
 }
 
-export const blog = loader(createMDXSource(blogPosts), {
+export const blog = loader(toFumadocsSource(blogPosts, []), {
   baseUrl: '/blog',
 });
 

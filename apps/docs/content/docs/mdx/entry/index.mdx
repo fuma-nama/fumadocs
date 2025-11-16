@@ -1,0 +1,27 @@
+---
+title: Accessing Collections
+description: Access collection outputs from entry files.
+icon: FileUp
+---
+
+## Overview
+
+Afte defining collections in your config file, collection entries are compiled into JavaScript files that your app can access.
+
+While the compilation will be done by Fumadocs MDX's bundler/runtime plugins, it also generates **entry files** to access the collection outputs.
+
+### Entry Files
+
+Collection outputs will be generated under the output directory, you can access them from entry files.
+
+<Files>
+  <Folder name=".source" defaultOpen>
+    <File name="server.ts" />
+    <File name="browser.ts" />
+    <File name="dynamic.ts" />
+  </Folder>
+</Files>
+
+See below for a list of available ways to access outputs.
+
+<DocsCategory />

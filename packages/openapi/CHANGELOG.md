@@ -1,5 +1,19 @@
 # @fuma-docs/openapi
 
+## 10.0.7
+
+### Patch Changes
+
+- Updated dependencies [c5c00e9]
+  - fumadocs-core@16.0.12
+  - fumadocs-ui@16.0.12
+
+## 10.0.6
+
+### Patch Changes
+
+- e792e43: hotfix recursive `oneOf` schema UI
+
 ## 10.0.5
 
 ### Patch Changes

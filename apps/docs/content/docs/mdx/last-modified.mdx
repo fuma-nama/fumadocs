@@ -5,14 +5,20 @@ description: Output the last modified time of a document
 
 ## Usage
 
-This feature is not enabled by default, you can enable this from the config file. Note that it only supports Git as version control.
-Please ensure you have Git installed on your machine, and **the repository is not shallow cloned**, as it relies on your local Git history.
+You can add the plugin from the config file.
+
+<Callout type="warning" title="Git is used by default">
+  Please ensure you have Git installed on your machine, and **the repository is
+  not shallow cloned**, as it relies on your local Git history.
+</Callout>
 
 ```ts title="source.config.ts"
 import { defineConfig } from 'fumadocs-mdx/config';
+import lastModified from 'fumadocs-mdx/plugins/last-modified';
 
 export default defineConfig({
-  lastModifiedTime: 'git', // [!code highlight]
+  // [!code ++]
+  plugins: [lastModified()],
 });
 ```
 
@@ -26,7 +32,7 @@ import { source } from '@/lib/source';
 const page = source.getPage(['...']);
 
 console.log(new Date(page.data.lastModified));
-// or with async mode:
+// or with lazy loading
 const { lastModified } = await page.data.load();
 console.log(new Date(lastModified));
 ```

@@ -1,4 +1,4 @@
-import { createCore, findConfigFile } from '@/core';
+import { _Defaults, createCore } from '@/core';
 import { createMdxLoader } from '@/loaders/mdx';
 import { toNode } from '@/loaders/adapter';
 import { createStandaloneConfigLoader } from '@/loaders/config';
@@ -7,8 +7,8 @@ import { createMetaLoader } from '@/loaders/meta';
 
 const core = createCore({
   environment: 'node',
-  configPath: findConfigFile(),
-  outDir: '.source',
+  configPath: _Defaults.configPath,
+  outDir: _Defaults.outDir,
 });
 
 const configLoader = createStandaloneConfigLoader({
