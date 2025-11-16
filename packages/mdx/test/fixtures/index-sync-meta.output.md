@@ -14,7 +14,7 @@ export const docs = await create.meta("docs", "packages/mdx/test/fixtures/genera
 import { fromConfigDynamic } from 'fumadocs-mdx/runtime/dynamic';
 import * as Config from './config';
 
-const create = fromConfigDynamic(Config);
+const create = await fromConfigDynamic(Config);
 ```
 
 ```ts title="browser.ts"

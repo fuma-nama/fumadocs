@@ -15,7 +15,7 @@ export const docs = await create.docLazy("docs", "packages/mdx/test/fixtures/gen
 import { fromConfigDynamic } from 'fumadocs-mdx/runtime/dynamic';
 import * as Config from './config';
 
-const create = fromConfigDynamic(Config);
+const create = await fromConfigDynamic(Config);
 ```
 
 ```ts title="browser.ts"
