@@ -19,8 +19,6 @@ export interface LastModifiedPluginOptions {
 
 /**
  * Injects `lastModified` property to page exports.
- *
- * By default, it uses Git to obtain the last modified time.
  */
 export default function lastModified(
   options: LastModifiedPluginOptions = {},
