@@ -1,11 +1,11 @@
-Setup an import alias (optional):
+Setup an import alias (recommended):
 
 ```json title="tsconfig.json"
 {
   "compilerOptions": {
     "paths": {
       // [!code ++]
-      "@/.source": [".source"]
+      "fumadocs-mdx:collections/*": [".source/*"]
     }
   }
 }

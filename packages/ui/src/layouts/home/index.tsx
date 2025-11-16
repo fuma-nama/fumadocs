@@ -20,11 +20,11 @@ import { ChevronDown, Languages } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import {
   Navbar,
-  NavbarLinkItem,
-  Menu,
-  MenuContent,
-  MenuLinkItem,
-  MenuTrigger,
+  NavigationMenuLinkItem,
+  MobileNavigationMenuContent,
+  MobileNavigationMenuLinkItem,
+  MobileNavigationMenuTrigger,
+  NavigationMenuItem,
 } from '@/layouts/home/client';
 import { buttonVariants } from '@/components/ui/button';
 
@@ -109,7 +109,7 @@ export function Header({
         {navItems
           .filter((item) => !isSecondary(item))
           .map((item, i) => (
-            <NavbarLinkItem key={i} item={item} className="text-sm" />
+            <NavigationMenuLinkItem key={i} item={item} className="text-sm" />
           ))}
       </ul>
       <div className="flex flex-row items-center justify-end gap-1.5 flex-1 max-lg:hidden">
@@ -129,16 +129,12 @@ export function Header({
         )}
         <ul className="flex flex-row gap-2 items-center empty:hidden">
           {navItems.filter(isSecondary).map((item, i) => (
-            <NavbarLinkItem
+            <NavigationMenuLinkItem
               key={i}
-              item={item}
               className={cn(
-                item.type === 'icon' && [
-                  '-mx-1',
-                  i === 0 && 'ms-0',
-                  i === navItems.length - 1 && 'me-0',
-                ],
+                item.type === 'icon' && '-mx-1 first:ms-0 last:me-0',
               )}
+              item={item}
             />
           ))}
         </ul>
@@ -148,8 +144,8 @@ export function Header({
           (searchToggle.components?.sm ?? (
             <SearchToggle className="p-2" hideIfDisabled />
           ))}
-        <Menu>
-          <MenuTrigger
+        <NavigationMenuItem>
+          <MobileNavigationMenuTrigger
             aria-label="Toggle Menu"
             className={cn(
               buttonVariants({
@@ -161,32 +157,40 @@ export function Header({
             enableHover={nav.enableHoverToOpen}
           >
             <ChevronDown className="transition-transform duration-300 group-data-[state=open]:rotate-180" />
-          </MenuTrigger>
-          <MenuContent className="sm:flex-row sm:items-center sm:justify-end">
+          </MobileNavigationMenuTrigger>
+          <MobileNavigationMenuContent className="sm:flex-row sm:items-center sm:justify-end">
             {menuItems
               .filter((item) => !isSecondary(item))
               .map((item, i) => (
-                <MenuLinkItem key={i} item={item} className="sm:hidden" />
+                <MobileNavigationMenuLinkItem
+                  key={i}
+                  item={item}
+                  className="sm:hidden"
+                />
               ))}
-            <div className="-ms-1.5 flex flex-row items-center gap-1.5 max-sm:mt-2">
+            <div className="-ms-1.5 flex flex-row items-center gap-2 max-sm:mt-2">
               {menuItems.filter(isSecondary).map((item, i) => (
-                <MenuLinkItem key={i} item={item} className="-me-1.5" />
+                <MobileNavigationMenuLinkItem
+                  key={i}
+                  item={item}
+                  className={cn(item.type === 'icon' && '-mx-1 first:ms-0')}
+                />
               ))}
               <div role="separator" className="flex-1" />
-              {i18n ? (
+              {i18n && (
                 <LanguageToggle>
                   <Languages className="size-5" />
                   <LanguageToggleText />
                   <ChevronDown className="size-3 text-fd-muted-foreground" />
                 </LanguageToggle>
-              ) : null}
+              )}
               {themeSwitch.enabled !== false &&
                 (themeSwitch.component ?? (
                   <ThemeToggle mode={themeSwitch?.mode} />
                 ))}
             </div>
-          </MenuContent>
-        </Menu>
+          </MobileNavigationMenuContent>
+        </NavigationMenuItem>
       </ul>
     </Navbar>
   );

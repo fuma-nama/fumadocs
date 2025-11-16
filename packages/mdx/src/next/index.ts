@@ -7,11 +7,11 @@ import type {
 } from 'next/dist/server/config-shared';
 import * as path from 'node:path';
 import { loadConfig } from '@/config/load-from-file';
-import { removeFileCache } from '@/next/file-cache';
 import { ValidationError } from '@/utils/validation';
-import next from '@/plugins/next';
-import { type Core, createCore, findConfigFile } from '@/core';
-import { mdxLoaderGlob } from '@/loaders';
+import { _Defaults, type Core, createCore } from '@/core';
+import { mdxLoaderGlob, metaLoaderGlob } from '@/loaders';
+import type { IndexFilePluginOptions } from '@/plugins/index-file';
+import indexFile from '@/plugins/index-file';
 
 export interface CreateMDXOptions {
   /**
@@ -25,23 +25,26 @@ export interface CreateMDXOptions {
    * @defaultValue '.source'
    */
   outDir?: string;
+
+  index?: IndexFilePluginOptions | false;
 }
 
 const defaultPageExtensions = ['mdx', 'md', 'jsx', 'js', 'tsx', 'ts'];
 
 export function createMDX(createOptions: CreateMDXOptions = {}) {
-  const options = applyDefaults(createOptions);
+  const core = createNextCore(applyDefaults(createOptions));
   const isDev = process.env.NODE_ENV === 'development';
 
   if (process.env._FUMADOCS_MDX !== '1') {
     process.env._FUMADOCS_MDX = '1';
 
-    void init(isDev, options);
+    void init(isDev, core);
   }
 
   return (nextConfig: NextConfig = {}): NextConfig => {
     const loaderOptions: WebpackLoaderOptions = {
-      ...options,
+      ...core._options,
+      compiledConfigPath: core.getCompiledConfigPath(),
       isDev,
     };
 
@@ -53,6 +56,24 @@ export function createMDX(createOptions: CreateMDXOptions = {}) {
           loaders: [
             {
               loader: 'fumadocs-mdx/loader-mdx',
+              options: loaderOptions as unknown as TurbopackLoaderOptions,
+            },
+          ],
+          as: '*.js',
+        },
+        '*.json': {
+          loaders: [
+            {
+              loader: 'fumadocs-mdx/loader-meta',
+              options: loaderOptions as unknown as TurbopackLoaderOptions,
+            },
+          ],
+          as: '*.json',
+        },
+        '*.yaml': {
+          loaders: [
+            {
+              loader: 'fumadocs-mdx/loader-meta',
               options: loaderOptions as unknown as TurbopackLoaderOptions,
             },
           ],
@@ -71,16 +92,28 @@ export function createMDX(createOptions: CreateMDXOptions = {}) {
         config.module ||= {};
         config.module.rules ||= [];
 
-        config.module.rules.push({
-          test: mdxLoaderGlob,
-          use: [
-            options.defaultLoaders.babel,
-            {
-              loader: 'fumadocs-mdx/loader-mdx',
-              options: loaderOptions,
-            },
-          ],
-        });
+        config.module.rules.push(
+          {
+            test: mdxLoaderGlob,
+            use: [
+              options.defaultLoaders.babel,
+              {
+                loader: 'fumadocs-mdx/loader-mdx',
+                options: loaderOptions,
+              },
+            ],
+          },
+          {
+            test: metaLoaderGlob,
+            use: [
+              options.defaultLoaders.babel,
+              {
+                loader: 'fumadocs-mdx/loader-meta',
+                options: loaderOptions,
+              },
+            ],
+          },
+        );
 
         config.plugins ||= [];
 
@@ -90,15 +123,10 @@ export function createMDX(createOptions: CreateMDXOptions = {}) {
   };
 }
 
-async function init(
-  dev: boolean,
-  options: Required<CreateMDXOptions>,
-): Promise<void> {
-  const core = createNextCore(options);
-
+async function init(dev: boolean, core: Core): Promise<void> {
   async function initOrReload() {
     await core.init({
-      config: loadConfig(options.configPath, options.outDir, true),
+      config: loadConfig(core, true),
     });
     await core.emitAndWrite();
   }
@@ -108,10 +136,10 @@ async function init(
     const watcher = new FSWatcher({
       ignoreInitial: true,
       persistent: true,
-      ignored: [options.outDir],
+      ignored: [core._options.outDir],
     });
 
-    watcher.add(options.configPath);
+    watcher.add(core._options.configPath);
     for (const collection of core.getConfig().collectionList) {
       if (collection.type === 'docs') {
         watcher.add(collection.docs.dir);
@@ -125,11 +153,8 @@ async function init(
       console.log('[MDX] started dev server');
     });
 
-    watcher.on('all', async (event, file) => {
-      const absolutePath = path.resolve(file);
-      if (event === 'change') removeFileCache(absolutePath);
-
-      if (absolutePath === path.resolve(options.configPath)) {
+    watcher.on('all', async (_event, file) => {
+      if (path.resolve(file) === path.resolve(core._options.configPath)) {
         // skip plugin listeners
         watcher.removeAllListeners();
 
@@ -156,38 +181,30 @@ async function init(
   }
 }
 
-export async function postInstall(
-  configPath = findConfigFile(),
-  outDir = '.source',
-) {
-  const core = await createNextCore({
-    outDir,
-    configPath,
-  }).init({
-    config: loadConfig(configPath, outDir, true),
+export async function postInstall(options: CreateMDXOptions) {
+  const core = createNextCore(applyDefaults(options));
+  await core.init({
+    config: loadConfig(core, true),
   });
-
   await core.emitAndWrite();
 }
 
 function applyDefaults(options: CreateMDXOptions): Required<CreateMDXOptions> {
   return {
-    outDir: options.outDir ?? '.source',
-    configPath: options.configPath ?? findConfigFile(),
+    index: {},
+    outDir: options.outDir ?? _Defaults.outDir,
+    configPath: options.configPath ?? _Defaults.configPath,
   };
 }
 
-function createNextCore({
-  outDir,
-  configPath,
-}: Required<CreateMDXOptions>): Core {
+function createNextCore(options: Required<CreateMDXOptions>): Core {
   const core = createCore(
     {
       environment: 'next',
-      outDir,
-      configPath,
+      outDir: options.outDir,
+      configPath: options.configPath,
     },
-    [next()],
+    [options.index && indexFile(options.index)],
   );
 
   return {
@@ -197,7 +214,7 @@ function createNextCore({
         await core.emitAndWrite(...args);
       } catch (err) {
         if (err instanceof ValidationError) {
-          console.error(err.toStringFormatted());
+          console.error(await err.toStringFormatted());
         } else {
           console.error(err);
         }

@@ -33,26 +33,9 @@
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
-    "./runtime/next": {
-      "import": "./dist/runtime/next/index.js",
-      "types": "./dist/runtime/next/index.d.ts"
-    },
-    "./runtime/async": {
-      "import": "./dist/runtime/next/async.js",
-      "types": "./dist/runtime/next/async.d.ts"
-    },
-    "./runtime/vite": {
-      "browser": "./dist/runtime/vite/browser.js",
-      "import": "./dist/runtime/vite/server.js",
-      "types": "./dist/runtime/vite/server.d.ts"
-    },
-    "./runtime/vite.server": {
-      "import": "./dist/runtime/vite/server.js",
-      "types": "./dist/runtime/vite/server.d.ts"
-    },
-    "./runtime/vite.browser": {
-      "import": "./dist/runtime/vite/browser.js",
-      "types": "./dist/runtime/vite/browser.d.ts"
+    "./runtime/*": {
+      "import": "./dist/runtime/*.js",
+      "types": "./dist/runtime/*.d.ts"
     },
     "./node/loader": {
       "import": "./dist/node/loader.js",
@@ -86,9 +69,9 @@
     "@mdx-js/mdx": "^3.1.1",
     "@standard-schema/spec": "^1.0.0",
     "chokidar": "^4.0.3",
-    "esbuild": "^0.25.12",
+    "esbuild": "^0.27.0",
     "estree-util-value-to-estree": "^3.5.0",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^4.1.1",
     "lru-cache": "^11.2.2",
     "mdast-util-to-markdown": "^2.1.2",
     "picocolors": "^1.1.1",
@@ -99,31 +82,31 @@
     "unified": "^11.0.5",
     "unist-util-remove-position": "^5.0.0",
     "unist-util-visit": "^5.0.0",
+    "vfile": "^6.0.3",
     "zod": "^4.1.12"
   },
   "devDependencies": {
     "@fumadocs/mdx-remote": "workspace:*",
-    "@types/bun": "^1.3.1",
+    "@types/bun": "^1.3.2",
     "@types/js-yaml": "^4.0.9",
     "@types/mdast": "^4.0.4",
     "@types/mdx": "^2.0.13",
-    "@types/node": "^24.10.0",
+    "@types/node": "^24.10.1",
     "@types/picomatch": "^4.0.2",
-    "@types/react": "^19.2.2",
-    "astro": "^5.15.3",
+    "@types/react": "^19.2.5",
+    "astro": "^5.15.8",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "mdast-util-directive": "^3.1.0",
     "mdast-util-mdx-jsx": "^3.2.0",
-    "next": "16.0.1",
+    "next": "16.0.3",
     "react": "^19.2.0",
     "remark": "^15.0.1",
     "remark-directive": "^4.0.0",
     "remark-stringify": "^11.0.0",
-    "rollup": "^4.52.5",
+    "rollup": "^4.53.2",
     "tsconfig": "workspace:*",
-    "vfile": "^6.0.3",
-    "vite": "^7.2.0",
+    "vite": "^7.2.2",
     "webpack": "^5.102.1"
   },
   "peerDependencies": {

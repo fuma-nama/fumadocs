@@ -9,7 +9,7 @@ You can use [`next-validate-link`](https://next-validate-link.vercel.app) to val
 
 > This guide is mainly for **Fumadocs MDX**, see the docs of `next-validate-link` for other setups.
 
-Create a script for Bun:
+Create a script:
 
 ```ts title="scripts/lint.ts"
 import {
@@ -75,20 +75,14 @@ void checkLinks();
 
 ### Running Lint
 
-To access the `source` object outside of app runtime, you'll need a runtime loader:
+To access the `source` object outside of app runtime, configure [Fumadocs MDX Loader](/docs/mdx/loader/bun) first.
 
-```toml tab="bunfig.toml"
-preload = ["./scripts/preload.ts"]
-```
-
-```ts tab="scripts/preload.ts"
-import { createMdxPlugin } from 'fumadocs-mdx/bun';
-
-Bun.plugin(createMdxPlugin());
-```
-
-Run the script to validate links:
+Then, run the script to validate links:
 
 ```bash
 bun ./scripts/lint.ts
 ```
+
+> For Node.js, you might need to configure `tsconfig-paths`, TypeScript transpiling, and [Fumadocs MDX Loader](/docs/mdx/loader/node).
+>
+> Without special reasons, using Bun or [`tsx`](https://github.com/privatenumber/tsx) would be simpler.

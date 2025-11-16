@@ -31,15 +31,16 @@ or you are using Vite, which defaults to generating code with Vite-specific APIs
 ```ts title="preload.ts" tab="Next.js"
 import { postInstall } from 'fumadocs-mdx/next';
 
-await postInstall('source.config.ts');
+await postInstall({ configPath: 'source.config.ts' });
 ```
 
 ```ts title="preload.ts" tab="Vite"
 import { postInstall } from 'fumadocs-mdx/vite';
 
-await postInstall('source.config.ts', {
-  generateIndexFile: {
-    runtime: 'bun',
+await postInstall({
+  configPath: 'source.config.ts',
+  index: {
+    target: 'bun',
   },
 });
 ```

@@ -25,7 +25,7 @@ export async function fumapress(
       },
     }),
     mdx(await createContentConfig(resolved), {
-      generateIndexFile: false,
+      index: false,
       updateViteConfig: false,
     }),
     init(null, resolved),

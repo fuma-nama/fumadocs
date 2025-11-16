@@ -1,0 +1,142 @@
+---
+title: Browser Entry
+description: Access collections from browser/client environment.
+---
+
+## Usage
+
+The generated outputs are optimized using async imports to optimize for browser environments.
+
+Only doc/docs collections are accessible on browser.
+
+```tsx
+import browserCollections from 'fumadocs-mdx:collections/browser';
+
+// unloaded entries
+console.log(browserCollections['collection name'].raw);
+
+// define client-side collection loader
+const clientLoader = browserCollections['collection name'].createClientLoader({
+  component(
+    // access the compiled file
+    { default: MDX },
+    // define props (optional)
+    props: { myProp: string },
+  ) {
+    return (
+      <div>
+        <MDX />
+      </div>
+    );
+  },
+});
+
+// server (static generator) return a path
+async function serverLoader() {
+  return source.getPage(slugs)!.path;
+}
+
+async function loader() {
+  const path = await serverLoader();
+  // preload the path
+  await clientLoader.preload(path);
+  return { path };
+}
+
+function Page() {
+  const { path } = loader();
+  const Content = clientLoader.getComponent(path);
+
+  // render the content
+  return <Content myProp="hello world" />;
+}
+```
+
+## Examples
+
+The examples are for non-RSC usage, we recommend using RSC whenever possible for best client-side performance (avoiding hydration).
+
+### Tanstack Start
+
+```tsx title="src/routes/docs/$.tsx"
+import { createFileRoute, notFound } from '@tanstack/react-router';
+import { createServerFn } from '@tanstack/react-start';
+import { source } from '@/lib/source';
+import browserCollections from 'fumadocs-mdx:collections/browser';
+
+export const Route = createFileRoute('/docs/$')({
+  component: Page,
+  loader: async ({ params }) => {
+    const data = await loader({ data: params._splat?.split('/') ?? [] });
+    await clientLoader.preload(data.path);
+    return data;
+  },
+});
+
+const loader = createServerFn({
+  method: 'GET',
+})
+  .inputValidator((slugs: string[]) => slugs)
+  .handler(async ({ data: slugs }) => {
+    const page = source.getPage(slugs);
+    if (!page) throw notFound();
+
+    return {
+      path: page.path,
+    };
+  });
+
+const clientLoader = browserCollections.docs.createClientLoader({
+  component({ frontmatter, default: MDX }) {
+    return (
+      <div className="prose">
+        <h1>{frontmatter.title}</h1>
+        <MDX />
+      </div>
+    );
+  },
+});
+
+function Page() {
+  const data = Route.useLoaderData();
+  const Content = clientLoader.getComponent(data.path);
+
+  return <Content />;
+}
+```
+
+### React Router
+
+```tsx
+import type { Route } from './+types/page';
+import { source } from '@/lib/source';
+import browserCollections from 'fumadocs-mdx:collections/browser';
+
+export async function loader({ params }: Route.LoaderArgs) {
+  const slugs = params['*'].split('/').filter((v) => v.length > 0);
+  const page = source.getPage(slugs);
+  if (!page) throw new Response('Not found', { status: 404 });
+
+  return {
+    path: page.path,
+  };
+}
+
+const clientLoader = browserCollections.docs.createClientLoader({
+  component({ frontmatter, default: MDX }) {
+    return (
+      <div className="prose">
+        <h1>{frontmatter.title}</h1>
+        <MDX />
+      </div>
+    );
+  },
+});
+
+export default function Page(props: Route.ComponentProps) {
+  const { path } = props.loaderData;
+  const Content = clientLoader.getComponent(path);
+
+  return <Content />;
+}
+```

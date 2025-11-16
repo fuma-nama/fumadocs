@@ -5,7 +5,7 @@ description: Generate types without running dev/build server
 
 ### Overview
 
-You can run `fumadocs-mdx` to generate types & index file (e.g. the `.source` folder).
+You can run `fumadocs-mdx` to generate types & entry files (the `.source` folder).
 
 Optionally, you can run it in post install to ensure types are generated when initializing the project.
 
@@ -20,7 +20,7 @@ Optionally, you can run it in post install to ensure types are generated when in
 If your project uses a custom path for configuration file or output directory, you can provide them as command arguments:
 
 ```npm
-npx fumadocs-mdx <config-path> <output-dir>
+npx fumadocs-mdx "config-path" "output-dir"
 ```
 
 - `config-path`: Fumadocs MDX config file, default to `source.config.ts`.

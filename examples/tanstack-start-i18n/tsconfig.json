@@ -17,7 +17,7 @@
     "types": ["vite/client"],
     "paths": {
       "@/*": ["./src/*"],
-      "@/.source": [".source"]
+      "fumadocs-mdx:collections/*": [".source/*"]
     },
     "noEmit": true
   }

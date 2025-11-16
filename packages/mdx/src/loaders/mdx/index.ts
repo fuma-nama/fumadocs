@@ -1,11 +1,8 @@
 import { fumaMatter } from '@/utils/fuma-matter';
-import { validate } from '@/utils/validation';
-import { getGitTimestamp } from '@/utils/git-timestamp';
-import { buildMDX } from '@/loaders/mdx/build-mdx';
 import type { SourceMap } from 'rollup';
 import type { Loader } from '@/loaders/adapter';
 import { z } from 'zod';
-import type { DocCollectionItem, LoadedConfig } from '@/config/build';
+import type { DocCollectionItem } from '@/config/build';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
@@ -37,10 +34,10 @@ export function createMdxLoader(configLoader: ConfigLoader): Loader {
       compiler,
       filePath,
     }) {
+      const config = await configLoader.getConfig();
       const value = await getSource();
       const matter = fumaMatter(value);
       const parsed = querySchema.parse(query);
-      const config = await configLoader.getConfig();
 
       let after: (() => Promise<void>) | undefined;
 
@@ -80,15 +77,10 @@ export function createMdxLoader(configLoader: ConfigLoader): Loader {
           break;
       }
 
-      if (docCollection?.schema) {
-        matter.data = await validate(
-          docCollection.schema,
-          matter.data,
-          {
-            source: value,
-            path: filePath,
-          },
-          `invalid frontmatter in ${filePath}`,
+      if (docCollection) {
+        matter.data = await configLoader.core.transformFrontmatter(
+          { collection: docCollection, filePath, source: value },
+          matter.data as Record<string, unknown>,
         );
       }
 
@@ -99,28 +91,18 @@ export function createMdxLoader(configLoader: ConfigLoader): Loader {
         };
       }
 
-      const data: Record<string, unknown> = {};
-      if (config.global.lastModifiedTime === 'git') {
-        data.lastModified = (await getGitTimestamp(filePath))?.getTime();
-      }
-
       // ensure the line number is correct in dev mode
       const lineOffset = isDevelopment ? countLines(matter.matter) : 0;
 
-      const compiled = await buildMDX(
-        `${getConfigHash(config)}:${parsed.collection ?? 'global'}`,
-        '\n'.repeat(lineOffset) + matter.content,
-        {
-          development: isDevelopment,
-          ...(docCollection?.mdxOptions ??
-            (await config.getDefaultMDXOptions())),
-          postprocess: docCollection?.postprocess,
-          data,
-          filePath,
-          frontmatter: matter.data as Record<string, unknown>,
-          _compiler: compiler,
-        },
-      );
+      const { buildMDX } = await import('@/loaders/mdx/build-mdx');
+      const compiled = await buildMDX(configLoader.core, docCollection, {
+        isDevelopment,
+        source: '\n'.repeat(lineOffset) + matter.content,
+        filePath,
+        frontmatter: matter.data as Record<string, unknown>,
+        _compiler: compiler,
+        environment: 'bundler',
+      });
 
       const out = {
         code: String(compiled.value),
@@ -131,17 +113,6 @@ export function createMdxLoader(configLoader: ConfigLoader): Loader {
       return out;
     },
   };
-}
-
-const hashes = new WeakMap<LoadedConfig, string>();
-
-function getConfigHash(config: LoadedConfig) {
-  let hash = hashes.get(config);
-  if (hash) return hash;
-
-  hash = Date.now().toString();
-  hashes.set(config, hash);
-  return hash;
 }
 
 function generateCacheHash(input: string): string {

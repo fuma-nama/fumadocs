@@ -3,21 +3,21 @@ import { buildConfig } from '@/config/build';
 import { ValidationError } from '@/utils/validation';
 import { createMdxLoader } from '@/loaders/mdx';
 import { toVite } from '@/loaders/adapter';
-import vite, { type IndexFileOptions } from '@/plugins/vite';
 import type { FSWatcher } from 'chokidar';
-import { createCore, findConfigFile } from '@/core';
+import { _Defaults, createCore } from '@/core';
 import { createIntegratedConfigLoader } from '@/loaders/config';
 import { createMetaLoader } from '@/loaders/meta';
+import indexFile, { IndexFilePluginOptions } from '@/plugins/index-file';
 
 const FumadocsDeps = ['fumadocs-core', 'fumadocs-ui', 'fumadocs-openapi'];
 
 export interface PluginOptions {
   /**
-   * Automatically generate index files for accessing files with `import.meta.glob`.
+   * Generate index files for accessing content.
    *
    * @defaultValue true
    */
-  generateIndexFile?: boolean | IndexFileOptions;
+  index?: boolean | IndexFilePluginOptions;
 
   /**
    * @defaultValue source.config.ts
@@ -92,7 +92,7 @@ export default async function mdx(
         }
       } catch (e) {
         if (e instanceof ValidationError) {
-          throw new Error(e.toStringFormatted());
+          throw new Error(await e.toStringFormatted());
         }
 
         throw e;
@@ -101,24 +101,23 @@ export default async function mdx(
   };
 }
 
-export async function postInstall(
-  configPath = findConfigFile(),
-  pluginOptions: PluginOptions = {},
-) {
+export async function postInstall(pluginOptions: PluginOptions = {}) {
   const { loadConfig } = await import('@/config/load-from-file');
-  const options = applyDefaults(pluginOptions);
-  const core = await createViteCore(options).init({
-    config: loadConfig(configPath, options.outDir, true),
-  });
+  const core = createViteCore(applyDefaults(pluginOptions));
 
+  await core.init({
+    config: loadConfig(core, true),
+  });
   await core.emitAndWrite();
 }
 
 function createViteCore({
+  index,
   configPath,
   outDir,
-  generateIndexFile,
 }: Required<PluginOptions>) {
+  if (index === true) index = {};
+
   return createCore(
     {
       environment: 'vite',
@@ -126,9 +125,11 @@ function createViteCore({
       outDir,
     },
     [
-      vite({
-        index: generateIndexFile,
-      }),
+      index &&
+        indexFile({
+          ...index,
+          target: index.target ?? 'vite',
+        }),
     ],
   );
 }
@@ -136,8 +137,8 @@ function createViteCore({
 function applyDefaults(options: PluginOptions): Required<PluginOptions> {
   return {
     updateViteConfig: options.updateViteConfig ?? true,
-    generateIndexFile: options.generateIndexFile ?? true,
-    configPath: options.configPath ?? 'source.config.ts',
-    outDir: options.outDir ?? '.source',
+    index: options.index ?? true,
+    configPath: options.configPath ?? _Defaults.configPath,
+    outDir: options.outDir ?? _Defaults.outDir,
   };
 }

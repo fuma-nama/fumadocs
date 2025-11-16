@@ -1,8 +1,5 @@
 export * from './define';
-export {
-  getDefaultMDXOptions,
-  type DefaultMDXOptions,
-} from '@/loaders/mdx/preset';
+export * from '@/config/preset';
 export * from './zod-4';
 export { remarkInclude } from '@/loaders/mdx/remark-include';
 

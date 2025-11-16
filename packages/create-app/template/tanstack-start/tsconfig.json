@@ -17,7 +17,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@/.source": [".source"]
+      "fumadocs-mdx:collections/*": [".source/*"]
     },
     "noEmit": true
   }

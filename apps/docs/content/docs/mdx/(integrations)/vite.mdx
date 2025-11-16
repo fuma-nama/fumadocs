@@ -1,0 +1,95 @@
+---
+title: Vite
+description: Use Fumadocs MDX with Vite
+---
+
+## Setup
+
+<div className="fd-steps [&_h3]:fd-step">
+
+### Installation
+
+```npm
+npm i fumadocs-mdx fumadocs-core @types/mdx
+```
+
+Create the configuration file:
+
+```ts title="source.config.ts"
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  dir: 'content/docs',
+});
+```
+
+Add the Vite plugin:
+
+```ts tab="Vite" title="vite.config.ts"
+import { defineConfig } from 'vite';
+import mdx from 'fumadocs-mdx/vite';
+import * as MdxConfig from './source.config';
+
+export default defineConfig({
+  plugins: [
+    // [!code ++]
+    mdx(MdxConfig),
+    // ...
+  ],
+});
+```
+
+```ts tab="Waku" title="waku.config.ts"
+import { type Config, defineConfig } from 'waku/config';
+import mdx from 'fumadocs-mdx/vite';
+import * as MdxConfig from './source.config.js';
+import tsconfigPaths from 'vite-tsconfig-paths';
+import type { UserConfig } from 'vite';
+
+export default defineConfig({
+  vite: {
+    plugins: [
+      // [!code ++]
+      mdx(MdxConfig),
+      tsconfigPaths(),
+    ],
+  } satisfies UserConfig as Config['vite'],
+});
+```
+
+<include>./.shared.mdx</include>
+
+> You might need to configure [`vite-tsconfig-paths`](https://github.com/aleclarson/vite-tsconfig-paths) plugin for path alias.
+
+### Integrate with Fumadocs
+
+To integrate with Fumadocs, make a `lib/source.ts` file:
+
+```ts title="app/lib/source.ts"
+import { docs } from 'fumadocs-mdx:collections/server';
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  baseUrl: '/docs',
+  source: docs.toFumadocsSource(),
+});
+```
+
+The `.source` folder will be generated when you run development server or production build.
+
+### Done
+
+You can now write content in `content/docs` folder.
+
+</div>
+
+## What is Next?
+
+<Cards>
+  <Card title="Accessing Collections" href="/docs/mdx/entry">
+    Learn how to access collection outputs.
+  </Card>
+  <Card title="Lazy Loading" href="/docs/mdx/async">
+    Hit performance bottleneck? You can try lazy loading.
+  </Card>
+</Cards>

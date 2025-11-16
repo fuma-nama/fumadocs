@@ -9,8 +9,7 @@ import {
 import { source } from '@/lib/source';
 import type * as PageTree from 'fumadocs-core/page-tree';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
-import { docs } from '@/.source';
-import { toClientRenderer } from 'fumadocs-mdx/runtime/vite';
+import browserCollections from 'fumadocs-mdx:collections/browser';
 import { baseOptions } from '@/lib/layout.shared';
 
 export async function loader({ params }: Route.LoaderArgs) {
@@ -24,9 +23,8 @@ export async function loader({ params }: Route.LoaderArgs) {
   };
 }
 
-const renderer = toClientRenderer(
-  docs.doc,
-  ({ toc, default: Mdx, frontmatter }) => {
+const clientLoader = browserCollections.docs.createClientLoader({
+  component({ toc, default: Mdx, frontmatter }) {
     return (
       <DocsPage toc={toc}>
         <title>{frontmatter.title}</title>
@@ -39,11 +37,11 @@ const renderer = toClientRenderer(
       </DocsPage>
     );
   },
-);
+});
 
 export default function Page({ loaderData, params }: Route.ComponentProps) {
   const { tree, path } = loaderData;
-  const Content = renderer[path];
+  const Content = clientLoader.getComponent(path);
 
   return (
     <DocsLayout {...baseOptions(params.lang)} tree={tree as PageTree.Root}>

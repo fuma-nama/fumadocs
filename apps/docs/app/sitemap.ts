@@ -6,6 +6,19 @@ export const revalidate = false;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const url = (path: string): string => new URL(path, baseUrl).toString();
+  const items = await Promise.all(
+    source.getPages().map(async (page) => {
+      if (page.data.type === 'openapi') return;
+      const { lastModified } = await page.data.load();
+
+      return {
+        url: url(page.url),
+        lastModified: lastModified ? new Date(lastModified) : undefined,
+        changeFrequency: 'weekly',
+        priority: 0.5,
+      } as MetadataRoute.Sitemap[number];
+    }),
+  );
 
   return [
     {
@@ -23,16 +36,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.8,
     },
-    ...source.getPages().flatMap((page) => {
-      if (page.data.type === 'openapi') return [];
-      const { lastModified } = page.data;
-
-      return {
-        url: url(page.url),
-        lastModified: lastModified ? new Date(lastModified) : undefined,
-        changeFrequency: 'weekly',
-        priority: 0.5,
-      } as MetadataRoute.Sitemap[number];
-    }),
+    ...items.filter((v) => v !== undefined),
   ];
 }

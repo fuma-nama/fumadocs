@@ -95,7 +95,7 @@ Customise MDX options at the collection level.
 > This API is only available on `doc` type.
 
 ```ts title="source.config.ts"
-import { defineCollections, getDefaultMDXOptions } from 'fumadocs-mdx/config';
+import { defineCollections } from 'fumadocs-mdx/config';
 
 export const blog = defineCollections({
   type: 'doc',
@@ -108,14 +108,14 @@ export const blog = defineCollections({
 By design, this will remove all default settings applied by your global config and Fumadocs MDX.
 You have full control over MDX options.
 
-You can use [`getDefaultMDXOptions`](/docs/mdx/mdx) to apply the default MDX preset.
+You can use [`applyMdxPreset`](/docs/mdx/mdx) to apply the default MDX preset.
 
 ```ts title="source.config.ts"
-import { defineCollections, getDefaultMDXOptions } from 'fumadocs-mdx/config';
+import { defineCollections } from 'fumadocs-mdx/config';
 
 export const blog = defineCollections({
   type: 'doc',
-  mdxOptions: getDefaultMDXOptions({
+  mdxOptions: applyMdxPreset({
     // extend the preset
   }),
 });

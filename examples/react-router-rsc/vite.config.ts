@@ -12,6 +12,8 @@ export default defineConfig({
     tailwindcss(),
     reactRouterRSC(),
     rsc(),
-    tsconfigPaths(),
+    tsconfigPaths({
+      root: __dirname,
+    }),
   ],
 });

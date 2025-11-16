@@ -1,7 +1,6 @@
 ---
 title: Import MDX Files
-description: Importing MDX files directly
-icon: FileUp
+description: Importing MDX files directly.
 ---
 
 ## Introduction
@@ -60,9 +59,7 @@ export default function Content(props: ComponentProps<'main'>) {
 }
 ```
 
-#### MDX Components
-
-It doesn't have MDX components by default, you have to provide them:
+It doesn't have **MDX components** by default, you have to provide them:
 
 ```tsx tab="mdx-components.tsx"
 import defaultMdxComponents from 'fumadocs-ui/mdx';
@@ -90,6 +87,8 @@ export default defineConfig({
 });
 ```
 
-#### Other Frameworks?
+<Callout title="Other Frameworks?">
 
-Other frameworks like Tanstack Start require explicit declaration of loaders, it's recommended to use them as components in your pages instead.
+Other React.js frameworks like Tanstack Start usually prefer explicit declaration of loaders, it's recommended to use them as components in your pages instead.
+
+</Callout>
