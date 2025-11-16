@@ -18,7 +18,7 @@ export interface LastModifiedPluginOptions {
 }
 
 /**
- * Injects `lastModified` property to page data.
+ * Injects `lastModified` property to page exports.
  *
  * By default, it uses Git to obtain the last modified time.
  */
@@ -32,10 +32,16 @@ export default function lastModified(
     doc: {
       async vfile(file) {
         if (versionControl === 'git') {
-          const timestamp = await getGitTimestamp(this.filePath);
+          const timestamp = await getGitTimestamp(this.filePath).then((v) =>
+            v?.getTime(),
+          );
           if (timestamp === undefined) return;
 
-          file.data.lastModified = timestamp.getTime();
+          file.data['mdx-export'] ??= [];
+          file.data['mdx-export'].push({
+            name: 'lastModified',
+            value: timestamp,
+          });
         }
       },
     },

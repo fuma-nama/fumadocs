@@ -229,11 +229,13 @@ async function generateDynamicIndexFile(core: Core, codegen: CodeGen) {
     const fullPath = path.join(collection.dir, file);
     const content = await readFileWithCache(fullPath).catch(() => '');
     const parsed = fumaMatter(content);
-    const data = await core.metadata(
-      collection,
-      fullPath,
-      content,
-      parsed.data,
+    const data = await core.transformFrontmatter(
+      {
+        collection,
+        filePath: fullPath,
+        source: content,
+      },
+      parsed.data as Record<string, unknown>,
     );
 
     const hash = createHash('md5').update(content).digest('hex');

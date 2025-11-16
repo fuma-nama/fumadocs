@@ -7,6 +7,9 @@ import type {
   MetaCollection,
 } from '@/config/define';
 import picomatch from 'picomatch';
+import { applyMdxPreset } from '@/config/preset';
+
+export type BuildEnvironment = 'bundler' | 'runtime';
 
 export interface LoadedConfig {
   collectionList: CollectionItem[];
@@ -15,7 +18,7 @@ export interface LoadedConfig {
   global: GlobalConfig;
   getMDXOptions(
     collection?: DocCollectionItem,
-    environment?: 'bundler' | 'runtime',
+    environment?: BuildEnvironment,
   ): ProcessorOptions | Promise<ProcessorOptions>;
 }
 
@@ -158,19 +161,15 @@ export function buildConfig(config: Record<string, unknown>): LoadedConfig {
 
       if (collection?.mdxOptions) {
         const optionsFn = collection.mdxOptions;
-        result = typeof optionsFn === 'function' ? optionsFn() : optionsFn;
+        result =
+          typeof optionsFn === 'function' ? optionsFn(environment) : optionsFn;
       } else {
         result = (async () => {
           const optionsFn = this.global.mdxOptions;
           const options =
             typeof optionsFn === 'function' ? await optionsFn() : optionsFn;
 
-          if (options?.preset === 'minimal') return options;
-          const { getDefaultMDXOptions } = await import('@/loaders/mdx/preset');
-          return getDefaultMDXOptions({
-            ...options,
-            _withoutBundler: environment === 'runtime',
-          });
+          return applyMdxPreset(options)(environment);
         })();
       }
 

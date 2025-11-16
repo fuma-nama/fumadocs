@@ -32,6 +32,7 @@ export interface CompilerOptions {
   addDependency: (file: string) => void;
 }
 
+// TODO: allow plugins to customise the type
 export interface CompiledMDXProperties<Frontmatter = Record<string, unknown>> {
   frontmatter: Frontmatter;
   structuredData: StructuredData;
@@ -42,8 +43,17 @@ export interface CompiledMDXProperties<Frontmatter = Record<string, unknown>> {
    * Added by the `last-modified` plugin.
    */
   lastModified?: Date;
+  /**
+   * Enable from `postprocess` option.
+   */
   extractedReferences?: ExtractedReference[];
+  /**
+   * Enable from `postprocess` option.
+   */
   _markdown?: string;
+  /**
+   * Enable from `postprocess` option.
+   */
   _mdast?: string;
 }
 
@@ -58,19 +68,12 @@ export interface FumadocsDataMap {
    */
   'mdx-export'?: { name: string; value: unknown }[];
 
-  extractedReferences: ExtractedReference[];
-
   /**
    * [Fumadocs MDX] The compiler object from loader
    */
   _compiler?: CompilerOptions;
 
   _getProcessor?: (format: 'md' | 'mdx') => Processor;
-
-  /**
-   * [Fumadocs MDX] Processed Markdown content before `remark-rehype`.
-   */
-  _markdown?: string;
 }
 
 declare module 'vfile' {
@@ -106,11 +109,7 @@ export async function buildMDX(
         valueToExport: [
           ...(collection?.postprocess?.valueToExport ?? []),
           'structuredData',
-          'extractedReferences',
           'frontmatter',
-          'lastModified',
-          '_markdown',
-          '_mdast',
         ],
       };
 
@@ -139,7 +138,7 @@ export async function buildMDX(
   });
 
   if (collection) {
-    vfile = await core.doc.vfile(collection, filePath, vfile);
+    vfile = await core.transformVFile({ collection, filePath, source }, vfile);
   }
 
   return getProcessor(filePath.endsWith('.mdx') ? 'mdx' : 'md').process(vfile);

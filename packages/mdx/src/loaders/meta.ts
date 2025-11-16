@@ -56,7 +56,14 @@ export function createMetaLoader(
       const data = parse(filePath, source);
 
       if (!metaCollection) return data;
-      return configLoader.core.metadata(metaCollection, filePath, source, data);
+      return configLoader.core.transformMeta(
+        {
+          collection: metaCollection,
+          filePath,
+          source,
+        },
+        data,
+      );
     };
   }
 

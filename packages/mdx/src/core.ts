@@ -24,6 +24,15 @@ export interface PluginContext extends CoreOptions {
   core: Core;
 }
 
+export type CompilationContext<Collection> = PluginContext &
+  TransformOptions<Collection>;
+
+export interface TransformOptions<Collection> {
+  collection: Collection;
+  filePath: string;
+  source: string;
+}
+
 export interface Plugin {
   name?: string;
 
@@ -48,26 +57,30 @@ export interface Plugin {
     server: ServerContext,
   ) => Awaitable<void>;
 
-  /**
-   * Transform frontmatter/metadata
-   */
-  metadata?: (
-    this: PluginContext & {
-      collection: DocCollectionItem | MetaCollectionItem;
-      filePath: string;
-    },
-    data: unknown,
-  ) => Awaitable<unknown | void>;
+  meta?: {
+    /**
+     * Transform metadata
+     */
+    transform?: (
+      this: CompilationContext<MetaCollectionItem>,
+      data: unknown,
+    ) => Awaitable<unknown | void>;
+  };
 
   doc?: {
+    /**
+     * Transform frontmatter
+     */
+    frontmatter?: (
+      this: CompilationContext<DocCollectionItem>,
+      data: Record<string, unknown>,
+    ) => Awaitable<Record<string, unknown> | void>;
+
     /**
      * Transform `vfile` on compilation stage
      */
     vfile?: (
-      this: PluginContext & {
-        collection: DocCollectionItem;
-        filePath: string;
-      },
+      this: CompilationContext<DocCollectionItem>,
       file: VFile,
     ) => Awaitable<VFile | void>;
   };
@@ -120,6 +133,28 @@ export function createCore(
 ) {
   let config: LoadedConfig;
   let plugins: Plugin[];
+
+  async function transformMetadata<T>(
+    {
+      collection,
+      filePath,
+      source,
+    }: TransformOptions<DocCollectionItem | MetaCollectionItem>,
+    data: unknown,
+  ): Promise<T> {
+    if (collection.schema) {
+      data = await validate(
+        collection.schema,
+        data,
+        { path: filePath, source },
+        collection.type === 'doc'
+          ? `invalid frontmatter in ${filePath}`
+          : `invalid data in ${filePath}`,
+      );
+    }
+
+    return data as T;
+  }
 
   const core = {
     _options: options,
@@ -187,55 +222,56 @@ export function createCore(
       );
       console.log(`[MDX] generated files in ${performance.now() - start}ms`);
     },
-    async metadata(
-      collection: DocCollectionItem | MetaCollectionItem,
-      filePath: string,
-      source: string,
-      data: unknown,
-    ) {
-      if (collection.schema) {
-        data = await validate(
-          collection.schema,
-          data,
-          { path: filePath, source },
-          collection.type === 'doc'
-            ? `invalid frontmatter in ${filePath}`
-            : `invalid data in ${filePath}`,
-        );
-      }
 
+    async transformMeta(
+      options: TransformOptions<MetaCollectionItem>,
+      data: unknown,
+    ): Promise<unknown> {
       const ctx = {
         ...pluginContext,
-        filePath,
-        collection,
+        ...options,
       };
 
+      data = await transformMetadata(options, data);
       for (const plugin of plugins) {
-        if (plugin.metadata)
-          data = (await plugin.metadata.call(ctx, data)) ?? data;
+        if (plugin.meta?.transform)
+          data = (await plugin.meta.transform.call(ctx, data)) ?? data;
       }
 
       return data;
     },
-    doc: {
-      async vfile(
-        collection: DocCollectionItem,
-        filePath: string,
-        file: VFile,
-      ): Promise<VFile> {
-        const ctx = {
-          ...pluginContext,
-          filePath,
-          collection,
-        };
+    async transformFrontmatter(
+      options: TransformOptions<DocCollectionItem>,
+      data: Record<string, unknown>,
+    ): Promise<Record<string, unknown>> {
+      const ctx = {
+        ...pluginContext,
+        ...options,
+      };
 
-        for (const plugin of plugins) {
-          if (plugin.doc?.vfile)
-            file = (await plugin.doc.vfile.call(ctx, file)) ?? file;
-        }
+      data = await transformMetadata(options, data);
+      for (const plugin of plugins) {
+        if (plugin.doc?.frontmatter)
+          data = (await plugin.doc.frontmatter.call(ctx, data)) ?? data;
+      }
 
-        return file;
-      },
+      return data;
+    },
+    async transformVFile(
+      options: TransformOptions<DocCollectionItem>,
+      file: VFile,
+    ): Promise<VFile> {
+      const ctx = {
+        ...pluginContext,
+        ...options,
+      };
+
+      for (const plugin of plugins) {
+        if (plugin.doc?.vfile)
+          file = (await plugin.doc.vfile.call(ctx, file)) ?? file;
+      }
+
+      return file;
     },
   };
 

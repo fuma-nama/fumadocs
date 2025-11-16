@@ -1,9 +1,10 @@
 import type { StandardSchemaV1 } from '@standard-schema/spec';
-import type { DefaultMDXOptions } from '@/loaders/mdx/preset';
+import type { MDXPresetOptions } from '@/config/preset';
 import type { ProcessorOptions } from '@mdx-js/mdx';
 import { frontmatterSchema, metaSchema } from '@/config/zod-4';
 import type { PostprocessOptions } from '@/loaders/mdx/remark-postprocess';
 import type { PluginOption } from '@/core';
+import type { BuildEnvironment } from './build';
 
 export type CollectionSchema<Schema extends StandardSchemaV1, Context> =
   | Schema
@@ -39,7 +40,9 @@ export interface DocCollection<
   type: 'doc';
 
   postprocess?: Partial<PostprocessOptions>;
-  mdxOptions?: ProcessorOptions | (() => Promise<ProcessorOptions>);
+  mdxOptions?:
+    | ProcessorOptions
+    | ((environment: BuildEnvironment) => Promise<ProcessorOptions>);
 
   /**
    * Load files with async
@@ -65,12 +68,6 @@ export interface DocsCollection<
   meta: MetaCollection<MetaSchema>;
 }
 
-type GlobalConfigMDXOptions =
-  | ({ preset?: 'fumadocs' } & DefaultMDXOptions)
-  | ({
-      preset: 'minimal';
-    } & ProcessorOptions);
-
 export interface GlobalConfig {
   collections?: Record<string, AnyCollection>;
   plugins?: PluginOption[];
@@ -78,9 +75,9 @@ export interface GlobalConfig {
   /**
    * Configure global MDX options
    *
-   * @remarks `GlobalConfigMDXOptions`
+   * @remarks `MDXPresetOptions`
    */
-  mdxOptions?: GlobalConfigMDXOptions | (() => Promise<GlobalConfigMDXOptions>);
+  mdxOptions?: MDXPresetOptions | (() => Promise<MDXPresetOptions>);
 
   /**
    * specify a directory to access & store cache (disabled during development mode).

@@ -78,11 +78,9 @@ export function createMdxLoader(configLoader: ConfigLoader): Loader {
       }
 
       if (docCollection) {
-        matter.data = await configLoader.core.metadata(
-          docCollection,
-          filePath,
-          value,
-          matter.data,
+        matter.data = await configLoader.core.transformFrontmatter(
+          { collection: docCollection, filePath, source: value },
+          matter.data as Record<string, unknown>,
         );
       }
 
