@@ -64,7 +64,9 @@ export function Navbar(props: ComponentProps<'div'>) {
   );
 }
 
-export function NavbarLinkItem({
+export { NavigationMenuItem };
+
+export function NavigationMenuLinkItem({
   item,
   ...props
 }: {
@@ -114,11 +116,8 @@ export function NavbarLinkItem({
     });
 
     return (
-      <NavigationMenuItem>
-        <NavigationMenuTrigger
-          {...props}
-          className={cn(navItemVariants(), 'rounded-md', props.className)}
-        >
+      <NavigationMenuItem {...props}>
+        <NavigationMenuTrigger className={cn(navItemVariants(), 'rounded-md')}>
           {item.url ? (
             <Link href={item.url} external={item.external}>
               {item.text}
@@ -135,16 +134,12 @@ export function NavbarLinkItem({
   }
 
   return (
-    <NavigationMenuItem>
+    <NavigationMenuItem {...props}>
       <NavigationMenuLink asChild>
         <BaseLinkItem
           item={item}
           aria-label={item.type === 'icon' ? item.label : undefined}
-          {...props}
-          className={cn(
-            navItemVariants({ variant: item.type }),
-            props.className,
-          )}
+          className={cn(navItemVariants({ variant: item.type }))}
         >
           {item.type === 'icon' ? item.icon : item.text}
         </BaseLinkItem>
@@ -153,9 +148,7 @@ export function NavbarLinkItem({
   );
 }
 
-export const Menu = NavigationMenuItem;
-
-export function MenuLinkItem({
+export function MobileNavigationMenuLinkItem({
   item,
   ...props
 }: {
@@ -187,7 +180,7 @@ export function MenuLinkItem({
           )}
         </p>
         {item.items.map((child, i) => (
-          <MenuLinkItem key={i} item={child} />
+          <MobileNavigationMenuLinkItem key={i} item={child} />
         ))}
       </div>
     );
@@ -220,7 +213,7 @@ export function MenuLinkItem({
   );
 }
 
-export function MenuTrigger({
+export function MobileNavigationMenuTrigger({
   enableHover = false,
   ...props
 }: ComponentProps<typeof NavigationMenuTrigger> & {
@@ -239,7 +232,7 @@ export function MenuTrigger({
   );
 }
 
-export function MenuContent(
+export function MobileNavigationMenuContent(
   props: ComponentProps<typeof NavigationMenuContent>,
 ) {
   return (

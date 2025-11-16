@@ -18,7 +18,7 @@ const tiers = [
     color: 'text-yellow-600 dark:text-yellow-400',
   },
   {
-    name: 'Sliver Sponsor',
+    name: 'Silver Sponsor',
     min: 128,
     color: 'text-fd-muted-foreground',
   },
