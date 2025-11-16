@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-core",
-  "version": "16.0.10",
+  "version": "16.0.11",
   "description": "The library for building a documentation website in any React.js framework",
   "keywords": [
     "Fumadocs",
@@ -170,7 +170,7 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router": "7.x.x",
-    "waku": "^0.26.0"
+    "waku": "^0.26.0 || ^0.27.0"
   },
   "peerDependenciesMeta": {
     "@mixedbread/sdk": {
