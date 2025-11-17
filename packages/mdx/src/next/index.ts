@@ -43,7 +43,7 @@ export function createMDX(createOptions: CreateMDXOptions = {}) {
 
   return (nextConfig: NextConfig = {}): NextConfig => {
     const loaderOptions: WebpackLoaderOptions = {
-      ...core._options,
+      ...core.getOptions(),
       compiledConfigPath: core.getCompiledConfigPath(),
       isDev,
     };
@@ -133,13 +133,14 @@ async function init(dev: boolean, core: Core): Promise<void> {
 
   async function devServer() {
     const { FSWatcher } = await import('chokidar');
+    const { configPath, outDir } = core.getOptions();
     const watcher = new FSWatcher({
       ignoreInitial: true,
       persistent: true,
-      ignored: [core._options.outDir],
+      ignored: [outDir],
     });
 
-    watcher.add(core._options.configPath);
+    watcher.add(configPath);
     for (const collection of core.getConfig().collectionList) {
       if (collection.type === 'docs') {
         watcher.add(collection.docs.dir);
@@ -153,8 +154,9 @@ async function init(dev: boolean, core: Core): Promise<void> {
       console.log('[MDX] started dev server');
     });
 
+    const absoluteConfigPath = path.resolve(configPath);
     watcher.on('all', async (_event, file) => {
-      if (path.resolve(file) === path.resolve(core._options.configPath)) {
+      if (path.resolve(file) === absoluteConfigPath) {
         // skip plugin listeners
         watcher.removeAllListeners();
 

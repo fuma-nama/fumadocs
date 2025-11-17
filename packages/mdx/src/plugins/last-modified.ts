@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { x } from 'tinyexec';
 import type { Plugin } from '@/core';
+import { ident } from '@/utils/codegen';
 
 const cache = new Map<string, Promise<Date>>();
 
@@ -15,7 +16,20 @@ export interface LastModifiedPluginOptions {
    * @defaultValue 'git'
    */
   versionControl?: 'git';
+
+  /**
+   * Filter the collections to include by names
+   */
+  filter?: (collection: string) => boolean;
 }
+
+const ExtendTypes = `{
+  /**
+   * Last modified date of document file, obtained from version control.
+   *
+   */
+  lastModified?: Date;
+}`;
 
 /**
  * Injects `lastModified` property to page exports.
@@ -23,16 +37,36 @@ export interface LastModifiedPluginOptions {
 export default function lastModified(
   options: LastModifiedPluginOptions = {},
 ): Plugin {
-  const { versionControl = 'git' } = options;
+  const { versionControl = 'git', filter = () => true } = options;
 
   return {
     name: 'last-modified',
+    'index-file': {
+      generateTypeConfig() {
+        const lines: string[] = [];
+        lines.push('{');
+        lines.push('  DocData: {');
+        for (const collection of this.core.getConfig().collectionList) {
+          if (filter(collection.name)) {
+            lines.push(ident(`${collection.name}: ${ExtendTypes},`, 2));
+          }
+        }
+        lines.push('  }');
+        lines.push('}');
+        return lines.join('\n');
+      },
+      serverOptions(options) {
+        options.doc ??= {};
+        options.doc.passthroughs ??= [];
+        options.doc.passthroughs.push('lastModified');
+      },
+    },
     doc: {
       async vfile(file) {
+        if (!filter(this.collection.name)) return;
+
         if (versionControl === 'git') {
-          const timestamp = await getGitTimestamp(this.filePath).then((v) =>
-            v?.getTime(),
-          );
+          const timestamp = await getGitTimestamp(this.filePath);
           if (timestamp === undefined) return;
 
           file.data['mdx-export'] ??= [];

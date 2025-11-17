@@ -26,11 +26,13 @@ export function createMdxPlugin(options: MdxPluginOptions = {}): BunPlugin {
     name: 'bun-plugin-fumadocs-mdx',
     async setup(build) {
       const importPath = pathToFileURL(configPath).href;
-      const core = await createCore({
+      const core = createCore({
         environment,
         outDir,
         configPath,
-      }).init({
+      });
+
+      await core.init({
         config: buildConfig(await import(importPath)),
       });
 

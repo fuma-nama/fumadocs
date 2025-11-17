@@ -6,9 +6,11 @@ import type {
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import type { FSWatcher } from 'chokidar';
-import { removeFileCache } from './utils/codegen/cache';
 import { validate } from './utils/validation';
 import type { VFile } from 'vfile';
+import type { IndexFilePlugin } from './plugins/index-file';
+import type { PostprocessOptions } from './config';
+import { ident } from './utils/codegen';
 
 type Awaitable<T> = T | Promise<T>;
 
@@ -33,7 +35,7 @@ export interface TransformOptions<Collection> {
   source: string;
 }
 
-export interface Plugin {
+export interface Plugin extends IndexFilePlugin {
   name?: string;
 
   /**
@@ -157,7 +159,6 @@ export function createCore(
   }
 
   const core = {
-    _options: options,
     /**
      * Convenient cache store, reset when config changes
      */
@@ -166,6 +167,7 @@ export function createCore(
       config = await newConfig;
       this.cache.clear();
       plugins = await getPlugins([
+        postprocessPlugin(),
         ...defaultPlugins,
         ...(config.global.plugins ?? []),
       ]);
@@ -174,8 +176,9 @@ export function createCore(
         const out = await plugin.config?.call(pluginContext, config);
         if (out) config = out;
       }
-
-      return this;
+    },
+    getOptions() {
+      return options;
     },
     getConfig(): LoadedConfig {
       return config;
@@ -186,11 +189,13 @@ export function createCore(
     getCompiledConfigPath(): string {
       return path.join(options.outDir, 'source.config.mjs');
     },
+    getPlugins() {
+      return plugins;
+    },
+    getPluginContext(): PluginContext {
+      return pluginContext;
+    },
     async initServer(server: ServerContext): Promise<void> {
-      server.watcher?.on('all', async (event, file) => {
-        if (event === 'change') removeFileCache(file);
-      });
-
       for (const plugin of plugins) {
         await plugin.configureServer?.call(pluginContext, server);
       }
@@ -282,6 +287,48 @@ export function createCore(
   };
 
   return core;
+}
+
+function postprocessPlugin(): Plugin {
+  const LinkReferenceTypes = `{
+  /**
+   * extracted references (e.g. hrefs, paths), useful for analyzing relationships between pages.
+   */
+  extractedReferences?: import('fumadocs-mdx').ExtractedReference[];
+}`;
+
+  return {
+    'index-file': {
+      generateTypeConfig() {
+        const lines: string[] = [];
+        lines.push('{');
+        lines.push('  DocData: {');
+        for (const collection of this.core.getConfig().collectionList) {
+          let postprocessOptions: Partial<PostprocessOptions> | undefined;
+          switch (collection.type) {
+            case 'doc':
+              postprocessOptions = collection.postprocess;
+              break;
+            case 'docs':
+              postprocessOptions = collection.docs.postprocess;
+              break;
+          }
+
+          if (postprocessOptions?.extractLinkReferences) {
+            lines.push(ident(`${collection.name}: ${LinkReferenceTypes},`, 2));
+          }
+        }
+        lines.push('  }');
+        lines.push('}');
+        return lines.join('\n');
+      },
+      serverOptions(options) {
+        options.doc ??= {};
+        options.doc.passthroughs ??= [];
+        options.doc.passthroughs.push('extractedReferences');
+      },
+    },
+  };
 }
 
 export type Core = ReturnType<typeof createCore>;

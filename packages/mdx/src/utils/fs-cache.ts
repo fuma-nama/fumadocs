@@ -17,7 +17,7 @@ function toFullPath(file: string) {
   return file;
 }
 
-export async function readFileWithCache(file: string): Promise<string> {
+export function readFileWithCache(file: string): Promise<string> {
   const fullPath = toFullPath(file);
   const cached = map.get(fullPath);
   if (cached) return cached;

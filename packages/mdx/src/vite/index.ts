@@ -44,9 +44,11 @@ export default async function mdx(
   pluginOptions: PluginOptions = {},
 ): Promise<Plugin> {
   const options = applyDefaults(pluginOptions);
-  const core = await createViteCore(options).init({
+  const core = createViteCore(options);
+  await core.init({
     config: buildConfig(config),
   });
+
   const configLoader = createIntegratedConfigLoader(core);
   const mdxLoader = toVite(createMdxLoader(configLoader));
   const metaLoader = toVite(
@@ -104,7 +106,6 @@ export default async function mdx(
 export async function postInstall(pluginOptions: PluginOptions = {}) {
   const { loadConfig } = await import('@/config/load-from-file');
   const core = createViteCore(applyDefaults(pluginOptions));
-
   await core.init({
     config: loadConfig(core, true),
   });
