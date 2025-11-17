@@ -35,7 +35,7 @@ export default function ScalarPlayground({
       )}
     >
       <MethodLabel className="text-xs">{method}</MethodLabel>
-      <code className="flex-1 overflow-auto text-nowrap text-[13px] text-fd-muted-foreground">
+      <code className="flex-1 overflow-auto text-nowrap text-[0.8125rem] text-fd-muted-foreground">
         {path}
       </code>
       <ApiClientModalProvider

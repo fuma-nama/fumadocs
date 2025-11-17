@@ -34,7 +34,7 @@ function pageTreeCodeTitles(): LoaderPlugin {
         ) {
           return {
             ...node,
-            name: <code className="text-[13px]">{node.name}</code>,
+            name: <code className="text-[0.8125rem]">{node.name}</code>,
           };
         }
         return node;

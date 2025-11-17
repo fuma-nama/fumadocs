@@ -212,7 +212,7 @@ export function DocsLayout({
           <div className="flex">
             <Link
               href={nav.url ?? '/'}
-              className="inline-flex text-[15px] items-center gap-2.5 font-medium me-auto"
+              className="inline-flex text-[0.9375rem] items-center gap-2.5 font-medium me-auto"
             >
               {nav.title}
             </Link>

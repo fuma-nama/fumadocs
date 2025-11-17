@@ -67,7 +67,7 @@ export default function ServerSelect(props: HTMLAttributes<HTMLDivElement>) {
           <SelectContent>
             {servers.map((item) => (
               <SelectItem key={item.url} value={item.url}>
-                <code className="text-[13px]">{item.url}</code>
+                <code className="text-[0.8125rem]">{item.url}</code>
                 <p className="text-fd-muted-foreground">{item.description}</p>
               </SelectItem>
             ))}

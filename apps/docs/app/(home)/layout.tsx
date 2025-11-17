@@ -41,7 +41,7 @@ export default function Layout({ children }: LayoutProps<'/'>) {
               <NavbarMenuTrigger>
                 <Link href="/docs/ui">Documentation</Link>
               </NavbarMenuTrigger>
-              <NavbarMenuContent className="text-[15px]">
+              <NavbarMenuContent>
                 <NavbarMenuLink href="/docs/ui" className="md:row-span-2">
                   <div className="-mx-3 -mt-3">
                     <Image
