@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 16.0.13
+
+### Patch Changes
+
+- 88dae4d: Reduce `px` usage
+  - fumadocs-core@16.0.13
+
 ## 16.0.12
 
 ### Patch Changes
