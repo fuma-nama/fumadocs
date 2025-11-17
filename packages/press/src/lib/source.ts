@@ -1,9 +1,10 @@
 /// <reference types="fumadocs-mdx" />
 import { type InferPageType, loader } from 'fumadocs-core/source';
-import { fromConfig } from 'fumadocs-mdx/runtime/server';
+import { server } from 'fumadocs-mdx/runtime/server';
 import type { FumadocsMDXConfig } from '../config/content.js';
+import type { InternalTypeConfig } from 'fumadocs-mdx/runtime/types';
 
-const create = fromConfig<FumadocsMDXConfig>();
+const create = server<FumadocsMDXConfig, InternalTypeConfig>();
 
 export const docs = await create.docsLazy(
   'docs',
