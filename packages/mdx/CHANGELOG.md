@@ -1,5 +1,12 @@
 # next-docs-mdx
 
+## 14.0.1
+
+### Patch Changes
+
+- 52dabc3: Support type-safe collection generation
+  - fumadocs-core@16.0.13
+
 ## 14.0.0
 
 ### Major Changes
