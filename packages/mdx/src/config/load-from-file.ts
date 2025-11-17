@@ -5,11 +5,12 @@ import type { Core } from '@/core';
 
 async function compileConfig(core: Core) {
   const { build } = await import('esbuild');
+  const { configPath, outDir } = core.getOptions();
 
   const transformed = await build({
-    entryPoints: [{ in: core._options.configPath, out: 'source.config' }],
+    entryPoints: [{ in: configPath, out: 'source.config' }],
     bundle: true,
-    outdir: core._options.outDir,
+    outdir: outDir,
     target: 'node20',
     write: true,
     platform: 'node',

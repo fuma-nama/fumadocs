@@ -1,9 +1,18 @@
 import { type ReactNode, type FC, lazy, createElement } from 'react';
-import type { CompiledMDXFile } from './server';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type { DocCollection, DocsCollection } from '@/config/define';
+import type { CompiledMDXProperties } from '@/loaders/mdx/build-mdx';
+import type { InternalTypeConfig } from './types';
 
-export interface ClientLoaderOptions<Frontmatter, Props> {
+type CompiledMDXFile<
+  Name extends string,
+  Frontmatter,
+  TC extends InternalTypeConfig,
+> = CompiledMDXProperties<Frontmatter> &
+  TC['DocData'][Name] &
+  Record<string, unknown>;
+
+export interface ClientLoaderOptions<Doc, Props> {
   /**
    * Loader ID (usually your collection name)
    *
@@ -15,11 +24,11 @@ export interface ClientLoaderOptions<Frontmatter, Props> {
    */
   id?: string;
 
-  component: (loaded: CompiledMDXFile<Frontmatter>, props: Props) => ReactNode;
+  component: (loaded: Doc, props: Props) => ReactNode;
 }
 
-export interface ClientLoader<Frontmatter, Props> {
-  preload: (path: string) => Promise<CompiledMDXFile<Frontmatter>>;
+export interface ClientLoader<Doc, Props> {
+  preload: (path: string) => Promise<Doc>;
   /**
    * Get a component that renders content with `React.lazy`.
    */
@@ -31,37 +40,39 @@ export interface ClientLoader<Frontmatter, Props> {
   useContent: (path: string, props: Props) => ReactNode;
 }
 
-export type BrowserCreate<Config> = ReturnType<typeof fromConfig<Config>>;
+export type BrowserCreate<Config, TC extends InternalTypeConfig> = ReturnType<
+  typeof browser<Config, TC>
+>;
 
-export interface DocCollectionEntry<Frontmatter> {
-  raw: Record<string, () => Promise<CompiledMDXFile<Frontmatter>>>;
+export interface DocCollectionEntry<
+  Name extends string = string,
+  Frontmatter = unknown,
+  TC extends InternalTypeConfig = InternalTypeConfig,
+> {
+  raw: Record<string, () => Promise<CompiledMDXFile<Name, Frontmatter, TC>>>;
+
   createClientLoader: <Props extends object>(
-    options: ClientLoaderOptions<Frontmatter, Props>,
-  ) => ClientLoader<Frontmatter, Props>;
+    options: ClientLoaderOptions<CompiledMDXFile<Name, Frontmatter, TC>, Props>,
+  ) => ClientLoader<CompiledMDXFile<Name, Frontmatter, TC>, Props>;
 }
 
-export function fromConfig<Config>() {
+export function browser<Config, TC extends InternalTypeConfig>() {
   return {
-    doc<Name extends keyof Config>(
+    doc<Name extends keyof Config & string>(
       _name: Name,
       glob: Record<string, () => Promise<unknown>>,
     ) {
-      const raw = glob as Record<
-        string,
-        () => Promise<CompiledMDXFile<unknown>>
-      >;
-
-      const out: DocCollectionEntry<unknown> = {
-        raw,
+      const out: DocCollectionEntry = {
+        raw: glob as DocCollectionEntry['raw'],
         createClientLoader({ id = _name as string, ...options }) {
-          return createClientLoader(raw, { id, ...options });
+          return createClientLoader(this.raw, { id, ...options });
         },
       };
 
       return out as Config[Name] extends
         | DocCollection<infer Schema>
         | DocsCollection<infer Schema>
-        ? DocCollectionEntry<StandardSchemaV1.InferOutput<Schema>>
+        ? DocCollectionEntry<Name, StandardSchemaV1.InferOutput<Schema>, TC>
         : never;
     },
   };
@@ -70,20 +81,20 @@ export function fromConfig<Config>() {
 const loaderStore = new Map<
   string,
   {
-    preloaded: Map<string, CompiledMDXFile<any>>;
+    preloaded: Map<string, CompiledMDXProperties>;
   }
 >();
 
-export function createClientLoader<Frontmatter, Props extends object = object>(
-  globEntries: Record<string, () => Promise<CompiledMDXFile<Frontmatter>>>,
-  options: ClientLoaderOptions<Frontmatter, Props>,
-): ClientLoader<Frontmatter, Props> {
+export function createClientLoader<
+  Doc = CompiledMDXProperties,
+  Props extends object = object,
+>(
+  globEntries: Record<string, () => Promise<Doc>>,
+  options: ClientLoaderOptions<Doc, Props>,
+): ClientLoader<Doc, Props> {
   const { id = '', component } = options;
   const renderers: Record<string, FC<Props>> = {};
-  const loaders = new Map<
-    string,
-    () => Promise<CompiledMDXFile<Frontmatter>>
-  >();
+  const loaders = new Map<string, () => Promise<Doc>>();
   const store = loaderStore.get(id) ?? {
     preloaded: new Map(),
   };

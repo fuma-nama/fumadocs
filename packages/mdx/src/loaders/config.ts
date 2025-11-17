@@ -27,7 +27,7 @@ export function createStandaloneConfigLoader({
   async function getConfigHash(): Promise<string> {
     if (mode === 'production') return 'static';
 
-    const stats = await fs.stat(core._options.configPath).catch(() => {
+    const stats = await fs.stat(core.getOptions().configPath).catch(() => {
       throw new Error('Cannot find config file');
     });
 

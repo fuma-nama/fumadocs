@@ -165,7 +165,7 @@ export function CreateAppAnimation() {
       {tick > timeWindowOpen && (
         <LaunchAppWindow className="absolute bottom-5 right-4 z-10 animate-in fade-in slide-in-from-top-10" />
       )}
-      <pre className="overflow-hidden rounded-xl border text-[13px] shadow-lg bg-fd-card">
+      <pre className="overflow-hidden rounded-xl border text-sm shadow-lg bg-fd-card">
         <div className="flex flex-row items-center gap-2 border-b px-4 py-2">
           <TerminalIcon className="size-4" />{' '}
           <span className="font-bold">Terminal</span>

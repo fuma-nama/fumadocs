@@ -104,7 +104,7 @@ export function NavigationMenuLinkItem({
             {rest.children ?? (
               <>
                 {banner}
-                <p className="text-[15px] font-medium">{child.text}</p>
+                <p className="text-base font-medium">{child.text}</p>
                 <p className="text-sm text-fd-muted-foreground empty:hidden">
                   {child.description}
                 </p>

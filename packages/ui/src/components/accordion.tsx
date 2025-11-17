@@ -95,7 +95,7 @@ export const Accordion = forwardRef<
           {id ? <CopyButton id={id} /> : null}
         </AccordionPrimitive.Header>
         <AccordionPrimitive.Content className="overflow-hidden data-[state=closed]:animate-fd-accordion-up data-[state=open]:animate-fd-accordion-down">
-          <div className="px-4 pb-2 text-[15px] prose-no-margin">
+          <div className="px-4 pb-2 text-[0.9375rem] prose-no-margin">
             {children}
           </div>
         </AccordionPrimitive.Content>

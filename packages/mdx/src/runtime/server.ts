@@ -5,127 +5,80 @@ import type {
   VirtualFile,
 } from 'fumadocs-core/source';
 import * as path from 'node:path';
-import type { StructuredData } from 'fumadocs-core/mdx-plugins';
-import type { TOCItemType } from 'fumadocs-core/toc';
-import type { MDXContent } from 'mdx/types';
-import type { ExtractedReference } from '@/loaders/mdx/remark-postprocess';
-import type { Root } from 'mdast';
 import type { DocCollection, DocsCollection, MetaCollection } from '@/config';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type { CompiledMDXProperties } from '@/loaders/mdx/build-mdx';
-
-export interface FileInfo {
-  /**
-   * virtualized path for Source API
-   */
-  path: string;
-
-  /**
-   * the file path in file system
-   */
-  fullPath: string;
-}
-
-export interface DocData {
-  /**
-   * Compiled MDX content (as component)
-   */
-  body: MDXContent;
-
-  /**
-   * table of contents generated from content.
-   */
-  toc: TOCItemType[];
-
-  /**
-   * structured data for document search indexing.
-   */
-  structuredData: StructuredData;
-
-  /**
-   * Raw exports from the compiled MDX file.
-   */
-  _exports: Record<string, unknown>;
-
-  /**
-   * Last modified date of document file, obtained from version control.
-   *
-   * Added by the `last-modified` plugin.
-   */
-  lastModified?: Date;
-
-  /**
-   * extracted references (e.g. hrefs, paths), useful for analyzing relationships between pages.
-   */
-  extractedReferences?: ExtractedReference[];
-}
-
-export interface DocMethods {
-  /**
-   * file info
-   */
-  info: FileInfo;
-
-  /**
-   * get document as text.
-   *
-   * - `type: raw` - read the original content from file system.
-   * - `type: processed` - get the processed Markdown content, only available when `includeProcessedMarkdown` is enabled on collection config.
-   */
-  getText: (type: 'raw' | 'processed') => Promise<string>;
-
-  getMDAST: () => Promise<Root>;
-}
-
-export interface MetaMethods {
-  /**
-   * file info
-   */
-  info: FileInfo;
-}
+import type {
+  InternalTypeConfig,
+  DocData,
+  DocMethods,
+  FileInfo,
+  MetaMethods,
+} from './types';
 
 export type MetaCollectionEntry<Data> = Data & MetaMethods;
 
-export type DocCollectionEntry<Frontmatter> = DocData &
-  DocMethods &
+export type DocCollectionEntry<
+  Name extends string = string,
+  Frontmatter = unknown,
+  TC extends InternalTypeConfig = InternalTypeConfig,
+> = DocData & DocMethods & Frontmatter & TC['DocData'][Name];
+
+export type AsyncDocCollectionEntry<
+  Name extends string = string,
+  Frontmatter = unknown,
+  TC extends InternalTypeConfig = InternalTypeConfig,
+> = {
+  load: () => Promise<DocData & TC['DocData'][Name]>;
+} & DocMethods &
   Frontmatter;
 
-export type AsyncDocCollectionEntry<Frontmatter> = DocMethods & {
-  load: () => Promise<DocData>;
-} & Frontmatter;
-
-export type CompiledMDXFile<Frontmatter> = CompiledMDXProperties<Frontmatter> &
-  Record<string, unknown>;
-
 export interface DocsCollectionEntry<
-  Frontmatter extends PageData,
-  Meta extends MetaData,
+  Name extends string = string,
+  Frontmatter extends PageData = PageData,
+  Meta extends MetaData = MetaData,
+  TC extends InternalTypeConfig = InternalTypeConfig,
 > {
-  docs: DocCollectionEntry<Frontmatter>[];
+  docs: DocCollectionEntry<Name, Frontmatter, TC>[];
   meta: MetaCollectionEntry<Meta>[];
   toFumadocsSource: () => Source<{
-    pageData: DocCollectionEntry<Frontmatter>;
+    pageData: DocCollectionEntry<Name, Frontmatter, TC>;
     metaData: MetaCollectionEntry<Meta>;
   }>;
 }
 
 export interface AsyncDocsCollectionEntry<
-  Frontmatter extends PageData,
-  Meta extends MetaData,
+  Name extends string = string,
+  Frontmatter extends PageData = PageData,
+  Meta extends MetaData = MetaData,
+  TC extends InternalTypeConfig = InternalTypeConfig,
 > {
-  docs: AsyncDocCollectionEntry<Frontmatter>[];
+  docs: AsyncDocCollectionEntry<Name, Frontmatter, TC>[];
   meta: MetaCollectionEntry<Meta>[];
   toFumadocsSource: () => Source<{
-    pageData: AsyncDocCollectionEntry<Frontmatter>;
+    pageData: AsyncDocCollectionEntry<Name, Frontmatter, TC>;
     metaData: MetaCollectionEntry<Meta>;
   }>;
 }
 
 type AwaitableGlobEntries<T> = Record<string, T | (() => Promise<T>)>;
 
-export type ServerCreate<Config> = ReturnType<typeof fromConfig<Config>>;
+export type ServerCreate<
+  Config,
+  TC extends InternalTypeConfig = InternalTypeConfig,
+> = ReturnType<typeof server<Config, TC>>;
 
-export function fromConfig<Config>() {
+export interface ServerOptions {
+  doc?: {
+    passthroughs?: string[];
+  };
+}
+
+export function server<Config, TC extends InternalTypeConfig>(
+  options: ServerOptions = {},
+) {
+  const { doc: { passthroughs: docPassthroughs = [] } = {} } = options;
+
   function fileInfo(file: string, base: string): FileInfo {
     if (file.startsWith('./')) {
       file = file.slice(2);
@@ -137,43 +90,48 @@ export function fromConfig<Config>() {
     };
   }
 
-  function mapDocData(entry: CompiledMDXFile<any>): DocData {
-    return {
+  function mapDocData(entry: CompiledMDXProperties): DocData {
+    const data: DocData = {
       body: entry.default,
       toc: entry.toc,
-      extractedReferences: entry.extractedReferences,
       structuredData: entry.structuredData,
-      lastModified: entry.lastModified,
-      _exports: entry,
+      _exports: entry as unknown as Record<string, unknown>,
     };
+
+    for (const key of docPassthroughs) {
+      // @ts-expect-error -- handle passthrough properties
+      data[key] = entry[key];
+    }
+
+    return data;
   }
 
   return {
-    async doc<Name extends keyof Config>(
+    async doc<Name extends keyof Config & string>(
       _name: Name,
       base: string,
       glob: AwaitableGlobEntries<unknown>,
     ) {
       const out = await Promise.all(
         Object.entries(glob).map(async ([k, v]) => {
-          const data: CompiledMDXFile<unknown> =
+          const data: CompiledMDXProperties =
             typeof v === 'function' ? await v() : v;
 
           return {
             ...mapDocData(data),
             ...(data.frontmatter as object),
             ...createDocMethods(fileInfo(k, base), () => data),
-          } satisfies DocCollectionEntry<unknown>;
+          } satisfies DocCollectionEntry;
         }),
       );
 
       return out as unknown as Config[Name] extends
         | DocCollection<infer Schema>
         | DocsCollection<infer Schema>
-        ? DocCollectionEntry<StandardSchemaV1.InferOutput<Schema>>[]
+        ? DocCollectionEntry<Name, StandardSchemaV1.InferOutput<Schema>, TC>[]
         : never;
     },
-    async docLazy<Name extends keyof Config>(
+    async docLazy<Name extends keyof Config & string>(
       _name: Name,
       base: string,
       head: AwaitableGlobEntries<unknown>,
@@ -182,7 +140,7 @@ export function fromConfig<Config>() {
       const out = await Promise.all(
         Object.entries(head).map(async ([k, v]) => {
           const data = typeof v === 'function' ? await v() : v;
-          const content = body[k] as () => Promise<CompiledMDXFile<unknown>>;
+          const content = body[k] as () => Promise<CompiledMDXProperties>;
 
           return {
             ...data,
@@ -190,17 +148,21 @@ export function fromConfig<Config>() {
             async load() {
               return mapDocData(await content());
             },
-          } satisfies AsyncDocCollectionEntry<unknown>;
+          } satisfies AsyncDocCollectionEntry;
         }),
       );
 
       return out as unknown as Config[Name] extends
         | DocCollection<infer Schema>
         | DocsCollection<infer Schema>
-        ? AsyncDocCollectionEntry<StandardSchemaV1.InferOutput<Schema>>[]
+        ? AsyncDocCollectionEntry<
+            Name,
+            StandardSchemaV1.InferOutput<Schema>,
+            TC
+          >[]
         : never;
     },
-    async meta<Name extends keyof Config>(
+    async meta<Name extends keyof Config & string>(
       _name: Name,
       base: string,
       glob: AwaitableGlobEntries<unknown>,
@@ -223,7 +185,7 @@ export function fromConfig<Config>() {
         : never;
     },
 
-    async docs<Name extends keyof Config>(
+    async docs<Name extends keyof Config & string>(
       name: Name,
       base: string,
       metaGlob: AwaitableGlobEntries<unknown>,
@@ -235,7 +197,7 @@ export function fromConfig<Config>() {
         toFumadocsSource() {
           return toFumadocsSource(this.docs, this.meta);
         },
-      } satisfies DocsCollectionEntry<PageData, MetaData>;
+      } satisfies DocsCollectionEntry;
 
       return entry as Config[Name] extends DocsCollection<
         infer Page,
@@ -244,14 +206,16 @@ export function fromConfig<Config>() {
         ? StandardSchemaV1.InferOutput<Page> extends PageData
           ? StandardSchemaV1.InferOutput<Meta> extends MetaData
             ? DocsCollectionEntry<
+                Name,
                 StandardSchemaV1.InferOutput<Page>,
-                StandardSchemaV1.InferOutput<Meta>
+                StandardSchemaV1.InferOutput<Meta>,
+                TC
               >
             : never
           : never
         : never;
     },
-    async docsLazy<Name extends keyof Config>(
+    async docsLazy<Name extends keyof Config & string>(
       name: Name,
       base: string,
       metaGlob: AwaitableGlobEntries<unknown>,
@@ -264,7 +228,7 @@ export function fromConfig<Config>() {
         toFumadocsSource() {
           return toFumadocsSource(this.docs, this.meta);
         },
-      } satisfies AsyncDocsCollectionEntry<PageData, MetaData>;
+      } satisfies AsyncDocsCollectionEntry;
 
       return entry as Config[Name] extends DocsCollection<
         infer Page,
@@ -273,8 +237,10 @@ export function fromConfig<Config>() {
         ? StandardSchemaV1.InferOutput<Page> extends PageData
           ? StandardSchemaV1.InferOutput<Meta> extends MetaData
             ? AsyncDocsCollectionEntry<
+                Name,
                 StandardSchemaV1.InferOutput<Page>,
-                StandardSchemaV1.InferOutput<Meta>
+                StandardSchemaV1.InferOutput<Meta>,
+                TC
               >
             : never
           : never
@@ -323,7 +289,7 @@ export function toFumadocsSource<
 
 function createDocMethods(
   info: FileInfo,
-  load: () => CompiledMDXProperties<any> | Promise<CompiledMDXProperties<any>>,
+  load: () => CompiledMDXProperties | Promise<CompiledMDXProperties>,
 ): DocMethods {
   return {
     info,

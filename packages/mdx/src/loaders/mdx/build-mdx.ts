@@ -6,7 +6,6 @@ import type { TOCItemType } from 'fumadocs-core/toc';
 import type { FC } from 'react';
 import type { MDXProps } from 'mdx/types';
 import {
-  type ExtractedReference,
   type PostprocessOptions,
   remarkPostprocess,
 } from '@/loaders/mdx/remark-postprocess';
@@ -32,21 +31,12 @@ export interface CompilerOptions {
   addDependency: (file: string) => void;
 }
 
-// TODO: allow plugins to customise the type
 export interface CompiledMDXProperties<Frontmatter = Record<string, unknown>> {
   frontmatter: Frontmatter;
   structuredData: StructuredData;
   toc: TOCItemType[];
   default: FC<MDXProps>;
 
-  /**
-   * Added by the `last-modified` plugin.
-   */
-  lastModified?: Date;
-  /**
-   * Enable from `postprocess` option.
-   */
-  extractedReferences?: ExtractedReference[];
   /**
    * Enable from `postprocess` option.
    */

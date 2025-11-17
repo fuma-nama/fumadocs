@@ -270,7 +270,7 @@ export async function Operation({
         ) : (
           <div className="flex flex-row items-center gap-2.5 p-3 rounded-xl border bg-fd-card text-fd-card-foreground not-prose">
             <MethodLabel className="text-xs">{method.method}</MethodLabel>
-            <code className="flex-1 overflow-auto text-nowrap text-[13px] text-fd-muted-foreground">
+            <code className="flex-1 overflow-auto text-nowrap text-[0.8125rem] text-fd-muted-foreground">
               {path}
             </code>
           </div>
@@ -335,7 +335,7 @@ async function ResponseAccordion({
           <SelectTabTrigger items={contentTypes.map((v) => v[0])} />
         )}
         {contentTypes.length === 1 && (
-          <p className="text-[13px] text-fd-muted-foreground">
+          <p className="text-sm text-fd-muted-foreground">
             {contentTypes[0][0]}
           </p>
         )}

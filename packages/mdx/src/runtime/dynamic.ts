@@ -4,8 +4,9 @@ import { executeMdx } from '@fumadocs/mdx-remote/client';
 import { pathToFileURL } from 'node:url';
 import { fumaMatter } from '@/utils/fuma-matter';
 import fs from 'node:fs/promises';
-import { type FileInfo, fromConfig } from './server';
+import { server, type ServerOptions } from './server';
 import { type CoreOptions, createCore } from '@/core';
+import type { FileInfo, InternalTypeConfig } from './types';
 
 export interface LazyEntry<Data = unknown> {
   info: FileInfo;
@@ -14,19 +15,22 @@ export interface LazyEntry<Data = unknown> {
   hash?: string;
 }
 
-export type CreateDynamic<Config> = ReturnType<
-  typeof fromConfigDynamic<Config>
->;
+export type CreateDynamic<
+  Config,
+  TC extends InternalTypeConfig = InternalTypeConfig,
+> = ReturnType<typeof dynamic<Config, TC>>;
 
-export async function fromConfigDynamic<Config>(
+export async function dynamic<Config, TC extends InternalTypeConfig>(
   configExports: Config,
   coreOptions: CoreOptions,
+  serverOptions?: ServerOptions,
 ) {
-  const core = await createCore(coreOptions).init({
+  const core = createCore(coreOptions);
+  await core.init({
     config: buildConfig(configExports as Record<string, unknown>),
   });
 
-  const create = fromConfig<Config>();
+  const create = server<Config, TC>(serverOptions);
 
   function getDocCollection(name: string): DocCollectionItem | undefined {
     const collection = core.getConfig().getCollection(name);
@@ -70,7 +74,7 @@ export async function fromConfigDynamic<Config>(
   }
 
   return {
-    async doc<Name extends keyof Config>(
+    async doc<Name extends keyof Config & string>(
       name: Name,
       base: string,
       entries: LazyEntry<unknown>[],
@@ -83,7 +87,7 @@ export async function fromConfigDynamic<Config>(
 
       return create.docLazy(name, base, head, body);
     },
-    async docs<Name extends keyof Config>(
+    async docs<Name extends keyof Config & string>(
       name: Name,
       base: string,
       meta: Record<string, unknown>,

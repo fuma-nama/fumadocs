@@ -57,9 +57,7 @@ export function baseOptions(): BaseLayoutProps {
       title: (
         <>
           {logo}
-          <span className="font-medium in-[.uwu]:hidden in-[header]:text-[15px]">
-            Fumadocs
-          </span>
+          <span className="font-medium in-[.uwu]:hidden">Fumadocs</span>
         </>
       ),
     },

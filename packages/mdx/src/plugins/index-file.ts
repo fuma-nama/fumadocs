@@ -1,4 +1,4 @@
-import type { Core, Plugin } from '@/core';
+import type { Core, Plugin, PluginContext } from '@/core';
 import type {
   LoadedConfig,
   CollectionItem,
@@ -8,11 +8,12 @@ import type {
 import path from 'path';
 import { type CodeGen, createCodegen, ident } from '@/utils/codegen';
 import { glob } from 'tinyglobby';
-import { readFileWithCache } from '@/utils/codegen/cache';
+import { readFileWithCache, removeFileCache } from '@/utils/fs-cache';
 import { createHash } from 'crypto';
 import type { LazyEntry } from '@/runtime/dynamic';
 import type { EmitEntry } from '@/core';
 import { fumaMatter } from '@/utils/fuma-matter';
+import type { ServerOptions } from '@/runtime/server';
 
 export interface IndexFilePluginOptions {
   target?: 'default' | 'vite';
@@ -35,6 +36,20 @@ export interface IndexFilePluginOptions {
   dynamic?: boolean;
 }
 
+export interface IndexFilePlugin {
+  ['index-file']?: {
+    generateTypeConfig?: (this: PluginContext) => string | void;
+    serverOptions?: (this: PluginContext, options: ServerOptions) => void;
+  };
+}
+
+interface FileGenContext {
+  core: Core;
+  codegen: CodeGen;
+  serverOptions: ServerOptions;
+  tc: string;
+}
+
 export default function indexFile(
   options: IndexFilePluginOptions = {},
 ): Plugin {
@@ -54,6 +69,33 @@ export default function indexFile(
     );
   }
 
+  function generateConfigs(core: Core): {
+    serverOptions: ServerOptions;
+    tc: string;
+  } {
+    const serverOptions: ServerOptions = {};
+    const typeConfigs: string[] = [];
+    const ctx = core.getPluginContext();
+
+    for (const plugin of core.getPlugins()) {
+      const indexFilePlugin = plugin['index-file'];
+      if (!indexFilePlugin) continue;
+      indexFilePlugin.serverOptions?.call(ctx, serverOptions);
+
+      const config = indexFilePlugin.generateTypeConfig?.call(ctx);
+      if (config) typeConfigs.push(config);
+    }
+
+    if (typeConfigs.length === 0) {
+      typeConfigs.push('{ DocData: {} }');
+    }
+
+    return {
+      serverOptions,
+      tc: typeConfigs.join(' & '),
+    };
+  }
+
   return {
     name: 'index-file',
     config(v) {
@@ -64,6 +106,8 @@ export default function indexFile(
       if (!server.watcher) return;
 
       server.watcher.on('all', async (event, file) => {
+        removeFileCache(file);
+
         // dynamic collections always require re-generation on change
         if (dynamicCollections.length === 0) {
           // vite uses `import.meta.glob`, no need to re-generate
@@ -89,62 +133,56 @@ export default function indexFile(
     },
     async emit() {
       const globCache = new Map<string, Promise<string[]>>();
-      const makeCodeGen = () =>
-        createCodegen({
+      const { serverOptions, tc } = generateConfigs(this.core);
+
+      const toEmitEntry = async (
+        path: string,
+        content: (ctx: FileGenContext) => Promise<void>,
+      ): Promise<EmitEntry> => {
+        const codegen = createCodegen({
           target,
           outDir: this.outDir,
           jsExtension: addJsExtension,
           globCache,
         });
-
-      async function toEmitEntry(
-        path: string,
-        content: Promise<string>,
-      ): Promise<EmitEntry> {
+        await content({
+          core: this.core,
+          codegen,
+          serverOptions,
+          tc,
+        });
         return {
           path,
-          content: await content,
+          content: codegen.toString(),
         };
-      }
+      };
 
       const out: Promise<EmitEntry>[] = [
-        toEmitEntry(
-          'server.ts',
-          generateServerIndexFile(makeCodeGen(), config, this.configPath),
-        ),
+        toEmitEntry('server.ts', generateServerIndexFile),
       ];
 
       if (dynamic)
-        out.push(
-          toEmitEntry(
-            'dynamic.ts',
-            generateDynamicIndexFile(this.core, makeCodeGen()),
-          ),
-        );
+        out.push(toEmitEntry('dynamic.ts', generateDynamicIndexFile));
 
       if (browser)
-        out.push(
-          toEmitEntry(
-            'browser.ts',
-            generateBrowserIndexFile(makeCodeGen(), config, this.configPath),
-          ),
-        );
+        out.push(toEmitEntry('browser.ts', generateBrowserIndexFile));
 
       return await Promise.all(out);
     },
   };
 }
 
-async function generateServerIndexFile(
-  codegen: CodeGen,
-  config: LoadedConfig,
-  configPath: string,
-): Promise<string> {
+async function generateServerIndexFile({
+  core,
+  codegen,
+  serverOptions,
+  tc,
+}: FileGenContext) {
   codegen.lines.push(
-    `import { fromConfig } from 'fumadocs-mdx/runtime/server';`,
-    `import type * as Config from '${codegen.formatImportPath(configPath)}';`,
+    `import { server } from 'fumadocs-mdx/runtime/server';`,
+    `import type * as Config from '${codegen.formatImportPath(core.getOptions().configPath)}';`,
     '',
-    `const create = fromConfig<typeof Config>();`,
+    `const create = server<typeof Config, ${tc}>(${JSON.stringify(serverOptions)});`,
   );
 
   async function generateCollectionObject(
@@ -202,24 +240,27 @@ async function generateServerIndexFile(
   }
 
   await codegen.pushAsync(
-    config.collectionList.map(async (collection) => {
+    core.getConfig().collectionList.map(async (collection) => {
       const obj = await generateCollectionObject(collection);
       if (!obj) return;
 
       return `\nexport const ${collection.name} = ${obj};`;
     }),
   );
-
-  return codegen.toString();
 }
 
-async function generateDynamicIndexFile(core: Core, codegen: CodeGen) {
-  const { configPath } = core._options;
+async function generateDynamicIndexFile({
+  core,
+  codegen,
+  serverOptions,
+  tc,
+}: FileGenContext) {
+  const { configPath } = core.getOptions();
   codegen.lines.push(
-    `import { fromConfigDynamic } from 'fumadocs-mdx/runtime/dynamic';`,
+    `import { dynamic } from 'fumadocs-mdx/runtime/dynamic';`,
     `import * as Config from '${codegen.formatImportPath(configPath)}';`,
     '',
-    `const create = await fromConfigDynamic(Config);`,
+    `const create = await dynamic<typeof Config, ${tc}>(Config, ${JSON.stringify(core.getOptions())}, ${JSON.stringify(serverOptions)});`,
   );
 
   async function generateCollectionObjectEntry(
@@ -296,20 +337,14 @@ async function generateDynamicIndexFile(core: Core, codegen: CodeGen) {
       return `\nexport const ${collection.name} = ${obj};`;
     }),
   );
-
-  return codegen.toString();
 }
 
-async function generateBrowserIndexFile(
-  codegen: CodeGen,
-  config: LoadedConfig,
-  configPath: string,
-): Promise<string> {
+async function generateBrowserIndexFile({ core, codegen, tc }: FileGenContext) {
   codegen.lines.push(
-    `import { fromConfig } from 'fumadocs-mdx/runtime/browser';`,
-    `import type * as Config from '${codegen.formatImportPath(configPath)}';`,
+    `import { browser } from 'fumadocs-mdx/runtime/browser';`,
+    `import type * as Config from '${codegen.formatImportPath(core.getOptions().configPath)}';`,
     '',
-    `const create = fromConfig<typeof Config>();`,
+    `const create = browser<typeof Config, ${tc}>();`,
   );
 
   async function generateCollectionObject(
@@ -331,7 +366,7 @@ async function generateBrowserIndexFile(
   codegen.lines.push('const browserCollections = {');
 
   await codegen.pushAsync(
-    config.collectionList.map(async (collection) => {
+    core.getConfig().collectionList.map(async (collection) => {
       const obj = await generateCollectionObject(collection);
       if (!obj) return;
 
@@ -340,7 +375,6 @@ async function generateBrowserIndexFile(
   );
 
   codegen.lines.push('};', 'export default browserCollections;');
-  return codegen.toString();
 }
 
 function generateDocCollectionFrontmatterGlob(
