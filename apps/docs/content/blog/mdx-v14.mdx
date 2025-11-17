@@ -41,6 +41,19 @@ import { docs } from 'fumadocs-mdx:collections/dynamic';
 import browserCollections from 'fumadocs-mdx:collections/browser';
 ```
 
+To use `loader()` with doc collections, use the new `toFumadocsSource()` utility instead.
+
+```ts
+import { blogPosts } from 'fumadocs-mdx:collections/server';
+import { toFumadocsSource } from 'fumadocs-mdx/runtime/server';
+import { loader } from 'fumadocs-core/source';
+
+export const blog = loader({
+  baseUrl: '/blog',
+  source: toFumadocsSource(blogPosts, []),
+});
+```
+
 ### Async & Dynamic Mode
 
 On Next.js, **Async Mode** now aligns with the behaviour on Vite to generate async imports. This enables server-side chunking to improve memory usage.

@@ -39,7 +39,7 @@ export default async function Page(props: PageProps<'/blog/[slug]'>) {
       <p className="text-fd-muted-foreground mb-8">{page.data.description}</p>
 
       <div className="prose min-w-0 flex-1">
-        <div className="flex flex-row items-center gap-2 mb-8 not-prose">
+        <div className="flex flex-row gap-2 mb-8 not-prose">
           <ShareButton url={page.url} />
           <Link
             href="/blog"
