@@ -5,7 +5,7 @@ import { NextProvider } from 'fumadocs-core/framework/next';
 
 export function RootProvider(props: ComponentProps<typeof BaseProvider>) {
   return (
-    <NextProvider>
+    <NextProvider Link={props.components?.Link}>
       <BaseProvider {...props}>{props.children}</BaseProvider>
     </NextProvider>
   );

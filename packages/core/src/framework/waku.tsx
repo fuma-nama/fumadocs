@@ -45,6 +45,16 @@ const framework: Framework = {
   },
 };
 
-export function WakuProvider({ children }: { children: ReactNode }) {
-  return <FrameworkProvider {...framework}>{children}</FrameworkProvider>;
+export function WakuProvider({
+  children,
+  Link: CustomLink,
+}: {
+  children: ReactNode;
+  Link?: Framework['Link'];
+}) {
+  return (
+    <FrameworkProvider {...framework} Link={CustomLink || framework.Link}>
+      {children}
+    </FrameworkProvider>
+  );
 }

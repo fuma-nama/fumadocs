@@ -5,7 +5,7 @@ import { TanstackProvider } from 'fumadocs-core/framework/tanstack';
 
 export function RootProvider(props: ComponentProps<typeof BaseProvider>) {
   return (
-    <TanstackProvider>
+    <TanstackProvider Link={props.components?.Link}>
       <BaseProvider {...props}>{props.children}</BaseProvider>
     </TanstackProvider>
   );

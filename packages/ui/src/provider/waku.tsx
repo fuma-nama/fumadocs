@@ -5,7 +5,7 @@ import { WakuProvider } from 'fumadocs-core/framework/waku';
 
 export function RootProvider(props: ComponentProps<typeof BaseProvider>) {
   return (
-    <WakuProvider>
+    <WakuProvider Link={props.components?.Link}>
       <BaseProvider {...props}>{props.children}</BaseProvider>
     </WakuProvider>
   );

@@ -18,7 +18,7 @@ import {
   type LocaleItem,
   type Translations,
 } from '@/contexts/i18n';
-import { usePathname, useRouter } from 'fumadocs-core/framework';
+import { Framework, usePathname, useRouter } from 'fumadocs-core/framework';
 
 interface SearchOptions
   extends Omit<SearchProviderProps, 'options' | 'children'> {
@@ -56,6 +56,13 @@ export interface RootProviderProps {
   };
 
   i18n?: Omit<I18nProviderProps, 'children'>;
+
+  /**
+   * Custom components to override framework defaults
+   */
+  components?: {
+    Link?: Framework['Link'];
+  };
 
   children?: ReactNode;
 }

@@ -40,6 +40,19 @@ const framework: Framework = {
   },
 };
 
-export function ReactRouterProvider({ children }: { children: ReactNode }) {
-  return <FrameworkProvider {...framework}>{children}</FrameworkProvider>;
+export function ReactRouterProvider({
+  children,
+  Link: CustomLink,
+}: {
+  children: ReactNode;
+  Link?: Framework['Link'];
+}) {
+  return (
+    <FrameworkProvider
+      {...framework}
+      Link={CustomLink || framework.Link}
+    >
+      {children}
+    </FrameworkProvider>
+  );
 }

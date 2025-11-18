@@ -5,13 +5,19 @@ import { useParams, usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 
-export function NextProvider({ children }: { children: ReactNode }) {
+export function NextProvider({
+  children,
+  Link: CustomLink,
+}: {
+  children: ReactNode;
+  Link?: Framework['Link'];
+}) {
   return (
     <FrameworkProvider
       usePathname={usePathname}
       useRouter={useRouter}
       useParams={useParams}
-      Link={Link as Framework['Link']}
+      Link={CustomLink || (Link as Framework['Link'])}
       Image={Image as Framework['Image']}
     >
       {children}

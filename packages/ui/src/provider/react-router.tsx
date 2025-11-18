@@ -5,7 +5,7 @@ import { ReactRouterProvider } from 'fumadocs-core/framework/react-router';
 
 export function RootProvider(props: ComponentProps<typeof BaseProvider>) {
   return (
-    <ReactRouterProvider>
+    <ReactRouterProvider Link={props.components?.Link}>
       <BaseProvider {...props}>{props.children}</BaseProvider>
     </ReactRouterProvider>
   );
