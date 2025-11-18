@@ -14,7 +14,7 @@ import { Marquee } from '@/app/(home)/marquee';
 import { CodeBlock } from '@/components/code-block';
 import {
   Hero,
-  AgnosticImage,
+  AgnosticBackground,
   CreateAppAnimation,
   PreviewImages,
   Writing,
@@ -472,7 +472,7 @@ function ForEngineers() {
           </svg>
         </div>
 
-        <AgnosticImage className="absolute inset-0 -z-1 mask-[linear-gradient(to_top,white_30%,transparent_calc(100%-120px))]" />
+        <AgnosticBackground />
       </div>
       <div
         className={cn(
