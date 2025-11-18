@@ -66,10 +66,7 @@ export function TanstackProvider({
   Link?: Framework['Link'];
 }) {
   return (
-    <FrameworkProvider
-      {...framework}
-      Link={CustomLink || framework.Link}
-    >
+    <FrameworkProvider {...framework} Link={CustomLink || framework.Link}>
       {children}
     </FrameworkProvider>
   );
