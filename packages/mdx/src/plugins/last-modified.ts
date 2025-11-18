@@ -4,6 +4,7 @@ import type { Plugin } from '@/core';
 import { ident } from '@/utils/codegen';
 
 const cache = new Map<string, Promise<Date>>();
+type VersionControlFn = (filePath: string) => Promise<Date | undefined>;
 
 export interface LastModifiedPluginOptions {
   /**
@@ -13,9 +14,11 @@ export interface LastModifiedPluginOptions {
    *
    *    If you are using Vercel, please set `VERCEL_DEEP_CLONE` environment variable to `true`.
    *
+   * - A function: return the last modified time for given file path.
+   *
    * @defaultValue 'git'
    */
-  versionControl?: 'git';
+  versionControl?: 'git' | VersionControlFn;
 
   /**
    * Filter the collections to include by names
@@ -38,6 +41,15 @@ export default function lastModified(
   options: LastModifiedPluginOptions = {},
 ): Plugin {
   const { versionControl = 'git', filter = () => true } = options;
+  let fn: VersionControlFn;
+
+  switch (versionControl) {
+    case 'git':
+      fn = getGitTimestamp;
+      break;
+    default:
+      fn = versionControl;
+  }
 
   return {
     name: 'last-modified',
@@ -65,10 +77,9 @@ export default function lastModified(
       async vfile(file) {
         if (!filter(this.collection.name)) return;
 
-        if (versionControl === 'git') {
-          const timestamp = await getGitTimestamp(this.filePath);
-          if (timestamp === undefined) return;
+        const timestamp = await fn(this.filePath);
 
+        if (timestamp !== undefined) {
           file.data['mdx-export'] ??= [];
           file.data['mdx-export'].push({
             name: 'lastModified',
