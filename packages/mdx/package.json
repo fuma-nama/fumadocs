@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-mdx",
-  "version": "14.0.1",
+  "version": "14.0.2",
   "description": "The built-in source for Fumadocs",
   "keywords": [
     "NextJs",
@@ -16,8 +16,7 @@
     "./loader-meta": "./loader-meta.cjs",
     "./config": {
       "import": "./dist/config/index.js",
-      "types": "./dist/config/index.d.ts",
-      "require": "./dist/config/index.cjs"
+      "types": "./dist/config/index.d.ts"
     },
     "./next": {
       "import": "./dist/next/index.js",
@@ -26,8 +25,7 @@
     },
     "./vite": {
       "import": "./dist/vite/index.js",
-      "types": "./dist/vite/index.d.ts",
-      "require": "./dist/vite/index.cjs"
+      "types": "./dist/vite/index.d.ts"
     },
     ".": {
       "import": "./dist/index.js",

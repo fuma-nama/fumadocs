@@ -1,9 +1,14 @@
-import { type ReactNode, useMemo } from 'react';
+import { type ReactNode, useRef, useMemo } from 'react';
 import { type Framework, FrameworkProvider } from '@/framework/index';
-import { useParams, Link, useRouter, useMatch } from '@tanstack/react-router';
+import {
+  useParams,
+  Link,
+  useRouter,
+  useRouterState,
+} from '@tanstack/react-router';
 
 const framework: Framework = {
-  Link({ href, prefetch, ...props }) {
+  Link({ href, prefetch = true, ...props }) {
     return (
       <Link to={href} preload={prefetch ? 'intent' : false} {...props}>
         {props.children}
@@ -11,7 +16,22 @@ const framework: Framework = {
     );
   },
   usePathname() {
-    return useMatch({ strict: false, select: (s) => s.pathname });
+    const { isLoading, pathname } = useRouterState({
+      select: (state) => ({
+        isLoading: state.isLoading,
+        pathname: state.location.pathname,
+      }),
+    });
+
+    const activePathname = useRef(pathname);
+    return useMemo(() => {
+      if (isLoading) {
+        return activePathname.current;
+      }
+
+      activePathname.current = pathname;
+      return pathname;
+    }, [isLoading, pathname]);
   },
   useRouter() {
     const router = useRouter();

@@ -45,13 +45,9 @@ export interface LoaderOptions<
   /**
    * Additional options for page tree builder
    */
-  pageTree?: PageTreeOptions<S['pageData'], S['metaData']>;
+  pageTree?: PageTreeOptions<S>;
 
-  plugins?: (
-    | LoaderPlugin<S['pageData'], S['metaData']>
-    | LoaderPlugin<S['pageData'], S['metaData']>[]
-    | undefined
-  )[];
+  plugins?: (LoaderPlugin<S> | LoaderPlugin<S>[] | undefined)[];
 
   icon?: IconResolver;
   slugs?: (info: { path: string }) => string[];

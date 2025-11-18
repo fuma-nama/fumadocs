@@ -3,11 +3,12 @@ import * as path from 'node:path';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 import { ValidationError } from '@/utils/validation';
-import { defineCollections } from '@/config';
+import { defineCollections, defineConfig } from '@/config';
 import { fumaMatter } from '@/utils/fuma-matter';
 import { buildConfig } from '@/config/build';
 import { createCore } from '@/core';
 import indexFile from '@/plugins/index-file';
+import lastModified from '@/plugins/last-modified';
 
 test('format errors', async () => {
   const schema = z.object({
@@ -44,32 +45,81 @@ const baseDir = path.relative(
   process.cwd(),
   path.dirname(fileURLToPath(import.meta.url)),
 );
-const cases = [
+const cases: {
+  name: string;
+  config: Record<string, unknown>;
+}[] = [
   {
     name: 'sync',
-    collection: defineCollections({
-      type: 'doc',
-      dir: path.join(baseDir, './fixtures/generate-index'),
-    }),
+    config: {
+      docs: defineCollections({
+        type: 'doc',
+        dir: path.join(baseDir, './fixtures/generate-index'),
+      }),
+      blogs: defineCollections({
+        type: 'doc',
+        dir: path.join(baseDir, './fixtures/generate-index'),
+        postprocess: {
+          extractLinkReferences: true,
+        },
+      }),
+      default: defineConfig({
+        plugins: [
+          lastModified({
+            versionControl: async () => new Date('2025-11-18'),
+          }),
+        ],
+      }),
+    },
   },
   {
     name: 'sync-meta',
-    collection: defineCollections({
-      type: 'meta',
-      dir: path.join(baseDir, './fixtures/generate-index'),
-    }),
+    config: {
+      docs: defineCollections({
+        type: 'meta',
+        dir: path.join(baseDir, './fixtures/generate-index'),
+      }),
+    },
   },
   {
     name: 'async',
-    collection: defineCollections({
-      type: 'doc',
-      dir: path.join(baseDir, './fixtures/generate-index'),
-      async: true,
-    }),
+    config: {
+      docs: defineCollections({
+        type: 'doc',
+        dir: path.join(baseDir, './fixtures/generate-index'),
+        async: true,
+      }),
+      blogs: defineCollections({
+        type: 'doc',
+        dir: path.join(baseDir, './fixtures/generate-index'),
+        postprocess: {
+          extractLinkReferences: true,
+        },
+        async: true,
+      }),
+    },
+  },
+  {
+    name: 'dynamic',
+    config: {
+      docs: defineCollections({
+        type: 'doc',
+        dir: path.join(baseDir, './fixtures/generate-index'),
+        dynamic: true,
+      }),
+      blogs: defineCollections({
+        type: 'doc',
+        dir: path.join(baseDir, './fixtures/generate-index'),
+        postprocess: {
+          extractLinkReferences: true,
+        },
+        dynamic: true,
+      }),
+    },
   },
 ];
 
-for (const { name, collection } of cases) {
+for (const { name, config } of cases) {
   test(`generate JS index file: ${name}`, async () => {
     const core = createCore(
       {
@@ -81,9 +131,7 @@ for (const { name, collection } of cases) {
     );
 
     await core.init({
-      config: buildConfig({
-        docs: collection,
-      }),
+      config: buildConfig(config),
     });
     const markdown = (await core.emit())
       .map(

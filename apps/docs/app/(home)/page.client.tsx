@@ -6,7 +6,9 @@ import {
   type HTMLAttributes,
   type ReactElement,
   type ReactNode,
+  type RefObject,
   useEffect,
+  useRef,
   useState,
 } from 'react';
 import { ArrowRight, TerminalIcon } from 'lucide-react';
@@ -36,6 +38,8 @@ const Dithering = dynamic(
 
 export function Hero() {
   const { resolvedTheme } = useTheme();
+  const ref = useRef<HTMLImageElement | null>(null);
+  const visible = useIsVisible(ref);
   const [showShaders, setShowShaders] = useState(false);
   const [imageReady, setImageReady] = useState(false);
 
@@ -60,7 +64,10 @@ export function Hero() {
           softness={1}
           intensity={0.9}
           noise={0.5}
+          speed={visible ? 1 : 0}
           shape="corners"
+          minPixelRatio={1}
+          maxPixelCount={1920 * 1080 * 2}
         />
       )}
       {showShaders && (
@@ -73,12 +80,14 @@ export function Hero() {
           type="4x4"
           scale={0.5}
           size={3}
-          speed={0.5}
+          speed={visible ? 0.5 : 0}
           rotation={270}
           className="absolute max-lg:bottom-[-50%] max-lg:left-[-200px] animate-fd-fade-in duration-400 lg:top-[-5%] lg:right-0"
+          minPixelRatio={1}
         />
       )}
       <Image
+        ref={ref}
         src={HeroImage}
         alt="hero-image"
         className={cn(
@@ -323,17 +332,25 @@ export function Writing({
   );
 }
 
-export function AgnosticImage(props: ComponentProps<typeof Dithering>) {
+export function AgnosticBackground() {
   const { resolvedTheme } = useTheme();
+  const ref = useRef<HTMLDivElement>(null);
+  const visible = useIsVisible(ref);
+
   return (
-    <Dithering
-      colorBack="#00000000"
-      colorFront={resolvedTheme === 'dark' ? '#fc7744' : '#c6bb58'}
-      shape="warp"
-      type="4x4"
-      speed={0.4}
-      {...props}
-    />
+    <div
+      ref={ref}
+      className="absolute inset-0 -z-1 mask-[linear-gradient(to_top,white_30%,transparent_calc(100%-120px))]"
+    >
+      <Dithering
+        colorBack="#00000000"
+        colorFront={resolvedTheme === 'dark' ? '#fc7744' : '#c6bb58'}
+        shape="warp"
+        type="4x4"
+        speed={visible ? 0.4 : 0}
+        className="size-full"
+      />
+    </div>
   );
 }
 
@@ -349,9 +366,42 @@ export function ContentAdoptionBackground(
           ? ['#39BE1C', '#9c2f05', '#7A2A0000']
           : ['#DF3F00', '#fcfc51', '#ffa057', '#7A2A0020']
       }
+      speed={0}
       colorBack="#1D1004"
       shape="sphere"
       {...props}
     />
   );
+}
+
+let observer: IntersectionObserver;
+const observerTargets = new WeakMap<
+  Element,
+  (entry: IntersectionObserverEntry) => void
+>();
+
+function useIsVisible(ref: RefObject<HTMLElement | null>) {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    observer ??= new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        observerTargets.get(entry.target)?.(entry);
+      }
+    });
+
+    const element = ref.current;
+    if (!element) return;
+    observerTargets.set(element, (entry) => {
+      setVisible(entry.isIntersecting);
+    });
+    observer.observe(element);
+
+    return () => {
+      observer.unobserve(element);
+      observerTargets.delete(element);
+    };
+  }, [ref]);
+
+  return visible;
 }

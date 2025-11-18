@@ -1,9 +1,5 @@
 ```ts title="server.ts"
 // @ts-nocheck
-import { frontmatter as __fd_glob_3 } from "./generate-index/folder/test.mdx?collection=blogs&only=frontmatter"
-import { frontmatter as __fd_glob_2 } from "./generate-index/index.mdx?collection=blogs&only=frontmatter"
-import { frontmatter as __fd_glob_1 } from "./generate-index/folder/test.mdx?collection=docs&only=frontmatter"
-import { frontmatter as __fd_glob_0 } from "./generate-index/index.mdx?collection=docs&only=frontmatter"
 import { server } from 'fumadocs-mdx/runtime/server';
 import type * as Config from './config';
 
@@ -17,10 +13,6 @@ const create = server<typeof Config, import("fumadocs-mdx/runtime/types").Intern
     },
   }
 }>({"doc":{"passthroughs":["extractedReferences"]}});
-
-export const docs = await create.docLazy("docs", "packages/mdx/test/fixtures/generate-index", {"index.mdx": __fd_glob_0, "folder/test.mdx": __fd_glob_1, }, {"index.mdx": () => import("./generate-index/index.mdx?collection=docs"), "folder/test.mdx": () => import("./generate-index/folder/test.mdx?collection=docs"), });
-
-export const blogs = await create.docLazy("blogs", "packages/mdx/test/fixtures/generate-index", {"index.mdx": __fd_glob_2, "folder/test.mdx": __fd_glob_3, }, {"index.mdx": () => import("./generate-index/index.mdx?collection=blogs"), "folder/test.mdx": () => import("./generate-index/folder/test.mdx?collection=blogs"), });
 ```
 
 ```ts title="dynamic.ts"
@@ -38,6 +30,10 @@ const create = await dynamic<typeof Config, import("fumadocs-mdx/runtime/types")
     },
   }
 }>(Config, {"configPath":"packages/mdx/test/fixtures/config.ts","environment":"test","outDir":"packages/mdx/test/fixtures"}, {"doc":{"passthroughs":["extractedReferences"]}});
+
+export const docs = await create.doc("docs", "packages/mdx/test/fixtures/generate-index", { absolutePath: path.resolve("packages/mdx/test/fixtures/generate-index/index.mdx"), info: {"fullPath":"packages/mdx/test/fixtures/generate-index/index.mdx","path":"index.mdx"}, data: {}, hash: "b12f02f44f5ed3318104c095c455e5ee" }, { absolutePath: path.resolve("packages/mdx/test/fixtures/generate-index/folder/test.mdx"), info: {"fullPath":"packages/mdx/test/fixtures/generate-index/folder/test.mdx","path":"folder/test.mdx"}, data: {}, hash: "d41d8cd98f00b204e9800998ecf8427e" });
+
+export const blogs = await create.doc("blogs", "packages/mdx/test/fixtures/generate-index", { absolutePath: path.resolve("packages/mdx/test/fixtures/generate-index/index.mdx"), info: {"fullPath":"packages/mdx/test/fixtures/generate-index/index.mdx","path":"index.mdx"}, data: {}, hash: "b12f02f44f5ed3318104c095c455e5ee" }, { absolutePath: path.resolve("packages/mdx/test/fixtures/generate-index/folder/test.mdx"), info: {"fullPath":"packages/mdx/test/fixtures/generate-index/folder/test.mdx","path":"folder/test.mdx"}, data: {}, hash: "d41d8cd98f00b204e9800998ecf8427e" });
 ```
 
 ```ts title="browser.ts"
@@ -56,8 +52,6 @@ const create = browser<typeof Config, import("fumadocs-mdx/runtime/types").Inter
   }
 }>();
 const browserCollections = {
-  docs: create.doc("docs", {"index.mdx": () => import("./generate-index/index.mdx?collection=docs"), "folder/test.mdx": () => import("./generate-index/folder/test.mdx?collection=docs"), }),
-  blogs: create.doc("blogs", {"index.mdx": () => import("./generate-index/index.mdx?collection=blogs"), "folder/test.mdx": () => import("./generate-index/folder/test.mdx?collection=blogs"), }),
 };
 export default browserCollections;
 ```

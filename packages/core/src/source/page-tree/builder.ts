@@ -1,5 +1,5 @@
 import type * as PageTree from '@/page-tree/definitions';
-import type { MetaData, PageData, UrlFn } from '@/source';
+import type { MetaData, PageData, SourceConfig, UrlFn } from '@/source';
 import type { ContentStorage } from '@/source/storage/content';
 import { basename, extname, joinPath } from '@/source/path';
 import { transformerFallback } from '@/source/page-tree/transformer-fallback';
@@ -47,10 +47,7 @@ export interface PageTreeTransformer<
   ) => PageTree.Root;
 }
 
-export interface PageTreeOptions<
-  Page extends PageData = PageData,
-  Meta extends MetaData = MetaData,
-> {
+export interface PageTreeOptions<Config extends SourceConfig = SourceConfig> {
   id?: string;
   /**
    * Remove references to the file path of original nodes (`$ref`)
@@ -68,7 +65,7 @@ export interface PageTreeOptions<
   /**
    * Additional page tree transformers to apply
    */
-  transformers?: PageTreeTransformer<Page, Meta>[];
+  transformers?: PageTreeTransformer<Config['pageData'], Config['metaData']>[];
 }
 
 export interface PageTreeBuilder {

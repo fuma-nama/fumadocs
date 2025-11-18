@@ -74,20 +74,18 @@ export default function indexFile(
     tc: string;
   } {
     const serverOptions: ServerOptions = {};
-    const typeConfigs: string[] = [];
+    const typeConfigs: string[] = [
+      'import("fumadocs-mdx/runtime/types").InternalTypeConfig',
+    ];
     const ctx = core.getPluginContext();
 
     for (const plugin of core.getPlugins()) {
       const indexFilePlugin = plugin['index-file'];
       if (!indexFilePlugin) continue;
-      indexFilePlugin.serverOptions?.call(ctx, serverOptions);
 
+      indexFilePlugin.serverOptions?.call(ctx, serverOptions);
       const config = indexFilePlugin.generateTypeConfig?.call(ctx);
       if (config) typeConfigs.push(config);
-    }
-
-    if (typeConfigs.length === 0) {
-      typeConfigs.push('{ DocData: {} }');
     }
 
     return {

@@ -74,6 +74,11 @@ export function remarkPostprocess(
     }
 
     file.data['mdx-export'] ??= [];
+    file.data['mdx-export'].push({
+      name: 'frontmatter',
+      value: frontmatter,
+    });
+
     if (extractLinkReferences) {
       const urls: ExtractedReference[] = [];
 

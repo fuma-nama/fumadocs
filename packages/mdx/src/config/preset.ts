@@ -95,7 +95,10 @@ export function applyMdxPreset(
         ...v,
         remarkStructureOptions !== false && [
           plugins.remarkStructure,
-          remarkStructureOptions,
+          {
+            exportAs: 'structuredData',
+            ...remarkStructureOptions,
+          } satisfies Plugins.StructureOptions,
         ],
         valueToExport.length > 0 &&
           (() => {

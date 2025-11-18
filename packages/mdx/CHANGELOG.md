@@ -1,5 +1,14 @@
 # next-docs-mdx
 
+## 14.0.2
+
+### Patch Changes
+
+- 59743c0: Use `remarkStructure().exportAs` option to export `structuredData`
+- 59743c0: only provide CJS fallback for Next.js
+- Updated dependencies [c3b8474]
+  - fumadocs-core@16.0.14
+
 ## 14.0.1
 
 ### Patch Changes

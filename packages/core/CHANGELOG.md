@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 16.0.14
+
+### Patch Changes
+
+- c3b8474: hotfix Tanstack Router `usePathname` inconsistency due to `useMatch` on layout.
+
 ## 16.0.13
 
 ## 16.0.12
