@@ -1,12 +1,8 @@
 import type { ContentStorage } from '@/source/storage/content';
 import type { PageTreeTransformer } from '@/source/page-tree/builder';
-import type { MetaData, PageData } from '@/source/types';
-import type { ResolvedLoaderConfig } from '@/source/loader';
+import type { ResolvedLoaderConfig, SourceConfig } from '@/source/loader';
 
-export interface LoaderPlugin<
-  Page extends PageData = PageData,
-  Meta extends MetaData = MetaData,
-> {
+export interface LoaderPlugin<Config extends SourceConfig = SourceConfig> {
   name?: string;
 
   /**
@@ -26,12 +22,17 @@ export interface LoaderPlugin<
   /**
    * transform the storage after loading
    */
-  transformStorage?: (context: { storage: ContentStorage<Page, Meta> }) => void;
+  transformStorage?: (context: {
+    storage: ContentStorage<Config['pageData'], Config['metaData']>;
+  }) => void;
 
   /**
    * transform the generated page tree
    */
-  transformPageTree?: PageTreeTransformer<Page, Meta>;
+  transformPageTree?: PageTreeTransformer<
+    Config['pageData'],
+    Config['metaData']
+  >;
 }
 
 const priorityMap = {
