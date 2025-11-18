@@ -3,7 +3,7 @@ import { type ComponentProps, Fragment, useState } from 'react';
 import { cva } from 'class-variance-authority';
 import Link from 'fumadocs-core/link';
 import { cn } from '@/utils/cn';
-import { BaseLinkItem, LinkItemType } from '@/layouts/shared';
+import { BaseLinkItem, type LinkItemType } from '@/layouts/shared';
 import {
   NavigationMenu,
   NavigationMenuContent,
