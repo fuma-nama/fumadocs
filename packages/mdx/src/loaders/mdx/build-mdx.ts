@@ -99,11 +99,6 @@ export async function buildMDX(
       const postprocessOptions: PostprocessOptions = {
         _format: format,
         ...collection?.postprocess,
-        valueToExport: [
-          ...(collection?.postprocess?.valueToExport ?? []),
-          'structuredData',
-          'frontmatter',
-        ],
       };
 
       processor = createProcessor({
