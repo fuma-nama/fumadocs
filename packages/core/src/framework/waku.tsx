@@ -36,9 +36,9 @@ const framework: Framework = {
       [router],
     );
   },
-  Link({ href, prefetch: _prefetch, ...props }) {
+  Link({ href, prefetch, ...props }) {
     return (
-      <WakuLink to={href!} {...props}>
+      <WakuLink to={href!} unstable_prefetchOnEnter={prefetch} {...props}>
         {props.children}
       </WakuLink>
     );
