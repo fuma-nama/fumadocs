@@ -13,7 +13,7 @@ export default async function loader(
 ): Promise<void> {
   const options = this.getOptions();
   this.cacheable(true);
-  this.addDependency(options.compiledConfigPath);
+  this.addDependency(options.absoluteCompiledConfigPath);
 
   if (!instance) {
     instance = toWebpack(
