@@ -1,4 +1,4 @@
-import { CircleCheck, CircleX, Info, TriangleAlert, Lightbulb } from 'lucide-react';
+import { CircleCheck, CircleX, Info, TriangleAlert, Sun } from 'lucide-react';
 import type { ComponentProps, ReactNode } from 'react';
 import { cn } from '@/utils/cn';
 
@@ -68,7 +68,7 @@ export function CalloutContainer({
           warning: <TriangleAlert className={iconClass} />,
           error: <CircleX className={iconClass} />,
           success: <CircleCheck className={iconClass} />,
-          idea: <Lightbulb className={iconClass} />,
+          idea: <Sun className={iconClass} />,
         }[type]}
       <div className="flex flex-col gap-2 min-w-0 flex-1">{children}</div>
     </div>
