@@ -57,8 +57,8 @@ export function WakuProvider({
   return (
     <FrameworkProvider
       {...framework}
-      Link={CustomLink || framework.Link}
-      Image={CustomImage}
+      Link={CustomLink ?? framework.Link}
+      Image={CustomImage ?? framework.Image}
     >
       {children}
     </FrameworkProvider>

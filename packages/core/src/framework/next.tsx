@@ -19,8 +19,8 @@ export function NextProvider({
       usePathname={usePathname}
       useRouter={useRouter}
       useParams={useParams}
-      Link={CustomLink || (Link as Framework['Link'])}
-      Image={CustomImage || (Image as Framework['Image'])}
+      Link={CustomLink ?? (Link as Framework['Link'])}
+      Image={CustomImage ?? (Image as Framework['Image'])}
     >
       {children}
     </FrameworkProvider>
