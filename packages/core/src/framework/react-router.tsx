@@ -43,12 +43,18 @@ const framework: Framework = {
 export function ReactRouterProvider({
   children,
   Link: CustomLink,
+  Image: CustomImage,
 }: {
   children: ReactNode;
   Link?: Framework['Link'];
+  Image?: Framework['Image'];
 }) {
   return (
-    <FrameworkProvider {...framework} Link={CustomLink || framework.Link}>
+    <FrameworkProvider
+      {...framework}
+      Link={CustomLink || framework.Link}
+      Image={CustomImage}
+    >
       {children}
     </FrameworkProvider>
   );
