@@ -30,7 +30,7 @@ import {
   type SidebarProps,
   SidebarTrigger,
   SidebarViewport,
-} from '@/components/layout/sidebar';
+} from './sidebar';
 import { TreeContextProvider } from '@/contexts/tree';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
@@ -40,8 +40,8 @@ import {
   Sidebar as SidebarIcon,
   X,
 } from 'lucide-react';
-import { LanguageToggle } from '@/components/layout/language-toggle';
-import { ThemeToggle } from '@/components/layout/theme-toggle';
+import { LanguageToggle } from '../shared/language-toggle';
+import { ThemeToggle } from '../shared/theme-toggle';
 import {
   Popover,
   PopoverContent,
@@ -55,12 +55,9 @@ import {
   NavbarSidebarTrigger,
 } from '@/layouts/notebook/client';
 import { NavProvider } from '@/contexts/layout';
-import { type Option, RootToggle } from '@/components/layout/root-toggle';
+import { type Option, RootToggle } from './root-toggle';
 import Link from 'fumadocs-core/link';
-import {
-  LargeSearchToggle,
-  SearchToggle,
-} from '@/components/layout/search-toggle';
+import { LargeSearchToggle, SearchToggle } from '../shared/search-toggle';
 import {
   getSidebarTabs,
   type GetSidebarTabsOptions,

@@ -1,0 +1,19 @@
+@source '../../dist/layouts/docs/**/*.js';
+
+#nd-docs-layout {
+  --fd-sidebar-width: 0px;
+  --fd-toc-width: 0px;
+  --fd-layout-width: 1600px;
+}
+
+@variant md {
+  #nd-docs-layout {
+    --fd-sidebar-width: 268px;
+  }
+}
+
+@variant xl {
+  #nd-docs-layout {
+    --fd-toc-width: 268px;
+  }
+}

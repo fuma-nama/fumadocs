@@ -14,43 +14,23 @@ import {
   type SidebarComponents,
   SidebarContent,
   SidebarContentMobile,
-  SidebarFolder,
-  SidebarFolderContent,
-  SidebarFolderLink,
-  SidebarFolderTrigger,
   SidebarFooter,
   SidebarHeader,
-  SidebarItem,
+  SidebarLinkItem,
   SidebarPageTree,
   type SidebarProps,
   SidebarTrigger,
   SidebarViewport,
-} from '@/components/layout/sidebar';
-import { type Option, RootToggle } from '@/components/layout/root-toggle';
-import {
-  type BaseLayoutProps,
-  BaseLinkItem,
-  getLinks,
-  type LinkItemType,
-} from '@/layouts/shared';
-import {
-  LanguageToggle,
-  LanguageToggleText,
-} from '@/components/layout/language-toggle';
-import {
-  CollapsibleControl,
-  LayoutBody,
-  LayoutTabs,
-  Navbar,
-} from '@/layouts/docs/client';
+} from './sidebar';
+import { type Option, RootToggle } from './root-toggle';
+import { type BaseLayoutProps, BaseLinkItem, getLinks } from '@/layouts/shared';
+import { LanguageToggle, LanguageToggleText } from '../shared/language-toggle';
+import { CollapsibleControl, LayoutTabs, LayoutHeader } from './client';
 import { TreeContextProvider } from '@/contexts/tree';
-import { ThemeToggle } from '@/components/layout/theme-toggle';
+import { ThemeToggle } from '../shared/theme-toggle';
 import { NavProvider } from '@/contexts/layout';
 import Link from 'fumadocs-core/link';
-import {
-  LargeSearchToggle,
-  SearchToggle,
-} from '@/components/layout/search-toggle';
+import { LargeSearchToggle, SearchToggle } from '../shared/search-toggle';
 import {
   getSidebarTabs,
   type GetSidebarTabsOptions,
@@ -120,9 +100,6 @@ export function DocsLayout({
     return [];
   }, [tree, sidebarTabs]);
   const links = getLinks(props.links ?? [], props.githubUrl);
-  const sidebarVariables = cn(
-    'md:[--fd-sidebar-width:268px] lg:[--fd-sidebar-width:286px]',
-  );
 
   function sidebar() {
     const {
@@ -176,12 +153,12 @@ export function DocsLayout({
                 </BaseLinkItem>
               ))}
             </div>
-            {i18n ? (
+            {i18n && (
               <LanguageToggle>
                 <Languages className="size-4.5" />
                 <LanguageToggleText />
               </LanguageToggle>
-            ) : null}
+            )}
             {themeSwitch.enabled !== false &&
               (themeSwitch.component ?? (
                 <ThemeToggle className="p-0" mode={themeSwitch.mode} />
@@ -296,98 +273,57 @@ export function DocsLayout({
   return (
     <TreeContextProvider tree={tree}>
       <NavProvider transparentMode={transparentMode}>
-        {nav.enabled !== false &&
-          (nav.component ?? (
-            <Navbar className="h-(--fd-nav-height) on-root:[--fd-nav-height:56px] md:on-root:[--fd-nav-height:0px] md:hidden">
-              <Link
-                href={nav.url ?? '/'}
-                className="inline-flex items-center gap-2.5 font-semibold"
-              >
-                {nav.title}
-              </Link>
-              <div className="flex-1">{nav.children}</div>
-              {searchToggle.enabled !== false &&
-                (searchToggle.components?.sm ?? (
-                  <SearchToggle className="p-2" hideIfDisabled />
-                ))}
-              {sidebarEnabled && (
-                <SidebarTrigger
-                  className={cn(
-                    buttonVariants({
-                      color: 'ghost',
-                      size: 'icon-sm',
-                      className: 'p-2',
-                    }),
-                  )}
-                >
-                  <SidebarIcon />
-                </SidebarTrigger>
-              )}
-            </Navbar>
-          ))}
-        <LayoutBody
+        <div
+          id="nd-docs-layout"
           {...props.containerProps}
-          className={cn(
-            'md:[&_#nd-page_article]:pt-12 xl:[&_#nd-page_article]:px-8',
-            sidebarEnabled && sidebarVariables,
-            props.containerProps?.className,
-          )}
+          className="grid h-dvh"
+          style={{
+            gridTemplate: `"header header header"
+    "sidebar main toc" 1fr / minmax(var(--fd-sidebar-width), 1fr) minmax(0px, 900px) minmax(var(--fd-toc-width), 1fr)`,
+          }}
         >
+          {nav.enabled !== false &&
+            (nav.component ?? (
+              <LayoutHeader
+                id="nd-subnav"
+                className="[grid-area:header] z-30 flex items-center ps-4 pe-2.5 border-b transition-colors backdrop-blur-sm h-14 md:hidden data-[transparent=true]:bg-fd-background/80"
+              >
+                <Link
+                  href={nav.url ?? '/'}
+                  className="inline-flex items-center gap-2.5 font-semibold"
+                >
+                  {nav.title}
+                </Link>
+                <div className="flex-1">{nav.children}</div>
+                {searchToggle.enabled !== false &&
+                  (searchToggle.components?.sm ?? (
+                    <SearchToggle className="p-2" hideIfDisabled />
+                  ))}
+                {sidebarEnabled && (
+                  <SidebarTrigger
+                    className={cn(
+                      buttonVariants({
+                        color: 'ghost',
+                        size: 'icon-sm',
+                        className: 'p-2',
+                      }),
+                    )}
+                  >
+                    <SidebarIcon />
+                  </SidebarTrigger>
+                )}
+              </LayoutHeader>
+            ))}
           {sidebarEnabled && sidebar()}
           {tabMode === 'top' && tabs.length > 0 && (
             <LayoutTabs
               options={tabs}
-              className="sticky top-[calc(var(--fd-nav-height)+var(--fd-tocnav-height))] z-10 bg-fd-background border-b px-6 pt-3 xl:px-8 max-md:hidden"
+              className="z-10 bg-fd-background border-b px-6 pt-3 xl:px-8 max-md:hidden"
             />
           )}
           {children}
-        </LayoutBody>
+        </div>
       </NavProvider>
     </TreeContextProvider>
   );
 }
-
-function SidebarLinkItem({
-  item,
-  ...props
-}: {
-  item: Exclude<LinkItemType, { type: 'icon' }>;
-  className?: string;
-}) {
-  if (item.type === 'menu')
-    return (
-      <SidebarFolder {...props}>
-        {item.url ? (
-          <SidebarFolderLink href={item.url} external={item.external}>
-            {item.icon}
-            {item.text}
-          </SidebarFolderLink>
-        ) : (
-          <SidebarFolderTrigger>
-            {item.icon}
-            {item.text}
-          </SidebarFolderTrigger>
-        )}
-        <SidebarFolderContent>
-          {item.items.map((child, i) => (
-            <SidebarLinkItem key={i} item={child} />
-          ))}
-        </SidebarFolderContent>
-      </SidebarFolder>
-    );
-
-  if (item.type === 'custom') return <div {...props}>{item.children}</div>;
-
-  return (
-    <SidebarItem
-      href={item.url}
-      icon={item.icon}
-      external={item.external}
-      {...props}
-    >
-      {item.text}
-    </SidebarItem>
-  );
-}
-
-export { CollapsibleControl, Navbar, SidebarTrigger, type LinkItemType };

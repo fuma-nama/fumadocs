@@ -23,10 +23,11 @@ import { LLMCopyButton, ViewOptions } from '@/components/ai/page-actions';
 import { Banner } from 'fumadocs-ui/components/banner';
 import { Installation } from '@/components/preview/installation';
 import { Customisation } from '@/components/preview/customisation';
-import { DocsBody, DocsPage } from 'fumadocs-ui/page';
+import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
 import { NotFound } from '@/components/not-found';
 import { getSuggestions } from '@/app/docs/[...slug]/suggestions';
 import { PathUtils } from 'fumadocs-core/source';
+import { PageLastUpdate } from 'fumadocs-ui/layouts/docs/page/atoms';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -66,7 +67,6 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
   return (
     <DocsPage
       toc={toc}
-      lastUpdate={lastModified ? new Date(lastModified) : undefined}
       tableOfContent={{
         style: 'clerk',
       }}
@@ -81,6 +81,7 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
           markdownUrl={`${page.url}.mdx`}
           githubUrl={`https://github.com/${owner}/${repo}/blob/dev/apps/docs/content/docs/${page.path}`}
         />
+        {lastModified && <PageLastUpdate date={lastModified} />}
       </div>
       <div className="prose flex-1 text-fd-foreground/90">
         {page.data.preview && <PreviewRenderer preview={page.data.preview} />}

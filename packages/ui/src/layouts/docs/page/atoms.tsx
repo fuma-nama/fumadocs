@@ -29,8 +29,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { useSidebar } from '@/contexts/sidebar';
-import { useTOCItems } from '@/components/layout/toc';
+import { useTOCItems } from './toc';
 import { useActiveAnchor } from 'fumadocs-core/toc';
 
 const TocPopoverContext = createContext<{
@@ -54,7 +53,7 @@ export function PageTOCPopoverTrigger(props: ComponentProps<'button'>) {
     <CollapsibleTrigger
       {...props}
       className={cn(
-        'flex w-full h-(--fd-tocnav-height) items-center text-sm text-fd-muted-foreground gap-2.5 px-4 py-2.5 text-start focus-visible:outline-none [&_svg]:size-4 md:px-6',
+        'flex w-full h-10 items-center text-sm text-fd-muted-foreground gap-2.5 px-4 py-2.5 text-start focus-visible:outline-none [&_svg]:size-4 md:px-6',
         props.className,
       )}
     >
@@ -165,7 +164,6 @@ export function PageTOCPopoverContent(props: ComponentProps<'div'>) {
 export function PageTOCPopover(props: ComponentProps<'div'>) {
   const ref = useRef<HTMLElement>(null);
   const [open, setOpen] = useState(false);
-  const { collapsed } = useSidebar();
   const { isTransparent } = useNav();
 
   const onClick = useEffectEvent((e: Event) => {
@@ -199,19 +197,11 @@ export function PageTOCPopover(props: ComponentProps<'div'>) {
           id="nd-tocnav"
           {...props}
           className={cn(
-            'fixed pr-(--removed-body-scroll-bar-size,0) z-10 border-b backdrop-blur-sm transition-colors xl:hidden max-xl:on-root:[--fd-tocnav-height:40px]',
+            'sticky top-0 z-10 [grid-area:header] border-b backdrop-blur-sm transition-colors xl:hidden',
             (!isTransparent || open) && 'bg-fd-background/80',
             open && 'shadow-lg',
             props.className,
           )}
-          style={{
-            ...props.style,
-            top: 'calc(var(--fd-banner-height) + var(--fd-nav-height))',
-            insetInlineStart: collapsed
-              ? '0px'
-              : 'calc(var(--fd-sidebar-width) + var(--fd-layout-offset))',
-            insetInlineEnd: 0,
-          }}
         >
           {props.children}
         </header>
@@ -389,31 +379,6 @@ export function PageBreadcrumb({
           </Fragment>
         );
       })}
-    </div>
-  );
-}
-
-export function PageTOC(props: ComponentProps<'div'>) {
-  const { collapsed } = useSidebar();
-  const offset = collapsed ? '0px' : 'var(--fd-layout-offset)';
-
-  return (
-    <div
-      id="nd-toc"
-      {...props}
-      className={cn(
-        'fixed bottom-0 pt-12 pb-2 pr-(--removed-body-scroll-bar-size,0) xl:on-root:[--fd-toc-width:286px] max-xl:hidden',
-        props.className,
-      )}
-      style={{
-        ...props.style,
-        top: 'calc(var(--fd-banner-height) + var(--fd-nav-height))',
-        insetInlineEnd: `max(${offset}, calc(50vw - var(--fd-sidebar-width)/2 - var(--fd-page-width)/2))`,
-      }}
-    >
-      <div className="flex h-full w-(--fd-toc-width) max-w-full flex-col pe-4">
-        {props.children}
-      </div>
     </div>
   );
 }

@@ -7,15 +7,6 @@ import {
   type NavOptions,
 } from '@/layouts/shared';
 import { NavProvider } from '@/contexts/layout';
-import {
-  LargeSearchToggle,
-  SearchToggle,
-} from '@/components/layout/search-toggle';
-import { ThemeToggle } from '@/components/layout/theme-toggle';
-import {
-  LanguageToggle,
-  LanguageToggleText,
-} from '@/components/layout/language-toggle';
 import { ChevronDown, Languages } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import {
@@ -27,6 +18,9 @@ import {
   NavigationMenuItem,
 } from '@/layouts/home/client';
 import { buttonVariants } from '@/components/ui/button';
+import { LargeSearchToggle, SearchToggle } from '../shared/search-toggle';
+import { LanguageToggle, LanguageToggleText } from '../shared/language-toggle';
+import { ThemeToggle } from '../shared/theme-toggle';
 
 export interface HomeLayoutProps extends BaseLayoutProps {
   nav?: Partial<

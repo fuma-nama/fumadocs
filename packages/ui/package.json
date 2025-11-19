@@ -12,9 +12,7 @@
   "author": "Fuma Nama",
   "type": "module",
   "exports": {
-    "./style.css": "./dist/style.css",
     "./css/*": "./css/*",
-    "./image-zoom.css": "./dist/image-zoom.css",
     "./components/*": {
       "import": "./dist/components/*.js",
       "types": "./dist/components/*.d.ts",
@@ -37,20 +35,20 @@
       "types": "./dist/layouts/docs/index.d.ts"
     },
     "./layouts/docs/page": {
-      "import": "./dist/layouts/docs/page.js",
-      "types": "./dist/layouts/docs/page.d.ts"
+      "import": "./dist/layouts/docs/page/index.js",
+      "types": "./dist/layouts/docs/page/index.d.ts"
     },
-    "./layouts/docs-client": {
-      "import": "./dist/layouts/docs/client.js",
-      "types": "./dist/layouts/docs/client.d.ts"
+    "./layouts/docs/page/atoms": {
+      "import": "./dist/layouts/docs/page/atoms.js",
+      "types": "./dist/layouts/docs/page/atoms.d.ts"
     },
     "./layouts/notebook": {
       "import": "./dist/layouts/notebook/index.js",
       "types": "./dist/layouts/notebook/index.d.ts"
     },
-    "./layouts/notebook-client": {
-      "import": "./dist/layouts/notebook/client.js",
-      "types": "./dist/layouts/notebook/client.d.ts"
+    "./layouts/notebook/page": {
+      "import": "./dist/layouts/notebook/page/index.js",
+      "types": "./dist/layouts/notebook/page/index.d.ts"
     },
     "./layouts/links": {
       "import": "./dist/layouts/shared/index.js",
@@ -59,11 +57,6 @@
     "./layouts/shared": {
       "import": "./dist/layouts/shared/index.js",
       "types": "./dist/layouts/shared/index.d.ts"
-    },
-    "./page": {
-      "node": "./dist/page.js",
-      "import": "./dist/page.js",
-      "types": "./dist/page.d.ts"
     },
     "./provider": {
       "import": "./dist/provider/index.js",
@@ -104,12 +97,9 @@
     "css/*"
   ],
   "scripts": {
-    "build": "pnpm build:layout && pnpm build:tailwind",
-    "build:layout": "tsc --project tsconfig.build.json && tsc-alias -p tsconfig.build.json",
-    "build:tailwind": "tailwindcss -i css/style.css -o ./dist/style.css && tailwindcss -i src/components/image-zoom.css -o dist/components/image-zoom.css",
+    "build": "tsc --project tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "clean": "rimraf dist",
-    "dev": "concurrently \"tsc -w --project tsconfig.build.json\" \"tsc-alias -w -p tsconfig.build.json\" \"pnpm dev:tailwind\"",
-    "dev:tailwind": "tailwindcss -i css/style.css -o ./dist/style.css -w && tailwindcss -i src/components/image-zoom.css -o dist/components/image-zoom.css -w",
+    "dev": "concurrently \"tsc -w --project tsconfig.build.json\" \"tsc-alias -w -p tsconfig.build.json\"",
     "lint": "eslint .",
     "types:check": "tsc --noEmit"
   },
@@ -136,7 +126,6 @@
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",
     "@next/eslint-plugin-next": "16.0.3",
-    "@tailwindcss/cli": "^4.1.17",
     "@types/lodash.merge": "^4.6.9",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",

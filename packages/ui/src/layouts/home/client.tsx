@@ -45,7 +45,7 @@ export function Navbar(props: ComponentProps<'div'>) {
         id="nd-nav"
         {...props}
         className={cn(
-          'fixed top-(--fd-banner-height) z-40 left-0 right-(--removed-body-scroll-bar-size,0) backdrop-blur-lg border-b transition-colors *:mx-auto *:max-w-fd-container',
+          'sticky top-0 z-40 backdrop-blur-lg border-b transition-colors *:mx-auto *:max-w-fd-container',
           value.length > 0 && 'max-lg:shadow-lg max-lg:rounded-b-2xl',
           (!isTransparent || value.length > 0) && 'bg-fd-background/80',
           props.className,

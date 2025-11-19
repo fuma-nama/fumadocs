@@ -2,7 +2,6 @@
 
 import { Image, type ImageProps } from 'fumadocs-core/framework';
 import { type ImgHTMLAttributes } from 'react';
-import './image-zoom.css';
 import Zoom, { type UncontrolledProps } from 'react-medium-image-zoom';
 
 export type ImageZoomProps = ImageProps & {

@@ -322,7 +322,8 @@ export const registry: Registry = {
         },
         {
           type: 'css',
-          path: 'components/image-zoom.css',
+          path: '../css/components/image-zoom.css',
+          target: 'components/image-zoom.css',
         },
       ],
     },
