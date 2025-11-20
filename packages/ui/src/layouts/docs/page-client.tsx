@@ -223,13 +223,13 @@ export function PageTOCPopover(props: ComponentProps<'div'>) {
 export function PageLastUpdate({
   date: value,
   ...props
-}: Omit<ComponentProps<'p'>, 'children'> & { date: Date | string }) {
+}: Omit<ComponentProps<'p'>, 'children'> & { date: Date }) {
   const { text } = useI18n();
   const [date, setDate] = useState('');
 
   useEffect(() => {
     // to the timezone of client
-    setDate(new Date(value).toLocaleDateString());
+    setDate(value.toLocaleDateString());
   }, [value]);
 
   return (
