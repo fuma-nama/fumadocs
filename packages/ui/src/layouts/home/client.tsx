@@ -1,9 +1,9 @@
 'use client';
-import { type ComponentProps, Fragment, useState } from 'react';
+import { type ComponentProps, Fragment, useMemo, useState } from 'react';
 import { cva } from 'class-variance-authority';
 import Link from 'fumadocs-core/link';
 import { cn } from '@/utils/cn';
-import { BaseLinkItem, type LinkItemType } from '@/layouts/shared';
+import { BaseLinkItem, getLinks, type LinkItemType } from '@/layouts/shared';
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -15,6 +15,17 @@ import {
 } from '@/components/ui/navigation-menu';
 import { useNav } from '@/contexts/layout';
 import { buttonVariants } from '@/components/ui/button';
+import type { HomeLayoutProps } from '.';
+import {
+  LargeSearchToggle,
+  SearchToggle,
+} from '@/layouts/shared/search-toggle';
+import { ThemeToggle } from '@/layouts/shared/theme-toggle';
+import {
+  LanguageToggle,
+  LanguageToggleText,
+} from '@/layouts/shared/language-toggle';
+import { ChevronDown, Languages } from 'lucide-react';
 
 export const navItemVariants = cva('[&_svg]:size-4', {
   variants: {
@@ -35,7 +46,142 @@ export const navItemVariants = cva('[&_svg]:size-4', {
   },
 });
 
-export function Navbar(props: ComponentProps<'div'>) {
+export function Header({
+  nav = {},
+  i18n = false,
+  links,
+  githubUrl,
+  themeSwitch = {},
+  searchToggle = {},
+}: HomeLayoutProps) {
+  const { navItems, menuItems } = useMemo(() => {
+    const navItems: LinkItemType[] = [];
+    const menuItems: LinkItemType[] = [];
+
+    for (const item of getLinks(links, githubUrl)) {
+      switch (item.on ?? 'all') {
+        case 'menu':
+          menuItems.push(item);
+          break;
+        case 'nav':
+          navItems.push(item);
+          break;
+        default:
+          navItems.push(item);
+          menuItems.push(item);
+      }
+    }
+
+    return { navItems, menuItems };
+  }, [links, githubUrl]);
+
+  return (
+    <HeaderNavigationMenu>
+      <Link
+        href={nav.url ?? '/'}
+        className="inline-flex items-center gap-2.5 font-semibold"
+      >
+        {nav.title}
+      </Link>
+      {nav.children}
+      <ul className="flex flex-row items-center gap-2 px-6 max-sm:hidden">
+        {navItems
+          .filter((item) => !isSecondary(item))
+          .map((item, i) => (
+            <NavigationMenuLinkItem key={i} item={item} className="text-sm" />
+          ))}
+      </ul>
+      <div className="flex flex-row items-center justify-end gap-1.5 flex-1 max-lg:hidden">
+        {searchToggle.enabled !== false &&
+          (searchToggle.components?.lg ?? (
+            <LargeSearchToggle
+              className="w-full rounded-full ps-2.5 max-w-[240px]"
+              hideIfDisabled
+            />
+          ))}
+        {themeSwitch.enabled !== false &&
+          (themeSwitch.component ?? <ThemeToggle mode={themeSwitch?.mode} />)}
+        {i18n && (
+          <LanguageToggle>
+            <Languages className="size-5" />
+          </LanguageToggle>
+        )}
+        <ul className="flex flex-row gap-2 items-center empty:hidden">
+          {navItems.filter(isSecondary).map((item, i) => (
+            <NavigationMenuLinkItem
+              key={i}
+              className={cn(
+                item.type === 'icon' && '-mx-1 first:ms-0 last:me-0',
+              )}
+              item={item}
+            />
+          ))}
+        </ul>
+      </div>
+      <ul className="flex flex-row items-center ms-auto -me-1.5 lg:hidden">
+        {searchToggle.enabled !== false &&
+          (searchToggle.components?.sm ?? (
+            <SearchToggle className="p-2" hideIfDisabled />
+          ))}
+        <NavigationMenuItem>
+          <MobileNavigationMenuTrigger
+            aria-label="Toggle Menu"
+            className={cn(
+              buttonVariants({
+                size: 'icon',
+                color: 'ghost',
+                className: 'group [&_svg]:size-5.5',
+              }),
+            )}
+            enableHover={nav.enableHoverToOpen}
+          >
+            <ChevronDown className="transition-transform duration-300 group-data-[state=open]:rotate-180" />
+          </MobileNavigationMenuTrigger>
+          <MobileNavigationMenuContent className="sm:flex-row sm:items-center sm:justify-end">
+            {menuItems
+              .filter((item) => !isSecondary(item))
+              .map((item, i) => (
+                <MobileNavigationMenuLinkItem
+                  key={i}
+                  item={item}
+                  className="sm:hidden"
+                />
+              ))}
+            <div className="-ms-1.5 flex flex-row items-center gap-2 max-sm:mt-2">
+              {menuItems.filter(isSecondary).map((item, i) => (
+                <MobileNavigationMenuLinkItem
+                  key={i}
+                  item={item}
+                  className={cn(item.type === 'icon' && '-mx-1 first:ms-0')}
+                />
+              ))}
+              <div role="separator" className="flex-1" />
+              {i18n && (
+                <LanguageToggle>
+                  <Languages className="size-5" />
+                  <LanguageToggleText />
+                  <ChevronDown className="size-3 text-fd-muted-foreground" />
+                </LanguageToggle>
+              )}
+              {themeSwitch.enabled !== false &&
+                (themeSwitch.component ?? (
+                  <ThemeToggle mode={themeSwitch?.mode} />
+                ))}
+            </div>
+          </MobileNavigationMenuContent>
+        </NavigationMenuItem>
+      </ul>
+    </HeaderNavigationMenu>
+  );
+}
+
+function isSecondary(item: LinkItemType): boolean {
+  if ('secondary' in item && item.secondary != null) return item.secondary;
+
+  return item.type === 'icon';
+}
+
+function HeaderNavigationMenu(props: ComponentProps<'div'>) {
   const [value, setValue] = useState('');
   const { isTransparent } = useNav();
 
@@ -44,21 +190,24 @@ export function Navbar(props: ComponentProps<'div'>) {
       <header
         id="nd-nav"
         {...props}
-        className={cn(
-          'sticky top-0 z-40 backdrop-blur-lg border-b transition-colors *:mx-auto *:max-w-fd-container',
-          value.length > 0 && 'max-lg:shadow-lg max-lg:rounded-b-2xl',
-          (!isTransparent || value.length > 0) && 'bg-fd-background/80',
-          props.className,
-        )}
+        className={cn('sticky h-14 top-0 z-40', props.className)}
       >
-        <NavigationMenuList
-          className="flex h-14 w-full items-center px-4"
-          asChild
+        <div
+          className={cn(
+            'backdrop-blur-lg border-b transition-colors *:mx-auto *:max-w-fd-container',
+            value.length > 0 && 'max-lg:shadow-lg max-lg:rounded-b-2xl',
+            (!isTransparent || value.length > 0) && 'bg-fd-background/80',
+          )}
         >
-          <nav>{props.children}</nav>
-        </NavigationMenuList>
+          <NavigationMenuList
+            className="flex h-14 w-full items-center px-4"
+            asChild
+          >
+            <nav>{props.children}</nav>
+          </NavigationMenuList>
 
-        <NavigationMenuViewport />
+          <NavigationMenuViewport />
+        </div>
       </header>
     </NavigationMenu>
   );
