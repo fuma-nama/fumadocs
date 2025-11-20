@@ -1,5 +1,15 @@
 # next-docs-ui
 
+## 16.0.15
+
+### Patch Changes
+
+- 40d9b75: Add 'idea' callout type
+- ade44d0: feat: enhance framework providers to accept custom Link components
+- Updated dependencies [fe380da]
+- Updated dependencies [ade44d0]
+  - fumadocs-core@16.0.15
+
 ## 16.0.14
 
 ### Patch Changes
