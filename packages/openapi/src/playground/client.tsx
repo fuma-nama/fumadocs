@@ -459,9 +459,10 @@ function FormBody({
               return renderParameterField(fieldName, field);
             }
 
+            const contentTypes = field.content && Object.keys(field.content);
             const schema = (
-              field.content
-                ? field.content[Object.keys(field.content)[0]].schema
+              field.content && contentTypes && contentTypes.length > 0
+                ? field.content[contentTypes[0]].schema
                 : field.schema
             ) as ParsedSchema;
 

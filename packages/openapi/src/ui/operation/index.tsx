@@ -84,12 +84,14 @@ export async function Operation({
   const contentTypes = body ? Object.entries(body.content) : null;
 
   if (body && contentTypes && contentTypes.length > 0) {
+    const [defaultValue] = contentTypes[0];
+
     bodyNode = (
-      <SelectTabs defaultValue={contentTypes[0][0]}>
+      <SelectTabs defaultValue={defaultValue}>
         <div className="flex gap-2 items-end justify-between">
           {ctx.renderHeading(headingLevel, 'Request Body')}
           <SelectTabTrigger
-            items={contentTypes.map((v) => v[0])}
+            items={contentTypes.map(([key]) => key)}
             className="mb-4"
           />
         </div>
@@ -204,15 +206,16 @@ export async function Operation({
     );
   }
 
-  if (method.callbacks) {
-    const callbacks = Object.entries(method.callbacks);
+  const callbacks = method.callbacks ? Object.entries(method.callbacks) : null;
+  if (callbacks && callbacks.length > 0) {
+    const [defaultValue] = callbacks[0];
 
     callbacksNode = (
-      <SelectTabs defaultValue={callbacks[0][0]}>
+      <SelectTabs defaultValue={defaultValue}>
         <div className="flex justify-between gap-2 items-end">
           {ctx.renderHeading(headingLevel, 'Callbacks')}
           <SelectTabTrigger
-            items={callbacks.map((v) => v[0])}
+            items={callbacks.map(([key]) => key)}
             className="mb-4"
           />
         </div>
@@ -327,17 +330,25 @@ async function ResponseAccordion({
   const { generateTypeScriptSchema } = ctx;
   const contentTypes = response.content ? Object.entries(response.content) : [];
 
+  if (contentTypes.length === 0) {
+    return (
+      response.description && (
+        <div className="prose-no-margin">
+          {ctx.renderMarkdown(response.description)}
+        </div>
+      )
+    );
+  }
+
+  const [defaultValue] = contentTypes[0];
   return (
-    <SelectTabs defaultValue={contentTypes.at(0)?.[0]}>
+    <SelectTabs defaultValue={defaultValue}>
       <AccordionHeader>
         <AccordionTrigger className="font-mono">{status}</AccordionTrigger>
-        {contentTypes.length > 1 && (
-          <SelectTabTrigger items={contentTypes.map((v) => v[0])} />
-        )}
-        {contentTypes.length === 1 && (
-          <p className="text-sm text-fd-muted-foreground">
-            {contentTypes[0][0]}
-          </p>
+        {contentTypes.length > 1 ? (
+          <SelectTabTrigger items={contentTypes.map(([key]) => key)} />
+        ) : (
+          <p className="text-sm text-fd-muted-foreground">{defaultValue}</p>
         )}
       </AccordionHeader>
 
@@ -347,7 +358,7 @@ async function ResponseAccordion({
             {ctx.renderMarkdown(response.description)}
           </div>
         )}
-        {contentTypes?.map(async ([type, resType]) => {
+        {contentTypes.map(async ([type, resType]) => {
           const schema = resType.schema;
           let ts: string | undefined;
 
