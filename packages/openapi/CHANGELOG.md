@@ -1,5 +1,16 @@
 # @fuma-docs/openapi
 
+## 10.0.10
+
+### Patch Changes
+
+- fb3401a: Fix errors on empty callbacks
+- Updated dependencies [fe380da]
+- Updated dependencies [40d9b75]
+- Updated dependencies [ade44d0]
+  - fumadocs-core@16.0.15
+  - fumadocs-ui@16.0.15
+
 ## 10.0.9
 
 ### Patch Changes
