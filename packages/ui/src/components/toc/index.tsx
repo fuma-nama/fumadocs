@@ -3,7 +3,7 @@ import * as Primitive from 'fumadocs-core/toc';
 import {
   type ComponentProps,
   createContext,
-  useContext,
+  use,
   type RefObject,
   useEffect,
   useEffectEvent,
@@ -15,7 +15,7 @@ import { mergeRefs } from '@/utils/merge-refs';
 const TOCContext = createContext<Primitive.TOCItemType[]>([]);
 
 export function useTOCItems(): Primitive.TOCItemType[] {
-  return useContext(TOCContext);
+  return use(TOCContext);
 }
 
 export function TOCProvider({

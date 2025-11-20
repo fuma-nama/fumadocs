@@ -138,7 +138,7 @@ export function DocsPage({
         ))}
       <article
         id="nd-page"
-        className="flex flex-col min-w-0 [grid-area:main] px-4 py-2 gap-4 lg:px-8 lg:pt-14"
+        className="flex flex-col min-w-0 px-4 py-2 [grid-area:main] gap-4 overflow-y-auto lg:px-8 lg:py-14"
       >
         {breadcrumbEnabled &&
           (breadcrumb ?? <PageBreadcrumb {...breadcrumbProps} />)}
@@ -150,7 +150,7 @@ export function DocsPage({
         (tocReplace ?? (
           <div
             id="nd-toc"
-            className="sticky top-(--fd-docs-toc-top) h-[calc(100dvh-var(--fd-docs-toc-top))] flex flex-col min-h-0 [grid-area:toc] w-(--fd-toc-width) pt-12 pe-4 pb-2 max-xl:hidden"
+            className="flex flex-col min-h-0 [grid-area:toc] w-(--fd-toc-width) pt-12 pe-4 pb-2 max-xl:hidden"
           >
             {tocOptions.header}
             <h3

@@ -4,11 +4,17 @@
   --fd-sidebar-width: 0px;
   --fd-toc-width: 0px;
   --fd-layout-width: 1600px;
+
+  --fd-docs-toc-top: 0px;
+  --fd-docs-toc-popover-top: calc(14 * var(--spacing));
+  --fd-docs-sidebar-top: 0px;
+  --fd-docs-nav-top: 0px;
 }
 
 @variant md {
   #nd-docs-layout {
     --fd-sidebar-width: 268px;
+    --fd-docs-toc-popover-top: 0px;
   }
 }
 

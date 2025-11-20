@@ -191,17 +191,13 @@ export function PageTOCPopover(props: ComponentProps<'div'>) {
         [setOpen, open],
       )}
     >
-      <Collapsible
-        open={open}
-        onOpenChange={setOpen}
-        className="sticky top-(--fd-docs-toc-popover-top) z-10 [grid-area:toc-popover] h-10 xl:hidden"
-      >
+      <Collapsible open={open} onOpenChange={setOpen} asChild>
         <header
           ref={ref}
           id="nd-tocnav"
           {...props}
           className={cn(
-            'border-b backdrop-blur-sm transition-colors',
+            'sticky top-0 z-10 [grid-area:header] border-b backdrop-blur-sm transition-colors xl:hidden',
             (!isTransparent || open) && 'bg-fd-background/80',
             open && 'shadow-lg',
             props.className,

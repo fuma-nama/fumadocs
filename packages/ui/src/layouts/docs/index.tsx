@@ -184,7 +184,13 @@ export function DocsLayout({
     );
 
     const content = (
-      <SidebarContent {...rest}>
+      <SidebarContent
+        {...rest}
+        className={cn(
+          'sticky top-(--fd-docs-sidebar-top) [grid-area:sidebar] h-[calc(100dvh-var(--fd-docs-sidebar-top))] flex flex-col items-end z-20 bg-fd-card text-sm border-e min-h-0 transition-[top,opacity,translate,width] duration-200 max-md:hidden *:w-(--fd-sidebar-width)',
+          rest.className,
+        )}
+      >
         <SidebarHeader>
           <div className="flex">
             <Link
@@ -276,17 +282,18 @@ export function DocsLayout({
         <div
           id="nd-docs-layout"
           {...props.containerProps}
-          className="grid h-dvh"
+          className="grid"
           style={{
-            gridTemplate: `"header header header"
-    "sidebar main toc" 1fr / minmax(var(--fd-sidebar-width), 1fr) minmax(0px, 900px) minmax(var(--fd-toc-width), 1fr)`,
+            gridTemplate: `"sidebar header header"
+            "sidebar toc-popover toc-popover"
+            "sidebar main toc" 1fr / minmax(var(--fd-sidebar-width), 1fr) minmax(0px, 900px) minmax(var(--fd-toc-width), 1fr)`,
           }}
         >
           {nav.enabled !== false &&
             (nav.component ?? (
               <LayoutHeader
                 id="nd-subnav"
-                className="[grid-area:header] z-30 flex items-center ps-4 pe-2.5 border-b transition-colors backdrop-blur-sm h-14 md:hidden data-[transparent=true]:bg-fd-background/80"
+                className="[grid-area:header] sticky top-(--fd-docs-nav-top) z-30 flex items-center ps-4 pe-2.5 border-b transition-colors backdrop-blur-sm h-14 md:hidden data-[transparent=false]:bg-fd-background/80"
               >
                 <Link
                   href={nav.url ?? '/'}

@@ -126,12 +126,11 @@ export function SidebarContent(props: ComponentProps<'aside'>) {
       {...props}
       data-collapsed={collapsed}
       className={cn(
-        '[grid-area:sidebar] flex flex-col items-end z-20 bg-fd-card text-sm border-e min-h-0 transition-[top,opacity,translate,width] duration-200 max-md:hidden *:w-(--fd-sidebar-width)',
+        props.className,
         collapsed && [
           'rounded-xl border translate-x-(--fd-sidebar-offset) rtl:-translate-x-(--fd-sidebar-offset)',
           hover ? 'z-50 shadow-lg' : 'opacity-0',
         ],
-        props.className,
       )}
       onPointerEnter={(e) => {
         if (
