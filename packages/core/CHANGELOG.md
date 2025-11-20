@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 16.0.15
+
+### Patch Changes
+
+- fe380da: feat(waku): WakuLink component to use unstable_prefetchOnEnter for prefetch
+- ade44d0: feat: enhance framework providers to accept custom Link components
+
 ## 16.0.14
 
 ### Patch Changes
