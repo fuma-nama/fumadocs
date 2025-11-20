@@ -20,7 +20,11 @@ import {
 } from '@/source/page-tree/builder';
 import { joinPath } from './path';
 import { normalizeUrl } from '@/utils/normalize-url';
-import { buildPlugins, type LoaderPlugin } from '@/source/plugins';
+import {
+  buildPlugins,
+  type LoaderPluginOption,
+  type LoaderPlugin,
+} from '@/source/plugins';
 import { slugsPlugin } from '@/source/plugins/slugs';
 import { iconPlugin, type IconResolver } from '@/source/plugins/icon';
 
@@ -29,26 +33,21 @@ export interface LoaderConfig {
   i18n: I18nConfig | undefined;
 }
 
-export interface SourceConfig {
-  pageData: PageData;
-  metaData: MetaData;
-}
-
-export interface LoaderOptions<
-  S extends SourceConfig = SourceConfig,
-  I18n extends I18nConfig | undefined = I18nConfig | undefined,
-> {
+export interface LoaderOptions<C extends LoaderConfig = LoaderConfig> {
   baseUrl: string;
-  i18n?: I18n;
+  i18n?: C['i18n'];
   url?: UrlFn;
 
   /**
    * Additional options for page tree builder
    */
-  pageTree?: PageTreeOptions<S>;
+  pageTree?: PageTreeOptions<C>;
 
-  plugins?: (LoaderPlugin<S> | LoaderPlugin<S>[] | undefined)[];
-
+  plugins?:
+    | LoaderPluginOption[]
+    | ((context: {
+        typedPlugin: (plugin: LoaderPlugin<C>) => LoaderPlugin;
+      }) => LoaderPluginOption[]);
   icon?: IconResolver;
   slugs?: (info: { path: string }) => string[];
 }
@@ -64,6 +63,11 @@ export interface ResolvedLoaderConfig {
 
 export interface Source<Config extends SourceConfig = SourceConfig> {
   files: VirtualFile<Config>[];
+}
+
+export interface SourceConfig {
+  pageData: PageData;
+  metaData: MetaData;
 }
 
 interface SharedFileInfo {
@@ -227,7 +231,10 @@ export function loader<
   I18n extends I18nConfig | undefined = undefined,
 >(
   source: Source<Config>,
-  options: LoaderOptions<NoInfer<Config>, I18n>,
+  options: LoaderOptions<{
+    source: NoInfer<Config>;
+    i18n: I18n;
+  }>,
 ): LoaderOutput<{
   source: Config;
   i18n: I18n;
@@ -237,7 +244,10 @@ export function loader<
   Config extends SourceConfig,
   I18n extends I18nConfig | undefined = undefined,
 >(
-  options: LoaderOptions<NoInfer<Config>, I18n> & {
+  options: LoaderOptions<{
+    source: NoInfer<Config>;
+    i18n: I18n;
+  }> & {
     source: Source<Config>;
   },
 ): LoaderOutput<{
@@ -277,7 +287,11 @@ function resolveConfig(
     plugins: buildPlugins([
       slugsPlugin(slugs),
       icon && iconPlugin(icon),
-      ...plugins,
+      ...(typeof plugins === 'function'
+        ? plugins({
+            typedPlugin: (plugin) => plugin as unknown as LoaderPlugin,
+          })
+        : plugins),
     ]),
   };
 

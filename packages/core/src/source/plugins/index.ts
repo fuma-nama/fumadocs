@@ -1,8 +1,8 @@
 import type { ContentStorage } from '@/source/storage/content';
 import type { PageTreeTransformer } from '@/source/page-tree/builder';
-import type { ResolvedLoaderConfig, SourceConfig } from '@/source/loader';
+import type { LoaderConfig, ResolvedLoaderConfig } from '@/source/loader';
 
-export interface LoaderPlugin<Config extends SourceConfig = SourceConfig> {
+export interface LoaderPlugin<Config extends LoaderConfig = LoaderConfig> {
   name?: string;
 
   /**
@@ -23,17 +23,25 @@ export interface LoaderPlugin<Config extends SourceConfig = SourceConfig> {
    * transform the storage after loading
    */
   transformStorage?: (context: {
-    storage: ContentStorage<Config['pageData'], Config['metaData']>;
+    storage: ContentStorage<
+      Config['source']['pageData'],
+      Config['source']['metaData']
+    >;
   }) => void;
 
   /**
    * transform the generated page tree
    */
   transformPageTree?: PageTreeTransformer<
-    Config['pageData'],
-    Config['metaData']
+    Config['source']['pageData'],
+    Config['source']['metaData']
   >;
 }
+
+export type LoaderPluginOption<Config extends LoaderConfig = LoaderConfig> =
+  | LoaderPlugin<Config>
+  | LoaderPluginOption<Config>[]
+  | undefined;
 
 const priorityMap = {
   pre: 1,
@@ -42,17 +50,21 @@ const priorityMap = {
 };
 
 export function buildPlugins(
-  plugins: (LoaderPlugin | LoaderPlugin[] | undefined)[],
+  plugins: LoaderPluginOption[],
+  sort = true,
 ): LoaderPlugin[] {
   const flatten: LoaderPlugin[] = [];
 
   for (const plugin of plugins) {
-    if (Array.isArray(plugin)) flatten.push(...plugin);
+    if (Array.isArray(plugin)) flatten.push(...buildPlugins(plugin, false));
     else if (plugin) flatten.push(plugin);
   }
 
-  return flatten.sort(
-    (a, b) =>
-      priorityMap[b.enforce ?? 'default'] - priorityMap[a.enforce ?? 'default'],
-  );
+  if (sort)
+    return flatten.sort(
+      (a, b) =>
+        priorityMap[b.enforce ?? 'default'] -
+        priorityMap[a.enforce ?? 'default'],
+    );
+  return flatten;
 }
