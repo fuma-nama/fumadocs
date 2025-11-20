@@ -1,5 +1,5 @@
 ---
-"fumadocs-ui": patch
+'fumadocs-ui': patch
 ---
 
 Add 'idea' callout type

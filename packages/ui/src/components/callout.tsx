@@ -2,7 +2,13 @@ import { CircleCheck, CircleX, Info, TriangleAlert, Sun } from 'lucide-react';
 import type { ComponentProps, ReactNode } from 'react';
 import { cn } from '@/utils/cn';
 
-export type CalloutType = 'info' | 'warn' | 'error' | 'success' | 'warning' | 'idea';
+export type CalloutType =
+  | 'info'
+  | 'warn'
+  | 'error'
+  | 'success'
+  | 'warning'
+  | 'idea';
 
 const iconClass = 'size-5 -me-0.5 fill-(--callout-color) text-fd-card';
 
