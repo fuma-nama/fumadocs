@@ -58,6 +58,22 @@ const framework: Framework = {
 /**
  * Fumadocs adapter for Tanstack Router/Start
  */
-export function TanstackProvider({ children }: { children: ReactNode }) {
-  return <FrameworkProvider {...framework}>{children}</FrameworkProvider>;
+export function TanstackProvider({
+  children,
+  Link: CustomLink,
+  Image: CustomImage,
+}: {
+  children: ReactNode;
+  Link?: Framework['Link'];
+  Image?: Framework['Image'];
+}) {
+  return (
+    <FrameworkProvider
+      {...framework}
+      Link={CustomLink ?? framework.Link}
+      Image={CustomImage ?? framework.Image}
+    >
+      {children}
+    </FrameworkProvider>
+  );
 }

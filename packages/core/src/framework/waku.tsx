@@ -36,15 +36,31 @@ const framework: Framework = {
       [router],
     );
   },
-  Link({ href, prefetch: _prefetch, ...props }) {
+  Link({ href, prefetch = true, ...props }) {
     return (
-      <WakuLink to={href!} {...props}>
+      <WakuLink to={href!} unstable_prefetchOnEnter={prefetch} {...props}>
         {props.children}
       </WakuLink>
     );
   },
 };
 
-export function WakuProvider({ children }: { children: ReactNode }) {
-  return <FrameworkProvider {...framework}>{children}</FrameworkProvider>;
+export function WakuProvider({
+  children,
+  Link: CustomLink,
+  Image: CustomImage,
+}: {
+  children: ReactNode;
+  Link?: Framework['Link'];
+  Image?: Framework['Image'];
+}) {
+  return (
+    <FrameworkProvider
+      {...framework}
+      Link={CustomLink ?? framework.Link}
+      Image={CustomImage ?? framework.Image}
+    >
+      {children}
+    </FrameworkProvider>
+  );
 }

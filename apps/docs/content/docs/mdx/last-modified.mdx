@@ -24,15 +24,15 @@ export default defineConfig({
 
 ### Access the Property
 
-After doing this, a `lastModified` number will be exported for each document. You can convert it to a JavaScript Date object.
+After doing this, a `lastModified` property will be exported for each document (as `Date`).
 
 ```ts
 import { source } from '@/lib/source';
 
 const page = source.getPage(['...']);
 
-console.log(new Date(page.data.lastModified));
+console.log(page.data.lastModified);
 // or with lazy loading
 const { lastModified } = await page.data.load();
-console.log(new Date(lastModified));
+console.log(lastModified);
 ```

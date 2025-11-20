@@ -105,7 +105,7 @@ export function useFieldInfo(
             schema.type = types;
 
             return match;
-          }) ?? types[0],
+          }) ?? types.at(0),
         oneOf: -1,
       };
     }

@@ -67,7 +67,7 @@ export function Hero() {
           speed={visible ? 1 : 0}
           shape="corners"
           minPixelRatio={1}
-          maxPixelCount={1920 * 1080 * 2}
+          maxPixelCount={1920 * 1080}
         />
       )}
       {showShaders && (
@@ -349,6 +349,7 @@ export function AgnosticBackground() {
         type="4x4"
         speed={visible ? 0.4 : 0}
         className="size-full"
+        minPixelRatio={1}
       />
     </div>
   );

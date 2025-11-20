@@ -44,7 +44,7 @@ export function createMDX(createOptions: CreateMDXOptions = {}) {
   return (nextConfig: NextConfig = {}): NextConfig => {
     const loaderOptions: WebpackLoaderOptions = {
       ...core.getOptions(),
-      compiledConfigPath: core.getCompiledConfigPath(),
+      absoluteCompiledConfigPath: path.resolve(core.getCompiledConfigPath()),
       isDev,
     };
 
@@ -105,8 +105,8 @@ export function createMDX(createOptions: CreateMDXOptions = {}) {
           },
           {
             test: metaLoaderGlob,
+            enforce: 'pre',
             use: [
-              options.defaultLoaders.babel,
               {
                 loader: 'fumadocs-mdx/loader-meta',
                 options: loaderOptions,

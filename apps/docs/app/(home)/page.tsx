@@ -585,8 +585,8 @@ export const source = loader({
         )}
       >
         <ContentAdoptionBackground className="absolute inset-0" />
-        <div className="absolute top-8 left-4 w-[70%] flex flex-col bg-neutral-900/80 backdrop-blur-lg border  text-neutral-200 p-2 rounded-xl shadow-lg shadow-black">
-          <p className="p-2 font-medium border-b mb-2 text-neutral-400">
+        <div className="absolute top-8 left-4 w-[70%] flex flex-col bg-neutral-50/80 backdrop-blur-lg border text-neutral-800 p-2 rounded-xl shadow-lg shadow-black dark:bg-neutral-900/80 dark:text-neutral-200">
+          <p className="px-2 pb-2 font-medium border-b mb-2 text-neutral-500 dark:text-neutral-400">
             My CMS
           </p>
           {['My Page', 'Another Page', 'Components', 'Getting Started'].map(
@@ -595,7 +595,7 @@ export const source = loader({
                 key={page}
                 className="flex items-center gap-2 p-2 rounded-lg hover:bg-neutral-400/20"
               >
-                <FileIcon className="stroke-neutral-400 size-4" />
+                <FileIcon className="stroke-neutral-500 size-4 dark:stroke-neutral-400" />
                 <span className="text-sm">{page}</span>
                 <div className="px-3 py-1 font-mono rounded-full bg-brand text-xs text-brand-foreground ms-auto">
                   Article
@@ -605,11 +605,11 @@ export const source = loader({
           )}
         </div>
 
-        <div className="absolute bottom-8 right-4 w-[70%] flex flex-col bg-neutral-900 text-neutral-200 rounded-xl rounded-tl-none border shadow-lg shadow-black">
-          <div className="absolute -left-px bottom-full rounded-t-xl px-4 pt-2 pb-1 bg-neutral-900 text-neutral-400 border-t border-x font-medium">
+        <div className="absolute bottom-8 right-4 w-[70%] flex flex-col bg-neutral-100 text-neutral-800 rounded-xl border shadow-lg shadow-black dark:bg-neutral-900 dark:text-neutral-200">
+          <div className="px-4 py-2 text-neutral-500 border-b font-medium dark:text-neutral-400">
             MDX Editor
           </div>
-          <pre className="text-base text-neutral-300 overflow-auto p-4">
+          <pre className="text-base text-neutral-800 overflow-auto p-4 dark:text-neutral-400">
             {`---
 title: Hello World
 ---

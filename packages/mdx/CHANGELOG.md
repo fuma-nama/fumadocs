@@ -1,5 +1,14 @@
 # next-docs-mdx
 
+## 14.0.3
+
+### Patch Changes
+
+- f362ea1: Fix Webpack warnings (they require absolute paths for dependencies)
+- Updated dependencies [fe380da]
+- Updated dependencies [ade44d0]
+  - fumadocs-core@16.0.15
+
 ## 14.0.2
 
 ### Patch Changes

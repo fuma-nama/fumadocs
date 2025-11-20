@@ -48,14 +48,17 @@ interface RenderRefOptions {
   $ref: string;
 }
 
-const typeVariants = cva('text-sm text-fd-muted-foreground font-mono', {
-  variants: {
-    variant: {
-      trigger:
-        'underline hover:text-fd-accent-foreground data-[state=open]:text-fd-accent-foreground',
+const typeVariants = cva(
+  'text-sm text-start text-fd-muted-foreground wrap-anywhere font-mono',
+  {
+    variants: {
+      variant: {
+        trigger:
+          'underline hover:text-fd-accent-foreground data-[state=open]:text-fd-accent-foreground',
+      },
     },
   },
-});
+);
 
 const PropertyContext = createContext<PropertyContextType>({
   renderRef: (props) => <RootRef {...props} />,

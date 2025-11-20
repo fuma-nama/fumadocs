@@ -1,7 +1,7 @@
 import { type Core, type CoreOptions, createCore } from '@/core';
 
 export interface WebpackLoaderOptions extends CoreOptions {
-  compiledConfigPath: string;
+  absoluteCompiledConfigPath: string;
   isDev: boolean;
 }
 
