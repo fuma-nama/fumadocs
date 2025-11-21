@@ -1,53 +1,51 @@
 import type * as PageTree from '@/page-tree/definitions';
-import type { MetaData, PageData, SourceConfig, UrlFn } from '@/source';
+import type { LoaderConfig, ResolvedLoaderConfig } from '@/source/loader';
 import type { ContentStorage } from '@/source/storage/content';
 import { basename, extname, joinPath } from '@/source/path';
 import { transformerFallback } from '@/source/page-tree/transformer-fallback';
-import type { LoaderPlugin } from '@/source/plugins';
+import type { SourceConfig } from '../source';
 
 export interface PageTreeBuilderContext<
-  Page extends PageData = PageData,
-  Meta extends MetaData = MetaData,
+  Config extends SourceConfig = SourceConfig,
 > {
   rootId: string;
   generateNodeId: () => string;
   options: PageTreeOptions;
-  transformers: PageTreeTransformer<Page, Meta>[];
+  transformers: PageTreeTransformer<Config>[];
 
   builder: PageTreeBuilder;
-  storage: ContentStorage<Page, Meta>;
-  getUrl: UrlFn;
+  storage: ContentStorage<Config>;
+  getUrl: ResolvedLoaderConfig['url'];
 
-  storages?: Record<string, ContentStorage<Page, Meta>>;
+  storages?: Record<string, ContentStorage<Config>>;
   locale?: string;
 }
 
 export interface PageTreeTransformer<
-  Page extends PageData = PageData,
-  Meta extends MetaData = MetaData,
+  Config extends SourceConfig = SourceConfig,
 > {
   file?: (
-    this: PageTreeBuilderContext<Page, Meta>,
+    this: PageTreeBuilderContext<Config>,
     node: PageTree.Item,
     filePath?: string,
   ) => PageTree.Item;
   folder?: (
-    this: PageTreeBuilderContext<Page, Meta>,
+    this: PageTreeBuilderContext<Config>,
     node: PageTree.Folder,
     folderPath: string,
     metaPath?: string,
   ) => PageTree.Folder;
   separator?: (
-    this: PageTreeBuilderContext<Page, Meta>,
+    this: PageTreeBuilderContext<Config>,
     node: PageTree.Separator,
   ) => PageTree.Separator;
   root?: (
-    this: PageTreeBuilderContext<Page, Meta>,
+    this: PageTreeBuilderContext<Config>,
     node: PageTree.Root,
   ) => PageTree.Root;
 }
 
-export interface PageTreeOptions<Config extends SourceConfig = SourceConfig> {
+export interface PageTreeOptions<Config extends LoaderConfig = LoaderConfig> {
   id?: string;
   /**
    * Remove references to the file path of original nodes (`$ref`)
@@ -65,7 +63,7 @@ export interface PageTreeOptions<Config extends SourceConfig = SourceConfig> {
   /**
    * Additional page tree transformers to apply
    */
-  transformers?: PageTreeTransformer<Config['pageData'], Config['metaData']>[];
+  transformers?: PageTreeTransformer<Config['source']>[];
 }
 
 export interface PageTreeBuilder {
@@ -87,15 +85,16 @@ const extractPrefix = '...';
 const excludePrefix = '!';
 
 export function createPageTreeBuilder(
-  getUrl: UrlFn,
-  plugins?: LoaderPlugin[],
+  loaderConfig: ResolvedLoaderConfig,
 ): PageTreeBuilder {
+  const { plugins = [], url, pageTree: defaultOptions = {} } = loaderConfig;
+
   return {
-    build(storage, options) {
+    build(storage, options = defaultOptions) {
       const key = '';
       return this.buildI18n({ [key]: storage }, options)[key];
     },
-    buildI18n(storages, options = {}) {
+    buildI18n(storages, options = defaultOptions) {
       let nextId = 0;
       const out: Record<string, PageTree.Root> = {};
       const transformers: PageTreeTransformer[] = [];
@@ -104,7 +103,7 @@ export function createPageTreeBuilder(
         transformers.push(...options.transformers);
       }
 
-      for (const plugin of plugins ?? []) {
+      for (const plugin of plugins) {
         if (plugin.transformPageTree)
           transformers.push(plugin.transformPageTree);
       }
@@ -122,7 +121,7 @@ export function createPageTreeBuilder(
           transformers,
           builder: this,
           options,
-          getUrl,
+          getUrl: url,
           locale,
           storage,
           storages,

@@ -80,8 +80,8 @@ export function Hero() {
           type="4x4"
           scale={0.5}
           size={3}
-          speed={visible ? 0.5 : 0}
-          rotation={270}
+          speed={0}
+          frame={5000 * 120}
           className="absolute max-lg:bottom-[-50%] max-lg:left-[-200px] animate-fd-fade-in duration-400 lg:top-[-5%] lg:right-0"
           minPixelRatio={1}
         />
