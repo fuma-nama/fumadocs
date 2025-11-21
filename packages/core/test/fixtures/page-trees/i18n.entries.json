@@ -3,7 +3,6 @@
     "language": "cn",
     "pages": [
       {
-        "absolutePath": "",
         "data": {
           "title": "Hello Chinese",
         },
@@ -15,7 +14,6 @@
         "url": "/cn/test",
       },
       {
-        "absolutePath": "",
         "data": {
           "title": "Nested Page Chinese",
         },
@@ -33,7 +31,6 @@
     "language": "en",
     "pages": [
       {
-        "absolutePath": "",
         "data": {
           "title": "Hello",
         },
@@ -45,7 +42,6 @@
         "url": "/en/test",
       },
       {
-        "absolutePath": "",
         "data": {
           "title": "Nested Page",
         },

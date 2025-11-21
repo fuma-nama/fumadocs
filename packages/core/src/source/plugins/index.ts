@@ -23,19 +23,13 @@ export interface LoaderPlugin<Config extends LoaderConfig = LoaderConfig> {
    * transform the storage after loading
    */
   transformStorage?: (context: {
-    storage: ContentStorage<
-      Config['source']['pageData'],
-      Config['source']['metaData']
-    >;
+    storage: ContentStorage<Config['source']>;
   }) => void;
 
   /**
    * transform the generated page tree
    */
-  transformPageTree?: PageTreeTransformer<
-    Config['source']['pageData'],
-    Config['source']['metaData']
-  >;
+  transformPageTree?: PageTreeTransformer<Config['source']>;
 }
 
 export type LoaderPluginOption<Config extends LoaderConfig = LoaderConfig> =
