@@ -294,7 +294,7 @@ export function PageFooter({ items, ...props }: FooterProps) {
     <div
       {...props}
       className={cn(
-        '@container grid gap-4 pb-6',
+        '@container grid gap-4',
         previous && next ? 'grid-cols-2' : 'grid-cols-1',
         props.className,
       )}

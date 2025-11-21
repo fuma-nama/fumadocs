@@ -138,7 +138,7 @@ export function DocsPage({
         ))}
       <article
         id="nd-page"
-        className="flex flex-col min-w-0 [grid-area:main] px-4 py-2 gap-4 lg:px-8 lg:pt-14"
+        className="flex flex-col min-w-0 [grid-area:main] px-4 py-6 gap-4 md:px-6 md:pt-8 xl:px-8 xl:pt-14"
       >
         {breadcrumbEnabled &&
           (breadcrumb ?? <PageBreadcrumb {...breadcrumbProps} />)}
