@@ -128,9 +128,12 @@ export async function Operation({
 
         <Accordions type="multiple">
           {statuses.map((status) => (
-            <AccordionItem key={status} value={status}>
-              <ResponseAccordion status={status} operation={method} ctx={ctx} />
-            </AccordionItem>
+            <ResponseAccordion
+              key={status}
+              status={status}
+              operation={method}
+              ctx={ctx}
+            />
           ))}
         </Accordions>
       </>
@@ -329,29 +332,28 @@ async function ResponseAccordion({
   const response = operation.responses![status];
   const { generateTypeScriptSchema } = ctx;
   const contentTypes = response.content ? Object.entries(response.content) : [];
+  let wrapper = (children: ReactNode) => children;
+  let selectorNode: ReactNode = null;
 
-  if (contentTypes.length === 0) {
-    return (
-      response.description && (
-        <div className="prose-no-margin">
-          {ctx.renderMarkdown(response.description)}
-        </div>
-      )
+  if (contentTypes.length > 0) {
+    const [defaultValue] = contentTypes[0];
+    selectorNode =
+      contentTypes.length === 1 ? (
+        <p className="text-sm text-fd-muted-foreground">{defaultValue}</p>
+      ) : (
+        <SelectTabTrigger items={contentTypes.map(([key]) => key)} />
+      );
+    wrapper = (children) => (
+      <SelectTabs defaultValue={defaultValue}>{children}</SelectTabs>
     );
   }
 
-  const [defaultValue] = contentTypes[0];
-  return (
-    <SelectTabs defaultValue={defaultValue}>
+  return wrapper(
+    <AccordionItem value={status}>
       <AccordionHeader>
         <AccordionTrigger className="font-mono">{status}</AccordionTrigger>
-        {contentTypes.length > 1 ? (
-          <SelectTabTrigger items={contentTypes.map(([key]) => key)} />
-        ) : (
-          <p className="text-sm text-fd-muted-foreground">{defaultValue}</p>
-        )}
+        {selectorNode}
       </AccordionHeader>
-
       <AccordionContent className="ps-4.5">
         {response.description && (
           <div className="prose-no-margin">
@@ -386,7 +388,7 @@ async function ResponseAccordion({
           );
         })}
       </AccordionContent>
-    </SelectTabs>
+    </AccordionItem>,
   );
 }
 

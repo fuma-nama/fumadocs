@@ -21,7 +21,10 @@ export const revalidate = 60 * 30;
 
 export async function getSponsors(owner: string): Promise<Sponsor[]> {
   if (!process.env.GITHUB_TOKEN) {
-    throw new Error('GITHUB_TOKEN environment variable is required');
+    console.warn(
+      'GITHUB_TOKEN environment variable is required for fetching sponsors.',
+    );
+    return [];
   }
 
   const octokit = new Octokit({
