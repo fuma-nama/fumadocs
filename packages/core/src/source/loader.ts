@@ -119,7 +119,7 @@ export interface LoaderOutput<Config extends LoaderConfig> {
   }[];
 
   /**
-   * Get page with slugs
+   * Get page with slugs, the slugs can also be URI encoded.
    *
    * @param language - If empty, the default language will be used
    */
@@ -373,8 +373,16 @@ function createOutput(
 
       return list;
     },
+    // the slugs plugin generates encoded slugs by default.
+    // we can assume page slugs are always URI encoded.
     getPage(slugs = [], language = defaultLanguage) {
-      return walker.pages.get(`${language}.${slugs.join('/')}`);
+      // 1. `slugs` is already decoded
+      let page = walker.pages.get(`${language}.${slugs.join('/')}`);
+      if (page) return page;
+
+      // 1. `slugs` is URI encoded
+      page = walker.pages.get(`${language}.${slugs.map(decodeURI).join('/')}`);
+      if (page) return page;
     },
     getNodeMeta(node, language = defaultLanguage) {
       const ref = node.$ref?.metaFile;
