@@ -9,7 +9,7 @@ Loader plugins can extend `loader()` to customise its output.
 
 A list of built-in plugins:
 
-- **Lucide Icons**: use icons from Lucide React (require `lucide-react` to be installed).
+- **Lucide Icons**: use icons from [Lucide React](https://lucide.dev) (require `lucide-react` to be installed).
 
   ```ts
   import { loader } from 'fumadocs-core/source';
@@ -25,20 +25,39 @@ A list of built-in plugins:
 
 Each plugin is an object:
 
-```ts
+```ts tab="Strictly Typed"
 import { loader } from 'fumadocs-core/source';
 
 export const source = loader({
-  plugins: [
-    {
-      transformStorage({ storage }) {},
-      transformPageTree: {
-        // ...
-      },
-    },
+  plugins: ({ typedPlugin }) => [
+    typedPlugin({
+      // plugin config
+    }),
   ],
 });
 ```
+
+```ts tab="Simple"
+import { loader, type LoaderPlugin } from 'fumadocs-core/source';
+
+export const source = loader({
+  plugins: [myPlugin()],
+});
+
+function myPlugin(): LoaderPlugin {
+  return {
+    // plugin config
+  };
+}
+```
+
+<Callout title="Good to know">
+
+`typedPlugin` enforces a more accurate type for plugin, including custom properties from your content source.
+
+But to make the plugin reusable (across different loaders), use the `LoaderPlugin` type instead.
+
+</Callout>
 
 ### Storage
 
@@ -50,15 +69,12 @@ To perform virtual file-system operations before processing, you can hook `trans
 import { loader } from 'fumadocs-core/source';
 
 export const source = loader({
-  plugins: [
-    {
+  plugins: ({ typedPlugin }) => [
+    typedPlugin({
       transformStorage({ storage }) {
         storage.read('my/path');
       },
-      transformPageTree: {
-        // ...
-      },
-    },
+    }),
   ],
 });
 ```
@@ -73,8 +89,8 @@ You can customise it using the `transformPageTree`, such as attaching custom pro
 import { loader } from 'fumadocs-core/source';
 
 export const source = loader({
-  plugins: [
-    {
+  plugins: ({ typedPlugin }) => [
+    typedPlugin({
       transformPageTree: {
         file(node, file) {
           // access the original (unfiltered) file data
@@ -85,7 +101,7 @@ export const source = loader({
           return node;
         },
       },
-    },
+    }),
   ],
 });
 ```
