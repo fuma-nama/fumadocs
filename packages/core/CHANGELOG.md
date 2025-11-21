@@ -1,5 +1,41 @@
 # next-docs-zeta
 
+## 16.1.0
+
+### Minor Changes
+
+- 15bd183: **[Loader API] Default the type of `plugins` to `LoaderPluginOption[]`**
+
+  It should no longer enforce type checks on custom properties from your content source.
+
+  For creating fully typed plugins (with custom properties), use the following pattern:
+
+  ```ts
+  import { loader } from 'fumadocs-core/source';
+  import { docs } from 'fumadocs-mdx:collections/server';
+  import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
+
+  export const source = loader(docs.toFumadocsSource(), {
+    baseUrl: '/docs',
+    plugins: ({ typedPlugin }) => [
+      lucideIconsPlugin(),
+      typedPlugin({
+        // the plugin config
+      }),
+    ],
+  });
+  ```
+
+- 42ad84c: **[Loader API] Refactor internal type parameters**
+
+  Internal types like `ContentStorage`, `PageTreeTransformer` now use a single `Config extends SourceConfig` generic parameter.
+
+  It makes extending their parameters easier, this should not affect normal usages.
+
+### Patch Changes
+
+- 2e01720: [Loader API] Support calling `loader().getPage(slugs)` with URI encoded slugs
+
 ## 16.0.15
 
 ### Patch Changes

@@ -1,5 +1,16 @@
 # @fuma-docs/openapi
 
+## 10.0.11
+
+### Patch Changes
+
+- 5ac448a: Improve response rendering
+- Updated dependencies [2e01720]
+- Updated dependencies [15bd183]
+- Updated dependencies [42ad84c]
+  - fumadocs-core@16.1.0
+  - fumadocs-ui@16.1.0
+
 ## 10.0.10
 
 ### Patch Changes
