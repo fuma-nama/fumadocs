@@ -38,6 +38,64 @@ const TocPopoverContext = createContext<{
   setOpen: (open: boolean) => void;
 } | null>(null);
 
+export function PageTOCPopover(props: ComponentProps<'div'>) {
+  const ref = useRef<HTMLElement>(null);
+  const [open, setOpen] = useState(false);
+  const { collapsed } = useSidebar();
+  const { isTransparent } = useNav();
+
+  const onClick = useEffectEvent((e: Event) => {
+    if (!open) return;
+
+    if (ref.current && !ref.current.contains(e.target as HTMLElement))
+      setOpen(false);
+  });
+
+  useEffect(() => {
+    window.addEventListener('click', onClick);
+
+    return () => {
+      window.removeEventListener('click', onClick);
+    };
+  }, []);
+
+  return (
+    <TocPopoverContext
+      value={useMemo(
+        () => ({
+          open,
+          setOpen,
+        }),
+        [setOpen, open],
+      )}
+    >
+      <Collapsible open={open} onOpenChange={setOpen} asChild>
+        <header
+          ref={ref}
+          data-toc-popover=""
+          {...props}
+          className={cn(
+            'fixed pr-(--removed-body-scroll-bar-size,0) z-10 border-b backdrop-blur-sm transition-colors xl:hidden max-xl:on-notebook-layout:[--fd-tocnav-height:40px]',
+            (!isTransparent || open) && 'bg-fd-background/80',
+            open && 'shadow-lg',
+            props.className,
+          )}
+          style={{
+            ...props.style,
+            top: 'calc(var(--fd-banner-height) + var(--fd-nav-height))',
+            insetInlineStart: collapsed
+              ? '0px'
+              : 'calc(var(--fd-sidebar-width) + var(--fd-layout-offset))',
+            insetInlineEnd: 0,
+          }}
+        >
+          {props.children}
+        </header>
+      </Collapsible>
+    </TocPopoverContext>
+  );
+}
+
 export function PageTOCPopoverTrigger(props: ComponentProps<'button'>) {
   const { text } = useI18n();
   const { open } = use(TocPopoverContext)!;
@@ -52,6 +110,7 @@ export function PageTOCPopoverTrigger(props: ComponentProps<'button'>) {
 
   return (
     <CollapsibleTrigger
+      data-toc-popover-trigger=""
       {...props}
       className={cn(
         'flex w-full h-(--fd-tocnav-height) items-center text-sm text-fd-muted-foreground gap-2.5 px-4 py-2.5 text-start focus-visible:outline-none [&_svg]:size-4 md:px-6',
@@ -153,70 +212,12 @@ function ProgressCircle({
 export function PageTOCPopoverContent(props: ComponentProps<'div'>) {
   return (
     <CollapsibleContent
-      data-toc-popover=""
+      data-toc-popover-content=""
       {...props}
       className={cn('flex flex-col px-4 max-h-[50vh] md:px-6', props.className)}
     >
       {props.children}
     </CollapsibleContent>
-  );
-}
-
-export function PageTOCPopover(props: ComponentProps<'div'>) {
-  const ref = useRef<HTMLElement>(null);
-  const [open, setOpen] = useState(false);
-  const { collapsed } = useSidebar();
-  const { isTransparent } = useNav();
-
-  const onClick = useEffectEvent((e: Event) => {
-    if (!open) return;
-
-    if (ref.current && !ref.current.contains(e.target as HTMLElement))
-      setOpen(false);
-  });
-
-  useEffect(() => {
-    window.addEventListener('click', onClick);
-
-    return () => {
-      window.removeEventListener('click', onClick);
-    };
-  }, []);
-
-  return (
-    <TocPopoverContext
-      value={useMemo(
-        () => ({
-          open,
-          setOpen,
-        }),
-        [setOpen, open],
-      )}
-    >
-      <Collapsible open={open} onOpenChange={setOpen} asChild>
-        <header
-          ref={ref}
-          id="nd-tocnav"
-          {...props}
-          className={cn(
-            'fixed pr-(--removed-body-scroll-bar-size,0) z-10 border-b backdrop-blur-sm transition-colors xl:hidden max-xl:on-notebook-layout:[--fd-tocnav-height:40px]',
-            (!isTransparent || open) && 'bg-fd-background/80',
-            open && 'shadow-lg',
-            props.className,
-          )}
-          style={{
-            ...props.style,
-            top: 'calc(var(--fd-banner-height) + var(--fd-nav-height))',
-            insetInlineStart: collapsed
-              ? '0px'
-              : 'calc(var(--fd-sidebar-width) + var(--fd-layout-offset))',
-            insetInlineEnd: 0,
-          }}
-        >
-          {props.children}
-        </header>
-      </Collapsible>
-    </TocPopoverContext>
   );
 }
 

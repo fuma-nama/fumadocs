@@ -23,13 +23,41 @@ export function LayoutHeader(props: ComponentProps<'header'>) {
   );
 }
 
+export function LayoutBody({
+  className,
+  style,
+  children,
+  ...props
+}: ComponentProps<'div'>) {
+  const { collapsed } = useSidebar();
+  const sidebarCol = collapsed
+    ? 'minmax(0px, 1fr)'
+    : 'minmax(var(--fd-sidebar-width), 1fr)';
+
+  return (
+    <div
+      id="nd-docs-layout"
+      className={cn('grid transition-[grid-template-columns]', className)}
+      style={{
+        gridTemplate: `"sidebar header header"
+        "sidebar toc-popover toc-popover"
+        "sidebar main toc" 1fr / ${sidebarCol} minmax(0px, 900px) minmax(var(--fd-toc-width), 1fr)`,
+        ...style,
+      }}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+}
+
 export function CollapsibleControl() {
   const { collapsed } = useSidebar();
 
   return (
     <div
       className={cn(
-        'fixed flex top-4 shadow-lg transition-opacity rounded-xl p-0.5 border bg-fd-muted text-fd-muted-foreground z-10 max-md:hidden xl:start-4 max-xl:end-4',
+        'fixed flex top-16 shadow-lg transition-opacity rounded-xl p-0.5 border bg-fd-muted text-fd-muted-foreground z-10 max-md:hidden xl:top-4 xl:start-4 max-xl:end-4',
         !collapsed && 'pointer-events-none opacity-0',
       )}
     >
@@ -68,36 +96,19 @@ export function LayoutTabs({
         props.className,
       )}
     >
-      {options.map((option) => (
-        <LayoutTab
-          key={option.url}
-          selected={selected === option}
-          option={option}
-        />
+      {options.map((option, i) => (
+        <Link
+          key={i}
+          href={option.url}
+          className={cn(
+            'inline-flex border-b-2 border-transparent transition-colors items-center pb-1.5 font-medium gap-2 text-fd-muted-foreground text-sm text-nowrap hover:text-fd-accent-foreground',
+            option.unlisted && selected !== option && 'hidden',
+            selected === option && 'border-fd-primary text-fd-primary',
+          )}
+        >
+          {option.title}
+        </Link>
       ))}
     </div>
-  );
-}
-
-function LayoutTab({
-  option: { title, url, unlisted, props },
-  selected = false,
-}: {
-  option: Option;
-  selected?: boolean;
-}) {
-  return (
-    <Link
-      href={url}
-      {...props}
-      className={cn(
-        'inline-flex border-b-2 border-transparent transition-colors items-center pb-1.5 font-medium gap-2 text-fd-muted-foreground text-sm text-nowrap hover:text-fd-accent-foreground',
-        unlisted && !selected && 'hidden',
-        selected && 'border-fd-primary text-fd-primary',
-        props?.className,
-      )}
-    >
-      {title}
-    </Link>
   );
 }

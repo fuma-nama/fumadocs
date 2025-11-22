@@ -113,52 +113,66 @@ export function SidebarContent(props: ComponentProps<'aside'>) {
   const { collapsed } = useSidebar();
   const [hover, setHover] = useState(false);
   const timerRef = useRef(0);
-  const closeTimeRef = useRef(0);
+  const ignoreHoverUntil = useRef(0);
 
   useOnChange(collapsed, () => {
-    setHover(false);
-    closeTimeRef.current = Date.now() + 150;
+    setHover(true);
+    ignoreHoverUntil.current = Date.now() + 200;
+
+    setTimeout(() => {
+      setHover(false);
+    }, 200);
   });
 
   return (
-    <aside
-      id="nd-sidebar"
-      {...props}
-      data-collapsed={collapsed}
-      className={cn(
-        props.className,
-        collapsed && [
-          'rounded-xl border translate-x-(--fd-sidebar-offset) rtl:-translate-x-(--fd-sidebar-offset)',
-          hover ? 'z-50 shadow-lg' : 'opacity-0',
-        ],
-      )}
-      onPointerEnter={(e) => {
-        if (
-          !collapsed ||
-          e.pointerType === 'touch' ||
-          closeTimeRef.current > Date.now()
-        )
-          return;
-        window.clearTimeout(timerRef.current);
-        setHover(true);
-      }}
-      onPointerLeave={(e) => {
-        if (!collapsed || e.pointerType === 'touch') return;
-        window.clearTimeout(timerRef.current);
+    <>
+      <aside
+        id="nd-sidebar"
+        {...props}
+        data-collapsed={collapsed}
+        className={cn(
+          'sticky top-(--fd-docs-sidebar-top) [grid-area:sidebar] h-[calc(100dvh-var(--fd-docs-sidebar-top))] flex flex-col items-end z-20 bg-fd-card text-sm border-e min-h-0 *:w-(--fd-sidebar-width) max-md:hidden',
+          collapsed && [
+            'fixed start-0 inset-y-2 h-auto rounded-xl border transition-[opacity,translate] duration-200',
+            hover
+              ? 'z-50 shadow-lg translate-x-2 rtl:-translate-x-2'
+              : 'opacity-0 -translate-x-[calc(100%-16px)] rtl:translate-x-[calc(100%-16px)]',
+          ],
+          props.className,
+        )}
+        onPointerEnter={(e) => {
+          if (
+            !collapsed ||
+            e.pointerType === 'touch' ||
+            ignoreHoverUntil.current > Date.now()
+          )
+            return;
+          window.clearTimeout(timerRef.current);
+          setHover(true);
+        }}
+        onPointerLeave={(e) => {
+          if (
+            !collapsed ||
+            e.pointerType === 'touch' ||
+            ignoreHoverUntil.current > Date.now()
+          )
+            return;
+          window.clearTimeout(timerRef.current);
 
-        timerRef.current = window.setTimeout(
-          () => {
-            setHover(false);
-            closeTimeRef.current = Date.now() + 150;
-          },
-          Math.min(e.clientX, document.body.clientWidth - e.clientX) > 100
-            ? 0
-            : 500,
-        );
-      }}
-    >
-      {props.children}
-    </aside>
+          timerRef.current = window.setTimeout(
+            () => {
+              setHover(false);
+              ignoreHoverUntil.current = Date.now() + 200;
+            },
+            Math.min(e.clientX, document.body.clientWidth - e.clientX) > 100
+              ? 0
+              : 500,
+          );
+        }}
+      >
+        {props.children}
+      </aside>
+    </>
   );
 }
 

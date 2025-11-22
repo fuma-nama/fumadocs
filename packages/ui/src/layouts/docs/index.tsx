@@ -29,7 +29,12 @@ import {
   LanguageToggle,
   LanguageToggleText,
 } from '@/layouts/shared/language-toggle';
-import { CollapsibleControl, LayoutTabs, LayoutHeader } from './client';
+import {
+  CollapsibleControl,
+  LayoutTabs,
+  LayoutHeader,
+  LayoutBody,
+} from './client';
 import { TreeContextProvider } from '@/contexts/tree';
 import { ThemeToggle } from '../shared/theme-toggle';
 import { NavProvider } from '@/contexts/layout';
@@ -191,13 +196,7 @@ export function DocsLayout({
     );
 
     const content = (
-      <SidebarContent
-        {...rest}
-        className={cn(
-          'sticky top-(--fd-docs-sidebar-top) [grid-area:sidebar] h-[calc(100dvh-var(--fd-docs-sidebar-top))] flex flex-col items-end z-20 bg-fd-card text-sm border-e min-h-0 transition-[top,opacity,translate,width] duration-200 max-md:hidden *:w-(--fd-sidebar-width)',
-          rest.className,
-        )}
-      >
+      <SidebarContent {...rest}>
         <SidebarHeader>
           <div className="flex">
             <Link
@@ -286,16 +285,7 @@ export function DocsLayout({
   return (
     <TreeContextProvider tree={tree}>
       <NavProvider transparentMode={transparentMode}>
-        <div
-          id="nd-docs-layout"
-          {...props.containerProps}
-          className="grid"
-          style={{
-            gridTemplate: `"sidebar header header"
-            "sidebar toc-popover toc-popover"
-            "sidebar main toc" 1fr / minmax(var(--fd-sidebar-width), 1fr) minmax(0px, 900px) minmax(var(--fd-toc-width), 1fr)`,
-          }}
-        >
+        <LayoutBody {...props.containerProps}>
           {nav.enabled !== false &&
             (nav.component ?? (
               <LayoutHeader
@@ -336,7 +326,7 @@ export function DocsLayout({
             />
           )}
           {children}
-        </div>
+        </LayoutBody>
       </NavProvider>
     </TreeContextProvider>
   );

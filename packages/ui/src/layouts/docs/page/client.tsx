@@ -37,7 +37,11 @@ const TocPopoverContext = createContext<{
   setOpen: (open: boolean) => void;
 } | null>(null);
 
-export function PageTOCPopover(props: ComponentProps<'div'>) {
+export function PageTOCPopover({
+  className,
+  children,
+  ...rest
+}: ComponentProps<'div'>) {
   const ref = useRef<HTMLElement>(null);
   const [open, setOpen] = useState(false);
   const { isTransparent } = useNav();
@@ -70,27 +74,32 @@ export function PageTOCPopover(props: ComponentProps<'div'>) {
       <Collapsible
         open={open}
         onOpenChange={setOpen}
-        className="sticky top-(--fd-docs-toc-popover-top) z-10 [grid-area:toc-popover] h-10 xl:hidden"
+        data-toc-popover=""
+        className={cn(
+          'sticky top-(--fd-docs-toc-popover-top) z-10 [grid-area:toc-popover] h-10 xl:hidden',
+          className,
+        )}
+        {...rest}
       >
         <header
           ref={ref}
-          id="nd-tocnav"
-          {...props}
           className={cn(
             'border-b backdrop-blur-sm transition-colors',
             (!isTransparent || open) && 'bg-fd-background/80',
             open && 'shadow-lg',
-            props.className,
           )}
         >
-          {props.children}
+          {children}
         </header>
       </Collapsible>
     </TocPopoverContext>
   );
 }
 
-export function PageTOCPopoverTrigger(props: ComponentProps<'button'>) {
+export function PageTOCPopoverTrigger({
+  className,
+  ...props
+}: ComponentProps<'button'>) {
   const { text } = useI18n();
   const { open } = use(TocPopoverContext)!;
   const items = useTOCItems();
@@ -104,11 +113,12 @@ export function PageTOCPopoverTrigger(props: ComponentProps<'button'>) {
 
   return (
     <CollapsibleTrigger
-      {...props}
       className={cn(
         'flex w-full h-10 items-center text-sm text-fd-muted-foreground gap-2.5 px-4 py-2.5 text-start focus-visible:outline-none [&_svg]:size-4 md:px-6',
-        props.className,
+        className,
       )}
+      data-toc-popover-trigger=""
+      {...props}
     >
       <ProgressCircle
         value={(selected + 1) / Math.max(1, items.length)}
@@ -205,7 +215,7 @@ function ProgressCircle({
 export function PageTOCPopoverContent(props: ComponentProps<'div'>) {
   return (
     <CollapsibleContent
-      data-toc-popover=""
+      data-toc-popover-content=""
       {...props}
       className={cn('flex flex-col px-4 max-h-[50vh] md:px-6', props.className)}
     >
