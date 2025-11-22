@@ -380,11 +380,9 @@ function SecurityTabs({
         value={securityId.toString()}
         onValueChange={(v) => setSecurityId(Number(v))}
       >
-        {securities.length > 1 && (
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-        )}
+        <SelectTrigger>
+          <SelectValue />
+        </SelectTrigger>
         <SelectContent>
           {securities.map((security, i) => (
             <SelectItem key={i} value={i.toString()}>
@@ -789,7 +787,7 @@ function DefaultResultDisplay({
           type="button"
           className={cn(
             buttonVariants({ size: 'icon-xs' }),
-            'p-0.5 text-fd-muted-foreground hover:text-fd-accent-foreground',
+            'p-0 text-fd-muted-foreground hover:text-fd-accent-foreground [&_svg]:size-3.5',
           )}
           onClick={() => reset()}
           aria-label="Dismiss response"

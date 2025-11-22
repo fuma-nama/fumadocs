@@ -96,8 +96,13 @@ export async function Operation({
               className="mb-4"
             />
           ) : (
-            <p className="text-sm text-fd-muted-foreground font-medium not-prose mb-7">
-              {contentTypes[0][0]}
+            <p
+              className={cn(
+                'text-sm text-fd-muted-foreground font-medium not-prose',
+                headingLevel === 2 ? 'mb-7' : 'mb-4',
+              )}
+            >
+              {defaultValue}
             </p>
           )}
         </div>
@@ -236,7 +241,7 @@ export async function Operation({
             />
           ) : (
             <p className="text-sm text-fd-muted-foreground font-medium not-prose mb-7">
-              {callbacks[0][0]}
+              {defaultValue}
             </p>
           )}
         </div>
