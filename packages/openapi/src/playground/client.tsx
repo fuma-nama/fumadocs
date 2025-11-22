@@ -381,9 +381,9 @@ function SecurityTabs({
         onValueChange={(v) => setSecurityId(Number(v))}
       >
         {securities.length > 1 && (
-        <SelectTrigger>
-          <SelectValue />
-        </SelectTrigger>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
         )}
         <SelectContent>
           {securities.map((security, i) => (
@@ -781,9 +781,9 @@ function DefaultResultDisplay({
   return (
     <div className="flex flex-col gap-3 p-3">
       <div className="flex justify-between items-center">
-      <div className="inline-flex items-center gap-1.5 text-sm font-medium text-fd-foreground">
-        <statusInfo.icon className={cn('size-4', statusInfo.color)} />
-        {statusInfo.description}
+        <div className="inline-flex items-center gap-1.5 text-sm font-medium text-fd-foreground">
+          <statusInfo.icon className={cn('size-4', statusInfo.color)} />
+          {statusInfo.description}
         </div>
         <button
           type="button"

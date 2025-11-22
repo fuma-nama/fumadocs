@@ -91,10 +91,10 @@ export async function Operation({
         <div className="flex gap-2 items-end justify-between">
           {ctx.renderHeading(headingLevel, 'Request Body')}
           {contentTypes.length > 1 ? (
-          <SelectTabTrigger
-            items={contentTypes.map(([key]) => key)}
-            className="mb-4"
-          />
+            <SelectTabTrigger
+              items={contentTypes.map(([key]) => key)}
+              className="mb-4"
+            />
           ) : (
             <p className="text-sm text-fd-muted-foreground font-medium not-prose mb-7">
               {contentTypes[0][0]}
@@ -193,7 +193,7 @@ export async function Operation({
         <div className="flex items-end justify-between gap-2">
           {ctx.renderHeading(headingLevel, 'Authorization')}
           {names.length > 1 ? (
-          <SelectTabTrigger items={names} className="mb-4" />
+            <SelectTabTrigger items={names} className="mb-4" />
           ) : (
             <p className="text-sm text-fd-muted-foreground font-medium not-prose mb-7">
               {names[0]}
@@ -230,10 +230,10 @@ export async function Operation({
         <div className="flex justify-between gap-2 items-end">
           {ctx.renderHeading(headingLevel, 'Callbacks')}
           {callbacks.length > 1 ? (
-          <SelectTabTrigger
-            items={callbacks.map(([key]) => key)}
-            className="mb-4"
-          />
+            <SelectTabTrigger
+              items={callbacks.map(([key]) => key)}
+              className="mb-4"
+            />
           ) : (
             <p className="text-sm text-fd-muted-foreground font-medium not-prose mb-7">
               {callbacks[0][0]}
