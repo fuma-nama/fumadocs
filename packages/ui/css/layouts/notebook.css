@@ -1,0 +1,32 @@
+@source '../../dist/layouts/notebook/**/*.js';
+
+@layer base {
+  #nd-notebook-layout {
+    --fd-page-width: 1200px;
+    --fd-sidebar-width: 0px;
+    --fd-toc-width: 0px;
+    --fd-layout-width: 1600px;
+    --fd-banner-height: 0px;
+    --fd-nav-height: 0px;
+    --fd-tocnav-height: 0px;
+    --fd-sidebar-mobile-offset: 100%;
+    --fd-layout-offset: max(calc(50vw - var(--fd-layout-width) / 2), 0px);
+  }
+
+  [dir='rtl'] #nd-notebook-layout {
+    --fd-sidebar-mobile-offset: -100%;
+  }
+
+  @variant xl {
+    #nd-notebook-layout {
+      --fd-toc-width: 286px;
+    }
+  }
+}
+
+/* Apply styles to #nd-notebook-layout */
+@custom-variant on-notebook-layout {
+  #nd-notebook-layout:has(&) {
+    @slot;
+  }
+}

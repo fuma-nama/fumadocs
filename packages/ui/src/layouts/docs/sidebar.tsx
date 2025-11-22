@@ -7,7 +7,7 @@ import {
   type FC,
   Fragment,
   type ReactNode,
-  useContext,
+  use,
   useMemo,
   useRef,
   useState,
@@ -33,6 +33,7 @@ import type * as PageTree from 'fumadocs-core/page-tree';
 import { useTreeContext, useTreePath } from '@/contexts/tree';
 import { useMediaQuery } from 'fumadocs-core/utils/use-media-query';
 import { Presence } from '@radix-ui/react-presence';
+import type { LinkItemType } from '@/layouts/shared';
 
 export interface SidebarProps {
   /**
@@ -125,26 +126,12 @@ export function SidebarContent(props: ComponentProps<'aside'>) {
       {...props}
       data-collapsed={collapsed}
       className={cn(
-        'fixed left-0 rtl:left-auto rtl:right-(--removed-body-scroll-bar-size,0) flex flex-col items-end top-(--fd-sidebar-top) bottom-(--fd-sidebar-margin) z-20 bg-fd-card text-sm border-e transition-[top,opacity,translate,width] duration-200 max-md:hidden *:w-(--fd-sidebar-width)',
+        props.className,
         collapsed && [
           'rounded-xl border translate-x-(--fd-sidebar-offset) rtl:-translate-x-(--fd-sidebar-offset)',
           hover ? 'z-50 shadow-lg' : 'opacity-0',
         ],
-        props.className,
       )}
-      style={
-        {
-          ...props.style,
-          '--fd-sidebar-offset': hover
-            ? 'calc(var(--spacing) * 2)'
-            : 'calc(16px - 100%)',
-          '--fd-sidebar-margin': collapsed ? '0.5rem' : '0px',
-          '--fd-sidebar-top': `calc(var(--fd-banner-height) + var(--fd-nav-height) + var(--fd-sidebar-margin))`,
-          width: collapsed
-            ? 'var(--fd-sidebar-width)'
-            : 'calc(var(--spacing) + var(--fd-sidebar-width) + var(--fd-layout-offset))',
-        } as object
-      }
       onPointerEnter={(e) => {
         if (
           !collapsed ||
@@ -236,7 +223,7 @@ export function SidebarFooter(props: ComponentProps<'div'>) {
 
 export function SidebarViewport(props: ScrollAreaProps) {
   return (
-    <ScrollArea {...props} className={cn('h-full', props.className)}>
+    <ScrollArea {...props} className={cn('min-h-0 flex-1', props.className)}>
       <ScrollViewport
         className="p-4 overscroll-contain"
         style={
@@ -441,14 +428,14 @@ export function SidebarCollapseTrigger(props: ComponentProps<'button'>) {
 }
 
 function useFolderContext() {
-  const ctx = useContext(FolderContext);
+  const ctx = use(FolderContext);
   if (!ctx) throw new Error('Missing sidebar folder');
 
   return ctx;
 }
 
 function useInternalContext() {
-  const ctx = useContext(Context);
+  const ctx = use(Context);
   if (!ctx) throw new Error('<Sidebar /> component required.');
 
   return ctx;
@@ -555,5 +542,48 @@ function PageTreeFolder({
       )}
       <SidebarFolderContent>{props.children}</SidebarFolderContent>
     </SidebarFolder>
+  );
+}
+
+export function SidebarLinkItem({
+  item,
+  ...props
+}: {
+  item: Exclude<LinkItemType, { type: 'icon' }>;
+  className?: string;
+}) {
+  if (item.type === 'menu')
+    return (
+      <SidebarFolder {...props}>
+        {item.url ? (
+          <SidebarFolderLink href={item.url} external={item.external}>
+            {item.icon}
+            {item.text}
+          </SidebarFolderLink>
+        ) : (
+          <SidebarFolderTrigger>
+            {item.icon}
+            {item.text}
+          </SidebarFolderTrigger>
+        )}
+        <SidebarFolderContent>
+          {item.items.map((child, i) => (
+            <SidebarLinkItem key={i} item={child} />
+          ))}
+        </SidebarFolderContent>
+      </SidebarFolder>
+    );
+
+  if (item.type === 'custom') return <div {...props}>{item.children}</div>;
+
+  return (
+    <SidebarItem
+      href={item.url}
+      icon={item.icon}
+      external={item.external}
+      {...props}
+    >
+      {item.text}
+    </SidebarItem>
   );
 }

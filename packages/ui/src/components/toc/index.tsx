@@ -1,11 +1,59 @@
+'use client';
+import * as Primitive from 'fumadocs-core/toc';
 import {
-  type HTMLAttributes,
+  type ComponentProps,
+  createContext,
+  use,
   type RefObject,
   useEffect,
   useEffectEvent,
   useRef,
 } from 'react';
-import { useActiveAnchors } from 'fumadocs-core/toc';
+import { cn } from '@/utils/cn';
+import { mergeRefs } from '@/utils/merge-refs';
+
+const TOCContext = createContext<Primitive.TOCItemType[]>([]);
+
+export function useTOCItems(): Primitive.TOCItemType[] {
+  return use(TOCContext);
+}
+
+export function TOCProvider({
+  toc,
+  children,
+  ...props
+}: ComponentProps<typeof Primitive.AnchorProvider>) {
+  return (
+    <TOCContext value={toc}>
+      <Primitive.AnchorProvider toc={toc} {...props}>
+        {children}
+      </Primitive.AnchorProvider>
+    </TOCContext>
+  );
+}
+
+export function TOCScrollArea({
+  ref,
+  className,
+  ...props
+}: ComponentProps<'div'>) {
+  const viewRef = useRef<HTMLDivElement>(null);
+
+  return (
+    <div
+      ref={mergeRefs(viewRef, ref)}
+      className={cn(
+        'relative min-h-0 text-sm ms-px overflow-auto [scrollbar-width:none] mask-[linear-gradient(to_bottom,transparent,white_16px,white_calc(100%-16px),transparent)] py-3',
+        className,
+      )}
+      {...props}
+    >
+      <Primitive.ScrollProvider containerRef={viewRef}>
+        {props.children}
+      </Primitive.ScrollProvider>
+    </div>
+  );
+}
 
 type TocThumb = [top: number, height: number];
 
@@ -16,7 +64,7 @@ interface RefProps {
 export function TocThumb({
   containerRef,
   ...props
-}: HTMLAttributes<HTMLDivElement> & RefProps) {
+}: ComponentProps<'div'> & RefProps) {
   const thumbRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -31,7 +79,7 @@ function Updater({
   containerRef,
   thumbRef,
 }: RefProps & { thumbRef: RefObject<HTMLElement | null> }) {
-  const active = useActiveAnchors();
+  const active = Primitive.useActiveAnchors();
   const onPrint = useEffectEvent(() => {
     if (!containerRef.current || !thumbRef.current) return;
 

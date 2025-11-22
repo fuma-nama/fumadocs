@@ -1,15 +1,14 @@
 'use client';
 
 import { Image, type ImageProps } from 'fumadocs-core/framework';
-import { type ImgHTMLAttributes } from 'react';
-import './image-zoom.css';
+import type { ComponentProps } from 'react';
 import Zoom, { type UncontrolledProps } from 'react-medium-image-zoom';
 
 export type ImageZoomProps = ImageProps & {
   /**
    * Image props when zoom in
    */
-  zoomInProps?: ImgHTMLAttributes<HTMLImageElement>;
+  zoomInProps?: ComponentProps<'img'>;
 
   /**
    * Props for `react-medium-image-zoom`

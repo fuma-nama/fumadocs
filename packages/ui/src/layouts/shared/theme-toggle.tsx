@@ -2,7 +2,7 @@
 import { cva } from 'class-variance-authority';
 import { Moon, Sun, Airplay } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { type HTMLAttributes, useLayoutEffect, useState } from 'react';
+import { ComponentProps, useEffect, useState } from 'react';
 import { cn } from '@/utils/cn';
 
 const itemVariants = cva(
@@ -27,13 +27,13 @@ export function ThemeToggle({
   className,
   mode = 'light-dark',
   ...props
-}: HTMLAttributes<HTMLElement> & {
+}: ComponentProps<'div'> & {
   mode?: 'light-dark' | 'light-dark-system';
 }) {
   const { setTheme, theme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     setMounted(true);
   }, []);
 
@@ -51,7 +51,6 @@ export function ThemeToggle({
         aria-label={`Toggle Theme`}
         onClick={() => setTheme(value === 'light' ? 'dark' : 'light')}
         data-theme-toggle=""
-        {...props}
       >
         {full.map(([key, Icon]) => {
           if (key === 'system') return;

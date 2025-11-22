@@ -37,33 +37,24 @@
       "types": "./dist/layouts/docs/index.d.ts"
     },
     "./layouts/docs/page": {
-      "import": "./dist/layouts/docs/page.js",
-      "types": "./dist/layouts/docs/page.d.ts"
-    },
-    "./layouts/docs-client": {
-      "import": "./dist/layouts/docs/client.js",
-      "types": "./dist/layouts/docs/client.d.ts"
+      "import": "./dist/layouts/docs/page/index.js",
+      "types": "./dist/layouts/docs/page/index.d.ts"
     },
     "./layouts/notebook": {
       "import": "./dist/layouts/notebook/index.js",
       "types": "./dist/layouts/notebook/index.d.ts"
     },
-    "./layouts/notebook-client": {
-      "import": "./dist/layouts/notebook/client.js",
-      "types": "./dist/layouts/notebook/client.d.ts"
-    },
-    "./layouts/links": {
-      "import": "./dist/layouts/shared/index.js",
-      "types": "./dist/layouts/shared/index.d.ts"
+    "./layouts/notebook/page": {
+      "import": "./dist/layouts/notebook/page/index.js",
+      "types": "./dist/layouts/notebook/page/index.d.ts"
     },
     "./layouts/shared": {
       "import": "./dist/layouts/shared/index.js",
       "types": "./dist/layouts/shared/index.d.ts"
     },
     "./page": {
-      "node": "./dist/page.js",
-      "import": "./dist/page.js",
-      "types": "./dist/page.d.ts"
+      "import": "./dist/layouts/docs/page/index.js",
+      "types": "./dist/layouts/docs/page/index.d.ts"
     },
     "./provider": {
       "import": "./dist/provider/index.js",

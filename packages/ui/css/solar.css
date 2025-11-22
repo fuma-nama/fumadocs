@@ -27,11 +27,11 @@
     border: none;
   }
 
-  .fd-default-layout #nd-page article {
+  #nd-docs-layout #nd-page article {
     @apply mx-4;
   }
 
-  .fd-notebook-layout #nd-page article {
+  #nd-notebook-layout #nd-page article {
     @apply mx-6;
   }
 }

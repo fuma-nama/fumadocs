@@ -2,16 +2,11 @@
 import * as Primitive from 'fumadocs-core/toc';
 import { type ComponentProps, useEffect, useRef, useState } from 'react';
 import { cn } from '@/utils/cn';
-import { TocThumb } from '@/components/layout/toc-thumb';
-import { useTOCItems } from '@/components/layout/toc';
+import { useTOCItems, TocThumb } from '.';
 import { mergeRefs } from '@/utils/merge-refs';
 import { useI18n } from '@/contexts/i18n';
 
-export default function ClerkTOCItems({
-  ref,
-  className,
-  ...props
-}: ComponentProps<'div'>) {
+export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
   const containerRef = useRef<HTMLDivElement>(null);
   const items = useTOCItems();
   const { text } = useI18n();
@@ -77,7 +72,7 @@ export default function ClerkTOCItems({
 
   return (
     <>
-      {svg ? (
+      {svg && (
         <div
           className="absolute start-0 top-0 rtl:-scale-x-100"
           style={{
@@ -96,7 +91,7 @@ export default function ClerkTOCItems({
             className="mt-(--fd-top) h-(--fd-height) bg-fd-primary transition-all"
           />
         </div>
-      ) : null}
+      )}
       <div
         ref={mergeRefs(containerRef, ref)}
         className={cn('flex flex-col', className)}
@@ -144,9 +139,9 @@ function TOCItem({
       style={{
         paddingInlineStart: getItemOffset(item.depth),
       }}
-      className="prose relative py-1.5 text-sm text-fd-muted-foreground hover:text-fd-accent-foreground transition-colors [overflow-wrap:anywhere] first:pt-0 last:pb-0 data-[active=true]:text-fd-primary"
+      className="prose relative py-1.5 text-sm text-fd-muted-foreground hover:text-fd-accent-foreground transition-colors wrap-anywhere first:pt-0 last:pb-0 data-[active=true]:text-fd-primary"
     >
-      {offset !== upperOffset ? (
+      {offset !== upperOffset && (
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 16 16"
@@ -161,7 +156,7 @@ function TOCItem({
             strokeWidth="1"
           />
         </svg>
-      ) : null}
+      )}
       <div
         className={cn(
           'absolute inset-y-0 w-px bg-fd-foreground/10',

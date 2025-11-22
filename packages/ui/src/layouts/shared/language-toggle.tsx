@@ -1,5 +1,5 @@
 'use client';
-import { type ButtonHTMLAttributes, type HTMLAttributes } from 'react';
+import type { ComponentProps } from 'react';
 import { useI18n } from '@/contexts/i18n';
 import {
   Popover,
@@ -9,7 +9,7 @@ import {
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 
-export type LanguageSelectProps = ButtonHTMLAttributes<HTMLButtonElement>;
+export type LanguageSelectProps = ComponentProps<'button'>;
 
 export function LanguageToggle(props: LanguageSelectProps): React.ReactElement {
   const context = useI18n();
@@ -56,9 +56,7 @@ export function LanguageToggle(props: LanguageSelectProps): React.ReactElement {
   );
 }
 
-export function LanguageToggleText(
-  props: HTMLAttributes<HTMLSpanElement>,
-): React.ReactElement {
+export function LanguageToggleText(props: ComponentProps<'span'>) {
   const context = useI18n();
   const text = context.locales?.find(
     (item) => item.locale === context.locale,

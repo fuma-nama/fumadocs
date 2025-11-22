@@ -3,23 +3,22 @@ import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { Edit } from '@/icons';
 import { I18nLabel } from '@/contexts/i18n';
+import type { AnchorProviderProps, TOCItemType } from 'fumadocs-core/toc';
+import { TOCProvider, TOCScrollArea } from '@/components/toc';
+import * as TocDefault from '@/components/toc/default';
+import * as TocClerk from '@/components/toc/clerk';
+import { Text } from 'lucide-react';
 import {
-  type BreadcrumbProps,
-  type FooterProps,
-  PageArticle,
+  BreadcrumbProps,
+  FooterProps,
   PageBreadcrumb,
   PageFooter,
   PageLastUpdate,
-  PageRoot,
   PageTOC,
-  PageTOCItems,
   PageTOCPopover,
   PageTOCPopoverContent,
-  PageTOCPopoverItems,
   PageTOCPopoverTrigger,
-  PageTOCTitle,
-} from '@/layouts/docs/page';
-import type { AnchorProviderProps, TOCItemType } from 'fumadocs-core/toc';
+} from './client';
 
 interface EditOnGitHubOptions
   extends Omit<ComponentProps<'a'>, 'href' | 'children'> {
@@ -138,17 +137,24 @@ export function DocsPage({
     tocPopoverOptions.header !== undefined ||
     tocPopoverOptions.footer !== undefined;
 
-  return (
-    <PageRoot
-      toc={
-        tocEnabled || tocPopoverEnabled
-          ? {
-              toc,
-              single: tocOptions.single,
-            }
-          : false
-      }
+  let wrapper = (children: ReactNode) => children;
+
+  if (tocEnabled || tocPopoverEnabled) {
+    wrapper = (children) => (
+      <TOCProvider toc={toc} single={tocOptions.single}>
+        {children}
+      </TOCProvider>
+    );
+  }
+
+  return wrapper(
+    <div
+      id="nd-page"
       {...container}
+      className={cn(
+        'flex flex-1 w-full mx-auto max-w-(--fd-page-width) pt-(--fd-tocnav-height) pe-(--fd-toc-width)',
+        container?.className,
+      )}
     >
       {tocPopoverEnabled &&
         (tocPopover ?? (
@@ -156,12 +162,24 @@ export function DocsPage({
             <PageTOCPopoverTrigger />
             <PageTOCPopoverContent>
               {tocPopoverOptions.header}
-              <PageTOCPopoverItems variant={tocPopoverOptions.style} />
+              <TOCScrollArea>
+                {tocPopoverOptions.style === 'clerk' ? (
+                  <TocDefault.TOCItems />
+                ) : (
+                  <TocClerk.TOCItems />
+                )}
+              </TOCScrollArea>
               {tocPopoverOptions.footer}
             </PageTOCPopoverContent>
           </PageTOCPopover>
         ))}
-      <PageArticle {...article}>
+      <article
+        {...article}
+        className={cn(
+          'flex min-w-0 w-full flex-col gap-4 pt-8 px-4 md:px-6 md:mx-auto',
+          article?.className,
+        )}
+      >
         {breadcrumbEnabled &&
           (breadcrumb ?? <PageBreadcrumb {...breadcrumbProps} />)}
         {children}
@@ -175,17 +193,29 @@ export function DocsPage({
         </div>
         {footer.enabled !== false &&
           (footer.component ?? <PageFooter items={footer.items} />)}
-      </PageArticle>
+      </article>
       {tocEnabled &&
         (tocReplace ?? (
           <PageTOC>
             {tocOptions.header}
-            <PageTOCTitle />
-            <PageTOCItems variant={tocOptions.style} />
+            <h3
+              id="toc-title"
+              className="inline-flex items-center gap-1.5 text-sm text-fd-muted-foreground"
+            >
+              <Text className="size-4" />
+              <I18nLabel label="toc" />
+            </h3>
+            <TOCScrollArea>
+              {tocOptions.style === 'clerk' ? (
+                <TocDefault.TOCItems />
+              ) : (
+                <TocClerk.TOCItems />
+              )}
+            </TOCScrollArea>
             {tocOptions.footer}
           </PageTOC>
         ))}
-    </PageRoot>
+    </div>,
   );
 }
 

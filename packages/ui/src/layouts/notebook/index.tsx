@@ -6,13 +6,7 @@ import {
   type ReactNode,
   useMemo,
 } from 'react';
-import {
-  type BaseLayoutProps,
-  BaseLinkItem,
-  type BaseLinkType,
-  getLinks,
-  type LinkItemType,
-} from '@/layouts/shared';
+import { type BaseLayoutProps, resolveLinkItems } from '@/layouts/shared';
 import {
   Sidebar,
   SidebarCollapseTrigger,
@@ -30,7 +24,7 @@ import {
   type SidebarProps,
   SidebarTrigger,
   SidebarViewport,
-} from '@/components/layout/sidebar';
+} from './sidebar';
 import { TreeContextProvider } from '@/contexts/tree';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
@@ -40,8 +34,8 @@ import {
   Sidebar as SidebarIcon,
   X,
 } from 'lucide-react';
-import { LanguageToggle } from '@/components/layout/language-toggle';
-import { ThemeToggle } from '@/components/layout/theme-toggle';
+import { LanguageToggle } from '@/layouts/shared/language-toggle';
+import { ThemeToggle } from '@/layouts/shared/theme-toggle';
 import {
   Popover,
   PopoverContent,
@@ -55,16 +49,17 @@ import {
   NavbarSidebarTrigger,
 } from '@/layouts/notebook/client';
 import { NavProvider } from '@/contexts/layout';
-import { type Option, RootToggle } from '@/components/layout/root-toggle';
+import { type Option, RootToggle } from '@/layouts/shared/root-toggle';
 import Link from 'fumadocs-core/link';
 import {
   LargeSearchToggle,
   SearchToggle,
-} from '@/components/layout/search-toggle';
+} from '@/layouts/shared/search-toggle';
 import {
   getSidebarTabs,
   type GetSidebarTabsOptions,
 } from '@/utils/get-sidebar-tabs';
+import { LinkItem, type LinkItemType } from '@/layouts/shared/link-item';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
@@ -110,7 +105,7 @@ export function DocsLayout(props: DocsLayoutProps) {
   } = props;
 
   const navMode = nav.mode ?? 'auto';
-  const links = getLinks(props.links ?? [], props.githubUrl);
+  const links = resolveLinkItems(props);
   const tabs = useMemo(() => {
     if (Array.isArray(tabOptions)) {
       return tabOptions;
@@ -229,7 +224,7 @@ export function DocsLayout(props: DocsLayoutProps) {
           )}
         >
           {iconLinks.map((item, i) => (
-            <BaseLinkItem
+            <LinkItem
               key={i}
               item={item}
               className={cn(
@@ -242,7 +237,7 @@ export function DocsLayout(props: DocsLayoutProps) {
               aria-label={item.label}
             >
               {item.icon}
-            </BaseLinkItem>
+            </LinkItem>
           ))}
         </Footer>
       </SidebarContent>
@@ -273,7 +268,7 @@ export function DocsLayout(props: DocsLayoutProps) {
           )}
         >
           {iconLinks.map((item, i) => (
-            <BaseLinkItem
+            <LinkItem
               key={i}
               item={item}
               className={cn(
@@ -287,7 +282,7 @@ export function DocsLayout(props: DocsLayoutProps) {
               aria-label={item.label}
             >
               {item.icon}
-            </BaseLinkItem>
+            </LinkItem>
           ))}
           {i18n && (
             <LanguageToggle>
@@ -353,8 +348,8 @@ function DocsNavbar({
     <Navbar
       mode={navMode}
       className={cn(
-        'on-root:[--fd-nav-height:56px] md:on-root:[--fd-nav-height:64px]',
-        tabs.length > 0 && 'lg:on-root:[--fd-nav-height:104px]',
+        'on-notebook-layout:[--fd-nav-height:56px] md:on-notebook-layout:[--fd-nav-height:64px]',
+        tabs.length > 0 && 'lg:on-notebook-layout:[--fd-nav-height:104px]',
       )}
     >
       <div
@@ -433,7 +428,7 @@ function DocsNavbar({
           {links
             .filter((item) => item.type === 'icon')
             .map((item, i) => (
-              <BaseLinkItem
+              <LinkItem
                 key={i}
                 item={item}
                 className={cn(
@@ -443,7 +438,7 @@ function DocsNavbar({
                 aria-label={item.label}
               >
                 {item.icon}
-              </BaseLinkItem>
+              </LinkItem>
             ))}
 
           <div className="flex items-center md:hidden">
@@ -508,7 +503,7 @@ function NavbarLinkItem({
           )}
         >
           {item.url ? (
-            <BaseLinkItem item={item as BaseLinkType}>{item.text}</BaseLinkItem>
+            <LinkItem item={item as { url: string }}>{item.text}</LinkItem>
           ) : (
             item.text
           )}
@@ -520,14 +515,14 @@ function NavbarLinkItem({
               return <Fragment key={i}>{child.children}</Fragment>;
 
             return (
-              <BaseLinkItem
+              <LinkItem
                 key={i}
                 item={child}
                 className="inline-flex items-center gap-2 rounded-md p-2 text-start hover:bg-fd-accent hover:text-fd-accent-foreground data-[active=true]:text-fd-primary [&_svg]:size-4"
               >
                 {child.icon}
                 {child.text}
-              </BaseLinkItem>
+              </LinkItem>
             );
           })}
         </PopoverContent>
@@ -538,9 +533,9 @@ function NavbarLinkItem({
   if (item.type === 'custom') return item.children;
 
   return (
-    <BaseLinkItem item={item} {...props}>
+    <LinkItem item={item} {...props}>
       {item.text}
-    </BaseLinkItem>
+    </LinkItem>
   );
 }
 

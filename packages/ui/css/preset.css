@@ -1,22 +1,20 @@
 @import './shiki.css';
+@import './components/image-zoom.css';
 
-@source '../dist/**/*.js';
+/* TODO: remove them on next major */
+@import './layouts/docs.css';
+@import './layouts/home.css';
+@import './layouts/notebook.css';
+
+@source '../dist/*.js';
+@source '../dist/{components,contexts,provider,utils}/**/*.js';
+@source '../dist/layouts/shared/**/*.js';
+
 @plugin '../dist/theme/typography/index.js';
 
-[dir='rtl'] {
-  --fd-sidebar-mobile-offset: -100%;
-}
-
 @theme {
-  --fd-sidebar-mobile-offset: 100%;
   --spacing-fd-container: 1400px;
-  --fd-page-width: 1200px;
-  --fd-sidebar-width: 0px;
-  --fd-toc-width: 0px;
-  --fd-layout-width: 1600px;
-  --fd-banner-height: 0px;
-  --fd-nav-height: 0px;
-  --fd-tocnav-height: 0px;
+
   --animate-fd-fade-in: fd-fade-in 300ms ease;
   --animate-fd-fade-out: fd-fade-out 300ms ease;
 
@@ -230,11 +228,6 @@
     background-color: var(--color-fd-background);
     color: var(--color-fd-foreground);
   }
-
-  :root,
-  #nd-docs-layout {
-    --fd-layout-offset: max(calc(50vw - var(--fd-layout-width) / 2), 0px);
-  }
 }
 
 @utility fd-scroll-container {
@@ -299,14 +292,7 @@
   margin-inline: auto;
   padding-inline: 1rem;
 
-  @apply 2xl:max-w-(--spacing-fd-container);
+  @apply 2xl:max-w-fd-container;
 }
 
 @variant dark (&:where(.dark, .dark *));
-
-/* Apply styles to :root */
-@custom-variant on-root {
-  :root:has(&) {
-    @slot;
-  }
-}

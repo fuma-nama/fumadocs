@@ -8,7 +8,7 @@ import { Sidebar as SidebarIcon } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import { usePathname } from 'fumadocs-core/framework';
 import { isTabActive } from '@/utils/is-active';
-import type { Option } from '@/components/layout/root-toggle';
+import type { Option } from '@/layouts/shared/root-toggle';
 
 export function Navbar({
   mode,
@@ -40,10 +40,10 @@ export function LayoutBody(props: ComponentProps<'main'>) {
 
   return (
     <main
-      id="nd-docs-layout"
+      id="nd-notebook-layout"
       {...props}
       className={cn(
-        'flex flex-1 flex-col transition-[padding] pt-(--fd-nav-height) fd-notebook-layout',
+        'flex flex-1 flex-col transition-[padding] pt-(--fd-nav-height)',
         !collapsed && 'mx-(--fd-layout-offset)',
         props.className,
       )}
