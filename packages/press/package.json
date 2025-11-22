@@ -43,7 +43,7 @@
     "react-dom": "^19.2.0",
     "tsconfig": "workspace:*",
     "typescript": "^5.9.3",
-    "zshy": "^0.4.4"
+    "zshy": "^0.6.0"
   },
   "zshy": {
     "cjs": false,
