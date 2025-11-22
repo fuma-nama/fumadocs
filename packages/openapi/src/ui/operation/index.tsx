@@ -90,10 +90,16 @@ export async function Operation({
       <SelectTabs defaultValue={defaultValue}>
         <div className="flex gap-2 items-end justify-between">
           {ctx.renderHeading(headingLevel, 'Request Body')}
+          {contentTypes.length > 1 ? (
           <SelectTabTrigger
             items={contentTypes.map(([key]) => key)}
             className="mb-4"
           />
+          ) : (
+            <p className="text-sm text-fd-muted-foreground font-medium not-prose mb-7">
+              {contentTypes[0][0]}
+            </p>
+          )}
         </div>
         {body.description && ctx.renderMarkdown(body.description)}
         {contentTypes.map(([type, content]) => {
@@ -186,7 +192,13 @@ export async function Operation({
       <SelectTabs defaultValue={names[0]}>
         <div className="flex items-end justify-between gap-2">
           {ctx.renderHeading(headingLevel, 'Authorization')}
+          {names.length > 1 ? (
           <SelectTabTrigger items={names} className="mb-4" />
+          ) : (
+            <p className="text-sm text-fd-muted-foreground font-medium not-prose mb-7">
+              {names[0]}
+            </p>
+          )}
         </div>
         {securities.map((security, i) => (
           <SelectTab key={i} value={names[i]}>
@@ -217,10 +229,16 @@ export async function Operation({
       <SelectTabs defaultValue={defaultValue}>
         <div className="flex justify-between gap-2 items-end">
           {ctx.renderHeading(headingLevel, 'Callbacks')}
+          {callbacks.length > 1 ? (
           <SelectTabTrigger
             items={callbacks.map(([key]) => key)}
             className="mb-4"
           />
+          ) : (
+            <p className="text-sm text-fd-muted-foreground font-medium not-prose mb-7">
+              {callbacks[0][0]}
+            </p>
+          )}
         </div>
         {callbacks.map(([name, callback]) => (
           <SelectTab key={name} value={name}>
@@ -356,7 +374,7 @@ async function ResponseAccordion({
       </AccordionHeader>
       <AccordionContent className="ps-4.5">
         {response.description && (
-          <div className="prose-no-margin">
+          <div className="prose-no-margin mb-2">
             {ctx.renderMarkdown(response.description)}
           </div>
         )}
@@ -371,7 +389,7 @@ async function ResponseAccordion({
           }
 
           return (
-            <SelectTab key={type} value={type} className="my-2">
+            <SelectTab key={type} value={type} className="mb-2">
               {ts && <CopyResponseTypeScript code={ts} />}
               {schema && (
                 <div className="border px-3 py-2 rounded-lg">
