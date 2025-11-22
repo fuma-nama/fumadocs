@@ -1,5 +1,4 @@
 @import './shiki.css';
-@import './components/image-zoom.css';
 
 /* TODO: remove them on next major */
 @import './layouts/docs.css';
