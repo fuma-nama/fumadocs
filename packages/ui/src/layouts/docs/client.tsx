@@ -1,23 +1,57 @@
 'use client';
 
 import { Sidebar as SidebarIcon } from 'lucide-react';
-import { type ComponentProps, useMemo } from 'react';
+import {
+  type ComponentProps,
+  createContext,
+  type ReactNode,
+  use,
+  useMemo,
+} from 'react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { useSidebar } from '@/contexts/sidebar';
-import { useNav } from '@/contexts/layout';
 import { SidebarCollapseTrigger } from './sidebar';
 import { SearchToggle } from '../shared/search-toggle';
 import { usePathname } from 'fumadocs-core/framework';
 import { isTabActive } from '@/utils/is-active';
 import Link from 'fumadocs-core/link';
 import type { SidebarTab } from '@/utils/get-sidebar-tabs';
+import { useIsScrollTop } from '@/utils/use-is-scroll-top';
 
-export function LayoutHeader(props: ComponentProps<'header'>) {
-  const { isTransparent } = useNav();
+export const LayoutContext = createContext<{
+  isNavTransparent: boolean;
+} | null>(null);
+
+export function LayoutContextProvider({
+  navTransparentMode = 'none',
+  children,
+}: {
+  navTransparentMode?: 'always' | 'top' | 'none';
+  children: ReactNode;
+}) {
+  const isTop =
+    useIsScrollTop({ enabled: navTransparentMode === 'top' }) ?? true;
 
   return (
-    <header data-transparent={isTransparent} {...props}>
+    <LayoutContext
+      value={{
+        isNavTransparent:
+          navTransparentMode === 'top'
+            ? isTop
+            : navTransparentMode === 'always',
+      }}
+    >
+      {children}
+    </LayoutContext>
+  );
+}
+
+export function LayoutHeader(props: ComponentProps<'header'>) {
+  const { isNavTransparent } = use(LayoutContext)!;
+
+  return (
+    <header data-transparent={isNavTransparent} {...props}>
       {props.children}
     </header>
   );

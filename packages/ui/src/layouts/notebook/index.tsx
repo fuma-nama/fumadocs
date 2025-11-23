@@ -44,11 +44,11 @@ import {
 import type * as PageTree from 'fumadocs-core/page-tree';
 import {
   LayoutBody,
+  LayoutContextProvider,
   LayoutTabs,
   Navbar,
   NavbarSidebarTrigger,
 } from '@/layouts/notebook/client';
-import { NavProvider } from '@/contexts/layout';
 import {
   type SidebarTabWithProps,
   SidebarTabTrigger,
@@ -101,7 +101,7 @@ interface SidebarOptions
 export function DocsLayout(props: DocsLayoutProps) {
   const {
     tabMode = 'sidebar',
-    nav: { transparentMode, ...nav } = {},
+    nav = {},
     sidebar: { tabs: tabOptions, ...sidebarProps } = {},
     i18n = false,
     themeSwitch = {},
@@ -312,7 +312,7 @@ export function DocsLayout(props: DocsLayoutProps) {
 
   return (
     <TreeContextProvider tree={props.tree}>
-      <NavProvider transparentMode={transparentMode}>
+      <LayoutContextProvider navTransparentMode={nav.transparentMode}>
         <LayoutBody
           {...props.containerProps}
           className={cn(
@@ -328,7 +328,7 @@ export function DocsLayout(props: DocsLayoutProps) {
           />
           {props.children}
         </LayoutBody>
-      </NavProvider>
+      </LayoutContextProvider>
     </TreeContextProvider>
   );
 }

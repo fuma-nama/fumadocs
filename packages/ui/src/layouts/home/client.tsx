@@ -3,7 +3,11 @@ import { type ComponentProps, Fragment, useMemo, useState } from 'react';
 import { cva } from 'class-variance-authority';
 import Link from 'fumadocs-core/link';
 import { cn } from '@/utils/cn';
-import { resolveLinkItems, type LinkItemType } from '@/layouts/shared';
+import {
+  type NavOptions,
+  resolveLinkItems,
+  type LinkItemType,
+} from '@/layouts/shared';
 import { LinkItem } from '@/layouts/shared/link-item';
 import {
   NavigationMenu,
@@ -14,7 +18,6 @@ import {
   NavigationMenuTrigger,
   NavigationMenuViewport,
 } from '@/components/ui/navigation-menu';
-import { useNav } from '@/contexts/layout';
 import { buttonVariants } from '@/components/ui/button';
 import type { HomeLayoutProps } from '.';
 import {
@@ -27,6 +30,7 @@ import {
   LanguageToggleText,
 } from '@/layouts/shared/language-toggle';
 import { ChevronDown, Languages } from 'lucide-react';
+import { useIsScrollTop } from '@/utils/use-is-scroll-top';
 
 export const navItemVariants = cva('[&_svg]:size-4', {
   variants: {
@@ -77,7 +81,7 @@ export function Header({
   }, [links, githubUrl]);
 
   return (
-    <HeaderNavigationMenu>
+    <HeaderNavigationMenu transparentMode={nav.transparentMode}>
       <Link
         href={nav.url ?? '/'}
         className="inline-flex items-center gap-2.5 font-semibold"
@@ -184,9 +188,16 @@ function isSecondary(item: LinkItemType): boolean {
   return item.type === 'icon';
 }
 
-function HeaderNavigationMenu(props: ComponentProps<'div'>) {
+function HeaderNavigationMenu({
+  transparentMode = 'none',
+  ...props
+}: ComponentProps<'div'> & {
+  transparentMode?: NavOptions['transparentMode'];
+}) {
   const [value, setValue] = useState('');
-  const { isTransparent } = useNav();
+  const isTop = useIsScrollTop({ enabled: transparentMode === 'top' }) ?? true;
+  const isTransparent =
+    transparentMode === 'top' ? isTop : transparentMode === 'always';
 
   return (
     <NavigationMenu value={value} onValueChange={setValue} asChild>

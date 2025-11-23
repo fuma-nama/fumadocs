@@ -1,7 +1,6 @@
 import type { ComponentProps } from 'react';
 import { cn } from '@/utils/cn';
 import { type BaseLayoutProps, type NavOptions } from '@/layouts/shared';
-import { NavProvider } from '@/contexts/layout';
 import { Header } from '@/layouts/home/client';
 
 export interface HomeLayoutProps extends BaseLayoutProps {
@@ -27,25 +26,23 @@ export function HomeLayout(props: HomeLayoutProps & ComponentProps<'main'>) {
   } = props;
 
   return (
-    <NavProvider transparentMode={nav?.transparentMode}>
-      <main
-        id="nd-home-layout"
-        {...rest}
-        className={cn('flex flex-1 flex-col', rest.className)}
-      >
-        {nav.enabled !== false &&
-          (nav.component ?? (
-            <Header
-              links={links}
-              nav={nav}
-              themeSwitch={themeSwitch}
-              searchToggle={searchToggle}
-              i18n={i18n}
-              githubUrl={githubUrl}
-            />
-          ))}
-        {props.children}
-      </main>
-    </NavProvider>
+    <main
+      id="nd-home-layout"
+      {...rest}
+      className={cn('flex flex-1 flex-col', rest.className)}
+    >
+      {nav.enabled !== false &&
+        (nav.component ?? (
+          <Header
+            links={links}
+            nav={nav}
+            themeSwitch={themeSwitch}
+            searchToggle={searchToggle}
+            i18n={i18n}
+            githubUrl={githubUrl}
+          />
+        ))}
+      {props.children}
+    </main>
   );
 }

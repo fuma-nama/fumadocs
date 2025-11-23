@@ -35,10 +35,10 @@ import {
   LayoutTabs,
   LayoutHeader,
   LayoutBody,
+  LayoutContextProvider,
 } from './client';
 import { TreeContextProvider } from '@/contexts/tree';
 import { ThemeToggle } from '../shared/theme-toggle';
-import { NavProvider } from '@/contexts/layout';
 import Link from 'fumadocs-core/link';
 import {
   LargeSearchToggle,
@@ -287,7 +287,7 @@ export function DocsLayout({
 
   return (
     <TreeContextProvider tree={tree}>
-      <NavProvider transparentMode={transparentMode}>
+      <LayoutContextProvider navTransparentMode={transparentMode}>
         <LayoutBody {...props.containerProps}>
           {nav.enabled !== false &&
             (nav.component ?? (
@@ -330,7 +330,7 @@ export function DocsLayout({
           )}
           {children}
         </LayoutBody>
-      </NavProvider>
+      </LayoutContextProvider>
     </TreeContextProvider>
   );
 }

@@ -1,42 +1,22 @@
-import { type ComponentProps, forwardRef, type ReactNode } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
-import { Edit } from '@/icons';
 import { I18nLabel } from '@/contexts/i18n';
 import type { AnchorProviderProps, TOCItemType } from 'fumadocs-core/toc';
 import { TOCProvider, TOCScrollArea } from '@/components/toc';
 import * as TocDefault from '@/components/toc/default';
 import * as TocClerk from '@/components/toc/clerk';
-import { Text } from 'lucide-react';
+import { Edit, Text } from 'lucide-react';
 import {
   BreadcrumbProps,
   FooterProps,
   PageBreadcrumb,
   PageFooter,
-  PageLastUpdate,
   PageTOC,
   PageTOCPopover,
   PageTOCPopoverContent,
   PageTOCPopoverTrigger,
 } from './client';
-
-interface EditOnGitHubOptions
-  extends Omit<ComponentProps<'a'>, 'href' | 'children'> {
-  owner: string;
-  repo: string;
-
-  /**
-   * SHA or ref (branch or tag) name.
-   *
-   * @defaultValue main
-   */
-  sha?: string;
-
-  /**
-   * File path in the repo
-   */
-  path: string;
-}
 
 interface BreadcrumbOptions extends BreadcrumbProps {
   enabled: boolean;
@@ -70,9 +50,6 @@ export interface DocsPageProps {
    */
   footer?: Partial<FooterOptions>;
 
-  editOnGithub?: EditOnGitHubOptions;
-  lastUpdate?: Date | string | number;
-
   container?: ComponentProps<'div'>;
   article?: ComponentProps<'article'>;
   children?: ReactNode;
@@ -101,14 +78,12 @@ type TableOfContentOptions = Pick<AnchorProviderProps, 'single'> & {
 type TableOfContentPopoverOptions = Omit<TableOfContentOptions, 'single'>;
 
 export function DocsPage({
-  editOnGithub,
   breadcrumb: {
     enabled: breadcrumbEnabled = true,
     component: breadcrumb,
     ...breadcrumbProps
   } = {},
   footer = {},
-  lastUpdate,
   container,
   full = false,
   tableOfContentPopover: {
@@ -183,14 +158,6 @@ export function DocsPage({
         {breadcrumbEnabled &&
           (breadcrumb ?? <PageBreadcrumb {...breadcrumbProps} />)}
         {children}
-        <div className="flex flex-row flex-wrap items-center justify-between gap-4 empty:hidden">
-          {editOnGithub && (
-            <EditOnGitHub
-              href={`https://github.com/${editOnGithub.owner}/${editOnGithub.repo}/blob/${editOnGithub.sha}/${editOnGithub.path.startsWith('/') ? editOnGithub.path.slice(1) : editOnGithub.path}`}
-            />
-          )}
-          {lastUpdate && <PageLastUpdate date={new Date(lastUpdate)} />}
-        </div>
         {footer.enabled !== false &&
           (footer.component ?? <PageFooter items={footer.items} />)}
       </article>
@@ -247,48 +214,46 @@ export function EditOnGitHub(props: ComponentProps<'a'>) {
 /**
  * Add typography styles
  */
-export const DocsBody = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
-  (props, ref) => (
-    <div ref={ref} {...props} className={cn('prose flex-1', props.className)}>
-      {props.children}
+export function DocsBody({
+  children,
+  className,
+  ...props
+}: ComponentProps<'div'>) {
+  return (
+    <div {...props} className={cn('prose flex-1', className)}>
+      {children}
     </div>
-  ),
-);
+  );
+}
 
-DocsBody.displayName = 'DocsBody';
-
-export const DocsDescription = forwardRef<
-  HTMLParagraphElement,
-  ComponentProps<'p'>
->((props, ref) => {
-  // don't render if no description provided
-  if (props.children === undefined) return null;
+export function DocsDescription({
+  children,
+  className,
+  ...props
+}: ComponentProps<'p'>) {
+  // Don't render if no description provided
+  if (children === undefined) return null;
 
   return (
     <p
-      ref={ref}
       {...props}
-      className={cn('mb-8 text-lg text-fd-muted-foreground', props.className)}
+      className={cn('mb-8 text-lg text-fd-muted-foreground', className)}
     >
-      {props.children}
+      {children}
     </p>
   );
-});
+}
 
-DocsDescription.displayName = 'DocsDescription';
+export function DocsTitle({
+  children,
+  className,
+  ...props
+}: ComponentProps<'h1'>) {
+  return (
+    <h1 {...props} className={cn('text-[1.75em] font-semibold', className)}>
+      {children}
+    </h1>
+  );
+}
 
-export const DocsTitle = forwardRef<HTMLHeadingElement, ComponentProps<'h1'>>(
-  (props, ref) => {
-    return (
-      <h1
-        ref={ref}
-        {...props}
-        className={cn('text-[1.75em] font-semibold', props.className)}
-      >
-        {props.children}
-      </h1>
-    );
-  },
-);
-
-DocsTitle.displayName = 'DocsTitle';
+export { PageLastUpdate, PageBreadcrumb } from './client';

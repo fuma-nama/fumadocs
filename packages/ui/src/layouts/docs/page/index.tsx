@@ -8,7 +8,6 @@ import {
   type FooterProps,
   PageBreadcrumb,
   PageFooter,
-  PageLastUpdate,
   PageTOCPopover,
   PageTOCPopoverContent,
   PageTOCPopoverTrigger,
@@ -28,24 +27,6 @@ interface FooterOptions extends FooterProps {
   component: ReactNode;
 }
 
-interface EditOnGitHubOptions
-  extends Omit<ComponentProps<'a'>, 'href' | 'children'> {
-  owner: string;
-  repo: string;
-
-  /**
-   * SHA or ref (branch or tag) name.
-   *
-   * @defaultValue main
-   */
-  sha?: string;
-
-  /**
-   * File path in the repo
-   */
-  path: string;
-}
-
 export interface DocsPageProps {
   toc?: TOCItemType[];
   tableOfContent?: Partial<TableOfContentOptions>;
@@ -57,9 +38,6 @@ export interface DocsPageProps {
    * @defaultValue false
    */
   full?: boolean;
-
-  editOnGithub?: EditOnGitHubOptions;
-  lastUpdate?: Date | string | number;
 
   /**
    * Replace or disable breadcrumb
@@ -115,8 +93,6 @@ export function DocsPage({
     ...tocOptions
   } = {},
   toc = [],
-  editOnGithub,
-  lastUpdate,
   children,
 }: DocsPageProps) {
   // disable TOC on full mode, you can still enable it with `enabled` option.
@@ -167,14 +143,6 @@ export function DocsPage({
         {breadcrumbEnabled &&
           (breadcrumb ?? <PageBreadcrumb {...breadcrumbProps} />)}
         {children}
-        <div className="flex flex-row flex-wrap items-center justify-between gap-4 empty:hidden">
-          {editOnGithub && (
-            <EditOnGitHub
-              href={`https://github.com/${editOnGithub.owner}/${editOnGithub.repo}/blob/${editOnGithub.sha}/${editOnGithub.path.startsWith('/') ? editOnGithub.path.slice(1) : editOnGithub.path}`}
-            />
-          )}
-          {lastUpdate && <PageLastUpdate date={new Date(lastUpdate)} />}
-        </div>
         {footer.enabled !== false &&
           (footer.component ?? <PageFooter items={footer.items} />)}
       </article>
@@ -182,7 +150,7 @@ export function DocsPage({
         (tocReplace ?? (
           <div
             id="nd-toc"
-            className="sticky top-(--fd-docs-toc-top) h-[calc(100dvh-var(--fd-docs-toc-top))] flex flex-col min-h-0 [grid-area:toc] w-(--fd-toc-width) pt-12 pe-4 pb-2 max-xl:hidden"
+            className="sticky top-(--fd-docs-toc-top) h-[calc(100dvh-var(--fd-docs-toc-top))] flex flex-col [grid-area:toc] w-(--fd-toc-width) pt-12 pe-4 pb-2 max-xl:hidden"
           >
             {tocOptions.header}
             <h3
@@ -276,13 +244,4 @@ export function DocsTitle({
   );
 }
 
-/**
- * For separate MDX page
- */
-export function withArticle(props: ComponentProps<'main'>) {
-  return (
-    <main {...props} className={cn('container py-12', props.className)}>
-      <article className="prose">{props.children}</article>
-    </main>
-  );
-}
+export { PageLastUpdate, PageBreadcrumb } from './client';

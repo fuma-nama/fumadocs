@@ -1,21 +1,55 @@
 'use client';
 import { cn } from '@/utils/cn';
-import { type ComponentProps, useMemo } from 'react';
+import {
+  type ComponentProps,
+  createContext,
+  type ReactNode,
+  use,
+  useMemo,
+} from 'react';
 import { useSidebar } from '@/contexts/sidebar';
-import { useNav } from '@/contexts/layout';
 import { buttonVariants } from '@/components/ui/button';
 import { Sidebar as SidebarIcon } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import { usePathname } from 'fumadocs-core/framework';
 import { isTabActive } from '@/utils/is-active';
 import type { SidebarTabWithProps } from '@/layouts/shared/sidebar-tab';
+import { useIsScrollTop } from '@/utils/use-is-scroll-top';
+
+export const LayoutContext = createContext<{
+  isNavTransparent: boolean;
+} | null>(null);
+
+export function LayoutContextProvider({
+  navTransparentMode = 'none',
+  children,
+}: {
+  navTransparentMode?: 'always' | 'top' | 'none';
+  children: ReactNode;
+}) {
+  const isTop =
+    useIsScrollTop({ enabled: navTransparentMode === 'top' }) ?? true;
+
+  return (
+    <LayoutContext
+      value={{
+        isNavTransparent:
+          navTransparentMode === 'top'
+            ? isTop
+            : navTransparentMode === 'always',
+      }}
+    >
+      {children}
+    </LayoutContext>
+  );
+}
 
 export function Navbar({
   mode,
   ...props
 }: ComponentProps<'header'> & { mode: 'top' | 'auto' }) {
   const { open, collapsed } = useSidebar();
-  const { isTransparent } = useNav();
+  const { isNavTransparent } = use(LayoutContext)!;
 
   return (
     <header
@@ -23,7 +57,7 @@ export function Navbar({
       {...props}
       className={cn(
         'fixed flex flex-col top-(--fd-banner-height) left-0 right-(--removed-body-scroll-bar-size,0) z-10 px-(--fd-layout-offset) h-(--fd-nav-height) backdrop-blur-sm transition-colors',
-        (!isTransparent || open) && 'bg-fd-background/80',
+        (!isNavTransparent || open) && 'bg-fd-background/80',
         mode === 'auto' &&
           !collapsed &&
           'ps-[calc(var(--fd-layout-offset)+var(--fd-sidebar-width))]',

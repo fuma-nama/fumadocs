@@ -156,7 +156,7 @@ function I18nProvider({
   onChangeRef.current = onChange;
 
   return (
-    <I18nContext.Provider
+    <I18nContext
       value={useMemo(
         () => ({
           locale,
@@ -171,6 +171,6 @@ function I18nProvider({
       )}
     >
       {children}
-    </I18nContext.Provider>
+    </I18nContext>
   );
 }

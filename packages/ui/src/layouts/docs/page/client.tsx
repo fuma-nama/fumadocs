@@ -11,7 +11,7 @@ import {
   useState,
   use,
 } from 'react';
-import { ChevronDown, ChevronLeft, ChevronRight } from '@/icons';
+import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import { cn } from '@/utils/cn';
 import { useI18n } from '@/contexts/i18n';
@@ -22,7 +22,6 @@ import {
   type BreadcrumbOptions,
   getBreadcrumbItemsFromPath,
 } from 'fumadocs-core/breadcrumb';
-import { useNav } from '@/contexts/layout';
 import { isActive } from '@/utils/is-active';
 import {
   Collapsible,
@@ -31,6 +30,7 @@ import {
 } from '@/components/ui/collapsible';
 import { useTOCItems } from '@/components/toc';
 import { useActiveAnchor } from 'fumadocs-core/toc';
+import { LayoutContext } from '../client';
 
 const TocPopoverContext = createContext<{
   open: boolean;
@@ -44,7 +44,7 @@ export function PageTOCPopover({
 }: ComponentProps<'div'>) {
   const ref = useRef<HTMLElement>(null);
   const [open, setOpen] = useState(false);
-  const { isTransparent } = useNav();
+  const { isNavTransparent } = use(LayoutContext)!;
 
   const onClick = useEffectEvent((e: Event) => {
     if (!open) return;
@@ -85,7 +85,7 @@ export function PageTOCPopover({
           ref={ref}
           className={cn(
             'border-b backdrop-blur-sm transition-colors',
-            (!isTransparent || open) && 'bg-fd-background/80',
+            (!isNavTransparent || open) && 'bg-fd-background/80',
             open && 'shadow-lg',
           )}
         >
