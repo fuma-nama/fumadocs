@@ -8,6 +8,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import { TreeContextProvider } from 'fumadocs-ui/contexts/tree';
 import { source } from '@/lib/source';
 import { NextProvider } from 'fumadocs-core/framework/next';
+import { Banner } from 'fumadocs-ui/components/banner';
 
 export const metadata = createMetadata({
   title: {
@@ -45,7 +46,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <Body>
         <NextProvider>
           <TreeContextProvider tree={source.pageTree}>
-            <Provider>{children}</Provider>
+            <Provider>
+              <Banner>Hello World</Banner>
+              {children}
+            </Provider>
           </TreeContextProvider>
         </NextProvider>
       </Body>
