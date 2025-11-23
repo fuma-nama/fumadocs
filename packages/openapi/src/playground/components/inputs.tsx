@@ -408,7 +408,11 @@ export function FieldSet({
                 }}
               >
                 {union.map((item, i) => (
-                  <option key={i} value={i}>
+                  <option
+                    key={i}
+                    value={i}
+                    className="bg-fd-popover text-fd-popover-foreground"
+                  >
                     {schemaToString(item, undefined, FormatFlags.UseAlias)}
                   </option>
                 ))}
@@ -449,7 +453,11 @@ export function FieldSet({
                 }}
               >
                 {field.type.map((item) => (
-                  <option key={item} value={item}>
+                  <option
+                    key={item}
+                    value={item}
+                    className="bg-fd-popover text-fd-popover-foreground"
+                  >
                     {item}
                   </option>
                 ))}

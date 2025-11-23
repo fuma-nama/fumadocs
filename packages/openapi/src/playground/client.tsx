@@ -51,7 +51,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from 'fumadocs-ui/components/ui/collapsible';
-import { ChevronDown, LoaderCircle } from 'lucide-react';
+import { X, ChevronDown, LoaderCircle } from 'lucide-react';
 import { encodeRequestData } from '@/requests/media/encode';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from 'fumadocs-ui/utils/cn';
@@ -351,7 +351,9 @@ export default function PlaygroundClient({
             </SecurityTabs>
           )}
           <FormBody body={body} parameters={parameters} />
-          {testQuery.data ? <ResultDisplay data={testQuery.data} /> : null}
+          {testQuery.data ? (
+            <ResultDisplay data={testQuery.data} reset={testQuery.reset} />
+          ) : null}
         </form>
       </SchemaProvider>
     </FormProvider>
@@ -764,15 +766,34 @@ function Route({
   );
 }
 
-function DefaultResultDisplay({ data }: { data: FetchResult }) {
+function DefaultResultDisplay({
+  data,
+  reset,
+}: {
+  data: FetchResult;
+  reset: () => void;
+}) {
   const statusInfo = useMemo(() => getStatusInfo(data.status), [data.status]);
   const { shikiOptions } = useApiContext();
 
   return (
     <div className="flex flex-col gap-3 p-3">
-      <div className="inline-flex items-center gap-1.5 text-sm font-medium text-fd-foreground">
-        <statusInfo.icon className={cn('size-4', statusInfo.color)} />
-        {statusInfo.description}
+      <div className="flex justify-between items-center">
+        <div className="inline-flex items-center gap-1.5 text-sm font-medium text-fd-foreground">
+          <statusInfo.icon className={cn('size-4', statusInfo.color)} />
+          {statusInfo.description}
+        </div>
+        <button
+          type="button"
+          className={cn(
+            buttonVariants({ size: 'icon-xs' }),
+            'p-0 text-fd-muted-foreground hover:text-fd-accent-foreground [&_svg]:size-3.5',
+          )}
+          onClick={() => reset()}
+          aria-label="Dismiss response"
+        >
+          <X />
+        </button>
       </div>
       <p className="text-sm text-fd-muted-foreground">{data.status}</p>
       {data.data !== undefined && (
