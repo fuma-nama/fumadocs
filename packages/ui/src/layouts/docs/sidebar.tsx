@@ -133,7 +133,7 @@ export function SidebarContent(props: ComponentProps<'aside'>) {
         {...props}
         data-collapsed={collapsed}
         className={cn(
-          'sticky top-(--fd-docs-sidebar-top) [grid-area:sidebar] h-[calc(100dvh-var(--fd-docs-sidebar-top))] flex flex-col items-end z-20 bg-fd-card text-sm border-e *:w-(--fd-sidebar-width) max-md:hidden',
+          'sticky top-(--fd-docs-row-1) [grid-area:sidebar] h-[calc(var(--fd-docs-height)-var(--fd-docs-row-1))] flex flex-col items-end z-20 bg-fd-card text-sm border-e *:w-(--fd-sidebar-width) max-md:hidden',
           collapsed && [
             'fixed start-0 inset-y-2 h-auto rounded-xl border transition-[opacity,translate] duration-200',
             hover

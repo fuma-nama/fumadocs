@@ -19,7 +19,7 @@
 
 @variant md {
   #nd-docs-layout {
-    --fd-docs-toc-popover-top: calc(2.5 * var(--spacing));
+    --fd-docs-row-3: calc(var(--fd-docs-row-2) + 2.5 * var(--spacing));
 
     #nd-page {
       @apply bg-fd-article rounded-xl border shadow-xl m-4;
@@ -31,7 +31,8 @@
     }
 
     [data-toc-popover] {
-      @apply mx-4 mt-(--fd-docs-toc-popover-top);
+      top: calc(var(--fd-docs-row-1) + 2.5 * var(--spacing));
+      @apply mx-4 mt-2.5;
 
       header {
         transform-origin: top center;

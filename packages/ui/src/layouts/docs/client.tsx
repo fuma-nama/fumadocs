@@ -79,7 +79,7 @@ export function LayoutBody({
         ". sidebar header toc ."
         ". sidebar toc-popover toc ."
         ". sidebar main toc ." 1fr
-        ". . . . ." / auto minmax(var(--fd-sidebar-col), 1fr) auto minmax(min-content, 1fr) auto`,
+        ". . . . ." / auto minmax(var(--fd-sidebar-col), 1fr) minmax(0, var(--fd-page-width)) minmax(min-content, 1fr) auto`,
           '--fd-sidebar-col': collapsed ? '0px' : 'var(--fd-sidebar-width)',
           ...style,
         } as object

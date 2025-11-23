@@ -141,7 +141,7 @@ export async function APIExample({
 
   renderAPIExampleLayout ??= (slots) => {
     return (
-      <div className="prose-no-margin md:sticky md:py-4 md:top-(--fd-docs-toc-top) xl:w-[400px]">
+      <div className="prose-no-margin md:sticky md:top-[calc(var(--fd-docs-row-1,2rem)+1rem)] xl:w-[400px]">
         {slots.selector}
         {slots.usageTabs}
         {slots.responseTabs}
