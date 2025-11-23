@@ -52,12 +52,13 @@
 }
 
 #nd-sidebar {
-  @apply bg-fd-background;
+  --color-fd-muted: inherit !important;
+  --color-fd-secondary: inherit !important;
+  --color-fd-muted-foreground: inherit !important;
+  @apply bg-fd-card;
 }
 
 #nd-sidebar[data-collapsed='false'] {
   border: none;
-  --color-fd-muted: inherit;
-  --color-fd-secondary: inherit;
-  --color-fd-muted-foreground: inherit;
+  @apply bg-fd-background;
 }

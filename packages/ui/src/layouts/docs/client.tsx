@@ -64,9 +64,6 @@ export function LayoutBody({
   ...props
 }: ComponentProps<'div'>) {
   const { collapsed } = useSidebar();
-  const sidebarCol = collapsed
-    ? 'minmax(0px, 1fr)'
-    : 'minmax(var(--fd-sidebar-width), 1fr)';
 
   return (
     <div
@@ -75,12 +72,18 @@ export function LayoutBody({
         'grid transition-[grid-template-columns] overflow-x-clip',
         className,
       )}
-      style={{
-        gridTemplate: `"sidebar header header"
-        "sidebar toc-popover toc-popover"
-        "sidebar main toc" 1fr / ${sidebarCol} minmax(0px, 900px) minmax(var(--fd-toc-width), 1fr)`,
-        ...style,
-      }}
+      data-sidebar-collapsed={collapsed}
+      style={
+        {
+          gridTemplate: `". . . . ."
+        ". sidebar header toc ."
+        ". sidebar toc-popover toc ."
+        ". sidebar main toc ." 1fr
+        ". . . . ." / auto minmax(var(--fd-sidebar-col), 1fr) minmax(0px, 900px) minmax(min-content, 1fr) auto`,
+          '--fd-sidebar-col': collapsed ? '0px' : 'var(--fd-sidebar-width)',
+          ...style,
+        } as object
+      }
       {...props}
     >
       {children}

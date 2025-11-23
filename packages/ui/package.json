@@ -53,12 +53,8 @@
       "types": "./dist/layouts/shared/index.d.ts"
     },
     "./page": {
-      "import": "./dist/layouts/docs/page/index.js",
-      "types": "./dist/layouts/docs/page/index.d.ts"
-    },
-    "./provider": {
-      "import": "./dist/provider/index.js",
-      "types": "./dist/provider/index.d.ts"
+      "import": "./dist/page.js",
+      "types": "./dist/page.d.ts"
     },
     "./provider/*": {
       "import": "./dist/provider/*.js",

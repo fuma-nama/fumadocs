@@ -5,9 +5,16 @@ import * as Docs from './layouts/docs/page';
 import * as Notebook from './layouts/notebook/page';
 import { LayoutContext } from './layouts/docs/client';
 
-export { DocsDescription, DocsTitle, EditOnGitHub } from './layouts/docs/page';
-
 // TODO: remove this compat layer on v17
+
+export {
+  DocsDescription,
+  DocsTitle,
+  EditOnGitHub,
+  DocsBody,
+  PageBreadcrumb,
+  PageLastUpdate,
+} from './layouts/docs/page';
 
 interface EditOnGitHubOptions
   extends Omit<ComponentProps<'a'>, 'href' | 'children'> {

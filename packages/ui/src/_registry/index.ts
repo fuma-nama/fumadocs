@@ -8,8 +8,6 @@ const mapToPackage = {
   'contexts/search.tsx': 'fumadocs-ui/contexts/search',
   'contexts/tree.tsx': 'fumadocs-ui/contexts/tree',
   'contexts/i18n.tsx': 'fumadocs-ui/contexts/i18n',
-  'contexts/layout.tsx': 'fumadocs-ui/contexts/layout',
-  'provider/index.tsx': 'fumadocs-ui/provider',
   'utils/get-sidebar-tabs.tsx': 'fumadocs-ui/utils/get-sidebar-tabs',
   'utils/use-copy-button.ts': 'fumadocs-ui/utils/use-copy-button',
 };
