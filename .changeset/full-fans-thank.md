@@ -12,4 +12,4 @@ import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
 import { DocsPage } from 'fumadocs-ui/layouts/notebook/page';
 ```
 
-The default `fumadocs-ui/page` will redirect to the correct layout. We highly recommend you to update the import.
+While the default `fumadocs-ui/page` will redirect to the correct layout, we highly recommend you to update the import.

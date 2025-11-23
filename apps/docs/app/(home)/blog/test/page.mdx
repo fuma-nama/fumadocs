@@ -1,4 +1,10 @@
-export { withArticle as default } from 'fumadocs-ui/page';
+export default function withArticle(props) {
+  return (
+    <main {...props} className={cn('container py-12', props.className)}>
+      <article className="prose">{props.children}</article>
+    </main>
+  );
+}
 
 ## Hello World
 
@@ -7,7 +13,13 @@ Create a `page.mdx` file, put the page under a non-docs layout.
 Apply typography styles with:
 
 ```jsx
-export { withArticle as default } from 'fumadocs-ui/page';
+export default function withArticle(props) {
+  return (
+    <main {...props} className={cn('container py-12', props.className)}>
+      <article className="prose">{props.children}</article>
+    </main>
+  );
+}
 ```
 
 Done!

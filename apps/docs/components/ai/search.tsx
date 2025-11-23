@@ -389,7 +389,7 @@ export function AISearchPanel() {
       <Presence present={open}>
         <div
           className={cn(
-            'overflow-hidden z-30 bg-fd-popover text-fd-popover-foreground [--ai-chat-width:360px] xl:[--ai-chat-width:460px]',
+            'overflow-hidden z-30 bg-fd-popover text-fd-popover-foreground [--ai-chat-width:400px] xl:[--ai-chat-width:460px]',
             'max-lg:fixed max-lg:inset-x-2 max-lg:top-4 max-lg:border max-lg:rounded-2xl max-lg:shadow-xl',
             'lg:sticky lg:top-0 lg:h-dvh lg:border-s lg:[grid-area:toc] lg:ms-auto',
             open

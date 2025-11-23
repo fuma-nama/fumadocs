@@ -1,5 +1,5 @@
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { DocsPage, type DocsPageProps } from 'fumadocs-ui/page';
+import { DocsPage, type DocsPageProps } from 'fumadocs-ui/layouts/docs/page';
 import type { Root } from 'fumadocs-core/page-tree';
 import type { ReactNode } from 'react';
 import { FrameworkProvider } from 'fumadocs-core/framework';

@@ -4,7 +4,7 @@ import {
   DocsDescription,
   DocsPage,
   DocsTitle,
-} from 'fumadocs-ui/page';
+} from 'fumadocs-ui/layouts/docs/page';
 import { type Page, source } from '../../lib/source';
 import { baseOptions } from '../../lib/layout.shared';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
