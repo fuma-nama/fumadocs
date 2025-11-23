@@ -49,7 +49,10 @@ import {
   NavbarSidebarTrigger,
 } from '@/layouts/notebook/client';
 import { NavProvider } from '@/contexts/layout';
-import { type Option, RootToggle } from '@/layouts/shared/root-toggle';
+import {
+  type SidebarTabWithProps,
+  SidebarTabTrigger,
+} from '@/layouts/shared/sidebar-tab';
 import Link from 'fumadocs-core/link';
 import {
   LargeSearchToggle,
@@ -82,7 +85,7 @@ interface SidebarOptions
   /**
    * Root Toggle options
    */
-  tabs?: Option[] | GetSidebarTabsOptions | false;
+  tabs?: SidebarTabWithProps[] | GetSidebarTabsOptions | false;
 
   banner?: ReactNode | FC<ComponentProps<typeof SidebarHeader>>;
   footer?: ReactNode | FC<ComponentProps<typeof SidebarFooter>>;
@@ -155,10 +158,10 @@ export function DocsLayout(props: DocsLayoutProps) {
     const rootToggle = (
       <>
         {tabMode === 'sidebar' && tabs.length > 0 && (
-          <RootToggle className="mb-2" options={tabs} />
+          <SidebarTabTrigger className="mb-2" options={tabs} />
         )}
         {tabMode === 'navbar' && tabs.length > 0 && (
-          <RootToggle options={tabs} className="lg:hidden" />
+          <SidebarTabTrigger options={tabs} className="lg:hidden" />
         )}
       </>
     );
@@ -340,7 +343,7 @@ function DocsNavbar({
   i18n,
 }: DocsLayoutProps & {
   links: LinkItemType[];
-  tabs: Option[];
+  tabs: SidebarTabWithProps[];
 }) {
   const navMode = nav.mode ?? 'auto';
 

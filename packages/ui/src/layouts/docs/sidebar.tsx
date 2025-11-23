@@ -116,12 +116,14 @@ export function SidebarContent(props: ComponentProps<'aside'>) {
   const ignoreHoverUntil = useRef(0);
 
   useOnChange(collapsed, () => {
-    setHover(true);
-    ignoreHoverUntil.current = Date.now() + 200;
+    if (collapsed) {
+      setHover(true);
+      ignoreHoverUntil.current = Date.now() + 200;
 
-    setTimeout(() => {
-      setHover(false);
-    }, 200);
+      setTimeout(() => {
+        setHover(false);
+      }, 200);
+    }
   });
 
   return (
@@ -210,28 +212,6 @@ export function SidebarContentMobile({
         )}
       </Presence>
     </>
-  );
-}
-
-export function SidebarHeader(props: ComponentProps<'div'>) {
-  return (
-    <div
-      {...props}
-      className={cn('flex flex-col gap-3 p-4 pb-2', props.className)}
-    >
-      {props.children}
-    </div>
-  );
-}
-
-export function SidebarFooter(props: ComponentProps<'div'>) {
-  return (
-    <div
-      {...props}
-      className={cn('flex flex-col border-t p-4 pt-2', props.className)}
-    >
-      {props.children}
-    </div>
   );
 }
 

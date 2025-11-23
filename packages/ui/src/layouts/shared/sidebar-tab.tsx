@@ -13,17 +13,17 @@ import {
 } from '@/components/ui/popover';
 import type { SidebarTab } from '@/utils/get-sidebar-tabs';
 
-export interface Option extends SidebarTab {
+export interface SidebarTabWithProps extends SidebarTab {
   props?: ComponentProps<'a'>;
 }
 
-export function RootToggle({
+export function SidebarTabTrigger({
   options,
   placeholder,
   ...props
 }: {
   placeholder?: ReactNode;
-  options: Option[];
+  options: SidebarTabWithProps[];
 } & ComponentProps<'button'>) {
   const [open, setOpen] = useState(false);
   const { closeOnRedirect } = useSidebar();

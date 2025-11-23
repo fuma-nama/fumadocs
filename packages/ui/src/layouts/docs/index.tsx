@@ -14,15 +14,16 @@ import {
   type SidebarComponents,
   SidebarContent,
   SidebarContentMobile,
-  SidebarFooter,
-  SidebarHeader,
   SidebarLinkItem,
   SidebarPageTree,
   type SidebarProps,
   SidebarTrigger,
   SidebarViewport,
 } from './sidebar';
-import { type Option, RootToggle } from '@/layouts/shared/root-toggle';
+import {
+  type SidebarTabWithProps,
+  SidebarTabTrigger,
+} from '@/layouts/shared/sidebar-tab';
 import { type BaseLayoutProps, resolveLinkItems } from '@/layouts/shared';
 import { LinkItem } from '@/layouts/shared/link-item';
 import {
@@ -71,7 +72,7 @@ interface SidebarOptions
   /**
    * Root Toggle options
    */
-  tabs?: Option[] | GetSidebarTabsOptions | false;
+  tabs?: SidebarTabWithProps[] | GetSidebarTabsOptions | false;
 
   banner?: ReactNode;
   footer?: ReactNode;
@@ -145,7 +146,7 @@ export function DocsLayout({
 
     const mobile = (
       <SidebarContentMobile {...rest}>
-        <SidebarHeader>
+        <div className="flex flex-col gap-3 p-4 pb-2">
           <div className="flex text-fd-muted-foreground items-center gap-1.5">
             <div className="flex flex-1">
               {iconLinks.map((item, i) => (
@@ -187,17 +188,19 @@ export function DocsLayout({
               <SidebarIcon />
             </SidebarTrigger>
           </div>
-          {tabs.length > 0 && <RootToggle options={tabs} />}
+          {tabs.length > 0 && <SidebarTabTrigger options={tabs} />}
           {banner}
-        </SidebarHeader>
+        </div>
         {viewport}
-        <SidebarFooter className="empty:hidden">{footer}</SidebarFooter>
+        <div className="flex flex-col border-t p-4 pt-2 empty:hidden">
+          {footer}
+        </div>
       </SidebarContentMobile>
     );
 
     const content = (
       <SidebarContent {...rest}>
-        <SidebarHeader>
+        <div className="flex flex-col gap-3 p-4 pb-2">
           <div className="flex">
             <Link
               href={nav.url ?? '/'}
@@ -225,16 +228,16 @@ export function DocsLayout({
               <LargeSearchToggle hideIfDisabled />
             ))}
           {tabs.length > 0 && tabMode === 'auto' && (
-            <RootToggle options={tabs} />
+            <SidebarTabTrigger options={tabs} />
           )}
           {banner}
-        </SidebarHeader>
+        </div>
         {viewport}
         {(i18n ||
           iconLinks.length > 0 ||
           themeSwitch?.enabled !== false ||
           footer) && (
-          <SidebarFooter>
+          <div className="flex flex-col border-t p-4 pt-2 empty:hidden">
             <div className="flex text-fd-muted-foreground items-center empty:hidden">
               {i18n && (
                 <LanguageToggle>
@@ -262,7 +265,7 @@ export function DocsLayout({
                 ))}
             </div>
             {footer}
-          </SidebarFooter>
+          </div>
         )}
       </SidebarContent>
     );

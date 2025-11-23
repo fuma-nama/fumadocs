@@ -8,7 +8,7 @@ import { Sidebar as SidebarIcon } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import { usePathname } from 'fumadocs-core/framework';
 import { isTabActive } from '@/utils/is-active';
-import type { Option } from '@/layouts/shared/root-toggle';
+import type { SidebarTabWithProps } from '@/layouts/shared/sidebar-tab';
 
 export function Navbar({
   mode,
@@ -86,7 +86,7 @@ export function LayoutTabs({
   options,
   ...props
 }: ComponentProps<'div'> & {
-  options: Option[];
+  options: SidebarTabWithProps[];
 }) {
   const pathname = usePathname();
   const selected = useMemo(() => {
@@ -116,7 +116,7 @@ function LayoutTab({
   option: { title, url, unlisted, props },
   selected = false,
 }: {
-  option: Option;
+  option: SidebarTabWithProps;
   selected?: boolean;
 }) {
   return (

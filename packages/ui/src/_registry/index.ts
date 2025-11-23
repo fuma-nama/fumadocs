@@ -110,24 +110,44 @@ export const registry: Registry = {
         {
           type: 'components',
           path: 'layouts/shared/index.tsx',
-          target: 'components/layout/shared/index.tsx',
+          target: 'components/layout/shared.tsx',
         },
         {
           type: 'components',
-          path: 'layouts/shared/client.tsx',
-          target: 'components/layout/shared/client.tsx',
+          path: 'layouts/shared/sidebar-tab.tsx',
+          target: 'components/layout/sidebar-tab.tsx',
         },
         {
           type: 'components',
-          path: 'components/layout/search-toggle.tsx',
+          path: 'layouts/shared/language-toggle.tsx',
+          target: 'components/layout/language-toggle.tsx',
         },
         {
           type: 'components',
-          path: 'components/layout/theme-toggle.tsx',
+          path: 'layouts/shared/link-item.tsx',
+          target: 'components/layout/link-item.tsx',
         },
         {
           type: 'components',
-          path: 'components/layout/sidebar.tsx',
+          path: 'layouts/shared/search-toggle.tsx',
+          target: 'components/layout/search-toggle.tsx',
+        },
+        {
+          type: 'components',
+          path: 'layouts/shared/theme-toggle.tsx',
+          target: 'components/layout/theme-toggle.tsx',
+        },
+        {
+          type: 'components',
+          path: 'components/toc/clerk.tsx',
+        },
+        {
+          type: 'components',
+          path: 'components/toc/default.tsx',
+        },
+        {
+          type: 'components',
+          path: 'components/toc/index.tsx',
         },
       ],
     },
@@ -144,6 +164,21 @@ export const registry: Registry = {
           path: 'layouts/docs/client.tsx',
           target: 'components/layout/docs/client.tsx',
         },
+        {
+          type: 'block',
+          path: 'layouts/docs/sidebar.tsx',
+          target: 'components/layout/docs/sidebar.tsx',
+        },
+        {
+          type: 'block',
+          path: 'layouts/docs/page/index.tsx',
+          target: 'components/layout/docs/page/index.tsx',
+        },
+        {
+          type: 'block',
+          path: 'layouts/docs/page/client.tsx',
+          target: 'components/layout/docs/page/client.tsx',
+        },
       ],
       unlisted: true,
     },
@@ -153,45 +188,27 @@ export const registry: Registry = {
         {
           type: 'block',
           path: 'layouts/notebook/index.tsx',
-          target: 'components/layout/docs/index.tsx',
+          target: 'components/layout/notebook/index.tsx',
         },
         {
           type: 'block',
           path: 'layouts/notebook/client.tsx',
-          target: 'components/layout/docs/client.tsx',
-        },
-      ],
-      unlisted: true,
-    },
-    {
-      name: 'layouts/page',
-      files: [
-        {
-          type: 'components',
-          path: 'layouts/docs/page.tsx',
-          target: 'components/layout/docs/page.tsx',
+          target: 'components/layout/notebook/client.tsx',
         },
         {
           type: 'block',
-          path: 'layouts/docs/page-client.tsx',
-          target: 'components/layout/docs/page-client.tsx',
+          path: 'layouts/notebook/sidebar.tsx',
+          target: 'components/layout/notebook/sidebar.tsx',
         },
         {
-          type: 'components',
-          path: 'page.tsx',
-          target: 'components/layout/page.tsx',
+          type: 'block',
+          path: 'layouts/notebook/page/index.tsx',
+          target: 'components/layout/notebook/page/index.tsx',
         },
         {
-          type: 'ui',
-          path: 'components/layout/toc.tsx',
-        },
-        {
-          type: 'ui',
-          path: 'components/layout/toc-clerk.tsx',
-        },
-        {
-          type: 'ui',
-          path: 'components/layout/toc-thumb.tsx',
+          type: 'block',
+          path: 'layouts/notebook/page/client.tsx',
+          target: 'components/layout/notebook/page/client.tsx',
         },
       ],
       unlisted: true,
@@ -204,13 +221,6 @@ export const registry: Registry = {
           path: 'layouts/home/index.tsx',
           target: 'components/layout/home/index.tsx',
         },
-        /* optional
-        {
-          type: 'components',
-          path: 'layouts/home/navbar.tsx',
-          target: 'components/layout/home/navbar.tsx',
-        },
-        */
         {
           type: 'components',
           path: 'layouts/home/client.tsx',
@@ -218,26 +228,6 @@ export const registry: Registry = {
         },
       ],
       unlisted: true,
-    },
-    {
-      name: 'root-toggle',
-      description: 'the UI of Sidebar Tabs',
-      files: [
-        {
-          type: 'components',
-          path: 'components/layout/root-toggle.tsx',
-        },
-      ],
-    },
-    {
-      name: 'language-toggle',
-      description: 'Language Select',
-      files: [
-        {
-          type: 'components',
-          path: 'components/layout/language-toggle.tsx',
-        },
-      ],
     },
     {
       name: 'accordion',

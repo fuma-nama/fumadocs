@@ -8,10 +8,10 @@ import { useSidebar } from '@/contexts/sidebar';
 import { useNav } from '@/contexts/layout';
 import { SidebarCollapseTrigger } from './sidebar';
 import { SearchToggle } from '../shared/search-toggle';
-import type { Option } from '@/layouts/shared/root-toggle';
 import { usePathname } from 'fumadocs-core/framework';
 import { isTabActive } from '@/utils/is-active';
 import Link from 'fumadocs-core/link';
+import type { SidebarTab } from '@/utils/get-sidebar-tabs';
 
 export function LayoutHeader(props: ComponentProps<'header'>) {
   const { isTransparent } = useNav();
@@ -37,7 +37,10 @@ export function LayoutBody({
   return (
     <div
       id="nd-docs-layout"
-      className={cn('grid transition-[grid-template-columns]', className)}
+      className={cn(
+        'grid transition-[grid-template-columns] overflow-x-clip',
+        className,
+      )}
       style={{
         gridTemplate: `"sidebar header header"
         "sidebar toc-popover toc-popover"
@@ -81,7 +84,7 @@ export function LayoutTabs({
   options,
   ...props
 }: ComponentProps<'div'> & {
-  options: Option[];
+  options: SidebarTab[];
 }) {
   const pathname = usePathname();
   const selected = useMemo(() => {
