@@ -268,7 +268,12 @@ function generateStaticData(
   return { toc, structuredData };
 }
 
-function pageContent(props: ApiPageProps): string {
+function pageContent({
+  showTitle,
+  showDescription,
+  document,
+  ...props
+}: ApiPageProps): string {
   // filter extra properties in props
   const operations: OperationItem[] = (props.operations ?? []).map((item) => ({
     path: item.path,
@@ -279,5 +284,17 @@ function pageContent(props: ApiPageProps): string {
     method: item.method,
   }));
 
-  return `<APIPage document={${JSON.stringify(props.document)}} operations={${JSON.stringify(operations)}} webhooks={${JSON.stringify(webhooks)}} hasHead={${JSON.stringify(props.showTitle)}} />`;
+  const propStrs: string[] = [
+    `document={${JSON.stringify(document)}}`,
+    `operations={${JSON.stringify(operations)}}`,
+    `webhooks={${JSON.stringify(webhooks)}}`,
+  ];
+  if (showTitle) {
+    propStrs.push(`showTitle={${JSON.stringify(showTitle)}}`);
+  }
+  if (showDescription) {
+    propStrs.push(`showTitle={${JSON.stringify(showDescription)}}`);
+  }
+
+  return `<APIPage ${propStrs.join(' ')} />`;
 }
