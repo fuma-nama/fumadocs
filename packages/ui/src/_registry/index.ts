@@ -63,12 +63,12 @@ export const registry: Registry = {
         {
           type: 'block',
           path: '_registry/layout/docs-min.tsx',
-          target: 'components/layout/docs.tsx',
+          target: 'components/layout/docs/index.tsx',
         },
         {
           type: 'block',
           path: '_registry/layout/page-min.tsx',
-          target: 'components/layout/page.tsx',
+          target: 'components/layout/docs/page.tsx',
         },
       ],
       unlisted: true,

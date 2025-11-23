@@ -1,12 +1,4 @@
-import {
-  cancel,
-  confirm,
-  group,
-  intro,
-  log,
-  outro,
-  select,
-} from '@clack/prompts';
+import { cancel, group, intro, log, outro, select } from '@clack/prompts';
 import picocolors from 'picocolors';
 import {
   createComponentInstaller,
@@ -64,14 +56,6 @@ export async function customise(resolver: Resolver, config: LoadedConfig) {
           ],
         });
       },
-      page: async (v) => {
-        if (v.results.target !== 'docs' || v.results.mode === 'minimal')
-          return false;
-
-        return confirm({
-          message: 'Do you want to customise the page component too?',
-        });
-      },
     },
     {
       onCancel: () => {
@@ -83,29 +67,28 @@ export async function customise(resolver: Resolver, config: LoadedConfig) {
 
   if (result.target === 'docs') {
     const targets = [];
-    let pageAdded = false;
     if (result.mode === 'minimal') {
       targets.push('layouts/docs-min');
-      pageAdded = true;
     } else {
-      if (result.page) {
-        targets.push('layouts/page');
-        pageAdded = true;
-      }
-
       targets.push(
         result.mode === 'full-default' ? 'layouts/docs' : 'layouts/notebook',
       );
     }
 
     await install(targets, installer);
-    const maps: [string, string][] = [
-      ['fumadocs-ui/layouts/docs', '@/components/layout/docs'],
-    ];
-
-    if (pageAdded) {
-      maps.push(['fumadocs-ui/page', '@/components/layout/page']);
-    }
+    const maps: [string, string][] =
+      result.mode === 'full-notebook'
+        ? [
+            ['fumadocs-ui/layouts/notebook', '@/components/layout/notebook'],
+            [
+              'fumadocs-ui/layouts/notebook/page',
+              '@/components/layout/notebook/page',
+            ],
+          ]
+        : [
+            ['fumadocs-ui/layouts/docs', '@/components/layout/docs'],
+            ['fumadocs-ui/layouts/docs/page', '@/components/layout/docs/page'],
+          ];
 
     printNext(...maps);
   }
