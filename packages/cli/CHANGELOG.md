@@ -1,5 +1,11 @@
 # fumadocs
 
+## 1.1.0
+
+### Minor Changes
+
+- 897fdef: Update `customise` command to support Fumadocs UI 16.2.0
+
 ## 1.0.3
 
 ### Patch Changes

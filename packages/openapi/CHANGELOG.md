@@ -1,5 +1,15 @@
 # @fuma-docs/openapi
 
+## 10.0.12
+
+### Patch Changes
+
+- 6635eb5: Improve UX
+- Updated dependencies [80579fd]
+- Updated dependencies [a9f4eda]
+  - fumadocs-ui@16.2.0
+  - fumadocs-core@16.2.0
+
 ## 10.0.11
 
 ### Patch Changes
