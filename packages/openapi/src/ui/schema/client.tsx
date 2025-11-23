@@ -176,9 +176,20 @@ function SchemaUIContent({ $type }: { $type: string }) {
     child = (
       <>
         {child}
-        <ObjectCollapsible name="Array item">
-          <SchemaUIContent $type={schema.item.$type} />
-        </ObjectCollapsible>
+        <Collapsible className="my-2">
+          <CollapsibleTrigger
+            className={cn(
+              buttonVariants({ color: 'secondary', size: 'sm' }),
+              'group px-3 py-2 data-[state=open]:rounded-b-none',
+            )}
+          >
+            Array Item
+            <ChevronDown className="size-4 text-fd-muted-foreground group-data-[state=open]:rotate-180" />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="-mt-px bg-fd-card px-3 rounded-lg rounded-tl-none border shadow-sm">
+            <SchemaUIContent $type={schema.item.$type} />
+          </CollapsibleContent>
+        </Collapsible>
       </>
     );
   }
@@ -384,25 +395,6 @@ function LinkRef({
     >
       {text}
     </button>
-  );
-}
-
-function ObjectCollapsible(props: { name: string; children: ReactNode }) {
-  return (
-    <Collapsible className="my-2" {...props}>
-      <CollapsibleTrigger
-        className={cn(
-          buttonVariants({ color: 'secondary', size: 'sm' }),
-          'group px-3 py-2 data-[state=open]:rounded-b-none',
-        )}
-      >
-        {props.name}
-        <ChevronDown className="size-4 text-fd-muted-foreground group-data-[state=open]:rotate-180" />
-      </CollapsibleTrigger>
-      <CollapsibleContent className="-mt-px *:bg-fd-card">
-        {props.children}
-      </CollapsibleContent>
-    </Collapsible>
   );
 }
 

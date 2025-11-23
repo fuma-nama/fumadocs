@@ -62,7 +62,6 @@ export function toText(
         processed,
         {
           operations: [entry.item],
-          hasHead: false,
         },
         {
           ...options,
@@ -79,7 +78,7 @@ export function toText(
         {
           operations: entry.operations,
           webhooks: entry.webhooks,
-          hasHead: true,
+          showTitle: true,
         },
         {
           ...options,
@@ -96,7 +95,7 @@ export function toText(
         {
           operations: entry.operations,
           webhooks: entry.webhooks,
-          hasHead: true,
+          showTitle: true,
         },
         {
           ...options,
@@ -113,7 +112,6 @@ export function toText(
         processed,
         {
           webhooks: [entry.item],
-          hasHead: false,
         },
         {
           ...options,
@@ -243,7 +241,7 @@ function generateStaticData(
     const operation = dereferenced.paths?.[item.path]?.[item.method];
     if (!operation) continue;
 
-    if (props.hasHead && operation.operationId) {
+    if (props.showTitle && operation.operationId) {
       const title =
         operation.summary ??
         (operation.operationId ? idToTitle(operation.operationId) : item.path);
@@ -281,5 +279,5 @@ function pageContent(props: ApiPageProps): string {
     method: item.method,
   }));
 
-  return `<APIPage document={${JSON.stringify(props.document)}} operations={${JSON.stringify(operations)}} webhooks={${JSON.stringify(webhooks)}} hasHead={${JSON.stringify(props.hasHead)}} />`;
+  return `<APIPage document={${JSON.stringify(props.document)}} operations={${JSON.stringify(operations)}} webhooks={${JSON.stringify(webhooks)}} hasHead={${JSON.stringify(props.showTitle)}} />`;
 }

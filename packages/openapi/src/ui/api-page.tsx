@@ -123,6 +123,7 @@ export interface CreateAPIPageOptions {
     renderOperationLayout?: (
       slots: {
         header: ReactNode;
+        description: ReactNode;
         apiExample: ReactNode;
         apiPlayground: ReactNode;
 
@@ -138,6 +139,7 @@ export interface CreateAPIPageOptions {
 
     renderWebhookLayout?: (slots: {
       header: ReactNode;
+      description: ReactNode;
       authSchemes: ReactNode;
       paremeters: ReactNode;
       body: ReactNode;
@@ -188,7 +190,8 @@ export interface CreateAPIPageOptions {
 
 export interface ApiPageProps {
   document: Promise<ProcessedDocument> | string | ProcessedDocument;
-  hasHead?: boolean;
+  showTitle?: boolean;
+  showDescription?: boolean;
 
   /**
    * An array of operations
@@ -307,7 +310,8 @@ export function createAPIPage(
 }
 
 async function APIPage({
-  hasHead = false,
+  showTitle: hasHead = false,
+  showDescription,
   operations,
   webhooks,
   ctx,
@@ -348,7 +352,8 @@ async function APIPage({
               method={method}
               path={item.path}
               ctx={ctx}
-              hasHead={hasHead}
+              showTitle={hasHead}
+              showDescription={showDescription}
             />
           ),
         };
@@ -375,7 +380,8 @@ async function APIPage({
               method={createMethod(item.method, webhook, hook)}
               ctx={ctx}
               path={`/${item.name}`}
-              hasHead={hasHead}
+              showTitle={hasHead}
+              showDescription={showDescription}
             />
           ),
         };

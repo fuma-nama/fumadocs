@@ -46,7 +46,8 @@ export async function Operation({
   path,
   method,
   ctx,
-  hasHead,
+  showTitle,
+  showDescription,
   headingLevel = 2,
 }: {
   type?: 'webhook' | 'operation';
@@ -54,7 +55,8 @@ export async function Operation({
   method: MethodInformation;
   ctx: RenderContext;
 
-  hasHead?: boolean;
+  showTitle?: boolean;
+  showDescription?: boolean;
   headingLevel?: number;
 }) {
   const {
@@ -62,22 +64,21 @@ export async function Operation({
   } = ctx;
   const body = method.requestBody;
   let headNode: ReactNode = null;
+  const descriptionNode =
+    showDescription &&
+    method.description &&
+    ctx.renderMarkdown(method.description);
   let bodyNode: ReactNode = null;
   let authNode: ReactNode = null;
   let responseNode: ReactNode = null;
   let callbacksNode: ReactNode = null;
 
-  if (hasHead) {
+  if (showTitle) {
     const title =
       method.summary ??
       (method.operationId ? idToTitle(method.operationId) : path);
 
-    headNode = (
-      <>
-        {ctx.renderHeading(headingLevel, title)}
-        {method.description && ctx.renderMarkdown(method.description)}
-      </>
-    );
+    headNode = ctx.renderHeading(headingLevel, title);
     headingLevel++;
   }
 
@@ -262,18 +263,11 @@ export async function Operation({
   if (type === 'operation') {
     renderOperationLayout ??= (slots) => {
       return (
-        <div
-          className="flex flex-col gap-x-6 gap-y-4 xl:flex-row xl:items-start"
-          style={
-            {
-              '--fd-api-info-top':
-                'calc(12px + var(--fd-nav-height) + var(--fd-banner-height) + var(--fd-tocnav-height, 0px))',
-            } as object
-          }
-        >
+        <div className="flex flex-col gap-x-6 gap-y-4 xl:flex-row xl:items-start">
           <div className="min-w-0 flex-1">
             {slots.header}
             {slots.apiPlayground}
+            {slots.description}
             {slots.authSchemes}
             {slots.paremeters}
             {slots.body}
@@ -289,6 +283,7 @@ export async function Operation({
     const content = await renderOperationLayout(
       {
         header: headNode,
+        description: descriptionNode,
         authSchemes: authNode,
         body: bodyNode,
         callbacks: callbacksNode,
@@ -325,6 +320,7 @@ export async function Operation({
     renderWebhookLayout ??= (slots) => (
       <div>
         {slots.header}
+        {slots.description}
         {slots.authSchemes}
         {slots.paremeters}
         {slots.body}
@@ -334,6 +330,7 @@ export async function Operation({
     );
     return renderWebhookLayout({
       header: headNode,
+      description: descriptionNode,
       authSchemes: authNode,
       body: bodyNode,
       callbacks: callbacksNode,
