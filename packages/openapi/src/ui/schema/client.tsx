@@ -447,7 +447,9 @@ function Property({
       <div className="flex flex-wrap items-center gap-3 not-prose">
         <span className="font-medium font-mono text-fd-primary">
           {name}
-          {required === false && (
+          {required ? (
+            <span className="text-red-400">*</span>
+          ) : (
             <span className="text-fd-muted-foreground">?</span>
           )}
         </span>
