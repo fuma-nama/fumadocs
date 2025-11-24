@@ -242,6 +242,10 @@ export function generateSchemaUI({
         const extended = {
           ...schema,
           ...item,
+          properties: {
+            ...schema.properties,
+            ...item.properties,
+          }
         };
         delete extended['oneOf'];
 
