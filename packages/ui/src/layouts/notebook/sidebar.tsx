@@ -33,6 +33,7 @@ import type * as PageTree from 'fumadocs-core/page-tree';
 import { useTreeContext, useTreePath } from '@/contexts/tree';
 import { useMediaQuery } from 'fumadocs-core/utils/use-media-query';
 import { Presence } from '@radix-ui/react-presence';
+import type { LinkItemType } from '@/layouts/shared/link-item';
 
 export interface SidebarProps {
   /**
@@ -555,5 +556,48 @@ function PageTreeFolder({
       )}
       <SidebarFolderContent>{props.children}</SidebarFolderContent>
     </SidebarFolder>
+  );
+}
+
+export function SidebarLinkItem({
+  item,
+  ...props
+}: {
+  item: Exclude<LinkItemType, { type: 'icon' }>;
+  className?: string;
+}) {
+  if (item.type === 'menu')
+    return (
+      <SidebarFolder {...props}>
+        {item.url ? (
+          <SidebarFolderLink href={item.url} external={item.external}>
+            {item.icon}
+            {item.text}
+          </SidebarFolderLink>
+        ) : (
+          <SidebarFolderTrigger>
+            {item.icon}
+            {item.text}
+          </SidebarFolderTrigger>
+        )}
+        <SidebarFolderContent>
+          {item.items.map((child, i) => (
+            <SidebarLinkItem key={i} item={child} />
+          ))}
+        </SidebarFolderContent>
+      </SidebarFolder>
+    );
+
+  if (item.type === 'custom') return <div {...props}>{item.children}</div>;
+
+  return (
+    <SidebarItem
+      href={item.url}
+      icon={item.icon}
+      external={item.external}
+      {...props}
+    >
+      {item.text}
+    </SidebarItem>
   );
 }

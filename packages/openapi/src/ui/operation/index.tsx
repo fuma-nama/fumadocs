@@ -263,7 +263,7 @@ export async function Operation({
   if (type === 'operation') {
     renderOperationLayout ??= (slots) => {
       return (
-        <div className="flex flex-col gap-x-6 gap-y-4 xl:flex-row xl:items-start">
+        <div className="flex flex-col gap-x-6 gap-y-4 @4xl:flex-row @4xl:items-start">
           <div className="min-w-0 flex-1">
             {slots.header}
             {slots.apiPlayground}

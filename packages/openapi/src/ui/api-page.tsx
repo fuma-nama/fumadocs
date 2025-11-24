@@ -321,7 +321,7 @@ async function APIPage({
   const { dereferenced } = ctx.schema;
   let { renderPageLayout } = ctx.content ?? {};
   renderPageLayout ??= (slots) => (
-    <div className="flex flex-col gap-24 text-sm">
+    <div className="flex flex-col gap-24 text-sm @container">
       {slots.operations?.map((op) => op.children)}
       {slots.webhooks?.map((op) => op.children)}
     </div>
