@@ -231,6 +231,23 @@ function SchemaUIProperty({
     );
   }
 
+  if (schema.type === 'and' && schema.items.length > 0) {
+    type = (
+      <span className={cn(typeVariants(), 'flex flex-row gap-2 items-center')}>
+        {schema.items.map((item, i) => (
+          <Fragment key={item.$type}>
+            {i > 0 && <span>&</span>}
+            {renderRef({
+              pathName: name,
+              text: item.name,
+              $ref: item.$type,
+            })}
+          </Fragment>
+        ))}
+      </span>
+    );
+  }
+
   if (schema.type === 'object' && schema.props.length > 0) {
     type = renderRef({
       text: schema.aliasName,

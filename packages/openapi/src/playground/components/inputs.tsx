@@ -3,7 +3,6 @@ import {
   type ComponentProps,
   type HTMLAttributes,
   type ReactNode,
-  useMemo,
   useState,
 } from 'react';
 import { ChevronDown, Plus, Trash2, X } from 'lucide-react';
@@ -20,7 +19,6 @@ import { Input, labelVariants } from '@/ui/components/input';
 import { getDefaultValue } from '../get-default-values';
 import { cn } from 'fumadocs-ui/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { combineSchema } from '@/utils/combine-schema';
 import { FormatFlags, schemaToString } from '@/utils/schema-to-string';
 import {
   anyFields,
@@ -73,9 +71,7 @@ export function ObjectInput({
   field: Exclude<RequestSchema, boolean>;
   fieldName: string;
 } & ComponentProps<'div'>) {
-  const resolved = useResolvedSchema(_field);
-  const field = useMemo(() => combineSchema([resolved]), [resolved]);
-  if (typeof field === 'boolean') return;
+  const field = useResolvedSchema(_field);
 
   return (
     <div
@@ -486,7 +482,7 @@ export function FieldSet({
     </button>
   );
 
-  if (field.type === 'object' || field.anyOf || field.allOf) {
+  if (field.type === 'object' || info.intersection) {
     return (
       <fieldset
         {...props}
@@ -503,7 +499,7 @@ export function FieldSet({
         </FieldLabel>
         {show && (
           <ObjectInput
-            field={field}
+            field={info.intersection?.merged ?? field}
             fieldName={fieldName}
             {...props}
             className={cn(

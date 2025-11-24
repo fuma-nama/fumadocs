@@ -293,7 +293,7 @@ function pageContent({
     propStrs.push(`showTitle={${JSON.stringify(showTitle)}}`);
   }
   if (showDescription) {
-    propStrs.push(`showTitle={${JSON.stringify(showDescription)}}`);
+    propStrs.push(`showDescription={${JSON.stringify(showDescription)}}`);
   }
 
   return `<APIPage ${propStrs.join(' ')} />`;

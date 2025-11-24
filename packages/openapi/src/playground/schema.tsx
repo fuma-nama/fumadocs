@@ -4,6 +4,7 @@ import { createContext, ReactNode, useContext, useMemo, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { getDefaultValue } from '@/playground/get-default-values';
 import type { ParsedSchema } from '@/utils/schema';
+import { mergeAllOf } from '@/utils/merge-schema';
 
 interface SchemaContextType {
   references: Record<string, RequestSchema>;
@@ -11,7 +12,7 @@ interface SchemaContextType {
   ajv: Ajv2020;
 }
 
-type UnionField = 'anyOf' | 'allOf' | 'oneOf';
+type UnionField = 'anyOf' | 'oneOf';
 
 export interface FieldInfo {
   selectedType?: string;
@@ -21,6 +22,10 @@ export interface FieldInfo {
    * The actual field that represents union members.
    */
   unionField?: UnionField;
+
+  intersection?: {
+    merged: Exclude<RequestSchema, boolean>;
+  };
 }
 
 const SchemaContext = createContext<SchemaContextType | undefined>(undefined);
@@ -76,41 +81,46 @@ export function useFieldInfo(
   const { fieldInfoMap, ajv } = useContext(SchemaContext)!;
   const form = useFormContext();
   const keyName = `${fieldName}:${depth}`;
-  const value = form.getValues(fieldName as 'body');
   const [info, setInfo] = useState<FieldInfo>(() => {
+    const value = form.getValues(fieldName as 'body');
     const initialInfo = fieldInfoMap.get(keyName);
     if (initialInfo) return initialInfo;
 
+    const out: FieldInfo = {
+      oneOf: -1,
+    };
     const union = getUnion(schema);
     if (union) {
       const [members, field] = union;
 
-      let oneOf = members.findIndex((item) => ajv.validate(item, value));
-      if (oneOf === -1) oneOf = 0;
-
-      return {
-        oneOf,
-        unionField: field,
-      };
+      out.oneOf = members.findIndex((item) => ajv.validate(item, value));
+      if (out.oneOf === -1) out.oneOf = 0;
+      out.unionField = field;
     }
 
     if (Array.isArray(schema.type)) {
       const types = schema.type;
 
-      return {
-        selectedType:
-          types.find((type) => {
-            schema.type = type;
-            const match = ajv.validate(schema, value);
-            schema.type = types;
+      out.selectedType =
+        types.find((type) => {
+          schema.type = type;
+          const match = ajv.validate(schema, value);
+          schema.type = types;
 
-            return match;
-          }) ?? types.at(0),
-        oneOf: -1,
-      };
+          return match;
+        }) ?? types.at(0);
     }
 
-    return { oneOf: -1 };
+    if (schema.allOf) {
+      const merged = mergeAllOf(schema);
+
+      if (typeof merged !== 'boolean')
+        out.intersection = {
+          merged,
+        };
+    }
+
+    return out;
   });
 
   fieldInfoMap.set(keyName, info);
@@ -164,27 +174,11 @@ export function fallbackAny(
   return typeof schema === 'boolean' ? anyFields : schema;
 }
 
-/**
- * We automatically merge `allOf` | `anyOf` if all members are objects, but it's also possible for them to behave same as a union (`oneOf`).
- */
-function isUnion(anyOrAllOf: readonly ParsedSchema[]): boolean {
-  return anyOrAllOf.every((item) => {
-    if (typeof item === 'boolean') return true;
-
-    const u = item.anyOf || item.allOf;
-    return item.type !== 'object' && (!u || isUnion(u));
-  });
-}
-
 function getUnion(
   schema: Exclude<RequestSchema, boolean>,
 ): [readonly ParsedSchema[], UnionField] | undefined {
-  if (schema.anyOf && isUnion(schema.anyOf)) {
+  if (schema.anyOf) {
     return [schema.anyOf, 'anyOf'];
-  }
-
-  if (schema.allOf && isUnion(schema.allOf)) {
-    return [schema.allOf, 'allOf'];
   }
 
   if (schema.oneOf) return [schema.oneOf, 'oneOf'];

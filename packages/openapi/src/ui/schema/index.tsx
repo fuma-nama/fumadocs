@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import type { ResolvedSchema } from '@/utils/schema';
 import type { RenderContext } from '@/types';
 import { FormatFlags, schemaToString } from '@/utils/schema-to-string';
-import { combineSchema } from '@/utils/combine-schema';
+import { mergeAllOf } from '@/utils/merge-schema';
 import type { SchemaUIProps } from '@/ui/schema/client';
 import { SchemaUILazy } from '@/ui/schema/lazy';
 
@@ -39,6 +39,13 @@ export type SchemaData = FieldBase &
       }
     | {
         type: 'or';
+        items: {
+          name: string;
+          $type: string;
+        }[];
+      }
+    | {
+        type: 'and';
         items: {
           name: string;
           $type: string;
@@ -228,7 +235,40 @@ export function generateSchemaUI({
       return;
     }
 
-    if (schema.oneOf) {
+    if (schema.oneOf && schema.anyOf) {
+      const out: SchemaData = {
+        type: 'and',
+        items: [],
+        ...base(schema),
+      };
+      refs[id] = out;
+
+      const $oneOf = `${id}_oneOf`;
+      const $anyOf = `${id}_anyOf`;
+      scanRefs($oneOf, {
+        ...schema,
+        anyOf: undefined,
+      });
+      scanRefs($anyOf, {
+        ...schema,
+        oneOf: undefined,
+      });
+      out.items.push(
+        {
+          name: refs[$oneOf].aliasName,
+          $type: $oneOf,
+        },
+        {
+          name: refs[$anyOf].aliasName,
+          $type: $anyOf,
+        },
+      );
+      return;
+    }
+
+    // display both `oneOf` & `anyOf` as OR for simplified overview
+    const union = schema.oneOf ?? schema.anyOf;
+    if (union) {
       const out: SchemaData = {
         type: 'or',
         items: [],
@@ -236,32 +276,31 @@ export function generateSchemaUI({
       };
       refs[id] = out;
 
-      for (const item of schema.oneOf) {
+      for (const item of union) {
         if (typeof item !== 'object') continue;
         const key = `${id}_extends:${getSchemaId(item)}`;
         const extended = {
           ...schema,
+          oneOf: undefined,
+          anyOf: undefined,
           ...item,
           properties: {
             ...schema.properties,
             ...item.properties,
-          }
+          },
         };
-        delete extended['oneOf'];
 
         scanRefs(key, extended);
         out.items.push({
           $type: key,
-          name: schemaToString(extended, ctx.schema, FormatFlags.UseAlias),
+          name: refs[key].aliasName,
         });
       }
       return;
     }
 
-    const of = schema.allOf ?? schema.anyOf;
-    if (of) {
-      const combined = combineSchema(of as ResolvedSchema[]);
-      scanRefs(id, combined);
+    if (schema.allOf) {
+      scanRefs(id, mergeAllOf(schema));
       return;
     }
 
