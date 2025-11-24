@@ -240,10 +240,11 @@ export function generateSchemaUI({
         if (typeof item !== 'object') continue;
         const key = `${id}_extends:${getSchemaId(item)}`;
         const extended = {
+          ...schema,
           ...item,
           properties: {
-            ...item.properties,
             ...schema.properties,
+            ...item.properties,
           }
         };
         delete extended['oneOf'];
