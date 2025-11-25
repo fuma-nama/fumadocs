@@ -9,6 +9,7 @@ import type { NoReference } from '@/utils/schema';
 import Slugger from 'github-slugger';
 import { removeUndefined } from '@/utils/remove-undefined';
 import type { OutputEntry } from '@/utils/pages/builder';
+import type { InternalOpenAPIMeta } from '@/server/source-api';
 
 export interface PagesToTextOptions {
   /**
@@ -195,13 +196,19 @@ function generatePage(
     document: schemaId,
   };
 
-  let meta: object | undefined;
+  let meta: InternalOpenAPIMeta | undefined;
   if (page.operations?.length === 1) {
     const operation = page.operations[0];
 
     meta = {
       method: operation.method.toUpperCase(),
-      route: operation.path,
+    };
+  } else if (page.webhooks?.length === 1) {
+    const webhook = page.webhooks[0];
+
+    meta = {
+      method: webhook.method.toUpperCase(),
+      webhook: true,
     };
   }
 
@@ -272,23 +279,38 @@ function pageContent({
   showTitle,
   showDescription,
   document,
-  ...props
+  webhooks,
+  operations,
 }: ApiPageProps): string {
-  // filter extra properties in props
-  const operations: OperationItem[] = (props.operations ?? []).map((item) => ({
-    path: item.path,
-    method: item.method,
-  }));
-  const webhooks: WebhookItem[] = (props.webhooks ?? []).map((item) => ({
-    name: item.name,
-    method: item.method,
-  }));
+  const propStrs: string[] = [`document={${JSON.stringify(document)}}`];
 
-  const propStrs: string[] = [
-    `document={${JSON.stringify(document)}}`,
-    `operations={${JSON.stringify(operations)}}`,
-    `webhooks={${JSON.stringify(webhooks)}}`,
-  ];
+  // filter extra properties in props
+  if (webhooks) {
+    propStrs.push(
+      `webhooks={${JSON.stringify(
+        webhooks.map(
+          (item) =>
+            ({
+              name: item.name,
+              method: item.method,
+            }) satisfies WebhookItem,
+        ),
+      )}}`,
+    );
+  }
+  if (operations) {
+    propStrs.push(
+      `operations={${JSON.stringify(
+        operations.map(
+          (item) =>
+            ({
+              path: item.path,
+              method: item.method,
+            }) satisfies OperationItem,
+        ),
+      )}}`,
+    );
+  }
   if (showTitle) {
     propStrs.push(`showTitle={${JSON.stringify(showTitle)}}`);
   }
