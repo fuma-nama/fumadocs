@@ -42,7 +42,7 @@ export async function UsageTabs({
 
   renderAPIExampleLayout ??= (slots) => {
     return (
-      <div className="prose-no-margin @4xl:sticky @4xl:top-[calc(var(--fd-docs-row-1,2rem)+1rem)] @4xl:w-[400px]">
+      <div className="prose-no-margin">
         {slots.selector}
         {slots.usageTabs}
         {slots.responseTabs}

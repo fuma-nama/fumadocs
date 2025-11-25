@@ -168,15 +168,11 @@ export async function RequestTabs({
   if (!operation.requestBody) return null;
   const { renderRequestTabs = renderRequestTabsDefault } = ctx.content ?? {};
 
-  return (
-    <div className="@4xl:sticky @4xl:top-[calc(var(--fd-docs-row-1,2rem)+1rem)] @4xl:w-[400px]">
-      {await renderRequestTabs(getExampleRequests(path, operation, ctx), {
-        ...ctx,
-        route: path,
-        operation,
-      })}
-    </div>
-  );
+  return renderRequestTabs(getExampleRequests(path, operation, ctx), {
+    ...ctx,
+    route: path,
+    operation,
+  });
 }
 
 function renderRequestTabsDefault(
@@ -232,8 +228,9 @@ function renderRequestTabsDefault(
     );
   }
 
+  let children: ReactNode;
   if (items.length > 1) {
-    return (
+    children = (
       <Tabs defaultValue={items[0].id}>
         <TabsList>
           {items.map((item) => (
@@ -250,13 +247,15 @@ function renderRequestTabsDefault(
       </Tabs>
     );
   } else if (items.length === 1) {
-    return (
-      <div className="p-3 rounded-xl border prose-no-margin bg-fd-card text-fd-card-foreground shadow-md">
-        <p className="font-semibold border-b pb-2">Example Requests</p>
-        {renderItem(items[0])}
-      </div>
-    );
+    children = renderItem(items[0]);
+  } else {
+    children = <p className="text-fd-muted-foreground text-xs">Empty</p>;
   }
 
-  return 'Empty';
+  return (
+    <div className="p-3 rounded-xl border prose-no-margin bg-fd-card text-fd-card-foreground shadow-md">
+      <p className="font-semibold border-b pb-2">Example Requests</p>
+      {children}
+    </div>
+  );
 }

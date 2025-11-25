@@ -279,7 +279,9 @@ export async function Operation({
             {slots.responses}
             {slots.callbacks}
           </div>
-          {slots.apiExample}
+          <div className="@4xl:sticky @4xl:top-[calc(var(--fd-docs-row-1,2rem)+1rem)] @4xl:w-[400px]">
+            {slots.apiExample}
+          </div>
         </div>
       );
     };
@@ -333,7 +335,9 @@ export async function Operation({
           {slots.responses}
           {slots.callbacks}
         </div>
-        {slots.requests}
+        <div className="@4xl:sticky @4xl:top-[calc(var(--fd-docs-row-1,2rem)+1rem)] @4xl:w-[400px]">
+          {slots.requests}
+        </div>
       </div>
     );
     return renderWebhookLayout({
