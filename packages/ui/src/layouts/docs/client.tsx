@@ -75,12 +75,13 @@ export function LayoutBody({
       data-sidebar-collapsed={collapsed}
       style={
         {
-          gridTemplate: `". . . . ."
-        ". sidebar header toc ."
-        ". sidebar toc-popover toc ."
-        ". sidebar main toc ." 1fr
-        ". . . . ." / auto minmax(var(--fd-sidebar-col), 1fr) minmax(0, var(--fd-page-width)) minmax(min-content, 1fr) auto`,
+          gridTemplate: `". . . ."
+        ". sidebar header toc"
+        ". sidebar toc-popover toc"
+        ". sidebar main toc" 1fr / auto minmax(var(--fd-sidebar-col), 1fr) minmax(0, var(--fd-page-width)) minmax(min-content, 1fr)`,
           '--fd-sidebar-col': collapsed ? '0px' : 'var(--fd-sidebar-width)',
+          gridAutoColumns: 'auto',
+          gridAutoRows: 'auto',
           ...style,
         } as object
       }
