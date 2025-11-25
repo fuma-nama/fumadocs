@@ -33,9 +33,10 @@ export function intersection(a: ParsedSchema, b: ParsedSchema): ParsedSchema {
       case 'additionalItems':
       case 'examples':
       case 'allOf':
+      case 'writeOnly':
+      case 'readOnly':
         // ignored
         break;
-
       case 'title': {
         const value = b[key];
         if (value === undefined) break;

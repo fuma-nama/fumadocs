@@ -1,8 +1,4 @@
-export function deepEqual(
-  a: unknown,
-  b: unknown,
-  visited: Set<object> = new Set(),
-): boolean {
+export function deepEqual(a: unknown, b: unknown): boolean {
   if (a === b) {
     return true;
   }
@@ -15,21 +11,11 @@ export function deepEqual(
     return false;
   }
 
-  // Handle circular references
-  if (visited.has(a) || visited.has(b)) {
-    return a === b; // If already visited, compare references to avoid infinite recursion
-  }
-
-  visited.add(a);
-  visited.add(b);
-
   if (Array.isArray(a) && Array.isArray(b)) {
     if (a.length !== b.length) {
       return false;
     }
-    return a.every((item, index) =>
-      deepEqual(item, b[index], new Set(visited)),
-    );
+    return a.every((item, index) => deepEqual(item, b[index]));
   }
 
   if (Array.isArray(a) || Array.isArray(b)) {
@@ -49,7 +35,6 @@ export function deepEqual(
       deepEqual(
         (a as Record<string, unknown>)[key],
         (b as Record<string, unknown>)[key],
-        new Set(visited),
       ),
   );
 }

@@ -58,13 +58,15 @@ export function schemaToString(
     if (schema.type === 'array')
       return `array<${schema.items ? run(schema.items, flags | FormatFlags.UseAlias) : 'unknown'}>`;
 
-    if (schema.oneOf) {
-      return union(schema.oneOf, ' | ', flags);
+    const or = schema.oneOf ?? schema.anyOf;
+    if (schema.oneOf && schema.anyOf) {
+      return `(${union(schema.oneOf, ' | ', flags)}) & (${union(schema.anyOf, ' | ', flags)})`;
+    } else if (or) {
+      return union(or, ' | ', flags);
     }
 
-    const combinedOf = schema.anyOf ?? schema.allOf;
-    if (combinedOf) {
-      return union(combinedOf, ' & ', flags);
+    if (schema.allOf) {
+      return union(schema.allOf, ' & ', flags);
     }
 
     if (schema.not) return `not ${run(schema.not, flags)}`;

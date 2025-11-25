@@ -14,8 +14,6 @@ export interface FieldBase {
   aliasName: string;
 
   deprecated?: boolean;
-  writeOnly?: boolean;
-  readOnly?: boolean;
 }
 
 export type SchemaData = FieldBase &
@@ -55,7 +53,16 @@ export type SchemaData = FieldBase &
 
 export interface SchemaUIOptions {
   root: ResolvedSchema;
-  ctx: RenderContext;
+  client: Omit<SchemaUIProps, 'generated'>;
+
+  /**
+   * include read only props
+   */
+  readOnly?: boolean;
+  /**
+   * include write only props
+   */
+  writeOnly?: boolean;
 }
 
 export interface SchemaUIGeneratedData {
@@ -65,22 +72,26 @@ export interface SchemaUIGeneratedData {
 
 export function Schema({
   ctx,
-  root,
-  ...props
-}: SchemaUIOptions & Omit<SchemaUIProps, 'generated'>) {
+  ...options
+}: SchemaUIOptions & {
+  ctx: RenderContext;
+}) {
   if (ctx.schemaUI?.render) {
-    return ctx.schemaUI.render({ root, ...props }, ctx);
+    return ctx.schemaUI.render(options, ctx);
   }
 
   return (
-    <SchemaUILazy {...props} generated={generateSchemaUI({ ctx, root })} />
+    <SchemaUILazy
+      {...options.client}
+      generated={generateSchemaUI(options, ctx)}
+    />
   );
 }
 
-export function generateSchemaUI({
-  ctx,
-  root,
-}: SchemaUIOptions): SchemaUIGeneratedData {
+export function generateSchemaUI(
+  { root, readOnly, writeOnly }: SchemaUIOptions,
+  ctx: RenderContext,
+): SchemaUIGeneratedData {
   const refs: Record<string, SchemaData> = {};
   const { showExample = false } = ctx.schemaUI ?? {};
 
@@ -181,6 +192,13 @@ export function generateSchemaUI({
     return generated;
   }
 
+  function isVisible(schema: ResolvedSchema): boolean {
+    if (typeof schema === 'boolean') return true;
+    if (schema.writeOnly) return writeOnly ?? false;
+    if (schema.readOnly) return readOnly ?? false;
+    return true;
+  }
+
   function base(schema: ResolvedSchema): FieldBase {
     if (typeof schema === 'boolean') {
       const name = schema ? 'any' : 'never';
@@ -196,8 +214,6 @@ export function generateSchemaUI({
       typeName: schemaToString(schema, ctx.schema),
       aliasName: schemaToString(schema, ctx.schema, FormatFlags.UseAlias),
       deprecated: schema.deprecated,
-      readOnly: schema.readOnly,
-      writeOnly: schema.writeOnly,
     };
   }
 
@@ -220,13 +236,11 @@ export function generateSchemaUI({
       refs[id] = out;
 
       for (const type of schema.type) {
-        const item = {
+        const key = `${id}_type:${type}`;
+        scanRefs(key, {
           ...schema,
           type,
-        };
-
-        const key = `${id}_type:${type}`;
-        scanRefs(key, item);
+        });
         out.items.push({
           name: type,
           $type: key,
@@ -277,9 +291,9 @@ export function generateSchemaUI({
       refs[id] = out;
 
       for (const item of union) {
-        if (typeof item !== 'object') continue;
+        if (typeof item !== 'object' || !isVisible(item)) continue;
         const key = `${id}_extends:${getSchemaId(item)}`;
-        const extended = {
+        scanRefs(key, {
           ...schema,
           oneOf: undefined,
           anyOf: undefined,
@@ -288,9 +302,7 @@ export function generateSchemaUI({
             ...schema.properties,
             ...item.properties,
           },
-        };
-
-        scanRefs(key, extended);
+        });
         out.items.push({
           $type: key,
           name: refs[key].aliasName,
@@ -312,11 +324,16 @@ export function generateSchemaUI({
       };
       refs[id] = out;
 
-      const props = Object.entries(schema.properties ?? {});
-      if (schema.patternProperties)
-        props.push(...Object.entries(schema.patternProperties));
+      const {
+        properties = {},
+        patternProperties,
+        additionalProperties,
+      } = schema;
+      const props = Object.entries(properties);
+      if (patternProperties) props.push(...Object.entries(patternProperties));
 
       for (const [key, prop] of props) {
+        if (!isVisible(prop)) continue;
         const $type = getSchemaId(prop);
         scanRefs($type, prop);
         out.props.push({
@@ -326,9 +343,12 @@ export function generateSchemaUI({
         });
       }
 
-      if (schema.additionalProperties) {
-        const $type = getSchemaId(schema.additionalProperties);
-        scanRefs($type, schema.additionalProperties);
+      if (
+        additionalProperties !== undefined &&
+        isVisible(additionalProperties)
+      ) {
+        const $type = getSchemaId(additionalProperties);
+        scanRefs($type, additionalProperties);
 
         out.props.push({
           $type,

@@ -116,10 +116,12 @@ export async function Operation({
           return (
             <SelectTab key={type} value={type}>
               <Schema
-                name="body"
-                as="body"
+                client={{
+                  name: 'body',
+                  as: 'body',
+                  required: body.required,
+                }}
                 root={(content.schema ?? {}) as ResolvedSchema}
-                required={body.required}
                 readOnly={method.method === 'GET'}
                 writeOnly={method.method !== 'GET'}
                 ctx={ctx}
@@ -163,7 +165,10 @@ export async function Operation({
           {params.map((param) => (
             <Schema
               key={param.name}
-              name={param.name}
+              client={{
+                name: param.name,
+                required: param.required,
+              }}
               root={
                 {
                   ...param.schema,
@@ -173,7 +178,6 @@ export async function Operation({
                     (param.schema?.deprecated ?? false),
                 } as ResolvedSchema
               }
-              required={param.required}
               readOnly={method.method === 'GET'}
               writeOnly={method.method !== 'GET'}
               ctx={ctx}
@@ -396,9 +400,11 @@ async function ResponseAccordion({
               {schema && (
                 <div className="border px-3 py-2 rounded-lg">
                   <Schema
-                    name="response"
+                    client={{
+                      name: 'response',
+                      as: 'body',
+                    }}
                     root={schema as ResolvedSchema}
-                    as="body"
                     readOnly
                     ctx={ctx}
                   />

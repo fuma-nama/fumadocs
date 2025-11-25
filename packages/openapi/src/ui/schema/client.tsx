@@ -33,10 +33,7 @@ import {
 import { cn } from 'fumadocs-ui/utils/cn';
 import { cva } from 'class-variance-authority';
 
-interface DataContextType extends SchemaUIGeneratedData {
-  readOnly?: boolean;
-  writeOnly?: boolean;
-}
+type DataContextType = SchemaUIGeneratedData;
 
 interface PropertyContextType {
   renderRef: (options: RenderRefOptions) => ReactNode;
@@ -79,8 +76,6 @@ export interface SchemaUIProps {
   required?: boolean;
   as?: 'property' | 'body';
 
-  readOnly?: boolean;
-  writeOnly?: boolean;
   generated: SchemaUIGeneratedData;
 }
 
@@ -89,18 +84,9 @@ export function SchemaUI({
   required = false,
   as = 'property',
   generated,
-  readOnly,
-  writeOnly,
 }: SchemaUIProps) {
   const schema = generated.refs[generated.$root];
-  const context: DataContextType = useMemo(
-    () => ({
-      ...generated,
-      readOnly,
-      writeOnly,
-    }),
-    [generated, readOnly, writeOnly],
-  );
+  const context: DataContextType = useMemo(() => generated, [generated]);
   const isProperty = as === 'property' || !isExpandable(schema);
 
   return (
@@ -121,12 +107,8 @@ export function SchemaUI({
 }
 
 function SchemaUIContent({ $type }: { $type: string }) {
-  const { refs, readOnly, writeOnly } = useData();
+  const { refs } = useData();
   const schema = refs[$type];
-
-  if ((schema.readOnly && !readOnly) || (schema.writeOnly && !writeOnly))
-    return;
-
   let child: ReactNode = null;
 
   if (schema.type === 'or' && schema.items.length > 0) {
@@ -207,11 +189,8 @@ function SchemaUIProperty({
   overrides?: Partial<PropertyProps>;
 }) {
   const { renderRef } = useProperty();
-  const { refs, readOnly, writeOnly } = useData();
+  const { refs } = useData();
   const schema = refs[$type];
-
-  if ((schema.readOnly && !readOnly) || (schema.writeOnly && !writeOnly))
-    return;
 
   let type: ReactNode = schema.typeName;
   if (schema.type === 'or' && schema.items.length > 0) {

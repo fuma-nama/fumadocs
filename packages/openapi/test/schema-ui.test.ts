@@ -10,11 +10,16 @@ const cwd = fileURLToPath(new URL('./', import.meta.url));
 test('test', async () => {
   const ctx = await renderContextFrom(path.join(cwd, './fixtures/unkey.json'));
 
-  const out = generateSchemaUI({
+  const out = generateSchemaUI(
+    {
+      client: {
+        name: 'test',
+      },
+      root: ctx.schema.dereferenced.components!.schemas!
+        .V1KeysVerifyKeyResponse as ResolvedSchema,
+    },
     ctx,
-    root: ctx.schema.dereferenced.components!.schemas!
-      .V1KeysVerifyKeyResponse as ResolvedSchema,
-  });
+  );
 
   expect(out).toMatchInlineSnapshot(`
     {
@@ -77,50 +82,40 @@ test('test', async () => {
               "required": false,
             },
           ],
-          "readOnly": undefined,
           "type": "object",
           "typeName": "object",
-          "writeOnly": undefined,
         },
         "__1": {
           "aliasName": "string",
           "deprecated": undefined,
           "description": "The id of the key",
           "infoTags": [],
-          "readOnly": undefined,
           "type": "primitive",
           "typeName": "string",
-          "writeOnly": undefined,
         },
         "__10": {
           "aliasName": "number",
           "deprecated": undefined,
           "description": "Remaining requests after this verification",
           "infoTags": [],
-          "readOnly": undefined,
           "type": "primitive",
           "typeName": "number",
-          "writeOnly": undefined,
         },
         "__11": {
           "aliasName": "number",
           "deprecated": undefined,
           "description": "Unix timestamp in milliseconds when the ratelimit will reset",
           "infoTags": [],
-          "readOnly": undefined,
           "type": "primitive",
           "typeName": "number",
-          "writeOnly": undefined,
         },
         "__12": {
           "aliasName": "number",
           "deprecated": undefined,
           "description": "The number of requests that can be made with this key before it becomes invalid. If this field is null or undefined, the key has no request limit.",
           "infoTags": [],
-          "readOnly": undefined,
           "type": "primitive",
           "typeName": "number",
-          "writeOnly": undefined,
         },
         "__13": {
           "aliasName": "string",
@@ -151,20 +146,16 @@ test('test', async () => {
               </code>
             </div>,
           ],
-          "readOnly": undefined,
           "type": "primitive",
           "typeName": "string",
-          "writeOnly": undefined,
         },
         "__14": {
           "aliasName": "boolean",
           "deprecated": undefined,
           "description": "Sets the key to be enabled or disabled. Disabled keys will not verify.",
           "infoTags": [],
-          "readOnly": undefined,
           "type": "primitive",
           "typeName": "boolean",
-          "writeOnly": undefined,
         },
         "__2": {
           "aliasName": "boolean",
@@ -172,30 +163,24 @@ test('test', async () => {
           "description": "Whether the key is valid or not.
     A key could be invalid for a number of reasons, for example if it has expired, has no more verifications left or if it has been deleted.",
           "infoTags": [],
-          "readOnly": undefined,
           "type": "primitive",
           "typeName": "boolean",
-          "writeOnly": undefined,
         },
         "__3": {
           "aliasName": "string",
           "deprecated": undefined,
           "description": "The name of the key, give keys a name to easily identifiy their purpose",
           "infoTags": [],
-          "readOnly": undefined,
           "type": "primitive",
           "typeName": "string",
-          "writeOnly": undefined,
         },
         "__4": {
           "aliasName": "string",
           "deprecated": undefined,
           "description": "The id of the tenant associated with this key. Use whatever reference you have in your system to identify the tenant. When verifying the key, we will send this field back to you, so you know who is accessing your API.",
           "infoTags": [],
-          "readOnly": undefined,
           "type": "primitive",
           "typeName": "string",
-          "writeOnly": undefined,
         },
         "__5": {
           "aliasName": "object",
@@ -209,30 +194,24 @@ test('test', async () => {
               "required": false,
             },
           ],
-          "readOnly": undefined,
           "type": "object",
           "typeName": "object",
-          "writeOnly": undefined,
         },
         "__6": {
           "aliasName": "unknown",
           "deprecated": undefined,
           "description": undefined,
           "infoTags": [],
-          "readOnly": undefined,
           "type": "primitive",
           "typeName": "unknown",
-          "writeOnly": undefined,
         },
         "__7": {
           "aliasName": "number",
           "deprecated": undefined,
           "description": "The unix timestamp in milliseconds when the key will expire. If this field is null or undefined, the key is not expiring.",
           "infoTags": [],
-          "readOnly": undefined,
           "type": "primitive",
           "typeName": "number",
-          "writeOnly": undefined,
         },
         "__8": {
           "aliasName": "object",
@@ -256,20 +235,16 @@ test('test', async () => {
               "required": true,
             },
           ],
-          "readOnly": undefined,
           "type": "object",
           "typeName": "object",
-          "writeOnly": undefined,
         },
         "__9": {
           "aliasName": "number",
           "deprecated": undefined,
           "description": "Maximum number of requests that can be made inside a window",
           "infoTags": [],
-          "readOnly": undefined,
           "type": "primitive",
           "typeName": "number",
-          "writeOnly": undefined,
         },
       },
     }

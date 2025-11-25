@@ -2,11 +2,7 @@
 import Slugger from 'github-slugger';
 import { Operation } from '@/ui/operation';
 import type { MethodInformation, RenderContext } from '@/types';
-import {
-  createMethod,
-  type NoReference,
-  type ResolvedSchema,
-} from '@/utils/schema';
+import { createMethod, type NoReference } from '@/utils/schema';
 import type { OpenAPIV3_1 } from 'openapi-types';
 import type { ProcessedDocument } from '@/utils/process-document';
 import { defaultAdapters, MediaAdapter } from '@/requests/media/adapter';
@@ -35,7 +31,7 @@ import remarkRehype from 'remark-rehype';
 import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import * as JsxRuntime from 'react/jsx-runtime';
 import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
-import type { SchemaUIProps } from './schema/client';
+import type { SchemaUIOptions } from './schema';
 
 type Awaitable<T> = T | Promise<T>;
 
@@ -153,9 +149,7 @@ export interface CreateAPIPageOptions {
    */
   schemaUI?: {
     render?: (
-      options: Omit<SchemaUIProps, 'generated'> & {
-        root: ResolvedSchema;
-      },
+      options: SchemaUIOptions,
       ctx: RenderContext,
     ) => Awaitable<ReactNode>;
 
