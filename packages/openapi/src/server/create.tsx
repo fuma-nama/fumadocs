@@ -4,7 +4,7 @@ import {
   processDocument,
   type ProcessedDocument,
 } from '@/utils/process-document';
-import type { CodeUsageGenerator } from '@/ui/operation/example-panel';
+import type { CodeUsageGenerator } from '@/ui/operation/usage-tabs';
 
 /**
  * schema id -> file path, URL, or downloaded schema object

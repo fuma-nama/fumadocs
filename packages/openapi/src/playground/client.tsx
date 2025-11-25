@@ -60,7 +60,6 @@ import {
   SchemaProvider,
   useResolvedSchema,
 } from '@/playground/schema';
-import { useOperationContext } from '@/ui/contexts/operation';
 import {
   Select,
   SelectContent,
@@ -73,6 +72,7 @@ import type { ParsedSchema } from '@/utils/schema';
 import type { RequestData } from '@/requests/types';
 import ServerSelect from './components/server-select';
 import { useStorageKey } from '@/ui/client/storage-key';
+import { useExampleRequests } from '@/ui/operation/usage-tabs/client';
 
 export interface FormValues {
   path: Record<string, unknown>;
@@ -167,11 +167,7 @@ export default function PlaygroundClient({
   proxyUrl,
   ...rest
 }: PlaygroundClientProps) {
-  const {
-    example: exampleId,
-    examples,
-    setExampleData,
-  } = useOperationContext();
+  const { example: exampleId, examples, setExampleData } = useExampleRequests();
   const storageKeys = useStorageKey();
   const fieldInfoMap = useMemo(() => new Map<string, FieldInfo>(), []);
   const {

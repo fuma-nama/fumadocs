@@ -14,10 +14,7 @@ import {
 } from 'fumadocs-core/highlight';
 import type { OpenAPIServer } from '@/server';
 import type { APIPageClientOptions } from './client';
-import type {
-  CodeUsageGenerator,
-  ResponseTab,
-} from './operation/example-panel';
+import type { CodeUsageGenerator } from './operation/usage-tabs';
 import { ApiProviderLazy } from './contexts/api.lazy';
 import { Heading } from 'fumadocs-ui/components/heading';
 import {
@@ -32,6 +29,8 @@ import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import * as JsxRuntime from 'react/jsx-runtime';
 import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
 import type { SchemaUIOptions } from './schema';
+import type { ResponseTab } from './operation/response-tabs';
+import type { ExampleRequestItem } from './operation/request-tabs';
 
 type Awaitable<T> = T | Promise<T>;
 
@@ -82,6 +81,14 @@ export interface CreateAPIPageOptions {
       ctx: RenderContext,
     ) => Awaitable<ReactNode>;
 
+    renderRequestTabs: (
+      items: ExampleRequestItem[],
+      ctx: RenderContext & {
+        route: string;
+        operation: NoReference<MethodInformation>;
+      },
+    ) => Awaitable<ReactNode>;
+
     renderAPIExampleLayout?: (
       slots: {
         selector: ReactNode;
@@ -130,7 +137,7 @@ export interface CreateAPIPageOptions {
         callbacks: ReactNode;
       },
       ctx: RenderContext,
-      method: MethodInformation,
+      method: NoReference<MethodInformation>,
     ) => Awaitable<ReactNode>;
 
     renderWebhookLayout?: (slots: {
@@ -139,6 +146,7 @@ export interface CreateAPIPageOptions {
       authSchemes: ReactNode;
       paremeters: ReactNode;
       body: ReactNode;
+      requests: ReactNode;
       responses: ReactNode;
       callbacks: ReactNode;
     }) => Awaitable<ReactNode>;

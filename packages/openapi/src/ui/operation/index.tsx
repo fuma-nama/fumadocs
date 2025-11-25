@@ -13,7 +13,7 @@ import {
 } from '@/utils/schema';
 import { idToTitle } from '@/utils/id-to-title';
 import { Schema } from '../schema';
-import { APIExample, getAPIExamples } from '@/ui/operation/example-panel';
+import { UsageTabs } from '@/ui/operation/usage-tabs';
 import { MethodLabel } from '@/ui/components/method-label';
 import { getTypescriptSchema } from '@/utils/get-typescript-schema';
 import {
@@ -32,7 +32,8 @@ import {
 import { isMediaTypeSupported } from '@/requests/media/adapter';
 import { cn } from 'fumadocs-ui/utils/cn';
 import { APIPlayground } from '@/playground';
-import { OperationProviderLazy } from '../contexts/operation.lazy';
+import { RequestTabs, getExampleRequests } from './request-tabs';
+import { UsageTabsProviderLazy } from './usage-tabs/lazy';
 
 const ParamTypes = {
   path: 'Path Parameters',
@@ -303,33 +304,36 @@ export async function Operation({
             </code>
           </div>
         ),
-        apiExample: <APIExample method={method} ctx={ctx} />,
+        apiExample: <UsageTabs method={method} ctx={ctx} />,
       },
       ctx,
       method,
     );
 
     return (
-      <OperationProviderLazy
+      <UsageTabsProviderLazy
         defaultExampleId={
           method['x-exclusiveCodeSample'] ?? method['x-selectedCodeSample']
         }
         route={path}
-        examples={getAPIExamples(path, method, ctx)}
+        examples={getExampleRequests(path, method, ctx)}
       >
         {content}
-      </OperationProviderLazy>
+      </UsageTabsProviderLazy>
     );
   } else {
     renderWebhookLayout ??= (slots) => (
-      <div>
-        {slots.header}
-        {slots.description}
-        {slots.authSchemes}
-        {slots.paremeters}
-        {slots.body}
-        {slots.responses}
-        {slots.callbacks}
+      <div className="flex flex-col-reverse gap-x-6 gap-y-4 @4xl:flex-row @4xl:items-start">
+        <div className="min-w-0 flex-1">
+          {slots.header}
+          {slots.description}
+          {slots.authSchemes}
+          {slots.paremeters}
+          {slots.body}
+          {slots.responses}
+          {slots.callbacks}
+        </div>
+        {slots.requests}
       </div>
     );
     return renderWebhookLayout({
@@ -340,6 +344,7 @@ export async function Operation({
       callbacks: callbacksNode,
       paremeters: parameterNode,
       responses: responseNode,
+      requests: <RequestTabs path={path} operation={method} ctx={ctx} />,
     });
   }
 }
