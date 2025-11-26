@@ -32,15 +32,17 @@ export function LayoutContextProvider({
 }) {
   const isTop =
     useIsScrollTop({ enabled: navTransparentMode === 'top' }) ?? true;
+  const isNavTransparent =
+    navTransparentMode === 'top' ? isTop : navTransparentMode === 'always';
 
   return (
     <LayoutContext
-      value={{
-        isNavTransparent:
-          navTransparentMode === 'top'
-            ? isTop
-            : navTransparentMode === 'always',
-      }}
+      value={useMemo(
+        () => ({
+          isNavTransparent,
+        }),
+        [isNavTransparent],
+      )}
     >
       {children}
     </LayoutContext>

@@ -28,20 +28,23 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { useSidebar } from '@/contexts/sidebar';
 import { useTOCItems } from '@/components/toc';
 import { useActiveAnchor } from 'fumadocs-core/toc';
 import { LayoutContext } from '../client';
+import { useFooterItems } from '@/utils/use-footer-items';
 
 const TocPopoverContext = createContext<{
   open: boolean;
   setOpen: (open: boolean) => void;
 } | null>(null);
 
-export function PageTOCPopover(props: ComponentProps<'div'>) {
+export function PageTOCPopover({
+  className,
+  children,
+  ...rest
+}: ComponentProps<'div'>) {
   const ref = useRef<HTMLElement>(null);
   const [open, setOpen] = useState(false);
-  const { collapsed } = useSidebar();
   const { isNavTransparent } = use(LayoutContext)!;
 
   const onClick = useEffectEvent((e: Event) => {
@@ -69,34 +72,35 @@ export function PageTOCPopover(props: ComponentProps<'div'>) {
         [setOpen, open],
       )}
     >
-      <Collapsible open={open} onOpenChange={setOpen} asChild>
+      <Collapsible
+        open={open}
+        onOpenChange={setOpen}
+        data-toc-popover=""
+        className={cn(
+          'sticky top-(--fd-docs-row-2) z-10 [grid-area:toc-popover] h-10 xl:hidden',
+          className,
+        )}
+        {...rest}
+      >
         <header
           ref={ref}
-          data-toc-popover=""
-          {...props}
           className={cn(
-            'fixed pr-(--removed-body-scroll-bar-size,0) z-10 border-b backdrop-blur-sm transition-colors xl:hidden max-xl:on-notebook-layout:[--fd-tocnav-height:40px]',
+            'border-b backdrop-blur-sm transition-colors',
             (!isNavTransparent || open) && 'bg-fd-background/80',
             open && 'shadow-lg',
-            props.className,
           )}
-          style={{
-            ...props.style,
-            top: 'calc(var(--fd-banner-height) + var(--fd-nav-height))',
-            insetInlineStart: collapsed
-              ? '0px'
-              : 'calc(var(--fd-sidebar-width) + var(--fd-layout-offset))',
-            insetInlineEnd: 0,
-          }}
         >
-          {props.children}
+          {children}
         </header>
       </Collapsible>
     </TocPopoverContext>
   );
 }
 
-export function PageTOCPopoverTrigger(props: ComponentProps<'button'>) {
+export function PageTOCPopoverTrigger({
+  className,
+  ...props
+}: ComponentProps<'button'>) {
   const { text } = useI18n();
   const { open } = use(TocPopoverContext)!;
   const items = useTOCItems();
@@ -110,12 +114,12 @@ export function PageTOCPopoverTrigger(props: ComponentProps<'button'>) {
 
   return (
     <CollapsibleTrigger
+      className={cn(
+        'flex w-full h-10 items-center text-sm text-fd-muted-foreground gap-2.5 px-4 py-2.5 text-start focus-visible:outline-none [&_svg]:size-4 md:px-6',
+        className,
+      )}
       data-toc-popover-trigger=""
       {...props}
-      className={cn(
-        'flex w-full h-(--fd-tocnav-height) items-center text-sm text-fd-muted-foreground gap-2.5 px-4 py-2.5 text-start focus-visible:outline-none [&_svg]:size-4 md:px-6',
-        props.className,
-      )}
     >
       <ProgressCircle
         value={(selected + 1) / Math.max(1, items.length)}
@@ -254,54 +258,28 @@ export interface FooterProps extends ComponentProps<'div'> {
   };
 }
 
-function scanNavigationList(tree: PageTree.Node[]) {
-  const list: PageTree.Item[] = [];
-
-  tree.forEach((node) => {
-    if (node.type === 'folder') {
-      if (node.index) {
-        list.push(node.index);
-      }
-
-      list.push(...scanNavigationList(node.children));
-      return;
-    }
-
-    if (node.type === 'page' && !node.external) {
-      list.push(node);
-    }
-  });
-
-  return list;
-}
-
-const listCache = new Map<string, PageTree.Item[]>();
-
 export function PageFooter({ items, ...props }: FooterProps) {
-  const { root } = useTreeContext();
+  const footerList = useFooterItems();
   const pathname = usePathname();
-
   const { previous, next } = useMemo(() => {
     if (items) return items;
 
-    const cached = listCache.get(root.$id);
-    const list = cached ?? scanNavigationList(root.children);
-    listCache.set(root.$id, list);
-
-    const idx = list.findIndex((item) => isActive(item.url, pathname, false));
+    const idx = footerList.findIndex((item) =>
+      isActive(item.url, pathname, false),
+    );
 
     if (idx === -1) return {};
     return {
-      previous: list[idx - 1],
-      next: list[idx + 1],
+      previous: footerList[idx - 1],
+      next: footerList[idx + 1],
     };
-  }, [items, pathname, root]);
+  }, [footerList, items, pathname]);
 
   return (
     <div
       {...props}
       className={cn(
-        '@container grid gap-4 pb-6',
+        '@container grid gap-4',
         previous && next ? 'grid-cols-2' : 'grid-cols-1',
         props.className,
       )}
@@ -390,31 +368,6 @@ export function PageBreadcrumb({
           </Fragment>
         );
       })}
-    </div>
-  );
-}
-
-export function PageTOC(props: ComponentProps<'div'>) {
-  const { collapsed } = useSidebar();
-  const offset = collapsed ? '0px' : 'var(--fd-layout-offset)';
-
-  return (
-    <div
-      id="nd-toc"
-      {...props}
-      className={cn(
-        'fixed bottom-0 pt-12 pb-2 pr-(--removed-body-scroll-bar-size,0) max-xl:hidden',
-        props.className,
-      )}
-      style={{
-        ...props.style,
-        top: 'calc(var(--fd-banner-height) + var(--fd-nav-height))',
-        insetInlineEnd: `max(${offset}, calc(50vw - var(--fd-sidebar-width)/2 - var(--fd-page-width)/2))`,
-      }}
-    >
-      <div className="flex h-full w-(--fd-toc-width) max-w-full flex-col pe-4">
-        {props.children}
-      </div>
     </div>
   );
 }

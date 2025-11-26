@@ -33,7 +33,8 @@ import type * as PageTree from 'fumadocs-core/page-tree';
 import { useTreeContext, useTreePath } from '@/contexts/tree';
 import { useMediaQuery } from 'fumadocs-core/utils/use-media-query';
 import { Presence } from '@radix-ui/react-presence';
-import type { LinkItemType } from '@/layouts/shared/link-item';
+import type { LinkItemType } from '@/layouts/shared';
+import { LayoutContext } from './client';
 
 export interface SidebarProps {
   /**
@@ -113,66 +114,73 @@ export function SidebarContent(props: ComponentProps<'aside'>) {
   const { collapsed } = useSidebar();
   const [hover, setHover] = useState(false);
   const timerRef = useRef(0);
-  const closeTimeRef = useRef(0);
+  const ignoreHoverUntil = useRef(0);
+  const { navMode } = use(LayoutContext)!;
 
   useOnChange(collapsed, () => {
-    setHover(false);
-    closeTimeRef.current = Date.now() + 150;
+    if (collapsed) {
+      setHover(true);
+      ignoreHoverUntil.current = Date.now() + 200;
+
+      setTimeout(() => {
+        setHover(false);
+      }, 200);
+    }
   });
 
   return (
-    <aside
-      id="nd-sidebar"
-      {...props}
-      data-collapsed={collapsed}
-      className={cn(
-        'fixed left-0 rtl:left-auto rtl:right-(--removed-body-scroll-bar-size,0) flex flex-col items-end top-(--fd-sidebar-top) bottom-(--fd-sidebar-margin) z-20 bg-fd-card text-sm border-e transition-[top,opacity,translate,width] duration-200 max-md:hidden *:w-(--fd-sidebar-width)',
-        collapsed && [
-          'rounded-xl border translate-x-(--fd-sidebar-offset) rtl:-translate-x-(--fd-sidebar-offset)',
-          hover ? 'z-50 shadow-lg' : 'opacity-0',
-        ],
-        props.className,
-      )}
-      style={
-        {
-          ...props.style,
-          '--fd-sidebar-offset': hover
-            ? 'calc(var(--spacing) * 2)'
-            : 'calc(16px - 100%)',
-          '--fd-sidebar-margin': collapsed ? '0.5rem' : '0px',
-          '--fd-sidebar-top': `calc(var(--fd-banner-height) + var(--fd-nav-height) + var(--fd-sidebar-margin))`,
-          width: collapsed
-            ? 'var(--fd-sidebar-width)'
-            : 'calc(var(--spacing) + var(--fd-sidebar-width) + var(--fd-layout-offset))',
-        } as object
-      }
-      onPointerEnter={(e) => {
-        if (
-          !collapsed ||
-          e.pointerType === 'touch' ||
-          closeTimeRef.current > Date.now()
-        )
-          return;
-        window.clearTimeout(timerRef.current);
-        setHover(true);
-      }}
-      onPointerLeave={(e) => {
-        if (!collapsed || e.pointerType === 'touch') return;
-        window.clearTimeout(timerRef.current);
+    <>
+      <aside
+        id="nd-sidebar"
+        {...props}
+        data-collapsed={collapsed}
+        className={cn(
+          'sticky [grid-area:sidebar] flex flex-col items-end z-20 text-sm *:w-(--fd-sidebar-width) max-md:hidden',
+          (navMode === 'auto' || collapsed) && 'bg-fd-card border-e',
+          navMode === 'auto'
+            ? 'top-(--fd-docs-row-1) h-[calc(var(--fd-docs-height)-var(--fd-docs-row-1))]'
+            : 'top-(--fd-docs-row-2) h-[calc(var(--fd-docs-height)-var(--fd-docs-row-2))]',
+          collapsed && [
+            'fixed start-0 inset-y-2 h-auto rounded-xl border transition-[opacity,translate] duration-200',
+            hover
+              ? 'z-50 shadow-lg translate-x-2 rtl:-translate-x-2'
+              : 'opacity-0 -translate-x-[calc(100%-16px)] rtl:translate-x-[calc(100%-16px)]',
+          ],
+          props.className,
+        )}
+        onPointerEnter={(e) => {
+          if (
+            !collapsed ||
+            e.pointerType === 'touch' ||
+            ignoreHoverUntil.current > Date.now()
+          )
+            return;
+          window.clearTimeout(timerRef.current);
+          setHover(true);
+        }}
+        onPointerLeave={(e) => {
+          if (
+            !collapsed ||
+            e.pointerType === 'touch' ||
+            ignoreHoverUntil.current > Date.now()
+          )
+            return;
+          window.clearTimeout(timerRef.current);
 
-        timerRef.current = window.setTimeout(
-          () => {
-            setHover(false);
-            closeTimeRef.current = Date.now() + 150;
-          },
-          Math.min(e.clientX, document.body.clientWidth - e.clientX) > 100
-            ? 0
-            : 500,
-        );
-      }}
-    >
-      {props.children}
-    </aside>
+          timerRef.current = window.setTimeout(
+            () => {
+              setHover(false);
+              ignoreHoverUntil.current = Date.now() + 200;
+            },
+            Math.min(e.clientX, document.body.clientWidth - e.clientX) > 100
+              ? 0
+              : 500,
+          );
+        }}
+      >
+        {props.children}
+      </aside>
+    </>
   );
 }
 
@@ -213,31 +221,9 @@ export function SidebarContentMobile({
   );
 }
 
-export function SidebarHeader(props: ComponentProps<'div'>) {
-  return (
-    <div
-      {...props}
-      className={cn('flex flex-col gap-3 p-4 pb-2', props.className)}
-    >
-      {props.children}
-    </div>
-  );
-}
-
-export function SidebarFooter(props: ComponentProps<'div'>) {
-  return (
-    <div
-      {...props}
-      className={cn('flex flex-col border-t p-4 pt-2', props.className)}
-    >
-      {props.children}
-    </div>
-  );
-}
-
 export function SidebarViewport(props: ScrollAreaProps) {
   return (
-    <ScrollArea {...props} className={cn('h-full', props.className)}>
+    <ScrollArea {...props} className={cn('min-h-0 flex-1', props.className)}>
       <ScrollViewport
         className="p-4 overscroll-contain"
         style={

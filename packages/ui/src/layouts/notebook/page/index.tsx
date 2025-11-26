@@ -1,22 +1,21 @@
 import type { ComponentProps, ReactNode } from 'react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
-import { I18nLabel } from '@/contexts/i18n';
-import type { AnchorProviderProps, TOCItemType } from 'fumadocs-core/toc';
-import { TOCProvider, TOCScrollArea } from '@/components/toc';
-import * as TocDefault from '@/components/toc/default';
-import * as TocClerk from '@/components/toc/clerk';
 import { Edit, Text } from 'lucide-react';
+import { I18nLabel } from '@/contexts/i18n';
 import {
-  BreadcrumbProps,
-  FooterProps,
+  type BreadcrumbProps,
+  type FooterProps,
   PageBreadcrumb,
   PageFooter,
-  PageTOC,
   PageTOCPopover,
   PageTOCPopoverContent,
   PageTOCPopoverTrigger,
 } from './client';
+import type { AnchorProviderProps, TOCItemType } from 'fumadocs-core/toc';
+import * as TocDefault from '@/components/toc/default';
+import * as TocClerk from '@/components/toc/clerk';
+import { TOCProvider, TOCScrollArea } from '@/components/toc';
 
 interface BreadcrumbOptions extends BreadcrumbProps {
   enabled: boolean;
@@ -50,8 +49,6 @@ export interface DocsPageProps {
    */
   footer?: Partial<FooterOptions>;
 
-  container?: ComponentProps<'div'>;
-  article?: ComponentProps<'article'>;
   children?: ReactNode;
 }
 
@@ -84,7 +81,6 @@ export function DocsPage({
     ...breadcrumbProps
   } = {},
   footer = {},
-  container,
   full = false,
   tableOfContentPopover: {
     enabled: tocPopoverEnabled,
@@ -97,7 +93,6 @@ export function DocsPage({
     ...tocOptions
   } = {},
   toc = [],
-  article,
   children,
 }: DocsPageProps) {
   // disable TOC on full mode, you can still enable it with `enabled` option.
@@ -116,21 +111,14 @@ export function DocsPage({
 
   if (tocEnabled || tocPopoverEnabled) {
     wrapper = (children) => (
-      <TOCProvider toc={toc} single={tocOptions.single}>
+      <TOCProvider single={tocOptions.single} toc={toc}>
         {children}
       </TOCProvider>
     );
   }
 
   return wrapper(
-    <div
-      id="nd-page"
-      {...container}
-      className={cn(
-        'flex flex-1 w-full mx-auto max-w-(--fd-page-width) pt-(--fd-tocnav-height) pe-(--fd-toc-width)',
-        container?.className,
-      )}
-    >
+    <>
       {tocPopoverEnabled &&
         (tocPopover ?? (
           <PageTOCPopover>
@@ -139,9 +127,9 @@ export function DocsPage({
               {tocPopoverOptions.header}
               <TOCScrollArea>
                 {tocPopoverOptions.style === 'clerk' ? (
-                  <TocDefault.TOCItems />
-                ) : (
                   <TocClerk.TOCItems />
+                ) : (
+                  <TocDefault.TOCItems />
                 )}
               </TOCScrollArea>
               {tocPopoverOptions.footer}
@@ -149,11 +137,9 @@ export function DocsPage({
           </PageTOCPopover>
         ))}
       <article
-        {...article}
-        className={cn(
-          'flex min-w-0 w-full flex-col gap-4 pt-8 px-4 md:px-6 md:mx-auto',
-          article?.className,
-        )}
+        id="nd-page"
+        data-full={full}
+        className="flex flex-col [grid-area:main] px-4 py-6 gap-4 md:px-6 md:pt-8 xl:px-8 xl:pt-14"
       >
         {breadcrumbEnabled &&
           (breadcrumb ?? <PageBreadcrumb {...breadcrumbProps} />)}
@@ -163,7 +149,10 @@ export function DocsPage({
       </article>
       {tocEnabled &&
         (tocReplace ?? (
-          <PageTOC>
+          <div
+            id="nd-toc"
+            className="sticky top-(--fd-docs-row-2) h-[calc(var(--fd-docs-height)-var(--fd-docs-row-1))] flex flex-col [grid-area:toc] w-(--fd-toc-width) pt-12 pe-4 pb-2 max-xl:hidden"
+          >
             {tocOptions.header}
             <h3
               id="toc-title"
@@ -174,15 +163,15 @@ export function DocsPage({
             </h3>
             <TOCScrollArea>
               {tocOptions.style === 'clerk' ? (
-                <TocDefault.TOCItems />
-              ) : (
                 <TocClerk.TOCItems />
+              ) : (
+                <TocDefault.TOCItems />
               )}
             </TOCScrollArea>
             {tocOptions.footer}
-          </PageTOC>
+          </div>
         ))}
-    </div>,
+    </>,
   );
 }
 

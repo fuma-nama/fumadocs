@@ -3,168 +3,210 @@ import { cn } from '@/utils/cn';
 import {
   type ComponentProps,
   createContext,
+  Fragment,
+  type HTMLAttributes,
   type ReactNode,
   use,
   useMemo,
 } from 'react';
 import { useSidebar } from '@/contexts/sidebar';
-import { buttonVariants } from '@/components/ui/button';
-import { Sidebar as SidebarIcon } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import { usePathname } from 'fumadocs-core/framework';
 import { isTabActive } from '@/utils/is-active';
 import type { SidebarTabWithProps } from '@/layouts/shared/sidebar-tab';
 import { useIsScrollTop } from '@/utils/use-is-scroll-top';
+import { LinkItem, type LinkItemType } from '../shared/link-item';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 
-export const LayoutContext = createContext<{
-  isNavTransparent: boolean;
-} | null>(null);
+export const LayoutContext = createContext<
+  | (LayoutInfo & {
+      isNavTransparent: boolean;
+    })
+  | null
+>(null);
+
+export interface LayoutInfo {
+  tabMode: 'sidebar' | 'navbar';
+  navMode: 'top' | 'auto';
+}
 
 export function LayoutContextProvider({
   navTransparentMode = 'none',
+  navMode,
+  tabMode,
   children,
-}: {
+}: LayoutInfo & {
   navTransparentMode?: 'always' | 'top' | 'none';
   children: ReactNode;
 }) {
   const isTop =
     useIsScrollTop({ enabled: navTransparentMode === 'top' }) ?? true;
+  const isNavTransparent =
+    navTransparentMode === 'top' ? isTop : navTransparentMode === 'always';
 
   return (
     <LayoutContext
-      value={{
-        isNavTransparent:
-          navTransparentMode === 'top'
-            ? isTop
-            : navTransparentMode === 'always',
-      }}
+      value={useMemo(
+        () => ({
+          isNavTransparent,
+          navMode,
+          tabMode,
+        }),
+        [isNavTransparent, navMode, tabMode],
+      )}
     >
       {children}
     </LayoutContext>
   );
 }
 
-export function Navbar({
-  mode,
-  ...props
-}: ComponentProps<'header'> & { mode: 'top' | 'auto' }) {
-  const { open, collapsed } = useSidebar();
+export function LayoutHeader(props: ComponentProps<'header'>) {
+  const { open } = useSidebar();
   const { isNavTransparent } = use(LayoutContext)!;
 
   return (
-    <header
-      id="nd-subnav"
-      {...props}
-      className={cn(
-        'fixed flex flex-col top-(--fd-banner-height) left-0 right-(--removed-body-scroll-bar-size,0) z-10 px-(--fd-layout-offset) h-(--fd-nav-height) backdrop-blur-sm transition-colors',
-        (!isNavTransparent || open) && 'bg-fd-background/80',
-        mode === 'auto' &&
-          !collapsed &&
-          'ps-[calc(var(--fd-layout-offset)+var(--fd-sidebar-width))]',
-        props.className,
-      )}
-    >
+    <header data-transparent={isNavTransparent && !open} {...props}>
       {props.children}
     </header>
   );
 }
 
-export function LayoutBody(props: ComponentProps<'main'>) {
+export function LayoutBody({
+  className,
+  style,
+  children,
+  ...props
+}: ComponentProps<'div'>) {
+  const { navMode } = use(LayoutContext)!;
   const { collapsed } = useSidebar();
 
   return (
-    <main
+    <div
       id="nd-notebook-layout"
-      {...props}
       className={cn(
-        'flex flex-1 flex-col transition-[padding] pt-(--fd-nav-height)',
-        !collapsed && 'mx-(--fd-layout-offset)',
-        props.className,
+        'grid transition-[grid-template-columns] overflow-x-clip',
+        className,
       )}
-      style={{
-        ...props.style,
-        paddingInlineStart: collapsed
-          ? 'min(calc(100vw - var(--fd-page-width)), var(--fd-sidebar-width))'
-          : 'var(--fd-sidebar-width)',
-      }}
+      style={
+        {
+          gridTemplate:
+            navMode === 'top'
+              ? `". . . ."
+        ". header header header"
+        ". sidebar toc-popover toc-popover"
+        ". sidebar main toc" 1fr / auto minmax(var(--fd-sidebar-col), 1fr) minmax(0, var(--fd-page-width)) minmax(var(--fd-toc-width), 1fr)`
+              : `". . . ."
+        ". sidebar header header"
+        ". sidebar toc-popover toc-popover"
+        ". sidebar main toc" 1fr / auto minmax(var(--fd-sidebar-col), 1fr) minmax(0, var(--fd-page-width)) minmax(var(--fd-toc-width), 1fr)`,
+          '--fd-sidebar-col': collapsed ? '0px' : 'var(--fd-sidebar-width)',
+          gridAutoColumns: 'auto',
+          gridAutoRows: 'auto',
+          ...style,
+        } as object
+      }
+      {...props}
     >
-      {props.children}
-    </main>
+      {children}
+    </div>
   );
 }
 
-export function NavbarSidebarTrigger({
-  className,
-  ...props
-}: ComponentProps<'button'>) {
-  const { setOpen } = useSidebar();
-
-  return (
-    <button
-      {...props}
-      className={cn(
-        buttonVariants({
-          color: 'ghost',
-          size: 'icon-sm',
-          className,
-        }),
-      )}
-      onClick={() => setOpen((prev) => !prev)}
-    >
-      <SidebarIcon />
-    </button>
-  );
-}
-
-export function LayoutTabs({
+export function LayoutHeaderTabs({
   options,
+  className,
   ...props
 }: ComponentProps<'div'> & {
   options: SidebarTabWithProps[];
 }) {
   const pathname = usePathname();
-  const selected = useMemo(() => {
-    return options.findLast((option) => isTabActive(option, pathname));
+  const selectedIdx = useMemo(() => {
+    return options.findLastIndex((option) => isTabActive(option, pathname));
   }, [options, pathname]);
 
   return (
-    <div
-      {...props}
-      className={cn(
-        'flex flex-row items-end gap-6 overflow-auto',
-        props.className,
-      )}
-    >
-      {options.map((option) => (
-        <LayoutTab
-          key={option.url}
-          selected={selected === option}
-          option={option}
-        />
-      ))}
+    <div className={cn('flex flex-row items-end gap-6', className)} {...props}>
+      {options.map((option, i) => {
+        const {
+          title,
+          url,
+          unlisted,
+          props: { className, ...rest } = {},
+        } = option;
+        const isSelected = selectedIdx === i;
+
+        return (
+          <Link
+            key={i}
+            href={url}
+            className={cn(
+              'inline-flex border-b-2 border-transparent transition-colors items-center pb-1.5 font-medium gap-2 text-fd-muted-foreground text-sm text-nowrap hover:text-fd-accent-foreground',
+              unlisted && !isSelected && 'hidden',
+              isSelected && 'border-fd-primary text-fd-primary',
+              className,
+            )}
+            {...rest}
+          >
+            {title}
+          </Link>
+        );
+      })}
     </div>
   );
 }
 
-function LayoutTab({
-  option: { title, url, unlisted, props },
-  selected = false,
-}: {
-  option: SidebarTabWithProps;
-  selected?: boolean;
-}) {
+export function NavbarLinkItem({
+  item,
+  ...props
+}: { item: LinkItemType } & HTMLAttributes<HTMLElement>) {
+  if (item.type === 'menu') {
+    return (
+      <Popover>
+        <PopoverTrigger
+          {...props}
+          className={cn(
+            'inline-flex items-center gap-1.5 has-data-[active=true]:text-fd-primary',
+            props.className,
+          )}
+        >
+          {item.url ? (
+            <LinkItem item={item as { url: string }}>{item.text}</LinkItem>
+          ) : (
+            item.text
+          )}
+          <ChevronDown className="size-3" />
+        </PopoverTrigger>
+        <PopoverContent className="flex flex-col">
+          {item.items.map((child, i) => {
+            if (child.type === 'custom')
+              return <Fragment key={i}>{child.children}</Fragment>;
+
+            return (
+              <LinkItem
+                key={i}
+                item={child}
+                className="inline-flex items-center gap-2 rounded-md p-2 text-start hover:bg-fd-accent hover:text-fd-accent-foreground data-[active=true]:text-fd-primary [&_svg]:size-4"
+              >
+                {child.icon}
+                {child.text}
+              </LinkItem>
+            );
+          })}
+        </PopoverContent>
+      </Popover>
+    );
+  }
+
+  if (item.type === 'custom') return item.children;
+
   return (
-    <Link
-      href={url}
-      {...props}
-      className={cn(
-        'inline-flex border-b-2 border-transparent transition-colors items-center pb-1.5 font-medium gap-2 text-fd-muted-foreground text-sm text-nowrap hover:text-fd-accent-foreground',
-        unlisted && !selected && 'hidden',
-        selected && 'border-fd-primary text-fd-primary',
-        props?.className,
-      )}
-    >
-      {title}
-    </Link>
+    <LinkItem item={item} {...props}>
+      {item.text}
+    </LinkItem>
   );
 }

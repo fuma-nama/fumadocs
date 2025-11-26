@@ -31,6 +31,7 @@ import {
 import { useTOCItems } from '@/components/toc';
 import { useActiveAnchor } from 'fumadocs-core/toc';
 import { LayoutContext } from '../client';
+import { useFooterItems } from '@/utils/use-footer-items';
 
 const TocPopoverContext = createContext<{
   open: boolean;
@@ -227,13 +228,13 @@ export function PageTOCPopoverContent(props: ComponentProps<'div'>) {
 export function PageLastUpdate({
   date: value,
   ...props
-}: Omit<ComponentProps<'p'>, 'children'> & { date: Date | string }) {
+}: Omit<ComponentProps<'p'>, 'children'> & { date: Date }) {
   const { text } = useI18n();
   const [date, setDate] = useState('');
 
   useEffect(() => {
     // to the timezone of client
-    setDate(new Date(value).toLocaleDateString());
+    setDate(value.toLocaleDateString());
   }, [value]);
 
   return (
@@ -257,48 +258,23 @@ export interface FooterProps extends ComponentProps<'div'> {
   };
 }
 
-function scanNavigationList(tree: PageTree.Node[]) {
-  const list: PageTree.Item[] = [];
-
-  tree.forEach((node) => {
-    if (node.type === 'folder') {
-      if (node.index) {
-        list.push(node.index);
-      }
-
-      list.push(...scanNavigationList(node.children));
-      return;
-    }
-
-    if (node.type === 'page' && !node.external) {
-      list.push(node);
-    }
-  });
-
-  return list;
-}
-
-const listCache = new Map<string, PageTree.Item[]>();
-
 export function PageFooter({ items, ...props }: FooterProps) {
-  const { root } = useTreeContext();
+  const footerList = useFooterItems();
   const pathname = usePathname();
 
   const { previous, next } = useMemo(() => {
     if (items) return items;
 
-    const cached = listCache.get(root.$id);
-    const list = cached ?? scanNavigationList(root.children);
-    listCache.set(root.$id, list);
-
-    const idx = list.findIndex((item) => isActive(item.url, pathname, false));
+    const idx = footerList.findIndex((item) =>
+      isActive(item.url, pathname, false),
+    );
 
     if (idx === -1) return {};
     return {
-      previous: list[idx - 1],
-      next: list[idx + 1],
+      previous: footerList[idx - 1],
+      next: footerList[idx + 1],
     };
-  }, [items, pathname, root]);
+  }, [footerList, items, pathname]);
 
   return (
     <div

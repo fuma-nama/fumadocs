@@ -1,7 +1,6 @@
 import {
   type ComponentProps,
   type FC,
-  Fragment,
   type HTMLAttributes,
   type ReactNode,
   useMemo,
@@ -13,8 +12,6 @@ import {
   type SidebarComponents,
   SidebarContent,
   SidebarContentMobile,
-  SidebarFooter,
-  SidebarHeader,
   SidebarLinkItem,
   SidebarPageTree,
   type SidebarProps,
@@ -24,26 +21,16 @@ import {
 import { TreeContextProvider } from '@/contexts/tree';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
-import {
-  ChevronDown,
-  Languages,
-  Sidebar as SidebarIcon,
-  X,
-} from 'lucide-react';
+import { Languages, Sidebar as SidebarIcon, X } from 'lucide-react';
 import { LanguageToggle } from '@/layouts/shared/language-toggle';
 import { ThemeToggle } from '@/layouts/shared/theme-toggle';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
 import type * as PageTree from 'fumadocs-core/page-tree';
 import {
   LayoutBody,
   LayoutContextProvider,
-  LayoutTabs,
-  Navbar,
-  NavbarSidebarTrigger,
+  LayoutHeaderTabs,
+  LayoutHeader,
+  NavbarLinkItem,
 } from '@/layouts/notebook/client';
 import {
   type SidebarTabWithProps,
@@ -83,8 +70,8 @@ interface SidebarOptions
    */
   tabs?: SidebarTabWithProps[] | GetSidebarTabsOptions | false;
 
-  banner?: ReactNode | FC<ComponentProps<typeof SidebarHeader>>;
-  footer?: ReactNode | FC<ComponentProps<typeof SidebarFooter>>;
+  banner?: ReactNode | FC<ComponentProps<'div'>>;
+  footer?: ReactNode | FC<ComponentProps<'div'>>;
 
   /**
    * Support collapsing the sidebar on desktop mode
@@ -134,34 +121,28 @@ export function DocsLayout(props: DocsLayoutProps) {
     const Header =
       typeof banner === 'function'
         ? banner
-        : (props: ComponentProps<typeof SidebarHeader>) => (
-            <SidebarHeader {...props}>
+        : ({ className, ...props }: ComponentProps<'div'>) => (
+            <div
+              className={cn('flex flex-col gap-3 p-4 pb-2', className)}
+              {...props}
+            >
               {props.children}
               {banner}
-            </SidebarHeader>
+            </div>
           );
     const Footer =
       typeof footer === 'function'
         ? footer
-        : (props: ComponentProps<typeof SidebarFooter>) => (
-            <SidebarFooter {...props}>
+        : ({ className, ...props }: ComponentProps<'div'>) => (
+            <div
+              className={cn('flex flex-col border-t p-4 pt-2', className)}
+              {...props}
+            >
               {props.children}
               {footer}
-            </SidebarFooter>
+            </div>
           );
     const iconLinks = links.filter((item) => item.type === 'icon');
-
-    const rootToggle = (
-      <>
-        {tabMode === 'sidebar' && tabs.length > 0 && (
-          <SidebarTabTrigger className="mb-2" options={tabs} />
-        )}
-        {tabMode === 'navbar' && tabs.length > 0 && (
-          <SidebarTabTrigger options={tabs} className="lg:hidden" />
-        )}
-      </>
-    );
-
     const viewport = (
       <SidebarViewport>
         {links
@@ -179,15 +160,7 @@ export function DocsLayout(props: DocsLayoutProps) {
     );
 
     const content = (
-      <SidebarContent
-        {...rest}
-        className={cn(
-          navMode === 'top'
-            ? 'border-e-0 bg-transparent'
-            : '[--fd-nav-height:0px]',
-          rest.className,
-        )}
-      >
+      <SidebarContent {...rest}>
         <Header className="empty:hidden">
           {navMode === 'auto' && (
             <div className="flex justify-between">
@@ -213,7 +186,12 @@ export function DocsLayout(props: DocsLayoutProps) {
             </div>
           )}
           {nav.children}
-          {rootToggle}
+          {tabs.length > 0 && (
+            <SidebarTabTrigger
+              options={tabs}
+              className={cn(tabMode === 'navbar' && 'lg:hidden')}
+            />
+          )}
         </Header>
         {viewport}
         <Footer
@@ -256,7 +234,7 @@ export function DocsLayout(props: DocsLayoutProps) {
           >
             <X />
           </SidebarTrigger>
-          {rootToggle}
+          {tabs.length > 0 && <SidebarTabTrigger options={tabs} />}
         </Header>
         {viewport}
         <Footer
@@ -308,14 +286,12 @@ export function DocsLayout(props: DocsLayoutProps) {
 
   return (
     <TreeContextProvider tree={props.tree}>
-      <LayoutContextProvider navTransparentMode={nav.transparentMode}>
-        <LayoutBody
-          {...props.containerProps}
-          className={cn(
-            'md:[--fd-sidebar-width:286px]',
-            props.containerProps?.className,
-          )}
-        >
+      <LayoutContextProvider
+        navMode={nav.mode ?? 'auto'}
+        tabMode={tabMode}
+        navTransparentMode={nav.transparentMode}
+      >
+        <LayoutBody {...props.containerProps}>
           {sidebar()}
           <DocsNavbar
             {...props}
@@ -344,27 +320,20 @@ function DocsNavbar({
   const navMode = nav.mode ?? 'auto';
 
   return (
-    <Navbar
-      mode={navMode}
-      className={cn(
-        'on-notebook-layout:[--fd-nav-height:56px] md:on-notebook-layout:[--fd-nav-height:64px]',
-        tabs.length > 0 && 'lg:on-notebook-layout:[--fd-nav-height:104px]',
-      )}
+    <LayoutHeader
+      id="nd-subnav"
+      className="sticky [grid-area:header] flex flex-col top-(--fd-docs-row-1) z-10 backdrop-blur-sm transition-colors data-[transparent=false]:bg-fd-background/80"
     >
       <div
-        className={cn(
-          'flex border-b px-4 gap-2 flex-1 md:px-6',
-          navMode === 'top' && 'ps-7',
-        )}
+        data-header-body=""
+        className="flex border-b px-4 gap-2 h-14 md:px-6"
       >
         <div
           className={cn(
             'items-center',
             navMode === 'top' && 'flex flex-1',
-            navMode === 'auto' && [
-              'hidden max-md:flex',
-              sidebarCollapsible && 'has-data-[collapsed=true]:md:flex',
-            ],
+            navMode === 'auto' &&
+              'hidden has-data-[collapsed=true]:md:flex max-md:flex',
           )}
         >
           {sidebarCollapsible && navMode === 'auto' && (
@@ -445,7 +414,17 @@ function DocsNavbar({
               (searchToggle.components?.sm ?? (
                 <SearchToggle hideIfDisabled className="p-2" />
               ))}
-            <NavbarSidebarTrigger className="p-2 -me-1.5" />
+            <SidebarTrigger
+              className={cn(
+                buttonVariants({
+                  color: 'ghost',
+                  size: 'icon-sm',
+                  className: 'p-2 -me-1.5',
+                }),
+              )}
+            >
+              <SidebarIcon />
+            </SidebarTrigger>
           </div>
 
           <div className="flex items-center gap-2 max-md:hidden">
@@ -475,65 +454,12 @@ function DocsNavbar({
         </div>
       </div>
       {tabs.length > 0 && (
-        <LayoutTabs
-          className={cn(
-            'border-b px-6 h-10 max-lg:hidden',
-            navMode === 'top' && 'ps-7',
-          )}
+        <LayoutHeaderTabs
+          data-header-tabs=""
+          className="overflow-x-auto border-b px-6 h-10 max-lg:hidden"
           options={tabs}
         />
       )}
-    </Navbar>
-  );
-}
-
-function NavbarLinkItem({
-  item,
-  ...props
-}: { item: LinkItemType } & HTMLAttributes<HTMLElement>) {
-  if (item.type === 'menu') {
-    return (
-      <Popover>
-        <PopoverTrigger
-          {...props}
-          className={cn(
-            'inline-flex items-center gap-1.5 has-data-[active=true]:text-fd-primary',
-            props.className,
-          )}
-        >
-          {item.url ? (
-            <LinkItem item={item as { url: string }}>{item.text}</LinkItem>
-          ) : (
-            item.text
-          )}
-          <ChevronDown className="size-3" />
-        </PopoverTrigger>
-        <PopoverContent className="flex flex-col">
-          {item.items.map((child, i) => {
-            if (child.type === 'custom')
-              return <Fragment key={i}>{child.children}</Fragment>;
-
-            return (
-              <LinkItem
-                key={i}
-                item={child}
-                className="inline-flex items-center gap-2 rounded-md p-2 text-start hover:bg-fd-accent hover:text-fd-accent-foreground data-[active=true]:text-fd-primary [&_svg]:size-4"
-              >
-                {child.icon}
-                {child.text}
-              </LinkItem>
-            );
-          })}
-        </PopoverContent>
-      </Popover>
-    );
-  }
-
-  if (item.type === 'custom') return item.children;
-
-  return (
-    <LinkItem item={item} {...props}>
-      {item.text}
-    </LinkItem>
+    </LayoutHeader>
   );
 }
