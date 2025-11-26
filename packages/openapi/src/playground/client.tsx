@@ -2,13 +2,13 @@
 import {
   type FC,
   Fragment,
-  type HTMLAttributes,
   lazy,
   type ReactNode,
   useEffect,
   useMemo,
   useState,
   useEffectEvent,
+  type ComponentProps,
 } from 'react';
 import type {
   FieldPath,
@@ -31,11 +31,7 @@ import {
   JsonInput,
   ObjectInput,
 } from './components/inputs';
-import type {
-  ParameterField,
-  RequestSchema,
-  SecurityEntry,
-} from '@/playground/index';
+import type { ParameterField, SecurityEntry } from '@/playground/index';
 import { getStatusInfo } from './status-info';
 import {
   joinURL,
@@ -58,6 +54,7 @@ import { cn } from 'fumadocs-ui/utils/cn';
 import {
   type FieldInfo,
   SchemaProvider,
+  SchemaScope,
   useResolvedSchema,
 } from '@/playground/schema';
 import {
@@ -87,19 +84,21 @@ export interface FormValues {
   _encoded?: RequestData;
 }
 
-export interface PlaygroundClientProps extends HTMLAttributes<HTMLFormElement> {
+export interface PlaygroundClientProps
+  extends ComponentProps<'form'>,
+    SchemaScope {
   route: string;
   method: string;
   parameters?: ParameterField[];
   securities: SecurityEntry[][];
   body?: {
-    schema: RequestSchema;
+    schema: ParsedSchema;
     mediaType: string;
   };
   /**
    * Resolver for $ref schemas you've passed
    */
-  references: Record<string, RequestSchema>;
+  references: Record<string, ParsedSchema>;
   proxyUrl?: string;
 }
 
@@ -140,7 +139,7 @@ export interface PlaygroundClientOptions {
   renderBodyField?: (
     fieldName: 'body',
     info: {
-      schema: RequestSchema;
+      schema: ParsedSchema;
       mediaType: string;
     },
   ) => ReactNode;
@@ -165,6 +164,8 @@ export default function PlaygroundClient({
   body,
   references,
   proxyUrl,
+  writeOnly,
+  readOnly,
   ...rest
 }: PlaygroundClientProps) {
   const { example: exampleId, examples, setExampleData } = useExampleRequests();
@@ -306,7 +307,12 @@ export default function PlaygroundClient({
 
   return (
     <FormProvider {...form}>
-      <SchemaProvider fieldInfoMap={fieldInfoMap} references={references}>
+      <SchemaProvider
+        fieldInfoMap={fieldInfoMap}
+        references={references}
+        writeOnly={writeOnly}
+        readOnly={readOnly}
+      >
         <form
           {...rest}
           className={cn(
@@ -494,7 +500,7 @@ function FormBody({
   );
 }
 
-function BodyInput({ field: _field }: { field: RequestSchema }) {
+function BodyInput({ field: _field }: { field: ParsedSchema }) {
   const field = useResolvedSchema(_field);
   const [isJson, setIsJson] = useState(false);
 
@@ -736,10 +742,7 @@ function useAuthInputs(
   return { inputs, mapInputs, initAuthValues };
 }
 
-function Route({
-  route,
-  ...props
-}: HTMLAttributes<HTMLDivElement> & { route: string }) {
+function Route({ route, ...props }: ComponentProps<'div'> & { route: string }) {
   return (
     <div
       {...props}
@@ -815,7 +818,7 @@ function CollapsiblePanel({
   title,
   children,
   ...props
-}: Omit<HTMLAttributes<HTMLDivElement>, 'title'> & {
+}: Omit<ComponentProps<'div'>, 'title'> & {
   title: ReactNode;
 }) {
   return (

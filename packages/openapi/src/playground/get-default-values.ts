@@ -1,6 +1,6 @@
-import type { RequestSchema } from '@/playground/index';
+import type { ParsedSchema } from '@/utils/schema';
 
-export function getDefaultValue(schema: RequestSchema): unknown {
+export function getDefaultValue(schema: ParsedSchema): unknown {
   if (typeof schema === 'boolean') return null;
 
   const type = schema.type;

@@ -1,15 +1,26 @@
 import { Ajv2020 } from 'ajv/dist/2020';
-import type { RequestSchema } from '@/playground/index';
-import { createContext, ReactNode, useContext, useMemo, useState } from 'react';
+import { createContext, ReactNode, use, useMemo, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { getDefaultValue } from '@/playground/get-default-values';
 import type { ParsedSchema } from '@/utils/schema';
 import { mergeAllOf } from '@/utils/merge-schema';
 
-interface SchemaContextType {
-  references: Record<string, RequestSchema>;
+interface SchemaContextType extends SchemaScope {
+  references: Record<string, ParsedSchema>;
   fieldInfoMap: Map<string, FieldInfo>;
   ajv: Ajv2020;
+}
+
+export interface SchemaScope {
+  /**
+   * show write only fields
+   */
+  writeOnly: boolean;
+
+  /**
+   * show read only fields
+   */
+  readOnly: boolean;
 }
 
 type UnionField = 'anyOf' | 'oneOf';
@@ -24,7 +35,7 @@ export interface FieldInfo {
   unionField?: UnionField;
 
   intersection?: {
-    merged: Exclude<RequestSchema, boolean>;
+    merged: Exclude<ParsedSchema, boolean>;
   };
 }
 
@@ -33,11 +44,13 @@ export const anyFields = {
   type: ['string', 'number', 'boolean', 'array', 'object'],
   items: true,
   additionalProperties: true,
-} satisfies RequestSchema;
+} satisfies ParsedSchema;
 
 export function SchemaProvider({
   references,
   fieldInfoMap,
+  readOnly,
+  writeOnly,
   children,
 }: Omit<SchemaContextType, 'ajv'> & { children: ReactNode }) {
   const ajv = useMemo(
@@ -54,13 +67,17 @@ export function SchemaProvider({
   return (
     <SchemaContext.Provider
       value={useMemo(
-        () => ({ references, fieldInfoMap, ajv }),
-        [fieldInfoMap, references, ajv],
+        () => ({ references, fieldInfoMap, ajv, readOnly, writeOnly }),
+        [references, fieldInfoMap, ajv, readOnly, writeOnly],
       )}
     >
       {children}
     </SchemaContext.Provider>
   );
+}
+
+export function useSchemaScope(): SchemaScope {
+  return use(SchemaContext)!;
 }
 
 /**
@@ -72,13 +89,13 @@ export function SchemaProvider({
  */
 export function useFieldInfo(
   fieldName: string,
-  schema: Exclude<RequestSchema, boolean>,
+  schema: Exclude<ParsedSchema, boolean>,
   depth: number,
 ): {
   info: FieldInfo;
   updateInfo: (value: Partial<FieldInfo>) => void;
 } {
-  const { fieldInfoMap, ajv } = useContext(SchemaContext)!;
+  const { fieldInfoMap, ajv } = use(SchemaContext)!;
   const form = useFormContext();
   const keyName = `${fieldName}:${depth}`;
   const [info, setInfo] = useState<FieldInfo>(() => {
@@ -157,9 +174,9 @@ export function useFieldInfo(
  * Resolve `$ref` in the schema, **not recursive**.
  */
 export function useResolvedSchema(
-  schema: RequestSchema,
-): Exclude<RequestSchema, boolean> {
-  const { references } = useContext(SchemaContext)!;
+  schema: ParsedSchema,
+): Exclude<ParsedSchema, boolean> {
+  const { references } = use(SchemaContext)!;
 
   return useMemo(() => {
     if (typeof schema === 'boolean') return anyFields;
@@ -169,13 +186,13 @@ export function useResolvedSchema(
 }
 
 export function fallbackAny(
-  schema: RequestSchema,
-): Exclude<RequestSchema, boolean> {
+  schema: ParsedSchema,
+): Exclude<ParsedSchema, boolean> {
   return typeof schema === 'boolean' ? anyFields : schema;
 }
 
 function getUnion(
-  schema: Exclude<RequestSchema, boolean>,
+  schema: Exclude<ParsedSchema, boolean>,
 ): [readonly ParsedSchema[], UnionField] | undefined {
   if (schema.anyOf) {
     return [schema.anyOf, 'anyOf'];

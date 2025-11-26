@@ -276,11 +276,11 @@ export function createAPIPage(
         ...options.mediaAdapters,
       },
       slugger,
-      renderHeading(depth, text) {
+      renderHeading(depth, text, props) {
         const id = slugger.slug(text);
 
         return (
-          <Heading id={id} key={id} as={`h${depth}` as `h1`}>
+          <Heading id={id} key={id} as={`h${depth}` as `h1`} {...props}>
             {text}
           </Heading>
         );

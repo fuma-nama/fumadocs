@@ -17,10 +17,8 @@ export type ParameterField = NoReference<ParameterObject> & {
   in: 'cookie' | 'header' | 'query' | 'path';
 };
 
-export type RequestSchema = ParsedSchema;
-
 interface Context {
-  references: Record<string, RequestSchema>;
+  references: Record<string, ParsedSchema>;
   registered: WeakMap<Exclude<ParsedSchema, boolean>, string>;
   nextId: () => string;
 }
@@ -70,6 +68,8 @@ export async function APIPlayground({ path, method, ctx }: APIPlaygroundProps) {
         : undefined,
     references: context.references,
     proxyUrl: ctx.proxyUrl,
+    writeOnly: true,
+    readOnly: false,
   };
 
   return <ClientLazy {...props} />;
@@ -79,7 +79,7 @@ function writeReferences(
   schema: ParsedSchema,
   ctx: Context,
   stack: WeakMap<object, object> = new WeakMap(),
-): RequestSchema {
+): ParsedSchema {
   if (typeof schema !== 'object' || !schema) return schema;
   if (stack.has(schema)) {
     const out = stack.get(schema)!;

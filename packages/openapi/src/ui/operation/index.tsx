@@ -91,19 +91,13 @@ export async function Operation({
     bodyNode = (
       <SelectTabs defaultValue={defaultValue}>
         <div className="flex gap-2 items-end justify-between">
-          {ctx.renderHeading(headingLevel, 'Request Body')}
+          {ctx.renderHeading(headingLevel, 'Request Body', {
+            className: 'my-0!',
+          })}
           {contentTypes.length > 1 ? (
-            <SelectTabTrigger
-              items={contentTypes.map(([key]) => key)}
-              className="mb-4"
-            />
+            <SelectTabTrigger items={contentTypes.map(([key]) => key)} />
           ) : (
-            <p
-              className={cn(
-                'text-sm text-fd-muted-foreground font-medium not-prose',
-                headingLevel === 2 ? 'mb-7' : 'mb-4',
-              )}
-            >
+            <p className="text-sm text-fd-muted-foreground font-medium not-prose">
               {defaultValue}
             </p>
           )}

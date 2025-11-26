@@ -14,7 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/ui/components/select';
-import type { RequestSchema } from '@/playground/index';
 import { Input, labelVariants } from '@/ui/components/input';
 import { getDefaultValue } from '../get-default-values';
 import { cn } from 'fumadocs-ui/utils/cn';
@@ -24,7 +23,9 @@ import {
   anyFields,
   useFieldInfo,
   useResolvedSchema,
+  useSchemaScope,
 } from '@/playground/schema';
+import type { ParsedSchema } from '@/utils/schema';
 
 function FieldLabel(props: ComponentProps<'label'>) {
   return (
@@ -68,7 +69,7 @@ export function ObjectInput({
   fieldName,
   ...props
 }: {
-  field: Exclude<RequestSchema, boolean>;
+  field: Exclude<ParsedSchema, boolean>;
   fieldName: string;
 } & ComponentProps<'div'>) {
   const field = useResolvedSchema(_field);
@@ -149,7 +150,7 @@ function DynamicProperties({
 }: {
   fieldName: string;
   filterKey?: (key: string) => boolean;
-  getType: (key: string) => RequestSchema;
+  getType: (key: string) => ParsedSchema;
 }) {
   const { control, setValue, getValues } = useFormContext();
   const [nextName, setNextName] = useState('');
@@ -239,7 +240,7 @@ export function FieldInput({
   isRequired,
   ...props
 }: HTMLAttributes<HTMLElement> & {
-  field: Exclude<RequestSchema, boolean>;
+  field: Exclude<ParsedSchema, boolean>;
   isRequired?: boolean;
   fieldName: string;
 }) {
@@ -364,7 +365,7 @@ export function FieldSet({
 }: HTMLAttributes<HTMLElement> & {
   isRequired?: boolean;
   name?: ReactNode;
-  field: RequestSchema;
+  field: ParsedSchema;
   fieldName: string;
   depth?: number;
 
@@ -372,11 +373,14 @@ export function FieldSet({
   toolbar?: ReactNode;
   collapsible?: boolean;
 }) {
+  const { readOnly, writeOnly } = useSchemaScope();
   const field = useResolvedSchema(_field);
   const [show, setShow] = useState(!collapsible);
   const { info, updateInfo } = useFieldInfo(fieldName, field, depth);
 
-  if (_field === false) return null;
+  if (_field === false) return;
+  if (field.readOnly && !readOnly) return;
+  if (field.writeOnly && !writeOnly) return;
 
   if (info.unionField) {
     const union = field[info.unionField]!;
@@ -559,7 +563,7 @@ function ArrayInput({
   ...props
 }: {
   fieldName: string;
-  items: RequestSchema;
+  items: ParsedSchema;
 } & ComponentProps<'div'>) {
   const name = fieldName.split('.').at(-1) ?? '';
   const { fields, append, remove } = useFieldArray({
