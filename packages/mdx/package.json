@@ -66,7 +66,7 @@
   "dependencies": {
     "@mdx-js/mdx": "^3.1.1",
     "@standard-schema/spec": "^1.0.0",
-    "chokidar": "^4.0.3",
+    "chokidar": "^5.0.0",
     "esbuild": "^0.27.0",
     "estree-util-value-to-estree": "^3.5.0",
     "js-yaml": "^4.1.1",
