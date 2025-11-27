@@ -1,1 +1,7 @@
 @source '../../dist/layouts/home/**/*.js';
+
+@layer {
+  #nd-home-layout {
+    --fd-layout-width: 1400px;
+  }
+}

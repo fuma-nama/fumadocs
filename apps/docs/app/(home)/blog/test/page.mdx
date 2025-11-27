@@ -1,6 +1,6 @@
 export default function withArticle(props) {
   return (
-    <main {...props} className="container py-12">
+    <main {...props} className="w-full max-w-[1400px] mx-auto px-4 py-12">
       <article className="prose">{props.children}</article>
     </main>
   );
@@ -15,7 +15,13 @@ Apply typography styles with:
 ```jsx
 export default function withArticle(props) {
   return (
-    <main {...props} className={cn('container py-12', props.className)}>
+    <main
+      {...props}
+      className={cn(
+        'w-full max-w-[1400px] mx-auto px-4 py-12',
+        props.className,
+      )}
+    >
       <article className="prose">{props.children}</article>
     </main>
   );

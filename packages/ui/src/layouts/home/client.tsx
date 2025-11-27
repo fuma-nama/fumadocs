@@ -208,7 +208,7 @@ function HeaderNavigationMenu({
       >
         <div
           className={cn(
-            'backdrop-blur-lg border-b transition-colors *:mx-auto *:max-w-fd-container',
+            'backdrop-blur-lg border-b transition-colors *:mx-auto *:max-w-(--fd-layout-width)',
             value.length > 0 && 'max-lg:shadow-lg max-lg:rounded-b-2xl',
             (!isTransparent || value.length > 0) && 'bg-fd-background/80',
           )}

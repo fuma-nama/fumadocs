@@ -3,7 +3,7 @@ import Link, { type LinkProps } from 'next/link';
 
 export default function DocsPage() {
   return (
-    <main className="container flex flex-col flex-1 justify-center items-center py-16 text-center z-2">
+    <main className="w-full max-w-page mx-auto flex flex-col flex-1 justify-center items-center px-4 py-16 text-center z-2">
       <h1 className="mb-4 text-3xl font-semibold md:text-4xl">
         Getting Started
       </h1>

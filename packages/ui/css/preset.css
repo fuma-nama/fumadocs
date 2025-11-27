@@ -45,9 +45,15 @@
   }
 }
 
-@theme {
-  --spacing-fd-container: 1400px;
+:root {
+  --fd-sidebar-drawer-offset: 100%;
+}
 
+[dir='rtl'] {
+  --fd-sidebar-drawer-offset: -100%;
+}
+
+@theme {
   --animate-fd-fade-in: fd-fade-in 300ms ease;
   --animate-fd-fade-out: fd-fade-out 300ms ease;
 
@@ -79,13 +85,13 @@
 
   @keyframes fd-sidebar-in {
     from {
-      transform: translateX(var(--fd-sidebar-mobile-offset));
+      transform: translateX(var(--fd-sidebar-drawer-offset));
     }
   }
 
   @keyframes fd-sidebar-out {
     to {
-      transform: translateX(var(--fd-sidebar-mobile-offset));
+      transform: translateX(var(--fd-sidebar-drawer-offset));
     }
   }
 
@@ -319,13 +325,6 @@
   syntax: '<length>';
   inherits: false;
   initial-value: 0px;
-}
-
-@utility container {
-  margin-inline: auto;
-  padding-inline: 1rem;
-
-  @apply 2xl:max-w-fd-container;
 }
 
 @variant dark (&:where(.dark, .dark *));

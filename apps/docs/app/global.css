@@ -6,7 +6,7 @@
 @plugin 'tailwindcss-animate';
 
 @theme {
-  --spacing-fd-container: 1436px;
+  --spacing-page: 1436px;
   --color-brand: hsl(26, 73%, 51%);
   --color-brand-foreground: white;
   --color-brand-secondary: #c6bb58;
@@ -85,6 +85,10 @@
 :root {
   --headless-color: hsl(250, 80%, 54%);
   --ui-color: hsl(41, 100%, 40%);
+}
+
+html {
+  scrollbar-gutter: stable;
 }
 
 body {

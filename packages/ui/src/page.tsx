@@ -44,7 +44,13 @@ export interface DocsPageProps extends Docs.DocsPageProps {
  */
 export function withArticle(props: ComponentProps<'main'>) {
   return (
-    <main {...props} className={cn('container py-12', props.className)}>
+    <main
+      {...props}
+      className={cn(
+        'w-full max-w-[1400px] mx-auto px-4 py-12',
+        props.className,
+      )}
+    >
       <article className="prose">{props.children}</article>
     </main>
   );
