@@ -129,7 +129,7 @@ export default defineConfig({
 
 ```ts tab="MDX Compiler"
 import { compile } from '@mdx-js/mdx';
-import { remarkNpm, type RemarkNpmOptions } from 'fumadocs-docgen';
+import { remarkNpm, type RemarkNpmOptions } from 'fumadocs-core/mdx-plugins';
 
 const remarkNpmOptions: RemarkNpmOptions = {
   persist: {
@@ -138,7 +138,7 @@ const remarkNpmOptions: RemarkNpmOptions = {
 };
 
 await compile('...', {
-  remarkPlugins: [[remarkInstall, remarkNpmOptions]],
+  remarkPlugins: [[remarkNpm, remarkNpmOptions]],
 });
 ```
 
