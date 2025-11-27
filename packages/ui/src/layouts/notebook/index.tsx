@@ -278,8 +278,8 @@ export function DocsLayout(props: DocsLayoutProps) {
       <Sidebar
         defaultOpenLevel={defaultOpenLevel}
         prefetch={prefetch}
-        Content={content}
-        Mobile={mobile}
+        full={content}
+        drawer={mobile}
       />
     );
   }

@@ -274,13 +274,13 @@ export function DocsLayout({
       <Sidebar
         defaultOpenLevel={defaultOpenLevel}
         prefetch={prefetch}
-        Mobile={mobile}
-        Content={
+        full={
           <>
             {collapsible && <CollapsibleControl />}
             {content}
           </>
         }
+        drawer={mobile}
       />
     );
   }

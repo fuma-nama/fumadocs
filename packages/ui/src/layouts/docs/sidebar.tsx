@@ -8,6 +8,7 @@ import {
   Fragment,
   type ReactNode,
   use,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -33,9 +34,12 @@ import type * as PageTree from 'fumadocs-core/page-tree';
 import { useTreeContext, useTreePath } from '@/contexts/tree';
 import { useMediaQuery } from 'fumadocs-core/utils/use-media-query';
 import { Presence } from '@radix-ui/react-presence';
-import type { LinkItemType } from '@/layouts/shared';
+import type { LinkItemType } from '@/layouts/shared/link-item';
+import scrollIntoView from 'scroll-into-view-if-needed';
 
-export interface SidebarProps {
+type Mode = 'drawer' | 'full';
+
+export type SidebarProps = {
   /**
    * Open folders by default if their level is lower or equal to a specific level
    * (Starting from 1)
@@ -50,22 +54,13 @@ export interface SidebarProps {
    * @defaultValue true
    */
   prefetch?: boolean;
-
-  /**
-   * Children to render
-   */
-  Content: ReactNode;
-
-  /**
-   * Alternative children for mobile
-   */
-  Mobile?: ReactNode;
-}
+} & Record<Mode, ReactNode>;
 
 interface InternalContext {
   defaultOpenLevel: number;
   prefetch: boolean;
   level: number;
+  mode: Mode;
 }
 
 const itemVariants = cva(
@@ -90,23 +85,19 @@ const FolderContext = createContext<{
 export function Sidebar({
   defaultOpenLevel = 0,
   prefetch = true,
-  Mobile,
-  Content,
+  ...renderers
 }: SidebarProps) {
-  const isMobile = useMediaQuery('(width < 768px)') ?? false;
+  const mode: Mode = useMediaQuery('(width < 768px)') ? 'drawer' : 'full';
   const context = useMemo<InternalContext>(() => {
     return {
       defaultOpenLevel,
       prefetch,
       level: 1,
+      mode,
     };
-  }, [defaultOpenLevel, prefetch]);
+  }, [defaultOpenLevel, mode, prefetch]);
 
-  return (
-    <Context.Provider value={context}>
-      {isMobile && Mobile != null ? Mobile : Content}
-    </Context.Provider>
-  );
+  return <Context value={context}>{renderers[mode]}</Context>;
 }
 
 export function SidebarContent(props: ComponentProps<'aside'>) {
@@ -255,12 +246,26 @@ export function SidebarItem({
   icon?: ReactNode;
 }) {
   const pathname = usePathname();
+  const ref = useRef<HTMLAnchorElement>(null);
   const active =
     props.href !== undefined && isActive(props.href, pathname, false);
-  const { prefetch } = useInternalContext();
+  const { prefetch, mode } = useInternalContext();
+
+  useEffect(() => {
+    if (active && ref.current) {
+      scrollIntoView(ref.current, {
+        behavior: 'smooth',
+        boundary: document.getElementById(
+          mode === 'drawer' ? 'nd-sidebar-mobile' : 'nd-sidebar',
+        ),
+        scrollMode: 'if-needed',
+      });
+    }
+  }, [active, mode]);
 
   return (
     <Link
+      ref={ref}
       {...props}
       data-active={active}
       className={cn(itemVariants({ active }), props.className)}
