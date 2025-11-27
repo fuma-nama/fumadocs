@@ -293,11 +293,7 @@ export function DocsLayout(props: DocsLayoutProps) {
       >
         <LayoutBody {...props.containerProps}>
           {sidebar()}
-          <DocsNavbar
-            {...props}
-            links={links}
-            tabs={tabMode == 'navbar' ? tabs : []}
-          />
+          <DocsNavbar {...props} links={links} tabs={tabs} />
           {props.children}
         </LayoutBody>
       </LayoutContextProvider>
@@ -308,6 +304,7 @@ export function DocsLayout(props: DocsLayoutProps) {
 function DocsNavbar({
   links,
   tabs,
+  tabMode = 'sidebar',
   sidebar: { collapsible: sidebarCollapsible = true } = {},
   searchToggle = {},
   themeSwitch = {},
@@ -385,11 +382,7 @@ function DocsNavbar({
             {links
               .filter((item) => item.type !== 'icon')
               .map((item, i) => (
-                <NavbarLinkItem
-                  key={i}
-                  item={item}
-                  className="text-sm text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground data-[active=true]:text-fd-primary"
-                />
+                <NavbarLinkItem key={i} item={item} />
               ))}
           </div>
           {nav.children}
@@ -453,7 +446,7 @@ function DocsNavbar({
           </div>
         </div>
       </div>
-      {tabs.length > 0 && (
+      {tabMode === 'navbar' && tabs.length > 0 && (
         <LayoutHeaderTabs
           data-header-tabs=""
           className="overflow-x-auto border-b px-6 h-10 max-lg:hidden"

@@ -9,7 +9,7 @@
 
     --fd-docs-row-1: var(--fd-banner-height, 0px);
     --fd-docs-row-2: calc(14 * var(--spacing) + var(--fd-docs-row-1));
-    --fd-docs-row-3: calc(10 * var(--spacing) + var(--fd-docs-row-2));
+    --fd-docs-row-3: var(--fd-docs-row-2);
     --fd-docs-height: 100dvh;
 
     --fd-sidebar-mobile-offset: 100%;
@@ -38,7 +38,12 @@
   @variant xl {
     #nd-notebook-layout:has(#nd-toc) {
       --fd-toc-width: 268px;
-      --fd-docs-row-3: var(--fd-docs-row-2);
+    }
+  }
+
+  @variant not-xl {
+    #nd-notebook-layout:has([data-toc-popover]) {
+      --fd-docs-row-3: calc(10 * var(--spacing) + var(--fd-docs-row-2));
     }
   }
 }

@@ -96,15 +96,15 @@ export function LayoutBody({
         {
           gridTemplate:
             navMode === 'top'
-              ? `". . . ."
-        ". header header header"
-        ". sidebar toc-popover toc-popover"
-        ". sidebar main toc" 1fr / auto minmax(var(--fd-sidebar-col), 1fr) minmax(0, var(--fd-page-width)) minmax(var(--fd-toc-width), 1fr)`
-              : `". . . ."
-        ". sidebar header header"
-        ". sidebar toc-popover toc-popover"
-        ". sidebar main toc" 1fr / auto minmax(var(--fd-sidebar-col), 1fr) minmax(0, var(--fd-page-width)) minmax(var(--fd-toc-width), 1fr)`,
+              ? `". header header header ."
+        "sidebar sidebar toc-popover toc-popover ."
+        "sidebar sidebar main toc toc" 1fr / minmax(min-content, 1fr) var(--fd-sidebar-col) minmax(0, var(--fd-page-col)) var(--fd-toc-width) minmax(min-content, 1fr)`
+              : `"sidebar sidebar header header ."
+        "sidebar sidebar toc-popover toc-popover ."
+        "sidebar sidebar main toc ." 1fr / minmax(min-content, 1fr) var(--fd-sidebar-col) minmax(0, var(--fd-page-col)) var(--fd-toc-width) minmax(min-content, 1fr)`,
           '--fd-sidebar-col': collapsed ? '0px' : 'var(--fd-sidebar-width)',
+          '--fd-page-col':
+            'calc(var(--fd-layout-width) - var(--fd-toc-width) - var(--fd-sidebar-width))',
           gridAutoColumns: 'auto',
           gridAutoRows: 'auto',
           ...style,
@@ -162,17 +162,20 @@ export function LayoutHeaderTabs({
 
 export function NavbarLinkItem({
   item,
+  className,
   ...props
 }: { item: LinkItemType } & HTMLAttributes<HTMLElement>) {
+  if (item.type === 'custom') return item.children;
+
   if (item.type === 'menu') {
     return (
       <Popover>
         <PopoverTrigger
-          {...props}
           className={cn(
-            'inline-flex items-center gap-1.5 has-data-[active=true]:text-fd-primary',
-            props.className,
+            'inline-flex items-center gap-1.5 text-sm text-fd-muted-foreground has-data-[active=true]:text-fd-primary',
+            className,
           )}
+          {...props}
         >
           {item.url ? (
             <LinkItem item={item as { url: string }}>{item.text}</LinkItem>
@@ -202,10 +205,15 @@ export function NavbarLinkItem({
     );
   }
 
-  if (item.type === 'custom') return item.children;
-
   return (
-    <LinkItem item={item} {...props}>
+    <LinkItem
+      item={item}
+      className={cn(
+        'text-sm text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground data-[active=true]:text-fd-primary',
+        className,
+      )}
+      {...props}
+    >
       {item.text}
     </LinkItem>
   );

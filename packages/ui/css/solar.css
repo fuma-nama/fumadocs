@@ -19,8 +19,6 @@
 
 @variant md {
   #nd-docs-layout {
-    --fd-docs-row-3: calc(var(--fd-docs-row-2) + 2.5 * var(--spacing));
-
     #nd-page {
       @apply bg-fd-article rounded-xl border shadow-xl m-4;
     }
@@ -42,13 +40,31 @@
   }
 
   #nd-notebook-layout {
-    #nd-page article {
-      @apply bg-fd-article rounded-xl border shadow-xl mx-6 my-4;
+    #nd-page {
+      @apply bg-fd-article rounded-xl border shadow-xl m-4;
+    }
+
+    [data-toc-popover-trigger],
+    [data-toc-popover-content] {
+      @apply px-4;
     }
 
     [data-toc-popover] {
-      border: none;
+      top: calc(var(--fd-docs-row-2) + 2.5 * var(--spacing));
+      @apply mx-4 mt-2.5;
+
+      header {
+        transform-origin: top center;
+        @apply border rounded-xl shadow-lg transition-[margin] has-data-[active=true]:-mx-2 has-data-[active=true]:bg-fd-popover/80;
+      }
     }
+  }
+}
+
+@variant not-xl {
+  #nd-docs-layout:has([data-toc-popover]),
+  #nd-notebook-layout:has([data-toc-popover]) {
+    --fd-docs-row-3: calc(12.5 * var(--spacing) + var(--fd-docs-row-2));
   }
 }
 

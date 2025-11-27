@@ -1,4 +1,4 @@
-import { DocsLayout } from 'fumadocs-ui/layouts/notebook';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { baseOptions, linkItems, logo } from '@/lib/layout.shared';
 import { source } from '@/lib/source';
 import {
@@ -16,7 +16,7 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
       {...base}
       tree={source.pageTree}
       // just icon items
-      links={[...linkItems]}
+      links={linkItems.filter((item) => item.type === 'icon')}
       nav={{
         ...base.nav,
         title: (
@@ -27,9 +27,7 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
             </span>
           </>
         ),
-        mode: 'top',
       }}
-      tabMode="navbar"
       sidebar={{
         tabs: {
           transform(option, node) {

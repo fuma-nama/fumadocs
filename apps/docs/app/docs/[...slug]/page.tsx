@@ -27,7 +27,7 @@ import {
   DocsBody,
   DocsPage,
   PageLastUpdate,
-} from 'fumadocs-ui/layouts/notebook/page';
+} from 'fumadocs-ui/layouts/docs/page';
 import { NotFound } from '@/components/not-found';
 import { getSuggestions } from '@/app/docs/[...slug]/suggestions';
 import { PathUtils } from 'fumadocs-core/source';
