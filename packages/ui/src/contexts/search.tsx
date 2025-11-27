@@ -118,7 +118,7 @@ export function SearchProvider({
         typeof v.key === 'string' ? e.key === v.key : v.key(e),
       )
     ) {
-      setIsOpen(true);
+      setIsOpen((open) => !open);
       e.preventDefault();
     }
   });
