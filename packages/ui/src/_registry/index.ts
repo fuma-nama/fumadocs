@@ -137,14 +137,17 @@ export const registry: Registry = {
         {
           type: 'components',
           path: 'components/toc/clerk.tsx',
+          target: 'components/toc/clerk.tsx',
         },
         {
           type: 'components',
           path: 'components/toc/default.tsx',
+          target: 'components/toc/default.tsx',
         },
         {
           type: 'components',
           path: 'components/toc/index.tsx',
+          target: 'components/toc/index.tsx',
         },
         {
           type: 'components',
