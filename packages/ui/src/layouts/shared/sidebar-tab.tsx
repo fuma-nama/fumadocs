@@ -5,7 +5,7 @@ import Link from 'fumadocs-core/link';
 import { usePathname } from 'fumadocs-core/framework';
 import { cn } from '@/utils/cn';
 import { isTabActive } from '@/utils/is-active';
-import { useSidebar } from '@/contexts/sidebar';
+import { useSidebar } from '@/components/sidebar/base';
 import {
   Popover,
   PopoverContent,

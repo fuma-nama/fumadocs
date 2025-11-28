@@ -10,7 +10,7 @@ import {
 } from 'react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
-import { useSidebar } from '@/contexts/sidebar';
+import { useSidebar } from '@/components/sidebar/base';
 import { SidebarCollapseTrigger } from './sidebar';
 import { SearchToggle } from '../shared/search-toggle';
 import { usePathname } from 'fumadocs-core/framework';

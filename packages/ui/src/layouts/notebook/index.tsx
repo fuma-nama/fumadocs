@@ -11,10 +11,9 @@ import {
   SidebarCollapseTrigger,
   type SidebarComponents,
   SidebarContent,
-  SidebarContentMobile,
+  SidebarDrawer,
   SidebarLinkItem,
   SidebarPageTree,
-  type SidebarProps,
   SidebarTrigger,
   SidebarViewport,
 } from './sidebar';
@@ -62,7 +61,7 @@ export interface DocsLayoutProps extends BaseLayoutProps {
 
 interface SidebarOptions
   extends ComponentProps<'aside'>,
-    Pick<SidebarProps, 'defaultOpenLevel' | 'prefetch'> {
+    Pick<ComponentProps<typeof Sidebar>, 'defaultOpenLevel' | 'prefetch'> {
   components?: Partial<SidebarComponents>;
 
   /**
@@ -85,7 +84,12 @@ export function DocsLayout(props: DocsLayoutProps) {
   const {
     tabMode = 'sidebar',
     nav = {},
-    sidebar: { tabs: tabOptions, ...sidebarProps } = {},
+    sidebar: {
+      tabs: tabOptions,
+      defaultOpenLevel,
+      prefetch,
+      ...sidebarProps
+    } = {},
     i18n = false,
     themeSwitch = {},
   } = props;
@@ -114,8 +118,6 @@ export function DocsLayout(props: DocsLayoutProps) {
       footer,
       components,
       collapsible = true,
-      prefetch,
-      defaultOpenLevel,
       ...rest
     } = sidebarProps;
     const Header =
@@ -159,128 +161,118 @@ export function DocsLayout(props: DocsLayoutProps) {
       </SidebarViewport>
     );
 
-    const content = (
-      <SidebarContent {...rest}>
-        <Header className="empty:hidden">
-          {navMode === 'auto' && (
-            <div className="flex justify-between">
-              <Link
-                href={nav.url ?? '/'}
-                className="inline-flex items-center gap-2.5 font-medium"
-              >
-                {nav.title}
-              </Link>
-              {collapsible && (
-                <SidebarCollapseTrigger
-                  className={cn(
-                    buttonVariants({
-                      color: 'ghost',
-                      size: 'icon-sm',
-                      className: 'mt-px mb-auto text-fd-muted-foreground',
-                    }),
-                  )}
+    return (
+      <>
+        <SidebarContent {...rest}>
+          <Header className="empty:hidden">
+            {navMode === 'auto' && (
+              <div className="flex justify-between">
+                <Link
+                  href={nav.url ?? '/'}
+                  className="inline-flex items-center gap-2.5 font-medium"
                 >
-                  <SidebarIcon />
-                </SidebarCollapseTrigger>
-              )}
-            </div>
-          )}
-          {nav.children}
-          {tabs.length > 0 && (
-            <SidebarTabTrigger
-              options={tabs}
-              className={cn(tabMode === 'navbar' && 'lg:hidden')}
-            />
-          )}
-        </Header>
-        {viewport}
-        <Footer
-          className={cn(
-            'hidden flex-row text-fd-muted-foreground items-center',
-            iconLinks.length > 0 && 'max-lg:flex',
-          )}
-        >
-          {iconLinks.map((item, i) => (
-            <LinkItem
-              key={i}
-              item={item}
-              className={cn(
-                buttonVariants({
-                  size: 'icon-sm',
-                  color: 'ghost',
-                  className: 'lg:hidden',
-                }),
-              )}
-              aria-label={item.label}
-            >
-              {item.icon}
-            </LinkItem>
-          ))}
-        </Footer>
-      </SidebarContent>
-    );
-
-    const mobile = (
-      <SidebarContentMobile {...rest}>
-        <Header>
-          <SidebarTrigger
+                  {nav.title}
+                </Link>
+                {collapsible && (
+                  <SidebarCollapseTrigger
+                    className={cn(
+                      buttonVariants({
+                        color: 'ghost',
+                        size: 'icon-sm',
+                        className: 'mt-px mb-auto text-fd-muted-foreground',
+                      }),
+                    )}
+                  >
+                    <SidebarIcon />
+                  </SidebarCollapseTrigger>
+                )}
+              </div>
+            )}
+            {nav.children}
+            {tabs.length > 0 && (
+              <SidebarTabTrigger
+                options={tabs}
+                className={cn(tabMode === 'navbar' && 'lg:hidden')}
+              />
+            )}
+          </Header>
+          {viewport}
+          <Footer
             className={cn(
-              buttonVariants({
-                size: 'icon-sm',
-                color: 'ghost',
-                className: 'ms-auto text-fd-muted-foreground',
-              }),
+              'hidden flex-row text-fd-muted-foreground items-center',
+              iconLinks.length > 0 && 'max-lg:flex',
             )}
           >
-            <X />
-          </SidebarTrigger>
-          {tabs.length > 0 && <SidebarTabTrigger options={tabs} />}
-        </Header>
-        {viewport}
-        <Footer
-          className={cn(
-            'hidden flex-row items-center justify-end',
-            (i18n || themeSwitch.enabled !== false) && 'flex',
-            iconLinks.length > 0 && 'max-lg:flex',
-          )}
-        >
-          {iconLinks.map((item, i) => (
-            <LinkItem
-              key={i}
-              item={item}
+            {iconLinks.map((item, i) => (
+              <LinkItem
+                key={i}
+                item={item}
+                className={cn(
+                  buttonVariants({
+                    size: 'icon-sm',
+                    color: 'ghost',
+                    className: 'lg:hidden',
+                  }),
+                )}
+                aria-label={item.label}
+              >
+                {item.icon}
+              </LinkItem>
+            ))}
+          </Footer>
+        </SidebarContent>
+        <SidebarDrawer {...rest}>
+          <Header>
+            <SidebarTrigger
               className={cn(
                 buttonVariants({
                   size: 'icon-sm',
                   color: 'ghost',
+                  className: 'ms-auto text-fd-muted-foreground',
                 }),
-                'text-fd-muted-foreground lg:hidden',
-                i === iconLinks.length - 1 && 'me-auto',
               )}
-              aria-label={item.label}
             >
-              {item.icon}
-            </LinkItem>
-          ))}
-          {i18n && (
-            <LanguageToggle>
-              <Languages className="size-4.5 text-fd-muted-foreground" />
-            </LanguageToggle>
-          )}
-          {themeSwitch.enabled !== false &&
-            (themeSwitch.component ?? (
-              <ThemeToggle mode={themeSwitch.mode ?? 'light-dark-system'} />
+              <X />
+            </SidebarTrigger>
+            {tabs.length > 0 && <SidebarTabTrigger options={tabs} />}
+          </Header>
+          {viewport}
+          <Footer
+            className={cn(
+              'hidden flex-row items-center justify-end',
+              (i18n || themeSwitch.enabled !== false) && 'flex',
+              iconLinks.length > 0 && 'max-lg:flex',
+            )}
+          >
+            {iconLinks.map((item, i) => (
+              <LinkItem
+                key={i}
+                item={item}
+                className={cn(
+                  buttonVariants({
+                    size: 'icon-sm',
+                    color: 'ghost',
+                  }),
+                  'text-fd-muted-foreground lg:hidden',
+                  i === iconLinks.length - 1 && 'me-auto',
+                )}
+                aria-label={item.label}
+              >
+                {item.icon}
+              </LinkItem>
             ))}
-        </Footer>
-      </SidebarContentMobile>
-    );
-
-    return (
-      <Sidebar
-        defaultOpenLevel={defaultOpenLevel}
-        prefetch={prefetch}
-        full={content}
-        drawer={mobile}
-      />
+            {i18n && (
+              <LanguageToggle>
+                <Languages className="size-4.5 text-fd-muted-foreground" />
+              </LanguageToggle>
+            )}
+            {themeSwitch.enabled !== false &&
+              (themeSwitch.component ?? (
+                <ThemeToggle mode={themeSwitch.mode ?? 'light-dark-system'} />
+              ))}
+          </Footer>
+        </SidebarDrawer>
+      </>
     );
   }
 
@@ -291,11 +283,13 @@ export function DocsLayout(props: DocsLayoutProps) {
         tabMode={tabMode}
         navTransparentMode={nav.transparentMode}
       >
-        <LayoutBody {...props.containerProps}>
-          {sidebar()}
-          <DocsNavbar {...props} links={links} tabs={tabs} />
-          {props.children}
-        </LayoutBody>
+        <Sidebar defaultOpenLevel={defaultOpenLevel} prefetch={prefetch}>
+          <LayoutBody {...props.containerProps}>
+            {sidebar()}
+            <DocsNavbar {...props} links={links} tabs={tabs} />
+            {props.children}
+          </LayoutBody>
+        </Sidebar>
       </LayoutContextProvider>
     </TreeContextProvider>
   );

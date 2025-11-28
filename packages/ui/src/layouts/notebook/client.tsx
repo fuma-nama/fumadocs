@@ -9,7 +9,7 @@ import {
   use,
   useMemo,
 } from 'react';
-import { useSidebar } from '@/contexts/sidebar';
+import { useSidebar } from '@/components/sidebar/base';
 import { ChevronDown } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import { usePathname } from 'fumadocs-core/framework';
