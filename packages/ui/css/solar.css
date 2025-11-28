@@ -7,8 +7,6 @@
 
 :root {
   letter-spacing: -0.25px;
-  --fd-layout-width: 1600px;
-  --fd-page-width: 1400px;
 }
 
 .dark {
@@ -20,7 +18,12 @@
 @variant md {
   #nd-docs-layout {
     #nd-page {
-      @apply bg-fd-article rounded-xl border shadow-xl m-4;
+      @apply relative md:px-9 xl:px-12;
+    }
+
+    #nd-page:before {
+      content: '';
+      @apply absolute inset-0 bg-fd-article rounded-xl border shadow-xl m-4 mb-2 -z-1;
     }
 
     [data-toc-popover-trigger],
@@ -41,7 +44,12 @@
 
   #nd-notebook-layout {
     #nd-page {
-      @apply bg-fd-article rounded-xl border shadow-xl m-4;
+      @apply relative md:px-9 xl:px-12;
+    }
+
+    #nd-page:before {
+      content: '';
+      @apply absolute inset-0 bg-fd-article rounded-xl border shadow-xl m-4 mb-2 -z-1;
     }
 
     [data-toc-popover-trigger],
@@ -58,13 +66,6 @@
         @apply border rounded-xl shadow-lg transition-[margin] has-data-[active=true]:-mx-2 has-data-[active=true]:bg-fd-popover/80;
       }
     }
-  }
-}
-
-@variant not-xl {
-  #nd-docs-layout:has([data-toc-popover]),
-  #nd-notebook-layout:has([data-toc-popover]) {
-    --fd-docs-row-3: calc(12.5 * var(--spacing) + var(--fd-docs-row-2));
   }
 }
 

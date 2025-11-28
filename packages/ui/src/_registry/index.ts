@@ -4,7 +4,6 @@ import * as path from 'node:path';
 
 const srcDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../');
 const mapToPackage = {
-  'contexts/sidebar.tsx': 'fumadocs-ui/contexts/sidebar',
   'contexts/search.tsx': 'fumadocs-ui/contexts/search',
   'contexts/tree.tsx': 'fumadocs-ui/contexts/tree',
   'contexts/i18n.tsx': 'fumadocs-ui/contexts/i18n',
@@ -146,6 +145,11 @@ export const registry: Registry = {
         {
           type: 'components',
           path: 'components/toc/index.tsx',
+        },
+        {
+          type: 'components',
+          path: 'components/sidebar/base.tsx',
+          target: 'components/layout/sidebar.tsx',
         },
       ],
     },

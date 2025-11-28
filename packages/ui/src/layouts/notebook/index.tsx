@@ -92,6 +92,7 @@ export function DocsLayout(props: DocsLayoutProps) {
     } = {},
     i18n = false,
     themeSwitch = {},
+    tree,
   } = props;
 
   const navMode = nav.mode ?? 'auto';
@@ -102,15 +103,15 @@ export function DocsLayout(props: DocsLayoutProps) {
     }
 
     if (typeof tabOptions === 'object') {
-      return getSidebarTabs(props.tree, tabOptions);
+      return getSidebarTabs(tree, tabOptions);
     }
 
     if (tabOptions !== false) {
-      return getSidebarTabs(props.tree);
+      return getSidebarTabs(tree);
     }
 
     return [];
-  }, [tabOptions, props.tree]);
+  }, [tabOptions, tree]);
 
   function sidebar() {
     const {
@@ -277,7 +278,7 @@ export function DocsLayout(props: DocsLayoutProps) {
   }
 
   return (
-    <TreeContextProvider tree={props.tree}>
+    <TreeContextProvider tree={tree}>
       <LayoutContextProvider
         navMode={nav.mode ?? 'auto'}
         tabMode={tabMode}
@@ -309,11 +310,15 @@ function DocsNavbar({
   tabs: SidebarTabWithProps[];
 }) {
   const navMode = nav.mode ?? 'auto';
+  const showLayoutTabs = tabMode === 'navbar' && tabs.length > 0;
 
   return (
     <LayoutHeader
       id="nd-subnav"
-      className="sticky [grid-area:header] flex flex-col top-(--fd-docs-row-1) z-10 backdrop-blur-sm transition-colors data-[transparent=false]:bg-fd-background/80"
+      className={cn(
+        'sticky [grid-area:header] flex flex-col top-(--fd-docs-row-1) z-10 backdrop-blur-sm transition-colors data-[transparent=false]:bg-fd-background/80 layout:[--fd-header-height:--spacing(14)]',
+        showLayoutTabs && 'lg:layout:[--fd-header-height:--spacing(24)]',
+      )}
     >
       <div
         data-header-body=""
@@ -440,7 +445,7 @@ function DocsNavbar({
           </div>
         </div>
       </div>
-      {tabMode === 'navbar' && tabs.length > 0 && (
+      {showLayoutTabs && (
         <LayoutHeaderTabs
           data-header-tabs=""
           className="overflow-x-auto border-b px-6 h-10 max-lg:hidden"

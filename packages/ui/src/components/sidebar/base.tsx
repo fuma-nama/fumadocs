@@ -256,11 +256,13 @@ export function SidebarViewport(props: ScrollAreaProps) {
 }
 
 export function SidebarSeparator(props: ComponentProps<'p'>) {
+  const depth = useFolderDepth();
   return (
     <p
       {...props}
       className={cn(
         'inline-flex items-center gap-2 mb-1.5 px-2 mt-6 empty:mb-0',
+        depth === 0 && 'first:mt-0',
         props.className,
       )}
     >
@@ -420,7 +422,6 @@ function useAutoScroll(
   useEffect(() => {
     if (active && ref.current) {
       scrollIntoView(ref.current, {
-        behavior: 'smooth',
         boundary: document.getElementById(
           mode === 'drawer' ? 'nd-sidebar-mobile' : 'nd-sidebar',
         ),

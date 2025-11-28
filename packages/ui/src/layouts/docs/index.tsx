@@ -278,7 +278,7 @@ export function DocsLayout({
               (nav.component ?? (
                 <LayoutHeader
                   id="nd-subnav"
-                  className="[grid-area:header] sticky top-(--fd-docs-row-1) z-30 flex items-center ps-4 pe-2.5 border-b transition-colors backdrop-blur-sm h-14 md:hidden data-[transparent=false]:bg-fd-background/80"
+                  className="[grid-area:header] sticky top-(--fd-docs-row-1) z-30 flex items-center ps-4 pe-2.5 border-b transition-colors backdrop-blur-sm h-(--fd-header-height) md:hidden max-md:layout:[--fd-header-height:--spacing(14)] data-[transparent=false]:bg-fd-background/80"
                 >
                   <Link
                     href={nav.url ?? '/'}

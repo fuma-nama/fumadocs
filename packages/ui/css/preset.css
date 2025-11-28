@@ -294,3 +294,12 @@
 }
 
 @variant dark (&:where(.dark, .dark *));
+
+/* define/override layout variables */
+@variant layout {
+  #nd-docs-layout:has(&),
+  #nd-notebook-layout:has(&),
+  #nd-home-layout:has(&) {
+    @slot;
+  }
+}

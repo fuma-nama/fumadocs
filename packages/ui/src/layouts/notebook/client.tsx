@@ -89,7 +89,7 @@ export function LayoutBody({
     <div
       id="nd-notebook-layout"
       className={cn(
-        'grid transition-[grid-template-columns] overflow-x-clip',
+        'grid overflow-x-clip min-h-(--fd-docs-height) [--fd-docs-height:100dvh] [--fd-header-height:0px] [--fd-toc-popover-height:0px] [--fd-sidebar-width:0px] [--fd-toc-width:0px]',
         className,
       )}
       style={
@@ -102,9 +102,14 @@ export function LayoutBody({
               : `"sidebar sidebar header header ."
         "sidebar sidebar toc-popover toc-popover ."
         "sidebar sidebar main toc ." 1fr / minmax(min-content, 1fr) var(--fd-sidebar-col) minmax(0, var(--fd-page-col)) var(--fd-toc-width) minmax(min-content, 1fr)`,
+          '--fd-docs-row-1': 'var(--fd-banner-height, 0px)',
+          '--fd-docs-row-2':
+            'calc(var(--fd-docs-row-1) + var(--fd-header-height))',
+          '--fd-docs-row-3':
+            'calc(var(--fd-docs-row-2) + var(--fd-toc-popover-height))',
           '--fd-sidebar-col': collapsed ? '0px' : 'var(--fd-sidebar-width)',
           '--fd-page-col':
-            'calc(var(--fd-layout-width) - var(--fd-toc-width) - var(--fd-sidebar-width))',
+            'calc(var(--fd-layout-width,97rem) - var(--fd-sidebar-width) - var(--fd-toc-width))',
           gridAutoColumns: 'auto',
           gridAutoRows: 'auto',
           ...style,

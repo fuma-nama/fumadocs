@@ -16,11 +16,16 @@ import type { LinkItemType } from '../shared/link-item';
 import { cva } from 'class-variance-authority';
 import { LayoutContext } from './client';
 
-const itemVariants = cva([
-  'relative flex flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground wrap-anywhere [&_svg]:size-4 [&_svg]:shrink-0',
-  'data-[active=true]:bg-fd-primary/10 data-[active=true]:text-fd-primary',
-  'data-[active=false]:transition-colors data-[active=false]:hover:bg-fd-accent/50 data-[active=false]:hover:text-fd-accent-foreground/80 data-[active=false]:hover:transition-none',
-]);
+const itemVariants = cva(
+  'relative flex flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground wrap-anywhere transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none [&_svg]:size-4 [&_svg]:shrink-0',
+  {
+    variants: {
+      variant: {
+        link: 'data-[active=true]:bg-fd-primary/10 data-[active=true]:text-fd-primary data-[active=true]:hover:transition-colors',
+      },
+    },
+  },
+);
 
 function getItemOffset(depth: number) {
   return `calc(${2 + 3 * depth} * var(--spacing))`;
@@ -44,7 +49,7 @@ export function SidebarContent({
     <Base.SidebarContent
       aside={({ collapsed, hovered }) => ({
         className: cn(
-          'sticky [grid-area:sidebar] flex flex-col items-end z-20 text-sm *:w-(--fd-sidebar-width) max-md:hidden',
+          'sticky [grid-area:sidebar] flex flex-col items-end z-20 text-sm *:w-(--fd-sidebar-width) md:layout:[--fd-sidebar-width:268px] max-md:hidden',
           (navMode === 'auto' || collapsed) &&
             'data-[collapsed=true]:bg-fd-card data-[collapsed=true]:border-e',
           navMode === 'auto'
@@ -119,7 +124,7 @@ export function SidebarItem({
 
   return (
     <Base.SidebarItem
-      className={cn(itemVariants(), className)}
+      className={cn(itemVariants({ variant: 'link' }), className)}
       style={{
         paddingInlineStart: getItemOffset(depth),
         ...style,
@@ -140,7 +145,6 @@ export function SidebarFolderTrigger({
 
   return (
     <Base.SidebarFolderTrigger
-      data-active={false}
       className={cn(itemVariants(), 'w-full', className)}
       style={{
         paddingInlineStart: getItemOffset(depth - 1),
@@ -162,7 +166,7 @@ export function SidebarFolderLink({
 
   return (
     <Base.SidebarFolderLink
-      className={cn(itemVariants(), 'w-full', className)}
+      className={cn(itemVariants({ variant: 'link' }), 'w-full', className)}
       style={{
         paddingInlineStart: getItemOffset(depth - 1),
         ...style,

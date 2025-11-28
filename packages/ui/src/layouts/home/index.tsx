@@ -29,7 +29,10 @@ export function HomeLayout(props: HomeLayoutProps & ComponentProps<'main'>) {
     <main
       id="nd-home-layout"
       {...rest}
-      className={cn('flex flex-1 flex-col', rest.className)}
+      className={cn(
+        'flex flex-1 flex-col [--fd-layout-width:1400px]',
+        rest.className,
+      )}
     >
       {nav.enabled !== false &&
         (nav.component ?? (
