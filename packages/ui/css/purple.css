@@ -1,3 +1,5 @@
+@import './colors/index.css';
+
 @theme {
   --color-fd-background: hsl(256, 100%, 96%);
   --color-fd-primary: hsl(270, 100%, 52%);

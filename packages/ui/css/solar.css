@@ -1,4 +1,4 @@
-@import './neutral.css';
+@import './colors/index.css';
 
 @theme {
   --color-fd-primary: oklch(0.487 0.083 262.691);
@@ -69,9 +69,6 @@
 }
 
 #nd-sidebar {
-  --color-fd-muted: inherit !important;
-  --color-fd-secondary: inherit !important;
-  --color-fd-muted-foreground: inherit !important;
   @apply bg-fd-card;
 }
 
