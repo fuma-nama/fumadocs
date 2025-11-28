@@ -72,7 +72,6 @@ export function LayoutBody({
       id="nd-docs-layout"
       className={cn(
         'grid transition-[grid-template-columns] overflow-x-clip min-h-(--fd-docs-height) [--fd-docs-height:100dvh] [--fd-header-height:0px] [--fd-toc-popover-height:0px] [--fd-sidebar-width:0px] [--fd-toc-width:0px]',
-        'xl:[--fd-internal-toc-placeholder:268px]',
         className,
       )}
       data-sidebar-collapsed={collapsed}
@@ -88,7 +87,7 @@ export function LayoutBody({
             'calc(var(--fd-docs-row-2) + var(--fd-toc-popover-height))',
           '--fd-sidebar-col': collapsed ? '0px' : 'var(--fd-sidebar-width)',
           '--fd-page-col':
-            'calc(var(--fd-layout-width,97rem) - var(--fd-sidebar-width) - var(--fd-internal-toc-placeholder, 0px))',
+            'calc(var(--fd-layout-width,97rem) - var(--fd-sidebar-width) - var(--fd-toc-width))',
           gridAutoColumns: 'auto',
           gridAutoRows: 'auto',
           ...style,
