@@ -74,8 +74,10 @@ id.
 
 ### Persistent
 
-You can enable persistent by passing a `persist` property. The value will be
-stored in `localStorage`, with its id as the key.
+When `groupId` is specified, their value will be temporarily stored in `sessionStorage`.
+
+To persist the value, you can specify a `persist` prop. The value will be
+stored in `localStorage`, with its group ID as storage key.
 
 ```mdx
 <Tabs groupId="language" items={['Javascript', 'Rust']} persist>
@@ -83,8 +85,6 @@ stored in `localStorage`, with its id as the key.
   <Tab value="Rust">Rust is fast</Tab>
 </Tabs>
 ```
-
-> Persistent only works if you have passed an `id`.
 
 ### Default Value
 
