@@ -159,12 +159,11 @@ import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 
 Handling layout is challenging, Fumadocs UI needed an approach that is:
 
-- **Composable:** Layout components can easily manage their position & size, preferably in place.
-- **Flexible:** Don't rely on fixed values/heights, any external component (e.g. AI Chat) can be corporated into the layout.
-- **Cohesive:** Layout components can reflect on others' changes, e.g. animating sidebar collapsing.
-- **Predictable:** Layout properties should not be scattered, the ultimate result can be easily predicted from source code.
-
-And most importantly, maximize browser compatibility, which means it cannot leverage the latest CSS features.
+- **Composable:** Layout components should manage their position and size effortlessly, ideally in place.
+- **Flexible:** The system should avoid reliance on fixed values or heights, enabling seamless integration of external components, such as AI chat interfaces.
+- **Cohesive:** Components should respond to changes in others, for instance, by animating sidebar collapses.
+- **Predictable:** Layout properties should remain centralized, allowing the final result to be readily anticipated from the source code.
+- **Compatible:** The solution should work on older browsers by leveraging only Baseline Widly Available CSS features.
 
 Fumadocs UI does this with a grid system:
 

@@ -1,0 +1,120 @@
+---
+title: Fumadocs 16.2
+description: UI Refactor
+author: Fuma Nama
+date: 2025-11-29
+---
+
+We are pleased to announce the release of Fumadocs 16.2, introducing a better layout system for Fumadocs UI.
+
+## The New Layout System
+
+Handling layouts in documentation frameworks can present significant challenges.
+
+As a solution, Fumadocs UI implemented a [Grid System](/docs/ui/layouts/docs#the-layout-system) that is composable, flexible, cohesive and predictable.
+See the linked docs for more details.
+
+In short, the layout consists of a grid container, and layout componenents using `position: sticky`:
+
+```css
+#nd-docs-layout {
+  grid-template:
+    'sidebar header toc'
+    'sidebar toc-popover toc'
+    'sidebar main toc' 1fr / minmax(var(--fd-sidebar-col), 1fr) minmax(
+      0,
+      var(--fd-page-col)
+    )
+    minmax(min-content, 1fr);
+
+  --fd-docs-row-1: var(--fd-banner-height, 0px);
+  --fd-docs-row-2: calc(var(--fd-docs-row-1) + var(--fd-header-height));
+  --fd-docs-row-3: calc(var(--fd-docs-row-2) + var(--fd-toc-popover-height));
+}
+```
+
+The container defines the offsets of each row, layout components can leverage them according to their grid area:
+
+```css
+.layout-component {
+  position: sticky;
+  top: var(--fd-docs-row-1);
+  height: calc(var(--fd-docs-height) - var(--fd-docs-row-1));
+}
+```
+
+Layout components are also responsible to declare their heights via CSS variables, allowing container to calculate the right row offsets.
+
+```css
+#nd-docs-layout:has(.layout-component) {
+  --fd-header-height: 56px;
+}
+```
+
+For user-land customizations, we recommend the Fumadocs CLI customize command, or hooking the relevant grid areas like:
+
+```css
+.custom-component {
+  /* depends on the layout, usually we have toc, toc-popover, sidebar, header, main */
+  grid-area: main;
+}
+```
+
+### Why the Change?
+
+Previously, Fumadocs UI relied on `position: fixed` and mathematical computations (inspired by Vitepress). The older method often lacked composability and difficult for beginners to manage.
+
+The new system fixed most of the flaws, allowing easier visualizations, while reducing the complexity of previous solutions.
+
+## Breaking Changes
+
+While Fumadocs 16.2 preserves compatibility in several areas, notably:
+
+- The `--fd-layout-width` CSS variable continues to function as expected.
+- All ID and data attributes remain unchanged.
+
+However, the shift to the new grid system may impact existing customizations, particularly those dependent on the prior fixed-position logic. We recommend reviewing your implementation carefully and testing thoroughly.
+
+## Minor Changes
+
+### No Longer Exposing Internal Components
+
+Layout components such as Root Toggle, Language Toggle, and Theme Toggle are no longer directly exposed.
+This decision enables Fumadocs UI to iterate these elements without introducing unexpected breaking changes to usage outside of API surfaces.
+
+**Migration Steps:** Override the relevant layout components with your own implementations, or utilize the Fumadocs CLI commands (`add` or `customize`) to install them locally.
+
+### Importing Page Layouts by Type
+
+The notebook layout is now isolated from default layout, including their page components.
+
+Make sure to import the appropriate page layout based on your docs layout:
+
+```ts
+// For docs layout
+import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
+// For notebook layout
+import { DocsPage } from 'fumadocs-ui/layouts/notebook/page';
+```
+
+**Migration Steps:** Update your imports accordingly. Although the default `fumadocs-ui/page` will redirect to the correct layout, we strongly advise explicit imports for clarity and future-proofing.
+
+### Removal of Unused Styles
+
+Styles related to the abandoned `container` utility, and `--spacing-fd-container` variable, have been dropped as they are no longer utilized.
+
+**Migration Steps:** Remove references to these styles from your codebase.
+
+### Relocation of Sidebar Context
+
+The `fumadocs-ui/contexts/sidebar` module has been removed. Access the context via:
+
+```ts
+import { useSidebar } from 'fumadocs-ui/components/sidebar/base';
+```
+
+**Migration Steps:** Update import paths, ensure the context is only accessed within `<DocsLayout />`.
+
+## Conclusion
+
+Fumadocs 16.2 aims to offer greater flexibility for developers. Welcome to share your thoughts about the new design on GitHub Discussion!
