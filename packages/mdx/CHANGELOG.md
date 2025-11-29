@@ -1,5 +1,12 @@
 # next-docs-mdx
 
+## 14.0.4
+
+### Patch Changes
+
+- f59339b: Fix `last-modified` plugin date checking
+  - fumadocs-core@16.2.0
+
 ## 14.0.3
 
 ### Patch Changes
