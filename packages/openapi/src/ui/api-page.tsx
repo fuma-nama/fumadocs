@@ -2,11 +2,7 @@
 import Slugger from 'github-slugger';
 import { Operation } from '@/ui/operation';
 import type { MethodInformation, RenderContext } from '@/types';
-import {
-  createMethod,
-  type NoReference,
-  type ResolvedSchema,
-} from '@/utils/schema';
+import { createMethod, type NoReference } from '@/utils/schema';
 import type { OpenAPIV3_1 } from 'openapi-types';
 import type { ProcessedDocument } from '@/utils/process-document';
 import { defaultAdapters, MediaAdapter } from '@/requests/media/adapter';
@@ -18,10 +14,7 @@ import {
 } from 'fumadocs-core/highlight';
 import type { OpenAPIServer } from '@/server';
 import type { APIPageClientOptions } from './client';
-import type {
-  CodeUsageGenerator,
-  ResponseTab,
-} from './operation/example-panel';
+import type { CodeUsageGenerator } from './operation/usage-tabs';
 import { ApiProviderLazy } from './contexts/api.lazy';
 import { Heading } from 'fumadocs-ui/components/heading';
 import {
@@ -35,7 +28,9 @@ import remarkRehype from 'remark-rehype';
 import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import * as JsxRuntime from 'react/jsx-runtime';
 import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
-import type { SchemaUIProps } from './schema/client';
+import type { SchemaUIOptions } from './schema';
+import type { ResponseTab } from './operation/response-tabs';
+import type { ExampleRequestItem } from './operation/request-tabs';
 
 type Awaitable<T> = T | Promise<T>;
 
@@ -86,6 +81,14 @@ export interface CreateAPIPageOptions {
       ctx: RenderContext,
     ) => Awaitable<ReactNode>;
 
+    renderRequestTabs: (
+      items: ExampleRequestItem[],
+      ctx: RenderContext & {
+        route: string;
+        operation: NoReference<MethodInformation>;
+      },
+    ) => Awaitable<ReactNode>;
+
     renderAPIExampleLayout?: (
       slots: {
         selector: ReactNode;
@@ -123,6 +126,7 @@ export interface CreateAPIPageOptions {
     renderOperationLayout?: (
       slots: {
         header: ReactNode;
+        description: ReactNode;
         apiExample: ReactNode;
         apiPlayground: ReactNode;
 
@@ -133,14 +137,16 @@ export interface CreateAPIPageOptions {
         callbacks: ReactNode;
       },
       ctx: RenderContext,
-      method: MethodInformation,
+      method: NoReference<MethodInformation>,
     ) => Awaitable<ReactNode>;
 
     renderWebhookLayout?: (slots: {
       header: ReactNode;
+      description: ReactNode;
       authSchemes: ReactNode;
       paremeters: ReactNode;
       body: ReactNode;
+      requests: ReactNode;
       responses: ReactNode;
       callbacks: ReactNode;
     }) => Awaitable<ReactNode>;
@@ -151,9 +157,7 @@ export interface CreateAPIPageOptions {
    */
   schemaUI?: {
     render?: (
-      options: Omit<SchemaUIProps, 'generated'> & {
-        root: ResolvedSchema;
-      },
+      options: SchemaUIOptions,
       ctx: RenderContext,
     ) => Awaitable<ReactNode>;
 
@@ -188,7 +192,8 @@ export interface CreateAPIPageOptions {
 
 export interface ApiPageProps {
   document: Promise<ProcessedDocument> | string | ProcessedDocument;
-  hasHead?: boolean;
+  showTitle?: boolean;
+  showDescription?: boolean;
 
   /**
    * An array of operations
@@ -271,11 +276,11 @@ export function createAPIPage(
         ...options.mediaAdapters,
       },
       slugger,
-      renderHeading(depth, text) {
+      renderHeading(depth, text, props) {
         const id = slugger.slug(text);
 
         return (
-          <Heading id={id} key={id} as={`h${depth}` as `h1`}>
+          <Heading id={id} key={id} as={`h${depth}` as `h1`} {...props}>
             {text}
           </Heading>
         );
@@ -307,7 +312,8 @@ export function createAPIPage(
 }
 
 async function APIPage({
-  hasHead = false,
+  showTitle: hasHead = false,
+  showDescription,
   operations,
   webhooks,
   ctx,
@@ -317,7 +323,7 @@ async function APIPage({
   const { dereferenced } = ctx.schema;
   let { renderPageLayout } = ctx.content ?? {};
   renderPageLayout ??= (slots) => (
-    <div className="flex flex-col gap-24 text-sm">
+    <div className="flex flex-col gap-24 text-sm @container">
       {slots.operations?.map((op) => op.children)}
       {slots.webhooks?.map((op) => op.children)}
     </div>
@@ -348,7 +354,8 @@ async function APIPage({
               method={method}
               path={item.path}
               ctx={ctx}
-              hasHead={hasHead}
+              showTitle={hasHead}
+              showDescription={showDescription}
             />
           ),
         };
@@ -375,7 +382,8 @@ async function APIPage({
               method={createMethod(item.method, webhook, hook)}
               ctx={ctx}
               path={`/${item.name}`}
-              hasHead={hasHead}
+              showTitle={hasHead}
+              showDescription={showDescription}
             />
           ),
         };

@@ -13,7 +13,7 @@ import {
 } from '@/utils/schema';
 import { idToTitle } from '@/utils/id-to-title';
 import { Schema } from '../schema';
-import { APIExample, getAPIExamples } from '@/ui/operation/example-panel';
+import { UsageTabs } from '@/ui/operation/usage-tabs';
 import { MethodLabel } from '@/ui/components/method-label';
 import { getTypescriptSchema } from '@/utils/get-typescript-schema';
 import {
@@ -32,7 +32,8 @@ import {
 import { isMediaTypeSupported } from '@/requests/media/adapter';
 import { cn } from 'fumadocs-ui/utils/cn';
 import { APIPlayground } from '@/playground';
-import { OperationProviderLazy } from '../contexts/operation.lazy';
+import { RequestTabs, getExampleRequests } from './request-tabs';
+import { UsageTabsProviderLazy } from './usage-tabs/lazy';
 
 const ParamTypes = {
   path: 'Path Parameters',
@@ -46,7 +47,8 @@ export async function Operation({
   path,
   method,
   ctx,
-  hasHead,
+  showTitle,
+  showDescription,
   headingLevel = 2,
 }: {
   type?: 'webhook' | 'operation';
@@ -54,7 +56,8 @@ export async function Operation({
   method: MethodInformation;
   ctx: RenderContext;
 
-  hasHead?: boolean;
+  showTitle?: boolean;
+  showDescription?: boolean;
   headingLevel?: number;
 }) {
   const {
@@ -62,22 +65,21 @@ export async function Operation({
   } = ctx;
   const body = method.requestBody;
   let headNode: ReactNode = null;
+  const descriptionNode =
+    showDescription &&
+    method.description &&
+    ctx.renderMarkdown(method.description);
   let bodyNode: ReactNode = null;
   let authNode: ReactNode = null;
   let responseNode: ReactNode = null;
   let callbacksNode: ReactNode = null;
 
-  if (hasHead) {
+  if (showTitle) {
     const title =
       method.summary ??
       (method.operationId ? idToTitle(method.operationId) : path);
 
-    headNode = (
-      <>
-        {ctx.renderHeading(headingLevel, title)}
-        {method.description && ctx.renderMarkdown(method.description)}
-      </>
-    );
+    headNode = ctx.renderHeading(headingLevel, title);
     headingLevel++;
   }
 
@@ -89,11 +91,16 @@ export async function Operation({
     bodyNode = (
       <SelectTabs defaultValue={defaultValue}>
         <div className="flex gap-2 items-end justify-between">
-          {ctx.renderHeading(headingLevel, 'Request Body')}
-          <SelectTabTrigger
-            items={contentTypes.map(([key]) => key)}
-            className="mb-4"
-          />
+          {ctx.renderHeading(headingLevel, 'Request Body', {
+            className: 'my-0!',
+          })}
+          {contentTypes.length > 1 ? (
+            <SelectTabTrigger items={contentTypes.map(([key]) => key)} />
+          ) : (
+            <p className="text-sm text-fd-muted-foreground font-medium not-prose">
+              {defaultValue}
+            </p>
+          )}
         </div>
         {body.description && ctx.renderMarkdown(body.description)}
         {contentTypes.map(([type, content]) => {
@@ -104,10 +111,12 @@ export async function Operation({
           return (
             <SelectTab key={type} value={type}>
               <Schema
-                name="body"
-                as="body"
+                client={{
+                  name: 'body',
+                  as: 'body',
+                  required: body.required,
+                }}
                 root={(content.schema ?? {}) as ResolvedSchema}
-                required={body.required}
                 readOnly={method.method === 'GET'}
                 writeOnly={method.method !== 'GET'}
                 ctx={ctx}
@@ -151,7 +160,10 @@ export async function Operation({
           {params.map((param) => (
             <Schema
               key={param.name}
-              name={param.name}
+              client={{
+                name: param.name,
+                required: param.required,
+              }}
               root={
                 {
                   ...param.schema,
@@ -161,7 +173,6 @@ export async function Operation({
                     (param.schema?.deprecated ?? false),
                 } as ResolvedSchema
               }
-              required={param.required}
               readOnly={method.method === 'GET'}
               writeOnly={method.method !== 'GET'}
               ctx={ctx}
@@ -186,7 +197,13 @@ export async function Operation({
       <SelectTabs defaultValue={names[0]}>
         <div className="flex items-end justify-between gap-2">
           {ctx.renderHeading(headingLevel, 'Authorization')}
-          <SelectTabTrigger items={names} className="mb-4" />
+          {names.length > 1 ? (
+            <SelectTabTrigger items={names} className="mb-4" />
+          ) : (
+            <p className="text-sm text-fd-muted-foreground font-medium not-prose mb-7">
+              {names[0]}
+            </p>
+          )}
         </div>
         {securities.map((security, i) => (
           <SelectTab key={i} value={names[i]}>
@@ -217,10 +234,16 @@ export async function Operation({
       <SelectTabs defaultValue={defaultValue}>
         <div className="flex justify-between gap-2 items-end">
           {ctx.renderHeading(headingLevel, 'Callbacks')}
-          <SelectTabTrigger
-            items={callbacks.map(([key]) => key)}
-            className="mb-4"
-          />
+          {callbacks.length > 1 ? (
+            <SelectTabTrigger
+              items={callbacks.map(([key]) => key)}
+              className="mb-4"
+            />
+          ) : (
+            <p className="text-sm text-fd-muted-foreground font-medium not-prose mb-7">
+              {defaultValue}
+            </p>
+          )}
         </div>
         {callbacks.map(([name, callback]) => (
           <SelectTab key={name} value={name}>
@@ -239,25 +262,20 @@ export async function Operation({
   if (type === 'operation') {
     renderOperationLayout ??= (slots) => {
       return (
-        <div
-          className="flex flex-col gap-x-6 gap-y-4 xl:flex-row xl:items-start"
-          style={
-            {
-              '--fd-api-info-top':
-                'calc(12px + var(--fd-nav-height) + var(--fd-banner-height) + var(--fd-tocnav-height, 0px))',
-            } as object
-          }
-        >
+        <div className="flex flex-col gap-x-6 gap-y-4 @4xl:flex-row @4xl:items-start">
           <div className="min-w-0 flex-1">
             {slots.header}
             {slots.apiPlayground}
+            {slots.description}
             {slots.authSchemes}
             {slots.paremeters}
             {slots.body}
             {slots.responses}
             {slots.callbacks}
           </div>
-          {slots.apiExample}
+          <div className="@4xl:sticky @4xl:top-[calc(var(--fd-docs-row-1,2rem)+1rem)] @4xl:w-[400px]">
+            {slots.apiExample}
+          </div>
         </div>
       );
     };
@@ -266,6 +284,7 @@ export async function Operation({
     const content = await renderOperationLayout(
       {
         header: headNode,
+        description: descriptionNode,
         authSchemes: authNode,
         body: bodyNode,
         callbacks: callbacksNode,
@@ -281,41 +300,49 @@ export async function Operation({
             </code>
           </div>
         ),
-        apiExample: <APIExample method={method} ctx={ctx} />,
+        apiExample: <UsageTabs method={method} ctx={ctx} />,
       },
       ctx,
       method,
     );
 
     return (
-      <OperationProviderLazy
+      <UsageTabsProviderLazy
         defaultExampleId={
           method['x-exclusiveCodeSample'] ?? method['x-selectedCodeSample']
         }
         route={path}
-        examples={getAPIExamples(path, method, ctx)}
+        examples={getExampleRequests(path, method, ctx)}
       >
         {content}
-      </OperationProviderLazy>
+      </UsageTabsProviderLazy>
     );
   } else {
     renderWebhookLayout ??= (slots) => (
-      <div>
-        {slots.header}
-        {slots.authSchemes}
-        {slots.paremeters}
-        {slots.body}
-        {slots.responses}
-        {slots.callbacks}
+      <div className="flex flex-col-reverse gap-x-6 gap-y-4 @4xl:flex-row @4xl:items-start">
+        <div className="min-w-0 flex-1">
+          {slots.header}
+          {slots.description}
+          {slots.authSchemes}
+          {slots.paremeters}
+          {slots.body}
+          {slots.responses}
+          {slots.callbacks}
+        </div>
+        <div className="@4xl:sticky @4xl:top-[calc(var(--fd-docs-row-1,2rem)+1rem)] @4xl:w-[400px]">
+          {slots.requests}
+        </div>
       </div>
     );
     return renderWebhookLayout({
       header: headNode,
+      description: descriptionNode,
       authSchemes: authNode,
       body: bodyNode,
       callbacks: callbacksNode,
       paremeters: parameterNode,
       responses: responseNode,
+      requests: <RequestTabs path={path} operation={method} ctx={ctx} />,
     });
   }
 }
@@ -356,7 +383,7 @@ async function ResponseAccordion({
       </AccordionHeader>
       <AccordionContent className="ps-4.5">
         {response.description && (
-          <div className="prose-no-margin">
+          <div className="prose-no-margin mb-2">
             {ctx.renderMarkdown(response.description)}
           </div>
         )}
@@ -371,14 +398,16 @@ async function ResponseAccordion({
           }
 
           return (
-            <SelectTab key={type} value={type} className="my-2">
+            <SelectTab key={type} value={type} className="mb-2">
               {ts && <CopyResponseTypeScript code={ts} />}
               {schema && (
                 <div className="border px-3 py-2 rounded-lg">
                   <Schema
-                    name="response"
+                    client={{
+                      name: 'response',
+                      as: 'body',
+                    }}
                     root={schema as ResolvedSchema}
-                    as="body"
                     readOnly
                     ctx={ctx}
                   />

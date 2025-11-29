@@ -1,4 +1,4 @@
-@import './default.css';
+@import './colors/index.css';
 
 @theme {
   --color-fd-background: hsl(250, 20%, 92%);

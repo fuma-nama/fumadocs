@@ -6,7 +6,7 @@ import {
   DocsDescription,
   DocsPage,
   DocsTitle,
-} from 'fumadocs-ui/page';
+} from 'fumadocs-ui/layouts/docs/page';
 
 export default function DocPage({ slugs }: PageProps<'/docs/[...slugs]'>) {
   const page = source.getPage(slugs);

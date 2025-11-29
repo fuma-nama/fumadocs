@@ -2,13 +2,13 @@
 import {
   type FC,
   Fragment,
-  type HTMLAttributes,
   lazy,
   type ReactNode,
   useEffect,
   useMemo,
   useState,
   useEffectEvent,
+  type ComponentProps,
 } from 'react';
 import type {
   FieldPath,
@@ -31,11 +31,7 @@ import {
   JsonInput,
   ObjectInput,
 } from './components/inputs';
-import type {
-  ParameterField,
-  RequestSchema,
-  SecurityEntry,
-} from '@/playground/index';
+import type { ParameterField, SecurityEntry } from '@/playground/index';
 import { getStatusInfo } from './status-info';
 import {
   joinURL,
@@ -51,16 +47,16 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from 'fumadocs-ui/components/ui/collapsible';
-import { ChevronDown, LoaderCircle } from 'lucide-react';
+import { X, ChevronDown, LoaderCircle } from 'lucide-react';
 import { encodeRequestData } from '@/requests/media/encode';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from 'fumadocs-ui/utils/cn';
 import {
   type FieldInfo,
   SchemaProvider,
+  SchemaScope,
   useResolvedSchema,
 } from '@/playground/schema';
-import { useOperationContext } from '@/ui/contexts/operation';
 import {
   Select,
   SelectContent,
@@ -73,6 +69,7 @@ import type { ParsedSchema } from '@/utils/schema';
 import type { RequestData } from '@/requests/types';
 import ServerSelect from './components/server-select';
 import { useStorageKey } from '@/ui/client/storage-key';
+import { useExampleRequests } from '@/ui/operation/usage-tabs/client';
 
 export interface FormValues {
   path: Record<string, unknown>;
@@ -87,19 +84,21 @@ export interface FormValues {
   _encoded?: RequestData;
 }
 
-export interface PlaygroundClientProps extends HTMLAttributes<HTMLFormElement> {
+export interface PlaygroundClientProps
+  extends ComponentProps<'form'>,
+    SchemaScope {
   route: string;
   method: string;
   parameters?: ParameterField[];
   securities: SecurityEntry[][];
   body?: {
-    schema: RequestSchema;
+    schema: ParsedSchema;
     mediaType: string;
   };
   /**
    * Resolver for $ref schemas you've passed
    */
-  references: Record<string, RequestSchema>;
+  references: Record<string, ParsedSchema>;
   proxyUrl?: string;
 }
 
@@ -140,7 +139,7 @@ export interface PlaygroundClientOptions {
   renderBodyField?: (
     fieldName: 'body',
     info: {
-      schema: RequestSchema;
+      schema: ParsedSchema;
       mediaType: string;
     },
   ) => ReactNode;
@@ -165,13 +164,11 @@ export default function PlaygroundClient({
   body,
   references,
   proxyUrl,
+  writeOnly,
+  readOnly,
   ...rest
 }: PlaygroundClientProps) {
-  const {
-    example: exampleId,
-    examples,
-    setExampleData,
-  } = useOperationContext();
+  const { example: exampleId, examples, setExampleData } = useExampleRequests();
   const storageKeys = useStorageKey();
   const fieldInfoMap = useMemo(() => new Map<string, FieldInfo>(), []);
   const {
@@ -310,7 +307,12 @@ export default function PlaygroundClient({
 
   return (
     <FormProvider {...form}>
-      <SchemaProvider fieldInfoMap={fieldInfoMap} references={references}>
+      <SchemaProvider
+        fieldInfoMap={fieldInfoMap}
+        references={references}
+        writeOnly={writeOnly}
+        readOnly={readOnly}
+      >
         <form
           {...rest}
           className={cn(
@@ -351,7 +353,9 @@ export default function PlaygroundClient({
             </SecurityTabs>
           )}
           <FormBody body={body} parameters={parameters} />
-          {testQuery.data ? <ResultDisplay data={testQuery.data} /> : null}
+          {testQuery.data ? (
+            <ResultDisplay data={testQuery.data} reset={testQuery.reset} />
+          ) : null}
         </form>
       </SchemaProvider>
     </FormProvider>
@@ -496,7 +500,7 @@ function FormBody({
   );
 }
 
-function BodyInput({ field: _field }: { field: RequestSchema }) {
+function BodyInput({ field: _field }: { field: ParsedSchema }) {
   const field = useResolvedSchema(_field);
   const [isJson, setIsJson] = useState(false);
 
@@ -738,10 +742,7 @@ function useAuthInputs(
   return { inputs, mapInputs, initAuthValues };
 }
 
-function Route({
-  route,
-  ...props
-}: HTMLAttributes<HTMLDivElement> & { route: string }) {
+function Route({ route, ...props }: ComponentProps<'div'> & { route: string }) {
   return (
     <div
       {...props}
@@ -764,15 +765,34 @@ function Route({
   );
 }
 
-function DefaultResultDisplay({ data }: { data: FetchResult }) {
+function DefaultResultDisplay({
+  data,
+  reset,
+}: {
+  data: FetchResult;
+  reset: () => void;
+}) {
   const statusInfo = useMemo(() => getStatusInfo(data.status), [data.status]);
   const { shikiOptions } = useApiContext();
 
   return (
     <div className="flex flex-col gap-3 p-3">
-      <div className="inline-flex items-center gap-1.5 text-sm font-medium text-fd-foreground">
-        <statusInfo.icon className={cn('size-4', statusInfo.color)} />
-        {statusInfo.description}
+      <div className="flex justify-between items-center">
+        <div className="inline-flex items-center gap-1.5 text-sm font-medium text-fd-foreground">
+          <statusInfo.icon className={cn('size-4', statusInfo.color)} />
+          {statusInfo.description}
+        </div>
+        <button
+          type="button"
+          className={cn(
+            buttonVariants({ size: 'icon-xs' }),
+            'p-0 text-fd-muted-foreground hover:text-fd-accent-foreground [&_svg]:size-3.5',
+          )}
+          onClick={() => reset()}
+          aria-label="Dismiss response"
+        >
+          <X />
+        </button>
       </div>
       <p className="text-sm text-fd-muted-foreground">{data.status}</p>
       {data.data !== undefined && (
@@ -798,7 +818,7 @@ function CollapsiblePanel({
   title,
   children,
   ...props
-}: Omit<HTMLAttributes<HTMLDivElement>, 'title'> & {
+}: Omit<ComponentProps<'div'>, 'title'> & {
   title: ReactNode;
 }) {
   return (

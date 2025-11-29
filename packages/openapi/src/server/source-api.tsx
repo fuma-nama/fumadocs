@@ -16,10 +16,13 @@ declare module 'fumadocs-core/source' {
     /**
      * Added by Fumadocs OpenAPI
      */
-    _openapi?: {
-      method?: string;
-    };
+    _openapi?: InternalOpenAPIMeta;
   }
+}
+
+export interface InternalOpenAPIMeta {
+  method?: string;
+  webhook?: boolean;
 }
 
 /**
@@ -35,19 +38,24 @@ export function openapiPlugin(): LoaderPlugin {
         const file = this.storage.read(filePath);
         if (!file || file.format !== 'page') return node;
 
-        const data = file.data;
-        let method: string | undefined;
+        const openApiData = file.data._openapi;
+        if (!openApiData || typeof openApiData !== 'object') return node;
 
-        if ('_openapi' in data && typeof data._openapi === 'object') {
-          method = data._openapi.method;
-        }
-
-        if (method) {
+        if (openApiData.webhook) {
+          node.name = (
+            <>
+              {node.name}{' '}
+              <span className="ms-auto border border-current px-1 rounded-lg text-xs text-nowrap font-mono">
+                Webhook
+              </span>
+            </>
+          );
+        } else if (openApiData.method) {
           node.name = (
             <>
               {node.name}{' '}
               <MethodLabel className="ms-auto text-xs text-nowrap">
-                {method}
+                {openApiData.method}
               </MethodLabel>
             </>
           );
@@ -93,12 +101,17 @@ export async function openapiSource(
       path: `${baseDir}/${entry.path}`,
       data: {
         ...entry.info,
-        getAPIPageProps: () => toBody(entry),
+        getAPIPageProps() {
+          const props = toBody(entry);
+          props.showDescription ??= true;
+          return props;
+        },
         _openapi: {
           method:
             entry.type === 'operation' || entry.type === 'webhook'
               ? entry.item.method
               : undefined,
+          webhook: entry.type === 'webhook',
         },
       },
     });

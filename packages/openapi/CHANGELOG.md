@@ -1,5 +1,30 @@
 # @fuma-docs/openapi
 
+## 10.1.0
+
+### Minor Changes
+
+- 4b2a7e4: Require peer dep of Fumadocs 16.2.0
+- e5c9f7f: Display webhook request examples
+
+### Patch Changes
+
+- ed67af0: enhance schema generation by merging properties from extended schema properties
+- 196d71c: support webhook badge
+- 0e327bd: use container query
+- c44d999: Fix schema scope in API playgrounds
+- 6635eb5: Improve UX
+- 0e327bd: Improve `allOf` merging util
+- 60e3324: improve description rendering
+- Updated dependencies [80579fd]
+- Updated dependencies [a9f4eda]
+- Updated dependencies [36eb90a]
+- Updated dependencies [5d65002]
+- Updated dependencies [9a39883]
+- Updated dependencies [12d3f78]
+  - fumadocs-ui@16.2.0
+  - fumadocs-core@16.2.0
+
 ## 10.0.11
 
 ### Patch Changes

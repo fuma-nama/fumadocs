@@ -4,7 +4,8 @@ import {
   DocsDescription,
   DocsPage,
   DocsTitle,
-} from 'fumadocs-ui/page';
+  PageLastUpdate,
+} from 'fumadocs-ui/layouts/docs/page';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { renderFromHtml } from '@/lib/render-html';
@@ -19,7 +20,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   const { node, toc } = renderFromHtml(page.data.content);
 
   return (
-    <DocsPage toc={toc} lastUpdate={page.data.updatedAt}>
+    <DocsPage toc={toc}>
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       {page.data.coverImage && (
@@ -31,6 +32,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
         />
       )}
       <DocsBody>{node}</DocsBody>
+      {page.data.updatedAt && <PageLastUpdate date={page.data.updatedAt} />}
     </DocsPage>
   );
 }

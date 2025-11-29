@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { combineSchema } from '@/utils/combine-schema';
+import { mergeAllOf } from '@/utils/merge-schema';
 import {
   joinURL,
   resolveRequestData,
@@ -10,17 +10,19 @@ import type { RequestData } from '@/requests/types';
 
 describe('Merge object schemas', () => {
   test('Merge single object', () => {
-    const result = combineSchema([
-      {
-        type: 'object',
-        properties: {
-          test: {
-            type: 'string',
-            enum: ['one', 'two'],
+    const result = mergeAllOf({
+      allOf: [
+        {
+          type: 'object',
+          properties: {
+            test: {
+              type: 'string',
+              enum: ['one', 'two'],
+            },
           },
         },
-      },
-    ]);
+      ],
+    });
 
     expect(result).toMatchInlineSnapshot(`
       {
@@ -39,25 +41,27 @@ describe('Merge object schemas', () => {
   });
 
   test('Merge multiple objects', () => {
-    const result = combineSchema([
-      {
-        type: 'object',
-        properties: {
-          test: {
-            type: 'string',
-            enum: ['one', 'two'],
+    const result = mergeAllOf({
+      allOf: [
+        {
+          type: 'object',
+          properties: {
+            test: {
+              type: 'string',
+              enum: ['one', 'two'],
+            },
           },
         },
-      },
-      {
-        type: 'object',
-        properties: {
-          hello: {
-            type: 'number',
+        {
+          type: 'object',
+          properties: {
+            hello: {
+              type: 'number',
+            },
           },
         },
-      },
-    ]);
+      ],
+    });
 
     expect(result).toMatchInlineSnapshot(`
       {
@@ -79,26 +83,28 @@ describe('Merge object schemas', () => {
   });
 
   test('Merge multiple objects: required', () => {
-    const result = combineSchema([
-      {
-        type: 'object',
-        properties: {
-          test: {
-            type: 'string',
-            enum: ['one', 'two'],
+    const result = mergeAllOf({
+      allOf: [
+        {
+          type: 'object',
+          properties: {
+            test: {
+              type: 'string',
+              enum: ['one', 'two'],
+            },
           },
         },
-      },
-      {
-        type: 'object',
-        properties: {
-          hello: {
-            type: 'number',
+        {
+          type: 'object',
+          properties: {
+            hello: {
+              type: 'number',
+            },
           },
+          required: ['hello'],
         },
-        required: ['hello'],
-      },
-    ]);
+      ],
+    });
 
     expect(result).toMatchInlineSnapshot(`
       {
@@ -123,24 +129,26 @@ describe('Merge object schemas', () => {
   });
 
   test('Merge multiple objects: additional properties', () => {
-    const result = combineSchema([
-      {
-        type: 'object',
-        properties: {
-          test: {
+    const result = mergeAllOf({
+      allOf: [
+        {
+          type: 'object',
+          properties: {
+            test: {
+              type: 'string',
+              enum: ['one', 'two'],
+            },
+          },
+          additionalProperties: true,
+        },
+        {
+          type: 'object',
+          additionalProperties: {
             type: 'string',
-            enum: ['one', 'two'],
           },
         },
-        additionalProperties: true,
-      },
-      {
-        type: 'object',
-        additionalProperties: {
-          type: 'string',
-        },
-      },
-    ]);
+      ],
+    });
 
     expect(result).toMatchInlineSnapshot(`
       {
@@ -160,37 +168,39 @@ describe('Merge object schemas', () => {
   });
 
   test('Merge multiple objects: `allOf`', () => {
-    const result = combineSchema([
-      {
-        type: 'object',
-        properties: {
-          test: {
-            type: 'string',
-            enum: ['one', 'two'],
+    const result = mergeAllOf({
+      allOf: [
+        {
+          type: 'object',
+          properties: {
+            test: {
+              type: 'string',
+              enum: ['one', 'two'],
+            },
           },
         },
-      },
-      {
-        allOf: [
-          {
-            type: 'object',
-            properties: {
-              hello: {
-                type: 'number',
+        {
+          allOf: [
+            {
+              type: 'object',
+              properties: {
+                hello: {
+                  type: 'number',
+                },
               },
             },
-          },
-          {
-            type: 'object',
-            properties: {
-              world: {
-                type: 'number',
+            {
+              type: 'object',
+              properties: {
+                world: {
+                  type: 'number',
+                },
               },
             },
-          },
-        ],
-      },
-    ]);
+          ],
+        },
+      ],
+    });
 
     expect(result).toMatchInlineSnapshot(`
       {

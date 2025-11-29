@@ -1,4 +1,4 @@
-@import './default.css';
+@import './colors/index.css';
 
 @theme {
   --color-fd-muted: hsl(0, 0%, 96.1%);

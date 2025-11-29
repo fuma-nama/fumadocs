@@ -1,4 +1,4 @@
-@import './neutral.css';
+@import './colors/index.css';
 
 @theme {
   --color-fd-primary: oklch(0.487 0.083 262.691);
@@ -7,8 +7,6 @@
 
 :root {
   letter-spacing: -0.25px;
-  --fd-layout-width: 1600px;
-  --fd-page-width: 1400px;
 }
 
 .dark {
@@ -18,31 +16,64 @@
 }
 
 @variant md {
-  #nd-page article {
-    @apply bg-fd-article rounded-xl border shadow-xl my-4;
+  #nd-docs-layout {
+    #nd-page {
+      @apply relative md:px-9 xl:px-12;
+    }
+
+    #nd-page:before {
+      content: '';
+      @apply absolute inset-0 bg-fd-article rounded-xl border shadow-xl m-4 mb-2 -z-1;
+    }
+
+    [data-toc-popover-trigger],
+    [data-toc-popover-content] {
+      @apply px-4;
+    }
+
+    [data-toc-popover] {
+      top: calc(var(--fd-docs-row-1) + 2.5 * var(--spacing));
+      @apply mx-4 mt-2.5;
+
+      header {
+        transform-origin: top center;
+        @apply border rounded-xl shadow-lg transition-[margin] has-data-[active=true]:-mx-2 has-data-[active=true]:bg-fd-popover/80;
+      }
+    }
   }
 
-  #nd-tocnav,
-  #nd-subnav > div {
-    border: none;
-  }
+  #nd-notebook-layout {
+    #nd-page {
+      @apply relative md:px-9 xl:px-12;
+    }
 
-  .fd-default-layout #nd-page article {
-    @apply mx-4;
-  }
+    #nd-page:before {
+      content: '';
+      @apply absolute inset-0 bg-fd-article rounded-xl border shadow-xl m-4 mb-2 -z-1;
+    }
 
-  .fd-notebook-layout #nd-page article {
-    @apply mx-6;
+    [data-toc-popover-trigger],
+    [data-toc-popover-content] {
+      @apply px-4;
+    }
+
+    [data-toc-popover] {
+      top: calc(var(--fd-docs-row-2) + 2.5 * var(--spacing));
+      @apply mx-4 mt-2.5;
+
+      header {
+        transform-origin: top center;
+        @apply border rounded-xl shadow-lg transition-[margin] has-data-[active=true]:-mx-2 has-data-[active=true]:bg-fd-popover/80;
+      }
+    }
   }
 }
 
 #nd-sidebar {
-  @apply bg-fd-background;
+  @apply bg-fd-card;
 }
 
 #nd-sidebar[data-collapsed='false'] {
   border: none;
-  --color-fd-muted: inherit;
-  --color-fd-secondary: inherit;
-  --color-fd-muted-foreground: inherit;
+  @apply bg-fd-background;
 }

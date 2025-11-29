@@ -1,5 +1,46 @@
 # next-docs-ui
 
+## 16.2.0
+
+### Minor Changes
+
+- 80579fd: **No longer expose layout components**
+
+  This includes Root Toggle, Language Toggle, Theme Toggle etc.
+
+  It allows Fumadocs UI to change these components without introducing breaking changes over existing customizations.
+
+  If you're using the removed components, consider overriding the layout components with yours, or use Fumadocs CLI add/customize command.
+
+- a9f4eda: **Require importing page layout according to your docs layout**
+
+  ```ts
+  // for docs layout
+  import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
+
+  // for notebook layout
+  import { DocsPage } from 'fumadocs-ui/layouts/notebook/page';
+  ```
+
+  While the default `fumadocs-ui/page` will redirect to the correct layout, we highly recommend you to update the import.
+
+- 5d65002: Remove `container` styles, this includes `--spacing-fd-container` as they are no longer used.
+- 9a39883: **Move Sidebar context into docs layouts**
+
+  `fumadocs-ui/contexts/sidebar` is removed, you can still reference the context with:
+
+  ```ts
+  import { useSidebar } from 'fumadocs-ui/components/sidebar/base';
+  ```
+
+  Make sure you're only accessing it in `<DocsLayout />`.
+
+### Patch Changes
+
+- 36eb90a: Fix sidebar items not automatically scrolled
+- 12d3f78: Tabs: always prefer session storage
+  - fumadocs-core@16.2.0
+
 ## 16.1.0
 
 ### Patch Changes

@@ -10,7 +10,6 @@ import {
 } from 'react';
 import { DirectionProvider } from '@radix-ui/react-direction';
 import type { DefaultSearchDialogProps } from '@/components/dialog/search-default';
-import { SidebarProvider } from '@/contexts/sidebar';
 import { SearchProvider, type SearchProviderProps } from '@/contexts/search';
 import {
   defaultTranslations,
@@ -121,11 +120,7 @@ export function RootProvider({
     body = <I18nProvider {...i18n}>{body}</I18nProvider>;
   }
 
-  return (
-    <DirectionProvider dir={dir}>
-      <SidebarProvider>{body}</SidebarProvider>
-    </DirectionProvider>
-  );
+  return <DirectionProvider dir={dir}>{body}</DirectionProvider>;
 }
 
 function I18nProvider({
@@ -156,7 +151,7 @@ function I18nProvider({
   onChangeRef.current = onChange;
 
   return (
-    <I18nContext.Provider
+    <I18nContext
       value={useMemo(
         () => ({
           locale,
@@ -171,6 +166,6 @@ function I18nProvider({
       )}
     >
       {children}
-    </I18nContext.Provider>
+    </I18nContext>
   );
 }

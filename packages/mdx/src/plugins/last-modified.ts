@@ -3,8 +3,8 @@ import { x } from 'tinyexec';
 import type { Plugin } from '@/core';
 import { ident } from '@/utils/codegen';
 
-const cache = new Map<string, Promise<Date>>();
-type VersionControlFn = (filePath: string) => Promise<Date | undefined>;
+const cache = new Map<string, Promise<Date | null>>();
+type VersionControlFn = (filePath: string) => Promise<Date | null | undefined>;
 
 export interface LastModifiedPluginOptions {
   /**
@@ -78,8 +78,7 @@ export default function lastModified(
         if (!filter(this.collection.name)) return;
 
         const timestamp = await fn(this.filePath);
-
-        if (timestamp !== undefined) {
+        if (timestamp) {
           file.data['mdx-export'] ??= [];
           file.data['mdx-export'].push({
             name: 'lastModified',
@@ -91,7 +90,7 @@ export default function lastModified(
   };
 }
 
-async function getGitTimestamp(file: string): Promise<Date | undefined> {
+async function getGitTimestamp(file: string): Promise<Date | null> {
   const cached = cache.get(file);
   if (cached) return cached;
 
@@ -104,9 +103,10 @@ async function getGitTimestamp(file: string): Promise<Date | undefined> {
       },
     );
 
-    return new Date(out.stdout);
+    const date = new Date(out.stdout);
+    return isNaN(date.getTime()) ? null : date;
   })();
 
   cache.set(file, timePromise);
-  return timePromise.catch(() => undefined);
+  return timePromise.catch(() => null);
 }

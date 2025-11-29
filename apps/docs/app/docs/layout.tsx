@@ -1,7 +1,11 @@
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { baseOptions, linkItems, logo } from '@/lib/layout.shared';
 import { source } from '@/lib/source';
-import { AISearchTrigger } from '@/components/ai/search';
+import {
+  AISearch,
+  AISearchPanel,
+  AISearchTrigger,
+} from '@/components/ai/search';
 import 'katex/dist/katex.min.css';
 
 export default function Layout({ children }: LayoutProps<'/docs'>) {
@@ -12,7 +16,7 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
       {...base}
       tree={source.pageTree}
       // just icon items
-      links={[...linkItems.filter((item) => item.type === 'icon')]}
+      links={linkItems.filter((item) => item.type === 'icon')}
       nav={{
         ...base.nav,
         title: (
@@ -53,7 +57,10 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
     >
       {children}
 
-      <AISearchTrigger />
+      <AISearch>
+        <AISearchPanel />
+        <AISearchTrigger />
+      </AISearch>
     </DocsLayout>
   );
 }

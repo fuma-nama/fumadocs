@@ -1,5 +1,3 @@
-@import './default.css';
-
 @theme {
   --color-fd-background: var(--background);
   --color-fd-foreground: var(--foreground);

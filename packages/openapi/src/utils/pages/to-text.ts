@@ -9,6 +9,7 @@ import type { NoReference } from '@/utils/schema';
 import Slugger from 'github-slugger';
 import { removeUndefined } from '@/utils/remove-undefined';
 import type { OutputEntry } from '@/utils/pages/builder';
+import type { InternalOpenAPIMeta } from '@/server/source-api';
 
 export interface PagesToTextOptions {
   /**
@@ -62,7 +63,6 @@ export function toText(
         processed,
         {
           operations: [entry.item],
-          hasHead: false,
         },
         {
           ...options,
@@ -79,7 +79,7 @@ export function toText(
         {
           operations: entry.operations,
           webhooks: entry.webhooks,
-          hasHead: true,
+          showTitle: true,
         },
         {
           ...options,
@@ -96,7 +96,7 @@ export function toText(
         {
           operations: entry.operations,
           webhooks: entry.webhooks,
-          hasHead: true,
+          showTitle: true,
         },
         {
           ...options,
@@ -113,7 +113,6 @@ export function toText(
         processed,
         {
           webhooks: [entry.item],
-          hasHead: false,
         },
         {
           ...options,
@@ -197,13 +196,19 @@ function generatePage(
     document: schemaId,
   };
 
-  let meta: object | undefined;
+  let meta: InternalOpenAPIMeta | undefined;
   if (page.operations?.length === 1) {
     const operation = page.operations[0];
 
     meta = {
       method: operation.method.toUpperCase(),
-      route: operation.path,
+    };
+  } else if (page.webhooks?.length === 1) {
+    const webhook = page.webhooks[0];
+
+    meta = {
+      method: webhook.method.toUpperCase(),
+      webhook: true,
     };
   }
 
@@ -243,7 +248,7 @@ function generateStaticData(
     const operation = dereferenced.paths?.[item.path]?.[item.method];
     if (!operation) continue;
 
-    if (props.hasHead && operation.operationId) {
+    if (props.showTitle && operation.operationId) {
       const title =
         operation.summary ??
         (operation.operationId ? idToTitle(operation.operationId) : item.path);
@@ -270,16 +275,48 @@ function generateStaticData(
   return { toc, structuredData };
 }
 
-function pageContent(props: ApiPageProps): string {
-  // filter extra properties in props
-  const operations: OperationItem[] = (props.operations ?? []).map((item) => ({
-    path: item.path,
-    method: item.method,
-  }));
-  const webhooks: WebhookItem[] = (props.webhooks ?? []).map((item) => ({
-    name: item.name,
-    method: item.method,
-  }));
+function pageContent({
+  showTitle,
+  showDescription,
+  document,
+  webhooks,
+  operations,
+}: ApiPageProps): string {
+  const propStrs: string[] = [`document={${JSON.stringify(document)}}`];
 
-  return `<APIPage document={${JSON.stringify(props.document)}} operations={${JSON.stringify(operations)}} webhooks={${JSON.stringify(webhooks)}} hasHead={${JSON.stringify(props.hasHead)}} />`;
+  // filter extra properties in props
+  if (webhooks) {
+    propStrs.push(
+      `webhooks={${JSON.stringify(
+        webhooks.map(
+          (item) =>
+            ({
+              name: item.name,
+              method: item.method,
+            }) satisfies WebhookItem,
+        ),
+      )}}`,
+    );
+  }
+  if (operations) {
+    propStrs.push(
+      `operations={${JSON.stringify(
+        operations.map(
+          (item) =>
+            ({
+              path: item.path,
+              method: item.method,
+            }) satisfies OperationItem,
+        ),
+      )}}`,
+    );
+  }
+  if (showTitle) {
+    propStrs.push(`showTitle={${JSON.stringify(showTitle)}}`);
+  }
+  if (showDescription) {
+    propStrs.push(`showDescription={${JSON.stringify(showDescription)}}`);
+  }
+
+  return `<APIPage ${propStrs.join(' ')} />`;
 }

@@ -1,4 +1,4 @@
-@import './default.css';
+@import './colors/index.css';
 
 @theme {
   --color-fd-popover: hsl(220, 22%, 92%);

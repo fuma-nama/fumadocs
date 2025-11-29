@@ -5,8 +5,8 @@ import type { ProcessedDocument } from '@/utils/process-document';
 import type { MediaAdapter } from '@/requests/media/adapter';
 import type { OpenAPIOptions } from '@/server';
 import type { CreateAPIPageOptions } from './ui/api-page';
-import type { CodeUsageGenerator } from './ui/operation/example-panel';
-import type { ReactNode } from 'react';
+import type { CodeUsageGenerator } from './ui/operation/usage-tabs';
+import type { HTMLAttributes, ReactNode } from 'react';
 
 export type Document = V3_1.Document;
 export type OperationObject = V3_1.OperationObject;
@@ -40,7 +40,11 @@ export interface RenderContext
 
   mediaAdapters: Record<string, MediaAdapter>;
 
-  renderHeading: (depth: number, text: string) => ReactNode;
+  renderHeading: (
+    depth: number,
+    text: string,
+    props?: HTMLAttributes<HTMLHeadingElement>,
+  ) => ReactNode;
   renderMarkdown: (text: string) => ReactNode;
   renderCodeBlock: (lang: string, code: string) => ReactNode;
 }

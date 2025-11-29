@@ -1,57 +1,100 @@
 'use client';
 
 import { Sidebar as SidebarIcon } from 'lucide-react';
-import { type ComponentProps, useMemo } from 'react';
+import {
+  type ComponentProps,
+  createContext,
+  type ReactNode,
+  use,
+  useMemo,
+} from 'react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
-import { useSidebar } from '@/contexts/sidebar';
-import { useNav } from '@/contexts/layout';
-import { SidebarCollapseTrigger } from '@/components/layout/sidebar';
-import { SearchToggle } from '@/components/layout/search-toggle';
-import type { Option } from '@/components/layout/root-toggle';
+import { useSidebar } from '@/components/sidebar/base';
+import { SidebarCollapseTrigger } from './sidebar';
+import { SearchToggle } from '../shared/search-toggle';
 import { usePathname } from 'fumadocs-core/framework';
 import { isTabActive } from '@/utils/is-active';
 import Link from 'fumadocs-core/link';
+import type { SidebarTab } from '@/utils/get-sidebar-tabs';
+import { useIsScrollTop } from '@/utils/use-is-scroll-top';
 
-export function Navbar(props: ComponentProps<'header'>) {
-  const { isTransparent } = useNav();
+export const LayoutContext = createContext<{
+  isNavTransparent: boolean;
+} | null>(null);
+
+export function LayoutContextProvider({
+  navTransparentMode = 'none',
+  children,
+}: {
+  navTransparentMode?: 'always' | 'top' | 'none';
+  children: ReactNode;
+}) {
+  const isTop =
+    useIsScrollTop({ enabled: navTransparentMode === 'top' }) ?? true;
+  const isNavTransparent =
+    navTransparentMode === 'top' ? isTop : navTransparentMode === 'always';
 
   return (
-    <header
-      id="nd-subnav"
-      {...props}
-      className={cn(
-        'fixed top-(--fd-banner-height) left-0 right-(--removed-body-scroll-bar-size,0) z-30 flex items-center ps-4 pe-2.5 border-b transition-colors backdrop-blur-sm',
-        !isTransparent && 'bg-fd-background/80',
-        props.className,
+    <LayoutContext
+      value={useMemo(
+        () => ({
+          isNavTransparent,
+        }),
+        [isNavTransparent],
       )}
     >
+      {children}
+    </LayoutContext>
+  );
+}
+
+export function LayoutHeader(props: ComponentProps<'header'>) {
+  const { isNavTransparent } = use(LayoutContext)!;
+
+  return (
+    <header data-transparent={isNavTransparent} {...props}>
       {props.children}
     </header>
   );
 }
 
-export function LayoutBody(props: ComponentProps<'main'>) {
+export function LayoutBody({
+  className,
+  style,
+  children,
+  ...props
+}: ComponentProps<'div'>) {
   const { collapsed } = useSidebar();
 
   return (
-    <main
+    <div
       id="nd-docs-layout"
-      {...props}
       className={cn(
-        'flex flex-1 flex-col pt-(--fd-nav-height) transition-[padding] fd-default-layout',
-        !collapsed && 'mx-(--fd-layout-offset)',
-        props.className,
+        'grid transition-[grid-template-columns] overflow-x-clip min-h-(--fd-docs-height) [--fd-docs-height:100dvh] [--fd-header-height:0px] [--fd-toc-popover-height:0px] [--fd-sidebar-width:0px] [--fd-toc-width:0px]',
+        className,
       )}
-      style={{
-        ...props.style,
-        paddingInlineStart: collapsed
-          ? 'min(calc(100vw - var(--fd-page-width)), var(--fd-sidebar-width))'
-          : 'var(--fd-sidebar-width)',
-      }}
+      data-sidebar-collapsed={collapsed}
+      style={
+        {
+          gridTemplate: `"sidebar header toc"
+        "sidebar toc-popover toc"
+        "sidebar main toc" 1fr / minmax(var(--fd-sidebar-col), 1fr) minmax(0, calc(var(--fd-layout-width,97rem) - var(--fd-sidebar-width) - var(--fd-toc-width))) minmax(min-content, 1fr)`,
+          '--fd-docs-row-1': 'var(--fd-banner-height, 0px)',
+          '--fd-docs-row-2':
+            'calc(var(--fd-docs-row-1) + var(--fd-header-height))',
+          '--fd-docs-row-3':
+            'calc(var(--fd-docs-row-2) + var(--fd-toc-popover-height))',
+          '--fd-sidebar-col': collapsed ? '0px' : 'var(--fd-sidebar-width)',
+          gridAutoColumns: 'auto',
+          gridAutoRows: 'auto',
+          ...style,
+        } as object
+      }
+      {...props}
     >
-      {props.children}
-    </main>
+      {children}
+    </div>
   );
 }
 
@@ -61,12 +104,9 @@ export function CollapsibleControl() {
   return (
     <div
       className={cn(
-        'fixed flex shadow-lg transition-opacity rounded-xl p-0.5 border bg-fd-muted text-fd-muted-foreground z-10 max-md:hidden xl:start-4 max-xl:end-4',
+        'fixed flex top-16 shadow-lg transition-opacity rounded-xl p-0.5 border bg-fd-muted text-fd-muted-foreground z-10 max-md:hidden xl:top-4 xl:start-4 max-xl:end-4',
         !collapsed && 'pointer-events-none opacity-0',
       )}
-      style={{
-        top: 'calc(var(--fd-banner-height) + var(--fd-tocnav-height) + var(--spacing) * 4)',
-      }}
     >
       <SidebarCollapseTrigger
         className={cn(
@@ -88,7 +128,7 @@ export function LayoutTabs({
   options,
   ...props
 }: ComponentProps<'div'> & {
-  options: Option[];
+  options: SidebarTab[];
 }) {
   const pathname = usePathname();
   const selected = useMemo(() => {
@@ -99,40 +139,23 @@ export function LayoutTabs({
     <div
       {...props}
       className={cn(
-        'flex flex-row items-end gap-6 overflow-auto',
+        'flex flex-row items-end gap-6 overflow-auto [grid-area:main]',
         props.className,
       )}
     >
-      {options.map((option) => (
-        <LayoutTab
-          key={option.url}
-          selected={selected === option}
-          option={option}
-        />
+      {options.map((option, i) => (
+        <Link
+          key={i}
+          href={option.url}
+          className={cn(
+            'inline-flex border-b-2 border-transparent transition-colors items-center pb-1.5 font-medium gap-2 text-fd-muted-foreground text-sm text-nowrap hover:text-fd-accent-foreground',
+            option.unlisted && selected !== option && 'hidden',
+            selected === option && 'border-fd-primary text-fd-primary',
+          )}
+        >
+          {option.title}
+        </Link>
       ))}
     </div>
-  );
-}
-
-function LayoutTab({
-  option: { title, url, unlisted, props },
-  selected = false,
-}: {
-  option: Option;
-  selected?: boolean;
-}) {
-  return (
-    <Link
-      href={url}
-      {...props}
-      className={cn(
-        'inline-flex border-b-2 border-transparent transition-colors items-center pb-1.5 font-medium gap-2 text-fd-muted-foreground text-sm text-nowrap hover:text-fd-accent-foreground',
-        unlisted && !selected && 'hidden',
-        selected && 'border-fd-primary text-fd-primary',
-        props?.className,
-      )}
-    >
-      {title}
-    </Link>
   );
 }

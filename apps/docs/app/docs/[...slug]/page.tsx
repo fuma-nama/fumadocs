@@ -23,7 +23,11 @@ import { LLMCopyButton, ViewOptions } from '@/components/ai/page-actions';
 import { Banner } from 'fumadocs-ui/components/banner';
 import { Installation } from '@/components/preview/installation';
 import { Customisation } from '@/components/preview/customisation';
-import { DocsBody, DocsPage } from 'fumadocs-ui/page';
+import {
+  DocsBody,
+  DocsPage,
+  PageLastUpdate,
+} from 'fumadocs-ui/layouts/docs/page';
 import { NotFound } from '@/components/not-found';
 import { getSuggestions } from '@/app/docs/[...slug]/suggestions';
 import { PathUtils } from 'fumadocs-core/source';
@@ -51,9 +55,9 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
   if (page.data.type === 'openapi') {
     const { APIPage } = await import('@/components/api-page');
     return (
-      <DocsPage>
+      <DocsPage full>
         <h1 className="text-[1.75em] font-semibold">{page.data.title}</h1>
-        <p className="text-fd-muted-foreground mb-6">{page.data.description}</p>
+
         <DocsBody>
           <APIPage {...page.data.getAPIPageProps()} />
         </DocsBody>
@@ -66,7 +70,6 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
   return (
     <DocsPage
       toc={toc}
-      lastUpdate={lastModified ? new Date(lastModified) : undefined}
       tableOfContent={{
         style: 'clerk',
       }}
@@ -75,7 +78,7 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
       <p className="text-lg text-fd-muted-foreground mb-2">
         {page.data.description}
       </p>
-      <div className="flex flex-row gap-2 items-center border-b pb-6">
+      <div className="flex flex-row flex-wrap gap-2 items-center border-b pb-6">
         <LLMCopyButton markdownUrl={`${page.url}.mdx`} />
         <ViewOptions
           markdownUrl={`${page.url}.mdx`}
@@ -130,6 +133,7 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
         {page.data.index ? <DocsCategory url={page.url} /> : null}
       </div>
       <Feedback onRateAction={onRateAction} />
+      {lastModified && <PageLastUpdate date={lastModified} />}
     </DocsPage>
   );
 }

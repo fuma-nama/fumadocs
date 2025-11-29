@@ -1725,8 +1725,8 @@ importers:
         specifier: ^1.0.0
         version: 1.0.0
       chokidar:
-        specifier: ^4.0.3
-        version: 4.0.3
+        specifier: ^5.0.0
+        version: 5.0.0
       esbuild:
         specifier: ^0.27.0
         version: 0.27.0
@@ -1985,18 +1985,9 @@ importers:
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
-      fumadocs-core:
-        specifier: workspace:*
-        version: link:../core
-      fumadocs-ui:
-        specifier: workspace:*
-        version: link:../ui
       github-slugger:
         specifier: ^2.0.0
         version: 2.0.0
-      gray-matter:
-        specifier: ^4.0.3
-        version: 4.0.3
       hast-util-to-jsx-runtime:
         specifier: ^2.3.6
         version: 2.3.6
@@ -2024,9 +2015,6 @@ importers:
       remark-rehype:
         specifier: ^11.1.2
         version: 11.1.2
-      tinyglobby:
-        specifier: ^0.2.15
-        version: 0.2.15
       xml-js:
         specifier: ^1.6.11
         version: 1.6.11
@@ -2049,6 +2037,12 @@ importers:
       eslint-config-custom:
         specifier: workspace:*
         version: link:../eslint-config-custom
+      fumadocs-core:
+        specifier: workspace:*
+        version: link:../core
+      fumadocs-ui:
+        specifier: workspace:*
+        version: link:../ui
       json-schema-typed:
         specifier: ^8.0.1
         version: 8.0.1
@@ -6701,6 +6695,10 @@ packages:
     resolution: {integrity: sha512-Qgzu8kfBvo+cA4962jnP1KkS6Dop5NS6g7R5LFYJr4b8Ub94PPQXUksCw9PvXoeXPRRddRNC5C1JQUR2SMGtnA==}
     engines: {node: '>= 14.16.0'}
 
+  chokidar@5.0.0:
+    resolution: {integrity: sha512-TQMmc3w+5AxjpL8iIiwebF73dRDF4fBIieAqGn9RGCWaEVwQ6Fb2cGe31Yns0RRIzii5goJ1Y7xbMwo1TxMplw==}
+    engines: {node: '>= 20.19.0'}
+
   chrome-trace-event@1.0.4:
     resolution: {integrity: sha512-rNjApaLzuwaOTjCiT8lSDdGN1APCiqkChLMJxJPWLunPAt5fy8xgU9/jNOchV84wfIxrA0lRQB7oCT8jrn/wrQ==}
     engines: {node: '>=6.0'}
@@ -9831,6 +9829,10 @@ packages:
   readdirp@4.1.2:
     resolution: {integrity: sha512-GDhwkLfywWL2s6vEjyhri+eXmfH6j1L7JE27WhqLeYzoh/A3DBaYGEj2H/HFZCn/kMfim73FXxEJTw06WtxQwg==}
     engines: {node: '>= 14.18.0'}
+
+  readdirp@5.0.0:
+    resolution: {integrity: sha512-9u/XQ1pvrQtYyMpZe7DXKv2p5CNvyVwzUB6uhLAnQwHMSgKMBR62lc7AHljaeteeHXn11XTAaLLUVZYVZyuRBQ==}
+    engines: {node: '>= 20.19.0'}
 
   recast@0.23.11:
     resolution: {integrity: sha512-YTUo+Flmw4ZXiWfQKGcwwc11KnoRAYgzAE2E7mXKCjSviTKShtxBsN6YUUBB2gtaBzKzeKunxhUwNHQuRryhWA==}
@@ -16626,6 +16628,10 @@ snapshots:
     dependencies:
       readdirp: 4.1.2
 
+  chokidar@5.0.0:
+    dependencies:
+      readdirp: 5.0.0
+
   chrome-trace-event@1.0.4: {}
 
   ci-info@3.9.0: {}
@@ -20427,6 +20433,8 @@ snapshots:
       picomatch: 2.3.1
 
   readdirp@4.1.2: {}
+
+  readdirp@5.0.0: {}
 
   recast@0.23.11:
     dependencies:

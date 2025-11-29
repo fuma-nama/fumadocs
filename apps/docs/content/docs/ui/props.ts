@@ -6,7 +6,7 @@ import type { TypeTable } from 'fumadocs-ui/components/type-table';
 import type { Card } from 'fumadocs-ui/components/card';
 import type { DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
 import type { ComponentProps, ComponentPropsWithoutRef } from 'react';
-import type { DocsPageProps } from 'fumadocs-ui/page';
+import type { DocsPageProps } from 'fumadocs-ui/layouts/docs/page';
 import type { AutoTypeTable } from 'fumadocs-typescript/ui';
 
 export type AccordionsProps = Omit<

@@ -15,7 +15,11 @@ export class ValidationError extends Error {
   }
 
   async toStringFormatted() {
-    const picocolors = await import('picocolors');
+    // Handle ESM/CJS interop: picocolors is a CJS module that exports via
+    // module.exports = createColors(). When dynamically imported in ESM context
+    // (e.g., Next.js 16 Turbopack), the exports are wrapped under .default
+    const picocolorsModule = await import('picocolors');
+    const picocolors = picocolorsModule.default ?? picocolorsModule;
 
     return [
       picocolors.bold(`[MDX] ${this.title}:`),

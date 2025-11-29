@@ -1,13 +1,26 @@
 'use client';
 import type * as PageTree from 'fumadocs-core/page-tree';
-import { type ComponentProps, type ReactNode, useMemo } from 'react';
+import {
+  type ComponentProps,
+  createContext,
+  type ReactNode,
+  use,
+  useMemo,
+  useState,
+} from 'react';
 import { cn } from '@/utils/cn';
 import { TreeContextProvider, useTreeContext } from 'fumadocs-ui/contexts/tree';
 import Link from 'fumadocs-core/link';
 import { useSearchContext } from 'fumadocs-ui/contexts/search';
-import { useSidebar } from 'fumadocs-ui/contexts/sidebar';
 import { cva } from 'class-variance-authority';
 import { usePathname } from 'fumadocs-core/framework';
+
+interface SidebarContext {
+  open: boolean;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const SidebarContext = createContext<SidebarContext | null>(null);
 
 export interface DocsLayoutProps {
   tree: PageTree.Root;
@@ -17,24 +30,44 @@ export interface DocsLayoutProps {
 export function DocsLayout({ tree, children }: DocsLayoutProps) {
   return (
     <TreeContextProvider tree={tree}>
-      <header className="sticky top-0 bg-fd-background h-14 z-20">
-        <nav className="flex flex-row items-center gap-2 size-full px-4">
-          <Link href="/" className="font-medium mr-auto">
-            My Docs
-          </Link>
+      <SidebarProvider>
+        <header className="sticky top-0 bg-fd-background h-14 z-20">
+          <nav className="flex flex-row items-center gap-2 size-full px-4">
+            <Link href="/" className="font-medium mr-auto">
+              My Docs
+            </Link>
 
-          <SearchToggle />
-          <NavbarSidebarTrigger className="md:hidden" />
-        </nav>
-      </header>
-      <main
-        id="nd-docs-layout"
-        className="flex flex-1 flex-row [--fd-nav-height:56px]"
-      >
-        <Sidebar />
-        {children}
-      </main>
+            <SearchToggle />
+            <NavbarSidebarTrigger className="md:hidden" />
+          </nav>
+        </header>
+        <main
+          id="nd-docs-layout"
+          className="flex flex-1 flex-row [--fd-nav-height:56px]"
+        >
+          <Sidebar />
+          {children}
+        </main>
+      </SidebarProvider>
     </TreeContextProvider>
+  );
+}
+
+function SidebarProvider({ children }: { children: ReactNode }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <SidebarContext
+      value={useMemo(
+        () => ({
+          open,
+          setOpen,
+        }),
+        [open],
+      )}
+    >
+      {children}
+    </SidebarContext>
   );
 }
 
@@ -54,7 +87,7 @@ function SearchToggle(props: ComponentProps<'button'>) {
 }
 
 function NavbarSidebarTrigger(props: ComponentProps<'button'>) {
-  const { open, setOpen } = useSidebar();
+  const { open, setOpen } = use(SidebarContext)!;
 
   return (
     <button
@@ -69,7 +102,7 @@ function NavbarSidebarTrigger(props: ComponentProps<'button'>) {
 
 function Sidebar() {
   const { root } = useTreeContext();
-  const { open } = useSidebar();
+  const { open } = use(SidebarContext)!;
 
   const children = useMemo(() => {
     function renderItems(items: PageTree.Node[]) {

@@ -33,10 +33,7 @@ import {
 import { cn } from 'fumadocs-ui/utils/cn';
 import { cva } from 'class-variance-authority';
 
-interface DataContextType extends SchemaUIGeneratedData {
-  readOnly?: boolean;
-  writeOnly?: boolean;
-}
+type DataContextType = SchemaUIGeneratedData;
 
 interface PropertyContextType {
   renderRef: (options: RenderRefOptions) => ReactNode;
@@ -79,8 +76,6 @@ export interface SchemaUIProps {
   required?: boolean;
   as?: 'property' | 'body';
 
-  readOnly?: boolean;
-  writeOnly?: boolean;
   generated: SchemaUIGeneratedData;
 }
 
@@ -89,18 +84,9 @@ export function SchemaUI({
   required = false,
   as = 'property',
   generated,
-  readOnly,
-  writeOnly,
 }: SchemaUIProps) {
   const schema = generated.refs[generated.$root];
-  const context: DataContextType = useMemo(
-    () => ({
-      ...generated,
-      readOnly,
-      writeOnly,
-    }),
-    [generated, readOnly, writeOnly],
-  );
+  const context: DataContextType = useMemo(() => generated, [generated]);
   const isProperty = as === 'property' || !isExpandable(schema);
 
   return (
@@ -121,12 +107,8 @@ export function SchemaUI({
 }
 
 function SchemaUIContent({ $type }: { $type: string }) {
-  const { refs, readOnly, writeOnly } = useData();
+  const { refs } = useData();
   const schema = refs[$type];
-
-  if ((schema.readOnly && !readOnly) || (schema.writeOnly && !writeOnly))
-    return;
-
   let child: ReactNode = null;
 
   if (schema.type === 'or' && schema.items.length > 0) {
@@ -176,9 +158,20 @@ function SchemaUIContent({ $type }: { $type: string }) {
     child = (
       <>
         {child}
-        <ObjectCollapsible name="Array item">
-          <SchemaUIContent $type={schema.item.$type} />
-        </ObjectCollapsible>
+        <Collapsible className="my-2">
+          <CollapsibleTrigger
+            className={cn(
+              buttonVariants({ color: 'secondary', size: 'sm' }),
+              'group px-3 py-2 data-[state=open]:rounded-b-none',
+            )}
+          >
+            Array Item
+            <ChevronDown className="size-4 text-fd-muted-foreground group-data-[state=open]:rotate-180" />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="-mt-px bg-fd-card px-3 rounded-lg rounded-tl-none border shadow-sm">
+            <SchemaUIContent $type={schema.item.$type} />
+          </CollapsibleContent>
+        </Collapsible>
       </>
     );
   }
@@ -196,11 +189,8 @@ function SchemaUIProperty({
   overrides?: Partial<PropertyProps>;
 }) {
   const { renderRef } = useProperty();
-  const { refs, readOnly, writeOnly } = useData();
+  const { refs } = useData();
   const schema = refs[$type];
-
-  if ((schema.readOnly && !readOnly) || (schema.writeOnly && !writeOnly))
-    return;
 
   let type: ReactNode = schema.typeName;
   if (schema.type === 'or' && schema.items.length > 0) {
@@ -209,6 +199,23 @@ function SchemaUIProperty({
         {schema.items.map((item, i) => (
           <Fragment key={item.$type}>
             {i > 0 && <span>|</span>}
+            {renderRef({
+              pathName: name,
+              text: item.name,
+              $ref: item.$type,
+            })}
+          </Fragment>
+        ))}
+      </span>
+    );
+  }
+
+  if (schema.type === 'and' && schema.items.length > 0) {
+    type = (
+      <span className={cn(typeVariants(), 'flex flex-row gap-2 items-center')}>
+        {schema.items.map((item, i) => (
+          <Fragment key={item.$type}>
+            {i > 0 && <span>&</span>}
             {renderRef({
               pathName: name,
               text: item.name,
@@ -387,25 +394,6 @@ function LinkRef({
   );
 }
 
-function ObjectCollapsible(props: { name: string; children: ReactNode }) {
-  return (
-    <Collapsible className="my-2" {...props}>
-      <CollapsibleTrigger
-        className={cn(
-          buttonVariants({ color: 'secondary', size: 'sm' }),
-          'group px-3 py-2 data-[state=open]:rounded-b-none',
-        )}
-      >
-        {props.name}
-        <ChevronDown className="size-4 text-fd-muted-foreground group-data-[state=open]:rotate-180" />
-      </CollapsibleTrigger>
-      <CollapsibleContent className="-mt-px *:bg-fd-card">
-        {props.children}
-      </CollapsibleContent>
-    </Collapsible>
-  );
-}
-
 interface PropertyProps {
   name: ReactNode;
   type: ReactNode;
@@ -438,7 +426,9 @@ function Property({
       <div className="flex flex-wrap items-center gap-3 not-prose">
         <span className="font-medium font-mono text-fd-primary">
           {name}
-          {required === false && (
+          {required ? (
+            <span className="text-red-400">*</span>
+          ) : (
             <span className="text-fd-muted-foreground">?</span>
           )}
         </span>

@@ -4,7 +4,7 @@ import {
   DocsDescription,
   DocsPage,
   DocsTitle,
-} from 'fumadocs-ui/page';
+} from 'fumadocs-ui/layouts/docs/page';
 import { type Page, source } from '../../lib/source';
 import { baseOptions } from '../../lib/layout.shared';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
@@ -51,7 +51,9 @@ async function Layout({ page, children }: { page: Page; children: ReactNode }) {
   if (layout === 'home') {
     return (
       <HomeLayout {...baseOptions()}>
-        <div className="w-full max-w-fd-container mx-auto p-4">{children}</div>
+        <div className="w-full max-w-(--fd-layout-width) mx-auto p-4">
+          {children}
+        </div>
       </HomeLayout>
     );
   }

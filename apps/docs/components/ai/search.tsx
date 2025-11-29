@@ -2,9 +2,11 @@
 import {
   type ComponentProps,
   createContext,
+  type ReactNode,
   type SyntheticEvent,
   use,
   useEffect,
+  useEffectEvent,
   useMemo,
   useRef,
   useState,
@@ -299,7 +301,7 @@ function Message({
   );
 }
 
-export function AISearchTrigger() {
+export function AISearch({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const chat = useChat({
     id: 'search',
@@ -308,7 +310,38 @@ export function AISearchTrigger() {
     }),
   });
 
-  const onKeyPress = (e: KeyboardEvent) => {
+  return (
+    <Context value={useMemo(() => ({ chat, open, setOpen }), [chat, open])}>
+      {children}
+    </Context>
+  );
+}
+
+export function AISearchTrigger() {
+  const { open, setOpen } = use(Context)!;
+
+  return (
+    <button
+      className={cn(
+        buttonVariants({
+          variant: 'secondary',
+        }),
+        'fixed bottom-4 gap-3 w-24 end-[calc(--spacing(4)+var(--removed-body-scroll-bar-size,0px))] text-fd-muted-foreground rounded-2xl shadow-lg z-20 transition-[translate,opacity]',
+        open && 'translate-y-10 opacity-0',
+      )}
+      onClick={() => setOpen(true)}
+    >
+      <MessageCircleIcon className="size-4.5" />
+      Ask AI
+    </button>
+  );
+}
+
+export function AISearchPanel() {
+  const { open, setOpen } = use(Context)!;
+  const chat = useChatContext();
+
+  const onKeyPress = useEffectEvent((e: KeyboardEvent) => {
     if (e.key === 'Escape' && open) {
       setOpen(false);
       e.preventDefault();
@@ -318,77 +351,78 @@ export function AISearchTrigger() {
       setOpen(true);
       e.preventDefault();
     }
-  };
+  });
 
-  const onKeyPressRef = useRef(onKeyPress);
-  onKeyPressRef.current = onKeyPress;
   useEffect(() => {
-    const listener = (e: KeyboardEvent) => onKeyPressRef.current(e);
-    window.addEventListener('keydown', listener);
-    return () => window.removeEventListener('keydown', listener);
+    window.addEventListener('keydown', onKeyPress);
+    return () => window.removeEventListener('keydown', onKeyPress);
   }, []);
 
   return (
-    <Context value={useMemo(() => ({ chat, open, setOpen }), [chat, open])}>
+    <>
       <style>
         {`
         @keyframes ask-ai-open {
           from {
-            translate: 100% 0;
+            width: 0px;
+          }
+          to {
+            width: var(--ai-chat-width);
           }
         }
-        
         @keyframes ask-ai-close {
+          from {
+            width: var(--ai-chat-width);
+          }
           to {
-            translate: 100% 0;
-            opacity: 0;
+            width: 0px;
           }
         }`}
       </style>
       <Presence present={open}>
         <div
+          data-state={open ? 'open' : 'closed'}
+          className="fixed inset-0 z-30 backdrop-blur-xs bg-fd-overlay data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out lg:hidden"
+          onClick={() => setOpen(false)}
+        />
+      </Presence>
+      <Presence present={open}>
+        <div
           className={cn(
-            'fixed flex flex-col inset-y-2 p-2 bg-fd-popover text-fd-popover-foreground border rounded-2xl shadow-lg z-30 sm:w-[460px] sm:end-2 max-sm:inset-x-2',
+            'overflow-hidden z-30 bg-fd-popover text-fd-popover-foreground [--ai-chat-width:400px] xl:[--ai-chat-width:460px]',
+            'max-lg:fixed max-lg:inset-x-2 max-lg:top-4 max-lg:border max-lg:rounded-2xl max-lg:shadow-xl',
+            'lg:sticky lg:top-0 lg:h-dvh lg:border-s  lg:ms-auto lg:in-[#nd-docs-layout]:[grid-area:toc] lg:in-[#nd-notebook-layout]:row-span-full lg:in-[#nd-notebook-layout]:col-start-5',
             open
-              ? 'animate-[ask-ai-open_300ms]'
-              : 'animate-[ask-ai-close_300ms]',
+              ? 'animate-fd-dialog-in lg:animate-[ask-ai-open_200ms]'
+              : 'animate-fd-dialog-out lg:animate-[ask-ai-close_200ms]',
           )}
         >
-          <Header />
-          <List
-            className="px-3 py-4 flex-1 overscroll-contain"
-            style={{
-              maskImage:
-                'linear-gradient(to bottom, transparent, white 1rem, white calc(100% - 1rem), transparent 100%)',
-            }}
-          >
-            <div className="flex flex-col gap-4">
-              {chat.messages
-                .filter((msg) => msg.role !== 'system')
-                .map((item) => (
-                  <Message key={item.id} message={item} />
-                ))}
-            </div>
-          </List>
-          <div className="rounded-xl border bg-fd-card text-fd-card-foreground has-focus-visible:ring-2 has-focus-visible:ring-fd-ring">
-            <SearchAIInput />
-            <div className="flex items-center gap-1.5 p-1 empty:hidden">
-              <SearchAIActions />
+          <div className="flex flex-col p-2 size-full max-lg:max-h-[80dvh] lg:w-(--ai-chat-width) xl:p-4">
+            <Header />
+            <List
+              className="px-3 py-4 flex-1 overscroll-contain"
+              style={{
+                maskImage:
+                  'linear-gradient(to bottom, transparent, white 1rem, white calc(100% - 1rem), transparent 100%)',
+              }}
+            >
+              <div className="flex flex-col gap-4">
+                {chat.messages
+                  .filter((msg) => msg.role !== 'system')
+                  .map((item) => (
+                    <Message key={item.id} message={item} />
+                  ))}
+              </div>
+            </List>
+            <div className="rounded-xl border bg-fd-card text-fd-card-foreground has-focus-visible:ring-2 has-focus-visible:ring-fd-ring">
+              <SearchAIInput />
+              <div className="flex items-center gap-1.5 p-1 empty:hidden">
+                <SearchAIActions />
+              </div>
             </div>
           </div>
         </div>
       </Presence>
-      <button
-        className={cn(
-          'fixed flex items-center gap-2 bottom-4 bg-fd-secondary px-2 gap-3 w-24 h-10 text-sm font-medium text-fd-muted-foreground rounded-2xl border shadow-lg z-20 transition-[translate,opacity]',
-          'end-[calc(var(--removed-body-scroll-bar-size,0px)+var(--fd-layout-offset)+1rem)]',
-          open && 'translate-y-10 opacity-0',
-        )}
-        onClick={() => setOpen(true)}
-      >
-        <MessageCircleIcon className="size-4.5" />
-        Ask AI
-      </button>
-    </Context>
+    </>
   );
 }

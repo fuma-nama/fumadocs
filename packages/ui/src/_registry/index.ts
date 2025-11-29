@@ -3,16 +3,6 @@ import type { Registry } from '@fumadocs/cli/build';
 import * as path from 'node:path';
 
 const srcDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../');
-const mapToPackage = {
-  'contexts/sidebar.tsx': 'fumadocs-ui/contexts/sidebar',
-  'contexts/search.tsx': 'fumadocs-ui/contexts/search',
-  'contexts/tree.tsx': 'fumadocs-ui/contexts/tree',
-  'contexts/i18n.tsx': 'fumadocs-ui/contexts/i18n',
-  'contexts/layout.tsx': 'fumadocs-ui/contexts/layout',
-  'provider/index.tsx': 'fumadocs-ui/provider',
-  'utils/get-sidebar-tabs.tsx': 'fumadocs-ui/utils/get-sidebar-tabs',
-  'utils/use-copy-button.ts': 'fumadocs-ui/utils/use-copy-button',
-};
 
 // in shadcn cli, the order of files matters when writing import paths on consumer's codebase
 export const registry: Registry = {
@@ -31,11 +21,14 @@ export const registry: Registry = {
         specifier: 'lucide-react',
       };
 
-    if (filePath in mapToPackage) {
+    if (
+      (filePath.startsWith('utils/') || filePath.startsWith('contexts/')) &&
+      filePath !== 'utils/cn.ts'
+    ) {
       return {
         type: 'dependency',
         dep: 'fumadocs-ui',
-        specifier: mapToPackage[filePath as keyof typeof mapToPackage],
+        specifier: `fumadocs-ui/${filePath.slice(0, -path.extname(filePath).length)}`,
       };
     }
 
@@ -63,12 +56,12 @@ export const registry: Registry = {
         {
           type: 'block',
           path: '_registry/layout/docs-min.tsx',
-          target: 'components/layout/docs.tsx',
+          target: 'components/layout/docs/index.tsx',
         },
         {
           type: 'block',
           path: '_registry/layout/page-min.tsx',
-          target: 'components/layout/page.tsx',
+          target: 'components/layout/docs/page.tsx',
         },
       ],
       unlisted: true,
@@ -110,24 +103,62 @@ export const registry: Registry = {
         {
           type: 'components',
           path: 'layouts/shared/index.tsx',
-          target: 'components/layout/shared/index.tsx',
+          target: 'components/layout/shared.tsx',
         },
         {
           type: 'components',
-          path: 'layouts/shared/client.tsx',
-          target: 'components/layout/shared/client.tsx',
+          path: 'layouts/shared/language-toggle.tsx',
+          target: 'components/layout/language-toggle.tsx',
         },
         {
           type: 'components',
-          path: 'components/layout/search-toggle.tsx',
+          path: 'layouts/shared/link-item.tsx',
+          target: 'components/layout/link-item.tsx',
         },
         {
           type: 'components',
-          path: 'components/layout/theme-toggle.tsx',
+          path: 'layouts/shared/search-toggle.tsx',
+          target: 'components/layout/search-toggle.tsx',
         },
         {
           type: 'components',
-          path: 'components/layout/sidebar.tsx',
+          path: 'layouts/shared/theme-toggle.tsx',
+          target: 'components/layout/theme-toggle.tsx',
+        },
+        {
+          type: 'components',
+          path: 'components/toc/clerk.tsx',
+          target: 'components/toc/clerk.tsx',
+        },
+        {
+          type: 'components',
+          path: 'components/toc/default.tsx',
+          target: 'components/toc/default.tsx',
+        },
+        {
+          type: 'components',
+          path: 'components/toc/index.tsx',
+          target: 'components/toc/index.tsx',
+        },
+        {
+          type: 'components',
+          path: 'components/sidebar/base.tsx',
+          target: 'components/layout/sidebar/base.tsx',
+        },
+        {
+          type: 'components',
+          path: 'components/sidebar/page-tree.tsx',
+          target: 'components/layout/sidebar/page-tree.tsx',
+        },
+        {
+          type: 'components',
+          path: 'components/sidebar/link-item.tsx',
+          target: 'components/layout/sidebar/link-item.tsx',
+        },
+        {
+          type: 'components',
+          path: 'components/sidebar/tabs.tsx',
+          target: 'components/layout/sidebar/tabs.tsx',
         },
       ],
     },
@@ -144,6 +175,21 @@ export const registry: Registry = {
           path: 'layouts/docs/client.tsx',
           target: 'components/layout/docs/client.tsx',
         },
+        {
+          type: 'block',
+          path: 'layouts/docs/sidebar.tsx',
+          target: 'components/layout/docs/sidebar.tsx',
+        },
+        {
+          type: 'block',
+          path: 'layouts/docs/page/index.tsx',
+          target: 'components/layout/docs/page/index.tsx',
+        },
+        {
+          type: 'block',
+          path: 'layouts/docs/page/client.tsx',
+          target: 'components/layout/docs/page/client.tsx',
+        },
       ],
       unlisted: true,
     },
@@ -153,45 +199,27 @@ export const registry: Registry = {
         {
           type: 'block',
           path: 'layouts/notebook/index.tsx',
-          target: 'components/layout/docs/index.tsx',
+          target: 'components/layout/notebook/index.tsx',
         },
         {
           type: 'block',
           path: 'layouts/notebook/client.tsx',
-          target: 'components/layout/docs/client.tsx',
-        },
-      ],
-      unlisted: true,
-    },
-    {
-      name: 'layouts/page',
-      files: [
-        {
-          type: 'components',
-          path: 'layouts/docs/page.tsx',
-          target: 'components/layout/docs/page.tsx',
+          target: 'components/layout/notebook/client.tsx',
         },
         {
           type: 'block',
-          path: 'layouts/docs/page-client.tsx',
-          target: 'components/layout/docs/page-client.tsx',
+          path: 'layouts/notebook/sidebar.tsx',
+          target: 'components/layout/notebook/sidebar.tsx',
         },
         {
-          type: 'components',
-          path: 'page.tsx',
-          target: 'components/layout/page.tsx',
+          type: 'block',
+          path: 'layouts/notebook/page/index.tsx',
+          target: 'components/layout/notebook/page/index.tsx',
         },
         {
-          type: 'ui',
-          path: 'components/layout/toc.tsx',
-        },
-        {
-          type: 'ui',
-          path: 'components/layout/toc-clerk.tsx',
-        },
-        {
-          type: 'ui',
-          path: 'components/layout/toc-thumb.tsx',
+          type: 'block',
+          path: 'layouts/notebook/page/client.tsx',
+          target: 'components/layout/notebook/page/client.tsx',
         },
       ],
       unlisted: true,
@@ -204,13 +232,6 @@ export const registry: Registry = {
           path: 'layouts/home/index.tsx',
           target: 'components/layout/home/index.tsx',
         },
-        /* optional
-        {
-          type: 'components',
-          path: 'layouts/home/navbar.tsx',
-          target: 'components/layout/home/navbar.tsx',
-        },
-        */
         {
           type: 'components',
           path: 'layouts/home/client.tsx',
@@ -218,26 +239,6 @@ export const registry: Registry = {
         },
       ],
       unlisted: true,
-    },
-    {
-      name: 'root-toggle',
-      description: 'the UI of Sidebar Tabs',
-      files: [
-        {
-          type: 'components',
-          path: 'components/layout/root-toggle.tsx',
-        },
-      ],
-    },
-    {
-      name: 'language-toggle',
-      description: 'Language Select',
-      files: [
-        {
-          type: 'components',
-          path: 'components/layout/language-toggle.tsx',
-        },
-      ],
     },
     {
       name: 'accordion',

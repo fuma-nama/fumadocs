@@ -70,7 +70,7 @@ For docs page, it's the same logic:
 You may need table of contents, which can be generated on your own, or using the [`getTableOfContents`](/docs/headless/utils/get-toc) utility (Markdown/MDX only).
 
 ```tsx
-import { DocsPage, DocsBody } from 'fumadocs-ui/page';
+import { DocsPage, DocsBody } from 'fumadocs-ui/layouts/docs/page';
 import { getPage } from './my-content-source';
 import { notFound } from 'next/navigation';
 
@@ -145,7 +145,7 @@ It's compatible with Server Components. For example:
 ```tsx
 import { createCompiler } from '@fumadocs/mdx-remote';
 import { getPage } from './my-content-source';
-import { DocsBody, DocsPage } from 'fumadocs-ui/page';
+import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
 import { getMDXComponents } from '@/mdx-components';
 
 const compiler = createCompiler({

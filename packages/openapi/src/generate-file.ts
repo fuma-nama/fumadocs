@@ -8,12 +8,11 @@ import {
 import type { ProcessedDocument } from '@/utils/process-document';
 import type { OpenAPIServer } from '@/server';
 import { createGetUrl, getSlugs } from 'fumadocs-core/source';
-import matter from 'gray-matter';
 import {
   createAutoPreset,
   type SchemaToPagesOptions,
 } from '@/utils/pages/preset-auto';
-import { fromSchema } from '@/utils/pages/builder';
+import { fromSchema, type OutputEntry } from '@/utils/pages/builder';
 
 export interface OutputFile {
   path: string;
@@ -21,7 +20,7 @@ export interface OutputFile {
 }
 
 interface IndexConfig {
-  items: IndexItem[] | ((ctx: HookContext) => IndexItem[]);
+  items: IndexItem[] | ((ctx: BeforeWriteContext) => IndexItem[]);
 
   /**
    * Generate URLs for cards
@@ -47,7 +46,7 @@ interface IndexItem {
    * - items in `inputs` to include all generated pages of a specific schema.
    * - specific Markdown/MDX files.
    */
-  only?: (string | OutputFile)[];
+  only?: string[];
 }
 
 interface GenerateFilesConfig extends PagesToTextOptions {
@@ -70,16 +69,16 @@ interface GenerateFilesConfig extends PagesToTextOptions {
    * Can add/change/remove output files before writing to file system
    **/
   beforeWrite?: (
-    this: HookContext,
+    this: BeforeWriteContext,
     files: OutputFile[],
   ) => void | Promise<void>;
 }
 
 export type Config = SchemaToPagesOptions & GenerateFilesConfig;
 
-interface HookContext {
-  files: OutputFile[];
+interface BeforeWriteContext {
   readonly generated: Record<string, OutputFile[]>;
+  readonly generatedEntries: Record<string, OutputEntry[]>;
   readonly documents: Record<string, ProcessedDocument>;
 }
 
@@ -101,11 +100,11 @@ export async function generateFiles(options: Config): Promise<void> {
 export async function generateFilesOnly(
   options: SchemaToPagesOptions & Omit<GenerateFilesConfig, 'output'>,
 ): Promise<OutputFile[]> {
-  const { beforeWrite } = options;
   const schemas = await options.input.getSchemas();
 
-  const generated: Record<string, OutputFile[]> = {};
   const files: OutputFile[] = [];
+  const generated: Record<string, OutputFile[]> = {};
+  const generatedEntries: Record<string, OutputEntry[]> = {};
 
   const entries = Object.entries(schemas);
   if (entries.length === 0) {
@@ -113,34 +112,42 @@ export async function generateFilesOnly(
   }
   const preset = createAutoPreset(options);
   for (const [id, schema] of entries) {
-    const result = fromSchema(id, schema, preset).map<OutputFile>((page) => ({
-      path: page.path,
-      content: toText(page, schema, options),
-    }));
-    files.push(...result);
-    generated[id] = result;
+    const entries = fromSchema(id, schema, preset);
+    const schemaFiles = (generated[id] ??= []);
+
+    generatedEntries[id] = entries;
+    for (const entry of entries) {
+      const file: OutputFile = {
+        path: entry.path,
+        content: toText(entry, schema, options),
+      };
+
+      schemaFiles.push(file);
+      files.push(file);
+    }
   }
 
-  const context: HookContext = {
-    files,
+  const context: BeforeWriteContext = {
     generated,
+    generatedEntries,
     documents: schemas,
   };
 
   if (options.index) {
-    writeIndexFiles(context, options.index, options);
+    writeIndexFiles(files, context, options);
   }
 
-  await beforeWrite?.call(context, context.files);
-  return context.files;
+  await options.beforeWrite?.call(context, files);
+  return files;
 }
 
 function writeIndexFiles(
-  context: HookContext,
-  options: IndexConfig,
-  generateOptions: PagesToTextOptions,
+  files: OutputFile[],
+  context: BeforeWriteContext,
+  options: SchemaToPagesOptions & Omit<GenerateFilesConfig, 'output'>,
 ) {
-  const { items, url } = options;
+  const { generatedEntries } = context;
+  const { items, url } = options.index!;
 
   let urlFn: (path: string) => string;
   if (typeof url === 'object') {
@@ -151,41 +158,43 @@ function writeIndexFiles(
     urlFn = url;
   }
 
+  function findEntryByPath(path: string) {
+    for (const entries of Object.values(generatedEntries)) {
+      const match = entries.find((entry) => entry.path === path);
+
+      if (match) return match;
+    }
+  }
+
   function fileContent(index: IndexItem): string {
-    const generatedPages = context.generated;
     const content: string[] = [];
     content.push('<Cards>');
-    const files = new Map<string, OutputFile>();
+    const pathToEntry = new Map<string, OutputEntry>();
     const only = index.only ?? Object.keys(context.generated);
 
     for (const item of only) {
-      if (typeof item === 'object') {
-        files.set(item.path, item);
-        continue;
-      }
+      if (generatedEntries[item]) {
+        for (const entry of generatedEntries[item]) {
+          pathToEntry.set(entry.path, entry);
+        }
+      } else {
+        const match = findEntryByPath(item);
+        if (!match) {
+          throw new Error(
+            `${item} does not exist on "input", available: ${Object.keys(generatedEntries).join(', ')}.`,
+          );
+        }
 
-      const result = generatedPages[item];
-      if (!result)
-        throw new Error(
-          `${item} does not exist on "input", available: ${Object.keys(generatedPages).join(', ')}.`,
-        );
-
-      for (const file of result) {
-        files.set(file.path, file);
+        pathToEntry.set(match.path, match);
       }
     }
 
-    for (const file of files.values()) {
-      const isContent = file.path.endsWith('.mdx') || file.path.endsWith('.md');
-      if (!isContent) continue;
-      const { data } = matter(file.content);
-      if (typeof data.title !== 'string') continue;
-
-      const descriptionAttr = data.description
-        ? `description=${JSON.stringify(data.description)} `
+    for (const file of pathToEntry.values()) {
+      const descriptionAttr = file.info.description
+        ? `description=${JSON.stringify(file.info.description)} `
         : '';
       content.push(
-        `<Card href="${urlFn(file.path)}" title=${JSON.stringify(data.title)} ${descriptionAttr}/>`,
+        `<Card href="${urlFn(file.path)}" title=${JSON.stringify(file.info.title)} ${descriptionAttr}/>`,
       );
     }
 
@@ -196,12 +205,12 @@ function writeIndexFiles(
         description: index.description,
       },
       content.join('\n'),
-      generateOptions,
+      options,
     );
   }
 
   for (const item of typeof items === 'function' ? items(context) : items) {
-    context.files.push({
+    files.push({
       path:
         path.extname(item.path).length === 0 ? `${item.path}.mdx` : item.path,
       content: fileContent(item),

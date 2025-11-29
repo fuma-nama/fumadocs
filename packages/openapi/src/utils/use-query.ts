@@ -4,6 +4,7 @@ export function useQuery<I extends unknown[], T>(
   fn: (...input: I) => Promise<T>,
 ): {
   start: (...input: I) => void;
+  reset: () => void;
   data?: T;
   error?: unknown;
   isLoading: boolean;
@@ -35,6 +36,11 @@ export function useQuery<I extends unknown[], T>(
           .finally(() => {
             setLoading(false);
           });
+      },
+      reset() {
+        setData(undefined);
+        setError(undefined);
+        setLoading(false);
       },
     }),
     [error, data, loading],
