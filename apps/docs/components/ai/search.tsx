@@ -326,7 +326,7 @@ export function AISearchTrigger() {
         buttonVariants({
           variant: 'secondary',
         }),
-        'fixed end-4 bottom-4 gap-3 w-24  text-fd-muted-foreground rounded-2xl shadow-lg z-20 transition-all',
+        'fixed bottom-4 gap-3 w-24 end-[calc(--spacing(4)+var(--removed-body-scroll-bar-size,0px))] text-fd-muted-foreground rounded-2xl shadow-lg z-20 transition-[translate,opacity]',
         open && 'translate-y-10 opacity-0',
       )}
       onClick={() => setOpen(true)}

@@ -15,6 +15,7 @@
   --color-fd-accent: hsla(0, 0%, 82%, 50%);
   --color-fd-accent-foreground: hsl(0, 0%, 9%);
   --color-fd-ring: hsl(0, 0%, 63.9%);
+  --color-fd-overlay: hsla(0, 0%, 0%, 0.2);
 }
 
 .dark {
