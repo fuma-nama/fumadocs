@@ -9,7 +9,6 @@ import { type BaseLayoutProps, resolveLinkItems } from '@/layouts/shared';
 import {
   Sidebar,
   SidebarCollapseTrigger,
-  type SidebarComponents,
   SidebarContent,
   SidebarDrawer,
   SidebarLinkItem,
@@ -31,10 +30,6 @@ import {
   LayoutHeader,
   NavbarLinkItem,
 } from '@/layouts/notebook/client';
-import {
-  type SidebarTabWithProps,
-  SidebarTabTrigger,
-} from '@/layouts/shared/sidebar-tab';
 import Link from 'fumadocs-core/link';
 import {
   LargeSearchToggle,
@@ -45,6 +40,11 @@ import {
   type GetSidebarTabsOptions,
 } from '@/utils/get-sidebar-tabs';
 import { LinkItem, type LinkItemType } from '@/layouts/shared/link-item';
+import type { SidebarPageTreeComponents } from '@/components/sidebar/page-tree';
+import {
+  SidebarTabTrigger,
+  type SidebarTabWithProps,
+} from '@/components/sidebar/tabs';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
@@ -62,7 +62,7 @@ export interface DocsLayoutProps extends BaseLayoutProps {
 interface SidebarOptions
   extends ComponentProps<'aside'>,
     Pick<ComponentProps<typeof Sidebar>, 'defaultOpenLevel' | 'prefetch'> {
-  components?: Partial<SidebarComponents>;
+  components?: Partial<SidebarPageTreeComponents>;
 
   /**
    * Root Toggle options
@@ -158,7 +158,7 @@ export function DocsLayout(props: DocsLayoutProps) {
             />
           ))}
 
-        <SidebarPageTree components={components} />
+        <SidebarPageTree {...components} />
       </SidebarViewport>
     );
 

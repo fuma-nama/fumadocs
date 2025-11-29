@@ -3,13 +3,6 @@ import type { Registry } from '@fumadocs/cli/build';
 import * as path from 'node:path';
 
 const srcDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../');
-const mapToPackage = {
-  'contexts/search.tsx': 'fumadocs-ui/contexts/search',
-  'contexts/tree.tsx': 'fumadocs-ui/contexts/tree',
-  'contexts/i18n.tsx': 'fumadocs-ui/contexts/i18n',
-  'utils/get-sidebar-tabs.tsx': 'fumadocs-ui/utils/get-sidebar-tabs',
-  'utils/use-copy-button.ts': 'fumadocs-ui/utils/use-copy-button',
-};
 
 // in shadcn cli, the order of files matters when writing import paths on consumer's codebase
 export const registry: Registry = {
@@ -28,11 +21,14 @@ export const registry: Registry = {
         specifier: 'lucide-react',
       };
 
-    if (filePath in mapToPackage) {
+    if (
+      (filePath.startsWith('utils/') || filePath.startsWith('contexts/')) &&
+      filePath !== 'utils/cn.ts'
+    ) {
       return {
         type: 'dependency',
         dep: 'fumadocs-ui',
-        specifier: mapToPackage[filePath as keyof typeof mapToPackage],
+        specifier: `fumadocs-ui/${filePath.slice(0, -path.extname(filePath).length)}`,
       };
     }
 
@@ -111,11 +107,6 @@ export const registry: Registry = {
         },
         {
           type: 'components',
-          path: 'layouts/shared/sidebar-tab.tsx',
-          target: 'components/layout/sidebar-tab.tsx',
-        },
-        {
-          type: 'components',
           path: 'layouts/shared/language-toggle.tsx',
           target: 'components/layout/language-toggle.tsx',
         },
@@ -152,7 +143,22 @@ export const registry: Registry = {
         {
           type: 'components',
           path: 'components/sidebar/base.tsx',
-          target: 'components/layout/sidebar.tsx',
+          target: 'components/layout/sidebar/base.tsx',
+        },
+        {
+          type: 'components',
+          path: 'components/sidebar/page-tree.tsx',
+          target: 'components/layout/sidebar/page-tree.tsx',
+        },
+        {
+          type: 'components',
+          path: 'components/sidebar/link-item.tsx',
+          target: 'components/layout/sidebar/link-item.tsx',
+        },
+        {
+          type: 'components',
+          path: 'components/sidebar/tabs.tsx',
+          target: 'components/layout/sidebar/tabs.tsx',
         },
       ],
     },

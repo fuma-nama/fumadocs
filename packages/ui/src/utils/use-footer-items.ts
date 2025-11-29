@@ -3,7 +3,10 @@ import type * as PageTree from 'fumadocs-core/page-tree';
 
 const footerCache = new Map<string, PageTree.Item[]>();
 
-export function useFooterItems() {
+/**
+ * @returns a list of page tree items (linear), that you can obtain footer items
+ */
+export function useFooterItems(): PageTree.Item[] {
   const { root } = useTreeContext();
   const cached = footerCache.get(root.$id);
   if (cached) return cached;

@@ -14,7 +14,6 @@ import { ChevronDown } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import { usePathname } from 'fumadocs-core/framework';
 import { isTabActive } from '@/utils/is-active';
-import type { SidebarTabWithProps } from '@/layouts/shared/sidebar-tab';
 import { useIsScrollTop } from '@/utils/use-is-scroll-top';
 import { LinkItem, type LinkItemType } from '../shared/link-item';
 import {
@@ -22,6 +21,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import type { SidebarTabWithProps } from '@/components/sidebar/tabs';
 
 export const LayoutContext = createContext<
   | (LayoutInfo & {

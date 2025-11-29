@@ -1,18 +1,10 @@
 'use client';
 import * as Base from '@/components/sidebar/base';
-import type * as PageTree from 'fumadocs-core/page-tree';
 import { cn } from '@/utils/cn';
-import {
-  Fragment,
-  type HTMLAttributes,
-  useMemo,
-  type ComponentProps,
-  type FC,
-  type ReactNode,
-} from 'react';
-import { useTreeContext, useTreePath } from '@/contexts/tree';
-import type { LinkItemType } from '../shared/link-item';
+import type { ComponentProps } from 'react';
 import { cva } from 'class-variance-authority';
+import { createPageTreeRenderer } from '@/components/sidebar/page-tree';
+import { createLinkItemRenderer } from '@/components/sidebar/link-item';
 
 const itemVariants = cva(
   'relative flex flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground wrap-anywhere transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none [&_svg]:size-4 [&_svg]:shrink-0',
@@ -194,140 +186,19 @@ export function SidebarFolderContent({
   );
 }
 
-export interface SidebarComponents {
-  Item: FC<{ item: PageTree.Item }>;
-  Folder: FC<{ item: PageTree.Folder; level: number; children: ReactNode }>;
-  Separator: FC<{ item: PageTree.Separator }>;
-}
+export const SidebarPageTree = createPageTreeRenderer({
+  SidebarFolder,
+  SidebarFolderContent,
+  SidebarFolderLink,
+  SidebarFolderTrigger,
+  SidebarItem,
+  SidebarSeparator,
+});
 
-/**
- * Render sidebar items from page tree
- */
-export function SidebarPageTree({
-  components,
-}: {
-  components?: Partial<SidebarComponents>;
-}) {
-  const { root } = useTreeContext();
-  return useMemo(() => {
-    const { Separator, Item, Folder = PageTreeFolder } = components ?? {};
-
-    function renderSidebarList(
-      items: PageTree.Node[],
-      level: number,
-    ): ReactNode[] {
-      return items.map((item, i) => {
-        if (item.type === 'separator') {
-          if (Separator) return <Separator key={i} item={item} />;
-          return (
-            <SidebarSeparator key={i} className={cn(i !== 0 && 'mt-6')}>
-              {item.icon}
-              {item.name}
-            </SidebarSeparator>
-          );
-        }
-
-        if (item.type === 'folder') {
-          return (
-            <Folder key={i} item={item} level={level}>
-              {renderSidebarList(item.children, level + 1)}
-            </Folder>
-          );
-        }
-
-        if (Item) return <Item key={item.url} item={item} />;
-        return (
-          <SidebarItem
-            key={item.url}
-            href={item.url}
-            external={item.external}
-            icon={item.icon}
-          >
-            {item.name}
-          </SidebarItem>
-        );
-      });
-    }
-
-    return (
-      <Fragment key={root.$id}>{renderSidebarList(root.children, 1)}</Fragment>
-    );
-  }, [components, root]);
-}
-
-function PageTreeFolder({
-  item,
-  ...props
-}: {
-  item: PageTree.Folder;
-  children: ReactNode;
-}) {
-  const path = useTreePath();
-
-  return (
-    <SidebarFolder
-      defaultOpen={(value) =>
-        (item.defaultOpen ?? value) || path.includes(item)
-      }
-    >
-      {item.index ? (
-        <SidebarFolderLink
-          href={item.index.url}
-          external={item.index.external}
-          {...props}
-        >
-          {item.icon}
-          {item.name}
-        </SidebarFolderLink>
-      ) : (
-        <SidebarFolderTrigger {...props}>
-          {item.icon}
-          {item.name}
-        </SidebarFolderTrigger>
-      )}
-      <SidebarFolderContent>{props.children}</SidebarFolderContent>
-    </SidebarFolder>
-  );
-}
-
-export function SidebarLinkItem({
-  item,
-  ...props
-}: HTMLAttributes<HTMLElement> & {
-  item: Exclude<LinkItemType, { type: 'icon' }>;
-}) {
-  if (item.type === 'custom') return <div {...props}>{item.children}</div>;
-
-  if (item.type === 'menu')
-    return (
-      <SidebarFolder {...props}>
-        {item.url ? (
-          <SidebarFolderLink href={item.url} external={item.external}>
-            {item.icon}
-            {item.text}
-          </SidebarFolderLink>
-        ) : (
-          <SidebarFolderTrigger>
-            {item.icon}
-            {item.text}
-          </SidebarFolderTrigger>
-        )}
-        <SidebarFolderContent>
-          {item.items.map((child, i) => (
-            <SidebarLinkItem key={i} item={child} />
-          ))}
-        </SidebarFolderContent>
-      </SidebarFolder>
-    );
-
-  return (
-    <SidebarItem
-      href={item.url}
-      icon={item.icon}
-      external={item.external}
-      {...props}
-    >
-      {item.text}
-    </SidebarItem>
-  );
-}
+export const SidebarLinkItem = createLinkItemRenderer({
+  SidebarFolder,
+  SidebarFolderContent,
+  SidebarFolderLink,
+  SidebarFolderTrigger,
+  SidebarItem,
+});

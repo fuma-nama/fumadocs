@@ -11,7 +11,6 @@ import { buttonVariants } from '@/components/ui/button';
 import {
   Sidebar,
   SidebarCollapseTrigger,
-  type SidebarComponents,
   SidebarContent,
   SidebarDrawer,
   SidebarLinkItem,
@@ -19,10 +18,6 @@ import {
   SidebarTrigger,
   SidebarViewport,
 } from './sidebar';
-import {
-  type SidebarTabWithProps,
-  SidebarTabTrigger,
-} from '@/layouts/shared/sidebar-tab';
 import { type BaseLayoutProps, resolveLinkItems } from '@/layouts/shared';
 import { LinkItem } from '@/layouts/shared/link-item';
 import {
@@ -47,6 +42,11 @@ import {
   getSidebarTabs,
   type GetSidebarTabsOptions,
 } from '@/utils/get-sidebar-tabs';
+import type { SidebarPageTreeComponents } from '@/components/sidebar/page-tree';
+import {
+  SidebarTabTrigger,
+  type SidebarTabWithProps,
+} from '@/components/sidebar/tabs';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
@@ -66,7 +66,7 @@ interface SidebarOptions
     Pick<ComponentProps<typeof Sidebar>, 'defaultOpenLevel' | 'prefetch'> {
   enabled?: boolean;
   component?: ReactNode;
-  components?: Partial<SidebarComponents>;
+  components?: Partial<SidebarPageTreeComponents>;
 
   /**
    * Root Toggle options
@@ -138,7 +138,7 @@ export function DocsLayout({
               className={cn(i === list.length - 1 && 'mb-4')}
             />
           ))}
-        <SidebarPageTree components={components} />
+        <SidebarPageTree {...components} />
       </SidebarViewport>
     );
 
