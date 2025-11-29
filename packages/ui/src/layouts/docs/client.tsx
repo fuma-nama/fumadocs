@@ -79,15 +79,13 @@ export function LayoutBody({
         {
           gridTemplate: `"sidebar header toc"
         "sidebar toc-popover toc"
-        "sidebar main toc" 1fr / minmax(var(--fd-sidebar-col), 1fr) minmax(0, var(--fd-page-col)) minmax(min-content, 1fr)`,
+        "sidebar main toc" 1fr / minmax(var(--fd-sidebar-col), 1fr) minmax(0, calc(var(--fd-layout-width,97rem) - var(--fd-sidebar-width) - var(--fd-toc-width))) minmax(min-content, 1fr)`,
           '--fd-docs-row-1': 'var(--fd-banner-height, 0px)',
           '--fd-docs-row-2':
             'calc(var(--fd-docs-row-1) + var(--fd-header-height))',
           '--fd-docs-row-3':
             'calc(var(--fd-docs-row-2) + var(--fd-toc-popover-height))',
           '--fd-sidebar-col': collapsed ? '0px' : 'var(--fd-sidebar-width)',
-          '--fd-page-col':
-            'calc(var(--fd-layout-width,97rem) - var(--fd-sidebar-width) - var(--fd-toc-width))',
           gridAutoColumns: 'auto',
           gridAutoRows: 'auto',
           ...style,
