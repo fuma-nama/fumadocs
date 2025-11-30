@@ -60,7 +60,10 @@ This will render the title in the MDX body.
 Link to the original GitHub file with your component.
 
 ```tsx
+// docs layout:
 import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
+// notebook layout:
+import { DocsPage } from 'fumadocs-ui/layouts/notebook/page';
 
 <DocsPage>
   <a
@@ -79,7 +82,10 @@ import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
 Display last updated time of the page.
 
 ```tsx
+// docs layout:
 import { DocsPage, PageLastUpdate } from 'fumadocs-ui/layouts/docs/page';
+// notebook layout:
+import { DocsPage, PageLastUpdate } from 'fumadocs-ui/layouts/notebook/page';
 
 const lastModifiedTime: Date | undefined;
 
@@ -134,7 +140,10 @@ To extend the page to fill up all available space, pass `full` to the page compo
 This will force TOC to be shown as a popover.
 
 ```tsx
+// docs layout:
 import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
+// notebook layout:
+import { DocsPage } from 'fumadocs-ui/layouts/notebook/page';
 
 <DocsPage full>...</DocsPage>;
 ```
@@ -147,7 +156,10 @@ For Markdown and MDX documents, You can obtain it using the
 [TOC Utility](/docs/headless/utils/get-toc). Content sources like Fumadocs MDX offer this out-of-the-box.
 
 ```tsx
+// docs layout:
 import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
+// notebook layout:
+import { DocsPage } from 'fumadocs-ui/layouts/notebook/page';
 
 <DocsPage toc={headings}>...</DocsPage>;
 ```
@@ -155,7 +167,10 @@ import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
 You can customise or disable it with the `tableOfContent` option, or with `tableOfContentPopover` on smaller devices.
 
 ```tsx
+// docs layout:
 import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
+// notebook layout:
+import { DocsPage } from 'fumadocs-ui/layouts/notebook/page';
 
 <DocsPage tableOfContent={options} tableOfContentPopover={options}>
   ...
@@ -169,7 +184,10 @@ import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
 You can choose another style for TOC, like `clerk` inspired by https://clerk.com:
 
 ```tsx
+// docs layout:
 import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
+// notebook layout:
+import { DocsPage } from 'fumadocs-ui/layouts/notebook/page';
 
 <DocsPage
   tableOfContent={{
@@ -189,11 +207,12 @@ Footer is a navigation element that has two buttons to jump to the next and prev
 Customise the footer with the `footer` option.
 
 ```tsx
-import { DocsPage, DocsBody } from 'fumadocs-ui/layouts/docs/page';
+// docs layout:
+import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
+// notebook layout:
+import { DocsPage } from 'fumadocs-ui/layouts/notebook/page';
 
-<DocsPage footer={options}>
-  <DocsBody>...</DocsBody>
-</DocsPage>;
+<DocsPage footer={options}>...</DocsPage>;
 ```
 
 <auto-type-table path="../../props.ts" name="FooterProps" />

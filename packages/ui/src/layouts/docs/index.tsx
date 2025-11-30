@@ -25,7 +25,6 @@ import {
   LanguageToggleText,
 } from '@/layouts/shared/language-toggle';
 import {
-  CollapsibleControl,
   LayoutTabs,
   LayoutHeader,
   LayoutBody,
@@ -144,7 +143,6 @@ export function DocsLayout({
 
     return (
       <>
-        {collapsible && <CollapsibleControl />}
         <SidebarContent {...rest}>
           <div className="flex flex-col gap-3 p-4 pb-2">
             <div className="flex">
