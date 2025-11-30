@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 16.2.1
+
+### Patch Changes
+
+- 556cb6b: Fix missing default colors
+- c6120ff: Add sidebar animation back
+  - fumadocs-core@16.2.1
+
 ## 16.2.0
 
 ### Minor Changes
