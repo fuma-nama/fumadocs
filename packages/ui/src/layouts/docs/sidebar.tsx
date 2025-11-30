@@ -71,7 +71,7 @@ export function SidebarContent({
                 ref.current &&
                   (ref.current.getAttribute('data-collapsed') === 'true') !==
                     collapsed &&
-                  'transition-[width,inset-block,translate]',
+                  'transition-[width,inset-block,translate,background-color]',
                 className,
               )}
               {...props}
