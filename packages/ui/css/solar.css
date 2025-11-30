@@ -69,10 +69,6 @@
   }
 }
 
-#nd-sidebar {
-  @apply bg-fd-card;
-}
-
 #nd-sidebar[data-collapsed='false'] {
   border: none;
   @apply bg-fd-background;

@@ -91,7 +91,7 @@ export function LayoutBody({
     <div
       id="nd-notebook-layout"
       className={cn(
-        'grid overflow-x-clip min-h-(--fd-docs-height) [--fd-docs-height:100dvh] [--fd-header-height:0px] [--fd-toc-popover-height:0px] [--fd-sidebar-width:0px] [--fd-toc-width:0px]',
+        'grid overflow-x-clip min-h-(--fd-docs-height) auto-cols-auto auto-rows-auto [--fd-docs-height:100dvh] [--fd-header-height:0px] [--fd-toc-popover-height:0px] [--fd-sidebar-width:0px] [--fd-toc-width:0px]',
         className,
       )}
       style={
@@ -110,8 +110,6 @@ export function LayoutBody({
           '--fd-docs-row-3':
             'calc(var(--fd-docs-row-2) + var(--fd-toc-popover-height))',
           '--fd-sidebar-col': collapsed ? '0px' : 'var(--fd-sidebar-width)',
-          gridAutoColumns: 'auto',
-          gridAutoRows: 'auto',
           ...style,
         } as object
       }

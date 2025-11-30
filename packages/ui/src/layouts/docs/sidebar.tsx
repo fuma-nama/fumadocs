@@ -1,10 +1,14 @@
 'use client';
 import * as Base from '@/components/sidebar/base';
 import { cn } from '@/utils/cn';
-import type { ComponentProps } from 'react';
+import { useRef, type ComponentProps } from 'react';
 import { cva } from 'class-variance-authority';
 import { createPageTreeRenderer } from '@/components/sidebar/page-tree';
 import { createLinkItemRenderer } from '@/components/sidebar/link-item';
+import { buttonVariants } from '@/components/ui/button';
+import { SearchToggle } from '@/layouts/shared/search-toggle';
+import { Sidebar as SidebarIcon } from 'lucide-react';
+import { mergeRefs } from '@/utils/merge-refs';
 
 const itemVariants = cva(
   'relative flex flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground wrap-anywhere transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none [&_svg]:size-4 [&_svg]:shrink-0',
@@ -12,6 +16,9 @@ const itemVariants = cva(
     variants: {
       variant: {
         link: 'data-[active=true]:bg-fd-primary/10 data-[active=true]:text-fd-primary data-[active=true]:hover:transition-colors',
+      },
+      highlight: {
+        true: "data-[active=true]:before:content-[''] data-[active=true]:before:bg-fd-primary data-[active=true]:before:absolute data-[active=true]:before:w-px data-[active=true]:before:inset-y-2.5 data-[active=true]:before:start-2.5",
       },
     },
   },
@@ -30,27 +37,71 @@ export const {
 } = Base;
 
 export function SidebarContent({
+  ref: refProp,
   className,
   children,
   ...props
 }: ComponentProps<'aside'>) {
+  const ref = useRef<HTMLElement>(null);
+
   return (
-    <Base.SidebarContent
-      aside={({ collapsed, hovered }) => ({
-        className: cn(
-          'sticky top-(--fd-docs-row-1) [grid-area:sidebar] h-[calc(var(--fd-docs-height)-var(--fd-docs-row-1))] flex flex-col items-end z-20 bg-fd-card text-sm border-e *:w-(--fd-sidebar-width) md:layout:[--fd-sidebar-width:268px] max-md:hidden',
-          collapsed && [
-            'fixed start-0 inset-y-2 h-auto rounded-xl border transition-[opacity,translate] duration-200',
-            hovered
-              ? 'z-50 shadow-lg translate-x-2 rtl:-translate-x-2'
-              : 'opacity-0 -translate-x-[calc(100%-16px)] rtl:translate-x-[calc(100%-16px)]',
-          ],
-          className,
-        ),
-        ...props,
-      })}
-    >
-      {children}
+    <Base.SidebarContent>
+      {({ collapsed, hovered, ref: asideRef, ...rest }) => (
+        <>
+          <div
+            data-sidebar-placeholder=""
+            className="sticky top-(--fd-docs-row-1) z-20 [grid-area:sidebar] pointer-events-none *:pointer-events-auto h-[calc(var(--fd-docs-height)-var(--fd-docs-row-1))] md:layout:[--fd-sidebar-width:268px] max-md:hidden"
+          >
+            {collapsed && (
+              <div className="absolute start-0 inset-y-0 w-4" {...rest} />
+            )}
+            <aside
+              id="nd-sidebar"
+              ref={mergeRefs(ref, refProp, asideRef)}
+              data-collapsed={collapsed}
+              data-hovered={collapsed && hovered}
+              className={cn(
+                'absolute flex flex-col w-full start-0 inset-y-0 items-end bg-fd-card text-sm border-e duration-250 *:w-(--fd-sidebar-width)',
+                collapsed && [
+                  'inset-y-2 rounded-xl transition-transform border w-(--fd-sidebar-width)',
+                  hovered
+                    ? 'shadow-lg translate-x-2 rtl:-translate-x-2'
+                    : '-translate-x-(--fd-sidebar-width) rtl:translate-x-full',
+                ],
+                ref.current &&
+                  (ref.current.getAttribute('data-collapsed') === 'true') !==
+                    collapsed &&
+                  'transition-[width,inset-block,translate]',
+                className,
+              )}
+              {...props}
+              {...rest}
+            >
+              {children}
+            </aside>
+          </div>
+          <div
+            data-sidebar-panel=""
+            className={cn(
+              'fixed flex top-[calc(--spacing(4)+var(--fd-toc-popover-height))] start-4 shadow-lg transition-opacity rounded-xl p-0.5 border bg-fd-muted text-fd-muted-foreground z-10',
+              (!collapsed || hovered) && 'pointer-events-none opacity-0',
+            )}
+          >
+            <SidebarCollapseTrigger
+              className={cn(
+                buttonVariants({
+                  color: 'ghost',
+                  size: 'icon-sm',
+                  className: 'rounded-lg',
+                }),
+              )}
+            >
+              <SidebarIcon />
+            </SidebarCollapseTrigger>
+            <SearchToggle className="rounded-lg" hideIfDisabled />
+          </div>
+        </>
+      )}
     </Base.SidebarContent>
   );
 }
@@ -108,7 +159,10 @@ export function SidebarItem({
 
   return (
     <Base.SidebarItem
-      className={cn(itemVariants({ variant: 'link' }), className)}
+      className={cn(
+        itemVariants({ variant: 'link', highlight: depth >= 1 }),
+        className,
+      )}
       style={{
         paddingInlineStart: getItemOffset(depth),
         ...style,
@@ -150,7 +204,11 @@ export function SidebarFolderLink({
 
   return (
     <Base.SidebarFolderLink
-      className={cn(itemVariants({ variant: 'link' }), 'w-full', className)}
+      className={cn(
+        itemVariants({ variant: 'link', highlight: depth > 1 }),
+        'w-full',
+        className,
+      )}
       style={{
         paddingInlineStart: getItemOffset(depth - 1),
         ...style,
@@ -173,10 +231,8 @@ export function SidebarFolderContent({
     <Base.SidebarFolderContent
       className={cn(
         'relative',
-        depth === 1 && [
+        depth === 1 &&
           "before:content-[''] before:absolute before:w-px before:inset-y-1 before:bg-fd-border before:start-2.5",
-          "**:data-[active=true]:before:content-[''] **:data-[active=true]:before:bg-fd-primary **:data-[active=true]:before:absolute **:data-[active=true]:before:w-px **:data-[active=true]:before:inset-y-2.5 **:data-[active=true]:before:start-2.5",
-        ],
         className,
       )}
       {...props}

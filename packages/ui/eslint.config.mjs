@@ -11,6 +11,7 @@ export default [
       '@typescript-eslint/unbound-method': 'off',
       '@typescript-eslint/restrict-template-expressions': 'off',
       'import/no-relative-packages': 'off',
+      'react-hooks/purity': 'off',
     },
   },
 ];

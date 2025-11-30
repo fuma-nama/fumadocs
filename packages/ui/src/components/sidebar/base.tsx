@@ -3,6 +3,7 @@ import { ChevronDown, ExternalLink } from 'lucide-react';
 import {
   type ComponentProps,
   createContext,
+  type PointerEvent,
   type ReactNode,
   type RefObject,
   use,
@@ -130,71 +131,59 @@ export function useFolderDepth() {
 
 export function SidebarContent({
   children,
-  aside,
 }: {
-  aside?: (state: {
+  children: (state: {
+    ref: RefObject<HTMLElement | null>;
     collapsed: boolean;
     hovered: boolean;
-  }) => ComponentProps<'aside'>;
-  children: ReactNode;
+    onPointerEnter: (event: PointerEvent) => void;
+    onPointerLeave: (event: PointerEvent) => void;
+  }) => ReactNode;
 }) {
   const { collapsed, mode } = useSidebar();
   const [hover, setHover] = useState(false);
+  const ref = useRef<HTMLElement>(null);
   const timerRef = useRef(0);
-  const ignoreHoverUntil = useRef(0);
 
   useOnChange(collapsed, () => {
-    if (collapsed) {
-      setHover(true);
-      ignoreHoverUntil.current = Date.now() + 200;
-
-      setTimeout(() => {
-        setHover(false);
-      }, 200);
-    }
+    if (collapsed) setHover(false);
   });
 
   if (mode !== 'full') return;
 
-  return (
-    <aside
-      id="nd-sidebar"
-      data-collapsed={collapsed}
-      data-hovered={collapsed && hover}
-      {...aside?.({ collapsed, hovered: hover })}
-      onPointerEnter={(e) => {
-        if (
-          !collapsed ||
-          e.pointerType === 'touch' ||
-          ignoreHoverUntil.current > Date.now()
-        )
-          return;
-        window.clearTimeout(timerRef.current);
-        setHover(true);
-      }}
-      onPointerLeave={(e) => {
-        if (
-          !collapsed ||
-          e.pointerType === 'touch' ||
-          ignoreHoverUntil.current > Date.now()
-        )
-          return;
-        window.clearTimeout(timerRef.current);
+  function shouldIgnoreHover(e: PointerEvent): boolean {
+    const element = ref.current;
+    if (!element) return true;
 
-        timerRef.current = window.setTimeout(
-          () => {
-            setHover(false);
-            ignoreHoverUntil.current = Date.now() + 200;
-          },
-          Math.min(e.clientX, document.body.clientWidth - e.clientX) > 100
-            ? 0
-            : 500,
-        );
-      }}
-    >
-      {children}
-    </aside>
-  );
+    return (
+      !collapsed ||
+      e.pointerType === 'touch' ||
+      element.getAnimations().length > 0
+    );
+  }
+
+  return children({
+    ref,
+    collapsed,
+    hovered: hover,
+    onPointerEnter(e) {
+      if (shouldIgnoreHover(e)) return;
+      window.clearTimeout(timerRef.current);
+      setHover(true);
+    },
+    onPointerLeave(e) {
+      if (shouldIgnoreHover(e)) return;
+      window.clearTimeout(timerRef.current);
+
+      timerRef.current = window.setTimeout(
+        () => setHover(false),
+        // if mouse is leaving the viewport, add a close delay
+        Math.min(e.clientX, document.body.clientWidth - e.clientX) > 100
+          ? 0
+          : 500,
+      );
+    },
+  });
 }
 
 export function SidebarDrawerOverlay(props: ComponentProps<'div'>) {
