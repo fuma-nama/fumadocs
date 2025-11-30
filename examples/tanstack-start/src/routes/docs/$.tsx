@@ -2,8 +2,6 @@ import { createFileRoute, notFound } from '@tanstack/react-router';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { createServerFn } from '@tanstack/react-start';
 import { source } from '@/lib/source';
-import type * as PageTree from 'fumadocs-core/page-tree';
-import { useMemo } from 'react';
 import browserCollections from 'fumadocs-mdx:collections/browser';
 import {
   DocsBody,
@@ -13,6 +11,7 @@ import {
 } from 'fumadocs-ui/layouts/docs/page';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { baseOptions } from '@/lib/layout.shared';
+import { useFumadocsLoader } from 'fumadocs-core/source/client';
 
 export const Route = createFileRoute('/docs/$')({
   component: Page,
@@ -33,8 +32,8 @@ const serverLoader = createServerFn({
     if (!page) throw notFound();
 
     return {
-      tree: source.pageTree as object,
       path: page.path,
+      serializedLoader: await source.serialize(),
     };
   });
 
@@ -58,48 +57,12 @@ const clientLoader = browserCollections.docs.createClientLoader({
 
 function Page() {
   const data = Route.useLoaderData();
+  const source = useFumadocsLoader(data.serializedLoader);
   const Content = clientLoader.getComponent(data.path);
-  const tree = useMemo(
-    () => transformPageTree(data.tree as PageTree.Folder),
-    [data.tree],
-  );
 
   return (
-    <DocsLayout {...baseOptions()} tree={tree}>
+    <DocsLayout {...baseOptions()} tree={source.getPageTree()}>
       <Content />
     </DocsLayout>
   );
-}
-
-function transformPageTree(root: PageTree.Root): PageTree.Root {
-  function mapNode<T extends PageTree.Node>(item: T): T {
-    if (typeof item.icon === 'string') {
-      item = {
-        ...item,
-        icon: (
-          <span
-            dangerouslySetInnerHTML={{
-              __html: item.icon,
-            }}
-          />
-        ),
-      };
-    }
-
-    if (item.type === 'folder') {
-      return {
-        ...item,
-        index: item.index ? mapNode(item.index) : undefined,
-        children: item.children.map(mapNode),
-      };
-    }
-
-    return item;
-  }
-
-  return {
-    ...root,
-    children: root.children.map(mapNode),
-    fallback: root.fallback ? transformPageTree(root.fallback) : undefined,
-  };
 }

@@ -28,10 +28,6 @@
       "import": "./dist/content/*.js",
       "types": "./dist/content/*.d.ts"
     },
-    "./hide-if-empty": {
-      "import": "./dist/hide-if-empty.js",
-      "types": "./dist/hide-if-empty.d.ts"
-    },
     "./negotiation": {
       "import": "./dist/negotiation/index.js",
       "types": "./dist/negotiation/index.d.ts"
@@ -51,6 +47,10 @@
     "./source": {
       "import": "./dist/source/index.js",
       "types": "./dist/source/index.d.ts"
+    },
+    "./source/client": {
+      "import": "./dist/source/client/index.js",
+      "types": "./dist/source/client/index.d.ts"
     },
     "./source/*": {
       "import": "./dist/source/plugins/*.js",

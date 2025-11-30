@@ -161,7 +161,7 @@ function createPageTreeBuilderUtils(ctx: PageTreeBuilderContext) {
 
   return {
     buildPaths(paths: string[], reversed = false): PageTree.Node[] {
-      const items: PageTree.Item[] = [];
+      const items: PageTree.Node[] = [];
       const folders: PageTree.Folder[] = [];
       const sortedPaths = paths.sort(
         (a, b) => a.localeCompare(b) * (reversed ? -1 : 1),
@@ -181,7 +181,8 @@ function createPageTreeBuilderUtils(ctx: PageTreeBuilderContext) {
         if (dirNode) folders.push(dirNode);
       }
 
-      return [...items, ...folders];
+      items.push(...folders);
+      return items;
     },
     resolveFolderItem(
       folderPath: string,

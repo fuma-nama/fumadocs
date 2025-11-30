@@ -15,6 +15,8 @@ import {
 import { slugsPlugin } from '@/source/plugins/slugs';
 import { iconPlugin, type IconResolver } from '@/source/plugins/icon';
 import type { Source, SourceConfig, PageData, MetaData } from './source';
+import type { SerializedLoader } from './client';
+import { visit } from '@/page-tree/utils';
 
 export interface LoaderConfig {
   source: SourceConfig;
@@ -151,6 +153,8 @@ export interface LoaderOutput<Config extends LoaderConfig> {
     slug?: TSlug,
     lang?: TLang,
   ) => (Record<TSlug, string[]> & Record<TLang, string>)[];
+
+  serialize: () => Promise<SerializedLoader<Config>>;
 }
 
 function indexPages(
@@ -305,22 +309,25 @@ function createOutput(
   const storages = buildContentStorage(loaderConfig, defaultLanguage);
   const walker = indexPages(storages, loaderConfig);
   const builder = createPageTreeBuilder(loaderConfig);
-  let pageTree: Record<string, PageTree.Root> | undefined;
+  let pageTrees: Record<string, PageTree.Root> | undefined;
+  function getPageTrees() {
+    return (pageTrees ??= builder.buildI18n(storages));
+  }
 
   return {
     _i18n: i18n,
     get pageTree() {
-      pageTree ??= builder.buildI18n(storages);
+      const trees = getPageTrees();
 
       return i18n
-        ? (pageTree as unknown as LoaderOutput<LoaderConfig>['pageTree'])
-        : pageTree[defaultLanguage];
+        ? (trees as unknown as LoaderOutput<LoaderConfig>['pageTree'])
+        : trees[defaultLanguage];
     },
     set pageTree(v) {
       if (i18n) {
-        pageTree = v as unknown as Record<string, PageTree.Root>;
+        pageTrees = v as unknown as Record<string, PageTree.Root>;
       } else {
-        pageTree = {
+        pageTrees = {
           [defaultLanguage]: v,
         };
       }
@@ -396,14 +403,8 @@ function createOutput(
 
       return walker.pathToPage.get(`${language}.${ref}`);
     },
-    getPageTree(locale) {
-      if (i18n) {
-        return this.pageTree[
-          (locale ?? defaultLanguage) as keyof typeof pageTree
-        ];
-      }
-
-      return this.pageTree;
+    getPageTree(locale = defaultLanguage) {
+      return getPageTrees()[locale];
     },
     // @ts-expect-error -- ignore this
     generateParams(slug, lang) {
@@ -419,6 +420,33 @@ function createOutput(
       return this.getPages().map((page) => ({
         [slug ?? 'slug']: page.slugs,
       }));
+    },
+    async serialize() {
+      const { renderToString } = await import('react-dom/server.edge');
+      const serializedTrees: Record<string, PageTree.Root> = {};
+      const trees = getPageTrees();
+
+      for (const k in trees) {
+        serializedTrees[k] = visit(trees[k], (node) => {
+          node = { ...node };
+          if ('icon' in node && node.icon) {
+            node.icon = renderToString(node.icon);
+          }
+          if (node.name) {
+            node.name = renderToString(node.name);
+          }
+          if ('children' in node) {
+            node.children = [...node.children];
+          }
+
+          return node;
+        });
+      }
+
+      return {
+        defaultLanguage,
+        pageTree: serializedTrees,
+      };
     },
   };
 }
