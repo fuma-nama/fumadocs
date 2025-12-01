@@ -28,8 +28,7 @@ export type MethodInformation = NoReference<OperationObject> & {
 };
 
 export interface RenderContext
-  extends Pick<OpenAPIOptions, 'proxyUrl'>,
-    CreateAPIPageOptions {
+  extends Pick<OpenAPIOptions, 'proxyUrl'>, CreateAPIPageOptions {
   servers: NoReference<ServerObject>[];
   slugger: Slugger;
 

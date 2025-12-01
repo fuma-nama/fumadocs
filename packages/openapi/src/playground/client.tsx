@@ -85,8 +85,7 @@ export interface FormValues {
 }
 
 export interface PlaygroundClientProps
-  extends ComponentProps<'form'>,
-    SchemaScope {
+  extends ComponentProps<'form'>, SchemaScope {
   route: string;
   method: string;
   parameters?: ParameterField[];

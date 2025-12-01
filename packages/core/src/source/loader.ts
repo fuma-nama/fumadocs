@@ -153,6 +153,9 @@ export interface LoaderOutput<Config extends LoaderConfig> {
     lang?: TLang,
   ) => (Record<TSlug, string[]> & Record<TLang, string>)[];
 
+  /**
+   * serialize page tree for non-RSC environments
+   */
   serializePageTree: (tree: PageTree.Root) => Promise<object>;
 }
 

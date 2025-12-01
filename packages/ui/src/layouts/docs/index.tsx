@@ -61,7 +61,8 @@ export interface DocsLayoutProps extends BaseLayoutProps {
 }
 
 interface SidebarOptions
-  extends ComponentProps<'aside'>,
+  extends
+    ComponentProps<'aside'>,
     Pick<ComponentProps<typeof Sidebar>, 'defaultOpenLevel' | 'prefetch'> {
   enabled?: boolean;
   component?: ReactNode;

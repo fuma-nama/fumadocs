@@ -17,8 +17,10 @@ import {
   type ResolvePlugins,
 } from '@/resolve-plugins';
 
-export interface TransformOptions
-  extends Omit<MDXOptions, 'remarkPlugins' | 'rehypePlugins'> {
+export interface TransformOptions extends Omit<
+  MDXOptions,
+  'remarkPlugins' | 'rehypePlugins'
+> {
   remarkPlugins?: ResolvePlugins;
   rehypePlugins?: ResolvePlugins;
 
