@@ -25,7 +25,7 @@ export async function fetchDocs(
   query: string,
   { api = '/api/search', locale, tag }: FetchOptions,
 ): Promise<SortedResult[]> {
-  const url = new URL(api, window.location.origin);
+  const url = api.startsWith('http') ? new URL(api) : new URL(api, window.location.origin);
 
   url.searchParams.set('query', query);
   if (locale) url.searchParams.set('locale', locale);
