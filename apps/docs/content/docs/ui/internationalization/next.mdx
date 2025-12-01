@@ -162,7 +162,7 @@ export default async function Layout({
 
   return (
     // [!code highlight]
-    <DocsLayout {...baseOptions(lang)} tree={source.pageTree[lang]}>
+    <DocsLayout {...baseOptions(lang)} tree={source.getPageTree(lang)}>
       {children}
     </DocsLayout>
   );

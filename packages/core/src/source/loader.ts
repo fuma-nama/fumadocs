@@ -15,7 +15,6 @@ import {
 import { slugsPlugin } from '@/source/plugins/slugs';
 import { iconPlugin, type IconResolver } from '@/source/plugins/icon';
 import type { Source, SourceConfig, PageData, MetaData } from './source';
-import type { SerializedLoader } from './client';
 import { visit } from '@/page-tree/utils';
 
 export interface LoaderConfig {
@@ -154,7 +153,7 @@ export interface LoaderOutput<Config extends LoaderConfig> {
     lang?: TLang,
   ) => (Record<TSlug, string[]> & Record<TLang, string>)[];
 
-  serialize: () => Promise<SerializedLoader<Config>>;
+  serializePageTree: (tree: PageTree.Root) => Promise<object>;
 }
 
 function indexPages(
@@ -264,46 +263,10 @@ export function loader(
       ]
     | [Source, LoaderOptions]
 ): LoaderOutput<LoaderConfig> {
-  const resolved =
+  const loaderConfig =
     args.length === 2
       ? resolveConfig(args[0], args[1])
       : resolveConfig(args[0].source, args[0]);
-
-  return createOutput(resolved);
-}
-
-function resolveConfig(
-  source: Source,
-  { slugs, icon, plugins = [], baseUrl, url, ...base }: LoaderOptions,
-): ResolvedLoaderConfig {
-  let config: ResolvedLoaderConfig = {
-    ...base,
-    url: url
-      ? (...args) => normalizeUrl(url(...args))
-      : createGetUrl(baseUrl, base.i18n),
-    source,
-    plugins: buildPlugins([
-      slugsPlugin(slugs),
-      icon && iconPlugin(icon),
-      ...(typeof plugins === 'function'
-        ? plugins({
-            typedPlugin: (plugin) => plugin as unknown as LoaderPlugin,
-          })
-        : plugins),
-    ]),
-  };
-
-  for (const plugin of config.plugins ?? []) {
-    const result = plugin.config?.(config);
-    if (result) config = result;
-  }
-
-  return config;
-}
-
-function createOutput(
-  loaderConfig: ResolvedLoaderConfig,
-): LoaderOutput<LoaderConfig> {
   const { i18n } = loaderConfig;
   const defaultLanguage = i18n?.defaultLanguage ?? '';
   const storages = buildContentStorage(loaderConfig, defaultLanguage);
@@ -327,9 +290,8 @@ function createOutput(
       if (i18n) {
         pageTrees = v as unknown as Record<string, PageTree.Root>;
       } else {
-        pageTrees = {
-          [defaultLanguage]: v,
-        };
+        pageTrees ??= {};
+        pageTrees[defaultLanguage] = v;
       }
     },
     getPageByHref(href, { dir = '', language = defaultLanguage } = {}) {
@@ -383,11 +345,11 @@ function createOutput(
     // the slugs plugin generates encoded slugs by default.
     // we can assume page slugs are always URI encoded.
     getPage(slugs = [], language = defaultLanguage) {
-      // 1. `slugs` is already decoded
+      // `slugs` is already decoded
       let page = walker.pages.get(`${language}.${slugs.join('/')}`);
       if (page) return page;
 
-      // 1. `slugs` is URI encoded
+      // `slugs` is URI encoded
       page = walker.pages.get(`${language}.${slugs.map(decodeURI).join('/')}`);
       if (page) return page;
     },
@@ -404,7 +366,8 @@ function createOutput(
       return walker.pathToPage.get(`${language}.${ref}`);
     },
     getPageTree(locale = defaultLanguage) {
-      return getPageTrees()[locale];
+      const trees = getPageTrees();
+      return trees[locale] ?? trees[defaultLanguage];
     },
     // @ts-expect-error -- ignore this
     generateParams(slug, lang) {
@@ -421,34 +384,54 @@ function createOutput(
         [slug ?? 'slug']: page.slugs,
       }));
     },
-    async serialize() {
+    async serializePageTree(tree: PageTree.Root): Promise<object> {
       const { renderToString } = await import('react-dom/server.edge');
-      const serializedTrees: Record<string, PageTree.Root> = {};
-      const trees = getPageTrees();
 
-      for (const k in trees) {
-        serializedTrees[k] = visit(trees[k], (node) => {
-          node = { ...node };
-          if ('icon' in node && node.icon) {
-            node.icon = renderToString(node.icon);
-          }
-          if (node.name) {
-            node.name = renderToString(node.name);
-          }
-          if ('children' in node) {
-            node.children = [...node.children];
-          }
+      return visit(tree, (node) => {
+        node = { ...node };
+        if ('icon' in node && node.icon) {
+          node.icon = renderToString(node.icon);
+        }
+        if (node.name) {
+          node.name = renderToString(node.name);
+        }
+        if ('children' in node) {
+          node.children = [...node.children];
+        }
 
-          return node;
-        });
-      }
-
-      return {
-        defaultLanguage,
-        pageTree: serializedTrees,
-      };
+        return node;
+      });
     },
   };
+}
+
+function resolveConfig(
+  source: Source,
+  { slugs, icon, plugins = [], baseUrl, url, ...base }: LoaderOptions,
+): ResolvedLoaderConfig {
+  let config: ResolvedLoaderConfig = {
+    ...base,
+    url: url
+      ? (...args) => normalizeUrl(url(...args))
+      : createGetUrl(baseUrl, base.i18n),
+    source,
+    plugins: buildPlugins([
+      slugsPlugin(slugs),
+      icon && iconPlugin(icon),
+      ...(typeof plugins === 'function'
+        ? plugins({
+            typedPlugin: (plugin) => plugin as unknown as LoaderPlugin,
+          })
+        : plugins),
+    ]),
+  };
+
+  for (const plugin of config.plugins ?? []) {
+    const result = plugin.config?.(config);
+    if (result) config = result;
+  }
+
+  return config;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- infer types

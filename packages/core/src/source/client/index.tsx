@@ -1,43 +1,8 @@
-import type { I18nConfig } from '@/i18n';
-import type { LoaderConfig } from '../loader';
 import type * as PageTree from '@/page-tree';
 import { visit } from '@/page-tree/utils';
 import { useMemo } from 'react';
 
-export interface SerializedLoader<_Config extends LoaderConfig> {
-  defaultLanguage: string;
-  pageTree: Record<string, object>;
-}
-
-export interface ClientLoader<Config extends LoaderConfig> {
-  getPageTree: (
-    locale?: Config['i18n'] extends I18nConfig<infer Lang> ? Lang : undefined,
-  ) => PageTree.Root;
-}
-
-/**
- * create a client-side loader.
- *
- * It only receives the serialized loader from server-side, hence not sharing plugins and some properties.
- */
-export function deserializeLoader<Config extends LoaderConfig>(
-  serialized: SerializedLoader<Config>,
-): ClientLoader<Config> {
-  const { defaultLanguage, pageTree: serializedPageTree } = serialized;
-
-  const pageTree: Record<string, PageTree.Root> = {};
-  for (const k in serializedPageTree) {
-    pageTree[k] = deserializePageTree(serializedPageTree[k] as PageTree.Root);
-  }
-
-  return {
-    getPageTree(locale: string = defaultLanguage) {
-      return pageTree[locale] ?? pageTree[defaultLanguage];
-    },
-  };
-}
-
-function deserializePageTree(root: PageTree.Root): PageTree.Root {
+export function deserializePageTree(root: PageTree.Root): PageTree.Root {
   function deserializeHTML(html: string) {
     return (
       <span
@@ -60,12 +25,24 @@ function deserializePageTree(root: PageTree.Root): PageTree.Root {
 }
 
 /**
- * create & cache a client-side loader.
+ * Deserialize data passed from server-side loader.
  *
- * @see deserializeLoader
+ * It only receives the serialized data from server-side, hence not sharing plugins and some properties.
  */
-export function useFumadocsLoader<Config extends LoaderConfig>(
-  serialized: SerializedLoader<Config>,
-): ClientLoader<Config> {
-  return useMemo(() => deserializeLoader(serialized), [serialized]);
+export function useFumadocsLoader<
+  V extends {
+    pageTree?: object;
+  },
+>(serialized: V) {
+  const { pageTree } = serialized;
+
+  return useMemo(() => {
+    return {
+      pageTree: pageTree
+        ? deserializePageTree(pageTree as PageTree.Root)
+        : undefined,
+    } as {
+      pageTree: V['pageTree'] extends object ? PageTree.Root : undefined;
+    };
+  }, [pageTree]);
 }

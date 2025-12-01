@@ -33,7 +33,7 @@ const serverLoader = createServerFn({
 
     return {
       path: page.path,
-      serializedLoader: await source.serialize(),
+      pageTree: await source.serializePageTree(source.getPageTree()),
     };
   });
 
@@ -57,11 +57,11 @@ const clientLoader = browserCollections.docs.createClientLoader({
 
 function Page() {
   const data = Route.useLoaderData();
-  const source = useFumadocsLoader(data.serializedLoader);
+  const { pageTree } = useFumadocsLoader(data);
   const Content = clientLoader.getComponent(data.path);
 
   return (
-    <DocsLayout {...baseOptions()} tree={source.getPageTree()}>
+    <DocsLayout {...baseOptions()} tree={pageTree}>
       <Content />
     </DocsLayout>
   );
