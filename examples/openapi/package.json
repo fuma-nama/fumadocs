@@ -14,18 +14,18 @@
     "fumadocs-mdx": "workspace:*",
     "fumadocs-openapi": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "next": "16.0.3",
+    "next": "16.0.6",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "shiki": "^3.15.0"
+    "shiki": "^3.17.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.17",
     "@types/mdx": "^2.0.13",
-    "@types/react": "^19.2.5",
+    "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "postcss": "^8.5.6",
-    "rimraf": "^6.1.0",
+    "rimraf": "^6.1.2",
     "tailwindcss": "^4.1.17",
     "typescript": "^5.9.3"
   }
