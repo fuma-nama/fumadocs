@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 16.2.2
+
+### Patch Changes
+
+- 464442b: Support client-side loader, including serialization layer
+- 6c668e1: Support absolute URLs in search fetch client
+
 ## 16.2.1
 
 ## 16.2.0
