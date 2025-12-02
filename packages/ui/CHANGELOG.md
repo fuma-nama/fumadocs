@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 16.2.2
+
+### Patch Changes
+
+- 19db270: Align menu behaviour on notebook layout with home layout
+- Updated dependencies [464442b]
+- Updated dependencies [6c668e1]
+  - fumadocs-core@16.2.2
+
 ## 16.2.1
 
 ### Patch Changes
