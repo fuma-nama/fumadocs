@@ -12,7 +12,7 @@ import { useSidebar } from '@/components/sidebar/base';
 import { usePathname } from 'fumadocs-core/framework';
 import { isTabActive } from '@/utils/is-active';
 import Link from 'fumadocs-core/link';
-import type { SidebarTab } from '@/utils/get-sidebar-tabs';
+import type { SidebarTab } from '@/components/sidebar/tabs';
 import { useIsScrollTop } from '@/utils/use-is-scroll-top';
 
 export const LayoutContext = createContext<{

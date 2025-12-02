@@ -1,4 +1,4 @@
-import type { SidebarTab } from '@/utils/get-sidebar-tabs';
+import type { SidebarTab } from '@/components/sidebar/tabs';
 
 function normalize(url: string) {
   if (url.length > 1 && url.endsWith('/')) return url.slice(0, -1);

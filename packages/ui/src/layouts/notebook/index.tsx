@@ -35,16 +35,16 @@ import {
   LargeSearchToggle,
   SearchToggle,
 } from '@/layouts/shared/search-toggle';
-import {
-  getSidebarTabs,
-  type GetSidebarTabsOptions,
-} from '@/utils/get-sidebar-tabs';
 import { LinkItem, type LinkItemType } from '@/layouts/shared/link-item';
 import type { SidebarPageTreeComponents } from '@/components/sidebar/page-tree';
 import {
-  SidebarTabTrigger,
-  type SidebarTabWithProps,
+  getSidebarTabs,
+  type GetSidebarTabsOptions,
 } from '@/components/sidebar/tabs';
+import {
+  SidebarTabsDropdown,
+  type SidebarTabWithProps,
+} from '@/components/sidebar/tabs/dropdown';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
@@ -200,7 +200,7 @@ export function DocsLayout(props: DocsLayoutProps) {
             )}
             {nav.children}
             {tabs.length > 0 && (
-              <SidebarTabTrigger
+              <SidebarTabsDropdown
                 options={tabs}
                 className={cn(tabMode === 'navbar' && 'lg:hidden')}
               />
@@ -239,7 +239,7 @@ export function DocsLayout(props: DocsLayoutProps) {
             >
               <X />
             </SidebarTrigger>
-            {tabs.length > 0 && <SidebarTabTrigger options={tabs} />}
+            {tabs.length > 0 && <SidebarTabsDropdown options={tabs} />}
           </Header>
           {viewport}
           <Footer

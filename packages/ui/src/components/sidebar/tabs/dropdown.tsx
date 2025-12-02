@@ -11,13 +11,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import type { SidebarTab } from '@/utils/get-sidebar-tabs';
+import type { SidebarTab } from '.';
 
 export interface SidebarTabWithProps extends SidebarTab {
   props?: ComponentProps<'a'>;
 }
 
-export function SidebarTabTrigger({
+export function SidebarTabsDropdown({
   options,
   placeholder,
   ...props

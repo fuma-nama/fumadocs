@@ -28,7 +28,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import type { SidebarTabWithProps } from '@/components/sidebar/tabs';
+import type { SidebarTabWithProps } from '@/components/sidebar/tabs/dropdown';
 
 export const LayoutContext = createContext<
   | (LayoutInfo & {
