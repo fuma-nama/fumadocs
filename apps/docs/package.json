@@ -84,6 +84,7 @@
     "browserslist-config-baseline": "^0.5.0",
     "eslint-config-custom": "workspace:*",
     "gray-matter": "^4.0.3",
+    "mcp-handler": "^1.0.4",
     "next-validate-link": "^1.6.3",
     "postcss": "^8.5.6",
     "shadcn": "3.5.1",
