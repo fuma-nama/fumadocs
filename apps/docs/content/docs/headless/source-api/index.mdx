@@ -11,7 +11,7 @@ description: Turn a content source into a unified interface
 - Assign URL to each page.
 - Output useful utilities to interact with content.
 
-It doesn't rely on the real file system (zero `node:fs` usage), a virtual storage is also allowed.
+It is a server-side API, but doesn't rely on the real file system (zero `node:fs` usage), a virtual storage is also allowed.
 
 ## Usage
 
@@ -159,4 +159,36 @@ import { source } from '@/lib/source';
 
 // language -> pages
 const entries = source.getLanguages();
+```
+
+## Client API
+
+Loader API is best when used in RSC environments, which allows passing JSX nodes across the server-client boundary.
+
+For non-RSC environments, it provides a tiny serialization layer.
+
+```ts tab="Server"
+import { source } from '@/lib/source';
+
+// where you pass loader data
+async function loader() {
+  const pageTree = source.getPageTree();
+
+  return {
+    pageTree: await source.serializePageTree(pageTree),
+  };
+}
+```
+
+```tsx tab="Client"
+import { useFumadocsLoader } from 'fumadocs-core/source/client';
+
+function MyComponent() {
+  // receives loader data
+  const data = useLoaderData();
+  const { pageTree } = useFumadocsLoader(data);
+
+  // now render it (e.g. via Fumadocs UI)
+  return <DocsLayout tree={pageTree}>...</DocsLayout>;
+}
 ```
