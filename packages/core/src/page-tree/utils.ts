@@ -84,45 +84,28 @@ export function getPageTreePeers(
   }
 
   // Multiple trees case
-  const trees = treeOrTrees as Record<string, PageTree.Root>;
-
-  for (const lang in trees) {
-    const rootTree = trees[lang];
-    if (rootTree) {
-      const parent = findParentFromTree(rootTree, url);
-      if (parent) {
-        return parent.children.filter(
-          (item) => item.type === 'page' && item.url !== url,
-        ) as PageTree.Item[];
-      }
-    }
+  for (const lang in treeOrTrees) {
+    const result = getPageTreePeers(treeOrTrees[lang], url);
+    if (result) return result;
   }
 
   return [];
 }
 
 function findParentFromTree(
-  node: PageTree.Root | PageTree.Folder,
+  from: PageTree.Root | PageTree.Folder,
   url: string,
 ): PageTree.Root | PageTree.Folder | undefined {
-  if ('index' in node && node.index?.url === url) {
-    return node;
-  }
+  let result: PageTree.Root | PageTree.Folder | undefined;
 
-  for (const child of node.children) {
-    if (child.type === 'folder') {
-      const parent = findParentFromTree(child, url);
-      if (parent) return parent;
+  visit(from, (node, parent) => {
+    if ('type' in node && node.type === 'page' && node.url === url) {
+      result = parent;
+      return 'break';
     }
+  });
 
-    if (child.type === 'page' && child.url === url) {
-      return node;
-    }
-  }
-
-  if ('fallback' in node && node.fallback) {
-    return findParentFromTree(node.fallback, url);
-  }
+  return result;
 }
 
 /**
@@ -171,4 +154,52 @@ export function findPath(
   }
 
   return run(nodes) ?? null;
+}
+
+const VisitBreak = Symbol('VisitBreak');
+
+export function visit<Root extends PageTree.Node | PageTree.Root>(
+  root: Root,
+  visitor: <T extends PageTree.Node | PageTree.Root>(
+    node: T,
+    parent?: PageTree.Root | PageTree.Folder,
+  ) => 'skip' | 'break' | T | void,
+): Root {
+  function onNode<T extends PageTree.Node | PageTree.Root>(
+    node: T,
+    parent?: PageTree.Root | PageTree.Folder,
+  ): T {
+    const result = visitor(node, parent);
+    switch (result) {
+      case 'skip':
+        return node;
+      case 'break':
+        throw VisitBreak;
+      default:
+        if (result) node = result;
+    }
+
+    if ('index' in node && node.index) {
+      node.index = onNode(node.index, node);
+    }
+
+    if ('fallback' in node && node.fallback) {
+      node.fallback = onNode(node.fallback, node);
+    }
+
+    if ('children' in node) {
+      for (let i = 0; i < node.children.length; i++) {
+        node.children[i] = onNode(node.children[i], node);
+      }
+    }
+
+    return node;
+  }
+
+  try {
+    return onNode(root);
+  } catch (e) {
+    if (e === VisitBreak) return root;
+    throw e;
+  }
 }

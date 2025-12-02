@@ -47,6 +47,7 @@ export function remarkTypeScriptToJavaScript({
 }: TypeScriptToJavaScriptOptions = {}): Transformer<Root> {
   return async (tree, file) => {
     const oxc = await import('oxc-transform');
+    const tasks: Promise<void>[] = [];
 
     visit(tree, 'code', (node) => {
       const lang = node.lang;
@@ -55,57 +56,63 @@ export function remarkTypeScriptToJavaScript({
       const meta = parseCodeBlockAttributes(node.meta ?? '', ['ts2js']);
       if (!disableTrigger && !('ts2js' in meta.attributes)) return;
 
-      const result = oxc.transform(
-        `${file.path ?? 'test'}.${lang}`,
-        node.value,
-        {
-          sourcemap: false,
-          jsx: 'preserve',
-        },
+      tasks.push(
+        (async () => {
+          const result = await oxc.transform(
+            `${file.path ?? 'test'}.${lang}`,
+            node.value,
+            {
+              sourcemap: false,
+              jsx: 'preserve',
+            },
+          );
+
+          const replacement = generateCodeBlockTabs({
+            persist,
+            defaultValue,
+            triggers: [
+              {
+                value: 'ts',
+                children: [{ type: 'text', value: 'TypeScript' }],
+              },
+              {
+                value: 'js',
+                children: [{ type: 'text', value: 'JavaScript' }],
+              },
+            ],
+            tabs: [
+              {
+                value: 'ts',
+                children: [
+                  {
+                    type: 'code',
+                    lang: node.lang,
+                    meta: meta.rest,
+                    value: node.value,
+                  },
+                ],
+              },
+              {
+                value: 'js',
+                children: [
+                  {
+                    type: 'code',
+                    lang: lang === 'tsx' ? 'jsx' : 'js',
+                    meta: meta.attributes.ts2js ?? meta.rest,
+                    value: result.code,
+                  },
+                ],
+              },
+            ],
+          });
+
+          Object.assign(node, replacement);
+        })(),
       );
 
-      const targetLang = lang === 'tsx' ? 'jsx' : 'js';
-      const replacement = generateCodeBlockTabs({
-        persist,
-        defaultValue,
-        triggers: [
-          {
-            value: 'ts',
-            children: [{ type: 'text', value: 'TypeScript' }],
-          },
-          {
-            value: 'js',
-            children: [{ type: 'text', value: 'JavaScript' }],
-          },
-        ],
-        tabs: [
-          {
-            value: 'ts',
-            children: [
-              {
-                type: 'code',
-                lang: node.lang,
-                meta: meta.rest,
-                value: node.value,
-              },
-            ],
-          },
-          {
-            value: 'js',
-            children: [
-              {
-                type: 'code',
-                lang: targetLang,
-                meta: meta.attributes.ts2js ?? meta.rest,
-                value: result.code,
-              },
-            ],
-          },
-        ],
-      });
-
-      Object.assign(node, replacement);
       return 'skip';
     });
+
+    await Promise.all(tasks);
   };
 }

@@ -3,8 +3,7 @@ import Image from 'next/image';
 import { cn } from '@/lib/cn';
 import { fetchContributors } from '@/lib/get-contributors';
 
-export interface ContributorCounterProps
-  extends HTMLAttributes<HTMLDivElement> {
+export interface ContributorCounterProps extends HTMLAttributes<HTMLDivElement> {
   repoOwner: string;
   repoName: string;
   displayCount?: number;

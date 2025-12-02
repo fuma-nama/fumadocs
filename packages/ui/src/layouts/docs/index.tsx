@@ -40,12 +40,12 @@ import {
 import {
   getSidebarTabs,
   type GetSidebarTabsOptions,
-} from '@/utils/get-sidebar-tabs';
+} from '@/components/sidebar/tabs';
 import type { SidebarPageTreeComponents } from '@/components/sidebar/page-tree';
 import {
-  SidebarTabTrigger,
+  SidebarTabsDropdown,
   type SidebarTabWithProps,
-} from '@/components/sidebar/tabs';
+} from '@/components/sidebar/tabs/dropdown';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
@@ -61,7 +61,8 @@ export interface DocsLayoutProps extends BaseLayoutProps {
 }
 
 interface SidebarOptions
-  extends ComponentProps<'aside'>,
+  extends
+    ComponentProps<'aside'>,
     Pick<ComponentProps<typeof Sidebar>, 'defaultOpenLevel' | 'prefetch'> {
   enabled?: boolean;
   component?: ReactNode;
@@ -172,7 +173,7 @@ export function DocsLayout({
                 <LargeSearchToggle hideIfDisabled />
               ))}
             {tabs.length > 0 && tabMode === 'auto' && (
-              <SidebarTabTrigger options={tabs} />
+              <SidebarTabsDropdown options={tabs} />
             )}
             {banner}
           </div>
@@ -255,7 +256,7 @@ export function DocsLayout({
                 <SidebarIcon />
               </SidebarTrigger>
             </div>
-            {tabs.length > 0 && <SidebarTabTrigger options={tabs} />}
+            {tabs.length > 0 && <SidebarTabsDropdown options={tabs} />}
             {banner}
           </div>
           {viewport}

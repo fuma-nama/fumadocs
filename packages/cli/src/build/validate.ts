@@ -1,21 +1,20 @@
 import type { Output, OutputComponent } from '@/registry/schema';
 
 export function validateOutput(registry: Output) {
-  function validateComponent(
-    comp: OutputComponent,
-    ctx: {
-      stack?: Map<string, Set<string>>;
-    } = {},
-  ) {
-    const { stack = new Map<string, Set<string>>() } = ctx;
+  const validatedComps = new Set<string>();
+  const fileToComps = new Map<string, Set<string>>();
+
+  function validateComponent(comp: OutputComponent) {
+    if (validatedComps.has(comp.name)) return;
+    validatedComps.add(comp.name);
 
     for (const file of comp.files) {
-      const parents = stack.get(file.path);
+      const parents = fileToComps.get(file.path);
 
       if (parents) {
         parents.add(comp.name);
       } else {
-        stack.set(file.path, new Set([comp.name]));
+        fileToComps.set(file.path, new Set([comp.name]));
       }
     }
 
@@ -26,15 +25,12 @@ export function validateOutput(registry: Output) {
         continue;
       }
 
-      validateComponent(subComp, {
-        stack,
-      });
+      validateComponent(subComp);
     }
 
     for (const file of comp.files) {
-      const parents = stack.get(file.path);
-      if (!parents) continue;
-      if (parents.size <= 1) continue;
+      const parents = fileToComps.get(file.path);
+      if (!parents || parents.size <= 1) continue;
 
       throw new Error(
         `Duplicated file in same component ${Array.from(parents).join(', ')}: ${file.path}`,
@@ -42,12 +38,9 @@ export function validateOutput(registry: Output) {
     }
   }
 
-  const compSet = new Set<string>();
   for (const comp of registry.components) {
-    if (compSet.has(comp.name))
-      throw new Error(`duplicated component name ${comp.name}`);
-    compSet.add(comp.name);
-
+    // per comp
+    fileToComps.clear();
     validateComponent(comp);
   }
 }

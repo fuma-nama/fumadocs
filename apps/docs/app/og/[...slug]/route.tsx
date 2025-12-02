@@ -15,12 +15,10 @@ export async function GET(
   if (!page) notFound();
 
   return new ImageResponse(
-    (
-      <MetadataImage
-        title={page.data.title}
-        description={page.data.description}
-      />
-    ),
+    <MetadataImage
+      title={page.data.title}
+      description={page.data.description}
+    />,
     await getImageResponseOptions(),
   );
 }

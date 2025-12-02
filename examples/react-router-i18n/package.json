@@ -25,12 +25,12 @@
     "@tailwindcss/vite": "^4.1.17",
     "@types/mdx": "^2.0.13",
     "@types/node": "^24.10.1",
-    "@types/react": "^19.2.5",
+    "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "react-router-devtools": "^6.0.0",
     "tailwindcss": "^4.1.17",
     "typescript": "^5.9.3",
-    "vite": "^7.2.2",
+    "vite": "^7.2.6",
     "vite-tsconfig-paths": "^5.1.4"
   }
 }

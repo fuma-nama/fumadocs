@@ -70,8 +70,10 @@ function defaultBuildIndex(source: LoaderOutput<LoaderConfig>) {
   };
 }
 
-interface Options<S extends LoaderOutput<LoaderConfig>>
-  extends Omit<AdvancedOptions, 'indexes'> {
+interface Options<S extends LoaderOutput<LoaderConfig>> extends Omit<
+  AdvancedOptions,
+  'indexes'
+> {
   localeMap?: {
     [K in S extends LoaderOutput<infer C>
       ? C['i18n'] extends I18nConfig<infer Languages>

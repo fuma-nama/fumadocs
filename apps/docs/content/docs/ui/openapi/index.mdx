@@ -3,8 +3,12 @@ title: OpenAPI
 description: Generating docs for OpenAPI schema
 ---
 
-<Callout type="warning" title="Server Component Only">
-  It only works under RSC environments.
+<Callout type="warning" title="Before Reading">
+
+- Only OpenAPI 3.0 and 3.1 are supported.
+- It only works under RSC
+  environments.
+
 </Callout>
 
 ## Manual Setup
@@ -32,7 +36,7 @@ Add the following line:
 @import 'fumadocs-openapi/css/preset.css';
 ```
 
-### Configure Pages
+### Configure Plugin
 
 Create an OpenAPI instance on the server.
 
@@ -76,24 +80,10 @@ export default defineClientConfig({
 });
 ```
 
-Add the `APIPage` component to your MDX Components.
+### Generate Pages
 
-```tsx title="mdx-components.tsx"
-import defaultComponents from 'fumadocs-ui/mdx';
-import { APIPage } from '@/components/api-page';
-import type { MDXComponents } from 'mdx/types';
-
-// make sure you can use it in MDX files
-export function getMDXComponents(components?: MDXComponents): MDXComponents {
-  return {
-    ...defaultComponents,
-    APIPage,
-    ...components,
-  };
-}
-```
-
-### Generate Files
+<Tabs items={["MDX Files", "Virtual Files"]}>
+<Tab>
 
 You can generate MDX files directly from your OpenAPI schema.
 
@@ -112,13 +102,82 @@ void generateFiles({
 });
 ```
 
-> Only OpenAPI 3.0 and 3.1 are supported.
-
 Generate docs with the script:
 
 ```bash
 bun ./scripts/generate-docs.ts
 ```
+
+Add the `APIPage` component to your MDX Components.
+
+```tsx title="mdx-components.tsx"
+import defaultComponents from 'fumadocs-ui/mdx';
+import { APIPage } from '@/components/api-page';
+import type { MDXComponents } from 'mdx/types';
+
+// make sure you can use it in MDX files
+export function getMDXComponents(components?: MDXComponents): MDXComponents {
+  return {
+    ...defaultComponents,
+    APIPage,
+    ...components,
+  };
+}
+```
+
+</Tab>
+<Tab>
+
+You can also use it without generating real files by integrating into [Loader API](/docs/headless/source-api/source).
+
+```ts title="lib/source.ts"
+import { loader, multiple } from 'fumadocs-core/source';
+import { openapiPlugin, openapiSource } from 'fumadocs-openapi/server';
+import { docs } from 'fumadocs-mdx:collections/server';
+import { openapi } from '@/lib/openapi';
+
+export const source = loader(
+  // [!code ++:6]
+  multiple({
+    docs: docs.toFumadocsSource(),
+    openapi: await openapiSource(openapi, {
+      baseDir: 'openapi',
+    }),
+  }),
+  {
+    baseUrl: '/docs',
+    plugins: [openapiPlugin()],
+    // ...
+  },
+);
+```
+
+It shares a different type from your original source, explicit handling of OpenAPI pages might be necessary (e.g. in your page component).
+
+```tsx title="docs/[[...slug]]/page.tsx"
+import { APIPage } from '@/components/api-page';
+
+function Page() {
+  const page = source.getPage('...');
+
+  if (page.data.type === 'openapi') {
+    return (
+      <DocsPage full>
+        <h1 className="text-[1.75em] font-semibold">{page.data.title}</h1>
+
+        <DocsBody>
+          <APIPage {...page.data.getAPIPageProps()} />
+        </DocsBody>
+      </DocsPage>
+    );
+  }
+
+  // your original flow below...
+}
+```
+
+</Tab>
+</Tabs>
 
 ## Features
 

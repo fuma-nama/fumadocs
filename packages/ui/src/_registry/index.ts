@@ -157,8 +157,13 @@ export const registry: Registry = {
         },
         {
           type: 'components',
-          path: 'components/sidebar/tabs.tsx',
-          target: 'components/layout/sidebar/tabs.tsx',
+          path: 'components/sidebar/tabs/index.tsx',
+          target: 'components/layout/sidebar/tabs/index.tsx',
+        },
+        {
+          type: 'components',
+          path: 'components/sidebar/tabs/dropdown.tsx',
+          target: 'components/layout/sidebar/tabs/dropdown.tsx',
         },
       ],
     },

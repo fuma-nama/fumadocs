@@ -35,16 +35,16 @@ import {
   LargeSearchToggle,
   SearchToggle,
 } from '@/layouts/shared/search-toggle';
-import {
-  getSidebarTabs,
-  type GetSidebarTabsOptions,
-} from '@/utils/get-sidebar-tabs';
 import { LinkItem, type LinkItemType } from '@/layouts/shared/link-item';
 import type { SidebarPageTreeComponents } from '@/components/sidebar/page-tree';
 import {
-  SidebarTabTrigger,
-  type SidebarTabWithProps,
+  getSidebarTabs,
+  type GetSidebarTabsOptions,
 } from '@/components/sidebar/tabs';
+import {
+  SidebarTabsDropdown,
+  type SidebarTabWithProps,
+} from '@/components/sidebar/tabs/dropdown';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
@@ -60,7 +60,8 @@ export interface DocsLayoutProps extends BaseLayoutProps {
 }
 
 interface SidebarOptions
-  extends ComponentProps<'aside'>,
+  extends
+    ComponentProps<'aside'>,
     Pick<ComponentProps<typeof Sidebar>, 'defaultOpenLevel' | 'prefetch'> {
   components?: Partial<SidebarPageTreeComponents>;
 
@@ -121,12 +122,17 @@ export function DocsLayout(props: DocsLayoutProps) {
       collapsible = true,
       ...rest
     } = sidebarProps;
+
+    const iconLinks = links.filter((item) => item.type === 'icon');
     const Header =
       typeof banner === 'function'
         ? banner
         : ({ className, ...props }: ComponentProps<'div'>) => (
             <div
-              className={cn('flex flex-col gap-3 p-4 pb-2', className)}
+              className={cn(
+                'flex flex-col gap-3 p-4 pb-2 empty:hidden',
+                className,
+              )}
               {...props}
             >
               {props.children}
@@ -138,14 +144,17 @@ export function DocsLayout(props: DocsLayoutProps) {
         ? footer
         : ({ className, ...props }: ComponentProps<'div'>) => (
             <div
-              className={cn('flex flex-col border-t p-4 pt-2', className)}
+              className={cn(
+                'hidden flex-row text-fd-muted-foreground items-center border-t p-4 pt-2',
+                iconLinks.length > 0 && 'max-lg:flex',
+                className,
+              )}
               {...props}
             >
               {props.children}
               {footer}
             </div>
           );
-    const iconLinks = links.filter((item) => item.type === 'icon');
     const viewport = (
       <SidebarViewport>
         {links
@@ -165,7 +174,7 @@ export function DocsLayout(props: DocsLayoutProps) {
     return (
       <>
         <SidebarContent {...rest}>
-          <Header className="empty:hidden">
+          <Header>
             {navMode === 'auto' && (
               <div className="flex justify-between">
                 <Link
@@ -191,19 +200,14 @@ export function DocsLayout(props: DocsLayoutProps) {
             )}
             {nav.children}
             {tabs.length > 0 && (
-              <SidebarTabTrigger
+              <SidebarTabsDropdown
                 options={tabs}
                 className={cn(tabMode === 'navbar' && 'lg:hidden')}
               />
             )}
           </Header>
           {viewport}
-          <Footer
-            className={cn(
-              'hidden flex-row text-fd-muted-foreground items-center',
-              iconLinks.length > 0 && 'max-lg:flex',
-            )}
-          >
+          <Footer>
             {iconLinks.map((item, i) => (
               <LinkItem
                 key={i}
@@ -235,7 +239,7 @@ export function DocsLayout(props: DocsLayoutProps) {
             >
               <X />
             </SidebarTrigger>
-            {tabs.length > 0 && <SidebarTabTrigger options={tabs} />}
+            {tabs.length > 0 && <SidebarTabsDropdown options={tabs} />}
           </Header>
           {viewport}
           <Footer

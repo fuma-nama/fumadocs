@@ -155,8 +155,10 @@ export function PageTOCPopoverTrigger({
   );
 }
 
-interface ProgressCircleProps
-  extends Omit<React.ComponentProps<'svg'>, 'strokeWidth'> {
+interface ProgressCircleProps extends Omit<
+  React.ComponentProps<'svg'>,
+  'strokeWidth'
+> {
   value: number;
   strokeWidth?: number;
   size?: number;

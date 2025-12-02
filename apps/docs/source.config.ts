@@ -72,20 +72,16 @@ export default defineConfig({
     lastModified(),
   ],
   mdxOptions: async () => {
-    const { rehypeCodeDefaultOptions } = await import(
-      'fumadocs-core/mdx-plugins/rehype-code'
-    );
-    const { remarkSteps } = await import(
-      'fumadocs-core/mdx-plugins/remark-steps'
-    );
+    const { rehypeCodeDefaultOptions } =
+      await import('fumadocs-core/mdx-plugins/rehype-code');
+    const { remarkSteps } =
+      await import('fumadocs-core/mdx-plugins/remark-steps');
     const { transformerTwoslash } = await import('fumadocs-twoslash');
-    const { createFileSystemTypesCache } = await import(
-      'fumadocs-twoslash/cache-fs'
-    );
+    const { createFileSystemTypesCache } =
+      await import('fumadocs-twoslash/cache-fs');
     const { default: remarkMath } = await import('remark-math');
-    const { remarkTypeScriptToJavaScript } = await import(
-      'fumadocs-docgen/remark-ts2js'
-    );
+    const { remarkTypeScriptToJavaScript } =
+      await import('fumadocs-docgen/remark-ts2js');
     const { default: rehypeKatex } = await import('rehype-katex');
     const { remarkAutoTypeTable } = await import('fumadocs-typescript');
 

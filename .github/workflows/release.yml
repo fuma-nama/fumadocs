@@ -6,6 +6,9 @@ on:
       - dev
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   release:
@@ -35,4 +38,3 @@ jobs:
           version: pnpm run version
         env:
           GITHUB_TOKEN: ${{ secrets.UPDATE_TEMPLATE_SSH_KEY }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

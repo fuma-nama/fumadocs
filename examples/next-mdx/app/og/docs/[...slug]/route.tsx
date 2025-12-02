@@ -14,13 +14,11 @@ export async function GET(
   if (!page) notFound();
 
   return new ImageResponse(
-    (
-      <DefaultImage
-        title={page.data.title}
-        description={page.data.description}
-        site="My App"
-      />
-    ),
+    <DefaultImage
+      title={page.data.title}
+      description={page.data.description}
+      site="My App"
+    />,
     {
       width: 1200,
       height: 630,

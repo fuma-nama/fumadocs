@@ -1,5 +1,15 @@
 # create-fumadocs-versions
 
+## 16.0.22
+
+### Patch Changes
+
+- Updated dependencies [464442b]
+- Updated dependencies [6c668e1]
+- Updated dependencies [19db270]
+  - fumadocs-core@16.2.2
+  - fumadocs-ui@16.2.2
+
 ## 16.0.21
 
 ### Patch Changes
