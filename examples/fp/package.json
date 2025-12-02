@@ -24,7 +24,7 @@
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
-    "express": "^5.1.0",
+    "express": "^5.2.1",
     "react-router-devtools": "^6.0.0",
     "tailwindcss": "^4.1.17",
     "typescript": "^5.9.3",
