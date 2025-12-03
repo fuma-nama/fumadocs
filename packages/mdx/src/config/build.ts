@@ -27,18 +27,18 @@ export type CollectionItem =
   | DocCollectionItem
   | DocsCollectionItem;
 
-type PrimitiveCollectionItem<T extends DocCollection | MetaCollection> = Omit<
-  T,
-  'files'
-> & {
+interface PrimitiveCollectionItem {
   name: string;
+  cwd: string;
   hasFile: (filePath: string) => boolean;
   isFileSupported: (filePath: string) => boolean;
   patterns: string[];
-};
+}
 
-export type MetaCollectionItem = PrimitiveCollectionItem<MetaCollection>;
-export type DocCollectionItem = PrimitiveCollectionItem<DocCollection>;
+export type MetaCollectionItem = PrimitiveCollectionItem &
+  Omit<MetaCollection, 'files'>;
+export type DocCollectionItem = PrimitiveCollectionItem &
+  Omit<DocCollection, 'files'>;
 
 export interface DocsCollectionItem extends DocsCollection {
   name: string;
@@ -60,27 +60,37 @@ export function buildCollection(
     return {
       ...config,
       name,
-      meta: buildPrimitiveCollection(name, config.meta),
-      docs: buildPrimitiveCollection(name, config.docs),
+      meta: buildCollection(name, config.meta),
+      docs: buildCollection(name, config.docs),
       hasFile(filePath) {
         return this.docs.hasFile(filePath) || this.meta.hasFile(filePath);
       },
     } as DocsCollectionItem;
   }
 
-  return buildPrimitiveCollection(name, config) as CollectionItem;
-}
-
-function buildPrimitiveCollection<T extends DocCollection | MetaCollection>(
-  name: string,
-  { files, ...config }: T,
-): PrimitiveCollectionItem<T> {
-  const supportedFormats = SupportedFormats[config.type];
-  const patterns = files ?? [`**/*.{${supportedFormats.join(',')}}`];
-  let matchers: picomatch.Matcher[];
+  if (config.type === 'doc') {
+    return {
+      ...config,
+      ...buildPrimitiveCollection(name, config),
+    };
+  }
 
   return {
     ...config,
+    ...buildPrimitiveCollection(name, config),
+  };
+}
+
+function buildPrimitiveCollection(
+  name: string,
+  config: DocCollection | MetaCollection,
+): PrimitiveCollectionItem {
+  const supportedFormats = SupportedFormats[config.type];
+  const patterns = config.files ?? [`**/*.{${supportedFormats.join(',')}}`];
+  let matchers: picomatch.Matcher[];
+
+  return {
+    cwd: process.cwd(),
     name,
     patterns,
     isFileSupported(filePath) {

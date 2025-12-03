@@ -70,7 +70,6 @@
     "esbuild": "^0.27.0",
     "estree-util-value-to-estree": "^3.5.0",
     "js-yaml": "^4.1.1",
-    "lru-cache": "^11.2.4",
     "mdast-util-to-markdown": "^2.1.2",
     "picocolors": "^1.1.1",
     "picomatch": "^4.0.3",

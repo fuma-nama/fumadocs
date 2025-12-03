@@ -8,7 +8,7 @@ import type {
 import path from 'path';
 import { type CodeGen, createCodegen, ident } from '@/utils/codegen';
 import { glob } from 'tinyglobby';
-import { readFileWithCache, removeFileCache } from '@/utils/fs-cache';
+import { createFSCache } from '@/utils/fs-cache';
 import { createHash } from 'crypto';
 import type { LazyEntry } from '@/runtime/dynamic';
 import type { EmitEntry } from '@/core';
@@ -49,6 +49,8 @@ interface FileGenContext {
   serverOptions: ServerOptions;
   tc: string;
 }
+
+const indexFileCache = createFSCache();
 
 export default function indexFile(
   options: IndexFilePluginOptions = {},
@@ -104,7 +106,7 @@ export default function indexFile(
       if (!server.watcher) return;
 
       server.watcher.on('all', async (event, file) => {
-        removeFileCache(file);
+        indexFileCache.delete(file);
 
         // dynamic collections always require re-generation on change
         if (dynamicCollections.length === 0) {
@@ -266,7 +268,7 @@ async function generateDynamicIndexFile({
     file: string,
   ) {
     const fullPath = path.join(collection.dir, file);
-    const content = await readFileWithCache(fullPath).catch(() => '');
+    const content = await indexFileCache.read(fullPath).catch(() => '');
     const parsed = fumaMatter(content);
     const data = await core.transformFrontmatter(
       {

@@ -1739,9 +1739,6 @@ importers:
       js-yaml:
         specifier: ^4.1.1
         version: 4.1.1
-      lru-cache:
-        specifier: ^11.2.4
-        version: 11.2.4
       mdast-util-to-markdown:
         specifier: ^2.1.2
         version: 2.1.2
@@ -6497,7 +6494,6 @@ packages:
 
   bun@1.3.3:
     resolution: {integrity: sha512-2hJ4ocTZ634/Ptph4lysvO+LbbRZq8fzRvMwX0/CqaLBxrF2UB5D1LdMB8qGcdtCer4/VR9Bx5ORub0yn+yzmw==}
-    cpu: [arm64, x64]
     os: [darwin, linux, win32]
     hasBin: true
 
