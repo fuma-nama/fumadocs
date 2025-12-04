@@ -1,5 +1,18 @@
 # next-docs-mdx
 
+## 14.1.0
+
+### Minor Changes
+
+- fc0e3db: Support Workspaces API [Experimental]
+
+### Patch Changes
+
+- Updated dependencies [ef8eb6c]
+- Updated dependencies [e0c4c3a]
+- Updated dependencies [4e2bca7]
+  - fumadocs-core@16.2.3
+
 ## 14.0.4
 
 ### Patch Changes
