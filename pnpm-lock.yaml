@@ -1591,6 +1591,9 @@ importers:
       waku:
         specifier: ^0.27.2
         version: 0.27.2(@swc/helpers@0.5.17)(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.1(react@19.2.1))(react-server-dom-webpack@19.2.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(webpack@5.103.0(@swc/core@1.15.3)(esbuild@0.27.0)))(react@19.2.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+      zod:
+        specifier: ^4.1.13
+        version: 4.1.13
 
   packages/create-app:
     dependencies:
@@ -6656,6 +6659,7 @@ packages:
 
   bun@1.3.3:
     resolution: {integrity: sha512-2hJ4ocTZ634/Ptph4lysvO+LbbRZq8fzRvMwX0/CqaLBxrF2UB5D1LdMB8qGcdtCer4/VR9Bx5ORub0yn+yzmw==}
+    cpu: [arm64, x64]
     os: [darwin, linux, win32]
     hasBin: true
 

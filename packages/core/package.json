@@ -52,6 +52,10 @@
       "import": "./dist/source/client/index.js",
       "types": "./dist/source/client/index.d.ts"
     },
+    "./source/schema": {
+      "import": "./dist/source/schema.js",
+      "types": "./dist/source/schema.d.ts"
+    },
     "./source/*": {
       "import": "./dist/source/plugins/*.js",
       "types": "./dist/source/plugins/*.d.ts"
@@ -157,7 +161,8 @@
     "typescript": "^5.9.3",
     "unified": "^11.0.5",
     "vfile": "^6.0.3",
-    "waku": "^0.27.2"
+    "waku": "^0.27.2",
+    "zod": "^4.1.13"
   },
   "peerDependencies": {
     "@mixedbread/sdk": "^0.19.0",
@@ -170,7 +175,8 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router": "7.x.x",
-    "waku": "^0.26.0 || ^0.27.0"
+    "waku": "^0.26.0 || ^0.27.0",
+    "zod": "*"
   },
   "peerDependenciesMeta": {
     "@mixedbread/sdk": {
@@ -204,6 +210,9 @@
       "optional": true
     },
     "lucide-react": {
+      "optional": true
+    },
+    "zod": {
       "optional": true
     }
   },
