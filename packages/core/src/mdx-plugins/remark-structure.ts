@@ -33,7 +33,7 @@ export interface StructureOptions {
   /**
    * Types to be scanned as content.
    *
-   * @defaultValue ['heading', 'paragraph', 'blockquote', 'tableCell', 'mdxJsxFlowElement']
+   * @defaultValue ['heading', 'paragraph', 'blockquote', 'tableCell', 'mdxJsxFlowElement', 'code']
    */
   types?: string[] | ((node: Nodes) => boolean);
 
@@ -84,6 +84,7 @@ export function remarkStructure({
     'blockquote',
     'tableCell',
     'mdxJsxFlowElement',
+    'code',
   ],
   allowedMdxAttributes = (node) => {
     if (!node.name) return false;
