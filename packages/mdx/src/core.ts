@@ -114,6 +114,7 @@ export interface CoreOptions {
   workspace?: {
     parent: Core;
     name: string;
+    dir: string;
   };
 }
 
@@ -213,6 +214,7 @@ export function createCore(options: CoreOptions) {
               workspace: {
                 name,
                 parent: this,
+                dir: workspace.dir,
               },
             });
             await core.init({ config: workspace.config });

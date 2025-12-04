@@ -43,14 +43,6 @@ export default function lastModified(
   const { versionControl = 'git', filter = () => true } = options;
   let fn: VersionControlFn;
 
-  switch (versionControl) {
-    case 'git':
-      fn = getGitTimestamp;
-      break;
-    default:
-      fn = versionControl;
-  }
-
   return {
     name: 'last-modified',
     'index-file': {
@@ -73,6 +65,18 @@ export default function lastModified(
         options.doc.passthroughs.push('lastModified');
       },
     },
+    config() {
+      const { workspace } = this.core.getOptions();
+      const cwd = workspace ? path.resolve(workspace.dir) : process.cwd();
+
+      switch (versionControl) {
+        case 'git':
+          fn = (v) => getGitTimestamp(v, cwd);
+          break;
+        default:
+          fn = versionControl;
+      }
+    },
     doc: {
       async vfile(file) {
         if (!filter(this.collection.name)) return;
@@ -90,23 +94,29 @@ export default function lastModified(
   };
 }
 
-async function getGitTimestamp(file: string): Promise<Date | null> {
+async function getGitTimestamp(
+  file: string,
+  cwd: string,
+): Promise<Date | null> {
   const cached = cache.get(file);
   if (cached) return cached;
 
   const timePromise = (async () => {
     const out = await x(
       'git',
-      ['log', '-1', '--pretty="%ai"', path.relative(process.cwd(), file)],
+      ['log', '-1', '--pretty="%ai"', path.relative(cwd, file)],
       {
-        throwOnError: true,
+        nodeOptions: {
+          cwd,
+        },
       },
     );
 
+    if (out.exitCode !== 0) return null;
     const date = new Date(out.stdout);
     return isNaN(date.getTime()) ? null : date;
   })();
 
   cache.set(file, timePromise);
-  return timePromise.catch(() => null);
+  return timePromise;
 }
