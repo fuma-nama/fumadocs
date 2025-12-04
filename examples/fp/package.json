@@ -13,9 +13,9 @@
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "fumapress": "workspace:*",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "react-router": "^7.9.6"
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
+    "react-router": "^7.10.0"
   },
   "devDependencies": {
     "@remix-run/node-fetch-server": "^0.12.0",
