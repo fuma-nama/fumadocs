@@ -1,9 +1,5 @@
 import type { EmitEntry, Plugin } from '@/core';
-import type {
-  DocsCollectionItem,
-  LoadedConfig,
-  MetaCollectionItem,
-} from '@/config/build';
+import type { DocsCollectionItem, MetaCollectionItem } from '@/config/build';
 import { z } from 'zod';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -25,23 +21,18 @@ export interface JSONSchemaOptions {
 export default function jsonSchema({
   insert = false,
 }: JSONSchemaOptions = {}): Plugin {
-  let config: LoadedConfig;
-
   function getSchemaPath(name: string) {
     return `json-schema/${name}.json`;
   }
 
   return {
-    config(v) {
-      config = v;
-    },
     configureServer(server) {
       if (!server.watcher || !insert) return;
 
       server.watcher.on('add', async (file) => {
         let parent: DocsCollectionItem | undefined;
         let match: MetaCollectionItem | undefined;
-        for (const collection of config.collectionList) {
+        for (const collection of this.core.getCollections()) {
           if (collection.type === 'meta' && collection.hasFile(file)) {
             match = collection;
             break;
@@ -90,7 +81,7 @@ export default function jsonSchema({
         });
       }
 
-      for (const collection of config.collectionList) {
+      for (const collection of this.core.getCollections()) {
         if (collection.type === 'docs') {
           if (collection.meta.schema instanceof z.ZodType) {
             onSchema(`${collection.name}.meta`, collection.meta.schema);

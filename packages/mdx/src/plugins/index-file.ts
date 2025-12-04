@@ -1,6 +1,5 @@
 import type { Core, CoreOptions, Plugin, PluginContext } from '@/core';
 import type {
-  LoadedConfig,
   CollectionItem,
   DocCollectionItem,
   MetaCollectionItem,
@@ -61,7 +60,6 @@ export default function indexFile(
     browser = true,
     dynamic = true,
   } = options;
-  let config: LoadedConfig;
   let dynamicCollections: CollectionItem[];
 
   function isDynamic(collection: CollectionItem) {
@@ -98,9 +96,8 @@ export default function indexFile(
 
   return {
     name: 'index-file',
-    config(v) {
-      config = v;
-      dynamicCollections = config.collectionList.filter(isDynamic);
+    config() {
+      dynamicCollections = this.core.getCollections().filter(isDynamic);
     },
     configureServer(server) {
       if (!server.watcher) return;
@@ -116,9 +113,9 @@ export default function indexFile(
           if (target === 'default' && event === 'change') return;
         }
 
-        const updatedCollection = config.collectionList.find((collection) =>
-          collection.hasFile(file),
-        );
+        const updatedCollection = this.core
+          .getCollections()
+          .find((collection) => collection.hasFile(file));
 
         if (!updatedCollection) return;
         if (!isDynamic(updatedCollection)) {
@@ -126,8 +123,9 @@ export default function indexFile(
           if (target === 'default' && event === 'change') return;
         }
 
-        await this.core.emitAndWrite({
+        await this.core.emit({
           filterPlugin: (plugin) => plugin.name === 'index-file',
+          filterWorkspace: () => false,
         });
       });
     },
@@ -240,7 +238,7 @@ async function generateServerIndexFile({
   }
 
   await codegen.pushAsync(
-    core.getConfig().collectionList.map(async (collection) => {
+    core.getCollections().map(async (collection) => {
       const obj = await generateCollectionObject(collection);
       if (!obj) return;
 
@@ -336,7 +334,7 @@ async function generateDynamicIndexFile({
   }
 
   await codegen.pushAsync(
-    core.getConfig().collectionList.map(async (collection) => {
+    core.getCollections().map(async (collection) => {
       const obj = await generateCollectionObject(collection);
       if (!obj) return;
 
@@ -372,7 +370,7 @@ async function generateBrowserIndexFile({ core, codegen, tc }: FileGenContext) {
   codegen.lines.push('const browserCollections = {');
 
   await codegen.pushAsync(
-    core.getConfig().collectionList.map(async (collection) => {
+    core.getCollections().map(async (collection) => {
       const obj = await generateCollectionObject(collection);
       if (!obj) return;
 

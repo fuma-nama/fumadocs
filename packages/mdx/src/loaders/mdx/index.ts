@@ -24,7 +24,7 @@ const cacheEntry = z.object({
 
 type CacheEntry = z.infer<typeof cacheEntry>;
 
-export function createMdxLoader(configLoader: ConfigLoader): Loader {
+export function createMdxLoader({ core, getConfig }: ConfigLoader): Loader {
   return {
     test: mdxLoaderGlob,
     async load({
@@ -34,7 +34,7 @@ export function createMdxLoader(configLoader: ConfigLoader): Loader {
       compiler,
       filePath,
     }) {
-      const config = await configLoader.getConfig();
+      const config = await getConfig();
       const value = await getSource();
       const matter = fumaMatter(value);
       const parsed = querySchema.parse(query);
@@ -64,7 +64,7 @@ export function createMdxLoader(configLoader: ConfigLoader): Loader {
       }
 
       const collection = parsed.collection
-        ? config.getCollection(parsed.collection)
+        ? core.getCollection(parsed.collection)
         : undefined;
 
       let docCollection: DocCollectionItem | undefined;
@@ -78,7 +78,7 @@ export function createMdxLoader(configLoader: ConfigLoader): Loader {
       }
 
       if (docCollection) {
-        matter.data = await configLoader.core.transformFrontmatter(
+        matter.data = await core.transformFrontmatter(
           { collection: docCollection, filePath, source: value },
           matter.data as Record<string, unknown>,
         );
@@ -95,7 +95,7 @@ export function createMdxLoader(configLoader: ConfigLoader): Loader {
       const lineOffset = isDevelopment ? countLines(matter.matter) : 0;
 
       const { buildMDX } = await import('@/loaders/mdx/build-mdx');
-      const compiled = await buildMDX(configLoader.core, docCollection, {
+      const compiled = await buildMDX(core, docCollection, {
         isDevelopment,
         source: '\n'.repeat(lineOffset) + matter.content,
         filePath,

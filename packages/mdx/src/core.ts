@@ -1,4 +1,5 @@
 import type {
+  CollectionItem,
   DocCollectionItem,
   LoadedConfig,
   MetaCollectionItem,
@@ -108,6 +109,14 @@ export interface CoreOptions {
 
   extend?: (core: Core) => Core;
   plugins?: PluginOption[];
+
+  /**
+   * the workspace info if this instance is created as a workspace
+   */
+  workspace?: {
+    parent: Core;
+    name: string;
+  };
 }
 
 export interface EmitOptions {
@@ -115,6 +124,21 @@ export interface EmitOptions {
    * filter the plugins to run emit
    */
   filterPlugin?: (plugin: Plugin) => boolean;
+
+  /**
+   * filter the workspaces to run emit
+   */
+  filterWorkspace?: (workspace: string) => boolean;
+
+  /**
+   * write files
+   */
+  write?: boolean;
+}
+
+export interface EmitOutput {
+  entries: EmitEntry[];
+  workspaces: Record<string, EmitEntry[]>;
 }
 
 export const _Defaults = {
@@ -137,7 +161,7 @@ async function getPlugins(pluginOptions: PluginOption[]): Promise<Plugin[]> {
 export function createCore(options: CoreOptions) {
   let config: LoadedConfig;
   let plugins: Plugin[];
-  let workspaces: Core[];
+  const workspaces = new Map<string, Core>();
 
   async function transformMetadata<T>(
     {
@@ -169,6 +193,7 @@ export function createCore(options: CoreOptions) {
     async init({ config: newConfig }: { config: Awaitable<LoadedConfig> }) {
       config = await newConfig;
       this.cache.clear();
+      workspaces.clear();
       plugins = await getPlugins([
         postprocessPlugin(),
         options.plugins,
@@ -180,13 +205,23 @@ export function createCore(options: CoreOptions) {
         if (out) config = out;
       }
 
-      workspaces = await Promise.all(
-        Object.values(config.workspaces).map(async (workspace) => {
-          const core = createCore(options);
-          await core.init({ config: workspace.config });
-          return core;
-        }),
-      );
+      // only support workspaces with max depth 1
+      if (!options.workspace) {
+        await Promise.all(
+          Object.entries(config.workspaces).map(async ([name, workspace]) => {
+            const core = createCore({
+              ...options,
+              outDir: path.join(options.outDir, name),
+              workspace: {
+                name,
+                parent: this,
+              },
+            });
+            await core.init({ config: workspace.config });
+            workspaces.set(name, core);
+          }),
+        );
+      }
     },
     getOptions() {
       return options;
@@ -203,6 +238,18 @@ export function createCore(options: CoreOptions) {
     getPlugins() {
       return plugins;
     },
+    getCollections(workspace?: string): CollectionItem[] {
+      if (workspace) return workspaces.get(workspace)?.getCollections() ?? [];
+      return Array.from(config.collections.values());
+    },
+    getCollection(
+      name: string,
+      workspace?: string,
+    ): CollectionItem | undefined {
+      if (workspace) return workspaces.get(workspace)?.getCollection(name);
+
+      return config.collections.get(name);
+    },
     getPluginContext(): PluginContext {
       return {
         core: this,
@@ -214,46 +261,58 @@ export function createCore(options: CoreOptions) {
       for (const plugin of plugins) {
         await plugin.configureServer?.call(ctx, server);
       }
-      for (const workspace of workspaces) {
+      for (const workspace of workspaces.values()) {
         await workspace.initServer(server);
       }
     },
-    async emit({ filterPlugin = () => true }: EmitOptions = {}): Promise<
-      EmitEntry[]
-    > {
+    async emit(emitOptions: EmitOptions = {}): Promise<EmitOutput> {
+      const { filterPlugin, filterWorkspace, write = false } = emitOptions;
+      const start = performance.now();
       const ctx = this.getPluginContext();
-      const files = new Map<string, EmitEntry>();
-      async function add(...v: Awaitable<EmitEntry[] | false>[]) {
-        for (const li of await Promise.all(v)) {
-          if (li === false) continue;
-          for (const item of li) files.set(item.path, item);
-        }
-      }
-      await add(
-        ...plugins.map((plugin) => {
-          if (!filterPlugin(plugin) || !plugin.emit) return false;
+      const added = new Set<string>();
+      const out: EmitOutput = {
+        entries: [],
+        workspaces: {},
+      };
 
+      for (const li of await Promise.all(
+        plugins.map((plugin) => {
+          if ((filterPlugin && !filterPlugin(plugin)) || !plugin.emit) return;
           return plugin.emit.call(ctx);
         }),
-        ...workspaces.map((workspace) => workspace.emit({ filterPlugin })),
-      );
-      return Array.from(files.values());
+      )) {
+        if (!li) continue;
+        for (const item of li) {
+          if (added.has(item.path)) continue;
+          out.entries.push(item);
+          added.add(item.path);
+        }
+      }
+
+      if (write) {
+        await Promise.all(
+          out.entries.map(async (entry) => {
+            const file = path.join(options.outDir, entry.path);
+
+            await fs.mkdir(path.dirname(file), { recursive: true });
+            await fs.writeFile(file, entry.content);
+          }),
+        );
+
+        console.log(
+          options.workspace
+            ? `[MDX: ${options.workspace.name}] generated files in ${performance.now() - start}ms`
+            : `[MDX] generated files in ${performance.now() - start}ms`,
+        );
+      }
+
+      for (const [name, workspace] of workspaces) {
+        if (filterWorkspace && !filterWorkspace(name)) continue;
+        out.workspaces[name] = (await workspace.emit(emitOptions)).entries;
+      }
+
+      return out;
     },
-    async emitAndWrite(emitOptions?: EmitOptions): Promise<void> {
-      const start = performance.now();
-      const out = await this.emit(emitOptions);
-
-      await Promise.all(
-        out.map(async (entry) => {
-          const file = path.join(options.outDir, entry.path);
-
-          await fs.mkdir(path.dirname(file), { recursive: true });
-          await fs.writeFile(file, entry.content);
-        }),
-      );
-      console.log(`[MDX] generated files in ${performance.now() - start}ms`);
-    },
-
     async transformMeta(
       options: TransformOptions<MetaCollectionItem>,
       data: unknown,
@@ -327,7 +386,7 @@ function postprocessPlugin(): Plugin {
         const lines: string[] = [];
         lines.push('{');
         lines.push('  DocData: {');
-        for (const collection of this.core.getConfig().collectionList) {
+        for (const collection of this.core.getCollections()) {
           let postprocessOptions: Partial<PostprocessOptions> | undefined;
           switch (collection.type) {
             case 'doc':

@@ -7,7 +7,6 @@ import type {
 } from 'next/dist/server/config-shared';
 import * as path from 'node:path';
 import { loadConfig } from '@/config/load-from-file';
-import { ValidationError } from '@/utils/validation';
 import { _Defaults, type Core, createCore } from '@/core';
 import { mdxLoaderGlob, metaLoaderGlob } from '@/loaders';
 import type { IndexFilePluginOptions } from '@/plugins/index-file';
@@ -130,7 +129,7 @@ async function init(dev: boolean, core: Core): Promise<void> {
     await core.init({
       config: loadConfig(core, true),
     });
-    await core.emitAndWrite();
+    await core.emit({ write: true });
   }
 
   async function devServer() {
@@ -143,7 +142,7 @@ async function init(dev: boolean, core: Core): Promise<void> {
     });
 
     watcher.add(configPath);
-    for (const collection of core.getConfig().collectionList) {
+    for (const collection of core.getCollections()) {
       if (collection.type === 'docs') {
         watcher.add(collection.docs.dir);
         watcher.add(collection.meta.dir);
@@ -190,7 +189,7 @@ export async function postInstall(options: CreateMDXOptions) {
   await core.init({
     config: loadConfig(core, true),
   });
-  await core.emitAndWrite();
+  await core.emit({ write: true });
 }
 
 function applyDefaults(options: CreateMDXOptions): Required<CreateMDXOptions> {
@@ -207,21 +206,5 @@ function createNextCore(options: Required<CreateMDXOptions>): Core {
     outDir: options.outDir,
     configPath: options.configPath,
     plugins: [options.index && indexFile(options.index)],
-    extend(core) {
-      return {
-        ...core,
-        async emitAndWrite(...args) {
-          try {
-            await core.emitAndWrite(...args);
-          } catch (err) {
-            if (err instanceof ValidationError) {
-              console.error(await err.toStringFormatted());
-            } else {
-              console.error(err);
-            }
-          }
-        },
-      };
-    },
   });
 }

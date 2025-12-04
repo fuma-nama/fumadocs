@@ -122,6 +122,7 @@ export async function buildMDX(
   let vfile = new VFile({
     value: source,
     path: filePath,
+    cwd: collection?.cwd,
     data: { frontmatter, _compiler, _getProcessor: getProcessor },
   });
 

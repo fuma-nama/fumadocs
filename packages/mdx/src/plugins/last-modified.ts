@@ -58,7 +58,7 @@ export default function lastModified(
         const lines: string[] = [];
         lines.push('{');
         lines.push('  DocData: {');
-        for (const collection of this.core.getConfig().collectionList) {
+        for (const collection of this.core.getCollections()) {
           if (filter(collection.name)) {
             lines.push(ident(`${collection.name}: ${ExtendTypes},`, 2));
           }

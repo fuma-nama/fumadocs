@@ -131,7 +131,7 @@ for (const { name, config } of cases) {
     await core.init({
       config: buildConfig(config),
     });
-    const markdown = (await core.emit())
+    const markdown = (await core.emit({ write: false })).entries
       .map(
         (entry) => `\`\`\`ts title="${entry.path}"\n${entry.content}\n\`\`\``,
       )

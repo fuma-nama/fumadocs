@@ -13,9 +13,7 @@ import path from 'node:path';
 export type BuildEnvironment = 'bundler' | 'runtime';
 
 export interface LoadedConfig {
-  collectionList: CollectionItem[];
-  getCollection(name: string): CollectionItem | undefined;
-
+  collections: Map<string, CollectionItem>;
   global: GlobalConfig;
   getMDXOptions(
     collection?: DocCollectionItem,
@@ -157,10 +155,7 @@ export function buildConfig(
   >();
   return {
     global: loaded,
-    collectionList: Array.from(collections.values()),
-    getCollection(name: string) {
-      return collections.get(name);
-    },
+    collections,
     workspaces: Object.fromEntries(
       Object.entries(loaded.workspaces ?? {}).map(([key, value]) => {
         return [

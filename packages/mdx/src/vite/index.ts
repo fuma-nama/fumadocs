@@ -76,7 +76,7 @@ export default async function mdx(
       } satisfies UserConfig);
     },
     async buildStart() {
-      await core.emitAndWrite();
+      await core.emit({ write: true });
     },
     async configureServer(server) {
       await core.initServer({
@@ -109,7 +109,7 @@ export async function postInstall(pluginOptions: PluginOptions = {}) {
   await core.init({
     config: loadConfig(core, true),
   });
-  await core.emitAndWrite();
+  await core.emit({ write: true });
 }
 
 function createViteCore({
