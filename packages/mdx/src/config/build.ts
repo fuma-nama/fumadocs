@@ -69,27 +69,23 @@ export function buildCollection(
   cwd: string,
 ): CollectionItem {
   if (collection.type === 'docs') {
-    const docs = buildCollection(
-      name,
-      collection.docs,
-      cwd,
-    ) as DocCollectionItem;
-    const meta = buildCollection(
-      name,
-      collection.meta,
-      cwd,
-    ) as MetaCollectionItem;
     return {
       ...collection,
-      dir: docs.dir,
+      type: 'docs',
+      get dir() {
+        return this.docs.dir;
+      },
       name,
-      meta,
-      docs,
+      meta: buildCollection(name, collection.meta, cwd) as MetaCollectionItem,
+      docs: buildCollection(name, collection.docs, cwd) as DocCollectionItem,
       hasFile(filePath) {
-        return docs.hasFile(filePath) || meta.hasFile(filePath);
+        return this.docs.hasFile(filePath) || this.meta.hasFile(filePath);
       },
       isFileSupported(filePath) {
-        return docs.isFileSupported(filePath) || meta.isFileSupported(filePath);
+        return (
+          this.docs.isFileSupported(filePath) ||
+          this.meta.isFileSupported(filePath)
+        );
       },
       cwd,
     };
@@ -119,11 +115,12 @@ function buildPrimitiveCollection(
       return supportedFormats.some((format) => filePath.endsWith(`.${format}`));
     },
     hasFile(filePath) {
-      matcher ??= picomatch(patterns, {
-        cwd: this.dir,
-      });
+      if (!this.isFileSupported(filePath)) return false;
 
-      return this.isFileSupported(filePath) && matcher(filePath);
+      const relativePath = path.relative(this.dir, filePath);
+      if (relativePath.startsWith(`..${path.sep}`)) return false;
+
+      return (matcher ??= picomatch(patterns))(relativePath);
     },
   };
 }

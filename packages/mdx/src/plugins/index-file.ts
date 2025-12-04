@@ -127,6 +127,7 @@ export default function indexFile(
         await this.core.emit({
           filterPlugin: (plugin) => plugin.name === 'index-file',
           filterWorkspace: () => false,
+          write: true,
         });
       });
     },
@@ -134,7 +135,6 @@ export default function indexFile(
       const globCache = new Map<string, Promise<string[]>>();
       const { workspace, outDir } = this.core.getOptions();
       const { serverOptions, tc } = generateConfigs(this.core);
-
       const toEmitEntry = async (
         path: string,
         content: (ctx: FileGenContext) => Promise<void>,

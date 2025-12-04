@@ -155,7 +155,7 @@ for (const { name, config } of cases) {
       config: buildConfig(config),
     });
 
-    const { entries, workspaces } = await core.emit({ write: false });
+    const { entries, workspaces } = await core.emit();
     for (const [name, workspace] of Object.entries(workspaces)) {
       for (const item of workspace) {
         item.path = path.join(name, item.path);
