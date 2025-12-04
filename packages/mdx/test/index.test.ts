@@ -114,6 +114,29 @@ const cases: {
       }),
     },
   },
+  {
+    name: 'workspace',
+    config: {
+      docs: defineCollections({
+        type: 'doc',
+        dir: path.join(baseDir, './fixtures/generate-index'),
+      }),
+      default: defineConfig({
+        workspaces: {
+          test: {
+            dir: path.join(baseDir, './fixtures/generate-index-2'),
+            config: {
+              docs: defineCollections({
+                type: 'doc',
+                dir: '.',
+                async: true,
+              }),
+            },
+          },
+        },
+      }),
+    },
+  },
 ];
 
 for (const { name, config } of cases) {
@@ -131,7 +154,15 @@ for (const { name, config } of cases) {
     await core.init({
       config: buildConfig(config),
     });
-    const markdown = (await core.emit({ write: false })).entries
+
+    const { entries, workspaces } = await core.emit({ write: false });
+    for (const [name, workspace] of Object.entries(workspaces)) {
+      for (const item of workspace) {
+        item.path = path.join(name, item.path);
+        entries.push(item);
+      }
+    }
+    const markdown = entries
       .map(
         (entry) => `\`\`\`ts title="${entry.path}"\n${entry.content}\n\`\`\``,
       )

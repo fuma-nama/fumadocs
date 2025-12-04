@@ -170,7 +170,7 @@ export function buildConfig(
           key,
           {
             dir: value.dir,
-            config: buildConfig(value.config, path.join(cwd, value.dir)),
+            config: buildConfig(value.config, path.resolve(cwd, value.dir)),
           },
         ];
       }),
