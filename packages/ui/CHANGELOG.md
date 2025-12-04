@@ -1,5 +1,15 @@
 # next-docs-ui
 
+## 16.2.3
+
+### Patch Changes
+
+- 4e2bca7: support `collapsible` in meta data
+- Updated dependencies [ef8eb6c]
+- Updated dependencies [e0c4c3a]
+- Updated dependencies [4e2bca7]
+  - fumadocs-core@16.2.3
+
 ## 16.2.2
 
 ### Patch Changes

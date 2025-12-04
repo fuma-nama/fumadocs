@@ -1,5 +1,13 @@
 # next-docs-zeta
 
+## 16.2.3
+
+### Patch Changes
+
+- ef8eb6c: Expose Zod schema for page & meta data
+- e0c4c3a: [Remark Image] Respect `title` in images
+- 4e2bca7: support `collapsible` in meta data
+
 ## 16.2.2
 
 ### Patch Changes
