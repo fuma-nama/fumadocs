@@ -180,12 +180,13 @@ export function createCore(options: CoreOptions) {
         if (out) config = out;
       }
 
-      workspaces = [];
-      for (const workspace of Object.values(config.workspaces)) {
-        const core = createCore(options);
-        await core.init({ config: workspace.config });
-        workspaces.push(core);
-      }
+      workspaces = await Promise.all(
+        Object.values(config.workspaces).map(async (workspace) => {
+          const core = createCore(options);
+          await core.init({ config: workspace.config });
+          return core;
+        }),
+      );
     },
     getOptions() {
       return options;
@@ -221,22 +222,22 @@ export function createCore(options: CoreOptions) {
       EmitEntry[]
     > {
       const ctx = this.getPluginContext();
-      const files: EmitEntry[] = [];
-      async function add(v: Awaitable<EmitEntry[] | false>[]) {
+      const files = new Map<string, EmitEntry>();
+      async function add(...v: Awaitable<EmitEntry[] | false>[]) {
         for (const li of await Promise.all(v)) {
           if (li === false) continue;
-          for (const item of li) files.push(item);
+          for (const item of li) files.set(item.path, item);
         }
       }
-      add(
-        plugins.map((plugin) => {
+      await add(
+        ...plugins.map((plugin) => {
           if (!filterPlugin(plugin) || !plugin.emit) return false;
 
           return plugin.emit.call(ctx);
         }),
+        ...workspaces.map((workspace) => workspace.emit({ filterPlugin })),
       );
-      add(workspaces.map((workspace) => workspace.emit({ filterPlugin })));
-      return files;
+      return Array.from(files.values());
     },
     async emitAndWrite(emitOptions?: EmitOptions): Promise<void> {
       const start = performance.now();

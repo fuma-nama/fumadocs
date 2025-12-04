@@ -1,4 +1,4 @@
-import type { Core, Plugin, PluginContext } from '@/core';
+import type { Core, CoreOptions, Plugin, PluginContext } from '@/core';
 import type {
   LoadedConfig,
   CollectionItem,
@@ -255,12 +255,18 @@ async function generateDynamicIndexFile({
   serverOptions,
   tc,
 }: FileGenContext) {
-  const { configPath } = core.getOptions();
+  const { configPath, environment, outDir } = core.getOptions();
+  // serializable config options
+  const partialOptions: CoreOptions = {
+    configPath,
+    environment,
+    outDir,
+  };
   codegen.lines.push(
     `import { dynamic } from 'fumadocs-mdx/runtime/dynamic';`,
     `import * as Config from '${codegen.formatImportPath(configPath)}';`,
     '',
-    `const create = await dynamic<typeof Config, ${tc}>(Config, ${JSON.stringify(core.getOptions())}, ${JSON.stringify(serverOptions)});`,
+    `const create = await dynamic<typeof Config, ${tc}>(Config, ${JSON.stringify(partialOptions)}, ${JSON.stringify(serverOptions)});`,
   );
 
   async function generateCollectionObjectEntry(
