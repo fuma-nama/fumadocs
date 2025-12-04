@@ -200,27 +200,26 @@ function applyDefaults(options: CreateMDXOptions): Required<CreateMDXOptions> {
 }
 
 function createNextCore(options: Required<CreateMDXOptions>): Core {
-  const core = createCore(
-    {
-      environment: 'next',
-      outDir: options.outDir,
-      configPath: options.configPath,
+  return createCore({
+    environment: 'next',
+    outDir: options.outDir,
+    configPath: options.configPath,
+    plugins: [options.index && indexFile(options.index)],
+    extend(core) {
+      return {
+        ...core,
+        async emitAndWrite(...args) {
+          try {
+            await core.emitAndWrite(...args);
+          } catch (err) {
+            if (err instanceof ValidationError) {
+              console.error(await err.toStringFormatted());
+            } else {
+              console.error(err);
+            }
+          }
+        },
+      };
     },
-    [options.index && indexFile(options.index)],
-  );
-
-  return {
-    ...core,
-    async emitAndWrite(...args) {
-      try {
-        await core.emitAndWrite(...args);
-      } catch (err) {
-        if (err instanceof ValidationError) {
-          console.error(await err.toStringFormatted());
-        } else {
-          console.error(err);
-        }
-      }
-    },
-  };
+  });
 }

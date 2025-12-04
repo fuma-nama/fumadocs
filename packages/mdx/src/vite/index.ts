@@ -119,20 +119,18 @@ function createViteCore({
 }: Required<PluginOptions>) {
   if (index === true) index = {};
 
-  return createCore(
-    {
-      environment: 'vite',
-      configPath,
-      outDir,
-    },
-    [
+  return createCore({
+    environment: 'vite',
+    configPath,
+    outDir,
+    plugins: [
       index &&
         indexFile({
           ...index,
           target: index.target ?? 'vite',
         }),
     ],
-  );
+  });
 }
 
 function applyDefaults(options: PluginOptions): Required<PluginOptions> {

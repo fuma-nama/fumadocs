@@ -88,7 +88,9 @@ export interface Plugin extends IndexFilePlugin {
   };
 }
 
-export type PluginOption = Awaitable<Plugin | PluginOption[] | false>;
+export type PluginOption = Awaitable<
+  Plugin | PluginOption[] | false | undefined
+>;
 
 export interface ServerContext {
   /**
@@ -103,6 +105,9 @@ export interface CoreOptions {
   environment: string;
   configPath: string;
   outDir: string;
+
+  extend?: (core: Core) => Core;
+  plugins?: PluginOption[];
 }
 
 export interface EmitOptions {
@@ -129,12 +134,10 @@ async function getPlugins(pluginOptions: PluginOption[]): Promise<Plugin[]> {
   return plugins;
 }
 
-export function createCore(
-  options: CoreOptions,
-  defaultPlugins: PluginOption[] = [],
-) {
+export function createCore(options: CoreOptions) {
   let config: LoadedConfig;
   let plugins: Plugin[];
+  let workspaces: Core[];
 
   async function transformMetadata<T>(
     {
@@ -168,13 +171,20 @@ export function createCore(
       this.cache.clear();
       plugins = await getPlugins([
         postprocessPlugin(),
-        ...defaultPlugins,
-        ...(config.global.plugins ?? []),
+        options.plugins,
+        config.global.plugins,
       ]);
 
       for (const plugin of plugins) {
-        const out = await plugin.config?.call(pluginContext, config);
+        const out = await plugin.config?.call(this.getPluginContext(), config);
         if (out) config = out;
+      }
+
+      workspaces = [];
+      for (const workspace of Object.values(config.workspaces)) {
+        const core = createCore(options);
+        await core.init({ config: workspace.config });
+        workspaces.push(core);
       }
     },
     getOptions() {
@@ -193,25 +203,40 @@ export function createCore(
       return plugins;
     },
     getPluginContext(): PluginContext {
-      return pluginContext;
+      return {
+        core: this,
+        ...options,
+      };
     },
     async initServer(server: ServerContext): Promise<void> {
+      const ctx = this.getPluginContext();
       for (const plugin of plugins) {
-        await plugin.configureServer?.call(pluginContext, server);
+        await plugin.configureServer?.call(ctx, server);
+      }
+      for (const workspace of workspaces) {
+        await workspace.initServer(server);
       }
     },
     async emit({ filterPlugin = () => true }: EmitOptions = {}): Promise<
       EmitEntry[]
     > {
-      return (
-        await Promise.all(
-          plugins.map((plugin) => {
-            if (!filterPlugin(plugin) || !plugin.emit) return [];
+      const ctx = this.getPluginContext();
+      const files: EmitEntry[] = [];
+      async function add(v: Awaitable<EmitEntry[] | false>[]) {
+        for (const li of await Promise.all(v)) {
+          if (li === false) continue;
+          for (const item of li) files.push(item);
+        }
+      }
+      add(
+        plugins.map((plugin) => {
+          if (!filterPlugin(plugin) || !plugin.emit) return false;
 
-            return plugin.emit.call(pluginContext);
-          }),
-        )
-      ).flat();
+          return plugin.emit.call(ctx);
+        }),
+      );
+      add(workspaces.map((workspace) => workspace.emit({ filterPlugin })));
+      return files;
     },
     async emitAndWrite(emitOptions?: EmitOptions): Promise<void> {
       const start = performance.now();
@@ -233,7 +258,7 @@ export function createCore(
       data: unknown,
     ): Promise<unknown> {
       const ctx = {
-        ...pluginContext,
+        ...this.getPluginContext(),
         ...options,
       };
 
@@ -250,7 +275,7 @@ export function createCore(
       data: Record<string, unknown>,
     ): Promise<Record<string, unknown>> {
       const ctx = {
-        ...pluginContext,
+        ...this.getPluginContext(),
         ...options,
       };
 
@@ -267,7 +292,7 @@ export function createCore(
       file: VFile,
     ): Promise<VFile> {
       const ctx = {
-        ...pluginContext,
+        ...this.getPluginContext(),
         ...options,
       };
 
@@ -280,11 +305,9 @@ export function createCore(
     },
   };
 
-  // core & core options should be immutable, we can share it across all instances
-  const pluginContext: PluginContext = {
-    core,
-    ...options,
-  };
+  if (options.extend) {
+    return (options.extend as (v: typeof core) => typeof core)(core);
+  }
 
   return core;
 }

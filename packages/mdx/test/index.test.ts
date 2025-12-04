@@ -121,14 +121,12 @@ const cases: {
 
 for (const { name, config } of cases) {
   test(`generate JS index file: ${name}`, async () => {
-    const core = createCore(
-      {
-        configPath: path.join(baseDir, './fixtures/config.ts'),
-        environment: 'test',
-        outDir: path.join(baseDir, './fixtures'),
-      },
-      [indexFile()],
-    );
+    const core = createCore({
+      configPath: path.join(baseDir, './fixtures/config.ts'),
+      environment: 'test',
+      outDir: path.join(baseDir, './fixtures'),
+      plugins: [indexFile()],
+    });
 
     await core.init({
       config: buildConfig(config),

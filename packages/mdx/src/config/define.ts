@@ -76,10 +76,13 @@ export interface GlobalConfig {
    */
   mdxOptions?: MDXPresetOptions | (() => Promise<MDXPresetOptions>);
 
-  workspaces?: {
-    name: string;
-    dir: string;
-  }[];
+  workspaces?: Record<
+    string,
+    {
+      dir: string;
+      config: Record<string, unknown>;
+    }
+  >;
 
   /**
    * specify a directory to access & store cache (disabled during development mode).
