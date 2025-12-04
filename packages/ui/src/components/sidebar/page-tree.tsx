@@ -38,9 +38,9 @@ export function createPageTreeRenderer({
 
     return (
       <SidebarFolder
-        defaultOpen={(value) =>
-          (item.defaultOpen ?? value) || path.includes(item)
-        }
+        collapsible={item.collapsible}
+        active={path.includes(item)}
+        defaultOpen={item.defaultOpen}
       >
         {item.index ? (
           <SidebarFolderLink

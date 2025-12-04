@@ -13,6 +13,7 @@ export interface MetaData {
   root?: boolean | undefined;
   pages?: string[] | undefined;
   defaultOpen?: boolean | undefined;
+  collapsible?: boolean | undefined;
 
   description?: string | undefined;
 }

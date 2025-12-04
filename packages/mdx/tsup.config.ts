@@ -1,5 +1,12 @@
 import { defineConfig } from 'tsup';
 
+const external = ['next', 'typescript', 'bun'];
+
+const noExternal = [
+  // TODO: remove this when the min `fumadocs-core` version is above 16.2.3
+  'fumadocs-core/source/schema',
+];
+
 export default defineConfig([
   {
     entry: [
@@ -11,7 +18,8 @@ export default defineConfig([
       './src/plugins/*.ts',
     ],
     format: 'esm',
-    external: ['next', 'typescript', 'bun'],
+    noExternal,
+    external,
     dts: true,
     target: 'node22',
   },
@@ -22,7 +30,8 @@ export default defineConfig([
       './next/index': './src/next/index.ts',
     },
     format: 'cjs',
-    external: ['next', 'typescript', 'bun'],
+    noExternal,
+    external,
     dts: false,
     target: 'node22',
   },

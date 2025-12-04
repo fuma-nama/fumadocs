@@ -491,6 +491,7 @@ test('Loader: Serialize data', async () => {
                 "url": "/hello",
               },
             ],
+            "collapsible": undefined,
             "defaultOpen": undefined,
             "description": undefined,
             "icon": undefined,
