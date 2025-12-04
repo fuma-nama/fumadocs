@@ -268,20 +268,19 @@ function createPageTreeBuilderUtils(ctx: PageTreeBuilderContext) {
       );
 
       let meta = storage.read(metaPath);
-      if (meta?.format !== 'meta') {
-        meta = undefined;
-      }
+      if (meta && meta.format !== 'meta') meta = undefined;
 
-      const isRoot = meta?.data.root ?? isGlobalRoot;
+      const metadata = meta?.data ?? {};
+      const { root = isGlobalRoot, pages } = metadata;
       let index: PageTree.Item | undefined;
       let children: PageTree.Node[];
 
-      if (meta && meta.data.pages) {
-        const resolved = meta.data.pages.flatMap<
+      if (pages) {
+        const resolved = pages.flatMap<
           PageTree.Node | typeof rest | typeof restReversed
         >((item) => this.resolveFolderItem(folderPath, item));
 
-        if (!isRoot && !visitedPaths.has(indexPath)) {
+        if (!root && !visitedPaths.has(indexPath)) {
           index = this.file(indexPath);
         }
 
@@ -300,7 +299,7 @@ function createPageTreeBuilderUtils(ctx: PageTreeBuilderContext) {
 
         children = resolved as PageTree.Node[];
       } else {
-        if (!isRoot && !visitedPaths.has(indexPath)) {
+        if (!root && !visitedPaths.has(indexPath)) {
           index = this.file(indexPath);
         }
 
@@ -309,19 +308,20 @@ function createPageTreeBuilderUtils(ctx: PageTreeBuilderContext) {
         );
       }
 
-      let name = meta?.data.title ?? index?.name;
-      if (!name) {
-        const folderName = basename(folderPath);
-        name = pathToName(group.exec(folderName)?.[1] ?? folderName);
-      }
-
       let node: PageTree.Folder = {
         type: 'folder',
-        name,
-        icon: meta?.data.icon ?? index?.icon,
-        root: meta?.data.root,
-        defaultOpen: meta?.data.defaultOpen,
-        description: meta?.data.description,
+        name:
+          metadata.title ??
+          index?.name ??
+          (() => {
+            const folderName = basename(folderPath);
+            return pathToName(group.exec(folderName)?.[1] ?? folderName);
+          })(),
+        icon: metadata.icon,
+        root: metadata.root,
+        defaultOpen: metadata.defaultOpen,
+        description: metadata.description,
+        collapsible: metadata.collapsible,
         index,
         children,
         $id: nextNodeId(folderPath),

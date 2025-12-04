@@ -1,0 +1,98 @@
+---
+title: Workspace
+description: Use Fumadocs MDX in multiple workspace.
+---
+
+## Overview
+
+**Workspace** in Fumadocs MDX, refers to an independent project with its own config and content.
+
+<Files>
+  <Folder name="my-workspace" defaultOpen>
+    <Folder name="content/docs" defaultOpen>
+      <File name="index.mdx" />
+      <File name="test.mdx" />
+    </Folder>
+    <File name="source.config.ts" />
+  </Folder>
+  <Folder name="content/docs" defaultOpen>
+    <File name="welcome.mdx" />
+  </Folder>
+  <File name="source.config.ts" />
+</Files>
+
+<Callout title="Good to Know">
+  Fumadocs MDX Workspace is not limited to the traditional meaning of workspace
+  in package managers.
+
+They do not need to have its own `package.json`, only a config file is needed.
+
+</Callout>
+
+To define a workspace, add:
+
+```ts title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  workspaces: {
+    'my-workspace': {
+      dir: 'my-workspace',
+      config: await import('./my-workspace/source.config.ts'),
+    },
+  },
+});
+```
+
+When writing content in a workspace, note that:
+
+- `cwd` refers to the **current workspace directory**.
+- configs will not inherit, workspaces are always independent.
+
+By running dev or build server, you should see collection entries from all workspaces to be generated.
+
+### Accessing Collections
+
+You can access the generated files of a workspace at `.source/{workspace}/*`. For example:
+
+```ts title="lib/source.ts"
+import { docs } from 'fumadocs-mdx:collections/my-workspace/server';
+```
+
+> The output location of root workspace is not changed.
+
+To integrate multiple sources in Fumadocs, use [`multiple`](/docs/headless/source-api/source#multiple-sources):
+
+```ts title="lib/source.ts"
+import { loader, multiple } from 'fumadocs-core/source';
+import { docs } from 'fumadocs-mdx:collections/server';
+import * as MyWorkspace from 'fumadocs-mdx:collections/my-workspace/server';
+
+export const source = loader(
+  multiple({
+    root: docs.toFumadocsSource(),
+    'my-workspace': MyWorkspace.docs.toFumadocsSource(),
+  }),
+  {
+    baseUrl: '/docs',
+  },
+);
+```
+
+## When to Use
+
+In some setups, you might have multiple Fumadocs MDX configs with their own content directory.
+
+With workspaces, you can integrate them into one Fumadocs MDX config, and access all collections of each workspace.
+
+This is cruial for use cases like storing content across multiple repos, a simpified setup would be:
+
+- let your main docs repo be $A$, and other repos be $T_n$
+- for each repo $T_n$:
+  - $T_n$ has $A$ as a git submodule.
+  - $T_n$ defines its own config `source.config.ts` and work independently.
+  - when a commit is made to the content in $T_n$, it triggers a GitHub action (or CI), which creates a new deployment on $A$.
+- when a deployment is triggered on $A$:
+  - Fumadocs MDX handles each $T_n$ as a workspace.
+  - each workspace generates its own collection entries, e.g. `fumadocs-mdx:collections/{repo}/server`.
+  - Fumadocs `loader()` integrate multiple sources into one.

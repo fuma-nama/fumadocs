@@ -8,6 +8,7 @@ import type { MetaCollectionItem } from '@/config/build';
 const querySchema = z
   .object({
     collection: z.string().optional(),
+    workspace: z.string().optional(),
   })
   .loose();
 
@@ -15,7 +16,7 @@ const querySchema = z
  * load meta files, fallback to bundler's built-in plugins when ?collection is unspecified.
  */
 export function createMetaLoader(
-  configLoader: ConfigLoader,
+  { getCore }: ConfigLoader,
   resolve: {
     json?: 'json' | 'js';
     yaml?: 'yaml' | 'js';
@@ -37,11 +38,15 @@ export function createMetaLoader(
   function onMeta(source: string, { filePath, query }: LoaderInput) {
     const parsed = querySchema.safeParse(query);
     if (!parsed.success || !parsed.data.collection) return null;
-    const collectionName = parsed.data.collection;
+    const { collection: collectionName, workspace } = parsed.data;
 
     return async (): Promise<unknown> => {
-      const config = await configLoader.getConfig();
-      const collection = config.getCollection(collectionName);
+      let core = await getCore();
+      if (workspace) {
+        core = core.getWorkspaces().get(workspace) ?? core;
+      }
+
+      const collection = core.getCollection(collectionName);
       let metaCollection: MetaCollectionItem | undefined;
 
       switch (collection?.type) {
@@ -56,7 +61,7 @@ export function createMetaLoader(
       const data = parse(filePath, source);
 
       if (!metaCollection) return data;
-      return configLoader.core.transformMeta(
+      return core.transformMeta(
         {
           collection: metaCollection,
           filePath,

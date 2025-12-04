@@ -7,7 +7,6 @@ import type {
 } from 'next/dist/server/config-shared';
 import * as path from 'node:path';
 import { loadConfig } from '@/config/load-from-file';
-import { ValidationError } from '@/utils/validation';
 import { _Defaults, type Core, createCore } from '@/core';
 import { mdxLoaderGlob, metaLoaderGlob } from '@/loaders';
 import type { IndexFilePluginOptions } from '@/plugins/index-file';
@@ -42,8 +41,10 @@ export function createMDX(createOptions: CreateMDXOptions = {}) {
   }
 
   return (nextConfig: NextConfig = {}): NextConfig => {
+    const { configPath, outDir } = core.getOptions();
     const loaderOptions: WebpackLoaderOptions = {
-      ...core.getOptions(),
+      configPath,
+      outDir,
       absoluteCompiledConfigPath: path.resolve(core.getCompiledConfigPath()),
       isDev,
     };
@@ -128,7 +129,7 @@ async function init(dev: boolean, core: Core): Promise<void> {
     await core.init({
       config: loadConfig(core, true),
     });
-    await core.emitAndWrite();
+    await core.emit({ write: true });
   }
 
   async function devServer() {
@@ -141,11 +142,11 @@ async function init(dev: boolean, core: Core): Promise<void> {
     });
 
     watcher.add(configPath);
-    for (const collection of core.getConfig().collectionList) {
-      if (collection.type === 'docs') {
-        watcher.add(collection.docs.dir);
-        watcher.add(collection.meta.dir);
-      } else {
+    for (const collection of core.getCollections()) {
+      watcher.add(collection.dir);
+    }
+    for (const workspace of core.getWorkspaces().values()) {
+      for (const collection of workspace.getCollections()) {
         watcher.add(collection.dir);
       }
     }
@@ -188,7 +189,7 @@ export async function postInstall(options: CreateMDXOptions) {
   await core.init({
     config: loadConfig(core, true),
   });
-  await core.emitAndWrite();
+  await core.emit({ write: true });
 }
 
 function applyDefaults(options: CreateMDXOptions): Required<CreateMDXOptions> {
@@ -200,27 +201,10 @@ function applyDefaults(options: CreateMDXOptions): Required<CreateMDXOptions> {
 }
 
 function createNextCore(options: Required<CreateMDXOptions>): Core {
-  const core = createCore(
-    {
-      environment: 'next',
-      outDir: options.outDir,
-      configPath: options.configPath,
-    },
-    [options.index && indexFile(options.index)],
-  );
-
-  return {
-    ...core,
-    async emitAndWrite(...args) {
-      try {
-        await core.emitAndWrite(...args);
-      } catch (err) {
-        if (err instanceof ValidationError) {
-          console.error(await err.toStringFormatted());
-        } else {
-          console.error(err);
-        }
-      }
-    },
-  };
+  return createCore({
+    environment: 'next',
+    outDir: options.outDir,
+    configPath: options.configPath,
+    plugins: [options.index && indexFile(options.index)],
+  });
 }

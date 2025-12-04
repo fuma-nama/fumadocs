@@ -74,6 +74,7 @@ const FolderContext = createContext<{
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   depth: number;
+  collapsible: boolean;
 } | null>(null);
 
 export function SidebarProvider({
@@ -123,6 +124,10 @@ export function useSidebar(): SidebarContext {
     );
 
   return ctx;
+}
+
+export function useFolder() {
+  return use(FolderContext);
 }
 
 export function useFolderDepth() {
@@ -284,17 +289,22 @@ export function SidebarItem({
 }
 
 export function SidebarFolder({
-  defaultOpen: defaultOpenOption = false,
+  defaultOpen: defaultOpenProp,
+  collapsible = true,
+  active = false,
+  children,
   ...props
 }: ComponentProps<'div'> & {
-  defaultOpen?: boolean | ((currentDefault: boolean) => boolean);
+  active?: boolean;
+  defaultOpen?: boolean;
+  collapsible?: boolean;
 }) {
   const { defaultOpenLevel } = useSidebar();
   const depth = useFolderDepth() + 1;
   const defaultOpen =
-    typeof defaultOpenOption === 'function'
-      ? defaultOpenOption(defaultOpenLevel >= depth)
-      : defaultOpenLevel >= depth || defaultOpenOption;
+    collapsible === false ||
+    active ||
+    (defaultOpenProp ?? defaultOpenLevel >= depth);
   const [open, setOpen] = useState(defaultOpen);
 
   useOnChange(defaultOpen, (v) => {
@@ -302,33 +312,48 @@ export function SidebarFolder({
   });
 
   return (
-    <Collapsible open={open} onOpenChange={setOpen} {...props}>
+    <Collapsible
+      open={open}
+      onOpenChange={setOpen}
+      disabled={!collapsible}
+      {...props}
+    >
       <FolderContext
-        value={useMemo(() => ({ open, setOpen, depth }), [depth, open])}
+        value={useMemo(
+          () => ({ open, setOpen, depth, collapsible }),
+          [collapsible, depth, open],
+        )}
       >
-        {props.children}
+        {children}
       </FolderContext>
     </Collapsible>
   );
 }
 
-export function SidebarFolderTrigger(props: CollapsibleTriggerProps) {
-  const { open } = use(FolderContext)!;
+export function SidebarFolderTrigger({
+  children,
+  ...props
+}: CollapsibleTriggerProps) {
+  const { open, collapsible } = use(FolderContext)!;
 
-  return (
-    <CollapsibleTrigger {...props}>
-      {props.children}
-      <ChevronDown
-        data-icon
-        className={cn('ms-auto transition-transform', !open && '-rotate-90')}
-      />
-    </CollapsibleTrigger>
-  );
+  if (collapsible) {
+    return (
+      <CollapsibleTrigger {...props}>
+        {children}
+        <ChevronDown
+          data-icon
+          className={cn('ms-auto transition-transform', !open && '-rotate-90')}
+        />
+      </CollapsibleTrigger>
+    );
+  }
+
+  return <div {...(props as ComponentProps<'div'>)}>{children}</div>;
 }
 
-export function SidebarFolderLink(props: LinkProps) {
+export function SidebarFolderLink({ children, ...props }: LinkProps) {
   const ref = useRef<HTMLAnchorElement>(null);
-  const { open, setOpen } = use(FolderContext)!;
+  const { open, setOpen, collapsible } = use(FolderContext)!;
   const { prefetch } = useSidebar();
   const pathname = usePathname();
   const active =
@@ -341,6 +366,8 @@ export function SidebarFolderLink(props: LinkProps) {
       ref={ref}
       data-active={active}
       onClick={(e) => {
+        if (!collapsible) return;
+
         if (
           e.target instanceof Element &&
           e.target.matches('[data-icon], [data-icon] *')
@@ -354,11 +381,13 @@ export function SidebarFolderLink(props: LinkProps) {
       prefetch={prefetch}
       {...props}
     >
-      {props.children}
-      <ChevronDown
-        data-icon
-        className={cn('ms-auto transition-transform', !open && '-rotate-90')}
-      />
+      {children}
+      {collapsible && (
+        <ChevronDown
+          data-icon
+          className={cn('ms-auto transition-transform', !open && '-rotate-90')}
+        />
+      )}
     </Link>
   );
 }

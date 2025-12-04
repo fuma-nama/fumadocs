@@ -8,18 +8,24 @@ import type {
 } from '@/config/define';
 import picomatch from 'picomatch';
 import { applyMdxPreset } from '@/config/preset';
+import path from 'node:path';
 
 export type BuildEnvironment = 'bundler' | 'runtime';
 
 export interface LoadedConfig {
-  collectionList: CollectionItem[];
-  getCollection(name: string): CollectionItem | undefined;
-
+  collections: Map<string, CollectionItem>;
   global: GlobalConfig;
   getMDXOptions(
     collection?: DocCollectionItem,
     environment?: BuildEnvironment,
   ): ProcessorOptions | Promise<ProcessorOptions>;
+  workspaces: Record<
+    string,
+    {
+      dir: string;
+      config: LoadedConfig;
+    }
+  >;
 }
 
 export type CollectionItem =
@@ -27,24 +33,29 @@ export type CollectionItem =
   | DocCollectionItem
   | DocsCollectionItem;
 
-type PrimitiveCollectionItem<T extends DocCollection | MetaCollection> = Omit<
-  T,
-  'files'
-> & {
+interface PrimitiveCollectionItem {
   name: string;
+  cwd: string;
+  /**
+   * content directory (absolute)
+   */
+  dir: string;
   hasFile: (filePath: string) => boolean;
   isFileSupported: (filePath: string) => boolean;
   patterns: string[];
-};
+}
 
-export type MetaCollectionItem = PrimitiveCollectionItem<MetaCollection>;
-export type DocCollectionItem = PrimitiveCollectionItem<DocCollection>;
+export type MetaCollectionItem = PrimitiveCollectionItem &
+  Omit<MetaCollection, 'files' | 'dir'>;
+export type DocCollectionItem = PrimitiveCollectionItem &
+  Omit<DocCollection, 'files' | 'dir'>;
 
-export interface DocsCollectionItem extends DocsCollection {
-  name: string;
+export interface DocsCollectionItem
+  extends
+    Omit<DocsCollection, 'dir' | 'meta' | 'docs'>,
+    Omit<PrimitiveCollectionItem, 'patterns'> {
   meta: MetaCollectionItem;
   docs: DocCollectionItem;
-  hasFile: (filePath: string) => boolean;
 }
 
 const SupportedFormats = {
@@ -54,55 +65,70 @@ const SupportedFormats = {
 
 export function buildCollection(
   name: string,
-  config: AnyCollection,
+  collection: AnyCollection,
+  cwd: string,
 ): CollectionItem {
-  if (config.type === 'docs') {
+  if (collection.type === 'docs') {
     return {
-      ...config,
+      ...collection,
+      type: 'docs',
+      get dir() {
+        return this.docs.dir;
+      },
       name,
-      meta: buildPrimitiveCollection(name, config.meta),
-      docs: buildPrimitiveCollection(name, config.docs),
+      meta: buildCollection(name, collection.meta, cwd) as MetaCollectionItem,
+      docs: buildCollection(name, collection.docs, cwd) as DocCollectionItem,
       hasFile(filePath) {
         return this.docs.hasFile(filePath) || this.meta.hasFile(filePath);
       },
-    } as DocsCollectionItem;
+      isFileSupported(filePath) {
+        return (
+          this.docs.isFileSupported(filePath) ||
+          this.meta.isFileSupported(filePath)
+        );
+      },
+      cwd,
+    };
   }
 
-  return buildPrimitiveCollection(name, config) as CollectionItem;
+  return {
+    ...collection,
+    ...buildPrimitiveCollection(name, collection, cwd),
+  };
 }
 
-function buildPrimitiveCollection<T extends DocCollection | MetaCollection>(
+function buildPrimitiveCollection(
   name: string,
-  { files, ...config }: T,
-): PrimitiveCollectionItem<T> {
+  config: DocCollection | MetaCollection,
+  cwd: string,
+): PrimitiveCollectionItem {
   const supportedFormats = SupportedFormats[config.type];
-  const patterns = files ?? [`**/*.{${supportedFormats.join(',')}}`];
-  let matchers: picomatch.Matcher[];
+  const patterns = config.files ?? [`**/*.{${supportedFormats.join(',')}}`];
+  let matcher: picomatch.Matcher;
 
   return {
-    ...config,
+    dir: path.resolve(cwd, config.dir),
+    cwd,
     name,
     patterns,
     isFileSupported(filePath) {
       return supportedFormats.some((format) => filePath.endsWith(`.${format}`));
     },
     hasFile(filePath) {
-      matchers ??= (Array.isArray(config.dir) ? config.dir : [config.dir]).map(
-        (dir) =>
-          picomatch(patterns, {
-            cwd: dir,
-          }),
-      );
+      if (!this.isFileSupported(filePath)) return false;
 
-      return (
-        this.isFileSupported(filePath) &&
-        matchers.some((matcher) => matcher(filePath))
-      );
+      const relativePath = path.relative(this.dir, filePath);
+      if (relativePath.startsWith(`..${path.sep}`)) return false;
+
+      return (matcher ??= picomatch(patterns))(relativePath);
     },
   };
 }
 
-export function buildConfig(config: Record<string, unknown>): LoadedConfig {
+export function buildConfig(
+  config: Record<string, unknown>,
+  cwd = process.cwd(),
+): LoadedConfig {
   const collections = new Map<string, CollectionItem>();
   const loaded: GlobalConfig = {};
 
@@ -112,16 +138,8 @@ export function buildConfig(config: Record<string, unknown>): LoadedConfig {
     }
 
     if (typeof v === 'object' && 'type' in v) {
-      if (v.type === 'docs') {
-        collections.set(k, buildCollection(k, v as DocsCollection));
-        continue;
-      }
-
-      if (v.type === 'doc' || v.type === 'meta') {
-        collections.set(
-          k,
-          buildCollection(k, v as MetaCollection | DocCollection),
-        );
+      if (v.type === 'docs' || v.type === 'doc' || v.type === 'meta') {
+        collections.set(k, buildCollection(k, v as AnyCollection, cwd));
         continue;
       }
     }
@@ -142,10 +160,18 @@ export function buildConfig(config: Record<string, unknown>): LoadedConfig {
   >();
   return {
     global: loaded,
-    collectionList: Array.from(collections.values()),
-    getCollection(name: string) {
-      return collections.get(name);
-    },
+    collections,
+    workspaces: Object.fromEntries(
+      Object.entries(loaded.workspaces ?? {}).map(([key, value]) => {
+        return [
+          key,
+          {
+            dir: value.dir,
+            config: buildConfig(value.config, path.resolve(cwd, value.dir)),
+          },
+        ];
+      }),
+    ),
     getMDXOptions(collection, environment = 'bundler') {
       const key = collection
         ? `${environment}:${collection.name}`

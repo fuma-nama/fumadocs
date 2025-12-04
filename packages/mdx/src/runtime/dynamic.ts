@@ -33,7 +33,7 @@ export async function dynamic<Config, TC extends InternalTypeConfig>(
   const create = server<Config, TC>(serverOptions);
 
   function getDocCollection(name: string): DocCollectionItem | undefined {
-    const collection = core.getConfig().getCollection(name);
+    const collection = core.getCollection(name);
     if (!collection) return;
 
     if (collection.type === 'docs') return collection.docs;

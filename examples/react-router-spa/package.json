@@ -10,17 +10,17 @@
   },
   "dependencies": {
     "@orama/orama": "^3.1.16",
-    "@react-router/node": "^7.9.6",
+    "@react-router/node": "^7.10.0",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "isbot": "^5.1.32",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "react-router": "^7.9.6"
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
+    "react-router": "^7.10.0"
   },
   "devDependencies": {
-    "@react-router/dev": "^7.9.6",
+    "@react-router/dev": "^7.10.0",
     "@tailwindcss/vite": "^4.1.17",
     "@types/mdx": "^2.0.13",
     "@types/node": "^24.10.1",

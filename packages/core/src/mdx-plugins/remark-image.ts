@@ -4,7 +4,7 @@ import type { Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
 import type { MdxjsEsm } from 'mdast-util-mdxjs-esm';
 import type { ISizeCalculationResult } from 'image-size/types/interface';
-import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
+import type { MdxJsxAttribute, MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
 import { fileURLToPath } from 'node:url';
 
 const VALID_BLUR_EXT = ['.jpeg', '.png', '.webp', '.avif', '.jpg'];
@@ -94,6 +94,22 @@ export function remarkImage({
       src: Source,
       node: Image,
     ): Promise<MdxJsxFlowElement | undefined> {
+      const attributes: MdxJsxAttribute[] = [
+        {
+          type: 'mdxJsxAttribute',
+          name: 'alt',
+          value: node.alt ?? 'image',
+        },
+      ];
+
+      if (node.title) {
+        attributes.push({
+          type: 'mdxJsxAttribute',
+          name: 'title',
+          value: node.title,
+        });
+      }
+
       if (src.type === 'file' && useImport) {
         // Unique variable name for the given static image URL
         const variableName = `__img${importsToInject.length}`;
@@ -112,37 +128,32 @@ export function remarkImage({
           importPath: getImportPath(src.file, file.dirname),
         });
 
+        attributes.push({
+          type: 'mdxJsxAttribute',
+          name: 'src',
+          value: {
+            type: 'mdxJsxAttributeValueExpression',
+            value: variableName,
+            data: {
+              estree: {
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: { type: 'Identifier', name: variableName },
+                  },
+                ],
+                type: 'Program',
+                sourceType: 'script',
+              },
+            },
+          },
+        });
+
         const out: MdxJsxFlowElement = {
           children: [],
           type: 'mdxJsxFlowElement',
           name: 'img',
-          attributes: [
-            {
-              type: 'mdxJsxAttribute',
-              name: 'alt',
-              value: node.alt ?? 'image',
-            },
-            {
-              type: 'mdxJsxAttribute',
-              name: 'src',
-              value: {
-                type: 'mdxJsxAttributeValueExpression',
-                value: variableName,
-                data: {
-                  estree: {
-                    body: [
-                      {
-                        type: 'ExpressionStatement',
-                        expression: { type: 'Identifier', name: variableName },
-                      },
-                    ],
-                    type: 'Program',
-                    sourceType: 'script',
-                  },
-                },
-              },
-            },
-          ],
+          attributes,
         };
 
         if (hasBlur) {
@@ -167,32 +178,29 @@ export function remarkImage({
 
       if (!size) return;
 
+      attributes.push(
+        {
+          type: 'mdxJsxAttribute',
+          name: 'src',
+          // `src` doesn't support file paths, we can use `node.url` for files and let the underlying framework handle it
+          value: src.type === 'url' ? src.url.toString() : node.url,
+        },
+        {
+          type: 'mdxJsxAttribute',
+          name: 'width',
+          value: size.width.toString(),
+        },
+        {
+          type: 'mdxJsxAttribute',
+          name: 'height',
+          value: size.height.toString(),
+        },
+      );
+
       return {
         type: 'mdxJsxFlowElement',
         name: 'img',
-        attributes: [
-          {
-            type: 'mdxJsxAttribute',
-            name: 'alt',
-            value: node.alt ?? 'image',
-          },
-          {
-            type: 'mdxJsxAttribute',
-            name: 'src',
-            // `src` doesn't support file paths, we can use `node.url` for files and let the underlying framework handle it
-            value: src.type === 'url' ? src.url.toString() : node.url,
-          },
-          {
-            type: 'mdxJsxAttribute',
-            name: 'width',
-            value: size.width.toString(),
-          },
-          {
-            type: 'mdxJsxAttribute',
-            name: 'height',
-            value: size.height.toString(),
-          },
-        ],
+        attributes,
         children: [],
       };
     }

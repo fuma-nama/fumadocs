@@ -76,7 +76,7 @@ export default async function mdx(
       } satisfies UserConfig);
     },
     async buildStart() {
-      await core.emitAndWrite();
+      await core.emit({ write: true });
     },
     async configureServer(server) {
       await core.initServer({
@@ -109,7 +109,7 @@ export async function postInstall(pluginOptions: PluginOptions = {}) {
   await core.init({
     config: loadConfig(core, true),
   });
-  await core.emitAndWrite();
+  await core.emit({ write: true });
 }
 
 function createViteCore({
@@ -119,20 +119,18 @@ function createViteCore({
 }: Required<PluginOptions>) {
   if (index === true) index = {};
 
-  return createCore(
-    {
-      environment: 'vite',
-      configPath,
-      outDir,
-    },
-    [
+  return createCore({
+    environment: 'vite',
+    configPath,
+    outDir,
+    plugins: [
       index &&
         indexFile({
           ...index,
           target: index.target ?? 'vite',
         }),
     ],
-  );
+  });
 }
 
 function applyDefaults(options: PluginOptions): Required<PluginOptions> {

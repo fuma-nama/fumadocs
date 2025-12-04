@@ -1,6 +1,5 @@
-import type { Core, Plugin, PluginContext } from '@/core';
+import type { Core, CoreOptions, Plugin, PluginContext } from '@/core';
 import type {
-  LoadedConfig,
   CollectionItem,
   DocCollectionItem,
   MetaCollectionItem,
@@ -8,7 +7,7 @@ import type {
 import path from 'path';
 import { type CodeGen, createCodegen, ident } from '@/utils/codegen';
 import { glob } from 'tinyglobby';
-import { readFileWithCache, removeFileCache } from '@/utils/fs-cache';
+import { createFSCache } from '@/utils/fs-cache';
 import { createHash } from 'crypto';
 import type { LazyEntry } from '@/runtime/dynamic';
 import type { EmitEntry } from '@/core';
@@ -45,10 +44,13 @@ export interface IndexFilePlugin {
 
 interface FileGenContext {
   core: Core;
+  workspace?: string;
   codegen: CodeGen;
   serverOptions: ServerOptions;
   tc: string;
 }
+
+const indexFileCache = createFSCache();
 
 export default function indexFile(
   options: IndexFilePluginOptions = {},
@@ -59,7 +61,6 @@ export default function indexFile(
     browser = true,
     dynamic = true,
   } = options;
-  let config: LoadedConfig;
   let dynamicCollections: CollectionItem[];
 
   function isDynamic(collection: CollectionItem) {
@@ -96,15 +97,14 @@ export default function indexFile(
 
   return {
     name: 'index-file',
-    config(v) {
-      config = v;
-      dynamicCollections = config.collectionList.filter(isDynamic);
+    config() {
+      dynamicCollections = this.core.getCollections().filter(isDynamic);
     },
     configureServer(server) {
       if (!server.watcher) return;
 
       server.watcher.on('all', async (event, file) => {
-        removeFileCache(file);
+        indexFileCache.delete(file);
 
         // dynamic collections always require re-generation on change
         if (dynamicCollections.length === 0) {
@@ -114,9 +114,9 @@ export default function indexFile(
           if (target === 'default' && event === 'change') return;
         }
 
-        const updatedCollection = config.collectionList.find((collection) =>
-          collection.hasFile(file),
-        );
+        const updatedCollection = this.core
+          .getCollections()
+          .find((collection) => collection.hasFile(file));
 
         if (!updatedCollection) return;
         if (!isDynamic(updatedCollection)) {
@@ -124,22 +124,24 @@ export default function indexFile(
           if (target === 'default' && event === 'change') return;
         }
 
-        await this.core.emitAndWrite({
+        await this.core.emit({
           filterPlugin: (plugin) => plugin.name === 'index-file',
+          filterWorkspace: () => false,
+          write: true,
         });
       });
     },
     async emit() {
       const globCache = new Map<string, Promise<string[]>>();
+      const { workspace, outDir } = this.core.getOptions();
       const { serverOptions, tc } = generateConfigs(this.core);
-
       const toEmitEntry = async (
         path: string,
         content: (ctx: FileGenContext) => Promise<void>,
       ): Promise<EmitEntry> => {
         const codegen = createCodegen({
           target,
-          outDir: this.outDir,
+          outDir: outDir,
           jsExtension: addJsExtension,
           globCache,
         });
@@ -148,6 +150,7 @@ export default function indexFile(
           codegen,
           serverOptions,
           tc,
+          workspace: workspace?.name,
         });
         return {
           path,
@@ -170,12 +173,8 @@ export default function indexFile(
   };
 }
 
-async function generateServerIndexFile({
-  core,
-  codegen,
-  serverOptions,
-  tc,
-}: FileGenContext) {
+async function generateServerIndexFile(ctx: FileGenContext) {
+  const { core, codegen, serverOptions, tc } = ctx;
   codegen.lines.push(
     `import { server } from 'fumadocs-mdx/runtime/server';`,
     `import type * as Config from '${codegen.formatImportPath(core.getOptions().configPath)}';`,
@@ -186,51 +185,49 @@ async function generateServerIndexFile({
   async function generateCollectionObject(
     collection: CollectionItem,
   ): Promise<string | undefined> {
+    const base = getBase(collection);
+
     switch (collection.type) {
       case 'docs': {
         if (collection.docs.dynamic) return;
 
         if (collection.docs.async) {
           const [metaGlob, headGlob, bodyGlob] = await Promise.all([
-            generateMetaCollectionGlob(codegen, collection.meta, true),
-            generateDocCollectionFrontmatterGlob(
-              codegen,
-              collection.docs,
-              true,
-            ),
-            generateDocCollectionGlob(codegen, collection.docs),
+            generateMetaCollectionGlob(ctx, collection.meta, true),
+            generateDocCollectionFrontmatterGlob(ctx, collection.docs, true),
+            generateDocCollectionGlob(ctx, collection.docs),
           ]);
 
-          return `await create.docsLazy("${collection.name}", "${collection.dir}", ${metaGlob}, ${headGlob}, ${bodyGlob})`;
+          return `await create.docsLazy("${collection.name}", "${base}", ${metaGlob}, ${headGlob}, ${bodyGlob})`;
         }
 
         const [metaGlob, docGlob] = await Promise.all([
-          generateMetaCollectionGlob(codegen, collection.meta, true),
-          generateDocCollectionGlob(codegen, collection.docs, true),
+          generateMetaCollectionGlob(ctx, collection.meta, true),
+          generateDocCollectionGlob(ctx, collection.docs, true),
         ]);
 
-        return `await create.docs("${collection.name}", "${collection.dir}", ${metaGlob}, ${docGlob})`;
+        return `await create.docs("${collection.name}", "${base}", ${metaGlob}, ${docGlob})`;
       }
       case 'doc':
         if (collection.dynamic) return;
 
         if (collection.async) {
           const [headGlob, bodyGlob] = await Promise.all([
-            generateDocCollectionFrontmatterGlob(codegen, collection, true),
-            generateDocCollectionGlob(codegen, collection),
+            generateDocCollectionFrontmatterGlob(ctx, collection, true),
+            generateDocCollectionGlob(ctx, collection),
           ]);
 
-          return `await create.docLazy("${collection.name}", "${collection.dir}", ${headGlob}, ${bodyGlob})`;
+          return `await create.docLazy("${collection.name}", "${base}", ${headGlob}, ${bodyGlob})`;
         }
 
-        return `await create.doc("${collection.name}", "${collection.dir}", ${await generateDocCollectionGlob(
-          codegen,
+        return `await create.doc("${collection.name}", "${base}", ${await generateDocCollectionGlob(
+          ctx,
           collection,
           true,
         )})`;
       case 'meta':
-        return `await create.meta("${collection.name}", "${collection.dir}", ${await generateMetaCollectionGlob(
-          codegen,
+        return `await create.meta("${collection.name}", "${base}", ${await generateMetaCollectionGlob(
+          ctx,
           collection,
           true,
         )})`;
@@ -238,7 +235,7 @@ async function generateServerIndexFile({
   }
 
   await codegen.pushAsync(
-    core.getConfig().collectionList.map(async (collection) => {
+    core.getCollections().map(async (collection) => {
       const obj = await generateCollectionObject(collection);
       if (!obj) return;
 
@@ -247,26 +244,28 @@ async function generateServerIndexFile({
   );
 }
 
-async function generateDynamicIndexFile({
-  core,
-  codegen,
-  serverOptions,
-  tc,
-}: FileGenContext) {
-  const { configPath } = core.getOptions();
+async function generateDynamicIndexFile(ctx: FileGenContext) {
+  const { core, codegen, serverOptions, tc } = ctx;
+  const { configPath, environment, outDir } = core.getOptions();
+  // serializable config options
+  const partialOptions: CoreOptions = {
+    configPath,
+    environment,
+    outDir,
+  };
   codegen.lines.push(
     `import { dynamic } from 'fumadocs-mdx/runtime/dynamic';`,
     `import * as Config from '${codegen.formatImportPath(configPath)}';`,
     '',
-    `const create = await dynamic<typeof Config, ${tc}>(Config, ${JSON.stringify(core.getOptions())}, ${JSON.stringify(serverOptions)});`,
+    `const create = await dynamic<typeof Config, ${tc}>(Config, ${JSON.stringify(partialOptions)}, ${JSON.stringify(serverOptions)});`,
   );
 
   async function generateCollectionObjectEntry(
     collection: DocCollectionItem,
-    file: string,
+    absolutePath: string,
   ) {
-    const fullPath = path.join(collection.dir, file);
-    const content = await readFileWithCache(fullPath).catch(() => '');
+    const fullPath = path.relative(process.cwd(), absolutePath);
+    const content = await indexFileCache.read(fullPath).catch(() => '');
     const parsed = fumaMatter(content);
     const data = await core.transformFrontmatter(
       {
@@ -285,7 +284,7 @@ async function generateDynamicIndexFile({
     for (const [k, v] of Object.entries({
       info: {
         fullPath,
-        path: file,
+        path: path.relative(collection.dir, absolutePath),
       },
       data,
       hash,
@@ -307,6 +306,7 @@ async function generateDynamicIndexFile({
 
     const files = await glob(collection.patterns, {
       cwd: collection.dir,
+      absolute: true,
     });
     const entries = await Promise.all(
       files.map((file) => generateCollectionObjectEntry(collection, file)),
@@ -315,20 +315,20 @@ async function generateDynamicIndexFile({
     switch (parent.type) {
       case 'docs': {
         const metaGlob = await generateMetaCollectionGlob(
-          codegen,
+          ctx,
           parent.meta,
           true,
         );
 
-        return `await create.docs("${parent.name}", "${parent.dir}", ${metaGlob}, ${entries.join(', ')})`;
+        return `await create.docs("${parent.name}", "${getBase(parent)}", ${metaGlob}, ${entries.join(', ')})`;
       }
       case 'doc':
-        return `await create.doc("${collection.name}", "${collection.dir}", ${entries.join(', ')})`;
+        return `await create.doc("${collection.name}", "${getBase(collection)}", ${entries.join(', ')})`;
     }
   }
 
   await codegen.pushAsync(
-    core.getConfig().collectionList.map(async (collection) => {
+    core.getCollections().map(async (collection) => {
       const obj = await generateCollectionObject(collection);
       if (!obj) return;
 
@@ -337,7 +337,8 @@ async function generateDynamicIndexFile({
   );
 }
 
-async function generateBrowserIndexFile({ core, codegen, tc }: FileGenContext) {
+async function generateBrowserIndexFile(ctx: FileGenContext) {
+  const { core, codegen, tc } = ctx;
   codegen.lines.push(
     `import { browser } from 'fumadocs-mdx/runtime/browser';`,
     `import type * as Config from '${codegen.formatImportPath(core.getOptions().configPath)}';`,
@@ -357,14 +358,14 @@ async function generateBrowserIndexFile({ core, codegen, tc }: FileGenContext) {
       case 'doc':
         if (collection.dynamic) return;
 
-        return `create.doc("${collection.name}", ${await generateDocCollectionGlob(codegen, collection)})`;
+        return `create.doc("${collection.name}", ${await generateDocCollectionGlob(ctx, collection)})`;
     }
   }
 
   codegen.lines.push('const browserCollections = {');
 
   await codegen.pushAsync(
-    core.getConfig().collectionList.map(async (collection) => {
+    core.getCollections().map(async (collection) => {
       const obj = await generateCollectionObject(collection);
       if (!obj) return;
 
@@ -375,8 +376,12 @@ async function generateBrowserIndexFile({ core, codegen, tc }: FileGenContext) {
   codegen.lines.push('};', 'export default browserCollections;');
 }
 
+function getBase(collection: CollectionItem) {
+  return path.relative(process.cwd(), collection.dir);
+}
+
 function generateDocCollectionFrontmatterGlob(
-  codegen: CodeGen,
+  { codegen, workspace }: FileGenContext,
   collection: DocCollectionItem,
   eager = false,
 ) {
@@ -384,6 +389,7 @@ function generateDocCollectionFrontmatterGlob(
     query: {
       collection: collection.name,
       only: 'frontmatter',
+      workspace,
     },
     import: 'frontmatter',
     base: collection.dir,
@@ -392,13 +398,14 @@ function generateDocCollectionFrontmatterGlob(
 }
 
 function generateDocCollectionGlob(
-  codegen: CodeGen,
+  { codegen, workspace }: FileGenContext,
   collection: DocCollectionItem,
   eager = false,
 ) {
   return codegen.generateGlobImport(collection.patterns, {
     query: {
       collection: collection.name,
+      workspace,
     },
     base: collection.dir,
     eager,
@@ -406,13 +413,14 @@ function generateDocCollectionGlob(
 }
 
 function generateMetaCollectionGlob(
-  codegen: CodeGen,
+  { codegen, workspace }: FileGenContext,
   collection: MetaCollectionItem,
   eager = false,
 ) {
   return codegen.generateGlobImport(collection.patterns, {
     query: {
       collection: collection.name,
+      workspace,
     },
     import: 'default',
     base: collection.dir,

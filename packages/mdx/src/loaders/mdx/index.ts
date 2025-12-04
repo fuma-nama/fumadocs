@@ -13,6 +13,7 @@ const querySchema = z
   .object({
     only: z.literal(['frontmatter', 'all']).default('all'),
     collection: z.string().optional(),
+    workspace: z.string().optional(),
   })
   .loose();
 
@@ -24,7 +25,7 @@ const cacheEntry = z.object({
 
 type CacheEntry = z.infer<typeof cacheEntry>;
 
-export function createMdxLoader(configLoader: ConfigLoader): Loader {
+export function createMdxLoader({ getCore }: ConfigLoader): Loader {
   return {
     test: mdxLoaderGlob,
     async load({
@@ -34,16 +35,24 @@ export function createMdxLoader(configLoader: ConfigLoader): Loader {
       compiler,
       filePath,
     }) {
-      const config = await configLoader.getConfig();
+      let core = await getCore();
       const value = await getSource();
       const matter = fumaMatter(value);
-      const parsed = querySchema.parse(query);
+      const {
+        collection: collectionName,
+        workspace,
+        only,
+      } = querySchema.parse(query);
+      if (workspace) {
+        core = core.getWorkspaces().get(workspace) ?? core;
+      }
 
       let after: (() => Promise<void>) | undefined;
 
-      if (!isDevelopment && config.global.experimentalBuildCache) {
-        const cacheDir = config.global.experimentalBuildCache;
-        const cacheKey = `${parsed.hash}_${parsed.collection ?? 'global'}_${generateCacheHash(filePath)}`;
+      const { experimentalBuildCache = false } = core.getConfig().global;
+      if (!isDevelopment && experimentalBuildCache) {
+        const cacheDir = experimentalBuildCache;
+        const cacheKey = `${collectionName ?? 'global'}_${generateCacheHash(filePath)}`;
 
         const cached = await fs
           .readFile(path.join(cacheDir, cacheKey))
@@ -63,8 +72,8 @@ export function createMdxLoader(configLoader: ConfigLoader): Loader {
         };
       }
 
-      const collection = parsed.collection
-        ? config.getCollection(parsed.collection)
+      const collection = collectionName
+        ? core.getCollection(collectionName)
         : undefined;
 
       let docCollection: DocCollectionItem | undefined;
@@ -78,13 +87,13 @@ export function createMdxLoader(configLoader: ConfigLoader): Loader {
       }
 
       if (docCollection) {
-        matter.data = await configLoader.core.transformFrontmatter(
+        matter.data = await core.transformFrontmatter(
           { collection: docCollection, filePath, source: value },
           matter.data as Record<string, unknown>,
         );
       }
 
-      if (parsed.only === 'frontmatter') {
+      if (only === 'frontmatter') {
         return {
           code: `export const frontmatter = ${JSON.stringify(matter.data)}`,
           map: null,
@@ -95,7 +104,7 @@ export function createMdxLoader(configLoader: ConfigLoader): Loader {
       const lineOffset = isDevelopment ? countLines(matter.matter) : 0;
 
       const { buildMDX } = await import('@/loaders/mdx/build-mdx');
-      const compiled = await buildMDX(configLoader.core, docCollection, {
+      const compiled = await buildMDX(core, docCollection, {
         isDevelopment,
         source: '\n'.repeat(lineOffset) + matter.content,
         filePath,

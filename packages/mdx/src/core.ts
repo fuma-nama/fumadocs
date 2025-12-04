@@ -1,4 +1,5 @@
 import type {
+  CollectionItem,
   DocCollectionItem,
   LoadedConfig,
   MetaCollectionItem,
@@ -22,7 +23,7 @@ export interface EmitEntry {
   content: string;
 }
 
-export interface PluginContext extends CoreOptions {
+export interface PluginContext {
   core: Core;
 }
 
@@ -88,7 +89,9 @@ export interface Plugin extends IndexFilePlugin {
   };
 }
 
-export type PluginOption = Awaitable<Plugin | PluginOption[] | false>;
+export type PluginOption = Awaitable<
+  Plugin | PluginOption[] | false | undefined
+>;
 
 export interface ServerContext {
   /**
@@ -103,6 +106,16 @@ export interface CoreOptions {
   environment: string;
   configPath: string;
   outDir: string;
+  plugins?: PluginOption[];
+
+  /**
+   * the workspace info if this instance is created as a workspace
+   */
+  workspace?: {
+    parent: Core;
+    name: string;
+    dir: string;
+  };
 }
 
 export interface EmitOptions {
@@ -110,6 +123,21 @@ export interface EmitOptions {
    * filter the plugins to run emit
    */
   filterPlugin?: (plugin: Plugin) => boolean;
+
+  /**
+   * filter the workspaces to run emit
+   */
+  filterWorkspace?: (workspace: string) => boolean;
+
+  /**
+   * write files
+   */
+  write?: boolean;
+}
+
+export interface EmitOutput {
+  entries: EmitEntry[];
+  workspaces: Record<string, EmitEntry[]>;
 }
 
 export const _Defaults = {
@@ -129,12 +157,10 @@ async function getPlugins(pluginOptions: PluginOption[]): Promise<Plugin[]> {
   return plugins;
 }
 
-export function createCore(
-  options: CoreOptions,
-  defaultPlugins: PluginOption[] = [],
-) {
+export function createCore(options: CoreOptions) {
   let config: LoadedConfig;
   let plugins: Plugin[];
+  const workspaces = new Map<string, Core>();
 
   async function transformMetadata<T>(
     {
@@ -158,7 +184,7 @@ export function createCore(
     return data as T;
   }
 
-  const core = {
+  return {
     /**
      * Convenient cache store, reset when config changes
      */
@@ -166,16 +192,39 @@ export function createCore(
     async init({ config: newConfig }: { config: Awaitable<LoadedConfig> }) {
       config = await newConfig;
       this.cache.clear();
+      workspaces.clear();
       plugins = await getPlugins([
         postprocessPlugin(),
-        ...defaultPlugins,
-        ...(config.global.plugins ?? []),
+        options.plugins,
+        config.global.plugins,
       ]);
 
       for (const plugin of plugins) {
-        const out = await plugin.config?.call(pluginContext, config);
+        const out = await plugin.config?.call(this.getPluginContext(), config);
         if (out) config = out;
       }
+
+      // only support workspaces with max depth 1
+      if (!options.workspace) {
+        await Promise.all(
+          Object.entries(config.workspaces).map(async ([name, workspace]) => {
+            const core = createCore({
+              ...options,
+              outDir: path.join(options.outDir, name),
+              workspace: {
+                name,
+                parent: this,
+                dir: workspace.dir,
+              },
+            });
+            await core.init({ config: workspace.config });
+            workspaces.set(name, core);
+          }),
+        );
+      }
+    },
+    getWorkspaces() {
+      return workspaces;
     },
     getOptions() {
       return options;
@@ -192,48 +241,80 @@ export function createCore(
     getPlugins() {
       return plugins;
     },
+    getCollections(): CollectionItem[] {
+      return Array.from(config.collections.values());
+    },
+    getCollection(name: string): CollectionItem | undefined {
+      return config.collections.get(name);
+    },
     getPluginContext(): PluginContext {
-      return pluginContext;
+      return {
+        core: this,
+      };
     },
     async initServer(server: ServerContext): Promise<void> {
+      const ctx = this.getPluginContext();
       for (const plugin of plugins) {
-        await plugin.configureServer?.call(pluginContext, server);
+        await plugin.configureServer?.call(ctx, server);
+      }
+      for (const workspace of workspaces.values()) {
+        await workspace.initServer(server);
       }
     },
-    async emit({ filterPlugin = () => true }: EmitOptions = {}): Promise<
-      EmitEntry[]
-    > {
-      return (
-        await Promise.all(
-          plugins.map((plugin) => {
-            if (!filterPlugin(plugin) || !plugin.emit) return [];
-
-            return plugin.emit.call(pluginContext);
-          }),
-        )
-      ).flat();
-    },
-    async emitAndWrite(emitOptions?: EmitOptions): Promise<void> {
+    async emit(emitOptions: EmitOptions = {}): Promise<EmitOutput> {
+      const { filterPlugin, filterWorkspace, write = false } = emitOptions;
       const start = performance.now();
-      const out = await this.emit(emitOptions);
+      const ctx = this.getPluginContext();
+      const added = new Set<string>();
+      const out: EmitOutput = {
+        entries: [],
+        workspaces: {},
+      };
 
-      await Promise.all(
-        out.map(async (entry) => {
-          const file = path.join(options.outDir, entry.path);
-
-          await fs.mkdir(path.dirname(file), { recursive: true });
-          await fs.writeFile(file, entry.content);
+      for (const li of await Promise.all(
+        plugins.map((plugin) => {
+          if ((filterPlugin && !filterPlugin(plugin)) || !plugin.emit) return;
+          return plugin.emit.call(ctx);
         }),
-      );
-      console.log(`[MDX] generated files in ${performance.now() - start}ms`);
-    },
+      )) {
+        if (!li) continue;
+        for (const item of li) {
+          if (added.has(item.path)) continue;
+          out.entries.push(item);
+          added.add(item.path);
+        }
+      }
 
+      if (write) {
+        await Promise.all(
+          out.entries.map(async (entry) => {
+            const file = path.join(options.outDir, entry.path);
+
+            await fs.mkdir(path.dirname(file), { recursive: true });
+            await fs.writeFile(file, entry.content);
+          }),
+        );
+
+        console.log(
+          options.workspace
+            ? `[MDX: ${options.workspace.name}] generated files in ${performance.now() - start}ms`
+            : `[MDX] generated files in ${performance.now() - start}ms`,
+        );
+      }
+
+      for (const [name, workspace] of workspaces) {
+        if (filterWorkspace && !filterWorkspace(name)) continue;
+        out.workspaces[name] = (await workspace.emit(emitOptions)).entries;
+      }
+
+      return out;
+    },
     async transformMeta(
       options: TransformOptions<MetaCollectionItem>,
       data: unknown,
     ): Promise<unknown> {
       const ctx = {
-        ...pluginContext,
+        ...this.getPluginContext(),
         ...options,
       };
 
@@ -250,7 +331,7 @@ export function createCore(
       data: Record<string, unknown>,
     ): Promise<Record<string, unknown>> {
       const ctx = {
-        ...pluginContext,
+        ...this.getPluginContext(),
         ...options,
       };
 
@@ -267,7 +348,7 @@ export function createCore(
       file: VFile,
     ): Promise<VFile> {
       const ctx = {
-        ...pluginContext,
+        ...this.getPluginContext(),
         ...options,
       };
 
@@ -279,14 +360,6 @@ export function createCore(
       return file;
     },
   };
-
-  // core & core options should be immutable, we can share it across all instances
-  const pluginContext: PluginContext = {
-    core,
-    ...options,
-  };
-
-  return core;
 }
 
 function postprocessPlugin(): Plugin {
@@ -303,7 +376,7 @@ function postprocessPlugin(): Plugin {
         const lines: string[] = [];
         lines.push('{');
         lines.push('  DocData: {');
-        for (const collection of this.core.getConfig().collectionList) {
+        for (const collection of this.core.getCollections()) {
           let postprocessOptions: Partial<PostprocessOptions> | undefined;
           switch (collection.type) {
             case 'doc':

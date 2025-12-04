@@ -1,7 +1,9 @@
-import { type Core, type CoreOptions, createCore } from '@/core';
+import { type Core, createCore } from '@/core';
 
-export interface WebpackLoaderOptions extends CoreOptions {
+export interface WebpackLoaderOptions {
   absoluteCompiledConfigPath: string;
+  configPath: string;
+  outDir: string;
   isDev: boolean;
 }
 

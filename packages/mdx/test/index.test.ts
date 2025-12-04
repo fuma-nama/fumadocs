@@ -41,10 +41,7 @@ test('format errors', async () => {
   }
 });
 
-const baseDir = path.relative(
-  process.cwd(),
-  path.dirname(fileURLToPath(import.meta.url)),
-);
+const baseDir = path.dirname(fileURLToPath(import.meta.url));
 const cases: {
   name: string;
   config: Record<string, unknown>;
@@ -117,23 +114,55 @@ const cases: {
       }),
     },
   },
+  {
+    name: 'workspace',
+    config: {
+      docs: defineCollections({
+        type: 'doc',
+        dir: path.join(baseDir, './fixtures/generate-index'),
+      }),
+      default: defineConfig({
+        workspaces: {
+          test: {
+            dir: path.join(baseDir, './fixtures/generate-index-2'),
+            config: {
+              docs: defineCollections({
+                type: 'doc',
+                dir: '.',
+                async: true,
+              }),
+            },
+          },
+        },
+      }),
+    },
+  },
 ];
 
 for (const { name, config } of cases) {
   test(`generate JS index file: ${name}`, async () => {
-    const core = createCore(
-      {
-        configPath: path.join(baseDir, './fixtures/config.ts'),
-        environment: 'test',
-        outDir: path.join(baseDir, './fixtures'),
-      },
-      [indexFile()],
-    );
+    const core = createCore({
+      configPath: path.relative(
+        process.cwd(),
+        path.join(baseDir, './fixtures/config.ts'),
+      ),
+      environment: 'test',
+      outDir: path.relative(process.cwd(), path.join(baseDir, './fixtures')),
+      plugins: [indexFile()],
+    });
 
     await core.init({
       config: buildConfig(config),
     });
-    const markdown = (await core.emit())
+
+    const { entries, workspaces } = await core.emit();
+    for (const [name, workspace] of Object.entries(workspaces)) {
+      for (const item of workspace) {
+        item.path = path.join(name, item.path);
+        entries.push(item);
+      }
+    }
+    const markdown = entries
       .map(
         (entry) => `\`\`\`ts title="${entry.path}"\n${entry.content}\n\`\`\``,
       )
