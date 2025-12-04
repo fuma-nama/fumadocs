@@ -1,10 +1,8 @@
 import type { Core } from '@/core';
 import fs from 'node:fs/promises';
-import type { LoadedConfig } from '@/config/build';
 
 export interface ConfigLoader {
-  getConfig: () => LoadedConfig | Promise<LoadedConfig>;
-  core: Core;
+  getCore(): Promise<Core>;
 }
 
 export function createStandaloneConfigLoader({
@@ -22,7 +20,12 @@ export function createStandaloneConfigLoader({
    */
   mode: 'dev' | 'production';
 }): ConfigLoader {
-  let loaded: { config: Promise<LoadedConfig>; hash: string } | undefined;
+  let prev:
+    | {
+        hash: string;
+        init: Promise<void>;
+      }
+    | undefined;
 
   async function getConfigHash(): Promise<string> {
     if (mode === 'production') return 'static';
@@ -34,26 +37,24 @@ export function createStandaloneConfigLoader({
     return stats.mtime.getTime().toString();
   }
 
-  async function newConfig() {
-    const { loadConfig } = await import('../config/load-from-file');
-    await core.init({
-      config: loadConfig(core, buildConfig),
-    });
-
-    return core.getConfig();
-  }
-
   return {
-    core,
-    async getConfig() {
+    async getCore() {
       const hash = await getConfigHash();
-      if (loaded && loaded.hash === hash) return loaded.config;
+      if (!prev || hash !== prev.hash) {
+        prev = {
+          hash,
+          init: (async () => {
+            const { loadConfig } = await import('../config/load-from-file');
 
-      loaded = {
-        hash,
-        config: newConfig(),
-      };
-      return loaded.config;
+            await core.init({
+              config: loadConfig(core, buildConfig),
+            });
+          })(),
+        };
+      }
+
+      await prev.init;
+      return core;
     },
   };
 }
@@ -63,9 +64,8 @@ export function createStandaloneConfigLoader({
  */
 export function createIntegratedConfigLoader(core: Core): ConfigLoader {
   return {
-    core,
-    getConfig() {
-      return core.getConfig();
+    async getCore() {
+      return core;
     },
   };
 }

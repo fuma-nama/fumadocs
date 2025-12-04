@@ -27,6 +27,7 @@ export default function jsonSchema({
 
   return {
     configureServer(server) {
+      const { outDir } = this.core.getOptions();
       if (!server.watcher || !insert) return;
 
       server.watcher.on('add', async (file) => {
@@ -55,7 +56,7 @@ export default function jsonSchema({
 
         if ('$schema' in obj) return;
         const schemaPath = path.join(
-          this.outDir,
+          outDir,
           getSchemaPath(parent ? `${parent.name}.meta` : match.name),
         );
         const updated = {

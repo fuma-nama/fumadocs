@@ -41,10 +41,7 @@ test('format errors', async () => {
   }
 });
 
-const baseDir = path.relative(
-  process.cwd(),
-  path.dirname(fileURLToPath(import.meta.url)),
-);
+const baseDir = path.dirname(fileURLToPath(import.meta.url));
 const cases: {
   name: string;
   config: Record<string, unknown>;
@@ -122,9 +119,12 @@ const cases: {
 for (const { name, config } of cases) {
   test(`generate JS index file: ${name}`, async () => {
     const core = createCore({
-      configPath: path.join(baseDir, './fixtures/config.ts'),
+      configPath: path.relative(
+        process.cwd(),
+        path.join(baseDir, './fixtures/config.ts'),
+      ),
       environment: 'test',
-      outDir: path.join(baseDir, './fixtures'),
+      outDir: path.relative(process.cwd(), path.join(baseDir, './fixtures')),
       plugins: [indexFile()],
     });
 

@@ -143,10 +143,10 @@ async function init(dev: boolean, core: Core): Promise<void> {
 
     watcher.add(configPath);
     for (const collection of core.getCollections()) {
-      if (collection.type === 'docs') {
-        watcher.add(collection.docs.dir);
-        watcher.add(collection.meta.dir);
-      } else {
+      watcher.add(collection.dir);
+    }
+    for (const workspace of core.getWorkspaces().values()) {
+      for (const collection of workspace.getCollections()) {
         watcher.add(collection.dir);
       }
     }

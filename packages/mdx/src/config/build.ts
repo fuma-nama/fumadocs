@@ -36,21 +36,26 @@ export type CollectionItem =
 interface PrimitiveCollectionItem {
   name: string;
   cwd: string;
+  /**
+   * content directory (absolute)
+   */
+  dir: string;
   hasFile: (filePath: string) => boolean;
   isFileSupported: (filePath: string) => boolean;
   patterns: string[];
 }
 
 export type MetaCollectionItem = PrimitiveCollectionItem &
-  Omit<MetaCollection, 'files'>;
+  Omit<MetaCollection, 'files' | 'dir'>;
 export type DocCollectionItem = PrimitiveCollectionItem &
-  Omit<DocCollection, 'files'>;
+  Omit<DocCollection, 'files' | 'dir'>;
 
-export interface DocsCollectionItem extends DocsCollection {
-  name: string;
+export interface DocsCollectionItem
+  extends
+    Omit<DocsCollection, 'dir' | 'meta' | 'docs'>,
+    Omit<PrimitiveCollectionItem, 'patterns'> {
   meta: MetaCollectionItem;
   docs: DocCollectionItem;
-  hasFile: (filePath: string) => boolean;
 }
 
 const SupportedFormats = {
@@ -64,21 +69,29 @@ export function buildCollection(
   cwd: string,
 ): CollectionItem {
   if (collection.type === 'docs') {
-    return {
-      ...collection,
+    const docs = buildCollection(
       name,
-      meta: buildCollection(name, collection.meta, cwd),
-      docs: buildCollection(name, collection.docs, cwd),
-      hasFile(filePath) {
-        return this.docs.hasFile(filePath) || this.meta.hasFile(filePath);
-      },
-    } as DocsCollectionItem;
-  }
-
-  if (collection.type === 'doc') {
+      collection.docs,
+      cwd,
+    ) as DocCollectionItem;
+    const meta = buildCollection(
+      name,
+      collection.meta,
+      cwd,
+    ) as MetaCollectionItem;
     return {
       ...collection,
-      ...buildPrimitiveCollection(name, collection, cwd),
+      dir: docs.dir,
+      name,
+      meta,
+      docs,
+      hasFile(filePath) {
+        return docs.hasFile(filePath) || meta.hasFile(filePath);
+      },
+      isFileSupported(filePath) {
+        return docs.isFileSupported(filePath) || meta.isFileSupported(filePath);
+      },
+      cwd,
     };
   }
 
@@ -95,9 +108,10 @@ function buildPrimitiveCollection(
 ): PrimitiveCollectionItem {
   const supportedFormats = SupportedFormats[config.type];
   const patterns = config.files ?? [`**/*.{${supportedFormats.join(',')}}`];
-  let matchers: picomatch.Matcher[];
+  let matcher: picomatch.Matcher;
 
   return {
+    dir: path.resolve(cwd, config.dir),
     cwd,
     name,
     patterns,
@@ -105,17 +119,11 @@ function buildPrimitiveCollection(
       return supportedFormats.some((format) => filePath.endsWith(`.${format}`));
     },
     hasFile(filePath) {
-      matchers ??= (Array.isArray(config.dir) ? config.dir : [config.dir]).map(
-        (dir) =>
-          picomatch(patterns, {
-            cwd: dir,
-          }),
-      );
+      matcher ??= picomatch(patterns, {
+        cwd: this.dir,
+      });
 
-      return (
-        this.isFileSupported(filePath) &&
-        matchers.some((matcher) => matcher(filePath))
-      );
+      return this.isFileSupported(filePath) && matcher(filePath);
     },
   };
 }

@@ -23,7 +23,7 @@ export interface EmitEntry {
   content: string;
 }
 
-export interface PluginContext extends CoreOptions {
+export interface PluginContext {
   core: Core;
 }
 
@@ -106,8 +106,6 @@ export interface CoreOptions {
   environment: string;
   configPath: string;
   outDir: string;
-
-  extend?: (core: Core) => Core;
   plugins?: PluginOption[];
 
   /**
@@ -185,7 +183,7 @@ export function createCore(options: CoreOptions) {
     return data as T;
   }
 
-  const core = {
+  return {
     /**
      * Convenient cache store, reset when config changes
      */
@@ -223,6 +221,9 @@ export function createCore(options: CoreOptions) {
         );
       }
     },
+    getWorkspaces() {
+      return workspaces;
+    },
     getOptions() {
       return options;
     },
@@ -238,22 +239,15 @@ export function createCore(options: CoreOptions) {
     getPlugins() {
       return plugins;
     },
-    getCollections(workspace?: string): CollectionItem[] {
-      if (workspace) return workspaces.get(workspace)?.getCollections() ?? [];
+    getCollections(): CollectionItem[] {
       return Array.from(config.collections.values());
     },
-    getCollection(
-      name: string,
-      workspace?: string,
-    ): CollectionItem | undefined {
-      if (workspace) return workspaces.get(workspace)?.getCollection(name);
-
+    getCollection(name: string): CollectionItem | undefined {
       return config.collections.get(name);
     },
     getPluginContext(): PluginContext {
       return {
         core: this,
-        ...options,
       };
     },
     async initServer(server: ServerContext): Promise<void> {
@@ -364,12 +358,6 @@ export function createCore(options: CoreOptions) {
       return file;
     },
   };
-
-  if (options.extend) {
-    return (options.extend as (v: typeof core) => typeof core)(core);
-  }
-
-  return core;
 }
 
 function postprocessPlugin(): Plugin {
