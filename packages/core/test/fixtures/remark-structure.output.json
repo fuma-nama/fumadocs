@@ -24,6 +24,12 @@
       "content": "Goodbye",
       "heading": "heading-3",
     },
+    {
+      "content": "function main() {
+  console.log('indexed');
+}",
+      "heading": "heading-3",
+    },
   ],
   "headings": [
     {

@@ -13,5 +13,7 @@ Some text here
 | Hello World | Goodbye     |
 
 ```ts
-console.log('Not indexed');
+function main() {
+  console.log('indexed');
+}
 ```
