@@ -42,8 +42,10 @@ export function createMDX(createOptions: CreateMDXOptions = {}) {
   }
 
   return (nextConfig: NextConfig = {}): NextConfig => {
+    const { configPath, outDir } = core.getOptions();
     const loaderOptions: WebpackLoaderOptions = {
-      ...core.getOptions(),
+      configPath,
+      outDir,
       absoluteCompiledConfigPath: path.resolve(core.getCompiledConfigPath()),
       isDev,
     };
