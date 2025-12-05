@@ -89,7 +89,6 @@ export default defineConfig({
 
     return {
       remarkStructureOptions: {
-        ...remarkStructureDefaultOptions,
         types: [...remarkStructureDefaultOptions.types, 'code'],
       },
       rehypeCodeOptions: {
