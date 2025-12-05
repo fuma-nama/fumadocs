@@ -81,7 +81,7 @@ export interface CreateAPIPageOptions {
       ctx: RenderContext,
     ) => Awaitable<ReactNode>;
 
-    renderRequestTabs: (
+    renderRequestTabs?: (
       items: ExampleRequestItem[],
       ctx: RenderContext & {
         route: string;
