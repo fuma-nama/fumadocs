@@ -189,9 +189,14 @@ export async function Operation({
 
   if (type === 'operation' && securities.length > 0) {
     const securitySchemes = dereferenced.components?.securitySchemes;
-    const names = securities.map((security) =>
-      Object.keys(security).join(' & '),
-    );
+    const names = securities.map((security) => {
+      const intersection = new Set<string>();
+      for (const [key, value] of Object.entries(security)) {
+        intersection.add(`${key} ${value}`);
+      }
+
+      return Array.from(intersection).join(' & ');
+    });
 
     authNode = (
       <SelectTabs defaultValue={names[0]}>
@@ -477,13 +482,6 @@ function AuthScheme({
   scopes: string[];
   ctx: RenderContext;
 }) {
-  const scopeElement =
-    scopes.length > 0 ? (
-      <p>
-        Scope: <code>{scopes.join(', ')}</code>
-      </p>
-    ) : null;
-
   if (schema.type === 'http' || schema.type === 'oauth2') {
     return (
       <AuthProperty
@@ -493,23 +491,22 @@ function AuthScheme({
             ? `Basic <token>`
             : 'Bearer <token>'
         }
+        scopes={scopes}
       >
         {schema.description && ctx.renderMarkdown(schema.description)}
         <p>
           In: <code>header</code>
         </p>
-        {scopeElement}
       </AuthProperty>
     );
   }
 
   if (schema.type === 'apiKey') {
     return (
-      <AuthProperty name={schema.name} type="<token>">
+      <AuthProperty name={schema.name} type="<token>" scopes={scopes}>
         {schema.description && ctx.renderMarkdown(schema.description)}
         <p>
           In: <code>{schema.in}</code>
-          {scopeElement}
         </p>
       </AuthProperty>
     );
@@ -517,9 +514,8 @@ function AuthScheme({
 
   if (schema.type === 'openIdConnect') {
     return (
-      <AuthProperty name="OpenID Connect" type="<token>">
+      <AuthProperty name="OpenID Connect" type="<token>" scopes={scopes}>
         {schema.description && ctx.renderMarkdown(schema.description)}
-        {scopeElement}
       </AuthProperty>
     );
   }
@@ -528,10 +524,12 @@ function AuthScheme({
 function AuthProperty({
   name,
   type,
+  scopes = [],
   ...props
 }: ComponentProps<'div'> & {
   name: string;
   type: string;
+  scopes?: string[];
 }) {
   return (
     <div
@@ -545,6 +543,11 @@ function AuthProperty({
       </div>
       <div className="prose-no-margin pt-2.5 empty:hidden">
         {props.children}
+        {scopes.length > 0 && (
+          <p>
+            Scope: <code>{scopes.join(', ')}</code>
+          </p>
+        )}
       </div>
     </div>
   );
