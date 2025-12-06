@@ -86,19 +86,22 @@ export async function Operation({
   const contentTypes = body ? Object.entries(body.content) : null;
 
   if (body && contentTypes && contentTypes.length > 0) {
-    const [defaultValue] = contentTypes[0];
+    const items = contentTypes.map(([key]) => ({
+      label: <code className="text-xs">{key}</code>,
+      value: key,
+    }));
 
     bodyNode = (
-      <SelectTabs defaultValue={defaultValue}>
-        <div className="flex gap-2 items-end justify-between">
+      <SelectTabs defaultValue={items[0].value}>
+        <div className="flex gap-2 items-center justify-between">
           {ctx.renderHeading(headingLevel, 'Request Body', {
             className: 'my-0!',
           })}
           {contentTypes.length > 1 ? (
-            <SelectTabTrigger items={contentTypes.map(([key]) => key)} />
+            <SelectTabTrigger items={items} className="font-medium" />
           ) : (
-            <p className="text-sm text-fd-muted-foreground font-medium not-prose">
-              {defaultValue}
+            <p className="text-fd-muted-foreground not-prose">
+              {items[0].label}
             </p>
           )}
         </div>
@@ -189,29 +192,40 @@ export async function Operation({
 
   if (type === 'operation' && securities.length > 0) {
     const securitySchemes = dereferenced.components?.securitySchemes;
-    const names = securities.map((security) => {
-      const intersection = new Set<string>();
-      for (const [key, value] of Object.entries(security)) {
-        intersection.add(`${key} ${value}`);
-      }
-
-      return Array.from(intersection).join(' & ');
+    const items = securities.map((security, i) => {
+      return {
+        value: String(i),
+        label: (
+          <div className="flex flex-col text-xs min-w-0">
+            {Object.entries(security).map(([key, scopes]) => (
+              <code key={key} className="truncate">
+                <span className="font-medium">{key}</span>{' '}
+                {scopes.length > 0 && (
+                  <span className="text-fd-muted-foreground">
+                    {scopes.join(', ')}
+                  </span>
+                )}
+              </code>
+            ))}
+          </div>
+        ),
+      };
     });
 
     authNode = (
-      <SelectTabs defaultValue={names[0]}>
-        <div className="flex items-end justify-between gap-2">
-          {ctx.renderHeading(headingLevel, 'Authorization')}
-          {names.length > 1 ? (
-            <SelectTabTrigger items={names} className="mb-4" />
+      <SelectTabs defaultValue={items[0].value}>
+        <div className="flex items-start justify-between gap-2 mt-10 mb-5">
+          {ctx.renderHeading(headingLevel, 'Authorization', {
+            className: 'my-0!',
+          })}
+          {items.length > 1 ? (
+            <SelectTabTrigger items={items} />
           ) : (
-            <p className="text-sm text-fd-muted-foreground font-medium not-prose mb-7">
-              {names[0]}
-            </p>
+            <p className="not-prose">{items[0].label}</p>
           )}
         </div>
         {securities.map((security, i) => (
-          <SelectTab key={i} value={names[i]}>
+          <SelectTab key={i} value={items[i].value}>
             {Object.entries(security).map(([key, scopes]) => {
               const scheme = securitySchemes?.[key];
               if (!scheme) return;
@@ -233,20 +247,22 @@ export async function Operation({
 
   const callbacks = method.callbacks ? Object.entries(method.callbacks) : null;
   if (callbacks && callbacks.length > 0) {
-    const [defaultValue] = callbacks[0];
+    const items = callbacks.map(([key]) => ({
+      label: <code className="text-xs">{key}</code>,
+      value: key,
+    }));
 
     callbacksNode = (
-      <SelectTabs defaultValue={defaultValue}>
-        <div className="flex justify-between gap-2 items-end">
-          {ctx.renderHeading(headingLevel, 'Callbacks')}
+      <SelectTabs defaultValue={items[0].value}>
+        <div className="flex justify-between gap-2 items-end mt-10 mb-5">
+          {ctx.renderHeading(headingLevel, 'Callbacks', {
+            className: 'my-0!',
+          })}
           {callbacks.length > 1 ? (
-            <SelectTabTrigger
-              items={callbacks.map(([key]) => key)}
-              className="mb-4"
-            />
+            <SelectTabTrigger items={items} className="font-medium" />
           ) : (
-            <p className="text-sm text-fd-muted-foreground font-medium not-prose mb-7">
-              {defaultValue}
+            <p className="text-fd-muted-foreground not-prose">
+              {items[0].label}
             </p>
           )}
         </div>
@@ -368,15 +384,19 @@ async function ResponseAccordion({
   let selectorNode: ReactNode = null;
 
   if (contentTypes.length > 0) {
-    const [defaultValue] = contentTypes[0];
+    const items = contentTypes.map(([key]) => ({
+      label: <code className="text-xs">{key}</code>,
+      value: key,
+    }));
+
     selectorNode =
-      contentTypes.length === 1 ? (
-        <p className="text-sm text-fd-muted-foreground">{defaultValue}</p>
+      items.length === 1 ? (
+        <p className="text-fd-muted-foreground not-prose">{items[0].label}</p>
       ) : (
-        <SelectTabTrigger items={contentTypes.map(([key]) => key)} />
+        <SelectTabTrigger items={items} />
       );
     wrapper = (children) => (
-      <SelectTabs defaultValue={defaultValue}>{children}</SelectTabs>
+      <SelectTabs defaultValue={items[0].value}>{children}</SelectTabs>
     );
   }
 
@@ -447,7 +467,7 @@ function WebhookCallback({
           return (
             <div
               key={method}
-              className="border p-3 my-2 prose-no-margin rounded-lg"
+              className="border p-3 my-2 @container prose-no-margin rounded-lg"
             >
               <Operation
                 type="webhook"
@@ -525,6 +545,7 @@ function AuthProperty({
   name,
   type,
   scopes = [],
+  className,
   ...props
 }: ComponentProps<'div'> & {
   name: string;
@@ -532,9 +553,7 @@ function AuthProperty({
   scopes?: string[];
 }) {
   return (
-    <div
-      className={cn('text-sm border-t py-4 first:border-t-0', props.className)}
-    >
+    <div className={cn('text-sm border-t py-4 first:border-t-0', className)}>
       <div className="flex flex-wrap items-center gap-3 not-prose">
         <span className="font-medium font-mono text-fd-primary">{name}</span>
         <span className="text-sm font-mono text-fd-muted-foreground">
