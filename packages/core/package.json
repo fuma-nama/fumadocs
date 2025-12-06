@@ -137,9 +137,9 @@
   },
   "devDependencies": {
     "@mdx-js/mdx": "^3.1.1",
-    "@mixedbread/sdk": "^0.45.0",
+    "@mixedbread/sdk": "^0.46.0",
     "@orama/core": "^1.2.13",
-    "@tanstack/react-router": "1.136.18",
+    "@tanstack/react-router": "1.139.14",
     "@types/estree-jsx": "^1.0.5",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
@@ -147,7 +147,7 @@
     "@types/node": "24.10.1",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
-    "algoliasearch": "5.45.0",
+    "algoliasearch": "5.46.0",
     "eslint-config-custom": "workspace:*",
     "lucide-react": "^0.555.0",
     "mdast-util-mdx-jsx": "^3.2.0",
@@ -165,7 +165,7 @@
     "zod": "^4.1.13"
   },
   "peerDependencies": {
-    "@mixedbread/sdk": "^0.19.0",
+    "@mixedbread/sdk": "^0.46.0",
     "@orama/core": "1.x.x",
     "@tanstack/react-router": "1.x.x",
     "@types/react": "*",
