@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { type DependencyList, useRef, useState } from 'react';
 import { useDebounce } from '@/utils/use-debounce';
 import { type FetchOptions } from '@/search/client/fetch';
 import { useOnChange } from '@/utils/use-on-change';
@@ -35,9 +35,11 @@ export type Client =
       type: 'mixedbread';
     } & MixedbreadOptions);
 
-function isDifferentDeep(a: unknown, b: unknown): boolean {
+function isDeepEqual(a: unknown, b: unknown): boolean {
+  if (a === b) return true;
+
   if (Array.isArray(a) && Array.isArray(b)) {
-    return b.length !== a.length || a.some((v, i) => isDifferentDeep(v, b[i]));
+    return b.length === a.length && a.every((v, i) => isDeepEqual(v, b[i]));
   }
 
   if (typeof a === 'object' && a && typeof b === 'object' && b) {
@@ -45,20 +47,22 @@ function isDifferentDeep(a: unknown, b: unknown): boolean {
     const bKeys = Object.keys(b);
 
     return (
-      aKeys.length !== bKeys.length ||
-      aKeys.some((key) =>
-        isDifferentDeep(a[key as keyof object], b[key as keyof object]),
+      aKeys.length === bKeys.length &&
+      aKeys.every(
+        (key) =>
+          Object.hasOwn(b, key) &&
+          isDeepEqual(a[key as keyof object], b[key as keyof object]),
       )
     );
   }
 
-  return a !== b;
+  return false;
 }
 
 /**
  * Provide a hook to query different official search clients.
  *
- * Note: it will re-query when its parameters changed, make sure to use `useCallback()` on functions passed to this hook.
+ * Note: it will re-query when its parameters changed, make sure to use `useMemo()` on `clientOptions` or define `deps` array.
  */
 export function useDocsSearch(
   clientOptions: Client & {
@@ -76,6 +80,7 @@ export function useDocsSearch(
      */
     allowEmpty?: boolean;
   },
+  deps?: DependencyList,
 ): UseDocsSearch {
   const { delayMs = 100, allowEmpty = false, ...client } = clientOptions;
 
@@ -87,7 +92,7 @@ export function useDocsSearch(
   const onStart = useRef<() => void>(undefined);
 
   useOnChange(
-    [client, debouncedValue],
+    [deps ?? clientOptions, debouncedValue],
     () => {
       if (onStart.current) {
         onStart.current();
@@ -145,7 +150,7 @@ export function useDocsSearch(
           setIsLoading(false);
         });
     },
-    isDifferentDeep,
+    deps ? undefined : (a, b) => !isDeepEqual(a, b),
   );
 
   return { search, setSearch, query: { isLoading, data: results, error } };
