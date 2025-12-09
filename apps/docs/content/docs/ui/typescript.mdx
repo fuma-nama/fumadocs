@@ -74,9 +74,9 @@ interface MyInterface {
 }
 ```
 
-### Specify Type Name
+### Simplified Type
 
-You can specify the name of a type with the `@remarks` tsdoc tag.
+You can specify the simplified name of a type with the `@remarks` tsdoc tag.
 
 ```ts
 interface MyInterface {
@@ -88,3 +88,16 @@ interface MyInterface {
 ```
 
 This will make the type of `time` property to be shown as `timestamp`.
+
+### Full type
+
+You can specify the full name of a type with the `@fumadocsType` tsdoc tag.
+
+```ts
+interface MyInterface {
+  /**
+   * @fumadocsType `MyBeautifulClient` // [!code highlight]
+   */
+  client: MyClient;
+}
+```
