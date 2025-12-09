@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-ui",
-  "version": "16.2.3",
+  "version": "16.2.4",
   "description": "The React.js documentation framework",
   "keywords": [
     "NextJs",
@@ -126,15 +126,15 @@
   },
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",
-    "@next/eslint-plugin-next": "16.0.7",
+    "@next/eslint-plugin-next": "16.0.8",
     "@tailwindcss/cli": "^4.1.17",
     "@types/lodash.merge": "^4.6.9",
-    "@types/node": "^24.10.1",
+    "@types/node": "^24.10.2",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
-    "next": "16.0.7",
+    "next": "16.0.8",
     "tailwindcss": "^4.1.17",
     "tsc-alias": "^1.8.16",
     "tsconfig": "workspace:*"

@@ -33,7 +33,7 @@ export interface StructureOptions {
   /**
    * Types to be scanned as content.
    *
-   * @defaultValue ['heading', 'paragraph', 'blockquote', 'tableCell', 'mdxJsxFlowElement', 'code']
+   * @defaultValue ['heading', 'paragraph', 'blockquote', 'tableCell', 'mdxJsxFlowElement']
    */
   types?: string[] | ((node: Nodes) => boolean);
 
@@ -74,24 +74,31 @@ declare module 'vfile' {
   }
 }
 
-/**
- * Attach structured data to VFile, you can access via `vfile.data.structuredData`.
- */
-export function remarkStructure({
-  types = [
+export const remarkStructureDefaultOptions = {
+  types: [
     'heading',
     'paragraph',
     'blockquote',
     'tableCell',
     'mdxJsxFlowElement',
-    'code',
   ],
-  allowedMdxAttributes = (node) => {
+  allowedMdxAttributes: (node) => {
     if (!node.name) return false;
 
     return ['TypeTable', 'Callout'].includes(node.name);
   },
-  exportAs = false,
+  exportAs: false,
+} satisfies Required<StructureOptions>;
+
+/**
+ * Extract content into structured data.
+ *
+ * By default, the output is stored into VFile (`vfile.data.structuredData`), you can specify `exportAs` to export it.
+ */
+export function remarkStructure({
+  types = remarkStructureDefaultOptions.types,
+  allowedMdxAttributes = remarkStructureDefaultOptions.allowedMdxAttributes,
+  exportAs = remarkStructureDefaultOptions.exportAs,
 }: StructureOptions = {}): Transformer<Root, Root> {
   const slugger = new Slugger();
 

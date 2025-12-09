@@ -1,0 +1,69 @@
+---
+title: The Future of Fumadocs MDX
+description: A roadmap for Fumadocs MDX.
+date: 2025-12-05
+author: Fuma Nama
+---
+
+## Overview of Fumadocs MDX
+
+Fumadocs MDX serves as a content processing layer, initially developed for processing MDX files and as an alternative to Contentlayer.
+
+Its primary functions include:
+
+- Compiling and processing content.
+- Offering interfaces to access compiled content.
+- Ensuring type safety and compatibility across environments, such as browsers and Cloudflare Workers.
+
+### Comparison with CMS
+
+Fumadocs MDX is not a content management system (CMS). A CMS encompasses more than content processing, it integrates features such as:
+
+- **Database Integration:** For storing content.
+- **Version Control:** To enable rollbacks, commits, and conflict resolution.
+- **Permission Management:** To handle user access and roles.
+- **Authoring Workflow:** Supporting stages like drafting, reviewing, and publishing.
+
+Fumadocs MDX lacks these CMS capabilities independently, but they can be achieved through integration with Git and GitHub. This approach offers distinct benefits over traditional CMS solutions, including:
+
+- Maintaining a unified history within Git, rather than distributing it across Git and a separate CMS.
+- Composing content and code changes in a single pull request.
+
+GitHub's collaboration tools, such as access controls, pull request reviews, and automation, support the implementation of authoring workflows.
+
+Fumadocs MDX is not intended to evolve into a CMS; it remains a foundational content processing layer.
+
+## Roadmap
+
+Fumadocs MDX is closely associated with Fumadocs, yet the content processing layer should ideally operate independently, without reliance on any specific documentation framework.
+
+<Callout title="Note">
+  At present, Fumadocs MDX depends solely on the remark and rehype plugins from
+  `fumadocs-core`.
+</Callout>
+
+In the near future, certain components will transition to `fuma-content`, improving extensibility and introducing more APIs. Such as:
+
+- **Framework Agnostic:** Fuma Content should work anywhere, including Vite, Turbopack/Webpack, and even JS runtimes.
+- **No Framework Defaults:** the MDX preset of Fumadocs will be offered by `fumadocs-core`, likely as a Fuma Content plugin.
+- **Content Adapters:** Expanding support beyond MDX and JSON files to include custom collection types, as well as an Obsidian plugin for handling editor-specific syntax.
+- **Zero breaking changes to Fumadocs MDX:** we adopt Fuma Content under the hood, but surface APIs will not be changed. Ideally, it will be similar to how Vite leverages Rolldown.
+
+API-wise, Fuma Content plugins will distinguish from bundler plugins, but plugins can leverage the built-in abstraction layer to implement loaders.
+Otherwise, we will encourage [Unplugin](https://unplugin.unjs.io) for advanced needs.
+
+Although `fuma-content` focuses on content processing, it provides a foundation for developing a CMS layer, such as plugins for MDX editing or remote databases. It will be a bigger goal.
+
+<Callout title="Clarification" type="warn">
+
+Fumadocs MDX extends beyond a simple MDX loader, its architecture supports multiple formats.
+
+Although no renaming is planned, the name Fumadocs MDX no longer fully captures its scope.
+
+</Callout>
+
+### The Current Progress
+
+Fumadocs MDX already includes primitives for advanced setups, such as the new **Workspace API**, which enables content processing across multiple repositories.
+
+We are welcome for feedbacks on GitHub Discussions!

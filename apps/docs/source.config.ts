@@ -74,6 +74,8 @@ export default defineConfig({
   mdxOptions: async () => {
     const { rehypeCodeDefaultOptions } =
       await import('fumadocs-core/mdx-plugins/rehype-code');
+    const { remarkStructureDefaultOptions } =
+      await import('fumadocs-core/mdx-plugins/remark-structure');
     const { remarkSteps } =
       await import('fumadocs-core/mdx-plugins/remark-steps');
     const { transformerTwoslash } = await import('fumadocs-twoslash');
@@ -86,6 +88,9 @@ export default defineConfig({
     const { remarkAutoTypeTable } = await import('fumadocs-typescript');
 
     return {
+      remarkStructureOptions: {
+        types: [...remarkStructureDefaultOptions.types, 'code'],
+      },
       rehypeCodeOptions: {
         langs: ['ts', 'js', 'html', 'tsx', 'mdx'],
         inline: 'tailing-curly-colon',

@@ -1,5 +1,12 @@
 # @fuma-docs/openapi
 
+## 10.1.1
+
+### Patch Changes
+
+- 25393cd: Fix duplicated security scheme name in requirements
+- 928cc25: Fix wrong option types
+
 ## 10.1.0
 
 ### Minor Changes

@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 16.2.4
+
+### Patch Changes
+
+- da87713: Fix recursive checking on unknown types
+- d17499b: Fix `basePath` being ignored
+
 ## 16.2.3
 
 ### Patch Changes

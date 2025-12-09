@@ -1,5 +1,15 @@
 # fumadocs-typescript
 
+## 4.0.14
+
+### Patch Changes
+
+- f728e67: Support customising full type with `@fumadocsType` tag
+- Updated dependencies [da87713]
+- Updated dependencies [d17499b]
+  - fumadocs-core@16.2.4
+  - fumadocs-ui@16.2.4
+
 ## 4.0.13
 
 ### Patch Changes

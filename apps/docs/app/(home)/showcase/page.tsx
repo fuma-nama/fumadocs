@@ -33,11 +33,6 @@ interface ShowcaseObject {
 
 const showcases: ShowcaseObject[] = [
   {
-    image: '/showcases/million.png',
-    name: 'Million',
-    url: 'https://million.dev',
-  },
-  {
     image: '/showcases/shadcn.png',
     name: 'shadcn/ui',
     url: 'https://ui.shadcn.com',
@@ -72,11 +67,6 @@ const showcases: ShowcaseObject[] = [
     image: '/showcases/ultracite.jpg',
     name: 'Ultracite',
     url: 'https://ultracite.ai',
-  },
-  {
-    image: '/showcases/pigsty.jpg',
-    name: 'Pigsty',
-    url: 'https://pgsty.dev',
   },
   {
     image: '/showcases/sim.png',

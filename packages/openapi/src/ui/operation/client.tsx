@@ -89,22 +89,28 @@ export function SelectTab({
 
 export function SelectTabTrigger({
   items,
+  className,
   ...props
-}: ComponentProps<typeof SelectTrigger> & { items: string[] }) {
+}: ComponentProps<typeof SelectTrigger> & {
+  items: {
+    label: ReactNode;
+    value: string;
+  }[];
+}) {
   const { type, setType } = use(Context)!;
 
   return (
     <Select value={type ?? ''} onValueChange={setType}>
       <SelectTrigger
+        className={cn('not-prose w-fit min-w-0 *:min-w-0', className)}
         {...props}
-        className={cn('not-prose w-fit', props.className)}
       >
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        {items.map((type) => (
-          <SelectItem key={type} value={type}>
-            {type}
+        {items.map(({ label, value }) => (
+          <SelectItem key={value} value={value}>
+            {label}
           </SelectItem>
         ))}
       </SelectContent>

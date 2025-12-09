@@ -42,7 +42,7 @@
     "zod": "^4.1.13"
   },
   "devDependencies": {
-    "@types/node": "24.10.1",
+    "@types/node": "24.10.2",
     "eslint-config-custom": "workspace:*",
     "shadcn": "3.5.1",
     "tsconfig": "workspace:*"

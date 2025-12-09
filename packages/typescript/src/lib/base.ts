@@ -213,6 +213,11 @@ function getDocEntry(
       }) satisfies RawTag,
   );
 
+  let type = subType.getText(
+    context.declaration,
+    ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope |
+      ts.TypeFormatFlags.NoTruncation,
+  );
   let simplifiedType = getSimpleForm(
     subType,
     program.getTypeChecker(),
@@ -220,12 +225,19 @@ function getDocEntry(
     context.declaration,
   );
 
-  const remarksTag = tags.find((tag) => tag.name === 'remarks');
-  if (remarksTag) {
-    const match = /^`(?<name>.+)`/.exec(remarksTag.text)?.[1];
+  for (const tag of tags) {
+    // replace full type with @fumadocsType
+    if (tag.name === 'fumadocsType') {
+      const match = /`(?<name>.+)`$/.exec(tag.text)?.[1];
+      if (match) type = match;
+      continue;
+    }
 
-    // replace type with @remarks
-    if (match) simplifiedType = match;
+    // replace simplified type with @remarks
+    if (tag.name === 'remarks') {
+      const match = /^`(?<name>.+)`/.exec(tag.text)?.[1];
+      if (match) simplifiedType = match;
+    }
   }
 
   const entry: DocEntry = {
@@ -236,11 +248,7 @@ function getDocEntry(
       ),
     ),
     tags,
-    type: subType.getText(
-      context.declaration,
-      ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope |
-        ts.TypeFormatFlags.NoTruncation,
-    ),
+    type,
     simplifiedType,
     required: !isOptional,
     deprecated: tags.some((tag) => tag.name === 'deprecated'),
