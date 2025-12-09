@@ -347,11 +347,11 @@ function createPageTreeBuilderUtils(ctx: PageTreeBuilderContext) {
       const page = storage.read(path);
       if (page?.format !== 'page') return;
 
-      const { title, description, icon } = page.data;
+      const { title, description, icon, sidebarTitle } = page.data;
       let item: PageTree.Item = {
         $id: nextNodeId(path),
         type: 'page',
-        name: title ?? pathToName(basename(path, extname(path))),
+        name: sidebarTitle ?? title ?? pathToName(basename(path, extname(path))),
         description,
         icon,
         url: getUrl(page.slugs, locale),
