@@ -17,17 +17,17 @@
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "react-server-dom-webpack": "^19.2.1",
-    "waku": "^0.27.2"
+    "waku": "^0.27.3"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.17",
     "@types/mdx": "^2.0.13",
-    "@types/node": "^24.10.1",
+    "@types/node": "^24.10.2",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "tailwindcss": "^4.1.17",
     "typescript": "^5.9.3",
-    "vite": "^7.2.6",
+    "vite": "^7.2.7",
     "vite-tsconfig-paths": "^5.1.4"
   }
 }

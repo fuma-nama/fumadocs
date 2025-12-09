@@ -15,5 +15,4 @@ node_modules
 /playwright/.cache/
 .tanstack
 
-src/routeTree.gen.ts
 .source
