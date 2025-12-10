@@ -1,11 +1,11 @@
 import type { MethodInformation, RenderContext, ResponseObject } from '@/types';
-import { type NoReference, getPreferredType } from '@/utils/schema';
+import { getPreferredType, type NoReference } from '@/utils/schema';
 import {
-  Accordions,
-  AccordionItem,
-  AccordionHeader,
-  AccordionTrigger,
   AccordionContent,
+  AccordionHeader,
+  AccordionItem,
+  Accordions,
+  AccordionTrigger,
 } from '@/ui/components/accordion';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import { sample } from 'openapi-sampler';
@@ -64,7 +64,7 @@ export function ResponseTabs({
       tab.examples ??= [];
 
       for (const [key, sample] of Object.entries(responseOfType.examples)) {
-        const title = sample?.summary ?? `Example ${key}`;
+        const title = sample?.summary || `Example ${key}`;
 
         tab.examples.push({
           label: title,
