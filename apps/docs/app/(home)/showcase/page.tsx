@@ -16,6 +16,7 @@ import Link from 'fumadocs-core/link';
 import MixSpace from '@/public/showcases/mix-space.png';
 import TurboStarter from '@/public/showcases/turbostarter.png';
 import Nemo from '@/public/showcases/nemo.png';
+import HexaasBlog from '@/public/showcases/hexaas-blog.png';
 
 export const metadata = createMetadata({
   title: 'Showcase',
@@ -263,6 +264,11 @@ const blogs: ShowcaseObject[] = [
     name: 'stutuer',
     url: 'https://www.stutuer.tech',
   },
+  {
+    image: HexaasBlog,
+    name: "hexaa's blog",
+    url: 'https://hexaa.sh/blog',
+  }
 ];
 
 const vercel = [
