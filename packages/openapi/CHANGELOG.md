@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 10.1.2
+
+### Patch Changes
+
+- 88150ae: Handle empty summary when generating display name
+
 ## 10.1.1
 
 ### Patch Changes
