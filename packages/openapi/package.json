@@ -62,7 +62,7 @@
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-slot": "^1.2.4",
     "@scalar/json-magic": "^0.8.4",
-    "@scalar/openapi-parser": "0.23.5",
+    "@scalar/openapi-parser": "0.23.7",
     "ajv": "^8.17.1",
     "class-variance-authority": "^0.7.1",
     "github-slugger": "^2.0.0",

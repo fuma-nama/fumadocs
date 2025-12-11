@@ -44,7 +44,7 @@
   "devDependencies": {
     "@types/node": "24.10.2",
     "eslint-config-custom": "workspace:*",
-    "shadcn": "3.5.1",
+    "shadcn": "3.5.2",
     "tsconfig": "workspace:*"
   },
   "publishConfig": {
