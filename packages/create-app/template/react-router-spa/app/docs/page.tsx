@@ -7,10 +7,10 @@ import {
   DocsTitle,
 } from 'fumadocs-ui/layouts/docs/page';
 import { source } from '@/lib/source';
-import type * as PageTree from 'fumadocs-core/page-tree';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import browserCollections from 'fumadocs-mdx:collections/browser';
 import { baseOptions } from '@/lib/layout.shared';
+import { useFumadocsLoader } from 'fumadocs-core/source/client';
 
 export async function loader({ params }: Route.LoaderArgs) {
   const slugs = params['*'].split('/').filter((v) => v.length > 0);
@@ -19,7 +19,7 @@ export async function loader({ params }: Route.LoaderArgs) {
 
   return {
     path: page.path,
-    tree: source.getPageTree(),
+    pageTree: await source.serializePageTree(source.pageTree),
   };
 }
 
@@ -40,11 +40,11 @@ const clientLoader = browserCollections.docs.createClientLoader({
 });
 
 export default function Page({ loaderData }: Route.ComponentProps) {
-  const { tree, path } = loaderData;
-  const Content = clientLoader.getComponent(path);
+  const Content = clientLoader.getComponent(loaderData.path);
+  const { pageTree } = useFumadocsLoader(loaderData);
 
   return (
-    <DocsLayout {...baseOptions()} tree={tree as PageTree.Root}>
+    <DocsLayout {...baseOptions()} tree={pageTree}>
       <Content />
     </DocsLayout>
   );

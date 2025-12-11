@@ -1,11 +1,11 @@
 import type { MethodInformation, RenderContext } from '@/types';
-import { type NoReference, getPreferredType } from '@/utils/schema';
+import { getPreferredType, type NoReference } from '@/utils/schema';
 import {
-  Accordions,
-  AccordionItem,
-  AccordionHeader,
-  AccordionTrigger,
   AccordionContent,
+  AccordionHeader,
+  AccordionItem,
+  Accordions,
+  AccordionTrigger,
 } from '@/ui/components/accordion';
 import { sample } from 'openapi-sampler';
 import type { ReactNode } from 'react';
@@ -46,7 +46,7 @@ export function getExampleRequests(
 
       result.push({
         id: key,
-        name: value.summary ?? key,
+        name: value.summary || key,
         description: value.description,
         data,
         encoded: encodeRequestData(

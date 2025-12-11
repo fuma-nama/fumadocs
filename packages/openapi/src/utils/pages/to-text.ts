@@ -250,7 +250,7 @@ function generateStaticData(
 
     if (props.showTitle && operation.operationId) {
       const title =
-        operation.summary ??
+        operation.summary ||
         (operation.operationId ? idToTitle(operation.operationId) : item.path);
       const id = slugger.slug(title);
 

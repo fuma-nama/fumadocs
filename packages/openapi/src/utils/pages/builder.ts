@@ -168,7 +168,7 @@ export function fromSchema(
         pathItem,
         operation,
         get displayName() {
-          return operation.summary ?? pathItem.summary ?? idToTitle(item.name);
+          return operation.summary || pathItem.summary || idToTitle(item.name);
         },
       };
     },
@@ -182,8 +182,8 @@ export function fromSchema(
         operation,
         get displayName() {
           return (
-            operation.summary ??
-            pathItem.summary ??
+            operation.summary ||
+            pathItem.summary ||
             (operation.operationId
               ? idToTitle(operation.operationId)
               : item.path)

@@ -12,15 +12,15 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "lucide-react": "^0.555.0",
-    "next": "16.0.7",
+    "lucide-react": "^0.556.0",
+    "next": "16.0.8",
     "react": "^19.2.1",
     "react-dom": "^19.2.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.17",
     "@types/mdx": "^2.0.13",
-    "@types/node": "^24.10.1",
+    "@types/node": "^24.10.2",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "postcss": "^8.5.6",

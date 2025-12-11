@@ -32,7 +32,7 @@ import {
 import { isMediaTypeSupported } from '@/requests/media/adapter';
 import { cn } from 'fumadocs-ui/utils/cn';
 import { APIPlayground } from '@/playground';
-import { RequestTabs, getExampleRequests } from './request-tabs';
+import { getExampleRequests, RequestTabs } from './request-tabs';
 import { UsageTabsProviderLazy } from './usage-tabs/lazy';
 
 const ParamTypes = {
@@ -76,7 +76,7 @@ export async function Operation({
 
   if (showTitle) {
     const title =
-      method.summary ??
+      method.summary ||
       (method.operationId ? idToTitle(method.operationId) : path);
 
     headNode = ctx.renderHeading(headingLevel, title);
@@ -93,7 +93,7 @@ export async function Operation({
 
     bodyNode = (
       <SelectTabs defaultValue={items[0].value}>
-        <div className="flex gap-2 items-center justify-between">
+        <div className="flex gap-2 items-center justify-between mt-10">
           {ctx.renderHeading(headingLevel, 'Request Body', {
             className: 'my-0!',
           })}
@@ -214,7 +214,7 @@ export async function Operation({
 
     authNode = (
       <SelectTabs defaultValue={items[0].value}>
-        <div className="flex items-start justify-between gap-2 mt-10 mb-5">
+        <div className="flex items-start justify-between gap-2 mt-10">
           {ctx.renderHeading(headingLevel, 'Authorization', {
             className: 'my-0!',
           })}
@@ -254,7 +254,7 @@ export async function Operation({
 
     callbacksNode = (
       <SelectTabs defaultValue={items[0].value}>
-        <div className="flex justify-between gap-2 items-end mt-10 mb-5">
+        <div className="flex justify-between gap-2 items-end mt-10">
           {ctx.renderHeading(headingLevel, 'Callbacks', {
             className: 'my-0!',
           })}
@@ -553,7 +553,7 @@ function AuthProperty({
   scopes?: string[];
 }) {
   return (
-    <div className={cn('text-sm border-t py-4 first:border-t-0', className)}>
+    <div className={cn('text-sm border-t my-4 first:border-t-0', className)}>
       <div className="flex flex-wrap items-center gap-3 not-prose">
         <span className="font-medium font-mono text-fd-primary">{name}</span>
         <span className="text-sm font-mono text-fd-muted-foreground">
