@@ -152,7 +152,7 @@
     "lucide-react": "^0.556.0",
     "mdast-util-mdx-jsx": "^3.2.0",
     "mdast-util-mdxjs-esm": "^2.0.1",
-    "next": "16.0.8",
+    "next": "16.0.10",
     "react-router": "^7.10.1",
     "remark-directive": "^4.0.0",
     "remark-mdx": "^3.1.1",
