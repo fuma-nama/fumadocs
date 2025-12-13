@@ -16,19 +16,19 @@
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "isbot": "^5.1.32",
-    "react": "^19.2.1",
-    "react-dom": "^19.2.1",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "react-router": "^7.10.1"
   },
   "devDependencies": {
     "@react-router/dev": "^7.10.1",
-    "@tailwindcss/vite": "^4.1.17",
+    "@tailwindcss/vite": "^4.1.18",
     "@types/mdx": "^2.0.13",
     "@types/node": "^24.10.2",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "react-router-devtools": "^6.0.0",
-    "tailwindcss": "^4.1.17",
+    "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3",
     "vite": "^7.2.7",
     "vite-tsconfig-paths": "^5.1.4"

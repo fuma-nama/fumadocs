@@ -42,11 +42,11 @@
   },
   "dependencies": {
     "@radix-ui/react-popover": "^1.1.15",
-    "@shikijs/twoslash": "^3.19.0",
+    "@shikijs/twoslash": "^3.20.0",
     "mdast-util-from-markdown": "^2.0.2",
     "mdast-util-gfm": "^3.1.0",
     "mdast-util-to-hast": "^13.2.1",
-    "shiki": "^3.19.0",
+    "shiki": "^3.20.0",
     "tailwind-merge": "^3.4.0",
     "twoslash": "^0.3.4"
   },
