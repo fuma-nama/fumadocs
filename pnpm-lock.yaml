@@ -1075,11 +1075,11 @@ importers:
   examples/tanstack-start:
     dependencies:
       '@tanstack/react-router':
-        specifier: 1.141.2
-        version: 1.141.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+        specifier: 1.136.18
+        version: 1.136.18(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@tanstack/react-router-devtools':
         specifier: 1.136.18
-        version: 1.136.18(@tanstack/react-router@1.141.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@tanstack/router-core@1.141.2)(@types/node@24.10.2)(csstype@3.2.3)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(solid-js@1.9.10)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 1.136.18(@tanstack/react-router@1.136.18(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@tanstack/router-core@1.141.2)(@types/node@24.10.2)(csstype@3.2.3)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(solid-js@1.9.10)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       '@tanstack/react-start':
         specifier: 1.136.18
         version: 1.136.18(crossws@0.4.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(vite@7.2.7(@types/node@24.10.2)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(webpack@5.103.0(@swc/core@1.15.4)(esbuild@0.27.0))
@@ -1128,7 +1128,7 @@ importers:
         version: 5.1.2(vite@7.2.7(@types/node@24.10.2)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       nitro:
         specifier: 3.0.1-alpha.1
-        version: 3.0.1-alpha.1(chokidar@5.0.0)(lru-cache@11.2.4)(rollup@4.53.3)(vite@7.2.7(@types/node@24.10.2)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
+        version: 3.0.1-alpha.1(chokidar@4.0.3)(lru-cache@11.2.4)(rollup@4.53.3)(vite@7.2.7(@types/node@24.10.2)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       tailwindcss:
         specifier: ^4.1.18
         version: 4.1.18
@@ -1145,11 +1145,11 @@ importers:
         specifier: ^3.1.16
         version: 3.1.16
       '@tanstack/react-router':
-        specifier: 1.141.2
-        version: 1.141.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+        specifier: 1.136.18
+        version: 1.136.18(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@tanstack/react-router-devtools':
         specifier: 1.136.18
-        version: 1.136.18(@tanstack/react-router@1.141.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@tanstack/router-core@1.141.2)(@types/node@24.10.2)(csstype@3.2.3)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(solid-js@1.9.10)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 1.136.18(@tanstack/react-router@1.136.18(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@tanstack/router-core@1.141.2)(@types/node@24.10.2)(csstype@3.2.3)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(solid-js@1.9.10)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       '@tanstack/react-start':
         specifier: 1.136.18
         version: 1.136.18(crossws@0.4.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(vite@7.2.7(@types/node@24.10.2)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(webpack@5.103.0(@swc/core@1.15.4)(esbuild@0.27.0))
@@ -1212,11 +1212,11 @@ importers:
         specifier: ^3.1.16
         version: 3.1.16
       '@tanstack/react-router':
-        specifier: 1.141.2
-        version: 1.141.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+        specifier: 1.136.18
+        version: 1.136.18(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@tanstack/react-router-devtools':
         specifier: 1.136.18
-        version: 1.136.18(@tanstack/react-router@1.141.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@tanstack/router-core@1.141.2)(@types/node@24.10.2)(csstype@3.2.3)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(solid-js@1.9.10)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 1.136.18(@tanstack/react-router@1.136.18(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@tanstack/router-core@1.141.2)(@types/node@24.10.2)(csstype@3.2.3)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(solid-js@1.9.10)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       '@tanstack/react-start':
         specifier: 1.136.18
         version: 1.136.18(crossws@0.4.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(vite@7.2.7(@types/node@24.10.2)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(webpack@5.103.0(@swc/core@1.15.4)(esbuild@0.27.0))
@@ -1523,8 +1523,8 @@ importers:
         specifier: ^1.2.14
         version: 1.2.14
       '@tanstack/react-router':
-        specifier: 1.141.2
-        version: 1.141.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+        specifier: 1.136.18
+        version: 1.136.18(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@types/estree-jsx':
         specifier: ^1.0.5
         version: 1.0.5
@@ -5658,13 +5658,6 @@ packages:
 
   '@tanstack/react-router@1.136.18':
     resolution: {integrity: sha512-KXlzIZ5W6LKAl8Ot2p1CJJ7B6ZkXFnfaJEhOkPWHA0K7sTrQYOphMwdFBKyaYUCfoBrygqVM5g17mWMpQ4Va2A==}
-    engines: {node: '>=12'}
-    peerDependencies:
-      react: '>=18.0.0 || >=19.0.0'
-      react-dom: '>=18.0.0 || >=19.0.0'
-
-  '@tanstack/react-router@1.141.2':
-    resolution: {integrity: sha512-inPEgxYuGPNJvd7wo9BYVKW/BP9GwZO0EaZLBE7+l0RtPcIqAQQLqYhYwb2xikuQg6ueZectj7LObAGivkBpSw==}
     engines: {node: '>=12'}
     peerDependencies:
       react: '>=18.0.0 || >=19.0.0'
@@ -15059,9 +15052,9 @@ snapshots:
       - solid-js
       - utf-8-validate
 
-  '@tanstack/react-router-devtools@1.136.18(@tanstack/react-router@1.141.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@tanstack/router-core@1.141.2)(@types/node@24.10.2)(csstype@3.2.3)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(solid-js@1.9.10)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)':
+  '@tanstack/react-router-devtools@1.136.18(@tanstack/react-router@1.136.18(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@tanstack/router-core@1.141.2)(@types/node@24.10.2)(csstype@3.2.3)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(solid-js@1.9.10)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)':
     dependencies:
-      '@tanstack/react-router': 1.141.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@tanstack/react-router': 1.136.18(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@tanstack/router-devtools-core': 1.136.17(@tanstack/router-core@1.141.2)(@types/node@24.10.2)(csstype@3.2.3)(jiti@2.6.1)(lightningcss@1.30.2)(solid-js@1.9.10)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       react: 19.2.3
       react-dom: 19.2.3(react@19.2.3)
@@ -15088,17 +15081,6 @@ snapshots:
       '@tanstack/history': 1.133.28
       '@tanstack/react-store': 0.8.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@tanstack/router-core': 1.136.17
-      isbot: 5.1.32
-      react: 19.2.3
-      react-dom: 19.2.3(react@19.2.3)
-      tiny-invariant: 1.3.3
-      tiny-warning: 1.0.3
-
-  '@tanstack/react-router@1.141.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
-    dependencies:
-      '@tanstack/history': 1.141.0
-      '@tanstack/react-store': 0.8.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      '@tanstack/router-core': 1.141.2
       isbot: 5.1.32
       react: 19.2.3
       react-dom: 19.2.3(react@19.2.3)
@@ -19784,7 +19766,7 @@ snapshots:
 
   nf3@0.1.10: {}
 
-  nitro@3.0.1-alpha.1(chokidar@5.0.0)(lru-cache@11.2.4)(rollup@4.53.3)(vite@7.2.7(@types/node@24.10.2)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)):
+  nitro@3.0.1-alpha.1(chokidar@4.0.3)(lru-cache@11.2.4)(rollup@4.53.3)(vite@7.2.7(@types/node@24.10.2)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)):
     dependencies:
       consola: 3.4.2
       crossws: 0.4.1(srvx@0.9.6)
@@ -19799,7 +19781,7 @@ snapshots:
       srvx: 0.9.6
       undici: 7.16.0
       unenv: 2.0.0-rc.24
-      unstorage: 2.0.0-alpha.4(chokidar@5.0.0)(db0@0.3.4)(lru-cache@11.2.4)(ofetch@2.0.0-alpha.3)
+      unstorage: 2.0.0-alpha.4(chokidar@4.0.3)(db0@0.3.4)(lru-cache@11.2.4)(ofetch@2.0.0-alpha.3)
     optionalDependencies:
       rollup: 4.53.3
       vite: 7.2.7(@types/node@24.10.2)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -21919,9 +21901,9 @@ snapshots:
     optionalDependencies:
       db0: 0.3.4
 
-  unstorage@2.0.0-alpha.4(chokidar@5.0.0)(db0@0.3.4)(lru-cache@11.2.4)(ofetch@2.0.0-alpha.3):
+  unstorage@2.0.0-alpha.4(chokidar@4.0.3)(db0@0.3.4)(lru-cache@11.2.4)(ofetch@2.0.0-alpha.3):
     optionalDependencies:
-      chokidar: 5.0.0
+      chokidar: 4.0.3
       db0: 0.3.4
       lru-cache: 11.2.4
       ofetch: 2.0.0-alpha.3
