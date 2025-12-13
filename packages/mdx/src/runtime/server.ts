@@ -4,10 +4,10 @@ import type {
   Source,
   VirtualFile,
 } from 'fumadocs-core/source';
-import * as path from 'node:path';
 import type { DocCollection, DocsCollection, MetaCollection } from '@/config';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type { CompiledMDXProperties } from '@/loaders/mdx/build-mdx';
+import * as path from './path';
 import type {
   InternalTypeConfig,
   DocData,
