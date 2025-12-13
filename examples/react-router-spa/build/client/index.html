@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>New React Router App</title>
+    <meta name="description" content="Welcome to React Router!" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin="anonymous"
+    />
+    <link rel="modulepreload" href="/assets/manifest-15fd3442.js" />
+    <link rel="modulepreload" href="/assets/entry.client-DwtqniiQ.js" />
+    <link rel="modulepreload" href="/assets/index-CT70PKhW.js" />
+    <link rel="modulepreload" href="/assets/root-g5t2mEZ9.js" />
+    <link rel="modulepreload" href="/assets/root-72sXvtgv.js" />
+    <link rel="modulepreload" href="/assets/index-C0GeZixz.js" />
+    <link rel="modulepreload" href="/assets/button-345GfI1w.js" />
+    <link rel="modulepreload" href="/assets/home-BDV2K_eX.js" />
+    <link rel="modulepreload" href="/assets/layout.shared-WQQuTG8U.js" />
+    <link rel="stylesheet" href="/assets/root-Da6joNLy.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&amp;display=swap"
+    />
+  </head>
+  <body class="flex flex-col min-h-screen">
+    <script>
+      ((e2, i, s, u, m, a, l2, h) => {
+        let d = document.documentElement,
+          w = ['light', 'dark'];
+        function p(n2) {
+          ((Array.isArray(e2) ? e2 : [e2]).forEach((y) => {
+            let k = y === 'class',
+              S = k && a ? m.map((f) => a[f] || f) : m;
+            k
+              ? (d.classList.remove(...S),
+                d.classList.add(a && a[n2] ? a[n2] : n2))
+              : d.setAttribute(y, n2);
+          }),
+            R(n2));
+        }
+        function R(n2) {
+          h && w.includes(n2) && (d.style.colorScheme = n2);
+        }
+        function c() {
+          return window.matchMedia('(prefers-color-scheme: dark)').matches
+            ? 'dark'
+            : 'light';
+        }
+        if (u) p(u);
+        else
+          try {
+            let n2 = localStorage.getItem(i) || s,
+              y = l2 && n2 === 'system' ? c() : n2;
+            p(y);
+          } catch (n2) {}
+      })('class', 'theme', 'system', null, ['light', 'dark'], null, true, true);
+    </script>
+    <main id="nd-home-layout" class="flex flex-1 flex-col pt-14">
+      <header
+        id="nd-nav"
+        class="fixed top-(--fd-banner-height) z-40 left-0 right-(--removed-body-scroll-bar-size,0) backdrop-blur-lg border-b transition-colors *:mx-auto *:max-w-fd-container bg-fd-background/80"
+        aria-label="Main"
+        data-orientation="horizontal"
+        dir="ltr"
+      >
+        <div style="position: relative">
+          <nav
+            data-orientation="horizontal"
+            class="flex h-14 w-full items-center px-4"
+            dir="ltr"
+          >
+            <a
+              class="inline-flex items-center gap-2.5 font-semibold"
+              href="/"
+              data-discover="true"
+              >React Router</a
+            >
+            <ul
+              class="flex flex-row items-center gap-2 px-6 max-sm:hidden"
+            ></ul>
+            <div
+              class="flex flex-row items-center justify-end gap-1.5 flex-1 max-lg:hidden"
+            >
+              <button
+                type="button"
+                data-search-full=""
+                class="inline-flex items-center gap-2 border bg-fd-secondary/50 p-1.5 text-sm text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground w-full rounded-full ps-2.5 max-w-[240px]"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="lucide size-4"
+                >
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.3-4.3"></path></svg
+                >Search
+                <div class="ms-auto inline-flex gap-0.5">
+                  <kbd class="rounded-md border bg-fd-background px-1.5">⌘</kbd
+                  ><kbd class="rounded-md border bg-fd-background px-1.5"
+                    >K</kbd
+                  >
+                </div></button
+              ><button
+                class="inline-flex items-center rounded-full border p-1"
+                aria-label="Toggle Theme"
+                data-theme-toggle=""
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="lucide size-6.5 rounded-full p-1.5 text-fd-muted-foreground"
+                >
+                  <circle cx="12" cy="12" r="4"></circle>
+                  <path d="M12 2v2"></path>
+                  <path d="M12 20v2"></path>
+                  <path d="m4.93 4.93 1.41 1.41"></path>
+                  <path d="m17.66 17.66 1.41 1.41"></path>
+                  <path d="M2 12h2"></path>
+                  <path d="M20 12h2"></path>
+                  <path d="m6.34 17.66-1.41 1.41"></path>
+                  <path d="m19.07 4.93-1.41 1.41"></path></svg
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="lucide size-6.5 rounded-full p-1.5 text-fd-muted-foreground"
+                >
+                  <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                </svg>
+              </button>
+              <div class="flex flex-row items-center empty:hidden"></div>
+            </div>
+            <ul class="flex flex-row items-center ms-auto -me-1.5 lg:hidden">
+              <button
+                type="button"
+                class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors duration-100 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring hover:bg-fd-accent hover:text-fd-accent-foreground [&amp;_svg]:size-4.5 p-2"
+                data-search=""
+                aria-label="Open Search"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="lucide"
+                >
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.3-4.3"></path>
+                </svg>
+              </button>
+              <li class="list-none">
+                <button
+                  id="radix-_R_6j5_-trigger-radix-_R_2lmj5_"
+                  data-state="closed"
+                  aria-expanded="false"
+                  aria-controls="radix-_R_6j5_-content-radix-_R_2lmj5_"
+                  class="data-[state=open]:bg-fd-accent/50 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors duration-100 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring hover:bg-fd-accent hover:text-fd-accent-foreground p-1.5 [&amp;_svg]:size-5 group"
+                  aria-label="Toggle Menu"
+                  data-radix-collection-item=""
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide !size-5.5 transition-transform duration-300 group-data-[state=open]:rotate-180"
+                  >
+                    <path d="m6 9 6 6 6-6"></path>
+                  </svg>
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </div>
+        <div class="flex w-full justify-center"></div>
+      </header>
+      <div
+        class="p-4 flex flex-col items-center justify-center text-center flex-1"
+      >
+        <h1 class="text-xl font-bold mb-2">Fumadocs on React Router.</h1>
+        <p class="text-fd-muted-foreground mb-4">
+          The truly flexible docs framework on React.js.
+        </p>
+        <a
+          class="text-sm bg-fd-primary text-fd-primary-foreground rounded-full font-medium px-4 py-2.5"
+          href="/docs"
+          data-discover="true"
+          >Open Docs</a
+        >
+      </div>
+    </main>
+    <script>
+      ((storageKey2, restoreKey) => {
+        if (!window.history.state || !window.history.state.key) {
+          let key = Math.random().toString(32).slice(2);
+          window.history.replaceState({ key }, '');
+        }
+        try {
+          let positions = JSON.parse(
+            sessionStorage.getItem(storageKey2) || '{}',
+          );
+          let storedY = positions[restoreKey || window.history.state.key];
+          if (typeof storedY === 'number') {
+            window.scrollTo(0, storedY);
+          }
+        } catch (error) {
+          console.error(error);
+          sessionStorage.removeItem(storageKey2);
+        }
+      })('react-router-scroll-positions', null);
+    </script>
+    <script>
+      window.__reactRouterContext = {
+        basename: '/',
+        future: {
+          v8_middleware: false,
+          unstable_optimizeDeps: false,
+          unstable_splitRouteModules: false,
+          unstable_subResourceIntegrity: false,
+          unstable_viteEnvironmentApi: false,
+        },
+        routeDiscovery: { mode: 'initial' },
+        ssr: false,
+        isSpaMode: false,
+      };
+      window.__reactRouterContext.stream = new ReadableStream({
+        start(controller) {
+          window.__reactRouterContext.streamController = controller;
+        },
+      }).pipeThrough(new TextEncoderStream());
+    </script>
+    <script type="module" async="">
+      import '/assets/manifest-15fd3442.js';
+      import * as route0 from '/assets/root-g5t2mEZ9.js';
+      import * as route1 from '/assets/home-BDV2K_eX.js';
+
+      window.__reactRouterRouteModules = {
+        root: route0,
+        'routes/home': route1,
+      };
+
+      import('/assets/entry.client-DwtqniiQ.js');
+    </script>
+    <!--$?--><template id="B:0"></template
+    ><!--/$-->
+    <script id="_R_">
+      requestAnimationFrame(function () {
+        $RT = performance.now();
+      });
+    </script>
+    <div hidden id="S:0">
+      <script>
+        window.__reactRouterContext.streamController.enqueue(
+          '[{"_1":2,"_3":-5,"_4":-5},"loaderData",{},"actionData","errors"]\n',
+        );
+      </script>
+      <!--$?--><template id="B:1"></template
+      ><!--/$-->
+    </div>
+    <script>
+      $RB = [];
+      $RV = function (a) {
+        $RT = performance.now();
+        for (var b = 0; b < a.length; b += 2) {
+          var c = a[b],
+            e = a[b + 1];
+          null !== e.parentNode && e.parentNode.removeChild(e);
+          var f = c.parentNode;
+          if (f) {
+            var g = c.previousSibling,
+              h = 0;
+            do {
+              if (c && 8 === c.nodeType) {
+                var d = c.data;
+                if ('/$' === d || '/&' === d)
+                  if (0 === h) break;
+                  else h--;
+                else
+                  ('$' !== d &&
+                    '$?' !== d &&
+                    '$~' !== d &&
+                    '$!' !== d &&
+                    '&' !== d) ||
+                    h++;
+              }
+              d = c.nextSibling;
+              f.removeChild(c);
+              c = d;
+            } while (c);
+            for (; e.firstChild; ) f.insertBefore(e.firstChild, c);
+            g.data = '$';
+            g._reactRetry && requestAnimationFrame(g._reactRetry);
+          }
+        }
+        a.length = 0;
+      };
+      $RC = function (a, b) {
+        if ((b = document.getElementById(b)))
+          (a = document.getElementById(a))
+            ? ((a.previousSibling.data = '$~'),
+              $RB.push(a, b),
+              2 === $RB.length &&
+                ('number' !== typeof $RT
+                  ? requestAnimationFrame($RV.bind(null, $RB))
+                  : ((a = performance.now()),
+                    setTimeout(
+                      $RV.bind(null, $RB),
+                      2300 > a && 2e3 < a ? 2300 - a : $RT + 300 - a,
+                    ))))
+            : b.parentNode.removeChild(b);
+      };
+      $RC('B:0', 'S:0');
+    </script>
+    <div hidden id="S:1">
+      <script>
+        window.__reactRouterContext.streamController.close();
+      </script>
+    </div>
+    <script>
+      $RC('B:1', 'S:1');
+    </script>
+  </body>
+</html>

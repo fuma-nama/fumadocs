@@ -42,19 +42,19 @@
   },
   "dependencies": {
     "@radix-ui/react-popover": "^1.1.15",
-    "@shikijs/twoslash": "^3.13.0",
+    "@shikijs/twoslash": "^3.20.0",
     "mdast-util-from-markdown": "^2.0.2",
     "mdast-util-gfm": "^3.1.0",
-    "mdast-util-to-hast": "^13.2.0",
-    "shiki": "^3.13.0",
-    "tailwind-merge": "^3.3.1",
+    "mdast-util-to-hast": "^13.2.1",
+    "shiki": "^3.20.0",
+    "tailwind-merge": "^3.4.0",
     "twoslash": "^0.3.4"
   },
   "devDependencies": {
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
     "@types/node": "24.6.2",
-    "@types/react": "^19.2.0",
+    "@types/react": "^19.2.7",
     "eslint-config-custom": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "tsconfig": "workspace:*"

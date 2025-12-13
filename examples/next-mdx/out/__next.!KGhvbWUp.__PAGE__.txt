@@ -1,0 +1,6 @@
+1:"$Sreact.fragment"
+2:I[26140,["/_next/static/chunks/d4b42a4471e76b63.js","/_next/static/chunks/d74c6954d0dafbcf.js","/_next/static/chunks/d0fe6e8f5140b17f.js","/_next/static/chunks/d64cc51f556ffe12.js","/_next/static/chunks/691f1a7d65379747.js"],""]
+3:I[50627,["/_next/static/chunks/5e0304eede26ce64.js","/_next/static/chunks/5d211c5863093406.js"],"OutletBoundary"]
+4:"$Sreact.suspense"
+0:{"buildId":"8o9ydcA2Ymgs7dYorx2d3","rsc":["$","$1","c",{"children":[["$","div",null,{"className":"flex flex-col justify-center text-center flex-1","children":[["$","h1",null,{"className":"text-2xl font-bold mb-4","children":"Hello World"}],["$","p",null,{"children":["You can open"," ",["$","$L2",null,{"href":"/docs","className":"font-medium underline","children":"/docs"}]," ","and see the documentation."]}]]}],null,["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"loading":null,"isPartial":false}
+5:null

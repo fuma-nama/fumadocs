@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin="anonymous"
+    />
+    <link rel="modulepreload" href="/assets/manifest-15fd3442.js" />
+    <link rel="modulepreload" href="/assets/entry.client-DwtqniiQ.js" />
+    <link rel="modulepreload" href="/assets/index-CT70PKhW.js" />
+    <link rel="modulepreload" href="/assets/root-g5t2mEZ9.js" />
+    <link rel="modulepreload" href="/assets/root-72sXvtgv.js" />
+    <link rel="modulepreload" href="/assets/index-C0GeZixz.js" />
+    <link rel="modulepreload" href="/assets/button-345GfI1w.js" />
+    <link rel="stylesheet" href="/assets/root-Da6joNLy.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&amp;display=swap"
+    />
+  </head>
+  <body class="flex flex-col min-h-screen">
+    <script>
+      ((e2, i, s, u, m, a, l2, h) => {
+        let d = document.documentElement,
+          w = ['light', 'dark'];
+        function p(n2) {
+          ((Array.isArray(e2) ? e2 : [e2]).forEach((y) => {
+            let k = y === 'class',
+              S = k && a ? m.map((f) => a[f] || f) : m;
+            k
+              ? (d.classList.remove(...S),
+                d.classList.add(a && a[n2] ? a[n2] : n2))
+              : d.setAttribute(y, n2);
+          }),
+            R(n2));
+        }
+        function R(n2) {
+          h && w.includes(n2) && (d.style.colorScheme = n2);
+        }
+        function c() {
+          return window.matchMedia('(prefers-color-scheme: dark)').matches
+            ? 'dark'
+            : 'light';
+        }
+        if (u) p(u);
+        else
+          try {
+            let n2 = localStorage.getItem(i) || s,
+              y = l2 && n2 === 'system' ? c() : n2;
+            p(y);
+          } catch (n2) {}
+      })('class', 'theme', 'system', null, ['light', 'dark'], null, true, true);
+    </script>
+    <script>
+      console.log(
+        '💿 Hey developer 👋. You can provide a way better UX than this ' +
+          'when your app is loading JS modules and/or running `clientLoader` ' +
+          'functions. Check out https://reactrouter.com/start/framework/route-module#hydratefallback ' +
+          'for more information.',
+      );
+    </script>
+    <script>
+      window.__reactRouterContext = {
+        basename: '/',
+        future: {
+          v8_middleware: false,
+          unstable_optimizeDeps: false,
+          unstable_splitRouteModules: false,
+          unstable_subResourceIntegrity: false,
+          unstable_viteEnvironmentApi: false,
+        },
+        routeDiscovery: { mode: 'initial' },
+        ssr: false,
+        isSpaMode: true,
+      };
+      window.__reactRouterContext.stream = new ReadableStream({
+        start(controller) {
+          window.__reactRouterContext.streamController = controller;
+        },
+      }).pipeThrough(new TextEncoderStream());
+    </script>
+    <script type="module" async="">
+      import '/assets/manifest-15fd3442.js';
+      import * as route0 from '/assets/root-g5t2mEZ9.js';
+
+      window.__reactRouterRouteModules = { root: route0 };
+
+      import('/assets/entry.client-DwtqniiQ.js');
+    </script>
+    <!--$-->
+    <script>
+      window.__reactRouterContext.streamController.enqueue(
+        '[{"_1":2,"_3":-5,"_4":-5},"loaderData",{},"actionData","errors"]\n',
+      );
+    </script>
+    <!--$-->
+    <script>
+      window.__reactRouterContext.streamController.close();
+    </script>
+    <!--/$--><!--/$-->
+  </body>
+</html>

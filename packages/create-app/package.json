@@ -30,9 +30,9 @@
   },
   "dependencies": {
     "@clack/prompts": "^0.11.0",
-    "commander": "^14.0.1",
+    "commander": "^14.0.2",
     "picocolors": "^1.1.1",
-    "tinyexec": "^1.0.1"
+    "tinyexec": "^1.0.2"
   },
   "devDependencies": {
     "@types/cross-spawn": "^6.0.6",

@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin="anonymous"
+    />
+    <link rel="modulepreload" href="/assets/manifest-15fd3442.js" />
+    <link rel="modulepreload" href="/assets/entry.client-DwtqniiQ.js" />
+    <link rel="modulepreload" href="/assets/index-CT70PKhW.js" />
+    <link rel="modulepreload" href="/assets/root-g5t2mEZ9.js" />
+    <link rel="modulepreload" href="/assets/root-72sXvtgv.js" />
+    <link rel="modulepreload" href="/assets/index-C0GeZixz.js" />
+    <link rel="modulepreload" href="/assets/button-345GfI1w.js" />
+    <link rel="modulepreload" href="/assets/page-likrheyv.js" />
+    <link rel="modulepreload" href="/assets/layout.shared-WQQuTG8U.js" />
+    <title>Test</title>
+    <meta name="description" content="A document to test Fumadocs" />
+    <link rel="stylesheet" href="/assets/root-Da6joNLy.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&amp;display=swap"
+    />
+  </head>
+  <body class="flex flex-col min-h-screen">
+    <script>
+      ((e2, i, s, u, m, a, l2, h) => {
+        let d = document.documentElement,
+          w = ['light', 'dark'];
+        function p(n2) {
+          ((Array.isArray(e2) ? e2 : [e2]).forEach((y) => {
+            let k = y === 'class',
+              S = k && a ? m.map((f) => a[f] || f) : m;
+            k
+              ? (d.classList.remove(...S),
+                d.classList.add(a && a[n2] ? a[n2] : n2))
+              : d.setAttribute(y, n2);
+          }),
+            R(n2));
+        }
+        function R(n2) {
+          h && w.includes(n2) && (d.style.colorScheme = n2);
+        }
+        function c() {
+          return window.matchMedia('(prefers-color-scheme: dark)').matches
+            ? 'dark'
+            : 'light';
+        }
+        if (u) p(u);
+        else
+          try {
+            let n2 = localStorage.getItem(i) || s,
+              y = l2 && n2 === 'system' ? c() : n2;
+            p(y);
+          } catch (n2) {}
+      })('class', 'theme', 'system', null, ['light', 'dark'], null, true, true);
+    </script>
+    <header
+      id="nd-subnav"
+      class="fixed top-(--fd-banner-height) left-0 right-(--removed-body-scroll-bar-size,0) z-30 flex items-center ps-4 pe-2.5 border-b transition-colors backdrop-blur-sm bg-fd-background/80 h-(--fd-nav-height) on-root:[--fd-nav-height:56px] md:on-root:[--fd-nav-height:0px] md:hidden"
+    >
+      <a
+        class="inline-flex items-center gap-2.5 font-semibold"
+        href="/"
+        data-discover="true"
+        >React Router</a
+      >
+      <div class="flex-1"></div>
+      <button
+        type="button"
+        class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors duration-100 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring hover:bg-fd-accent hover:text-fd-accent-foreground [&amp;_svg]:size-4.5 p-2"
+        data-search=""
+        aria-label="Open Search"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="lucide"
+        >
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </svg></button
+      ><button
+        class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors duration-100 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring hover:bg-fd-accent hover:text-fd-accent-foreground [&amp;_svg]:size-4.5 p-2"
+        aria-label="Open Sidebar"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="lucide"
+        >
+          <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+          <path d="M9 3v18"></path>
+        </svg>
+      </button>
+    </header>
+    <main
+      id="nd-docs-layout"
+      class="flex flex-1 flex-col pt-(--fd-nav-height) transition-[padding] fd-default-layout mx-(--fd-layout-offset) md:[&amp;_#nd-page_article]:pt-12 xl:[&amp;_#nd-page_article]:px-8 md:[--fd-sidebar-width:268px] lg:[--fd-sidebar-width:286px]"
+      style="padding-inline-start: var(--fd-sidebar-width)"
+    >
+      <div
+        class="fixed flex shadow-lg transition-opacity rounded-xl p-0.5 border bg-fd-muted text-fd-muted-foreground z-10 max-md:hidden xl:start-4 max-xl:end-4 pointer-events-none opacity-0"
+        style="
+          top: calc(
+            var(--fd-banner-height) + var(--fd-tocnav-height) + var(--spacing) *
+              4
+          );
+        "
+      >
+        <button
+          type="button"
+          aria-label="Collapse Sidebar"
+          data-collapsed="false"
+          class="inline-flex items-center justify-center text-sm font-medium transition-colors duration-100 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring hover:bg-fd-accent hover:text-fd-accent-foreground p-1.5 [&amp;_svg]:size-4.5 rounded-lg"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="lucide"
+          >
+            <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+            <path d="M9 3v18"></path>
+          </svg></button
+        ><button
+          type="button"
+          class="inline-flex items-center justify-center text-sm font-medium transition-colors duration-100 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring hover:bg-fd-accent hover:text-fd-accent-foreground p-1.5 [&amp;_svg]:size-4.5 rounded-lg"
+          data-search=""
+          aria-label="Open Search"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="lucide"
+          >
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.3-4.3"></path>
+          </svg>
+        </button>
+      </div>
+      <aside
+        id="nd-sidebar"
+        data-collapsed="false"
+        class="fixed left-0 rtl:left-auto rtl:right-(--removed-body-scroll-bar-size,0) flex flex-col items-end top-(--fd-sidebar-top) bottom-(--fd-sidebar-margin) z-20 bg-fd-card text-sm border-e transition-[top,opacity,translate,width] duration-200 max-md:hidden *:w-(--fd-sidebar-width)"
+        style="
+          --fd-sidebar-offset: calc(16px - 100%);
+          --fd-sidebar-margin: 0px;
+          --fd-sidebar-top: calc(
+            var(--fd-banner-height) + var(--fd-nav-height) +
+              var(--fd-sidebar-margin)
+          );
+          width: calc(
+            var(--spacing) + var(--fd-sidebar-width) + var(--fd-layout-offset)
+          );
+        "
+      >
+        <div class="flex flex-col gap-3 p-4 pb-2">
+          <div class="flex">
+            <a
+              class="inline-flex text-[15px] items-center gap-2.5 font-medium me-auto"
+              href="/"
+              data-discover="true"
+              >React Router</a
+            ><button
+              type="button"
+              aria-label="Collapse Sidebar"
+              data-collapsed="false"
+              class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors duration-100 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring hover:bg-fd-accent hover:text-fd-accent-foreground p-1.5 [&amp;_svg]:size-4.5 mb-auto text-fd-muted-foreground"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="lucide"
+              >
+                <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+                <path d="M9 3v18"></path>
+              </svg>
+            </button>
+          </div>
+          <button
+            type="button"
+            data-search-full=""
+            class="inline-flex items-center gap-2 rounded-lg border bg-fd-secondary/50 p-1.5 ps-2 text-sm text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="lucide size-4"
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.3-4.3"></path></svg
+            >Search
+            <div class="ms-auto inline-flex gap-0.5">
+              <kbd class="rounded-md border bg-fd-background px-1.5">⌘</kbd
+              ><kbd class="rounded-md border bg-fd-background px-1.5">K</kbd>
+            </div>
+          </button>
+        </div>
+        <div
+          dir="ltr"
+          class="overflow-hidden h-full"
+          style="
+            position: relative;
+            --radix-scroll-area-corner-width: 0px;
+            --radix-scroll-area-corner-height: 0px;
+          "
+        >
+          <style>
+            [data-radix-scroll-area-viewport] {
+              scrollbar-width: none;
+              -ms-overflow-style: none;
+              -webkit-overflow-scrolling: touch;
+            }
+            [data-radix-scroll-area-viewport]::-webkit-scrollbar {
+              display: none;
+            }
+          </style>
+          <div
+            data-radix-scroll-area-viewport=""
+            class="size-full rounded-[inherit] p-4 overscroll-contain"
+            style="
+              overflow-x: hidden;
+              overflow-y: hidden;
+              --sidebar-item-offset: calc(var(--spacing) * 2);
+              mask-image: linear-gradient(
+                to bottom,
+                transparent,
+                white 12px,
+                white calc(100% - 12px),
+                transparent
+              );
+            "
+          >
+            <div style="min-width: 100%; display: table">
+              <a
+                data-active="false"
+                class="relative flex flex-row items-center gap-2 rounded-lg p-2 ps-(--sidebar-item-offset) text-start text-fd-muted-foreground [overflow-wrap:anywhere] [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none"
+                href="/docs"
+                data-discover="true"
+                >Hello World</a
+              ><a
+                data-active="true"
+                class="relative flex flex-row items-center gap-2 rounded-lg p-2 ps-(--sidebar-item-offset) text-start [overflow-wrap:anywhere] [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 bg-fd-primary/10 text-fd-primary"
+                href="/docs/test"
+                data-discover="true"
+                >Test</a
+              >
+            </div>
+          </div>
+        </div>
+        <div class="flex flex-col border-t p-4 pt-2">
+          <div class="flex text-fd-muted-foreground items-center empty:hidden">
+            <button
+              class="inline-flex items-center rounded-full border ms-auto p-0"
+              aria-label="Toggle Theme"
+              data-theme-toggle=""
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="lucide size-6.5 rounded-full p-1.5 text-fd-muted-foreground"
+              >
+                <circle cx="12" cy="12" r="4"></circle>
+                <path d="M12 2v2"></path>
+                <path d="M12 20v2"></path>
+                <path d="m4.93 4.93 1.41 1.41"></path>
+                <path d="m17.66 17.66 1.41 1.41"></path>
+                <path d="M2 12h2"></path>
+                <path d="M20 12h2"></path>
+                <path d="m6.34 17.66-1.41 1.41"></path>
+                <path d="m19.07 4.93-1.41 1.41"></path></svg
+              ><svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="lucide size-6.5 rounded-full p-1.5 text-fd-muted-foreground"
+              >
+                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </aside>
+      <div
+        id="nd-page"
+        class="flex flex-1 w-full mx-auto max-w-(--fd-page-width) pt-(--fd-tocnav-height) pe-(--fd-toc-width)"
+      >
+        <header
+          id="nd-tocnav"
+          class="fixed pr-(--removed-body-scroll-bar-size,0) z-10 border-b backdrop-blur-sm transition-colors xl:hidden max-xl:on-root:[--fd-tocnav-height:40px] bg-fd-background/80"
+          style="
+            top: calc(var(--fd-banner-height) + var(--fd-nav-height));
+            inset-inline-start: calc(
+              var(--fd-sidebar-width) + var(--fd-layout-offset)
+            );
+            inset-inline-end: 0;
+          "
+          data-state="closed"
+        >
+          <button
+            type="button"
+            aria-controls="radix-_R_3qj5_"
+            aria-expanded="false"
+            data-state="closed"
+            class="flex w-full h-(--fd-tocnav-height) items-center text-sm text-fd-muted-foreground gap-2.5 px-4 py-2.5 text-start focus-visible:outline-none [&amp;_svg]:size-4 md:px-6"
+          >
+            <svg
+              role="progressbar"
+              viewBox="0 0 24 24"
+              aria-valuenow="0"
+              aria-valuemin="0"
+              aria-valuemax="1"
+              class="shrink-0"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="11"
+                fill="none"
+                stroke-width="2"
+                class="stroke-current/25"
+              ></circle>
+              <circle
+                cx="12"
+                cy="12"
+                r="11"
+                fill="none"
+                stroke-width="2"
+                stroke="currentColor"
+                stroke-dasharray="69.11503837897544"
+                stroke-dashoffset="69.11503837897544"
+                stroke-linecap="round"
+                transform="rotate(-90 12 12)"
+                class="transition-all"
+              ></circle></svg
+            ><span class="grid flex-1 *:my-auto *:row-start-1 *:col-start-1"
+              ><span class="truncate transition-all">Test</span
+              ><span
+                class="truncate transition-all opacity-0 translate-y-full pointer-events-none"
+              ></span></span
+            ><svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="lucide shrink-0 transition-transform mx-0.5"
+            >
+              <path d="m6 9 6 6 6-6"></path>
+            </svg>
+          </button>
+          <div
+            data-state="closed"
+            id="radix-_R_3qj5_"
+            hidden=""
+            data-toc-popover=""
+            class="overflow-hidden flex flex-col px-4 max-h-[50vh] md:px-6"
+          ></div>
+        </header>
+        <article
+          class="flex min-w-0 w-full flex-col gap-4 pt-8 px-4 md:px-6 md:mx-auto"
+        >
+          <h1 class="text-[1.75em] font-semibold">Test</h1>
+          <p class="mb-8 text-lg text-fd-muted-foreground">
+            A document to test Fumadocs
+          </p>
+          <div class="prose flex-1">
+            <p>Hey there!</p>
+            <h2 class="flex scroll-m-28 flex-row items-center gap-2" id="cards">
+              <a data-card="" href="#cards" class="peer">Cards</a
+              ><svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="lucide size-3.5 shrink-0 text-fd-muted-foreground opacity-0 transition-opacity peer-hover:opacity-100"
+                aria-label="Link to section"
+              >
+                <path
+                  d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+                ></path>
+                <path
+                  d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+                ></path>
+              </svg>
+            </h2>
+            <div class="grid grid-cols-2 gap-3 @container">
+              <a
+                href="https://nextjs.org/docs"
+                rel="noreferrer noopener"
+                target="_blank"
+                data-card="true"
+                class="block rounded-xl border bg-fd-card p-4 text-fd-card-foreground transition-colors @max-lg:col-span-full hover:bg-fd-accent/80"
+                ><h3 class="not-prose mb-1 text-sm font-medium">
+                  Learn more about Next.js
+                </h3>
+                <div
+                  class="text-sm text-fd-muted-foreground prose-no-margin empty:hidden"
+                ></div></a
+              ><a
+                href="https://fumadocs.dev"
+                rel="noreferrer noopener"
+                target="_blank"
+                data-card="true"
+                class="block rounded-xl border bg-fd-card p-4 text-fd-card-foreground transition-colors @max-lg:col-span-full hover:bg-fd-accent/80"
+                ><h3 class="not-prose mb-1 text-sm font-medium">
+                  Learn more about Fumadocs
+                </h3>
+                <div
+                  class="text-sm text-fd-muted-foreground prose-no-margin empty:hidden"
+                ></div
+              ></a>
+            </div>
+            <h3
+              class="flex scroll-m-28 flex-row items-center gap-2"
+              id="codeblock"
+            >
+              <a data-card="" href="#codeblock" class="peer">CodeBlock</a
+              ><svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="lucide size-3.5 shrink-0 text-fd-muted-foreground opacity-0 transition-opacity peer-hover:opacity-100"
+                aria-label="Link to section"
+              >
+                <path
+                  d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+                ></path>
+                <path
+                  d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+                ></path>
+              </svg>
+            </h3>
+            <figure
+              dir="ltr"
+              class="my-4 bg-fd-card rounded-xl shiki relative border shadow-sm outline-none not-prose overflow-hidden text-sm shiki shiki-themes github-light github-dark"
+              style="
+                --shiki-light: #24292e;
+                --shiki-dark: #e1e4e8;
+                --shiki-light-bg: #fff;
+                --shiki-dark-bg: #24292e;
+              "
+              tabindex="0"
+            >
+              <div
+                class="empty:hidden absolute top-2 right-2 z-2 backdrop-blur-lg rounded-lg text-fd-muted-foreground"
+              >
+                <button
+                  type="button"
+                  class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors duration-100 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring p-1 [&amp;_svg]:size-4 hover:text-fd-accent-foreground data-[checked]:text-fd-accent-foreground"
+                  aria-label="Copy Text"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide"
+                  >
+                    <rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect>
+                    <path
+                      d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"
+                    ></path>
+                  </svg>
+                </button>
+              </div>
+              <div
+                class="text-[13px] py-3.5 overflow-auto max-h-[600px] fd-scroll-container"
+                style="--padding-right: calc(var(--spacing) * 8)"
+              >
+                <pre
+                  class="min-w-full w-max *:flex *:flex-col"
+                ><code><span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">console.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0">log</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">(</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF">&#x27;Hello World&#x27;</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">);</span></span></code></pre>
+              </div>
+            </figure>
+            <h4 class="flex scroll-m-28 flex-row items-center gap-2" id="list">
+              <a data-card="" href="#list" class="peer">List</a
+              ><svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="lucide size-3.5 shrink-0 text-fd-muted-foreground opacity-0 transition-opacity peer-hover:opacity-100"
+                aria-label="Link to section"
+              >
+                <path
+                  d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+                ></path>
+                <path
+                  d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+                ></path>
+              </svg>
+            </h4>
+            <ul>
+              <li>Hello</li>
+              <li>World</li>
+            </ul>
+          </div>
+          <div
+            class="flex flex-row flex-wrap items-center justify-between gap-4 empty:hidden"
+          ></div>
+          <div class="@container grid gap-4 pb-6 grid-cols-1">
+            <a
+              class="flex flex-col gap-2 rounded-lg border p-4 text-sm transition-colors hover:bg-fd-accent/80 hover:text-fd-accent-foreground @max-lg:col-span-full"
+              href="/docs"
+              data-discover="true"
+              ><div class="inline-flex items-center gap-1.5 font-medium">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="lucide -mx-1 size-4 shrink-0 rtl:rotate-180"
+                >
+                  <path d="m15 18-6-6 6-6"></path>
+                </svg>
+                <p>Hello World</p>
+              </div>
+              <p class="text-fd-muted-foreground truncate">
+                Your first `document` You&#x27;ll love it!
+              </p></a
+            >
+          </div>
+        </article>
+        <div
+          id="nd-toc"
+          class="fixed bottom-0 pt-12 pb-2 pr-(--removed-body-scroll-bar-size,0) xl:on-root:[--fd-toc-width:286px] max-xl:hidden"
+          style="
+            top: calc(var(--fd-banner-height) + var(--fd-nav-height));
+            inset-inline-end: max(
+              var(--fd-layout-offset),
+              calc(
+                50vw - var(--fd-sidebar-width) / 2 - var(--fd-page-width) / 2
+              )
+            );
+          "
+        >
+          <div class="flex h-full w-(--fd-toc-width) max-w-full flex-col pe-4">
+            <h3
+              id="toc-title"
+              class="inline-flex items-center gap-1.5 text-sm text-fd-muted-foreground"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="lucide size-4"
+              >
+                <path d="M15 18H3"></path>
+                <path d="M17 6H3"></path>
+                <path d="M21 12H3"></path></svg
+              >On this page
+            </h3>
+            <div
+              class="relative min-h-0 text-sm ms-px overflow-auto [scrollbar-width:none] [mask-image:linear-gradient(to_bottom,transparent,white_16px,white_calc(100%-16px),transparent)] py-3"
+            >
+              <div
+                role="none"
+                class="absolute top-(--fd-top) h-(--fd-height) w-px bg-fd-primary transition-all"
+              ></div>
+              <div class="flex flex-col border-s border-fd-foreground/10">
+                <a
+                  data-active="false"
+                  href="#cards"
+                  class="prose py-1.5 text-sm text-fd-muted-foreground transition-colors [overflow-wrap:anywhere] first:pt-0 last:pb-0 data-[active=true]:text-fd-primary ps-3"
+                  >Cards</a
+                ><a
+                  data-active="false"
+                  href="#codeblock"
+                  class="prose py-1.5 text-sm text-fd-muted-foreground transition-colors [overflow-wrap:anywhere] first:pt-0 last:pb-0 data-[active=true]:text-fd-primary ps-6"
+                  >CodeBlock</a
+                ><a
+                  data-active="false"
+                  href="#list"
+                  class="prose py-1.5 text-sm text-fd-muted-foreground transition-colors [overflow-wrap:anywhere] first:pt-0 last:pb-0 data-[active=true]:text-fd-primary ps-8"
+                  >List</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script>
+      ((storageKey2, restoreKey) => {
+        if (!window.history.state || !window.history.state.key) {
+          let key = Math.random().toString(32).slice(2);
+          window.history.replaceState({ key }, '');
+        }
+        try {
+          let positions = JSON.parse(
+            sessionStorage.getItem(storageKey2) || '{}',
+          );
+          let storedY = positions[restoreKey || window.history.state.key];
+          if (typeof storedY === 'number') {
+            window.scrollTo(0, storedY);
+          }
+        } catch (error) {
+          console.error(error);
+          sessionStorage.removeItem(storageKey2);
+        }
+      })('react-router-scroll-positions', null);
+    </script>
+    <script>
+      window.__reactRouterContext = {
+        basename: '/',
+        future: {
+          v8_middleware: false,
+          unstable_optimizeDeps: false,
+          unstable_splitRouteModules: false,
+          unstable_subResourceIntegrity: false,
+          unstable_viteEnvironmentApi: false,
+        },
+        routeDiscovery: { mode: 'initial' },
+        ssr: false,
+        isSpaMode: false,
+      };
+      window.__reactRouterContext.stream = new ReadableStream({
+        start(controller) {
+          window.__reactRouterContext.streamController = controller;
+        },
+      }).pipeThrough(new TextEncoderStream());
+    </script>
+    <script type="module" async="">
+      import '/assets/manifest-15fd3442.js';
+      import * as route0 from '/assets/root-g5t2mEZ9.js';
+      import * as route1 from '/assets/page-likrheyv.js';
+
+      window.__reactRouterRouteModules = { root: route0, 'docs/page': route1 };
+
+      import('/assets/entry.client-DwtqniiQ.js');
+    </script>
+    <!--$-->
+    <script>
+      window.__reactRouterContext.streamController.enqueue(
+        '[{"_1":2,"_33":-5,"_34":-5},"loaderData",{"_3":4},"docs/page",{"_5":6,"_7":8},"path","test.mdx","tree",{"_9":10,"_11":12,"_13":14},"$id","root","name","Docs","children",[15,28],{"_9":16,"_17":18,"_11":19,"_20":21,"_22":-7,"_23":24,"_25":26},"index.mdx","type","page","Hello World","description","Your first `document`\\nYou\'ll love it!\\n","icon","url","/docs","$ref",{"_27":16},"file",{"_9":6,"_17":18,"_11":29,"_20":30,"_22":-7,"_23":31,"_25":32},"Test","A document to test Fumadocs","/docs/test",{"_27":6},"actionData","errors"]\n',
+      );
+    </script>
+    <!--$-->
+    <script>
+      window.__reactRouterContext.streamController.close();
+    </script>
+    <!--/$--><!--/$-->
+  </body>
+</html>
