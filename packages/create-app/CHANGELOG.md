@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 16.0.25
+
+### Patch Changes
+
+- 07fb964: update Next.js ESLint config
+
 ## 16.0.24
 
 ## 16.0.23

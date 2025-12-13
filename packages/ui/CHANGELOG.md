@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 16.2.5
+
+### Patch Changes
+
+- 8469c6d: fix shadcn ui preset
+- Updated dependencies [7292424]
+  - fumadocs-core@16.2.5
+
 ## 16.2.4
 
 ### Patch Changes
