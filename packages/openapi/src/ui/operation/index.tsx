@@ -221,7 +221,7 @@ export async function Operation({
           {items.length > 1 ? (
             <SelectTabTrigger items={items} />
           ) : (
-            <p className="not-prose">{items[0].label}</p>
+            <div className="not-prose">{items[0].label}</div>
           )}
         </div>
         {securities.map((security, i) => (
