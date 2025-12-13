@@ -1,6 +1,7 @@
 @import './colors/index.css';
 
-@theme {
+:root,
+.dark {
   --color-fd-background: var(--background);
   --color-fd-foreground: var(--foreground);
   --color-fd-muted: var(--muted);
