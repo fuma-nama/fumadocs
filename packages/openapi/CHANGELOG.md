@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 10.1.4
+
+### Patch Changes
+
+- 90ada4b: Fix example value generation for parameters
+
 ## 10.1.3
 
 ### Patch Changes
