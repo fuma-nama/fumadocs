@@ -2,4 +2,4 @@
 'fumadocs-mdx': patch
 ---
 
-fix: make server entrypoint browser compatible
+feat: make server entrypoint browser compatible
