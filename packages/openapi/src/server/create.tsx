@@ -35,6 +35,7 @@ export interface OpenAPIOptions {
 export interface OpenAPIServer {
   createProxy: typeof createProxy;
   getSchemas: () => Promise<ProcessedSchemaMap>;
+  getSchema: (document: string) => Promise<ProcessedDocument>;
   readonly options: OpenAPIOptions;
 }
 
@@ -65,6 +66,16 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
   return {
     options,
     createProxy,
+    async getSchema(document) {
+      const schemas = await getSchemas();
+      if (document in schemas) return schemas[document];
+
+      console.warn(
+        `[Fumadocs OpenAPI] the document "${document}" is not listed in the input array, this may not be expected.`,
+      );
+      // do not cache unlisted documents
+      return processDocument(document);
+    },
     async getSchemas() {
       if (disableCache) return getSchemas();
 

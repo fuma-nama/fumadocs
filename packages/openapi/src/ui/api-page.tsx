@@ -253,7 +253,7 @@ export function createAPIPage(
   return async function APIPageWrapper({ document, ...props }) {
     let processed: ProcessedDocument;
     if (typeof document === 'string') {
-      processed = (await server.getSchemas())[document];
+      processed = await server.getSchema(document);
     } else {
       processed = await document;
     }
