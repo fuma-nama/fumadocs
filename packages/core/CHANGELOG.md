@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 16.2.5
+
+### Patch Changes
+
+- 7292424: Support MDX preset in Fumadocs Core
+
 ## 16.2.4
 
 ### Patch Changes

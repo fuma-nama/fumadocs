@@ -1,5 +1,16 @@
 # @fuma-docs/openapi
 
+## 10.1.3
+
+### Patch Changes
+
+- ddeeb74: Improve error message on invalid document props
+- fb3440c: fix possible hydration errors
+- Updated dependencies [8469c6d]
+- Updated dependencies [7292424]
+  - fumadocs-ui@16.2.5
+  - fumadocs-core@16.2.5
+
 ## 10.1.2
 
 ### Patch Changes
