@@ -80,6 +80,11 @@ const showcases: ShowcaseObject[] = [
     url: 'https://comfydeploy.com',
   },
   {
+    image: '/showcases/octarine.png',
+    name: 'Octarine',
+    url: 'https://docs.octarine.app',
+  },
+  {
     image: '/showcases/next-faq.png',
     name: 'Next.js Discord Common Questions',
     url: 'https://nextjs-faq.com',
@@ -268,7 +273,7 @@ const blogs: ShowcaseObject[] = [
     image: HexaasBlog,
     name: "hexaa's blog",
     url: 'https://hexaa.sh/blog',
-  }
+  },
 ];
 
 const vercel = [
