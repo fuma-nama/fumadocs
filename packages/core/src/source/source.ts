@@ -83,34 +83,51 @@ export function multiple<T extends Record<string, Source>>(sources: T) {
   return out;
 }
 
-/**
- * map virtual files in source
- */
-export function map<Config extends SourceConfig>(source: Source<Config>) {
+export function source<Page extends PageData, Meta extends MetaData>(config: {
+  pages: VirtualPage<Page>[];
+  metas: VirtualMeta<Meta>[];
+}): Source<{
+  pageData: Page;
+  metaData: Meta;
+}> {
   return {
-    page<$Page extends PageData>(
-      fn: (entry: VirtualPage<Config['pageData']>) => VirtualPage<$Page>,
-    ): Source<{
-      pageData: $Page;
-      metaData: Config['metaData'];
-    }> {
-      return {
-        files: source.files.map((file) =>
-          file.type === 'page' ? fn(file) : file,
-        ),
-      };
+    files: [...config.pages, ...config.metas],
+  };
+}
+
+/**
+ * update a source object in-place.
+ */
+export function update<Config extends SourceConfig>(source: Source<Config>) {
+  return {
+    page<V extends PageData>(
+      fn: (page: VirtualPage<Config['pageData']>) => VirtualPage<V>,
+    ) {
+      for (let i = 0; i < source.files.length; i++) {
+        const file = source.files[i];
+        if (file.type === 'page') source.files[i] = fn(file);
+      }
+
+      return this as unknown as typeof update<{
+        pageData: V;
+        metaData: Config['metaData'];
+      }>;
     },
-    meta<$Meta extends MetaData>(
-      fn: (entry: VirtualMeta<Config['metaData']>) => VirtualMeta<$Meta>,
-    ): Source<{
-      pageData: Config['pageData'];
-      metaData: $Meta;
-    }> {
-      return {
-        files: source.files.map((file) =>
-          file.type === 'meta' ? fn(file) : file,
-        ),
-      };
+    meta<V extends MetaData>(
+      fn: (meta: VirtualMeta<Config['metaData']>) => VirtualMeta<V>,
+    ) {
+      for (let i = 0; i < source.files.length; i++) {
+        const file = source.files[i];
+        if (file.type === 'meta') source.files[i] = fn(file);
+      }
+
+      return this as unknown as typeof update<{
+        pageData: Config['pageData'];
+        metaData: V;
+      }>;
+    },
+    build() {
+      return source;
     },
   };
 }
