@@ -100,6 +100,17 @@ export function source<Page extends PageData, Meta extends MetaData>(config: {
  */
 export function update<Config extends SourceConfig>(source: Source<Config>) {
   return {
+    files<Page extends PageData, Meta extends MetaData>(
+      fn: (
+        files: VirtualFile<Config>[],
+      ) => (VirtualPage<Page> | VirtualMeta<Meta>)[],
+    ) {
+      source.files = fn(source.files);
+      return this as unknown as typeof update<{
+        pageData: Page;
+        metaData: Meta;
+      }>;
+    },
     page<V extends PageData>(
       fn: (page: VirtualPage<Config['pageData']>) => VirtualPage<V>,
     ) {
