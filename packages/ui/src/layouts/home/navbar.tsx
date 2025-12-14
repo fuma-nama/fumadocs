@@ -3,14 +3,12 @@ import Link, { type LinkProps } from 'fumadocs-core/link';
 import { cn } from '@/utils/cn';
 import {
   NavigationMenuContent,
+  type NavigationMenuContentProps,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuTrigger,
+  type NavigationMenuTriggerProps,
 } from '@/components/ui/navigation-menu';
-import type {
-  NavigationMenuContentProps,
-  NavigationMenuTriggerProps,
-} from '@radix-ui/react-navigation-menu';
 import { navItemVariants } from './client';
 
 export const NavbarMenu = NavigationMenuItem;

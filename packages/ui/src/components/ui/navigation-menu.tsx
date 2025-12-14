@@ -3,6 +3,9 @@ import * as React from 'react';
 import * as Primitive from '@radix-ui/react-navigation-menu';
 import { cn } from '@/utils/cn';
 
+export type NavigationMenuContentProps = Primitive.NavigationMenuContentProps;
+export type NavigationMenuTriggerProps = Primitive.NavigationMenuTriggerProps;
+
 const NavigationMenu = Primitive.Root;
 
 const NavigationMenuList = Primitive.List;

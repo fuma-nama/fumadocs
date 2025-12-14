@@ -1,6 +1,6 @@
 import {
-  build,
   combineRegistry,
+  RegistryCompiler,
   writeFumadocsRegistry,
   writeShadcnRegistry,
 } from '@fumadocs/cli/build';
@@ -9,8 +9,8 @@ import * as ui from '../../../packages/ui/src/_registry';
 
 export async function buildRegistry() {
   const [mainRegistry, uiRegistry] = await Promise.all([
-    build(registry),
-    build(ui.registry),
+    new RegistryCompiler(registry).compile(),
+    new RegistryCompiler(ui.registry).compile(),
   ]);
   const all = combineRegistry(mainRegistry, uiRegistry);
 

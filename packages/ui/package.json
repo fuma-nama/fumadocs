@@ -15,6 +15,10 @@
     "./style.css": "./dist/style.css",
     "./css/*": "./css/*",
     "./image-zoom.css": "./dist/image-zoom.css",
+    "./components/tabs.unstyled": {
+      "import": "./dist/components/ui/tabs.js",
+      "types": "./dist/components/ui/tabs.d.ts"
+    },
     "./components/*": {
       "import": "./dist/components/*.js",
       "types": "./dist/components/*.d.ts",

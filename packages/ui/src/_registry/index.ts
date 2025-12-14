@@ -252,6 +252,10 @@ export const registry: Registry = {
           type: 'components',
           path: 'components/accordion.tsx',
         },
+        {
+          type: 'ui',
+          path: 'components/ui/accordion.tsx',
+        },
       ],
     },
     {
@@ -358,8 +362,8 @@ export const registry: Registry = {
           path: 'components/tabs.tsx',
         },
         {
-          type: 'components',
-          path: 'components/tabs.unstyled.tsx',
+          type: 'ui',
+          path: 'components/ui/tabs.tsx',
         },
       ],
     },
