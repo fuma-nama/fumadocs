@@ -343,7 +343,9 @@ export class ComponentCompiler {
 
     return [
       result,
-      ...(await Promise.all(queue.map(this.buildFileAndDeps))).flat(),
+      ...(
+        await Promise.all(queue.map((file) => this.buildFileAndDeps(file)))
+      ).flat(),
     ];
   }
 

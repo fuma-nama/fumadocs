@@ -13,12 +13,7 @@ import {
 import { cn } from '@/utils/cn';
 import { useCopyButton } from '@/utils/use-copy-button';
 import { buttonVariants } from '@/components/ui/button';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/tabs.unstyled';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { mergeRefs } from '@/utils/merge-refs';
 
 export interface CodeBlockProps extends ComponentProps<'figure'> {
