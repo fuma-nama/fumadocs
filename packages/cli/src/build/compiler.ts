@@ -15,6 +15,7 @@ export interface CompiledRegistry {
   name: string;
   index: z.input<typeof indexSchema>[];
   components: CompiledComponent[];
+  switchables?: Record<string, Switchable>;
 }
 
 export interface ComponentFile {
@@ -111,6 +112,7 @@ export class RegistryCompiler {
       name: registry.name,
       index: [],
       components: [],
+      switchables: registry.switchables,
     };
 
     const builtComps = await Promise.all(
@@ -307,7 +309,7 @@ export class ComponentCompiler {
       if (reference.type === 'custom') return reference.specifier;
 
       if (reference.type === 'file') {
-        const refFile = this.compiler.raw.onUnknownFile?.(reference.file);
+        const refFile = this.registry.onUnknownFile?.(reference.file);
         if (refFile) {
           queue.push(refFile);
           return this.toImportPath(refFile);

@@ -3,21 +3,19 @@ import fs from 'node:fs/promises';
 import { confirm, isCancel, log, outro } from '@clack/prompts';
 import { createEmptyProject } from '@/utils/typescript';
 import { typescriptExtensions } from '@/constants';
-import {
-  toImportSpecifier,
-  transformReferences,
-} from '@/utils/transform-references';
+import { toImportSpecifier } from '@/utils/ast';
 import type { Component, File } from '@/registry/schema';
 import type { RegistryClient } from '@/registry/client';
 import { x } from 'tinyexec';
 import { DependencyManager } from '@/registry/installer/dep-manager';
+import { AsyncCache } from '@/utils/cache';
 
 type DownloadedComponents = Omit<Component, 'subComponents'>[];
 
 export class ComponentInstaller {
   private readonly project = createEmptyProject();
   private readonly installedFiles = new Set<string>();
-  private readonly downloadedComps = new Map<string, DownloadedComponents>();
+  private readonly downloadCache = new AsyncCache<DownloadedComponents>();
   private readonly client: RegistryClient;
   readonly dependencies: Record<string, string | null> = {};
   readonly devDependencies: Record<string, string | null> = {};
@@ -42,7 +40,7 @@ export class ComponentInstaller {
 
       const outPath = this.resolveOutputPath(file);
       const output = typescriptExtensions.includes(path.extname(filePath))
-        ? this.transform(outPath, file, fileList)
+        ? await this.transform(outPath, file, fileList)
         : file.content;
 
       const status = await fs
@@ -113,33 +111,38 @@ export class ComponentInstaller {
   /**
    * return a list of components, merged with child components.
    */
-  private async download(name: string): Promise<DownloadedComponents> {
-    const cached = this.downloadedComps.get(name);
-    if (cached) return cached;
+  private download(
+    name: string,
+  ): DownloadedComponents | Promise<DownloadedComponents> {
+    return this.downloadCache.cached(name, async () => {
+      const comp = await this.client.fetchComponent(name);
+      const result: DownloadedComponents = [comp];
 
-    const comp = await this.client.fetchComponent(name);
-    const result: DownloadedComponents = [comp];
+      // place it before downloading child components to avoid recursive downloads
+      this.downloadCache.store.set(name, result);
 
-    // place it before downloading child components to avoid recursive downloads
-    this.downloadedComps.set(name, result);
-
-    for (const sub of comp.subComponents) {
-      result.push(...(await this.download(sub)));
-    }
-
-    return result;
+      const child = await Promise.all(
+        comp.subComponents.map((sub) => this.download(sub)),
+      );
+      for (const sub of child) result.push(...sub);
+      return result;
+    });
   }
 
-  private transform(filePath: string, file: File, fileList: File[]) {
+  private async transform(
+    filePath: string,
+    file: File,
+    fileList: File[],
+  ): Promise<string> {
     const sourceFile = this.project.createSourceFile(filePath, file.content, {
       overwrite: true,
     });
 
-    transformReferences(sourceFile, (specifier) => {
-      const prefix = '@/';
-
-      if (specifier.startsWith(prefix)) {
-        const lookup = specifier.substring(prefix.length);
+    // transform alias
+    const prefix = '@/';
+    for (const specifier of sourceFile.getImportStringLiterals()) {
+      if (specifier.getLiteralValue().startsWith(prefix)) {
+        const lookup = specifier.getLiteralValue().substring(prefix.length);
 
         const target = fileList.find((item) => {
           const filePath = item.target ?? item.path;
@@ -147,14 +150,34 @@ export class ComponentInstaller {
           return filePath === lookup;
         });
 
-        if (!target) {
+        if (target) {
+          specifier.setLiteralValue(
+            toImportSpecifier(filePath, this.resolveOutputPath(target)),
+          );
+        } else {
           console.warn(`cannot find the referenced file of ${specifier}`);
-          return specifier;
         }
-
-        return toImportSpecifier(filePath, this.resolveOutputPath(target));
       }
-    });
+    }
+
+    // switchables
+    // TODO: handle namespace imports like MySwitchable.member
+    for (const statement of sourceFile.getImportDeclarations()) {
+      const info = await this.client.fetchRegistryInfo();
+      const specifier = statement.getModuleSpecifier().getLiteralValue();
+
+      if (info.switchables && specifier in info.switchables) {
+        const switchable = info.switchables[specifier];
+        statement.setModuleSpecifier(switchable.specifier);
+        for (const member of statement.getNamedImports()) {
+          const name = member.getName();
+
+          if (name in switchable.members) {
+            member.setName(switchable.members[name]);
+          }
+        }
+      }
+    }
 
     return sourceFile.getFullText();
   }
