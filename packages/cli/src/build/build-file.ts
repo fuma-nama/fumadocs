@@ -2,7 +2,7 @@ import * as path from 'node:path';
 import { SourceFile, StringLiteral, ts } from 'ts-morph';
 import type { ComponentBuilder } from '@/build/component-builder';
 import type { Component, ComponentFile } from '@/build/build-registry';
-import type { OutputFile } from '@/registry/schema';
+import type { FileInput } from '@/registry/schema';
 
 export type SourceReference =
   | {
@@ -50,7 +50,7 @@ export async function buildFile(
    * keep original one if `undefined`
    */
   writeReference: (reference: Reference) => string | undefined,
-): Promise<OutputFile> {
+): Promise<FileInput> {
   const sourceFilePath = path.join(builder.registryDir, file.path);
 
   const defaultResolve = (

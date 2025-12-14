@@ -37,7 +37,7 @@ function createConfigSchema(isSrc: boolean) {
 
 type ConfigSchema = ReturnType<typeof createConfigSchema>;
 
-export type Config = z.input<ConfigSchema>;
+export type ConfigInput = z.input<ConfigSchema>;
 
 export type LoadedConfig = z.output<ConfigSchema>;
 
@@ -72,7 +72,7 @@ export async function initConfig(
   }
 
   const src = await isSrc();
-  const defaultConfig = createConfigSchema(src).parse({} satisfies Config);
+  const defaultConfig = createConfigSchema(src).parse({} satisfies ConfigInput);
 
   await fs.writeFile(file, JSON.stringify(defaultConfig, null, 2));
   return defaultConfig;

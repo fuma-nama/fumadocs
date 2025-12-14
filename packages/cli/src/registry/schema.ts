@@ -1,10 +1,16 @@
 import { z } from 'zod';
 
-export type Output = z.infer<typeof rootSchema>;
+export interface RawRegistry {
+  name: string;
+  index: z.input<typeof indexSchema>[];
+  components: z.input<typeof componentSchema>[];
+}
+
 export type NamespaceType = (typeof namespaces)[number];
-export type OutputIndex = z.infer<typeof indexSchema>;
-export type OutputFile = z.infer<typeof fileSchema>;
-export type OutputComponent = z.infer<typeof componentSchema>;
+export type FileInput = z.input<typeof fileSchema>;
+export type FileOutput = z.output<typeof fileSchema>;
+export type ComponentInput = z.input<typeof componentSchema>;
+export type ComponentOutput = z.infer<typeof componentSchema>;
 
 export const namespaces = [
   'components',
@@ -36,10 +42,4 @@ export const componentSchema = z.object({
   dependencies: z.record(z.string(), z.string().or(z.null())),
   devDependencies: z.record(z.string(), z.string().or(z.null())),
   subComponents: z.array(z.string()).default([]),
-});
-
-export const rootSchema = z.object({
-  name: z.string(),
-  index: z.array(indexSchema),
-  components: z.array(componentSchema),
 });

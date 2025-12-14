@@ -3,11 +3,6 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { Command } from 'commander';
 import picocolors from 'picocolors';
-import {
-  localResolver,
-  remoteResolver,
-  type Resolver,
-} from '@/utils/add/install-component';
 import { createOrLoadConfig, initConfig } from '@/config';
 import {
   type JsonTreeNode,
@@ -18,6 +13,7 @@ import { runTree } from '@/utils/file-tree/run-tree';
 import packageJson from '../package.json';
 import { customise } from '@/commands/customise';
 import { add } from '@/commands/add';
+import { localResolver, remoteResolver } from '@/registry/client';
 
 const program = new Command().option('--config <string>');
 
@@ -104,9 +100,7 @@ program
     },
   );
 
-function getResolverFromDir(
-  dir: string = 'https://fumadocs.dev/registry',
-): Resolver {
+function getResolverFromDir(dir: string = 'https://fumadocs.dev/registry') {
   if (dir in dirShortcuts) dir = dirShortcuts[dir];
 
   return dir.startsWith('http://') || dir.startsWith('https://')

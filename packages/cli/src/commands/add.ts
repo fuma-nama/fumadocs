@@ -7,36 +7,23 @@ import {
   spinner,
 } from '@clack/prompts';
 import picocolors from 'picocolors';
-import {
-  type ComponentInstaller,
-  createComponentInstaller,
-  type Resolver,
-} from '@/utils/add/install-component';
-import { installDeps } from '@/utils/add/install-deps';
+import { ComponentInstaller } from '@/registry/installer';
 import type { LoadedConfig } from '@/config';
-import { validateRegistryIndex } from '@/registry/client';
+import { RegistryClient, type Resolver } from '@/registry/client';
 
 export async function add(
   input: string[],
   resolver: Resolver,
   config: LoadedConfig,
 ) {
-  const installer = createComponentInstaller({
-    resolver,
-    config,
-  });
+  const client = new RegistryClient(config, resolver);
+  const installer = new ComponentInstaller(client);
   let target = input;
 
   if (input.length === 0) {
     const spin = spinner();
     spin.start('fetching registry');
-    const indexes = validateRegistryIndex(
-      await resolver('_registry.json').catch((e) => {
-        log.error(String(e));
-        process.exit(1);
-      }),
-    );
-
+    const indexes = await client.fetchRegistryIndexes();
     spin.stop(picocolors.bold(picocolors.greenBright('registry fetched')));
 
     const value = await multiselect({
@@ -60,9 +47,6 @@ export async function add(
 }
 
 export async function install(target: string[], installer: ComponentInstaller) {
-  const dependencies: Record<string, string | null> = {};
-  const devDependencies: Record<string, string | null> = {};
-
   for (const name of target) {
     intro(
       picocolors.bold(
@@ -71,11 +55,7 @@ export async function install(target: string[], installer: ComponentInstaller) {
     );
 
     try {
-      const output = await installer.install(name);
-
-      Object.assign(dependencies, output.dependencies);
-      Object.assign(devDependencies, output.devDependencies);
-
+      await installer.install(name);
       outro(picocolors.bold(picocolors.greenBright(`${name} installed`)));
     } catch (e) {
       log.error(String(e));
@@ -85,7 +65,8 @@ export async function install(target: string[], installer: ComponentInstaller) {
 
   intro(picocolors.bold('New Dependencies'));
 
-  await installDeps(dependencies, devDependencies);
+  await installer.installDeps();
+  await installer.onEnd();
 
   outro(picocolors.bold(picocolors.greenBright('Successful')));
 }

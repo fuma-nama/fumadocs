@@ -7,10 +7,10 @@ import {
 } from './component-builder';
 import { validateOutput } from '@/build/validate';
 import type {
+  ComponentInput,
+  FileInput,
   NamespaceType,
-  Output,
-  OutputComponent,
-  OutputFile,
+  RawRegistry,
 } from '@/registry/schema';
 
 export type OnResolve = (reference: SourceReference) => Reference;
@@ -68,8 +68,8 @@ export interface Registry {
   devDependencies?: Record<string, string | null>;
 }
 
-export async function build(registry: Registry): Promise<Output> {
-  const output: Output = {
+export async function build(registry: Registry): Promise<RawRegistry> {
+  const output: RawRegistry = {
     name: registry.name,
     index: [],
     components: [],
@@ -122,7 +122,7 @@ async function buildComponent(component: Component, builder: ComponentBuilder) {
     return `@/${filePath.replaceAll(path.sep, '/')}`;
   }
 
-  async function build(file: ComponentFile): Promise<OutputFile[]> {
+  async function build(file: ComponentFile): Promise<FileInput[]> {
     if (processedFiles.has(file.path)) return [];
     processedFiles.add(file.path);
 
@@ -175,5 +175,5 @@ async function buildComponent(component: Component, builder: ComponentBuilder) {
       dependencies: Object.fromEntries(dependencies),
       devDependencies: Object.fromEntries(devDependencies),
     },
-  ] as [Component, OutputComponent];
+  ] as [Component, ComponentInput];
 }

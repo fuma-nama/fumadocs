@@ -1,4 +1,4 @@
-import type { Output, OutputComponent } from '@/registry/schema';
+import type { ComponentInput, RawRegistry } from '@/registry/schema';
 import type { Registry as ShadcnRegistry, RegistryItem } from 'shadcn/schema';
 
 function mapDeps(deps: Record<string, string | null>) {
@@ -14,7 +14,7 @@ function escapeName(name: string) {
 }
 
 export function toShadcnRegistry(
-  out: Output,
+  out: RawRegistry,
   baseUrl: string,
 ): { registry: ShadcnRegistry; index: ShadcnRegistry } {
   const registry: ShadcnRegistry = {
@@ -35,7 +35,7 @@ export function toShadcnRegistry(
 }
 
 function componentToShadcn(
-  comp: OutputComponent,
+  comp: ComponentInput,
   baseUrl: string,
   noFile = false,
 ): RegistryItem {
@@ -48,7 +48,7 @@ function componentToShadcn(
     block: 'registry:block',
   } as const;
 
-  function onFile(file: OutputComponent['files'][number]) {
+  function onFile(file: ComponentInput['files'][number]) {
     return {
       type: FileType[file.type],
       content: file.content,
@@ -65,7 +65,7 @@ function componentToShadcn(
     description: comp.description,
     dependencies: mapDeps(comp.dependencies),
     devDependencies: mapDeps(comp.devDependencies),
-    registryDependencies: comp.subComponents.map((comp) => {
+    registryDependencies: comp.subComponents?.map((comp) => {
       if (comp.startsWith('https://') || comp.startsWith('http://'))
         return comp;
 

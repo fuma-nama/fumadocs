@@ -1,10 +1,10 @@
-import type { Output, OutputComponent } from '@/registry/schema';
+import type { ComponentInput, RawRegistry } from '@/registry/schema';
 
-export function validateOutput(registry: Output) {
+export function validateOutput(registry: RawRegistry) {
   const validatedComps = new Set<string>();
   const fileToComps = new Map<string, Set<string>>();
 
-  function validateComponent(comp: OutputComponent) {
+  function validateComponent(comp: ComponentInput) {
     if (validatedComps.has(comp.name)) return;
     validatedComps.add(comp.name);
 
@@ -18,7 +18,7 @@ export function validateOutput(registry: Output) {
       }
     }
 
-    for (const name of comp.subComponents) {
+    for (const name of comp.subComponents ?? []) {
       const subComp = registry.components.find((item) => item.name === name);
       if (!subComp) {
         console.warn(`skipped component ${name}: not found`);
