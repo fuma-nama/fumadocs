@@ -1,10 +1,11 @@
-import type { ComponentInput, RawRegistry } from '@/registry/schema';
+import type { CompiledComponent } from '@/registry/schema';
+import type { CompiledRegistry } from '@/build/compiler';
 
-export function validateOutput(registry: RawRegistry) {
+export function validateOutput(registry: CompiledRegistry) {
   const validatedComps = new Set<string>();
   const fileToComps = new Map<string, Set<string>>();
 
-  function validateComponent(comp: ComponentInput) {
+  function validateComponent(comp: CompiledComponent) {
     if (validatedComps.has(comp.name)) return;
     validatedComps.add(comp.name);
 

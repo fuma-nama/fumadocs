@@ -1,9 +1,12 @@
-import { componentSchema, indexSchema } from '@/registry/schema';
+import {
+  type CompiledRegistryInfo,
+  componentSchema,
+  registryInfoSchema,
+} from '@/registry/schema';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import type { LoadedConfig } from '@/config';
 import { log } from '@clack/prompts';
-import { z } from 'zod';
 
 /**
  * Resolve file, throw error if not found
@@ -39,18 +42,22 @@ export function localResolver(dir: string): Resolver {
 export class RegistryClient {
   readonly config: LoadedConfig;
   private readonly resolver: Resolver;
+  private registryInfo: CompiledRegistryInfo | undefined;
 
   constructor(config: LoadedConfig, resolver: Resolver) {
     this.config = config;
     this.resolver = resolver;
   }
 
-  async fetchRegistryIndexes() {
-    const indexes = await this.resolver('_registry.json').catch((e) => {
-      log.error(String(e));
-      process.exit(1);
-    });
-    return z.array(indexSchema).parse(indexes);
+  async fetchRegistryInfo() {
+    this.registryInfo ??= registryInfoSchema.parse(
+      await this.resolver('_registry.json').catch((e) => {
+        log.error(String(e));
+        process.exit(1);
+      }),
+    );
+
+    return this.registryInfo;
   }
 
   async fetchComponent(name: string) {

@@ -3,14 +3,15 @@ import * as path from 'node:path';
 import picocolors from 'picocolors';
 import { toShadcnRegistry } from '@/build/shadcn';
 import { validateOutput } from '@/build/validate';
-import type { RawRegistry } from '@/registry/schema';
+import type { CompiledRegistry } from '@/build/compiler';
 
-export * from './build-registry';
-export * from './component-builder';
+export * from './compiler';
 export * from './shadcn';
 
-export function combineRegistry(...items: RawRegistry[]): RawRegistry {
-  const out: RawRegistry = {
+export function combineRegistry(
+  ...items: CompiledRegistry[]
+): CompiledRegistry {
+  const out: CompiledRegistry = {
     index: [],
     components: [],
     name: items[0].name,
@@ -26,7 +27,7 @@ export function combineRegistry(...items: RawRegistry[]): RawRegistry {
 }
 
 export async function writeShadcnRegistry(
-  out: RawRegistry,
+  out: CompiledRegistry,
   options: {
     dir: string;
     /**
@@ -64,7 +65,7 @@ export async function writeShadcnRegistry(
 }
 
 export async function writeFumadocsRegistry(
-  out: RawRegistry,
+  out: CompiledRegistry,
   options: {
     dir: string;
 

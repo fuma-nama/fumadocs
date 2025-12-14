@@ -7,12 +7,12 @@ import {
   toImportSpecifier,
   transformReferences,
 } from '@/utils/transform-references';
-import type { ComponentOutput, FileOutput } from '@/registry/schema';
+import type { Component, File } from '@/registry/schema';
 import type { RegistryClient } from '@/registry/client';
 import { x } from 'tinyexec';
 import { DependencyManager } from '@/registry/installer/dep-manager';
 
-type DownloadedComponents = Omit<ComponentOutput, 'subComponents'>[];
+type DownloadedComponents = Omit<Component, 'subComponents'>[];
 
 export class ComponentInstaller {
   private readonly project = createEmptyProject();
@@ -90,8 +90,8 @@ export class ComponentInstaller {
     }
   }
 
-  private buildFileList(downloaded: DownloadedComponents): FileOutput[] {
-    const map = new Map<string, FileOutput>();
+  private buildFileList(downloaded: DownloadedComponents): File[] {
+    const map = new Map<string, File>();
     for (const item of downloaded) {
       for (const file of item.files) {
         const filePath = file.target ?? file.path;
@@ -130,11 +130,7 @@ export class ComponentInstaller {
     return result;
   }
 
-  private transform(
-    filePath: string,
-    file: FileOutput,
-    fileList: FileOutput[],
-  ) {
+  private transform(filePath: string, file: File, fileList: File[]) {
     const sourceFile = this.project.createSourceFile(filePath, file.content, {
       overwrite: true,
     });
@@ -163,7 +159,7 @@ export class ComponentInstaller {
     return sourceFile.getFullText();
   }
 
-  private resolveOutputPath(ref: FileOutput): string {
+  private resolveOutputPath(ref: File): string {
     const config = this.client.config;
     if (ref.target) {
       return path.join(config.baseDir, ref.target);

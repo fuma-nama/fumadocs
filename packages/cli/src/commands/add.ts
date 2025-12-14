@@ -23,12 +23,12 @@ export async function add(
   if (input.length === 0) {
     const spin = spinner();
     spin.start('fetching registry');
-    const indexes = await client.fetchRegistryIndexes();
+    const info = await client.fetchRegistryInfo();
     spin.stop(picocolors.bold(picocolors.greenBright('registry fetched')));
 
     const value = await multiselect({
       message: 'Select components to install',
-      options: indexes.map((item) => ({
+      options: info.indexes.map((item) => ({
         label: item.title,
         value: item.name,
         hint: item.description,

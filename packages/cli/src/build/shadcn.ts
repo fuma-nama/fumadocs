@@ -1,5 +1,6 @@
-import type { ComponentInput, RawRegistry } from '@/registry/schema';
+import type { CompiledComponent } from '@/registry/schema';
 import type { Registry as ShadcnRegistry, RegistryItem } from 'shadcn/schema';
+import type { CompiledRegistry } from '@/build/compiler';
 
 function mapDeps(deps: Record<string, string | null>) {
   return Object.entries(deps).map(([k, v]) => {
@@ -14,7 +15,7 @@ function escapeName(name: string) {
 }
 
 export function toShadcnRegistry(
-  out: RawRegistry,
+  out: CompiledRegistry,
   baseUrl: string,
 ): { registry: ShadcnRegistry; index: ShadcnRegistry } {
   const registry: ShadcnRegistry = {
@@ -35,7 +36,7 @@ export function toShadcnRegistry(
 }
 
 function componentToShadcn(
-  comp: ComponentInput,
+  comp: CompiledComponent,
   baseUrl: string,
   noFile = false,
 ): RegistryItem {
@@ -48,7 +49,7 @@ function componentToShadcn(
     block: 'registry:block',
   } as const;
 
-  function onFile(file: ComponentInput['files'][number]) {
+  function onFile(file: CompiledComponent['files'][number]) {
     return {
       type: FileType[file.type],
       content: file.content,

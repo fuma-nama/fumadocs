@@ -11,6 +11,7 @@ export class DependencyManager {
    * Get dependencies from `package.json`
    */
   async getDeps(): Promise<Map<string, string>> {
+    if (this.cachedInstalledDeps) return this.cachedInstalledDeps;
     const dependencies = new Map<string, string>();
 
     if (!(await exists('package.json'))) return dependencies;
@@ -21,9 +22,9 @@ export class DependencyManager {
     if ('dependencies' in parsed && typeof parsed.dependencies === 'object') {
       const records = parsed.dependencies as Record<string, string>;
 
-      Object.entries(records).forEach(([k, v]) => {
+      for (const [k, v] of Object.entries(records)) {
         dependencies.set(k, v);
-      });
+      }
     }
 
     if (
@@ -37,14 +38,13 @@ export class DependencyManager {
       }
     }
 
-    return dependencies;
+    return (this.cachedInstalledDeps = dependencies);
   }
 
   private async resolveInstallDependencies(
     deps: Record<string, string | null>,
   ): Promise<string[]> {
-    const cachedInstalledDeps = (this.cachedInstalledDeps ??=
-      await this.getDeps());
+    const cachedInstalledDeps = await this.getDeps();
 
     return Object.entries(deps)
       .filter(([k]) => !cachedInstalledDeps.has(k))

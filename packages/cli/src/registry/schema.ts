@@ -1,16 +1,11 @@
 import { z } from 'zod';
 
-export interface RawRegistry {
-  name: string;
-  index: z.input<typeof indexSchema>[];
-  components: z.input<typeof componentSchema>[];
-}
-
 export type NamespaceType = (typeof namespaces)[number];
-export type FileInput = z.input<typeof fileSchema>;
-export type FileOutput = z.output<typeof fileSchema>;
-export type ComponentInput = z.input<typeof componentSchema>;
-export type ComponentOutput = z.infer<typeof componentSchema>;
+export type CompiledFile = z.input<typeof fileSchema>;
+export type CompiledComponent = z.input<typeof componentSchema>;
+export type CompiledRegistryInfo = z.input<typeof registryInfoSchema>;
+export type File = z.output<typeof fileSchema>;
+export type Component = z.output<typeof componentSchema>;
 
 export const namespaces = [
   'components',
@@ -42,4 +37,21 @@ export const componentSchema = z.object({
   dependencies: z.record(z.string(), z.string().or(z.null())),
   devDependencies: z.record(z.string(), z.string().or(z.null())),
   subComponents: z.array(z.string()).default([]),
+});
+
+export const switchableEntitySchema = z.object({
+  /**
+   * map specifier string
+   */
+  specifier: z.string(),
+
+  /**
+   * map names of exported members
+   */
+  members: z.record(z.string(), z.string()),
+});
+
+export const registryInfoSchema = z.object({
+  switchables: z.record(z.string(), switchableEntitySchema).optional(),
+  indexes: z.array(indexSchema),
 });
