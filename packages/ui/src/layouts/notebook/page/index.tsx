@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactNode } from 'react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
-import { Edit, Text } from 'lucide-react';
+import { Edit, Text } from '@icons';
 import { I18nLabel } from '@/contexts/i18n';
 import {
   type BreadcrumbProps,

@@ -5,7 +5,7 @@ import {
   type ReactNode,
   useMemo,
 } from 'react';
-import { Languages, Sidebar as SidebarIcon } from 'lucide-react';
+import { Languages, Sidebar as SidebarIcon } from '@icons';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import {
@@ -25,10 +25,10 @@ import {
   LanguageToggleText,
 } from '@/layouts/shared/language-toggle';
 import {
-  LayoutTabs,
-  LayoutHeader,
   LayoutBody,
   LayoutContextProvider,
+  LayoutHeader,
+  LayoutTabs,
 } from './client';
 import { TreeContextProvider } from '@/contexts/tree';
 import { ThemeToggle } from '../shared/theme-toggle';

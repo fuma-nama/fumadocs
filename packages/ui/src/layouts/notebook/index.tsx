@@ -19,15 +19,15 @@ import {
 import { TreeContextProvider } from '@/contexts/tree';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
-import { Languages, Sidebar as SidebarIcon, X } from 'lucide-react';
+import { Languages, Sidebar as SidebarIcon, X } from '@icons';
 import { LanguageToggle } from '@/layouts/shared/language-toggle';
 import { ThemeToggle } from '@/layouts/shared/theme-toggle';
 import type * as PageTree from 'fumadocs-core/page-tree';
 import {
   LayoutBody,
   LayoutContextProvider,
-  LayoutHeaderTabs,
   LayoutHeader,
+  LayoutHeaderTabs,
   NavbarLinkItem,
 } from '@/layouts/notebook/client';
 import Link from 'fumadocs-core/link';

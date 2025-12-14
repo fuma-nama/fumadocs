@@ -2,16 +2,16 @@
 
 import {
   type ComponentProps,
+  createContext,
   Fragment,
+  use,
   useEffect,
   useEffectEvent,
-  createContext,
   useMemo,
   useRef,
   useState,
-  use,
 } from 'react';
-import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight } from '@icons';
 import Link from 'fumadocs-core/link';
 import { cn } from '@/utils/cn';
 import { useI18n } from '@/contexts/i18n';

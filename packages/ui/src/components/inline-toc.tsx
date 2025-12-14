@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown } from '@icons';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import {
   Collapsible,

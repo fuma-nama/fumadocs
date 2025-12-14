@@ -5,7 +5,7 @@ import type {
   AccordionSingleProps,
 } from '@radix-ui/react-accordion';
 import * as AccordionPrimitive from '@radix-ui/react-accordion';
-import { Check, ChevronRight, Link as LinkIcon } from 'lucide-react';
+import { Check, ChevronRight, Link as LinkIcon } from '@icons';
 import {
   type ComponentPropsWithoutRef,
   forwardRef,

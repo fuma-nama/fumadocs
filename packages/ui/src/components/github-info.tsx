@@ -1,5 +1,5 @@
 import { cn } from '@/utils/cn';
-import { Star } from 'lucide-react';
+import { Star } from '@icons';
 import { type AnchorHTMLAttributes } from 'react';
 
 async function getRepoStarsAndForks(

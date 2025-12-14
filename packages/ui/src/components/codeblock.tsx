@@ -1,5 +1,5 @@
 'use client';
-import { Check, Clipboard } from 'lucide-react';
+import { Check, Clipboard } from '@icons';
 import {
   type ComponentProps,
   createContext,

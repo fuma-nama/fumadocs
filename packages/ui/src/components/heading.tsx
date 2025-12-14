@@ -1,4 +1,4 @@
-import { Link } from 'lucide-react';
+import { Link } from '@icons';
 import type { ComponentPropsWithoutRef } from 'react';
 import { cn } from '@/utils/cn';
 

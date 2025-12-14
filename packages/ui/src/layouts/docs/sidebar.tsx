@@ -7,7 +7,7 @@ import { createPageTreeRenderer } from '@/components/sidebar/page-tree';
 import { createLinkItemRenderer } from '@/components/sidebar/link-item';
 import { buttonVariants } from '@/components/ui/button';
 import { SearchToggle } from '@/layouts/shared/search-toggle';
-import { Sidebar as SidebarIcon } from 'lucide-react';
+import { Sidebar as SidebarIcon } from '@icons';
 import { mergeRefs } from '@/utils/merge-refs';
 
 const itemVariants = cva(

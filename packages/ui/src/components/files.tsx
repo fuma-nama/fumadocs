@@ -1,11 +1,7 @@
 'use client';
 
 import { cva } from 'class-variance-authority';
-import {
-  File as FileIcon,
-  Folder as FolderIcon,
-  FolderOpen,
-} from 'lucide-react';
+import { File as FileIcon, Folder as FolderIcon, FolderOpen } from '@icons';
 import { type HTMLAttributes, type ReactNode, useState } from 'react';
 import { cn } from '@/utils/cn';
 import {

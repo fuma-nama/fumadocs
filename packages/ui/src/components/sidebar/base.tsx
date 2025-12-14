@@ -1,5 +1,5 @@
 'use client';
-import { ChevronDown, ExternalLink } from 'lucide-react';
+import { ChevronDown, ExternalLink } from '@icons';
 import {
   type ComponentProps,
   createContext,

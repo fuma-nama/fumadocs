@@ -4,9 +4,9 @@ import { cva } from 'class-variance-authority';
 import Link from 'fumadocs-core/link';
 import { cn } from '@/utils/cn';
 import {
+  type LinkItemType,
   type NavOptions,
   resolveLinkItems,
-  type LinkItemType,
 } from '@/layouts/shared';
 import { LinkItem } from '@/layouts/shared/link-item';
 import {
@@ -29,7 +29,7 @@ import {
   LanguageToggle,
   LanguageToggleText,
 } from '@/layouts/shared/language-toggle';
-import { ChevronDown, Languages } from 'lucide-react';
+import { ChevronDown, Languages } from '@icons';
 import { useIsScrollTop } from '@/utils/use-is-scroll-top';
 
 export const navItemVariants = cva('[&_svg]:size-4', {

@@ -1,7 +1,7 @@
 'use client';
 
 import { type HTMLAttributes, useEffect, useState } from 'react';
-import { X } from 'lucide-react';
+import { X } from '@icons';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 

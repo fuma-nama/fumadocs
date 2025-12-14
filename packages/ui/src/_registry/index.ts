@@ -416,7 +416,7 @@ export const registry: Registry = {
   dependencies: {
     'fumadocs-core': null,
     'fumadocs-ui': null,
-    'lucide-react': null,
+    '@icons': null,
     react: null,
   },
 };
