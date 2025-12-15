@@ -6,7 +6,7 @@ import {
   type TOCItemType,
   useActiveAnchors,
 } from 'fumadocs-core/toc';
-import { cn } from '@/utils/cn';
+import { cn } from '@fumadocs/ui-utils/utils/cn';
 import { useTreeContext } from 'fumadocs-ui/contexts/tree';
 import { Link, usePathname } from 'fumadocs-core/framework';
 import type * as PageTree from 'fumadocs-core/page-tree';
