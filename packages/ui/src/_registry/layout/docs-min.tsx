@@ -8,7 +8,7 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { cn } from '@/utils/cn';
+import { cn } from '@fumadocs/ui-utils/utils/cn';
 import { TreeContextProvider, useTreeContext } from 'fumadocs-ui/contexts/tree';
 import Link from 'fumadocs-core/link';
 import { useSearchContext } from 'fumadocs-ui/contexts/search';

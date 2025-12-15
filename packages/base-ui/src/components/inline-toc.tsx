@@ -1,0 +1,50 @@
+'use client';
+
+import { ChevronDown } from '@fumadocs/ui-utils/icons';
+import type { TOCItemType } from 'fumadocs-core/toc';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from './ui/collapsible';
+import type { ComponentProps } from 'react';
+import { cn } from '@fumadocs/ui-utils/utils/cn';
+
+export interface InlineTocProps extends ComponentProps<typeof Collapsible> {
+  items: TOCItemType[];
+}
+
+export function InlineTOC({ items, className, ...props }: InlineTocProps) {
+  return (
+    <Collapsible
+      {...props}
+      className={(s) =>
+        cn(
+          'not-prose rounded-lg border bg-fd-card text-fd-card-foreground',
+          typeof className === 'function' ? className(s) : className,
+        )
+      }
+    >
+      <CollapsibleTrigger className="group inline-flex w-full items-center justify-between px-4 py-2.5 font-medium">
+        {props.children ?? 'Table of Contents'}
+        <ChevronDown className="size-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <div className="flex flex-col p-4 pt-0 text-sm text-fd-muted-foreground">
+          {items.map((item) => (
+            <a
+              key={item.url}
+              href={item.url}
+              className="border-s py-1.5 hover:text-fd-accent-foreground"
+              style={{
+                paddingInlineStart: 12 * Math.max(item.depth - 1, 0),
+              }}
+            >
+              {item.title}
+            </a>
+          ))}
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}

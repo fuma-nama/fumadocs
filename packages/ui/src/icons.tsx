@@ -1,5 +1,5 @@
 /**
- * @license @icons - ISC
+ * @license @fumadocs/ui-utils/icons - ISC
  *
  * All copyright belongs to https://github.com/lucide-icons/lucide, we bundle it as part of library to avoid upstream issues.
  */
