@@ -1,5 +1,5 @@
 'use client';
-import { type ComponentProps, Fragment, useMemo, useState } from 'react';
+import { type ComponentProps, Fragment, useMemo } from 'react';
 import { cva } from 'class-variance-authority';
 import Link from 'fumadocs-core/link';
 import { cn } from '@fumadocs/ui-utils/cn';
@@ -35,7 +35,7 @@ import { NavigationMenu } from '@base-ui/react';
 export const navItemVariants = cva('[&_svg]:size-4', {
   variants: {
     variant: {
-      main: 'inline-flex items-center gap-1 p-2 text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground data-[active=true]:text-fd-primary',
+      main: 'inline-flex items-center gap-1 p-2 text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground data-[active=true]:text-fd-primary data-[popup-open]:text-fd-primary',
       button: buttonVariants({
         color: 'secondary',
         className: 'gap-1.5',
@@ -220,14 +220,14 @@ function HeaderNavigationMenu({
             <NavigationMenu.Portal>
               <NavigationMenu.Positioner
                 sideOffset={10}
-                className="box-border h-(--positioner-height) w-(--positioner-width) max-w-(--available-width) transition-[top,left,right,bottom] duration-(--duration) ease-(--easing) before:absolute before:content-[''] data-[instant]:transition-none data-[side=bottom]:before:top-[-10px] data-[side=bottom]:before:right-0 data-[side=bottom]:before:left-0 data-[side=bottom]:before:h-2.5 data-[side=left]:before:top-0 data-[side=left]:before:right-[-10px] data-[side=left]:before:bottom-0 data-[side=left]:before:w-2.5 data-[side=right]:before:top-0 data-[side=right]:before:bottom-0 data-[side=right]:before:left-[-10px] data-[side=right]:before:w-2.5 data-[side=top]:before:right-0 data-[side=top]:before:bottom-[-10px] data-[side=top]:before:left-0 data-[side=top]:before:h-2.5"
+                className="box-border z-20 h-(--positioner-height) w-(--positioner-width) transition-[left,right] duration-(--duration) ease-(--easing) data-[instant]:transition-none"
                 style={{
                   ['--duration' as string]: '0.35s',
                   ['--easing' as string]: 'cubic-bezier(0.22, 1, 0.36, 1)',
                 }}
               >
-                <NavigationMenu.Popup className="data-[ending-style]:easing-[ease] relative h-(--popup-height) origin-(--transform-origin) rounded-lg bg-[canvas] text-gray-900 shadow-lg shadow-gray-200 outline outline-1 outline-gray-200 transition-[opacity,transform,width,height,scale,translate] duration-[var(--duration)] ease-[var(--easing)] data-[ending-style]:scale-90 data-[ending-style]:opacity-0 data-[ending-style]:duration-150 data-[starting-style]:scale-90 data-[starting-style]:opacity-0 w-[var(--popup-width)] xs:w-[var(--popup-width)] dark:shadow-none dark:-outline-offset-1 dark:outline-gray-300">
-                  <NavigationMenu.Viewport className="relative h-full w-full overflow-hidden" />
+                <NavigationMenu.Popup className="relative h-(--popup-height) origin-(--transform-origin) rounded-lg bg-fd-background/80  border backdrop-blur-lg shadow-lg transition-[opacity,transform,width,height,scale,translate] duration-(--duration) ease-(--easing) data-[ending-style]:scale-90 data-[ending-style]:opacity-0 data-[ending-style]:duration-150 data-[starting-style]:scale-90 data-[starting-style]:opacity-0 w-(--popup-width) max-w-[1400px]">
+                  <NavigationMenu.Viewport className="relative size-full overflow-hidden *:w-[1400px]" />
                 </NavigationMenu.Popup>
               </NavigationMenu.Positioner>
             </NavigationMenu.Portal>
