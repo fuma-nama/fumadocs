@@ -1,5 +1,5 @@
 'use client';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
+import { cn } from '@fumadocs/ui-utils/cn';
 import {
   type ComponentProps,
   createContext,
@@ -17,7 +17,7 @@ import { ChevronDown } from '@fumadocs/ui-utils/icons';
 import Link from 'fumadocs-core/link';
 import { usePathname } from 'fumadocs-core/framework';
 import { isTabActive } from '@/utils/is-active';
-import { useIsScrollTop } from '@fumadocs/ui-utils/utils/use-is-scroll-top';
+import { useIsScrollTop } from '@fumadocs/ui-utils/hooks/use-is-scroll-top';
 import {
   LinkItem,
   type LinkItemType,

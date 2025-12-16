@@ -8,10 +8,10 @@ import {
   useRef,
   useState,
 } from 'react';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
-import { useCopyButton } from '@fumadocs/ui-utils/utils/use-copy-button';
+import { cn } from '@fumadocs/ui-utils/cn';
+import { useCopyButton } from '@fumadocs/ui-utils/hooks/use-copy-button';
 import { buttonVariants } from '@/components/ui/button';
-import { mergeRefs } from '@fumadocs/ui-utils/utils/merge-refs';
+import { mergeRefs } from '@fumadocs/ui-utils/merge-refs';
 import {
   Accordion as Root,
   AccordionContent,

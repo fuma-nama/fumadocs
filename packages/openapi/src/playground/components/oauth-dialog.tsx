@@ -11,7 +11,7 @@ import { useForm } from 'react-hook-form';
 import { Input, labelVariants } from '@/ui/components/input';
 import { useQuery } from '@/utils/use-query';
 import { type ReactNode, useEffect, useState } from 'react';
-import { cn } from 'fumadocs-ui/utils/cn';
+import { cn } from '@/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import {
   Select,

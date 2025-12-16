@@ -3,7 +3,7 @@
 import { Accordion as Primitive } from '@base-ui/react/accordion';
 import { ChevronRight } from '@fumadocs/ui-utils/icons';
 import { type ComponentProps } from 'react';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
+import { cn } from '@fumadocs/ui-utils/cn';
 
 export function Accordion({
   className,
@@ -77,7 +77,7 @@ export function AccordionTrigger({
       }
       {...props}
     >
-      <ChevronRight className="size-4 shrink-0 text-fd-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-90" />
+      <ChevronRight className="size-4 shrink-0 text-fd-muted-foreground transition-transform duration-200 group-data-[panel-open]:rotate-90" />
       {children}
     </Primitive.Trigger>
   );
@@ -92,7 +92,7 @@ export function AccordionContent({
     <Primitive.Panel
       className={(s) =>
         cn(
-          'overflow-hidden data-[state=closed]:animate-fd-accordion-up data-[state=open]:animate-fd-accordion-down',
+          'h-(--accordion-panel-height) overflow-hidden transition-[height] ease-out data-[ending-style]:h-0 data-[starting-style]:h-0',
           typeof className === 'function' ? className(s) : className,
         )
       }

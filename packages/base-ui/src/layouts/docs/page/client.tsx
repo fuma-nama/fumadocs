@@ -17,7 +17,7 @@ import {
   ChevronRight,
 } from '@fumadocs/ui-utils/icons';
 import Link from 'fumadocs-core/link';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
+import { cn } from '@fumadocs/ui-utils/cn';
 import { useI18n } from '@/contexts/i18n';
 import { useTreeContext, useTreePath } from '@/contexts/tree';
 import type * as PageTree from 'fumadocs-core/page-tree';
@@ -35,7 +35,7 @@ import {
 import { useTOCItems } from '@/components/toc';
 import { useActiveAnchor } from 'fumadocs-core/toc';
 import { LayoutContext } from '../client';
-import { useFooterItems } from '@fumadocs/ui-utils/utils/use-footer-items';
+import { useFooterItems } from '@fumadocs/ui-utils/hooks/use-footer-items';
 
 const TocPopoverContext = createContext<{
   open: boolean;
@@ -226,7 +226,7 @@ export function PageTOCPopoverContent(props: ComponentProps<'div'>) {
       {...props}
       className={cn('flex flex-col px-4 max-h-[50vh] md:px-6', props.className)}
     >
-      {props.children}
+      <div>{props.children}</div>
     </CollapsibleContent>
   );
 }

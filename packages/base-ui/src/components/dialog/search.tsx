@@ -19,7 +19,7 @@ import {
   useState,
 } from 'react';
 import { I18nLabel, useI18n } from '@/contexts/i18n';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
+import { cn } from '@fumadocs/ui-utils/cn';
 import { Dialog } from '@base-ui/react/dialog';
 import type {
   HighlightedText,
@@ -174,7 +174,7 @@ export function SearchDialogOverlay({
       {...props}
       className={(s) =>
         cn(
-          'fixed inset-0 z-50 backdrop-blur-xs bg-fd-overlay data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out',
+          'fixed inset-0 z-50 backdrop-blur-xs bg-fd-overlay data-[open]:animate-fd-fade-in data-[closed]:animate-fd-fade-out',
           typeof className === 'function' ? className(s) : className,
         )
       }
@@ -190,20 +190,22 @@ export function SearchDialogContent({
   const { text } = useI18n();
 
   return (
-    <Dialog.Popup
-      aria-describedby={undefined}
-      {...props}
-      className={(s) =>
-        cn(
-          'fixed left-1/2 top-4 md:top-[calc(50%-250px)] z-50 w-[calc(100%-1rem)] max-w-screen-sm -translate-x-1/2 rounded-xl border bg-fd-popover text-fd-popover-foreground shadow-2xl shadow-black/50 overflow-hidden data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in',
-          '*:border-b *:has-[+:last-child[data-empty=true]]:border-b-0 *:data-[empty=true]:border-b-0 *:last:border-b-0',
-          typeof className === 'function' ? className(s) : className,
-        )
-      }
-    >
-      <Dialog.Title className="hidden">{text.search}</Dialog.Title>
-      {children}
-    </Dialog.Popup>
+    <Dialog.Portal>
+      <Dialog.Popup
+        aria-describedby={undefined}
+        {...props}
+        className={(s) =>
+          cn(
+            'fixed left-1/2 top-4 md:top-[calc(50%-250px)] z-50 w-[calc(100%-1rem)] max-w-screen-sm -translate-x-1/2 rounded-xl border bg-fd-popover text-fd-popover-foreground shadow-2xl shadow-black/50 overflow-hidden data-[closed]:animate-fd-dialog-out data-[open]:animate-fd-dialog-in',
+            '*:border-b *:has-[+:last-child[data-empty=true]]:border-b-0 *:data-[empty=true]:border-b-0 *:last:border-b-0',
+            typeof className === 'function' ? className(s) : className,
+          )
+        }
+      >
+        <Dialog.Title className="hidden">{text.search}</Dialog.Title>
+        {children}
+      </Dialog.Popup>
+    </Dialog.Portal>
   );
 }
 

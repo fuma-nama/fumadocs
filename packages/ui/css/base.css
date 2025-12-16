@@ -1,5 +1,5 @@
 @import './shiki.css';
-@plugin '../dist/theme/typography/index.js';
+@plugin '../dist/typography/index.js';
 
 :root {
   --fd-sidebar-drawer-offset: 100%;

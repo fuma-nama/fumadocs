@@ -17,7 +17,7 @@ import {
   SidebarViewport,
 } from './sidebar';
 import { TreeContextProvider } from '@/contexts/tree';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
+import { cn } from '@fumadocs/ui-utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { Languages, Sidebar as SidebarIcon, X } from '@fumadocs/ui-utils/icons';
 import { LanguageToggle } from '@/layouts/shared/language-toggle';

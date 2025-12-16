@@ -2,7 +2,7 @@
 
 import { type HTMLAttributes, useEffect, useState } from 'react';
 import { X } from '@fumadocs/ui-utils/icons';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
+import { cn } from '@fumadocs/ui-utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 
 type BannerVariant = 'rainbow' | 'normal';

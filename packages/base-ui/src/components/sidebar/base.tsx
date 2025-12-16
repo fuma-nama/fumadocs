@@ -14,7 +14,7 @@ import {
 } from 'react';
 import Link, { type LinkProps } from 'fumadocs-core/link';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
+import { cn } from '@fumadocs/ui-utils/cn';
 import {
   ScrollArea,
   type ScrollAreaProps,
@@ -31,6 +31,7 @@ import {
 import { useMediaQuery } from 'fumadocs-core/utils/use-media-query';
 import scrollIntoView from 'scroll-into-view-if-needed';
 import { usePathname } from 'fumadocs-core/framework';
+import ReactDOM from 'react-dom';
 
 interface SidebarContext {
   open: boolean;
@@ -193,12 +194,17 @@ export function SidebarContent({
 
 export function SidebarDrawerOverlay(props: ComponentProps<'div'>) {
   const { open, setOpen, mode } = useSidebar();
+  const [hidden, setHidden] = useState(!open);
 
-  if (mode !== 'drawer') return;
+  if (open && hidden) setHidden(false);
+  if (mode !== 'drawer' || hidden) return;
   return (
     <div
       data-state={open ? 'open' : 'closed'}
       onClick={() => setOpen(false)}
+      onAnimationEnd={() => {
+        if (!open) ReactDOM.flushSync(() => setHidden(true));
+      }}
       {...props}
     />
   );
@@ -210,14 +216,18 @@ export function SidebarDrawerContent({
   ...props
 }: ComponentProps<'aside'>) {
   const { open, mode } = useSidebar();
-  const state = open ? 'open' : 'closed';
+  const [hidden, setHidden] = useState(!open);
 
+  if (open && hidden) setHidden(false);
   if (mode !== 'drawer') return;
   return (
     <aside
       id="nd-sidebar-mobile"
-      data-state={state}
-      className={cn(!open && 'invisible', className)}
+      data-state={open ? 'open' : 'closed'}
+      className={cn(hidden && 'invisible', className)}
+      onAnimationEnd={() => {
+        if (!open) ReactDOM.flushSync(() => setHidden(true));
+      }}
       {...props}
     >
       {children}

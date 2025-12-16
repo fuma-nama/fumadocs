@@ -3,7 +3,7 @@
 import { ChevronDown } from '@fumadocs/ui-utils/icons';
 import Link from 'fumadocs-core/link';
 import { cva } from 'class-variance-authority';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
+import { cn } from '@fumadocs/ui-utils/cn';
 import { type ReactNode, useState } from 'react';
 import {
   Collapsible,
@@ -120,7 +120,7 @@ function Item({
         ) : (
           <span className="@max-xl:hidden">{type}</span>
         )}
-        <ChevronDown className="absolute end-2 size-4 text-fd-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+        <ChevronDown className="absolute end-2 size-4 text-fd-muted-foreground transition-transform group-data-[open]:rotate-180" />
       </CollapsibleTrigger>
       <CollapsibleContent>
         <div className="grid grid-cols-[1fr_3fr] gap-y-4 text-sm p-3 overflow-auto fd-scroll-container border-t">

@@ -15,7 +15,7 @@ import {
   CalloutTitle,
 } from '@/components/callout';
 import { Heading } from '@/components/heading';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
+import { cn } from '@fumadocs/ui-utils/cn';
 import {
   CodeBlock,
   CodeBlockTab,

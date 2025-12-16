@@ -3,7 +3,7 @@
 import { ChevronDown } from '@fumadocs/ui-utils/icons';
 import Link from 'fumadocs-core/link';
 import { cva } from 'class-variance-authority';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
+import { cn } from '@fumadocs/ui-utils/cn';
 import { type ReactNode, useState } from 'react';
 import {
   Collapsible,

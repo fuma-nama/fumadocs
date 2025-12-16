@@ -1,6 +1,6 @@
 import { Link } from '@fumadocs/ui-utils/icons';
 import type { ComponentPropsWithoutRef } from 'react';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
+import { cn } from '@fumadocs/ui-utils/cn';
 
 type Types = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 type HeadingProps<T extends Types> = Omit<ComponentPropsWithoutRef<T>, 'as'> & {

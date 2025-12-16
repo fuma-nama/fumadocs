@@ -3,7 +3,7 @@
 import * as Primitive from '@radix-ui/react-accordion';
 import { ChevronRight } from '@fumadocs/ui-utils/icons';
 import { type ComponentProps } from 'react';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
+import { cn } from '@fumadocs/ui-utils/cn';
 
 export function Accordion({
   className,

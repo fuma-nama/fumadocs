@@ -6,7 +6,7 @@ import {
   useMemo,
 } from 'react';
 import { Languages, Sidebar as SidebarIcon } from '@fumadocs/ui-utils/icons';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
+import { cn } from '@fumadocs/ui-utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import {
   Sidebar,

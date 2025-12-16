@@ -6,7 +6,7 @@ import type {
   HighlightOptionsThemes,
 } from 'fumadocs-core/highlight';
 import { useShiki } from 'fumadocs-core/highlight/client';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
+import { cn } from '@fumadocs/ui-utils/cn';
 import {
   type ComponentProps,
   createContext,

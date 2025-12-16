@@ -3,7 +3,7 @@ import { Check, ChevronsUpDown } from '@fumadocs/ui-utils/icons';
 import { type ComponentProps, type ReactNode, useMemo, useState } from 'react';
 import Link from 'fumadocs-core/link';
 import { usePathname } from 'fumadocs-core/framework';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
+import { cn } from '@fumadocs/ui-utils/cn';
 import { isTabActive } from '@/utils/is-active';
 import { useSidebar } from '@/components/sidebar/base';
 import {

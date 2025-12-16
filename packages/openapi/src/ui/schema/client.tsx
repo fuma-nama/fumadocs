@@ -23,14 +23,14 @@ import {
   CollapsibleTrigger,
 } from 'fumadocs-ui/components/ui/collapsible';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown } from '@/ui/icons';
 import { Badge } from '@/ui/components/method-label';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from 'fumadocs-ui/components/ui/popover';
-import { cn } from 'fumadocs-ui/utils/cn';
+import { cn } from '@/utils/cn';
 import { cva } from 'class-variance-authority';
 
 type DataContextType = SchemaUIGeneratedData;

@@ -2,8 +2,7 @@
   "extends": "tsconfig/react-library.json",
   "compilerOptions": {
     "paths": {
-      "@/*": ["./src/*"],
-      "@fumadocs/ui-utils/icons": ["./src/icons"]
+      "@/*": ["./src/*"]
     }
   },
   "tsc-alias": {

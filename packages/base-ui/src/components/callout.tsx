@@ -6,7 +6,7 @@ import {
   TriangleAlert,
 } from '@fumadocs/ui-utils/icons';
 import type { ComponentProps, ReactNode } from 'react';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
+import { cn } from '@fumadocs/ui-utils/cn';
 
 export type CalloutType =
   | 'info'

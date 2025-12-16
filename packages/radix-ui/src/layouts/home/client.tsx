@@ -2,7 +2,7 @@
 import { type ComponentProps, Fragment, useMemo, useState } from 'react';
 import { cva } from 'class-variance-authority';
 import Link from 'fumadocs-core/link';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
+import { cn } from '@fumadocs/ui-utils/cn';
 import {
   type LinkItemType,
   type NavOptions,
@@ -30,7 +30,7 @@ import {
   LanguageToggleText,
 } from '@/layouts/shared/language-toggle';
 import { ChevronDown, Languages } from '@fumadocs/ui-utils/icons';
-import { useIsScrollTop } from '@fumadocs/ui-utils/utils/use-is-scroll-top';
+import { useIsScrollTop } from '@fumadocs/ui-utils/hooks/use-is-scroll-top';
 
 export const navItemVariants = cva('[&_svg]:size-4', {
   variants: {

@@ -7,7 +7,7 @@ import {
   FolderOpen,
 } from '@fumadocs/ui-utils/icons';
 import { type HTMLAttributes, type ReactNode, useState } from 'react';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
+import { cn } from '@fumadocs/ui-utils/cn';
 import {
   Collapsible,
   CollapsibleContent,

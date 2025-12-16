@@ -1,7 +1,7 @@
 'use client';
 import { Collapsible as Primitive } from '@base-ui/react/collapsible';
-import { type ComponentProps, useEffect, useState } from 'react';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
+import type { ComponentProps } from 'react';
+import { cn } from '@fumadocs/ui-utils/cn';
 
 export const Collapsible = Primitive.Root;
 
@@ -12,20 +12,12 @@ export function CollapsibleContent({
   className,
   ...props
 }: ComponentProps<typeof Primitive.Panel>) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   return (
     <Primitive.Panel
       {...props}
       className={(s) =>
         cn(
-          'overflow-hidden',
-          mounted &&
-            'data-[state=closed]:animate-fd-collapsible-up data-[state=open]:animate-fd-collapsible-down',
+          "overflow-hidden [&[hidden]:not([hidden='until-found'])]:hidden h-(--collapsible-panel-height) transition-[height] data-[starting-style]:h-0 data-[ending-style]:h-0",
           typeof className === 'function' ? className(s) : className,
         )
       }

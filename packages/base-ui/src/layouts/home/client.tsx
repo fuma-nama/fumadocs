@@ -2,7 +2,7 @@
 import { type ComponentProps, Fragment, useMemo, useState } from 'react';
 import { cva } from 'class-variance-authority';
 import Link from 'fumadocs-core/link';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
+import { cn } from '@fumadocs/ui-utils/cn';
 import {
   type LinkItemType,
   type NavOptions,
@@ -10,13 +10,12 @@ import {
 } from '@/layouts/shared';
 import { LinkItem } from '@/layouts/shared/link-item';
 import {
-  NavigationMenu,
+  NavigationMenuRoot,
   NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-  NavigationMenuViewport,
 } from '@/components/ui/navigation-menu';
 import { buttonVariants } from '@/components/ui/button';
 import type { HomeLayoutProps } from '.';
@@ -30,7 +29,8 @@ import {
   LanguageToggleText,
 } from '@/layouts/shared/language-toggle';
 import { ChevronDown, Languages } from '@fumadocs/ui-utils/icons';
-import { useIsScrollTop } from '@fumadocs/ui-utils/utils/use-is-scroll-top';
+import { useIsScrollTop } from '@fumadocs/ui-utils/hooks/use-is-scroll-top';
+import { NavigationMenu } from '@base-ui/react';
 
 export const navItemVariants = cva('[&_svg]:size-4', {
   variants: {
@@ -142,7 +142,7 @@ export function Header({
               nav.enableHoverToOpen ? undefined : (e) => e.preventDefault()
             }
           >
-            <ChevronDown className="transition-transform duration-300 group-data-[state=open]:rotate-180" />
+            <ChevronDown className="transition-transform duration-300 group-data-[open]:rotate-180" />
           </NavigationMenuTrigger>
           <NavigationMenuContent className="flex flex-col p-4 sm:flex-row sm:items-center sm:justify-end">
             {menuItems
@@ -194,16 +194,13 @@ function HeaderNavigationMenu({
 }: ComponentProps<'div'> & {
   transparentMode?: NavOptions['transparentMode'];
 }) {
-  const [value, setValue] = useState('');
   const isTop = useIsScrollTop({ enabled: transparentMode === 'top' }) ?? true;
   const isTransparent =
     transparentMode === 'top' ? isTop : transparentMode === 'always';
 
   return (
-    <NavigationMenu
-      value={value}
-      onValueChange={setValue}
-      render={
+    <NavigationMenuRoot
+      render={(_, s) => (
         <header
           id="nd-nav"
           {...props}
@@ -212,18 +209,31 @@ function HeaderNavigationMenu({
           <div
             className={cn(
               'backdrop-blur-lg border-b transition-colors *:mx-auto *:max-w-(--fd-layout-width)',
-              value.length > 0 && 'max-lg:shadow-lg max-lg:rounded-b-2xl',
-              (!isTransparent || value.length > 0) && 'bg-fd-background/80',
+              s.open && 'max-lg:shadow-lg max-lg:rounded-b-2xl',
+              (!isTransparent || s.open) && 'bg-fd-background/80',
             )}
           >
             <NavigationMenuList
               className="flex h-14 w-full items-center px-4"
               render={<nav>{props.children}</nav>}
             />
-            <NavigationMenuViewport />
+            <NavigationMenu.Portal>
+              <NavigationMenu.Positioner
+                sideOffset={10}
+                className="box-border h-(--positioner-height) w-(--positioner-width) max-w-(--available-width) transition-[top,left,right,bottom] duration-(--duration) ease-(--easing) before:absolute before:content-[''] data-[instant]:transition-none data-[side=bottom]:before:top-[-10px] data-[side=bottom]:before:right-0 data-[side=bottom]:before:left-0 data-[side=bottom]:before:h-2.5 data-[side=left]:before:top-0 data-[side=left]:before:right-[-10px] data-[side=left]:before:bottom-0 data-[side=left]:before:w-2.5 data-[side=right]:before:top-0 data-[side=right]:before:bottom-0 data-[side=right]:before:left-[-10px] data-[side=right]:before:w-2.5 data-[side=top]:before:right-0 data-[side=top]:before:bottom-[-10px] data-[side=top]:before:left-0 data-[side=top]:before:h-2.5"
+                style={{
+                  ['--duration' as string]: '0.35s',
+                  ['--easing' as string]: 'cubic-bezier(0.22, 1, 0.36, 1)',
+                }}
+              >
+                <NavigationMenu.Popup className="data-[ending-style]:easing-[ease] relative h-(--popup-height) origin-(--transform-origin) rounded-lg bg-[canvas] text-gray-900 shadow-lg shadow-gray-200 outline outline-1 outline-gray-200 transition-[opacity,transform,width,height,scale,translate] duration-[var(--duration)] ease-[var(--easing)] data-[ending-style]:scale-90 data-[ending-style]:opacity-0 data-[ending-style]:duration-150 data-[starting-style]:scale-90 data-[starting-style]:opacity-0 w-[var(--popup-width)] xs:w-[var(--popup-width)] dark:shadow-none dark:-outline-offset-1 dark:outline-gray-300">
+                  <NavigationMenu.Viewport className="relative h-full w-full overflow-hidden" />
+                </NavigationMenu.Popup>
+              </NavigationMenu.Positioner>
+            </NavigationMenu.Portal>
           </div>
         </header>
-      }
+      )}
     />
   );
 }

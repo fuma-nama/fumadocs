@@ -11,7 +11,7 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
+import { cn } from '@fumadocs/ui-utils/cn';
 import * as Unstyled from './ui/tabs';
 
 type CollectionKey = string | symbol;
@@ -75,7 +75,7 @@ export const TabsTrigger = React.forwardRef<
     {...props}
     className={(s) =>
       cn(
-        'inline-flex items-center gap-2 whitespace-nowrap text-fd-muted-foreground border-b border-transparent py-2 text-sm font-medium transition-colors [&_svg]:size-4 hover:text-fd-accent-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-fd-primary data-[state=active]:text-fd-primary',
+        'inline-flex items-center gap-2 whitespace-nowrap text-fd-muted-foreground border-b border-transparent py-2 text-sm font-medium transition-colors [&_svg]:size-4 hover:text-fd-accent-foreground disabled:pointer-events-none disabled:opacity-50 data-[active]:border-fd-primary data-[active]:text-fd-primary',
         typeof className === 'function' ? className(s) : className,
       )
     }
@@ -171,7 +171,7 @@ export function TabsContent({
       keepMounted
       className={(s) =>
         cn(
-          'p-4 text-[0.9375rem] bg-fd-background rounded-xl outline-none prose-no-margin data-[state=inactive]:hidden [&>figure:only-child]:-m-4 [&>figure:only-child]:border-none',
+          'p-4 text-[0.9375rem] bg-fd-background rounded-xl outline-none prose-no-margin data-[inactive]:hidden [&>figure:only-child]:-m-4 [&>figure:only-child]:border-none',
           typeof className === 'function' ? className(s) : className,
         )
       }

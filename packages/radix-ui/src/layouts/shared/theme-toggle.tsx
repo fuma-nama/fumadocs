@@ -3,7 +3,7 @@ import { cva } from 'class-variance-authority';
 import { Airplay, Moon, Sun } from '@fumadocs/ui-utils/icons';
 import { useTheme } from 'next-themes';
 import { ComponentProps, useEffect, useState } from 'react';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
+import { cn } from '@fumadocs/ui-utils/cn';
 
 const itemVariants = cva(
   'size-6.5 rounded-full p-1.5 text-fd-muted-foreground',

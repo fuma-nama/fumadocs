@@ -138,8 +138,8 @@ importers:
         specifier: workspace:^
         version: link:../../packages/typescript
       fumadocs-ui:
-        specifier: workspace:*
-        version: link:../../packages/radix-ui
+        specifier: workspace:@fumadocs/base-ui@*
+        version: link:../../packages/base-ui
       hast-util-to-jsx-runtime:
         specifier: ^2.3.6
         version: 2.3.6
@@ -2016,6 +2016,9 @@ importers:
 
   packages/openapi:
     dependencies:
+      '@fumadocs/ui-utils':
+        specifier: workspace:*
+        version: link:../ui
       '@fumari/json-schema-to-typescript':
         specifier: ^2.0.0
         version: 2.0.0(prettier@3.7.4)
@@ -2073,6 +2076,9 @@ importers:
       remark-rehype:
         specifier: ^11.1.2
         version: 11.1.2
+      tailwind-merge:
+        specifier: ^3.4.0
+        version: 3.4.0
       xml-js:
         specifier: ^1.6.11
         version: 1.6.11

@@ -1,5 +1,5 @@
 'use client';
-import { cn } from 'fumadocs-ui/utils/cn';
+import { cn } from '@/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import {
   ApiClientModalProvider,

@@ -10,11 +10,11 @@ import {
   useMemo,
   useRef,
 } from 'react';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
-import { useCopyButton } from '@fumadocs/ui-utils/utils/use-copy-button';
+import { cn } from '@fumadocs/ui-utils/cn';
+import { useCopyButton } from '@fumadocs/ui-utils/hooks/use-copy-button';
 import { buttonVariants } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { mergeRefs } from '@fumadocs/ui-utils/utils/merge-refs';
+import { mergeRefs } from '@fumadocs/ui-utils/merge-refs';
 
 export interface CodeBlockProps extends ComponentProps<'figure'> {
   /**
@@ -256,12 +256,13 @@ export function CodeBlockTabsTrigger({
       {...props}
       className={(s) =>
         cn(
-          'relative group inline-flex text-sm font-medium text-nowrap items-center transition-colors gap-2 px-2 py-1.5 hover:text-fd-accent-foreground data-[state=active]:text-fd-primary [&_svg]:size-3.5',
+          'relative group inline-flex text-sm font-medium text-nowrap items-center transition-colors gap-2 px-2 py-1.5 [&_svg]:size-3.5',
+          s.active ? 'text-fd-primary' : 'hover:text-fd-accent-foreground',
           typeof className === 'function' ? className(s) : className,
         )
       }
     >
-      <div className="absolute inset-x-2 bottom-0 h-px group-data-[state=active]:bg-fd-primary" />
+      <div className="absolute inset-x-2 bottom-0 h-px group-data-[active]:bg-fd-primary" />
       {children}
     </TabsTrigger>
   );

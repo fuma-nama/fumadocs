@@ -1,7 +1,7 @@
 'use client';
-import { useI18n } from '@/contexts/i18n';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
-import { mergeRefs } from '@fumadocs/ui-utils/utils/merge-refs';
+import { useI18n } from '@fumadocs/ui-utils/contexts/i18n';
+import { cn } from '@fumadocs/ui-utils/cn';
+import { mergeRefs } from '@fumadocs/ui-utils/merge-refs';
 import { type ComponentProps, useRef } from 'react';
 import { TocThumb, useTOCItems } from '.';
 import * as Primitive from 'fumadocs-core/toc';

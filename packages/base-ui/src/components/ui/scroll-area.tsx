@@ -1,6 +1,6 @@
 import { ScrollArea as Primitive } from '@base-ui/react/scroll-area';
 import * as React from 'react';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
+import { cn } from '@fumadocs/ui-utils/cn';
 
 const ScrollArea = React.forwardRef<
   React.ComponentRef<typeof Primitive.Root>,
@@ -53,7 +53,8 @@ const ScrollBar = React.forwardRef<
     orientation={orientation}
     className={(s) =>
       cn(
-        'flex select-none data-[state=hidden]:animate-fd-fade-out',
+        'flex select-none transition-opacity',
+        !s.hovering && 'opacity-0',
         orientation === 'vertical' && 'h-full w-1.5',
         orientation === 'horizontal' && 'h-1.5 flex-col',
         typeof className === 'function' ? className(s) : className,

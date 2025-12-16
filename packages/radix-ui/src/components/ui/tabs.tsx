@@ -11,7 +11,7 @@ import {
   useState,
 } from 'react';
 import * as Primitive from '@radix-ui/react-tabs';
-import { mergeRefs } from '@fumadocs/ui-utils/utils/merge-refs';
+import { mergeRefs } from '@fumadocs/ui-utils/merge-refs';
 
 type ChangeListener = (v: string) => void;
 const listeners = new Map<string, Set<ChangeListener>>();

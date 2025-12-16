@@ -1,12 +1,12 @@
 'use client';
 import * as React from 'react';
 import { NavigationMenu as Primitive } from '@base-ui/react/navigation-menu';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
+import { cn } from '@fumadocs/ui-utils/cn';
 
 export type NavigationMenuContentProps = Primitive.Content.Props;
 export type NavigationMenuTriggerProps = Primitive.Trigger.Props;
 
-const NavigationMenu = Primitive.Root;
+const NavigationMenuRoot = Primitive.Root;
 
 const NavigationMenuList = Primitive.List;
 
@@ -38,7 +38,7 @@ const NavigationMenuTrigger = React.forwardRef<
     ref={ref}
     className={(s) =>
       cn(
-        'data-[state=open]:bg-fd-accent/50',
+        'data-[open]:bg-fd-accent/50',
         typeof className === 'function' ? className(s) : className,
       )
     }
@@ -57,7 +57,13 @@ const NavigationMenuContent = React.forwardRef<
     ref={ref}
     className={(s) =>
       cn(
-        'absolute inset-x-0 top-0 overflow-auto fd-scroll-container max-h-[80svh] data-[motion=from-end]:animate-fd-enterFromRight data-[motion=from-start]:animate-fd-enterFromLeft data-[motion=to-end]:animate-fd-exitToRight data-[motion=to-start]:animate-fd-exitToLeft',
+        'w-[calc(100vw_-_40px)] h-full p-6 xs:w-max xs:min-w-[400px] xs:w-max',
+        'transition-[opacity,transform,translate] duration-[var(--duration)] ease-[var(--easing)]',
+        'data-[starting-style]:opacity-0 data-[ending-style]:opacity-0',
+        'data-[starting-style]:data-[activation-direction=left]:translate-x-[-50%]',
+        'data-[starting-style]:data-[activation-direction=right]:translate-x-[50%]',
+        'data-[ending-style]:data-[activation-direction=left]:translate-x-[50%]',
+        'data-[ending-style]:data-[activation-direction=right]:translate-x-[-50%]',
         typeof className === 'function' ? className(s) : className,
       )
     }
@@ -68,30 +74,11 @@ NavigationMenuContent.displayName = Primitive.Content.displayName;
 
 const NavigationMenuLink = Primitive.Link;
 
-const NavigationMenuViewport = React.forwardRef<
-  React.ComponentRef<typeof Primitive.Viewport>,
-  React.ComponentPropsWithoutRef<typeof Primitive.Viewport>
->(({ className, ...props }, ref) => (
-  <div ref={ref} className="flex w-full justify-center">
-    <Primitive.Viewport
-      {...props}
-      className={(s) =>
-        cn(
-          'relative h-(--radix-navigation-menu-viewport-height) w-full origin-[top_center] overflow-hidden transition-[width,height] duration-300 data-[state=closed]:animate-fd-nav-menu-out data-[state=open]:animate-fd-nav-menu-in',
-          typeof className === 'function' ? className(s) : className,
-        )
-      }
-    />
-  </div>
-));
-NavigationMenuViewport.displayName = Primitive.Viewport.displayName;
-
 export {
-  NavigationMenu,
+  NavigationMenuRoot,
   NavigationMenuList,
   NavigationMenuItem,
   NavigationMenuContent,
   NavigationMenuTrigger,
   NavigationMenuLink,
-  NavigationMenuViewport,
 };

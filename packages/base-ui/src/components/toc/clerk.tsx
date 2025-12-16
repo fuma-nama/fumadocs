@@ -1,9 +1,9 @@
 'use client';
 import * as Primitive from 'fumadocs-core/toc';
 import { type ComponentProps, useEffect, useRef, useState } from 'react';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
+import { cn } from '@fumadocs/ui-utils/cn';
 import { TocThumb, useTOCItems } from '.';
-import { mergeRefs } from '@fumadocs/ui-utils/utils/merge-refs';
+import { mergeRefs } from '@fumadocs/ui-utils/merge-refs';
 import { useI18n } from '@/contexts/i18n';
 
 export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {

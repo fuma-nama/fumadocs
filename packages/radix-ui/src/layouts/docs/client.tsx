@@ -7,13 +7,13 @@ import {
   use,
   useMemo,
 } from 'react';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
+import { cn } from '@fumadocs/ui-utils/cn';
 import { useSidebar } from '@/components/sidebar/base';
 import { usePathname } from 'fumadocs-core/framework';
 import { isTabActive } from '@/utils/is-active';
 import Link from 'fumadocs-core/link';
 import type { SidebarTab } from '@/components/sidebar/tabs';
-import { useIsScrollTop } from '@fumadocs/ui-utils/utils/use-is-scroll-top';
+import { useIsScrollTop } from '@fumadocs/ui-utils/hooks/use-is-scroll-top';
 
 export const LayoutContext = createContext<{
   isNavTransparent: boolean;

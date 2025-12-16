@@ -1,4 +1,4 @@
-import { cn } from '@fumadocs/ui-utils/utils/cn';
+import { cn } from '@fumadocs/ui-utils/cn';
 import { Star } from '@fumadocs/ui-utils/icons';
 import { type AnchorHTMLAttributes } from 'react';
 

@@ -47,10 +47,10 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from 'fumadocs-ui/components/ui/collapsible';
-import { X, ChevronDown, LoaderCircle } from 'lucide-react';
+import { X, ChevronDown, LoaderCircle } from '@/ui/icons';
 import { encodeRequestData } from '@/requests/media/encode';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { cn } from 'fumadocs-ui/utils/cn';
+import { cn } from '@/utils/cn';
 import {
   type FieldInfo,
   SchemaProvider,

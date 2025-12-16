@@ -1,5 +1,5 @@
 import type { ComponentProps, ReactNode } from 'react';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
+import { cn } from '@fumadocs/ui-utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { Edit, Text } from '@fumadocs/ui-utils/icons';
 import { I18nLabel } from '@/contexts/i18n';

@@ -9,8 +9,8 @@ import {
   useEffectEvent,
   useRef,
 } from 'react';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
-import { mergeRefs } from '@fumadocs/ui-utils/utils/merge-refs';
+import { cn } from '@fumadocs/ui-utils/cn';
+import { mergeRefs } from '@fumadocs/ui-utils/merge-refs';
 
 const TOCContext = createContext<Primitive.TOCItemType[]>([]);
 

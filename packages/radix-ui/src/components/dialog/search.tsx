@@ -19,7 +19,7 @@ import {
   useState,
 } from 'react';
 import { I18nLabel, useI18n } from '@/contexts/i18n';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
+import { cn } from '@fumadocs/ui-utils/cn';
 import {
   Dialog,
   DialogContent,

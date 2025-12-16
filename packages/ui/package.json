@@ -13,29 +13,9 @@
   "type": "module",
   "exports": {
     "./css/*": "./css/*",
-    "./i18n": {
-      "import": "./dist/i18n.js",
-      "types": "./dist/i18n.d.ts"
-    },
-    "./og/*": {
-      "import": "./dist/og/*.js",
-      "types": "./dist/og/*.d.ts"
-    },
-    "./contexts/*": {
-      "import": "./dist/contexts/*.js",
-      "types": "./dist/contexts/*.d.ts"
-    },
-    "./theme/*": {
-      "import": "./dist/theme/*.js",
-      "types": "./dist/theme/*.d.ts"
-    },
-    "./utils/*": {
-      "import": "./dist/utils/*.js",
-      "types": "./dist/utils/*.d.ts"
-    },
-    "./icons": {
-      "import": "./dist/icons.js",
-      "types": "./dist/icons.d.ts"
+    "./*": {
+      "import": "./dist/*.js",
+      "types": "./dist/*.d.ts"
     }
   },
   "files": [

@@ -1,6 +1,6 @@
 'use client';
 import * as Base from '@/components/sidebar/base';
-import { cn } from '@fumadocs/ui-utils/utils/cn';
+import { cn } from '@fumadocs/ui-utils/cn';
 import { type ComponentProps, useRef } from 'react';
 import { cva } from 'class-variance-authority';
 import { createPageTreeRenderer } from '@/components/sidebar/page-tree';
@@ -8,7 +8,7 @@ import { createLinkItemRenderer } from '@/components/sidebar/link-item';
 import { buttonVariants } from '@/components/ui/button';
 import { SearchToggle } from '@/layouts/shared/search-toggle';
 import { Sidebar as SidebarIcon } from '@fumadocs/ui-utils/icons';
-import { mergeRefs } from '@fumadocs/ui-utils/utils/merge-refs';
+import { mergeRefs } from '@fumadocs/ui-utils/merge-refs';
 
 const itemVariants = cva(
   'relative flex flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground wrap-anywhere [&_svg]:size-4 [&_svg]:shrink-0',
