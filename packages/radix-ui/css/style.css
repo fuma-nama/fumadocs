@@ -1,9 +1,0 @@
-@import 'tailwindcss';
-@import './neutral.css';
-@import './preset.css';
-
-@layer base {
-  body {
-    @apply flex flex-col min-h-screen;
-  }
-}

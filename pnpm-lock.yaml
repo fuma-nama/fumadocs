@@ -139,7 +139,7 @@ importers:
         version: link:../../packages/typescript
       fumadocs-ui:
         specifier: workspace:*
-        version: link:../../packages/radix-ui
+        version: link:../../packages/ui
       hast-util-to-jsx-runtime:
         specifier: ^2.3.6
         version: 2.3.6
@@ -320,7 +320,7 @@ importers:
         version: link:../../packages/core
       fumadocs-ui:
         specifier: workspace:*
-        version: link:../../packages/radix-ui
+        version: link:../../packages/ui
       react:
         specifier: ^19.2.3
         version: 19.2.3
@@ -354,7 +354,7 @@ importers:
         version: link:../../packages/core
       fumadocs-ui:
         specifier: workspace:*
-        version: link:../../packages/radix-ui
+        version: link:../../packages/ui
       next:
         specifier: 16.0.10
         version: 16.0.10(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -397,7 +397,7 @@ importers:
         version: link:../../packages/mdx
       fumadocs-ui:
         specifier: workspace:*
-        version: link:../../packages/radix-ui
+        version: link:../../packages/ui
       fumapress:
         specifier: workspace:*
         version: link:../../packages/press
@@ -458,7 +458,7 @@ importers:
         version: link:../../packages/mdx
       fumadocs-ui:
         specifier: workspace:*
-        version: link:../../packages/radix-ui
+        version: link:../../packages/ui
       next:
         specifier: 16.0.10
         version: 16.0.10(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -489,7 +489,7 @@ importers:
         version: link:../../packages/core
       fumadocs-ui:
         specifier: workspace:*
-        version: link:../../packages/radix-ui
+        version: link:../../packages/ui
       github-slugger:
         specifier: ^2.0.0
         version: 2.0.0
@@ -541,7 +541,7 @@ importers:
         version: link:../../packages/mdx
       fumadocs-ui:
         specifier: workspace:*
-        version: link:../../packages/radix-ui
+        version: link:../../packages/ui
       lucide-react:
         specifier: ^0.561.0
         version: 0.561.0(react@19.2.3)
@@ -590,7 +590,7 @@ importers:
         version: link:../../packages/mdx
       fumadocs-ui:
         specifier: workspace:*
-        version: link:../../packages/radix-ui
+        version: link:../../packages/ui
       next:
         specifier: 16.0.10
         version: 16.0.10(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -636,7 +636,7 @@ importers:
         version: link:../../packages/obsidian
       fumadocs-ui:
         specifier: workspace:*
-        version: link:../../packages/radix-ui
+        version: link:../../packages/ui
       next:
         specifier: 16.0.10
         version: 16.0.10(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -682,7 +682,7 @@ importers:
         version: link:../../packages/openapi
       fumadocs-ui:
         specifier: workspace:*
-        version: link:../../packages/radix-ui
+        version: link:../../packages/ui
       next:
         specifier: 16.0.10
         version: 16.0.10(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -734,7 +734,7 @@ importers:
         version: link:../../packages/python
       fumadocs-ui:
         specifier: workspace:*
-        version: link:../../packages/radix-ui
+        version: link:../../packages/ui
       next:
         specifier: 16.0.10
         version: 16.0.10(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -786,7 +786,7 @@ importers:
         version: link:../../packages/mdx
       fumadocs-ui:
         specifier: workspace:*
-        version: link:../../packages/radix-ui
+        version: link:../../packages/ui
       isbot:
         specifier: ^5.1.32
         version: 5.1.32
@@ -853,7 +853,7 @@ importers:
         version: link:../../packages/mdx
       fumadocs-ui:
         specifier: workspace:*
-        version: link:../../packages/radix-ui
+        version: link:../../packages/ui
       isbot:
         specifier: ^5.1.32
         version: 5.1.32
@@ -917,7 +917,7 @@ importers:
         version: link:../../packages/mdx
       fumadocs-ui:
         specifier: workspace:*
-        version: link:../../packages/radix-ui
+        version: link:../../packages/ui
       isbot:
         specifier: ^5.1.32
         version: 5.1.32
@@ -984,7 +984,7 @@ importers:
         version: link:../../packages/mdx
       fumadocs-ui:
         specifier: workspace:*
-        version: link:../../packages/radix-ui
+        version: link:../../packages/ui
       isbot:
         specifier: ^5.1.32
         version: 5.1.32
@@ -1045,7 +1045,7 @@ importers:
         version: link:../../packages/core
       fumadocs-ui:
         specifier: workspace:*
-        version: link:../../packages/radix-ui
+        version: link:../../packages/ui
       next:
         specifier: 16.0.10
         version: 16.0.10(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -1091,7 +1091,7 @@ importers:
         version: link:../../packages/mdx
       fumadocs-ui:
         specifier: workspace:*
-        version: link:../../packages/radix-ui
+        version: link:../../packages/ui
       lucide-react:
         specifier: ^0.561.0
         version: 0.561.0(react@19.2.3)
@@ -1161,7 +1161,7 @@ importers:
         version: link:../../packages/mdx
       fumadocs-ui:
         specifier: workspace:*
-        version: link:../../packages/radix-ui
+        version: link:../../packages/ui
       lucide-static:
         specifier: ^0.561.0
         version: 0.561.0
@@ -1231,7 +1231,7 @@ importers:
         version: link:../../packages/mdx
       fumadocs-ui:
         specifier: workspace:*
-        version: link:../../packages/radix-ui
+        version: link:../../packages/ui
       lucide-static:
         specifier: ^0.561.0
         version: 0.561.0
@@ -1289,7 +1289,7 @@ importers:
         version: link:../../packages/mdx
       fumadocs-ui:
         specifier: workspace:*
-        version: link:../../packages/radix-ui
+        version: link:../../packages/ui
       react:
         specifier: ^19.2.3
         version: 19.2.3
@@ -1344,7 +1344,7 @@ importers:
         version: link:../../packages/mdx
       fumadocs-ui:
         specifier: workspace:*
-        version: link:../../packages/radix-ui
+        version: link:../../packages/ui
       react:
         specifier: ^19.2.3
         version: 19.2.3
@@ -1385,64 +1385,6 @@ importers:
       vite-tsconfig-paths:
         specifier: ^5.1.4
         version: 5.1.4(typescript@5.9.3)(vite@7.2.7(@types/node@24.10.2)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
-
-  packages/base-ui:
-    dependencies:
-      '@base-ui/react':
-        specifier: ^1.0.0
-        version: 1.0.0(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      '@fumadocs/ui-utils':
-        specifier: workspace:*
-        version: link:../ui
-      class-variance-authority:
-        specifier: ^0.7.1
-        version: 0.7.1
-      fumadocs-core:
-        specifier: workspace:*
-        version: link:../core
-      next-themes:
-        specifier: ^0.4.6
-        version: 0.4.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      react:
-        specifier: ^19.2.0
-        version: 19.2.3
-      react-dom:
-        specifier: ^19.2.0
-        version: 19.2.3(react@19.2.3)
-      react-medium-image-zoom:
-        specifier: ^5.4.0
-        version: 5.4.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      scroll-into-view-if-needed:
-        specifier: ^3.1.0
-        version: 3.1.0
-    devDependencies:
-      '@fumadocs/cli':
-        specifier: workspace:*
-        version: link:../cli
-      '@tailwindcss/cli':
-        specifier: ^4.1.18
-        version: 4.1.18
-      '@types/node':
-        specifier: ^24.10.2
-        version: 24.10.2
-      '@types/react':
-        specifier: ^19.2.7
-        version: 19.2.7
-      '@types/react-dom':
-        specifier: ^19.2.3
-        version: 19.2.3(@types/react@19.2.7)
-      eslint-config-custom:
-        specifier: workspace:*
-        version: link:../eslint-config-custom
-      tailwindcss:
-        specifier: ^4.1.18
-        version: 4.1.18
-      tsc-alias:
-        specifier: ^1.8.16
-        version: 1.8.16
-      tsconfig:
-        specifier: workspace:*
-        version: link:../tsconfig
 
   packages/cli:
     dependencies:
@@ -1712,7 +1654,7 @@ importers:
         version: link:../mdx
       fumadocs-ui:
         specifier: workspace:*
-        version: link:../radix-ui
+        version: link:../ui
 
   packages/doc-gen:
     dependencies:
@@ -2000,7 +1942,7 @@ importers:
         version: link:../core
       fumadocs-ui:
         specifier: workspace:*
-        version: link:../radix-ui
+        version: link:../ui
       mdast-util-mdx-jsx:
         specifier: ^3.2.0
         version: 3.2.0
@@ -2100,7 +2042,7 @@ importers:
         version: link:../core
       fumadocs-ui:
         specifier: workspace:*
-        version: link:../radix-ui
+        version: link:../ui
       json-schema-typed:
         specifier: ^8.0.2
         version: 8.0.2
@@ -2136,7 +2078,7 @@ importers:
         version: link:../mdx
       fumadocs-ui:
         specifier: workspace:*
-        version: link:../radix-ui
+        version: link:../ui
       picocolors:
         specifier: ^1.1.1
         version: 1.1.1
@@ -2213,95 +2155,10 @@ importers:
         version: link:../core
       fumadocs-ui:
         specifier: workspace:*
-        version: link:../radix-ui
+        version: link:../ui
       lucide-react:
         specifier: ^0.561.0
         version: 0.561.0(react@19.2.3)
-      tsconfig:
-        specifier: workspace:*
-        version: link:../tsconfig
-
-  packages/radix-ui:
-    dependencies:
-      '@fumadocs/ui-utils':
-        specifier: workspace:*
-        version: link:../ui
-      '@radix-ui/react-accordion':
-        specifier: ^1.2.12
-        version: 1.2.12(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      '@radix-ui/react-collapsible':
-        specifier: ^1.1.12
-        version: 1.1.12(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      '@radix-ui/react-dialog':
-        specifier: ^1.1.15
-        version: 1.1.15(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      '@radix-ui/react-direction':
-        specifier: ^1.1.1
-        version: 1.1.1(@types/react@19.2.7)(react@19.2.3)
-      '@radix-ui/react-navigation-menu':
-        specifier: ^1.2.14
-        version: 1.2.14(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      '@radix-ui/react-popover':
-        specifier: ^1.1.15
-        version: 1.1.15(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      '@radix-ui/react-presence':
-        specifier: ^1.1.5
-        version: 1.1.5(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      '@radix-ui/react-scroll-area':
-        specifier: ^1.2.10
-        version: 1.2.10(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      '@radix-ui/react-slot':
-        specifier: ^1.2.4
-        version: 1.2.4(@types/react@19.2.7)(react@19.2.3)
-      '@radix-ui/react-tabs':
-        specifier: ^1.1.13
-        version: 1.1.13(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      class-variance-authority:
-        specifier: ^0.7.1
-        version: 0.7.1
-      fumadocs-core:
-        specifier: workspace:*
-        version: link:../core
-      next-themes:
-        specifier: ^0.4.6
-        version: 0.4.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      react:
-        specifier: ^19.2.0
-        version: 19.2.3
-      react-dom:
-        specifier: ^19.2.0
-        version: 19.2.3(react@19.2.3)
-      react-medium-image-zoom:
-        specifier: ^5.4.0
-        version: 5.4.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      scroll-into-view-if-needed:
-        specifier: ^3.1.0
-        version: 3.1.0
-    devDependencies:
-      '@fumadocs/cli':
-        specifier: workspace:*
-        version: link:../cli
-      '@tailwindcss/cli':
-        specifier: ^4.1.18
-        version: 4.1.18
-      '@types/node':
-        specifier: ^24.10.2
-        version: 24.10.2
-      '@types/react':
-        specifier: ^19.2.7
-        version: 19.2.7
-      '@types/react-dom':
-        specifier: ^19.2.3
-        version: 19.2.3(@types/react@19.2.7)
-      eslint-config-custom:
-        specifier: workspace:*
-        version: link:../eslint-config-custom
-      tailwindcss:
-        specifier: ^4.1.18
-        version: 4.1.18
-      tsc-alias:
-        specifier: ^1.8.16
-        version: 1.8.16
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
@@ -2355,7 +2212,7 @@ importers:
         version: link:../eslint-config-custom
       fumadocs-ui:
         specifier: workspace:*
-        version: link:../radix-ui
+        version: link:../ui
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
@@ -2416,7 +2273,7 @@ importers:
         version: link:../core
       fumadocs-ui:
         specifier: workspace:*
-        version: link:../radix-ui
+        version: link:../ui
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
@@ -2429,6 +2286,39 @@ importers:
 
   packages/ui:
     dependencies:
+      '@radix-ui/react-accordion':
+        specifier: ^1.2.12
+        version: 1.2.12(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@radix-ui/react-collapsible':
+        specifier: ^1.1.12
+        version: 1.1.12(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@radix-ui/react-dialog':
+        specifier: ^1.1.15
+        version: 1.1.15(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@radix-ui/react-direction':
+        specifier: ^1.1.1
+        version: 1.1.1(@types/react@19.2.7)(react@19.2.3)
+      '@radix-ui/react-navigation-menu':
+        specifier: ^1.2.14
+        version: 1.2.14(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@radix-ui/react-popover':
+        specifier: ^1.1.15
+        version: 1.1.15(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@radix-ui/react-presence':
+        specifier: ^1.1.5
+        version: 1.1.5(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@radix-ui/react-scroll-area':
+        specifier: ^1.2.10
+        version: 1.2.10(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@radix-ui/react-slot':
+        specifier: ^1.2.4
+        version: 1.2.4(@types/react@19.2.7)(react@19.2.3)
+      '@radix-ui/react-tabs':
+        specifier: ^1.1.13
+        version: 1.1.13(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      class-variance-authority:
+        specifier: ^0.7.1
+        version: 0.7.1
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
@@ -2447,6 +2337,12 @@ importers:
       react-dom:
         specifier: ^19.2.0
         version: 19.2.3(react@19.2.3)
+      react-medium-image-zoom:
+        specifier: ^5.4.0
+        version: 5.4.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      scroll-into-view-if-needed:
+        specifier: ^3.1.0
+        version: 3.1.0
       tailwind-merge:
         specifier: ^3.4.0
         version: 3.4.0
@@ -2454,6 +2350,12 @@ importers:
       '@fumadocs/cli':
         specifier: workspace:*
         version: link:../cli
+      '@next/eslint-plugin-next':
+        specifier: 16.0.10
+        version: 16.0.10
+      '@tailwindcss/cli':
+        specifier: ^4.1.18
+        version: 4.1.18
       '@types/lodash.merge':
         specifier: ^4.6.9
         version: 4.6.9
@@ -2763,27 +2665,6 @@ packages:
   '@babel/types@7.28.5':
     resolution: {integrity: sha512-qQ5m48eI/MFLQ5PxQj4PFaprjyCTLI37ElWMmNs0K8Lk3dVeOdNpB3ks8jc7yM5CDmVC73eMVk/trk3fgmrUpA==}
     engines: {node: '>=6.9.0'}
-
-  '@base-ui/react@1.0.0':
-    resolution: {integrity: sha512-4USBWz++DUSLTuIYpbYkSgy1F9ZmNG9S/lXvlUN6qMK0P0RlW+6eQmDUB4DgZ7HVvtXl4pvi4z5J2fv6Z3+9hg==}
-    engines: {node: '>=14.0.0'}
-    peerDependencies:
-      '@types/react': ^17 || ^18 || ^19
-      react: ^17 || ^18 || ^19
-      react-dom: ^17 || ^18 || ^19
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
-
-  '@base-ui/utils@0.2.3':
-    resolution: {integrity: sha512-/CguQ2PDaOzeVOkllQR8nocJ0FFIDqsWIcURsVmm53QGo8NhFNpePjNlyPIB41luxfOqnG7PU0xicMEw3ls7XQ==}
-    peerDependencies:
-      '@types/react': ^17 || ^18 || ^19
-      react: ^17 || ^18 || ^19
-      react-dom: ^17 || ^18 || ^19
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
 
   '@biomejs/biome@2.3.8':
     resolution: {integrity: sha512-Qjsgoe6FEBxWAUzwFGFrB+1+M8y/y5kwmg5CHac+GSVOdmOIqsAiXM5QMVGZJ1eCUCLlPZtq4aFAQ0eawEUuUA==}
@@ -3545,12 +3426,6 @@ packages:
 
   '@floating-ui/react-dom@2.1.5':
     resolution: {integrity: sha512-HDO/1/1oH9fjj4eLgegrlH3dklZpHtUYYFiVwMUwfGvk9jWDRWqkklA2/NFScknrcNSspbV868WjXORvreDX+Q==}
-    peerDependencies:
-      react: '>=16.8.0'
-      react-dom: '>=16.8.0'
-
-  '@floating-ui/react-dom@2.1.6':
-    resolution: {integrity: sha512-4JX6rEatQEvlmgU80wZyq9RT96HZJa88q8hp0pBd+LrczeDI4o6uA2M+uvxngVHo4Ihr8uibXxH6+70zhAFrVw==}
     peerDependencies:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
@@ -10110,9 +9985,6 @@ packages:
     resolution: {integrity: sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw==}
     engines: {node: '>=0.10.0'}
 
-  reselect@5.1.1:
-    resolution: {integrity: sha512-K/BG6eIky/SBpzfHZv/dd+9JBFiS4SWV7FIujVyJRux6e45+73RaUHXLmIR1f7WOMaQ0U1km6qwklRQxpJJY0w==}
-
   resolve-from@4.0.0:
     resolution: {integrity: sha512-pb/MYmXstAkysRFx8piNI1tGFNQIFA3vkE3Gq4EuA1dF6gHp/+vgZqsCGJapvy8N3Q+4o7FwvquPJcnZ7RYy4g==}
     engines: {node: '>=4'}
@@ -12122,31 +11994,6 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
 
-  '@base-ui/react@1.0.0(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
-    dependencies:
-      '@babel/runtime': 7.28.4
-      '@base-ui/utils': 0.2.3(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      '@floating-ui/react-dom': 2.1.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      '@floating-ui/utils': 0.2.10
-      react: 19.2.3
-      react-dom: 19.2.3(react@19.2.3)
-      reselect: 5.1.1
-      tabbable: 6.3.0
-      use-sync-external-store: 1.6.0(react@19.2.3)
-    optionalDependencies:
-      '@types/react': 19.2.7
-
-  '@base-ui/utils@0.2.3(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
-    dependencies:
-      '@babel/runtime': 7.28.4
-      '@floating-ui/utils': 0.2.10
-      react: 19.2.3
-      react-dom: 19.2.3(react@19.2.3)
-      reselect: 5.1.1
-      use-sync-external-store: 1.6.0(react@19.2.3)
-    optionalDependencies:
-      '@types/react': 19.2.7
-
   '@biomejs/biome@2.3.8':
     optionalDependencies:
       '@biomejs/cli-darwin-arm64': 2.3.8
@@ -12846,12 +12693,6 @@ snapshots:
       '@floating-ui/utils': 0.2.10
 
   '@floating-ui/react-dom@2.1.5(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
-    dependencies:
-      '@floating-ui/dom': 1.7.4
-      react: 19.2.3
-      react-dom: 19.2.3(react@19.2.3)
-
-  '@floating-ui/react-dom@2.1.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
     dependencies:
       '@floating-ui/dom': 1.7.4
       react: 19.2.3
@@ -15690,7 +15531,7 @@ snapshots:
 
   '@types/fontkit@2.0.8':
     dependencies:
-      '@types/node': 24.10.2
+      '@types/node': 25.0.1
 
   '@types/geojson@7946.0.16': {}
 
@@ -15739,7 +15580,6 @@ snapshots:
   '@types/node@25.0.1':
     dependencies:
       undici-types: 7.16.0
-    optional: true
 
   '@types/openapi-sampler@1.0.3': {}
 
@@ -20928,8 +20768,6 @@ snapshots:
   require-directory@2.1.1: {}
 
   require-from-string@2.0.2: {}
-
-  reselect@5.1.1: {}
 
   resolve-from@4.0.0: {}
 
