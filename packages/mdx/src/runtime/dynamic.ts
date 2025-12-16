@@ -42,7 +42,7 @@ export async function dynamic<Config, TC extends InternalTypeConfig>(
 
   function convertLazyEntries(
     collection: DocCollectionItem,
-    entries: LazyEntry<unknown>[],
+    entries: LazyEntry[],
   ) {
     const head: Record<string, () => unknown> = {};
     const body: Record<string, () => Promise<unknown>> = {};
