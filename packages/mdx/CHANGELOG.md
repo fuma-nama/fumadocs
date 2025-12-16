@@ -1,5 +1,11 @@
 # next-docs-mdx
 
+## 14.1.1
+
+### Patch Changes
+
+- adaf9ae: hotfix Windows path escape
+
 ## 14.1.0
 
 ### Minor Changes
