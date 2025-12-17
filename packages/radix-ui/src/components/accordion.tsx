@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, Link as LinkIcon } from '@fumadocs/ui-utils/icons';
+import { Check, Link as LinkIcon } from '@fumadocs/ui/icons';
 import {
   ComponentProps,
   type ReactNode,
@@ -8,10 +8,10 @@ import {
   useRef,
   useState,
 } from 'react';
-import { cn } from '@fumadocs/ui-utils/cn';
-import { useCopyButton } from '@fumadocs/ui-utils/hooks/use-copy-button';
+import { cn } from '@fumadocs/ui/cn';
+import { useCopyButton } from '@fumadocs/ui/hooks/use-copy-button';
 import { buttonVariants } from '@/components/ui/button';
-import { mergeRefs } from '@fumadocs/ui-utils/merge-refs';
+import { mergeRefs } from '@fumadocs/ui/merge-refs';
 import {
   Accordion as Root,
   AccordionContent,

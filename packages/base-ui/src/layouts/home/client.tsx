@@ -1,14 +1,23 @@
 'use client';
-import { type ComponentProps, Fragment, useMemo } from 'react';
+import {
+  type ComponentProps,
+  createContext,
+  Fragment,
+  use,
+  useEffect,
+  useEffectEvent,
+  useMemo,
+  useState,
+} from 'react';
 import { cva } from 'class-variance-authority';
 import Link from 'fumadocs-core/link';
-import { cn } from '@fumadocs/ui-utils/cn';
+import { cn } from '@fumadocs/ui/cn';
 import {
   type LinkItemType,
   type NavOptions,
   resolveLinkItems,
 } from '@/layouts/shared';
-import { LinkItem } from '@/layouts/shared/link-item';
+import { LinkItem } from '@fumadocs/ui/link-item';
 import {
   NavigationMenuRoot,
   NavigationMenuContent,
@@ -28,9 +37,19 @@ import {
   LanguageToggle,
   LanguageToggleText,
 } from '@/layouts/shared/language-toggle';
-import { ChevronDown, Languages } from '@fumadocs/ui-utils/icons';
-import { useIsScrollTop } from '@fumadocs/ui-utils/hooks/use-is-scroll-top';
+import { ChevronDown, Languages } from '@fumadocs/ui/icons';
+import { useIsScrollTop } from '@fumadocs/ui/hooks/use-is-scroll-top';
 import { NavigationMenu } from '@base-ui/react';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+
+const MobileMenuContext = createContext<{
+  open: boolean;
+  setOpen: (open: boolean) => void;
+} | null>(null);
 
 export const navItemVariants = cva('[&_svg]:size-4', {
   variants: {
@@ -81,88 +100,98 @@ export function Header({
   }, [links, githubUrl]);
 
   return (
-    <HeaderNavigationMenu transparentMode={nav.transparentMode}>
-      <Link
-        href={nav.url ?? '/'}
-        className="inline-flex items-center gap-2.5 font-semibold"
-      >
-        {nav.title}
-      </Link>
-      {nav.children}
-      <ul className="flex flex-row items-center gap-2 px-6 max-sm:hidden">
-        {navItems
-          .filter((item) => !isSecondary(item))
-          .map((item, i) => (
-            <NavigationMenuLinkItem key={i} item={item} className="text-sm" />
-          ))}
-      </ul>
-      <div className="flex flex-row items-center justify-end gap-1.5 flex-1 max-lg:hidden">
-        {searchToggle.enabled !== false &&
-          (searchToggle.components?.lg ?? (
-            <LargeSearchToggle
-              className="w-full rounded-full ps-2.5 max-w-[240px]"
-              hideIfDisabled
-            />
-          ))}
-        {themeSwitch.enabled !== false &&
-          (themeSwitch.component ?? <ThemeToggle mode={themeSwitch?.mode} />)}
-        {i18n && (
-          <LanguageToggle>
-            <Languages className="size-5" />
-          </LanguageToggle>
-        )}
-        <ul className="flex flex-row gap-2 items-center empty:hidden">
-          {navItems.filter(isSecondary).map((item, i) => (
-            <NavigationMenuLinkItem
-              key={i}
-              className={cn(
-                item.type === 'icon' && '-mx-1 first:ms-0 last:me-0',
+    <MobileMenuCollapsible
+      render={(_, s) => (
+        <HeaderRoot
+          transparentMode={nav.transparentMode}
+          className={cn(s.open && 'shadow-lg rounded-b-2xl')}
+        >
+          <NavigationMenuList className="flex h-14 w-full items-center px-4">
+            <Link
+              href={nav.url ?? '/'}
+              className="inline-flex items-center gap-2.5 font-semibold"
+            >
+              {nav.title}
+            </Link>
+            {nav.children}
+            <ul className="flex flex-row items-center gap-2 px-6 max-sm:hidden">
+              {navItems
+                .filter((item) => !isSecondary(item))
+                .map((item, i) => (
+                  <NavigationMenuLinkItem
+                    key={i}
+                    item={item}
+                    className="text-sm"
+                  />
+                ))}
+            </ul>
+            <div className="flex flex-row items-center justify-end gap-1.5 flex-1 max-lg:hidden">
+              {searchToggle.enabled !== false &&
+                (searchToggle.components?.lg ?? (
+                  <LargeSearchToggle
+                    className="w-full rounded-full ps-2.5 max-w-[240px]"
+                    hideIfDisabled
+                  />
+                ))}
+              {themeSwitch.enabled !== false &&
+                (themeSwitch.component ?? (
+                  <ThemeToggle mode={themeSwitch?.mode} />
+                ))}
+              {i18n && (
+                <LanguageToggle>
+                  <Languages className="size-5" />
+                </LanguageToggle>
               )}
-              item={item}
-            />
-          ))}
-        </ul>
-      </div>
-      <ul className="flex flex-row items-center ms-auto -me-1.5 lg:hidden">
-        {searchToggle.enabled !== false &&
-          (searchToggle.components?.sm ?? (
-            <SearchToggle className="p-2" hideIfDisabled />
-          ))}
-        <NavigationMenuItem>
-          <NavigationMenuTrigger
-            aria-label="Toggle Menu"
-            className={cn(
-              buttonVariants({
-                size: 'icon',
-                color: 'ghost',
-                className: 'group [&_svg]:size-5.5',
-              }),
-            )}
-            onPointerMove={
-              nav.enableHoverToOpen ? undefined : (e) => e.preventDefault()
-            }
-          >
-            <ChevronDown className="transition-transform duration-300 group-data-[open]:rotate-180" />
-          </NavigationMenuTrigger>
-          <NavigationMenuContent className="flex flex-col p-4 sm:flex-row sm:items-center sm:justify-end">
+              <ul className="flex flex-row gap-2 items-center empty:hidden">
+                {navItems.filter(isSecondary).map((item, i) => (
+                  <NavigationMenuLinkItem
+                    key={i}
+                    className={cn(
+                      item.type === 'icon' && '-mx-1 first:ms-0 last:me-0',
+                    )}
+                    item={item}
+                  />
+                ))}
+              </ul>
+            </div>
+            <ul className="flex flex-row items-center ms-auto -me-1.5 lg:hidden">
+              {searchToggle.enabled !== false &&
+                (searchToggle.components?.sm ?? (
+                  <SearchToggle className="p-2" hideIfDisabled />
+                ))}
+              <CollapsibleTrigger
+                aria-label="Toggle Menu"
+                className={cn(
+                  buttonVariants({
+                    size: 'icon',
+                    color: 'ghost',
+                    className: 'group [&_svg]:size-5.5',
+                  }),
+                )}
+              >
+                <ChevronDown className="transition-transform duration-300 group-data-[panel-open]:rotate-180" />
+              </CollapsibleTrigger>
+            </ul>
+          </NavigationMenuList>
+          <CollapsibleContent className="flex flex-col px-4">
             {menuItems
               .filter((item) => !isSecondary(item))
               .map((item, i) => (
-                <MobileNavigationMenuLinkItem
+                <MobileMenuLinkItem
                   key={i}
                   item={item}
-                  className="sm:hidden"
+                  className="first:mt-4 sm:hidden"
                 />
               ))}
-            <div className="-ms-1.5 flex flex-row items-center gap-2 max-sm:mt-2">
+            <div className="-ms-1.5 flex flex-row pt-2 pb-4 items-center justify-end gap-2">
               {menuItems.filter(isSecondary).map((item, i) => (
-                <MobileNavigationMenuLinkItem
+                <MobileMenuLinkItem
                   key={i}
                   item={item}
                   className={cn(item.type === 'icon' && '-mx-1 first:ms-0')}
                 />
               ))}
-              <div role="separator" className="flex-1" />
+              <div role="separator" className="flex-1 sm:hidden" />
               {i18n && (
                 <LanguageToggle>
                   <Languages className="size-5" />
@@ -175,10 +204,56 @@ export function Header({
                   <ThemeToggle mode={themeSwitch?.mode} />
                 ))}
             </div>
-          </NavigationMenuContent>
-        </NavigationMenuItem>
-      </ul>
-    </HeaderNavigationMenu>
+          </CollapsibleContent>
+          <NavigationMenu.Portal>
+            <NavigationMenu.Positioner
+              sideOffset={10}
+              className="z-20 h-(--positioner-height) w-(--positioner-width) max-w-(--available-width) transition-[left,right] duration-(--duration) ease-(--easing) data-[instant]:transition-none"
+              style={{
+                ['--duration' as string]: '0.35s',
+                ['--easing' as string]: 'cubic-bezier(0.22, 1, 0.36, 1)',
+              }}
+            >
+              <NavigationMenu.Popup className="relative w-(--popup-width) h-(--popup-height) max-w-(--fd-layout-width,1400px) origin-(--transform-origin) rounded-xl bg-fd-background/80  border backdrop-blur-lg shadow-lg transition-[opacity,transform,width,height,scale,translate] duration-(--duration) ease-(--easing) data-[ending-style]:scale-90 data-[ending-style]:opacity-0 data-[ending-style]:duration-150 data-[starting-style]:scale-90 data-[starting-style]:opacity-0">
+                <NavigationMenu.Viewport className="relative size-full overflow-hidden" />
+              </NavigationMenu.Popup>
+            </NavigationMenu.Positioner>
+          </NavigationMenu.Portal>
+        </HeaderRoot>
+      )}
+    />
+  );
+}
+
+function MobileMenuCollapsible(props: ComponentProps<typeof Collapsible>) {
+  const [open, setOpen] = useState(false);
+
+  const onClick = useEffectEvent((e: Event) => {
+    if (!open) return;
+    const header = document.getElementById('nd-nav');
+    if (header && !header.contains(e.target as HTMLElement)) setOpen(false);
+  });
+
+  useEffect(() => {
+    window.addEventListener('click', onClick);
+
+    return () => {
+      window.removeEventListener('click', onClick);
+    };
+  }, []);
+
+  return (
+    <MobileMenuContext
+      value={useMemo(
+        () => ({
+          open,
+          setOpen,
+        }),
+        [open],
+      )}
+    >
+      <Collapsible open={open} onOpenChange={setOpen} {...props} />
+    </MobileMenuContext>
   );
 }
 
@@ -188,8 +263,10 @@ function isSecondary(item: LinkItemType): boolean {
   return item.type === 'icon';
 }
 
-function HeaderNavigationMenu({
+function HeaderRoot({
   transparentMode = 'none',
+  children,
+  className,
   ...props
 }: ComponentProps<'div'> & {
   transparentMode?: NavOptions['transparentMode'];
@@ -199,42 +276,22 @@ function HeaderNavigationMenu({
     transparentMode === 'top' ? isTop : transparentMode === 'always';
 
   return (
-    <NavigationMenuRoot
-      render={(_, s) => (
-        <header
-          id="nd-nav"
-          {...props}
-          className={cn('sticky h-14 top-0 z-40', props.className)}
-        >
-          <div
+    <header id="nd-nav" className="sticky h-14 top-0 z-40">
+      <NavigationMenuRoot
+        render={(_, s) => (
+          <nav
             className={cn(
-              'backdrop-blur-lg border-b transition-colors *:mx-auto *:max-w-(--fd-layout-width)',
-              s.open && 'max-lg:shadow-lg max-lg:rounded-b-2xl',
+              'w-full backdrop-blur-lg border-b transition-colors mx-auto max-w-(--fd-layout-width)',
               (!isTransparent || s.open) && 'bg-fd-background/80',
+              className,
             )}
+            {...props}
           >
-            <NavigationMenuList
-              className="flex h-14 w-full items-center px-4"
-              render={<nav>{props.children}</nav>}
-            />
-            <NavigationMenu.Portal>
-              <NavigationMenu.Positioner
-                sideOffset={10}
-                className="box-border z-20 h-(--positioner-height) w-(--positioner-width) transition-[left,right] duration-(--duration) ease-(--easing) data-[instant]:transition-none"
-                style={{
-                  ['--duration' as string]: '0.35s',
-                  ['--easing' as string]: 'cubic-bezier(0.22, 1, 0.36, 1)',
-                }}
-              >
-                <NavigationMenu.Popup className="relative h-(--popup-height) origin-(--transform-origin) rounded-lg bg-fd-background/80  border backdrop-blur-lg shadow-lg transition-[opacity,transform,width,height,scale,translate] duration-(--duration) ease-(--easing) data-[ending-style]:scale-90 data-[ending-style]:opacity-0 data-[ending-style]:duration-150 data-[starting-style]:scale-90 data-[starting-style]:opacity-0 w-(--popup-width) max-w-[1400px]">
-                  <NavigationMenu.Viewport className="relative size-full overflow-hidden *:w-[1400px]" />
-                </NavigationMenu.Popup>
-              </NavigationMenu.Positioner>
-            </NavigationMenu.Portal>
-          </div>
-        </header>
-      )}
-    />
+            {children}
+          </nav>
+        )}
+      />
+    </header>
   );
 }
 
@@ -325,15 +382,16 @@ function NavigationMenuLinkItem({
   );
 }
 
-function MobileNavigationMenuLinkItem({
+function MobileMenuLinkItem({
   item,
-  ...props
+  className,
 }: {
   item: LinkItemType;
   className?: string;
 }) {
   if (item.type === 'custom')
-    return <div className={cn('grid', props.className)}>{item.children}</div>;
+    return <div className={cn('grid', className)}>{item.children}</div>;
+  const { setOpen } = use(MobileMenuContext)!;
 
   if (item.type === 'menu') {
     const header = (
@@ -344,52 +402,50 @@ function MobileNavigationMenuLinkItem({
     );
 
     return (
-      <div className={cn('mb-4 flex flex-col', props.className)}>
+      <div className={cn('mb-4 flex flex-col', className)}>
         <p className="mb-1 text-sm text-fd-muted-foreground">
           {item.url ? (
-            <NavigationMenuLink
-              render={
-                <Link href={item.url} external={item.external}>
-                  {header}
-                </Link>
-              }
-            />
+            <Link
+              href={item.url}
+              external={item.external}
+              onClick={() => setOpen(false)}
+            >
+              {header}
+            </Link>
           ) : (
             header
           )}
         </p>
         {item.items.map((child, i) => (
-          <MobileNavigationMenuLinkItem key={i} item={child} />
+          <MobileMenuLinkItem key={i} item={child} />
         ))}
       </div>
     );
   }
 
   return (
-    <NavigationMenuLink
-      render={
-        <LinkItem
-          item={item}
-          className={cn(
-            {
-              main: 'inline-flex items-center gap-2 py-1.5 transition-colors hover:text-fd-popover-foreground/50 data-[active=true]:font-medium data-[active=true]:text-fd-primary [&_svg]:size-4',
-              icon: buttonVariants({
-                size: 'icon',
-                color: 'ghost',
-              }),
-              button: buttonVariants({
-                color: 'secondary',
-                className: 'gap-1.5 [&_svg]:size-4',
-              }),
-            }[item.type ?? 'main'],
-            props.className,
-          )}
-          aria-label={item.type === 'icon' ? item.label : undefined}
-        >
-          {item.icon}
-          {item.type === 'icon' ? undefined : item.text}
-        </LinkItem>
-      }
-    />
+    <LinkItem
+      item={item}
+      className={cn(
+        (!item.type || item.type === 'main') &&
+          'inline-flex items-center gap-2 py-1.5 transition-colors hover:text-fd-popover-foreground/50 data-[active=true]:font-medium data-[active=true]:text-fd-primary [&_svg]:size-4',
+        item.type === 'icon' &&
+          buttonVariants({
+            size: 'icon',
+            color: 'ghost',
+          }),
+        item.type === 'button' &&
+          buttonVariants({
+            color: 'secondary',
+            className: 'gap-1.5 [&_svg]:size-4',
+          }),
+        className,
+      )}
+      aria-label={item.type === 'icon' ? item.label : undefined}
+      onClick={() => setOpen(false)}
+    >
+      {item.icon}
+      {item.type !== 'icon' && item.text}
+    </LinkItem>
   );
 }

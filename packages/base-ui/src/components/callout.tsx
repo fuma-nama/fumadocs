@@ -4,9 +4,9 @@ import {
   Info,
   Sun,
   TriangleAlert,
-} from '@fumadocs/ui-utils/icons';
+} from '@fumadocs/ui/icons';
 import type { ComponentProps, ReactNode } from 'react';
-import { cn } from '@fumadocs/ui-utils/cn';
+import { cn } from '@fumadocs/ui/cn';
 
 export type CalloutType =
   | 'info'

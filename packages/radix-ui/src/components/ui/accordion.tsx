@@ -1,9 +1,9 @@
 'use client';
 
 import * as Primitive from '@radix-ui/react-accordion';
-import { ChevronRight } from '@fumadocs/ui-utils/icons';
+import { ChevronRight } from '@fumadocs/ui/icons';
 import { type ComponentProps } from 'react';
-import { cn } from '@fumadocs/ui-utils/cn';
+import { cn } from '@fumadocs/ui/cn';
 
 export function Accordion({
   className,

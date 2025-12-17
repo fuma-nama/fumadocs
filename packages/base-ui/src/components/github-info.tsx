@@ -1,5 +1,5 @@
-import { cn } from '@fumadocs/ui-utils/cn';
-import { Star } from '@fumadocs/ui-utils/icons';
+import { cn } from '@fumadocs/ui/cn';
+import { Star } from '@fumadocs/ui/icons';
 import { type AnchorHTMLAttributes } from 'react';
 
 async function getRepoStarsAndForks(

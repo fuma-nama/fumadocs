@@ -1,7 +1,7 @@
 {
-  "name": "@fumadocs/ui-utils",
+  "name": "@fumadocs/ui",
   "version": "16.2.5",
-  "description": "The React.js documentation framework",
+  "description": "The low-level primitives for Fumadocs UI.",
   "keywords": [
     "Fumadocs",
     "Docs"

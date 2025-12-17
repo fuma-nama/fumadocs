@@ -1,5 +1,5 @@
 'use client';
-import { Check, Clipboard } from '@fumadocs/ui-utils/icons';
+import { Check, Clipboard } from '@fumadocs/ui/icons';
 import {
   type ComponentProps,
   createContext,
@@ -10,11 +10,11 @@ import {
   useMemo,
   useRef,
 } from 'react';
-import { cn } from '@fumadocs/ui-utils/cn';
-import { useCopyButton } from '@fumadocs/ui-utils/hooks/use-copy-button';
+import { cn } from '@fumadocs/ui/cn';
+import { useCopyButton } from '@fumadocs/ui/hooks/use-copy-button';
 import { buttonVariants } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { mergeRefs } from '@fumadocs/ui-utils/merge-refs';
+import { mergeRefs } from '@fumadocs/ui/merge-refs';
 
 export interface CodeBlockProps extends ComponentProps<'figure'> {
   /**

@@ -17,9 +17,9 @@ import {
   SidebarViewport,
 } from './sidebar';
 import { TreeContextProvider } from '@/contexts/tree';
-import { cn } from '@fumadocs/ui-utils/cn';
+import { cn } from '@fumadocs/ui/cn';
 import { buttonVariants } from '@/components/ui/button';
-import { Languages, Sidebar as SidebarIcon, X } from '@fumadocs/ui-utils/icons';
+import { Languages, Sidebar as SidebarIcon, X } from '@fumadocs/ui/icons';
 import { LanguageToggle } from '@/layouts/shared/language-toggle';
 import { ThemeToggle } from '@/layouts/shared/theme-toggle';
 import type * as PageTree from 'fumadocs-core/page-tree';
@@ -35,7 +35,7 @@ import {
   LargeSearchToggle,
   SearchToggle,
 } from '@/layouts/shared/search-toggle';
-import { LinkItem, type LinkItemType } from '@/layouts/shared/link-item';
+import { LinkItem, type LinkItemType } from '@fumadocs/ui/link-item';
 import type { SidebarPageTreeComponents } from '@/components/sidebar/page-tree';
 import {
   getSidebarTabs,

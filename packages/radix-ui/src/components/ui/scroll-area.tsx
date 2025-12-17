@@ -1,6 +1,6 @@
 import * as Primitive from '@radix-ui/react-scroll-area';
 import * as React from 'react';
-import { cn } from '@fumadocs/ui-utils/cn';
+import { cn } from '@fumadocs/ui/cn';
 
 const ScrollArea = React.forwardRef<
   React.ComponentRef<typeof Primitive.Root>,

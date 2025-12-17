@@ -1,17 +1,10 @@
 import type { ComponentProps } from 'react';
-import { cn } from '@fumadocs/ui-utils/cn';
+import { cn } from '@fumadocs/ui/cn';
 import { type BaseLayoutProps, type NavOptions } from '@/layouts/shared';
 import { Header } from '@/layouts/home/client';
 
 export interface HomeLayoutProps extends BaseLayoutProps {
-  nav?: Partial<
-    NavOptions & {
-      /**
-       * Open mobile menu when hovering the trigger
-       */
-      enableHoverToOpen?: boolean;
-    }
-  >;
+  nav?: Partial<NavOptions>;
 }
 
 export function HomeLayout(props: HomeLayoutProps & ComponentProps<'main'>) {

@@ -1,10 +1,6 @@
 'use client';
 
-import {
-  ChevronRight,
-  Hash,
-  Search as SearchIcon,
-} from '@fumadocs/ui-utils/icons';
+import { ChevronRight, Hash, Search as SearchIcon } from '@fumadocs/ui/icons';
 import {
   type ComponentProps,
   createContext,
@@ -19,7 +15,7 @@ import {
   useState,
 } from 'react';
 import { I18nLabel, useI18n } from '@/contexts/i18n';
-import { cn } from '@fumadocs/ui-utils/cn';
+import { cn } from '@fumadocs/ui/cn';
 import {
   Dialog,
   DialogContent,

@@ -5,8 +5,8 @@ import {
   type ReactNode,
   useMemo,
 } from 'react';
-import { Languages, Sidebar as SidebarIcon } from '@fumadocs/ui-utils/icons';
-import { cn } from '@fumadocs/ui-utils/cn';
+import { Languages, Sidebar as SidebarIcon } from '@fumadocs/ui/icons';
+import { cn } from '@fumadocs/ui/cn';
 import { buttonVariants } from '@/components/ui/button';
 import {
   Sidebar,
@@ -19,7 +19,7 @@ import {
   SidebarViewport,
 } from './sidebar';
 import { type BaseLayoutProps, resolveLinkItems } from '@/layouts/shared';
-import { LinkItem } from '@/layouts/shared/link-item';
+import { LinkItem } from '@fumadocs/ui/link-item';
 import {
   LanguageToggle,
   LanguageToggleText,

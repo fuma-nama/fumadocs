@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import type { I18nConfig } from 'fumadocs-core/i18n';
-import type { LinkItemType } from './link-item';
+import type { LinkItemType } from '@fumadocs/ui/link-item';
 
 export interface NavOptions {
   enabled: boolean;
@@ -86,4 +86,4 @@ export function resolveLinkItems({
   return result;
 }
 
-export type * from './link-item';
+export type * from '@fumadocs/ui/link-item';

@@ -1,6 +1,6 @@
 'use client';
 import { type ComponentProps, use } from 'react';
-import { cn } from '@fumadocs/ui-utils/cn';
+import { cn } from '@fumadocs/ui/cn';
 import * as Docs from './layouts/docs/page';
 import * as Notebook from './layouts/notebook/page';
 import { LayoutContext } from './layouts/docs/client';

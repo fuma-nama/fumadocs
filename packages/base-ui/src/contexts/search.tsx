@@ -1,1 +1,1 @@
-export * from '@fumadocs/ui-utils/contexts/search';
+export * from '@fumadocs/ui/contexts/search';

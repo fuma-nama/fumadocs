@@ -1,9 +1,9 @@
 'use client';
 
 import { Accordion as Primitive } from '@base-ui/react/accordion';
-import { ChevronRight } from '@fumadocs/ui-utils/icons';
+import { ChevronRight } from '@fumadocs/ui/icons';
 import { type ComponentProps } from 'react';
-import { cn } from '@fumadocs/ui-utils/cn';
+import { cn } from '@fumadocs/ui/cn';
 
 export function Accordion({
   className,
@@ -23,23 +23,10 @@ export function Accordion({
 }
 
 export function AccordionItem({
-  className,
   children,
   ...props
 }: ComponentProps<typeof Primitive.Item>) {
-  return (
-    <Primitive.Item
-      className={(s) =>
-        cn(
-          'scroll-m-24',
-          typeof className === 'function' ? className(s) : className,
-        )
-      }
-      {...props}
-    >
-      {children}
-    </Primitive.Item>
-  );
+  return <Primitive.Item {...props}>{children}</Primitive.Item>;
 }
 
 export function AccordionHeader({
@@ -51,7 +38,7 @@ export function AccordionHeader({
     <Primitive.Header
       className={(s) =>
         cn(
-          'not-prose flex flex-row items-center text-fd-card-foreground font-medium has-focus-visible:bg-fd-accent',
+          'scroll-m-24 not-prose flex flex-row items-center text-fd-card-foreground font-medium has-focus-visible:bg-fd-accent',
           typeof className === 'function' ? className(s) : className,
         )
       }

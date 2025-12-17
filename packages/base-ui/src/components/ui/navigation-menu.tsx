@@ -1,7 +1,7 @@
 'use client';
 import * as React from 'react';
 import { NavigationMenu as Primitive } from '@base-ui/react/navigation-menu';
-import { cn } from '@fumadocs/ui-utils/cn';
+import { cn } from '@fumadocs/ui/cn';
 
 export type NavigationMenuContentProps = Primitive.Content.Props;
 export type NavigationMenuTriggerProps = Primitive.Trigger.Props;
@@ -33,17 +33,8 @@ NavigationMenuItem.displayName = Primitive.Item.displayName;
 const NavigationMenuTrigger = React.forwardRef<
   React.ComponentRef<typeof Primitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof Primitive.Trigger>
->(({ className, children, ...props }, ref) => (
-  <Primitive.Trigger
-    ref={ref}
-    className={(s) =>
-      cn(
-        'data-[open]:bg-fd-accent/50',
-        typeof className === 'function' ? className(s) : className,
-      )
-    }
-    {...props}
-  >
+>(({ children, ...props }, ref) => (
+  <Primitive.Trigger ref={ref} {...props}>
     {children}
   </Primitive.Trigger>
 ));
@@ -57,13 +48,13 @@ const NavigationMenuContent = React.forwardRef<
     ref={ref}
     className={(s) =>
       cn(
-        'w-[calc(100vw_-_40px)] h-full p-6 xs:w-max xs:min-w-[400px] xs:w-max',
-        'transition-[opacity,transform,translate] duration-[var(--duration)] ease-[var(--easing)]',
+        'size-full p-4',
+        'transition-[opacity,transform,translate] duration-(--duration) ease-(--easing)',
         'data-[starting-style]:opacity-0 data-[ending-style]:opacity-0',
-        'data-[starting-style]:data-[activation-direction=left]:translate-x-[-50%]',
-        'data-[starting-style]:data-[activation-direction=right]:translate-x-[50%]',
-        'data-[ending-style]:data-[activation-direction=left]:translate-x-[50%]',
-        'data-[ending-style]:data-[activation-direction=right]:translate-x-[-50%]',
+        'data-[starting-style]:data-[activation-direction=left]:-translate-x-1/2',
+        'data-[starting-style]:data-[activation-direction=right]:translate-x-1/2',
+        'data-[ending-style]:data-[activation-direction=left]:translate-x-1/2',
+        'data-[ending-style]:data-[activation-direction=right]:-translate-x-1/2',
         typeof className === 'function' ? className(s) : className,
       )
     }

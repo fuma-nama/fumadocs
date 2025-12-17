@@ -1,2 +1,2 @@
 'use client';
-export * from '@fumadocs/ui-utils/contexts/tree';
+export * from '@fumadocs/ui/contexts/tree';

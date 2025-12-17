@@ -1,7 +1,7 @@
 {
   "name": "fumadocs-ui",
   "version": "16.2.5",
-  "description": "The React.js documentation framework",
+  "description": "The Radix UI version of Fumadocs UI",
   "keywords": [
     "Fumadocs",
     "Docs"
@@ -101,7 +101,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@fumadocs/ui-utils": "workspace:*",
+    "@fumadocs/ui": "workspace:*",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-dialog": "^1.1.15",

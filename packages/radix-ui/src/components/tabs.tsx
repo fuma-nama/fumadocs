@@ -11,7 +11,7 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { cn } from '@fumadocs/ui-utils/cn';
+import { cn } from '@fumadocs/ui/cn';
 import * as Unstyled from './ui/tabs';
 
 type CollectionKey = string | symbol;

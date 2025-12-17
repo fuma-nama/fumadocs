@@ -1,1 +1,1 @@
-export * from '@fumadocs/ui-utils/hooks/use-footer-items';
+export * from '@fumadocs/ui/hooks/use-footer-items';

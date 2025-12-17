@@ -1,12 +1,12 @@
 'use client';
 import * as Base from '@/components/sidebar/base';
-import { cn } from '@fumadocs/ui-utils/cn';
+import { cn } from '@fumadocs/ui/cn';
 import { type ComponentProps, use, useRef } from 'react';
 import { cva } from 'class-variance-authority';
 import { LayoutContext } from './client';
 import { createPageTreeRenderer } from '@/components/sidebar/page-tree';
 import { createLinkItemRenderer } from '@/components/sidebar/link-item';
-import { mergeRefs } from '@fumadocs/ui-utils/merge-refs';
+import { mergeRefs } from '@fumadocs/ui/merge-refs';
 
 const itemVariants = cva(
   'relative flex flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground wrap-anywhere [&_svg]:size-4 [&_svg]:shrink-0',

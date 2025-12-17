@@ -1,4 +1,5 @@
 @import './shiki.css';
+@source '../dist/components/**/*.js';
 @plugin '../dist/typography/index.js';
 
 :root {

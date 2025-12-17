@@ -138,8 +138,8 @@ importers:
         specifier: workspace:^
         version: link:../../packages/typescript
       fumadocs-ui:
-        specifier: workspace:@fumadocs/base-ui@*
-        version: link:../../packages/base-ui
+        specifier: workspace:*
+        version: link:../../packages/radix-ui
       hast-util-to-jsx-runtime:
         specifier: ^2.3.6
         version: 2.3.6
@@ -1391,7 +1391,7 @@ importers:
       '@base-ui/react':
         specifier: ^1.0.0
         version: 1.0.0(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      '@fumadocs/ui-utils':
+      '@fumadocs/ui':
         specifier: workspace:*
         version: link:../ui
       class-variance-authority:
@@ -2016,7 +2016,7 @@ importers:
 
   packages/openapi:
     dependencies:
-      '@fumadocs/ui-utils':
+      '@fumadocs/ui':
         specifier: workspace:*
         version: link:../ui
       '@fumari/json-schema-to-typescript':
@@ -2229,7 +2229,7 @@ importers:
 
   packages/radix-ui:
     dependencies:
-      '@fumadocs/ui-utils':
+      '@fumadocs/ui':
         specifier: workspace:*
         version: link:../ui
       '@radix-ui/react-accordion':

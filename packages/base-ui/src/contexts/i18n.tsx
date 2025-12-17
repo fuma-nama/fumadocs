@@ -1,1 +1,1 @@
-export * from '@fumadocs/ui-utils/contexts/i18n';
+export * from '@fumadocs/ui/contexts/i18n';

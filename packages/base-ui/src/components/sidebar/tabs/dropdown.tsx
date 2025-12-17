@@ -1,10 +1,10 @@
 'use client';
-import { Check, ChevronsUpDown } from '@fumadocs/ui-utils/icons';
+import { Check, ChevronsUpDown } from '@fumadocs/ui/icons';
 import { type ComponentProps, type ReactNode, useMemo, useState } from 'react';
 import Link from 'fumadocs-core/link';
 import { usePathname } from 'fumadocs-core/framework';
-import { cn } from '@fumadocs/ui-utils/cn';
-import { isTabActive } from '@/utils/is-active';
+import { cn } from '@fumadocs/ui/cn';
+import { normalize, isActive } from '@fumadocs/ui/urls';
 import { useSidebar } from '@/components/sidebar/base';
 import {
   Popover,
@@ -106,4 +106,10 @@ export function SidebarTabsDropdown({
       </PopoverContent>
     </Popover>
   );
+}
+
+export function isTabActive(tab: SidebarTab, pathname: string) {
+  if (tab.urls) return tab.urls.has(normalize(pathname));
+
+  return isActive(tab.url, pathname, true);
 }

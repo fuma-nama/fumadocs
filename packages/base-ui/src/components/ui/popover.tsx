@@ -1,7 +1,7 @@
 'use client';
 import { Popover as Primitive } from '@base-ui/react/popover';
 import * as React from 'react';
-import { cn } from '@fumadocs/ui-utils/cn';
+import { cn } from '@fumadocs/ui/cn';
 
 const Popover = Primitive.Root;
 

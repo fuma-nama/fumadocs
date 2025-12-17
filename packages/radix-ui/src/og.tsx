@@ -1,1 +1,1 @@
-export * from '@fumadocs/ui-utils/og/next';
+export * from '@fumadocs/ui/og/next';

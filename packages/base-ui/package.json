@@ -1,7 +1,7 @@
 {
   "name": "@fumadocs/base-ui",
   "version": "16.2.5",
-  "description": "The React.js documentation framework",
+  "description": "The Base UI version of Fumadocs UI",
   "keywords": [
     "Fumadocs",
     "Docs"
@@ -15,10 +15,6 @@
     "./style.css": "./dist/style.css",
     "./css/*": "./css/*",
     "./image-zoom.css": "./dist/image-zoom.css",
-    "./components/tabs.unstyled": {
-      "import": "./dist/components/ui/tabs.js",
-      "types": "./dist/components/ui/tabs.d.ts"
-    },
     "./components/*": {
       "import": "./dist/components/*.js",
       "types": "./dist/components/*.d.ts",
@@ -77,21 +73,9 @@
       "import": "./dist/og.js",
       "types": "./dist/og.d.ts"
     },
-    "./theme/*": {
-      "import": "./dist/theme/*.js",
-      "types": "./dist/theme/*.d.ts"
-    },
-    "./utils/get-sidebar-tabs": {
-      "import": "./dist/components/sidebar/tabs/index.js",
-      "types": "./dist/components/sidebar/tabs/index.d.ts"
-    },
     "./utils/*": {
       "import": "./dist/utils/*.js",
       "types": "./dist/utils/*.d.ts"
-    },
-    "./internal/icons": {
-      "import": "./dist/icons.js",
-      "types": "./dist/icons.d.ts"
     }
   },
   "files": [
@@ -110,7 +94,7 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.0.0",
-    "@fumadocs/ui-utils": "workspace:*",
+    "@fumadocs/ui": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "fumadocs-core": "workspace:*",
     "next-themes": "^0.4.6",

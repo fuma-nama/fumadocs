@@ -1,5 +1,5 @@
 'use client';
-import { cn } from '@fumadocs/ui-utils/cn';
+import { cn } from '@fumadocs/ui/cn';
 import {
   type ComponentProps,
   createContext,
@@ -13,22 +13,24 @@ import {
   useState,
 } from 'react';
 import { useSidebar } from '@/components/sidebar/base';
-import { ChevronDown } from '@fumadocs/ui-utils/icons';
+import { ChevronDown } from '@fumadocs/ui/icons';
 import Link from 'fumadocs-core/link';
 import { usePathname } from 'fumadocs-core/framework';
-import { isTabActive } from '@/utils/is-active';
-import { useIsScrollTop } from '@fumadocs/ui-utils/hooks/use-is-scroll-top';
+import {
+  isTabActive,
+  type SidebarTabWithProps,
+} from '@/components/sidebar/tabs/dropdown';
+import { useIsScrollTop } from '@fumadocs/ui/hooks/use-is-scroll-top';
 import {
   LinkItem,
   type LinkItemType,
   type MenuItemType,
-} from '../shared/link-item';
+} from '@fumadocs/ui/link-item';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import type { SidebarTabWithProps } from '@/components/sidebar/tabs/dropdown';
 
 export const LayoutContext = createContext<
   | (LayoutInfo & {
