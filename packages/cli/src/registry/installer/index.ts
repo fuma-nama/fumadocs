@@ -184,11 +184,6 @@ export class ComponentInstaller {
 
   private resolveOutputPath(ref: File): string {
     const config = this.client.config;
-    if (ref.target) {
-      return path.join(config.baseDir, ref.target);
-    }
-
-    const base = path.basename(ref.path);
     const dir = (
       {
         components: config.aliases.componentsDir,
@@ -199,7 +194,10 @@ export class ComponentInstaller {
         route: './',
       } as const
     )[ref.type];
+    if (ref.target) {
+      return path.join(config.baseDir, ref.target.replace('<dir>', dir));
+    }
 
-    return path.join(config.baseDir, dir, base);
+    return path.join(config.baseDir, dir, path.basename(ref.path));
   }
 }

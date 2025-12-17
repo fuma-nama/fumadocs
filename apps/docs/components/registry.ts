@@ -1,18 +1,11 @@
 import { type Registry } from '@fumadocs/cli/build';
 import * as ui from '../../../packages/ui/src/_registry';
+import * as radixUi from '../../../packages/radix-ui/src/_registry';
 import { fileURLToPath } from 'node:url';
 import * as path from 'node:path';
+import { resolveFromRemote } from '@fumadocs/cli/build';
 
 const baseDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../');
-
-function selectFrom(r: Registry, component: string, filename: string) {
-  const comp = r.components.find((comp) => comp.name === component)!;
-
-  return {
-    component: comp,
-    file: comp.files.find((file) => path.basename(file.path) === filename)!,
-  };
-}
 
 export const registry: Registry = {
   dir: baseDir,
@@ -30,14 +23,11 @@ export const registry: Registry = {
       const filePath = path.relative(baseDir, ref.file);
 
       if (filePath === 'lib/cn.ts') {
-        return {
-          type: 'sub-component',
-          resolved: {
-            type: 'remote',
-            registryName: ui.registry.name,
-            ...selectFrom(ui.registry, 'cn', 'cn.ts'),
-          },
-        };
+        return resolveFromRemote(
+          ui.registry,
+          'cn',
+          (file) => file.path === 'cn.ts',
+        )!;
       }
     }
 
@@ -45,14 +35,11 @@ export const registry: Registry = {
       ref.type === 'dependency' &&
       ref.specifier === 'fumadocs-ui/components/ui/button'
     ) {
-      return {
-        type: 'sub-component',
-        resolved: {
-          type: 'remote',
-          registryName: ui.registry.name,
-          ...selectFrom(ui.registry, 'button', 'button.tsx'),
-        },
-      };
+      return resolveFromRemote(
+        radixUi.registry,
+        'button',
+        (file) => path.basename(file.path) === 'button.tsx',
+      )!;
     }
 
     return ref;

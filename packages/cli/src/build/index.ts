@@ -14,10 +14,12 @@ export function combineRegistry(
   const out: CompiledRegistry = {
     index: [],
     components: [],
+    switchables: {},
     name: items[0].name,
   };
 
   for (const item of items) {
+    Object.assign(out.switchables!, item.switchables);
     out.components.push(...item.components);
     out.index.push(...item.index);
   }
