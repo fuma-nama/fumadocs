@@ -11,19 +11,25 @@ import { log } from '@clack/prompts';
 import { AsyncCache } from '@/utils/cache';
 
 export interface RegistryClient {
+  readonly registryId: string;
   readonly config: LoadedConfig;
   fetchRegistryInfo: () => Promise<DownloadedRegistryInfo>;
   fetchComponent: (name: string) => Promise<Component>;
+  hasComponent: (name: string) => Promise<boolean>;
   createLinkedRegistryClient: (registryName: string) => RegistryClient;
 }
 
 const fetchCache = new AsyncCache<unknown>();
 
 export class HttpRegistryClient implements RegistryClient {
+  readonly registryId: string;
+
   constructor(
     readonly baseUrl: string,
     readonly config: LoadedConfig,
-  ) {}
+  ) {
+    this.registryId = baseUrl;
+  }
 
   async fetchRegistryInfo(baseUrl = this.baseUrl) {
     const url = new URL('_registry.json', `${baseUrl}/`);
@@ -44,13 +50,18 @@ export class HttpRegistryClient implements RegistryClient {
     return fetchCache.cached<Component>(url.href, async () => {
       const res = await fetch(`${this.baseUrl}/${name}.json`);
       if (!res.ok) {
-        log.error(`component ${name} not found:`);
-        log.error(await res.text());
-        process.exit(1);
+        log.error(`component ${name} not found at ${url.href}`);
+        throw new Error(await res.text());
       }
 
       return componentSchema.parse(await res.json());
     });
+  }
+
+  async hasComponent(name: string) {
+    const url = new URL(`${name}.json`, `${this.baseUrl}/`);
+    const res = await fetch(url, { method: 'HEAD' });
+    return res.ok;
   }
 
   createLinkedRegistryClient(name: string) {
@@ -59,12 +70,15 @@ export class HttpRegistryClient implements RegistryClient {
 }
 
 export class LocalRegistryClient implements RegistryClient {
+  readonly registryId: string;
   private registryInfo: DownloadedRegistryInfo | undefined;
 
   constructor(
     private readonly dir: string,
     readonly config: LoadedConfig,
-  ) {}
+  ) {
+    this.registryId = dir;
+  }
 
   async fetchRegistryInfo(dir = this.dir) {
     if (this.registryInfo) return this.registryInfo;
@@ -88,12 +102,21 @@ export class LocalRegistryClient implements RegistryClient {
       .readFile(filePath)
       .then((res) => JSON.parse(res.toString()))
       .catch((e) => {
-        log.error(`component ${name} not found:`);
-        log.error(String(e));
-        process.exit(1);
+        log.error(`component ${name} not found at ${filePath}`);
+        throw e;
       });
 
     return componentSchema.parse(out);
+  }
+
+  async hasComponent(name: string) {
+    const filePath = path.join(this.dir, `${name}.json`);
+    try {
+      await fs.stat(filePath);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   createLinkedRegistryClient(name: string) {

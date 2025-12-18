@@ -23,18 +23,6 @@ export interface ComponentInstallerPlugin {
   }) => void | Promise<void>;
 }
 
-async function getLinkedRegistryClient(
-  root: RegistryClient,
-  component: string,
-) {
-  const info = await root.fetchRegistryInfo();
-  const [registry] = component.split('/', 1);
-  if (registry && info.registries && registry in info.registries) {
-    return root.createLinkedRegistryClient(registry);
-  }
-  return root;
-}
-
 export class ComponentInstaller {
   private readonly project = createEmptyProject();
   private readonly installedFiles = new Set<string>();
@@ -48,10 +36,21 @@ export class ComponentInstaller {
   ) {}
 
   async install(name: string) {
-    const downloaded = await this.download(
-      name,
-      await getLinkedRegistryClient(this.rootClient, name),
-    );
+    let downloaded: DownloadedComponent[];
+    // detect linked registry
+    const info = await this.rootClient.fetchRegistryInfo();
+
+    for (const registry of info.registries ?? []) {
+      if (name.startsWith(`${registry}/`)) {
+        downloaded = await this.download(
+          name.slice(registry.length + 1),
+          this.rootClient.createLinkedRegistryClient(registry),
+        );
+        break;
+      }
+    }
+
+    downloaded ??= await this.download(name, this.rootClient);
 
     for (const item of downloaded) {
       Object.assign(this.dependencies, item.dependencies);
@@ -60,12 +59,11 @@ export class ComponentInstaller {
 
     for (const comp of downloaded) {
       for (const file of comp.files) {
-        const filePath = file.target ?? file.path;
         const outPath = this.resolveOutputPath(file);
         if (this.installedFiles.has(outPath)) continue;
         this.installedFiles.add(outPath);
 
-        const output = typescriptExtensions.includes(path.extname(filePath))
+        const output = typescriptExtensions.includes(path.extname(outPath))
           ? await this.transform(name, file, comp, downloaded)
           : file.content;
 
@@ -121,8 +119,8 @@ export class ComponentInstaller {
     name: string,
     client: RegistryClient,
     contextVariables?: Record<string, unknown>,
-    hash = name,
   ): Promise<DownloadedComponent[]> {
+    const hash = `${client.registryId} ${name}`;
     const info = await client.fetchRegistryInfo();
     const variables = { ...contextVariables, ...info.env };
     for (const [k, v] of Object.entries(info.variables ?? {})) {
@@ -138,18 +136,15 @@ export class ComponentInstaller {
       const child = await Promise.all(
         comp.subComponents.map((sub) => {
           if (typeof sub === 'string') return this.download(sub, client);
-          const baseUrl = new URL(
-            sub.baseUrl,
+          const baseUrl =
             this.rootClient instanceof HttpRegistryClient
-              ? `${this.rootClient.baseUrl}/`
-              : undefined,
-          );
+              ? new URL(sub.baseUrl, `${this.rootClient.baseUrl}/`).href
+              : sub.baseUrl;
 
           return this.download(
             sub.component,
-            new HttpRegistryClient(baseUrl.href, client.config),
+            new HttpRegistryClient(baseUrl, client.config),
             variables,
-            `${sub.baseUrl} > ${sub.component}`,
           );
         }),
       );

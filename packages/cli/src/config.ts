@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import { isSrc } from '@/utils/is-src';
 import { z } from 'zod';
 
-function createConfigSchema(isSrc: boolean) {
+export function createConfigSchema(isSrc: boolean) {
   const defaultAliases = {
     uiDir: './components/ui',
     componentsDir: './components',
@@ -10,9 +10,6 @@ function createConfigSchema(isSrc: boolean) {
     cssDir: './styles',
     libDir: './lib',
   };
-  const defaultVariables = {
-    icon: 'lucide-react',
-  } as const;
 
   return z.object({
     aliases: z
@@ -24,12 +21,6 @@ function createConfigSchema(isSrc: boolean) {
         libDir: z.string().default(defaultAliases.libDir),
       })
       .default(defaultAliases),
-
-    variables: z
-      .object({
-        icon: z.enum(['lucide-react']).default(defaultVariables.icon),
-      })
-      .default(defaultVariables),
 
     baseDir: z.string().default(isSrc ? 'src' : ''),
     uiLibrary: z.enum(['radix-ui', 'base-ui']).default('radix-ui'),
@@ -70,6 +61,7 @@ export async function createOrLoadConfig(
  */
 export async function initConfig(
   file = './cli.json',
+  src?: boolean,
 ): Promise<LoadedConfig | undefined> {
   if (
     await fs
@@ -80,9 +72,9 @@ export async function initConfig(
     return;
   }
 
-  const src = await isSrc();
-  const defaultConfig = createConfigSchema(src).parse({} satisfies ConfigInput);
-
+  const defaultConfig = createConfigSchema(src ?? (await isSrc())).parse(
+    {} satisfies ConfigInput,
+  );
   await fs.writeFile(file, JSON.stringify(defaultConfig, null, 2));
   return defaultConfig;
 }

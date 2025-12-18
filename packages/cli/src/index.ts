@@ -44,8 +44,8 @@ program
   });
 
 const dirShortcuts: Record<string, string> = {
-  ':dev': 'https://preview.fumadocs.dev/registry',
-  ':localhost': 'http://localhost:3000/registry',
+  ':preview': 'https://preview.fumadocs.dev/registry',
+  ':dev': 'http://localhost:3000/registry',
 };
 
 program

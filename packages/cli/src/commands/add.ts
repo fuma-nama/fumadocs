@@ -9,16 +9,13 @@ import {
 import picocolors from 'picocolors';
 import { ComponentInstaller } from '@/registry/installer';
 import type { RegistryClient } from '@/registry/client';
-
-const UIRegistries = {
-  'base-ui': 'fumadocs/base-ui',
-  'radix-ui': 'fumadocs/radix-ui',
-};
+import { UIRegistries } from '@/commands/shared';
 
 export async function add(input: string[], client: RegistryClient) {
   const config = client.config;
-  let target: string[] = input;
+  let target: string[];
   const installer = new ComponentInstaller(client);
+  const registry = UIRegistries[config.uiLibrary];
 
   if (input.length === 0) {
     const spin = spinner();
@@ -37,20 +34,16 @@ export async function add(input: string[], client: RegistryClient) {
         hint: item.description,
       });
     }
+    const { indexes } = await client
+      .createLinkedRegistryClient(registry)
+      .fetchRegistryInfo();
 
-    if (config.uiLibrary in UIRegistries) {
-      const registry = UIRegistries[config.uiLibrary];
-      const { indexes } = await client
-        .createLinkedRegistryClient(registry)
-        .fetchRegistryInfo();
-
-      for (const item of indexes) {
-        options.push({
-          label: item.title ?? item.name,
-          value: `${registry}/${item.name}`,
-          hint: item.description,
-        });
-      }
+    for (const item of indexes) {
+      options.push({
+        label: item.title ?? item.name,
+        value: `${registry}/${item.name}`,
+        hint: item.description,
+      });
     }
 
     spin.stop(picocolors.bold(picocolors.greenBright('registry fetched')));
@@ -65,6 +58,12 @@ export async function add(input: string[], client: RegistryClient) {
     }
 
     target = value;
+  } else {
+    target = await Promise.all(
+      input.map(async (item) =>
+        (await client.hasComponent(item)) ? item : `${registry}/${item}`,
+      ),
+    );
   }
 
   await install(target, installer);

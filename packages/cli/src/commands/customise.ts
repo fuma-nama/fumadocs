@@ -3,9 +3,11 @@ import picocolors from 'picocolors';
 import { install } from '@/commands/add';
 import type { RegistryClient } from '@/registry/client';
 import { ComponentInstaller } from '@/registry/installer';
+import { UIRegistries } from '@/commands/shared';
 
 export async function customise(client: RegistryClient) {
   intro(picocolors.bgBlack(picocolors.whiteBright('Customise Fumadocs UI')));
+  const config = client.config;
   const installer = new ComponentInstaller(client);
 
   const result = await group(
@@ -62,10 +64,14 @@ export async function customise(client: RegistryClient) {
   if (result.target === 'docs') {
     const targets = [];
     if (result.mode === 'minimal') {
-      targets.push('layouts/docs-min');
+      targets.push('fumadocs/ui/layouts/docs-min');
     } else {
+      const registry = UIRegistries[config.uiLibrary];
+
       targets.push(
-        result.mode === 'full-default' ? 'layouts/docs' : 'layouts/notebook',
+        result.mode === 'full-default'
+          ? `${registry}/layouts/docs`
+          : `${registry}/layouts/notebook`,
       );
     }
 

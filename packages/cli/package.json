@@ -16,7 +16,8 @@
     "./build": {
       "import": "./dist/build/index.js",
       "types": "./dist/build/index.d.ts"
-    }
+    },
+    "./schema/*": "./dist/schema/*"
   },
   "main": "./dist/index.js",
   "bin": {
