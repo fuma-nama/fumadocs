@@ -5,7 +5,7 @@ import {
   type ReactNode,
   useState,
 } from 'react';
-import { ChevronDown, Plus, Trash2, X } from 'lucide-react';
+import { ChevronDown, Plus, Trash2, X } from '@/ui/icons';
 import { useController, useFieldArray, useFormContext } from 'react-hook-form';
 import {
   Select,
@@ -16,7 +16,7 @@ import {
 } from '@/ui/components/select';
 import { Input, labelVariants } from '@/ui/components/input';
 import { getDefaultValue } from '../get-default-values';
-import { cn } from 'fumadocs-ui/utils/cn';
+import { cn } from '@/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { FormatFlags, schemaToString } from '@/utils/schema-to-string';
 import {

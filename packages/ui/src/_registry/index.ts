@@ -1,19 +1,124 @@
 import { fileURLToPath } from 'node:url';
-import type { Registry } from '@fumadocs/cli/build';
+import type {
+  Registry,
+  Reference,
+  SourceReference,
+  Component,
+  ComponentFile,
+} from '@fumadocs/cli/build';
 import * as path from 'node:path';
+import { Glob } from 'bun';
 
 const srcDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../');
 
-// in shadcn cli, the order of files matters when writing import paths on consumer's codebase
+// import specifier -> sub component & file
+const installables: Record<
+  string,
+  {
+    comp: Component;
+    file: ComponentFile;
+  }
+> = {};
+
+const contextFiles = new Set(
+  new Glob('*').scanSync({ cwd: path.join(srcDir, 'contexts') }),
+);
+const hookFiles = new Set(
+  new Glob('*').scanSync({ cwd: path.join(srcDir, 'hooks') }),
+);
+const componentFiles = new Set(
+  new Glob('**/*').scanSync({ cwd: path.join(srcDir, 'components') }),
+);
+
+export function resolveForwardedAPIs(
+  ref: SourceReference,
+  upstreamPackage: string,
+  upstreamRegistry: Registry,
+): Reference | undefined {
+  if (ref.type === 'dependency' && ref.dep === '@fumadocs/ui') {
+    const specifier = ref.specifier;
+
+    if (specifier === '@fumadocs/ui/icons') {
+      return {
+        type: 'dependency',
+        dep: 'lucide-react',
+        specifier: 'lucide-react',
+      };
+    }
+
+    if (specifier in installables) {
+      const { comp, file } = installables[specifier];
+      return {
+        type: 'sub-component',
+        resolved: {
+          type: 'remote',
+          registryName: registry.name,
+          component: comp,
+          file,
+        },
+      };
+    }
+
+    return {
+      type: 'dependency',
+      dep: upstreamPackage,
+      specifier: specifier
+        .replace('@fumadocs/ui/hooks', `${upstreamPackage}/utils`)
+        .replace('@fumadocs/ui', upstreamPackage),
+    };
+  }
+
+  if (ref.type === 'file') {
+    const filePath = path
+      .relative(upstreamRegistry.dir, ref.file)
+      .replaceAll('\\', '/');
+
+    let hasForwarding: boolean;
+    const [dir, rest] = splitDir(filePath);
+    switch (dir) {
+      case 'contexts':
+        hasForwarding = contextFiles.has(rest);
+        break;
+      case 'components':
+        hasForwarding = componentFiles.has(rest);
+        break;
+      case 'utils':
+        hasForwarding = hookFiles.has(rest);
+        break;
+      default:
+        hasForwarding = filePath === 'i18n.tsx';
+    }
+
+    if (hasForwarding)
+      return resolveForwardedAPIs(
+        {
+          type: 'dependency',
+          dep: '@fumadocs/ui',
+          specifier: `@fumadocs/ui/${filePath.slice(0, -path.extname(filePath).length)}`,
+        },
+        upstreamPackage,
+        upstreamRegistry,
+      );
+  }
+}
+
 export const registry: Registry = {
-  name: 'fumadocs-ui',
+  name: 'fumadocs/ui',
   dir: srcDir,
   tsconfigPath: '../tsconfig.json',
   packageJson: '../package.json',
+  variables: {
+    ui: {
+      description: 'the main UI package',
+      default: 'fumadocs-ui',
+    },
+  },
   onResolve(ref) {
     if (ref.type !== 'file') return ref;
+    const filePath = path
+      .relative(registry.dir, ref.file)
+      .replaceAll('\\', '/');
 
-    const filePath = path.relative(srcDir, ref.file);
     if (filePath === 'icons.tsx')
       return {
         type: 'dependency',
@@ -21,32 +126,16 @@ export const registry: Registry = {
         specifier: 'lucide-react',
       };
 
-    if (
-      (filePath.startsWith('utils/') || filePath.startsWith('contexts/')) &&
-      filePath !== 'utils/cn.ts'
-    ) {
-      return {
-        type: 'dependency',
-        dep: 'fumadocs-ui',
-        specifier: `fumadocs-ui/${filePath.slice(0, -path.extname(filePath).length)}`,
-      };
+    const [dir, rest] = splitDir(filePath);
+    switch (dir) {
+      case 'contexts':
+        return {
+          type: 'custom',
+          specifier: `<ui>/${dir}/${rest.slice(0, -path.extname(rest).length)}`,
+        };
     }
 
     return ref;
-  },
-  onUnknownFile(file) {
-    const relativePath = path.relative(srcDir, file);
-    if (relativePath.startsWith('utils/'))
-      return {
-        type: 'lib',
-        path: relativePath,
-      };
-    if (relativePath.startsWith('components/ui/')) {
-      return {
-        type: 'components',
-        path: relativePath,
-      };
-    }
   },
   components: [
     {
@@ -67,12 +156,12 @@ export const registry: Registry = {
       unlisted: true,
     },
     {
-      name: 'is-active',
+      name: 'urls',
       unlisted: true,
       files: [
         {
           type: 'lib',
-          path: 'utils/is-active.ts',
+          path: 'urls.ts',
         },
       ],
     },
@@ -82,7 +171,7 @@ export const registry: Registry = {
       files: [
         {
           type: 'lib',
-          path: 'utils/cn.ts',
+          path: 'cn.ts',
         },
       ],
     },
@@ -92,335 +181,64 @@ export const registry: Registry = {
       files: [
         {
           type: 'lib',
-          path: 'utils/merge-refs.ts',
+          path: 'merge-refs.ts',
         },
       ],
     },
     {
-      name: 'layouts/shared',
+      name: 'link-item',
       unlisted: true,
       files: [
         {
           type: 'components',
-          path: 'layouts/shared/index.tsx',
-          target: 'components/layout/shared.tsx',
+          path: 'link-item.tsx',
+          target: '<dir>/layout/link-item.tsx',
         },
-        {
-          type: 'components',
-          path: 'layouts/shared/language-toggle.tsx',
-          target: 'components/layout/language-toggle.tsx',
-        },
-        {
-          type: 'components',
-          path: 'layouts/shared/link-item.tsx',
-          target: 'components/layout/link-item.tsx',
-        },
-        {
-          type: 'components',
-          path: 'layouts/shared/search-toggle.tsx',
-          target: 'components/layout/search-toggle.tsx',
-        },
-        {
-          type: 'components',
-          path: 'layouts/shared/theme-toggle.tsx',
-          target: 'components/layout/theme-toggle.tsx',
-        },
+      ],
+    },
+    {
+      name: 'toc',
+      unlisted: true,
+      files: [
         {
           type: 'components',
           path: 'components/toc/clerk.tsx',
-          target: 'components/toc/clerk.tsx',
+          target: '<dir>/toc/clerk.tsx',
         },
         {
           type: 'components',
           path: 'components/toc/default.tsx',
-          target: 'components/toc/default.tsx',
+          target: '<dir>/toc/default.tsx',
         },
         {
           type: 'components',
           path: 'components/toc/index.tsx',
-          target: 'components/toc/index.tsx',
-        },
-        {
-          type: 'components',
-          path: 'components/sidebar/base.tsx',
-          target: 'components/layout/sidebar/base.tsx',
-        },
-        {
-          type: 'components',
-          path: 'components/sidebar/page-tree.tsx',
-          target: 'components/layout/sidebar/page-tree.tsx',
-        },
-        {
-          type: 'components',
-          path: 'components/sidebar/link-item.tsx',
-          target: 'components/layout/sidebar/link-item.tsx',
-        },
-        {
-          type: 'components',
-          path: 'components/sidebar/tabs/index.tsx',
-          target: 'components/layout/sidebar/tabs/index.tsx',
-        },
-        {
-          type: 'components',
-          path: 'components/sidebar/tabs/dropdown.tsx',
-          target: 'components/layout/sidebar/tabs/dropdown.tsx',
-        },
-      ],
-    },
-    {
-      name: 'layouts/docs',
-      files: [
-        {
-          type: 'block',
-          path: 'layouts/docs/index.tsx',
-          target: 'components/layout/docs/index.tsx',
-        },
-        {
-          type: 'block',
-          path: 'layouts/docs/client.tsx',
-          target: 'components/layout/docs/client.tsx',
-        },
-        {
-          type: 'block',
-          path: 'layouts/docs/sidebar.tsx',
-          target: 'components/layout/docs/sidebar.tsx',
-        },
-        {
-          type: 'block',
-          path: 'layouts/docs/page/index.tsx',
-          target: 'components/layout/docs/page/index.tsx',
-        },
-        {
-          type: 'block',
-          path: 'layouts/docs/page/client.tsx',
-          target: 'components/layout/docs/page/client.tsx',
-        },
-      ],
-      unlisted: true,
-    },
-    {
-      name: 'layouts/notebook',
-      files: [
-        {
-          type: 'block',
-          path: 'layouts/notebook/index.tsx',
-          target: 'components/layout/notebook/index.tsx',
-        },
-        {
-          type: 'block',
-          path: 'layouts/notebook/client.tsx',
-          target: 'components/layout/notebook/client.tsx',
-        },
-        {
-          type: 'block',
-          path: 'layouts/notebook/sidebar.tsx',
-          target: 'components/layout/notebook/sidebar.tsx',
-        },
-        {
-          type: 'block',
-          path: 'layouts/notebook/page/index.tsx',
-          target: 'components/layout/notebook/page/index.tsx',
-        },
-        {
-          type: 'block',
-          path: 'layouts/notebook/page/client.tsx',
-          target: 'components/layout/notebook/page/client.tsx',
-        },
-      ],
-      unlisted: true,
-    },
-    {
-      name: 'layouts/home',
-      files: [
-        {
-          type: 'block',
-          path: 'layouts/home/index.tsx',
-          target: 'components/layout/home/index.tsx',
-        },
-        {
-          type: 'components',
-          path: 'layouts/home/client.tsx',
-          target: 'components/layout/home/client.tsx',
-        },
-      ],
-      unlisted: true,
-    },
-    {
-      name: 'accordion',
-      files: [
-        {
-          type: 'components',
-          path: 'components/accordion.tsx',
-        },
-        {
-          type: 'ui',
-          path: 'components/ui/accordion.tsx',
-        },
-      ],
-    },
-    {
-      name: 'github-info',
-      files: [
-        {
-          type: 'components',
-          path: 'components/github-info.tsx',
-        },
-      ],
-      description: 'A card to display GitHub repo info',
-    },
-    {
-      name: 'banner',
-      files: [
-        {
-          type: 'components',
-          path: 'components/banner.tsx',
-        },
-      ],
-    },
-    {
-      name: 'callout',
-      files: [
-        {
-          type: 'components',
-          path: 'components/callout.tsx',
-        },
-      ],
-    },
-    {
-      name: 'card',
-      files: [
-        {
-          type: 'components',
-          path: 'components/card.tsx',
-        },
-      ],
-    },
-    {
-      name: 'codeblock',
-      files: [
-        {
-          type: 'components',
-          path: 'components/codeblock.tsx',
-        },
-      ],
-    },
-    {
-      name: 'files',
-      files: [
-        {
-          type: 'components',
-          path: 'components/files.tsx',
-        },
-      ],
-    },
-    {
-      name: 'heading',
-      files: [
-        {
-          type: 'components',
-          path: 'components/heading.tsx',
-        },
-      ],
-    },
-    {
-      name: 'image-zoom',
-      description: 'Zoomable Image',
-      files: [
-        {
-          type: 'components',
-          path: 'components/image-zoom.tsx',
-        },
-        {
-          type: 'css',
-          path: 'components/image-zoom.css',
-        },
-      ],
-    },
-    {
-      name: 'inline-toc',
-      files: [
-        {
-          type: 'components',
-          path: 'components/inline-toc.tsx',
-        },
-      ],
-    },
-    {
-      name: 'steps',
-      files: [
-        {
-          type: 'components',
-          path: 'components/steps.tsx',
-        },
-      ],
-    },
-    {
-      name: 'tabs',
-      files: [
-        {
-          type: 'components',
-          path: 'components/tabs.tsx',
-        },
-        {
-          type: 'ui',
-          path: 'components/ui/tabs.tsx',
-        },
-      ],
-    },
-    {
-      name: 'type-table',
-      files: [
-        {
-          type: 'components',
-          path: 'components/type-table.tsx',
-        },
-      ],
-    },
-    {
-      name: 'button',
-      unlisted: true,
-      files: [
-        {
-          type: 'ui',
-          path: 'components/ui/button.tsx',
-        },
-      ],
-    },
-    {
-      name: 'popover',
-      unlisted: true,
-      files: [
-        {
-          type: 'ui',
-          path: 'components/ui/popover.tsx',
-        },
-      ],
-    },
-    {
-      name: 'scroll-area',
-      unlisted: true,
-      files: [
-        {
-          type: 'ui',
-          path: 'components/ui/scroll-area.tsx',
-        },
-      ],
-    },
-    {
-      name: 'collapsible',
-      unlisted: true,
-      files: [
-        {
-          type: 'ui',
-          path: 'components/ui/collapsible.tsx',
+          target: '<dir>/toc/index.tsx',
         },
       ],
     },
   ],
   dependencies: {
     'fumadocs-core': null,
-    'fumadocs-ui': null,
-    '@icons': null,
     react: null,
   },
 };
+
+function splitDir(filePath: string): [dir: string, rest: string] {
+  const idx = filePath.indexOf('/');
+  if (idx === -1) {
+    return ['', filePath];
+  } else {
+    return [filePath.substring(0, idx), filePath.substring(idx + 1)];
+  }
+}
+
+for (const comp of registry.components) {
+  for (const file of comp.files) {
+    const importPath = file.path.slice(0, -path.extname(file.path).length);
+    installables[`@fumadocs/ui/${importPath}`] = {
+      comp,
+      file,
+    };
+  }
+}

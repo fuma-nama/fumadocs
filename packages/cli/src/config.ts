@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import { isSrc } from '@/utils/is-src';
 import { z } from 'zod';
 
-function createConfigSchema(isSrc: boolean) {
+export function createConfigSchema(isSrc: boolean) {
   const defaultAliases = {
     uiDir: './components/ui',
     componentsDir: './components',
@@ -12,6 +12,14 @@ function createConfigSchema(isSrc: boolean) {
   };
 
   return z.object({
+    $schema: z
+      .string()
+      .default(
+        isSrc
+          ? 'node_modules/@fumadocs/cli/dist/schema/src.json'
+          : 'node_modules/@fumadocs/cli/dist/schema/default.json',
+      )
+      .optional(),
     aliases: z
       .object({
         uiDir: z.string().default(defaultAliases.uiDir),
@@ -23,6 +31,7 @@ function createConfigSchema(isSrc: boolean) {
       .default(defaultAliases),
 
     baseDir: z.string().default(isSrc ? 'src' : ''),
+    uiLibrary: z.enum(['radix-ui', 'base-ui']).default('radix-ui'),
 
     commands: z
       .object({
@@ -38,7 +47,6 @@ function createConfigSchema(isSrc: boolean) {
 type ConfigSchema = ReturnType<typeof createConfigSchema>;
 
 export type ConfigInput = z.input<ConfigSchema>;
-
 export type LoadedConfig = z.output<ConfigSchema>;
 
 export async function createOrLoadConfig(
@@ -61,6 +69,7 @@ export async function createOrLoadConfig(
  */
 export async function initConfig(
   file = './cli.json',
+  src?: boolean,
 ): Promise<LoadedConfig | undefined> {
   if (
     await fs
@@ -71,9 +80,9 @@ export async function initConfig(
     return;
   }
 
-  const src = await isSrc();
-  const defaultConfig = createConfigSchema(src).parse({} satisfies ConfigInput);
-
+  const defaultConfig = createConfigSchema(src ?? (await isSrc())).parse(
+    {} satisfies ConfigInput,
+  );
   await fs.writeFile(file, JSON.stringify(defaultConfig, null, 2));
   return defaultConfig;
 }

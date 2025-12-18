@@ -3,14 +3,15 @@ import * as Primitive from 'fumadocs-core/toc';
 import {
   type ComponentProps,
   createContext,
-  use,
   type RefObject,
+  use,
   useEffect,
   useEffectEvent,
   useRef,
 } from 'react';
-import { cn } from '@/utils/cn';
-import { mergeRefs } from '@/utils/merge-refs';
+import { cn } from '@/cn';
+import { mergeRefs } from '@/merge-refs';
+import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 
 const TOCContext = createContext<Primitive.TOCItemType[]>([]);
 
@@ -66,19 +67,6 @@ export function TocThumb({
   ...props
 }: ComponentProps<'div'> & RefProps) {
   const thumbRef = useRef<HTMLDivElement>(null);
-
-  return (
-    <>
-      <div ref={thumbRef} role="none" {...props} />
-      <Updater containerRef={containerRef} thumbRef={thumbRef} />
-    </>
-  );
-}
-
-function Updater({
-  containerRef,
-  thumbRef,
-}: RefProps & { thumbRef: RefObject<HTMLElement | null> }) {
   const active = Primitive.useActiveAnchors();
   const onPrint = useEffectEvent(() => {
     if (!containerRef.current || !thumbRef.current) return;
@@ -98,11 +86,13 @@ function Updater({
     };
   }, [containerRef]);
 
-  if (containerRef.current && thumbRef.current) {
-    update(thumbRef.current, calc(containerRef.current, active));
-  }
+  useOnChange(active, () => {
+    if (containerRef.current && thumbRef.current) {
+      update(thumbRef.current, calc(containerRef.current, active));
+    }
+  });
 
-  return null;
+  return <div ref={thumbRef} role="none" {...props} />;
 }
 
 function calc(container: HTMLElement, active: string[]): TocThumb {

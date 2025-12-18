@@ -2,9 +2,9 @@
   "extends": "tsconfig/react-library.json",
   "compilerOptions": {
     "paths": {
-      "@/*": ["./src/*"],
-      "@icons": ["./src/icons"]
-    }
+      "@/*": ["./src/*"]
+    },
+    "types": ["bun"]
   },
   "tsc-alias": {
     "resolveFullPaths": true

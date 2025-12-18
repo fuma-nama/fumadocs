@@ -1,9 +1,9 @@
 'use client';
 import { useI18n } from '@/contexts/i18n';
-import { cn } from '@/utils/cn';
-import { mergeRefs } from '@/utils/merge-refs';
+import { cn } from '@/cn';
 import { type ComponentProps, useRef } from 'react';
-import { useTOCItems, TocThumb } from '.';
+import { mergeRefs } from '@/merge-refs';
+import { TocThumb, useTOCItems } from '.';
 import * as Primitive from 'fumadocs-core/toc';
 
 export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
@@ -22,7 +22,7 @@ export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
     <>
       <TocThumb
         containerRef={containerRef}
-        className="absolute top-(--fd-top) h-(--fd-height) w-px bg-fd-primary transition-all"
+        className="absolute top-0 translate-y-(--fd-top) h-(--fd-height) w-px bg-fd-primary transition-[translate,height]"
       />
       <div
         ref={mergeRefs(ref, containerRef)}

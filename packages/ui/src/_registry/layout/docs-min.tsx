@@ -8,10 +8,10 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { cn } from '@/utils/cn';
-import { TreeContextProvider, useTreeContext } from 'fumadocs-ui/contexts/tree';
+import { cn } from '@/cn';
+import { TreeContextProvider, useTreeContext } from '@/contexts/tree';
 import Link from 'fumadocs-core/link';
-import { useSearchContext } from 'fumadocs-ui/contexts/search';
+import { useSearchContext } from '@/contexts/search';
 import { cva } from 'class-variance-authority';
 import { usePathname } from 'fumadocs-core/framework';
 

@@ -38,8 +38,6 @@ import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 <DocsLayout
   sidebar={{
     enabled: true,
-    // replace the default sidebar
-    // component:
   }}
 />;
 ```
@@ -47,6 +45,51 @@ import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 > See [Sidebar Links](/docs/ui/navigation/sidebar) for customising sidebar items.
 
 <auto-type-table path="../../props.ts" name="SidebarProps" />
+
+### Sidebar Components
+
+You can replace certain components for rendering page tree.
+
+```tsx tab="layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { SidebarSeparator } from './layout.client';
+
+<DocsLayout
+  sidebar={{
+    enabled: true,
+    components: {
+      Separator: SidebarSeparator,
+    },
+  }}
+/>;
+```
+
+```tsx tab="layout.client.tsx"
+'use client';
+import * as Base from 'fumadocs-ui/components/sidebar/base';
+
+export function SidebarSeparator({
+  className,
+  style,
+  children,
+  ...props
+}: ComponentProps<'p'>) {
+  const depth = Base.useFolderDepth();
+
+  return (
+    <Base.SidebarSeparator
+      className={cn('[&_svg]:size-4 [&_svg]:shrink-0', className)}
+      style={{
+        paddingInlineStart: `calc(${2 + 3 * depth} * var(--spacing))`,
+        ...style,
+      }}
+      {...props}
+    >
+      {children}
+    </Base.SidebarSeparator>
+  );
+}
+```
 
 ## Nav
 

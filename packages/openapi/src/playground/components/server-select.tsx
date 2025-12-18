@@ -14,7 +14,7 @@ import {
   useState,
   useEffectEvent,
 } from 'react';
-import { cn } from 'fumadocs-ui/utils/cn';
+import { cn } from '@/utils/cn';
 import {
   Dialog,
   DialogContent,

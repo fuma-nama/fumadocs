@@ -3,8 +3,9 @@ import * as path from 'node:path';
 import type {
   CompiledComponent,
   CompiledFile,
-  indexSchema,
+  httpSubComponent,
   NamespaceType,
+  registryInfoSchema,
 } from '@/registry/schema';
 import type { z } from 'zod';
 import { Project, SourceFile, StringLiteral, ts } from 'ts-morph';
@@ -13,20 +14,14 @@ export type OnResolve = (reference: SourceReference) => Reference;
 
 export interface CompiledRegistry {
   name: string;
-  index: z.input<typeof indexSchema>[];
   components: CompiledComponent[];
-  switchables?: Record<string, Switchable>;
+  info: z.output<typeof registryInfoSchema>;
 }
 
 export interface ComponentFile {
   type: NamespaceType;
   path: string;
   target?: string;
-}
-
-export interface Switchable {
-  specifier: string;
-  members: Record<string, string>;
 }
 
 export interface Component {
@@ -51,12 +46,14 @@ export interface PackageJson {
   devDependencies?: Record<string, string>;
 }
 
-export interface Registry {
+export interface Registry extends Omit<
+  z.input<typeof registryInfoSchema>,
+  'indexes'
+> {
   name: string;
   packageJson: string | PackageJson;
   tsconfigPath: string;
   components: Component[];
-  switchables?: Record<string, Switchable>;
 
   /**
    * The directory of registry, used to resolve relative paths
@@ -110,9 +107,12 @@ export class RegistryCompiler {
     this.resolver = new RegistryResolver(this, await this.readPackageJson());
     const output: CompiledRegistry = {
       name: registry.name,
-      index: [],
+      info: {
+        indexes: [],
+        env: registry.env,
+        variables: registry.variables,
+      },
       components: [],
-      switchables: registry.switchables,
     };
 
     const builtComps = await Promise.all(
@@ -128,7 +128,7 @@ export class RegistryCompiler {
 
     for (const [input, comp] of builtComps) {
       if (!input.unlisted) {
-        output.index.push({
+        output.info.indexes.push({
           name: input.name,
           title: input.title,
           description: input.description,
@@ -262,7 +262,9 @@ export type Reference =
 export class ComponentCompiler {
   private readonly processedFiles = new Set<string>();
   private readonly registry: Registry;
-  private readonly subComponents = new Set<string>();
+  private readonly subComponents = new Set<
+    string | z.input<typeof httpSubComponent>
+  >();
   private readonly devDependencies = new Map<string, string | null>();
   private readonly dependencies = new Map<string, string | null>();
 
@@ -325,7 +327,15 @@ export class ComponentCompiler {
       if (reference.type === 'sub-component') {
         const resolved = reference.resolved;
         if (resolved.component.name !== this.component.name) {
-          this.subComponents.add(resolved.component.name);
+          if (resolved.type === 'remote') {
+            this.subComponents.add({
+              type: 'http',
+              baseUrl: resolved.registryName,
+              component: resolved.component.name,
+            });
+          } else {
+            this.subComponents.add(resolved.component.name);
+          }
         }
 
         return this.toImportPath(resolved.file);
@@ -463,4 +473,25 @@ export class ComponentCompiler {
       target: file.target,
     };
   }
+}
+
+export function resolveFromRemote(
+  r: Registry,
+  component: string,
+  selectFile: (file: ComponentFile) => boolean,
+): Reference | undefined {
+  const comp = r.components.find((comp) => comp.name === component);
+  if (!comp) return;
+  const file = comp.files.find(selectFile);
+  if (!file) return;
+
+  return {
+    type: 'sub-component',
+    resolved: {
+      type: 'remote',
+      registryName: r.name,
+      component: comp,
+      file,
+    },
+  };
 }
