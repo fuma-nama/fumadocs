@@ -85,7 +85,7 @@ export function SidebarContent({
           <div
             data-sidebar-panel=""
             className={cn(
-              'fixed flex top-[calc(--spacing(4)+var(--fd-toc-popover-height))] start-4 shadow-lg transition-opacity rounded-xl p-0.5 border bg-fd-muted text-fd-muted-foreground z-10',
+              'fixed flex top-[calc(--spacing(4)+var(--fd-docs-row-3))] start-4 shadow-lg transition-opacity rounded-xl p-0.5 border bg-fd-muted text-fd-muted-foreground z-10',
               (!collapsed || hovered) && 'pointer-events-none opacity-0',
             )}
           >
