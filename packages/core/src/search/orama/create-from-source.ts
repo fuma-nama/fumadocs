@@ -5,12 +5,7 @@ import {
   createSearchAPI,
   type SearchAPI,
 } from '@/search/server';
-import {
-  type InferPageType,
-  type LoaderConfig,
-  type LoaderOutput,
-  type Page,
-} from '@/source';
+import type { LoaderConfig, LoaderOutput, Page } from '@/source';
 import { type StructuredData } from '@/mdx-plugins';
 import { basename, extname } from '@/source/path';
 import type { I18nConfig } from '@/i18n';
@@ -19,7 +14,7 @@ import { findPath } from '@/page-tree/utils';
 
 type Awaitable<T> = T | Promise<T>;
 
-function defaultBuildIndex(source: LoaderOutput<LoaderConfig>) {
+function defaultBuildIndex<C extends LoaderConfig>(source: LoaderOutput<C>) {
   function isBreadcrumbItem(item: unknown): item is string {
     return typeof item === 'string' && item.length > 0;
   }
@@ -70,28 +65,28 @@ function defaultBuildIndex(source: LoaderOutput<LoaderConfig>) {
   };
 }
 
-interface Options<S extends LoaderOutput<LoaderConfig>> extends Omit<
+interface Options<C extends LoaderConfig> extends Omit<
   AdvancedOptions,
   'indexes'
 > {
   localeMap?: {
-    [K in S extends LoaderOutput<infer C>
-      ? C['i18n'] extends I18nConfig<infer Languages>
-        ? Languages
-        : string
-      : string]?: Partial<AdvancedOptions> | Language;
+    [K in C['i18n'] extends I18nConfig<infer Languages> ? Languages : string]?:
+      | Partial<AdvancedOptions>
+      | Language;
   };
-  buildIndex?: (page: InferPageType<S>) => Awaitable<AdvancedIndex>;
+  buildIndex?: (
+    page: Page<C['source']['pageData']>,
+  ) => Awaitable<AdvancedIndex>;
 }
 
-export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
-  source: S,
-  options?: Options<S>,
+export function createFromSource<C extends LoaderConfig>(
+  source: LoaderOutput<C>,
+  options?: Options<C>,
 ): SearchAPI;
 
-export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
-  source: S,
-  options: Options<S> = {},
+export function createFromSource<C extends LoaderConfig>(
+  source: LoaderOutput<C>,
+  options: Options<C> = {},
 ): SearchAPI {
   const { buildIndex = defaultBuildIndex(source) } = options;
 
@@ -102,7 +97,7 @@ export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
       indexes: async () => {
         const indexes = source.getLanguages().flatMap((entry) => {
           return entry.pages.map(async (page) => ({
-            ...(await buildIndex(page as InferPageType<S>)),
+            ...(await buildIndex(page)),
             locale: entry.language,
           }));
         });
@@ -115,9 +110,7 @@ export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
   return createSearchAPI('advanced', {
     ...options,
     indexes: async () => {
-      const indexes = source
-        .getPages()
-        .map((page) => buildIndex(page as InferPageType<S>));
+      const indexes = source.getPages().map((page) => buildIndex(page));
 
       return Promise.all(indexes);
     },

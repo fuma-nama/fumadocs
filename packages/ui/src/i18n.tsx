@@ -1,5 +1,4 @@
-import type { Translations } from '@/contexts/i18n';
-import type { I18nProviderProps } from './provider/base';
+import type { I18nProviderProps, Translations } from '@/contexts/i18n';
 import type { I18nConfig } from 'fumadocs-core/i18n';
 
 export type { I18nProviderProps, Translations };

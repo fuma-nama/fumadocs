@@ -1,5 +1,9 @@
 import type { MethodInformation, RenderContext } from '@/types';
-import { getPreferredType, type NoReference } from '@/utils/schema';
+import {
+  getPreferredType,
+  type NoReference,
+  pickExample,
+} from '@/utils/schema';
 import {
   AccordionContent,
   AccordionHeader,
@@ -91,28 +95,21 @@ function getRequestData(
   };
 
   for (const param of method.parameters ?? []) {
-    let schema = param.schema;
-    let value: unknown | undefined;
+    let value = pickExample(param);
 
-    if (!schema && param.content) {
-      const type = getPreferredType(param.content);
+    if (value === undefined && param.required) {
+      if (param.schema) {
+        value = sample(param.schema as object);
+      } else if (param.content) {
+        const type = getPreferredType(param.content);
+        const content = type ? param.content[type] : undefined;
+        if (!content || !content.schema)
+          throw new Error(
+            `Cannot find "${param.name}" parameter info for media type "${type}" in ${path} ${method.method}`,
+          );
 
-      const content = type ? param.content[type] : undefined;
-      if (!content || !content.schema)
-        throw new Error(
-          `Cannot find parameter schema for ${param.name} in ${path} ${method.method}`,
-        );
-
-      schema = content.schema;
-      value = content.example ?? param.example;
-    } else {
-      value = param.example;
-    }
-
-    if (param.required) {
-      value ??= sample(schema as object);
-    } else if (value === undefined) {
-      continue;
+        value = sample(content.schema as object);
+      }
     }
 
     switch (param.in) {

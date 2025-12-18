@@ -1,0 +1,133 @@
+{
+  "name": "@fumadocs/base-ui",
+  "version": "16.3.0",
+  "description": "The Base UI version of Fumadocs UI",
+  "keywords": [
+    "Fumadocs",
+    "Docs"
+  ],
+  "homepage": "https://fumadocs.dev",
+  "repository": "github:fuma-nama/fumadocs",
+  "license": "MIT",
+  "author": "Fuma Nama",
+  "type": "module",
+  "exports": {
+    "./style.css": "./dist/style.css",
+    "./css/*": "./css/*",
+    "./image-zoom.css": "./dist/image-zoom.css",
+    "./components/*": {
+      "import": "./dist/components/*.js",
+      "types": "./dist/components/*.d.ts",
+      "default": "./dist/components/*.js"
+    },
+    "./i18n": {
+      "import": "./dist/i18n.js",
+      "types": "./dist/i18n.d.ts"
+    },
+    "./layouts/home": {
+      "import": "./dist/layouts/home/index.js",
+      "types": "./dist/layouts/home/index.d.ts"
+    },
+    "./layouts/home/navbar": {
+      "import": "./dist/layouts/home/navbar.js",
+      "types": "./dist/layouts/home/navbar.d.ts"
+    },
+    "./layouts/docs": {
+      "import": "./dist/layouts/docs/index.js",
+      "types": "./dist/layouts/docs/index.d.ts"
+    },
+    "./layouts/docs/page": {
+      "import": "./dist/layouts/docs/page/index.js",
+      "types": "./dist/layouts/docs/page/index.d.ts"
+    },
+    "./layouts/notebook": {
+      "import": "./dist/layouts/notebook/index.js",
+      "types": "./dist/layouts/notebook/index.d.ts"
+    },
+    "./layouts/notebook/page": {
+      "import": "./dist/layouts/notebook/page/index.js",
+      "types": "./dist/layouts/notebook/page/index.d.ts"
+    },
+    "./layouts/shared": {
+      "import": "./dist/layouts/shared/index.js",
+      "types": "./dist/layouts/shared/index.d.ts"
+    },
+    "./page": {
+      "import": "./dist/page.js",
+      "types": "./dist/page.d.ts"
+    },
+    "./provider/*": {
+      "import": "./dist/provider/*.js",
+      "types": "./dist/provider/*.d.ts"
+    },
+    "./contexts/*": {
+      "import": "./dist/contexts/*.js",
+      "types": "./dist/contexts/*.d.ts"
+    },
+    "./mdx": {
+      "node": "./dist/mdx.server.js",
+      "import": "./dist/mdx.js",
+      "types": "./dist/mdx.d.ts"
+    },
+    "./og": {
+      "import": "./dist/og.js",
+      "types": "./dist/og.d.ts"
+    },
+    "./utils/*": {
+      "import": "./dist/utils/*.js",
+      "types": "./dist/utils/*.d.ts"
+    }
+  },
+  "files": [
+    "dist/*",
+    "css/*"
+  ],
+  "scripts": {
+    "build": "pnpm build:layout && pnpm build:tailwind",
+    "build:layout": "tsc --project tsconfig.build.json && tsc-alias -p tsconfig.build.json",
+    "build:tailwind": "tailwindcss -i css/style.css -o ./dist/style.css && tailwindcss -i src/components/image-zoom.css -o dist/components/image-zoom.css",
+    "clean": "rimraf dist",
+    "dev": "concurrently \"tsc -w --project tsconfig.build.json\" \"tsc-alias -w -p tsconfig.build.json\" \"pnpm dev:tailwind\"",
+    "dev:tailwind": "tailwindcss -i css/style.css -o ./dist/style.css -w && tailwindcss -i src/components/image-zoom.css -o dist/components/image-zoom.css -w",
+    "lint": "eslint .",
+    "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@base-ui/react": "^1.0.0",
+    "@fumadocs/ui": "workspace:*",
+    "class-variance-authority": "^0.7.1",
+    "fumadocs-core": "workspace:*",
+    "next-themes": "^0.4.6",
+    "react-medium-image-zoom": "^5.4.0",
+    "scroll-into-view-if-needed": "^3.1.0"
+  },
+  "devDependencies": {
+    "@fumadocs/cli": "workspace:*",
+    "@tailwindcss/cli": "^4.1.18",
+    "@types/node": "^24.10.2",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "eslint-config-custom": "workspace:*",
+    "fumadocs-core": "workspace:*",
+    "tailwindcss": "^4.1.18",
+    "tsc-alias": "^1.8.16",
+    "tsconfig": "workspace:*"
+  },
+  "peerDependencies": {
+    "@types/react": "*",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "tailwindcss": "^4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    },
+    "tailwindcss": {
+      "optional": true
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

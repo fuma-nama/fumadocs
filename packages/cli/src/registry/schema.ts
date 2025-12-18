@@ -1,10 +1,12 @@
 import { z } from 'zod';
 
-export type Output = z.infer<typeof rootSchema>;
 export type NamespaceType = (typeof namespaces)[number];
-export type OutputIndex = z.infer<typeof indexSchema>;
-export type OutputFile = z.infer<typeof fileSchema>;
-export type OutputComponent = z.infer<typeof componentSchema>;
+export type CompiledFile = z.input<typeof fileSchema>;
+export type CompiledComponent = z.input<typeof componentSchema>;
+export type CompiledRegistryInfo = z.input<typeof registryInfoSchema>;
+export type DownloadedRegistryInfo = z.output<typeof registryInfoSchema>;
+export type File = z.output<typeof fileSchema>;
+export type Component = z.output<typeof componentSchema>;
 
 export const namespaces = [
   'components',
@@ -28,6 +30,12 @@ export const fileSchema = z.object({
   content: z.string(),
 });
 
+export const httpSubComponent = z.object({
+  type: z.literal('http'),
+  baseUrl: z.string(),
+  component: z.string(),
+});
+
 export const componentSchema = z.object({
   name: z.string(),
   title: z.string().optional(),
@@ -35,11 +43,30 @@ export const componentSchema = z.object({
   files: z.array(fileSchema),
   dependencies: z.record(z.string(), z.string().or(z.null())),
   devDependencies: z.record(z.string(), z.string().or(z.null())),
-  subComponents: z.array(z.string()).default([]),
+  /**
+   * list of sub components, either local (component name) or remote (registry info & component name)
+   */
+  subComponents: z.array(z.string().or(httpSubComponent)).default([]),
 });
 
-export const rootSchema = z.object({
-  name: z.string(),
-  index: z.array(indexSchema),
-  components: z.array(componentSchema),
+export const registryInfoSchema = z.object({
+  /**
+   * define used variables, variables can be referenced in the import specifiers of component files.
+   */
+  variables: z
+    .record(
+      z.string(),
+      z.object({
+        description: z.string().optional(),
+        default: z.unknown().optional(),
+      }),
+    )
+    .optional(),
+  /**
+   * provide variables to sub components
+   */
+  env: z.record(z.string(), z.unknown()).optional(),
+  indexes: z.array(indexSchema).default([]),
+
+  registries: z.array(z.string()).optional(),
 });

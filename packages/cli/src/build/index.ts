@@ -1,70 +1,30 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import picocolors from 'picocolors';
-import { toShadcnRegistry } from '@/build/shadcn';
-import { validateOutput } from '@/build/validate';
-import type { Output } from '@/registry/schema';
+import type { CompiledRegistry } from '@/build/compiler';
 
-export * from './build-registry';
-export * from './component-builder';
-export * from './shadcn';
+export * from './compiler';
 
-export function combineRegistry(...items: Output[]): Output {
-  const out: Output = {
-    index: [],
-    components: [],
-    name: items[0].name,
-  };
-
-  for (const item of items) {
-    out.components.push(...item.components);
-    out.index.push(...item.index);
-  }
-
-  validateOutput(out);
-  return out;
+export interface MonoRegistry extends CompiledRegistry {
+  registries: CompiledRegistry[];
 }
 
-export async function writeShadcnRegistry(
-  out: Output,
-  options: {
-    dir: string;
-    /**
-     * Remove previous outputs
-     *
-     * @defaultValue false
-     */
-    cleanDir?: boolean;
-
-    baseUrl: string;
-  },
-) {
-  const { dir, cleanDir = false, baseUrl } = options;
-
-  if (cleanDir) {
-    await fs.rm(dir, {
-      recursive: true,
-      force: true,
-    });
-    console.log(picocolors.bold(picocolors.greenBright('Cleaned directory')));
-  }
-
-  const { registry, index } = toShadcnRegistry(out, baseUrl);
-  const write = registry.items.map(async (item) => {
-    const file = path.join(dir, `${item.name}.json`);
-
-    await writeFile(file, JSON.stringify(item, null, 2));
-  });
-
-  write.push(
-    writeFile(path.join(dir, 'registry.json'), JSON.stringify(index, null, 2)),
-  );
-
-  await Promise.all(write);
+export function combineRegistry(
+  root: CompiledRegistry,
+  ...items: CompiledRegistry[]
+): MonoRegistry {
+  return {
+    ...root,
+    info: {
+      ...root.info,
+      registries: items.map((item) => item.name),
+    },
+    registries: items,
+  };
 }
 
 export async function writeFumadocsRegistry(
-  out: Output,
+  out: CompiledRegistry | MonoRegistry,
   options: {
     dir: string;
 
@@ -88,9 +48,9 @@ export async function writeFumadocsRegistry(
     console.log(picocolors.bold(picocolors.greenBright('Cleaned directory')));
   }
 
-  async function writeIndex() {
+  async function writeInfo() {
     const file = path.join(dir, '_registry.json');
-    const json = JSON.stringify(out.index, null, 2);
+    const json = JSON.stringify(out.info, null, 2);
 
     await writeFile(file, json, log);
   }
@@ -102,7 +62,18 @@ export async function writeFumadocsRegistry(
     await writeFile(file, json, log);
   });
 
-  write.push(writeIndex());
+  write.push(writeInfo());
+  if ('registries' in out) {
+    for (const child of out.registries) {
+      write.push(
+        writeFumadocsRegistry(child, {
+          dir: path.join(dir, child.name),
+          log: options.log,
+        }),
+      );
+    }
+  }
+
   await Promise.all(write);
 }
 

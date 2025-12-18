@@ -1,9 +1,9 @@
 'use client';
 import * as Primitive from 'fumadocs-core/toc';
 import { type ComponentProps, useEffect, useRef, useState } from 'react';
-import { cn } from '@/utils/cn';
-import { useTOCItems, TocThumb } from '.';
-import { mergeRefs } from '@/utils/merge-refs';
+import { cn } from '@/cn';
+import { TocThumb, useTOCItems } from '.';
+import { mergeRefs } from '@/merge-refs';
 import { useI18n } from '@/contexts/i18n';
 
 export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
@@ -88,7 +88,7 @@ export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
         >
           <TocThumb
             containerRef={containerRef}
-            className="mt-(--fd-top) h-(--fd-height) bg-fd-primary transition-all"
+            className="translate-y-(--fd-top) h-(--fd-height) bg-fd-primary transition-[translate,height]"
           />
         </div>
       )}

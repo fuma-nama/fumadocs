@@ -2,8 +2,7 @@
   "extends": "tsconfig/react-library.json",
   "compilerOptions": {
     "paths": {
-      "@/*": ["./src/*"],
-      "lucide-react": ["./src/icons"]
+      "@/*": ["./src/*"]
     }
   },
   "tsc-alias": {

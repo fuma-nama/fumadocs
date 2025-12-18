@@ -1,0 +1,217 @@
+@import './shiki.css';
+@source '../dist/components/**/*.js';
+@plugin '../dist/typography/index.js';
+
+:root {
+  --fd-sidebar-drawer-offset: 100%;
+}
+
+[dir='rtl'] {
+  --fd-sidebar-drawer-offset: -100%;
+}
+
+@theme {
+  --animate-fd-fade-in: fd-fade-in 300ms ease;
+  --animate-fd-fade-out: fd-fade-out 300ms ease;
+
+  --animate-fd-dialog-in: fd-dialog-in 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-fd-dialog-out: fd-dialog-out 300ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  --animate-fd-popover-in: fd-popover-in 100ms ease;
+  --animate-fd-popover-out: fd-popover-out 100ms ease;
+
+  --animate-fd-enterFromLeft: fd-enterFromLeft 250ms ease;
+  --animate-fd-enterFromRight: fd-enterFromRight 250ms ease;
+
+  --animate-fd-sidebar-in: fd-sidebar-in 250ms ease;
+  --animate-fd-sidebar-out: fd-sidebar-out 250ms ease;
+
+  --animate-fd-exitToLeft: fd-exitToLeft 250ms ease;
+  --animate-fd-exitToRight: fd-exitToRight 250ms ease;
+
+  @keyframes fd-sidebar-in {
+    from {
+      transform: translateX(var(--fd-sidebar-drawer-offset));
+    }
+  }
+
+  @keyframes fd-sidebar-out {
+    to {
+      transform: translateX(var(--fd-sidebar-drawer-offset));
+    }
+  }
+
+  @keyframes fd-dialog-in {
+    from {
+      transform: scale(1.06);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+
+  @keyframes fd-dialog-out {
+    from {
+      transform: scale(1);
+    }
+    to {
+      transform: scale(1.04);
+      opacity: 0;
+    }
+  }
+
+  @keyframes fd-popover-in {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+  }
+
+  @keyframes fd-popover-out {
+    to {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+  }
+
+  @keyframes fd-fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fd-fade-out {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes fd-enterFromRight {
+    from {
+      opacity: 0;
+      transform: translateX(200px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes fd-enterFromLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-200px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes fd-exitToRight {
+    from {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateX(200px);
+    }
+  }
+
+  @keyframes fd-exitToLeft {
+    from {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateX(-200px);
+    }
+  }
+}
+
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-fd-border, currentColor);
+  }
+
+  body {
+    background-color: var(--color-fd-background);
+    color: var(--color-fd-foreground);
+  }
+}
+
+@utility fd-scroll-container {
+  &::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 5px;
+    background: var(--color-fd-border);
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-corner {
+    display: none;
+  }
+}
+
+@utility fd-steps {
+  counter-reset: step;
+  position: relative;
+  @apply pl-6 ml-2 border-l sm:ml-4 sm:pl-7;
+}
+
+@utility fd-step {
+  &:before {
+    background-color: var(--color-fd-secondary);
+    color: var(--color-fd-secondary-foreground);
+    content: counter(step);
+    counter-increment: step;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    display: flex;
+    position: absolute;
+    @apply size-8 -start-4 rounded-full;
+  }
+}
+
+@utility prose-no-margin {
+  & > :first-child {
+    margin-top: 0;
+  }
+
+  & > :last-child {
+    margin-bottom: 0;
+  }
+}
+
+@variant dark (&:where(.dark, .dark *));
+
+/* define/override layout variables */
+@variant layout {
+  #nd-docs-layout:has(&),
+  #nd-notebook-layout:has(&),
+  #nd-home-layout:has(&) {
+    @slot;
+  }
+}

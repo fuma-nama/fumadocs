@@ -9,13 +9,14 @@ import { joinPath } from './path';
 import { normalizeUrl } from '@/utils/normalize-url';
 import {
   buildPlugins,
-  type LoaderPluginOption,
   type LoaderPlugin,
+  type LoaderPluginOption,
 } from '@/source/plugins';
 import { slugsPlugin } from '@/source/plugins/slugs';
 import { iconPlugin, type IconResolver } from '@/source/plugins/icon';
-import type { Source, SourceConfig, PageData, MetaData } from './source';
+import type { MetaData, PageData, Source, SourceConfig } from './source';
 import { visit } from '@/page-tree/utils';
+import path from 'node:path';
 
 export interface LoaderConfig {
   source: SourceConfig;
@@ -82,6 +83,12 @@ export interface LoaderOutput<Config extends LoaderConfig> {
     : PageTree.Root;
 
   getPageTree: (locale?: string) => PageTree.Root;
+  /**
+   * get referenced page from href, supported:
+   *
+   * - relative file paths, like `./my/page.mdx`.
+   * - generated page pathname, like `/docs/my/page`.
+   */
   getPageByHref: (
     href: string,
     options?: {
@@ -98,6 +105,15 @@ export interface LoaderOutput<Config extends LoaderConfig> {
         hash?: string;
       }
     | undefined;
+  /**
+   * resolve special hrefs in a page, including:
+   *
+   * - relative file paths, like `./my/page.mdx`.
+   */
+  resolveHref: (
+    href: string,
+    parent: Page<Config['source']['pageData']>,
+  ) => string;
 
   /**
    * @internal
@@ -301,10 +317,7 @@ export function loader(
       const [value, hash] = href.split('#', 2);
       let target;
 
-      if (
-        value.startsWith('.') &&
-        (value.endsWith('.md') || value.endsWith('.mdx'))
-      ) {
+      if (value.startsWith('./')) {
         const path = joinPath(dir, value);
 
         target = walker.pathToPage.get(`${language}.${path}`);
@@ -317,6 +330,22 @@ export function loader(
           page: target,
           hash,
         };
+    },
+    resolveHref(href, parent) {
+      if (href.startsWith('./')) {
+        const target = this.getPageByHref(href, {
+          dir: path.dirname(parent.path),
+          language: parent.locale,
+        });
+
+        if (target) {
+          return target.hash
+            ? `${target.page.url}#${target.hash}`
+            : target.page.url;
+        }
+      }
+
+      return href;
     },
     getPages(language) {
       const pages: Page[] = [];

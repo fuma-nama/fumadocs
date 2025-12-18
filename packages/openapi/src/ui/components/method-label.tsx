@@ -1,6 +1,6 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 import type { HTMLAttributes } from 'react';
-import { cn } from 'fumadocs-ui/utils/cn';
+import { cn } from '@/utils/cn';
 
 export const badgeVariants = cva('font-mono font-medium', {
   variants: {
