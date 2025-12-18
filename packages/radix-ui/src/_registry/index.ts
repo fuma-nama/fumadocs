@@ -12,6 +12,9 @@ export const registry: Registry = {
   onResolve(ref) {
     return resolveForwardedAPIs(ref, 'fumadocs-ui', registry) ?? ref;
   },
+  env: {
+    ui: 'fumadocs-ui',
+  },
   components: [
     {
       name: 'layouts/shared',

@@ -10,6 +10,9 @@ function createConfigSchema(isSrc: boolean) {
     cssDir: './styles',
     libDir: './lib',
   };
+  const defaultVariables = {
+    icon: 'lucide-react',
+  } as const;
 
   return z.object({
     aliases: z
@@ -22,7 +25,14 @@ function createConfigSchema(isSrc: boolean) {
       })
       .default(defaultAliases),
 
+    variables: z
+      .object({
+        icon: z.enum(['lucide-react']).default(defaultVariables.icon),
+      })
+      .default(defaultVariables),
+
     baseDir: z.string().default(isSrc ? 'src' : ''),
+    uiLibrary: z.enum(['radix-ui', 'base-ui']).default('radix-ui'),
 
     commands: z
       .object({
@@ -38,7 +48,6 @@ function createConfigSchema(isSrc: boolean) {
 type ConfigSchema = ReturnType<typeof createConfigSchema>;
 
 export type ConfigInput = z.input<ConfigSchema>;
-
 export type LoadedConfig = z.output<ConfigSchema>;
 
 export async function createOrLoadConfig(

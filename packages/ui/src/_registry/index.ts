@@ -107,6 +107,12 @@ export const registry: Registry = {
   dir: srcDir,
   tsconfigPath: '../tsconfig.json',
   packageJson: '../package.json',
+  variables: {
+    ui: {
+      description: 'the main UI package',
+      default: 'fumadocs-ui',
+    },
+  },
   onResolve(ref) {
     if (ref.type !== 'file') return ref;
     const filePath = path

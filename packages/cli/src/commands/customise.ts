@@ -1,12 +1,10 @@
 import { cancel, group, intro, log, outro, select } from '@clack/prompts';
 import picocolors from 'picocolors';
-import type { LoadedConfig } from '@/config';
 import { install } from '@/commands/add';
-import { RegistryClient, Resolver } from '@/registry/client';
+import type { RegistryClient } from '@/registry/client';
 import { ComponentInstaller } from '@/registry/installer';
 
-export async function customise(resolver: Resolver, config: LoadedConfig) {
-  const client = new RegistryClient(config, resolver);
+export async function customise(client: RegistryClient) {
   intro(picocolors.bgBlack(picocolors.whiteBright('Customise Fumadocs UI')));
   const installer = new ComponentInstaller(client);
 

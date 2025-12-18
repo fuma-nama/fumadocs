@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { Command } from 'commander';
 import picocolors from 'picocolors';
-import { createOrLoadConfig, initConfig } from '@/config';
+import { createOrLoadConfig, initConfig, type LoadedConfig } from '@/config';
 import {
   type JsonTreeNode,
   treeToJavaScript,
@@ -13,7 +13,7 @@ import { runTree } from '@/utils/file-tree/run-tree';
 import packageJson from '../package.json';
 import { customise } from '@/commands/customise';
 import { add } from '@/commands/add';
-import { localResolver, remoteResolver } from '@/registry/client';
+import { HttpRegistryClient, LocalRegistryClient } from '@/registry/client';
 
 const program = new Command().option('--config <string>');
 
@@ -35,8 +35,12 @@ program
   .description('simple way to customise layouts with Fumadocs UI')
   .option('--dir <string>', 'the root url or directory to resolve registry')
   .action(async (options: { config?: string; dir?: string }) => {
-    const resolver = getResolverFromDir(options.dir);
-    await customise(resolver, await createOrLoadConfig(options.config));
+    await customise(
+      createClientFromDir(
+        options.dir,
+        await createOrLoadConfig(options.config),
+      ),
+    );
   });
 
 const dirShortcuts: Record<string, string> = {
@@ -51,8 +55,11 @@ program
   .option('--dir <string>', 'the root url or directory to resolve registry')
   .action(
     async (input: string[], options: { config?: string; dir?: string }) => {
-      const resolver = getResolverFromDir(options.dir);
-      await add(input, resolver, await createOrLoadConfig(options.config));
+      const client = createClientFromDir(
+        options.dir,
+        await createOrLoadConfig(options.config),
+      );
+      await add(input, client);
     },
   );
 
@@ -100,12 +107,15 @@ program
     },
   );
 
-function getResolverFromDir(dir: string = 'https://fumadocs.dev/registry') {
+function createClientFromDir(
+  dir = 'https://fumadocs.dev/registry',
+  config: LoadedConfig,
+) {
   if (dir in dirShortcuts) dir = dirShortcuts[dir];
 
   return dir.startsWith('http://') || dir.startsWith('https://')
-    ? remoteResolver(dir)
-    : localResolver(dir);
+    ? new HttpRegistryClient(dir, config)
+    : new LocalRegistryClient(dir, config);
 }
 
 program.parse();

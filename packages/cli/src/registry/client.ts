@@ -1,5 +1,6 @@
 import {
-  type CompiledRegistryInfo,
+  type DownloadedRegistryInfo,
+  type Component,
   componentSchema,
   registryInfoSchema,
 } from '@/registry/schema';
@@ -7,28 +8,69 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import type { LoadedConfig } from '@/config';
 import { log } from '@clack/prompts';
+import { AsyncCache } from '@/utils/cache';
 
-/**
- * Resolve file, throw error if not found
- */
-export type Resolver = (file: string) => Promise<unknown>;
-
-export function remoteResolver(url: string): Resolver {
-  return async (file) => {
-    const res = await fetch(`${url}/${file}`);
-    if (!res.ok) {
-      throw new Error(`failed to fetch ${url}/${file}: ${res.statusText}`);
-    }
-
-    return await res.json();
-  };
+export interface RegistryClient {
+  readonly config: LoadedConfig;
+  fetchRegistryInfo: () => Promise<DownloadedRegistryInfo>;
+  fetchComponent: (name: string) => Promise<Component>;
+  createLinkedRegistryClient: (registryName: string) => RegistryClient;
 }
 
-export function localResolver(dir: string): Resolver {
-  return async (file) => {
-    const filePath = path.join(dir, file);
+const fetchCache = new AsyncCache<unknown>();
 
-    return await fs
+export class HttpRegistryClient implements RegistryClient {
+  constructor(
+    readonly baseUrl: string,
+    readonly config: LoadedConfig,
+  ) {}
+
+  async fetchRegistryInfo(baseUrl = this.baseUrl) {
+    const url = new URL('_registry.json', `${baseUrl}/`);
+
+    return fetchCache.cached<DownloadedRegistryInfo>(url.href, async () => {
+      const res = await fetch(url);
+      if (!res.ok) {
+        throw new Error(`failed to fetch ${url.href}: ${res.statusText}`);
+      }
+
+      return registryInfoSchema.parse(await res.json());
+    });
+  }
+
+  async fetchComponent(name: string) {
+    const url = new URL(`${name}.json`, `${this.baseUrl}/`);
+
+    return fetchCache.cached<Component>(url.href, async () => {
+      const res = await fetch(`${this.baseUrl}/${name}.json`);
+      if (!res.ok) {
+        log.error(`component ${name} not found:`);
+        log.error(await res.text());
+        process.exit(1);
+      }
+
+      return componentSchema.parse(await res.json());
+    });
+  }
+
+  createLinkedRegistryClient(name: string) {
+    return new HttpRegistryClient(`${this.baseUrl}/${name}`, this.config);
+  }
+}
+
+export class LocalRegistryClient implements RegistryClient {
+  private registryInfo: DownloadedRegistryInfo | undefined;
+
+  constructor(
+    private readonly dir: string,
+    readonly config: LoadedConfig,
+  ) {}
+
+  async fetchRegistryInfo(dir = this.dir) {
+    if (this.registryInfo) return this.registryInfo;
+
+    const filePath = path.join(dir, '_registry.json');
+    const out = await fs
       .readFile(filePath)
       .then((res) => JSON.parse(res.toString()))
       .catch((e) => {
@@ -36,37 +78,25 @@ export function localResolver(dir: string): Resolver {
           cause: e,
         });
       });
-  };
-}
 
-export class RegistryClient {
-  readonly config: LoadedConfig;
-  private readonly resolver: Resolver;
-  private registryInfo: CompiledRegistryInfo | undefined;
-
-  constructor(config: LoadedConfig, resolver: Resolver) {
-    this.config = config;
-    this.resolver = resolver;
-  }
-
-  async fetchRegistryInfo() {
-    this.registryInfo ??= registryInfoSchema.parse(
-      await this.resolver('_registry.json').catch((e) => {
-        log.error(String(e));
-        process.exit(1);
-      }),
-    );
-
-    return this.registryInfo;
+    return (this.registryInfo = registryInfoSchema.parse(out));
   }
 
   async fetchComponent(name: string) {
-    return componentSchema.parse(
-      await this.resolver(`${name}.json`).catch((e) => {
+    const filePath = path.join(this.dir, `${name}.json`);
+    const out = await fs
+      .readFile(filePath)
+      .then((res) => JSON.parse(res.toString()))
+      .catch((e) => {
         log.error(`component ${name} not found:`);
         log.error(String(e));
         process.exit(1);
-      }),
-    );
+      });
+
+    return componentSchema.parse(out);
+  }
+
+  createLinkedRegistryClient(name: string) {
+    return new LocalRegistryClient(path.join(this.dir, name), this.config);
   }
 }
