@@ -1,6 +1,6 @@
 import type { ComponentProps, ReactNode } from 'react';
 import { cva } from 'class-variance-authority';
-import { cn } from 'fumadocs-ui/utils/cn';
+import { twMerge as cn } from 'tailwind-merge';
 import {
   Collapsible,
   CollapsibleContent,

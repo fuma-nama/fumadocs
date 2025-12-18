@@ -2201,6 +2201,9 @@ importers:
       js-yaml:
         specifier: ^4.1.1
         version: 4.1.1
+      tailwind-merge:
+        specifier: ^3.4.0
+        version: 3.4.0
     devDependencies:
       '@types/js-yaml':
         specifier: ^4.0.9
