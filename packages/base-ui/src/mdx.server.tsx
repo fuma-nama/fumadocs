@@ -9,13 +9,12 @@ import defaultMdxComponents from '@/mdx';
  * @param source the source object
  * @param OverrideLink The component to override from
  */
-export function createRelativeLink(
-  source: LoaderOutput<LoaderConfig>,
+export function createRelativeLink<C extends LoaderConfig>(
+  source: LoaderOutput<C>,
   page: Page,
   OverrideLink: FC<ComponentProps<'a'>> = defaultMdxComponents.a,
 ): FC<ComponentProps<'a'>> {
   return async function RelativeLink({ href, ...props }) {
-    // resolve relative href
     return (
       <OverrideLink
         href={href ? source.resolveHref(href, page) : href}

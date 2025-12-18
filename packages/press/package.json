@@ -72,15 +72,15 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "default": "./dist/index.js"
     },
     "./*": {
       "types": "./dist/*",
-      "import": "./dist/*"
+      "default": "./dist/*"
     },
     "./vite": {
       "types": "./dist/vite/index.d.ts",
-      "import": "./dist/vite/index.js"
+      "default": "./dist/vite/index.js"
     }
   },
   "bin": {

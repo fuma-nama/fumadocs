@@ -43,6 +43,7 @@
     "@types/node": "^24.10.2",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
+    "class-variance-authority": "^0.7.1",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "next": "16.0.10",

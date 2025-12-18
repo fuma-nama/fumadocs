@@ -1,11 +1,6 @@
-import {
-  CircleCheck,
-  CircleX,
-  Info,
-  TriangleAlert,
-} from 'fumadocs-ui/internal/icons';
-import { ComponentProps } from 'react';
-import { cn } from 'fumadocs-ui/utils/cn';
+import { CircleCheck, CircleX, Info, TriangleAlert } from './icons';
+import type { ComponentProps } from 'react';
+import { twMerge as cn } from 'tailwind-merge';
 
 interface CalloutProps extends ComponentProps<'div'> {
   /**
