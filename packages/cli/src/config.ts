@@ -12,6 +12,14 @@ export function createConfigSchema(isSrc: boolean) {
   };
 
   return z.object({
+    $schema: z
+      .string()
+      .default(
+        isSrc
+          ? 'node_modules/@fumadocs/cli/dist/schema/src.json'
+          : 'node_modules/@fumadocs/cli/dist/schema/default.json',
+      )
+      .optional(),
     aliases: z
       .object({
         uiDir: z.string().default(defaultAliases.uiDir),
