@@ -1,5 +1,18 @@
 # @fuma-docs/openapi
 
+## 10.2.0
+
+### Minor Changes
+
+- a69b060: Support both Base UI and Radix UI as base component libraries
+
+### Patch Changes
+
+- Updated dependencies [a69b060]
+  - fumadocs-ui@16.3.0
+  - fumadocs-core@16.3.0
+  - @fumadocs/ui@16.3.0
+
 ## 10.1.4
 
 ### Patch Changes
