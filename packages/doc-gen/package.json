@@ -40,9 +40,9 @@
     "estree-util-to-js": "^2.0.0",
     "estree-util-value-to-estree": "^3.5.0",
     "npm-to-yarn": "^3.0.1",
-    "oxc-transform": "^0.102.0",
+    "oxc-transform": "^0.104.0",
     "unist-util-visit": "^5.0.0",
-    "zod": "^4.1.13"
+    "zod": "^4.2.1"
   },
   "peerDependencies": {
     "fumadocs-core": "^15.7.2 || ^16.0.0"

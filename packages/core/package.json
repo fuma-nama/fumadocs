@@ -116,8 +116,8 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@formatjs/intl-localematcher": "^0.6.2",
-    "@orama/orama": "^3.1.16",
+    "@formatjs/intl-localematcher": "^0.7.2",
+    "@orama/orama": "^3.1.17",
     "@shikijs/rehype": "^3.20.0",
     "@shikijs/transformers": "^3.20.0",
     "estree-util-value-to-estree": "^3.5.0",
@@ -147,13 +147,13 @@
     "@types/node": "24.10.2",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
-    "algoliasearch": "5.46.0",
+    "algoliasearch": "5.46.1",
     "eslint-config-custom": "workspace:*",
-    "lucide-react": "^0.561.0",
+    "lucide-react": "^0.562.0",
     "mdast-util-mdx-jsx": "^3.2.0",
     "mdast-util-mdxjs-esm": "^2.0.1",
-    "next": "16.0.10",
-    "react-router": "^7.10.1",
+    "next": "16.1.0",
+    "react-router": "^7.11.0",
     "remark-directive": "^4.0.0",
     "remark-mdx": "^3.1.1",
     "remove-markdown": "^0.6.2",
@@ -161,8 +161,8 @@
     "typescript": "^5.9.3",
     "unified": "^11.0.5",
     "vfile": "^6.0.3",
-    "waku": "^0.27.4",
-    "zod": "^4.1.13"
+    "waku": "^0.27.5",
+    "zod": "^4.2.1"
   },
   "peerDependencies": {
     "@mixedbread/sdk": "^0.19.0",
