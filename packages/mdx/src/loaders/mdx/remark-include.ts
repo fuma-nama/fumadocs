@@ -11,6 +11,91 @@ import type { Directives } from 'mdast-util-directive';
 import { remarkMarkAndUnravel } from '@/loaders/mdx/remark-unravel';
 import { flattenNode } from './mdast-utils';
 
+/**
+ * VS Code–style region extraction
+ * Adapted from VitePress:
+ * https://github.com/vuejs/vitepress/blob/main/src/node/markdown/plugins/snippet.ts
+ */
+
+// region marker regexes
+const REGION_MARKERS = [
+  {
+    start: /^\s*\/\/\s*#?region\b\s*(.*?)\s*$/,
+    end: /^\s*\/\/\s*#?endregion\b\s*(.*?)\s*$/,
+  },
+  {
+    start: /^\s*<!--\s*#?region\b\s*(.*?)\s*-->/,
+    end: /^\s*<!--\s*#?endregion\b\s*(.*?)\s*-->/,
+  },
+  {
+    start: /^\s*\/\*\s*#region\b\s*(.*?)\s*\*\//,
+    end: /^\s*\/\*\s*#endregion\b\s*(.*?)\s*\*\//,
+  },
+  {
+    start: /^\s*#[rR]egion\b\s*(.*?)\s*$/,
+    end: /^\s*#[eE]nd ?[rR]egion\b\s*(.*?)\s*$/,
+  },
+  {
+    start: /^\s*#\s*#?region\b\s*(.*?)\s*$/,
+    end: /^\s*#\s*#?endregion\b\s*(.*?)\s*$/,
+  },
+  {
+    start: /^\s*(?:--|::|@?REM)\s*#region\b\s*(.*?)\s*$/,
+    end: /^\s*(?:--|::|@?REM)\s*#endregion\b\s*(.*?)\s*$/,
+  },
+  {
+    start: /^\s*#pragma\s+region\b\s*(.*?)\s*$/,
+    end: /^\s*#pragma\s+endregion\b\s*(.*?)\s*$/,
+  },
+  {
+    start: /^\s*\(\*\s*#region\b\s*(.*?)\s*\*\)/,
+    end: /^\s*\(\*\s*#endregion\b\s*(.*?)\s*\*\)/,
+  },
+];
+
+function dedent(text: string): string {
+  const lines = text.split('\n');
+  const minIndent = lines.reduce((min, line) => {
+    const match = line.match(/^(\s*)\S/);
+    return match ? Math.min(min, match[1].length) : min;
+  }, Infinity);
+
+  return minIndent === Infinity
+    ? text
+    : lines.map((l) => l.slice(minIndent)).join('\n');
+}
+
+function extractCodeRegion(content: string, regionName: string): string {
+  const lines = content.split('\n');
+
+  for (let i = 0; i < lines.length; i++) {
+    for (const re of REGION_MARKERS) {
+      const match = re.start.exec(lines[i]);
+      if (match?.[1] !== regionName) continue;
+
+      let depth = 1;
+      const start = i + 1;
+
+      for (let j = start; j < lines.length; j++) {
+        if (re.start.exec(lines[j])?.[1] === regionName) depth++;
+
+        const endName = re.end.exec(lines[j])?.[1];
+        if (endName === regionName || endName === '') {
+          if (--depth === 0) {
+            return dedent(
+              lines
+                .slice(start, j)
+                .filter((l) => !re.start.test(l) && !re.end.test(l))
+                .join('\n'),
+            );
+          }
+        }
+      }
+    }
+  }
+  throw new Error(`Region "${regionName}" not found`);
+}
+
 export interface Params {
   lang?: string;
   meta?: string;
@@ -126,14 +211,18 @@ export function remarkInclude(this: Processor): Transformer<Root, Root> {
 
     const ext = path.extname(targetPath);
     _compiler?.addDependency(targetPath);
+    // For non-Markdown files, support VS Code–style region extraction
     if (params.lang || (ext !== '.md' && ext !== '.mdx')) {
       const lang = params.lang ?? ext.slice(1);
-
+      let value = content;
+      if (heading) {
+        value = extractCodeRegion(content, heading.trim());
+      }
       return {
         type: 'code',
         lang,
         meta: params.meta,
-        value: content,
+        value,
         data: {},
       } satisfies Code;
     }
