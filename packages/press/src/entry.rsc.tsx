@@ -8,7 +8,7 @@ import {
 } from '@vitejs/plugin-rsc/rsc';
 import { unstable_matchRSCServerRequest as matchRSCServerRequest } from 'react-router';
 
-import { routes } from './routes/config.js';
+import { routes } from './routes/config';
 
 async function fetchServer(request: Request) {
   return matchRSCServerRequest({
@@ -23,8 +23,8 @@ async function fetchServer(request: Request) {
     // The app routes.
     routes: await routes(),
     // Encode the match with the React Server implementation.
-    generateResponse(match, options) {
-      return new Response(renderToReadableStream(match.payload, options), {
+    generateResponse(match) {
+      return new Response(renderToReadableStream(match.payload), {
         status: match.statusCode,
         headers: match.headers,
       });
@@ -35,12 +35,8 @@ async function fetchServer(request: Request) {
 export default async function handler(request: Request) {
   // Import the generateHTML function from the client environment
   const ssr = await import.meta.viteRsc.loadModule<
-    typeof import('./entry.ssr.js')
+    typeof import('./entry.ssr')
   >('ssr', 'index');
 
-  return ssr.generateHTML(request, fetchServer);
-}
-
-if (import.meta.hot) {
-  import.meta.hot.accept();
+  return ssr.generateHTML(request, await fetchServer(request));
 }
