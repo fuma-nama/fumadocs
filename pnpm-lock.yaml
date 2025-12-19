@@ -2016,9 +2016,6 @@ importers:
 
   packages/openapi:
     dependencies:
-      '@fumadocs/ui':
-        specifier: workspace:*
-        version: link:../ui
       '@fumari/json-schema-to-typescript':
         specifier: ^2.0.0
         version: 2.0.0(prettier@3.7.4)
@@ -6486,7 +6483,6 @@ packages:
 
   bun@1.3.4:
     resolution: {integrity: sha512-xV6KgD5ImquuKsoghzbWmYzeCXmmSgN6yJGz444hri2W+NGKNRFUNrEhy9+/rRXbvNA2qF0K0jAwqFNy1/GhBg==}
-    cpu: [arm64, x64]
     os: [darwin, linux, win32]
     hasBin: true
 
