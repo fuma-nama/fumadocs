@@ -84,12 +84,12 @@ export function SidebarTabsDropdown({
                 item.props?.className,
               )}
             >
-              <div className="shrink-0 size-9 md:mt-1 md:mb-auto md:size-5 empty:hidden">
+              <div className="shrink-0 size-9 md:mb-auto md:size-5 empty:hidden">
                 {item.icon}
               </div>
               <div>
-                <p className="text-sm font-medium">{item.title}</p>
-                <p className="text-[0.8125rem] text-fd-muted-foreground empty:hidden">
+                <p className="text-sm font-medium leading-none">{item.title}</p>
+                <p className="text-[0.8125rem] text-fd-muted-foreground mt-1 empty:hidden">
                   {item.description}
                 </p>
               </div>
