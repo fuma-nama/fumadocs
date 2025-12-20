@@ -15,10 +15,10 @@
     "fumapress": "workspace:*",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "react-router": "^7.10.1"
+    "react-router": "^7.11.0"
   },
   "devDependencies": {
-    "@remix-run/node-fetch-server": "^0.12.0",
+    "@remix-run/node-fetch-server": "^0.13.0",
     "@tailwindcss/vite": "^4.1.18",
     "@types/mdx": "^2.0.13",
     "@types/node": "^24.10.2",
@@ -28,6 +28,6 @@
     "react-router-devtools": "^6.0.0",
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3",
-    "vite": "^7.2.7"
+    "vite": "^7.3.0"
   }
 }

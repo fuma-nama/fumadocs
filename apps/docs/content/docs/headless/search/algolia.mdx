@@ -8,26 +8,6 @@ description: Integrate Algolia Search with Fumadocs
   search dialog](https://algolia.com/policies/free-services-terms).
 </Callout>
 
-## Introduction
-
-The Algolia Integration automatically configures Algolia Search for document search.
-
-It creates a record for **each paragraph** in your document, it is also recommended by Algolia.
-
-Each record contains searchable attributes:
-
-| Attribute | Description           |
-| --------- | --------------------- |
-| `title`   | Page Title            |
-| `section` | Heading ID (nullable) |
-| `content` | Paragraph content     |
-
-The `section` field only exists in paragraphs under a heading. Headings and
-paragraphs are indexed as an individual record, grouped by their page ID.
-
-Notice that it expects the `url` property of a page to be unique, you shouldn't have two pages with the same
-url.
-
 ## Setup
 
 Install dependencies:
@@ -132,7 +112,7 @@ You can consider different options for implementing the UI:
 
 - Use their official clients directly.
 
-## Options
+## Advanced
 
 ### Tag Filter
 
@@ -176,3 +156,23 @@ And update your search client:
   ```
 
 The `tag` field is an attribute for faceting. You can also use the filter `tag:value` on Algolia search clients.
+
+### Under the Hood
+
+The Algolia Integration automatically configures Algolia Search for document search.
+
+It creates a record for **each paragraph** in your document, it is also recommended by Algolia.
+
+Each record contains searchable attributes:
+
+| Attribute | Description           |
+| --------- | --------------------- |
+| `title`   | Page Title            |
+| `section` | Heading ID (nullable) |
+| `content` | Paragraph content     |
+
+The `section` field only exists in paragraphs under a heading. Headings and
+paragraphs are indexed as an individual record, grouped by their page ID.
+
+Notice that it expects the `url` property of a page to be unique, you shouldn't have two pages with the same
+url.

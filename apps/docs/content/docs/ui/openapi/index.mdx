@@ -152,6 +152,8 @@ export const source = loader(
 );
 ```
 
+`openapiSource()` is a server-side API that generates pages directly to your `loader()`, hence allowing dynamic generation (e.g. different page tree as schema changes).
+
 It shares a different type from your original source, explicit handling of OpenAPI pages might be necessary (e.g. in your page component).
 
 ```tsx title="docs/[[...slug]]/page.tsx"
@@ -160,6 +162,7 @@ import { APIPage } from '@/components/api-page';
 function Page() {
   const page = source.getPage('...');
 
+  // for OpenAPI pages
   if (page.data.type === 'openapi') {
     return (
       <DocsPage full>

@@ -39,12 +39,12 @@
     "picocolors": "^1.1.1",
     "tinyexec": "^1.0.2",
     "ts-morph": "^27.0.2",
-    "zod": "^4.1.13"
+    "zod": "^4.2.1"
   },
   "devDependencies": {
     "@types/node": "24.10.2",
     "eslint-config-custom": "workspace:*",
-    "shadcn": "3.6.0",
+    "shadcn": "3.6.2",
     "tsconfig": "workspace:*"
   },
   "publishConfig": {

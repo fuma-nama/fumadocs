@@ -28,118 +28,124 @@
         {
           "children": [
             {
-              "position": undefined,
-              "type": "text",
-              "value": "Hello World [#heading]",
-            },
-          ],
-          "depth": 1,
-          "position": undefined,
-          "type": "heading",
-        },
-        {
-          "children": [
-            {
-              "position": undefined,
-              "type": "text",
-              "value": "Hey there!",
-            },
-          ],
-          "position": undefined,
-          "type": "paragraph",
-        },
-        {
-          "attributes": [
-            {
-              "name": "id",
-              "position": {
-                "end": {
-                  "column": 29,
-                  "line": 5,
-                  "offset": 66,
+              "children": [
+                {
+                  "position": undefined,
+                  "type": "text",
+                  "value": "Hello World [#heading]",
                 },
-                "start": {
-                  "column": 10,
-                  "line": 5,
-                  "offset": 47,
+              ],
+              "depth": 1,
+              "position": undefined,
+              "type": "heading",
+            },
+            {
+              "children": [
+                {
+                  "position": undefined,
+                  "type": "text",
+                  "value": "Hey there!",
                 },
+              ],
+              "position": undefined,
+              "type": "paragraph",
+            },
+            {
+              "attributes": [
+                {
+                  "name": "id",
+                  "position": {
+                    "end": {
+                      "column": 29,
+                      "line": 5,
+                      "offset": 66,
+                    },
+                    "start": {
+                      "column": 10,
+                      "line": 5,
+                      "offset": 47,
+                    },
+                  },
+                  "type": "mdxJsxAttribute",
+                  "value": "section-in-jsx",
+                },
+              ],
+              "children": [
+                {
+                  "children": [
+                    {
+                      "position": undefined,
+                      "type": "text",
+                      "value": "This is My Test.",
+                    },
+                  ],
+                  "position": undefined,
+                  "type": "paragraph",
+                },
+                {
+                  "children": [
+                    {
+                      "position": undefined,
+                      "type": "text",
+                      "value": "Nested Heading",
+                    },
+                  ],
+                  "depth": 3,
+                  "position": undefined,
+                  "type": "heading",
+                },
+                {
+                  "lang": "ts",
+                  "meta": null,
+                  "position": undefined,
+                  "type": "code",
+                  "value": "console.log('Hello World');",
+                },
+              ],
+              "name": "section",
+              "position": undefined,
+              "type": "mdxJsxFlowElement",
+            },
+            {
+              "attributes": {
+                "id": "section-in-directive",
               },
-              "type": "mdxJsxAttribute",
-              "value": "section-in-jsx",
-            },
-          ],
-          "children": [
-            {
               "children": [
                 {
+                  "children": [
+                    {
+                      "position": undefined,
+                      "type": "text",
+                      "value": "Heading in Directive",
+                    },
+                  ],
+                  "depth": 3,
                   "position": undefined,
-                  "type": "text",
-                  "value": "This is My Test.",
+                  "type": "heading",
                 },
-              ],
-              "position": undefined,
-              "type": "paragraph",
-            },
-            {
-              "children": [
                 {
+                  "children": [
+                    {
+                      "position": undefined,
+                      "type": "text",
+                      "value": "some content inside.",
+                    },
+                  ],
                   "position": undefined,
-                  "type": "text",
-                  "value": "Nested Heading",
+                  "type": "paragraph",
                 },
               ],
-              "depth": 3,
+              "name": "section",
               "position": undefined,
-              "type": "heading",
-            },
-            {
-              "lang": "ts",
-              "meta": null,
-              "position": undefined,
-              "type": "code",
-              "value": "console.log('Hello World');",
+              "type": "containerDirective",
             },
           ],
-          "name": "section",
           "position": undefined,
-          "type": "mdxJsxFlowElement",
-        },
-        {
-          "attributes": {
-            "id": "section-in-directive",
-          },
-          "children": [
-            {
-              "children": [
-                {
-                  "position": undefined,
-                  "type": "text",
-                  "value": "Heading in Directive",
-                },
-              ],
-              "depth": 3,
-              "position": undefined,
-              "type": "heading",
-            },
-            {
-              "children": [
-                {
-                  "position": undefined,
-                  "type": "text",
-                  "value": "some content inside.",
-                },
-              ],
-              "position": undefined,
-              "type": "paragraph",
-            },
-          ],
-          "name": "section",
-          "position": undefined,
-          "type": "containerDirective",
+          "type": "root",
         },
       ],
       "position": undefined,
-      "type": "root",
+      "type": "blockquote",
     },
     {
       "children": [
@@ -157,51 +163,154 @@
         {
           "children": [
             {
-              "position": undefined,
-              "type": "text",
-              "value": "Hello World",
-            },
-          ],
-          "data": {
-            "hProperties": {
-              "id": "heading",
-            },
-          },
-          "depth": 1,
-          "position": undefined,
-          "type": "heading",
-        },
-        {
-          "children": [
-            {
-              "position": undefined,
-              "type": "text",
-              "value": "Hey there!",
-            },
-          ],
-          "position": undefined,
-          "type": "paragraph",
-        },
-        {
-          "attributes": [
-            {
-              "name": "id",
-              "position": {
-                "end": {
-                  "column": 29,
-                  "line": 5,
-                  "offset": 66,
+              "children": [
+                {
+                  "position": undefined,
+                  "type": "text",
+                  "value": "Hello World",
                 },
-                "start": {
-                  "column": 10,
-                  "line": 5,
-                  "offset": 47,
+              ],
+              "data": {
+                "hProperties": {
+                  "id": "heading",
                 },
               },
-              "type": "mdxJsxAttribute",
-              "value": "section-in-jsx",
+              "depth": 1,
+              "position": undefined,
+              "type": "heading",
+            },
+            {
+              "children": [
+                {
+                  "position": undefined,
+                  "type": "text",
+                  "value": "Hey there!",
+                },
+              ],
+              "position": undefined,
+              "type": "paragraph",
+            },
+            {
+              "attributes": [
+                {
+                  "name": "id",
+                  "position": {
+                    "end": {
+                      "column": 29,
+                      "line": 5,
+                      "offset": 66,
+                    },
+                    "start": {
+                      "column": 10,
+                      "line": 5,
+                      "offset": 47,
+                    },
+                  },
+                  "type": "mdxJsxAttribute",
+                  "value": "section-in-jsx",
+                },
+              ],
+              "children": [
+                {
+                  "children": [
+                    {
+                      "position": undefined,
+                      "type": "text",
+                      "value": "This is My Test.",
+                    },
+                  ],
+                  "position": undefined,
+                  "type": "paragraph",
+                },
+                {
+                  "children": [
+                    {
+                      "position": undefined,
+                      "type": "text",
+                      "value": "Nested Heading",
+                    },
+                  ],
+                  "data": {
+                    "hProperties": {
+                      "id": "nested-heading",
+                    },
+                  },
+                  "depth": 3,
+                  "position": undefined,
+                  "type": "heading",
+                },
+                {
+                  "lang": "ts",
+                  "meta": null,
+                  "position": undefined,
+                  "type": "code",
+                  "value": "console.log('Hello World');",
+                },
+              ],
+              "name": "section",
+              "position": undefined,
+              "type": "mdxJsxFlowElement",
+            },
+            {
+              "attributes": {
+                "id": "section-in-directive",
+              },
+              "children": [
+                {
+                  "children": [
+                    {
+                      "position": undefined,
+                      "type": "text",
+                      "value": "Heading in Directive",
+                    },
+                  ],
+                  "data": {
+                    "hProperties": {
+                      "id": "heading-in-directive",
+                    },
+                  },
+                  "depth": 3,
+                  "position": undefined,
+                  "type": "heading",
+                },
+                {
+                  "children": [
+                    {
+                      "position": undefined,
+                      "type": "text",
+                      "value": "some content inside.",
+                    },
+                  ],
+                  "position": undefined,
+                  "type": "paragraph",
+                },
+              ],
+              "name": "section",
+              "position": undefined,
+              "type": "containerDirective",
             },
           ],
+          "position": undefined,
+          "type": "root",
+        },
+      ],
+      "position": undefined,
+      "type": "blockquote",
+    },
+    {
+      "children": [
+        {
+          "position": undefined,
+          "type": "text",
+          "value": "In JSX:",
+        },
+      ],
+      "position": undefined,
+      "type": "paragraph",
+    },
+    {
+      "children": [
+        {
           "children": [
             {
               "children": [
@@ -239,14 +348,27 @@
               "value": "console.log('Hello World');",
             },
           ],
-          "name": "section",
           "position": undefined,
-          "type": "mdxJsxFlowElement",
+          "type": "root",
         },
+      ],
+      "position": undefined,
+      "type": "blockquote",
+    },
+    {
+      "children": [
         {
-          "attributes": {
-            "id": "section-in-directive",
-          },
+          "position": undefined,
+          "type": "text",
+          "value": "In Directive:",
+        },
+      ],
+      "position": undefined,
+      "type": "paragraph",
+    },
+    {
+      "children": [
+        {
           "children": [
             {
               "children": [
@@ -277,110 +399,12 @@
               "type": "paragraph",
             },
           ],
-          "name": "section",
           "position": undefined,
-          "type": "containerDirective",
+          "type": "root",
         },
       ],
       "position": undefined,
-      "type": "root",
-    },
-    {
-      "children": [
-        {
-          "position": undefined,
-          "type": "text",
-          "value": "In JSX:",
-        },
-      ],
-      "position": undefined,
-      "type": "paragraph",
-    },
-    {
-      "children": [
-        {
-          "children": [
-            {
-              "position": undefined,
-              "type": "text",
-              "value": "This is My Test.",
-            },
-          ],
-          "position": undefined,
-          "type": "paragraph",
-        },
-        {
-          "children": [
-            {
-              "position": undefined,
-              "type": "text",
-              "value": "Nested Heading",
-            },
-          ],
-          "data": {
-            "hProperties": {
-              "id": "nested-heading",
-            },
-          },
-          "depth": 3,
-          "position": undefined,
-          "type": "heading",
-        },
-        {
-          "lang": "ts",
-          "meta": null,
-          "position": undefined,
-          "type": "code",
-          "value": "console.log('Hello World');",
-        },
-      ],
-      "position": undefined,
-      "type": "root",
-    },
-    {
-      "children": [
-        {
-          "position": undefined,
-          "type": "text",
-          "value": "In Directive:",
-        },
-      ],
-      "position": undefined,
-      "type": "paragraph",
-    },
-    {
-      "children": [
-        {
-          "children": [
-            {
-              "position": undefined,
-              "type": "text",
-              "value": "Heading in Directive",
-            },
-          ],
-          "data": {
-            "hProperties": {
-              "id": "heading-in-directive",
-            },
-          },
-          "depth": 3,
-          "position": undefined,
-          "type": "heading",
-        },
-        {
-          "children": [
-            {
-              "position": undefined,
-              "type": "text",
-              "value": "some content inside.",
-            },
-          ],
-          "position": undefined,
-          "type": "paragraph",
-        },
-      ],
-      "position": undefined,
-      "type": "root",
+      "type": "blockquote",
     },
     {
       "children": [
@@ -406,40 +430,46 @@
       "type": "paragraph",
     },
     {
-      "attributes": {},
       "children": [
         {
+          "attributes": {},
           "children": [
             {
+              "children": [
+                {
+                  "position": undefined,
+                  "type": "text",
+                  "value": "Heading in Directive",
+                },
+              ],
+              "data": {
+                "hProperties": {
+                  "id": "heading-in-directive",
+                },
+              },
+              "depth": 3,
               "position": undefined,
-              "type": "text",
-              "value": "Heading in Directive",
+              "type": "heading",
             },
-          ],
-          "data": {
-            "hProperties": {
-              "id": "heading-in-directive",
-            },
-          },
-          "depth": 3,
-          "position": undefined,
-          "type": "heading",
-        },
-        {
-          "children": [
             {
+              "children": [
+                {
+                  "position": undefined,
+                  "type": "text",
+                  "value": "some content inside.",
+                },
+              ],
               "position": undefined,
-              "type": "text",
-              "value": "some content inside.",
+              "type": "paragraph",
             },
           ],
+          "name": "include",
           "position": undefined,
-          "type": "paragraph",
+          "type": "root",
         },
       ],
-      "name": "include",
       "position": undefined,
-      "type": "root",
+      "type": "blockquote",
     },
     {
       "children": [
@@ -453,40 +483,216 @@
       "type": "paragraph",
     },
     {
-      "attributes": {},
+      "children": [
+        {
+          "attributes": {},
+          "children": [
+            {
+              "children": [
+                {
+                  "position": undefined,
+                  "type": "text",
+                  "value": "Heading in Directive",
+                },
+              ],
+              "data": {
+                "hProperties": {
+                  "id": "heading-in-directive",
+                },
+              },
+              "depth": 3,
+              "position": undefined,
+              "type": "heading",
+            },
+            {
+              "children": [
+                {
+                  "position": undefined,
+                  "type": "text",
+                  "value": "some content inside.",
+                },
+              ],
+              "position": undefined,
+              "type": "paragraph",
+            },
+          ],
+          "name": "include",
+          "position": undefined,
+          "type": "root",
+        },
+      ],
+      "position": undefined,
+      "type": "blockquote",
+    },
+    {
+      "children": [
+        {
+          "position": undefined,
+          "type": "text",
+          "value": "Code",
+        },
+      ],
+      "depth": 2,
+      "position": undefined,
+      "type": "heading",
+    },
+    {
       "children": [
         {
           "children": [
             {
+              "attributes": [],
+              "children": [
+                {
+                  "position": undefined,
+                  "type": "text",
+                  "value": "./code.ts",
+                },
+              ],
+              "name": "include",
               "position": undefined,
-              "type": "text",
-              "value": "Heading in Directive",
+              "type": "mdxJsxTextElement",
             },
           ],
-          "data": {
-            "hProperties": {
-              "id": "heading-in-directive",
-            },
-          },
-          "depth": 3,
+          "data": {},
+          "lang": "ts",
+          "meta": undefined,
           "position": undefined,
-          "type": "heading",
+          "type": "code",
+          "value": "//#region a
+console.log('hello world');
+//#endregion
+
+export function fn() {
+  //#region b
+  console.log('one');
+  //#region c
+  return function nested() {
+    console.log('two');
+    //#endregion
+    console.log('three');
+  };
+  //#endregion
+}
+",
         },
+      ],
+      "position": undefined,
+      "type": "blockquote",
+    },
+    {
+      "children": [
+        {
+          "position": undefined,
+          "type": "text",
+          "value": "With Region:",
+        },
+      ],
+      "position": undefined,
+      "type": "paragraph",
+    },
+    {
+      "children": [
         {
           "children": [
             {
+              "attributes": [],
+              "children": [
+                {
+                  "position": undefined,
+                  "type": "text",
+                  "value": "./code.ts#a",
+                },
+              ],
+              "name": "include",
               "position": undefined,
-              "type": "text",
-              "value": "some content inside.",
+              "type": "mdxJsxTextElement",
             },
           ],
+          "data": {},
+          "lang": "ts",
+          "meta": undefined,
           "position": undefined,
-          "type": "paragraph",
+          "type": "code",
+          "value": "console.log('hello world');",
         },
       ],
-      "name": "include",
       "position": undefined,
-      "type": "root",
+      "type": "blockquote",
+    },
+    {
+      "children": [
+        {
+          "position": undefined,
+          "type": "text",
+          "value": "With Nested Region:",
+        },
+      ],
+      "position": undefined,
+      "type": "paragraph",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "attributes": [],
+              "children": [
+                {
+                  "position": undefined,
+                  "type": "text",
+                  "value": "./code.ts#b",
+                },
+              ],
+              "name": "include",
+              "position": undefined,
+              "type": "mdxJsxTextElement",
+            },
+          ],
+          "data": {},
+          "lang": "ts",
+          "meta": undefined,
+          "position": undefined,
+          "type": "code",
+          "value": "console.log('one');
+return function nested() {
+  console.log('two');
+  console.log('three');
+};",
+        },
+      ],
+      "position": undefined,
+      "type": "blockquote",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "attributes": [],
+              "children": [
+                {
+                  "position": undefined,
+                  "type": "text",
+                  "value": "./code.ts#c",
+                },
+              ],
+              "name": "include",
+              "position": undefined,
+              "type": "mdxJsxTextElement",
+            },
+          ],
+          "data": {},
+          "lang": "ts",
+          "meta": undefined,
+          "position": undefined,
+          "type": "code",
+          "value": "return function nested() {
+  console.log('two');",
+        },
+      ],
+      "position": undefined,
+      "type": "blockquote",
     },
   ],
   "position": undefined,

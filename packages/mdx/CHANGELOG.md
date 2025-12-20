@@ -1,5 +1,11 @@
 # next-docs-mdx
 
+## 14.2.0
+
+### Minor Changes
+
+- 8ce2c70: Add VS Code-style #region / #endregion support to <include /> for code files
+
 ## 14.1.1
 
 ### Patch Changes

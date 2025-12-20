@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 16.3.1
+
+### Patch Changes
+
+- f398e36: Improve sidebar dropdown
+  - fumadocs-core@16.3.1
+  - @fumadocs/ui@16.3.1
+
 ## 16.3.0
 
 ### Minor Changes

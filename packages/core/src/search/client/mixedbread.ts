@@ -1,8 +1,8 @@
 import type { SortedResult } from '@/search';
-import Mixedbread from '@mixedbread/sdk';
-import { VectorStoreSearchResponse } from '@mixedbread/sdk/resources/vector-stores';
+import type Mixedbread from '@mixedbread/sdk';
 import removeMd from 'remove-markdown';
 import Slugger from 'github-slugger';
+import type { StoreSearchResponse } from '@mixedbread/sdk/resources/stores';
 
 export interface MixedbreadOptions {
   /**
@@ -33,7 +33,7 @@ export interface SearchMetadata {
   tag?: string;
 }
 
-type VectorStoreSearchResult = VectorStoreSearchResponse['data'][number] & {
+type StoreSearchResult = StoreSearchResponse['data'][number] & {
   generated_metadata: SearchMetadata;
 };
 
@@ -51,11 +51,9 @@ function extractHeadingTitle(text: string): string {
 
   if (firstLine) {
     // Use remove-markdown to convert to plain text and remove colons
-    const plainText = removeMd(firstLine, {
+    return removeMd(firstLine, {
       useImgAltText: false,
     });
-
-    return plainText;
   }
 
   return '';
@@ -71,9 +69,9 @@ export async function search(
     return [];
   }
 
-  const res = await client.vectorStores.search({
+  const res = await client.stores.search({
     query,
-    vector_store_identifiers: [vectorStoreId],
+    store_identifiers: [vectorStoreId],
     top_k: 10,
     filters: {
       key: 'generated_metadata.tag',
@@ -85,7 +83,7 @@ export async function search(
     },
   });
 
-  return (res.data as VectorStoreSearchResult[]).flatMap((item) => {
+  return (res.data as StoreSearchResult[]).flatMap((item) => {
     const metadata = item.generated_metadata;
 
     const url = metadata.url || '#';

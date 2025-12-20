@@ -65,7 +65,7 @@ export function AccordionTrigger(
         props.className,
       )}
     >
-      <ChevronRight className="size-3.5 text-fd-muted-foreground shrink-0 transition-transform group-data-[state=open]/accordion:rotate-90" />
+      <ChevronRight className="size-3.5 text-fd-muted-foreground shrink-0 transition-transform group-focus-visible/accordion:text-fd-primary group-data-[state=open]/accordion:rotate-90" />
       {props.children}
     </Primitive.Trigger>
   );

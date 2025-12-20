@@ -40,8 +40,8 @@ export function schemaToString(
     if ((flags & FormatFlags.UseAlias) === FormatFlags.UseAlias) {
       if (schema.title) return schema.title;
 
-      const ref = ctx?.getRawRef(schema);
-      if (ref) return ref.split('/').at(-1)!;
+      const ref = ctx?.getRawRef(schema)?.split('/');
+      if (ref && ref.length > 0) return ref[ref.length - 1];
     }
 
     if (Array.isArray(schema.type)) {

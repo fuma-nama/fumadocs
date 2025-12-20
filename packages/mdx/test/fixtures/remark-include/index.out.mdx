@@ -2,74 +2,116 @@
 
 Full:
 
-# Hello World \[#heading]
-
-Hey there!
-
-<section id="section-in-jsx">
-  This is My Test.
-
-  ### Nested Heading
-
-  ```ts
-  console.log('Hello World');
-  ```
-</section>
-
-:::section{#section-in-directive}
-### Heading in Directive
-
-some content inside.
-:::
+> # Hello World \[#heading]
+>
+> Hey there!
+>
+> <section id="section-in-jsx">
+>   This is My Test.
+>
+>   ### Nested Heading
+>
+>   ```ts
+>   console.log('Hello World');
+>   ```
+> </section>
+>
+> :::section{#section-in-directive}
+> ### Heading in Directive
+>
+> some content inside.
+> :::
 
 First Heading:
 
-# Hello World
-
-Hey there!
-
-<section id="section-in-jsx">
-  This is My Test.
-
-  ### Nested Heading
-
-  ```ts
-  console.log('Hello World');
-  ```
-</section>
-
-:::section{#section-in-directive}
-### Heading in Directive
-
-some content inside.
-:::
+> # Hello World
+>
+> Hey there!
+>
+> <section id="section-in-jsx">
+>   This is My Test.
+>
+>   ### Nested Heading
+>
+>   ```ts
+>   console.log('Hello World');
+>   ```
+> </section>
+>
+> :::section{#section-in-directive}
+> ### Heading in Directive
+>
+> some content inside.
+> :::
 
 In JSX:
 
-This is My Test.
-
-### Nested Heading
-
-```ts
-console.log('Hello World');
-```
+> This is My Test.
+>
+> ### Nested Heading
+>
+> ```ts
+> console.log('Hello World');
+> ```
 
 In Directive:
 
-### Heading in Directive
-
-some content inside.
+> ### Heading in Directive
+>
+> some content inside.
 
 ## Using Directives
 
 In Directive:
 
-### Heading in Directive
-
-some content inside.
+> ### Heading in Directive
+>
+> some content inside.
 
 Inline Directive:
 
-### Heading in Directive
+> ### Heading in Directive
+>
+> some content inside.
 
-some content inside.
+## Code
+
+> ```ts
+> //#region a
+> console.log('hello world');
+> //#endregion
+>
+> export function fn() {
+>   //#region b
+>   console.log('one');
+>   //#region c
+>   return function nested() {
+>     console.log('two');
+>     //#endregion
+>     console.log('three');
+>   };
+>   //#endregion
+> }
+>
+> ```
+
+With Region:
+
+> ```ts
+> console.log('hello world');
+> ```
+
+With Nested Region:
+
+> ```ts
+> console.log('one');
+> return function nested() {
+>   console.log('two');
+>   console.log('three');
+> };
+> ```
+
+> ```ts
+> return function nested() {
+>   console.log('two');
+> ```

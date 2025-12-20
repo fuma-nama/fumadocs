@@ -10,6 +10,9 @@ import type {
 import type { OpenAPIServer } from '@/server/create';
 import type { SchemaToPagesOptions } from '@/utils/pages/preset-auto';
 import type { ApiPageProps } from '@/ui/api-page';
+import { toStaticData } from '@/utils/pages/to-static-data';
+import type { StructuredData } from 'fumadocs-core/mdx-plugins';
+import type { TOCItemType } from 'fumadocs-core/toc';
 
 declare module 'fumadocs-core/source' {
   export interface PageData {
@@ -69,13 +72,15 @@ export function openapiPlugin(): LoaderPlugin {
 
 interface OpenAPIPageData extends PageData {
   getAPIPageProps: () => ApiPageProps;
+  structuredData: StructuredData;
+  toc: TOCItemType[];
 }
 
 /**
  * Generate virtual pages for Fumadocs Source API
  */
 export async function openapiSource(
-  from: OpenAPIServer,
+  server: OpenAPIServer,
   options: SchemaToPagesOptions & {
     baseDir?: string;
   } = {},
@@ -94,27 +99,32 @@ export async function openapiSource(
     metaData: MetaData;
   }>[] = [];
 
-  const entries = await fromServer(from, createAutoPreset(options));
-  for (const entry of Object.values(entries).flat()) {
-    files.push({
-      type: 'page',
-      path: `${baseDir}/${entry.path}`,
-      data: {
-        ...entry.info,
-        getAPIPageProps() {
-          const props = toBody(entry);
-          props.showDescription ??= true;
-          return props;
+  const entries = await fromServer(server, createAutoPreset(options));
+  for (const [schemaId, list] of Object.entries(entries)) {
+    const dereferenced = (await server.getSchema(schemaId)).dereferenced;
+    for (const entry of list) {
+      const props = toBody(entry);
+      props.showDescription ??= true;
+
+      files.push({
+        type: 'page',
+        path: `${baseDir}/${entry.path}`,
+        data: {
+          ...entry.info,
+          getAPIPageProps() {
+            return props;
+          },
+          ...toStaticData(props, dereferenced),
+          _openapi: {
+            method:
+              entry.type === 'operation' || entry.type === 'webhook'
+                ? entry.item.method
+                : undefined,
+            webhook: entry.type === 'webhook',
+          },
         },
-        _openapi: {
-          method:
-            entry.type === 'operation' || entry.type === 'webhook'
-              ? entry.item.method
-              : undefined,
-          webhook: entry.type === 'webhook',
-        },
-      },
-    });
+      });
+    }
   }
 
   return {

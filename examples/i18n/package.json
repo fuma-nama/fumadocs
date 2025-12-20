@@ -9,11 +9,11 @@
     "types:check": "fumadocs-mdx && next typegen && tsc --noEmit"
   },
   "dependencies": {
-    "@orama/tokenizers": "^3.1.16",
+    "@orama/tokenizers": "^3.1.17",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "next": "16.0.10",
+    "next": "16.1.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3"
   },

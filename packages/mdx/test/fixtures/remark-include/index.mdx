@@ -2,28 +2,42 @@
 
 Full:
 
-<include>./test.mdx</include>
+> <include>./test.mdx</include>
 
 First Heading:
 
-<include>./test.mdx#heading</include>
+> <include>./test.mdx#heading</include>
 
 In JSX:
 
-<include>./test.mdx#section-in-jsx</include>
+> <include>./test.mdx#section-in-jsx</include>
 
 In Directive:
 
-<include>./test.mdx#section-in-directive</include>
+> <include>./test.mdx#section-in-directive</include>
 
 ## Using Directives
 
 In Directive:
 
-:::include
-./test.mdx#section-in-directive
-:::
+> :::include
+> ./test.mdx#section-in-directive
+> :::
 
 Inline Directive:
 
-::include[./test.mdx#section-in-directive]
+> ::include[./test.mdx#section-in-directive]
+
+## Code
+
+> <include>./code.ts</include>
+
+With Region:
+
+> <include>./code.ts#a</include>
+
+With Nested Region:
+
+> <include>./code.ts#b</include>
+
+> <include>./code.ts#c</include>
