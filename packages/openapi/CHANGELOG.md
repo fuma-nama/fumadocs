@@ -1,5 +1,12 @@
 # @fuma-docs/openapi
 
+## 10.2.1
+
+### Patch Changes
+
+- 058a46b: Support `structuredData` in virtual file source
+- 52e84ad: improve schema UI for large unions
+
 ## 10.2.0
 
 ### Minor Changes
