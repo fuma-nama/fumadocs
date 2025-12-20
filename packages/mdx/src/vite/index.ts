@@ -9,7 +9,12 @@ import { createIntegratedConfigLoader } from '@/loaders/config';
 import { createMetaLoader } from '@/loaders/meta';
 import indexFile, { IndexFilePluginOptions } from '@/plugins/index-file';
 
-const FumadocsDeps = ['fumadocs-core', 'fumadocs-ui', 'fumadocs-openapi'];
+const FumadocsDeps = [
+  'fumadocs-core',
+  'fumadocs-ui',
+  'fumadocs-openapi',
+  '@fumadocs/base-ui',
+];
 
 export interface PluginOptions {
   /**

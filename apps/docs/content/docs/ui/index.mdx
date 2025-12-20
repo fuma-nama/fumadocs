@@ -169,7 +169,12 @@ Make sure to exclude Fumadocs from pre-bundling and add it to `noExternal`:
 import { defineConfig } from 'vite';
 
 // add other Fumadocs deps as needed
-const FumadocsDeps = ['fumadocs-core', 'fumadocs-ui'];
+const FumadocsDeps = [
+  'fumadocs-core',
+  'fumadocs-ui',
+  'fumadocs-openapi',
+  '@fumadocs/base-ui',
+];
 
 export default defineConfig({
   resolve: {
