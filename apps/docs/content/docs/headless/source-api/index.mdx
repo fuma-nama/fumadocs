@@ -1,17 +1,22 @@
 ---
 title: Loader API
-description: Turn a content source into a unified interface
+description: Turn content sources into a unified interface
 ---
 
 ## What it does?
 
-`loader()` provides an interface for Fumadocs to integrate with file-system based content sources.
+`loader()` provides an interface for Fumadocs to integrate with different content sources.
 
 - Generate [page slugs and page tree](/docs/headless/page-conventions).
 - Assign URL to each page.
 - Output useful utilities to interact with content.
 
-It is a server-side API, but doesn't rely on the real file system (zero `node:fs` usage), a virtual storage is also allowed.
+<Callout type='warn' title="Common Misconceptions">
+
+- `loader()` is a server-side API, not a build-time magic or browser compatible API.
+- It uses in-memory storage, the files are passed from your content sources.
+
+</Callout>
 
 ## Usage
 
