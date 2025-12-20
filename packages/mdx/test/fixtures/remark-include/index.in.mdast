@@ -26,21 +26,27 @@
     {
       "children": [
         {
-          "attributes": [],
           "children": [
             {
+              "attributes": [],
+              "children": [
+                {
+                  "position": undefined,
+                  "type": "text",
+                  "value": "./test.mdx",
+                },
+              ],
+              "name": "include",
               "position": undefined,
-              "type": "text",
-              "value": "./test.mdx",
+              "type": "mdxJsxTextElement",
             },
           ],
-          "name": "include",
           "position": undefined,
-          "type": "mdxJsxTextElement",
+          "type": "paragraph",
         },
       ],
       "position": undefined,
-      "type": "paragraph",
+      "type": "blockquote",
     },
     {
       "children": [
@@ -56,21 +62,27 @@
     {
       "children": [
         {
-          "attributes": [],
           "children": [
             {
+              "attributes": [],
+              "children": [
+                {
+                  "position": undefined,
+                  "type": "text",
+                  "value": "./test.mdx#heading",
+                },
+              ],
+              "name": "include",
               "position": undefined,
-              "type": "text",
-              "value": "./test.mdx#heading",
+              "type": "mdxJsxTextElement",
             },
           ],
-          "name": "include",
           "position": undefined,
-          "type": "mdxJsxTextElement",
+          "type": "paragraph",
         },
       ],
       "position": undefined,
-      "type": "paragraph",
+      "type": "blockquote",
     },
     {
       "children": [
@@ -86,21 +98,27 @@
     {
       "children": [
         {
-          "attributes": [],
           "children": [
             {
+              "attributes": [],
+              "children": [
+                {
+                  "position": undefined,
+                  "type": "text",
+                  "value": "./test.mdx#section-in-jsx",
+                },
+              ],
+              "name": "include",
               "position": undefined,
-              "type": "text",
-              "value": "./test.mdx#section-in-jsx",
+              "type": "mdxJsxTextElement",
             },
           ],
-          "name": "include",
           "position": undefined,
-          "type": "mdxJsxTextElement",
+          "type": "paragraph",
         },
       ],
       "position": undefined,
-      "type": "paragraph",
+      "type": "blockquote",
     },
     {
       "children": [
@@ -116,21 +134,27 @@
     {
       "children": [
         {
-          "attributes": [],
           "children": [
             {
+              "attributes": [],
+              "children": [
+                {
+                  "position": undefined,
+                  "type": "text",
+                  "value": "./test.mdx#section-in-directive",
+                },
+              ],
+              "name": "include",
               "position": undefined,
-              "type": "text",
-              "value": "./test.mdx#section-in-directive",
+              "type": "mdxJsxTextElement",
             },
           ],
-          "name": "include",
           "position": undefined,
-          "type": "mdxJsxTextElement",
+          "type": "paragraph",
         },
       ],
       "position": undefined,
-      "type": "paragraph",
+      "type": "blockquote",
     },
     {
       "children": [
@@ -156,23 +180,29 @@
       "type": "paragraph",
     },
     {
-      "attributes": {},
       "children": [
         {
+          "attributes": {},
           "children": [
             {
+              "children": [
+                {
+                  "position": undefined,
+                  "type": "text",
+                  "value": "./test.mdx#section-in-directive",
+                },
+              ],
               "position": undefined,
-              "type": "text",
-              "value": "./test.mdx#section-in-directive",
+              "type": "paragraph",
             },
           ],
+          "name": "include",
           "position": undefined,
-          "type": "paragraph",
+          "type": "containerDirective",
         },
       ],
-      "name": "include",
       "position": undefined,
-      "type": "containerDirective",
+      "type": "blockquote",
     },
     {
       "children": [
@@ -186,17 +216,157 @@
       "type": "paragraph",
     },
     {
-      "attributes": {},
+      "children": [
+        {
+          "attributes": {},
+          "children": [
+            {
+              "position": undefined,
+              "type": "text",
+              "value": "./test.mdx#section-in-directive",
+            },
+          ],
+          "name": "include",
+          "position": undefined,
+          "type": "leafDirective",
+        },
+      ],
+      "position": undefined,
+      "type": "blockquote",
+    },
+    {
       "children": [
         {
           "position": undefined,
           "type": "text",
-          "value": "./test.mdx#section-in-directive",
+          "value": "Code",
         },
       ],
-      "name": "include",
+      "depth": 2,
       "position": undefined,
-      "type": "leafDirective",
+      "type": "heading",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "attributes": [],
+              "children": [
+                {
+                  "position": undefined,
+                  "type": "text",
+                  "value": "./code.ts",
+                },
+              ],
+              "name": "include",
+              "position": undefined,
+              "type": "mdxJsxTextElement",
+            },
+          ],
+          "position": undefined,
+          "type": "paragraph",
+        },
+      ],
+      "position": undefined,
+      "type": "blockquote",
+    },
+    {
+      "children": [
+        {
+          "position": undefined,
+          "type": "text",
+          "value": "With Region:",
+        },
+      ],
+      "position": undefined,
+      "type": "paragraph",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "attributes": [],
+              "children": [
+                {
+                  "position": undefined,
+                  "type": "text",
+                  "value": "./code.ts#a",
+                },
+              ],
+              "name": "include",
+              "position": undefined,
+              "type": "mdxJsxTextElement",
+            },
+          ],
+          "position": undefined,
+          "type": "paragraph",
+        },
+      ],
+      "position": undefined,
+      "type": "blockquote",
+    },
+    {
+      "children": [
+        {
+          "position": undefined,
+          "type": "text",
+          "value": "With Nested Region:",
+        },
+      ],
+      "position": undefined,
+      "type": "paragraph",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "attributes": [],
+              "children": [
+                {
+                  "position": undefined,
+                  "type": "text",
+                  "value": "./code.ts#b",
+                },
+              ],
+              "name": "include",
+              "position": undefined,
+              "type": "mdxJsxTextElement",
+            },
+          ],
+          "position": undefined,
+          "type": "paragraph",
+        },
+      ],
+      "position": undefined,
+      "type": "blockquote",
+    },
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "attributes": [],
+              "children": [
+                {
+                  "position": undefined,
+                  "type": "text",
+                  "value": "./code.ts#c",
+                },
+              ],
+              "name": "include",
+              "position": undefined,
+              "type": "mdxJsxTextElement",
+            },
+          ],
+          "position": undefined,
+          "type": "paragraph",
+        },
+      ],
+      "position": undefined,
+      "type": "blockquote",
     },
   ],
   "position": undefined,
