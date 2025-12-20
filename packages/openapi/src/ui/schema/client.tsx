@@ -43,10 +43,12 @@ interface RenderRefOptions {
   text: ReactNode;
   pathName: ReactNode;
   $ref: string;
+
+  inlineUnion?: boolean;
 }
 
 const typeVariants = cva(
-  'text-sm text-start text-fd-muted-foreground wrap-anywhere font-mono',
+  'text-sm text-start text-fd-muted-foreground font-mono',
   {
     variants: {
       variant: {
@@ -193,38 +195,16 @@ function SchemaUIProperty({
   const schema = refs[$type];
 
   let type: ReactNode = schema.typeName;
-  if (schema.type === 'or' && schema.items.length > 0) {
-    type = (
-      <span className={cn(typeVariants(), 'flex flex-row gap-2 items-center')}>
-        {schema.items.map((item, i) => (
-          <Fragment key={item.$type}>
-            {i > 0 && <span>|</span>}
-            {renderRef({
-              pathName: name,
-              text: item.name,
-              $ref: item.$type,
-            })}
-          </Fragment>
-        ))}
-      </span>
-    );
-  }
-
-  if (schema.type === 'and' && schema.items.length > 0) {
-    type = (
-      <span className={cn(typeVariants(), 'flex flex-row gap-2 items-center')}>
-        {schema.items.map((item, i) => (
-          <Fragment key={item.$type}>
-            {i > 0 && <span>&</span>}
-            {renderRef({
-              pathName: name,
-              text: item.name,
-              $ref: item.$type,
-            })}
-          </Fragment>
-        ))}
-      </span>
-    );
+  if (
+    (schema.type === 'or' || schema.type === 'and') &&
+    schema.items.length > 0
+  ) {
+    type = renderRef({
+      text: schema.aliasName,
+      pathName: name,
+      $ref: $type,
+      inlineUnion: true,
+    });
   }
 
   if (schema.type === 'object' && schema.props.length > 0) {
@@ -238,7 +218,7 @@ function SchemaUIProperty({
   if (schema.type === 'array') {
     type = renderRef({
       text: schema.aliasName,
-      pathName: <>{name}[]</>,
+      pathName: name,
       $ref: schema.item.$type,
     });
   }
@@ -335,13 +315,34 @@ function SchemaUIPopover({
   );
 }
 
-function RootRef({ text, $ref, pathName }: RenderRefOptions) {
+function RootRef({ text, $ref, pathName, inlineUnion }: RenderRefOptions) {
   const { refs } = useData();
   const ref = useCallback((element: HTMLDivElement | null) => {
     if (!element || element.style.getPropertyValue('--initial-height')) return;
 
     element.style.setProperty('--initial-height', `${element.clientHeight}px`);
   }, []);
+
+  const schema = refs[$ref];
+
+  if (inlineUnion && (schema.type === 'and' || schema.type === 'or')) {
+    const sep = schema.type === 'and' ? '&' : '|';
+    return (
+      <span
+        className={cn(
+          typeVariants(),
+          'flex flex-row gap-2 items-center flex-wrap',
+        )}
+      >
+        {schema.items.map((item, i) => (
+          <Fragment key={item.$type}>
+            {i > 0 && <span>{sep}</span>}
+            <RootRef pathName={pathName} text={item.name} $ref={item.$type} />
+          </Fragment>
+        ))}
+      </span>
+    );
+  }
 
   if (!isExpandable(refs[$ref])) {
     return <span className={cn(typeVariants())}>{text}</span>;
@@ -359,7 +360,12 @@ function RootRef({ text, $ref, pathName }: RenderRefOptions) {
         <SchemaUIPopover
           initialPath={[
             {
-              name: pathName,
+              name: (
+                <>
+                  {pathName}
+                  {schema.type === 'array' && '[]'}
+                </>
+              ),
               $ref: $ref,
             },
           ]}
@@ -411,6 +417,7 @@ function Property({
   required,
   deprecated,
   nested = false,
+  className,
   ...props
 }: PropertyProps) {
   return (
@@ -420,7 +427,7 @@ function Property({
         nested
           ? 'p-3 border-x bg-fd-card last:rounded-b-xl first:rounded-tr-xl last:border-b'
           : 'py-4 first:border-t-0',
-        props.className,
+        className,
       )}
     >
       <div className="flex flex-wrap items-center gap-3 not-prose">

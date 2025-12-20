@@ -256,27 +256,15 @@ export function generateSchemaUI(
         ...base(schema),
       };
       refs[id] = out;
+      for (const omit of ['anyOf', 'oneOf'] as const) {
+        const $type = `${id}_omit:${omit}`;
+        scanRefs($type, { ...schema, [omit]: undefined });
 
-      const $oneOf = `${id}_oneOf`;
-      const $anyOf = `${id}_anyOf`;
-      scanRefs($oneOf, {
-        ...schema,
-        anyOf: undefined,
-      });
-      scanRefs($anyOf, {
-        ...schema,
-        oneOf: undefined,
-      });
-      out.items.push(
-        {
-          name: refs[$oneOf].aliasName,
-          $type: $oneOf,
-        },
-        {
-          name: refs[$anyOf].aliasName,
-          $type: $anyOf,
-        },
-      );
+        out.items.push({
+          name: refs[$type].aliasName,
+          $type,
+        });
+      }
       return;
     }
 
@@ -292,7 +280,9 @@ export function generateSchemaUI(
 
       for (const item of union) {
         if (typeof item !== 'object' || !isVisible(item)) continue;
-        const key = `${id}_extends:${getSchemaId(item)}`;
+        const itemId = getSchemaId(item);
+        const key = `${id}_extends:${itemId}`;
+
         scanRefs(key, {
           ...schema,
           oneOf: undefined,
@@ -305,7 +295,9 @@ export function generateSchemaUI(
         });
         out.items.push({
           $type: key,
-          name: refs[key].aliasName,
+          name:
+            refs[itemId]?.aliasName ??
+            schemaToString(item, ctx.schema, FormatFlags.UseAlias),
         });
       }
       return;
