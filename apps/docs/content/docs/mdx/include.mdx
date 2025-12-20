@@ -55,6 +55,24 @@ For other types of files, it will become a codeblock:
 ::include[page.md]{lang=md meta='title="lib.md"'}
 ```
 
+You can include only a region of content:
+
+```ts title="code.ts"
+export function fn() {
+  //#region a
+  console.log('one');
+  //#endregion
+}
+```
+
+```mdx tab="MDX"
+<include>./code.ts#a</include>
+```
+
+```md tab="Markdown"
+::include[./code.ts#a]
+```
+
 ### `cwd`
 
 Resolve relative paths from cwd instead of the current file:
