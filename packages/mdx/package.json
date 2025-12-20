@@ -111,10 +111,14 @@
     "fumadocs-core": "^15.0.0 || ^16.0.0",
     "next": "^15.3.0 || ^16.0.0",
     "react": "*",
+    "@types/react": "*",
     "vite": "6.x.x || 7.x.x"
   },
   "peerDependenciesMeta": {
     "react": {
+      "optional": true
+    },
+    "@types/react": {
       "optional": true
     },
     "next": {
