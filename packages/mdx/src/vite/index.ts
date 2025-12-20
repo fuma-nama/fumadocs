@@ -9,13 +9,6 @@ import { createIntegratedConfigLoader } from '@/loaders/config';
 import { createMetaLoader } from '@/loaders/meta';
 import indexFile, { IndexFilePluginOptions } from '@/plugins/index-file';
 
-const FumadocsDeps = [
-  'fumadocs-core',
-  'fumadocs-ui',
-  'fumadocs-openapi',
-  '@fumadocs/base-ui',
-];
-
 export interface PluginOptions {
   /**
    * Generate index files for accessing content.
@@ -71,12 +64,21 @@ export default async function mdx(
       if (!options.updateViteConfig) return config;
 
       return mergeConfig(config, {
-        optimizeDeps: {
-          exclude: FumadocsDeps,
-        },
         resolve: {
-          noExternal: FumadocsDeps,
-          dedupe: FumadocsDeps,
+          noExternal: [
+            'fumadocs-core',
+            'fumadocs-ui',
+            'fumadocs-openapi',
+            '@fumadocs/base-ui',
+            '@fumadocs/ui',
+          ],
+          // only dedupe for public, non-transitive libs
+          dedupe: [
+            'fumadocs-core',
+            'fumadocs-ui',
+            'fumadocs-openapi',
+            '@fumadocs/base-ui',
+          ],
         },
       } satisfies UserConfig);
     },
