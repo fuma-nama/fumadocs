@@ -1,5 +1,12 @@
 # create-fumadocs-versions
 
+## 16.0.29
+
+### Patch Changes
+
+- Updated dependencies [8ce2c70]
+  - fumadocs-mdx@14.2.0
+
 ## 16.0.28
 
 ### Patch Changes
