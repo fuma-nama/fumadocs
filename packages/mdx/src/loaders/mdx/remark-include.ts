@@ -53,15 +53,14 @@ const REGION_MARKERS = [
   },
 ];
 
-function dedent(text: string): string {
-  const lines = text.split('\n');
+function dedent(lines: string[]): string {
   const minIndent = lines.reduce((min, line) => {
     const match = line.match(/^(\s*)\S/);
     return match ? Math.min(min, match[1].length) : min;
   }, Infinity);
 
   return minIndent === Infinity
-    ? text
+    ? lines.join('\n')
     : lines.map((l) => l.slice(minIndent)).join('\n');
 }
 
@@ -70,25 +69,28 @@ function extractCodeRegion(content: string, regionName: string): string {
 
   for (let i = 0; i < lines.length; i++) {
     for (const re of REGION_MARKERS) {
-      const match = re.start.exec(lines[i]);
+      let match = re.start.exec(lines[i]);
       if (match?.[1] !== regionName) continue;
 
       let depth = 1;
-      const start = i + 1;
+      const extractedLines: string[] = [];
+      for (let j = i + 1; j < lines.length; j++) {
+        match = re.start.exec(lines[j]);
+        if (match) {
+          depth++;
+          continue;
+        }
 
-      for (let j = start; j < lines.length; j++) {
-        if (re.start.exec(lines[j])?.[1] === regionName) depth++;
+        match = re.end.exec(lines[j]);
+        if (match) {
+          if (match[1] === regionName) depth = 0;
+          else if (match[1] === '') depth--;
+          else continue;
 
-        const endName = re.end.exec(lines[j])?.[1];
-        if (endName === regionName || endName === '') {
-          if (--depth === 0) {
-            return dedent(
-              lines
-                .slice(start, j)
-                .filter((l) => !re.start.test(l) && !re.end.test(l))
-                .join('\n'),
-            );
-          }
+          if (depth > 0) continue;
+          return dedent(extractedLines);
+        } else {
+          extractedLines.push(lines[j]);
         }
       }
     }
