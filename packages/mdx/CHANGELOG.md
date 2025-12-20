@@ -1,5 +1,11 @@
 # next-docs-mdx
 
+## 14.2.1
+
+### Patch Changes
+
+- 3a5b077: hotfix Vite bundling
+
 ## 14.2.0
 
 ### Minor Changes
