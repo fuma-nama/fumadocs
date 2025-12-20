@@ -57,6 +57,24 @@ You can automatically sync your documentation by adding a sync script to your `p
 }
 ```
 
+### Search Client
+
+- **Fumadocs UI**: see [Search UI](/docs/ui/search/mixedbread) for details.
+- **Search Client**:
+
+  ```ts
+  import { useDocsSearch } from 'fumadocs-core/search/client';
+
+  const mxbai = new Mixedbread({
+    apiKey: 'YOUR_API_KEY',
+  });
+
+  const client = useDocsSearch({
+    type: 'mixedbread',
+    client: mxbai,
+  });
+  ```
+
 ## Options
 
 ### Tag Filter
