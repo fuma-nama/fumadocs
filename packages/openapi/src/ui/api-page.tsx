@@ -102,7 +102,7 @@ export interface CreateAPIPageOptions {
      * @param generators - codegens for API example usages
      */
     renderAPIExampleUsageTabs?: (
-      generators: CodeUsageGenerator<unknown>[],
+      generators: CodeUsageGenerator[],
       ctx: RenderContext,
     ) => Awaitable<ReactNode>;
 
