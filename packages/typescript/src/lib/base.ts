@@ -6,15 +6,15 @@ import {
   type Type,
 } from 'ts-morph';
 import { createProject, type TypescriptConfig } from '@/create-project';
-import fs from 'node:fs';
+import fs from 'node:fs/promises';
 import {
   type BaseTypeTableProps,
   type GenerateTypeTableOptions,
   getTypeTableOutput,
 } from '@/lib/type-table';
-import { createCache } from '@/lib/cache';
 import path from 'node:path';
 import { getSimpleForm } from '@/lib/get-simple-form';
+import type { Cache } from '@/cache';
 
 export interface GeneratedDoc {
   name: string;
@@ -72,9 +72,9 @@ export interface GeneratorOptions extends TypescriptConfig {
   /**
    * cache results, note that some options are not marked as dependency.
    *
-   * @defaultValue fs
+   * @defaultValue false
    */
-  cache?: 'fs' | false;
+  cache?: Cache | false;
 
   project?: Project;
 }
@@ -86,9 +86,7 @@ export function createGenerator(config?: GeneratorOptions | Project) {
           project: config,
         }
       : config;
-  const cacheType =
-    options?.cache ?? (process.env.NODE_ENV !== 'development' ? 'fs' : false);
-  const cache = cacheType === 'fs' ? createCache() : null;
+  const cache = options?.cache ? options.cache : null;
   let instance: Project | undefined;
 
   function getProject() {
@@ -97,7 +95,7 @@ export function createGenerator(config?: GeneratorOptions | Project) {
   }
 
   return {
-    generateDocumentation(
+    async generateDocumentation(
       file: {
         path: string;
         content?: string;
@@ -106,10 +104,12 @@ export function createGenerator(config?: GeneratorOptions | Project) {
       options?: GenerateOptions,
     ) {
       const content =
-        file.content ?? fs.readFileSync(path.resolve(file.path)).toString();
+        file.content ?? (await fs.readFile(path.resolve(file.path))).toString();
       const cacheKey = `${file.path}:${name}:${content}`;
       if (cache) {
-        const cached = cache.read(cacheKey) as GeneratedDoc[] | undefined;
+        const cached = (await cache.read(cacheKey)) as
+          | GeneratedDoc[]
+          | undefined;
         if (cached) return cached;
       }
       const sourceFile = getProject().createSourceFile(file.path, content, {
@@ -128,7 +128,7 @@ export function createGenerator(config?: GeneratorOptions | Project) {
         out.push(generate(getProject(), k, d[0], options));
       }
 
-      cache?.write(cacheKey, out);
+      void cache?.write(cacheKey, out);
       return out;
     },
     generateTypeTable(
@@ -138,28 +138,6 @@ export function createGenerator(config?: GeneratorOptions | Project) {
       return getTypeTableOutput(this, props, options);
     },
   };
-}
-
-/**
- * Generate documentation for properties in an exported type/interface
- *
- * @deprecated use `createGenerator` instead
- */
-export function generateDocumentation(
-  file: string,
-  name: string | undefined,
-  content: string,
-  options: GenerateOptions & {
-    /**
-     * Typescript configurations
-     */
-    config?: TypescriptConfig;
-    project?: Project;
-  } = {},
-): GeneratedDoc[] {
-  const gen = createGenerator(options.project ?? options.config);
-
-  return gen.generateDocumentation({ path: file, content }, name, options);
 }
 
 function generate(

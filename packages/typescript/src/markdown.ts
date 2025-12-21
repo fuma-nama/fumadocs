@@ -6,10 +6,15 @@ import {
   type RehypeCodeOptions,
 } from 'fumadocs-core/mdx-plugins/rehype-code';
 import remarkRehype from 'remark-rehype';
-import { highlightHast } from 'fumadocs-core/highlight';
+import { getHighlighter } from 'fumadocs-core/highlight';
 
 const shikiOptions = {
   lazy: true,
+  langs: ['ts', 'tsx'],
+
+  // disable default transformers & meta parser
+  transformers: [],
+  parseMetaString: undefined,
 
   themes: {
     light: 'github-light',
@@ -23,10 +28,16 @@ const processor = remark()
   .use(rehypeCode, shikiOptions);
 
 export async function renderTypeToHast(type: string): Promise<Nodes> {
-  const nodes = await highlightHast(type, {
-    ...shikiOptions,
+  const highlighter = await getHighlighter('js', {
+    langs: ['ts'],
+    themes: Object.values(shikiOptions.themes),
+  });
+
+  const nodes = highlighter.codeToHast(type, {
     lang: 'ts',
     structure: 'inline',
+    themes: shikiOptions.themes,
+    defaultColor: false,
   });
 
   return {

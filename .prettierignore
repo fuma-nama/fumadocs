@@ -4,8 +4,6 @@ pnpm-lock.yaml
 
 packages/create-app/versions.json
 
-apps/docs/shaders/*
-
 **/test/out/**/*
 **/test/fixtures/**/*.output.*
 **/test/fixtures/**/*.out.*
@@ -21,8 +19,6 @@ examples/openapi/content/docs/(api)/**/*.mdx
 
 examples/obsidian/content/docs/vault/**/*
 examples/obsidian/obsidian/Obsidian Vault
-
-apps/docs/content/docs/ui/typescript.mdx
 
 .content-collections/**/*
 

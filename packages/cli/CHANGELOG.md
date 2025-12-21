@@ -1,5 +1,11 @@
 # fumadocs
 
+## 1.2.0
+
+### Minor Changes
+
+- 389e68b: Fumadocs UI 16.3
+
 ## 1.1.0
 
 ### Minor Changes

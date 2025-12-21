@@ -67,7 +67,7 @@ export async function getTypeTableOutput(
     content += `\nexport type ${typeName} = ${type}`;
   }
 
-  const output = gen.generateDocumentation(
+  const output = await gen.generateDocumentation(
     { path: file ?? 'temp.ts', content },
     typeName,
     options,

@@ -1,5 +1,13 @@
 # @fumadocs/base-ui
 
+## 16.3.2
+
+### Patch Changes
+
+- 7c78045: Support custom renderer for `title` in layouts
+  - @fumadocs/ui@16.3.2
+  - fumadocs-core@16.3.2
+
 ## 16.3.1
 
 ### Patch Changes
