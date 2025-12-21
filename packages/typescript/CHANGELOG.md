@@ -1,5 +1,43 @@
 # fumadocs-typescript
 
+## 5.0.0
+
+### Major Changes
+
+- 9a3e2e8: **Require async for `generator.generateDocumentation()`**
+
+  This is necessary to support async cache adapter.
+
+- 9a3e2e8: **Remove deprecated APIs**
+  - removed standalone `generateDocumentation()` function, create a generator instead.
+  - removed `generateFiles` & MDX generation APIs, use `remarkAutoTypeTable` instead.
+
+- 9a3e2e8: **Require explicit cache**
+
+  Previously, we enabled file system cache by default, but the directory is not customisable and only support Next.js.
+
+  Now, cache is disabled by default and require explicit declaration.
+
+  Update all your `createGenerator()` calls:
+
+  ```ts
+  import {
+    createGenerator,
+    createFileSystemGeneratorCache,
+  } from 'fumadocs-typescript';
+
+  const generator = createGenerator({
+    // add this!
+    cache: createFileSystemGeneratorCache('.next/fumadocs-typescript'),
+  });
+  ```
+
+### Patch Changes
+
+- Updated dependencies [7c78045]
+  - fumadocs-ui@16.3.2
+  - fumadocs-core@16.3.2
+
 ## 4.0.14
 
 ### Patch Changes

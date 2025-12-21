@@ -1,5 +1,11 @@
 # @fumadocs/ui
 
+## 16.3.2
+
+### Patch Changes
+
+- fumadocs-core@16.3.2
+
 ## 16.3.1
 
 ### Patch Changes
