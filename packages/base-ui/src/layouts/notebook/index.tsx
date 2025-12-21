@@ -5,7 +5,11 @@ import {
   type ReactNode,
   useMemo,
 } from 'react';
-import { type BaseLayoutProps, resolveLinkItems } from '@/layouts/shared';
+import {
+  type BaseLayoutProps,
+  renderTitleNav,
+  resolveLinkItems,
+} from '@/layouts/shared';
 import {
   Sidebar,
   SidebarCollapseTrigger,
@@ -30,7 +34,6 @@ import {
   LayoutHeaderTabs,
   NavbarLinkItem,
 } from '@/layouts/notebook/client';
-import Link from 'fumadocs-core/link';
 import {
   LargeSearchToggle,
   SearchToggle,
@@ -177,12 +180,9 @@ export function DocsLayout(props: DocsLayoutProps) {
           <Header>
             {navMode === 'auto' && (
               <div className="flex justify-between">
-                <Link
-                  href={nav.url ?? '/'}
-                  className="inline-flex items-center gap-2.5 font-medium"
-                >
-                  {nav.title}
-                </Link>
+                {renderTitleNav(nav, {
+                  className: 'inline-flex items-center gap-2.5 font-medium',
+                })}
                 {collapsible && (
                   <SidebarCollapseTrigger
                     className={cn(
@@ -349,15 +349,12 @@ function DocsNavbar({
               <SidebarIcon />
             </SidebarCollapseTrigger>
           )}
-          <Link
-            href={nav.url ?? '/'}
-            className={cn(
+          {renderTitleNav(nav, {
+            className: cn(
               'inline-flex items-center gap-2.5 font-semibold',
               navMode === 'auto' && 'md:hidden',
-            )}
-          >
-            {nav.title}
-          </Link>
+            ),
+          })}
         </div>
         {searchToggle.enabled !== false &&
           (searchToggle.components?.lg ? (

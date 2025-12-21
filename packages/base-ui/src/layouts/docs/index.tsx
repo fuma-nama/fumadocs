@@ -18,7 +18,11 @@ import {
   SidebarTrigger,
   SidebarViewport,
 } from './sidebar';
-import { type BaseLayoutProps, resolveLinkItems } from '@/layouts/shared';
+import {
+  type BaseLayoutProps,
+  renderTitleNav,
+  resolveLinkItems,
+} from '@/layouts/shared';
 import { LinkItem } from '@fumadocs/ui/link-item';
 import {
   LanguageToggle,
@@ -32,7 +36,6 @@ import {
 } from './client';
 import { TreeContextProvider } from '@/contexts/tree';
 import { ThemeToggle } from '../shared/theme-toggle';
-import Link from 'fumadocs-core/link';
 import {
   LargeSearchToggle,
   SearchToggle,
@@ -147,12 +150,10 @@ export function DocsLayout({
         <SidebarContent {...rest}>
           <div className="flex flex-col gap-3 p-4 pb-2">
             <div className="flex">
-              <Link
-                href={nav.url ?? '/'}
-                className="inline-flex text-[0.9375rem] items-center gap-2.5 font-medium me-auto"
-              >
-                {nav.title}
-              </Link>
+              {renderTitleNav(nav, {
+                className:
+                  'inline-flex text-[0.9375rem] items-center gap-2.5 font-medium me-auto',
+              })}
               {nav.children}
               {collapsible && (
                 <SidebarCollapseTrigger
@@ -279,12 +280,9 @@ export function DocsLayout({
                   id="nd-subnav"
                   className="[grid-area:header] sticky top-(--fd-docs-row-1) z-30 flex items-center ps-4 pe-2.5 border-b transition-colors backdrop-blur-sm h-(--fd-header-height) md:hidden max-md:layout:[--fd-header-height:--spacing(14)] data-[transparent=false]:bg-fd-background/80"
                 >
-                  <Link
-                    href={nav.url ?? '/'}
-                    className="inline-flex items-center gap-2.5 font-semibold"
-                  >
-                    {nav.title}
-                  </Link>
+                  {renderTitleNav(nav, {
+                    className: 'inline-flex items-center gap-2.5 font-semibold',
+                  })}
                   <div className="flex-1">{nav.children}</div>
                   {searchToggle.enabled !== false &&
                     (searchToggle.components?.sm ?? (

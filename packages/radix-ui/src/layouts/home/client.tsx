@@ -6,6 +6,7 @@ import { cn } from '@fumadocs/ui/cn';
 import {
   type LinkItemType,
   type NavOptions,
+  renderTitleNav,
   resolveLinkItems,
 } from '@/layouts/shared';
 import { LinkItem } from '@fumadocs/ui/link-item';
@@ -82,12 +83,9 @@ export function Header({
 
   return (
     <HeaderNavigationMenu transparentMode={nav.transparentMode}>
-      <Link
-        href={nav.url ?? '/'}
-        className="inline-flex items-center gap-2.5 font-semibold"
-      >
-        {nav.title}
-      </Link>
+      {renderTitleNav(nav, {
+        className: 'inline-flex items-center gap-2.5 font-semibold',
+      })}
       {nav.children}
       <ul className="flex flex-row items-center gap-2 px-6 max-sm:hidden">
         {navItems
