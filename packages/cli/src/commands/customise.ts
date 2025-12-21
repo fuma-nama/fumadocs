@@ -61,13 +61,12 @@ export async function customise(client: RegistryClient) {
     },
   );
 
+  const registry = UIRegistries[config.uiLibrary];
   if (result.target === 'docs') {
     const targets = [];
     if (result.mode === 'minimal') {
       targets.push('fumadocs/ui/layouts/docs-min');
     } else {
-      const registry = UIRegistries[config.uiLibrary];
-
       targets.push(
         result.mode === 'full-default'
           ? `${registry}/layouts/docs`
@@ -94,7 +93,7 @@ export async function customise(client: RegistryClient) {
   }
 
   if (result.target === 'home') {
-    await install(['layouts/home'], installer);
+    await install([`${registry}/layouts/home`], installer);
     printNext(['fumadocs-ui/layouts/home', `@/components/layout/home`]);
   }
 
