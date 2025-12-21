@@ -1,5 +1,12 @@
 # next-docs-mdx
 
+## 14.2.2
+
+### Patch Changes
+
+- 2de6151: add `@types/react` to peer dep
+  - fumadocs-core@16.3.2
+
 ## 14.2.1
 
 ### Patch Changes
