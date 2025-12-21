@@ -37,6 +37,7 @@ export async function renderTypeToHast(type: string): Promise<Nodes> {
     lang: 'ts',
     structure: 'inline',
     themes: shikiOptions.themes,
+    defaultColor: false,
   });
 
   return {
