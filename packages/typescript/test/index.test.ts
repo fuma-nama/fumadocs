@@ -13,8 +13,8 @@ const generator = createGenerator({
 const relative = (s: string): string =>
   path.resolve(fileURLToPath(new URL(s, import.meta.url)));
 
-test('class members', () => {
-  const out = generator.generateDocumentation(
+test('class members', async () => {
+  const out = await generator.generateDocumentation(
     {
       path: 'index.ts',
       content: `
@@ -62,8 +62,8 @@ test('class members', () => {
   `);
 });
 
-test('interface members', () => {
-  const out = generator.generateDocumentation(
+test('interface members', async () => {
+  const out = await generator.generateDocumentation(
     {
       path: 'index.ts',
       content: `
@@ -116,7 +116,9 @@ const project = createProject(tsconfig);
 
 function getSimpleForms(fileName: string, sourceCode: string) {
   const out: string[] = [];
-  const sourceFile = project.createSourceFile(fileName, sourceCode);
+  const sourceFile = project.createSourceFile(fileName, sourceCode, {
+    overwrite: true,
+  });
   const checker = project.getTypeChecker();
 
   function visit(node: Node) {

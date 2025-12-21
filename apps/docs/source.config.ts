@@ -85,8 +85,15 @@ export default defineConfig({
     const { remarkTypeScriptToJavaScript } =
       await import('fumadocs-docgen/remark-ts2js');
     const { default: rehypeKatex } = await import('rehype-katex');
-    const { remarkAutoTypeTable } = await import('fumadocs-typescript');
+    const {
+      remarkAutoTypeTable,
+      createGenerator,
+      createFileSystemGeneratorCache,
+    } = await import('fumadocs-typescript');
 
+    const generator = createGenerator({
+      cache: createFileSystemGeneratorCache('.next/fumadocs-typescript'),
+    });
     return {
       remarkStructureOptions: {
         types: [...remarkStructureDefaultOptions.types, 'code'],
@@ -117,7 +124,12 @@ export default defineConfig({
       remarkPlugins: [
         remarkSteps,
         remarkMath,
-        remarkAutoTypeTable,
+        [
+          remarkAutoTypeTable,
+          {
+            generator,
+          },
+        ],
         remarkTypeScriptToJavaScript,
       ],
       rehypePlugins: (v) => [rehypeKatex, ...v],

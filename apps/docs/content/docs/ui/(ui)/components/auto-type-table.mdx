@@ -53,10 +53,16 @@ Initialize the TypeScript compiler and add it as a MDX component.
 ```tsx title="mdx-components.tsx"
 import defaultComponents from 'fumadocs-ui/mdx';
 import type { MDXComponents } from 'mdx/types';
-import { createGenerator } from 'fumadocs-typescript';
+import {
+  createGenerator,
+  createFileSystemGeneratorCache,
+} from 'fumadocs-typescript';
 import { AutoTypeTable } from 'fumadocs-typescript/ui';
 
-const generator = createGenerator();
+const generator = createGenerator({
+  // set a cache, necessary for serverless platform like Vercel
+  cache: createFileSystemGeneratorCache('.next/fumadocs-typescript'),
+});
 
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
@@ -139,14 +145,16 @@ Your `tsconfig.json` file in the current working directory will be loaded.
 You can change the compiler settings from [`createGenerator()`](/docs/ui/typescript).
 
 ```ts
-import { createGenerator } from 'fumadocs-typescript';
+import {
+  createGenerator,
+  createFileSystemGeneratorCache,
+} from 'fumadocs-typescript';
 
 const generator = createGenerator({
   tsconfigPath: './tsconfig.json',
   // where to resolve relative paths (normally cwd)
   basePath: './',
-  // disable file system cache
-  cache: false,
+  // other options...
 });
 ```
 

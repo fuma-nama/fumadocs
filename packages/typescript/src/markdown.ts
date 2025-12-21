@@ -10,6 +10,11 @@ import { highlightHast } from 'fumadocs-core/highlight';
 
 const shikiOptions = {
   lazy: true,
+  langs: ['ts', 'tsx'],
+
+  // disable default transformers & meta parser
+  transformers: [],
+  parseMetaString: undefined,
 
   themes: {
     light: 'github-light',

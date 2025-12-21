@@ -24,11 +24,13 @@ const generator = createGenerator(tsconfig);
 test('Run', async () => {
   const file = relative('./fixtures/test.ts');
 
-  const result = ['Test1', 'Test2', 'Test3', 'Test4'].flatMap((name) =>
-    generator.generateDocumentation({ path: file }, name),
+  const result = await Promise.all(
+    ['Test1', 'Test2', 'Test3', 'Test4'].map((name) => {
+      return generator.generateDocumentation({ path: file }, name);
+    }),
   );
 
-  await expect(JSON.stringify(result, null, 2)).toMatchFileSnapshot(
+  await expect(JSON.stringify(result.flat(), null, 2)).toMatchFileSnapshot(
     './fixtures/test.output.json',
   );
 });
