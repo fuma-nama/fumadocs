@@ -13,7 +13,7 @@
     "start": "next start"
   },
   "dependencies": {
-    "@ai-sdk/openai-compatible": "^1.0.29",
+    "@ai-sdk/openai-compatible": "^2.0.0",
     "@ai-sdk/react": "^2.0.117",
     "@fumadocs/mdx-remote": "workspace:*",
     "@mixedbread/sdk": "^0.46.0",
