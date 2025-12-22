@@ -5,7 +5,7 @@ description: Integrate Mixedbread Search with Fumadocs
 
 ## Introduction
 
-The Mixedbread Integration uses vector search to provide semantic search capabilities for your documentation. It indexes your documentation content into a vector store, enabling users to search using natural language queries and find relevant content based on meaning rather than just keyword matching.
+The Mixedbread Integration uses vector search to provide semantic search capabilities for your documentation. It indexes your documentation content into a store, enabling users to search using natural language queries and find relevant content based on meaning rather than just keyword matching.
 
 ## Setup
 
@@ -15,13 +15,13 @@ The Mixedbread Integration uses vector search to provide semantic search capabil
 2. Navigate to [API Keys](https://platform.mixedbread.com/platform?next=api-keys)
 3. Create a new API key and store it in your environment variables
 
-### Create a Vector Store
+### Create a Store
 
-To sync your documentation, you'll need to create a vector store:
+To sync your documentation, you'll need to create a store:
 
-1. Go to the [Vector Stores](https://platform.mixedbread.com/platform?next=vector-stores) in your Mixedbread dashboard
-2. Create a new vector store for your documentation
-3. Copy the vector store ID
+1. Go to the [Stores](https://platform.mixedbread.com/platform?next=stores) in your Mixedbread dashboard
+2. Create a new store for your documentation
+3. Copy the store ID
 
 ### Sync Documentation
 
@@ -40,10 +40,10 @@ Configure authentication and sync your documentation:
 mxbai config keys add YOUR_API_KEY
 
 # Sync your documentation
-mxbai vs sync YOUR_VECTOR_STORE_ID "./content/docs"
+mxbai vs sync YOUR_STORE_ID "./content/docs"
 ```
 
-The CLI will automatically detect changes in your documentation and update the vector store accordingly.
+The CLI will automatically detect changes in your documentation and update the store accordingly.
 
 ### Workflow
 
@@ -52,7 +52,7 @@ You can automatically sync your documentation by adding a sync script to your `p
 ```json
 {
   "scripts": {
-    "build": "... && mxbai vs sync YOUR_VECTOR_STORE_ID './content/docs' --ci"
+    "build": "... && mxbai vs sync YOUR_STORE_ID './content/docs' --ci"
   }
 }
 ```
