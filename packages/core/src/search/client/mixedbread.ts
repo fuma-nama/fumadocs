@@ -6,9 +6,9 @@ import type { StoreSearchResponse } from '@mixedbread/sdk/resources/stores';
 
 export interface MixedbreadOptions {
   /**
-   * The ID of the vector store to search in
+   * The identifier of the store to search in
    */
-  vectorStoreId: string;
+  storeIdentifier: string;
 
   /**
    * The Mixedbread SDK client instance
@@ -59,11 +59,18 @@ function extractHeadingTitle(text: string): string {
   return '';
 }
 
+/**
+ * Searches the specified Mixedbread store and produces page and heading search results.
+ *
+ * @param query - The search text; if empty or only whitespace, the function returns an empty array.
+ * @param options - Mixedbread client and search options: includes `client`, `storeIdentifier` (store to query), and optional `tag` to filter results.
+ * @returns An array of `SortedResult` where each matched item yields a page entry and, if a Markdown heading is present, an additional heading entry linking to the heading fragment URL.
+ */
 export async function search(
   query: string,
   options: MixedbreadOptions,
 ): Promise<SortedResult[]> {
-  const { client, vectorStoreId, tag } = options;
+  const { client, storeIdentifier, tag } = options;
 
   if (!query.trim()) {
     return [];
@@ -71,7 +78,7 @@ export async function search(
 
   const res = await client.stores.search({
     query,
-    store_identifiers: [vectorStoreId],
+    store_identifiers: [storeIdentifier],
     top_k: 10,
     filters: {
       key: 'generated_metadata.tag',

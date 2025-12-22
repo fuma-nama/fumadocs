@@ -21,12 +21,21 @@ const client = new Mixedbread({
   baseURL: 'https://api.example.com', // Optional, defaults to https://api.mixedbread.com
 });
 
+/**
+ * Render a search dialog connected to Mixedbread-powered document search.
+ *
+ * The dialog is bound to the search state provided by `useDocsSearch` and reflects
+ * loading and result data from the Mixedbread client. It also uses the current
+ * locale from `useI18n` for localized searches.
+ *
+ * @returns A React element that renders a search dialog bound to Mixedbread document search results
+ */
 export default function CustomSearchDialog(props: SharedProps) {
   const { locale } = useI18n(); // (optional) for i18n
   const { search, setSearch, query } = useDocsSearch({
     type: 'mixedbread',
     client,
-    vectorStoreId: 'vectorStoreId',
+    storeIdentifier: 'your_store_identifier',
     locale,
   });
 
