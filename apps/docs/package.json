@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^1.0.29",
-    "@ai-sdk/react": "^2.0.117",
+    "@ai-sdk/react": "^3.0.0",
     "@fumadocs/mdx-remote": "workspace:*",
     "@mixedbread/sdk": "^0.46.0",
     "@orama/core": "^1.2.14",
