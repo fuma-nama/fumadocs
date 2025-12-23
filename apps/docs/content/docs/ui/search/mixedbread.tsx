@@ -26,7 +26,7 @@ export default function CustomSearchDialog(props: SharedProps) {
   const { search, setSearch, query } = useDocsSearch({
     type: 'mixedbread',
     client,
-    vectorStoreId: 'vectorStoreId',
+    storeIdentifier: 'your_store_identifier',
     locale,
   });
 

@@ -165,7 +165,7 @@
     "zod": "^4.2.1"
   },
   "peerDependencies": {
-    "@mixedbread/sdk": "^0.19.0",
+    "@mixedbread/sdk": "^0.46.0",
     "@orama/core": "1.x.x",
     "@tanstack/react-router": "1.x.x",
     "@types/react": "*",
