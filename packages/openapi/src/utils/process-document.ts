@@ -14,7 +14,7 @@ export type ProcessedDocument = {
   _internal_idToSchema: () => Map<string, object>;
 
   /**
-   * Get raw object from dereference object
+   * Get raw object from dereferenced object
    */
   getRawRef: (obj: object) => string | undefined;
 
