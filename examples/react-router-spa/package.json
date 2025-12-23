@@ -9,7 +9,7 @@
     "types:check": "react-router typegen && fumadocs-mdx && tsc --noEmit"
   },
   "dependencies": {
-    "@orama/orama": "^3.1.17",
+    "@orama/orama": "^3.1.18",
     "@react-router/node": "^7.11.0",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
