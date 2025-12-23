@@ -27,7 +27,7 @@
     "@shikijs/rehype": "^3.20.0",
     "@shikijs/transformers": "^3.20.0",
     "@takumi-rs/image-response": "^0.58.0",
-    "ai": "^5.0.115",
+    "ai": "^6.0.0",
     "class-variance-authority": "^0.7.1",
     "d3-force": "^3.0.0",
     "estree-util-build-jsx": "^3.0.1",
