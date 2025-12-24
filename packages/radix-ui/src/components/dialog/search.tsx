@@ -6,8 +6,8 @@ import {
   createContext,
   Fragment,
   type ReactNode,
+  use,
   useCallback,
-  useContext,
   useEffect,
   useEffectEvent,
   useMemo,
@@ -50,6 +50,7 @@ export type { SharedProps };
 export interface SearchDialogProps extends SharedProps {
   search: string;
   onSearchChange: (v: string) => void;
+  onSelect?: (item: SearchItemType) => void;
   isLoading?: boolean;
 
   children: ReactNode;
@@ -60,7 +61,7 @@ const Context = createContext<{
   onOpenChange: (open: boolean) => void;
   search: string;
   onSearchChange: (v: string) => void;
-
+  onSelect: (item: SearchItemType) => void;
   isLoading: boolean;
 } | null>(null);
 
@@ -81,9 +82,22 @@ export function SearchDialog({
   search,
   onSearchChange,
   isLoading = false,
+  onSelect: onSelectProp,
   children,
 }: SearchDialogProps) {
-  const [active, setActive] = useState<string | null>(null);
+  const router = useRouter();
+  const onSelect = useEffectEvent((item: SearchItemType) => {
+    if (item.type === 'action') {
+      item.onSelect();
+    } else if (item.external) {
+      window.open(item.url, '_blank')?.focus();
+    } else {
+      router.push(item.url);
+    }
+
+    onOpenChange(false);
+    onSelectProp?.(item);
+  });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -94,11 +108,11 @@ export function SearchDialog({
             onOpenChange,
             search,
             onSearchChange,
-            active,
-            setActive,
+            // eslint-disable-next-line react-hooks/rules-of-hooks -- used in child components
+            onSelect,
             isLoading,
           }),
-          [active, isLoading, onOpenChange, onSearchChange, open, search],
+          [isLoading, onOpenChange, onSearchChange, open, search],
         )}
       >
         {children}
@@ -223,23 +237,10 @@ export function SearchDialogList({
   Item?: (props: { item: SearchItemType; onClick: () => void }) => ReactNode;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const { onSelect } = useSearch();
   const [active, setActive] = useState<string | null>(() =>
     items && items.length > 0 ? items[0].id : null,
   );
-  const { onOpenChange } = useSearch();
-  const router = useRouter();
-
-  const onOpen = (item: SearchItemType) => {
-    if (item.type === 'action') {
-      item.onSelect();
-    } else if (item.external) {
-      window.open(item.url, '_blank')?.focus();
-    } else {
-      router.push(item.url);
-    }
-
-    onOpenChange(false);
-  };
 
   const onKey = useEffectEvent((e: KeyboardEvent) => {
     if (!items || e.isComposing) return;
@@ -257,7 +258,7 @@ export function SearchDialogList({
     if (e.key === 'Enter') {
       const selected = items.find((item) => item.id === active);
 
-      if (selected) onOpen(selected);
+      if (selected) onSelect(selected);
       e.preventDefault();
     }
   });
@@ -320,7 +321,7 @@ export function SearchDialogList({
 
           {items?.map((item) => (
             <Fragment key={item.id}>
-              {Item({ item, onClick: () => onOpen(item) })}
+              {Item({ item, onClick: () => onSelect(item) })}
             </Fragment>
           ))}
         </ListContext.Provider>
@@ -511,19 +512,19 @@ function renderHighlights(highlights: HighlightedText<ReactNode>[]): ReactNode {
 }
 
 export function useSearch() {
-  const ctx = useContext(Context);
+  const ctx = use(Context);
   if (!ctx) throw new Error('Missing <SearchDialog />');
   return ctx;
 }
 
 export function useTagsList() {
-  const ctx = useContext(TagsListContext);
+  const ctx = use(TagsListContext);
   if (!ctx) throw new Error('Missing <TagsList />');
   return ctx;
 }
 
 export function useSearchList() {
-  const ctx = useContext(ListContext);
+  const ctx = use(ListContext);
   if (!ctx) throw new Error('Missing <SearchDialogList />');
   return ctx;
 }
