@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 16.4.0
+
+### Minor Changes
+
+- a3b7919: Update mixedbread integration API and docs
+
 ## 16.3.2
 
 ## 16.3.1
