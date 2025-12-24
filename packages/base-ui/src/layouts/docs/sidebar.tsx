@@ -30,13 +30,13 @@ function getItemOffset(depth: number) {
   return `calc(${2 + 3 * depth} * var(--spacing))`;
 }
 
-export const {
-  SidebarProvider: Sidebar,
+export {
+  SidebarProvider as Sidebar,
   SidebarFolder,
   SidebarCollapseTrigger,
   SidebarViewport,
   SidebarTrigger,
-} = Base;
+} from '@/components/sidebar/base';
 
 export function SidebarContent({
   ref: refProp,
@@ -89,7 +89,7 @@ export function SidebarContent({
               (!collapsed || hovered) && 'pointer-events-none opacity-0',
             )}
           >
-            <SidebarCollapseTrigger
+            <Base.SidebarCollapseTrigger
               className={cn(
                 buttonVariants({
                   color: 'ghost',
@@ -99,7 +99,7 @@ export function SidebarContent({
               )}
             >
               <SidebarIcon />
-            </SidebarCollapseTrigger>
+            </Base.SidebarCollapseTrigger>
             <SearchToggle className="rounded-lg" hideIfDisabled />
           </div>
         </>
@@ -253,7 +253,7 @@ export function SidebarFolderContent({
 }
 
 export const SidebarPageTree = createPageTreeRenderer({
-  SidebarFolder,
+  SidebarFolder: Base.SidebarFolder,
   SidebarFolderContent,
   SidebarFolderLink,
   SidebarFolderTrigger,
@@ -262,7 +262,7 @@ export const SidebarPageTree = createPageTreeRenderer({
 });
 
 export const SidebarLinkItem = createLinkItemRenderer({
-  SidebarFolder,
+  SidebarFolder: Base.SidebarFolder,
   SidebarFolderContent,
   SidebarFolderLink,
   SidebarFolderTrigger,
