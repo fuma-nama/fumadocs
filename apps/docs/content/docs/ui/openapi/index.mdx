@@ -167,12 +167,28 @@ function Page() {
     return (
       <DocsPage full>
         <h1 className="text-[1.75em] font-semibold">{page.data.title}</h1>
-
         <DocsBody>
           <APIPage {...page.data.getAPIPageProps()} />
         </DocsBody>
       </DocsPage>
     );
+  }
+
+  // your original flow below...
+}
+```
+
+Or where you return text for LLM:
+
+```ts
+import { source } from '@/lib/source';
+import type { InferPageType } from 'fumadocs-core/source';
+
+export async function getLLMText(page: InferPageType<typeof source>) {
+  // [!code ++:4]
+  if (page.data.type === 'openapi') {
+    // e.g. return the stringified OpenAPI schema
+    return JSON.stringify(page.data.getSchema().bundled, null, 2);
   }
 
   // your original flow below...

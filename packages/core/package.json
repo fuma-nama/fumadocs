@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-core",
-  "version": "16.3.2",
+  "version": "16.4.0",
   "description": "The React.js library for building a documentation website",
   "keywords": [
     "Fumadocs",
@@ -117,7 +117,7 @@
   },
   "dependencies": {
     "@formatjs/intl-localematcher": "^0.7.2",
-    "@orama/orama": "^3.1.17",
+    "@orama/orama": "^3.1.18",
     "@shikijs/rehype": "^3.20.0",
     "@shikijs/transformers": "^3.20.0",
     "estree-util-value-to-estree": "^3.5.0",
@@ -138,7 +138,7 @@
   "devDependencies": {
     "@mdx-js/mdx": "^3.1.1",
     "@mixedbread/sdk": "^0.46.0",
-    "@orama/core": "^1.2.14",
+    "@orama/core": "^1.2.15",
     "@tanstack/react-router": "1.136.18",
     "@types/estree-jsx": "^1.0.5",
     "@types/hast": "^3.0.4",
@@ -147,12 +147,12 @@
     "@types/node": "24.10.2",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
-    "algoliasearch": "5.46.1",
+    "algoliasearch": "5.46.2",
     "eslint-config-custom": "workspace:*",
     "lucide-react": "^0.562.0",
     "mdast-util-mdx-jsx": "^3.2.0",
     "mdast-util-mdxjs-esm": "^2.0.1",
-    "next": "16.1.0",
+    "next": "16.1.1",
     "react-router": "^7.11.0",
     "remark-directive": "^4.0.0",
     "remark-mdx": "^3.1.1",
@@ -165,7 +165,7 @@
     "zod": "^4.2.1"
   },
   "peerDependencies": {
-    "@mixedbread/sdk": "^0.19.0",
+    "@mixedbread/sdk": "^0.46.0",
     "@orama/core": "1.x.x",
     "@tanstack/react-router": "1.x.x",
     "@types/react": "*",

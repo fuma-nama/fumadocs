@@ -96,22 +96,22 @@
     "fumadocs-core": "workspace:*",
     "mdast-util-directive": "^3.1.0",
     "mdast-util-mdx-jsx": "^3.2.0",
-    "next": "16.1.0",
+    "next": "16.1.1",
     "react": "^19.2.3",
     "remark": "^15.0.1",
     "remark-directive": "^4.0.0",
     "remark-stringify": "^11.0.0",
-    "rollup": "^4.53.5",
+    "rollup": "^4.54.0",
     "tsconfig": "workspace:*",
     "vite": "^7.3.0",
     "webpack": "^5.104.1"
   },
   "peerDependencies": {
     "@fumadocs/mdx-remote": "^1.4.0",
+    "@types/react": "*",
     "fumadocs-core": "^15.0.0 || ^16.0.0",
     "next": "^15.3.0 || ^16.0.0",
     "react": "*",
-    "@types/react": "*",
     "vite": "6.x.x || 7.x.x"
   },
   "peerDependenciesMeta": {
