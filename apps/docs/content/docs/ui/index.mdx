@@ -201,6 +201,31 @@ export default defineConfig({
     You can [enable Static Exports](/docs/ui/static-export) on Next.js to get a static build output.
 
   </Accordion>
+  <Accordion id='webpack' title='Reading from "fumadocs-mdx:collections/server" is not handled by plugins'>
+
+Webpack resolves import namespace **before** your import aliases in `tsconfig.json`. When using Fumadocs MDX, you have to rename your import alias to `collections/*` instead.
+
+```json title="tsconfig.json"
+{
+  "compilerOptions": {
+    "paths": {
+      // [!code ++]
+      "collections/*": [".source/*"]
+    }
+  }
+}
+```
+
+Make sure to update the references as well.
+
+```ts title="lib/source.ts"
+// [!code --]
+import { docs } from 'fumadocs-mdx:collections/server';
+// [!code ++]
+import { docs } from 'collections/server';
+```
+
+</Accordion>
   <Accordion id='custom-layout-docs-page' title='How to create a page in /docs without docs layout?'>
 
     Same as managing layouts in Next.js App Router, remove the original MDX file from content directory (`/content/docs`).
