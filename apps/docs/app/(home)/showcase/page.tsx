@@ -85,9 +85,9 @@ const showcases: ShowcaseObject[] = [
     url: 'https://docs.octarine.app',
   },
   {
-    image: '/showcases/next-faq.png',
-    name: 'Next.js Discord Common Questions',
-    url: 'https://nextjs-faq.com',
+    image: '/showcases/llm-gateway.png',
+    name: 'LLM Gateway',
+    url: 'https://llmgateway.io',
   },
   {
     image: ArkType,
@@ -100,14 +100,19 @@ const showcases: ShowcaseObject[] = [
     url: 'https://docs.zen-browser.app',
   },
   {
+    image: '/showcases/hero-ui.png',
+    name: 'Hero UI',
+    url: 'https://v3.heroui.com',
+  },
+  {
     image: '/showcases/hiro.png',
     name: 'Hiro',
     url: 'https://docs.hiro.so/stacks',
   },
   {
-    image: '/showcases/freestyle.png',
-    name: 'Freestyle',
-    url: 'https://freestyle.sh',
+    image: '/showcases/next-faq.png',
+    name: 'Next.js Discord Common Questions',
+    url: 'https://nextjs-faq.com',
   },
   {
     image: OpenPanel,
@@ -125,19 +130,29 @@ const showcases: ShowcaseObject[] = [
     url: 'https://kibo-ui.com',
   },
   {
-    image: '/showcases/libra.png',
-    name: 'Libra',
-    url: 'https://libra.dev',
-  },
-  {
     image: '/showcases/hexta-ui.png',
     name: 'HextaUI',
     url: 'https://hextaui.com',
   },
   {
+    image: MixSpace,
+    name: 'MixSpace',
+    url: 'https://mx-space.js.org',
+  },
+  {
+    image: '/showcases/libra.png',
+    name: 'Libra',
+    url: 'https://libra.dev',
+  },
+  {
     image: Sunar,
     name: 'Sunar',
     url: 'https://sunar.js.org',
+  },
+  {
+    image: '/showcases/freestyle.png',
+    name: 'Freestyle',
+    url: 'https://freestyle.sh',
   },
   {
     image: VisionUI,
@@ -159,11 +174,7 @@ const showcases: ShowcaseObject[] = [
     name: 'axion/js',
     url: 'https://axionjs.com',
   },
-  {
-    image: MixSpace,
-    name: 'MixSpace',
-    url: 'https://mx-space.js.org',
-  },
+
   {
     image: '/showcases/codehike.png',
     name: 'CodeHike',
@@ -216,10 +227,6 @@ const showcases: ShowcaseObject[] = [
   {
     name: 'Rehooks',
     url: 'https://rehooks.pyr33x.ir',
-  },
-  {
-    name: 'Sherif',
-    url: 'https://eslint-config-sherif.dev',
   },
   {
     name: 'Swellchain',
