@@ -1,5 +1,15 @@
 # @fuma-docs/openapi
 
+## 10.2.2
+
+### Patch Changes
+
+- b752aff: Add `getSchema()` to virtual pages
+- Updated dependencies [da98fe2]
+- Updated dependencies [a3b7919]
+  - fumadocs-ui@16.4.0
+  - fumadocs-core@16.4.0
+
 ## 10.2.1
 
 ### Patch Changes

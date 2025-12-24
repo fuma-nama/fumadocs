@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 16.4.0
+
+### Patch Changes
+
+- da98fe2: Support `onSelect` prop in `<SearchDialog />` component
+- Updated dependencies [a3b7919]
+  - fumadocs-core@16.4.0
+  - @fumadocs/ui@16.4.0
+
 ## 16.3.2
 
 ### Patch Changes
