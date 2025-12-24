@@ -351,7 +351,7 @@ export function SearchDialogListItem({
         <div className="inline-flex items-center text-fd-muted-foreground text-xs empty:hidden">
           {item.breadcrumbs?.map((item, i) => (
             <Fragment key={i}>
-              {i > 0 && <ChevronRight className="size-4" />}
+              {i > 0 && <ChevronRight className="size-4 rtl:rotate-180" />}
               {item}
             </Fragment>
           ))}
