@@ -1,0 +1,154 @@
+---
+title: Takumi
+description: Integrate Takumi for framework agnostic and fast metadata image generation.
+---
+
+## Installation
+
+```npm
+npm install @takumi-rs/image-response
+```
+
+Make sure to add `@takumi-rs/image-response` to `serverExternalPackages` (Next.js) or `external` depends on what bundler you are using.
+
+```ts tab="next.config.ts"
+import type { NextConfig } from 'next';
+
+const config: NextConfig = {
+  // [!code ++]
+  serverExternalPackages: ['@takumi-rs/image-response'],
+};
+```
+
+```ts tab="vite.config.ts"
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  ssr: {
+    // [!code ++]
+    external: ['@takumi-rs/image-response'],
+  },
+});
+```
+
+```ts tab="For Nitro / TanStack Start (vite.config.ts)"
+import { defineConfig } from 'vite';
+// [!code ++:3]
+import takumiPackageJson from "@takumi-rs/core/package.json" with {
+  type: "json",
+};
+
+export default defineConfig({
+  nitro: {
+    externals: {
+      // [!code ++:2]
+      external: ["@takumi-rs/core"], 
+      traceInclude: Object.keys(takumiPackageJson.optionalDependencies), 
+    }
+  }
+});
+```
+
+## Metadata Image
+
+You can generate metadata images dynamically using `@takumi-rs/image-response`.
+
+Add the following under your loader, and define image metadata for pages:
+
+```ts tab="lib/source.ts"
+import { type InferPageType } from 'fumadocs-core/source';
+
+// [!code ++:8]
+export function getPageImage(page: InferPageType<typeof source>) {
+  const segments = [...page.slugs, 'image.webp'];
+
+  return {
+    segments,
+    url: `/og/docs/${segments.join('/')}`,
+  };
+}
+```
+
+```tsx tab="app/docs/[[...slug]]/page.tsx"
+import { notFound } from 'next/navigation';
+import { source, getPageImage } from '@/lib/source';
+import type { Metadata } from 'next';
+
+export async function generateMetadata(
+  props: PageProps<'/docs/[[...slug]]'>,
+): Promise<Metadata> {
+  const params = await props.params;
+  const page = source.getPage(params.slug);
+  if (!page) notFound();
+
+  return {
+    title: page.data.title,
+    description: page.data.description,
+    openGraph: {
+      // [!code ++]
+      images: getPageImage(page).url,
+    },
+  };
+}
+```
+
+> We append `image.webp` to the end of slugs so that we can access it via `/og/docs/my-page/image.webp`, which results in smaller image sizes. You could use `image.png` if you prefer.
+
+Finally, create a route handler to generate images at build time:
+
+```tsx title="app/og/docs/[...slug]/route.tsx"
+import { getPageImage, source } from '@/lib/source';
+import { notFound } from 'next/navigation';
+import { ImageResponse } from '@takumi-rs/image-response';
+import { generate as DefaultImage } from 'fumadocs-ui/og';
+
+export const revalidate = false;
+
+export async function GET(
+  _req: Request,
+  { params }: RouteContext<'/og/docs/[...slug]'>,
+) {
+  const { slug } = await params;
+  const page = source.getPage(slug.slice(0, -1));
+  if (!page) notFound();
+
+  return new ImageResponse(
+    <DefaultImage
+      title={page.data.title}
+      description={page.data.description}
+      site="My App"
+    />,
+    {
+      width: 1200,
+      height: 630,
+      format: 'webp',
+    },
+  );
+}
+
+export function generateStaticParams() {
+  return source.getPages().map((page) => ({
+    lang: page.locale,
+    slug: getPageImage(page).segments,
+  }));
+}
+
+```
+
+See [Takumi's Documentation](https://takumi.kane.tw/docs) for more details on how to use it.
+
+### Other Presets
+
+There's other available styles on Fumadocs CLI, such as `mono`:
+
+```npm
+npx @fumadocs/cli@latest add og/mono
+```
+
+Or Takumi's [`docs-template`](https://takumi.kane.tw/docs/templates#docs-template) modified from fumadocs:
+
+```npm
+npx shadcn@latest add https://takumi.kane.tw/templates/registry/docs-template.json
+```
+
+Replaced your old `generate` with the installed one.
