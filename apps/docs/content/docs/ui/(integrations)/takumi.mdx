@@ -34,18 +34,16 @@ export default defineConfig({
 ```ts tab="For Nitro / TanStack Start (vite.config.ts)"
 import { defineConfig } from 'vite';
 // [!code ++:3]
-import takumiPackageJson from "@takumi-rs/core/package.json" with {
-  type: "json",
-};
+import takumiPackageJson from '@takumi-rs/core/package.json' with { type: 'json' };
 
 export default defineConfig({
   nitro: {
     externals: {
       // [!code ++:2]
-      external: ["@takumi-rs/core"], 
-      traceInclude: Object.keys(takumiPackageJson.optionalDependencies), 
-    }
-  }
+      external: ['@takumi-rs/core'],
+      traceInclude: Object.keys(takumiPackageJson.optionalDependencies),
+    },
+  },
 });
 ```
 
@@ -132,10 +130,11 @@ export function generateStaticParams() {
     slug: getPageImage(page).segments,
   }));
 }
-
 ```
 
-See [Takumi's Documentation](https://takumi.kane.tw/docs) for more details on how to use it.
+> Takumi comes with pre-bundled full-axis (100-900) [`Geist`](https://vercel.com/font) and `Geist Mono` fonts, so you don't need to worry about it.
+
+See [Takumi's Documentation](https://takumi.kane.tw/docs) for more details or advanced usage.
 
 ### Other Presets
 
