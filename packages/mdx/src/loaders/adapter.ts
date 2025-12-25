@@ -22,6 +22,13 @@ export interface LoaderInput {
 export interface LoaderOutput {
   code: string;
   map?: unknown;
+
+  /**
+   * Only supported in Vite 8.
+   *
+   * Explicitly define the transformed module type, for unsupported environments, you need to consider the differences between each bundler.
+   */
+  moduleType?: 'js' | 'json';
 }
 
 type Awaitable<T> = T | Promise<T>;
@@ -119,6 +126,7 @@ export function toVite(loader: Loader): ViteLoader {
       return {
         code: result.code,
         map: result.map as SourceMap,
+        moduleType: result.moduleType,
       };
     },
   };
@@ -172,7 +180,7 @@ export function toBun(loader: Loader) {
 
     return {
       contents: output.code,
-      loader: 'js',
+      loader: output.moduleType ?? 'js',
     };
   }
 
