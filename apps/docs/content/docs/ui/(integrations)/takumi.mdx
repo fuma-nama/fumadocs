@@ -11,7 +11,7 @@ npm install @takumi-rs/image-response
 
 Make sure to add `@takumi-rs/image-response` to `serverExternalPackages` (Next.js) or `external` depends on what bundler you are using.
 
-```ts tab="next.config.ts"
+```ts title="next.config.ts" tab="Next.js"
 import type { NextConfig } from 'next';
 
 const config: NextConfig = {
@@ -20,7 +20,7 @@ const config: NextConfig = {
 };
 ```
 
-```ts tab="vite.config.ts"
+```ts title="vite.config.ts" tab="Vite"
 import { defineConfig } from 'vite';
 
 export default defineConfig({
@@ -31,7 +31,7 @@ export default defineConfig({
 });
 ```
 
-```ts tab="For Nitro / TanStack Start (vite.config.ts)"
+```ts title="vite.config.ts" tab="Nitro / TanStack Start"
 import { defineConfig } from 'vite';
 // [!code ++]
 import takumiPackageJson from '@takumi-rs/core/package.json' with { type: 'json' };
@@ -53,7 +53,7 @@ You can generate metadata images dynamically using `@takumi-rs/image-response`.
 
 Add the following under your loader, and define image metadata for pages:
 
-```ts tab="lib/source.ts"
+```ts title="lib/source.ts"
 import { type InferPageType } from 'fumadocs-core/source';
 
 // [!code ++:8]
@@ -67,7 +67,7 @@ export function getPageImage(page: InferPageType<typeof source>) {
 }
 ```
 
-```tsx tab="app/docs/[[...slug]]/page.tsx"
+```tsx tab="Next.js" title="app/docs/[[...slug]]/page.tsx"
 import { notFound } from 'next/navigation';
 import { source, getPageImage } from '@/lib/source';
 import type { Metadata } from 'next';
@@ -90,11 +90,26 @@ export async function generateMetadata(
 }
 ```
 
+```tsx tab="React Router" title="app/docs/page.tsx"
+// [!code ++]
+import { getPageImage } from '@/lib/source';
+
+// Somewhere in your component or client loader
+return (
+  <>
+    {/* [!code ++] */}
+    <meta name='og:image' content={getPageImage(page).url} />
+  </>
+);
+```
+
 > We append `image.webp` to the end of slugs so that we can access it via `/og/docs/my-page/image.webp`, which results in smaller image sizes. You could use `image.png` if you prefer.
 
 Finally, create a route handler to generate images at build time:
 
-```tsx title="app/og/docs/[...slug]/route.tsx"
+<Tabs items={['Next.js', 'React Router']}>
+<Tab value='Next.js'>
+```tsx title="app/docs/og.tsx"
 import { getPageImage, source } from '@/lib/source';
 import { notFound } from 'next/navigation';
 import { ImageResponse } from '@takumi-rs/image-response';
@@ -114,7 +129,7 @@ export async function GET(
     <DefaultImage
       title={page.data.title}
       description={page.data.description}
-      site="My App"
+      site='My App'
     />,
     {
       width: 1200,
@@ -131,6 +146,85 @@ export function generateStaticParams() {
   }));
 }
 ```
+</Tab>
+<Tab value='React Router'>
+```tsx title="app/docs/og.tsx"
+import { ImageResponse } from "@takumi-rs/image-response";
+import { source } from "@/lib/source";
+import { generate as DefaultImage } from 'fumadocs-ui/og';
+import type { Route } from "./+types/og";
+
+export function loader({ params }: Route.LoaderArgs) {
+  const slugs = params["*"]
+    .split("/")
+    .filter((v) => v.length > 0)
+    .slice(0, -1);
+  const page = source.getPage(slugs);
+
+  if (!page) throw new Response(undefined, { status: 404 });
+
+  return new ImageResponse(
+    <DefaultImage
+      title={page.data.title}
+      description={page.data.description}
+      site='My App'
+    />,
+    {
+      width: 1200,
+      height: 630,
+      format: 'webp',
+    },
+  );
+}
+```
+
+```ts title="app/routes.ts"
+import { type RouteConfig, route } from "@react-router/dev/routes";
+
+export default [
+  // [!code ++]
+  route("/og/docs/*", "docs/og.tsx"),
+] satisfies RouteConfig;
+```
+
+```ts title="react-router.config.ts"
+import type { Config } from '@react-router/dev/config';
+
+// [!code ++:17]
+function getDocsPaths() {
+  const paths = Object.keys(
+    import.meta.glob('./**/*.{mdx,md}', {
+      base: './content',
+    }),
+  );
+
+  return paths.map(relativeFileNameToPath);
+}
+
+function relativeFileNameToPath(name: string) {
+  const path = name.slice(1).replace(/(index)?\.(md|mdx)$/, '');
+
+  if (!path.endsWith('/')) return `${path}/`;
+
+  return path;
+}
+
+export default {
+  // [!code ++:6]
+  prerender({ getStaticPaths }) {
+    const docsPaths = getDocsPaths();
+    const docsOgPaths = docsPaths.map((path) => `/og${path}image.webp`);
+
+    return [...getStaticPaths(), ...docsPaths, ...docsOgPaths];
+  },
+  routeDiscovery: {
+    mode: 'initial',
+  },
+} satisfies Config;
+```
+
+</Tab>
+</Tabs>
 
 > Takumi comes with pre-bundled full-axis (100-900) [`Geist`](https://vercel.com/font) and `Geist Mono` fonts, so you don't need to worry about it.
 
