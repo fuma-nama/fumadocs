@@ -1,5 +1,12 @@
 # @fumadocs/ui
 
+## 16.4.1
+
+### Patch Changes
+
+- 0a3adb8: fix TOC ease function
+  - fumadocs-core@16.4.1
+
 ## 16.4.0
 
 ### Patch Changes
