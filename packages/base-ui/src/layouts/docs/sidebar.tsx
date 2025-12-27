@@ -30,13 +30,33 @@ function getItemOffset(depth: number) {
   return `calc(${2 + 3 * depth} * var(--spacing))`;
 }
 
-export {
-  SidebarProvider as Sidebar,
-  SidebarFolder,
-  SidebarCollapseTrigger,
-  SidebarViewport,
-  SidebarTrigger,
-} from '@/components/sidebar/base';
+export function Sidebar(props: ComponentProps<typeof Base.SidebarProvider>) {
+  return <Base.SidebarProvider {...props} />;
+}
+
+export function SidebarFolder(
+  props: ComponentProps<typeof Base.SidebarFolder>,
+) {
+  return <Base.SidebarFolder {...props} />;
+}
+
+export function SidebarCollapseTrigger(
+  props: ComponentProps<typeof Base.SidebarCollapseTrigger>,
+) {
+  return <Base.SidebarCollapseTrigger {...props} />;
+}
+
+export function SidebarViewport(
+  props: ComponentProps<typeof Base.SidebarViewport>,
+) {
+  return <Base.SidebarViewport {...props} />;
+}
+
+export function SidebarTrigger(
+  props: ComponentProps<typeof Base.SidebarTrigger>,
+) {
+  return <Base.SidebarTrigger {...props} />;
+}
 
 export function SidebarContent({
   ref: refProp,
@@ -253,7 +273,7 @@ export function SidebarFolderContent({
 }
 
 export const SidebarPageTree = createPageTreeRenderer({
-  SidebarFolder: Base.SidebarFolder,
+  SidebarFolder,
   SidebarFolderContent,
   SidebarFolderLink,
   SidebarFolderTrigger,
@@ -262,7 +282,7 @@ export const SidebarPageTree = createPageTreeRenderer({
 });
 
 export const SidebarLinkItem = createLinkItemRenderer({
-  SidebarFolder: Base.SidebarFolder,
+  SidebarFolder,
   SidebarFolderContent,
   SidebarFolderLink,
   SidebarFolderTrigger,
