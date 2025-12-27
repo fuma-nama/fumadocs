@@ -122,7 +122,7 @@ export function CodeBlock({
       ) : (
         Actions({
           className:
-            'absolute top-2 right-2 z-2 backdrop-blur-lg rounded-lg text-fd-muted-foreground',
+            'absolute top-3 right-2 z-2 backdrop-blur-lg rounded-lg text-fd-muted-foreground',
           children: allowCopy && <CopyButton containerRef={areaRef} />,
         })
       )}

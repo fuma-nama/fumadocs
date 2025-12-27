@@ -2,7 +2,7 @@ import {
   CircleCheck,
   CircleX,
   Info,
-  Sun,
+  LightBulb,
   TriangleAlert,
 } from '@fumadocs/ui/icons';
 import type { ComponentProps, ReactNode } from 'react';
@@ -80,7 +80,9 @@ export function CalloutContainer({
           warning: <TriangleAlert className={iconClass} />,
           error: <CircleX className={iconClass} />,
           success: <CircleCheck className={iconClass} />,
-          idea: <Sun className={iconClass} />,
+          idea: (
+            <LightBulb className="size-5 -me-0.5 fill-(--callout-color) text-(--callout-color)" />
+          ),
         }[type]}
       <div className="flex flex-col gap-2 min-w-0 flex-1">{children}</div>
     </div>
