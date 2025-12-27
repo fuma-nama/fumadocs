@@ -1,5 +1,12 @@
 # next-docs-mdx
 
+## 14.2.3
+
+### Patch Changes
+
+- 3a8b9b0: support Vite 8 `moduleType` option
+  - fumadocs-core@16.4.1
+
 ## 14.2.2
 
 ### Patch Changes
