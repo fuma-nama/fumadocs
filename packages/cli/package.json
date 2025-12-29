@@ -25,9 +25,9 @@
     "dist/*"
   ],
   "scripts": {
-    "build": "tsdown",
+    "build": "tsdown --config-loader unrun",
     "clean": "rimraf dist",
-    "dev": "tsdown --watch",
+    "dev": "tsdown --watch --config-loader unrun",
     "lint": "eslint .",
     "types:check": "tsc --noEmit"
   },
