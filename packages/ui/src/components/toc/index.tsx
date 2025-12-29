@@ -99,7 +99,7 @@ export function TocThumb({
     }
   });
 
-  return <div ref={thumbRef} role="none" {...props} />;
+  return <div ref={thumbRef} data-hidden={active.length === 0} {...props} />;
 }
 
 function calc(container: HTMLElement, active: string[]): TocThumbType {
