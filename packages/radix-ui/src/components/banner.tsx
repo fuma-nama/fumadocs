@@ -1,7 +1,7 @@
 'use client';
 
 import { type HTMLAttributes, useEffect, useState } from 'react';
-import { X } from '@fumadocs/ui/icons';
+import { X } from 'lucide-react';
 import { cn } from '@fumadocs/ui/cn';
 import { buttonVariants } from '@/components/ui/button';
 

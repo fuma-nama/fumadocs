@@ -1,5 +1,5 @@
 'use client';
-import { ChevronDown, ExternalLink } from '@fumadocs/ui/icons';
+import { ChevronDown, ExternalLink } from 'lucide-react';
 import {
   type ComponentProps,
   createContext,

@@ -5,7 +5,7 @@ import {
   type ReactNode,
   useState,
 } from 'react';
-import { ChevronDown, Plus, Trash2, X } from '@/ui/icons';
+import { ChevronDown, Plus, Trash2, X } from 'lucide-react';
 import { useController, useFieldArray, useFormContext } from 'react-hook-form';
 import {
   Select,

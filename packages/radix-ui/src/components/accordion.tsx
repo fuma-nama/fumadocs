@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, Link as LinkIcon } from '@fumadocs/ui/icons';
+import { Check, Link as LinkIcon } from 'lucide-react';
 import {
   ComponentProps,
   type ReactNode,

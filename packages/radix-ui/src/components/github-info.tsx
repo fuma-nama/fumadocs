@@ -1,5 +1,5 @@
 import { cn } from '@fumadocs/ui/cn';
-import { Star } from '@fumadocs/ui/icons';
+import { Star } from 'lucide-react';
 import { type AnchorHTMLAttributes } from 'react';
 
 async function getRepoStarsAndForks(

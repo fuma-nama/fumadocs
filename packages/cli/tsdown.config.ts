@@ -1,4 +1,4 @@
-import { defineConfig } from 'tsup';
+import { defineConfig } from 'tsdown';
 import fs from 'node:fs/promises';
 import { createConfigSchema } from '@/config';
 import { z } from 'zod';
@@ -7,6 +7,7 @@ export default defineConfig({
   entry: ['./src/index.ts', './src/build/index.ts'],
   format: 'esm',
   dts: true,
+  fixedExtension: false,
   target: 'node22',
   async onSuccess() {
     console.log('JSON schema generated');

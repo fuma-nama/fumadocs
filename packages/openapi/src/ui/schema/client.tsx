@@ -23,7 +23,7 @@ import {
   CollapsibleTrigger,
 } from 'fumadocs-ui/components/ui/collapsible';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { ChevronDown } from '@/ui/icons';
+import { ChevronDown } from 'lucide-react';
 import { Badge } from '@/ui/components/method-label';
 import {
   Popover,

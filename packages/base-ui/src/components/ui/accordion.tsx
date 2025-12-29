@@ -1,7 +1,7 @@
 'use client';
 
 import { Accordion as Primitive } from '@base-ui/react/accordion';
-import { ChevronRight } from '@fumadocs/ui/icons';
+import { ChevronRight } from 'lucide-react';
 import { type ComponentProps } from 'react';
 import { cn } from '@fumadocs/ui/cn';
 

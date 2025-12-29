@@ -1,4 +1,4 @@
-import { CircleCheck, CircleX } from '@/ui/icons';
+import { CircleCheck, CircleX } from 'lucide-react';
 
 interface StatusInfo {
   description: string;

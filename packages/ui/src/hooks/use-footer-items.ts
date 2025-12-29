@@ -1,3 +1,4 @@
+'use client';
 import { useTreeContext } from '@/contexts/tree';
 import type * as PageTree from 'fumadocs-core/page-tree';
 

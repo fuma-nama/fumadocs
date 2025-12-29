@@ -1,4 +1,4 @@
-import { defineConfig } from 'tsup';
+import { defineConfig } from 'tsdown';
 
 const external = ['next', 'typescript', 'bun'];
 
@@ -21,18 +21,19 @@ export default defineConfig([
     noExternal,
     external,
     dts: true,
+    fixedExtension: false,
     target: 'node22',
   },
   {
-    entry: {
-      // ensure Next.js CJS config compatibility
-      // because next.config.ts by default uses CJS
-      './next/index': './src/next/index.ts',
-    },
+    outDir: 'dist/next',
+    // ensure Next.js CJS config compatibility
+    // because next.config.ts by default uses CJS
+    entry: ['./src/next/index.ts'],
     format: 'cjs',
     noExternal,
     external,
     dts: false,
+    fixedExtension: false,
     target: 'node22',
   },
 ]);

@@ -29,9 +29,9 @@
     "dist/*"
   ],
   "scripts": {
-    "build": "tsup",
+    "build": "tsdown",
     "clean": "rimraf dist",
-    "dev": "tsup --watch",
+    "dev": "tsdown --watch",
     "lint": "eslint .",
     "types:check": "tsc --noEmit"
   },
@@ -41,6 +41,7 @@
     "zod": "^4.2.1"
   },
   "devDependencies": {
+    "tsdown": "^0.18.3",
     "@types/mdx": "^2.0.13",
     "@types/node": "24.10.2",
     "@types/react": "^19.2.7",

@@ -1,5 +1,5 @@
 'use client';
-import { Check, Clipboard } from '@fumadocs/ui/icons';
+import { Check, Clipboard } from 'lucide-react';
 import {
   type ComponentProps,
   createContext,

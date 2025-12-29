@@ -11,7 +11,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { ChevronDown, ChevronLeft, ChevronRight } from '@fumadocs/ui/icons';
+import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import { cn } from '@fumadocs/ui/cn';
 import { useI18n } from '@/contexts/i18n';

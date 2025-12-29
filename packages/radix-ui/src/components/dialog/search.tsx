@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronRight, Hash, Search as SearchIcon } from '@fumadocs/ui/icons';
+import { ChevronRight, Hash, Search as SearchIcon } from 'lucide-react';
 import {
   type ComponentProps,
   createContext,

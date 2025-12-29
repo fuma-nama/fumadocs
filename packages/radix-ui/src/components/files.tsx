@@ -5,7 +5,7 @@ import {
   File as FileIcon,
   Folder as FolderIcon,
   FolderOpen,
-} from '@fumadocs/ui/icons';
+} from 'lucide-react';
 import { type HTMLAttributes, type ReactNode, useState } from 'react';
 import { cn } from '@fumadocs/ui/cn';
 import {

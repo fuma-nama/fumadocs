@@ -1,4 +1,4 @@
-import { Link } from '@fumadocs/ui/icons';
+import { Link } from 'lucide-react';
 import type { ComponentPropsWithoutRef } from 'react';
 import { cn } from '@fumadocs/ui/cn';
 

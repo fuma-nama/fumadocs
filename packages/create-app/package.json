@@ -30,9 +30,9 @@
     "dist/*"
   ],
   "scripts": {
-    "build": "pnpm run sync && tsup",
+    "build": "pnpm run sync && tsdown",
     "clean": "rimraf dist",
-    "dev": "tsup --watch",
+    "dev": "tsdown --watch",
     "lint": "eslint .",
     "postpublish": "echo \"Updating template repo\" && bash ./scripts/update-git-repo.sh",
     "types:check": "tsc --noEmit",
@@ -47,6 +47,7 @@
     "ts-morph": "^27.0.2"
   },
   "devDependencies": {
+    "tsdown": "^0.18.3",
     "@types/cross-spawn": "^6.0.6",
     "@types/node": "24.10.2",
     "eslint-config-custom": "workspace:*",

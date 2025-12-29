@@ -1,6 +1,6 @@
 'use client';
 import type { ComponentProps } from 'react';
-import { Search } from '@fumadocs/ui/icons';
+import { Search } from 'lucide-react';
 import { useSearchContext } from '@/contexts/search';
 import { useI18n } from '@/contexts/i18n';
 import { cn } from '@fumadocs/ui/cn';

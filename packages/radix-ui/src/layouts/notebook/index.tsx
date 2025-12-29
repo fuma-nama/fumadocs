@@ -23,7 +23,7 @@ import {
 import { TreeContextProvider } from '@/contexts/tree';
 import { cn } from '@fumadocs/ui/cn';
 import { buttonVariants } from '@/components/ui/button';
-import { Languages, Sidebar as SidebarIcon, X } from '@fumadocs/ui/icons';
+import { Languages, Sidebar as SidebarIcon, X } from 'lucide-react';
 import { LanguageToggle } from '@/layouts/shared/language-toggle';
 import { ThemeToggle } from '@/layouts/shared/theme-toggle';
 import type * as PageTree from 'fumadocs-core/page-tree';

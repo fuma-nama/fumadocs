@@ -38,7 +38,7 @@ export function resolveForwardedAPIs(
   if (ref.type === 'dependency' && ref.dep === '@fumadocs/ui') {
     const specifier = ref.specifier;
 
-    if (specifier === '@fumadocs/ui/icons') {
+    if (specifier === 'lucide-react') {
       return {
         type: 'dependency',
         dep: 'lucide-react',

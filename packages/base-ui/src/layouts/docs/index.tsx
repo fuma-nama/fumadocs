@@ -5,7 +5,7 @@ import {
   type ReactNode,
   useMemo,
 } from 'react';
-import { Languages, Sidebar as SidebarIcon } from '@fumadocs/ui/icons';
+import { Languages, Sidebar as SidebarIcon } from 'lucide-react';
 import { cn } from '@fumadocs/ui/cn';
 import { buttonVariants } from '@/components/ui/button';
 import {

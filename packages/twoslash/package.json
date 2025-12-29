@@ -34,9 +34,9 @@
     "styles/*"
   ],
   "scripts": {
-    "build": "tsup",
+    "build": "tsdown",
     "clean": "rimraf dist",
-    "dev": "tsup --watch",
+    "dev": "tsdown --watch",
     "lint": "eslint .",
     "types:check": "tsc --noEmit"
   },
@@ -51,6 +51,7 @@
     "twoslash": "^0.3.6"
   },
   "devDependencies": {
+    "tsdown": "^0.18.3",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
     "@types/node": "24.10.2",

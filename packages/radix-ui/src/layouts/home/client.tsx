@@ -30,7 +30,7 @@ import {
   LanguageToggle,
   LanguageToggleText,
 } from '@/layouts/shared/language-toggle';
-import { ChevronDown, Languages } from '@fumadocs/ui/icons';
+import { ChevronDown, Languages } from 'lucide-react';
 import { useIsScrollTop } from '@fumadocs/ui/hooks/use-is-scroll-top';
 
 export const navItemVariants = cva('[&_svg]:size-4', {

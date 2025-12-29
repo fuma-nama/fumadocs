@@ -109,9 +109,9 @@
     "dist/*"
   ],
   "scripts": {
-    "build": "tsup",
+    "build": "tsdown",
     "clean": "rimraf dist",
-    "dev": "tsup --watch",
+    "dev": "tsdown --watch",
     "lint": "eslint .",
     "types:check": "tsc --noEmit"
   },
@@ -136,6 +136,7 @@
     "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
+    "tsdown": "^0.18.3",
     "@mdx-js/mdx": "^3.1.1",
     "@mixedbread/sdk": "^0.46.0",
     "@orama/core": "^1.2.15",

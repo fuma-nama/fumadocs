@@ -47,7 +47,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from 'fumadocs-ui/components/ui/collapsible';
-import { X, ChevronDown, LoaderCircle } from '@/ui/icons';
+import { X, ChevronDown, LoaderCircle } from 'lucide-react';
 import { encodeRequestData } from '@/requests/media/encode';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from '@/utils/cn';

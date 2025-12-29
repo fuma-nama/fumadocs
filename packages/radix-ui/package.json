@@ -92,15 +92,15 @@
   ],
   "scripts": {
     "build": "pnpm build:layout && pnpm build:tailwind",
-    "build:layout": "tsc --project tsconfig.build.json && tsc-alias -p tsconfig.build.json",
+    "build:layout": "tsdown",
     "build:tailwind": "tailwindcss -i css/style.css -o ./dist/style.css && tailwindcss -i src/components/image-zoom.css -o dist/components/image-zoom.css",
     "clean": "rimraf dist",
-    "dev": "concurrently \"tsc -w --project tsconfig.build.json\" \"tsc-alias -w -p tsconfig.build.json\" \"pnpm dev:tailwind\"",
-    "dev:tailwind": "tailwindcss -i css/style.css -o ./dist/style.css -w && tailwindcss -i src/components/image-zoom.css -o dist/components/image-zoom.css -w",
+    "dev": "concurrently \"tsdown --watch\" \"tailwindcss -i css/style.css -o ./dist/style.css -w\" \"tailwindcss -i src/components/image-zoom.css -o dist/components/image-zoom.css -w\"",
     "lint": "eslint .",
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "lucide-react": "^0.562.0",
     "@fumadocs/ui": "workspace:*",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-collapsible": "^1.1.12",
@@ -125,10 +125,9 @@
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "eslint-config-custom": "workspace:*",
-    "fumadocs-core": "workspace:*",
     "tailwindcss": "^4.1.18",
-    "tsc-alias": "^1.8.16",
-    "tsconfig": "workspace:*"
+    "tsconfig": "workspace:*",
+    "tsdown": "^0.18.3"
   },
   "peerDependencies": {
     "@types/react": "*",

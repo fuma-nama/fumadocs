@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronDown } from '@fumadocs/ui/icons';
+import { ChevronDown } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import { cva } from 'class-variance-authority';
 import { cn } from '@fumadocs/ui/cn';
