@@ -3,12 +3,5 @@
   "description": "The default theme",
   "icon": "PanelsTopLeft",
   "root": true,
-  "pages": [
-    "---Introduction---",
-    "index",
-    "component-library",
-    "theme",
-    "---[Book]References---",
-    "..."
-  ]
+  "pages": ["---Introduction---", "index", "component-library", "theme", "---References---", "..."]
 }

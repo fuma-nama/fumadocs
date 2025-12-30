@@ -31,12 +31,17 @@ const items = [
   },
   {
     name: 'Framework',
-    description: 'Only results about Fumadocs UI & guides',
+    description: 'Only results about framework guides',
+    value: 'framework',
+  },
+  {
+    name: 'UI',
+    description: 'Only results about Fumadocs UI',
     value: 'ui',
   },
   {
     name: 'Core',
-    description: 'Only results about headless features',
+    description: 'Only results about Fumadocs Core',
     value: 'headless',
   },
   {

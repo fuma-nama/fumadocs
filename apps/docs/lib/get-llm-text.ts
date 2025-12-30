@@ -1,15 +1,18 @@
 import { type Page } from '@/lib/source';
+import { getSection } from './source/navigation';
 
 export async function getLLMText(page: Page) {
   if (page.data.type === 'openapi') return '';
 
+  const section = getSection(page.slugs[0]);
   const category =
     {
-      ui: 'Fumadocs Framework',
-      headless: 'Fumadocs Core (core library of framework)',
+      framework: 'Fumadocs (Framework Mode)',
+      ui: 'Fumadocs UI (the default theme of Fumadocs)',
+      headless: 'Fumadocs Core (the core library of Fumadocs)',
       mdx: 'Fumadocs MDX (the built-in content source)',
       cli: 'Fumadocs CLI (the CLI tool for automating Fumadocs apps)',
-    }[page.slugs[0]] ?? page.slugs[0];
+    }[section] ?? section;
 
   const processed = await page.data.getText('processed');
 
