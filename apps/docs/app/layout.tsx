@@ -37,11 +37,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html
-      lang="en"
-      className={`${geist.variable} ${mono.variable}`}
-      suppressHydrationWarning
-    >
+    <html lang="en" className={`${geist.variable} ${mono.variable}`} suppressHydrationWarning>
       <Body>
         <NextProvider>
           <TreeContextProvider tree={source.pageTree}>

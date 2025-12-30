@@ -77,11 +77,7 @@ export async function writeFumadocsRegistry(
   await Promise.all(write);
 }
 
-async function writeFile(
-  file: string,
-  content: string,
-  log = true,
-): Promise<void> {
+async function writeFile(file: string, content: string, log = true): Promise<void> {
   await fs.mkdir(path.dirname(file), { recursive: true });
   await fs.writeFile(file, content);
 

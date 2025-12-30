@@ -4,9 +4,7 @@ import { basename, dirname, extname } from '@/source/path';
 /**
  * Generate slugs for pages if missing
  */
-export function slugsPlugin(
-  slugsFn?: (info: { path: string }) => string[],
-): LoaderPlugin {
+export function slugsPlugin(slugsFn?: (info: { path: string }) => string[]): LoaderPlugin {
   function isIndex(file: string) {
     return basename(file, extname(file)) === 'index';
   }
@@ -61,8 +59,7 @@ export function getSlugs(file: string): string[] {
     if (seg.length > 0 && !GroupRegex.test(seg)) slugs.push(encodeURI(seg));
   }
 
-  if (GroupRegex.test(name))
-    throw new Error(`Cannot use folder group in file names: ${file}`);
+  if (GroupRegex.test(name)) throw new Error(`Cannot use folder group in file names: ${file}`);
 
   if (name !== 'index') {
     slugs.push(encodeURI(name));

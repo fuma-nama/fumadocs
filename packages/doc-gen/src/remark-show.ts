@@ -18,25 +18,19 @@ export function remarkShow(options?: {
       for (const attr of node.attributes) {
         if (attr.type !== 'mdxJsxAttribute' || attr.name !== 'on') continue;
 
-        if (
-          !attr.value ||
-          typeof attr.value !== 'object' ||
-          !attr.value.data?.estree
-        )
+        if (!attr.value || typeof attr.value !== 'object' || !attr.value.data?.estree)
           // skip invalid <show> components and its children
           return 'skip';
 
         const js = toJs(attr.value.data.estree);
 
-        const callback = new Function(
-          ...Object.keys(variables),
-          `return ${js.value}`,
-        )(...Object.values(variables));
+        const callback = new Function(...Object.keys(variables), `return ${js.value}`)(
+          ...Object.values(variables),
+        );
 
         tasks.push(
           (async () => {
-            const value =
-              typeof callback === 'function' ? await callback(file) : callback;
+            const value = typeof callback === 'function' ? await callback(file) : callback;
 
             Object.assign(node, {
               type: 'mdxJsxFlowElement',

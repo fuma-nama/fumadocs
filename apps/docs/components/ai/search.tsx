@@ -41,11 +41,7 @@ function Header() {
         <p className="text-sm font-medium mb-2">Ask AI</p>
         <p className="text-xs text-fd-muted-foreground">
           Powered by{' '}
-          <a
-            href="https://inkeep.com"
-            target="_blank"
-            rel="noreferrer noopener"
-          >
+          <a href="https://inkeep.com" target="_blank" rel="noreferrer noopener">
             Inkeep AI
           </a>
         </p>
@@ -112,9 +108,7 @@ function SearchAIActions() {
 const StorageKeyInput = '__ai_search_input';
 function SearchAIInput(props: ComponentProps<'form'>) {
   const { status, sendMessage, stop } = useChatContext();
-  const [input, setInput] = useState(
-    () => localStorage.getItem(StorageKeyInput) ?? '',
-  );
+  const [input, setInput] = useState(() => localStorage.getItem(StorageKeyInput) ?? '');
   const isLoading = status === 'streaming' || status === 'submitted';
   const onStart = (e?: SyntheticEvent) => {
     e?.preventDefault();
@@ -129,11 +123,7 @@ function SearchAIInput(props: ComponentProps<'form'>) {
   }, [isLoading]);
 
   return (
-    <form
-      {...props}
-      className={cn('flex items-start pe-2', props.className)}
-      onSubmit={onStart}
-    >
+    <form {...props} className={cn('flex items-start pe-2', props.className)} onSubmit={onStart}>
       <Input
         value={input}
         placeholder={isLoading ? 'AI is answering...' : 'Ask a question'}
@@ -216,10 +206,7 @@ function List(props: Omit<ComponentProps<'div'>, 'dir'>) {
     <div
       ref={containerRef}
       {...props}
-      className={cn(
-        'fd-scroll-container overflow-y-auto min-w-0 flex flex-col',
-        props.className,
-      )}
+      className={cn('fd-scroll-container overflow-y-auto min-w-0 flex flex-col', props.className)}
     >
       {props.children}
     </div>
@@ -252,10 +239,7 @@ const roleName: Record<string, string> = {
   assistant: 'fumadocs',
 };
 
-function Message({
-  message,
-  ...props
-}: { message: UIMessage } & ComponentProps<'div'>) {
+function Message({ message, ...props }: { message: UIMessage } & ComponentProps<'div'>) {
   let markdown = '';
   let links: z.infer<typeof ProvideLinksToolSchema>['links'] = [];
 
@@ -311,9 +295,7 @@ export function AISearch({ children }: { children: ReactNode }) {
   });
 
   return (
-    <Context value={useMemo(() => ({ chat, open, setOpen }), [chat, open])}>
-      {children}
-    </Context>
+    <Context value={useMemo(() => ({ chat, open, setOpen }), [chat, open])}>{children}</Context>
   );
 }
 

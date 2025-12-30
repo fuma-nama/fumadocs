@@ -66,9 +66,7 @@ export function remarkHeading({
       if (!props.id) {
         flattened ??= flattenNode(heading);
 
-        props.id = defaultSlug
-          ? defaultSlug(root, heading, flattened)
-          : slugger.slug(flattened);
+        props.id = defaultSlug ? defaultSlug(root, heading, flattened) : slugger.slug(flattened);
       }
 
       if (generateToc) {

@@ -11,11 +11,7 @@ export function schemaToString(
   ctx?: ProcessedDocument,
   flags: FormatFlags = FormatFlags.None,
 ): string {
-  function union(
-    union: readonly ResolvedSchema[],
-    sep: string,
-    flags: FormatFlags,
-  ) {
+  function union(union: readonly ResolvedSchema[], sep: string, flags: FormatFlags) {
     const members = new Set();
     let nullable = false;
 

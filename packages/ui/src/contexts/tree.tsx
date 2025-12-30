@@ -36,17 +36,11 @@ export function TreeContextProvider({
     );
   }, [tree, pathname]);
 
-  const root =
-    path.findLast((item) => item.type === 'folder' && item.root) ?? tree;
+  const root = path.findLast((item) => item.type === 'folder' && item.root) ?? tree;
   root.$id ??= String(nextIdRef.current++);
 
   return (
-    <TreeContext
-      value={useMemo(
-        () => ({ root, full: tree }) as TreeContextType,
-        [root, tree],
-      )}
-    >
+    <TreeContext value={useMemo(() => ({ root, full: tree }) as TreeContextType, [root, tree])}>
       <PathContext value={path}>{children}</PathContext>
     </TreeContext>
   );
@@ -59,7 +53,6 @@ export function useTreePath(): PageTree.Node[] {
 export function useTreeContext(): TreeContextType {
   const ctx = use(TreeContext);
 
-  if (!ctx)
-    throw new Error('You must wrap this component under <DocsLayout />');
+  if (!ctx) throw new Error('You must wrap this component under <DocsLayout />');
   return ctx;
 }

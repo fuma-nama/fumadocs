@@ -31,23 +31,13 @@ export interface LucideProps extends ComponentProps<'svg'> {
   size?: string | number;
 }
 
-export type IconNode = [
-  elementName: SVGElementType,
-  attrs: Record<string, string>,
-][];
+export type IconNode = [elementName: SVGElementType, attrs: Record<string, string>][];
 
 const createLucideIcon = (iconName: string, iconNode: IconNode) => {
   const Component = forwardRef<SVGSVGElement, LucideProps>(
     ({ size = 24, color = 'currentColor', children, ...props }, ref) => {
       return (
-        <svg
-          ref={ref}
-          {...defaultAttributes}
-          width={size}
-          height={size}
-          stroke={color}
-          {...props}
-        >
+        <svg ref={ref} {...defaultAttributes} width={size} height={size} stroke={color} {...props}>
           {iconNode.map(([tag, attr]) => createElement(tag, attr))}
           {children}
         </svg>

@@ -146,10 +146,7 @@ export function generateDocument(
   if (imports) {
     out.push(
       ...imports
-        .map(
-          (item) =>
-            `import { ${item.names.join(', ')} } from ${JSON.stringify(item.from)};`,
-        )
+        .map((item) => `import { ${item.names.join(', ')} } from ${JSON.stringify(item.from)};`)
         .join('\n'),
     );
   }
@@ -206,8 +203,7 @@ function generatePage(
   const data = toStaticData(page, processed.dereferenced);
   const content: string[] = [];
 
-  if (options.description && includeDescription)
-    content.push(options.description);
+  if (options.description && includeDescription) content.push(options.description);
   content.push(pageContent(page));
 
   return generateDocument(

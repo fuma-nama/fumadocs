@@ -46,10 +46,7 @@ export interface PackageJson {
   devDependencies?: Record<string, string>;
 }
 
-export interface Registry extends Omit<
-  z.input<typeof registryInfoSchema>,
-  'indexes'
-> {
+export interface Registry extends Omit<z.input<typeof registryInfoSchema>, 'indexes'> {
   name: string;
   packageJson: string | PackageJson;
   tsconfigPath: string;
@@ -119,10 +116,7 @@ export class RegistryCompiler {
       registry.components.map(async (component) => {
         const compiler = new ComponentCompiler(this, component);
 
-        return [component, await compiler.build()] as [
-          Component,
-          CompiledComponent,
-        ];
+        return [component, await compiler.build()] as [Component, CompiledComponent];
       }),
     );
 
@@ -145,10 +139,7 @@ export class RegistryCompiler {
 class RegistryResolver {
   private readonly deps: Record<string, string | null>;
   private readonly devDeps: Record<string, string | null>;
-  private readonly fileToComponent = new Map<
-    string,
-    [Component, ComponentFile]
-  >();
+  private readonly fileToComponent = new Map<string, [Component, ComponentFile]>();
 
   constructor(
     private readonly compiler: RegistryCompiler,
@@ -262,9 +253,7 @@ export type Reference =
 export class ComponentCompiler {
   private readonly processedFiles = new Set<string>();
   private readonly registry: Registry;
-  private readonly subComponents = new Set<
-    string | z.input<typeof httpSubComponent>
-  >();
+  private readonly subComponents = new Set<string | z.input<typeof httpSubComponent>>();
   private readonly devDependencies = new Map<string, string | null>();
   private readonly dependencies = new Map<string, string | null>();
 
@@ -291,9 +280,7 @@ export class ComponentCompiler {
       title: this.component.title,
       description: this.component.description,
       files: (
-        await Promise.all(
-          this.component.files.map((file) => this.buildFileAndDeps(file)),
-        )
+        await Promise.all(this.component.files.map((file) => this.buildFileAndDeps(file)))
       ).flat(),
       subComponents: Array.from(this.subComponents),
       dependencies: Object.fromEntries(this.dependencies),
@@ -319,9 +306,7 @@ export class ComponentCompiler {
 
         if (refFile === false) return;
 
-        throw new Error(
-          `Unknown file ${reference.file} referenced by ${file.path}`,
-        );
+        throw new Error(`Unknown file ${reference.file} referenced by ${file.path}`);
       }
 
       if (reference.type === 'sub-component') {
@@ -343,8 +328,7 @@ export class ComponentCompiler {
 
       const dep = resolver.getDepInfo(reference.dep);
       if (dep) {
-        const map =
-          dep.type === 'dev' ? this.devDependencies : this.dependencies;
+        const map = dep.type === 'dev' ? this.devDependencies : this.dependencies;
         map.set(dep.name, dep.version);
       }
 
@@ -353,9 +337,7 @@ export class ComponentCompiler {
 
     return [
       result,
-      ...(
-        await Promise.all(queue.map((file) => this.buildFileAndDeps(file)))
-      ).flat(),
+      ...(await Promise.all(queue.map((file) => this.buildFileAndDeps(file)))).flat(),
     ];
   }
 
@@ -417,10 +399,7 @@ export class ComponentCompiler {
     /**
      * Process import paths
      */
-    const process = (
-      specifier: StringLiteral,
-      specifiedFile: SourceFile | undefined,
-    ) => {
+    const process = (specifier: StringLiteral, specifiedFile: SourceFile | undefined) => {
       const onResolve = this.component.onResolve ?? this.registry.onResolve;
       let resolved: Reference | undefined = this.resolveImport(
         sourceFilePath,
@@ -459,10 +438,7 @@ export class ComponentCompiler {
 
         if (!argument.isKind(ts.SyntaxKind.StringLiteral)) continue;
 
-        process(
-          argument,
-          argument.getSymbol()?.getDeclarations()[0].getSourceFile(),
-        );
+        process(argument, argument.getSymbol()?.getDeclarations()[0].getSourceFile());
       }
     }
 

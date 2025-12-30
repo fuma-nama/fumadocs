@@ -16,20 +16,14 @@ export async function copy(
     filterDir?: (dir: string) => boolean;
   } = {},
 ): Promise<void> {
-  const {
-    rename = (s) => s,
-    filterDir = () => true,
-    filter = () => true,
-  } = options;
+  const { rename = (s) => s, filterDir = () => true, filter = () => true } = options;
   const stats = await fs.stat(from);
 
   if (stats.isDirectory() && filterDir(from)) {
     const files = await fs.readdir(from);
 
     await Promise.all(
-      files.map((file) =>
-        copy(path.join(from, file), path.join(to, file), options),
-      ),
+      files.map((file) => copy(path.join(from, file), path.join(to, file), options)),
     );
   }
 
@@ -89,16 +83,12 @@ export async function tryGitInit(cwd: string): Promise<boolean> {
       },
     });
 
-    await x(
-      'git',
-      ['commit', '-m', 'Initial commit from Create Fumadocs App'],
-      {
-        throwOnError: true,
-        nodeOptions: {
-          cwd,
-        },
+    await x('git', ['commit', '-m', 'Initial commit from Create Fumadocs App'], {
+      throwOnError: true,
+      nodeOptions: {
+        cwd,
       },
-    );
+    });
     return true;
   } catch {
     await fs.rmdir(join(cwd, '.git'), { recursive: true }).catch(() => null);
@@ -107,10 +97,7 @@ export async function tryGitInit(cwd: string): Promise<boolean> {
   }
 }
 
-export function pick<T extends object, K extends keyof T>(
-  obj: T,
-  keys: K[],
-): Pick<T, K> {
+export function pick<T extends object, K extends keyof T>(obj: T, keys: K[]): Pick<T, K> {
   const result: Partial<T> = {};
 
   for (const key of keys) {

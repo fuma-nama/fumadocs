@@ -15,16 +15,12 @@ export interface LoaderPlugin<Config extends LoaderConfig = LoaderConfig> {
   /**
    * receive & replace loader options
    */
-  config?: (
-    config: ResolvedLoaderConfig,
-  ) => ResolvedLoaderConfig | void | undefined;
+  config?: (config: ResolvedLoaderConfig) => ResolvedLoaderConfig | void | undefined;
 
   /**
    * transform the storage after loading
    */
-  transformStorage?: (context: {
-    storage: ContentStorage<Config['source']>;
-  }) => void;
+  transformStorage?: (context: { storage: ContentStorage<Config['source']> }) => void;
 
   /**
    * transform the generated page tree
@@ -43,10 +39,7 @@ const priorityMap = {
   post: -1,
 };
 
-export function buildPlugins(
-  plugins: LoaderPluginOption[],
-  sort = true,
-): LoaderPlugin[] {
+export function buildPlugins(plugins: LoaderPluginOption[], sort = true): LoaderPlugin[] {
   const flatten: LoaderPlugin[] = [];
 
   for (const plugin of plugins) {
@@ -56,9 +49,7 @@ export function buildPlugins(
 
   if (sort)
     return flatten.sort(
-      (a, b) =>
-        priorityMap[b.enforce ?? 'default'] -
-        priorityMap[a.enforce ?? 'default'],
+      (a, b) => priorityMap[b.enforce ?? 'default'] - priorityMap[a.enforce ?? 'default'],
     );
   return flatten;
 }

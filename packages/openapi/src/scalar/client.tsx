@@ -1,10 +1,7 @@
 'use client';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import {
-  ApiClientModalProvider,
-  useApiClientModal,
-} from '@scalar/api-client-react';
+import { ApiClientModalProvider, useApiClientModal } from '@scalar/api-client-react';
 import { MethodLabel } from '@/ui/components/method-label';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
@@ -56,13 +53,8 @@ function Trigger({ path, method }: { path: string; method: string }) {
   return (
     <button
       type="submit"
-      className={cn(
-        buttonVariants({ color: 'primary', size: 'sm' }),
-        'px-3 py-1.5',
-      )}
-      onClick={() =>
-        client?.open({ path, method: method as OpenAPIV3_1.HttpMethods })
-      }
+      className={cn(buttonVariants({ color: 'primary', size: 'sm' }), 'px-3 py-1.5')}
+      onClick={() => client?.open({ path, method: method as OpenAPIV3_1.HttpMethods })}
     >
       Test
     </button>

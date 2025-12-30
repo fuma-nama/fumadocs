@@ -30,9 +30,7 @@ describe('Generate documents', () => {
       per: 'operation',
     });
 
-    await expect(stringifyOutput(out)).toMatchFileSnapshot(
-      './out/petstore-per-operation.md',
-    );
+    await expect(stringifyOutput(out)).toMatchFileSnapshot('./out/petstore-per-operation.md');
   });
 
   test('Museum (Per Tag)', async () => {
@@ -45,9 +43,7 @@ describe('Generate documents', () => {
       per: 'tag',
     });
 
-    await expect(stringifyOutput(out)).toMatchFileSnapshot(
-      './out/museum-per-tag.md',
-    );
+    await expect(stringifyOutput(out)).toMatchFileSnapshot('./out/museum-per-tag.md');
   });
 
   test('Unkey (Per File)', async () => {
@@ -60,9 +56,7 @@ describe('Generate documents', () => {
       per: 'file',
     });
 
-    await expect(stringifyOutput(out)).toMatchFileSnapshot(
-      './out/unkey-per-file.md',
-    );
+    await expect(stringifyOutput(out)).toMatchFileSnapshot('./out/unkey-per-file.md');
   });
 
   test('Generate Files', async () => {
@@ -76,9 +70,7 @@ describe('Generate documents', () => {
       per: 'file',
     });
 
-    await expect(stringifyOutput(out)).toMatchFileSnapshot(
-      './out/museum+petstore.md',
-    );
+    await expect(stringifyOutput(out)).toMatchFileSnapshot('./out/museum+petstore.md');
   });
 
   test('Generate Files - throws error when no input files found', async () => {
@@ -106,9 +98,7 @@ describe('Generate documents', () => {
       },
     });
 
-    await expect(stringifyOutput(out)).toMatchFileSnapshot(
-      './out/products-group-by-tag.md',
-    );
+    await expect(stringifyOutput(out)).toMatchFileSnapshot('./out/products-group-by-tag.md');
   });
 
   test('Generate Files - with index', async () => {
@@ -137,9 +127,7 @@ describe('Generate documents', () => {
       },
     });
 
-    await expect(stringifyOutput(out)).toMatchFileSnapshot(
-      './out/products-with-index.md',
-    );
+    await expect(stringifyOutput(out)).toMatchFileSnapshot('./out/products-with-index.md');
   });
 });
 

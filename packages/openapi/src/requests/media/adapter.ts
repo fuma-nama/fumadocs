@@ -54,10 +54,7 @@ export interface MediaAdapter {
    *
    * @returns code that inits a `body` variable, or undefined if not supported (skip example for that language).
    */
-  generateExample: (
-    data: { body: unknown },
-    ctx: MediaContext,
-  ) => string | undefined;
+  generateExample: (data: { body: unknown }, ctx: MediaContext) => string | undefined;
 }
 
 export const defaultAdapters = {
@@ -95,9 +92,7 @@ export const defaultAdapters = {
   'application/x-www-form-urlencoded': {
     encode(data) {
       if (typeof data.body !== 'object')
-        throw new Error(
-          `Input value must be object, received: ${typeof data.body}`,
-        );
+        throw new Error(`Input value must be object, received: ${typeof data.body}`);
 
       const params = new URLSearchParams();
       for (const key in data.body) {
@@ -120,9 +115,7 @@ export const defaultAdapters = {
       const body = data.body as Record<string, unknown>;
 
       if (typeof body !== 'object' || !body) {
-        throw new Error(
-          `Unsupported body type: ${typeof body}, expected: object`,
-        );
+        throw new Error(`Unsupported body type: ${typeof body}, expected: object`);
       }
 
       for (const key in body) {
@@ -194,10 +187,7 @@ export const defaultAdapters = {
         for (const [key, value] of Object.entries(data.body as object)) {
           if (!value) continue;
 
-          const escaped = escapeString(
-            inputToString(value, 'application/json'),
-            '`',
-          );
+          const escaped = escapeString(inputToString(value, 'application/json'), '`');
 
           s.push(`mp.WriteField("${key}", ${escaped})`);
         }

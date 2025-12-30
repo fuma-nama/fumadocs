@@ -142,10 +142,7 @@ const cases: {
 for (const { name, config } of cases) {
   test(`generate JS index file: ${name}`, async () => {
     const core = createCore({
-      configPath: path.relative(
-        process.cwd(),
-        path.join(baseDir, './fixtures/config.ts'),
-      ),
+      configPath: path.relative(process.cwd(), path.join(baseDir, './fixtures/config.ts')),
       environment: 'test',
       outDir: path.relative(process.cwd(), path.join(baseDir, './fixtures')),
       plugins: [indexFile()],
@@ -163,23 +160,16 @@ for (const { name, config } of cases) {
       }
     }
     const markdown = entries
-      .map(
-        (entry) => `\`\`\`ts title="${entry.path}"\n${entry.content}\n\`\`\``,
-      )
+      .map((entry) => `\`\`\`ts title="${entry.path}"\n${entry.content}\n\`\`\``)
       .join('\n\n');
 
-    await expect(markdown).toMatchFileSnapshot(
-      `./fixtures/index-${name}.output.md`,
-    );
+    await expect(markdown).toMatchFileSnapshot(`./fixtures/index-${name}.output.md`);
   });
 }
 
 test('parse frontmatter', () => {
-  expect(
-    fumaMatter(
-      '---\ntitle: hello world\ndescription: I love Fumadocs\n---\nwow looks cool.',
-    ),
-  ).toMatchInlineSnapshot(`
+  expect(fumaMatter('---\ntitle: hello world\ndescription: I love Fumadocs\n---\nwow looks cool.'))
+    .toMatchInlineSnapshot(`
     {
       "content": "wow looks cool.",
       "data": {
@@ -213,8 +203,7 @@ test('parse frontmatter', () => {
     }
   `);
 
-  expect(fumaMatter('--- \ntitle: hello world\r\n---\r\nwow looks cool.'))
-    .toMatchInlineSnapshot(`
+  expect(fumaMatter('--- \ntitle: hello world\r\n---\r\nwow looks cool.')).toMatchInlineSnapshot(`
     {
       "content": "--- 
     title: hello world

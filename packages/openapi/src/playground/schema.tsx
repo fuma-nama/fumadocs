@@ -150,11 +150,7 @@ export function useFieldInfo(
         ...value,
       };
 
-      if (
-        updated.oneOf === info.oneOf &&
-        updated.selectedType === info.selectedType
-      )
-        return;
+      if (updated.oneOf === info.oneOf && updated.selectedType === info.selectedType) return;
 
       setInfo(updated);
 
@@ -173,9 +169,7 @@ export function useFieldInfo(
 /**
  * Resolve `$ref` in the schema, **not recursive**.
  */
-export function useResolvedSchema(
-  schema: ParsedSchema,
-): Exclude<ParsedSchema, boolean> {
+export function useResolvedSchema(schema: ParsedSchema): Exclude<ParsedSchema, boolean> {
   const { references } = use(SchemaContext)!;
 
   return useMemo(() => {
@@ -185,9 +179,7 @@ export function useResolvedSchema(
   }, [references, schema]);
 }
 
-export function fallbackAny(
-  schema: ParsedSchema,
-): Exclude<ParsedSchema, boolean> {
+export function fallbackAny(schema: ParsedSchema): Exclude<ParsedSchema, boolean> {
   return typeof schema === 'boolean' ? anyFields : schema;
 }
 

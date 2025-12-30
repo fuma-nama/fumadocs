@@ -16,10 +16,7 @@ export {
   PageLastUpdate,
 } from './layouts/docs/page';
 
-interface EditOnGitHubOptions extends Omit<
-  ComponentProps<'a'>,
-  'href' | 'children'
-> {
+interface EditOnGitHubOptions extends Omit<ComponentProps<'a'>, 'href' | 'children'> {
   owner: string;
   repo: string;
 
@@ -46,28 +43,15 @@ export interface DocsPageProps extends Docs.DocsPageProps {
  */
 export function withArticle(props: ComponentProps<'main'>) {
   return (
-    <main
-      {...props}
-      className={cn(
-        'w-full max-w-[1400px] mx-auto px-4 py-12',
-        props.className,
-      )}
-    >
+    <main {...props} className={cn('w-full max-w-[1400px] mx-auto px-4 py-12', props.className)}>
       <article className="prose">{props.children}</article>
     </main>
   );
 }
 
-export function DocsPage({
-  lastUpdate,
-  editOnGithub,
-  children,
-  ...props
-}: DocsPageProps) {
+export function DocsPage({ lastUpdate, editOnGithub, children, ...props }: DocsPageProps) {
   const docsLayoutCtx = use(LayoutContext);
-  const { DocsPage, EditOnGitHub, PageLastUpdate } = docsLayoutCtx
-    ? Docs
-    : Notebook;
+  const { DocsPage, EditOnGitHub, PageLastUpdate } = docsLayoutCtx ? Docs : Notebook;
 
   return (
     <DocsPage {...props}>

@@ -1,12 +1,6 @@
 'use client';
 
-import {
-  type ComponentProps,
-  createContext,
-  type ReactNode,
-  use,
-  useMemo,
-} from 'react';
+import { type ComponentProps, createContext, type ReactNode, use, useMemo } from 'react';
 import { cn } from '@fumadocs/ui/cn';
 import { useSidebar } from '@/components/sidebar/base';
 import { usePathname } from 'fumadocs-core/framework';
@@ -26,10 +20,8 @@ export function LayoutContextProvider({
   navTransparentMode?: 'always' | 'top' | 'none';
   children: ReactNode;
 }) {
-  const isTop =
-    useIsScrollTop({ enabled: navTransparentMode === 'top' }) ?? true;
-  const isNavTransparent =
-    navTransparentMode === 'top' ? isTop : navTransparentMode === 'always';
+  const isTop = useIsScrollTop({ enabled: navTransparentMode === 'top' }) ?? true;
+  const isNavTransparent = navTransparentMode === 'top' ? isTop : navTransparentMode === 'always';
 
   return (
     <LayoutContext
@@ -55,12 +47,7 @@ export function LayoutHeader(props: ComponentProps<'header'>) {
   );
 }
 
-export function LayoutBody({
-  className,
-  style,
-  children,
-  ...props
-}: ComponentProps<'div'>) {
+export function LayoutBody({ className, style, children, ...props }: ComponentProps<'div'>) {
   const { collapsed } = useSidebar();
 
   return (
@@ -77,10 +64,8 @@ export function LayoutBody({
         "sidebar toc-popover toc"
         "sidebar main toc" 1fr / minmax(var(--fd-sidebar-col), 1fr) minmax(0, calc(var(--fd-layout-width,97rem) - var(--fd-sidebar-width) - var(--fd-toc-width))) minmax(min-content, 1fr)`,
           '--fd-docs-row-1': 'var(--fd-banner-height, 0px)',
-          '--fd-docs-row-2':
-            'calc(var(--fd-docs-row-1) + var(--fd-header-height))',
-          '--fd-docs-row-3':
-            'calc(var(--fd-docs-row-2) + var(--fd-toc-popover-height))',
+          '--fd-docs-row-2': 'calc(var(--fd-docs-row-1) + var(--fd-header-height))',
+          '--fd-docs-row-3': 'calc(var(--fd-docs-row-2) + var(--fd-toc-popover-height))',
           '--fd-sidebar-col': collapsed ? '0px' : 'var(--fd-sidebar-width)',
           ...style,
         } as object

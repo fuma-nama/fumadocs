@@ -29,9 +29,7 @@ function pluginOption(
   def: (v: Pluggable[]) => (Pluggable | false)[],
   options: ResolvePlugins = [],
 ): Pluggable[] {
-  const list = def(Array.isArray(options) ? options : []).filter(
-    Boolean,
-  ) as Pluggable[];
+  const list = def(Array.isArray(options) ? options : []).filter(Boolean) as Pluggable[];
 
   if (typeof options === 'function') {
     return options(list);
@@ -81,15 +79,11 @@ export function applyMdxPreset(
           plugins.remarkImage,
           {
             ...remarkImageOptions,
-            useImport:
-              remarkImageOptions?.useImport ?? environment === 'bundler',
+            useImport: remarkImageOptions?.useImport ?? environment === 'bundler',
           },
         ],
         'remarkCodeTab' in plugins &&
-          remarkCodeTabOptions !== false && [
-            plugins.remarkCodeTab,
-            remarkCodeTabOptions,
-          ],
+          remarkCodeTabOptions !== false && [plugins.remarkCodeTab, remarkCodeTabOptions],
         'remarkNpm' in plugins &&
           remarkNpmOptions !== false && [plugins.remarkNpm, remarkNpmOptions],
         ...v,
@@ -130,8 +124,7 @@ export function applyMdxPreset(
 
     return {
       ...mdxOptions,
-      outputFormat:
-        environment === 'runtime' ? 'function-body' : mdxOptions.outputFormat,
+      outputFormat: environment === 'runtime' ? 'function-body' : mdxOptions.outputFormat,
       remarkPlugins,
       rehypePlugins,
     };

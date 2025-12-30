@@ -27,10 +27,7 @@ export class DependencyManager {
       }
     }
 
-    if (
-      'devDependencies' in parsed &&
-      typeof parsed.devDependencies === 'object'
-    ) {
+    if ('devDependencies' in parsed && typeof parsed.devDependencies === 'object') {
       const records = parsed.devDependencies as Record<string, string>;
 
       for (const [k, v] of Object.entries(records)) {
@@ -41,9 +38,7 @@ export class DependencyManager {
     return (this.cachedInstalledDeps = dependencies);
   }
 
-  private async resolveInstallDependencies(
-    deps: Record<string, string | null>,
-  ): Promise<string[]> {
+  private async resolveInstallDependencies(deps: Record<string, string | null>): Promise<string[]> {
     const cachedInstalledDeps = await this.getDeps();
 
     return Object.entries(deps)
@@ -51,10 +46,7 @@ export class DependencyManager {
       .map(([k, v]) => (v === null || v.length === 0 ? k : `${k}@${v}`));
   }
 
-  async installDeps(
-    deps: Record<string, string | null>,
-    devDeps: Record<string, string | null>,
-  ) {
+  async installDeps(deps: Record<string, string | null>, devDeps: Record<string, string | null>) {
     const items = await this.resolveInstallDependencies(deps);
     const devItems = await this.resolveInstallDependencies(devDeps);
     if (items.length === 0 && devItems.length === 0) return;

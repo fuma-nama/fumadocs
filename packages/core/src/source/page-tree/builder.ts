@@ -5,9 +5,7 @@ import { basename, extname, joinPath } from '@/source/path';
 import { transformerFallback } from '@/source/page-tree/transformer-fallback';
 import type { SourceConfig } from '../source';
 
-export interface PageTreeBuilderContext<
-  Config extends SourceConfig = SourceConfig,
-> {
+export interface PageTreeBuilderContext<Config extends SourceConfig = SourceConfig> {
   rootId: string;
   generateNodeId: () => string;
   options: PageTreeOptions;
@@ -21,9 +19,7 @@ export interface PageTreeBuilderContext<
   locale?: string;
 }
 
-export interface PageTreeTransformer<
-  Config extends SourceConfig = SourceConfig,
-> {
+export interface PageTreeTransformer<Config extends SourceConfig = SourceConfig> {
   file?: (
     this: PageTreeBuilderContext<Config>,
     node: PageTree.Item,
@@ -39,10 +35,7 @@ export interface PageTreeTransformer<
     this: PageTreeBuilderContext<Config>,
     node: PageTree.Separator,
   ) => PageTree.Separator;
-  root?: (
-    this: PageTreeBuilderContext<Config>,
-    node: PageTree.Root,
-  ) => PageTree.Root;
+  root?: (this: PageTreeBuilderContext<Config>, node: PageTree.Root) => PageTree.Root;
 }
 
 export interface PageTreeOptions<Config extends LoaderConfig = LoaderConfig> {
@@ -76,17 +69,14 @@ export interface PageTreeBuilder {
 }
 
 const group = /^\((?<name>.+)\)$/;
-const link =
-  /^(?<external>external:)?(?:\[(?<icon>[^\]]+)])?\[(?<name>[^\]]+)]\((?<url>[^)]+)\)$/;
+const link = /^(?<external>external:)?(?:\[(?<icon>[^\]]+)])?\[(?<name>[^\]]+)]\((?<url>[^)]+)\)$/;
 const separator = /^---(?:\[(?<icon>[^\]]+)])?(?<name>.+)---|^---$/;
 const rest = '...' as const;
 const restReversed = 'z...a' as const;
 const extractPrefix = '...';
 const excludePrefix = '!';
 
-export function createPageTreeBuilder(
-  loaderConfig: ResolvedLoaderConfig,
-): PageTreeBuilder {
+export function createPageTreeBuilder(loaderConfig: ResolvedLoaderConfig): PageTreeBuilder {
   const { plugins = [], url, pageTree: defaultOptions = {} } = loaderConfig;
 
   return {
@@ -104,8 +94,7 @@ export function createPageTreeBuilder(
       }
 
       for (const plugin of plugins) {
-        if (plugin.transformPageTree)
-          transformers.push(plugin.transformPageTree);
+        if (plugin.transformPageTree) transformers.push(plugin.transformPageTree);
       }
 
       if (options.generateFallback ?? true) {
@@ -163,15 +152,12 @@ function createPageTreeBuilderUtils(ctx: PageTreeBuilderContext) {
     buildPaths(paths: string[], reversed = false): PageTree.Node[] {
       const items: PageTree.Node[] = [];
       const folders: PageTree.Folder[] = [];
-      const sortedPaths = paths.sort(
-        (a, b) => a.localeCompare(b) * (reversed ? -1 : 1),
-      );
+      const sortedPaths = paths.sort((a, b) => a.localeCompare(b) * (reversed ? -1 : 1));
 
       for (const path of sortedPaths) {
         const fileNode = this.file(path);
         if (fileNode) {
-          if (basename(path, extname(path)) === 'index')
-            items.unshift(fileNode);
+          if (basename(path, extname(path)) === 'index') items.unshift(fileNode);
           else items.push(fileNode);
 
           continue;
@@ -184,10 +170,7 @@ function createPageTreeBuilderUtils(ctx: PageTreeBuilderContext) {
       items.push(...folders);
       return items;
     },
-    resolveFolderItem(
-      folderPath: string,
-      item: string,
-    ): PageTree.Node[] | '...' | 'z...a' {
+    resolveFolderItem(folderPath: string, item: string): PageTree.Node[] | '...' | 'z...a' {
       if (item === rest || item === restReversed) return item;
 
       let match = separator.exec(item);
@@ -253,19 +236,13 @@ function createPageTreeBuilderUtils(ctx: PageTreeBuilderContext) {
       const fileNode = this.file(path);
       return fileNode ? [fileNode] : [];
     },
-    folder(
-      folderPath: string,
-      isGlobalRoot: boolean,
-    ): PageTree.Folder | undefined {
+    folder(folderPath: string, isGlobalRoot: boolean): PageTree.Folder | undefined {
       const { storage, options, transformers } = ctx;
       const files = storage.readDir(folderPath);
       if (!files) return;
 
       const metaPath = resolveFlattenPath(joinPath(folderPath, 'meta'), 'meta');
-      const indexPath = resolveFlattenPath(
-        joinPath(folderPath, 'index'),
-        'page',
-      );
+      const indexPath = resolveFlattenPath(joinPath(folderPath, 'index'), 'page');
 
       let meta = storage.read(metaPath);
       if (meta && meta.format !== 'meta') meta = undefined;
@@ -276,9 +253,9 @@ function createPageTreeBuilderUtils(ctx: PageTreeBuilderContext) {
       let children: PageTree.Node[];
 
       if (pages) {
-        const resolved = pages.flatMap<
-          PageTree.Node | typeof rest | typeof restReversed
-        >((item) => this.resolveFolderItem(folderPath, item));
+        const resolved = pages.flatMap<PageTree.Node | typeof rest | typeof restReversed>((item) =>
+          this.resolveFolderItem(folderPath, item),
+        );
 
         if (!root && !visitedPaths.has(indexPath)) {
           index = this.file(indexPath);
@@ -303,9 +280,7 @@ function createPageTreeBuilderUtils(ctx: PageTreeBuilderContext) {
           index = this.file(indexPath);
         }
 
-        children = this.buildPaths(
-          files.filter((file) => !visitedPaths.has(file)),
-        );
+        children = this.buildPaths(files.filter((file) => !visitedPaths.has(file)));
       }
 
       let node: PageTree.Folder = {

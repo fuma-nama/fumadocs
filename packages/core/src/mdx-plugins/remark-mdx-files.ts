@@ -116,9 +116,7 @@ function defaultToMDX(node: Node, depth = 0): MdxJsxFlowElement {
  *
  * into MDX `<Files />` component
  */
-export function remarkMdxFiles(
-  options: RemarkMdxFilesOptions = {},
-): Transformer<Root, Root> {
+export function remarkMdxFiles(options: RemarkMdxFilesOptions = {}): Transformer<Root, Root> {
   const { lang = 'files', toMdx = defaultToMDX } = options;
 
   return (tree) => {

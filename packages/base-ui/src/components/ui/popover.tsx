@@ -13,12 +13,7 @@ const PopoverContent = React.forwardRef<
     Pick<Primitive.Positioner.Props, 'sideOffset' | 'align'>
 >(({ className, align = 'center', sideOffset = 4, ...props }, ref) => (
   <Primitive.Portal>
-    <Primitive.Positioner
-      align={align}
-      side="bottom"
-      sideOffset={sideOffset}
-      className="z-50"
-    >
+    <Primitive.Positioner align={align} side="bottom" sideOffset={sideOffset} className="z-50">
       <Primitive.Popup
         ref={ref}
         className={(s) =>

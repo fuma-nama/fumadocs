@@ -244,10 +244,7 @@ export function remarkInclude(this: Processor): Transformer<Root, Root> {
 
     if (heading) {
       // parse headings before extraction
-      const extracted = extractSection(
-        await baseProcessor.use(remarkHeading).run(mdast),
-        heading,
-      );
+      const extracted = extractSection(await baseProcessor.use(remarkHeading).run(mdast), heading);
       if (!extracted)
         throw new Error(
           `Cannot find section ${heading} in ${targetPath}, make sure you have encapsulated the section in a <section id="${heading}"> tag, or a :::section directive with remark-directive configured.`,
@@ -274,17 +271,11 @@ export function remarkInclude(this: Processor): Transformer<Root, Root> {
 
       const attributes = parseElementAttributes(node);
       const { file: relativePath, section } = parseSpecifier(specifier);
-      const targetPath = path.resolve(
-        'cwd' in attributes ? file.cwd : file.dirname!,
-        relativePath,
-      );
+      const targetPath = path.resolve('cwd' in attributes ? file.cwd : file.dirname!, relativePath);
 
       queue.push(
         embedContent(targetPath, section, attributes, file).then((replace) => {
-          Object.assign(
-            parent && parent.type === 'paragraph' ? parent : node,
-            replace,
-          );
+          Object.assign(parent && parent.type === 'paragraph' ? parent : node, replace);
         }),
       );
 

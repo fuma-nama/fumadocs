@@ -28,21 +28,11 @@ type CacheEntry = z.infer<typeof cacheEntry>;
 export function createMdxLoader({ getCore }: ConfigLoader): Loader {
   return {
     test: mdxLoaderGlob,
-    async load({
-      getSource,
-      development: isDevelopment,
-      query,
-      compiler,
-      filePath,
-    }) {
+    async load({ getSource, development: isDevelopment, query, compiler, filePath }) {
       let core = await getCore();
       const value = await getSource();
       const matter = fumaMatter(value);
-      const {
-        collection: collectionName,
-        workspace,
-        only,
-      } = querySchema.parse(query);
+      const { collection: collectionName, workspace, only } = querySchema.parse(query);
       if (workspace) {
         core = core.getWorkspaces().get(workspace) ?? core;
       }
@@ -72,9 +62,7 @@ export function createMdxLoader({ getCore }: ConfigLoader): Loader {
         };
       }
 
-      const collection = collectionName
-        ? core.getCollection(collectionName)
-        : undefined;
+      const collection = collectionName ? core.getCollection(collectionName) : undefined;
 
       let docCollection: DocCollectionItem | undefined;
       switch (collection?.type) {
@@ -100,13 +88,11 @@ export function createMdxLoader({ getCore }: ConfigLoader): Loader {
         };
       }
 
-      // ensure the line number is correct in dev mode
-      const lineOffset = isDevelopment ? countLines(matter.matter) : 0;
-
       const { buildMDX } = await import('@/loaders/mdx/build-mdx');
       const compiled = await buildMDX(core, docCollection, {
         isDevelopment,
-        source: '\n'.repeat(lineOffset) + matter.content,
+        // ensure the line number is correct in errors
+        source: '\n'.repeat(countLines(matter.matter)) + matter.content,
         filePath,
         frontmatter: matter.data as Record<string, unknown>,
         _compiler: compiler,

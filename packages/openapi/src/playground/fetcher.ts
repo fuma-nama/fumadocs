@@ -28,10 +28,7 @@ export function createBrowserFetcher(
   return {
     async fetch(url, options) {
       const headers = new Headers();
-      if (
-        options.bodyMediaType &&
-        options.bodyMediaType !== 'multipart/form-data'
-      )
+      if (options.bodyMediaType && options.bodyMediaType !== 'multipart/form-data')
         headers.append('Content-Type', options.bodyMediaType);
 
       for (const key in options.header) {
@@ -44,9 +41,7 @@ export function createBrowserFetcher(
         }
       }
 
-      const proxyUrl = options.proxyUrl
-        ? new URL(options.proxyUrl, document.baseURI)
-        : null;
+      const proxyUrl = options.proxyUrl ? new URL(options.proxyUrl, document.baseURI) : null;
 
       if (proxyUrl) {
         proxyUrl.searchParams.append('url', url);
@@ -101,8 +96,7 @@ export function createBrowserFetcher(
           return { status: res.status, type, data };
         })
         .catch((e) => {
-          const message =
-            e instanceof Error ? `[${e.name}] ${e.message}` : e.toString();
+          const message = e instanceof Error ? `[${e.name}] ${e.message}` : e.toString();
 
           return {
             status: 400,

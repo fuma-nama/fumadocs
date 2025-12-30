@@ -6,11 +6,7 @@ import { usePathname } from 'fumadocs-core/framework';
 import { cn } from '@fumadocs/ui/cn';
 import { normalize, isActive } from '@fumadocs/ui/urls';
 import { useSidebar } from '@/components/sidebar/base';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import type { SidebarTab } from '.';
 
 export interface SidebarTabWithProps extends SidebarTab {
@@ -40,9 +36,7 @@ export function SidebarTabsDropdown({
 
   const item = selected ? (
     <>
-      <div className="size-9 shrink-0 empty:hidden md:size-5">
-        {selected.icon}
-      </div>
+      <div className="size-9 shrink-0 empty:hidden md:size-5">{selected.icon}</div>
       <div>
         <p className="text-sm font-medium">{selected.title}</p>
         <p className="text-sm text-fd-muted-foreground empty:hidden md:hidden">
@@ -84,9 +78,7 @@ export function SidebarTabsDropdown({
                 item.props?.className,
               )}
             >
-              <div className="shrink-0 size-9 md:mb-auto md:size-5 empty:hidden">
-                {item.icon}
-              </div>
+              <div className="shrink-0 size-9 md:mb-auto md:size-5 empty:hidden">{item.icon}</div>
               <div>
                 <p className="text-sm font-medium leading-none">{item.title}</p>
                 <p className="text-[0.8125rem] text-fd-muted-foreground mt-1 empty:hidden">

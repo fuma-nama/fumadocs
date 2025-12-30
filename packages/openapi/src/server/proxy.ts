@@ -38,9 +38,7 @@ export function createProxy(options: CreateProxyOptions = {}): Proxy {
     allowedOrigins,
     allowedUrls,
     filterRequest = (req) => {
-      return (
-        !allowedUrls || allowedUrls.some((item) => req.url.startsWith(item))
-      );
+      return !allowedUrls || allowedUrls.some((item) => req.url.startsWith(item));
     },
     overrides,
   } = options;
@@ -51,12 +49,9 @@ export function createProxy(options: CreateProxyOptions = {}): Proxy {
     const url = searchParams.get('url');
 
     if (!url)
-      return Response.json(
-        '[Proxy] A `url` query parameter is required for proxy url',
-        {
-          status: 400,
-        },
-      );
+      return Response.json('[Proxy] A `url` query parameter is required for proxy url', {
+        status: 400,
+      });
 
     const parsedUrl = URL.parse(url);
     if (!parsedUrl)
@@ -65,12 +60,9 @@ export function createProxy(options: CreateProxyOptions = {}): Proxy {
       });
 
     if (allowedOrigins && !allowedOrigins.includes(parsedUrl.origin)) {
-      return Response.json(
-        `[Proxy] The origin "${parsedUrl.origin}" is not allowed.`,
-        {
-          status: 400,
-        },
-      );
+      return Response.json(`[Proxy] The origin "${parsedUrl.origin}" is not allowed.`, {
+        status: 400,
+      });
     }
 
     const contentLength = req.headers.get('content-length');
@@ -81,8 +73,7 @@ export function createProxy(options: CreateProxyOptions = {}): Proxy {
       cache: 'no-cache',
       headers: req.headers,
       body:
-        hasBody &&
-        ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method.toUpperCase())
+        hasBody && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method.toUpperCase())
           ? await req.arrayBuffer()
           : undefined,
     });

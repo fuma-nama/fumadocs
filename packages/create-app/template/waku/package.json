@@ -1,8 +1,8 @@
 {
   "name": "example-waku",
   "private": true,
-  "sideEffects": false,
   "type": "module",
+  "sideEffects": false,
   "scripts": {
     "dev": "waku dev",
     "build": "waku build",

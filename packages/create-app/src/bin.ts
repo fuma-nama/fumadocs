@@ -30,10 +30,7 @@ const command = program
     ).choices(['eslint', 'biome']),
   )
   .addOption(
-    new Option('--search <name>', 'configure a search solution').choices([
-      'orama',
-      'orama-cloud',
-    ]),
+    new Option('--search <name>', 'configure a search solution').choices(['orama', 'orama-cloud']),
   )
   .addOption(
     new Option('--template <name>', 'choose a template').choices(
@@ -206,9 +203,7 @@ async function main(): Promise<void> {
   } else {
     console.log(pc.cyan(`${config.pm} dev`));
   }
-  console.log(
-    pc.bold('\nYou can now open the project and start writing documents'),
-  );
+  console.log(pc.bold('\nYou can now open the project and start writing documents'));
 
   process.exit(0);
 }

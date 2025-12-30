@@ -4,11 +4,7 @@ import path from 'node:path';
 import { Command } from 'commander';
 import picocolors from 'picocolors';
 import { createOrLoadConfig, initConfig, type LoadedConfig } from '@/config';
-import {
-  type JsonTreeNode,
-  treeToJavaScript,
-  treeToMdx,
-} from '@/commands/file-tree';
+import { type JsonTreeNode, treeToJavaScript, treeToMdx } from '@/commands/file-tree';
 import { runTree } from '@/utils/file-tree/run-tree';
 import packageJson from '../package.json';
 import { customise } from '@/commands/customise';
@@ -35,12 +31,7 @@ program
   .description('simple way to customise layouts with Fumadocs UI')
   .option('--dir <string>', 'the root url or directory to resolve registry')
   .action(async (options: { config?: string; dir?: string }) => {
-    await customise(
-      createClientFromDir(
-        options.dir,
-        await createOrLoadConfig(options.config),
-      ),
-    );
+    await customise(createClientFromDir(options.dir, await createOrLoadConfig(options.config)));
   });
 
 const dirShortcuts: Record<string, string> = {
@@ -53,22 +44,14 @@ program
   .description('add a new component to your docs')
   .argument('[components...]', 'components to download')
   .option('--dir <string>', 'the root url or directory to resolve registry')
-  .action(
-    async (input: string[], options: { config?: string; dir?: string }) => {
-      const client = createClientFromDir(
-        options.dir,
-        await createOrLoadConfig(options.config),
-      );
-      await add(input, client);
-    },
-  );
+  .action(async (input: string[], options: { config?: string; dir?: string }) => {
+    const client = createClientFromDir(options.dir, await createOrLoadConfig(options.config));
+    await add(input, client);
+  });
 
 program
   .command('tree')
-  .argument(
-    '[json_or_args]',
-    'JSON output of `tree` command or arguments for the `tree` command',
-  )
+  .argument('[json_or_args]', 'JSON output of `tree` command or arguments for the `tree` command')
   .argument('[output]', 'output path of file')
   .option('--js', 'output as JavaScript file')
   .option('--no-root', 'remove the root node')
@@ -77,11 +60,7 @@ program
     async (
       str: string | undefined,
       output: string | undefined,
-      {
-        js,
-        root,
-        importName,
-      }: { js: boolean; root: boolean; importName?: string },
+      { js, root, importName }: { js: boolean; root: boolean; importName?: string },
     ) => {
       const jsExtensions = ['.js', '.tsx', '.jsx'];
       const noRoot = !root;
@@ -107,10 +86,7 @@ program
     },
   );
 
-function createClientFromDir(
-  dir = 'https://fumadocs.dev/registry',
-  config: LoadedConfig,
-) {
+function createClientFromDir(dir = 'https://fumadocs.dev/registry', config: LoadedConfig) {
   if (dir in dirShortcuts) dir = dirShortcuts[dir];
 
   return dir.startsWith('http://') || dir.startsWith('https://')

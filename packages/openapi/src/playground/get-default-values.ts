@@ -20,8 +20,7 @@ export function getDefaultValue(schema: ParsedSchema): unknown {
   if (type === 'array') return [];
   if (type === 'null') return null;
   if (type === 'string') {
-    if (typeof schema === 'object' && schema.format === 'binary')
-      return undefined;
+    if (typeof schema === 'object' && schema.format === 'binary') return undefined;
 
     return '';
   }

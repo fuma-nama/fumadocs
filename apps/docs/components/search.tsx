@@ -15,11 +15,7 @@ import {
 } from 'fumadocs-ui/components/dialog/search';
 import { useDocsSearch } from 'fumadocs-core/search/client';
 import { useMemo, useState } from 'react';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from 'fumadocs-ui/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from 'fumadocs-ui/components/ui/popover';
 import { ArrowRight, ChevronDown } from 'lucide-react';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from '@/lib/cn';
@@ -94,10 +90,7 @@ export default function CustomSearchDialog(props: SharedProps) {
           <div className="inline-flex items-center gap-2 text-fd-muted-foreground">
             <ArrowRight className="size-4" />
             <p>
-              Jump to{' '}
-              <span className="font-medium text-fd-foreground">
-                {page.name}
-              </span>
+              Jump to <span className="font-medium text-fd-foreground">{page.name}</span>
             </p>
           </div>
         ),
@@ -107,12 +100,7 @@ export default function CustomSearchDialog(props: SharedProps) {
   }, [router, search, searchMap]);
 
   return (
-    <SearchDialog
-      search={search}
-      onSearchChange={setSearch}
-      isLoading={query.isLoading}
-      {...props}
-    >
+    <SearchDialog search={search} onSearchChange={setSearch} isLoading={query.isLoading} {...props}>
       <SearchDialogOverlay />
       <SearchDialogContent>
         <SearchDialogHeader>

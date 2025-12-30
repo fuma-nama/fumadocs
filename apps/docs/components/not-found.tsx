@@ -19,11 +19,7 @@ export function NotFound(props: NotFoundProps) {
       <h1 className="text-4xl font-bold font-mono">Not Found</h1>
       <div className="w-full border border-fd-foreground/50 border-dashed p-4 max-w-[400px]">
         <Suspense
-          fallback={
-            <p className="text-sm text-fd-muted-foreground">
-              Finding Alternatives...
-            </p>
-          }
+          fallback={<p className="text-sm text-fd-muted-foreground">Finding Alternatives...</p>}
         >
           <Alternative {...props} />
         </Suspense>

@@ -21,7 +21,5 @@ const mdxLoader = toNode(createMdxLoader(configLoader));
 const metaLoader = toNode(createMetaLoader(configLoader));
 
 export const load: LoadHook = (url, context, nextLoad) => {
-  return mdxLoader(url, context, (v, ctx) =>
-    metaLoader(v, { ...context, ...ctx }, nextLoad),
-  );
+  return mdxLoader(url, context, (v, ctx) => metaLoader(v, { ...context, ...ctx }, nextLoad));
 };

@@ -1,12 +1,5 @@
 'use client';
-import {
-  lazy,
-  type RefObject,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { lazy, type RefObject, useEffect, useMemo, useRef, useState } from 'react';
 import type {
   ForceGraphMethods,
   ForceGraphProps,
@@ -101,9 +94,7 @@ function ClientOnly({
     ctx.arc(node.x!, node.y!, radius, 0, 2 * Math.PI, false);
 
     const hoverNode = hoveredRef.current;
-    const isActive =
-      hoverNode?.id === node.id ||
-      hoverNode?.neighbors?.includes(node.id as string);
+    const isActive = hoverNode?.id === node.id || hoverNode?.neighbors?.includes(node.id as string);
 
     ctx.fillStyle = isActive
       ? style.getPropertyValue('--color-fd-primary')

@@ -17,10 +17,7 @@ export function remarkMarkAndUnravel(): Transformer<Root, Root> {
         while (++offset < children.length) {
           const child = children[offset];
 
-          if (
-            child.type === 'mdxJsxTextElement' ||
-            child.type === 'mdxTextExpression'
-          ) {
+          if (child.type === 'mdxJsxTextElement' || child.type === 'mdxTextExpression') {
             oneOrMore = true;
           } else if (child.type === 'text' && child.value.trim().length === 0) {
             // Empty.
@@ -47,10 +44,7 @@ export function remarkMarkAndUnravel(): Transformer<Root, Root> {
               child.type = 'mdxFlowExpression';
             }
 
-            if (
-              child.type === 'text' &&
-              /^[\t\r\n ]+$/.test(String(child.value))
-            ) {
+            if (child.type === 'text' && /^[\t\r\n ]+$/.test(String(child.value))) {
               // Empty.
             } else {
               newChildren.push(child);

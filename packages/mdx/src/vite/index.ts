@@ -73,12 +73,7 @@ export default async function mdx(
             '@fumadocs/ui',
           ],
           // only dedupe for public, non-transitive libs
-          dedupe: [
-            'fumadocs-core',
-            'fumadocs-ui',
-            'fumadocs-openapi',
-            '@fumadocs/base-ui',
-          ],
+          dedupe: ['fumadocs-core', 'fumadocs-ui', 'fumadocs-openapi', '@fumadocs/base-ui'],
         },
       } satisfies UserConfig);
     },
@@ -119,11 +114,7 @@ export async function postInstall(pluginOptions: PluginOptions = {}) {
   await core.emit({ write: true });
 }
 
-function createViteCore({
-  index,
-  configPath,
-  outDir,
-}: Required<PluginOptions>) {
+function createViteCore({ index, configPath, outDir }: Required<PluginOptions>) {
   if (index === true) index = {};
 
   return createCore({

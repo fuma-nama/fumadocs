@@ -80,11 +80,7 @@ export function remarkSteps({
         if (startIdx === -1) return;
         // range: start index to i - 1
         const item = {};
-        const nodes = parent.children.splice(
-          startIdx,
-          i - startIdx,
-          item as RootContent,
-        );
+        const nodes = parent.children.splice(startIdx, i - startIdx, item as RootContent);
         Object.assign(item, convertToSteps(nodes));
         i = startIdx + 1;
         startIdx = -1;

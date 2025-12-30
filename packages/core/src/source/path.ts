@@ -1,10 +1,7 @@
 export function basename(path: string, ext?: string): string {
   const idx = path.lastIndexOf('/');
 
-  return path.substring(
-    idx === -1 ? 0 : idx + 1,
-    ext ? path.length - ext.length : path.length,
-  );
+  return path.substring(idx === -1 ? 0 : idx + 1, ext ? path.length - ext.length : path.length);
 }
 
 export function extname(path: string): string {

@@ -19,9 +19,7 @@ export function toStaticData(
 
   function pathItem(item: NoReference<OperationObject>, defaultTitle: string) {
     if (page.showTitle && item.operationId) {
-      const title =
-        item.summary ||
-        (item.operationId ? idToTitle(item.operationId) : defaultTitle);
+      const title = item.summary || (item.operationId ? idToTitle(item.operationId) : defaultTitle);
       const id = slugger.slug(title);
 
       toc.push({

@@ -23,10 +23,7 @@ export async function getLLMText(page: Page) {
   const tasks: Promise<void>[] = [];
 
   visit(tree, (node) => {
-    if (
-      node.type === 'mdxJsxFlowElement' ||
-      node.type === 'mdxFlowExpression'
-    ) {
+    if (node.type === 'mdxJsxFlowElement' || node.type === 'mdxFlowExpression') {
       const context = {
         React,
         ...getMDXComponents(),

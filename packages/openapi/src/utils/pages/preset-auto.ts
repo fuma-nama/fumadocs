@@ -26,11 +26,7 @@ interface OperationConfig extends BaseConfig {
    *
    * @defaultValue 'none'
    */
-  groupBy?:
-    | 'tag'
-    | 'route'
-    | 'none'
-    | ((entry: OperationOutput | WebhookOutput) => string);
+  groupBy?: 'tag' | 'route' | 'none' | ((entry: OperationOutput | WebhookOutput) => string);
 
   /**
    * Specify name for output file
@@ -97,9 +93,7 @@ interface BaseConfig {
   slugify?: (name: string) => string;
 }
 
-export function createAutoPreset(
-  options: SchemaToPagesOptions,
-): PagesBuilderConfig {
+export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderConfig {
   if (options.per === 'custom') return options;
   const {
     slugify = (s) => {
@@ -121,14 +115,11 @@ export function createAutoPreset(
       if (result.type === 'group') {
         const schemaId = result.schemaId;
 
-        return isUrl(schemaId)
-          ? 'index'
-          : path.basename(schemaId, path.extname(schemaId));
+        return isUrl(schemaId) ? 'index' : path.basename(schemaId, path.extname(schemaId));
       }
 
       if (result.type === 'operation') {
-        const operation =
-          document.paths![result.item.path]![result.item.method]!;
+        const operation = document.paths![result.item.path]![result.item.method]!;
 
         if (algorithm === 'v2' && operation.operationId) {
           return operation.operationId;
@@ -150,10 +141,7 @@ export function createAutoPreset(
     };
   }
 
-  function groupOutput(
-    builder: PagesBuilder,
-    entry: OperationOutput | WebhookOutput,
-  ): string[] {
+  function groupOutput(builder: PagesBuilder, entry: OperationOutput | WebhookOutput): string[] {
     const { dereferenced } = builder.document;
     const { groupBy = 'none' } = options as OperationConfig;
 
@@ -226,12 +214,8 @@ export function createAutoPreset(
               title: displayName,
               description: tag.description,
             },
-            webhooks: items.webhooks.filter((webhook) =>
-              webhook.tags?.includes(tag.name),
-            ),
-            operations: items.operations.filter((op) =>
-              op.tags?.includes(tag.name),
-            ),
+            webhooks: items.webhooks.filter((webhook) => webhook.tags?.includes(tag.name)),
+            operations: items.operations.filter((op) => op.tags?.includes(tag.name)),
             tag: tag.name,
             rawTag: tag,
           };
@@ -244,8 +228,7 @@ export function createAutoPreset(
       }
 
       for (const op of items.operations) {
-        const { pathItem, operation, displayName } =
-          builder.fromExtractedOperation(op)!;
+        const { pathItem, operation, displayName } = builder.fromExtractedOperation(op)!;
 
         const entry: OperationOutput = {
           type: 'operation',
@@ -264,8 +247,7 @@ export function createAutoPreset(
       }
 
       for (const webhook of items.webhooks) {
-        const { pathItem, operation, displayName } =
-          builder.fromExtractedWebhook(webhook)!;
+        const { pathItem, operation, displayName } = builder.fromExtractedWebhook(webhook)!;
 
         const entry: WebhookOutput = {
           type: 'webhook',

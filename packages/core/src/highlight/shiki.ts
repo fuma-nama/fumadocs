@@ -41,17 +41,8 @@ export type HighlightOptions = HighlightOptionsCommon &
 
 const highlighters = new Map<string, Promise<Highlighter>>();
 
-export async function highlightHast(
-  code: string,
-  options: HighlightOptions,
-): Promise<Root> {
-  const {
-    lang: initialLang,
-    fallbackLanguage,
-    components: _,
-    engine = 'js',
-    ...rest
-  } = options;
+export async function highlightHast(code: string, options: HighlightOptions): Promise<Root> {
+  const { lang: initialLang, fallbackLanguage, components: _, engine = 'js', ...rest } = options;
   let lang = initialLang;
   let themes: CodeOptionsThemes<BundledTheme>;
   let themesToLoad;
@@ -61,8 +52,7 @@ export async function highlightHast(
     themesToLoad = [themes.theme];
   } else {
     themes = {
-      themes:
-        'themes' in options && options.themes ? options.themes : defaultThemes,
+      themes: 'themes' in options && options.themes ? options.themes : defaultThemes,
     };
     themesToLoad = Object.values(themes.themes).filter((v) => v !== undefined);
   }
@@ -105,10 +95,7 @@ export function hastToJsx(hast: Root, options?: Partial<ToJsxOptions>) {
  */
 export async function getHighlighter(
   engineType: 'js' | 'oniguruma',
-  options: Omit<
-    BundledHighlighterOptions<BundledLanguage, BundledTheme>,
-    'engine'
-  >,
+  options: Omit<BundledHighlighterOptions<BundledLanguage, BundledTheme>, 'engine'>,
 ) {
   const { createHighlighter } = await import('shiki');
   let highlighter = highlighters.get(engineType);
@@ -117,9 +104,7 @@ export async function getHighlighter(
     let engine;
 
     if (engineType === 'js') {
-      engine = import('shiki/engine/javascript').then((res) =>
-        res.createJavaScriptRegexEngine(),
-      );
+      engine = import('shiki/engine/javascript').then((res) => res.createJavaScriptRegexEngine());
     } else {
       engine = import('shiki/engine/oniguruma').then((res) =>
         res.createOnigurumaEngine(import('shiki/wasm')),
@@ -147,10 +132,7 @@ export async function getHighlighter(
   });
 }
 
-export async function highlight(
-  code: string,
-  options: HighlightOptions,
-): Promise<ReactNode> {
+export async function highlight(code: string, options: HighlightOptions): Promise<ReactNode> {
   return hastToJsx(await highlightHast(code, options), {
     components: options.components,
   });

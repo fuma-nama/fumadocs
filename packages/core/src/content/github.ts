@@ -77,19 +77,13 @@ export async function getGithubLastEdit({
     headers.append('authorization', token);
   }
 
-  const res = await fetch(
-    `${baseUrl}/repos/${owner}/${repo}/commits?${params.toString()}`,
-    {
-      cache: 'force-cache',
-      ...options,
-      headers,
-    },
-  );
+  const res = await fetch(`${baseUrl}/repos/${owner}/${repo}/commits?${params.toString()}`, {
+    cache: 'force-cache',
+    ...options,
+    headers,
+  });
 
-  if (!res.ok)
-    throw new Error(
-      `Failed to fetch last edit time from Git ${await res.text()}`,
-    );
+  if (!res.ok) throw new Error(`Failed to fetch last edit time from Git ${await res.text()}`);
   const data = (await res.json()) as Response;
 
   if (data.length === 0) return null;

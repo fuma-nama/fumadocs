@@ -1,17 +1,10 @@
 import type * as PageTree from '@/page-tree/definitions';
 import type { I18nConfig } from '@/i18n';
 import { buildContentStorage, type ContentStorage } from './storage/content';
-import {
-  createPageTreeBuilder,
-  type PageTreeOptions,
-} from '@/source/page-tree/builder';
+import { createPageTreeBuilder, type PageTreeOptions } from '@/source/page-tree/builder';
 import { joinPath } from './path';
 import { normalizeUrl } from '@/utils/normalize-url';
-import {
-  buildPlugins,
-  type LoaderPlugin,
-  type LoaderPluginOption,
-} from '@/source/plugins';
+import { buildPlugins, type LoaderPlugin, type LoaderPluginOption } from '@/source/plugins';
 import { slugsPlugin } from '@/source/plugins/slugs';
 import { iconPlugin, type IconResolver } from '@/source/plugins/icon';
 import type { MetaData, PageData, Source, SourceConfig } from './source';
@@ -78,9 +71,7 @@ export interface Meta<Data = MetaData> extends SharedFileInfo {
 }
 
 export interface LoaderOutput<Config extends LoaderConfig> {
-  pageTree: Config['i18n'] extends I18nConfig
-    ? Record<string, PageTree.Root>
-    : PageTree.Root;
+  pageTree: Config['i18n'] extends I18nConfig ? Record<string, PageTree.Root> : PageTree.Root;
 
   getPageTree: (locale?: string) => PageTree.Root;
   /**
@@ -110,10 +101,7 @@ export interface LoaderOutput<Config extends LoaderConfig> {
    *
    * - relative file paths, like `./my/page.mdx`.
    */
-  resolveHref: (
-    href: string,
-    parent: Page<Config['source']['pageData']>,
-  ) => string;
+  resolveHref: (href: string, parent: Page<Config['source']['pageData']>) => string;
 
   /**
    * @internal
@@ -161,10 +149,7 @@ export interface LoaderOutput<Config extends LoaderConfig> {
    * @param slug - customise parameter name for slugs
    * @param lang - customise parameter name for lang
    */
-  generateParams: <
-    TSlug extends string = 'slug',
-    TLang extends string = 'lang',
-  >(
+  generateParams: <TSlug extends string = 'slug', TLang extends string = 'lang'>(
     slug?: TSlug,
     lang?: TLang,
   ) => (Record<TSlug, string[]> & Record<TLang, string>)[];
@@ -175,10 +160,7 @@ export interface LoaderOutput<Config extends LoaderConfig> {
   serializePageTree: (tree: PageTree.Root) => Promise<object>;
 }
 
-function indexPages(
-  storages: Record<string, ContentStorage>,
-  { url }: ResolvedLoaderConfig,
-) {
+function indexPages(storages: Record<string, ContentStorage>, { url }: ResolvedLoaderConfig) {
   const result = {
     // (locale.slugs -> page)
     pages: new Map<string, Page>(),
@@ -218,10 +200,7 @@ function indexPages(
   return result;
 }
 
-export function createGetUrl(
-  baseUrl: string,
-  i18n?: I18nConfig,
-): ResolvedLoaderConfig['url'] {
+export function createGetUrl(baseUrl: string, i18n?: I18nConfig): ResolvedLoaderConfig['url'] {
   const baseSlugs = baseUrl.split('/');
 
   return (slugs, locale) => {
@@ -230,10 +209,7 @@ export function createGetUrl(
 
     if (hideLocale === 'never') {
       urlLocale = locale;
-    } else if (
-      hideLocale === 'default-locale' &&
-      locale !== i18n?.defaultLanguage
-    ) {
+    } else if (hideLocale === 'default-locale' && locale !== i18n?.defaultLanguage) {
       urlLocale = locale;
     }
 
@@ -283,9 +259,7 @@ export function loader(
     | [Source, LoaderOptions]
 ): LoaderOutput<LoaderConfig> {
   const loaderConfig =
-    args.length === 2
-      ? resolveConfig(args[0], args[1])
-      : resolveConfig(args[0].source, args[0]);
+    args.length === 2 ? resolveConfig(args[0], args[1]) : resolveConfig(args[0].source, args[0]);
   const { i18n } = loaderConfig;
   const defaultLanguage = i18n?.defaultLanguage ?? '';
   const storages = buildContentStorage(loaderConfig, defaultLanguage);
@@ -339,9 +313,7 @@ export function loader(
         });
 
         if (target) {
-          return target.hash
-            ? `${target.page.url}#${target.hash}`
-            : target.page.url;
+          return target.hash ? `${target.page.url}#${target.hash}` : target.page.url;
         }
       }
 
@@ -443,9 +415,7 @@ function resolveConfig(
 ): ResolvedLoaderConfig {
   let config: ResolvedLoaderConfig = {
     ...base,
-    url: url
-      ? (...args) => normalizeUrl(url(...args))
-      : createGetUrl(baseUrl, base.i18n),
+    url: url ? (...args) => normalizeUrl(url(...args)) : createGetUrl(baseUrl, base.i18n),
     source,
     plugins: buildPlugins([
       slugsPlugin(slugs),
@@ -468,12 +438,8 @@ function resolveConfig(
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- infer types
 export type InferPageType<Utils extends LoaderOutput<any>> =
-  Utils extends LoaderOutput<infer Config>
-    ? Page<Config['source']['pageData']>
-    : never;
+  Utils extends LoaderOutput<infer Config> ? Page<Config['source']['pageData']> : never;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- infer types
 export type InferMetaType<Utils extends LoaderOutput<any>> =
-  Utils extends LoaderOutput<infer Config>
-    ? Meta<Config['source']['metaData']>
-    : never;
+  Utils extends LoaderOutput<infer Config> ? Meta<Config['source']['metaData']> : never;

@@ -99,10 +99,7 @@ export class ComponentInstaller {
   }
 
   async installDeps() {
-    await new DependencyManager().installDeps(
-      this.dependencies,
-      this.devDependencies,
-    );
+    await new DependencyManager().installDeps(this.dependencies, this.devDependencies);
   }
 
   async onEnd() {
@@ -179,9 +176,7 @@ export class ComponentInstaller {
     });
     for (const specifier of sourceFile.getImportStringLiterals()) {
       for (const [k, v] of variables) {
-        specifier.setLiteralValue(
-          specifier.getLiteralValue().replaceAll(`<${k}>`, v as string),
-        );
+        specifier.setLiteralValue(specifier.getLiteralValue().replaceAll(`<${k}>`, v as string));
       }
 
       if (specifier.getLiteralValue().startsWith(prefix)) {
@@ -189,9 +184,7 @@ export class ComponentInstaller {
         const target = pathToFile.get(lookup);
 
         if (target) {
-          specifier.setLiteralValue(
-            toImportSpecifier(filePath, this.resolveOutputPath(target)),
-          );
+          specifier.setLiteralValue(toImportSpecifier(filePath, this.resolveOutputPath(target)));
         } else {
           console.warn(`cannot find the referenced file of ${specifier}`);
         }

@@ -3,59 +3,62 @@
   "version": "14.2.3",
   "description": "The built-in source for Fumadocs",
   "keywords": [
-    "NextJs",
-    "Docs"
+    "Docs",
+    "NextJs"
   ],
   "homepage": "https://fumadocs.dev",
-  "repository": "github:fuma-nama/fumadocs",
   "license": "MIT",
   "author": "Fuma Nama",
+  "repository": "github:fuma-nama/fumadocs",
+  "bin": "./dist/bin.js",
+  "files": [
+    "loader-mdx.cjs",
+    "loader-meta.cjs",
+    "dist/*"
+  ],
   "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     "./loader-mdx": "./loader-mdx.cjs",
     "./loader-meta": "./loader-meta.cjs",
     "./config": {
-      "import": "./dist/config/index.js",
-      "types": "./dist/config/index.d.ts"
+      "types": "./dist/config/index.d.ts",
+      "import": "./dist/config/index.js"
     },
     "./next": {
-      "import": "./dist/next/index.js",
       "types": "./dist/next/index.d.ts",
+      "import": "./dist/next/index.js",
       "require": "./dist/next/index.cjs"
     },
     "./vite": {
-      "import": "./dist/vite/index.js",
-      "types": "./dist/vite/index.d.ts"
+      "types": "./dist/vite/index.d.ts",
+      "import": "./dist/vite/index.js"
     },
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     },
     "./runtime/*": {
-      "import": "./dist/runtime/*.js",
-      "types": "./dist/runtime/*.d.ts"
+      "types": "./dist/runtime/*.d.ts",
+      "import": "./dist/runtime/*.js"
     },
     "./node/loader": {
-      "import": "./dist/node/loader.js",
-      "types": "./dist/node/loader.d.ts"
+      "types": "./dist/node/loader.d.ts",
+      "import": "./dist/node/loader.js"
     },
     "./bun": {
-      "import": "./dist/bun/index.js",
-      "types": "./dist/bun/index.d.ts"
+      "types": "./dist/bun/index.d.ts",
+      "import": "./dist/bun/index.js"
     },
     "./plugins/*": {
-      "import": "./dist/plugins/*.js",
-      "types": "./dist/plugins/*.d.ts"
+      "types": "./dist/plugins/*.d.ts",
+      "import": "./dist/plugins/*.js"
     }
   },
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "bin": "./dist/bin.js",
-  "files": [
-    "dist/*",
-    "loader-mdx.cjs",
-    "loader-meta.cjs"
-  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsdown",
     "clean": "rimraf dist",
@@ -83,7 +86,6 @@
     "zod": "^4.2.1"
   },
   "devDependencies": {
-    "tsdown": "^0.18.3",
     "@fumadocs/mdx-remote": "workspace:*",
     "@types/bun": "^1.3.5",
     "@types/js-yaml": "^4.0.9",
@@ -103,6 +105,7 @@
     "remark-stringify": "^11.0.0",
     "rollup": "^4.54.0",
     "tsconfig": "workspace:*",
+    "tsdown": "^0.18.3",
     "vite": "^7.3.0",
     "webpack": "^5.104.1"
   },
@@ -130,8 +133,5 @@
     "@fumadocs/mdx-remote": {
       "optional": true
     }
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

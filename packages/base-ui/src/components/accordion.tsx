@@ -1,13 +1,7 @@
 'use client';
 
 import { Check, Link as LinkIcon } from 'lucide-react';
-import {
-  ComponentProps,
-  type ReactNode,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { ComponentProps, type ReactNode, useEffect, useRef, useState } from 'react';
 import { cn } from '@fumadocs/ui/cn';
 import { useCopyButton } from '@fumadocs/ui/hooks/use-copy-button';
 import { buttonVariants } from '@/components/ui/button';
@@ -103,11 +97,7 @@ function CopyButton({ id }: { id: string }) {
       )}
       onClick={onClick}
     >
-      {checked ? (
-        <Check className="size-3.5" />
-      ) : (
-        <LinkIcon className="size-3.5" />
-      )}
+      {checked ? <Check className="size-3.5" /> : <LinkIcon className="size-3.5" />}
     </button>
   );
 }

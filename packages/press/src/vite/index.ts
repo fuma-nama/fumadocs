@@ -10,9 +10,7 @@ import { findFile } from '../lib/find-file.js';
 
 const extnames = ['.js', '.ts', '.jsx', '.tsx'];
 
-export async function fumapress(
-  config: Partial<FumapressConfig> = {},
-): Promise<PluginOption[]> {
+export async function fumapress(config: Partial<FumapressConfig> = {}): Promise<PluginOption[]> {
   const resolved = defineConfig(config);
 
   return [
@@ -40,14 +38,12 @@ function init(configPath: string | null, config: FumapressConfig): Plugin {
     enforce: 'pre',
     configEnvironment(_name, config) {
       if (config.optimizeDeps?.include) {
-        config.optimizeDeps.include = config.optimizeDeps.include.map(
-          (entry) => {
-            if (entry.startsWith('@vitejs/plugin-rsc')) {
-              entry = `fumapress > ${entry}`;
-            }
-            return entry;
-          },
-        );
+        config.optimizeDeps.include = config.optimizeDeps.include.map((entry) => {
+          if (entry.startsWith('@vitejs/plugin-rsc')) {
+            entry = `fumapress > ${entry}`;
+          }
+          return entry;
+        });
       }
     },
     async configResolved() {

@@ -1,18 +1,11 @@
-import {
-  type ParameterNode,
-  type TypeNode,
-  TypeTable,
-} from 'fumadocs-ui/components/type-table';
+import { type ParameterNode, type TypeNode, TypeTable } from 'fumadocs-ui/components/type-table';
 import { type Jsx, toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import * as runtime from 'react/jsx-runtime';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { renderMarkdownToHast, renderTypeToHast } from '@/markdown';
 import 'server-only';
 import type { ReactNode } from 'react';
-import {
-  type BaseTypeTableProps,
-  type GenerateTypeTableOptions,
-} from '@/lib/type-table';
+import { type BaseTypeTableProps, type GenerateTypeTableOptions } from '@/lib/type-table';
 import { type Generator } from '@/lib/base';
 import type { Nodes } from 'hast';
 import { parseTags } from '@/lib/parse-tags';
@@ -42,9 +35,7 @@ export async function AutoTypeTable({
       for (const param of tags.params ?? []) {
         paramNodes.push({
           name: param.name,
-          description: param.description
-            ? await renderMarkdown(param.description)
-            : undefined,
+          description: param.description ? await renderMarkdown(param.description) : undefined,
         });
       }
 
@@ -58,19 +49,12 @@ export async function AutoTypeTable({
           parameters: paramNodes,
           required: entry.required,
           deprecated: entry.deprecated,
-          returns: tags.returns
-            ? await renderMarkdown(tags.returns)
-            : undefined,
+          returns: tags.returns ? await renderMarkdown(tags.returns) : undefined,
         } as TypeNode,
       ];
     });
 
-    return (
-      <TypeTable
-        key={item.name}
-        type={Object.fromEntries(await Promise.all(entries))}
-      />
-    );
+    return <TypeTable key={item.name} type={Object.fromEntries(await Promise.all(entries))} />;
   });
 }
 

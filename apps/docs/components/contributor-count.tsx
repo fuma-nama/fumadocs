@@ -21,10 +21,7 @@ export default async function ContributorCounter({
     .slice(0, displayCount);
 
   return (
-    <div
-      {...props}
-      className={cn('flex flex-col items-center gap-4', props.className)}
-    >
+    <div {...props} className={cn('flex flex-col items-center gap-4', props.className)}>
       <div className="flex flex-row flex-wrap items-center justify-center md:pe-4">
         {topContributors.map((contributor, i) => (
           <a

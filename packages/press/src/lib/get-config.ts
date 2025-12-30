@@ -15,16 +15,12 @@ export async function findConfigPath(): Promise<string | null> {
   return paths.length > 0 ? paths[0] : null;
 }
 
-export async function loadConfig(
-  configPath?: string | null,
-): Promise<FumapressConfig> {
+export async function loadConfig(configPath?: string | null): Promise<FumapressConfig> {
   if (configPath === null) return DefaultConfig;
   if (configPath === undefined) return loadConfig(await findConfigPath());
 
   try {
-    const { default: userConfig } = await import(
-      pathToFileURL(configPath).href
-    );
+    const { default: userConfig } = await import(pathToFileURL(configPath).href);
 
     return checkConfig(userConfig);
   } catch (error) {

@@ -17,20 +17,9 @@ import { ChevronDown } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import { usePathname } from 'fumadocs-core/framework';
 import { useIsScrollTop } from '@fumadocs/ui/hooks/use-is-scroll-top';
-import {
-  LinkItem,
-  type LinkItemType,
-  type MenuItemType,
-} from '@fumadocs/ui/link-item';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import {
-  isTabActive,
-  type SidebarTabWithProps,
-} from '@/components/sidebar/tabs/dropdown';
+import { LinkItem, type LinkItemType, type MenuItemType } from '@fumadocs/ui/link-item';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { isTabActive, type SidebarTabWithProps } from '@/components/sidebar/tabs/dropdown';
 
 export const LayoutContext = createContext<
   | (LayoutInfo & {
@@ -53,10 +42,8 @@ export function LayoutContextProvider({
   navTransparentMode?: 'always' | 'top' | 'none';
   children: ReactNode;
 }) {
-  const isTop =
-    useIsScrollTop({ enabled: navTransparentMode === 'top' }) ?? true;
-  const isNavTransparent =
-    navTransparentMode === 'top' ? isTop : navTransparentMode === 'always';
+  const isTop = useIsScrollTop({ enabled: navTransparentMode === 'top' }) ?? true;
+  const isNavTransparent = navTransparentMode === 'top' ? isTop : navTransparentMode === 'always';
 
   return (
     <LayoutContext
@@ -85,12 +72,7 @@ export function LayoutHeader(props: ComponentProps<'header'>) {
   );
 }
 
-export function LayoutBody({
-  className,
-  style,
-  children,
-  ...props
-}: ComponentProps<'div'>) {
+export function LayoutBody({ className, style, children, ...props }: ComponentProps<'div'>) {
   const { navMode } = use(LayoutContext)!;
   const { collapsed } = useSidebar();
   const pageCol =
@@ -114,10 +96,8 @@ export function LayoutBody({
         "sidebar sidebar toc-popover toc-popover ."
         "sidebar sidebar main toc ." 1fr / minmax(min-content, 1fr) var(--fd-sidebar-col) minmax(0, ${pageCol}) var(--fd-toc-width) minmax(min-content, 1fr)`,
           '--fd-docs-row-1': 'var(--fd-banner-height, 0px)',
-          '--fd-docs-row-2':
-            'calc(var(--fd-docs-row-1) + var(--fd-header-height))',
-          '--fd-docs-row-3':
-            'calc(var(--fd-docs-row-2) + var(--fd-toc-popover-height))',
+          '--fd-docs-row-2': 'calc(var(--fd-docs-row-1) + var(--fd-header-height))',
+          '--fd-docs-row-3': 'calc(var(--fd-docs-row-2) + var(--fd-toc-popover-height))',
           '--fd-sidebar-col': collapsed ? '0px' : 'var(--fd-sidebar-width)',
           ...style,
         } as object
@@ -144,12 +124,7 @@ export function LayoutHeaderTabs({
   return (
     <div className={cn('flex flex-row items-end gap-6', className)} {...props}>
       {options.map((option, i) => {
-        const {
-          title,
-          url,
-          unlisted,
-          props: { className, ...rest } = {},
-        } = option;
+        const { title, url, unlisted, props: { className, ...rest } = {} } = option;
         const isSelected = selectedIdx === i;
 
         return (
@@ -234,8 +209,7 @@ function NavbarLinkItemMenu({
     <Popover
       open={open}
       onOpenChange={(value) => {
-        if (freezeUntil.current === null || Date.now() >= freezeUntil.current)
-          setOpen(value);
+        if (freezeUntil.current === null || Date.now() >= freezeUntil.current) setOpen(value);
       }}
     >
       <PopoverTrigger
@@ -247,11 +221,7 @@ function NavbarLinkItemMenu({
         onPointerLeave={onPointerLeave}
         {...props}
       >
-        {item.url ? (
-          <LinkItem item={item as { url: string }}>{item.text}</LinkItem>
-        ) : (
-          item.text
-        )}
+        {item.url ? <LinkItem item={item as { url: string }}>{item.text}</LinkItem> : item.text}
         <ChevronDown className="size-3" />
       </PopoverTrigger>
       <PopoverContent
@@ -260,8 +230,7 @@ function NavbarLinkItemMenu({
         onPointerLeave={onPointerLeave}
       >
         {item.items.map((child, i) => {
-          if (child.type === 'custom')
-            return <Fragment key={i}>{child.children}</Fragment>;
+          if (child.type === 'custom') return <Fragment key={i}>{child.children}</Fragment>;
 
           return (
             <LinkItem

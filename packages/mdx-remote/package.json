@@ -3,31 +3,34 @@
   "version": "1.4.3",
   "description": "The remote MDX files adapter for Fumadocs",
   "keywords": [
-    "NextJs",
     "Docs",
+    "NextJs",
     "fumadocs",
     "next-mdx-remote"
   ],
   "homepage": "https://fumadocs.dev",
-  "repository": "github:fuma-nama/fumadocs",
   "license": "MIT",
   "author": "Fuma Nama",
-  "type": "module",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    },
-    "./client": {
-      "import": "./dist/client/index.js",
-      "types": "./dist/client/index.d.ts"
-    }
-  },
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "repository": "github:fuma-nama/fumadocs",
   "files": [
     "dist/*"
   ],
+  "type": "module",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./client": {
+      "types": "./dist/client/index.d.ts",
+      "import": "./dist/client/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsdown",
     "clean": "rimraf dist",
@@ -41,7 +44,6 @@
     "zod": "^4.2.1"
   },
   "devDependencies": {
-    "tsdown": "^0.18.3",
     "@types/mdx": "^2.0.13",
     "@types/node": "24.10.2",
     "@types/react": "^19.2.7",
@@ -50,6 +52,7 @@
     "react": "^19.2.3",
     "tinyglobby": "^0.2.15",
     "tsconfig": "workspace:*",
+    "tsdown": "^0.18.3",
     "unified": "^11.0.5",
     "vfile": "^6.0.3"
   },
@@ -62,8 +65,5 @@
     "@types/react": {
       "optional": true
     }
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

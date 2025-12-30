@@ -68,9 +68,7 @@ export function createCodegen({
       patterns: string | string[],
       { base, ...rest }: GlobImportOptions,
     ): string {
-      patterns = (typeof patterns === 'string' ? [patterns] : patterns).map(
-        normalizeViteGlobPath,
-      );
+      patterns = (typeof patterns === 'string' ? [patterns] : patterns).map(normalizeViteGlobPath);
 
       return `import.meta.glob(${JSON.stringify(patterns)}, ${JSON.stringify(
         {
@@ -83,12 +81,7 @@ export function createCodegen({
     },
     async generateNodeGlobImport(
       patterns: string | string[],
-      {
-        base,
-        eager = false,
-        query = {},
-        import: importName,
-      }: GlobImportOptions,
+      { base, eager = false, query = {}, import: importName }: GlobImportOptions,
     ): Promise<string> {
       const cacheKey = JSON.stringify({ patterns, base });
       let files = globCache.get(cacheKey);
@@ -108,8 +101,7 @@ export function createCodegen({
           if (v !== undefined) searchParams.set(k, v);
         }
 
-        const importPath =
-          this.formatImportPath(fullPath) + '?' + searchParams.toString();
+        const importPath = this.formatImportPath(fullPath) + '?' + searchParams.toString();
         if (eager) {
           const name = `__fd_glob_${eagerImportId++}`;
           this.lines.unshift(

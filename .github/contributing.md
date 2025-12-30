@@ -6,12 +6,12 @@ Before submitting a pull request, there are some guidelines you should notice.
 ### Guidelines
 
 This project is a monorepo using Turborepo, pnpm and
-[Changesets](https://github.com/changesets/changesets). 
+[Changesets](https://github.com/changesets/changesets).
 
 #### Before Submitting
 
 - Check if there's other similar PRs.
-- Format your code with `pnpm run prettier`.
+- Format your code with `pnpm run format`.
 - Add changesets with `pnpm changeset`, which documents the changes you've made.
 - Run unit tests with `pnpm test` and update snapshots if necessary.
 
@@ -27,7 +27,7 @@ OR open a bug report and link it in your PR.
 
 #### Docs
 
-Contributing to the docs is relatively easier, make sure to check the typos and grammatical mistakes before submitting. 
+Contributing to the docs is relatively easier, make sure to check the typos and grammatical mistakes before submitting.
 
 ### New to contributing?
 

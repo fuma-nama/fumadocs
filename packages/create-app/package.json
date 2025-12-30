@@ -3,32 +3,35 @@
   "version": "16.0.33",
   "description": "Create a new documentation site with Fumadocs",
   "keywords": [
-    "react",
     "Docs",
-    "Fumadocs"
+    "Fumadocs",
+    "react"
   ],
   "homepage": "https://fumadocs.dev",
-  "repository": "github:fuma-nama/fumadocs",
   "license": "MIT",
   "author": "Fuma Nama",
-  "type": "module",
+  "repository": "github:fuma-nama/fumadocs",
   "bin": "./dist/bin.js",
+  "files": [
+    "dist/*",
+    "template/*"
+  ],
+  "type": "module",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     },
     "./plugins/*": {
-      "import": "./dist/plugins/*.js",
-      "types": "./dist/plugins/*.d.ts"
+      "types": "./dist/plugins/*.d.ts",
+      "import": "./dist/plugins/*.js"
     }
   },
-  "files": [
-    "template/*",
-    "dist/*"
-  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "pnpm run sync && tsdown",
     "clean": "rimraf dist",
@@ -47,18 +50,15 @@
     "ts-morph": "^27.0.2"
   },
   "devDependencies": {
-    "tsdown": "^0.18.3",
     "@types/cross-spawn": "^6.0.6",
     "@types/node": "24.10.2",
     "eslint-config-custom": "workspace:*",
     "tinyglobby": "^0.2.15",
     "tsconfig": "workspace:*",
+    "tsdown": "^0.18.3",
     "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=18.17.0"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

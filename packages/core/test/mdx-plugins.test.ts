@@ -34,13 +34,8 @@ test('Remark Heading', async () => {
 });
 
 test('Remark Structure', async () => {
-  const content = readFileSync(
-    path.resolve(cwd, './fixtures/remark-structure.md'),
-  );
-  const result = await remark()
-    .use(remarkGfm)
-    .use(remarkStructure)
-    .process(content);
+  const content = readFileSync(path.resolve(cwd, './fixtures/remark-structure.md'));
+  const result = await remark().use(remarkGfm).use(remarkStructure).process(content);
 
   await expect(result.data.structuredData).toMatchFileSnapshot(
     path.resolve(cwd, './fixtures/remark-structure.output.json'),
@@ -48,13 +43,8 @@ test('Remark Structure', async () => {
 });
 
 test('Remark Admonition', async () => {
-  const content = readFileSync(
-    path.resolve(cwd, './fixtures/remark-admonition.md'),
-  );
-  const processor = remark()
-    .use(remarkMdx)
-    .use(remarkDirective)
-    .use(remarkDirectiveAdmonition);
+  const content = readFileSync(path.resolve(cwd, './fixtures/remark-admonition.md'));
+  const processor = remark().use(remarkMdx).use(remarkDirective).use(remarkDirectiveAdmonition);
   let tree = processor.parse(content);
   tree = await processor.run(tree);
 
@@ -64,9 +54,7 @@ test('Remark Admonition', async () => {
 });
 
 test('Remark Steps', async () => {
-  const content = await fs.readFile(
-    path.resolve(cwd, './fixtures/remark-steps.md'),
-  );
+  const content = await fs.readFile(path.resolve(cwd, './fixtures/remark-steps.md'));
   const processor = remark().use(remarkSteps).use(remarkMdx);
   const result = await processor.process(content);
 
@@ -107,9 +95,7 @@ test('Remark Image: Without Import', async () => {
 });
 
 test('Remark Image: `publicDir` with URL', async () => {
-  const content = readFileSync(
-    path.resolve(cwd, './fixtures/remark-image-public-dir.md'),
-  );
+  const content = readFileSync(path.resolve(cwd, './fixtures/remark-image-public-dir.md'));
   const result = await remark()
     .use(remarkImage, {
       publicDir: 'https://fumadocs.dev',
@@ -124,13 +110,8 @@ test('Remark Image: `publicDir` with URL', async () => {
 });
 
 test('Remark MDX Files', async () => {
-  const content = readFileSync(
-    path.resolve(cwd, './fixtures/remark-mdx-files.md'),
-  );
-  const result = await remark()
-    .use(remarkMdxFiles)
-    .use(remarkMdx)
-    .process(content);
+  const content = readFileSync(path.resolve(cwd, './fixtures/remark-mdx-files.md'));
+  const result = await remark().use(remarkMdxFiles).use(remarkMdx).process(content);
 
   await expect(result.value).toMatchFileSnapshot(
     path.resolve(cwd, './fixtures/remark-mdx-files.output.mdx'),
@@ -138,13 +119,8 @@ test('Remark MDX Files', async () => {
 });
 
 test('converts mermaid codeblock to MDX Mermaid component', async () => {
-  const content = readFileSync(
-    path.resolve(cwd, './fixtures/remark-mdx-mermaid.md'),
-  );
-  const result = await remark()
-    .use(remarkMdxMermaid)
-    .use(remarkMdx)
-    .process(content);
+  const content = readFileSync(path.resolve(cwd, './fixtures/remark-mdx-mermaid.md'));
+  const result = await remark().use(remarkMdxMermaid).use(remarkMdx).process(content);
 
   await expect(result.value).toMatchFileSnapshot(
     path.resolve(cwd, './fixtures/remark-mdx-mermaid.output.mdx'),

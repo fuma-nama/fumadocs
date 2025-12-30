@@ -90,10 +90,7 @@ export function remarkImage({
     const importsToInject: { variableName: string; importPath: string }[] = [];
     const promises: Promise<void>[] = [];
 
-    async function onImage(
-      src: Source,
-      node: Image,
-    ): Promise<MdxJsxFlowElement | undefined> {
+    async function onImage(src: Source, node: Image): Promise<MdxJsxFlowElement | undefined> {
       const attributes: MdxJsxAttribute[] = [
         {
           type: 'mdxJsxAttribute',
@@ -114,8 +111,7 @@ export function remarkImage({
         // Unique variable name for the given static image URL
         const variableName = `__img${importsToInject.length}`;
         const hasBlur =
-          placeholder === 'blur' &&
-          VALID_BLUR_EXT.some((ext) => src.file.endsWith(ext));
+          placeholder === 'blur' && VALID_BLUR_EXT.some((ext) => src.file.endsWith(ext));
 
         if (!file.dirname) {
           throw new Error(
@@ -276,13 +272,8 @@ function getImportPath(file: string, dir: string): string {
  * @param publicDir - dir/url to resolve absolute paths
  * @param dir - dir to resolve relative paths
  */
-function parseSrc(
-  src: string,
-  publicDir: string,
-  dir?: string,
-): Source | undefined {
-  if (src.startsWith('file:///'))
-    return { type: 'file', file: fileURLToPath(src) };
+function parseSrc(src: string, publicDir: string, dir?: string): Source | undefined {
+  if (src.startsWith('file:///')) return { type: 'file', file: fileURLToPath(src) };
 
   if (EXTERNAL_URL_REGEX.test(src)) {
     return {
@@ -294,9 +285,7 @@ function parseSrc(
   if (src.startsWith('/')) {
     if (EXTERNAL_URL_REGEX.test(publicDir)) {
       const url = new URL(publicDir);
-      const segs = [...url.pathname.split('/'), ...src.split('/')].filter(
-        (v) => v.length > 0,
-      );
+      const segs = [...url.pathname.split('/'), ...src.split('/')].filter((v) => v.length > 0);
 
       url.pathname = `/${segs.join('/')}`;
       return { type: 'url', url };
@@ -333,8 +322,7 @@ async function getImageSize(
 
   const { timeout } = typeof onExternal === 'object' ? onExternal : {};
   const res = await fetch(src.url, {
-    signal:
-      typeof timeout === 'number' ? AbortSignal.timeout(timeout) : undefined,
+    signal: typeof timeout === 'number' ? AbortSignal.timeout(timeout) : undefined,
   });
   if (!res.ok) {
     throw new Error(

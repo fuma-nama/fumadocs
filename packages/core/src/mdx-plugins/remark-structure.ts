@@ -75,13 +75,7 @@ declare module 'vfile' {
 }
 
 export const remarkStructureDefaultOptions = {
-  types: [
-    'heading',
-    'paragraph',
-    'blockquote',
-    'tableCell',
-    'mdxJsxFlowElement',
-  ],
+  types: ['heading', 'paragraph', 'blockquote', 'tableCell', 'mdxJsxFlowElement'],
   allowedMdxAttributes: (node) => {
     if (!node.name) return false;
 
@@ -166,22 +160,13 @@ export function remarkStructure({
         data.contents.push(
           ...element.attributes.flatMap((attribute) => {
             const value =
-              typeof attribute.value === 'string'
-                ? attribute.value
-                : attribute.value?.value;
+              typeof attribute.value === 'string' ? attribute.value : attribute.value?.value;
             if (!value || value.length === 0) return [];
-            if (
-              allowedMdxAttributes &&
-              !allowedMdxAttributes(element, attribute)
-            )
-              return [];
+            if (allowedMdxAttributes && !allowedMdxAttributes(element, attribute)) return [];
 
             return {
               heading: lastHeading,
-              content:
-                attribute.type === 'mdxJsxAttribute'
-                  ? `${attribute.name}: ${value}`
-                  : value,
+              content: attribute.type === 'mdxJsxAttribute' ? `${attribute.name}: ${value}` : value,
             };
           }),
         );
@@ -203,10 +188,7 @@ export function remarkStructure({
     file.data.structuredData = data;
     if (exportAs) {
       tree.children.unshift(
-        toMdxExport(
-          typeof exportAs === 'string' ? exportAs : 'structuredData',
-          data,
-        ),
+        toMdxExport(typeof exportAs === 'string' ? exportAs : 'structuredData', data),
       );
     }
   };

@@ -3,15 +3,9 @@ name = "fumapy"
 version = "0.1.0"
 description = "Extract API documentation from source code and docstrings. For the python API extension for FumaDocs."
 
-authors = [
-    { name = "florez", email = "florez@ethz.ch" },
-    { name = 'fuma-nama' }
-]
+authors = [{ name = "florez", email = "florez@ethz.ch" }, { name = 'fuma-nama' }]
 requires-python = ">=3.10"
-dependencies = [
-    "griffe (>=1.13.0, <2.0.0)",
-    "griffe_typingdoc (>=0.2.8, <1.0.0)"
-]
+dependencies = ["griffe (>=1.13.0, <2.0.0)", "griffe_typingdoc (>=0.2.8, <1.0.0)"]
 
 [project.scripts]
 fumapy-generate = "fumapy:generate"

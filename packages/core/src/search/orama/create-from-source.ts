@@ -65,18 +65,13 @@ function defaultBuildIndex<C extends LoaderConfig>(source: LoaderOutput<C>) {
   };
 }
 
-interface Options<C extends LoaderConfig> extends Omit<
-  AdvancedOptions,
-  'indexes'
-> {
+interface Options<C extends LoaderConfig> extends Omit<AdvancedOptions, 'indexes'> {
   localeMap?: {
     [K in C['i18n'] extends I18nConfig<infer Languages> ? Languages : string]?:
       | Partial<AdvancedOptions>
       | Language;
   };
-  buildIndex?: (
-    page: Page<C['source']['pageData']>,
-  ) => Awaitable<AdvancedIndex>;
+  buildIndex?: (page: Page<C['source']['pageData']>) => Awaitable<AdvancedIndex>;
 }
 
 export function createFromSource<C extends LoaderConfig>(

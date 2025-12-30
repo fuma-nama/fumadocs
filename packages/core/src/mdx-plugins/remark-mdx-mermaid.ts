@@ -28,9 +28,7 @@ export interface RemarkMdxMermaidOptions {
 /**
  * Convert `mermaid` codeblocks into `<Mermaid />` MDX component
  */
-export function remarkMdxMermaid(
-  options: RemarkMdxMermaidOptions = {},
-): Transformer<Root, Root> {
+export function remarkMdxMermaid(options: RemarkMdxMermaidOptions = {}): Transformer<Root, Root> {
   const { lang = 'mermaid' } = options;
 
   return (tree) => {

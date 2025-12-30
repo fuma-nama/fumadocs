@@ -1,10 +1,5 @@
 import type * as PageTree from 'fumadocs-core/page-tree';
-import {
-  type ComponentProps,
-  type HTMLAttributes,
-  type ReactNode,
-  useMemo,
-} from 'react';
+import { type ComponentProps, type HTMLAttributes, type ReactNode, useMemo } from 'react';
 import { Languages, Sidebar as SidebarIcon } from 'lucide-react';
 import { cn } from '@fumadocs/ui/cn';
 import { buttonVariants } from '@/components/ui/button';
@@ -18,37 +13,16 @@ import {
   SidebarTrigger,
   SidebarViewport,
 } from './sidebar';
-import {
-  type BaseLayoutProps,
-  renderTitleNav,
-  resolveLinkItems,
-} from '@/layouts/shared';
+import { type BaseLayoutProps, renderTitleNav, resolveLinkItems } from '@/layouts/shared';
 import { LinkItem } from '@fumadocs/ui/link-item';
-import {
-  LanguageToggle,
-  LanguageToggleText,
-} from '@/layouts/shared/language-toggle';
-import {
-  LayoutBody,
-  LayoutContextProvider,
-  LayoutHeader,
-  LayoutTabs,
-} from './client';
+import { LanguageToggle, LanguageToggleText } from '@/layouts/shared/language-toggle';
+import { LayoutBody, LayoutContextProvider, LayoutHeader, LayoutTabs } from './client';
 import { TreeContextProvider } from '@/contexts/tree';
 import { ThemeToggle } from '../shared/theme-toggle';
-import {
-  LargeSearchToggle,
-  SearchToggle,
-} from '@/layouts/shared/search-toggle';
-import {
-  getSidebarTabs,
-  type GetSidebarTabsOptions,
-} from '@/components/sidebar/tabs';
+import { LargeSearchToggle, SearchToggle } from '@/layouts/shared/search-toggle';
+import { getSidebarTabs, type GetSidebarTabsOptions } from '@/components/sidebar/tabs';
 import type { SidebarPageTreeComponents } from '@/components/sidebar/page-tree';
-import {
-  SidebarTabsDropdown,
-  type SidebarTabWithProps,
-} from '@/components/sidebar/tabs/dropdown';
+import { SidebarTabsDropdown, type SidebarTabWithProps } from '@/components/sidebar/tabs/dropdown';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
@@ -119,14 +93,7 @@ export function DocsLayout({
   const links = resolveLinkItems(props);
 
   function sidebar() {
-    const {
-      footer,
-      banner,
-      collapsible = true,
-      component,
-      components,
-      ...rest
-    } = sidebarProps;
+    const { footer, banner, collapsible = true, component, components, ...rest } = sidebarProps;
     if (component) return component;
 
     const iconLinks = links.filter((item) => item.type === 'icon');
@@ -135,11 +102,7 @@ export function DocsLayout({
         {links
           .filter((v) => v.type !== 'icon')
           .map((item, i, list) => (
-            <SidebarLinkItem
-              key={i}
-              item={item}
-              className={cn(i === list.length - 1 && 'mb-4')}
-            />
+            <SidebarLinkItem key={i} item={item} className={cn(i === list.length - 1 && 'mb-4')} />
           ))}
         <SidebarPageTree {...components} />
       </SidebarViewport>
@@ -151,8 +114,7 @@ export function DocsLayout({
           <div className="flex flex-col gap-3 p-4 pb-2">
             <div className="flex">
               {renderTitleNav(nav, {
-                className:
-                  'inline-flex text-[0.9375rem] items-center gap-2.5 font-medium me-auto',
+                className: 'inline-flex text-[0.9375rem] items-center gap-2.5 font-medium me-auto',
               })}
               {nav.children}
               {collapsible && (
@@ -170,19 +132,12 @@ export function DocsLayout({
               )}
             </div>
             {searchToggle.enabled !== false &&
-              (searchToggle.components?.lg ?? (
-                <LargeSearchToggle hideIfDisabled />
-              ))}
-            {tabs.length > 0 && tabMode === 'auto' && (
-              <SidebarTabsDropdown options={tabs} />
-            )}
+              (searchToggle.components?.lg ?? <LargeSearchToggle hideIfDisabled />)}
+            {tabs.length > 0 && tabMode === 'auto' && <SidebarTabsDropdown options={tabs} />}
             {banner}
           </div>
           {viewport}
-          {(i18n ||
-            iconLinks.length > 0 ||
-            themeSwitch?.enabled !== false ||
-            footer) && (
+          {(i18n || iconLinks.length > 0 || themeSwitch?.enabled !== false || footer) && (
             <div className="flex flex-col border-t p-4 pt-2 empty:hidden">
               <div className="flex text-fd-muted-foreground items-center empty:hidden">
                 {i18n && (
@@ -194,9 +149,7 @@ export function DocsLayout({
                   <LinkItem
                     key={i}
                     item={item}
-                    className={cn(
-                      buttonVariants({ size: 'icon-sm', color: 'ghost' }),
-                    )}
+                    className={cn(buttonVariants({ size: 'icon-sm', color: 'ghost' }))}
                     aria-label={item.label}
                   >
                     {item.icon}
@@ -204,10 +157,7 @@ export function DocsLayout({
                 ))}
                 {themeSwitch.enabled !== false &&
                   (themeSwitch.component ?? (
-                    <ThemeToggle
-                      className="ms-auto p-0"
-                      mode={themeSwitch.mode}
-                    />
+                    <ThemeToggle className="ms-auto p-0" mode={themeSwitch.mode} />
                   ))}
               </div>
               {footer}
@@ -242,9 +192,7 @@ export function DocsLayout({
                 </LanguageToggle>
               )}
               {themeSwitch.enabled !== false &&
-                (themeSwitch.component ?? (
-                  <ThemeToggle className="p-0" mode={themeSwitch.mode} />
-                ))}
+                (themeSwitch.component ?? <ThemeToggle className="p-0" mode={themeSwitch.mode} />)}
               <SidebarTrigger
                 className={cn(
                   buttonVariants({
@@ -261,9 +209,7 @@ export function DocsLayout({
             {banner}
           </div>
           {viewport}
-          <div className="flex flex-col border-t p-4 pt-2 empty:hidden">
-            {footer}
-          </div>
+          <div className="flex flex-col border-t p-4 pt-2 empty:hidden">{footer}</div>
         </SidebarDrawer>
       </>
     );

@@ -8,9 +8,7 @@ import Link from 'fumadocs-core/link';
 
 const HoverCard = HoverCardPrimitive.Root;
 
-function HoverCardTrigger(
-  props: ComponentProps<typeof HoverCardPrimitive.Trigger>,
-) {
+function HoverCardTrigger(props: ComponentProps<typeof HoverCardPrimitive.Trigger>) {
   return (
     <HoverCardPrimitive.Trigger asChild>
       <Link {...props} />

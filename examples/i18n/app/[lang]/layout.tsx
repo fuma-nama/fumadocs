@@ -26,10 +26,7 @@ const { provider } = defineI18nUI(i18n, {
   },
 });
 
-export default async function Layout({
-  params,
-  children,
-}: LayoutProps<'/[lang]'>) {
+export default async function Layout({ params, children }: LayoutProps<'/[lang]'>) {
   const { lang } = await params;
   return (
     <html lang={lang} className={inter.className} suppressHydrationWarning>

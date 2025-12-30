@@ -1,9 +1,5 @@
 import type { MethodInformation, RenderContext } from '@/types';
-import {
-  getPreferredType,
-  type NoReference,
-  pickExample,
-} from '@/utils/schema';
+import { getPreferredType, type NoReference, pickExample } from '@/utils/schema';
 import {
   AccordionContent,
   AccordionHeader,
@@ -15,12 +11,7 @@ import { sample } from 'openapi-sampler';
 import type { ReactNode } from 'react';
 import type { RawRequestData, RequestData } from '@/requests/types';
 import { encodeRequestData } from '@/requests/media/encode';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from 'fumadocs-ui/components/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from 'fumadocs-ui/components/tabs';
 import { resolveRequestData } from '@/utils/url';
 import { MethodLabel } from '../components/method-label';
 
@@ -37,9 +28,7 @@ export function getExampleRequests(
   operation: NoReference<MethodInformation>,
   ctx: RenderContext,
 ): ExampleRequestItem[] {
-  const media = operation.requestBody
-    ? getPreferredType(operation.requestBody.content)
-    : null;
+  const media = operation.requestBody ? getPreferredType(operation.requestBody.content) : null;
   const bodyOfType = media ? operation.requestBody?.content[media] : null;
 
   if (bodyOfType?.examples) {
@@ -53,11 +42,7 @@ export function getExampleRequests(
         name: value.summary || key,
         description: value.description,
         data,
-        encoded: encodeRequestData(
-          data,
-          ctx.mediaAdapters,
-          operation.parameters ?? [],
-        ),
+        encoded: encodeRequestData(data, ctx.mediaAdapters, operation.parameters ?? []),
       });
     }
 
@@ -71,11 +56,7 @@ export function getExampleRequests(
       name: 'Default',
       description: bodyOfType?.schema?.description,
       data,
-      encoded: encodeRequestData(
-        data,
-        ctx.mediaAdapters,
-        operation.parameters ?? [],
-      ),
+      encoded: encodeRequestData(data, ctx.mediaAdapters, operation.parameters ?? []),
     },
   ];
 }
@@ -131,9 +112,7 @@ function getRequestData(
     const body = method.requestBody.content;
     const type = getPreferredType(body);
     if (!type)
-      throw new Error(
-        `Cannot find body schema for ${path} ${method.method}: missing media type`,
-      );
+      throw new Error(`Cannot find body schema for ${path} ${method.method}: missing media type`);
     result.bodyMediaType = type as RawRequestData['bodyMediaType'];
     const bodyOfType = body[type];
 

@@ -45,9 +45,7 @@ function resolveCallout(node: Blockquote) {
   );
 }
 
-export function remarkConvert({
-  resolver,
-}: RemarkConvertOptions): Transformer<Root, Root> {
+export function remarkConvert({ resolver }: RemarkConvertOptions): Transformer<Root, Root> {
   return (tree, file) => {
     const sourceFile = file.data.source;
     if (!sourceFile) return;

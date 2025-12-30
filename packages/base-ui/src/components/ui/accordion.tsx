@@ -5,10 +5,7 @@ import { ChevronRight } from 'lucide-react';
 import { type ComponentProps } from 'react';
 import { cn } from '@fumadocs/ui/cn';
 
-export function Accordion({
-  className,
-  ...props
-}: ComponentProps<typeof Primitive.Root>) {
+export function Accordion({ className, ...props }: ComponentProps<typeof Primitive.Root>) {
   return (
     <Primitive.Root
       className={(s) =>
@@ -22,10 +19,7 @@ export function Accordion({
   );
 }
 
-export function AccordionItem({
-  children,
-  ...props
-}: ComponentProps<typeof Primitive.Item>) {
+export function AccordionItem({ children, ...props }: ComponentProps<typeof Primitive.Item>) {
   return <Primitive.Item {...props}>{children}</Primitive.Item>;
 }
 

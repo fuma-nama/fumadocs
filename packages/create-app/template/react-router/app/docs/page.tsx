@@ -1,11 +1,6 @@
 import type { Route } from './+types/page';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import {
-  DocsBody,
-  DocsDescription,
-  DocsPage,
-  DocsTitle,
-} from 'fumadocs-ui/layouts/docs/page';
+import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
 import { source } from '@/lib/source';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import browserCollections from 'fumadocs-mdx:collections/browser';

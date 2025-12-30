@@ -1,0 +1,29 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "singleQuote": true,
+  "ignorePatterns": [
+    "CHANGELOG.md",
+    "pnpm-lock.yaml",
+    ".github/**/*.md",
+
+    "packages/create-app/versions.json",
+
+    "**/test/out/**/*",
+    "**/test/fixtures/**/*.output.*",
+    "**/test/fixtures/**/*.out.*",
+
+    "out",
+    ".content-collections",
+
+    "examples/obsidian/content/docs/vault/**/*",
+    "examples/obsidian/obsidian/Obsidian Vault",
+
+    ".content-collections/**/*",
+
+    "packages/mdx-remote/test/fixtures/**/*.js",
+    "packages/mdx-remote/test/fixtures/**/*.json",
+    "packages/core/test/fixtures/page-trees/**/*.json",
+
+    "routeTree.gen.ts",
+  ],
+}

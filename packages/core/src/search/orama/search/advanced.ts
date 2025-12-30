@@ -1,8 +1,5 @@
 import { getByID, type Orama, search, type SearchParams } from '@orama/orama';
-import {
-  type AdvancedDocument,
-  type advancedSchema,
-} from '@/search/orama/create-db';
+import { type AdvancedDocument, type advancedSchema } from '@/search/orama/create-db';
 import { removeUndefined } from '@/utils/remove-undefined';
 import { createContentHighlighter, type SortedResult } from '@/search';
 

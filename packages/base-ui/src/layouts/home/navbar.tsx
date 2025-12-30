@@ -13,10 +13,7 @@ import { navItemVariants } from './client';
 
 export const NavbarMenu = NavigationMenuItem;
 
-export function NavbarMenuContent({
-  className,
-  ...props
-}: NavigationMenuContentProps) {
+export function NavbarMenuContent({ className, ...props }: NavigationMenuContentProps) {
   return (
     <NavigationMenuContent
       className={(s) =>
@@ -32,10 +29,7 @@ export function NavbarMenuContent({
   );
 }
 
-export function NavbarMenuTrigger({
-  className,
-  ...props
-}: NavigationMenuTriggerProps) {
+export function NavbarMenuTrigger({ className, ...props }: NavigationMenuTriggerProps) {
   return (
     <NavigationMenuTrigger
       {...props}

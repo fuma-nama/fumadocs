@@ -15,12 +15,7 @@ export function createRelativeLink<C extends LoaderConfig>(
   OverrideLink: FC<ComponentProps<'a'>> = defaultMdxComponents.a,
 ): FC<ComponentProps<'a'>> {
   return async function RelativeLink({ href, ...props }) {
-    return (
-      <OverrideLink
-        href={href ? source.resolveHref(href, page) : href}
-        {...props}
-      />
-    );
+    return <OverrideLink href={href ? source.resolveHref(href, page) : href} {...props} />;
   };
 }
 

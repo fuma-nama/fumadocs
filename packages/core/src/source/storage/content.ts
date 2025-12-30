@@ -3,8 +3,9 @@ import { basename, dirname, joinPath, slash, splitPath } from '@/source/path';
 import type { ResolvedLoaderConfig } from '../loader';
 import type { SourceConfig } from '../source';
 
-export type ContentStorage<Config extends SourceConfig = SourceConfig> =
-  FileSystem<ContentStorageFile<Config>>;
+export type ContentStorage<Config extends SourceConfig = SourceConfig> = FileSystem<
+  ContentStorageFile<Config>
+>;
 
 export type ContentStorageFile<Config extends SourceConfig = SourceConfig> =
   | {
@@ -31,8 +32,7 @@ const parsers = {
   dir(path: string): [string, string?] {
     const [locale, ...segs] = path.split('/');
 
-    if (locale && segs.length > 0 && isLocaleValid(locale))
-      return [segs.join('/'), locale];
+    if (locale && segs.length > 0 && isLocaleValid(locale)) return [segs.join('/'), locale];
 
     return [path];
   },
@@ -102,9 +102,7 @@ export function buildContentStorage(
       };
     }
 
-    const [pathWithoutLocale, locale = i18n.defaultLanguage] = parser(
-      file.path,
-    );
+    const [pathWithoutLocale, locale = i18n.defaultLanguage] = parser(file.path);
     const list = normalized.get(locale) ?? [];
     list.push({
       pathWithoutLocale,
@@ -114,9 +112,7 @@ export function buildContentStorage(
   }
 
   const fallbackLang =
-    i18n.fallbackLanguage !== null
-      ? (i18n.fallbackLanguage ?? i18n.defaultLanguage)
-      : null;
+    i18n.fallbackLanguage !== null ? (i18n.fallbackLanguage ?? i18n.defaultLanguage) : null;
 
   function scan(lang: string) {
     if (storages[lang]) return;

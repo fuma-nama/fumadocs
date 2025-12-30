@@ -9,14 +9,7 @@ import type {
 import { idToTitle } from '@/utils/id-to-title';
 import { OpenAPIV3_1 } from 'openapi-types';
 
-export const methodKeys = [
-  'get',
-  'post',
-  'patch',
-  'delete',
-  'head',
-  'put',
-] as const;
+export const methodKeys = ['get', 'post', 'patch', 'delete', 'head', 'put'] as const;
 
 export type NoReference<T> = T extends (infer I)[]
   ? NoReference<I>[]
@@ -37,9 +30,7 @@ type NoReferenceJSONSchema<T> = T extends (infer I)[]
 export type ParsedSchema = JSONSchema;
 export type ResolvedSchema = NoReferenceJSONSchema<ParsedSchema>;
 
-export function getPreferredType(
-  body: Record<string, unknown>,
-): string | undefined {
+export function getPreferredType(body: Record<string, unknown>): string | undefined {
   if ('application/json' in body) return 'application/json';
 
   return Object.keys(body)[0];

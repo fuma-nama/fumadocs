@@ -32,8 +32,6 @@ export interface OperationClientOptions {
   }>;
 }
 
-export function defineClientConfig(
-  options: APIPageClientOptions = {},
-): APIPageClientOptions {
+export function defineClientConfig(options: APIPageClientOptions = {}): APIPageClientOptions {
   return options;
 }

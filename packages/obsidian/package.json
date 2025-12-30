@@ -3,34 +3,37 @@
   "version": "0.0.6",
   "description": "Obsidian Integration for Fumadocs",
   "keywords": [
-    "NextJs",
-    "fumadocs",
     "Docs",
-    "Obsidian"
+    "NextJs",
+    "Obsidian",
+    "fumadocs"
   ],
   "homepage": "https://fumadocs.dev",
-  "repository": "github:fuma-nama/fumadocs",
   "license": "MIT",
   "author": "Fuma Nama",
-  "type": "module",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "repository": "github:fuma-nama/fumadocs",
   "files": [
     "dist/*"
   ],
+  "type": "module",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     },
     "./ui": {
-      "import": "./dist/ui/index.js",
-      "types": "./dist/ui/index.d.ts"
+      "types": "./dist/ui/index.d.ts",
+      "import": "./dist/ui/index.js"
     },
     "./mdx": {
-      "import": "./dist/mdx/index.js",
-      "types": "./dist/mdx/index.d.ts"
+      "types": "./dist/mdx/index.d.ts",
+      "import": "./dist/mdx/index.js"
     }
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "build": "tsdown",
@@ -54,7 +57,6 @@
     "zod": "^4.2.1"
   },
   "devDependencies": {
-    "tsdown": "^0.18.3",
     "@types/estree": "^1.0.8",
     "@types/js-yaml": "^4.0.9",
     "@types/mdast": "^4.0.4",
@@ -64,19 +66,17 @@
     "fumadocs-core": "workspace:*",
     "mdast-util-mdx-jsx": "^3.2.0",
     "tsconfig": "workspace:*",
+    "tsdown": "^0.18.3",
     "typescript": "^5.9.3",
     "vfile": "^6.0.3"
-  },
-  "peerDependenciesMeta": {
-    "@types/react": {
-      "optional": true
-    }
   },
   "peerDependencies": {
     "@types/react": "*",
     "fumadocs-core": "^15.0.0 || ^16.0.0"
   },
-  "publishConfig": {
-    "access": "public"
+  "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    }
   }
 }

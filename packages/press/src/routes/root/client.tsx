@@ -1,12 +1,6 @@
 'use client';
 
-import {
-  isRouteErrorResponse,
-  Links,
-  Meta,
-  ScrollRestoration,
-  useRouteError,
-} from 'react-router';
+import { isRouteErrorResponse, Links, Meta, ScrollRestoration, useRouteError } from 'react-router';
 import { RootProvider } from 'fumadocs-ui/provider/react-router';
 
 export function Layout({ children }: { children: React.ReactNode }) {

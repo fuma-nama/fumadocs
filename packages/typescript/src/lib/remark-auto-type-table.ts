@@ -1,20 +1,12 @@
 import type { Root } from 'mdast';
 import type { Nodes } from 'hast';
 import type { Transformer } from 'unified';
-import type {
-  Expression,
-  ExpressionStatement,
-  ObjectExpression,
-  Program,
-} from 'estree';
+import type { Expression, ExpressionStatement, ObjectExpression, Program } from 'estree';
 import { createGenerator, type DocEntry, type Generator } from '@/lib/base';
 import { renderMarkdownToHast, renderTypeToHast } from '@/markdown';
 import { valueToEstree } from 'estree-util-value-to-estree';
 import { visit } from 'unist-util-visit';
-import {
-  type BaseTypeTableProps,
-  type GenerateTypeTableOptions,
-} from '@/lib/type-table';
+import { type BaseTypeTableProps, type GenerateTypeTableOptions } from '@/lib/type-table';
 import { toEstree } from 'hast-util-to-estree';
 import { type ParameterTag, parseTags } from '@/lib/parse-tags';
 
@@ -66,11 +58,9 @@ async function buildTypeProp(
     node.addJsxProperty('typeDescription', await renderType(entry.type));
     node.addExpressionNode('required', valueToEstree(entry.required));
 
-    if (tags.default)
-      node.addJsxProperty('default', await renderType(tags.default));
+    if (tags.default) node.addJsxProperty('default', await renderType(tags.default));
 
-    if (tags.returns)
-      node.addJsxProperty('returns', await renderMarkdown(tags.returns));
+    if (tags.returns) node.addJsxProperty('returns', await renderMarkdown(tags.returns));
 
     if (tags.params) {
       node.addExpressionNode('parameters', {
@@ -80,10 +70,7 @@ async function buildTypeProp(
     }
 
     if (entry.description) {
-      node.addJsxProperty(
-        'description',
-        await renderMarkdown(entry.description),
-      );
+      node.addJsxProperty('description', await renderMarkdown(entry.description));
     }
 
     return node.build();
@@ -93,10 +80,7 @@ async function buildTypeProp(
     const node = objectBuilder();
     node.addExpressionNode('name', valueToEstree(param.name));
     if (param.description)
-      node.addJsxProperty(
-        'description',
-        await renderMarkdown(param.description),
-      );
+      node.addJsxProperty('description', await renderMarkdown(param.description));
 
     return node.build();
   }

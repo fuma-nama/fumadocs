@@ -1844,8 +1844,7 @@ paths:
         structure and behaviour. See also: NodeUpdatePropertySchema
       tags: [nodes]
       parameters: [$ref: '#/components/parameters/NodeSlugParam']
-      requestBody:
-        { $ref: '#/components/requestBodies/NodeUpdatePropertySchema' }
+      requestBody: { $ref: '#/components/requestBodies/NodeUpdatePropertySchema' }
       responses:
         default: { $ref: '#/components/responses/InternalServerError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -1868,8 +1867,7 @@ paths:
         quick schema changes without the need to remove or update values before.
       tags: [nodes]
       parameters: [$ref: '#/components/parameters/NodeSlugParam']
-      requestBody:
-        { $ref: '#/components/requestBodies/NodeUpdatePropertySchema' }
+      requestBody: { $ref: '#/components/requestBodies/NodeUpdatePropertySchema' }
       responses:
         default: { $ref: '#/components/responses/InternalServerError' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -2975,8 +2973,7 @@ components:
             type: string
       content:
         application/json:
-          schema:
-            { $ref: '#/components/schemas/WebAuthnPublicKeyCreationOptions' }
+          schema: { $ref: '#/components/schemas/WebAuthnPublicKeyCreationOptions' }
 
     WebAuthnGetAssertionOK:
       description: OK
@@ -4112,12 +4109,9 @@ components:
         excludeCredentials:
           type: array
           items: { $ref: '#/components/schemas/PublicKeyCredentialDescriptor' }
-        authenticatorSelection:
-          { $ref: '#/components/schemas/AuthenticatorSelectionCriteria' }
-        attestation:
-          { $ref: '#/components/schemas/AttestationConveyancePreference' }
-        extensions:
-          { $ref: '#/components/schemas/AuthenticationExtensionsClientInputs' }
+        authenticatorSelection: { $ref: '#/components/schemas/AuthenticatorSelectionCriteria' }
+        attestation: { $ref: '#/components/schemas/AttestationConveyancePreference' }
+        extensions: { $ref: '#/components/schemas/AuthenticationExtensionsClientInputs' }
 
     PublicKeyCredentialRpEntity:
       description: |
@@ -4437,18 +4431,7 @@ components:
 
     AccountCommonProps:
       required:
-        [
-          joined,
-          handle,
-          name,
-          roles,
-          bio,
-          links,
-          meta,
-          verified_status,
-          email_addresses,
-          admin,
-        ]
+        [joined, handle, name, roles, bio, links, meta, verified_status, email_addresses, admin]
       properties:
         joined: { $ref: '#/components/schemas/MemberJoinedDate' }
         suspended: { $ref: '#/components/schemas/MemberSuspendedDate' }
@@ -5336,8 +5319,7 @@ components:
         parent: { $ref: '#/components/schemas/Asset' }
 
     AssetSourceURL:
-      description:
-        An asset source URL holds the address of an off-platform media asset
+      description: An asset source URL holds the address of an off-platform media asset
         which is not hosted on a Storyden instance. It may represent a source
         URL for an intended download or an asset which is stored elsewhere.
       type: string
@@ -5685,8 +5667,7 @@ components:
           format: url
           nullable: true
         description: { $ref: '#/components/schemas/NodeDescription' }
-        primary_image_asset_id:
-          { $ref: '#/components/schemas/NullableIdentifier' }
+        primary_image_asset_id: { $ref: '#/components/schemas/NullableIdentifier' }
         content: { $ref: '#/components/schemas/PostContent' }
         parent: { $ref: '#/components/schemas/NodeSlug' }
         hide_child_tree:
@@ -6110,8 +6091,7 @@ components:
         time_range: { $ref: '#/components/schemas/EventTimeRange' }
         primary_image: { $ref: '#/components/schemas/Asset' }
         participants: { $ref: '#/components/schemas/EventParticipantList' }
-        participation_policy:
-          { $ref: '#/components/schemas/EventParticipationPolicy' }
+        participation_policy: { $ref: '#/components/schemas/EventParticipationPolicy' }
         visibility: { $ref: '#/components/schemas/Visibility' }
         location: { $ref: '#/components/schemas/EventLocation' }
         capacity: { $ref: '#/components/schemas/EventCapacity' }
@@ -6133,8 +6113,7 @@ components:
         content: { $ref: '#/components/schemas/PostContent' }
         time_range: { $ref: '#/components/schemas/EventTimeRange' }
         primary_image_asset_id: { $ref: '#/components/schemas/AssetID' }
-        participation_policy:
-          { $ref: '#/components/schemas/EventParticipationPolicy' }
+        participation_policy: { $ref: '#/components/schemas/EventParticipationPolicy' }
         visibility: { $ref: '#/components/schemas/Visibility' }
         location: { $ref: '#/components/schemas/EventLocation' }
         capacity: { $ref: '#/components/schemas/EventCapacity' }
@@ -6150,8 +6129,7 @@ components:
         content: { $ref: '#/components/schemas/PostContent' }
         time_range: { $ref: '#/components/schemas/EventTimeRange' }
         primary_image_asset_id: { $ref: '#/components/schemas/AssetID' }
-        participation_policy:
-          { $ref: '#/components/schemas/EventParticipationPolicy' }
+        participation_policy: { $ref: '#/components/schemas/EventParticipationPolicy' }
         visibility: { $ref: '#/components/schemas/Visibility' }
         location: { $ref: '#/components/schemas/EventLocation' }
         capacity: { $ref: '#/components/schemas/EventCapacity' }

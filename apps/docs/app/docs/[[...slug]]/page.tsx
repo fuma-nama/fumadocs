@@ -10,11 +10,7 @@ import { Wrapper } from '@/components/preview/wrapper';
 import { Mermaid } from '@/components/mdx/mermaid';
 import { Feedback } from '@/components/feedback';
 import { onRateAction, owner, repo } from '@/lib/github';
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from '@/components/ui/hover-card';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import Link from 'fumadocs-core/link';
 import { getPageTreePeers } from 'fumadocs-core/page-tree';
 import { Card, Cards } from 'fumadocs-ui/components/card';
@@ -23,13 +19,9 @@ import { LLMCopyButton, ViewOptions } from '@/components/ai/page-actions';
 import { Banner } from 'fumadocs-ui/components/banner';
 import { Installation } from '@/components/preview/installation';
 import { Customisation } from '@/components/preview/customisation';
-import {
-  DocsBody,
-  DocsPage,
-  PageLastUpdate,
-} from 'fumadocs-ui/layouts/docs/page';
+import { DocsBody, DocsPage, PageLastUpdate } from 'fumadocs-ui/layouts/docs/page';
 import { NotFound } from '@/components/not-found';
-import { getSuggestions } from '@/app/docs/[...slug]/suggestions';
+import { getSuggestions } from './suggestions';
 import { PathUtils } from 'fumadocs-core/source';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
@@ -43,13 +35,15 @@ function PreviewRenderer({ preview }: { preview: string }): ReactNode {
 
 export const revalidate = false;
 
-export default async function Page(props: PageProps<'/docs/[...slug]'>) {
+export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   const params = await props.params;
   const page = source.getPage(params.slug);
 
   if (!page)
     return (
-      <NotFound getSuggestions={() => getSuggestions(params.slug.join(' '))} />
+      <NotFound
+        getSuggestions={async () => (params.slug ? getSuggestions(params.slug.join(' ')) : [])}
+      />
     );
 
   if (page.data.type === 'openapi') {
@@ -75,9 +69,7 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
       }}
     >
       <h1 className="text-[1.75em] font-semibold">{page.data.title}</h1>
-      <p className="text-lg text-fd-muted-foreground mb-2">
-        {page.data.description}
-      </p>
+      <p className="text-lg text-fd-muted-foreground mb-2">{page.data.description}</p>
       <div className="flex flex-row flex-wrap gap-2 items-center border-b pb-6">
         <LLMCopyButton markdownUrl={`${page.url}.mdx`} />
         <ViewOptions
@@ -100,20 +92,14 @@ export default async function Page(props: PageProps<'/docs/[...slug]'>) {
               return (
                 <HoverCard>
                   <HoverCardTrigger
-                    href={
-                      found.hash
-                        ? `${found.page.url}#${found.hash}`
-                        : found.page.url
-                    }
+                    href={found.hash ? `${found.page.url}#${found.hash}` : found.page.url}
                     {...props}
                   >
                     {props.children}
                   </HoverCardTrigger>
                   <HoverCardContent className="text-sm">
                     <p className="font-medium">{found.page.data.title}</p>
-                    <p className="text-fd-muted-foreground">
-                      {found.page.data.description}
-                    </p>
+                    <p className="text-fd-muted-foreground">{found.page.data.description}</p>
                   </HoverCardContent>
                 </HoverCard>
               );
@@ -150,9 +136,7 @@ function DocsCategory({ url }: { url: string }) {
   );
 }
 
-export async function generateMetadata(
-  props: PageProps<'/docs/[...slug]'>,
-): Promise<Metadata> {
+export async function generateMetadata(props: PageProps<'/docs/[[...slug]]'>): Promise<Metadata> {
   const { slug = [] } = await props.params;
   const page = source.getPage(slug);
   if (!page)
@@ -160,8 +144,7 @@ export async function generateMetadata(
       title: 'Not Found',
     });
 
-  const description =
-    page.data.description ?? 'The library for building documentation sites';
+  const description = page.data.description ?? 'The library for building documentation sites';
 
   const image = {
     url: getPageImage(page).url,

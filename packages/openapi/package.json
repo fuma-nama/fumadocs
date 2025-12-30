@@ -3,51 +3,54 @@
   "version": "10.2.2",
   "description": "Generate MDX docs for your OpenAPI spec",
   "keywords": [
-    "NextJs",
-    "Docs"
+    "Docs",
+    "NextJs"
   ],
   "homepage": "https://fumadocs.dev",
-  "repository": "github:fuma-nama/fumadocs",
   "license": "MIT",
   "author": "Fuma Nama",
+  "repository": "github:fuma-nama/fumadocs",
+  "files": [
+    "css",
+    "dist"
+  ],
   "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     },
     "./css/*": "./css/*",
     "./ui": {
-      "import": "./dist/ui/index.js",
-      "types": "./dist/ui/index.d.ts"
+      "types": "./dist/ui/index.d.ts",
+      "import": "./dist/ui/index.js"
     },
     "./ui/client": {
-      "import": "./dist/ui/client/index.js",
-      "types": "./dist/ui/client/index.d.ts"
+      "types": "./dist/ui/client/index.d.ts",
+      "import": "./dist/ui/client/index.js"
     },
     "./playground": {
-      "import": "./dist/playground/index.js",
-      "types": "./dist/playground/index.d.ts"
+      "types": "./dist/playground/index.d.ts",
+      "import": "./dist/playground/index.js"
     },
     "./playground/client": {
-      "import": "./dist/playground/client.js",
-      "types": "./dist/playground/client.d.ts"
+      "types": "./dist/playground/client.d.ts",
+      "import": "./dist/playground/client.js"
     },
     "./scalar": {
-      "import": "./dist/scalar/index.js",
-      "types": "./dist/scalar/index.d.ts"
+      "types": "./dist/scalar/index.d.ts",
+      "import": "./dist/scalar/index.js"
     },
     "./server": {
-      "import": "./dist/server/index.js",
-      "types": "./dist/server/index.d.ts"
+      "types": "./dist/server/index.d.ts",
+      "import": "./dist/server/index.js"
     }
   },
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "files": [
-    "dist",
-    "css"
-  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsdown",
     "clean": "rimraf dist",
@@ -56,7 +59,6 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "lucide-react": "^0.562.0",
     "@fumari/json-schema-to-typescript": "^2.0.0",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -69,6 +71,7 @@
     "github-slugger": "^2.0.0",
     "hast-util-to-jsx-runtime": "^2.3.6",
     "js-yaml": "^4.1.1",
+    "lucide-react": "^0.562.0",
     "next-themes": "^0.4.6",
     "openapi-sampler": "^1.6.2",
     "react-hook-form": "^7.69.0",
@@ -107,8 +110,5 @@
     "@scalar/api-client-react": {
       "optional": true
     }
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

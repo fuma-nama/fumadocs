@@ -38,9 +38,7 @@ export function isMarkdownPreferred(
     markdownMediaTypes?: string[];
   },
 ) {
-  const {
-    markdownMediaTypes = ['text/plain', 'text/markdown', 'text/x-markdown'],
-  } = options ?? {};
+  const { markdownMediaTypes = ['text/plain', 'text/markdown', 'text/x-markdown'] } = options ?? {};
 
   const mediaTypes = getNegotiator(request).mediaTypes();
   return markdownMediaTypes.some((type) => mediaTypes.includes(type));

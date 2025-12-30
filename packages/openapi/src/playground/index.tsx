@@ -4,11 +4,7 @@ import type {
   RenderContext,
   SecuritySchemeObject,
 } from '@/types';
-import {
-  getPreferredType,
-  type NoReference,
-  type ParsedSchema,
-} from '@/utils/schema';
+import { getPreferredType, type NoReference, type ParsedSchema } from '@/utils/schema';
 import { type PlaygroundClientProps } from './client';
 import { ClientLazy } from './lazy';
 
@@ -59,10 +55,7 @@ export async function APIPlayground({ path, method, ctx }: APIPlaygroundProps) {
     body:
       bodyContent && mediaType
         ? ({
-            schema: writeReferences(
-              bodyContent[mediaType].schema as ParsedSchema,
-              context,
-            ),
+            schema: writeReferences(bodyContent[mediaType].schema as ParsedSchema, context),
             mediaType,
           } as PlaygroundClientProps['body'])
         : undefined,
@@ -101,9 +94,7 @@ function writeReferences(
       case 'oneOf':
       case 'allOf':
       case 'anyOf':
-        output[name] = output[name].map((item) =>
-          writeReferences(item, ctx, stack),
-        );
+        output[name] = output[name].map((item) => writeReferences(item, ctx, stack));
         continue;
       case 'items':
       case 'additionalProperties':

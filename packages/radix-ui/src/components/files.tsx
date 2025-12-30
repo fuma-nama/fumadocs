@@ -1,32 +1,18 @@
 'use client';
 
 import { cva } from 'class-variance-authority';
-import {
-  File as FileIcon,
-  Folder as FolderIcon,
-  FolderOpen,
-} from 'lucide-react';
+import { File as FileIcon, Folder as FolderIcon, FolderOpen } from 'lucide-react';
 import { type HTMLAttributes, type ReactNode, useState } from 'react';
 import { cn } from '@fumadocs/ui/cn';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from './ui/collapsible';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
 
 const itemVariants = cva(
   'flex flex-row items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-fd-accent hover:text-fd-accent-foreground [&_svg]:size-4',
 );
 
-export function Files({
-  className,
-  ...props
-}: HTMLAttributes<HTMLDivElement>): React.ReactElement {
+export function Files({ className, ...props }: HTMLAttributes<HTMLDivElement>): React.ReactElement {
   return (
-    <div
-      className={cn('not-prose rounded-md border bg-fd-card p-2', className)}
-      {...props}
-    >
+    <div className={cn('not-prose rounded-md border bg-fd-card p-2', className)} {...props}>
       {props.children}
     </div>
   );
@@ -64,11 +50,7 @@ export function File({
   );
 }
 
-export function Folder({
-  name,
-  defaultOpen = false,
-  ...props
-}: FolderProps): React.ReactElement {
+export function Folder({ name, defaultOpen = false, ...props }: FolderProps): React.ReactElement {
   const [open, setOpen] = useState(defaultOpen);
 
   return (

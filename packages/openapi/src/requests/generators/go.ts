@@ -17,9 +17,7 @@ export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
   if (cookies.length > 0) {
     headers.set(
       'Cookie',
-      JSON.stringify(
-        cookies.map(([k, param]) => `${k}=${param.value}`).join('; '),
-      ),
+      JSON.stringify(cookies.map(([k, param]) => `${k}=${param.value}`).join('; ')),
     );
   }
 

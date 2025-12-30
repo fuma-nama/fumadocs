@@ -54,10 +54,7 @@ export async function UsageTabs({
     if (generators.length === 0) return null;
 
     return (
-      <CodeBlockTabs
-        groupId="fumadocs_openapi_requests"
-        defaultValue={generators[0].id}
-      >
+      <CodeBlockTabs groupId="fumadocs_openapi_requests" defaultValue={generators[0].id}>
         <CodeBlockTabsList>
           {generators.map((item) => (
             <CodeBlockTabsTrigger key={item.id} value={item.id}>
@@ -96,9 +93,7 @@ export async function UsageTabs({
 
   return renderAPIExampleLayout(
     {
-      selector: method['x-exclusiveCodeSample'] ? null : (
-        <UsageTabsSelectorLazy />
-      ),
+      selector: method['x-exclusiveCodeSample'] ? null : <UsageTabsSelectorLazy />,
       usageTabs: await renderAPIExampleUsageTabs(generators, ctx),
       responseTabs: <ResponseTabs operation={method} ctx={ctx} />,
     },

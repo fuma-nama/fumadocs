@@ -55,8 +55,7 @@ export function intersection(a: ParsedSchema, b: ParsedSchema): ParsedSchema {
       case 'minLength': {
         const value = b[key];
         if (value === undefined) break;
-        result[key] =
-          result[key] === undefined ? value : Math.max(result[key], value);
+        result[key] = result[key] === undefined ? value : Math.max(result[key], value);
         break;
       }
       case 'maxContains':
@@ -67,8 +66,7 @@ export function intersection(a: ParsedSchema, b: ParsedSchema): ParsedSchema {
       case 'exclusiveMaximum': {
         const value = b[key];
         if (value === undefined) break;
-        result[key] =
-          result[key] === undefined ? value : Math.min(result[key], value);
+        result[key] = result[key] === undefined ? value : Math.min(result[key], value);
         break;
       }
       // intersection
@@ -78,10 +76,7 @@ export function intersection(a: ParsedSchema, b: ParsedSchema): ParsedSchema {
         const value = b[key];
         if (value === undefined) break;
 
-        result[key] =
-          result[key] === undefined
-            ? value
-            : intersectArray(result[key], value);
+        result[key] = result[key] === undefined ? value : intersectArray(result[key], value);
         break;
       }
       // require same
@@ -138,8 +133,7 @@ export function intersection(a: ParsedSchema, b: ParsedSchema): ParsedSchema {
         const value = b[key];
         if (value === undefined) break;
 
-        result[key] =
-          result[key] === undefined ? value : intersection(result[key], value);
+        result[key] = result[key] === undefined ? value : intersection(result[key], value);
         break;
       }
       case 'not': {

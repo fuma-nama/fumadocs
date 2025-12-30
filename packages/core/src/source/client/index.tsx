@@ -38,9 +38,7 @@ export function useFumadocsLoader<
 
   return useMemo(() => {
     return {
-      pageTree: pageTree
-        ? deserializePageTree(pageTree as PageTree.Root)
-        : undefined,
+      pageTree: pageTree ? deserializePageTree(pageTree as PageTree.Root) : undefined,
     } as {
       pageTree: V['pageTree'] extends object ? PageTree.Root : undefined;
     };

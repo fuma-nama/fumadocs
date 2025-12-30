@@ -14,9 +14,7 @@ export const badgeVariants = cva('font-mono font-medium', {
   },
 });
 
-function getMethodColor(
-  method: string,
-): VariantProps<typeof badgeVariants>['color'] {
+function getMethodColor(method: string): VariantProps<typeof badgeVariants>['color'] {
   switch (method.toUpperCase()) {
     case 'PUT':
       return 'yellow';
@@ -35,8 +33,7 @@ export function Badge({
   className,
   color,
   ...props
-}: Omit<HTMLAttributes<HTMLSpanElement>, 'color'> &
-  VariantProps<typeof badgeVariants>) {
+}: Omit<HTMLAttributes<HTMLSpanElement>, 'color'> & VariantProps<typeof badgeVariants>) {
   return (
     <span
       className={cn(

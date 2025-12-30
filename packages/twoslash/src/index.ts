@@ -23,9 +23,7 @@ export type TransformerTwoslashOptions = TransformerTwoslashIndexOptions;
 let cachedInstance: TwoslashInstance | undefined;
 
 // This is highly inspired by https://github.com/shikijs/shiki/blob/main/packages/vitepress-twoslash
-export function transformerTwoslash(
-  options: TransformerTwoslashOptions = {},
-): ShikiTransformer {
+export function transformerTwoslash(options: TransformerTwoslashOptions = {}): ShikiTransformer {
   const ignoreClass = 'nd-copy-ignore';
 
   // lazy load Twoslash instance so it works on serverless platforms
@@ -72,12 +70,7 @@ export function transformerTwoslash(
         tagName: 'div',
         class: 'twoslash shiki fd-codeblock prose-no-margin',
         children: (v) => {
-          if (
-            v.length === 1 &&
-            v[0].type === 'element' &&
-            v[0].tagName === 'pre'
-          )
-            return v;
+          if (v.length === 1 && v[0].type === 'element' && v[0].tagName === 'pre') return v;
 
           return [
             {
@@ -124,10 +117,7 @@ export function transformerTwoslash(
   });
 }
 
-function renderMarkdown(
-  this: ShikiTransformerContextCommon,
-  md: string,
-): ElementContent[] {
+function renderMarkdown(this: ShikiTransformerContextCommon, md: string): ElementContent[] {
   const mdast = fromMarkdown(
     md.replace(/{@link (?<link>[^}]*)}/g, '$1'), // replace jsdoc links
     { mdastExtensions: [gfmFromMarkdown()] },
@@ -160,15 +150,10 @@ function renderMarkdownInline(
   md: string,
   context?: string,
 ): ElementContent[] {
-  const text =
-    context === 'tag:param' ? md.replace(/^(?<link>[\w$-]+)/, '`$1` ') : md;
+  const text = context === 'tag:param' ? md.replace(/^(?<link>[\w$-]+)/, '`$1` ') : md;
 
   const children = renderMarkdown.call(this, text);
-  if (
-    children.length === 1 &&
-    children[0].type === 'element' &&
-    children[0].tagName === 'p'
-  )
+  if (children.length === 1 && children[0].type === 'element' && children[0].tagName === 'p')
     return children[0].children;
   return children;
 }

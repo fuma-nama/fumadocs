@@ -1,17 +1,8 @@
 import type { ProcessedDocument } from '@/utils/process-document';
 import type { OpenAPIServer } from '@/server';
 import type { OperationItem, WebhookItem } from '@/ui/api-page';
-import type {
-  Document,
-  OperationObject,
-  PathItemObject,
-  TagObject,
-} from '@/types';
-import {
-  getTagDisplayName,
-  methodKeys,
-  type NoReference,
-} from '@/utils/schema';
+import type { Document, OperationObject, PathItemObject, TagObject } from '@/types';
+import { getTagDisplayName, methodKeys, type NoReference } from '@/utils/schema';
 import type { OpenAPIV3_1 } from 'openapi-types';
 import { idToTitle } from '@/utils/id-to-title';
 
@@ -48,11 +39,7 @@ export interface OutputGroup extends BaseEntry {
   webhooks: WebhookItem[];
 }
 
-export type OutputEntry =
-  | TagOutput
-  | OperationOutput
-  | WebhookOutput
-  | OutputGroup;
+export type OutputEntry = TagOutput | OperationOutput | WebhookOutput | OutputGroup;
 
 export interface PagesBuilderConfig {
   toPages: (builder: PagesBuilder) => void;
@@ -184,9 +171,7 @@ export function fromSchema(
           return (
             operation.summary ||
             pathItem.summary ||
-            (operation.operationId
-              ? idToTitle(operation.operationId)
-              : item.path)
+            (operation.operationId ? idToTitle(operation.operationId) : item.path)
           );
         },
       };

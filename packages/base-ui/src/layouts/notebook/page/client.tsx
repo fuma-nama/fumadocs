@@ -18,16 +18,9 @@ import { useI18n } from '@/contexts/i18n';
 import { useTreeContext, useTreePath } from '@/contexts/tree';
 import type * as PageTree from 'fumadocs-core/page-tree';
 import { usePathname } from 'fumadocs-core/framework';
-import {
-  type BreadcrumbOptions,
-  getBreadcrumbItemsFromPath,
-} from 'fumadocs-core/breadcrumb';
+import { type BreadcrumbOptions, getBreadcrumbItemsFromPath } from 'fumadocs-core/breadcrumb';
 import { isActive } from '@fumadocs/ui/urls';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useTOCItems } from '@/components/toc';
 import { useActiveAnchor } from 'fumadocs-core/toc';
 import { LayoutContext } from '../client';
@@ -38,11 +31,7 @@ const TocPopoverContext = createContext<{
   setOpen: (open: boolean) => void;
 } | null>(null);
 
-export function PageTOCPopover({
-  className,
-  children,
-  ...rest
-}: ComponentProps<'div'>) {
+export function PageTOCPopover({ className, children, ...rest }: ComponentProps<'div'>) {
   const ref = useRef<HTMLElement>(null);
   const [open, setOpen] = useState(false);
   const { isNavTransparent } = use(LayoutContext)!;
@@ -50,8 +39,7 @@ export function PageTOCPopover({
   const onClick = useEffectEvent((e: Event) => {
     if (!open) return;
 
-    if (ref.current && !ref.current.contains(e.target as HTMLElement))
-      setOpen(false);
+    if (ref.current && !ref.current.contains(e.target as HTMLElement)) setOpen(false);
   });
 
   useEffect(() => {
@@ -97,10 +85,7 @@ export function PageTOCPopover({
   );
 }
 
-export function PageTOCPopoverTrigger({
-  className,
-  ...props
-}: ComponentProps<'button'>) {
+export function PageTOCPopoverTrigger({ className, ...props }: ComponentProps<'button'>) {
   const { text } = useI18n();
   const { open } = use(TocPopoverContext)!;
   const items = useTOCItems();
@@ -145,20 +130,12 @@ export function PageTOCPopoverTrigger({
           {items[selected]?.title}
         </span>
       </span>
-      <ChevronDown
-        className={cn(
-          'shrink-0 transition-transform mx-0.5',
-          open && 'rotate-180',
-        )}
-      />
+      <ChevronDown className={cn('shrink-0 transition-transform mx-0.5', open && 'rotate-180')} />
     </CollapsibleTrigger>
   );
 }
 
-interface ProgressCircleProps extends Omit<
-  React.ComponentProps<'svg'>,
-  'strokeWidth'
-> {
+interface ProgressCircleProps extends Omit<React.ComponentProps<'svg'>, 'strokeWidth'> {
   value: number;
   strokeWidth?: number;
   size?: number;
@@ -240,10 +217,7 @@ export function PageLastUpdate({
   }, [value]);
 
   return (
-    <p
-      {...props}
-      className={cn('text-sm text-fd-muted-foreground', props.className)}
-    >
+    <p {...props} className={cn('text-sm text-fd-muted-foreground', props.className)}>
       {text.lastUpdate} {date}
     </p>
   );
@@ -266,9 +240,7 @@ export function PageFooter({ items, ...props }: FooterProps) {
   const { previous, next } = useMemo(() => {
     if (items) return items;
 
-    const idx = footerList.findIndex((item) =>
-      isActive(item.url, pathname, false),
-    );
+    const idx = footerList.findIndex((item) => isActive(item.url, pathname, false));
 
     if (idx === -1) return {};
     return {
@@ -343,16 +315,10 @@ export function PageBreadcrumb({
   return (
     <div
       {...props}
-      className={cn(
-        'flex items-center gap-1.5 text-sm text-fd-muted-foreground',
-        props.className,
-      )}
+      className={cn('flex items-center gap-1.5 text-sm text-fd-muted-foreground', props.className)}
     >
       {items.map((item, i) => {
-        const className = cn(
-          'truncate',
-          i === items.length - 1 && 'text-fd-primary font-medium',
-        );
+        const className = cn('truncate', i === items.length - 1 && 'text-fd-primary font-medium');
 
         return (
           <Fragment key={i}>

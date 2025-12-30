@@ -1,9 +1,4 @@
-import {
-  type FileObject,
-  printErrors,
-  scanURLs,
-  validateFiles,
-} from 'next-validate-link';
+import { type FileObject, printErrors, scanURLs, validateFiles } from 'next-validate-link';
 import { InferPageType } from 'fumadocs-core/source';
 import { blog, source } from '@/lib/source';
 
@@ -33,30 +28,23 @@ async function checkLinks() {
     },
   });
 
-  console.log(
-    `collected ${scanned.urls.size} URLs, ${scanned.fallbackUrls.length} fallbacks`,
-  );
+  console.log(`collected ${scanned.urls.size} URLs, ${scanned.fallbackUrls.length} fallbacks`);
 
   printErrors(
-    await validateFiles(
-      [...(await getFiles(source)), ...(await getFiles(blog))],
-      {
-        scanned,
-        markdown: {
-          components: {
-            Card: { attributes: ['href'] },
-          },
+    await validateFiles([...(await getFiles(source)), ...(await getFiles(blog))], {
+      scanned,
+      markdown: {
+        components: {
+          Card: { attributes: ['href'] },
         },
-        checkRelativePaths: 'as-url',
       },
-    ),
+      checkRelativePaths: 'as-url',
+    }),
     true,
   );
 }
 
-async function getHeadings({
-  data,
-}: InferPageType<AnySource>): Promise<string[]> {
+async function getHeadings({ data }: InferPageType<AnySource>): Promise<string[]> {
   if ('type' in data && data.type === 'openapi') return [];
   const { _exports, toc } = await data.load();
   const headings = toc.map((item) => item.url.slice(1));

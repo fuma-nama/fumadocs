@@ -18,9 +18,7 @@ export interface JSONSchemaOptions {
  *
  * note: **it only works with Zod**
  */
-export default function jsonSchema({
-  insert = false,
-}: JSONSchemaOptions = {}): Plugin {
+export default function jsonSchema({ insert = false }: JSONSchemaOptions = {}): Plugin {
   function getSchemaPath(name: string) {
     return `json-schema/${name}.json`;
   }

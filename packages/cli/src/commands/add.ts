@@ -1,11 +1,4 @@
-import {
-  intro,
-  isCancel,
-  log,
-  multiselect,
-  outro,
-  spinner,
-} from '@clack/prompts';
+import { intro, isCancel, log, multiselect, outro, spinner } from '@clack/prompts';
 import picocolors from 'picocolors';
 import { ComponentInstaller } from '@/registry/installer';
 import type { RegistryClient } from '@/registry/client';
@@ -34,9 +27,7 @@ export async function add(input: string[], client: RegistryClient) {
         hint: item.description,
       });
     }
-    const { indexes } = await client
-      .createLinkedRegistryClient(registry)
-      .fetchRegistryInfo();
+    const { indexes } = await client.createLinkedRegistryClient(registry).fetchRegistryInfo();
 
     for (const item of indexes) {
       options.push({
@@ -60,9 +51,7 @@ export async function add(input: string[], client: RegistryClient) {
     target = value;
   } else {
     target = await Promise.all(
-      input.map(async (item) =>
-        (await client.hasComponent(item)) ? item : `${registry}/${item}`,
-      ),
+      input.map(async (item) => ((await client.hasComponent(item)) ? item : `${registry}/${item}`)),
     );
   }
 
@@ -71,11 +60,7 @@ export async function add(input: string[], client: RegistryClient) {
 
 export async function install(target: string[], installer: ComponentInstaller) {
   for (const name of target) {
-    intro(
-      picocolors.bold(
-        picocolors.inverse(picocolors.cyanBright(`Add Component: ${name}`)),
-      ),
-    );
+    intro(picocolors.bold(picocolors.inverse(picocolors.cyanBright(`Add Component: ${name}`))));
 
     try {
       await installer.install(name);

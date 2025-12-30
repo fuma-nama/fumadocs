@@ -16,10 +16,7 @@ export function Mermaid({ chart }: { chart: string }) {
 
 const cache = new Map<string, Promise<unknown>>();
 
-function cachePromise<T>(
-  key: string,
-  setPromise: () => Promise<T>,
-): Promise<T> {
+function cachePromise<T>(key: string, setPromise: () => Promise<T>): Promise<T> {
   const cached = cache.get(key);
   if (cached) return cached as Promise<T>;
 
@@ -31,9 +28,7 @@ function cachePromise<T>(
 function MermaidContent({ chart }: { chart: string }) {
   const id = useId();
   const { resolvedTheme } = useTheme();
-  const { default: mermaid } = use(
-    cachePromise('mermaid', () => import('mermaid')),
-  );
+  const { default: mermaid } = use(cachePromise('mermaid', () => import('mermaid')));
 
   mermaid.initialize({
     startOnLoad: false,

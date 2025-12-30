@@ -1,17 +1,10 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
-import {
-  generateDocument,
-  type PagesToTextOptions,
-  toText,
-} from './utils/pages/to-text';
+import { generateDocument, type PagesToTextOptions, toText } from './utils/pages/to-text';
 import type { ProcessedDocument } from '@/utils/process-document';
 import type { OpenAPIServer } from '@/server';
 import { createGetUrl, getSlugs } from 'fumadocs-core/source';
-import {
-  createAutoPreset,
-  type SchemaToPagesOptions,
-} from '@/utils/pages/preset-auto';
+import { createAutoPreset, type SchemaToPagesOptions } from '@/utils/pages/preset-auto';
 import { fromSchema, type OutputEntry } from '@/utils/pages/builder';
 
 export interface OutputFile {
@@ -68,10 +61,7 @@ interface GenerateFilesConfig extends PagesToTextOptions {
   /**
    * Can add/change/remove output files before writing to file system
    **/
-  beforeWrite?: (
-    this: BeforeWriteContext,
-    files: OutputFile[],
-  ) => void | Promise<void>;
+  beforeWrite?: (this: BeforeWriteContext, files: OutputFile[]) => void | Promise<void>;
 }
 
 export type Config = SchemaToPagesOptions & GenerateFilesConfig;
@@ -211,8 +201,7 @@ function writeIndexFiles(
 
   for (const item of typeof items === 'function' ? items(context) : items) {
     files.push({
-      path:
-        path.extname(item.path).length === 0 ? `${item.path}.mdx` : item.path,
+      path: path.extname(item.path).length === 0 ? `${item.path}.mdx` : item.path,
       content: fileContent(item),
     });
   }

@@ -133,8 +133,7 @@ function createRenameOutput(preset: RenameOutputPreset): RenameOutputFn {
 
 function normalize(filePath: string): string {
   filePath = stash(filePath);
-  if (filePath.startsWith('../'))
-    throw new Error(`${filePath} points outside of vault folder`);
+  if (filePath.startsWith('../')) throw new Error(`${filePath} points outside of vault folder`);
 
   return filePath.startsWith('./') ? filePath.slice(2) : filePath;
 }

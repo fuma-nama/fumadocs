@@ -32,10 +32,7 @@ export function Provider({ children }: { children: ReactNode }) {
       }}
     >
       <TooltipProvider>
-        <script
-          suppressHydrationWarning
-          dangerouslySetInnerHTML={{ __html: inject }}
-        />
+        <script suppressHydrationWarning dangerouslySetInnerHTML={{ __html: inject }} />
         {children}
       </TooltipProvider>
     </RootProvider>

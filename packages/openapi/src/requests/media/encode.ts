@@ -74,8 +74,7 @@ export function encodeRequestData(
         if (field.in === 'query') {
           const style = field.style ?? 'form';
 
-          if (style in FormDelimiter)
-            sep = FormDelimiter[style as keyof typeof FormDelimiter];
+          if (style in FormDelimiter) sep = FormDelimiter[style as keyof typeof FormDelimiter];
         }
 
         output[key] = {

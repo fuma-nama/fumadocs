@@ -1,13 +1,6 @@
 'use client';
 import type * as PageTree from 'fumadocs-core/page-tree';
-import {
-  type ComponentProps,
-  createContext,
-  type ReactNode,
-  use,
-  useMemo,
-  useState,
-} from 'react';
+import { type ComponentProps, createContext, type ReactNode, use, useMemo, useState } from 'react';
 import { cn } from '@/cn';
 import { TreeContextProvider, useTreeContext } from '@/contexts/tree';
 import Link from 'fumadocs-core/link';
@@ -41,10 +34,7 @@ export function DocsLayout({ tree, children }: DocsLayoutProps) {
             <NavbarSidebarTrigger className="md:hidden" />
           </nav>
         </header>
-        <main
-          id="nd-docs-layout"
-          className="flex flex-1 flex-row [--fd-nav-height:56px]"
-        >
+        <main id="nd-docs-layout" className="flex flex-1 flex-row [--fd-nav-height:56px]">
           <Sidebar />
           {children}
         </main>
@@ -90,11 +80,7 @@ function NavbarSidebarTrigger(props: ComponentProps<'button'>) {
   const { open, setOpen } = use(SidebarContext)!;
 
   return (
-    <button
-      {...props}
-      className={cn('text-sm', props.className)}
-      onClick={() => setOpen(!open)}
-    >
+    <button {...props} className={cn('text-sm', props.className)} onClick={() => setOpen(!open)}>
       Sidebar
     </button>
   );
@@ -141,13 +127,7 @@ const linkVariants = cva(
   },
 );
 
-function SidebarItem({
-  item,
-  children,
-}: {
-  item: PageTree.Node;
-  children: ReactNode;
-}) {
+function SidebarItem({ item, children }: { item: PageTree.Node; children: ReactNode }) {
   const pathname = usePathname();
 
   if (item.type === 'page') {

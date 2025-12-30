@@ -11,9 +11,7 @@ interface Options {
   jsxRuntime?: unknown;
 }
 
-const AsyncFunction: new (
-  ...args: string[]
-) => (...args: unknown[]) => Promise<unknown> =
+const AsyncFunction: new (...args: string[]) => (...args: unknown[]) => Promise<unknown> =
   Object.getPrototypeOf(executeMdx).constructor;
 
 export async function executeMdx(compiled: string, options: Options = {}) {

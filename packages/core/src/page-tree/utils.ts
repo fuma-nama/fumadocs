@@ -140,8 +140,7 @@ export function findPath(
       }
 
       if (node.type === 'folder') {
-        const items =
-          node.index && matcher(node.index) ? [node.index] : run(node.children);
+        const items = node.index && matcher(node.index) ? [node.index] : run(node.children);
 
         if (items) {
           items.unshift(node);

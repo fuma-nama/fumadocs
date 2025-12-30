@@ -43,10 +43,7 @@ export function useBreadcrumb(
   tree: PageTree.Root,
   options?: BreadcrumbOptions,
 ): BreadcrumbItem[] {
-  return useMemo(
-    () => getBreadcrumbItems(url, tree, options),
-    [tree, url, options],
-  );
+  return useMemo(() => getBreadcrumbItems(url, tree, options), [tree, url, options]);
 }
 
 export function getBreadcrumbItems(
@@ -54,11 +51,7 @@ export function getBreadcrumbItems(
   tree: PageTree.Root,
   options: BreadcrumbOptions = {},
 ): BreadcrumbItem[] {
-  return getBreadcrumbItemsFromPath(
-    tree,
-    searchPath(tree.children, url) ?? [],
-    options,
-  );
+  return getBreadcrumbItemsFromPath(tree, searchPath(tree.children, url) ?? [], options);
 }
 
 export function getBreadcrumbItemsFromPath(
@@ -66,11 +59,7 @@ export function getBreadcrumbItemsFromPath(
   path: PageTree.Node[],
   options: BreadcrumbOptions,
 ): BreadcrumbItem[] {
-  const {
-    includePage = false,
-    includeSeparator = false,
-    includeRoot = false,
-  } = options;
+  const { includePage = false, includeSeparator = false, includeRoot = false } = options;
   let items: BreadcrumbItem[] = [];
   for (let i = 0; i < path.length; i++) {
     const item = path[i];
@@ -124,14 +113,8 @@ export function getBreadcrumbItemsFromPath(
  * @returns The path to the target node from root
  * @internal Don't use this on your own
  */
-export function searchPath(
-  nodes: PageTree.Node[],
-  url: string,
-): PageTree.Node[] | null {
+export function searchPath(nodes: PageTree.Node[], url: string): PageTree.Node[] | null {
   const normalizedUrl = normalizeUrl(url);
 
-  return findPath(
-    nodes,
-    (node) => node.type === 'page' && node.url === normalizedUrl,
-  );
+  return findPath(nodes, (node) => node.type === 'page' && node.url === normalizedUrl);
 }

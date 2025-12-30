@@ -1,8 +1,8 @@
 {
   "name": "example-tanstack-start-i18n",
   "private": true,
-  "sideEffects": false,
   "type": "module",
+  "sideEffects": false,
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",

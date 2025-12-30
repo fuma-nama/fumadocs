@@ -630,13 +630,7 @@
                           "description": "The name of the connected analytics service"
                         }
                       },
-                      "required": [
-                        "metrics",
-                        "logger",
-                        "ratelimit",
-                        "usagelimit",
-                        "analytics"
-                      ]
+                      "required": ["metrics", "logger", "ratelimit", "usagelimit", "analytics"]
                     }
                   },
                   "required": ["status", "services"]
@@ -1065,12 +1059,7 @@
                         "description": "Determines the speed at which tokens are refilled, in milliseconds."
                       }
                     },
-                    "required": [
-                      "type",
-                      "limit",
-                      "refillRate",
-                      "refillInterval"
-                    ],
+                    "required": ["type", "limit", "refillRate", "refillInterval"],
                     "description": "Unkey comes with per-key ratelimiting out of the box.",
                     "example": {
                       "type": "fast",
@@ -1353,12 +1342,7 @@
                         "description": "Determines the speed at which tokens are refilled, in milliseconds."
                       }
                     },
-                    "required": [
-                      "type",
-                      "limit",
-                      "refillRate",
-                      "refillInterval"
-                    ],
+                    "required": ["type", "limit", "refillRate", "refillInterval"],
                     "description": "Unkey comes with per-key ratelimiting out of the box. Set `null` to disable.",
                     "example": {
                       "type": "fast",
@@ -1723,12 +1707,7 @@
                             "example": 0
                           }
                         },
-                        "required": [
-                          "time",
-                          "success",
-                          "rateLimited",
-                          "usageExceeded"
-                        ]
+                        "required": ["time", "success", "rateLimited", "usageExceeded"]
                       }
                     }
                   },

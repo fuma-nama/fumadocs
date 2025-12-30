@@ -64,10 +64,7 @@
   --animate-stroke: stroke 5s linear infinite;
 
   --color-gradient-radial: radial-gradient(circle, var(--tw-gradient-stops));
-  --color-repeat-gradient-to-r: repeating-linear-gradient(
-    to right,
-    var(--tw-gradient-stops)
-  );
+  --color-repeat-gradient-to-r: repeating-linear-gradient(to right, var(--tw-gradient-stops));
   --color-repeat-gradient-to-br: repeating-linear-gradient(
     to bottom right,
     var(--tw-gradient-stops)
@@ -82,9 +79,14 @@
   --color-fd-primary: var(--headless-color);
 }
 
+.framework {
+  --color-fd-primary: var(--framework-color);
+}
+
 :root {
   --headless-color: hsl(250, 80%, 54%);
-  --ui-color: hsl(41, 100%, 40%);
+  --framework-color: hsl(41, 100%, 40%);
+  --ui-color: hsl(217, 100%, 58%);
 }
 
 html {
@@ -101,7 +103,8 @@ body {
 
 .dark {
   --headless-color: hsl(250 100% 80%);
-  --ui-color: #fff383;
+  --framework-color: #fff383;
+  --ui-color: #a9ceff;
 }
 
 @keyframes circuit_1 {

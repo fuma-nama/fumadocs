@@ -8,12 +8,7 @@ import {
   SelectValue,
 } from '@/ui/components/select';
 import { Input, labelVariants } from '@/ui/components/input';
-import {
-  type HTMLAttributes,
-  useEffect,
-  useState,
-  useEffectEvent,
-} from 'react';
+import { type HTMLAttributes, useEffect, useState, useEffectEvent } from 'react';
 import { cn } from '@/utils/cn';
 import {
   Dialog,
@@ -39,9 +34,7 @@ export default function ServerSelect(props: HTMLAttributes<HTMLDivElement>) {
   }, []);
 
   if (servers.length <= 0) return;
-  const serverSchema = server
-    ? servers.find((obj) => obj.url === server.url)
-    : null;
+  const serverSchema = server ? servers.find((obj) => obj.url === server.url) : null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -56,9 +49,7 @@ export default function ServerSelect(props: HTMLAttributes<HTMLDivElement>) {
       <DialogContent {...props}>
         <DialogHeader>
           <DialogTitle>Server URL</DialogTitle>
-          <DialogDescription>
-            The base URL of your API endpoint.
-          </DialogDescription>
+          <DialogDescription>The base URL of your API endpoint.</DialogDescription>
         </DialogHeader>
         <Select value={server?.url} onValueChange={setServer}>
           <SelectTrigger>

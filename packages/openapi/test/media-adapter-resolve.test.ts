@@ -17,10 +17,7 @@ describe('Media Adapter Resolution', () => {
   });
 
   test('resolves with charset parameter', () => {
-    const adapter = resolveMediaAdapter(
-      'application/json; charset=utf-8',
-      defaultAdapters,
-    );
+    const adapter = resolveMediaAdapter('application/json; charset=utf-8', defaultAdapters);
     expect(adapter).toBe(defaultAdapters['application/json']);
   });
 
@@ -57,29 +54,18 @@ describe('Media Adapter Resolution', () => {
   });
 
   test('returns undefined for unsupported +suffix', () => {
-    const adapter = resolveMediaAdapter(
-      'application/custom+yaml',
-      defaultAdapters,
-    );
+    const adapter = resolveMediaAdapter('application/custom+yaml', defaultAdapters);
     expect(adapter).toBeUndefined();
   });
 
   test('isMediaTypeSupported returns true for supported types', () => {
-    expect(isMediaTypeSupported('application/json', defaultAdapters)).toBe(
-      true,
-    );
-    expect(
-      isMediaTypeSupported('application/json-patch+json', defaultAdapters),
-    ).toBe(true);
-    expect(isMediaTypeSupported('multipart/form-data', defaultAdapters)).toBe(
-      true,
-    );
+    expect(isMediaTypeSupported('application/json', defaultAdapters)).toBe(true);
+    expect(isMediaTypeSupported('application/json-patch+json', defaultAdapters)).toBe(true);
+    expect(isMediaTypeSupported('multipart/form-data', defaultAdapters)).toBe(true);
   });
 
   test('isMediaTypeSupported returns false for unsupported types', () => {
-    expect(isMediaTypeSupported('application/yaml', defaultAdapters)).toBe(
-      false,
-    );
+    expect(isMediaTypeSupported('application/yaml', defaultAdapters)).toBe(false);
     expect(isMediaTypeSupported('text/plain', defaultAdapters)).toBe(false);
   });
 });

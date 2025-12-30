@@ -61,9 +61,7 @@ export function generateCodeBlockTabs({
         (trigger) =>
           ({
             type: 'mdxJsxFlowElement',
-            attributes: [
-              { type: 'mdxJsxAttribute', name: 'value', value: trigger.value },
-            ],
+            attributes: [{ type: 'mdxJsxAttribute', name: 'value', value: trigger.value }],
             name: 'CodeBlockTabsTrigger',
             children: trigger.children,
           }) as MdxJsxFlowElement,
@@ -75,9 +73,7 @@ export function generateCodeBlockTabs({
     children.push({
       type: 'mdxJsxFlowElement',
       name: 'CodeBlockTab',
-      attributes: [
-        { type: 'mdxJsxAttribute', name: 'value', value: tab.value },
-      ],
+      attributes: [{ type: 'mdxJsxAttribute', name: 'value', value: tab.value }],
       children: tab.children,
     });
   }

@@ -41,10 +41,7 @@ export function getSidebarTabs(
 ): SidebarTab[] {
   const results: SidebarTab[] = [];
 
-  function scanOptions(
-    node: PageTree.Root | PageTree.Folder,
-    unlisted?: boolean,
-  ) {
+  function scanOptions(node: PageTree.Root | PageTree.Folder, unlisted?: boolean) {
     if ('root' in node && node.root) {
       const urls = getFolderUrls(node);
 
@@ -74,10 +71,7 @@ export function getSidebarTabs(
   return results;
 }
 
-function getFolderUrls(
-  folder: PageTree.Folder,
-  output: Set<string> = new Set(),
-): Set<string> {
+function getFolderUrls(folder: PageTree.Folder, output: Set<string> = new Set()): Set<string> {
   if (folder.index) output.add(folder.index.url);
 
   for (const child of folder.children) {

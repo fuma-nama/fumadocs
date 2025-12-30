@@ -22,13 +22,9 @@ export function biome(): TemplatePlugin {
       };
     },
     async afterWrite() {
-      const config =
-        this.template.value === '+next+fuma-docs-mdx' ? next : base;
+      const config = this.template.value === '+next+fuma-docs-mdx' ? next : base;
 
-      await writeFile(
-        path.join(this.dest, 'biome.json'),
-        JSON.stringify(config, null, 2),
-      );
+      await writeFile(path.join(this.dest, 'biome.json'), JSON.stringify(config, null, 2));
       this.log('Configured Biome');
     },
   };

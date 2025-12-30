@@ -15,8 +15,7 @@ export function generatePythonObject(v: unknown, imports = new Set()): string {
     return `datetime.datetime(${v.getFullYear()}, ${v.getMonth() + 1}, ${v.getDate()}, ${v.getHours()}, ${v.getMinutes()}, ${v.getSeconds()}, ${v.getMilliseconds()})`;
   } else if (typeof v === 'object') {
     const entries = Object.entries(v).map(
-      ([key, value]) =>
-        `  ${JSON.stringify(key)}: ${generatePythonObject(value, imports)}`,
+      ([key, value]) => `  ${JSON.stringify(key)}: ${generatePythonObject(value, imports)}`,
     );
     return `{\n${entries.join(', \n')}\n}`;
   } else {

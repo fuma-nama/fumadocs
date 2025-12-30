@@ -4,8 +4,7 @@ import { createContentHighlighter } from '@/search';
 test('highlight search results', () => {
   const highlighter = createContentHighlighter('hello world helloworld');
 
-  expect(highlighter.highlight('oops hello, world hello! worldhello'))
-    .toMatchInlineSnapshot(`
+  expect(highlighter.highlight('oops hello, world hello! worldhello')).toMatchInlineSnapshot(`
       [
         {
           "content": "oops ",

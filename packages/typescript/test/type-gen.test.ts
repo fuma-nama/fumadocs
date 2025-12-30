@@ -10,8 +10,7 @@ import * as path from 'node:path';
 import * as fs from 'node:fs/promises';
 import { createProcessor } from '@mdx-js/mdx';
 
-const relative = (s: string): string =>
-  path.resolve(fileURLToPath(new URL(s, import.meta.url)));
+const relative = (s: string): string => path.resolve(fileURLToPath(new URL(s, import.meta.url)));
 
 const tsconfig: GeneratorOptions = {
   tsconfigPath: relative('../tsconfig.json'),
@@ -52,7 +51,5 @@ test('Run on MDX files', async () => {
     path: file,
     value: (await fs.readFile(file)).toString(),
   });
-  await expect(String(output.value)).toMatchFileSnapshot(
-    './fixtures/test.output.js',
-  );
+  await expect(String(output.value)).toMatchFileSnapshot('./fixtures/test.output.js');
 });

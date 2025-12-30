@@ -24,10 +24,7 @@ export function withBase(url: string, base: string): string {
   return url;
 }
 
-export function resolveServerUrl(
-  template: string,
-  variables: Record<string, string>,
-): string {
+export function resolveServerUrl(template: string, variables: Record<string, string>): string {
   for (const [key, value] of Object.entries(variables)) {
     template = template.replaceAll(`{${key}}`, value);
   }
@@ -35,10 +32,7 @@ export function resolveServerUrl(
   return template;
 }
 
-export function resolveRequestData(
-  pathname: string,
-  { path, query }: RequestData,
-): string {
+export function resolveRequestData(pathname: string, { path, query }: RequestData): string {
   // First, resolve path parameters in the pathname
   for (const key in path) {
     const param = path[key];

@@ -20,15 +20,9 @@ const installables: Record<
   }
 > = {};
 
-const contextFiles = new Set(
-  new Glob('*').scanSync({ cwd: path.join(srcDir, 'contexts') }),
-);
-const hookFiles = new Set(
-  new Glob('*').scanSync({ cwd: path.join(srcDir, 'hooks') }),
-);
-const componentFiles = new Set(
-  new Glob('**/*').scanSync({ cwd: path.join(srcDir, 'components') }),
-);
+const contextFiles = new Set(new Glob('*').scanSync({ cwd: path.join(srcDir, 'contexts') }));
+const hookFiles = new Set(new Glob('*').scanSync({ cwd: path.join(srcDir, 'hooks') }));
+const componentFiles = new Set(new Glob('**/*').scanSync({ cwd: path.join(srcDir, 'components') }));
 
 export function resolveForwardedAPIs(
   ref: SourceReference,
@@ -69,9 +63,7 @@ export function resolveForwardedAPIs(
   }
 
   if (ref.type === 'file') {
-    const filePath = path
-      .relative(upstreamRegistry.dir, ref.file)
-      .replaceAll('\\', '/');
+    const filePath = path.relative(upstreamRegistry.dir, ref.file).replaceAll('\\', '/');
 
     let hasForwarding: boolean;
     const [dir, rest] = splitDir(filePath);
@@ -115,9 +107,7 @@ export const registry: Registry = {
   },
   onResolve(ref) {
     if (ref.type !== 'file') return ref;
-    const filePath = path
-      .relative(registry.dir, ref.file)
-      .replaceAll('\\', '/');
+    const filePath = path.relative(registry.dir, ref.file).replaceAll('\\', '/');
 
     if (filePath === 'icons.tsx')
       return {

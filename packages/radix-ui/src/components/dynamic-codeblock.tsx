@@ -70,20 +70,13 @@ export function DynamicCodeBlock({
 
   const children = (
     <PropsContext value={codeblock}>
-      <Internal
-        id={id}
-        {...useDeferredValue({ code, options: shikiOptions })}
-      />
+      <Internal id={id} {...useDeferredValue({ code, options: shikiOptions })} />
     </PropsContext>
   );
 
   if (wrapInSuspense)
     return (
-      <Suspense
-        fallback={
-          <Placeholder code={code} components={shikiOptions.components} />
-        }
-      >
+      <Suspense fallback={<Placeholder code={code} components={shikiOptions.components} />}>
         {children}
       </Suspense>
     );
@@ -98,10 +91,7 @@ function Placeholder({
   code: string;
   components: HighlightOptions['components'];
 }) {
-  const { pre: Pre = 'pre', code: Code = 'code' } = components as Record<
-    string,
-    FC
-  >;
+  const { pre: Pre = 'pre', code: Code = 'code' } = components as Record<string, FC>;
 
   return (
     <Pre>
@@ -116,14 +106,6 @@ function Placeholder({
   );
 }
 
-function Internal({
-  id,
-  code,
-  options,
-}: {
-  id: string;
-  code: string;
-  options: HighlightOptions;
-}) {
+function Internal({ id, code, options }: { id: string; code: string; options: HighlightOptions }) {
   return useShiki(code, options, [id, options.lang, code]);
 }

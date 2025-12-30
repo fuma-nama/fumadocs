@@ -1,9 +1,7 @@
 'use client';
 import * as React from 'react';
 
-type UseEffectEvent = <F extends (...params: never[]) => unknown>(
-  callback: F,
-) => F;
+type UseEffectEvent = <F extends (...params: never[]) => unknown>(callback: F) => F;
 
 /**
  * Polyfill for React.js 19.2 `useEffectEvent`.
@@ -17,8 +15,5 @@ export const useEffectEvent: UseEffectEvent =
         const ref = React.useRef(callback);
         ref.current = callback;
 
-        return React.useCallback(
-          ((...params) => ref.current(...params)) as F,
-          [],
-        );
+        return React.useCallback(((...params) => ref.current(...params)) as F, []);
       };

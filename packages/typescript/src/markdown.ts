@@ -1,10 +1,7 @@
 import type { ElementContent, Nodes } from 'hast';
 import { remark } from 'remark';
 import { remarkGfm } from 'fumadocs-core/mdx-plugins/remark-gfm';
-import {
-  rehypeCode,
-  type RehypeCodeOptions,
-} from 'fumadocs-core/mdx-plugins/rehype-code';
+import { rehypeCode, type RehypeCodeOptions } from 'fumadocs-core/mdx-plugins/rehype-code';
 import remarkRehype from 'remark-rehype';
 import { getHighlighter } from 'fumadocs-core/highlight';
 
@@ -22,10 +19,7 @@ const shikiOptions = {
   },
 } satisfies RehypeCodeOptions;
 
-const processor = remark()
-  .use(remarkGfm)
-  .use(remarkRehype)
-  .use(rehypeCode, shikiOptions);
+const processor = remark().use(remarkGfm).use(remarkRehype).use(rehypeCode, shikiOptions);
 
 export async function renderTypeToHast(type: string): Promise<Nodes> {
   const highlighter = await getHighlighter('js', {

@@ -23,18 +23,11 @@ export const registry: Registry = {
       const filePath = path.relative(baseDir, ref.file);
 
       if (filePath === 'lib/cn.ts') {
-        return resolveFromRemote(
-          ui.registry,
-          'cn',
-          (file) => file.path === 'cn.ts',
-        )!;
+        return resolveFromRemote(ui.registry, 'cn', (file) => file.path === 'cn.ts')!;
       }
     }
 
-    if (
-      ref.type === 'dependency' &&
-      ref.specifier === 'fumadocs-ui/components/ui/button'
-    ) {
+    if (ref.type === 'dependency' && ref.specifier === 'fumadocs-ui/components/ui/button') {
       return resolveFromRemote(
         radixUi.registry,
         'button',
@@ -74,8 +67,7 @@ export const registry: Registry = {
     {
       name: 'ai/search',
       title: 'AI Search (Next.js Only)',
-      description:
-        'Ask AI dialog for your docs, you need to configure Inkeep first',
+      description: 'Ask AI dialog for your docs, you need to configure Inkeep first',
       files: [
         {
           type: 'components',

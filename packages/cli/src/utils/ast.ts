@@ -10,19 +10,14 @@ import { typescriptExtensions } from '@/constants';
  * // should output './dir/hello'
  * ```
  */
-export function toImportSpecifier(
-  sourceFile: string,
-  referenceFile: string,
-): string {
+export function toImportSpecifier(sourceFile: string, referenceFile: string): string {
   const extname = path.extname(referenceFile);
   const removeExt = typescriptExtensions.includes(extname);
 
   let importPath = path
     .relative(
       path.dirname(sourceFile),
-      removeExt
-        ? referenceFile.substring(0, referenceFile.length - extname.length)
-        : referenceFile,
+      removeExt ? referenceFile.substring(0, referenceFile.length - extname.length) : referenceFile,
     )
     .replaceAll(path.sep, '/');
 

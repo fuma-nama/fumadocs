@@ -91,35 +91,33 @@ export function OauthDialog({
     },
   });
 
-  const authCodeCallback = useQuery(
-    async (code: string, state: AuthCodeState) => {
-      const value = scheme.flows.authorizationCode!;
+  const authCodeCallback = useQuery(async (code: string, state: AuthCodeState) => {
+    const value = scheme.flows.authorizationCode!;
 
-      const res = await fetch(value.tokenUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          grant_type: 'authorization_code',
-          code,
-          // note: `state` could be invalid, but server will check it
-          redirect_uri: state.redirect_uri,
-          client_id: state.client_id,
-          client_secret: state.client_secret,
-        }),
-      });
+    const res = await fetch(value.tokenUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        grant_type: 'authorization_code',
+        code,
+        // note: `state` could be invalid, but server will check it
+        redirect_uri: state.redirect_uri,
+        client_id: state.client_id,
+        client_secret: state.client_secret,
+      }),
+    });
 
-      if (!res.ok) throw new Error(await res.text());
-      const { access_token, token_type = 'Bearer' } = (await res.json()) as {
-        access_token: string;
-        token_type?: string;
-      };
+    if (!res.ok) throw new Error(await res.text());
+    const { access_token, token_type = 'Bearer' } = (await res.json()) as {
+      access_token: string;
+      token_type?: string;
+    };
 
-      setToken(`${token_type} ${access_token}`);
-      setOpen(false);
-    },
-  );
+    setToken(`${token_type} ${access_token}`);
+    setOpen(false);
+  });
 
   useEffect(() => {
     if (scheme.flows.authorizationCode) {
@@ -258,9 +256,7 @@ export function OauthDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Authorization</DialogTitle>
-          <DialogDescription>
-            Obtain the access token for API.
-          </DialogDescription>
+          <DialogDescription>Obtain the access token for API.</DialogDescription>
         </DialogHeader>
         <form
           className="flex flex-col gap-6"
@@ -355,9 +351,7 @@ export function OauthDialog({
               </fieldset>
             </>
           )}
-          {error ? (
-            <p className="text-red-400 font-medium text-sm">{String(error)}</p>
-          ) : null}
+          {error ? <p className="text-red-400 font-medium text-sm">{String(error)}</p> : null}
           <button
             type="submit"
             disabled={isLoading}

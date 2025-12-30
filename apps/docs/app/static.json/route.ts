@@ -28,8 +28,6 @@ export async function GET(): Promise<Response> {
   });
 
   return Response.json(
-    (await Promise.all(promises)).filter(
-      (v) => v !== undefined,
-    ) as OramaDocument[],
+    (await Promise.all(promises)).filter((v) => v !== undefined) as OramaDocument[],
   );
 }

@@ -25,9 +25,7 @@ export interface ReadFilesOptions {
   dir: string;
 }
 
-export async function readVaultFiles(
-  options: ReadFilesOptions,
-): Promise<VaultFile[]> {
+export async function readVaultFiles(options: ReadFilesOptions): Promise<VaultFile[]> {
   const { include = '**/*', dir } = options;
   const paths = await glob(include, { cwd: dir });
 

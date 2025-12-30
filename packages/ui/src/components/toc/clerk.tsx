@@ -35,10 +35,7 @@ export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
         const styles = getComputedStyle(element);
         const offset = getLineOffset(items[i].depth) + 1,
           top = element.offsetTop + parseFloat(styles.paddingTop),
-          bottom =
-            element.offsetTop +
-            element.clientHeight -
-            parseFloat(styles.paddingBottom);
+          bottom = element.offsetTop + element.clientHeight - parseFloat(styles.paddingBottom);
 
         w = Math.max(offset, w);
         h = Math.max(h, bottom);
@@ -92,11 +89,7 @@ export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
           />
         </div>
       )}
-      <div
-        ref={mergeRefs(containerRef, ref)}
-        className={cn('flex flex-col', className)}
-        {...props}
-      >
+      <div ref={mergeRefs(containerRef, ref)} className={cn('flex flex-col', className)} {...props}>
         {items.map((item, i) => (
           <TOCItem
             key={item.url}

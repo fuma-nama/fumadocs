@@ -59,10 +59,7 @@ function extractHeadingTitle(text: string): string {
   return '';
 }
 
-export async function search(
-  query: string,
-  options: MixedbreadOptions,
-): Promise<SortedResult[]> {
+export async function search(query: string, options: MixedbreadOptions): Promise<SortedResult[]> {
   const { client, storeIdentifier, tag } = options;
 
   if (!query.trim()) {
@@ -98,8 +95,7 @@ export async function search(
       },
     ];
 
-    const headingTitle =
-      item.type === 'text' ? extractHeadingTitle(item.text) : '';
+    const headingTitle = item.type === 'text' ? extractHeadingTitle(item.text) : '';
 
     if (headingTitle) {
       slugger.reset();

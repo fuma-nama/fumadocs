@@ -14,10 +14,7 @@ test('get slugs', () => {
 
 test('get slugs: folder groups', () => {
   expect(getSlugs('(nested)/index.mdx')).toStrictEqual([]);
-  expect(getSlugs('folder/(nested)/page.mdx')).toStrictEqual([
-    'folder',
-    'page',
-  ]);
+  expect(getSlugs('folder/(nested)/page.mdx')).toStrictEqual(['folder', 'page']);
 
   expect(() => getSlugs('nested/(page).mdx')).toThrowError();
 });
@@ -66,8 +63,7 @@ test('Nested Directories', async () => {
     './fixtures/page-trees/nested.tree.json',
   );
 
-  expect(result.getPages().map((page) => page.slugs.join('/')))
-    .toMatchInlineSnapshot(`
+  expect(result.getPages().map((page) => page.slugs.join('/'))).toMatchInlineSnapshot(`
       [
         "test",
         "hidden",
@@ -96,9 +92,9 @@ test('Internationalized Routing', async () => {
   await expect(removeUndefined(result.pageTree, true)).toMatchFileSnapshot(
     './fixtures/page-trees/i18n.tree.json',
   );
-  await expect(
-    removeUndefined(result.getLanguages(), true),
-  ).toMatchFileSnapshot('./fixtures/page-trees/i18n.entries.json');
+  await expect(removeUndefined(result.getLanguages(), true)).toMatchFileSnapshot(
+    './fixtures/page-trees/i18n.entries.json',
+  );
 });
 
 test('Internationalized Routing: Hide Prefix', async () => {
@@ -165,8 +161,7 @@ test('Loader: Without meta.json', () => {
     },
   });
 
-  expect(removeUndefined(result.pageTree, true), 'Page Tree')
-    .toMatchInlineSnapshot(`
+  expect(removeUndefined(result.pageTree, true), 'Page Tree').toMatchInlineSnapshot(`
       {
         "$id": "root",
         "children": [
@@ -227,8 +222,7 @@ test('Loader: Rest operator', () => {
     },
   });
 
-  expect(removeUndefined(result.pageTree, true), 'Page Tree')
-    .toMatchInlineSnapshot(`
+  expect(removeUndefined(result.pageTree, true), 'Page Tree').toMatchInlineSnapshot(`
       {
         "$id": "root",
         "children": [
@@ -371,8 +365,7 @@ test('Loader: No duplicate pages when referencing subfolder items and folder', (
   ]);
 
   // Check the page tree structure
-  expect(removeUndefined(result.pageTree, true), 'Page Tree')
-    .toMatchInlineSnapshot(`
+  expect(removeUndefined(result.pageTree, true), 'Page Tree').toMatchInlineSnapshot(`
       {
         "$id": "root",
         "children": [
@@ -457,8 +450,7 @@ test('Loader: Serialize data', async () => {
 
   const prev = JSON.stringify(result.pageTree);
 
-  expect(await result.serializePageTree(result.pageTree))
-    .toMatchInlineSnapshot(`
+  expect(await result.serializePageTree(result.pageTree)).toMatchInlineSnapshot(`
       {
         "$id": "root",
         "children": [

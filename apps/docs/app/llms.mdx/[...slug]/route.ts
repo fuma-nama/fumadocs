@@ -5,10 +5,7 @@ import { notFound } from 'next/navigation';
 
 export const revalidate = false;
 
-export async function GET(
-  _req: NextRequest,
-  { params }: RouteContext<'/llms.mdx/[...slug]'>,
-) {
+export async function GET(_req: NextRequest, { params }: RouteContext<'/llms.mdx/[...slug]'>) {
   const slug = (await params).slug;
   const page = source.getPage(slug);
   if (!page) notFound();

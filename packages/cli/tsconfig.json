@@ -9,11 +9,5 @@
     "module": "ESNext",
     "target": "ES2020"
   },
-  "exclude": [
-    "dist",
-    "node_modules",
-    "test/repo",
-    "test/repo-2",
-    "eslint.config.mjs"
-  ]
+  "exclude": ["dist", "node_modules", "test/repo", "test/repo-2", "eslint.config.mjs"]
 }

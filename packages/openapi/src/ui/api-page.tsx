@@ -17,10 +17,7 @@ import type { APIPageClientOptions } from './client';
 import type { CodeUsageGenerator } from './operation/usage-tabs';
 import { ApiProviderLazy } from './contexts/api.lazy';
 import { Heading } from 'fumadocs-ui/components/heading';
-import {
-  rehypeCode,
-  type RehypeCodeOptions,
-} from 'fumadocs-core/mdx-plugins/rehype-code';
+import { rehypeCode, type RehypeCodeOptions } from 'fumadocs-core/mdx-plugins/rehype-code';
 import { remarkGfm } from 'fumadocs-core/mdx-plugins/remark-gfm';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { remark } from 'remark';
@@ -44,21 +41,15 @@ export interface CreateAPIPageOptions {
    * @param statusCode - status code
    */
   generateTypeScriptSchema?:
-    | ((
-        method: NoReference<MethodInformation>,
-        statusCode: string,
-      ) => Awaitable<string>)
+    | ((method: NoReference<MethodInformation>, statusCode: string) => Awaitable<string>)
     | false;
 
   /**
    * Generate example code usage for endpoints.
    */
-  generateCodeSamples?: (
-    method: MethodInformation,
-  ) => Awaitable<CodeUsageGenerator[]>;
+  generateCodeSamples?: (method: MethodInformation) => Awaitable<CodeUsageGenerator[]>;
 
-  shikiOptions?: Omit<HighlightOptionsCommon, 'lang' | 'components'> &
-    HighlightOptionsThemes;
+  shikiOptions?: Omit<HighlightOptionsCommon, 'lang' | 'components'> & HighlightOptionsThemes;
 
   /**
    * Show full response schema instead of only example response & Typescript definitions.
@@ -76,10 +67,7 @@ export interface CreateAPIPageOptions {
    * Customise page content
    */
   content?: {
-    renderResponseTabs?: (
-      tabs: ResponseTab[],
-      ctx: RenderContext,
-    ) => Awaitable<ReactNode>;
+    renderResponseTabs?: (tabs: ResponseTab[], ctx: RenderContext) => Awaitable<ReactNode>;
 
     renderRequestTabs?: (
       items: ExampleRequestItem[],
@@ -156,10 +144,7 @@ export interface CreateAPIPageOptions {
    * Info UI for JSON schemas
    */
   schemaUI?: {
-    render?: (
-      options: SchemaUIOptions,
-      ctx: RenderContext,
-    ) => Awaitable<ReactNode>;
+    render?: (options: SchemaUIOptions, ctx: RenderContext) => Awaitable<ReactNode>;
 
     /**
      * Show examples under the generated content of JSON schemas.
@@ -334,9 +319,7 @@ async function APIPage({
       operations: operations?.map((item) => {
         const pathItem = dereferenced.paths?.[item.path];
         if (!pathItem)
-          throw new Error(
-            `[Fumadocs OpenAPI] Path not found in OpenAPI schema: ${item.path}`,
-          );
+          throw new Error(`[Fumadocs OpenAPI] Path not found in OpenAPI schema: ${item.path}`);
 
         const operation = pathItem[item.method];
         if (!operation)
@@ -363,9 +346,7 @@ async function APIPage({
       webhooks: webhooks?.map((item) => {
         const webhook = dereferenced.webhooks?.[item.name];
         if (!webhook)
-          throw new Error(
-            `[Fumadocs OpenAPI] Webhook not found in OpenAPI schema: ${item.name}`,
-          );
+          throw new Error(`[Fumadocs OpenAPI] Webhook not found in OpenAPI schema: ${item.name}`);
 
         const hook = webhook[item.method];
         if (!hook)

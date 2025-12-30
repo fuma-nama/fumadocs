@@ -14,8 +14,7 @@ function em(px: number, base: number) {
 }
 
 const colors = {
-  '--tw-prose-body':
-    'color-mix(in oklab, var(--color-fd-foreground) 90%, transparent)',
+  '--tw-prose-body': 'color-mix(in oklab, var(--color-fd-foreground) 90%, transparent)',
   '--tw-prose-headings': 'var(--color-fd-foreground)',
   '--tw-prose-lead': `var(--color-fd-foreground)`,
   '--tw-prose-links': `var(--color-fd-foreground)`,
@@ -357,8 +356,7 @@ export const DEFAULT: Config = {
         fontWeight: '500',
         fontFamily: 'inherit',
         color: 'var(--tw-prose-kbd)',
-        boxShadow:
-          '0 0 0 1px var(--tw-prose-kbd-shadows),0 3px 0 var(--tw-prose-kbd-shadows)',
+        boxShadow: '0 0 0 1px var(--tw-prose-kbd-shadows),0 3px 0 var(--tw-prose-kbd-shadows)',
       },
       code: {
         padding: '3px',

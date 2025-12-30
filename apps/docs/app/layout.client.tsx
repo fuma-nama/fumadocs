@@ -3,24 +3,17 @@
 import { useParams } from 'next/navigation';
 import { type ReactNode, useId } from 'react';
 import { cn } from '@/lib/cn';
+import { getSection } from '@/lib/source/navigation';
 
-export function Body({
-  children,
-}: {
-  children: ReactNode;
-}): React.ReactElement {
+export function Body({ children }: { children: ReactNode }): React.ReactElement {
   const mode = useMode();
 
-  return (
-    <body className={cn(mode, 'relative flex min-h-screen flex-col')}>
-      {children}
-    </body>
-  );
+  return <body className={cn(mode, 'relative flex min-h-screen flex-col')}>{children}</body>;
 }
 
 export function useMode(): string | undefined {
-  const { slug } = useParams();
-  return Array.isArray(slug) && slug.length > 0 ? slug[0] : undefined;
+  const { slug = [] } = useParams();
+  if (Array.isArray(slug)) return getSection(slug[0]);
 }
 
 export function FumadocsIcon(props: React.SVGProps<SVGSVGElement>) {
@@ -36,10 +29,7 @@ export function FumadocsIcon(props: React.SVGProps<SVGSVGElement>) {
         strokeWidth="1"
       />
       <defs>
-        <linearGradient
-          id={`${id}-iconGradient`}
-          gradientTransform="rotate(45)"
-        >
+        <linearGradient id={`${id}-iconGradient`} gradientTransform="rotate(45)">
           <stop offset="45%" stopColor="var(--color-fd-background)" />
           <stop offset="100%" stopColor="var(--color-fd-primary)" />
         </linearGradient>

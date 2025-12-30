@@ -12,24 +12,16 @@ export function createFileSystemGeneratorCache(dir: string): Cache {
 
   return {
     async write(input, data) {
-      const hash = createHash('SHA256')
-        .update(input)
-        .digest('hex')
-        .slice(0, 12);
+      const hash = createHash('SHA256').update(input).digest('hex').slice(0, 12);
 
       await initDirPromise;
       await fs.writeFile(path.join(dir, `${hash}.json`), JSON.stringify(data));
     },
     async read(input) {
-      const hash = createHash('SHA256')
-        .update(input)
-        .digest('hex')
-        .slice(0, 12);
+      const hash = createHash('SHA256').update(input).digest('hex').slice(0, 12);
 
       try {
-        return JSON.parse(
-          (await fs.readFile(path.join(dir, `${hash}.json`))).toString(),
-        );
+        return JSON.parse((await fs.readFile(path.join(dir, `${hash}.json`))).toString());
       } catch {
         return;
       }

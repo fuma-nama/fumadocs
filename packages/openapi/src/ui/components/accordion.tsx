@@ -6,12 +6,7 @@ import type { ComponentProps } from 'react';
 import { cn } from '@/utils/cn';
 
 export function Accordions(props: ComponentProps<typeof Primitive.Root>) {
-  return (
-    <Primitive.Root
-      {...props}
-      className={cn('divide-y divide-fd-border', props.className)}
-    />
-  );
+  return <Primitive.Root {...props} className={cn('divide-y divide-fd-border', props.className)} />;
 }
 
 export function AccordionItem(props: ComponentProps<typeof Primitive.Item>) {
@@ -22,9 +17,7 @@ export function AccordionItem(props: ComponentProps<typeof Primitive.Item>) {
   );
 }
 
-export function AccordionContent(
-  props: ComponentProps<typeof Primitive.Content>,
-) {
+export function AccordionContent(props: ComponentProps<typeof Primitive.Content>) {
   return (
     <Primitive.Content
       {...props}
@@ -38,25 +31,18 @@ export function AccordionContent(
   );
 }
 
-export function AccordionHeader(
-  props: ComponentProps<typeof Primitive.Header>,
-) {
+export function AccordionHeader(props: ComponentProps<typeof Primitive.Header>) {
   return (
     <Primitive.Header
       {...props}
-      className={cn(
-        'not-prose flex py-2 text-fd-foreground font-medium',
-        props.className,
-      )}
+      className={cn('not-prose flex py-2 text-fd-foreground font-medium', props.className)}
     >
       {props.children}
     </Primitive.Header>
   );
 }
 
-export function AccordionTrigger(
-  props: ComponentProps<typeof Primitive.Trigger>,
-) {
+export function AccordionTrigger(props: ComponentProps<typeof Primitive.Trigger>) {
   return (
     <Primitive.Trigger
       {...props}

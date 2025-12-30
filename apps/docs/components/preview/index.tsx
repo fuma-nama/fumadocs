@@ -55,11 +55,7 @@ export function tabs(): ReactNode {
   return (
     <Wrapper>
       <div className="prose-no-margin">
-        <Tabs
-          groupId="language"
-          persist
-          items={['Javascript', 'Rust', 'Typescript']}
-        >
+        <Tabs groupId="language" persist items={['Javascript', 'Rust', 'Typescript']}>
           <Tab value="Javascript">Hello World in Javascript</Tab>
           <Tab value="Rust">Hello World in Rust</Tab>
           <Tab value="Typescript">Also works if items are not the same</Tab>
@@ -69,9 +65,7 @@ export function tabs(): ReactNode {
           <Tab value="Javascript">
             Value is shared! Try refresh and see if the value is persisted
           </Tab>
-          <Tab value="Rust">
-            Value is shared! Try refresh and see if the value is persisted
-          </Tab>
+          <Tab value="Rust">Value is shared! Try refresh and see if the value is persisted</Tab>
         </Tabs>
       </div>
     </Wrapper>
@@ -85,8 +79,7 @@ export function typeTable(): ReactNode {
         <TypeTable
           type={{
             percentage: {
-              description:
-                'The percentage of scroll position to display the roll button',
+              description: 'The percentage of scroll position to display the roll button',
               type: 'number',
               default: '0.2',
             },
@@ -215,12 +208,7 @@ export function banner(): ReactNode {
           Be careful, Fumadocs v99 has released
         </Banner>
 
-        <Banner
-          id="test-rainbow"
-          className="z-0"
-          variant="rainbow"
-          changeLayout={false}
-        >
+        <Banner id="test-rainbow" className="z-0" variant="rainbow" changeLayout={false}>
           Using the <code>rainbow</code> variant
         </Banner>
 

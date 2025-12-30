@@ -3,11 +3,7 @@ import path from 'node:path';
 import { stash } from '@/utils/stash';
 import { slug } from 'github-slugger';
 
-export function getFileHref(
-  ref: ParsedFile,
-  sourceFile: ParsedFile,
-  heading?: string,
-) {
+export function getFileHref(ref: ParsedFile, sourceFile: ParsedFile, heading?: string) {
   if (ref.format === 'media' && ref.url) return ref.url;
 
   const dir = path.dirname(sourceFile.outPath);

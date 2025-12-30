@@ -1,9 +1,3 @@
 {
-  "pages": [
-    "---API Documentation---",
-    "index",
-    "...",
-    "---References---",
-    "...(api)"
-  ]
+  "pages": ["---API Documentation---", "index", "...", "---References---", "...(api)"]
 }

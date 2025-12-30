@@ -86,9 +86,7 @@ export function ApiProvider({
         [servers, client, shikiOptions],
       )}
     >
-      <ServerSelectProvider defaultBaseUrl={defaultBaseUrl}>
-        {children}
-      </ServerSelectProvider>
+      <ServerSelectProvider defaultBaseUrl={defaultBaseUrl}>{children}</ServerSelectProvider>
     </ApiContext>
   );
 }
@@ -139,10 +137,7 @@ function ServerSelectProvider({
               if (!prev) return null;
 
               const updated = { ...prev, variables };
-              localStorage.setItem(
-                storageKeys.of('server-url'),
-                JSON.stringify(updated),
-              );
+              localStorage.setItem(storageKeys.of('server-url'), JSON.stringify(updated));
               return updated;
             });
           },
@@ -155,10 +150,7 @@ function ServerSelectProvider({
               variables: getDefaultValues(obj),
             };
 
-            localStorage.setItem(
-              storageKeys.of('server-url'),
-              JSON.stringify(result),
-            );
+            localStorage.setItem(storageKeys.of('server-url'), JSON.stringify(result));
             setServer(result);
           },
         }),
@@ -170,9 +162,7 @@ function ServerSelectProvider({
   );
 }
 
-function getDefaultValues(
-  server: NoReference<ServerObject>,
-): Record<string, string> {
+function getDefaultValues(server: NoReference<ServerObject>): Record<string, string> {
   const out: Record<string, string> = {};
   if (!server.variables) return out;
 

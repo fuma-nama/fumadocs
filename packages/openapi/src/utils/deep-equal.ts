@@ -32,9 +32,6 @@ export function deepEqual(a: unknown, b: unknown): boolean {
   return keysA.every(
     (key) =>
       Object.prototype.hasOwnProperty.call(b, key) &&
-      deepEqual(
-        (a as Record<string, unknown>)[key],
-        (b as Record<string, unknown>)[key],
-      ),
+      deepEqual((a as Record<string, unknown>)[key], (b as Record<string, unknown>)[key]),
   );
 }

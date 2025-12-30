@@ -20,9 +20,7 @@ export type MDXRuntimePresetOptions = Omit<
 /**
  * apply MDX processor presets
  */
-export async function mdxPreset(
-  options: MDXRuntimePresetOptions = {},
-): Promise<ProcessorOptions> {
+export async function mdxPreset(options: MDXRuntimePresetOptions = {}): Promise<ProcessorOptions> {
   const {
     rehypeCodeOptions,
     remarkImageOptions,
@@ -45,20 +43,14 @@ export async function mdxPreset(
         },
       ]),
       remarkImageOptions !== false &&
-        import('@/mdx-plugins/remark-image').then((mod) => [
-          mod.remarkImage,
-          remarkImageOptions,
-        ]),
+        import('@/mdx-plugins/remark-image').then((mod) => [mod.remarkImage, remarkImageOptions]),
       remarkCodeTabOptions !== false &&
         import('@/mdx-plugins/remark-code-tab').then((mod) => [
           mod.remarkCodeTab,
           remarkCodeTabOptions,
         ]),
       remarkNpmOptions !== false &&
-        import('@/mdx-plugins/remark-npm').then((mod) => [
-          mod.remarkNpm,
-          remarkNpmOptions,
-        ]),
+        import('@/mdx-plugins/remark-npm').then((mod) => [mod.remarkNpm, remarkNpmOptions]),
       ...v,
       remarkStructureOptions !== false &&
         import('@/mdx-plugins/remark-structure').then((mod) => [
@@ -75,10 +67,7 @@ export async function mdxPreset(
   const rehypePlugins = await resolvePlugins(
     (v) => [
       rehypeCodeOptions !== false &&
-        import('@/mdx-plugins/rehype-code').then((mod) => [
-          mod.rehypeCode,
-          rehypeCodeOptions,
-        ]),
+        import('@/mdx-plugins/rehype-code').then((mod) => [mod.rehypeCode, rehypeCodeOptions]),
       ...v,
       import('@/mdx-plugins/rehype-toc').then((mod) => mod.rehypeToc),
     ],

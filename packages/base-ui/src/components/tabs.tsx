@@ -113,9 +113,7 @@ export function Tabs({
     >
       {items && (
         <TabsList>
-          {label && (
-            <span className="text-sm font-medium my-auto me-auto">{label}</span>
-          )}
+          {label && <span className="text-sm font-medium my-auto me-auto">{label}</span>}
           {items.map((item) => (
             <TabsTrigger key={item} value={escapeValue(item)}>
               {item}
@@ -123,19 +121,14 @@ export function Tabs({
           ))}
         </TabsList>
       )}
-      <TabsContext.Provider
-        value={useMemo(() => ({ items, collection }), [collection, items])}
-      >
+      <TabsContext.Provider value={useMemo(() => ({ items, collection }), [collection, items])}>
         {props.children}
       </TabsContext.Provider>
     </Unstyled.Tabs>
   );
 }
 
-export interface TabProps extends Omit<
-  ComponentProps<typeof Unstyled.TabsContent>,
-  'value'
-> {
+export interface TabProps extends Omit<ComponentProps<typeof Unstyled.TabsContent>, 'value'> {
   /**
    * Value of tab, detect from index if unspecified.
    */

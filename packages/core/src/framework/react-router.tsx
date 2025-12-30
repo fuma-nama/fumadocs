@@ -1,12 +1,6 @@
 import { type ReactNode, useMemo } from 'react';
 import { type Framework, FrameworkProvider } from '@/framework/index';
-import {
-  Link,
-  useLocation,
-  useNavigate,
-  useParams,
-  useRevalidator,
-} from 'react-router';
+import { Link, useLocation, useNavigate, useParams, useRevalidator } from 'react-router';
 
 const framework: Framework = {
   usePathname() {

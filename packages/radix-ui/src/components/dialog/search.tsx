@@ -16,16 +16,8 @@ import {
 } from 'react';
 import { I18nLabel, useI18n } from '@/contexts/i18n';
 import { cn } from '@fumadocs/ui/cn';
-import {
-  Dialog,
-  DialogContent,
-  DialogOverlay,
-  DialogTitle,
-} from '@radix-ui/react-dialog';
-import type {
-  HighlightedText,
-  ReactSortedResult as BaseResultType,
-} from 'fumadocs-core/search';
+import { Dialog, DialogContent, DialogOverlay, DialogTitle } from '@radix-ui/react-dialog';
+import type { HighlightedText, ReactSortedResult as BaseResultType } from 'fumadocs-core/search';
 import { cva } from 'class-variance-authority';
 import { useRouter } from 'fumadocs-core/framework';
 import type { SharedProps } from '@/contexts/search';
@@ -122,12 +114,7 @@ export function SearchDialog({
 }
 
 export function SearchDialogHeader(props: ComponentProps<'div'>) {
-  return (
-    <div
-      {...props}
-      className={cn('flex flex-row items-center gap-2 p-3', props.className)}
-    />
-  );
+  return <div {...props} className={cn('flex flex-row items-center gap-2 p-3', props.className)} />;
 }
 
 export function SearchDialogInput(props: ComponentProps<'input'>) {
@@ -172,17 +159,10 @@ export function SearchDialogClose({
 }
 
 export function SearchDialogFooter(props: ComponentProps<'div'>) {
-  return (
-    <div
-      {...props}
-      className={cn('bg-fd-secondary/50 p-3 empty:hidden', props.className)}
-    />
-  );
+  return <div {...props} className={cn('bg-fd-secondary/50 p-3 empty:hidden', props.className)} />;
 }
 
-export function SearchDialogOverlay(
-  props: ComponentProps<typeof DialogOverlay>,
-) {
+export function SearchDialogOverlay(props: ComponentProps<typeof DialogOverlay>) {
   return (
     <DialogOverlay
       {...props}
@@ -194,10 +174,7 @@ export function SearchDialogOverlay(
   );
 }
 
-export function SearchDialogContent({
-  children,
-  ...props
-}: ComponentProps<typeof DialogContent>) {
+export function SearchDialogContent({ children, ...props }: ComponentProps<typeof DialogContent>) {
   const { text } = useI18n();
 
   return (
@@ -270,10 +247,7 @@ export function SearchDialogList({
     const observer = new ResizeObserver(() => {
       const viewport = element.firstElementChild!;
 
-      element.style.setProperty(
-        '--fd-animated-height',
-        `${viewport.clientHeight}px`,
-      );
+      element.style.setProperty('--fd-animated-height', `${viewport.clientHeight}px`);
     });
 
     const viewport = element.firstElementChild;
@@ -303,10 +277,7 @@ export function SearchDialogList({
       )}
     >
       <div
-        className={cn(
-          'w-full flex flex-col overflow-y-auto max-h-[460px] p-1',
-          !items && 'hidden',
-        )}
+        className={cn('w-full flex flex-col overflow-y-auto max-h-[460px] p-1', !items && 'hidden')}
       >
         <ListContext.Provider
           value={useMemo(
@@ -320,9 +291,7 @@ export function SearchDialogList({
           {items?.length === 0 && Empty()}
 
           {items?.map((item) => (
-            <Fragment key={item.id}>
-              {Item({ item, onClick: () => onSelect(item) })}
-            </Fragment>
+            <Fragment key={item.id}>{Item({ item, onClick: () => onSelect(item) })}</Fragment>
           ))}
         </ListContext.Provider>
       </div>
@@ -358,10 +327,7 @@ export function SearchDialogListItem({
         </div>
 
         {item.type !== 'page' && (
-          <div
-            role="none"
-            className="absolute start-3 inset-y-0 w-px bg-fd-border"
-          />
+          <div role="none" className="absolute start-3 inset-y-0 w-px bg-fd-border" />
         )}
         <p
           className={cn(
@@ -375,9 +341,7 @@ export function SearchDialogListItem({
           {item.type === 'heading' && (
             <Hash className="inline me-1 size-4 text-fd-muted-foreground" />
           )}
-          {item.contentWithHighlights
-            ? render(item.contentWithHighlights)
-            : item.content}
+          {item.contentWithHighlights ? render(item.contentWithHighlights) : item.content}
         </p>
       </>
     );
@@ -444,17 +408,9 @@ const itemVariants = cva(
   },
 );
 
-export function TagsList({
-  tag,
-  onTagChange,
-  allowClear = false,
-  ...props
-}: TagsListProps) {
+export function TagsList({ tag, onTagChange, allowClear = false, ...props }: TagsListProps) {
   return (
-    <div
-      {...props}
-      className={cn('flex items-center gap-1 flex-wrap', props.className)}
-    >
+    <div {...props} className={cn('flex items-center gap-1 flex-wrap', props.className)}>
       <TagsListContext.Provider
         value={useMemo(
           () => ({

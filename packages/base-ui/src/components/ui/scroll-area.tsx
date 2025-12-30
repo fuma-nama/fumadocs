@@ -9,10 +9,7 @@ const ScrollArea = React.forwardRef<
   <Primitive.Root
     ref={ref}
     className={(s) =>
-      cn(
-        'overflow-hidden',
-        typeof className === 'function' ? className(s) : className,
-      )
+      cn('overflow-hidden', typeof className === 'function' ? className(s) : className)
     }
     {...props}
   >
@@ -31,10 +28,7 @@ const ScrollViewport = React.forwardRef<
   <Primitive.Viewport
     ref={ref}
     className={(s) =>
-      cn(
-        'size-full rounded-[inherit]',
-        typeof className === 'function' ? className(s) : className,
-      )
+      cn('size-full rounded-[inherit]', typeof className === 'function' ? className(s) : className)
     }
     {...props}
   >

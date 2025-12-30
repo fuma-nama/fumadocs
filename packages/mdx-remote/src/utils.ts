@@ -7,9 +7,7 @@ export function pluginOption(
   def: (v: Pluggable[]) => (Pluggable | false | null)[],
   options: ResolvePlugins = [],
 ): Pluggable[] {
-  const list = def(Array.isArray(options) ? options : []).filter(
-    Boolean,
-  ) as Pluggable[];
+  const list = def(Array.isArray(options) ? options : []).filter(Boolean) as Pluggable[];
 
   if (typeof options === 'function') {
     return options(list);

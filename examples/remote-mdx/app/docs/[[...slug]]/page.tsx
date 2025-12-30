@@ -1,10 +1,5 @@
 import type { Metadata } from 'next';
-import {
-  DocsBody,
-  DocsDescription,
-  DocsPage,
-  DocsTitle,
-} from 'fumadocs-ui/layouts/docs/page';
+import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
 import { notFound } from 'next/navigation';
 import defaultComponents from 'fumadocs-ui/mdx';
 import { createCompiler, parseFrontmatter } from '@fumadocs/mdx-remote';
@@ -12,9 +7,7 @@ import { type Frontmatter, getPage, getPages } from '@/app/docs/utils';
 
 const compiler = createCompiler();
 
-export default async function Page(props: {
-  params: Promise<{ slug?: string[] }>;
-}) {
+export default async function Page(props: { params: Promise<{ slug?: string[] }> }) {
   const params = await props.params;
   const page = await getPage(params.slug);
   if (!page) notFound();

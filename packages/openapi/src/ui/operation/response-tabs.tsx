@@ -76,8 +76,7 @@ export function ResponseTabs({
       tab.examples ??= [];
       tab.examples.push({
         label: 'Example',
-        sample:
-          responseOfType.example ?? sample(responseOfType.schema as object),
+        sample: responseOfType.example ?? sample(responseOfType.schema as object),
       });
     }
 
@@ -107,11 +106,7 @@ function renderResponseTabsDefault(
     let slot: ReactNode = 'Empty';
     if (examples.length > 1) {
       slot = (
-        <Accordions
-          type="single"
-          className="pt-2"
-          defaultValue={examples[0].label}
-        >
+        <Accordions type="single" className="pt-2" defaultValue={examples[0].label}>
           {examples.map((example, i) => (
             <AccordionItem key={i} value={example.label}>
               <AccordionHeader>
@@ -134,10 +129,7 @@ function renderResponseTabsDefault(
   if (tabs.length === 0) return null;
 
   return (
-    <Tabs
-      groupId="fumadocs_openapi_responses"
-      items={tabs.map((tab) => tab.code)}
-    >
+    <Tabs groupId="fumadocs_openapi_responses" items={tabs.map((tab) => tab.code)}>
       {tabs.map(renderResponse)}
     </Tabs>
   );

@@ -1,11 +1,5 @@
 'use client';
-import {
-  type MouseEventHandler,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { type MouseEventHandler, useCallback, useEffect, useRef, useState } from 'react';
 
 export function useCopyButton(
   onCopy: () => void | Promise<void>,

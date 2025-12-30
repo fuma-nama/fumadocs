@@ -2,10 +2,7 @@ import type { Processor, Transformer } from 'unified';
 import type { BlockContent, Code, DefinitionContent, Root } from 'mdast';
 import { visit } from 'unist-util-visit';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
-import {
-  generateCodeBlockTabs,
-  parseCodeBlockAttributes,
-} from '@/mdx-plugins/codeblock-utils';
+import { generateCodeBlockTabs, parseCodeBlockAttributes } from '@/mdx-plugins/codeblock-utils';
 
 type TabType = keyof typeof Types;
 export interface RemarkCodeTabOptions {
@@ -193,20 +190,14 @@ export function remarkCodeTab(
       let localParseMdx = parseMdx;
       let withParent = true;
 
-      if (
-        node.type === 'mdxJsxFlowElement' &&
-        node.name &&
-        node.name in Types
-      ) {
+      if (node.type === 'mdxJsxFlowElement' && node.name && node.name in Types) {
         withParent = false;
         localTabs = node.name as TabType;
 
         // for `Tabs` in simple mode, it doesn't support MDX tab names
         if (node.name === 'Tabs' && localParseMdx) {
           localParseMdx = node.attributes.every(
-            (attribute) =>
-              attribute.type !== 'mdxJsxAttribute' ||
-              attribute.name !== 'items',
+            (attribute) => attribute.type !== 'mdxJsxAttribute' || attribute.name !== 'items',
           );
         }
       }
@@ -282,9 +273,7 @@ function mdxToAst(processor: Processor, name: string) {
   return node;
 }
 
-function createFragment(
-  children: (BlockContent | DefinitionContent)[],
-): MdxJsxFlowElement {
+function createFragment(children: (BlockContent | DefinitionContent)[]): MdxJsxFlowElement {
   return {
     type: 'mdxJsxFlowElement',
     name: null,
