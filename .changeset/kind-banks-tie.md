@@ -1,5 +1,5 @@
 ---
-"fumadocs-core": patch
+'fumadocs-core': patch
 ---
 
 Support `findSiblings()` page tree utility

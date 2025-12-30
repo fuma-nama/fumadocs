@@ -4,8 +4,8 @@ description: Integrate Algolia Search with Fumadocs
 ---
 
 <Callout title="Notice">
-  If you're using Algolia's free tier, you have to [display their logo on your
-  search dialog](https://algolia.com/policies/free-services-terms).
+  If you're using Algolia's free tier, you have to [display their logo on your search
+  dialog](https://algolia.com/policies/free-services-terms).
 </Callout>
 
 ## Setup
@@ -94,7 +94,7 @@ You may manually upload search indexes with the script, or integrate it with you
 
 You can consider different options for implementing the UI:
 
-- Using [Fumadocs UI search dialog](/docs/ui/search/algolia).
+- Using [Fumadocs UI search dialog](/docs/search/algolia).
 - Build your own using the built-in search client hook:
 
   ```ts twoslash
@@ -143,7 +143,7 @@ export async function exportSearchIndexes() {
 
 And update your search client:
 
-- **Fumadocs UI**: Enable [Tag Filter](/docs/ui/search/algolia#tag-filter) on Search UI.
+- **Fumadocs UI**: Enable [Tag Filter](/docs/search/algolia#tag-filter) on Search UI.
 - **Search Client**: You can add the tag filter like:
 
   ```ts

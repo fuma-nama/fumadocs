@@ -1,0 +1,38 @@
+---
+title: Inline TOC
+description: Add Inline TOC into your documentation
+preview: inlineTOC
+---
+
+<Installation name="inline-toc" />
+
+## Usage
+
+You can use it in your MDX content:
+
+```mdx title="content.mdx"
+import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
+
+<InlineTOC items={toc}>Table of Contents</InlineTOC>
+```
+
+Or adding it to every page.
+
+```tsx title="page.tsx"
+import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
+import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
+
+export default function Page() {
+  // ...
+  return (
+    <DocsPage>
+      {/* [!code ++] */}
+      <InlineTOC items={page.data.toc}>Table of Contents</InlineTOC>
+    </DocsPage>
+  );
+}
+```
+
+## Reference
+
+<auto-type-table cwd path="content/docs/ui/props.ts" name="InlineTOCProps" />

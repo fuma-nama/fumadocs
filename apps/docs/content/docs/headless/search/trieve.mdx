@@ -26,8 +26,8 @@ Sign up and create a dataset. Then obtain 2 API keys where one has only read acc
 Store these credentials in environment variables.
 
 <Callout title="Notice">
-  One API Key should have only read access for the public facing search and the
-  other should have admin access to create and delete chunks.
+  One API Key should have only read access for the public facing search and the other should have
+  admin access to create and delete chunks.
 </Callout>
 
 ### Sync Dataset
@@ -203,9 +203,5 @@ const client = new TrieveSDK({
   datasetId: 'datasetId',
 });
 
-const { search, setSearch, query } = useTrieveSearch(
-  client,
-  undefined,
-  '<your tag value>',
-);
+const { search, setSearch, query } = useTrieveSearch(client, undefined, '<your tag value>');
 ```

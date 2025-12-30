@@ -18,8 +18,7 @@ Unserializable data such as functions can't be passed to page tree.
 
 ## Conventions
 
-The type definitions of page tree, for people who want to hardcode/generate it.
-You can also import the type from Fumadocs.
+You can import the type definitions of page tree, useful if you want to hardcode or generate it.
 
 ```ts
 import type * as PageTree from 'fumadocs-core/page-tree';
@@ -39,6 +38,8 @@ The initial root of page trees.
 
 ### Page
 
+A node representing link.
+
 ```json
 {
   "type": "page",
@@ -52,6 +53,8 @@ The initial root of page trees.
 <auto-type-table path="props.ts" name="PageTreeItem" />
 
 ### Folder
+
+A node containing multiple children nodes.
 
 ```json
 {

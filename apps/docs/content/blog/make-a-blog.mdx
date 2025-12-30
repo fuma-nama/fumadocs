@@ -98,9 +98,7 @@ import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { blog } from '@/lib/source';
 
-export default async function Page(props: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function Page(props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   const page = blog.getPage([params.slug]);
 
@@ -126,9 +124,7 @@ export default async function Page(props: {
           </div>
           <div>
             <p className="mb-1 text-sm text-fd-muted-foreground">At</p>
-            <p className="font-medium">
-              {new Date(page.data.date).toDateString()}
-            </p>
+            <p className="font-medium">{new Date(page.data.date).toDateString()}</p>
           </div>
         </div>
       </article>
@@ -149,9 +145,7 @@ And configure metadata:
 import { notFound } from 'next/navigation';
 import { blog } from '@/lib/source';
 
-export async function generateMetadata(props: {
-  params: Promise<{ slug: string }>;
-}) {
+export async function generateMetadata(props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   const page = blog.getPage([params.slug]);
 

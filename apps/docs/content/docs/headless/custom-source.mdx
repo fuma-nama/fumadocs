@@ -152,11 +152,7 @@ const compiler = createCompiler({
   // options
 });
 
-export default async function Page({
-  params,
-}: {
-  params: { slug?: string[] };
-}) {
+export default async function Page({ params }: { params: { slug?: string[] } }) {
   const page = getPage(params.slug);
   const compiled = await compiler.compile({
     source: page.content,

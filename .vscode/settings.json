@@ -11,5 +11,6 @@
   "files.associations": {
     "**/packages/create-app/template/**/*": "plaintext"
   },
+  "prettier.enable": false,
   "editor.defaultFormatter": "oxc.oxc-vscode"
 }

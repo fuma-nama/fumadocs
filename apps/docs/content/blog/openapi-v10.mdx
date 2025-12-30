@@ -160,18 +160,11 @@ export const APIPage = createAPIPage(openapi, {
       <div>{/* custom layout */}</div>
     ),
     renderAPIExampleUsageTabs: (generators) => <div>{/* custom tabs */}</div>,
-    renderPageLayout: ({ operations, webhooks }) => (
-      <div>{/* custom page */}</div>
-    ),
+    renderPageLayout: ({ operations, webhooks }) => <div>{/* custom page */}</div>,
     renderOperationLayout: (slots) => <div>{/* custom operation */}</div>,
-    renderWebhookLayout: ({
-      header,
-      authSchemes,
-      parameters,
-      body,
-      responses,
-      callbacks,
-    }) => <div>{/* custom webhook */}</div>,
+    renderWebhookLayout: ({ header, authSchemes, parameters, body, responses, callbacks }) => (
+      <div>{/* custom webhook */}</div>
+    ),
   },
 });
 ```

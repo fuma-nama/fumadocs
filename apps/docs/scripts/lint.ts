@@ -15,7 +15,7 @@ async function checkLinks() {
           hashes: await getHeadings(page),
         })),
       ),
-      'docs/[...slug]': await Promise.all(
+      'docs/[[...slug]]': await Promise.all(
         source.getPages().map(async (page) => {
           return {
             value: {

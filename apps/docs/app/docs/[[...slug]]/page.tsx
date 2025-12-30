@@ -12,7 +12,7 @@ import { Feedback } from '@/components/feedback';
 import { onRateAction, owner, repo } from '@/lib/github';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import Link from 'fumadocs-core/link';
-import { getPageTreePeers } from 'fumadocs-core/page-tree';
+import { findSiblings } from 'fumadocs-core/page-tree';
 import { Card, Cards } from 'fumadocs-ui/components/card';
 import { getMDXComponents } from '@/mdx-components';
 import { LLMCopyButton, ViewOptions } from '@/components/ai/page-actions';
@@ -127,11 +127,19 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
 function DocsCategory({ url }: { url: string }) {
   return (
     <Cards>
-      {getPageTreePeers(source.pageTree, url).map((peer) => (
-        <Card key={peer.url} title={peer.name} href={peer.url}>
-          {peer.description}
-        </Card>
-      ))}
+      {findSiblings(source.pageTree, url).map((item) => {
+        if (item.type === 'separator') return;
+        if (item.type === 'folder') {
+          if (!item.index) return;
+          item = item.index;
+        }
+
+        return (
+          <Card key={item.url} title={item.name} href={item.url}>
+            {item.description}
+          </Card>
+        );
+      })}
     </Cards>
   );
 }

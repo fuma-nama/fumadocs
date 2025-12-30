@@ -88,7 +88,7 @@ export function findSiblings(
     const parent = findParent(tree, url);
     if (!parent) return [];
 
-    return parent.children;
+    return parent.children.filter((item) => item.type !== 'page' || item.url !== url);
   }
 
   // Multiple trees case

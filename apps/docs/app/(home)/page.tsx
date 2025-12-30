@@ -76,7 +76,7 @@ export default function Page() {
             your <span className="text-brand">style</span>.
           </h1>
           <div className="flex flex-row items-center justify-center gap-4 flex-wrap w-fit">
-            <Link href="/docs/ui" className={cn(buttonVariants(), 'max-sm:text-sm')}>
+            <Link href="/docs" className={cn(buttonVariants(), 'max-sm:text-sm')}>
               Getting Started
             </Link>
             <a
@@ -716,7 +716,7 @@ function OpenSource() {
           </span>
         </li>
         <li className="flex flex-row flex-wrap gap-2 mt-auto">
-          <Link href="/docs/ui" className={cn(buttonVariants())}>
+          <Link href="/docs" className={cn(buttonVariants())}>
             Read docs
           </Link>
           <a

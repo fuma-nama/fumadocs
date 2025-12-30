@@ -1,6 +1,7 @@
 {
   "$schema": "./node_modules/oxfmt/configuration_schema.json",
   "singleQuote": true,
+  "embeddedLanguageFormatting": "auto",
   "ignorePatterns": [
     "CHANGELOG.md",
     "pnpm-lock.yaml",
