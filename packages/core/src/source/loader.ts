@@ -4,12 +4,12 @@ import { buildContentStorage, type ContentStorage } from './storage/content';
 import { createPageTreeBuilder, type PageTreeOptions } from '@/source/page-tree/builder';
 import { joinPath } from './path';
 import { normalizeUrl } from '@/utils/normalize-url';
-import { buildPlugins, type LoaderPlugin, type LoaderPluginOption } from '@/source/plugins';
-import { slugsPlugin } from '@/source/plugins/slugs';
+import { SlugFn, slugsPlugin } from '@/source/plugins/slugs';
 import { iconPlugin, type IconResolver } from '@/source/plugins/icon';
 import type { MetaData, PageData, Source, SourceConfig } from './source';
 import { visit } from '@/page-tree/utils';
 import path from 'node:path';
+import type { PageTreeTransformer } from '@/source/page-tree/builder';
 
 export interface LoaderConfig {
   source: SourceConfig;
@@ -32,7 +32,7 @@ export interface LoaderOptions<C extends LoaderConfig = LoaderConfig> {
         typedPlugin: (plugin: LoaderPlugin<C>) => LoaderPlugin;
       }) => LoaderPluginOption[]);
   icon?: IconResolver;
-  slugs?: (info: { path: string }) => string[];
+  slugs?: SlugFn<C>;
 }
 
 export interface ResolvedLoaderConfig {
@@ -418,13 +418,13 @@ function resolveConfig(
     url: url ? (...args) => normalizeUrl(url(...args)) : createGetUrl(baseUrl, base.i18n),
     source,
     plugins: buildPlugins([
-      slugsPlugin(slugs),
       icon && iconPlugin(icon),
       ...(typeof plugins === 'function'
         ? plugins({
             typedPlugin: (plugin) => plugin as unknown as LoaderPlugin,
           })
         : plugins),
+      slugsPlugin(slugs),
     ]),
   };
 
@@ -434,6 +434,58 @@ function resolveConfig(
   }
 
   return config;
+}
+
+export interface LoaderPlugin<Config extends LoaderConfig = LoaderConfig> {
+  name?: string;
+
+  /**
+   * Change the order of plugin:
+   * - `pre`: before normal plugins
+   * - `post`: after normal plugins
+   */
+  enforce?: 'pre' | 'post';
+
+  /**
+   * receive & replace loader options
+   */
+  config?: (config: ResolvedLoaderConfig) => ResolvedLoaderConfig | void | undefined;
+
+  /**
+   * transform the storage after loading
+   */
+  transformStorage?: (context: { storage: ContentStorage<Config['source']> }) => void;
+
+  /**
+   * transform the generated page tree
+   */
+  transformPageTree?: PageTreeTransformer<Config['source']>;
+}
+
+export type LoaderPluginOption<Config extends LoaderConfig = LoaderConfig> =
+  | LoaderPlugin<Config>
+  | LoaderPluginOption<Config>[]
+  | undefined;
+
+const priorityMap = {
+  pre: 1,
+  default: 0,
+  post: -1,
+};
+
+function buildPlugins(plugins: LoaderPluginOption[], sort = true): LoaderPlugin[] {
+  const flatten: LoaderPlugin[] = [];
+
+  for (const plugin of plugins) {
+    if (Array.isArray(plugin)) flatten.push(...buildPlugins(plugin, false));
+    else if (plugin) flatten.push(plugin);
+  }
+
+  if (sort)
+    return flatten.sort(
+      (a, b) => priorityMap[b.enforce ?? 'default'] - priorityMap[a.enforce ?? 'default'],
+    );
+  return flatten;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- infer types

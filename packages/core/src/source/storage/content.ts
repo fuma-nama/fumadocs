@@ -8,21 +8,25 @@ export type ContentStorage<Config extends SourceConfig = SourceConfig> = FileSys
 >;
 
 export type ContentStorageFile<Config extends SourceConfig = SourceConfig> =
-  | {
-      path: string;
-      absolutePath?: string;
+  | ContentStorageMetaFile<Config>
+  | ContentStoragePageFile<Config>;
 
-      format: 'meta';
-      data: Config['metaData'];
-    }
-  | {
-      path: string;
-      absolutePath?: string;
+export interface ContentStorageMetaFile<Config extends SourceConfig = SourceConfig> {
+  path: string;
+  absolutePath?: string;
 
-      format: 'page';
-      slugs: string[];
-      data: Config['pageData'];
-    };
+  format: 'meta';
+  data: Config['metaData'];
+}
+
+export interface ContentStoragePageFile<Config extends SourceConfig = SourceConfig> {
+  path: string;
+  absolutePath?: string;
+
+  format: 'page';
+  slugs: string[];
+  data: Config['pageData'];
+}
 
 function isLocaleValid(locale: string) {
   return locale.length > 0 && !/\d+/.test(locale);
