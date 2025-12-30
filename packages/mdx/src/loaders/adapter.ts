@@ -6,7 +6,6 @@ import type { SourceMap, TransformPluginContext } from 'rollup';
 import type { TransformResult } from 'vite';
 import { parse } from 'node:querystring';
 import { ValidationError } from '@/utils/validation';
-import path from 'node:path';
 import type { LoaderContext } from 'webpack';
 import { readFileSync } from 'node:fs';
 
@@ -165,9 +164,6 @@ export function toWebpack(loader: Loader): WebpackLoader {
       }
 
       if (!(error instanceof Error)) throw error;
-
-      const fpath = path.relative(this.context, this.resourcePath);
-      error.message = `${fpath}:${error.name}: ${error.message}`;
       callback(error);
     }
   };

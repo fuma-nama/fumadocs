@@ -215,21 +215,33 @@ export function remarkAutoTypeTable(
 
     visit(tree, 'mdxJsxFlowElement', (node) => {
       if (node.name !== name) return;
-      const props: Record<string, string | null> = {};
+      const props: Record<string, string | true> = {};
+      const onError = (message: string, cause?: Error) => {
+        const location = node.position
+          ? `${file.path}:${node.position.start.line}:${node.position.start.column}`
+          : file.path;
+        throw new Error(`${location} from <auto-type-table>: ${message}`, {
+          cause,
+        });
+      };
 
       for (const attr of node.attributes) {
-        if (
-          attr.type !== 'mdxJsxAttribute' ||
-          (typeof attr.value !== 'string' && attr.value !== null)
-        )
-          throw new Error(
-            '`auto-type-table` only support string & boolean attributes',
-          );
-
-        props[attr.name] = attr.value;
+        if (attr.type !== 'mdxJsxAttribute') {
+          onError('only named attributes are allowed.');
+        } else if (typeof attr.value === 'string') {
+          props[attr.name] = attr.value;
+        } else if (attr.value === null) {
+          props[attr.name] = true;
+        } else {
+          onError('only string & boolean attributes are allowed.');
+        }
       }
 
-      queue.push(run(node, props));
+      queue.push(
+        run(node, props).catch((err) => {
+          onError('failed to generate type table', err);
+        }),
+      );
       return 'skip';
     });
 
