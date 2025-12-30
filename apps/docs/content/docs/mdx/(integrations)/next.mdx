@@ -50,7 +50,11 @@ export default withMDX(config);
 
 <Callout title="ESM Only" type='warn' className="mt-4">
 
-    The Next.js config must be a `.mjs` file since Fumadocs is ESM-only.
+    Since **Fumadocs is ESM-only**, the Next.js configuration must be loaded as an **ES Module**.
+
+    **`next.config.mjs` is recommended**, as it is always treated as ESM and avoids any module-resolution ambiguity.
+    You may also use **`next.config.js`**, **`next.config.ts`**, or **`next.config.mts`**,  
+    provided the configuration is evaluated as ESM (for example, by setting `"type": "module"` in `package.json`).
 
 </Callout>
 
