@@ -12,7 +12,7 @@ interface Output {
   data: unknown;
 }
 
-const regex = /^---\r?\n(.+?)\r?\n---\r?\n/s;
+const regex = /^---\r?\n(.+?)\r?\n---\r?\n?/s;
 
 /**
  * parse frontmatter, it supports only yaml format

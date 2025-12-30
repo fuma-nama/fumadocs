@@ -292,7 +292,7 @@ function createPageTreeBuilderUtils(ctx: PageTreeBuilderContext) {
             const folderName = basename(folderPath);
             return pathToName(group.exec(folderName)?.[1] ?? folderName);
           })(),
-        icon: metadata.icon,
+        icon: metadata.icon ?? index?.icon,
         root: metadata.root,
         defaultOpen: metadata.defaultOpen,
         description: metadata.description,

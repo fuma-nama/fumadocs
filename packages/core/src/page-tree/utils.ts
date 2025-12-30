@@ -65,22 +65,30 @@ export function getPageTreeRoots(
 }
 
 /**
- * Get other page tree nodes that lives under the same parent
+ * Get other item nodes that lives under the same parent.
  */
 export function getPageTreePeers(
   treeOrTrees: PageTree.Root | Record<string, PageTree.Root>,
   url: string,
 ): PageTree.Item[] {
+  return findSiblings(treeOrTrees, url).filter((item) => item.type === 'page');
+}
+
+/**
+ * Get other tree nodes that lives under the same parent.
+ */
+export function findSiblings(
+  treeOrTrees: PageTree.Root | Record<string, PageTree.Root>,
+  url: string,
+): PageTree.Node[] {
   // Check if it's a single tree or multiple trees (i18n)
   if ('children' in treeOrTrees) {
     // Single tree case
     const tree = treeOrTrees as PageTree.Root;
-    const parent = findParentFromTree(tree, url);
+    const parent = findParent(tree, url);
     if (!parent) return [];
 
-    return parent.children.filter(
-      (item) => item.type === 'page' && item.url !== url,
-    ) as PageTree.Item[];
+    return parent.children;
   }
 
   // Multiple trees case
@@ -92,7 +100,7 @@ export function getPageTreePeers(
   return [];
 }
 
-function findParentFromTree(
+export function findParent(
   from: PageTree.Root | PageTree.Folder,
   url: string,
 ): PageTree.Root | PageTree.Folder | undefined {
@@ -157,6 +165,12 @@ export function findPath(
 
 const VisitBreak = Symbol('VisitBreak');
 
+/**
+ * Perform a depth-first search on page tree visiting every node.
+ *
+ * @param root - the root of page tree to visit.
+ * @param visitor - function to receive nodes, return `skip` to skip the children of current node, `break` to stop the search entirely.
+ */
 export function visit<Root extends PageTree.Node | PageTree.Root>(
   root: Root,
   visitor: <T extends PageTree.Node | PageTree.Root>(
