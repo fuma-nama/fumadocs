@@ -1,5 +1,17 @@
 # fumadocs-obsidian
 
+## 0.0.7
+
+### Patch Changes
+
+- b16a32f: Switch to tsdown for bundling
+- dd7498f: fix slugification
+- Updated dependencies [590d36a]
+- Updated dependencies [98d38ff]
+- Updated dependencies [446631d]
+- Updated dependencies [b16a32f]
+  - fumadocs-core@16.4.2
+
 ## 0.0.6
 
 ### Patch Changes

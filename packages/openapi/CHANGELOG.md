@@ -1,5 +1,18 @@
 # @fuma-docs/openapi
 
+## 10.2.3
+
+### Patch Changes
+
+- 7e58c8e: Fix Parameter Serialization
+- b16a32f: Switch to tsdown for bundling
+- Updated dependencies [590d36a]
+- Updated dependencies [98d38ff]
+- Updated dependencies [446631d]
+- Updated dependencies [b16a32f]
+  - fumadocs-core@16.4.2
+  - fumadocs-ui@16.4.2
+
 ## 10.2.2
 
 ### Patch Changes
@@ -188,8 +201,8 @@
 
   ```ts
   // components/api-page.tsx
-  import { openapi } from '@/lib/openapi';
-  import { createAPIPage } from 'fumadocs-openapi/ui';
+  import { openapi } from "@/lib/openapi";
+  import { createAPIPage } from "fumadocs-openapi/ui";
 
   export const APIPage = createAPIPage(openapi, {
     // e.g. customise render functions
@@ -219,8 +232,8 @@
 
   ```tsx
   // components/api-page.tsx
-  import { openapi } from '@/lib/openapi';
-  import { createAPIPage } from 'fumadocs-openapi/ui';
+  import { openapi } from "@/lib/openapi";
+  import { createAPIPage } from "fumadocs-openapi/ui";
 
   export const APIPage = createAPIPage(openapi, {
     content: {
@@ -250,23 +263,23 @@
   Before:
 
   ```ts
-  import { openapi } from '@/lib/openapi';
+  import { openapi } from "@/lib/openapi";
 
   void generateFiles({
-    input: ['./products.yaml'],
-    output: './content/docs',
+    input: ["./products.yaml"],
+    output: "./content/docs",
   });
   ```
 
   After:
 
   ```ts
-  import { generateFiles } from 'fumadocs-openapi';
-  import { openapi } from '@/lib/openapi';
+  import { generateFiles } from "fumadocs-openapi";
+  import { openapi } from "@/lib/openapi";
 
   void generateFiles({
     input: openapi,
-    output: './content/docs',
+    output: "./content/docs",
   });
   ```
 
@@ -298,12 +311,12 @@
 
   ```ts
   // lib/openapi.ts
-  import { createOpenAPI } from 'fumadocs-openapi/server';
-  import path from 'node:path';
+  import { createOpenAPI } from "fumadocs-openapi/server";
+  import path from "node:path";
 
   export const openapi = createOpenAPI({
-    input: [path.resolve('./scalar.yaml')],
-    proxyUrl: '/api/proxy',
+    input: [path.resolve("./scalar.yaml")],
+    proxyUrl: "/api/proxy",
   });
   ```
 
@@ -327,8 +340,8 @@
 
   ```ts
   // components/api-page.tsx
-  import { openapi } from '@/lib/openapi';
-  import { createAPIPage } from 'fumadocs-openapi/ui';
+  import { openapi } from "@/lib/openapi";
+  import { createAPIPage } from "fumadocs-openapi/ui";
 
   export const APIPage = createAPIPage(openapi, {
     playground: {
@@ -341,9 +354,9 @@
 
   ```tsx
   // components/api-page.tsx
-  import { openapi } from '@/lib/openapi';
-  import { createAPIPage } from 'fumadocs-openapi/ui';
-  import client from './api-page.client';
+  import { openapi } from "@/lib/openapi";
+  import { createAPIPage } from "fumadocs-openapi/ui";
+  import client from "./api-page.client";
 
   export const APIPage = createAPIPage(openapi, {
     client,
@@ -352,17 +365,17 @@
 
   ```tsx
   // components/api-page.client.tsx
-  'use client';
-  import { defineClientConfig } from 'fumadocs-openapi/ui/client';
+  "use client";
+  import { defineClientConfig } from "fumadocs-openapi/ui/client";
 
   export default defineClientConfig({
     playground: {
       transformAuthInputs: (inputs) => [
         ...inputs,
         {
-          fieldName: 'auth.tests',
+          fieldName: "auth.tests",
           children: <div>Tests</div>,
-          defaultValue: '',
+          defaultValue: "",
         },
       ],
     },
@@ -375,10 +388,10 @@
 
   ```tsx
   // components/api-page.tsx
-  import { openapi } from '@/lib/openapi';
-  import { createAPIPage } from 'fumadocs-openapi/ui';
-  import { adapters } from './my-media-adapters';
-  import client from './api-page.client';
+  import { openapi } from "@/lib/openapi";
+  import { createAPIPage } from "fumadocs-openapi/ui";
+  import { adapters } from "./my-media-adapters";
+  import client from "./api-page.client";
 
   export const APIPage = createAPIPage(openapi, {
     client,
@@ -388,9 +401,9 @@
 
   ```tsx
   // components/api-page.client.tsx
-  'use client';
-  import { defineClientConfig } from 'fumadocs-openapi/ui/client';
-  import { adapters } from './my-media-adapters';
+  "use client";
+  import { defineClientConfig } from "fumadocs-openapi/ui/client";
+  import { adapters } from "./my-media-adapters";
 
   export default defineClientConfig({
     mediaAdapters: adapters,
@@ -408,11 +421,11 @@
 
   ```tsx
   // components/api-page.client.tsx
-  'use client';
-  import { defineClientConfig } from 'fumadocs-openapi/ui/client';
+  "use client";
+  import { defineClientConfig } from "fumadocs-openapi/ui/client";
 
   export default defineClientConfig({
-    storageKeyPrefix: 'fumadocs-openapi-custom-',
+    storageKeyPrefix: "fumadocs-openapi-custom-",
   });
   ```
 
@@ -758,22 +771,22 @@
   Migration: Move the server object from `lib/source` to `lib/openapi`
 
   ```ts
-  import { createOpenAPI } from 'fumadocs-openapi/server';
+  import { createOpenAPI } from "fumadocs-openapi/server";
 
   export const openapi = createOpenAPI({
-    input: ['./my-schema.json'],
+    input: ["./my-schema.json"],
   });
   ```
 
   Use the server object for `generateFiles()`:
 
   ```ts
-  import { generateFiles } from 'fumadocs-openapi';
-  import { openapi } from '@/lib/openapi';
+  import { generateFiles } from "fumadocs-openapi";
+  import { openapi } from "@/lib/openapi";
 
   void generateFiles({
     input: openapi,
-    output: './content/docs',
+    output: "./content/docs",
     // we recommend to enable it
     // make sure your endpoint description doesn't break MDX syntax.
     includeDescription: true,
@@ -1091,15 +1104,15 @@
 
   ```ts
   generateFiles({
-    input: ['./content/docs/openapi/museum.yaml'],
-    output: './content/docs/openapi/(generated)',
-    per: 'operation',
+    input: ["./content/docs/openapi/museum.yaml"],
+    output: "./content/docs/openapi/(generated)",
+    per: "operation",
     name: (output, document) => {
       // page info
       output.item;
       // parsed OpenAPI schema
       document;
-      return 'dir/my-file';
+      return "dir/my-file";
     },
   });
   ```
@@ -1108,11 +1121,11 @@
 
   ```ts
   generateFiles({
-    input: ['./content/docs/openapi/museum.yaml'],
-    output: './content/docs/openapi/(generated)',
-    per: 'operation',
+    input: ["./content/docs/openapi/museum.yaml"],
+    output: "./content/docs/openapi/(generated)",
+    per: "operation",
     name: {
-      algorithm: 'v1',
+      algorithm: "v1",
     },
   });
   ```
@@ -1123,9 +1136,9 @@
 
   ```ts
   generateFiles({
-    input: ['./content/docs/openapi/museum.yaml'],
-    output: './content/docs/openapi/(generated)',
-    per: 'operation',
+    input: ["./content/docs/openapi/museum.yaml"],
+    output: "./content/docs/openapi/(generated)",
+    per: "operation",
   });
   ```
 
@@ -1287,11 +1300,11 @@
   We highly recommend to use the following instead:
 
   ```css
-  @import 'tailwindcss';
-  @import 'fumadocs-ui/css/neutral.css';
-  @import 'fumadocs-ui/css/preset.css';
+  @import "tailwindcss";
+  @import "fumadocs-ui/css/neutral.css";
+  @import "fumadocs-ui/css/preset.css";
   /* do this */
-  @import 'fumadocs-openapi/css/preset.css';
+  @import "fumadocs-openapi/css/preset.css";
   ```
 
 - Updated dependencies [3a5595a]
@@ -1335,10 +1348,10 @@
   in your `mdx-components.tsx` (or where you pass MDX components):
 
   ```tsx
-  import defaultComponents from 'fumadocs-ui/mdx';
-  import { APIPage } from 'fumadocs-openapi/ui';
-  import { openapi } from '@/lib/source';
-  import type { MDXComponents } from 'mdx/types';
+  import defaultComponents from "fumadocs-ui/mdx";
+  import { APIPage } from "fumadocs-openapi/ui";
+  import { openapi } from "@/lib/source";
+  import type { MDXComponents } from "mdx/types";
 
   export function getMDXComponents(components?: MDXComponents): MDXComponents {
     return {
@@ -1690,8 +1703,8 @@
   From:
 
   ```tsx
-  import { createOpenAPI } from 'fumadocs-openapi/server';
-  import { APIPlayground } from 'fumadocs-openapi/scalar';
+  import { createOpenAPI } from "fumadocs-openapi/server";
+  import { APIPlayground } from "fumadocs-openapi/scalar";
 
   export const openapi = createOpenAPI({
     useScalar: true,
@@ -1701,8 +1714,8 @@
   To:
 
   ```tsx
-  import { createOpenAPI } from 'fumadocs-openapi/server';
-  import { APIPlayground } from 'fumadocs-openapi/scalar';
+  import { createOpenAPI } from "fumadocs-openapi/server";
+  import { APIPlayground } from "fumadocs-openapi/scalar";
 
   export const openapi = createOpenAPI({
     renderer: {
@@ -2414,7 +2427,7 @@
   ---
 
   <APIPage
-    operations={[{ path: '/v1/apis.deleteApi', method: 'post' }]}
+    operations={[{ path: "/v1/apis.deleteApi", method: "post" }]}
     hasHead={false}
   />
   ```
@@ -2620,13 +2633,13 @@
   Add the package to `content` under your Tailwind CSS configuration.
 
   ```js
-  import { createPreset, presets } from 'fumadocs-ui/tailwind-plugin';
+  import { createPreset, presets } from "fumadocs-ui/tailwind-plugin";
 
   /** @type {import('tailwindcss').Config} */
   export default {
     content: [
-      './node_modules/fumadocs-ui/dist/**/*.js',
-      './node_modules/fumadocs-openapi/dist/**/*.js',
+      "./node_modules/fumadocs-ui/dist/**/*.js",
+      "./node_modules/fumadocs-openapi/dist/**/*.js",
     ],
     presets: [createPreset()],
   };
@@ -2824,11 +2837,11 @@
   migrate: Create a script named `scripts/generate-docs.mjs`:
 
   ```js
-  import { generateFiles } from 'fumadocs-openapi';
+  import { generateFiles } from "fumadocs-openapi";
 
   void generateFiles({
-    input: ['./petstore.yaml'],
-    output: './content/docs',
+    input: ["./petstore.yaml"],
+    output: "./content/docs",
   });
   ```
 
@@ -2875,18 +2888,18 @@
    * @type {import("@fuma-docs/openapi").Config}
    */
   module.exports = {
-    input: ['./petstore.yaml'],
-    output: './content/docs',
-    per: 'tag',
+    input: ["./petstore.yaml"],
+    output: "./content/docs",
+    per: "tag",
     render: (title, description) => {
       return {
         frontmatter: [
-          '---',
+          "---",
           `title: ${title}`,
           `description: ${description}`,
-          'toc: false',
-          '---',
-        ].join('\n'),
+          "toc: false",
+          "---",
+        ].join("\n"),
       };
     },
   };
