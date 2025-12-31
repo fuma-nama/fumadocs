@@ -1,6 +1,6 @@
 import type { ParsedFile, VaultStorage } from '@/build-storage';
 import path from 'node:path';
-import { stash } from '@/utils/stash';
+import { slash } from '@/utils/slash';
 
 export interface VaultResolver {
   /**
@@ -35,7 +35,7 @@ export function buildResolver(storage: VaultStorage): VaultResolver {
     const parsed = path.parse(file.path);
 
     nameToFile.set(parsed.name, file);
-    pathToFile.set(stash(path.join(parsed.dir, parsed.name)), file);
+    pathToFile.set(slash(path.join(parsed.dir, parsed.name)), file);
 
     nameToFile.set(parsed.base, file);
     pathToFile.set(file.path, file);
@@ -59,7 +59,7 @@ export function buildResolver(storage: VaultStorage): VaultResolver {
       const dir = path.dirname(fromPath);
 
       if (name.startsWith('./') || name.startsWith('../')) {
-        return this.resolvePath(stash(path.join(dir, name)));
+        return this.resolvePath(slash(path.join(dir, name)));
       }
 
       // absolute path or name

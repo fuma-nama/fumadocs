@@ -1,8 +1,9 @@
 import path from 'node:path';
 import matter from 'gray-matter';
 import { type Frontmatter, frontmatterSchema } from '@/utils/schema';
-import { stash } from '@/utils/stash';
+import { slash } from '@/utils/slash';
 import type { VaultFile } from '@/read-vaults';
+import { slug } from 'github-slugger';
 
 type RenameOutputFn = (originalOutputPath: string, file: VaultFile) => string;
 type RenameOutputPreset = 'ignore' | 'simple';
@@ -86,23 +87,19 @@ export function buildStorage(
   const storage = new Map<string, ParsedFile>();
 
   for (const rawFile of rawFiles) {
-    parseFile(rawFile);
-  }
-
-  function parseFile(file: VaultFile) {
-    const normalizedPath = normalize(file.path);
-    let outPath = getOutputPath(normalizedPath, file);
+    const normalizedPath = normalize(rawFile.path);
+    let outPath = getOutputPath(normalizedPath, rawFile);
     let parsed: ParsedFile;
 
     if (['.md', '.mdx'].includes(path.extname(normalizedPath))) {
-      const { data, content } = matter(String(file.content));
+      const { data, content } = matter(String(rawFile.content));
       if (enforceMdx) {
         outPath = outPath.slice(0, -path.extname(outPath).length) + '.mdx';
       }
 
       parsed = {
         format: 'content',
-        _raw: file._raw,
+        _raw: rawFile._raw,
         path: normalizedPath,
         outPath,
         frontmatter: frontmatterSchema.parse(data),
@@ -112,10 +109,10 @@ export function buildStorage(
       parsed = {
         format: 'media',
         path: normalizedPath,
-        _raw: file._raw,
+        _raw: rawFile._raw,
         outPath,
-        content: file.content,
-        url: url(outPath, file),
+        content: rawFile.content,
+        url: url(outPath, rawFile),
       };
     }
 
@@ -128,11 +125,25 @@ export function buildStorage(
 function createRenameOutput(preset: RenameOutputPreset): RenameOutputFn {
   if (preset === 'ignore') return (file) => file;
 
-  return (file) => file.toLowerCase().replaceAll(' ', '-');
+  const occurrences = new Map<string, number>();
+  return (file) => {
+    const ext = path.extname(file);
+    const segs = file.slice(0, -ext.length).split('/');
+    for (let i = 0; i < segs.length; i++) {
+      // preserve separators
+      segs[i] = slug(segs[i]);
+    }
+    // we only count occurrences by the full path
+    let out = segs.join('/');
+    const o = occurrences.get(out) ?? 0;
+    occurrences.set(out, o + 1);
+    if (o > 0) out += `-${o}`;
+    return out + ext;
+  };
 }
 
 function normalize(filePath: string): string {
-  filePath = stash(filePath);
+  filePath = slash(filePath);
   if (filePath.startsWith('../')) throw new Error(`${filePath} points outside of vault folder`);
 
   return filePath.startsWith('./') ? filePath.slice(2) : filePath;
