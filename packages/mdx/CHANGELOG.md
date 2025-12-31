@@ -1,5 +1,18 @@
 # next-docs-mdx
 
+## 14.2.4
+
+### Patch Changes
+
+- 689d31e: Improve error message
+- b16a32f: Switch to tsdown for bundling
+- Updated dependencies [590d36a]
+- Updated dependencies [98d38ff]
+- Updated dependencies [446631d]
+- Updated dependencies [b16a32f]
+  - fumadocs-core@16.4.2
+  - @fumadocs/mdx-remote@1.4.4
+
 ## 14.2.3
 
 ### Patch Changes
@@ -91,11 +104,11 @@
 
   ```ts
   // source.config.ts
-  import { defineCollections, applyMdxPreset } from 'fumadocs-mdx/config';
-  import { myPlugin } from './remark-plugin';
+  import { defineCollections, applyMdxPreset } from "fumadocs-mdx/config";
+  import { myPlugin } from "./remark-plugin";
 
   export const blog = defineCollections({
-    type: 'doc',
+    type: "doc",
     mdxOptions: applyMdxPreset({
       remarkPlugins: [myPlugin],
       // You can also pass a function to control the order of remark plugins.
@@ -110,8 +123,8 @@
 
   ```ts
   // source.config.ts
-  import { defineConfig } from 'fumadocs-mdx/config';
-  import lastModified from 'fumadocs-mdx/plugins/last-modified';
+  import { defineConfig } from "fumadocs-mdx/config";
+  import lastModified from "fumadocs-mdx/plugins/last-modified";
 
   export default defineConfig({
     plugins: [lastModified()],
@@ -124,12 +137,12 @@
 
   ```ts
   // source.config.ts
-  import { defineDocs } from 'fumadocs-mdx/config';
+  import { defineDocs } from "fumadocs-mdx/config";
 
   export const docs = defineDocs({
-    dir: 'content/guides',
+    dir: "content/guides",
     docs: {
-      files: ['./i-love-fumadocs/**/*.{md,mdx}'],
+      files: ["./i-love-fumadocs/**/*.{md,mdx}"],
     },
   });
   ```
@@ -140,7 +153,7 @@
 
   ```ts
   // source.config.ts
-  import { defineDocs } from 'fumadocs-mdx/config';
+  import { defineDocs } from "fumadocs-mdx/config";
 
   export const docs = defineDocs({
     docs: {
@@ -832,7 +845,7 @@
   A `source.config.ts` is now required.
 
   ```ts
-  import { defineDocs, defineConfig } from 'fumadocs-mdx/config';
+  import { defineDocs, defineConfig } from "fumadocs-mdx/config";
 
   export const { docs, meta } = defineDocs();
 
@@ -1224,7 +1237,7 @@
   Become:
 
   ```mdx
-  import img_banner from '../../public/image.png';
+  import img_banner from "../../public/image.png";
 
   <img alt="banner" src={img_banner} />
   ```
@@ -1285,13 +1298,13 @@
   `fromMap` has been removed. Please use `createMDXSource` instead.
 
   ```ts
-  import { map } from '@/.map';
-  import { createMDXSource } from 'next-docs-mdx';
-  import { loader } from 'next-docs-zeta/source';
+  import { map } from "@/.map";
+  import { createMDXSource } from "next-docs-mdx";
+  import { loader } from "next-docs-zeta/source";
 
   export const { getPage, getPages, pageTree } = loader({
-    baseUrl: '/docs',
-    rootDir: 'docs',
+    baseUrl: "/docs",
+    rootDir: "docs",
     source: createMDXSource(map),
   });
   ```
@@ -1305,7 +1318,7 @@
   ```js
   const withNextDocs = createNextDocs({
     mdxOptions: {
-      lastModifiedTime: 'git',
+      lastModifiedTime: "git",
     },
   });
   ```
@@ -1354,7 +1367,7 @@
 
   ```ts
   const utils = fromMap(map, {
-    rootDir: 'ui',
+    rootDir: "ui",
     schema: {
       frontmatter: frontmatterSchema,
     },
@@ -1385,11 +1398,11 @@
   The `validate` options is now renamed to `schema`.
 
   ```ts
-  import { defaultSchemas, fromMap } from 'next-docs-mdx/map';
+  import { defaultSchemas, fromMap } from "next-docs-mdx/map";
 
   const utils = fromMap(map, {
-    rootDir: 'docs/ui',
-    baseUrl: '/docs/ui',
+    rootDir: "docs/ui",
+    baseUrl: "/docs/ui",
     schema: {
       frontmatter: defaultSchemas.frontmatter.extend({
         preview: z.string().optional(),
@@ -1408,7 +1421,7 @@
 
   ```js
   const withNextDocs = createNextDocs({
-    rootContentPath: './content/docs',
+    rootContentPath: "./content/docs",
   });
   ```
 

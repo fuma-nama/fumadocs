@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 16.0.34
+
+### Patch Changes
+
+- b16a32f: Switch to tsdown for bundling
+
 ## 16.0.33
 
 ## 16.0.32

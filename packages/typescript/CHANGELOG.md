@@ -1,5 +1,18 @@
 # fumadocs-typescript
 
+## 5.0.1
+
+### Patch Changes
+
+- 689d31e: Improve error message
+- b16a32f: Switch to tsdown for bundling
+- Updated dependencies [590d36a]
+- Updated dependencies [98d38ff]
+- Updated dependencies [446631d]
+- Updated dependencies [b16a32f]
+  - fumadocs-core@16.4.2
+  - fumadocs-ui@16.4.2
+
 ## 5.0.0
 
 ### Major Changes
@@ -24,11 +37,11 @@
   import {
     createGenerator,
     createFileSystemGeneratorCache,
-  } from 'fumadocs-typescript';
+  } from "fumadocs-typescript";
 
   const generator = createGenerator({
     // add this!
-    cache: createFileSystemGeneratorCache('.next/fumadocs-typescript'),
+    cache: createFileSystemGeneratorCache(".next/fumadocs-typescript"),
   });
   ```
 
@@ -179,7 +192,7 @@
   Create a generator instance:
 
   ```ts
-  import { createGenerator } from 'fumadocs-typescript';
+  import { createGenerator } from "fumadocs-typescript";
 
   const generator = createGenerator(tsconfig);
   ```
@@ -299,7 +312,7 @@
   Add the `remarkDocGen` plugin to your remark plugins.
 
   ```ts
-  import { remarkDocGen, fileGenerator } from 'fumadocs-docgen';
+  import { remarkDocGen, fileGenerator } from "fumadocs-docgen";
 
   remark().use(remarkDocGen, { generators: [fileGenerator()] });
   ```
@@ -329,7 +342,7 @@
   For `remarkInstall`, it remains the same:
 
   ```ts
-  import { remarkInstall } from 'fumadocs-docgen';
+  import { remarkInstall } from "fumadocs-docgen";
   ```
 
 ## 1.0.2

@@ -1,5 +1,11 @@
 # fumadocs
 
+## 1.2.1
+
+### Patch Changes
+
+- b16a32f: Switch to tsdown for bundling
+
 ## 1.2.0
 
 ### Minor Changes
