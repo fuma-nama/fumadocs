@@ -1,15 +1,5 @@
-import {
-  type ComponentProps,
-  type FC,
-  type HTMLAttributes,
-  type ReactNode,
-  useMemo,
-} from 'react';
-import {
-  type BaseLayoutProps,
-  renderTitleNav,
-  resolveLinkItems,
-} from '@/layouts/shared';
+import { type ComponentProps, type FC, type HTMLAttributes, type ReactNode, useMemo } from 'react';
+import { type BaseLayoutProps, renderTitleNav, resolveLinkItems } from '@/layouts/shared';
 import {
   Sidebar,
   SidebarCollapseTrigger,
@@ -23,7 +13,7 @@ import {
 import { TreeContextProvider } from '@/contexts/tree';
 import { cn } from '@fumadocs/ui/cn';
 import { buttonVariants } from '@/components/ui/button';
-import { Languages, Sidebar as SidebarIcon, X } from '@fumadocs/ui/icons';
+import { Languages, Sidebar as SidebarIcon, X } from 'lucide-react';
 import { LanguageToggle } from '@/layouts/shared/language-toggle';
 import { ThemeToggle } from '@/layouts/shared/theme-toggle';
 import type * as PageTree from 'fumadocs-core/page-tree';
@@ -34,20 +24,11 @@ import {
   LayoutHeaderTabs,
   NavbarLinkItem,
 } from '@/layouts/notebook/client';
-import {
-  LargeSearchToggle,
-  SearchToggle,
-} from '@/layouts/shared/search-toggle';
+import { LargeSearchToggle, SearchToggle } from '@/layouts/shared/search-toggle';
 import { LinkItem, type LinkItemType } from '@fumadocs/ui/link-item';
 import type { SidebarPageTreeComponents } from '@/components/sidebar/page-tree';
-import {
-  getSidebarTabs,
-  type GetSidebarTabsOptions,
-} from '@/components/sidebar/tabs';
-import {
-  SidebarTabsDropdown,
-  type SidebarTabWithProps,
-} from '@/components/sidebar/tabs/dropdown';
+import { getSidebarTabs, type GetSidebarTabsOptions } from '@/components/sidebar/tabs';
+import { SidebarTabsDropdown, type SidebarTabWithProps } from '@/components/sidebar/tabs/dropdown';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
@@ -88,12 +69,7 @@ export function DocsLayout(props: DocsLayoutProps) {
   const {
     tabMode = 'sidebar',
     nav = {},
-    sidebar: {
-      tabs: tabOptions,
-      defaultOpenLevel,
-      prefetch,
-      ...sidebarProps
-    } = {},
+    sidebar: { tabs: tabOptions, defaultOpenLevel, prefetch, ...sidebarProps } = {},
     i18n = false,
     themeSwitch = {},
     tree,
@@ -118,26 +94,14 @@ export function DocsLayout(props: DocsLayoutProps) {
   }, [tabOptions, tree]);
 
   function sidebar() {
-    const {
-      banner,
-      footer,
-      components,
-      collapsible = true,
-      ...rest
-    } = sidebarProps;
+    const { banner, footer, components, collapsible = true, ...rest } = sidebarProps;
 
     const iconLinks = links.filter((item) => item.type === 'icon');
     const Header =
       typeof banner === 'function'
         ? banner
         : ({ className, ...props }: ComponentProps<'div'>) => (
-            <div
-              className={cn(
-                'flex flex-col gap-3 p-4 pb-2 empty:hidden',
-                className,
-              )}
-              {...props}
-            >
+            <div className={cn('flex flex-col gap-3 p-4 pb-2 empty:hidden', className)} {...props}>
               {props.children}
               {banner}
             </div>
@@ -198,7 +162,6 @@ export function DocsLayout(props: DocsLayoutProps) {
                 )}
               </div>
             )}
-            {nav.children}
             {tabs.length > 0 && (
               <SidebarTabsDropdown
                 options={tabs}
@@ -324,16 +287,12 @@ function DocsNavbar({
         showLayoutTabs && 'lg:layout:[--fd-header-height:--spacing(24)]',
       )}
     >
-      <div
-        data-header-body=""
-        className="flex border-b px-4 gap-2 h-14 md:px-6"
-      >
+      <div data-header-body="" className="flex border-b px-4 gap-2 h-14 md:px-6">
         <div
           className={cn(
             'items-center',
             navMode === 'top' && 'flex flex-1',
-            navMode === 'auto' &&
-              'hidden has-data-[collapsed=true]:md:flex max-md:flex',
+            navMode === 'auto' && 'hidden has-data-[collapsed=true]:md:flex max-md:flex',
           )}
         >
           {sidebarCollapsible && navMode === 'auto' && (
@@ -355,6 +314,7 @@ function DocsNavbar({
               navMode === 'auto' && 'md:hidden',
             ),
           })}
+          {nav.children}
         </div>
         {searchToggle.enabled !== false &&
           (searchToggle.components?.lg ? (
@@ -371,9 +331,7 @@ function DocsNavbar({
               hideIfDisabled
               className={cn(
                 'w-full my-auto max-md:hidden',
-                navMode === 'top'
-                  ? 'rounded-xl max-w-sm ps-2.5'
-                  : 'max-w-[240px]',
+                navMode === 'top' ? 'rounded-xl max-w-sm ps-2.5' : 'max-w-[240px]',
               )}
             />
           ))}
@@ -385,7 +343,6 @@ function DocsNavbar({
                 <NavbarLinkItem key={i} item={item} />
               ))}
           </div>
-          {nav.children}
           {links
             .filter((item) => item.type === 'icon')
             .map((item, i) => (
@@ -404,9 +361,7 @@ function DocsNavbar({
 
           <div className="flex items-center md:hidden">
             {searchToggle.enabled !== false &&
-              (searchToggle.components?.sm ?? (
-                <SearchToggle hideIfDisabled className="p-2" />
-              ))}
+              (searchToggle.components?.sm ?? <SearchToggle hideIfDisabled className="p-2" />)}
             <SidebarTrigger
               className={cn(
                 buttonVariants({

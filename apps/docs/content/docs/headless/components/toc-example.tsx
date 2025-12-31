@@ -1,18 +1,7 @@
-import {
-  AnchorProvider,
-  ScrollProvider,
-  TOCItem,
-  type TOCItemType,
-} from 'fumadocs-core/toc';
+import { AnchorProvider, ScrollProvider, TOCItem, type TOCItemType } from 'fumadocs-core/toc';
 import { type ReactNode, useRef } from 'react';
 
-export function Page({
-  items,
-  children,
-}: {
-  items: TOCItemType[];
-  children: ReactNode;
-}) {
+export function Page({ items, children }: { items: TOCItemType[]; children: ReactNode }) {
   const viewRef = useRef<HTMLDivElement>(null);
 
   return (

@@ -63,22 +63,11 @@ export interface ScrollProviderProps {
   children?: ReactNode;
 }
 
-export function ScrollProvider({
-  containerRef,
-  children,
-}: ScrollProviderProps) {
-  return (
-    <ScrollContext.Provider value={containerRef}>
-      {children}
-    </ScrollContext.Provider>
-  );
+export function ScrollProvider({ containerRef, children }: ScrollProviderProps) {
+  return <ScrollContext.Provider value={containerRef}>{children}</ScrollContext.Provider>;
 }
 
-export function AnchorProvider({
-  toc,
-  single = false,
-  children,
-}: AnchorProviderProps) {
+export function AnchorProvider({ toc, single = false, children }: AnchorProviderProps) {
   const headings = useMemo(() => {
     return toc.map((item) => item.url.split('#')[1]);
   }, [toc]);
@@ -95,11 +84,7 @@ export interface TOCItemProps extends Omit<ComponentProps<'a'>, 'href'> {
   onActiveChange?: (v: boolean) => void;
 }
 
-export function TOCItem({
-  ref,
-  onActiveChange = () => null,
-  ...props
-}: TOCItemProps) {
+export function TOCItem({ ref, onActiveChange = () => null, ...props }: TOCItemProps) {
   const containerRef = useContext(ScrollContext);
   const anchorRef = useRef<HTMLAnchorElement>(null);
   const activeOrder = useActiveAnchors().indexOf(props.href.slice(1));
@@ -163,8 +148,7 @@ function useAnchorObserver(watch: string[], single: boolean): string[] {
     }
 
     if (state.visible.size === 0) {
-      const viewTop =
-        entries.length > 0 ? (entries[0]?.rootBounds?.top ?? 0) : 0;
+      const viewTop = entries.length > 0 ? (entries[0]?.rootBounds?.top ?? 0) : 0;
       let fallback: Element | undefined;
       let min = -1;
 
@@ -202,9 +186,7 @@ function useAnchorObserver(watch: string[], single: boolean): string[] {
   useEffect(() => {
     const observer = observerRef.current;
     if (!observer) return;
-    const elements = watch.flatMap(
-      (heading) => document.getElementById(heading) ?? [],
-    );
+    const elements = watch.flatMap((heading) => document.getElementById(heading) ?? []);
 
     for (const element of elements) observer.observe(element);
     return () => {

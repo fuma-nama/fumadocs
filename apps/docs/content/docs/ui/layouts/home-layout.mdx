@@ -1,0 +1,26 @@
+---
+title: Home Layout
+description: Shared layout for other pages
+---
+
+A layout with only navbar.
+
+![preview](./home.png)
+
+<Customisation />
+
+## Usage
+
+Add a navbar and search dialog across other pages.
+
+```tsx title="/app/(home)/layout.tsx"
+import { HomeLayout } from 'fumadocs-ui/layouts/home';
+import { baseOptions } from '@/lib/layout.shared';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return <HomeLayout {...baseOptions()}>{children}</HomeLayout>;
+}
+```
+
+See detailed docs for [`links`](/docs/ui/layouts/links) and [`nav`](/docs/ui/layouts/nav) options.

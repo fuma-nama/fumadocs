@@ -15,13 +15,7 @@ Apply typography styles with:
 ```jsx
 export default function withArticle(props) {
   return (
-    <main
-      {...props}
-      className={cn(
-        'w-full max-w-[1400px] mx-auto px-4 py-12',
-        props.className,
-      )}
-    >
+    <main {...props} className={cn('w-full max-w-[1400px] mx-auto px-4 py-12', props.className)}>
       <article className="prose">{props.children}</article>
     </main>
   );

@@ -4,23 +4,13 @@
  * You may copy and modify the code
  */
 import type { Context, Meta } from '@content-collections/core';
-import {
-  compileMDX as baseCompileMDX,
-  type Options as MDXOptions,
-} from '@content-collections/mdx';
+import { compileMDX as baseCompileMDX, type Options as MDXOptions } from '@content-collections/mdx';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import * as Plugins from 'fumadocs-core/mdx-plugins';
 import { z, z as Zod } from 'zod';
-import {
-  resolvePlugin,
-  resolvePlugins,
-  type ResolvePlugins,
-} from '@/resolve-plugins';
+import { resolvePlugin, resolvePlugins, type ResolvePlugins } from '@/resolve-plugins';
 
-export interface TransformOptions extends Omit<
-  MDXOptions,
-  'remarkPlugins' | 'rehypePlugins'
-> {
+export interface TransformOptions extends Omit<MDXOptions, 'remarkPlugins' | 'rehypePlugins'> {
   remarkPlugins?: ResolvePlugins;
   rehypePlugins?: ResolvePlugins;
 
@@ -108,10 +98,7 @@ export async function transformMDX<D extends BaseDoc>(
           cwd: process.cwd(),
           ...rest,
           rehypePlugins: resolvePlugins(
-            (plugins) => [
-              resolvePlugin(Plugins.rehypeCode, rehypeCodeOptions),
-              ...plugins,
-            ],
+            (plugins) => [resolvePlugin(Plugins.rehypeCode, rehypeCodeOptions), ...plugins],
             rest.rehypePlugins,
           ),
           remarkPlugins: resolvePlugins(

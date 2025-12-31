@@ -1,12 +1,8 @@
 'use client';
 
-import { ChevronDown } from '@fumadocs/ui/icons';
+import { ChevronDown } from 'lucide-react';
 import type { TOCItemType } from 'fumadocs-core/toc';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from './ui/collapsible';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
 import type { ComponentProps } from 'react';
 import { cn } from '@fumadocs/ui/cn';
 

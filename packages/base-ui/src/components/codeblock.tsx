@@ -1,5 +1,5 @@
 'use client';
-import { Check, Clipboard } from '@fumadocs/ui/icons';
+import { Check, Clipboard } from 'lucide-react';
 import {
   type ComponentProps,
   createContext,
@@ -60,10 +60,7 @@ const TabsContext = createContext<{
 
 export function Pre(props: ComponentProps<'pre'>) {
   return (
-    <pre
-      {...props}
-      className={cn('min-w-full w-max *:flex *:flex-col', props.className)}
-    >
+    <pre {...props} className={cn('min-w-full w-max *:flex *:flex-col', props.className)}>
       {props.children}
     </pre>
   );
@@ -77,9 +74,7 @@ export function CodeBlock({
   icon,
   viewportProps = {},
   children,
-  Actions = (props) => (
-    <div {...props} className={cn('empty:hidden', props.className)} />
-  ),
+  Actions = (props) => <div {...props} className={cn('empty:hidden', props.className)} />,
   ...props
 }: CodeBlockProps) {
   const inTab = use(TabsContext) !== null;
@@ -92,9 +87,7 @@ export function CodeBlock({
       {...props}
       tabIndex={-1}
       className={cn(
-        inTab
-          ? 'bg-fd-secondary -mx-px -mb-px last:rounded-b-xl'
-          : 'my-4 bg-fd-card rounded-xl',
+        inTab ? 'bg-fd-secondary -mx-px -mb-px last:rounded-b-xl' : 'my-4 bg-fd-card rounded-xl',
         keepBackground && 'bg-(--shiki-light-bg) dark:bg-(--shiki-dark-bg)',
 
         'shiki relative border shadow-sm not-prose overflow-hidden text-sm',
@@ -177,8 +170,7 @@ function CopyButton({
       data-checked={checked || undefined}
       className={cn(
         buttonVariants({
-          className:
-            'hover:text-fd-accent-foreground data-checked:text-fd-accent-foreground',
+          className: 'hover:text-fd-accent-foreground data-checked:text-fd-accent-foreground',
           size: 'icon-xs',
         }),
         className,
@@ -192,11 +184,7 @@ function CopyButton({
   );
 }
 
-export function CodeBlockTabs({
-  ref,
-  className,
-  ...props
-}: ComponentProps<typeof Tabs>) {
+export function CodeBlockTabs({ ref, className, ...props }: ComponentProps<typeof Tabs>) {
   const containerRef = useRef<HTMLDivElement>(null);
   const nested = use(TabsContext) !== null;
 
@@ -227,10 +215,7 @@ export function CodeBlockTabs({
   );
 }
 
-export function CodeBlockTabsList({
-  className,
-  ...props
-}: ComponentProps<typeof TabsList>) {
+export function CodeBlockTabsList({ className, ...props }: ComponentProps<typeof TabsList>) {
   return (
     <TabsList
       {...props}

@@ -1,94 +1,96 @@
 {
   "name": "@fumadocs/base-ui",
-  "version": "16.4.0",
+  "version": "16.4.2",
   "description": "The Base UI version of Fumadocs UI",
   "keywords": [
-    "Fumadocs",
-    "Docs"
+    "Docs",
+    "Fumadocs"
   ],
   "homepage": "https://fumadocs.dev",
-  "repository": "github:fuma-nama/fumadocs",
   "license": "MIT",
   "author": "Fuma Nama",
+  "repository": "github:fuma-nama/fumadocs",
+  "files": [
+    "css/*",
+    "dist/*"
+  ],
   "type": "module",
   "exports": {
     "./style.css": "./dist/style.css",
     "./css/*": "./css/*",
     "./image-zoom.css": "./dist/image-zoom.css",
     "./components/*": {
-      "import": "./dist/components/*.js",
       "types": "./dist/components/*.d.ts",
+      "import": "./dist/components/*.js",
       "default": "./dist/components/*.js"
     },
     "./i18n": {
-      "import": "./dist/i18n.js",
-      "types": "./dist/i18n.d.ts"
+      "types": "./dist/i18n.d.ts",
+      "import": "./dist/i18n.js"
     },
     "./layouts/home": {
-      "import": "./dist/layouts/home/index.js",
-      "types": "./dist/layouts/home/index.d.ts"
+      "types": "./dist/layouts/home/index.d.ts",
+      "import": "./dist/layouts/home/index.js"
     },
     "./layouts/home/navbar": {
-      "import": "./dist/layouts/home/navbar.js",
-      "types": "./dist/layouts/home/navbar.d.ts"
+      "types": "./dist/layouts/home/navbar.d.ts",
+      "import": "./dist/layouts/home/navbar.js"
     },
     "./layouts/docs": {
-      "import": "./dist/layouts/docs/index.js",
-      "types": "./dist/layouts/docs/index.d.ts"
+      "types": "./dist/layouts/docs/index.d.ts",
+      "import": "./dist/layouts/docs/index.js"
     },
     "./layouts/docs/page": {
-      "import": "./dist/layouts/docs/page/index.js",
-      "types": "./dist/layouts/docs/page/index.d.ts"
+      "types": "./dist/layouts/docs/page/index.d.ts",
+      "import": "./dist/layouts/docs/page/index.js"
     },
     "./layouts/notebook": {
-      "import": "./dist/layouts/notebook/index.js",
-      "types": "./dist/layouts/notebook/index.d.ts"
+      "types": "./dist/layouts/notebook/index.d.ts",
+      "import": "./dist/layouts/notebook/index.js"
     },
     "./layouts/notebook/page": {
-      "import": "./dist/layouts/notebook/page/index.js",
-      "types": "./dist/layouts/notebook/page/index.d.ts"
+      "types": "./dist/layouts/notebook/page/index.d.ts",
+      "import": "./dist/layouts/notebook/page/index.js"
     },
     "./layouts/shared": {
-      "import": "./dist/layouts/shared/index.js",
-      "types": "./dist/layouts/shared/index.d.ts"
+      "types": "./dist/layouts/shared/index.d.ts",
+      "import": "./dist/layouts/shared/index.js"
     },
     "./page": {
-      "import": "./dist/page.js",
-      "types": "./dist/page.d.ts"
+      "types": "./dist/page.d.ts",
+      "import": "./dist/page.js"
     },
     "./provider/*": {
-      "import": "./dist/provider/*.js",
-      "types": "./dist/provider/*.d.ts"
+      "types": "./dist/provider/*.d.ts",
+      "import": "./dist/provider/*.js"
     },
     "./contexts/*": {
-      "import": "./dist/contexts/*.js",
-      "types": "./dist/contexts/*.d.ts"
+      "types": "./dist/contexts/*.d.ts",
+      "import": "./dist/contexts/*.js"
     },
     "./mdx": {
+      "types": "./dist/mdx.d.ts",
       "node": "./dist/mdx.server.js",
-      "import": "./dist/mdx.js",
-      "types": "./dist/mdx.d.ts"
+      "import": "./dist/mdx.js"
     },
     "./og": {
-      "import": "./dist/og.js",
-      "types": "./dist/og.d.ts"
+      "types": "./dist/og.d.ts",
+      "import": "./dist/og.js"
     },
     "./utils/*": {
-      "import": "./dist/utils/*.js",
-      "types": "./dist/utils/*.d.ts"
+      "types": "./dist/utils/*.d.ts",
+      "import": "./dist/utils/*.js"
     }
   },
-  "files": [
-    "dist/*",
-    "css/*"
-  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "pnpm build:layout && pnpm build:tailwind",
-    "build:layout": "tsc --project tsconfig.build.json && tsc-alias -p tsconfig.build.json",
+    "build:layout": "tsdown",
     "build:tailwind": "tailwindcss -i css/style.css -o ./dist/style.css && tailwindcss -i src/components/image-zoom.css -o dist/components/image-zoom.css",
     "clean": "rimraf dist",
-    "dev": "concurrently \"tsc -w --project tsconfig.build.json\" \"tsc-alias -w -p tsconfig.build.json\" \"pnpm dev:tailwind\"",
-    "dev:tailwind": "tailwindcss -i css/style.css -o ./dist/style.css -w && tailwindcss -i src/components/image-zoom.css -o dist/components/image-zoom.css -w",
+    "dev": "concurrently \"tsdown --watch\" \"tailwindcss -i css/style.css -o ./dist/style.css -w\" \"tailwindcss -i src/components/image-zoom.css -o dist/components/image-zoom.css -w\"",
     "lint": "eslint .",
     "types:check": "tsc --noEmit"
   },
@@ -97,6 +99,7 @@
     "@fumadocs/ui": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "fumadocs-core": "workspace:*",
+    "lucide-react": "^0.562.0",
     "next-themes": "^0.4.6",
     "react-medium-image-zoom": "^5.4.0",
     "scroll-into-view-if-needed": "^3.1.0"
@@ -108,10 +111,9 @@
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "eslint-config-custom": "workspace:*",
-    "fumadocs-core": "workspace:*",
     "tailwindcss": "^4.1.18",
-    "tsc-alias": "^1.8.16",
-    "tsconfig": "workspace:*"
+    "tsconfig": "workspace:*",
+    "tsdown": "^0.18.3"
   },
   "peerDependencies": {
     "@types/react": "*",
@@ -126,8 +128,5 @@
     "tailwindcss": {
       "optional": true
     }
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

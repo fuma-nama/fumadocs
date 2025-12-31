@@ -1,11 +1,5 @@
 import { visit } from 'unist-util-visit';
-import type {
-  Paragraph,
-  Parent,
-  PhrasingContent,
-  Root,
-  RootContent,
-} from 'mdast';
+import type { Paragraph, Parent, PhrasingContent, Root, RootContent } from 'mdast';
 import type { Transformer } from 'unified';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
 import { getFileHref, getHeadingHash } from '@/utils/get-refs';
@@ -26,9 +20,7 @@ export interface RemarkWikilinksOptions {
   resolver: VaultResolver;
 }
 
-export function remarkWikilinks({
-  resolver,
-}: RemarkWikilinksOptions): Transformer<Root, Root> {
+export function remarkWikilinks({ resolver }: RemarkWikilinksOptions): Transformer<Root, Root> {
   return (tree, file) => {
     if (!file.data.source) return;
     const sourceFile = file.data.source;
@@ -110,12 +102,7 @@ function resolveParagraphText(
   }
 
   while ((result = RegexWikilink.exec(text))) {
-    const resolved = resolveWikilink(
-      result[0].startsWith('!'),
-      result[1],
-      sourceFile,
-      resolver,
-    );
+    const resolved = resolveWikilink(result[0].startsWith('!'), result[1], sourceFile, resolver);
     if (!resolved) continue;
     if (lastIndex < result.index) {
       concat.push({
@@ -167,9 +154,7 @@ function resolveWikilink(
   const isHeadingOnly = name.length === 0 && heading;
 
   if (isEmbed) {
-    const ref = isHeadingOnly
-      ? sourceFile
-      : resolver.resolveAny(name, sourceFile.path);
+    const ref = isHeadingOnly ? sourceFile : resolver.resolveAny(name, sourceFile.path);
 
     if (!ref) {
       console.warn(`failed to resolve ${name} wikilink`);
@@ -199,10 +184,7 @@ function resolveWikilink(
       } satisfies MdxJsxFlowElement;
     }
 
-    if (alias)
-      console.warn(
-        'we do not support specifying image size like `![[image.png|300]].',
-      );
+    if (alias) console.warn('we do not support specifying image size like `![[image.png|300]].');
 
     return {
       type: 'image',

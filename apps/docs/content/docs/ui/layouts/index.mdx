@@ -1,0 +1,68 @@
+---
+title: Layouts
+description: A list of layout components.
+---
+
+## Overview
+
+Fumadocs UI provides essential layouts to display content.
+
+<DocsCategory />
+
+### Configurations
+
+Each layout supports a shared set of options.
+
+It is recommended to store these options into a file, and pass them to the layouts.
+
+```tsx tab="Shared Options" title="lib/layout.shared.tsx"
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export function baseOptions(): BaseLayoutProps {
+  return {
+    nav: {
+      title: 'My App',
+    },
+  };
+}
+```
+
+```tsx tab="Docs Layout" title="app/docs/layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { baseOptions } from '@/lib/layout.shared';
+import { source } from '@/lib/source';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <DocsLayout
+      // [!code highlight]
+      {...baseOptions()}
+      tree={source.getPageTree()}
+    >
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+```tsx tab="Home Layout" title="app/(home)/layout.tsx"
+import { HomeLayout } from 'fumadocs-ui/layouts/home';
+import { baseOptions } from '@/lib/layout.shared';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <HomeLayout
+      // [!code highlight]
+      {...baseOptions()}
+    >
+      {children}
+    </HomeLayout>
+  );
+}
+```
+
+See detailed docs for [`links`](/docs/ui/layouts/links) and [`nav`](/docs/ui/layouts/nav) options.
+
+<auto-type-table cwd path="content/docs/ui/props.ts" name="BaseLayoutProps" />

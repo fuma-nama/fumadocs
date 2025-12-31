@@ -12,9 +12,7 @@ function Home() {
   return (
     <HomeLayout {...baseOptions(lang)}>
       <div className="p-4 text-center my-auto">
-        <h1 className="font-medium text-xl mb-4">
-          Fumadocs on Tanstack Start.
-        </h1>
+        <h1 className="font-medium text-xl mb-4">Fumadocs on Tanstack Start.</h1>
         <Link
           to="/$lang/docs/$"
           params={{

@@ -11,10 +11,7 @@ export function useStorageKey() {
     () => ({
       of: (name: KeyName) => getStorageKey(storageKeyPrefix, name),
       AuthField: (field: AuthField) =>
-        getStorageKey(
-          storageKeyPrefix,
-          `auth-${field.original?.id ?? field.fieldName}`,
-        ),
+        getStorageKey(storageKeyPrefix, `auth-${field.original?.id ?? field.fieldName}`),
     }),
     [storageKeyPrefix],
   );

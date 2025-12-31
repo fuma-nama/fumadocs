@@ -32,8 +32,7 @@ export function inputToString(
       );
 
     for (const key in value) {
-      if (value[key as keyof object])
-        params.set(key, String(value[key as keyof object]));
+      if (value[key as keyof object]) params.set(key, String(value[key as keyof object]));
     }
 
     return params.toString();

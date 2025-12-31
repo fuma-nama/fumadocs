@@ -35,13 +35,9 @@ export function rehypeToc(
       const last = element.children.at(-1);
       if (last?.type === 'text' && last.value.endsWith(TocOnlyTag)) {
         isTocOnly = true;
-        last.value = last.value
-          .substring(0, last.value.length - TocOnlyTag.length)
-          .trimEnd();
+        last.value = last.value.substring(0, last.value.length - TocOnlyTag.length).trimEnd();
       } else if (last?.type === 'text' && last.value.endsWith(NoTocTag)) {
-        last.value = last.value
-          .substring(0, last.value.length - NoTocTag.length)
-          .trimEnd();
+        last.value = last.value.substring(0, last.value.length - NoTocTag.length).trimEnd();
         return 'skip';
       }
 

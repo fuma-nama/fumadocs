@@ -15,24 +15,13 @@ export interface HomeLayoutProps extends BaseLayoutProps {
 }
 
 export function HomeLayout(props: HomeLayoutProps & ComponentProps<'main'>) {
-  const {
-    nav = {},
-    links,
-    githubUrl,
-    i18n,
-    themeSwitch = {},
-    searchToggle,
-    ...rest
-  } = props;
+  const { nav = {}, links, githubUrl, i18n, themeSwitch = {}, searchToggle, ...rest } = props;
 
   return (
     <main
       id="nd-home-layout"
       {...rest}
-      className={cn(
-        'flex flex-1 flex-col [--fd-layout-width:1400px]',
-        rest.className,
-      )}
+      className={cn('flex flex-1 flex-col [--fd-layout-width:1400px]', rest.className)}
     >
       {nav.enabled !== false &&
         (nav.component ?? (

@@ -3,10 +3,8 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"]
-    }
-  },
-  "tsc-alias": {
-    "resolveFullPaths": true
+    },
+    "types": ["react/experimental"]
   },
   "exclude": ["node_modules", "dist", "eslint.config.mjs", "tailwind.config.js"]
 }

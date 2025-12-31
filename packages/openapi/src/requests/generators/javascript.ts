@@ -14,14 +14,12 @@ export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
   }
 
   for (const [k, v] of Object.entries(data.header)) {
-    headers[k] = v.value as string;
+    headers[k] = v.value;
   }
 
   const cookies = Object.entries(data.cookie);
   if (cookies.length > 0) {
-    headers['cookie'] = cookies
-      .map(([key, param]) => `${key}=${param.value}`)
-      .join('; ');
+    headers['cookie'] = cookies.map(([key, param]) => `${key}=${param.value}`).join('; ');
   }
 
   if (Object.keys(headers).length > 0) {

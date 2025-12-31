@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { readFileSync } from 'node:fs';
+import fs from 'node:fs/promises';
 import path from 'node:path';
 import { remark } from 'remark';
 import {
@@ -16,7 +16,6 @@ import { fileURLToPath } from 'node:url';
 import remarkMdx from 'remark-mdx';
 import remarkGfm from 'remark-gfm';
 import { createProcessor } from '@mdx-js/mdx';
-import * as fs from 'node:fs/promises';
 import { remarkSteps } from '@/mdx-plugins/remark-steps';
 import remarkDirective from 'remark-directive';
 
@@ -24,7 +23,7 @@ const cwd = path.dirname(fileURLToPath(import.meta.url));
 
 test('Remark Heading', async () => {
   const file = path.resolve(cwd, './fixtures/remark-heading.md');
-  const content = readFileSync(file);
+  const content = await fs.readFile(file);
 
   const result = await remark().use(remarkHeading).process(content);
 
@@ -33,14 +32,22 @@ test('Remark Heading', async () => {
   );
 });
 
-test('Remark Structure', async () => {
-  const content = readFileSync(
-    path.resolve(cwd, './fixtures/remark-structure.md'),
+test('Remark Mdx Files', async () => {
+  const file = path.resolve(cwd, './fixtures/remark-mdx-files.mdx');
+  const content = await fs.readFile(file);
+
+  const result = await remark().use(remarkMdx).use(remarkMdxFiles).process({
+    path: file,
+    value: content,
+  });
+  await expect(String(result.value)).toMatchFileSnapshot(
+    path.resolve(cwd, './fixtures/remark-mdx-files.output.mdx'),
   );
-  const result = await remark()
-    .use(remarkGfm)
-    .use(remarkStructure)
-    .process(content);
+});
+
+test('Remark Structure', async () => {
+  const content = await fs.readFile(path.resolve(cwd, './fixtures/remark-structure.md'));
+  const result = await remark().use(remarkGfm).use(remarkStructure).process(content);
 
   await expect(result.data.structuredData).toMatchFileSnapshot(
     path.resolve(cwd, './fixtures/remark-structure.output.json'),
@@ -48,13 +55,8 @@ test('Remark Structure', async () => {
 });
 
 test('Remark Admonition', async () => {
-  const content = readFileSync(
-    path.resolve(cwd, './fixtures/remark-admonition.md'),
-  );
-  const processor = remark()
-    .use(remarkMdx)
-    .use(remarkDirective)
-    .use(remarkDirectiveAdmonition);
+  const content = await fs.readFile(path.resolve(cwd, './fixtures/remark-admonition.md'));
+  const processor = remark().use(remarkMdx).use(remarkDirective).use(remarkDirectiveAdmonition);
   let tree = processor.parse(content);
   tree = await processor.run(tree);
 
@@ -64,9 +66,7 @@ test('Remark Admonition', async () => {
 });
 
 test('Remark Steps', async () => {
-  const content = await fs.readFile(
-    path.resolve(cwd, './fixtures/remark-steps.md'),
-  );
+  const content = await fs.readFile(path.resolve(cwd, './fixtures/remark-steps.md'));
   const processor = remark().use(remarkSteps).use(remarkMdx);
   const result = await processor.process(content);
 
@@ -77,7 +77,7 @@ test('Remark Steps', async () => {
 
 test('Remark Image: With Path', async () => {
   const file = path.resolve(cwd, './fixtures/remark-image.md');
-  const content = readFileSync(file);
+  const content = await fs.readFile(file);
   const processor = remark()
     .use(remarkImage, { publicDir: path.resolve(cwd, './fixtures') })
     .use(remarkMdx);
@@ -92,7 +92,7 @@ test('Remark Image: With Path', async () => {
 });
 
 test('Remark Image: Without Import', async () => {
-  const content = readFileSync(path.resolve(cwd, './fixtures/remark-image.md'));
+  const content = await fs.readFile(path.resolve(cwd, './fixtures/remark-image.md'));
   const result = await remark()
     .use(remarkImage, {
       publicDir: path.resolve(cwd, './fixtures'),
@@ -107,9 +107,7 @@ test('Remark Image: Without Import', async () => {
 });
 
 test('Remark Image: `publicDir` with URL', async () => {
-  const content = readFileSync(
-    path.resolve(cwd, './fixtures/remark-image-public-dir.md'),
-  );
+  const content = await fs.readFile(path.resolve(cwd, './fixtures/remark-image-public-dir.md'));
   const result = await remark()
     .use(remarkImage, {
       publicDir: 'https://fumadocs.dev',
@@ -123,28 +121,9 @@ test('Remark Image: `publicDir` with URL', async () => {
   );
 });
 
-test('Remark MDX Files', async () => {
-  const content = readFileSync(
-    path.resolve(cwd, './fixtures/remark-mdx-files.md'),
-  );
-  const result = await remark()
-    .use(remarkMdxFiles)
-    .use(remarkMdx)
-    .process(content);
-
-  await expect(result.value).toMatchFileSnapshot(
-    path.resolve(cwd, './fixtures/remark-mdx-files.output.mdx'),
-  );
-});
-
 test('converts mermaid codeblock to MDX Mermaid component', async () => {
-  const content = readFileSync(
-    path.resolve(cwd, './fixtures/remark-mdx-mermaid.md'),
-  );
-  const result = await remark()
-    .use(remarkMdxMermaid)
-    .use(remarkMdx)
-    .process(content);
+  const content = await fs.readFile(path.resolve(cwd, './fixtures/remark-mdx-mermaid.md'));
+  const result = await remark().use(remarkMdxMermaid).use(remarkMdx).process(content);
 
   await expect(result.value).toMatchFileSnapshot(
     path.resolve(cwd, './fixtures/remark-mdx-mermaid.output.mdx'),
@@ -152,7 +131,7 @@ test('converts mermaid codeblock to MDX Mermaid component', async () => {
 });
 
 test('Rehype Toc', async () => {
-  const content = readFileSync(path.resolve(cwd, './fixtures/rehype-toc.md'));
+  const content = await fs.readFile(path.resolve(cwd, './fixtures/rehype-toc.md'));
 
   const processor = createProcessor({
     remarkPlugins: [remarkHeading],

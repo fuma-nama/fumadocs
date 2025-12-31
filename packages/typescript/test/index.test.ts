@@ -10,8 +10,7 @@ const generator = createGenerator({
   cache: false,
 });
 
-const relative = (s: string): string =>
-  path.resolve(fileURLToPath(new URL(s, import.meta.url)));
+const relative = (s: string): string => path.resolve(fileURLToPath(new URL(s, import.meta.url)));
 
 test('class members', async () => {
   const out = await generator.generateDocumentation(

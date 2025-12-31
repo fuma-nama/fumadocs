@@ -90,23 +90,17 @@ test('Breadcrumbs', () => {
     ],
   };
 
-  expect(
-    getBreadcrumbItems('/docs/folder', tree, { includePage: true }),
-  ).toStrictEqual([{ name: 'World', url: '/docs/folder' }]);
+  expect(getBreadcrumbItems('/docs/folder', tree, { includePage: true })).toStrictEqual([
+    { name: 'World', url: '/docs/folder' },
+  ]);
 
   expect(getBreadcrumbItems('/invalid', tree)).toMatchInlineSnapshot(`[]`);
 });
 
 test('I18n: Format URL', () => {
-  expect(DefaultFormatter.get(new NextURL('https://fumadocs.dev/en'))).toBe(
-    'en',
-  );
-  expect(
-    DefaultFormatter.get(new NextURL('https://fumadocs.dev/en/test')),
-  ).toBe('en');
-  expect(
-    DefaultFormatter.get(new NextURL('https://fumadocs.dev')),
-  ).toBeUndefined();
+  expect(DefaultFormatter.get(new NextURL('https://fumadocs.dev/en'))).toBe('en');
+  expect(DefaultFormatter.get(new NextURL('https://fumadocs.dev/en/test'))).toBe('en');
+  expect(DefaultFormatter.get(new NextURL('https://fumadocs.dev'))).toBeUndefined();
   expect(
     DefaultFormatter.get(
       new NextURL('https://fumadocs.dev/docs', {
@@ -126,9 +120,9 @@ test('I18n: Format URL', () => {
     ),
   ).toBe('en');
 
-  expect(
-    DefaultFormatter.add(new NextURL('https://fumadocs.dev'), 'cn').href,
-  ).toBe('https://fumadocs.dev/cn/');
+  expect(DefaultFormatter.add(new NextURL('https://fumadocs.dev'), 'cn').href).toBe(
+    'https://fumadocs.dev/cn/',
+  );
   expect(
     DefaultFormatter.add(
       new NextURL('https://fumadocs.dev/docs', {
@@ -140,13 +134,12 @@ test('I18n: Format URL', () => {
     ).href,
   ).toBe('https://fumadocs.dev/docs/cn/');
 
-  expect(
-    DefaultFormatter.remove(new NextURL('https://fumadocs.dev/en')).href,
-  ).toBe('https://fumadocs.dev/');
-  expect(
-    DefaultFormatter.remove(new NextURL('https://fumadocs.dev/en/test/hello'))
-      .href,
-  ).toBe('https://fumadocs.dev/test/hello');
+  expect(DefaultFormatter.remove(new NextURL('https://fumadocs.dev/en')).href).toBe(
+    'https://fumadocs.dev/',
+  );
+  expect(DefaultFormatter.remove(new NextURL('https://fumadocs.dev/en/test/hello')).href).toBe(
+    'https://fumadocs.dev/test/hello',
+  );
   expect(
     DefaultFormatter.remove(
       new NextURL('https://fumadocs.dev/docs/en', {

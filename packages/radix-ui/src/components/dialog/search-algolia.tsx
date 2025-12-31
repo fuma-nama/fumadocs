@@ -1,9 +1,6 @@
 'use client';
 
-import {
-  type AlgoliaOptions,
-  useDocsSearch,
-} from 'fumadocs-core/search/client';
+import { type AlgoliaOptions, useDocsSearch } from 'fumadocs-core/search/client';
 import { type ReactNode, useMemo, useState } from 'react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import {
@@ -83,12 +80,7 @@ export default function AlgoliaSearchDialog({
   const label = showAlgolia && <AlgoliaTitle />;
 
   return (
-    <SearchDialog
-      search={search}
-      onSearchChange={setSearch}
-      isLoading={query.isLoading}
-      {...props}
-    >
+    <SearchDialog search={search} onSearchChange={setSearch} isLoading={query.isLoading} {...props}>
       <SearchDialogOverlay />
       <SearchDialogContent>
         <SearchDialogHeader>
@@ -96,9 +88,7 @@ export default function AlgoliaSearchDialog({
           <SearchDialogInput />
           <SearchDialogClose />
         </SearchDialogHeader>
-        <SearchDialogList
-          items={query.data !== 'empty' ? query.data : defaultItems}
-        />
+        <SearchDialogList items={query.data !== 'empty' ? query.data : defaultItems} />
       </SearchDialogContent>
       <SearchDialogFooter>
         {tags.length > 0 ? (

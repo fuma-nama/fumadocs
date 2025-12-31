@@ -8,9 +8,7 @@ type CompiledMDXFile<
   Name extends string,
   Frontmatter,
   TC extends InternalTypeConfig,
-> = CompiledMDXProperties<Frontmatter> &
-  TC['DocData'][Name] &
-  Record<string, unknown>;
+> = CompiledMDXProperties<Frontmatter> & TC['DocData'][Name] & Record<string, unknown>;
 
 export interface ClientLoaderOptions<Doc, Props> {
   /**
@@ -69,9 +67,7 @@ export function browser<Config, TC extends InternalTypeConfig>() {
         },
       };
 
-      return out as Config[Name] extends
-        | DocCollection<infer Schema>
-        | DocsCollection<infer Schema>
+      return out as Config[Name] extends DocCollection<infer Schema> | DocsCollection<infer Schema>
         ? DocCollectionEntry<Name, StandardSchemaV1.InferOutput<Schema>, TC>
         : never;
     },
@@ -85,10 +81,7 @@ const loaderStore = new Map<
   }
 >();
 
-export function createClientLoader<
-  Doc = CompiledMDXProperties,
-  Props extends object = object,
->(
+export function createClientLoader<Doc = CompiledMDXProperties, Props extends object = object>(
   globEntries: Record<string, () => Promise<Doc>>,
   options: ClientLoaderOptions<Doc, Props>,
 ): ClientLoader<Doc, Props> {
@@ -107,9 +100,7 @@ export function createClientLoader<
   function getLoader(path: string) {
     const loader = loaders.get(path);
     if (!loader)
-      throw new Error(
-        `[createClientLoader] ${path} does not exist in available entries`,
-      );
+      throw new Error(`[createClientLoader] ${path} does not exist in available entries`);
     return loader;
   }
 

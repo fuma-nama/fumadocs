@@ -5,23 +5,13 @@ import type {
   RenderContext,
   SecuritySchemeObject,
 } from '@/types';
-import {
-  createMethod,
-  methodKeys,
-  type NoReference,
-  type ResolvedSchema,
-} from '@/utils/schema';
+import { createMethod, methodKeys, type NoReference, type ResolvedSchema } from '@/utils/schema';
 import { idToTitle } from '@/utils/id-to-title';
 import { Schema } from '../schema';
 import { UsageTabs } from '@/ui/operation/usage-tabs';
 import { MethodLabel } from '@/ui/components/method-label';
 import { getTypescriptSchema } from '@/utils/get-typescript-schema';
-import {
-  CopyResponseTypeScript,
-  SelectTab,
-  SelectTabs,
-  SelectTabTrigger,
-} from './client';
+import { CopyResponseTypeScript, SelectTab, SelectTabs, SelectTabTrigger } from './client';
 import {
   AccordionContent,
   AccordionHeader,
@@ -66,18 +56,14 @@ export async function Operation({
   const body = method.requestBody;
   let headNode: ReactNode = null;
   const descriptionNode =
-    showDescription &&
-    method.description &&
-    ctx.renderMarkdown(method.description);
+    showDescription && method.description && ctx.renderMarkdown(method.description);
   let bodyNode: ReactNode = null;
   let authNode: ReactNode = null;
   let responseNode: ReactNode = null;
   let callbacksNode: ReactNode = null;
 
   if (showTitle) {
-    const title =
-      method.summary ||
-      (method.operationId ? idToTitle(method.operationId) : path);
+    const title = method.summary || (method.operationId ? idToTitle(method.operationId) : path);
 
     headNode = ctx.renderHeading(headingLevel, title);
     headingLevel++;
@@ -100,9 +86,7 @@ export async function Operation({
           {contentTypes.length > 1 ? (
             <SelectTabTrigger items={items} className="font-medium" />
           ) : (
-            <p className="text-fd-muted-foreground not-prose">
-              {items[0].label}
-            </p>
+            <p className="text-fd-muted-foreground not-prose">{items[0].label}</p>
           )}
         </div>
         {body.description && ctx.renderMarkdown(body.description)}
@@ -140,12 +124,7 @@ export async function Operation({
 
         <Accordions type="multiple">
           {statuses.map((status) => (
-            <ResponseAccordion
-              key={status}
-              status={status}
-              operation={method}
-              ctx={ctx}
-            />
+            <ResponseAccordion key={status} status={status} operation={method} ctx={ctx} />
           ))}
         </Accordions>
       </>
@@ -171,9 +150,7 @@ export async function Operation({
                 {
                   ...param.schema,
                   description: param.description ?? param.schema?.description,
-                  deprecated:
-                    (param.deprecated ?? false) ||
-                    (param.schema?.deprecated ?? false),
+                  deprecated: (param.deprecated ?? false) || (param.schema?.deprecated ?? false),
                 } as ResolvedSchema
               }
               readOnly={method.method === 'GET'}
@@ -201,9 +178,7 @@ export async function Operation({
               <code key={key} className="truncate">
                 <span className="font-medium">{key}</span>{' '}
                 {scopes.length > 0 && (
-                  <span className="text-fd-muted-foreground">
-                    {scopes.join(', ')}
-                  </span>
+                  <span className="text-fd-muted-foreground">{scopes.join(', ')}</span>
                 )}
               </code>
             ))}
@@ -230,14 +205,7 @@ export async function Operation({
               const scheme = securitySchemes?.[key];
               if (!scheme) return;
 
-              return (
-                <AuthScheme
-                  key={key}
-                  scheme={scheme}
-                  scopes={scopes}
-                  ctx={ctx}
-                />
-              );
+              return <AuthScheme key={key} scheme={scheme} scopes={scopes} ctx={ctx} />;
             })}
           </SelectTab>
         ))}
@@ -261,18 +229,12 @@ export async function Operation({
           {callbacks.length > 1 ? (
             <SelectTabTrigger items={items} className="font-medium" />
           ) : (
-            <p className="text-fd-muted-foreground not-prose">
-              {items[0].label}
-            </p>
+            <p className="text-fd-muted-foreground not-prose">{items[0].label}</p>
           )}
         </div>
         {callbacks.map(([name, callback]) => (
           <SelectTab key={name} value={name}>
-            <WebhookCallback
-              callback={callback}
-              ctx={ctx}
-              headingLevel={headingLevel}
-            />
+            <WebhookCallback callback={callback} ctx={ctx} headingLevel={headingLevel} />
           </SelectTab>
         ))}
       </SelectTabs>
@@ -329,9 +291,7 @@ export async function Operation({
 
     return (
       <UsageTabsProviderLazy
-        defaultExampleId={
-          method['x-exclusiveCodeSample'] ?? method['x-selectedCodeSample']
-        }
+        defaultExampleId={method['x-exclusiveCodeSample'] ?? method['x-selectedCodeSample']}
         route={path}
         examples={getExampleRequests(path, method, ctx)}
       >
@@ -395,9 +355,7 @@ async function ResponseAccordion({
       ) : (
         <SelectTabTrigger items={items} />
       );
-    wrapper = (children) => (
-      <SelectTabs defaultValue={items[0].value}>{children}</SelectTabs>
-    );
+    wrapper = (children) => <SelectTabs defaultValue={items[0].value}>{children}</SelectTabs>;
   }
 
   return wrapper(
@@ -408,9 +366,7 @@ async function ResponseAccordion({
       </AccordionHeader>
       <AccordionContent className="ps-4.5">
         {response.description && (
-          <div className="prose-no-margin mb-2">
-            {ctx.renderMarkdown(response.description)}
-          </div>
+          <div className="prose-no-margin mb-2">{ctx.renderMarkdown(response.description)}</div>
         )}
         {contentTypes.map(async ([type, resType]) => {
           const schema = resType.schema;
@@ -465,10 +421,7 @@ function WebhookCallback({
           if (!operation) return null;
 
           return (
-            <div
-              key={method}
-              className="border p-3 my-2 @container prose-no-margin rounded-lg"
-            >
+            <div key={method} className="border p-3 my-2 @container prose-no-margin rounded-lg">
               <Operation
                 type="webhook"
                 path={path}
@@ -507,9 +460,7 @@ function AuthScheme({
       <AuthProperty
         name="Authorization"
         type={
-          schema.type === 'http' && schema.scheme === 'basic'
-            ? `Basic <token>`
-            : 'Bearer <token>'
+          schema.type === 'http' && schema.scheme === 'basic' ? `Basic <token>` : 'Bearer <token>'
         }
         scopes={scopes}
       >
@@ -556,9 +507,7 @@ function AuthProperty({
     <div className={cn('text-sm border-t my-4 first:border-t-0', className)}>
       <div className="flex flex-wrap items-center gap-3 not-prose">
         <span className="font-medium font-mono text-fd-primary">{name}</span>
-        <span className="text-sm font-mono text-fd-muted-foreground">
-          {type}
-        </span>
+        <span className="text-sm font-mono text-fd-muted-foreground">{type}</span>
       </div>
       <div className="prose-no-margin pt-2.5 empty:hidden">
         {props.children}

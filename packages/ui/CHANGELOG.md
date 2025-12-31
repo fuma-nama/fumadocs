@@ -1,5 +1,23 @@
 # @fumadocs/ui
 
+## 16.4.2
+
+### Patch Changes
+
+- b16a32f: Switch to tsdown for bundling
+- Updated dependencies [590d36a]
+- Updated dependencies [98d38ff]
+- Updated dependencies [446631d]
+- Updated dependencies [b16a32f]
+  - fumadocs-core@16.4.2
+
+## 16.4.1
+
+### Patch Changes
+
+- 0a3adb8: fix TOC ease function
+  - fumadocs-core@16.4.1
+
 ## 16.4.0
 
 ### Patch Changes

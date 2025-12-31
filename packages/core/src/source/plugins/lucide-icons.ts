@@ -15,7 +15,7 @@ export function lucideIconsPlugin(
   return iconPlugin((icon = defaultIcon) => {
     if (icon === undefined) return;
     const Icon = icons[icon as keyof typeof icons];
-    if (!icon) {
+    if (!Icon) {
       console.warn(`[lucide-icons-plugin] Unknown icon detected: ${icon}.`);
       return;
     }

@@ -1,0 +1,61 @@
+---
+title: Feedback
+description: Receive feedback from your users
+---
+
+## Overview
+
+Feedback is crucial for knowing what your reader thinks, and help you to further improve documentation content.
+
+You can integrate a simple feedback system with Fumadocs.
+
+## Installation
+
+Install it using **Fumadocs CLI**.
+
+```npm
+npx @fumadocs/cli@latest add feedback
+```
+
+## Usage
+
+Now add the `<Feedback />` component to your docs page:
+
+```tsx
+import { DocsPage } from 'fumadocs-ui/layout/docs/page';
+import { Feedback } from '@/components/feedback';
+import posthog from 'posthog-js';
+
+export default async function Page() {
+  return (
+    <DocsPage>
+      {/* at the bottom of page */}
+      <Feedback
+        onRateAction={async (url, feedback) => {
+          'use server';
+
+          await posthog.capture('on_rate_docs', feedback);
+        }}
+      />
+    </DocsPage>
+  );
+}
+```
+
+- `onRateAction`: fired when user submit feedback.
+
+You can specify a server action, or any function (in client component). Such as reporting user feedback as a `on_rate_docs` event on PostHog.
+
+### Integrating with GitHub Discussion
+
+To report your feedback to GitHub Discussion, make a custom `onRateAction`.
+
+You can copy this server action as a starting point:
+
+<include cwd meta="lib/github.ts">
+  ./lib/github.ts
+</include>
+
+- Create your own GitHub App and obtain its app ID and private key.
+- Fill required environment variables.
+- Replace constants like `owner`, `repo`, and `DocsCategory`.

@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactNode } from 'react';
 import { cn } from '@fumadocs/ui/cn';
 import { buttonVariants } from '@/components/ui/button';
-import { Edit, Text } from '@fumadocs/ui/icons';
+import { Edit, Text } from 'lucide-react';
 import { I18nLabel } from '@/contexts/i18n';
 import {
   type BreadcrumbProps,
@@ -75,11 +75,7 @@ type TableOfContentOptions = Pick<AnchorProviderProps, 'single'> & {
 type TableOfContentPopoverOptions = Omit<TableOfContentOptions, 'single'>;
 
 export function DocsPage({
-  breadcrumb: {
-    enabled: breadcrumbEnabled = true,
-    component: breadcrumb,
-    ...breadcrumbProps
-  } = {},
+  breadcrumb: { enabled: breadcrumbEnabled = true, component: breadcrumb, ...breadcrumbProps } = {},
   footer = {},
   full = false,
   tableOfContentPopover: {
@@ -87,20 +83,13 @@ export function DocsPage({
     component: tocPopover,
     ...tocPopoverOptions
   } = {},
-  tableOfContent: {
-    enabled: tocEnabled,
-    component: tocReplace,
-    ...tocOptions
-  } = {},
+  tableOfContent: { enabled: tocEnabled, component: tocReplace, ...tocOptions } = {},
   toc = [],
   children,
 }: DocsPageProps) {
   // disable TOC on full mode, you can still enable it with `enabled` option.
   tocEnabled ??=
-    !full &&
-    (toc.length > 0 ||
-      tocOptions.footer !== undefined ||
-      tocOptions.header !== undefined);
+    !full && (toc.length > 0 || tocOptions.footer !== undefined || tocOptions.header !== undefined);
 
   tocPopoverEnabled ??=
     toc.length > 0 ||
@@ -144,11 +133,9 @@ export function DocsPage({
           full ? 'max-w-[1200px]' : 'xl:layout:[--fd-toc-width:268px]',
         )}
       >
-        {breadcrumbEnabled &&
-          (breadcrumb ?? <PageBreadcrumb {...breadcrumbProps} />)}
+        {breadcrumbEnabled && (breadcrumb ?? <PageBreadcrumb {...breadcrumbProps} />)}
         {children}
-        {footer.enabled !== false &&
-          (footer.component ?? <PageFooter items={footer.items} />)}
+        {footer.enabled !== false && (footer.component ?? <PageFooter items={footer.items} />)}
       </article>
       {tocEnabled &&
         (tocReplace ?? (
@@ -165,11 +152,7 @@ export function DocsPage({
               <I18nLabel label="toc" />
             </h3>
             <TOCScrollArea>
-              {tocOptions.style === 'clerk' ? (
-                <TocClerk.TOCItems />
-              ) : (
-                <TocDefault.TOCItems />
-              )}
+              {tocOptions.style === 'clerk' ? <TocClerk.TOCItems /> : <TocDefault.TOCItems />}
             </TOCScrollArea>
             {tocOptions.footer}
           </div>
@@ -206,11 +189,7 @@ export function EditOnGitHub(props: ComponentProps<'a'>) {
 /**
  * Add typography styles
  */
-export function DocsBody({
-  children,
-  className,
-  ...props
-}: ComponentProps<'div'>) {
+export function DocsBody({ children, className, ...props }: ComponentProps<'div'>) {
   return (
     <div {...props} className={cn('prose flex-1', className)}>
       {children}
@@ -218,29 +197,18 @@ export function DocsBody({
   );
 }
 
-export function DocsDescription({
-  children,
-  className,
-  ...props
-}: ComponentProps<'p'>) {
+export function DocsDescription({ children, className, ...props }: ComponentProps<'p'>) {
   // Don't render if no description provided
   if (children === undefined) return null;
 
   return (
-    <p
-      {...props}
-      className={cn('mb-8 text-lg text-fd-muted-foreground', className)}
-    >
+    <p {...props} className={cn('mb-8 text-lg text-fd-muted-foreground', className)}>
       {children}
     </p>
   );
 }
 
-export function DocsTitle({
-  children,
-  className,
-  ...props
-}: ComponentProps<'h1'>) {
+export function DocsTitle({ children, className, ...props }: ComponentProps<'h1'>) {
   return (
     <h1 {...props} className={cn('text-[1.75em] font-semibold', className)}>
       {children}

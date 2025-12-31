@@ -7,7 +7,7 @@ import { createPageTreeRenderer } from '@/components/sidebar/page-tree';
 import { createLinkItemRenderer } from '@/components/sidebar/link-item';
 import { buttonVariants } from '@/components/ui/button';
 import { SearchToggle } from '@/layouts/shared/search-toggle';
-import { Sidebar as SidebarIcon } from '@fumadocs/ui/icons';
+import { Sidebar as SidebarIcon } from 'lucide-react';
 import { mergeRefs } from '@fumadocs/ui/merge-refs';
 
 const itemVariants = cva(
@@ -54,9 +54,7 @@ export function SidebarContent({
             data-sidebar-placeholder=""
             className="sticky top-(--fd-docs-row-1) z-20 [grid-area:sidebar] pointer-events-none *:pointer-events-auto h-[calc(var(--fd-docs-height)-var(--fd-docs-row-1))] md:layout:[--fd-sidebar-width:268px] max-md:hidden"
           >
-            {collapsed && (
-              <div className="absolute start-0 inset-y-0 w-4" {...rest} />
-            )}
+            {collapsed && <div className="absolute start-0 inset-y-0 w-4" {...rest} />}
             <aside
               id="nd-sidebar"
               ref={mergeRefs(ref, refProp, asideRef)}
@@ -71,8 +69,7 @@ export function SidebarContent({
                     : '-translate-x-(--fd-sidebar-width) rtl:translate-x-full',
                 ],
                 ref.current &&
-                  (ref.current.getAttribute('data-collapsed') === 'true') !==
-                    collapsed &&
+                  (ref.current.getAttribute('data-collapsed') === 'true') !== collapsed &&
                   'transition-[width,inset-block,translate,background-color]',
                 className,
               )}
@@ -129,12 +126,7 @@ export function SidebarDrawer({
   );
 }
 
-export function SidebarSeparator({
-  className,
-  style,
-  children,
-  ...props
-}: ComponentProps<'p'>) {
+export function SidebarSeparator({ className, style, children, ...props }: ComponentProps<'p'>) {
   const depth = Base.useFolderDepth();
 
   return (
@@ -161,10 +153,7 @@ export function SidebarItem({
 
   return (
     <Base.SidebarItem
-      className={cn(
-        itemVariants({ variant: 'link', highlight: depth >= 1 }),
-        className,
-      )}
+      className={cn(itemVariants({ variant: 'link', highlight: depth >= 1 }), className)}
       style={{
         paddingInlineStart: getItemOffset(depth),
         ...style,
@@ -185,11 +174,7 @@ export function SidebarFolderTrigger({
 
   return (
     <Base.SidebarFolderTrigger
-      className={cn(
-        itemVariants({ variant: collapsible ? 'button' : null }),
-        'w-full',
-        className,
-      )}
+      className={cn(itemVariants({ variant: collapsible ? 'button' : null }), 'w-full', className)}
       style={{
         paddingInlineStart: getItemOffset(depth - 1),
         ...style,
@@ -210,11 +195,7 @@ export function SidebarFolderLink({
 
   return (
     <Base.SidebarFolderLink
-      className={cn(
-        itemVariants({ variant: 'link', highlight: depth > 1 }),
-        'w-full',
-        className,
-      )}
+      className={cn(itemVariants({ variant: 'link', highlight: depth > 1 }), 'w-full', className)}
       style={{
         paddingInlineStart: getItemOffset(depth - 1),
         ...style,

@@ -1,5 +1,5 @@
 import * as SelectPrimitive from '@radix-ui/react-select';
-import { Check, ChevronDown, ChevronUp } from '@/ui/icons';
+import { Check, ChevronDown, ChevronUp } from 'lucide-react';
 import React, { forwardRef } from 'react';
 import { cn } from '@/utils/cn';
 
@@ -55,8 +55,7 @@ const SelectScrollDownButton = forwardRef<
     <ChevronDown className="size-4" />
   </SelectPrimitive.ScrollDownButton>
 ));
-SelectScrollDownButton.displayName =
-  SelectPrimitive.ScrollDownButton.displayName;
+SelectScrollDownButton.displayName = SelectPrimitive.ScrollDownButton.displayName;
 
 const SelectContent = forwardRef<
   React.ComponentRef<typeof SelectPrimitive.Content>,
@@ -73,9 +72,7 @@ const SelectContent = forwardRef<
       {...props}
     >
       <SelectScrollUpButton />
-      <SelectPrimitive.Viewport className="p-1">
-        {children}
-      </SelectPrimitive.Viewport>
+      <SelectPrimitive.Viewport className="p-1">{children}</SelectPrimitive.Viewport>
       <SelectScrollDownButton />
     </SelectPrimitive.Content>
   </SelectPrimitive.Portal>

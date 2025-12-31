@@ -6,12 +6,7 @@ const ScrollArea = React.forwardRef<
   React.ComponentRef<typeof Primitive.Root>,
   React.ComponentPropsWithoutRef<typeof Primitive.Root>
 >(({ className, children, ...props }, ref) => (
-  <Primitive.Root
-    ref={ref}
-    type="scroll"
-    className={cn('overflow-hidden', className)}
-    {...props}
-  >
+  <Primitive.Root ref={ref} type="scroll" className={cn('overflow-hidden', className)} {...props}>
     {children}
     <Primitive.Corner />
     <ScrollBar orientation="vertical" />
@@ -24,11 +19,7 @@ const ScrollViewport = React.forwardRef<
   React.ComponentRef<typeof Primitive.Viewport>,
   React.ComponentPropsWithoutRef<typeof Primitive.Viewport>
 >(({ className, children, ...props }, ref) => (
-  <Primitive.Viewport
-    ref={ref}
-    className={cn('size-full rounded-[inherit]', className)}
-    {...props}
-  >
+  <Primitive.Viewport ref={ref} className={cn('size-full rounded-[inherit]', className)} {...props}>
     {children}
   </Primitive.Viewport>
 ));

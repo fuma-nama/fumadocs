@@ -13,10 +13,7 @@ export interface RemarkObsidianOptions {
 /**
  * [Experimental] One remark plugin to use Obsidian-style Markdown with Fumadocs
  */
-export function remarkObsidian(
-  this: Processor,
-  options: RemarkObsidianOptions,
-) {
+export function remarkObsidian(this: Processor, options: RemarkObsidianOptions) {
   const { files } = options;
   const storage = buildStorage(files, {
     url: () => undefined,

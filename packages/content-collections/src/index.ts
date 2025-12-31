@@ -1,10 +1,7 @@
 import type { Source, VirtualFile } from 'fumadocs-core/source';
 import type { BaseDocsData, BaseMetaData } from '@/types';
 
-export function createMDXSource<
-  Docs extends BaseDocsData,
-  Meta extends BaseMetaData,
->(
+export function createMDXSource<Docs extends BaseDocsData, Meta extends BaseMetaData>(
   allDocs: Docs[],
   allMetas: Meta[],
 ): Source<{

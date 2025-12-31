@@ -28,10 +28,7 @@ export interface LoadedConfig {
   >;
 }
 
-export type CollectionItem =
-  | MetaCollectionItem
-  | DocCollectionItem
-  | DocsCollectionItem;
+export type CollectionItem = MetaCollectionItem | DocCollectionItem | DocsCollectionItem;
 
 interface PrimitiveCollectionItem {
   name: string;
@@ -45,15 +42,11 @@ interface PrimitiveCollectionItem {
   patterns: string[];
 }
 
-export type MetaCollectionItem = PrimitiveCollectionItem &
-  Omit<MetaCollection, 'files' | 'dir'>;
-export type DocCollectionItem = PrimitiveCollectionItem &
-  Omit<DocCollection, 'files' | 'dir'>;
+export type MetaCollectionItem = PrimitiveCollectionItem & Omit<MetaCollection, 'files' | 'dir'>;
+export type DocCollectionItem = PrimitiveCollectionItem & Omit<DocCollection, 'files' | 'dir'>;
 
 export interface DocsCollectionItem
-  extends
-    Omit<DocsCollection, 'dir' | 'meta' | 'docs'>,
-    Omit<PrimitiveCollectionItem, 'patterns'> {
+  extends Omit<DocsCollection, 'dir' | 'meta' | 'docs'>, Omit<PrimitiveCollectionItem, 'patterns'> {
   meta: MetaCollectionItem;
   docs: DocCollectionItem;
 }
@@ -82,10 +75,7 @@ export function buildCollection(
         return this.docs.hasFile(filePath) || this.meta.hasFile(filePath);
       },
       isFileSupported(filePath) {
-        return (
-          this.docs.isFileSupported(filePath) ||
-          this.meta.isFileSupported(filePath)
-        );
+        return this.docs.isFileSupported(filePath) || this.meta.isFileSupported(filePath);
       },
       cwd,
     };
@@ -125,10 +115,7 @@ function buildPrimitiveCollection(
   };
 }
 
-export function buildConfig(
-  config: Record<string, unknown>,
-  cwd = process.cwd(),
-): LoadedConfig {
+export function buildConfig(config: Record<string, unknown>, cwd = process.cwd()): LoadedConfig {
   const collections = new Map<string, CollectionItem>();
   const loaded: GlobalConfig = {};
 
@@ -154,10 +141,7 @@ export function buildConfig(
     );
   }
 
-  const mdxOptionsCache = new Map<
-    string,
-    ProcessorOptions | Promise<ProcessorOptions>
-  >();
+  const mdxOptionsCache = new Map<string, ProcessorOptions | Promise<ProcessorOptions>>();
   return {
     global: loaded,
     collections,
@@ -173,22 +157,18 @@ export function buildConfig(
       }),
     ),
     getMDXOptions(collection, environment = 'bundler') {
-      const key = collection
-        ? `${environment}:${collection.name}`
-        : environment;
+      const key = collection ? `${environment}:${collection.name}` : environment;
       const cached = mdxOptionsCache.get(key);
       if (cached) return cached;
       let result: ProcessorOptions | Promise<ProcessorOptions>;
 
       if (collection?.mdxOptions) {
         const optionsFn = collection.mdxOptions;
-        result =
-          typeof optionsFn === 'function' ? optionsFn(environment) : optionsFn;
+        result = typeof optionsFn === 'function' ? optionsFn(environment) : optionsFn;
       } else {
         result = (async () => {
           const optionsFn = this.global.mdxOptions;
-          const options =
-            typeof optionsFn === 'function' ? await optionsFn() : optionsFn;
+          const options = typeof optionsFn === 'function' ? await optionsFn() : optionsFn;
 
           return applyMdxPreset(options)(environment);
         })();

@@ -49,10 +49,7 @@ export async function getTypeTableOutput(
   { name, type, ...props }: BaseTypeTableProps,
   options?: GenerateTypeTableOptions,
 ) {
-  const file =
-    props.path && options?.basePath
-      ? join(options.basePath, props.path)
-      : props.path;
+  const file = props.path && options?.basePath ? join(options.basePath, props.path) : props.path;
   let typeName = name;
   let content = '';
 

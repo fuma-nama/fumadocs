@@ -3,17 +3,39 @@
   "version": "0.0.8",
   "description": "The minimal setup for Fumadocs",
   "keywords": [
-    "Fumadocs",
-    "Docs"
+    "Docs",
+    "Fumadocs"
   ],
   "homepage": "https://fumadocs.dev",
-  "repository": "github:fuma-nama/fumadocs",
   "license": "MIT",
   "author": "Fuma Nama",
-  "type": "module",
+  "repository": "github:fuma-nama/fumadocs",
+  "bin": {
+    "fumapress": "./dist/cli/index.js"
+  },
   "files": [
     "dist/*"
   ],
+  "type": "module",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./dist/*",
+      "default": "./dist/*"
+    },
+    "./vite": {
+      "types": "./dist/vite/index.d.ts",
+      "default": "./dist/vite/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "zshy",
     "dev": "bun scripts/dev.ts",
@@ -45,6 +67,15 @@
     "typescript": "^5.9.3",
     "zshy": "^0.6.0"
   },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react-dom": {
+      "optional": true
+    }
+  },
   "zshy": {
     "cjs": false,
     "module": "./src/index.ts",
@@ -56,36 +87,5 @@
       "./*": "./src/*",
       "./vite": "./src/vite/index.ts"
     }
-  },
-  "peerDependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
-  },
-  "peerDependenciesMeta": {
-    "react-dom": {
-      "optional": true
-    }
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    },
-    "./*": {
-      "types": "./dist/*",
-      "default": "./dist/*"
-    },
-    "./vite": {
-      "types": "./dist/vite/index.d.ts",
-      "default": "./dist/vite/index.js"
-    }
-  },
-  "bin": {
-    "fumapress": "./dist/cli/index.js"
-  },
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts"
+  }
 }

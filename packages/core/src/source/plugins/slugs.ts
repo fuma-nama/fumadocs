@@ -1,12 +1,20 @@
-import type { LoaderPlugin } from '@/source/plugins';
 import { basename, dirname, extname } from '@/source/path';
+import type { ContentStoragePageFile } from '../storage/content';
+import type { LoaderConfig, LoaderPlugin } from '../loader';
+
+/**
+ * a function to generate slugs, return `undefined` to fallback to default generation.
+ */
+export type SlugFn<Config extends LoaderConfig = LoaderConfig> = (
+  file: ContentStoragePageFile<Config['source']>,
+) => string[] | undefined;
 
 /**
  * Generate slugs for pages if missing
  */
-export function slugsPlugin(
-  slugsFn?: (info: { path: string }) => string[],
-): LoaderPlugin {
+export function slugsPlugin<Config extends LoaderConfig = LoaderConfig>(
+  slugFn?: SlugFn<Config>,
+): LoaderPlugin<Config> {
   function isIndex(file: string) {
     return basename(file, extname(file)) === 'index';
   }
@@ -14,24 +22,23 @@ export function slugsPlugin(
   return {
     name: 'fumadocs:slugs',
     transformStorage({ storage }) {
-      const indexFiles = new Set<string>();
+      const indexFiles: string[] = [];
       const taken = new Set<string>();
-      // for custom slugs function, don't handle conflicting cases like `dir/index.mdx` vs `dir.mdx`
-      const autoIndex = slugsFn === undefined;
 
       for (const path of storage.getFiles()) {
         const file = storage.read(path);
         if (!file || file.format !== 'page' || file.slugs) continue;
 
-        if (isIndex(path) && autoIndex) {
-          indexFiles.add(path);
+        const customSlugs = slugFn?.(file);
+        // for custom slugs function, don't handle conflicting cases like `dir/index.mdx` vs `dir.mdx`
+        if (customSlugs === undefined && isIndex(path)) {
+          indexFiles.push(path);
           continue;
         }
 
-        file.slugs = slugsFn ? slugsFn({ path }) : getSlugs(path);
-
+        file.slugs = customSlugs ?? getSlugs(path);
         const key = file.slugs.join('/');
-        if (taken.has(key)) throw new Error('Duplicated slugs');
+        if (taken.has(key)) throw new Error(`Duplicated slugs: ${key}`);
         taken.add(key);
       }
 
@@ -43,6 +50,23 @@ export function slugsPlugin(
         if (taken.has(file.slugs.join('/'))) file.slugs.push('index');
       }
     },
+  };
+}
+
+/**
+ * Generate slugs from file data (e.g. frontmatter).
+ *
+ * @param key - the property name in file data to generate slugs, default to `slug`.
+ */
+export function slugsFromData<Config extends LoaderConfig = LoaderConfig>(
+  key = 'slug',
+): SlugFn<Config> {
+  return (file) => {
+    const k = key as keyof typeof file.data;
+
+    if (k in file.data && typeof file.data[k] === 'string') {
+      return file.data[k].split('/').filter((v) => v.length > 0);
+    }
   };
 }
 
@@ -61,8 +85,7 @@ export function getSlugs(file: string): string[] {
     if (seg.length > 0 && !GroupRegex.test(seg)) slugs.push(encodeURI(seg));
   }
 
-  if (GroupRegex.test(name))
-    throw new Error(`Cannot use folder group in file names: ${file}`);
+  if (GroupRegex.test(name)) throw new Error(`Cannot use folder group in file names: ${file}`);
 
   if (name !== 'index') {
     slugs.push(encodeURI(name));

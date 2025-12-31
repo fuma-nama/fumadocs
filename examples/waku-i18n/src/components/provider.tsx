@@ -20,9 +20,5 @@ const { provider } = defineI18nUI(i18n, {
 export function Provider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
-  return (
-    <RootProvider i18n={provider(router.path.split('/')[1])}>
-      {children}
-    </RootProvider>
-  );
+  return <RootProvider i18n={provider(router.path.split('/')[1])}>{children}</RootProvider>;
 }

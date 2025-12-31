@@ -1,4 +1,4 @@
-import { Link } from '@fumadocs/ui/icons';
+import { Link } from 'lucide-react';
 import type { ComponentPropsWithoutRef } from 'react';
 import { cn } from '@fumadocs/ui/cn';
 
@@ -17,10 +17,7 @@ export function Heading<T extends Types = 'h1'>({
   if (!props.id) return <As className={className} {...props} />;
 
   return (
-    <As
-      className={cn('flex scroll-m-28 flex-row items-center gap-2', className)}
-      {...props}
-    >
+    <As className={cn('flex scroll-m-28 flex-row items-center gap-2', className)} {...props}>
       <a data-card="" href={`#${props.id}`} className="peer">
         {props.children}
       </a>

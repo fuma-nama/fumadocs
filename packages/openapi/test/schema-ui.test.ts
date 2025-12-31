@@ -15,8 +15,7 @@ test('test', async () => {
       client: {
         name: 'test',
       },
-      root: ctx.schema.dereferenced.components!.schemas!
-        .V1KeysVerifyKeyResponse as ResolvedSchema,
+      root: ctx.schema.dereferenced.components!.schemas!.V1KeysVerifyKeyResponse as ResolvedSchema,
     },
     ctx,
   );

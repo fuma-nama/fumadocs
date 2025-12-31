@@ -1,9 +1,4 @@
-import {
-  ArrayLiteralExpression,
-  MethodDeclaration,
-  SourceFile,
-  ts,
-} from 'ts-morph';
+import { ArrayLiteralExpression, MethodDeclaration, SourceFile, ts } from 'ts-morph';
 import { getCodeValue } from '@/transform/shared';
 import SyntaxKind = ts.SyntaxKind;
 
@@ -56,8 +51,7 @@ export function filterReactRouterRoute(
     for (const element of arr.getElements()) {
       if (
         !element.isKind(SyntaxKind.CallExpression) ||
-        element.getFirstChildByKind(SyntaxKind.Identifier)?.getText() !==
-          'route'
+        element.getFirstChildByKind(SyntaxKind.Identifier)?.getText() !== 'route'
       )
         continue;
       const args = element.getArguments();

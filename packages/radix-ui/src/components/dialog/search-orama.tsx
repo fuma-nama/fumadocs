@@ -1,9 +1,6 @@
 'use client';
 
-import {
-  type OramaCloudOptions,
-  useDocsSearch,
-} from 'fumadocs-core/search/client';
+import { type OramaCloudOptions, useDocsSearch } from 'fumadocs-core/search/client';
 import { type ReactNode, useMemo, useState } from 'react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import {
@@ -94,12 +91,7 @@ export default function OramaSearchDialog({
   const label = showOrama && <Label />;
 
   return (
-    <SearchDialog
-      search={search}
-      onSearchChange={setSearch}
-      isLoading={query.isLoading}
-      {...props}
-    >
+    <SearchDialog search={search} onSearchChange={setSearch} isLoading={query.isLoading} {...props}>
       <SearchDialogOverlay />
       <SearchDialogContent>
         <SearchDialogHeader>
@@ -107,9 +99,7 @@ export default function OramaSearchDialog({
           <SearchDialogInput />
           <SearchDialogClose />
         </SearchDialogHeader>
-        <SearchDialogList
-          items={query.data !== 'empty' ? query.data : defaultItems}
-        />
+        <SearchDialogList items={query.data !== 'empty' ? query.data : defaultItems} />
         <SearchDialogFooter>
           {tags.length > 0 ? (
             <TagsList tag={tag} onTagChange={setTag} allowClear={allowClear}>

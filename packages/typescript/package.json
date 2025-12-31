@@ -1,36 +1,39 @@
 {
   "name": "fumadocs-typescript",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "description": "Typescript Integration for Fumadocs",
   "keywords": [
+    "Docs",
     "NextJs",
-    "fumadocs",
-    "Docs"
+    "fumadocs"
   ],
   "homepage": "https://fumadocs.dev",
-  "repository": "github:fuma-nama/fumadocs",
   "license": "MIT",
   "author": "Fuma Nama",
-  "type": "module",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    },
-    "./ui": {
-      "import": "./dist/ui/index.js",
-      "types": "./dist/ui/index.d.ts"
-    }
-  },
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "repository": "github:fuma-nama/fumadocs",
   "files": [
     "dist/*"
   ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./ui": {
+      "types": "./dist/ui/index.d.ts",
+      "import": "./dist/ui/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "build": "tsup",
+    "build": "tsdown",
     "clean": "rimraf dist",
-    "dev": "tsup --watch",
+    "dev": "tsdown --watch",
     "lint": "eslint .",
     "types:check": "tsc --noEmit"
   },
@@ -56,6 +59,7 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "tsconfig": "workspace:*",
+    "tsdown": "^0.18.3",
     "typescript": "^5.9.3",
     "unified": "^11.0.5"
   },
@@ -63,6 +67,7 @@
     "@types/react": "*",
     "fumadocs-core": "^15.7.0 || ^16.0.0",
     "fumadocs-ui": "^15.7.0 || ^16.0.0",
+    "react": "*",
     "typescript": "*"
   },
   "peerDependenciesMeta": {
@@ -72,8 +77,5 @@
     "@types/react": {
       "optional": true
     }
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

@@ -1,6 +1,6 @@
 import type { Loader, LoaderInput } from '@/loaders/adapter';
 import type { ConfigLoader } from '@/loaders/config';
-import { dump, load } from 'js-yaml';
+import { load } from 'js-yaml';
 import { z } from 'zod';
 import { metaLoaderGlob } from '.';
 import type { MetaCollectionItem } from '@/config/build';
@@ -19,10 +19,10 @@ export function createMetaLoader(
   { getCore }: ConfigLoader,
   resolve: {
     json?: 'json' | 'js';
-    yaml?: 'yaml' | 'js';
+    yaml?: 'js';
   } = {},
 ): Loader {
-  const { json: resolveJson = 'js', yaml: resolveYaml = 'js' } = resolve;
+  const { json: resolveJson = 'js' } = resolve;
 
   function parse(filePath: string, source: string) {
     try {
@@ -81,6 +81,7 @@ export function createMetaLoader(
 
       if (input.filePath.endsWith('.json')) {
         return {
+          moduleType: resolveJson,
           code:
             resolveJson === 'json'
               ? JSON.stringify(data)
@@ -88,10 +89,8 @@ export function createMetaLoader(
         };
       } else {
         return {
-          code:
-            resolveYaml === 'yaml'
-              ? dump(data)
-              : `export default ${JSON.stringify(data)}`,
+          moduleType: 'js',
+          code: `export default ${JSON.stringify(data)}`,
         };
       }
     },

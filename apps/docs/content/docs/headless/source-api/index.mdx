@@ -20,7 +20,7 @@ description: Turn content sources into a unified interface
 
 ## Usage
 
-You can use it with built-in content sources like Fumadocs MDX.
+You can use it with content sources like Fumadocs MDX, see [`source`](/docs/headless/source-api/source) for details.
 
 ```ts
 import { loader } from 'fumadocs-core/source';
@@ -49,9 +49,25 @@ loader({
 });
 ```
 
+### Slugs
+
+Define a custom function to generate slugs from page files.
+
+```ts
+import { loader } from 'fumadocs-core/source';
+
+loader({
+  slugs(file) {
+    console.log(file.path, file.data);
+    // or return `undefined` to fallback to default value
+    return ['my', 'slug'];
+  },
+});
+```
+
 ### Icons
 
-Load the [icon](/docs/headless/page-conventions#icons) property specified by pages and meta files.
+Load the [icon](/docs/headless/page-conventions#icons) property specified by page and meta files.
 
 ```ts
 import { loader } from 'fumadocs-core/source';
@@ -124,7 +140,7 @@ source.getPages('locale');
 import { source } from '@/lib/source';
 
 // without i18n
-source.pageTree;
+source.getPageTree();
 
 // with i18n
 source.getPageTree('locale');

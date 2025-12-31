@@ -7,7 +7,7 @@ import { createPageTreeRenderer } from '@/components/sidebar/page-tree';
 import { createLinkItemRenderer } from '@/components/sidebar/link-item';
 import { buttonVariants } from '@/components/ui/button';
 import { SearchToggle } from '@/layouts/shared/search-toggle';
-import { Sidebar as SidebarIcon } from '@fumadocs/ui/icons';
+import { Sidebar as SidebarIcon } from 'lucide-react';
 import { mergeRefs } from '@fumadocs/ui/merge-refs';
 
 const itemVariants = cva(
@@ -30,13 +30,25 @@ function getItemOffset(depth: number) {
   return `calc(${2 + 3 * depth} * var(--spacing))`;
 }
 
-export {
-  SidebarProvider as Sidebar,
-  SidebarFolder,
-  SidebarCollapseTrigger,
-  SidebarViewport,
-  SidebarTrigger,
-} from '@/components/sidebar/base';
+export function Sidebar(props: ComponentProps<typeof Base.SidebarProvider>) {
+  return <Base.SidebarProvider {...props} />;
+}
+
+export function SidebarFolder(props: ComponentProps<typeof Base.SidebarFolder>) {
+  return <Base.SidebarFolder {...props} />;
+}
+
+export function SidebarCollapseTrigger(props: ComponentProps<typeof Base.SidebarCollapseTrigger>) {
+  return <Base.SidebarCollapseTrigger {...props} />;
+}
+
+export function SidebarViewport(props: ComponentProps<typeof Base.SidebarViewport>) {
+  return <Base.SidebarViewport {...props} />;
+}
+
+export function SidebarTrigger(props: ComponentProps<typeof Base.SidebarTrigger>) {
+  return <Base.SidebarTrigger {...props} />;
+}
 
 export function SidebarContent({
   ref: refProp,
@@ -54,9 +66,7 @@ export function SidebarContent({
             data-sidebar-placeholder=""
             className="sticky top-(--fd-docs-row-1) z-20 [grid-area:sidebar] pointer-events-none *:pointer-events-auto h-[calc(var(--fd-docs-height)-var(--fd-docs-row-1))] md:layout:[--fd-sidebar-width:268px] max-md:hidden"
           >
-            {collapsed && (
-              <div className="absolute start-0 inset-y-0 w-4" {...rest} />
-            )}
+            {collapsed && <div className="absolute start-0 inset-y-0 w-4" {...rest} />}
             <aside
               id="nd-sidebar"
               ref={mergeRefs(ref, refProp, asideRef)}
@@ -71,8 +81,7 @@ export function SidebarContent({
                     : '-translate-x-(--fd-sidebar-width) rtl:translate-x-full',
                 ],
                 ref.current &&
-                  (ref.current.getAttribute('data-collapsed') === 'true') !==
-                    collapsed &&
+                  (ref.current.getAttribute('data-collapsed') === 'true') !== collapsed &&
                   'transition-[width,inset-block,translate,background-color]',
                 className,
               )}
@@ -129,12 +138,7 @@ export function SidebarDrawer({
   );
 }
 
-export function SidebarSeparator({
-  className,
-  style,
-  children,
-  ...props
-}: ComponentProps<'p'>) {
+export function SidebarSeparator({ className, style, children, ...props }: ComponentProps<'p'>) {
   const depth = Base.useFolderDepth();
 
   return (
@@ -161,10 +165,7 @@ export function SidebarItem({
 
   return (
     <Base.SidebarItem
-      className={cn(
-        itemVariants({ variant: 'link', highlight: depth >= 1 }),
-        className,
-      )}
+      className={cn(itemVariants({ variant: 'link', highlight: depth >= 1 }), className)}
       style={{
         paddingInlineStart: getItemOffset(depth),
         ...style,
@@ -212,11 +213,7 @@ export function SidebarFolderLink({
 
   return (
     <Base.SidebarFolderLink
-      className={cn(
-        itemVariants({ variant: 'link', highlight: depth > 1 }),
-        'w-full',
-        className,
-      )}
+      className={cn(itemVariants({ variant: 'link', highlight: depth > 1 }), 'w-full', className)}
       style={{
         paddingInlineStart: getItemOffset(depth - 1),
         ...style,
@@ -253,7 +250,7 @@ export function SidebarFolderContent({
 }
 
 export const SidebarPageTree = createPageTreeRenderer({
-  SidebarFolder: Base.SidebarFolder,
+  SidebarFolder,
   SidebarFolderContent,
   SidebarFolderLink,
   SidebarFolderTrigger,
@@ -262,7 +259,7 @@ export const SidebarPageTree = createPageTreeRenderer({
 });
 
 export const SidebarLinkItem = createLinkItemRenderer({
-  SidebarFolder: Base.SidebarFolder,
+  SidebarFolder,
   SidebarFolderContent,
   SidebarFolderLink,
   SidebarFolderTrigger,

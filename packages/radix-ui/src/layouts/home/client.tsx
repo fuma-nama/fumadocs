@@ -21,16 +21,10 @@ import {
 } from '@/components/ui/navigation-menu';
 import { buttonVariants } from '@/components/ui/button';
 import type { HomeLayoutProps } from '.';
-import {
-  LargeSearchToggle,
-  SearchToggle,
-} from '@/layouts/shared/search-toggle';
+import { LargeSearchToggle, SearchToggle } from '@/layouts/shared/search-toggle';
 import { ThemeToggle } from '@/layouts/shared/theme-toggle';
-import {
-  LanguageToggle,
-  LanguageToggleText,
-} from '@/layouts/shared/language-toggle';
-import { ChevronDown, Languages } from '@fumadocs/ui/icons';
+import { LanguageToggle, LanguageToggleText } from '@/layouts/shared/language-toggle';
+import { ChevronDown, Languages } from 'lucide-react';
 import { useIsScrollTop } from '@fumadocs/ui/hooks/use-is-scroll-top';
 
 export const navItemVariants = cva('[&_svg]:size-4', {
@@ -113,9 +107,7 @@ export function Header({
           {navItems.filter(isSecondary).map((item, i) => (
             <NavigationMenuLinkItem
               key={i}
-              className={cn(
-                item.type === 'icon' && '-mx-1 first:ms-0 last:me-0',
-              )}
+              className={cn(item.type === 'icon' && '-mx-1 first:ms-0 last:me-0')}
               item={item}
             />
           ))}
@@ -123,9 +115,7 @@ export function Header({
       </div>
       <ul className="flex flex-row items-center ms-auto -me-1.5 lg:hidden">
         {searchToggle.enabled !== false &&
-          (searchToggle.components?.sm ?? (
-            <SearchToggle className="p-2" hideIfDisabled />
-          ))}
+          (searchToggle.components?.sm ?? <SearchToggle className="p-2" hideIfDisabled />)}
         <NavigationMenuItem>
           <NavigationMenuTrigger
             aria-label="Toggle Menu"
@@ -136,9 +126,7 @@ export function Header({
                 className: 'group [&_svg]:size-5.5',
               }),
             )}
-            onPointerMove={
-              nav.enableHoverToOpen ? undefined : (e) => e.preventDefault()
-            }
+            onPointerMove={nav.enableHoverToOpen ? undefined : (e) => e.preventDefault()}
           >
             <ChevronDown className="transition-transform duration-300 group-data-[state=open]:rotate-180" />
           </NavigationMenuTrigger>
@@ -146,11 +134,7 @@ export function Header({
             {menuItems
               .filter((item) => !isSecondary(item))
               .map((item, i) => (
-                <MobileNavigationMenuLinkItem
-                  key={i}
-                  item={item}
-                  className="sm:hidden"
-                />
+                <MobileNavigationMenuLinkItem key={i} item={item} className="sm:hidden" />
               ))}
             <div className="-ms-1.5 flex flex-row items-center gap-2 max-sm:mt-2">
               {menuItems.filter(isSecondary).map((item, i) => (
@@ -169,9 +153,7 @@ export function Header({
                 </LanguageToggle>
               )}
               {themeSwitch.enabled !== false &&
-                (themeSwitch.component ?? (
-                  <ThemeToggle mode={themeSwitch?.mode} />
-                ))}
+                (themeSwitch.component ?? <ThemeToggle mode={themeSwitch?.mode} />)}
             </div>
           </NavigationMenuContent>
         </NavigationMenuItem>
@@ -194,16 +176,11 @@ function HeaderNavigationMenu({
 }) {
   const [value, setValue] = useState('');
   const isTop = useIsScrollTop({ enabled: transparentMode === 'top' }) ?? true;
-  const isTransparent =
-    transparentMode === 'top' ? isTop : transparentMode === 'always';
+  const isTransparent = transparentMode === 'top' ? isTop : transparentMode === 'always';
 
   return (
     <NavigationMenu value={value} onValueChange={setValue} asChild>
-      <header
-        id="nd-nav"
-        {...props}
-        className={cn('sticky h-14 top-0 z-40', props.className)}
-      >
+      <header id="nd-nav" {...props} className={cn('sticky h-14 top-0 z-40', props.className)}>
         <div
           className={cn(
             'backdrop-blur-lg border-b transition-colors *:mx-auto *:max-w-(--fd-layout-width)',
@@ -211,10 +188,7 @@ function HeaderNavigationMenu({
             (!isTransparent || value.length > 0) && 'bg-fd-background/80',
           )}
         >
-          <NavigationMenuList
-            className="flex h-14 w-full items-center px-4"
-            asChild
-          >
+          <NavigationMenuList className="flex h-14 w-full items-center px-4" asChild>
             <nav>{props.children}</nav>
           </NavigationMenuList>
 
@@ -225,13 +199,7 @@ function HeaderNavigationMenu({
   );
 }
 
-function NavigationMenuLinkItem({
-  item,
-  ...props
-}: {
-  item: LinkItemType;
-  className?: string;
-}) {
+function NavigationMenuLinkItem({ item, ...props }: { item: LinkItemType; className?: string }) {
   if (item.type === 'custom') return <div {...props}>{item.children}</div>;
 
   if (item.type === 'menu') {
@@ -242,9 +210,7 @@ function NavigationMenuLinkItem({
 
       const {
         banner = child.icon ? (
-          <div className="w-fit rounded-md border bg-fd-muted p-1 [&_svg]:size-4">
-            {child.icon}
-          </div>
+          <div className="w-fit rounded-md border bg-fd-muted p-1 [&_svg]:size-4">{child.icon}</div>
         ) : null,
         ...rest
       } = child.menu ?? {};
@@ -264,9 +230,7 @@ function NavigationMenuLinkItem({
               <>
                 {banner}
                 <p className="text-base font-medium">{child.text}</p>
-                <p className="text-sm text-fd-muted-foreground empty:hidden">
-                  {child.description}
-                </p>
+                <p className="text-sm text-fd-muted-foreground empty:hidden">{child.description}</p>
               </>
             )}
           </Link>

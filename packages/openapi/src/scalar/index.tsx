@@ -13,9 +13,7 @@ function APIPlayground({
   method: MethodInformation;
   ctx: RenderContext;
 }) {
-  return (
-    <Client method={method.method} path={path} spec={ctx.schema.bundled} />
-  );
+  return <Client method={method.method} path={path} spec={ctx.schema.bundled} />;
 }
 
 /**
@@ -23,9 +21,7 @@ function APIPlayground({
  *
  * Requires `@scalar/api-client-react` to be installed, it imports the styles automatically.
  */
-export function withScalar(
-  options: CreateAPIPageOptions = {},
-): CreateAPIPageOptions {
+export function withScalar(options: CreateAPIPageOptions = {}): CreateAPIPageOptions {
   return {
     ...options,
     playground: {

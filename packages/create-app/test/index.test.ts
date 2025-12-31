@@ -18,9 +18,7 @@ const project = new Project({
 });
 
 async function createSourceFile(templatePath: string) {
-  const content = (
-    await fs.readFile(path.join(__dirname, templatePath))
-  ).toString();
+  const content = (await fs.readFile(path.join(__dirname, templatePath))).toString();
 
   return project.createSourceFile('temp.ts', content, {
     overwrite: true,
@@ -28,9 +26,7 @@ async function createSourceFile(templatePath: string) {
 }
 
 test('transform tanstack start vite config: add pages', async () => {
-  const sourceFile = await createSourceFile(
-    'fixtures/tanstack-vite-config.txt',
-  );
+  const sourceFile = await createSourceFile('fixtures/tanstack-vite-config.txt');
   addTanstackPrerender(sourceFile, ['/static.json', '/docs/test']);
   await expect(sourceFile.getFullText()).toMatchFileSnapshot(
     'fixtures/tanstack-vite-config(add-pages).output.txt',
@@ -64,11 +60,7 @@ test('transform react router routes: filter routes', async () => {
 
 test('transform react router config: remove exclude', async () => {
   const sourceFile = await createSourceFile('fixtures/react-router-config.txt');
-  filterReactRouterPrerenderArray(
-    sourceFile,
-    'excluded',
-    (v) => v !== '/api/search',
-  );
+  filterReactRouterPrerenderArray(sourceFile, 'excluded', (v) => v !== '/api/search');
   await expect(sourceFile.getFullText()).toMatchFileSnapshot(
     'fixtures/react-router-config(remove-exclude).output.txt',
   );

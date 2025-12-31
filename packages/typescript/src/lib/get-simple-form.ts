@@ -60,10 +60,7 @@ export function getSimpleForm(
     return 'object';
   }
 
-  return type.getText(
-    location,
-    ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope,
-  );
+  return type.getText(location, ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope);
 }
 
 function dedupe<T>(arr: T[]): T[] {

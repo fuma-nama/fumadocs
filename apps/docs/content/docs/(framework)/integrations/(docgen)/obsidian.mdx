@@ -1,0 +1,66 @@
+---
+title: Obsidian
+description: Render your Obsidian vaults in Fumadocs.
+---
+
+<Callout type="warn" title="Experimental">
+  Might have bugs or breaking changes, use it at your own risk.
+</Callout>
+
+## Setup
+
+```npm
+npm i fumadocs-obsidian
+```
+
+You can copy your vault folder to the project (e.g. root directory):
+
+<Files>
+  <Folder name="Obsidian Vault" defaultOpen>
+    <File name="Introduction.md" />
+    <File name="Folder/Hello World.md" />
+  </Folder>
+  <File name="package.json" />
+</Files>
+
+Create a script to generate docs & assets:
+
+```ts title="scripts/generate.ts"
+import { fromVault } from 'fumadocs-obsidian';
+
+await fromVault({
+  dir: 'Obsidian Vault',
+  out: {
+    // you can specify the locations of `/public` & `/content/docs` folder
+  },
+});
+```
+
+Run the script to generate docs:
+
+```bash
+bun scripts/generate.ts
+```
+
+Finally, include necessary MDX components:
+
+```tsx title="mdx-components.tsx"
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+import * as ObsidianComponents from 'fumadocs-obsidian/ui';
+import type { MDXComponents } from 'mdx/types';
+
+export function getMDXComponents(components?: MDXComponents) {
+  return {
+    ...defaultMdxComponents,
+    ...ObsidianComponents,
+    ...components,
+  };
+}
+```
+
+### Additions
+
+Some syntax features need to be enabled separately:
+
+- [Mermaid](/docs/markdown/mermaid).
+- [Math](/docs/markdown/math).

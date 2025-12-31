@@ -32,10 +32,8 @@ export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
   s.push('var client = new HttpClient();');
   const headerLines: string[] = [];
 
-  function addHeader(key: string, value: unknown) {
-    headerLines.push(
-      `client.DefaultRequestHeaders.Add("${key}", ${JSON.stringify(value)});`,
-    );
+  function addHeader(key: string, value: string) {
+    headerLines.push(`client.DefaultRequestHeaders.Add("${key}", ${JSON.stringify(value)});`);
   }
   for (const k in headers) {
     addHeader(k, headers[k].value);
@@ -53,8 +51,7 @@ export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
   s.push(...headerLines);
 
   // Build the request
-  const method =
-    data.method[0].toUpperCase() + data.method.slice(1).toLowerCase() + 'Async';
+  const method = data.method[0].toUpperCase() + data.method.slice(1).toLowerCase() + 'Async';
 
   if (body) {
     s.push(`var response = await client.${method}("${url}", body);`);

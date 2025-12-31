@@ -1,9 +1,4 @@
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from 'fumadocs-ui/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from 'fumadocs-ui/components/ui/tabs';
 import { CodeBlock } from '@/components/code-block';
 
 export function Installation({ name }: { name: string }) {
@@ -14,9 +9,7 @@ export function Installation({ name }: { name: string }) {
       <TabsList className="flex flex-col gap-3 text-sm items-start p-3 mb-2 bg-fd-card text-fd-card-foreground rounded-xl border not-prose sm:flex-row">
         <div className="me-auto">
           <p className="font-medium">Install to your codebase</p>
-          <p className="mt-1 text-fd-muted-foreground">
-            Easier customisation & control.
-          </p>
+          <p className="mt-1 text-fd-muted-foreground">Easier customisation & control.</p>
         </div>
         {tabs.map((tab) => (
           <TabsTrigger

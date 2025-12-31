@@ -1,38 +1,41 @@
 {
   "name": "create-fumadocs-app",
-  "version": "16.0.32",
+  "version": "16.0.34",
   "description": "Create a new documentation site with Fumadocs",
   "keywords": [
-    "react",
     "Docs",
-    "Fumadocs"
+    "Fumadocs",
+    "react"
   ],
   "homepage": "https://fumadocs.dev",
-  "repository": "github:fuma-nama/fumadocs",
   "license": "MIT",
   "author": "Fuma Nama",
-  "type": "module",
+  "repository": "github:fuma-nama/fumadocs",
   "bin": "./dist/bin.js",
+  "files": [
+    "dist/*",
+    "template/*"
+  ],
+  "type": "module",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     },
     "./plugins/*": {
-      "import": "./dist/plugins/*.js",
-      "types": "./dist/plugins/*.d.ts"
+      "types": "./dist/plugins/*.d.ts",
+      "import": "./dist/plugins/*.js"
     }
   },
-  "files": [
-    "template/*",
-    "dist/*"
-  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "build": "pnpm run sync && tsup",
+    "build": "pnpm run sync && tsdown",
     "clean": "rimraf dist",
-    "dev": "tsup --watch",
+    "dev": "tsdown --watch",
     "lint": "eslint .",
     "postpublish": "echo \"Updating template repo\" && bash ./scripts/update-git-repo.sh",
     "types:check": "tsc --noEmit",
@@ -52,12 +55,10 @@
     "eslint-config-custom": "workspace:*",
     "tinyglobby": "^0.2.15",
     "tsconfig": "workspace:*",
+    "tsdown": "^0.18.3",
     "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=18.17.0"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

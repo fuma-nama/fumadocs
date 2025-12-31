@@ -1,42 +1,51 @@
 {
   "name": "fumadocs-python",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "The built-in Python docgen for Fumadocs",
   "keywords": [
-    "NextJs",
     "Docs",
+    "NextJs",
     "Python"
   ],
   "homepage": "https://fumadocs.dev",
-  "repository": "github:fuma-nama/fumadocs",
   "license": "MIT",
   "author": "Fuma Nama",
+  "repository": "github:fuma-nama/fumadocs",
+  "files": [
+    "fumapy",
+    "pyproject.toml",
+    "styles",
+    "dist/*"
+  ],
   "type": "module",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": [
-    "dist/*",
-    "fumapy",
-    "styles",
-    "pyproject.toml"
-  ],
   "exports": {
     "./preset.css": "./styles/preset.css",
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     },
     "./components": {
-      "import": "./dist/components/index.js",
-      "types": "./dist/components/index.d.ts"
+      "types": "./dist/components/index.d.ts",
+      "import": "./dist/components/index.js"
     }
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "build": "tsup",
+    "build": "tsdown",
     "clean": "rimraf dist",
-    "dev": "tsup --watch",
+    "dev": "tsdown --watch",
     "lint": "eslint .",
     "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "js-yaml": "^4.1.1",
+    "lucide-react": "^0.562.0",
+    "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
@@ -45,25 +54,18 @@
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "lucide-react": "^0.562.0",
-    "tsconfig": "workspace:*"
+    "tsconfig": "workspace:*",
+    "tsdown": "^0.18.3"
   },
   "peerDependencies": {
     "@types/react": "*",
     "fumadocs-core": "15.x.x || 16.x.x",
-    "fumadocs-ui": "15.x.x || 16.x.x"
+    "fumadocs-ui": "15.x.x || 16.x.x",
+    "react": "19.x.x"
   },
   "peerDependenciesMeta": {
     "@types/react": {
       "optional": true
     }
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "dependencies": {
-    "class-variance-authority": "^0.7.1",
-    "js-yaml": "^4.1.1",
-    "tailwind-merge": "^3.4.0"
   }
 }

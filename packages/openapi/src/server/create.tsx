@@ -1,18 +1,12 @@
 import { createProxy } from '@/server/proxy';
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
-import {
-  processDocument,
-  type ProcessedDocument,
-} from '@/utils/process-document';
+import { processDocument, type ProcessedDocument } from '@/utils/process-document';
 import type { CodeUsageGenerator } from '@/ui/operation/usage-tabs';
 
 /**
  * schema id -> file path, URL, or downloaded schema object
  */
-type SchemaMap = Record<
-  string,
-  string | OpenAPIV3_1.Document | OpenAPIV3.Document
->;
+type SchemaMap = Record<string, string | OpenAPIV3_1.Document | OpenAPIV3.Document>;
 type ProcessedSchemaMap = Record<string, ProcessedDocument>;
 
 export interface OpenAPIOptions {
@@ -84,14 +78,8 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
   };
 }
 
-export function createCodeSample<T>(
-  options: Partial<CodeUsageGenerator<T>>,
-): CodeUsageGenerator {
-  const {
-    lang = 'unknown',
-    id = lang,
-    ...rest
-  } = options as Partial<CodeUsageGenerator>;
+export function createCodeSample<T>(options: Partial<CodeUsageGenerator<T>>): CodeUsageGenerator {
+  const { lang = 'unknown', id = lang, ...rest } = options as Partial<CodeUsageGenerator>;
 
   return { id, lang, ...rest };
 }

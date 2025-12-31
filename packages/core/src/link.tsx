@@ -32,13 +32,7 @@ const Link = forwardRef<HTMLAnchorElement, LinkProps>(
   ) => {
     if (external) {
       return (
-        <a
-          ref={ref}
-          href={href}
-          rel="noreferrer noopener"
-          target="_blank"
-          {...props}
-        >
+        <a ref={ref} href={href} rel="noreferrer noopener" target="_blank" {...props}>
           {children}
         </a>
       );

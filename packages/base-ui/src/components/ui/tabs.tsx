@@ -129,10 +129,7 @@ export function Tabs({
   );
 }
 
-export function TabsContent({
-  value,
-  ...props
-}: ComponentProps<typeof Primitive.Panel>) {
+export function TabsContent({ value, ...props }: ComponentProps<typeof Primitive.Panel>) {
   const { valueToIdMap } = useTabContext();
 
   if (props.id) {

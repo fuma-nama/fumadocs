@@ -37,9 +37,7 @@ const ExtendTypes = `{
 /**
  * Injects `lastModified` property to page exports.
  */
-export default function lastModified(
-  options: LastModifiedPluginOptions = {},
-): Plugin {
+export default function lastModified(options: LastModifiedPluginOptions = {}): Plugin {
   const { versionControl = 'git', filter = () => true } = options;
   let fn: VersionControlFn;
 
@@ -94,23 +92,16 @@ export default function lastModified(
   };
 }
 
-async function getGitTimestamp(
-  file: string,
-  cwd: string,
-): Promise<Date | null> {
+async function getGitTimestamp(file: string, cwd: string): Promise<Date | null> {
   const cached = cache.get(file);
   if (cached) return cached;
 
   const timePromise = (async () => {
-    const out = await x(
-      'git',
-      ['log', '-1', '--pretty="%ai"', path.relative(cwd, file)],
-      {
-        nodeOptions: {
-          cwd,
-        },
+    const out = await x('git', ['log', '-1', '--pretty="%ai"', path.relative(cwd, file)], {
+      nodeOptions: {
+        cwd,
       },
-    );
+    });
 
     if (out.exitCode !== 0) return null;
     const date = new Date(out.stdout);

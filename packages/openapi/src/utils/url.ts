@@ -24,10 +24,7 @@ export function withBase(url: string, base: string): string {
   return url;
 }
 
-export function resolveServerUrl(
-  template: string,
-  variables: Record<string, string>,
-): string {
+export function resolveServerUrl(template: string, variables: Record<string, string>): string {
   for (const [key, value] of Object.entries(variables)) {
     template = template.replaceAll(`{${key}}`, value);
   }
@@ -35,19 +32,12 @@ export function resolveServerUrl(
   return template;
 }
 
-export function resolveRequestData(
-  pathname: string,
-  { path, query }: RequestData,
-): string {
+export function resolveRequestData(pathname: string, { path, query }: RequestData): string {
   // First, resolve path parameters in the pathname
   for (const key in path) {
     const param = path[key];
 
-    if (Array.isArray(param.value)) {
-      pathname = pathname.replace(`{${key}}`, param.value.join('/'));
-    } else {
-      pathname = pathname.replace(`{${key}}`, param.value);
-    }
+    pathname = pathname.replace(`{${key}}`, param.value);
   }
 
   // Check if pathname already contains query parameters (legacy API support)
@@ -59,16 +49,12 @@ export function resolveRequestData(
   // Add new query parameters from the RequestData
   for (const key in query) {
     const param = query[key];
+    if (param.values.length === 0) continue;
 
-    if (Array.isArray(param.value)) {
-      // Remove existing parameter first to avoid duplicates
-      searchParams.delete(key);
-      for (const item of param.value) {
-        searchParams.append(key, item);
-      }
-    } else {
-      // Set (replace if exists) the parameter value
-      searchParams.set(key, param.value);
+    // Remove existing parameter first to avoid duplicates
+    searchParams.delete(key);
+    for (const item of param.values) {
+      searchParams.append(key, item);
     }
   }
 

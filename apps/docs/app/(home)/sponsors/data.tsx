@@ -47,11 +47,7 @@ export const organizationAsUserSponsors = [
     asUser: 'marclave',
     logo: (
       <>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 593 593"
-          className="size-9.5"
-        >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 593 593" className="size-9.5">
           <path
             fill="currentColor"
             fillRule="evenodd"

@@ -1,16 +1,11 @@
 import { type Orama, search, type SearchParams } from '@orama/orama';
-import {
-  type SimpleDocument,
-  type simpleSchema,
-} from '@/search/orama/create-db';
+import { type SimpleDocument, type simpleSchema } from '@/search/orama/create-db';
 import { createContentHighlighter, type SortedResult } from '@/search';
 
 export async function searchSimple(
   db: Orama<typeof simpleSchema>,
   query: string,
-  params: Partial<
-    SearchParams<Orama<typeof simpleSchema>, SimpleDocument>
-  > = {},
+  params: Partial<SearchParams<Orama<typeof simpleSchema>, SimpleDocument>> = {},
 ): Promise<SortedResult[]> {
   const highlighter = createContentHighlighter(query);
   const result = await search(db, {

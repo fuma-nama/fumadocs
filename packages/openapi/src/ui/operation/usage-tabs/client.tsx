@@ -1,11 +1,6 @@
 'use client';
 import { useApiContext, useServerSelectContext } from '@/ui/contexts/api';
-import {
-  joinURL,
-  withBase,
-  resolveServerUrl,
-  resolveRequestData,
-} from '@/utils/url';
+import { joinURL, withBase, resolveServerUrl, resolveRequestData } from '@/utils/url';
 import {
   Select,
   SelectTrigger,
@@ -14,23 +9,12 @@ import {
   SelectItem,
 } from '@/ui/components/select';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
-import {
-  useState,
-  useEffect,
-  useMemo,
-  createContext,
-  ReactNode,
-  useRef,
-  use,
-} from 'react';
+import { useState, useEffect, useMemo, createContext, ReactNode, useRef, use } from 'react';
 import type { CodeUsageGenerator } from '.';
 import type { ExampleRequestItem } from '../request-tabs';
 import type { RawRequestData, RequestData } from '@/requests/types';
 
-export type ExampleUpdateListener = (
-  data: RawRequestData,
-  encoded: RequestData,
-) => void;
+export type ExampleUpdateListener = (data: RawRequestData, encoded: RequestData) => void;
 
 const Context = createContext<{
   route: string;
@@ -54,9 +38,7 @@ export function UsageTabsProvider({
   defaultExampleId?: string;
   children: ReactNode;
 }) {
-  const [example, setExample] = useState(
-    () => defaultExampleId ?? examples.at(0)?.id,
-  );
+  const [example, setExample] = useState(() => defaultExampleId ?? examples.at(0)?.id);
   const listeners = useRef<ExampleUpdateListener[]>([]);
 
   return (
@@ -90,9 +72,7 @@ export function UsageTabsProvider({
             }
           },
           removeListener(listener) {
-            listeners.current = listeners.current.filter(
-              (item) => item !== listener,
-            );
+            listeners.current = listeners.current.filter((item) => item !== listener);
           },
           addListener(listener) {
             // initial call to listeners to ensure their data is the latest
@@ -117,8 +97,7 @@ export function useExampleRequests() {
 
 export function UsageTabsSelector() {
   const { example: key, setExample: setKey, examples } = useExampleRequests();
-  const { APIExampleSelector: Override } =
-    useApiContext().client.operation ?? {};
+  const { APIExampleSelector: Override } = useApiContext().client.operation ?? {};
 
   if (Override) {
     return <Override items={examples} value={key} onValueChange={setKey} />;
@@ -182,9 +161,7 @@ export function UsageTab(sample: CodeUsageGenerator) {
       joinURL(
         withBase(
           server ? resolveServerUrl(server.url, server.variables) : '/',
-          typeof window !== 'undefined'
-            ? window.location.origin
-            : 'https://loading',
+          typeof window !== 'undefined' ? window.location.origin : 'https://loading',
         ),
         resolveRequestData(route, data),
       ),
@@ -198,7 +175,5 @@ export function UsageTab(sample: CodeUsageGenerator) {
 
   if (!code || !sample) return null;
 
-  return (
-    <DynamicCodeBlock lang={sample.lang} code={code} options={shikiOptions} />
-  );
+  return <DynamicCodeBlock lang={sample.lang} code={code} options={shikiOptions} />;
 }

@@ -1,15 +1,11 @@
 'use client';
 
-import { ChevronDown } from '@fumadocs/ui/icons';
+import { ChevronDown } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import { cva } from 'class-variance-authority';
 import { cn } from '@fumadocs/ui/cn';
 import { type ReactNode, useState } from 'react';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 export interface ParameterNode {
   name: string;
@@ -96,9 +92,7 @@ function Item({
       onOpenChange={setOpen}
       className={cn(
         'rounded-xl border overflow-hidden transition-all',
-        open
-          ? 'shadow-sm bg-fd-background not-last:mb-2'
-          : 'border-transparent',
+        open ? 'shadow-sm bg-fd-background not-last:mb-2' : 'border-transparent',
       )}
     >
       <CollapsibleTrigger className="relative flex flex-row items-center w-full group text-start px-3 py-2 not-prose hover:bg-fd-accent">
@@ -144,16 +138,9 @@ function Item({
               <p className={cn(fieldVariants())}>Parameters</p>
               <div className="flex flex-col gap-2">
                 {parameters.map((param) => (
-                  <div
-                    key={param.name}
-                    className="inline-flex items-center flex-wrap gap-1"
-                  >
-                    <p className="font-medium not-prose text-nowrap">
-                      {param.name} -
-                    </p>
-                    <div className="text-sm prose prose-no-margin">
-                      {param.description}
-                    </div>
+                  <div key={param.name} className="inline-flex items-center flex-wrap gap-1">
+                    <p className="font-medium not-prose text-nowrap">{param.name} -</p>
+                    <div className="text-sm prose prose-no-margin">{param.description}</div>
                   </div>
                 ))}
               </div>
@@ -162,9 +149,7 @@ function Item({
           {returns && (
             <>
               <p className={cn(fieldVariants())}>Returns</p>
-              <div className="my-auto text-sm prose prose-no-margin">
-                {returns}
-              </div>
+              <div className="my-auto text-sm prose prose-no-margin">{returns}</div>
             </>
           )}
         </div>

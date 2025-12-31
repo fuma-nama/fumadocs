@@ -27,8 +27,7 @@ export interface PluginContext {
   core: Core;
 }
 
-export type CompilationContext<Collection> = PluginContext &
-  TransformOptions<Collection>;
+export type CompilationContext<Collection> = PluginContext & TransformOptions<Collection>;
 
 export interface TransformOptions<Collection> {
   collection: Collection;
@@ -42,10 +41,7 @@ export interface Plugin extends IndexFilePlugin {
   /**
    * on config loaded/updated
    */
-  config?: (
-    this: PluginContext,
-    config: LoadedConfig,
-  ) => Awaitable<void | LoadedConfig>;
+  config?: (this: PluginContext, config: LoadedConfig) => Awaitable<void | LoadedConfig>;
 
   /**
    * Generate files (e.g. types, index file, or JSON schemas)
@@ -55,10 +51,7 @@ export interface Plugin extends IndexFilePlugin {
   /**
    * Configure Fumadocs dev server
    */
-  configureServer?: (
-    this: PluginContext,
-    server: ServerContext,
-  ) => Awaitable<void>;
+  configureServer?: (this: PluginContext, server: ServerContext) => Awaitable<void>;
 
   meta?: {
     /**
@@ -82,16 +75,11 @@ export interface Plugin extends IndexFilePlugin {
     /**
      * Transform `vfile` on compilation stage
      */
-    vfile?: (
-      this: CompilationContext<DocCollectionItem>,
-      file: VFile,
-    ) => Awaitable<VFile | void>;
+    vfile?: (this: CompilationContext<DocCollectionItem>, file: VFile) => Awaitable<VFile | void>;
   };
 }
 
-export type PluginOption = Awaitable<
-  Plugin | PluginOption[] | false | undefined
->;
+export type PluginOption = Awaitable<Plugin | PluginOption[] | false | undefined>;
 
 export interface ServerContext {
   /**
@@ -163,11 +151,7 @@ export function createCore(options: CoreOptions) {
   const workspaces = new Map<string, Core>();
 
   async function transformMetadata<T>(
-    {
-      collection,
-      filePath,
-      source,
-    }: TransformOptions<DocCollectionItem | MetaCollectionItem>,
+    { collection, filePath, source }: TransformOptions<DocCollectionItem | MetaCollectionItem>,
     data: unknown,
   ): Promise<T> {
     if (collection.schema) {
@@ -193,11 +177,7 @@ export function createCore(options: CoreOptions) {
       config = await newConfig;
       this.cache.clear();
       workspaces.clear();
-      plugins = await getPlugins([
-        postprocessPlugin(),
-        options.plugins,
-        config.global.plugins,
-      ]);
+      plugins = await getPlugins([postprocessPlugin(), options.plugins, config.global.plugins]);
 
       for (const plugin of plugins) {
         const out = await plugin.config?.call(this.getPluginContext(), config);
@@ -320,8 +300,7 @@ export function createCore(options: CoreOptions) {
 
       data = await transformMetadata(options, data);
       for (const plugin of plugins) {
-        if (plugin.meta?.transform)
-          data = (await plugin.meta.transform.call(ctx, data)) ?? data;
+        if (plugin.meta?.transform) data = (await plugin.meta.transform.call(ctx, data)) ?? data;
       }
 
       return data;
@@ -337,8 +316,7 @@ export function createCore(options: CoreOptions) {
 
       data = await transformMetadata(options, data);
       for (const plugin of plugins) {
-        if (plugin.doc?.frontmatter)
-          data = (await plugin.doc.frontmatter.call(ctx, data)) ?? data;
+        if (plugin.doc?.frontmatter) data = (await plugin.doc.frontmatter.call(ctx, data)) ?? data;
       }
 
       return data;
@@ -353,8 +331,7 @@ export function createCore(options: CoreOptions) {
       };
 
       for (const plugin of plugins) {
-        if (plugin.doc?.vfile)
-          file = (await plugin.doc.vfile.call(ctx, file)) ?? file;
+        if (plugin.doc?.vfile) file = (await plugin.doc.vfile.call(ctx, file)) ?? file;
       }
 
       return file;

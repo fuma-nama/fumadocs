@@ -19,9 +19,7 @@ export interface RemarkAdmonitionOptions {
  *
  * @deprecated Use `remarkDirectiveAdmonition` with `remark-directive` configured instead.
  */
-export function remarkAdmonition(
-  options: RemarkAdmonitionOptions = {},
-): Transformer<Root, Root> {
+export function remarkAdmonition(options: RemarkAdmonitionOptions = {}): Transformer<Root, Root> {
   const tag = options.tag ?? ':::';
   // compatible with Docusaurus
   const typeMap = options.typeMap ?? {
@@ -46,9 +44,7 @@ export function remarkAdmonition(
       if (nodes[i].type !== 'paragraph') continue;
 
       const text = flattenNode(nodes[i]);
-      const typeName = Object.keys(typeMap).find((type) =>
-        text.startsWith(`${tag}${type}`),
-      );
+      const typeName = Object.keys(typeMap).find((type) => text.startsWith(`${tag}${type}`));
 
       if (typeName) {
         if (open !== -1) {

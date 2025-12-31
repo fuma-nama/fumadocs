@@ -1,38 +1,44 @@
 {
   "name": "@fumadocs/content-collections",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "The Content Collections adapter for Fumadocs",
   "keywords": [
-    "NextJs",
+    "Content Collections",
     "Docs",
-    "Content Collections"
+    "NextJs"
   ],
   "homepage": "https://fumadocs.dev",
-  "repository": "github:fuma-nama/fumadocs",
   "license": "MIT",
   "author": "Fuma Nama",
-  "type": "module",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    },
-    "./configuration": {
-      "import": "./dist/configuration.js",
-      "types": "./dist/configuration.d.ts"
-    }
-  },
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "repository": "github:fuma-nama/fumadocs",
   "files": [
     "dist/*"
   ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./configuration": {
+      "types": "./dist/configuration.d.ts",
+      "import": "./dist/configuration.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "build": "tsup",
+    "build": "tsdown",
     "clean": "rimraf dist",
-    "dev": "tsup --watch",
+    "dev": "tsdown --watch",
     "lint": "eslint .",
     "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^4.2.1"
   },
   "devDependencies": {
     "@content-collections/core": "^0.13.0",
@@ -41,15 +47,12 @@
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "tsconfig": "workspace:*",
-    "unified": "^11.0.5",
-    "zod": "^4.2.1"
+    "tsdown": "^0.18.3",
+    "unified": "^11.0.5"
   },
   "peerDependencies": {
     "@content-collections/core": "0.x.x",
     "@content-collections/mdx": "0.x.x",
     "fumadocs-core": "15.x.x || 16.x.x"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

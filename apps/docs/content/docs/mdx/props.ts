@@ -1,5 +1,1 @@
-export type {
-  GlobalConfig,
-  DocCollection,
-  MetaCollection,
-} from 'fumadocs-mdx/config';
+export type { GlobalConfig, DocCollection, MetaCollection } from 'fumadocs-mdx/config';

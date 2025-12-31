@@ -20,9 +20,7 @@ export type MDXBundlerPresetOptions = Omit<
 /**
  * apply MDX processor presets
  */
-export async function mdxPreset(
-  options: MDXBundlerPresetOptions = {},
-): Promise<ProcessorOptions> {
+export async function mdxPreset(options: MDXBundlerPresetOptions = {}): Promise<ProcessorOptions> {
   const {
     rehypeCodeOptions,
     remarkImageOptions,
@@ -57,10 +55,7 @@ export async function mdxPreset(
           remarkCodeTabOptions,
         ]),
       remarkNpmOptions !== false &&
-        import('@/mdx-plugins/remark-npm').then((mod) => [
-          mod.remarkNpm,
-          remarkNpmOptions,
-        ]),
+        import('@/mdx-plugins/remark-npm').then((mod) => [mod.remarkNpm, remarkNpmOptions]),
       ...v,
       remarkStructureOptions !== false &&
         import('@/mdx-plugins/remark-structure').then((mod) => [
@@ -77,10 +72,7 @@ export async function mdxPreset(
   const rehypePlugins = await resolvePlugins(
     (v) => [
       rehypeCodeOptions !== false &&
-        import('@/mdx-plugins/rehype-code').then((mod) => [
-          mod.rehypeCode,
-          rehypeCodeOptions,
-        ]),
+        import('@/mdx-plugins/rehype-code').then((mod) => [mod.rehypeCode, rehypeCodeOptions]),
       ...v,
       import('@/mdx-plugins/rehype-toc').then((mod) => mod.rehypeToc),
     ],

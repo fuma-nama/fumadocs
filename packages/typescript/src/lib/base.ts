@@ -103,13 +103,10 @@ export function createGenerator(config?: GeneratorOptions | Project) {
       name: string | undefined,
       options?: GenerateOptions,
     ) {
-      const content =
-        file.content ?? (await fs.readFile(path.resolve(file.path))).toString();
+      const content = file.content ?? (await fs.readFile(path.resolve(file.path))).toString();
       const cacheKey = `${file.path}:${name}:${content}`;
       if (cache) {
-        const cached = (await cache.read(cacheKey)) as
-          | GeneratedDoc[]
-          | undefined;
+        const cached = (await cache.read(cacheKey)) as GeneratedDoc[] | undefined;
         if (cached) return cached;
       }
       const sourceFile = getProject().createSourceFile(file.path, content, {
@@ -121,9 +118,7 @@ export function createGenerator(config?: GeneratorOptions | Project) {
         if (name && name !== k) continue;
 
         if (d.length > 1)
-          console.warn(
-            `export ${k} should not have more than one type declaration.`,
-          );
+          console.warn(`export ${k} should not have more than one type declaration.`);
 
         out.push(generate(getProject(), k, d[0], options));
       }
@@ -131,10 +126,7 @@ export function createGenerator(config?: GeneratorOptions | Project) {
       void cache?.write(cacheKey, out);
       return out;
     },
-    generateTypeTable(
-      props: BaseTypeTableProps,
-      options?: GenerateTypeTableOptions,
-    ) {
+    generateTypeTable(props: BaseTypeTableProps, options?: GenerateTypeTableOptions) {
       return getTypeTableOutput(this, props, options);
     },
   };
@@ -155,9 +147,7 @@ function generate(
 
   const comment = declaration
     .getSymbol()
-    ?.compilerSymbol.getDocumentationComment(
-      program.getTypeChecker().compilerObject,
-    );
+    ?.compilerSymbol.getDocumentationComment(program.getTypeChecker().compilerObject);
 
   return {
     name,
@@ -166,16 +156,11 @@ function generate(
       .getType()
       .getProperties()
       .map((prop) => getDocEntry(prop, entryContext))
-      .filter(
-        (entry) => entry && (allowInternal || !('internal' in entry.tags)),
-      ) as DocEntry[],
+      .filter((entry) => entry && (allowInternal || !('internal' in entry.tags))) as DocEntry[],
   };
 }
 
-function getDocEntry(
-  prop: TsSymbol,
-  context: EntryContext,
-): DocEntry | undefined {
+function getDocEntry(prop: TsSymbol, context: EntryContext): DocEntry | undefined {
   const { transform, program } = context;
   if (context.type.isClass() && prop.getName().startsWith('#')) {
     return;
@@ -193,8 +178,7 @@ function getDocEntry(
 
   let type = subType.getText(
     context.declaration,
-    ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope |
-      ts.TypeFormatFlags.NoTruncation,
+    ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope | ts.TypeFormatFlags.NoTruncation,
   );
   let simplifiedType = getSimpleForm(
     subType,
@@ -221,9 +205,7 @@ function getDocEntry(
   const entry: DocEntry = {
     name: prop.getName(),
     description: ts.displayPartsToString(
-      prop.compilerSymbol.getDocumentationComment(
-        program.getTypeChecker().compilerObject,
-      ),
+      prop.compilerSymbol.getDocumentationComment(program.getTypeChecker().compilerObject),
     ),
     tags,
     type,

@@ -49,9 +49,7 @@ type ConfigSchema = ReturnType<typeof createConfigSchema>;
 export type ConfigInput = z.input<ConfigSchema>;
 export type LoadedConfig = z.output<ConfigSchema>;
 
-export async function createOrLoadConfig(
-  file = './cli.json',
-): Promise<LoadedConfig> {
+export async function createOrLoadConfig(file = './cli.json'): Promise<LoadedConfig> {
   const inited = await initConfig(file);
   if (inited) return inited;
 
@@ -80,9 +78,7 @@ export async function initConfig(
     return;
   }
 
-  const defaultConfig = createConfigSchema(src ?? (await isSrc())).parse(
-    {} satisfies ConfigInput,
-  );
+  const defaultConfig = createConfigSchema(src ?? (await isSrc())).parse({} satisfies ConfigInput);
   await fs.writeFile(file, JSON.stringify(defaultConfig, null, 2));
   return defaultConfig;
 }

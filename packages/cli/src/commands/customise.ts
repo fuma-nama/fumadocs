@@ -79,10 +79,7 @@ export async function customise(client: RegistryClient) {
       result.mode === 'full-notebook'
         ? [
             ['fumadocs-ui/layouts/notebook', '@/components/layout/notebook'],
-            [
-              'fumadocs-ui/layouts/notebook/page',
-              '@/components/layout/notebook/page',
-            ],
+            ['fumadocs-ui/layouts/notebook/page', '@/components/layout/notebook/page'],
           ]
         : [
             ['fumadocs-ui/layouts/docs', '@/components/layout/docs'],
@@ -108,9 +105,7 @@ function printNext(...maps: [from: string, to: string][]) {
       'You can check the installed components in `components`.',
       picocolors.dim('---'),
       'Open your `layout.tsx` files, replace the imports of components:',
-      ...maps.map(([from, to]) =>
-        picocolors.greenBright(`"${from}" -> "${to}"`),
-      ),
+      ...maps.map(([from, to]) => picocolors.greenBright(`"${from}" -> "${to}"`)),
     ].join('\n'),
   );
 }

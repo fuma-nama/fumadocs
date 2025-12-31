@@ -1,0 +1,63 @@
+---
+title: MDX Remote
+description: Compiled Markdown/MDX content on demand.
+---
+
+## Introduction
+
+Fumadocs offers the **MDX Remote** package, it is a helper to integrate Markdown/MDX content sources with Fumadocs.
+You can think it as a `next-mdx-remote` with built-in plugins for Fumadocs.
+
+<Callout type='warn' title="Be Careful">
+
+The Passed MDX content must be trusted as it allows code execution by default.
+
+</Callout>
+
+### Setup
+
+```package-install
+@fumadocs/mdx-remote
+```
+
+The main feature it offers is the MDX Compiler, it can compile MDX content to JSX nodes.
+Since it doesn't use a bundler, there's some limitations:
+
+- No imports and exports in MDX files.
+
+It's compatible with Server Components. For example:
+
+```tsx
+import { createCompiler } from '@fumadocs/mdx-remote';
+import { getPage } from './my-content-source';
+import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/docs/page';
+import { getMDXComponents } from '@/mdx-components';
+
+const compiler = createCompiler({
+  // options
+});
+
+export default async function Page({ params }: { params: { slug?: string[] } }) {
+  const page = getPage(params.slug);
+  const compiled = await compiler.compile({
+    source: page.content,
+  });
+
+  const MdxContent = compiled.body;
+
+  return (
+    <DocsPage toc={compiled.toc}>
+      <DocsBody>
+        <MdxContent components={getMDXComponents()} />
+      </DocsBody>
+    </DocsPage>
+  );
+}
+```
+
+### Images
+
+On serverless platforms like Vercel, the original `public` folder (including static assets like images) will be removed after production build.
+The MDX compiler might no longer be able to access local images in `public`.
+
+When referencing images, make sure to use a URL.

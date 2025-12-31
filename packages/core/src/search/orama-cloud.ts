@@ -86,10 +86,7 @@ export interface OramaIndex {
   content: string;
 }
 
-export async function sync(
-  orama: OramaCloud,
-  options: SyncOptions,
-): Promise<void> {
+export async function sync(orama: OramaCloud, options: SyncOptions): Promise<void> {
   const { autoDeploy = true } = options;
   const index = orama.index.set(options.index);
   await index.transaction.open();
@@ -101,10 +98,7 @@ export async function sync(
   if (autoDeploy) await index.transaction.commit();
 }
 
-export async function syncI18n(
-  orama: OramaCloud,
-  options: I18nSyncOptions,
-): Promise<void> {
+export async function syncI18n(orama: OramaCloud, options: I18nSyncOptions): Promise<void> {
   const { autoDeploy = true, indexes } = options;
 
   const tasks = options.documents.map(async (document) => {
@@ -146,13 +140,10 @@ function toIndex(page: OramaDocument): OramaIndex[] {
     };
   }
 
-  if (page.description)
-    indexes.push(createIndex(undefined, undefined, page.description));
+  if (page.description) indexes.push(createIndex(undefined, undefined, page.description));
 
   page.structured.contents.forEach((p) => {
-    const heading = p.heading
-      ? page.structured.headings.find((h) => p.heading === h.id)
-      : null;
+    const heading = p.heading ? page.structured.headings.find((h) => p.heading === h.id) : null;
 
     const index = createIndex(heading?.content, heading?.id, p.content);
 

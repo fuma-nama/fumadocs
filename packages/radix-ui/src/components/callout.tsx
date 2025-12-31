@@ -1,20 +1,8 @@
-import {
-  CircleCheck,
-  CircleX,
-  Info,
-  Sun,
-  TriangleAlert,
-} from '@fumadocs/ui/icons';
+import { CircleCheck, CircleX, Info, Lightbulb, TriangleAlert } from 'lucide-react';
 import type { ComponentProps, ReactNode } from 'react';
 import { cn } from '@fumadocs/ui/cn';
 
-export type CalloutType =
-  | 'info'
-  | 'warn'
-  | 'error'
-  | 'success'
-  | 'warning'
-  | 'idea';
+export type CalloutType = 'info' | 'warn' | 'error' | 'success' | 'warning' | 'idea';
 
 const iconClass = 'size-5 -me-0.5 fill-(--callout-color) text-fd-card';
 
@@ -80,18 +68,16 @@ export function CalloutContainer({
           warning: <TriangleAlert className={iconClass} />,
           error: <CircleX className={iconClass} />,
           success: <CircleCheck className={iconClass} />,
-          idea: <Sun className={iconClass} />,
+          idea: (
+            <Lightbulb className="size-5 -me-0.5 fill-(--callout-color) text-(--callout-color)" />
+          ),
         }[type]}
       <div className="flex flex-col gap-2 min-w-0 flex-1">{children}</div>
     </div>
   );
 }
 
-export function CalloutTitle({
-  children,
-  className,
-  ...props
-}: ComponentProps<'p'>) {
+export function CalloutTitle({ children, className, ...props }: ComponentProps<'p'>) {
   return (
     <p className={cn('font-medium my-0!', className)} {...props}>
       {children}
@@ -99,17 +85,10 @@ export function CalloutTitle({
   );
 }
 
-export function CalloutDescription({
-  children,
-  className,
-  ...props
-}: ComponentProps<'p'>) {
+export function CalloutDescription({ children, className, ...props }: ComponentProps<'p'>) {
   return (
     <div
-      className={cn(
-        'text-fd-muted-foreground prose-no-margin empty:hidden',
-        className,
-      )}
+      className={cn('text-fd-muted-foreground prose-no-margin empty:hidden', className)}
       {...props}
     >
       {children}

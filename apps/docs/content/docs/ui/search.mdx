@@ -1,0 +1,126 @@
+---
+title: Search UI
+description: The UI for document search
+---
+
+## Overview
+
+You can customise Search UI from [`<RootProvider />`](/docs/ui/layouts/root-provider).
+
+```tsx title="app/layout.tsx"
+import { RootProvider } from 'fumadocs-ui/provider/<framework>';
+import type { ReactNode } from 'react';
+import { SearchDialog } from '@/components/my-search-dialog';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <html>
+      <body>
+        <RootProvider
+          // [!code highlight:4]
+          search={{
+            enabled: false, // disable search entirely
+            SearchDialog, // replace search dialog
+          }}
+        >
+          {children}
+        </RootProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+### Hot Keys
+
+Customise the hot keys to trigger search dialog, by default it's <kbd>⌘</kbd> <kbd>K</kbd> or <kbd>Ctrl</kbd> <kbd>K</kbd>.
+
+```tsx
+import { RootProvider } from 'fumadocs-ui/provider/<framework>';
+
+<RootProvider
+  search={{
+    hotKey: [
+      {
+        display: 'K',
+        key: 'k', // key code, or a function determining whether the key is pressed
+      },
+    ],
+  }}
+>
+  {children}
+</RootProvider>;
+```
+
+### References
+
+A full list of options.
+
+<auto-type-table cwd path="content/docs/ui/props.ts" name="SearchProps" />
+
+## Custom UI
+
+Fumadocs UI also exposes a lower level `<SearchDialog />` component for advanced use, you can create your own search dialog to replace the default one.
+
+```tsx twoslash
+'use client';
+import React from 'react';
+import { useDocsSearch } from 'fumadocs-core/search/client';
+import {
+  SearchDialog,
+  SearchDialogClose,
+  SearchDialogContent,
+  SearchDialogHeader,
+  SearchDialogFooter,
+  SearchDialogIcon,
+  SearchDialogInput,
+  SearchDialogList,
+  SearchDialogOverlay,
+  type SharedProps,
+} from 'fumadocs-ui/components/dialog/search';
+import { useI18n } from 'fumadocs-ui/contexts/i18n';
+
+export default function DefaultSearchDialog(props: SharedProps) {
+  const { locale } = useI18n(); // (optional) for i18n
+  const { search, setSearch, query } = useDocsSearch({
+    type: 'fetch',
+    locale,
+  });
+
+  return (
+    <SearchDialog search={search} onSearchChange={setSearch} isLoading={query.isLoading} {...props}>
+      <SearchDialogOverlay />
+      <SearchDialogContent>
+        <SearchDialogHeader>
+          <SearchDialogIcon />
+          <SearchDialogInput />
+          <SearchDialogClose />
+        </SearchDialogHeader>
+        <SearchDialogList items={query.data !== 'empty' ? query.data : null} />
+      </SearchDialogContent>
+      <SearchDialogFooter>{/* footer items */}</SearchDialogFooter>
+    </SearchDialog>
+  );
+}
+```
+
+### Highlight Matches
+
+Search integrations can provide `contentWithHighlights` to highlight matches.
+
+You can customise how highlights are rendered.
+
+```tsx title="components/search.tsx"
+<SearchDialogList
+  items={query.data !== 'empty' ? query.data : null}
+  // [!code highlight:8]
+  Item={(props) => (
+    <SearchDialogListItem
+      {...props}
+      renderHighlights={(highlights) => {
+        // ...
+      }}
+    />
+  )}
+/>
+```

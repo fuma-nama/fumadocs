@@ -18,10 +18,7 @@ interface Context {
   modifier?: string;
 }
 
-function inWhere(
-  selector: string,
-  { className, prefix, modifier }: Options & Context,
-) {
+function inWhere(selector: string, { className, prefix, modifier }: Options & Context) {
   const prefixedNot = prefix(`.not-${className}`).slice(1);
   const selectorPrefix = selector.startsWith('>')
     ? `${modifier === 'DEFAULT' ? `.${className}` : `.${className}-${modifier}`} `
@@ -37,14 +34,8 @@ function inWhere(
   return `:where(${selectorPrefix}${selector}):not(:where([class~="${prefixedNot}"],[class~="${prefixedNot}"] *))`;
 }
 
-function configToCss(
-  config: Config = {},
-  { className, modifier, prefix }: Options & Context,
-) {
-  function updateSelector(
-    k: string,
-    v: unknown,
-  ): [k: string, v: unknown, object?] {
+function configToCss(config: Config = {}, { className, modifier, prefix }: Options & Context) {
+  function updateSelector(k: string, v: unknown): [k: string, v: unknown, object?] {
     if (Array.isArray(v)) {
       return [k, v];
     }
@@ -55,9 +46,7 @@ function configToCss(
         return [
           inWhere(k, { className, modifier, prefix }),
           v,
-          Object.fromEntries(
-            Object.entries(v).map(([k, v]) => updateSelector(k, v)),
-          ),
+          Object.fromEntries(Object.entries(v).map(([k, v]) => updateSelector(k, v))),
         ];
       }
 
@@ -69,8 +58,8 @@ function configToCss(
 
   const css = config.css ?? [];
   return Object.fromEntries(
-    Object.entries(merge({}, ...(Array.isArray(css) ? css : [css]))).map(
-      ([k, v]) => updateSelector(k, v),
+    Object.entries(merge({}, ...(Array.isArray(css) ? css : [css]))).map(([k, v]) =>
+      updateSelector(k, v),
     ),
   );
 }
@@ -182,9 +171,7 @@ export const typography: unknown = plugin.withOptions<Options>(
             ...styles.DEFAULT,
             css: [
               ...(styles.DEFAULT.css ?? []),
-              styleOptions.disableRoundedTable
-                ? styles.normalTable
-                : styles.roundedTable,
+              styleOptions.disableRoundedTable ? styles.normalTable : styles.roundedTable,
             ],
           },
           {

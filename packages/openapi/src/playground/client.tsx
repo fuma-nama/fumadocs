@@ -10,35 +10,14 @@ import {
   useEffectEvent,
   type ComponentProps,
 } from 'react';
-import type {
-  FieldPath,
-  UseControllerProps,
-  UseControllerReturn,
-} from 'react-hook-form';
-import {
-  FormProvider,
-  get,
-  set,
-  useController,
-  useForm,
-  useFormContext,
-} from 'react-hook-form';
+import type { FieldPath, UseControllerProps, UseControllerReturn } from 'react-hook-form';
+import { FormProvider, get, set, useController, useForm, useFormContext } from 'react-hook-form';
 import { useApiContext } from '@/ui/contexts/api';
 import type { FetchResult } from '@/playground/fetcher';
-import {
-  FieldInput,
-  FieldSet,
-  JsonInput,
-  ObjectInput,
-} from './components/inputs';
+import { FieldInput, FieldSet, JsonInput, ObjectInput } from './components/inputs';
 import type { ParameterField, SecurityEntry } from '@/playground/index';
 import { getStatusInfo } from './status-info';
-import {
-  joinURL,
-  resolveRequestData,
-  resolveServerUrl,
-  withBase,
-} from '@/utils/url';
+import { joinURL, resolveRequestData, resolveServerUrl, withBase } from '@/utils/url';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
 import { MethodLabel } from '@/ui/components/method-label';
 import { useQuery } from '@/utils/use-query';
@@ -47,7 +26,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from 'fumadocs-ui/components/ui/collapsible';
-import { X, ChevronDown, LoaderCircle } from '@/ui/icons';
+import { X, ChevronDown, LoaderCircle } from 'lucide-react';
 import { encodeRequestData } from '@/requests/media/encode';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from '@/utils/cn';
@@ -84,8 +63,7 @@ export interface FormValues {
   _encoded?: RequestData;
 }
 
-export interface PlaygroundClientProps
-  extends ComponentProps<'form'>, SchemaScope {
+export interface PlaygroundClientProps extends ComponentProps<'form'>, SchemaScope {
   route: string;
   method: string;
   parameters?: ParameterField[];
@@ -125,10 +103,7 @@ export interface PlaygroundClientOptions {
    *
    * Recommended types packages: `json-schema-typed`, `openapi-types`.
    */
-  renderParameterField?: (
-    fieldName: FieldPath<FormValues>,
-    param: ParameterField,
-  ) => ReactNode;
+  renderParameterField?: (fieldName: FieldPath<FormValues>, param: ParameterField) => ReactNode;
 
   /**
    * render the input for API endpoint body.
@@ -188,9 +163,7 @@ export default function PlaygroundClient({
   );
 
   const defaultValues: FormValues = useMemo(() => {
-    const requestData = examples.find(
-      (example) => example.id === exampleId,
-    )?.data;
+    const requestData = examples.find((example) => example.id === exampleId)?.data;
 
     return {
       path: requestData?.path ?? {},
@@ -220,9 +193,7 @@ export default function PlaygroundClient({
     return fetcher.fetch(
       joinURL(
         withBase(
-          targetServer
-            ? resolveServerUrl(targetServer.url, targetServer.variables)
-            : '/',
+          targetServer ? resolveServerUrl(targetServer.url, targetServer.variables) : '/',
           window.location.origin,
         ),
         resolveRequestData(route, input._encoded),
@@ -239,10 +210,7 @@ export default function PlaygroundClient({
       const value = get(values, item.fieldName);
 
       if (value) {
-        localStorage.setItem(
-          storageKeys.AuthField(item),
-          JSON.stringify(value),
-        );
+        localStorage.setItem(storageKeys.AuthField(item), JSON.stringify(value));
       }
     }
 
@@ -267,10 +235,7 @@ export default function PlaygroundClient({
         delete values._encoded;
 
         if (timer) window.clearTimeout(timer);
-        timer = window.setTimeout(
-          () => onUpdateDebounced(values),
-          timer ? 400 : 0,
-        );
+        timer = window.setTimeout(() => onUpdateDebounced(values), timer ? 400 : 0);
       },
     });
 
@@ -326,17 +291,10 @@ export default function PlaygroundClient({
             <Route route={route} className="flex-1" />
             <button
               type="submit"
-              className={cn(
-                buttonVariants({ color: 'primary', size: 'sm' }),
-                'w-14 py-1.5',
-              )}
+              className={cn(buttonVariants({ color: 'primary', size: 'sm' }), 'w-14 py-1.5')}
               disabled={testQuery.isLoading}
             >
-              {testQuery.isLoading ? (
-                <LoaderCircle className="size-4 animate-spin" />
-              ) : (
-                'Send'
-              )}
+              {testQuery.isLoading ? <LoaderCircle className="size-4 animate-spin" /> : 'Send'}
             </button>
           </div>
 
@@ -352,9 +310,7 @@ export default function PlaygroundClient({
             </SecurityTabs>
           )}
           <FormBody body={body} parameters={parameters} />
-          {testQuery.data ? (
-            <ResultDisplay data={testQuery.data} reset={testQuery.reset} />
-          ) : null}
+          {testQuery.data ? <ResultDisplay data={testQuery.data} reset={testQuery.reset} /> : null}
         </form>
       </SchemaProvider>
     </FormProvider>
@@ -377,10 +333,7 @@ function SecurityTabs({
 
   const result = (
     <CollapsiblePanel title="Authorization">
-      <Select
-        value={securityId.toString()}
-        onValueChange={(v) => setSecurityId(Number(v))}
-      >
+      <Select value={securityId.toString()} onValueChange={(v) => setSecurityId(Number(v))}>
         <SelectTrigger>
           <SelectValue />
         </SelectTrigger>
@@ -390,9 +343,7 @@ function SecurityTabs({
               {security.map((item) => (
                 <div key={item.id} className="max-w-[600px]">
                   <p className="font-mono font-medium">{item.id}</p>
-                  <p className="text-fd-muted-foreground whitespace-pre-wrap">
-                    {item.description}
-                  </p>
+                  <p className="text-fd-muted-foreground whitespace-pre-wrap">{item.description}</p>
                 </div>
               ))}
             </SelectItem>
@@ -433,12 +384,8 @@ function SecurityTabs({
 
 const ParamTypes = ['path', 'header', 'cookie', 'query'] as const;
 
-function FormBody({
-  parameters = [],
-  body,
-}: Pick<PlaygroundClientProps, 'parameters' | 'body'>) {
-  const { renderParameterField, renderBodyField } =
-    useApiContext().client.playground ?? {};
+function FormBody({ parameters = [], body }: Pick<PlaygroundClientProps, 'parameters' | 'body'>) {
+  const { renderParameterField, renderBodyField } = useApiContext().client.playground ?? {};
   const panels = useMemo(() => {
     return ParamTypes.map((type) => {
       const items = parameters.filter((v) => v.in === type);
@@ -470,12 +417,7 @@ function FormBody({
             ) as ParsedSchema;
 
             return (
-              <FieldSet
-                key={fieldName}
-                name={field.name}
-                fieldName={fieldName}
-                field={schema}
-              />
+              <FieldSet key={fieldName} name={field.name} fieldName={fieldName} field={schema} />
             );
           })}
         </CollapsiblePanel>
@@ -488,11 +430,7 @@ function FormBody({
       {panels}
       {body && (
         <CollapsiblePanel title="Body">
-          {renderBodyField ? (
-            renderBodyField('body', body)
-          ) : (
-            <BodyInput field={body.schema} />
-          )}
+          {renderBodyField ? renderBodyField('body', body) : <BodyInput field={body.schema} />}
         </CollapsiblePanel>
       )}
     </>
@@ -503,8 +441,7 @@ function BodyInput({ field: _field }: { field: ParsedSchema }) {
   const field = useResolvedSchema(_field);
   const [isJson, setIsJson] = useState(false);
 
-  if (field.format === 'binary')
-    return <FieldSet field={field} fieldName="body" />;
+  if (field.format === 'binary') return <FieldSet field={field} fieldName="body" />;
 
   if (isJson)
     return (
@@ -696,8 +633,8 @@ function useAuthInputs(
                 }}
               />
               <p className="text-fd-muted-foreground text-xs">
-                OpenID Connect is not supported at the moment, you can still set
-                an access token here.
+                OpenID Connect is not supported at the moment, you can still set an access token
+                here.
               </p>
             </>
           ),
@@ -764,13 +701,7 @@ function Route({ route, ...props }: ComponentProps<'div'> & { route: string }) {
   );
 }
 
-function DefaultResultDisplay({
-  data,
-  reset,
-}: {
-  data: FetchResult;
-  reset: () => void;
-}) {
+function DefaultResultDisplay({ data, reset }: { data: FetchResult; reset: () => void }) {
   const statusInfo = useMemo(() => getStatusInfo(data.status), [data.status]);
   const { shikiOptions } = useApiContext();
 
@@ -796,16 +727,8 @@ function DefaultResultDisplay({
       <p className="text-sm text-fd-muted-foreground">{data.status}</p>
       {data.data !== undefined && (
         <DynamicCodeBlock
-          lang={
-            typeof data.data === 'string' && data.data.length > 50000
-              ? 'text'
-              : data.type
-          }
-          code={
-            typeof data.data === 'string'
-              ? data.data
-              : JSON.stringify(data.data, null, 2)
-          }
+          lang={typeof data.data === 'string' && data.data.length > 50000 ? 'text' : data.type}
+          code={typeof data.data === 'string' ? data.data : JSON.stringify(data.data, null, 2)}
           options={shikiOptions}
         />
       )}

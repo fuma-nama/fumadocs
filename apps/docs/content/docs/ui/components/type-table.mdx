@@ -1,0 +1,35 @@
+---
+title: Type Table
+description: A table for documenting types
+preview: typeTable
+---
+
+<Installation name="type-table" />
+
+## Usage
+
+It accepts a `type` property.
+
+```mdx
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+<TypeTable
+  type={{
+    percentage: {
+      description: 'The percentage of scroll position to display the roll button',
+      type: 'number',
+      default: 0.2,
+    },
+  }}
+/>
+```
+
+## References
+
+### Type Table
+
+<auto-type-table cwd path="content/docs/ui/props.ts" name="TypeTableProps" />
+
+### Object Type
+
+<auto-type-table cwd path="content/docs/ui/props.ts" name="ObjectTypeProps" />

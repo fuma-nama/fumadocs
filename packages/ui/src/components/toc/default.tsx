@@ -22,14 +22,11 @@ export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
     <>
       <TocThumb
         containerRef={containerRef}
-        className="absolute top-0 translate-y-(--fd-top) h-(--fd-height) w-px bg-fd-primary transition-[translate,height]"
+        className="absolute top-(--fd-top) h-(--fd-height) w-0.5 rounded-e-sm bg-fd-primary transition-[top,height] ease-linear duration-250"
       />
       <div
         ref={mergeRefs(ref, containerRef)}
-        className={cn(
-          'flex flex-col border-s border-fd-foreground/10',
-          className,
-        )}
+        className={cn('flex flex-col border-s border-fd-foreground/10', className)}
         {...props}
       >
         {items.map((item) => (

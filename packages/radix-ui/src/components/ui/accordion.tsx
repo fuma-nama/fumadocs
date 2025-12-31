@@ -1,14 +1,11 @@
 'use client';
 
 import * as Primitive from '@radix-ui/react-accordion';
-import { ChevronRight } from '@fumadocs/ui/icons';
+import { ChevronRight } from 'lucide-react';
 import { type ComponentProps } from 'react';
 import { cn } from '@fumadocs/ui/cn';
 
-export function Accordion({
-  className,
-  ...props
-}: ComponentProps<typeof Primitive.Root>) {
+export function Accordion({ className, ...props }: ComponentProps<typeof Primitive.Root>) {
   return (
     <Primitive.Root
       className={cn(

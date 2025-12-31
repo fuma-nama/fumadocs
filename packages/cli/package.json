@@ -1,34 +1,36 @@
 {
   "name": "@fumadocs/cli",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "The CLI tool for Fumadocs",
   "keywords": [
-    "NextJs",
     "Docs",
     "Fumadocs"
   ],
   "homepage": "https://fumadocs.dev",
-  "repository": "github:fuma-nama/fumadocs",
   "license": "MIT",
   "author": "Fuma Nama",
-  "type": "module",
-  "exports": {
-    "./build": {
-      "import": "./dist/build/index.js",
-      "types": "./dist/build/index.d.ts"
-    }
-  },
-  "main": "./dist/index.js",
+  "repository": "github:fuma-nama/fumadocs",
   "bin": {
     "fumadocs": "./dist/index.js"
   },
   "files": [
     "dist/*"
   ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "exports": {
+    "./build": {
+      "types": "./dist/build/index.d.ts",
+      "import": "./dist/build/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "build": "tsup",
+    "build": "tsdown --config-loader unrun",
     "clean": "rimraf dist",
-    "dev": "tsup --watch",
+    "dev": "tsdown --watch --config-loader unrun",
     "lint": "eslint .",
     "types:check": "tsc --noEmit"
   },
@@ -45,9 +47,7 @@
     "@types/node": "24.10.2",
     "eslint-config-custom": "workspace:*",
     "shadcn": "3.6.2",
-    "tsconfig": "workspace:*"
-  },
-  "publishConfig": {
-    "access": "public"
+    "tsconfig": "workspace:*",
+    "tsdown": "^0.18.3"
   }
 }

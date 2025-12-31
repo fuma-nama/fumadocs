@@ -6,7 +6,6 @@ import type { SourceMap, TransformPluginContext } from 'rollup';
 import type { TransformResult } from 'vite';
 import { parse } from 'node:querystring';
 import { ValidationError } from '@/utils/validation';
-import path from 'node:path';
 import type { LoaderContext } from 'webpack';
 import { readFileSync } from 'node:fs';
 
@@ -22,6 +21,13 @@ export interface LoaderInput {
 export interface LoaderOutput {
   code: string;
   map?: unknown;
+
+  /**
+   * Only supported in Vite 8.
+   *
+   * Explicitly define the transformed module type, for unsupported environments, you need to consider the differences between each bundler.
+   */
+  moduleType?: 'js' | 'json';
 }
 
 type Awaitable<T> = T | Promise<T>;
@@ -119,6 +125,7 @@ export function toVite(loader: Loader): ViteLoader {
       return {
         code: result.code,
         map: result.map as SourceMap,
+        moduleType: result.moduleType,
       };
     },
   };
@@ -157,9 +164,6 @@ export function toWebpack(loader: Loader): WebpackLoader {
       }
 
       if (!(error instanceof Error)) throw error;
-
-      const fpath = path.relative(this.context, this.resourcePath);
-      error.message = `${fpath}:${error.name}: ${error.message}`;
       callback(error);
     }
   };
@@ -172,7 +176,7 @@ export function toBun(loader: Loader) {
 
     return {
       contents: output.code,
-      loader: 'js',
+      loader: output.moduleType ?? 'js',
     };
   }
 

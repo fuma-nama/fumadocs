@@ -4,10 +4,7 @@ import { cn } from '@fumadocs/ui/cn';
 
 export function Cards(props: HTMLAttributes<HTMLDivElement>) {
   return (
-    <div
-      {...props}
-      className={cn('grid grid-cols-2 gap-3 @container', props.className)}
-    >
+    <div {...props} className={cn('grid grid-cols-2 gap-3 @container', props.className)}>
       {props.children}
     </div>
   );
@@ -41,9 +38,7 @@ export function Card({ icon, title, description, ...props }: CardProps) {
         </div>
       ) : null}
       <h3 className="not-prose mb-1 text-sm font-medium">{title}</h3>
-      {description ? (
-        <p className="my-0! text-sm text-fd-muted-foreground">{description}</p>
-      ) : null}
+      {description ? <p className="my-0! text-sm text-fd-muted-foreground">{description}</p> : null}
       <div className="text-sm text-fd-muted-foreground prose-no-margin empty:hidden">
         {props.children}
       </div>

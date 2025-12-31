@@ -4,19 +4,10 @@ import { type ComponentPropsWithoutRef, lazy, type ReactNode } from 'react';
 import { DirectionProvider } from '@base-ui/react/direction-provider';
 import type { DefaultSearchDialogProps } from '@/components/dialog/search-default';
 import { ThemeProvider } from 'next-themes';
-import {
-  I18nProvider,
-  type I18nProviderProps,
-} from '@fumadocs/ui/contexts/i18n';
-import {
-  SearchProvider,
-  type SearchProviderProps,
-} from '@fumadocs/ui/contexts/search';
+import { I18nProvider, type I18nProviderProps } from '@fumadocs/ui/contexts/i18n';
+import { SearchProvider, type SearchProviderProps } from '@fumadocs/ui/contexts/search';
 
-interface SearchOptions extends Omit<
-  SearchProviderProps,
-  'options' | 'children'
-> {
+interface SearchOptions extends Omit<SearchProviderProps, 'children'> {
   options?: Partial<DefaultSearchDialogProps>;
 
   /**
@@ -55,9 +46,7 @@ export interface RootProviderProps {
   children?: ReactNode;
 }
 
-const DefaultSearchDialog = lazy(
-  () => import('@/components/dialog/search-default'),
-);
+const DefaultSearchDialog = lazy(() => import('@/components/dialog/search-default'));
 
 export function RootProvider({
   children,

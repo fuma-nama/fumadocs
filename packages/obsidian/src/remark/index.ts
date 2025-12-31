@@ -6,10 +6,7 @@ import { remarkBlockId } from '@/remark/remark-block-id';
 import type { PluggableList } from 'unified';
 import { remarkWikilinks } from '@/remark/remark-wikilinks';
 
-export function getRemarkPlugins(
-  storage: VaultStorage,
-  resolver: VaultResolver,
-): PluggableList {
+export function getRemarkPlugins(storage: VaultStorage, resolver: VaultResolver): PluggableList {
   return [
     [remarkWikilinks, { resolver, storage }],
     [remarkConvert, { resolver, storage }],

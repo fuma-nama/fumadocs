@@ -2,10 +2,7 @@ import type { Root } from 'mdast';
 import type { Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
 import convert from 'npm-to-yarn';
-import {
-  type CodeBlockTabsOptions,
-  generateCodeBlockTabs,
-} from '@/mdx-plugins/codeblock-utils';
+import { type CodeBlockTabsOptions, generateCodeBlockTabs } from '@/mdx-plugins/codeblock-utils';
 
 interface PackageManager {
   name: string;
@@ -55,11 +52,7 @@ export function remarkNpm({
       if (!node.lang || !aliases.includes(node.lang)) return;
       let code = node.value;
 
-      if (
-        node.lang === 'package-install' &&
-        !code.startsWith('npm') &&
-        !code.startsWith('npx')
-      ) {
+      if (node.lang === 'package-install' && !code.startsWith('npm') && !code.startsWith('npx')) {
         code = `npm install ${code}`;
       }
       const options: CodeBlockTabsOptions = {

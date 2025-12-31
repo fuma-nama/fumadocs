@@ -40,9 +40,7 @@ export interface DocCollection<
   type: 'doc';
 
   postprocess?: Partial<PostprocessOptions>;
-  mdxOptions?:
-    | ProcessorOptions
-    | ((environment: BuildEnvironment) => Promise<ProcessorOptions>);
+  mdxOptions?: ProcessorOptions | ((environment: BuildEnvironment) => Promise<ProcessorOptions>);
 
   /**
    * Load files with async
@@ -92,12 +90,12 @@ export interface GlobalConfig {
   experimentalBuildCache?: string;
 }
 
-export function defineCollections<
-  Schema extends StandardSchemaV1 = StandardSchemaV1,
->(options: DocCollection<Schema>): DocCollection<Schema>;
-export function defineCollections<
-  Schema extends StandardSchemaV1 = StandardSchemaV1,
->(options: MetaCollection<Schema>): MetaCollection<Schema>;
+export function defineCollections<Schema extends StandardSchemaV1 = StandardSchemaV1>(
+  options: DocCollection<Schema>,
+): DocCollection<Schema>;
+export function defineCollections<Schema extends StandardSchemaV1 = StandardSchemaV1>(
+  options: MetaCollection<Schema>,
+): MetaCollection<Schema>;
 
 export function defineCollections(
   options: DocCollection | MetaCollection,

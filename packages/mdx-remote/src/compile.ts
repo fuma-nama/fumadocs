@@ -7,10 +7,7 @@ import type { TableOfContents } from 'fumadocs-core/toc';
 import { executeMdx, type MdxContent } from '@/render';
 import { pathToFileURL } from 'node:url';
 
-export type FumadocsPresetOptions = Omit<
-  CompileOptions,
-  'remarkPlugins' | 'rehypePlugins'
-> & {
+export type FumadocsPresetOptions = Omit<CompileOptions, 'remarkPlugins' | 'rehypePlugins'> & {
   preset?: 'fumadocs';
   remarkPlugins?: ResolvePlugins;
   rehypePlugins?: ResolvePlugins;
@@ -32,9 +29,7 @@ export type FumadocsPresetOptions = Omit<
   remarkImageOptions?: Plugins.RemarkImageOptions | false;
 };
 
-export type CompilerOptions =
-  | (CompileOptions & { preset: 'minimal' })
-  | FumadocsPresetOptions;
+export type CompilerOptions = (CompileOptions & { preset: 'minimal' }) | FumadocsPresetOptions;
 
 export interface CompileMDXOptions {
   source: string;
@@ -72,25 +67,17 @@ export function createCompiler(mdxOptions?: CompilerOptions) {
     if (!format || format === 'detect') format = 'mdx';
 
     return (instance = createProcessor({
-      ...(mdxOptions?.preset === 'minimal'
-        ? mdxOptions
-        : getCompileOptions(mdxOptions)),
+      ...(mdxOptions?.preset === 'minimal' ? mdxOptions : getCompileOptions(mdxOptions)),
       format,
     }));
   }
 
   return {
-    async render(
-      compiled: string,
-      scope?: Record<string, unknown>,
-      filePath?: string,
-    ) {
+    async render(compiled: string, scope?: Record<string, unknown>, filePath?: string) {
       return executeMdx(compiled, {
         scope,
         baseUrl: filePath ? pathToFileURL(filePath) : undefined,
-        jsxRuntime: mdxOptions?.development
-          ? await import('react/jsx-dev-runtime')
-          : undefined,
+        jsxRuntime: mdxOptions?.development ? await import('react/jsx-dev-runtime') : undefined,
       });
     },
     /**
@@ -113,19 +100,14 @@ export function createCompiler(mdxOptions?: CompilerOptions) {
         },
       });
       const compiled = String(file);
-      const exports = !skipRender
-        ? await this.render(compiled, scope, options.filePath)
-        : null;
+      const exports = !skipRender ? await this.render(compiled, scope, options.filePath) : null;
 
       return {
         vfile: file,
         compiled,
         frontmatter: frontmatter as Frontmatter,
         async body(props) {
-          if (!exports)
-            throw new Error(
-              'Body cannot be rendered when `skipRender` is set to true',
-            );
+          if (!exports) throw new Error('Body cannot be rendered when `skipRender` is set to true');
 
           return exports.default({
             components: { ...options.components, ...props.components },
@@ -141,9 +123,7 @@ export function createCompiler(mdxOptions?: CompilerOptions) {
 /**
  * @deprecated Use `createCompiler()` API instead, this function will always create a new compiler instance.
  */
-export async function compileMDX<
-  Frontmatter extends object = Record<string, unknown>,
->(
+export async function compileMDX<Frontmatter extends object = Record<string, unknown>>(
   options: CompileMDXOptions & {
     mdxOptions?: CompilerOptions;
   },
@@ -164,9 +144,7 @@ function getCompileOptions({
   imageDir = './public',
   ...options
 }: FumadocsPresetOptions = {}): CompileOptions {
-  function getPlugin<K extends keyof typeof Plugins>(
-    name: K,
-  ): (typeof Plugins)[K] | null {
+  function getPlugin<K extends keyof typeof Plugins>(name: K): (typeof Plugins)[K] | null {
     return name in Plugins ? Plugins[name] : null;
   }
   const remarkGfm = getPlugin('remarkGfm');
@@ -199,21 +177,15 @@ function getCompileOptions({
         remarkCodeTab && remarkCodeTabOptions !== false
           ? [remarkCodeTab, remarkCodeTabOptions]
           : null,
-        remarkNpm && remarkNpmOptions !== false
-          ? [remarkNpm, remarkNpmOptions]
-          : null,
+        remarkNpm && remarkNpmOptions !== false ? [remarkNpm, remarkNpmOptions] : null,
         ...v,
       ],
       options.remarkPlugins,
     ),
     rehypePlugins: pluginOption(
       (v) => [
-        rehypeCode && rehypeCodeOptions !== false
-          ? [rehypeCode, rehypeCodeOptions]
-          : null,
-        rehypeToc && rehypeTocOptions !== false
-          ? [rehypeToc, rehypeTocOptions]
-          : null,
+        rehypeCode && rehypeCodeOptions !== false ? [rehypeCode, rehypeCodeOptions] : null,
+        rehypeToc && rehypeTocOptions !== false ? [rehypeToc, rehypeTocOptions] : null,
         ...v,
       ],
       options.rehypePlugins,

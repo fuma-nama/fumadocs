@@ -27,13 +27,7 @@ export function createPageTreeRenderer({
   SidebarSeparator,
   SidebarItem,
 }: InternalComponents) {
-  function PageTreeFolder({
-    item,
-    children,
-  }: {
-    item: PageTree.Folder;
-    children: ReactNode;
-  }) {
+  function PageTreeFolder({ item, children }: { item: PageTree.Folder; children: ReactNode }) {
     const path = useTreePath();
 
     return (
@@ -43,10 +37,7 @@ export function createPageTreeRenderer({
         defaultOpen={item.defaultOpen}
       >
         {item.index ? (
-          <SidebarFolderLink
-            href={item.index.url}
-            external={item.index.external}
-          >
+          <SidebarFolderLink href={item.index.url} external={item.index.external}>
             {item.icon}
             {item.name}
           </SidebarFolderLink>
@@ -64,9 +55,7 @@ export function createPageTreeRenderer({
   /**
    * Render sidebar items from page tree
    */
-  return function SidebarPageTree(
-    components: Partial<SidebarPageTreeComponents>,
-  ) {
+  return function SidebarPageTree(components: Partial<SidebarPageTreeComponents>) {
     const { root } = useTreeContext();
     const { Separator, Item, Folder = PageTreeFolder } = components;
 
@@ -93,21 +82,14 @@ export function createPageTreeRenderer({
 
           if (Item) return <Item key={item.url} item={item} />;
           return (
-            <SidebarItem
-              key={item.url}
-              href={item.url}
-              external={item.external}
-              icon={item.icon}
-            >
+            <SidebarItem key={item.url} href={item.url} external={item.external} icon={item.icon}>
               {item.name}
             </SidebarItem>
           );
         });
       }
 
-      return (
-        <Fragment key={root.$id}>{renderSidebarList(root.children)}</Fragment>
-      );
+      return <Fragment key={root.$id}>{renderSidebarList(root.children)}</Fragment>;
     }, [Folder, Item, Separator, root]);
   };
 }

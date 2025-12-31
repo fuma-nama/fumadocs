@@ -8,11 +8,7 @@ import {
   transformerNotationWordHighlight,
 } from '@shikijs/transformers';
 import type { Processor, Transformer } from 'unified';
-import {
-  type BuiltinTheme,
-  bundledLanguages,
-  type ShikiTransformer,
-} from 'shiki';
+import { type BuiltinTheme, bundledLanguages, type ShikiTransformer } from 'shiki';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
 import type { CodeBlockIcon, IconOptions } from './transformer-icon';
 import { transformerIcon } from './transformer-icon';
@@ -53,16 +49,13 @@ function parseLineNumber(str: string, data: Record<string, unknown>) {
   return str.replace(/lineNumbers=(\d+)|lineNumbers/, (_, ...args) => {
     data['data-line-numbers'] = true;
 
-    if (args[0] !== undefined)
-      data['data-line-numbers-start'] = Number(args[0]);
+    if (args[0] !== undefined) data['data-line-numbers-start'] = Number(args[0]);
 
     return '';
   });
 }
 
-type DistributiveOmit<T, K extends keyof T> = T extends unknown
-  ? Omit<T, K>
-  : never;
+type DistributiveOmit<T, K extends keyof T> = T extends unknown ? Omit<T, K> : never;
 
 export type RehypeCodeOptions = DistributiveOmit<RehypeShikiOptions, 'lazy'> & {
   /**
@@ -139,9 +132,7 @@ export function rehypeCode(
       'themes' in options
         ? (Object.values(options.themes).filter(Boolean) as BuiltinTheme[])
         : [options.theme],
-    langs:
-      options.langs ??
-      (options.lazy ? ['ts', 'tsx'] : Object.keys(bundledLanguages)),
+    langs: options.langs ?? (options.lazy ? ['ts', 'tsx'] : Object.keys(bundledLanguages)),
     langAlias: options.langAlias,
   });
 

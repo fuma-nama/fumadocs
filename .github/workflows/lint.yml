@@ -23,7 +23,7 @@ jobs:
         run: pnpm i --frozen-lockfile
 
       - name: Lint Format
-        run: pnpm lint:prettier
+        run: pnpm lint:format
 
       - name: Check Types
         run: pnpm build --filter=./packages/* && pnpm i --frozen-lockfile && pnpm types:check

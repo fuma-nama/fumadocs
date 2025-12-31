@@ -24,12 +24,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       {page.data.coverImage && (
-        <img
-          alt="cover"
-          src={page.data.coverImage}
-          fetchPriority="high"
-          className="rounded-xl"
-        />
+        <img alt="cover" src={page.data.coverImage} fetchPriority="high" className="rounded-xl" />
       )}
       <DocsBody>{node}</DocsBody>
       {page.data.updatedAt && <PageLastUpdate date={page.data.updatedAt} />}
@@ -41,9 +36,7 @@ export async function generateStaticParams() {
   return source.generateParams();
 }
 
-export async function generateMetadata(
-  props: PageProps<'/docs/[[...slug]]'>,
-): Promise<Metadata> {
+export async function generateMetadata(props: PageProps<'/docs/[[...slug]]'>): Promise<Metadata> {
   const params = await props.params;
   const page = source.getPage(params.slug);
   if (!page) notFound();

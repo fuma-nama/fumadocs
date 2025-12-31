@@ -1,20 +1,9 @@
-import type {
-  MetaData,
-  PageData,
-  Source,
-  VirtualFile,
-} from 'fumadocs-core/source';
+import type { MetaData, PageData, Source, VirtualFile } from 'fumadocs-core/source';
 import * as path from 'node:path';
 import type { DocCollection, DocsCollection, MetaCollection } from '@/config';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type { CompiledMDXProperties } from '@/loaders/mdx/build-mdx';
-import type {
-  InternalTypeConfig,
-  DocData,
-  DocMethods,
-  FileInfo,
-  MetaMethods,
-} from './types';
+import type { InternalTypeConfig, DocData, DocMethods, FileInfo, MetaMethods } from './types';
 
 export type MetaCollectionEntry<Data> = Data & MetaMethods;
 
@@ -63,10 +52,9 @@ export interface AsyncDocsCollectionEntry<
 
 type AwaitableGlobEntries<T> = Record<string, T | (() => Promise<T>)>;
 
-export type ServerCreate<
-  Config,
-  TC extends InternalTypeConfig = InternalTypeConfig,
-> = ReturnType<typeof server<Config, TC>>;
+export type ServerCreate<Config, TC extends InternalTypeConfig = InternalTypeConfig> = ReturnType<
+  typeof server<Config, TC>
+>;
 
 export interface ServerOptions {
   doc?: {
@@ -74,9 +62,7 @@ export interface ServerOptions {
   };
 }
 
-export function server<Config, TC extends InternalTypeConfig>(
-  options: ServerOptions = {},
-) {
+export function server<Config, TC extends InternalTypeConfig>(options: ServerOptions = {}) {
   const { doc: { passthroughs: docPassthroughs = [] } = {} } = options;
 
   function fileInfo(file: string, base: string): FileInfo {
@@ -114,8 +100,7 @@ export function server<Config, TC extends InternalTypeConfig>(
     ) {
       const out = await Promise.all(
         Object.entries(glob).map(async ([k, v]) => {
-          const data: CompiledMDXProperties =
-            typeof v === 'function' ? await v() : v;
+          const data: CompiledMDXProperties = typeof v === 'function' ? await v() : v;
 
           return {
             ...mapDocData(data),
@@ -155,11 +140,7 @@ export function server<Config, TC extends InternalTypeConfig>(
       return out as unknown as Config[Name] extends
         | DocCollection<infer Schema>
         | DocsCollection<infer Schema>
-        ? AsyncDocCollectionEntry<
-            Name,
-            StandardSchemaV1.InferOutput<Schema>,
-            TC
-          >[]
+        ? AsyncDocCollectionEntry<Name, StandardSchemaV1.InferOutput<Schema>, TC>[]
         : never;
     },
     async meta<Name extends keyof Config & string>(
@@ -199,10 +180,7 @@ export function server<Config, TC extends InternalTypeConfig>(
         },
       } satisfies DocsCollectionEntry;
 
-      return entry as Config[Name] extends DocsCollection<
-        infer Page,
-        infer Meta
-      >
+      return entry as Config[Name] extends DocsCollection<infer Page, infer Meta>
         ? StandardSchemaV1.InferOutput<Page> extends PageData
           ? StandardSchemaV1.InferOutput<Meta> extends MetaData
             ? DocsCollectionEntry<
@@ -230,10 +208,7 @@ export function server<Config, TC extends InternalTypeConfig>(
         },
       } satisfies AsyncDocsCollectionEntry;
 
-      return entry as Config[Name] extends DocsCollection<
-        infer Page,
-        infer Meta
-      >
+      return entry as Config[Name] extends DocsCollection<infer Page, infer Meta>
         ? StandardSchemaV1.InferOutput<Page> extends PageData
           ? StandardSchemaV1.InferOutput<Meta> extends MetaData
             ? AsyncDocsCollectionEntry<

@@ -3,12 +3,7 @@ import fs from 'node:fs/promises';
 import { copy, tryGitInit } from '@/utils';
 import type { PackageManager } from './auto-install';
 import { autoInstall } from './auto-install';
-import {
-  depVersions,
-  sourceDir,
-  type TemplateInfo,
-  templates,
-} from './constants';
+import { depVersions, sourceDir, type TemplateInfo, templates } from './constants';
 
 export type Template = TemplateInfo['value'];
 export interface Options {
@@ -63,10 +58,7 @@ export interface TemplatePlugin {
     packageJson: PackageJsonType,
   ) => Awaitable<void | PackageJsonType>;
   afterWrite?: (this: TemplatePluginContext) => Awaitable<void>;
-  readme?: (
-    this: TemplatePluginContext,
-    content: string,
-  ) => Awaitable<void | string>;
+  readme?: (this: TemplatePluginContext, content: string) => Awaitable<void | string>;
 }
 
 export async function create(createOptions: Options): Promise<void> {
@@ -79,12 +71,9 @@ export async function create(createOptions: Options): Promise<void> {
     log = console.log,
   } = createOptions;
 
-  let template = templates.find(
-    (item) => item.value === createOptions.template,
-  )!;
+  let template = templates.find((item) => item.value === createOptions.template)!;
   for (const plugin of plugins) {
-    template =
-      (await plugin.template?.call({ dest: outputDir }, template)) ?? template;
+    template = (await plugin.template?.call({ dest: outputDir }, template)) ?? template;
   }
 
   const appDir = path.join(outputDir, template.appDir);
@@ -107,9 +96,7 @@ export async function create(createOptions: Options): Promise<void> {
   const packageJsonPath = path.join(outputDir, 'package.json');
   let packageJson = await initPackageJson(projectName, packageJsonPath);
   for (const plugin of plugins) {
-    packageJson =
-      (await plugin.packageJson?.call(pluginContext, packageJson)) ??
-      packageJson;
+    packageJson = (await plugin.packageJson?.call(pluginContext, packageJson)) ?? packageJson;
   }
   await fs.writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2));
 
@@ -152,9 +139,7 @@ async function initPackageJson(
     return deps;
   }
 
-  const packageJson: PackageJsonType = JSON.parse(
-    (await fs.readFile(packageJsonPath)).toString(),
-  );
+  const packageJson: PackageJsonType = JSON.parse((await fs.readFile(packageJsonPath)).toString());
 
   return {
     ...packageJson,

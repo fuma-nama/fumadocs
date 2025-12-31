@@ -42,10 +42,7 @@ export const DefaultFormatter: URLFormatter = {
   },
   add(url, locale) {
     const next = new URL(url);
-    next.pathname = `${url.basePath}/${locale}/${url.pathname}`.replaceAll(
-      /\/+/g,
-      '/',
-    );
+    next.pathname = `${url.basePath}/${locale}/${url.pathname}`.replaceAll(/\/+/g, '/');
     return next;
   },
   remove(url) {

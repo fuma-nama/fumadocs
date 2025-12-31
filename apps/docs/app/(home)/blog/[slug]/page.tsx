@@ -28,8 +28,7 @@ export default async function Page(props: PageProps<'/blog/[slug]'>) {
           <p className="mb-1 text-sm text-fd-muted-foreground">At</p>
           <p className="font-medium">
             {new Date(
-              page.data.date ??
-                path.basename(page.path, path.extname(page.path)),
+              page.data.date ?? path.basename(page.path, path.extname(page.path)),
             ).toDateString()}
           </p>
         </div>
@@ -61,9 +60,7 @@ export default async function Page(props: PageProps<'/blog/[slug]'>) {
   );
 }
 
-export async function generateMetadata(
-  props: PageProps<'/blog/[slug]'>,
-): Promise<Metadata> {
+export async function generateMetadata(props: PageProps<'/blog/[slug]'>): Promise<Metadata> {
   const params = await props.params;
   const page = blog.getPage([params.slug]);
 
@@ -71,8 +68,7 @@ export async function generateMetadata(
 
   return createMetadata({
     title: page.data.title,
-    description:
-      page.data.description ?? 'The library for building documentation sites',
+    description: page.data.description ?? 'The library for building documentation sites',
   });
 }
 

@@ -1,11 +1,6 @@
 import { type ReactNode, useRef, useMemo } from 'react';
 import { type Framework, FrameworkProvider } from '@/framework/index';
-import {
-  useParams,
-  Link,
-  useRouter,
-  useRouterState,
-} from '@tanstack/react-router';
+import { useParams, Link, useRouter, useRouterState } from '@tanstack/react-router';
 
 const framework: Framework = {
   Link({ href, prefetch = true, ...props }) {

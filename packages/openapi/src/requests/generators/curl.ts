@@ -19,8 +19,7 @@ export const generator: SampleGenerator = (url, data) => {
   }
 
   if (data.body && data.bodyMediaType === 'multipart/form-data') {
-    if (typeof data.body !== 'object')
-      throw new Error('[CURL] request body must be an object.');
+    if (typeof data.body !== 'object') throw new Error('[CURL] request body must be an object.');
 
     for (const [key, value] of Object.entries(data.body)) {
       s.push(`-F ${key}=${JSON.stringify(inputToString(value))}`);

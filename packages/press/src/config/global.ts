@@ -11,9 +11,7 @@ export interface FumapressConfig {
   content?: ContentConfig;
 }
 
-export function defineConfig(
-  config: Partial<FumapressConfig>,
-): FumapressConfig {
+export function defineConfig(config: Partial<FumapressConfig>): FumapressConfig {
   return {
     ...config,
     appDir: config.appDir ?? './app',

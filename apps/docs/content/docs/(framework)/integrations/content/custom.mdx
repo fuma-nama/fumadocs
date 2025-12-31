@@ -1,0 +1,112 @@
+---
+title: Build Your Own
+description: Build your own content source for Fumadocs.
+---
+
+## Introduction
+
+For a custom content source implementation, there's two ways:
+
+### Using Loader API
+
+Loader API has a file-system-like interface for integrating different content sources.
+
+See [Loader API `source`](/docs/headless/source-api/source) for details.
+
+### Using Low-Level API
+
+For more robust control, you can use lower level APIs directly.
+
+#### 1. Page Tree
+
+You can either hardcode the page tree, or write some code to generate one.
+See [Definitions of Page Tree](/docs/headless/page-tree).
+
+Pass your page tree to `DocsLayout` (usually in a `layout.tsx`):
+
+```tsx title="layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <DocsLayout
+      // [!code ++:5]
+      tree={
+        {
+          // your own tree
+        }
+      }
+    >
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+The page tree is like a smarter "sidebar items", they will be referenced everywhere in the UI for navigation elements, such as the page footer.
+
+#### 2. Page Content
+
+For docs page, it's the same logic:
+
+- Define path params (`slugs`).
+- Fetch page content from path params.
+- Render the content (inside the `DocsPage` component).
+
+You may need table of contents, which can be generated on your own, or using the [`getTableOfContents`](/docs/headless/utils/get-toc) utility (Markdown/MDX only).
+
+```tsx
+import { DocsPage, DocsBody } from 'fumadocs-ui/layouts/docs/page';
+import { getPage } from './my-content-source';
+import { notFound } from 'next/navigation';
+
+export default function Page({ params }: { params: { slug?: string[] } }) {
+  const page = getPage(params.slug);
+  if (!page) notFound();
+
+  return (
+    <DocsPage toc={page.tableOfContents}>
+      <DocsBody>{page.render()}</DocsBody>
+    </DocsPage>
+  );
+}
+```
+
+#### 3. Pre-rendering
+
+The mechanism for pre-rendering differs depending on your React.js framework.
+
+It's important to pre-render pages (especially the frequently visited ones) to improve initial load time.
+
+<Callout title='In Next.js'>
+
+Define the [`generateStaticParams`](https://nextjs.org/docs/app/api-reference/functions/generate-static-params) function to populate dynamic & catch-all routes.
+
+</Callout>
+
+When pre-rendering pages from a remote source, make sure to optimize repeated reads during the build phase.
+For example, if you're fetching content via GitHub API, it is better to clone the repository content locally for pre-rendering.
+
+```text tab="Before"
+/docs/* -> GET github.com
+/docs/introduction -> GET github.com
+/docs/my-page -> GET github.com
+Error: API Ratelimit
+```
+
+```text tab="After"
+start -> git clone
+/docs/* -> ls
+/docs/introduction -> read file
+/docs/my-page -> read file
+```
+
+#### 4. Document Search
+
+This can be difficult considering your content may not be necessarily Markdown/MDX.
+For Markdown and MDX, the built-in [Search API](/docs/headless/search/orama) + search index usage is adequate for most use cases.
+Otherwise, you will have to bring your own implementation.
+
+We recommend 3rd party solutions like Orama or Algolia Search. They are more flexible than the built-in Search API, and is easier to integrate with remote sources.
+Fumadocs offers a variant of [Search Integrations](/docs/headless/search).

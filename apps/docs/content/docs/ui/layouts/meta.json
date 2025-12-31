@@ -1,0 +1,4 @@
+{
+  "$schema": "../../../../.source/json-schema/docs.meta.json",
+  "pages": ["---Configurations---", "links", "nav", "---Components---", "..."]
+}

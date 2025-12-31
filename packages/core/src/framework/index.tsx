@@ -41,9 +41,7 @@ export interface Framework {
 }
 
 const notImplemented = () => {
-  throw new Error(
-    'You need to wrap your application inside `FrameworkProvider`.',
-  );
+  throw new Error('You need to wrap your application inside `FrameworkProvider`.');
 };
 
 const FrameworkContext = createContext<Framework>({
@@ -92,12 +90,7 @@ export function Image(props: ImageProps) {
     const { src, alt, priority, ...rest } = props;
 
     return (
-      <img
-        alt={alt}
-        src={src as string}
-        fetchPriority={priority ? 'high' : 'auto'}
-        {...rest}
-      />
+      <img alt={alt} src={src as string} fetchPriority={priority ? 'high' : 'auto'} {...rest} />
     );
   }
 

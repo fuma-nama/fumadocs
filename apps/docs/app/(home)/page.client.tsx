@@ -127,9 +127,7 @@ export function CreateAppAnimation() {
   lines.push(
     <span key="command_type">
       {installCmd.substring(0, tick)}
-      {tick < timeCommandEnter && (
-        <div className="inline-block h-3 w-1 animate-pulse bg-white" />
-      )}
+      {tick < timeCommandEnter && <div className="inline-block h-3 w-1 animate-pulse bg-white" />}
     </span>,
   );
 
@@ -176,8 +174,7 @@ export function CreateAppAnimation() {
       )}
       <pre className="overflow-hidden rounded-xl border text-sm shadow-lg bg-fd-card">
         <div className="flex flex-row items-center gap-2 border-b px-4 py-2">
-          <TerminalIcon className="size-4" />{' '}
-          <span className="font-bold">Terminal</span>
+          <TerminalIcon className="size-4" /> <span className="font-bold">Terminal</span>
           <div className="grow" />
           <div className="size-2 rounded-full bg-red-400" />
         </div>
@@ -206,17 +203,14 @@ function LaunchAppWindow(props: HTMLAttributes<HTMLDivElement>) {
   );
 }
 
-const previewButtonVariants = cva(
-  'w-20 h-8 text-sm font-medium transition-colors rounded-full',
-  {
-    variants: {
-      active: {
-        true: 'text-fd-primary-foreground',
-        false: 'text-fd-muted-foreground',
-      },
+const previewButtonVariants = cva('w-20 h-8 text-sm font-medium transition-colors rounded-full', {
+  variants: {
+    active: {
+      true: 'text-fd-primary-foreground',
+      false: 'text-fd-muted-foreground',
     },
   },
-);
+});
 export function PreviewImages(props: ComponentProps<'div'>) {
   const [active, setActive] = useState(0);
   const previews = [
@@ -261,9 +255,7 @@ export function PreviewImages(props: ComponentProps<'div'>) {
           alt="preview"
           className={cn(
             'col-start-1 row-start-1 select-none',
-            active === i
-              ? 'animate-in fade-in slide-in-from-bottom-12 duration-800'
-              : 'invisible',
+            active === i ? 'animate-in fade-in slide-in-from-bottom-12 duration-800' : 'invisible',
           )}
         />
       ))}
@@ -291,8 +283,7 @@ export function Writing({
 }: {
   tabs: Record<(typeof WritingTabs)[number]['value'], ReactNode>;
 }) {
-  const [tab, setTab] =
-    useState<(typeof WritingTabs)[number]['value']>('writer');
+  const [tab, setTab] = useState<(typeof WritingTabs)[number]['value']>('writer');
 
   return (
     <div className="col-span-full my-20">
@@ -300,8 +291,8 @@ export function Writing({
         Anybody can write.
       </h2>
       <p className="text-center mb-8 mx-auto w-full max-w-[800px]">
-        Native support for Markdown & MDX, offering intuitive, convenient and
-        extensive syntax for non-dev writers, developers, and AI agents.
+        Native support for Markdown & MDX, offering intuitive, convenient and extensive syntax for
+        non-dev writers, developers, and AI agents.
       </p>
       <div className="flex justify-center items-center gap-4 text-fd-muted-foreground mb-6">
         {WritingTabs.map((item) => (
@@ -355,9 +346,7 @@ export function AgnosticBackground() {
   );
 }
 
-export function ContentAdoptionBackground(
-  props: ComponentProps<typeof GrainGradient>,
-) {
+export function ContentAdoptionBackground(props: ComponentProps<typeof GrainGradient>) {
   const { resolvedTheme } = useTheme();
 
   return (
@@ -376,10 +365,7 @@ export function ContentAdoptionBackground(
 }
 
 let observer: IntersectionObserver;
-const observerTargets = new WeakMap<
-  Element,
-  (entry: IntersectionObserverEntry) => void
->();
+const observerTargets = new WeakMap<Element, (entry: IntersectionObserverEntry) => void>();
 
 function useIsVisible(ref: RefObject<HTMLElement | null>) {
   const [visible, setVisible] = useState(false);

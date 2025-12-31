@@ -1,0 +1,31 @@
+---
+title: Component Library
+description: The underlying headless component library.
+icon: Library
+---
+
+## Overview
+
+Fumadocs UI maintains support for both **Base UI** and **Radix UI**, while it uses Radix UI by default.
+
+The configuration may be different if you use Fumadocs CLI for customising components.
+
+### Base UI
+
+You can opt-in to use Base UI by replacing `fumadocs-ui` with the `@fumadocs/base-ui` package:
+
+```json title="package.json"
+{
+  "dependency": {
+    "fumadocs-ui": "npm:@fumadocs/base-ui@latest"
+  }
+}
+```
+
+For Fumadocs CLI, also configure it in your `cli.json` config:
+
+```json title="cli.json"
+{
+  "uiLibrary": "base-ui"
+}
+```

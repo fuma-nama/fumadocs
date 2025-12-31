@@ -39,23 +39,17 @@ async function getTokenizer(
   locale: string,
 ): Promise<{ language: string } | { tokenizer: Tokenizer }> {
   return {
-    language:
-      Object.keys(STEMMERS).find((lang) => STEMMERS[lang] === locale) ?? locale,
+    language: Object.keys(STEMMERS).find((lang) => STEMMERS[lang] === locale) ?? locale,
   };
 }
 
-async function initSimple(
-  options: I18nSimpleOptions,
-): Promise<Map<string, SearchServer>> {
+async function initSimple(options: I18nSimpleOptions): Promise<Map<string, SearchServer>> {
   const map = new Map<string, SearchServer>();
   if (options.i18n.languages.length === 0) {
     return map;
   }
 
-  const indexes =
-    typeof options.indexes === 'function'
-      ? await options.indexes()
-      : options.indexes;
+  const indexes = typeof options.indexes === 'function' ? await options.indexes() : options.indexes;
 
   for (const locale of options.i18n.languages) {
     const localeIndexes = indexes.filter((index) => index.locale === locale);
@@ -80,18 +74,13 @@ async function initSimple(
   return map;
 }
 
-async function initAdvanced(
-  options: I18nAdvancedOptions,
-): Promise<Map<string, SearchServer>> {
+async function initAdvanced(options: I18nAdvancedOptions): Promise<Map<string, SearchServer>> {
   const map = new Map<string, SearchServer>();
   if (options.i18n.languages.length === 0) {
     return map;
   }
 
-  const indexes =
-    typeof options.indexes === 'function'
-      ? await options.indexes()
-      : options.indexes;
+  const indexes = typeof options.indexes === 'function' ? await options.indexes() : options.indexes;
 
   for (const locale of options.i18n.languages) {
     const localeIndexes = indexes.filter((index) => index.locale === locale);

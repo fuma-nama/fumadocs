@@ -1,117 +1,120 @@
 {
   "name": "fumadocs-core",
-  "version": "16.4.0",
+  "version": "16.4.2",
   "description": "The React.js library for building a documentation website",
   "keywords": [
-    "Fumadocs",
-    "Docs"
+    "Docs",
+    "Fumadocs"
   ],
   "homepage": "https://fumadocs.dev",
-  "repository": "github:fuma-nama/fumadocs",
   "license": "MIT",
   "author": "Fuma Nama",
-  "type": "module",
-  "exports": {
-    "./breadcrumb": {
-      "import": "./dist/breadcrumb.js",
-      "types": "./dist/breadcrumb.d.ts"
-    },
-    "./toc": {
-      "import": "./dist/toc.js",
-      "types": "./dist/toc.d.ts"
-    },
-    "./content": {
-      "import": "./dist/content/index.js",
-      "types": "./dist/content/index.d.ts"
-    },
-    "./content/*": {
-      "import": "./dist/content/*.js",
-      "types": "./dist/content/*.d.ts"
-    },
-    "./negotiation": {
-      "import": "./dist/negotiation/index.js",
-      "types": "./dist/negotiation/index.d.ts"
-    },
-    "./page-tree": {
-      "import": "./dist/page-tree/index.js",
-      "types": "./dist/page-tree/index.d.ts"
-    },
-    "./search": {
-      "import": "./dist/search/index.js",
-      "types": "./dist/search/index.d.ts"
-    },
-    "./search/*": {
-      "import": "./dist/search/*.js",
-      "types": "./dist/search/*.d.ts"
-    },
-    "./source": {
-      "import": "./dist/source/index.js",
-      "types": "./dist/source/index.d.ts"
-    },
-    "./source/client": {
-      "import": "./dist/source/client/index.js",
-      "types": "./dist/source/client/index.d.ts"
-    },
-    "./source/schema": {
-      "import": "./dist/source/schema.js",
-      "types": "./dist/source/schema.d.ts"
-    },
-    "./source/*": {
-      "import": "./dist/source/plugins/*.js",
-      "types": "./dist/source/plugins/*.d.ts"
-    },
-    "./utils/*": {
-      "import": "./dist/utils/*.js",
-      "types": "./dist/utils/*.d.ts"
-    },
-    "./link": {
-      "import": "./dist/link.js",
-      "types": "./dist/link.d.ts"
-    },
-    "./dynamic-link": {
-      "import": "./dist/dynamic-link.js",
-      "types": "./dist/dynamic-link.d.ts"
-    },
-    "./mdx-plugins": {
-      "import": "./dist/mdx-plugins/index.js",
-      "types": "./dist/mdx-plugins/index.d.ts"
-    },
-    "./mdx-plugins/*": {
-      "import": "./dist/mdx-plugins/*.js",
-      "types": "./dist/mdx-plugins/*.d.ts"
-    },
-    "./i18n": {
-      "import": "./dist/i18n/index.js",
-      "types": "./dist/i18n/index.d.ts"
-    },
-    "./i18n/middleware": {
-      "import": "./dist/i18n/middleware.js",
-      "types": "./dist/i18n/middleware.d.ts"
-    },
-    "./highlight": {
-      "import": "./dist/highlight/index.js",
-      "types": "./dist/highlight/index.d.ts"
-    },
-    "./highlight/client": {
-      "import": "./dist/highlight/client.js",
-      "types": "./dist/highlight/client.d.ts"
-    },
-    "./framework": {
-      "import": "./dist/framework/index.js",
-      "types": "./dist/framework/index.d.ts"
-    },
-    "./framework/*": {
-      "import": "./dist/framework/*.js",
-      "types": "./dist/framework/*.d.ts"
-    }
-  },
+  "repository": "github:fuma-nama/fumadocs",
   "files": [
     "dist/*"
   ],
+  "type": "module",
+  "exports": {
+    "./breadcrumb": {
+      "types": "./dist/breadcrumb.d.ts",
+      "import": "./dist/breadcrumb.js"
+    },
+    "./toc": {
+      "types": "./dist/toc.d.ts",
+      "import": "./dist/toc.js"
+    },
+    "./content": {
+      "types": "./dist/content/index.d.ts",
+      "import": "./dist/content/index.js"
+    },
+    "./content/*": {
+      "types": "./dist/content/*.d.ts",
+      "import": "./dist/content/*.js"
+    },
+    "./negotiation": {
+      "types": "./dist/negotiation/index.d.ts",
+      "import": "./dist/negotiation/index.js"
+    },
+    "./page-tree": {
+      "types": "./dist/page-tree/index.d.ts",
+      "import": "./dist/page-tree/index.js"
+    },
+    "./search": {
+      "types": "./dist/search/index.d.ts",
+      "import": "./dist/search/index.js"
+    },
+    "./search/*": {
+      "types": "./dist/search/*.d.ts",
+      "import": "./dist/search/*.js"
+    },
+    "./source": {
+      "types": "./dist/source/index.d.ts",
+      "import": "./dist/source/index.js"
+    },
+    "./source/client": {
+      "types": "./dist/source/client/index.d.ts",
+      "import": "./dist/source/client/index.js"
+    },
+    "./source/schema": {
+      "types": "./dist/source/schema.d.ts",
+      "import": "./dist/source/schema.js"
+    },
+    "./source/*": {
+      "types": "./dist/source/plugins/*.d.ts",
+      "import": "./dist/source/plugins/*.js"
+    },
+    "./utils/*": {
+      "types": "./dist/utils/*.d.ts",
+      "import": "./dist/utils/*.js"
+    },
+    "./link": {
+      "types": "./dist/link.d.ts",
+      "import": "./dist/link.js"
+    },
+    "./dynamic-link": {
+      "types": "./dist/dynamic-link.d.ts",
+      "import": "./dist/dynamic-link.js"
+    },
+    "./mdx-plugins": {
+      "types": "./dist/mdx-plugins/index.d.ts",
+      "import": "./dist/mdx-plugins/index.js"
+    },
+    "./mdx-plugins/*": {
+      "types": "./dist/mdx-plugins/*.d.ts",
+      "import": "./dist/mdx-plugins/*.js"
+    },
+    "./i18n": {
+      "types": "./dist/i18n/index.d.ts",
+      "import": "./dist/i18n/index.js"
+    },
+    "./i18n/middleware": {
+      "types": "./dist/i18n/middleware.d.ts",
+      "import": "./dist/i18n/middleware.js"
+    },
+    "./highlight": {
+      "types": "./dist/highlight/index.d.ts",
+      "import": "./dist/highlight/index.js"
+    },
+    "./highlight/client": {
+      "types": "./dist/highlight/client.d.ts",
+      "import": "./dist/highlight/client.js"
+    },
+    "./framework": {
+      "types": "./dist/framework/index.d.ts",
+      "import": "./dist/framework/index.js"
+    },
+    "./framework/*": {
+      "types": "./dist/framework/*.d.ts",
+      "import": "./dist/framework/*.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "build": "tsup",
+    "build": "tsdown",
     "clean": "rimraf dist",
-    "dev": "tsup --watch",
+    "dev": "tsdown --watch",
     "lint": "eslint .",
     "types:check": "tsc --noEmit"
   },
@@ -133,6 +136,7 @@
     "remark-rehype": "^11.1.2",
     "scroll-into-view-if-needed": "^3.1.0",
     "shiki": "^3.20.0",
+    "tinyglobby": "^0.2.15",
     "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
@@ -158,6 +162,7 @@
     "remark-mdx": "^3.1.1",
     "remove-markdown": "^0.6.2",
     "tsconfig": "workspace:*",
+    "tsdown": "^0.18.3",
     "typescript": "^5.9.3",
     "unified": "^11.0.5",
     "vfile": "^6.0.3",
@@ -215,8 +220,5 @@
     "zod": {
       "optional": true
     }
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

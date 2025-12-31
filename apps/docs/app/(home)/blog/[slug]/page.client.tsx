@@ -10,11 +10,7 @@ export function ShareButton({ url }: { url: string }) {
   });
 
   return (
-    <button
-      type="button"
-      className={cn(buttonVariants({ className: 'gap-2' }))}
-      onClick={onCopy}
-    >
+    <button type="button" className={cn(buttonVariants({ className: 'gap-2' }))} onClick={onCopy}>
       {isChecked ? <Check className="size-4" /> : <Share className="size-4" />}
       {isChecked ? 'Copied URL' : 'Share Post'}
     </button>

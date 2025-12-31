@@ -1,0 +1,108 @@
+---
+title: Root Provider
+description: The context provider of Fumadocs UI.
+---
+
+The context provider of all the components, including `next-themes` and [`<FrameworkProvider />`](/docs/headless#installation). It should be located at the root layout.
+
+## Usage
+
+Import it according to your React.js framework:
+
+```jsx tab="Next.js"
+import { RootProvider } from 'fumadocs-ui/provider/next';
+
+export default function Layout({ children }) {
+  return (
+    <html lang="en">
+      <body>
+        <RootProvider>{children}</RootProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+```jsx tab="React Router"
+import { RootProvider } from 'fumadocs-ui/provider/react-router';
+
+export function Layout({ children }) {
+  return (
+    <html lang="en">
+      <body>
+        <RootProvider>{children}</RootProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+```jsx tab="Tanstack"
+import {
+  HeadContent,
+  Scripts,
+} from '@tanstack/react-router';
+import { RootProvider } from 'fumadocs-ui/provider/tanstack';
+
+function RootDocument({ children }: { children: React.ReactNode }) {
+  return (
+    <html suppressHydrationWarning>
+      <head>
+        <HeadContent />
+      </head>
+      <body className="flex flex-col min-h-screen">
+        <RootProvider>{children}</RootProvider>
+        <Scripts />
+      </body>
+    </html>
+  );
+}
+
+```
+
+```jsx tab="Waku"
+import { RootProvider } from 'fumadocs-ui/provider/waku';
+
+export default function Layout({ children }) {
+  return (
+    <html lang="en">
+      <body>
+        <RootProvider>{children}</RootProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+### Search Dialog
+
+Customize or disable the search dialog with `search` option.
+
+```jsx
+<RootProvider
+  search={{
+    enabled: false,
+  }}
+>
+  {children}
+</RootProvider>
+```
+
+Learn more from [Search](/docs/ui/search).
+
+### Theme Provider
+
+Fumadocs supports light/dark modes with [`next-themes`](https://github.com/pacocoursey/next-themes).
+Customise or disable it with `theme` option.
+
+```jsx
+<RootProvider
+  theme={{
+    enabled: false,
+  }}
+>
+  {children}
+</RootProvider>
+```
+
+You can also install & reference `next-themes` in your code for managing themes.

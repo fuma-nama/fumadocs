@@ -5,10 +5,7 @@ import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { FC } from 'react';
 import type { MDXProps } from 'mdx/types';
-import {
-  type PostprocessOptions,
-  remarkPostprocess,
-} from '@/loaders/mdx/remark-postprocess';
+import { type PostprocessOptions, remarkPostprocess } from '@/loaders/mdx/remark-postprocess';
 import type { Core } from '@/core';
 import type { DocCollectionItem } from '@/config/build';
 
@@ -77,18 +74,9 @@ declare module 'vfile' {
 export async function buildMDX(
   core: Core,
   collection: DocCollectionItem | undefined,
-  {
-    filePath,
-    frontmatter,
-    source,
-    _compiler,
-    environment,
-    isDevelopment,
-  }: BuildMDXOptions,
+  { filePath, frontmatter, source, _compiler, environment, isDevelopment }: BuildMDXOptions,
 ): Promise<VFile> {
-  const mdxOptions = await core
-    .getConfig()
-    .getMDXOptions(collection, environment);
+  const mdxOptions = await core.getConfig().getMDXOptions(collection, environment);
 
   function getProcessor(format: 'md' | 'mdx') {
     const cache = core.cache as Map<string, Processor>;

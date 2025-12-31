@@ -1,37 +1,39 @@
 {
   "name": "@fumadocs/ui",
-  "version": "16.4.0",
+  "version": "16.4.2",
   "description": "The low-level primitives for Fumadocs UI.",
   "keywords": [
-    "Fumadocs",
-    "Docs"
+    "Docs",
+    "Fumadocs"
   ],
   "homepage": "https://fumadocs.dev",
-  "repository": "github:fuma-nama/fumadocs",
   "license": "MIT",
   "author": "Fuma Nama",
+  "repository": "github:fuma-nama/fumadocs",
+  "files": [
+    "css/*",
+    "dist/*"
+  ],
   "type": "module",
   "exports": {
     "./css/*": "./css/*",
     "./*": {
-      "import": "./dist/*.js",
-      "types": "./dist/*.d.ts"
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.js"
     }
   },
-  "files": [
-    "dist/*",
-    "css/*"
-  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "build": "tsc --project tsconfig.build.json && tsc-alias -p tsconfig.build.json",
+    "build": "tsdown",
     "clean": "rimraf dist",
-    "dev": "concurrently \"tsc -w --project tsconfig.build.json\" \"tsc-alias -w -p tsconfig.build.json\"",
+    "dev": "tsdown --watch",
     "lint": "eslint .",
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
     "fumadocs-core": "workspace:*",
-    "lodash.merge": "^4.6.2",
     "next-themes": "^0.4.6",
     "postcss-selector-parser": "^7.1.1",
     "tailwind-merge": "^3.4.0"
@@ -46,10 +48,11 @@
     "class-variance-authority": "^0.7.1",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
+    "lodash.merge": "^4.6.2",
     "next": "16.1.1",
     "tailwindcss": "^4.1.18",
-    "tsc-alias": "^1.8.16",
-    "tsconfig": "workspace:*"
+    "tsconfig": "workspace:*",
+    "tsdown": "^0.18.3"
   },
   "peerDependencies": {
     "@types/react": "*",
@@ -68,8 +71,5 @@
     "tailwindcss": {
       "optional": true
     }
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

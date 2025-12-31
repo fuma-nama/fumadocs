@@ -10,12 +10,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from 'fumadocs-ui/components/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from 'fumadocs-ui/components/tabs';
 import type { SchemaData, SchemaUIGeneratedData } from '@/ui/schema';
 import {
   Collapsible,
@@ -23,13 +18,9 @@ import {
   CollapsibleTrigger,
 } from 'fumadocs-ui/components/ui/collapsible';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { ChevronDown } from '@/ui/icons';
+import { ChevronDown } from 'lucide-react';
 import { Badge } from '@/ui/components/method-label';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from 'fumadocs-ui/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from 'fumadocs-ui/components/ui/popover';
 import { cn } from '@/utils/cn';
 import { cva } from 'class-variance-authority';
 
@@ -47,17 +38,14 @@ interface RenderRefOptions {
   inlineUnion?: boolean;
 }
 
-const typeVariants = cva(
-  'text-sm text-start text-fd-muted-foreground font-mono',
-  {
-    variants: {
-      variant: {
-        trigger:
-          'underline hover:text-fd-accent-foreground data-[state=open]:text-fd-accent-foreground',
-      },
+const typeVariants = cva('text-sm text-start text-fd-muted-foreground font-mono', {
+  variants: {
+    variant: {
+      trigger:
+        'underline hover:text-fd-accent-foreground data-[state=open]:text-fd-accent-foreground',
     },
   },
-);
+});
 
 const PropertyContext = createContext<PropertyContextType>({
   renderRef: (props) => <RootRef {...props} />,
@@ -81,12 +69,7 @@ export interface SchemaUIProps {
   generated: SchemaUIGeneratedData;
 }
 
-export function SchemaUI({
-  name,
-  required = false,
-  as = 'property',
-  generated,
-}: SchemaUIProps) {
+export function SchemaUI({ name, required = false, as = 'property', generated }: SchemaUIProps) {
   const schema = generated.refs[generated.$root];
   const context: DataContextType = useMemo(() => generated, [generated]);
   const isProperty = as === 'property' || !isExpandable(schema);
@@ -195,10 +178,7 @@ function SchemaUIProperty({
   const schema = refs[$type];
 
   let type: ReactNode = schema.typeName;
-  if (
-    (schema.type === 'or' || schema.type === 'and') &&
-    schema.items.length > 0
-  ) {
+  if ((schema.type === 'or' || schema.type === 'and') && schema.items.length > 0) {
     type = renderRef({
       text: schema.aliasName,
       pathName: name,
@@ -224,12 +204,7 @@ function SchemaUIProperty({
   }
 
   return (
-    <Property
-      name={name}
-      type={type}
-      deprecated={schema.deprecated}
-      {...overrides}
-    >
+    <Property name={name} type={type} deprecated={schema.deprecated} {...overrides}>
       {schema.description}
       {schema.infoTags && schema.infoTags.length > 0 && (
         <div className="flex flex-row gap-2 flex-wrap my-2 not-prose empty:hidden">
@@ -242,11 +217,7 @@ function SchemaUIProperty({
   );
 }
 
-function SchemaUIPopover({
-  initialPath,
-}: {
-  initialPath: { name: ReactNode; $ref?: string }[];
-}) {
+function SchemaUIPopover({ initialPath }: { initialPath: { name: ReactNode; $ref?: string }[] }) {
   const [path, setPath] = useState(initialPath);
   const ref = useRef<HTMLDivElement>(null);
   const last = path.findLast((item) => item.$ref !== undefined);
@@ -279,19 +250,14 @@ function SchemaUIPopover({
     <>
       <div className="sticky top-0 flex flex-row flex-wrap items-center text-sm font-medium font-mono bg-fd-muted p-2">
         {path.map((item, i) => {
-          const isDuplicated = path.some(
-            (other, j) => j < i && other.$ref === item.$ref,
-          );
+          const isDuplicated = path.some((other, j) => j < i && other.$ref === item.$ref);
           const className = cn(
             isDuplicated && 'text-orange-400',
             item.$ref && 'hover:underline hover:text-fd-accent-foreground',
           );
 
           const node = item.$ref ? (
-            <button
-              onClick={() => setPath((path) => path.slice(0, i + 1))}
-              className={className}
-            >
+            <button onClick={() => setPath((path) => path.slice(0, i + 1))} className={className}>
               {item.name}
             </button>
           ) : (
@@ -328,12 +294,7 @@ function RootRef({ text, $ref, pathName, inlineUnion }: RenderRefOptions) {
   if (inlineUnion && (schema.type === 'and' || schema.type === 'or')) {
     const sep = schema.type === 'and' ? '&' : '|';
     return (
-      <span
-        className={cn(
-          typeVariants(),
-          'flex flex-row gap-2 items-center flex-wrap',
-        )}
-      >
+      <span className={cn(typeVariants(), 'flex flex-row gap-2 items-center flex-wrap')}>
         {schema.items.map((item, i) => (
           <Fragment key={item.$type}>
             {i > 0 && <span>{sep}</span>}
@@ -350,13 +311,8 @@ function RootRef({ text, $ref, pathName, inlineUnion }: RenderRefOptions) {
 
   return (
     <Popover>
-      <PopoverTrigger className={cn(typeVariants({ variant: 'trigger' }))}>
-        {text}
-      </PopoverTrigger>
-      <PopoverContent
-        ref={ref}
-        className="w-[600px] min-h-(--initial-height,0) max-h-[460px] p-0"
-      >
+      <PopoverTrigger className={cn(typeVariants({ variant: 'trigger' }))}>{text}</PopoverTrigger>
+      <PopoverContent ref={ref} className="w-[600px] min-h-(--initial-height,0) max-h-[460px] p-0">
         <SchemaUIPopover
           initialPath={[
             {
@@ -440,9 +396,7 @@ function Property({
           )}
         </span>
         {typeof type === 'string' ? (
-          <span className="text-sm font-mono text-fd-muted-foreground">
-            {type}
-          </span>
+          <span className="text-sm font-mono text-fd-muted-foreground">{type}</span>
         ) : (
           type
         )}
@@ -452,9 +406,7 @@ function Property({
           </Badge>
         )}
       </div>
-      <div className="prose-no-margin pt-2.5 empty:hidden">
-        {props.children}
-      </div>
+      <div className="prose-no-margin pt-2.5 empty:hidden">{props.children}</div>
     </div>
   );
 }

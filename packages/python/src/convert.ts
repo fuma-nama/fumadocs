@@ -17,10 +17,7 @@ export interface ConvertOptions {
   baseUrl?: string;
 }
 
-export function convert(
-  mod: ModuleInterface,
-  options: ConvertOptions = {},
-): OutputFile[] {
+export function convert(mod: ModuleInterface, options: ConvertOptions = {}): OutputFile[] {
   const files: OutputFile[] = [];
   const content: string[] = [];
   const tabs: string[] = [];
@@ -80,9 +77,7 @@ export function convert(
         {
           items: tabs,
         },
-        tabContents
-          .map((content, i) => element('Tab', { value: tabs[i] }, content))
-          .join('\n'),
+        tabContents.map((content, i) => element('Tab', { value: tabs[i] }, content)).join('\n'),
       ),
     );
   }
@@ -144,11 +139,7 @@ function convertFunction(func: FunctionInterface) {
         ? element('PySourceCode', undefined, codeblock('python', func.source))
         : null,
       func.parameters.length > 0
-        ? element(
-            'div',
-            undefined,
-            func.parameters.map(convertParameter).join('\n'),
-          )
+        ? element('div', undefined, func.parameters.map(convertParameter).join('\n'))
         : null,
       element(
         'PyFunctionReturn',
@@ -169,9 +160,7 @@ function convertParameter(param: ParameterInterface) {
   const lines: string[] = [];
   if (param.description)
     lines.push(
-      typeof param.description === 'string'
-        ? param.description
-        : convertDoc(param.description),
+      typeof param.description === 'string' ? param.description : convertDoc(param.description),
     );
 
   return element(
@@ -189,9 +178,7 @@ function convertAttribute(attribute: AttributeInterface) {
       type: attribute.annotation,
       value: attribute.value,
     },
-    [attribute.description ? convertDoc(attribute.description) : null]
-      .filter(Boolean)
-      .join('\n'),
+    [attribute.description ? convertDoc(attribute.description) : null].filter(Boolean).join('\n'),
   );
 }
 
@@ -232,11 +219,7 @@ function codeblock(meta: string, code: string) {
   return `${delimit}${meta}\n${code.replaceAll(delimit, '\\' + delimit)}\n${delimit}`;
 }
 
-function element(
-  name: string,
-  props: Record<string, unknown> = {},
-  children?: string,
-) {
+function element(name: string, props: Record<string, unknown> = {}, children?: string) {
   const propsStr: string[] = [];
   for (const key in props) {
     propsStr.push(`${key}={${JSON.stringify(props[key])}}`);
@@ -259,10 +242,7 @@ function getHref(
   const { baseUrl = '/' } = options;
 
   return (
-    '/' +
-    [...baseUrl.split('/'), ...ele.path.split('.')]
-      .filter((v) => v.length > 0)
-      .join('/')
+    '/' + [...baseUrl.split('/'), ...ele.path.split('.')].filter((v) => v.length > 0).join('/')
   );
 }
 

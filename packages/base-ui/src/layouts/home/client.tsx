@@ -29,23 +29,13 @@ import {
 } from '@/components/ui/navigation-menu';
 import { buttonVariants } from '@/components/ui/button';
 import type { HomeLayoutProps } from '.';
-import {
-  LargeSearchToggle,
-  SearchToggle,
-} from '@/layouts/shared/search-toggle';
+import { LargeSearchToggle, SearchToggle } from '@/layouts/shared/search-toggle';
 import { ThemeToggle } from '@/layouts/shared/theme-toggle';
-import {
-  LanguageToggle,
-  LanguageToggleText,
-} from '@/layouts/shared/language-toggle';
-import { ChevronDown, Languages } from '@fumadocs/ui/icons';
+import { LanguageToggle, LanguageToggleText } from '@/layouts/shared/language-toggle';
+import { ChevronDown, Languages } from 'lucide-react';
 import { useIsScrollTop } from '@fumadocs/ui/hooks/use-is-scroll-top';
 import { NavigationMenu } from '@base-ui/react';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 const MobileMenuContext = createContext<{
   open: boolean;
@@ -116,11 +106,7 @@ export function Header({
               {navItems
                 .filter((item) => !isSecondary(item))
                 .map((item, i) => (
-                  <NavigationMenuLinkItem
-                    key={i}
-                    item={item}
-                    className="text-sm"
-                  />
+                  <NavigationMenuLinkItem key={i} item={item} className="text-sm" />
                 ))}
             </ul>
             <div className="flex flex-row items-center justify-end gap-1.5 flex-1 max-lg:hidden">
@@ -132,9 +118,7 @@ export function Header({
                   />
                 ))}
               {themeSwitch.enabled !== false &&
-                (themeSwitch.component ?? (
-                  <ThemeToggle mode={themeSwitch?.mode} />
-                ))}
+                (themeSwitch.component ?? <ThemeToggle mode={themeSwitch?.mode} />)}
               {i18n && (
                 <LanguageToggle>
                   <Languages className="size-5" />
@@ -144,9 +128,7 @@ export function Header({
                 {navItems.filter(isSecondary).map((item, i) => (
                   <NavigationMenuLinkItem
                     key={i}
-                    className={cn(
-                      item.type === 'icon' && '-mx-1 first:ms-0 last:me-0',
-                    )}
+                    className={cn(item.type === 'icon' && '-mx-1 first:ms-0 last:me-0')}
                     item={item}
                   />
                 ))}
@@ -154,9 +136,7 @@ export function Header({
             </div>
             <ul className="flex flex-row items-center ms-auto -me-1.5 lg:hidden">
               {searchToggle.enabled !== false &&
-                (searchToggle.components?.sm ?? (
-                  <SearchToggle className="p-2" hideIfDisabled />
-                ))}
+                (searchToggle.components?.sm ?? <SearchToggle className="p-2" hideIfDisabled />)}
               <CollapsibleTrigger
                 aria-label="Toggle Menu"
                 className={cn(
@@ -175,11 +155,7 @@ export function Header({
             {menuItems
               .filter((item) => !isSecondary(item))
               .map((item, i) => (
-                <MobileMenuLinkItem
-                  key={i}
-                  item={item}
-                  className="first:mt-4 sm:hidden"
-                />
+                <MobileMenuLinkItem key={i} item={item} className="first:mt-4 sm:hidden" />
               ))}
             <div className="-ms-1.5 flex flex-row pt-2 pb-4 items-center justify-end gap-2">
               {menuItems.filter(isSecondary).map((item, i) => (
@@ -198,9 +174,7 @@ export function Header({
                 </LanguageToggle>
               )}
               {themeSwitch.enabled !== false &&
-                (themeSwitch.component ?? (
-                  <ThemeToggle mode={themeSwitch?.mode} />
-                ))}
+                (themeSwitch.component ?? <ThemeToggle mode={themeSwitch?.mode} />)}
             </div>
           </CollapsibleContent>
           <NavigationMenu.Portal>
@@ -270,8 +244,7 @@ function HeaderRoot({
   transparentMode?: NavOptions['transparentMode'];
 }) {
   const isTop = useIsScrollTop({ enabled: transparentMode === 'top' }) ?? true;
-  const isTransparent =
-    transparentMode === 'top' ? isTop : transparentMode === 'always';
+  const isTransparent = transparentMode === 'top' ? isTop : transparentMode === 'always';
 
   return (
     <header id="nd-nav" className="sticky h-14 top-0 z-40">
@@ -293,13 +266,7 @@ function HeaderRoot({
   );
 }
 
-function NavigationMenuLinkItem({
-  item,
-  ...props
-}: {
-  item: LinkItemType;
-  className?: string;
-}) {
+function NavigationMenuLinkItem({ item, ...props }: { item: LinkItemType; className?: string }) {
   if (item.type === 'custom') return <div {...props}>{item.children}</div>;
 
   if (item.type === 'menu') {
@@ -310,9 +277,7 @@ function NavigationMenuLinkItem({
 
       const {
         banner = child.icon ? (
-          <div className="w-fit rounded-md border bg-fd-muted p-1 [&_svg]:size-4">
-            {child.icon}
-          </div>
+          <div className="w-fit rounded-md border bg-fd-muted p-1 [&_svg]:size-4">{child.icon}</div>
         ) : null,
         ...rest
       } = child.menu ?? {};
@@ -380,15 +345,8 @@ function NavigationMenuLinkItem({
   );
 }
 
-function MobileMenuLinkItem({
-  item,
-  className,
-}: {
-  item: LinkItemType;
-  className?: string;
-}) {
-  if (item.type === 'custom')
-    return <div className={cn('grid', className)}>{item.children}</div>;
+function MobileMenuLinkItem({ item, className }: { item: LinkItemType; className?: string }) {
+  if (item.type === 'custom') return <div className={cn('grid', className)}>{item.children}</div>;
   const { setOpen } = use(MobileMenuContext)!;
 
   if (item.type === 'menu') {
@@ -403,11 +361,7 @@ function MobileMenuLinkItem({
       <div className={cn('mb-4 flex flex-col', className)}>
         <p className="mb-1 text-sm text-fd-muted-foreground">
           {item.url ? (
-            <Link
-              href={item.url}
-              external={item.external}
-              onClick={() => setOpen(false)}
-            >
+            <Link href={item.url} external={item.external} onClick={() => setOpen(false)}>
               {header}
             </Link>
           ) : (

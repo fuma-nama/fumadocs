@@ -25,16 +25,12 @@ setServerCallback(
 // Get and decode the initial server payload.
 createFromReadableStream<RSCServerPayload>(getRSCStream()).then((payload) => {
   startTransition(async () => {
-    const formState =
-      payload.type === 'render' ? await payload.formState : undefined;
+    const formState = payload.type === 'render' ? await payload.formState : undefined;
 
     hydrateRoot(
       document,
       <StrictMode>
-        <RSCHydratedRouter
-          createFromReadableStream={createFromReadableStream}
-          payload={payload}
-        />
+        <RSCHydratedRouter createFromReadableStream={createFromReadableStream} payload={payload} />
       </StrictMode>,
       {
         formState: formState as ReactFormState,

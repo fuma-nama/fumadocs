@@ -6,9 +6,7 @@ export function resolvePlugins(
   def: (v: Pluggable[]) => (Pluggable | false)[],
   options: ResolvePlugins = [],
 ): Pluggable[] {
-  const list = def(Array.isArray(options) ? options : []).filter(
-    Boolean,
-  ) as Pluggable[];
+  const list = def(Array.isArray(options) ? options : []).filter(Boolean) as Pluggable[];
 
   if (typeof options === 'function') {
     return options(list);
@@ -23,8 +21,7 @@ export function resolvePlugin<Param>(
   options: Param | boolean,
   defaultOptions?: Param,
 ): Pluggable | false {
-  if (typeof options === 'boolean')
-    return options ? [plugin, defaultOptions] : false;
+  if (typeof options === 'boolean') return options ? [plugin, defaultOptions] : false;
 
   return [plugin, { ...defaultOptions, ...options }];
 }

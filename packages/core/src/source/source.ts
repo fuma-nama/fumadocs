@@ -101,9 +101,7 @@ export function source<Page extends PageData, Meta extends MetaData>(config: {
 export function update<Config extends SourceConfig>(source: Source<Config>) {
   return {
     files<Page extends PageData, Meta extends MetaData>(
-      fn: (
-        files: VirtualFile<Config>[],
-      ) => (VirtualPage<Page> | VirtualMeta<Meta>)[],
+      fn: (files: VirtualFile<Config>[]) => (VirtualPage<Page> | VirtualMeta<Meta>)[],
     ) {
       source.files = fn(source.files);
       return this as unknown as typeof update<{
@@ -111,9 +109,7 @@ export function update<Config extends SourceConfig>(source: Source<Config>) {
         metaData: Meta;
       }>;
     },
-    page<V extends PageData>(
-      fn: (page: VirtualPage<Config['pageData']>) => VirtualPage<V>,
-    ) {
+    page<V extends PageData>(fn: (page: VirtualPage<Config['pageData']>) => VirtualPage<V>) {
       for (let i = 0; i < source.files.length; i++) {
         const file = source.files[i];
         if (file.type === 'page') source.files[i] = fn(file);
@@ -124,9 +120,7 @@ export function update<Config extends SourceConfig>(source: Source<Config>) {
         metaData: Config['metaData'];
       }>;
     },
-    meta<V extends MetaData>(
-      fn: (meta: VirtualMeta<Config['metaData']>) => VirtualMeta<V>,
-    ) {
+    meta<V extends MetaData>(fn: (meta: VirtualMeta<Config['metaData']>) => VirtualMeta<V>) {
       for (let i = 0; i < source.files.length; i++) {
         const file = source.files[i];
         if (file.type === 'meta') source.files[i] = fn(file);

@@ -16,12 +16,7 @@ const NavigationMenuItem = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <Primitive.Item
     ref={ref}
-    className={(s) =>
-      cn(
-        'list-none',
-        typeof className === 'function' ? className(s) : className,
-      )
-    }
+    className={(s) => cn('list-none', typeof className === 'function' ? className(s) : className)}
     {...props}
   >
     {children}

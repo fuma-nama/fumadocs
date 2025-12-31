@@ -1,7 +1,4 @@
-import {
-  type AdvancedIndex,
-  createSearchAPI,
-} from 'fumadocs-core/search/server';
+import { type AdvancedIndex, createSearchAPI } from 'fumadocs-core/search/server';
 import * as fs from 'node:fs/promises';
 import { getPages } from '@/app/docs/utils';
 import { parseFrontmatter } from '@fumadocs/mdx-remote';

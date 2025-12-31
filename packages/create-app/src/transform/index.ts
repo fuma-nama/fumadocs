@@ -18,17 +18,13 @@ export async function rootProvider(
   { appDir, template }: TemplatePluginContext,
   fn: (mod: RootLayoutMod) => void,
 ) {
-  const file = await createSourceFile(
-    path.join(appDir, template.rootProviderPath),
-  );
+  const file = await createSourceFile(path.join(appDir, template.rootProviderPath));
   fn({
     addSearchDialog(specifier) {
       const elements = file.getDescendantsOfKind(SyntaxKind.JsxElement);
 
       for (const element of elements) {
-        const provider = element.getFirstChildByKind(
-          SyntaxKind.JsxOpeningElement,
-        );
+        const provider = element.getFirstChildByKind(SyntaxKind.JsxOpeningElement);
         if (provider?.getTagNameNode().getText() !== 'RootProvider') continue;
 
         // Skip if search prop already exists
@@ -37,8 +33,7 @@ export async function rootProvider(
             .getAttributes()
             .some(
               (attr) =>
-                attr.isKind(SyntaxKind.JsxAttribute) &&
-                attr.getNameNode().getText() === 'search',
+                attr.isKind(SyntaxKind.JsxAttribute) && attr.getNameNode().getText() === 'search',
             )
         )
           continue;
@@ -77,9 +72,7 @@ export async function reactRouterRoutes(
   { dest, appDir }: TemplatePluginContext,
   fn: (mod: ReactRouterRoutesMod) => void,
 ) {
-  const configFile = await createSourceFile(
-    path.join(dest, 'react-router.config.ts'),
-  );
+  const configFile = await createSourceFile(path.join(dest, 'react-router.config.ts'));
   const routesFile = await createSourceFile(path.join(appDir, 'routes.ts'));
   const tasks: Promise<unknown>[] = [];
 
@@ -165,9 +158,7 @@ export async function tanstackStartRoutes(
   fn({
     addRoute(options) {
       if (options.code) {
-        tasks.push(
-          fs.writeFile(path.join(appDir, 'routes', options.path), options.code),
-        );
+        tasks.push(fs.writeFile(path.join(appDir, 'routes', options.path), options.code));
       }
 
       if (options.prerender) {
@@ -175,9 +166,7 @@ export async function tanstackStartRoutes(
       }
     },
     removeRoute(options) {
-      tasks.push(
-        fs.unlink(path.join(appDir, 'routes', options.path)).catch(() => null),
-      );
+      tasks.push(fs.unlink(path.join(appDir, 'routes', options.path)).catch(() => null));
     },
   });
 

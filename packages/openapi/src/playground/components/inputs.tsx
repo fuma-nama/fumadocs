@@ -1,11 +1,6 @@
 'use client';
-import {
-  type ComponentProps,
-  type HTMLAttributes,
-  type ReactNode,
-  useState,
-} from 'react';
-import { ChevronDown, Plus, Trash2, X } from '@/ui/icons';
+import { type ComponentProps, type HTMLAttributes, type ReactNode, useState } from 'react';
+import { ChevronDown, Plus, Trash2, X } from 'lucide-react';
 import { useController, useFieldArray, useFormContext } from 'react-hook-form';
 import {
   Select,
@@ -19,20 +14,12 @@ import { getDefaultValue } from '../get-default-values';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { FormatFlags, schemaToString } from '@/utils/schema-to-string';
-import {
-  anyFields,
-  useFieldInfo,
-  useResolvedSchema,
-  useSchemaScope,
-} from '@/playground/schema';
+import { anyFields, useFieldInfo, useResolvedSchema, useSchemaScope } from '@/playground/schema';
 import type { ParsedSchema } from '@/utils/schema';
 
 function FieldLabel(props: ComponentProps<'label'>) {
   return (
-    <label
-      {...props}
-      className={cn('w-full inline-flex items-center gap-0.5', props.className)}
-    >
+    <label {...props} className={cn('w-full inline-flex items-center gap-0.5', props.className)}>
       {props.children}
     </label>
   );
@@ -43,10 +30,7 @@ function FieldLabelName({
   ...props
 }: ComponentProps<'span'> & { required?: boolean }) {
   return (
-    <span
-      {...props}
-      className={cn(labelVariants(), 'font-mono me-auto', props.className)}
-    >
+    <span {...props} className={cn(labelVariants(), 'font-mono me-auto', props.className)}>
       {props.children}
       {required && <span className="text-red-400/80 mx-1">*</span>}
     </span>
@@ -55,10 +39,7 @@ function FieldLabelName({
 
 function FieldLabelType(props: ComponentProps<'code'>) {
   return (
-    <code
-      {...props}
-      className={cn('text-xs text-fd-muted-foreground', props.className)}
-    >
+    <code {...props} className={cn('text-xs text-fd-muted-foreground', props.className)}>
       {props.children}
     </code>
   );
@@ -75,10 +56,7 @@ export function ObjectInput({
   const field = useResolvedSchema(_field);
 
   return (
-    <div
-      {...props}
-      className={cn('grid grid-cols-1 gap-4 @md:grid-cols-2', props.className)}
-    >
+    <div {...props} className={cn('grid grid-cols-1 gap-4 @md:grid-cols-2', props.className)}>
       {Object.entries(field.properties ?? {}).map(([key, child]) => (
         <FieldSet
           key={key}
@@ -91,9 +69,7 @@ export function ObjectInput({
       {(field.additionalProperties || field.patternProperties) && (
         <DynamicProperties
           fieldName={fieldName}
-          filterKey={(v) =>
-            !field.properties || !Object.keys(field.properties).includes(v)
-          }
+          filterKey={(v) => !field.properties || !Object.keys(field.properties).includes(v)}
           getType={(key) => {
             for (const pattern in field.patternProperties) {
               if (key.match(RegExp(pattern))) {
@@ -116,9 +92,7 @@ export function JsonInput({ fieldName }: { fieldName: string }) {
     name: fieldName,
   });
   const [error, setError] = useState<string | null>(null);
-  const [value, setValue] = useState(() =>
-    JSON.stringify(controller.field.value, null, 2),
-  );
+  const [value, setValue] = useState(() => JSON.stringify(controller.field.value, null, 2));
 
   return (
     <div className="flex flex-col bg-fd-secondary text-fd-secondary-foreground overflow-hidden border rounded-lg">
@@ -136,9 +110,7 @@ export function JsonInput({ fieldName }: { fieldName: string }) {
           }
         }}
       />
-      <p className="p-2 text-xs font-mono border-t text-red-400 empty:hidden">
-        {error}
-      </p>
+      <p className="p-2 text-xs font-mono border-t text-red-400 empty:hidden">{error}</p>
     </div>
   );
 }
@@ -221,10 +193,7 @@ function DynamicProperties({
         />
         <button
           type="button"
-          className={cn(
-            buttonVariants({ color: 'secondary', size: 'sm' }),
-            'px-4',
-          )}
+          className={cn(buttonVariants({ color: 'secondary', size: 'sm' }), 'px-4')}
           onClick={onAppend}
         >
           New
@@ -295,16 +264,10 @@ export function FieldInput({
     return (
       <Select
         value={String(value)}
-        onValueChange={(value) =>
-          onChange(value === 'undefined' ? undefined : value === 'true')
-        }
+        onValueChange={(value) => onChange(value === 'undefined' ? undefined : value === 'true')}
         disabled={restField.disabled}
       >
-        <SelectTrigger
-          id={fieldName}
-          className={props.className}
-          {...restField}
-        >
+        <SelectTrigger id={fieldName} className={props.className} {...restField}>
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -408,11 +371,7 @@ export function FieldSet({
                 }}
               >
                 {union.map((item, i) => (
-                  <option
-                    key={i}
-                    value={i}
-                    className="bg-fd-popover text-fd-popover-foreground"
-                  >
+                  <option key={i} value={i} className="bg-fd-popover text-fd-popover-foreground">
                     {schemaToString(item, undefined, FormatFlags.UseAlias)}
                   </option>
                 ))}
@@ -490,10 +449,7 @@ export function FieldSet({
     return (
       <fieldset
         {...props}
-        className={cn(
-          'flex flex-col gap-1.5 col-span-full @container',
-          props.className,
-        )}
+        className={cn('flex flex-col gap-1.5 col-span-full @container', props.className)}
       >
         <FieldLabel htmlFor={fieldName}>
           {showBn}
@@ -518,10 +474,7 @@ export function FieldSet({
 
   if (field.type === 'array') {
     return (
-      <fieldset
-        {...props}
-        className={cn('flex flex-col gap-1.5 col-span-full', props.className)}
-      >
+      <fieldset {...props} className={cn('flex flex-col gap-1.5 col-span-full', props.className)}>
         <FieldLabel htmlFor={fieldName}>
           {showBn}
           <FieldLabelName required={isRequired}>{name}</FieldLabelName>
@@ -543,10 +496,7 @@ export function FieldSet({
     );
   }
   return (
-    <fieldset
-      {...props}
-      className={cn('flex flex-col gap-1.5', props.className)}
-    >
+    <fieldset {...props} className={cn('flex flex-col gap-1.5', props.className)}>
       <FieldLabel htmlFor={fieldName}>
         <FieldLabelName required={isRequired}>{name}</FieldLabelName>
         {slotType ?? <FieldLabelType>{schemaToString(field)}</FieldLabelType>}

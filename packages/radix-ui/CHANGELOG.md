@@ -1,5 +1,25 @@
 # next-docs-ui
 
+## 16.4.2
+
+### Patch Changes
+
+- b16a32f: Switch to tsdown for bundling
+- Updated dependencies [590d36a]
+- Updated dependencies [98d38ff]
+- Updated dependencies [446631d]
+- Updated dependencies [b16a32f]
+  - fumadocs-core@16.4.2
+  - @fumadocs/ui@16.4.2
+
+## 16.4.1
+
+### Patch Changes
+
+- Updated dependencies [0a3adb8]
+  - @fumadocs/ui@16.4.1
+  - fumadocs-core@16.4.1
+
 ## 16.4.0
 
 ### Patch Changes
@@ -96,10 +116,10 @@
 
   ```ts
   // for docs layout
-  import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
+  import { DocsPage } from "fumadocs-ui/layouts/docs/page";
 
   // for notebook layout
-  import { DocsPage } from 'fumadocs-ui/layouts/notebook/page';
+  import { DocsPage } from "fumadocs-ui/layouts/notebook/page";
   ```
 
   While the default `fumadocs-ui/page` will redirect to the correct layout, we highly recommend you to update the import.
@@ -110,7 +130,7 @@
   `fumadocs-ui/contexts/sidebar` is removed, you can still reference the context with:
 
   ```ts
-  import { useSidebar } from 'fumadocs-ui/components/sidebar/base';
+  import { useSidebar } from "fumadocs-ui/components/sidebar/base";
   ```
 
   Make sure you're only accessing it in `<DocsLayout />`.
@@ -280,7 +300,7 @@
       export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
         source: S,
         pageToIndexFn?: (page: InferPageType<S>) => Awaitable<AdvancedIndex>,
-        options?: Omit<Options<S>, 'buildIndex'>,
+        options?: Omit<Options<S>, "buildIndex">,
       ): SearchAPI;
       ```
     - remove deprecated parameters in `useSearch()`, pass them in the client object instead.
@@ -505,27 +525,27 @@
 
   ```ts
   // lib/source.ts
-  import { defineI18n } from 'fumadocs-core/i18n';
+  import { defineI18n } from "fumadocs-core/i18n";
 
   export const i18n = defineI18n({
-    defaultLanguage: 'en',
-    languages: ['en', 'cn'],
+    defaultLanguage: "en",
+    languages: ["en", "cn"],
   });
   ```
 
   ```tsx
   // root layout
-  import { defineI18nUI } from 'fumadocs-ui/i18n';
-  import { i18n } from '@/lib/i18n';
+  import { defineI18nUI } from "fumadocs-ui/i18n";
+  import { i18n } from "@/lib/i18n";
 
   const { provider } = defineI18nUI(i18n, {
     translations: {
       cn: {
-        displayName: 'Chinese',
-        search: 'Translated Content',
+        displayName: "Chinese",
+        search: "Translated Content",
       },
       en: {
-        displayName: 'English',
+        displayName: "English",
       },
     },
   });
@@ -539,8 +559,8 @@
 
   ```ts
   // here!
-  import { createI18nMiddleware } from 'fumadocs-core/i18n/middleware';
-  import { i18n } from '@/lib/i18n';
+  import { createI18nMiddleware } from "fumadocs-core/i18n/middleware";
+  import { i18n } from "@/lib/i18n";
 
   export default createI18nMiddleware(i18n);
   ```
@@ -784,12 +804,12 @@
   Now we highly recommend to pass an index name to `sync()`:
 
   ```ts
-  import { algoliasearch } from 'algoliasearch';
-  import { sync } from 'fumadocs-core/search/algolia';
-  const client = algoliasearch('id', 'key');
+  import { algoliasearch } from "algoliasearch";
+  import { sync } from "fumadocs-core/search/algolia";
+  const client = algoliasearch("id", "key");
 
   void sync(client, {
-    indexName: 'document',
+    indexName: "document",
     documents: records,
   });
   ```
@@ -797,11 +817,11 @@
   For search client, pass them to `searchOptions`:
 
   ```tsx
-  'use client';
+  "use client";
 
-  import { liteClient } from 'algoliasearch/lite';
-  import type { SharedProps } from 'fumadocs-ui/components/dialog/search';
-  import SearchDialog from 'fumadocs-ui/components/dialog/search-algolia';
+  import { liteClient } from "algoliasearch/lite";
+  import type { SharedProps } from "fumadocs-ui/components/dialog/search";
+  import SearchDialog from "fumadocs-ui/components/dialog/search-algolia";
 
   const client = liteClient(appId, apiKey);
 
@@ -810,7 +830,7 @@
       <SearchDialog
         searchOptions={{
           client,
-          indexName: 'document',
+          indexName: "document",
         }}
         {...props}
         showAlgolia
@@ -1208,11 +1228,11 @@
   Add the following to your CSS file:
 
   ```css
-  @import 'tailwindcss';
-  @import 'fumadocs-ui/css/neutral.css';
-  @import 'fumadocs-ui/css/preset.css';
+  @import "tailwindcss";
+  @import "fumadocs-ui/css/neutral.css";
+  @import "fumadocs-ui/css/preset.css";
   /* if you have Twoslash enabled */
-  @import 'fumadocs-twoslash/twoslash.css';
+  @import "fumadocs-twoslash/twoslash.css";
 
   @source '../node_modules/fumadocs-ui/dist/**/*.js';
   /* if you have OpenAPI enabled */
@@ -1551,21 +1571,21 @@
   **migrate:** Use
 
   ```ts
-  import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+  import { DocsLayout } from "fumadocs-ui/layouts/docs";
 
-  import { HomeLayout } from 'fumadocs-ui/layouts/home';
+  import { HomeLayout } from "fumadocs-ui/layouts/home";
 
-  import { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+  import { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
   ```
 
   Instead of
 
   ```ts
-  import { DocsLayout } from 'fumadocs-ui/layout';
+  import { DocsLayout } from "fumadocs-ui/layout";
 
-  import { HomeLayout } from 'fumadocs-ui/home-layout';
+  import { HomeLayout } from "fumadocs-ui/home-layout";
 
-  import { HomeLayoutProps } from 'fumadocs-ui/home-layout';
+  import { HomeLayoutProps } from "fumadocs-ui/home-layout";
   ```
 
 - 9a10262: **Move Twoslash UI components to `fumadocs-twoslash`**
@@ -1577,17 +1597,17 @@
   Before:
 
   ```ts
-  import 'fumadocs-ui/twoslash.css';
+  import "fumadocs-ui/twoslash.css";
 
-  import { Popup } from 'fumadocs-ui/twoslash/popup';
+  import { Popup } from "fumadocs-ui/twoslash/popup";
   ```
 
   After:
 
   ```ts
-  import 'fumadocs-twoslash/twoslash.css';
+  import "fumadocs-twoslash/twoslash.css";
 
-  import { Popup } from 'fumadocs-twoslash/ui';
+  import { Popup } from "fumadocs-twoslash/ui";
   ```
 
   **Tailwind CSS is now required for Twoslash integration.**
@@ -1605,8 +1625,8 @@
   The component now takes `from` prop which is the Source API object.
 
   ```tsx
-  import { source } from '@/lib/source';
-  import { DocsCategory } from 'fumadocs-ui/page';
+  import { source } from "@/lib/source";
+  import { DocsCategory } from "fumadocs-ui/page";
 
   const page = source.getPage(params.slug);
 
@@ -1892,13 +1912,13 @@
   **migrate:** Rename the option.
 
   ```js
-  import { createPreset } from 'fumadocs-ui/tailwind-plugin';
+  import { createPreset } from "fumadocs-ui/tailwind-plugin";
 
   /** @type {import('tailwindcss').Config} */
   export default {
     presets: [
       createPreset({
-        cssPrefix: 'fd',
+        cssPrefix: "fd",
       }),
     ],
   };
@@ -1913,7 +1933,7 @@
   Enable `keepBackground` on `<CodeBlock />`, and remove deprecated usage.
 
   ```tsx
-  import { Pre, CodeBlock } from 'fumadocs-ui/components/codeblock';
+  import { Pre, CodeBlock } from "fumadocs-ui/components/codeblock";
 
   <MDX
     components={{
@@ -1939,9 +1959,9 @@
   **migrate:**
 
   ```tsx
-  import { RootProvider } from 'fumadocs-ui/provider';
-  import type { ReactNode } from 'react';
-  import { I18nProvider } from 'fumadocs-ui/i18n';
+  import { RootProvider } from "fumadocs-ui/provider";
+  import type { ReactNode } from "react";
+  import { I18nProvider } from "fumadocs-ui/i18n";
 
   export default function Layout({
     params: { lang },
@@ -1958,24 +1978,24 @@
             // options
             locales={[
               {
-                name: 'English',
-                locale: 'en',
+                name: "English",
+                locale: "en",
               },
               {
-                name: 'Chinese',
-                locale: 'cn',
+                name: "Chinese",
+                locale: "cn",
               },
             ]}
             // translations
             translations={
               {
                 cn: {
-                  toc: '目錄',
-                  search: '搜尋文檔',
-                  lastUpdate: '最後更新於',
-                  searchNoResult: '沒有結果',
-                  previousPage: '上一頁',
-                  nextPage: '下一頁',
+                  toc: "目錄",
+                  search: "搜尋文檔",
+                  lastUpdate: "最後更新於",
+                  searchNoResult: "沒有結果",
+                  previousPage: "上一頁",
+                  nextPage: "下一頁",
                 },
               }[lang]
             }
@@ -2019,7 +2039,7 @@
   **migrate:** Enable `addGlobalColors` on Tailwind CSS Plugin or add the `fd-` prefix to class names.
 
   ```js
-  import { createPreset } from 'fumadocs-ui/tailwind-plugin';
+  import { createPreset } from "fumadocs-ui/tailwind-plugin";
 
   /** @type {import('tailwindcss').Config} */
   export default {
@@ -2041,7 +2061,7 @@
   This also includes class names, change your custom styles if necessary.
 
   ```tsx
-  import { Pre, CodeBlock } from 'fumadocs-ui/components/codeblock';
+  import { Pre, CodeBlock } from "fumadocs-ui/components/codeblock";
 
   <MDX
     components={{
@@ -2405,7 +2425,7 @@
   Remove your `<LanguageSelect />` component from the layout. Enable the new language toggle with:
 
   ```tsx
-  import { DocsLayout } from 'fumadocs-ui/layout';
+  import { DocsLayout } from "fumadocs-ui/layout";
 
   export default function Layout({ children }: { children: React.ReactNode }) {
     return <DocsLayout i18n>{children}</DocsLayout>;
@@ -2834,8 +2854,8 @@
   <I18nProvider
     translations={{
       cn: {
-        name: 'Chinese', // required
-        search: 'Translated Content',
+        name: "Chinese", // required
+        search: "Translated Content",
       },
     }}
   ></I18nProvider>
@@ -2848,15 +2868,15 @@
   migrate: Use `createPreset` instead
 
   ```js
-  const { createPreset } = require('fumadocs-ui/tailwind-plugin');
+  const { createPreset } = require("fumadocs-ui/tailwind-plugin");
 
   /** @type {import('tailwindcss').Config} */
   module.exports = {
     content: [
-      './components/**/*.{ts,tsx}',
-      './app/**/*.{ts,tsx}',
-      './content/**/*.mdx',
-      './node_modules/fumadocs-ui/dist/**/*.js',
+      "./components/**/*.{ts,tsx}",
+      "./app/**/*.{ts,tsx}",
+      "./content/**/*.mdx",
+      "./node_modules/fumadocs-ui/dist/**/*.js",
     ],
     presets: [createPreset()],
   };
@@ -2869,7 +2889,7 @@
   Before:
 
   ```tsx
-  import { CodeBlock, Pre } from 'fumadocs-ui/mdx/pre';
+  import { CodeBlock, Pre } from "fumadocs-ui/mdx/pre";
 
   <Pre title={title} allowCopy {...props} />;
   ```
@@ -2877,7 +2897,7 @@
   After:
 
   ```tsx
-  import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
+  import { CodeBlock, Pre } from "fumadocs-ui/components/codeblock";
 
   <CodeBlock title={title} allowCopy>
     <Pre {...props} />
@@ -2998,14 +3018,14 @@
   Add theme presets for the Tailwind CSS plugin, the default and ocean presets are available now.
 
   ```js
-  const { docsUi, docsUiPlugins } = require('next-docs-ui/tailwind-plugin');
+  const { docsUi, docsUiPlugins } = require("next-docs-ui/tailwind-plugin");
 
   /** @type {import('tailwindcss').Config} */
   module.exports = {
     plugins: [
       ...docsUiPlugins,
       docsUi({
-        preset: 'ocean',
+        preset: "ocean",
       }),
     ],
   };
@@ -3041,7 +3061,7 @@
   Same as Docs Layout but doesn't include a sidebar. It can be used outside of the docs, a page tree is not required.
 
   ```jsx
-  import { Layout } from 'next-docs-ui/layout';
+  import { Layout } from "next-docs-ui/layout";
 
   export default function HomeLayout({ children }) {
     return <Layout>{children}</Layout>;
@@ -3098,16 +3118,16 @@
   If you are using Tailwind CSS for your docs, it's now recommended to use the official plugin instead.
 
   ```js
-  const { docsUi, docsUiPlugins } = require('next-docs-ui/tailwind-plugin');
+  const { docsUi, docsUiPlugins } = require("next-docs-ui/tailwind-plugin");
 
   /** @type {import('tailwindcss').Config} */
   module.exports = {
-    darkMode: 'class',
+    darkMode: "class",
     content: [
-      './components/**/*.{ts,tsx}',
-      './app/**/*.{ts,tsx}',
-      './content/**/*.mdx',
-      './node_modules/next-docs-ui/dist/**/*.js',
+      "./components/**/*.{ts,tsx}",
+      "./app/**/*.{ts,tsx}",
+      "./content/**/*.mdx",
+      "./node_modules/next-docs-ui/dist/**/*.js",
     ],
     plugins: [...docsUiPlugins, docsUi],
   };

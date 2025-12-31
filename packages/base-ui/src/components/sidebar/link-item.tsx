@@ -52,12 +52,7 @@ export function createLinkItemRenderer({
       );
 
     return (
-      <SidebarItem
-        href={item.url}
-        icon={item.icon}
-        external={item.external}
-        {...props}
-      >
+      <SidebarItem href={item.url} icon={item.icon} external={item.external} {...props}>
         {item.text}
       </SidebarItem>
     );

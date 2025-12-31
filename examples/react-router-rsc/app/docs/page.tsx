@@ -1,11 +1,6 @@
 import type { Route } from './+types/page';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import {
-  DocsBody,
-  DocsDescription,
-  DocsPage,
-  DocsTitle,
-} from 'fumadocs-ui/layouts/docs/page';
+import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
 import { source } from '@/lib/source';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { baseOptions } from '@/lib/layout.shared';
@@ -18,7 +13,7 @@ export function ServerComponent({ params }: Route.ComponentProps) {
   const { body: MDX } = page.data;
 
   return (
-    <DocsLayout {...baseOptions()} tree={source.pageTree}>
+    <DocsLayout {...baseOptions()} tree={source.getPageTree()}>
       <DocsPage toc={page.data.toc}>
         <title>{page.data.title}</title>
         <meta name="description" content={page.data.description} />

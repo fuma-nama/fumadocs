@@ -8,14 +8,7 @@ export type DownloadedRegistryInfo = z.output<typeof registryInfoSchema>;
 export type File = z.output<typeof fileSchema>;
 export type Component = z.output<typeof componentSchema>;
 
-export const namespaces = [
-  'components',
-  'lib',
-  'css',
-  'route',
-  'ui',
-  'block',
-] as const;
+export const namespaces = ['components', 'lib', 'css', 'route', 'ui', 'block'] as const;
 
 export const indexSchema = z.object({
   name: z.string(),

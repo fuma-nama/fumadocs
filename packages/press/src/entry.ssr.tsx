@@ -6,10 +6,7 @@ import {
 } from 'react-router';
 import type { ReactFormState } from 'react-dom/client';
 
-export async function generateHTML(
-  request: Request,
-  serverResponse: Response,
-): Promise<Response> {
+export async function generateHTML(request: Request, serverResponse: Response): Promise<Response> {
   return await routeRSCServerRequest({
     // The incoming request.
     request,
@@ -21,19 +18,12 @@ export async function generateHTML(
     async renderHTML(getPayload) {
       const payload = await getPayload();
 
-      const bootstrapScriptContent =
-        await import.meta.viteRsc.loadBootstrapScriptContent('index');
+      const bootstrapScriptContent = await import.meta.viteRsc.loadBootstrapScriptContent('index');
 
-      return await renderHTMLToReadableStream(
-        <RSCStaticRouter getPayload={getPayload} />,
-        {
-          bootstrapScriptContent,
-          formState:
-            'formState' in payload
-              ? (payload.formState as ReactFormState)
-              : undefined,
-        },
-      );
+      return await renderHTMLToReadableStream(<RSCStaticRouter getPayload={getPayload} />, {
+        bootstrapScriptContent,
+        formState: 'formState' in payload ? (payload.formState as ReactFormState) : undefined,
+      });
     },
   });
 }

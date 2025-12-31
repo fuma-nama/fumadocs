@@ -1,10 +1,7 @@
 import { type AnyOrama, create, load, type Orama } from '@orama/orama';
 import { searchSimple } from '@/search/orama/search/simple';
 import { searchAdvanced } from '@/search/orama/search/advanced';
-import {
-  type advancedSchema,
-  type simpleSchema,
-} from '@/search/orama/create-db';
+import { type advancedSchema, type simpleSchema } from '@/search/orama/create-db';
 import type { ExportedData } from '@/search/server';
 
 export interface StaticOptions {
@@ -94,8 +91,7 @@ export async function search(query: string, options: StaticOptions) {
   const db = (await loadDB(options)).get(locale ?? '');
 
   if (!db) return [];
-  if (db.type === 'simple')
-    return searchSimple(db as unknown as Orama<typeof simpleSchema>, query);
+  if (db.type === 'simple') return searchSimple(db as unknown as Orama<typeof simpleSchema>, query);
 
   return searchAdvanced(db.db as Orama<typeof advancedSchema>, query, tag);
 }

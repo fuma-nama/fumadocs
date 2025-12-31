@@ -1,0 +1,42 @@
+---
+title: Page Tree Utils
+description: Common utilities to interact with page tree.
+---
+
+## Usage
+
+See [Definitions](/docs/headless/page-tree) to learn more about Page Tree.
+
+```ts
+import {
+  findNeighbour,
+  findSiblings,
+  getPageTreeRoots,
+  findParent,
+  findPath,
+  type Root,
+} from 'fumadocs-core/page-tree';
+
+const pageTree: Root = {
+  // ...the root of page tree
+};
+
+// Get neighbours of a page
+const neighbours = findNeighbour(pageTree, '/url/to/page');
+
+// Get a list of root folders
+const roots = getPageTreeRoots(pageTree);
+
+// Get the sibling nodes of a page
+const siblings = findSiblings(pageTree, '/url/to/page');
+
+// Get the parent node of a page
+const parent = findParent(pageTree, '/url/to/page');
+
+// Find the path to the first matching node
+const path = findPath(
+  pageTree.children,
+  // matcher
+  (node) => node.type === 'page' && node.url === '/url/to/page',
+);
+```

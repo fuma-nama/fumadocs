@@ -46,31 +46,18 @@ export interface SyncOptions {
  * @param client - Algolia Admin Client
  * @param options - Index Options
  */
-export async function sync(
-  client: Algoliasearch,
-  options: SyncOptions,
-): Promise<void> {
+export async function sync(client: Algoliasearch, options: SyncOptions): Promise<void> {
   const { indexName = 'document', documents } = options;
   await setIndexSettings(client, indexName);
   await updateDocuments(client, indexName, documents);
 }
 
-export async function setIndexSettings(
-  client: Algoliasearch,
-  indexName: string,
-): Promise<void> {
+export async function setIndexSettings(client: Algoliasearch, indexName: string): Promise<void> {
   await client.setSettings({
     indexName,
     indexSettings: {
       attributeForDistinct: 'page_id',
-      attributesToRetrieve: [
-        'title',
-        'section',
-        'content',
-        'url',
-        'section_id',
-        'breadcrumbs',
-      ],
+      attributesToRetrieve: ['title', 'section', 'content', 'url', 'section_id', 'breadcrumbs'],
       searchableAttributes: ['title', 'section', 'content'],
       attributesToSnippet: [],
       attributesForFaceting: ['tag'],
@@ -102,8 +89,7 @@ function toIndex(page: DocumentRecord): BaseIndex[] {
     };
   }
 
-  if (page.description)
-    indexes.push(createIndex(undefined, undefined, page.description));
+  if (page.description) indexes.push(createIndex(undefined, undefined, page.description));
   const { headings, contents } = page.structured;
 
   for (const p of contents) {

@@ -4,9 +4,7 @@ import { type ComponentType, lazy } from 'react';
 // we wrap another layer of component such that it is valid
 // TODO: perhaps we can remove it once Waku migrated to vite-rsc
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- type infer
-export function wrapLazy<T extends ComponentType<any>>(
-  load: () => Promise<{ default: T }>,
-): T {
+export function wrapLazy<T extends ComponentType<any>>(load: () => Promise<{ default: T }>): T {
   const V = lazy(load);
 
   return function wrapper(props) {

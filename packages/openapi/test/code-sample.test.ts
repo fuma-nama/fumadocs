@@ -24,7 +24,7 @@ describe('Code Sample Generators', () => {
       authorization: { value: 'Bearer' },
     },
     query: {
-      search: { value: 'ai' },
+      search: { values: ['ai'] },
     },
   };
   const url = resolveRequestData('http://localhost:8080/{test}', data);
@@ -35,26 +35,18 @@ describe('Code Sample Generators', () => {
   };
 
   test(`Go`, async () => {
-    await expect(Go.generator(url, data, context)).toMatchFileSnapshot(
-      `./out/samples/1.go`,
-    );
+    await expect(Go.generator(url, data, context)).toMatchFileSnapshot(`./out/samples/1.go`);
   });
 
   test(`Curl`, async () => {
-    await expect(Curl.generator(url, data, context)).toMatchFileSnapshot(
-      `./out/samples/1.bash`,
-    );
+    await expect(Curl.generator(url, data, context)).toMatchFileSnapshot(`./out/samples/1.bash`);
   });
 
   test(`Python`, async () => {
-    await expect(Python.generator(url, data, context)).toMatchFileSnapshot(
-      `./out/samples/1.py`,
-    );
+    await expect(Python.generator(url, data, context)).toMatchFileSnapshot(`./out/samples/1.py`);
   });
 
   test(`JavaScript`, async () => {
-    await expect(JS.generator(url, data, context)).toMatchFileSnapshot(
-      `./out/samples/1.js`,
-    );
+    await expect(JS.generator(url, data, context)).toMatchFileSnapshot(`./out/samples/1.js`);
   });
 });

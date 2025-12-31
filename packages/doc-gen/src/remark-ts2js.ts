@@ -58,14 +58,10 @@ export function remarkTypeScriptToJavaScript({
 
       tasks.push(
         (async () => {
-          const result = await oxc.transform(
-            `${file.path ?? 'test'}.${lang}`,
-            node.value,
-            {
-              sourcemap: false,
-              jsx: 'preserve',
-            },
-          );
+          const result = await oxc.transform(`${file.path ?? 'test'}.${lang}`, node.value, {
+            sourcemap: false,
+            jsx: 'preserve',
+          });
 
           const replacement = generateCodeBlockTabs({
             persist,

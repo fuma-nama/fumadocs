@@ -24,8 +24,7 @@ export function remarkBlockId(): Transformer<Root, Root> {
 
           id = match[1];
           textNode.value =
-            value.slice(0, match.index).trimEnd() +
-            value.slice(match.index + match[0].length);
+            value.slice(0, match.index).trimEnd() + value.slice(match.index + match[0].length);
           return false;
         },
         true,

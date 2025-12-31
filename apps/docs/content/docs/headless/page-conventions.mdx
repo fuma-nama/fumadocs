@@ -19,6 +19,8 @@ You can define folders and pages similar to file-system based routing.
   </Folder>
 </Files>
 
+To customise its output further, you may use [Loader Plugins](/docs/headless/source-api/plugins).
+
 ## File
 
 For [MDX](https://mdxjs.com) & Markdown file, you can customise page information from frontmatter.
@@ -88,10 +90,7 @@ For example, when you are opening root folder `framework`, the other folders (e.
 <Files>
   <Folder name="framework" defaultOpen>
     <File name="index.mdx" />
-    <File
-      name="current-page.mdx"
-      className="!text-fd-primary !bg-fd-primary/10"
-    />
+    <File name="current-page.mdx" className="!text-fd-primary !bg-fd-primary/10" />
     <File name="other-pages.mdx" />
   </Folder>
   <Folder name="headless (hidden)" className="opacity-50" disabled defaultOpen>
@@ -101,7 +100,7 @@ For example, when you are opening root folder `framework`, the other folders (e.
 
 <Callout title='Fumadocs UI'>
 
-Fumadocs UI renders root folders as [Sidebar Tabs](/docs/ui/navigation/sidebar#sidebar-tabs), which allows user to switch between them.
+Fumadocs UI renders root folders as [Sidebar Tabs](/docs/ui/layouts/docs#sidebar-tabs), which allows user to switch between them.
 
 </Callout>
 

@@ -1,11 +1,7 @@
 'use client';
 
 import { type ComponentProps, type ReactNode, useMemo } from 'react';
-import {
-  AnchorProvider,
-  type TOCItemType,
-  useActiveAnchors,
-} from 'fumadocs-core/toc';
+import { AnchorProvider, type TOCItemType, useActiveAnchors } from 'fumadocs-core/toc';
 import { cn } from '@/cn';
 import { useTreeContext } from '@/contexts/tree';
 import { Link, usePathname } from 'fumadocs-core/framework';
@@ -53,10 +49,7 @@ export function DocsDescription(props: ComponentProps<'p'>) {
   if (props.children === undefined) return null;
 
   return (
-    <p
-      {...props}
-      className={cn('mb-8 text-lg text-fd-muted-foreground', props.className)}
-    >
+    <p {...props} className={cn('mb-8 text-lg text-fd-muted-foreground', props.className)}>
       {props.children}
     </p>
   );
@@ -76,10 +69,7 @@ function TocItem({ item }: { item: TOCItemType }) {
   return (
     <a
       href={item.url}
-      className={cn(
-        'text-sm text-fd-foreground/80 py-1',
-        isActive && 'text-fd-primary',
-      )}
+      className={cn('text-sm text-fd-foreground/80 py-1', isActive && 'text-fd-primary')}
       style={{
         paddingLeft: Math.max(0, item.depth - 2) * 16,
       }}

@@ -1,13 +1,7 @@
 'use client';
 
-import { Check, Link as LinkIcon } from '@fumadocs/ui/icons';
-import {
-  ComponentProps,
-  type ReactNode,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { Check, Link as LinkIcon } from 'lucide-react';
+import { ComponentProps, type ReactNode, useEffect, useRef, useState } from 'react';
 import { cn } from '@fumadocs/ui/cn';
 import { useCopyButton } from '@fumadocs/ui/hooks/use-copy-button';
 import { buttonVariants } from '@/components/ui/button';
@@ -42,8 +36,7 @@ export function Accordions({
     if (!selected || !element.contains(selected)) return;
     const value = selected.getAttribute('data-accordion-value');
 
-    if (value)
-      setValue((prev) => (typeof prev === 'string' ? value : [value, ...prev]));
+    if (value) setValue((prev) => (typeof prev === 'string' ? value : [value, ...prev]));
   }, []);
 
   return (
@@ -80,9 +73,7 @@ export function Accordion({
         {id ? <CopyButton id={id} /> : null}
       </AccordionHeader>
       <AccordionContent>
-        <div className="px-4 pb-2 text-[0.9375rem] prose-no-margin">
-          {children}
-        </div>
+        <div className="px-4 pb-2 text-[0.9375rem] prose-no-margin">{children}</div>
       </AccordionContent>
     </AccordionItem>
   );
@@ -108,11 +99,7 @@ function CopyButton({ id }: { id: string }) {
       )}
       onClick={onClick}
     >
-      {checked ? (
-        <Check className="size-3.5" />
-      ) : (
-        <LinkIcon className="size-3.5" />
-      )}
+      {checked ? <Check className="size-3.5" /> : <LinkIcon className="size-3.5" />}
     </button>
   );
 }

@@ -11,10 +11,7 @@ export interface DocGenerator {
   /**
    * Transform codeblocks to another mdast element
    */
-  run: (
-    input: unknown,
-    context: Context,
-  ) => Awaitable<object | object[] | undefined>;
+  run: (input: unknown, context: Context) => Awaitable<object | object[] | undefined>;
 
   onFile?: (tree: Root, file: VFile) => void;
 }
@@ -31,9 +28,7 @@ export interface RemarkDocGenOptions {
 
 const metaRegex = /doc-gen:(?<name>.+)/;
 
-export function remarkDocGen({
-  generators = [],
-}: RemarkDocGenOptions): Transformer<Root, Root> {
+export function remarkDocGen({ generators = [] }: RemarkDocGenOptions): Transformer<Root, Root> {
   return async (tree, file) => {
     generators.forEach((gen) => gen.onFile?.(tree, file));
     const queue: Promise<void>[] = [];

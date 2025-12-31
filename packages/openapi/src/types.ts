@@ -27,8 +27,7 @@ export type MethodInformation = NoReference<OperationObject> & {
   'x-exclusiveCodeSample'?: string;
 };
 
-export interface RenderContext
-  extends Pick<OpenAPIOptions, 'proxyUrl'>, CreateAPIPageOptions {
+export interface RenderContext extends Pick<OpenAPIOptions, 'proxyUrl'>, CreateAPIPageOptions {
   servers: NoReference<ServerObject>[];
   slugger: Slugger;
 

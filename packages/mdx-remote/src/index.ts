@@ -7,11 +7,7 @@ export { parseFrontmatter } from './utils';
 /**
  * @deprecated Use `compiler.render` instead
  */
-export async function executeMdx(
-  compiled: string,
-  scope: object,
-  baseUrl?: string | URL,
-) {
+export async function executeMdx(compiled: string, scope: object, baseUrl?: string | URL) {
   let jsxRuntime;
 
   if (process.env.NODE_ENV === 'production') {

@@ -1,12 +1,9 @@
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { baseOptions, linkItems, logo } from '@/lib/layout.shared';
 import { source } from '@/lib/source';
-import {
-  AISearch,
-  AISearchPanel,
-  AISearchTrigger,
-} from '@/components/ai/search';
+import { AISearch, AISearchPanel, AISearchTrigger } from '@/components/ai/search';
 import 'katex/dist/katex.min.css';
+import { getSection } from '@/lib/source/navigation';
 
 export default function Layout({ children }: LayoutProps<'/docs'>) {
   const base = baseOptions();
@@ -14,7 +11,7 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
   return (
     <DocsLayout
       {...base}
-      tree={source.pageTree}
+      tree={source.getPageTree()}
       // just icon items
       links={linkItems.filter((item) => item.type === 'icon')}
       nav={{
@@ -22,9 +19,7 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
         title: (
           <>
             {logo}
-            <span className="font-medium in-[.uwu]:hidden max-md:hidden">
-              Fumadocs
-            </span>
+            <span className="font-medium in-[.uwu]:hidden max-md:hidden">Fumadocs</span>
           </>
         ),
       }}
@@ -33,8 +28,7 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
           transform(option, node) {
             const meta = source.getNodeMeta(node);
             if (!meta || !node.icon) return option;
-
-            const color = `var(--${meta.path.split('/')[0]}-color, var(--color-fd-foreground))`;
+            const color = `var(--${getSection(meta.path)}-color, var(--color-fd-foreground))`;
 
             return {
               ...option,

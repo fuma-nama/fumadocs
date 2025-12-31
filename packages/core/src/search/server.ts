@@ -1,10 +1,4 @@
-import {
-  create,
-  type Orama,
-  type RawData,
-  save,
-  type SearchParams,
-} from '@orama/orama';
+import { create, type Orama, type RawData, save, type SearchParams } from '@orama/orama';
 import type { StructuredData } from '@/mdx-plugins/remark-structure';
 import { createEndpoint } from '@/search/orama/create-endpoint';
 import {
@@ -82,9 +76,7 @@ export interface AdvancedOptions extends SharedOptions {
   /**
    * Customise search options on server
    */
-  search?: Partial<
-    SearchParams<Orama<typeof advancedSchema>, AdvancedDocument>
-  >;
+  search?: Partial<SearchParams<Orama<typeof advancedSchema>, AdvancedDocument>>;
 }
 
 export function createSearchAPI<T extends SearchType>(

@@ -117,7 +117,7 @@ export const { GET } = createSearchAPI('advanced', {
 
 You can search documents using:
 
-- **Fumadocs UI**: Supported out-of-the-box, see [Search UI](/docs/ui/search/orama) for details.
+- **Fumadocs UI**: Supported out-of-the-box, see [Search UI](/docs/search/orama) for details.
 - **Search Client**:
 
 ```ts twoslash
@@ -157,7 +157,7 @@ const server = createFromSource(source, {
 
 and update your search client:
 
-- **Fumadocs UI**: Configure [Tag Filter](/docs/ui/search/orama#tag-filter) on Search UI.
+- **Fumadocs UI**: Configure [Tag Filter](/docs/search/orama#tag-filter) on Search UI.
 - **Search Client**: pass a tag to the hook.
 
 ```ts
@@ -237,7 +237,7 @@ export const getConfig = async () => ({
 
 and update your search clients:
 
-- **Fumadocs UI**: use [static client](/docs/ui/search/orama#static) on Search UI.
+- **Fumadocs UI**: use [static client](/docs/search/orama#static) on Search UI.
 
 - **Search Client**: use `static` instead of `fetch`.
 

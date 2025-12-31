@@ -1,5 +1,13 @@
 # fumadocs-twoslash
 
+## 3.1.11
+
+### Patch Changes
+
+- b16a32f: Switch to tsdown for bundling
+- Updated dependencies [b16a32f]
+  - fumadocs-ui@16.4.2
+
 ## 3.1.10
 
 ### Patch Changes
@@ -166,17 +174,17 @@
   Before:
 
   ```ts
-  import 'fumadocs-ui/twoslash.css';
+  import "fumadocs-ui/twoslash.css";
 
-  import { Popup } from 'fumadocs-ui/twoslash/popup';
+  import { Popup } from "fumadocs-ui/twoslash/popup";
   ```
 
   After:
 
   ```ts
-  import 'fumadocs-twoslash/twoslash.css';
+  import "fumadocs-twoslash/twoslash.css";
 
-  import { Popup } from 'fumadocs-twoslash/ui';
+  import { Popup } from "fumadocs-twoslash/ui";
   ```
 
   **Tailwind CSS is now required for Twoslash integration.**

@@ -11,10 +11,7 @@ import { VFile } from 'vfile';
 import { removePosition } from 'unist-util-remove-position';
 
 const dir = path.dirname(fileURLToPath(import.meta.url));
-const processor = remark()
-  .use(remarkMdx)
-  .use(remarkInclude)
-  .use(remarkDirective);
+const processor = remark().use(remarkMdx).use(remarkInclude).use(remarkDirective);
 
 test('remark include', async () => {
   const file = path.join(dir, 'fixtures/remark-include/index.mdx');
@@ -31,15 +28,11 @@ test('remark include', async () => {
 
   const parsed = processor.parse(vfile);
   removePosition(parsed);
-  await expect(parsed).toMatchFileSnapshot(
-    'fixtures/remark-include/index.in.mdast',
-  );
+  await expect(parsed).toMatchFileSnapshot('fixtures/remark-include/index.in.mdast');
 
   const out = await processor.run(parsed, vfile);
   removePosition(out);
-  await expect(out).toMatchFileSnapshot(
-    'fixtures/remark-include/index.out.mdast',
-  );
+  await expect(out).toMatchFileSnapshot('fixtures/remark-include/index.out.mdast');
 
   await expect(processor.stringify(out, vfile)).toMatchFileSnapshot(
     'fixtures/remark-include/index.out.mdx',

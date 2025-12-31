@@ -1,9 +1,5 @@
 import type { Core, CoreOptions, Plugin, PluginContext } from '@/core';
-import type {
-  CollectionItem,
-  DocCollectionItem,
-  MetaCollectionItem,
-} from '@/config/build';
+import type { CollectionItem, DocCollectionItem, MetaCollectionItem } from '@/config/build';
 import path from 'path';
 import { type CodeGen, createCodegen, ident, slash } from '@/utils/codegen';
 import { glob } from 'tinyglobby';
@@ -52,15 +48,8 @@ interface FileGenContext {
 
 const indexFileCache = createFSCache();
 
-export default function indexFile(
-  options: IndexFilePluginOptions = {},
-): Plugin {
-  const {
-    target = 'default',
-    addJsExtension,
-    browser = true,
-    dynamic = true,
-  } = options;
+export default function indexFile(options: IndexFilePluginOptions = {}): Plugin {
+  const { target = 'default', addJsExtension, browser = true, dynamic = true } = options;
   let dynamicCollections: CollectionItem[];
 
   function isDynamic(collection: CollectionItem) {
@@ -75,9 +64,7 @@ export default function indexFile(
     tc: string;
   } {
     const serverOptions: ServerOptions = {};
-    const typeConfigs: string[] = [
-      'import("fumadocs-mdx/runtime/types").InternalTypeConfig',
-    ];
+    const typeConfigs: string[] = ['import("fumadocs-mdx/runtime/types").InternalTypeConfig'];
     const ctx = core.getPluginContext();
 
     for (const plugin of core.getPlugins()) {
@@ -158,15 +145,11 @@ export default function indexFile(
         };
       };
 
-      const out: Promise<EmitEntry>[] = [
-        toEmitEntry('server.ts', generateServerIndexFile),
-      ];
+      const out: Promise<EmitEntry>[] = [toEmitEntry('server.ts', generateServerIndexFile)];
 
-      if (dynamic)
-        out.push(toEmitEntry('dynamic.ts', generateDynamicIndexFile));
+      if (dynamic) out.push(toEmitEntry('dynamic.ts', generateDynamicIndexFile));
 
-      if (browser)
-        out.push(toEmitEntry('browser.ts', generateBrowserIndexFile));
+      if (browser) out.push(toEmitEntry('browser.ts', generateBrowserIndexFile));
 
       return await Promise.all(out);
     },
@@ -182,9 +165,7 @@ async function generateServerIndexFile(ctx: FileGenContext) {
     `const create = server<typeof Config, ${tc}>(${JSON.stringify(serverOptions)});`,
   );
 
-  async function generateCollectionObject(
-    collection: CollectionItem,
-  ): Promise<string | undefined> {
+  async function generateCollectionObject(collection: CollectionItem): Promise<string | undefined> {
     const base = getBase(collection);
 
     switch (collection.type) {
@@ -295,9 +276,7 @@ async function generateDynamicIndexFile(ctx: FileGenContext) {
     return `{ ${infoStr.join(', ')} }`;
   }
 
-  async function generateCollectionObject(
-    parent: CollectionItem,
-  ): Promise<string | undefined> {
+  async function generateCollectionObject(parent: CollectionItem): Promise<string | undefined> {
     let collection: DocCollectionItem | undefined;
     if (parent.type === 'doc') collection = parent;
     else if (parent.type === 'docs') collection = parent.docs;
@@ -314,11 +293,7 @@ async function generateDynamicIndexFile(ctx: FileGenContext) {
 
     switch (parent.type) {
       case 'docs': {
-        const metaGlob = await generateMetaCollectionGlob(
-          ctx,
-          parent.meta,
-          true,
-        );
+        const metaGlob = await generateMetaCollectionGlob(ctx, parent.meta, true);
 
         return `await create.docs("${parent.name}", "${getBase(parent)}", ${metaGlob}, ${entries.join(', ')})`;
       }
@@ -346,9 +321,7 @@ async function generateBrowserIndexFile(ctx: FileGenContext) {
     `const create = browser<typeof Config, ${tc}>();`,
   );
 
-  async function generateCollectionObject(
-    collection: CollectionItem,
-  ): Promise<string | undefined> {
+  async function generateCollectionObject(collection: CollectionItem): Promise<string | undefined> {
     switch (collection.type) {
       case 'docs': {
         if (collection.docs.dynamic) return;

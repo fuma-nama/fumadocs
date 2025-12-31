@@ -21,10 +21,7 @@ In short, the layout consists of a grid container, and layout componenents using
   grid-template:
     'sidebar header toc'
     'sidebar toc-popover toc'
-    'sidebar main toc' 1fr / minmax(var(--fd-sidebar-col), 1fr) minmax(
-      0,
-      var(--fd-page-col)
-    )
+    'sidebar main toc' 1fr / minmax(var(--fd-sidebar-col), 1fr) minmax(0, var(--fd-page-col))
     minmax(min-content, 1fr);
 
   --fd-docs-row-1: var(--fd-banner-height, 0px);

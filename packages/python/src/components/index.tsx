@@ -11,26 +11,18 @@ import { ChevronRight } from 'lucide-react';
 import { highlight } from 'fumadocs-core/highlight';
 
 const cardVariants = cva('bg-fd-card rounded-lg text-sm my-6 p-3 border');
-const badgeVariants = cva(
-  'text-xs font-medium border p-1 rounded-lg not-prose',
-  {
-    variants: {
-      color: {
-        func: 'bg-fdpy-func/10 text-fdpy-func border-fdpy-func/50',
-        attribute:
-          'bg-fdpy-attribute/10 text-fdpy-attribute border-fdpy-attribute/50',
-        class: 'bg-fdpy-class/10 text-fdpy-class border-fdpy-class/50',
-        primary: 'bg-fd-primary/10 text-fd-primary border-fd-primary/10',
-      },
+const badgeVariants = cva('text-xs font-medium border p-1 rounded-lg not-prose', {
+  variants: {
+    color: {
+      func: 'bg-fdpy-func/10 text-fdpy-func border-fdpy-func/50',
+      attribute: 'bg-fdpy-attribute/10 text-fdpy-attribute border-fdpy-attribute/50',
+      class: 'bg-fdpy-class/10 text-fdpy-class border-fdpy-class/50',
+      primary: 'bg-fd-primary/10 text-fd-primary border-fd-primary/10',
     },
   },
-);
+});
 
-export function PyFunction(props: {
-  name: string;
-  type: string;
-  children?: ReactNode;
-}) {
+export function PyFunction(props: { name: string; type: string; children?: ReactNode }) {
   return (
     <figure className={cn(cardVariants())}>
       <div className="flex gap-2 items-center font-mono flex-wrap mb-4">
@@ -42,9 +34,7 @@ export function PyFunction(props: {
           code={props.type}
         />
       </div>
-      <div className="text-fd-muted-foreground prose-no-margin">
-        {props.children}
-      </div>
+      <div className="text-fd-muted-foreground prose-no-margin">{props.children}</div>
     </figure>
   );
 }
@@ -58,9 +48,7 @@ export function PyAttribute(props: {
   return (
     <figure className={cn(cardVariants())}>
       <div className="flex gap-2 items-center flex-wrap font-mono mb-4">
-        <code className={cn(badgeVariants({ color: 'attribute' }))}>
-          attribute
-        </code>
+        <code className={cn(badgeVariants({ color: 'attribute' }))}>attribute</code>
         {props.name}
         {props.type && (
           <InlineCode
@@ -72,11 +60,7 @@ export function PyAttribute(props: {
       </div>
       <div className="text-fd-muted-foreground prose-no-margin">
         {props.value && (
-          <InlineCode
-            lang="python"
-            className="not-prose text-xs"
-            code={`= ${props.value}`}
-          />
+          <InlineCode lang="python" className="not-prose text-xs" code={`= ${props.value}`} />
         )}
         {props.children}
       </div>
@@ -108,11 +92,7 @@ export function PyParameter(props: {
       </div>
       <div className="text-fd-muted-foreground prose-no-margin mt-4 empty:hidden">
         {props.value ? (
-          <InlineCode
-            lang="python"
-            code={`= ${props.value}`}
-            className="not-prose text-xs"
-          />
+          <InlineCode lang="python" code={`= ${props.value}`} className="not-prose text-xs" />
         ) : null}
         {props.children}
       </div>
@@ -135,20 +115,12 @@ export function PySourceCode({ children }: { children: ReactNode }) {
         Source Code
         <ChevronRight className="size-3.5 text-fd-muted-foreground group-data-[state=open]:rotate-90" />
       </CollapsibleTrigger>
-      <CollapsibleContent className="prose-no-margin">
-        {children}
-      </CollapsibleContent>
+      <CollapsibleContent className="prose-no-margin">{children}</CollapsibleContent>
     </Collapsible>
   );
 }
 
-export function PyFunctionReturn({
-  type,
-  children,
-}: {
-  type?: string;
-  children: ReactNode;
-}) {
+export function PyFunctionReturn({ type, children }: { type?: string; children: ReactNode }) {
   return (
     <div className="border bg-fd-secondary rounded-lg p-3 mt-2">
       <div className="flex flex-wrap gap-2 not-prose">
@@ -171,13 +143,7 @@ async function InlineCode({
   return highlight(code, {
     lang,
     components: {
-      pre: (props) => (
-        <span
-          {...props}
-          {...rest}
-          className={cn(rest.className, props.className)}
-        />
-      ),
+      pre: (props) => <span {...props} {...rest} className={cn(rest.className, props.className)} />,
     },
   });
 }

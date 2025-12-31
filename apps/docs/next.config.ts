@@ -36,19 +36,9 @@ const config: NextConfig = {
         source: '/docs/:path*.mdx',
         destination: '/llms.mdx/:path*',
       },
-    ];
-  },
-  async redirects() {
-    return [
       {
-        source: '/docs/ui/blocks/layout',
-        destination: '/docs/ui/layouts/docs',
-        permanent: true,
-      },
-      {
-        source: '/docs/ui/blocks/:path*',
-        destination: '/docs/ui/layouts/:path*',
-        permanent: true,
+        source: '/docs.mdx',
+        destination: '/llms.mdx',
       },
     ];
   },
