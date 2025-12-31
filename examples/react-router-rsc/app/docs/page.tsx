@@ -13,7 +13,7 @@ export function ServerComponent({ params }: Route.ComponentProps) {
   const { body: MDX } = page.data;
 
   return (
-    <DocsLayout {...baseOptions()} tree={source.pageTree}>
+    <DocsLayout {...baseOptions()} tree={source.getPageTree()}>
       <DocsPage toc={page.data.toc}>
         <title>{page.data.title}</title>
         <meta name="description" content={page.data.description} />

@@ -1,7 +1,9 @@
 ---
 title: Notebook Layout
-description: A more compact version of Docs Layout
+description: A compact version of Docs Layout
 ---
+
+A compact version of [`<DocsLayout />`](/docs/ui/layouts/docs).
 
 ![Notebook](/docs/notebook.png)
 
@@ -9,7 +11,7 @@ description: A more compact version of Docs Layout
 
 ## Usage
 
-Enable the notebook layout with `fumadocs-ui/layouts/notebook`, it's a more compact version of [`<DocsLayout />`](/docs/ui/layouts/docs).
+Enable the notebook layout with `fumadocs-ui/layouts/notebook`.
 
 ```tsx title="layout.tsx"
 import { DocsLayout } from 'fumadocs-ui/layouts/notebook'; // [!code highlight]
@@ -19,7 +21,7 @@ import type { ReactNode } from 'react';
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <DocsLayout {...baseOptions()} tree={source.pageTree}>
+    <DocsLayout {...baseOptions()} tree={source.getPageTree()}>
       {children}
     </DocsLayout>
   );
@@ -50,7 +52,7 @@ export default function Layout({ children }: { children: ReactNode }) {
     <DocsLayout
       {...baseOptions()}
       tabMode="navbar" // [!code ++]
-      tree={source.pageTree}
+      tree={source.getPageTree()}
     >
       {children}
     </DocsLayout>
@@ -77,7 +79,7 @@ export default function Layout({ children }: { children: ReactNode }) {
     <DocsLayout
       {...base}
       nav={{ ...nav, mode: 'top' }} // [!code ++]
-      tree={source.pageTree}
+      tree={source.getPageTree()}
     >
       {children}
     </DocsLayout>

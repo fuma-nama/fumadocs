@@ -14,10 +14,10 @@
     "page-conventions",
     "markdown",
     "---Configurations---",
+    "navigation",
     "versioning",
     "deploying",
     "internationalization",
-    "navigation",
     "search",
     "---Integrations---",
     "...integrations"

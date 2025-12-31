@@ -37,7 +37,7 @@ async function Layout({ page, children }: { page: Page; children: ReactNode }) {
     const { toc } = await page.data.load();
 
     return (
-      <DocsLayout {...baseOptions()} tree={source.pageTree}>
+      <DocsLayout {...baseOptions()} tree={source.getPageTree()}>
         <DocsPage toc={toc}>{children}</DocsPage>
       </DocsLayout>
     );

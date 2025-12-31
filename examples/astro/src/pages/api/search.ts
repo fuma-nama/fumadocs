@@ -13,7 +13,9 @@ const server = createFromSource(source, {
       description: page.data.description,
       structuredData,
       url: page.url,
-      breadcrumbs: getBreadcrumbItems(page.url, source.pageTree).map((item) => String(item.name)),
+      breadcrumbs: getBreadcrumbItems(page.url, source.getPageTree()).map((item) =>
+        String(item.name),
+      ),
     };
   },
 });

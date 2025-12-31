@@ -1,19 +1,19 @@
 ---
-import { render, type CollectionEntry } from 'astro:content';
-import { Docs } from '@/components/docs';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
-import '@/styles/global.css';
-import { source } from '@/lib/source';
-import Layout from '@/components/layout.astro';
-import type { TOCItemType } from 'fumadocs-core/toc';
+import { render, type CollectionEntry } from "astro:content";
+import { Docs } from "@/components/docs";
+import defaultMdxComponents from "fumadocs-ui/mdx";
+import "@/styles/global.css";
+import { source } from "@/lib/source";
+import Layout from "@/components/layout.astro";
+import type { TOCItemType } from "fumadocs-core/toc";
 
 interface Props {
-  page: CollectionEntry<'docs'>;
+  page: CollectionEntry<"docs">;
 }
 
 export async function getStaticPaths() {
   return source.getPages().map((page) => ({
-    params: { slug: page.slugs.length > 0 ? page.slugs.join('/') : undefined },
+    params: { slug: page.slugs.length > 0 ? page.slugs.join("/") : undefined },
     props: { page: page.data._raw },
   }));
 }
@@ -24,7 +24,7 @@ const { Content, headings } = await render(page);
 const toc: TOCItemType[] = headings.map((heading) => ({
   depth: heading.depth,
   title: heading.text,
-  url: '#' + heading.slug,
+  url: "#" + heading.slug,
 }));
 ---
 
@@ -33,7 +33,7 @@ const toc: TOCItemType[] = headings.map((heading) => ({
   <meta name="title" content={page.data.title} />
   <meta name="description" content={page.data.description} />
   <Docs
-    tree={source.pageTree}
+    tree={source.getPageTree()}
     pathname={Astro.url.pathname}
     params={Astro.params as Record<string, string | string[]>}
     page={{ toc }}

@@ -73,3 +73,5 @@ export type FooterProps = Omit<NonNullable<DocsPageProps['footer']>, keyof Compo
 export type AutoTypeTableProps = ComponentPropsWithoutRef<typeof AutoTypeTable>;
 
 export type SearchProps = Required<RootProviderProps>['search'];
+
+export type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';

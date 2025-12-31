@@ -171,7 +171,7 @@ export async function loader({ params }: Route.LoaderArgs) {
   return {
     path: page.path,
     // [!code --]
-    tree: source.pageTree,
+    tree: source.getPageTree(),
     // [!code ++]
     tree: source.getPageTree(params.lang),
   };

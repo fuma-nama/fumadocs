@@ -13,5 +13,6 @@
   },
   "prettier.enable": false,
   "editor.formatOnSave": true,
-  "editor.defaultFormatter": "oxc.oxc-vscode"
+  "editor.defaultFormatter": "oxc.oxc-vscode",
+  "oxc.linter.enabled": false
 }

@@ -152,7 +152,7 @@ export const source = loader({
   </Accordion>
 
     <Accordion id='multi-docs' title="How to implement multi-docs?">
-        We recommend to use [Sidebar Tabs](/docs/navigation/sidebar#sidebar-tabs).
+        We recommend to use [Sidebar Tabs](/docs/ui/layouts/docs#sidebar-tabs).
     </Accordion>
 
 </Accordions>
@@ -237,7 +237,7 @@ import { docs } from 'collections/server';
 
     <Files>
       <File name="(home)/docs/test/page.tsx" />
-      <Folder name="docs">
+      <Folder name="docs" defaultOpen>
         <File name="layout.tsx" />
         <File name="[[...slug]]/page.tsx" />
       </Folder>
@@ -272,7 +272,7 @@ For authoring docs, make sure to read:
     Fumadocs has some additional features for authoring content.
   </Card>
   <Card href="/docs/navigation" title="Navigation">
-    Learn how to customise navigation links and sidebar items.
+    Learn how to customise navigation structure.
   </Card>
   <Card href="/docs/page-conventions" title="Page Slugs & Page Tree">
     Learn how to organise content.
@@ -299,7 +299,7 @@ For authoring docs, make sure to read:
   />
   <Card href="/docs/ui/theme" title="Color Themes" description="Add themes to Fumadocs UI" />
   <Card
-    href="/docs/ui/layouts/docs"
+    href="/docs/ui/layouts"
     title="Layouts"
     description="Customise your Fumadocs UI layouts"
   />

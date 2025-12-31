@@ -40,7 +40,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en" className={`${geist.variable} ${mono.variable}`} suppressHydrationWarning>
       <Body>
         <NextProvider>
-          <TreeContextProvider tree={source.pageTree}>
+          <TreeContextProvider tree={source.getPageTree()}>
             <Provider>{children}</Provider>
           </TreeContextProvider>
         </NextProvider>

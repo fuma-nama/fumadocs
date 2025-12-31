@@ -14,7 +14,7 @@ export async function loader({ params }: Route.LoaderArgs) {
 
   return {
     path: page.path,
-    pageTree: await source.serializePageTree(source.pageTree),
+    pageTree: await source.serializePageTree(source.getPageTree()),
   };
 }
 

@@ -30,7 +30,7 @@ const loader = createServerFn({
 
     return {
       path: page.path,
-      pageTree: await source.serializePageTree(source.pageTree),
+      pageTree: await source.serializePageTree(source.getPageTree()),
     };
   });
 

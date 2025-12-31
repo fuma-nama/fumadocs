@@ -10,7 +10,7 @@ export async function GET(): Promise<Response> {
   const promises = pages.map(async (page) => {
     if (page.data.type === 'openapi') return;
 
-    const items = getBreadcrumbItems(page.url, source.pageTree, {
+    const items = getBreadcrumbItems(page.url, source.getPageTree(), {
       includePage: false,
       includeRoot: true,
     });

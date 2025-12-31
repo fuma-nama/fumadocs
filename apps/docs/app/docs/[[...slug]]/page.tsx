@@ -127,7 +127,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
 function DocsCategory({ url }: { url: string }) {
   return (
     <Cards>
-      {findSiblings(source.pageTree, url).map((item) => {
+      {findSiblings(source.getPageTree(), url).map((item) => {
         if (item.type === 'separator') return;
         if (item.type === 'folder') {
           if (!item.index) return;

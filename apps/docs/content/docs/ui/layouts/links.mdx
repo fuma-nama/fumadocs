@@ -1,11 +1,11 @@
 ---
 title: Layout Links
-description: Customise the shared navigation links on all layouts.
+description: Navigation configurations on all layouts.
 ---
 
 ## Overview
 
-Fumadocs allows adding additional links to your layouts with a `links` prop, like linking to your "showcase" page.
+Fumadocs allows adding navigation links to your layouts with a `links` prop, like linking to your "showcase" page.
 
 <div className="not-prose grid gap-2 *:border max-sm:*:last:hidden sm:grid-cols-[2fr_1fr]">
 
@@ -15,13 +15,12 @@ Fumadocs allows adding additional links to your layouts with a `links` prop, lik
 
 </div>
 
-```tsx tab="Shared Options" title="lib/layout.shared.tsx"
+```tsx tab="All" title="lib/layout.shared.tsx"
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 
 export function baseOptions(): BaseLayoutProps {
   return {
-    links: [], // [!code highlight]
-    // other options}
+    links: [], // [!code ++]
   };
 }
 ```
@@ -36,7 +35,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   return (
     <DocsLayout
       {...baseOptions()}
-      tree={source.pageTree}
+      tree={source.getPageTree()}
       links={[]} // [!code highlight]
     >
       {children}
