@@ -12,6 +12,7 @@ export default [
       'no-console': 'off',
       // some arrays will not be changed
       'react/no-array-index-key': 'off',
+      'no-fallthrough': 'off',
     },
   },
 ];

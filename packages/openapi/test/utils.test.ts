@@ -315,7 +315,7 @@ describe('URL utilities', () => {
       const requestData: RequestData = {
         method: 'GET',
         path: {
-          segments: { value: ['api', 'v1', 'users'] },
+          segments: { value: 'api/v1/users' },
         },
         query: {},
         header: {},
@@ -330,8 +330,8 @@ describe('URL utilities', () => {
         method: 'GET',
         path: {},
         query: {
-          limit: { value: '10' },
-          offset: { value: '20' },
+          limit: { values: ['10'] },
+          offset: { values: ['20'] },
         },
         header: {},
         cookie: {},
@@ -345,7 +345,7 @@ describe('URL utilities', () => {
         method: 'GET',
         path: {},
         query: {
-          tags: { value: ['javascript', 'typescript'] },
+          tags: { values: ['javascript', 'typescript'] },
         },
         header: {},
         cookie: {},
@@ -362,7 +362,7 @@ describe('URL utilities', () => {
         method: 'GET',
         path: {},
         query: {
-          limit: { value: '5' },
+          limit: { values: ['5'] },
         },
         header: {},
         cookie: {},
@@ -378,8 +378,8 @@ describe('URL utilities', () => {
         method: 'GET',
         path: {},
         query: {
-          limit: { value: '10' },
-          sort: { value: 'date' },
+          limit: { values: ['10'] },
+          sort: { values: ['date'] },
         },
         header: {},
         cookie: {},
@@ -397,7 +397,7 @@ describe('URL utilities', () => {
           userId: { value: '123' },
         },
         query: {
-          include: { value: 'profile' },
+          include: { values: ['profile'] },
         },
         header: {},
         cookie: {},
@@ -413,7 +413,7 @@ describe('URL utilities', () => {
         method: 'GET',
         path: {},
         query: {
-          verbose: { value: 'false' },
+          verbose: { values: ['false'] },
         },
         header: {},
         cookie: {},
@@ -429,7 +429,7 @@ describe('URL utilities', () => {
         method: 'GET',
         path: {},
         query: {
-          newParam: { value: 'value' },
+          newParam: { values: ['value'] },
         },
         header: {},
         cookie: {},
@@ -445,7 +445,7 @@ describe('URL utilities', () => {
         method: 'GET',
         path: {},
         query: {
-          categories: { value: ['tech', 'science'] },
+          categories: { values: ['tech', 'science'] },
         },
         header: {},
         cookie: {},
@@ -461,7 +461,7 @@ describe('URL utilities', () => {
         method: 'GET',
         path: {},
         query: {
-          tags: { value: ['new', 'updated'] },
+          tags: { values: ['new', 'updated'] },
         },
         header: {},
         cookie: {},
@@ -494,9 +494,9 @@ describe('URL utilities', () => {
           projectId: { value: 'web-app' },
         },
         query: {
-          include: { value: ['members', 'settings'] },
-          format: { value: 'json' },
-          debug: { value: 'true' },
+          include: { values: ['members', 'settings'] },
+          format: { values: ['json'] },
+          debug: { values: ['true'] },
         },
         header: {},
         cookie: {},

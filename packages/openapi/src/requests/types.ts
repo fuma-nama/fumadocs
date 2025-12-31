@@ -1,5 +1,5 @@
 import type { MediaAdapter } from '@/requests/media/adapter';
-import type { EncodedParameter } from '@/requests/media/encode';
+import type { EncodedParameter, EncodedParameterMultiple } from '@/requests/media/encode';
 
 export type SampleGenerator<ServerContext = unknown> = (
   url: string,
@@ -26,7 +26,7 @@ export interface RequestData {
   method: string;
 
   path: Record<string, EncodedParameter>;
-  query: Record<string, EncodedParameter>;
+  query: Record<string, EncodedParameterMultiple>;
   header: Record<string, EncodedParameter>;
   cookie: Record<string, EncodedParameter>;
 

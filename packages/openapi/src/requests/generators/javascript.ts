@@ -14,7 +14,7 @@ export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
   }
 
   for (const [k, v] of Object.entries(data.header)) {
-    headers[k] = v.value as string;
+    headers[k] = v.value;
   }
 
   const cookies = Object.entries(data.cookie);

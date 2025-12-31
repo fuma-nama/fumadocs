@@ -32,7 +32,7 @@ export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
   s.push('var client = new HttpClient();');
   const headerLines: string[] = [];
 
-  function addHeader(key: string, value: unknown) {
+  function addHeader(key: string, value: string) {
     headerLines.push(`client.DefaultRequestHeaders.Add("${key}", ${JSON.stringify(value)});`);
   }
   for (const k in headers) {

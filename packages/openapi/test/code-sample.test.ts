@@ -24,7 +24,7 @@ describe('Code Sample Generators', () => {
       authorization: { value: 'Bearer' },
     },
     query: {
-      search: { value: 'ai' },
+      search: { values: ['ai'] },
     },
   };
   const url = resolveRequestData('http://localhost:8080/{test}', data);

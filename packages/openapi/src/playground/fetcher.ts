@@ -33,12 +33,7 @@ export function createBrowserFetcher(
 
       for (const key in options.header) {
         const param = options.header[key];
-
-        if (!Array.isArray(param.value)) {
-          headers.append(key, param.value);
-        } else {
-          headers.append(key, param.value.join(','));
-        }
+        headers.append(key, param.value);
       }
 
       const proxyUrl = options.proxyUrl ? new URL(options.proxyUrl, document.baseURI) : null;

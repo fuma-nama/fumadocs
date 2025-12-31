@@ -5,117 +5,67 @@ import type { ParameterObject } from '@/types';
 import type { RawRequestData, RequestData } from '@/requests/types';
 
 export interface EncodedParameter {
-  readonly value: string | string[];
+  readonly value: string;
 }
 
-const FormDelimiter = {
-  spaceDelimited: ' ',
-  pipeDelimited: '|',
-};
+export interface EncodedParameterMultiple {
+  readonly values: string[];
+}
 
-const PathPrefix = {
-  label: '.',
-  matrix: ';',
-};
-
+/**
+ * serialize parameters, see https://swagger.io/docs/specification/v3_0/serialization.
+ */
 export function encodeRequestData(
   from: RawRequestData,
   adapters: Record<string, MediaAdapter>,
   parameters: NoReference<ParameterObject>[],
 ): RequestData {
-  const result: Partial<RequestData> = {
+  const result: RequestData = {
     method: from.method,
     body: from.body,
     bodyMediaType: from.bodyMediaType,
+    cookie: {},
+    header: {},
+    path: {},
+    query: {},
   };
 
   for (const type of ['cookie', 'query', 'header', 'path'] as const) {
-    const output: Record<string, EncodedParameter> = {};
-
     for (const key in from[type]) {
       const value = from[type][key];
       if (value == null) continue;
 
       const field = parameters.find((p) => p.name === key && p.in === type);
-      if (!field) {
-        output[key] = { value: String(value) };
-        continue;
-      }
+      // skip unknown parameters
+      if (!field) continue;
 
       const encoder = getMediaEncoder(field, adapters);
       if (encoder) {
-        output[key] = { value: encoder(value) };
+        result[type][key] = { value: encoder(value) };
         continue;
       }
 
-      const explode = field.explode ?? true;
-      let prefix = '';
-      let sep = ',';
-
-      if (field.in === 'path') {
-        const style = field.style ?? 'simple';
-
-        if (style in PathPrefix) {
-          prefix = PathPrefix[style as keyof typeof PathPrefix];
-
-          if (explode) sep = prefix;
-        }
-      }
-
-      if (Array.isArray(value)) {
-        // header & cookie doesn't support explode for array values
-        if (explode && field.in !== 'header' && field.in !== 'cookie') {
-          output[key] = {
-            value: prefix + value.map(String),
+      switch (type) {
+        case 'path':
+          serializePathParameter(field, value, result.path);
+          break;
+        case 'query':
+          serializeQueryParameter(field, value, result.query);
+          break;
+        case 'header': {
+          result.header[key] = {
+            value: serializeSimple(value, field.explode ?? false),
           };
-          continue;
+          break;
         }
-
-        if (field.in === 'query') {
-          const style = field.style ?? 'form';
-
-          if (style in FormDelimiter) sep = FormDelimiter[style as keyof typeof FormDelimiter];
-        }
-
-        output[key] = {
-          value: prefix + value.map(String).join(sep),
-        };
-        continue;
+        case 'cookie':
+          serializeCookieParameter(field, value, result.cookie);
+          break;
       }
-
-      if (typeof value === 'object' && value) {
-        // header & path creates key-value pairs
-        if (explode && (field.in === 'header' || field.in === 'path')) {
-          output[key] = {
-            value:
-              prefix +
-              Object.entries(value)
-                .map(([k, v]) => `${k}=${v}`)
-                .join(sep),
-          };
-          continue;
-        }
-
-        if (explode || field.style === 'deepObject') {
-          writeObject(key, value, field.style === 'deepObject', output);
-          continue;
-        }
-
-        output[key] = {
-          value: prefix + Object.entries(value).flat().join(sep),
-        };
-        continue;
-      }
-
-      output[key] = {
-        value: prefix + String(value),
-      };
     }
-
-    result[type] = output;
   }
 
-  return result as RequestData;
+  return result;
 }
 
 function getMediaEncoder(
@@ -132,25 +82,177 @@ function getMediaEncoder(
   }
 }
 
-function writeObject(
-  parentKey: string,
-  value: object,
-  deep: boolean,
+function serializeSimple(value: NonNullable<unknown>, explode: boolean): string {
+  if (Array.isArray(value)) {
+    return value.join(',');
+  }
+  if (typeof value === 'object') {
+    return explode
+      ? Object.entries(value)
+          .map(([k, v]) => `${k}=${v}`)
+          .join(',')
+      : Object.entries(value).flat().join(',');
+  }
+  return String(value);
+}
+
+function serializePathParameter(
+  field: NoReference<ParameterObject>,
+  value: NonNullable<unknown>,
+  // write output
+  output: Record<string, EncodedParameter>,
+): void {
+  const { explode = false, name } = field;
+
+  switch (field.style) {
+    case 'label':
+      if (Array.isArray(value)) {
+        output[field.name] = {
+          value: '.' + value.join(explode ? '.' : ','),
+        };
+        break;
+      }
+      if (typeof value === 'object') {
+        output[field.name] = {
+          value:
+            '.' +
+            (explode
+              ? Object.entries(value)
+                  .map(([k, v]) => `${k}=${v}`)
+                  .join('.')
+              : Object.entries(value).flat().join(',')),
+        };
+        break;
+      }
+      output[field.name] = {
+        value: `.${value}`,
+      };
+      break;
+    case 'matrix': {
+      const specifier = `;${name}=`;
+
+      if (Array.isArray(value)) {
+        output[field.name] = {
+          value: explode
+            ? `${specifier}${value.join(',')}`
+            : `${specifier}${value.join(specifier)}`,
+        };
+        break;
+      }
+      if (typeof value === 'object') {
+        output[field.name] = {
+          value: explode
+            ? Object.entries(value)
+                .map(([k, v]) => `;${k}=${v}`)
+                .join('')
+            : specifier + Object.entries(value).flat().join(','),
+        };
+        break;
+      }
+
+      output[field.name] = {
+        value: `${specifier}${value}`,
+      };
+      break;
+    }
+    // simple
+    default:
+      output[field.name] = {
+        value: serializeSimple(value, explode),
+      };
+  }
+}
+
+function serializeQueryParameter(
+  field: NoReference<ParameterObject>,
+  value: NonNullable<unknown>,
+  // write output
+  output: Record<string, EncodedParameterMultiple>,
+): void {
+  const { explode = true } = field;
+
+  switch (field.style) {
+    case 'spaceDelimited':
+      if (!explode && Array.isArray(value)) {
+        output[field.name] = {
+          values: [value.join(' ')],
+        };
+        break;
+      }
+    case 'pipeDelimited':
+      if (!explode && Array.isArray(value)) {
+        output[field.name] = {
+          values: [value.join('|')],
+        };
+        break;
+      }
+    case 'deepObject':
+      if (!Array.isArray(value) && typeof value === 'object') {
+        for (const [k, v] of Object.entries(value)) {
+          output[`${field.name}[${k}]`] = {
+            // note: the behaviour of nested array is undefined, we do this to avoid edge cases
+            values: Array.isArray(v) ? v : [String(v)],
+          };
+        }
+        break;
+      }
+    // form
+    default:
+      if (Array.isArray(value)) {
+        output[field.name] = {
+          values: explode ? value : [value.join(',')],
+        };
+        break;
+      }
+
+      if (typeof value === 'object' && explode) {
+        for (const [k, v] of Object.entries(value)) {
+          output[k] = {
+            values: [String(v)],
+          };
+        }
+        break;
+      }
+
+      if (typeof value === 'object') {
+        output[field.name] = {
+          values: [Object.entries(value).flat().join(',')],
+        };
+        break;
+      }
+
+      output[field.name] = {
+        values: [String(value)],
+      };
+  }
+}
+
+function serializeCookieParameter(
+  field: NoReference<ParameterObject>,
+  value: NonNullable<unknown>,
+  // write output
   output: Record<string, EncodedParameter>,
 ) {
-  for (const k in value) {
-    const prop: unknown = value[k as keyof object];
-    if (prop == null) continue;
+  const { explode = true } = field;
 
-    const key = deep ? `${parentKey}[${k}]` : k;
-    if (!deep || typeof prop !== 'object') {
-      output[key] = {
-        value: String(prop),
+  // form
+  if (Array.isArray(value)) {
+    output[field.name] = {
+      value: explode ? value.map((v) => `${field.name}=${v}`).join('&') : value.join(','),
+    };
+  } else if (typeof value === 'object' && explode) {
+    for (const [k, v] of Object.entries(value)) {
+      output[k] = {
+        value: String(v),
       };
-
-      continue;
     }
-
-    writeObject(key, value, deep, output);
+  } else if (typeof value === 'object') {
+    output[field.name] = {
+      value: Object.entries(value).flat().join(','),
+    };
+  } else {
+    output[field.name] = {
+      value: String(value),
+    };
   }
 }

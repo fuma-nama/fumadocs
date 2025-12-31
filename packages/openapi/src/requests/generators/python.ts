@@ -25,7 +25,7 @@ export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
   }
 
   for (const [k, v] of Object.entries(data.header)) {
-    headers[k] = v.value as string;
+    headers[k] = v.value;
   }
 
   if (Object.keys(headers).length > 0) {
@@ -37,7 +37,7 @@ export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
     const cookies: Record<string, string> = {};
 
     for (const [k, v] of inputCookies) {
-      cookies[k] = v.value as string;
+      cookies[k] = v.value;
     }
 
     params.push(`cookies = ${generatePythonObject(cookies, imports)}`);
