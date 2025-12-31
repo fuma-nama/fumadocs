@@ -162,7 +162,6 @@ export function DocsLayout(props: DocsLayoutProps) {
                 )}
               </div>
             )}
-            {nav.children}
             {tabs.length > 0 && (
               <SidebarTabsDropdown
                 options={tabs}
@@ -315,6 +314,7 @@ function DocsNavbar({
               navMode === 'auto' && 'md:hidden',
             ),
           })}
+          {nav.children}
         </div>
         {searchToggle.enabled !== false &&
           (searchToggle.components?.lg ? (
@@ -343,7 +343,6 @@ function DocsNavbar({
                 <NavbarLinkItem key={i} item={item} />
               ))}
           </div>
-          {nav.children}
           {links
             .filter((item) => item.type === 'icon')
             .map((item, i) => (
