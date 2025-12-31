@@ -10,5 +10,5 @@ export * from './remark-code-tab';
 export * from './remark-steps';
 export * from './remark-npm';
 export * from './codeblock-utils';
-export * from './remark-mdx-files';
+export { remarkMdxFiles, type RemarkMdxFilesOptions } from './remark-mdx-files';
 export * from './remark-mdx-mermaid';

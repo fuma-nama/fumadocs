@@ -1,5 +1,5 @@
 ---
-"fumadocs-obsidian": patch
+'fumadocs-obsidian': patch
 ---
 
 fix slugification

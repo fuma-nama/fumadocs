@@ -28,12 +28,20 @@ import { File, Folder, Files } from 'fumadocs-ui/components/files';
 </Files>
 ```
 
-### As CodeBlock
+### File
 
-You can enable [`remark-mdx-files`](/docs/headless/mdx/remark-mdx-files) to define file structure with codeblocks.
+<auto-type-table cwd path="content/docs/ui/props.ts" name="FileProps" />
+
+### Folder
+
+<auto-type-table cwd path="content/docs/ui/props.ts" name="FolderProps" />
+
+## Remark Plugin
+
+You can enable [`remark-mdx-files`](/docs/headless/mdx/remark-mdx-files) for additional feature & syntax.
 
 ```tsx title="source.config.ts (Fumadocs MDX)"
-import { remarkMdxFiles } from 'fumadocs-core/mdx-plugins';
+import { remarkMdxFiles } from 'fumadocs-core/mdx-plugins/remark-mdx-files';
 import { defineConfig } from 'fumadocs-mdx/config';
 
 export default defineConfig({
@@ -44,7 +52,9 @@ export default defineConfig({
 });
 ```
 
-it will convert `files` codeblocks into MDX usage, like:
+### CodeBlock Syntax
+
+It will convert `files` codeblocks into `<Files />` component, like:
 
 ````md title="content.md"
 ```files
@@ -57,10 +67,12 @@ project
 ```
 ````
 
-### File
+### `<auto-files>`
 
-<auto-type-table cwd path="content/docs/ui/props.ts" name="FileProps" />
+Generate `<Files />` component from glob.
 
-### Folder
+```mdx title="content.mdx"
+<auto-files dir="./my-dir" pattern="**/*.{ts,tsx}" />
 
-<auto-type-table cwd path="content/docs/ui/props.ts" name="FolderProps" />
+<auto-files dir="./my-dir" pattern="**/*.{ts,tsx}" defaultOpenAll />
+```

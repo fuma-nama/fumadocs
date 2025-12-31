@@ -1571,6 +1571,9 @@ importers:
       shiki:
         specifier: ^3.20.0
         version: 3.20.0
+      tinyglobby:
+        specifier: ^0.2.15
+        version: 0.2.15
       unist-util-visit:
         specifier: ^5.0.0
         version: 5.0.0

@@ -1,5 +1,5 @@
 ---
-"fumadocs-openapi": patch
+'fumadocs-openapi': patch
 ---
 
 Fix Parameter Serialization
