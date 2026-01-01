@@ -61,7 +61,7 @@
     "eslint-config-custom": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "tsconfig": "workspace:*",
-    "tsdown": "^0.18.3"
+    "tsdown": "^0.18.4"
   },
   "peerDependencies": {
     "@types/react": "*",

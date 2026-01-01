@@ -38,7 +38,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "zod": "^4.2.1"
+    "zod": "^4.3.4"
   },
   "devDependencies": {
     "@content-collections/core": "^0.13.0",
@@ -47,7 +47,7 @@
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "tsconfig": "workspace:*",
-    "tsdown": "^0.18.3",
+    "tsdown": "^0.18.4",
     "unified": "^11.0.5"
   },
   "peerDependencies": {
