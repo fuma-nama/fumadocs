@@ -1,5 +1,11 @@
 # fumadocs-obsidian
 
+## 0.0.8
+
+### Patch Changes
+
+- b9a3d31: Support Math syntax & custom remark plugins
+
 ## 0.0.7
 
 ### Patch Changes
