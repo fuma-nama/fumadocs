@@ -13,8 +13,10 @@ export default defineConfig({
   plugins: [
     mdx(await import('./source.config')),
     // see https://tanstack.com/start/latest/docs/framework/react/guide/hosting for hosting config
-    // we configured nitro by default
-    nitro(),
+    // we configured Nitro by default
+    nitro({
+      preset: 'node',
+    }),
     tailwindcss(),
     tsConfigPaths({
       projects: ['./tsconfig.json'],
