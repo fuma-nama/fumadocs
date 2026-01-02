@@ -21,6 +21,7 @@ import { Installation } from '@/components/preview/installation';
 import { Customisation } from '@/components/preview/customisation';
 import { DocsBody, DocsPage, PageLastUpdate } from 'fumadocs-ui/layouts/docs/page';
 import { NotFound } from '@/components/not-found';
+import { TOCFooter } from '@/components/toc-footer'
 import { getSuggestions } from './suggestions';
 import { PathUtils } from 'fumadocs-core/source';
 
@@ -60,12 +61,14 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   }
 
   const { body: Mdx, toc, lastModified } = await page.data.load();
+  const githubUrl = `https://github.com/${owner}/${repo}/blob/dev/apps/docs/content/docs/${page.path}`;
 
   return (
     <DocsPage
       toc={toc}
       tableOfContent={{
         style: 'clerk',
+        footer: <TOCFooter githubUrl={githubUrl} />
       }}
     >
       <h1 className="text-[1.75em] font-semibold">{page.data.title}</h1>
@@ -74,7 +77,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
         <LLMCopyButton markdownUrl={`${page.url}.mdx`} />
         <ViewOptions
           markdownUrl={`${page.url}.mdx`}
-          githubUrl={`https://github.com/${owner}/${repo}/blob/dev/apps/docs/content/docs/${page.path}`}
+          githubUrl={githubUrl}
         />
       </div>
       <div className="prose flex-1 text-fd-foreground/90">
