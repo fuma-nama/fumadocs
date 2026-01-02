@@ -21,16 +21,16 @@
   "types": "./dist/index.d.mts",
   "exports": {
     ".": {
-      "import": "./dist/index.mjs",
-      "types": "./dist/index.d.mts"
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
     },
     "./vite": {
-      "import": "./dist/vite/index.mjs",
-      "types": "./dist/vite/index.d.mts"
+      "types": "./dist/vite/index.d.mts",
+      "import": "./dist/vite/index.mjs"
     },
     "./*": {
-      "import": "./dist/*.mjs",
-      "types": "./dist/*.d.mts"
+      "types": "./dist/*.d.mts",
+      "import": "./dist/*.mjs"
     }
   },
   "publishConfig": {
