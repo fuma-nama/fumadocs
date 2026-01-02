@@ -9,6 +9,7 @@
     "eslint": "^9.39.2",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
-    "fumadocs-ui": "workspace:*"
+    "fumadocs-ui": "workspace:*",
+    "@fumadocs/ui": "workspace:*"
   }
 }

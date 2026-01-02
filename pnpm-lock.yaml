@@ -1275,6 +1275,9 @@ importers:
 
   examples/waku:
     dependencies:
+      '@fumadocs/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       fumadocs-core:
         specifier: workspace:*
         version: link:../../packages/core
@@ -1284,6 +1287,9 @@ importers:
       fumadocs-ui:
         specifier: workspace:*
         version: link:../../packages/radix-ui
+      lucide-react:
+        specifier: ^0.562.0
+        version: 0.562.0(react@19.2.3)
       react:
         specifier: ^19.2.3
         version: 19.2.3
@@ -1711,6 +1717,9 @@ importers:
       '@biomejs/biome':
         specifier: ^2.3.10
         version: 2.3.10
+      '@fumadocs/ui':
+        specifier: workspace:*
+        version: link:../ui
       '@orama/core':
         specifier: ^1.2.16
         version: 1.2.16
