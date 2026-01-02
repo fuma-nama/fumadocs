@@ -18,6 +18,7 @@ export function TOCFooter({ githubUrl }: { githubUrl: string }) {
       
       <button
         type='button'
+        aria-label='Scroll to top'
         className='group flex items-center gap-x-1 opacity-100 transition-opacity duration-300'
         onClick={(e) => {
           e.preventDefault();
