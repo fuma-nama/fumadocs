@@ -6,13 +6,13 @@ export function TOCFooter({ githubUrl }: { githubUrl: string }) {
   return (
     <div className='mt-4 hidden w-full border-t py-4 pl-2 text-fd-muted-foreground text-sm lg:flex lg:flex-col lg:gap-2'>
       <a
-        aria-label='Edit this page on Github'
+        aria-label='Edit this page on GitHub'
         className='transition-colors hover:text-fd-foreground'
         href={githubUrl}
         rel='noopener'
         target='_blank'
       >
-        Edit this page on Github
+        Edit this page on GitHub
         <SquareArrowOutUpRight className='mb-px ml-1 inline-flex size-3' />
       </a>
       
