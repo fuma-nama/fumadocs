@@ -68,17 +68,14 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
       toc={toc}
       tableOfContent={{
         style: 'clerk',
-        footer: <TOCFooter githubUrl={githubUrl} />
+        footer: <TOCFooter githubUrl={githubUrl} />,
       }}
     >
       <h1 className="text-[1.75em] font-semibold">{page.data.title}</h1>
       <p className="text-lg text-fd-muted-foreground mb-2">{page.data.description}</p>
       <div className="flex flex-row flex-wrap gap-2 items-center border-b pb-6">
         <LLMCopyButton markdownUrl={`${page.url}.mdx`} />
-        <ViewOptions
-          markdownUrl={`${page.url}.mdx`}
-          githubUrl={githubUrl}
-        />
+        <ViewOptions markdownUrl={`${page.url}.mdx`} githubUrl={githubUrl} />
       </div>
       <div className="prose flex-1 text-fd-foreground/90">
         {page.data.preview && <PreviewRenderer preview={page.data.preview} />}
