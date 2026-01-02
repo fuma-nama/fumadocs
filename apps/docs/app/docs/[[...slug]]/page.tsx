@@ -21,7 +21,7 @@ import { Installation } from '@/components/preview/installation';
 import { Customisation } from '@/components/preview/customisation';
 import { DocsBody, DocsPage, PageLastUpdate } from 'fumadocs-ui/layouts/docs/page';
 import { NotFound } from '@/components/not-found';
-import { TOCFooter } from '@/components/toc-footer'
+import { TOCFooter } from '@/components/toc-footer';
 import { getSuggestions } from './suggestions';
 import { PathUtils } from 'fumadocs-core/source';
 
