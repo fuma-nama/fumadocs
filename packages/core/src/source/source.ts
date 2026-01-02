@@ -95,41 +95,55 @@ export function source<Page extends PageData, Meta extends MetaData>(config: {
   };
 }
 
+export interface _SourceUpdate_<Config extends SourceConfig> {
+  files: <Page extends PageData, Meta extends MetaData>(
+    fn: (files: VirtualFile<Config>[]) => (VirtualPage<Page> | VirtualMeta<Meta>)[],
+  ) => _SourceUpdate_<{
+    pageData: Page;
+    metaData: Meta;
+  }>;
+  page: <V extends PageData>(
+    fn: (page: VirtualPage<Config['pageData']>) => VirtualPage<V>,
+  ) => _SourceUpdate_<{
+    pageData: V;
+    metaData: Config['metaData'];
+  }>;
+
+  meta: <V extends MetaData>(
+    fn: (meta: VirtualMeta<Config['metaData']>) => VirtualMeta<V>,
+  ) => _SourceUpdate_<{
+    pageData: Config['pageData'];
+    metaData: V;
+  }>;
+  build: () => Source<Config>;
+}
+
 /**
  * update a source object in-place.
  */
-export function update<Config extends SourceConfig>(source: Source<Config>) {
+export function update<Config extends SourceConfig>(
+  source: Source<Config>,
+): _SourceUpdate_<Config> {
   return {
-    files<Page extends PageData, Meta extends MetaData>(
-      fn: (files: VirtualFile<Config>[]) => (VirtualPage<Page> | VirtualMeta<Meta>)[],
-    ) {
+    files(fn) {
       source.files = fn(source.files);
-      return this as unknown as typeof update<{
-        pageData: Page;
-        metaData: Meta;
-      }>;
+      return this as _SourceUpdate_<never>;
     },
-    page<V extends PageData>(fn: (page: VirtualPage<Config['pageData']>) => VirtualPage<V>) {
+    page(fn) {
       for (let i = 0; i < source.files.length; i++) {
         const file = source.files[i];
         if (file.type === 'page') source.files[i] = fn(file);
       }
 
-      return this as unknown as typeof update<{
-        pageData: V;
-        metaData: Config['metaData'];
-      }>;
+      return this as _SourceUpdate_<never>;
     },
-    meta<V extends MetaData>(fn: (meta: VirtualMeta<Config['metaData']>) => VirtualMeta<V>) {
+    meta(fn) {
       for (let i = 0; i < source.files.length; i++) {
         const file = source.files[i];
         if (file.type === 'meta') source.files[i] = fn(file);
       }
 
-      return this as unknown as typeof update<{
-        pageData: Config['pageData'];
-        metaData: V;
-      }>;
+      return this as _SourceUpdate_<never>;
     },
     build() {
       return source;
