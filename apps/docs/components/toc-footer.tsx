@@ -9,7 +9,7 @@ export function TOCFooter({ githubUrl }: { githubUrl: string }) {
         aria-label='Edit this page on GitHub'
         className='transition-colors hover:text-fd-foreground'
         href={githubUrl}
-        rel='noopener'
+        rel='noreferrer noopener'
         target='_blank'
       >
         Edit this page on GitHub
