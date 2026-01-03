@@ -11,13 +11,21 @@ We are pleased to announce Fumadocs MDX 14. This update introduces several major
 - Improve performance & memory consumption.
 - Improve browser/dynamic compilation suport.
 
-## Major Changes
+## New Model
+
+The output is now separated into:
+
+- **`.source/server`:** the content data available for server (e.g. RSC, SSR), should not be referenced in client code.
+- **`.source/browser`:** the data available for browser, with built-in serialization, chunking and loader layer.
+- **`.source/dynamic`:** interface for dynamic content compilation, only generated for collections with `dynamic: true`.
+
+## Breaking Changes
 
 ### Entry Files
 
 Fumadocs MDX now generates multiple entry files in `.source` folder.
 
-You can add/update the path aliases in `tsconfig.json` for new entry files.
+To migrate, add/update the path aliases in `tsconfig.json` for new entry files.
 
 ```json title="tsconfig.json"
 {
@@ -32,16 +40,56 @@ You can add/update the path aliases in `tsconfig.json` for new entry files.
 
 Import your collections from the entry files instead of `@/.source`:
 
-```ts
-// ordinary collections
+```tsx
+// access collections on server-side
 import { docs } from 'fumadocs-mdx:collections/server';
-// collections in dynamic mode
-import { docs } from 'fumadocs-mdx:collections/dynamic';
-// non-RSC environment
+
+// non-RSC environment (e.g. browser)
 import browserCollections from 'fumadocs-mdx:collections/browser';
+
+const clientLoader = browserCollections.docs.createClientLoader({
+  component({ frontmatter, default: MDX }) {
+    return (
+      <div className="prose">
+        <h1>{frontmatter.title}</h1>
+        <MDX />
+      </div>
+    );
+  },
+});
+
+// new collection type: dynamically-compiled collections
+import { docs } from 'fumadocs-mdx:collections/dynamic';
 ```
 
-To use `loader()` with doc collections, use the new `toFumadocsSource()` utility instead.
+<Callout>
+
+The new browser `createClientLoader()` should work seamlessly with old usage.
+
+See [Browser Entry](/docs/mdx/entry/browser#examples) for more examples of `browserCollections`.
+
+</Callout>
+
+### Fumadocs Adapter
+
+The adapter for `loader()` API is also changed.
+
+For `docs` collection, `create.sourceAsync()` (Vite) is now consistent with Next.js:
+
+```ts
+import { docs } from 'fumadocs-mdx:collections/server';
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  baseUrl: '/docs',
+  // [!code highlight]
+  source: docs.toFumadocsSource(),
+});
+```
+
+For `doc` collections, `createMDXSource()` (Next.js) is renamed to `toFumadocsSource()`.
+
+If you use `create.sourceAsync()` (Vite) for `doc` collections, you should also switch to `toFumadocsSource()`.
 
 ```ts
 import { blogPosts } from 'fumadocs-mdx:collections/server';
@@ -50,6 +98,7 @@ import { loader } from 'fumadocs-core/source';
 
 export const blog = loader({
   baseUrl: '/blog',
+  // [!code highlight]
   source: toFumadocsSource(blogPosts, []),
 });
 ```
