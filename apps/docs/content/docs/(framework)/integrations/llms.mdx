@@ -103,14 +103,14 @@ Allow AI agents to get the content of a page as Markdown/MDX, by appending `.mdx
 
 Make a route handler to return page content, and a middleware to point to it:
 
-```ts tab="Next.js" title="app/llms.mdx/[[...slug]]/route.ts"
+```ts tab="Next.js" title="app/llms.mdx/docs/[[...slug]]/route.ts"
 import { getLLMText } from '@/lib/get-llm-text';
 import { source } from '@/lib/source';
 import { notFound } from 'next/navigation';
 
 export const revalidate = false;
 
-export async function GET(_req: Request, { params }: RouteContext<'/llms.mdx/[[...slug]]'>) {
+export async function GET(_req: Request, { params }: RouteContext<'/llms.mdx/docs/[[...slug]]'>) {
   const { slug } = await params;
   const page = source.getPage(slug);
   if (!page) notFound();
@@ -136,7 +136,7 @@ const config: NextConfig = {
     return [
       {
         source: '/docs/:path*.mdx',
-        destination: '/llms.mdx/:path*',
+        destination: '/llms.mdx/docs/:path*',
       },
     ];
   },
@@ -148,11 +148,11 @@ import { index, route, type RouteConfig } from '@react-router/dev/routes';
 
 export default [
   // [!code ++]
-  route('llms.mdx/*', 'routes/llms-mdx.ts'),
+  route('llms.mdx/docs/*', 'routes/docs/llms-mdx.ts'),
 ] satisfies RouteConfig;
 ```
 
-```ts tab="React Router" title="app/routes/llms-mdx.ts"
+```ts tab="React Router" title="app/routes/docs/llms-mdx.ts"
 import type { Route } from './+types/llms-mdx';
 import { source } from '@/lib/source';
 import { getLLMText } from '@/lib/get-llm-text';
@@ -177,7 +177,7 @@ import { rewritePath } from 'fumadocs-core/negotiation';
 import type { Route } from './+types/root';
 
 // [!code ++:20]
-const { rewrite: rewriteLLM } = rewritePath('/docs{/*path}.mdx', '/llms.mdx{/*path}');
+const { rewrite: rewriteLLM } = rewritePath('/docs{/*path}.mdx', '/llms.mdx/docs{/*path}');
 const serverMiddleware: Route.MiddlewareFunction = async ({ request }, next) => {
   const url = new URL(request.url);
   const path = rewriteLLM(url.pathname);
@@ -189,11 +189,11 @@ const serverMiddleware: Route.MiddlewareFunction = async ({ request }, next) => 
 export const middleware = [serverMiddleware];
 ```
 
-```ts tab="Tanstack Start" title="src/routes/llms[.]mdx.$.ts"
+```ts tab="Tanstack Start" title="src/routes/llms[.]mdx.docs.$.ts"
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { source } from '@/lib/source';
 
-export const Route = createFileRoute('/llms.mdx/$')({
+export const Route = createFileRoute('/llms.mdx/docs/$')({
   server: {
     handlers: {
       GET: async ({ params }) => {
@@ -217,7 +217,7 @@ import { createMiddleware, createStart } from '@tanstack/react-start';
 import { rewritePath } from 'fumadocs-core/negotiation';
 import { redirect } from '@tanstack/react-router';
 
-const { rewrite: rewriteLLM } = rewritePath('/docs{/*path}.mdx', 'llms.mdx{/*path}');
+const { rewrite: rewriteLLM } = rewritePath('/docs{/*path}.mdx', 'llms.mdx/docs{/*path}');
 
 const llmMiddleware = createMiddleware().server(({ next, request }) => {
   const url = new URL(request.url);
@@ -245,7 +245,7 @@ To serve the Markdown content instead for AI agents, you can leverage the `Accep
 import { NextRequest, NextResponse } from 'next/server';
 import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
 
-const { rewrite: rewriteLLM } = rewritePath('/docs/*path', '/llms.mdx/*path');
+const { rewrite: rewriteLLM } = rewritePath('/docs{/*path}', '/llms.mdx/docs{/*path}');
 
 export default function proxy(request: NextRequest) {
   if (isMarkdownPreferred(request)) {
