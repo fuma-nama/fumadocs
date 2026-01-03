@@ -1,5 +1,5 @@
+import type { CloudManager } from '@oramacloud/client';
 import type { StructuredData } from '@/mdx-plugins';
-import { type AnyObject, type OramaCloud } from '@orama/core';
 
 export interface SyncOptions {
   /**
@@ -86,30 +86,25 @@ export interface OramaIndex {
   content: string;
 }
 
-export async function sync(orama: OramaCloud, options: SyncOptions): Promise<void> {
+export async function sync(cloudManager: CloudManager, options: SyncOptions): Promise<void> {
   const { autoDeploy = true } = options;
-  const index = orama.index.set(options.index);
-  await index.transaction.open();
+  const index = cloudManager.index(options.index);
 
-  await index.transaction.insertDocuments(
-    options.documents.flatMap(toIndex) as unknown as AnyObject[],
-  );
-
-  if (autoDeploy) await index.transaction.commit();
+  await index.snapshot(options.documents.flatMap(toIndex));
+  if (autoDeploy) await index.deploy();
 }
 
-export async function syncI18n(orama: OramaCloud, options: I18nSyncOptions): Promise<void> {
-  const { autoDeploy = true, indexes } = options;
+export async function syncI18n(
+  cloudManager: CloudManager,
+  options: I18nSyncOptions,
+): Promise<void> {
+  const { autoDeploy = true } = options;
 
   const tasks = options.documents.map(async (document) => {
-    const index = orama.index.set(indexes[document.locale]);
-    await index.transaction.open();
+    const index = cloudManager.index(options.indexes[document.locale]);
 
-    await index.transaction.insertDocuments(
-      document.items.flatMap(toIndex) as unknown as AnyObject[],
-    );
-
-    if (autoDeploy) await index.transaction.commit();
+    await index.snapshot(document.items.flatMap(toIndex));
+    if (autoDeploy) await index.deploy();
   });
 
   await Promise.all(tasks);
@@ -129,7 +124,6 @@ function toIndex(page: OramaDocument): OramaIndex[] {
       id: `${page.id}-${(id++).toString()}`,
       title: page.title,
       url: page.url,
-      // TODO: explicit declare enums
       page_id: page.id,
       tag: page.tag,
       section,

@@ -5,6 +5,7 @@ import { useOnChange } from '@/utils/use-on-change';
 import { type StaticOptions } from '@/search/client/static';
 import { type AlgoliaOptions } from '@/search/client/algolia';
 import { type OramaCloudOptions } from '@/search/client/orama-cloud';
+import { type OramaCloudLegacyOptions } from '@/search/client/orama-cloud-legacy';
 import { type MixedbreadOptions } from '@/search/client/mixedbread';
 import type { SortedResult } from '@/search';
 
@@ -31,6 +32,9 @@ export type Client =
   | ({
       type: 'orama-cloud';
     } & OramaCloudOptions)
+  | ({
+      type: 'orama-cloud-legacy';
+    } & OramaCloudLegacyOptions)
   | ({
       type: 'mixedbread';
     } & MixedbreadOptions);
@@ -106,33 +110,34 @@ export function useDocsSearch(
 
       async function run(): Promise<SortedResult[] | 'empty'> {
         if (debouncedValue.length === 0 && !allowEmpty) return 'empty';
-
-        if (client.type === 'fetch') {
-          const { fetchDocs } = await import('./client/fetch');
-          return fetchDocs(debouncedValue, client);
+        switch (client.type) {
+          case 'fetch': {
+            const { fetchDocs } = await import('./client/fetch');
+            return fetchDocs(debouncedValue, client);
+          }
+          case 'algolia': {
+            const { searchDocs } = await import('./client/algolia');
+            return searchDocs(debouncedValue, client);
+          }
+          case 'orama-cloud': {
+            const { searchDocs } = await import('./client/orama-cloud');
+            return searchDocs(debouncedValue, client);
+          }
+          case 'orama-cloud-legacy': {
+            const { searchDocs } = await import('./client/orama-cloud-legacy');
+            return searchDocs(debouncedValue, client);
+          }
+          case 'mixedbread': {
+            const { search } = await import('./client/mixedbread');
+            return search(debouncedValue, client);
+          }
+          case 'static': {
+            const { search } = await import('./client/static');
+            return search(debouncedValue, client);
+          }
+          default:
+            throw new Error('unknown search client');
         }
-
-        if (client.type === 'algolia') {
-          const { searchDocs } = await import('./client/algolia');
-          return searchDocs(debouncedValue, client);
-        }
-
-        if (client.type === 'orama-cloud') {
-          const { searchDocs } = await import('./client/orama-cloud');
-          return searchDocs(debouncedValue, client);
-        }
-
-        if (client.type === 'static') {
-          const { search } = await import('./client/static');
-          return search(debouncedValue, client);
-        }
-
-        if (client.type === 'mixedbread') {
-          const { search } = await import('./client/mixedbread');
-          return search(debouncedValue, client);
-        }
-
-        throw new Error('unknown search client');
       }
 
       void run()
