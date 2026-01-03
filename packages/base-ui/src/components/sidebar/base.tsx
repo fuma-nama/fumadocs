@@ -40,7 +40,7 @@ interface SidebarContext {
    */
   closeOnRedirect: RefObject<boolean>;
   defaultOpenLevel: number;
-  prefetch: boolean;
+  prefetch?: boolean;
   mode: Mode;
 }
 
@@ -54,9 +54,7 @@ export interface SidebarProviderProps {
   defaultOpenLevel?: number;
 
   /**
-   * Prefetch links
-   *
-   * @defaultValue true
+   * Prefetch links, default behaviour depends on your React.js framework.
    */
   prefetch?: boolean;
 
@@ -76,7 +74,7 @@ const FolderContext = createContext<{
 
 export function SidebarProvider({
   defaultOpenLevel = 0,
-  prefetch = true,
+  prefetch,
   children,
 }: SidebarProviderProps) {
   const closeOnRedirect = useRef(true);
