@@ -57,8 +57,8 @@ importers:
         specifier: ^2.0.2
         version: 2.0.2(zod@4.3.4)
       '@ai-sdk/react':
-        specifier: ^3.0.5
-        version: 3.0.5(react@19.2.3)(zod@4.3.4)
+        specifier: ^3.0.6
+        version: 3.0.6(react@19.2.3)(zod@4.3.4)
       '@fumadocs/mdx-remote':
         specifier: workspace:*
         version: link:../../packages/mdx-remote
@@ -93,11 +93,11 @@ importers:
         specifier: ^3.20.0
         version: 3.20.0
       '@takumi-rs/image-response':
-        specifier: ^0.60.8
-        version: 0.60.8
+        specifier: ^0.61.0
+        version: 0.61.0
       ai:
-        specifier: ^6.0.5
-        version: 6.0.5(zod@4.3.4)
+        specifier: ^6.0.6
+        version: 6.0.6(zod@4.3.4)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -525,7 +525,7 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
-  examples/next-mdx:
+  examples/next:
     dependencies:
       fumadocs-core:
         specifier: workspace:*
@@ -610,6 +610,61 @@ importers:
       postcss:
         specifier: ^8.5.6
         version: 8.5.6
+      tailwindcss:
+        specifier: ^4.1.18
+        version: 4.1.18
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
+  examples/next-static:
+    dependencies:
+      '@orama/orama':
+        specifier: ^3.1.18
+        version: 3.1.18
+      fumadocs-core:
+        specifier: workspace:*
+        version: link:../../packages/core
+      fumadocs-mdx:
+        specifier: workspace:*
+        version: link:../../packages/mdx
+      fumadocs-ui:
+        specifier: workspace:*
+        version: link:../../packages/radix-ui
+      lucide-react:
+        specifier: ^0.562.0
+        version: 0.562.0(react@19.2.3)
+      next:
+        specifier: 16.1.1
+        version: 16.1.1(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      react:
+        specifier: ^19.2.3
+        version: 19.2.3
+      react-dom:
+        specifier: ^19.2.3
+        version: 19.2.3(react@19.2.3)
+    devDependencies:
+      '@tailwindcss/postcss':
+        specifier: ^4.1.18
+        version: 4.1.18
+      '@types/mdx':
+        specifier: ^2.0.13
+        version: 2.0.13
+      '@types/node':
+        specifier: ^24.10.2
+        version: 24.10.2
+      '@types/react':
+        specifier: ^19.2.7
+        version: 19.2.7
+      '@types/react-dom':
+        specifier: ^19.2.3
+        version: 19.2.3(@types/react@19.2.7)
+      postcss:
+        specifier: ^8.5.6
+        version: 8.5.6
+      serve:
+        specifier: ^14.2.5
+        version: 14.2.5
       tailwindcss:
         specifier: ^4.1.18
         version: 4.1.18
@@ -1518,8 +1573,8 @@ importers:
   packages/core:
     dependencies:
       '@formatjs/intl-localematcher':
-        specifier: ^0.7.3
-        version: 0.7.3
+        specifier: ^0.7.4
+        version: 0.7.4
       '@orama/orama':
         specifier: ^3.1.18
         version: 3.1.18
@@ -2548,8 +2603,8 @@ importers:
 
 packages:
 
-  '@ai-sdk/gateway@3.0.4':
-    resolution: {integrity: sha512-OlccjNYZ5+4FaNyvs0kb3N5H6U/QCKlKPTGsgUo8IZkqfMQu8ALI1XD6l/BCuTKto+OO9xUPObT/W7JhbqJ5nA==}
+  '@ai-sdk/gateway@3.0.5':
+    resolution: {integrity: sha512-AtxA1wcoKTHr9uFoC5KZEXqJP4SMW4j3VbcliUECUYssbWbePJ9+b3AaCny1lxf1xhDK9EIyAgBOKhXoQSr9nA==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -2570,8 +2625,8 @@ packages:
     resolution: {integrity: sha512-2lR4w7mr9XrydzxBSjir4N6YMGdXD+Np1Sh0RXABh7tWdNFFwIeRI1Q+SaYZMbfL8Pg8RRLcrxQm51yxTLhokg==}
     engines: {node: '>=18'}
 
-  '@ai-sdk/react@3.0.5':
-    resolution: {integrity: sha512-0J9YKeeouG2tg84hEu2p9W6zcv4TRrl0BQq0HmUjqn/Y6arXeX1LNTTG1WhO4y2oPLVGrhzurJIUmMgzJl41yQ==}
+  '@ai-sdk/react@3.0.6':
+    resolution: {integrity: sha512-ub88RCcT+v1xgsadRtXbcqOoFj3duVyGayOUtUCt2CTbyh+4zdxzXL9Oc/WH8Mqr4X+OKLVddRiLfqUYh0xmlA==}
     engines: {node: '>=18'}
     peerDependencies:
       react: ^18 || ~19.0.1 || ~19.1.2 || ^19.2.1
@@ -3455,11 +3510,11 @@ packages:
   '@floating-ui/vue@1.1.9':
     resolution: {integrity: sha512-BfNqNW6KA83Nexspgb9DZuz578R7HT8MZw1CfK9I6Ah4QReNWEJsXWHN+SdmOVLNGmTPDi+fDT535Df5PzMLbQ==}
 
-  '@formatjs/fast-memoize@3.0.1':
-    resolution: {integrity: sha512-kzk635kEmsxrrEWQXY7uKRocFCVXR4es5OQqcqCGg2NPtQztG/OBkE9THHu6UOTxpfyIkZhh6DjPBZGRp7y3og==}
+  '@formatjs/fast-memoize@3.0.2':
+    resolution: {integrity: sha512-YFApUDWFmjpPwAE7VcY7PYVjm6JaLZOAo0UfCQj1/OGi/1QtduG9kIBHmVC551M6AI01qvuP5kjbDebrZOT4Vg==}
 
-  '@formatjs/intl-localematcher@0.7.3':
-    resolution: {integrity: sha512-NaeABectKdTCOnlH9VFGmMS3K0JuR7Soc2t5R2MCkBrM3H/hlKVYh0XSrcjjPkbjIdrF7L/Bzx9JtGuVaSfYlA==}
+  '@formatjs/intl-localematcher@0.7.4':
+    resolution: {integrity: sha512-AWsSZupIBMU/y04Nj24CjohyNVyfItMJPxSzX5OJwedDEIbGLOHkPxCjAeLeiLF2dw4xmQA8psktdi9MaebBQw==}
 
   '@fumari/json-schema-to-typescript@2.0.0':
     resolution: {integrity: sha512-X0Wm3QJLj1Rtb1nY2exM6QwMXb9LGyIKLf35+n6xyltDDBLMECOC4R/zPaw3RwgFVmvRLSmLCd+ht4sKabgmNw==}
@@ -5340,66 +5395,66 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7
 
-  '@takumi-rs/core-darwin-arm64@0.60.8':
-    resolution: {integrity: sha512-UJwguMmebGa7L2l/0SZUAz0WBnRviGHUPKQQAEk5iwE4QKEVR6bdaHUwtsSDZClZZ23yAxKR/fQwi7YShqAszA==}
+  '@takumi-rs/core-darwin-arm64@0.61.0':
+    resolution: {integrity: sha512-ocyeWcDefBPbdKAQ8iek+idUdsj2xpGeri8LkWyGTpkrrFZUAvAjlf1mAWXNYuoCqjdIw0QwoGOiAHWipXs/xA==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [arm64]
     os: [darwin]
 
-  '@takumi-rs/core-darwin-x64@0.60.8':
-    resolution: {integrity: sha512-KX3FYYvDUnzX676dgh8KQEbCLkvpluMQuwxtpSh2/JS/vEM+NqiWvGs6RTbH4ufXDFlHkIgKo9jTB+4owyfwGA==}
+  '@takumi-rs/core-darwin-x64@0.61.0':
+    resolution: {integrity: sha512-66jKqitP1/BDtNQNy/X1Z9uaJk8mflqsI4IcOMbHZo5/e1VYr2/AK4LxDIosRaX1+wKnPgDP6gzgJxREYvZrMA==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [x64]
     os: [darwin]
 
-  '@takumi-rs/core-linux-arm64-gnu@0.60.8':
-    resolution: {integrity: sha512-Veq34+nUaBdnbxzv7X8iZDLKhvjkLT5ljVPx2SvGrxhvY/pQCCMXEhaMQeYoWctmWmkYrxDl/5Qf41o5ogSaQA==}
+  '@takumi-rs/core-linux-arm64-gnu@0.61.0':
+    resolution: {integrity: sha512-jXULje1/Bqsa65qqOR/E2g7uhnkmfcBpjc+9ze44gqYOfLdCpICdHMFq0c/n7f4vacqnwbSP6Rwpzk+btoaYug==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [arm64]
     os: [linux]
 
-  '@takumi-rs/core-linux-arm64-musl@0.60.8':
-    resolution: {integrity: sha512-kdimeQ9WjqzwqHuEMBtXJIoQ6uv9096srlviCRiHNo6AxzmPMw4sSB59fHx33QtehAiIEGKqPp/4020Vixprkg==}
+  '@takumi-rs/core-linux-arm64-musl@0.61.0':
+    resolution: {integrity: sha512-6zxGOTi3fAepQ2Dmws9TBLiGbxxYjZGqG2PYdJzv4T41DPHY+SHAh2Drwi8ZQU+V568JGT5K8ZswIMak+oRVdA==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [arm64]
     os: [linux]
 
-  '@takumi-rs/core-linux-x64-gnu@0.60.8':
-    resolution: {integrity: sha512-iu6cgtAv9pfhpOSCuZAnZzWhNPqbGcEOvCCGQxypWhdSHHQwftW70kbasA+PaXaLKOWvFgGs9QGtIjeMYLWu6A==}
+  '@takumi-rs/core-linux-x64-gnu@0.61.0':
+    resolution: {integrity: sha512-25Yv9RLmzaqY7Kore1MSxVl9nbG0Peu01HS8tLB9sm1cKWREe04zxEK940BeNii0tc2HZe+shDg74xyhQN8sgw==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [x64]
     os: [linux]
 
-  '@takumi-rs/core-linux-x64-musl@0.60.8':
-    resolution: {integrity: sha512-NSNo5lZSRG7GeLa+B/2/KDbGxz9/9LkUYGVpUKSQyVabv0OV4esViIdM70LrPCueFaMAD2G82rwAfTFrLBLEcg==}
+  '@takumi-rs/core-linux-x64-musl@0.61.0':
+    resolution: {integrity: sha512-vombu/4g39mt/pJL6kdby0WnzeX97HCFUUi3ah2Q/xnA3bkfJXhmNYZ6dzUU7FMrDYg8mL5EEItJFY1nKZKV0g==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [x64]
     os: [linux]
 
-  '@takumi-rs/core-win32-arm64-msvc@0.60.8':
-    resolution: {integrity: sha512-PD+rEeNziVenFU0NodLsNsy/oQDtytAJOdwpe54WhLZLa1TjaABQ4SWQszBAHO+P1W4G1lvONubn9AQRvYgMag==}
+  '@takumi-rs/core-win32-arm64-msvc@0.61.0':
+    resolution: {integrity: sha512-UYV1JDj9IRg+BmKAOtYtmByljkuAokWhQO4HbhMykbUI183G2x5SY5Xk/3FrqeoYyTAlxpoSqSLn5fz4Zo2nrg==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [arm64]
     os: [win32]
 
-  '@takumi-rs/core-win32-x64-msvc@0.60.8':
-    resolution: {integrity: sha512-fzeCGOsE+kG22enpxVHXLs6rwVqgc2H6rsp6KJI2BMbSN2BeSEdjT1qNHJamJlw4xqm2qr/Z24vhz/51VCxmew==}
+  '@takumi-rs/core-win32-x64-msvc@0.61.0':
+    resolution: {integrity: sha512-t8e1RJgqMgbiLoB6DS/PtvBIBxWaoy6GLsJCa1S8o52bYFgX88nv8ZG6sCe6zFUzaVT/CpyKxXpidji0eA21Ng==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [x64]
     os: [win32]
 
-  '@takumi-rs/core@0.60.8':
-    resolution: {integrity: sha512-4+32Ldnp37HAH6chK/xrVEJ6v+E5J75qyaf40A/2qgVSI+aXKjhx8GLAzR7DEOGkCy+mpJsBSm3DNOpTIdL2RA==}
+  '@takumi-rs/core@0.61.0':
+    resolution: {integrity: sha512-mekQ+XQykiKKNn99Pzt1F0moa+Q4QaU5xySZ1rOUuFKv+t8lRlYceBLaDCckCIvrUQeuKJY+kToA4JPbqymOHQ==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
 
-  '@takumi-rs/helpers@0.60.8':
-    resolution: {integrity: sha512-GjZlGBRMDQ8lX2JyVWretYEwk61VFhTHmMdc6tdJyoBo8ny86L//gGdAApFLWhW90Fd71Ms1DoW9WyfoilLzCw==}
+  '@takumi-rs/helpers@0.61.0':
+    resolution: {integrity: sha512-CyQqt+xd7T1DdW4PyOr6cO8FXM/a0cza8WDbIPV782iopx/65NonXg+QF0LpbStCYhnVXZFcJNFdBr30bJav9w==}
 
-  '@takumi-rs/image-response@0.60.8':
-    resolution: {integrity: sha512-+4Py+jtZ3cV9YFP8wN29jBRQHZqzodLb2JDoEL/FQLTEvQhXnK4Zi5sx+F+9WAtq24gOW5UcXWqszLKxbE2I0g==}
+  '@takumi-rs/image-response@0.61.0':
+    resolution: {integrity: sha512-POj+yZ8IBufRx3Pyjhpkh/BFmpsUXqO5ANn0GWJhltnwu6kSrsJY//7fWhtZy0oPa350IGsyuun48kiBMgj9OQ==}
 
-  '@takumi-rs/wasm@0.60.8':
-    resolution: {integrity: sha512-ocfs/HM0VUYqzf/pzrRXFErRq6jKEtkEn3el5IdERC5oYOvoMPudAtrTurVV7iXBAnDdy7suAfn59kC/sbUDSQ==}
+  '@takumi-rs/wasm@0.61.0':
+    resolution: {integrity: sha512-LzD1sqHtsqXfyCRCwknNDwFqCxuqGFEGX5ZHoE8OZm/2PDRR5uDrgG16+AUMmA/MkReEiy0vKE0X2+zFGSAvVQ==}
 
   '@tanstack/devtools-client@0.0.5':
     resolution: {integrity: sha512-hsNDE3iu4frt9cC2ppn1mNRnLKo2uc1/1hXAyY9z4UYb+o40M2clFAhiFoo4HngjfGJDV3x18KVVIq7W4Un+zA==}
@@ -6154,8 +6209,8 @@ packages:
     resolution: {integrity: sha512-MnA+YT8fwfJPgBx3m60MNqakm30XOkyIoH1y6huTQvC0PwZG7ki8NacLBcrPbNoo8vEZy7Jpuk7+jMO+CUovTQ==}
     engines: {node: '>= 14'}
 
-  ai@6.0.5:
-    resolution: {integrity: sha512-CKL3dDHedWskC6EY67LrULonZBU9vL+Bwa+xQEcprBhJfxpogntG3utjiAkYuy5ZQatyWk+SmWG8HLvcnhvbRg==}
+  ai@6.0.6:
+    resolution: {integrity: sha512-LM0eAMWVn3RTj+0X5O1m/8g+7QiTeWG5aN5FsDbdmCkAQHVg93XxLbljFOLzi0NMjuJgf7fKLKmWoPsrdMyqfw==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -11076,7 +11131,7 @@ packages:
 
 snapshots:
 
-  '@ai-sdk/gateway@3.0.4(zod@4.3.4)':
+  '@ai-sdk/gateway@3.0.5(zod@4.3.4)':
     dependencies:
       '@ai-sdk/provider': 3.0.1
       '@ai-sdk/provider-utils': 4.0.2(zod@4.3.4)
@@ -11100,10 +11155,10 @@ snapshots:
     dependencies:
       json-schema: 0.4.0
 
-  '@ai-sdk/react@3.0.5(react@19.2.3)(zod@4.3.4)':
+  '@ai-sdk/react@3.0.6(react@19.2.3)(zod@4.3.4)':
     dependencies:
       '@ai-sdk/provider-utils': 4.0.2(zod@4.3.4)
-      ai: 6.0.5(zod@4.3.4)
+      ai: 6.0.6(zod@4.3.4)
       react: 19.2.3
       swr: 2.3.8(react@19.2.3)
       throttleit: 2.1.0
@@ -12158,13 +12213,13 @@ snapshots:
       - '@vue/composition-api'
       - vue
 
-  '@formatjs/fast-memoize@3.0.1':
+  '@formatjs/fast-memoize@3.0.2':
     dependencies:
       tslib: 2.8.1
 
-  '@formatjs/intl-localematcher@0.7.3':
+  '@formatjs/intl-localematcher@0.7.4':
     dependencies:
-      '@formatjs/fast-memoize': 3.0.1
+      '@formatjs/fast-memoize': 3.0.2
       tslib: 2.8.1
 
   '@fumari/json-schema-to-typescript@2.0.0(prettier@3.7.4)':
@@ -14192,50 +14247,50 @@ snapshots:
       tailwindcss: 4.1.18
       vite: 7.3.0(@types/node@24.10.2)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
-  '@takumi-rs/core-darwin-arm64@0.60.8':
+  '@takumi-rs/core-darwin-arm64@0.61.0':
     optional: true
 
-  '@takumi-rs/core-darwin-x64@0.60.8':
+  '@takumi-rs/core-darwin-x64@0.61.0':
     optional: true
 
-  '@takumi-rs/core-linux-arm64-gnu@0.60.8':
+  '@takumi-rs/core-linux-arm64-gnu@0.61.0':
     optional: true
 
-  '@takumi-rs/core-linux-arm64-musl@0.60.8':
+  '@takumi-rs/core-linux-arm64-musl@0.61.0':
     optional: true
 
-  '@takumi-rs/core-linux-x64-gnu@0.60.8':
+  '@takumi-rs/core-linux-x64-gnu@0.61.0':
     optional: true
 
-  '@takumi-rs/core-linux-x64-musl@0.60.8':
+  '@takumi-rs/core-linux-x64-musl@0.61.0':
     optional: true
 
-  '@takumi-rs/core-win32-arm64-msvc@0.60.8':
+  '@takumi-rs/core-win32-arm64-msvc@0.61.0':
     optional: true
 
-  '@takumi-rs/core-win32-x64-msvc@0.60.8':
+  '@takumi-rs/core-win32-x64-msvc@0.61.0':
     optional: true
 
-  '@takumi-rs/core@0.60.8':
+  '@takumi-rs/core@0.61.0':
     optionalDependencies:
-      '@takumi-rs/core-darwin-arm64': 0.60.8
-      '@takumi-rs/core-darwin-x64': 0.60.8
-      '@takumi-rs/core-linux-arm64-gnu': 0.60.8
-      '@takumi-rs/core-linux-arm64-musl': 0.60.8
-      '@takumi-rs/core-linux-x64-gnu': 0.60.8
-      '@takumi-rs/core-linux-x64-musl': 0.60.8
-      '@takumi-rs/core-win32-arm64-msvc': 0.60.8
-      '@takumi-rs/core-win32-x64-msvc': 0.60.8
+      '@takumi-rs/core-darwin-arm64': 0.61.0
+      '@takumi-rs/core-darwin-x64': 0.61.0
+      '@takumi-rs/core-linux-arm64-gnu': 0.61.0
+      '@takumi-rs/core-linux-arm64-musl': 0.61.0
+      '@takumi-rs/core-linux-x64-gnu': 0.61.0
+      '@takumi-rs/core-linux-x64-musl': 0.61.0
+      '@takumi-rs/core-win32-arm64-msvc': 0.61.0
+      '@takumi-rs/core-win32-x64-msvc': 0.61.0
 
-  '@takumi-rs/helpers@0.60.8': {}
+  '@takumi-rs/helpers@0.61.0': {}
 
-  '@takumi-rs/image-response@0.60.8':
+  '@takumi-rs/image-response@0.61.0':
     dependencies:
-      '@takumi-rs/core': 0.60.8
-      '@takumi-rs/helpers': 0.60.8
-      '@takumi-rs/wasm': 0.60.8
+      '@takumi-rs/core': 0.61.0
+      '@takumi-rs/helpers': 0.61.0
+      '@takumi-rs/wasm': 0.61.0
 
-  '@takumi-rs/wasm@0.60.8': {}
+  '@takumi-rs/wasm@0.61.0': {}
 
   '@tanstack/devtools-client@0.0.5':
     dependencies:
@@ -15214,9 +15269,9 @@ snapshots:
 
   agent-base@7.1.4: {}
 
-  ai@6.0.5(zod@4.3.4):
+  ai@6.0.6(zod@4.3.4):
     dependencies:
-      '@ai-sdk/gateway': 3.0.4(zod@4.3.4)
+      '@ai-sdk/gateway': 3.0.5(zod@4.3.4)
       '@ai-sdk/provider': 3.0.1
       '@ai-sdk/provider-utils': 4.0.2(zod@4.3.4)
       '@opentelemetry/api': 1.9.0

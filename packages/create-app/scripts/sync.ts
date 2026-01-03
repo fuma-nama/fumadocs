@@ -15,6 +15,7 @@ const templates = [
   'react-router-spa',
   'waku',
   ['next', '+next+fuma-docs-mdx'],
+  ['next-static', '+next+fuma-docs-mdx+static'],
 ];
 
 async function rm(files: string[]) {

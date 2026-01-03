@@ -86,32 +86,31 @@ async function main(): Promise<void> {
 
         return select({
           message: 'Configure linter?',
-          options:
-            results.template === '+next+fuma-docs-mdx'
-              ? [
-                  {
-                    value: 'disabled',
-                    label: 'Disabled',
-                  },
-                  {
-                    value: 'eslint',
-                    label: 'ESLint',
-                  },
-                  {
-                    value: 'biome',
-                    label: 'Biome',
-                  },
-                ]
-              : [
-                  {
-                    value: 'disabled',
-                    label: 'Disabled',
-                  },
-                  {
-                    value: 'biome',
-                    label: 'Biome',
-                  },
-                ],
+          options: results.template?.startsWith('+next')
+            ? [
+                {
+                  value: 'disabled',
+                  label: 'Disabled',
+                },
+                {
+                  value: 'eslint',
+                  label: 'ESLint',
+                },
+                {
+                  value: 'biome',
+                  label: 'Biome',
+                },
+              ]
+            : [
+                {
+                  value: 'disabled',
+                  label: 'Disabled',
+                },
+                {
+                  value: 'biome',
+                  label: 'Biome',
+                },
+              ],
         });
       },
       search: async () => {
