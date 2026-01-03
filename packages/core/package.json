@@ -119,7 +119,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@formatjs/intl-localematcher": "^0.7.3",
+    "@formatjs/intl-localematcher": "^0.7.4",
     "@orama/orama": "^3.1.18",
     "@shikijs/rehype": "^3.20.0",
     "@shikijs/transformers": "^3.20.0",
