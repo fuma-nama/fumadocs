@@ -17,7 +17,7 @@ export interface SyncOptions {
   autoDeploy?: boolean;
 }
 
-export type I18nSyncOptions = Omit<SyncOptions, 'index' | 'documents'> & {
+export interface I18nSyncOptions extends Omit<SyncOptions, 'index' | 'documents'> {
   /**
    * Indexes to sync.
    *
@@ -29,7 +29,7 @@ export type I18nSyncOptions = Omit<SyncOptions, 'index' | 'documents'> & {
     locale: string;
     items: OramaDocument[];
   }[];
-};
+}
 
 export interface OramaDocument {
   /**

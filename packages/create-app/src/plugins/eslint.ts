@@ -22,7 +22,7 @@ export default eslintConfig;`;
 export function eslint(): TemplatePlugin {
   return {
     packageJson(packageJson) {
-      if (this.template.value !== '+next+fuma-docs-mdx') return;
+      if (!this.template.value.startsWith('+next')) return;
 
       return {
         ...packageJson,
@@ -38,7 +38,7 @@ export function eslint(): TemplatePlugin {
       };
     },
     async afterWrite() {
-      if (this.template.value !== '+next+fuma-docs-mdx') return;
+      if (!this.template.value.startsWith('+next')) return;
 
       await writeFile(path.join(this.dest, 'eslint.config.mjs'), config);
       this.log('Configured ESLint');

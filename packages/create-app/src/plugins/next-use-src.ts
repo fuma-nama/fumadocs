@@ -8,7 +8,7 @@ import fs from 'node:fs/promises';
 export function nextUseSrc(): TemplatePlugin {
   return {
     template(info) {
-      if (info.value !== '+next+fuma-docs-mdx') return;
+      if (!info.value.startsWith('+next')) return;
 
       return {
         ...info,
@@ -17,7 +17,8 @@ export function nextUseSrc(): TemplatePlugin {
           if (
             path.basename(file) === 'mdx-components.tsx' ||
             isRelative(path.join(this.dest, 'app'), file) ||
-            isRelative(path.join(this.dest, 'lib'), file)
+            isRelative(path.join(this.dest, 'lib'), file) ||
+            isRelative(path.join(this.dest, 'components'), file)
           ) {
             return path.join(this.dest, 'src', path.relative(this.dest, file));
           }
@@ -28,7 +29,7 @@ export function nextUseSrc(): TemplatePlugin {
     },
     // update tsconfig.json for src dir
     async afterWrite() {
-      if (this.template.value !== '+next+fuma-docs-mdx') return;
+      if (!this.template.value.startsWith('+next')) return;
 
       const tsconfigPath = path.join(this.dest, 'tsconfig.json');
       const content = (await fs.readFile(tsconfigPath)).toString();

@@ -1,14 +1,15 @@
 {
-  "name": "example-next-mdx",
+  "name": "example-next-static",
   "version": "0.0.0",
   "private": true,
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "start": "next start",
+    "start": "serve out",
     "types:check": "fumadocs-mdx && next typegen && tsc --noEmit"
   },
   "dependencies": {
+    "@orama/orama": "^3.1.18",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
@@ -24,6 +25,7 @@
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "postcss": "^8.5.6",
+    "serve": "^14.2.5",
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3"
   }

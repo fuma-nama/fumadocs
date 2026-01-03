@@ -13,11 +13,11 @@
     "start": "next start"
   },
   "dependencies": {
-    "@ai-sdk/openai-compatible": "^2.0.0",
-    "@ai-sdk/react": "^3.0.1",
+    "@ai-sdk/openai-compatible": "^2.0.2",
+    "@ai-sdk/react": "^3.0.6",
     "@fumadocs/mdx-remote": "workspace:*",
     "@mixedbread/sdk": "^0.46.0",
-    "@orama/core": "^1.2.15",
+    "@orama/core": "^1.2.16",
     "@orama/orama": "^3.1.18",
     "@paper-design/shaders-react": "^0.0.68",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -26,8 +26,8 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@shikijs/rehype": "^3.20.0",
     "@shikijs/transformers": "^3.20.0",
-    "@takumi-rs/image-response": "^0.60.0",
-    "ai": "^6.0.1",
+    "@takumi-rs/image-response": "^0.61.0",
+    "ai": "^6.0.6",
     "class-variance-authority": "^0.7.1",
     "d3-force": "^3.0.0",
     "estree-util-build-jsx": "^3.0.1",
@@ -47,7 +47,7 @@
     "next": "16.1.1",
     "next-themes": "^0.4.6",
     "octokit": "^5.0.5",
-    "oxc-transform": "^0.105.0",
+    "oxc-transform": "^0.106.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-force-graph-2d": "^1.29.0",
@@ -63,7 +63,7 @@
     "tailwind-merge": "^3.4.0",
     "twoslash": "^0.3.6",
     "unist-util-visit": "^5.0.0",
-    "zod": "^4.2.1"
+    "zod": "^4.3.4"
   },
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",

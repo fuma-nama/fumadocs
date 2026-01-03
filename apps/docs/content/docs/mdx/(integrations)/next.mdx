@@ -48,9 +48,11 @@ const withMDX = createMDX({
 export default withMDX(config);
 ```
 
-<Callout title="ESM Only" type='warn' className="mt-4">
+<Callout title="ESM Only" type='warn'>
 
-    The Next.js config must be a `.mjs` file since Fumadocs is ESM-only.
+Fumadocs MDX is ESM-only, it's recommended to use `next.config.mjs` for accurate ESM resolution.
+
+For TypeScript config file, it requires Native Node.js TypeScript Resolver, you can see [Next.js docs](https://nextjs.org/docs/app/api-reference/config/typescript#using-nodejs-native-typescript-resolver-for-nextconfigts) for details.
 
 </Callout>
 

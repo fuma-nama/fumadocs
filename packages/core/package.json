@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-core",
-  "version": "16.4.2",
+  "version": "16.4.3",
   "description": "The React.js library for building a documentation website",
   "keywords": [
     "Docs",
@@ -119,7 +119,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@formatjs/intl-localematcher": "^0.7.2",
+    "@formatjs/intl-localematcher": "^0.7.4",
     "@orama/orama": "^3.1.18",
     "@shikijs/rehype": "^3.20.0",
     "@shikijs/transformers": "^3.20.0",
@@ -142,8 +142,9 @@
   "devDependencies": {
     "@mdx-js/mdx": "^3.1.1",
     "@mixedbread/sdk": "^0.46.0",
-    "@orama/core": "^1.2.15",
-    "@tanstack/react-router": "1.136.18",
+    "@orama/core": "^1.2.16",
+    "@oramacloud/client": "^2.1.4",
+    "@tanstack/react-router": "1.144.0",
     "@types/estree-jsx": "^1.0.5",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
@@ -162,16 +163,17 @@
     "remark-mdx": "^3.1.1",
     "remove-markdown": "^0.6.2",
     "tsconfig": "workspace:*",
-    "tsdown": "^0.18.3",
+    "tsdown": "^0.18.4",
     "typescript": "^5.9.3",
     "unified": "^11.0.5",
     "vfile": "^6.0.3",
-    "waku": "^0.27.5",
-    "zod": "^4.2.1"
+    "waku": "1.0.0-alpha.0",
+    "zod": "^4.3.4"
   },
   "peerDependencies": {
     "@mixedbread/sdk": "^0.46.0",
     "@orama/core": "1.x.x",
+    "@oramacloud/client": "2.x.x",
     "@tanstack/react-router": "1.x.x",
     "@types/react": "*",
     "algoliasearch": "5.x.x",
@@ -191,6 +193,9 @@
       "optional": true
     },
     "@orama/core": {
+      "optional": true
+    },
+    "@oramacloud/client": {
       "optional": true
     },
     "algoliasearch": {

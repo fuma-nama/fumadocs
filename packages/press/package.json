@@ -11,34 +11,34 @@
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/fumadocs",
   "bin": {
-    "fumapress": "./dist/cli/index.js"
+    "fumapress": "./dist/cli/index.mjs"
   },
   "files": [
     "dist/*"
   ],
   "type": "module",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    },
-    "./*": {
-      "types": "./dist/*",
-      "default": "./dist/*"
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
     },
     "./vite": {
-      "types": "./dist/vite/index.d.ts",
-      "default": "./dist/vite/index.js"
+      "types": "./dist/vite/index.d.mts",
+      "import": "./dist/vite/index.mjs"
+    },
+    "./*": {
+      "types": "./dist/*.d.mts",
+      "import": "./dist/*.mjs"
     }
   },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "build": "zshy",
-    "dev": "bun scripts/dev.ts",
+    "build": "tsdown",
+    "dev": "tsdown --watch",
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
@@ -52,7 +52,7 @@
     "react-router": "^7.11.0",
     "tinyglobby": "^0.2.15",
     "vite": "^7.3.0",
-    "zod": "^4.2.1"
+    "zod": "^4.3.4"
   },
   "devDependencies": {
     "@mdx-js/mdx": "^3.1.1",
@@ -64,8 +64,8 @@
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "tsconfig": "workspace:*",
-    "typescript": "^5.9.3",
-    "zshy": "^0.6.0"
+    "tsdown": "^0.18.4",
+    "typescript": "^5.9.3"
   },
   "peerDependencies": {
     "react": "^19.0.0",
@@ -74,18 +74,6 @@
   "peerDependenciesMeta": {
     "react-dom": {
       "optional": true
-    }
-  },
-  "zshy": {
-    "cjs": false,
-    "module": "./src/index.ts",
-    "bin": {
-      "fumapress": "./src/cli/index.ts"
-    },
-    "exports": {
-      ".": "./src/index.ts",
-      "./*": "./src/*",
-      "./vite": "./src/vite/index.ts"
     }
   }
 }

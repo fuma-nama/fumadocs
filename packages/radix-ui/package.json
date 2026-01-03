@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-ui",
-  "version": "16.4.2",
+  "version": "16.4.3",
   "description": "The Radix UI version of Fumadocs UI",
   "keywords": [
     "Docs",
@@ -130,7 +130,7 @@
     "eslint-config-custom": "workspace:*",
     "tailwindcss": "^4.1.18",
     "tsconfig": "workspace:*",
-    "tsdown": "^0.18.3"
+    "tsdown": "^0.18.4"
   },
   "peerDependencies": {
     "@types/react": "*",

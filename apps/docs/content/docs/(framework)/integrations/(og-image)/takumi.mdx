@@ -105,7 +105,7 @@ return (
 
 Finally, create a route handler to generate images at build time:
 
-```tsx tab="Next.js" title="app/docs/og.tsx"
+```tsx tab="Next.js" title="app/og/docs/[...slug]/route.tsx"
 import { getPageImage, source } from '@/lib/source';
 import { notFound } from 'next/navigation';
 import { ImageResponse } from '@takumi-rs/image-response';
