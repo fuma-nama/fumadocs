@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 16.4.3
+
+### Patch Changes
+
+- f5dcb7c: fix `update()` source function types
+- 7e08b2f: Add `orama-cloud-legacy` search integration for old Orama Cloud users
+
 ## 16.4.2
 
 ### Patch Changes
