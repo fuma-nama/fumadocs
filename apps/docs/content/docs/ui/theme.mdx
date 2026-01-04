@@ -1,4 +1,5 @@
 ---
+
 title: Themes
 description: Add Theme to Fumadocs UI
 icon: Palette
@@ -83,53 +84,79 @@ It comes with many presets out-of-the-box, you can pick one you prefer.
 @import 'fumadocs-ui/css/preset.css';
 ```
 
-<Tabs items={['neutral', 'black', 'vitepress', 'dusk', 'catppuccin', 'ocean', 'purple', 'solar']}>
+Most themes primarily swap **color tokens** (backgrounds, borders, accents, etc.) while keeping the same overall UI structure.
 
-    <Tab value='neutral'>
+**`solar` and `mintlify` are different:** they are **layout presets** in addition to color presets. That means they can change not just the palette, but also **layout and component styling** (e.g. nav/header presentation, spacing, typography treatment, and other structural UI details) to better match those design systems.
+
+<Tabs items={['neutral', 'black', 'vitepress', 'dusk', 'catppuccin', 'ocean', 'purple', 'solar', 'mintlify']}>
+
+```
+<Tab value='neutral'>
+```
 
 ![Neutral](/themes/neutral.png)
 
-    </Tab>
+```
+</Tab>
 
-    <Tab value='black'>
+<Tab value='black'>
+```
 
 ![Black](/themes/black.png)
 
-    </Tab>
+```
+</Tab>
 
-    <Tab value='vitepress'>
+<Tab value='vitepress'>
+```
 
 ![Vitepress](/themes/vitepress.png)
 
-    </Tab>
+```
+</Tab>
 
-    <Tab value='dusk'>
+<Tab value='dusk'>
+```
 
 ![Dusk](/themes/dusk.png)
 
-    </Tab>
+```
+</Tab>
 
-    <Tab value='Catppuccin'>
+<Tab value='Catppuccin'>
+```
 
 ![Catppuccin](/themes/catppuccin.png)
 
-    </Tab>
+```
+</Tab>
 
-    <Tab value='ocean'>
+<Tab value='ocean'>
+```
 
 ![Ocean](/themes/ocean.png)
 
-    </Tab>
+```
+</Tab>
 
-    <Tab value='purple'>
+<Tab value='purple'>
+```
 
 ![Purple](/themes/purple.png)
 
-    </Tab>
+```
+</Tab>
+```
 
   <Tab value='solar'>
 
-    ![Solar](/themes/solar.png)
+![Solar (layout + colors)](/themes/solar.png)
+
+  </Tab>
+
+  <Tab value='mintlify'>
+
+![Mintlify (layout + colors)](/themes/mintlify.png)
 
   </Tab>
 
