@@ -51,6 +51,9 @@ export interface DocsPageProps {
 
   children?: ReactNode;
 
+  /**
+   * Apply class names to the `#nd-page` container.
+   */
   className?: string;
 }
 
