@@ -26,7 +26,7 @@
     "@types/node": "^24.10.2",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-rsc": "^0.5.7",
+    "@vitejs/plugin-rsc": "^0.5.10",
     "react-router-devtools": "^6.0.1",
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3",

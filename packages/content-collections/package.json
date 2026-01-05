@@ -38,10 +38,10 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "zod": "^4.3.4"
+    "zod": "^4.3.5"
   },
   "devDependencies": {
-    "@content-collections/core": "^0.13.0",
+    "@content-collections/core": "^0.13.1",
     "@content-collections/mdx": "^0.2.2",
     "@types/node": "24.10.2",
     "eslint-config-custom": "workspace:*",

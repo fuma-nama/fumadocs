@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.1.2",
-    "@vitejs/plugin-rsc": "^0.5.7",
+    "@vitejs/plugin-rsc": "^0.5.10",
     "commander": "^14.0.2",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
@@ -52,7 +52,7 @@
     "react-router": "^7.11.0",
     "tinyglobby": "^0.2.15",
     "vite": "^7.3.0",
-    "zod": "^4.3.4"
+    "zod": "^4.3.5"
   },
   "devDependencies": {
     "@mdx-js/mdx": "^3.1.1",

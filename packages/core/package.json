@@ -168,7 +168,7 @@
     "unified": "^11.0.5",
     "vfile": "^6.0.3",
     "waku": "1.0.0-alpha.0",
-    "zod": "^4.3.4"
+    "zod": "^4.3.5"
   },
   "peerDependencies": {
     "@mixedbread/sdk": "^0.46.0",
