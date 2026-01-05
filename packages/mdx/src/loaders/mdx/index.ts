@@ -9,13 +9,11 @@ import { createHash } from 'node:crypto';
 import type { ConfigLoader } from '@/loaders/config';
 import { mdxLoaderGlob } from '..';
 
-const querySchema = z
-  .object({
-    only: z.literal(['frontmatter', 'all']).default('all'),
-    collection: z.string().optional(),
-    workspace: z.string().optional(),
-  })
-  .loose();
+const querySchema = z.looseObject({
+  only: z.literal(['frontmatter', 'all']).default('all'),
+  collection: z.string().optional(),
+  workspace: z.string().optional(),
+});
 
 const cacheEntry = z.object({
   code: z.string(),
