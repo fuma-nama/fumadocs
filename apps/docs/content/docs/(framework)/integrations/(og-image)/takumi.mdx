@@ -1,6 +1,6 @@
 ---
 title: Takumi
-description: Integrate Takumi for framework agnostic and fast metadata image generation.
+description: Framework agnostic and fast OG image generation.
 ---
 
 ## Installation
@@ -9,7 +9,16 @@ description: Integrate Takumi for framework agnostic and fast metadata image gen
 npm install @takumi-rs/image-response
 ```
 
-Make sure to add `@takumi-rs/image-response` to `serverExternalPackages` (Next.js) or `external` depends on what bundler you are using.
+<Callout type="warning">
+If you are using package manager with virtual store such as `pnpm` or `yarn`, add the following to your `.npmrc` file and re-run `pnpm i` to allow hoisting of the native binary.
+
+```text title=".npmrc"
+public-hoist-pattern[]=@takumi-rs/core-*
+```
+
+</Callout>
+
+To avoid bundling the native binary and allow `require()` calls to function properly, additional configuration is required depending on your bundler.
 
 ```ts title="next.config.ts" tab="Next.js"
 import type { NextConfig } from 'next';
@@ -20,7 +29,7 @@ const config: NextConfig = {
 };
 ```
 
-```ts title="vite.config.ts" tab="Nitro / TanStack Start"
+```ts title="vite.config.ts" tab="Nitro"
 import { defineConfig } from 'vite';
 // [!code ++]
 import takumiPackageJson from '@takumi-rs/core/package.json' with { type: 'json' };
@@ -33,6 +42,10 @@ export default defineConfig({
       traceInclude: Object.keys(takumiPackageJson.optionalDependencies),
     },
   },
+  optimizeDeps: {
+    // [!code ++]
+    exclude: ['@takumi-rs/core'],
+  },
 });
 ```
 
@@ -41,8 +54,13 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   ssr: {
+    // [!code ++:2]
+    noExternal: ['@takumi-rs/image-response'],
+    external: ['@takumi-rs/core'],
+  }
+  optimizeDeps: {
     // [!code ++]
-    external: ['@takumi-rs/image-response'],
+    exclude: ['@takumi-rs/core'],
   },
 });
 ```
