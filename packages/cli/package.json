@@ -37,13 +37,16 @@
   "dependencies": {
     "@clack/prompts": "^0.11.0",
     "commander": "^14.0.2",
+    "magic-string": "^0.30.21",
+    "oxc-parser": "^0.107.0",
+    "oxc-resolver": "^11.16.2",
     "package-manager-detector": "^1.6.0",
     "picocolors": "^1.1.1",
     "tinyexec": "^1.0.2",
-    "ts-morph": "^27.0.2",
-    "zod": "^4.3.4"
+    "zod": "^4.3.5"
   },
   "devDependencies": {
+    "@oxc-project/types": "^0.107.0",
     "@types/node": "24.10.2",
     "eslint-config-custom": "workspace:*",
     "shadcn": "3.6.2",

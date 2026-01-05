@@ -1,6 +1,6 @@
 ---
-"fumadocs-ui": patch
-"@fumadocs/base-ui": patch
+'fumadocs-ui': patch
+'@fumadocs/base-ui': patch
 ---
 
 expose `useAutoScroll()`

@@ -8,7 +8,10 @@ import type {
   registryInfoSchema,
 } from '@/registry/schema';
 import type { z } from 'zod';
-import { Project, SourceFile, StringLiteral, ts } from 'ts-morph';
+import { parse } from 'oxc-parser';
+import { ResolverFactory } from 'oxc-resolver';
+import MagicString from 'magic-string';
+import { transformSpecifiers } from '@/utils/ast';
 
 export type OnResolve = (reference: SourceReference) => Reference;
 
@@ -73,14 +76,10 @@ export interface Registry extends Omit<z.input<typeof registryInfoSchema>, 'inde
 
 export class RegistryCompiler {
   readonly raw: Registry;
-  readonly project: Project;
   resolver!: RegistryResolver;
 
   constructor(registry: Registry) {
     this.raw = registry;
-    this.project = new Project({
-      tsConfigFilePath: path.join(registry.dir, registry.tsconfigPath),
-    });
   }
 
   private async readPackageJson(): Promise<PackageJson | undefined> {
@@ -90,13 +89,6 @@ export class RegistryCompiler {
       .readFile(path.join(this.raw.dir, this.raw.packageJson))
       .then((res) => JSON.parse(res.toString()) as PackageJson)
       .catch(() => undefined);
-  }
-
-  async createSourceFile(file: string) {
-    const content = await fs.readFile(file);
-    return this.project.createSourceFile(file, content.toString(), {
-      overwrite: true,
-    });
   }
 
   async compile(): Promise<CompiledRegistry> {
@@ -140,6 +132,7 @@ class RegistryResolver {
   private readonly deps: Record<string, string | null>;
   private readonly devDeps: Record<string, string | null>;
   private readonly fileToComponent = new Map<string, [Component, ComponentFile]>();
+  readonly oxc: ResolverFactory;
 
   constructor(
     private readonly compiler: RegistryCompiler,
@@ -166,6 +159,15 @@ class RegistryResolver {
       ...packageJson?.devDependencies,
       ...registry.devDependencies,
     };
+
+    // resolve anything possible
+    this.oxc = new ResolverFactory({
+      extensions: ['.js', '.jsx', '.ts', '.tsx', '.node'],
+      conditionNames: ['node', 'import', 'require', 'default', 'types'],
+      tsconfig: {
+        configFile: path.join(registry.dir, registry.tsconfigPath),
+      },
+    });
   }
 
   getDepFromSpecifier(specifier: string) {
@@ -241,6 +243,10 @@ export type SourceReference =
             file: ComponentFile;
             registryName: string;
           };
+    }
+  | {
+      type: 'unknown-specifier';
+      specifier: string;
     };
 
 export type Reference =
@@ -253,7 +259,7 @@ export type Reference =
 export class ComponentCompiler {
   private readonly processedFiles = new Set<string>();
   private readonly registry: Registry;
-  private readonly subComponents = new Set<string | z.input<typeof httpSubComponent>>();
+  private readonly subComponents = new Map<string, string | z.input<typeof httpSubComponent>>();
   private readonly devDependencies = new Map<string, string | null>();
   private readonly dependencies = new Map<string, string | null>();
 
@@ -279,22 +285,28 @@ export class ComponentCompiler {
       name: this.component.name,
       title: this.component.title,
       description: this.component.description,
-      files: (
-        await Promise.all(this.component.files.map((file) => this.buildFileAndDeps(file)))
-      ).flat(),
-      subComponents: Array.from(this.subComponents),
+      files: (await Promise.all(this.component.files.map((file) => this.onBuildFile(file)))).flat(),
+      subComponents: Array.from(this.subComponents.values()),
       dependencies: Object.fromEntries(this.dependencies),
       devDependencies: Object.fromEntries(this.devDependencies),
     };
   }
 
-  private async buildFileAndDeps(file: ComponentFile): Promise<CompiledFile[]> {
+  private async onBuildFile(file: ComponentFile): Promise<CompiledFile[]> {
     if (this.processedFiles.has(file.path)) return [];
     this.processedFiles.add(file.path);
     const resolver = this.compiler.resolver;
 
     const queue: ComponentFile[] = [];
     const result = await this.buildFile(file, (reference) => {
+      if (reference.type === 'unknown-specifier') {
+        if (!reference.specifier.startsWith('node:')) {
+          console.warn(`Unknown specifier ${reference.specifier}, skipping for now`);
+        }
+
+        return reference.specifier;
+      }
+
       if (reference.type === 'custom') return reference.specifier;
 
       if (reference.type === 'file') {
@@ -311,16 +323,17 @@ export class ComponentCompiler {
 
       if (reference.type === 'sub-component') {
         const resolved = reference.resolved;
-        if (resolved.component.name !== this.component.name) {
-          if (resolved.type === 'remote') {
-            this.subComponents.add({
-              type: 'http',
-              baseUrl: resolved.registryName,
-              component: resolved.component.name,
-            });
-          } else {
-            this.subComponents.add(resolved.component.name);
-          }
+        if (resolved.component.name === this.component.name)
+          return this.toImportPath(resolved.file);
+
+        if (resolved.type === 'remote') {
+          this.subComponents.set(`${resolved.registryName}:${resolved.component.name}`, {
+            type: 'http',
+            baseUrl: resolved.registryName,
+            component: resolved.component.name,
+          });
+        } else {
+          this.subComponents.set(resolved.component.name, resolved.component.name);
         }
 
         return this.toImportPath(resolved.file);
@@ -335,54 +348,7 @@ export class ComponentCompiler {
       return reference.specifier;
     });
 
-    return [
-      result,
-      ...(await Promise.all(queue.map((file) => this.buildFileAndDeps(file)))).flat(),
-    ];
-  }
-
-  private resolveImport(
-    sourceFilePath: string,
-    specifier: string,
-    specified: SourceFile | undefined,
-  ): SourceReference | undefined {
-    let filePath: string;
-    if (specified) {
-      filePath = specified.getFilePath();
-    } else if (specifier.startsWith('./') || specifier.startsWith('../')) {
-      filePath = path.join(path.dirname(sourceFilePath), specifier);
-    } else {
-      if (!specifier.startsWith('node:'))
-        console.warn(`Unknown specifier ${specifier}, skipping for now`);
-      return;
-    }
-
-    const resolver = this.compiler.resolver;
-    // outside of registry dir
-    if (path.relative(this.registry.dir, filePath).startsWith('../')) {
-      return {
-        type: 'dependency',
-        dep: resolver.getDepFromSpecifier(specifier),
-        specifier,
-      };
-    }
-
-    const sub = resolver.getSubComponent(filePath);
-    if (sub) {
-      return {
-        type: 'sub-component',
-        resolved: {
-          type: 'local',
-          component: sub.component,
-          file: sub.file,
-        },
-      };
-    }
-
-    return {
-      type: 'file',
-      file: filePath,
-    };
+    return [result, ...(await Promise.all(queue.map((file) => this.onBuildFile(file)))).flat()];
   }
 
   private async buildFile(
@@ -395,55 +361,79 @@ export class ComponentCompiler {
     writeReference: (reference: Reference) => string | undefined,
   ): Promise<CompiledFile> {
     const sourceFilePath = path.join(this.registry.dir, file.path);
+    const astTypes: Record<string, 'js' | 'ts' | undefined> = {
+      '.ts': 'ts',
+      '.tsx': 'ts',
+      '.js': 'js',
+      '.jsx': 'js',
+    };
+    const astType = astTypes[path.extname(file.path)];
+    const content = (await fs.readFile(sourceFilePath)).toString();
 
+    if (!astType)
+      return {
+        content,
+        path: file.path,
+        type: file.type,
+        target: file.target,
+      };
+
+    const resolver = this.compiler.resolver;
+
+    const ast = await parse(sourceFilePath, content, {
+      astType,
+    });
+
+    if (ast.errors.length > 0) {
+      throw new Error(`failed to parse file ${sourceFilePath}: \n${ast.errors.join('\n')}`);
+    }
+
+    const s = new MagicString(content);
     /**
      * Process import paths
      */
-    const process = (specifier: StringLiteral, specifiedFile: SourceFile | undefined) => {
+    transformSpecifiers(ast.program, s, (specifier) => {
+      let resolved: Reference = {
+        type: 'unknown-specifier',
+        specifier: specifier,
+      };
       const onResolve = this.component.onResolve ?? this.registry.onResolve;
-      let resolved: Reference | undefined = this.resolveImport(
-        sourceFilePath,
-        specifier.getLiteralValue(),
-        specifiedFile,
-      );
-
-      if (!resolved) return;
-      if (onResolve) resolved = onResolve(resolved);
-      const out = writeReference(resolved);
-      if (out) specifier.setLiteralValue(out);
-    };
-
-    const sourceFile = await this.compiler.createSourceFile(sourceFilePath);
-
-    for (const item of sourceFile.getImportDeclarations()) {
-      process(item.getModuleSpecifier(), item.getModuleSpecifierSourceFile());
-    }
-
-    for (const item of sourceFile.getExportDeclarations()) {
-      const specifier = item.getModuleSpecifier();
-      if (!specifier) continue;
-
-      process(specifier, item.getModuleSpecifierSourceFile());
-    }
-
-    // transform async imports
-    const calls = sourceFile.getDescendantsOfKind(ts.SyntaxKind.CallExpression);
-
-    for (const expression of calls) {
-      if (
-        expression.getExpression().isKind(ts.SyntaxKind.ImportKeyword) &&
-        expression.getArguments().length === 1
-      ) {
-        const argument = expression.getArguments()[0];
-
-        if (!argument.isKind(ts.SyntaxKind.StringLiteral)) continue;
-
-        process(argument, argument.getSymbol()?.getDeclarations()[0].getSourceFile());
+      const resolvedSpecifier = resolver.oxc.resolveFileSync(sourceFilePath, specifier);
+      if (resolvedSpecifier.error || !resolvedSpecifier.path) {
+        return writeReference(onResolve ? onResolve(resolved) : resolved);
       }
-    }
+
+      resolved = {
+        type: 'file',
+        file: resolvedSpecifier.path,
+      };
+
+      // outside of registry dir
+      if (path.relative(this.registry.dir, resolvedSpecifier.path).startsWith('../')) {
+        resolved = {
+          type: 'dependency',
+          dep: resolver.getDepFromSpecifier(specifier),
+          specifier,
+        };
+      } else {
+        const sub = resolver.getSubComponent(resolvedSpecifier.path);
+        if (sub) {
+          resolved = {
+            type: 'sub-component',
+            resolved: {
+              type: 'local',
+              component: sub.component,
+              file: sub.file,
+            },
+          };
+        }
+      }
+
+      return writeReference(onResolve ? onResolve(resolved) : resolved);
+    });
 
     return {
-      content: sourceFile.getFullText(),
+      content: s.toString(),
       type: file.type,
       path: file.path,
       target: file.target,

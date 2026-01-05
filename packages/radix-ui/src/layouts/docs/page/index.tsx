@@ -50,6 +50,11 @@ export interface DocsPageProps {
   footer?: Partial<FooterOptions>;
 
   children?: ReactNode;
+
+  /**
+   * Apply class names to the `#nd-page` container.
+   */
+  className?: string;
 }
 
 type TableOfContentOptions = Pick<AnchorProviderProps, 'single'> & {
@@ -86,6 +91,7 @@ export function DocsPage({
   tableOfContent: { enabled: tocEnabled, component: tocReplace, ...tocOptions } = {},
   toc = [],
   children,
+  className,
 }: DocsPageProps) {
   // disable TOC on full mode, you can still enable it with `enabled` option.
   tocEnabled ??=
@@ -131,6 +137,7 @@ export function DocsPage({
         className={cn(
           'flex flex-col w-full max-w-[900px] mx-auto [grid-area:main] px-4 py-6 gap-4 md:px-6 md:pt-8 xl:px-8 xl:pt-14',
           full ? 'max-w-[1200px]' : 'xl:layout:[--fd-toc-width:268px]',
+          className,
         )}
       >
         {breadcrumbEnabled && (breadcrumb ?? <PageBreadcrumb {...breadcrumbProps} />)}
