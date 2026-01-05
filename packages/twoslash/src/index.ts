@@ -3,10 +3,11 @@ import type { Code } from 'mdast';
 import { fromMarkdown } from 'mdast-util-from-markdown';
 import { gfmFromMarkdown } from 'mdast-util-gfm';
 import { defaultHandlers, toHast } from 'mdast-util-to-hast';
-import type {
-  ShikiTransformer,
-  ShikiTransformerContext,
-  ShikiTransformerContextCommon,
+import {
+  ShikiError,
+  type ShikiTransformer,
+  type ShikiTransformerContext,
+  type ShikiTransformerContextCommon,
 } from 'shiki';
 import {
   createTransformerFactory,
@@ -127,7 +128,9 @@ function renderMarkdown(this: ShikiTransformerContextCommon, md: string): Elemen
     toHast(mdast, {
       handlers: {
         code: (state, node: Code) => {
-          if (node.lang) {
+          if (!node.lang) return defaultHandlers.code(state, node);
+
+          try {
             return this.codeToHast(node.value, {
               ...this.options,
               transformers: [],
@@ -136,9 +139,21 @@ function renderMarkdown(this: ShikiTransformerContextCommon, md: string): Elemen
               },
               lang: node.lang,
             }).children[0] as Element;
-          }
+          } catch (e) {
+            if (e instanceof Error) {
+              console.error(
+                `[fumadocs-twoslash] encountered an error when highlighting codeblock in a Twoslash popup: ${e.message}`,
+              );
+            }
 
-          return defaultHandlers.code(state, node);
+            if (e instanceof ShikiError) {
+              console.error(
+                `[fumadocs-twoslash] if language "${node.lang}" is not found, you may have enabled lazy loading which is not compatible with Twoslash, please consider to define "${node.lang}" in the "langs" option first.`,
+              );
+            }
+
+            return defaultHandlers.code(state, node);
+          }
         },
       },
     }) as Element
