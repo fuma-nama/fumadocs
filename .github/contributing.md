@@ -54,26 +54,17 @@ pnpm install
 
 #### Running the Project
 
+This repository uses Turborepo, so development servers should be started using the --filter option.
+Before running any app, build all shared packages:
+
 ```bash
-pnpm run dev
+pnpm run build --filter=./packages/*
 ```
 
-Start all apps except examples:
+Then, start docs site in dev mode.
 
 ```bash
-pnpm run dev:all
-```
-
-Start only example apps:
-
-```bash
-pnpm run dev:examples
-```
-
-#### Build
-
-```bash
-pnpm run build
+pnpm run dev --filter=docs
 ```
 
 #### Formatting & Linting
