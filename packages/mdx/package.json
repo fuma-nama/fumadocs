@@ -83,7 +83,7 @@
     "unist-util-remove-position": "^5.0.0",
     "unist-util-visit": "^5.0.0",
     "vfile": "^6.0.3",
-    "zod": "^4.3.4"
+    "zod": "^4.3.5"
   },
   "devDependencies": {
     "@fumadocs/mdx-remote": "workspace:*",
@@ -103,7 +103,7 @@
     "remark": "^15.0.1",
     "remark-directive": "^4.0.0",
     "remark-stringify": "^11.0.0",
-    "rollup": "^4.54.0",
+    "rollup": "^4.55.1",
     "tsconfig": "workspace:*",
     "tsdown": "^0.18.4",
     "vite": "^7.3.0",

@@ -29,6 +29,63 @@ OR open a bug report and link it in your PR.
 
 Contributing to the docs is relatively easier, make sure to check the typos and grammatical mistakes before submitting.
 
+### Local Development
+
+Follow the steps below to set up the project locally for development.
+
+#### Prerequisites
+
+- Node
+- pnpm  
+- Git
+
+#### Setup
+
+```bash
+git clone https://github.com/<your-username>/fumadocs.git
+cd fumadocs
+```
+
+#### Install Dependencies
+
+```bash
+pnpm install
+```
+
+#### Running the Project
+
+This repository uses Turborepo, so development servers should be started using the --filter option.
+Before running any app, build all shared packages:
+
+```bash
+pnpm run build --filter=./packages/*
+```
+
+Then, start docs site in dev mode.
+
+```bash
+pnpm run dev --filter=docs
+```
+
+#### Formatting & Linting
+
+```bash
+pnpm run format
+pnpm run lint
+```
+
+#### Type Checking
+
+```bash
+pnpm run types:check
+```
+
+#### Tests
+
+```bash
+pnpm test
+```
+
 ### New to contributing?
 
 You may start with contributing to the docs,

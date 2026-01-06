@@ -1,5 +1,13 @@
 # create-next-docs-app
 
+## 16.0.37
+
+## 16.0.36
+
+### Patch Changes
+
+- 2f6391b: hotfix wrong dep version
+
 ## 16.0.35
 
 ## 16.0.34

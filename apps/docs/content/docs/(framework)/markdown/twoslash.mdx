@@ -36,6 +36,10 @@ export default defineConfig({
         dark: 'github-dark',
       },
       transformers: [...(rehypeCodeDefaultOptions.transformers ?? []), transformerTwoslash()],
+
+      // important: Shiki doesn't support lazy loading languages for codeblocks in Twoslash popups
+      // make sure to define them first (e.g. the common ones)
+      langs: ['js', 'jsx', 'ts', 'tsx'],
     },
   },
 });
@@ -57,6 +61,7 @@ import type { MDXComponents } from 'mdx/types';
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
     ...defaultComponents,
+    // [!code ++]
     ...Twoslash,
     ...components,
   };
@@ -70,6 +75,19 @@ Now you can add `twoslash` meta string to codeblocks.
 console.log('Hello World');
 ```
 ````
+
+### Cache
+
+Optionally, you can enable filesystem cache with `typesCache` option:
+
+```ts twoslash title="source.config.ts"
+import { transformerTwoslash } from 'fumadocs-twoslash';
+import { createFileSystemTypesCache } from 'fumadocs-twoslash/cache-fs';
+
+transformerTwoslash({
+  typesCache: createFileSystemTypesCache(),
+});
+```
 
 ### Example
 
@@ -105,17 +123,4 @@ console.log(a);
 const a = '123';
 
 a = 132;
-```
-
-## Cache
-
-You can enable filesystem cache with `typesCache` option:
-
-```ts twoslash title="source.config.ts"
-import { transformerTwoslash } from 'fumadocs-twoslash';
-import { createFileSystemTypesCache } from 'fumadocs-twoslash/cache-fs';
-
-transformerTwoslash({
-  typesCache: createFileSystemTypesCache(),
-});
 ```

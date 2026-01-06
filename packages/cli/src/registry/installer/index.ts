@@ -1,32 +1,36 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import { confirm, isCancel, log, outro } from '@clack/prompts';
-import { createEmptyProject } from '@/utils/typescript';
 import { typescriptExtensions } from '@/constants';
-import { toImportSpecifier } from '@/utils/ast';
+import { toImportSpecifier, transformSpecifiers } from '@/utils/ast';
 import type { Component, File } from '@/registry/schema';
 import { HttpRegistryClient, type RegistryClient } from '@/registry/client';
 import { x } from 'tinyexec';
 import { DependencyManager } from '@/registry/installer/dep-manager';
-import { AsyncCache } from '@/utils/cache';
-import type { SourceFile } from 'ts-morph';
+import { createCache } from '@/utils/cache';
+import { parse, type ParseResult } from 'oxc-parser';
+import MagicString from 'magic-string';
 
 interface DownloadedComponent extends Omit<Component, 'subComponents'> {
   variables?: Record<string, unknown>;
 }
 
 export interface ComponentInstallerPlugin {
-  transform?: (context: {
-    file: SourceFile;
-    componentFile: File;
+  /**
+   * transform file downloaded from components
+   */
+  transformFile?: (context: {
+    s: MagicString;
+    parsed: ParseResult;
+
+    file: File;
     component: DownloadedComponent;
   }) => void | Promise<void>;
 }
 
 export class ComponentInstaller {
-  private readonly project = createEmptyProject();
   private readonly installedFiles = new Set<string>();
-  private readonly downloadCache = new AsyncCache<DownloadedComponent[]>();
+  private readonly downloadCache = createCache<DownloadedComponent[]>();
   readonly dependencies: Record<string, string | null> = {};
   readonly devDependencies: Record<string, string | null> = {};
 
@@ -124,11 +128,11 @@ export class ComponentInstaller {
       variables[k] ??= v.default;
     }
 
-    const out = await this.downloadCache.cached(hash, async () => {
+    const out = await this.downloadCache.cached(hash, async (presolve) => {
       const comp = await client.fetchComponent(name);
       const result: DownloadedComponent[] = [comp];
       // place it before downloading child components to avoid recursive downloads
-      this.downloadCache.store.set(hash, result);
+      presolve(result);
 
       const child = await Promise.all(
         comp.subComponents.map((sub) => {
@@ -152,7 +156,7 @@ export class ComponentInstaller {
     return out.map((file) => ({ ...file, variables }));
   }
 
-  private readonly pathToFileCache = new AsyncCache<Map<string, File>>();
+  private readonly pathToFileCache = createCache<Map<string, File>>();
   private async transform(
     taskId: string,
     file: File,
@@ -160,9 +164,8 @@ export class ComponentInstaller {
     allComponents: DownloadedComponent[],
   ): Promise<string> {
     const filePath = this.resolveOutputPath(file);
-    const sourceFile = this.project.createSourceFile(filePath, file.content, {
-      overwrite: true,
-    });
+    const parsed = await parse(filePath, file.content);
+    const s = new MagicString(file.content);
 
     // transform alias
     const prefix = '@/';
@@ -174,32 +177,36 @@ export class ComponentInstaller {
       }
       return map;
     });
-    for (const specifier of sourceFile.getImportStringLiterals()) {
+
+    transformSpecifiers(parsed.program, s, (specifier) => {
       for (const [k, v] of variables) {
-        specifier.setLiteralValue(specifier.getLiteralValue().replaceAll(`<${k}>`, v as string));
+        specifier = specifier.replaceAll(`<${k}>`, v as string);
       }
 
-      if (specifier.getLiteralValue().startsWith(prefix)) {
-        const lookup = specifier.getLiteralValue().substring(prefix.length);
+      if (specifier.startsWith(prefix)) {
+        const lookup = specifier.substring(prefix.length);
         const target = pathToFile.get(lookup);
 
         if (target) {
-          specifier.setLiteralValue(toImportSpecifier(filePath, this.resolveOutputPath(target)));
+          specifier = toImportSpecifier(filePath, this.resolveOutputPath(target));
         } else {
           console.warn(`cannot find the referenced file of ${specifier}`);
         }
       }
-    }
+
+      return specifier;
+    });
 
     for (const plugin of this.plugins) {
-      await plugin.transform?.({
-        file: sourceFile,
-        componentFile: file,
+      await plugin.transformFile?.({
+        s,
+        parsed,
+        file,
         component,
       });
     }
 
-    return sourceFile.getFullText();
+    return s.toString();
   }
 
   private resolveOutputPath(file: File): string {

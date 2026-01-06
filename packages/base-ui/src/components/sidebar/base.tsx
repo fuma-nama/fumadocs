@@ -399,7 +399,10 @@ export function SidebarCollapseTrigger(props: ComponentProps<'button'>) {
   );
 }
 
-function useAutoScroll(active: boolean, ref: RefObject<HTMLAnchorElement | null>) {
+/**
+ * scroll to the element if `active` is true
+ */
+export function useAutoScroll(active: boolean, ref: RefObject<HTMLElement | null>) {
   const { mode } = useSidebar();
 
   useEffect(() => {

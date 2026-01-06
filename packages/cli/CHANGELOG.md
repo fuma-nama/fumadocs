@@ -1,5 +1,11 @@
 # fumadocs
 
+## 1.2.2
+
+### Patch Changes
+
+- 6039041: Migrate to oxc for AST manipulation
+
 ## 1.2.1
 
 ### Patch Changes

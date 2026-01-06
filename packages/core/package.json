@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-core",
-  "version": "16.4.3",
+  "version": "16.4.4",
   "description": "The React.js library for building a documentation website",
   "keywords": [
     "Docs",
@@ -168,7 +168,7 @@
     "unified": "^11.0.5",
     "vfile": "^6.0.3",
     "waku": "1.0.0-alpha.0",
-    "zod": "^4.3.4"
+    "zod": "^4.3.5"
   },
   "peerDependencies": {
     "@mixedbread/sdk": "^0.46.0",
@@ -183,7 +183,7 @@
     "react-dom": "^19.2.0",
     "react-router": "7.x.x",
     "waku": "^0.26.0 || ^0.27.0",
-    "zod": "*"
+    "zod": "4.x.x"
   },
   "peerDependenciesMeta": {
     "@mixedbread/sdk": {

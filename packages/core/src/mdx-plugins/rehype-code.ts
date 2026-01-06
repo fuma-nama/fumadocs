@@ -132,7 +132,8 @@ export function rehypeCode(
       'themes' in options
         ? (Object.values(options.themes).filter(Boolean) as BuiltinTheme[])
         : [options.theme],
-    langs: options.langs ?? (options.lazy ? ['ts', 'tsx'] : Object.keys(bundledLanguages)),
+    langs:
+      options.langs ?? (options.lazy ? ['js', 'jsx', 'ts', 'tsx'] : Object.keys(bundledLanguages)),
     langAlias: options.langAlias,
   });
 

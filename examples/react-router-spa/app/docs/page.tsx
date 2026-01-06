@@ -19,9 +19,15 @@ export async function loader({ params }: Route.LoaderArgs) {
 }
 
 const clientLoader = browserCollections.docs.createClientLoader({
-  component({ toc, default: Mdx, frontmatter }) {
+  component(
+    { toc, frontmatter, default: Mdx },
+    // you can define props for the `<Content />` component
+    props: {
+      className?: string;
+    },
+  ) {
     return (
-      <DocsPage toc={toc}>
+      <DocsPage toc={toc} {...props}>
         <title>{frontmatter.title}</title>
         <meta name="description" content={frontmatter.description} />
         <DocsTitle>{frontmatter.title}</DocsTitle>

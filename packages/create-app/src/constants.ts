@@ -1,5 +1,10 @@
 import { fileURLToPath } from 'node:url';
 import versionPkg from '../../create-app-versions/package.json';
+import * as corePkg from '../../core/package.json';
+import * as uiPkg from '../../ui/package.json';
+import * as mdxPkg from '../../mdx/package.json';
+import * as radixPkg from '../../radix-ui/package.json';
+import * as basePkg from '../../base-ui/package.json';
 
 export const sourceDir = fileURLToPath(new URL(`../`, import.meta.url).href);
 
@@ -75,4 +80,10 @@ export const templates: TemplateInfo[] = [
   },
 ];
 
+const workspaces = [corePkg, uiPkg, mdxPkg, radixPkg, basePkg];
+
 export const depVersions = versionPkg.dependencies;
+
+for (const workspace of workspaces) {
+  depVersions[workspace.name as keyof typeof depVersions] = workspace.version;
+}

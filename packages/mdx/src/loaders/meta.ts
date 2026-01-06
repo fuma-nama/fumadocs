@@ -5,12 +5,10 @@ import { z } from 'zod';
 import { metaLoaderGlob } from '.';
 import type { MetaCollectionItem } from '@/config/build';
 
-const querySchema = z
-  .object({
-    collection: z.string().optional(),
-    workspace: z.string().optional(),
-  })
-  .loose();
+const querySchema = z.looseObject({
+  collection: z.string().optional(),
+  workspace: z.string().optional(),
+});
 
 /**
  * load meta files, fallback to bundler's built-in plugins when ?collection is unspecified.
