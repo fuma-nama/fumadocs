@@ -43,7 +43,7 @@ Follow the steps below to set up the project locally for development.
 
 ```bash
 git clone https://github.com/<your-username>/fumadocs.git
-cd <repo-name>
+cd fumadocs
 ```
 
 #### Install Dependencies
