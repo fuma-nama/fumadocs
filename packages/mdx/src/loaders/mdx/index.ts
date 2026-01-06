@@ -1,5 +1,4 @@
 import { fumaMatter } from '@/utils/fuma-matter';
-import type { SourceMap } from 'rollup';
 import type { Loader } from '@/loaders/adapter';
 import { z } from 'zod';
 import type { DocCollectionItem } from '@/config/build';
@@ -99,7 +98,7 @@ export function createMdxLoader({ getCore }: ConfigLoader): Loader {
 
       const out = {
         code: String(compiled.value),
-        map: compiled.map as SourceMap,
+        map: compiled.map,
       };
 
       await after?.();
