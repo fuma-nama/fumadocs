@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 16.4.4
+
+### Patch Changes
+
+- c804ac6: expose `useAutoScroll()`
+- Updated dependencies [cdc97e0]
+  - fumadocs-core@16.4.4
+  - @fumadocs/ui@16.4.4
+
 ## 16.4.3
 
 ### Patch Changes
