@@ -234,7 +234,7 @@ export interface FooterProps extends ComponentProps<'div'> {
   };
 }
 
-export function PageFooter({ items, ...props }: FooterProps) {
+export function PageFooter({ items, children, className, ...props }: FooterProps) {
   const footerList = useFooterItems();
   const pathname = usePathname();
   const { previous, next } = useMemo(() => {
@@ -250,17 +250,20 @@ export function PageFooter({ items, ...props }: FooterProps) {
   }, [footerList, items, pathname]);
 
   return (
-    <div
-      {...props}
-      className={cn(
-        '@container grid gap-4',
-        previous && next ? 'grid-cols-2' : 'grid-cols-1',
-        props.className,
-      )}
-    >
-      {previous ? <FooterItem item={previous} index={0} /> : null}
-      {next ? <FooterItem item={next} index={1} /> : null}
-    </div>
+    <>
+      <div
+        className={cn(
+          '@container grid gap-4',
+          previous && next ? 'grid-cols-2' : 'grid-cols-1',
+          className,
+        )}
+        {...props}
+      >
+        {previous && <FooterItem item={previous} index={0} />}
+        {next && <FooterItem item={next} index={1} />}
+      </div>
+      {children}
+    </>
   );
 }
 
