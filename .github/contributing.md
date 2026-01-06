@@ -42,7 +42,7 @@ Follow the steps below to set up the project locally for development.
 #### Setup
 
 ```bash
-git clone https://github.com/<your-username>/<repo-name>.git
+git clone https://github.com/<your-username>/fumadocs.git
 cd <repo-name>
 ```
 
