@@ -1,5 +1,13 @@
 # fumadocs-twoslash
 
+## 3.1.12
+
+### Patch Changes
+
+- cdc97e0: Improve experience with Shiki Twoslash
+- Updated dependencies [c804ac6]
+  - fumadocs-ui@16.4.4
+
 ## 3.1.11
 
 ### Patch Changes

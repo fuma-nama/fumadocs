@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 16.4.4
+
+### Patch Changes
+
+- cdc97e0: Improve experience with Shiki Twoslash
+
 ## 16.4.3
 
 ### Patch Changes
