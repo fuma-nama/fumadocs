@@ -29,6 +29,72 @@ OR open a bug report and link it in your PR.
 
 Contributing to the docs is relatively easier, make sure to check the typos and grammatical mistakes before submitting.
 
+### Local Development
+
+Follow the steps below to set up the project locally for development.
+
+#### Prerequisites
+
+- Node
+- pnpm  
+- Git
+
+#### Setup
+
+```bash
+git clone https://github.com/<your-username>/<repo-name>.git
+cd <repo-name>
+```
+
+#### Install Dependencies
+
+```bash
+pnpm install
+```
+
+#### Running the Project
+
+```bash
+pnpm run dev
+```
+
+Start all apps except examples:
+
+```bash
+pnpm run dev:all
+```
+
+Start only example apps:
+
+```bash
+pnpm run dev:examples
+```
+
+#### Build
+
+```bash
+pnpm run build
+```
+
+#### Formatting & Linting
+
+```bash
+pnpm run format
+pnpm run lint
+```
+
+#### Type Checking
+
+```bash
+pnpm run types:check
+```
+
+#### Tests
+
+```bash
+pnpm test
+```
+
 ### New to contributing?
 
 You may start with contributing to the docs,
