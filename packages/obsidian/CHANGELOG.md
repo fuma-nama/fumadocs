@@ -1,5 +1,12 @@
 # fumadocs-obsidian
 
+## 0.0.9
+
+### Patch Changes
+
+- d7c2752: support custom frontmatter function & preserve by default
+  - fumadocs-core@16.4.5
+
 ## 0.0.8
 
 ### Patch Changes

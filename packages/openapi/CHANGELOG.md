@@ -1,5 +1,14 @@
 # @fuma-docs/openapi
 
+## 10.2.4
+
+### Patch Changes
+
+- e55510b: fix unknown parameter encoding
+- Updated dependencies [9f06196]
+  - fumadocs-ui@16.4.5
+  - fumadocs-core@16.4.5
+
 ## 10.2.3
 
 ### Patch Changes
