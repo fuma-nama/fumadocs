@@ -13,19 +13,21 @@ export function nextUseSrc(): TemplatePlugin {
       return {
         ...info,
         appDir: 'src',
-        rename: (file) => {
-          if (
-            path.basename(file) === 'mdx-components.tsx' ||
-            isRelative(path.join(this.dest, 'app'), file) ||
-            isRelative(path.join(this.dest, 'lib'), file) ||
-            isRelative(path.join(this.dest, 'components'), file)
-          ) {
-            return path.join(this.dest, 'src', path.relative(this.dest, file));
-          }
-
-          return file;
-        },
       };
+    },
+    write(file) {
+      const filePath = file.filePath;
+
+      if (
+        path.basename(filePath) === 'mdx-components.tsx' ||
+        isRelative(path.join(this.dest, 'app'), filePath) ||
+        isRelative(path.join(this.dest, 'lib'), filePath) ||
+        isRelative(path.join(this.dest, 'components'), filePath)
+      ) {
+        file.filePath = path.join(this.dest, 'src', path.relative(this.dest, filePath));
+      }
+
+      return file;
     },
     // update tsconfig.json for src dir
     async afterWrite() {

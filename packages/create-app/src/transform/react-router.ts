@@ -1,29 +1,27 @@
-import { ArrayLiteralExpression, MethodDeclaration, SourceFile, ts } from 'ts-morph';
-import { getCodeValue } from '@/transform/shared';
-import SyntaxKind = ts.SyntaxKind;
+import { Program, Visitor } from 'oxc-parser';
 
 /**
  * filter items in a specific array initializer in the prerender function
  */
 export function filterReactRouterPrerenderArray(
-  sourceFile: SourceFile,
+  routesAst: Program,
   array: 'paths' | 'excluded',
   filter: (item: string) => boolean,
 ) {
   const methodBody = getPrerenderMethod(sourceFile)?.getBody();
   if (!methodBody) return;
+  new Visitor({
+    VariableDeclaration(node) {
+      const d = node.declarations.find((d) => d.id.type === 'Identifier' && d.id.name === array);
 
-  const initializer = methodBody
-    .getDescendantsOfKind(SyntaxKind.VariableDeclaration)
-    .find((item) => item.getName() === array)
-    ?.getInitializerIfKind(SyntaxKind.ArrayLiteralExpression);
+      if (!d?.init || d.init.type !== 'ArrayExpression') return;
 
-  if (!initializer) return;
-  for (const element of initializer.getElements()) {
-    if (!filter(getCodeValue(element.getText()))) {
-      initializer.removeElement(element);
-    }
-  }
+      d.init.elements = d.init.elements.filter((element) => {
+        if (!element || element.type !== 'Literal') return true;
+        return filter(element.value as string);
+      });
+    },
+  }).visit(routesAst);
 }
 
 /**

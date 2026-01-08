@@ -1,4 +1,4 @@
-import { TemplatePluginContext } from '@/index';
+import { TemplateFile, TemplatePluginContext } from '@/index';
 import { createSourceFile } from '@/transform/shared';
 import path from 'node:path';
 import {
@@ -8,7 +8,7 @@ import {
 } from '@/transform/react-router';
 import fs from 'node:fs/promises';
 import { addTanstackPrerender } from '@/transform/tanstack-start';
-import { StructureKind, SyntaxKind } from 'ts-morph';
+import { parse, type Program } from 'oxc-parser';
 
 interface RootLayoutMod {
   addSearchDialog: (specifier: string) => void;
@@ -66,6 +66,8 @@ interface ReactRouterRoutesMod {
    * @param path API route's path
    */
   removeRoute: (path: string) => void;
+
+  addPrerender: (path: string) => void;
 }
 
 export async function reactRouterRoutes(
@@ -81,14 +83,14 @@ export async function reactRouterRoutes(
   }
 
   fn({
-    addRoute: (p, entry, code) => {
+    addRoute(p, entry, code) {
       addReactRouterRoute(routesFile, [{ path: p, entry }]);
 
       if (code) {
         tasks.push(fs.writeFile(path.join(appDir, entry), code));
       }
     },
-    removeRoute: (p) => {
+    removeRoute(p) {
       const normalizedPath = normalizePath(p);
 
       filterReactRouterRoute(routesFile, (item) => {
@@ -110,6 +112,7 @@ export async function reactRouterRoutes(
         (item) => normalizePath(item) !== normalizedPath,
       );
     },
+    addPrerender(path) {},
   });
 
   await Promise.all([...tasks, routesFile.save(), configFile.save()]);
@@ -150,6 +153,7 @@ export interface TanstackStartRoutesMod {
 
 export async function tanstackStartRoutes(
   { appDir, dest }: TemplatePluginContext,
+  ast: Program,
   fn: (mod: TanstackStartRoutesMod) => void,
 ) {
   const configFile = await createSourceFile(path.join(dest, 'vite.config.ts'));
@@ -171,4 +175,41 @@ export async function tanstackStartRoutes(
   });
 
   await Promise.all([...tasks, configFile.save()]);
+}
+
+export function transformTanstackStart(
+  { appDir, dest }: TemplatePluginContext,
+  fn: (mod: TanstackStartRoutesMod) => void,
+): {
+  writeFiles: () => Promise<void>;
+  transformFile: (file: TemplateFile) => Promise<TemplateFile>;
+} {
+  const fileWrites: Promise<void>[] = [];
+
+  fn({
+    addRoute(options) {
+      if (options.code) {
+        fileWrites.push(fs.writeFile(path.join(appDir, 'routes', options.path), options.code));
+      }
+
+      if (options.prerender) {
+        addTanstackPrerender(configFile, [options.route]);
+      }
+    },
+    removeRoute(options) {
+      fileWrites.push(fs.unlink(path.join(appDir, 'routes', options.path)).catch(() => undefined));
+    },
+  });
+
+  return {
+    writeFiles() {},
+    async transformFile(file) {
+      const parsed = await parse(file.filePath, file.content);
+
+      if (file.filePath === path.join(dest, 'vite.config.ts')) {
+      }
+
+      return file;
+    },
+  };
 }

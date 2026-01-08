@@ -27,6 +27,12 @@ This project uses Orama Cloud for 3rd party search solution.
 
 See https://fumadocs.dev/docs/headless/search/orama-cloud for integrating Orama Cloud to Fumadocs.`;
     },
+    write(options) {
+      const { appDir, template } = this;
+
+      if (options.filePath === path.join(appDir, template.rootProviderPath)) {
+      }
+    },
     async afterWrite() {
       const { dest, appDir, template } = this;
       await copy(path.join(sourceDir, 'template/+orama-cloud/@root'), dest);

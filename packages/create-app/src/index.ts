@@ -1,9 +1,10 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import { copy, tryGitInit } from '@/utils';
+import { tryGitInit, writeFile } from '@/utils';
 import type { PackageManager } from './auto-install';
 import { autoInstall } from './auto-install';
 import { depVersions, sourceDir, type TemplateInfo, templates } from './constants';
+import { glob } from 'tinyglobby';
 
 export type Template = TemplateInfo['value'];
 export interface Options {
@@ -48,6 +49,11 @@ export type PackageJsonType = {
 
 type Awaitable<T> = T | Promise<T>;
 
+export interface TemplateFile {
+  filePath: string;
+  content: string;
+}
+
 export interface TemplatePlugin {
   template?: (
     this: Pick<TemplatePluginContext, 'dest'>,
@@ -57,6 +63,17 @@ export interface TemplatePlugin {
     this: TemplatePluginContext,
     packageJson: PackageJsonType,
   ) => Awaitable<void | PackageJsonType>;
+
+  /**
+   * transform file path & content when writing from template.
+   *
+   * return the transformed file, `undefined` if unchanged.
+   */
+  write?: (
+    this: TemplatePluginContext,
+    options: TemplateFile,
+  ) => Awaitable<TemplateFile | undefined>;
+
   afterWrite?: (this: TemplatePluginContext) => Awaitable<void>;
   readme?: (this: TemplatePluginContext, content: string) => Awaitable<void | string>;
 }
@@ -85,27 +102,42 @@ export async function create(createOptions: Options): Promise<void> {
     appDir,
   };
 
-  await copy(path.join(sourceDir, 'template', template.value), outputDir, {
-    rename(file) {
-      file = file.replace('example.gitignore', '.gitignore');
-
-      return template.rename?.(file) ?? file;
-    },
+  const templateDir = path.join(sourceDir, 'template', template.value);
+  const templateFiles = await glob('**/*', {
+    cwd: templateDir,
   });
+  await Promise.all(
+    templateFiles.map(async (file) => {
+      let obj: TemplateFile = {
+        // transform .gitignore
+        filePath: path.join(outputDir, file).replace('example.gitignore', '.gitignore'),
+        content: (await fs.readFile(path.join(templateDir, file))).toString(),
+      };
 
-  const packageJsonPath = path.join(outputDir, 'package.json');
-  let packageJson = await initPackageJson(projectName, packageJsonPath);
-  for (const plugin of plugins) {
-    packageJson = (await plugin.packageJson?.call(pluginContext, packageJson)) ?? packageJson;
-  }
-  await fs.writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2));
+      // transform package.json
+      if (path.basename(obj.filePath) === 'package.json') {
+        let packageJson = transformPackageJsonWorkspaces(projectName, obj);
+        for (const plugin of plugins) {
+          packageJson = (await plugin.packageJson?.call(pluginContext, packageJson)) ?? packageJson;
+        }
+        obj.content = JSON.stringify(packageJson, null, 2);
+      }
 
-  const readmePath = path.join(outputDir, 'README.md');
-  let readme = `# ${projectName}\n\n${await fs.readFile(readmePath)}`;
-  for (const plugin of plugins) {
-    readme = (await plugin.readme?.call(pluginContext, readme)) ?? readme;
-  }
-  await fs.writeFile(readmePath, readme);
+      if (path.basename(obj.filePath) === 'READMD.md') {
+        let readme = `# ${projectName}\n\n${obj.content}`;
+        for (const plugin of plugins) {
+          readme = (await plugin.readme?.call(pluginContext, readme)) ?? readme;
+        }
+        obj.content = readme;
+      }
+
+      for (const plugin of plugins) {
+        if (plugin.write) obj = (await plugin.write.call(pluginContext, obj)) ?? obj;
+      }
+
+      await writeFile(obj.filePath, obj.content);
+    }),
+  );
 
   for (const plugin of plugins) {
     await plugin.afterWrite?.call(pluginContext);
@@ -125,10 +157,7 @@ export async function create(createOptions: Options): Promise<void> {
   }
 }
 
-async function initPackageJson(
-  projectName: string,
-  packageJsonPath: string,
-): Promise<PackageJsonType> {
+function transformPackageJsonWorkspaces(projectName: string, file: TemplateFile): PackageJsonType {
   function replaceWorkspaceDeps(deps: Record<string, string> = {}) {
     for (const k in deps) {
       if (deps[k].startsWith('workspace:') && k in depVersions) {
@@ -139,8 +168,7 @@ async function initPackageJson(
     return deps;
   }
 
-  const packageJson: PackageJsonType = JSON.parse((await fs.readFile(packageJsonPath)).toString());
-
+  const packageJson: PackageJsonType = JSON.parse(file.content);
   return {
     ...packageJson,
     name: projectName,

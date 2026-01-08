@@ -45,15 +45,18 @@
     "@clack/prompts": "^0.11.0",
     "@commander-js/extra-typings": "^14.0.0",
     "commander": "^14.0.2",
+    "esrap": "^2.2.1",
+    "magic-string": "^0.30.21",
+    "oxc-parser": "^0.107.0",
     "picocolors": "^1.1.1",
     "tinyexec": "^1.0.2",
-    "ts-morph": "^27.0.2"
+    "tinyglobby": "^0.2.15"
   },
   "devDependencies": {
+    "@oxc-project/types": "^0.107.0",
     "@types/cross-spawn": "^6.0.6",
     "@types/node": "24.10.2",
     "eslint-config-custom": "workspace:*",
-    "tinyglobby": "^0.2.15",
     "tsconfig": "workspace:*",
     "tsdown": "^0.18.4",
     "typescript": "^5.9.3"

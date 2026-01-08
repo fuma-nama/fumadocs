@@ -26,10 +26,6 @@ export interface TemplateInfo {
    */
   rootProviderPath: string;
   hint?: string;
-  /**
-   * rename files when copying from template
-   */
-  rename?: (name: string) => string;
 }
 
 export const templates: TemplateInfo[] = [
