@@ -35,9 +35,12 @@ export function encodeRequestData(
       const value = from[type][key];
       if (value == null) continue;
 
-      const field = parameters.find((p) => p.name === key && p.in === type);
-      // skip unknown parameters
-      if (!field) continue;
+      const field: NoReference<ParameterObject> = parameters.find(
+        (p) => p.name === key && p.in === type,
+      ) ?? {
+        name: key,
+        in: type,
+      };
 
       const encoder = getMediaEncoder(field, adapters);
       if (encoder) {

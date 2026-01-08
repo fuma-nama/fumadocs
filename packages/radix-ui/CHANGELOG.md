@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 16.4.5
+
+### Patch Changes
+
+- 9f06196: fix `footer.children` props
+  - fumadocs-core@16.4.5
+  - @fumadocs/ui@16.4.5
+
 ## 16.4.4
 
 ### Patch Changes
