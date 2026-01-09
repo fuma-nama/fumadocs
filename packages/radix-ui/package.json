@@ -115,7 +115,6 @@
     "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-tabs": "^1.1.13",
     "class-variance-authority": "^0.7.1",
-    "fumadocs-core": "workspace:*",
     "lucide-react": "^0.562.0",
     "next-themes": "^0.4.6",
     "react-medium-image-zoom": "^5.4.0",
@@ -124,21 +123,27 @@
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",
     "@tailwindcss/cli": "^4.1.18",
-    "@types/node": "^24.10.2",
+    "@types/node": "^25.0.3",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "eslint-config-custom": "workspace:*",
+    "fumadocs-core": "workspace:*",
     "tailwindcss": "^4.1.18",
     "tsconfig": "workspace:*",
     "tsdown": "^0.18.4"
   },
   "peerDependencies": {
     "@types/react": "*",
+    "fumadocs-core": "workspace:*",
+    "next": "16.x.x",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "tailwindcss": "^4.0.0"
   },
   "peerDependenciesMeta": {
+    "next": {
+      "optional": true
+    },
     "@types/react": {
       "optional": true
     },
