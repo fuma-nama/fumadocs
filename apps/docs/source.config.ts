@@ -1,4 +1,5 @@
 import {
+  applyMdxPreset,
   defineCollections,
   defineConfig,
   defineDocs,
@@ -27,6 +28,73 @@ export const docs = defineDocs({
       extractLinkReferences: true,
     },
     async: true,
+    async mdxOptions(environment) {
+      const { rehypeCodeDefaultOptions } = await import('fumadocs-core/mdx-plugins/rehype-code');
+      const { remarkStructureDefaultOptions } =
+        await import('fumadocs-core/mdx-plugins/remark-structure');
+      const { remarkSteps } = await import('fumadocs-core/mdx-plugins/remark-steps');
+      const { remarkFeedbackBlock } =
+        await import('fumadocs-core/mdx-plugins/remark-feedback-block');
+      const { transformerTwoslash } = await import('fumadocs-twoslash');
+      const { createFileSystemTypesCache } = await import('fumadocs-twoslash/cache-fs');
+      const { default: remarkMath } = await import('remark-math');
+      const { remarkTypeScriptToJavaScript } = await import('fumadocs-docgen/remark-ts2js');
+      const { default: rehypeKatex } = await import('rehype-katex');
+      const { remarkAutoTypeTable, createGenerator, createFileSystemGeneratorCache } =
+        await import('fumadocs-typescript');
+
+      const generator = createGenerator({
+        cache: createFileSystemGeneratorCache('.next/fumadocs-typescript'),
+      });
+      const feedbackOptions: RemarkFeedbackBlockOptions = {
+        resolve(node) {
+          // defensive approach
+          if (node.type === 'mdxJsxFlowElement') return 'skip';
+          return node.type === 'paragraph' || node.type === 'image' || node.type === 'list';
+        },
+      };
+      return applyMdxPreset({
+        remarkStructureOptions: {
+          types: [...remarkStructureDefaultOptions.types, 'code'],
+        },
+        rehypeCodeOptions: {
+          langs: ['ts', 'js', 'html', 'tsx', 'mdx'],
+          inline: 'tailing-curly-colon',
+          themes: {
+            light: 'catppuccin-latte',
+            dark: 'catppuccin-mocha',
+          },
+          transformers: [
+            ...(rehypeCodeDefaultOptions.transformers ?? []),
+            transformerTwoslash({
+              typesCache: createFileSystemTypesCache(),
+            }),
+            transformerEscape(),
+          ],
+        },
+        remarkCodeTabOptions: {
+          parseMdx: true,
+        },
+        remarkNpmOptions: {
+          persist: {
+            id: 'package-manager',
+          },
+        },
+        remarkPlugins: [
+          remarkSteps,
+          remarkMath,
+          [remarkFeedbackBlock, feedbackOptions],
+          [
+            remarkAutoTypeTable,
+            {
+              generator,
+            },
+          ],
+          remarkTypeScriptToJavaScript,
+        ],
+        rehypePlugins: (v) => [rehypeKatex, ...v],
+      })(environment);
+    },
   },
   meta: {
     schema: metaSchema.extend({
@@ -43,6 +111,30 @@ export const blog = defineCollections({
     date: z.iso.date().or(z.date()),
   }),
   async: true,
+  async mdxOptions(environment) {
+    const { rehypeCodeDefaultOptions } = await import('fumadocs-core/mdx-plugins/rehype-code');
+    const { remarkSteps } = await import('fumadocs-core/mdx-plugins/remark-steps');
+
+    return applyMdxPreset({
+      rehypeCodeOptions: {
+        inline: 'tailing-curly-colon',
+        themes: {
+          light: 'catppuccin-latte',
+          dark: 'catppuccin-mocha',
+        },
+        transformers: [...(rehypeCodeDefaultOptions.transformers ?? []), transformerEscape()],
+      },
+      remarkCodeTabOptions: {
+        parseMdx: true,
+      },
+      remarkNpmOptions: {
+        persist: {
+          id: 'package-manager',
+        },
+      },
+      remarkPlugins: [remarkSteps],
+    })(environment);
+  },
 });
 
 function transformerEscape(): ShikiTransformer {
@@ -72,70 +164,4 @@ export default defineConfig({
     }),
     lastModified(),
   ],
-  mdxOptions: async () => {
-    const { rehypeCodeDefaultOptions } = await import('fumadocs-core/mdx-plugins/rehype-code');
-    const { remarkStructureDefaultOptions } =
-      await import('fumadocs-core/mdx-plugins/remark-structure');
-    const { remarkSteps } = await import('fumadocs-core/mdx-plugins/remark-steps');
-    const { remarkFeedbackBlock } = await import('fumadocs-core/mdx-plugins/remark-feedback-block');
-    const { transformerTwoslash } = await import('fumadocs-twoslash');
-    const { createFileSystemTypesCache } = await import('fumadocs-twoslash/cache-fs');
-    const { default: remarkMath } = await import('remark-math');
-    const { remarkTypeScriptToJavaScript } = await import('fumadocs-docgen/remark-ts2js');
-    const { default: rehypeKatex } = await import('rehype-katex');
-    const { remarkAutoTypeTable, createGenerator, createFileSystemGeneratorCache } =
-      await import('fumadocs-typescript');
-
-    const generator = createGenerator({
-      cache: createFileSystemGeneratorCache('.next/fumadocs-typescript'),
-    });
-    const feedbackOptions: RemarkFeedbackBlockOptions = {
-      resolve(node) {
-        // defensive approach
-        if (node.type === 'mdxJsxFlowElement') return 'skip';
-        return node.type === 'paragraph' || node.type === 'image' || node.type === 'list';
-      },
-    };
-    return {
-      remarkStructureOptions: {
-        types: [...remarkStructureDefaultOptions.types, 'code'],
-      },
-      rehypeCodeOptions: {
-        langs: ['ts', 'js', 'html', 'tsx', 'mdx'],
-        inline: 'tailing-curly-colon',
-        themes: {
-          light: 'catppuccin-latte',
-          dark: 'catppuccin-mocha',
-        },
-        transformers: [
-          ...(rehypeCodeDefaultOptions.transformers ?? []),
-          transformerTwoslash({
-            typesCache: createFileSystemTypesCache(),
-          }),
-          transformerEscape(),
-        ],
-      },
-      remarkCodeTabOptions: {
-        parseMdx: true,
-      },
-      remarkNpmOptions: {
-        persist: {
-          id: 'package-manager',
-        },
-      },
-      remarkPlugins: [
-        remarkSteps,
-        remarkMath,
-        [remarkFeedbackBlock, feedbackOptions],
-        [
-          remarkAutoTypeTable,
-          {
-            generator,
-          },
-        ],
-        remarkTypeScriptToJavaScript,
-      ],
-      rehypePlugins: (v) => [rehypeKatex, ...v],
-    };
-  },
 });
