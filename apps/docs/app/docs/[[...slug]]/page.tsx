@@ -8,8 +8,8 @@ import { createMetadata, getPageImage } from '@/lib/metadata';
 import { source } from '@/lib/source';
 import { Wrapper } from '@/components/preview/wrapper';
 import { Mermaid } from '@/components/mdx/mermaid';
-import { Feedback } from '@/components/feedback';
-import { onRateAction, owner, repo } from '@/lib/github';
+import { Feedback, FeedbackBlock } from '@/components/feedback/client';
+import { onBlockFeedbackAction, onPageFeedbackAction, owner, repo } from '@/lib/github';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import Link from 'fumadocs-core/link';
 import { findSiblings } from 'fumadocs-core/page-tree';
@@ -104,6 +104,11 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
                 </HoverCard>
               );
             },
+            FeedbackBlock: ({ children, ...props }) => (
+              <FeedbackBlock {...props} onSendAction={onBlockFeedbackAction}>
+                {children}
+              </FeedbackBlock>
+            ),
             Banner,
             Mermaid,
             TypeTable,
@@ -118,7 +123,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
         />
         {page.data.index ? <DocsCategory url={page.url} /> : null}
       </div>
-      <Feedback onRateAction={onRateAction} />
+      <Feedback onSendAction={onPageFeedbackAction} />
       {lastModified && <PageLastUpdate date={lastModified} />}
     </DocsPage>
   );

@@ -10,6 +10,7 @@ import type { ElementContent } from 'hast';
 import jsonSchema from 'fumadocs-mdx/plugins/json-schema';
 import lastModified from 'fumadocs-mdx/plugins/last-modified';
 import type { ShikiTransformer } from 'shiki';
+import type { RemarkFeedbackBlockOptions } from 'fumadocs-core/mdx-plugins';
 
 export const docs = defineDocs({
   docs: {
@@ -76,6 +77,7 @@ export default defineConfig({
     const { remarkStructureDefaultOptions } =
       await import('fumadocs-core/mdx-plugins/remark-structure');
     const { remarkSteps } = await import('fumadocs-core/mdx-plugins/remark-steps');
+    const { remarkFeedbackBlock } = await import('fumadocs-core/mdx-plugins/remark-feedback-block');
     const { transformerTwoslash } = await import('fumadocs-twoslash');
     const { createFileSystemTypesCache } = await import('fumadocs-twoslash/cache-fs');
     const { default: remarkMath } = await import('remark-math');
@@ -87,6 +89,13 @@ export default defineConfig({
     const generator = createGenerator({
       cache: createFileSystemGeneratorCache('.next/fumadocs-typescript'),
     });
+    const feedbackOptions: RemarkFeedbackBlockOptions = {
+      resolve(node) {
+        // defensive approach
+        if (node.type === 'mdxJsxFlowElement') return 'skip';
+        return node.type === 'paragraph' || node.type === 'image';
+      },
+    };
     return {
       remarkStructureOptions: {
         types: [...remarkStructureDefaultOptions.types, 'code'],
@@ -117,6 +126,7 @@ export default defineConfig({
       remarkPlugins: [
         remarkSteps,
         remarkMath,
+        [remarkFeedbackBlock, feedbackOptions],
         [
           remarkAutoTypeTable,
           {
