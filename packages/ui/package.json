@@ -54,8 +54,8 @@
     "tsdown": "^0.18.4"
   },
   "peerDependencies": {
-    "fumadocs-core": "workspace:*",
     "@types/react": "*",
+    "fumadocs-core": "workspace:*",
     "next": "16.x.x",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

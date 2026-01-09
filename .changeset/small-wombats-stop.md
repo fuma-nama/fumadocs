@@ -1,5 +1,5 @@
 ---
-"fumadocs-core": patch
+'fumadocs-core': patch
 ---
 
 Introduce `remark-feedback-block` plugin

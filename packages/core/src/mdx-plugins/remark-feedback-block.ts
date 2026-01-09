@@ -19,7 +19,7 @@ export interface RemarkFeedbackBlockOptions {
   /**
    * determine how the node should be resolved into a feedback block.
    *
-   * scan paragraph & image nodes by default.
+   * scan paragraph, list, and image nodes by default.
    *
    * @returns
    * - `true`: convert the node into a feedback block.
@@ -31,7 +31,7 @@ export interface RemarkFeedbackBlockOptions {
   /**
    * generate & include the block body to `<FeedbackBlock body="..." />` as string
    *
-   * @defaultValue false
+   * @defaultValue true
    */
   generateBody?: boolean;
 }
@@ -50,8 +50,8 @@ export interface FeedbackBlockProps {
 export function remarkFeedbackBlock({
   generateHash = ({ body }) => createHash('md5').update(body).digest('hex').substring(0, 16),
   tagName = 'FeedbackBlock',
-  resolve = (node) => node.type === 'paragraph' || node.type === 'image',
-  generateBody = false,
+  resolve = (node) => node.type === 'paragraph' || node.type === 'image' || node.type === 'list',
+  generateBody = true,
 }: RemarkFeedbackBlockOptions = {}): Transformer<Root, Root> {
   return (tree) => {
     const counts = new Map<string, number>();

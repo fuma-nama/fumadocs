@@ -93,7 +93,7 @@ export default defineConfig({
       resolve(node) {
         // defensive approach
         if (node.type === 'mdxJsxFlowElement') return 'skip';
-        return node.type === 'paragraph' || node.type === 'image';
+        return node.type === 'paragraph' || node.type === 'image' || node.type === 'list';
       },
     };
     return {

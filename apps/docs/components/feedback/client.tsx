@@ -46,7 +46,7 @@ const blockFeedbackResult = z.extend(blockFeedback, {
 });
 
 /**
- * A feedback component to be attached to the end of page
+ * A feedback component to be attached at the end of page
  */
 export function Feedback({
   onSendAction,
@@ -189,6 +189,11 @@ export function Feedback({
   );
 }
 
+/**
+ * A feedback component for each content block in page, should be used with `remark-feedback-block`.
+ *
+ * See https://fumadocs.dev/docs/integrations/feedback.
+ */
 export function FeedbackBlock({
   id,
   body,

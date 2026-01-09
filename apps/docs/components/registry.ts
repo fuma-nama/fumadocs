@@ -63,7 +63,13 @@ export const registry: Registry = {
       files: [
         {
           type: 'components',
-          path: 'components/feedback.tsx',
+          path: 'components/feedback/client.tsx',
+          target: '<dir>/feedback/client.tsx',
+        },
+        {
+          type: 'components',
+          path: 'components/feedback/schema.ts',
+          target: '<dir>/feedback/schema.ts',
         },
       ],
     },
