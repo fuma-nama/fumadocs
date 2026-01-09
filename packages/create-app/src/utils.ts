@@ -91,7 +91,7 @@ export async function tryGitInit(cwd: string): Promise<boolean> {
     });
     return true;
   } catch {
-    await fs.rmdir(join(cwd, '.git'), { recursive: true }).catch(() => null);
+    await fs.rm(join(cwd, '.git'), { recursive: true, force: true });
 
     return false;
   }
