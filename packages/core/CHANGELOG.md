@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 16.4.6
+
+### Patch Changes
+
+- ea57dbf: Introduce `remark-feedback-block` plugin
+
 ## 16.4.5
 
 ## 16.4.4

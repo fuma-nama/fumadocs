@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/ui",
-  "version": "16.4.5",
+  "version": "16.4.6",
   "description": "The low-level primitives for Fumadocs UI.",
   "keywords": [
     "Docs",
@@ -33,7 +33,6 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "fumadocs-core": "workspace:*",
     "next-themes": "^0.4.6",
     "postcss-selector-parser": "^7.1.1",
     "tailwind-merge": "^3.4.0"
@@ -56,6 +55,7 @@
   },
   "peerDependencies": {
     "@types/react": "*",
+    "fumadocs-core": "workspace:*",
     "next": "16.x.x",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

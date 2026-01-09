@@ -47,9 +47,9 @@
   },
   "devDependencies": {
     "@oxc-project/types": "^0.107.0",
-    "@types/node": "24.10.2",
+    "@types/node": "25.0.3",
     "eslint-config-custom": "workspace:*",
-    "shadcn": "3.6.2",
+    "shadcn": "3.6.3",
     "tsconfig": "workspace:*",
     "tsdown": "^0.18.4"
   }
