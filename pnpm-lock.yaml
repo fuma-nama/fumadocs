@@ -2560,9 +2560,6 @@ importers:
 
   packages/ui:
     dependencies:
-      fumadocs-core:
-        specifier: workspace:*
-        version: link:../core
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -2603,6 +2600,9 @@ importers:
       eslint-config-custom:
         specifier: workspace:*
         version: link:../eslint-config-custom
+      fumadocs-core:
+        specifier: workspace:*
+        version: link:../core
       lodash.merge:
         specifier: ^4.6.2
         version: 4.6.2

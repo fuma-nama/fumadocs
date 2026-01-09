@@ -27,12 +27,15 @@ export const registry: Registry = {
       }
     }
 
-    if (ref.type === 'dependency' && ref.specifier === 'fumadocs-ui/components/ui/button') {
-      return resolveFromRemote(
-        radixUi.registry,
-        'button',
-        (file) => path.basename(file.path) === 'button.tsx',
-      )!;
+    if (ref.type === 'dependency' && ref.dep === 'fumadocs-ui') {
+      const match = /fumadocs-ui\/components\/ui\/(.*)/.exec(ref.specifier);
+      if (match) {
+        return resolveFromRemote(
+          radixUi.registry,
+          match[1],
+          (file) => path.basename(file.path, path.extname(file.path)) === match[1],
+        )!;
+      }
     }
 
     return ref;

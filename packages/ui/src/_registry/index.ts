@@ -11,37 +11,33 @@ import { Glob } from 'bun';
 
 const srcDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../');
 
-// import specifier -> sub component & file
-const installables: Record<
+/** import specifier -> sub component & file */
+const installables = new Map<
   string,
   {
     comp: Component;
     file: ComponentFile;
   }
-> = {};
+>();
 
-const contextFiles = new Set(new Glob('*').scanSync({ cwd: path.join(srcDir, 'contexts') }));
-const hookFiles = new Set(new Glob('*').scanSync({ cwd: path.join(srcDir, 'hooks') }));
-const componentFiles = new Set(new Glob('**/*').scanSync({ cwd: path.join(srcDir, 'components') }));
+/** file path (relative to registry dir) -> import specifier */
+const forwardables = new Map<string, string>();
 
+/**
+ * - transform import to `@fumadocs/ui` into sub component references, or forward to upstream package instead.
+ * - when importing files from upstream package that's forwarded from `@fumadocs/ui` (e.g. contexts), they will be treated as direct imports to `@fumadocs/ui`.
+ */
 export function resolveForwardedAPIs(
   ref: SourceReference,
   upstreamPackage: string,
   upstreamRegistry: Registry,
 ): Reference | undefined {
+  const renameDirs: [ui: string, upstream: string][] = [['hooks', 'utils']];
+
   if (ref.type === 'dependency' && ref.dep === '@fumadocs/ui') {
-    const specifier = ref.specifier;
-
-    if (specifier === 'lucide-react') {
-      return {
-        type: 'dependency',
-        dep: 'lucide-react',
-        specifier: 'lucide-react',
-      };
-    }
-
-    if (specifier in installables) {
-      const { comp, file } = installables[specifier];
+    let specifier = ref.specifier;
+    if (installables.has(specifier)) {
+      const { comp, file } = installables.get(specifier)!;
       return {
         type: 'sub-component',
         resolved: {
@@ -52,41 +48,45 @@ export function resolveForwardedAPIs(
         },
       };
     }
+    specifier =
+      upstreamPackage +
+      specifier
+        .slice('@fumadocs/ui'.length)
+        .split('/')
+        .map((v) => {
+          for (const [ui, upstream] of renameDirs) {
+            if (ui === v) return upstream;
+          }
+          return v;
+        })
+        .join('/');
 
     return {
       type: 'dependency',
       dep: upstreamPackage,
-      specifier: specifier
-        .replace('@fumadocs/ui/hooks', `${upstreamPackage}/utils`)
-        .replace('@fumadocs/ui', upstreamPackage),
+      specifier,
     };
   }
 
   if (ref.type === 'file') {
-    const filePath = path.relative(upstreamRegistry.dir, ref.file).replaceAll('\\', '/');
+    const filePath = path
+      .relative(upstreamRegistry.dir, ref.file)
+      .split(/\/|\\/)
+      .map((v) => {
+        for (const [ui, upstream] of renameDirs) {
+          if (v === upstream) return ui;
+        }
+        return v;
+      })
+      .join('/');
+    const forwarded = forwardables.get(filePath);
 
-    let hasForwarding: boolean;
-    const [dir, rest] = splitDir(filePath);
-    switch (dir) {
-      case 'contexts':
-        hasForwarding = contextFiles.has(rest);
-        break;
-      case 'components':
-        hasForwarding = componentFiles.has(rest);
-        break;
-      case 'utils':
-        hasForwarding = hookFiles.has(rest);
-        break;
-      default:
-        hasForwarding = filePath === 'i18n.tsx';
-    }
-
-    if (hasForwarding)
+    if (forwarded)
       return resolveForwardedAPIs(
         {
           type: 'dependency',
           dep: '@fumadocs/ui',
-          specifier: `@fumadocs/ui/${filePath.slice(0, -path.extname(filePath).length)}`,
+          specifier: forwarded,
         },
         upstreamPackage,
         upstreamRegistry,
@@ -108,20 +108,12 @@ export const registry: Registry = {
   onResolve(ref) {
     if (ref.type !== 'file') return ref;
     const filePath = path.relative(registry.dir, ref.file).replaceAll('\\', '/');
-
-    if (filePath === 'icons.tsx')
-      return {
-        type: 'dependency',
-        dep: 'lucide-react',
-        specifier: 'lucide-react',
-      };
-
     const [dir, rest] = splitDir(filePath);
     switch (dir) {
       case 'contexts':
         return {
           type: 'custom',
-          specifier: `<ui>/${dir}/${rest.slice(0, -path.extname(rest).length)}`,
+          specifier: `<ui>/${dir}/${removeExtname(rest)}`,
         };
     }
 
@@ -223,12 +215,20 @@ function splitDir(filePath: string): [dir: string, rest: string] {
   }
 }
 
+function removeExtname(file: string) {
+  return file.slice(0, -path.extname(file).length);
+}
+
 for (const comp of registry.components) {
   for (const file of comp.files) {
-    const importPath = file.path.slice(0, -path.extname(file.path).length);
-    installables[`@fumadocs/ui/${importPath}`] = {
+    installables.set(`@fumadocs/ui/${removeExtname(file.path).replaceAll('\\', '/')}`, {
       comp,
       file,
-    };
+    });
   }
+}
+
+forwardables.set('i18n.tsx', '@fumadocs/ui/i18n');
+for await (const file of new Glob('{contexts,components,hooks}/**/*').scan(srcDir)) {
+  forwardables.set(file, `@fumadocs/ui/${removeExtname(file)}`);
 }
