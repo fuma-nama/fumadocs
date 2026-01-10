@@ -451,7 +451,9 @@ test('Loader: Serialize data', async () => {
   const prev = JSON.stringify(result.pageTree);
 
   expect(await result.serializePageTree(result.pageTree)).toMatchInlineSnapshot(`
-      {
+    {
+      "$fumadocs_loader": "page-tree",
+      "data": {
         "$id": "root",
         "children": [
           {
@@ -494,8 +496,9 @@ test('Loader: Serialize data', async () => {
           },
         ],
         "name": "Docs",
-      }
-    `);
+      },
+    }
+  `);
 
   expect(JSON.stringify(result.pageTree), 'page tree unchanged').toBe(prev);
 });
