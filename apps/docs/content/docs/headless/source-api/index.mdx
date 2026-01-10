@@ -205,9 +205,8 @@ async function loader() {
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 
 function MyComponent() {
-  // receives loader data
-  const data = useLoaderData();
-  const { pageTree } = useFumadocsLoader(data);
+  // `useLoaderData()` receives loader data (provided by your React framework)
+  const { pageTree, ...data } = useFumadocsLoader(useLoaderData());
 
   // now render it (e.g. via Fumadocs UI)
   return <DocsLayout tree={pageTree}>...</DocsLayout>;

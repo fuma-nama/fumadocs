@@ -59,12 +59,11 @@ const clientLoader = browserCollections.docs.createClientLoader({
 });
 
 function Page() {
-  const data = Route.useLoaderData();
+  const data = useFumadocsLoader(Route.useLoaderData());
   const Content = clientLoader.getComponent(data.path);
-  const { pageTree } = useFumadocsLoader(data);
 
   return (
-    <DocsLayout {...baseOptions()} tree={pageTree}>
+    <DocsLayout {...baseOptions()} tree={data.pageTree}>
       <Content />
     </DocsLayout>
   );
