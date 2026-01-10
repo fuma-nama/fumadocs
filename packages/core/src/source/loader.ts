@@ -10,6 +10,7 @@ import type { MetaData, PageData, Source, SourceConfig } from './source';
 import { visit } from '@/page-tree/utils';
 import path from 'node:path';
 import type { PageTreeTransformer } from '@/source/page-tree/builder';
+import type { SerializedPageTree } from './client';
 
 export interface LoaderConfig {
   source: SourceConfig;
@@ -157,7 +158,7 @@ export interface LoaderOutput<Config extends LoaderConfig> {
   /**
    * serialize page tree for non-RSC environments
    */
-  serializePageTree: (tree: PageTree.Root) => Promise<object>;
+  serializePageTree: (tree: PageTree.Root) => Promise<SerializedPageTree>;
 }
 
 function indexPages(storages: Record<string, ContentStorage>, { url }: ResolvedLoaderConfig) {
@@ -388,23 +389,26 @@ export function loader(
         [slug ?? 'slug']: page.slugs,
       }));
     },
-    async serializePageTree(tree: PageTree.Root): Promise<object> {
+    async serializePageTree(tree) {
       const { renderToString } = await import('react-dom/server.edge');
 
-      return visit(tree, (node) => {
-        node = { ...node };
-        if ('icon' in node && node.icon) {
-          node.icon = renderToString(node.icon);
-        }
-        if (node.name) {
-          node.name = renderToString(node.name);
-        }
-        if ('children' in node) {
-          node.children = [...node.children];
-        }
+      return {
+        $fumadocs_loader: 'page-tree',
+        data: visit(tree, (node) => {
+          node = { ...node };
+          if ('icon' in node && node.icon) {
+            node.icon = renderToString(node.icon);
+          }
+          if (node.name) {
+            node.name = renderToString(node.name);
+          }
+          if ('children' in node) {
+            node.children = [...node.children];
+          }
 
-        return node;
-      });
+          return node;
+        }),
+      };
     },
   };
 }
