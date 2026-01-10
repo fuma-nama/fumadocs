@@ -1,0 +1,43 @@
+{
+  "name": "@fumari/stf",
+  "version": "0.0.0",
+  "description": "Schema to Form.",
+  "keywords": [],
+  "license": "MIT",
+  "author": "Fuma Nama",
+  "repository": "github:fuma-nama/fumadocs",
+  "files": [
+    "css",
+    "dist"
+  ],
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "clean": "rimraf dist",
+    "dev": "tsdown --watch",
+    "lint": "eslint .",
+    "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "@types/node": "25.0.3",
+    "@types/react": "^19.2.7",
+    "eslint-config-custom": "workspace:*",
+    "tsconfig": "workspace:*",
+    "tsdown": "^0.18.4"
+  },
+  "peerDependencies": {
+    "@types/react": "*",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    }
+  }
+}

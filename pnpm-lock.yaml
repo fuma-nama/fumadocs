@@ -2428,6 +2428,31 @@ importers:
         specifier: ^0.18.4
         version: 0.18.4(oxc-resolver@11.16.2)(typescript@5.9.3)
 
+  packages/stf:
+    dependencies:
+      react:
+        specifier: ^19.2.0
+        version: 19.2.3
+      react-dom:
+        specifier: ^19.2.0
+        version: 19.2.3(react@19.2.3)
+    devDependencies:
+      '@types/node':
+        specifier: 25.0.3
+        version: 25.0.3
+      '@types/react':
+        specifier: ^19.2.7
+        version: 19.2.7
+      eslint-config-custom:
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      tsdown:
+        specifier: ^0.18.4
+        version: 0.18.4(oxc-resolver@11.16.2)(typescript@5.9.3)
+
   packages/tsconfig: {}
 
   packages/twoslash:
