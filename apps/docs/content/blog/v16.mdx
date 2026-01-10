@@ -30,16 +30,31 @@ Fumadocs 16 removed substantial amount of deprecated APIs accumulated since v15.
   - Use `fumadocs-ui/provider/next` for root provider.
   - Use individual exports for contexts from `fumadocs-ui/contexts/*`.
 - `fumadocs-ui/page`:
-  - Removed `<DocsCategory />`.
+  - Removed `<DocsCategory />`, use `getPageTreePeers()` instead:
+
+    ```tsx title="page.tsx"
+    import { getPageTreePeers } from 'fumadocs-core/page-tree';
+    import { source } from '@/lib/source';
+
+    <Cards>
+      {getPageTreePeers(source.getPageTree(), '/docs/my-page').map((peer) => (
+        <Card key={peer.url} title={peer.name} href={peer.url}>
+          {peer.description}
+        </Card>
+      ))}
+    </Cards>;
+    ```
+
   - Removed the `breadcrumbs.full` option in `<DocsPage />`.
+
 - `fumadocs-core/search/algolia`: The `document` option is renamed to `indexName`.
 - `fumadocs-core/search`: Removed the deprecated `createFromSource()` signature in `useSearch()`.
-- `fumadocs-core/highlight`: Removed `withPrerenderScript` and `loading` options from `useShiki()`.
+- `fumadocs-core/highlight`: Removed `withPrerenderScript` and `loading` options from `useShiki()`, use React Suspense API instead.
 - `fumadocs-core/i18n`: Removed `createI18nMiddleware` (import from `fumadocs-core/i18n/middleware` instead).
 - `fumadocs-core/source`:
-  - Removed `transformers`, `pageTree.attach*` options in `loader()`.
-  - Removed the `page.file` property.
-  - Removed internal utilities `FileInfo` and `parseFilePath`.
+  - Removed `transformers`, `pageTree.attach*` options in `loader()`: use [Loader Plugin](/docs/headless/source-api/plugins) instead.
+  - Removed the `page.file` property: use `page.path` instead.
+  - Removed internal utilities `FileInfo` and `parseFilePath`: use `PathUtils` instead.
 
 - **Migration to Orama Cloud's New SDK**: The `@orama/core` package replaces the prior client. Update your synchronization code as follows:
 
@@ -59,6 +74,22 @@ Fumadocs 16 removed substantial amount of deprecated APIs accumulated since v15.
   });
   ```
 
+  You can also continue to use the legacy Orama Cloud client:
+
+  ```ts
+  // [!code --]
+  import { ... } from 'fumadocs-core/search/orama-cloud';
+  // [!code ++]
+  import { ... } from 'fumadocs-core/search/orama-cloud-legacy';
+
+  useSearch({
+    // [!code --]
+    type: 'orama-cloud',
+    // [!code ++]
+    type: 'orama-cloud-legacy',
+  })
+  ```
+
   Refer to the [Orama Cloud documentation](https://docs.orama.com/docs/cloud/data-sources/rest-APIs/official-SDK/introduction) for further details.
 
 ### Styling Changes
@@ -73,84 +104,6 @@ Fumadocs UI has included some aggressive styling changes that you should know ab
     --fd-layout-width: 100vw;
   }
   ```
-
-## Fumadocs MDX 13
-
-Fumadocs MDX refined its API surface for better cross-framework compatibility and flexibility.
-
-### Plugins API
-
-We introduced Plugins API, enabling extensible modifications to MDX configurations without bundler-specific code—ideal for file generation (e.g., types, indexes) or config alterations.
-
-There's a `json-schema` plugin natively provided by Fumadocs MDX.
-
-```ts title="source.config.ts"
-import jsonSchema from 'fumadocs-mdx/plugins/json-schema';
-import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
-
-export const docs = defineDocs({
-  dir: 'content/docs',
-});
-
-export default defineConfig({
-  plugins: [jsonSchema()],
-});
-```
-
-### Bug Fixes
-
-- `remark-include`: fix Markdown stringify logics.
-- `postprocess.includeMDAST` support.
-- (Vite) support `useContent` on client loader for lint avoidance.
-
-### Next.js
-
-`createMDXSource` and `resolveFiles` are now relocated to `fumadocs-mdx/runtime/next`.
-
-This should not affect majority of projects, as `docs.toFumadocsSource()` is now the preferred way.
-
-### Vite
-
-The `source.generated.ts` file is now moved to `.source/index.ts`, you are recommended to import the `.source` folder (with a path alias).
-
-```json title="tsconfig.json"
-{
-  "compilerOptions": {
-    "paths": {
-      // [!code ++]
-      "@/.source": [".source"]
-    }
-  }
-}
-```
-
-**Migrate:**
-
-- run dev server/typegen to generate a `.source` folder.
-- import it over the original `source.generated.ts`
-
-  .
-
-- note that both docs and `create-fumadocs-app` are updated to `.source` folder.
-
-We also supported index file generation targeting other runtimes like Bun/Node.js.
-
-```ts title="vite.config.ts"
-import { defineConfig } from 'vite';
-import mdx from 'fumadocs-mdx/vite';
-import * as MdxConfig from './source.config';
-
-export default defineConfig({
-  plugins: [
-    mdx(MdxConfig, {
-      generateIndexFile: {
-        runtime: 'node',
-      },
-    }),
-    // ...
-  ],
-});
-```
 
 ## Fumadocs OpenAPI 9.6
 

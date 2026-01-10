@@ -1,0 +1,84 @@
+---
+title: Fumadocs MDX v13
+description: Better cross-framework compatibility and flexibility.
+author: Fuma Nama
+date: 2025-10-23
+---
+
+## Overview
+
+Fumadocs MDX refined its API surface for better cross-framework compatibility and flexibility.
+
+### Plugins API
+
+We introduced Plugins API, enabling extensible modifications to MDX configurations without bundler-specific code—ideal for file generation (e.g., types, indexes) or config alterations.
+
+There's a `json-schema` plugin natively provided by Fumadocs MDX.
+
+```ts title="source.config.ts"
+import jsonSchema from 'fumadocs-mdx/plugins/json-schema';
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  dir: 'content/docs',
+});
+
+export default defineConfig({
+  plugins: [jsonSchema()],
+});
+```
+
+## Migration
+
+### Next.js
+
+`createMDXSource` and `resolveFiles` are now relocated to `fumadocs-mdx/runtime/next`.
+
+This should not affect majority of projects, as `docs.toFumadocsSource()` is now the preferred way.
+
+### Vite
+
+The `source.generated.ts` file is now moved to `.source/index.ts`, you are recommended to import the `.source` folder (with a path alias).
+
+```json title="tsconfig.json"
+{
+  "compilerOptions": {
+    "paths": {
+      // [!code ++]
+      "@/.source": [".source"]
+    }
+  }
+}
+```
+
+**Migrate:**
+
+- run dev server/typegen to generate a `.source` folder.
+- import it over the original `source.generated.ts`.
+
+- note that both docs and `create-fumadocs-app` are updated to `.source` folder.
+
+We also supported index file generation targeting other runtimes like Bun/Node.js.
+
+```ts title="vite.config.ts"
+import { defineConfig } from 'vite';
+import mdx from 'fumadocs-mdx/vite';
+import * as MdxConfig from './source.config';
+
+export default defineConfig({
+  plugins: [
+    mdx(MdxConfig, {
+      generateIndexFile: {
+        runtime: 'node',
+      },
+    }),
+    // ...
+  ],
+});
+```
+
+### Bug Fixes
+
+- `remark-include`: fix Markdown stringify logics.
+- `postprocess.includeMDAST` support.
+- (Vite) support `useContent` on client loader for lint avoidance.
