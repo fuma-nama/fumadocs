@@ -11,7 +11,7 @@ export function arrayStartsWith(a: unknown[], b: unknown[]): boolean {
   return true;
 }
 
-export function objectGet(obj: unknown, key: string[]): unknown | undefined {
+export function objectGet(obj: unknown, key: (string | number)[]): unknown | undefined {
   let cur = obj;
 
   for (const prop of key) {

@@ -2,8 +2,10 @@
 import { createContext, use, useEffect, useRef, useState } from 'react';
 import { objectGet, arrayStartsWith } from './utils';
 
+export type FieldKey = (string | number)[];
+
 export interface DataEngineListener {
-  onUpdate?: (key: string[], value: unknown) => void;
+  onUpdate?: (key: FieldKey, value: unknown) => void;
 }
 
 export class DataEngine {
@@ -29,7 +31,7 @@ export class DataEngine {
    * @param value the initial value, only create the parent objects if `undefined`
    * @returns the value of initialized field, or the current value of field if already initialized
    */
-  init(key: string[], value?: unknown): unknown {
+  init(key: FieldKey, value?: unknown): unknown {
     if (key.length === 0) throw new Error('cannot init for empty key.');
     let cur = this.store as NonNullable<object>;
     const parentKey = key.slice(0, -1);
@@ -59,14 +61,14 @@ export class DataEngine {
     return value;
   }
 
-  get(key: string[]) {
+  get(key: FieldKey) {
     return objectGet(this.store, key);
   }
 
   /**
    * update the value of field if it exists
    */
-  update(key: string[], value: unknown): boolean {
+  update(key: FieldKey, value: unknown): boolean {
     const emitEvent = () => {
       for (const listener of this.listeners) listener.onUpdate?.(key, value);
     };
@@ -102,7 +104,7 @@ export class DataEngine {
   }
 
   useFieldValue<V = unknown>(
-    key: string[],
+    key: FieldKey,
     options: {
       defaultValue?: unknown;
       compute?: (currentValue: unknown) => V;

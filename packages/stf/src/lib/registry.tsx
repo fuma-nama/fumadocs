@@ -1,7 +1,7 @@
 import { useMemo, type ReactNode } from 'react';
 import type { Node, NodeRenderer } from './node';
 import type { FC } from 'react';
-import { DataEngine, DataEngineProvider } from './data-engine';
+import { DataEngine, DataEngineProvider, FieldKey } from './data-engine';
 
 export interface FormProps {
   defaultValues?: object;
@@ -28,7 +28,7 @@ export class SchemaRegistry {
   }
 
   toForm(root: Node): FC<FormProps> {
-    const render = (key: string[], v: Node): ReactNode => {
+    const render = (key: FieldKey, v: Node): ReactNode => {
       const renderer = this.nodes.get(v.type);
       if (!renderer) throw new Error(`missing renderer for "${v.type}" node`);
       const Renderer = renderer.Node;
