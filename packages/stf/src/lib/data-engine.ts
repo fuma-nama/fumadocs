@@ -1,11 +1,10 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import { createContext, use, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { objectGet, arrayStartsWith } from './utils';
-
-export type FieldKey = (string | number)[];
+import type { FieldKey } from './types';
 
 export interface DataEngineListener {
-  onUpdate?: (key: FieldKey, value: unknown) => void;
+  onUpdate?: (key: FieldKey) => void;
 }
 
 export class DataEngine {
@@ -28,37 +27,59 @@ export class DataEngine {
   /**
    * init a field
    * @param key the key of field
-   * @param value the initial value, only create the parent objects if `undefined`
+   * @param value the initial value, the field is also created for `undefined`
    * @returns the value of initialized field, or the current value of field if already initialized
    */
   init(key: FieldKey, value?: unknown): unknown {
     if (key.length === 0) throw new Error('cannot init for empty key.');
     let cur = this.store as NonNullable<object>;
     const parentKey = key.slice(0, -1);
+    const currentKey: FieldKey = [];
     const lastKey = key[key.length - 1];
 
     for (const prop of parentKey) {
       const propValue: unknown = cur[prop as keyof object];
 
-      if (propValue === undefined) {
-        cur[prop as keyof object] = {} as never;
-      } else if (typeof propValue === 'object' && propValue !== null) {
+      if (typeof propValue === 'object' && propValue !== null) {
         cur = propValue;
       } else {
-        console.warn(
-          `the original value of field ${parentKey.join('.')} is overidden, this might be unexpected.`,
-        );
-        cur[prop as keyof object] = {} as never;
+        if (propValue !== undefined)
+          console.warn(
+            `the original value of field ${currentKey.join('.')} is overidden, this might be unexpected.`,
+          );
+        this.fireOnUpdate(currentKey);
+        cur = cur[prop as keyof object] = {} as never;
       }
+
+      currentKey.push(prop);
     }
 
     const prev = cur[lastKey as keyof object];
     if (prev !== undefined) return prev;
-    if (value !== undefined) {
-      cur[lastKey as keyof object] = value as never;
-    }
-
+    cur[lastKey as keyof object] = value as never;
     return value;
+  }
+
+  delete(key: FieldKey): unknown {
+    if (key.length === 0) return;
+
+    const parentKey = key.slice(0, -1);
+    const prop = key[key.length - 1] as keyof object;
+    const parent = this.get(parentKey);
+
+    if (Array.isArray(parent)) {
+      this.update(
+        parentKey,
+        parent.filter((_, i) => i !== prop),
+      );
+      return parent[prop];
+    } else if (typeof parent === 'object' && parent !== null) {
+      const next = { ...parent };
+      delete next[prop];
+      this.update(parentKey, next);
+
+      return parent[prop];
+    }
   }
 
   get(key: FieldKey) {
@@ -69,19 +90,16 @@ export class DataEngine {
    * update the value of field if it exists
    */
   update(key: FieldKey, value: unknown): boolean {
-    const emitEvent = () => {
-      for (const listener of this.listeners) listener.onUpdate?.(key, value);
-    };
     if (key.length === 0) {
       this.store = value;
-      emitEvent();
+      this.fireOnUpdate(key);
       return true;
     }
 
     const v = objectGet(this.store, key.slice(0, -1));
     if (typeof v !== 'object' || v === null) return false;
     v[key[key.length - 1] as keyof object] = value as never;
-    emitEvent();
+    this.fireOnUpdate(key);
     return true;
   }
 
@@ -112,26 +130,21 @@ export class DataEngine {
       isChanged?: (prev: V, next: V) => boolean;
     } = {},
   ) {
-    const engine = useDataEngine();
     const { compute = (v) => v as V, defaultValue, isChanged = (a, b) => a !== b } = options;
-    const [value, setValue] = useState<V>(() => compute(engine.init(key, defaultValue)));
+    const [value, setValue] = useState<V>(() => compute(this.init(key, defaultValue)));
 
-    engine.useListener({
-      onUpdate(updatedKey) {
+    this.useListener({
+      onUpdate: (updatedKey) => {
         if (!arrayStartsWith(key, updatedKey) && !arrayStartsWith(updatedKey, key)) return;
-        const computed = compute(engine.get(key));
+        const computed = compute(this.get(key));
         if (isChanged(value, computed)) setValue(computed);
       },
     });
 
-    return [value, (newValue: unknown) => engine.update(key, newValue)] as const;
+    return [value, (newValue: unknown) => this.update(key, newValue)] as const;
   }
-}
 
-const Context = createContext<DataEngine | null>(null);
-
-export const DataEngineProvider = Context.Provider;
-
-export function useDataEngine(): DataEngine {
-  return use(Context)!;
+  private fireOnUpdate(field: FieldKey) {
+    for (const listener of this.listeners) listener.onUpdate?.(field);
+  }
 }

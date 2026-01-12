@@ -14,7 +14,6 @@ import type { FieldPath, UseControllerProps, UseControllerReturn } from 'react-h
 import { FormProvider, get, set, useController, useForm, useFormContext } from 'react-hook-form';
 import { useApiContext } from '@/ui/contexts/api';
 import type { FetchResult } from '@/playground/fetcher';
-import { FieldInput, FieldSet, JsonInput, ObjectInput } from './components/inputs';
 import type { ParameterField, SecurityEntry } from '@/playground/index';
 import { getStatusInfo } from './status-info';
 import { joinURL, resolveRequestData, resolveServerUrl, withBase } from '@/utils/url';
@@ -49,6 +48,7 @@ import type { RequestData } from '@/requests/types';
 import ServerSelect from './components/server-select';
 import { useStorageKey } from '@/ui/client/storage-key';
 import { useExampleRequests } from '@/ui/operation/usage-tabs/client';
+import { Form } from './stf/adapter';
 
 export interface FormValues {
   path: Record<string, unknown>;
@@ -270,7 +270,7 @@ export default function PlaygroundClient({
   });
 
   return (
-    <FormProvider {...form}>
+    <Form defaultValues={defaultValues}>
       <SchemaProvider
         fieldInfoMap={fieldInfoMap}
         references={references}
@@ -313,7 +313,7 @@ export default function PlaygroundClient({
           {testQuery.data ? <ResultDisplay data={testQuery.data} reset={testQuery.reset} /> : null}
         </form>
       </SchemaProvider>
-    </FormProvider>
+    </Form>
   );
 }
 

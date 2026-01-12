@@ -1,7 +1,7 @@
-import { FieldKey, useDataEngine } from '@/lib/data-engine';
-import { Node, NodeRendererContext } from '@/lib/node';
+import { Node, NodeRendererContext, FieldKey } from '@/lib/types';
 import { SchemaRegistryPlugin } from '@/lib/registry';
-import { FC, ReactNode } from 'react';
+import { useDataEngine } from '@/lib/render';
+import { FC } from 'react';
 
 export interface ArrayNode extends Node {
   type: 'array';
@@ -9,16 +9,17 @@ export interface ArrayNode extends Node {
   defaultValue?: unknown[];
 }
 
-export interface ItemRenderInfo {
+export interface ArrayItemInfo {
   field: FieldKey;
-  render: () => ReactNode;
+  node: Node;
 }
 
 export interface ArrayOptions {
-  Container: FC<{
-    items: ItemRenderInfo[];
-    ctx: NodeRendererContext<ArrayNode>;
-  }>;
+  Container: FC<
+    NodeRendererContext<ArrayNode> & {
+      items: ArrayItemInfo[];
+    }
+  >;
 }
 
 export function arrayPlugin({ Container }: ArrayOptions): SchemaRegistryPlugin {
@@ -27,11 +28,12 @@ export function arrayPlugin({ Container }: ArrayOptions): SchemaRegistryPlugin {
       registry.registerNode<ArrayNode>('array', {
         Node(ctx) {
           const engine = useDataEngine();
-          const { field, node, render } = ctx;
-          const [value] = engine.useFieldValue(ctx.field, {
+          const { field, node } = ctx;
+          const [value] = engine.useFieldValue(field, {
+            defaultValue: node.defaultValue,
             isChanged(prev, next) {
               if (Array.isArray(prev) && Array.isArray(next)) {
-                // skip deep compare, we only need to update the container when item added/deleted
+                // skip unnecessary re-renders, we only need to update the container when item added/deleted
                 return prev.length !== next.length;
               }
 
@@ -39,22 +41,23 @@ export function arrayPlugin({ Container }: ArrayOptions): SchemaRegistryPlugin {
             },
           });
 
-          const items: ItemRenderInfo[] = [];
+          const items: ArrayItemInfo[] = [];
           if (Array.isArray(value)) {
             for (let i = 0; i < value.length; i++) {
-              const itemField = [...field, i];
               items.push({
-                field: itemField,
-                render() {
-                  return render(itemField, node.item);
-                },
+                field: [...field, i],
+                node: node.item,
               });
             }
           }
 
-          return <Container ctx={ctx} items={items} />;
+          return <Container {...ctx} items={items} />;
         },
       });
     },
   };
+}
+
+export function arrayNode(node: ArrayNode): ArrayNode {
+  return node;
 }

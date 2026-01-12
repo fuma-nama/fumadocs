@@ -1,13 +1,12 @@
-import { useDataEngine } from '@/lib/data-engine';
-import { Node, NodeRendererContext } from '@/lib/node';
+import type { Node, NodeRendererContext, FieldKey } from '@/lib/types';
 import { SchemaRegistryPlugin } from '@/lib/registry';
+import { useDataEngine } from '@/lib/render';
 import { deepEqual } from '@/lib/utils';
-import { FC, ReactNode } from 'react';
+import type { FC } from 'react';
 
 export interface ObjectNode extends Node {
   type: 'object';
   properties: PropertyNode[];
-
   patternProperties?: Record<string, Node>;
   additionalProperties?: Node;
 }
@@ -22,21 +21,19 @@ export interface PropertyNode extends Node {
   children: Node;
 }
 
-export interface PropertyRenderInfo extends PropertyNode {
+export interface PropertyItemInfo {
   kind: 'fixed' | 'additional' | 'pattern';
-  render: () => ReactNode;
+  field: FieldKey;
+  node: PropertyNode;
 }
 
 export interface ObjectOptions {
-  Object: FC<{
-    properties: PropertyRenderInfo[];
-    ctx: NodeRendererContext<ObjectNode>;
-  }>;
-  Property: FC<
-    NodeRendererContext<PropertyNode> & {
-      renderChildren: () => ReactNode;
+  Object: FC<
+    NodeRendererContext<ObjectNode> & {
+      properties: PropertyItemInfo[];
     }
   >;
+  Property: FC<NodeRendererContext<PropertyNode>>;
 }
 
 export function objectPlugin({
@@ -48,25 +45,23 @@ export function objectPlugin({
       registry.registerNode<ObjectNode>('object', {
         Node(ctx) {
           const engine = useDataEngine();
-          const { field, node, render } = ctx;
-          const [objectKeys] = engine.useFieldValue(ctx.field, {
+          const { field, node } = ctx;
+          const [objectKeys] = engine.useFieldValue(field, {
             compute(currentValue) {
-              return Object.keys(currentValue ?? {});
+              return currentValue ? Object.keys(currentValue) : [];
             },
             isChanged(prev, next) {
               return !deepEqual(prev, next);
             },
           });
-          const properties: PropertyRenderInfo[] = [];
+          const properties: PropertyItemInfo[] = [];
           const unknownKeys = new Set(objectKeys);
           for (const prop of node.properties) {
             unknownKeys.delete(prop.key);
             properties.push({
-              ...prop,
               kind: 'fixed',
-              render() {
-                return render([...field, prop.key], prop);
-              },
+              field: [...field, prop.key],
+              node: prop,
             });
           }
 
@@ -77,14 +72,14 @@ export function objectPlugin({
               if (!key.match(regex)) continue;
               unknownKeys.delete(key);
               properties.push({
-                type: 'property',
                 kind: 'pattern',
-                name: key,
-                key,
-                children: prop,
-                render() {
-                  return render([...field, key], prop);
+                node: {
+                  type: 'property',
+                  name: key,
+                  key,
+                  children: prop,
                 },
+                field: [...field, key],
               });
             }
           }
@@ -93,30 +88,29 @@ export function objectPlugin({
             const prop = node.additionalProperties;
             for (const key of unknownKeys) {
               properties.push({
-                type: 'property',
                 kind: 'additional',
-                name: key,
-                key,
-                children: prop,
-                render() {
-                  return render([...field, key], prop);
+                node: {
+                  type: 'property',
+                  name: key,
+                  key,
+                  children: prop,
                 },
+                field: [...field, key],
               });
             }
           }
 
-          return <ObjectInput ctx={ctx} properties={properties} />;
+          return <ObjectInput {...ctx} properties={properties} />;
         },
       });
 
       registry.registerNode<PropertyNode>('property', {
-        Node(ctx) {
-          const { field, node, render } = ctx;
-          return (
-            <Property {...ctx} renderChildren={() => render([...field, node.key], node.children)} />
-          );
-        },
+        Node: Property,
       });
     },
   };
+}
+
+export function objectNode(node: ObjectNode): ObjectNode {
+  return node;
 }

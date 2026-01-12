@@ -1,5 +1,5 @@
-import { useDataEngine } from '@/lib/data-engine';
-import { Node } from '@/lib/node';
+import { useDataEngine } from '@/lib/render';
+import { Node, NodeRendererContext } from '@/lib/types';
 import { SchemaRegistryPlugin } from '@/lib/registry';
 import { FC } from 'react';
 
@@ -13,20 +13,21 @@ export interface EnumNode extends Node {
 }
 
 export interface EnumOptions {
-  Input: FC<{ value: unknown; setValue: (v: unknown) => void; node: EnumNode }>;
+  Input: FC<{ value: unknown; setValue: (v: unknown) => void } & NodeRendererContext<EnumNode>>;
 }
 
 export function enumPlugin({ Input }: EnumOptions): SchemaRegistryPlugin {
   return {
     apply(registry) {
       registry.registerNode<EnumNode>('enum', {
-        Node({ field, node }) {
+        Node(ctx) {
+          const { field, node } = ctx;
           const engine = useDataEngine();
           const [value, setValue] = engine.useFieldValue(field, {
             defaultValue: node.defaultValue,
           });
 
-          return <Input node={node} value={value} setValue={setValue} />;
+          return <Input {...ctx} value={value} setValue={setValue} />;
         },
       });
     },

@@ -13,7 +13,6 @@
   "type": "module",
   "exports": {
     ".": "./dist/index.js",
-    "./client": "./dist/client.js",
     "./lib/utils": "./dist/lib/utils.js",
     "./nodes/array": "./dist/nodes/array.js",
     "./nodes/enum": "./dist/nodes/enum.js",

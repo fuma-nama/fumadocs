@@ -60,6 +60,7 @@
   },
   "dependencies": {
     "@fumari/json-schema-to-typescript": "^2.0.0",
+    "@fumari/stf": "workspace:^",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-select": "^2.2.6",

@@ -1,6 +1,6 @@
-import type { Node } from '@/lib/node';
+import type { Node, NodeRendererContext } from '@/lib/types';
 import type { SchemaRegistryPlugin } from '../lib/registry';
-import { useDataEngine } from '@/lib/data-engine';
+import { useDataEngine } from '@/lib/render';
 import { type FC } from 'react';
 
 export interface StringNode extends Node {
@@ -27,22 +27,29 @@ export interface FileNode extends Node {
 export type PrimitiveNode = StringNode | BooleanNode | NumericNode | FileNode;
 
 export interface PrimitiveOptions {
-  Input: FC<{ value: unknown; setValue: (v: unknown) => void; node: PrimitiveNode }>;
+  Input: FC<
+    { value: unknown; setValue: (v: unknown) => void } & NodeRendererContext<PrimitiveNode>
+  >;
 }
 
 export function primitivePlugin({ Input }: PrimitiveOptions): SchemaRegistryPlugin {
   return {
     apply(registry) {
       registry.registerNode<PrimitiveNode>(['string', 'boolean', 'decimal', 'integer', 'file'], {
-        Node({ field, node }) {
+        Node(ctx) {
+          const { field, node } = ctx;
           const engine = useDataEngine();
           const [value, setValue] = engine.useFieldValue(field, {
             defaultValue: node.defaultValue,
           });
 
-          return <Input node={node} value={value} setValue={setValue} />;
+          return <Input {...ctx} value={value} setValue={setValue} />;
         },
       });
     },
   };
+}
+
+export function primitiveNode(node: PrimitiveNode): PrimitiveNode {
+  return node;
 }

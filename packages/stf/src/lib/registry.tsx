@@ -1,10 +1,12 @@
-import { useMemo, type ReactNode } from 'react';
-import type { Node, NodeRenderer } from './node';
-import type { FC } from 'react';
-import { DataEngine, DataEngineProvider, FieldKey } from './data-engine';
+import { useMemo } from 'react';
+import type { Node, NodeRenderer, FieldKey } from './types';
+import type { ReactNode } from 'react';
+import { DataEngine } from './data-engine';
+import { Provider, useRender } from './render';
 
 export interface FormProps {
   defaultValues?: object;
+  children: ReactNode;
 }
 
 export class SchemaRegistry {
@@ -13,6 +15,10 @@ export class SchemaRegistry {
   use(plugin: SchemaRegistryPlugin) {
     plugin.apply(this);
     return this;
+  }
+
+  getNodeRenderer(type: string) {
+    return this.nodes.get(type);
   }
 
   registerNode<V extends Node>(
@@ -27,19 +33,24 @@ export class SchemaRegistry {
     return this;
   }
 
-  toForm(root: Node): FC<FormProps> {
-    const render = (key: FieldKey, v: Node): ReactNode => {
-      const renderer = this.nodes.get(v.type);
-      if (!renderer) throw new Error(`missing renderer for "${v.type}" node`);
-      const Renderer = renderer.Node;
-      return <Renderer field={key} render={render} node={v} />;
-    };
+  toForm() {
+    const getRegistry = () => this;
 
-    return function Form(props) {
-      // eslint-disable-next-line react-hooks/exhaustive-deps -- assume default values unchanged
-      const engine = useMemo(() => new DataEngine(props.defaultValues), []);
+    return {
+      Form({ children, defaultValues }: FormProps) {
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- assume default values unchanged
+        const engine = useMemo(() => new DataEngine(defaultValues), []);
 
-      return <DataEngineProvider value={engine}>{render([], root)}</DataEngineProvider>;
+        return (
+          <Provider registry={getRegistry()} dataEngine={engine}>
+            {children}
+          </Provider>
+        );
+      },
+      Field({ field, schema }: { field: FieldKey; schema: Node }) {
+        const render = useRender();
+        return render(field, schema);
+      },
     };
   }
 }
