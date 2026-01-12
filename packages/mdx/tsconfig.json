@@ -5,6 +5,7 @@
       "@/*": ["./src/*"]
     },
     "types": ["remark-stringify", "@types/node"],
+    "jsx": "react-jsx",
     "noEmit": true,
     "lib": ["ESNext"],
     "module": "ESNext",

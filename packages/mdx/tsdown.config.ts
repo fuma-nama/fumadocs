@@ -14,7 +14,7 @@ export default defineConfig([
       './src/{config,next,vite,bun}/index.ts',
       './src/webpack/{mdx,meta}.ts',
       './src/node/loader.ts',
-      './src/runtime/*.ts',
+      './src/runtime/*.{ts,tsx}',
       './src/plugins/*.ts',
     ],
     format: 'esm',

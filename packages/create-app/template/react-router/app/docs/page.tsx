@@ -21,7 +21,7 @@ export async function loader({ params }: Route.LoaderArgs) {
 const clientLoader = browserCollections.docs.createClientLoader({
   component(
     { toc, frontmatter, default: Mdx },
-    // you can define props for the `<Content />` component
+    // you can define props for the component
     props: {
       className?: string;
     },

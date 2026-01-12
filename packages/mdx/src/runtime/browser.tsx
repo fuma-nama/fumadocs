@@ -1,4 +1,4 @@
-import { type ReactNode, type FC, lazy, createElement } from 'react';
+import { type ReactNode, type FC, Suspense, use } from 'react';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type { DocCollection, DocsCollection } from '@/config/define';
 import type { CompiledMDXProperties } from '@/loaders/mdx/build-mdx';
@@ -28,14 +28,15 @@ export interface ClientLoaderOptions<Doc, Props> {
 export interface ClientLoader<Doc, Props> {
   preload: (path: string) => Promise<Doc>;
   /**
-   * Get a component that renders content with `React.lazy`.
+   * Get a component that renders content with `use()`.
    */
   getComponent: (path: string) => FC<Props>;
-
   /**
-   * Get react nodes that renders content with `React.lazy`.
+   * Get react nodes that renders content, wraps `<Suspense>` by default.
    */
-  useContent: (path: string, props: Props) => ReactNode;
+  useContent: undefined extends Props
+    ? (path: string, props?: Props) => ReactNode
+    : (path: string, props: Props) => ReactNode;
 }
 
 export type BrowserCreate<Config, TC extends InternalTypeConfig> = ReturnType<
@@ -49,7 +50,7 @@ export interface DocCollectionEntry<
 > {
   raw: Record<string, () => Promise<CompiledMDXFile<Name, Frontmatter, TC>>>;
 
-  createClientLoader: <Props extends object>(
+  createClientLoader: <Props extends object | undefined = undefined>(
     options: ClientLoaderOptions<CompiledMDXFile<Name, Frontmatter, TC>, Props>,
   ) => ClientLoader<CompiledMDXFile<Name, Frontmatter, TC>, Props>;
 }
@@ -81,11 +82,14 @@ const loaderStore = new Map<
   }
 >();
 
-export function createClientLoader<Doc = CompiledMDXProperties, Props extends object = object>(
+export function createClientLoader<
+  Doc = CompiledMDXProperties,
+  Props extends object | undefined = undefined,
+>(
   globEntries: Record<string, () => Promise<Doc>>,
   options: ClientLoaderOptions<Doc, Props>,
 ): ClientLoader<Doc, Props> {
-  const { id = '', component } = options;
+  const { id = '', component: useRenderer } = options;
   const renderers: Record<string, FC<Props>> = {};
   const loaders = new Map<string, () => Promise<Doc>>();
   const store = loaderStore.get(id) ?? {
@@ -107,18 +111,16 @@ export function createClientLoader<Doc = CompiledMDXProperties, Props extends ob
   function getRenderer(path: string): FC<Props> {
     if (path in renderers) return renderers[path];
 
-    const OnDemand = lazy(async () => {
-      const loaded = await getLoader(path)();
-
-      return { default: (props) => component(loaded, props) };
-    });
-
-    renderers[path] = (props) => {
+    let promise: Promise<Doc> | undefined;
+    function Renderer(props: Props) {
       const cached = store.preloaded.get(path);
-      if (!cached) return createElement(OnDemand, props);
-      return component(cached, props);
-    };
-    return renderers[path];
+      if (cached) return useRenderer(cached, props);
+
+      const doc = use((promise ??= getLoader(path)()));
+      return useRenderer(doc, props);
+    }
+
+    return (renderers[path] = Renderer);
   }
 
   return {
@@ -130,9 +132,13 @@ export function createClientLoader<Doc = CompiledMDXProperties, Props extends ob
     getComponent(path) {
       return getRenderer(path);
     },
-    useContent(path, props) {
-      const Comp = this.getComponent(path);
-      return createElement(Comp, props);
+    useContent(path: string, props: Props & object) {
+      const Comp = getRenderer(path);
+      return (
+        <Suspense>
+          <Comp {...props} />
+        </Suspense>
+      );
     },
-  };
+  } as ClientLoader<Doc, Props>;
 }

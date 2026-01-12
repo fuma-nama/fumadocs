@@ -3,6 +3,7 @@ import {
   type ComponentType,
   createContext,
   type ReactNode,
+  Suspense,
   use,
   useEffect,
   useEffectEvent,
@@ -137,15 +138,18 @@ export function SearchProvider({
         [hotKey],
       )}
     >
-      {isOpen !== undefined && (
-        <SearchDialog
-          open={isOpen}
-          onOpenChange={setIsOpen}
-          // @ts-expect-error -- insert prop for official UIs
-          links={links}
-          {...options}
-        />
-      )}
+      <Suspense fallback={null}>
+        {isOpen !== undefined && (
+          <SearchDialog
+            open={isOpen}
+            onOpenChange={setIsOpen}
+            // @ts-expect-error -- insert prop for official UIs
+            links={links}
+            {...options}
+          />
+        )}
+      </Suspense>
+
       {children}
     </SearchContext>
   );
