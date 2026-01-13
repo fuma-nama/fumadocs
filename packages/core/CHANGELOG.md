@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 16.4.7
+
+### Patch Changes
+
+- 5dec9d0: `useFumadocsLoader()` support other names of the serialized page tree
+
 ## 16.4.6
 
 ### Patch Changes
