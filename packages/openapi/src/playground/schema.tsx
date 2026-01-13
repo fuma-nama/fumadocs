@@ -1,9 +1,9 @@
 import { Ajv2020 } from 'ajv/dist/2020';
 import { createContext, ReactNode, use, useMemo, useState } from 'react';
-import { useFormContext } from 'react-hook-form';
 import { getDefaultValue } from '@/playground/get-default-values';
 import type { ParsedSchema } from '@/utils/schema';
 import { mergeAllOf } from '@/utils/merge-schema';
+import { FieldKey, useDataEngine } from '@fumari/stf';
 
 interface SchemaContextType extends SchemaScope {
   references: Record<string, ParsedSchema>;
@@ -88,7 +88,7 @@ export function useSchemaScope(): SchemaScope {
  * @param depth - The depth to avoid duplicated field name with same schema (e.g. nested `oneOf`).
  */
 export function useFieldInfo(
-  fieldName: string,
+  fieldName: FieldKey,
   schema: Exclude<ParsedSchema, boolean>,
   depth: number,
 ): {
@@ -96,10 +96,10 @@ export function useFieldInfo(
   updateInfo: (value: Partial<FieldInfo>) => void;
 } {
   const { fieldInfoMap, ajv } = use(SchemaContext)!;
-  const form = useFormContext();
+  const engine = useDataEngine();
   const keyName = `${fieldName}:${depth}`;
   const [info, setInfo] = useState<FieldInfo>(() => {
-    const value = form.getValues(fieldName as 'body');
+    const value = engine.get(fieldName);
     const initialInfo = fieldInfoMap.get(keyName);
     if (initialInfo) return initialInfo;
 
@@ -161,7 +161,7 @@ export function useFieldInfo(
         valueSchema = { ...schema, type: updated.selectedType };
       }
 
-      form.setValue(fieldName, getDefaultValue(valueSchema));
+      engine.update(fieldName, getDefaultValue(valueSchema));
     },
   };
 }

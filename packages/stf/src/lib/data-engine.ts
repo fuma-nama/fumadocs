@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { useEffect, useRef, useState } from 'react';
-import { objectGet, arrayStartsWith } from './utils';
+import { objectGet, arrayStartsWith, objectSet } from './utils';
 import type { FieldKey } from './types';
 
 export interface DataEngineListener {
@@ -8,11 +8,11 @@ export interface DataEngineListener {
 }
 
 export class DataEngine {
-  store: unknown;
+  private data: unknown;
   private readonly listeners: DataEngineListener[] = [];
 
-  constructor(defaultValues: unknown) {
-    this.store = defaultValues;
+  constructor(defaultValues: unknown = {}) {
+    this.data = defaultValues;
   }
 
   listen(listener: DataEngineListener) {
@@ -24,6 +24,10 @@ export class DataEngine {
     if (idx !== -1) this.listeners.splice(idx, 1);
   }
 
+  getData() {
+    return this.data;
+  }
+
   /**
    * init a field
    * @param key the key of field
@@ -32,7 +36,7 @@ export class DataEngine {
    */
   init(key: FieldKey, value?: unknown): unknown {
     if (key.length === 0) throw new Error('cannot init for empty key.');
-    let cur = this.store as NonNullable<object>;
+    let cur = this.data as NonNullable<object>;
     const parentKey = key.slice(0, -1);
     const currentKey: FieldKey = [];
     const lastKey = key[key.length - 1];
@@ -57,6 +61,7 @@ export class DataEngine {
     const prev = cur[lastKey as keyof object];
     if (prev !== undefined) return prev;
     cur[lastKey as keyof object] = value as never;
+    this.fireOnUpdate(key);
     return value;
   }
 
@@ -83,24 +88,20 @@ export class DataEngine {
   }
 
   get(key: FieldKey) {
-    return objectGet(this.store, key);
+    return objectGet(this.data, key);
   }
 
   /**
    * update the value of field if it exists
    */
   update(key: FieldKey, value: unknown): boolean {
-    if (key.length === 0) {
-      this.store = value;
+    try {
+      this.data = objectSet(this.data, key, value);
       this.fireOnUpdate(key);
       return true;
+    } catch {
+      return false;
     }
-
-    const v = objectGet(this.store, key.slice(0, -1));
-    if (typeof v !== 'object' || v === null) return false;
-    v[key[key.length - 1] as keyof object] = value as never;
-    this.fireOnUpdate(key);
-    return true;
   }
 
   useListener(listener: DataEngineListener) {
@@ -126,18 +127,36 @@ export class DataEngine {
     options: {
       defaultValue?: unknown;
       compute?: (currentValue: unknown) => V;
+      /**
+       * specify when to re-compute value:
+       * - `all` (default): when the field, its children, or its ancestor changed.
+       * - `ignore-children`: when the field or its ancestor changed.
+       */
+      recompute?: 'ignore-children' | 'all';
       /** determine whether the value/computed value is changed */
       isChanged?: (prev: V, next: V) => boolean;
     } = {},
   ) {
-    const { compute = (v) => v as V, defaultValue, isChanged = (a, b) => a !== b } = options;
+    const {
+      compute = (v) => v as V,
+      defaultValue,
+      recompute = 'all',
+      isChanged = (a, b) => a !== b,
+    } = options;
     const [value, setValue] = useState<V>(() => compute(this.init(key, defaultValue)));
 
     this.useListener({
       onUpdate: (updatedKey) => {
-        if (!arrayStartsWith(key, updatedKey) && !arrayStartsWith(updatedKey, key)) return;
-        const computed = compute(this.get(key));
-        if (isChanged(value, computed)) setValue(computed);
+        let shouldRecompute: boolean;
+        if (recompute === 'all') {
+          shouldRecompute = arrayStartsWith(key, updatedKey) || arrayStartsWith(updatedKey, key);
+        } else {
+          shouldRecompute = arrayStartsWith(key, updatedKey);
+        }
+        if (shouldRecompute) {
+          const computed = compute(this.get(key));
+          if (isChanged(value, computed)) setValue(computed);
+        }
       },
     });
 

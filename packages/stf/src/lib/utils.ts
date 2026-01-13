@@ -1,3 +1,5 @@
+import { FieldKey } from './types';
+
 /**
  * test if array a starts with array b, only compare values via `===`.
  */
@@ -21,6 +23,22 @@ export function objectGet(obj: unknown, key: (string | number)[]): unknown | und
   }
 
   return cur;
+}
+
+/**
+ * set the value of field if it exists (in place)
+ *
+ * @returns updated value, throw error if parent object doesn't exist
+ */
+export function objectSet(obj: unknown, key: FieldKey, value: unknown): unknown {
+  if (key.length === 0) {
+    return value;
+  }
+
+  const parent = objectGet(obj, key.slice(0, -1));
+  if (typeof parent !== 'object' || parent === null) throw new Error('missing parent object');
+  parent[key[key.length - 1] as keyof object] = value as never;
+  return obj;
 }
 
 /**

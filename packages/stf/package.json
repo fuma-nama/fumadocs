@@ -14,11 +14,6 @@
   "exports": {
     ".": "./dist/index.js",
     "./lib/utils": "./dist/lib/utils.js",
-    "./nodes/array": "./dist/nodes/array.js",
-    "./nodes/enum": "./dist/nodes/enum.js",
-    "./nodes/object": "./dist/nodes/object.js",
-    "./nodes/primitive": "./dist/nodes/primitive.js",
-    "./nodes/union": "./dist/nodes/union.js",
     "./package.json": "./package.json"
   },
   "publishConfig": {
