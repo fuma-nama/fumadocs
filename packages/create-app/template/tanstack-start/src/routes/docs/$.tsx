@@ -33,9 +33,15 @@ const serverLoader = createServerFn({
   });
 
 const clientLoader = browserCollections.docs.createClientLoader({
-  component({ toc, frontmatter, default: MDX }) {
+  component(
+    { toc, frontmatter, default: MDX },
+    // you can define props for the component
+    props: {
+      className?: string;
+    },
+  ) {
     return (
-      <DocsPage toc={toc}>
+      <DocsPage toc={toc} {...props}>
         <DocsTitle>{frontmatter.title}</DocsTitle>
         <DocsDescription>{frontmatter.description}</DocsDescription>
         <DocsBody>
@@ -51,13 +57,13 @@ const clientLoader = browserCollections.docs.createClientLoader({
 });
 
 function Page() {
-  const data = Route.useLoaderData();
-  const { pageTree } = useFumadocsLoader(data);
-  const Content = clientLoader.getComponent(data.path);
+  const data = useFumadocsLoader(Route.useLoaderData());
 
   return (
-    <DocsLayout {...baseOptions()} tree={pageTree}>
-      <Content />
+    <DocsLayout {...baseOptions()} tree={data.pageTree}>
+      {clientLoader.useContent(data.path, {
+        className: '',
+      })}
     </DocsLayout>
   );
 }

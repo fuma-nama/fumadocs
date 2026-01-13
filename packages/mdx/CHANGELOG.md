@@ -1,5 +1,13 @@
 # next-docs-mdx
 
+## 14.2.5
+
+### Patch Changes
+
+- 0765817: improve `useContent()` for optional props on browser loader
+- Updated dependencies [5dec9d0]
+  - fumadocs-core@16.4.7
+
 ## 14.2.4
 
 ### Patch Changes
