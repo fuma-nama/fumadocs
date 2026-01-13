@@ -19,15 +19,9 @@ export async function loader({ params }: Route.LoaderArgs) {
 }
 
 const clientLoader = browserCollections.docs.createClientLoader({
-  component(
-    { toc, frontmatter, default: Mdx },
-    // you can define props for the `<Content />` component
-    props: {
-      className?: string;
-    },
-  ) {
+  component({ toc, frontmatter, default: Mdx }) {
     return (
-      <DocsPage toc={toc} {...props}>
+      <DocsPage toc={toc}>
         <title>{frontmatter.title}</title>
         <meta name="description" content={frontmatter.description} />
         <DocsTitle>{frontmatter.title}</DocsTitle>
@@ -41,12 +35,11 @@ const clientLoader = browserCollections.docs.createClientLoader({
 });
 
 export default function Page({ loaderData, params }: Route.ComponentProps) {
-  const Content = clientLoader.getComponent(loaderData.path);
   const { pageTree } = useFumadocsLoader(loaderData);
 
   return (
     <DocsLayout {...baseOptions(params.lang)} tree={pageTree}>
-      <Content />
+      {clientLoader.useContent(loaderData.path)}
     </DocsLayout>
   );
 }

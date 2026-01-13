@@ -7,6 +7,7 @@ import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layo
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { baseOptions } from '@/lib/layout.shared';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
+import { Suspense } from 'react';
 
 export const Route = createFileRoute('/$lang/docs/$')({
   component: Page,
@@ -61,7 +62,7 @@ function Page() {
 
   return (
     <DocsLayout {...baseOptions(lang)} tree={data.pageTree}>
-      {clientLoader.useContent(data.path)}
+      <Suspense>{clientLoader.useContent(data.path)}</Suspense>
     </DocsLayout>
   );
 }

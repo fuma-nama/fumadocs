@@ -138,8 +138,8 @@ export function SearchProvider({
         [hotKey],
       )}
     >
-      <Suspense fallback={null}>
-        {isOpen !== undefined && (
+      {isOpen !== undefined && (
+        <Suspense fallback={null}>
           <SearchDialog
             open={isOpen}
             onOpenChange={setIsOpen}
@@ -147,8 +147,8 @@ export function SearchProvider({
             links={links}
             {...options}
           />
-        )}
-      </Suspense>
+        </Suspense>
+      )}
 
       {children}
     </SearchContext>

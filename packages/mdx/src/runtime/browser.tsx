@@ -1,4 +1,4 @@
-import { type ReactNode, type FC, Suspense, use } from 'react';
+import { type ReactNode, type FC, use } from 'react';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type { DocCollection, DocsCollection } from '@/config/define';
 import type { CompiledMDXProperties } from '@/loaders/mdx/build-mdx';
@@ -113,10 +113,9 @@ export function createClientLoader<
 
     let promise: Promise<Doc> | undefined;
     function Renderer(props: Props) {
-      const cached = store.preloaded.get(path);
-      if (cached) return useRenderer(cached, props);
+      let doc = store.preloaded.get(path);
+      doc ??= use((promise ??= getLoader(path)()));
 
-      const doc = use((promise ??= getLoader(path)()));
       return useRenderer(doc, props);
     }
 
@@ -134,11 +133,7 @@ export function createClientLoader<
     },
     useContent(path: string, props: Props & object) {
       const Comp = getRenderer(path);
-      return (
-        <Suspense>
-          <Comp {...props} />
-        </Suspense>
-      );
+      return <Comp {...props} />;
     },
   } as ClientLoader<Doc, Props>;
 }
