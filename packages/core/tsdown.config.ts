@@ -13,6 +13,7 @@ export default defineConfig({
     'src/source/{index,schema}.ts',
     'src/source/client/*.{ts,tsx}',
     'src/source/plugins/{lucide-icons,slugs}.ts',
+    'src/source/plugins/status-badges.ts',
     'src/search/{index,client,server,algolia,orama-cloud,orama-cloud-legacy}.ts',
     'src/utils/use-on-change.ts',
     'src/utils/use-effect-event.ts',
