@@ -1,0 +1,5 @@
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+
+/* do not modify this, just to trigger intelli-sense of Tailwind CSS plugin */

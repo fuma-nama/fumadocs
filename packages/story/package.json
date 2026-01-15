@@ -25,10 +25,20 @@
     "lint": "eslint .",
     "types:check": "tsc --noEmit"
   },
+  "dependencies": {
+    "@fumari/stf": "workspace:^",
+    "@radix-ui/react-select": "^2.2.6",
+    "class-variance-authority": "^0.7.1",
+    "lucide-react": "^0.562.0",
+    "tailwind-merge": "^3.4.0",
+    "ts-morph": "^27.0.2"
+  },
   "devDependencies": {
     "@types/node": "25.0.5",
     "@types/react": "^19.2.8",
     "eslint-config-custom": "workspace:*",
+    "fumadocs-ui": "^16.4.7",
+    "tailwindcss": "^4.1.18",
     "tsconfig": "workspace:*",
     "tsdown": "^0.19.0"
   },
