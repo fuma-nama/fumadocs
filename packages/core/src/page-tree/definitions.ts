@@ -36,6 +36,11 @@ export interface Item extends ID {
    */
   external?: boolean;
 
+  /**
+   * Status of the page - "new", "beta", "deprecated"
+   */
+  status?: string;
+
   description?: ReactNode;
   icon?: ReactNode;
 }

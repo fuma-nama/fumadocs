@@ -22,6 +22,7 @@ export interface PageData {
   icon?: string | undefined;
   title?: string;
   description?: string | undefined;
+  status?: string | undefined;
 }
 
 export type VirtualFile<Config extends SourceConfig = SourceConfig> =

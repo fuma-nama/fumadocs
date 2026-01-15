@@ -20,6 +20,7 @@ export const pageSchema = z.object({
   title: z.string(),
   description: z.string().optional(),
   icon: z.string().optional(),
+  status: z.string().optional(),
   full: z.boolean().optional(),
 
   // Fumadocs OpenAPI generated
