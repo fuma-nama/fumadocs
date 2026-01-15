@@ -22,20 +22,6 @@ export interface PageData {
   icon?: string | undefined;
   title?: string;
   description?: string | undefined;
-  /**
-   * Status badge to display for the page (e.g., "new", "beta", "deprecated", "experimental").
-   * 
-   * This will be displayed as a badge in the sidebar and can be used in custom page layouts.
-   * 
-   * @example
-   * ```mdx
-   * ---
-   * title: My Page
-   * status: new
-   * ---
-   * ```
-   */
-  status?: string | undefined;
 }
 
 export type VirtualFile<Config extends SourceConfig = SourceConfig> =
