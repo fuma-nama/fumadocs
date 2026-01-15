@@ -10,7 +10,6 @@ import {
   type ComponentProps,
   useRef,
 } from 'react';
-import type { FieldPath } from 'react-hook-form';
 import { useApiContext } from '@/ui/contexts/api';
 import type { FetchResult } from '@/playground/fetcher';
 import type { ParameterField, SecurityEntry } from '@/playground/index';
@@ -28,12 +27,7 @@ import { X, ChevronDown, LoaderCircle } from 'lucide-react';
 import { encodeRequestData } from '@/requests/media/encode';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from '@/utils/cn';
-import {
-  type FieldInfo,
-  SchemaProvider,
-  SchemaScope,
-  useResolvedSchema,
-} from '@/playground/schema';
+import { SchemaProvider, SchemaScope, useResolvedSchema } from '@/playground/schema';
 import {
   Select,
   SelectContent,
@@ -47,10 +41,10 @@ import ServerSelect from './components/server-select';
 import { useStorageKey } from '@/ui/client/storage-key';
 import { useExampleRequests } from '@/ui/operation/usage-tabs/client';
 import { FieldKey, Stf, StfProvider, useDataEngine, useStf } from '@fumari/stf';
-import { objectGet, objectSet } from '@fumari/stf/lib/utils';
+import { objectGet, objectSet, stringifyFieldKey } from '@fumari/stf/lib/utils';
 import { FieldInput, FieldSet, JsonInput, ObjectInput } from './components/inputs';
 
-export interface FormValues {
+export interface FormValues extends Record<string, unknown> {
   path: Record<string, unknown>;
   query: Record<string, unknown>;
   header: Record<string, unknown>;
@@ -92,13 +86,12 @@ export interface PlaygroundClientOptions {
   /**
    * render the paremeter inputs of API endpoint.
    *
-   * It uses `react-hook-form`, you can use either:
-   * - the library itself, with types from `fumadocs-openapi/playground/client`.
+   * for updating values, use:
    * - the `Custom.useController()` from `fumadocs-openapi/playground/client`.
    *
    * Recommended types packages: `json-schema-typed`, `openapi-types`.
    */
-  renderParameterField?: (fieldName: FieldPath<FormValues>, param: ParameterField) => ReactNode;
+  renderParameterField?: (fieldName: FieldKey, param: ParameterField) => ReactNode;
 
   /**
    * render the input for API endpoint body.
@@ -139,7 +132,6 @@ export default function PlaygroundClient({
 }: PlaygroundClientProps) {
   const { example: exampleId, examples, setExampleData } = useExampleRequests();
   const storageKeys = useStorageKey();
-  const fieldInfoMap = useMemo(() => new Map<string, FieldInfo>(), []);
   const {
     mediaAdapters,
     serverRef,
@@ -170,6 +162,8 @@ export default function PlaygroundClient({
   }, [examples, exampleId]);
 
   const stf = useStf({
+    // it is fine to modify `defaultValues` in place
+    // because we already try to persist the form values via `setExampleData`.
     defaultValues,
   });
 
@@ -227,9 +221,7 @@ export default function PlaygroundClient({
 
   useEffect(() => {
     return () => {
-      stf.dataEngine.update([], defaultValues);
-      initAuthValues(stf);
-      fieldInfoMap.clear();
+      stf.dataEngine.reset(defaultValues);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- ignore other parts
   }, [defaultValues]);
@@ -237,16 +229,11 @@ export default function PlaygroundClient({
   useEffect(() => {
     return initAuthValues(stf);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- ignore other parts
-  }, [inputs]);
+  }, [defaultValues, inputs]);
 
   return (
     <StfProvider value={stf}>
-      <SchemaProvider
-        fieldInfoMap={fieldInfoMap}
-        references={references}
-        writeOnly={writeOnly}
-        readOnly={readOnly}
-      >
+      <SchemaProvider references={references} writeOnly={writeOnly} readOnly={readOnly}>
         <form
           {...rest}
           className={cn(
@@ -278,7 +265,7 @@ export default function PlaygroundClient({
               setSecurityId={setSecurityId}
             >
               {inputs.map((input) => (
-                <Fragment key={input.fieldName.join('.')}>{input.children}</Fragment>
+                <Fragment key={stringifyFieldKey(input.fieldName)}>{input.children}</Fragment>
               ))}
             </SecurityTabs>
           )}
@@ -379,7 +366,7 @@ function FormBody({ parameters = [], body }: Pick<PlaygroundClientProps, 'parame
           {items.map((field) => {
             const fieldName: FieldKey = [type, field.name];
             if (renderParameterField) {
-              return renderParameterField(fieldName.join('.') as FieldPath<FormValues>, field);
+              return renderParameterField(fieldName, field);
             }
 
             const contentTypes = field.content && Object.keys(field.content);
@@ -391,7 +378,7 @@ function FormBody({ parameters = [], body }: Pick<PlaygroundClientProps, 'parame
 
             return (
               <FieldSet
-                key={fieldName.join('.')}
+                key={stringifyFieldKey(fieldName)}
                 name={field.name}
                 fieldName={fieldName}
                 field={schema}
@@ -529,7 +516,7 @@ function useAuthInputs(
           defaultValue: 'Bearer ',
           children: (
             <fieldset className="flex flex-col gap-2">
-              <label htmlFor={fieldName.join('.')} className={cn(labelVariants())}>
+              <label htmlFor={stringifyFieldKey(fieldName)} className={cn(labelVariants())}>
                 Access Token
               </label>
               <div className="flex gap-2">
@@ -738,3 +725,18 @@ function CollapsiblePanel({
     </Collapsible>
   );
 }
+
+export const Custom = {
+  useController(
+    fieldName: FieldKey,
+    options?: {
+      defaultValue?: unknown;
+    },
+  ) {
+    const [value, setValue] = useDataEngine().useFieldValue(fieldName, options);
+    return {
+      value,
+      setValue,
+    };
+  },
+};

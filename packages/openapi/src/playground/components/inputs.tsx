@@ -1,6 +1,6 @@
 'use client';
 import { type ComponentProps, type HTMLAttributes, type ReactNode, useState } from 'react';
-import { ChevronDown, Plus, Trash2, X } from 'lucide-react';
+import { ChevronRight, Plus, Trash2, X } from 'lucide-react';
 import { FieldKey, useArray, useDataEngine, useObject } from '@fumari/stf';
 import {
   Select,
@@ -16,6 +16,7 @@ import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { FormatFlags, schemaToString } from '@/utils/schema-to-string';
 import { anyFields, useFieldInfo, useResolvedSchema, useSchemaScope } from '@/playground/schema';
 import type { ParsedSchema } from '@/utils/schema';
+import { stringifyFieldKey } from '@fumari/stf/lib/utils';
 
 function FieldLabel(props: ComponentProps<'label'>) {
   return (
@@ -106,6 +107,7 @@ export function ObjectInput({
             onChange={(e) => setNextName(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
+                setNextName('');
                 onAppend(nextName);
                 e.preventDefault();
               }
@@ -114,7 +116,10 @@ export function ObjectInput({
           <button
             type="button"
             className={cn(buttonVariants({ color: 'secondary', size: 'sm' }), 'px-4')}
-            onClick={() => onAppend(nextName)}
+            onClick={() => {
+              onAppend(nextName);
+              setNextName('');
+            }}
           >
             New
           </button>
@@ -161,12 +166,29 @@ export function FieldInput({
 }) {
   const engine = useDataEngine();
   const [value, setValue] = engine.useFieldValue(fieldName);
-  const id = fieldName.join('.');
+  const id = stringifyFieldKey(fieldName);
   if (field.type === 'null') return;
 
-  if (field.type === 'string' && field.format === 'binary') {
+  function renderUnset(children: ReactNode) {
     return (
-      <div {...props}>
+      <div {...props} className={cn('flex flex-row gap-2', props.className)}>
+        {children}
+        {value !== undefined && !isRequired && (
+          <button
+            type="button"
+            onClick={() => engine.delete(fieldName)}
+            className="text-fd-muted-foreground"
+          >
+            <X className="size-4" />
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  if (field.type === 'string' && field.format === 'binary') {
+    return renderUnset(
+      <>
         <label
           htmlFor={id}
           className={cn(
@@ -190,12 +212,32 @@ export function FieldInput({
           type="file"
           multiple={false}
           onChange={(e) => {
-            if (!e.target.files) return;
+            if (!e.target.files || e.target.files.length === 0) return;
             setValue(e.target.files.item(0));
           }}
           hidden
         />
-      </div>
+      </>,
+    );
+  }
+
+  if (field.enum && field.enum.length > 0) {
+    const idx = field.enum.indexOf(value);
+
+    return (
+      <Select value={String(idx)} onValueChange={(v) => setValue(field.enum![Number(v)])}>
+        <SelectTrigger id={id} {...props}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {field.enum.map((item, i) => (
+            <SelectItem key={i} value={String(i)}>
+              {typeof item === 'string' ? item : JSON.stringify(item, null, 2)}
+            </SelectItem>
+          ))}
+          {!isRequired && <SelectItem value="-1">Unset</SelectItem>}
+        </SelectContent>
+      </Select>
     );
   }
 
@@ -205,7 +247,7 @@ export function FieldInput({
         value={String(value)}
         onValueChange={(value) => setValue(value === 'undefined' ? undefined : value === 'true')}
       >
-        <SelectTrigger id={id} className={props.className}>
+        <SelectTrigger id={id} {...props}>
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -218,33 +260,21 @@ export function FieldInput({
   }
 
   const isNumber = field.type === 'integer' || field.type === 'number';
-
-  return (
-    <div {...props} className={cn('flex flex-row gap-2', props.className)}>
-      <Input
-        id={id}
-        placeholder="Enter value"
-        type={isNumber ? 'number' : 'text'}
-        step={field.type === 'integer' ? 1 : undefined}
-        value={String(value ?? '')}
-        onChange={(e) => {
-          if (isNumber) {
-            setValue(Number.isNaN(e.target.valueAsNumber) ? undefined : e.target.valueAsNumber);
-          } else if (!isNumber) {
-            setValue(e.target.value);
-          }
-        }}
-      />
-      {value !== undefined && !isRequired && (
-        <button
-          type="button"
-          onClick={() => engine.delete(fieldName)}
-          className="text-fd-muted-foreground"
-        >
-          <X className="size-4" />
-        </button>
-      )}
-    </div>
+  return renderUnset(
+    <Input
+      id={id}
+      placeholder="Enter value"
+      type={isNumber ? 'number' : 'text'}
+      step={field.type === 'integer' ? 1 : undefined}
+      value={String(value ?? '')}
+      onChange={(e) => {
+        if (isNumber) {
+          setValue(Number.isNaN(e.target.valueAsNumber) ? undefined : e.target.valueAsNumber);
+        } else if (!isNumber) {
+          setValue(e.target.value);
+        }
+      }}
+    />,
   );
 }
 
@@ -272,14 +302,15 @@ export function FieldSet({
   const { readOnly, writeOnly } = useSchemaScope();
   const field = useResolvedSchema(_field);
   const [show, setShow] = useState(!collapsible);
-  const { info, updateInfo } = useFieldInfo(fieldName, field, depth);
-  const id = fieldName.join('.');
+  const { info, updateInfo } = useFieldInfo(fieldName, field);
+  const id = stringifyFieldKey(fieldName);
+  const dataEngine = useDataEngine();
 
   if (_field === false) return;
   if (field.readOnly && !readOnly) return;
   if (field.writeOnly && !writeOnly) return;
 
-  if (info.unionField) {
+  if (info.unionField && field[info.unionField]) {
     const union = field[info.unionField]!;
     const showSelect = union.length > 1;
 
@@ -363,37 +394,39 @@ export function FieldSet({
     );
   }
 
-  const showBn = collapsible && (
-    <button
-      type="button"
-      onClick={() => setShow((prev) => !prev)}
-      className={cn(
-        buttonVariants({
-          size: 'icon-xs',
-          color: 'ghost',
-          className: 'text-fd-muted-foreground -ms-1',
-        }),
-      )}
-    >
-      <ChevronDown className={cn(show && 'rotate-180')} />
-    </button>
-  );
-
   if (field.type === 'object' || info.intersection) {
+    const schema = info.intersection?.merged ?? field;
     return (
       <fieldset
         {...props}
         className={cn('flex flex-col gap-1.5 col-span-full @container', props.className)}
       >
         <FieldLabel htmlFor={id}>
-          {showBn}
+          {collapsible && (
+            <button
+              type="button"
+              onClick={() => {
+                dataEngine.init(fieldName, getDefaultValue(schema));
+                setShow((prev) => !prev);
+              }}
+              className={cn(
+                buttonVariants({
+                  size: 'icon-xs',
+                  color: 'ghost',
+                  className: 'text-fd-muted-foreground -ms-1',
+                }),
+              )}
+            >
+              <ChevronRight className={cn(show && 'rotate-90')} />
+            </button>
+          )}
           <FieldLabelName required={isRequired}>{name}</FieldLabelName>
           {slotType ?? <FieldLabelType>{schemaToString(field)}</FieldLabelType>}
           {toolbar}
         </FieldLabel>
         {show && (
           <ObjectInput
-            field={info.intersection?.merged ?? field}
+            field={schema}
             fieldName={fieldName}
             {...props}
             className={cn(
@@ -410,7 +443,24 @@ export function FieldSet({
     return (
       <fieldset {...props} className={cn('flex flex-col gap-1.5 col-span-full', props.className)}>
         <FieldLabel htmlFor={id}>
-          {showBn}
+          {collapsible && (
+            <button
+              type="button"
+              onClick={() => {
+                dataEngine.init(fieldName, getDefaultValue(field));
+                setShow((prev) => !prev);
+              }}
+              className={cn(
+                buttonVariants({
+                  size: 'icon-xs',
+                  color: 'ghost',
+                  className: 'text-fd-muted-foreground -ms-1',
+                }),
+              )}
+            >
+              <ChevronRight className={cn(show && 'rotate-90')} />
+            </button>
+          )}
           <FieldLabelName required={isRequired}>{name}</FieldLabelName>
           {slotType ?? <FieldLabelType>{schemaToString(field)}</FieldLabelType>}
           {toolbar}

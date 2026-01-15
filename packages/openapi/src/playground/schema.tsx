@@ -7,7 +7,6 @@ import { FieldKey, useDataEngine } from '@fumari/stf';
 
 interface SchemaContextType extends SchemaScope {
   references: Record<string, ParsedSchema>;
-  fieldInfoMap: Map<string, FieldInfo>;
   ajv: Ajv2020;
 }
 
@@ -48,7 +47,6 @@ export const anyFields = {
 
 export function SchemaProvider({
   references,
-  fieldInfoMap,
   readOnly,
   writeOnly,
   children,
@@ -67,8 +65,8 @@ export function SchemaProvider({
   return (
     <SchemaContext.Provider
       value={useMemo(
-        () => ({ references, fieldInfoMap, ajv, readOnly, writeOnly }),
-        [references, fieldInfoMap, ajv, readOnly, writeOnly],
+        () => ({ references, ajv, readOnly, writeOnly }),
+        [references, ajv, readOnly, writeOnly],
       )}
     >
       {children}
@@ -90,17 +88,16 @@ export function useSchemaScope(): SchemaScope {
 export function useFieldInfo(
   fieldName: FieldKey,
   schema: Exclude<ParsedSchema, boolean>,
-  depth: number,
 ): {
   info: FieldInfo;
   updateInfo: (value: Partial<FieldInfo>) => void;
 } {
-  const { fieldInfoMap, ajv } = use(SchemaContext)!;
+  const { ajv } = use(SchemaContext)!;
   const engine = useDataEngine();
-  const keyName = `${fieldName}:${depth}`;
+  const attachedData = engine.attachedData<FieldInfo>('field-info');
   const [info, setInfo] = useState<FieldInfo>(() => {
     const value = engine.get(fieldName);
-    const initialInfo = fieldInfoMap.get(keyName);
+    const initialInfo = attachedData.get(fieldName);
     if (initialInfo) return initialInfo;
 
     const out: FieldInfo = {
@@ -140,8 +137,7 @@ export function useFieldInfo(
     return out;
   });
 
-  fieldInfoMap.set(keyName, info);
-
+  attachedData.set(fieldName, info);
   return {
     info,
     updateInfo: (value) => {

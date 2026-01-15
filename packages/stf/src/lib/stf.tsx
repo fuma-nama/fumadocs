@@ -13,11 +13,19 @@ export function StfProvider({ value, children }: { value: Stf; children: ReactNo
   return <Context value={value}>{children}</Context>;
 }
 
-export function useStf(options: { defaultValues?: unknown }): Stf {
+export function useStf(options: {
+  /**
+   * Note: the passed object will be modified in place, use `structuredClone()` to keep the original object unchanged.
+   */
+  defaultValues?: Record<string, unknown> | (() => Record<string, unknown>);
+}): Stf {
   const { defaultValues } = options;
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- assume unchanged
-  const dataEngine = useMemo(() => new DataEngine(defaultValues), []);
+  const dataEngine = useMemo(
+    () => new DataEngine(typeof defaultValues === 'function' ? defaultValues() : defaultValues),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- assume unchanged
+    [],
+  );
   return useMemo(
     () => ({
       dataEngine,
@@ -37,27 +45,24 @@ export interface ArrayItemInfo {
 
 export function useArray(field: FieldKey, defaultValue?: unknown[]) {
   const engine = useDataEngine();
-  const [value] = engine.useFieldValue(field, {
+  const [items] = engine.useFieldValue(field, {
     defaultValue,
-    isChanged(prev, next) {
-      if (Array.isArray(prev) && Array.isArray(next)) {
-        // skip unnecessary re-renders, we only need to update the container when item added/deleted
-        return prev.length !== next.length;
+    compute(value) {
+      const items: ArrayItemInfo[] = [];
+      if (Array.isArray(value)) {
+        for (let i = 0; i < value.length; i++) {
+          items.push({
+            field: [...field, i],
+            index: i,
+          });
+        }
       }
-
-      return prev !== next;
+      return items;
+    },
+    isChanged(prev, next) {
+      return prev.length !== next.length;
     },
   });
-
-  const items: ArrayItemInfo[] = [];
-  if (Array.isArray(value)) {
-    for (let i = 0; i < value.length; i++) {
-      items.push({
-        field: [...field, i],
-        index: i,
-      });
-    }
-  }
 
   return {
     items,

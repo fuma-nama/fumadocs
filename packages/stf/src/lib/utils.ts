@@ -37,7 +37,7 @@ export function objectSet(obj: unknown, key: FieldKey, value: unknown): unknown 
 
   const parent = objectGet(obj, key.slice(0, -1));
   if (typeof parent !== 'object' || parent === null) throw new Error('missing parent object');
-  parent[key[key.length - 1] as keyof object] = value as never;
+  (parent as Record<string, unknown>)[key[key.length - 1]] = value;
   return obj;
 }
 
@@ -80,4 +80,8 @@ export function deepEqual(a: unknown, b: unknown): boolean {
       Object.prototype.hasOwnProperty.call(b, key) &&
       deepEqual((a as Record<string, unknown>)[key], (b as Record<string, unknown>)[key]),
   );
+}
+
+export function stringifyFieldKey(fieldKey: FieldKey) {
+  return fieldKey.map((v) => `${typeof v}:${v}`).join('.');
 }
