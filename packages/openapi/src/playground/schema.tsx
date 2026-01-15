@@ -1,13 +1,12 @@
 import { Ajv2020 } from 'ajv/dist/2020';
 import { createContext, ReactNode, use, useMemo, useState } from 'react';
-import { useFormContext } from 'react-hook-form';
 import { getDefaultValue } from '@/playground/get-default-values';
 import type { ParsedSchema } from '@/utils/schema';
 import { mergeAllOf } from '@/utils/merge-schema';
+import { FieldKey, useDataEngine } from '@fumari/stf';
 
 interface SchemaContextType extends SchemaScope {
   references: Record<string, ParsedSchema>;
-  fieldInfoMap: Map<string, FieldInfo>;
   ajv: Ajv2020;
 }
 
@@ -48,7 +47,6 @@ export const anyFields = {
 
 export function SchemaProvider({
   references,
-  fieldInfoMap,
   readOnly,
   writeOnly,
   children,
@@ -67,8 +65,8 @@ export function SchemaProvider({
   return (
     <SchemaContext.Provider
       value={useMemo(
-        () => ({ references, fieldInfoMap, ajv, readOnly, writeOnly }),
-        [references, fieldInfoMap, ajv, readOnly, writeOnly],
+        () => ({ references, ajv, readOnly, writeOnly }),
+        [references, ajv, readOnly, writeOnly],
       )}
     >
       {children}
@@ -88,19 +86,18 @@ export function useSchemaScope(): SchemaScope {
  * @param depth - The depth to avoid duplicated field name with same schema (e.g. nested `oneOf`).
  */
 export function useFieldInfo(
-  fieldName: string,
+  fieldName: FieldKey,
   schema: Exclude<ParsedSchema, boolean>,
-  depth: number,
 ): {
   info: FieldInfo;
   updateInfo: (value: Partial<FieldInfo>) => void;
 } {
-  const { fieldInfoMap, ajv } = use(SchemaContext)!;
-  const form = useFormContext();
-  const keyName = `${fieldName}:${depth}`;
+  const { ajv } = use(SchemaContext)!;
+  const engine = useDataEngine();
+  const attachedData = engine.attachedData<FieldInfo>('field-info');
   const [info, setInfo] = useState<FieldInfo>(() => {
-    const value = form.getValues(fieldName as 'body');
-    const initialInfo = fieldInfoMap.get(keyName);
+    const value = engine.get(fieldName);
+    const initialInfo = attachedData.get(fieldName);
     if (initialInfo) return initialInfo;
 
     const out: FieldInfo = {
@@ -140,8 +137,7 @@ export function useFieldInfo(
     return out;
   });
 
-  fieldInfoMap.set(keyName, info);
-
+  attachedData.set(fieldName, info);
   return {
     info,
     updateInfo: (value) => {
@@ -161,7 +157,7 @@ export function useFieldInfo(
         valueSchema = { ...schema, type: updated.selectedType };
       }
 
-      form.setValue(fieldName, getDefaultValue(valueSchema));
+      engine.update(fieldName, getDefaultValue(valueSchema));
     },
   };
 }

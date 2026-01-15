@@ -2120,6 +2120,9 @@ importers:
       '@fumari/json-schema-to-typescript':
         specifier: ^2.0.0
         version: 2.0.0(prettier@3.7.4)
+      '@fumari/stf':
+        specifier: workspace:^
+        version: link:../stf
       '@radix-ui/react-accordion':
         specifier: ^1.2.12
         version: 1.2.12(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -2421,6 +2424,31 @@ importers:
       tailwindcss:
         specifier: ^4.1.18
         version: 4.1.18
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      tsdown:
+        specifier: ^0.19.0
+        version: 0.19.0(oxc-resolver@11.16.2)(typescript@5.9.3)
+
+  packages/stf:
+    dependencies:
+      react:
+        specifier: ^19.2.0
+        version: 19.2.3
+      react-dom:
+        specifier: ^19.2.0
+        version: 19.2.3(react@19.2.3)
+    devDependencies:
+      '@types/node':
+        specifier: 25.0.5
+        version: 25.0.5
+      '@types/react':
+        specifier: ^19.2.8
+        version: 19.2.8
+      eslint-config-custom:
+        specifier: workspace:*
+        version: link:../eslint-config-custom
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
