@@ -4,6 +4,13 @@ import type * as PageTree from 'fumadocs-core/page-tree';
 import type * as Base from './base';
 import { Badge, type BadgeVariants } from '@/components/ui/badge';
 
+/**
+ * extended Item type that may include status field from statusBadgesPlugin
+ */
+interface ItemWithStatus extends PageTree.Item {
+  status?: string;
+}
+
 export interface SidebarPageTreeComponents {
   Item: FC<{ item: PageTree.Item }>;
   Folder: FC<{ item: PageTree.Folder; children: ReactNode }>;
@@ -56,8 +63,8 @@ export function createPageTreeRenderer({
           <SidebarFolderLink href={item.index.url} external={item.index.external}>
             {item.icon}
             {item.name}
-            {item.index.status && (
-              <Badge variant={getStatusVariant(item.index.status)}>{truncateStatus(item.index.status)}</Badge>
+            {(item.index as ItemWithStatus).status && (
+              <Badge className="ms-auto" variant={getStatusVariant((item.index as ItemWithStatus).status!)}>{truncateStatus((item.index as ItemWithStatus).status!)}</Badge>
             )}
           </SidebarFolderLink>
         ) : (
@@ -103,8 +110,8 @@ export function createPageTreeRenderer({
           return (
             <SidebarItem key={item.url} href={item.url} external={item.external} icon={item.icon}>
               {item.name}
-              {item.status && (
-                <Badge className='ml-auto' variant={getStatusVariant(item.status)}>{truncateStatus(item.status)}</Badge>
+              {(item as ItemWithStatus).status && (
+                <Badge className="ms-auto" variant={getStatusVariant((item as ItemWithStatus).status!)}>{truncateStatus((item as ItemWithStatus).status!)}</Badge>
               )}
             </SidebarItem>
           );
