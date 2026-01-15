@@ -7,6 +7,7 @@ import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layo
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { baseOptions } from '@/lib/layout.shared';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
+import { Suspense } from 'react';
 
 export const Route = createFileRoute('/docs/$')({
   component: Page,
@@ -35,7 +36,7 @@ const serverLoader = createServerFn({
 const clientLoader = browserCollections.docs.createClientLoader({
   component(
     { toc, frontmatter, default: MDX },
-    // you can define props for the `<Content />` component
+    // you can define props for the component
     props: {
       className?: string;
     },
@@ -58,11 +59,14 @@ const clientLoader = browserCollections.docs.createClientLoader({
 
 function Page() {
   const data = useFumadocsLoader(Route.useLoaderData());
-  const Content = clientLoader.getComponent(data.path);
 
   return (
     <DocsLayout {...baseOptions()} tree={data.pageTree}>
-      <Content />
+      <Suspense>
+        {clientLoader.useContent(data.path, {
+          className: '',
+        })}
+      </Suspense>
     </DocsLayout>
   );
 }
