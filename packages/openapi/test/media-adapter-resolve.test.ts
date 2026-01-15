@@ -66,6 +66,6 @@ describe('Media Adapter Resolution', () => {
 
   test('isMediaTypeSupported returns false for unsupported types', () => {
     expect(isMediaTypeSupported('application/yaml', defaultAdapters)).toBe(false);
-    expect(isMediaTypeSupported('text/plain', defaultAdapters)).toBe(false);
+    expect(isMediaTypeSupported('application/unknown', defaultAdapters)).toBe(false);
   });
 });
