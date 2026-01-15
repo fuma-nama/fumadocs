@@ -2,6 +2,14 @@ import { useTreeContext, useTreePath } from '@/contexts/tree';
 import { type FC, type ReactNode, useMemo, Fragment } from 'react';
 import type * as PageTree from 'fumadocs-core/page-tree';
 import type * as Base from './base';
+import { Badge, type BadgeVariants } from '@/components/ui/badge';
+
+/**
+ * extended Item type that may include status field from statusBadgesPlugin
+ */
+interface ItemWithStatus extends PageTree.Item {
+  status?: string;
+}
 
 export interface SidebarPageTreeComponents {
   Item: FC<{ item: PageTree.Item }>;
@@ -18,6 +26,21 @@ type InternalComponents = Pick<
   | 'SidebarFolderTrigger'
   | 'SidebarItem'
 >;
+
+const statusVariantMap: Record<string, BadgeVariants['variant']> = {
+  new: 'new',
+  beta: 'beta',
+  deprecated: 'deprecated',
+  experimental: 'experimental',
+};
+
+function getStatusVariant(status: string): BadgeVariants['variant'] {
+  return statusVariantMap[status.toLowerCase()] ?? 'default';
+}
+
+function truncateStatus(status: string): string {
+  return status.slice(0, 4).toUpperCase();
+}
 
 export function createPageTreeRenderer({
   SidebarFolder,
@@ -40,6 +63,9 @@ export function createPageTreeRenderer({
           <SidebarFolderLink href={item.index.url} external={item.index.external}>
             {item.icon}
             {item.name}
+            {(item.index as ItemWithStatus).status && (
+              <Badge className="ms-auto" variant={getStatusVariant((item.index as ItemWithStatus).status!)}>{truncateStatus((item.index as ItemWithStatus).status!)}</Badge>
+            )}
           </SidebarFolderLink>
         ) : (
           <SidebarFolderTrigger>
@@ -84,6 +110,9 @@ export function createPageTreeRenderer({
           return (
             <SidebarItem key={item.url} href={item.url} external={item.external} icon={item.icon}>
               {item.name}
+              {(item as ItemWithStatus).status && (
+                <Badge className="ms-auto" variant={getStatusVariant((item as ItemWithStatus).status!)}>{truncateStatus((item as ItemWithStatus).status!)}</Badge>
+              )}
             </SidebarItem>
           );
         });
