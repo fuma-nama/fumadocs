@@ -31,6 +31,10 @@ function getStatusVariant(status: string): BadgeVariants['variant'] {
   return statusVariantMap[status.toLowerCase()] ?? 'default';
 }
 
+function truncateStatus(status: string): string {
+  return status.slice(0, 4).toUpperCase();
+}
+
 export function createPageTreeRenderer({
   SidebarFolder,
   SidebarFolderContent,
@@ -53,7 +57,7 @@ export function createPageTreeRenderer({
             {item.icon}
             {item.name}
             {item.index.status && (
-              <Badge variant={getStatusVariant(item.index.status)}>{item.index.status}</Badge>
+              <Badge variant={getStatusVariant(item.index.status)}>{truncateStatus(item.index.status)}</Badge>
             )}
           </SidebarFolderLink>
         ) : (
@@ -100,7 +104,7 @@ export function createPageTreeRenderer({
             <SidebarItem key={item.url} href={item.url} external={item.external} icon={item.icon}>
               {item.name}
               {item.status && (
-                <Badge variant={getStatusVariant(item.status)}>{item.status}</Badge>
+                <Badge className='ml-auto' variant={getStatusVariant(item.status)}>{truncateStatus(item.status)}</Badge>
               )}
             </SidebarItem>
           );

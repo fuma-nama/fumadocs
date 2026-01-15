@@ -3,18 +3,18 @@ import type { ComponentProps } from 'react';
 import { cn } from '@fumadocs/ui/cn';
 
 export const badgeVariants = cva(
-  'inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset',
+  'inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide',
   {
     variants: {
       variant: {
         default:
-          'bg-fd-primary/10 text-fd-primary ring-fd-primary/20',
-        new: 'bg-green-500/10 text-green-600 ring-green-500/20 dark:text-green-400',
-        beta: 'bg-blue-500/10 text-blue-600 ring-blue-500/20 dark:text-blue-400',
+          'bg-fd-primary/10 text-fd-primary ',
+        new: 'bg-green-500/10 text-green-600 dark:text-green-400',
+        beta: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
         deprecated:
-          'bg-red-500/10 text-red-600 ring-red-500/20 dark:text-red-400',
+          'bg-red-500/10 text-red-600 dark:text-red-400',
         experimental:
-          'bg-yellow-500/10 text-yellow-600 ring-yellow-500/20 dark:text-yellow-400',
+          'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 truncate max-w-[100px]',
       },
     },
     defaultVariants: {
