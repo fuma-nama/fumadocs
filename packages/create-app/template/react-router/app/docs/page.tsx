@@ -22,7 +22,7 @@ const clientLoader = browserCollections.docs.createClientLoader({
   component(
     { toc, frontmatter, default: Mdx },
     // you can define props for the `<Content />` component
-    props: {
+    props?: {
       className?: string;
     },
   ) {
@@ -41,12 +41,11 @@ const clientLoader = browserCollections.docs.createClientLoader({
 });
 
 export default function Page({ loaderData }: Route.ComponentProps) {
-  const Content = clientLoader.getComponent(loaderData.path);
-  const { pageTree } = useFumadocsLoader(loaderData);
+  const { path, pageTree } = useFumadocsLoader(loaderData);
 
   return (
     <DocsLayout {...baseOptions()} tree={pageTree}>
-      <Content />
+      {clientLoader.useContent(path)}
     </DocsLayout>
   );
 }

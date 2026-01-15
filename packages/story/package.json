@@ -1,7 +1,7 @@
 {
-  "name": "@fumari/stf",
+  "name": "@fumadocs/story",
   "version": "0.0.0",
-  "description": "Schema to Form.",
+  "description": "Story integration to Fumadocs.",
   "keywords": [],
   "license": "MIT",
   "author": "Fuma Nama",
