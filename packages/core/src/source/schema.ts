@@ -20,7 +20,12 @@ export const pageSchema = z.object({
   title: z.string(),
   description: z.string().optional(),
   icon: z.string().optional(),
-  status: z.string().optional(),
+  status: z
+    .string()
+    .optional()
+    .describe(
+      'Status badge to display for the page (e.g., "new", "beta", "deprecated", "experimental")',
+    ),
   full: z.boolean().optional(),
 
   // Fumadocs OpenAPI generated

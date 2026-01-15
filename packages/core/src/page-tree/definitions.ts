@@ -37,7 +37,10 @@ export interface Item extends ID {
   external?: boolean;
 
   /**
-   * Status of the page - "new", "beta", "deprecated"
+   * Status badge to display in the sidebar (e.g., "new", "beta", "deprecated", "experimental").
+   * 
+   * The badge will be automatically truncated to 4 characters and displayed in uppercase.
+   * Common values: "new" -> "NEW", "beta" -> "BETA", "deprecated" -> "DEPR", "experimental" -> "EXPE"
    */
   status?: string;
 
