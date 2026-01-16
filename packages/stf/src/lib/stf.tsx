@@ -22,7 +22,7 @@ export function useStf(options: {
   const { defaultValues } = options;
 
   const dataEngine = useMemo(
-    () => new DataEngine(typeof defaultValues === 'function' ? defaultValues() : defaultValues),
+    () => new DataEngine(defaultValues),
     // eslint-disable-next-line react-hooks/exhaustive-deps -- assume unchanged
     [],
   );

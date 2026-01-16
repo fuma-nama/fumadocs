@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { objectGet, arrayStartsWith, objectSet, deepEqual, stringifyFieldKey } from './utils';
+import { objectGet, objectSet, stringifyFieldKey } from './utils';
 import type { FieldKey } from './types';
 import { Stf, useDataEngine } from './stf';
 
@@ -11,17 +11,13 @@ function getDefaultValue<T>(defaultValue: DefaultValue<T>): T {
 
 export interface DataEngineListener {
   /**
+   * when specified, only call the listener for events affecting the specified field.
+   */
+  field?: FieldKey;
+  /**
    * when field value is changed
    */
-  onUpdate?: (
-    key: FieldKey,
-    ctx: {
-      /**
-       * An update is swallow if the change doesn't affect the values of children fields.
-       */
-      swallow: boolean;
-    },
-  ) => void;
+  onUpdate?: (key: FieldKey, ctx: OnUpdateContext) => void;
   /**
    * when `init(field)` is called
    */
@@ -32,13 +28,71 @@ export interface DataEngineListener {
   onDelete?: (key: FieldKey) => void;
 }
 
+interface OnUpdateContext {
+  /**
+   * An update is swallow if the change doesn't affect the values of children fields.
+   */
+  swallow: boolean;
+}
+
+class ListenerManager {
+  private readonly listeners = new Set<DataEngineListener>();
+  private readonly indexed = new Map<string, Set<DataEngineListener>>();
+
+  add(listener: DataEngineListener) {
+    if (!listener.field) {
+      this.listeners.add(listener);
+      return;
+    }
+    const key = stringifyFieldKey(listener.field);
+    const set = this.indexed.get(key) ?? new Set();
+    set.add(listener);
+    this.indexed.set(key, set);
+  }
+
+  remove(listener: DataEngineListener) {
+    if (!listener.field) {
+      this.listeners.delete(listener);
+    } else {
+      this.indexed.get(stringifyFieldKey(listener.field))?.delete(listener);
+    }
+  }
+
+  onUpdate(field: FieldKey, ctx: OnUpdateContext) {
+    for (const v of this.listeners) v.onUpdate?.(field, ctx);
+    const updatedKey = stringifyFieldKey(field);
+
+    if (ctx.swallow) {
+      const set = this.indexed.get(updatedKey);
+      if (set) for (const v of set) v.onUpdate?.(field, ctx);
+    } else {
+      for (const [k, listeners] of this.indexed.entries()) {
+        if (k !== updatedKey && !k.startsWith(updatedKey + '.')) continue;
+        for (const v of listeners) v.onUpdate?.(field, ctx);
+      }
+    }
+  }
+
+  onInit(field: FieldKey) {
+    for (const v of this.listeners) v.onInit?.(field);
+    const set = this.indexed.get(stringifyFieldKey(field));
+    if (set) for (const v of set) v.onInit?.(field);
+  }
+
+  onDelete(field: FieldKey) {
+    for (const v of this.listeners) v.onDelete?.(field);
+    const set = this.indexed.get(stringifyFieldKey(field));
+    if (set) for (const v of set) v.onDelete?.(field);
+  }
+}
+
 export class DataEngine {
   private data: NonNullable<object>;
   private attachedDataMap = new Map<string, unknown>();
-  private readonly listeners = new Set<DataEngineListener>();
+  private readonly listeners = new ListenerManager();
 
-  constructor(defaultValues: NonNullable<object> = {}) {
-    this.data = defaultValues;
+  constructor(defaultValues: DefaultValue<NonNullable<object>> = {}) {
+    this.data = getDefaultValue(defaultValues);
   }
 
   listen(listener: DataEngineListener) {
@@ -46,7 +100,7 @@ export class DataEngine {
   }
 
   unlisten(listener: DataEngineListener) {
-    this.listeners.delete(listener);
+    this.listeners.remove(listener);
   }
 
   getData() {
@@ -72,12 +126,8 @@ export class DataEngine {
         if (propValue !== undefined) return propValue;
         cur[propKey] = getDefaultValue(defaultValue);
 
-        for (const listener of this.listeners) {
-          listener.onUpdate?.(currentKey, {
-            swallow: true,
-          });
-          listener.onInit?.(key);
-        }
+        this.listeners.onUpdate(currentKey, { swallow: true });
+        this.listeners.onInit(key);
         return cur[propKey];
       } else if (typeof propValue === 'object' && propValue !== null) {
         cur = propValue as Record<string, unknown>;
@@ -88,10 +138,7 @@ export class DataEngine {
           );
 
         cur = cur[propKey] = {};
-        for (const listener of this.listeners)
-          listener.onUpdate?.(currentKey, {
-            swallow: true,
-          });
+        this.listeners.onUpdate(currentKey, { swallow: true });
       }
       currentKey.push(propKey);
     }
@@ -105,18 +152,14 @@ export class DataEngine {
 
     if (Array.isArray(parent) && typeof prop === 'number') {
       const [deleted] = parent.splice(prop, 1);
-      for (const listener of this.listeners) {
-        listener.onUpdate?.(parentKey, { swallow: false });
-        listener.onDelete?.(key);
-      }
+      this.listeners.onUpdate(parentKey, { swallow: false });
+      this.listeners.onDelete(key);
       return deleted;
     } else if (typeof parent === 'object' && parent !== null) {
       const temp = (parent as Record<string, unknown>)[prop];
       delete parent[prop as never];
-      for (const listener of this.listeners) {
-        listener.onUpdate?.(parentKey, { swallow: true });
-        listener.onDelete?.(key);
-      }
+      this.listeners.onUpdate(parentKey, { swallow: true });
+      this.listeners.onDelete(key);
       return temp;
     }
   }
@@ -132,10 +175,7 @@ export class DataEngine {
   update(key: FieldKey, value: unknown): boolean {
     try {
       this.data = objectSet(this.data, key, value) as NonNullable<object>;
-      for (const listener of this.listeners)
-        listener.onUpdate?.(key, {
-          swallow: false,
-        });
+      this.listeners.onUpdate(key, { swallow: false });
       return true;
     } catch {
       return false;
@@ -191,20 +231,14 @@ export function useFieldValue<V = unknown>(
   const [value, setValue] = useState<V>(() => compute(engine.init(key, defaultValue)));
 
   useListener({
-    onUpdate(updatedKey, ctx) {
-      if (
-        (ctx.swallow && deepEqual(updatedKey, key)) ||
-        (!ctx.swallow && arrayStartsWith(key, updatedKey))
-      ) {
-        const computed = compute(engine.get(key));
-        if (isChanged(value, computed)) setValue(computed);
-      }
+    field: key,
+    onUpdate() {
+      const computed = compute(engine.get(key));
+      if (isChanged(value, computed)) setValue(computed);
     },
-    onDelete(updatedKey) {
-      if (deepEqual(updatedKey, key)) {
-        const computed = compute(engine.get(key));
-        if (isChanged(value, computed)) setValue(computed);
-      }
+    onDelete() {
+      const computed = compute(undefined);
+      if (isChanged(value, computed)) setValue(computed);
     },
   });
 
@@ -218,6 +252,7 @@ export function useListener(listener: DataEngineListener & { stf?: Stf }) {
 
   useEffect(() => {
     const internal: DataEngineListener = {
+      field: listener.field,
       onDelete(...args) {
         return listenerRef.current.onDelete?.(...args);
       },
@@ -233,5 +268,5 @@ export function useListener(listener: DataEngineListener & { stf?: Stf }) {
     return () => {
       engine.unlisten(internal);
     };
-  }, [engine]);
+  }, [engine, listener.field]);
 }
