@@ -3,7 +3,7 @@
 import { TypeNode } from '@/types';
 import { FieldSet } from './arg-form';
 import { FC, useRef, useState } from 'react';
-import { StfProvider, useDataEngine, useStf } from '@fumari/stf';
+import { StfProvider, useDataEngine, useListener, useStf } from '@fumari/stf';
 
 export function Story({ argTypes, Component }: { argTypes: TypeNode; Component: FC }) {
   const stf = useStf({
@@ -29,7 +29,7 @@ function StoryComponent({ Component }: { Component: FC }) {
   const engine = useDataEngine();
   const timerRef = useRef(0);
   const [args, setArgs] = useState(() => engine.getData());
-  engine.useListener({
+  useListener({
     onUpdate() {
       if (timerRef.current) window.clearTimeout(timerRef.current);
       timerRef.current = window.setTimeout(() => setArgs({ ...engine.getData() }), 500);

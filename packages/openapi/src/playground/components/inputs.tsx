@@ -1,7 +1,7 @@
 'use client';
 import { type ComponentProps, type HTMLAttributes, type ReactNode, useState } from 'react';
 import { ChevronRight, Plus, Trash2, X } from 'lucide-react';
-import { FieldKey, useArray, useDataEngine, useObject } from '@fumari/stf';
+import { FieldKey, useArray, useDataEngine, useFieldValue, useObject } from '@fumari/stf';
 import {
   Select,
   SelectContent,
@@ -57,7 +57,7 @@ export function ObjectInput({
   const field = useResolvedSchema(_field);
   const [nextName, setNextName] = useState('');
   const { properties, onAppend, onDelete } = useObject(fieldName, {
-    defaultValue: getDefaultValue(field) as object,
+    defaultValue: () => getDefaultValue(field) as object,
     properties: field.properties ?? {},
     fallback: field.additionalProperties,
     patternProperties: field.patternProperties,
@@ -165,7 +165,7 @@ export function FieldInput({
   fieldName: FieldKey;
 }) {
   const engine = useDataEngine();
-  const [value, setValue] = engine.useFieldValue(fieldName);
+  const [value, setValue] = useFieldValue(fieldName);
   const id = stringifyFieldKey(fieldName);
   if (field.type === 'null') return;
 
@@ -500,7 +500,9 @@ function ArrayInput({
   items: ParsedSchema;
 } & ComponentProps<'div'>) {
   const name = fieldName.at(-1) ?? '';
-  const { items, insertItem, removeItem } = useArray(fieldName, []);
+  const { items, insertItem, removeItem } = useArray(fieldName, {
+    defaultValue: [],
+  });
 
   return (
     <div {...props} className={cn('flex flex-col gap-2', props.className)}>

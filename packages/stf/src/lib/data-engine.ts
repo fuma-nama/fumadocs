@@ -1,7 +1,13 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 import { useEffect, useRef, useState } from 'react';
 import { objectGet, arrayStartsWith, objectSet, deepEqual, stringifyFieldKey } from './utils';
 import type { FieldKey } from './types';
+import { Stf, useDataEngine } from './stf';
+
+export type DefaultValue<T = unknown> = T | (() => T);
+
+function getDefaultValue<T>(defaultValue: DefaultValue<T>): T {
+  return typeof defaultValue === 'function' ? (defaultValue as () => T)() : defaultValue;
+}
 
 export interface DataEngineListener {
   /**
@@ -29,19 +35,18 @@ export interface DataEngineListener {
 export class DataEngine {
   private data: NonNullable<object>;
   private attachedDataMap = new Map<string, unknown>();
-  private readonly listeners: DataEngineListener[] = [];
+  private readonly listeners = new Set<DataEngineListener>();
 
   constructor(defaultValues: NonNullable<object> = {}) {
     this.data = defaultValues;
   }
 
   listen(listener: DataEngineListener) {
-    this.listeners.push(listener);
+    this.listeners.add(listener);
   }
 
   unlisten(listener: DataEngineListener) {
-    const idx = this.listeners.indexOf(listener);
-    if (idx !== -1) this.listeners.splice(idx, 1);
+    this.listeners.delete(listener);
   }
 
   getData() {
@@ -51,10 +56,10 @@ export class DataEngine {
   /**
    * init a field
    * @param key the key of field
-   * @param value the initial value, the field is also created for `undefined`
+   * @param defaultValue the initial value, the field is also created for `undefined`
    * @returns the value of initialized field, or the current value of field if already initialized
    */
-  init(key: FieldKey, value?: unknown): unknown {
+  init(key: FieldKey, defaultValue?: DefaultValue): unknown {
     if (key.length === 0) return this.data;
     let cur = this.data as Record<string, unknown>;
     const currentKey: FieldKey = [];
@@ -65,7 +70,7 @@ export class DataEngine {
 
       if (i === key.length - 1) {
         if (propValue !== undefined) return propValue;
-        cur[propKey] = value;
+        cur[propKey] = getDefaultValue(defaultValue);
 
         for (const listener of this.listeners) {
           listener.onUpdate?.(currentKey, {
@@ -73,7 +78,7 @@ export class DataEngine {
           });
           listener.onInit?.(key);
         }
-        return value;
+        return cur[propKey];
       } else if (typeof propValue === 'object' && propValue !== null) {
         cur = propValue as Record<string, unknown>;
       } else {
@@ -137,68 +142,6 @@ export class DataEngine {
     }
   }
 
-  useListener(listener: DataEngineListener) {
-    const listenerRef = useRef(listener);
-    listenerRef.current = listener;
-
-    useEffect(() => {
-      const internal: DataEngineListener = {
-        onDelete(...args) {
-          return listenerRef.current.onDelete?.(...args);
-        },
-        onInit(...args) {
-          return listenerRef.current.onInit?.(...args);
-        },
-        onUpdate(...args) {
-          return listenerRef.current.onUpdate?.(...args);
-        },
-      };
-
-      this.listen(internal);
-      return () => {
-        this.unlisten(internal);
-      };
-    }, []);
-  }
-
-  useFieldValue<V = unknown>(
-    key: FieldKey,
-    options: {
-      defaultValue?: unknown;
-      /**
-       * compute value from the actual field value.
-       *
-       * to re-compute on in-place updates (may happen on objects, arrays), you should clone the object here.
-       */
-      compute?: (currentValue: unknown) => V;
-      /** determine whether the value/computed value is changed */
-      isChanged?: (prev: V, next: V) => boolean;
-    } = {},
-  ) {
-    const { compute = (v) => v as V, defaultValue, isChanged = (a, b) => a !== b } = options;
-    const [value, setValue] = useState<V>(() => compute(this.init(key, defaultValue)));
-
-    this.useListener({
-      onUpdate: (updatedKey, ctx) => {
-        if (
-          (ctx.swallow && deepEqual(updatedKey, key)) ||
-          (!ctx.swallow && arrayStartsWith(key, updatedKey))
-        ) {
-          const computed = compute(this.get(key));
-          if (isChanged(value, computed)) setValue(computed);
-        }
-      },
-      onDelete: (updatedKey) => {
-        if (deepEqual(updatedKey, key)) {
-          const computed = compute(this.get(key));
-          if (isChanged(value, computed)) setValue(computed);
-        }
-      },
-    });
-
-    return [value, (newValue: unknown) => this.update(key, newValue)] as const;
-  }
-
   attachedData<T>(namespace: string) {
     return {
       get: (field: FieldKey): T | undefined => {
@@ -225,4 +168,70 @@ export class DataEngine {
     this.update([], data);
     this.attachedDataMap.clear();
   }
+}
+
+export function useFieldValue<V = unknown>(
+  key: FieldKey,
+  options: {
+    stf?: Stf;
+    defaultValue?: DefaultValue;
+
+    /**
+     * compute value from the actual field value.
+     *
+     * to re-compute on in-place updates (may happen on objects, arrays), you should clone the object here.
+     */
+    compute?: (currentValue: unknown) => V;
+    /** determine whether the value/computed value is changed */
+    isChanged?: (prev: V, next: V) => boolean;
+  } = {},
+) {
+  const engine = useDataEngine(options.stf);
+  const { compute = (v) => v as V, defaultValue, isChanged = (a, b) => a !== b } = options;
+  const [value, setValue] = useState<V>(() => compute(engine.init(key, defaultValue)));
+
+  useListener({
+    onUpdate(updatedKey, ctx) {
+      if (
+        (ctx.swallow && deepEqual(updatedKey, key)) ||
+        (!ctx.swallow && arrayStartsWith(key, updatedKey))
+      ) {
+        const computed = compute(engine.get(key));
+        if (isChanged(value, computed)) setValue(computed);
+      }
+    },
+    onDelete(updatedKey) {
+      if (deepEqual(updatedKey, key)) {
+        const computed = compute(engine.get(key));
+        if (isChanged(value, computed)) setValue(computed);
+      }
+    },
+  });
+
+  return [value, (newValue: unknown) => engine.update(key, newValue)] as const;
+}
+
+export function useListener(listener: DataEngineListener & { stf?: Stf }) {
+  const engine = useDataEngine(listener.stf);
+  const listenerRef = useRef(listener);
+  listenerRef.current = listener;
+
+  useEffect(() => {
+    const internal: DataEngineListener = {
+      onDelete(...args) {
+        return listenerRef.current.onDelete?.(...args);
+      },
+      onInit(...args) {
+        return listenerRef.current.onInit?.(...args);
+      },
+      onUpdate(...args) {
+        return listenerRef.current.onUpdate?.(...args);
+      },
+    };
+
+    engine.listen(internal);
+    return () => {
+      engine.unlisten(internal);
+    };
+  }, [engine]);
 }

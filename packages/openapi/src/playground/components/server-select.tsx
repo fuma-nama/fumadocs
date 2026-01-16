@@ -21,7 +21,7 @@ import {
 import { resolveServerUrl, withBase } from '@/utils/url';
 import type { ServerVariableObject } from '@/types';
 import type { NoReference } from '@/utils/schema';
-import { StfProvider, useDataEngine, useStf } from '@fumari/stf';
+import { StfProvider, useFieldValue, useListener, useStf } from '@fumari/stf';
 
 export default function ServerSelect(props: HTMLAttributes<HTMLDivElement>) {
   const { servers } = useApiContext();
@@ -90,7 +90,8 @@ function ServerSelectContent({
     defaultValues: () => structuredClone(defaultValues),
   });
   const timerRef = useRef<number | null>(null);
-  stf.dataEngine.useListener({
+  useListener({
+    stf,
     onUpdate() {
       if (timerRef.current !== null) window.clearTimeout(timerRef.current);
 
@@ -129,7 +130,7 @@ function Field({
   variable: NoReference<ServerVariableObject>;
   fieldName: string;
 }) {
-  const [value, setValue] = useDataEngine().useFieldValue([fieldName], {
+  const [value, setValue] = useFieldValue([fieldName], {
     compute(currentValue) {
       return typeof currentValue === 'string' ? currentValue : undefined;
     },

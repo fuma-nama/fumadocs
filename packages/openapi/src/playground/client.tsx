@@ -40,7 +40,15 @@ import type { ParsedSchema } from '@/utils/schema';
 import ServerSelect from './components/server-select';
 import { useStorageKey } from '@/ui/client/storage-key';
 import { useExampleRequests } from '@/ui/operation/usage-tabs/client';
-import { FieldKey, Stf, StfProvider, useDataEngine, useStf } from '@fumari/stf';
+import {
+  FieldKey,
+  Stf,
+  StfProvider,
+  useDataEngine,
+  useFieldValue,
+  useListener,
+  useStf,
+} from '@fumari/stf';
 import { objectGet, objectSet, stringifyFieldKey } from '@fumari/stf/lib/utils';
 import { FieldInput, FieldSet, JsonInput, ObjectInput } from './components/inputs';
 
@@ -193,7 +201,8 @@ export default function PlaygroundClient({
   });
 
   const timerRef = useRef<number | null>(null);
-  stf.dataEngine.useListener({
+  useListener({
+    stf,
     onUpdate() {
       if (timerRef.current) window.clearTimeout(timerRef.current);
       timerRef.current = window.setTimeout(
@@ -733,7 +742,7 @@ export const Custom = {
       defaultValue?: unknown;
     },
   ) {
-    const [value, setValue] = useDataEngine().useFieldValue(fieldName, options);
+    const [value, setValue] = useFieldValue(fieldName, options);
     return {
       value,
       setValue,

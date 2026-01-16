@@ -1,5 +1,5 @@
 import { createContext, ReactNode, use, useMemo } from 'react';
-import { DataEngine } from './data-engine';
+import { DataEngine, DefaultValue, useFieldValue } from './data-engine';
 import { FieldKey } from './types';
 import { deepEqual } from './utils';
 
@@ -17,7 +17,7 @@ export function useStf(options: {
   /**
    * Note: the passed object will be modified in place, use `structuredClone()` to keep the original object unchanged.
    */
-  defaultValues?: Record<string, unknown> | (() => Record<string, unknown>);
+  defaultValues?: DefaultValue<Record<string, unknown>>;
 }): Stf {
   const { defaultValues } = options;
 
@@ -34,7 +34,8 @@ export function useStf(options: {
   );
 }
 
-export function useDataEngine() {
+export function useDataEngine(stf?: Stf) {
+  if (stf) return stf.dataEngine;
   return use(Context)!.dataEngine;
 }
 
@@ -43,10 +44,13 @@ export interface ArrayItemInfo {
   index: number;
 }
 
-export function useArray(field: FieldKey, defaultValue?: unknown[]) {
+export function useArray(
+  field: FieldKey,
+  options: { defaultValue?: DefaultValue<unknown[]> } = {},
+) {
   const engine = useDataEngine();
-  const [items] = engine.useFieldValue(field, {
-    defaultValue,
+  const [items] = useFieldValue(field, {
+    defaultValue: options.defaultValue,
     compute(value) {
       const items: ArrayItemInfo[] = [];
       if (Array.isArray(value)) {
@@ -94,14 +98,14 @@ export type PropertyItemInfo<T> =
 export function useObject<T>(
   field: FieldKey,
   options: {
-    defaultValue?: object;
+    defaultValue?: DefaultValue<object>;
     properties: Record<string, T>;
     patternProperties?: Record<string, T>;
     fallback?: T;
   },
 ) {
   const engine = useDataEngine();
-  const [objectKeys] = engine.useFieldValue(field, {
+  const [objectKeys] = useFieldValue(field, {
     defaultValue: options.defaultValue,
     compute(currentValue) {
       return currentValue ? Object.keys(currentValue) : [];

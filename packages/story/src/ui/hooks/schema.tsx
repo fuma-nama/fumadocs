@@ -20,7 +20,6 @@ export function useFieldInfo(
   const engine = useDataEngine();
   const attachedData = engine.attachedData<FieldInfo>('field-info');
   const [info, setInfo] = useState<FieldInfo>(() => {
-    const value = engine.get(fieldName);
     const initialInfo = attachedData.get(fieldName);
     if (initialInfo) return initialInfo;
 
@@ -30,11 +29,8 @@ export function useFieldInfo(
 
     if (node.type === 'union') {
       // Try to find which union type matches the current value
-      const matchingIndex = node.types.findIndex((type) => {
-        const defaultValue = getDefaultValue(type);
-        return JSON.stringify(value) === JSON.stringify(defaultValue);
-      });
-      out.unionIndex = matchingIndex >= 0 ? matchingIndex : 0;
+      const matchingIndex = node.types.findIndex(validate);
+      out.unionIndex = matchingIndex === -1 ? 0 : matchingIndex;
     }
 
     return out;
@@ -63,7 +59,33 @@ export function useFieldInfo(
   };
 }
 
-// Placeholder for anyFields equivalent
-export const anyFields: TypeNode = {
-  type: 'unknown',
-};
+function validate(node: TypeNode, value: unknown): boolean {
+  switch (node.type) {
+    case 'array':
+      return Array.isArray(value) && value.every((item) => validate(node.elementType, item));
+    case 'enum':
+      return node.members.some((member) => member.value === value);
+    case 'intersection':
+      return validate(node.intersection, value);
+    case 'union':
+      return node.types.some((t) => validate(t, value));
+    case 'null':
+      return value === 'null';
+    case 'literal':
+      return node.value === value;
+    case 'unknown':
+    case 'never':
+      return true;
+    case 'object':
+      return (
+        typeof value === 'object' &&
+        value !== null &&
+        node.properties.every((prop) => {
+          const propValue = value[prop.name as never];
+          return (!prop.required && propValue === undefined) || validate(prop.type, propValue);
+        })
+      );
+    default:
+      return typeof value === node.type;
+  }
+}

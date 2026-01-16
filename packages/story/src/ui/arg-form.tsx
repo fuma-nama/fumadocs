@@ -1,7 +1,7 @@
 'use client';
 import { type ComponentProps, type HTMLAttributes, type ReactNode, useState } from 'react';
 import { ChevronRight, Plus, Trash2, X } from 'lucide-react';
-import { FieldKey, useArray, useDataEngine, useObject } from '@fumari/stf';
+import { FieldKey, useArray, useDataEngine, useFieldValue, useObject } from '@fumari/stf';
 import {
   Select,
   SelectContent,
@@ -55,7 +55,7 @@ export function ObjectInput({
   fieldName: FieldKey;
 } & ComponentProps<'div'>) {
   const { properties } = useObject(fieldName, {
-    defaultValue: getDefaultValue(node) as object,
+    defaultValue: () => getDefaultValue(node) as object,
     properties: Object.fromEntries(node.properties.map((prop) => [prop.name, prop.type])),
   });
 
@@ -115,7 +115,7 @@ export function FieldInput({
   fieldName: FieldKey;
 }) {
   const engine = useDataEngine();
-  const [value, setValue] = engine.useFieldValue(fieldName);
+  const [value, setValue] = useFieldValue(fieldName);
   const id = stringifyFieldKey(fieldName);
 
   function renderUnset(children: ReactNode) {
@@ -391,7 +391,9 @@ function ArrayInput({
   items: TypeNode;
 } & ComponentProps<'div'>) {
   const name = fieldName.at(-1) ?? '';
-  const { items, insertItem, removeItem } = useArray(fieldName, []);
+  const { items, insertItem, removeItem } = useArray(fieldName, {
+    defaultValue: [],
+  });
 
   return (
     <div {...props} className={cn('flex flex-col gap-2', props.className)}>

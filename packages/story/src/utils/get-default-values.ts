@@ -14,6 +14,8 @@ export function getDefaultValue(node: TypeNode): unknown {
       return undefined;
     case 'string':
       return '';
+    case 'bigint':
+      return 0n;
     case 'number':
       return 0;
     case 'boolean':
@@ -27,21 +29,7 @@ export function getDefaultValue(node: TypeNode): unknown {
       // Return default value of first union type
       return node.types.length > 0 ? getDefaultValue(node.types[0]!) : undefined;
     case 'intersection': {
-      // For intersection, merge object properties if all are objects
-      const objects = node.members.filter((t) => t.type === 'object') as Array<
-        Extract<TypeNode, { type: 'object' }>
-      >;
-      if (objects.length > 0) {
-        const merged: Record<string, unknown> = {};
-        for (const obj of objects) {
-          for (const prop of obj.properties) {
-            merged[prop.name] = getDefaultValue(prop.type);
-          }
-        }
-        return merged;
-      }
-      // Otherwise return default of first type
-      return node.members.length > 0 ? getDefaultValue(node.members[0]!) : undefined;
+      return getDefaultValue(node.intersection);
     }
     case 'unknown':
       return undefined;
