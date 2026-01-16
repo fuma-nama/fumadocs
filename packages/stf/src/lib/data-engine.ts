@@ -55,7 +55,7 @@ export class DataEngine {
    * @returns the value of initialized field, or the current value of field if already initialized
    */
   init(key: FieldKey, value?: unknown): unknown {
-    if (key.length === 0) throw new Error('cannot init for empty key.');
+    if (key.length === 0) return this.data;
     let cur = this.data as Record<string, unknown>;
     const currentKey: FieldKey = [];
 

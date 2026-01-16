@@ -10,12 +10,12 @@ import {
   SelectValue,
 } from '@/ui/components/select';
 import { Input, labelVariants } from '@/ui/components/input';
-import { getDefaultValue } from '../get-default-values';
+import { getDefaultValue } from '../utils/get-default-values';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { FormatFlags, typeToString } from '@/utils/type-to-string';
-import { useFieldInfo, useResolvedTypeNode } from '@/playground/schema';
-import type { TypeNode } from '../lib/types';
+import { useFieldInfo } from '@/ui/hooks/schema';
+import type { ObjectNode, TypeNode } from '../types';
 import { stringifyFieldKey } from '@fumari/stf/lib/utils';
 
 function FieldLabel(props: ComponentProps<'label'>) {
@@ -47,26 +47,17 @@ function FieldLabelType(props: ComponentProps<'code'>) {
 }
 
 export function ObjectInput({
-  field,
+  field: node,
   fieldName,
   ...props
 }: {
-  field: Extract<TypeNode, { type: 'object' }>;
+  field: ObjectNode;
   fieldName: FieldKey;
 } & ComponentProps<'div'>) {
-  const node = useResolvedTypeNode(field);
-
-  const propertiesMap =
-    node.type === 'object'
-      ? Object.fromEntries(node.properties.map((prop) => [prop.name, prop.type]))
-      : {};
-
   const { properties } = useObject(fieldName, {
     defaultValue: getDefaultValue(node) as object,
-    properties: propertiesMap,
+    properties: Object.fromEntries(node.properties.map((prop) => [prop.name, prop.type])),
   });
-
-  if (node.type !== 'object') return null;
 
   return (
     <div {...props} className={cn('grid grid-cols-1 gap-4 @md:grid-cols-2', props.className)}>
@@ -144,7 +135,13 @@ export function FieldInput({
     );
   }
 
-  if (field.type === 'null' || field.type === 'undefined') {
+  if (
+    field.type === 'null' ||
+    field.type === 'undefined' ||
+    field.type === 'never' ||
+    field.type === 'unknown' ||
+    field.type === 'literal'
+  ) {
     return null;
   }
 
@@ -178,24 +175,6 @@ export function FieldInput({
     );
   }
 
-  if (field.type === 'literal') {
-    return renderUnset(
-      <Input
-        id={id}
-        placeholder="Enter value"
-        type={typeof field.value === 'number' ? 'number' : 'text'}
-        value={String(value ?? field.value)}
-        onChange={(e) => {
-          if (typeof field.value === 'number') {
-            setValue(Number.isNaN(e.target.valueAsNumber) ? field.value : e.target.valueAsNumber);
-          } else {
-            setValue(e.target.value);
-          }
-        }}
-      />,
-    );
-  }
-
   if (field.type === 'boolean') {
     return (
       <Select
@@ -214,15 +193,20 @@ export function FieldInput({
     );
   }
 
-  const isNumber = field.type === 'number';
   return renderUnset(
     <Input
       id={id}
       placeholder="Enter value"
-      type={isNumber ? 'number' : 'text'}
+      type={field.type === 'number' || field.type === 'bigint' ? 'number' : 'text'}
       value={String(value ?? '')}
       onChange={(e) => {
-        if (isNumber) {
+        if (field.type === 'bigint') {
+          try {
+            setValue(BigInt(e.target.value));
+          } catch {
+            setValue(undefined);
+          }
+        } else if (field.type === 'number') {
           setValue(Number.isNaN(e.target.valueAsNumber) ? undefined : e.target.valueAsNumber);
         } else {
           setValue(e.target.value);
@@ -232,32 +216,33 @@ export function FieldInput({
   );
 }
 
-export function FieldSet({
-  field: _field,
-  fieldName,
-  toolbar,
-  name,
-  isRequired,
-  depth = 0,
-  slotType,
-  collapsible = true,
-  ...props
-}: HTMLAttributes<HTMLElement> & {
-  isRequired?: boolean;
-  name?: ReactNode;
-  field: TypeNode;
-  fieldName: FieldKey;
-  depth?: number;
+export function FieldSet(
+  props: HTMLAttributes<HTMLElement> & {
+    isRequired?: boolean;
+    name?: ReactNode;
+    field: TypeNode;
+    fieldName: FieldKey;
 
-  slotType?: ReactNode;
-  toolbar?: ReactNode;
-  collapsible?: boolean;
-}) {
-  const field = useResolvedTypeNode(_field);
+    slotType?: ReactNode;
+    toolbar?: ReactNode;
+    collapsible?: boolean;
+  },
+) {
+  const {
+    field,
+    fieldName,
+    toolbar,
+    name,
+    isRequired,
+    slotType,
+    collapsible = true,
+    ...rest
+  } = props;
   const [show, setShow] = useState(!collapsible);
   const { info, updateInfo } = useFieldInfo(fieldName, field);
   const id = stringifyFieldKey(fieldName);
   const dataEngine = useDataEngine();
+  if (field.type === 'never') return;
 
   if (field.type === 'union') {
     const showSelect = field.types.length > 1;
@@ -265,12 +250,11 @@ export function FieldSet({
 
     return (
       <FieldSet
-        {...props}
+        {...rest}
         name={name}
         fieldName={fieldName}
         isRequired={isRequired}
         field={selectedType}
-        depth={depth + 1}
         slotType={showSelect ? false : slotType}
         toolbar={
           <>
@@ -299,61 +283,14 @@ export function FieldSet({
   }
 
   if (field.type === 'intersection') {
-    const merged = info.intersection?.merged ?? {
-      type: 'object' as const,
-      properties: field.types
-        .filter((t): t is Extract<TypeNode, { type: 'object' }> => t.type === 'object')
-        .flatMap((obj) => obj.properties),
-    };
-
-    return (
-      <fieldset
-        {...props}
-        className={cn('flex flex-col gap-1.5 col-span-full @container', props.className)}
-      >
-        <FieldLabel htmlFor={id}>
-          {collapsible && (
-            <button
-              type="button"
-              onClick={() => {
-                dataEngine.init(fieldName, getDefaultValue(merged));
-                setShow((prev) => !prev);
-              }}
-              className={cn(
-                buttonVariants({
-                  size: 'icon-xs',
-                  color: 'ghost',
-                  className: 'text-fd-muted-foreground -ms-1',
-                }),
-              )}
-            >
-              <ChevronRight className={cn(show && 'rotate-90')} />
-            </button>
-          )}
-          <FieldLabelName required={isRequired}>{name}</FieldLabelName>
-          {slotType ?? <FieldLabelType>{typeToString(field)}</FieldLabelType>}
-          {toolbar}
-        </FieldLabel>
-        {show && merged.type === 'object' && (
-          <ObjectInput
-            field={merged}
-            fieldName={fieldName}
-            {...props}
-            className={cn(
-              'rounded-lg border border-fd-primary/20 bg-fd-background/50 p-2 shadow-sm',
-              props.className,
-            )}
-          />
-        )}
-      </fieldset>
-    );
+    return <FieldSet {...props} field={field.intersection} />;
   }
 
   if (field.type === 'object') {
     return (
       <fieldset
-        {...props}
-        className={cn('flex flex-col gap-1.5 col-span-full @container', props.className)}
+        {...rest}
+        className={cn('flex flex-col gap-1.5 col-span-full @container', rest.className)}
       >
         <FieldLabel htmlFor={id}>
           {collapsible && (
@@ -382,10 +319,10 @@ export function FieldSet({
           <ObjectInput
             field={field}
             fieldName={fieldName}
-            {...props}
+            {...rest}
             className={cn(
               'rounded-lg border border-fd-primary/20 bg-fd-background/50 p-2 shadow-sm',
-              props.className,
+              rest.className,
             )}
           />
         )}
@@ -395,7 +332,7 @@ export function FieldSet({
 
   if (field.type === 'array') {
     return (
-      <fieldset {...props} className={cn('flex flex-col gap-1.5 col-span-full', props.className)}>
+      <fieldset {...rest} className={cn('flex flex-col gap-1.5 col-span-full', rest.className)}>
         <FieldLabel htmlFor={id}>
           {collapsible && (
             <button
@@ -423,10 +360,10 @@ export function FieldSet({
           <ArrayInput
             fieldName={fieldName}
             items={field.elementType}
-            {...props}
+            {...rest}
             className={cn(
               'rounded-lg border border-fd-primary/20 bg-fd-background/50 p-2 shadow-sm',
-              props.className,
+              rest.className,
             )}
           />
         )}
@@ -434,7 +371,7 @@ export function FieldSet({
     );
   }
   return (
-    <fieldset {...props} className={cn('flex flex-col gap-1.5', props.className)}>
+    <fieldset {...rest} className={cn('flex flex-col gap-1.5', rest.className)}>
       <FieldLabel htmlFor={id}>
         <FieldLabelName required={isRequired}>{name}</FieldLabelName>
         {slotType ?? <FieldLabelType>{typeToString(field)}</FieldLabelType>}

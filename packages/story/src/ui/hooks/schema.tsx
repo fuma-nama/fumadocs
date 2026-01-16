@@ -1,13 +1,10 @@
 import { useState } from 'react';
 import { FieldKey, useDataEngine } from '@fumari/stf';
-import type { TypeNode } from '../lib/types';
-import { getDefaultValue } from '../get-default-values';
+import type { TypeNode } from '../../types';
+import { getDefaultValue } from '../../utils/get-default-values';
 
 export interface FieldInfo {
   unionIndex: number;
-  intersection?: {
-    merged: TypeNode;
-  };
 }
 
 /**
@@ -40,20 +37,6 @@ export function useFieldInfo(
       out.unionIndex = matchingIndex >= 0 ? matchingIndex : 0;
     }
 
-    if (node.type === 'intersection') {
-      // For intersection, merge all object types
-      const objects = node.types.filter((t) => t.type === 'object') as Array<
-        Extract<TypeNode, { type: 'object' }>
-      >;
-      if (objects.length > 0) {
-        const merged: TypeNode = {
-          type: 'object',
-          properties: objects.flatMap((obj) => obj.properties),
-        };
-        out.intersection = { merged };
-      }
-    }
-
     return out;
   });
 
@@ -73,8 +56,6 @@ export function useFieldInfo(
       let valueNode: TypeNode = node;
       if (node.type === 'union' && updated.unionIndex >= 0) {
         valueNode = node.types[updated.unionIndex]!;
-      } else if (updated.intersection) {
-        valueNode = updated.intersection.merged;
       }
 
       engine.update(fieldName, getDefaultValue(valueNode));
@@ -82,32 +63,7 @@ export function useFieldInfo(
   };
 }
 
-/**
- * Resolve TypeNode (no-op for TypeNode, but kept for API compatibility).
- */
-export function useResolvedTypeNode(node: TypeNode): TypeNode {
-  return node;
-}
-
-/**
- * Schema scope (simplified for TypeNode - no readOnly/writeOnly needed).
- */
-export interface SchemaScope {
-  writeOnly: boolean;
-  readOnly: boolean;
-}
-
-export function useSchemaScope(): SchemaScope {
-  // For TypeNode, we don't need readOnly/writeOnly, but keep for compatibility
-  return {
-    writeOnly: false,
-    readOnly: false,
-  };
-}
-
 // Placeholder for anyFields equivalent
 export const anyFields: TypeNode = {
   type: 'unknown',
-  typeName: 'any',
 };
-

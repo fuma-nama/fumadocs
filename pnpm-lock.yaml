@@ -62,6 +62,9 @@ importers:
       '@fumadocs/mdx-remote':
         specifier: workspace:*
         version: link:../../packages/mdx-remote
+      '@fumadocs/story':
+        specifier: workspace:*
+        version: link:../../packages/story
       '@mixedbread/sdk':
         specifier: ^0.50.0
         version: 0.50.0

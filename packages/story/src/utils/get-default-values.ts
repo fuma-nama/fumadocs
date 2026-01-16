@@ -1,4 +1,4 @@
-import type { TypeNode } from './lib/types';
+import type { TypeNode } from '../types';
 
 export function getDefaultValue(node: TypeNode): unknown {
   switch (node.type) {
@@ -28,7 +28,7 @@ export function getDefaultValue(node: TypeNode): unknown {
       return node.types.length > 0 ? getDefaultValue(node.types[0]!) : undefined;
     case 'intersection': {
       // For intersection, merge object properties if all are objects
-      const objects = node.types.filter((t) => t.type === 'object') as Array<
+      const objects = node.members.filter((t) => t.type === 'object') as Array<
         Extract<TypeNode, { type: 'object' }>
       >;
       if (objects.length > 0) {
@@ -41,7 +41,7 @@ export function getDefaultValue(node: TypeNode): unknown {
         return merged;
       }
       // Otherwise return default of first type
-      return node.types.length > 0 ? getDefaultValue(node.types[0]!) : undefined;
+      return node.members.length > 0 ? getDefaultValue(node.members[0]!) : undefined;
     }
     case 'unknown':
       return undefined;

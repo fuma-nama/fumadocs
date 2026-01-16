@@ -1,106 +1,99 @@
-import { Project, type Type } from 'ts-morph';
-import * as path from 'node:path';
+import { Project } from 'ts-morph';
 import * as fs from 'node:fs/promises';
 import { createHash } from 'node:crypto';
-import { typeToNode } from './lib/type-tree';
-import type { Cache } from './lib/cache';
-import type { TypeNode } from './lib/types';
+import { createTypeTreeBuilder, literalEnumHandler } from './type-tree-builder';
+import type { Cache } from './cache';
+import type { TypeNode } from './types';
+import { FC } from 'react';
+import { fileURLToPath } from 'node:url';
 
-export interface StoryOptions {
-  from: {
-    file: string;
-    export: string;
-  };
+export interface StoryOptions<C extends FC> {
+  /**
+   * the export name of story
+   *
+   * @defaultValue `story`
+   */
+  name?: string;
+  Component: C;
   tsconfigPath?: string;
   cache?: Cache | false;
 }
 
-export * from './lib/types';
-export * from './lib/cache';
+export * from './types';
+export * from './cache';
 
-export interface StoryResult {
-  props: TypeNode;
+export interface StoryResult<C extends FC> {
+  analysis: {
+    props: TypeNode;
+  };
+
+  WithControl: FC<undefined>;
+
+  _static_: {
+    component: C;
+  };
 }
 
-export async function defineStory(options: StoryOptions): Promise<StoryResult> {
-  const filePath = path.resolve(options.from.file);
+async function cached<V>(cache: Cache | false, key: string, op: () => V | Promise<V>): Promise<V> {
+  if (cache === false) return op();
+  const cached = await cache.read(key);
+  if (cached) return cached as V;
+
+  const out = await op();
+  await cache.write(key, out);
+  return out;
+}
+
+export async function defineStory<C extends FC>(
+  callerUrl: string,
+  options: StoryOptions<C>,
+): Promise<StoryResult<C>> {
+  const { Component, cache = false, tsconfigPath = './tsconfig.json', name = 'story' } = options;
+  const filePath = fileURLToPath(callerUrl);
   const fileContent = await fs.readFile(filePath, 'utf-8');
 
   // Generate cache key based on file path, export name, and content hash
   const contentHash = createHash('MD5').update(fileContent).digest('hex').slice(0, 12);
-  const cacheKey = `${filePath}:${options.from.export}:${contentHash}`;
 
-  // Try to read from cache
-  if (options.cache !== false) {
-    const cached = await options.cache?.read(cacheKey);
-    if (cached) {
-      return cached as StoryResult;
-    }
-  }
+  const { propsNode } = await cached(
+    cache,
+    `extract-types:${filePath}:${name}:${contentHash}`,
+    () => {
+      const project = new Project({
+        tsConfigFilePath: tsconfigPath,
+        skipAddingFilesFromTsConfig: true,
+      });
 
-  const project = new Project({
-    tsConfigFilePath: options.tsconfigPath ?? './tsconfig.json',
-    skipAddingFilesFromTsConfig: true,
-  });
+      const injection = `export type _StoryProps_ = import('@fumadocs/story').GetProps<typeof ${name}>`;
+      const sourceFile = project.createSourceFile(filePath, `${fileContent}\n${injection}`, {
+        overwrite: true,
+      });
+      const exportedDeclarations = sourceFile.getExportedDeclarations();
+      const declaration = exportedDeclarations.get('_StoryProps_')?.[0];
 
-  const sourceFile = project.addSourceFileAtPath(filePath);
-
-  const exportedDeclarations = sourceFile.getExportedDeclarations();
-  const declaration = exportedDeclarations.get(options.from.export)?.[0];
-
-  if (!declaration) {
-    throw new Error(`Export "${options.from.export}" not found in file "${options.from.file}"`);
-  }
-
-  const type = declaration.getType();
-  const checker = project.getTypeChecker();
-
-  // Extract props type from React component
-  let propsType: Type | undefined;
-
-  // Check if it's a function component
-  const callSignatures = type.getCallSignatures();
-  if (callSignatures.length > 0) {
-    // Function component: props are the first parameter
-    const firstParam = callSignatures[0]?.getParameters()[0];
-    if (firstParam) {
-      propsType = firstParam.getTypeAtLocation(declaration);
-    }
-  } else if (type.isClassOrInterface()) {
-    // Class component: look for props property or constructor parameter
-    const propsProperty = type.getProperty('props');
-    if (propsProperty) {
-      propsType = propsProperty.getTypeAtLocation(declaration);
-    } else {
-      // Try to get from constructor
-      const constructSignatures = type.getConstructSignatures();
-      if (constructSignatures.length > 0) {
-        const firstParam = constructSignatures[0]?.getParameters()[0];
-        if (firstParam) {
-          propsType = firstParam.getTypeAtLocation(declaration);
-        }
+      if (!declaration) {
+        throw new Error(`Export "${name}" not found in file "${filePath}"`);
       }
-    }
-  } else if (type.isObject()) {
-    // Already an object type, use it directly
-    propsType = type;
-  }
 
-  if (!propsType) {
-    // Fallback: use the type itself
-    propsType = type;
-  }
+      const propsType = declaration.getType();
+      const typeTreeBuilder = createTypeTreeBuilder([literalEnumHandler]);
+      return {
+        propsNode: typeTreeBuilder.typeToNode(propsType, declaration),
+      };
+    },
+  );
 
-  const propsNode = typeToNode(propsType, checker, declaration);
+  return {
+    _static_: {
+      component: Component,
+    },
+    analysis: {
+      props: propsNode,
+    },
+    async WithControl() {
+      const { Story } = await import('./ui/story');
 
-  const result: StoryResult = {
-    props: propsNode,
+      return <Story Component={Component} argTypes={propsNode} />;
+    },
   };
-
-  // Write to cache
-  if (options.cache !== false) {
-    await options.cache?.write(cacheKey, result);
-  }
-
-  return result;
 }

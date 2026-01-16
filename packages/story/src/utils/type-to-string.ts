@@ -1,4 +1,4 @@
-import type { TypeNode } from '../lib/types';
+import type { TypeNode } from '../types';
 
 export enum FormatFlags {
   None = 0,
@@ -6,17 +6,9 @@ export enum FormatFlags {
 }
 
 export function typeToString(node: TypeNode, flags: FormatFlags = FormatFlags.None): string {
+  if (node.displayName) return node.displayName;
+
   switch (node.type) {
-    case 'string':
-      return 'string';
-    case 'number':
-      return 'number';
-    case 'boolean':
-      return 'boolean';
-    case 'null':
-      return 'null';
-    case 'undefined':
-      return 'undefined';
     case 'array':
       return `Array<${typeToString(node.elementType, flags)}>`;
     case 'object':
@@ -31,8 +23,8 @@ export function typeToString(node: TypeNode, flags: FormatFlags = FormatFlags.No
     case 'union':
       return node.types.map((t) => typeToString(t, flags)).join(' | ');
     case 'intersection':
-      return node.types.map((t) => typeToString(t, flags)).join(' & ');
-    case 'unknown':
-      return node.typeName;
+      return node.members.map((t) => typeToString(t, flags)).join(' & ');
+    default:
+      return node.type;
   }
 }

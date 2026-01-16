@@ -3,6 +3,7 @@
 @import 'fumadocs-ui/css/preset.css';
 @import 'fumadocs-twoslash/twoslash.css';
 @import 'fumadocs-openapi/css/preset.css';
+@import '@fumadocs/story/css/preset.css';
 @plugin 'tailwindcss-animate';
 
 @theme {

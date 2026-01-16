@@ -7,13 +7,14 @@
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/fumadocs",
   "files": [
+    "css",
     "dist"
   ],
   "type": "module",
   "exports": {
     ".": "./dist/index.js",
-    "./lib/utils": "./dist/lib/utils.js",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./css/*": "./css/*"
   },
   "publishConfig": {
     "access": "public"
@@ -44,6 +45,7 @@
   },
   "peerDependencies": {
     "@types/react": "*",
+    "fumadocs-ui": "16.x.x",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
