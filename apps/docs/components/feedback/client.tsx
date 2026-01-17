@@ -259,7 +259,9 @@ export function FeedbackBlock({
           Feedback
         </PopoverTrigger>
 
-        {children}
+        <div className="[.prose-no-margin_&]:prose-no-margin">
+          {children}
+        </div>
       </div>
 
       <PopoverContent className="min-w-[300px]">
