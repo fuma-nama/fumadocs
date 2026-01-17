@@ -1,6 +1,11 @@
 import * as fs from 'node:fs/promises';
 import { createHash } from 'node:crypto';
-import { createTypeTreeBuilder, literalEnumHandler } from './type-tree-builder';
+import {
+  createTypeTreeBuilder,
+  Handler,
+  literalEnumHandler,
+  reactNodeHandler,
+} from './type-tree-builder';
 import { cached, type Cache } from './cache';
 import type { TypeNode } from './types';
 import { ComponentPropsWithoutRef, FC } from 'react';
@@ -37,15 +42,13 @@ export interface StoryOptions<C extends FC<any>> {
       | {
           /** default to `tsconfig.json` under cwd */
           tsconfigPath?: string;
-          /** select props to include as control */
-          selector?: ControlSelector<ComponentPropsWithoutRef<C>>;
+          /** modify generated node */
+          transform?: (node: TypeNode) => TypeNode;
+          /** custom type-to-node handler */
+          handlers?: Handler[];
         };
   };
 }
-
-type ControlSelector<Props> = {
-  [K in keyof Props]?: boolean | ControlSelector<Props[K]>;
-};
 
 export * from './types';
 export { type Cache, createFileSystemCache } from './cache';
@@ -97,9 +100,14 @@ export function defineStory<C extends FC<any>>(
         }
 
         const propsType = declaration.getType();
-        const typeTreeBuilder = createTypeTreeBuilder([literalEnumHandler]);
+        let propsNode = createTypeTreeBuilder(project, [
+          literalEnumHandler,
+          reactNodeHandler,
+          ...(controls.handlers ?? []),
+        ]).typeToNode(propsType, declaration);
+        if (controls.transform) propsNode = controls.transform(propsNode);
         return {
-          propsNode: typeTreeBuilder.typeToNode(propsType, declaration),
+          propsNode,
         };
       },
     );

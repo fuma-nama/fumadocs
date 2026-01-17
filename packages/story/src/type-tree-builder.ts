@@ -1,4 +1,4 @@
-import { Type, Node, ts } from 'ts-morph';
+import { Type, Node, ts, type Project } from 'ts-morph';
 import type { LiteralNode, TypeNode, UnionNode } from './types';
 
 export enum TypeToNodeFlag {
@@ -16,6 +16,7 @@ export type Handler = (options: {
   flag: TypeToNodeFlag;
 
   builder: TypeTreeBuilder;
+  project: Project;
   cache: Map<TypeToNodeFlag, WeakMap<Type, TypeNode>>;
   getCache: () => TypeNode | undefined;
   setCache: (value: TypeNode) => void;
@@ -164,8 +165,14 @@ const baseHandler: Handler = ({ type, location, flag, setCache, root }) => {
     }
   }
 
+  // Handle primitive types
+  if (type.isString()) return { type: 'string' };
+  if (type.isNumber()) return { type: 'number' };
+  if (type.isBoolean()) return { type: 'boolean' };
+  if (type.isBigInt()) return { type: 'bigint' };
+
   // Handle objects and interfaces
-  if (type.isObject() || type.isClassOrInterface()) {
+  if (type.isObject() || type.isClassOrInterface() || type.getProperties().length > 0) {
     const properties = type.getProperties();
     const result: TypeNode = {
       type: 'object',
@@ -197,17 +204,24 @@ const baseHandler: Handler = ({ type, location, flag, setCache, root }) => {
     return result;
   }
 
-  // Handle primitive types
-  if (type.isString()) return { type: 'string' };
-  if (type.isNumber()) return { type: 'number' };
-  if (type.isBoolean()) return { type: 'boolean' };
-  if (type.isBigInt()) return { type: 'bigint' };
-
   // Fallback: return unknown with type name
   return {
     type: 'unknown',
     displayName: type.getText(location, ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope),
   };
+};
+
+export const reactNodeHandler: Handler = ({ type, location, flag, next }) => {
+  // a rough solution but works
+  // may need some improvements to do something like `Exclude<T, ReactNode> | string`
+  if (type.getUnionTypes().length > 1 && type.getText().includes('React.ReactNode')) {
+    return {
+      type: 'string',
+      displayName: 'ReactNode',
+    };
+  }
+
+  return next(type, location, flag);
 };
 
 export const literalEnumHandler: Handler = ({ type, location, flag, next }) => {
@@ -237,7 +251,7 @@ export const literalEnumHandler: Handler = ({ type, location, flag, next }) => {
   return result;
 };
 
-export function createTypeTreeBuilder(customHandlers: Handler[] = []) {
+export function createTypeTreeBuilder(project: Project, customHandlers: Handler[] = []) {
   const handlers: Handler[] = [...customHandlers, baseHandler];
 
   function callHandler(
@@ -253,6 +267,7 @@ export function createTypeTreeBuilder(customHandlers: Handler[] = []) {
     if (!handler) return { type: 'never' };
 
     return handler({
+      project,
       builder,
       cache,
       type,

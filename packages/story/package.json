@@ -31,6 +31,7 @@
     "@radix-ui/react-select": "^2.2.6",
     "class-variance-authority": "^0.7.1",
     "lucide-react": "^0.562.0",
+    "react-error-boundary": "^6.1.0",
     "tailwind-merge": "^3.4.0",
     "ts-morph": "^27.0.2"
   },
