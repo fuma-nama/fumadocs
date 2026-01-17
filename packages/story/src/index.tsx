@@ -3,8 +3,11 @@ import { createHash } from 'node:crypto';
 import { createTypeTreeBuilder, literalEnumHandler } from './type-tree-builder';
 import { cached, type Cache } from './cache';
 import type { TypeNode } from './types';
-import { FC } from 'react';
+import { ComponentPropsWithoutRef, FC } from 'react';
 import { fileURLToPath } from 'node:url';
+import { Project } from 'ts-morph';
+
+type Awaitable<T> = T | Promise<T>;
 
 export interface StoryOptions<C extends FC<any>> {
   /**
@@ -14,18 +17,40 @@ export interface StoryOptions<C extends FC<any>> {
    */
   name?: string;
   Component: C;
-  tsconfigPath?: string;
   cache?: Cache | false;
+
+  /**
+   * story arguments
+   */
+  args?: {
+    /**
+     * the default values of arguments
+     */
+    initial?: ComponentPropsWithoutRef<C> | (() => Awaitable<ComponentPropsWithoutRef<C>>);
+    /**
+     * customise the generated controls, by default generated from component props using TypeScript compiler.
+     */
+    controls?:
+      | {
+          node: TypeNode;
+        }
+      | {
+          /** default to `tsconfig.json` under cwd */
+          tsconfigPath?: string;
+          /** select props to include as control */
+          selector?: ControlSelector<ComponentPropsWithoutRef<C>>;
+        };
+  };
 }
 
+type ControlSelector<Props> = {
+  [K in keyof Props]?: boolean | ControlSelector<Props[K]>;
+};
+
 export * from './types';
-export * from './cache';
+export { type Cache, createFileSystemCache } from './cache';
 
 export interface StoryResult<C extends FC<any>> {
-  analysis: {
-    props: TypeNode;
-  };
-
   WithControl: FC<undefined>;
 
   _static_: {
@@ -33,57 +58,67 @@ export interface StoryResult<C extends FC<any>> {
   };
 }
 
-export async function defineStory<C extends FC<any>>(
+export function defineStory<C extends FC<any>>(
   callerUrl: string,
   options: StoryOptions<C>,
-): Promise<StoryResult<C>> {
-  const { Component, cache = false, tsconfigPath = './tsconfig.json', name = 'story' } = options;
+): StoryResult<C> {
+  const { Component, cache = false, name = 'story', args = {} } = options;
   const filePath = fileURLToPath(callerUrl);
-  const fileContent = await fs.readFile(filePath, 'utf-8');
 
-  // Generate cache key based on file path, export name, and content hash
-  const contentHash = createHash('MD5').update(fileContent).digest('hex').slice(0, 12);
+  async function generateControls(): Promise<{
+    propsNode: TypeNode;
+  }> {
+    const controls = args.controls ?? {};
+    if ('node' in controls) return { propsNode: controls.node };
 
-  const { propsNode } = await cached(
-    cache,
-    `extract-types:${filePath}:${name}:${contentHash}`,
-    async () => {
-      const { Project } = await import('ts-morph');
-      const project = new Project({
-        tsConfigFilePath: tsconfigPath,
-        skipAddingFilesFromTsConfig: true,
-      });
+    const fileContent = await fs.readFile(filePath, 'utf-8');
 
-      const injection = `export type _StoryProps_ = import('@fumadocs/story').GetProps<typeof ${name}>`;
-      const sourceFile = project.createSourceFile(filePath, `${fileContent}\n${injection}`, {
-        overwrite: true,
-      });
-      const exportedDeclarations = sourceFile.getExportedDeclarations();
-      const declaration = exportedDeclarations.get('_StoryProps_')?.[0];
+    return cached(
+      cache,
+      createHash('MD5')
+        .update(`extract-types:${filePath}:${name}:${fileContent}`)
+        .digest('hex')
+        .slice(0, 12),
+      async () => {
+        const project = new Project({
+          tsConfigFilePath: controls.tsconfigPath ?? './tsconfig.json',
+          skipAddingFilesFromTsConfig: true,
+        });
 
-      if (!declaration) {
-        throw new Error(`Export "${name}" not found in file "${filePath}"`);
-      }
+        const injection = `export type _StoryProps_ = import('@fumadocs/story').GetProps<typeof ${name}>`;
+        const sourceFile = project.createSourceFile(filePath, `${fileContent}\n${injection}`, {
+          overwrite: true,
+        });
+        const exportedDeclarations = sourceFile.getExportedDeclarations();
+        const declaration = exportedDeclarations.get('_StoryProps_')?.[0];
 
-      const propsType = declaration.getType();
-      const typeTreeBuilder = createTypeTreeBuilder([literalEnumHandler]);
-      return {
-        propsNode: typeTreeBuilder.typeToNode(propsType, declaration),
-      };
-    },
-  );
+        if (!declaration) {
+          throw new Error(`Export "${name}" not found in file "${filePath}"`);
+        }
+
+        const propsType = declaration.getType();
+        const typeTreeBuilder = createTypeTreeBuilder([literalEnumHandler]);
+        return {
+          propsNode: typeTreeBuilder.typeToNode(propsType, declaration),
+        };
+      },
+    );
+  }
 
   return {
     _static_: {
       component: Component,
     },
-    analysis: {
-      props: propsNode,
-    },
     async WithControl() {
       const { Story } = await import('./ui/story');
-
-      return <Story Component={Component} argTypes={propsNode} />;
+      const { propsNode } = await generateControls();
+      return (
+        <Story
+          Component={Component}
+          argTypes={propsNode}
+          defaultValues={typeof args.initial === 'function' ? await args.initial() : args.initial}
+        />
+      );
     },
   };
 }

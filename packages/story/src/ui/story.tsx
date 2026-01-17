@@ -5,9 +5,17 @@ import { FieldSet } from './arg-form';
 import { FC, useRef, useState } from 'react';
 import { StfProvider, useDataEngine, useListener, useStf } from '@fumari/stf';
 
-export function Story({ argTypes, Component }: { argTypes: TypeNode; Component: FC }) {
+export function Story({
+  argTypes,
+  Component,
+  defaultValues = {},
+}: {
+  argTypes: TypeNode;
+  Component: FC;
+  defaultValues?: Record<string, unknown>;
+}) {
   const stf = useStf({
-    defaultValues: {},
+    defaultValues,
   });
 
   return (

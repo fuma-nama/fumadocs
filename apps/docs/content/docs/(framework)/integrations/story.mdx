@@ -3,7 +3,7 @@ title: Story
 description: Display components with controls.
 ---
 
-import { story } from './index';
+import { story } from './story';
 
 <Callout type="warn" title="Server Component Only">
   This feature requires using a Server Component under RSC environment.
@@ -48,11 +48,56 @@ To create a story in Fumadocs Story:
 import { defineStory } from '@fumadocs/story';
 import { GraphView } from '@/components/graph-view';
 
-export const story = await defineStory(import.meta.url, {
+export const story = defineStory(import.meta.url, {
   Component: GraphView,
+  args: {
+    // default props (recommended)
+    initial: {},
+  },
 });
 ```
 
 - Fill the `Component` option to your component, the passed component must be a client component.
 
+Now you can render the story like:
+
+```mdx title="index.mdx"
+import { story } from './graph-view.story';
+
+## Overview
+
+Preview for component:
+
 <story.WithControl />
+```
+
+<story.WithControl />
+
+## Advanced
+
+### `controls`
+
+You can further customise on how the controls are generated:
+
+```tsx
+import { defineStory } from '@fumadocs/story';
+import { GraphView } from '@/components/graph-view';
+
+export const story = defineStory(import.meta.url, {
+  Component: GraphView,
+  args: {
+    // specify the control nodes
+    controls: {
+      node: {
+        type: 'object',
+        properties: [],
+      },
+    },
+
+    // or options for generator powered by tsc
+    controls: {
+      tsconfigPath: 'tsconfig.json',
+    },
+  },
+});
+```
