@@ -1,13 +1,12 @@
-import { Project } from 'ts-morph';
 import * as fs from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { createTypeTreeBuilder, literalEnumHandler } from './type-tree-builder';
-import type { Cache } from './cache';
+import { cached, type Cache } from './cache';
 import type { TypeNode } from './types';
 import { FC } from 'react';
 import { fileURLToPath } from 'node:url';
 
-export interface StoryOptions<C extends FC> {
+export interface StoryOptions<C extends FC<any>> {
   /**
    * the export name of story
    *
@@ -22,7 +21,7 @@ export interface StoryOptions<C extends FC> {
 export * from './types';
 export * from './cache';
 
-export interface StoryResult<C extends FC> {
+export interface StoryResult<C extends FC<any>> {
   analysis: {
     props: TypeNode;
   };
@@ -34,17 +33,7 @@ export interface StoryResult<C extends FC> {
   };
 }
 
-async function cached<V>(cache: Cache | false, key: string, op: () => V | Promise<V>): Promise<V> {
-  if (cache === false) return op();
-  const cached = await cache.read(key);
-  if (cached) return cached as V;
-
-  const out = await op();
-  await cache.write(key, out);
-  return out;
-}
-
-export async function defineStory<C extends FC>(
+export async function defineStory<C extends FC<any>>(
   callerUrl: string,
   options: StoryOptions<C>,
 ): Promise<StoryResult<C>> {
@@ -58,7 +47,8 @@ export async function defineStory<C extends FC>(
   const { propsNode } = await cached(
     cache,
     `extract-types:${filePath}:${name}:${contentHash}`,
-    () => {
+    async () => {
+      const { Project } = await import('ts-morph');
       const project = new Project({
         tsConfigFilePath: tsconfigPath,
         skipAddingFilesFromTsConfig: true,

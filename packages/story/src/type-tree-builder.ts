@@ -30,10 +30,7 @@ export type Handler = (options: {
   next: (type: Type, location: Node, flag: TypeToNodeFlag) => TypeNode;
 }) => TypeNode;
 
-const baseHandler: Handler = ({ type, location, flag, getCache, setCache, root }) => {
-  const done = getCache();
-  if (done) return done;
-
+const baseHandler: Handler = ({ type, location, flag, setCache, root }) => {
   if (type.isUndefined()) {
     return { type: 'undefined' };
   }
@@ -250,6 +247,8 @@ export function createTypeTreeBuilder(customHandlers: Handler[] = []) {
     index = 0,
     cache: Map<TypeToNodeFlag, WeakMap<Type, TypeNode>> = new Map(),
   ): TypeNode {
+    const cached = cache.get(flag)?.get(type);
+    if (cached) return cached;
     const handler = handlers[index];
     if (!handler) return { type: 'never' };
 

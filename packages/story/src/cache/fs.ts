@@ -1,10 +1,6 @@
 import fs from 'node:fs/promises';
 import * as path from 'node:path';
-
-export interface Cache {
-  read: (key: string) => unknown | undefined | Promise<unknown | undefined>;
-  write: (key: string, value: unknown) => void | Promise<void>;
-}
+import { Cache } from '.';
 
 export function createFileSystemCache(dir: string): Cache {
   // call `path.resolve` so Vercel NFT will include the cache directory in production.
@@ -16,11 +12,11 @@ export function createFileSystemCache(dir: string): Cache {
   return {
     async write(key, data) {
       await initDirPromise;
-      await fs.writeFile(path.join(dir, `${key}.json`), JSON.stringify(data));
+      await fs.writeFile(path.join(dir, `${key}.json`), data);
     },
     async read(key) {
       try {
-        return JSON.parse((await fs.readFile(path.join(dir, `${key}.json`))).toString());
+        return (await fs.readFile(path.join(dir, `${key}.json`))).toString();
       } catch {
         return;
       }

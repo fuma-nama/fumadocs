@@ -6,6 +6,7 @@ export default [
     rules: {
       // for the import hacks
       '@typescript-eslint/consistent-type-imports': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
       // some arrays like link items won't be changed
       'react/no-array-index-key': 'off',
       '@typescript-eslint/unbound-method': 'off',
