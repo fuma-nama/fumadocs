@@ -758,6 +758,7 @@ components:
           type: array
           items:
             type: string
+            enum: ['test', 'hello']
           examples:
             - ['solar-system', 'rocky', 'explored']
         lastUpdated:

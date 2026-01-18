@@ -12,7 +12,7 @@ export default defineConfig({
     'src/content/mdx/preset-*.ts',
     'src/source/{index,schema}.ts',
     'src/source/client/*.{ts,tsx}',
-    'src/source/plugins/{lucide-icons,slugs}.ts',
+    'src/source/plugins/{lucide-icons,slugs,status-badges}.{ts,tsx}',
     'src/search/{index,client,server,algolia,orama-cloud,orama-cloud-legacy}.ts',
     'src/utils/use-on-change.ts',
     'src/utils/use-effect-event.ts',

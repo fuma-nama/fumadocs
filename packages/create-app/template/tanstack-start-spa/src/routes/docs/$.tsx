@@ -8,6 +8,7 @@ import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { baseOptions } from '@/lib/layout.shared';
 import { staticFunctionMiddleware } from '@tanstack/start-static-server-functions';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
+import { Suspense } from 'react';
 
 export const Route = createFileRoute('/docs/$')({
   component: Page,
@@ -63,9 +64,11 @@ function Page() {
 
   return (
     <DocsLayout {...baseOptions()} tree={data.pageTree}>
-      {clientLoader.useContent(data.path, {
-        className: '',
-      })}
+      <Suspense>
+        {clientLoader.useContent(data.path, {
+          className: '',
+        })}
+      </Suspense>
     </DocsLayout>
   );
 }

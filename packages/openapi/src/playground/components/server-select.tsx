@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from '@/ui/components/select';
 import { Input, labelVariants } from '@/ui/components/input';
-import { type HTMLAttributes, useEffect, useState, useEffectEvent } from 'react';
+import { type HTMLAttributes, useEffect, useState, useRef } from 'react';
 import { cn } from '@/utils/cn';
 import {
   Dialog,
@@ -19,9 +19,9 @@ import {
   DialogTrigger,
 } from '@/ui/components/dialog';
 import { resolveServerUrl, withBase } from '@/utils/url';
-import { FormProvider, useController, useForm } from 'react-hook-form';
 import type { ServerVariableObject } from '@/types';
 import type { NoReference } from '@/utils/schema';
+import { StfProvider, useFieldValue, useListener, useStf } from '@fumari/stf';
 
 export default function ServerSelect(props: HTMLAttributes<HTMLDivElement>) {
   const { servers } = useApiContext();
@@ -86,29 +86,24 @@ function ServerSelectContent({
   onChange: (values: Record<string, string>) => void;
   schema: Record<string, NoReference<ServerVariableObject>>;
 }) {
-  const form = useForm({
-    defaultValues,
+  const stf = useStf({
+    defaultValues: () => structuredClone(defaultValues),
+  });
+  const timerRef = useRef<number | null>(null);
+  useListener({
+    stf,
+    onUpdate() {
+      if (timerRef.current !== null) window.clearTimeout(timerRef.current);
+
+      timerRef.current = window.setTimeout(
+        () => onChange(stf.dataEngine.getData() as Record<string, string>),
+        500,
+      );
+    },
   });
 
-  const onChangeDebounced = useEffectEvent(onChange);
-  useEffect(() => {
-    let timer: number | null = null;
-
-    return form.subscribe({
-      formState: {
-        values: true,
-      },
-      callback({ values }) {
-        if (timer !== null) window.clearTimeout(timer);
-
-        timer = window.setTimeout(() => onChangeDebounced(values), 500);
-      },
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- `form` shouldn't be included
-  }, []);
-
   return (
-    <FormProvider {...form}>
+    <StfProvider value={stf}>
       <div className="flex flex-col gap-4">
         {Object.entries(schema).map(([key, variable]) => {
           return (
@@ -124,7 +119,7 @@ function ServerSelectContent({
           );
         })}
       </div>
-    </FormProvider>
+    </StfProvider>
   );
 }
 
@@ -135,14 +130,16 @@ function Field({
   variable: NoReference<ServerVariableObject>;
   fieldName: string;
 }) {
-  const { field } = useController({
-    name: fieldName,
+  const [value, setValue] = useFieldValue([fieldName], {
+    compute(currentValue) {
+      return typeof currentValue === 'string' ? currentValue : undefined;
+    },
   });
 
   if (variable.enum) {
     return (
-      <Select value={field.value} onValueChange={field.onChange}>
-        <SelectTrigger id={fieldName} ref={field.ref}>
+      <Select value={value} onValueChange={setValue}>
+        <SelectTrigger id={fieldName}>
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -156,5 +153,5 @@ function Field({
     );
   }
 
-  return <Input id={fieldName} {...field} />;
+  return <Input id={fieldName} value={value} onChange={(e) => setValue(e.target.value)} />;
 }

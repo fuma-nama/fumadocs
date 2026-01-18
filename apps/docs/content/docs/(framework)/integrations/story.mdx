@@ -1,0 +1,103 @@
+---
+title: Story
+description: Display components with controls.
+---
+
+import { story } from './story';
+
+<Callout type="warn" title="Server Component Only">
+  This feature requires using a Server Component under RSC environment.
+</Callout>
+
+## Introduction
+
+You can use Fumadocs Story to display & document components.
+It is a simple, docs-focused alternative of [Storybook](https://storybook.js.org), it is mainly designed for component libraries.
+
+<Callout title="When to use it over Storybook?">
+
+Fumadocs Story is not a replacement for Storybook, we still recommend Storybook for proper UI testing.
+
+</Callout>
+
+## Installation
+
+```npm
+npm i @fumadocs/story
+```
+
+Add the Tailwind CSS preset.
+
+```css title="Tailwind CSS"
+/* [!code ++] */
+@import '@fumadocs/story/css/preset.css';
+```
+
+### Create a Story
+
+If you are new to the concept of Story, this is a short explanation from **Storybook** docs:
+
+<blockquote>
+  A story captures the rendered state of a UI component. It's an object with annotations that
+  describe the component's behavior and appearance given a set of arguments.
+</blockquote>
+
+To create a story in Fumadocs Story:
+
+```tsx title="graph-view.story.tsx"
+import { defineStory } from '@fumadocs/story';
+import { GraphView } from '@/components/graph-view';
+
+export const story = defineStory(import.meta.url, {
+  Component: GraphView,
+  args: {
+    // default props (recommended)
+    initial: {},
+  },
+});
+```
+
+- Fill the `Component` option to your component, the passed component must be a client component.
+
+Now you can render the story like:
+
+```mdx title="index.mdx"
+import { story } from './graph-view.story';
+
+## Overview
+
+Preview for component:
+
+<story.WithControl />
+```
+
+<story.WithControl />
+
+## Advanced
+
+### `controls`
+
+You can further customise on how the controls are generated:
+
+```tsx
+import { defineStory } from '@fumadocs/story';
+import { GraphView } from '@/components/graph-view';
+
+export const story = defineStory(import.meta.url, {
+  Component: GraphView,
+  args: {
+    // specify the control nodes
+    controls: {
+      node: {
+        type: 'object',
+        properties: [],
+      },
+    },
+
+    // or options for generator powered by tsc
+    controls: {
+      tsconfigPath: 'tsconfig.json',
+    },
+  },
+});
+```
