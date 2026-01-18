@@ -18,7 +18,7 @@
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-server-dom-webpack": "^19.2.3",
-    "waku": "1.0.0-alpha.1"
+    "waku": "1.0.0-alpha.2"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.18",
