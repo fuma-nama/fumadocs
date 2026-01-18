@@ -1,5 +1,14 @@
 # @fuma-docs/openapi
 
+## 10.2.5
+
+### Patch Changes
+
+- cadff12: Use internal implementation for form in OpenAPI playground
+- 897cc26: Improve schema UI array rendering
+- Updated dependencies [6ac37c4]
+  - @fumari/stf@0.0.1
+
 ## 10.2.4
 
 ### Patch Changes
