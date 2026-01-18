@@ -1,8 +1,8 @@
 'use client';
 
-import { TypeNode } from '@/types';
+import { TypeNode } from '@/type-tree/types';
 import { FieldSet } from './arg-form';
-import { FC, useRef, useState } from 'react';
+import { FC, Suspense, useDeferredValue, useRef, useState } from 'react';
 import { StfProvider, useDataEngine, useListener, useStf } from '@fumari/stf';
 import { ErrorBoundary } from 'react-error-boundary';
 import { AlertCircle } from 'lucide-react';
@@ -41,10 +41,11 @@ function StoryComponent({ Component }: { Component: FC }) {
   const engine = useDataEngine();
   const timerRef = useRef(0);
   const [args, setArgs] = useState(() => engine.getData());
+  const deferredArgs = useDeferredValue(args);
   useListener({
     onUpdate() {
       if (timerRef.current) window.clearTimeout(timerRef.current);
-      timerRef.current = window.setTimeout(() => setArgs({ ...engine.getData() }), 500);
+      timerRef.current = window.setTimeout(() => setArgs({ ...engine.getData() }), 100);
     },
   });
 
@@ -66,7 +67,9 @@ function StoryComponent({ Component }: { Component: FC }) {
         </div>
       )}
     >
-      <Component {...args} key={undefined} />
+      <Suspense>
+        <Component {...deferredArgs} key={undefined} />
+      </Suspense>
     </ErrorBoundary>
   );
 }

@@ -13,10 +13,11 @@ import { Input, labelVariants } from '@/ui/components/input';
 import { getDefaultValue } from '../utils/get-default-values';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { FormatFlags, typeToString } from '@/utils/type-to-string';
-import { useFieldInfo } from '@/ui/hooks/schema';
-import type { ObjectNode, TypeNode } from '../types';
+import { FormatFlags, typeToString } from '@/type-tree/stringify';
+import type { ObjectNode, TypeNode } from '../type-tree/types';
 import { stringifyFieldKey } from '@fumari/stf/lib/utils';
+import { validate } from '@/type-tree/validator';
+import { formatDateForInput } from '@/utils/date';
 
 function FieldLabel(props: ComponentProps<'label'>) {
   return (
@@ -190,6 +191,19 @@ export function FieldInput({
           {!isRequired && <SelectItem value="undefined">Unset</SelectItem>}
         </SelectContent>
       </Select>
+    );
+  }
+  if (field.type === 'date') {
+    return renderUnset(
+      <Input
+        id={id}
+        placeholder="Enter value"
+        type="date"
+        value={value instanceof Date ? formatDateForInput(value) : ''}
+        onChange={(e) => {
+          setValue(e.target.valueAsDate ?? undefined);
+        }}
+      />,
     );
   }
 
@@ -443,4 +457,55 @@ function ArrayInput({
       </button>
     </div>
   );
+}
+
+interface FieldInfo {
+  unionIndex: number;
+}
+
+/**
+ * A hook to store dynamic info of a field, such as selected type in union.
+ */
+function useFieldInfo(
+  fieldName: FieldKey,
+  node: TypeNode,
+): {
+  info: FieldInfo;
+  updateInfo: (value: Partial<FieldInfo>) => void;
+} {
+  const engine = useDataEngine();
+  const attachedData = engine.attachedData<FieldInfo>('field-info');
+  const [info, setInfo] = useState<FieldInfo>(() => {
+    const initialInfo = attachedData.get(fieldName);
+    if (initialInfo) return initialInfo;
+
+    const out: FieldInfo = {
+      unionIndex: 0,
+    };
+
+    if (node.type === 'union') {
+      // Try to find which union type matches the current value
+      const matchingIndex = node.types.findIndex(validate);
+      out.unionIndex = matchingIndex === -1 ? 0 : matchingIndex;
+    }
+
+    return out;
+  });
+
+  attachedData.set(fieldName, info);
+  return {
+    info,
+    updateInfo: (value) => {
+      const updated = {
+        ...info,
+        ...value,
+      };
+
+      if (updated.unionIndex === info.unionIndex) return;
+      setInfo(updated);
+      if (node.type === 'union' && node.types[updated.unionIndex]) {
+        engine.update(fieldName, getDefaultValue(node.types[updated.unionIndex]));
+      }
+    },
+  };
 }

@@ -1,6 +1,3 @@
-import { ComponentPropsWithoutRef } from 'react';
-import { StoryResult } from '.';
-
 export type TypeNode =
   | ObjectNode
   | EnumNode
@@ -14,6 +11,7 @@ export type TypeNode =
   | LiteralNode
   | NullNode
   | UndefinedNode
+  | DateNode
   | UnknownNode
   | NeverNode;
 
@@ -44,6 +42,10 @@ export interface BigIntNode extends Node {
 
 export interface StringNode extends Node {
   type: 'string';
+}
+
+export interface DateNode extends Node {
+  type: 'date';
 }
 
 export interface NumberNode extends Node {
@@ -91,6 +93,3 @@ export interface UnknownNode extends Node {
 export interface NeverNode extends Node {
   type: 'never';
 }
-
-export type GetProps<Result> =
-  Result extends StoryResult<infer C> ? Omit<ComponentPropsWithoutRef<C>, 'key'> : never;

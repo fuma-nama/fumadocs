@@ -1,16 +1,11 @@
 import * as fs from 'node:fs/promises';
-import { createHash } from 'node:crypto';
-import {
-  createTypeTreeBuilder,
-  Handler,
-  literalEnumHandler,
-  reactNodeHandler,
-} from './type-tree-builder';
+import { createTypeTreeBuilder, Handler, literalEnumHandler } from './type-tree/builder';
 import { cached, type Cache } from './cache';
-import type { TypeNode } from './types';
-import { ComponentPropsWithoutRef, FC } from 'react';
+import type { TypeNode } from './type-tree/types';
+import { ComponentPropsWithoutRef, FC, ReactNode } from 'react';
 import { fileURLToPath } from 'node:url';
 import { Project } from 'ts-morph';
+import { getHash } from './utils/get-hash';
 
 type Awaitable<T> = T | Promise<T>;
 
@@ -50,7 +45,6 @@ export interface StoryOptions<C extends FC<any>> {
   };
 }
 
-export * from './types';
 export { type Cache, createFileSystemCache } from './cache';
 
 export interface StoryResult<C extends FC<any>> {
@@ -60,6 +54,19 @@ export interface StoryResult<C extends FC<any>> {
     component: C;
   };
 }
+
+export type GetProps<Result> =
+  Result extends StoryResult<infer C>
+    ? ReplaceReactNode<Omit<ComponentPropsWithoutRef<C>, 'key'>>
+    : never;
+
+type ReplaceReactNode<V> = ReactNode extends V
+  ? ReplaceReactNode<Exclude<V, ReactNode>> | string
+  : V extends Record<string, unknown>
+    ? {
+        [K in keyof V]: ReplaceReactNode<V[K]>;
+      }
+    : V;
 
 export function defineStory<C extends FC<any>>(
   callerUrl: string,
@@ -76,41 +83,32 @@ export function defineStory<C extends FC<any>>(
 
     const fileContent = await fs.readFile(filePath, 'utf-8');
 
-    return cached(
-      cache,
-      createHash('MD5')
-        .update(`extract-types:${filePath}:${name}:${fileContent}`)
-        .digest('hex')
-        .slice(0, 12),
-      async () => {
-        const project = new Project({
-          tsConfigFilePath: controls.tsconfigPath ?? './tsconfig.json',
-          skipAddingFilesFromTsConfig: true,
-        });
+    return cached(cache, getHash(`extract-types:${filePath}:${name}:${fileContent}`), async () => {
+      const project = new Project({
+        tsConfigFilePath: controls.tsconfigPath ?? './tsconfig.json',
+        skipAddingFilesFromTsConfig: true,
+      });
 
-        const injection = `export type _StoryProps_ = import('@fumadocs/story').GetProps<typeof ${name}>`;
-        const sourceFile = project.createSourceFile(filePath, `${fileContent}\n${injection}`, {
-          overwrite: true,
-        });
-        const exportedDeclarations = sourceFile.getExportedDeclarations();
-        const declaration = exportedDeclarations.get('_StoryProps_')?.[0];
+      const injection = `export type _StoryProps_ = import('@fumadocs/story').GetProps<typeof ${name}>`;
+      const sourceFile = project.createSourceFile(filePath, `${fileContent}\n${injection}`, {
+        overwrite: true,
+      });
+      const exportedDeclarations = sourceFile.getExportedDeclarations();
+      const declaration = exportedDeclarations.get('_StoryProps_')?.[0];
 
-        if (!declaration) {
-          throw new Error(`Export "${name}" not found in file "${filePath}"`);
-        }
+      if (!declaration) {
+        throw new Error(`Export "${name}" not found in file "${filePath}"`);
+      }
 
-        const propsType = declaration.getType();
-        let propsNode = createTypeTreeBuilder(project, [
-          literalEnumHandler,
-          reactNodeHandler,
-          ...(controls.handlers ?? []),
-        ]).typeToNode(propsType, declaration);
-        if (controls.transform) propsNode = controls.transform(propsNode);
-        return {
-          propsNode,
-        };
-      },
-    );
+      let propsNode = createTypeTreeBuilder(project, [
+        literalEnumHandler,
+        ...(controls.handlers ?? []),
+      ]).typeToNode(declaration.getType(), declaration);
+      if (controls.transform) propsNode = controls.transform(propsNode);
+      return {
+        propsNode,
+      };
+    });
   }
 
   return {

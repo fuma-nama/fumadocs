@@ -24,14 +24,14 @@ export type Handler = (options: {
   /**
    * start from the first handler
    */
-  root: (type: Type, location: Node, flag: TypeToNodeFlag) => TypeNode;
+  root: (type: Type, flag: TypeToNodeFlag, location?: Node) => TypeNode;
   /**
    * start from the next handler
    */
-  next: (type: Type, location: Node, flag: TypeToNodeFlag) => TypeNode;
+  next: (type: Type, flag: TypeToNodeFlag, location?: Node) => TypeNode;
 }) => TypeNode;
 
-const baseHandler: Handler = ({ type, location, flag, setCache, root }) => {
+const baseHandler: Handler = ({ type, flag, location, setCache, root }) => {
   if (type.isUndefined()) {
     return { type: 'undefined' };
   }
@@ -49,7 +49,7 @@ const baseHandler: Handler = ({ type, location, flag, setCache, root }) => {
     };
     setCache(result);
     for (const t of type.getUnionTypes()) {
-      const item = root(t, location, flag);
+      const item = root(t, flag);
       if (item.type !== 'never') result.types.push(item);
     }
     if (result.types.length === 0) Object.assign(result, { type: 'never' } satisfies TypeNode);
@@ -65,9 +65,9 @@ const baseHandler: Handler = ({ type, location, flag, setCache, root }) => {
       intersection: { type: 'never' },
     };
     setCache(result);
-    result.intersection = root(type, location, flag | TypeToNodeFlag.NoIntersection);
+    result.intersection = root(type, flag | TypeToNodeFlag.NoIntersection);
     for (const t of intersectionTypes) {
-      const member = root(t, location, flag);
+      const member = root(t, flag);
       if (member.type !== 'never') result.members.push(member);
     }
     return result;
@@ -99,7 +99,7 @@ const baseHandler: Handler = ({ type, location, flag, setCache, root }) => {
       elementType: { type: 'never' },
     };
     setCache(result);
-    result.elementType = elementType ? root(elementType, location, flag) : { type: 'unknown' };
+    result.elementType = elementType ? root(elementType, flag) : { type: 'unknown' };
     return result;
   }
 
@@ -118,7 +118,7 @@ const baseHandler: Handler = ({ type, location, flag, setCache, root }) => {
       elementType: { type: 'never' },
     };
     setCache(result);
-    const elementTypes = elements.map((t) => root(t, location, flag));
+    const elementTypes = elements.map((t) => root(t, flag));
     if (elementTypes.length > 0)
       result.elementType =
         elementTypes.length > 1
@@ -170,12 +170,17 @@ const baseHandler: Handler = ({ type, location, flag, setCache, root }) => {
   if (type.isNumber()) return { type: 'number' };
   if (type.isBoolean()) return { type: 'boolean' };
   if (type.isBigInt()) return { type: 'bigint' };
+  const symbol = type.getSymbol();
+  if (symbol && symbol.getName() === 'Date') return { type: 'date' };
 
   // Handle objects and interfaces
   if (type.isObject() || type.isClassOrInterface() || type.getProperties().length > 0) {
     const properties = type.getProperties();
+    const alias = type.getAliasSymbol();
+    const aliasTypeArguments = type.getAliasTypeArguments();
     const result: TypeNode = {
       type: 'object',
+      displayName: alias && aliasTypeArguments.length === 0 ? alias.getName() : undefined,
       properties: [],
     };
     setCache(result);
@@ -186,8 +191,7 @@ const baseHandler: Handler = ({ type, location, flag, setCache, root }) => {
         continue;
       }
       const propType = prop.getTypeAtLocation(location);
-      const isOptional = prop.isOptional();
-      let child = root(propType, location, flag);
+      let child = root(propType, flag, prop.getValueDeclaration());
       if (child.type === 'union') {
         child = unwrapUnion({
           ...child,
@@ -198,7 +202,7 @@ const baseHandler: Handler = ({ type, location, flag, setCache, root }) => {
       result.properties.push({
         name: prop.getName(),
         type: child,
-        required: !isOptional,
+        required: !prop.isOptional(),
       });
     }
     return result;
@@ -211,21 +215,8 @@ const baseHandler: Handler = ({ type, location, flag, setCache, root }) => {
   };
 };
 
-export const reactNodeHandler: Handler = ({ type, location, flag, next }) => {
-  // a rough solution but works
-  // may need some improvements to do something like `Exclude<T, ReactNode> | string`
-  if (type.getUnionTypes().length > 1 && type.getText().includes('React.ReactNode')) {
-    return {
-      type: 'string',
-      displayName: 'ReactNode',
-    };
-  }
-
-  return next(type, location, flag);
-};
-
-export const literalEnumHandler: Handler = ({ type, location, flag, next }) => {
-  const result = next(type, location, flag);
+export const literalEnumHandler: Handler = ({ type, flag, next }) => {
+  const result = next(type, flag);
   if (result.type !== 'union') return result;
 
   const literalTypes: LiteralNode[] = [];
@@ -284,11 +275,11 @@ export function createTypeTreeBuilder(project: Project, customHandlers: Handler[
         }
         typeCache.set(type, value);
       },
-      next(type, location, flag) {
-        return callHandler(type, location, flag, index + 1, cache);
+      next(type, flag, l = location) {
+        return callHandler(type, l, flag, index + 1, cache);
       },
-      root(type, location, flag) {
-        return callHandler(type, location, flag, 0, cache);
+      root(type, flag, l = location) {
+        return callHandler(type, l, flag, 0, cache);
       },
     });
   }

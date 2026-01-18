@@ -13,6 +13,7 @@
   "type": "module",
   "exports": {
     ".": "./dist/index.js",
+    "./type-tree": "./dist/type-tree/index.js",
     "./package.json": "./package.json",
     "./css/*": "./css/*"
   },

@@ -1,4 +1,4 @@
-import type { TypeNode } from '../types';
+import type { TypeNode } from '../type-tree/types';
 
 export function getDefaultValue(node: TypeNode): unknown {
   switch (node.type) {
@@ -31,6 +31,8 @@ export function getDefaultValue(node: TypeNode): unknown {
     case 'intersection': {
       return getDefaultValue(node.intersection);
     }
+    case 'date':
+      return new Date(Date.now());
     case 'unknown':
       return undefined;
   }

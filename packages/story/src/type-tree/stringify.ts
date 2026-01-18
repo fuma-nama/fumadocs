@@ -1,4 +1,4 @@
-import type { TypeNode } from '../types';
+import type { TypeNode } from './types';
 
 export enum FormatFlags {
   None = 0,
@@ -11,10 +11,6 @@ export function typeToString(node: TypeNode, flags: FormatFlags = FormatFlags.No
   switch (node.type) {
     case 'array':
       return `Array<${typeToString(node.elementType, flags)}>`;
-    case 'object':
-      return 'object';
-    case 'enum':
-      return 'enum';
     case 'literal':
       if (typeof node.value === 'string') {
         return `"${node.value}"`;
