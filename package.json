@@ -25,9 +25,9 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "7.0.1",
     "eslint-plugin-tailwindcss": "^3.18.2",
-    "oxfmt": "^0.23.0",
+    "oxfmt": "^0.24.0",
     "rimraf": "^6.1.2",
-    "turbo": "2.7.3",
+    "turbo": "2.7.5",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.52.0",
     "vitest": "^4.0.16"
@@ -35,5 +35,5 @@
   "engines": {
     "node": ">= 18.17.0"
   },
-  "packageManager": "pnpm@10.18.3"
+  "packageManager": "pnpm@10.28.0"
 }
