@@ -47,7 +47,7 @@ Create a story factory to store your global settings:
 ```ts title="lib/story.ts"
 import { createFileSystemCache, defineStoryFactory } from '@fumadocs/story';
 
-const { defineStory } = defineStoryFactory({
+export const { defineStory } = defineStoryFactory({
   // for Vercel, this is required: choose a directory for cache.
   cache:
     process.env.NODE_ENV === 'production'
