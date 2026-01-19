@@ -1,7 +1,7 @@
 import type { Processor, Transformer } from 'unified';
 import type { Heading, Root, RootContent } from 'mdast';
 import { visit } from 'unist-util-visit';
-import { Options, toMarkdown } from 'mdast-util-to-markdown';
+import { toMarkdown } from 'mdast-util-to-markdown';
 import { valueToEstree } from 'estree-util-value-to-estree';
 import { removePosition } from 'unist-util-remove-position';
 import remarkMdx from 'remark-mdx';
