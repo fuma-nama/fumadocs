@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/ui/components/select';
-import { Input, labelVariants } from '@/ui/components/input';
+import { Input } from '@/ui/components/input';
 import { getDefaultValue } from '../utils/get-default-values';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
@@ -18,6 +18,11 @@ import type { ObjectNode, TypeNode } from '../type-tree/types';
 import { stringifyFieldKey } from '@fumari/stf/lib/utils';
 import { validate } from '@/type-tree/validator';
 import { formatDateForInput } from '@/utils/date';
+import { cva } from 'class-variance-authority';
+
+const labelVariants = cva(
+  'text-xs font-mono font-medium text-fd-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
+);
 
 function FieldLabel(props: ComponentProps<'label'>) {
   return (
@@ -27,16 +32,8 @@ function FieldLabel(props: ComponentProps<'label'>) {
   );
 }
 
-function FieldLabelName({
-  required = false,
-  ...props
-}: ComponentProps<'span'> & { required?: boolean }) {
-  return (
-    <span {...props} className={cn(labelVariants(), 'font-mono me-auto', props.className)}>
-      {props.children}
-      {required && <span className="text-red-400/80 mx-1">*</span>}
-    </span>
-  );
+function FieldLabelRequired() {
+  return <span className="text-red-400/80 mx-1">*</span>;
 }
 
 function FieldLabelType(props: ComponentProps<'code'>) {
@@ -256,6 +253,11 @@ export function FieldSet(
   const { info, updateInfo } = useFieldInfo(fieldName, field);
   const id = stringifyFieldKey(fieldName);
   const dataEngine = useDataEngine();
+  const onShow = () => {
+    dataEngine.init(fieldName, getDefaultValue(field));
+    setShow((prev) => !prev);
+  };
+
   if (field.type === 'never') return;
 
   if (field.type === 'union') {
@@ -310,10 +312,7 @@ export function FieldSet(
           {collapsible && (
             <button
               type="button"
-              onClick={() => {
-                dataEngine.init(fieldName, getDefaultValue(field));
-                setShow((prev) => !prev);
-              }}
+              onClick={onShow}
               className={cn(
                 buttonVariants({
                   size: 'icon-xs',
@@ -325,7 +324,10 @@ export function FieldSet(
               <ChevronRight className={cn(show && 'rotate-90')} />
             </button>
           )}
-          <FieldLabelName required={isRequired}>{name}</FieldLabelName>
+          <button type="button" onClick={onShow} className={cn(labelVariants(), 'me-auto')}>
+            {name}
+            {isRequired && <FieldLabelRequired />}
+          </button>
           {slotType ?? <FieldLabelType>{typeToString(field)}</FieldLabelType>}
           {toolbar}
         </FieldLabel>
@@ -351,10 +353,7 @@ export function FieldSet(
           {collapsible && (
             <button
               type="button"
-              onClick={() => {
-                dataEngine.init(fieldName, getDefaultValue(field));
-                setShow((prev) => !prev);
-              }}
+              onClick={onShow}
               className={cn(
                 buttonVariants({
                   size: 'icon-xs',
@@ -366,7 +365,10 @@ export function FieldSet(
               <ChevronRight className={cn(show && 'rotate-90')} />
             </button>
           )}
-          <FieldLabelName required={isRequired}>{name}</FieldLabelName>
+          <button type="button" onClick={onShow} className={cn(labelVariants(), 'me-auto')}>
+            {name}
+            {isRequired && <FieldLabelRequired />}
+          </button>
           {slotType ?? <FieldLabelType>{typeToString(field)}</FieldLabelType>}
           {toolbar}
         </FieldLabel>
@@ -387,7 +389,10 @@ export function FieldSet(
   return (
     <fieldset {...rest} className={cn('flex flex-col gap-1.5', rest.className)}>
       <FieldLabel htmlFor={id}>
-        <FieldLabelName required={isRequired}>{name}</FieldLabelName>
+        <span className={cn(labelVariants(), 'me-auto')}>
+          {name}
+          {isRequired && <FieldLabelRequired />}
+        </span>
         {slotType ?? <FieldLabelType>{typeToString(field)}</FieldLabelType>}
         {toolbar}
       </FieldLabel>
