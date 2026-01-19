@@ -8,26 +8,65 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { AlertCircle } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
+import { VariantInfo } from '..';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './components/select';
 
 export function Story({
-  argTypes,
+  presets,
+  displayName,
   Component,
-  defaultValues = {},
 }: {
-  argTypes: TypeNode;
   Component: FC;
-  defaultValues?: Record<string, unknown>;
+  displayName?: string;
+  presets: (VariantInfo & {
+    controls: TypeNode;
+    defaultValues?: Record<string, unknown>;
+  })[];
 }) {
+  const [variant, setVariant] = useState(presets[0].variant);
+  const preset = presets.find((preset) => preset.variant === variant);
   const stf = useStf({
-    defaultValues,
+    defaultValues: preset?.defaultValues,
   });
+  if (!preset) return;
 
   return (
     <StfProvider value={stf}>
-      <div className="not-prose p-1 border rounded-md shadow-sm bg-fd-card">
+      <div className="not-prose flex flex-col gap-1 p-1 border rounded-md shadow-sm bg-fd-card text-fd-card-foreground">
+        <div className="flex flex-row items-center gap-2 empty:hidden">
+          {displayName && <p className="text-sm font-medium px-1.5">{displayName}</p>}
+          {presets.length > 1 && (
+            <Select
+              value={variant}
+              onValueChange={(value) => {
+                const preset = presets.find((preset) => preset.variant === value);
+                if (preset) {
+                  setVariant(value);
+                  stf.dataEngine.reset(preset.defaultValues ?? {});
+                }
+              }}
+            >
+              <SelectTrigger
+                variant="ghost"
+                className="w-fit ms-auto text-fd-muted-foreground text-xs font-medium"
+              >
+                <SelectValue>{preset.variant}</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {presets.map((item) => (
+                  <SelectItem key={item.variant} value={item.variant}>
+                    <p className="text-xs font-medium">{item.variant}</p>
+                    <p className="text-xs text-fd-muted-foreground">{item.description}</p>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        </div>
         <StoryComponent Component={Component} />
         <FieldSet
-          field={argTypes}
+          key={variant}
+          field={preset.controls}
           fieldName={[]}
           name="Props"
           className="max-h-[600px] overflow-auto"

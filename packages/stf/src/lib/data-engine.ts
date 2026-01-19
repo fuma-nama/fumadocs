@@ -205,8 +205,8 @@ export class DataEngine {
   }
 
   reset(data: Record<string, unknown>) {
-    this.update([], data);
     this.attachedDataMap.clear();
+    this.update([], data);
   }
 }
 

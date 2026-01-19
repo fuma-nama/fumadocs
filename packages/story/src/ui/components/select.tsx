@@ -2,6 +2,7 @@ import * as SelectPrimitive from '@radix-ui/react-select';
 import { Check, ChevronDown, ChevronUp } from 'lucide-react';
 import React, { forwardRef } from 'react';
 import { cn } from '@/utils/cn';
+import { cva, type VariantProps } from 'class-variance-authority';
 
 const Select = SelectPrimitive.Root;
 
@@ -9,16 +10,30 @@ const SelectGroup = SelectPrimitive.Group;
 
 const SelectValue = SelectPrimitive.Value;
 
+const triggerVariants = cva(
+  'flex items-center w-full rounded-md gap-2 text-start text-sm focus:outline-none focus:ring focus:ring-fd-ring disabled:cursor-not-allowed disabled:opacity-50',
+  {
+    variants: {
+      variant: {
+        default:
+          'border p-2 text-fd-secondary-foreground bg-fd-secondary hover:bg-fd-accent hover:text-fd-accent-foreground',
+        ghost: 'px-1.5 py-1 hover:bg-fd-accent hover:text-fd-accent-foreground',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+    },
+  },
+);
+
 const SelectTrigger = forwardRef<
   React.ComponentRef<typeof SelectPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
->(({ className, children, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> &
+    VariantProps<typeof triggerVariants>
+>(({ className, variant, children, ...props }, ref) => (
   <SelectPrimitive.Trigger
     ref={ref}
-    className={cn(
-      'flex items-center w-full rounded-md border p-2 gap-2 text-start text-sm text-fd-secondary-foreground bg-fd-secondary hover:bg-fd-accent focus:outline-none focus:ring focus:ring-fd-ring disabled:cursor-not-allowed disabled:opacity-50',
-      className,
-    )}
+    className={cn(triggerVariants({ variant }), className)}
     {...props}
   >
     {children}
@@ -98,7 +113,7 @@ const SelectItem = forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      'flex select-none flex-row items-center rounded-md py-1.5 px-2 text-sm outline-none focus:bg-fd-accent focus:text-fd-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+      'flex select-none flex-row items-center rounded-md gap-2 py-1.5 px-2 text-sm outline-none focus:bg-fd-accent focus:text-fd-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
       className,
     )}
     {...props}

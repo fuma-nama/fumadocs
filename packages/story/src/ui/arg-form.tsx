@@ -317,7 +317,7 @@ export function FieldSet(
                 buttonVariants({
                   size: 'icon-xs',
                   color: 'ghost',
-                  className: 'text-fd-muted-foreground -ms-1',
+                  className: 'text-fd-muted-foreground',
                 }),
               )}
             >
@@ -335,11 +335,7 @@ export function FieldSet(
           <ObjectInput
             field={field}
             fieldName={fieldName}
-            {...rest}
-            className={cn(
-              'rounded-lg border border-fd-primary/20 bg-fd-background/50 p-2 shadow-sm',
-              rest.className,
-            )}
+            className="rounded-lg border border-fd-primary/20 bg-fd-background/50 p-2 shadow-sm"
           />
         )}
       </fieldset>
@@ -376,11 +372,7 @@ export function FieldSet(
           <ArrayInput
             fieldName={fieldName}
             items={field.elementType}
-            {...rest}
-            className={cn(
-              'rounded-lg border border-fd-primary/20 bg-fd-background/50 p-2 shadow-sm',
-              rest.className,
-            )}
+            className="rounded-lg border border-fd-primary/20 bg-fd-background/50 p-2 shadow-sm"
           />
         )}
       </fieldset>
