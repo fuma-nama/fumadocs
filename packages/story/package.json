@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/story",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Story integration to Fumadocs.",
   "keywords": [],
   "license": "MIT",
@@ -28,7 +28,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@fumari/stf": "workspace:^",
+    "@fumari/stf": "workspace:*",
     "@radix-ui/react-select": "^2.2.6",
     "class-variance-authority": "^0.7.1",
     "lucide-react": "^0.562.0",

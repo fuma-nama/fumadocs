@@ -1,16 +1,30 @@
-import { createFileSystemCache, defineStory } from '@fumadocs/story';
+import { createFileSystemCache, defineStoryFactory } from '@fumadocs/story';
 import { CalloutStory } from './client';
 
-export const story = defineStory(import.meta.url, {
-  Component: CalloutStory,
+const { defineStory } = defineStoryFactory({
   // use only on Vercel
   cache:
     process.env.NODE_ENV === 'production'
       ? createFileSystemCache('.next/fumadocs-story')
       : undefined,
-  args: {
-    initial: {
-      title: 'This is a Callout',
+});
+
+export const story = defineStory(import.meta.url, {
+  displayName: 'Callout',
+  Component: CalloutStory,
+  args: [
+    {
+      variant: 'Default',
+      initial: {
+        title: 'This is a Callout',
+      },
     },
-  },
+    {
+      variant: 'Warning',
+      initial: {
+        title: 'This is a Callout',
+        type: 'warning',
+      },
+    },
+  ],
 });

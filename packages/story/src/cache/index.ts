@@ -9,6 +9,9 @@ export interface Cache {
 
 export * from './fs';
 
+/**
+ * Note: the returned value is always re-constructed, direct modifications will not pollute the cached values.
+ */
 export async function cached<V>(
   cache: Cache | false,
   key: string,

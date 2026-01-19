@@ -42,10 +42,29 @@ If you are new to the concept of Story, this is a short explanation from **Story
   describe the component's behavior and appearance given a set of arguments.
 </blockquote>
 
-To create a story in Fumadocs Story:
+Create a story factory to store your global settings:
+
+```ts title="lib/story.ts"
+import { createFileSystemCache, defineStoryFactory } from '@fumadocs/story';
+
+const { defineStory } = defineStoryFactory({
+  // for Vercel, this is required: choose a directory for cache.
+  cache:
+    process.env.NODE_ENV === 'production'
+      ? createFileSystemCache('.next/fumadocs-story')
+      : undefined,
+
+  tsc: {
+    // we use tsc to generate controls from types
+    // you can customise TypeScript options here
+  },
+});
+```
+
+Now create your first story:
 
 ```tsx title="graph-view.story.tsx"
-import { defineStory } from '@fumadocs/story';
+import { defineStory } from '@/lib/story';
 import { GraphView } from '@/components/graph-view';
 
 export const story = defineStory(import.meta.url, {
@@ -57,7 +76,7 @@ export const story = defineStory(import.meta.url, {
 });
 ```
 
-- Fill the `Component` option to your component, the passed component must be a client component.
+- Fill the `Component` option to your component, the passed component must be a **client component**.
 
 Now you can render the story like:
 
@@ -73,7 +92,34 @@ Preview for component:
 
 <story.WithControl />
 
-## Advanced
+## Configurations
+
+### Variants
+
+You can provide multiple variants of the component with `args`:
+
+```ts
+import { defineStory } from '@/lib/story';
+import { Callout } from '@/components/callout';
+
+export const story = defineStory(import.meta.url, {
+  Component: Callout,
+  args: [
+    {
+      variant: 'Default',
+      initial: {
+        type: 'default',
+      },
+    },
+    {
+      variant: 'Warning',
+      initial: {
+        type: 'warning',
+      },
+    },
+  ],
+});
+```
 
 ### `controls`
 
@@ -94,9 +140,9 @@ export const story = defineStory(import.meta.url, {
       },
     },
 
-    // or options for generator powered by tsc
+    // or customise the generated controls
     controls: {
-      tsconfigPath: 'tsconfig.json',
+      transform: (node) => node,
     },
   },
 });

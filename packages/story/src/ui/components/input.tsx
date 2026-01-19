@@ -1,12 +1,7 @@
 import * as React from 'react';
 import { cn } from '@/utils/cn';
-import { cva } from 'class-variance-authority';
 
 export type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
-
-export const labelVariants = cva(
-  'text-xs font-medium text-fd-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
-);
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, ...props }, ref) => {
