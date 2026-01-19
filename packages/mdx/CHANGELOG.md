@@ -1,5 +1,11 @@
 # next-docs-mdx
 
+## 14.2.6
+
+### Patch Changes
+
+- 339dedf: Add heading IDs into processed markdown by default
+
 ## 14.2.5
 
 ### Patch Changes
