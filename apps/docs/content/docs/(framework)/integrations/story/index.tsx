@@ -21,9 +21,11 @@ export const story = defineStory(import.meta.url, {
     },
     {
       variant: 'Warning',
+      fixed: {
+        type: 'warning',
+      },
       initial: {
         title: 'This is a Callout',
-        type: 'warning',
       },
     },
   ],

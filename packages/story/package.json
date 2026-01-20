@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/story",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Story integration to Fumadocs.",
   "keywords": [],
   "license": "MIT",
@@ -37,6 +37,7 @@
     "ts-morph": "^27.0.2"
   },
   "devDependencies": {
+    "@fastify/deepmerge": "^3.1.0",
     "@types/node": "25.0.5",
     "@types/react": "^19.2.8",
     "@types/ungap__structured-clone": "^1.2.0",

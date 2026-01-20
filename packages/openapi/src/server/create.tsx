@@ -61,7 +61,7 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
     options,
     createProxy,
     async getSchema(document) {
-      const schemas = await getSchemas();
+      const schemas = await this.getSchemas();
       if (document in schemas) return schemas[document];
 
       console.warn(
