@@ -1,5 +1,11 @@
 # @fumadocs/story
 
+## 0.0.3
+
+### Patch Changes
+
+- 9e62a4d: support fixed values for props
+
 ## 0.0.2
 
 ### Patch Changes
