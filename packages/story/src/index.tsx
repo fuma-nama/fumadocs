@@ -1,11 +1,12 @@
 import * as fs from 'node:fs/promises';
-import { createTypeTreeBuilder, literalEnumHandler } from './type-tree/builder';
+import { collapse, createTypeTreeBuilder, literalEnumHandler } from './type-tree/builder';
 import { cached, type Cache } from './cache';
 import type { TypeNode } from './type-tree/types';
 import { ComponentPropsWithoutRef, FC, ReactNode } from 'react';
 import { fileURLToPath } from 'node:url';
 import { Project } from 'ts-morph';
 import { getHash } from './utils/get-hash';
+import { deepmerge } from '@fastify/deepmerge';
 
 type Awaitable<T> = T | Promise<T>;
 
@@ -27,9 +28,15 @@ export interface StoryOptions<C extends FC<any>> {
 
 export interface ArgsOptions<C extends FC<any> = FC<any>> {
   /**
-   * the default values of arguments
+   * the default values of arguments.
    */
   initial?: ComponentPropsWithoutRef<C> | (() => Awaitable<ComponentPropsWithoutRef<C>>);
+  /**
+   * fixed values for arguments, will disable the relevant controls.
+   */
+  fixed?:
+    | Partial<ComponentPropsWithoutRef<C>>
+    | (() => Awaitable<Partial<ComponentPropsWithoutRef<C>>>);
   /**
    * customise the generated controls, by default generated from component props using TypeScript compiler.
    */
@@ -87,6 +94,9 @@ export interface VariantInfo {
 export function defineStoryFactory(factoryOptions: StoryFactoryOptions = {}): StoryFactory {
   let _project: Project | undefined;
   const { cache = false, tsc: { tsconfigPath } = {} } = factoryOptions;
+  const propsDeepmerge = deepmerge({
+    mergeArray: () => (_target, source) => source,
+  });
 
   function initProject() {
     return (_project ??= new Project({
@@ -99,7 +109,10 @@ export function defineStoryFactory(factoryOptions: StoryFactoryOptions = {}): St
     defineStory(callerUrl, { Component, name = 'story', displayName, args = {} }) {
       const filePath = fileURLToPath(callerUrl);
 
-      async function generateDefaultControls({ controls = {} }: ArgsOptions): Promise<TypeNode> {
+      async function generateDefaultControls(
+        fixedValues: unknown,
+        controls: ArgsOptions['controls'] = {},
+      ): Promise<TypeNode> {
         if ('node' in controls) return controls.node;
 
         const fileContent = await fs.readFile(filePath, 'utf-8');
@@ -112,9 +125,7 @@ export function defineStoryFactory(factoryOptions: StoryFactoryOptions = {}): St
             const sourceFile = project.createSourceFile(filePath, `${fileContent}\n${injection}`, {
               overwrite: true,
             });
-            const exportedDeclarations = sourceFile.getExportedDeclarations();
-            const declaration = exportedDeclarations.get('_StoryProps_')?.[0];
-
+            const declaration = sourceFile.getExportedDeclarations().get('_StoryProps_')?.[0];
             if (!declaration) {
               throw new Error(`Export "${name}" not found in file "${filePath}"`);
             }
@@ -127,6 +138,7 @@ export function defineStoryFactory(factoryOptions: StoryFactoryOptions = {}): St
         );
 
         if (controls.transform) propsNode = controls.transform(propsNode);
+        if (fixedValues) propsNode = collapse(propsNode, fixedValues);
         return propsNode;
       }
 
@@ -145,13 +157,19 @@ export function defineStoryFactory(factoryOptions: StoryFactoryOptions = {}): St
               displayName={displayName}
               Component={Component}
               presets={await Promise.all(
-                presets.map(async (preset) => ({
-                  variant: preset.variant,
-                  description: preset.description,
-                  controls: await generateDefaultControls(preset),
-                  defaultValues:
-                    typeof preset.initial === 'function' ? await preset.initial() : preset.initial,
-                })),
+                presets.map(async (preset) => {
+                  const fixedValues =
+                    typeof preset.fixed === 'function' ? await preset.fixed() : preset.fixed;
+                  const initial =
+                    typeof preset.initial === 'function' ? await preset.initial() : preset.initial;
+
+                  return {
+                    variant: preset.variant,
+                    description: preset.description,
+                    controls: await generateDefaultControls(fixedValues, preset.controls),
+                    defaultValues: fixedValues ? propsDeepmerge(initial, fixedValues) : initial,
+                  };
+                }),
               )}
             />
           );

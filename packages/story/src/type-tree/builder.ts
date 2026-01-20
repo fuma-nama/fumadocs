@@ -1,5 +1,6 @@
 import { Type, Node, ts, type Project } from 'ts-morph';
-import type { LiteralNode, TypeNode, UnionNode } from './types';
+import type { LiteralNode, ObjectNode, TypeNode, UnionNode } from './types';
+import { validate } from './validator';
 
 export enum TypeToNodeFlag {
   None = 0,
@@ -32,14 +33,16 @@ export type Handler = (options: {
 }) => TypeNode;
 
 const baseHandler: Handler = ({ type, flag, location, setCache, root }) => {
-  if (type.isUndefined()) {
-    return { type: 'undefined' };
-  }
-
-  if (type.isNull()) {
-    return { type: 'null' };
-  }
-
+  // Handle primitive types
+  if (type.isString()) return { type: 'string' };
+  if (type.isNumber()) return { type: 'number' };
+  if (type.isBoolean()) return { type: 'boolean' };
+  if (type.isBigInt()) return { type: 'bigint' };
+  const symbol = type.getSymbol();
+  if (symbol && symbol.getName() === 'Date') return { type: 'date' };
+  if (type.isUndefined()) return { type: 'undefined' };
+  if (type.isUnknown()) return { type: 'unknown' };
+  if (type.isNull()) return { type: 'null' };
   if (type.isNever() || type.getCallSignatures().length > 0) return { type: 'never' };
 
   if (type.isUnion()) {
@@ -48,12 +51,8 @@ const baseHandler: Handler = ({ type, flag, location, setCache, root }) => {
       types: [],
     };
     setCache(result);
-    for (const t of type.getUnionTypes()) {
-      const item = root(t, flag);
-      if (item.type !== 'never') result.types.push(item);
-    }
-    if (result.types.length === 0) Object.assign(result, { type: 'never' } satisfies TypeNode);
-    else if (result.types.length === 1) Object.assign(result, result.types[0]);
+    for (const t of type.getUnionTypes()) result.types.push(root(t, flag));
+    Object.assign(result, unwrapUnion(result));
     return result;
   }
 
@@ -118,15 +117,10 @@ const baseHandler: Handler = ({ type, flag, location, setCache, root }) => {
       elementType: { type: 'never' },
     };
     setCache(result);
-    const elementTypes = elements.map((t) => root(t, flag));
-    if (elementTypes.length > 0)
-      result.elementType =
-        elementTypes.length > 1
-          ? {
-              type: 'union',
-              types: elementTypes,
-            }
-          : elementTypes[0];
+    result.elementType = unwrapUnion({
+      type: 'union',
+      types: elements.map((t) => root(t, flag)),
+    });
     return result;
   }
 
@@ -165,14 +159,6 @@ const baseHandler: Handler = ({ type, flag, location, setCache, root }) => {
     }
   }
 
-  // Handle primitive types
-  if (type.isString()) return { type: 'string' };
-  if (type.isNumber()) return { type: 'number' };
-  if (type.isBoolean()) return { type: 'boolean' };
-  if (type.isBigInt()) return { type: 'bigint' };
-  const symbol = type.getSymbol();
-  if (symbol && symbol.getName() === 'Date') return { type: 'date' };
-
   // Handle objects and interfaces
   if (type.isObject() || type.isClassOrInterface() || type.getProperties().length > 0) {
     const properties = type.getProperties();
@@ -187,9 +173,8 @@ const baseHandler: Handler = ({ type, flag, location, setCache, root }) => {
 
     for (const prop of properties) {
       // Skip private properties
-      if (prop.getName().startsWith('#')) {
-        continue;
-      }
+      if (prop.getName().startsWith('#')) continue;
+
       const propType = prop.getTypeAtLocation(location);
       let child = root(propType, flag, prop.getValueDeclaration());
       if (child.type === 'union') {
@@ -197,20 +182,23 @@ const baseHandler: Handler = ({ type, flag, location, setCache, root }) => {
           ...child,
           types: child.types.filter((t) => t.type !== 'undefined'),
         });
+      } else if (child.type === 'undefined') {
+        continue;
       }
-      if (child.type === 'never' || child.type === 'undefined') continue;
-      result.properties.push({
-        name: prop.getName(),
-        type: child,
-        required: !prop.isOptional(),
-      });
+
+      if (child.type !== 'never') {
+        result.properties.push({
+          name: prop.getName(),
+          type: child,
+          required: !prop.isOptional(),
+        });
+      }
     }
     return result;
   }
 
-  // Fallback: return unknown with type name
   return {
-    type: 'unknown',
+    type: 'never',
     displayName: type.getText(location, ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope),
   };
 };
@@ -293,9 +281,62 @@ export function createTypeTreeBuilder(project: Project, customHandlers: Handler[
   return builder;
 }
 
-function unwrapUnion(union: UnionNode): TypeNode {
-  const types = union.types;
-  if (types.length === 0) return { type: 'never' };
-  if (types.length === 1) return types[0];
+/**
+ * collapse controls into a deterministic state when certain values are known & immutable:
+ * - collapse determined unions
+ * - remove immutable controls
+ * @returns modified node (modification is in place)
+ */
+export function collapse(node: TypeNode, value: unknown): TypeNode {
+  if (node.type === 'object') {
+    if (typeof value !== 'object' || value === null) return node;
+    const newProps: ObjectNode['properties'] = [];
+    for (const prop of node.properties) {
+      if (!(prop.name in value)) {
+        newProps.push(prop);
+        continue;
+      }
+
+      prop.type = collapse(prop.type, value[prop.name as never]);
+      if (prop.type.type !== 'never') newProps.push(prop);
+    }
+    node.properties = newProps;
+    return node;
+  }
+
+  if (node.type === 'union') {
+    const newTypes: TypeNode[] = [];
+    for (const member of node.types) {
+      if (validate(member, value)) newTypes.push(collapse(member, value));
+    }
+    node.types = newTypes;
+    return unwrapUnion(node);
+  }
+
+  return { type: 'never' };
+}
+
+/** simplify union */
+export function unwrapUnion(union: UnionNode): TypeNode {
+  const members = new Set<TypeNode>();
+  for (let t of union.types) {
+    if (t.type === 'union') t = unwrapUnion(t);
+
+    switch (t.type) {
+      case 'unknown':
+        return t;
+      case 'never':
+        break;
+      case 'union':
+        for (const child of t.types) members.add(child);
+        break;
+      default:
+        members.add(t);
+    }
+  }
+
+  if (members.size === 0) return { type: 'never' };
+  if (members.size === 1) return members.values().next().value!;
+  union.types = Array.from(members);
   return union;
 }

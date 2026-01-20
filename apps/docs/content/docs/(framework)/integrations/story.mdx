@@ -63,12 +63,12 @@ export const { defineStory } = defineStoryFactory({
 
 Now create your first story:
 
-```tsx title="graph-view.story.tsx"
+```tsx tab="my-component.story.tsx"
 import { defineStory } from '@/lib/story';
-import { GraphView } from '@/components/graph-view';
+import { MyComponent } from './my-component';
 
 export const story = defineStory(import.meta.url, {
-  Component: GraphView,
+  Component: MyComponent,
   args: {
     // default props (recommended)
     initial: {},
@@ -76,12 +76,25 @@ export const story = defineStory(import.meta.url, {
 });
 ```
 
-- Fill the `Component` option to your component, the passed component must be a **client component**.
+```tsx tab="my-component.tsx"
+'use client';
+
+export interface MyComponentProps {
+  title?: string;
+}
+
+export function MyComponent({ title }: MyComponentProps) {
+  return <p>{title}</p>;
+}
+```
+
+- The story must be exported as `story`, or the `name` option must be set to match the export name.
+- Fill the `Component` option with your component, the passed component must be a **client component**.
 
 Now you can render the story like:
 
 ```mdx title="index.mdx"
-import { story } from './graph-view.story';
+import { story } from '@/components/my-component.story';
 
 ## Overview
 
@@ -108,12 +121,16 @@ export const story = defineStory(import.meta.url, {
     {
       variant: 'Default',
       initial: {
-        type: 'default',
+        title: 'This is a Callout',
       },
     },
     {
       variant: 'Warning',
       initial: {
+        title: 'This is a Callout',
+      },
+      // fixed values for props
+      fixed: {
         type: 'warning',
       },
     },
