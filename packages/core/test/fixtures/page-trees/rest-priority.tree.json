@@ -15,19 +15,6 @@
       "type": "folder",
     },
     {
-      "$id": "root:b",
-      "children": [
-        {
-          "$id": "root:b/test.mdx",
-          "name": "Page B (Test)",
-          "type": "page",
-          "url": "/b/test",
-        },
-      ],
-      "name": "B",
-      "type": "folder",
-    },
-    {
       "$id": "root:c",
       "children": [
         {
@@ -35,6 +22,12 @@
           "name": "Page C",
           "type": "page",
           "url": "/c/test",
+        },
+        {
+          "$id": "root:b/test.mdx",
+          "name": "Page B (Test)",
+          "type": "page",
+          "url": "/b/test",
         },
         {
           "$id": "root:b/hello.mdx",

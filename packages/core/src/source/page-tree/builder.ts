@@ -153,23 +153,32 @@ function createPageTreeBuilderUtils(ctx: PageTreeBuilderContext) {
    */
   function registerOwner(ownerPath: string, node: PageTree.Node, priority: number): boolean {
     const existing = nodeOwner.get(node);
-    if (existing) {
-      if (existing.owner === ownerPath) {
-        existing.priority = Math.max(existing.priority, priority);
-        return true;
-      }
-      if (existing.priority >= priority) return false;
-
-      // return ownership
-      const folder = pathToNode.get(existing.owner);
-      if (folder && folder.type === 'folder') {
-        if (folder.index === node) delete folder.index;
-        else folder.children = folder.children.filter((child) => child !== node);
-      }
+    if (!existing) {
+      nodeOwner.set(node, { owner: ownerPath, priority });
+      return true;
     }
+    if (existing.owner === ownerPath) {
+      existing.priority = Math.max(existing.priority, priority);
+      return true;
+    }
+    if (existing.priority >= priority) return false;
 
-    nodeOwner.set(node, { owner: ownerPath, priority });
+    // return ownership
+    const folder = pathToNode.get(existing.owner);
+    if (folder && folder.type === 'folder') {
+      if (folder.index === node) delete folder.index;
+      else folder.children = folder.children.filter((child) => child !== node);
+    }
+    existing.owner = ownerPath;
+    existing.priority = priority;
     return true;
+  }
+
+  function transferOwner(ownerPath: string, node: PageTree.Node) {
+    const existing = nodeOwner.get(node);
+    if (existing) {
+      existing.owner = ownerPath;
+    }
   }
 
   function nextNodeId(localId = ctx.generateNodeId()) {
@@ -256,20 +265,27 @@ function createPageTreeBuilderUtils(ctx: PageTreeBuilderContext) {
 
       if (item.startsWith(extractPrefix)) {
         const path = joinPath(folderPath, item.slice(extractPrefix.length));
-        const dirNode = this.folder(path, false);
-        if (!dirNode) return;
+        const node = this.folder(path, false);
+        if (!node) return;
 
-        for (const child of dirNode.children) {
-          if (registerOwner(folderPath, child, 1)) outputArray.push(child);
-        }
         excludedPaths.add(path);
+        if (registerOwner(folderPath, node, 2)) {
+          for (const child of node.children) {
+            transferOwner(folderPath, node);
+            outputArray.push(child);
+          }
+        } else {
+          for (const child of node.children) {
+            if (registerOwner(folderPath, child, 2)) outputArray.push(child);
+          }
+        }
         return;
       }
 
       const path = resolveFlattenPath(joinPath(folderPath, item), 'page');
       const node = this.folder(path, false) ?? this.file(path);
       if (node) {
-        outputArray.push(node);
+        if (registerOwner(folderPath, node, 2)) outputArray.push(node);
         excludedPaths.add(path);
       }
     },
@@ -304,7 +320,7 @@ function createPageTreeBuilderUtils(ctx: PageTreeBuilderContext) {
         for (const item of outputArray) {
           if (item !== rest && item !== restReversed) {
             if (item === index) index = undefined;
-            if (registerOwner(folderPath, item, 3)) children.push(item);
+            children.push(item);
             continue;
           }
 
