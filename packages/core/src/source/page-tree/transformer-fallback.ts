@@ -18,7 +18,8 @@ export function transformerFallback(): PageTreeTransformer {
       if (isolatedStorage.getFiles().length === 0) return root;
 
       root.fallback = this.builder.build(isolatedStorage, {
-        ...this.options,
+        noRef: this.noRef,
+        transformers: this.transformers,
         id: `fallback-${root.$id ?? ''}`,
         generateFallback: false,
       });
