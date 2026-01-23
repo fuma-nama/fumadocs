@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 16.4.8
+
+### Patch Changes
+
+- 0025484: [Page Tree Builder] define the priority to resolve node owner
+
 ## 16.4.7
 
 ### Patch Changes
