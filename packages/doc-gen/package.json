@@ -42,7 +42,7 @@
     "estree-util-to-js": "^2.0.0",
     "estree-util-value-to-estree": "^3.5.0",
     "npm-to-yarn": "^3.0.1",
-    "oxc-transform": "^0.107.0",
+    "oxc-transform": "^0.110.0",
     "unist-util-visit": "^5.0.0",
     "zod": "^4.3.5"
   },
@@ -51,7 +51,7 @@
     "@types/estree": "^1.0.8",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
-    "@types/node": "25.0.5",
+    "@types/node": "25.0.10",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "mdast-util-mdx-jsx": "^3.2.0",

@@ -123,8 +123,8 @@
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",
     "@tailwindcss/cli": "^4.1.18",
-    "@types/node": "^25.0.5",
-    "@types/react": "^19.2.8",
+    "@types/node": "^25.0.10",
+    "@types/react": "^19.2.9",
     "@types/react-dom": "^19.2.3",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",

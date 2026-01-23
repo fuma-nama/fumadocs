@@ -37,9 +37,9 @@
     "ts-morph": "^27.0.2"
   },
   "devDependencies": {
-    "@fastify/deepmerge": "^3.1.0",
-    "@types/node": "25.0.5",
-    "@types/react": "^19.2.8",
+    "@fastify/deepmerge": "^3.2.0",
+    "@types/node": "25.0.10",
+    "@types/react": "^19.2.9",
     "@types/ungap__structured-clone": "^1.2.0",
     "@ungap/structured-clone": "^1.3.0",
     "eslint-config-custom": "workspace:*",

@@ -95,7 +95,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@base-ui/react": "^1.0.0",
+    "@base-ui/react": "^1.1.0",
     "@fumadocs/ui": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "lucide-react": "^0.562.0",
@@ -106,8 +106,8 @@
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",
     "@tailwindcss/cli": "^4.1.18",
-    "@types/node": "^25.0.5",
-    "@types/react": "^19.2.8",
+    "@types/node": "^25.0.10",
+    "@types/react": "^19.2.9",
     "@types/react-dom": "^19.2.3",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",

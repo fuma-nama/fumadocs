@@ -7,6 +7,10 @@ export interface SerializedPageTree {
   data: object;
 }
 
+export type Serialized<Data> = {
+  [K in keyof Data]: Data[K] extends SerializedPageTree ? PageTree.Root : Data[K];
+};
+
 function deserializeHTML(html: string) {
   return (
     <span
@@ -37,29 +41,26 @@ export function deserializePageTree(serialized: SerializedPageTree): PageTree.Ro
  *
  * other unrelated properties are kept in the output.
  */
-export function useFumadocsLoader<V>(serialized: V): {
-  [K in keyof V]: V[K] extends SerializedPageTree ? PageTree.Root : V[K];
-} {
+export function useFumadocsLoader<V>(serialized: V): Serialized<V> {
   return useMemo(() => {
     const out: Record<string, unknown> = {};
     for (const k in serialized) {
-      const v: unknown = serialized[k];
-      if (
-        typeof v === 'object' &&
-        v !== null &&
-        '$fumadocs_loader' in v &&
-        v.$fumadocs_loader === 'page-tree' &&
-        'data' in v &&
-        typeof v.data === 'object'
-      ) {
-        out[k] = deserializePageTree(v as SerializedPageTree);
+      const v = serialized[k];
+      if (isSerializedPageTree(v)) {
+        out[k] = deserializePageTree(v);
       } else {
         out[k] = v;
       }
     }
-
-    return out as {
-      [K in keyof V]: V[K] extends SerializedPageTree ? PageTree.Root : V[K];
-    };
+    return out as Serialized<V>;
   }, [serialized]);
+}
+
+function isSerializedPageTree(v: unknown): v is SerializedPageTree {
+  return (
+    typeof v === 'object' &&
+    v !== null &&
+    '$fumadocs_loader' in v &&
+    v.$fumadocs_loader === 'page-tree'
+  );
 }
