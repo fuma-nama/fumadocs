@@ -5,5 +5,7 @@ export default defineConfig({
   target: 'es2023',
   entry: ['./src/index.{ts,tsx}', './src/ui/story.tsx', './src/type-tree/index.ts'],
   fixedExtension: false,
-  dts: true,
+  dts: {
+    sourcemap: false,
+  },
 });

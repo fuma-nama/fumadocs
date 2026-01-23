@@ -38,7 +38,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "zod": "^4.3.5"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@content-collections/core": "^0.13.1",

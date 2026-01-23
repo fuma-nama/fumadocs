@@ -81,9 +81,9 @@
     "tinyglobby": "^0.2.15",
     "unified": "^11.0.5",
     "unist-util-remove-position": "^5.0.0",
-    "unist-util-visit": "^5.0.0",
+    "unist-util-visit": "^5.1.0",
     "vfile": "^6.0.3",
-    "zod": "^4.3.5"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@fumadocs/mdx-remote": "workspace:*",

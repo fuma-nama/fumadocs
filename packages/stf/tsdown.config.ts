@@ -5,6 +5,8 @@ export default defineConfig({
   target: 'es2023',
   entry: ['./src/index.{ts,tsx}', './src/lib/utils.ts'],
   fixedExtension: false,
-  dts: true,
+  dts: {
+    sourcemap: false,
+  },
   exports: true,
 });

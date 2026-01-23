@@ -7,7 +7,9 @@ export default defineConfig({
   entry: ['./src/**/*.{ts,tsx}', '!./src/_registry'],
   fixedExtension: false,
   unbundle: true,
-  dts: true,
+  dts: {
+    sourcemap: false,
+  },
   async onSuccess() {
     // wait until https://github.com/rolldown/tsdown/issues/472
     let content = (await fs.readFile('dist/components/image-zoom.js')).toString();

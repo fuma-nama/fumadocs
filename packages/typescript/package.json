@@ -45,7 +45,8 @@
     "remark-rehype": "^11.1.2",
     "tinyglobby": "^0.2.15",
     "ts-morph": "^27.0.2",
-    "unist-util-visit": "^5.0.0"
+    "unified": "^11.0.5",
+    "unist-util-visit": "^5.1.0"
   },
   "devDependencies": {
     "@mdx-js/mdx": "^3.1.1",
@@ -60,8 +61,7 @@
     "fumadocs-ui": "workspace:*",
     "tsconfig": "workspace:*",
     "tsdown": "^0.19.0",
-    "typescript": "^5.9.3",
-    "unified": "^11.0.5"
+    "typescript": "^5.9.3"
   },
   "peerDependencies": {
     "@types/react": "*",

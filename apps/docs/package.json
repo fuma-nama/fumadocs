@@ -13,8 +13,8 @@
     "start": "next start"
   },
   "dependencies": {
-    "@ai-sdk/openai-compatible": "^2.0.16",
-    "@ai-sdk/react": "^3.0.47",
+    "@ai-sdk/openai-compatible": "^2.0.18",
+    "@ai-sdk/react": "^3.0.50",
     "@fumadocs/mdx-remote": "workspace:*",
     "@fumadocs/story": "workspace:*",
     "@mixedbread/sdk": "^0.50.1",
@@ -28,7 +28,7 @@
     "@shikijs/rehype": "^3.21.0",
     "@shikijs/transformers": "^3.21.0",
     "@takumi-rs/image-response": "^0.65.0",
-    "ai": "^6.0.45",
+    "ai": "^6.0.48",
     "class-variance-authority": "^0.7.1",
     "d3-force": "^3.0.0",
     "estree-util-build-jsx": "^3.0.1",
@@ -43,7 +43,7 @@
     "fumadocs-ui": "workspace:*",
     "hast-util-to-jsx-runtime": "^2.3.6",
     "katex": "^0.16.27",
-    "lucide-react": "^0.562.0",
+    "lucide-react": "^0.563.0",
     "mermaid": "^11.12.2",
     "next": "16.1.4",
     "next-themes": "^0.4.6",
@@ -63,8 +63,8 @@
     "shiki": "^3.21.0",
     "tailwind-merge": "^3.4.0",
     "twoslash": "^0.3.6",
-    "unist-util-visit": "^5.0.0",
-    "zod": "^4.3.5"
+    "unist-util-visit": "^5.1.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",

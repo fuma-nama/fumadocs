@@ -98,7 +98,7 @@
     "@base-ui/react": "^1.1.0",
     "@fumadocs/ui": "workspace:*",
     "class-variance-authority": "^0.7.1",
-    "lucide-react": "^0.562.0",
+    "lucide-react": "^0.563.0",
     "next-themes": "^0.4.6",
     "react-medium-image-zoom": "^5.4.0",
     "scroll-into-view-if-needed": "^3.1.0"

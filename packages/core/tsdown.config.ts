@@ -1,9 +1,11 @@
 import { defineConfig } from 'tsdown';
 
 export default defineConfig({
-  dts: true,
+  dts: {
+    sourcemap: false,
+  },
   fixedExtension: false,
-  target: 'es2022',
+  target: 'es2023',
   format: 'esm',
   entry: [
     'src/{toc,link,breadcrumb,dynamic-link}.tsx',
