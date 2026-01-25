@@ -10,9 +10,9 @@
     "types:check": "fumadocs-mdx && tsc --noEmit"
   },
   "dependencies": {
-    "@tanstack/react-router": "1.154.13",
-    "@tanstack/react-router-devtools": "1.154.13",
-    "@tanstack/react-start": "1.154.13",
+    "@tanstack/react-router": "1.157.6",
+    "@tanstack/react-router-devtools": "1.157.6",
+    "@tanstack/react-start": "1.157.6",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
@@ -31,6 +31,6 @@
     "@vitejs/plugin-react": "^5.1.2",
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3",
-    "vite-tsconfig-paths": "^6.0.4"
+    "vite-tsconfig-paths": "^6.0.5"
   }
 }

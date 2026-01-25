@@ -10,18 +10,18 @@
   },
   "dependencies": {
     "@orama/tokenizers": "^3.1.18",
-    "@react-router/node": "^7.12.0",
-    "@react-router/serve": "^7.12.0",
+    "@react-router/node": "^7.13.0",
+    "@react-router/serve": "^7.13.0",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "isbot": "^5.1.33",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "react-router": "^7.12.0"
+    "react-router": "^7.13.0"
   },
   "devDependencies": {
-    "@react-router/dev": "^7.12.0",
+    "@react-router/dev": "^7.13.0",
     "@tailwindcss/vite": "^4.1.18",
     "@types/mdx": "^2.0.13",
     "@types/node": "^25.0.10",
@@ -31,6 +31,6 @@
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
-    "vite-tsconfig-paths": "^6.0.4"
+    "vite-tsconfig-paths": "^6.0.5"
   }
 }

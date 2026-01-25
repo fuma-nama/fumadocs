@@ -39,7 +39,7 @@
     "commander": "^14.0.2",
     "magic-string": "^0.30.21",
     "oxc-parser": "^0.110.0",
-    "oxc-resolver": "^11.16.3",
+    "oxc-resolver": "^11.16.4",
     "package-manager-detector": "^1.6.0",
     "picocolors": "^1.1.1",
     "tinyexec": "^1.0.2",

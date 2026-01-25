@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^2.0.18",
-    "@ai-sdk/react": "^3.0.50",
+    "@ai-sdk/react": "^3.0.51",
     "@fumadocs/mdx-remote": "workspace:*",
     "@fumadocs/story": "workspace:*",
     "@mixedbread/sdk": "^0.50.1",
@@ -28,7 +28,7 @@
     "@shikijs/rehype": "^3.21.0",
     "@shikijs/transformers": "^3.21.0",
     "@takumi-rs/image-response": "^0.65.0",
-    "ai": "^6.0.48",
+    "ai": "^6.0.49",
     "class-variance-authority": "^0.7.1",
     "d3-force": "^3.0.0",
     "estree-util-build-jsx": "^3.0.1",

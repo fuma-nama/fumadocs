@@ -2,13 +2,13 @@ import * as fs from "node:fs/promises";
 import { collapse, createTypeTreeBuilder, literalEnumHandler } from "./type-tree/builder";
 import { cached, type Cache } from "./cache";
 import type { TypeNode } from "./type-tree/types";
-import { ComponentPropsWithoutRef, FC, ReactNode } from "react";
+import type { ComponentPropsWithoutRef, FC, ReactNode } from "react";
 import { fileURLToPath } from "node:url";
-import { Project } from "ts-morph";
 import { getHash } from "./utils/get-hash";
 import { deepmerge } from "@fastify/deepmerge";
 import type { ClientPayload } from "./client";
 import { serialize } from "./utils/serialization";
+import type { Project } from "ts-morph";
 
 type Awaitable<T> = T | Promise<T>;
 
@@ -20,7 +20,7 @@ export interface StoryOptions<C extends FC<any>> {
    */
   name?: string;
   displayName?: string;
-  Component: C;
+  Component?: C;
 
   /**
    * story arguments, you can pass an array of options for multiple presets.
@@ -55,14 +55,14 @@ export interface ArgsOptions<C extends FC<any> = FC<any>> {
 export { type Cache } from "./cache";
 export { createFileSystemCache } from "./cache/fs";
 
-export interface Story<C extends FC<any>> {
+export interface Story<C extends FC<any> = FC<any>> {
   /** render as a server component (require RSC). */
   WithControl: FC<undefined>;
-  /** create a serialized client payload, pass it to the client-side story renderer (need SSR support of your React.js framework). */
+  /** create a serialized client payload, you can pass it to `<StoryPayloadProvider />`. (for React.js frameworks with SSR support). */
   getClientPayload: () => Promise<string>;
 
   _private_: {
-    component: C;
+    component?: C;
   };
 }
 
@@ -90,6 +90,9 @@ export interface StoryFactoryOptions {
 
 export interface StoryFactory {
   defineStory: <C extends FC<any>>(callerUrl: string, options: StoryOptions<C>) => Story<C>;
+  getStoryPayloads: <Stories extends Record<string, Story>>(
+    stories: Stories,
+  ) => Promise<Record<keyof Stories, string>>;
 }
 
 export interface VariantInfo {
@@ -98,23 +101,27 @@ export interface VariantInfo {
 }
 
 export function defineStoryFactory(factoryOptions: StoryFactoryOptions = {}): StoryFactory {
-  let _project: Project | undefined;
-  const { cache = false, tsc: { tsconfigPath } = {} } = factoryOptions;
+  let _project: Promise<Project> | undefined;
+  const { cache = false } = factoryOptions;
   const propsDeepmerge = deepmerge({
     mergeArray: () => (_target, source) => source,
   });
 
   function initProject() {
-    return (_project ??= new Project({
-      tsConfigFilePath: tsconfigPath ?? "./tsconfig.json",
-      skipAddingFilesFromTsConfig: true,
+    return (_project ??= import("ts-morph").then((mod) => {
+      const { tsconfigPath = "./tsconfig.json" } = factoryOptions.tsc ?? {};
+
+      return new mod.Project({
+        tsConfigFilePath: tsconfigPath,
+        skipAddingFilesFromTsConfig: true,
+      });
     }));
   }
 
   async function generateControlsCached(filePath: string, name: string): Promise<TypeNode> {
     const fileContent = await fs.readFile(filePath, "utf-8");
     return cached(cache, getHash(`controls:${filePath}:${name}:${fileContent}`), async () => {
-      const project = initProject();
+      const project = await initProject();
       const injection = `export type _StoryProps_ = import('@fumadocs/story').GetProps<typeof ${name}>`;
       const sourceFile = project.createSourceFile(filePath, `${fileContent}\n${injection}`, {
         overwrite: true,
@@ -178,10 +185,21 @@ export function defineStoryFactory(factoryOptions: StoryFactoryOptions = {}): St
           return serialize(await getClientPayload());
         },
         async WithControl() {
+          if (!Component) throw new Error("`Component` option is not defined");
+
           const { WithControl } = await import("./client/with-control");
           return <WithControl Component={Component} {...await getClientPayload()} />;
         },
       };
+    },
+    async getStoryPayloads(stories) {
+      const generated = await Promise.all(
+        Object.entries(stories).map(async ([name, story]) => {
+          return [name, await story.getClientPayload()];
+        }),
+      );
+
+      return Object.fromEntries(generated);
     },
   };
 }

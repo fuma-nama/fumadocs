@@ -27,7 +27,7 @@
     "eslint-plugin-tailwindcss": "^3.18.2",
     "oxfmt": "^0.26.0",
     "rimraf": "^6.1.2",
-    "turbo": "2.7.5",
+    "turbo": "2.7.6",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.53.1",
     "vitest": "^4.0.18"
