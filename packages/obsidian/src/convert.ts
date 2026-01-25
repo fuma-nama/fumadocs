@@ -19,7 +19,7 @@ import { remarkGfm } from 'fumadocs-core/mdx-plugins/remark-gfm';
 import remarkMath from 'remark-math';
 
 export interface OutputFile {
-  type: 'asset' | 'content' | 'custom';
+  type: 'asset' | 'content' | 'data' | 'custom';
 
   /**
    * paths relative to target folder, for example:
@@ -74,6 +74,16 @@ export async function convertVaultFiles(
     if (file.format === 'media') {
       output.push({
         type: 'asset',
+        path: file.outPath,
+        content: file.content,
+      });
+
+      return;
+    }
+
+    if (file.format === 'data') {
+      output.push({
+        type: 'data',
         path: file.outPath,
         content: file.content,
       });

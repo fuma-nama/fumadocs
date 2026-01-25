@@ -36,7 +36,7 @@ export interface VaultStorage {
   files: Map<string, ParsedFile>;
 }
 
-export type ParsedFile = ParsedContentFile | ParsedMediaFile;
+export type ParsedFile = ParsedContentFile | ParsedMediaFile | ParsedDataFile;
 
 export interface ParsedContentFile extends Omit<VaultFile, 'content'> {
   format: 'content';
@@ -60,6 +60,11 @@ export interface ParsedMediaFile extends VaultFile {
    * The output URL. When undefined, it means the file is only accessible via paths.
    */
   url?: string;
+}
+
+export interface ParsedDataFile extends VaultFile {
+  format: 'data';
+  outPath: string;
 }
 
 /**
@@ -91,7 +96,17 @@ export function buildStorage(
     let outPath = getOutputPath(normalizedPath, rawFile);
     let parsed: ParsedFile;
 
-    if (['.md', '.mdx'].includes(path.extname(normalizedPath))) {
+    const basename = path.basename(normalizedPath).toLowerCase();
+
+    if (basename === 'meta.json') {
+      parsed = {
+        format: 'data',
+        path: normalizedPath,
+        _raw: rawFile._raw,
+        outPath,
+        content: rawFile.content,
+      };
+    } else if (['.md', '.mdx'].includes(path.extname(normalizedPath))) {
       const { data, content } = matter(String(rawFile.content));
       if (enforceMdx) {
         outPath = outPath.slice(0, -path.extname(outPath).length) + '.mdx';
