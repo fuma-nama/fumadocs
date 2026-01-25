@@ -1,34 +1,31 @@
 'use client';
 
-import { TypeNode } from '@/type-tree/types';
-import { FieldSet } from './arg-form';
-import { FC, Suspense, useDeferredValue, useRef, useState } from 'react';
-import { StfProvider, useDataEngine, useListener, useStf } from '@fumari/stf';
-import { ErrorBoundary } from 'react-error-boundary';
-import { AlertCircle } from 'lucide-react';
 import { cn } from '@/utils/cn';
+import { useStf, StfProvider, useDataEngine, useListener } from '@fumari/stf';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './components/select';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
+import { AlertCircle } from 'lucide-react';
+import { FC, useState, useRef, useDeferredValue, Suspense } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
+import { FieldSet } from './arg-form';
 import { VariantInfo } from '..';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './components/select';
+import type { TypeNode } from '@/type-tree/types';
 
-export function Story({
-  presets,
-  displayName,
-  Component,
-}: {
-  Component: FC;
+export interface WithControlProps {
   displayName?: string;
+  Component: FC;
   presets: (VariantInfo & {
     controls: TypeNode;
     defaultValues?: Record<string, unknown>;
   })[];
-}) {
+}
+
+export function WithControl({ presets, displayName, Component }: WithControlProps) {
   const [variant, setVariant] = useState(presets[0].variant);
   const preset = presets.find((preset) => preset.variant === variant);
   const stf = useStf({
     defaultValues: preset?.defaultValues,
   });
-  if (!preset) return;
 
   return (
     <StfProvider value={stf}>
@@ -50,7 +47,7 @@ export function Story({
                 variant="ghost"
                 className="w-fit ms-auto text-fd-muted-foreground text-xs font-medium"
               >
-                <SelectValue>{preset.variant}</SelectValue>
+                <SelectValue placeholder="No Variant">{preset?.variant}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {presets.map((item) => (
@@ -64,13 +61,15 @@ export function Story({
           )}
         </div>
         <StoryComponent Component={Component} />
-        <FieldSet
-          key={variant}
-          field={preset.controls}
-          fieldName={[]}
-          name="Props"
-          className="max-h-[600px] overflow-auto"
-        />
+        {preset && (
+          <FieldSet
+            key={variant}
+            field={preset.controls}
+            fieldName={[]}
+            name="Props"
+            className="max-h-[600px] overflow-auto"
+          />
+        )}
       </div>
     </StfProvider>
   );
