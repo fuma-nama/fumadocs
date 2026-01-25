@@ -18,3 +18,22 @@ export const source: Source = {
     },
   ],
 };
+
+export const noMeta: Source = {
+  files: [
+    {
+      type: 'page',
+      path: 'test.mdx',
+      data: {
+        title: 'Hello',
+      },
+    },
+    {
+      type: 'page',
+      path: 'hello/index.mdx',
+      data: {
+        title: 'Hello',
+      },
+    },
+  ],
+};

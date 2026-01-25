@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { createGetUrl, getSlugs, loader } from '@/source';
+import { createGetUrl, getSlugs, loader, LoaderOptions, Source } from '@/source';
 import type { ReactElement } from 'react';
 import { removeUndefined } from '@/utils/remove-undefined';
 import { lucideIconsPlugin } from '@/source/plugins/lucide-icons';
@@ -32,18 +32,93 @@ test('Get URL: Base', () => {
   expect(getUrl([''])).toBe('/docs');
 });
 
+const pageTreeTests: {
+  title: string;
+  output: string;
+  source: Source;
+  loader?: Partial<LoaderOptions>;
+}[] = [
+  {
+    title: 'Basic',
+    source: (await import('./fixtures/page-trees/basic')).source,
+    output: './fixtures/page-trees/basic.tree.json',
+  },
+  {
+    title: 'Basic: no meta.json',
+    source: (await import('./fixtures/page-trees/basic')).noMeta,
+    output: './fixtures/page-trees/basic-no-meta.tree.json',
+  },
+  {
+    title: 'Rest',
+    source: (await import('./fixtures/page-trees/rest')).source,
+    output: './fixtures/page-trees/rest.tree.json',
+  },
+  {
+    title: 'Rest: priority',
+    source: (await import('./fixtures/page-trees/rest')).withPriority,
+    output: './fixtures/page-trees/rest-priority.tree.json',
+  },
+  {
+    title: 'Nested Directory',
+    source: (await import('./fixtures/page-trees/nested')).source,
+    output: './fixtures/page-trees/nested.tree.json',
+  },
+  {
+    title: 'Internationalized Routing',
+    source: (await import('./fixtures/page-trees/i18n')).source,
+    output: './fixtures/page-trees/i18n.tree.json',
+    loader: {
+      i18n: {
+        languages: ['cn', 'en'],
+        defaultLanguage: 'en',
+      },
+    },
+  },
+  {
+    title: 'Internationalized Routing: No Prefix',
+    source: (await import('./fixtures/page-trees/i18n')).source,
+    output: './fixtures/page-trees/i18n-no-prefix.tree.json',
+    loader: {
+      i18n: {
+        languages: ['cn', 'en'],
+        defaultLanguage: 'en',
+        hideLocale: 'default-locale',
+      },
+    },
+  },
+  {
+    title: 'Internationalized Routing: dir',
+    source: (await import('./fixtures/page-trees/i18n-dir')).source,
+    output: './fixtures/page-trees/i18n-dir.test.json',
+    loader: {
+      i18n: {
+        parser: 'dir',
+        languages: ['cn', 'en'],
+        defaultLanguage: 'en',
+      },
+    },
+  },
+];
+
+for (const pageTreeTest of pageTreeTests) {
+  test(`Page Tree: ${pageTreeTest.title}`, async () => {
+    const source = loader(pageTreeTest.source, {
+      baseUrl: '/',
+      pageTree: {
+        noRef: true,
+      },
+      ...pageTreeTest.loader,
+    });
+
+    await expect(removeUndefined(source.pageTree, true)).toMatchFileSnapshot(pageTreeTest.output);
+  });
+}
+
 test('Loader: Simple', async () => {
   const result = loader({
     baseUrl: '/',
-    pageTree: {
-      noRef: true,
-    },
     source: (await import('./fixtures/page-trees/basic')).source,
   });
-
-  await expect(removeUndefined(result.pageTree, true)).toMatchFileSnapshot(
-    './fixtures/page-trees/basic.tree.json',
-  );
 
   expect(result.getPages().length).toBe(1);
   expect(result.getPage(['test'])).toBeDefined();
@@ -53,15 +128,8 @@ test('Nested Directories', async () => {
   const result = loader({
     baseUrl: '/',
     icon: (v) => v as unknown as ReactElement,
-    pageTree: {
-      noRef: true,
-    },
     source: (await import('./fixtures/page-trees/nested')).source,
   });
-
-  await expect(removeUndefined(result.pageTree, true)).toMatchFileSnapshot(
-    './fixtures/page-trees/nested.tree.json',
-  );
 
   expect(result.getPages().map((page) => page.slugs.join('/'))).toMatchInlineSnapshot(`
       [
@@ -89,9 +157,6 @@ test('Internationalized Routing', async () => {
     source: (await import('./fixtures/page-trees/i18n')).source,
   });
 
-  await expect(removeUndefined(result.pageTree, true)).toMatchFileSnapshot(
-    './fixtures/page-trees/i18n.tree.json',
-  );
   await expect(removeUndefined(result.getLanguages(), true)).toMatchFileSnapshot(
     './fixtures/page-trees/i18n.entries.json',
   );
@@ -105,143 +170,11 @@ test('Internationalized Routing: Hide Prefix', async () => {
       defaultLanguage: 'en',
       hideLocale: 'default-locale',
     },
-    pageTree: {
-      noRef: true,
-    },
     source: (await import('./fixtures/page-trees/i18n')).source,
   });
-
-  await expect(removeUndefined(result.pageTree, true)).toMatchFileSnapshot(
-    './fixtures/page-trees/i18n-no-prefix.tree.json',
-  );
   expect(result.getPages().length).toBe(4);
   expect(result.getPage(['test'])?.url).toBe('/test');
   expect(result.getPage(['test'], 'cn')?.url).toBe('/cn/test');
-});
-
-test('Internationalized Routing: dir', async () => {
-  const result = loader({
-    baseUrl: '/',
-    i18n: {
-      parser: 'dir',
-      languages: ['cn', 'en'],
-      defaultLanguage: 'en',
-    },
-    source: (await import('./fixtures/page-trees/i18n-dir')).source,
-  });
-
-  await expect(removeUndefined(result.pageTree, true)).toMatchFileSnapshot(
-    './fixtures/page-trees/i18n-dir.tree.json',
-  );
-});
-
-test('Loader: Without meta.json', () => {
-  const result = loader({
-    baseUrl: '/',
-    pageTree: {
-      noRef: true,
-    },
-    source: {
-      files: [
-        {
-          type: 'page',
-          path: 'test.mdx',
-          data: {
-            title: 'Hello',
-          },
-        },
-        {
-          type: 'page',
-          path: 'hello/index.mdx',
-          data: {
-            title: 'Hello',
-          },
-        },
-      ],
-    },
-  });
-
-  expect(removeUndefined(result.pageTree, true), 'Page Tree').toMatchInlineSnapshot(`
-      {
-        "$id": "root",
-        "children": [
-          {
-            "$id": "root:test.mdx",
-            "name": "Hello",
-            "type": "page",
-            "url": "/test",
-          },
-          {
-            "$id": "root:hello",
-            "children": [],
-            "index": {
-              "$id": "root:hello/index.mdx",
-              "name": "Hello",
-              "type": "page",
-              "url": "/hello",
-            },
-            "name": "Hello",
-            "type": "folder",
-          },
-        ],
-        "name": "Docs",
-      }
-    `);
-});
-
-test('Loader: Rest operator', () => {
-  const result = loader({
-    baseUrl: '/',
-    pageTree: {
-      noRef: true,
-    },
-    source: {
-      files: [
-        {
-          type: 'meta',
-          path: 'meta.json',
-          data: {
-            pages: ['z...a'],
-          },
-        },
-        {
-          type: 'page',
-          path: '1-2.mdx',
-          data: {
-            title: '1.2',
-          },
-        },
-        {
-          type: 'page',
-          path: '2-2.mdx',
-          data: {
-            title: '2.2',
-          },
-        },
-      ],
-    },
-  });
-
-  expect(removeUndefined(result.pageTree, true), 'Page Tree').toMatchInlineSnapshot(`
-      {
-        "$id": "root",
-        "children": [
-          {
-            "$id": "root:2-2.mdx",
-            "name": "2.2",
-            "type": "page",
-            "url": "/2-2",
-          },
-          {
-            "$id": "root:1-2.mdx",
-            "name": "1.2",
-            "type": "page",
-            "url": "/1-2",
-          },
-        ],
-        "name": "Docs",
-      }
-    `);
 });
 
 test('Loader: Allow duplicate pages when explicitly referenced twice', () => {

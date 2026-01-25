@@ -1,0 +1,92 @@
+---
+title: Story
+description: Display components with controls.
+---
+
+import { story } from './index';
+
+<story.WithControl />
+
+## Introduction
+
+You can use Fumadocs Story to display & document components.
+It is a simple, docs-focused alternative of [Storybook](https://storybook.js.org), it is mainly designed for component libraries.
+
+If you are new to the concept of Story, this is a short explanation from **Storybook** docs:
+
+<blockquote>
+  A story captures the rendered state of a UI component. It's an object with annotations that
+  describe the component's behavior and appearance given a set of arguments.
+</blockquote>
+
+<Callout title="When to use it over Storybook?">
+
+Fumadocs Story is not a replacement for Storybook, we still recommend Storybook for proper UI testing.
+
+</Callout>
+
+## Installation
+
+Follow the installation guide according to your setup:
+
+<DocsCategory />
+
+## Configurations
+
+### Variants
+
+You can provide multiple variants of the component with `args`:
+
+```ts
+import { defineStory } from '@/lib/story';
+import { Callout } from '@/components/callout';
+
+export const story = defineStory(import.meta.url, {
+  Component: Callout,
+  args: [
+    {
+      variant: 'Default',
+      initial: {
+        title: 'This is a Callout',
+      },
+    },
+    {
+      variant: 'Warning',
+      initial: {
+        title: 'This is a Callout',
+      },
+      // fixed values for props
+      fixed: {
+        type: 'warning',
+      },
+    },
+  ],
+});
+```
+
+### `controls`
+
+You can further customise on how the controls are generated:
+
+```tsx
+import { defineStory } from '@fumadocs/story';
+import { GraphView } from '@/components/graph-view';
+
+export const story = defineStory(import.meta.url, {
+  Component: GraphView,
+  args: {
+    // specify the control nodes
+    controls: {
+      node: {
+        type: 'object',
+        properties: [],
+      },
+    },
+
+    // or customise the generated controls
+    controls: {
+      transform: (node) => node,
+    },
+  },
+});
+```

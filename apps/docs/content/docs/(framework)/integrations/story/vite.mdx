@@ -1,0 +1,142 @@
+---
+title: Vite
+description: Configure Fumadocs Story for Vite-based frameworks.
+---
+
+## Installation
+
+```npm
+npm i @fumadocs/story ts-morph
+```
+
+Add the Tailwind CSS preset.
+
+```css title="Tailwind CSS"
+/* [!code ++] */
+@import '@fumadocs/story/css/preset.css';
+```
+
+Externalize `ts-morph`:
+
+```ts title="vite.config.ts"
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  resolve: {
+    // [!code ++]
+    external: ['ts-morph'],
+  },
+});
+```
+
+### Create a Story
+
+Create a story factory to store your global settings:
+
+```ts title="lib/story.ts"
+import { createFileSystemCache, defineStoryFactory } from '@fumadocs/story';
+
+export const { defineStory, getStoryPayloads } = defineStoryFactory({
+  // for Vercel, this is required: choose a directory for cache.
+  cache: process.env.NODE_ENV === 'production' ? createFileSystemCache('.story/cache') : undefined,
+
+  tsc: {
+    // we use tsc to generate controls from types
+    // you can pass TypeScript options here
+  },
+});
+```
+
+Now create your first story:
+
+```tsx tab="my-component.story.tsx"
+import { defineStory } from '@/lib/story';
+import type { MyComponent } from './my-component';
+
+// must be exported as `story`
+// or set the `name` option to match export name.
+export const story = defineStory<typeof MyComponent>(
+  // the path of this file:
+  'src/components/my-component.story.tsx',
+  {
+    args: {
+      // default props (recommended)
+      initial: {},
+    },
+  },
+);
+```
+
+```tsx tab="my-component.story.client.tsx"
+import { createStoryClient } from '@fumadocs/story/client';
+import { MyComponent } from './my-component';
+import type { story } from './my-component.story';
+
+export const storyClient = createStoryClient<typeof story>({
+  Component: MyComponent,
+});
+```
+
+```tsx tab="my-component.tsx"
+export interface MyComponentProps {
+  title?: string;
+}
+
+export function MyComponent({ title }: MyComponentProps) {
+  return <p>{title}</p>;
+}
+```
+
+Story clients require payloads from server to render, you can leverage the SSR functionality of your React.js framework.
+
+For instance, on Tanstack Start:
+
+```tsx title="docs/$.tsx"
+import { story as calloutStory } from '@/components/my-component.story';
+import { storyClient as calloutStoryClient } from '@/components/my-component.story.client';
+import { StoryPayloadProvider } from '@fumadocs/story/client';
+import { getStoryPayloads } from '@/lib/story';
+
+export const Route = createFileRoute('/docs/$')({
+  component: Page,
+  loader: async ({ params }) => {
+    // load story payloads from server [!code ++]
+    return serverStoryLoader();
+  },
+});
+
+const stories = {
+  callout: calloutStory,
+};
+
+const clientStories = {
+  callout: calloutStoryClient,
+};
+
+const serverStoryLoader = createServerFn({
+  method: 'GET',
+}).handler(async () => {
+  return {
+    // generate payloads [!code ++]
+    storyPayloads: await getStoryPayloads(stories),
+  };
+});
+
+function Page() {
+  const data = Route.useLoaderData();
+
+  return (
+    <StoryPayloadProvider payloads={data.storyPayloads} clients={clientStories}>
+      {/* children */}
+    </StoryPayloadProvider>
+  );
+}
+```
+
+Now you can render the story like:
+
+```mdx title="index.mdx"
+import { StoryWithControl } from '@fumadocs/story/client';
+
+<StoryWithControl name="callout" />
+```

@@ -44,13 +44,13 @@
   "dependencies": {
     "class-variance-authority": "^0.7.1",
     "js-yaml": "^4.1.1",
-    "lucide-react": "^0.562.0",
+    "lucide-react": "^0.563.0",
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^25.0.5",
-    "@types/react": "^19.2.8",
+    "@types/node": "^25.0.10",
+    "@types/react": "^19.2.9",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",

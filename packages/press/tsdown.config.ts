@@ -5,6 +5,8 @@ export default defineConfig({
   unbundle: true,
   format: 'esm',
   target: 'node22',
-  dts: true,
+  dts: {
+    sourcemap: false,
+  },
   external: ['virtual:app/routes'],
 });

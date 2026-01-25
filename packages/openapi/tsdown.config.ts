@@ -13,5 +13,8 @@ export default defineConfig({
   ],
   fixedExtension: false,
   unbundle: true,
-  dts: true,
+  dts: {
+    sourcemap: false,
+  },
+  external: [/json-schema-typed/, 'openapi-types'],
 });

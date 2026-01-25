@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-ui",
-  "version": "16.4.7",
+  "version": "16.4.8",
   "description": "The Radix UI version of Fumadocs UI",
   "keywords": [
     "Docs",
@@ -115,7 +115,7 @@
     "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-tabs": "^1.1.13",
     "class-variance-authority": "^0.7.1",
-    "lucide-react": "^0.562.0",
+    "lucide-react": "^0.563.0",
     "next-themes": "^0.4.6",
     "react-medium-image-zoom": "^5.4.0",
     "scroll-into-view-if-needed": "^3.1.0"
@@ -123,8 +123,8 @@
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",
     "@tailwindcss/cli": "^4.1.18",
-    "@types/node": "^25.0.5",
-    "@types/react": "^19.2.8",
+    "@types/node": "^25.0.10",
+    "@types/react": "^19.2.9",
     "@types/react-dom": "^19.2.3",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",

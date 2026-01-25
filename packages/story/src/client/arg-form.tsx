@@ -1,4 +1,3 @@
-'use client';
 import { type ComponentProps, type HTMLAttributes, type ReactNode, useState } from 'react';
 import { ChevronRight, Plus, Trash2, X } from 'lucide-react';
 import { FieldKey, useArray, useDataEngine, useFieldValue, useObject } from '@fumari/stf';
@@ -8,13 +7,13 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/ui/components/select';
-import { Input } from '@/ui/components/input';
-import { getDefaultValue } from '../utils/get-default-values';
+} from '@/client/components/select';
+import { Input } from '@/client/components/input';
+import { getDefaultValue } from '@/type-tree/sampler';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { FormatFlags, typeToString } from '@/type-tree/stringify';
-import type { ObjectNode, TypeNode } from '../type-tree/types';
+import type { ObjectNode, TypeNode } from '@/type-tree/types';
 import { stringifyFieldKey } from '@fumari/stf/lib/utils';
 import { validate } from '@/type-tree/validator';
 import { formatDateForInput } from '@/utils/date';

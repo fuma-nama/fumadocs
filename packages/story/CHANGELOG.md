@@ -1,5 +1,11 @@
 # @fumadocs/story
 
+## 0.0.4
+
+### Patch Changes
+
+- 5eeb16c: Support Client API for non-RSC environment
+
 ## 0.0.3
 
 ### Patch Changes

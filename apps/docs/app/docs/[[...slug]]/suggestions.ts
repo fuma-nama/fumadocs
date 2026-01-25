@@ -14,8 +14,9 @@ export async function getSuggestions(pathname: string): Promise<Suggestion[]> {
 
   if (!results?.groups) return [];
 
-  return results.groups.map((group) => {
+  return results.groups.flatMap((group) => {
     const doc = group.result[0];
+    if (!doc) return [];
 
     return {
       id: doc.id,

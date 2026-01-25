@@ -1,0 +1,24 @@
+{
+  "$id": "root",
+  "children": [
+    {
+      "$id": "root:test.mdx",
+      "name": "Hello",
+      "type": "page",
+      "url": "/test",
+    },
+    {
+      "$id": "root:hello",
+      "children": [],
+      "index": {
+        "$id": "root:hello/index.mdx",
+        "name": "Hello",
+        "type": "page",
+        "url": "/hello",
+      },
+      "name": "Hello",
+      "type": "folder",
+    },
+  ],
+  "name": "Docs",
+}

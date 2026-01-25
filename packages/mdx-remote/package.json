@@ -41,20 +41,20 @@
   "dependencies": {
     "@mdx-js/mdx": "^3.1.1",
     "gray-matter": "^4.0.3",
-    "zod": "^4.3.5"
+    "unified": "^11.0.5",
+    "vfile": "^6.0.3",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/mdx": "^2.0.13",
-    "@types/node": "25.0.5",
-    "@types/react": "^19.2.8",
+    "@types/node": "25.0.10",
+    "@types/react": "^19.2.9",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "react": "^19.2.3",
     "tinyglobby": "^0.2.15",
     "tsconfig": "workspace:*",
-    "tsdown": "^0.19.0",
-    "unified": "^11.0.5",
-    "vfile": "^6.0.3"
+    "tsdown": "^0.19.0"
   },
   "peerDependencies": {
     "@types/react": "*",
