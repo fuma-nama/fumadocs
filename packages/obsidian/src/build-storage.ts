@@ -96,9 +96,9 @@ export function buildStorage(
     let outPath = getOutputPath(normalizedPath, rawFile);
     let parsed: ParsedFile;
 
-    const basename = path.basename(normalizedPath).toLowerCase();
+    const ext = path.extname(normalizedPath);
 
-    if (basename === 'meta.json') {
+    if ((['.json', '.yaml', '.yml', '.toml']).includes(ext)) {
       parsed = {
         format: 'data',
         path: normalizedPath,
@@ -106,7 +106,7 @@ export function buildStorage(
         outPath,
         content: rawFile.content,
       };
-    } else if (['.md', '.mdx'].includes(path.extname(normalizedPath))) {
+    } else if (['.md', '.mdx'].includes(ext)) {
       const { data, content } = matter(String(rawFile.content));
       if (enforceMdx) {
         outPath = outPath.slice(0, -path.extname(outPath).length) + '.mdx';
