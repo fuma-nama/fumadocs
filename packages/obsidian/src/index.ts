@@ -30,6 +30,7 @@ export async function writeVaultFiles(files: OutputFile[], options: WriteFilesOp
   const map = {
     asset: publicDir,
     content: contentDir,
+    data: contentDir,
     custom: '',
   } as const;
 
