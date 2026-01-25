@@ -89,7 +89,7 @@ export interface StoryFactoryOptions {
 }
 
 export interface StoryFactory {
-  defineStory: <C extends FC<any>>(callerUrl: string, options: StoryOptions<C>) => Story<C>;
+  defineStory: <C extends FC<any>>(urlOrPath: URL | string, options: StoryOptions<C>) => Story<C>;
   getStoryPayloads: <Stories extends Record<string, Story>>(
     stories: Stories,
   ) => Promise<Record<keyof Stories, string>>;
@@ -126,8 +126,9 @@ export function defineStoryFactory(factoryOptions: StoryFactoryOptions = {}): St
       const sourceFile = project.createSourceFile(filePath, `${fileContent}\n${injection}`, {
         overwrite: true,
       });
-      const declaration = sourceFile.getExportedDeclarations().get("_StoryProps_")?.[0];
-      if (!declaration) {
+      const declarations = sourceFile.getExportedDeclarations();
+      const declaration = declarations.get("_StoryProps_")?.[0];
+      if (!declarations.has(name) || !declaration) {
         throw new Error(`Export "${name}" not found in file "${filePath}"`);
       }
 
@@ -139,8 +140,11 @@ export function defineStoryFactory(factoryOptions: StoryFactoryOptions = {}): St
   }
 
   return {
-    defineStory(callerUrl, { Component, name = "story", displayName, args = {} }) {
-      const filePath = fileURLToPath(callerUrl);
+    defineStory(urlOrPath, { Component, name = "story", displayName, args = {} }) {
+      const filePath =
+        urlOrPath instanceof URL || urlOrPath.startsWith("file:///")
+          ? fileURLToPath(urlOrPath)
+          : urlOrPath;
 
       async function getClientPayload(): Promise<ClientPayload> {
         const normalized = Array.isArray(args) ? args : [{ ...args, variant: "default" }];
