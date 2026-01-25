@@ -1,8 +1,8 @@
-import { Callout } from "fumadocs-ui/components/callout";
-import type { ComponentProps } from "react";
+import { Callout } from 'fumadocs-ui/components/callout';
+import type { ComponentProps } from 'react';
 
 export function CalloutStory(
-  props: Pick<ComponentProps<typeof Callout>, "title" | "type" | "children">,
+  props: Pick<ComponentProps<typeof Callout>, 'title' | 'type' | 'children'>,
 ) {
   return (
     <div className="p-3 bg-fd-background border rounded-md">

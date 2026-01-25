@@ -1,14 +1,14 @@
-import * as fs from "node:fs/promises";
-import { collapse, createTypeTreeBuilder, literalEnumHandler } from "./type-tree/builder";
-import { cached, type Cache } from "./cache";
-import type { TypeNode } from "./type-tree/types";
-import type { ComponentPropsWithoutRef, FC, ReactNode } from "react";
-import { fileURLToPath } from "node:url";
-import { getHash } from "./utils/get-hash";
-import { deepmerge } from "@fastify/deepmerge";
-import type { ClientPayload } from "./client";
-import { serialize } from "./utils/serialization";
-import type { Project } from "ts-morph";
+import * as fs from 'node:fs/promises';
+import { collapse, createTypeTreeBuilder, literalEnumHandler } from './type-tree/builder';
+import { cached, type Cache } from './cache';
+import type { TypeNode } from './type-tree/types';
+import type { ComponentPropsWithoutRef, FC, ReactNode } from 'react';
+import { fileURLToPath } from 'node:url';
+import { getHash } from './utils/get-hash';
+import { deepmerge } from '@fastify/deepmerge';
+import type { ClientPayload } from './client';
+import { serialize } from './utils/serialization';
+import type { Project } from 'ts-morph';
 
 type Awaitable<T> = T | Promise<T>;
 
@@ -52,8 +52,8 @@ export interface ArgsOptions<C extends FC<any> = FC<any>> {
       };
 }
 
-export { type Cache } from "./cache";
-export { createFileSystemCache } from "./cache/fs";
+export { type Cache } from './cache';
+export { createFileSystemCache } from './cache/fs';
 
 export interface Story<C extends FC<any> = FC<any>> {
   /** render as a server component (require RSC). */
@@ -68,7 +68,7 @@ export interface Story<C extends FC<any> = FC<any>> {
 
 export type GetProps<Result> =
   Result extends Story<infer C>
-    ? ReplaceReactNode<Omit<ComponentPropsWithoutRef<C>, "key">>
+    ? ReplaceReactNode<Omit<ComponentPropsWithoutRef<C>, 'key'>>
     : never;
 
 type ReplaceReactNode<V> = ReactNode extends V
@@ -108,8 +108,8 @@ export function defineStoryFactory(factoryOptions: StoryFactoryOptions = {}): St
   });
 
   function initProject() {
-    return (_project ??= import("ts-morph").then((mod) => {
-      const { tsconfigPath = "./tsconfig.json" } = factoryOptions.tsc ?? {};
+    return (_project ??= import('ts-morph').then((mod) => {
+      const { tsconfigPath = './tsconfig.json' } = factoryOptions.tsc ?? {};
 
       return new mod.Project({
         tsConfigFilePath: tsconfigPath,
@@ -119,7 +119,7 @@ export function defineStoryFactory(factoryOptions: StoryFactoryOptions = {}): St
   }
 
   async function generateControlsCached(filePath: string, name: string): Promise<TypeNode> {
-    const fileContent = await fs.readFile(filePath, "utf-8");
+    const fileContent = await fs.readFile(filePath, 'utf-8');
     return cached(cache, getHash(`controls:${filePath}:${name}:${fileContent}`), async () => {
       const project = await initProject();
       const injection = `export type _StoryProps_ = import('@fumadocs/story').GetProps<typeof ${name}>`;
@@ -127,7 +127,7 @@ export function defineStoryFactory(factoryOptions: StoryFactoryOptions = {}): St
         overwrite: true,
       });
       const declarations = sourceFile.getExportedDeclarations();
-      const declaration = declarations.get("_StoryProps_")?.[0];
+      const declaration = declarations.get('_StoryProps_')?.[0];
       if (!declarations.has(name) || !declaration) {
         throw new Error(`Export "${name}" not found in file "${filePath}"`);
       }
@@ -140,26 +140,26 @@ export function defineStoryFactory(factoryOptions: StoryFactoryOptions = {}): St
   }
 
   return {
-    defineStory(urlOrPath, { Component, name = "story", displayName, args = {} }) {
+    defineStory(urlOrPath, { Component, name = 'story', displayName, args = {} }) {
       const filePath =
-        urlOrPath instanceof URL || urlOrPath.startsWith("file:///")
+        urlOrPath instanceof URL || urlOrPath.startsWith('file:///')
           ? fileURLToPath(urlOrPath)
           : urlOrPath;
 
       async function getClientPayload(): Promise<ClientPayload> {
-        const normalized = Array.isArray(args) ? args : [{ ...args, variant: "default" }];
+        const normalized = Array.isArray(args) ? args : [{ ...args, variant: 'default' }];
 
         return {
           displayName,
           presets: await Promise.all(
-            normalized.map(async (preset): Promise<ClientPayload["presets"][number]> => {
+            normalized.map(async (preset): Promise<ClientPayload['presets'][number]> => {
               const fixedValues =
-                typeof preset.fixed === "function" ? await preset.fixed() : preset.fixed;
+                typeof preset.fixed === 'function' ? await preset.fixed() : preset.fixed;
               const initial =
-                typeof preset.initial === "function" ? await preset.initial() : preset.initial;
+                typeof preset.initial === 'function' ? await preset.initial() : preset.initial;
               let controls: TypeNode;
 
-              if (preset.controls && "node" in preset.controls) {
+              if (preset.controls && 'node' in preset.controls) {
                 controls = preset.controls.node;
               } else {
                 controls = await generateControlsCached(filePath, name);
@@ -189,9 +189,9 @@ export function defineStoryFactory(factoryOptions: StoryFactoryOptions = {}): St
           return serialize(await getClientPayload());
         },
         async WithControl() {
-          if (!Component) throw new Error("`Component` option is not defined");
+          if (!Component) throw new Error('`Component` option is not defined');
 
-          const { WithControl } = await import("./client/with-control");
+          const { WithControl } = await import('./client/with-control');
           return <WithControl Component={Component} {...await getClientPayload()} />;
         },
       };

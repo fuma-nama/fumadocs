@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { createContext, FC, ReactNode, use, useMemo } from "react";
-import { Story } from "..";
-import { WithControl, WithControlProps } from "./with-control";
-import { deserialize } from "@/utils/serialization";
+import { createContext, FC, ReactNode, use, useMemo } from 'react';
+import { Story } from '..';
+import { WithControl, WithControlProps } from './with-control';
+import { deserialize } from '@/utils/serialization';
 
 export interface StoryClientOptions<C extends FC<any>> {
   Component: C;
@@ -20,7 +20,7 @@ const Context = createContext<{
   clients: Map<string, StoryClient>;
 } | null>(null);
 
-export type ClientPayload = Omit<WithControlProps, "Component">;
+export type ClientPayload = Omit<WithControlProps, 'Component'>;
 
 export function createStoryClient<StoryType extends Story<FC<any>>>(
   options: StoryClientOptions<StoryType extends Story<infer C> ? C : never>,
@@ -84,7 +84,7 @@ export function StoryWithControl({
   name: string;
 }) {
   const ctx = use(Context);
-  if (!ctx) throw new Error("missing <StoryPayloadProvider />.");
+  if (!ctx) throw new Error('missing <StoryPayloadProvider />.');
 
   const client = ctx.clients.get(name);
   if (!client) throw new Error(`missing "${name}" client in <StoryPayloadProvider />.`);

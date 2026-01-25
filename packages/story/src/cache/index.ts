@@ -1,4 +1,4 @@
-import { deserialize, serialize } from "@/utils/serialization";
+import { deserialize, serialize } from '@/utils/serialization';
 
 type Awaitable<T> = T | Promise<T>;
 

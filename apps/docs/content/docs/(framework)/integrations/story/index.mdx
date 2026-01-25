@@ -3,7 +3,7 @@ title: Story
 description: Display components with controls.
 ---
 
-import { story } from "./index";
+import { story } from './index';
 
 <story.WithControl />
 
@@ -38,26 +38,26 @@ Follow the installation guide according to your setup:
 You can provide multiple variants of the component with `args`:
 
 ```ts
-import { defineStory } from "@/lib/story";
-import { Callout } from "@/components/callout";
+import { defineStory } from '@/lib/story';
+import { Callout } from '@/components/callout';
 
 export const story = defineStory(import.meta.url, {
   Component: Callout,
   args: [
     {
-      variant: "Default",
+      variant: 'Default',
       initial: {
-        title: "This is a Callout",
+        title: 'This is a Callout',
       },
     },
     {
-      variant: "Warning",
+      variant: 'Warning',
       initial: {
-        title: "This is a Callout",
+        title: 'This is a Callout',
       },
       // fixed values for props
       fixed: {
-        type: "warning",
+        type: 'warning',
       },
     },
   ],
@@ -69,8 +69,8 @@ export const story = defineStory(import.meta.url, {
 You can further customise on how the controls are generated:
 
 ```tsx
-import { defineStory } from "@fumadocs/story";
-import { GraphView } from "@/components/graph-view";
+import { defineStory } from '@fumadocs/story';
+import { GraphView } from '@/components/graph-view';
 
 export const story = defineStory(import.meta.url, {
   Component: GraphView,
@@ -78,7 +78,7 @@ export const story = defineStory(import.meta.url, {
     // specify the control nodes
     controls: {
       node: {
-        type: "object",
+        type: 'object',
         properties: [],
       },
     },
