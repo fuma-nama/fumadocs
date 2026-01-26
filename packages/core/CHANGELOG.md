@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 16.4.9
+
+### Patch Changes
+
+- 48dd0c2: fix incorrect page tree output
+
 ## 16.4.8
 
 ### Patch Changes
