@@ -422,7 +422,6 @@ test('Loader: Serialize data', async () => {
             "defaultOpen": undefined,
             "description": undefined,
             "icon": undefined,
-            "index": undefined,
             "name": "Hello Folder",
             "root": undefined,
             "type": "folder",
