@@ -98,7 +98,7 @@ export function buildStorage(
 
     const ext = path.extname(normalizedPath);
 
-    if ((['.json', '.yaml', '.yml', '.toml']).includes(ext)) {
+    if (['.json', '.yaml', '.yml', '.toml'].includes(ext)) {
       parsed = {
         format: 'data',
         path: normalizedPath,
