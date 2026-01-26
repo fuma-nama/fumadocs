@@ -1,5 +1,13 @@
 # fumadocs-obsidian
 
+## 0.0.10
+
+### Patch Changes
+
+- 3b216f5: Allow data files in obsidian vaults
+- Updated dependencies [48dd0c2]
+  - fumadocs-core@16.4.9
+
 ## 0.0.9
 
 ### Patch Changes
