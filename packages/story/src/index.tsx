@@ -57,7 +57,7 @@ export { createFileSystemCache } from './cache/fs';
 
 export interface Story<C extends FC<any> = FC<any>> {
   /** render as a server component (require RSC). */
-  WithControl: FC<undefined>;
+  WithControl: FC;
   /** create a serialized client payload, you can pass it to `<StoryPayloadProvider />`. (for React.js frameworks with SSR support). */
   getClientPayload: () => Promise<string>;
 
