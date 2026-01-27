@@ -1,5 +1,11 @@
 # @fumadocs/story
 
+## 0.0.5
+
+### Patch Changes
+
+- 44a24a4: Support using the client instance for rendering
+
 ## 0.0.4
 
 ### Patch Changes
