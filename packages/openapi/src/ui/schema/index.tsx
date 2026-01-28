@@ -95,9 +95,9 @@ export function generateSchemaUI(
 
     function field(key: string, value: ReactNode) {
       return (
-        <div className="bg-fd-secondary border rounded-lg text-xs p-1.5 shadow-md">
+        <div className="bg-fd-secondary border rounded-lg text-xs p-1.5 shadow-md max-w-full">
           <span className="font-medium me-2">{key}</span>
-          <code className="text-fd-muted-foreground">{value}</code>
+          <code className="text-fd-muted-foreground wrap-break-word">{value}</code>
         </div>
       );
     }
