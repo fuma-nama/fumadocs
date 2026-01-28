@@ -212,7 +212,7 @@ function createPageTreeBuilderUtils(ctx: PageTreeBuilderContext) {
           continue;
         }
 
-        const dirNode = this.folder(path, false);
+        const dirNode = this.folder(path);
         if (dirNode) folders.push(dirNode);
       }
 
@@ -277,37 +277,43 @@ function createPageTreeBuilderUtils(ctx: PageTreeBuilderContext) {
 
       if (item.startsWith(extractPrefix)) {
         const path = joinPath(folderPath, item.slice(extractPrefix.length));
-        const node = this.folder(path, false);
+        const node = this.folder(path);
         if (!node) return;
 
-        excludedPaths.add(path);
+        const children = node.index ? [node.index, ...node.children] : node.children;
         if (registerOwner(folderPath, node, 2)) {
-          for (const child of node.children) {
+          for (const child of children) {
             transferOwner(folderPath, child);
             outputArray.push(child);
           }
+          excludedPaths.add(path);
         } else {
-          for (const child of node.children) {
+          for (const child of children) {
             if (registerOwner(folderPath, child, 2)) outputArray.push(child);
           }
         }
         return;
       }
 
-      const path = resolveFlattenPath(joinPath(folderPath, item), 'page');
-      const node = this.folder(path, false) ?? this.file(path);
-      if (node) {
-        if (registerOwner(folderPath, node, 2)) outputArray.push(node);
-        excludedPaths.add(path);
+      let path = joinPath(folderPath, item);
+      let node: PageTree.Node | undefined = this.folder(path);
+      if (!node) {
+        path = resolveFlattenPath(path, 'page');
+        node = this.file(path);
       }
+      if (!node) return;
+
+      if (registerOwner(folderPath, node, 2)) outputArray.push(node);
+      excludedPaths.add(path);
     },
-    folder(folderPath: string, isGlobalRoot: boolean): PageTree.Folder | undefined {
+    folder(folderPath: string): PageTree.Folder | undefined {
       const cached = pathToNode.get(folderPath);
       if (cached) return cached as PageTree.Folder;
 
       const files = ctx.storage.readDir(folderPath);
       if (!files) return;
 
+      const isGlobalRoot = folderPath === '';
       const metaPath = resolveFlattenPath(joinPath(folderPath, 'meta'), 'meta');
       const indexPath = resolveFlattenPath(joinPath(folderPath, 'index'), 'page');
       let meta = ctx.storage.read(metaPath);
@@ -417,7 +423,7 @@ function createPageTreeBuilderUtils(ctx: PageTreeBuilderContext) {
       return item;
     },
     root(): PageTree.Root {
-      const folder = this.folder('', true)!;
+      const folder = this.folder('')!;
       let root: PageTree.Root = {
         $id: ctx.rootId,
         name: folder.name || 'Docs',

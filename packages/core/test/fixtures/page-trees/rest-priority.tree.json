@@ -24,6 +24,12 @@
           "url": "/c/test",
         },
         {
+          "$id": "root:b/index.mdx",
+          "name": "Page B (Index)",
+          "type": "page",
+          "url": "/b",
+        },
+        {
           "$id": "root:b/test.mdx",
           "name": "Page B (Test)",
           "type": "page",
