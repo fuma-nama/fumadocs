@@ -7,7 +7,6 @@ import type { SourceConfig } from '../source';
 
 export interface PageTreeBuilderContext<Config extends SourceConfig = SourceConfig> {
   rootId: string;
-  generateNodeId: () => string;
   noRef: boolean;
   transformers: PageTreeTransformer<Config>[];
 
@@ -17,6 +16,7 @@ export interface PageTreeBuilderContext<Config extends SourceConfig = SourceConf
 
   storages?: Record<string, ContentStorage<Config>>;
   locale?: string;
+  custom?: Record<string, unknown>;
 }
 
 export interface PageTreeTransformer<Config extends SourceConfig = SourceConfig> {
@@ -57,6 +57,9 @@ export interface PageTreeOptions<Config extends LoaderConfig = LoaderConfig> {
    * Additional page tree transformers to apply
    */
   transformers?: PageTreeTransformer<Config['source']>[];
+
+  /** custom context */
+  context?: Record<string, unknown>;
 }
 
 export interface PageTreeBuilder {
@@ -79,34 +82,43 @@ const excludePrefix = '!';
 export function createPageTreeBuilder(loaderConfig: ResolvedLoaderConfig): PageTreeBuilder {
   const { plugins = [], url, pageTree: defaultOptions = {} } = loaderConfig;
 
+  function getTransformers(options: PageTreeOptions) {
+    const transformers: PageTreeTransformer[] = [];
+    if (options.transformers) {
+      transformers.push(...options.transformers);
+    }
+
+    for (const plugin of plugins) {
+      if (plugin.transformPageTree) transformers.push(plugin.transformPageTree);
+    }
+
+    if (options.generateFallback ?? true) {
+      transformers.push(transformerFallback());
+    }
+    return transformers;
+  }
+
   return {
     build(storage, options = defaultOptions) {
-      const key = '';
-      return this.buildI18n({ [key]: storage }, options)[key];
+      const transformers = getTransformers(options);
+
+      return createPageTreeBuilderUtils({
+        rootId: options.id ?? 'root',
+        transformers,
+        builder: this,
+        noRef: options.noRef ?? false,
+        getUrl: url,
+        storage,
+        custom: options.context,
+      }).root();
     },
     buildI18n(storages, options = defaultOptions) {
-      let nextId = 0;
       const out: Record<string, PageTree.Root> = {};
-      const transformers: PageTreeTransformer[] = [];
-
-      if (options.transformers) {
-        transformers.push(...options.transformers);
-      }
-
-      for (const plugin of plugins) {
-        if (plugin.transformPageTree) transformers.push(plugin.transformPageTree);
-      }
-
-      if (options.generateFallback ?? true) {
-        transformers.push(transformerFallback());
-      }
+      const transformers = getTransformers(options);
 
       for (const [locale, storage] of Object.entries(storages)) {
-        let rootId = locale.length === 0 ? 'root' : locale;
-        if (options.id) rootId = `${options.id}-${rootId}`;
-
         out[locale] = createPageTreeBuilderUtils({
-          rootId,
+          rootId: options.id ? `${options.id}-${locale}` : locale,
           transformers,
           builder: this,
           noRef: options.noRef ?? false,
@@ -114,9 +126,7 @@ export function createPageTreeBuilder(loaderConfig: ResolvedLoaderConfig): PageT
           locale,
           storage,
           storages,
-          generateNodeId() {
-            return '_' + nextId++;
-          },
+          custom: options.context,
         }).root();
       }
 
@@ -185,7 +195,8 @@ function createPageTreeBuilderUtils(ctx: PageTreeBuilderContext) {
     }
   }
 
-  function nextNodeId(localId = ctx.generateNodeId()) {
+  let _id = 0;
+  function nextNodeId(localId = `_${_id++}`) {
     return `${ctx.rootId}:${localId}`;
   }
 
@@ -388,7 +399,7 @@ function createPageTreeBuilderUtils(ctx: PageTreeBuilderContext) {
       }
       for (const transformer of ctx.transformers) {
         if (!transformer.folder) continue;
-        node = transformer.folder.call(ctx, node, folderPath, metaPath);
+        node = transformer.folder.call(ctx, node, folderPath, meta ? metaPath : undefined);
       }
       pathToNode.set(folderPath, node);
       return node;
@@ -423,11 +434,11 @@ function createPageTreeBuilderUtils(ctx: PageTreeBuilderContext) {
       return item;
     },
     root(): PageTree.Root {
-      const folder = this.folder('')!;
+      const folder = this.folder('');
       let root: PageTree.Root = {
         $id: ctx.rootId,
-        name: folder.name || 'Docs',
-        children: folder.children,
+        name: folder?.name || 'Docs',
+        children: folder ? folder.children : [],
       };
 
       for (const transformer of ctx.transformers) {
