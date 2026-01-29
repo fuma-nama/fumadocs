@@ -1,5 +1,17 @@
 # @fuma-docs/openapi
 
+## 10.2.7
+
+### Patch Changes
+
+- eb3d763: Break long words in openapi examples
+- 2abaff9: Improve object inputs
+- Updated dependencies [430a5f1]
+- Updated dependencies [099fde7]
+- Updated dependencies [6fd7e63]
+  - fumadocs-ui@16.4.10
+  - fumadocs-core@16.4.10
+
 ## 10.2.6
 
 ### Patch Changes
