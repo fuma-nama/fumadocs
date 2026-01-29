@@ -1,14 +1,9 @@
 'use client';
-import { type ComponentProps, Fragment, useMemo, useState } from 'react';
+import { type ComponentProps, Fragment, useState } from 'react';
 import { cva } from 'class-variance-authority';
 import Link from 'fumadocs-core/link';
 import { cn } from '@fumadocs/ui/cn';
-import {
-  type LinkItemType,
-  type NavOptions,
-  renderTitleNav,
-  resolveLinkItems,
-} from '@/layouts/shared';
+import { type LinkItemType, type NavOptions, renderTitleNav, useLinkItems } from '@/layouts/shared';
 import { LinkItem } from '@fumadocs/ui/link-item';
 import {
   NavigationMenu,
@@ -54,26 +49,7 @@ export function Header({
   themeSwitch = {},
   searchToggle = {},
 }: HomeLayoutProps) {
-  const { navItems, menuItems } = useMemo(() => {
-    const navItems: LinkItemType[] = [];
-    const menuItems: LinkItemType[] = [];
-
-    for (const item of resolveLinkItems({ links, githubUrl })) {
-      switch (item.on ?? 'all') {
-        case 'menu':
-          menuItems.push(item);
-          break;
-        case 'nav':
-          navItems.push(item);
-          break;
-        default:
-          navItems.push(item);
-          menuItems.push(item);
-      }
-    }
-
-    return { navItems, menuItems };
-  }, [links, githubUrl]);
+  const { navItems, menuItems } = useLinkItems({ links, githubUrl });
 
   return (
     <HeaderNavigationMenu transparentMode={nav.transparentMode}>

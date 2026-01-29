@@ -11,7 +11,7 @@ import {
   useState,
 } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from 'fumadocs-ui/components/tabs';
-import type { SchemaUIGeneratedData } from '@/ui/schema';
+import type { InfoTag, SchemaUIGeneratedData } from '@/ui/schema';
 import {
   Collapsible,
   CollapsibleContent,
@@ -167,8 +167,8 @@ function SchemaUIProperty({
       {schema.description}
       {schema.infoTags && schema.infoTags.length > 0 && (
         <div className="flex flex-row gap-2 flex-wrap my-2 not-prose empty:hidden">
-          {schema.infoTags.map((tag, i) => (
-            <Fragment key={i}>{tag}</Fragment>
+          {schema.infoTags.map((tag) => (
+            <InfoTag key={tag.label} tag={tag} />
           ))}
         </div>
       )}
@@ -179,6 +179,41 @@ function SchemaUIProperty({
     <Property name={name} type={type} deprecated={schema.deprecated} {...overrides}>
       {child}
     </Property>
+  );
+}
+
+function InfoTag({ tag }: { tag: InfoTag }) {
+  const ref = useRef<HTMLElement>(null);
+  const [isTruncated, setTruncated] = useState(false);
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    // assume the tag width will never change
+    setTruncated(element.scrollWidth !== element.offsetWidth);
+  }, []);
+
+  return (
+    <div className="flex flex-row items-start gap-2 bg-fd-secondary border rounded-lg text-xs p-1.5 shadow-md max-w-full">
+      <span className="font-medium">{tag.label}</span>
+      <code
+        ref={ref}
+        className={cn(
+          'min-w-0 flex-1 text-fd-muted-foreground',
+          open ? 'wrap-break-word' : 'truncate',
+        )}
+      >
+        {tag.value}
+      </code>
+      {isTruncated && (
+        <button
+          className={cn(buttonVariants({ size: 'icon-xs', variant: 'ghost' }))}
+          onClick={() => setOpen((prev) => !prev)}
+        >
+          <ChevronDown />
+        </button>
+      )}
+    </div>
   );
 }
 

@@ -1,70 +1,56 @@
 import { exists } from '@/utils/fs';
 import fs from 'node:fs/promises';
-import { getPackageManager } from '@/utils/get-package-manager';
-import { confirm, isCancel, spinner } from '@clack/prompts';
+import { getPackageManager, PackageManager } from '@/utils/get-package-manager';
 import { x } from 'tinyexec';
 
 export class DependencyManager {
-  private cachedInstalledDeps: Map<string, string> | undefined;
+  private installedDeps = new Map<string, string>();
+  dependencies: string[] = [];
+  devDependencies: string[] = [];
+  packageManager: PackageManager = 'npm';
 
-  /**
-   * Get dependencies from `package.json`
-   */
-  async getDeps(): Promise<Map<string, string>> {
-    if (this.cachedInstalledDeps) return this.cachedInstalledDeps;
-    const dependencies = new Map<string, string>();
+  async init(deps: Record<string, string | null>, devDeps: Record<string, string | null>) {
+    this.installedDeps.clear();
+    if (await exists('package.json')) {
+      const content = await fs.readFile('package.json');
+      const parsed = JSON.parse(content.toString()) as object;
 
-    if (!(await exists('package.json'))) return dependencies;
+      if ('dependencies' in parsed && typeof parsed.dependencies === 'object') {
+        const records = parsed.dependencies as Record<string, string>;
 
-    const content = await fs.readFile('package.json');
-    const parsed = JSON.parse(content.toString()) as object;
+        for (const [k, v] of Object.entries(records)) {
+          this.installedDeps.set(k, v);
+        }
+      }
 
-    if ('dependencies' in parsed && typeof parsed.dependencies === 'object') {
-      const records = parsed.dependencies as Record<string, string>;
+      if ('devDependencies' in parsed && typeof parsed.devDependencies === 'object') {
+        const records = parsed.devDependencies as Record<string, string>;
 
-      for (const [k, v] of Object.entries(records)) {
-        dependencies.set(k, v);
+        for (const [k, v] of Object.entries(records)) {
+          this.installedDeps.set(k, v);
+        }
       }
     }
 
-    if ('devDependencies' in parsed && typeof parsed.devDependencies === 'object') {
-      const records = parsed.devDependencies as Record<string, string>;
-
-      for (const [k, v] of Object.entries(records)) {
-        dependencies.set(k, v);
-      }
-    }
-
-    return (this.cachedInstalledDeps = dependencies);
+    this.dependencies = this.resolveRequiredDependencies(deps);
+    this.devDependencies = this.resolveRequiredDependencies(devDeps);
+    this.packageManager = await getPackageManager();
   }
 
-  private async resolveInstallDependencies(deps: Record<string, string | null>): Promise<string[]> {
-    const cachedInstalledDeps = await this.getDeps();
-
+  private resolveRequiredDependencies(deps: Record<string, string | null>): string[] {
     return Object.entries(deps)
-      .filter(([k]) => !cachedInstalledDeps.has(k))
+      .filter(([k]) => !this.installedDeps.has(k))
       .map(([k, v]) => (v === null || v.length === 0 ? k : `${k}@${v}`));
   }
 
-  async installDeps(deps: Record<string, string | null>, devDeps: Record<string, string | null>) {
-    const items = await this.resolveInstallDependencies(deps);
-    const devItems = await this.resolveInstallDependencies(devDeps);
-    if (items.length === 0 && devItems.length === 0) return;
+  hasRequired() {
+    return this.dependencies.length > 0 || this.devDependencies.length > 0;
+  }
 
-    const manager = await getPackageManager();
-    const value = await confirm({
-      message: `Do you want to install with ${manager}?
-${[...items, ...devItems].map((v) => `- ${v}`).join('\n')}`,
-    });
-
-    if (isCancel(value) || !value) {
-      return;
-    }
-
-    const spin = spinner();
-    spin.start('Installing dependencies...');
-    if (items.length > 0) await x(manager, ['install', ...items]);
-    if (devItems.length > 0) await x(manager, ['install', ...devItems, '-D']);
-    spin.stop('Dependencies installed.');
+  async installRequired() {
+    if (this.dependencies.length > 0)
+      await x(this.packageManager, ['install', ...this.dependencies]);
+    if (this.devDependencies.length > 0)
+      await x(this.packageManager, ['install', ...this.devDependencies, '-D']);
   }
 }

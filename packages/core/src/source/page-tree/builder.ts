@@ -7,7 +7,6 @@ import type { SourceConfig } from '../source';
 
 export interface PageTreeBuilderContext<Config extends SourceConfig = SourceConfig> {
   rootId: string;
-  generateNodeId: () => string;
   noRef: boolean;
   transformers: PageTreeTransformer<Config>[];
 
@@ -17,6 +16,7 @@ export interface PageTreeBuilderContext<Config extends SourceConfig = SourceConf
 
   storages?: Record<string, ContentStorage<Config>>;
   locale?: string;
+  custom?: Record<string, unknown>;
 }
 
 export interface PageTreeTransformer<Config extends SourceConfig = SourceConfig> {
@@ -57,6 +57,9 @@ export interface PageTreeOptions<Config extends LoaderConfig = LoaderConfig> {
    * Additional page tree transformers to apply
    */
   transformers?: PageTreeTransformer<Config['source']>[];
+
+  /** custom context */
+  context?: Record<string, unknown>;
 }
 
 export interface PageTreeBuilder {
@@ -79,34 +82,43 @@ const excludePrefix = '!';
 export function createPageTreeBuilder(loaderConfig: ResolvedLoaderConfig): PageTreeBuilder {
   const { plugins = [], url, pageTree: defaultOptions = {} } = loaderConfig;
 
+  function getTransformers(options: PageTreeOptions) {
+    const transformers: PageTreeTransformer[] = [];
+    if (options.transformers) {
+      transformers.push(...options.transformers);
+    }
+
+    for (const plugin of plugins) {
+      if (plugin.transformPageTree) transformers.push(plugin.transformPageTree);
+    }
+
+    if (options.generateFallback ?? true) {
+      transformers.push(transformerFallback());
+    }
+    return transformers;
+  }
+
   return {
     build(storage, options = defaultOptions) {
-      const key = '';
-      return this.buildI18n({ [key]: storage }, options)[key];
+      const transformers = getTransformers(options);
+
+      return createPageTreeBuilderUtils({
+        rootId: options.id ?? 'root',
+        transformers,
+        builder: this,
+        noRef: options.noRef ?? false,
+        getUrl: url,
+        storage,
+        custom: options.context,
+      }).root();
     },
     buildI18n(storages, options = defaultOptions) {
-      let nextId = 0;
       const out: Record<string, PageTree.Root> = {};
-      const transformers: PageTreeTransformer[] = [];
-
-      if (options.transformers) {
-        transformers.push(...options.transformers);
-      }
-
-      for (const plugin of plugins) {
-        if (plugin.transformPageTree) transformers.push(plugin.transformPageTree);
-      }
-
-      if (options.generateFallback ?? true) {
-        transformers.push(transformerFallback());
-      }
+      const transformers = getTransformers(options);
 
       for (const [locale, storage] of Object.entries(storages)) {
-        let rootId = locale.length === 0 ? 'root' : locale;
-        if (options.id) rootId = `${options.id}-${rootId}`;
-
         out[locale] = createPageTreeBuilderUtils({
-          rootId,
+          rootId: options.id ? `${options.id}-${locale}` : locale,
           transformers,
           builder: this,
           noRef: options.noRef ?? false,
@@ -114,9 +126,7 @@ export function createPageTreeBuilder(loaderConfig: ResolvedLoaderConfig): PageT
           locale,
           storage,
           storages,
-          generateNodeId() {
-            return '_' + nextId++;
-          },
+          custom: options.context,
         }).root();
       }
 
@@ -142,19 +152,22 @@ function createFlattenPathResolver(storage: ContentStorage) {
 
 function createPageTreeBuilderUtils(ctx: PageTreeBuilderContext) {
   const resolveFlattenPath = createFlattenPathResolver(ctx.storage);
-  /** virtual file path -> output page tree node (if built) */
+  /** virtual file path -> output page tree node (if cached) */
   const pathToNode = new Map<string, PageTree.Node>();
-  const nodeOwner = new Map<PageTree.Node, { owner: string; priority: number }>();
+  /** unfinished nodes */
+  const unfinished = new WeakSet<PageTree.Node>();
+  const ownerMap = new Map<PageTree.Node, { owner: string; priority: number }>();
 
   /**
    * when a node is referenced by multiple folders via `...`, this determines which owner they should belong to.
    *
    * @returns whether the owner owns the node.
    */
-  function registerOwner(ownerPath: string, node: PageTree.Node, priority: number): boolean {
-    const existing = nodeOwner.get(node);
+  function own(ownerPath: string, node: PageTree.Node, priority: number): boolean {
+    if (unfinished.has(node)) return false;
+    const existing = ownerMap.get(node);
     if (!existing) {
-      nodeOwner.set(node, { owner: ownerPath, priority });
+      ownerMap.set(node, { owner: ownerPath, priority });
       return true;
     }
     if (existing.owner === ownerPath) {
@@ -179,13 +192,12 @@ function createPageTreeBuilderUtils(ctx: PageTreeBuilderContext) {
   }
 
   function transferOwner(ownerPath: string, node: PageTree.Node) {
-    const existing = nodeOwner.get(node);
-    if (existing) {
-      existing.owner = ownerPath;
-    }
+    const existing = ownerMap.get(node);
+    if (existing) existing.owner = ownerPath;
   }
 
-  function nextNodeId(localId = ctx.generateNodeId()) {
+  let _id = 0;
+  function nextNodeId(localId = `_${_id++}`) {
     return `${ctx.rootId}:${localId}`;
   }
 
@@ -212,7 +224,7 @@ function createPageTreeBuilderUtils(ctx: PageTreeBuilderContext) {
           continue;
         }
 
-        const dirNode = this.folder(path, false);
+        const dirNode = this.folder(path);
         if (dirNode) folders.push(dirNode);
       }
 
@@ -277,37 +289,42 @@ function createPageTreeBuilderUtils(ctx: PageTreeBuilderContext) {
 
       if (item.startsWith(extractPrefix)) {
         const path = joinPath(folderPath, item.slice(extractPrefix.length));
-        const node = this.folder(path, false);
+        const node = this.folder(path);
         if (!node) return;
 
-        excludedPaths.add(path);
-        if (registerOwner(folderPath, node, 2)) {
-          for (const child of node.children) {
+        const children = node.index ? [node.index, ...node.children] : node.children;
+        if (own(folderPath, node, 2)) {
+          for (const child of children) {
             transferOwner(folderPath, child);
             outputArray.push(child);
           }
+          excludedPaths.add(path);
         } else {
-          for (const child of node.children) {
-            if (registerOwner(folderPath, child, 2)) outputArray.push(child);
+          for (const child of children) {
+            if (own(folderPath, child, 2)) outputArray.push(child);
           }
         }
         return;
       }
 
-      const path = resolveFlattenPath(joinPath(folderPath, item), 'page');
-      const node = this.folder(path, false) ?? this.file(path);
-      if (node) {
-        if (registerOwner(folderPath, node, 2)) outputArray.push(node);
-        excludedPaths.add(path);
+      let path = joinPath(folderPath, item);
+      let node: PageTree.Node | undefined = this.folder(path);
+      if (!node) {
+        path = resolveFlattenPath(path, 'page');
+        node = this.file(path);
       }
+      if (!node || !own(folderPath, node, 2)) return;
+      outputArray.push(node);
+      excludedPaths.add(path);
     },
-    folder(folderPath: string, isGlobalRoot: boolean): PageTree.Folder | undefined {
+    folder(folderPath: string): PageTree.Folder | undefined {
       const cached = pathToNode.get(folderPath);
       if (cached) return cached as PageTree.Folder;
 
       const files = ctx.storage.readDir(folderPath);
       if (!files) return;
 
+      const isGlobalRoot = folderPath === '';
       const metaPath = resolveFlattenPath(joinPath(folderPath, 'meta'), 'meta');
       const indexPath = resolveFlattenPath(joinPath(folderPath, 'index'), 'page');
       let meta = ctx.storage.read(metaPath);
@@ -331,10 +348,11 @@ function createPageTreeBuilderUtils(ctx: PageTreeBuilderContext) {
             : undefined,
       };
       pathToNode.set(folderPath, node);
+      unfinished.add(node);
 
       if (!(metadata.root ?? isGlobalRoot)) {
         const file = this.file(indexPath);
-        if (file && registerOwner(folderPath, file, 0)) node.index = file;
+        if (file && own(folderPath, file, 0)) node.index = file;
       }
 
       if (metadata.pages) {
@@ -362,7 +380,7 @@ function createPageTreeBuilderUtils(ctx: PageTreeBuilderContext) {
             item === restReversed,
           );
           for (const child of resolvedItem) {
-            if (registerOwner(folderPath, child, 0)) node.children.push(child);
+            if (own(folderPath, child, 0)) node.children.push(child);
           }
         }
       } else {
@@ -370,19 +388,20 @@ function createPageTreeBuilderUtils(ctx: PageTreeBuilderContext) {
           files,
           node.index ? (file) => file !== indexPath : undefined,
         )) {
-          if (registerOwner(folderPath, item, 0)) node.children.push(item);
+          if (own(folderPath, item, 0)) node.children.push(item);
         }
       }
 
       node.icon = metadata.icon ?? node.index?.icon;
       node.name = metadata.title ?? node.index?.name;
+      unfinished.delete(node);
       if (!node.name) {
         const folderName = basename(folderPath);
         node.name = pathToName(group.exec(folderName)?.[1] ?? folderName);
       }
       for (const transformer of ctx.transformers) {
         if (!transformer.folder) continue;
-        node = transformer.folder.call(ctx, node, folderPath, metaPath);
+        node = transformer.folder.call(ctx, node, folderPath, meta ? metaPath : undefined);
       }
       pathToNode.set(folderPath, node);
       return node;
@@ -417,11 +436,11 @@ function createPageTreeBuilderUtils(ctx: PageTreeBuilderContext) {
       return item;
     },
     root(): PageTree.Root {
-      const folder = this.folder('', true)!;
+      const folder = this.folder('');
       let root: PageTree.Root = {
         $id: ctx.rootId,
-        name: folder.name || 'Docs',
-        children: folder.children,
+        name: folder?.name || 'Docs',
+        children: folder ? folder.children : [],
       };
 
       for (const transformer of ctx.transformers) {

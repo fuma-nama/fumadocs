@@ -26,18 +26,6 @@ function FieldLabel(props: ComponentProps<'label'>) {
   );
 }
 
-function FieldLabelName({
-  required = false,
-  ...props
-}: ComponentProps<'span'> & { required?: boolean }) {
-  return (
-    <span {...props} className={cn(labelVariants(), 'font-mono me-auto', props.className)}>
-      {props.children}
-      {required && <span className="text-red-400/80 mx-1">*</span>}
-    </span>
-  );
-}
-
 function FieldLabelType(props: ComponentProps<'code'>) {
   return (
     <code {...props} className={cn('text-xs text-fd-muted-foreground', props.className)}>
@@ -310,6 +298,34 @@ export function FieldSet({
   if (field.readOnly && !readOnly) return;
   if (field.writeOnly && !writeOnly) return;
 
+  function renderLabelTrigger(schema = field) {
+    if (!collapsible) return renderLabelName();
+
+    return (
+      <button
+        type="button"
+        className={cn(labelVariants(), 'inline-flex items-center gap-1 font-mono me-auto')}
+        onClick={() => {
+          dataEngine.init(fieldName, getDefaultValue(schema));
+          setShow((prev) => !prev);
+        }}
+      >
+        <ChevronRight className={cn('size-3.5 text-fd-muted-foreground', show && 'rotate-90')} />
+        {name}
+        {isRequired && <span className="text-red-400/80">*</span>}
+      </button>
+    );
+  }
+
+  function renderLabelName() {
+    return (
+      <span className={cn(labelVariants(), 'font-mono me-auto')}>
+        {name}
+        {isRequired && <span className="text-red-400/80 mx-1">*</span>}
+      </span>
+    );
+  }
+
   if (info.unionField && field[info.unionField]) {
     const union = field[info.unionField]!;
     const showSelect = union.length > 1;
@@ -402,25 +418,7 @@ export function FieldSet({
         className={cn('flex flex-col gap-1.5 col-span-full @container', props.className)}
       >
         <FieldLabel htmlFor={id}>
-          {collapsible && (
-            <button
-              type="button"
-              onClick={() => {
-                dataEngine.init(fieldName, getDefaultValue(schema));
-                setShow((prev) => !prev);
-              }}
-              className={cn(
-                buttonVariants({
-                  size: 'icon-xs',
-                  color: 'ghost',
-                  className: 'text-fd-muted-foreground -ms-1',
-                }),
-              )}
-            >
-              <ChevronRight className={cn(show && 'rotate-90')} />
-            </button>
-          )}
-          <FieldLabelName required={isRequired}>{name}</FieldLabelName>
+          {renderLabelTrigger(schema)}
           {slotType ?? <FieldLabelType>{schemaToString(field)}</FieldLabelType>}
           {toolbar}
         </FieldLabel>
@@ -428,11 +426,7 @@ export function FieldSet({
           <ObjectInput
             field={schema}
             fieldName={fieldName}
-            {...props}
-            className={cn(
-              'rounded-lg border border-fd-primary/20 bg-fd-background/50 p-2 shadow-sm',
-              props.className,
-            )}
+            className="rounded-lg border border-fd-primary/20 bg-fd-background/50 p-2 shadow-sm"
           />
         )}
       </fieldset>
@@ -443,25 +437,7 @@ export function FieldSet({
     return (
       <fieldset {...props} className={cn('flex flex-col gap-1.5 col-span-full', props.className)}>
         <FieldLabel htmlFor={id}>
-          {collapsible && (
-            <button
-              type="button"
-              onClick={() => {
-                dataEngine.init(fieldName, getDefaultValue(field));
-                setShow((prev) => !prev);
-              }}
-              className={cn(
-                buttonVariants({
-                  size: 'icon-xs',
-                  color: 'ghost',
-                  className: 'text-fd-muted-foreground -ms-1',
-                }),
-              )}
-            >
-              <ChevronRight className={cn(show && 'rotate-90')} />
-            </button>
-          )}
-          <FieldLabelName required={isRequired}>{name}</FieldLabelName>
+          {renderLabelTrigger()}
           {slotType ?? <FieldLabelType>{schemaToString(field)}</FieldLabelType>}
           {toolbar}
         </FieldLabel>
@@ -469,11 +445,7 @@ export function FieldSet({
           <ArrayInput
             fieldName={fieldName}
             items={field.items ?? anyFields}
-            {...props}
-            className={cn(
-              'rounded-lg border border-fd-primary/20 bg-fd-background/50 p-2 shadow-sm',
-              props.className,
-            )}
+            className="rounded-lg border border-fd-primary/20 bg-fd-background/50 p-2 shadow-sm"
           />
         )}
       </fieldset>
@@ -482,7 +454,7 @@ export function FieldSet({
   return (
     <fieldset {...props} className={cn('flex flex-col gap-1.5', props.className)}>
       <FieldLabel htmlFor={id}>
-        <FieldLabelName required={isRequired}>{name}</FieldLabelName>
+        {renderLabelName()}
         {slotType ?? <FieldLabelType>{schemaToString(field)}</FieldLabelType>}
         {toolbar}
       </FieldLabel>

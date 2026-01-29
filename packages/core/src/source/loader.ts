@@ -1,6 +1,6 @@
 import type * as PageTree from '@/page-tree/definitions';
 import type { I18nConfig } from '@/i18n';
-import { buildContentStorage, type ContentStorage } from './storage/content';
+import { createContentStorageBuilder, type ContentStorage } from './storage/content';
 import { createPageTreeBuilder, type PageTreeOptions } from '@/source/page-tree/builder';
 import { joinPath } from './path';
 import { normalizeUrl } from '@/utils/normalize-url';
@@ -11,6 +11,7 @@ import { visit } from '@/page-tree/utils';
 import path from 'node:path';
 import type { PageTreeTransformer } from '@/source/page-tree/builder';
 import type { SerializedPageTree } from './client';
+import { FileSystem } from './storage/file-system';
 
 export interface LoaderConfig {
   source: SourceConfig;
@@ -112,7 +113,7 @@ export interface LoaderOutput<Config extends LoaderConfig> {
   /**
    * Get a list of pages from specified language
    *
-   * @param language - If empty, list pages from all languages.
+   * @param language - If unspecified, list pages from all languages.
    */
   getPages: (language?: string) => Page<Config['source']['pageData']>[];
 
@@ -127,7 +128,7 @@ export interface LoaderOutput<Config extends LoaderConfig> {
   /**
    * Get page with slugs, the slugs can also be URI encoded.
    *
-   * @param language - If empty, the default language will be used
+   * @param language - If unspecified, the default language will be used.
    */
   getPage: (
     slugs: string[] | undefined,
@@ -161,44 +162,72 @@ export interface LoaderOutput<Config extends LoaderConfig> {
   serializePageTree: (tree: PageTree.Root) => Promise<SerializedPageTree>;
 }
 
-function indexPages(storages: Record<string, ContentStorage>, { url }: ResolvedLoaderConfig) {
-  const result = {
-    // (locale.slugs -> page)
-    pages: new Map<string, Page>(),
-    // (locale.path -> page)
-    pathToMeta: new Map<string, Meta>(),
-    // (locale.path -> meta)
-    pathToPage: new Map<string, Page>(),
-  };
+function createPageIndexer({ url }: ResolvedLoaderConfig) {
+  // (locale.slugs -> page)
+  const pages = new Map<string, Page>();
+  // (locale.path -> page)
+  const pathToMeta = new Map<string, Meta>();
+  // (locale.path -> meta)
+  const pathToPage = new Map<string, Page>();
 
-  for (const [lang, storage] of Object.entries(storages)) {
-    for (const filePath of storage.getFiles()) {
-      const item = storage.read(filePath)!;
-      const path = `${lang}.${filePath}`;
+  return {
+    scan(storage: ContentStorage, lang?: string) {
+      for (const filePath of storage.getFiles()) {
+        const item = storage.read(filePath)!;
+        const prefix = lang ? `${lang}.` : '.';
+        const path = prefix + filePath;
 
-      if (item.format === 'meta') {
-        result.pathToMeta.set(path, {
-          path: item.path,
+        if (item.format === 'meta') {
+          pathToMeta.set(path, {
+            path: item.path,
+            absolutePath: item.absolutePath,
+            data: item.data,
+          });
+          continue;
+        }
+
+        const page: Page = {
           absolutePath: item.absolutePath,
+          path: item.path,
+          url: url(item.slugs, lang),
+          slugs: item.slugs,
           data: item.data,
-        });
-        continue;
+          locale: lang,
+        };
+        pathToPage.set(path, page);
+        pages.set(prefix + page.slugs.join('/'), page);
+      }
+    },
+    getPage(path: string, lang = '') {
+      return pathToPage.get(`${lang}.${path}`);
+    },
+    getMeta(path: string, lang = '') {
+      return pathToMeta.get(`${lang}.${path}`);
+    },
+    // the slugs plugin generates encoded slugs by default.
+    // we can assume page slugs are always URI encoded.
+    getPageBySlugs(slugs: string[], lang = '') {
+      // `slugs` is already decoded
+      let page = pages.get(`${lang}.${slugs.join('/')}`);
+      if (page) return page;
+
+      // `slugs` is URI encoded
+      page = pages.get(`${lang}.${slugs.map(decodeURI).join('/')}`);
+      if (page) return page;
+    },
+    /** do not filter by language if `lang` is not specified */
+    getPages(lang?: string) {
+      const out: Page[] = [];
+
+      for (const [key, value] of pages.entries()) {
+        if (lang === undefined || key.startsWith(`${lang}.`)) {
+          out.push(value);
+        }
       }
 
-      const page: Page = {
-        absolutePath: item.absolutePath,
-        path: item.path,
-        url: url(item.slugs, lang),
-        slugs: item.slugs,
-        data: item.data,
-        locale: lang,
-      };
-      result.pathToPage.set(path, page);
-      result.pages.set(`${lang}.${page.slugs.join('/')}`, page);
-    }
-  }
-
-  return result;
+      return out;
+    },
+  };
 }
 
 export function createGetUrl(baseUrl: string, i18n?: I18nConfig): ResolvedLoaderConfig['url'] {
@@ -262,40 +291,42 @@ export function loader(
   const loaderConfig =
     args.length === 2 ? resolveConfig(args[0], args[1]) : resolveConfig(args[0].source, args[0]);
   const { i18n } = loaderConfig;
-  const defaultLanguage = i18n?.defaultLanguage ?? '';
-  const storages = buildContentStorage(loaderConfig, defaultLanguage);
-  const walker = indexPages(storages, loaderConfig);
-  const builder = createPageTreeBuilder(loaderConfig);
-  let pageTrees: Record<string, PageTree.Root> | undefined;
+  const storage = i18n
+    ? createContentStorageBuilder(loaderConfig).i18n()
+    : createContentStorageBuilder(loaderConfig).single();
+  const indexer = createPageIndexer(loaderConfig);
+  const treeBuilder = createPageTreeBuilder(loaderConfig);
+
+  if (storage instanceof FileSystem) {
+    indexer.scan(storage);
+  } else {
+    for (const locale in storage) {
+      indexer.scan(storage[locale], locale);
+    }
+  }
+
+  let pageTrees: Record<string, PageTree.Root> | PageTree.Root | undefined;
   function getPageTrees() {
-    return (pageTrees ??= builder.buildI18n(storages));
+    return (pageTrees ??=
+      storage instanceof FileSystem ? treeBuilder.build(storage) : treeBuilder.buildI18n(storage));
   }
 
   return {
     _i18n: i18n,
     get pageTree() {
-      const trees = getPageTrees();
-
-      return i18n
-        ? (trees as unknown as LoaderOutput<LoaderConfig>['pageTree'])
-        : trees[defaultLanguage];
+      return getPageTrees() as unknown as LoaderOutput<LoaderConfig>['pageTree'];
     },
     set pageTree(v) {
-      if (i18n) {
-        pageTrees = v as unknown as Record<string, PageTree.Root>;
-      } else {
-        pageTrees ??= {};
-        pageTrees[defaultLanguage] = v;
-      }
+      pageTrees = v;
     },
-    getPageByHref(href, { dir = '', language = defaultLanguage } = {}) {
+    getPageByHref(href, { dir = '', language = i18n?.defaultLanguage } = {}) {
       const [value, hash] = href.split('#', 2);
       let target;
 
       if (value.startsWith('./')) {
         const path = joinPath(dir, value);
 
-        target = walker.pathToPage.get(`${language}.${path}`);
+        target = indexer.getPage(path, language);
       } else {
         target = this.getPages(language).find((item) => item.url === value);
       }
@@ -321,15 +352,7 @@ export function loader(
       return href;
     },
     getPages(language) {
-      const pages: Page[] = [];
-
-      for (const [key, value] of walker.pages.entries()) {
-        if (language === undefined || key.startsWith(`${language}.`)) {
-          pages.push(value);
-        }
-      }
-
-      return pages;
+      return indexer.getPages(language);
     },
     getLanguages() {
       const list: {
@@ -349,30 +372,29 @@ export function loader(
     },
     // the slugs plugin generates encoded slugs by default.
     // we can assume page slugs are always URI encoded.
-    getPage(slugs = [], language = defaultLanguage) {
-      // `slugs` is already decoded
-      let page = walker.pages.get(`${language}.${slugs.join('/')}`);
-      if (page) return page;
-
-      // `slugs` is URI encoded
-      page = walker.pages.get(`${language}.${slugs.map(decodeURI).join('/')}`);
-      if (page) return page;
+    getPage(slugs = [], language = i18n?.defaultLanguage) {
+      return indexer.getPageBySlugs(slugs, language);
     },
-    getNodeMeta(node, language = defaultLanguage) {
+    getNodeMeta(node, language = i18n?.defaultLanguage) {
       const ref = node.$ref?.metaFile;
       if (!ref) return;
 
-      return walker.pathToMeta.get(`${language}.${ref}`);
+      return indexer.getMeta(ref, language);
     },
-    getNodePage(node, language = defaultLanguage) {
+    getNodePage(node, language = i18n?.defaultLanguage) {
       const ref = node.$ref?.file;
       if (!ref) return;
 
-      return walker.pathToPage.get(`${language}.${ref}`);
+      return indexer.getPage(ref, language);
     },
-    getPageTree(locale = defaultLanguage) {
-      const trees = getPageTrees();
-      return trees[locale] ?? trees[defaultLanguage];
+    getPageTree(locale) {
+      if (i18n) {
+        const trees = getPageTrees() as Record<string, PageTree.Root>;
+        if (locale && trees[locale]) return trees[locale];
+        return trees[i18n.defaultLanguage];
+      }
+
+      return getPageTrees() as PageTree.Root;
     },
     // @ts-expect-error -- ignore this
     generateParams(slug, lang) {

@@ -31,7 +31,7 @@ const LangDocsSplatRoute = LangDocsSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/api/search': typeof ApiSearchRoute
-  '/$lang': typeof LangIndexRoute
+  '/$lang/': typeof LangIndexRoute
   '/$lang/docs/$': typeof LangDocsSplatRoute
 }
 export interface FileRoutesByTo {
@@ -47,7 +47,7 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/api/search' | '/$lang' | '/$lang/docs/$'
+  fullPaths: '/api/search' | '/$lang/' | '/$lang/docs/$'
   fileRoutesByTo: FileRoutesByTo
   to: '/api/search' | '/$lang' | '/$lang/docs/$'
   id: '__root__' | '/api/search' | '/$lang/' | '/$lang/docs/$'
@@ -64,7 +64,7 @@ declare module '@tanstack/react-router' {
     '/$lang/': {
       id: '/$lang/'
       path: '/$lang'
-      fullPath: '/$lang'
+      fullPath: '/$lang/'
       preLoaderRoute: typeof LangIndexRouteImport
       parentRoute: typeof rootRouteImport
     }

@@ -48,6 +48,13 @@ export const withPriority: Source = {
     },
     {
       type: 'page',
+      path: '/b/index.mdx',
+      data: {
+        title: 'Page B (Index)',
+      },
+    },
+    {
+      type: 'page',
       path: '/b/hello.mdx',
       data: {
         title: 'Page B (Hello)',

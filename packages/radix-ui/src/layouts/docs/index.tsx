@@ -13,7 +13,7 @@ import {
   SidebarTrigger,
   SidebarViewport,
 } from './sidebar';
-import { type BaseLayoutProps, renderTitleNav, resolveLinkItems } from '@/layouts/shared';
+import { type BaseLayoutProps, renderTitleNav, useLinkItems } from '@/layouts/shared';
 import { LinkItem } from '@fumadocs/ui/link-item';
 import { LanguageToggle, LanguageToggleText } from '@/layouts/shared/language-toggle';
 import { LayoutBody, LayoutContextProvider, LayoutHeader, LayoutTabs } from './client';
@@ -90,16 +90,16 @@ export function DocsLayout({
     }
     return [];
   }, [tree, sidebarTabs]);
-  const links = resolveLinkItems(props);
+  const { menuItems } = useLinkItems(props);
 
   function sidebar() {
     const { footer, banner, collapsible = true, component, components, ...rest } = sidebarProps;
     if (component) return component;
 
-    const iconLinks = links.filter((item) => item.type === 'icon');
+    const iconLinks = menuItems.filter((item) => item.type === 'icon');
     const viewport = (
       <SidebarViewport>
-        {links
+        {menuItems
           .filter((v) => v.type !== 'icon')
           .map((item, i, list) => (
             <SidebarLinkItem key={i} item={item} className={cn(i === list.length - 1 && 'mb-4')} />

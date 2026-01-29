@@ -10,28 +10,37 @@ export interface StoryClientOptions<C extends FC<any>> {
 }
 
 export interface StoryClient<C extends FC<any> = FC<any>> {
+  WithControl: FC;
   _private_: {
     component: C;
   };
 }
 
 const Context = createContext<{
-  payloads: Map<string, ClientPayload>;
-  clients: Map<string, StoryClient>;
+  clientMap: Map<string, StoryClient>;
+  clientPayloads: WeakMap<StoryClient, ClientPayload>;
 } | null>(null);
 
 export type ClientPayload = Omit<WithControlProps, 'Component'>;
 
 export function createStoryClient<StoryType extends Story<FC<any>>>(
   options: StoryClientOptions<StoryType extends Story<infer C> ? C : never>,
-): StoryClient<StoryType extends Story<infer C> ? C : never> {
+) {
   const { Component } = options;
 
-  return {
+  const story: StoryClient<StoryType extends Story<infer C> ? C : never> = {
+    WithControl() {
+      const { clientPayloads } = usePayloadContext();
+      const payload = clientPayloads.get(story);
+      if (!payload) throw new Error('missing story payload in <StoryPayloadProvider />.');
+
+      return <WithControl {...payload} Component={Component} />;
+    },
     _private_: {
       component: Component,
     },
   };
+  return story;
 }
 
 export function StoryPayloadProvider<Payloads extends Record<string, string>>({
@@ -45,30 +54,26 @@ export function StoryPayloadProvider<Payloads extends Record<string, string>>({
 }) {
   const clientEntries = Object.entries(clients);
   const payloadEntries = Object.entries(payloads);
-  const payloadMap = useMemo(() => {
-    const map = new Map<string, ClientPayload>();
-    for (const [name, payload] of payloadEntries) {
-      map.set(name, deserialize(payload) as ClientPayload);
-    }
-    return map;
-  }, [payloadEntries]);
-  const clientMap = useMemo(() => {
-    const map = new Map<string, StoryClient>();
-    for (const [name, client] of clientEntries) {
-      map.set(name, client);
-    }
-    return map;
-  }, [clientEntries]);
 
   return (
     <Context
-      value={useMemo(
-        () => ({
-          clients: clientMap,
-          payloads: payloadMap,
-        }),
-        [clientMap, payloadMap],
-      )}
+      value={useMemo(() => {
+        const clientPayloads = new WeakMap<StoryClient, ClientPayload>();
+        const clientMap = new Map<string, StoryClient>();
+        for (const [name, client] of clientEntries) {
+          clientMap.set(name, client);
+        }
+
+        for (const [name, payload] of payloadEntries) {
+          const client = clientMap.get(name);
+          if (client) clientPayloads.set(client, deserialize(payload) as ClientPayload);
+        }
+
+        return {
+          clientMap,
+          clientPayloads,
+        };
+      }, [clientEntries, payloadEntries])}
     >
       {children}
     </Context>
@@ -83,14 +88,15 @@ export function StoryWithControl({
    */
   name: string;
 }) {
-  const ctx = use(Context);
-  if (!ctx) throw new Error('missing <StoryPayloadProvider />.');
-
-  const client = ctx.clients.get(name);
+  const { clientMap } = usePayloadContext();
+  const client = clientMap.get(name);
   if (!client) throw new Error(`missing "${name}" client in <StoryPayloadProvider />.`);
 
-  const payload = ctx.payloads.get(name);
-  if (!payload) throw new Error(`missing "${name}" payload in <StoryPayloadProvider />.`);
+  return <client.WithControl />;
+}
 
-  return <WithControl {...payload} Component={client._private_.component} />;
+function usePayloadContext() {
+  const ctx = use(Context);
+  if (!ctx) throw new Error('missing <StoryPayloadProvider />.');
+  return ctx;
 }

@@ -1,4 +1,4 @@
-import type { ComponentProps, ReactNode } from 'react';
+import { useMemo, type ComponentProps, type ReactNode } from 'react';
 import type { I18nConfig } from 'fumadocs-core/i18n';
 import type { LinkItemType } from '@fumadocs/ui/link-item';
 import Link from 'fumadocs-core/link';
@@ -97,6 +97,30 @@ export function renderTitleNav(
       {title}
     </Link>
   );
+}
+
+export function useLinkItems({ githubUrl, links }: Pick<BaseLayoutProps, 'links' | 'githubUrl'>) {
+  return useMemo(() => {
+    const all = resolveLinkItems({ links, githubUrl });
+    const navItems: LinkItemType[] = [];
+    const menuItems: LinkItemType[] = [];
+
+    for (const item of all) {
+      switch (item.on ?? 'all') {
+        case 'menu':
+          menuItems.push(item);
+          break;
+        case 'nav':
+          navItems.push(item);
+          break;
+        default:
+          navItems.push(item);
+          menuItems.push(item);
+      }
+    }
+
+    return { navItems, menuItems, all };
+  }, [links, githubUrl]);
 }
 
 export type * from '@fumadocs/ui/link-item';

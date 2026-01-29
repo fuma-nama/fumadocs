@@ -156,7 +156,7 @@ function resolveWikilink(
   if (isEmbed) {
     const ref = isHeadingOnly ? sourceFile : resolver.resolveAny(name, sourceFile.path);
 
-    if (!ref) {
+    if (!ref || ref.format === 'data') {
       console.warn(`failed to resolve ${name} wikilink`);
       return;
     }
