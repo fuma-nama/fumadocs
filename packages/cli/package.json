@@ -35,7 +35,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@clack/prompts": "^0.11.0",
+    "@clack/prompts": "^1.0.0",
     "commander": "^14.0.2",
     "magic-string": "^0.30.21",
     "oxc-parser": "^0.111.0",
