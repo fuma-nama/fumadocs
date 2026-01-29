@@ -1156,9 +1156,6 @@ importers:
       react-dom:
         specifier: ^19.2.4
         version: 19.2.4(react@19.2.4)
-      tailwind-merge:
-        specifier: ^3.4.0
-        version: 3.4.0
       vite:
         specifier: ^7.3.1
         version: 7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
@@ -1181,6 +1178,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: ^5.1.2
         version: 5.1.2(vite@7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
+      nitro:
+        specifier: npm:nitro-nightly@3.0.1-20260128-211656-ae83c97e
+        version: nitro-nightly@3.0.1-20260128-211656-ae83c97e(chokidar@5.0.0)(lru-cache@11.2.4)(rollup@4.57.0)(vite@7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
       tailwindcss:
         specifier: ^4.1.18
         version: 4.1.18
@@ -1293,9 +1293,6 @@ importers:
       react-dom:
         specifier: ^19.2.4
         version: 19.2.4(react@19.2.4)
-      tailwind-merge:
-        specifier: ^3.4.0
-        version: 3.4.0
       vite:
         specifier: ^7.3.1
         version: 7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
@@ -1318,6 +1315,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: ^5.1.2
         version: 5.1.2(vite@7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
+      nitro:
+        specifier: npm:nitro-nightly@3.0.1-20260128-211656-ae83c97e
+        version: nitro-nightly@3.0.1-20260128-211656-ae83c97e(chokidar@5.0.0)(lru-cache@11.2.4)(rollup@4.57.0)(vite@7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
       serve:
         specifier: ^14.2.5
         version: 14.2.5
@@ -4338,6 +4338,125 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@oxc-minify/binding-android-arm-eabi@0.111.0':
+    resolution: {integrity: sha512-MkDWMUkYjfzcIA/StNBN/mi17WjdKnt7Fa2ESOND3b333dLCfaiS3zy+p7IYvAPV+osaK8DtcmUVlstX6l9Smw==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [arm]
+    os: [android]
+
+  '@oxc-minify/binding-android-arm64@0.111.0':
+    resolution: {integrity: sha512-KzeDAiB6sybY7+1dK6qJu7QDhWQuYgeh7UZiPQHn+jWyWgdnobhYCCUP46XfMXlP1u0/wabFKmvV6iLNLfdX+g==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [arm64]
+    os: [android]
+
+  '@oxc-minify/binding-darwin-arm64@0.111.0':
+    resolution: {integrity: sha512-1WJMKAWH7Zxue0oNtJ12kcP85g//d8g/sTmbYMZ6TaFGaxym5KwgtdCan21k7V9NUaPajffKzd8oqTcBHSo/SA==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@oxc-minify/binding-darwin-x64@0.111.0':
+    resolution: {integrity: sha512-HVcHVkBnGf4dN44bkw/W+ZkBWm69mCo3mDdzY70l23fkSpVIuFIog9zKT97pvA4MMFnKM8fm0de7/kAnlJW9+Q==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [x64]
+    os: [darwin]
+
+  '@oxc-minify/binding-freebsd-x64@0.111.0':
+    resolution: {integrity: sha512-4V74yRfYCrC50QWYIFRkUKLABfTY4xI1HvSq2+9iqDuTGjADIox7Y/4XxDP7JKuF1zzuETiODZBQck/rHC7pug==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [x64]
+    os: [freebsd]
+
+  '@oxc-minify/binding-linux-arm-gnueabihf@0.111.0':
+    resolution: {integrity: sha512-kDjfiayel9TQq/da673LF9OZcAVKVVFlSf88x1zARyZpSxMOacHVDRX7Xs+BwoIMLsfPieHNzClqlnc9tnubdw==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [arm]
+    os: [linux]
+
+  '@oxc-minify/binding-linux-arm-musleabihf@0.111.0':
+    resolution: {integrity: sha512-rH97TIfhDSJbgJIWbNRYJqO3jxXNZ05drDyHfXibq9PuC6NJPQtarUtXeKHtzVAZzs5N9uLyv2ioLe6xyjFKqA==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [arm]
+    os: [linux]
+
+  '@oxc-minify/binding-linux-arm64-gnu@0.111.0':
+    resolution: {integrity: sha512-ljCl7ONCSgrLd9mx08Kiz196zar/YonzAnQI+XsW9+Gad1Mm8qIcBnQL7wo6rJSVIehFnDo0AIGNXkXTVPl9eQ==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [arm64]
+    os: [linux]
+
+  '@oxc-minify/binding-linux-arm64-musl@0.111.0':
+    resolution: {integrity: sha512-2uLSY9VIS2ALoWjq1S36L0J5tABMTWTHY8TkTk5LcctCq80xIFkdia5cRv+mbxb7GiEFMxh8dqgk9t5t0pms9A==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [arm64]
+    os: [linux]
+
+  '@oxc-minify/binding-linux-ppc64-gnu@0.111.0':
+    resolution: {integrity: sha512-DVWUVhPwiNtdDTpXccOTe/L8BPIjZMnceua9eQBK7qknEMobP1IFLp2IohjPYdCUsmbat7saHlCqXKeVg4Gt3Q==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [ppc64]
+    os: [linux]
+
+  '@oxc-minify/binding-linux-riscv64-gnu@0.111.0':
+    resolution: {integrity: sha512-M0iAuPkJ3jKqQzuub6JLP80ftYRbwE1fCxLvHwxpB98rlNlHjGG/+R9dMR55/aZhRPzBqQE0fFfOFUsnsVs5gg==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [riscv64]
+    os: [linux]
+
+  '@oxc-minify/binding-linux-riscv64-musl@0.111.0':
+    resolution: {integrity: sha512-n2khk4qOfmVLbjr5xXL/8YgvkTRe8bV/D8/dT6BWOqknwfweWtXumpcD/CVFC1majM+HoMDetuPbgm4BTcqAyQ==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [riscv64]
+    os: [linux]
+
+  '@oxc-minify/binding-linux-s390x-gnu@0.111.0':
+    resolution: {integrity: sha512-CFCM6d1RkWr8Z4/w6sL8CuGN6ruzm0gAD9FIyRmi6xDhCUyDitpnhVJ5WXkuREpSzVFiBY8qsZ9I2djtsuTo5A==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [s390x]
+    os: [linux]
+
+  '@oxc-minify/binding-linux-x64-gnu@0.111.0':
+    resolution: {integrity: sha512-/e/PAlEoJ8VFJvmgAiQZloUUNyPbokl+hKIEfcV2GWWViNrs/1hFAnommeUoaF1+SSngTjvZ4zTFXcQfY3AYWA==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [x64]
+    os: [linux]
+
+  '@oxc-minify/binding-linux-x64-musl@0.111.0':
+    resolution: {integrity: sha512-cZp0X4P6RbZZ226pRWCntzGzSTAQqaGM5Q/aw+hbHswlx8eXoVvdy3krdloGxvQUU1DCpJY2QGNvW0xWVSdp+A==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [x64]
+    os: [linux]
+
+  '@oxc-minify/binding-openharmony-arm64@0.111.0':
+    resolution: {integrity: sha512-HY9OKzZ2GW7o/YE5fwp2SDk81H38TqkXegFS55LFJKyEsJlwiUsi2EG59KiMrMfHAwpasGBE9WSyEcm+hEDEsw==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [arm64]
+    os: [openharmony]
+
+  '@oxc-minify/binding-wasm32-wasi@0.111.0':
+    resolution: {integrity: sha512-4CF7xeQhlM34//Rmmog82m3SeEV0aEhAJaNl+fcsMuuq/+rfwNct/kBaf1qSPqvhuWiPQWVcXrSE38BPWW/vnw==}
+    engines: {node: '>=14.0.0'}
+    cpu: [wasm32]
+
+  '@oxc-minify/binding-win32-arm64-msvc@0.111.0':
+    resolution: {integrity: sha512-loUKo//QHI61Nj3HODrQes1u+8Mx+4YsN56+QyCKWyRTQNY+V4TqAtcoOsZTVKSQFm6+8IgV9KVtc8hOpiO5Kw==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [arm64]
+    os: [win32]
+
+  '@oxc-minify/binding-win32-ia32-msvc@0.111.0':
+    resolution: {integrity: sha512-JopCb4BLw9UjcCsJkLP5ZJ7JjJj3oZHQzaOB6udQTkN+0kOHpySCr9BCYkrx1fA7afh6V8W88lYJc1BmM9qD7Q==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [ia32]
+    os: [win32]
+
+  '@oxc-minify/binding-win32-x64-msvc@0.111.0':
+    resolution: {integrity: sha512-XDbGGYuY2W5edAwd+clMul4Cw4TqZR83//XqowLXbd1sGYq1m2Zo+vXHXvl3LS0Z2xdoJRJl+dJ0GPATwLx3JQ==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [x64]
+    os: [win32]
+
   '@oxc-parser/binding-android-arm-eabi@0.111.0':
     resolution: {integrity: sha512-2VEmMlziuV3OxDawQv0GUCAjnvnybpRiuM8Uy9PReX58D4WbXx5F1zyJOuYr+mnyWwHKgjGa7c9xzchDFkPR5A==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -6974,7 +7093,6 @@ packages:
 
   bun@1.3.6:
     resolution: {integrity: sha512-Tn98GlZVN2WM7+lg/uGn5DzUao37Yc0PUz7yzYHdeF5hd+SmHQGbCUIKE4Sspdgtxn49LunK3mDNBC2Qn6GJjw==}
-    cpu: [arm64, x64]
     os: [darwin, linux, win32]
     hasBin: true
 
@@ -7212,6 +7330,10 @@ packages:
 
   confbox@0.2.2:
     resolution: {integrity: sha512-1NB+BKqhtNipMsov4xI/NnhCKp9XG9NamYp5PVm9klAT0fsrNPjaFICsCFhNhwZJKNh7zB/3q8qXz0E9oaMNtQ==}
+
+  consola@3.4.2:
+    resolution: {integrity: sha512-5IKcdX0nnYavi6G7TtOhwkYzyjfJlatbjMjuLSfE2kYT5pMDOilZ4OvMhi637CcDICTmz3wARPoyhqyX1Y+XvA==}
+    engines: {node: ^14.18.0 || >=16.10.0}
 
   content-disposition@0.5.2:
     resolution: {integrity: sha512-kRGRZw3bLlFISDBgwTSA1TMBFN6J6GWDeubmDE3AF+3+yXL8hTWv8r5rkLbqYXY4RjPk/EzHnClI3zQf1cFmHA==}
@@ -9538,6 +9660,28 @@ packages:
       sass:
         optional: true
 
+  nf3@0.3.7:
+    resolution: {integrity: sha512-wL73kyZbBoeTWlvQWQ0gQDZnqp+aNlUN5YIqsc3fv5V/06LAlwrwt+G7TpugFLJIai0AhrmnKJ2kgW0xprj+yQ==}
+
+  nitro-nightly@3.0.1-20260128-211656-ae83c97e:
+    resolution: {integrity: sha512-1WWSIEmcWYDDtQ7yyyOw44UEmwa5djIh3iV7whydhTT1+JXM/jBB/MNI+fBGjL9BPn1ttKRCfLudPCJfmhu0VA==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    hasBin: true
+    peerDependencies:
+      rolldown: '>=1.0.0-rc.2'
+      rollup: ^4.57.0
+      vite: ^7 || ^8 || >=8.0.0-0
+      xml2js: ^0.6.2
+    peerDependenciesMeta:
+      rolldown:
+        optional: true
+      rollup:
+        optional: true
+      vite:
+        optional: true
+      xml2js:
+        optional: true
+
   nlcst-to-string@4.0.0:
     resolution: {integrity: sha512-YKLBCcUYKAg0FNlOBT6aI91qFmSiFKiluk655WzPF+DDMA02qIyy8uiRqI8QXtcFpEvll12LpL5MXqEmAZ+dcA==}
 
@@ -9623,6 +9767,9 @@ packages:
   ofetch@1.5.1:
     resolution: {integrity: sha512-2W4oUZlVaqAPAil6FUg/difl6YhqhUR7x2eZY4bQCko22UXg3hptq9KLQdqFClV+Wu85UX7hNtdGTngi/1BxcA==}
 
+  ofetch@2.0.0-alpha.3:
+    resolution: {integrity: sha512-zpYTCs2byOuft65vI3z43Dd6iSdFbOZZLb9/d21aCpx2rGastVU9dOCv0lu4ykc1Ur1anAYjDi3SUvR0vq50JA==}
+
   ohash@2.0.11:
     resolution: {integrity: sha512-RdR9FQrFwNBNXAr4GixM8YaRZRJ5PUWbKYbE5eOsrwAjJW0q2REGcf79oYPsLyskQCZG1PLN+S/K1V00joZAoQ==}
 
@@ -9686,6 +9833,10 @@ packages:
   own-keys@1.0.1:
     resolution: {integrity: sha512-qFOyK5PjiWZd+QQIh+1jhdb9LpxTF0qs7Pm8o5QHYZ0M3vKqSqzsZaEB6oWlxZ+q2sJBMI/Ktgd2N5ZwQoRHfg==}
     engines: {node: '>= 0.4'}
+
+  oxc-minify@0.111.0:
+    resolution: {integrity: sha512-tooT6OU4dv8esdLxpELcBYc3R3zN+Bn0llM58RP8djBrxN57l7E5KqfTFq035kEaYl58C0fEgsOEL9G6zO6oQA==}
+    engines: {node: ^20.19.0 || >=22.12.0}
 
   oxc-parser@0.111.0:
     resolution: {integrity: sha512-beesBIb46bfuBure8ztUOQ3mOsC12SwEAHERO+PgSZAcWspoULUvb5CQ1wWUSpnTKsmUXIv6mQVXODPgbgX5WQ==}
@@ -11025,6 +11176,9 @@ packages:
     resolution: {integrity: sha512-4VQSpGEGsWzk0VYxyB/wVX/Q7qf9t5znLRgs0dzszr9w9Fej/8RVNQ+S20vdXSAyra/bJ7ZQfGv6ZMj7UEbzSg==}
     engines: {node: '>=20.18.1'}
 
+  unenv@2.0.0-rc.24:
+    resolution: {integrity: sha512-i7qRCmY42zmCwnYlh9H2SvLEypEFGye5iRmEMKjcGi7zk9UquigRjFtTLz0TYqr0ZGLZhaMHl/foy1bZR+Cwlw==}
+
   unicorn-magic@0.3.0:
     resolution: {integrity: sha512-+QBBXBCvifc56fsbuxZQ6Sic3wqqc3WWaqxs58gvJrcOuN83HGTCwz3oS5phzU9LthRNE9VrJCFCLUgHeeFnfA==}
     engines: {node: '>=18'}
@@ -11155,6 +11309,80 @@ packages:
       idb-keyval:
         optional: true
       ioredis:
+        optional: true
+      uploadthing:
+        optional: true
+
+  unstorage@2.0.0-alpha.5:
+    resolution: {integrity: sha512-Sj8btci21Twnd6M+N+MHhjg3fVn6lAPElPmvFTe0Y/wR0WImErUdA1PzlAaUavHylJ7uDiFwlZDQKm0elG4b7g==}
+    peerDependencies:
+      '@azure/app-configuration': ^1.9.0
+      '@azure/cosmos': ^4.7.0
+      '@azure/data-tables': ^13.3.1
+      '@azure/identity': ^4.13.0
+      '@azure/keyvault-secrets': ^4.10.0
+      '@azure/storage-blob': ^12.29.1
+      '@capacitor/preferences': ^6.0.3 || ^7.0.0
+      '@deno/kv': '>=0.12.0'
+      '@netlify/blobs': ^6.5.0 || ^7.0.0 || ^8.1.0 || ^9.0.0 || ^10.0.0
+      '@planetscale/database': ^1.19.0
+      '@upstash/redis': ^1.35.6
+      '@vercel/blob': '>=0.27.3'
+      '@vercel/functions': ^2.2.12 || ^3.0.0
+      '@vercel/kv': ^1.0.1
+      aws4fetch: ^1.0.20
+      chokidar: ^4 || ^5
+      db0: '>=0.3.4'
+      idb-keyval: ^6.2.2
+      ioredis: ^5.8.2
+      lru-cache: ^11.2.2
+      mongodb: ^6 || ^7
+      ofetch: '*'
+      uploadthing: ^7.7.4
+    peerDependenciesMeta:
+      '@azure/app-configuration':
+        optional: true
+      '@azure/cosmos':
+        optional: true
+      '@azure/data-tables':
+        optional: true
+      '@azure/identity':
+        optional: true
+      '@azure/keyvault-secrets':
+        optional: true
+      '@azure/storage-blob':
+        optional: true
+      '@capacitor/preferences':
+        optional: true
+      '@deno/kv':
+        optional: true
+      '@netlify/blobs':
+        optional: true
+      '@planetscale/database':
+        optional: true
+      '@upstash/redis':
+        optional: true
+      '@vercel/blob':
+        optional: true
+      '@vercel/functions':
+        optional: true
+      '@vercel/kv':
+        optional: true
+      aws4fetch:
+        optional: true
+      chokidar:
+        optional: true
+      db0:
+        optional: true
+      idb-keyval:
+        optional: true
+      ioredis:
+        optional: true
+      lru-cache:
+        optional: true
+      mongodb:
+        optional: true
+      ofetch:
         optional: true
       uploadthing:
         optional: true
@@ -13437,6 +13665,68 @@ snapshots:
     optional: true
 
   '@oven/bun-windows-x64@1.3.6':
+    optional: true
+
+  '@oxc-minify/binding-android-arm-eabi@0.111.0':
+    optional: true
+
+  '@oxc-minify/binding-android-arm64@0.111.0':
+    optional: true
+
+  '@oxc-minify/binding-darwin-arm64@0.111.0':
+    optional: true
+
+  '@oxc-minify/binding-darwin-x64@0.111.0':
+    optional: true
+
+  '@oxc-minify/binding-freebsd-x64@0.111.0':
+    optional: true
+
+  '@oxc-minify/binding-linux-arm-gnueabihf@0.111.0':
+    optional: true
+
+  '@oxc-minify/binding-linux-arm-musleabihf@0.111.0':
+    optional: true
+
+  '@oxc-minify/binding-linux-arm64-gnu@0.111.0':
+    optional: true
+
+  '@oxc-minify/binding-linux-arm64-musl@0.111.0':
+    optional: true
+
+  '@oxc-minify/binding-linux-ppc64-gnu@0.111.0':
+    optional: true
+
+  '@oxc-minify/binding-linux-riscv64-gnu@0.111.0':
+    optional: true
+
+  '@oxc-minify/binding-linux-riscv64-musl@0.111.0':
+    optional: true
+
+  '@oxc-minify/binding-linux-s390x-gnu@0.111.0':
+    optional: true
+
+  '@oxc-minify/binding-linux-x64-gnu@0.111.0':
+    optional: true
+
+  '@oxc-minify/binding-linux-x64-musl@0.111.0':
+    optional: true
+
+  '@oxc-minify/binding-openharmony-arm64@0.111.0':
+    optional: true
+
+  '@oxc-minify/binding-wasm32-wasi@0.111.0':
+    dependencies:
+      '@napi-rs/wasm-runtime': 1.1.1
+    optional: true
+
+  '@oxc-minify/binding-win32-arm64-msvc@0.111.0':
+    optional: true
+
+  '@oxc-minify/binding-win32-ia32-msvc@0.111.0':
+    optional: true
+
+  '@oxc-minify/binding-win32-x64-msvc@0.111.0':
     optional: true
 
   '@oxc-parser/binding-android-arm-eabi@0.111.0':
@@ -16604,6 +16894,8 @@ snapshots:
 
   confbox@0.2.2: {}
 
+  consola@3.4.2: {}
+
   content-disposition@0.5.2: {}
 
   content-disposition@0.5.4:
@@ -16671,8 +16963,9 @@ snapshots:
     dependencies:
       uncrypto: 0.1.3
 
-  crossws@0.4.4:
-    optional: true
+  crossws@0.4.4(srvx@0.10.1):
+    optionalDependencies:
+      srvx: 0.10.1
 
   css-select@5.2.2:
     dependencies:
@@ -16934,8 +17227,7 @@ snapshots:
 
   dayjs@1.11.19: {}
 
-  db0@0.3.4:
-    optional: true
+  db0@0.3.4: {}
 
   debounce@1.2.1: {}
 
@@ -17914,7 +18206,7 @@ snapshots:
       rou3: 0.7.12
       srvx: 0.10.1
     optionalDependencies:
-      crossws: 0.4.4
+      crossws: 0.4.4(srvx@0.10.1)
 
   hachure-fill@0.5.2: {}
 
@@ -19461,6 +19753,56 @@ snapshots:
       - '@babel/core'
       - babel-plugin-macros
 
+  nf3@0.3.7: {}
+
+  nitro-nightly@3.0.1-20260128-211656-ae83c97e(chokidar@5.0.0)(lru-cache@11.2.4)(rollup@4.57.0)(vite@7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)):
+    dependencies:
+      consola: 3.4.2
+      crossws: 0.4.4(srvx@0.10.1)
+      db0: 0.3.4
+      h3: 2.0.1-rc.11(crossws@0.4.4)
+      jiti: 2.6.1
+      nf3: 0.3.7
+      ofetch: 2.0.0-alpha.3
+      ohash: 2.0.11
+      oxc-minify: 0.111.0
+      oxc-transform: 0.111.0
+      srvx: 0.10.1
+      undici: 7.19.2
+      unenv: 2.0.0-rc.24
+      unstorage: 2.0.0-alpha.5(chokidar@5.0.0)(db0@0.3.4)(lru-cache@11.2.4)(ofetch@2.0.0-alpha.3)
+    optionalDependencies:
+      rollup: 4.57.0
+      vite: 7.3.1(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
+    transitivePeerDependencies:
+      - '@azure/app-configuration'
+      - '@azure/cosmos'
+      - '@azure/data-tables'
+      - '@azure/identity'
+      - '@azure/keyvault-secrets'
+      - '@azure/storage-blob'
+      - '@capacitor/preferences'
+      - '@deno/kv'
+      - '@electric-sql/pglite'
+      - '@libsql/client'
+      - '@netlify/blobs'
+      - '@planetscale/database'
+      - '@upstash/redis'
+      - '@vercel/blob'
+      - '@vercel/functions'
+      - '@vercel/kv'
+      - aws4fetch
+      - better-sqlite3
+      - chokidar
+      - drizzle-orm
+      - idb-keyval
+      - ioredis
+      - lru-cache
+      - mongodb
+      - mysql2
+      - sqlite3
+      - uploadthing
+
   nlcst-to-string@4.0.0:
     dependencies:
       '@types/nlcst': 2.0.3
@@ -19558,6 +19900,8 @@ snapshots:
       node-fetch-native: 1.6.7
       ufo: 1.6.3
 
+  ofetch@2.0.0-alpha.3: {}
+
   ohash@2.0.11: {}
 
   on-finished@2.3.0:
@@ -19639,6 +19983,29 @@ snapshots:
       get-intrinsic: 1.3.0
       object-keys: 1.1.1
       safe-push-apply: 1.0.0
+
+  oxc-minify@0.111.0:
+    optionalDependencies:
+      '@oxc-minify/binding-android-arm-eabi': 0.111.0
+      '@oxc-minify/binding-android-arm64': 0.111.0
+      '@oxc-minify/binding-darwin-arm64': 0.111.0
+      '@oxc-minify/binding-darwin-x64': 0.111.0
+      '@oxc-minify/binding-freebsd-x64': 0.111.0
+      '@oxc-minify/binding-linux-arm-gnueabihf': 0.111.0
+      '@oxc-minify/binding-linux-arm-musleabihf': 0.111.0
+      '@oxc-minify/binding-linux-arm64-gnu': 0.111.0
+      '@oxc-minify/binding-linux-arm64-musl': 0.111.0
+      '@oxc-minify/binding-linux-ppc64-gnu': 0.111.0
+      '@oxc-minify/binding-linux-riscv64-gnu': 0.111.0
+      '@oxc-minify/binding-linux-riscv64-musl': 0.111.0
+      '@oxc-minify/binding-linux-s390x-gnu': 0.111.0
+      '@oxc-minify/binding-linux-x64-gnu': 0.111.0
+      '@oxc-minify/binding-linux-x64-musl': 0.111.0
+      '@oxc-minify/binding-openharmony-arm64': 0.111.0
+      '@oxc-minify/binding-wasm32-wasi': 0.111.0
+      '@oxc-minify/binding-win32-arm64-msvc': 0.111.0
+      '@oxc-minify/binding-win32-ia32-msvc': 0.111.0
+      '@oxc-minify/binding-win32-x64-msvc': 0.111.0
 
   oxc-parser@0.111.0:
     dependencies:
@@ -21372,6 +21739,10 @@ snapshots:
 
   undici@7.19.2: {}
 
+  unenv@2.0.0-rc.24:
+    dependencies:
+      pathe: 2.0.3
+
   unicorn-magic@0.3.0: {}
 
   unified@11.0.5:
@@ -21469,6 +21840,13 @@ snapshots:
       ufo: 1.6.3
     optionalDependencies:
       db0: 0.3.4
+
+  unstorage@2.0.0-alpha.5(chokidar@5.0.0)(db0@0.3.4)(lru-cache@11.2.4)(ofetch@2.0.0-alpha.3):
+    optionalDependencies:
+      chokidar: 5.0.0
+      db0: 0.3.4
+      lru-cache: 11.2.4
+      ofetch: 2.0.0-alpha.3
 
   until-async@3.0.2: {}
 

@@ -4,6 +4,7 @@ import { defineConfig } from 'vite';
 import tsConfigPaths from 'vite-tsconfig-paths';
 import tailwindcss from '@tailwindcss/vite';
 import mdx from 'fumadocs-mdx/vite';
+import { nitro } from 'nitro/vite';
 
 export default defineConfig({
   server: {
@@ -21,5 +22,7 @@ export default defineConfig({
       },
     }),
     react(),
+    // please see https://tanstack.com/start/latest/docs/framework/react/guide/hosting#nitro for guides on hosting
+    nitro(),
   ],
 });
