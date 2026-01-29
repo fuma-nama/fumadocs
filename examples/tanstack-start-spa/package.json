@@ -33,6 +33,7 @@
     "@vitejs/plugin-react": "^5.1.2",
     "nitro": "npm:nitro-nightly@3.0.1-20260128-211656-ae83c97e",
     "serve": "^14.2.5",
+    "srvx": "^0.10.1",
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3",
     "vite-tsconfig-paths": "^6.0.5"
