@@ -1,5 +1,11 @@
 # fumadocs
 
+## 1.2.3
+
+### Patch Changes
+
+- 65ff886: Improve CLI interactive experience
+
 ## 1.2.2
 
 ### Patch Changes

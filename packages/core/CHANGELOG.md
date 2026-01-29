@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 16.4.10
+
+### Patch Changes
+
+- 099fde7: [Page Tree] Extract index page from folder
+- 6fd7e63: handle circular reference in page tree
+
 ## 16.4.9
 
 ### Patch Changes
