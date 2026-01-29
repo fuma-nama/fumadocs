@@ -98,6 +98,11 @@ const pageTreeTests: {
       },
     },
   },
+  {
+    title: 'Circular Reference',
+    source: (await import('./fixtures/page-trees/circular')).source,
+    output: './fixtures/page-trees/circular.test.json',
+  },
 ];
 
 for (const pageTreeTest of pageTreeTests) {
