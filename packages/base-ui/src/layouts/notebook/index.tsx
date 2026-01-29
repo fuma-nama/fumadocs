@@ -1,5 +1,5 @@
 import { type ComponentProps, type FC, type HTMLAttributes, type ReactNode, useMemo } from 'react';
-import { type BaseLayoutProps, renderTitleNav, resolveLinkItems } from '@/layouts/shared';
+import { type BaseLayoutProps, renderTitleNav, useLinkItems } from '@/layouts/shared';
 import {
   Sidebar,
   SidebarCollapseTrigger,
@@ -76,7 +76,7 @@ export function DocsLayout(props: DocsLayoutProps) {
   } = props;
 
   const navMode = nav.mode ?? 'auto';
-  const links = resolveLinkItems(props);
+  const { menuItems, navItems } = useLinkItems(props);
   const tabs = useMemo(() => {
     if (Array.isArray(tabOptions)) {
       return tabOptions;
@@ -96,7 +96,7 @@ export function DocsLayout(props: DocsLayoutProps) {
   function sidebar() {
     const { banner, footer, components, collapsible = true, ...rest } = sidebarProps;
 
-    const iconLinks = links.filter((item) => item.type === 'icon');
+    const iconLinks = menuItems.filter((item) => item.type === 'icon');
     const Header =
       typeof banner === 'function'
         ? banner
@@ -124,7 +124,7 @@ export function DocsLayout(props: DocsLayoutProps) {
           );
     const viewport = (
       <SidebarViewport>
-        {links
+        {menuItems
           .filter((item) => item.type !== 'icon')
           .map((item, i, arr) => (
             <SidebarLinkItem
@@ -254,7 +254,7 @@ export function DocsLayout(props: DocsLayoutProps) {
         <Sidebar defaultOpenLevel={defaultOpenLevel} prefetch={prefetch}>
           <LayoutBody {...props.containerProps}>
             {sidebar()}
-            <DocsNavbar {...props} links={links} tabs={tabs} />
+            <DocsNavbar {...props} links={navItems} tabs={tabs} />
             {props.children}
           </LayoutBody>
         </Sidebar>
