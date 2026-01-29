@@ -35,11 +35,11 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@clack/prompts": "^0.11.0",
+    "@clack/prompts": "^1.0.0",
     "commander": "^14.0.2",
     "magic-string": "^0.30.21",
     "oxc-parser": "^0.111.0",
-    "oxc-resolver": "^11.16.4",
+    "oxc-resolver": "^11.17.0",
     "package-manager-detector": "^1.6.0",
     "picocolors": "^1.1.1",
     "tinyexec": "^1.0.2",
@@ -47,7 +47,7 @@
   },
   "devDependencies": {
     "@oxc-project/types": "^0.111.0",
-    "@types/node": "25.0.10",
+    "@types/node": "25.1.0",
     "eslint-config-custom": "workspace:*",
     "shadcn": "3.7.0",
     "tsconfig": "workspace:*",

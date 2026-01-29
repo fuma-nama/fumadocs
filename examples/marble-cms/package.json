@@ -11,7 +11,7 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "github-slugger": "^2.0.0",
-    "html-react-parser": "^5.2.13",
+    "html-react-parser": "^5.2.14",
     "next": "16.1.6",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18",
-    "@types/node": "25.0.10",
+    "@types/node": "25.1.0",
     "@types/react": "^19.2.10",
     "@types/react-dom": "^19.2.3",
     "postcss": "^8.5.6",

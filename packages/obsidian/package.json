@@ -61,7 +61,7 @@
     "@types/estree": "^1.0.8",
     "@types/js-yaml": "^4.0.9",
     "@types/mdast": "^4.0.4",
-    "@types/node": "25.0.10",
+    "@types/node": "25.1.0",
     "@types/react": "^19.2.10",
     "@types/react-dom": "^19.2.3",
     "eslint-config-custom": "workspace:*",

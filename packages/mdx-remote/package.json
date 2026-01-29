@@ -47,7 +47,7 @@
   },
   "devDependencies": {
     "@types/mdx": "^2.0.13",
-    "@types/node": "25.0.10",
+    "@types/node": "25.1.0",
     "@types/react": "^19.2.10",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",

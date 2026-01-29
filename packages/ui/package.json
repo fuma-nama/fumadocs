@@ -41,7 +41,7 @@
     "@fumadocs/cli": "workspace:*",
     "@types/bun": "^1.3.7",
     "@types/lodash.merge": "^4.6.9",
-    "@types/node": "^25.0.10",
+    "@types/node": "^25.1.0",
     "@types/react": "^19.2.10",
     "@types/react-dom": "^19.2.3",
     "class-variance-authority": "^0.7.1",
