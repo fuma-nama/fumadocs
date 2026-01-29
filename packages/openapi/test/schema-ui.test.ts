@@ -130,20 +130,10 @@ test('test', async () => {
     - INSUFFICIENT_PERMISSIONS: you do not have the required permissions to perform this action
     ",
           "infoTags": [
-            <div
-              className="bg-fd-secondary border rounded-lg text-xs p-1.5 shadow-md max-w-full"
-            >
-              <span
-                className="font-medium me-2"
-              >
-                Value in
-              </span>
-              <code
-                className="text-fd-muted-foreground wrap-break-word"
-              >
-                "NOT_FOUND" | "FORBIDDEN" | "USAGE_EXCEEDED" | "RATE_LIMITED" | "UNAUTHORIZED" | "DISABLED" | "INSUFFICIENT_PERMISSIONS"
-              </code>
-            </div>,
+            {
+              "label": "Value in",
+              "value": ""NOT_FOUND" | "FORBIDDEN" | "USAGE_EXCEEDED" | "RATE_LIMITED" | "UNAUTHORIZED" | "DISABLED" | "INSUFFICIENT_PERMISSIONS"",
+            },
           ],
           "type": "primitive",
           "typeName": "string",
