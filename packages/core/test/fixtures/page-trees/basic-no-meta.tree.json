@@ -2,16 +2,16 @@
   "$id": "root",
   "children": [
     {
-      "$id": "root:test.mdx",
+      "$id": "test.mdx",
       "name": "Hello",
       "type": "page",
       "url": "/test",
     },
     {
-      "$id": "root:hello",
+      "$id": "hello",
       "children": [],
       "index": {
-        "$id": "root:hello/index.mdx",
+        "$id": "hello/index.mdx",
         "name": "Hello",
         "type": "page",
         "url": "/hello",

@@ -217,9 +217,9 @@ test('Loader: Allow duplicate pages when explicitly referenced twice', () => {
 
   const treeChildren = result.pageTree.children;
   expect(treeChildren.length).toBe(3);
-  expect(treeChildren[0].$id).toBe('root:page1.mdx');
-  expect(treeChildren[1].$id).toBe('root:page1.mdx');
-  expect(treeChildren[2].$id).toBe('root:page2.mdx');
+  expect(treeChildren[0].$id).toBe('page1.mdx');
+  expect(treeChildren[1].$id).toBe('page1.mdx');
+  expect(treeChildren[2].$id).toBe('page2.mdx');
 });
 
 test('Loader: No duplicate pages when referencing subfolder items and folder', () => {
@@ -304,50 +304,50 @@ test('Loader: No duplicate pages when referencing subfolder items and folder', (
 
   // Check the page tree structure
   expect(removeUndefined(result.pageTree, true), 'Page Tree').toMatchInlineSnapshot(`
-      {
-        "$id": "root",
-        "children": [
-          {
-            "$id": "root:index.mdx",
-            "name": "Home",
-            "type": "page",
-            "url": "/",
-          },
-          {
-            "$id": "root:subfolder/page1.mdx",
-            "name": "Subfolder Page 1",
-            "type": "page",
-            "url": "/subfolder/page1",
-          },
-          {
-            "$id": "root:subfolder/page2.mdx",
-            "name": "Subfolder Page 2",
-            "type": "page",
-            "url": "/subfolder/page2",
-          },
-          {
-            "$id": "root:other-page.mdx",
-            "name": "Other Page",
-            "type": "page",
-            "url": "/other-page",
-          },
-          {
-            "$id": "root:subfolder",
-            "children": [
-              {
-                "$id": "root:subfolder/page3.mdx",
-                "name": "Subfolder Page 3",
-                "type": "page",
-                "url": "/subfolder/page3",
-              },
-            ],
-            "name": "Subfolder",
-            "type": "folder",
-          },
-        ],
-        "name": "Docs",
-      }
-    `);
+    {
+      "$id": "root",
+      "children": [
+        {
+          "$id": "index.mdx",
+          "name": "Home",
+          "type": "page",
+          "url": "/",
+        },
+        {
+          "$id": "subfolder/page1.mdx",
+          "name": "Subfolder Page 1",
+          "type": "page",
+          "url": "/subfolder/page1",
+        },
+        {
+          "$id": "subfolder/page2.mdx",
+          "name": "Subfolder Page 2",
+          "type": "page",
+          "url": "/subfolder/page2",
+        },
+        {
+          "$id": "other-page.mdx",
+          "name": "Other Page",
+          "type": "page",
+          "url": "/other-page",
+        },
+        {
+          "$id": "subfolder",
+          "children": [
+            {
+              "$id": "subfolder/page3.mdx",
+              "name": "Subfolder Page 3",
+              "type": "page",
+              "url": "/subfolder/page3",
+            },
+          ],
+          "name": "Subfolder",
+          "type": "folder",
+        },
+      ],
+      "name": "Docs",
+    }
+  `);
 });
 
 test('Loader: Serialize data', async () => {
@@ -396,23 +396,23 @@ test('Loader: Serialize data', async () => {
         "$id": "root",
         "children": [
           {
-            "$id": "root:test.mdx",
+            "$id": "test.mdx",
             "icon": "<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rocket" aria-hidden="true"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>",
             "name": "Hello &lt;Foo&gt;",
             "type": "page",
             "url": "/test",
           },
           {
-            "$id": "root:hello",
+            "$id": "hello",
             "children": [
               {
-                "$id": "root:_0",
+                "$id": "_0",
                 "icon": "<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-timer" aria-hidden="true"><line x1="10" x2="14" y1="2" y2="2"></line><line x1="12" x2="15" y1="14" y2="11"></line><circle cx="12" cy="14" r="8"></circle></svg>",
                 "name": "Hello World",
                 "type": "separator",
               },
               {
-                "$id": "root:hello/index.mdx",
+                "$id": "hello/index.mdx",
                 "name": "Hello",
                 "type": "page",
                 "url": "/hello",

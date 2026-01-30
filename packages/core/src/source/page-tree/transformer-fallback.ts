@@ -1,10 +1,11 @@
-import type {
-  ContentStorage,
-  PageTreeBuilderContext,
-  PageTreeTransformer,
-  SourceConfig,
+import {
+  FileSystem,
+  type ContentStorage,
+  type PageTreeBuilderContext,
+  type PageTreeTransformer,
+  type SourceConfig,
 } from '@/source';
-import { FileSystem } from '@/source';
+import { PageTreeBuilder } from '@/source/page-tree/builder';
 
 export function transformerFallback(): PageTreeTransformer {
   const addedFiles = new Set<string>();
@@ -21,17 +22,17 @@ export function transformerFallback(): PageTreeTransformer {
       for (const file of this.storage.getFiles()) {
         if (addedFiles.has(file)) continue;
 
-        const content = this.storage.read(file);
-        if (content) isolatedStorage.write(file, content);
+        isolatedStorage.write(file, this.storage.read(file)!);
       }
 
-      root.fallback = this.builder.build(isolatedStorage, {
-        id: `fallback-${this.rootId}`,
+      root.fallback = new PageTreeBuilder(isolatedStorage, {
+        idPrefix: this.idPrefix ? `fallback:${this.idPrefix}` : 'fallback',
+        url: this.getUrl,
         noRef: this.noRef,
         transformers: this.transformers,
         generateFallback: false,
         context: { ...this.custom, _fallback: true },
-      });
+      }).root();
 
       addedFiles.clear();
       return root;

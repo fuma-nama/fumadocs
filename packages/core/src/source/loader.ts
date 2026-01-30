@@ -1,7 +1,7 @@
 import type * as PageTree from '@/page-tree/definitions';
 import type { I18nConfig } from '@/i18n';
 import { createContentStorageBuilder, type ContentStorage } from './storage/content';
-import { createPageTreeBuilder, type PageTreeOptions } from '@/source/page-tree/builder';
+import { PageTreeBuilder, type PageTreeOptions } from '@/source/page-tree/builder';
 import { joinPath } from './path';
 import { normalizeUrl } from '@/utils/normalize-url';
 import { SlugFn, slugsPlugin } from '@/source/plugins/slugs';
@@ -26,7 +26,7 @@ export interface LoaderOptions<C extends LoaderConfig = LoaderConfig> {
   /**
    * Additional options for page tree builder
    */
-  pageTree?: PageTreeOptions<C>;
+  pageTree?: Partial<PageTreeOptions<C>>;
 
   plugins?:
     | LoaderPluginOption[]
@@ -42,7 +42,7 @@ export interface ResolvedLoaderConfig {
   url: (slugs: string[], locale?: string) => string;
 
   plugins?: LoaderPlugin[];
-  pageTree?: PageTreeOptions;
+  pageTree?: Partial<PageTreeOptions>;
   i18n?: I18nConfig | undefined;
 }
 
@@ -295,7 +295,6 @@ export function loader(
     ? createContentStorageBuilder(loaderConfig).i18n()
     : createContentStorageBuilder(loaderConfig).single();
   const indexer = createPageIndexer(loaderConfig);
-  const treeBuilder = createPageTreeBuilder(loaderConfig);
 
   if (storage instanceof FileSystem) {
     indexer.scan(storage);
@@ -307,8 +306,34 @@ export function loader(
 
   let pageTrees: Record<string, PageTree.Root> | PageTree.Root | undefined;
   function getPageTrees() {
-    return (pageTrees ??=
-      storage instanceof FileSystem ? treeBuilder.build(storage) : treeBuilder.buildI18n(storage));
+    if (pageTrees) return pageTrees;
+    const { plugins = [], url, pageTree: pageTreeConfig } = loaderConfig;
+    const transformers: PageTreeTransformer[] = [];
+
+    if (pageTreeConfig?.transformers) {
+      transformers.push(...pageTreeConfig.transformers);
+    }
+
+    for (const plugin of plugins) {
+      if (plugin.transformPageTree) transformers.push(plugin.transformPageTree);
+    }
+
+    const options: PageTreeOptions = {
+      url,
+      ...pageTreeConfig,
+      transformers,
+    };
+
+    if (storage instanceof FileSystem) {
+      const out = new PageTreeBuilder(storage, options).root();
+      return (pageTrees = out);
+    } else {
+      const out: Record<string, PageTree.Root> = {};
+      for (const locale in storage) {
+        out[locale] = new PageTreeBuilder([locale, storage], options).root();
+      }
+      return (pageTrees = out);
+    }
   }
 
   return {

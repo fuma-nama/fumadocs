@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 16.4.11
+
+### Patch Changes
+
+- a75a84d: fix duplicated transformer execution for fallback trees
+
 ## 16.4.10
 
 ### Patch Changes
