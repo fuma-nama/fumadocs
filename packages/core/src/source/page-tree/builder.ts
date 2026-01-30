@@ -173,7 +173,7 @@ export class PageTreeBuilder {
     if (existing) existing.owner = ownerPath;
   }
 
-  private nextNodeId(localId = `_${this._nextId++}`) {
+  private generateId(localId = `_${this._nextId++}`) {
     let id = localId;
     if (this.ctx.locale) id = `${this.ctx.locale}:${id}`;
     if (this.ctx.idPrefix) id = `${this.ctx.idPrefix}:${id}`;
@@ -222,7 +222,7 @@ export class PageTreeBuilder {
     let match = separator.exec(item);
     if (match?.groups) {
       let node: PageTree.Separator = {
-        $id: this.nextNodeId(),
+        $id: this.generateId(),
         type: 'separator',
         icon: match.groups.icon,
         name: match.groups.name,
@@ -241,7 +241,7 @@ export class PageTreeBuilder {
       const { icon, url, name, external } = match.groups;
 
       let node: PageTree.Item = {
-        $id: this.nextNodeId(),
+        $id: this.generateId(),
         type: 'page',
         icon,
         name,
@@ -317,7 +317,7 @@ export class PageTreeBuilder {
       description: metadata.description,
       collapsible: metadata.collapsible,
       children: [],
-      $id: this.nextNodeId(folderPath),
+      $id: this.generateId(folderPath),
       $ref:
         !this.ctx.noRef && meta
           ? {
@@ -394,7 +394,7 @@ export class PageTreeBuilder {
 
     const { title, description, icon } = page.data;
     let item: PageTree.Item = {
-      $id: this.nextNodeId(path),
+      $id: this.generateId(path),
       type: 'page',
       name: title ?? pathToName(basename(path, extname(path))),
       description,
@@ -415,10 +415,10 @@ export class PageTreeBuilder {
     return item;
   }
 
-  root(id = this.ctx.locale ?? 'root', path = ''): PageTree.Root {
+  root(id = 'root', path = ''): PageTree.Root {
     const folder = this.folder(path);
     let root: PageTree.Root = {
-      $id: id,
+      $id: this.generateId(id),
       name: folder?.name || 'Docs',
       children: folder ? folder.children : [],
     };
