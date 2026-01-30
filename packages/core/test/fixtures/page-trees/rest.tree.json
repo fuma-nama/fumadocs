@@ -2,13 +2,13 @@
   "$id": "root",
   "children": [
     {
-      "$id": "root:2-2.mdx",
+      "$id": "2-2.mdx",
       "name": "2.2",
       "type": "page",
       "url": "/2-2",
     },
     {
-      "$id": "root:1-2.mdx",
+      "$id": "1-2.mdx",
       "name": "1.2",
       "type": "page",
       "url": "/1-2",

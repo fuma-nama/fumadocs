@@ -2,19 +2,19 @@
   "$id": "root",
   "children": [
     {
-      "$id": "root:a",
+      "$id": "a",
       "children": [
         {
-          "$id": "root:a/page.mdx",
+          "$id": "a/page.mdx",
           "name": "First Page",
           "type": "page",
           "url": "/a/page",
         },
         {
-          "$id": "root:a/b",
+          "$id": "a/b",
           "children": [
             {
-              "$id": "root:a/b/page.mdx",
+              "$id": "a/b/page.mdx",
               "name": "Second Page",
               "type": "page",
               "url": "/a/b/page",
