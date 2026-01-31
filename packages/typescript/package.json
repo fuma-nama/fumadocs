@@ -65,8 +65,8 @@
   },
   "peerDependencies": {
     "@types/react": "*",
-    "fumadocs-core": "^15.7.0 || ^16.0.0",
-    "fumadocs-ui": "^15.7.0 || ^16.0.0",
+    "fumadocs-core": "^16.5.0",
+    "fumadocs-ui": "^16.5.0",
     "react": "*",
     "typescript": "*"
   },

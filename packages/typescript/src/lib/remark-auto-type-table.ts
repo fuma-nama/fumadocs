@@ -3,12 +3,13 @@ import type { Nodes } from 'hast';
 import type { Transformer } from 'unified';
 import type { Expression, ExpressionStatement, ObjectExpression, Program } from 'estree';
 import { createGenerator, type DocEntry, type Generator } from '@/lib/base';
-import { renderMarkdownToHast, renderTypeToHast } from '@/markdown';
+import { type MarkdownRenderer, markdownRenderer } from '@/markdown';
 import { valueToEstree } from 'estree-util-value-to-estree';
 import { visit } from 'unist-util-visit';
 import { type BaseTypeTableProps, type GenerateTypeTableOptions } from '@/lib/type-table';
 import { toEstree } from 'hast-util-to-estree';
 import { type ParameterTag, parseTags } from '@/lib/parse-tags';
+import type { ResolvedShikiConfig } from 'fumadocs-core/highlight/config';
 
 function objectBuilder() {
   const out: ObjectExpression = {
@@ -46,21 +47,19 @@ function objectBuilder() {
 
 async function buildTypeProp(
   entries: DocEntry[],
-  {
-    renderMarkdown = renderMarkdownToHast,
-    renderType = renderTypeToHast,
-  }: RemarkAutoTypeTableOptions,
+  renderer: MarkdownRenderer,
 ): Promise<ObjectExpression> {
   async function onItem(entry: DocEntry) {
     const node = objectBuilder();
     const tags = parseTags(entry.tags);
-    node.addJsxProperty('type', await renderType(entry.simplifiedType));
-    node.addJsxProperty('typeDescription', await renderType(entry.type));
+    node.addJsxProperty('type', await renderer.renderTypeToHast(entry.simplifiedType));
+    node.addJsxProperty('typeDescription', await renderer.renderTypeToHast(entry.type));
     node.addExpressionNode('required', valueToEstree(entry.required));
 
-    if (tags.default) node.addJsxProperty('default', await renderType(tags.default));
+    if (tags.default) node.addJsxProperty('default', await renderer.renderTypeToHast(tags.default));
 
-    if (tags.returns) node.addJsxProperty('returns', await renderMarkdown(tags.returns));
+    if (tags.returns)
+      node.addJsxProperty('returns', await renderer.renderMarkdownToHast(tags.returns));
 
     if (tags.params) {
       node.addExpressionNode('parameters', {
@@ -70,7 +69,7 @@ async function buildTypeProp(
     }
 
     if (entry.description) {
-      node.addJsxProperty('description', await renderMarkdown(entry.description));
+      node.addJsxProperty('description', await renderer.renderMarkdownToHast(entry.description));
     }
 
     return node.build();
@@ -80,7 +79,7 @@ async function buildTypeProp(
     const node = objectBuilder();
     node.addExpressionNode('name', valueToEstree(param.name));
     if (param.description)
-      node.addJsxProperty('description', await renderMarkdown(param.description));
+      node.addJsxProperty('description', await renderer.renderMarkdownToHast(param.description));
 
     return node.build();
   }
@@ -111,8 +110,12 @@ export interface RemarkAutoTypeTableOptions {
    */
   outputName?: string;
 
-  renderMarkdown?: typeof renderMarkdownToHast;
-  renderType?: typeof renderTypeToHast;
+  /**
+   * config for Shiki when using default `renderMarkdown` & `renderType`.
+   */
+  shiki?: ResolvedShikiConfig;
+  renderMarkdown?: MarkdownRenderer['renderMarkdownToHast'];
+  renderType?: MarkdownRenderer['renderTypeToHast'];
 
   /**
    * Customise type table generation
@@ -145,7 +148,19 @@ export function remarkAutoTypeTable(
     options: generateOptions = {},
     remarkStringify = true,
     generator = createGenerator(),
+    renderMarkdown,
+    renderType,
+    shiki,
   } = config;
+  let renderer: MarkdownRenderer;
+
+  if (renderMarkdown && renderType) {
+    renderer = { renderMarkdownToHast: renderMarkdown, renderTypeToHast: renderType };
+  } else {
+    renderer = markdownRenderer(shiki);
+    if (renderMarkdown) renderer.renderMarkdownToHast = renderMarkdown;
+    if (renderType) renderer.renderTypeToHast = renderType;
+  }
 
   return async (tree, file) => {
     const queue: Promise<void>[] = [];
@@ -178,7 +193,7 @@ export function remarkAutoTypeTable(
                     body: [
                       {
                         type: 'ExpressionStatement',
-                        expression: await buildTypeProp(doc.entries, config),
+                        expression: await buildTypeProp(doc.entries, renderer),
                       },
                     ],
                   } satisfies Program,
