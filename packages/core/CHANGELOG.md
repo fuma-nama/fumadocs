@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 17.0.0
+
+### Minor Changes
+
+- 9ba1250: Support Universal Shiki configuration
+
 ## 16.4.11
 
 ### Patch Changes

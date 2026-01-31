@@ -1,5 +1,13 @@
 # @fumadocs/ui
 
+## 17.0.0
+
+### Patch Changes
+
+- 85cc22f: support `.core` exports for dynamic codeblocks
+- Updated dependencies [9ba1250]
+  - fumadocs-core@17.0.0
+
 ## 16.4.11
 
 ### Patch Changes
