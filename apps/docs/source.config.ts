@@ -12,6 +12,8 @@ import jsonSchema from 'fumadocs-mdx/plugins/json-schema';
 import lastModified from 'fumadocs-mdx/plugins/last-modified';
 import type { ShikiTransformer } from 'shiki';
 import type { RemarkFeedbackBlockOptions } from 'fumadocs-core/mdx-plugins';
+import type { RemarkAutoTypeTableOptions } from 'fumadocs-typescript';
+import { shikiConfig } from './lib/shiki';
 
 export const docs = defineDocs({
   docs: {
@@ -43,15 +45,18 @@ export const docs = defineDocs({
       const { remarkAutoTypeTable, createGenerator, createFileSystemGeneratorCache } =
         await import('fumadocs-typescript');
 
-      const generator = createGenerator({
-        cache: createFileSystemGeneratorCache('.next/fumadocs-typescript'),
-      });
       const feedbackOptions: RemarkFeedbackBlockOptions = {
         resolve(node) {
           // defensive approach
           if (node.type === 'mdxJsxFlowElement') return 'skip';
           return node.type === 'paragraph' || node.type === 'image' || node.type === 'list';
         },
+      };
+      const typeTableOptions: RemarkAutoTypeTableOptions = {
+        generator: createGenerator({
+          cache: createFileSystemGeneratorCache('.next/fumadocs-typescript'),
+        }),
+        shiki: shikiConfig,
       };
       return applyMdxPreset({
         remarkStructureOptions: {
@@ -84,12 +89,7 @@ export const docs = defineDocs({
           remarkSteps,
           remarkMath,
           [remarkFeedbackBlock, feedbackOptions],
-          [
-            remarkAutoTypeTable,
-            {
-              generator,
-            },
-          ],
+          [remarkAutoTypeTable, typeTableOptions],
           remarkTypeScriptToJavaScript,
         ],
         rehypePlugins: (v) => [rehypeKatex, ...v],
