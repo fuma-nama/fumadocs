@@ -15,15 +15,11 @@ export function defineShikiConfig(config: ShikiConfig): ResolvedShikiConfig {
     createHighlighter() {
       if (created) return created;
 
-      const res = config.createHighlighter();
-      if ('then' in res) {
-        return res.then((v) => {
-          created = v;
-          return v;
-        });
-      } else {
-        return (created = res);
+      created = config.createHighlighter();
+      if ('then' in created) {
+        created = created.then((v) => (created = v));
       }
+      return created;
     },
   };
 }

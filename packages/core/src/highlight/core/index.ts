@@ -1,10 +1,12 @@
 import type {
-  BundledHighlighterOptions,
   BundledLanguage,
   CodeOptionsMeta,
   CodeOptionsThemes,
   CodeToHastOptionsCommon,
   BundledTheme,
+  HighlighterCore,
+  ThemeRegistrationAny,
+  LanguageRegistration,
 } from 'shiki';
 import {
   type Components,
@@ -30,7 +32,7 @@ export async function highlightHast(
 ): Promise<Root> {
   const { lang: initialLang, fallbackLanguage, config, ...rest } = options;
   let lang = initialLang;
-  let themesToLoad: unknown[];
+  let themesToLoad: (ThemeRegistrationAny | string)[];
 
   if (!('theme' in rest) && !('themes' in rest)) {
     Object.assign(rest, config.defaultThemes);
@@ -45,20 +47,57 @@ export async function highlightHast(
   }
 
   const highlighter = await config.createHighlighter();
-  await highlighter.loadTheme(...(themesToLoad as never[]));
-
-  try {
-    await highlighter.loadLanguage(lang as never);
-  } catch {
-    lang = fallbackLanguage ?? 'text';
-    await highlighter.loadLanguage(lang as never);
-  }
+  await Promise.all([
+    loadMissingTheme(highlighter, ...themesToLoad),
+    loadMissingLanguage(highlighter, lang).catch(() => {
+      lang = fallbackLanguage ?? 'text';
+      if (fallbackLanguage) return loadMissingLanguage(highlighter, fallbackLanguage);
+    }),
+  ]);
 
   return highlighter.codeToHast(code, {
     lang,
     defaultColor: 'themes' in rest ? false : undefined,
     ...rest,
   });
+}
+
+async function loadMissingTheme(
+  highlighter: HighlighterCore,
+  ...themes: (ThemeRegistrationAny | string)[]
+) {
+  const { isSpecialTheme } = await import('shiki/core');
+
+  const missingThemes = themes.filter((theme) => {
+    if (isSpecialTheme(theme)) return false;
+    try {
+      highlighter.getTheme(theme);
+      return false;
+    } catch {
+      return true;
+    }
+  });
+
+  if (missingThemes.length > 0) await highlighter.loadTheme(...(missingThemes as never[]));
+}
+
+async function loadMissingLanguage(
+  highlighter: HighlighterCore,
+  ...langs: (LanguageRegistration | string)[]
+) {
+  const { isSpecialLang } = await import('shiki/core');
+
+  const missingLangs = langs.filter((lang) => {
+    if (isSpecialLang(lang)) return false;
+    try {
+      highlighter.getLanguage(lang);
+      return false;
+    } catch {
+      return true;
+    }
+  });
+
+  if (missingLangs.length > 0) await highlighter.loadLanguage(...(missingLangs as never[]));
 }
 
 export function hastToJsx(hast: Root, options?: Partial<ToJsxOptions>) {
@@ -79,13 +118,16 @@ export function hastToJsx(hast: Root, options?: Partial<ToJsxOptions>) {
  */
 export async function getHighlighter(
   config: ResolvedShikiConfig,
-  options: Omit<BundledHighlighterOptions<BundledLanguage, BundledTheme>, 'engine' | 'langAlias'>,
+  options?: {
+    langs?: (BundledLanguage | LanguageRegistration)[];
+    themes?: (BundledTheme | ThemeRegistrationAny)[];
+  },
 ) {
   const highlighter = await config.createHighlighter();
 
   await Promise.all([
-    highlighter.loadLanguage(...(options.langs as never[])),
-    highlighter.loadTheme(...(options.themes as never[])),
+    options?.langs && loadMissingLanguage(highlighter, ...options.langs),
+    options?.themes && loadMissingTheme(highlighter, ...options.themes),
   ]);
 
   return highlighter;

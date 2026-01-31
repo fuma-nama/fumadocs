@@ -7,8 +7,12 @@ import type { MakeOptional } from '@/types';
 
 const ShikiConfigContext = createContext<ResolvedShikiConfig | null>(null);
 
-export function useShikiConfig(defaultConfig?: ResolvedShikiConfig) {
-  if (defaultConfig) return defaultConfig;
+export function useShikiConfigOptional() {
+  return use(ShikiConfigContext);
+}
+
+export function useShikiConfig(forced?: ResolvedShikiConfig) {
+  if (forced) return forced;
   const ctx = use(ShikiConfigContext);
   if (!ctx) throw new Error(`missing <ShikiConfigProvider />`);
   return ctx;
@@ -26,16 +30,14 @@ export function ShikiConfigProvider({
 
 const promises: Record<string, Promise<ReactNode>> = {};
 
+export type UseShikiOptions = MakeOptional<CoreHighlightOptions, 'config'>;
+
 /**
  * get highlighted results, should be used with React Suspense API.
  *
  * note: results are cached with (lang, code) as keys, if this is not the desired behaviour, pass a `deps` instead.
  */
-export function useShiki(
-  code: string,
-  options: MakeOptional<CoreHighlightOptions, 'config'>,
-  deps?: DependencyList,
-): ReactNode {
+export function useShiki(code: string, options: UseShikiOptions, deps?: DependencyList): ReactNode {
   const config = useShikiConfig(options.config);
   const key = useMemo(() => {
     return deps ? JSON.stringify(deps) : `${options.lang}:${code}`;

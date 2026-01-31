@@ -1,14 +1,16 @@
-import { createHighlighter, createOnigurumaEngine } from 'shiki';
 import { defineShikiConfig } from '../config';
 
-export const withJSEngine = defineShikiConfig({
-  defaultThemes: {
-    themes: {
-      light: 'github-light',
-      dark: 'github-dark',
-    },
+const defaultThemes = {
+  themes: {
+    light: 'github-light',
+    dark: 'github-dark',
   },
+};
+
+export const withJSEngine = defineShikiConfig({
+  defaultThemes,
   async createHighlighter() {
+    const { createHighlighter } = await import('shiki');
     const { createJavaScriptRegexEngine } = await import('shiki/engine/javascript');
 
     return createHighlighter({
@@ -20,13 +22,9 @@ export const withJSEngine = defineShikiConfig({
 });
 
 export const withWASMEngine = defineShikiConfig({
-  defaultThemes: {
-    themes: {
-      light: 'github-light',
-      dark: 'github-dark',
-    },
-  },
-  createHighlighter() {
+  defaultThemes,
+  async createHighlighter() {
+    const { createHighlighter, createOnigurumaEngine } = await import('shiki');
     return createHighlighter({
       langs: [],
       themes: [],
