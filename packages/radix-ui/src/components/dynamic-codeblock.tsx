@@ -1,10 +1,6 @@
 'use client';
 import { CodeBlock, type CodeBlockProps, Pre } from '@/components/codeblock';
-import type {
-  HighlightOptions,
-  HighlightOptionsCommon,
-  HighlightOptionsThemes,
-} from 'fumadocs-core/highlight';
+import type { HighlightOptions } from 'fumadocs-core/highlight';
 import { useShiki } from 'fumadocs-core/highlight/client';
 import { cn } from '@fumadocs/ui/cn';
 import {
@@ -32,8 +28,10 @@ export interface DynamicCodeblockProps {
    * @defaultValue true
    */
   wrapInSuspense?: boolean;
-  options?: Omit<HighlightOptionsCommon, 'lang'> & HighlightOptionsThemes;
+  options?: DistributiveOmit<HighlightOptions, 'lang'>;
 }
+
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
 
 const PropsContext = createContext<CodeBlockProps | undefined>(undefined);
 

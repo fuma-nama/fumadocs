@@ -46,3 +46,5 @@ export interface RenderContext extends Pick<OpenAPIOptions, 'proxyUrl'>, CreateA
   renderMarkdown: (text: string) => ReactNode;
   renderCodeBlock: (lang: string, code: string) => ReactNode;
 }
+
+export type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;

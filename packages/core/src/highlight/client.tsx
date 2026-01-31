@@ -1,8 +1,8 @@
 'use client';
-import { type DependencyList, type ReactNode, use, useMemo } from 'react';
-import { highlight, type HighlightOptions } from './shiki';
-
-const promises: Record<string, Promise<ReactNode>> = {};
+import type { DependencyList, ReactNode } from 'react';
+import type { HighlightOptions } from '.';
+import { useShiki as useShikiBase } from './core/client';
+import { withJSEngine } from './full/config';
 
 /**
  * get highlighted results, should be used with React Suspense API.
@@ -14,9 +14,12 @@ export function useShiki(
   options: HighlightOptions,
   deps?: DependencyList,
 ): ReactNode {
-  const key = useMemo(() => {
-    return deps ? JSON.stringify(deps) : `${options.lang}:${code}`;
-  }, [code, deps, options.lang]);
-
-  return use((promises[key] ??= highlight(code, options)));
+  return useShikiBase(
+    code,
+    {
+      config: withJSEngine,
+      ...options,
+    },
+    deps,
+  );
 }

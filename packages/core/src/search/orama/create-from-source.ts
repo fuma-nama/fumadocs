@@ -11,8 +11,7 @@ import { basename, extname } from '@/source/path';
 import type { I18nConfig } from '@/i18n';
 import type { Language } from '@orama/orama';
 import { findPath } from '@/page-tree/utils';
-
-type Awaitable<T> = T | Promise<T>;
+import type { Awaitable } from '@/types';
 
 function defaultBuildIndex<C extends LoaderConfig>(source: LoaderOutput<C>) {
   function isBreadcrumbItem(item: unknown): item is string {

@@ -95,9 +95,13 @@
       "types": "./dist/highlight/index.d.ts",
       "import": "./dist/highlight/index.js"
     },
-    "./highlight/client": {
-      "types": "./dist/highlight/client.d.ts",
-      "import": "./dist/highlight/client.js"
+    "./highlight/core": {
+      "types": "./dist/highlight/core/index.d.ts",
+      "import": "./dist/highlight/core/index.js"
+    },
+    "./highlight/*": {
+      "types": "./dist/highlight/*.d.ts",
+      "import": "./dist/highlight/*.js"
     },
     "./framework": {
       "types": "./dist/framework/index.d.ts",

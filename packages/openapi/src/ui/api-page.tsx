@@ -1,17 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- rehype-react without types */
 import Slugger from 'github-slugger';
 import { Operation } from '@/ui/operation';
-import type { MethodInformation, RenderContext } from '@/types';
+import type { DistributiveOmit, MethodInformation, RenderContext } from '@/types';
 import { createMethod, type NoReference } from '@/utils/schema';
 import type { OpenAPIV3_1 } from 'openapi-types';
 import type { ProcessedDocument } from '@/utils/process-document';
 import { defaultAdapters, MediaAdapter } from '@/requests/media/adapter';
 import type { FC, ReactNode } from 'react';
-import {
-  highlight,
-  type HighlightOptionsCommon,
-  type HighlightOptionsThemes,
-} from 'fumadocs-core/highlight';
+import { highlight, type HighlightOptions } from 'fumadocs-core/highlight';
 import type { OpenAPIServer } from '@/server';
 import type { APIPageClientOptions } from './client';
 import type { CodeUsageGenerator } from './operation/usage-tabs';
@@ -49,7 +45,7 @@ export interface CreateAPIPageOptions {
    */
   generateCodeSamples?: (method: MethodInformation) => Awaitable<CodeUsageGenerator[]>;
 
-  shikiOptions?: Omit<HighlightOptionsCommon, 'lang' | 'components'> & HighlightOptionsThemes;
+  shikiOptions?: DistributiveOmit<HighlightOptions, 'lang' | 'components'>;
 
   /**
    * Show full response schema instead of only example response & Typescript definitions.
