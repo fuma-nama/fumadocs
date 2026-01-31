@@ -148,7 +148,7 @@
     "@mixedbread/sdk": "^0.50.1",
     "@orama/core": "^1.2.16",
     "@oramacloud/client": "^2.1.4",
-    "@tanstack/react-router": "1.157.16",
+    "@tanstack/react-router": "1.157.18",
     "@types/estree-jsx": "^1.0.5",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
@@ -167,7 +167,7 @@
     "remark-mdx": "^3.1.1",
     "remove-markdown": "^0.6.3",
     "tsconfig": "workspace:*",
-    "tsdown": "^0.19.0",
+    "tsdown": "^0.20.0",
     "typescript": "^5.9.3",
     "unified": "^11.0.5",
     "vfile": "^6.0.3",
@@ -175,7 +175,7 @@
     "zod": "^4.3.6"
   },
   "peerDependencies": {
-    "@mixedbread/sdk": "^0.46.0",
+    "@mixedbread/sdk": "^0.50.0",
     "@orama/core": "1.x.x",
     "@oramacloud/client": "2.x.x",
     "@tanstack/react-router": "1.x.x",

@@ -54,7 +54,7 @@
     "react": "^19.2.4",
     "tinyglobby": "^0.2.15",
     "tsconfig": "workspace:*",
-    "tsdown": "^0.19.0"
+    "tsdown": "^0.20.0"
   },
   "peerDependencies": {
     "@types/react": "*",
