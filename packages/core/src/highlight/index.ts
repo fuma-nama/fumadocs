@@ -1,4 +1,9 @@
-import type { BundledHighlighterOptions, BundledLanguage, BundledTheme } from 'shiki';
+import type {
+  BundledLanguage,
+  BundledTheme,
+  LanguageRegistration,
+  ThemeRegistrationAny,
+} from 'shiki';
 import type { ReactNode } from 'react';
 import type { Root } from 'hast';
 import type { DistributiveOmit } from '@/types';
@@ -30,7 +35,10 @@ export async function highlightHast(code: string, options: HighlightOptions): Pr
  */
 export async function getHighlighter(
   engineType: 'js' | 'oniguruma',
-  options: Omit<BundledHighlighterOptions<BundledLanguage, BundledTheme>, 'engine' | 'langAlias'>,
+  options?: {
+    langs?: (BundledLanguage | LanguageRegistration)[];
+    themes?: (BundledTheme | ThemeRegistrationAny)[];
+  },
 ) {
   return base.getHighlighter(engineType === 'js' ? withJSEngine : withWASMEngine, options);
 }

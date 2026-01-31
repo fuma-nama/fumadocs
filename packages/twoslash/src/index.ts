@@ -3,12 +3,12 @@ import type { Code } from 'mdast';
 import { fromMarkdown } from 'mdast-util-from-markdown';
 import { gfmFromMarkdown } from 'mdast-util-gfm';
 import { defaultHandlers, toHast } from 'mdast-util-to-hast';
-import {
-  ShikiError,
-  type ShikiTransformer,
-  type ShikiTransformerContext,
-  type ShikiTransformerContextCommon,
+import type {
+  ShikiTransformer,
+  ShikiTransformerContext,
+  ShikiTransformerContextCommon,
 } from 'shiki';
+import { ShikiError } from 'shiki/core';
 import {
   createTransformerFactory,
   rendererRich,
