@@ -88,7 +88,7 @@
     "mcp-handler": "^1.0.7",
     "next-validate-link": "^1.6.4",
     "postcss": "^8.5.6",
-    "shadcn": "3.7.0",
+    "shadcn": "3.8.1",
     "tailwindcss": "^4.1.18",
     "tailwindcss-animate": "^1.0.7",
     "tinyexec": "^1.0.2",
