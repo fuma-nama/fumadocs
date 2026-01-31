@@ -21,7 +21,7 @@ const installables = new Map<
 >();
 
 /** file path (relative to registry dir) -> import specifier */
-const forwardables = new Map<string, string>();
+const forwardedFiles = new Map<string, string>();
 
 /**
  * - transform import to `@fumadocs/ui` into sub component references, or forward to upstream package instead.
@@ -79,7 +79,7 @@ export function resolveForwardedAPIs(
         return v;
       })
       .join('/');
-    const forwarded = forwardables.get(filePath);
+    const forwarded = forwardedFiles.get(filePath);
 
     if (forwarded)
       return resolveForwardedAPIs(
@@ -228,7 +228,11 @@ for (const comp of registry.components) {
   }
 }
 
-forwardables.set('i18n.tsx', '@fumadocs/ui/i18n');
-for await (const file of new Glob('{contexts,components,hooks}/**/*').scan(srcDir)) {
-  forwardables.set(file, `@fumadocs/ui/${removeExtname(file)}`);
+forwardedFiles.set('i18n.tsx', '@fumadocs/ui/i18n');
+for await (const file of new Glob('{contexts,hooks}/**/*').scan(srcDir)) {
+  forwardedFiles.set(file, `@fumadocs/ui/${removeExtname(file)}`);
+}
+
+for await (const file of new Glob('components/toc/**/*').scan(srcDir)) {
+  forwardedFiles.set(file, `@fumadocs/ui/${removeExtname(file)}`);
 }
