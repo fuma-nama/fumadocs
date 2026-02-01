@@ -1,5 +1,4 @@
 ---
-'fumadocs-core': minor
 'fumadocs-ui': minor
 ---
 
