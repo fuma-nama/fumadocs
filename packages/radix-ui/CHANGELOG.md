@@ -1,5 +1,17 @@
 # next-docs-ui
 
+## 17.0.0
+
+### Minor Changes
+
+- 9ba1250: Support Universal Shiki configuration
+
+### Patch Changes
+
+- Updated dependencies [85cc22f]
+  - @fumadocs/ui@17.0.0
+  - fumadocs-core@17.0.0
+
 ## 16.4.11
 
 ### Patch Changes
