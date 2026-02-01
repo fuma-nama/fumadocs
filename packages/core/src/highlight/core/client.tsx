@@ -1,6 +1,15 @@
 'use client';
 
-import { use, createContext, type ReactNode, type DependencyList, useMemo } from 'react';
+import {
+  use,
+  createContext,
+  type ReactNode,
+  type DependencyList,
+  useMemo,
+  useEffect,
+  useState,
+  useRef,
+} from 'react';
 import type { ResolvedShikiConfig } from '../config';
 import { CoreHighlightOptions, highlight } from '.';
 import type { MakeOptional } from '@/types';
@@ -31,6 +40,37 @@ export function ShikiConfigProvider({
 const promises: Record<string, Promise<ReactNode>> = {};
 
 export type UseShikiOptions = MakeOptional<CoreHighlightOptions, 'config'>;
+
+/**
+ * get highlighted results (uncached), use `useEffect` instead of React 19 APIs.
+ */
+export function useShikiDynamic(
+  code: string,
+  options: UseShikiOptions & { defaultValue?: ReactNode },
+  deps: DependencyList,
+): ReactNode {
+  const [node, setNode] = useState(options.defaultValue);
+  const config = useShikiConfig(options.config);
+  const lastTask = useRef<Promise<ReactNode> | null>(null);
+
+  useEffect(() => {
+    const promise = highlight(code, {
+      ...options,
+      config,
+    });
+    lastTask.current = promise;
+
+    void promise.then((res) => {
+      if (lastTask.current === promise) setNode(res);
+    });
+    return () => {
+      lastTask.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
+
+  return node;
+}
 
 /**
  * get highlighted results, should be used with React Suspense API.

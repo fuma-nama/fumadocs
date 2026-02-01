@@ -1,16 +1,8 @@
 'use client';
 import { CodeBlock, type CodeBlockProps, Pre } from '@/components/codeblock';
-import { useShiki, type UseShikiOptions } from 'fumadocs-core/highlight/core/client';
+import { useShikiDynamic, type UseShikiOptions } from 'fumadocs-core/highlight/core/client';
 import { cn } from '@fumadocs/ui/cn';
-import {
-  type ComponentProps,
-  createContext,
-  type FC,
-  Suspense,
-  use,
-  useDeferredValue,
-  useId,
-} from 'react';
+import { type ComponentProps, createContext, type FC, use, useId } from 'react';
 
 export interface DynamicCodeblockProps {
   lang: string;
@@ -64,21 +56,10 @@ export function DynamicCodeBlock({
       ...options?.components,
     },
   };
+  let node = useShikiDynamic(code, shikiOptions, [id, lang, code]);
+  if (wrapInSuspense) node ??= <Placeholder code={code} components={shikiOptions.components} />;
 
-  const children = (
-    <PropsContext value={codeblock}>
-      <Internal id={id} {...useDeferredValue({ code, options: shikiOptions })} />
-    </PropsContext>
-  );
-
-  if (wrapInSuspense)
-    return (
-      <Suspense fallback={<Placeholder code={code} components={shikiOptions.components} />}>
-        {children}
-      </Suspense>
-    );
-
-  return children;
+  return <PropsContext value={codeblock}>{node}</PropsContext>;
 }
 
 function Placeholder({
@@ -101,8 +82,4 @@ function Placeholder({
       </Code>
     </Pre>
   );
-}
-
-function Internal({ id, code, options }: { id: string; code: string; options: UseShikiOptions }) {
-  return useShiki(code, options, [id, options.lang, code]);
 }

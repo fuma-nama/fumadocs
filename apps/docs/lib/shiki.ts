@@ -1,3 +1,12 @@
-import { withJSEngine } from 'fumadocs-core/highlight/full/config';
+import { configDefault } from 'fumadocs-core/highlight';
+import type { ResolvedShikiConfig } from 'fumadocs-core/highlight/config';
 
-export const shikiConfig = withJSEngine;
+export const shikiConfig: ResolvedShikiConfig = {
+  ...configDefault,
+  defaultThemes: {
+    themes: {
+      light: 'github-light',
+      dark: 'vesper',
+    },
+  },
+};

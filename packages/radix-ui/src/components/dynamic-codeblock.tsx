@@ -1,10 +1,10 @@
 'use client';
 import { useShikiConfigOptional } from 'fumadocs-core/highlight/core/client';
 import * as base from './dynamic-codeblock.core';
-import { withJSEngine } from 'fumadocs-core/highlight/full/config';
+import { configDefault } from 'fumadocs-core/highlight';
 
 export function DynamicCodeBlock(props: base.DynamicCodeblockProps) {
-  const config = useShikiConfigOptional() ?? withJSEngine;
+  const config = useShikiConfigOptional() ?? configDefault;
   return (
     <base.DynamicCodeBlock
       {...props}

@@ -1,17 +1,17 @@
 import type { ElementContent, Nodes } from 'hast';
 import { remark } from 'remark';
 import { remarkGfm } from 'fumadocs-core/mdx-plugins/remark-gfm';
-import { createRehypeCode } from 'fumadocs-core/mdx-plugins/rehype-code.min';
+import { createRehypeCode } from 'fumadocs-core/mdx-plugins/rehype-code.core';
 import remarkRehype from 'remark-rehype';
 import { highlightHast } from 'fumadocs-core/highlight/core';
-import { withJSEngine } from 'fumadocs-core/highlight/full/config';
+import { configDefault } from 'fumadocs-core/highlight';
 
 export interface MarkdownRenderer {
   renderTypeToHast: (type: string) => Nodes | Promise<Nodes>;
   renderMarkdownToHast: (md: string) => Nodes | Promise<Nodes>;
 }
 
-export function markdownRenderer(shiki = withJSEngine): MarkdownRenderer {
+export function markdownRenderer(shiki = configDefault): MarkdownRenderer {
   const processor = remark()
     .use(remarkGfm)
     .use(remarkRehype)
@@ -28,7 +28,6 @@ export function markdownRenderer(shiki = withJSEngine): MarkdownRenderer {
         config: shiki,
         lang: 'ts',
         structure: 'inline',
-        defaultColor: false,
       });
 
       return {

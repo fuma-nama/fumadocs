@@ -8,11 +8,7 @@ import type {
   ThemeRegistrationAny,
   LanguageRegistration,
 } from 'shiki';
-import {
-  type Components,
-  type Options as ToJsxOptions,
-  toJsxRuntime,
-} from 'hast-util-to-jsx-runtime';
+import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import { Fragment, type ReactNode } from 'react';
 import { jsx, jsxs } from 'react/jsx-runtime';
 import type { Root } from 'hast';
@@ -30,36 +26,38 @@ export async function highlightHast(
   code: string,
   options: DistributiveOmit<CoreHighlightOptions, 'components'>,
 ): Promise<Root> {
-  const { lang: initialLang, fallbackLanguage, config, ...rest } = options;
-  let lang = initialLang;
+  const { fallbackLanguage = 'text', config, ...resolved } = options;
   let themesToLoad: (ThemeRegistrationAny | string)[];
 
-  if (!('theme' in rest) && !('themes' in rest)) {
-    Object.assign(rest, config.defaultThemes);
+  if (!('theme' in resolved) && !('themes' in resolved)) {
+    Object.assign(resolved, config.defaultThemes);
   }
 
-  if ('theme' in rest) {
-    themesToLoad = [rest.theme];
-  } else if ('themes' in rest) {
-    themesToLoad = Object.values(rest.themes).filter((v) => v !== undefined);
+  if ('theme' in resolved) {
+    themesToLoad = [resolved.theme];
+  } else if ('themes' in resolved) {
+    themesToLoad = Object.values(resolved.themes).filter((v) => v !== undefined);
+    resolved.defaultColor ??= false;
   } else {
     throw new Error('impossible');
   }
 
+  const { isSpecialLang } = await import('shiki/core');
   const highlighter = await config.createHighlighter();
+  if (
+    !isSpecialLang(resolved.lang) &&
+    !(resolved.lang in highlighter.getBundledLanguages()) &&
+    !highlighter.getLoadedLanguages().includes(resolved.lang)
+  ) {
+    resolved.lang = fallbackLanguage;
+  }
+
   await Promise.all([
     loadMissingTheme(highlighter, ...themesToLoad),
-    loadMissingLanguage(highlighter, lang).catch(() => {
-      lang = fallbackLanguage ?? 'text';
-      if (fallbackLanguage) return loadMissingLanguage(highlighter, fallbackLanguage);
-    }),
+    loadMissingLanguage(highlighter, resolved.lang),
   ]);
 
-  return highlighter.codeToHast(code, {
-    lang,
-    defaultColor: 'themes' in rest ? false : undefined,
-    ...rest,
-  });
+  return highlighter.codeToHast(code, resolved);
 }
 
 async function loadMissingTheme(
@@ -100,16 +98,6 @@ async function loadMissingLanguage(
   if (missingLangs.length > 0) await highlighter.loadLanguage(...(missingLangs as never[]));
 }
 
-export function hastToJsx(hast: Root, options?: Partial<ToJsxOptions>) {
-  return toJsxRuntime(hast, {
-    jsx,
-    jsxs,
-    development: false,
-    Fragment,
-    ...options,
-  });
-}
-
 /**
  * Get Shiki highlighter instance of Fumadocs (mostly for internal use, you should use Shiki directly over this).
  *
@@ -133,11 +121,12 @@ export async function getHighlighter(
   return highlighter;
 }
 
-export async function highlight(
-  code: string,
-  { components, ...rest }: CoreHighlightOptions,
-): Promise<ReactNode> {
-  return hastToJsx(await highlightHast(code, rest), {
-    components,
+export async function highlight(code: string, options: CoreHighlightOptions): Promise<ReactNode> {
+  return toJsxRuntime(await highlightHast(code, options), {
+    jsx,
+    jsxs,
+    development: false,
+    Fragment,
+    components: options.components,
   });
 }

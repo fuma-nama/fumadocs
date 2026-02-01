@@ -21,7 +21,6 @@ export default defineConfig({
     'src/i18n/*.ts',
     'src/highlight/{index,config,client}.{ts,tsx}',
     'src/highlight/core/*',
-    'src/highlight/full/*',
     'src/mdx-plugins/{index,codeblock-utils}.ts',
     'src/mdx-plugins/remark-*.ts',
     'src/mdx-plugins/rehype-*.ts',

@@ -10,7 +10,7 @@ import type { OpenAPIServer } from '@/server';
 import type { APIPageClientOptions } from './client';
 import type { CodeUsageGenerator } from './operation/usage-tabs';
 import { Heading } from 'fumadocs-ui/components/heading';
-import { createRehypeCode } from 'fumadocs-core/mdx-plugins/rehype-code.min';
+import { createRehypeCode } from 'fumadocs-core/mdx-plugins/rehype-code.core';
 import { remarkGfm } from 'fumadocs-core/mdx-plugins/remark-gfm';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { remark } from 'remark';

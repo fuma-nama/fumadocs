@@ -1,5 +1,5 @@
-import * as base from './rehype-code.min';
-import { withJSEngine, withWASMEngine } from '@/highlight/full/config';
+import * as base from './rehype-code.core';
+import { configDefault, configWASM } from '@/highlight';
 
 export type RehypeCodeOptions = base.RehypeCodeOptionsCommon & {
   /**
@@ -12,7 +12,7 @@ export type RehypeCodeOptions = base.RehypeCodeOptionsCommon & {
 
 export const rehypeCodeDefaultOptions: RehypeCodeOptions = {
   engine: 'js',
-  ...base.rehypeCodeDefaultOptions(withJSEngine),
+  ...base.rehypeCodeDefaultOptions(configDefault),
 };
 
 export const rehypeCode = base.createRehypeCode<Partial<RehypeCodeOptions>>((_options) => {
@@ -20,8 +20,8 @@ export const rehypeCode = base.createRehypeCode<Partial<RehypeCodeOptions>>((_op
     ...rehypeCodeDefaultOptions,
     ..._options,
   };
-  if (options.engine === 'oniguruma') return { config: withWASMEngine, options };
-  return { config: withJSEngine, options };
+  if (options.engine === 'oniguruma') return { config: configWASM, options };
+  return { config: configDefault, options };
 });
 
-export { transformerIcon, transformerTab, type CodeBlockIcon } from './rehype-code.min';
+export { transformerIcon, transformerTab, type CodeBlockIcon } from './rehype-code.core';
