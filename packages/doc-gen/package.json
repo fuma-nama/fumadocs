@@ -63,6 +63,6 @@
     "vfile": "^6.0.3"
   },
   "peerDependencies": {
-    "fumadocs-core": "^15.7.2 || ^16.0.0"
+    "fumadocs-core": "^17.0.0"
   }
 }

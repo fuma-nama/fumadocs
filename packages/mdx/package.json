@@ -112,7 +112,7 @@
   "peerDependencies": {
     "@fumadocs/mdx-remote": "^1.4.0",
     "@types/react": "*",
-    "fumadocs-core": "^15.0.0 || ^16.0.0",
+    "fumadocs-core": "^17.0.0",
     "next": "^15.3.0 || ^16.0.0",
     "react": "*",
     "vite": "6.x.x || 7.x.x"
