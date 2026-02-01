@@ -1,5 +1,17 @@
 # @fuma-docs/openapi
 
+## 10.3.1
+
+### Minor Changes
+
+- c03f8c3: Support `/ui/base` for reduced bundle size
+
+### Patch Changes
+
+- Updated dependencies [9ba1250]
+  - fumadocs-ui@16.5.0
+  - fumadocs-core@16.5.0
+
 ## 10.2.7
 
 ### Patch Changes
