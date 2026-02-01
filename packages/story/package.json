@@ -51,7 +51,7 @@
   },
   "peerDependencies": {
     "@types/react": "*",
-    "fumadocs-ui": "16.x.x",
+    "fumadocs-ui": "17.x",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

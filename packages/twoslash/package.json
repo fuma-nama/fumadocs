@@ -65,7 +65,7 @@
   },
   "peerDependencies": {
     "@types/react": "*",
-    "fumadocs-ui": "^15.0.0 || ^16.0.0",
+    "fumadocs-ui": "^17.0.0",
     "react": "18.x.x || 19.x.x"
   },
   "peerDependenciesMeta": {
