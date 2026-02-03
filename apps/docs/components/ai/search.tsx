@@ -36,9 +36,9 @@ function Header() {
   const { setOpen } = use(Context)!;
 
   return (
-    <div className="sticky top-0 flex items-start gap-2">
-      <div className="flex-1 p-3 border rounded-xl bg-fd-card text-fd-card-foreground">
-        <p className="text-sm font-medium mb-2">Ask AI</p>
+    <div className="sticky top-0 flex items-start gap-2 border rounded-xl bg-fd-secondary text-fd-secondary-foreground shadow-sm">
+      <div className="px-3 py-2 flex-1">
+        <p className="text-sm font-medium mb-2">AI Chat</p>
         <p className="text-xs text-fd-muted-foreground">
           Powered by{' '}
           <a href="https://inkeep.com" target="_blank" rel="noreferrer noopener">
@@ -46,14 +46,15 @@ function Header() {
           </a>
         </p>
       </div>
+
       <button
         aria-label="Close"
         tabIndex={-1}
         className={cn(
           buttonVariants({
             size: 'icon-sm',
-            color: 'secondary',
-            className: 'rounded-full',
+            color: 'ghost',
+            className: 'text-fd-muted-foreground rounded-full',
           }),
         )}
         onClick={() => setOpen(false)}
@@ -160,7 +161,7 @@ function SearchAIInput(props: ComponentProps<'form'>) {
           type="submit"
           className={cn(
             buttonVariants({
-              color: 'secondary',
+              color: 'primary',
               className: 'transition-all rounded-full mt-2',
             }),
           )}
@@ -340,16 +341,18 @@ export function AISearchPanel() {
     return () => window.removeEventListener('keydown', onKeyPress);
   }, []);
 
+  const messages = chat.messages.filter((msg) => msg.role !== 'system');
+
   return (
     <>
       <style>
         {`
         @keyframes ask-ai-open {
           from {
-            width: 0px;
+            translate: 100% 0;
           }
           to {
-            width: var(--ai-chat-width);
+            translate: 0 0;
           }
         }
         @keyframes ask-ai-close {
@@ -371,32 +374,36 @@ export function AISearchPanel() {
       <Presence present={open}>
         <div
           className={cn(
-            'overflow-hidden z-30 bg-fd-popover text-fd-popover-foreground [--ai-chat-width:400px] xl:[--ai-chat-width:460px]',
+            'overflow-hidden z-30 bg-fd-card text-fd-card-foreground [--ai-chat-width:400px] 2xl:[--ai-chat-width:460px]',
             'max-lg:fixed max-lg:inset-x-2 max-lg:top-4 max-lg:border max-lg:rounded-2xl max-lg:shadow-xl',
-            'lg:sticky lg:top-0 lg:h-dvh lg:border-s  lg:ms-auto lg:in-[#nd-docs-layout]:[grid-area:toc] lg:in-[#nd-notebook-layout]:row-span-full lg:in-[#nd-notebook-layout]:col-start-5',
+            'lg:sticky lg:top-0 lg:h-dvh lg:border-s lg:ms-auto lg:in-[#nd-docs-layout]:[grid-area:toc] lg:in-[#nd-notebook-layout]:row-span-full lg:in-[#nd-notebook-layout]:col-start-5',
             open
               ? 'animate-fd-dialog-in lg:animate-[ask-ai-open_200ms]'
               : 'animate-fd-dialog-out lg:animate-[ask-ai-close_200ms]',
           )}
         >
-          <div className="flex flex-col p-2 size-full max-lg:max-h-[80dvh] lg:w-(--ai-chat-width) xl:p-4">
+          <div className="flex flex-col p-2 size-full max-lg:max-h-[80dvh] lg:w-(--ai-chat-width) lg:p-3">
             <Header />
             <List
-              className="px-3 py-4 flex-1 overscroll-contain"
+              className="py-4 flex-1 overscroll-contain"
               style={{
                 maskImage:
                   'linear-gradient(to bottom, transparent, white 1rem, white calc(100% - 1rem), transparent 100%)',
               }}
             >
-              <div className="flex flex-col gap-4">
-                {chat.messages
-                  .filter((msg) => msg.role !== 'system')
-                  .map((item) => (
-                    <Message key={item.id} message={item} />
-                  ))}
+              <div className="flex flex-col px-3 gap-4">
+                {messages.map((item) => (
+                  <Message key={item.id} message={item} />
+                ))}
               </div>
+              {messages.length === 0 && (
+                <div className="text-sm text-fd-muted-foreground/80 size-full flex flex-col items-center justify-center text-center gap-2">
+                  <MessageCircleIcon fill="currentColor" stroke="none" />
+                  <p>Start a new chat below.</p>
+                </div>
+              )}
             </List>
-            <div className="rounded-xl border bg-fd-card text-fd-card-foreground has-focus-visible:ring-2 has-focus-visible:ring-fd-ring">
+            <div className="rounded-xl border bg-fd-secondary text-fd-secondary-foreground shadow-sm has-focus-visible:shadow-md">
               <SearchAIInput />
               <div className="flex items-center gap-1.5 p-1 empty:hidden">
                 <SearchAIActions />
