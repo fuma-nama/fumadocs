@@ -1,7 +1,7 @@
 'use client';
 import { cn } from '@/lib/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { MessageSquare, ThumbsDown, ThumbsUp } from 'lucide-react';
+import { CornerDownRightIcon, MessageSquare, ThumbsDown, ThumbsUp } from 'lucide-react';
 import {
   ReactNode,
   type SyntheticEvent,
@@ -239,15 +239,18 @@ export function FeedbackBlock({
       <div className="relative group/feedback">
         <div
           className={cn(
-            'absolute -inset-1 rounded-sm pointer-events-none z-[-1]',
-            open ? 'bg-fd-accent' : 'group-hover/feedback:bg-fd-accent',
+            'absolute -inset-1 rounded-sm pointer-events-none transition-colors duration-100 z-[-1]',
+            open
+              ? 'bg-fd-accent'
+              : 'group-hover/feedback:bg-fd-accent group-hover/feedback:delay-100',
           )}
         />
         <PopoverTrigger
           className={cn(
             buttonVariants({ variant: 'secondary', size: 'sm' }),
-            'absolute -top-7 end-0 backdrop-blur-sm text-fd-muted-foreground gap-1.5',
-            !open && 'invisible group-hover/feedback:visible hover:visible',
+            'absolute -top-7 end-0 backdrop-blur-sm text-fd-muted-foreground gap-1.5 transition-all duration-100 data-[state=open]:bg-fd-accent data-[state=open]:text-fd-accent-foreground',
+            !open &&
+              'opacity-0 pointer-events-none group-hover/feedback:pointer-events-auto group-hover/feedback:opacity-100 group-hover/feedback:delay-100 hover:pointer-events-auto hover:opacity-100 hover:delay-100',
           )}
           onClick={(e) => {
             setOpen((prev) => !prev);
@@ -259,12 +262,12 @@ export function FeedbackBlock({
           Feedback
         </PopoverTrigger>
 
-        <div className="[.prose-no-margin_&]:prose-no-margin">{children}</div>
+        <div className="in-[.prose-no-margin]:prose-no-margin">{children}</div>
       </div>
 
-      <PopoverContent className="min-w-[300px]">
+      <PopoverContent className="min-w-[300px] bg-fd-card text-fd-card-foreground">
         {previous ? (
-          <div className="flex flex-col items-center gap-2 text-fd-muted-foreground text-sm text-center rounded-xl">
+          <div className="flex flex-col items-center py-2 gap-2 text-fd-muted-foreground text-sm text-center rounded-xl">
             <p>Thank you for your feedback!</p>
             <div className="flex flex-row items-center gap-2">
               <a
@@ -313,9 +316,10 @@ export function FeedbackBlock({
             />
             <button
               type="submit"
-              className={cn(buttonVariants({ color: 'outline' }), 'w-fit px-3')}
+              className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'gap-1.5')}
               disabled={isPending}
             >
+              <CornerDownRightIcon className="text-fd-muted-foreground size-4" />
               Submit
             </button>
           </form>
