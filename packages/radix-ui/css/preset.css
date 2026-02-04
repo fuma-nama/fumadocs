@@ -4,6 +4,7 @@
 @import './layouts/docs.css';
 @import './layouts/home.css';
 @import './layouts/notebook.css';
+@import './layouts/flux.css';
 
 @source '../dist/*.js';
 @source '../dist/{components,contexts,provider,utils}/**/*.js';

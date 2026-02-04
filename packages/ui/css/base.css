@@ -211,7 +211,8 @@
 @variant layout {
   #nd-docs-layout:has(&),
   #nd-notebook-layout:has(&),
-  #nd-home-layout:has(&) {
+  #nd-home-layout:has(&),
+  #nd-flux-layout:has(&) {
     @slot;
   }
 }

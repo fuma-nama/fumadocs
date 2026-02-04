@@ -130,8 +130,10 @@ export function useFolderDepth() {
 }
 
 export function SidebarContent({
+  mode: allowedMode = 'full',
   children,
 }: {
+  mode?: Mode | true;
   children: (state: {
     ref: RefObject<HTMLElement | null>;
     collapsed: boolean;
@@ -149,7 +151,7 @@ export function SidebarContent({
     if (collapsed) setHover(false);
   });
 
-  if (mode !== 'full') return;
+  if (allowedMode !== true && allowedMode !== mode) return;
 
   function shouldIgnoreHover(e: PointerEvent): boolean {
     const element = ref.current;
