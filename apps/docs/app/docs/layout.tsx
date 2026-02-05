@@ -1,4 +1,4 @@
-import { DocsLayout } from 'fumadocs-ui/layouts/flux';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { baseOptions, linkItems, logo } from '@/components/layouts/shared';
 import { source } from '@/lib/source';
 import { AISearch, AISearchPanel, AISearchTrigger } from '@/components/ai/search';
