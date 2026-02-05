@@ -1,5 +1,13 @@
 # @fumadocs/ui
 
+## 16.5.0
+
+### Patch Changes
+
+- 85cc22f: support `.core` exports for dynamic codeblocks, migrate to effect-based `useShiki()` to avoid limitations of `<Suspense />`.
+- Updated dependencies [9ba1250]
+  - fumadocs-core@16.5.0
+
 ## 16.4.11
 
 ### Patch Changes

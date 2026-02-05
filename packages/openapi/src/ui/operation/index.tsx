@@ -10,7 +10,6 @@ import { idToTitle } from '@/utils/id-to-title';
 import { Schema } from '../schema';
 import { UsageTabs } from '@/ui/operation/usage-tabs';
 import { MethodLabel } from '@/ui/components/method-label';
-import { getTypescriptSchema } from '@/utils/get-typescript-schema';
 import { CopyResponseTypeScript, SelectTab, SelectTabs, SelectTabTrigger } from './client';
 import {
   AccordionContent,
@@ -338,7 +337,6 @@ async function ResponseAccordion({
   ctx: RenderContext;
 }) {
   const response = operation.responses![status];
-  const { generateTypeScriptSchema } = ctx;
   const contentTypes = response.content ? Object.entries(response.content) : [];
   let wrapper = (children: ReactNode) => children;
   let selectorNode: ReactNode = null;
@@ -372,10 +370,8 @@ async function ResponseAccordion({
           const schema = resType.schema;
           let ts: string | undefined;
 
-          if (generateTypeScriptSchema) {
-            ts = await generateTypeScriptSchema(operation, status);
-          } else if (generateTypeScriptSchema === undefined && schema) {
-            ts = await getTypescriptSchema(schema, ctx);
+          if (ctx.generateTypeScriptSchema) {
+            ts = await ctx.generateTypeScriptSchema(operation, status, type, ctx);
           }
 
           return (

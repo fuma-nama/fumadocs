@@ -10,6 +10,7 @@ export default defineConfig({
   dts: {
     sourcemap: false,
   },
+  clean: false,
   async onSuccess() {
     // wait until https://github.com/rolldown/tsdown/issues/472
     let content = (await fs.readFile('dist/components/image-zoom.js')).toString();

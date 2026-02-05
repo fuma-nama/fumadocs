@@ -1,9 +1,12 @@
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { baseOptions, linkItems, logo } from '@/lib/layout.shared';
+import { baseOptions, linkItems, logo } from '@/components/layouts/shared';
 import { source } from '@/lib/source';
 import { AISearch, AISearchPanel, AISearchTrigger } from '@/components/ai/search';
-import 'katex/dist/katex.min.css';
 import { getSection } from '@/lib/source/navigation';
+import { MessageCircleIcon } from 'lucide-react';
+import { cn } from '@/lib/cn';
+import { buttonVariants } from 'fumadocs-ui/components/ui/button';
+import 'katex/dist/katex.min.css';
 
 export default function Layout({ children }: LayoutProps<'/docs'>) {
   const base = baseOptions();
@@ -53,7 +56,18 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
 
       <AISearch>
         <AISearchPanel />
-        <AISearchTrigger />
+        <AISearchTrigger
+          position="float"
+          className={cn(
+            buttonVariants({
+              variant: 'secondary',
+              className: 'text-fd-muted-foreground rounded-2xl',
+            }),
+          )}
+        >
+          <MessageCircleIcon className="size-4.5" />
+          Ask AI
+        </AISearchTrigger>
       </AISearch>
     </DocsLayout>
   );

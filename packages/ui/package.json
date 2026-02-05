@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/ui",
-  "version": "16.4.11",
+  "version": "16.5.0",
   "description": "The low-level primitives for Fumadocs UI.",
   "keywords": [
     "Docs",

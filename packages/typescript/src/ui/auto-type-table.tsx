@@ -2,29 +2,42 @@ import { type ParameterNode, type TypeNode, TypeTable } from 'fumadocs-ui/compon
 import { type Jsx, toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import * as runtime from 'react/jsx-runtime';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
-import { renderMarkdownToHast, renderTypeToHast } from '@/markdown';
 import 'server-only';
 import type { ReactNode } from 'react';
 import { type BaseTypeTableProps, type GenerateTypeTableOptions } from '@/lib/type-table';
 import { type Generator } from '@/lib/base';
 import type { Nodes } from 'hast';
 import { parseTags } from '@/lib/parse-tags';
+import type { ResolvedShikiConfig } from 'fumadocs-core/highlight/config';
+import { markdownRenderer } from '@/markdown';
 
-export type AutoTypeTableProps = BaseTypeTableProps;
+interface JSXMarkdownRenderer {
+  renderMarkdown: (md: string) => Promise<ReactNode>;
+  renderType: (type: string) => Promise<ReactNode>;
+}
+
+export interface AutoTypeTableProps extends BaseTypeTableProps, Partial<JSXMarkdownRenderer> {
+  generator: Generator;
+
+  /** Shiki configuration when using default `renderMarkdown` & `renderType` */
+  shiki?: ResolvedShikiConfig;
+  options?: GenerateTypeTableOptions;
+}
 
 export async function AutoTypeTable({
   generator,
   options = {},
-  renderType = renderTypeDefault,
-  renderMarkdown = renderMarkdownDefault,
+  renderType,
+  renderMarkdown,
+  shiki,
   ...props
-}: AutoTypeTableProps & {
-  generator: Generator;
+}: AutoTypeTableProps) {
+  if (!renderType || !renderMarkdown) {
+    const renderer = markdownRenderer(shiki);
+    renderType ??= async (v) => toJsx(await renderer.renderTypeToHast(v));
+    renderMarkdown ??= async (v) => toJsx(await renderer.renderMarkdownToHast(v));
+  }
 
-  renderMarkdown?: typeof renderMarkdownDefault;
-  renderType?: typeof renderTypeDefault;
-  options?: GenerateTypeTableOptions;
-}) {
   const output = await generator.generateTypeTable(props, options);
 
   return output.map(async (item) => {
@@ -65,12 +78,4 @@ function toJsx(hast: Nodes) {
     jsxs: runtime.jsxs as Jsx,
     components: { ...defaultMdxComponents, img: undefined },
   });
-}
-
-async function renderTypeDefault(type: string): Promise<ReactNode> {
-  return toJsx(await renderTypeToHast(type));
-}
-
-async function renderMarkdownDefault(md: string): Promise<ReactNode> {
-  return toJsx(await renderMarkdownToHast(md));
 }

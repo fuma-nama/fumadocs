@@ -292,10 +292,6 @@ You can install the AI search dialog using Fumadocs CLI:
 npx @fumadocs/cli add ai/search
 ```
 
-Then, add the `<AISearchTrigger />` component to your root layout.
-
-### AI Model
-
 By default, it's configured for [Inkeep AI](https://inkeep.com) using Vercel AI SDK.
 
 To setup for Inkeep AI:
@@ -306,17 +302,34 @@ To setup for Inkeep AI:
    INKEEP_API_KEY="..."
    ```
 
-2. Add the `AISearchTrigger` component to root layout (or anywhere you prefer):
+2. Add the component & trigger to root layout (or anywhere you prefer):
 
    ```tsx
-   import { AISearchTrigger } from '@/components/search';
+   import { AISearch, AISearchPanel, AISearchTrigger } from '@/components/ai/search';
+   import { MessageCircleIcon } from 'lucide-react';
+   import { buttonVariants } from '@/components/button';
 
    export default function RootLayout({ children }: { children: React.ReactNode }) {
      return (
        <html lang="en">
          <body>
-           {/* [!code ++] */}
-           <AISearchTrigger />
+           {/* [!code ++:17] */}
+           <AISearch>
+             <AISearchPanel />
+             <AISearchTrigger
+               position="float"
+               className={cn(
+                 buttonVariants({
+                   variant: 'secondary',
+                   className: 'text-fd-muted-foreground rounded-2xl',
+                 }),
+               )}
+             >
+               <MessageCircleIcon className="size-4.5" />
+               Ask AI
+             </AISearchTrigger>
+           </AISearch>
+
            {children}
          </body>
        </html>

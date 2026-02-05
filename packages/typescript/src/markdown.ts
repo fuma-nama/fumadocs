@@ -1,58 +1,55 @@
 import type { ElementContent, Nodes } from 'hast';
 import { remark } from 'remark';
 import { remarkGfm } from 'fumadocs-core/mdx-plugins/remark-gfm';
-import { rehypeCode, type RehypeCodeOptions } from 'fumadocs-core/mdx-plugins/rehype-code';
+import { createRehypeCode } from 'fumadocs-core/mdx-plugins/rehype-code.core';
 import remarkRehype from 'remark-rehype';
-import { getHighlighter } from 'fumadocs-core/highlight';
+import { highlightHast } from 'fumadocs-core/highlight/core';
+import { configDefault } from 'fumadocs-core/highlight';
 
-const shikiOptions = {
-  lazy: true,
-  langs: ['ts', 'tsx'],
-
-  // disable default transformers & meta parser
-  transformers: [],
-  parseMetaString: undefined,
-
-  themes: {
-    light: 'github-light',
-    dark: 'github-dark',
-  },
-} satisfies RehypeCodeOptions;
-
-const processor = remark().use(remarkGfm).use(remarkRehype).use(rehypeCode, shikiOptions);
-
-export async function renderTypeToHast(type: string): Promise<Nodes> {
-  const highlighter = await getHighlighter('js', {
-    langs: ['ts'],
-    themes: Object.values(shikiOptions.themes),
-  });
-
-  const nodes = highlighter.codeToHast(type, {
-    lang: 'ts',
-    structure: 'inline',
-    themes: shikiOptions.themes,
-    defaultColor: false,
-  });
-
-  return {
-    type: 'element',
-    tagName: 'span',
-    properties: {
-      class: 'shiki',
-    },
-    children: [
-      {
-        type: 'element',
-        tagName: 'code',
-        properties: {},
-        children: nodes.children as ElementContent[],
-      },
-    ],
-  };
+export interface MarkdownRenderer {
+  renderTypeToHast: (type: string) => Nodes | Promise<Nodes>;
+  renderMarkdownToHast: (md: string) => Nodes | Promise<Nodes>;
 }
 
-export async function renderMarkdownToHast(md: string): Promise<Nodes> {
-  md = md.replace(/{@link (?<link>[^}]*)}/g, '$1'); // replace jsdoc links
+export function markdownRenderer(shiki = configDefault): MarkdownRenderer {
+  const processor = remark()
+    .use(remarkGfm)
+    .use(remarkRehype)
+    .use(createRehypeCode(shiki), {
+      lazy: true,
+      langs: ['ts', 'tsx'],
+      // disable default transformers & meta parser
+      transformers: [],
+      parseMetaString: undefined,
+    });
+  return {
+    async renderTypeToHast(type) {
+      const nodes = await highlightHast(type, {
+        config: shiki,
+        lang: 'ts',
+        structure: 'inline',
+      });
 
-  return processor.run(processor.parse(md));
+      return {
+        type: 'element',
+        tagName: 'span',
+        properties: {
+          class: 'shiki',
+        },
+        children: [
+          {
+            type: 'element',
+            tagName: 'code',
+            properties: {},
+            children: nodes.children as ElementContent[],
+          },
+        ],
+      };
+    },
+    renderMarkdownToHast(md) {
+      md = md.replace(/{@link (?<link>[^}]*)}/g, '$1'); // replace jsdoc links
+
+      return processor.run(processor.parse(md));
+    },
+  };
 }

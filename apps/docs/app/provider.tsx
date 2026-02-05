@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import type { ReactNode } from 'react';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 
-const SearchDialog = dynamic(() => import('@/components/search'), {
+const SearchDialog = dynamic(() => import('@/components/layouts/search'), {
   ssr: false,
 });
 

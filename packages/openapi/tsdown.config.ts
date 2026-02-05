@@ -6,6 +6,7 @@ export default defineConfig({
   entry: [
     './src/index.ts',
     './src/ui/index.ts',
+    './src/ui/base.tsx',
     './src/ui/client/index.tsx',
     './src/playground/{index,client}.tsx',
     './src/scalar/index.tsx',
