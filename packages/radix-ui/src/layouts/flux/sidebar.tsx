@@ -121,7 +121,7 @@ export function SidebarContent({
           <motion.aside
             id="nd-sidebar"
             ref={mergeRefs(ref, refProp)}
-            className={cn('mx-auto md:max-w-[400px]', className)}
+            className={cn('mx-auto sm:max-w-[400px]', className)}
             onClick={(e) => e.stopPropagation()}
             {...(props as ComponentProps<typeof motion.aside>)}
           >

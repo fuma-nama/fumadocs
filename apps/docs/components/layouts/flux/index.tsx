@@ -1,18 +1,15 @@
-import { DocsLayout } from 'fumadocs-ui/layouts/flux';
 import { baseOptions, linkItems, logo } from '@/components/layouts/shared';
 import { source } from '@/lib/source';
-import { AISearch, AISearchPanel, AISearchTrigger } from '@/components/ai/search';
 import { getSection } from '@/lib/source/navigation';
-import { MessageCircleIcon } from 'lucide-react';
-import { cn } from '@/lib/cn';
-import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import 'katex/dist/katex.min.css';
+import { getSidebarTabs } from 'fumadocs-ui/components/sidebar/tabs/index';
+import type { ReactNode } from 'react';
+import { LayoutClient } from './client';
 
-export default function Layout({ children }: LayoutProps<'/docs'>) {
+export function FluxLayout({ children }: { children: ReactNode }) {
   const base = baseOptions();
 
   return (
-    <DocsLayout
+    <LayoutClient
       {...base}
       tree={source.getPageTree()}
       // just icon items
@@ -27,7 +24,7 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
         ),
       }}
       sidebar={{
-        tabs: {
+        tabs: getSidebarTabs(source.getPageTree(), {
           transform(option, node) {
             const meta = source.getNodeMeta(node);
             if (!meta || !node.icon) return option;
@@ -37,7 +34,7 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
               ...option,
               icon: (
                 <div
-                  className="[&_svg]:size-full rounded-lg size-full text-(--tab-color) max-md:bg-(--tab-color)/10 max-md:border max-md:p-1.5"
+                  className="[&_svg]:size-full rounded-sm size-full text-(--tab-color) bg-(--tab-color)/10 border p-0.5"
                   style={
                     {
                       '--tab-color': color,
@@ -49,26 +46,10 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
               ),
             };
           },
-        },
+        }),
       }}
     >
       {children}
-
-      <AISearch>
-        <AISearchPanel />
-        <AISearchTrigger
-          position="float"
-          className={cn(
-            buttonVariants({
-              variant: 'secondary',
-              className: 'text-fd-muted-foreground rounded-2xl',
-            }),
-          )}
-        >
-          <MessageCircleIcon className="size-4.5" />
-          Ask AI
-        </AISearchTrigger>
-      </AISearch>
-    </DocsLayout>
+    </LayoutClient>
   );
 }
