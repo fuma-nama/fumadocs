@@ -1,5 +1,5 @@
 ---
-"@fumadocs/tailwind": patch
+'@fumadocs/tailwind': patch
 ---
 
 initial release

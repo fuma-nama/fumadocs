@@ -1,6 +1,7 @@
 @import './lib/base.css';
 
 /* TODO: remove them on next major */
+@import './layouts/flux.css';
 @import './layouts/docs.css';
 @import './layouts/home.css';
 @import './layouts/notebook.css';
