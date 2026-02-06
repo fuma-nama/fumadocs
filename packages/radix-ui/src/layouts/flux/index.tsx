@@ -142,7 +142,7 @@ export function DocsLayout({
               {themeSwitch.enabled !== false &&
                 (themeSwitch.component ?? (
                   <ThemeToggle
-                    className="px-1 py-0 h-full ms-1 rounded-xl bg-fd-muted *:rounded-lg"
+                    className="p-1 h-full ms-1 rounded-xl bg-fd-muted *:rounded-lg"
                     mode={themeSwitch.mode}
                   />
                 ))}
@@ -239,9 +239,7 @@ export function NavigationPanel({
           </div>
 
           <div className="flex flex-row gap-1.5 overflow-x-auto overflow-y-hidden p-2 sm:p-1">
-            <div className="flex flex-row items-center gap-2 min-w-0 flex-1 empty:hidden">
-              {tabDropdown}
-            </div>
+            <div className="flex flex-row items-center gap-2 min-w-0 flex-1">{tabDropdown}</div>
 
             <div className="flex flex-row items-center text-fd-muted-foreground border-x px-0.5 empty:hidden">
               {link}
