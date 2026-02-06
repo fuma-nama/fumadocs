@@ -77,14 +77,14 @@ function PageTOCPopoverPhysical({ className, children, ...rest }: ComponentProps
         open={open}
         onOpenChange={setOpen}
         data-toc-popover=""
-        className={cn('h-9 animate-fd-fade-in', className)}
+        className={cn('relative h-9 animate-fd-fade-in', className)}
         {...rest}
       >
         <header
           ref={ref}
           className={cn(
-            'border rounded-xl transition-colors bg-fd-secondary text-fd-secondary-foreground translate-y-[calc(-100%+--spacing(9.5))]',
-            open && 'shadow-lg bg-fd-popover/80 text-fd-popover-foreground backdrop-blur-sm',
+            'absolute w-full bottom-0 border rounded-xl transition-colors bg-fd-secondary text-fd-secondary-foreground backdrop-blur-sm',
+            open && 'shadow-lg bg-fd-popover/80 text-fd-popover-foreground',
           )}
         >
           {children}

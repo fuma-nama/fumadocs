@@ -67,9 +67,6 @@ function CustomNavigationPanel({ tool, ...props }: NavigationPanelProps) {
           {ai.open && (
             <motion.div
               className="flex flex-col size-full px-3 mx-auto sm:max-w-[380px]"
-              onClick={(e) => {
-                if (e.target !== e.currentTarget) e.stopPropagation();
-              }}
               variants={{
                 show: {
                   y: 0,
@@ -91,14 +88,14 @@ function CustomNavigationPanel({ tool, ...props }: NavigationPanelProps) {
                 },
               }}
             >
-              <AISearchPanelHeader />
+              <AISearchPanelHeader onClick={(e) => e.stopPropagation()} />
               <AISearchPanelList className="flex-1" />
             </motion.div>
           )}
         </AnimatePresence>
       </NavigationPanelOverlay>
       <NavigationPanel
-        layout
+        layout="size"
         tool={
           <>
             <button

@@ -28,11 +28,17 @@ const Context = createContext<{
   chat: UseChatHelpers<UIMessage>;
 } | null>(null);
 
-export function AISearchPanelHeader() {
+export function AISearchPanelHeader({ className, ...props }: ComponentProps<'div'>) {
   const { setOpen } = useAISearchContext();
 
   return (
-    <div className="sticky top-0 flex items-start gap-2 border rounded-xl bg-fd-secondary text-fd-secondary-foreground shadow-sm">
+    <div
+      className={cn(
+        'sticky top-0 flex items-start gap-2 border rounded-xl bg-fd-secondary text-fd-secondary-foreground shadow-sm',
+        className,
+      )}
+      {...props}
+    >
       <div className="px-3 py-2 flex-1">
         <p className="text-sm font-medium mb-2">AI Chat</p>
         <p className="text-xs text-fd-muted-foreground">
@@ -252,7 +258,7 @@ function Message({ message, ...props }: { message: UIMessage } & ComponentProps<
   }
 
   return (
-    <div {...props}>
+    <div onClick={(e) => e.stopPropagation()} {...props}>
       <p
         className={cn(
           'mb-1 text-sm font-medium text-fd-muted-foreground',
@@ -394,15 +400,16 @@ export function AISearchPanelList({ className, style, ...props }: ComponentProps
       }}
       {...props}
     >
-      <div className="flex flex-col px-3 gap-4">
-        {messages.map((item) => (
-          <Message key={item.id} message={item} />
-        ))}
-      </div>
-      {messages.length === 0 && (
+      {messages.length === 0 ? (
         <div className="text-sm text-fd-muted-foreground/80 size-full flex flex-col items-center justify-center text-center gap-2">
           <MessageCircleIcon fill="currentColor" stroke="none" />
-          <p>Start a new chat below.</p>
+          <p onClick={(e) => e.stopPropagation()}>Start a new chat below.</p>
+        </div>
+      ) : (
+        <div className="flex flex-col px-3 gap-4">
+          {messages.map((item) => (
+            <Message key={item.id} message={item} />
+          ))}
         </div>
       )}
     </List>
