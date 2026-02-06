@@ -1,4 +1,5 @@
 import { defineConfig } from 'tsdown';
+import { compileInline } from './scripts/compile-inline.utils';
 
 export default defineConfig({
   format: 'esm',
@@ -16,6 +17,9 @@ export default defineConfig({
   unbundle: true,
   dts: {
     sourcemap: false,
+  },
+  async onSuccess() {
+    await compileInline();
   },
   external: [/json-schema-typed/, 'openapi-types'],
 });

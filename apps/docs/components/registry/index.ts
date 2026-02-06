@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import * as path from 'node:path';
 import { resolveFromRemote } from '@fumadocs/cli/build';
 
-const baseDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../');
+const baseDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../../');
 
 export const registry: Registry = {
   dir: baseDir,
@@ -18,6 +18,14 @@ export const registry: Registry = {
     if (filePath.startsWith('lib/source/')) return false;
   },
   onResolve(ref) {
+    if (ref.type === 'file') {
+      const file = path.relative(baseDir, ref.file);
+
+      if (file === 'lib/cn.ts') {
+        return resolveFromRemote(radixUi.registry, 'cn', () => true)!;
+      }
+    }
+
     if (ref.type === 'dependency' && ref.dep === 'fumadocs-ui') {
       const match = /fumadocs-ui\/components\/ui\/(.*)/.exec(ref.specifier);
       if (match) {

@@ -15,6 +15,10 @@
   ],
   "type": "module",
   "exports": {
+    "./compile": {
+      "types": "./dist/compile.d.ts",
+      "import": "./dist/compile.js"
+    },
     "./typography": {
       "types": "./dist/typography/index.d.ts",
       "import": "./dist/typography/index.js"
@@ -34,6 +38,7 @@
     "postcss-selector-parser": "^7.1.1"
   },
   "devDependencies": {
+    "@tailwindcss/oxide": "^4.1.18",
     "@types/lodash.merge": "^4.6.9",
     "@types/node": "^25.1.0",
     "eslint-config-custom": "workspace:*",

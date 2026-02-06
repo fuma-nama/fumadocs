@@ -8,4 +8,5 @@ export default defineConfig({
   dts: {
     sourcemap: false,
   },
+  external: ['@tailwindcss/oxide'],
 });

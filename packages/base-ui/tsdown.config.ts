@@ -1,5 +1,6 @@
 import { defineConfig } from 'tsdown';
 import fs from 'node:fs/promises';
+import { compileInline } from './scripts/compile-inline.utils';
 
 export default defineConfig({
   format: 'esm',
@@ -13,6 +14,7 @@ export default defineConfig({
   unbundle: true,
   dts: true,
   async onSuccess() {
+    await compileInline();
     // wait until https://github.com/rolldown/tsdown/issues/472
     let content = (await fs.readFile('dist/components/image-zoom.js')).toString();
     content = content.replaceAll(`import "./image-zoom2.js";`, `import "./image-zoom.css";`);
