@@ -1,5 +1,15 @@
 # next-docs-ui
 
+## 16.5.1
+
+### Patch Changes
+
+- c08364a: support Flux layout
+- 53ad20b: Pre-scan class names to optimize Tailwind CSS compilation performance
+- Updated dependencies [db93ebd]
+  - @fumadocs/tailwind@0.0.1
+  - fumadocs-core@16.5.1
+
 ## 16.5.0
 
 ### Minor Changes

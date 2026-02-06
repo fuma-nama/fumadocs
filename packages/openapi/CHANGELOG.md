@@ -1,5 +1,15 @@
 # @fuma-docs/openapi
 
+## 10.3.2
+
+### Patch Changes
+
+- 53ad20b: Pre-scan class names to optimize Tailwind CSS compilation performance
+- Updated dependencies [c08364a]
+- Updated dependencies [53ad20b]
+  - fumadocs-ui@16.5.1
+  - fumadocs-core@16.5.1
+
 ## 10.3.1
 
 ### Minor Changes
