@@ -1,6 +1,6 @@
 import { Link } from 'lucide-react';
 import type { ComponentPropsWithoutRef } from 'react';
-import { cn } from '@fumadocs/ui/cn';
+import { cn } from '@/utils/cn';
 
 type Types = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 type HeadingProps<T extends Types> = Omit<ComponentPropsWithoutRef<T>, 'as'> & {

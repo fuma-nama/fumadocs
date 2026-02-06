@@ -1,7 +1,7 @@
 import { fileURLToPath } from 'node:url';
 import type { Registry } from '@fumadocs/cli/build';
 import * as path from 'node:path';
-import { resolveForwardedAPIs } from '../../../ui/src/_registry';
+import { commonComponents, resolveExternal } from '../../../shared/registry';
 
 const srcDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../');
 
@@ -11,13 +11,14 @@ export const registry: Registry = {
   dir: srcDir,
   tsconfigPath: '../tsconfig.json',
   packageJson: '../package.json',
-  onResolve(ref) {
-    return resolveForwardedAPIs(ref, '@fumadocs/base-ui', registry) ?? ref;
-  },
   env: {
     ui: '@fumadocs/base-ui',
   },
+  onResolve(ref) {
+    return resolveExternal(ref, 'fumadocs-ui', srcDir) ?? ref;
+  },
   components: [
+    ...commonComponents,
     {
       name: 'layouts/shared',
       unlisted: true,
@@ -326,6 +327,7 @@ export const registry: Registry = {
   dependencies: {
     'fumadocs-core': null,
     '@fumadocs/base-ui': null,
+    'fumadocs-ui': 'npm:@fumadocs/base-ui',
     react: null,
   },
 };

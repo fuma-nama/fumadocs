@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/base-ui",
-  "version": "16.5.0",
+  "version": "16.5.1",
   "description": "The Base UI version of Fumadocs UI",
   "keywords": [
     "Docs",
@@ -43,6 +43,14 @@
     "./layouts/docs/page": {
       "types": "./dist/layouts/docs/page/index.d.ts",
       "import": "./dist/layouts/docs/page/index.js"
+    },
+    "./layouts/flux": {
+      "types": "./dist/layouts/flux/index.d.ts",
+      "import": "./dist/layouts/flux/index.js"
+    },
+    "./layouts/flux/page": {
+      "types": "./dist/layouts/flux/page/index.d.ts",
+      "import": "./dist/layouts/flux/page/index.js"
     },
     "./layouts/notebook": {
       "types": "./dist/layouts/notebook/index.d.ts",
@@ -87,7 +95,7 @@
   },
   "scripts": {
     "build": "pnpm build:layout && pnpm build:tailwind",
-    "build:layout": "tsdown",
+    "build:layout": "tsdown --config-loader unrun",
     "build:tailwind": "tailwindcss -i css/style.css -o ./dist/style.css && tailwindcss -i src/components/image-zoom.css -o dist/components/image-zoom.css",
     "clean": "rimraf dist",
     "dev": "concurrently \"tsdown --watch\" \"tailwindcss -i css/style.css -o ./dist/style.css -w\" \"tailwindcss -i src/components/image-zoom.css -o dist/components/image-zoom.css -w\"",
@@ -96,12 +104,15 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.1.0",
-    "@fumadocs/ui": "workspace:*",
+    "@fumadocs/tailwind": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "lucide-react": "^0.563.0",
+    "motion": "^12.30.1",
     "next-themes": "^0.4.6",
     "react-medium-image-zoom": "^5.4.0",
-    "scroll-into-view-if-needed": "^3.1.0"
+    "react-remove-scroll": "^2.7.2",
+    "scroll-into-view-if-needed": "^3.1.0",
+    "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",

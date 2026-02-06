@@ -1,7 +1,7 @@
 import type * as PageTree from 'fumadocs-core/page-tree';
 import { type ComponentProps, type HTMLAttributes, type ReactNode, useMemo } from 'react';
 import { Languages, Sidebar as SidebarIcon } from 'lucide-react';
-import { cn } from '@fumadocs/ui/cn';
+import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import {
   Sidebar,
@@ -14,7 +14,7 @@ import {
   SidebarViewport,
 } from './sidebar';
 import { type BaseLayoutProps, renderTitleNav, useLinkItems } from '@/layouts/shared';
-import { LinkItem } from '@fumadocs/ui/link-item';
+import { LinkItem } from '@/utils/link-item';
 import { LanguageToggle, LanguageToggleText } from '@/layouts/shared/language-toggle';
 import { LayoutBody, LayoutContextProvider, LayoutHeader, LayoutTabs } from './client';
 import { TreeContextProvider } from '@/contexts/tree';

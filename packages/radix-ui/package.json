@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-ui",
-  "version": "16.5.0",
+  "version": "16.5.1",
   "description": "The Radix UI version of Fumadocs UI",
   "keywords": [
     "Docs",
@@ -103,7 +103,7 @@
   },
   "scripts": {
     "build": "pnpm build:layout && pnpm build:tailwind",
-    "build:layout": "tsdown",
+    "build:layout": "tsdown --config-loader unrun",
     "build:tailwind": "tailwindcss -i css/style.css -o ./dist/style.css && tailwindcss -i src/components/image-zoom.css -o dist/components/image-zoom.css",
     "clean": "rimraf dist",
     "dev": "concurrently \"tsdown --watch\" \"tailwindcss -i css/style.css -o ./dist/style.css -w\" \"tailwindcss -i src/components/image-zoom.css -o dist/components/image-zoom.css -w\"",
@@ -111,7 +111,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@fumadocs/ui": "workspace:*",
+    "@fumadocs/tailwind": "workspace:*",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -128,7 +128,8 @@
     "next-themes": "^0.4.6",
     "react-medium-image-zoom": "^5.4.0",
     "react-remove-scroll": "^2.7.2",
-    "scroll-into-view-if-needed": "^3.1.0"
+    "scroll-into-view-if-needed": "^3.1.0",
+    "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",

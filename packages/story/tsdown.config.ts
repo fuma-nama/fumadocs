@@ -8,6 +8,7 @@ export default defineConfig({
     './src/client/{index,with-control}.tsx',
     './src/type-tree/index.ts',
   ],
+  unbundle: true,
   fixedExtension: false,
   dts: {
     sourcemap: false,

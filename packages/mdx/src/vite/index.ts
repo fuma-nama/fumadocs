@@ -65,13 +65,7 @@ export default async function mdx(
 
       return mergeConfig(config, {
         resolve: {
-          noExternal: [
-            'fumadocs-core',
-            'fumadocs-ui',
-            'fumadocs-openapi',
-            '@fumadocs/base-ui',
-            '@fumadocs/ui',
-          ],
+          noExternal: ['fumadocs-core', 'fumadocs-ui', 'fumadocs-openapi', '@fumadocs/base-ui'],
           // only dedupe for public, non-transitive libs
           dedupe: ['fumadocs-core', 'fumadocs-ui', 'fumadocs-openapi', '@fumadocs/base-ui'],
         },

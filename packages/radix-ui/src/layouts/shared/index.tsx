@@ -1,6 +1,6 @@
 import { useMemo, type ComponentProps, type ReactNode } from 'react';
 import type { I18nConfig } from 'fumadocs-core/i18n';
-import type { LinkItemType } from '@fumadocs/ui/link-item';
+import type { LinkItemType } from '@/utils/link-item';
 import Link from 'fumadocs-core/link';
 
 export interface NavOptions {
@@ -123,4 +123,4 @@ export function useLinkItems({ githubUrl, links }: Pick<BaseLayoutProps, 'links'
   }, [links, githubUrl]);
 }
 
-export type * from '@fumadocs/ui/link-item';
+export type * from '@/utils/link-item';

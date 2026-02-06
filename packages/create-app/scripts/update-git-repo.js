@@ -1,6 +1,7 @@
+// @ts-check
 import fs from 'node:fs';
 import path from 'node:path';
-import { create } from '../dist/create-app.js';
+import { create } from '../dist/index.js';
 
 const repo = process.argv[2] ?? './fumadocs-ui-template';
 
@@ -17,5 +18,6 @@ await create({
   outputDir: repo,
   template: '+next+fuma-docs-mdx',
   installDeps: false,
+  initializeGit: false,
   packageManager: 'npm',
 });

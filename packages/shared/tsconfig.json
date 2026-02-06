@@ -1,0 +1,7 @@
+{
+  "extends": "tsconfig/base.json",
+  "compilerOptions": {
+    "module": "esnext"
+  },
+  "exclude": ["node_modules", "dist", "eslint.config.mjs"]
+}

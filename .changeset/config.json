@@ -3,7 +3,7 @@
   "changelog": "@changesets/cli/changelog",
   "commit": false,
   "fixed": [
-    ["fumadocs-core", "fumadocs-ui", "@fumadocs/base-ui", "@fumadocs/ui"],
+    ["fumadocs-core", "fumadocs-ui", "@fumadocs/base-ui"],
     ["create-fumadocs-app", "create-fumadocs-versions"]
   ],
   "access": "restricted",

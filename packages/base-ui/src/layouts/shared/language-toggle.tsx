@@ -2,7 +2,7 @@
 import type { ComponentProps } from 'react';
 import { useI18n } from '@/contexts/i18n';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn } from '@fumadocs/ui/cn';
+import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 
 export type LanguageSelectProps = ComponentProps<'button'>;

@@ -11,7 +11,7 @@ import {
   SidebarViewport,
 } from './sidebar';
 import { TreeContextProvider } from '@/contexts/tree';
-import { cn } from '@fumadocs/ui/cn';
+import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { Languages, Sidebar as SidebarIcon, X } from 'lucide-react';
 import { LanguageToggle } from '@/layouts/shared/language-toggle';
@@ -25,7 +25,7 @@ import {
   NavbarLinkItem,
 } from '@/layouts/notebook/client';
 import { LargeSearchToggle, SearchToggle } from '@/layouts/shared/search-toggle';
-import { LinkItem, type LinkItemType } from '@fumadocs/ui/link-item';
+import { LinkItem, type LinkItemType } from '@/utils/link-item';
 import type { SidebarPageTreeComponents } from '@/components/sidebar/page-tree';
 import { getSidebarTabs, type GetSidebarTabsOptions } from '@/components/sidebar/tabs';
 import { SidebarTabsDropdown, type SidebarTabWithProps } from '@/components/sidebar/tabs/dropdown';
