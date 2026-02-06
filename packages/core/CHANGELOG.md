@@ -1,5 +1,7 @@
 # next-docs-zeta
 
+## 16.5.1
+
 ## 16.5.0
 
 ### Minor Changes
@@ -247,6 +249,7 @@
   migrate: The original component is mostly a wrapper of `react-remove-scroll`, you can use Shadcn UI for pre-built sidebars.
 
 - 4049ccc: **Remove `fumadocs-core/server` export**
+
   - **`getGithubLastEdit`:** Moved to `fumadocs-core/content/github`.
   - **`getTableOfContents`:** Moved to `fumadocs-core/content/toc`.
   - **`PageTree` and page tree utilities:** Moved to `fumadocs-core/page-tree`.
@@ -256,6 +259,7 @@
 - 429c41a: **Switch to Shiki JavaScript Regex engine by default**
 
   This is important for Cloudflare Worker compatibility, JavaScript engine is the new default over Oniguruma (WASM).
+
   - `rehype-code`: replaced the `experimentalJSEngine` option with `engine: js | oniguruma`.
   - `fumadocs-core/highlight`: use JS engine by default, drop custom engine support, use Shiki directly instead.
 
@@ -266,6 +270,7 @@
   As a consequence, Next.js 16 is now the minimal version when using Fumadocs UI because Next.js always uses the internal canary version of React.js.
 
 - 42f09c3: **Remove deprecated APIs**
+
   - `fumadocs-ui/page`:
     - removed `<DocsCategory />`.
     - removed `breadcrumbs.full` option from `<DocsPage />`.
@@ -276,7 +281,7 @@
       export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
         source: S,
         pageToIndexFn?: (page: InferPageType<S>) => Awaitable<AdvancedIndex>,
-        options?: Omit<Options<S>, "buildIndex">,
+        options?: Omit<Options<S>, "buildIndex">
       ): SearchAPI;
       ```
     - remove deprecated parameters in `useSearch()`, pass them in the client object instead.
@@ -339,6 +344,7 @@
   It will be removed on Fumadocs 16, as some APIs under the `/server` export are actually available (and even used) under browser environment.
 
   A more modularized design will be introduced over the original naming.
+
   - **`getGithubLastEdit`:** Moved to `fumadocs-core/content/github`.
   - **`getTableOfContents`:** Moved to `fumadocs-core/content/toc`.
   - **`PageTree` and page tree utilities:** Moved to `fumadocs-core/page-tree`.
@@ -853,7 +859,7 @@
     }),
     {
       // options
-    },
+    }
   );
 
   // to
@@ -1786,6 +1792,7 @@
 - f75287d: **Introduce `fumadocs-docgen` package.**
 
   Offer a better authoring experience for advanced use cases.
+
   - Move `remark-dynamic-content` and `remark-install` plugins to the new package `fumadocs-docgen`.
   - Support Typescript generator by default
 
@@ -1937,6 +1944,7 @@
 ### Major Changes
 
 - 2ea9437: **Migrate to rehype-shikiji**
+
   - Dropped support for inline code syntax highlighting
   - Use notation-based word/line highlighting instead of meta string
 
