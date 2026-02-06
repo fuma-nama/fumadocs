@@ -186,7 +186,7 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router": "7.x.x",
-    "waku": "^0.26.0 || ^0.27.0",
+    "waku": "^0.26.0 || ^0.27.0 || ^1.0.0",
     "zod": "4.x.x"
   },
   "peerDependenciesMeta": {
