@@ -56,7 +56,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsdown",
+    "build": "tsdown --config-loader unrun",
     "clean": "rimraf dist",
     "dev": "tsdown --watch",
     "lint": "eslint .",
