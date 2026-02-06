@@ -1,11 +1,11 @@
 'use client';
 import * as Base from '@/components/sidebar/base';
-import { cn } from '@fumadocs/ui/cn';
+import { cn } from '@/utils/cn';
 import { type ComponentProps, useEffect, useEffectEvent, useRef } from 'react';
 import { cva } from 'class-variance-authority';
 import { createPageTreeRenderer } from '@/components/sidebar/page-tree';
 import { createLinkItemRenderer } from '@/components/sidebar/link-item';
-import { mergeRefs } from '@fumadocs/ui/merge-refs';
+import { mergeRefs } from '@/utils/merge-refs';
 import { motion } from 'motion/react';
 import { RemoveScroll } from 'react-remove-scroll';
 

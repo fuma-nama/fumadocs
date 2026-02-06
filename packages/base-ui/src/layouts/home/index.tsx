@@ -1,5 +1,5 @@
 import type { ComponentProps } from 'react';
-import { cn } from '@fumadocs/ui/cn';
+import { cn } from '@/utils/cn';
 import { type BaseLayoutProps, type NavOptions } from '@/layouts/shared';
 import { Header } from '@/layouts/home/client';
 

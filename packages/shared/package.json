@@ -1,0 +1,10 @@
+{
+  "name": "shared",
+  "private": true,
+  "devDependencies": {
+    "@fumadocs/cli": "workspace:*",
+    "@types/node": "^25.1.0",
+    "eslint-config-custom": "workspace:*",
+    "tsconfig": "workspace:*"
+  }
+}

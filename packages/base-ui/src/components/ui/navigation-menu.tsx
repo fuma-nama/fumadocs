@@ -1,7 +1,7 @@
 'use client';
 import * as React from 'react';
 import { NavigationMenu as Primitive } from '@base-ui/react/navigation-menu';
-import { cn } from '@fumadocs/ui/cn';
+import { cn } from '@/utils/cn';
 
 export type NavigationMenuContentProps = Primitive.Content.Props;
 export type NavigationMenuTriggerProps = Primitive.Trigger.Props;

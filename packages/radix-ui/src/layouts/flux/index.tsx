@@ -5,7 +5,7 @@ import { TreeContextProvider } from '@/contexts/tree';
 import { getSidebarTabs, type GetSidebarTabsOptions } from '@/components/sidebar/tabs';
 import type { SidebarPageTreeComponents } from '@/components/sidebar/page-tree';
 import { type ComponentProps, HTMLAttributes, type ReactNode, useMemo } from 'react';
-import { cn } from '@fumadocs/ui/cn';
+import { cn } from '@/utils/cn';
 import { SidebarViewport, useSidebar } from '@/components/sidebar/base';
 import { SidebarTabsDropdown, type SidebarTabWithProps } from './tab-dropdown';
 import { Sidebar, SidebarContent, SidebarLinkItem, SidebarPageTree } from './sidebar';
@@ -15,7 +15,7 @@ import { renderTitleNav, useLinkItems } from '../shared';
 import { LanguageToggle } from '../shared/language-toggle';
 import { SearchToggle } from '../shared/search-toggle';
 import { ThemeToggle } from '../shared/theme-toggle';
-import { LinkItem } from '@fumadocs/ui/link-item';
+import { LinkItem } from '@/utils/link-item';
 import { AnimatePresence, motion } from 'motion/react';
 import { RemoveScroll } from 'react-remove-scroll';
 

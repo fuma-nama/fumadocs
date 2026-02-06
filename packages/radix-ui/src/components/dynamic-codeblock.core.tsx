@@ -1,7 +1,7 @@
 'use client';
 import { CodeBlock, type CodeBlockProps, Pre } from '@/components/codeblock';
 import { useShikiDynamic, type UseShikiOptions } from 'fumadocs-core/highlight/core/client';
-import { cn } from '@fumadocs/ui/cn';
+import { cn } from '@/utils/cn';
 import { type ComponentProps, createContext, type FC, use, useId } from 'react';
 
 export interface DynamicCodeblockProps {
