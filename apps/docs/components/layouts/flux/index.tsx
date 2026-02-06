@@ -34,7 +34,7 @@ export function FluxLayout({ children }: { children: ReactNode }) {
               ...option,
               icon: (
                 <div
-                  className="[&_svg]:size-full rounded-sm size-full text-(--tab-color) bg-(--tab-color)/10 border p-0.5"
+                  className="[&_svg]:size-full size-full text-(--tab-color)"
                   style={
                     {
                       '--tab-color': color,

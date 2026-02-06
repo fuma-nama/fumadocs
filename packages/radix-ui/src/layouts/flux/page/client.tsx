@@ -126,7 +126,7 @@ export function PageTOCPopoverTrigger({ className, ...props }: ComponentProps<'b
   return (
     <CollapsibleTrigger
       className={cn(
-        'flex w-full h-9 items-center text-sm text-fd-muted-foreground gap-2.5 px-2 text-start focus-visible:outline-none [&_svg]:size-4',
+        'flex w-full h-8.5 items-center text-sm text-fd-muted-foreground gap-2.5 px-2 text-start focus-visible:outline-none [&_svg]:size-4',
         className,
       )}
       data-toc-popover-trigger=""

@@ -8,6 +8,7 @@ import { isActive, normalize } from '@/utils/urls';
 import { useSidebar } from '@/components/sidebar/base';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import type { SidebarTab } from '@/components/sidebar/tabs';
+import { AnimatePresence, motion } from 'motion/react';
 
 export interface SidebarTabWithProps extends SidebarTab {
   props?: ComponentProps<'a'>;
@@ -25,10 +26,10 @@ export function SidebarTabsDropdown({
   const [open, setOpen] = useState(false);
   const { closeOnRedirect } = useSidebar();
   const pathname = usePathname();
-
-  const selected = useMemo(() => {
-    return options.findLast((item) => isTabActive(item, pathname));
+  const selectedIdx = useMemo(() => {
+    return options.findLastIndex((item) => isTabActive(item, pathname));
   }, [options, pathname]);
+  const selected = selectedIdx !== -1 ? options[selectedIdx] : undefined;
 
   const onClick = () => {
     closeOnRedirect.current = false;
@@ -37,7 +38,7 @@ export function SidebarTabsDropdown({
 
   const item = selected ? (
     <>
-      <div className="size-5 shrink-0 empty:hidden">{selected.icon}</div>
+      <div className="size-4.5 shrink-0 empty:hidden">{selected.icon}</div>
       <p className="font-medium">{selected.title}</p>
     </>
   ) : (
@@ -54,7 +55,26 @@ export function SidebarTabsDropdown({
           )}
           {...props}
         >
-          {item}
+          <AnimatePresence mode="popLayout">
+            <motion.span
+              key={selectedIdx}
+              className="flex w-full items-center text-nowrap gap-1.5"
+              initial={{
+                opacity: 0,
+                y: '100%',
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
+              exit={{
+                opacity: 0,
+                y: '-100%',
+              }}
+            >
+              {item}
+            </motion.span>
+          </AnimatePresence>
           <ChevronsUpDown className="shrink-0 ms-auto size-4 text-fd-muted-foreground" />
         </PopoverTrigger>
       )}
@@ -62,8 +82,8 @@ export function SidebarTabsDropdown({
         align="start"
         className="flex flex-col gap-1 max-w-svw p-1 fd-scroll-container"
       >
-        {options.map((item) => {
-          const isActive = selected && item.url === selected.url;
+        {options.map((item, i) => {
+          const isActive = i === selectedIdx;
           if (!isActive && item.unlisted) return;
 
           return (
@@ -73,11 +93,11 @@ export function SidebarTabsDropdown({
               onClick={onClick}
               {...item.props}
               className={cn(
-                'flex items-center gap-2 rounded-lg p-1.5 hover:bg-fd-accent hover:text-fd-accent-foreground',
+                'flex items-center gap-1.5 rounded-lg p-1.5 hover:bg-fd-accent hover:text-fd-accent-foreground',
                 item.props?.className,
               )}
             >
-              <div className="shrink-0 mb-auto size-5 empty:hidden">{item.icon}</div>
+              <div className="shrink-0 mb-auto size-4.5 empty:hidden">{item.icon}</div>
               <div>
                 <p className="text-sm font-medium leading-none">{item.title}</p>
                 <p className="text-[0.8125rem] text-fd-muted-foreground mt-1 empty:hidden">
