@@ -1,7 +1,7 @@
 import { joinPath, splitPath } from '@/source/path';
 import { describe, expect, test } from 'vitest';
 import type { Root } from '@/page-tree/definitions';
-import { findNeighbour } from '@/page-tree/utils';
+import { findNeighbour, findSiblings } from '@/page-tree/utils';
 import { getBreadcrumbItems } from '@/breadcrumb';
 import { DefaultFormatter } from '@/i18n/middleware';
 import { NextURL } from 'next/dist/server/web/next-url';
@@ -149,4 +149,53 @@ test('I18n: Format URL', () => {
       }),
     ).href,
   ).toBe('https://fumadocs.dev/docs/');
+});
+
+const tree: Root = {
+  name: 'docs',
+  children: [
+    {
+      type: 'folder',
+      name: 'test',
+      index: {
+        type: 'page',
+        name: 'Page 1',
+        url: '/page-1',
+      },
+      children: [
+        {
+          type: 'page',
+          name: 'Page 2',
+          url: '/page-2',
+        },
+        {
+          type: 'page',
+          name: 'Page 3',
+          url: '/page-3',
+        },
+      ],
+    },
+    {
+      type: 'page',
+      name: 'Page 4',
+      url: '/page-4',
+    },
+  ],
+};
+
+test('findSiblings', () => {
+  expect(findSiblings(tree, '/page-1')).toMatchInlineSnapshot(`
+    [
+      {
+        "name": "Page 2",
+        "type": "page",
+        "url": "/page-2",
+      },
+      {
+        "name": "Page 3",
+        "type": "page",
+        "url": "/page-3",
+      },
+    ]
+  `);
 });
