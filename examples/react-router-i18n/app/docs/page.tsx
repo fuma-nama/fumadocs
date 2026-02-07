@@ -19,7 +19,7 @@ export async function loader({ params }: Route.LoaderArgs) {
 }
 
 const clientLoader = browserCollections.docs.createClientLoader({
-  component({ toc, default: Mdx, frontmatter }) {
+  component({ toc, frontmatter, default: Mdx }) {
     return (
       <DocsPage toc={toc}>
         <title>{frontmatter.title}</title>
@@ -35,12 +35,11 @@ const clientLoader = browserCollections.docs.createClientLoader({
 });
 
 export default function Page({ loaderData, params }: Route.ComponentProps) {
-  const Content = clientLoader.getComponent(loaderData.path);
   const { pageTree } = useFumadocsLoader(loaderData);
 
   return (
     <DocsLayout {...baseOptions(params.lang)} tree={pageTree}>
-      <Content />
+      {clientLoader.useContent(loaderData.path)}
     </DocsLayout>
   );
 }

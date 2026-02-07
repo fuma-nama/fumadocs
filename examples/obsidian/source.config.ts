@@ -1,11 +1,12 @@
-import { defineConfig, defineDocs, frontmatterSchema } from 'fumadocs-mdx/config';
+import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
 import { remarkObsidian, RemarkObsidianOptions } from 'fumadocs-obsidian/mdx';
 import { readVaultFiles } from 'fumadocs-obsidian';
+import { pageSchema } from 'fumadocs-core/source/schema';
 
 export const docs = defineDocs({
   dir: 'content/docs',
   docs: {
-    schema: frontmatterSchema.partial(),
+    schema: pageSchema.partial(),
   },
 });
 

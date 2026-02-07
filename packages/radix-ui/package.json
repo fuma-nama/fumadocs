@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-ui",
-  "version": "16.4.3",
+  "version": "16.5.1",
   "description": "The Radix UI version of Fumadocs UI",
   "keywords": [
     "Docs",
@@ -47,6 +47,14 @@
     "./layouts/docs/page": {
       "types": "./dist/layouts/docs/page/index.d.ts",
       "import": "./dist/layouts/docs/page/index.js"
+    },
+    "./layouts/flux": {
+      "types": "./dist/layouts/flux/index.d.ts",
+      "import": "./dist/layouts/flux/index.js"
+    },
+    "./layouts/flux/page": {
+      "types": "./dist/layouts/flux/page/index.d.ts",
+      "import": "./dist/layouts/flux/page/index.js"
     },
     "./layouts/notebook": {
       "types": "./dist/layouts/notebook/index.d.ts",
@@ -95,7 +103,7 @@
   },
   "scripts": {
     "build": "pnpm build:layout && pnpm build:tailwind",
-    "build:layout": "tsdown",
+    "build:layout": "tsdown --config-loader unrun",
     "build:tailwind": "tailwindcss -i css/style.css -o ./dist/style.css && tailwindcss -i src/components/image-zoom.css -o dist/components/image-zoom.css",
     "clean": "rimraf dist",
     "dev": "concurrently \"tsdown --watch\" \"tailwindcss -i css/style.css -o ./dist/style.css -w\" \"tailwindcss -i src/components/image-zoom.css -o dist/components/image-zoom.css -w\"",
@@ -103,7 +111,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@fumadocs/ui": "workspace:*",
+    "@fumadocs/tailwind": "workspace:*",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -115,30 +123,38 @@
     "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-tabs": "^1.1.13",
     "class-variance-authority": "^0.7.1",
-    "fumadocs-core": "workspace:*",
-    "lucide-react": "^0.562.0",
+    "lucide-react": "^0.563.0",
+    "motion": "^12.33.0",
     "next-themes": "^0.4.6",
     "react-medium-image-zoom": "^5.4.0",
-    "scroll-into-view-if-needed": "^3.1.0"
+    "react-remove-scroll": "^2.7.2",
+    "scroll-into-view-if-needed": "^3.1.0",
+    "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",
     "@tailwindcss/cli": "^4.1.18",
-    "@types/node": "^24.10.2",
-    "@types/react": "^19.2.7",
+    "@types/node": "^25.2.1",
+    "@types/react": "^19.2.13",
     "@types/react-dom": "^19.2.3",
     "eslint-config-custom": "workspace:*",
+    "fumadocs-core": "workspace:*",
     "tailwindcss": "^4.1.18",
     "tsconfig": "workspace:*",
-    "tsdown": "^0.18.4"
+    "tsdown": "^0.20.3"
   },
   "peerDependencies": {
     "@types/react": "*",
+    "fumadocs-core": "workspace:*",
+    "next": "16.x.x",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "tailwindcss": "^4.0.0"
   },
   "peerDependenciesMeta": {
+    "next": {
+      "optional": true
+    },
     "@types/react": {
       "optional": true
     },

@@ -231,12 +231,13 @@ export const docs = defineDocs({
 You can extend the default Zod 4 schema of `docs` and `meta`.
 
 ```ts
-import { frontmatterSchema, metaSchema, defineDocs } from 'fumadocs-mdx/config';
+import { defineDocs } from 'fumadocs-mdx/config';
+import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
 import { z } from 'zod';
 
 export const docs = defineDocs({
   docs: {
-    schema: frontmatterSchema.extend({
+    schema: pageSchema.extend({
       index: z.boolean().default(false),
     }),
   },

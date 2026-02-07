@@ -28,17 +28,19 @@ const Context = createContext<{
   chat: UseChatHelpers<UIMessage>;
 } | null>(null);
 
-function useChatContext() {
-  return use(Context)!.chat;
-}
-
-function Header() {
-  const { setOpen } = use(Context)!;
+export function AISearchPanelHeader({ className, ...props }: ComponentProps<'div'>) {
+  const { setOpen } = useAISearchContext();
 
   return (
-    <div className="sticky top-0 flex items-start gap-2">
-      <div className="flex-1 p-3 border rounded-xl bg-fd-card text-fd-card-foreground">
-        <p className="text-sm font-medium mb-2">Ask AI</p>
+    <div
+      className={cn(
+        'sticky top-0 flex items-start gap-2 border rounded-xl bg-fd-secondary text-fd-secondary-foreground shadow-sm',
+        className,
+      )}
+      {...props}
+    >
+      <div className="px-3 py-2 flex-1">
+        <p className="text-sm font-medium mb-2">AI Chat</p>
         <p className="text-xs text-fd-muted-foreground">
           Powered by{' '}
           <a href="https://inkeep.com" target="_blank" rel="noreferrer noopener">
@@ -46,14 +48,15 @@ function Header() {
           </a>
         </p>
       </div>
+
       <button
         aria-label="Close"
         tabIndex={-1}
         className={cn(
           buttonVariants({
             size: 'icon-sm',
-            color: 'secondary',
-            className: 'rounded-full',
+            color: 'ghost',
+            className: 'text-fd-muted-foreground rounded-full',
           }),
         )}
         onClick={() => setOpen(false)}
@@ -64,7 +67,7 @@ function Header() {
   );
 }
 
-function SearchAIActions() {
+export function AISearchInputActions() {
   const { messages, status, setMessages, regenerate } = useChatContext();
   const isLoading = status === 'streaming';
 
@@ -106,7 +109,7 @@ function SearchAIActions() {
 }
 
 const StorageKeyInput = '__ai_search_input';
-function SearchAIInput(props: ComponentProps<'form'>) {
+export function AISearchInput(props: ComponentProps<'form'>) {
   const { status, sendMessage, stop } = useChatContext();
   const [input, setInput] = useState(() => localStorage.getItem(StorageKeyInput) ?? '');
   const isLoading = status === 'streaming' || status === 'submitted';
@@ -160,7 +163,7 @@ function SearchAIInput(props: ComponentProps<'form'>) {
           type="submit"
           className={cn(
             buttonVariants({
-              color: 'secondary',
+              color: 'primary',
               className: 'transition-all rounded-full mt-2',
             }),
           )}
@@ -255,7 +258,7 @@ function Message({ message, ...props }: { message: UIMessage } & ComponentProps<
   }
 
   return (
-    <div {...props}>
+    <div onClick={(e) => e.stopPropagation()} {...props}>
       <p
         className={cn(
           'mb-1 text-sm font-medium text-fd-muted-foreground',
@@ -299,46 +302,34 @@ export function AISearch({ children }: { children: ReactNode }) {
   );
 }
 
-export function AISearchTrigger() {
-  const { open, setOpen } = use(Context)!;
+export function AISearchTrigger({
+  position = 'default',
+  className,
+  ...props
+}: ComponentProps<'button'> & { position?: 'default' | 'float' }) {
+  const { open, setOpen } = useAISearchContext();
 
   return (
     <button
+      data-state={open ? 'open' : 'closed'}
       className={cn(
-        buttonVariants({
-          variant: 'secondary',
-        }),
-        'fixed bottom-4 gap-3 w-24 end-[calc(--spacing(4)+var(--removed-body-scroll-bar-size,0px))] text-fd-muted-foreground rounded-2xl shadow-lg z-20 transition-[translate,opacity]',
-        open && 'translate-y-10 opacity-0',
+        position === 'float' && [
+          'fixed bottom-4 gap-3 w-24 end-[calc(--spacing(4)+var(--removed-body-scroll-bar-size,0px))] shadow-lg z-20 transition-[translate,opacity]',
+          open && 'translate-y-10 opacity-0',
+        ],
+        className,
       )}
-      onClick={() => setOpen(true)}
+      onClick={() => setOpen(!open)}
+      {...props}
     >
-      <MessageCircleIcon className="size-4.5" />
-      Ask AI
+      {props.children}
     </button>
   );
 }
 
 export function AISearchPanel() {
-  const { open, setOpen } = use(Context)!;
-  const chat = useChatContext();
-
-  const onKeyPress = useEffectEvent((e: KeyboardEvent) => {
-    if (e.key === 'Escape' && open) {
-      setOpen(false);
-      e.preventDefault();
-    }
-
-    if (e.key === '/' && (e.metaKey || e.ctrlKey) && !open) {
-      setOpen(true);
-      e.preventDefault();
-    }
-  });
-
-  useEffect(() => {
-    window.addEventListener('keydown', onKeyPress);
-    return () => window.removeEventListener('keydown', onKeyPress);
-  }, []);
+  const { open, setOpen } = useAISearchContext();
+  useHotKey();
 
   return (
     <>
@@ -346,10 +337,10 @@ export function AISearchPanel() {
         {`
         @keyframes ask-ai-open {
           from {
-            width: 0px;
+            translate: 100% 0;
           }
           to {
-            width: var(--ai-chat-width);
+            translate: 0 0;
           }
         }
         @keyframes ask-ai-close {
@@ -371,35 +362,21 @@ export function AISearchPanel() {
       <Presence present={open}>
         <div
           className={cn(
-            'overflow-hidden z-30 bg-fd-popover text-fd-popover-foreground [--ai-chat-width:400px] xl:[--ai-chat-width:460px]',
+            'overflow-hidden z-30 bg-fd-card text-fd-card-foreground [--ai-chat-width:400px] 2xl:[--ai-chat-width:460px]',
             'max-lg:fixed max-lg:inset-x-2 max-lg:top-4 max-lg:border max-lg:rounded-2xl max-lg:shadow-xl',
-            'lg:sticky lg:top-0 lg:h-dvh lg:border-s  lg:ms-auto lg:in-[#nd-docs-layout]:[grid-area:toc] lg:in-[#nd-notebook-layout]:row-span-full lg:in-[#nd-notebook-layout]:col-start-5',
+            'lg:sticky lg:top-0 lg:h-dvh lg:border-s lg:ms-auto lg:in-[#nd-docs-layout]:[grid-area:toc] lg:in-[#nd-notebook-layout]:row-span-full lg:in-[#nd-notebook-layout]:col-start-5',
             open
               ? 'animate-fd-dialog-in lg:animate-[ask-ai-open_200ms]'
               : 'animate-fd-dialog-out lg:animate-[ask-ai-close_200ms]',
           )}
         >
-          <div className="flex flex-col p-2 size-full max-lg:max-h-[80dvh] lg:w-(--ai-chat-width) xl:p-4">
-            <Header />
-            <List
-              className="px-3 py-4 flex-1 overscroll-contain"
-              style={{
-                maskImage:
-                  'linear-gradient(to bottom, transparent, white 1rem, white calc(100% - 1rem), transparent 100%)',
-              }}
-            >
-              <div className="flex flex-col gap-4">
-                {chat.messages
-                  .filter((msg) => msg.role !== 'system')
-                  .map((item) => (
-                    <Message key={item.id} message={item} />
-                  ))}
-              </div>
-            </List>
-            <div className="rounded-xl border bg-fd-card text-fd-card-foreground has-focus-visible:ring-2 has-focus-visible:ring-fd-ring">
-              <SearchAIInput />
+          <div className="flex flex-col size-full p-2 max-lg:max-h-[80dvh] lg:p-3 lg:w-(--ai-chat-width)">
+            <AISearchPanelHeader />
+            <AISearchPanelList className="flex-1" />
+            <div className="rounded-xl border bg-fd-secondary text-fd-secondary-foreground shadow-sm has-focus-visible:shadow-md">
+              <AISearchInput />
               <div className="flex items-center gap-1.5 p-1 empty:hidden">
-                <SearchAIActions />
+                <AISearchInputActions />
               </div>
             </div>
           </div>
@@ -407,4 +384,63 @@ export function AISearchPanel() {
       </Presence>
     </>
   );
+}
+
+export function AISearchPanelList({ className, style, ...props }: ComponentProps<'div'>) {
+  const chat = useChatContext();
+  const messages = chat.messages.filter((msg) => msg.role !== 'system');
+
+  return (
+    <List
+      className={cn('py-4 overscroll-contain', className)}
+      style={{
+        maskImage:
+          'linear-gradient(to bottom, transparent, white 1rem, white calc(100% - 1rem), transparent 100%)',
+        ...style,
+      }}
+      {...props}
+    >
+      {messages.length === 0 ? (
+        <div className="text-sm text-fd-muted-foreground/80 size-full flex flex-col items-center justify-center text-center gap-2">
+          <MessageCircleIcon fill="currentColor" stroke="none" />
+          <p onClick={(e) => e.stopPropagation()}>Start a new chat below.</p>
+        </div>
+      ) : (
+        <div className="flex flex-col px-3 gap-4">
+          {messages.map((item) => (
+            <Message key={item.id} message={item} />
+          ))}
+        </div>
+      )}
+    </List>
+  );
+}
+
+export function useHotKey() {
+  const { open, setOpen } = useAISearchContext();
+
+  const onKeyPress = useEffectEvent((e: KeyboardEvent) => {
+    if (e.key === 'Escape' && open) {
+      setOpen(false);
+      e.preventDefault();
+    }
+
+    if (e.key === '/' && (e.metaKey || e.ctrlKey) && !open) {
+      setOpen(true);
+      e.preventDefault();
+    }
+  });
+
+  useEffect(() => {
+    window.addEventListener('keydown', onKeyPress);
+    return () => window.removeEventListener('keydown', onKeyPress);
+  }, []);
+}
+
+export function useAISearchContext() {
+  return use(Context)!;
+}
+
+function useChatContext() {
+  return use(Context)!.chat;
 }

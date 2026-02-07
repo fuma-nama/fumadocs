@@ -30,6 +30,13 @@ export function resolveMediaAdapter(
       return adapters[baseType];
     }
   }
+
+  if (mediaType === 'text/plain') {
+    console.warn(
+      'there is no defined behaviour for encoding form values into "text/plain", using JSON encoder for now.',
+    );
+    return adapters['application/json'];
+  }
 }
 
 /**

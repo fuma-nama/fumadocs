@@ -1,0 +1,58 @@
+{
+  "name": "@fumadocs/tailwind",
+  "version": "0.0.1",
+  "description": "The Tailwind CSS utils for Fumadocs UI.",
+  "keywords": [
+    "Docs",
+    "Fumadocs"
+  ],
+  "homepage": "https://fumadocs.dev",
+  "license": "MIT",
+  "author": "Fuma Nama",
+  "repository": "github:fuma-nama/fumadocs",
+  "files": [
+    "dist/*"
+  ],
+  "type": "module",
+  "exports": {
+    "./compile": {
+      "types": "./dist/compile.d.ts",
+      "import": "./dist/compile.js"
+    },
+    "./typography": {
+      "types": "./dist/typography/index.d.ts",
+      "import": "./dist/typography/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "clean": "rimraf dist",
+    "dev": "tsdown --watch",
+    "lint": "eslint .",
+    "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "postcss-selector-parser": "^7.1.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/oxide": "^4.1.18",
+    "@types/lodash.merge": "^4.6.9",
+    "@types/node": "^25.2.1",
+    "eslint-config-custom": "workspace:*",
+    "lodash.merge": "^4.6.2",
+    "tailwindcss": "^4.1.18",
+    "tsconfig": "workspace:*",
+    "tsdown": "^0.20.3"
+  },
+  "peerDependencies": {
+    "tailwindcss": "^4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "tailwindcss": {
+      "optional": true
+    }
+  }
+}

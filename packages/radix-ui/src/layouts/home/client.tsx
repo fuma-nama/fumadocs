@@ -1,15 +1,10 @@
 'use client';
-import { type ComponentProps, Fragment, useMemo, useState } from 'react';
+import { type ComponentProps, Fragment, useState } from 'react';
 import { cva } from 'class-variance-authority';
 import Link from 'fumadocs-core/link';
-import { cn } from '@fumadocs/ui/cn';
-import {
-  type LinkItemType,
-  type NavOptions,
-  renderTitleNav,
-  resolveLinkItems,
-} from '@/layouts/shared';
-import { LinkItem } from '@fumadocs/ui/link-item';
+import { cn } from '@/utils/cn';
+import { type LinkItemType, type NavOptions, renderTitleNav, useLinkItems } from '@/layouts/shared';
+import { LinkItem } from '@/utils/link-item';
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -25,7 +20,7 @@ import { LargeSearchToggle, SearchToggle } from '@/layouts/shared/search-toggle'
 import { ThemeToggle } from '@/layouts/shared/theme-toggle';
 import { LanguageToggle, LanguageToggleText } from '@/layouts/shared/language-toggle';
 import { ChevronDown, Languages } from 'lucide-react';
-import { useIsScrollTop } from '@fumadocs/ui/hooks/use-is-scroll-top';
+import { useIsScrollTop } from '@/utils/use-is-scroll-top';
 
 export const navItemVariants = cva('[&_svg]:size-4', {
   variants: {
@@ -54,26 +49,7 @@ export function Header({
   themeSwitch = {},
   searchToggle = {},
 }: HomeLayoutProps) {
-  const { navItems, menuItems } = useMemo(() => {
-    const navItems: LinkItemType[] = [];
-    const menuItems: LinkItemType[] = [];
-
-    for (const item of resolveLinkItems({ links, githubUrl })) {
-      switch (item.on ?? 'all') {
-        case 'menu':
-          menuItems.push(item);
-          break;
-        case 'nav':
-          navItems.push(item);
-          break;
-        default:
-          navItems.push(item);
-          menuItems.push(item);
-      }
-    }
-
-    return { navItems, menuItems };
-  }, [links, githubUrl]);
+  const { navItems, menuItems } = useLinkItems({ links, githubUrl });
 
   return (
     <HeaderNavigationMenu transparentMode={nav.transparentMode}>

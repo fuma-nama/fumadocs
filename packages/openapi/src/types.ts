@@ -4,7 +4,7 @@ import type { NoReference } from '@/utils/schema';
 import type { ProcessedDocument } from '@/utils/process-document';
 import type { MediaAdapter } from '@/requests/media/adapter';
 import type { OpenAPIOptions } from '@/server';
-import type { CreateAPIPageOptions } from './ui/api-page';
+import type { CreateAPIPageOptions } from './ui/base';
 import type { CodeUsageGenerator } from './ui/operation/usage-tabs';
 import type { HTMLAttributes, ReactNode } from 'react';
 
@@ -27,7 +27,8 @@ export type MethodInformation = NoReference<OperationObject> & {
   'x-exclusiveCodeSample'?: string;
 };
 
-export interface RenderContext extends Pick<OpenAPIOptions, 'proxyUrl'>, CreateAPIPageOptions {
+export interface RenderContext
+  extends Pick<OpenAPIOptions, 'proxyUrl'>, Omit<CreateAPIPageOptions, 'renderMarkdown'> {
   servers: NoReference<ServerObject>[];
   slugger: Slugger;
 
@@ -46,3 +47,6 @@ export interface RenderContext extends Pick<OpenAPIOptions, 'proxyUrl'>, CreateA
   renderMarkdown: (text: string) => ReactNode;
   renderCodeBlock: (lang: string, code: string) => ReactNode;
 }
+
+export type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
+export type Awaitable<T> = T | Promise<T>;

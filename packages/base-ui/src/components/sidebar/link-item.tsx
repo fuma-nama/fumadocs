@@ -1,6 +1,6 @@
 import type { HTMLAttributes } from 'react';
 import type * as Base from './base';
-import type { LinkItemType } from '@fumadocs/ui/link-item';
+import type { LinkItemType } from '@/utils/link-item';
 
 type InternalComponents = Pick<
   typeof Base,

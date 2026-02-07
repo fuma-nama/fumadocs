@@ -1,5 +1,93 @@
 # @fumadocs/base-ui
 
+## 16.5.1
+
+### Patch Changes
+
+- c08364a: support Flux layout
+- 53ad20b: Pre-scan class names to optimize Tailwind CSS compilation performance
+- Updated dependencies [db93ebd]
+  - @fumadocs/tailwind@0.0.1
+  - fumadocs-core@16.5.1
+
+## 16.5.0
+
+### Patch Changes
+
+- 85cc22f: support `.core` exports for dynamic codeblocks, migrate to effect-based `useShiki()` to avoid limitations of `<Suspense />`.
+- Updated dependencies [85cc22f]
+- Updated dependencies [9ba1250]
+  - @fumadocs/ui@16.5.0
+  - fumadocs-core@16.5.0
+
+## 16.4.11
+
+### Patch Changes
+
+- Updated dependencies [a75a84d]
+  - fumadocs-core@16.4.11
+  - @fumadocs/ui@16.4.11
+
+## 16.4.10
+
+### Patch Changes
+
+- 430a5f1: support `on` on docs layout
+- Updated dependencies [099fde7]
+- Updated dependencies [6fd7e63]
+  - fumadocs-core@16.4.10
+  - @fumadocs/ui@16.4.10
+
+## 16.4.9
+
+### Patch Changes
+
+- Updated dependencies [48dd0c2]
+  - fumadocs-core@16.4.9
+  - @fumadocs/ui@16.4.9
+
+## 16.4.8
+
+### Patch Changes
+
+- Updated dependencies [0025484]
+  - fumadocs-core@16.4.8
+  - @fumadocs/ui@16.4.8
+
+## 16.4.7
+
+### Patch Changes
+
+- Updated dependencies [0765817]
+- Updated dependencies [5dec9d0]
+  - @fumadocs/ui@16.4.7
+  - fumadocs-core@16.4.7
+
+## 16.4.6
+
+### Patch Changes
+
+- Updated dependencies [ea57dbf]
+  - fumadocs-core@16.4.6
+  - @fumadocs/ui@16.4.6
+
+## 16.4.5
+
+### Patch Changes
+
+- 9f06196: fix `footer.children` props
+  - fumadocs-core@16.4.5
+  - @fumadocs/ui@16.4.5
+
+## 16.4.4
+
+### Patch Changes
+
+- c804ac6: expose `useAutoScroll()`
+- Updated dependencies [cdc97e0]
+  - fumadocs-core@16.4.4
+  - @fumadocs/ui@16.4.4
+
 ## 16.4.3
 
 ### Patch Changes

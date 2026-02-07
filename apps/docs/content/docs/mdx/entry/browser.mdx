@@ -45,10 +45,11 @@ async function loader() {
 
 function Page() {
   const { path } = loader();
-  const Content = clientLoader.getComponent(path);
 
   // render the content
-  return <Content myProp="hello world" />;
+  return clientLoader.useContent(path, {
+    myProp: 'hello world',
+  });
 }
 ```
 
@@ -99,9 +100,8 @@ const clientLoader = browserCollections.docs.createClientLoader({
 
 function Page() {
   const data = Route.useLoaderData();
-  const Content = clientLoader.getComponent(data.path);
 
-  return <Content />;
+  return clientLoader.useContent(data.path);
 }
 ```
 
@@ -135,8 +135,7 @@ const clientLoader = browserCollections.docs.createClientLoader({
 
 export default function Page(props: Route.ComponentProps) {
   const { path } = props.loaderData;
-  const Content = clientLoader.getComponent(path);
 
-  return <Content />;
+  return clientLoader.useContent(path);
 }
 ```

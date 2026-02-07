@@ -2,3 +2,5 @@ packages:
   - packages/*
   - apps/*
   - examples/*
+onlyBuiltDependencies:
+  - bun

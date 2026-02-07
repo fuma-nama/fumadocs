@@ -11,14 +11,9 @@ import {
 } from 'react';
 import { cva } from 'class-variance-authority';
 import Link from 'fumadocs-core/link';
-import { cn } from '@fumadocs/ui/cn';
-import {
-  type LinkItemType,
-  type NavOptions,
-  renderTitleNav,
-  resolveLinkItems,
-} from '@/layouts/shared';
-import { LinkItem } from '@fumadocs/ui/link-item';
+import { cn } from '@/utils/cn';
+import { type LinkItemType, type NavOptions, renderTitleNav, useLinkItems } from '@/layouts/shared';
+import { LinkItem } from '@/utils/link-item';
 import {
   NavigationMenuRoot,
   NavigationMenuContent,
@@ -33,7 +28,7 @@ import { LargeSearchToggle, SearchToggle } from '@/layouts/shared/search-toggle'
 import { ThemeToggle } from '@/layouts/shared/theme-toggle';
 import { LanguageToggle, LanguageToggleText } from '@/layouts/shared/language-toggle';
 import { ChevronDown, Languages } from 'lucide-react';
-import { useIsScrollTop } from '@fumadocs/ui/hooks/use-is-scroll-top';
+import { useIsScrollTop } from '@/utils/use-is-scroll-top';
 import { NavigationMenu } from '@base-ui/react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
@@ -45,7 +40,7 @@ const MobileMenuContext = createContext<{
 export const navItemVariants = cva('[&_svg]:size-4', {
   variants: {
     variant: {
-      main: 'inline-flex items-center gap-1 p-2 text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground data-[active=true]:text-fd-primary data-[popup-open]:text-fd-primary',
+      main: 'inline-flex items-center gap-1 p-2 text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground data-[active=true]:text-fd-primary data-popup-open:text-fd-primary',
       button: buttonVariants({
         color: 'secondary',
         className: 'gap-1.5',
@@ -69,26 +64,7 @@ export function Header({
   themeSwitch = {},
   searchToggle = {},
 }: HomeLayoutProps) {
-  const { navItems, menuItems } = useMemo(() => {
-    const navItems: LinkItemType[] = [];
-    const menuItems: LinkItemType[] = [];
-
-    for (const item of resolveLinkItems({ links, githubUrl })) {
-      switch (item.on ?? 'all') {
-        case 'menu':
-          menuItems.push(item);
-          break;
-        case 'nav':
-          navItems.push(item);
-          break;
-        default:
-          navItems.push(item);
-          menuItems.push(item);
-      }
-    }
-
-    return { navItems, menuItems };
-  }, [links, githubUrl]);
+  const { menuItems, navItems } = useLinkItems({ links, githubUrl });
 
   return (
     <MobileMenuCollapsible
@@ -147,7 +123,7 @@ export function Header({
                   }),
                 )}
               >
-                <ChevronDown className="transition-transform duration-300 group-data-[panel-open]:rotate-180" />
+                <ChevronDown className="transition-transform duration-300 group-data-panel-open:rotate-180" />
               </CollapsibleTrigger>
             </ul>
           </NavigationMenuList>
@@ -180,13 +156,13 @@ export function Header({
           <NavigationMenu.Portal>
             <NavigationMenu.Positioner
               sideOffset={10}
-              className="z-20 h-(--positioner-height) w-(--positioner-width) max-w-(--available-width) transition-[left,right] duration-(--duration) ease-(--easing) data-[instant]:transition-none"
+              className="z-20 h-(--positioner-height) w-(--positioner-width) max-w-(--available-width) transition-[left,right] duration-(--duration) ease-(--easing) data-instant:transition-none"
               style={{
                 ['--duration' as string]: '0.35s',
                 ['--easing' as string]: 'cubic-bezier(0.22, 1, 0.36, 1)',
               }}
             >
-              <NavigationMenu.Popup className="relative w-(--popup-width) h-(--popup-height) max-w-(--fd-layout-width,1400px) origin-(--transform-origin) rounded-xl bg-fd-background/80  border backdrop-blur-lg shadow-lg transition-[opacity,transform,width,height,scale,translate] duration-(--duration) ease-(--easing) data-[ending-style]:scale-90 data-[ending-style]:opacity-0 data-[ending-style]:duration-150 data-[starting-style]:scale-90 data-[starting-style]:opacity-0">
+              <NavigationMenu.Popup className="relative w-(--popup-width) h-(--popup-height) max-w-(--fd-layout-width,1400px) origin-(--transform-origin) rounded-xl bg-fd-background/80  border backdrop-blur-lg shadow-lg transition-[opacity,transform,width,height,scale,translate] duration-(--duration) ease-(--easing) data-ending-style:scale-90 data-ending-style:opacity-0 data-ending-style:duration-150 data-starting-style:scale-90 data-starting-style:opacity-0">
                 <NavigationMenu.Viewport className="relative size-full overflow-hidden" />
               </NavigationMenu.Popup>
             </NavigationMenu.Positioner>

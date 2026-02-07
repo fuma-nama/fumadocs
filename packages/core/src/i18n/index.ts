@@ -34,7 +34,7 @@ export interface I18nConfig<Languages extends string = string> {
   /**
    * the fallback language when the page has no translations available for a given locale.
    *
-   * Default to ``defaultLanguage`, no fallback when set to `null`.
+   * Default to `defaultLanguage`, no fallback when set to `null`.
    */
   fallbackLanguage?: Languages | null;
 }

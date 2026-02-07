@@ -1,10 +1,9 @@
-@import '@fumadocs/ui/css/base.css';
+@import './lib/base.css';
 
 /* TODO: remove them on next major */
-@import './layouts/docs.css';
-@import './layouts/home.css';
-@import './layouts/notebook.css';
+@import './generated/flux.css';
+@import './generated/docs.css';
+@import './generated/home.css';
+@import './generated/notebook.css';
 
-@source '../dist/*.js';
-@source '../dist/{components,contexts,provider,utils}/**/*.js';
-@source '../dist/layouts/shared/**/*.js';
+@import './generated/shared.css';

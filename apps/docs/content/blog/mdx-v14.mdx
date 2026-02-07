@@ -9,7 +9,7 @@ We are pleased to announce Fumadocs MDX 14. This update introduces several major
 
 - Improve flexibility, taking the plugin approach further.
 - Improve performance & memory consumption.
-- Improve browser/dynamic compilation suport.
+- Improve browser/dynamic compilation support.
 
 ## New Model
 
@@ -40,26 +40,64 @@ To migrate, add/update the path aliases in `tsconfig.json` for new entry files.
 
 Import your collections from the entry files instead of `@/.source`:
 
-```tsx
-// access collections on server-side
+```ts tab="Server/RSC"
+// [!code --]
+import { docs } from '@/.source';
+// [!code ++]
 import { docs } from 'fumadocs-mdx:collections/server';
 
+// access collections on server-side, e.g.
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  source: docs.toFumadocsSource(),
+});
+```
+
+```tsx tab="Browser/non-RSC"
 // non-RSC environment (e.g. browser)
+// [!code --:20]
+import { docs } from '@/.source';
+
+const clientLoader = createClientLoader(docs.doc, {
+  id: 'docs',
+  component({ toc, frontmatter, default: MDX }) {
+    return (
+      <DocsPage toc={toc}>
+        <DocsTitle>{frontmatter.title}</DocsTitle>
+        <DocsDescription>{frontmatter.description}</DocsDescription>
+        <DocsBody>
+          <MDX
+            components={{
+              ...defaultMdxComponents,
+            }}
+          />
+        </DocsBody>
+      </DocsPage>
+    );
+  },
+});
+
+// [!code ++:20]
 import browserCollections from 'fumadocs-mdx:collections/browser';
 
 const clientLoader = browserCollections.docs.createClientLoader({
   component({ frontmatter, default: MDX }) {
     return (
-      <div className="prose">
-        <h1>{frontmatter.title}</h1>
-        <MDX />
-      </div>
+      <DocsPage toc={toc}>
+        <DocsTitle>{frontmatter.title}</DocsTitle>
+        <DocsDescription>{frontmatter.description}</DocsDescription>
+        <DocsBody>
+          <MDX
+            components={{
+              ...defaultMdxComponents,
+            }}
+          />
+        </DocsBody>
+      </DocsPage>
     );
   },
 });
-
-// new collection type: dynamically-compiled collections
-import { docs } from 'fumadocs-mdx:collections/dynamic';
 ```
 
 <Callout>
@@ -82,7 +120,9 @@ import { loader } from 'fumadocs-core/source';
 
 export const source = loader({
   baseUrl: '/docs',
-  // [!code highlight]
+  // [!code --]
+  source: await create.sourceAsync(docs.doc, docs.meta),
+  // [!code ++]
   source: docs.toFumadocsSource(),
 });
 ```
@@ -98,7 +138,11 @@ import { loader } from 'fumadocs-core/source';
 
 export const blog = loader({
   baseUrl: '/blog',
-  // [!code highlight]
+  // [!code --] for Next.js
+  source: createMDXSource(blogPosts, []),
+  // [!code --] for Vite
+  source: await create.sourceAsync(blogPosts, []),
+  // [!code ++]
   source: toFumadocsSource(blogPosts, []),
 });
 ```
@@ -189,7 +233,9 @@ export const blog = defineCollections({
 
 ### Introduction of `lastModified` Plugin
 
-The `lastModifiedTime` option has been replaced by a dedicated `lastModified` plugin. This shift promotes a plugin-based architecture for better extensibility.
+**The `lastModifiedTime` option has been replaced by a dedicated `lastModified` plugin.**
+
+This shift promotes a plugin-based architecture for better extensibility.
 
 ```ts title="source.config.ts"
 import { defineConfig } from 'fumadocs-mdx/config';

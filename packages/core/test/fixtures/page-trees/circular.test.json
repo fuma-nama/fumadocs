@@ -1,0 +1,32 @@
+{
+  "$id": "root",
+  "children": [
+    {
+      "$id": "a",
+      "children": [
+        {
+          "$id": "a/page.mdx",
+          "name": "First Page",
+          "type": "page",
+          "url": "/a/page",
+        },
+        {
+          "$id": "a/b",
+          "children": [
+            {
+              "$id": "a/b/page.mdx",
+              "name": "Second Page",
+              "type": "page",
+              "url": "/a/b/page",
+            },
+          ],
+          "name": "B",
+          "type": "folder",
+        },
+      ],
+      "name": "A",
+      "type": "folder",
+    },
+  ],
+  "name": "Docs",
+}

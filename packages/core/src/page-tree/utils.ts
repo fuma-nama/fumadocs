@@ -65,7 +65,9 @@ export function getPageTreeRoots(
 }
 
 /**
- * Get other item nodes that lives under the same parent.
+ * Get other **page** nodes that lives under the same parent.
+ *
+ * note: folders & its index nodes are not considered, use `findSiblings()` for more control.
  */
 export function getPageTreePeers(
   treeOrTrees: PageTree.Root | Record<string, PageTree.Root>,
@@ -93,8 +95,8 @@ export function findSiblings(
 
   // Multiple trees case
   for (const lang in treeOrTrees) {
-    const result = getPageTreePeers(treeOrTrees[lang], url);
-    if (result) return result;
+    const result = findSiblings(treeOrTrees[lang], url);
+    if (result.length > 0) return result;
   }
 
   return [];

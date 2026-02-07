@@ -1,5 +1,20 @@
 # fumadocs-obsidian
 
+## 0.0.10
+
+### Patch Changes
+
+- 3b216f5: Allow data files in obsidian vaults
+- Updated dependencies [48dd0c2]
+  - fumadocs-core@16.4.9
+
+## 0.0.9
+
+### Patch Changes
+
+- d7c2752: support custom frontmatter function & preserve by default
+  - fumadocs-core@16.4.5
+
 ## 0.0.8
 
 ### Patch Changes

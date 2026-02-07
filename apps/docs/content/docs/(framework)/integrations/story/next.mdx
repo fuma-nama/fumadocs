@@ -1,0 +1,81 @@
+---
+title: Next.js
+description: Configure Fumadocs Story on Next.js.
+---
+
+## Installation
+
+```npm
+npm i @fumadocs/story
+```
+
+Add the Tailwind CSS preset.
+
+```css title="Tailwind CSS"
+/* [!code ++] */
+@import '@fumadocs/story/css/preset.css';
+```
+
+### Create a Story
+
+Create a story factory to store your global settings:
+
+```ts title="lib/story.ts"
+import { createFileSystemCache, defineStoryFactory } from '@fumadocs/story';
+
+export const { defineStory } = defineStoryFactory({
+  // for Vercel, this is required: choose a directory for cache.
+  cache:
+    process.env.NODE_ENV === 'production'
+      ? createFileSystemCache('.next/fumadocs-story')
+      : undefined,
+
+  tsc: {
+    // we use tsc to generate controls from types
+    // you can pass TypeScript options here
+  },
+});
+```
+
+Now create your first story:
+
+```tsx tab="my-component.story.tsx"
+import { defineStory } from '@/lib/story';
+import { MyComponent } from './my-component';
+
+export const story = defineStory(import.meta.url, {
+  Component: MyComponent,
+  args: {
+    // default props (recommended)
+    initial: {},
+  },
+});
+```
+
+```tsx tab="my-component.tsx"
+'use client';
+
+export interface MyComponentProps {
+  title?: string;
+}
+
+export function MyComponent({ title }: MyComponentProps) {
+  return <p>{title}</p>;
+}
+```
+
+- The story must be defined in a server component.
+- The story must be exported as `story`, or the `name` option must be set to match the export name.
+- Fill the `Component` option with your component, the passed component must be a **client component**.
+
+Now you can render the story like:
+
+```mdx title="index.mdx"
+import { story } from '@/components/my-component.story';
+
+## Overview
+
+Preview for component:
+
+<story.WithControl />
+```

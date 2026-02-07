@@ -7,7 +7,6 @@ import {
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import type { LoadedConfig } from '@/config';
-import { log } from '@clack/prompts';
 import { createCache } from '@/utils/cache';
 
 export interface RegistryClient {
@@ -50,7 +49,9 @@ export class HttpRegistryClient implements RegistryClient {
     return fetchCache.$value<Component>().cached(url.href, async () => {
       const res = await fetch(`${this.baseUrl}/${name}.json`);
       if (!res.ok) {
-        log.error(`component ${name} not found at ${url.href}`);
+        if (res.status === 404) {
+          throw new Error(`component ${name} not found at ${url.href}`);
+        }
         throw new Error(await res.text());
       }
 
@@ -102,8 +103,7 @@ export class LocalRegistryClient implements RegistryClient {
       .readFile(filePath)
       .then((res) => JSON.parse(res.toString()))
       .catch((e) => {
-        log.error(`component ${name} not found at ${filePath}`);
-        throw e;
+        throw new Error(`component ${name} not found at ${filePath}`, { cause: e });
       });
 
     return componentSchema.parse(out);

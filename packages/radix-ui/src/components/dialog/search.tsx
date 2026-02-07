@@ -15,7 +15,7 @@ import {
   useState,
 } from 'react';
 import { I18nLabel, useI18n } from '@/contexts/i18n';
-import { cn } from '@fumadocs/ui/cn';
+import { cn } from '@/utils/cn';
 import { Dialog, DialogContent, DialogOverlay, DialogTitle } from '@radix-ui/react-dialog';
 import type { HighlightedText, ReactSortedResult as BaseResultType } from 'fumadocs-core/search';
 import { cva } from 'class-variance-authority';

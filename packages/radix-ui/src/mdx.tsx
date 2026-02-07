@@ -10,7 +10,7 @@ import { Image as FrameworkImage } from 'fumadocs-core/framework';
 import { Card, Cards } from '@/components/card';
 import { Callout, CalloutContainer, CalloutDescription, CalloutTitle } from '@/components/callout';
 import { Heading } from '@/components/heading';
-import { cn } from '@fumadocs/ui/cn';
+import { cn } from '@/utils/cn';
 import {
   CodeBlock,
   CodeBlockTab,

@@ -11,16 +11,16 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "github-slugger": "^2.0.0",
-    "html-react-parser": "^5.2.11",
-    "next": "16.1.1",
-    "react": "^19.2.3",
-    "react-dom": "^19.2.3",
-    "shiki": "^3.20.0"
+    "html-react-parser": "^5.2.17",
+    "next": "16.1.6",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "shiki": "^3.22.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18",
-    "@types/node": "24.10.2",
-    "@types/react": "^19.2.7",
+    "@types/node": "25.2.1",
+    "@types/react": "^19.2.13",
     "@types/react-dom": "^19.2.3",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.18",

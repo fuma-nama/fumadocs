@@ -1,7 +1,7 @@
 'use client';
 import { type ComponentProps, type HTMLAttributes, type ReactNode, useState } from 'react';
-import { ChevronDown, Plus, Trash2, X } from 'lucide-react';
-import { useController, useFieldArray, useFormContext } from 'react-hook-form';
+import { ChevronRight, Plus, Trash2, X } from 'lucide-react';
+import { FieldKey, useArray, useDataEngine, useFieldValue, useObject } from '@fumari/stf';
 import {
   Select,
   SelectContent,
@@ -16,24 +16,13 @@ import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { FormatFlags, schemaToString } from '@/utils/schema-to-string';
 import { anyFields, useFieldInfo, useResolvedSchema, useSchemaScope } from '@/playground/schema';
 import type { ParsedSchema } from '@/utils/schema';
+import { stringifyFieldKey } from '@fumari/stf/lib/utils';
 
 function FieldLabel(props: ComponentProps<'label'>) {
   return (
     <label {...props} className={cn('w-full inline-flex items-center gap-0.5', props.className)}>
       {props.children}
     </label>
-  );
-}
-
-function FieldLabelName({
-  required = false,
-  ...props
-}: ComponentProps<'span'> & { required?: boolean }) {
-  return (
-    <span {...props} className={cn(labelVariants(), 'font-mono me-auto', props.className)}>
-      {props.children}
-      {required && <span className="text-red-400/80 mx-1">*</span>}
-    </span>
   );
 }
 
@@ -51,59 +40,97 @@ export function ObjectInput({
   ...props
 }: {
   field: Exclude<ParsedSchema, boolean>;
-  fieldName: string;
+  fieldName: FieldKey;
 } & ComponentProps<'div'>) {
   const field = useResolvedSchema(_field);
+  const [nextName, setNextName] = useState('');
+  const { properties, onAppend, onDelete } = useObject(fieldName, {
+    defaultValue: () => getDefaultValue(field) as object,
+    properties: field.properties ?? {},
+    fallback: field.additionalProperties,
+    patternProperties: field.patternProperties,
+  });
 
+  const isDynamic = field.patternProperties ?? field.additionalProperties;
   return (
     <div {...props} className={cn('grid grid-cols-1 gap-4 @md:grid-cols-2', props.className)}>
-      {Object.entries(field.properties ?? {}).map(([key, child]) => (
-        <FieldSet
-          key={key}
-          name={key}
-          field={child}
-          fieldName={`${fieldName}.${key}`}
-          isRequired={field.required?.includes(key)}
-        />
-      ))}
-      {(field.additionalProperties || field.patternProperties) && (
-        <DynamicProperties
-          fieldName={fieldName}
-          filterKey={(v) => !field.properties || !Object.keys(field.properties).includes(v)}
-          getType={(key) => {
-            for (const pattern in field.patternProperties) {
-              if (key.match(RegExp(pattern))) {
-                return field.patternProperties[pattern];
+      {properties.map((child) => {
+        let toolbar: ReactNode = null;
+        if (child.kind === 'pattern' || child.kind === 'fallback') {
+          toolbar = (
+            <button
+              type="button"
+              aria-label="Remove Item"
+              className={cn(
+                buttonVariants({
+                  color: 'outline',
+                  size: 'icon-xs',
+                }),
+              )}
+              onClick={() => {
+                onDelete(child.key);
+              }}
+            >
+              <Trash2 />
+            </button>
+          );
+        }
+
+        return (
+          <FieldSet
+            key={child.key}
+            name={child.key}
+            field={child.info}
+            fieldName={child.field}
+            isRequired={field.required?.includes(child.key)}
+            toolbar={toolbar}
+          />
+        );
+      })}
+      {isDynamic && (
+        <div className="flex gap-2 col-span-full">
+          <Input
+            value={nextName}
+            placeholder="Enter Property Name"
+            onChange={(e) => setNextName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                setNextName('');
+                onAppend(nextName);
+                e.preventDefault();
               }
-            }
-
-            if (field.additionalProperties) return field.additionalProperties;
-
-            return anyFields;
-          }}
-        />
+            }}
+          />
+          <button
+            type="button"
+            className={cn(buttonVariants({ color: 'secondary', size: 'sm' }), 'px-4')}
+            onClick={() => {
+              onAppend(nextName);
+              setNextName('');
+            }}
+          >
+            New
+          </button>
+        </div>
       )}
     </div>
   );
 }
 
-export function JsonInput({ fieldName }: { fieldName: string }) {
-  const controller = useController({
-    name: fieldName,
-  });
+export function JsonInput({ fieldName }: { fieldName: FieldKey }) {
+  const engine = useDataEngine();
   const [error, setError] = useState<string | null>(null);
-  const [value, setValue] = useState(() => JSON.stringify(controller.field.value, null, 2));
+  const [value, setValue] = useState(() => JSON.stringify(engine.init(fieldName, {}), null, 2));
 
   return (
     <div className="flex flex-col bg-fd-secondary text-fd-secondary-foreground overflow-hidden border rounded-lg">
       <textarea
-        {...controller.field}
         value={value}
         className="p-2 h-[240px] text-sm font-mono resize-none focus-visible:outline-none"
         onChange={(v) => {
           setValue(v.target.value);
           try {
-            controller.field.onChange(JSON.parse(v.target.value));
+            engine.update(fieldName, JSON.parse(v.target.value));
             setError(null);
           } catch (e) {
             if (e instanceof Error) setError(e.message);
@@ -115,94 +142,6 @@ export function JsonInput({ fieldName }: { fieldName: string }) {
   );
 }
 
-function DynamicProperties({
-  fieldName,
-  filterKey = () => true,
-  getType = () => anyFields,
-}: {
-  fieldName: string;
-  filterKey?: (key: string) => boolean;
-  getType: (key: string) => ParsedSchema;
-}) {
-  const { control, setValue, getValues } = useFormContext();
-  const [nextName, setNextName] = useState('');
-  const [properties, setProperties] = useState<string[]>(() => {
-    const value = getValues(fieldName);
-    if (value) return Object.keys(value).filter(filterKey);
-
-    return [];
-  });
-
-  const onAppend = () => {
-    const name = nextName.trim();
-    if (name.length === 0) return;
-
-    setProperties((p) => {
-      if (p.includes(name) || !filterKey(name)) return p;
-      const type = getType(name);
-
-      setValue(`${fieldName}.${name}`, getDefaultValue(type));
-      setNextName('');
-      return [...p, name];
-    });
-  };
-
-  return (
-    <>
-      {properties.map((item) => {
-        const type = getType(item);
-
-        return (
-          <FieldSet
-            key={item}
-            name={item}
-            field={type}
-            fieldName={`${fieldName}.${item}`}
-            toolbar={
-              <button
-                type="button"
-                aria-label="Remove Item"
-                className={cn(
-                  buttonVariants({
-                    color: 'outline',
-                    size: 'icon-xs',
-                  }),
-                )}
-                onClick={() => {
-                  setProperties((p) => p.filter((prop) => prop !== item));
-                  control.unregister(`${fieldName}.${item}`);
-                }}
-              >
-                <Trash2 />
-              </button>
-            }
-          />
-        );
-      })}
-      <div className="flex gap-2 col-span-full">
-        <Input
-          value={nextName}
-          placeholder="Enter Property Name"
-          onChange={(e) => setNextName(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              onAppend();
-              e.preventDefault();
-            }
-          }}
-        />
-        <button
-          type="button"
-          className={cn(buttonVariants({ color: 'secondary', size: 'sm' }), 'px-4')}
-          onClick={onAppend}
-        >
-          New
-        </button>
-      </div>
-    </>
-  );
-}
-
 export function FieldInput({
   field,
   fieldName,
@@ -211,24 +150,35 @@ export function FieldInput({
 }: HTMLAttributes<HTMLElement> & {
   field: Exclude<ParsedSchema, boolean>;
   isRequired?: boolean;
-  fieldName: string;
+  fieldName: FieldKey;
 }) {
-  const form = useFormContext();
-  const {
-    field: { value, onChange, ...restField },
-    fieldState,
-  } = useController({
-    control: form.control,
-    name: fieldName,
-  });
-
+  const engine = useDataEngine();
+  const [value, setValue] = useFieldValue(fieldName);
+  const id = stringifyFieldKey(fieldName);
   if (field.type === 'null') return;
 
-  if (field.type === 'string' && field.format === 'binary') {
+  function renderUnset(children: ReactNode) {
     return (
-      <div {...props}>
+      <div {...props} className={cn('flex flex-row gap-2', props.className)}>
+        {children}
+        {value !== undefined && !isRequired && (
+          <button
+            type="button"
+            onClick={() => engine.delete(fieldName)}
+            className="text-fd-muted-foreground"
+          >
+            <X className="size-4" />
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  if (field.type === 'string' && field.format === 'binary') {
+    return renderUnset(
+      <>
         <label
-          htmlFor={fieldName}
+          htmlFor={id}
           className={cn(
             buttonVariants({
               color: 'secondary',
@@ -246,17 +196,36 @@ export function FieldInput({
           )}
         </label>
         <input
-          id={fieldName}
+          id={id}
           type="file"
           multiple={false}
           onChange={(e) => {
-            if (!e.target.files) return;
-            onChange(e.target.files.item(0));
+            if (!e.target.files || e.target.files.length === 0) return;
+            setValue(e.target.files.item(0));
           }}
           hidden
-          {...restField}
         />
-      </div>
+      </>,
+    );
+  }
+
+  if (field.enum && field.enum.length > 0) {
+    const idx = field.enum.indexOf(value);
+
+    return (
+      <Select value={String(idx)} onValueChange={(v) => setValue(field.enum![Number(v)])}>
+        <SelectTrigger id={id} {...props}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {field.enum.map((item, i) => (
+            <SelectItem key={i} value={String(i)}>
+              {typeof item === 'string' ? item : JSON.stringify(item, null, 2)}
+            </SelectItem>
+          ))}
+          {!isRequired && <SelectItem value="-1">Unset</SelectItem>}
+        </SelectContent>
+      </Select>
     );
   }
 
@@ -264,10 +233,9 @@ export function FieldInput({
     return (
       <Select
         value={String(value)}
-        onValueChange={(value) => onChange(value === 'undefined' ? undefined : value === 'true')}
-        disabled={restField.disabled}
+        onValueChange={(value) => setValue(value === 'undefined' ? undefined : value === 'true')}
       >
-        <SelectTrigger id={fieldName} className={props.className} {...restField}>
+        <SelectTrigger id={id} {...props}>
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -280,38 +248,21 @@ export function FieldInput({
   }
 
   const isNumber = field.type === 'integer' || field.type === 'number';
-
-  return (
-    <div {...props} className={cn('flex flex-row gap-2', props.className)}>
-      <Input
-        id={fieldName}
-        placeholder="Enter value"
-        type={isNumber ? 'number' : 'text'}
-        step={field.type === 'integer' ? 1 : undefined}
-        value={value ?? ''}
-        onChange={(e) => {
-          if (isNumber && !Number.isNaN(e.target.valueAsNumber)) {
-            onChange(e.target.valueAsNumber);
-          } else if (!isNumber) {
-            onChange(e.target.value);
-          }
-        }}
-        {...restField}
-      />
-      {fieldState.isDirty && (
-        <button
-          type="button"
-          // TODO: `react-hook-form` doesn't support setting a value to `undefined` (aka remove the value), if there's a default value defined.
-          // the default value is kept by `react-hook-form` internally, we cannot manipulate it.
-          // hence, we can only support resetting to the default value.
-          // perhaps when we migrate to Tanstack Form, we can reconsider this.
-          onClick={() => form.resetField(fieldName)}
-          className="text-fd-muted-foreground"
-        >
-          <X className="size-4" />
-        </button>
-      )}
-    </div>
+  return renderUnset(
+    <Input
+      id={id}
+      placeholder="Enter value"
+      type={isNumber ? 'number' : 'text'}
+      step={field.type === 'integer' ? 1 : undefined}
+      value={String(value ?? '')}
+      onChange={(e) => {
+        if (isNumber) {
+          setValue(Number.isNaN(e.target.valueAsNumber) ? undefined : e.target.valueAsNumber);
+        } else if (!isNumber) {
+          setValue(e.target.value);
+        }
+      }}
+    />,
   );
 }
 
@@ -329,7 +280,7 @@ export function FieldSet({
   isRequired?: boolean;
   name?: ReactNode;
   field: ParsedSchema;
-  fieldName: string;
+  fieldName: FieldKey;
   depth?: number;
 
   slotType?: ReactNode;
@@ -339,13 +290,43 @@ export function FieldSet({
   const { readOnly, writeOnly } = useSchemaScope();
   const field = useResolvedSchema(_field);
   const [show, setShow] = useState(!collapsible);
-  const { info, updateInfo } = useFieldInfo(fieldName, field, depth);
+  const { info, updateInfo } = useFieldInfo(fieldName, field);
+  const id = stringifyFieldKey(fieldName);
+  const dataEngine = useDataEngine();
 
   if (_field === false) return;
   if (field.readOnly && !readOnly) return;
   if (field.writeOnly && !writeOnly) return;
 
-  if (info.unionField) {
+  function renderLabelTrigger(schema = field) {
+    if (!collapsible) return renderLabelName();
+
+    return (
+      <button
+        type="button"
+        className={cn(labelVariants(), 'inline-flex items-center gap-1 font-mono me-auto')}
+        onClick={() => {
+          dataEngine.init(fieldName, getDefaultValue(schema));
+          setShow((prev) => !prev);
+        }}
+      >
+        <ChevronRight className={cn('size-3.5 text-fd-muted-foreground', show && 'rotate-90')} />
+        {name}
+        {isRequired && <span className="text-red-400/80">*</span>}
+      </button>
+    );
+  }
+
+  function renderLabelName() {
+    return (
+      <span className={cn(labelVariants(), 'font-mono me-auto')}>
+        {name}
+        {isRequired && <span className="text-red-400/80 mx-1">*</span>}
+      </span>
+    );
+  }
+
+  if (info.unionField && field[info.unionField]) {
     const union = field[info.unionField]!;
     const showSelect = union.length > 1;
 
@@ -429,43 +410,23 @@ export function FieldSet({
     );
   }
 
-  const showBn = collapsible && (
-    <button
-      type="button"
-      onClick={() => setShow((prev) => !prev)}
-      className={cn(
-        buttonVariants({
-          size: 'icon-xs',
-          color: 'ghost',
-          className: 'text-fd-muted-foreground -ms-1',
-        }),
-      )}
-    >
-      <ChevronDown className={cn(show && 'rotate-180')} />
-    </button>
-  );
-
   if (field.type === 'object' || info.intersection) {
+    const schema = info.intersection?.merged ?? field;
     return (
       <fieldset
         {...props}
         className={cn('flex flex-col gap-1.5 col-span-full @container', props.className)}
       >
-        <FieldLabel htmlFor={fieldName}>
-          {showBn}
-          <FieldLabelName required={isRequired}>{name}</FieldLabelName>
+        <FieldLabel htmlFor={id}>
+          {renderLabelTrigger(schema)}
           {slotType ?? <FieldLabelType>{schemaToString(field)}</FieldLabelType>}
           {toolbar}
         </FieldLabel>
         {show && (
           <ObjectInput
-            field={info.intersection?.merged ?? field}
+            field={schema}
             fieldName={fieldName}
-            {...props}
-            className={cn(
-              'rounded-lg border border-fd-primary/20 bg-fd-background/50 p-2 shadow-sm',
-              props.className,
-            )}
+            className="rounded-lg border border-fd-primary/20 bg-fd-background/50 p-2 shadow-sm"
           />
         )}
       </fieldset>
@@ -475,9 +436,8 @@ export function FieldSet({
   if (field.type === 'array') {
     return (
       <fieldset {...props} className={cn('flex flex-col gap-1.5 col-span-full', props.className)}>
-        <FieldLabel htmlFor={fieldName}>
-          {showBn}
-          <FieldLabelName required={isRequired}>{name}</FieldLabelName>
+        <FieldLabel htmlFor={id}>
+          {renderLabelTrigger()}
           {slotType ?? <FieldLabelType>{schemaToString(field)}</FieldLabelType>}
           {toolbar}
         </FieldLabel>
@@ -485,11 +445,7 @@ export function FieldSet({
           <ArrayInput
             fieldName={fieldName}
             items={field.items ?? anyFields}
-            {...props}
-            className={cn(
-              'rounded-lg border border-fd-primary/20 bg-fd-background/50 p-2 shadow-sm',
-              props.className,
-            )}
+            className="rounded-lg border border-fd-primary/20 bg-fd-background/50 p-2 shadow-sm"
           />
         )}
       </fieldset>
@@ -497,8 +453,8 @@ export function FieldSet({
   }
   return (
     <fieldset {...props} className={cn('flex flex-col gap-1.5', props.className)}>
-      <FieldLabel htmlFor={fieldName}>
-        <FieldLabelName required={isRequired}>{name}</FieldLabelName>
+      <FieldLabel htmlFor={id}>
+        {renderLabelName()}
         {slotType ?? <FieldLabelType>{schemaToString(field)}</FieldLabelType>}
         {toolbar}
       </FieldLabel>
@@ -509,30 +465,30 @@ export function FieldSet({
 
 function ArrayInput({
   fieldName,
-  items,
+  items: itemSchema,
   ...props
 }: {
-  fieldName: string;
+  fieldName: FieldKey;
   items: ParsedSchema;
 } & ComponentProps<'div'>) {
-  const name = fieldName.split('.').at(-1) ?? '';
-  const { fields, append, remove } = useFieldArray({
-    name: fieldName,
+  const name = fieldName.at(-1) ?? '';
+  const { items, insertItem, removeItem } = useArray(fieldName, {
+    defaultValue: [],
   });
 
   return (
     <div {...props} className={cn('flex flex-col gap-2', props.className)}>
-      {fields.map((item, index) => (
+      {items.map((item) => (
         <FieldSet
-          key={item.id}
+          key={item.index}
           name={
             <span className="text-fd-muted-foreground">
-              {name}[{index}]
+              {name}[{item.index}]
             </span>
           }
-          field={items}
+          field={itemSchema}
           isRequired
-          fieldName={`${fieldName}.${index}`}
+          fieldName={item.field}
           toolbar={
             <button
               type="button"
@@ -543,7 +499,7 @@ function ArrayInput({
                   size: 'icon-xs',
                 }),
               )}
-              onClick={() => remove(index)}
+              onClick={() => removeItem(item.index)}
             >
               <Trash2 />
             </button>
@@ -560,7 +516,7 @@ function ArrayInput({
           }),
         )}
         onClick={() => {
-          append(getDefaultValue(items));
+          insertItem(getDefaultValue(itemSchema));
         }}
       >
         <Plus className="size-4" />

@@ -1,5 +1,5 @@
 import type { ComponentProps, ReactNode } from 'react';
-import { cn } from '@fumadocs/ui/cn';
+import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { Edit, Text } from 'lucide-react';
 import { I18nLabel } from '@/contexts/i18n';
@@ -45,7 +45,9 @@ export interface DocsPageProps {
   breadcrumb?: Partial<BreadcrumbOptions>;
 
   /**
-   * Footer navigation, you can disable it by passing `false`
+   * Footer navigation, located under the page body.
+   *
+   * You can specify `footer.children` to add extra components under the footer.
    */
   footer?: Partial<FooterOptions>;
 
@@ -81,7 +83,7 @@ type TableOfContentPopoverOptions = Omit<TableOfContentOptions, 'single'>;
 
 export function DocsPage({
   breadcrumb: { enabled: breadcrumbEnabled = true, component: breadcrumb, ...breadcrumbProps } = {},
-  footer = {},
+  footer: { enabled: footerEnabled, component: footerReplace, ...footerProps } = {},
   full = false,
   tableOfContentPopover: {
     enabled: tocPopoverEnabled,
@@ -142,7 +144,7 @@ export function DocsPage({
       >
         {breadcrumbEnabled && (breadcrumb ?? <PageBreadcrumb {...breadcrumbProps} />)}
         {children}
-        {footer.enabled !== false && (footer.component ?? <PageFooter items={footer.items} />)}
+        {footerEnabled !== false && (footerReplace ?? <PageFooter {...footerProps} />)}
       </article>
       {tocEnabled &&
         (tocReplace ?? (

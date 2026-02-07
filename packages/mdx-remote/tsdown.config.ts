@@ -1,10 +1,11 @@
 import { defineConfig } from 'tsdown';
 
 export default defineConfig({
-  external: ['fumadocs-core', 'next', 'react'],
+  external: ['mdx/types'],
   dts: true,
   fixedExtension: false,
-  target: 'es2021',
+  target: 'es2023',
   entry: ['./src/index.ts', './src/client/index.ts'],
   format: 'esm',
+  inlineOnly: [],
 });

@@ -3,8 +3,8 @@ import { Check, ChevronsUpDown } from 'lucide-react';
 import { type ComponentProps, type ReactNode, useMemo, useState } from 'react';
 import Link from 'fumadocs-core/link';
 import { usePathname } from 'fumadocs-core/framework';
-import { cn } from '@fumadocs/ui/cn';
-import { normalize, isActive } from '@fumadocs/ui/urls';
+import { cn } from '@/utils/cn';
+import { normalize, isActive } from '@/utils/urls';
 import { useSidebar } from '@/components/sidebar/base';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import type { SidebarTab } from '.';
@@ -54,7 +54,7 @@ export function SidebarTabsDropdown({
         <PopoverTrigger
           {...props}
           className={cn(
-            'flex items-center gap-2 rounded-lg p-2 border bg-fd-secondary/50 text-start text-fd-secondary-foreground transition-colors hover:bg-fd-accent data-[open]:bg-fd-accent data-[open]:text-fd-accent-foreground',
+            'flex items-center gap-2 rounded-lg p-2 border bg-fd-secondary/50 text-start text-fd-secondary-foreground transition-colors hover:bg-fd-accent data-open:bg-fd-accent data-open:text-fd-accent-foreground',
             props.className,
           )}
         >

@@ -18,14 +18,15 @@ We will use Fumadocs MDX to manage the content, and implement our own UI with Ta
 Define a `blogPosts` collection.
 
 ```ts title="source.config.ts"
-import { defineCollections, frontmatterSchema } from 'fumadocs-mdx/config';
+import { defineCollections } from 'fumadocs-mdx/config';
+import { pageSchema } from 'fumadocs-core/source/schema';
 import { z } from 'zod';
 
 export const blogPosts = defineCollections({
   type: 'doc',
   dir: 'content/blog',
   // add required frontmatter properties
-  schema: frontmatterSchema.extend({
+  schema: pageSchema.extend({
     author: z.string(),
     date: z.string().date().or(z.date()),
   }),

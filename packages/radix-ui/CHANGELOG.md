@@ -1,5 +1,96 @@
 # next-docs-ui
 
+## 16.5.1
+
+### Patch Changes
+
+- c08364a: support Flux layout
+- 53ad20b: Pre-scan class names to optimize Tailwind CSS compilation performance
+- Updated dependencies [db93ebd]
+  - @fumadocs/tailwind@0.0.1
+  - fumadocs-core@16.5.1
+
+## 16.5.0
+
+### Minor Changes
+
+- 9ba1250: Support Universal Shiki configuration
+
+### Patch Changes
+
+- Updated dependencies [85cc22f]
+- Updated dependencies [9ba1250]
+  - @fumadocs/ui@16.5.0
+  - fumadocs-core@16.5.0
+
+## 16.4.11
+
+### Patch Changes
+
+- Updated dependencies [a75a84d]
+  - fumadocs-core@16.4.11
+  - @fumadocs/ui@16.4.11
+
+## 16.4.10
+
+### Patch Changes
+
+- 430a5f1: support `on` on docs layout
+- Updated dependencies [099fde7]
+- Updated dependencies [6fd7e63]
+  - fumadocs-core@16.4.10
+  - @fumadocs/ui@16.4.10
+
+## 16.4.9
+
+### Patch Changes
+
+- Updated dependencies [48dd0c2]
+  - fumadocs-core@16.4.9
+  - @fumadocs/ui@16.4.9
+
+## 16.4.8
+
+### Patch Changes
+
+- Updated dependencies [0025484]
+  - fumadocs-core@16.4.8
+  - @fumadocs/ui@16.4.8
+
+## 16.4.7
+
+### Patch Changes
+
+- Updated dependencies [0765817]
+- Updated dependencies [5dec9d0]
+  - @fumadocs/ui@16.4.7
+  - fumadocs-core@16.4.7
+
+## 16.4.6
+
+### Patch Changes
+
+- Updated dependencies [ea57dbf]
+  - fumadocs-core@16.4.6
+  - @fumadocs/ui@16.4.6
+
+## 16.4.5
+
+### Patch Changes
+
+- 9f06196: fix `footer.children` props
+  - fumadocs-core@16.4.5
+  - @fumadocs/ui@16.4.5
+
+## 16.4.4
+
+### Patch Changes
+
+- c804ac6: expose `useAutoScroll()`
+- Updated dependencies [cdc97e0]
+  - fumadocs-core@16.4.4
+  - @fumadocs/ui@16.4.4
+
 ## 16.4.3
 
 ### Patch Changes
@@ -310,7 +401,7 @@
       export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
         source: S,
         pageToIndexFn?: (page: InferPageType<S>) => Awaitable<AdvancedIndex>,
-        options?: Omit<Options<S>, "buildIndex">,
+        options?: Omit<Options<S>, "buildIndex">
       ): SearchAPI;
       ```
     - remove deprecated parameters in `useSearch()`, pass them in the client object instead.
@@ -359,6 +450,7 @@
 
 - 90cf1fe: Support `tabMode` on `<DocsLayout />`
 - 6c3bde5: **Prefer importing `<RootProvider />` from `fumadocs-ui/provider/<framework>`**
+
   - Old `fumadocs-ui/provider` will be kept, as it's used by majority of previous projects.
   - New guides & templates will follow the new recommendation.
 
@@ -771,6 +863,7 @@
   Changed layout positioning, all layout components now use `fixed` position.
 
   This may impact sites that:
+
   - using custom styling on Fumadocs layouts.
   - added a custom footer (see below).
 
@@ -1465,6 +1558,7 @@
 ### Minor Changes
 
 - 66c70ec: **Replace official Tailwind CSS typography plugin**
+
   - Other variants like `prose-sm` and `prose-gray` are removed, as it's supposed to only provide support for Fumadocs UI typography styles.
 
 - 05d224c: added the updateAnchor option for the Tabs ui component
@@ -2417,6 +2511,7 @@
 ### Major Changes
 
 - 62b5abb: **New Layout**
+
   - Remove navbar from docs layout, replace it with sidebar.
   - On smaller devices, navbar is always shown.
   - Remove exports of internal components, copying components from the repository is now the preferred way.

@@ -19,7 +19,7 @@ import { remarkGfm } from 'fumadocs-core/mdx-plugins/remark-gfm';
 import remarkMath from 'remark-math';
 
 export interface OutputFile {
-  type: 'asset' | 'content' | 'custom';
+  type: 'asset' | 'content' | 'data' | 'custom';
 
   /**
    * paths relative to target folder, for example:
@@ -38,6 +38,14 @@ export interface ConvertOptions extends VaultStorageOptions {
    * by default, we include plugins to handle Obsidian-specific syntax, GFM and Maths equations.
    */
   remarkPlugins?: PluggableList;
+
+  /**
+   * modify the generated frontmatter data
+   */
+  transformFrontmatter?: (
+    frontmatter: Record<string, unknown>,
+    ctx: { file: ParsedFile },
+  ) => Record<string, unknown>;
 }
 
 declare module 'vfile' {
@@ -48,7 +56,7 @@ declare module 'vfile' {
 
 export async function convertVaultFiles(
   rawFiles: VaultFile[],
-  { remarkPlugins = [], ...options }: ConvertOptions = {},
+  { remarkPlugins = [], transformFrontmatter, ...options }: ConvertOptions = {},
 ): Promise<OutputFile[]> {
   const storage = buildStorage(rawFiles, options);
   const resolver = buildResolver(storage);
@@ -73,6 +81,16 @@ export async function convertVaultFiles(
       return;
     }
 
+    if (file.format === 'data') {
+      output.push({
+        type: 'data',
+        path: file.outPath,
+        content: file.content,
+      });
+
+      return;
+    }
+
     const vfile = new VFile({
       path: file.path,
       value: file.content,
@@ -83,14 +101,16 @@ export async function convertVaultFiles(
 
     const mdast = await processor.run(processor.parse(vfile), vfile);
     const string = stringifier.stringify(mdast as Root);
-    const frontmatter = dump({
+    let frontmatter: Record<string, unknown> = {
+      ...file.frontmatter,
       title: path.basename(file.path, path.extname(file.path)),
-    }).trim();
+    };
+    if (transformFrontmatter) frontmatter = transformFrontmatter(frontmatter, { file });
 
     output.push({
       type: 'content',
       path: file.outPath,
-      content: `---\n${frontmatter}\n---\n${string}`,
+      content: `---\n${dump(frontmatter).trim()}\n---\n${string}`,
     });
   }
 

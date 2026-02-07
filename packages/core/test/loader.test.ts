@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { createGetUrl, getSlugs, loader } from '@/source';
+import { createGetUrl, getSlugs, loader, LoaderOptions, Source } from '@/source';
 import type { ReactElement } from 'react';
 import { removeUndefined } from '@/utils/remove-undefined';
 import { lucideIconsPlugin } from '@/source/plugins/lucide-icons';
@@ -32,18 +32,98 @@ test('Get URL: Base', () => {
   expect(getUrl([''])).toBe('/docs');
 });
 
+const pageTreeTests: {
+  title: string;
+  output: string;
+  source: Source;
+  loader?: Partial<LoaderOptions>;
+}[] = [
+  {
+    title: 'Basic',
+    source: (await import('./fixtures/page-trees/basic')).source,
+    output: './fixtures/page-trees/basic.tree.json',
+  },
+  {
+    title: 'Basic: no meta.json',
+    source: (await import('./fixtures/page-trees/basic')).noMeta,
+    output: './fixtures/page-trees/basic-no-meta.tree.json',
+  },
+  {
+    title: 'Rest',
+    source: (await import('./fixtures/page-trees/rest')).source,
+    output: './fixtures/page-trees/rest.tree.json',
+  },
+  {
+    title: 'Rest: priority',
+    source: (await import('./fixtures/page-trees/rest')).withPriority,
+    output: './fixtures/page-trees/rest-priority.tree.json',
+  },
+  {
+    title: 'Nested Directory',
+    source: (await import('./fixtures/page-trees/nested')).source,
+    output: './fixtures/page-trees/nested.tree.json',
+  },
+  {
+    title: 'Internationalized Routing',
+    source: (await import('./fixtures/page-trees/i18n')).source,
+    output: './fixtures/page-trees/i18n.tree.json',
+    loader: {
+      i18n: {
+        languages: ['cn', 'en'],
+        defaultLanguage: 'en',
+      },
+    },
+  },
+  {
+    title: 'Internationalized Routing: No Prefix',
+    source: (await import('./fixtures/page-trees/i18n')).source,
+    output: './fixtures/page-trees/i18n-no-prefix.tree.json',
+    loader: {
+      i18n: {
+        languages: ['cn', 'en'],
+        defaultLanguage: 'en',
+        hideLocale: 'default-locale',
+      },
+    },
+  },
+  {
+    title: 'Internationalized Routing: dir',
+    source: (await import('./fixtures/page-trees/i18n-dir')).source,
+    output: './fixtures/page-trees/i18n-dir.test.json',
+    loader: {
+      i18n: {
+        parser: 'dir',
+        languages: ['cn', 'en'],
+        defaultLanguage: 'en',
+      },
+    },
+  },
+  {
+    title: 'Circular Reference',
+    source: (await import('./fixtures/page-trees/circular')).source,
+    output: './fixtures/page-trees/circular.test.json',
+  },
+];
+
+for (const pageTreeTest of pageTreeTests) {
+  test(`Page Tree: ${pageTreeTest.title}`, async () => {
+    const source = loader(pageTreeTest.source, {
+      baseUrl: '/',
+      pageTree: {
+        noRef: true,
+      },
+      ...pageTreeTest.loader,
+    });
+
+    await expect(removeUndefined(source.pageTree, true)).toMatchFileSnapshot(pageTreeTest.output);
+  });
+}
+
 test('Loader: Simple', async () => {
   const result = loader({
     baseUrl: '/',
-    pageTree: {
-      noRef: true,
-    },
     source: (await import('./fixtures/page-trees/basic')).source,
   });
-
-  await expect(removeUndefined(result.pageTree, true)).toMatchFileSnapshot(
-    './fixtures/page-trees/basic.tree.json',
-  );
 
   expect(result.getPages().length).toBe(1);
   expect(result.getPage(['test'])).toBeDefined();
@@ -53,15 +133,8 @@ test('Nested Directories', async () => {
   const result = loader({
     baseUrl: '/',
     icon: (v) => v as unknown as ReactElement,
-    pageTree: {
-      noRef: true,
-    },
     source: (await import('./fixtures/page-trees/nested')).source,
   });
-
-  await expect(removeUndefined(result.pageTree, true)).toMatchFileSnapshot(
-    './fixtures/page-trees/nested.tree.json',
-  );
 
   expect(result.getPages().map((page) => page.slugs.join('/'))).toMatchInlineSnapshot(`
       [
@@ -89,9 +162,6 @@ test('Internationalized Routing', async () => {
     source: (await import('./fixtures/page-trees/i18n')).source,
   });
 
-  await expect(removeUndefined(result.pageTree, true)).toMatchFileSnapshot(
-    './fixtures/page-trees/i18n.tree.json',
-  );
   await expect(removeUndefined(result.getLanguages(), true)).toMatchFileSnapshot(
     './fixtures/page-trees/i18n.entries.json',
   );
@@ -105,143 +175,11 @@ test('Internationalized Routing: Hide Prefix', async () => {
       defaultLanguage: 'en',
       hideLocale: 'default-locale',
     },
-    pageTree: {
-      noRef: true,
-    },
     source: (await import('./fixtures/page-trees/i18n')).source,
   });
-
-  await expect(removeUndefined(result.pageTree, true)).toMatchFileSnapshot(
-    './fixtures/page-trees/i18n-no-prefix.tree.json',
-  );
   expect(result.getPages().length).toBe(4);
   expect(result.getPage(['test'])?.url).toBe('/test');
   expect(result.getPage(['test'], 'cn')?.url).toBe('/cn/test');
-});
-
-test('Internationalized Routing: dir', async () => {
-  const result = loader({
-    baseUrl: '/',
-    i18n: {
-      parser: 'dir',
-      languages: ['cn', 'en'],
-      defaultLanguage: 'en',
-    },
-    source: (await import('./fixtures/page-trees/i18n-dir')).source,
-  });
-
-  await expect(removeUndefined(result.pageTree, true)).toMatchFileSnapshot(
-    './fixtures/page-trees/i18n-dir.tree.json',
-  );
-});
-
-test('Loader: Without meta.json', () => {
-  const result = loader({
-    baseUrl: '/',
-    pageTree: {
-      noRef: true,
-    },
-    source: {
-      files: [
-        {
-          type: 'page',
-          path: 'test.mdx',
-          data: {
-            title: 'Hello',
-          },
-        },
-        {
-          type: 'page',
-          path: 'hello/index.mdx',
-          data: {
-            title: 'Hello',
-          },
-        },
-      ],
-    },
-  });
-
-  expect(removeUndefined(result.pageTree, true), 'Page Tree').toMatchInlineSnapshot(`
-      {
-        "$id": "root",
-        "children": [
-          {
-            "$id": "root:test.mdx",
-            "name": "Hello",
-            "type": "page",
-            "url": "/test",
-          },
-          {
-            "$id": "root:hello",
-            "children": [],
-            "index": {
-              "$id": "root:hello/index.mdx",
-              "name": "Hello",
-              "type": "page",
-              "url": "/hello",
-            },
-            "name": "Hello",
-            "type": "folder",
-          },
-        ],
-        "name": "Docs",
-      }
-    `);
-});
-
-test('Loader: Rest operator', () => {
-  const result = loader({
-    baseUrl: '/',
-    pageTree: {
-      noRef: true,
-    },
-    source: {
-      files: [
-        {
-          type: 'meta',
-          path: 'meta.json',
-          data: {
-            pages: ['z...a'],
-          },
-        },
-        {
-          type: 'page',
-          path: '1-2.mdx',
-          data: {
-            title: '1.2',
-          },
-        },
-        {
-          type: 'page',
-          path: '2-2.mdx',
-          data: {
-            title: '2.2',
-          },
-        },
-      ],
-    },
-  });
-
-  expect(removeUndefined(result.pageTree, true), 'Page Tree').toMatchInlineSnapshot(`
-      {
-        "$id": "root",
-        "children": [
-          {
-            "$id": "root:2-2.mdx",
-            "name": "2.2",
-            "type": "page",
-            "url": "/2-2",
-          },
-          {
-            "$id": "root:1-2.mdx",
-            "name": "1.2",
-            "type": "page",
-            "url": "/1-2",
-          },
-        ],
-        "name": "Docs",
-      }
-    `);
 });
 
 test('Loader: Allow duplicate pages when explicitly referenced twice', () => {
@@ -279,9 +217,9 @@ test('Loader: Allow duplicate pages when explicitly referenced twice', () => {
 
   const treeChildren = result.pageTree.children;
   expect(treeChildren.length).toBe(3);
-  expect(treeChildren[0].$id).toBe('root:page1.mdx');
-  expect(treeChildren[1].$id).toBe('root:page1.mdx');
-  expect(treeChildren[2].$id).toBe('root:page2.mdx');
+  expect(treeChildren[0].$id).toBe('page1.mdx');
+  expect(treeChildren[1].$id).toBe('page1.mdx');
+  expect(treeChildren[2].$id).toBe('page2.mdx');
 });
 
 test('Loader: No duplicate pages when referencing subfolder items and folder', () => {
@@ -366,50 +304,50 @@ test('Loader: No duplicate pages when referencing subfolder items and folder', (
 
   // Check the page tree structure
   expect(removeUndefined(result.pageTree, true), 'Page Tree').toMatchInlineSnapshot(`
-      {
-        "$id": "root",
-        "children": [
-          {
-            "$id": "root:index.mdx",
-            "name": "Home",
-            "type": "page",
-            "url": "/",
-          },
-          {
-            "$id": "root:subfolder/page1.mdx",
-            "name": "Subfolder Page 1",
-            "type": "page",
-            "url": "/subfolder/page1",
-          },
-          {
-            "$id": "root:subfolder/page2.mdx",
-            "name": "Subfolder Page 2",
-            "type": "page",
-            "url": "/subfolder/page2",
-          },
-          {
-            "$id": "root:other-page.mdx",
-            "name": "Other Page",
-            "type": "page",
-            "url": "/other-page",
-          },
-          {
-            "$id": "root:subfolder",
-            "children": [
-              {
-                "$id": "root:subfolder/page3.mdx",
-                "name": "Subfolder Page 3",
-                "type": "page",
-                "url": "/subfolder/page3",
-              },
-            ],
-            "name": "Subfolder",
-            "type": "folder",
-          },
-        ],
-        "name": "Docs",
-      }
-    `);
+    {
+      "$id": "root",
+      "children": [
+        {
+          "$id": "index.mdx",
+          "name": "Home",
+          "type": "page",
+          "url": "/",
+        },
+        {
+          "$id": "subfolder/page1.mdx",
+          "name": "Subfolder Page 1",
+          "type": "page",
+          "url": "/subfolder/page1",
+        },
+        {
+          "$id": "subfolder/page2.mdx",
+          "name": "Subfolder Page 2",
+          "type": "page",
+          "url": "/subfolder/page2",
+        },
+        {
+          "$id": "other-page.mdx",
+          "name": "Other Page",
+          "type": "page",
+          "url": "/other-page",
+        },
+        {
+          "$id": "subfolder",
+          "children": [
+            {
+              "$id": "subfolder/page3.mdx",
+              "name": "Subfolder Page 3",
+              "type": "page",
+              "url": "/subfolder/page3",
+            },
+          ],
+          "name": "Subfolder",
+          "type": "folder",
+        },
+      ],
+      "name": "Docs",
+    }
+  `);
 });
 
 test('Loader: Serialize data', async () => {
@@ -448,54 +386,46 @@ test('Loader: Serialize data', async () => {
     },
   });
 
+  removeUndefined(result.pageTree, true);
   const prev = JSON.stringify(result.pageTree);
 
   expect(await result.serializePageTree(result.pageTree)).toMatchInlineSnapshot(`
-      {
+    {
+      "$fumadocs_loader": "page-tree",
+      "data": {
         "$id": "root",
         "children": [
           {
-            "$id": "root:test.mdx",
-            "$ref": undefined,
-            "description": undefined,
+            "$id": "test.mdx",
             "icon": "<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rocket" aria-hidden="true"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>",
             "name": "Hello &lt;Foo&gt;",
             "type": "page",
             "url": "/test",
           },
           {
-            "$id": "root:hello",
-            "$ref": undefined,
+            "$id": "hello",
             "children": [
               {
-                "$id": "root:_0",
+                "$id": "_0",
                 "icon": "<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-timer" aria-hidden="true"><line x1="10" x2="14" y1="2" y2="2"></line><line x1="12" x2="15" y1="14" y2="11"></line><circle cx="12" cy="14" r="8"></circle></svg>",
                 "name": "Hello World",
                 "type": "separator",
               },
               {
-                "$id": "root:hello/index.mdx",
-                "$ref": undefined,
-                "description": undefined,
-                "icon": undefined,
+                "$id": "hello/index.mdx",
                 "name": "Hello",
                 "type": "page",
                 "url": "/hello",
               },
             ],
-            "collapsible": undefined,
-            "defaultOpen": undefined,
-            "description": undefined,
-            "icon": undefined,
-            "index": undefined,
             "name": "Hello Folder",
-            "root": undefined,
             "type": "folder",
           },
         ],
         "name": "Docs",
-      }
-    `);
+      },
+    }
+  `);
 
   expect(JSON.stringify(result.pageTree), 'page tree unchanged').toBe(prev);
 });

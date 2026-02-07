@@ -4,9 +4,7 @@
   "description": "The remote MDX files adapter for Fumadocs",
   "keywords": [
     "Docs",
-    "NextJs",
-    "fumadocs",
-    "next-mdx-remote"
+    "fumadocs"
   ],
   "homepage": "https://fumadocs.dev",
   "license": "MIT",
@@ -41,27 +39,31 @@
   "dependencies": {
     "@mdx-js/mdx": "^3.1.1",
     "gray-matter": "^4.0.3",
-    "zod": "^4.3.5"
+    "unified": "^11.0.5",
+    "vfile": "^6.0.3",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/mdx": "^2.0.13",
-    "@types/node": "24.10.2",
-    "@types/react": "^19.2.7",
+    "@types/node": "25.2.1",
+    "@types/react": "^19.2.13",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
-    "react": "^19.2.3",
+    "react": "^19.2.4",
     "tinyglobby": "^0.2.15",
     "tsconfig": "workspace:*",
-    "tsdown": "^0.18.4",
-    "unified": "^11.0.5",
-    "vfile": "^6.0.3"
+    "tsdown": "^0.20.3"
   },
   "peerDependencies": {
+    "@types/mdx": "*",
     "@types/react": "*",
     "fumadocs-core": "^15.0.0 || ^16.0.0",
     "react": "18.x.x || 19.x.x"
   },
   "peerDependenciesMeta": {
+    "@types/mdx": {
+      "optional": true
+    },
     "@types/react": {
       "optional": true
     }

@@ -1,6 +1,6 @@
 {
   "cn": {
-    "$id": "cn",
+    "$id": "cn:root",
     "children": [
       {
         "$id": "cn:test.mdx",
@@ -25,7 +25,7 @@
     "name": "Docs Chinese",
   },
   "en": {
-    "$id": "en",
+    "$id": "en:root",
     "children": [
       {
         "$id": "en:test.mdx",

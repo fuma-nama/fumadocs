@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-obsidian",
-  "version": "0.0.8",
+  "version": "0.0.10",
   "description": "Obsidian Integration for Fumadocs",
   "keywords": [
     "Docs",
@@ -53,26 +53,29 @@
     "tailwind-merge": "^3.4.0",
     "tinyglobby": "^0.2.15",
     "unified": "^11.0.5",
-    "unist-util-visit": "^5.0.0",
+    "unist-util-visit": "^5.1.0",
     "vfile": "^6.0.3",
-    "zod": "^4.3.5"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/estree": "^1.0.8",
     "@types/js-yaml": "^4.0.9",
     "@types/mdast": "^4.0.4",
-    "@types/node": "24.10.2",
-    "@types/react": "^19.2.7",
+    "@types/node": "25.2.1",
+    "@types/react": "^19.2.13",
+    "@types/react-dom": "^19.2.3",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "mdast-util-mdx-jsx": "^3.2.0",
     "tsconfig": "workspace:*",
-    "tsdown": "^0.18.4",
+    "tsdown": "^0.20.3",
     "typescript": "^5.9.3"
   },
   "peerDependencies": {
     "@types/react": "*",
-    "fumadocs-core": "^15.0.0 || ^16.0.0"
+    "fumadocs-core": "^15.0.0 || ^16.0.0",
+    "react": "*",
+    "react-dom": "*"
   },
   "peerDependenciesMeta": {
     "@types/react": {

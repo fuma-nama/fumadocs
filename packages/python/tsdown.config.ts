@@ -3,8 +3,10 @@ import { defineConfig } from 'tsdown';
 export default defineConfig({
   entry: ['./src/index.ts', './src/components/index.tsx'],
   format: 'esm',
-  dts: true,
+  dts: {
+    sourcemap: false,
+  },
   fixedExtension: false,
-  target: 'es2022',
-  external: ['react'],
+  target: 'es2023',
+  inlineOnly: [],
 });

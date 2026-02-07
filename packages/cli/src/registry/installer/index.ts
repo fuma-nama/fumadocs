@@ -1,6 +1,5 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import { confirm, isCancel, log, outro } from '@clack/prompts';
 import { typescriptExtensions } from '@/constants';
 import { toImportSpecifier, transformSpecifiers } from '@/utils/ast';
 import type { Component, File } from '@/registry/schema';
@@ -28,6 +27,12 @@ export interface ComponentInstallerPlugin {
   }) => void | Promise<void>;
 }
 
+export interface IOInterface {
+  onWarn: (message: string) => void;
+  confirmFileOverride: (options: { path: string }) => Promise<boolean>;
+  onFileDownloaded: (options: { path: string; file: File; component: DownloadedComponent }) => void;
+}
+
 export class ComponentInstaller {
   private readonly installedFiles = new Set<string>();
   private readonly downloadCache = createCache<DownloadedComponent[]>();
@@ -39,7 +44,7 @@ export class ComponentInstaller {
     private readonly plugins: ComponentInstallerPlugin[] = [],
   ) {}
 
-  async install(name: string) {
+  async install(name: string, io: IOInterface) {
     let downloaded: DownloadedComponent[];
     // detect linked registry
     const info = await this.rootClient.fetchRegistryInfo();
@@ -68,7 +73,7 @@ export class ComponentInstaller {
         this.installedFiles.add(outPath);
 
         const output = typescriptExtensions.includes(path.extname(outPath))
-          ? await this.transform(name, file, comp, downloaded)
+          ? await this.transform(io, name, file, comp, downloaded)
           : file.content;
 
         const status = await fs
@@ -82,28 +87,21 @@ export class ComponentInstaller {
         if (status === 'ignore') continue;
 
         if (status === 'need-update') {
-          const override = await confirm({
-            message: `Do you want to override ${outPath}?`,
-            initialValue: false,
-          });
-
-          if (isCancel(override)) {
-            outro('Ended');
-            process.exit(0);
-          }
-
+          const override = await io.confirmFileOverride({ path: outPath });
           if (!override) continue;
         }
 
         await fs.mkdir(path.dirname(outPath), { recursive: true });
         await fs.writeFile(outPath, output);
-        log.step(`downloaded ${outPath}`);
+        io.onFileDownloaded({ path: outPath, file, component: comp });
       }
     }
   }
 
-  async installDeps() {
-    await new DependencyManager().installDeps(this.dependencies, this.devDependencies);
+  async deps() {
+    const manager = new DependencyManager();
+    await manager.init(this.dependencies, this.devDependencies);
+    return manager;
   }
 
   async onEnd() {
@@ -158,6 +156,7 @@ export class ComponentInstaller {
 
   private readonly pathToFileCache = createCache<Map<string, File>>();
   private async transform(
+    io: IOInterface,
     taskId: string,
     file: File,
     component: DownloadedComponent,
@@ -190,7 +189,7 @@ export class ComponentInstaller {
         if (target) {
           specifier = toImportSpecifier(filePath, this.resolveOutputPath(target));
         } else {
-          console.warn(`cannot find the referenced file of ${specifier}`);
+          io.onWarn(`cannot find the referenced file of ${specifier}`);
         }
       }
 

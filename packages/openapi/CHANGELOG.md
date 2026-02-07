@@ -1,5 +1,63 @@
 # @fuma-docs/openapi
 
+## 10.3.2
+
+### Patch Changes
+
+- 53ad20b: Pre-scan class names to optimize Tailwind CSS compilation performance
+- Updated dependencies [c08364a]
+- Updated dependencies [53ad20b]
+  - fumadocs-ui@16.5.1
+  - fumadocs-core@16.5.1
+
+## 10.3.1
+
+### Minor Changes
+
+- c03f8c3: Support `/ui/base` for reduced bundle size
+
+### Patch Changes
+
+- Updated dependencies [9ba1250]
+  - fumadocs-ui@16.5.0
+  - fumadocs-core@16.5.0
+
+## 10.2.7
+
+### Patch Changes
+
+- eb3d763: Break long words in openapi examples
+- 2abaff9: Improve object inputs
+- Updated dependencies [430a5f1]
+- Updated dependencies [099fde7]
+- Updated dependencies [6fd7e63]
+  - fumadocs-ui@16.4.10
+  - fumadocs-core@16.4.10
+
+## 10.2.6
+
+### Patch Changes
+
+- 8d1362e: Fixed a performance issue where getSchema() would bypass the internal cache and re-parse the OpenAPI spec on every call. This was caused by calling the internal getSchemas() function instead of the cached method.
+
+## 10.2.5
+
+### Patch Changes
+
+- cadff12: Use internal implementation for form in OpenAPI playground
+- 897cc26: Improve schema UI array rendering
+- Updated dependencies [6ac37c4]
+  - @fumari/stf@0.0.1
+
+## 10.2.4
+
+### Patch Changes
+
+- e55510b: fix unknown parameter encoding
+- Updated dependencies [9f06196]
+  - fumadocs-ui@16.4.5
+  - fumadocs-core@16.4.5
+
 ## 10.2.3
 
 ### Patch Changes
@@ -284,6 +342,7 @@
   ```
 
 - aa4e1ad: **Redesign `createOpenAPI` usage**
+
   1. Isolate API page and API server.
 
   Before:
@@ -1092,6 +1151,7 @@
 - bdef238: **Redesign `generateFiles`**
 
   This redesign will finalize the behaviour of `generateFiles` to make it simpler, consistent across different versions of Fumadocs OpenAPI.
+
   - Abandoned `groupByFolder`, it's deprecated long time ago and can be replaced with `groupBy`.
   - Improved type safety, `groupBy` is now only available with `per` set to `operation`.
   - `name` usage changed (see below).
@@ -1143,6 +1203,7 @@
   ```
 
   With `per: operation`, you can use `groupBy` to group pages:
+
   - tag: `{tag}/{file}`
   - route: `{endpoint}/{method}` (it will ignore the `name` option)
   - none: `{file}` (default)
@@ -2717,6 +2778,7 @@
   **migrate:**
 
   Changed the output of MDX files, the new structure requires components:
+
   - Root
   - API
   - APIInfo

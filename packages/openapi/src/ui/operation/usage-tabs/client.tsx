@@ -8,7 +8,7 @@ import {
   SelectContent,
   SelectItem,
 } from '@/ui/components/select';
-import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
+import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock.core';
 import { useState, useEffect, useMemo, createContext, ReactNode, useRef, use } from 'react';
 import type { CodeUsageGenerator } from '.';
 import type { ExampleRequestItem } from '../request-tabs';

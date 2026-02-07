@@ -44,18 +44,18 @@
   "dependencies": {
     "class-variance-authority": "^0.7.1",
     "js-yaml": "^4.1.1",
-    "lucide-react": "^0.562.0",
+    "lucide-react": "^0.563.0",
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^24.10.2",
-    "@types/react": "^19.2.7",
+    "@types/node": "^25.2.1",
+    "@types/react": "^19.2.13",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "tsconfig": "workspace:*",
-    "tsdown": "^0.18.4"
+    "tsdown": "^0.20.3"
   },
   "peerDependencies": {
     "@types/react": "*",

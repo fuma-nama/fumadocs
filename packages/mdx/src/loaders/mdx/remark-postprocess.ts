@@ -1,5 +1,5 @@
 import type { Processor, Transformer } from 'unified';
-import type { Root, RootContent } from 'mdast';
+import type { Heading, Root, RootContent } from 'mdast';
 import { visit } from 'unist-util-visit';
 import { toMarkdown } from 'mdast-util-to-markdown';
 import { valueToEstree } from 'estree-util-value-to-estree';
@@ -22,7 +22,14 @@ export interface PostprocessOptions {
   /**
    * stringify MDAST and export via `_markdown`.
    */
-  includeProcessedMarkdown?: boolean;
+  includeProcessedMarkdown?:
+    | boolean
+    | {
+        /**
+         * include heading IDs into the processed markdown.
+         */
+        headingIds?: boolean;
+      };
 
   /**
    * extract link references, export via `extractedReferences`.
@@ -96,11 +103,20 @@ export function remarkPostprocess(
     }
 
     if (includeProcessedMarkdown) {
+      const { headingIds = true } =
+        typeof includeProcessedMarkdown === 'object' ? includeProcessedMarkdown : {};
       const processor = getStringifyProcessor();
       const markdown = toMarkdown(tree, {
         ...processor.data('settings'),
         // from https://github.com/remarkjs/remark/blob/main/packages/remark-stringify/lib/index.js
         extensions: processor.data('toMarkdownExtensions') || [],
+        handlers: {
+          heading: (node: Heading) => {
+            const id = node.data?.hProperties?.id;
+            const content = flattenNode(node);
+            return headingIds && id ? `${content} [#${id}]` : content;
+          },
+        },
       });
 
       file.data['mdx-export'].push({

@@ -1,0 +1,63 @@
+{
+  "name": "@fumadocs/story",
+  "version": "0.0.5",
+  "description": "Story integration to Fumadocs.",
+  "keywords": [],
+  "license": "MIT",
+  "author": "Fuma Nama",
+  "repository": "github:fuma-nama/fumadocs",
+  "files": [
+    "css",
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.js",
+    "./type-tree": "./dist/type-tree/index.js",
+    "./client": "./dist/client/index.js",
+    "./package.json": "./package.json",
+    "./css/*": "./css/*"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "clean": "rimraf dist",
+    "dev": "tsdown --watch",
+    "lint": "eslint .",
+    "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fumari/stf": "workspace:*",
+    "@radix-ui/react-select": "^2.2.6",
+    "class-variance-authority": "^0.7.1",
+    "lucide-react": "^0.563.0",
+    "react-error-boundary": "^6.1.0",
+    "tailwind-merge": "^3.4.0",
+    "ts-morph": "^27.0.2"
+  },
+  "devDependencies": {
+    "@fastify/deepmerge": "^3.2.0",
+    "@types/node": "25.2.1",
+    "@types/react": "^19.2.13",
+    "@types/ungap__structured-clone": "^1.2.0",
+    "@ungap/structured-clone": "^1.3.0",
+    "eslint-config-custom": "workspace:*",
+    "fumadocs-ui": "workspace:*",
+    "tailwindcss": "^4.1.18",
+    "tsconfig": "workspace:*",
+    "tsdown": "^0.20.3"
+  },
+  "peerDependencies": {
+    "@types/react": "*",
+    "fumadocs-ui": "16.x.x",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    }
+  }
+}
