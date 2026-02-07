@@ -61,14 +61,14 @@
     "@types/estree": "^1.0.8",
     "@types/js-yaml": "^4.0.9",
     "@types/mdast": "^4.0.4",
-    "@types/node": "25.1.0",
-    "@types/react": "^19.2.10",
+    "@types/node": "25.2.1",
+    "@types/react": "^19.2.13",
     "@types/react-dom": "^19.2.3",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "mdast-util-mdx-jsx": "^3.2.0",
     "tsconfig": "workspace:*",
-    "tsdown": "^0.19.0",
+    "tsdown": "^0.20.3",
     "typescript": "^5.9.3"
   },
   "peerDependencies": {

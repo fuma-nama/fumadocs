@@ -1,6 +1,6 @@
 import { defineConfig } from 'tsdown';
 
-const external = ['next', 'typescript', 'bun'];
+const external = ['next', 'typescript', 'webpack', 'bun', 'mdx/types'];
 
 const noExternal = [
   // TODO: remove this when the min `fumadocs-core` version is above 16.2.3
@@ -23,6 +23,7 @@ export default defineConfig([
     dts: true,
     fixedExtension: false,
     target: 'node22',
+    inlineOnly: [],
   },
   {
     outDir: 'dist/next',
@@ -35,5 +36,6 @@ export default defineConfig([
     dts: false,
     fixedExtension: false,
     target: 'node22',
+    inlineOnly: [],
   },
 ]);

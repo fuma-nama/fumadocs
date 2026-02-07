@@ -14,5 +14,6 @@
   "prettier.enable": false,
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "oxc.oxc-vscode",
-  "oxc.fmt.configPath": ".oxfmtrc.jsonc"
+  "oxc.fmt.configPath": ".oxfmtrc.jsonc",
+  "terminal.integrated.scrollback": 10000
 }

@@ -3,7 +3,7 @@
   "private": true,
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",
-    "@types/node": "^25.1.0",
+    "@types/node": "^25.2.1",
     "eslint-config-custom": "workspace:*",
     "tsconfig": "workspace:*"
   }

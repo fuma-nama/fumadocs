@@ -9,4 +9,5 @@ export default defineConfig({
     sourcemap: false,
   },
   external: ['@tailwindcss/oxide'],
+  inlineOnly: ['lodash.merge'],
 });

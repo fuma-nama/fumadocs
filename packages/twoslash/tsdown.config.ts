@@ -5,6 +5,7 @@ export default defineConfig({
   target: 'es2023',
   format: 'esm',
   entry: ['src/index.ts', 'src/cache-fs.ts', 'src/ui/index.ts'],
+  inlineOnly: [],
   dts: {
     sourcemap: false,
   },

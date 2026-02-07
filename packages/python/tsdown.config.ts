@@ -8,5 +8,5 @@ export default defineConfig({
   },
   fixedExtension: false,
   target: 'es2023',
-  external: ['react'],
+  inlineOnly: [],
 });

@@ -9,4 +9,5 @@ export default defineConfig({
     sourcemap: false,
   },
   external: ['virtual:app/routes'],
+  inlineOnly: [],
 });
