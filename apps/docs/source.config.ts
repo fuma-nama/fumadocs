@@ -1,11 +1,4 @@
-import {
-  applyMdxPreset,
-  defineCollections,
-  defineConfig,
-  defineDocs,
-  frontmatterSchema,
-  metaSchema,
-} from 'fumadocs-mdx/config';
+import { applyMdxPreset, defineCollections, defineConfig, defineDocs } from 'fumadocs-mdx/config';
 import { z } from 'zod';
 import type { ElementContent } from 'hast';
 import jsonSchema from 'fumadocs-mdx/plugins/json-schema';
@@ -14,10 +7,11 @@ import type { ShikiTransformer } from 'shiki';
 import type { RemarkFeedbackBlockOptions } from 'fumadocs-core/mdx-plugins';
 import type { RemarkAutoTypeTableOptions } from 'fumadocs-typescript';
 import { shikiConfig } from './lib/shiki';
+import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
 
 export const docs = defineDocs({
   docs: {
-    schema: frontmatterSchema.extend({
+    schema: pageSchema.extend({
       preview: z.string().optional(),
       index: z.boolean().default(false),
       /**
@@ -106,7 +100,7 @@ export const docs = defineDocs({
 export const blog = defineCollections({
   type: 'doc',
   dir: 'content/blog',
-  schema: frontmatterSchema.extend({
+  schema: pageSchema.extend({
     author: z.string(),
     date: z.iso.date().or(z.date()),
   }),
