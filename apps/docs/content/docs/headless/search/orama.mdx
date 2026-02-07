@@ -25,8 +25,8 @@ Create the server from source object.
   ../../examples/tanstack-start/src/routes/api/search.ts
 </include>
 
-<include cwd meta='tab="Waku" title="src/pages/api/search.ts"'>
-  ../../examples/waku/src/pages/api/search.ts
+<include cwd meta='tab="Waku" title="src/pages/_api/api/search.ts"'>
+  ../../examples/waku/src/pages/_api/api/search.ts
 </include>
 
 ### From Search Indexes
@@ -97,7 +97,7 @@ export const Route = createFileRoute('/api/search')({
 });
 ```
 
-```ts tab="Waku" title="src/pages/api/search.ts"
+```ts tab="Waku" title="src/pages/_api/api/search.ts"
 import { source } from '@/lib/source';
 import { createSearchAPI } from 'fumadocs-core/search/server';
 
@@ -220,7 +220,7 @@ export default defineConfig({
 });
 ```
 
-```ts tab="Waku" title="src/pages/api/search.ts"
+```ts tab="Waku" title="src/pages/_api/api/search.ts"
 import { source } from '@/lib/source';
 import { createFromSource } from 'fumadocs-core/search/server';
 
