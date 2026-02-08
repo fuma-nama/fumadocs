@@ -59,8 +59,8 @@ See https://fumadocs.dev/docs/headless/search/orama-cloud for integrating Orama 
         ]);
       } else {
         await Promise.all([
-          fs.unlink(path.join(appDir, 'pages/api/search.ts')).catch(() => null),
-          writeFile(path.join(appDir, 'pages/static.json.ts'), route.waku),
+          fs.unlink(path.join(appDir, 'pages/_api/api/search.ts')).catch(() => null),
+          writeFile(path.join(appDir, 'pages/_api/static.json.ts'), route.waku),
         ]);
       }
 

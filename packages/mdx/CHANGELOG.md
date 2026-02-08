@@ -1,5 +1,14 @@
 # next-docs-mdx
 
+## 14.2.7
+
+### Patch Changes
+
+- c22f6ee: bump tsdown
+- Updated dependencies [c22f6ee]
+  - @fumadocs/mdx-remote@1.4.5
+  - fumadocs-core@16.5.2
+
 ## 14.2.6
 
 ### Patch Changes

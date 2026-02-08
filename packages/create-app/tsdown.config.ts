@@ -6,4 +6,5 @@ export default defineConfig({
   target: 'node22',
   dts: true,
   fixedExtension: false,
+  inlineOnly: [],
 });

@@ -21,5 +21,5 @@ export default defineConfig({
   async onSuccess() {
     await compileInline();
   },
-  external: [/json-schema-typed/, 'openapi-types'],
+  inlineOnly: [],
 });

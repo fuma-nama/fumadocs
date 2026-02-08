@@ -1,5 +1,13 @@
 # @fumadocs/mdx-remote
 
+## 1.4.5
+
+### Patch Changes
+
+- c22f6ee: bump tsdown
+- Updated dependencies [c22f6ee]
+  - fumadocs-core@16.5.2
+
 ## 1.4.4
 
 ### Patch Changes

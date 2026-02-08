@@ -102,6 +102,37 @@ export const registry: Registry = {
       unlisted: true,
     },
     {
+      name: 'layouts/flux',
+      files: [
+        {
+          type: 'components',
+          path: 'layouts/flux/index.tsx',
+          target: '<dir>/layout/flux/index.tsx',
+        },
+        {
+          type: 'components',
+          path: 'layouts/flux/tab-dropdown.tsx',
+          target: '<dir>/layout/flux/tab-dropdown.tsx',
+        },
+        {
+          type: 'components',
+          path: 'layouts/flux/sidebar.tsx',
+          target: '<dir>/layout/flux/sidebar.tsx',
+        },
+        {
+          type: 'components',
+          path: 'layouts/flux/page/index.tsx',
+          target: '<dir>/layout/flux/page/index.tsx',
+        },
+        {
+          type: 'components',
+          path: 'layouts/flux/page/client.tsx',
+          target: '<dir>/layout/flux/page/client.tsx',
+        },
+      ],
+      unlisted: true,
+    },
+    {
       name: 'layouts/notebook',
       files: [
         {

@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/content-collections",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "The Content Collections adapter for Fumadocs",
   "keywords": [
     "Content Collections",
@@ -38,17 +38,17 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "unified": "^11.0.5",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@content-collections/core": "^0.13.1",
     "@content-collections/mdx": "^0.2.2",
-    "@types/node": "25.1.0",
+    "@types/node": "25.2.1",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "tsconfig": "workspace:*",
-    "tsdown": "^0.19.0",
-    "unified": "^11.0.5"
+    "tsdown": "^0.20.3"
   },
   "peerDependencies": {
     "@content-collections/core": "0.x.x",

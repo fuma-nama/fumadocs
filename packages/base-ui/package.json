@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/base-ui",
-  "version": "16.5.1",
+  "version": "16.5.2",
   "description": "The Base UI version of Fumadocs UI",
   "keywords": [
     "Docs",
@@ -107,7 +107,7 @@
     "@fumadocs/tailwind": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "lucide-react": "^0.563.0",
-    "motion": "^12.30.1",
+    "motion": "^12.33.0",
     "next-themes": "^0.4.6",
     "react-medium-image-zoom": "^5.4.0",
     "react-remove-scroll": "^2.7.2",
@@ -117,14 +117,14 @@
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",
     "@tailwindcss/cli": "^4.1.18",
-    "@types/node": "^25.1.0",
-    "@types/react": "^19.2.10",
+    "@types/node": "^25.2.1",
+    "@types/react": "^19.2.13",
     "@types/react-dom": "^19.2.3",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "tailwindcss": "^4.1.18",
     "tsconfig": "workspace:*",
-    "tsdown": "^0.19.0"
+    "tsdown": "^0.20.3"
   },
   "peerDependencies": {
     "@types/react": "*",

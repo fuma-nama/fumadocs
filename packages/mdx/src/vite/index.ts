@@ -90,7 +90,7 @@ export default async function mdx(
         }
       } catch (e) {
         if (e instanceof ValidationError) {
-          throw new Error(await e.toStringFormatted());
+          throw new Error(await e.toStringFormatted(), { cause: e });
         }
 
         throw e;

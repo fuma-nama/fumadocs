@@ -9,6 +9,7 @@ export default defineConfig({
   dts: true,
   fixedExtension: false,
   target: 'node22',
+  inlineOnly: [],
   async onSuccess() {
     console.log('JSON schema generated');
     await fs.mkdir('dist/schema', { recursive: true });

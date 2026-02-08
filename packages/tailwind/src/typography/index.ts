@@ -147,8 +147,8 @@ const SELECTORS = [
   ['lead', '[class~="lead"]'],
 ];
 
-export const typography: unknown = plugin.withOptions<Options>(
-  ({ className = 'prose', ...styleOptions } = {}) => {
+export const typography: ReturnType<typeof plugin.withOptions<Options>> =
+  plugin.withOptions<Options>(({ className = 'prose', ...styleOptions } = {}) => {
     return ({ addVariant, addComponents, ...rest }) => {
       const prefix = (rest as unknown as { prefix: Context['prefix'] }).prefix;
 
@@ -182,7 +182,6 @@ export const typography: unknown = plugin.withOptions<Options>(
         ),
       });
     };
-  },
-);
+  });
 
 export default typography;
