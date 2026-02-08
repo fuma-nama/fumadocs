@@ -1,5 +1,13 @@
 # fumadocs-obsidian
 
+## 0.0.11
+
+### Patch Changes
+
+- c22f6ee: bump tsdown
+- Updated dependencies [c22f6ee]
+  - fumadocs-core@16.5.2
+
 ## 0.0.10
 
 ### Patch Changes

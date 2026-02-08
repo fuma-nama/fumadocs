@@ -1,5 +1,14 @@
 # fumadocs-typescript
 
+## 5.1.2
+
+### Patch Changes
+
+- c22f6ee: bump tsdown
+- Updated dependencies [c22f6ee]
+  - fumadocs-ui@16.5.2
+  - fumadocs-core@16.5.2
+
 ## 5.1.0
 
 ### Minor Changes
