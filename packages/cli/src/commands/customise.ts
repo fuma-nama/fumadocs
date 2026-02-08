@@ -5,14 +5,20 @@ import type { RegistryClient } from '@/registry/client';
 import { ComponentInstaller } from '@/registry/installer';
 import { UIRegistries } from '@/commands/shared';
 
+interface TargetInfo {
+  target: string[];
+  replace: [string, string][];
+}
+
 export async function customise(client: RegistryClient) {
   intro(picocolors.bgBlack(picocolors.whiteBright('Customise Fumadocs UI')));
   const config = client.config;
   const installer = new ComponentInstaller(client);
+  const registry = UIRegistries[config.uiLibrary];
 
   const result = await group(
     {
-      target: () =>
+      layout: () =>
         select({
           message: 'What do you want to customise?',
           options: [
@@ -28,25 +34,58 @@ export async function customise(client: RegistryClient) {
             },
           ],
         }),
-      mode: (v) => {
-        if (v.results.target !== 'docs') return;
+      target: (v): Promise<TargetInfo | symbol> => {
+        if (v.results.layout !== 'docs')
+          return Promise.resolve({
+            target: [`${registry}/layouts/home`],
+            replace: [['fumadocs-ui/layouts/home', `@/components/layout/home`]],
+          });
 
-        return select({
+        return select<TargetInfo>({
           message: 'Which variant do you want to start from?',
           options: [
             {
               label: 'Start from minimal styles',
-              value: 'minimal',
               hint: 'for those who want to build their own variant from ground up.',
+              value: {
+                target: ['fumadocs/ui/layouts/docs-min'],
+                replace: [
+                  ['fumadocs-ui/layouts/docs', '@/components/layout/docs'],
+                  ['fumadocs-ui/layouts/docs/page', '@/components/layout/docs/page'],
+                ],
+              },
             },
             {
               label: 'Start from default layout',
-              value: 'full-default',
+              value: {
+                target: [`${registry}/layouts/docs`],
+                replace: [
+                  ['fumadocs-ui/layouts/docs', '@/components/layout/docs'],
+                  ['fumadocs-ui/layouts/docs/page', '@/components/layout/docs/page'],
+                ],
+              },
               hint: 'useful for adjusting small details.',
             },
             {
               label: 'Start from Notebook layout',
-              value: 'full-notebook',
+              value: {
+                target: [`${registry}/layouts/notebook`],
+                replace: [
+                  ['fumadocs-ui/layouts/notebook', '@/components/layout/notebook'],
+                  ['fumadocs-ui/layouts/notebook/page', '@/components/layout/notebook/page'],
+                ],
+              },
+              hint: 'useful for adjusting small details.',
+            },
+            {
+              label: 'Start from Flux layout',
+              value: {
+                target: [`${registry}/layouts/flux`],
+                replace: [
+                  ['fumadocs-ui/layouts/flux', '@/components/layout/flux'],
+                  ['fumadocs-ui/layouts/flux/page', '@/components/layout/flux/page'],
+                ],
+              },
               hint: 'useful for adjusting small details.',
             },
           ],
@@ -61,38 +100,9 @@ export async function customise(client: RegistryClient) {
     },
   );
 
-  const registry = UIRegistries[config.uiLibrary];
-  if (result.target === 'docs') {
-    const targets = [];
-    if (result.mode === 'minimal') {
-      targets.push('fumadocs/ui/layouts/docs-min');
-    } else {
-      targets.push(
-        result.mode === 'full-default'
-          ? `${registry}/layouts/docs`
-          : `${registry}/layouts/notebook`,
-      );
-    }
-
-    await install(targets, installer);
-    const maps: [string, string][] =
-      result.mode === 'full-notebook'
-        ? [
-            ['fumadocs-ui/layouts/notebook', '@/components/layout/notebook'],
-            ['fumadocs-ui/layouts/notebook/page', '@/components/layout/notebook/page'],
-          ]
-        : [
-            ['fumadocs-ui/layouts/docs', '@/components/layout/docs'],
-            ['fumadocs-ui/layouts/docs/page', '@/components/layout/docs/page'],
-          ];
-
-    printNext(...maps);
-  }
-
-  if (result.target === 'home') {
-    await install([`${registry}/layouts/home`], installer);
-    printNext(['fumadocs-ui/layouts/home', `@/components/layout/home`]);
-  }
+  const target = result.target as TargetInfo;
+  await install(target.target, installer);
+  printNext(...target.replace);
 
   outro(picocolors.bold('Have fun!'));
 }
