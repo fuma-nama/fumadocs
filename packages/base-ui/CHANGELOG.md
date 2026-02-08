@@ -1,5 +1,14 @@
 # @fumadocs/base-ui
 
+## 16.5.2
+
+### Patch Changes
+
+- c22f6ee: bump tsdown
+- Updated dependencies [c22f6ee]
+  - @fumadocs/tailwind@0.0.2
+  - fumadocs-core@16.5.2
+
 ## 16.5.1
 
 ### Patch Changes

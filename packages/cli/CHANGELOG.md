@@ -1,5 +1,12 @@
 # fumadocs
 
+## 1.2.4
+
+### Patch Changes
+
+- c22f6ee: bump tsdown
+- 4c570ce: add Flux layout to customise option
+
 ## 1.2.3
 
 ### Patch Changes

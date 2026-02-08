@@ -1,5 +1,13 @@
 # fumadocs-twoslash
 
+## 3.1.13
+
+### Patch Changes
+
+- c22f6ee: bump tsdown
+- Updated dependencies [c22f6ee]
+  - fumadocs-ui@16.5.2
+
 ## 3.1.12
 
 ### Patch Changes

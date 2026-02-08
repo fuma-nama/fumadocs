@@ -1,5 +1,13 @@
 # @fumadocs/content-collections
 
+## 1.2.6
+
+### Patch Changes
+
+- c22f6ee: bump tsdown
+- Updated dependencies [c22f6ee]
+  - fumadocs-core@16.5.2
+
 ## 1.2.5
 
 ### Patch Changes

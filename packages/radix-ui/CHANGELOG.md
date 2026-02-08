@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 16.5.2
+
+### Patch Changes
+
+- c22f6ee: bump tsdown
+- Updated dependencies [c22f6ee]
+  - @fumadocs/tailwind@0.0.2
+  - fumadocs-core@16.5.2
+
 ## 16.5.1
 
 ### Patch Changes
@@ -401,7 +410,7 @@
       export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
         source: S,
         pageToIndexFn?: (page: InferPageType<S>) => Awaitable<AdvancedIndex>,
-        options?: Omit<Options<S>, "buildIndex">
+        options?: Omit<Options<S>, "buildIndex">,
       ): SearchAPI;
       ```
     - remove deprecated parameters in `useSearch()`, pass them in the client object instead.
@@ -450,7 +459,6 @@
 
 - 90cf1fe: Support `tabMode` on `<DocsLayout />`
 - 6c3bde5: **Prefer importing `<RootProvider />` from `fumadocs-ui/provider/<framework>`**
-
   - Old `fumadocs-ui/provider` will be kept, as it's used by majority of previous projects.
   - New guides & templates will follow the new recommendation.
 
@@ -863,7 +871,6 @@
   Changed layout positioning, all layout components now use `fixed` position.
 
   This may impact sites that:
-
   - using custom styling on Fumadocs layouts.
   - added a custom footer (see below).
 
@@ -1558,7 +1565,6 @@
 ### Minor Changes
 
 - 66c70ec: **Replace official Tailwind CSS typography plugin**
-
   - Other variants like `prose-sm` and `prose-gray` are removed, as it's supposed to only provide support for Fumadocs UI typography styles.
 
 - 05d224c: added the updateAnchor option for the Tabs ui component
@@ -2511,7 +2517,6 @@
 ### Major Changes
 
 - 62b5abb: **New Layout**
-
   - Remove navbar from docs layout, replace it with sidebar.
   - On smaller devices, navbar is always shown.
   - Remove exports of internal components, copying components from the repository is now the preferred way.

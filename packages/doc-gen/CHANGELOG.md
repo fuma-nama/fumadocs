@@ -1,5 +1,13 @@
 # fumadocs-docgen
 
+## 3.0.6
+
+### Patch Changes
+
+- c22f6ee: bump tsdown
+- Updated dependencies [c22f6ee]
+  - fumadocs-core@16.5.2
+
 ## 3.0.5
 
 ### Patch Changes

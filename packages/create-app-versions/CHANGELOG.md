@@ -1,5 +1,15 @@
 # create-fumadocs-versions
 
+## 16.0.49
+
+### Patch Changes
+
+- c22f6ee: bump tsdown
+- Updated dependencies [c22f6ee]
+  - fumadocs-ui@16.5.2
+  - fumadocs-core@16.5.2
+  - fumadocs-mdx@14.2.7
+
 ## 16.0.48
 
 ### Patch Changes
