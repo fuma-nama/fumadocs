@@ -17,13 +17,11 @@
       "outputs": [
         ".output",
         "public/registry",
-        "public/r",
-        ".contentlayer/**",
         ".source/**",
-        "!.contentlayer/.cache/**",
         ".next/**",
         "!.next/cache/**",
         "dist/**",
+        "css/generated/**",
         "out",
         "build",
         ".vercel"

@@ -8,6 +8,11 @@ import type { RemarkFeedbackBlockOptions } from 'fumadocs-core/mdx-plugins';
 import type { RemarkAutoTypeTableOptions } from 'fumadocs-typescript';
 import { shikiConfig } from './lib/shiki';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
+import { visit } from 'unist-util-visit';
+import type { Transformer } from 'unified';
+import type { Root } from 'mdast';
+
+const isLint = process.env.LINT === '1';
 
 export const docs = defineDocs({
   docs: {
@@ -22,6 +27,7 @@ export const docs = defineDocs({
     postprocess: {
       includeProcessedMarkdown: true,
       extractLinkReferences: true,
+      valueToExport: ['elementIds'],
     },
     async: true,
     async mdxOptions(environment) {
@@ -56,21 +62,23 @@ export const docs = defineDocs({
         remarkStructureOptions: {
           types: [...remarkStructureDefaultOptions.types, 'code'],
         },
-        rehypeCodeOptions: {
-          langs: ['ts', 'js', 'html', 'tsx', 'mdx'],
-          inline: 'tailing-curly-colon',
-          themes: {
-            light: 'catppuccin-latte',
-            dark: 'catppuccin-mocha',
-          },
-          transformers: [
-            ...(rehypeCodeDefaultOptions.transformers ?? []),
-            transformerTwoslash({
-              typesCache: createFileSystemTypesCache(),
-            }),
-            transformerEscape(),
-          ],
-        },
+        rehypeCodeOptions: isLint
+          ? false
+          : {
+              langs: ['ts', 'js', 'html', 'tsx', 'mdx'],
+              inline: 'tailing-curly-colon',
+              themes: {
+                light: 'catppuccin-latte',
+                dark: 'catppuccin-mocha',
+              },
+              transformers: [
+                ...(rehypeCodeDefaultOptions.transformers ?? []),
+                transformerTwoslash({
+                  typesCache: createFileSystemTypesCache(),
+                }),
+                transformerEscape(),
+              ],
+            },
         remarkCodeTabOptions: {
           parseMdx: true,
         },
@@ -79,13 +87,15 @@ export const docs = defineDocs({
             id: 'package-manager',
           },
         },
-        remarkPlugins: [
-          remarkSteps,
-          remarkMath,
-          [remarkFeedbackBlock, feedbackOptions],
-          [remarkAutoTypeTable, typeTableOptions],
-          remarkTypeScriptToJavaScript,
-        ],
+        remarkPlugins: isLint
+          ? [remarkElementIds]
+          : [
+              remarkSteps,
+              remarkMath,
+              [remarkFeedbackBlock, feedbackOptions],
+              [remarkAutoTypeTable, typeTableOptions],
+              remarkTypeScriptToJavaScript,
+            ],
         rehypePlugins: (v) => [rehypeKatex, ...v],
       })(environment);
     },
@@ -110,14 +120,16 @@ export const blog = defineCollections({
     const { remarkSteps } = await import('fumadocs-core/mdx-plugins/remark-steps');
 
     return applyMdxPreset({
-      rehypeCodeOptions: {
-        inline: 'tailing-curly-colon',
-        themes: {
-          light: 'catppuccin-latte',
-          dark: 'catppuccin-mocha',
-        },
-        transformers: [...(rehypeCodeDefaultOptions.transformers ?? []), transformerEscape()],
-      },
+      rehypeCodeOptions: isLint
+        ? false
+        : {
+            inline: 'tailing-curly-colon',
+            themes: {
+              light: 'catppuccin-latte',
+              dark: 'catppuccin-mocha',
+            },
+            transformers: [...(rehypeCodeDefaultOptions.transformers ?? []), transformerEscape()],
+          },
       remarkCodeTabOptions: {
         parseMdx: true,
       },
@@ -126,7 +138,7 @@ export const blog = defineCollections({
           id: 'package-manager',
         },
       },
-      remarkPlugins: [remarkSteps],
+      remarkPlugins: isLint ? [remarkElementIds] : [remarkSteps],
     })(environment);
   },
 });
@@ -148,6 +160,25 @@ function transformerEscape(): ShikiTransformer {
       replace(hast);
       return hast;
     },
+  };
+}
+
+function remarkElementIds(): Transformer<Root, Root> {
+  return (tree, file) => {
+    file.data ??= {};
+    file.data.elementIds ??= [];
+
+    visit(tree, 'mdxJsxFlowElement', (element) => {
+      if (!element.name || !element.attributes) return;
+
+      const idAttr = element.attributes.find(
+        (attr) => attr.type === 'mdxJsxAttribute' && attr.name === 'id',
+      );
+
+      if (idAttr && typeof idAttr.value === 'string') {
+        (file.data.elementIds as string[]).push(idAttr.value);
+      }
+    });
   };
 }
 
