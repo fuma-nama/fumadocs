@@ -32,8 +32,6 @@ export const docs = defineDocs({
     async: true,
     async mdxOptions(environment) {
       const { rehypeCodeDefaultOptions } = await import('fumadocs-core/mdx-plugins/rehype-code');
-      const { remarkStructureDefaultOptions } =
-        await import('fumadocs-core/mdx-plugins/remark-structure');
       const { remarkSteps } = await import('fumadocs-core/mdx-plugins/remark-steps');
       const { remarkFeedbackBlock } =
         await import('fumadocs-core/mdx-plugins/remark-feedback-block');
@@ -59,9 +57,6 @@ export const docs = defineDocs({
         shiki: shikiConfig,
       };
       return applyMdxPreset({
-        remarkStructureOptions: {
-          types: [...remarkStructureDefaultOptions.types, 'code'],
-        },
         rehypeCodeOptions: isLint
           ? false
           : {

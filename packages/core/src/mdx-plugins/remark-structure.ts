@@ -2,14 +2,17 @@ import Slugger from 'github-slugger';
 import type { Nodes, Root } from 'mdast';
 import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
-import type { PluggableList, Transformer } from 'unified';
+import type { PluggableList, Processor, Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
 import { flattenNode, toMdxExport } from './mdast-utils';
-import type {
-  MdxJsxAttribute,
-  MdxJsxExpressionAttribute,
-  MdxJsxFlowElement,
-} from 'mdast-util-mdx-jsx';
+import {
+  mdxToMarkdown,
+  type MdxJsxAttribute,
+  type MdxJsxExpressionAttribute,
+  type MdxJsxFlowElement,
+  type MdxJsxTextElement,
+} from 'mdast-util-mdx';
+import { type Handle, toMarkdown } from 'mdast-util-to-markdown';
 
 interface Heading {
   id: string;
@@ -31,14 +34,21 @@ export interface StructuredData {
 
 export interface StructureOptions {
   /**
-   * Types to be scanned as content.
+   * MDAST **block** types to be scanned as content.
+   *
+   * If a node's type is represented in this array, it will be stringified and its children will not be scanned.
    *
    * @defaultValue ['heading', 'paragraph', 'blockquote', 'tableCell', 'mdxJsxFlowElement']
    */
   types?: string[] | ((node: Nodes) => boolean);
 
   /**
-   * A list of indexable MDX attributes, either:
+   * stringify a given node & its children, you can use something like `mdast-util-to-markdown`.
+   */
+  stringify?: (this: Processor, node: Nodes) => string;
+
+  /**
+   * By default, it will not index MDX attributes. You can define a list of MDX attributes to index, either:
    *
    * - an array of attribute names.
    * - a function that determines if attribute should be indexed.
@@ -46,12 +56,12 @@ export interface StructureOptions {
   allowedMdxAttributes?:
     | string[]
     | ((
-        node: MdxJsxFlowElement,
+        node: MdxJsxFlowElement | MdxJsxTextElement,
         attribute: MdxJsxAttribute | MdxJsxExpressionAttribute,
       ) => boolean);
 
   /**
-   * export as `structuredData` or specified variable name.
+   * export as `structuredData` (if true) or specified variable name.
    */
   exportAs?: string | boolean;
 }
@@ -59,7 +69,7 @@ export interface StructureOptions {
 declare module 'mdast' {
   interface Data {
     /**
-     * [Fumadocs] Get content of unserializable element, `remarkStructure` uses it to generate search index.
+     * [Fumadocs] Stringified form of node, `remarkStructure` uses it to generate search index.
      */
     _string?: string[];
   }
@@ -76,24 +86,32 @@ declare module 'vfile' {
 
 export const remarkStructureDefaultOptions = {
   types: ['heading', 'paragraph', 'blockquote', 'tableCell', 'mdxJsxFlowElement'],
-  allowedMdxAttributes: (node) => {
-    if (!node.name) return false;
-
-    return ['TypeTable', 'Callout'].includes(node.name);
+  allowedMdxAttributes(node) {
+    switch (node.name) {
+      case 'TypeTable':
+      case 'Callout':
+        return true;
+      default:
+        return false;
+    }
   },
   exportAs: false,
-} satisfies Required<StructureOptions>;
+} satisfies StructureOptions;
 
 /**
  * Extract content into structured data.
  *
  * By default, the output is stored into VFile (`vfile.data.structuredData`), you can specify `exportAs` to export it.
  */
-export function remarkStructure({
-  types = remarkStructureDefaultOptions.types,
-  allowedMdxAttributes = remarkStructureDefaultOptions.allowedMdxAttributes,
-  exportAs = remarkStructureDefaultOptions.exportAs,
-}: StructureOptions = {}): Transformer<Root, Root> {
+export function remarkStructure(
+  this: Processor,
+  {
+    types = remarkStructureDefaultOptions.types,
+    stringify,
+    allowedMdxAttributes = remarkStructureDefaultOptions.allowedMdxAttributes,
+    exportAs = remarkStructureDefaultOptions.exportAs,
+  }: StructureOptions = {},
+): Transformer<Root, Root> {
   const slugger = new Slugger();
 
   if (Array.isArray(allowedMdxAttributes)) {
@@ -106,6 +124,29 @@ export function remarkStructure({
     const arr = types;
     types = (node) => arr.includes(node.type);
   }
+
+  stringify ??= (root) => {
+    const { mdxJsxFlowElement } = mdxToMarkdown({ tightSelfClosing: true }).extensions![1]
+      .handlers!;
+    const wrapper: Handle = (node: MdxJsxFlowElement | MdxJsxTextElement, ...rest) => {
+      const originalAttributes = node.attributes;
+      if (allowedMdxAttributes)
+        node.attributes = node.attributes.filter((attr) => allowedMdxAttributes(node, attr));
+      const s = mdxJsxFlowElement!(node, ...rest);
+      node.attributes = originalAttributes;
+      return s;
+    };
+
+    return toMarkdown(root, {
+      ...this.data('settings'),
+      // from https://github.com/remarkjs/remark/blob/main/packages/remark-stringify/lib/index.js
+      extensions: this.data('toMarkdownExtensions') ?? [],
+      handlers: {
+        mdxJsxFlowElement: wrapper,
+        mdxJsxTextElement: wrapper,
+      },
+    });
+  };
 
   return (tree, file) => {
     slugger.reset();
@@ -156,31 +197,13 @@ export function remarkStructure({
         return 'skip';
       }
 
-      if (element.type === 'mdxJsxFlowElement' && element.name) {
-        data.contents.push(
-          ...element.attributes.flatMap((attribute) => {
-            const value =
-              typeof attribute.value === 'string' ? attribute.value : attribute.value?.value;
-            if (!value || value.length === 0) return [];
-            if (allowedMdxAttributes && !allowedMdxAttributes(element, attribute)) return [];
-
-            return {
-              heading: lastHeading,
-              content: attribute.type === 'mdxJsxAttribute' ? `${attribute.name}: ${value}` : value,
-            };
-          }),
-        );
-
-        return;
+      const content = stringify.call(this, element).trim();
+      if (content.length > 0) {
+        data.contents.push({
+          heading: lastHeading,
+          content,
+        });
       }
-
-      const content = flattenNode(element).trim();
-      if (content.length === 0) return;
-
-      data.contents.push({
-        heading: lastHeading,
-        content,
-      });
 
       return 'skip';
     });

@@ -1,4 +1,4 @@
-import type { MdxJsxAttribute, MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
+import type { MdxJsxAttribute, MdxJsxFlowElement } from 'mdast-util-mdx';
 import type { BlockContent, Text } from 'mdast';
 
 export interface CodeBlockTabsOptions {

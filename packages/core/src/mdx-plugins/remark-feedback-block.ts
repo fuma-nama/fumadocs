@@ -1,6 +1,6 @@
 import type { Transformer } from 'unified';
 import type { BlockContent, Root, RootContent } from 'mdast';
-import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
+import type { MdxJsxFlowElement } from 'mdast-util-mdx';
 import { visit } from 'unist-util-visit';
 import { createHash } from 'node:crypto';
 import { flattenNode } from './mdast-utils';

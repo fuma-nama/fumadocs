@@ -46,10 +46,14 @@ test('Remark Mdx Files', async () => {
 });
 
 test('Remark Structure', async () => {
-  const content = await fs.readFile(path.resolve(cwd, './fixtures/remark-structure.md'));
-  const result = await remark().use(remarkGfm).use(remarkStructure).process(content);
+  const content = await fs.readFile(path.resolve(cwd, './fixtures/remark-structure.mdx'));
+  const result = await remark()
+    .use(remarkGfm)
+    .use(remarkMdx)
+    .use(remarkStructure, { allowedMdxAttributes: ['title'] })
+    .process(content);
 
-  await expect(result.data.structuredData).toMatchFileSnapshot(
+  await expect(JSON.stringify(result.data.structuredData, null, 2)).toMatchFileSnapshot(
     path.resolve(cwd, './fixtures/remark-structure.output.json'),
   );
 });

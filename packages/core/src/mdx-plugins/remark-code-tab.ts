@@ -1,7 +1,7 @@
 import type { Processor, Transformer } from 'unified';
 import type { BlockContent, Code, DefinitionContent, Root } from 'mdast';
 import { visit } from 'unist-util-visit';
-import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
+import type { MdxJsxFlowElement } from 'mdast-util-mdx';
 import { generateCodeBlockTabs, parseCodeBlockAttributes } from '@/mdx-plugins/codeblock-utils';
 
 type TabType = keyof typeof Types;

@@ -1,42 +1,50 @@
 {
   "contents": [
     {
-      "content": "Some text here",
       "heading": "heading-1",
+      "content": "Some text here"
     },
     {
-      "content": "Some text here",
       "heading": "heading-2",
+      "content": "Some text here"
     },
     {
-      "content": "Name",
       "heading": "heading-3",
+      "content": "Name"
     },
     {
-      "content": "Description",
       "heading": "heading-3",
+      "content": "Description"
     },
     {
-      "content": "Hello World",
       "heading": "heading-3",
+      "content": "Hello World"
     },
     {
-      "content": "Goodbye",
       "heading": "heading-3",
+      "content": "Goodbye"
     },
+    {
+      "heading": "heading-3",
+      "content": "<Card title=\"Test\">wow</Card>"
+    },
+    {
+      "heading": "heading-3",
+      "content": "<Card title=\"Test\">\n  wow\n</Card>"
+    }
   ],
   "headings": [
     {
-      "content": "Heading 1",
       "id": "heading-1",
+      "content": "Heading 1"
     },
     {
-      "content": "Heading 2",
       "id": "heading-2",
+      "content": "Heading 2"
     },
     {
-      "content": "Heading 3",
       "id": "heading-3",
-    },
-  ],
+      "content": "Heading 3"
+    }
+  ]
 }

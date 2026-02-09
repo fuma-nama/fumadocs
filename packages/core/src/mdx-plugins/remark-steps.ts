@@ -1,7 +1,7 @@
 import type { Transformer } from 'unified';
 import type { BlockContent, Heading, Root, RootContent } from 'mdast';
 import { visit } from 'unist-util-visit';
-import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
+import type { MdxJsxFlowElement } from 'mdast-util-mdx';
 
 export interface RemarkStepsOptions {
   /**

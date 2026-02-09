@@ -9,7 +9,7 @@ import {
 } from '@shikijs/transformers';
 import type { Processor, Transformer } from 'unified';
 import type { Highlighter, ShikiTransformer } from 'shiki';
-import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
+import type { MdxJsxFlowElement } from 'mdast-util-mdx';
 import type { CodeBlockIcon, IconOptions } from './transformer-icon';
 import { transformerIcon } from './transformer-icon';
 import { parseCodeBlockAttributes } from '@/mdx-plugins/codeblock-utils';
