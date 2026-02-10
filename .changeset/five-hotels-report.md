@@ -1,5 +1,5 @@
 ---
-"fumadocs-core": minor
+'fumadocs-core': minor
 ---
 
 Move mixedbread search to server-side
