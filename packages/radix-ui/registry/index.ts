@@ -3,7 +3,7 @@ import type { Registry } from '@fumadocs/cli/build';
 import * as path from 'node:path';
 import { commonComponents, resolveExternal } from '../../shared/registry';
 
-const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../');
+const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../src');
 
 // in shadcn cli, the order of files matters when writing import paths on consumer's codebase
 export const registry: Registry = {
