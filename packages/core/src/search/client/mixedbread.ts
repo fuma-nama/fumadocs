@@ -4,6 +4,11 @@ import removeMd from 'remove-markdown';
 import Slugger from 'github-slugger';
 import type { StoreSearchResponse } from '@mixedbread/sdk/resources/stores';
 
+/**
+ * @deprecated Use `createMixedbreadSearchAPI` from `fumadocs-core/search/mixedbread` instead.
+ * This client-side approach exposes your API key in the browser.
+ * The server-side approach keeps the key secure and uses `type: 'fetch'` on the client.
+ */
 export interface MixedbreadOptions {
   /**
    * The identifier of the store to search in
@@ -59,6 +64,11 @@ function extractHeadingTitle(text: string): string {
   return '';
 }
 
+/**
+ * @deprecated Use `createMixedbreadSearchAPI` from `fumadocs-core/search/mixedbread` instead.
+ * This client-side approach exposes your API key in the browser.
+ * The server-side approach keeps the key secure and uses `type: 'fetch'` on the client.
+ */
 export async function search(query: string, options: MixedbreadOptions): Promise<SortedResult[]> {
   const { client, storeIdentifier, tag } = options;
 

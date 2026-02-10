@@ -57,6 +57,24 @@ You can automatically sync your documentation by adding a sync script to your `p
 }
 ```
 
+### Search API
+
+Create an API route to handle search requests server-side:
+
+```ts title="app/api/search/route.ts"
+import { createMixedbreadSearchAPI } from 'fumadocs-core/search/mixedbread';
+import Mixedbread from '@mixedbread/sdk';
+
+const client = new Mixedbread({
+  apiKey: 'YOUR_API_KEY',
+});
+
+export const { GET } = createMixedbreadSearchAPI({
+  client,
+  storeIdentifier: 'YOUR_STORE_ID',
+});
+```
+
 ### Search Client
 
 - **Fumadocs UI**: see [Search UI](/docs/search/mixedbread) for details.
@@ -65,13 +83,9 @@ You can automatically sync your documentation by adding a sync script to your `p
   ```ts
   import { useDocsSearch } from 'fumadocs-core/search/client';
 
-  const mxbai = new Mixedbread({
-    apiKey: 'YOUR_API_KEY',
-  });
-
   const client = useDocsSearch({
-    type: 'mixedbread',
-    client: mxbai,
+    type: 'fetch',
+    api: '/api/search',
   });
   ```
 
@@ -93,13 +107,15 @@ tag: docs
 
 And update your search client:
 
-- **Fumadocs UI**: Enable [Tag Filter](/docs/search/orama#tag-filter) on Search UI.
+- **Fumadocs UI**: Enable [Tag Filter](/docs/search/mixedbread#tag-filter) on Search UI.
 - **Search Client**: You can add the tag filter like:
 
   ```ts
   import { useDocsSearch } from 'fumadocs-core/search/client';
 
   const { search, setSearch, query } = useDocsSearch({
+    type: 'fetch',
+    api: '/api/search',
     tag: '<your tag value>',
     // ...
   });
