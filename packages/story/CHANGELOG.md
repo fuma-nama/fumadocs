@@ -1,5 +1,13 @@
 # @fumadocs/story
 
+## 0.0.7
+
+### Patch Changes
+
+- Updated dependencies [7872e27]
+  - @fumari/stf@0.0.3
+  - fumadocs-ui@16.5.4
+
 ## 0.0.6
 
 ### Patch Changes
