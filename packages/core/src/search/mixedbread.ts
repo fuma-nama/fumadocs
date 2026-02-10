@@ -113,7 +113,15 @@ function defaultTransform(results: StoreSearchResult[]): SortedResult[] {
 }
 
 export function createMixedbreadSearchAPI(options: MixedbreadSearchOptions): SearchAPI {
-  const { client, storeIdentifier, topK = 10, rerank = true, rewriteQuery, scoreThreshold, transform } = options;
+  const {
+    client,
+    storeIdentifier,
+    topK = 10,
+    rerank = true,
+    rewriteQuery,
+    scoreThreshold,
+    transform,
+  } = options;
 
   return createEndpoint({
     async search(query, searchOptions) {
