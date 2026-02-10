@@ -50,6 +50,7 @@ test('Remark Structure', async () => {
   const result = await remark()
     .use(remarkGfm)
     .use(remarkMdx)
+    .use(remarkHeading)
     .use(remarkStructure, { allowedMdxAttributes: ['title'] })
     .process(content);
 
