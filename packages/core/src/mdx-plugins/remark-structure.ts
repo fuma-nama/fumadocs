@@ -31,11 +31,25 @@ export interface StructuredData {
   contents: Content[];
 }
 
-export interface StructureOptions {
+interface StringifyOptions {
   /**
-   * MDAST **block** types to be scanned as content.
+   * Determine whether the element itself should be stringified in content block, only stringify its attributes & children if `false`.
    *
-   * If a node's type is represented in this array, it will be stringified and its children will not be scanned separatedly.
+   * Always return `false` by default.
+   */
+  filterMdxElements?: (node: MdxJsxFlowElement | MdxJsxTextElement) => boolean;
+
+  filterMdxAttributes?: (
+    node: MdxJsxFlowElement | MdxJsxTextElement,
+    attribute: MdxJsxAttribute | MdxJsxExpressionAttribute,
+  ) => boolean;
+}
+
+export interface StructureOptions extends Omit<StringifyOptions, 'filterMdxAttributes'> {
+  /**
+   * MDAST node types to be scanned as a content block.
+   *
+   * If a node's type represents in this array, it will be converted into a single content block.
    *
    * @defaultValue ['heading', 'paragraph', 'blockquote', 'tableCell', 'mdxJsxFlowElement']
    */
@@ -85,15 +99,6 @@ declare module 'vfile' {
 
 export const remarkStructureDefaultOptions = {
   types: ['heading', 'paragraph', 'blockquote', 'tableCell', 'mdxJsxFlowElement'],
-  allowedMdxAttributes(node) {
-    switch (node.name) {
-      case 'TypeTable':
-      case 'Callout':
-        return true;
-      default:
-        return false;
-    }
-  },
   exportAs: false,
 } satisfies StructureOptions;
 
@@ -107,8 +112,9 @@ export function remarkStructure(
   {
     types = remarkStructureDefaultOptions.types,
     stringify,
-    allowedMdxAttributes = remarkStructureDefaultOptions.allowedMdxAttributes,
+    allowedMdxAttributes,
     exportAs = remarkStructureDefaultOptions.exportAs,
+    ...stringifyOptions
   }: StructureOptions = {},
 ): Transformer<Root, Root> {
   if (Array.isArray(allowedMdxAttributes)) {
@@ -122,7 +128,10 @@ export function remarkStructure(
     types = (node) => arr.includes(node.type);
   }
 
-  stringify ??= defaultStringify({ filterMdxAttributes: allowedMdxAttributes });
+  stringify ??= defaultStringify({
+    filterMdxAttributes: allowedMdxAttributes,
+    ...stringifyOptions,
+  });
   return (tree, file) => {
     const data: StructuredData = { contents: [], headings: [] };
     let lastHeading: string | undefined;
@@ -161,17 +170,6 @@ export function remarkStructure(
         });
 
         lastHeading = id;
-        return 'skip';
-      }
-
-      if (element.data?._string) {
-        for (const content of element.data._string) {
-          data.contents.push({
-            heading: lastHeading,
-            content,
-          });
-        }
-
         return 'skip';
       }
 
@@ -219,14 +217,20 @@ interface CustomRootNode {
 }
 
 export function defaultStringify(
-  config: Options & {
-    filterMdxAttributes?: (
-      node: MdxJsxFlowElement | MdxJsxTextElement,
-      attribute: MdxJsxAttribute | MdxJsxExpressionAttribute,
-    ) => boolean;
-  } = {},
+  config: Options & StringifyOptions = {},
 ): (this: Processor, node: Nodes) => string {
-  const { filterMdxAttributes } = config;
+  const {
+    filterMdxAttributes = (node) => {
+      switch (node.name) {
+        case 'TypeTable':
+        case 'Callout':
+          return true;
+        default:
+          return false;
+      }
+    },
+    filterMdxElements = () => false,
+  } = config;
 
   function modHandler(handler: Handle): Handle {
     return function (node: Nodes, ...rest) {
@@ -234,14 +238,30 @@ export function defaultStringify(
 
       switch (node.type) {
         case 'mdxJsxFlowElement':
-        case 'mdxJsxTextElement':
-          if (filterMdxAttributes) {
-            const temp = node.attributes;
-            node.attributes = node.attributes.filter((attr) => filterMdxAttributes(node, attr));
-            const s = handler(node, ...rest);
-            node.attributes = temp;
-            return s;
+        case 'mdxJsxTextElement': {
+          const filteredAttributes = node.attributes.filter((attr) =>
+            filterMdxAttributes(node, attr),
+          );
+
+          if (!filterMdxElements(node)) {
+            let attrStr = '';
+
+            for (const attr of filteredAttributes) {
+              const str = typeof attr.value === 'string' ? attr.value : attr.value?.value;
+              if (!str) continue;
+              attrStr += attr.type === 'mdxJsxAttribute' ? `(${attr.name}=${str}) ` : `(${str}) `;
+            }
+
+            if (node.children.length === 0) return attrStr.trimEnd();
+            return attrStr + rest[1].handle({ type: 'root', children: node.children }, ...rest);
           }
+
+          const temp = node.attributes;
+          node.attributes = filteredAttributes;
+          const s = handler(node, ...rest);
+          node.attributes = temp;
+          return s;
+        }
         default:
           return handler(node, ...rest);
       }
