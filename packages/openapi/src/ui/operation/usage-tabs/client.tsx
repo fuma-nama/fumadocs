@@ -154,7 +154,12 @@ export function UsageTab(sample: CodeUsageGenerator) {
   }, [addListener, removeListener]);
 
   const code = useMemo(() => {
-    if (!sample.source || !data) return;
+    // Look up the currently selected example's data directly to ensure immediate sync
+    // on selection change. The data state may lag by one render due to useEffect timing.
+    const selectedExample = examples.find((example) => example.id === selectedExampleId);
+    const currentData = selectedExample?.encoded ?? data;
+
+    if (!sample.source || !currentData) return;
     if (typeof sample.source === 'string') return sample.source;
 
     return sample.source(
@@ -163,15 +168,15 @@ export function UsageTab(sample: CodeUsageGenerator) {
           server ? resolveServerUrl(server.url, server.variables) : '/',
           typeof window !== 'undefined' ? window.location.origin : 'https://loading',
         ),
-        resolveRequestData(route, data),
+        resolveRequestData(route, currentData),
       ),
-      data,
+      currentData,
       {
         server: sample.serverContext,
         mediaAdapters,
       },
     );
-  }, [mediaAdapters, sample, server, route, data]);
+  }, [mediaAdapters, sample, server, route, data, selectedExampleId, examples]);
 
   if (!code || !sample) return null;
 
