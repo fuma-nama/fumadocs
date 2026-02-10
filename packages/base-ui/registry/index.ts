@@ -1,7 +1,7 @@
 import { fileURLToPath } from 'node:url';
 import type { Registry } from '@fumadocs/cli/build';
 import * as path from 'node:path';
-import { commonComponents, resolveExternal } from '../../../shared/registry';
+import { commonComponents, resolveExternal } from '../../shared/registry';
 
 const srcDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../');
 

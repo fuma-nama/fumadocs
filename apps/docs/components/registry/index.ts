@@ -1,5 +1,5 @@
 import { type Registry } from '@fumadocs/cli/build';
-import * as radixUi from '../../../../packages/radix-ui/src/_registry';
+import * as radixUi from '../../../../packages/radix-ui/registry';
 import { fileURLToPath } from 'node:url';
 import * as path from 'node:path';
 import { resolveFromRemote } from '@fumadocs/cli/build';

@@ -10,7 +10,7 @@ import type {
   MdxJsxFlowElement,
   MdxJsxTextElement,
 } from 'mdast-util-mdx';
-import { type Handle, toMarkdown } from 'mdast-util-to-markdown';
+import { type Handle, type Options, toMarkdown } from 'mdast-util-to-markdown';
 import { remarkHeading } from './remark-heading';
 
 interface Heading {
@@ -219,7 +219,7 @@ interface CustomRootNode {
 }
 
 export function defaultStringify(
-  config: {
+  config: Options & {
     filterMdxAttributes?: (
       node: MdxJsxFlowElement | MdxJsxTextElement,
       attribute: MdxJsxAttribute | MdxJsxExpressionAttribute,
@@ -248,23 +248,29 @@ export function defaultStringify(
     };
   }
 
-  const rootHandler: Handle = function (node: CustomRootNode, _, state, info) {
-    const handlers: Record<string, Handle> = state.handlers;
-    for (const k in handlers) {
-      handlers[k] = modHandler(handlers[k]);
-    }
+  const handlers: Record<string, Handle> = {
+    ...config.handlers,
+    _custom(node: CustomRootNode, _, state, info) {
+      const handlers: Record<string, Handle> = state.handlers;
+      for (const k in handlers) {
+        handlers[k] = modHandler(handlers[k]);
+      }
 
-    return state.handle(node.root, undefined, state, info);
+      return state.handle(node.root, undefined, state, info);
+    },
   };
 
   return function (root) {
+    // from https://github.com/remarkjs/remark/blob/main/packages/remark-stringify/lib/index.js
+    const defaultExtensions = this.data('toMarkdownExtensions') ?? [];
+
     return toMarkdown({ type: '_custom', root } as never, {
       ...this.data('settings'),
-      // from https://github.com/remarkjs/remark/blob/main/packages/remark-stringify/lib/index.js
-      extensions: this.data('toMarkdownExtensions') ?? [],
-      handlers: {
-        _custom: rootHandler,
-      } as Record<string, Handle>,
+      ...config,
+      extensions: config.extensions
+        ? [...defaultExtensions, ...config.extensions]
+        : defaultExtensions,
+      handlers,
     });
   };
 }
