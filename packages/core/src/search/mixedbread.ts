@@ -130,15 +130,16 @@ export function createMixedbreadSearchAPI(options: MixedbreadSearchOptions): Sea
       }
 
       const tag = searchOptions?.tag;
+      const tags = Array.isArray(tag) ? tag : tag ? [tag] : undefined;
       const res = await client.stores.search({
         query,
         store_identifiers: [storeIdentifier],
         top_k: topK,
-        filters: tag
+        filters: tags
           ? {
               key: 'generated_metadata.tag',
-              operator: 'eq',
-              value: Array.isArray(tag) ? tag[0] : tag,
+              operator: tags.length === 1 ? 'eq' : 'in',
+              value: tags.length === 1 ? tags[0] : tags,
             }
           : undefined,
         search_options: {
