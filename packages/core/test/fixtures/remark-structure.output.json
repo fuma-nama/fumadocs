@@ -26,11 +26,15 @@
     },
     {
       "heading": "heading-3",
-      "content": "<Card title=\"Test\">wow</Card>"
+      "content": "wow"
     },
     {
       "heading": "heading-3",
-      "content": "<Card title=\"Test\">\n  wow\n</Card>"
+      "content": "wow"
+    },
+    {
+      "heading": "heading-3",
+      "content": "(type={ haha: test })"
     }
   ],
   "headings": [

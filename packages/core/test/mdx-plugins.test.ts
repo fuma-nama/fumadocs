@@ -51,7 +51,7 @@ test('Remark Structure', async () => {
     .use(remarkGfm)
     .use(remarkMdx)
     .use(remarkHeading)
-    .use(remarkStructure, { allowedMdxAttributes: ['title'] })
+    .use(remarkStructure)
     .process(content);
 
   await expect(JSON.stringify(result.data.structuredData, null, 2)).toMatchFileSnapshot(
