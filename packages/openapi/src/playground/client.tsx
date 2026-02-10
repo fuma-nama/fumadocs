@@ -229,9 +229,10 @@ export default function PlaygroundClient({
   });
 
   useEffect(() => {
-    return () => {
-      stf.dataEngine.reset(defaultValues);
-    };
+    // same object reference = unchanged
+    if (stf.dataEngine.getData() === defaultValues) return;
+
+    stf.dataEngine.reset(defaultValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- ignore other parts
   }, [defaultValues]);
 

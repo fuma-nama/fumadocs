@@ -47,7 +47,7 @@ export function UsageTabsProvider({
         () => ({
           example,
           route,
-          setExample: (newKey: string) => {
+          setExample(newKey: string) {
             const example = examples.find((example) => example.id === newKey);
             if (!example) return;
 

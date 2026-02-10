@@ -36,12 +36,12 @@ interface OnUpdateContext {
 }
 
 class ListenerManager {
-  private readonly listeners = new Set<DataEngineListener>();
+  private readonly unindexed = new Set<DataEngineListener>();
   private readonly indexed = new Map<string, Set<DataEngineListener>>();
 
   add(listener: DataEngineListener) {
     if (!listener.field) {
-      this.listeners.add(listener);
+      this.unindexed.add(listener);
       return;
     }
     const key = stringifyFieldKey(listener.field);
@@ -52,14 +52,14 @@ class ListenerManager {
 
   remove(listener: DataEngineListener) {
     if (!listener.field) {
-      this.listeners.delete(listener);
+      this.unindexed.delete(listener);
     } else {
       this.indexed.get(stringifyFieldKey(listener.field))?.delete(listener);
     }
   }
 
   onUpdate(field: FieldKey, ctx: OnUpdateContext) {
-    for (const v of this.listeners) v.onUpdate?.(field, ctx);
+    for (const v of this.unindexed) v.onUpdate?.(field, ctx);
     const updatedKey = stringifyFieldKey(field);
 
     if (ctx.swallow) {
@@ -67,20 +67,21 @@ class ListenerManager {
       if (set) for (const v of set) v.onUpdate?.(field, ctx);
     } else {
       for (const [k, listeners] of this.indexed.entries()) {
-        if (k !== updatedKey && !k.startsWith(updatedKey + '.')) continue;
+        if (updatedKey.length !== 0 && k !== updatedKey && !k.startsWith(updatedKey + '.'))
+          continue;
         for (const v of listeners) v.onUpdate?.(field, ctx);
       }
     }
   }
 
   onInit(field: FieldKey) {
-    for (const v of this.listeners) v.onInit?.(field);
+    for (const v of this.unindexed) v.onInit?.(field);
     const set = this.indexed.get(stringifyFieldKey(field));
     if (set) for (const v of set) v.onInit?.(field);
   }
 
   onDelete(field: FieldKey) {
-    for (const v of this.listeners) v.onDelete?.(field);
+    for (const v of this.unindexed) v.onDelete?.(field);
     const set = this.indexed.get(stringifyFieldKey(field));
     if (set) for (const v of set) v.onDelete?.(field);
   }
