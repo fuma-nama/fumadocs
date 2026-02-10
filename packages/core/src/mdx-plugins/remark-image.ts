@@ -2,9 +2,9 @@ import * as path from 'node:path';
 import type { Image, Root } from 'mdast';
 import type { Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
-import type { MdxjsEsm } from 'mdast-util-mdxjs-esm';
+import type { MdxjsEsm } from 'mdast-util-mdx';
 import type { ISizeCalculationResult } from 'image-size/types/interface';
-import type { MdxJsxAttribute, MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
+import type { MdxJsxAttribute, MdxJsxFlowElement } from 'mdast-util-mdx';
 import { fileURLToPath } from 'node:url';
 
 const VALID_BLUR_EXT = ['.jpeg', '.png', '.webp', '.avif', '.jpg'];

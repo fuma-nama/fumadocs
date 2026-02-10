@@ -8,6 +8,7 @@ export default [
   {
     rules: {
       'no-console': 'off',
+      'no-fallthrough': 'off',
       // handled by bundler
       'import/no-cycle': 'off',
     },

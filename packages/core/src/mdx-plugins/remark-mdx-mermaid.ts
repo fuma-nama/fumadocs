@@ -1,7 +1,7 @@
 import { visit } from 'unist-util-visit';
 import type { Transformer } from 'unified';
 import type { Root } from 'mdast';
-import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
+import type { MdxJsxFlowElement } from 'mdast-util-mdx';
 
 function toMDX(code: string): MdxJsxFlowElement {
   return {

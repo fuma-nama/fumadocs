@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/base-ui",
-  "version": "16.5.2",
+  "version": "16.5.3",
   "description": "The Base UI version of Fumadocs UI",
   "keywords": [
     "Docs",
@@ -98,7 +98,7 @@
     "build:layout": "tsdown --config-loader unrun",
     "build:tailwind": "tailwindcss -i css/style.css -o ./dist/style.css && tailwindcss -i src/components/image-zoom.css -o dist/components/image-zoom.css",
     "clean": "rimraf dist",
-    "dev": "concurrently \"tsdown --watch\" \"tailwindcss -i css/style.css -o ./dist/style.css -w\" \"tailwindcss -i src/components/image-zoom.css -o dist/components/image-zoom.css -w\"",
+    "dev": "concurrently \"tsdown --watch --clean false\" \"tailwindcss -i css/style.css -o ./dist/style.css -w\" \"tailwindcss -i src/components/image-zoom.css -o dist/components/image-zoom.css -w\"",
     "lint": "eslint .",
     "types:check": "tsc --noEmit"
   },

@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-core",
-  "version": "16.5.2",
+  "version": "16.5.3",
   "description": "The React.js library for building a documentation website",
   "keywords": [
     "Docs",
@@ -132,6 +132,8 @@
     "hast-util-to-estree": "^3.1.3",
     "hast-util-to-jsx-runtime": "^2.3.6",
     "image-size": "^2.0.2",
+    "mdast-util-mdx": "^3.0.0",
+    "mdast-util-to-markdown": "^2.1.2",
     "negotiator": "^1.0.0",
     "npm-to-yarn": "^3.0.1",
     "path-to-regexp": "^8.3.0",
@@ -161,8 +163,6 @@
     "algoliasearch": "5.48.0",
     "eslint-config-custom": "workspace:*",
     "lucide-react": "^0.563.0",
-    "mdast-util-mdx-jsx": "^3.2.0",
-    "mdast-util-mdxjs-esm": "^2.0.1",
     "next": "16.1.6",
     "react-router": "^7.13.0",
     "remark-directive": "^4.0.0",
@@ -186,7 +186,6 @@
     "@types/react": "*",
     "algoliasearch": "5.x.x",
     "lucide-react": "*",
-    "mdast-util-mdx-jsx": "*",
     "next": "16.x.x",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -195,9 +194,6 @@
     "zod": "4.x.x"
   },
   "peerDependenciesMeta": {
-    "mdast-util-mdx-jsx": {
-      "optional": true
-    },
     "@mdx-js/mdx": {
       "optional": true
     },

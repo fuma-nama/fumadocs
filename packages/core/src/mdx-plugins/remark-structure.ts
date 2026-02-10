@@ -1,15 +1,17 @@
-import Slugger from 'github-slugger';
 import type { Nodes, Root } from 'mdast';
 import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
-import type { PluggableList, Transformer } from 'unified';
+import type { PluggableList, Processor, Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
 import { flattenNode, toMdxExport } from './mdast-utils';
 import type {
   MdxJsxAttribute,
   MdxJsxExpressionAttribute,
   MdxJsxFlowElement,
-} from 'mdast-util-mdx-jsx';
+  MdxJsxTextElement,
+} from 'mdast-util-mdx';
+import { type Handle, type Options, toMarkdown } from 'mdast-util-to-markdown';
+import { remarkHeading } from './remark-heading';
 
 interface Heading {
   id: string;
@@ -31,14 +33,21 @@ export interface StructuredData {
 
 export interface StructureOptions {
   /**
-   * Types to be scanned as content.
+   * MDAST **block** types to be scanned as content.
+   *
+   * If a node's type is represented in this array, it will be stringified and its children will not be scanned separatedly.
    *
    * @defaultValue ['heading', 'paragraph', 'blockquote', 'tableCell', 'mdxJsxFlowElement']
    */
   types?: string[] | ((node: Nodes) => boolean);
 
   /**
-   * A list of indexable MDX attributes, either:
+   * stringify a given node & its children, you can use something like `mdast-util-to-markdown`.
+   */
+  stringify?: (this: Processor, node: Nodes) => string;
+
+  /**
+   * By default, it will not index MDX attributes. You can define a list of MDX attributes to index, either:
    *
    * - an array of attribute names.
    * - a function that determines if attribute should be indexed.
@@ -46,12 +55,12 @@ export interface StructureOptions {
   allowedMdxAttributes?:
     | string[]
     | ((
-        node: MdxJsxFlowElement,
+        node: MdxJsxFlowElement | MdxJsxTextElement,
         attribute: MdxJsxAttribute | MdxJsxExpressionAttribute,
       ) => boolean);
 
   /**
-   * export as `structuredData` or specified variable name.
+   * export as `structuredData` (if true) or specified variable name.
    */
   exportAs?: string | boolean;
 }
@@ -59,7 +68,7 @@ export interface StructureOptions {
 declare module 'mdast' {
   interface Data {
     /**
-     * [Fumadocs] Get content of unserializable element, `remarkStructure` uses it to generate search index.
+     * [Fumadocs] Stringified form of node, `remarkStructure` uses it to generate search index.
      */
     _string?: string[];
   }
@@ -76,26 +85,32 @@ declare module 'vfile' {
 
 export const remarkStructureDefaultOptions = {
   types: ['heading', 'paragraph', 'blockquote', 'tableCell', 'mdxJsxFlowElement'],
-  allowedMdxAttributes: (node) => {
-    if (!node.name) return false;
-
-    return ['TypeTable', 'Callout'].includes(node.name);
+  allowedMdxAttributes(node) {
+    switch (node.name) {
+      case 'TypeTable':
+      case 'Callout':
+        return true;
+      default:
+        return false;
+    }
   },
   exportAs: false,
-} satisfies Required<StructureOptions>;
+} satisfies StructureOptions;
 
 /**
  * Extract content into structured data.
  *
  * By default, the output is stored into VFile (`vfile.data.structuredData`), you can specify `exportAs` to export it.
  */
-export function remarkStructure({
-  types = remarkStructureDefaultOptions.types,
-  allowedMdxAttributes = remarkStructureDefaultOptions.allowedMdxAttributes,
-  exportAs = remarkStructureDefaultOptions.exportAs,
-}: StructureOptions = {}): Transformer<Root, Root> {
-  const slugger = new Slugger();
-
+export function remarkStructure(
+  this: Processor,
+  {
+    types = remarkStructureDefaultOptions.types,
+    stringify,
+    allowedMdxAttributes = remarkStructureDefaultOptions.allowedMdxAttributes,
+    exportAs = remarkStructureDefaultOptions.exportAs,
+  }: StructureOptions = {},
+): Transformer<Root, Root> {
   if (Array.isArray(allowedMdxAttributes)) {
     const arr = allowedMdxAttributes;
     allowedMdxAttributes = (_node, attribute) =>
@@ -107,8 +122,8 @@ export function remarkStructure({
     types = (node) => arr.includes(node.type);
   }
 
+  stringify ??= defaultStringify({ filterMdxAttributes: allowedMdxAttributes });
   return (tree, file) => {
-    slugger.reset();
     const data: StructuredData = { contents: [], headings: [] };
     let lastHeading: string | undefined;
 
@@ -132,13 +147,17 @@ export function remarkStructure({
       if (element.type === 'heading') {
         element.data ||= {};
         element.data.hProperties ||= {};
-        const properties = element.data.hProperties;
-        const content = flattenNode(element).trim();
-        const id = properties.id ?? slugger.slug(content);
+        const id = element.data.hProperties.id;
+        if (typeof id !== 'string') {
+          console.warn(
+            '[remark-structure] hProperties.id is missing in heading node, it is required to generate heading data. You can add remark-heading prior to remark-structure to generate heading IDs.',
+          );
+          return 'skip';
+        }
 
         data.headings.push({
           id,
-          content,
+          content: flattenNode(element).trim(),
         });
 
         lastHeading = id;
@@ -156,31 +175,13 @@ export function remarkStructure({
         return 'skip';
       }
 
-      if (element.type === 'mdxJsxFlowElement' && element.name) {
-        data.contents.push(
-          ...element.attributes.flatMap((attribute) => {
-            const value =
-              typeof attribute.value === 'string' ? attribute.value : attribute.value?.value;
-            if (!value || value.length === 0) return [];
-            if (allowedMdxAttributes && !allowedMdxAttributes(element, attribute)) return [];
-
-            return {
-              heading: lastHeading,
-              content: attribute.type === 'mdxJsxAttribute' ? `${attribute.name}: ${value}` : value,
-            };
-          }),
-        );
-
-        return;
+      const content = stringify.call(this, element).trim();
+      if (content.length > 0) {
+        data.contents.push({
+          heading: lastHeading,
+          content,
+        });
       }
-
-      const content = flattenNode(element).trim();
-      if (content.length === 0) return;
-
-      data.contents.push({
-        heading: lastHeading,
-        content,
-      });
 
       return 'skip';
     });
@@ -205,8 +206,71 @@ export function structure(
   const result = remark()
     .use(remarkGfm)
     .use(remarkPlugins)
+    .use(remarkHeading)
     .use(remarkStructure, options)
     .processSync(content);
 
   return result.data.structuredData!;
+}
+
+interface CustomRootNode {
+  type: '_custom';
+  root: Nodes;
+}
+
+export function defaultStringify(
+  config: Options & {
+    filterMdxAttributes?: (
+      node: MdxJsxFlowElement | MdxJsxTextElement,
+      attribute: MdxJsxAttribute | MdxJsxExpressionAttribute,
+    ) => boolean;
+  } = {},
+): (this: Processor, node: Nodes) => string {
+  const { filterMdxAttributes } = config;
+
+  function modHandler(handler: Handle): Handle {
+    return function (node: Nodes, ...rest) {
+      if (node.data?._string) return node.data._string.join('\n');
+
+      switch (node.type) {
+        case 'mdxJsxFlowElement':
+        case 'mdxJsxTextElement':
+          if (filterMdxAttributes) {
+            const temp = node.attributes;
+            node.attributes = node.attributes.filter((attr) => filterMdxAttributes(node, attr));
+            const s = handler(node, ...rest);
+            node.attributes = temp;
+            return s;
+          }
+        default:
+          return handler(node, ...rest);
+      }
+    };
+  }
+
+  const handlers: Record<string, Handle> = {
+    ...config.handlers,
+    _custom(node: CustomRootNode, _, state, info) {
+      const handlers: Record<string, Handle> = state.handlers;
+      for (const k in handlers) {
+        handlers[k] = modHandler(handlers[k]);
+      }
+
+      return state.handle(node.root, undefined, state, info);
+    },
+  };
+
+  return function (root) {
+    // from https://github.com/remarkjs/remark/blob/main/packages/remark-stringify/lib/index.js
+    const defaultExtensions = this.data('toMarkdownExtensions') ?? [];
+
+    return toMarkdown({ type: '_custom', root } as never, {
+      ...this.data('settings'),
+      ...config,
+      extensions: config.extensions
+        ? [...defaultExtensions, ...config.extensions]
+        : defaultExtensions,
+      handlers,
+    });
+  };
 }

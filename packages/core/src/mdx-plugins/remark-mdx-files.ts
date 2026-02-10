@@ -1,7 +1,7 @@
 import type { Root } from 'mdast';
 import { visit } from 'unist-util-visit';
 import type { Transformer } from 'unified';
-import type { MdxJsxAttribute, MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
+import type { MdxJsxAttribute, MdxJsxFlowElement } from 'mdast-util-mdx';
 import type { VFile } from 'vfile';
 import path from 'node:path';
 
