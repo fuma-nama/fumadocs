@@ -1,6 +1,6 @@
 import type { SortedResult } from '@/search';
 import type Mixedbread from '@mixedbread/sdk';
-import type { StoreSearchResponse } from '@mixedbread/sdk/resources/stores';
+import type { StoreSearchParams, StoreSearchResponse } from '@mixedbread/sdk/resources/stores';
 import removeMd from 'remove-markdown';
 import Slugger from 'github-slugger';
 import { createEndpoint } from '@/search/orama/create-endpoint';
@@ -130,18 +130,27 @@ export function createMixedbreadSearchAPI(options: MixedbreadSearchOptions): Sea
       }
 
       const tag = searchOptions?.tag;
-      const tags = Array.isArray(tag) ? tag : tag ? [tag] : undefined;
+
+      let filters: StoreSearchParams['filters'] | undefined;
+      if (Array.isArray(tag) && tag.length > 0) {
+        filters = {
+          key: 'generated_metadata.tag',
+          operator: 'in',
+          value: tag,
+        };
+      } else if (typeof tag === 'string') {
+        filters = {
+          key: 'generated_metadata.tag',
+          operator: 'eq',
+          value: tag,
+        };
+      }
+
       const res = await client.stores.search({
         query,
         store_identifiers: [storeIdentifier],
         top_k: topK,
-        filters: tags
-          ? {
-              key: 'generated_metadata.tag',
-              operator: tags.length === 1 ? 'eq' : 'in',
-              value: tags.length === 1 ? tags[0] : tags,
-            }
-          : undefined,
+        filters,
         search_options: {
           return_metadata: true,
           rerank,
