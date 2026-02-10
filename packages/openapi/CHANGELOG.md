@@ -1,5 +1,17 @@
 # @fuma-docs/openapi
 
+## 10.3.4
+
+### Patch Changes
+
+- 7872e27: fix change detector
+- Updated dependencies [7872e27]
+- Updated dependencies [1ad8a38]
+- Updated dependencies [3e8efb0]
+  - @fumari/stf@0.0.3
+  - fumadocs-core@16.5.4
+  - fumadocs-ui@16.5.4
+
 ## 10.3.3
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 16.5.4
+
+### Patch Changes
+
+- 1ad8a38: Support server-side Mixedbread search API, deprecate client-side adapter
+- 3e8efb0: [remark-structure] hotfix filter MDX elements
+
 ## 16.5.3
 
 ### Patch Changes

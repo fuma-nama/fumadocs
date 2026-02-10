@@ -1,5 +1,11 @@
 # @fumari/stf
 
+## 0.0.3
+
+### Patch Changes
+
+- 7872e27: fix change detector
+
 ## 0.0.2
 
 ### Patch Changes
