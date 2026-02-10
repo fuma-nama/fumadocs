@@ -1,5 +1,5 @@
 ---
-'fumadocs-core': minor
+'fumadocs-core': patch
 ---
 
-Move mixedbread search to server-side
+Support server-side Mixedbread search API, deprecate client-side adapter
