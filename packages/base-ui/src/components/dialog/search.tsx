@@ -53,7 +53,7 @@ export interface SearchDialogProps extends SharedProps {
   children: ReactNode;
 }
 
-const Context = createContext<{
+const RootContext = createContext<{
   open: boolean;
   onOpenChange: (open: boolean) => void;
   search: string;
@@ -72,6 +72,8 @@ const TagsListContext = createContext<{
   onValueChange: (value: string | undefined) => void;
   allowClear: boolean;
 } | null>(null);
+
+const PreContext = createContext(false);
 
 const mdRenderer = createMarkdownRenderer({
   remarkRehypeOptions: {
@@ -98,17 +100,16 @@ const mdComponents = {
   p(props: ComponentProps<'p'>) {
     return <p {...props} className="min-w-0" />;
   },
-  code({ children, className, ...props }: ComponentProps<'pre'>) {
+  code(props: ComponentProps<'pre'>) {
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- this is a component
+    const inPre = use(PreContext);
+    if (inPre) return <code {...props} />;
+
     return (
       <code
-        className={cn(
-          'border rounded-md -mx-0.5 px-0.5 bg-fd-secondary text-fd-secondary-foreground',
-          className,
-        )}
         {...props}
-      >
-        {children}
-      </code>
+        className="border rounded-md -mx-0.5 px-0.5 bg-fd-secondary text-fd-secondary-foreground"
+      />
     );
   },
   custom({
@@ -140,11 +141,11 @@ const mdComponents = {
       <pre
         {...props}
         className={cn(
-          'border rounded-md p-2 bg-fd-secondary text-fd-secondary-foreground max-h-20 overflow-hidden',
+          'flex flex-col border rounded-md my-0.5 p-2 bg-fd-secondary text-fd-secondary-foreground max-h-20 overflow-hidden *:mask-[linear-gradient(to_bottom,white,white_30px,transparent_80px)]',
           props.className,
         )}
       >
-        {props.children}
+        <PreContext value={true}>{props.children}</PreContext>
       </pre>
     );
   },
@@ -189,7 +190,7 @@ export function SearchDialog({
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
-      <Context.Provider
+      <RootContext
         value={useMemo(
           () => ({
             open,
@@ -204,7 +205,7 @@ export function SearchDialog({
         )}
       >
         {children}
-      </Context.Provider>
+      </RootContext>
     </Dialog.Root>
   );
 }
@@ -388,7 +389,7 @@ export function SearchDialogList({
       <div
         className={cn('w-full flex flex-col overflow-y-auto max-h-[460px] p-1', !items && 'hidden')}
       >
-        <ListContext.Provider
+        <ListContext
           value={useMemo(
             () => ({
               active,
@@ -402,7 +403,7 @@ export function SearchDialogList({
           {items?.map((item) => (
             <Fragment key={item.id}>{Item({ item, onClick: () => onSelect(item) })}</Fragment>
           ))}
-        </ListContext.Provider>
+        </ListContext>
       </div>
     </div>
   );
@@ -441,18 +442,19 @@ export function SearchDialogListItem({
         {item.type !== 'page' && (
           <div role="none" className="absolute start-3 inset-y-0 w-px bg-fd-border" />
         )}
+        {item.type === 'heading' && (
+          <Hash className="absolute start-6 top-2.5 size-4 text-fd-muted-foreground" />
+        )}
         <div
           className={cn(
-            'flex items-center min-w-0',
-            item.type !== 'page' && 'ps-4',
+            'min-w-0',
+            item.type === 'text' && 'ps-4',
+            item.type === 'heading' && 'ps-8',
             item.type === 'page' || item.type === 'heading'
               ? 'font-medium'
               : 'text-fd-popover-foreground/80',
           )}
         >
-          {item.type === 'heading' && (
-            <Hash className="inline me-1 size-4 text-fd-muted-foreground" />
-          )}
           {typeof item.content === 'string' ? renderMarkdown(item.content) : item.content}
         </div>
       </>
@@ -523,7 +525,7 @@ const itemVariants = cva(
 export function TagsList({ tag, onTagChange, allowClear = false, ...props }: TagsListProps) {
   return (
     <div {...props} className={cn('flex items-center gap-1 flex-wrap', props.className)}>
-      <TagsListContext.Provider
+      <TagsListContext
         value={useMemo(
           () => ({
             value: tag,
@@ -534,7 +536,7 @@ export function TagsList({ tag, onTagChange, allowClear = false, ...props }: Tag
         )}
       >
         {props.children}
-      </TagsListContext.Provider>
+      </TagsListContext>
     </div>
   );
 }
@@ -566,7 +568,7 @@ export function TagsListItem({
 }
 
 export function useSearch() {
-  const ctx = use(Context);
+  const ctx = use(RootContext);
   if (!ctx) throw new Error('Missing <SearchDialog />');
   return ctx;
 }
