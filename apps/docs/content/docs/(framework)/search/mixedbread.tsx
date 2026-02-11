@@ -14,19 +14,12 @@ import {
 } from 'fumadocs-ui/components/dialog/search';
 import { useDocsSearch } from 'fumadocs-core/search/client';
 import { useI18n } from 'fumadocs-ui/contexts/i18n';
-import Mixedbread from '@mixedbread/sdk';
-
-const client = new Mixedbread({
-  apiKey: 'mxb_xxxx',
-  baseURL: 'https://api.example.com', // Optional, defaults to https://api.mixedbread.com
-});
 
 export default function CustomSearchDialog(props: SharedProps) {
   const { locale } = useI18n(); // (optional) for i18n
   const { search, setSearch, query } = useDocsSearch({
-    type: 'mixedbread',
-    client,
-    storeIdentifier: 'your_store_identifier',
+    type: 'fetch',
+    api: '/api/search',
     locale,
   });
 

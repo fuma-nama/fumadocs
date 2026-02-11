@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/base-ui",
-  "version": "16.5.3",
+  "version": "16.5.4",
   "description": "The Base UI version of Fumadocs UI",
   "keywords": [
     "Docs",
@@ -111,12 +111,15 @@
     "next-themes": "^0.4.6",
     "react-medium-image-zoom": "^5.4.0",
     "react-remove-scroll": "^2.7.2",
+    "rehype-raw": "^7.0.0",
     "scroll-into-view-if-needed": "^3.1.0",
-    "tailwind-merge": "^3.4.0"
+    "tailwind-merge": "^3.4.0",
+    "unist-util-visit": "^5.1.0"
   },
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",
     "@tailwindcss/cli": "^4.1.18",
+    "@types/hast": "^3.0.4",
     "@types/node": "^25.2.1",
     "@types/react": "^19.2.13",
     "@types/react-dom": "^19.2.3",
@@ -124,7 +127,8 @@
     "fumadocs-core": "workspace:*",
     "tailwindcss": "^4.1.18",
     "tsconfig": "workspace:*",
-    "tsdown": "^0.20.3"
+    "tsdown": "^0.20.3",
+    "unified": "^11.0.5"
   },
   "peerDependencies": {
     "@types/react": "*",

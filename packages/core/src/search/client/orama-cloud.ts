@@ -64,15 +64,13 @@ export async function searchDocs(
         {
           id: hit.id,
           type: 'page',
-          content: doc.title,
-          contentWithHighlights: highlighter.highlight(doc.title),
+          content: highlighter.highlightMarkdown(doc.title),
           url: doc.path,
         },
         {
           id: 'page' + hit.id,
           type: 'text',
-          content: doc.content,
-          contentWithHighlights: highlighter.highlight(doc.content),
+          content: highlighter.highlightMarkdown(doc.content),
           url: doc.path,
         },
       );
@@ -109,9 +107,8 @@ export async function searchDocs(
         list.push({
           id: doc.page_id,
           type: 'page',
-          content: doc.title,
+          content: highlighter.highlightMarkdown(doc.title),
           breadcrumbs: doc.breadcrumbs,
-          contentWithHighlights: highlighter.highlight(doc.title),
           url: doc.url,
         });
         addedHead = true;
@@ -119,8 +116,7 @@ export async function searchDocs(
 
       list.push({
         id: doc.id,
-        content: doc.content,
-        contentWithHighlights: highlighter.highlight(doc.content),
+        content: highlighter.highlightMarkdown(doc.content),
         type: doc.content === doc.section ? 'heading' : 'text',
         url: doc.section_id ? `${doc.url}#${doc.section_id}` : doc.url,
       });

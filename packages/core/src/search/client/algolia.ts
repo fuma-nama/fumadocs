@@ -76,7 +76,7 @@ export async function searchDocs(
     if (hit.type === 'page') {
       return {
         ...hit,
-        contentWithHighlights: hit.contentWithHighlights ?? highlighter.highlight(hit.content),
+        content: highlighter.highlightMarkdown(hit.content),
       };
     }
 
