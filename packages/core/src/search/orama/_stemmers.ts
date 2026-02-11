@@ -29,5 +29,6 @@ export const STEMMERS: Record<string, string> = {
   tamil: 'ta',
   turkish: 'tr',
   ukrainian: 'uk',
+  vietnamese: 'vi',
   sanskrit: 'sk',
 };
