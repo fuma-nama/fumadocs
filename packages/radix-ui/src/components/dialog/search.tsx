@@ -100,6 +100,9 @@ const mdComponents = {
   p(props: ComponentProps<'p'>) {
     return <p {...props} className="min-w-0" />;
   },
+  strong(props: ComponentProps<'strong'>) {
+    return <strong {...props} className="text-fd-accent-foreground font-medium" />;
+  },
   code(props: ComponentProps<'pre'>) {
     // eslint-disable-next-line react-hooks/rules-of-hooks -- this is a component
     const inPre = use(PreContext);

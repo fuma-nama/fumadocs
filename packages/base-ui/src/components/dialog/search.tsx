@@ -97,6 +97,9 @@ const mdComponents = {
   a({ children }: ComponentProps<'a'>) {
     return <span>{children}</span>;
   },
+  strong(props: ComponentProps<'strong'>) {
+    return <strong {...props} className="font-medium" />;
+  },
   p(props: ComponentProps<'p'>) {
     return <p {...props} className="min-w-0" />;
   },
