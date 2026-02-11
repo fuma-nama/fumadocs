@@ -24,8 +24,8 @@
       "import": "./dist/toc.js"
     },
     "./content": {
-      "types": "./dist/content/index.d.ts",
-      "import": "./dist/content/index.js"
+      "types": "./dist/content/md.d.ts",
+      "import": "./dist/content/md.js"
     },
     "./content/*": {
       "types": "./dist/content/*.d.ts",
@@ -118,7 +118,7 @@
   "scripts": {
     "build": "tsdown",
     "clean": "rimraf dist",
-    "dev": "tsdown --watch",
+    "dev": "tsdown --watch --clean false",
     "lint": "eslint .",
     "types:check": "tsc --noEmit"
   },

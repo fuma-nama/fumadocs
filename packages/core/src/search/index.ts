@@ -1,4 +1,8 @@
+import type { Root } from 'mdast';
 import type { ReactNode } from 'react';
+import { remark } from 'remark';
+import type { Transformer } from 'unified';
+import { visit } from 'unist-util-visit';
 
 export interface SortedResult<Content = string> {
   id: string;
@@ -10,6 +14,9 @@ export interface SortedResult<Content = string> {
    * breadcrumbs to be displayed on UI
    */
   breadcrumbs?: Content[];
+  /**
+   * @deprecated it is now included in `content` as Markdown using `<mark />`.
+   */
   contentWithHighlights?: HighlightedText<Content>[];
 }
 
@@ -44,7 +51,11 @@ function buildRegexFromQuery(q: string): RegExp | null {
 }
 
 export function createContentHighlighter(query: string | RegExp) {
+  let processor = remark();
   const regex = typeof query === 'string' ? buildRegexFromQuery(query) : query;
+  if (regex) {
+    processor = processor.use(remarkHighlight, regex) as never;
+  }
 
   return {
     highlight(content: string): HighlightedText[] {
@@ -80,5 +91,39 @@ export function createContentHighlighter(query: string | RegExp) {
 
       return out;
     },
+    /**
+     * @param content - Markdown, it assumes the content is already sanitized & safe, no escape is performed.
+     */
+    highlightMarkdown(content: string): string {
+      if (!regex) return content;
+
+      return String(processor.processSync(content).value);
+    },
+  };
+}
+
+function remarkHighlight(regex: RegExp): Transformer<Root, Root> {
+  return (tree) => {
+    visit(tree, 'text', (node) => {
+      let out = '';
+      const content = node.value;
+
+      let i = 0;
+      for (const match of content.matchAll(regex)) {
+        if (i < match.index) {
+          out += content.substring(i, match.index);
+        }
+
+        out += `<mark>${match[0]}</mark>`;
+        i = match.index + match[0].length;
+      }
+
+      if (i < content.length) {
+        out += content.substring(i);
+      }
+
+      node.type = 'html' as never;
+      node.value = out;
+    });
   };
 }

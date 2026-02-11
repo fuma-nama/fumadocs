@@ -58,33 +58,16 @@ something`,
     [
       {
         "breadcrumbs": undefined,
-        "content": "Index",
-        "contentWithHighlights": [
-          {
-            "content": "Index",
-            "type": "text",
-          },
-        ],
+        "content": "Index
+    ",
         "id": "1",
         "type": "page",
         "url": "/",
       },
       {
         "breadcrumbs": undefined,
-        "content": "Hello World",
-        "contentWithHighlights": [
-          {
-            "content": "Hello",
-            "styles": {
-              "highlight": true,
-            },
-            "type": "text",
-          },
-          {
-            "content": " World",
-            "type": "text",
-          },
-        ],
+        "content": "<mark>Hello</mark> World
+    ",
         "id": "1-0",
         "type": "heading",
         "url": "/#hello-world",

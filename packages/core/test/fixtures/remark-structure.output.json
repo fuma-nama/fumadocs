@@ -26,7 +26,7 @@
     },
     {
       "heading": "heading-3",
-      "content": "wow"
+      "content": "<Card title=\"Test\">wow</Card>"
     },
     {
       "heading": "heading-3",
@@ -34,7 +34,47 @@
     },
     {
       "heading": "heading-3",
-      "content": "(type={ haha: test })"
+      "content": "<TypeTable type=\"{ haha: test }\" />"
+    },
+    {
+      "heading": "heading-3",
+      "content": "hello world."
+    },
+    {
+      "heading": "heading-3",
+      "content": "hello world."
+    },
+    {
+      "heading": "heading-3",
+      "content": "hello world."
+    },
+    {
+      "heading": "heading-3",
+      "content": "hello **world**."
+    },
+    {
+      "heading": "heading-3",
+      "content": "hello world."
+    },
+    {
+      "heading": "heading",
+      "content": "key"
+    },
+    {
+      "heading": "heading",
+      "content": "**value**"
+    },
+    {
+      "heading": "heading",
+      "content": "apple"
+    },
+    {
+      "heading": "heading",
+      "content": "banana **test**"
+    },
+    {
+      "heading": "heading",
+      "content": "Test"
     }
   ],
   "headings": [
@@ -49,6 +89,10 @@
     {
       "id": "heading-3",
       "content": "Heading 3"
+    },
+    {
+      "id": "heading",
+      "content": "Heading"
     }
   ]
 }
