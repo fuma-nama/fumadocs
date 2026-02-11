@@ -58,7 +58,7 @@
   "scripts": {
     "build": "tsdown --config-loader unrun",
     "clean": "rimraf dist",
-    "dev": "tsdown --watch",
+    "dev": "tsdown --watch --clean false",
     "lint": "eslint .",
     "types:check": "tsc --noEmit"
   },

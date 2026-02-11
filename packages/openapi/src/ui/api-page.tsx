@@ -3,7 +3,7 @@ import type { RenderContext } from '@/types';
 import { createMethod } from '@/utils/schema';
 import type { OpenAPIV3_1 } from 'openapi-types';
 import type { ProcessedDocument } from '@/utils/process-document';
-import { ApiProviderLazy } from './contexts/api.lazy';
+import { ApiProviderLazy, ServerProviderLazy } from './contexts/api.lazy';
 
 export interface ApiPageProps {
   document: Promise<ProcessedDocument> | string | ProcessedDocument;
@@ -113,14 +113,12 @@ export async function APIPage({
     },
     ctx,
   );
+  let servers = ctx.schema.dereferenced.servers;
+  if (!servers || servers.length === 0) servers = [{ url: '/' }];
 
   return (
-    <ApiProviderLazy
-      servers={ctx.servers}
-      shikiOptions={ctx.shikiOptions}
-      client={ctx.client ?? {}}
-    >
-      {content}
+    <ApiProviderLazy shikiOptions={ctx.shikiOptions} client={ctx.client ?? {}}>
+      <ServerProviderLazy servers={servers}>{content}</ServerProviderLazy>
     </ApiProviderLazy>
   );
 }

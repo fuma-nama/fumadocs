@@ -23,6 +23,7 @@ import { cn } from '@/utils/cn';
 import { APIPlayground } from '@/playground';
 import { getExampleRequests, RequestTabs } from './request-tabs';
 import { UsageTabsProviderLazy } from './usage-tabs/lazy';
+import { ServerProviderLazy } from '../contexts/api.lazy';
 
 const ParamTypes = {
   path: 'Path Parameters',
@@ -263,7 +264,7 @@ export async function Operation({
     };
 
     const playgroundEnabled = ctx.playground?.enabled ?? true;
-    const content = await renderOperationLayout(
+    let content = await renderOperationLayout(
       {
         header: headNode,
         description: descriptionNode,
@@ -288,7 +289,7 @@ export async function Operation({
       method,
     );
 
-    return (
+    content = (
       <UsageTabsProviderLazy
         defaultExampleId={method['x-exclusiveCodeSample'] ?? method['x-selectedCodeSample']}
         route={path}
@@ -297,6 +298,11 @@ export async function Operation({
         {content}
       </UsageTabsProviderLazy>
     );
+    if (method.servers) {
+      content = <ServerProviderLazy servers={method.servers}>{content}</ServerProviderLazy>;
+    }
+
+    return content;
   } else {
     renderWebhookLayout ??= (slots) => (
       <div className="flex flex-col-reverse gap-x-6 gap-y-4 @4xl:flex-row @4xl:items-start">

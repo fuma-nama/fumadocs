@@ -1,5 +1,5 @@
 'use client';
-import { useApiContext, useServerSelectContext } from '@/ui/contexts/api';
+import { useServerContext, useServerSelectContext } from '@/ui/contexts/api';
 import {
   Select,
   SelectContent,
@@ -24,7 +24,7 @@ import type { NoReference } from '@/utils/schema';
 import { StfProvider, useFieldValue, useListener, useStf } from '@fumari/stf';
 
 export default function ServerSelect(props: HTMLAttributes<HTMLDivElement>) {
-  const { servers } = useApiContext();
+  const { servers } = useServerContext();
   const { server, setServer, setServerVariables } = useServerSelectContext();
   const [open, setOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);

@@ -211,19 +211,12 @@ export function createAPIPage(
       processed = await document;
     }
 
-    const { dereferenced } = processed;
-    const servers =
-      dereferenced.servers && dereferenced.servers.length > 0
-        ? dereferenced.servers
-        : [{ url: '/' }];
-
     const slugger = new Slugger();
 
     const ctx: RenderContext = {
       schema: processed,
       proxyUrl: server.options.proxyUrl,
       ...options,
-      servers,
       mediaAdapters: {
         ...defaultAdapters,
         ...options.mediaAdapters,

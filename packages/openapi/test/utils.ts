@@ -19,7 +19,6 @@ export async function renderContextFrom(input: string): Promise<RenderContext> {
       return text;
     },
     schema,
-    servers: schema.dereferenced.servers!,
     slugger: new Slugger(),
   };
 }
