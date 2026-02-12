@@ -18,8 +18,8 @@
 ### Patch Changes
 
 - Updated dependencies [9ba1250]
-  - fumadocs-ui@17.0.0
-  - fumadocs-core@17.0.0
+  - fumadocs-ui@16.6.0
+  - fumadocs-core@16.6.0
 
 ## 5.0.1
 

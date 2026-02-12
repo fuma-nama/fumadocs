@@ -1,5 +1,19 @@
 # @fumadocs/base-ui
 
+## 16.6.0
+
+### Minor Changes
+
+- 9241992: **Support Markdown in search results**
+
+  This deprecates the old `contentWithHighlights` field in search results, the highlights are marked with Markdown instead (e.g. `Hello <mark>World</mark>`).
+
+### Patch Changes
+
+- Updated dependencies [9241992]
+- Updated dependencies [64a0057]
+  - fumadocs-core@16.6.0
+
 ## 16.5.4
 
 ### Patch Changes
