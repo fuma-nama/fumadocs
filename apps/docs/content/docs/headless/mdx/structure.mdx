@@ -7,7 +7,7 @@ description: Extract information from your documents, useful for implementing do
 
 Add it as a remark plugin.
 
-```ts title="MDX Compiler"
+```ts tab="MDX Compiler"
 import { compile } from '@mdx-js/mdx';
 import { remarkStructure } from 'fumadocs-core/mdx-plugins';
 
@@ -16,7 +16,17 @@ const vfile = await compile('...', {
 });
 ```
 
-> This plugin is included by default on Fumadocs MDX.
+```ts tab="Fumadocs MDX" title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    // This plugin is enabled by default on Fumadocs MDX
+    // options:
+    remarkStructureOptions: {},
+  },
+});
+```
 
 Extracted information could be found in `vfile.data.structuredData`, you may
 write your own plugin to convert it into a MDX export.
@@ -40,14 +50,16 @@ array, each item contains a `heading` prop indicating the heading of paragraph.
 | Prop      |                                      |
 | --------- | ------------------------------------ |
 | `id`      | unique identifier or slug of heading |
-| `content` | Text content                         |
+| `content` | Text content (Markdown)              |
 
 #### Content
 
 | Prop      |                                 |
 | --------- | ------------------------------- |
 | `heading` | Heading of paragraph (nullable) |
-| `content` | Text content                    |
+| `content` | Text content (Markdown)         |
+
+The content is stringified as Markdown text, you can customise it using the [`stringify`](#options) option.
 
 ## As a Function
 

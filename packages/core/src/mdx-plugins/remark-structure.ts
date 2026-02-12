@@ -1,9 +1,9 @@
-import type { Link, Nodes, Root } from 'mdast';
+import type { Heading, Link, Nodes, Root } from 'mdast';
 import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
 import type { PluggableList, Processor, Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
-import { flattenNode, toMdxExport } from './mdast-utils';
+import { toMdxExport } from './mdast-utils';
 import type {
   MdxJsxAttribute,
   MdxJsxExpressionAttribute,
@@ -37,13 +37,34 @@ interface StringifierContext {
   addContent: (...content: StructuredDataContent[]) => void;
 }
 
-interface StringifyOptions {
+export interface StringifyOptions {
   /**
    * Filter the elements to be included in the output:
    *
    * - `true`: include element & its children.
    * - `children-only`: exclude element but keep its children.
    * - `false`: exclude element & its children.
+   *
+   * Default:
+   *
+   * ```ts
+   * filterElement = (node) => {
+   *   switch (node.type) {
+   *     case 'mdxJsxFlowElement':
+   *     case 'mdxJsxTextElement':
+   *       switch (node.name) {
+   *         case 'File':
+   *         case 'TypeTable':
+   *         case 'Callout':
+   *         case 'Card':
+   *           return true;
+   *       }
+   *       return 'children-only';
+   *   }
+   *
+   *   return true;
+   * },
+   * ```
    */
   filterElement?: (node: Nodes) => boolean | 'children-only';
 
@@ -60,14 +81,14 @@ export interface StructureOptions {
   /**
    * MDAST node types to be scanned as a content block.
    *
-   * If a node's type represents in this array, it will be converted into a single content block.
+   * If a node's type is listed in this array, it will be converted into a single content block.
    *
    * @defaultValue ['heading', 'paragraph', 'blockquote', 'tableCell', 'mdxJsxFlowElement']
    */
   types?: string[] | ((node: Nodes) => boolean);
 
   /**
-   * stringify a given node & its children, you can use something like `mdast-util-to-markdown`.
+   * stringify text content from a MDAST node.
    */
   stringify?: Stringifier | StringifyOptions;
 
@@ -148,7 +169,7 @@ export function remarkStructure(
   const stringify =
     typeof stringifyOptions === 'function'
       ? stringifyOptions
-      : defaultStringify({
+      : defaultStringifier({
           filterMdxAttributes: Array.isArray(allowedMdxAttributes)
             ? (_node, attribute) =>
                 attribute.type === 'mdxJsxAttribute' &&
@@ -191,26 +212,28 @@ export function remarkStructure(
         case 'mdxJsxTextElement':
           if (!mdxTypes(element)) return;
           break;
-      }
+        case 'heading': {
+          element.data ||= {};
+          element.data.hProperties ||= {};
+          const id = element.data.hProperties.id;
+          if (typeof id !== 'string') {
+            console.warn(
+              '[remark-structure] hProperties.id is missing in heading node, it is required to generate heading data. You can add remark-heading prior to remark-structure to generate heading IDs.',
+            );
+            return 'skip';
+          }
 
-      if (element.type === 'heading') {
-        element.data ||= {};
-        element.data.hProperties ||= {};
-        const id = element.data.hProperties.id;
-        if (typeof id !== 'string') {
-          console.warn(
-            '[remark-structure] hProperties.id is missing in heading node, it is required to generate heading data. You can add remark-heading prior to remark-structure to generate heading IDs.',
-          );
+          const content = stringify.call(this, element, stringifierCtx).trim();
+          if (content.length > 0) {
+            data.headings.push({
+              id,
+              content,
+            });
+          }
+
+          lastHeading = id;
           return 'skip';
         }
-
-        data.headings.push({
-          id,
-          content: flattenNode(element).trim(),
-        });
-
-        lastHeading = id;
-        return 'skip';
       }
 
       const content = stringify.call(this, element, stringifierCtx).trim();
@@ -257,7 +280,7 @@ interface CustomRootNode {
   ctx: StringifierContext;
 }
 
-export function defaultStringify(config: Options & StringifyOptions = {}): Stringifier {
+export function defaultStringifier(config: Options & StringifyOptions = {}): Stringifier {
   const {
     filterMdxAttributes,
     filterElement = (node) => {
@@ -283,7 +306,7 @@ export function defaultStringify(config: Options & StringifyOptions = {}): Strin
       const { structuredData, _string } = node.data ?? {};
       if (structuredData) ctx.addContent(...structuredData.contents);
       if (_string) return typeof _string === 'function' ? _string() : _string;
-      const visibility = filterElement ? filterElement(node) : true;
+      const visibility = filterElement(node);
 
       if (visibility === false) return '';
 
@@ -330,6 +353,9 @@ export function defaultStringify(config: Options & StringifyOptions = {}): Strin
     link(node: Link, _, state, info) {
       return state.containerPhrasing(node, info);
     },
+    heading(node: Heading, _, state, info) {
+      return state.containerPhrasing(node, info);
+    },
     image() {
       return '';
     },
@@ -348,7 +374,7 @@ export function defaultStringify(config: Options & StringifyOptions = {}): Strin
     // from https://github.com/remarkjs/remark/blob/main/packages/remark-stringify/lib/index.js
     const defaultExtensions = this.data('toMarkdownExtensions') ?? [];
 
-    return toMarkdown({ type: '_custom', root, ctx } as never, {
+    return toMarkdown({ type: '_custom', root, ctx } satisfies CustomRootNode as never, {
       ...this.data('settings'),
       ...config,
       extensions: config.extensions

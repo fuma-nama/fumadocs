@@ -19,7 +19,7 @@ export interface RemarkFeedbackBlockOptions {
   /**
    * determine how the node should be resolved into a feedback block.
    *
-   * scan paragraph, list, and image nodes by default.
+   * default: skip MDX elements, convert paragraph, list item, and image nodes.
    *
    * @returns
    * - `true`: convert the node into a feedback block.
@@ -50,20 +50,31 @@ export interface FeedbackBlockProps {
 export function remarkFeedbackBlock({
   generateHash = ({ body }) => createHash('md5').update(body).digest('hex').substring(0, 16),
   tagName = 'FeedbackBlock',
-  resolve = (node) => node.type === 'paragraph' || node.type === 'image' || node.type === 'list',
+  resolve = (node) => {
+    switch (node.type) {
+      case 'mdxJsxFlowElement':
+        return 'skip';
+      case 'paragraph':
+      case 'image':
+      case 'listItem':
+        return true;
+      default:
+        return false;
+    }
+  },
   generateBody = true,
 }: RemarkFeedbackBlockOptions = {}): Transformer<Root, Root> {
   return (tree) => {
     const counts = new Map<string, number>();
 
     visit(tree, (node, index, parent) => {
-      if (node.type === 'root') return;
+      if (node.type === 'root' || !parent || typeof index !== 'number') return;
       const resolved = resolve(node);
       if (resolved === false) return;
       if (resolved === 'skip') return 'skip';
 
       const text = flattenNode(node).trim();
-      if (text.length === 0 || !parent || typeof index !== 'number') return;
+      if (text.length === 0) return;
       let id = generateHash({ body: text });
       const count = counts.get(id) ?? 0;
       if (count > 0) id = `${id}-${count}`;
