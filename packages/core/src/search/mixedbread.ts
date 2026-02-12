@@ -36,12 +36,12 @@ export interface MixedbreadSearchOptions {
   topK?: number;
 
   /**
-   * Re-rank search results for improved relevance
+   * Re-rank search results for improved relevance (this adds latency to the search)
    */
   rerank?: boolean;
 
   /**
-   * Rewrite the query for better search results
+   * Rewrite the query for better search results (this adds latency to the search)
    */
   rewriteQuery?: boolean;
 
