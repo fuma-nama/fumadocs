@@ -10,7 +10,7 @@ import {
   type ComponentProps,
   useRef,
 } from 'react';
-import { useApiContext } from '@/ui/contexts/api';
+import { useApiContext, useServerContext } from '@/ui/contexts/api';
 import type { FetchResult } from '@/playground/fetcher';
 import type { ParameterField, SecurityEntry } from '@/playground/index';
 import { getStatusInfo } from './status-info';
@@ -142,7 +142,6 @@ export default function PlaygroundClient({
   const storageKeys = useStorageKey();
   const {
     mediaAdapters,
-    serverRef,
     client: {
       playground: {
         components: { ResultDisplay = DefaultResultDisplay } = {},
@@ -151,6 +150,7 @@ export default function PlaygroundClient({
       } = {},
     },
   } = useApiContext();
+  const { serverRef } = useServerContext();
   const [securityId, setSecurityId] = useState(0);
   const { inputs, mapInputs, initAuthValues } = useAuthInputs(
     securities[securityId],

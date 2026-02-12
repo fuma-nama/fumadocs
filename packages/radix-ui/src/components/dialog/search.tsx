@@ -82,57 +82,56 @@ const mdRenderer = createMarkdownRenderer({
   rehypePlugins: [rehypeRaw, rehypeCustomElements],
 });
 
-const badgeVariant = cva('rounded-md border px-0.5 bg-fd-muted text-fd-muted-foreground', {
-  variants: {
-    variant: {
-      primary: 'bg-fd-primary text-fd-primary-foreground',
-    },
-  },
-});
-
 const mdComponents = {
   mark(props: ComponentProps<'mark'>) {
-    return <span {...props} className={cn('text-fd-primary underline', props.className)} />;
+    return <span {...props} className="text-fd-primary underline" />;
   },
-  a({ children }: ComponentProps<'a'>) {
-    return <span>{children}</span>;
-  },
+  a: 'span',
   p(props: ComponentProps<'p'>) {
     return <p {...props} className="min-w-0" />;
+  },
+  strong(props: ComponentProps<'strong'>) {
+    return <strong {...props} className="text-fd-accent-foreground font-medium" />;
   },
   code(props: ComponentProps<'pre'>) {
     // eslint-disable-next-line react-hooks/rules-of-hooks -- this is a component
     const inPre = use(PreContext);
-    if (inPre) return <code {...props} />;
+    if (inPre)
+      return (
+        <code
+          {...props}
+          className="mask-[linear-gradient(to_bottom,white,white_30px,transparent_80px)]"
+        />
+      );
 
     return (
       <code
         {...props}
-        className="border rounded-md -mx-0.5 px-0.5 bg-fd-secondary text-fd-secondary-foreground"
+        className="border rounded-md px-px bg-fd-secondary text-fd-secondary-foreground"
       />
     );
   },
   custom({
-    _tagName,
+    _tagName = 'fragment',
     children,
     ...rest
   }: Record<string, unknown> & { _tagName: string; children: ReactNode }) {
-    const propNodes = Object.entries(rest).map(([k, v]) => {
-      if (typeof v !== 'string') return;
-
-      return (
-        <code key={k} className={cn(badgeVariant(), 'truncate')}>
-          {k}: {v}
-        </code>
-      );
-    });
     return (
-      <span {...rest}>
-        <span className="flex min-w-0 text-xs items-center gap-2">
-          <code className={cn(badgeVariant({ variant: 'primary' }))}>{_tagName}</code>
-          {propNodes}
-        </span>
-        {children}
+      <span className="inline-flex max-w-full items-center border p-0.5 rounded-md bg-fd-card text-fd-card-foreground divide-x divide-fd-border">
+        <code className="rounded-sm px-0.5 me-1 bg-fd-primary font-medium text-xs text-fd-primary-foreground border-none">
+          {_tagName}
+        </code>
+        {Object.entries(rest).map(([k, v]) => {
+          if (typeof v !== 'string') return;
+
+          return (
+            <code key={k} className="truncate text-xs text-fd-muted-foreground px-1">
+              <span className="text-fd-card-foreground">{k}: </span>
+              {v}
+            </code>
+          );
+        })}
+        {children && <span className="ps-1">{children}</span>}
       </span>
     );
   },
@@ -141,7 +140,7 @@ const mdComponents = {
       <pre
         {...props}
         className={cn(
-          'flex flex-col border rounded-md my-0.5 p-2 bg-fd-secondary text-fd-secondary-foreground max-h-20 overflow-hidden *:mask-[linear-gradient(to_bottom,white,white_30px,transparent_80px)]',
+          'flex flex-col border rounded-md my-0.5 p-2 bg-fd-secondary text-fd-secondary-foreground max-h-20 overflow-hidden',
           props.className,
         )}
       >
@@ -175,7 +174,11 @@ export function SearchDialog({
   children,
 }: SearchDialogProps) {
   const router = useRouter();
-  const onSelect = useEffectEvent((item: SearchItemType) => {
+  const onOpenChangeCallback = useRef(onOpenChange);
+  onOpenChangeCallback.current = onOpenChange;
+  const onSearchChangeCallback = useRef(onSearchChange);
+  onSearchChangeCallback.current = onSearchChange;
+  const onSelect = (item: SearchItemType) => {
     if (item.type === 'action') {
       item.onSelect();
     } else if (item.external) {
@@ -186,7 +189,9 @@ export function SearchDialog({
 
     onOpenChange(false);
     onSelectProp?.(item);
-  });
+  };
+  const onSelectCallback = useRef(onSelect);
+  onSelectCallback.current = onSelect;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -194,14 +199,13 @@ export function SearchDialog({
         value={useMemo(
           () => ({
             open,
-            onOpenChange,
             search,
-            onSearchChange,
-            // eslint-disable-next-line react-hooks/rules-of-hooks -- used in child components
-            onSelect,
             isLoading,
+            onOpenChange: (v) => onOpenChangeCallback.current(v),
+            onSearchChange: (v) => onSearchChangeCallback.current(v),
+            onSelect: (v) => onSelectCallback.current(v),
           }),
-          [isLoading, onOpenChange, onSearchChange, open, search],
+          [isLoading, open, search],
         )}
       >
         {children}
@@ -510,16 +514,18 @@ const itemVariants = cva(
 );
 
 export function TagsList({ tag, onTagChange, allowClear = false, ...props }: TagsListProps) {
+  const onTagChangeCallback = useRef(onTagChange);
+  onTagChangeCallback.current = onTagChange;
   return (
     <div {...props} className={cn('flex items-center gap-1 flex-wrap', props.className)}>
       <TagsListContext
         value={useMemo(
           () => ({
             value: tag,
-            onValueChange: onTagChange,
+            onValueChange: (v) => onTagChangeCallback.current(v),
             allowClear,
           }),
-          [allowClear, onTagChange, tag],
+          [allowClear, tag],
         )}
       >
         {props.children}
@@ -543,9 +549,7 @@ export function TagsListItem({
       type="button"
       data-active={selected}
       className={cn(itemVariants({ active: selected, className }))}
-      onClick={() => {
-        onValueChange(selected && allowClear ? undefined : value);
-      }}
+      onClick={() => onValueChange(selected && allowClear ? undefined : value)}
       tabIndex={-1}
       {...props}
     >

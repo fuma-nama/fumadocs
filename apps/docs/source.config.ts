@@ -4,7 +4,6 @@ import type { ElementContent } from 'hast';
 import jsonSchema from 'fumadocs-mdx/plugins/json-schema';
 import lastModified from 'fumadocs-mdx/plugins/last-modified';
 import type { ShikiTransformer } from 'shiki';
-import type { RemarkFeedbackBlockOptions } from 'fumadocs-core/mdx-plugins';
 import type { RemarkAutoTypeTableOptions } from 'fumadocs-typescript';
 import { shikiConfig } from './lib/shiki';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
@@ -43,13 +42,6 @@ export const docs = defineDocs({
       const { remarkAutoTypeTable, createGenerator, createFileSystemGeneratorCache } =
         await import('fumadocs-typescript');
 
-      const feedbackOptions: RemarkFeedbackBlockOptions = {
-        resolve(node) {
-          // defensive approach
-          if (node.type === 'mdxJsxFlowElement') return 'skip';
-          return node.type === 'paragraph' || node.type === 'image' || node.type === 'list';
-        },
-      };
       const typeTableOptions: RemarkAutoTypeTableOptions = {
         generator: createGenerator({
           cache: createFileSystemGeneratorCache('.next/fumadocs-typescript'),
@@ -77,6 +69,27 @@ export const docs = defineDocs({
         remarkCodeTabOptions: {
           parseMdx: true,
         },
+        remarkStructureOptions: {
+          stringify: {
+            filterElement(node) {
+              switch (node.type) {
+                case 'mdxJsxFlowElement':
+                case 'mdxJsxTextElement':
+                  switch (node.name) {
+                    case 'File':
+                    case 'TypeTable':
+                    case 'Callout':
+                    case 'Card':
+                    case 'Custom':
+                      return true;
+                  }
+                  return 'children-only';
+              }
+
+              return true;
+            },
+          },
+        },
         remarkNpmOptions: {
           persist: {
             id: 'package-manager',
@@ -87,7 +100,7 @@ export const docs = defineDocs({
           : [
               remarkSteps,
               remarkMath,
-              [remarkFeedbackBlock, feedbackOptions],
+              remarkFeedbackBlock,
               [remarkAutoTypeTable, typeTableOptions],
               remarkTypeScriptToJavaScript,
             ],

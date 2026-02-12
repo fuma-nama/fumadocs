@@ -104,11 +104,11 @@ export default function DefaultSearchDialog(props: SharedProps) {
 }
 ```
 
-### Highlight Matches
+### Content Renderer
 
-Search integrations can provide `contentWithHighlights` to highlight matches.
+The content in search result supports Markdown, match highlights are expressed using `<mark />`.
 
-You can customise how highlights are rendered.
+You can customise the Markdown renderer.
 
 ```tsx title="components/search.tsx"
 <SearchDialogList
@@ -117,7 +117,7 @@ You can customise how highlights are rendered.
   Item={(props) => (
     <SearchDialogListItem
       {...props}
-      renderHighlights={(highlights) => {
+      renderMarkdown={(text) => {
         // ...
       }}
     />

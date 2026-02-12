@@ -54,6 +54,7 @@ export function createMethod(
     description: path.description,
     summary: path.summary,
     ...operation,
+    servers: operation.servers ?? path.servers,
     parameters: [...(operation.parameters ?? []), ...(path.parameters ?? [])],
     method: method.toUpperCase(),
   };
