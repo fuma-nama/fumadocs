@@ -172,62 +172,58 @@ function serializeQueryParameter(
   // write output
   output: Record<string, EncodedParameterMultiple>,
 ): void {
-  const { explode = true } = field;
+  const { style, explode = true } = field;
 
-  switch (field.style) {
-    case 'spaceDelimited':
-      if (!explode && Array.isArray(value)) {
-        output[field.name] = {
-          values: [value.join(' ')],
-        };
-        break;
-      }
-    case 'pipeDelimited':
-      if (!explode && Array.isArray(value)) {
-        output[field.name] = {
-          values: [value.join('|')],
-        };
-        break;
-      }
-    case 'deepObject':
-      if (!Array.isArray(value) && typeof value === 'object') {
-        for (const [k, v] of Object.entries(value)) {
-          output[`${field.name}[${k}]`] = {
-            // note: the behaviour of nested array is undefined, we do this to avoid edge cases
-            values: Array.isArray(v) ? v : [String(v)],
-          };
-        }
-        break;
-      }
-    // form
-    default:
-      if (Array.isArray(value)) {
-        output[field.name] = {
-          values: explode ? value : [value.join(',')],
-        };
-        break;
-      }
-
-      if (typeof value === 'object' && explode) {
-        for (const [k, v] of Object.entries(value)) {
-          output[k] = {
-            values: [String(v)],
-          };
-        }
-        break;
-      }
-
-      if (typeof value === 'object') {
-        output[field.name] = {
-          values: [Object.entries(value).flat().join(',')],
-        };
-        break;
-      }
-
-      output[field.name] = {
-        values: [String(value)],
-      };
+  if (style === 'spaceDelimited' && !explode && Array.isArray(value)) {
+    output[field.name] = {
+      values: [value.join(' ')],
+    };
+    return;
   }
+
+  if (style === 'pipeDelimited' && !explode && Array.isArray(value)) {
+    output[field.name] = {
+      values: [value.join('|')],
+    };
+    return;
+  }
+
+  if (style === 'deepObject' && !Array.isArray(value) && typeof value === 'object') {
+    for (const [k, v] of Object.entries(value)) {
+      output[`${field.name}[${k}]`] = {
+        // note: the behaviour of nested array is undefined, we do this to avoid edge cases
+        values: Array.isArray(v) ? v : [String(v)],
+      };
+    }
+    return;
+  }
+
+  if (Array.isArray(value)) {
+    output[field.name] = {
+      values: explode ? value : [value.join(',')],
+    };
+    return;
+  }
+
+  if (typeof value === 'object' && explode) {
+    for (const [k, v] of Object.entries(value)) {
+      output[k] = {
+        values: [String(v)],
+      };
+    }
+    return;
+  }
+
+  if (typeof value === 'object') {
+    output[field.name] = {
+      values: [Object.entries(value).flat().join(',')],
+    };
+    return;
+  }
+
+  output[field.name] = {
+    values: [String(value)],
+  };
 }
 
 function serializeCookieParameter(
