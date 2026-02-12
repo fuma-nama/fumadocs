@@ -37,8 +37,6 @@ export interface MixedbreadSearchOptions {
 
   /**
    * Re-rank search results for improved relevance
-   *
-   * @defaultValue true
    */
   rerank?: boolean;
 
@@ -117,7 +115,7 @@ export function createMixedbreadSearchAPI(options: MixedbreadSearchOptions): Sea
     client,
     storeIdentifier,
     topK = 10,
-    rerank = true,
+    rerank,
     rewriteQuery,
     scoreThreshold,
     transform,
