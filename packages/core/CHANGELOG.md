@@ -1,5 +1,15 @@
 # next-docs-zeta
 
+## 17.0.0
+
+### Minor Changes
+
+- 9241992: Support Markdown in search results
+
+### Patch Changes
+
+- 64a0057: [Remark Feedback] skip MDX elements by default to avoid interfering with component logic
+
 ## 16.5.4
 
 ### Patch Changes

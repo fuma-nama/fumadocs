@@ -1,5 +1,15 @@
 # @fuma-docs/openapi
 
+## 10.3.5
+
+### Patch Changes
+
+- 013bba7: support servers override
+- Updated dependencies [9241992]
+- Updated dependencies [64a0057]
+  - fumadocs-ui@17.0.0
+  - fumadocs-core@17.0.0
+
 ## 10.3.4
 
 ### Patch Changes

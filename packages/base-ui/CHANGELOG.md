@@ -1,5 +1,17 @@
 # @fumadocs/base-ui
 
+## 17.0.0
+
+### Minor Changes
+
+- 9241992: Support Markdown in search results
+
+### Patch Changes
+
+- Updated dependencies [9241992]
+- Updated dependencies [64a0057]
+  - fumadocs-core@17.0.0
+
 ## 16.5.4
 
 ### Patch Changes
