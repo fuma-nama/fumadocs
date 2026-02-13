@@ -93,7 +93,7 @@ function defaultTransform(results: StoreSearchResult[]): SortedResult[] {
       },
     ];
 
-    const headingTitle = item.type === 'text' ? extractHeadingTitle(item.text) : '';
+    const headingTitle = item.type === 'text' && item.text ? extractHeadingTitle(item.text) : '';
 
     if (headingTitle) {
       slugger.reset();

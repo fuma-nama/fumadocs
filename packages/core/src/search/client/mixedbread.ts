@@ -105,7 +105,7 @@ export async function search(query: string, options: MixedbreadOptions): Promise
       },
     ];
 
-    const headingTitle = item.type === 'text' ? extractHeadingTitle(item.text) : '';
+    const headingTitle = item.type === 'text' && item.text ? extractHeadingTitle(item.text) : '';
 
     if (headingTitle) {
       slugger.reset();
