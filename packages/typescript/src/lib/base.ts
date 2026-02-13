@@ -15,8 +15,13 @@ import {
 import path from 'node:path';
 import { getSimpleForm } from '@/lib/get-simple-form';
 import type { Cache } from '@/cache';
+import { version as packageVersion } from '../../package.json';
 
 export interface GeneratedDoc {
+  /**
+   * unique ID generated from file name & export declaration.
+   */
+  id: string;
   name: string;
   description: string;
   entries: DocEntry[];
@@ -26,6 +31,7 @@ export interface DocEntry {
   name: string;
   description: string;
   type: string;
+  typeHref?: string;
   simplifiedType: string;
 
   tags: RawTag[];
@@ -101,10 +107,10 @@ export function createGenerator(config?: GeneratorOptions | Project) {
         content?: string;
       },
       name: string | undefined,
-      options?: GenerateOptions,
+      options: GenerateOptions = {},
     ) {
       const content = file.content ?? (await fs.readFile(path.resolve(file.path))).toString();
-      const cacheKey = `${file.path}:${name}:${content}`;
+      const cacheKey = `${file.path}:${name}:${content}:${packageVersion}`;
       if (cache) {
         const cached = (await cache.read(cacheKey)) as GeneratedDoc[] | undefined;
         if (cached) return cached;
@@ -120,7 +126,15 @@ export function createGenerator(config?: GeneratorOptions | Project) {
         if (d.length > 1)
           console.warn(`export ${k} should not have more than one type declaration.`);
 
-        out.push(generate(getProject(), k, d[0], options));
+        out.push(
+          generate(
+            encodeURI(`${path.basename(file.path)}-${name}`),
+            getProject(),
+            k,
+            d[0],
+            options,
+          ),
+        );
       }
 
       void cache?.write(cacheKey, out);
@@ -133,10 +147,11 @@ export function createGenerator(config?: GeneratorOptions | Project) {
 }
 
 function generate(
+  id: string,
   program: Project,
   name: string,
   declaration: ExportedDeclarations,
-  { allowInternal = false, transform }: GenerateOptions = {},
+  { allowInternal = false, transform }: GenerateOptions,
 ): GeneratedDoc {
   const entryContext: EntryContext = {
     transform,
@@ -150,6 +165,7 @@ function generate(
     ?.compilerSymbol.getDocumentationComment(program.getTypeChecker().compilerObject);
 
   return {
+    id,
     name,
     description: comment ? ts.displayPartsToString(comment) : '',
     entries: declaration
@@ -176,43 +192,52 @@ function getDocEntry(prop: TsSymbol, context: EntryContext): DocEntry | undefine
       }) satisfies RawTag,
   );
 
-  let type = subType.getText(
-    context.declaration,
-    ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope | ts.TypeFormatFlags.NoTruncation,
-  );
-  let simplifiedType = getSimpleForm(
-    subType,
-    program.getTypeChecker(),
-    isOptional,
-    context.declaration,
-  );
-
-  for (const tag of tags) {
-    // replace full type with @fumadocsType
-    if (tag.name === 'fumadocsType') {
-      const match = /`(?<name>.+)`$/.exec(tag.text)?.[1];
-      if (match) type = match;
-      continue;
-    }
-
-    // replace simplified type with @remarks
-    if (tag.name === 'remarks') {
-      const match = /^`(?<name>.+)`/.exec(tag.text)?.[1];
-      if (match) simplifiedType = match;
-    }
-  }
-
   const entry: DocEntry = {
     name: prop.getName(),
     description: ts.displayPartsToString(
       prop.compilerSymbol.getDocumentationComment(program.getTypeChecker().compilerObject),
     ),
     tags,
-    type,
-    simplifiedType,
+    type: subType.getText(
+      context.declaration,
+      ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope | ts.TypeFormatFlags.NoTruncation,
+    ),
+    simplifiedType: getSimpleForm(
+      subType,
+      program.getTypeChecker(),
+      isOptional,
+      context.declaration,
+    ),
     required: !isOptional,
-    deprecated: tags.some((tag) => tag.name === 'deprecated'),
+    deprecated: false,
   };
+
+  for (const tag of tags) {
+    switch (tag.name) {
+      case 'fumadocsType': {
+        // replace full type with @fumadocsType
+        const match = /`(?<name>.+)`$/.exec(tag.text)?.[1];
+        if (match) entry.type = match;
+        break;
+      }
+      case 'remarks': {
+        // replace simplified type with @remarks
+        const match = /^`(?<name>.+)`/.exec(tag.text)?.[1];
+        if (match) entry.simplifiedType = match;
+        break;
+      }
+      case 'fumadocsHref': {
+        // add anchor to output property type
+        const content = tag.text.trim();
+        if (content.length > 0) entry.typeHref = content;
+        break;
+      }
+      case 'deprecated': {
+        entry.deprecated = true;
+        break;
+      }
+    }
+  }
 
   transform?.call(context, entry, subType, prop);
 

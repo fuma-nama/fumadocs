@@ -1,7 +1,7 @@
 import type { Root } from 'mdast';
 import type { Nodes } from 'hast';
 import type { Transformer } from 'unified';
-import type { Expression, ExpressionStatement, ObjectExpression, Program } from 'estree';
+import type { Expression, ExpressionStatement, ObjectExpression } from 'estree';
 import { createGenerator, type DocEntry, type Generator } from '@/lib/base';
 import { type MarkdownRenderer, markdownRenderer } from '@/markdown';
 import { valueToEstree } from 'estree-util-value-to-estree';
@@ -10,6 +10,7 @@ import { type BaseTypeTableProps, type GenerateTypeTableOptions } from '@/lib/ty
 import { toEstree } from 'hast-util-to-estree';
 import { type ParameterTag, parseTags } from '@/lib/parse-tags';
 import type { ResolvedShikiConfig } from 'fumadocs-core/highlight/config';
+import type { MdxJsxFlowElement } from 'mdast-util-mdx';
 
 function objectBuilder() {
   const out: ObjectExpression = {
@@ -25,8 +26,8 @@ function objectBuilder() {
         shorthand: false,
         computed: false,
         key: {
-          type: 'Identifier',
-          name: key,
+          type: 'Literal',
+          value: key,
         },
         kind: 'init',
         value: expression,
@@ -55,6 +56,9 @@ async function buildTypeProp(
     node.addJsxProperty('type', await renderer.renderTypeToHast(entry.simplifiedType));
     node.addJsxProperty('typeDescription', await renderer.renderTypeToHast(entry.type));
     node.addExpressionNode('required', valueToEstree(entry.required));
+
+    if (entry.typeHref)
+      node.addExpressionNode('typeDescriptionLink', valueToEstree(entry.typeHref));
 
     if (tags.default) node.addJsxProperty('default', await renderer.renderTypeToHast(tags.default));
 
@@ -123,7 +127,7 @@ export interface RemarkAutoTypeTableOptions {
   options?: GenerateTypeTableOptions;
 
   /**
-   * generate required `value` property for `remark-stringify`
+   * generate the stringified form of props (useful for `remark-stringify` etc).
    */
   remarkStringify?: boolean;
 
@@ -175,11 +179,16 @@ export function remarkAutoTypeTable(
         basePath,
       });
 
-      const rendered = output.map(async (doc) => {
+      const rendered = output.map(async (doc): Promise<MdxJsxFlowElement> => {
         return {
           type: 'mdxJsxFlowElement',
           name: outputName,
           attributes: [
+            {
+              type: 'mdxJsxAttribute',
+              name: 'id',
+              value: `type-table-${doc.id}`,
+            },
             {
               type: 'mdxJsxAttribute',
               name: 'type',
@@ -196,7 +205,7 @@ export function remarkAutoTypeTable(
                         expression: await buildTypeProp(doc.entries, renderer),
                       },
                     ],
-                  } satisfies Program,
+                  },
                 },
               },
             },

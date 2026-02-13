@@ -4,7 +4,7 @@ import { ChevronDown } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import { cva } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
-import { type ReactNode, useState } from 'react';
+import { type ComponentProps, type ReactNode, useEffect, useState } from 'react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 export interface ParameterNode {
@@ -43,31 +43,36 @@ export interface TypeNode {
   returns?: ReactNode;
 }
 
-const keyVariants = cva('text-fd-primary', {
-  variants: {
-    deprecated: {
-      true: 'line-through text-fd-primary/50',
-    },
-  },
-});
-
 const fieldVariants = cva('text-fd-muted-foreground not-prose pe-2');
 
-export function TypeTable({ type }: { type: Record<string, TypeNode> }) {
+export function TypeTable({
+  id,
+  type,
+  className,
+  ...props
+}: { type: Record<string, TypeNode> } & ComponentProps<'div'>) {
   return (
-    <div className="@container flex flex-col p-1 bg-fd-card text-fd-card-foreground rounded-2xl border my-6 text-sm overflow-hidden">
+    <div
+      id={id}
+      className={cn(
+        '@container flex flex-col p-1 bg-fd-card text-fd-card-foreground rounded-2xl border my-6 text-sm overflow-hidden',
+        className,
+      )}
+      {...props}
+    >
       <div className="flex font-medium items-center px-3 py-1 not-prose text-fd-muted-foreground">
-        <p className="w-[25%]">Prop</p>
+        <p className="w-1/4">Prop</p>
         <p className="@max-xl:hidden">Type</p>
       </div>
       {Object.entries(type).map(([key, value]) => (
-        <Item key={key} name={key} item={value} />
+        <Item key={key} parentId={id} name={key} item={value} />
       ))}
     </div>
   );
 }
 
 function Item({
+  parentId,
   name,
   item: {
     parameters = [],
@@ -81,27 +86,39 @@ function Item({
     returns,
   },
 }: {
+  parentId?: string;
   name: string;
   item: TypeNode;
 }) {
   const [open, setOpen] = useState(false);
+  const id = parentId ? `${parentId}-${name}` : undefined;
+
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (!id || !hash) return;
+    if (`#${id}` === hash) setOpen(true);
+  }, [id]);
 
   return (
     <Collapsible
+      id={id}
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={(v) => {
+        if (v && id) {
+          window.history.replaceState(null, '', `#${id}`);
+        }
+        setOpen(v);
+      }}
       className={cn(
-        'rounded-xl border overflow-hidden transition-all',
+        'rounded-xl border overflow-hidden scroll-m-20 transition-all',
         open ? 'shadow-sm bg-fd-background not-last:mb-2' : 'border-transparent',
       )}
     >
       <CollapsibleTrigger className="relative flex flex-row items-center w-full group text-start px-3 py-2 not-prose hover:bg-fd-accent">
         <code
           className={cn(
-            keyVariants({
-              deprecated,
-              className: 'min-w-fit w-[25%] font-medium pe-2',
-            }),
+            'text-fd-primary min-w-fit w-1/4 font-mono font-medium pe-2',
+            deprecated && 'line-through text-fd-primary/50',
           )}
         >
           {name}

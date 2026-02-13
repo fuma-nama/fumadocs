@@ -41,7 +41,7 @@ export async function AutoTypeTable({
   const output = await generator.generateTypeTable(props, options);
 
   return output.map(async (item) => {
-    const entries = item.entries.map(async (entry) => {
+    const entries = item.entries.map(async (entry): Promise<[string, TypeNode]> => {
       const tags = parseTags(entry.tags);
       const paramNodes: ParameterNode[] = [];
 
@@ -57,17 +57,24 @@ export async function AutoTypeTable({
         {
           type: await renderType(entry.simplifiedType),
           typeDescription: await renderType(entry.type),
+          typeDescriptionLink: entry.typeHref,
           description: await renderMarkdown(entry.description),
           default: tags.default ? await renderType(tags.default) : undefined,
           parameters: paramNodes,
           required: entry.required,
           deprecated: entry.deprecated,
           returns: tags.returns ? await renderMarkdown(tags.returns) : undefined,
-        } as TypeNode,
+        },
       ];
     });
 
-    return <TypeTable key={item.name} type={Object.fromEntries(await Promise.all(entries))} />;
+    return (
+      <TypeTable
+        key={item.name}
+        id={`type-table-${item.id}`}
+        type={Object.fromEntries(await Promise.all(entries))}
+      />
+    );
   });
 }
 

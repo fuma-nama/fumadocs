@@ -55,6 +55,7 @@ test('class members', async () => {
             "type": "number",
           },
         ],
+        "id": "index.ts-MyClass",
         "name": "MyClass",
       },
     ]
@@ -99,6 +100,7 @@ test('interface members', async () => {
             "type": "number",
           },
         ],
+        "id": "index.ts-MyInterface",
         "name": "MyInterface",
       },
     ]

@@ -59,6 +59,7 @@
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
+    "mdast-util-mdx": "^3.0.0",
     "tsconfig": "workspace:*",
     "tsdown": "^0.20.3",
     "typescript": "^5.9.3"

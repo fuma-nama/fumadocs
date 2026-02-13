@@ -10,6 +10,7 @@ function _createMdxContent(props) {
   return _jsx(_Fragment, {
     children: _jsx(_Fragment, {
       children: _jsx(TypeTable, {
+        id: "type-table-test-2.ts-Player",
         type: {
           name: {
             type: _jsx(_components.span, {

@@ -45,7 +45,10 @@ export type CardProps = Omit<
   keyof Omit<ComponentProps<'a'>, 'href'>
 >;
 
-export type TypeTableProps = ComponentPropsWithoutRef<typeof TypeTable>;
+export type TypeTableProps = Omit<
+  ComponentPropsWithoutRef<typeof TypeTable>,
+  keyof ComponentProps<'div'>
+>;
 
 export type ObjectTypeProps = ComponentPropsWithoutRef<typeof TypeTable>['type'][string];
 

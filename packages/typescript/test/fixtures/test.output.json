@@ -1,5 +1,6 @@
 [
   {
+    "id": "test.ts-Test1",
     "name": "Test1",
     "description": "",
     "entries": [
@@ -29,6 +30,7 @@
     ]
   },
   {
+    "id": "test.ts-Test2",
     "name": "Test2",
     "description": "",
     "entries": [
@@ -67,6 +69,7 @@
     ]
   },
   {
+    "id": "test.ts-Test3",
     "name": "Test3",
     "description": "Player in the room",
     "entries": [
@@ -123,6 +126,7 @@
     ]
   },
   {
+    "id": "test.ts-Test4",
     "name": "Test4",
     "description": "",
     "entries": [
