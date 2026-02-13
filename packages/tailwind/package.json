@@ -40,7 +40,7 @@
   "devDependencies": {
     "@tailwindcss/oxide": "^4.1.18",
     "@types/lodash.merge": "^4.6.9",
-    "@types/node": "^25.2.1",
+    "@types/node": "^25.2.3",
     "eslint-config-custom": "workspace:*",
     "lodash.merge": "^4.6.2",
     "tailwindcss": "^4.1.18",

@@ -17,7 +17,7 @@ import {
 import { I18nLabel, useI18n } from '@/contexts/i18n';
 import { cn } from '@/utils/cn';
 import { Dialog } from '@base-ui/react/dialog';
-import type { HighlightedText, ReactSortedResult as BaseResultType } from 'fumadocs-core/search';
+import type { HighlightedText, ReactSortedResult } from 'fumadocs-core/search';
 import { cva } from 'class-variance-authority';
 import { useRouter } from 'fumadocs-core/framework';
 import type { SharedProps } from '@/contexts/search';
@@ -31,7 +31,7 @@ import type { Transformer } from 'unified';
 import type { Root } from 'hast';
 
 export type SearchItemType =
-  | (BaseResultType & {
+  | (ReactSortedResult & {
       external?: boolean;
     })
   | {
@@ -290,11 +290,12 @@ export function SearchDialogContent({
   return (
     <Dialog.Portal>
       <Dialog.Popup
+        id="fd-search-dialog-content"
         aria-describedby={undefined}
         {...props}
         className={(s) =>
           cn(
-            'fixed left-1/2 top-4 md:top-[calc(50%-250px)] z-50 w-[calc(100%-1rem)] max-w-screen-sm -translate-x-1/2 rounded-xl border bg-fd-popover text-fd-popover-foreground shadow-2xl shadow-black/50 overflow-hidden data-closed:animate-fd-dialog-out dataopen:animate-fd-dialog-in',
+            'fixed left-1/2 top-4 md:top-[calc(50%-250px)] z-50 w-[calc(100%-1rem)] max-w-screen-sm -translate-x-1/2 rounded-xl border bg-fd-popover text-fd-popover-foreground shadow-2xl overflow-hidden data-closed:animate-fd-dialog-out data-open:animate-fd-dialog-in focus-visible:outline-none',
             '*:border-b *:has-[+:last-child[data-empty=true]]:border-b-0 *:data-[empty=true]:border-b-0 *:last:border-b-0',
             typeof className === 'function' ? className(s) : className,
           )
@@ -367,10 +368,12 @@ export function SearchDialogList({
     const viewport = element.firstElementChild;
     if (viewport) observer.observe(viewport);
 
-    window.addEventListener('keydown', onKey);
+    const content: Pick<Window, 'addEventListener' | 'removeEventListener'> =
+      document.getElementById('fd-search-dialog-content') ?? window;
+    content.addEventListener('keydown', onKey);
     return () => {
       observer.disconnect();
-      window.removeEventListener('keydown', onKey);
+      content.removeEventListener('keydown', onKey);
     };
   }, []);
 
