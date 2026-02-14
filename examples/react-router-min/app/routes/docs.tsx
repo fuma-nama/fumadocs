@@ -1,4 +1,4 @@
-import type { Route } from './+types/page';
+import type { Route } from './+types/docs';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
 import { source } from '@/lib/source';
@@ -14,6 +14,7 @@ export async function loader({ params }: Route.LoaderArgs) {
 
   return {
     path: page.path,
+    url: page.url,
     pageTree: await source.serializePageTree(source.getPageTree()),
   };
 }
@@ -21,10 +22,8 @@ export async function loader({ params }: Route.LoaderArgs) {
 const clientLoader = browserCollections.docs.createClientLoader({
   component(
     { toc, frontmatter, default: Mdx },
-    // you can define props for the component
-    props: {
-      className?: string;
-    },
+    // you can define props for the `<Content />` component
+    props?: { className: string },
   ) {
     return (
       <DocsPage toc={toc} {...props}>
@@ -41,13 +40,11 @@ const clientLoader = browserCollections.docs.createClientLoader({
 });
 
 export default function Page({ loaderData }: Route.ComponentProps) {
-  const { pageTree } = useFumadocsLoader(loaderData);
+  const { path, pageTree } = useFumadocsLoader(loaderData);
 
   return (
     <DocsLayout {...baseOptions()} tree={pageTree}>
-      {clientLoader.useContent(loaderData.path, {
-        className: '',
-      })}
+      {clientLoader.useContent(path)}
     </DocsLayout>
   );
 }

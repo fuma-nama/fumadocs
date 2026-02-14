@@ -88,7 +88,7 @@ export async function generateMetadata(props: PageProps<'/docs/[[...slug]]'>): P
 }
 ```
 
-```tsx tab="React Router" title="app/docs/page.tsx"
+```tsx tab="React Router" title="app/routes/docs.tsx"
 // [!code ++]
 import { getPageImage } from '@/lib/source';
 
@@ -136,7 +136,7 @@ export function generateStaticParams() {
 }
 ```
 
-```tsx tab="React Router" title="app/docs/og.tsx"
+```tsx tab="React Router" title="app/routes/og.tsx"
 import { ImageResponse } from '@takumi-rs/image-response';
 import { source } from '@/lib/source';
 import { generate as DefaultImage } from 'fumadocs-ui/og';
@@ -167,7 +167,7 @@ import { type RouteConfig, route } from '@react-router/dev/routes';
 
 export default [
   // [!code ++]
-  route('/og/docs/*', 'docs/og.tsx'),
+  route('/og/docs/*', 'routes/og.tsx'),
 ] satisfies RouteConfig;
 ```
 

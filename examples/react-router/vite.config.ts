@@ -11,7 +11,7 @@ export default defineConfig({
     tailwindcss(),
     reactRouter(),
     tsconfigPaths({
-      root: __dirname,
+      projects: ['./tsconfig.json'],
     }),
   ],
 });

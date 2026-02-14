@@ -28,8 +28,8 @@ import { route, type RouteConfig } from '@react-router/dev/routes';
 export default [
   // [!code highlight:2]
   route(':lang', 'routes/home.tsx'),
-  route(':lang/docs/*', 'docs/page.tsx'),
-  route('api/search', 'docs/search.ts'),
+  route(':lang/docs/*', 'routes/docs.tsx'),
+  route('api/search', 'routes/search.ts'),
 ] satisfies RouteConfig;
 ```
 
@@ -54,8 +54,8 @@ import { route, type RouteConfig } from '@react-router/dev/routes';
 export default [
   // [!code highlight:2]
   route(':lang?', 'routes/home.tsx'),
-  route(':lang?/docs/*', 'docs/page.tsx'),
-  route('api/search', 'docs/search.ts'),
+  route(':lang?/docs/*', 'routes/docs.tsx'),
+  route('api/search', 'routes/search.ts'),
 ] satisfies RouteConfig;
 ```
 
@@ -153,8 +153,8 @@ export default function Home({ params }: Route.ComponentProps) {
 }
 ```
 
-```tsx tab="Docs Page" title="app/docs/page.tsx"
-import type { Route } from './+types/page';
+```tsx tab="Docs Page" title="app/routes/docs.tsx"
+import type { Route } from './+types/docs';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { source } from '@/lib/source';
 import type * as PageTree from 'fumadocs-core/page-tree';

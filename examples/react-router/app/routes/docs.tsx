@@ -1,11 +1,12 @@
-import type { Route } from './+types/page';
+import type { Route } from './+types/docs';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
 import { source } from '@/lib/source';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import browserCollections from 'fumadocs-mdx:collections/browser';
-import { baseOptions } from '@/lib/layout.shared';
+import { baseOptions, gitConfig } from '@/lib/layout.shared';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
+import { LLMCopyButton, ViewOptions } from '@/components/ai/page-actions';
 
 export async function loader({ params }: Route.LoaderArgs) {
   const slugs = params['*'].split('/').filter((v) => v.length > 0);
@@ -14,6 +15,7 @@ export async function loader({ params }: Route.LoaderArgs) {
 
   return {
     path: page.path,
+    url: page.url,
     pageTree: await source.serializePageTree(source.getPageTree()),
   };
 }
@@ -22,16 +24,27 @@ const clientLoader = browserCollections.docs.createClientLoader({
   component(
     { toc, frontmatter, default: Mdx },
     // you can define props for the `<Content />` component
-    props?: {
-      className?: string;
+    {
+      path,
+      url,
+    }: {
+      path: string;
+      url: string;
     },
   ) {
     return (
-      <DocsPage toc={toc} {...props}>
+      <DocsPage toc={toc}>
         <title>{frontmatter.title}</title>
         <meta name="description" content={frontmatter.description} />
         <DocsTitle>{frontmatter.title}</DocsTitle>
         <DocsDescription>{frontmatter.description}</DocsDescription>
+        <div className="flex flex-row gap-2 items-center border-b -mt-4 pb-6">
+          <LLMCopyButton markdownUrl={`${url}.mdx`} />
+          <ViewOptions
+            markdownUrl={`${url}.mdx`}
+            githubUrl={`https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/content/docs/${path}`}
+          />
+        </div>
         <DocsBody>
           <Mdx components={{ ...defaultMdxComponents }} />
         </DocsBody>
@@ -41,11 +54,11 @@ const clientLoader = browserCollections.docs.createClientLoader({
 });
 
 export default function Page({ loaderData }: Route.ComponentProps) {
-  const { path, pageTree } = useFumadocsLoader(loaderData);
+  const { path, url, pageTree } = useFumadocsLoader(loaderData);
 
   return (
     <DocsLayout {...baseOptions()} tree={pageTree}>
-      {clientLoader.useContent(path)}
+      {clientLoader.useContent(path, { path, url })}
     </DocsLayout>
   );
 }

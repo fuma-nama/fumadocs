@@ -37,21 +37,21 @@ import { type RouteConfig, index, route } from '@react-router/dev/routes';
 export default [
   index('routes/home.tsx'),
   // [!code ++:2]
-  route('docs/*', 'docs/page.tsx'),
-  route('api/search', 'docs/search.ts'),
+  route('docs/*', 'routes/docs.tsx'),
+  route('api/search', 'routes/search.ts'),
 ] satisfies RouteConfig;
 ```
 
 Create the following files:
 
 <include cwd meta='tab="app/lib/layout.shared.tsx"'>
-  ../../examples/react-router/app/lib/layout.shared.tsx
+  ../../examples/react-router-min/app/lib/layout.shared.tsx
 </include>
-<include cwd meta='tab="app/docs/page.tsx"'>
-  ../../examples/react-router/app/docs/page.tsx
+<include cwd meta='tab="app/routes/docs.tsx"'>
+  ../../examples/react-router-min/app/routes/docs.tsx
 </include>
-<include cwd meta='tab="app/docs/search.ts"'>
-  ../../examples/react-router/app/docs/search.ts
+<include cwd meta='tab="app/routes/search.ts"'>
+  ../../examples/react-router-min/app/routes/search.ts
 </include>
 
 Wrap your entire app under Fumadocs providers:

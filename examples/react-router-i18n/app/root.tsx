@@ -12,6 +12,7 @@ import type { Route } from './+types/root';
 import './app.css';
 import type { Translations } from 'fumadocs-ui/i18n';
 import { i18n } from '@/lib/i18n';
+import NotFound from './routes/not-found';
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -79,9 +80,9 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   let stack: string | undefined;
 
   if (isRouteErrorResponse(error)) {
-    message = error.status === 404 ? '404' : 'Error';
-    details =
-      error.status === 404 ? 'The requested page could not be found.' : error.statusText || details;
+    if (error.status === 404) return <NotFound />;
+    message = 'Error';
+    details = error.statusText;
   } else if (import.meta.env.DEV && error && error instanceof Error) {
     details = error.message;
     stack = error.stack;
