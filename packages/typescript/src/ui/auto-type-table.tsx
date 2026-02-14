@@ -3,7 +3,7 @@ import { type Jsx, toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import * as runtime from 'react/jsx-runtime';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import 'server-only';
-import type { ReactNode } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 import { type BaseTypeTableProps, type GenerateTypeTableOptions } from '@/lib/type-table';
 import { type Generator } from '@/lib/base';
 import type { Nodes } from 'hast';
@@ -11,25 +11,26 @@ import { parseTags } from '@/lib/parse-tags';
 import type { ResolvedShikiConfig } from 'fumadocs-core/highlight/config';
 import { markdownRenderer } from '@/markdown';
 
-interface JSXMarkdownRenderer {
-  renderMarkdown: (md: string) => Promise<ReactNode>;
-  renderType: (type: string) => Promise<ReactNode>;
-}
-
-export interface AutoTypeTableProps extends BaseTypeTableProps, Partial<JSXMarkdownRenderer> {
+export interface AutoTypeTableProps extends BaseTypeTableProps, ComponentProps<'div'> {
   generator: Generator;
 
   /** Shiki configuration when using default `renderMarkdown` & `renderType` */
   shiki?: ResolvedShikiConfig;
   options?: GenerateTypeTableOptions;
+
+  renderMarkdown?: (md: string) => Promise<ReactNode>;
+  renderType?: (type: string) => Promise<ReactNode>;
 }
 
 export async function AutoTypeTable({
   generator,
-  options = {},
+  options,
   renderType,
   renderMarkdown,
   shiki,
+  name,
+  path,
+  type,
   ...props
 }: AutoTypeTableProps) {
   if (!renderType || !renderMarkdown) {
@@ -38,7 +39,7 @@ export async function AutoTypeTable({
     renderMarkdown ??= async (v) => toJsx(await renderer.renderMarkdownToHast(v));
   }
 
-  const output = await generator.generateTypeTable(props, options);
+  const output = await generator.generateTypeTable({ name, path, type }, options);
 
   return output.map(async (item) => {
     const entries = item.entries.map(async (entry): Promise<[string, TypeNode]> => {
@@ -73,6 +74,7 @@ export async function AutoTypeTable({
         key={item.name}
         id={`type-table-${item.id}`}
         type={Object.fromEntries(await Promise.all(entries))}
+        {...props}
       />
     );
   });

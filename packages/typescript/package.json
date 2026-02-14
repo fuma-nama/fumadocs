@@ -43,7 +43,6 @@
     "hast-util-to-jsx-runtime": "^2.3.6",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
-    "tinyglobby": "^0.2.15",
     "ts-morph": "^27.0.2",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.1.0"
@@ -62,7 +61,8 @@
     "mdast-util-mdx": "^3.0.0",
     "tsconfig": "workspace:*",
     "tsdown": "^0.20.3",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vfile": "^6.0.3"
   },
   "peerDependencies": {
     "@types/estree": "*",

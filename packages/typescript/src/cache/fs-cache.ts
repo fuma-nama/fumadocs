@@ -1,5 +1,4 @@
 import fs from 'node:fs/promises';
-import { createHash } from 'node:crypto';
 import path from 'node:path';
 import type { Cache } from '@/cache/index';
 
@@ -11,15 +10,11 @@ export function createFileSystemGeneratorCache(dir: string): Cache {
   });
 
   return {
-    async write(input, data) {
-      const hash = createHash('SHA256').update(input).digest('hex').slice(0, 12);
-
+    async write(hash, data) {
       await initDirPromise;
       await fs.writeFile(path.join(dir, `${hash}.json`), JSON.stringify(data));
     },
-    async read(input) {
-      const hash = createHash('SHA256').update(input).digest('hex').slice(0, 12);
-
+    async read(hash) {
       try {
         return JSON.parse((await fs.readFile(path.join(dir, `${hash}.json`))).toString());
       } catch {

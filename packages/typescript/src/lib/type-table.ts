@@ -1,6 +1,6 @@
-import * as fs from 'node:fs/promises';
-import { type GenerateOptions, type Generator } from '@/lib/base';
-import { join } from 'node:path';
+import fs from 'node:fs/promises';
+import type { GenerateOptions, Generator } from '@/lib/base';
+import path from 'node:path';
 
 export interface BaseTypeTableProps {
   /**
@@ -49,7 +49,8 @@ export async function getTypeTableOutput(
   { name, type, ...props }: BaseTypeTableProps,
   options?: GenerateTypeTableOptions,
 ) {
-  const file = props.path && options?.basePath ? join(options.basePath, props.path) : props.path;
+  const file =
+    props.path && options?.basePath ? path.join(options.basePath, props.path) : props.path;
   let typeName = name;
   let content = '';
 

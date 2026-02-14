@@ -82,33 +82,6 @@ function _createMdxContent(props) {
               })
             }),
             "required": true
-          },
-          "privateValue": {
-            "type": _jsx(_components.span, {
-              className: "shiki",
-              children: _jsx(_components.code, {
-                children: _jsx(_components.span, {
-                  style: {
-                    "--shiki-light": "#24292E",
-                    "--shiki-dark": "#E1E4E8"
-                  },
-                  children: "string"
-                })
-              })
-            }),
-            "typeDescription": _jsx(_components.span, {
-              className: "shiki",
-              children: _jsx(_components.code, {
-                children: _jsx(_components.span, {
-                  style: {
-                    "--shiki-light": "#24292E",
-                    "--shiki-dark": "#E1E4E8"
-                  },
-                  children: "string"
-                })
-              })
-            }),
-            "required": true
           }
         }
       })

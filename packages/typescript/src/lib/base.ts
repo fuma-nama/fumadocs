@@ -1,11 +1,4 @@
-import {
-  type ExportedDeclarations,
-  Project,
-  type Symbol as TsSymbol,
-  ts,
-  type Type,
-} from 'ts-morph';
-import { createProject, type TypescriptConfig } from '@/create-project';
+import type { ExportedDeclarations, Symbol as TsSymbol, Project, Type } from 'ts-morph';
 import fs from 'node:fs/promises';
 import {
   type BaseTypeTableProps,
@@ -13,8 +6,7 @@ import {
   getTypeTableOutput,
 } from '@/lib/type-table';
 import path from 'node:path';
-import { getSimpleForm } from '@/lib/get-simple-form';
-import type { Cache } from '@/cache';
+import { generateHash, type Cache } from '@/cache';
 import { version as packageVersion } from '../../package.json';
 
 export interface GeneratedDoc {
@@ -23,7 +15,7 @@ export interface GeneratedDoc {
    */
   id: string;
   name: string;
-  description: string;
+  description?: string;
   entries: DocEntry[];
 }
 
@@ -44,9 +36,8 @@ export interface RawTag {
   text: string;
 }
 
-interface EntryContext {
+interface EntryContext extends GenerateOptions {
   program: Project;
-  transform?: Transformer;
   type: Type;
   declaration: ExportedDeclarations;
 }
@@ -85,19 +76,40 @@ export interface GeneratorOptions extends TypescriptConfig {
   project?: Project;
 }
 
-export function createGenerator(config?: GeneratorOptions | Project) {
-  const options =
-    config instanceof Project
-      ? {
-          project: config,
-        }
-      : config;
+export interface TypescriptConfig {
+  tsconfigPath?: string;
+}
+
+export async function createProject(options: TypescriptConfig = {}): Promise<Project> {
+  const { Project } = await import('ts-morph');
+  return new Project({
+    tsConfigFilePath: options.tsconfigPath ?? './tsconfig.json',
+    skipAddingFilesFromTsConfig: true,
+  });
+}
+
+export function createGenerator(options: GeneratorOptions = {}) {
   const cache = options?.cache ? options.cache : null;
-  let instance: Project | undefined;
+  let instance: Project | Promise<Project> | undefined = options?.project;
 
   function getProject() {
-    instance ??= options?.project ?? createProject(options);
-    return instance;
+    if (instance) return instance;
+    return (instance = createProject(options));
+  }
+
+  function getSourceFile(project: Project, filePath: string, fileContent: string) {
+    const ext = path.extname(filePath);
+    const fileBase = filePath.slice(0, -ext.length);
+    let i = 0;
+    let sourceFile = project.getSourceFile(filePath);
+
+    while (sourceFile && sourceFile.getFullText() !== fileContent) {
+      filePath = `${fileBase}.${i++}${ext}`;
+      sourceFile = project.getSourceFile(filePath);
+    }
+
+    if (sourceFile) return sourceFile;
+    return project.createSourceFile(filePath, fileContent, { overwrite: true });
   }
 
   return {
@@ -109,35 +121,38 @@ export function createGenerator(config?: GeneratorOptions | Project) {
       name: string | undefined,
       options: GenerateOptions = {},
     ) {
-      const content = file.content ?? (await fs.readFile(path.resolve(file.path))).toString();
-      const cacheKey = `${file.path}:${name}:${content}:${packageVersion}`;
+      const fullPath = path.resolve(file.path);
+      const content = file.content ?? (await fs.readFile(fullPath)).toString();
+      let cacheKey: string | undefined;
       if (cache) {
+        cacheKey = generateHash(`${file.path}:${name}:${content}:${packageVersion}`);
         const cached = (await cache.read(cacheKey)) as GeneratedDoc[] | undefined;
         if (cached) return cached;
       }
-      const sourceFile = getProject().createSourceFile(file.path, content, {
-        overwrite: true,
-      });
+
+      const project = await getProject();
+      const sourceFile = getSourceFile(project, fullPath, content);
       const out: GeneratedDoc[] = [];
 
       for (const [k, d] of sourceFile.getExportedDeclarations()) {
-        if (name && name !== k) continue;
+        if (d.length === 0 || !name || name !== k) continue;
 
         if (d.length > 1)
           console.warn(`export ${k} should not have more than one type declaration.`);
 
-        out.push(
-          generate(
-            encodeURI(`${path.basename(file.path)}-${name}`),
-            getProject(),
-            k,
-            d[0],
-            options,
-          ),
-        );
+        const declaration = d[0];
+        const entryContext: EntryContext = {
+          ...options,
+          program: project,
+          type: declaration.getType(),
+          declaration,
+        };
+        out.push(await generate(encodeURI(`${path.basename(file.path)}-${name}`), k, entryContext));
       }
 
-      void cache?.write(cacheKey, out);
+      if (cache && cacheKey) {
+        await cache.write(cacheKey, out);
+      }
       return out;
     },
     generateTypeTable(props: BaseTypeTableProps, options?: GenerateTypeTableOptions) {
@@ -146,51 +161,51 @@ export function createGenerator(config?: GeneratorOptions | Project) {
   };
 }
 
-function generate(
+async function generate(
   id: string,
-  program: Project,
   name: string,
-  declaration: ExportedDeclarations,
-  { allowInternal = false, transform }: GenerateOptions,
-): GeneratedDoc {
-  const entryContext: EntryContext = {
-    transform,
-    program,
-    type: declaration.getType(),
-    declaration,
-  };
+  entryContext: EntryContext,
+): Promise<GeneratedDoc> {
+  const { ts } = await import('ts-morph');
+  const { declaration, program } = entryContext;
 
   const comment = declaration
     .getSymbol()
     ?.compilerSymbol.getDocumentationComment(program.getTypeChecker().compilerObject);
+  const entries: DocEntry[] = [];
+  for (const prop of declaration.getType().getProperties()) {
+    const out = await getDocEntry(prop, entryContext);
+    if (out) entries.push(out);
+  }
 
   return {
     id,
     name,
-    description: comment ? ts.displayPartsToString(comment) : '',
-    entries: declaration
-      .getType()
-      .getProperties()
-      .map((prop) => getDocEntry(prop, entryContext))
-      .filter((entry) => entry && (allowInternal || !('internal' in entry.tags))) as DocEntry[],
+    description: comment ? ts.displayPartsToString(comment) : undefined,
+    entries,
   };
 }
 
-function getDocEntry(prop: TsSymbol, context: EntryContext): DocEntry | undefined {
-  const { transform, program } = context;
+async function getDocEntry(prop: TsSymbol, context: EntryContext): Promise<DocEntry | undefined> {
+  const { ts } = await import('ts-morph');
+  const { getSimpleForm } = await import('@/lib/get-simple-form');
+  const { transform, allowInternal = false, program } = context;
   if (context.type.isClass() && prop.getName().startsWith('#')) {
     return;
   }
 
   const subType = prop.getTypeAtLocation(context.declaration);
   const isOptional = prop.isOptional();
-  const tags = prop.getJsDocTags().map(
-    (tag) =>
-      ({
-        name: tag.getName(),
-        text: ts.displayPartsToString(tag.getText()),
-      }) satisfies RawTag,
-  );
+  const tags: RawTag[] = [];
+
+  for (const tag of prop.getJsDocTags()) {
+    if (!allowInternal && tag.getName() === 'internal') return;
+
+    tags.push({
+      name: tag.getName(),
+      text: ts.displayPartsToString(tag.getText()),
+    });
+  }
 
   const entry: DocEntry = {
     name: prop.getName(),

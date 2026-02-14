@@ -1,10 +1,10 @@
-import * as ts from 'ts-morph';
+import { Node, Type, TypeChecker, TypeFormatFlags } from 'ts-morph';
 
 export function getSimpleForm(
-  type: ts.Type,
-  checker: ts.TypeChecker,
+  type: Type,
+  checker: TypeChecker,
   noUndefined = false,
-  location?: ts.Node,
+  location?: Node,
 ): string {
   if (type.isUndefined() && noUndefined) return '';
 
@@ -60,7 +60,7 @@ export function getSimpleForm(
     return 'object';
   }
 
-  return type.getText(location, ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope);
+  return type.getText(location, TypeFormatFlags.UseAliasDefinedOutsideCurrentScope);
 }
 
 function dedupe<T>(arr: T[]): T[] {

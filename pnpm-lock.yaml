@@ -2782,9 +2782,6 @@ importers:
       remark-rehype:
         specifier: ^11.1.2
         version: 11.1.2
-      tinyglobby:
-        specifier: ^0.2.15
-        version: 0.2.15
       ts-morph:
         specifier: ^27.0.2
         version: 27.0.2
@@ -2837,6 +2834,9 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
+      vfile:
+        specifier: ^6.0.3
+        version: 6.0.3
 
 packages:
 

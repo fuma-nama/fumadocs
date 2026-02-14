@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest';
-import { createGenerator, type GeneratorOptions } from '@/lib/base';
+import { createGenerator } from '@/lib/base';
 import { getSimpleForm } from '@/lib/get-simple-form';
-import { createProject } from '@/create-project';
+import { createProject } from '@/lib/base';
 import { type Node, ts } from 'ts-morph';
 import path from 'node:path';
 import { fileURLToPath } from 'url';
@@ -107,13 +107,9 @@ test('interface members', async () => {
   `);
 });
 
-const tsconfig: GeneratorOptions = {
+const project = await createProject({
   tsconfigPath: relative('../tsconfig.json'),
-  basePath: relative('../'),
-  cache: false,
-};
-
-const project = createProject(tsconfig);
+});
 
 function getSimpleForms(fileName: string, sourceCode: string) {
   const out: string[] = [];
