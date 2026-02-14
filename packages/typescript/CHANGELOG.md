@@ -1,5 +1,16 @@
 # fumadocs-typescript
 
+## 5.1.3
+
+### Patch Changes
+
+- 071347a: Support props passthrough for type tables
+- 20cd4d6: Support ID & `@fumadocsHref` tag in type tables
+- Updated dependencies [00c9a0f]
+- Updated dependencies [20cd4d6]
+  - fumadocs-core@16.6.1
+  - fumadocs-ui@16.6.1
+
 ## 5.1.2
 
 ### Patch Changes
