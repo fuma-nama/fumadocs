@@ -1,5 +1,13 @@
 # @fumadocs/base-ui
 
+## 16.6.1
+
+### Patch Changes
+
+- 89c6e65: fix search dialog shortcuts
+- Updated dependencies [00c9a0f]
+  - fumadocs-core@16.6.1
+
 ## 16.6.0
 
 ### Minor Changes

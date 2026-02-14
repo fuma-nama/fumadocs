@@ -115,3 +115,18 @@ interface MyInterface {
   client: MyClient;
 }
 ```
+
+### Type Href
+
+Link the property to other places when used with Type Table.
+
+Type Table will generate anchor ID automatically, you can use it to link to another type table.
+
+```ts
+interface MyInterface {
+  /**
+   * @fumadocsHref #type-table-temp.ts-MyClass-test
+   */
+  client: MyClient;
+}
+```

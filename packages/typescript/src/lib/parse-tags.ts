@@ -1,4 +1,4 @@
-import { RawTag } from '@/lib/base';
+import type { RawTag } from '@/lib/base';
 
 export interface ParameterTag {
   name: string;

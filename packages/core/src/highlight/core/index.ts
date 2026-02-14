@@ -27,17 +27,13 @@ export async function highlightHast(
   options: DistributiveOmit<CoreHighlightOptions, 'components'>,
 ): Promise<Root> {
   const { fallbackLanguage = 'text', config, ...resolved } = options;
+  Object.assign(resolved, config.resolveThemes(resolved));
   let themesToLoad: (ThemeRegistrationAny | string)[];
-
-  if (!('theme' in resolved) && !('themes' in resolved)) {
-    Object.assign(resolved, config.defaultThemes);
-  }
 
   if ('theme' in resolved) {
     themesToLoad = [resolved.theme];
   } else if ('themes' in resolved) {
     themesToLoad = Object.values(resolved.themes).filter((v) => v !== undefined);
-    resolved.defaultColor ??= false;
   } else {
     throw new Error('impossible');
   }

@@ -141,7 +141,7 @@ declare module 'vfile' {
 export const remarkStructureDefaultOptions = {
   types: ['heading', 'paragraph', 'blockquote', 'tableCell', 'mdxJsxFlowElement'],
   mdxTypes(node) {
-    return node.children.length === 0;
+    return !node.children || node.children.length === 0;
   },
   exportAs: false,
 } satisfies StructureOptions;

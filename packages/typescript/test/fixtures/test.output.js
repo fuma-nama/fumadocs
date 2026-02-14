@@ -10,9 +10,10 @@ function _createMdxContent(props) {
   return _jsx(_Fragment, {
     children: _jsx(_Fragment, {
       children: _jsx(TypeTable, {
+        id: "type-table-test-2.ts-Player",
         type: {
-          name: {
-            type: _jsx(_components.span, {
+          "name": {
+            "type": _jsx(_components.span, {
               className: "shiki",
               children: _jsx(_components.code, {
                 children: _jsx(_components.span, {
@@ -24,7 +25,7 @@ function _createMdxContent(props) {
                 })
               })
             }),
-            typeDescription: _jsx(_components.span, {
+            "typeDescription": _jsx(_components.span, {
               className: "shiki",
               children: _jsx(_components.code, {
                 children: _jsx(_components.span, {
@@ -36,8 +37,8 @@ function _createMdxContent(props) {
                 })
               })
             }),
-            required: true,
-            default: _jsx(_components.span, {
+            "required": true,
+            "default": _jsx(_components.span, {
               className: "shiki",
               children: _jsx(_components.code, {
                 children: _jsx(_components.span, {
@@ -49,14 +50,14 @@ function _createMdxContent(props) {
                 })
               })
             }),
-            description: _jsx(_Fragment, {
+            "description": _jsx(_Fragment, {
               children: _jsx(_components.p, {
                 children: "The name of player"
               })
             })
           },
-          age: {
-            type: _jsx(_components.span, {
+          "age": {
+            "type": _jsx(_components.span, {
               className: "shiki",
               children: _jsx(_components.code, {
                 children: _jsx(_components.span, {
@@ -68,7 +69,7 @@ function _createMdxContent(props) {
                 })
               })
             }),
-            typeDescription: _jsx(_components.span, {
+            "typeDescription": _jsx(_components.span, {
               className: "shiki",
               children: _jsx(_components.code, {
                 children: _jsx(_components.span, {
@@ -80,34 +81,7 @@ function _createMdxContent(props) {
                 })
               })
             }),
-            required: true
-          },
-          privateValue: {
-            type: _jsx(_components.span, {
-              className: "shiki",
-              children: _jsx(_components.code, {
-                children: _jsx(_components.span, {
-                  style: {
-                    "--shiki-light": "#24292E",
-                    "--shiki-dark": "#E1E4E8"
-                  },
-                  children: "string"
-                })
-              })
-            }),
-            typeDescription: _jsx(_components.span, {
-              className: "shiki",
-              children: _jsx(_components.code, {
-                children: _jsx(_components.span, {
-                  style: {
-                    "--shiki-light": "#24292E",
-                    "--shiki-dark": "#E1E4E8"
-                  },
-                  children: "string"
-                })
-              })
-            }),
-            required: true
+            "required": true
           }
         }
       })
