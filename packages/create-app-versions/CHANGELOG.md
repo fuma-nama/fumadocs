@@ -1,5 +1,7 @@
 # create-fumadocs-versions
 
+## 16.0.54
+
 ## 16.0.53
 
 ### Patch Changes
