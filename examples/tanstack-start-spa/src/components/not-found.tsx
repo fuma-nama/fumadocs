@@ -1,15 +1,11 @@
+import { baseOptions } from '@/lib/layout.shared';
 import { Link } from '@tanstack/react-router';
 import { HomeLayout } from 'fumadocs-ui/layouts/home';
 
 export function NotFound() {
   return (
-    <HomeLayout
-      nav={{
-        title: 'Tanstack Start',
-      }}
-      className="text-center py-32 justify-center"
-    >
-      <div className="flex flex-col items-center gap-4">
+    <HomeLayout {...baseOptions()}>
+      <div className="flex flex-col justify-center flex-1 text-center items-center gap-4">
         <h1 className="text-6xl font-bold text-fd-muted-foreground">404</h1>
         <h2 className="text-2xl font-semibold">Page Not Found</h2>
         <p className="text-fd-muted-foreground max-w-md">

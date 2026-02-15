@@ -5,8 +5,8 @@
   "sideEffects": false,
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build",
-    "start": "serve dist/client",
+    "build": "vite build && mv .output/dist/client/ .output/public/",
+    "start": "serve .output/public --config ../../serve.json",
     "preview": "vite preview",
     "types:check": "fumadocs-mdx && tsc --noEmit"
   },
@@ -22,6 +22,7 @@
     "lucide-react": "^0.563.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "tailwind-merge": "^3.4.0",
     "vite": "^7.3.1"
   },
   "devDependencies": {
