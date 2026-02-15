@@ -13,7 +13,7 @@ export default defineConfig({
     reactRouterRSC(),
     rsc(),
     tsconfigPaths({
-      root: __dirname,
+      projects: ['./tsconfig.json'],
     }),
   ],
 });
