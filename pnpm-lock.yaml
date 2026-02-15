@@ -1131,7 +1131,7 @@ importers:
         version: 19.2.3(@types/react@19.2.14)
       '@vitejs/plugin-rsc':
         specifier: ^0.5.19
-        version: 0.5.19(react-dom@19.2.4(react@19.2.4))(react-server-dom-webpack@19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
+        version: 0.5.19(react-dom@19.2.4(react@19.2.4))(react-server-dom-webpack@19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(webpack@5.105.2))(react@19.2.4)(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
       react-router-devtools:
         specifier: ^6.2.0
         version: 6.2.0(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(csstype@3.2.3)(react-dom@19.2.4(react@19.2.4))(react-router@7.13.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(solid-js@1.9.11)(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
@@ -1348,6 +1348,73 @@ importers:
       '@vitejs/plugin-react':
         specifier: ^5.1.4
         version: 5.1.4(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
+      tailwindcss:
+        specifier: ^4.1.18
+        version: 4.1.18
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vite-tsconfig-paths:
+        specifier: ^6.1.1
+        version: 6.1.1(typescript@5.9.3)(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
+
+  examples/tanstack-start-min:
+    dependencies:
+      '@tanstack/react-router':
+        specifier: 1.159.5
+        version: 1.159.5(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@tanstack/react-router-devtools':
+        specifier: 1.159.5
+        version: 1.159.5(@tanstack/react-router@1.159.5(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@tanstack/router-core@1.159.4)(csstype@3.2.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@tanstack/react-start':
+        specifier: 1.159.5
+        version: 1.159.5(crossws@0.4.4(srvx@0.11.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(webpack@5.105.2)
+      fumadocs-core:
+        specifier: workspace:*
+        version: link:../../packages/core
+      fumadocs-mdx:
+        specifier: workspace:*
+        version: link:../../packages/mdx
+      fumadocs-ui:
+        specifier: workspace:*
+        version: link:../../packages/radix-ui
+      lucide-react:
+        specifier: ^0.563.0
+        version: 0.563.0(react@19.2.4)
+      react:
+        specifier: ^19.2.4
+        version: 19.2.4
+      react-dom:
+        specifier: ^19.2.4
+        version: 19.2.4(react@19.2.4)
+      vite:
+        specifier: ^7.3.1
+        version: 7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
+    devDependencies:
+      '@tailwindcss/vite':
+        specifier: ^4.1.18
+        version: 4.1.18(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
+      '@types/mdx':
+        specifier: ^2.0.13
+        version: 2.0.13
+      '@types/node':
+        specifier: ^25.2.3
+        version: 25.2.3
+      '@types/react':
+        specifier: ^19.2.14
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: ^19.2.3
+        version: 19.2.3(@types/react@19.2.14)
+      '@vitejs/plugin-react':
+        specifier: ^5.1.4
+        version: 5.1.4(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
+      nitro:
+        specifier: npm:nitro-nightly@3.0.1-20260128-211656-ae83c97e
+        version: nitro-nightly@3.0.1-20260128-211656-ae83c97e(chokidar@5.0.0)(lru-cache@11.2.6)(rolldown@1.0.0-rc.4)(rollup@4.57.1)(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
+      srvx:
+        specifier: ^0.11.4
+        version: 0.11.4
       tailwindcss:
         specifier: ^4.1.18
         version: 4.1.18
@@ -2443,7 +2510,7 @@ importers:
         version: 5.1.4(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
       '@vitejs/plugin-rsc':
         specifier: ^0.5.19
-        version: 0.5.19(react-dom@19.2.4(react@19.2.4))(react-server-dom-webpack@19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
+        version: 0.5.19(react-dom@19.2.4(react@19.2.4))(react-server-dom-webpack@19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(webpack@5.105.2))(react@19.2.4)(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
       commander:
         specifier: ^14.0.3
         version: 14.0.3
@@ -14984,7 +15051,7 @@ snapshots:
       vite-node: 3.2.4(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
     optionalDependencies:
       '@react-router/serve': 7.13.0(react-router@7.13.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(typescript@5.9.3)
-      '@vitejs/plugin-rsc': 0.5.19(react-dom@19.2.4(react@19.2.4))(react-server-dom-webpack@19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
+      '@vitejs/plugin-rsc': 0.5.19(react-dom@19.2.4(react@19.2.4))(react-server-dom-webpack@19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(webpack@5.105.2))(react@19.2.4)(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
       react-server-dom-webpack: 19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(webpack@5.105.2)
       typescript: 5.9.3
     transitivePeerDependencies:
@@ -16559,7 +16626,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitejs/plugin-rsc@0.5.19(react-dom@19.2.4(react@19.2.4))(react-server-dom-webpack@19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))':
+  '@vitejs/plugin-rsc@0.5.19(react-dom@19.2.4(react@19.2.4))(react-server-dom-webpack@19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(webpack@5.105.2))(react@19.2.4)(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))':
     dependencies:
       '@rolldown/pluginutils': 1.0.0-rc.2
       es-module-lexer: 2.0.0
@@ -22756,7 +22823,7 @@ snapshots:
     dependencies:
       '@hono/node-server': 1.19.9(hono@4.11.8)
       '@vitejs/plugin-react': 5.1.4(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
-      '@vitejs/plugin-rsc': 0.5.19(react-dom@19.2.4(react@19.2.4))(react-server-dom-webpack@19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
+      '@vitejs/plugin-rsc': 0.5.19(react-dom@19.2.4(react@19.2.4))(react-server-dom-webpack@19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(webpack@5.105.2))(react@19.2.4)(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
       dotenv: 17.2.4
       hono: 4.11.8
       magic-string: 0.30.21
