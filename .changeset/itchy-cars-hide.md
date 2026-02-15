@@ -1,5 +1,5 @@
 ---
-"create-fumadocs-app": patch
+'create-fumadocs-app': patch
 ---
 
 Force CLI update
