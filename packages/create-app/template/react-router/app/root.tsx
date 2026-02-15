@@ -9,6 +9,8 @@ import {
 import { RootProvider } from 'fumadocs-ui/provider/react-router';
 import type { Route } from './+types/root';
 import './app.css';
+import { rewritePath } from 'fumadocs-core/negotiation';
+import NotFound from './routes/not-found';
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -51,9 +53,9 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   let stack: string | undefined;
 
   if (isRouteErrorResponse(error)) {
-    message = error.status === 404 ? '404' : 'Error';
-    details =
-      error.status === 404 ? 'The requested page could not be found.' : error.statusText || details;
+    if (error.status === 404) return <NotFound />;
+    message = 'Error';
+    details = error.statusText;
   } else if (import.meta.env.DEV && error && error instanceof Error) {
     details = error.message;
     stack = error.stack;
@@ -71,3 +73,12 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
     </main>
   );
 }
+
+const { rewrite: rewriteLLM } = rewritePath('/docs{/*path}.mdx', '/llms.mdx/docs{/*path}');
+const serverMiddleware: Route.MiddlewareFunction = async ({ request }, next) => {
+  const url = new URL(request.url);
+  const path = rewriteLLM(url.pathname);
+  if (path) return Response.redirect(new URL(path, url));
+  return next();
+};
+export const middleware = [serverMiddleware];
