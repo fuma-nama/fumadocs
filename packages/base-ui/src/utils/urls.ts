@@ -6,7 +6,7 @@ export function normalize(urlOrPath: string) {
 /**
  * @returns if `href` is matching the given pathname
  */
-export function isActive(href: string, pathname: string, nested = true): boolean {
+export function isActive(href: string, pathname: string, nested = false): boolean {
   href = normalize(href);
   pathname = normalize(pathname);
 

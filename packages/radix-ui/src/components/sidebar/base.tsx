@@ -16,7 +16,6 @@ import Link, { type LinkProps } from 'fumadocs-core/link';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { cn } from '@/utils/cn';
 import { ScrollArea, type ScrollAreaProps, ScrollViewport } from '@/components/ui/scroll-area';
-import { isActive } from '@/utils/urls';
 import {
   Collapsible,
   CollapsibleContent,
@@ -250,15 +249,15 @@ export function SidebarSeparator(props: ComponentProps<'p'>) {
 
 export function SidebarItem({
   icon,
+  active = false,
   children,
   ...props
 }: LinkProps & {
+  active?: boolean;
   icon?: ReactNode;
 }) {
-  const pathname = usePathname();
   const ref = useRef<HTMLAnchorElement>(null);
   const { prefetch } = useSidebar();
-  const active = props.href !== undefined && isActive(props.href, pathname, false);
 
   useAutoScroll(active, ref);
 
@@ -320,12 +319,16 @@ export function SidebarFolderTrigger({ children, ...props }: CollapsibleTriggerP
   return <div {...(props as ComponentProps<'div'>)}>{children}</div>;
 }
 
-export function SidebarFolderLink({ children, ...props }: LinkProps) {
+export function SidebarFolderLink({
+  children,
+  active = false,
+  ...props
+}: LinkProps & {
+  active?: boolean;
+}) {
   const ref = useRef<HTMLAnchorElement>(null);
   const { open, setOpen, collapsible } = use(FolderContext)!;
   const { prefetch } = useSidebar();
-  const pathname = usePathname();
-  const active = props.href !== undefined && isActive(props.href, pathname, false);
 
   useAutoScroll(active, ref);
 

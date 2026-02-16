@@ -1,6 +1,7 @@
+'use client';
 import type { HTMLAttributes } from 'react';
 import type * as Base from './base';
-import type { LinkItemType } from '@/utils/link-item';
+import { useLinkItemActive, type LinkItemType } from '@/utils/link-item';
 
 type InternalComponents = Pick<
   typeof Base,
@@ -27,13 +28,14 @@ export function createLinkItemRenderer({
   }: HTMLAttributes<HTMLElement> & {
     item: Exclude<LinkItemType, { type: 'icon' }>;
   }) {
+    const active = useLinkItemActive(item);
     if (item.type === 'custom') return <div {...props}>{item.children}</div>;
 
     if (item.type === 'menu')
       return (
         <SidebarFolder {...props}>
           {item.url ? (
-            <SidebarFolderLink href={item.url} external={item.external}>
+            <SidebarFolderLink href={item.url} active={active} external={item.external}>
               {item.icon}
               {item.text}
             </SidebarFolderLink>
@@ -52,7 +54,13 @@ export function createLinkItemRenderer({
       );
 
     return (
-      <SidebarItem href={item.url} icon={item.icon} external={item.external} {...props}>
+      <SidebarItem
+        href={item.url}
+        icon={item.icon}
+        external={item.external}
+        active={active}
+        {...props}
+      >
         {item.text}
       </SidebarItem>
     );

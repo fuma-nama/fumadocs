@@ -135,16 +135,14 @@ function Page() {
 
 Now you can render the story like:
 
-```mdx title="index.mdx"
-import { StoryWithControl } from '@fumadocs/story/client';
-
-<StoryWithControl name="callout" />
-```
-
-Or from the story client instance:
-
-```mdx title="index.mdx"
+```mdx title="index.mdx" tab="From Instance"
 import { storyClient } from '@/components/my-component.story.client';
 
 <storyClient.WithControl />
+```
+
+```mdx title="index.mdx" tab="From Payload Name"
+import { StoryWithControl } from '@fumadocs/story/client';
+
+<StoryWithControl name="callout" />
 ```

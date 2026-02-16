@@ -1,5 +1,12 @@
 # @fumadocs/base-ui
 
+## 16.6.2
+
+### Patch Changes
+
+- cfc5590: Implement `active` on sidebar link items
+  - fumadocs-core@16.6.2
+
 ## 16.6.1
 
 ### Patch Changes

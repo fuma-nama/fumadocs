@@ -17,12 +17,12 @@ Create the server from source object.
   ../../examples/next/app/api/search/route.ts
 </include>
 
-<include cwd meta='tab="React Router" title="app/docs/search.ts"'>
-  ../../examples/react-router/app/docs/search.ts
+<include cwd meta='tab="React Router" title="app/routes/search.ts"'>
+  ../../examples/react-router-min/app/routes/search.ts
 </include>
 
 <include cwd meta='tab="Tanstack Start" title="src/routes/api/search.ts"'>
-  ../../examples/tanstack-start/src/routes/api/search.ts
+  ../../examples/tanstack-start-min/src/routes/api/search.ts
 </include>
 
 <include cwd meta='tab="Waku" title="src/pages/_api/api/search.ts"'>
@@ -51,7 +51,7 @@ export const { GET } = createSearchAPI('advanced', {
 });
 ```
 
-```ts tab="React Router" title="app/docs/search.ts"
+```ts tab="React Router" title="app/routes/search.ts"
 import type { Route } from './+types/search';
 import { createSearchAPI } from 'fumadocs-core/search/server';
 import { source } from '@/lib/source';
@@ -182,7 +182,7 @@ export const revalidate = false;
 export const { staticGET: GET } = createFromSource(source);
 ```
 
-```ts tab="React Router" title="app/docs/search.ts"
+```ts tab="React Router" title="app/routes/search.ts"
 // make sure this route is pre-rendered in `react-router.config.ts`.
 export async function loader() {
   // [!code highlight]

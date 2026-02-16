@@ -57,19 +57,19 @@ export function GET() {
 }
 ```
 
-```ts tab="React Router"
-// app/routes/rss.ts
+```ts tab="React Router" title="app/routes/rss.ts"
 import { getRSS } from '@/lib/rss';
 
 export async function loader() {
   return new Response(getRSS());
 }
+```
 
-// app/routes.ts
+```ts tab="React Router" title="app/routes.ts"
 import { route, type RouteConfig } from '@react-router/dev/routes';
 
 export default [
-  // ...
+  // [!code ++]
   route('rss.xml', 'routes/rss.ts'),
 ] satisfies RouteConfig;
 ```

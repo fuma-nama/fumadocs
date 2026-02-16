@@ -1,5 +1,13 @@
 # create-next-docs-app
 
+## 16.0.55
+
+## 16.0.54
+
+### Patch Changes
+
+- 0e48cbe: Force CLI update
+
 ## 16.0.53
 
 ## 16.0.52

@@ -189,6 +189,17 @@ const serverMiddleware: Route.MiddlewareFunction = async ({ request }, next) => 
 export const middleware = [serverMiddleware];
 ```
 
+```ts tab="React Router" title="react-router.config.ts"
+import type { Config } from '@react-router/dev/config';
+
+export default {
+  // enable middleware [!code ++:3]
+  future: {
+    v8_middleware: true,
+  },
+} satisfies Config;
+```
+
 ```ts tab="Tanstack Start" title="src/routes/llms[.]mdx.docs.$.ts"
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { source } from '@/lib/source';
@@ -201,7 +212,7 @@ export const Route = createFileRoute('/llms.mdx/docs/$')({
         const page = source.getPage(slugs);
         if (!page) throw notFound();
 
-        return new Response(await page.data.getText('raw'), {
+        return new Response(await page.data.getText('processed'), {
           headers: {
             'Content-Type': 'text/markdown',
           },
@@ -217,7 +228,7 @@ import { createMiddleware, createStart } from '@tanstack/react-start';
 import { rewritePath } from 'fumadocs-core/negotiation';
 import { redirect } from '@tanstack/react-router';
 
-const { rewrite: rewriteLLM } = rewritePath('/docs{/*path}.mdx', 'llms.mdx/docs{/*path}');
+const { rewrite: rewriteLLM } = rewritePath('/docs{/*path}.mdx', '/llms.mdx/docs{/*path}');
 
 const llmMiddleware = createMiddleware().server(({ next, request }) => {
   const url = new URL(request.url);
