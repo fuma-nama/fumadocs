@@ -263,7 +263,7 @@ export function PageFooter({ items, children, className, ...props }: FooterProps
   const { previous, next } = useMemo(() => {
     if (items) return items;
 
-    const idx = footerList.findIndex((item) => isActive(item.url, pathname, false));
+    const idx = footerList.findIndex((item) => isActive(item.url, pathname));
 
     if (idx === -1) return {};
     return {

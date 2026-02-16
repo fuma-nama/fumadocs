@@ -98,14 +98,21 @@ export function LinkItem({
   ref,
   item,
   ...props
-}: Omit<ComponentProps<'a'>, 'href'> & { item: WithHref }) {
-  const pathname = usePathname();
-  const activeType = item.active ?? 'url';
-  const active = activeType !== 'none' && isActive(item.url, pathname, activeType === 'nested-url');
+}: Omit<ComponentProps<'a'>, 'href'> & { item: LinkItemType & WithHref }) {
+  const active = useLinkItemActive(item);
 
   return (
     <Link ref={ref} href={item.url} external={item.external} {...props} data-active={active}>
       {props.children}
     </Link>
   );
+}
+
+export function useLinkItemActive(link: LinkItemType) {
+  const pathname = usePathname();
+
+  if (link.type === 'custom' || !link.url) return false;
+  if (link.active === 'none') return false;
+
+  return isActive(link.url, pathname, link.active === 'nested-url');
 }

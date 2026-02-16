@@ -221,7 +221,7 @@ function NavbarLinkItemMenu({
         onPointerLeave={onPointerLeave}
         {...props}
       >
-        {item.url ? <LinkItem item={item as { url: string }}>{item.text}</LinkItem> : item.text}
+        {item.url ? <LinkItem item={item as never}>{item.text}</LinkItem> : item.text}
         <ChevronDown className="size-3" />
       </PopoverTrigger>
       <PopoverContent
