@@ -374,7 +374,7 @@ function FormBody({ parameters = [], body }: Pick<PlaygroundClientProps, 'parame
           }
         >
           {items.map((field) => {
-            const fieldName: FieldKey = [type, field.name];
+            const fieldName: FieldKey = [type, field.name!];
             if (renderParameterField) {
               return renderParameterField(fieldName, field);
             }
@@ -573,7 +573,7 @@ function useAuthInputs(
           ),
         });
       } else if (security.type === 'apiKey') {
-        const fieldName: FieldKey = [security.in, security.name];
+        const fieldName: FieldKey = [security.in!, security.name!];
 
         result.push({
           fieldName,

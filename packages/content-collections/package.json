@@ -42,7 +42,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@content-collections/core": "^0.13.1",
+    "@content-collections/core": "^0.14.0",
     "@content-collections/mdx": "^0.2.2",
     "@types/node": "25.2.3",
     "eslint-config-custom": "workspace:*",

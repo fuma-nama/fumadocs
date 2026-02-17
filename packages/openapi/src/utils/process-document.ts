@@ -1,11 +1,11 @@
 import type { Document } from '@/types';
 import type { NoReference } from '@/utils/schema';
-import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
-import { dereference, upgrade } from '@scalar/openapi-parser';
+import { dereference } from '@scalar/openapi-parser';
 import { bundle } from '@scalar/json-magic/bundle';
+import { upgrade } from '@scalar/openapi-upgrader';
 import { fetchUrls, readFiles } from '@scalar/json-magic/bundle/plugins/node';
 
-export type ProcessedDocument = {
+export interface ProcessedDocument {
   /**
    * dereferenced document
    */
@@ -19,13 +19,11 @@ export type ProcessedDocument = {
   getRawRef: (obj: object) => string | undefined;
 
   bundled: Document;
-};
+}
 
 const cache = new Map<string, ProcessedDocument>();
 
-export async function processDocumentCached(
-  input: string | OpenAPIV3_1.Document | OpenAPIV3.Document,
-): Promise<ProcessedDocument> {
+export async function processDocumentCached(input: string | Document): Promise<ProcessedDocument> {
   if (typeof input !== 'string') return processDocument(input);
 
   const cached = cache.get(input);
@@ -39,10 +37,8 @@ export async function processDocumentCached(
 /**
  * process & reference input document to a Fumadocs OpenAPI compatible format
  */
-export async function processDocument(
-  input: string | OpenAPIV3_1.Document | OpenAPIV3.Document,
-): Promise<ProcessedDocument> {
-  const document = await bundle(input as string, {
+export async function processDocument(input: string | Document): Promise<ProcessedDocument> {
+  const document = await bundle(input, {
     plugins: [fetchUrls(), readFiles()],
     treeShake: true,
     urlMap: true,
@@ -52,7 +48,7 @@ export async function processDocument(
       },
     },
   })
-    .then((v) => upgrade(v).specification)
+    .then((v) => upgrade(v as never, '3.2'))
     .catch((e) => {
       throw new Error(`[OpenAPI] Failed to resolve input: ${input}`, {
         cause: e,

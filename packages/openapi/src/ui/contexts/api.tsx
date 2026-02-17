@@ -128,7 +128,7 @@ function ServerSelectProvider({
 
     return defaultItem
       ? {
-          url: defaultItem.url,
+          url: defaultItem.url!,
           variables: getDefaultValues(defaultItem),
         }
       : null;
@@ -189,7 +189,7 @@ function getDefaultValues(server: NoReference<ServerObject>): Record<string, str
   if (!server.variables) return out;
 
   for (const [k, v] of Object.entries(server.variables)) {
-    out[k] = v.default;
+    if (v.default !== undefined) out[k] = String(v.default);
   }
 
   return out;

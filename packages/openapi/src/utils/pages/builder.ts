@@ -3,7 +3,6 @@ import type { OpenAPIServer } from '@/server';
 import type { OperationItem, WebhookItem } from '@/ui/api-page';
 import type { Document, OperationObject, PathItemObject, TagObject } from '@/types';
 import { getTagDisplayName, methodKeys, type NoReference } from '@/utils/schema';
-import type { OpenAPIV3_1 } from 'openapi-types';
 import { idToTitle } from '@/utils/id-to-title';
 
 interface BaseEntry {
@@ -207,7 +206,7 @@ function extractInfo(document: NoReference<Document>): ExtractedInfo {
       if (!pathItem[methodKey]) continue;
 
       result.operations.push({
-        method: methodKey as OpenAPIV3_1.HttpMethods,
+        method: methodKey,
         path,
         tags: pathItem[methodKey]?.tags,
       });
@@ -221,7 +220,7 @@ function extractInfo(document: NoReference<Document>): ExtractedInfo {
       if (!pathItem[methodKey]) continue;
 
       result.webhooks.push({
-        method: methodKey as OpenAPIV3_1.HttpMethods,
+        method: methodKey,
         name,
         tags: pathItem[methodKey]?.tags,
       });

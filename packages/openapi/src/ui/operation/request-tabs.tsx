@@ -28,8 +28,9 @@ export function getExampleRequests(
   operation: NoReference<MethodInformation>,
   ctx: RenderContext,
 ): ExampleRequestItem[] {
-  const media = operation.requestBody ? getPreferredType(operation.requestBody.content) : null;
-  const bodyOfType = media ? operation.requestBody?.content[media] : null;
+  const requestBody = operation.requestBody;
+  const media = requestBody?.content ? getPreferredType(requestBody.content) : null;
+  const bodyOfType = media ? requestBody!.content![media] : null;
 
   if (bodyOfType?.examples) {
     const result: ExampleRequestItem[] = [];
@@ -54,7 +55,8 @@ export function getExampleRequests(
     {
       id: '_default',
       name: 'Default',
-      description: bodyOfType?.schema?.description,
+      description:
+        typeof bodyOfType?.schema === 'object' ? bodyOfType.schema.description : undefined,
       data,
       encoded: encodeRequestData(data, ctx.mediaAdapters, operation.parameters ?? []),
     },
@@ -76,7 +78,7 @@ function getRequestData(
   };
 
   for (const param of method.parameters ?? []) {
-    let value = pickExample(param);
+    let value = pickExample(param as never);
 
     if (value === undefined && param.required) {
       if (param.schema) {
@@ -95,20 +97,20 @@ function getRequestData(
 
     switch (param.in) {
       case 'cookie':
-        result.cookie[param.name] = value;
+        result.cookie[param.name!] = value;
         break;
       case 'header':
-        result.header[param.name] = value;
+        result.header[param.name!] = value;
         break;
       case 'query':
-        result.query[param.name] = value;
+        result.query[param.name!] = value;
         break;
       default:
-        result.path[param.name] = value;
+        result.path[param.name!] = value;
     }
   }
 
-  if (method.requestBody) {
+  if (method.requestBody?.content) {
     const body = method.requestBody.content;
     const type = getPreferredType(body);
     if (!type)

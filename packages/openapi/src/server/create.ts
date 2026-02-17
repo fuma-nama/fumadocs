@@ -1,12 +1,12 @@
 import { createProxy } from '@/server/proxy';
-import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import { processDocument, type ProcessedDocument } from '@/utils/process-document';
 import type { CodeUsageGenerator } from '@/ui/operation/usage-tabs';
+import type { Document } from '@/types';
 
 /**
  * schema id -> file path, URL, or downloaded schema object
  */
-type SchemaMap = Record<string, string | OpenAPIV3_1.Document | OpenAPIV3.Document>;
+type SchemaMap = Record<string, string | Document>;
 type ProcessedSchemaMap = Record<string, ProcessedDocument>;
 
 export interface OpenAPIOptions {

@@ -123,14 +123,14 @@
     "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-tabs": "^1.1.13",
     "class-variance-authority": "^0.7.1",
-    "lucide-react": "^0.563.0",
+    "lucide-react": "^0.570.0",
     "motion": "^12.34.0",
     "next-themes": "^0.4.6",
     "react-medium-image-zoom": "^5.4.0",
     "react-remove-scroll": "^2.7.2",
     "rehype-raw": "^7.0.0",
     "scroll-into-view-if-needed": "^3.1.0",
-    "tailwind-merge": "^3.4.0",
+    "tailwind-merge": "^3.4.1",
     "unist-util-visit": "^5.1.0"
   },
   "devDependencies": {

@@ -68,7 +68,7 @@ export default function ServerSelect(props: ComponentProps<typeof DialogTrigger>
           </SelectTrigger>
           <SelectContent>
             {servers.map((item) => (
-              <SelectItem key={item.url} value={item.url}>
+              <SelectItem key={item.url} value={item.url!}>
                 <code className="text-[0.8125rem]">{item.url}</code>
                 <p className="text-fd-muted-foreground">{item.description}</p>
               </SelectItem>
@@ -155,7 +155,7 @@ function Field({
         </SelectTrigger>
         <SelectContent>
           {variable.enum.map((value) => (
-            <SelectItem key={value} value={value}>
+            <SelectItem key={value} value={String(value)}>
               {value}
             </SelectItem>
           ))}
