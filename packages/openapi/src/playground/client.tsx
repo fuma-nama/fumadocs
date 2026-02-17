@@ -255,7 +255,7 @@ export default function PlaygroundClient({
             e.preventDefault();
           }}
         >
-          <ServerSelect />
+          <ServerSelect className="border-b" />
           <div className="flex flex-row items-center gap-2 text-sm p-3 not-last:pb-0">
             <MethodLabel>{method}</MethodLabel>
             <Route route={route} className="flex-1" />

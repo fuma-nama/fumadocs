@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from '@/ui/components/select';
 import { Input, labelVariants } from '@/ui/components/input';
-import { type HTMLAttributes, useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, type ComponentProps } from 'react';
 import { cn } from '@/utils/cn';
 import {
   Dialog,
@@ -23,7 +23,7 @@ import type { ServerVariableObject } from '@/types';
 import type { NoReference } from '@/utils/schema';
 import { StfProvider, useFieldValue, useListener, useStf } from '@fumari/stf';
 
-export default function ServerSelect(props: HTMLAttributes<HTMLDivElement>) {
+export default function ServerSelect(props: ComponentProps<typeof DialogTrigger>) {
   const { servers } = useServerContext();
   const { server, setServer, setServerVariables } = useServerSelectContext();
   const [open, setOpen] = useState(false);
@@ -38,15 +38,26 @@ export default function ServerSelect(props: HTMLAttributes<HTMLDivElement>) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger className="text-xs p-3 py-2 bg-fd-muted text-fd-muted-foreground transition-colors truncate hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:outline-none">
-        {isMounted
-          ? withBase(
-              server ? resolveServerUrl(server.url, server.variables) : '/',
-              window.location.origin,
-            )
-          : 'loading...'}
+      <DialogTrigger
+        {...props}
+        className={cn(
+          'flex items-center gap-2 text-sm text-start px-3 py-2 bg-fd-muted text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground',
+          props.className,
+        )}
+      >
+        <span className="px-2 py-0.5 -ms-2 font-medium rounded-lg border bg-fd-secondary text-fd-secondary-foreground shadow-sm">
+          Server URL
+        </span>
+        <code className="truncate min-w-0 flex-1">
+          {isMounted
+            ? withBase(
+                server ? resolveServerUrl(server.url, server.variables) : '/',
+                window.location.origin,
+              )
+            : 'loading...'}
+        </code>
       </DialogTrigger>
-      <DialogContent {...props}>
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Server URL</DialogTitle>
           <DialogDescription>The base URL of your API endpoint.</DialogDescription>
