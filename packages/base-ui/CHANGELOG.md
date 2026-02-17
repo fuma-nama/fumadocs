@@ -1,5 +1,12 @@
 # @fumadocs/base-ui
 
+## 16.6.3
+
+### Patch Changes
+
+- 1c26656: Extend grid of docs layout to 5 columns
+  - fumadocs-core@16.6.3
+
 ## 16.6.2
 
 ### Patch Changes
