@@ -22,6 +22,7 @@ import { resolveServerUrl, withBase } from '@/utils/url';
 import type { ServerVariableObject } from '@/types';
 import type { NoReference } from '@/utils/schema';
 import { StfProvider, useFieldValue, useListener, useStf } from '@fumari/stf';
+import { EditIcon } from 'lucide-react';
 
 export default function ServerSelect(props: ComponentProps<typeof DialogTrigger>) {
   const { servers } = useServerContext();
@@ -56,6 +57,7 @@ export default function ServerSelect(props: ComponentProps<typeof DialogTrigger>
               )
             : 'loading...'}
         </code>
+        <EditIcon className="size-4" />
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
