@@ -1,5 +1,7 @@
 import type { JSONSchema } from 'json-schema-typed/draft-2020-12';
 import type {
+  ExampleObject,
+  MediaTypeObject,
   MethodInformation,
   OperationObject,
   PathItemObject,
@@ -7,7 +9,6 @@ import type {
   TagObject,
 } from '@/types';
 import { idToTitle } from '@/utils/id-to-title';
-import { OpenAPIV3_1 } from 'openapi-types';
 
 export const methodKeys = ['get', 'post', 'patch', 'delete', 'head', 'put'] as const;
 
@@ -37,9 +38,11 @@ export function getPreferredType(body: Record<string, unknown>): string | undefi
 }
 
 export function getTagDisplayName(tag: TagObject): string {
-  return 'x-displayName' in tag && typeof tag['x-displayName'] === 'string'
-    ? tag['x-displayName']
-    : idToTitle(tag.name);
+  if ('x-displayName' in tag && typeof tag['x-displayName'] === 'string')
+    return tag['x-displayName'];
+
+  if (tag.summary) return tag.summary;
+  return idToTitle(tag.name!);
 }
 
 /**
@@ -63,10 +66,10 @@ export function createMethod(
 interface ExampleLike {
   example?: unknown;
   examples?: {
-    [media: string]: OpenAPIV3_1.ExampleObject;
+    [media: string]: ExampleObject;
   };
   content?: {
-    [media: string]: OpenAPIV3_1.MediaTypeObject;
+    [media: string]: MediaTypeObject;
   };
 }
 

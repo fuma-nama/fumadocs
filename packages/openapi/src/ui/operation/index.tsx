@@ -69,7 +69,7 @@ export async function Operation({
     headingLevel++;
   }
 
-  const contentTypes = body ? Object.entries(body.content) : null;
+  const contentTypes = body?.content ? Object.entries(body.content) : null;
 
   if (body && contentTypes && contentTypes.length > 0) {
     const items = contentTypes.map(([key]) => ({
@@ -143,15 +143,18 @@ export async function Operation({
             <Schema
               key={param.name}
               client={{
-                name: param.name,
+                name: param.name!,
                 required: param.required,
               }}
               root={
-                {
-                  ...param.schema,
-                  description: param.description ?? param.schema?.description,
-                  deprecated: (param.deprecated ?? false) || (param.schema?.deprecated ?? false),
-                } as ResolvedSchema
+                typeof param.schema === 'object'
+                  ? ({
+                      ...param.schema,
+                      description: param.description ?? param.schema?.description,
+                      deprecated:
+                        (param.deprecated ?? false) || (param.schema?.deprecated ?? false),
+                    } as ResolvedSchema)
+                  : (param.schema as ResolvedSchema)
               }
               readOnly={method.method === 'GET'}
               writeOnly={method.method !== 'GET'}
@@ -476,7 +479,7 @@ function AuthScheme({
 
   if (schema.type === 'apiKey') {
     return (
-      <AuthProperty name={schema.name} type="<token>" scopes={scopes}>
+      <AuthProperty name={schema.name!} type="<token>" scopes={scopes}>
         {schema.description && ctx.renderMarkdown(schema.description)}
         <p>
           In: <code>{schema.in}</code>

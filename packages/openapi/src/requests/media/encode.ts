@@ -18,7 +18,7 @@ export interface EncodedParameterMultiple {
 export function encodeRequestData(
   from: RawRequestData,
   adapters: Record<string, MediaAdapter>,
-  parameters: NoReference<ParameterObject>[],
+  parameters: NoReference<ParameterObject>[] = [],
 ): RequestData {
   const result: RequestData = {
     method: from.method,
@@ -110,13 +110,13 @@ function serializePathParameter(
   switch (field.style) {
     case 'label':
       if (Array.isArray(value)) {
-        output[field.name] = {
+        output[field.name!] = {
           value: '.' + value.join(explode ? '.' : ','),
         };
         break;
       }
       if (typeof value === 'object') {
-        output[field.name] = {
+        output[field.name!] = {
           value:
             '.' +
             (explode
@@ -127,7 +127,7 @@ function serializePathParameter(
         };
         break;
       }
-      output[field.name] = {
+      output[field.name!] = {
         value: `.${value}`,
       };
       break;
@@ -135,7 +135,7 @@ function serializePathParameter(
       const specifier = `;${name}=`;
 
       if (Array.isArray(value)) {
-        output[field.name] = {
+        output[field.name!] = {
           value: explode
             ? `${specifier}${value.join(',')}`
             : `${specifier}${value.join(specifier)}`,
@@ -143,7 +143,7 @@ function serializePathParameter(
         break;
       }
       if (typeof value === 'object') {
-        output[field.name] = {
+        output[field.name!] = {
           value: explode
             ? Object.entries(value)
                 .map(([k, v]) => `;${k}=${v}`)
@@ -153,14 +153,14 @@ function serializePathParameter(
         break;
       }
 
-      output[field.name] = {
+      output[field.name!] = {
         value: `${specifier}${value}`,
       };
       break;
     }
     // simple
     default:
-      output[field.name] = {
+      output[field.name!] = {
         value: serializeSimple(value, explode),
       };
   }
@@ -175,14 +175,14 @@ function serializeQueryParameter(
   const { style, explode = true } = field;
 
   if (style === 'spaceDelimited' && !explode && Array.isArray(value)) {
-    output[field.name] = {
+    output[field.name!] = {
       values: [value.join(' ')],
     };
     return;
   }
 
   if (style === 'pipeDelimited' && !explode && Array.isArray(value)) {
-    output[field.name] = {
+    output[field.name!] = {
       values: [value.join('|')],
     };
     return;
@@ -199,7 +199,7 @@ function serializeQueryParameter(
   }
 
   if (Array.isArray(value)) {
-    output[field.name] = {
+    output[field.name!] = {
       values: explode ? value : [value.join(',')],
     };
     return;
@@ -215,13 +215,13 @@ function serializeQueryParameter(
   }
 
   if (typeof value === 'object') {
-    output[field.name] = {
+    output[field.name!] = {
       values: [Object.entries(value).flat().join(',')],
     };
     return;
   }
 
-  output[field.name] = {
+  output[field.name!] = {
     values: [String(value)],
   };
 }
@@ -236,7 +236,7 @@ function serializeCookieParameter(
 
   // form
   if (Array.isArray(value)) {
-    output[field.name] = {
+    output[field.name!] = {
       value: explode ? value.map((v) => `${field.name}=${v}`).join('&') : value.join(','),
     };
   } else if (typeof value === 'object' && explode) {
@@ -246,11 +246,11 @@ function serializeCookieParameter(
       };
     }
   } else if (typeof value === 'object') {
-    output[field.name] = {
+    output[field.name!] = {
       value: Object.entries(value).flat().join(','),
     };
   } else {
-    output[field.name] = {
+    output[field.name!] = {
       value: String(value),
     };
   }

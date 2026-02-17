@@ -13,11 +13,11 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "lucide-react": "^0.563.0",
+    "lucide-react": "^0.570.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-server-dom-webpack": "^19.2.4",
-    "waku": "1.0.0-alpha.3"
+    "waku": "1.0.0-alpha.4"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.18",

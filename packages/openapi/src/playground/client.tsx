@@ -255,7 +255,7 @@ export default function PlaygroundClient({
             e.preventDefault();
           }}
         >
-          <ServerSelect />
+          <ServerSelect className="border-b" />
           <div className="flex flex-row items-center gap-2 text-sm p-3 not-last:pb-0">
             <MethodLabel>{method}</MethodLabel>
             <Route route={route} className="flex-1" />
@@ -374,7 +374,7 @@ function FormBody({ parameters = [], body }: Pick<PlaygroundClientProps, 'parame
           }
         >
           {items.map((field) => {
-            const fieldName: FieldKey = [type, field.name];
+            const fieldName: FieldKey = [type, field.name!];
             if (renderParameterField) {
               return renderParameterField(fieldName, field);
             }
@@ -573,7 +573,7 @@ function useAuthInputs(
           ),
         });
       } else if (security.type === 'apiKey') {
-        const fieldName: FieldKey = [security.in, security.name];
+        const fieldName: FieldKey = [security.in!, security.name!];
 
         result.push({
           fieldName,

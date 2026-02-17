@@ -54,15 +54,15 @@ export function LayoutBody({ className, style, children, ...props }: ComponentPr
     <div
       id="nd-docs-layout"
       className={cn(
-        'grid transition-[grid-template-columns] overflow-x-clip min-h-(--fd-docs-height) auto-cols-auto auto-rows-auto [--fd-docs-height:100dvh] [--fd-header-height:0px] [--fd-toc-popover-height:0px] [--fd-sidebar-width:0px] [--fd-toc-width:0px]',
+        'grid transition-[grid-template-columns] overflow-x-clip min-h-(--fd-docs-height) [--fd-docs-height:100dvh] [--fd-header-height:0px] [--fd-toc-popover-height:0px] [--fd-sidebar-width:0px] [--fd-toc-width:0px]',
         className,
       )}
       data-sidebar-collapsed={collapsed}
       style={
         {
-          gridTemplate: `"sidebar header toc"
-        "sidebar toc-popover toc"
-        "sidebar main toc" 1fr / minmax(var(--fd-sidebar-col), 1fr) minmax(0, calc(var(--fd-layout-width,97rem) - var(--fd-sidebar-width) - var(--fd-toc-width))) minmax(min-content, 1fr)`,
+          gridTemplate: `"sidebar sidebar header toc toc"
+        "sidebar sidebar toc-popover toc toc"
+        "sidebar sidebar main toc toc" 1fr / minmax(min-content, 1fr) var(--fd-sidebar-col) minmax(0, calc(var(--fd-layout-width,97rem) - var(--fd-sidebar-width) - var(--fd-toc-width))) var(--fd-toc-width) minmax(min-content, 1fr)`,
           '--fd-docs-row-1': 'var(--fd-banner-height, 0px)',
           '--fd-docs-row-2': 'calc(var(--fd-docs-row-1) + var(--fd-header-height))',
           '--fd-docs-row-3': 'calc(var(--fd-docs-row-2) + var(--fd-toc-popover-height))',

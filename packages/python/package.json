@@ -44,8 +44,8 @@
   "dependencies": {
     "class-variance-authority": "^0.7.1",
     "js-yaml": "^4.1.1",
-    "lucide-react": "^0.563.0",
-    "tailwind-merge": "^3.4.0"
+    "lucide-react": "^0.570.0",
+    "tailwind-merge": "^3.4.1"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",

@@ -1,7 +1,6 @@
 import { Operation } from '@/ui/operation';
-import type { RenderContext } from '@/types';
+import type { HttpMethods, RenderContext } from '@/types';
 import { createMethod } from '@/utils/schema';
-import type { OpenAPIV3_1 } from 'openapi-types';
 import type { ProcessedDocument } from '@/utils/process-document';
 import { ApiProviderLazy, ServerProviderLazy } from './contexts/api.lazy';
 
@@ -23,7 +22,7 @@ export interface WebhookItem {
    * webhook name in `webhooks`
    */
   name: string;
-  method: OpenAPIV3_1.HttpMethods;
+  method: HttpMethods;
 }
 
 export interface OperationItem {
@@ -34,7 +33,7 @@ export interface OperationItem {
   /**
    * the HTTP method of operation
    */
-  method: OpenAPIV3_1.HttpMethods;
+  method: HttpMethods;
 }
 
 export async function APIPage({

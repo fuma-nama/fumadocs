@@ -41,6 +41,7 @@ export type ApiProviderProps = InheritFromContext;
 
 export interface SelectedServer {
   url: string;
+  name?: string;
   variables: Record<string, string>;
 }
 
@@ -128,7 +129,8 @@ function ServerSelectProvider({
 
     return defaultItem
       ? {
-          url: defaultItem.url,
+          name: defaultItem.name,
+          url: defaultItem.url!,
           variables: getDefaultValues(defaultItem),
         }
       : null;
@@ -140,10 +142,18 @@ function ServerSelectProvider({
     if (!cached) return;
 
     try {
-      const obj = JSON.parse(cached);
-      if (!obj || typeof obj !== 'object') return;
-
-      setServer(obj);
+      const obj: unknown = JSON.parse(cached);
+      if (
+        typeof obj === 'object' &&
+        obj !== null &&
+        'url' in obj &&
+        typeof obj.url === 'string' &&
+        'variables' in obj &&
+        typeof obj.variables === 'object' &&
+        obj.variables !== null
+      ) {
+        setServer(obj as SelectedServer);
+      }
     } catch {
       // ignore
     }
@@ -168,6 +178,7 @@ function ServerSelectProvider({
             if (!obj) return;
 
             const result: SelectedServer = {
+              name: obj.name,
               url: value,
               variables: getDefaultValues(obj),
             };
@@ -189,7 +200,7 @@ function getDefaultValues(server: NoReference<ServerObject>): Record<string, str
   if (!server.variables) return out;
 
   for (const [k, v] of Object.entries(server.variables)) {
-    out[k] = v.default;
+    if (v.default !== undefined) out[k] = String(v.default);
   }
 
   return out;

@@ -42,7 +42,7 @@
     "estree-util-to-js": "^2.0.0",
     "estree-util-value-to-estree": "^3.5.0",
     "npm-to-yarn": "^3.0.1",
-    "oxc-transform": "^0.112.0",
+    "oxc-transform": "^0.114.0",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.1.0",
     "vfile": "^6.0.3",
