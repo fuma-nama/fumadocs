@@ -62,6 +62,7 @@ externalDocs:
 servers:
   - url: https://galaxy.scalar.com
   - url: '{protocol}://void.scalar.com/{path}'
+    name: Production
     description: Responds with your request data
     variables:
       protocol:

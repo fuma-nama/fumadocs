@@ -46,7 +46,7 @@ export default function ServerSelect(props: ComponentProps<typeof DialogTrigger>
         )}
       >
         <span className="px-2 py-0.5 -ms-2 font-medium rounded-lg border bg-fd-secondary text-fd-secondary-foreground shadow-sm">
-          Server URL
+          {server?.name ?? 'Server URL'}
         </span>
         <code className="truncate min-w-0 flex-1">
           {isMounted

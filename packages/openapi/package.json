@@ -60,8 +60,7 @@
     "clean": "rimraf dist",
     "dev": "tsdown --watch --clean false",
     "lint": "eslint .",
-    "types:check": "tsc --noEmit",
-    "postinstall": "patch-package"
+    "types:check": "tsc --noEmit"
   },
   "dependencies": {
     "@fumari/json-schema-to-typescript": "^2.0.0",
@@ -98,7 +97,6 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "json-schema-typed": "^8.0.2",
-    "patch-package": "^8.0.1",
     "tailwindcss": "^4.1.18",
     "tsconfig": "workspace:*",
     "tsdown": "^0.20.3"
