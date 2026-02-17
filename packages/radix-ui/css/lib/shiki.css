@@ -16,9 +16,12 @@
 :is(pre *):is(.shiki *):not(.not-fumadocs-codeblock *) {
   .line& {
     position: relative;
-    min-height: 1lh;
     padding-left: var(--padding-left);
     padding-right: var(--padding-right);
+  }
+
+  .line:empty& {
+    height: 1lh;
   }
 
   .has-focused .line&:not(.focused) {
