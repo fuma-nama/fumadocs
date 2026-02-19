@@ -1,5 +1,14 @@
 # @fuma-docs/openapi
 
+## 10.3.7
+
+### Patch Changes
+
+- 3f8c9b0: Support OpenAPI 3.2 security scheme deprecation
+- Updated dependencies [8f8e7f0]
+  - fumadocs-ui@16.6.4
+  - fumadocs-core@16.6.4
+
 ## 10.3.6
 
 ### Patch Changes

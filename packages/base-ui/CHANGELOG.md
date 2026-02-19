@@ -1,5 +1,12 @@
 # @fumadocs/base-ui
 
+## 16.6.4
+
+### Patch Changes
+
+- 8f8e7f0: fix accessibility issues
+  - fumadocs-core@16.6.4
+
 ## 16.6.3
 
 ### Patch Changes
