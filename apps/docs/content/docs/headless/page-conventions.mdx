@@ -90,7 +90,7 @@ For example, when you are opening root folder `framework`, the other folders (e.
 <Files>
   <Folder name="framework" defaultOpen>
     <File name="index.mdx" />
-    <File name="current-page.mdx" className="!text-fd-primary !bg-fd-primary/10" />
+    <File name="current-page.mdx" className="text-fd-primary! bg-fd-primary/10!" />
     <File name="other-pages.mdx" />
   </Folder>
   <Folder name="headless (hidden)" className="opacity-50" disabled defaultOpen>
@@ -161,6 +161,15 @@ Folder items are sorted alphabetically by default, you can add or control the or
   ]
 }
 ```
+
+<Callout type='warn' title="No Duplicated URL">
+
+The same page URL must not appear more than once in the entire page tree.
+Duplicated page items are not allowed for the same reason.
+
+This is intentional, such that Fumadocs can locate the active tree item purely based on current pathname.
+
+</Callout>
 
 ## Icons
 
