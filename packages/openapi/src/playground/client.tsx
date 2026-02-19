@@ -151,7 +151,10 @@ export default function PlaygroundClient({
     },
   } = useApiContext();
   const { serverRef } = useServerContext();
-  const [securityId, setSecurityId] = useState(0);
+  const [securityId, setSecurityId] = useState(() => {
+    const idx = securities.findIndex((s) => s.every((entry) => !entry.deprecated));
+    return idx === -1 ? 0 : idx;
+  });
   const { inputs, mapInputs, initAuthValues } = useAuthInputs(
     securities[securityId],
     transformAuthInputs,
@@ -312,7 +315,14 @@ function SecurityTabs({
             <SelectItem key={i} value={i.toString()}>
               {security.map((item) => (
                 <div key={item.id} className="max-w-[600px]">
-                  <p className="font-mono font-medium">{item.id}</p>
+                  <p
+                    className={cn(
+                      'font-mono font-medium',
+                      item.deprecated && 'text-fd-muted-foreground line-through',
+                    )}
+                  >
+                    {item.id}
+                  </p>
                   <p className="text-fd-muted-foreground whitespace-pre-wrap">{item.description}</p>
                 </div>
               ))}

@@ -9,7 +9,7 @@ import { createMethod, methodKeys, type NoReference, type ResolvedSchema } from 
 import { idToTitle } from '@/utils/id-to-title';
 import { Schema } from '../schema';
 import { UsageTabs } from '@/ui/operation/usage-tabs';
-import { MethodLabel } from '@/ui/components/method-label';
+import { Badge, MethodLabel } from '@/ui/components/method-label';
 import { CopyResponseTypeScript, SelectTab, SelectTabs, SelectTabTrigger } from './client';
 import {
   AccordionContent,
@@ -452,7 +452,7 @@ function WebhookCallback({
 }
 
 function AuthScheme({
-  scheme: schema,
+  scheme,
   scopes,
   ctx,
 }: {
@@ -460,16 +460,17 @@ function AuthScheme({
   scopes: string[];
   ctx: RenderContext;
 }) {
-  if (schema.type === 'http' || schema.type === 'oauth2') {
+  if (scheme.type === 'http' || scheme.type === 'oauth2') {
     return (
       <AuthProperty
         name="Authorization"
         type={
-          schema.type === 'http' && schema.scheme === 'basic' ? `Basic <token>` : 'Bearer <token>'
+          scheme.type === 'http' && scheme.scheme === 'basic' ? `Basic <token>` : 'Bearer <token>'
         }
+        deprecated={scheme.deprecated}
         scopes={scopes}
       >
-        {schema.description && ctx.renderMarkdown(schema.description)}
+        {scheme.description && ctx.renderMarkdown(scheme.description)}
         <p>
           In: <code>header</code>
         </p>
@@ -477,21 +478,31 @@ function AuthScheme({
     );
   }
 
-  if (schema.type === 'apiKey') {
+  if (scheme.type === 'apiKey') {
     return (
-      <AuthProperty name={schema.name!} type="<token>" scopes={scopes}>
-        {schema.description && ctx.renderMarkdown(schema.description)}
+      <AuthProperty
+        name={scheme.name!}
+        type="<token>"
+        deprecated={scheme.deprecated}
+        scopes={scopes}
+      >
+        {scheme.description && ctx.renderMarkdown(scheme.description)}
         <p>
-          In: <code>{schema.in}</code>
+          In: <code>{scheme.in}</code>
         </p>
       </AuthProperty>
     );
   }
 
-  if (schema.type === 'openIdConnect') {
+  if (scheme.type === 'openIdConnect') {
     return (
-      <AuthProperty name="OpenID Connect" type="<token>" scopes={scopes}>
-        {schema.description && ctx.renderMarkdown(schema.description)}
+      <AuthProperty
+        name="OpenID Connect"
+        type="<token>"
+        deprecated={scheme.deprecated}
+        scopes={scopes}
+      >
+        {scheme.description && ctx.renderMarkdown(scheme.description)}
       </AuthProperty>
     );
   }
@@ -500,12 +511,14 @@ function AuthScheme({
 function AuthProperty({
   name,
   type,
+  deprecated = false,
   scopes = [],
   className,
   ...props
 }: ComponentProps<'div'> & {
   name: string;
   type: string;
+  deprecated?: boolean;
   scopes?: string[];
 }) {
   return (
@@ -513,6 +526,7 @@ function AuthProperty({
       <div className="flex flex-wrap items-center gap-3 not-prose">
         <span className="font-medium font-mono text-fd-primary">{name}</span>
         <span className="text-sm font-mono text-fd-muted-foreground">{type}</span>
+        {deprecated && <Badge color="red">Deprecated</Badge>}
       </div>
       <div className="prose-no-margin pt-2.5 empty:hidden">
         {props.children}
