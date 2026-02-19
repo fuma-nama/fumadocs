@@ -28,7 +28,7 @@ export function NavbarMenuTrigger(props: NavigationMenuTriggerProps) {
   return (
     <NavigationMenuTrigger
       {...props}
-      className={cn(navItemVariants(), 'rounded-md', props.className)}
+      className={cn(navItemVariants(), 'text-sm rounded-md', props.className)}
     >
       {props.children}
     </NavigationMenuTrigger>
