@@ -1,0 +1,105 @@
+@import './index.css';
+
+@theme {
+  --color-fd-primary: oklch(0.487 0.083 262.691);
+  --color-fd-article: hsl(0, 0%, 97%);
+}
+
+:root {
+  letter-spacing: -0.25px;
+}
+
+.dark {
+  --color-fd-primary: oklch(0.902 0.0461 259.51);
+  --color-fd-article: hsl(0, 0%, 7.04%);
+  --color-fd-background: hsl(0, 0%, 5.04%);
+}
+
+@variant md {
+  #nd-docs-layout {
+    #nd-page {
+      @apply relative md:px-9 xl:px-12;
+    }
+
+    #nd-page:before {
+      content: '';
+      @apply absolute inset-0 bg-fd-article rounded-xl border shadow-xl m-4 mb-2 -z-1;
+    }
+
+    [data-toc-popover-trigger],
+    [data-toc-popover-content] {
+      @apply px-4;
+    }
+
+    [data-toc-popover] {
+      top: calc(var(--fd-docs-row-1) + 2.5 * var(--spacing));
+      @apply mx-4 mt-2.5;
+
+      header {
+        transform-origin: top center;
+        @apply border rounded-xl shadow-lg transition-[margin] has-data-[active=true]:-mx-2 has-data-[active=true]:bg-fd-popover/80;
+      }
+    }
+  }
+
+  #nd-notebook-layout {
+    #nd-page {
+      @apply relative md:px-9 xl:px-12;
+    }
+
+    #nd-page:before {
+      content: '';
+      @apply absolute inset-0 bg-fd-article rounded-xl border shadow-xl m-4 mb-2 -z-1;
+    }
+
+    [data-toc-popover-trigger],
+    [data-toc-popover-content] {
+      @apply px-4;
+    }
+
+    [data-toc-popover] {
+      top: calc(var(--fd-docs-row-2) + 2.5 * var(--spacing));
+      @apply mx-4 mt-2.5;
+
+      header {
+        transform-origin: top center;
+        @apply border rounded-xl shadow-lg transition-[margin] has-data-[active=true]:-mx-2 has-data-[active=true]:bg-fd-popover/80;
+      }
+    }
+  }
+}
+
+#nd-sidebar[data-collapsed='false'] {
+  border: none;
+  @apply bg-fd-background;
+}
+
+:root {
+  --fd-layout-width: 100vw;
+}
+
+/* Make docs content take up remaining space */
+article[id="nd-page"],
+article[data-full="false"] {
+  max-width: none !important;
+  width: 100%;
+}
+
+/* Move TOC inside main panel - Mintlify style */
+@variant md {
+  /* Extend the existing panel from #nd-page to cover TOC area */
+  #nd-docs-layout:has(#nd-toc) #nd-page::before {
+    /* Extend right edge to cover TOC area (negative value extends beyond container) */
+    /* Account for TOC width plus maintain the right margin */
+    right: calc(-1 * var(--fd-toc-width, 268px));
+  }
+
+  /* Adjust TOC styling to integrate with panel */
+  #nd-toc {
+    background: transparent;
+    /* Ensure TOC appears inside the extended panel */
+    position: relative;
+    z-index: 1;
+  }
+}
+
