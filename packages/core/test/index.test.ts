@@ -5,6 +5,7 @@ import { findNeighbour, findSiblings } from '@/page-tree/utils';
 import { getBreadcrumbItems } from '@/breadcrumb';
 import { DefaultFormatter } from '@/i18n/middleware';
 import { NextURL } from 'next/dist/server/web/next-url';
+import { updateHref } from '@/dynamic-link';
 
 test('Find Neighbours', () => {
   const tree: Root = {
@@ -198,4 +199,13 @@ test('findSiblings', () => {
       },
     ]
   `);
+});
+
+test('Dynamic Link: update href', () => {
+  expect(updateHref('/[lang]/test', {})).toBe('/test');
+  expect(updateHref('/[lang]/test', { lang: 'en' })).toBe('/en/test');
+  expect(updateHref('/[lang]/test', { lang: ['en', 'cn'] })).toBe('/en/cn/test');
+
+  // relative -> relative
+  expect(updateHref('[lang]/test', {})).toBe('test');
 });
