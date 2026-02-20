@@ -36,7 +36,7 @@ export function NavbarMenuTrigger({ className, ...props }: NavigationMenuTrigger
       className={(s) =>
         cn(
           navItemVariants(),
-          'rounded-md',
+          'text-sm rounded-md',
           typeof className === 'function' ? className(s) : className,
         )
       }

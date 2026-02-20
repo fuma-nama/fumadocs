@@ -58,6 +58,11 @@ const showcases: ShowcaseObject[] = [
     name: 'Zod',
     url: 'https://zod.dev',
   },
+  {
+    image: '/showcases/prisma.png',
+    name: 'Prisma',
+    url: 'https://prisma.io',
+  },
   { image: '/showcases/nuqs.jpg', name: 'nuqs', url: 'https://nuqs.47ng.com' },
   {
     image: '/showcases/dokploy.png',

@@ -10,7 +10,7 @@ export type MDXBundlerPresetOptions = Omit<
   remarkPlugins?: ResolvePlugins;
 
   remarkStructureOptions?: Plugins.StructureOptions | false;
-  remarkHeadingOptions?: Plugins.RemarkHeadingOptions;
+  remarkHeadingOptions?: Plugins.RemarkHeadingOptions | false;
   remarkImageOptions?: Plugins.RemarkImageOptions | false;
   remarkCodeTabOptions?: Plugins.RemarkCodeTabOptions | false;
   remarkNpmOptions?: Plugins.RemarkNpmOptions | false;
@@ -34,13 +34,14 @@ export async function mdxPreset(options: MDXBundlerPresetOptions = {}): Promise<
   const remarkPlugins = await resolvePlugins(
     (v) => [
       import('remark-gfm').then((mod) => mod.default),
-      import('@/mdx-plugins/remark-heading').then((mod) => [
-        mod.remarkHeading,
-        {
-          generateToc: false,
-          ...remarkHeadingOptions,
-        },
-      ]),
+      remarkHeadingOptions !== false &&
+        import('@/mdx-plugins/remark-heading').then((mod) => [
+          mod.remarkHeading,
+          {
+            generateToc: false,
+            ...remarkHeadingOptions,
+          },
+        ]),
       remarkImageOptions !== false &&
         import('@/mdx-plugins/remark-image').then((mod) => [
           mod.remarkImage,

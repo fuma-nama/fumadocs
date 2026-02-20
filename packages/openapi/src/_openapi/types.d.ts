@@ -261,13 +261,14 @@ export declare namespace OpenAPIV3_2 {
       mediaTypes?: Record<string, MediaTypeObject | ReferenceObject>;
     }
   >;
-  export type SecuritySchemeObject =
+  export type SecuritySchemeObject = (
     | HttpSecurityScheme
     | ApiKeySecurityScheme
     | OAuth2SecurityScheme
-    | (OpenIdSecurityScheme & {
-        deprecated?: boolean;
-      });
+    | OpenIdSecurityScheme
+  ) & {
+    deprecated?: boolean;
+  };
   export type HttpSecurityScheme = OpenAPIV3_1.HttpSecurityScheme;
   export type ApiKeySecurityScheme = OpenAPIV3_1.ApiKeySecurityScheme;
   export type OAuthFlows = OpenAPIV3_1.OAuthFlows & {

@@ -89,51 +89,53 @@ export function Header({
           ))}
         </ul>
       </div>
-      <ul className="flex flex-row items-center ms-auto -me-1.5 lg:hidden">
+      <div className="flex flex-row items-center ms-auto -me-1.5 lg:hidden">
         {searchToggle.enabled !== false &&
           (searchToggle.components?.sm ?? <SearchToggle className="p-2" hideIfDisabled />)}
-        <NavigationMenuItem>
-          <NavigationMenuTrigger
-            aria-label="Toggle Menu"
-            className={cn(
-              buttonVariants({
-                size: 'icon',
-                color: 'ghost',
-                className: 'group [&_svg]:size-5.5',
-              }),
-            )}
-            onPointerMove={nav.enableHoverToOpen ? undefined : (e) => e.preventDefault()}
-          >
-            <ChevronDown className="transition-transform duration-300 group-data-[state=open]:rotate-180" />
-          </NavigationMenuTrigger>
-          <NavigationMenuContent className="flex flex-col p-4 sm:flex-row sm:items-center sm:justify-end">
-            {menuItems
-              .filter((item) => !isSecondary(item))
-              .map((item, i) => (
-                <MobileNavigationMenuLinkItem key={i} item={item} className="sm:hidden" />
-              ))}
-            <div className="-ms-1.5 flex flex-row items-center gap-2 max-sm:mt-2">
-              {menuItems.filter(isSecondary).map((item, i) => (
-                <MobileNavigationMenuLinkItem
-                  key={i}
-                  item={item}
-                  className={cn(item.type === 'icon' && '-mx-1 first:ms-0')}
-                />
-              ))}
-              <div role="separator" className="flex-1" />
-              {i18n && (
-                <LanguageToggle>
-                  <Languages className="size-5" />
-                  <LanguageToggleText />
-                  <ChevronDown className="size-3 text-fd-muted-foreground" />
-                </LanguageToggle>
+        <NavigationMenuItem asChild>
+          <div>
+            <NavigationMenuTrigger
+              aria-label="Toggle Menu"
+              className={cn(
+                buttonVariants({
+                  size: 'icon',
+                  color: 'ghost',
+                  className: 'group [&_svg]:size-5.5',
+                }),
               )}
-              {themeSwitch.enabled !== false &&
-                (themeSwitch.component ?? <ThemeToggle mode={themeSwitch?.mode} />)}
-            </div>
-          </NavigationMenuContent>
+              onPointerMove={nav.enableHoverToOpen ? undefined : (e) => e.preventDefault()}
+            >
+              <ChevronDown className="transition-transform duration-300 group-data-[state=open]:rotate-180" />
+            </NavigationMenuTrigger>
+            <NavigationMenuContent className="flex flex-col p-4 sm:flex-row sm:items-center sm:justify-end">
+              {menuItems
+                .filter((item) => !isSecondary(item))
+                .map((item, i) => (
+                  <MobileNavigationMenuLinkItem key={i} item={item} className="sm:hidden" />
+                ))}
+              <div className="-ms-1.5 flex flex-row items-center gap-2 max-sm:mt-2">
+                {menuItems.filter(isSecondary).map((item, i) => (
+                  <MobileNavigationMenuLinkItem
+                    key={i}
+                    item={item}
+                    className={cn(item.type === 'icon' && '-mx-1 first:ms-0')}
+                  />
+                ))}
+                <div role="separator" className="flex-1" />
+                {i18n && (
+                  <LanguageToggle>
+                    <Languages className="size-5" />
+                    <LanguageToggleText />
+                    <ChevronDown className="size-3 text-fd-muted-foreground" />
+                  </LanguageToggle>
+                )}
+                {themeSwitch.enabled !== false &&
+                  (themeSwitch.component ?? <ThemeToggle mode={themeSwitch?.mode} />)}
+              </div>
+            </NavigationMenuContent>
+          </div>
         </NavigationMenuItem>
-      </ul>
+      </div>
     </HeaderNavigationMenu>
   );
 }
@@ -176,7 +178,7 @@ function HeaderNavigationMenu({
 }
 
 function NavigationMenuLinkItem({ item, ...props }: { item: LinkItemType; className?: string }) {
-  if (item.type === 'custom') return <div {...props}>{item.children}</div>;
+  if (item.type === 'custom') return item.children;
 
   if (item.type === 'menu') {
     const children = item.items.map((child, j) => {

@@ -5,6 +5,7 @@ import { cn } from '@/lib/cn';
 import { getSponsors } from '@/lib/get-sponsors';
 import { owner } from '@/lib/github';
 import { organizationAsUserSponsors } from '@/app/(home)/sponsors/data';
+import { HeartIcon } from 'lucide-react';
 
 const tiers = [
   {
@@ -60,7 +61,8 @@ export default async function Page() {
       />
       <h1 className="text-4xl font-semibold">Support Fumadocs</h1>
       <p className="mt-4 text-sm">
-        Your sponsorship means a lot to open-source projects, including Fumadocs.
+        Support the development work of Fumadocs. Fumadocs is fully open source, your sponsorship
+        means a lot.
       </p>
       <a
         href="https://github.com/sponsors/fuma-nama"
@@ -68,11 +70,14 @@ export default async function Page() {
         target="_blank"
         className={cn(
           buttonVariants({
-            className: 'rounded-full mt-6',
+            className: 'group rounded-full mt-6',
           }),
         )}
       >
         Sponsor
+        <span className="w-0 transition-[width] overflow-hidden group-hover:w-6">
+          <HeartIcon className="text-pink-200 ms-auto fill-current size-4 dark:text-red-400" />
+        </span>
       </a>
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 200" className="max-w-[600px]">
         <defs>

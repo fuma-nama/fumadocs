@@ -54,13 +54,22 @@ You can also configure block-level feedback (e.g. a feedback popover for each pa
 Add the `remark-feedback-block` Remark plugin:
 
 ```tsx title="source.config.ts (Fumadocs MDX)"
-import { remarkFeedbackBlock } from 'fumadocs-core/mdx-plugins/remark-feedback-block';
+import {
+  remarkFeedbackBlock,
+  type RemarkFeedbackBlockOptions,
+} from 'fumadocs-core/mdx-plugins/remark-feedback-block';
 import { defineConfig } from 'fumadocs-mdx/config';
+
+const feedbackOptions: RemarkFeedbackBlockOptions = {
+  // other options:
+};
 
 export default defineConfig({
   mdxOptions: {
-    // [!code ++]
-    remarkPlugins: [remarkFeedbackBlock],
+    remarkPlugins: [
+      // [!code ++]
+      [remarkFeedbackBlock, feedbackOptions],
+    ],
   },
 });
 ```

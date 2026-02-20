@@ -247,7 +247,7 @@ export function CodeBlockTabsTrigger({
         )
       }
     >
-      <div className="absolute inset-x-2 bottom-0 h-px group-data-[active]:bg-fd-primary" />
+      <div className="absolute inset-x-2 bottom-0 h-px group-data-active:bg-fd-primary" />
       {children}
     </TabsTrigger>
   );

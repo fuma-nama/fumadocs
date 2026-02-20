@@ -70,7 +70,7 @@ void checkLinks();
 
 ### Running Lint
 
-To access the `source` object outside of app runtime, configure [Fumadocs MDX Loader](/docs/mdx/loader/bun) first.
+To access the `source` object outside of app runtime, configure [Fumadocs MDX Loader](/docs/mdx/loader/bun) for Bun.
 
 Then, run the script to validate links:
 
@@ -78,6 +78,10 @@ Then, run the script to validate links:
 bun ./scripts/lint.ts
 ```
 
-> For Node.js, you might need to configure `tsconfig-paths`, TypeScript transpiling, and [Fumadocs MDX Loader](/docs/mdx/loader/node).
->
-> Without special reasons, using Bun or [`tsx`](https://github.com/privatenumber/tsx) would be simpler.
+<Callout title="Node.js Loader">
+
+You might need to configure TypeScript transpiling (or newer version of Node.js), and [Fumadocs MDX Loader](/docs/mdx/loader/node).
+
+Without special reasons, using Bun or [`tsx`](https://github.com/privatenumber/tsx) would be simpler.
+
+</Callout>

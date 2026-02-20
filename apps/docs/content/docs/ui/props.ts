@@ -73,7 +73,10 @@ export type BreadcrumbProps = Omit<
 
 export type FooterProps = Omit<NonNullable<DocsPageProps['footer']>, keyof ComponentProps<'div'>>;
 
-export type AutoTypeTableProps = ComponentPropsWithoutRef<typeof AutoTypeTable>;
+export type AutoTypeTableProps = Omit<
+  ComponentPropsWithoutRef<typeof AutoTypeTable>,
+  keyof ComponentProps<'div'>
+>;
 
 export type SearchProps = Required<RootProviderProps>['search'];
 

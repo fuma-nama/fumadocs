@@ -38,6 +38,9 @@ export interface TypeNode {
   required?: boolean;
   deprecated?: boolean;
 
+  /**
+   * a list of parameters info if the type is a function.
+   */
   parameters?: ParameterNode[];
 
   returns?: ReactNode;

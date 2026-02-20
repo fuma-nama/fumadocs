@@ -73,18 +73,18 @@ export function Header({
           transparentMode={nav.transparentMode}
           className={cn(s.open && 'shadow-lg rounded-b-2xl')}
         >
-          <NavigationMenuList className="flex h-14 w-full items-center px-4">
+          <div className="flex h-14 w-full items-center px-4">
             {renderTitleNav(nav, {
               className: 'inline-flex items-center gap-2.5 font-semibold',
             })}
             {nav.children}
-            <ul className="flex flex-row items-center gap-2 px-6 max-sm:hidden">
+            <NavigationMenuList className="flex flex-row items-center gap-2 px-6 max-sm:hidden">
               {navItems
                 .filter((item) => !isSecondary(item))
                 .map((item, i) => (
                   <NavigationMenuLinkItem key={i} item={item} className="text-sm" />
                 ))}
-            </ul>
+            </NavigationMenuList>
             <div className="flex flex-row items-center justify-end gap-1.5 flex-1 max-lg:hidden">
               {searchToggle.enabled !== false &&
                 (searchToggle.components?.lg ?? (
@@ -100,7 +100,7 @@ export function Header({
                   <Languages className="size-5" />
                 </LanguageToggle>
               )}
-              <ul className="flex flex-row gap-2 items-center empty:hidden">
+              <NavigationMenuList className="flex flex-row gap-2 items-center empty:hidden">
                 {navItems.filter(isSecondary).map((item, i) => (
                   <NavigationMenuLinkItem
                     key={i}
@@ -108,9 +108,9 @@ export function Header({
                     item={item}
                   />
                 ))}
-              </ul>
+              </NavigationMenuList>
             </div>
-            <ul className="flex flex-row items-center ms-auto -me-1.5 lg:hidden">
+            <div className="flex flex-row items-center ms-auto -me-1.5 lg:hidden">
               {searchToggle.enabled !== false &&
                 (searchToggle.components?.sm ?? <SearchToggle className="p-2" hideIfDisabled />)}
               <CollapsibleTrigger
@@ -125,8 +125,8 @@ export function Header({
               >
                 <ChevronDown className="transition-transform duration-300 group-data-panel-open:rotate-180" />
               </CollapsibleTrigger>
-            </ul>
-          </NavigationMenuList>
+            </div>
+          </div>
           <CollapsibleContent className="flex flex-col px-4">
             {menuItems
               .filter((item) => !isSecondary(item))
@@ -243,7 +243,7 @@ function HeaderRoot({
 }
 
 function NavigationMenuLinkItem({ item, ...props }: { item: LinkItemType; className?: string }) {
-  if (item.type === 'custom') return <div {...props}>{item.children}</div>;
+  if (item.type === 'custom') return item.children;
 
   if (item.type === 'menu') {
     const children = item.items.map((child, j) => {

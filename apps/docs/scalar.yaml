@@ -445,6 +445,7 @@ components:
       type: http
       scheme: bearer
       description: JWT Bearer token authentication
+      deprecated: true
     basicAuth:
       type: http
       scheme: basic
