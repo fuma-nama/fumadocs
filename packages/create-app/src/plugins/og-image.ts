@@ -55,7 +55,7 @@ async function nextConfigExternal(context: TemplatePluginContext) {
   const replaced = content.replace(
     'const config = {',
     `const config = {
-  servwerExternalPackages: ['@takumi-rs/image-response'],
+  serverExternalPackages: ['@takumi-rs/image-response'],
   `,
   );
 
