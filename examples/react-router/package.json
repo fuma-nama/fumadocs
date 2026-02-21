@@ -11,6 +11,7 @@
   "dependencies": {
     "@react-router/node": "^7.13.0",
     "@react-router/serve": "^7.13.0",
+    "@takumi-rs/image-response": "^0.68.17",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",

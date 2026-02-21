@@ -11,6 +11,15 @@ export default defineConfig({
     optimizeDeps: {
       exclude: ['fumadocs-ui', 'fumadocs-core'],
     },
+    ssr: {
+      external: ['@takumi-rs/image-response'],
+    },
+    resolve: {
+      alias: {
+        'next/og': import.meta.resolve('@takumi-rs/image-response'),
+        'next/dist/compiled/@vercel/og/types': import.meta.resolve('@takumi-rs/image-response'),
+      },
+    },
 
     plugins: [tailwindcss(), mdx(MdxConfig), tsconfigPaths()],
   } satisfies UserConfig as Config['vite'],
