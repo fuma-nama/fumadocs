@@ -889,8 +889,8 @@ importers:
         specifier: ^7.13.0
         version: 7.13.0(react-router@7.13.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(typescript@5.9.3)
       '@takumi-rs/image-response':
-        specifier: ^0.68.16
-        version: 0.68.16
+        specifier: ^0.68.17
+        version: 0.68.17
       fumadocs-core:
         specifier: workspace:*
         version: link:../../packages/core
@@ -1579,6 +1579,9 @@ importers:
 
   examples/waku:
     dependencies:
+      '@takumi-rs/image-response':
+        specifier: ^0.68.17
+        version: 0.68.17
       fumadocs-core:
         specifier: workspace:*
         version: link:../../packages/core
@@ -2058,8 +2061,8 @@ importers:
         specifier: ^1.2.18
         version: 1.2.18
       '@takumi-rs/image-response':
-        specifier: ^0.68.16
-        version: 0.68.16
+        specifier: ^0.68.17
+        version: 0.68.17
       eslint:
         specifier: ^10.0.0
         version: 10.0.0(jiti@2.6.1)
@@ -6435,8 +6438,8 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7
 
-  '@takumi-rs/core-darwin-arm64@0.68.16':
-    resolution: {integrity: sha512-S4B2n7NB4jkijv0A9wpBOuX9pVtu4ukTrtNAf6NxW5rmVdUvqmwouK6OjrrYl1+CjswZGFlOFiBUp9h+bV6h6w==}
+  '@takumi-rs/core-darwin-arm64@0.68.17':
+    resolution: {integrity: sha512-toMlVnB19J+eUVDOV3mhVOqFn+fMazycMZoeQSJQR/GXtog2peRp2dKqSE8w6gi7nGUOrZzX4u4L+eX+vwnfww==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [arm64]
     os: [darwin]
@@ -6447,8 +6450,8 @@ packages:
     cpu: [arm64]
     os: [darwin]
 
-  '@takumi-rs/core-darwin-x64@0.68.16':
-    resolution: {integrity: sha512-AGM8YCxraq0FgKr/ftYv3jtLozcsqMUtKWZl+LYwVyWpz0qzHrRpngyFnfMzxlgNK+8O8W+2s3n3SljfgkuZ3w==}
+  '@takumi-rs/core-darwin-x64@0.68.17':
+    resolution: {integrity: sha512-z4rQ4QLCIeHm9AWLiPBU8gG4gPTScFUC8zKFgCxlYMORgNcnija7VoeBfhc04rLL3h7LWWHPrp7Q2V8r7cpMHw==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [x64]
     os: [darwin]
@@ -6459,8 +6462,8 @@ packages:
     cpu: [x64]
     os: [darwin]
 
-  '@takumi-rs/core-linux-arm64-gnu@0.68.16':
-    resolution: {integrity: sha512-WQTapY7mDqd/teGmMHoi6RlnhEjfWWkwZOEQiWobwiJDu2CmnO9NdiFUfX9h0nHY/AHxZ+N4WmldJRSoZj55Dw==}
+  '@takumi-rs/core-linux-arm64-gnu@0.68.17':
+    resolution: {integrity: sha512-PRyL7KEujZDskgVf16KVkjVRgTw2QhznRmYYa/1YI2PWXcYvheEtOMRCL2B7dLbmFVsh1agXYMQrBEBEyH0YUA==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [arm64]
     os: [linux]
@@ -6471,8 +6474,8 @@ packages:
     cpu: [arm64]
     os: [linux]
 
-  '@takumi-rs/core-linux-arm64-musl@0.68.16':
-    resolution: {integrity: sha512-lie+WwL6XN0i+P0e+zfPhvx+UCLMEnRFaM8oN4XWL7gPMP6m3vPM1uH73edFjuZcyIwmP3LIA2ADOgFCUstYyQ==}
+  '@takumi-rs/core-linux-arm64-musl@0.68.17':
+    resolution: {integrity: sha512-4CiEF518wDnujF0fjql2XN6uO+OXl0svy0WgAF2656dCx2gJtWscaHytT2rsQ0ZmoFWE0dyWcDW1g/FBVPvuvA==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [arm64]
     os: [linux]
@@ -6483,8 +6486,8 @@ packages:
     cpu: [arm64]
     os: [linux]
 
-  '@takumi-rs/core-linux-x64-gnu@0.68.16':
-    resolution: {integrity: sha512-SRsqNUeg/F1B1wbUVHTIE2HqqYAMlA2JYG33mS84UPg8XzBoHzoY8eSwK6Os700K7JL/8qm4ZSB9vX+Nk44BNg==}
+  '@takumi-rs/core-linux-x64-gnu@0.68.17':
+    resolution: {integrity: sha512-jm8lTe2E6Tfq2b97GJC31TWK1JAEv+MsVbvL9DCLlYcafgYFlMXDUnOkZFMjlrmh0HcFAYDaBkniNDgIQfXqzg==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [x64]
     os: [linux]
@@ -6495,8 +6498,8 @@ packages:
     cpu: [x64]
     os: [linux]
 
-  '@takumi-rs/core-linux-x64-musl@0.68.16':
-    resolution: {integrity: sha512-zopP1zg+s5xpvCxFXsGe5cSmKi1hrnTh491ykZ7eyywdvDH9rsFly0fyECp1hi5c5J1KHrYskmGmbH/fkasG/w==}
+  '@takumi-rs/core-linux-x64-musl@0.68.17':
+    resolution: {integrity: sha512-nbdzQgC4ywzltDDV1fer1cKswwGE+xXZHdDiacdd7RM5XBng209Bmo3j1iv9dsX+4xXhByzCCGbxdWhhHqVXmw==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [x64]
     os: [linux]
@@ -6507,8 +6510,8 @@ packages:
     cpu: [x64]
     os: [linux]
 
-  '@takumi-rs/core-win32-arm64-msvc@0.68.16':
-    resolution: {integrity: sha512-l3KhrEsEjWeZtdBoet9eWsfH1qkO0TMO1rZTOYF8fouulYSXK4EhJMROuSIi4LZp6djq61cGEkWB9TqYCuNtlw==}
+  '@takumi-rs/core-win32-arm64-msvc@0.68.17':
+    resolution: {integrity: sha512-kE4F0LRmuhSwiNkFG7dTY9ID8+B7zb97QedyN/IO2fBJmRQDkqCGcip2gloh8YPPhCuKGjCqqqh2L+Tg9PKW7w==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [arm64]
     os: [win32]
@@ -6519,8 +6522,8 @@ packages:
     cpu: [arm64]
     os: [win32]
 
-  '@takumi-rs/core-win32-x64-msvc@0.68.16':
-    resolution: {integrity: sha512-AAjzi/Yyk2wy9tuvq4/5rYEVtrWG20YK5vJRSES4kPPczWffJT7j0lI1rOZHcRf1CCpDxWgw8LbxUdBkC2MZig==}
+  '@takumi-rs/core-win32-x64-msvc@0.68.17':
+    resolution: {integrity: sha512-oPbpEsc/POZcTzE1Om+nEI3IQs687iD/W2DMzs1LRlG4VY1vDF2m2mI7a0R3nQgFdOYKX3kkFIEsxY5qSTstnw==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [x64]
     os: [win32]
@@ -6531,28 +6534,28 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@takumi-rs/core@0.68.16':
-    resolution: {integrity: sha512-yMaNWTrPs5uOQ5ml2DFRykz/AkgQCQ6J9n+DjifUC5BPhbFA5SnkH7bir5CZm65Q1kJizB3zm94jFC8AUP6HrA==}
+  '@takumi-rs/core@0.68.17':
+    resolution: {integrity: sha512-kW4Z/93RkBZHVF5aoc4mh9kbyEJam0kGv/RbZKdUpg7ZQ97uetgJ/pY3OwcSsRY9bL5WmlBm2+s+EW814WXqpQ==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
 
   '@takumi-rs/core@0.68.4':
     resolution: {integrity: sha512-3Uj7kzdyVpRq66uW2MGVD2bcURaQN86HARNNAhHBDbV45jfnx0BwCQfrTHPvSQzGxZ0sbrynwwTVretXyAATOw==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
 
-  '@takumi-rs/helpers@0.68.16':
-    resolution: {integrity: sha512-4QuBSDSP32jmmoAgmdUAU7yWZRuptYBBdVBeTklGLYlGHba2iRIcYl0mL9mDuq/L2bsUyy6dibeJoghLC8mPww==}
+  '@takumi-rs/helpers@0.68.17':
+    resolution: {integrity: sha512-aREzIBHpGaUKqvl371UFx+HspMtcN9Y6SgwQ2HQZ8VcLn/C4uJYHkk4vg2Z0cIJsiMxxvc+8d58J/9sxzwc0vA==}
 
   '@takumi-rs/helpers@0.68.4':
     resolution: {integrity: sha512-vwhfTk+DXJ9WFBmAhWR38mFlYzWgy60oqcF84SNxtBd3vFF8misJIGSEEYlIZjj+1EKYCmszKbrH+CLvxWySUw==}
 
-  '@takumi-rs/image-response@0.68.16':
-    resolution: {integrity: sha512-U1f3a2ZJ+fXyiEL/dej9p0tGakQTn3/gNLLxEokRz9nlPTJ1vpE5100AsWkRA4RKxJRUicTsxBgI1sRKDTrT8Q==}
+  '@takumi-rs/image-response@0.68.17':
+    resolution: {integrity: sha512-Crnmfe7+ml3zACcS+mpgi7yJ0oTtJgXRsdphsDv0wY5LWNdKrNNMCsUE5Qp1zs7AdcuzWL0bYyBctRlImRTTdQ==}
 
   '@takumi-rs/image-response@0.68.4':
     resolution: {integrity: sha512-LiQ243RC4wNQKLKC8HH6wRyBsTSKLyBeLGwfm0UzGOMUWMeAtVbCzcy5G6nPifdPcr01btmV2LouEP6CCBBLog==}
 
-  '@takumi-rs/wasm@0.68.16':
-    resolution: {integrity: sha512-FShgIu+TTq6/Axi4DKYIvERwpuEsPJN0oobTpOA0c+SC65FC9wellonU/9sJEwOd+HA80PFD9hnnCyV4j7H0BA==}
+  '@takumi-rs/wasm@0.68.17':
+    resolution: {integrity: sha512-5fUGeQg+T8+m4huLxN6CjGvhCSD400WfO8J0X9Ud8ULpefFj3rP3a+eh9AhezlF9HqeltS+ODzB2BFbmmHCTVA==}
 
   '@takumi-rs/wasm@0.68.4':
     resolution: {integrity: sha512-eklfvfrWjwhR1XQHMI0Tt+1WZINsvMeKBrT3pq7G5IyM8P9e61mH28NRs0cyFCDxHu+lgGqHzyJylFBp7iKgtQ==}
@@ -15863,64 +15866,64 @@ snapshots:
       tailwindcss: 4.1.18
       vite: 7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
 
-  '@takumi-rs/core-darwin-arm64@0.68.16':
+  '@takumi-rs/core-darwin-arm64@0.68.17':
     optional: true
 
   '@takumi-rs/core-darwin-arm64@0.68.4':
     optional: true
 
-  '@takumi-rs/core-darwin-x64@0.68.16':
+  '@takumi-rs/core-darwin-x64@0.68.17':
     optional: true
 
   '@takumi-rs/core-darwin-x64@0.68.4':
     optional: true
 
-  '@takumi-rs/core-linux-arm64-gnu@0.68.16':
+  '@takumi-rs/core-linux-arm64-gnu@0.68.17':
     optional: true
 
   '@takumi-rs/core-linux-arm64-gnu@0.68.4':
     optional: true
 
-  '@takumi-rs/core-linux-arm64-musl@0.68.16':
+  '@takumi-rs/core-linux-arm64-musl@0.68.17':
     optional: true
 
   '@takumi-rs/core-linux-arm64-musl@0.68.4':
     optional: true
 
-  '@takumi-rs/core-linux-x64-gnu@0.68.16':
+  '@takumi-rs/core-linux-x64-gnu@0.68.17':
     optional: true
 
   '@takumi-rs/core-linux-x64-gnu@0.68.4':
     optional: true
 
-  '@takumi-rs/core-linux-x64-musl@0.68.16':
+  '@takumi-rs/core-linux-x64-musl@0.68.17':
     optional: true
 
   '@takumi-rs/core-linux-x64-musl@0.68.4':
     optional: true
 
-  '@takumi-rs/core-win32-arm64-msvc@0.68.16':
+  '@takumi-rs/core-win32-arm64-msvc@0.68.17':
     optional: true
 
   '@takumi-rs/core-win32-arm64-msvc@0.68.4':
     optional: true
 
-  '@takumi-rs/core-win32-x64-msvc@0.68.16':
+  '@takumi-rs/core-win32-x64-msvc@0.68.17':
     optional: true
 
   '@takumi-rs/core-win32-x64-msvc@0.68.4':
     optional: true
 
-  '@takumi-rs/core@0.68.16':
+  '@takumi-rs/core@0.68.17':
     optionalDependencies:
-      '@takumi-rs/core-darwin-arm64': 0.68.16
-      '@takumi-rs/core-darwin-x64': 0.68.16
-      '@takumi-rs/core-linux-arm64-gnu': 0.68.16
-      '@takumi-rs/core-linux-arm64-musl': 0.68.16
-      '@takumi-rs/core-linux-x64-gnu': 0.68.16
-      '@takumi-rs/core-linux-x64-musl': 0.68.16
-      '@takumi-rs/core-win32-arm64-msvc': 0.68.16
-      '@takumi-rs/core-win32-x64-msvc': 0.68.16
+      '@takumi-rs/core-darwin-arm64': 0.68.17
+      '@takumi-rs/core-darwin-x64': 0.68.17
+      '@takumi-rs/core-linux-arm64-gnu': 0.68.17
+      '@takumi-rs/core-linux-arm64-musl': 0.68.17
+      '@takumi-rs/core-linux-x64-gnu': 0.68.17
+      '@takumi-rs/core-linux-x64-musl': 0.68.17
+      '@takumi-rs/core-win32-arm64-msvc': 0.68.17
+      '@takumi-rs/core-win32-x64-msvc': 0.68.17
 
   '@takumi-rs/core@0.68.4':
     optionalDependencies:
@@ -15933,15 +15936,15 @@ snapshots:
       '@takumi-rs/core-win32-arm64-msvc': 0.68.4
       '@takumi-rs/core-win32-x64-msvc': 0.68.4
 
-  '@takumi-rs/helpers@0.68.16': {}
+  '@takumi-rs/helpers@0.68.17': {}
 
   '@takumi-rs/helpers@0.68.4': {}
 
-  '@takumi-rs/image-response@0.68.16':
+  '@takumi-rs/image-response@0.68.17':
     dependencies:
-      '@takumi-rs/core': 0.68.16
-      '@takumi-rs/helpers': 0.68.16
-      '@takumi-rs/wasm': 0.68.16
+      '@takumi-rs/core': 0.68.17
+      '@takumi-rs/helpers': 0.68.17
+      '@takumi-rs/wasm': 0.68.17
 
   '@takumi-rs/image-response@0.68.4':
     dependencies:
@@ -15949,7 +15952,7 @@ snapshots:
       '@takumi-rs/helpers': 0.68.4
       '@takumi-rs/wasm': 0.68.4
 
-  '@takumi-rs/wasm@0.68.16': {}
+  '@takumi-rs/wasm@0.68.17': {}
 
   '@takumi-rs/wasm@0.68.4': {}
 

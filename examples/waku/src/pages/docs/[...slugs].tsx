@@ -20,6 +20,7 @@ export default function DocPage({ slugs }: PageProps<'/docs/[...slugs]'>) {
   const MDX = page.data.body;
   return (
     <DocsPage toc={page.data.toc}>
+      <meta name="og:image" content={getPageImageUrl(slugs)} />
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
@@ -42,4 +43,10 @@ export async function getConfig() {
     render: 'static' as const,
     staticPaths: pages,
   } as const;
+}
+
+function getPageImageUrl(slugs: string[]) {
+  const segments = [...slugs, 'image.webp'];
+
+  return `/og/docs/${segments.join('/')}`;
 }
