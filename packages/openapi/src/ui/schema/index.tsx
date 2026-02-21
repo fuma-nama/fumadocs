@@ -155,8 +155,8 @@ export function generateSchemaUI(
   }
 
   let _counter = 0;
-  const autoIds = new WeakMap();
-  function getSchemaId(schema: ResolvedSchema) {
+  const autoIds = new WeakMap<Exclude<ResolvedSchema, boolean>, string>();
+  function getSchemaId(schema: ResolvedSchema): string {
     if (typeof schema === 'boolean') return String(schema);
     const raw = ctx.schema.getRawRef(schema);
     if (raw) return raw;
@@ -256,7 +256,7 @@ export function generateSchemaUI(
       refs[id] = out;
 
       for (const item of union) {
-        if (typeof item !== 'object' || !isVisible(item)) continue;
+        if (!item || typeof item !== 'object' || !isVisible(item)) continue;
         const itemId = getSchemaId(item);
         const key = `${id}_extends:${itemId}`;
 
@@ -296,7 +296,7 @@ export function generateSchemaUI(
       if (patternProperties) props.push(...Object.entries(patternProperties));
 
       for (const [key, prop] of props) {
-        if (!isVisible(prop)) continue;
+        if (!prop || !isVisible(prop)) continue;
         const $type = getSchemaId(prop);
         scanRefs($type, prop);
         out.props.push({
