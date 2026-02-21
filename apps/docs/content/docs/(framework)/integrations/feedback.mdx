@@ -86,7 +86,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     ...defaultComponents,
     FeedbackBlock: (props) => (
       <FeedbackBlock {...props} onSendAction={onBlockFeedbackAction}>
-        {children}
+        {props.children}
       </FeedbackBlock>
     ),
     ...components,
