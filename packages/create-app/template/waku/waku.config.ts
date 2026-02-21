@@ -14,11 +14,6 @@ export default defineConfig({
     ssr: {
       external: ['@takumi-rs/image-response'],
     },
-    build: {
-      rollupOptions: {
-        external: ['@takumi-rs/image-response'],
-      },
-    },
     resolve: {
       alias: {
         'next/og': import.meta.resolve('@takumi-rs/image-response'),
