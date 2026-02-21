@@ -22,6 +22,7 @@ export function ogImage(type: 'next-og' | 'takumi'): TemplatePlugin {
       if (this.template.value.startsWith('+next') && type === 'takumi') {
         await replaceImports(this);
         await replaceImagePath(this);
+        await nextConfigExternal(this);
       }
     },
   };
@@ -43,6 +44,20 @@ async function replaceImagePath(context: TemplatePluginContext) {
   const content = await fs.readFile(path, 'utf-8');
 
   const replaced = content.replace('image.png', 'image.webp');
+
+  await fs.writeFile(path, replaced);
+}
+
+async function nextConfigExternal(context: TemplatePluginContext) {
+  const path = join(context.appDir, 'next.config.mjs');
+  const content = await fs.readFile(path, 'utf-8');
+
+  const replaced = content.replace(
+    'const config = {',
+    `const config = {
+  servwerExternalPackages: ['@takumi-rs/image-response'],
+  `,
+  );
 
   await fs.writeFile(path, replaced);
 }

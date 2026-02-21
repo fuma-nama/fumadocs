@@ -8,17 +8,20 @@ export async function GET(_: Request, { params }: ApiContext<'/og/docs/[...slugs
 
   if (!page) throw new Error('Page not found');
 
-  return new ImageResponse(<DefaultImage title={page.data.title} description={page.data.description} site="My App" />, {
-    width: 1200,
-    height: 630,
-    format: 'webp',
-  });
+  return new ImageResponse(
+    <DefaultImage title={page.data.title} description={page.data.description} site="My App" />,
+    {
+      width: 1200,
+      height: 630,
+      format: 'webp',
+    },
+  );
 }
 
 export async function getConfig() {
   const pages = source
     .generateParams()
-    .map((item) => item.lang ? [item.lang, ...item.slug] : item.slug);
+    .map((item) => (item.lang ? [item.lang, ...item.slug] : item.slug));
 
   return {
     render: 'static' as const,
