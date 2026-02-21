@@ -45,4 +45,3 @@ export async function getConfig() {
     staticPaths: pages,
   } as const;
 }
-
