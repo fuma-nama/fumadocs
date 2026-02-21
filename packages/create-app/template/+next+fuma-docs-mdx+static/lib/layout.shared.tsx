@@ -12,5 +12,6 @@ export function baseOptions(): BaseLayoutProps {
     nav: {
       title: 'My App',
     },
+    githubUrl: `https://github.com/${gitConfig.user}/${gitConfig.repo}`,
   };
 }
