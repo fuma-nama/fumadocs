@@ -21,7 +21,7 @@ export default function DocPage({ slugs }: PageProps<'/docs/[...slugs]'>) {
   const MDX = page.data.body;
   return (
     <DocsPage toc={page.data.toc}>
-      <meta name="og:image" content={getPageImage(slugs).url} />
+      <meta property="og:image" content={getPageImage(slugs).url} />
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>

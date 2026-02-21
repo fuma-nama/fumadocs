@@ -1,5 +1,5 @@
 import { source } from '@/lib/source';
-import ImageResponse from '@takumi-rs/image-response';
+import { ImageResponse } from '@takumi-rs/image-response';
 import { generate as DefaultImage } from 'fumadocs-ui/og';
 import { ApiContext } from 'waku/router';
 

@@ -136,7 +136,7 @@ import { getPageImage } from '@/lib/og';
 return (
   <>
     {/* [!code ++] */}
-    <meta name="og:image" content={getPageImage(page.slugs).url} />
+    <meta property="og:image" content={getPageImage(page.slugs).url} />
   </>
 );
 ```
@@ -204,7 +204,7 @@ export function loader({ params }: Route.LoaderArgs) {
 
 ```tsx tab="Waku" title="src/pages/_api/og/docs/[...slugs]/image.webp.tsx"
 import { source } from '@/lib/source';
-import ImageResponse from '@takumi-rs/image-response';
+import { ImageResponse } from '@takumi-rs/image-response';
 import { generate as DefaultImage } from 'fumadocs-ui/og';
 import { ApiContext } from 'waku/router';
 
