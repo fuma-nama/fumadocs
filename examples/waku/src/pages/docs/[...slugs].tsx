@@ -2,6 +2,7 @@ import { source } from '@/lib/source';
 import { PageProps } from 'waku/router';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+import { getPageImage } from '@/lib/og';
 
 export default function DocPage({ slugs }: PageProps<'/docs/[...slugs]'>) {
   const page = source.getPage(slugs);
@@ -20,7 +21,7 @@ export default function DocPage({ slugs }: PageProps<'/docs/[...slugs]'>) {
   const MDX = page.data.body;
   return (
     <DocsPage toc={page.data.toc}>
-      <meta name="og:image" content={getPageImageUrl(slugs)} />
+      <meta name="og:image" content={getPageImage(slugs).url} />
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
@@ -45,8 +46,3 @@ export async function getConfig() {
   } as const;
 }
 
-function getPageImageUrl(slugs: string[]) {
-  const segments = [...slugs, 'image.webp'];
-
-  return `/og/docs/${segments.join('/')}`;
-}
