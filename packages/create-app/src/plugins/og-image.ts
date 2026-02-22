@@ -34,11 +34,7 @@ async function replaceImports(context: TemplatePluginContext) {
 
   let replaced = replaceAll(content, 'next/og', '@takumi-rs/image-response');
   replaced = replaceAll(replaced, 'fumadocs-ui/og', 'fumadocs-ui/og/takumi');
-  replaced = replace(
-    replaced,
-    'height: 630,',
-    "height: 630,\n      format: 'webp',",
-  );
+  replaced = replace(replaced, 'height: 630,', "height: 630,\n      format: 'webp',");
 
   await writeFile(path, replaced);
 }

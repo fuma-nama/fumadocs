@@ -109,11 +109,7 @@ export function pick<T extends object, K extends keyof T>(obj: T, keys: K[]): Pi
   return result as Pick<T, K>;
 }
 
-export function replace(
-  content: string,
-  target: string | RegExp,
-  replacement: string,
-): string {
+export function replace(content: string, target: string | RegExp, replacement: string): string {
   const result = content.replace(target, replacement);
   if (result === content) {
     throw new Error(`Failed to replace "${target.toString()}"`);
@@ -121,11 +117,7 @@ export function replace(
   return result;
 }
 
-export function replaceAll(
-  content: string,
-  target: string | RegExp,
-  replacement: string,
-): string {
+export function replaceAll(content: string, target: string | RegExp, replacement: string): string {
   const result = content.replaceAll(target, replacement);
   if (result === content) {
     throw new Error(`Failed to replace all "${target.toString()}"`);
