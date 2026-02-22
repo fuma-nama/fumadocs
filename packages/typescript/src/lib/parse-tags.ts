@@ -24,7 +24,9 @@ export function parseTags(tags: RawTag[]): TypedTags {
     }
 
     if (key === 'param') {
-      const [param, description] = text.split('-', 2);
+      const sepIdx = text.indexOf('-');
+      const param = sepIdx === -1 ? text.trim() : text.slice(0, sepIdx).trim();
+      const description = sepIdx === -1 ? '' : text.slice(sepIdx + 1).trim();
 
       typed.params ??= [];
       typed.params.push({
