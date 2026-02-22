@@ -1,6 +1,6 @@
 import { TemplatePlugin, TemplatePluginContext } from '@/index';
 import { depVersions } from '@/constants';
-import { pick } from '@/utils';
+import { pick, replace, replaceAll } from '@/utils';
 import { join } from 'node:path';
 import fs from 'node:fs/promises';
 
@@ -32,10 +32,13 @@ async function replaceImports(context: TemplatePluginContext) {
   const path = join(context.appDir, 'app/og/docs/[...slug]/route.tsx');
   const content = await fs.readFile(path, 'utf-8');
 
-  const replaced = content
-    .replaceAll('next/og', '@takumi-rs/image-response')
-    .replaceAll('fumadocs-ui/og', 'fumadocs-ui/og/takumi')
-    .replace('height: 630,', "height: 630,\n      format: 'webp',");
+  let replaced = replaceAll(content, 'next/og', '@takumi-rs/image-response');
+  replaced = replaceAll(replaced, 'fumadocs-ui/og', 'fumadocs-ui/og/takumi');
+  replaced = replace(
+    replaced,
+    'height: 630,',
+    "height: 630,\n      format: 'webp',",
+  );
 
   await fs.writeFile(path, replaced);
 }
@@ -44,7 +47,7 @@ async function replaceImagePath(context: TemplatePluginContext) {
   const path = join(context.appDir, 'lib/source.ts');
   const content = await fs.readFile(path, 'utf-8');
 
-  const replaced = content.replaceAll('image.png', 'image.webp');
+  const replaced = replaceAll(content, 'image.png', 'image.webp');
 
   await fs.writeFile(path, replaced);
 }
@@ -53,7 +56,8 @@ async function nextConfigExternal(context: TemplatePluginContext) {
   const path = join(context.appDir, 'next.config.mjs');
   const content = await fs.readFile(path, 'utf-8');
 
-  const replaced = content.replace(
+  const replaced = replace(
+    content,
     'const config = {',
     `const config = {
   serverExternalPackages: ['@takumi-rs/image-response'],
