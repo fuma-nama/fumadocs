@@ -1,5 +1,15 @@
 # fumadocs-typescript
 
+## 5.1.4
+
+### Patch Changes
+
+- 16360ef: fix tag parser
+- Updated dependencies [1a614de]
+- Updated dependencies [6ab6692]
+  - fumadocs-core@16.6.5
+  - fumadocs-ui@16.6.5
+
 ## 5.1.3
 
 ### Patch Changes

@@ -1,5 +1,14 @@
 # next-docs-mdx
 
+## 14.2.8
+
+### Patch Changes
+
+- 1a614de: enforce MDX stringifier by default
+- Updated dependencies [1a614de]
+- Updated dependencies [6ab6692]
+  - fumadocs-core@16.6.5
+
 ## 14.2.7
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 16.6.5
+
+### Patch Changes
+
+- 1a614de: enforce MDX stringifier by default
+- 6ab6692: fix edge case for Dynamic Link
+
 ## 16.6.4
 
 ## 16.6.3
