@@ -101,7 +101,32 @@ export async function generateMetadata(props: PageProps<'/docs/[[...slug]]'>): P
 }
 ```
 
-```tsx tab="Vite Based Framework" title="app/lib/og.ts"
+```tsx tab="React Router" title="app/lib/og.ts"
+export function getPageImage(slugs: string[]) {
+  const segments = [...slugs, 'image.webp'];
+
+  return {
+    segments,
+    url: `/og/docs/${segments.join('/')}`,
+  };
+}
+```
+
+```tsx tab="React Router" title="app/routes/docs.tsx"
+// [!code ++]
+import { getPageImage } from '@/lib/og';
+
+// Somewhere in your component or client loader
+return (
+  <>
+    {/* [!code ++] */}
+    <meta property="og:image" content={getPageImage(page.slugs).url} />
+  </>
+);
+```
+
+```tsx tab="Vite Based Framework" title="app/lib/source.ts"
+// [!code ++:8]
 export function getPageImage(slugs: string[]) {
   const segments = [...slugs, 'image.webp'];
 
