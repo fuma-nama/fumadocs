@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-docgen",
-  "version": "3.0.6",
+  "version": "3.0.7",
   "description": "Useful remark utilities and plugins",
   "keywords": [
     "Docs",
@@ -56,7 +56,7 @@
     "@types/node": "25.2.3",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
-    "mdast-util-mdx-jsx": "^3.2.0",
+    "mdast-util-mdx": "^3.0.0",
     "remark": "^15.0.1",
     "tsconfig": "workspace:*",
     "tsdown": "^0.20.3",
@@ -67,10 +67,10 @@
     "@types/hast": "*",
     "@types/mdast": "*",
     "fumadocs-core": "^15.7.2 || ^16.0.0",
-    "mdast-util-mdx-jsx": "*"
+    "mdast-util-mdx": "*"
   },
   "peerDependenciesMeta": {
-    "mdast-util-mdx-jsx": {
+    "mdast-util-mdx": {
       "optional": true
     },
     "@types/hast": {

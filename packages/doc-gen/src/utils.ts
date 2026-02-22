@@ -1,5 +1,5 @@
 import type { Expression, Program } from 'estree';
-import type { MdxJsxAttribute } from 'mdast-util-mdx-jsx';
+import type { MdxJsxAttribute } from 'mdast-util-mdx';
 
 export function createElement(name: string, attributes: object[], children?: unknown): object {
   const element: Record<string, unknown> = {

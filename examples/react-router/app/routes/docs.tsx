@@ -7,6 +7,7 @@ import browserCollections from 'fumadocs-mdx:collections/browser';
 import { baseOptions, gitConfig } from '@/lib/layout.shared';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { LLMCopyButton, ViewOptions } from '@/components/ai/page-actions';
+import { getPageImagePath } from '@/lib/og';
 
 export async function loader({ params }: Route.LoaderArgs) {
   const slugs = params['*'].split('/').filter((v) => v.length > 0);
@@ -17,6 +18,7 @@ export async function loader({ params }: Route.LoaderArgs) {
     path: page.path,
     url: page.url,
     pageTree: await source.serializePageTree(source.getPageTree()),
+    imagePath: getPageImagePath(slugs),
   };
 }
 
@@ -27,15 +29,18 @@ const clientLoader = browserCollections.docs.createClientLoader({
     {
       path,
       url,
+      imagePath,
     }: {
       path: string;
       url: string;
+      imagePath: string;
     },
   ) {
     return (
       <DocsPage toc={toc}>
         <title>{frontmatter.title}</title>
         <meta name="description" content={frontmatter.description} />
+        <meta property="og:image" content={imagePath} />
         <DocsTitle>{frontmatter.title}</DocsTitle>
         <DocsDescription>{frontmatter.description}</DocsDescription>
         <div className="flex flex-row gap-2 items-center border-b -mt-4 pb-6">
@@ -54,11 +59,11 @@ const clientLoader = browserCollections.docs.createClientLoader({
 });
 
 export default function Page({ loaderData }: Route.ComponentProps) {
-  const { path, url, pageTree } = useFumadocsLoader(loaderData);
+  const { path, url, pageTree, imagePath } = useFumadocsLoader(loaderData);
 
   return (
     <DocsLayout {...baseOptions()} tree={pageTree}>
-      {clientLoader.useContent(path, { path, url })}
+      {clientLoader.useContent(path, { path, url, imagePath })}
     </DocsLayout>
   );
 }

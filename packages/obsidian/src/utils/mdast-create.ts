@@ -1,5 +1,5 @@
 import type { BlockContent, DefinitionContent } from 'mdast';
-import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
+import type { MdxJsxFlowElement } from 'mdast-util-mdx';
 
 export function createCallout(
   type: string,

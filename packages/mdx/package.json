@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-mdx",
-  "version": "14.2.7",
+  "version": "14.2.8",
   "description": "The built-in source for Fumadocs",
   "keywords": [
     "Docs",
@@ -73,10 +73,10 @@
     "esbuild": "^0.27.3",
     "estree-util-value-to-estree": "^3.5.0",
     "js-yaml": "^4.1.1",
+    "mdast-util-mdx": "^3.0.0",
     "mdast-util-to-markdown": "^2.1.2",
     "picocolors": "^1.1.1",
     "picomatch": "^4.0.3",
-    "remark-mdx": "^3.1.1",
     "tinyexec": "^1.0.2",
     "tinyglobby": "^0.2.15",
     "unified": "^11.0.5",
@@ -97,12 +97,11 @@
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "mdast-util-directive": "^3.1.0",
-    "mdast-util-mdx-jsx": "^3.2.0",
     "next": "16.1.6",
     "react": "^19.2.4",
     "remark": "^15.0.1",
     "remark-directive": "^4.0.0",
-    "remark-stringify": "^11.0.0",
+    "remark-mdx": "^3.1.1",
     "rollup": "^4.57.1",
     "tsconfig": "workspace:*",
     "tsdown": "^0.20.3",
@@ -116,7 +115,6 @@
     "@types/react": "*",
     "fumadocs-core": "^15.0.0 || ^16.0.0",
     "mdast-util-directive": "*",
-    "mdast-util-mdx-jsx": "*",
     "next": "^15.3.0 || ^16.0.0",
     "react": "*",
     "vite": "6.x.x || 7.x.x"
@@ -129,9 +127,6 @@
       "optional": true
     },
     "@types/mdx": {
-      "optional": true
-    },
-    "mdast-util-mdx-jsx": {
       "optional": true
     },
     "react": {

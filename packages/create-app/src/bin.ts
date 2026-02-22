@@ -33,6 +33,9 @@ const command = program
     new Option('--search <name>', 'configure a search solution').choices(['orama', 'orama-cloud']),
   )
   .addOption(
+    new Option('--og-image <name>', 'configure OG image generation').choices(['next-og', 'takumi']),
+  )
+  .addOption(
     new Option('--template <name>', 'choose a template').choices(
       templates.map((item) => item.value),
     ),
@@ -133,6 +136,28 @@ async function main(): Promise<void> {
           ],
         });
       },
+      ogImage: async ({ results }: { results: { template?: Template } }) => {
+        if (config.ogImage !== undefined) return config.ogImage;
+        if (isCI) return 'takumi';
+
+        return select({
+          message: 'Configure Open Graph Image generation?',
+          options: [
+            {
+              value: 'takumi',
+              label: 'Takumi',
+              hint: 'Output WebP format, framework-agnostic',
+            },
+            {
+              value: 'next-og',
+              label: 'next/og',
+              hint: 'Next.js built-in solution',
+              disabled: !results.template?.startsWith('+next'),
+            },
+          ],
+          initialValue: 'takumi' as const,
+        });
+      },
       installDeps: async () => {
         if (config.install !== undefined) return config.install;
         if (isCI) return false;
@@ -175,6 +200,11 @@ async function main(): Promise<void> {
   if (options.lint === 'biome') {
     const { biome } = await import('./plugins/biome');
     plugins.push(biome());
+  }
+
+  if (options.ogImage) {
+    const { ogImage } = await import('./plugins/og-image');
+    plugins.push(ogImage(options.ogImage));
   }
 
   await create({

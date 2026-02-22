@@ -64,6 +64,7 @@ export function generate({
           style={{
             fontSize: '56px',
             fontWeight: 600,
+            margin: 0,
           }}
         >
           {props.site}
@@ -74,6 +75,7 @@ export function generate({
         style={{
           fontWeight: 800,
           fontSize: '82px',
+          margin: 0,
         }}
       >
         {props.title}
@@ -82,6 +84,7 @@ export function generate({
         style={{
           fontSize: '52px',
           color: 'rgba(240,240,240,0.8)',
+          margin: 0,
         }}
       >
         {props.description}

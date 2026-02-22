@@ -1,5 +1,15 @@
 # @fuma-docs/openapi
 
+## 10.3.8
+
+### Patch Changes
+
+- f5e7993: improve edge case handling
+- Updated dependencies [1a614de]
+- Updated dependencies [6ab6692]
+  - fumadocs-core@16.6.5
+  - fumadocs-ui@16.6.5
+
 ## 10.3.7
 
 ### Patch Changes

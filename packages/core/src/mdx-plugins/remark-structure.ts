@@ -4,11 +4,12 @@ import remarkGfm from 'remark-gfm';
 import type { PluggableList, Processor, Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
 import { toMdxExport } from './mdast-utils';
-import type {
-  MdxJsxAttribute,
-  MdxJsxExpressionAttribute,
-  MdxJsxFlowElement,
-  MdxJsxTextElement,
+import {
+  mdxToMarkdown,
+  type MdxJsxAttribute,
+  type MdxJsxExpressionAttribute,
+  type MdxJsxFlowElement,
+  type MdxJsxTextElement,
 } from 'mdast-util-mdx';
 import { type Handle, type Options, toMarkdown } from 'mdast-util-to-markdown';
 import { remarkHeading } from './remark-heading';
@@ -189,9 +190,10 @@ export function remarkStructure(
         };
       };
 
-      if (frontmatter._openapi?.structuredData) {
-        data.headings.push(...frontmatter._openapi.structuredData.headings);
-        data.contents.push(...frontmatter._openapi.structuredData.contents);
+      const openapiData = frontmatter._openapi?.structuredData;
+      if (openapiData) {
+        data.headings.push(...openapiData.headings);
+        data.contents.push(...openapiData.contents);
       }
     }
 
@@ -299,13 +301,14 @@ export function defaultStringifier(config: Options & StringifyOptions = {}): Str
 
       return true;
     },
+    ...customExtension
   } = config;
 
   function modHandler(handler: Handle, ctx: StringifierContext): Handle {
     return function (node: Nodes, parent, state, info) {
-      const { structuredData, _string } = node.data ?? {};
-      if (structuredData) ctx.addContent(...structuredData.contents);
-      if (_string) return typeof _string === 'function' ? _string() : _string;
+      if (node.data?.structuredData) ctx.addContent(...node.data.structuredData.contents);
+      if (node.data?._string)
+        return typeof node.data._string === 'function' ? node.data._string() : node.data._string;
       const visibility = filterElement(node);
 
       if (visibility === false) return '';
@@ -349,38 +352,37 @@ export function defaultStringifier(config: Options & StringifyOptions = {}): Str
     };
   }
 
-  const handlers: Record<string, Handle> = {
-    link(node: Link, _, state, info) {
-      return state.containerPhrasing(node, info);
-    },
-    heading(node: Heading, _, state, info) {
-      return state.containerPhrasing(node, info);
-    },
-    image() {
-      return '';
-    },
-    _custom(node: CustomRootNode, _, state, info) {
-      const handlers: Record<string, Handle> = state.handlers;
-      for (const k in handlers) {
-        handlers[k] = modHandler(handlers[k], node.ctx);
-      }
+  const customToMarkdown: Options = {
+    handlers: {
+      link(node: Link, _, state, info) {
+        return state.containerPhrasing(node, info);
+      },
+      heading(node: Heading, _, state, info) {
+        return state.containerPhrasing(node, info);
+      },
+      image() {
+        return '';
+      },
+      _custom(node: CustomRootNode, _, state, info) {
+        const handlers: Record<string, Handle> = state.handlers;
+        for (const k in handlers) {
+          handlers[k] = modHandler(handlers[k], node.ctx);
+        }
 
-      return state.handle(node.root, undefined, state, info);
-    },
-    ...config.handlers,
+        return state.handle(node.root, undefined, state, info);
+      },
+    } as Record<string, Handle>,
   };
 
   return function (root, ctx) {
-    // from https://github.com/remarkjs/remark/blob/main/packages/remark-stringify/lib/index.js
-    const defaultExtensions = this.data('toMarkdownExtensions') ?? [];
-
     return toMarkdown({ type: '_custom', root, ctx } satisfies CustomRootNode as never, {
       ...this.data('settings'),
-      ...config,
-      extensions: config.extensions
-        ? [...defaultExtensions, ...config.extensions]
-        : defaultExtensions,
-      handlers,
+      extensions: [
+        mdxToMarkdown(),
+        ...(this.data('toMarkdownExtensions') ?? []),
+        customToMarkdown,
+        customExtension,
+      ],
     });
   };
 }

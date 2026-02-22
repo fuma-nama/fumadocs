@@ -47,13 +47,26 @@ export default defineConfig({
 });
 ```
 
+```ts title="waku.config.ts" tab="Waku"
+import { defineConfig } from 'waku/config';
+
+export default defineConfig({
+  vite: {
+    ssr: {
+      // [!code ++]
+      external: ['@takumi-rs/image-response'],
+    },
+  },
+});
+```
+
 ## Metadata Image
 
 You can generate metadata images dynamically using `@takumi-rs/image-response`.
 
 Add the following under your loader, and define image metadata for pages:
 
-```ts title="lib/source.ts"
+```ts tab="Next.js" title="lib/source.ts"
 import { type InferPageType } from 'fumadocs-core/source';
 
 // [!code ++:8]
@@ -88,7 +101,43 @@ export async function generateMetadata(props: PageProps<'/docs/[[...slug]]'>): P
 }
 ```
 
+```tsx tab="React Router" title="app/lib/og.ts"
+export function getPageImage(slugs: string[]) {
+  const segments = [...slugs, 'image.webp'];
+
+  return {
+    segments,
+    url: `/og/docs/${segments.join('/')}`,
+  };
+}
+```
+
 ```tsx tab="React Router" title="app/routes/docs.tsx"
+// [!code ++]
+import { getPageImage } from '@/lib/og';
+
+// Somewhere in your component or client loader
+return (
+  <>
+    {/* [!code ++] */}
+    <meta property="og:image" content={getPageImage(page.slugs).url} />
+  </>
+);
+```
+
+```tsx tab="Vite Based Framework" title="app/lib/source.ts"
+// [!code ++:8]
+export function getPageImage(slugs: string[]) {
+  const segments = [...slugs, 'image.webp'];
+
+  return {
+    segments,
+    url: `/og/docs/${segments.join('/')}`,
+  };
+}
+```
+
+```tsx tab="Vite Based Framework" title="app/routes/docs.tsx"
 // [!code ++]
 import { getPageImage } from '@/lib/source';
 
@@ -96,7 +145,7 @@ import { getPageImage } from '@/lib/source';
 return (
   <>
     {/* [!code ++] */}
-    <meta name="og:image" content={getPageImage(page).url} />
+    <meta property="og:image" content={getPageImage(page.slugs).url} />
   </>
 );
 ```
@@ -109,7 +158,7 @@ Finally, create a route handler to generate images at build time:
 import { getPageImage, source } from '@/lib/source';
 import { notFound } from 'next/navigation';
 import { ImageResponse } from '@takumi-rs/image-response';
-import { generate as DefaultImage } from 'fumadocs-ui/og';
+import { generate as DefaultImage } from 'fumadocs-ui/og/takumi';
 
 export const revalidate = false;
 
@@ -136,11 +185,11 @@ export function generateStaticParams() {
 }
 ```
 
-```tsx tab="React Router" title="app/routes/og.tsx"
+```tsx tab="React Router" title="app/routes/docs.og.tsx"
 import { ImageResponse } from '@takumi-rs/image-response';
 import { source } from '@/lib/source';
-import { generate as DefaultImage } from 'fumadocs-ui/og';
-import type { Route } from './+types/og';
+import { generate as DefaultImage } from 'fumadocs-ui/og/takumi';
+import type { Route } from './+types/docs.og';
 
 export function loader({ params }: Route.LoaderArgs) {
   const slugs = params['*']
@@ -162,47 +211,72 @@ export function loader({ params }: Route.LoaderArgs) {
 }
 ```
 
+```tsx tab="Waku" title="src/pages/_api/og/docs/[...slugs]/image.webp.tsx"
+import { source } from '@/lib/source';
+import { ImageResponse } from '@takumi-rs/image-response';
+import { generate as DefaultImage } from 'fumadocs-ui/og/takumi';
+import { ApiContext } from 'waku/router';
+
+export async function GET(_: Request, { params }: ApiContext<'/og/docs/[...slugs]/image.webp'>) {
+  const page = source.getPage(params.slugs);
+
+  if (!page) return new Response(undefined, { status: 404 });
+
+  return new ImageResponse(
+    <DefaultImage title={page.data.title} description={page.data.description} site="My App" />,
+    {
+      width: 1200,
+      height: 630,
+      format: 'webp',
+    },
+  );
+}
+
+export async function getConfig() {
+  const pages = source
+    .generateParams()
+    .map((item) => (item.lang ? [item.lang, ...item.slug] : item.slug));
+
+  return {
+    render: 'static' as const,
+    staticPaths: pages,
+  } as const;
+}
+```
+
 ```ts tab="React Router" title="app/routes.ts"
 import { type RouteConfig, route } from '@react-router/dev/routes';
 
 export default [
   // [!code ++]
-  route('/og/docs/*', 'routes/og.tsx'),
+  route('/og/docs/*', 'routes/docs.og.tsx'),
 ] satisfies RouteConfig;
 ```
 
 ```ts tab="React Router" title="react-router.config.ts"
 import type { Config } from '@react-router/dev/config';
+import { glob } from 'node:fs/promises';
+import { createGetUrl, getSlugs } from 'fumadocs-core/source';
 
-// [!code ++:17]
-function getDocsPaths() {
-  const paths = Object.keys(
-    import.meta.glob('./**/*.{mdx,md}', {
-      base: './content',
-    }),
-  );
-
-  return paths.map(relativeFileNameToPath);
-}
-
-function relativeFileNameToPath(name: string) {
-  const path = name.slice(1).replace(/(index)?\.(md|mdx)$/, '');
-
-  if (!path.endsWith('/')) return `${path}/`;
-
-  return path;
-}
+const getUrl = createGetUrl('/docs');
 
 export default {
-  // [!code ++:6]
-  prerender({ getStaticPaths }) {
-    const docsPaths = getDocsPaths();
-    const docsOgPaths = docsPaths.map((path) => `/og${path}image.webp`);
-
-    return [...getStaticPaths(), ...docsPaths, ...docsOgPaths];
+  ssr: true,
+  future: {
+    v8_middleware: true,
   },
-  routeDiscovery: {
-    mode: 'initial',
+  // [!code ++:12]
+  async prerender({ getStaticPaths }) {
+    const paths = [...getStaticPaths()];
+
+    for await (const entry of glob('**/*.mdx', { cwd: 'content/docs' })) {
+      const slugs = getSlugs(entry);
+
+      paths.push(getUrl(slugs));
+      paths.push(`/og/docs/${[...slugs, 'image.webp'].join('/')}`);
+    }
+
+    return paths;
   },
 } satisfies Config;
 ```

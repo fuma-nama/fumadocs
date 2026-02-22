@@ -4,6 +4,7 @@ export default [
   index('routes/home.tsx'),
   route('docs/*', 'routes/docs.tsx'),
   route('api/search', 'routes/search.ts'),
+  route('og/docs/*', 'routes/og.docs.tsx'),
 
   // LLM integration:
   route('llms.txt', 'llms/index.ts'),

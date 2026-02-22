@@ -1,5 +1,14 @@
 # fumadocs-obsidian
 
+## 0.0.12
+
+### Patch Changes
+
+- 1a614de: enforce MDX stringifier by default
+- Updated dependencies [1a614de]
+- Updated dependencies [6ab6692]
+  - fumadocs-core@16.6.5
+
 ## 0.0.11
 
 ### Patch Changes

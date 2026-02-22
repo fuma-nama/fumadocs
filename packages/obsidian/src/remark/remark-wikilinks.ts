@@ -1,7 +1,7 @@
 import { visit } from 'unist-util-visit';
 import type { Paragraph, Parent, PhrasingContent, Root, RootContent } from 'mdast';
 import type { Transformer } from 'unified';
-import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
+import type { MdxJsxFlowElement } from 'mdast-util-mdx';
 import { getFileHref, getHeadingHash } from '@/utils/get-refs';
 import { ParsedFile } from '@/build-storage';
 import { VaultResolver } from '@/build-resolver';

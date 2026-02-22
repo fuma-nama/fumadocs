@@ -84,8 +84,8 @@ import type { MDXComponents } from 'mdx/types';
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
     ...defaultComponents,
-    FeedbackBlock: (props) => (
-      <FeedbackBlock {...props} onSendAction={onBlockFeedbackAction}>
+    FeedbackBlock: ({ children, ...rest }) => (
+      <FeedbackBlock {...rest} onSendAction={onBlockFeedbackAction}>
         {children}
       </FeedbackBlock>
     ),

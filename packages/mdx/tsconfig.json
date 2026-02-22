@@ -4,7 +4,7 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "types": ["remark-stringify", "@types/node", "@types/mdx"],
+    "types": ["@types/node", "@types/mdx"],
     "jsx": "react-jsx",
     "noEmit": true,
     "lib": ["ESNext"],

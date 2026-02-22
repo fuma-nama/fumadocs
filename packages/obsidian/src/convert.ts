@@ -100,7 +100,7 @@ export async function convertVaultFiles(
     });
 
     const mdast = await processor.run(processor.parse(vfile), vfile);
-    const string = stringifier.stringify(mdast as Root);
+    const string = stringifier.stringify(mdast as Root, vfile);
     let frontmatter: Record<string, unknown> = {
       ...file.frontmatter,
       title: path.basename(file.path, path.extname(file.path)),

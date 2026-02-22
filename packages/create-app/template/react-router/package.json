@@ -11,15 +11,16 @@
   "dependencies": {
     "@react-router/node": "^7.13.0",
     "@react-router/serve": "^7.13.0",
+    "@takumi-rs/image-response": "^0.68.17",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "isbot": "^5.1.35",
-    "lucide-react": "^0.563.0",
+    "lucide-react": "^0.570.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router": "^7.13.0",
-    "tailwind-merge": "^3.4.0"
+    "tailwind-merge": "^3.4.1"
   },
   "devDependencies": {
     "@react-router/dev": "^7.13.0",
