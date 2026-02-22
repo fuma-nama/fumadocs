@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-openapi",
-  "version": "10.3.7",
+  "version": "10.3.8",
   "description": "Generate MDX docs for your OpenAPI spec",
   "keywords": [
     "Docs",

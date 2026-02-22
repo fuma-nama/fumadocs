@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 16.6.5
+
+### Patch Changes
+
+- 6ab6692: fix edge case for Dynamic Link
+
 ## 16.6.4
 
 ## 16.6.3
