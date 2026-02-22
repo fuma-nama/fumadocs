@@ -33,7 +33,8 @@ async function replaceImports(context: TemplatePluginContext) {
   const content = await fs.readFile(path, 'utf-8');
 
   const replaced = content
-    .replace('next/og', '@takumi-rs/image-response')
+    .replaceAll('next/og', '@takumi-rs/image-response')
+    .replaceAll('fumadocs-ui/og', 'fumadocs-ui/og/takumi')
     .replace('height: 630,', "height: 630,\n      format: 'webp',");
 
   await fs.writeFile(path, replaced);
@@ -43,7 +44,7 @@ async function replaceImagePath(context: TemplatePluginContext) {
   const path = join(context.appDir, 'lib/source.ts');
   const content = await fs.readFile(path, 'utf-8');
 
-  const replaced = content.replace('image.png', 'image.webp');
+  const replaced = content.replaceAll('image.png', 'image.webp');
 
   await fs.writeFile(path, replaced);
 }

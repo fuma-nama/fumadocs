@@ -1698,6 +1698,9 @@ importers:
       '@fumadocs/tailwind':
         specifier: workspace:*
         version: link:../tailwind
+      '@takumi-rs/image-response':
+        specifier: ^0.68.17
+        version: 0.68.17
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -2657,6 +2660,9 @@ importers:
       '@radix-ui/react-tabs':
         specifier: ^1.1.13
         version: 1.1.13(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@takumi-rs/image-response':
+        specifier: ^0.68.17
+        version: 0.68.17
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1

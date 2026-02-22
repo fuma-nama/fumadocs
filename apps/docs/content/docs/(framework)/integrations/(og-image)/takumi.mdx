@@ -44,14 +44,6 @@ export default defineConfig({
     // [!code ++]
     external: ['@takumi-rs/image-response'],
   },
-  resolve: {
-    alias: {
-      // [!code ++:3]
-      // If you are using fumadocs-ui/og, you need to alias these packages
-      'next/og': import.meta.resolve('@takumi-rs/image-response'),
-      'next/dist/compiled/@vercel/og/types': import.meta.resolve('@takumi-rs/image-response'),
-    },
-  },
 });
 ```
 
@@ -63,14 +55,6 @@ export default defineConfig({
     ssr: {
       // [!code ++]
       external: ['@takumi-rs/image-response'],
-    },
-    resolve: {
-      alias: {
-        // [!code ++:3]
-        // If you are using fumadocs-ui/og, you need to alias these packages
-        'next/og': import.meta.resolve('@takumi-rs/image-response'),
-        'next/dist/compiled/@vercel/og/types': import.meta.resolve('@takumi-rs/image-response'),
-      },
     },
   },
 });
@@ -149,7 +133,7 @@ Finally, create a route handler to generate images at build time:
 import { getPageImage, source } from '@/lib/source';
 import { notFound } from 'next/navigation';
 import { ImageResponse } from '@takumi-rs/image-response';
-import { generate as DefaultImage } from 'fumadocs-ui/og';
+import { generate as DefaultImage } from 'fumadocs-ui/og/takumi';
 
 export const revalidate = false;
 
@@ -179,7 +163,7 @@ export function generateStaticParams() {
 ```tsx tab="React Router" title="app/routes/og.tsx"
 import { ImageResponse } from '@takumi-rs/image-response';
 import { source } from '@/lib/source';
-import { generate as DefaultImage } from 'fumadocs-ui/og';
+import { generate as DefaultImage } from 'fumadocs-ui/og/takumi';
 import type { Route } from './+types/og';
 
 export function loader({ params }: Route.LoaderArgs) {
@@ -205,13 +189,13 @@ export function loader({ params }: Route.LoaderArgs) {
 ```tsx tab="Waku" title="src/pages/_api/og/docs/[...slugs]/image.webp.tsx"
 import { source } from '@/lib/source';
 import { ImageResponse } from '@takumi-rs/image-response';
-import { generate as DefaultImage } from 'fumadocs-ui/og';
+import { generate as DefaultImage } from 'fumadocs-ui/og/takumi';
 import { ApiContext } from 'waku/router';
 
 export async function GET(_: Request, { params }: ApiContext<'/og/docs/[...slugs]/image.webp'>) {
   const page = source.getPage(params.slugs);
 
-  if (!page) throw new Error('Page not found');
+  if (!page) return new Response(undefined, { status: 404 });
 
   return new ImageResponse(
     <DefaultImage title={page.data.title} description={page.data.description} site="My App" />,

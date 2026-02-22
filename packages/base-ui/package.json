@@ -85,6 +85,10 @@
       "types": "./dist/og.d.ts",
       "import": "./dist/og.js"
     },
+    "./og/*": {
+      "types": "./dist/og/*.d.ts",
+      "import": "./dist/og/*.js"
+    },
     "./utils/*": {
       "types": "./dist/utils/*.d.ts",
       "import": "./dist/utils/*.js"
@@ -131,6 +135,7 @@
     "unified": "^11.0.5"
   },
   "peerDependencies": {
+    "@takumi-rs/image-response": "^0.68.17",
     "@types/react": "*",
     "fumadocs-core": "workspace:*",
     "next": "16.x.x",
@@ -140,6 +145,9 @@
   },
   "peerDependenciesMeta": {
     "next": {
+      "optional": true
+    },
+    "@takumi-rs/image-response": {
       "optional": true
     },
     "@types/react": {
