@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 10.3.9
+
+### Patch Changes
+
+- 5537900: allow optional parameter schema
+
 ## 10.3.8
 
 ### Patch Changes
