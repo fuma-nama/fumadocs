@@ -95,6 +95,11 @@ const showcases: ShowcaseObject[] = [
     url: 'https://llmgateway.io',
   },
   {
+    image: '/showcases/nativewind.png',
+    name: 'Nativewind',
+    url: 'https://www.nativewind.dev',
+  },
+  {
     image: ArkType,
     name: 'Arktype',
     url: 'https://arktype.io',
