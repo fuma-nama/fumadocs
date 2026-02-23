@@ -139,28 +139,31 @@ export async function Operation({
       <Fragment key={type}>
         {ctx.renderHeading(headingLevel, title)}
         <div className="flex flex-col">
-          {params.map((param) => (
-            <Schema
-              key={param.name}
-              client={{
-                name: param.name!,
-                required: param.required,
-              }}
-              root={
-                typeof param.schema === 'object'
-                  ? ({
-                      ...param.schema,
-                      description: param.description ?? param.schema?.description,
-                      deprecated:
-                        (param.deprecated ?? false) || (param.schema?.deprecated ?? false),
-                    } as ResolvedSchema)
-                  : (param.schema as ResolvedSchema)
-              }
-              readOnly={method.method === 'GET'}
-              writeOnly={method.method !== 'GET'}
-              ctx={ctx}
-            />
-          ))}
+          {params.map(
+            (param) =>
+              param.schema != null && (
+                <Schema
+                  key={param.name}
+                  client={{
+                    name: param.name!,
+                    required: param.required,
+                  }}
+                  root={
+                    typeof param.schema === 'object'
+                      ? {
+                          ...param.schema,
+                          description: param.description ?? param.schema?.description,
+                          deprecated:
+                            (param.deprecated ?? false) || (param.schema?.deprecated ?? false),
+                        }
+                      : param.schema
+                  }
+                  readOnly={method.method === 'GET'}
+                  writeOnly={method.method !== 'GET'}
+                  ctx={ctx}
+                />
+              ),
+          )}
         </div>
       </Fragment>
     );
@@ -393,7 +396,7 @@ async function ResponseAccordion({
                       name: 'response',
                       as: 'body',
                     }}
-                    root={schema as ResolvedSchema}
+                    root={schema}
                     readOnly
                     ctx={ctx}
                   />
