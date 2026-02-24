@@ -166,5 +166,12 @@ function Field({
     );
   }
 
-  return <Input id={fieldName} value={value} onChange={(e) => setValue(e.target.value)} />;
+  return (
+    <Input
+      id={fieldName}
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+      placeholder="Enter Value"
+    />
+  );
 }

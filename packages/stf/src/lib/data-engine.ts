@@ -15,15 +15,17 @@ export interface DataEngineListener {
    */
   field?: FieldKey;
   /**
-   * when field value is changed
+   * when field value is changed.
    */
   onUpdate?: (key: FieldKey, ctx: OnUpdateContext) => void;
   /**
-   * when `init(field)` is called
+   * fired on `init(field)`.
    */
   onInit?: (key: FieldKey, ctx: OnInitContext) => void;
   /**
-   * when `delete(field)` is called
+   * fired on `delete(field)`.
+   *
+   * when `field` is specified, this is also fired when parent is deleted.
    */
   onDelete?: (key: FieldKey, ctx: OnDeleteContext) => void;
 }
@@ -94,9 +96,14 @@ class ListenerManager {
   }
 
   onDelete(field: FieldKey, ctx: OnDeleteContext) {
+    const fieldKey = stringifyFieldKey(field);
     for (const v of this.unindexed) v.onDelete?.(field, ctx);
-    const set = this.indexed.get(stringifyFieldKey(field));
-    if (set) for (const v of set) v.onDelete?.(field, ctx);
+
+    for (const [k, listeners] of this.indexed.entries()) {
+      if (!fieldKeyStartsWith(k, fieldKey)) continue;
+
+      for (const v of listeners) v.onDelete?.(field, ctx);
+    }
   }
 }
 
@@ -169,15 +176,16 @@ export class DataEngine {
     if (Array.isArray(parent) && typeof prop === 'number') {
       const deleted: unknown[] = parent.splice(prop, 1);
       if (deleted.length === 0) return;
-      this.listeners.onUpdate(parentKey, { swallow: false, ...ctx });
-      this.listeners.onDelete(key, ctx);
 
+      this.listeners.onDelete(key, ctx);
+      // it will change children's field value when removed at middle
+      this.listeners.onUpdate(parentKey, { swallow: false, ...ctx });
       return deleted[0];
     } else if (typeof parent === 'object' && parent !== null) {
       const temp = (parent as Record<string, unknown>)[prop];
       delete parent[prop as never];
-      this.listeners.onUpdate(parentKey, { swallow: true, ...ctx });
       this.listeners.onDelete(key, ctx);
+      this.listeners.onUpdate(parentKey, { swallow: true, ...ctx });
       return temp;
     }
   }
@@ -242,13 +250,17 @@ export function useFieldValue<V = unknown>(
   useListener({
     field: key,
     stf: options.stf,
+    onInit() {
+      const computed = compute(engine.get(key));
+      setValue((prev) => (isChanged(prev, computed) ? computed : prev));
+    },
     onUpdate() {
       const computed = compute(engine.get(key));
-      if (isChanged(value, computed)) setValue(computed);
+      setValue((prev) => (isChanged(prev, computed) ? computed : prev));
     },
     onDelete() {
       const computed = compute(undefined);
-      if (isChanged(value, computed)) setValue(computed);
+      setValue((prev) => (isChanged(prev, computed) ? computed : prev));
     },
   });
 
