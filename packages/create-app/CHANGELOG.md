@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 16.0.59
+
+### Patch Changes
+
+- d6b271f: update template
+
 ## 16.0.58
 
 ## 16.0.57

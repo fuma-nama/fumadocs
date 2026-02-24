@@ -1,5 +1,14 @@
 # @fuma-docs/openapi
 
+## 10.3.10
+
+### Patch Changes
+
+- ff9e919: add unset button to non-primitive fields
+- Updated dependencies [fe37b9f]
+- Updated dependencies [fe37b9f]
+  - @fumari/stf@1.0.0
+
 ## 10.3.9
 
 ### Patch Changes
