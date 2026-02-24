@@ -1,5 +1,15 @@
 # @fumari/stf
 
+## 1.0.0
+
+### Major Changes
+
+- fe37b9f: stable release
+
+### Patch Changes
+
+- fe37b9f: Support namespace in data engine, remove `attachedData()` API
+
 ## 0.0.3
 
 ### Patch Changes
