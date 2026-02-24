@@ -1,5 +1,13 @@
 # @fumadocs/story
 
+## 0.0.8
+
+### Patch Changes
+
+- Updated dependencies [fe37b9f]
+- Updated dependencies [fe37b9f]
+  - @fumari/stf@1.0.0
+
 ## 0.0.7
 
 ### Patch Changes

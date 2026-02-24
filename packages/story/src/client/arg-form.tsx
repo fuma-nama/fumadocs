@@ -470,28 +470,29 @@ function useFieldInfo(
   updateInfo: (value: Partial<FieldInfo>) => void;
 } {
   const engine = useDataEngine();
-  const attachedData = engine.attachedData<FieldInfo>('field-info');
-  const [info, setInfo] = useState<FieldInfo>(() => {
-    const initialInfo = attachedData.get(fieldName);
-    if (initialInfo) return initialInfo;
+  const fieldData = engine.namespace(
+    `field-info:${stringifyFieldKey(fieldName)}`,
+    (): FieldInfo => {
+      const out: FieldInfo = {
+        unionIndex: 0,
+      };
 
-    const out: FieldInfo = {
-      unionIndex: 0,
-    };
+      if (node.type === 'union') {
+        // Try to find which union type matches the current value
+        const matchingIndex = node.types.findIndex(validate);
+        out.unionIndex = matchingIndex === -1 ? 0 : matchingIndex;
+      }
 
-    if (node.type === 'union') {
-      // Try to find which union type matches the current value
-      const matchingIndex = node.types.findIndex(validate);
-      out.unionIndex = matchingIndex === -1 ? 0 : matchingIndex;
-    }
-
-    return out;
+      return out;
+    },
+  );
+  const [info, setInfo] = useFieldValue<FieldInfo>([], {
+    stf: fieldData,
   });
 
-  attachedData.set(fieldName, info);
   return {
     info,
-    updateInfo: (value) => {
+    updateInfo(value) {
       const updated = {
         ...info,
         ...value,

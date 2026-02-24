@@ -1,17 +1,4 @@
-import { FieldKey } from './types';
-
-/**
- * test if array a starts with array b, only compare values via `===`.
- */
-export function arrayStartsWith(a: unknown[], b: unknown[]): boolean {
-  if (b.length > a.length) return false;
-
-  for (let i = 0; i < b.length; i++) {
-    if (a[i] !== b[i]) return false;
-  }
-
-  return true;
-}
+import type { FieldKey } from './types';
 
 export function objectGet(obj: unknown, key: (string | number)[]): unknown | undefined {
   let cur = obj;
@@ -84,4 +71,11 @@ export function deepEqual(a: unknown, b: unknown): boolean {
 
 export function stringifyFieldKey(fieldKey: FieldKey) {
   return fieldKey.map((v) => `${typeof v}:${v}`).join('.');
+}
+
+/**
+ * @returns if `a` starts with `b`.
+ */
+export function fieldKeyStartsWith(a: string, b: string): boolean {
+  return b.length === 0 || a === b || a.startsWith(b + '.');
 }

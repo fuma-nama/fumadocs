@@ -34,8 +34,9 @@ export function useStf(options: {
   );
 }
 
-export function useDataEngine(stf?: Stf) {
-  if (stf) return stf.dataEngine;
+export function useDataEngine(instance?: Stf | DataEngine) {
+  if (instance instanceof DataEngine) return instance;
+  if (instance) return instance.dataEngine;
   return use(Context)!.dataEngine;
 }
 

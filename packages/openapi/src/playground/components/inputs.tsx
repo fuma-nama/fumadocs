@@ -17,14 +17,9 @@ import { FormatFlags, schemaToString } from '@/utils/schema-to-string';
 import { anyFields, useFieldInfo, useResolvedSchema, useSchemaScope } from '@/playground/schema';
 import type { ParsedSchema } from '@/utils/schema';
 import { stringifyFieldKey } from '@fumari/stf/lib/utils';
+import { cva } from 'class-variance-authority';
 
-function FieldLabel(props: ComponentProps<'label'>) {
-  return (
-    <label {...props} className={cn('w-full inline-flex items-center gap-0.5', props.className)}>
-      {props.children}
-    </label>
-  );
-}
+const fieldLabelVariants = cva('w-full inline-flex items-center gap-0.5');
 
 function FieldLabelType(props: ComponentProps<'code'>) {
   return (
@@ -152,30 +147,12 @@ export function FieldInput({
   isRequired?: boolean;
   fieldName: FieldKey;
 }) {
-  const engine = useDataEngine();
   const [value, setValue] = useFieldValue(fieldName);
   const id = stringifyFieldKey(fieldName);
   if (field.type === 'null') return;
 
-  function renderUnset(children: ReactNode) {
-    return (
-      <div {...props} className={cn('flex flex-row gap-2', props.className)}>
-        {children}
-        {value !== undefined && !isRequired && (
-          <button
-            type="button"
-            onClick={() => engine.delete(fieldName)}
-            className="text-fd-muted-foreground"
-          >
-            <X className="size-4" />
-          </button>
-        )}
-      </div>
-    );
-  }
-
   if (field.type === 'string' && field.format === 'binary') {
-    return renderUnset(
+    return (
       <>
         <label
           htmlFor={id}
@@ -205,7 +182,7 @@ export function FieldInput({
           }}
           hidden
         />
-      </>,
+      </>
     );
   }
 
@@ -248,7 +225,7 @@ export function FieldInput({
   }
 
   const isNumber = field.type === 'integer' || field.type === 'number';
-  return renderUnset(
+  return (
     <Input
       id={id}
       placeholder="Enter value"
@@ -262,7 +239,7 @@ export function FieldInput({
           setValue(e.target.value);
         }
       }}
-    />,
+    />
   );
 }
 
@@ -293,10 +270,17 @@ export function FieldSet({
   const { info, updateInfo } = useFieldInfo(fieldName, field);
   const id = stringifyFieldKey(fieldName);
   const dataEngine = useDataEngine();
+  const [isDefined] = useFieldValue(fieldName, {
+    compute(currentValue) {
+      return currentValue !== undefined;
+    },
+  });
 
   if (_field === false) return;
   if (field.readOnly && !readOnly) return;
   if (field.writeOnly && !writeOnly) return;
+
+  if (collapsible && !isDefined && show) setShow(false);
 
   function renderLabelTrigger(schema = field) {
     if (!collapsible) return renderLabelName();
@@ -323,6 +307,18 @@ export function FieldSet({
         {name}
         {isRequired && <span className="text-red-400/80 mx-1">*</span>}
       </span>
+    );
+  }
+
+  function renderUnsetButton() {
+    return (
+      <button
+        type="button"
+        onClick={() => dataEngine.delete(fieldName)}
+        className="text-fd-muted-foreground hover:text-fd-accent-foreground"
+      >
+        <X className="size-3.5" />
+      </button>
     );
   }
 
@@ -417,11 +413,12 @@ export function FieldSet({
         {...props}
         className={cn('flex flex-col gap-1.5 col-span-full @container', props.className)}
       >
-        <FieldLabel htmlFor={id}>
+        <div className={fieldLabelVariants()}>
           {renderLabelTrigger(schema)}
           {slotType ?? <FieldLabelType>{schemaToString(field)}</FieldLabelType>}
           {toolbar}
-        </FieldLabel>
+          {!isRequired && isDefined && renderUnsetButton()}
+        </div>
         {show && (
           <ObjectInput
             field={schema}
@@ -436,11 +433,12 @@ export function FieldSet({
   if (field.type === 'array') {
     return (
       <fieldset {...props} className={cn('flex flex-col gap-1.5 col-span-full', props.className)}>
-        <FieldLabel htmlFor={id}>
+        <div className={fieldLabelVariants()}>
           {renderLabelTrigger()}
           {slotType ?? <FieldLabelType>{schemaToString(field)}</FieldLabelType>}
           {toolbar}
-        </FieldLabel>
+          {!isRequired && isDefined && renderUnsetButton()}
+        </div>
         {show && (
           <ArrayInput
             fieldName={fieldName}
@@ -451,13 +449,15 @@ export function FieldSet({
       </fieldset>
     );
   }
+
   return (
     <fieldset {...props} className={cn('flex flex-col gap-1.5', props.className)}>
-      <FieldLabel htmlFor={id}>
+      <label className={fieldLabelVariants()} htmlFor={id}>
         {renderLabelName()}
         {slotType ?? <FieldLabelType>{schemaToString(field)}</FieldLabelType>}
         {toolbar}
-      </FieldLabel>
+        {!isRequired && isDefined && renderUnsetButton()}
+      </label>
       <FieldInput field={field} fieldName={fieldName} isRequired={isRequired} />
     </fieldset>
   );
