@@ -1,11 +1,15 @@
 ---
-title: Internationalization
-description: Support multiple languages in your documentation
+title: Configuration
+description: Shared i18n configuration
 ---
+
+<Callout title="Core API Only">
+  For framework integration guide, see [Internationalization](/docs/internationalization).
+</Callout>
 
 ## Define Config
 
-Fumadocs core provides necessary middleware and options for i18n support.
+Fumadocs core provides necessary middleware and utilities for i18n support.
 
 You can define a config to share between utilities.
 
@@ -59,13 +63,3 @@ export const i18n = defineI18n({
   fallbackLanguage: 'cn',
 });
 ```
-
-## Middleware
-
-Redirects users to appropriate locale, it can be customised from `i18n.ts`.
-
-<include cwd meta='title="proxy.ts"'>
-  ../../examples/i18n/proxy.ts
-</include>
-
-> When `hideLocale` is enabled, it uses `NextResponse.rewrite` to hide locale prefixes.
