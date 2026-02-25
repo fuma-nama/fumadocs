@@ -1,5 +1,14 @@
 # @fuma-docs/openapi
 
+## 10.3.11
+
+### Patch Changes
+
+- 5a9b381: Pass `isRequired` to `FieldSet` for parameter enum fields in playground, fixing required enum parameters incorrectly showing an "Unset" option.
+- 21e60c3: support cleaning namespace information
+- Updated dependencies [21e60c3]
+  - @fumari/stf@1.0.1
+
 ## 10.3.10
 
 ### Patch Changes
