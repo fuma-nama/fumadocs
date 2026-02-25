@@ -1,5 +1,13 @@
 # @fumadocs/story
 
+## 0.0.9
+
+### Patch Changes
+
+- 21e60c3: support cleaning namespace information
+- Updated dependencies [21e60c3]
+  - @fumari/stf@1.0.1
+
 ## 0.0.8
 
 ### Patch Changes

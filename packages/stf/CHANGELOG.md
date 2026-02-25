@@ -1,5 +1,11 @@
 # @fumari/stf
 
+## 1.0.1
+
+### Patch Changes
+
+- 21e60c3: support cleaning namespace information
+
 ## 1.0.0
 
 ### Major Changes
