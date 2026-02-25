@@ -402,6 +402,7 @@ function FormBody({ parameters = [], body }: Pick<PlaygroundClientProps, 'parame
                 name={field.name}
                 fieldName={fieldName}
                 field={schema}
+                isRequired={field.required}
               />
             );
           })}
