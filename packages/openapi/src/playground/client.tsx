@@ -236,7 +236,6 @@ export default function PlaygroundClient({
     if (stf.dataEngine.getData() === defaultValues) return;
 
     stf.dataEngine.reset(defaultValues);
-    stf.dataEngine.clearNamespaces();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- ignore other parts
   }, [defaultValues]);
 

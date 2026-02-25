@@ -34,10 +34,6 @@ export interface DataEngineListener {
    * when `field` is specified, this is also fired when parent is deleted.
    */
   onDelete?: (key: FieldKey, ctx: OnDeleteContext) => void;
-  /**
-   * For listener attached to a namespace's engine, this is fired when the namespace is removed.
-   */
-  onUnmount?: () => void;
 }
 
 export interface OnUpdateContext {
@@ -58,6 +54,10 @@ export interface OnDeleteContext {
 export interface OnInitContext {
   /** custom data */
   custom?: Record<string, unknown>;
+}
+
+export interface NamespaceConfig {
+  reset?: () => void;
 }
 
 class ListenerManager {
@@ -115,16 +115,11 @@ class ListenerManager {
       for (const v of listeners) v.onDelete?.(field, ctx);
     }
   }
-
-  onUnmount() {
-    for (const v of this.unindexed) v.onUnmount?.();
-    for (const listeners of this.indexed.values()) for (const v of listeners) v.onUnmount?.();
-  }
 }
 
 export class DataEngine {
   private data: NonNullable<object>;
-  private readonly namespaces = new Map<string, DataEngine>();
+  readonly namespaces = new Map<string, { engine: DataEngine } & NamespaceConfig>();
   private readonly listeners = new ListenerManager();
 
   constructor(defaultValues: DefaultValue<NonNullable<object>> = {}) {
@@ -228,25 +223,25 @@ export class DataEngine {
   /**
    * create an isolated data engine
    */
-  namespace(namespace: string, initialValue?: DefaultValue<NonNullable<object>>) {
+  namespace(
+    namespace: string,
+    initialValue?: DefaultValue<NonNullable<object>>,
+    config?: NamespaceConfig,
+  ) {
     let child = this.namespaces.get(namespace);
     if (!child) {
-      child = new DataEngine(initialValue);
+      child = { engine: new DataEngine(initialValue), ...config };
       this.namespaces.set(namespace, child);
+    } else {
+      Object.assign(child, config);
     }
 
-    return child;
+    return child.engine;
   }
 
   reset(data: NonNullable<object>) {
     this.update([], data);
-  }
-
-  clearNamespaces() {
-    for (const [name, engine] of this.namespaces) {
-      this.namespaces.delete(name);
-      engine.listeners.onUnmount();
-    }
+    for (const { reset } of this.namespaces.values()) reset?.();
   }
 }
 
@@ -304,9 +299,6 @@ export function useListener(listener: DataEngineListener & { stf?: Stf | DataEng
   useEffect(() => {
     const internal: DataEngineListener = {
       field: listener.field,
-      onUnmount(...args) {
-        return listenerRef.current.onUnmount?.(...args);
-      },
       onDelete(...args) {
         return listenerRef.current.onDelete?.(...args);
       },
@@ -332,14 +324,10 @@ export function useNamespace(options: {
 }) {
   const { namespace, stf, initial } = options;
   const engine = useDataEngine(stf);
-  const [value, setValue] = useState(() => engine.namespace(namespace, initial));
-
-  useListener({
-    stf: value,
-    onUnmount() {
-      setValue(engine.namespace(namespace, initial));
+  const value = engine.namespace(namespace, initial, {
+    reset() {
+      value.update([], getDefaultValue(initial));
     },
   });
-
   return value;
 }
