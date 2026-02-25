@@ -267,7 +267,7 @@ export function FieldSet({
   const { readOnly, writeOnly } = useSchemaScope();
   const field = useResolvedSchema(_field);
   const [show, setShow] = useState(!collapsible);
-  const { info, updateInfo } = useFieldInfo(fieldName, field);
+  const { info, updateInfo } = useFieldInfo(fieldName, field, depth);
   const id = stringifyFieldKey(fieldName);
   const dataEngine = useDataEngine();
   const [isDefined] = useFieldValue(fieldName, {
@@ -335,6 +335,7 @@ export function FieldSet({
         field={union[info.oneOf]}
         depth={depth + 1}
         slotType={showSelect ? false : slotType}
+        collapsible={collapsible}
         toolbar={
           <>
             {showSelect && (
@@ -374,6 +375,7 @@ export function FieldSet({
           ...field,
           type: info.selectedType,
         }}
+        collapsible={collapsible}
         depth={depth + 1}
         slotType={showSelect ? false : slotType}
         toolbar={

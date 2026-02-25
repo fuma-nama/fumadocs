@@ -236,6 +236,7 @@ export default function PlaygroundClient({
     if (stf.dataEngine.getData() === defaultValues) return;
 
     stf.dataEngine.reset(defaultValues);
+    stf.dataEngine.clearNamespaces();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- ignore other parts
   }, [defaultValues]);
 
@@ -427,7 +428,7 @@ function BodyInput({ field: _field }: { field: ParsedSchema }) {
   const field = useResolvedSchema(_field);
   const [isJson, setIsJson] = useState(false);
 
-  if (field.format === 'binary') return <FieldSet field={field} fieldName={['body']} />;
+  if (field.format === 'binary') return <FieldSet field={field} fieldName={['body']} isRequired />;
 
   if (isJson)
     return (
@@ -454,6 +455,7 @@ function BodyInput({ field: _field }: { field: ParsedSchema }) {
       field={field}
       fieldName={['body']}
       collapsible={false}
+      isRequired
       name={
         <button
           type="button"

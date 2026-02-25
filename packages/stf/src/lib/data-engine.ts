@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { fieldKeyStartsWith, objectGet, objectSet, stringifyFieldKey } from './utils';
+import {
+  fieldKeyStartsWith,
+  isPlainObject,
+  objectGet,
+  objectSet,
+  stringifyFieldKey,
+} from './utils';
 import type { FieldKey } from './types';
 import { Stf, useDataEngine } from './stf';
 
@@ -28,6 +34,10 @@ export interface DataEngineListener {
    * when `field` is specified, this is also fired when parent is deleted.
    */
   onDelete?: (key: FieldKey, ctx: OnDeleteContext) => void;
+  /**
+   * For listener attached to a namespace's engine, this is fired when the namespace is removed.
+   */
+  onUnmount?: () => void;
 }
 
 export interface OnUpdateContext {
@@ -105,12 +115,16 @@ class ListenerManager {
       for (const v of listeners) v.onDelete?.(field, ctx);
     }
   }
+
+  onUnmount() {
+    for (const v of this.unindexed) v.onUnmount?.();
+    for (const listeners of this.indexed.values()) for (const v of listeners) v.onUnmount?.();
+  }
 }
 
 export class DataEngine {
   private data: NonNullable<object>;
-  /** namespace -> engine */
-  private namespaces = new Map<string, DataEngine>();
+  private readonly namespaces = new Map<string, DataEngine>();
   private readonly listeners = new ListenerManager();
 
   constructor(defaultValues: DefaultValue<NonNullable<object>> = {}) {
@@ -137,9 +151,9 @@ export class DataEngine {
    */
   init(key: FieldKey, defaultValue?: DefaultValue, ctx: OnInitContext = {}): unknown {
     if (key.length === 0) return this.data;
-    let cur = this.data as Record<string, unknown>;
-    const currentKey: FieldKey = [];
+    const parentKey: FieldKey = [];
     const parentUpdateCtx = { swallow: true, ...ctx };
+    let cur = this.data as Record<string, unknown>;
 
     for (let i = 0; i < key.length; i++) {
       const propKey = key[i];
@@ -149,21 +163,24 @@ export class DataEngine {
         if (propValue !== undefined) return propValue;
         cur[propKey] = getDefaultValue(defaultValue);
 
-        this.listeners.onUpdate(currentKey, parentUpdateCtx);
+        this.listeners.onUpdate(parentKey, parentUpdateCtx);
         this.listeners.onInit(key, ctx);
         return cur[propKey];
-      } else if (typeof propValue === 'object' && propValue !== null) {
-        cur = propValue as Record<string, unknown>;
+      } else if (isPlainObject(propValue)) {
+        cur = propValue;
+        parentKey.push(propKey);
       } else {
-        if (propValue !== undefined)
-          console.warn(
-            `the original value of field ${currentKey.join('.')} is overidden, this might be unexpected.`,
-          );
-
         cur = cur[propKey] = {};
-        this.listeners.onUpdate(currentKey, parentUpdateCtx);
+
+        this.listeners.onUpdate(parentKey, parentUpdateCtx);
+        parentKey.push(propKey);
+        if (propValue !== undefined) {
+          console.warn(
+            `the original value of field ${parentKey.join('.')} is overidden, this might be unexpected.`,
+          );
+          this.listeners.onUpdate(parentKey, parentUpdateCtx);
+        }
       }
-      currentKey.push(propKey);
     }
   }
 
@@ -181,9 +198,9 @@ export class DataEngine {
       // it will change children's field value when removed at middle
       this.listeners.onUpdate(parentKey, { swallow: false, ...ctx });
       return deleted[0];
-    } else if (typeof parent === 'object' && parent !== null) {
-      const temp = (parent as Record<string, unknown>)[prop];
-      delete parent[prop as never];
+    } else if (isPlainObject(parent)) {
+      const temp = parent[prop];
+      delete parent[prop];
       this.listeners.onDelete(key, ctx);
       this.listeners.onUpdate(parentKey, { swallow: true, ...ctx });
       return temp;
@@ -221,9 +238,15 @@ export class DataEngine {
     return child;
   }
 
-  reset(data: Record<string, unknown>) {
-    this.namespaces.clear();
+  reset(data: NonNullable<object>) {
     this.update([], data);
+  }
+
+  clearNamespaces() {
+    for (const [name, engine] of this.namespaces) {
+      this.namespaces.delete(name);
+      engine.listeners.onUnmount();
+    }
   }
 }
 
@@ -243,13 +266,19 @@ export function useFieldValue<V = unknown>(
     isChanged?: (prev: V, next: V) => boolean;
   } = {},
 ) {
-  const engine = useDataEngine(options.stf);
-  const { compute = (v) => v as V, defaultValue, isChanged = (a, b) => a !== b } = options;
+  const { stf, compute = (v) => v as V, defaultValue, isChanged = (a, b) => a !== b } = options;
+  const engine = useDataEngine(stf);
   const [value, setValue] = useState<V>(() => compute(engine.init(key, defaultValue)));
+  const prevEngineRef = useRef(engine);
+
+  if (prevEngineRef.current !== engine) {
+    setValue(compute(engine.init(key, defaultValue)));
+    prevEngineRef.current = engine;
+  }
 
   useListener({
     field: key,
-    stf: options.stf,
+    stf,
     onInit() {
       const computed = compute(engine.get(key));
       setValue((prev) => (isChanged(prev, computed) ? computed : prev));
@@ -275,6 +304,9 @@ export function useListener(listener: DataEngineListener & { stf?: Stf | DataEng
   useEffect(() => {
     const internal: DataEngineListener = {
       field: listener.field,
+      onUnmount(...args) {
+        return listenerRef.current.onUnmount?.(...args);
+      },
       onDelete(...args) {
         return listenerRef.current.onDelete?.(...args);
       },
@@ -291,4 +323,23 @@ export function useListener(listener: DataEngineListener & { stf?: Stf | DataEng
       engine.unlisten(internal);
     };
   }, [engine, listener.field]);
+}
+
+export function useNamespace(options: {
+  namespace: string;
+  initial?: DefaultValue<NonNullable<object>>;
+  stf?: Stf | DataEngine;
+}) {
+  const { namespace, stf, initial } = options;
+  const engine = useDataEngine(stf);
+  const [value, setValue] = useState(() => engine.namespace(namespace, initial));
+
+  useListener({
+    stf: value,
+    onUnmount() {
+      setValue(engine.namespace(namespace, initial));
+    },
+  });
+
+  return value;
 }

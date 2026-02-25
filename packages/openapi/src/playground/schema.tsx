@@ -3,7 +3,7 @@ import { createContext, ReactNode, use, useMemo } from 'react';
 import { getDefaultValue } from '@/playground/get-default-values';
 import type { ParsedSchema } from '@/utils/schema';
 import { mergeAllOf } from '@/utils/merge-schema';
-import { FieldKey, useDataEngine, useFieldValue } from '@fumari/stf';
+import { FieldKey, useDataEngine, useFieldValue, useNamespace } from '@fumari/stf';
 import { stringifyFieldKey } from '@fumari/stf/lib/utils';
 
 interface SchemaContextType extends SchemaScope {
@@ -89,15 +89,16 @@ export function useSchemaScope(): SchemaScope {
 export function useFieldInfo(
   fieldName: FieldKey,
   schema: Exclude<ParsedSchema, boolean>,
+  depth = 0,
 ): {
   info: FieldInfo;
   updateInfo: (value: Partial<FieldInfo>) => void;
 } {
   const { ajv } = use(SchemaContext)!;
   const engine = useDataEngine();
-  const fieldData = engine.namespace(
-    `field-info:${stringifyFieldKey(fieldName)}`,
-    (): FieldInfo => {
+  const fieldData = useNamespace({
+    namespace: `field-info:${depth}:${stringifyFieldKey(fieldName)}`,
+    initial(): FieldInfo {
       const value = engine.get(fieldName);
       const out: FieldInfo = {
         oneOf: -1,
@@ -116,12 +117,8 @@ export function useFieldInfo(
 
         out.selectedType =
           types.find((type) => {
-            schema.type = type;
-            const match = ajv.validate(schema, value);
-            schema.type = types;
-
-            return match;
-          }) ?? types.at(0);
+            return ajv.validate({ ...schema, type }, value);
+          }) ?? types[0];
       }
 
       if (schema.allOf) {
@@ -132,10 +129,9 @@ export function useFieldInfo(
             merged,
           };
       }
-
       return out;
     },
-  );
+  });
   const [info, setInfo] = useFieldValue<FieldInfo>([], {
     stf: fieldData,
   });

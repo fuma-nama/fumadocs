@@ -4,9 +4,8 @@ export function objectGet(obj: unknown, key: (string | number)[]): unknown | und
   let cur = obj;
 
   for (const prop of key) {
-    if (typeof cur !== 'object' || cur === null || !(prop in cur)) return;
-
-    cur = cur[prop as keyof typeof cur];
+    if (!isPlainObject(cur) || !(prop in cur)) return;
+    cur = cur[prop];
   }
 
   return cur;
@@ -23,8 +22,8 @@ export function objectSet(obj: unknown, key: FieldKey, value: unknown): unknown 
   }
 
   const parent = objectGet(obj, key.slice(0, -1));
-  if (typeof parent !== 'object' || parent === null) throw new Error('missing parent object');
-  (parent as Record<string, unknown>)[key[key.length - 1]] = value;
+  if (!isPlainObject(parent)) throw new Error('missing parent object');
+  parent[key[key.length - 1]] = value;
   return obj;
 }
 
@@ -55,22 +54,21 @@ export function deepEqual(a: unknown, b: unknown): boolean {
     return false;
   }
 
-  const keysA = Object.keys(a as object);
-  const keysB = Object.keys(b as object);
+  if (!isPlainObject(a) || !isPlainObject(b)) {
+    return false;
+  }
+  const keysA = Object.keys(a);
+  const keysB = Object.keys(b);
 
   if (keysA.length !== keysB.length) {
     return false;
   }
 
-  return keysA.every(
-    (key) =>
-      Object.prototype.hasOwnProperty.call(b, key) &&
-      deepEqual((a as Record<string, unknown>)[key], (b as Record<string, unknown>)[key]),
-  );
+  return keysA.every((key) => key in b && deepEqual(a[key], b[key]));
 }
 
 export function stringifyFieldKey(fieldKey: FieldKey) {
-  return fieldKey.map((v) => `${typeof v}:${v}`).join('.');
+  return fieldKey.map((v) => (typeof v === 'string' ? `_${v}` : `n${v}`)).join('.');
 }
 
 /**
@@ -78,4 +76,17 @@ export function stringifyFieldKey(fieldKey: FieldKey) {
  */
 export function fieldKeyStartsWith(a: string, b: string): boolean {
   return b.length === 0 || a === b || a.startsWith(b + '.');
+}
+
+export function isPlainObject(value: unknown): value is Record<string, unknown> {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const prototype = Object.getPrototypeOf(value);
+  return (
+    prototype === null ||
+    prototype === Object.prototype ||
+    Object.getPrototypeOf(prototype) === null
+  );
 }

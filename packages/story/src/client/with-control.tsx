@@ -40,6 +40,7 @@ export function WithControl({ presets, displayName, Component }: WithControlProp
                 if (preset) {
                   setVariant(value);
                   stf.dataEngine.reset(preset.defaultValues ?? {});
+                  stf.dataEngine.clearNamespaces();
                 }
               }}
             >
