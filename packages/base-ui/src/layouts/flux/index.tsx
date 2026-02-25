@@ -18,6 +18,7 @@ import { ThemeToggle } from '../shared/theme-toggle';
 import { LinkItem } from '@/utils/link-item';
 import { AnimatePresence, motion } from 'motion/react';
 import { RemoveScroll } from 'react-remove-scroll';
+import { useSearchContext } from '@/contexts/search';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
@@ -213,7 +214,6 @@ export function NavigationPanel({
   tabDropdown,
   tool,
   link,
-  className,
   children = (v) => v,
   ...props
 }: NavigationPanelProps &
@@ -223,13 +223,21 @@ export function NavigationPanel({
      */
     children?: (defaultChildren: ReactNode) => ReactNode;
   }) {
+  const { open } = useSearchContext();
   return (
     <motion.div
+      {...props}
       className={cn(
         'fixed left-1/2 w-[calc(100%-var(--removed-body-scroll-bar-size,0px))] translate-x-[calc(-50%-var(--removed-body-scroll-bar-size,0px)/2)] bottom-0 z-40 bg-fd-popover text-fd-popover-foreground border-t shadow-lg sm:bottom-6 sm:rounded-2xl sm:border sm:max-w-[380px]',
-        className,
+        props.className,
       )}
-      {...props}
+      animate={
+        props.animate ?? {
+          scale: open ? 0.9 : 1,
+          translateY: open ? 20 : 0,
+          opacity: open ? 0.8 : 1,
+        }
+      }
     >
       {children(
         <>
