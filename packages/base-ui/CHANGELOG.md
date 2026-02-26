@@ -1,5 +1,12 @@
 # @fumadocs/base-ui
 
+## 16.6.6
+
+### Patch Changes
+
+- 38bd784: improve flux layout
+  - fumadocs-core@16.6.6
+
 ## 16.6.5
 
 ### Patch Changes
