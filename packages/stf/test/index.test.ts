@@ -48,13 +48,13 @@ test('data engine: basic', () => {
   `);
   expect(logs).toMatchInlineSnapshot(`
     [
-      "update  true",
-      "update hello true",
-      "update hello,world true",
+      "init hello",
+      "init hello,world",
       "init hello,world,2",
-      "update hello,world true",
-      "update hello,world,1 true",
+      "update  true",
+      "init hello,world,1",
       "init hello,world,1,property",
+      "update hello,world true",
       "delete hello,world,1",
       "update hello,world false",
     ]

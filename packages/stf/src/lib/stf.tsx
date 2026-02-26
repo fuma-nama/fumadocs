@@ -6,7 +6,7 @@ import {
   type DefaultValue,
 } from './data-engine';
 import type { FieldKey } from './types';
-import { deepEqual } from './utils';
+import { deepEqual, isPlainObject } from './utils';
 
 const Context = createContext<Stf | null>(null);
 
@@ -24,18 +24,14 @@ export function useStf(options: {
    */
   defaultValues?: DefaultValue<Record<string, unknown>>;
 }): Stf {
-  const { defaultValues } = options;
+  const optionsRef = useRef(options);
+  optionsRef.current = options;
 
-  const dataEngine = useMemo(
-    () => new DataEngine(defaultValues),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- assume unchanged
-    [],
-  );
   return useMemo(
     () => ({
-      dataEngine,
+      dataEngine: new DataEngine(optionsRef.current.defaultValues),
     }),
-    [dataEngine],
+    [],
   );
 }
 
@@ -59,13 +55,13 @@ export function useArray(
     defaultValue: options.defaultValue,
     compute(value) {
       const items: ArrayItemInfo[] = [];
-      if (Array.isArray(value)) {
-        for (let i = 0; i < value.length; i++) {
-          items.push({
-            field: [...field, i],
-            index: i,
-          });
-        }
+      if (!Array.isArray(value)) return items;
+
+      for (let i = 0; i < value.length; i++) {
+        items.push({
+          field: [...field, i],
+          index: i,
+        });
       }
       return items;
     },
@@ -114,7 +110,7 @@ export function useObject<T>(
   const [objectKeys] = useFieldValue(field, {
     defaultValue: options.defaultValue,
     compute(currentValue) {
-      return currentValue ? Object.keys(currentValue) : [];
+      return isPlainObject(currentValue) ? Object.keys(currentValue) : [];
     },
     isChanged(prev, next) {
       return !deepEqual(prev, next);
@@ -196,25 +192,28 @@ export function useFieldValue<V = unknown>(
 ) {
   const { stf, compute = (v) => v as V, defaultValue, isChanged = (a, b) => a !== b } = options;
   const engine = useDataEngine(stf);
-  const [value, setValue] = useState<V>(() => compute(engine.init(key, defaultValue)));
+  const [value, setValue] = useState<V>(() =>
+    compute(defaultValue === undefined ? engine.get(key) : engine.init(key, defaultValue)),
+  );
   const prevEngineRef = useRef(engine);
 
   if (prevEngineRef.current !== engine) {
-    setValue(compute(engine.init(key, defaultValue)));
+    setValue(
+      compute(defaultValue === undefined ? engine.get(key) : engine.init(key, defaultValue)),
+    );
     prevEngineRef.current = engine;
+  }
+
+  function onUpdate() {
+    const computed = compute(engine.get(key));
+    setValue((prev) => (isChanged(prev, computed) ? computed : prev));
   }
 
   useListener({
     field: key,
     stf,
-    onInit() {
-      const computed = compute(engine.get(key));
-      setValue((prev) => (isChanged(prev, computed) ? computed : prev));
-    },
-    onUpdate() {
-      const computed = compute(engine.get(key));
-      setValue((prev) => (isChanged(prev, computed) ? computed : prev));
-    },
+    onInit: onUpdate,
+    onUpdate: onUpdate,
     onDelete() {
       const computed = compute(undefined);
       setValue((prev) => (isChanged(prev, computed) ? computed : prev));
@@ -257,10 +256,9 @@ export function useNamespace(options: {
 }) {
   const { namespace, stf, initial } = options;
   const engine = useDataEngine(stf);
-  const value = engine.namespace(namespace, initial, {
-    reset() {
-      value.update([], getDefaultValue(initial));
+  return engine.namespace(namespace, initial, {
+    reset({ engine }) {
+      engine.update([], getDefaultValue(initial));
     },
   });
-  return value;
 }

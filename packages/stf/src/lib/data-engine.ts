@@ -55,7 +55,7 @@ export interface OnInitContext {
 }
 
 export interface NamespaceConfig {
-  reset?: () => void;
+  reset?: (ctx: { engine: DataEngine }) => void;
 }
 
 class ListenerManager {
@@ -145,8 +145,11 @@ export class DataEngine {
   init(field: FieldKey, defaultValue?: DefaultValue, ctx: OnInitContext = {}): unknown {
     if (field.length === 0) return this.data;
     const parentKey: FieldKey = [];
-    const parentUpdateCtx = { swallow: true, ...ctx };
+    const parentUpdateCtx: OnUpdateContext = { swallow: true, ...ctx };
     let parent = this.data as Record<string, unknown> | unknown[];
+
+    const fieldsToInit: FieldKey[] = [];
+    let initStart: FieldKey | null = null;
 
     for (let i = 0; i < field.length; i++) {
       const key = field[i];
@@ -158,8 +161,9 @@ export class DataEngine {
         // @ts-expect-error -- allow access
         const out = (parent[key] = getDefaultValue(defaultValue));
 
-        this.listeners.onUpdate(parentKey, parentUpdateCtx);
-        this.listeners.onInit(field, ctx);
+        fieldsToInit.push(field);
+        for (const initField of fieldsToInit) this.listeners.onInit(initField, ctx);
+        this.listeners.onUpdate(initStart ?? parentKey, parentUpdateCtx);
         return out;
       } else if (isPlainObject(value) || Array.isArray(value)) {
         parent = value;
@@ -169,13 +173,16 @@ export class DataEngine {
         // @ts-expect-error -- allow access
         parent = parent[key] = typeof nextKey === 'number' ? new Array(nextKey + 1) : {};
 
-        this.listeners.onUpdate(parentKey, parentUpdateCtx);
-        parentKey.push(key);
-        if (value !== undefined) {
+        if (value === undefined) {
+          initStart ??= [...parentKey];
+          parentKey.push(key);
+          fieldsToInit.push([...parentKey]);
+        } else {
+          parentKey.push(key);
+          this.listeners.onUpdate(parentKey, parentUpdateCtx);
           console.warn(
             `the original value of field ${parentKey.join('.')} is overidden, this might be unexpected.`,
           );
-          this.listeners.onUpdate(parentKey, parentUpdateCtx);
         }
       }
     }
@@ -188,14 +195,16 @@ export class DataEngine {
     const parent = this.get(parentKey);
 
     if (typeof prop === 'number' && Array.isArray(parent)) {
+      if (parent.length === 0) return;
+      const isLast = prop === parent.length - 1;
       const deleted: unknown[] = parent.splice(prop, 1);
       if (deleted.length === 0) return;
 
       this.listeners.onDelete(key, ctx);
       // it will change children's field value when removed at middle
-      this.listeners.onUpdate(parentKey, { swallow: false, ...ctx });
+      this.listeners.onUpdate(parentKey, { swallow: isLast, ...ctx });
       return deleted[0];
-    } else if (isPlainObject(parent)) {
+    } else if (isPlainObject(parent) && prop in parent) {
       const temp = parent[prop];
       delete parent[prop];
       this.listeners.onDelete(key, ctx);
@@ -243,6 +252,6 @@ export class DataEngine {
 
   reset(data: NonNullable<object>) {
     this.update([], data);
-    for (const { reset } of this.namespaces.values()) reset?.();
+    for (const { engine, reset } of this.namespaces.values()) reset?.({ engine });
   }
 }
