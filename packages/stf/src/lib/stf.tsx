@@ -101,14 +101,23 @@ export function useObject<T>(
   field: FieldKey,
   options: {
     defaultValue?: DefaultValue<object>;
+    /** ignore fixed properties unless defined  */
+    lazy?: boolean;
     properties: Record<string, T>;
     patternProperties?: Record<string, T>;
     fallback?: T;
   },
 ) {
+  const {
+    properties: definedProps,
+    patternProperties: definedPatternProps = {},
+    defaultValue,
+    fallback,
+    lazy,
+  } = options;
   const engine = useDataEngine();
   const [objectKeys] = useFieldValue(field, {
-    defaultValue: options.defaultValue,
+    defaultValue,
     compute(currentValue) {
       return isPlainObject(currentValue) ? Object.keys(currentValue) : [];
     },
@@ -120,8 +129,10 @@ export function useObject<T>(
   const properties = useMemo(() => {
     const properties: PropertyItemInfo<T>[] = [];
     const unknownKeys = new Set(objectKeys);
-    for (const [key, prop] of Object.entries(options.properties)) {
+    for (const [key, prop] of Object.entries(definedProps)) {
+      if (lazy && !unknownKeys.has(key)) continue;
       unknownKeys.delete(key);
+
       properties.push({
         kind: 'fixed',
         field: [...field, key],
@@ -130,7 +141,7 @@ export function useObject<T>(
       });
     }
 
-    for (const [pattern, prop] of Object.entries(options.patternProperties ?? {})) {
+    for (const [pattern, prop] of Object.entries(definedPatternProps)) {
       const regex = RegExp(pattern);
 
       for (const key of unknownKeys) {
@@ -146,22 +157,23 @@ export function useObject<T>(
       }
     }
 
-    if (options.fallback) {
+    if (fallback) {
       for (const key of unknownKeys) {
         properties.push({
           kind: 'fallback',
           field: [...field, key],
           key,
-          info: options.fallback,
+          info: fallback,
         });
       }
     }
 
     return properties;
-  }, [field, objectKeys, options.fallback, options.patternProperties, options.properties]);
+  }, [definedPatternProps, definedProps, fallback, field, lazy, objectKeys]);
 
   return {
     properties,
+    _objectKeys: objectKeys,
     onAppend(name: string, value?: unknown) {
       name = name.trim();
       if (name.length === 0) return;

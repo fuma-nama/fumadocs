@@ -38,17 +38,45 @@ export function ObjectInput({
   fieldName: FieldKey;
 } & ComponentProps<'div'>) {
   const field = useResolvedSchema(_field);
+  const { patternProperties = {}, additionalProperties } = field;
+  const schemaPropKeys = field.properties ? Object.keys(field.properties) : [];
+  const isLazy = field['x-playground-lazy'] ?? schemaPropKeys.length > 100;
+  const isDynamic = Object.keys(patternProperties).length > 0 || additionalProperties !== undefined;
+
   const [nextName, setNextName] = useState('');
-  const { properties, onAppend, onDelete } = useObject(fieldName, {
+  const { properties, onAppend, onDelete, _objectKeys } = useObject(fieldName, {
+    lazy: isLazy,
     defaultValue: () => getDefaultValue(field) as object,
     properties: field.properties ?? {},
-    fallback: field.additionalProperties,
-    patternProperties: field.patternProperties,
+    fallback: additionalProperties,
+    patternProperties: patternProperties,
   });
 
-  const isDynamic = field.patternProperties ?? field.additionalProperties;
+  const hiddenProperties = isLazy ? schemaPropKeys.filter((key) => !_objectKeys.includes(key)) : [];
+
   return (
-    <div {...props} className={cn('grid grid-cols-1 gap-4 @md:grid-cols-2', props.className)}>
+    <div
+      {...props}
+      className={cn(
+        'grid grid-cols-1 gap-4 @md:grid-cols-2 *:data-[collapsible=true]:order-last',
+        props.className,
+      )}
+    >
+      {isLazy && hiddenProperties.length > 0 && (
+        <Select value="" onValueChange={onAppend}>
+          <SelectTrigger className="col-span-full">
+            <SelectValue placeholder="Show Property" />
+          </SelectTrigger>
+          <SelectContent>
+            {hiddenProperties.map((key) => (
+              <SelectItem key={key} value={key}>
+                {key}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
+
       {properties.map((child) => {
         let toolbar: ReactNode = null;
         if (child.kind === 'pattern' || child.kind === 'fallback') {
@@ -83,7 +111,7 @@ export function ObjectInput({
         );
       })}
       {isDynamic && (
-        <div className="flex gap-2 col-span-full">
+        <div className="flex gap-2 order-last col-span-full">
           <Input
             value={nextName}
             placeholder="Enter Property Name"
@@ -190,9 +218,12 @@ export function FieldInput({
     const idx = field.enum.indexOf(value);
 
     return (
-      <Select value={String(idx)} onValueChange={(v) => setValue(field.enum![Number(v)])}>
+      <Select
+        value={idx === -1 && isRequired ? '' : String(idx)}
+        onValueChange={(v) => setValue(field.enum![Number(v)])}
+      >
         <SelectTrigger id={id} {...props}>
-          <SelectValue />
+          <SelectValue placeholder="Select" />
         </SelectTrigger>
         <SelectContent>
           {field.enum.map((item, i) => (
@@ -413,6 +444,7 @@ export function FieldSet({
     return (
       <fieldset
         {...props}
+        data-collapsible={collapsible}
         className={cn('flex flex-col gap-1.5 col-span-full @container', props.className)}
       >
         <div className={fieldLabelVariants()}>
@@ -434,7 +466,11 @@ export function FieldSet({
 
   if (field.type === 'array') {
     return (
-      <fieldset {...props} className={cn('flex flex-col gap-1.5 col-span-full', props.className)}>
+      <fieldset
+        {...props}
+        data-collapsible={collapsible}
+        className={cn('flex flex-col gap-1.5 col-span-full', props.className)}
+      >
         <div className={fieldLabelVariants()}>
           {renderLabelTrigger()}
           {slotType ?? <FieldLabelType>{schemaToString(field)}</FieldLabelType>}
