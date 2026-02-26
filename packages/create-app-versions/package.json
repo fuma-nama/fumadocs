@@ -4,10 +4,10 @@
   "private": true,
   "description": "Used to track dependency versions in create-fumadocs-app",
   "dependencies": {
-    "@biomejs/biome": "^2.4.2",
-    "@orama/core": "^1.2.18",
-    "@takumi-rs/image-response": "^0.68.17",
-    "eslint": "^10.0.0",
+    "@biomejs/biome": "^2.4.4",
+    "@orama/core": "^1.2.19",
+    "@takumi-rs/image-response": "^0.69.1",
+    "eslint": "^10.0.2",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*"

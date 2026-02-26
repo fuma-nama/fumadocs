@@ -58,7 +58,7 @@ export function SidebarTabsDropdown({
           <AnimatePresence mode="popLayout">
             <motion.span
               key={selectedIdx}
-              className="flex w-full items-center text-nowrap gap-1.5"
+              className="flex w-full min-w-0 overflow-hidden items-center text-nowrap gap-1.5"
               initial={{
                 opacity: 0,
                 y: '100%',
