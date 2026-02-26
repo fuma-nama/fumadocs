@@ -12,8 +12,8 @@ export function createAPIPage(server: OpenAPIServer, options: CreateAPIPageOptio
     ...options,
     shiki: configDefault,
     generateTypeScriptSchema(method, statusCode, contentType, ctx) {
-      const schema = method.responses?.[statusCode]?.content?.[contentType];
-      if (!schema) return;
+      const schema = method.responses?.[statusCode]?.content?.[contentType].schema;
+      if (!schema || typeof schema !== 'object') return;
       return getTypescriptSchema(schema, ctx);
     },
   });
