@@ -4,8 +4,13 @@ export function objectGet(obj: unknown, key: (string | number)[]): unknown | und
   let cur = obj;
 
   for (const prop of key) {
-    if (!isPlainObject(cur) || !(prop in cur)) return;
-    cur = cur[prop];
+    if (isPlainObject(cur) && prop in cur) {
+      cur = cur[prop];
+    } else if (typeof prop === 'number' && Array.isArray(cur)) {
+      cur = cur[prop];
+    } else {
+      return;
+    }
   }
 
   return cur;
@@ -16,14 +21,20 @@ export function objectGet(obj: unknown, key: (string | number)[]): unknown | und
  *
  * @returns updated value, throw error if parent object doesn't exist
  */
-export function objectSet(obj: unknown, key: FieldKey, value: unknown): unknown {
-  if (key.length === 0) {
+export function objectSet(obj: unknown, field: FieldKey, value: unknown): unknown {
+  if (field.length === 0) {
     return value;
   }
 
-  const parent = objectGet(obj, key.slice(0, -1));
-  if (!isPlainObject(parent)) throw new Error('missing parent object');
-  parent[key[key.length - 1]] = value;
+  const parent = objectGet(obj, field.slice(0, -1));
+  const key = field[field.length - 1];
+  if (isPlainObject(parent)) {
+    parent[key] = value;
+  } else if (typeof key === 'number' && Array.isArray(parent)) {
+    parent[key] = value;
+  } else {
+    throw new Error('missing parent object');
+  }
   return obj;
 }
 

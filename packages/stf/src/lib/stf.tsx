@@ -1,6 +1,11 @@
-import { createContext, ReactNode, use, useMemo } from 'react';
-import { DataEngine, DefaultValue, useFieldValue } from './data-engine';
-import { FieldKey } from './types';
+import { createContext, ReactNode, use, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  DataEngine,
+  getDefaultValue,
+  type DataEngineListener,
+  type DefaultValue,
+} from './data-engine';
+import type { FieldKey } from './types';
 import { deepEqual } from './utils';
 
 const Context = createContext<Stf | null>(null);
@@ -171,4 +176,91 @@ export function useObject<T>(
       return engine.delete([...field, name]);
     },
   };
+}
+
+export function useFieldValue<V = unknown>(
+  key: FieldKey,
+  options: {
+    stf?: Stf | DataEngine;
+    defaultValue?: DefaultValue;
+
+    /**
+     * compute value from the actual field value.
+     *
+     * to re-compute on in-place updates (may happen on objects, arrays), you should clone the object here.
+     */
+    compute?: (currentValue: unknown) => V;
+    /** determine whether the value/computed value is changed */
+    isChanged?: (prev: V, next: V) => boolean;
+  } = {},
+) {
+  const { stf, compute = (v) => v as V, defaultValue, isChanged = (a, b) => a !== b } = options;
+  const engine = useDataEngine(stf);
+  const [value, setValue] = useState<V>(() => compute(engine.init(key, defaultValue)));
+  const prevEngineRef = useRef(engine);
+
+  if (prevEngineRef.current !== engine) {
+    setValue(compute(engine.init(key, defaultValue)));
+    prevEngineRef.current = engine;
+  }
+
+  useListener({
+    field: key,
+    stf,
+    onInit() {
+      const computed = compute(engine.get(key));
+      setValue((prev) => (isChanged(prev, computed) ? computed : prev));
+    },
+    onUpdate() {
+      const computed = compute(engine.get(key));
+      setValue((prev) => (isChanged(prev, computed) ? computed : prev));
+    },
+    onDelete() {
+      const computed = compute(undefined);
+      setValue((prev) => (isChanged(prev, computed) ? computed : prev));
+    },
+  });
+
+  return [value, (newValue: unknown) => engine.update(key, newValue)] as const;
+}
+
+export function useListener(listener: DataEngineListener & { stf?: Stf | DataEngine }) {
+  const engine = useDataEngine(listener.stf);
+  const listenerRef = useRef(listener);
+  listenerRef.current = listener;
+
+  useEffect(() => {
+    const internal: DataEngineListener = {
+      field: listener.field,
+      onDelete(...args) {
+        return listenerRef.current.onDelete?.(...args);
+      },
+      onInit(...args) {
+        return listenerRef.current.onInit?.(...args);
+      },
+      onUpdate(...args) {
+        return listenerRef.current.onUpdate?.(...args);
+      },
+    };
+
+    engine.listen(internal);
+    return () => {
+      engine.unlisten(internal);
+    };
+  }, [engine, listener.field]);
+}
+
+export function useNamespace(options: {
+  namespace: string;
+  initial?: DefaultValue<NonNullable<object>>;
+  stf?: Stf | DataEngine;
+}) {
+  const { namespace, stf, initial } = options;
+  const engine = useDataEngine(stf);
+  const value = engine.namespace(namespace, initial, {
+    reset() {
+      value.update([], getDefaultValue(initial));
+    },
+  });
+  return value;
 }
