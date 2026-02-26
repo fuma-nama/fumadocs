@@ -23,7 +23,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from 'fumadocs-ui/components/ui/collapsible';
-import { X, ChevronDown, LoaderCircle } from 'lucide-react';
+import { ChevronDown, LoaderCircle } from 'lucide-react';
 import { encodeRequestData } from '@/requests/media/encode';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from '@/utils/cn';
@@ -270,6 +270,7 @@ export default function PlaygroundClient({
               {testQuery.isLoading ? <LoaderCircle className="size-4 animate-spin" /> : 'Send'}
             </button>
           </div>
+          {testQuery.data ? <ResultDisplay data={testQuery.data} reset={testQuery.reset} /> : null}
 
           {securities.length > 0 && (
             <SecurityTabs
@@ -283,7 +284,6 @@ export default function PlaygroundClient({
             </SecurityTabs>
           )}
           <FormBody body={body} parameters={parameters} />
-          {testQuery.data ? <ResultDisplay data={testQuery.data} reset={testQuery.reset} /> : null}
         </form>
       </SchemaProvider>
     </StfProvider>
@@ -698,22 +698,18 @@ function DefaultResultDisplay({ data, reset }: { data: FetchResult; reset: () =>
   const { shikiOptions } = useApiContext();
 
   return (
-    <div className="flex flex-col gap-3 p-3">
+    <div className="flex flex-col gap-3 mt-2 px-3 py-2 border-y bg-fd-secondary text-fd-secondary-foreground">
       <div className="flex justify-between items-center">
-        <div className="inline-flex items-center gap-1.5 text-sm font-medium text-fd-foreground">
+        <div className="inline-flex items-center gap-1.5 text-sm font-medium">
           <statusInfo.icon className={cn('size-4', statusInfo.color)} />
           {statusInfo.description}
         </div>
         <button
           type="button"
-          className={cn(
-            buttonVariants({ size: 'icon-xs' }),
-            'p-0 text-fd-muted-foreground hover:text-fd-accent-foreground [&_svg]:size-3.5',
-          )}
+          className={cn(buttonVariants({ size: 'sm', variant: 'outline' }))}
           onClick={() => reset()}
-          aria-label="Dismiss response"
         >
-          <X />
+          Close
         </button>
       </div>
       <p className="text-sm text-fd-muted-foreground">{data.status}</p>
