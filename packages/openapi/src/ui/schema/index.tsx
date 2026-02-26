@@ -21,6 +21,12 @@ export interface InfoTag {
   value: string;
 }
 
+export interface SchemaDataObjectProperty {
+  name: string;
+  $type: string;
+  required: boolean;
+}
+
 export type SchemaData = FieldBase &
   (
     | {
@@ -28,11 +34,7 @@ export type SchemaData = FieldBase &
       }
     | {
         type: 'object';
-        props: {
-          name: string;
-          $type: string;
-          required: boolean;
-        }[];
+        props: SchemaDataObjectProperty[];
       }
     | {
         type: 'array';
