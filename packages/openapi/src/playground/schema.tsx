@@ -1,10 +1,11 @@
 import { Ajv2020 } from 'ajv/dist/2020';
 import { createContext, ReactNode, use, useMemo } from 'react';
-import { getDefaultValue } from '@/playground/get-default-values';
-import type { ParsedSchema } from '@/utils/schema';
+import type { ParsedSchema, ResolvedSchema } from '@/utils/schema';
 import { mergeAllOf } from '@/utils/merge-schema';
 import { FieldKey, useDataEngine, useFieldValue, useNamespace } from '@fumari/stf';
 import { stringifyFieldKey } from '@fumari/stf/lib/utils';
+import { sample } from 'openapi-sampler';
+import { FormatFlags, schemaToString } from '@/utils/schema-to-string';
 
 interface SchemaContextType extends SchemaScope {
   references: Record<string, ParsedSchema>;
@@ -96,6 +97,7 @@ export function useFieldInfo(
 } {
   const { ajv } = use(SchemaContext)!;
   const engine = useDataEngine();
+  const { generateDefault } = useSchemaUtils();
   const fieldData = useNamespace({
     namespace: `field-info:${depth}:${stringifyFieldKey(fieldName)}`,
     initial(): FieldInfo {
@@ -155,22 +157,42 @@ export function useFieldInfo(
         valueSchema = { ...schema, type: updated.selectedType };
       }
 
-      engine.update(fieldName, getDefaultValue(valueSchema));
+      engine.update(fieldName, generateDefault(valueSchema));
     },
   };
 }
 
-/**
- * Resolve `$ref` in the schema, **not recursive**.
- */
-export function useResolvedSchema(schema: ParsedSchema): Exclude<ParsedSchema, boolean> {
+export function useSchemaUtils() {
   const { references } = use(SchemaContext)!;
 
-  return useMemo(() => {
+  function resolve(schema: ParsedSchema): Exclude<ParsedSchema, boolean> {
     if (typeof schema === 'boolean') return anyFields;
-    if (schema.$ref) return fallbackAny(references[schema.$ref]);
+    let ref = schema.$ref;
+    if (ref) {
+      // use swallow resolution as it is already preprocessed in `playground/index.tsx`
+      const prefix = '#/';
+      if (ref.startsWith(prefix)) ref = ref.slice(prefix.length);
+      if (ref in references) return fallbackAny(references[ref]);
+    }
     return schema;
-  }, [references, schema]);
+  }
+
+  return {
+    generateDefault(schema: ParsedSchema): unknown {
+      return sample(
+        schema as never,
+        { skipNonRequired: true, skipReadOnly: true, quiet: true },
+        references,
+      );
+    },
+    /**
+     * Resolve `$ref` in the schema, **not recursive**.
+     */
+    resolve,
+    schemaToString(value: ResolvedSchema, flags?: FormatFlags) {
+      return schemaToString(value, (s) => ({ dereferenced: resolve(s), raw: s }), flags);
+    },
+  };
 }
 
 export function fallbackAny(schema: ParsedSchema): Exclude<ParsedSchema, boolean> {

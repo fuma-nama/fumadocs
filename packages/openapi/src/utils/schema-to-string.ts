@@ -1,4 +1,4 @@
-import { type ResolvedSchema } from '@/utils/schema';
+import type { ParsedSchema, ResolvedSchema } from '@/utils/schema';
 import type { ProcessedDocument } from '@/utils/process-document';
 
 export enum FormatFlags {
@@ -6,11 +6,27 @@ export enum FormatFlags {
   UseAlias = 1 << 0,
 }
 
+type Resolver = (schema: ResolvedSchema) => {
+  dereferenced: ResolvedSchema;
+  raw?: Exclude<ParsedSchema, boolean>;
+};
+
 export function schemaToString(
   value: ResolvedSchema,
-  ctx?: ProcessedDocument,
+  _resolver?: ProcessedDocument | Resolver,
   flags: FormatFlags = FormatFlags.None,
 ): string {
+  const resolver: Resolver =
+    typeof _resolver === 'function'
+      ? _resolver
+      : (schema) => {
+          const ref = _resolver?.getRawRef(schema);
+
+          return {
+            dereferenced: schema,
+            raw: ref ? { $ref: ref } : undefined,
+          };
+        };
   function union(union: readonly ResolvedSchema[], sep: string, flags: FormatFlags) {
     const members = new Set();
     let nullable = false;
@@ -30,13 +46,16 @@ export function schemaToString(
   }
 
   function run(schema: ResolvedSchema, flags: FormatFlags): string {
+    const resolved = resolver(schema);
+    schema = resolved.dereferenced;
+
     if (schema === true) return 'any';
     else if (schema === false) return 'never';
 
     if ((flags & FormatFlags.UseAlias) === FormatFlags.UseAlias) {
       if (schema.title) return schema.title;
 
-      const ref = ctx?.getRawRef(schema)?.split('/');
+      const ref = resolved.raw?.$ref?.split('/');
       if (ref && ref.length > 0) return ref[ref.length - 1];
     }
 

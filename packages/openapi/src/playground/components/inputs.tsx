@@ -10,11 +10,10 @@ import {
   SelectValue,
 } from '@/ui/components/select';
 import { Input, labelVariants } from '@/ui/components/input';
-import { getDefaultValue } from '../get-default-values';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { FormatFlags, schemaToString } from '@/utils/schema-to-string';
-import { anyFields, useFieldInfo, useResolvedSchema, useSchemaScope } from '@/playground/schema';
+import { FormatFlags } from '@/utils/schema-to-string';
+import { anyFields, useFieldInfo, useSchemaUtils, useSchemaScope } from '@/playground/schema';
 import type { ParsedSchema } from '@/utils/schema';
 import { stringifyFieldKey } from '@fumari/stf/lib/utils';
 import { cva } from 'class-variance-authority';
@@ -37,16 +36,20 @@ export function ObjectInput({
   field: Exclude<ParsedSchema, boolean>;
   fieldName: FieldKey;
 } & ComponentProps<'div'>) {
-  const field = useResolvedSchema(_field);
-  const { patternProperties = {}, additionalProperties } = field;
+  const { resolve, generateDefault } = useSchemaUtils();
+  const field = resolve(_field);
   const schemaPropKeys = field.properties ? Object.keys(field.properties) : [];
-  const isLazy = field['x-playground-lazy'] ?? schemaPropKeys.length > 100;
-  const isDynamic = Object.keys(patternProperties).length > 0 || additionalProperties !== undefined;
+  const {
+    patternProperties = {},
+    additionalProperties,
+    'x-playground-lazy': isLazy = schemaPropKeys.length > 100,
+  } = field;
+  const isDynamic = Object.keys(patternProperties).length > 0 || additionalProperties;
 
   const [nextName, setNextName] = useState('');
   const { properties, onAppend, onDelete, _objectKeys } = useObject(fieldName, {
     lazy: isLazy,
-    defaultValue: () => getDefaultValue(field) as object,
+    defaultValue: () => generateDefault(field) as object,
     properties: field.properties ?? {},
     fallback: additionalProperties,
     patternProperties: patternProperties,
@@ -296,7 +299,8 @@ export function FieldSet({
   collapsible?: boolean;
 }) {
   const { readOnly, writeOnly } = useSchemaScope();
-  const field = useResolvedSchema(_field);
+  const { resolve, generateDefault, schemaToString } = useSchemaUtils();
+  const field = resolve(_field);
   const [show, setShow] = useState(!collapsible);
   const { info, updateInfo } = useFieldInfo(fieldName, field, depth);
   const id = stringifyFieldKey(fieldName);
@@ -321,7 +325,7 @@ export function FieldSet({
         type="button"
         className={cn(labelVariants(), 'inline-flex items-center gap-1 font-mono me-auto')}
         onClick={() => {
-          dataEngine.init(fieldName, getDefaultValue(schema));
+          dataEngine.init(fieldName, generateDefault(schema));
           setShow((prev) => !prev);
         }}
       >
@@ -381,7 +385,7 @@ export function FieldSet({
               >
                 {union.map((item, i) => (
                   <option key={i} value={i} className="bg-fd-popover text-fd-popover-foreground">
-                    {schemaToString(item, undefined, FormatFlags.UseAlias)}
+                    {schemaToString(item, FormatFlags.UseAlias)}
                   </option>
                 ))}
               </select>
@@ -510,9 +514,8 @@ function ArrayInput({
   items: ParsedSchema;
 } & ComponentProps<'div'>) {
   const name = fieldName.at(-1) ?? '';
-  const { items, insertItem, removeItem } = useArray(fieldName, {
-    defaultValue: [],
-  });
+  const { generateDefault } = useSchemaUtils();
+  const { items, insertItem, removeItem } = useArray(fieldName);
 
   return (
     <div {...props} className={cn('flex flex-col gap-2', props.className)}>
@@ -554,7 +557,7 @@ function ArrayInput({
           }),
         )}
         onClick={() => {
-          insertItem(getDefaultValue(itemSchema));
+          insertItem(generateDefault(itemSchema));
         }}
       >
         <Plus className="size-4" />

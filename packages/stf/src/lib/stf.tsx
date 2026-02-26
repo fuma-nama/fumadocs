@@ -51,8 +51,9 @@ export function useArray(
   options: { defaultValue?: DefaultValue<unknown[]> } = {},
 ) {
   const engine = useDataEngine();
+  const { defaultValue } = options;
   const [items] = useFieldValue(field, {
-    defaultValue: options.defaultValue,
+    defaultValue,
     compute(value) {
       const items: ArrayItemInfo[] = [];
       if (!Array.isArray(value)) return items;
@@ -74,8 +75,8 @@ export function useArray(
     items,
     insertItem(itemValue?: unknown) {
       const value = engine.get(field);
-
-      engine.update(field, Array.isArray(value) ? [...value, itemValue] : [itemValue]);
+      const idx = Array.isArray(value) ? value.length : 0;
+      engine.init([...field, idx], itemValue);
     },
     removeItem(index: number) {
       engine.delete([...field, index]);

@@ -27,7 +27,7 @@ import { ChevronDown, LoaderCircle } from 'lucide-react';
 import { encodeRequestData } from '@/requests/media/encode';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from '@/utils/cn';
-import { SchemaProvider, SchemaScope, useResolvedSchema } from '@/playground/schema';
+import { SchemaProvider, SchemaScope, useSchemaUtils } from '@/playground/schema';
 import {
   Select,
   SelectContent,
@@ -424,7 +424,7 @@ function FormBody({ parameters = [], body }: Pick<PlaygroundClientProps, 'parame
 }
 
 function BodyInput({ field: _field }: { field: ParsedSchema }) {
-  const field = useResolvedSchema(_field);
+  const field = useSchemaUtils().resolve(_field);
   const [isJson, setIsJson] = useState(false);
 
   if (field.format === 'binary') return <FieldSet field={field} fieldName={['body']} isRequired />;

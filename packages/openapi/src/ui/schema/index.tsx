@@ -308,7 +308,7 @@ export function generateSchemaUI(
         });
       }
 
-      if (additionalProperties !== undefined && isVisible(additionalProperties)) {
+      if (additionalProperties && isVisible(additionalProperties)) {
         const $type = getSchemaId(additionalProperties);
         scanRefs($type, additionalProperties);
 
