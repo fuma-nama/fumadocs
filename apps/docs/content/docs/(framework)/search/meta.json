@@ -1,4 +1,4 @@
 {
   "$schema": "../../../../.source/json-schema/docs.meta.json",
-  "pages": ["orama", "..."]
+  "pages": ["orama", "...", "custom"]
 }

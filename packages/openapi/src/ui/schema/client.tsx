@@ -3,22 +3,25 @@ import {
   createContext,
   Fragment,
   type ReactNode,
+  Suspense,
   use,
   useCallback,
+  useDeferredValue,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from 'fumadocs-ui/components/tabs';
-import type { InfoTag, SchemaUIGeneratedData } from '@/ui/schema';
+import type { InfoTag, SchemaDataObjectProperty, SchemaUIGeneratedData } from '@/ui/schema';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from 'fumadocs-ui/components/ui/collapsible';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, FilterIcon } from 'lucide-react';
 import { Badge } from '@/ui/components/method-label';
 import { Popover, PopoverContent, PopoverTrigger } from 'fumadocs-ui/components/ui/popover';
 import { cn } from '@/utils/cn';
@@ -124,15 +127,8 @@ function SchemaUIProperty({
       $ref: $type,
     });
   } else if (schema.type === 'object' && schema.props.length > 0) {
-    if (variant === 'expand')
-      return schema.props.map((prop) => (
-        <SchemaUIProperty
-          key={prop.name}
-          name={prop.name}
-          $type={prop.$type}
-          overrides={{ required: prop.required }}
-        />
-      ));
+    if (variant === 'expand') return <SearchProps props={schema.props} />;
+
     type = renderRef({
       pathName: name,
       $ref: $type,
@@ -182,6 +178,49 @@ function SchemaUIProperty({
   );
 }
 
+function SearchProps({ props }: { props: SchemaDataObjectProperty[] }) {
+  const [search, setSearch] = useState('');
+  const deferredValue = useDeferredValue(search);
+
+  return (
+    <>
+      <div className="flex items-center border my-2 rounded-md bg-fd-secondary text-fd-secondary-foreground transition-colors shadow-sm focus-within:ring-2 focus-within:ring-fd-ring">
+        <FilterIcon className="text-fd-muted-foreground ms-2 size-3.5" />
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Filter Properties"
+          className="text-sm ps-2 py-2 flex-1 outline-none placeholder:text-fd-muted-foreground"
+        />
+      </div>
+      <Suspense>
+        <SearchPropsContent search={deferredValue} props={props} />
+      </Suspense>
+    </>
+  );
+}
+
+function SearchPropsContent({
+  search,
+  props,
+}: {
+  search: string;
+  props: SchemaDataObjectProperty[];
+}) {
+  search = search.trim().toLowerCase();
+  const filtered =
+    search.length > 0 ? props.filter((prop) => prop.name.toLowerCase().includes(search)) : props;
+
+  return filtered.map((prop) => (
+    <SchemaUIProperty
+      key={prop.name}
+      name={prop.name}
+      $type={prop.$type}
+      overrides={{ required: prop.required }}
+    />
+  ));
+}
+
 function InfoTag({ tag }: { tag: InfoTag }) {
   const ref = useRef<HTMLElement>(null);
   const [isTruncated, setTruncated] = useState(false);
@@ -217,18 +256,27 @@ function InfoTag({ tag }: { tag: InfoTag }) {
   );
 }
 
-function SchemaUIPopover({ initialPath }: { initialPath: { name: ReactNode; $ref?: string }[] }) {
+interface PathItemType {
+  name: ReactNode;
+  $ref?: string;
+  scrollTop?: number;
+}
+
+function SchemaUIPopover({ initialPath }: { initialPath: PathItemType[] }) {
   const [path, setPath] = useState(initialPath);
   const ref = useRef<HTMLDivElement>(null);
-  const last = path.findLast((item) => item.$ref !== undefined);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    const last = path[0];
     const element = ref.current;
-    if (!element || !element.parentElement) return;
+    if (!element || !last || !element.parentElement) return;
 
-    // reset scroll
-    element.parentElement.scrollTop = 0;
-  }, [last?.$ref]);
+    // recover scroll
+    element.parentElement.scrollTop = last?.scrollTop ?? 0;
+    return () => {
+      last.scrollTop = element.parentElement!.scrollTop;
+    };
+  }, [path]);
 
   const context: PopoverContextType = useMemo(
     () => ({
@@ -244,11 +292,11 @@ function SchemaUIPopover({ initialPath }: { initialPath: { name: ReactNode; $ref
     [],
   );
 
-  if (!last) return;
+  const currentRef = path.findLast((item) => item.$ref !== undefined);
 
   return (
     <>
-      <div className="sticky top-0 flex flex-row flex-wrap items-center text-sm font-medium font-mono bg-fd-muted p-2">
+      <div className="sticky top-0 flex flex-row flex-wrap items-center text-sm font-medium font-mono bg-fd-popover px-2 py-1.5 border-b">
         {path.map((item, i) => {
           const isDuplicated = path.some((other, j) => j < i && other.$ref === item.$ref);
           const className = cn(
@@ -272,9 +320,11 @@ function SchemaUIPopover({ initialPath }: { initialPath: { name: ReactNode; $ref
         })}
       </div>
       <PopoverContext value={context}>
-        <div ref={ref} className="px-2">
-          <SchemaUIProperty name="" $type={last.$ref!} variant="expand" />
-        </div>
+        {currentRef?.$ref && (
+          <div ref={ref} className="px-2">
+            <SchemaUIProperty name="" $type={currentRef.$ref} variant="expand" />
+          </div>
+        )}
       </PopoverContext>
     </>
   );
@@ -334,7 +384,7 @@ function RootPopoverTrigger({
   const ref = useCallback((element: HTMLDivElement | null) => {
     if (!element || element.style.getPropertyValue('--initial-height')) return;
 
-    element.style.setProperty('--initial-height', `${element.clientHeight}px`);
+    element.style.setProperty('--initial-height', `${element.clientHeight + 2}px`);
   }, []);
 
   return (

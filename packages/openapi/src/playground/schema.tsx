@@ -1,10 +1,11 @@
 import { Ajv2020 } from 'ajv/dist/2020';
 import { createContext, ReactNode, use, useMemo } from 'react';
-import { getDefaultValue } from '@/playground/get-default-values';
-import type { ParsedSchema } from '@/utils/schema';
+import type { ParsedSchema, ResolvedSchema } from '@/utils/schema';
 import { mergeAllOf } from '@/utils/merge-schema';
-import { FieldKey, useDataEngine, useFieldValue } from '@fumari/stf';
+import { FieldKey, useDataEngine, useFieldValue, useNamespace } from '@fumari/stf';
 import { stringifyFieldKey } from '@fumari/stf/lib/utils';
+import { sample } from 'openapi-sampler';
+import { FormatFlags, schemaToString } from '@/utils/schema-to-string';
 
 interface SchemaContextType extends SchemaScope {
   references: Record<string, ParsedSchema>;
@@ -89,15 +90,17 @@ export function useSchemaScope(): SchemaScope {
 export function useFieldInfo(
   fieldName: FieldKey,
   schema: Exclude<ParsedSchema, boolean>,
+  depth = 0,
 ): {
   info: FieldInfo;
   updateInfo: (value: Partial<FieldInfo>) => void;
 } {
   const { ajv } = use(SchemaContext)!;
   const engine = useDataEngine();
-  const fieldData = engine.namespace(
-    `field-info:${stringifyFieldKey(fieldName)}`,
-    (): FieldInfo => {
+  const { generateDefault } = useSchemaUtils();
+  const fieldData = useNamespace({
+    namespace: `field-info:${depth}:${stringifyFieldKey(fieldName)}`,
+    initial(): FieldInfo {
       const value = engine.get(fieldName);
       const out: FieldInfo = {
         oneOf: -1,
@@ -116,12 +119,8 @@ export function useFieldInfo(
 
         out.selectedType =
           types.find((type) => {
-            schema.type = type;
-            const match = ajv.validate(schema, value);
-            schema.type = types;
-
-            return match;
-          }) ?? types.at(0);
+            return ajv.validate({ ...schema, type }, value);
+          }) ?? types[0];
       }
 
       if (schema.allOf) {
@@ -132,10 +131,9 @@ export function useFieldInfo(
             merged,
           };
       }
-
       return out;
     },
-  );
+  });
   const [info, setInfo] = useFieldValue<FieldInfo>([], {
     stf: fieldData,
   });
@@ -159,22 +157,42 @@ export function useFieldInfo(
         valueSchema = { ...schema, type: updated.selectedType };
       }
 
-      engine.update(fieldName, getDefaultValue(valueSchema));
+      engine.update(fieldName, generateDefault(valueSchema));
     },
   };
 }
 
-/**
- * Resolve `$ref` in the schema, **not recursive**.
- */
-export function useResolvedSchema(schema: ParsedSchema): Exclude<ParsedSchema, boolean> {
+export function useSchemaUtils() {
   const { references } = use(SchemaContext)!;
 
-  return useMemo(() => {
+  function resolve(schema: ParsedSchema): Exclude<ParsedSchema, boolean> {
     if (typeof schema === 'boolean') return anyFields;
-    if (schema.$ref) return fallbackAny(references[schema.$ref]);
+    let ref = schema.$ref;
+    if (ref) {
+      // use swallow resolution as it is already preprocessed in `playground/index.tsx`
+      const prefix = '#/';
+      if (ref.startsWith(prefix)) ref = ref.slice(prefix.length);
+      if (ref in references) return fallbackAny(references[ref]);
+    }
     return schema;
-  }, [references, schema]);
+  }
+
+  return {
+    generateDefault(schema: ParsedSchema): unknown {
+      return sample(
+        schema as never,
+        { skipNonRequired: true, skipReadOnly: true, quiet: true },
+        references,
+      );
+    },
+    /**
+     * Resolve `$ref` in the schema, **not recursive**.
+     */
+    resolve,
+    schemaToString(value: ResolvedSchema, flags?: FormatFlags) {
+      return schemaToString(value, (s) => ({ dereferenced: resolve(s), raw: s }), flags);
+    },
+  };
 }
 
 export function fallbackAny(schema: ParsedSchema): Exclude<ParsedSchema, boolean> {

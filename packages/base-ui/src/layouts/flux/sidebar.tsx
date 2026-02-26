@@ -1,7 +1,7 @@
 'use client';
 import * as Base from '@/components/sidebar/base';
 import { cn } from '@/utils/cn';
-import { type ComponentProps, useEffect, useEffectEvent, useRef } from 'react';
+import { type ComponentProps, useEffect, useEffectEvent, useRef, useState } from 'react';
 import { cva } from 'class-variance-authority';
 import { createPageTreeRenderer } from '@/components/sidebar/page-tree';
 import { createLinkItemRenderer } from '@/components/sidebar/link-item';
@@ -61,6 +61,7 @@ export function SidebarContent({
   ...props
 }: ComponentProps<'aside'>) {
   const ref = useRef<HTMLElement>(null);
+  const [blockScroll, setBlockScroll] = useState(false);
   const { open, setOpen } = Base.useSidebar();
 
   const listener = useEffectEvent((e: KeyboardEvent) => {
@@ -76,8 +77,10 @@ export function SidebarContent({
     };
   }, []);
 
+  if (open && !blockScroll) setBlockScroll(true);
+
   return (
-    <RemoveScroll enabled={open}>
+    <RemoveScroll enabled={blockScroll}>
       <motion.div
         className={cn(
           'fixed inset-0 py-10 z-30 backdrop-blur-md bg-fd-background/60',
@@ -97,9 +100,12 @@ export function SidebarContent({
         onClick={() => {
           setOpen(false);
         }}
+        onAnimationComplete={(definition) => {
+          if (definition === 'hide') setBlockScroll(false);
+        }}
       >
         <motion.div
-          className="absolute overflow-y-auto pr-(--removed-body-scroll-bar-size,0) [scrollbar-width:none] py-16 inset-0 bottom-26 overscroll-contain mask-[linear-gradient(to_bottom,transparent,white_calc(var(--spacing)*14),white_calc(100%-var(--spacing)*14),transparent)] lg:text-sm"
+          className="absolute top-0 min-h-0 inset-x-0 bottom-26 overflow-y-auto fd-scroll-container pr-(--removed-body-scroll-bar-size,0) py-16 mask-[linear-gradient(to_bottom,transparent,white_--spacing(14),white_calc(100%---spacing(14)),transparent)] lg:text-sm"
           variants={{
             show: {
               y: 0,
@@ -111,11 +117,8 @@ export function SidebarContent({
             },
           }}
           transition={{
-            duration: 0.3,
+            duration: 0.4,
             ease: [0.16, 1, 0.3, 1],
-            opacity: {
-              duration: 0.1,
-            },
           }}
         >
           <motion.aside

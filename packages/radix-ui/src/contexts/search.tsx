@@ -69,12 +69,14 @@ export interface SearchProviderProps {
 
 interface SearchContextType {
   enabled: boolean;
+  open: boolean;
   hotKey: HotKey[];
   setOpenSearch: (value: boolean) => void;
 }
 
 const SearchContext = createContext<SearchContextType>({
   enabled: false,
+  open: false,
   hotKey: [],
   setOpenSearch: () => undefined,
 });
@@ -132,10 +134,11 @@ export function SearchProvider({
       value={useMemo(
         () => ({
           enabled: true,
+          open: isOpen ?? false,
           hotKey,
           setOpenSearch: setIsOpen,
         }),
-        [hotKey],
+        [isOpen, hotKey],
       )}
     >
       {isOpen !== undefined && (

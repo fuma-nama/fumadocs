@@ -1,5 +1,29 @@
 # @fuma-docs/openapi
 
+## 10.3.12
+
+### Patch Changes
+
+- fcdaa9f: better schema popover UI
+- a6e3b58: improve default value generation
+- 41ac2c6: fix `$ref` handling in stringifier
+- b01665e: support lazy field reveal on playground
+- 9013195: fix typescript schema generation
+- Updated dependencies [38bd784]
+- Updated dependencies [bd8c33a]
+  - fumadocs-ui@16.6.6
+  - @fumari/stf@1.0.2
+  - fumadocs-core@16.6.6
+
+## 10.3.11
+
+### Patch Changes
+
+- 5a9b381: Pass `isRequired` to `FieldSet` for parameter enum fields in playground, fixing required enum parameters incorrectly showing an "Unset" option.
+- 21e60c3: support cleaning namespace information
+- Updated dependencies [21e60c3]
+  - @fumari/stf@1.0.1
+
 ## 10.3.10
 
 ### Patch Changes

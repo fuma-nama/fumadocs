@@ -1,6 +1,13 @@
 import { type ComponentProps, type HTMLAttributes, type ReactNode, useState } from 'react';
 import { ChevronRight, Plus, Trash2, X } from 'lucide-react';
-import { FieldKey, useArray, useDataEngine, useFieldValue, useObject } from '@fumari/stf';
+import {
+  FieldKey,
+  useArray,
+  useDataEngine,
+  useFieldValue,
+  useNamespace,
+  useObject,
+} from '@fumari/stf';
 import {
   Select,
   SelectContent,
@@ -226,30 +233,30 @@ export function FieldInput({
   );
 }
 
-export function FieldSet(
-  props: HTMLAttributes<HTMLElement> & {
-    isRequired?: boolean;
-    name?: ReactNode;
-    field: TypeNode;
-    fieldName: FieldKey;
+export function FieldSet({
+  depth = 0,
+  field: _field,
+  fieldName,
+  toolbar,
+  name,
+  isRequired,
+  slotType,
+  collapsible = true,
+  ...rest
+}: HTMLAttributes<HTMLElement> & {
+  isRequired?: boolean;
+  name?: ReactNode;
+  field: TypeNode;
+  fieldName: FieldKey;
+  depth?: number;
 
-    slotType?: ReactNode;
-    toolbar?: ReactNode;
-    collapsible?: boolean;
-  },
-) {
-  const {
-    field,
-    fieldName,
-    toolbar,
-    name,
-    isRequired,
-    slotType,
-    collapsible = true,
-    ...rest
-  } = props;
+  slotType?: ReactNode;
+  toolbar?: ReactNode;
+  collapsible?: boolean;
+}) {
+  const field = _field.type === 'intersection' ? _field.intersection : _field;
   const [show, setShow] = useState(!collapsible);
-  const { info, updateInfo } = useFieldInfo(fieldName, field);
+  const { info, updateInfo } = useFieldInfo(fieldName, field, depth);
   const id = stringifyFieldKey(fieldName);
   const dataEngine = useDataEngine();
   const onShow = () => {
@@ -267,6 +274,7 @@ export function FieldSet(
       <FieldSet
         {...rest}
         name={name}
+        depth={depth + 1}
         fieldName={fieldName}
         isRequired={isRequired}
         field={selectedType}
@@ -295,10 +303,6 @@ export function FieldSet(
         }
       />
     );
-  }
-
-  if (field.type === 'intersection') {
-    return <FieldSet {...props} field={field.intersection} />;
   }
 
   if (field.type === 'object') {
@@ -465,14 +469,15 @@ interface FieldInfo {
 function useFieldInfo(
   fieldName: FieldKey,
   node: TypeNode,
+  depth = 0,
 ): {
   info: FieldInfo;
   updateInfo: (value: Partial<FieldInfo>) => void;
 } {
   const engine = useDataEngine();
-  const fieldData = engine.namespace(
-    `field-info:${stringifyFieldKey(fieldName)}`,
-    (): FieldInfo => {
+  const fieldData = useNamespace({
+    namespace: `field-info:${depth}:${stringifyFieldKey(fieldName)}`,
+    initial(): FieldInfo {
       const out: FieldInfo = {
         unionIndex: 0,
       };
@@ -485,7 +490,7 @@ function useFieldInfo(
 
       return out;
     },
-  );
+  });
   const [info, setInfo] = useFieldValue<FieldInfo>([], {
     stf: fieldData,
   });

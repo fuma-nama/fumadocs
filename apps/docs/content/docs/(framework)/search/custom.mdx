@@ -1,0 +1,66 @@
+---
+title: Custom Search
+description: For other search solutions.
+---
+
+## Overview
+
+Fumadocs is very flexible, you can integrate custom search with Fumadocs easily.
+
+### Search Indexes
+
+With Fumadocs MDX, the generated search indexes are exposed during runtime.
+
+To expose search indexes statically, create a function to generate records.
+
+```ts title="lib/export-search-indexes.ts"
+import { source } from '@/lib/source';
+import type { StructuredData } from 'fumadocs-core/mdx-plugins';
+
+export interface DocumentRecord {
+  title: string;
+  description?: string;
+  url: string;
+  structured: StructuredData;
+}
+
+export async function exportSearchIndexes() {
+  const results: DocumentRecord[] = [];
+
+  for (const page of source.getPages()) {
+    results.push({
+      structured: page.data.structuredData,
+      url: page.url,
+      title: page.data.title,
+      description: page.data.description,
+    });
+  }
+
+  return results;
+}
+```
+
+Export it via static route handler.
+
+<include cwd>content/docs/headless/search/.static-route-example.mdx</include>
+
+Finally, the exported records can be accessed at:
+
+```ts
+import * as fs from 'node:fs';
+import type { DocumentRecord } from '@/lib/export-search-indexes';
+
+// the path of pre-rendered `static.json`, choose one according to your React framework
+const filePath = {
+  next: '.next/server/app/static.json.body',
+  'tanstack-start': '.output/public/static.json',
+  'react-router': 'build/client/static.json',
+  waku: 'dist/public/static.json',
+}['next'];
+
+const content = fs.readFileSync(filePath);
+
+const records = JSON.parse(content.toString()) as DocumentRecord[];
+```
+
+You can use the `structuredData` to generate accurate search indexes.

@@ -10,11 +10,10 @@ import {
   SelectValue,
 } from '@/ui/components/select';
 import { Input, labelVariants } from '@/ui/components/input';
-import { getDefaultValue } from '../get-default-values';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { FormatFlags, schemaToString } from '@/utils/schema-to-string';
-import { anyFields, useFieldInfo, useResolvedSchema, useSchemaScope } from '@/playground/schema';
+import { FormatFlags } from '@/utils/schema-to-string';
+import { anyFields, useFieldInfo, useSchemaUtils, useSchemaScope } from '@/playground/schema';
 import type { ParsedSchema } from '@/utils/schema';
 import { stringifyFieldKey } from '@fumari/stf/lib/utils';
 import { cva } from 'class-variance-authority';
@@ -37,18 +36,50 @@ export function ObjectInput({
   field: Exclude<ParsedSchema, boolean>;
   fieldName: FieldKey;
 } & ComponentProps<'div'>) {
-  const field = useResolvedSchema(_field);
+  const { resolve, generateDefault } = useSchemaUtils();
+  const field = resolve(_field);
+  const schemaPropKeys = field.properties ? Object.keys(field.properties) : [];
+  const {
+    patternProperties = {},
+    additionalProperties,
+    'x-playground-lazy': isLazy = schemaPropKeys.length > 100,
+  } = field;
+  const isDynamic = Object.keys(patternProperties).length > 0 || additionalProperties;
+
   const [nextName, setNextName] = useState('');
-  const { properties, onAppend, onDelete } = useObject(fieldName, {
-    defaultValue: () => getDefaultValue(field) as object,
+  const { properties, onAppend, onDelete, _objectKeys } = useObject(fieldName, {
+    lazy: isLazy,
+    defaultValue: () => generateDefault(field) as object,
     properties: field.properties ?? {},
-    fallback: field.additionalProperties,
-    patternProperties: field.patternProperties,
+    fallback: additionalProperties,
+    patternProperties: patternProperties,
   });
 
-  const isDynamic = field.patternProperties ?? field.additionalProperties;
+  const hiddenProperties = isLazy ? schemaPropKeys.filter((key) => !_objectKeys.includes(key)) : [];
+
   return (
-    <div {...props} className={cn('grid grid-cols-1 gap-4 @md:grid-cols-2', props.className)}>
+    <div
+      {...props}
+      className={cn(
+        'grid grid-cols-1 gap-4 @md:grid-cols-2 *:data-[collapsible=true]:order-last',
+        props.className,
+      )}
+    >
+      {isLazy && hiddenProperties.length > 0 && (
+        <Select value="" onValueChange={onAppend}>
+          <SelectTrigger className="col-span-full">
+            <SelectValue placeholder="Show Property" />
+          </SelectTrigger>
+          <SelectContent>
+            {hiddenProperties.map((key) => (
+              <SelectItem key={key} value={key}>
+                {key}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
+
       {properties.map((child) => {
         let toolbar: ReactNode = null;
         if (child.kind === 'pattern' || child.kind === 'fallback') {
@@ -83,7 +114,7 @@ export function ObjectInput({
         );
       })}
       {isDynamic && (
-        <div className="flex gap-2 col-span-full">
+        <div className="flex gap-2 order-last col-span-full">
           <Input
             value={nextName}
             placeholder="Enter Property Name"
@@ -190,9 +221,12 @@ export function FieldInput({
     const idx = field.enum.indexOf(value);
 
     return (
-      <Select value={String(idx)} onValueChange={(v) => setValue(field.enum![Number(v)])}>
+      <Select
+        value={idx === -1 && isRequired ? '' : String(idx)}
+        onValueChange={(v) => setValue(field.enum![Number(v)])}
+      >
         <SelectTrigger id={id} {...props}>
-          <SelectValue />
+          <SelectValue placeholder="Select" />
         </SelectTrigger>
         <SelectContent>
           {field.enum.map((item, i) => (
@@ -265,9 +299,10 @@ export function FieldSet({
   collapsible?: boolean;
 }) {
   const { readOnly, writeOnly } = useSchemaScope();
-  const field = useResolvedSchema(_field);
+  const { resolve, generateDefault, schemaToString } = useSchemaUtils();
+  const field = resolve(_field);
   const [show, setShow] = useState(!collapsible);
-  const { info, updateInfo } = useFieldInfo(fieldName, field);
+  const { info, updateInfo } = useFieldInfo(fieldName, field, depth);
   const id = stringifyFieldKey(fieldName);
   const dataEngine = useDataEngine();
   const [isDefined] = useFieldValue(fieldName, {
@@ -290,7 +325,7 @@ export function FieldSet({
         type="button"
         className={cn(labelVariants(), 'inline-flex items-center gap-1 font-mono me-auto')}
         onClick={() => {
-          dataEngine.init(fieldName, getDefaultValue(schema));
+          dataEngine.init(fieldName, generateDefault(schema));
           setShow((prev) => !prev);
         }}
       >
@@ -335,6 +370,7 @@ export function FieldSet({
         field={union[info.oneOf]}
         depth={depth + 1}
         slotType={showSelect ? false : slotType}
+        collapsible={collapsible}
         toolbar={
           <>
             {showSelect && (
@@ -349,7 +385,7 @@ export function FieldSet({
               >
                 {union.map((item, i) => (
                   <option key={i} value={i} className="bg-fd-popover text-fd-popover-foreground">
-                    {schemaToString(item, undefined, FormatFlags.UseAlias)}
+                    {schemaToString(item, FormatFlags.UseAlias)}
                   </option>
                 ))}
               </select>
@@ -374,6 +410,7 @@ export function FieldSet({
           ...field,
           type: info.selectedType,
         }}
+        collapsible={collapsible}
         depth={depth + 1}
         slotType={showSelect ? false : slotType}
         toolbar={
@@ -411,6 +448,7 @@ export function FieldSet({
     return (
       <fieldset
         {...props}
+        data-collapsible={collapsible}
         className={cn('flex flex-col gap-1.5 col-span-full @container', props.className)}
       >
         <div className={fieldLabelVariants()}>
@@ -432,7 +470,11 @@ export function FieldSet({
 
   if (field.type === 'array') {
     return (
-      <fieldset {...props} className={cn('flex flex-col gap-1.5 col-span-full', props.className)}>
+      <fieldset
+        {...props}
+        data-collapsible={collapsible}
+        className={cn('flex flex-col gap-1.5 col-span-full', props.className)}
+      >
         <div className={fieldLabelVariants()}>
           {renderLabelTrigger()}
           {slotType ?? <FieldLabelType>{schemaToString(field)}</FieldLabelType>}
@@ -472,9 +514,8 @@ function ArrayInput({
   items: ParsedSchema;
 } & ComponentProps<'div'>) {
   const name = fieldName.at(-1) ?? '';
-  const { items, insertItem, removeItem } = useArray(fieldName, {
-    defaultValue: [],
-  });
+  const { generateDefault } = useSchemaUtils();
+  const { items, insertItem, removeItem } = useArray(fieldName);
 
   return (
     <div {...props} className={cn('flex flex-col gap-2', props.className)}>
@@ -516,7 +557,7 @@ function ArrayInput({
           }),
         )}
         onClick={() => {
-          insertItem(getDefaultValue(itemSchema));
+          insertItem(generateDefault(itemSchema));
         }}
       >
         <Plus className="size-4" />

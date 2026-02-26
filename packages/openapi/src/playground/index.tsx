@@ -80,7 +80,7 @@ function writeReferences(
     ctx.references[id] = out;
 
     return {
-      $ref: id,
+      $ref: `#/${id}`,
     };
   }
 
