@@ -254,7 +254,12 @@ function ObjectSearchContent({
   firstItemRef.current = filtered.length > 0 ? filtered[0] : null;
 
   if (filtered.length === 0)
-    return <p className="text-fd-muted-foreground text-sm">No props matching {`"${rawSearch}"`}</p>;
+    return (
+      <p className="text-fd-muted-foreground text-sm px-2">
+        No property matching{' '}
+        <span className="text-fd-foreground font-medium">{`"${rawSearch}"`}</span>
+      </p>
+    );
 
   return filtered.map((prop) => (
     <SchemaUIProperty

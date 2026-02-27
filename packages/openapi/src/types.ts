@@ -32,8 +32,12 @@ export type MethodInformation = NoReference<OperationObject> & {
   'x-exclusiveCodeSample'?: string;
 };
 
+type RequireKeys<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
+
 export interface RenderContext
-  extends Pick<OpenAPIOptions, 'proxyUrl'>, Omit<CreateAPIPageOptions, 'renderMarkdown'> {
+  extends
+    Pick<OpenAPIOptions, 'proxyUrl'>,
+    RequireKeys<CreateAPIPageOptions, 'generateTypeScriptDefinitions' | 'renderMarkdown'> {
   slugger: Slugger;
 
   /**
@@ -48,7 +52,6 @@ export interface RenderContext
     text: string,
     props?: HTMLAttributes<HTMLHeadingElement>,
   ) => ReactNode;
-  renderMarkdown: (text: string) => ReactNode;
   renderCodeBlock: (lang: string, code: string) => ReactNode;
 }
 

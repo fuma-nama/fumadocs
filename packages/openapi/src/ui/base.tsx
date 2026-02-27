@@ -23,6 +23,7 @@ import type { ExampleRequestItem } from './operation/request-tabs';
 import type { ResolvedShikiConfig } from 'fumadocs-core/highlight/config';
 import { APIPage, type ApiPageProps, type OperationItem, type WebhookItem } from './api-page';
 import type { CodeUsageGeneratorRegistry, InlineCodeUsageGenerator } from '@/requests/generators';
+import type { JSONSchema } from 'json-schema-typed';
 
 export interface CreateAPIPageOptions {
   /**
@@ -32,6 +33,7 @@ export interface CreateAPIPageOptions {
    *
    * @param method - the operation object
    * @param statusCode - status code
+   * @deprecated use `generateTypeScriptDefinitions` instead.
    */
   generateTypeScriptSchema?:
     | ((
@@ -41,6 +43,23 @@ export interface CreateAPIPageOptions {
         ctx: RenderContext,
       ) => Awaitable<string | undefined>)
     | false;
+
+  /**
+   * Generate TypeScript definitions from JSON schema.
+   *
+   * Pass `false` to disable it.
+   */
+  generateTypeScriptDefinitions?: (
+    schema: JSONSchema,
+    ctx: RenderContext & {
+      operation: NoReference<MethodInformation>;
+      /** @deprecated */
+      _internal_legacy?: {
+        statusCode: string;
+        contentType: string;
+      };
+    },
+  ) => Awaitable<string | undefined>;
 
   /**
    * Generate example code usage for endpoints.
@@ -53,7 +72,7 @@ export interface CreateAPIPageOptions {
   generateCodeSamples?: (method: MethodInformation) => Awaitable<InlineCodeUsageGenerator[]>;
 
   shiki: ResolvedShikiConfig;
-  renderMarkdown?: (md: string) => Awaitable<ReactNode>;
+  renderMarkdown?: (md: string) => ReactNode;
   shikiOptions?: DistributiveOmit<CoreHighlightOptions, 'config' | 'lang' | 'components'>;
 
   /**
@@ -235,6 +254,15 @@ export function createAPIPage(
             {text}
           </Heading>
         );
+      },
+      generateTypeScriptDefinitions(schema, ctx) {
+        const { generateTypeScriptSchema, generateTypeScriptDefinitions } = options;
+        if (generateTypeScriptSchema && ctx._internal_legacy) {
+          const { statusCode, contentType } = ctx._internal_legacy;
+          return generateTypeScriptSchema(ctx.operation, statusCode, contentType, ctx);
+        }
+
+        return generateTypeScriptDefinitions?.(schema, ctx);
       },
       async renderMarkdown(text) {
         if (options.renderMarkdown) return options.renderMarkdown(text);
