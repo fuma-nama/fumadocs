@@ -1,7 +1,7 @@
 import { createProxy } from '@/server/proxy';
 import { processDocument, type ProcessedDocument } from '@/utils/process-document';
-import type { CodeUsageGenerator } from '@/ui/operation/usage-tabs';
 import type { Document } from '@/types';
+import type { InlineCodeUsageGenerator } from '@/requests/generators';
 
 /**
  * schema id -> file path, URL, or downloaded schema object
@@ -78,8 +78,11 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
   };
 }
 
-export function createCodeSample<T>(options: Partial<CodeUsageGenerator<T>>): CodeUsageGenerator {
-  const { lang = 'unknown', id = lang, ...rest } = options as Partial<CodeUsageGenerator>;
-
-  return { id, lang, ...rest };
+/**
+ * @deprecated
+ */
+export function createCodeSample<T>(
+  options: InlineCodeUsageGenerator<T>,
+): InlineCodeUsageGenerator<T> {
+  return options;
 }

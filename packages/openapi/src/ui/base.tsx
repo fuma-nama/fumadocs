@@ -8,7 +8,6 @@ import type { FC, ReactNode } from 'react';
 import { highlight, type CoreHighlightOptions } from 'fumadocs-core/highlight/core';
 import type { OpenAPIServer } from '@/server';
 import type { APIPageClientOptions } from './client';
-import type { CodeUsageGenerator } from './operation/usage-tabs';
 import { Heading } from 'fumadocs-ui/components/heading';
 import { createRehypeCode } from 'fumadocs-core/mdx-plugins/rehype-code.core';
 import { remarkGfm } from 'fumadocs-core/mdx-plugins/remark-gfm';
@@ -23,6 +22,8 @@ import type { ResponseTab } from './operation/response-tabs';
 import type { ExampleRequestItem } from './operation/request-tabs';
 import type { ResolvedShikiConfig } from 'fumadocs-core/highlight/config';
 import { APIPage, type ApiPageProps, type OperationItem, type WebhookItem } from './api-page';
+import type { CodeUsageGeneratorRegistry, InlineCodeUsageGenerator } from '@/requests/generators';
+import type { JSONSchema } from 'json-schema-typed';
 
 export interface CreateAPIPageOptions {
   /**
@@ -32,6 +33,7 @@ export interface CreateAPIPageOptions {
    *
    * @param method - the operation object
    * @param statusCode - status code
+   * @deprecated use `generateTypeScriptDefinitions` instead.
    */
   generateTypeScriptSchema?:
     | ((
@@ -43,12 +45,34 @@ export interface CreateAPIPageOptions {
     | false;
 
   /**
+   * Generate TypeScript definitions from JSON schema.
+   *
+   * Pass `false` to disable it.
+   */
+  generateTypeScriptDefinitions?: (
+    schema: JSONSchema,
+    ctx: RenderContext & {
+      operation: NoReference<MethodInformation>;
+      /** @deprecated */
+      _internal_legacy?: {
+        statusCode: string;
+        contentType: string;
+      };
+    },
+  ) => Awaitable<string | undefined>;
+
+  /**
    * Generate example code usage for endpoints.
    */
-  generateCodeSamples?: (method: MethodInformation) => Awaitable<CodeUsageGenerator[]>;
+  codeUsages?: CodeUsageGeneratorRegistry;
+
+  /**
+   * Generate example code usage for endpoints.
+   */
+  generateCodeSamples?: (method: MethodInformation) => Awaitable<InlineCodeUsageGenerator[]>;
 
   shiki: ResolvedShikiConfig;
-  renderMarkdown?: (md: string) => Awaitable<ReactNode>;
+  renderMarkdown?: (md: string) => ReactNode;
   shikiOptions?: DistributiveOmit<CoreHighlightOptions, 'config' | 'lang' | 'components'>;
 
   /**
@@ -90,7 +114,7 @@ export interface CreateAPIPageOptions {
      * @param generators - codegens for API example usages
      */
     renderAPIExampleUsageTabs?: (
-      generators: CodeUsageGenerator[],
+      generators: CodeUsageGeneratorRegistry,
       ctx: RenderContext,
     ) => Awaitable<ReactNode>;
 
@@ -230,6 +254,15 @@ export function createAPIPage(
             {text}
           </Heading>
         );
+      },
+      generateTypeScriptDefinitions(schema, ctx) {
+        const { generateTypeScriptSchema, generateTypeScriptDefinitions } = options;
+        if (generateTypeScriptSchema && ctx._internal_legacy) {
+          const { statusCode, contentType } = ctx._internal_legacy;
+          return generateTypeScriptSchema(ctx.operation, statusCode, contentType, ctx);
+        }
+
+        return generateTypeScriptDefinitions?.(schema, ctx);
       },
       async renderMarkdown(text) {
         if (options.renderMarkdown) return options.renderMarkdown(text);

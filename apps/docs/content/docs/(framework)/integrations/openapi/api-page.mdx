@@ -29,40 +29,58 @@ export default defineClientConfig({
 });
 ```
 
-Installing the types packages is highly recommended for advanced customisations:
+### Generate Code Usages
 
-```package-install
-openapi-types json-schema-typed -D
+Generate code usage examples for each API endpoint.
+
+```ts title="lib/openapi/code-usage.ts" twoslash
+import {
+  createCodeUsageGeneratorRegistry,
+  type CodeUsageGenerator,
+} from 'fumadocs-openapi/requests/generators';
+import { registerDefault } from 'fumadocs-openapi/requests/generators/all';
+
+export const codeUsages = createCodeUsageGeneratorRegistry();
+
+// include defaults
+registerDefault(codeUsages);
+
+// add custom generators
+codeUsages.add('custom-id', {
+  label: 'My Example',
+  lang: 'js',
+  generate(url, data, { mediaAdapters }) {
+    // request data
+    console.log(url, data);
+
+    return 'const response = "hello world";';
+  },
+});
 ```
 
-It gives you a higher level of type-safety.
+Pass the registry to both client & server configs:
 
-### Generate Code Samples
-
-Generate custom code samples for each API endpoint.
-
-```ts
+```tsx tab="components/api-page.tsx"
 import { openapi } from '@/lib/openapi';
 import { createAPIPage } from 'fumadocs-openapi/ui';
+import { codeUsages } from '@/lib/openapi/code-usage';
+import client from './api-page.client';
 
 export const APIPage = createAPIPage(openapi, {
-  generateCodeSamples(endpoint) {
-    return [
-      {
-        id: 'js',
-        lang: 'js',
-        label: 'JavaScript SDK',
-        source: "console.log('hello')",
-      },
-      // or to disable the default code samples
-      // set `source: false`
-      {
-        id: 'curl',
-        lang: 'bash',
-        source: false,
-      },
-    ];
-  },
+  client,
+  // [!code ++]
+  codeUsages,
+});
+```
+
+```tsx tab="components/api-page.client.tsx"
+'use client';
+import { defineClientConfig } from 'fumadocs-openapi/ui/client';
+import { codeUsages } from '@/lib/openapi/code-usage';
+
+export default defineClientConfig({
+  // [!code ++]
+  codeUsages,
 });
 ```
 
@@ -89,7 +107,7 @@ You can create a media adapter to support other media types in API pages, a medi
 
 Put your media adapters in a separate file.
 
-```ts title="lib/media-adapters.ts" twoslash
+```ts title="lib/openapi/media.ts" twoslash
 import type { MediaAdapter } from 'fumadocs-openapi';
 
 export const mediaAdapters: Record<string, MediaAdapter> = {
@@ -123,7 +141,7 @@ Pass the adapter to both client & server configs.
 ```tsx tab="components/api-page.tsx"
 import { openapi } from '@/lib/openapi';
 import { createAPIPage } from 'fumadocs-openapi/ui';
-import { mediaAdapters } from '@/lib/media-adapters';
+import { mediaAdapters } from '@/lib/openapi/media';
 import client from './api-page.client';
 
 export const APIPage = createAPIPage(openapi, {
@@ -136,7 +154,7 @@ export const APIPage = createAPIPage(openapi, {
 ```tsx tab="components/api-page.client.tsx"
 'use client';
 import { defineClientConfig } from 'fumadocs-openapi/ui/client';
-import { mediaAdapters } from '@/lib/media-adapters';
+import { mediaAdapters } from '@/lib/openapi/media';
 
 export default defineClientConfig({
   // [!code ++]

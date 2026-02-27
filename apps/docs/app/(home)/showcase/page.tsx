@@ -15,7 +15,6 @@ import Design from './design.png';
 import Link from 'fumadocs-core/link';
 import MixSpace from '@/public/showcases/mix-space.png';
 import TurboStarter from '@/public/showcases/turbostarter.png';
-import Nemo from '@/public/showcases/nemo.png';
 import HexaasBlog from '@/public/showcases/hexaas-blog.png';
 
 export const metadata = createMetadata({
@@ -113,6 +112,16 @@ const showcases: ShowcaseObject[] = [
     image: '/showcases/hero-ui.png',
     name: 'Hero UI',
     url: 'https://v3.heroui.com',
+  },
+  {
+    image: '/showcases/documenso.png',
+    name: 'Documenso',
+    url: 'https://docs.documenso.com',
+  },
+  {
+    image: '/showcases/mrscraper.png',
+    name: 'MrScraper',
+    url: 'https://docs.mrscraper.com',
   },
   {
     image: '/showcases/hiro.png',
@@ -249,11 +258,6 @@ const showcases: ShowcaseObject[] = [
   {
     name: 'Llamaindex',
     url: 'https://ts.llamaindex.ai',
-  },
-  {
-    image: Nemo,
-    name: 'Nemo',
-    url: 'https://nemo.zanreal.com',
   },
   {
     name: 'Clojure Stack Lite',

@@ -26,26 +26,6 @@
     filter: blur(0);
   }
 
-  &[data-line-numbers] .twoslash-meta-line {
-    padding-left: calc(var(--padding-left) + 7 * var(--spacing));
-  }
-
-  &[data-line-numbers] .line {
-    counter-increment: line;
-    padding-left: calc(var(--padding-left) + 7 * var(--spacing));
-  }
-
-  &[data-line-numbers] .line::after {
-    position: absolute;
-    content: counter(line);
-    color: color-mix(
-      in oklab,
-      var(--fd-counter-color, var(--color-fd-muted-foreground)) 60%,
-      transparent
-    );
-    @apply top-0 left-4;
-  }
-
   .diff::before {
     position: absolute;
     left: calc(var(--spacing) * 1.5);
@@ -75,13 +55,38 @@
   .highlighted {
     --fd-counter-color: var(--color-fd-primary);
     padding-left: calc(var(--padding-left) - 2px);
+    @apply bg-fd-primary/10;
+  }
 
-    @apply border-l-2 border-fd-primary/50 bg-fd-primary/10;
+  .highlighted::after {
+    position: absolute;
+    content: '';
+    @apply inset-y-0 left-0 border-l-2 border-fd-primary/50;
   }
 
   .highlighted-word {
     padding: 1px;
     @apply border -my-px border-fd-primary/30 bg-fd-primary/10 rounded-md font-medium;
+  }
+
+  &[data-line-numbers] .twoslash-meta-line {
+    padding-left: calc(var(--padding-left) + 7 * var(--spacing));
+  }
+
+  &[data-line-numbers] .line {
+    counter-increment: line;
+    padding-left: calc(var(--padding-left) + 7 * var(--spacing));
+  }
+
+  &[data-line-numbers] .line::after {
+    position: absolute;
+    content: counter(line);
+    color: color-mix(
+      in oklab,
+      var(--fd-counter-color, var(--color-fd-muted-foreground)) 60%,
+      transparent
+    );
+    @apply inset-y-0 left-0 w-7 text-right;
   }
 }
 

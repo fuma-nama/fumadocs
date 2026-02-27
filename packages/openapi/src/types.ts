@@ -5,8 +5,8 @@ import type { ProcessedDocument } from '@/utils/process-document';
 import type { MediaAdapter } from '@/requests/media/adapter';
 import type { OpenAPIOptions } from '@/server';
 import type { CreateAPIPageOptions } from './ui/base';
-import type { CodeUsageGenerator } from './ui/operation/usage-tabs';
 import type { HTMLAttributes, ReactNode } from 'react';
+import type { InlineCodeUsageGenerator } from './requests/generators';
 
 export type Document = OpenAPIV3_2.Document;
 export type OperationObject = OpenAPIV3_2.OperationObject;
@@ -27,13 +27,17 @@ export type RequestBodyObject = OpenAPIV3_2.RequestBodyObject;
 
 export type MethodInformation = NoReference<OperationObject> & {
   method: string;
-  'x-codeSamples'?: Omit<CodeUsageGenerator, 'id'>[];
+  'x-codeSamples'?: InlineCodeUsageGenerator[];
   'x-selectedCodeSample'?: string;
   'x-exclusiveCodeSample'?: string;
 };
 
+type RequireKeys<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
+
 export interface RenderContext
-  extends Pick<OpenAPIOptions, 'proxyUrl'>, Omit<CreateAPIPageOptions, 'renderMarkdown'> {
+  extends
+    Pick<OpenAPIOptions, 'proxyUrl'>,
+    RequireKeys<CreateAPIPageOptions, 'generateTypeScriptDefinitions' | 'renderMarkdown'> {
   slugger: Slugger;
 
   /**
@@ -48,7 +52,6 @@ export interface RenderContext
     text: string,
     props?: HTMLAttributes<HTMLHeadingElement>,
   ) => ReactNode;
-  renderMarkdown: (text: string) => ReactNode;
   renderCodeBlock: (lang: string, code: string) => ReactNode;
 }
 

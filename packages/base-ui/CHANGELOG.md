@@ -1,5 +1,12 @@
 # @fumadocs/base-ui
 
+## 16.6.7
+
+### Patch Changes
+
+- 8faa2e4: fix codeblock highlight styles
+  - fumadocs-core@16.6.7
+
 ## 16.6.6
 
 ### Patch Changes

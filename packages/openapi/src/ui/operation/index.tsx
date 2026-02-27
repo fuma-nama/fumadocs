@@ -10,7 +10,7 @@ import { idToTitle } from '@/utils/id-to-title';
 import { Schema } from '../schema';
 import { UsageTabs } from '@/ui/operation/usage-tabs';
 import { Badge, MethodLabel } from '@/ui/components/method-label';
-import { CopyResponseTypeScript, SelectTab, SelectTabs, SelectTabTrigger } from './client';
+import { CopyTypeScriptPanel, SelectTab, SelectTabs, SelectTabTrigger } from './client';
 import {
   AccordionContent,
   AccordionHeader,
@@ -90,13 +90,21 @@ export async function Operation({
           )}
         </div>
         {body.description && ctx.renderMarkdown(body.description)}
-        {contentTypes.map(([type, content]) => {
+        {contentTypes.map(async ([type, content]) => {
           if (!isMediaTypeSupported(type, ctx.mediaAdapters)) {
             throw new Error(`Media type ${type} is not supported (in ${path})`);
           }
 
+          const ts = content.schema
+            ? await ctx.generateTypeScriptDefinitions(content.schema, {
+                operation: method,
+                ...ctx,
+              })
+            : undefined;
+
           return (
             <SelectTab key={type} value={type}>
+              {ts && <CopyTypeScriptPanel name="request body" code={ts} className="mt-4" />}
               <Schema
                 client={{
                   name: 'body',
@@ -380,15 +388,20 @@ async function ResponseAccordion({
         )}
         {contentTypes.map(async ([type, resType]) => {
           const schema = resType.schema;
-          let ts: string | undefined;
-
-          if (ctx.generateTypeScriptSchema) {
-            ts = await ctx.generateTypeScriptSchema(operation, status, type, ctx);
-          }
+          const ts = schema
+            ? await ctx.generateTypeScriptDefinitions(schema, {
+                operation,
+                _internal_legacy: {
+                  statusCode: status,
+                  contentType: type,
+                },
+                ...ctx,
+              })
+            : undefined;
 
           return (
             <SelectTab key={type} value={type} className="mb-2">
-              {ts && <CopyResponseTypeScript code={ts} />}
+              {ts && <CopyTypeScriptPanel name="response body" code={ts} />}
               {schema && (
                 <div className="border px-3 py-2 rounded-lg">
                   <Schema

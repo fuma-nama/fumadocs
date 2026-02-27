@@ -1,5 +1,15 @@
 # @fuma-docs/openapi
 
+## 10.3.13
+
+### Patch Changes
+
+- 825f401: enable Typescript definition generation for request body
+- 146bb4b: Support code usage generator registry
+- Updated dependencies [8faa2e4]
+  - fumadocs-ui@16.6.7
+  - fumadocs-core@16.6.7
+
 ## 10.3.12
 
 ### Patch Changes

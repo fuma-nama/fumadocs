@@ -41,7 +41,6 @@ export async function processDocument(input: string | Document): Promise<Process
   const document = await bundle(input, {
     plugins: [fetchUrls(), readFiles()],
     treeShake: true,
-    urlMap: true,
     hooks: {
       onResolveError(node) {
         throw new Error(`Failed to resolve ${node.$ref}`);
