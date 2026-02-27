@@ -5,8 +5,8 @@ import type { ProcessedDocument } from '@/utils/process-document';
 import type { MediaAdapter } from '@/requests/media/adapter';
 import type { OpenAPIOptions } from '@/server';
 import type { CreateAPIPageOptions } from './ui/base';
-import type { CodeUsageGenerator } from './ui/operation/usage-tabs';
 import type { HTMLAttributes, ReactNode } from 'react';
+import type { InlineCodeUsageGenerator } from './requests/generators';
 
 export type Document = OpenAPIV3_2.Document;
 export type OperationObject = OpenAPIV3_2.OperationObject;
@@ -27,7 +27,7 @@ export type RequestBodyObject = OpenAPIV3_2.RequestBodyObject;
 
 export type MethodInformation = NoReference<OperationObject> & {
   method: string;
-  'x-codeSamples'?: Omit<CodeUsageGenerator, 'id'>[];
+  'x-codeSamples'?: InlineCodeUsageGenerator[];
   'x-selectedCodeSample'?: string;
   'x-exclusiveCodeSample'?: string;
 };

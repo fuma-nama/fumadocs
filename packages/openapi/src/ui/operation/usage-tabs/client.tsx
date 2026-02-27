@@ -10,9 +10,9 @@ import {
 } from '@/ui/components/select';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock.core';
 import { useState, useEffect, useMemo, createContext, ReactNode, useRef, use } from 'react';
-import type { CodeUsageGenerator } from '.';
 import type { ExampleRequestItem } from '../request-tabs';
 import type { RawRequestData, RequestData } from '@/requests/types';
+import type { CodeUsageGenerator } from '@/requests/generators';
 
 export type ExampleUpdateListener = (data: RawRequestData, encoded: RequestData) => void;
 
@@ -130,8 +130,12 @@ export function UsageTabsSelector() {
   );
 }
 
-export function UsageTab(sample: CodeUsageGenerator) {
-  const { shikiOptions, mediaAdapters } = useApiContext();
+export function UsageTab({
+  id,
+  lang,
+  _client,
+}: Pick<CodeUsageGenerator, 'lang' | '_client'> & { id: string }) {
+  const { shikiOptions, mediaAdapters, codeUsages } = useApiContext();
   const {
     examples,
     example: selectedExampleId,
@@ -154,26 +158,33 @@ export function UsageTab(sample: CodeUsageGenerator) {
   }, [addListener, removeListener]);
 
   const code = useMemo(() => {
-    if (!sample.source || !data) return;
-    if (typeof sample.source === 'string') return sample.source;
-
-    return sample.source(
-      joinURL(
-        withBase(
-          server ? resolveServerUrl(server.url, server.variables) : '/',
-          typeof window !== 'undefined' ? window.location.origin : 'https://loading',
-        ),
-        resolveRequestData(route, data),
+    if (!data) return;
+    const url = joinURL(
+      withBase(
+        server ? resolveServerUrl(server.url, server.variables) : '/',
+        typeof window !== 'undefined' ? window.location.origin : 'https://loading',
       ),
-      data,
-      {
-        server: sample.serverContext,
-        mediaAdapters,
-      },
+      resolveRequestData(route, data),
     );
-  }, [mediaAdapters, sample, server, route, data]);
 
-  if (!code || !sample) return null;
+    if (_client) {
+      const { generate, serverContext } = _client;
+      if (typeof generate === 'string') return generate;
+      return generate(url, data, {
+        mediaAdapters,
+        server: serverContext,
+      });
+    }
 
-  return <DynamicCodeBlock lang={sample.lang} code={code} options={shikiOptions} />;
+    const codegen = codeUsages.get(id);
+    if (!codegen) return;
+    return codegen.generate(url, data, {
+      mediaAdapters,
+      server: null,
+    });
+  }, [data, server, route, _client, codeUsages, id, mediaAdapters]);
+
+  if (!code) return null;
+
+  return <DynamicCodeBlock lang={lang} code={code} options={shikiOptions} />;
 }

@@ -1,40 +1,42 @@
-'use client';
 import { ident } from '@/requests/string-utils';
-import type { SampleGenerator } from '@/requests/types';
+import type { CodeUsageGenerator } from '@/requests/generators';
 import { resolveMediaAdapter } from '@/requests/media/adapter';
 
-export const generator: SampleGenerator = (url, data, { mediaAdapters }) => {
-  const imports = ['fmt', 'net/http', 'io/ioutil'];
-  const headers = new Map<string, string>();
-  const variables = new Map<string, string>();
-  variables.set('url', JSON.stringify(url));
+export const go: CodeUsageGenerator = {
+  label: 'Go',
+  lang: 'go',
+  generate(url, data, { mediaAdapters }) {
+    const imports = ['fmt', 'net/http', 'io/ioutil'];
+    const headers = new Map<string, string>();
+    const variables = new Map<string, string>();
+    variables.set('url', JSON.stringify(url));
 
-  for (const header in data.header) {
-    headers.set(header, JSON.stringify(data.header[header].value));
-  }
+    for (const header in data.header) {
+      headers.set(header, JSON.stringify(data.header[header].value));
+    }
 
-  const cookies = Object.entries(data.cookie);
-  if (cookies.length > 0) {
-    headers.set(
-      'Cookie',
-      JSON.stringify(cookies.map(([k, param]) => `${k}=${param.value}`).join('; ')),
-    );
-  }
+    const cookies = Object.entries(data.cookie);
+    if (cookies.length > 0) {
+      headers.set(
+        'Cookie',
+        JSON.stringify(cookies.map(([k, param]) => `${k}=${param.value}`).join('; ')),
+      );
+    }
 
-  let body: string | undefined;
+    let body: string | undefined;
 
-  if (data.body && data.bodyMediaType) {
-    const adapter = resolveMediaAdapter(data.bodyMediaType, mediaAdapters);
-    headers.set('Content-Type', `"${data.bodyMediaType}"`);
-    body = adapter?.generateExample(data as { body: unknown }, {
-      lang: 'go',
-      addImport(from) {
-        imports.push(from);
-      },
-    });
-  }
+    if (data.body && data.bodyMediaType) {
+      const adapter = resolveMediaAdapter(data.bodyMediaType, mediaAdapters);
+      headers.set('Content-Type', `"${data.bodyMediaType}"`);
+      body = adapter?.generateExample(data as { body: unknown }, {
+        lang: 'go',
+        addImport(from) {
+          imports.push(from);
+        },
+      });
+    }
 
-  return `package main
+    return `package main
 
 import (
 ${ident(imports.map((v) => `"${v}"`).join('\n'))}
@@ -58,4 +60,5 @@ ${ident(
   fmt.Println(res)
   fmt.Println(string(body))
 }`;
+  },
 };

@@ -1,14 +1,4 @@
-import type { MediaAdapter } from '@/requests/media/adapter';
 import type { EncodedParameter, EncodedParameterMultiple } from '@/requests/media/encode';
-
-export type SampleGenerator<ServerContext = unknown> = (
-  url: string,
-  data: RequestData,
-  context: {
-    mediaAdapters: Record<string, MediaAdapter>;
-    server: ServerContext;
-  },
-) => string;
 
 export interface RawRequestData {
   method: string;

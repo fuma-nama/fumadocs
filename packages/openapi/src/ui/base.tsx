@@ -8,7 +8,6 @@ import type { FC, ReactNode } from 'react';
 import { highlight, type CoreHighlightOptions } from 'fumadocs-core/highlight/core';
 import type { OpenAPIServer } from '@/server';
 import type { APIPageClientOptions } from './client';
-import type { CodeUsageGenerator } from './operation/usage-tabs';
 import { Heading } from 'fumadocs-ui/components/heading';
 import { createRehypeCode } from 'fumadocs-core/mdx-plugins/rehype-code.core';
 import { remarkGfm } from 'fumadocs-core/mdx-plugins/remark-gfm';
@@ -23,6 +22,7 @@ import type { ResponseTab } from './operation/response-tabs';
 import type { ExampleRequestItem } from './operation/request-tabs';
 import type { ResolvedShikiConfig } from 'fumadocs-core/highlight/config';
 import { APIPage, type ApiPageProps, type OperationItem, type WebhookItem } from './api-page';
+import type { CodeUsageGeneratorRegistry, InlineCodeUsageGenerator } from '@/requests/generators';
 
 export interface CreateAPIPageOptions {
   /**
@@ -45,7 +45,12 @@ export interface CreateAPIPageOptions {
   /**
    * Generate example code usage for endpoints.
    */
-  generateCodeSamples?: (method: MethodInformation) => Awaitable<CodeUsageGenerator[]>;
+  codeUsages?: CodeUsageGeneratorRegistry;
+
+  /**
+   * Generate example code usage for endpoints.
+   */
+  generateCodeSamples?: (method: MethodInformation) => Awaitable<InlineCodeUsageGenerator[]>;
 
   shiki: ResolvedShikiConfig;
   renderMarkdown?: (md: string) => Awaitable<ReactNode>;
@@ -90,7 +95,7 @@ export interface CreateAPIPageOptions {
      * @param generators - codegens for API example usages
      */
     renderAPIExampleUsageTabs?: (
-      generators: CodeUsageGenerator[],
+      generators: CodeUsageGeneratorRegistry,
       ctx: RenderContext,
     ) => Awaitable<ReactNode>;
 

@@ -14,6 +14,11 @@ import { defaultAdapters, type MediaAdapter } from '@/requests/media/adapter';
 import type { NoReference } from '@/utils/schema';
 import { useStorageKey } from '../client/storage-key';
 import type { APIPageClientOptions } from '../client';
+import {
+  type CodeUsageGeneratorRegistry,
+  createCodeUsageGeneratorRegistry,
+} from '@/requests/generators';
+import { registerDefault } from '@/requests/generators/all';
 
 interface InheritFromContext extends Pick<RenderContext, 'shikiOptions'> {
   client: APIPageClientOptions;
@@ -47,6 +52,7 @@ export interface SelectedServer {
 
 interface ApiContextType extends InheritFromContext {
   mediaAdapters: Record<string, MediaAdapter>;
+  codeUsages: CodeUsageGeneratorRegistry;
 }
 
 interface ServerSelectType {
@@ -83,17 +89,25 @@ export function ApiProvider({
 }: ApiProviderProps & { children: ReactNode }) {
   return (
     <ApiContext
-      value={useMemo(
-        () => ({
+      value={useMemo(() => {
+        let codeUsages: CodeUsageGeneratorRegistry;
+        if (client.codeUsages) {
+          codeUsages = createCodeUsageGeneratorRegistry(client.codeUsages);
+        } else {
+          codeUsages = createCodeUsageGeneratorRegistry();
+          registerDefault(codeUsages);
+        }
+
+        return {
           shikiOptions,
           client,
+          codeUsages,
           mediaAdapters: {
             ...defaultAdapters,
             ...client.mediaAdapters,
           },
-        }),
-        [client, shikiOptions],
-      )}
+        };
+      }, [client, shikiOptions])}
     >
       {children}
     </ApiContext>

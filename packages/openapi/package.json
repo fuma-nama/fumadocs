@@ -16,41 +16,27 @@
   ],
   "type": "module",
   "main": "./dist/index.js",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    },
-    "./css/*": "./css/*",
-    "./ui": {
-      "types": "./dist/ui/index.d.ts",
-      "import": "./dist/ui/index.js"
-    },
-    "./ui/base": {
-      "types": "./dist/ui/base.d.ts",
-      "import": "./dist/ui/base.js"
-    },
-    "./ui/client": {
-      "types": "./dist/ui/client/index.d.ts",
-      "import": "./dist/ui/client/index.js"
-    },
-    "./playground": {
-      "types": "./dist/playground/index.d.ts",
-      "import": "./dist/playground/index.js"
-    },
-    "./playground/client": {
-      "types": "./dist/playground/client.d.ts",
-      "import": "./dist/playground/client.js"
-    },
-    "./scalar": {
-      "types": "./dist/scalar/index.d.ts",
-      "import": "./dist/scalar/index.js"
-    },
-    "./server": {
-      "types": "./dist/server/index.d.ts",
-      "import": "./dist/server/index.js"
-    }
+    ".": "./dist/index.js",
+    "./playground": "./dist/playground/index.js",
+    "./playground/client": "./dist/playground/client.js",
+    "./requests/generators": "./dist/requests/generators/index.js",
+    "./requests/generators/all": "./dist/requests/generators/all.js",
+    "./requests/generators/csharp": "./dist/requests/generators/csharp.js",
+    "./requests/generators/curl": "./dist/requests/generators/curl.js",
+    "./requests/generators/go": "./dist/requests/generators/go.js",
+    "./requests/generators/java": "./dist/requests/generators/java.js",
+    "./requests/generators/javascript": "./dist/requests/generators/javascript.js",
+    "./requests/generators/python": "./dist/requests/generators/python.js",
+    "./scalar": "./dist/scalar/index.js",
+    "./server": "./dist/server/index.js",
+    "./ui": "./dist/ui/index.js",
+    "./ui/base": "./dist/ui/base.js",
+    "./ui/client": "./dist/ui/client/index.js",
+    "./package.json": "./package.json",
+    "./css/*": "./css/*"
   },
   "publishConfig": {
     "access": "public"

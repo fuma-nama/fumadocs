@@ -12,6 +12,7 @@ export default defineConfig({
     './src/playground/{index,client}.tsx',
     './src/scalar/index.tsx',
     './src/server/index.ts',
+    './src/requests/generators/*.ts',
   ],
   fixedExtension: false,
   unbundle: true,
@@ -22,4 +23,12 @@ export default defineConfig({
     await compileInline();
   },
   inlineOnly: [],
+  exports: {
+    enabled: true,
+    customExports(v) {
+      v['./css/*'] = './css/*';
+      return v;
+    },
+    legacy: true,
+  },
 });

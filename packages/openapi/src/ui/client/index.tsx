@@ -3,6 +3,7 @@ import type { PlaygroundClientOptions } from '@/playground/client';
 import type { MediaAdapter } from '@/requests/media/adapter';
 import type { FC } from 'react';
 import type { ExampleRequestItem } from '../operation/request-tabs';
+import type { CodeUsageGeneratorRegistry } from '@/requests/generators';
 
 export interface APIPageClientOptions {
   playground?: PlaygroundClientOptions;
@@ -21,6 +22,11 @@ export interface APIPageClientOptions {
    * Support other media types (for client-side serialization)
    */
   mediaAdapters?: Record<string, MediaAdapter>;
+
+  /**
+   * generate code usage examples
+   */
+  codeUsages?: CodeUsageGeneratorRegistry;
 }
 
 export interface OperationClientOptions {
