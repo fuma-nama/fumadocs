@@ -8,6 +8,9 @@ export async function renderContextFrom(input: string): Promise<RenderContext> {
 
   return {
     mediaAdapters: {},
+    generateTypeScriptDefinitions() {
+      return '';
+    },
     shiki: configDefault,
     renderCodeBlock(_lang, code) {
       return code;

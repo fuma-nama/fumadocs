@@ -104,7 +104,7 @@ export async function Operation({
 
           return (
             <SelectTab key={type} value={type}>
-              {ts && <CopyTypeScriptPanel name="request body" code={ts} />}
+              {ts && <CopyTypeScriptPanel name="request body" code={ts} className="mt-4" />}
               <Schema
                 client={{
                   name: 'body',
@@ -388,14 +388,16 @@ async function ResponseAccordion({
         )}
         {contentTypes.map(async ([type, resType]) => {
           const schema = resType.schema;
-          const ts = await ctx.generateTypeScriptDefinitions(operation, {
-            operation,
-            _internal_legacy: {
-              statusCode: status,
-              contentType: type,
-            },
-            ...ctx,
-          });
+          const ts = schema
+            ? await ctx.generateTypeScriptDefinitions(schema, {
+                operation,
+                _internal_legacy: {
+                  statusCode: status,
+                  contentType: type,
+                },
+                ...ctx,
+              })
+            : undefined;
 
           return (
             <SelectTab key={type} value={type} className="mb-2">
