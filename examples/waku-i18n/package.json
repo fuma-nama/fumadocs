@@ -17,12 +17,12 @@
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-server-dom-webpack": "^19.2.4",
-    "waku": "1.0.0-alpha.4"
+    "waku": "1.0.0-alpha.5"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.1",
     "@types/mdx": "^2.0.13",
-    "@types/node": "^25.3.1",
+    "@types/node": "^25.3.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "tailwindcss": "^4.2.1",

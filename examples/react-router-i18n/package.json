@@ -24,7 +24,7 @@
     "@react-router/dev": "^7.13.1",
     "@tailwindcss/vite": "^4.2.1",
     "@types/mdx": "^2.0.13",
-    "@types/node": "^25.3.1",
+    "@types/node": "^25.3.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "react-router-devtools": "^6.2.0",

@@ -141,7 +141,7 @@
     "@fumadocs/cli": "workspace:*",
     "@tailwindcss/cli": "^4.2.1",
     "@types/hast": "^3.0.4",
-    "@types/node": "^25.3.1",
+    "@types/node": "^25.3.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "eslint-config-custom": "workspace:*",
