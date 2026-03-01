@@ -22,61 +22,61 @@ test('test', async () => {
 
   expect(out).toMatchInlineSnapshot(`
     {
-      "$root": "__0",
+      "$root": "#/components/schemas/V1KeysVerifyKeyResponse",
       "refs": {
-        "__0": {
-          "aliasName": "object",
+        "#/components/schemas/V1KeysVerifyKeyResponse": {
+          "aliasName": "V1KeysVerifyKeyResponse",
           "deprecated": undefined,
           "description": undefined,
           "infoTags": [],
           "props": [
             {
-              "$type": "__1",
+              "$type": "__0",
               "name": "keyId",
               "required": false,
             },
             {
-              "$type": "__2",
+              "$type": "__1",
               "name": "valid",
               "required": true,
             },
             {
-              "$type": "__3",
+              "$type": "__2",
               "name": "name",
               "required": false,
             },
             {
-              "$type": "__4",
+              "$type": "__3",
               "name": "ownerId",
               "required": false,
             },
             {
-              "$type": "__5",
+              "$type": "__4",
               "name": "meta",
               "required": false,
             },
             {
-              "$type": "__7",
+              "$type": "__6",
               "name": "expires",
               "required": false,
             },
             {
-              "$type": "__8",
+              "$type": "__7",
               "name": "ratelimit",
               "required": false,
             },
             {
-              "$type": "__12",
+              "$type": "__11",
               "name": "remaining",
               "required": false,
             },
             {
-              "$type": "__13",
+              "$type": "__12",
               "name": "code",
               "required": false,
             },
             {
-              "$type": "__14",
+              "$type": "__13",
               "name": "enabled",
               "required": false,
             },
@@ -84,7 +84,7 @@ test('test', async () => {
           "type": "object",
           "typeName": "object",
         },
-        "__1": {
+        "__0": {
           "aliasName": "string",
           "deprecated": undefined,
           "description": "The id of the key",
@@ -92,15 +92,16 @@ test('test', async () => {
           "type": "primitive",
           "typeName": "string",
         },
-        "__10": {
-          "aliasName": "number",
+        "__1": {
+          "aliasName": "boolean",
           "deprecated": undefined,
-          "description": "Remaining requests after this verification",
+          "description": "Whether the key is valid or not.
+    A key could be invalid for a number of reasons, for example if it has expired, has no more verifications left or if it has been deleted.",
           "infoTags": [],
           "type": "primitive",
-          "typeName": "number",
+          "typeName": "boolean",
         },
-        "__11": {
+        "__10": {
           "aliasName": "number",
           "deprecated": undefined,
           "description": "Unix timestamp in milliseconds when the ratelimit will reset",
@@ -108,7 +109,7 @@ test('test', async () => {
           "type": "primitive",
           "typeName": "number",
         },
-        "__12": {
+        "__11": {
           "aliasName": "number",
           "deprecated": undefined,
           "description": "The number of requests that can be made with this key before it becomes invalid. If this field is null or undefined, the key has no request limit.",
@@ -116,7 +117,7 @@ test('test', async () => {
           "type": "primitive",
           "typeName": "number",
         },
-        "__13": {
+        "__12": {
           "aliasName": "string",
           "deprecated": undefined,
           "description": "If the key is invalid this field will be set to the reason why it is invalid.
@@ -138,7 +139,7 @@ test('test', async () => {
           "type": "primitive",
           "typeName": "string",
         },
-        "__14": {
+        "__13": {
           "aliasName": "boolean",
           "deprecated": undefined,
           "description": "Sets the key to be enabled or disabled. Disabled keys will not verify.",
@@ -147,15 +148,6 @@ test('test', async () => {
           "typeName": "boolean",
         },
         "__2": {
-          "aliasName": "boolean",
-          "deprecated": undefined,
-          "description": "Whether the key is valid or not.
-    A key could be invalid for a number of reasons, for example if it has expired, has no more verifications left or if it has been deleted.",
-          "infoTags": [],
-          "type": "primitive",
-          "typeName": "boolean",
-        },
-        "__3": {
           "aliasName": "string",
           "deprecated": undefined,
           "description": "The name of the key, give keys a name to easily identifiy their purpose",
@@ -163,7 +155,7 @@ test('test', async () => {
           "type": "primitive",
           "typeName": "string",
         },
-        "__4": {
+        "__3": {
           "aliasName": "string",
           "deprecated": undefined,
           "description": "The id of the tenant associated with this key. Use whatever reference you have in your system to identify the tenant. When verifying the key, we will send this field back to you, so you know who is accessing your API.",
@@ -171,14 +163,14 @@ test('test', async () => {
           "type": "primitive",
           "typeName": "string",
         },
-        "__5": {
+        "__4": {
           "aliasName": "object",
           "deprecated": undefined,
           "description": "Any additional metadata you want to store with the key",
           "infoTags": [],
           "props": [
             {
-              "$type": "__6",
+              "$type": "__5",
               "name": "[key: string]",
               "required": false,
             },
@@ -186,7 +178,7 @@ test('test', async () => {
           "type": "object",
           "typeName": "object",
         },
-        "__6": {
+        "__5": {
           "aliasName": "unknown",
           "deprecated": undefined,
           "description": undefined,
@@ -194,7 +186,7 @@ test('test', async () => {
           "type": "primitive",
           "typeName": "unknown",
         },
-        "__7": {
+        "__6": {
           "aliasName": "number",
           "deprecated": undefined,
           "description": "The unix timestamp in milliseconds when the key will expire. If this field is null or undefined, the key is not expiring.",
@@ -202,24 +194,24 @@ test('test', async () => {
           "type": "primitive",
           "typeName": "number",
         },
-        "__8": {
+        "__7": {
           "aliasName": "object",
           "deprecated": undefined,
           "description": "The ratelimit configuration for this key. If this field is null or undefined, the key has no ratelimit.",
           "infoTags": [],
           "props": [
             {
-              "$type": "__9",
+              "$type": "__8",
               "name": "limit",
               "required": true,
             },
             {
-              "$type": "__10",
+              "$type": "__9",
               "name": "remaining",
               "required": true,
             },
             {
-              "$type": "__11",
+              "$type": "__10",
               "name": "reset",
               "required": true,
             },
@@ -227,10 +219,18 @@ test('test', async () => {
           "type": "object",
           "typeName": "object",
         },
-        "__9": {
+        "__8": {
           "aliasName": "number",
           "deprecated": undefined,
           "description": "Maximum number of requests that can be made inside a window",
+          "infoTags": [],
+          "type": "primitive",
+          "typeName": "number",
+        },
+        "__9": {
+          "aliasName": "number",
+          "deprecated": undefined,
+          "description": "Remaining requests after this verification",
           "infoTags": [],
           "type": "primitive",
           "typeName": "number",

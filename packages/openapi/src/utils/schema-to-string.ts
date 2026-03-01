@@ -8,7 +8,7 @@ export enum FormatFlags {
 
 type Resolver = (schema: ResolvedSchema) => {
   dereferenced: ResolvedSchema;
-  raw?: Exclude<ParsedSchema, boolean>;
+  raw?: ParsedSchema;
 };
 
 export function schemaToString(
@@ -20,7 +20,8 @@ export function schemaToString(
     typeof _resolver === 'function'
       ? _resolver
       : (schema) => {
-          const ref = _resolver?.getRawRef(schema);
+          const ref =
+            _resolver && typeof schema === 'object' ? _resolver.getRawRef(schema) : undefined;
 
           return {
             dereferenced: schema,
@@ -55,8 +56,10 @@ export function schemaToString(
     if ((flags & FormatFlags.UseAlias) === FormatFlags.UseAlias) {
       if (schema.title) return schema.title;
 
-      const ref = resolved.raw?.$ref?.split('/');
-      if (ref && ref.length > 0) return ref[ref.length - 1];
+      if (typeof resolved.raw === 'object' && resolved.raw.$ref) {
+        const ref = resolved.raw.$ref.split('/');
+        if (ref.length > 0) return ref[ref.length - 1];
+      }
     }
 
     if (Array.isArray(schema.type)) {

@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/mdx-remote",
-  "version": "1.4.5",
+  "version": "1.4.6",
   "description": "The remote MDX files adapter for Fumadocs",
   "keywords": [
     "Docs",
@@ -45,7 +45,7 @@
   },
   "devDependencies": {
     "@types/mdx": "^2.0.13",
-    "@types/node": "25.3.1",
+    "@types/node": "25.3.3",
     "@types/react": "^19.2.14",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",

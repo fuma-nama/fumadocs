@@ -1,5 +1,14 @@
 # fumadocs-typescript
 
+## 5.1.5
+
+### Patch Changes
+
+- 5453502: use Shiki.js v4
+- Updated dependencies [5453502]
+  - fumadocs-ui@16.6.8
+  - fumadocs-core@16.6.8
+
 ## 5.1.4
 
 ### Patch Changes

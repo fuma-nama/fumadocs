@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/tailwind",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "The Tailwind CSS utils for Fumadocs UI.",
   "keywords": [
     "Docs",
@@ -40,7 +40,7 @@
   "devDependencies": {
     "@tailwindcss/oxide": "^4.2.1",
     "@types/lodash.merge": "^4.6.9",
-    "@types/node": "^25.3.1",
+    "@types/node": "^25.3.3",
     "eslint-config-custom": "workspace:*",
     "lodash.merge": "^4.6.2",
     "tailwindcss": "^4.2.1",

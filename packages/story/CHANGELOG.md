@@ -1,5 +1,14 @@
 # @fumadocs/story
 
+## 0.0.11
+
+### Patch Changes
+
+- 5453502: use Shiki.js v4
+- Updated dependencies [5453502]
+  - fumadocs-ui@16.6.8
+  - @fumari/stf@1.0.3
+
 ## 0.0.10
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-python",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "The built-in Python docgen for Fumadocs",
   "keywords": [
     "Docs",
@@ -49,7 +49,7 @@
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^25.3.1",
+    "@types/node": "^25.3.3",
     "@types/react": "^19.2.14",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",

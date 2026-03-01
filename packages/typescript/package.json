@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-typescript",
-  "version": "5.1.4",
+  "version": "5.1.5",
   "description": "Typescript Integration for Fumadocs",
   "keywords": [
     "Docs",
@@ -52,7 +52,7 @@
     "@types/estree": "^1.0.8",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
-    "@types/node": "25.3.1",
+    "@types/node": "25.3.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "eslint-config-custom": "workspace:*",

@@ -1,23 +1,34 @@
 import { type ParsedSchema } from '@/utils/schema';
 import { deepEqual } from './deep-equal';
 
+interface Options {
+  dereference?: (schema: ParsedSchema) => ParsedSchema | undefined;
+}
+
 /**
  * Merge `allOf` object schema
  */
-export function mergeAllOf(schema: ParsedSchema): ParsedSchema {
+export function mergeAllOf(schema: ParsedSchema, options: Options = {}): ParsedSchema {
+  if (typeof schema === 'boolean') return schema;
+
+  const { dereference } = options;
+  if (dereference && '$ref' in schema && typeof schema.$ref === 'string') {
+    schema = dereference(schema) ?? schema;
+  }
+
   if (typeof schema === 'boolean' || !schema.allOf) return schema;
 
   const { allOf, ...rest } = schema;
   let result: ParsedSchema = rest;
   for (const item of allOf) {
-    result = intersection(result, item);
+    result = intersection(result, item, options);
   }
   return result;
 }
 
-export function intersection(a: ParsedSchema, b: ParsedSchema): ParsedSchema {
-  a = mergeAllOf(a);
-  b = mergeAllOf(b);
+function intersection(a: ParsedSchema, b: ParsedSchema, options: Options): ParsedSchema {
+  a = mergeAllOf(a, options);
+  b = mergeAllOf(b, options);
   if (typeof a === 'boolean' && typeof b === 'boolean') return a && b;
   if (typeof a === 'boolean') return a;
   if (typeof b === 'boolean') return b;
@@ -120,7 +131,7 @@ export function intersection(a: ParsedSchema, b: ParsedSchema): ParsedSchema {
           } else if (bProp === undefined) {
             out[prop] = aProp;
           } else {
-            out[prop] = intersection(aProp, bProp);
+            out[prop] = intersection(aProp, bProp, options);
           }
         }
 
@@ -133,7 +144,7 @@ export function intersection(a: ParsedSchema, b: ParsedSchema): ParsedSchema {
         const value = b[key];
         if (value === undefined) break;
 
-        result[key] = result[key] === undefined ? value : intersection(result[key], value);
+        result[key] = result[key] === undefined ? value : intersection(result[key], value, options);
         break;
       }
       case 'not': {

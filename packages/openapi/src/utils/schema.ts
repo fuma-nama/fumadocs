@@ -28,9 +28,11 @@ type NoReferenceJSONSchema<T> = T extends (infer I)[]
     ? Omit<T, '$ref'>
     : T;
 
-export type ParsedSchema = JSONSchema & {
-  'x-playground-lazy'?: boolean;
-};
+export type ParsedSchema =
+  | (JSONSchema & {
+      'x-playground-lazy'?: boolean;
+    })
+  | boolean;
 export type ResolvedSchema = NoReferenceJSONSchema<ParsedSchema>;
 
 export function getPreferredType(body: Record<string, unknown>): string | undefined {

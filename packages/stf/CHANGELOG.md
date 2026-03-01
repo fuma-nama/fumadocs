@@ -1,5 +1,11 @@
 # @fumari/stf
 
+## 1.0.3
+
+### Patch Changes
+
+- 5453502: use Shiki.js v4
+
 ## 1.0.2
 
 ### Patch Changes

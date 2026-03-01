@@ -98,6 +98,8 @@ export async function Operation({
           const ts = content.schema
             ? await ctx.generateTypeScriptDefinitions(content.schema, {
                 operation: method,
+                readOnly: false,
+                writeOnly: true,
                 ...ctx,
               })
             : undefined;
@@ -390,6 +392,8 @@ async function ResponseAccordion({
           const schema = resType.schema;
           const ts = schema
             ? await ctx.generateTypeScriptDefinitions(schema, {
+                readOnly: true,
+                writeOnly: false,
                 operation,
                 _internal_legacy: {
                   statusCode: status,

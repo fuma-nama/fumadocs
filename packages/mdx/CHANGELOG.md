@@ -1,5 +1,14 @@
 # next-docs-mdx
 
+## 14.2.9
+
+### Patch Changes
+
+- 5453502: use Shiki.js v4
+- Updated dependencies [5453502]
+  - @fumadocs/mdx-remote@1.4.6
+  - fumadocs-core@16.6.8
+
 ## 14.2.8
 
 ### Patch Changes

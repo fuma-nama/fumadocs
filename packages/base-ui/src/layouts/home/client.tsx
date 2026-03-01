@@ -73,7 +73,7 @@ export function Header({
           transparentMode={nav.transparentMode}
           className={cn(s.open && 'shadow-lg rounded-b-2xl')}
         >
-          <div className="flex h-14 w-full items-center px-4">
+          <div className="flex h-14 w-full items-center px-4 mx-auto max-w-(--fd-layout-width)">
             {renderTitleNav(nav, {
               className: 'inline-flex items-center gap-2.5 font-semibold',
             })}
@@ -228,7 +228,7 @@ function HeaderRoot({
         render={(_, s) => (
           <nav
             className={cn(
-              'w-full backdrop-blur-lg border-b transition-colors mx-auto max-w-(--fd-layout-width)',
+              'backdrop-blur-lg border-b transition-colors',
               (!isTransparent || s.open) && 'bg-fd-background/80',
               className,
             )}
