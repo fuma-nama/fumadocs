@@ -119,7 +119,7 @@ function SchemaUIProperty({
               key={item.$type}
               value={item.$type}
               forceMount={undefined}
-              className="py-0"
+              className="pt-2 pb-0"
             >
               <SchemaUIProperty {...item} variant="expand" />
             </TabsContent>
