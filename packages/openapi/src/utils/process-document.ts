@@ -33,7 +33,7 @@ export async function processDocument(input: string | Document): Promise<Process
       },
     },
   })
-    .then((v) => upgrade(v as never, '3.2'))
+    .then((v) => upgrade(v as never, '3.2') as Document)
     .catch((e) => {
       throw new Error(`[OpenAPI] Failed to resolve input: ${input}`, {
         cause: e,
