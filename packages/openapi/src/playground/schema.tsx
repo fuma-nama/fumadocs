@@ -59,9 +59,8 @@ export function SchemaProvider({
         strict: false,
         validateSchema: false,
         validateFormats: false,
-        schemas: references,
       }),
-    [references],
+    [],
   );
 
   return (
@@ -95,7 +94,7 @@ export function useFieldInfo(
   info: FieldInfo;
   updateInfo: (value: Partial<FieldInfo>) => void;
 } {
-  const { ajv } = use(SchemaContext)!;
+  const { ajv, references } = use(SchemaContext)!;
   const engine = useDataEngine();
   const { generateDefault } = useSchemaUtils();
   const fieldData = useNamespace({
@@ -109,7 +108,9 @@ export function useFieldInfo(
       if (union) {
         const [members, field] = union;
 
-        out.oneOf = members.findIndex((item) => ajv.validate(item, value));
+        out.oneOf = members.findIndex((item) =>
+          ajv.validate(typeof item === 'object' ? { ...item, ...references } : item, value),
+        );
         if (out.oneOf === -1) out.oneOf = 0;
         out.unionField = field;
       }
@@ -119,12 +120,16 @@ export function useFieldInfo(
 
         out.selectedType =
           types.find((type) => {
-            return ajv.validate({ ...schema, type }, value);
+            return ajv.validate({ ...schema, ...references, type }, value);
           }) ?? types[0];
       }
 
       if (schema.allOf) {
-        const merged = mergeAllOf(schema);
+        const merged = mergeAllOf(schema, {
+          dereference(schema) {
+            return dereference(schema, references);
+          },
+        });
 
         if (typeof merged !== 'boolean')
           out.intersection = {
@@ -154,7 +159,8 @@ export function useFieldInfo(
       if (updated.unionField) {
         valueSchema = schema[updated.unionField]![updated.oneOf];
       } else if (updated.selectedType) {
-        valueSchema = { ...schema, type: updated.selectedType };
+        // must remove to `examples` to avoid invalid default values
+        valueSchema = { ...schema, type: updated.selectedType, examples: undefined };
       }
 
       engine.update(fieldName, generateDefault(valueSchema));
@@ -164,18 +170,6 @@ export function useFieldInfo(
 
 export function useSchemaUtils() {
   const { references } = use(SchemaContext)!;
-
-  function resolve(schema: ParsedSchema): Exclude<ParsedSchema, boolean> {
-    if (typeof schema === 'boolean') return anyFields;
-    let ref = schema.$ref;
-    if (ref) {
-      // use swallow resolution as it is already preprocessed in `playground/index.tsx`
-      const prefix = '#/';
-      if (ref.startsWith(prefix)) ref = ref.slice(prefix.length);
-      if (ref in references) return fallbackAny(references[ref]);
-    }
-    return schema;
-  }
 
   return {
     generateDefault(schema: ParsedSchema): unknown {
@@ -188,14 +182,34 @@ export function useSchemaUtils() {
     /**
      * Resolve `$ref` in the schema, **not recursive**.
      */
-    resolve,
+    resolve(schema: ParsedSchema): Exclude<ParsedSchema, boolean> {
+      return fallbackAny(dereference(schema, references));
+    },
     schemaToString(value: ResolvedSchema, flags?: FormatFlags) {
-      return schemaToString(value, (s) => ({ dereferenced: resolve(s), raw: s }), flags);
+      return schemaToString(
+        value,
+        (s) => ({ dereferenced: dereference(s, references), raw: s }),
+        flags,
+      );
     },
   };
 }
 
-export function fallbackAny(schema: ParsedSchema): Exclude<ParsedSchema, boolean> {
+function dereference(schema: ParsedSchema, references: Record<string, ParsedSchema>): ParsedSchema {
+  if (typeof schema === 'boolean') return schema;
+
+  let ref = schema.$ref;
+  if (ref) {
+    // use swallow resolution as it is already preprocessed in `playground/index.tsx`
+    const prefix = '#/';
+    if (ref.startsWith(prefix)) ref = ref.slice(prefix.length);
+    if (ref in references) return references[ref];
+  }
+
+  return schema;
+}
+
+function fallbackAny(schema: ParsedSchema): Exclude<ParsedSchema, boolean> {
   return typeof schema === 'boolean' ? anyFields : schema;
 }
 

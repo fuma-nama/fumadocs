@@ -25,6 +25,17 @@ import { APIPage, type ApiPageProps, type OperationItem, type WebhookItem } from
 import type { CodeUsageGeneratorRegistry, InlineCodeUsageGenerator } from '@/requests/generators';
 import type { JSONSchema } from 'json-schema-typed';
 
+export interface GenerateTypeScriptDefinitionsContext extends RenderContext {
+  operation: NoReference<MethodInformation>;
+  readOnly: boolean;
+  writeOnly: boolean;
+  /** @deprecated */
+  _internal_legacy?: {
+    statusCode: string;
+    contentType: string;
+  };
+}
+
 export interface CreateAPIPageOptions {
   /**
    * Generate TypeScript definitions from response schema.
@@ -51,14 +62,7 @@ export interface CreateAPIPageOptions {
    */
   generateTypeScriptDefinitions?: (
     schema: JSONSchema,
-    ctx: RenderContext & {
-      operation: NoReference<MethodInformation>;
-      /** @deprecated */
-      _internal_legacy?: {
-        statusCode: string;
-        contentType: string;
-      };
-    },
+    ctx: GenerateTypeScriptDefinitionsContext,
   ) => Awaitable<string | undefined>;
 
   /**

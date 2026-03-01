@@ -1,17 +1,16 @@
 import type { Document } from '@/types';
 import type { NoReference } from '@/utils/schema';
-import { dereference } from '@scalar/openapi-parser';
 import { bundle } from '@scalar/json-magic/bundle';
 import { upgrade } from '@scalar/openapi-upgrader';
 import { fetchUrls, readFiles } from '@scalar/json-magic/bundle/plugins/node';
+import type { JSONSchema } from 'json-schema-typed/draft-2020-12';
+import { resolveRefSync } from 'dereference-json-schema';
 
 export interface ProcessedDocument {
   /**
    * dereferenced document
    */
   dereferenced: NoReference<Document>;
-
-  _internal_idToSchema: () => Map<string, object>;
 
   /**
    * Get raw object from dereferenced object
@@ -21,24 +20,11 @@ export interface ProcessedDocument {
   bundled: Document;
 }
 
-const cache = new Map<string, ProcessedDocument>();
-
-export async function processDocumentCached(input: string | Document): Promise<ProcessedDocument> {
-  if (typeof input !== 'string') return processDocument(input);
-
-  const cached = cache.get(input);
-  if (cached) return cached;
-  const processed = await processDocument(input);
-
-  cache.set(input, processed);
-  return processed;
-}
-
 /**
  * process & reference input document to a Fumadocs OpenAPI compatible format
  */
 export async function processDocument(input: string | Document): Promise<ProcessedDocument> {
-  const document = await bundle(input, {
+  const bundled: Document = await bundle(input, {
     plugins: [fetchUrls(), readFiles()],
     treeShake: true,
     hooks: {
@@ -58,23 +44,60 @@ export async function processDocument(input: string | Document): Promise<Process
    * Dereferenced value and its original `$ref` value
    */
   const dereferenceMap = new WeakMap<object, string>();
-  const serializable = new Map<string, object>();
 
   return {
-    dereferenced: dereference(document, {
-      throwOnError: true,
-      onDereference({ schema, ref }) {
-        serializable.set(ref, schema);
-        dereferenceMap.set(schema, ref);
-      },
-    }).schema as NoReference<Document>,
+    dereferenced: dereferenceSync(bundled as JSONSchema, (ref, schema) => {
+      dereferenceMap.set(schema as object, ref);
+    }) as NoReference<Document>,
     getRawRef(obj) {
       return dereferenceMap.get(obj);
     },
-
-    _internal_idToSchema() {
-      return serializable;
-    },
-    bundled: document as Document,
+    bundled,
   };
+}
+
+/**
+ * Resolves all $ref pointers in a schema and returns a new schema without any $ref pointers.
+ */
+function dereferenceSync(
+  schema: JSONSchema,
+  onDereference: (ref: string, schema: JSONSchema) => void,
+): JSONSchema {
+  if (typeof schema === 'boolean') return schema;
+  const visitedNodes = new Set<unknown>();
+  const cloned = structuredClone(schema);
+
+  function resolve(current: unknown, path: string): JSONSchema {
+    if (typeof current === 'object' && current !== null) {
+      // make sure we don't visit the same node twice
+      if (visitedNodes.has(current)) {
+        return current;
+      }
+      visitedNodes.add(current);
+
+      if (Array.isArray(current)) {
+        // array
+        for (let index = 0; index < current.length; index++) {
+          current[index] = resolve(current[index], `${path}/${index}`);
+        }
+      } else {
+        // object
+        if ('$ref' in current && typeof current['$ref'] === 'string') {
+          const ref = current['$ref'];
+          const out = resolveRefSync(cloned as never, ref) as JSONSchema;
+          onDereference(ref, out);
+          return out;
+        }
+
+        const obj = current as Record<string, unknown>;
+        for (const key in current) {
+          obj[key] = resolve(obj[key], `${path}/${key}`);
+        }
+      }
+    }
+
+    return current as JSONSchema;
+  }
+
+  return resolve(cloned, '#');
 }

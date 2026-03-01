@@ -1,7 +1,6 @@
 import type { OpenAPIServer } from '@/server';
 import * as base from './base';
 import { configDefault } from 'fumadocs-core/highlight';
-import { getTypescriptSchema } from '@/utils/get-typescript-schema';
 import { ApiPageProps } from './api-page';
 import { ShikiConfigProvider } from './full.client';
 
@@ -9,12 +8,23 @@ export type CreateAPIPageOptions = Partial<base.CreateAPIPageOptions>;
 
 export function createAPIPage(server: OpenAPIServer, options: CreateAPIPageOptions = {}) {
   const APIPage = base.createAPIPage(server, {
-    ...options,
     shiki: configDefault,
-    generateTypeScriptDefinitions(schema, ctx) {
+    async generateTypeScriptDefinitions(schema, ctx) {
       if (typeof schema !== 'object') return;
-      return getTypescriptSchema(schema, ctx);
+      const { compile } = await import('@fumari/json-schema-ts');
+
+      try {
+        return compile(schema, {
+          name: 'Response',
+          readOnly: ctx.readOnly,
+          writeOnly: ctx.writeOnly,
+          getSchemaId: ctx.schema.getRawRef,
+        });
+      } catch (e) {
+        console.warn('Failed to generate typescript schema:', e);
+      }
     },
+    ...options,
   });
 
   return function APIPageFull(props: ApiPageProps) {

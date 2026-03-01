@@ -16,7 +16,7 @@ export type ParameterField = NoReference<ParameterObject> & {
 interface Context {
   references: Record<string, ParsedSchema>;
   registered: WeakMap<Exclude<ParsedSchema, boolean>, string>;
-  nextId: () => string;
+  id: (schema?: object) => string;
 }
 
 export interface APIPlaygroundProps {
@@ -35,14 +35,22 @@ export async function APIPlayground({ path, method, ctx }: APIPlaygroundProps) {
     return ctx.playground.render({ path, method, ctx });
   }
 
-  let currentId = 0;
   const bodyContent = method.requestBody?.content;
   const mediaType = bodyContent ? getPreferredType(bodyContent) : undefined;
+  const takenIds = new Map<string, number>();
 
   const context: Context = {
     references: {},
-    nextId() {
-      return String(currentId++);
+    id(schema) {
+      let name = 'r';
+      if (schema) {
+        const ref = ctx.schema.getRawRef(schema)?.split('/');
+        if (ref && ref.length > 0) name = ref[ref.length - 1];
+      }
+
+      const count = takenIds.get(name) ?? 0;
+      takenIds.set(name, count + 1);
+      return count === 0 ? name : `${name}${count}`;
     },
     registered: new WeakMap(),
   };
@@ -76,7 +84,7 @@ function writeReferences(
   if (typeof schema !== 'object' || !schema) return schema;
   if (stack.has(schema)) {
     const out = stack.get(schema)!;
-    const id = ctx.nextId();
+    const id = ctx.id(schema);
     ctx.references[id] = out;
 
     return {

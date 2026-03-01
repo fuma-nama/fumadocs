@@ -2417,9 +2417,6 @@ importers:
       '@scalar/json-magic':
         specifier: ^0.11.5
         version: 0.11.5
-      '@scalar/openapi-parser':
-        specifier: 0.24.15
-        version: 0.24.15
       '@scalar/openapi-upgrader':
         specifier: ^0.1.9
         version: 0.1.9
@@ -2487,6 +2484,9 @@ importers:
       '@types/react':
         specifier: ^19.2.14
         version: 19.2.14
+      dereference-json-schema:
+        specifier: ^0.2.1
+        version: 0.2.1
       eslint-config-custom:
         specifier: workspace:*
         version: link:../eslint-config-custom
@@ -8350,6 +8350,9 @@ packages:
   dequal@2.0.3:
     resolution: {integrity: sha512-0je+qPKHEMohvfRTCEo3CrPG6cAzAYgmzKyxRiYSSDkS6eGJdyVJm7WaYA5ECaAD9wLB2T4EEeymA5aFVcYXCA==}
     engines: {node: '>=6'}
+
+  dereference-json-schema@0.2.1:
+    resolution: {integrity: sha512-uzJsrg225owJyRQ8FNTPHIuBOdSzIZlHhss9u6W8mp7jJldHqGuLv9cULagP/E26QVJDnjtG8U7Dw139mM1ydA==}
 
   destr@2.0.5:
     resolution: {integrity: sha512-ugFTXCtDZunbzasqBxrK93Ik/DRYsO6S/fedkWEMKqt04xZ4csmnmwGDBAb07QWNaGMAmnTIemsYZCksjATwsA==}
@@ -18189,6 +18192,8 @@ snapshots:
   depd@2.0.0: {}
 
   dequal@2.0.3: {}
+
+  dereference-json-schema@0.2.1: {}
 
   destr@2.0.5: {}
 
