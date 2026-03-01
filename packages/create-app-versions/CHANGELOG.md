@@ -1,5 +1,15 @@
 # create-fumadocs-versions
 
+## 16.0.62
+
+### Patch Changes
+
+- 5453502: use Shiki.js v4
+- Updated dependencies [5453502]
+  - fumadocs-ui@16.6.8
+  - fumadocs-core@16.6.8
+  - fumadocs-mdx@14.2.9
+
 ## 16.0.61
 
 ### Patch Changes

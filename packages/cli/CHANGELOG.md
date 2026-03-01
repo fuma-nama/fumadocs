@@ -1,5 +1,11 @@
 # fumadocs
 
+## 1.2.5
+
+### Patch Changes
+
+- 5453502: use Shiki.js v4
+
 ## 1.2.4
 
 ### Patch Changes

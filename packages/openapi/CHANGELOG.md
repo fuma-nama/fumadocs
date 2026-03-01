@@ -1,5 +1,16 @@
 # @fuma-docs/openapi
 
+## 10.3.14
+
+### Patch Changes
+
+- 53856d2: Improve dereference & TypeScript generation
+- 5453502: use Shiki.js v4
+- Updated dependencies [5453502]
+  - fumadocs-ui@16.6.8
+  - fumadocs-core@16.6.8
+  - @fumari/stf@1.0.3
+
 ## 10.3.13
 
 ### Patch Changes

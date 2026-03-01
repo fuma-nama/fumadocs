@@ -1,5 +1,14 @@
 # fumadocs-python
 
+## 0.0.9
+
+### Patch Changes
+
+- 5453502: use Shiki.js v4
+- Updated dependencies [5453502]
+  - fumadocs-ui@16.6.8
+  - fumadocs-core@16.6.8
+
 ## 0.0.8
 
 ### Patch Changes

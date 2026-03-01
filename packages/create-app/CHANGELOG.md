@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 16.0.62
+
+### Patch Changes
+
+- 5453502: use Shiki.js v4
+
 ## 16.0.61
 
 ## 16.0.60

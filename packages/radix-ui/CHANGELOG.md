@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 16.6.8
+
+### Patch Changes
+
+- 5453502: use Shiki.js v4
+- Updated dependencies [5453502]
+  - @fumadocs/tailwind@0.0.3
+  - fumadocs-core@16.6.8
+
 ## 16.6.7
 
 ### Patch Changes
