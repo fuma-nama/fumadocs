@@ -1,5 +1,13 @@
 # @fumadocs/mdx-remote
 
+## 1.4.6
+
+### Patch Changes
+
+- 5453502: use Shiki.js v4
+- Updated dependencies [5453502]
+  - fumadocs-core@16.6.8
+
 ## 1.4.5
 
 ### Patch Changes

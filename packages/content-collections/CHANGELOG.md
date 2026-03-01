@@ -1,5 +1,13 @@
 # @fumadocs/content-collections
 
+## 1.2.7
+
+### Patch Changes
+
+- 5453502: use Shiki.js v4
+- Updated dependencies [5453502]
+  - fumadocs-core@16.6.8
+
 ## 1.2.6
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 16.6.8
+
+### Patch Changes
+
+- 5453502: use Shiki.js v4
+
 ## 16.6.7
 
 ## 16.6.6
