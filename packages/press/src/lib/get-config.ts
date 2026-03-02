@@ -2,7 +2,7 @@ import { defineConfig, type FumapressConfig } from '../config/global.js';
 import { glob } from 'tinyglobby';
 import { pathToFileURL } from 'node:url';
 
-const DefaultConfig = defineConfig({});
+const DefaultConfig = defineConfig();
 
 /**
  * Default glob patterns for finding config file

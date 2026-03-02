@@ -1,19 +1,23 @@
-import type { ContentConfig } from './content';
+import type { LayoutConfig } from '../layouts/config';
+import type { ContentConfig } from '../lib/source';
 
 export interface FumapressConfig {
-  /**
-   * the directory for app files (relative to project root)
-   *
-   * @defaultValue './app'
-   */
-  appDir: string;
-
+  layout?: LayoutConfig;
   content?: ContentConfig;
 }
 
-export function defineConfig(config: Partial<FumapressConfig>): FumapressConfig {
+export function defineConfig(config: Partial<FumapressConfig> = {}): FumapressConfig {
   return {
     ...config,
-    appDir: config.appDir ?? './app',
+    layout: {
+      base() {
+        return {
+          nav: {
+            title: 'Fumapress',
+          },
+        };
+      },
+      ...config.layout,
+    },
   };
 }

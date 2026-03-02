@@ -8,6 +8,5 @@ export default defineConfig({
   dts: {
     sourcemap: false,
   },
-  external: ['virtual:app/routes'],
   inlineOnly: [],
 });

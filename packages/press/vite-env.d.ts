@@ -1,6 +1,3 @@
-declare module 'virtual:app/routes' {
-  import type { RoutesConfig } from './config/routes';
-
-  const routes: RoutesConfig;
-  export = routes;
+declare module 'react-router/react-server-index' {
+  export * from 'react-router';
 }

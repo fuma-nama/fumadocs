@@ -1,18 +1,34 @@
 #!/usr/bin/env node
 import { program } from 'commander';
-import { viteBuild } from '../vite/build.js';
-import { dev } from '../vite/dev.js';
+import path from 'node:path';
+import { baseDir } from '../constants.js';
+
+const configFile = path.join(baseDir, 'dist/vite.config.mjs');
 
 program.command('build').action(async () => {
-  await viteBuild();
+  const { createBuilder } = await import('vite');
+
+  try {
+    const builder = await createBuilder({
+      configFile,
+      root: process.cwd(),
+    });
+    await builder.buildApp();
+    console.log('Build completed successfully');
+  } catch (error) {
+    console.error('Build failed:', error);
+  }
 });
 
 program.command('dev').action(async () => {
-  await dev();
-});
+  const { createServer } = await import('vite');
+  const server = await createServer({
+    configFile,
+    root: process.cwd(),
+  });
 
-program.command('typegen').action(async () => {
-  // TODO: typegen content shapes
+  await server.listen();
+  server.printUrls();
 });
 
 void program.parseAsync(process.argv);
