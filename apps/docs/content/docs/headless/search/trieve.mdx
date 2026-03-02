@@ -64,14 +64,7 @@ import * as fs from 'node:fs';
 import { sync, type TrieveDocument } from 'trieve-fumadocs-adapter/search/sync';
 import { TrieveSDK } from 'trieve-ts-sdk';
 
-// the path of pre-rendered `static.json`, choose one according to your React framework
-const filePath = {
-  next: '.next/server/app/static.json.body',
-  'tanstack-start': '.output/public/static.json',
-  'react-router': 'build/client/static.json',
-  waku: 'dist/public/static.json',
-}['next'];
-
+const filePath = '<see below>';
 const content = fs.readFileSync(filePath);
 
 const records: TrieveDocument[] = JSON.parse(content.toString());
@@ -83,6 +76,8 @@ const client = new TrieveSDK({
 
 sync(client, records);
 ```
+
+<include>.static-route-output.mdx</include>
 
 Make sure to run the script after build:
 

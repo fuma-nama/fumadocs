@@ -46,21 +46,16 @@ Export it via static route handler.
 
 Finally, the exported records can be accessed at:
 
+<include cwd>content/docs/headless/search/.static-route-output.mdx#static-route-output</include>
+
+You can read it for further processing:
+
 ```ts
 import * as fs from 'node:fs';
 import type { DocumentRecord } from '@/lib/export-search-indexes';
 
-// the path of pre-rendered `static.json`, choose one according to your React framework
-const filePath = {
-  next: '.next/server/app/static.json.body',
-  'tanstack-start': '.output/public/static.json',
-  'react-router': 'build/client/static.json',
-  waku: 'dist/public/static.json',
-}['next'];
-
 const content = fs.readFileSync(filePath);
-
 const records = JSON.parse(content.toString()) as DocumentRecord[];
 ```
 
-You can use the `structuredData` to generate accurate search indexes.
+Use `structuredData` to generate accurate search indexes.
