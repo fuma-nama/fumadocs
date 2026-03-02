@@ -174,6 +174,11 @@ const showcases: ShowcaseObject[] = [
     url: 'https://freestyle.sh',
   },
   {
+    image: '/showcases/zap-studio.png',
+    name: 'Zap Studio',
+    url: 'https://zapstudio.dev',
+  },
+  {
     image: VisionUI,
     name: 'Vision UI',
     url: 'https://vision.uing.dev',
