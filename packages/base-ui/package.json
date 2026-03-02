@@ -135,7 +135,7 @@
     "unified": "^11.0.5"
   },
   "peerDependencies": {
-    "@takumi-rs/image-response": "^0.68.17",
+    "@takumi-rs/image-response": "*",
     "@types/react": "*",
     "fumadocs-core": "workspace:*",
     "next": "16.x.x",

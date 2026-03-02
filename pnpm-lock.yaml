@@ -2511,9 +2511,6 @@ importers:
 
   packages/press:
     dependencies:
-      '@mdx-js/mdx':
-        specifier: ^3.1.1
-        version: 3.1.1
       '@vitejs/plugin-react':
         specifier: ^5.1.4
         version: 5.1.4(vite@7.3.1(@types/node@25.3.3)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
@@ -2526,9 +2523,6 @@ importers:
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
-      fumadocs-mdx:
-        specifier: workspace:*
-        version: link:../mdx
       fumadocs-ui:
         specifier: workspace:*
         version: link:../radix-ui
@@ -2548,9 +2542,6 @@ importers:
         specifier: ^4.3.6
         version: 4.3.6
     devDependencies:
-      '@types/mdx':
-        specifier: ^2.0.13
-        version: 2.0.13
       '@types/node':
         specifier: ^25.3.3
         version: 25.3.3
