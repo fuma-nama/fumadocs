@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 16.0.63
+
+### Patch Changes
+
+- 3140798: fix Takumi plugin
+
 ## 16.0.62
 
 ### Patch Changes
