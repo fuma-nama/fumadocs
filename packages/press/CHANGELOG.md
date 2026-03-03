@@ -1,5 +1,11 @@
 # fumapress
 
+## 0.1.1
+
+### Patch Changes
+
+- 0379c74: Implement hot-reload & caching layer
+
 ## 0.1.0
 
 ### Minor Changes
