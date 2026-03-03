@@ -310,7 +310,7 @@ export function SidebarFolderTrigger({ children, ...props }: CollapsibleTriggerP
         {children}
         <ChevronDown
           data-icon
-          className={cn('ms-auto transition-transform', !open && '-rotate-90')}
+          className={cn('ms-auto transition-transform', !open && '-rotate-90 rtl:rotate-90')}
         />
       </CollapsibleTrigger>
     );
@@ -353,7 +353,7 @@ export function SidebarFolderLink({
       {collapsible && (
         <ChevronDown
           data-icon
-          className={cn('ms-auto transition-transform', !open && '-rotate-90')}
+          className={cn('ms-auto transition-transform', !open && '-rotate-90 rtl:rotate-90')}
         />
       )}
     </Link>
