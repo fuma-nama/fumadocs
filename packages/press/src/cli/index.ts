@@ -1,34 +1,23 @@
 #!/usr/bin/env node
 import { program } from 'commander';
-import path from 'node:path';
-import { baseDir } from '../constants.js';
+import { runStart } from './utils.js';
+import fs from 'node:fs/promises';
+import { findConfigPath } from '@/config/load-node.js';
 
-const configFile = path.join(baseDir, 'dist/vite.config.mjs');
-
-program.command('build').action(async () => {
-  const { createBuilder } = await import('vite');
-
-  try {
-    const builder = await createBuilder({
-      configFile,
-      root: process.cwd(),
-    });
-    await builder.buildApp();
-    console.log('Build completed successfully');
-  } catch (error) {
-    console.error('Build failed:', error);
-  }
+program.command('init').action(async () => {
+  if ((await findConfigPath()) === null)
+    await fs.writeFile(
+      'fumapress.config.ts',
+      `import { defineConfig } from "fumapress/config";\n\nexport default defineConfig();`,
+    );
 });
 
-program.command('dev').action(async () => {
-  const { createServer } = await import('vite');
-  const server = await createServer({
-    configFile,
-    root: process.cwd(),
+program
+  .command('start', { isDefault: true })
+  .option('-p, --port <PORT>')
+  .option('-h, --host <HOST>')
+  .action(async (options: { port?: string; host?: string }) => {
+    await runStart(options);
   });
-
-  await server.listen();
-  server.printUrls();
-});
 
 void program.parseAsync(process.argv);

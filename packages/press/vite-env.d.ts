@@ -1,3 +1,9 @@
-declare module 'react-router/react-server-index' {
-  export * from 'react-router';
+declare module 'process' {
+  global {
+    namespace NodeJS {
+      interface ProcessEnv {
+        PROJECT_DIR?: string;
+      }
+    }
+  }
 }

@@ -1,9 +1,24 @@
 {
-  "extends": "tsconfig/react-library.json",
   "compilerOptions": {
-    "types": ["vite/client", "@vitejs/plugin-rsc/types"],
-    "moduleResolution": "Bundler"
+    "target": "ES2022",
+    "baseUrl": ".",
+    "lib": ["dom", "dom.iterable", "ES2022"],
+    "types": ["vite", "vite/client"],
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "checkJs": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "noUncheckedIndexedAccess": true,
+    "noEmit": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
-  "include": ["src", "vite-env.d.ts", "*.config.ts"],
-  "exclude": ["node_modules", "dist", "eslint.config.mjs"]
+  "exclude": ["node_modules", "dist"]
 }

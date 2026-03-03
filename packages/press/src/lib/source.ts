@@ -3,10 +3,18 @@ import { glob } from 'tinyglobby';
 import grayMatter from 'gray-matter';
 import fs from 'node:fs/promises';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
-import { loadConfig } from './get-config';
+import { getConfigRuntime } from '../config/load-runtime';
 import path from 'node:path';
+import { revalidable } from './revalidable';
+import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 
 export interface ContentConfig {
+  projects?: ContentProjectConfig[];
+}
+
+export interface ContentProjectConfig {
+  name: string;
+  dir: string;
   include?: string[];
 }
 
@@ -16,10 +24,12 @@ export interface RawPage {
   absolutePath: string;
 
   data: {
-    title?: string;
+    title: string;
     description?: string;
     content: string;
     frontmatter: Record<string, unknown>;
+
+    project: ContentProjectConfig;
   };
 }
 
@@ -38,61 +48,75 @@ async function getPages(config: ContentConfig): Promise<{
   pages: RawPage[];
   metas: RawMeta[];
 }> {
-  const include = config.include ?? ['**/*.{md,mdx,json}', '!node_modules'];
-
-  async function md(file: string): Promise<RawPage> {
-    const content = (await fs.readFile(file)).toString();
+  async function md(project: ContentProjectConfig, file: string): Promise<RawPage> {
+    const absolutePath = path.resolve(project.dir, file);
+    const content = (await fs.readFile(absolutePath)).toString();
     const parsed = grayMatter({ content });
 
-    const dataResult = pageSchema.partial().loose().safeParse(parsed.data);
-    if (dataResult.error) {
-      throw dataResult.error;
-    }
+    // use default frontmatter if invalid in Fumadocs' spec
+    const { data: frontmatter = {} } = pageSchema.partial().loose().safeParse(parsed.data);
 
     return {
       type: 'page',
       path: file,
-      absolutePath: path.resolve(file),
+      absolutePath,
       data: {
-        title: dataResult.data.title,
-        description: dataResult.data.description,
-        content,
-        frontmatter: dataResult.data,
+        title: frontmatter.title ?? path.basename(file, path.extname(file)),
+        description: frontmatter.description,
+        content: parsed.content,
+        frontmatter,
+        project,
       },
     };
   }
 
-  async function json(file: string): Promise<RawMeta> {
-    const content = (await fs.readFile(file)).toString();
+  async function json(project: ContentProjectConfig, file: string): Promise<RawMeta | undefined> {
+    const absolutePath = path.resolve(project.dir, file);
+    const content = (await fs.readFile(absolutePath)).toString();
     const parsed = JSON.parse(content);
     const result = metaSchema.loose().safeParse(parsed);
-    if (result.error) throw result.error;
+
+    // ignore if it is not `meta.json` for Fumadocs
+    if (result.error) return;
     return {
       type: 'meta',
       path: file,
-      absolutePath: path.resolve(file),
+      absolutePath,
       data: result.data,
     };
   }
 
-  const files = await glob(include);
-  const all = await Promise.all(
-    files.map(async (file) => {
-      const ext = path.extname(file);
+  async function project(project: ContentProjectConfig) {
+    const files = await glob(
+      project.include ?? ['**/*.{md,mdx}', '**/meta.json', '!node_modules'],
+      {
+        cwd: project.dir,
+      },
+    );
 
-      try {
-        switch (ext) {
-          case '.json':
-            return await json(file);
-          case '.mdx':
-          case '.md':
-            return await md(file);
+    return await Promise.all(
+      files.map(async (file) => {
+        const ext = path.extname(file);
+
+        try {
+          switch (ext) {
+            case '.json':
+              return await json(project, file);
+            case '.mdx':
+            case '.md':
+              return await md(project, file);
+          }
+        } catch (e) {
+          console.error(`error when parsing ${file}`, e);
         }
-      } catch (e) {
-        console.error(`error when parsing ${file}`, e);
-      }
-    }),
-  );
+      }),
+    );
+  }
+
+  const projects = config.projects ?? [
+    { dir: process.env.PROJECT_DIR ?? process.cwd(), name: 'root' },
+  ];
+  const all = (await Promise.all(projects.map(project))).flat();
 
   return {
     metas: all.filter((item) => item?.type === 'meta'),
@@ -100,13 +124,25 @@ async function getPages(config: ContentConfig): Promise<{
   };
 }
 
-export async function getSource() {
-  const config = await loadConfig();
+export const getSource = revalidable({
+  async create() {
+    const config = await getConfigRuntime();
 
-  return loader({
-    source: source(await getPages(config.content ?? {})),
-    baseUrl: '/',
-  });
-}
+    return loader({
+      source: source(await getPages(config.content ?? {})),
+      plugins: [lucideIconsPlugin()],
+      baseUrl: '/',
+    });
+  },
+});
 
 export type SourcePage = InferPageType<Awaited<ReturnType<typeof getSource>>>;
+
+export function getPageImage(slugs: string[]) {
+  const segments = [...slugs, 'image.webp'];
+
+  return {
+    segments,
+    url: `/og/${segments.join('/')}`,
+  };
+}

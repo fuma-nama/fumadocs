@@ -1,7 +1,7 @@
 {
   "name": "fumapress",
   "version": "0.0.8",
-  "description": "The minimal setup for Fumadocs",
+  "description": "Opinionated Fumadocs for fast content preview",
   "keywords": [
     "Docs",
     "Fumadocs"
@@ -11,54 +11,59 @@
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/fumadocs",
   "bin": {
-    "fumapress": "./dist/cli/index.mjs"
+    "fumapress": "./dist/lib/cli/index.js"
   },
   "files": [
-    "dist/*"
+    "dist"
   ],
   "type": "module",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.mts",
+  "sideEffects": false,
   "exports": {
-    ".": {
-      "types": "./dist/index.d.mts",
-      "import": "./dist/index.mjs"
-    },
-    "./vite": {
-      "types": "./dist/vite/index.d.mts",
-      "import": "./dist/vite/index.mjs"
-    }
-  },
-  "publishConfig": {
-    "access": "public"
+    "./config": "./dist/lib/config/index.js"
   },
   "scripts": {
-    "build": "tsdown",
     "dev": "tsdown --watch",
+    "build": "waku build && tsdown",
+    "dev:app": "waku dev",
+    "build:app": "waku build",
+    "start:app": "waku start",
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@vitejs/plugin-react": "^5.1.4",
-    "@vitejs/plugin-rsc": "^0.5.21",
+    "@takumi-rs/image-response": "^0.69.5",
     "commander": "^14.0.3",
+    "dotenv": "^17.3.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "gray-matter": "^4.0.3",
-    "picocolors": "^1.1.1",
+    "hast-util-to-jsx-runtime": "^2.3.6",
+    "lucide-react": "^0.575.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "react-router": "^7.13.1",
+    "react-server-dom-webpack": "^19.2.4",
+    "rehype-katex": "^7.0.1",
+    "remark": "^15.0.1",
+    "remark-math": "^6.0.0",
+    "remark-rehype": "^11.1.2",
     "tinyglobby": "^0.2.15",
+    "vfile": "^6.0.3",
     "vite": "^7.3.1",
-    "zod": "^4.3.6"
+    "waku": "1.0.0-alpha.5"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.2.1",
+    "@types/hast": "^3.0.4",
+    "@types/mdast": "^4.0.4",
+    "@types/mdx": "^2.0.13",
     "@types/node": "^25.3.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "eslint-config-custom": "workspace:*",
-    "tsconfig": "workspace:*",
+    "@types/unist": "^3.0.3",
+    "katex": "^0.16.33",
+    "tailwindcss": "^4.2.1",
     "tsdown": "0.20.3",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "unified": "^11.0.5",
+    "vite-tsconfig-paths": "^6.1.1"
   }
 }

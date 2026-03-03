@@ -7,17 +7,5 @@ export interface FumapressConfig {
 }
 
 export function defineConfig(config: Partial<FumapressConfig> = {}): FumapressConfig {
-  return {
-    ...config,
-    layout: {
-      base() {
-        return {
-          nav: {
-            title: 'Fumapress',
-          },
-        };
-      },
-      ...config.layout,
-    },
-  };
+  return config;
 }
