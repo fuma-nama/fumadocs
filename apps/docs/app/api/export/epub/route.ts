@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic';
 
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX_REQUESTS = 10;
+const MAX_RATE_LIMIT_ENTRIES = 10_000;
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 
 function getClientIp(request: Request): string {
@@ -15,8 +16,29 @@ function getClientIp(request: Request): string {
   );
 }
 
+function pruneExpiredRateLimitEntries(): void {
+  const now = Date.now();
+  for (const [key, entry] of rateLimitMap.entries()) {
+    if (now > entry.resetAt) rateLimitMap.delete(key);
+  }
+}
+
+function evictOldestRateLimitEntries(): void {
+  if (rateLimitMap.size <= MAX_RATE_LIMIT_ENTRIES) return;
+  const entries = [...rateLimitMap.entries()].sort((a, b) => a[1].resetAt - b[1].resetAt);
+  const toRemove = entries.length - MAX_RATE_LIMIT_ENTRIES;
+  for (let i = 0; i < toRemove; i++) {
+    rateLimitMap.delete(entries[i][0]);
+  }
+}
+
+setInterval(pruneExpiredRateLimitEntries, RATE_LIMIT_WINDOW_MS);
+
 function checkRateLimit(ip: string): boolean {
   const now = Date.now();
+  pruneExpiredRateLimitEntries();
+  if (rateLimitMap.size >= MAX_RATE_LIMIT_ENTRIES) evictOldestRateLimitEntries();
+
   const entry = rateLimitMap.get(ip);
   if (!entry) {
     rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });

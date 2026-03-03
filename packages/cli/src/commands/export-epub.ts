@@ -13,7 +13,63 @@ import { exportEpub } from 'fumadocs-epub';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX_REQUESTS = 10;
+const MAX_RATE_LIMIT_ENTRIES = 10_000;
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+
+function getClientIp(request: Request): string {
+  return (
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+    request.headers.get('x-real-ip') ??
+    'unknown'
+  );
+}
+
+function pruneExpiredRateLimitEntries(): void {
+  const now = Date.now();
+  for (const [key, entry] of rateLimitMap.entries()) {
+    if (now > entry.resetAt) rateLimitMap.delete(key);
+  }
+}
+
+function evictOldestRateLimitEntries(): void {
+  if (rateLimitMap.size <= MAX_RATE_LIMIT_ENTRIES) return;
+  const entries = [...rateLimitMap.entries()].sort((a, b) => a[1].resetAt - b[1].resetAt);
+  const toRemove = entries.length - MAX_RATE_LIMIT_ENTRIES;
+  for (let i = 0; i < toRemove; i++) rateLimitMap.delete(entries[i][0]);
+}
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  pruneExpiredRateLimitEntries();
+  if (rateLimitMap.size >= MAX_RATE_LIMIT_ENTRIES) evictOldestRateLimitEntries();
+  const entry = rateLimitMap.get(ip);
+  if (!entry) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return true;
+  }
+  if (now > entry.resetAt) {
+    entry.count = 1;
+    entry.resetAt = now + RATE_LIMIT_WINDOW_MS;
+    return true;
+  }
+  entry.count++;
+  return entry.count <= RATE_LIMIT_MAX_REQUESTS;
+}
+
+export async function GET(request: Request) {
+  const ip = getClientIp(request);
+  if (!checkRateLimit(ip)) {
+    return new Response('Too Many Requests', { status: 429 });
+  }
+  const epubKey = process.env.EPUB_EXPORT_KEY;
+  if (epubKey) {
+    const authHeader = request.headers.get('x-epub-key') ?? request.headers.get('authorization')?.replace(/^Bearer\\s+/i, '');
+    if (authHeader !== epubKey) {
+      return new Response('Unauthorized', { status: 401 });
+    }
+  }
   const buffer = await exportEpub({
     source,
     config: {
@@ -70,9 +126,9 @@ async function waitForServer(baseUrl: string, maxAttempts = 30): Promise<boolean
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), PROBE_TIMEOUT_MS);
     try {
-      const res = await fetch(healthUrl, { signal: controller.signal });
+      await fetch(healthUrl, { signal: controller.signal });
       clearTimeout(timeoutId);
-      if (res.ok) return true;
+      return true; // Any successful fetch = server is up (404/401 still means Next.js responded)
     } catch {
       clearTimeout(timeoutId);
       // Server not ready yet
@@ -109,7 +165,10 @@ export async function exportEpub(options: {
     // no package.json or invalid
   }
   const hasAppOrPages =
-    (await exists(path.join(cwd, 'app'))) || (await exists(path.join(cwd, 'pages')));
+    (await exists(path.join(cwd, 'app'))) ||
+    (await exists(path.join(cwd, 'pages'))) ||
+    (await exists(path.join(cwd, 'src', 'app'))) ||
+    (await exists(path.join(cwd, 'src', 'pages')));
   const hasNext = hasNextConfig || (hasNextInPkg && hasAppOrPages);
   if (!hasNext) {
     console.error(picocolors.red('Next.js project not found. Run this command from a Fumadocs Next.js project root.'));
