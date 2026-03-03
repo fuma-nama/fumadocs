@@ -9,6 +9,7 @@ import { runTree } from '@/utils/file-tree/run-tree';
 import packageJson from '../package.json';
 import { customise } from '@/commands/customise';
 import { add } from '@/commands/add';
+import { exportEpub } from '@/commands/export-epub';
 import { HttpRegistryClient, LocalRegistryClient } from '@/registry/client';
 
 const program = new Command().option('--config <string>');
@@ -47,6 +48,24 @@ program
   .action(async (input: string[], options: { config?: string; dir?: string }) => {
     const client = createClientFromDir(options.dir, await createOrLoadConfig(options.config));
     await add(input, client);
+  });
+
+const exportCmd = program
+  .command('export')
+  .description('export documentation to various formats');
+
+exportCmd
+  .command('epub')
+  .description('export documentation to EPUB format')
+  .option('--output <path>', 'output file path', 'docs.epub')
+  .option('--port <number>', 'port for Next.js server', '3000')
+  .option('--scaffold-only', 'only scaffold the API route, do not build and fetch')
+  .action(async (options: { output?: string; port?: string; scaffoldOnly?: boolean }) => {
+    await exportEpub({
+      output: options.output,
+      port: options.port ? parseInt(options.port, 10) : undefined,
+      scaffoldOnly: options.scaffoldOnly,
+    });
   });
 
 program

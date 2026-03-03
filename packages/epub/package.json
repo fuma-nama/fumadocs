@@ -1,0 +1,57 @@
+{
+  "name": "fumadocs-epub",
+  "version": "1.0.0",
+  "description": "EPUB export for Fumadocs documentation",
+  "keywords": [
+    "fumadocs",
+    "epub",
+    "export",
+    "documentation"
+  ],
+  "homepage": "https://fumadocs.dev",
+  "license": "MIT",
+  "author": "Fuma Nama",
+  "repository": "github:fuma-nama/fumadocs",
+  "files": [
+    "dist/*"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "clean": "rimraf dist",
+    "dev": "tsdown --watch --clean false",
+    "lint": "eslint .",
+    "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "epub-gen-memory": "^1.1.2",
+    "remark-gfm": "^4.0.1",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.2",
+    "rehype-stringify": "^10.0.1",
+    "unified": "^11.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "25.3.3",
+    "eslint-config-custom": "workspace:*",
+    "fumadocs-core": "workspace:*",
+    "rimraf": "^6.0.0",
+    "tsconfig": "workspace:*",
+    "tsdown": "0.20.3",
+    "typescript": "^5.9.3"
+  },
+  "peerDependencies": {
+    "fumadocs-core": "^15.0.0 || ^16.0.0"
+  }
+}
