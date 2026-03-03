@@ -1,6 +1,6 @@
 "use strict";
 const {Fragment: _Fragment, jsx: _jsx, jsxs: _jsxs} = arguments[0];
-const toc = [];
+let toc = [];
 function _createMdxContent(props) {
   const _components = {
     code: "code",

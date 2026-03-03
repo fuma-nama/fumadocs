@@ -5,8 +5,6 @@ import { visit } from 'unist-util-visit';
 import type { TOCItemType } from '@/toc';
 import { flattenNode } from '@/mdx-plugins/mdast-utils';
 
-const slugger = new Slugger();
-
 declare module 'mdast' {
   export interface HeadingData extends Data {
     hProperties?: {
@@ -35,17 +33,33 @@ export interface RemarkHeadingOptions {
   generateToc?: boolean;
 }
 
+declare module 'vfile' {
+  interface DataMap {
+    /**
+     * [Fumadocs: remark-heading] output data.
+     */
+    toc?: TOCItemType[];
+  }
+}
+
 /**
  * Add heading ids and extract TOC
  */
 export function remarkHeading({
-  slug: defaultSlug,
+  slug,
   customId = true,
   generateToc = true,
 }: RemarkHeadingOptions = {}): Transformer<Root, Root> {
+  let slugger: Slugger | undefined;
+
+  if (!slug) {
+    slugger = new Slugger();
+    slug = (_root, _heading, text) => slugger!.slug(text);
+  }
+
   return (root, file) => {
     const toc: TOCItemType[] = [];
-    slugger.reset();
+    slugger?.reset();
 
     visit(root, 'heading', (heading) => {
       heading.data ||= {};
@@ -66,7 +80,7 @@ export function remarkHeading({
       if (!props.id) {
         flattened ??= flattenNode(heading);
 
-        props.id = defaultSlug ? defaultSlug(root, heading, flattened) : slugger.slug(flattened);
+        props.id = slug(root, heading, flattened);
       }
 
       if (generateToc) {

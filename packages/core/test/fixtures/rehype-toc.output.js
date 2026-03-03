@@ -1,5 +1,5 @@
 import {Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs} from "react/jsx-runtime";
-export const toc = [{
+export let toc = [{
   depth: 1,
   url: "#heading-1",
   title: _jsx(_Fragment, {
