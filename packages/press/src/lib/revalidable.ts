@@ -8,7 +8,14 @@ export interface RevalidableConfig<Args extends unknown[], O> {
   create: (...args: Args) => O;
 }
 
-export function revalidable<Args extends unknown[], O>(config: RevalidableConfig<Args, O>) {
+export type WithRevalidate<Args extends unknown[], O> = {
+  revalidate: (keepStale?: boolean) => void;
+  (...args: Args): O;
+};
+
+export function revalidable<Args extends unknown[], O>(
+  config: RevalidableConfig<Args, O>,
+): WithRevalidate<Args, O> {
   const { create, staleTime } = config;
 
   if (typeof staleTime === 'number') {
@@ -16,7 +23,7 @@ export function revalidable<Args extends unknown[], O>(config: RevalidableConfig
     let lastResult: O = undefined as O;
     let revalidating = false;
 
-    return function (...args: Args) {
+    const out: WithRevalidate<Args, O> = function (...args: Args) {
       if (lastValidated === null) {
         // init
         lastResult = create(...args);
@@ -46,7 +53,15 @@ export function revalidable<Args extends unknown[], O>(config: RevalidableConfig
 
       return lastResult;
     };
+
+    out.revalidate = (keepStale = true) => {
+      lastValidated = keepStale ? 0 : null;
+    };
   }
 
-  return cache(create);
+  const out = cache(create) as WithRevalidate<Args, O>;
+  out.revalidate = () => {
+    return;
+  };
+  return out;
 }

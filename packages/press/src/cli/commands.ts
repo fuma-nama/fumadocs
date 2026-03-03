@@ -15,8 +15,10 @@ export async function runStart(flags: { host?: string; port?: string }) {
   }
   process.env.PORT = String(port);
   process.env.PROJECT_DIR = process.cwd();
+  process.env.HOT_RELOAD = '1';
   process.chdir(baseDir);
   await import(serveFileUrl);
+
   console.log(`ready: Listening on http://${host || 'localhost'}:${port}/`);
 }
 

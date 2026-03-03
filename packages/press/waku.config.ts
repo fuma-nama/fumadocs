@@ -5,13 +5,14 @@ import type { UserConfig } from 'vite';
 
 export default defineConfig({
   distDir: 'dist/waku',
+  unstable_adapter: './src/lib/waku/adapter.ts',
   vite: {
     // we do this to avoid Vite from bundling React contexts and cause duplicated contexts conflicts.
     optimizeDeps: {
       exclude: ['fumadocs-ui', 'fumadocs-core'],
     },
-    ssr: {
-      external: ['@takumi-rs/image-response', 'unrun'],
+    resolve: {
+      external: ['@takumi-rs/image-response', 'unrun', 'chokidar'],
     },
 
     plugins: [tailwindcss(), tsconfigPaths()],

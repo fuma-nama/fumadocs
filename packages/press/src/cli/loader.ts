@@ -1,23 +1,7 @@
 import * as dotenv from 'dotenv';
-import * as vite from 'vite';
-import { defineConfig, type FumapressConfig } from '@/config/global';
-import { checkConfig, findConfigPath } from '@/config/load-node';
-import { pathToFileURL } from 'node:url';
 
 export function loadEnv() {
   dotenv.config({ path: ['.env.local', '.env'], quiet: true });
-}
-
-export async function loadConfig(): Promise<FumapressConfig> {
-  const configPath = await findConfigPath();
-  if (configPath !== null) {
-    const imported = await vite.runnerImport<{ default: FumapressConfig }>(
-      pathToFileURL(configPath).href,
-    );
-    return checkConfig(configPath, imported.module.default);
-  }
-
-  return defineConfig();
 }
 
 export function overrideNodeEnv(nodeEnv: 'development' | 'production') {

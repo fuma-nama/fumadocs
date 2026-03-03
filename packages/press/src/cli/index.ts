@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { program } from 'commander';
-import { runStart } from './utils.js';
+import { runStart } from './commands.js';
 import fs from 'node:fs/promises';
 import { findConfigPath } from '@/config/load-node.js';
 
