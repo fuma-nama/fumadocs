@@ -21,6 +21,9 @@
   "exports": {
     "./config": "./dist/lib/config/index.mjs"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "dev": "tsdown --watch",
     "build": "waku build && tsdown",
