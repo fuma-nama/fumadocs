@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 16.6.9
+
+### Patch Changes
+
+- 4d05c4e: [Search API] Generate breadcrumbs for custom `buildIndex` option.
+- 5f687b6: [rehype-toc] Support `data` export mode
+
 ## 16.6.8
 
 ### Patch Changes

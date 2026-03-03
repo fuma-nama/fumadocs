@@ -1,5 +1,22 @@
 # next-docs-ui
 
+## 16.6.9
+
+### Patch Changes
+
+- 0aad574: fix: reverse sidebar chevron direction for RTL layouts
+
+  In RTL mode, the `ChevronDown` icon in collapsed sidebar folders was
+  incorrectly pointing to the right (via `-rotate-90`). Added `rtl:rotate-90`
+  so the icon points to the left when the folder is collapsed, matching
+  the expected RTL reading direction.
+
+- 6a7725b: fix: use logical CSS properties in Steps component for RTL support
+- 7a61fa5: Support `codeblock.rsc` API for server-side codeblocks
+- Updated dependencies [4d05c4e]
+- Updated dependencies [5f687b6]
+  - fumadocs-core@16.6.9
+
 ## 16.6.8
 
 ### Patch Changes

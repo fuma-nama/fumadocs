@@ -1,0 +1,17 @@
+# fumapress
+
+## 0.1.0
+
+### Minor Changes
+
+- 0d92619: Redesign & ready for use
+
+### Patch Changes
+
+- Updated dependencies [0aad574]
+- Updated dependencies [6a7725b]
+- Updated dependencies [4d05c4e]
+- Updated dependencies [5f687b6]
+- Updated dependencies [7a61fa5]
+  - fumadocs-ui@16.6.9
+  - fumadocs-core@16.6.9
