@@ -25,6 +25,11 @@ export function resolveImageSrc(
     return src;
   }
 
+  // Protocol-relative URL (//cdn.example.com/...) - normalize to https:
+  if (src.startsWith('//')) {
+    return `https:${src}`;
+  }
+
   // Relative path - resolve from page directory
   if (src.startsWith('./') || src.startsWith('../') || !src.startsWith('/')) {
     const resolved = path.resolve(pageDir, src);

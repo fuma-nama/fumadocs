@@ -9,7 +9,9 @@ export function getPagesInTreeOrder<Page>(
   pageTree: PageTree.Root,
   getNodePage: (node: PageTree.Item) => Page | undefined,
 ): Page[] {
-  const items = flattenTree(pageTree.children);
+  const mainItems = flattenTree(pageTree.children);
+  const fallbackItems = pageTree.fallback ? flattenTree(pageTree.fallback.children) : [];
+  const items = [...mainItems, ...fallbackItems];
   const pages: Page[] = [];
 
   for (const item of items) {

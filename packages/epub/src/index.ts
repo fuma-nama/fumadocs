@@ -111,13 +111,23 @@ export async function exportEpub(options: EpubExportOptions): Promise<Buffer> {
 
   const chapters: { title: string; content: string }[] = [];
 
+  const resolvedPublicDir = publicDir ?? path.join(cwd, 'public');
+
   for (const page of filteredPages) {
-    const markdown = await (page.data as { getText: (type: string) => Promise<string> }).getText(
-      'processed',
-    );
+    let markdown: string;
+    try {
+      markdown = await (page.data as { getText: (type: string) => Promise<string> }).getText(
+        'processed',
+      );
+    } catch (err) {
+      const pageId = page.data.title ?? page.slugs?.slice(-1)[0] ?? page.path;
+      throw new Error(
+        `Failed to get processed markdown for page "${pageId}": ${err instanceof Error ? err.message : String(err)}. Ensure includeProcessedMarkdown: true in your docs collection config.`,
+      );
+    }
     const html = await markdownToHtml(markdown);
     const pageDir = getPageDir(page, cwd);
-    const resolvedHtml = resolveImagesInHtml(html, pageDir, publicDir);
+    const resolvedHtml = resolveImagesInHtml(html, pageDir, resolvedPublicDir);
 
     const pageTitle = page.data.title ?? page.slugs?.slice(-1)[0] ?? 'Untitled';
 
@@ -134,7 +144,7 @@ export async function exportEpub(options: EpubExportOptions): Promise<Buffer> {
     lang: language,
     publisher,
     isbn,
-    cover: resolveCoverPath(cover, cwd, publicDir ?? path.join(cwd, 'public')) ?? cover,
+    cover: resolveCoverPath(cover, cwd, resolvedPublicDir) ?? cover,
     css: css ?? defaultEpubStyles,
     prependChapterTitles: true,
     numberChaptersInTOC: true,

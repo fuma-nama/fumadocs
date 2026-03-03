@@ -17,9 +17,9 @@ export interface EpubConfig {
   cover?: string;
   /** Output file path - if set, writes to file in addition to returning buffer */
   outputPath?: string;
-  /** Filter: include only these pages */
+  /** Filter: include only these pages. Applied first (only pages where includePages(page) === true are considered). */
   includePages?: (page: Page) => boolean;
-  /** Filter: exclude these pages */
+  /** Filter: exclude these pages. Applied after includePages (removes pages from the include-filtered set). */
   excludePages?: (page: Page) => boolean;
   /** Custom CSS for the EPUB */
   css?: string;

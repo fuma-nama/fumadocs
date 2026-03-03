@@ -3,7 +3,7 @@ import path from 'node:path';
 import { exists } from '@/utils/fs';
 import picocolors from 'picocolors';
 import { spinner } from '@clack/prompts';
-import { exec } from 'node:child_process';
+import { exec, spawn } from 'node:child_process';
 import { promisify } from 'node:util';
 
 const execAsync = promisify(exec);
@@ -62,12 +62,19 @@ async function scaffoldApiRoute(cwd: string): Promise<boolean> {
   return true;
 }
 
-async function waitForServer(url: string, maxAttempts = 30): Promise<boolean> {
+const PROBE_TIMEOUT_MS = 2000;
+
+async function waitForServer(baseUrl: string, maxAttempts = 30): Promise<boolean> {
+  const healthUrl = `${baseUrl.replace(/\/$/, '')}/`;
   for (let i = 0; i < maxAttempts; i++) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), PROBE_TIMEOUT_MS);
     try {
-      const res = await fetch(url);
+      const res = await fetch(healthUrl, { signal: controller.signal });
+      clearTimeout(timeoutId);
       if (res.ok) return true;
     } catch {
+      clearTimeout(timeoutId);
       // Server not ready yet
     }
     await new Promise((r) => setTimeout(r, 1000));
@@ -83,12 +90,27 @@ export async function exportEpub(options: {
   const cwd = process.cwd();
   const outputPath = path.resolve(cwd, options.output ?? 'docs.epub');
   const port = options.port ?? 3000;
-  const exportUrl = `http://localhost:${port}/api/export/epub`;
+  const baseUrl = `http://localhost:${port}`;
+  const exportUrl = `${baseUrl}/api/export/epub`;
 
   const spin = spinner();
 
-  // Check for Next.js
-  const hasNext = await exists(path.join(cwd, 'next.config.js')) || await exists(path.join(cwd, 'next.config.ts')) || await exists(path.join(cwd, 'next.config.mjs'));
+  // Check for Next.js: package.json deps or app/pages directories
+  const hasNextConfig =
+    (await exists(path.join(cwd, 'next.config.js'))) ||
+    (await exists(path.join(cwd, 'next.config.ts'))) ||
+    (await exists(path.join(cwd, 'next.config.mjs')));
+  let hasNextInPkg = false;
+  try {
+    const pkg = JSON.parse(await fs.readFile(path.join(cwd, 'package.json'), 'utf-8'));
+    const deps = { ...pkg.dependencies, ...pkg.devDependencies, ...pkg.peerDependencies };
+    hasNextInPkg = !!deps?.next;
+  } catch {
+    // no package.json or invalid
+  }
+  const hasAppOrPages =
+    (await exists(path.join(cwd, 'app'))) || (await exists(path.join(cwd, 'pages')));
+  const hasNext = hasNextConfig || (hasNextInPkg && hasAppOrPages);
   if (!hasNext) {
     console.error(picocolors.red('Next.js project not found. Run this command from a Fumadocs Next.js project root.'));
     process.exit(1);
@@ -134,9 +156,11 @@ export async function exportEpub(options: {
   spin.stop('Build complete');
 
   spin.start('Starting server');
-  const child = exec('pnpm run start || npm run start || bun run start', {
+  const packageManager = process.env.npm_execpath?.includes('pnpm') ? 'pnpm' : process.env.npm_execpath?.includes('bun') ? 'bun' : 'npm';
+  const child = spawn(packageManager, ['run', 'start'], {
     cwd,
     env: { ...process.env, PORT: String(port) },
+    shell: true,
   });
 
   let serverReady = false;
@@ -144,7 +168,7 @@ export async function exportEpub(options: {
   child.stderr?.on('data', () => {});
 
   try {
-    serverReady = await waitForServer(exportUrl);
+    serverReady = await waitForServer(baseUrl);
   } catch {
     // ignore
   }
@@ -159,7 +183,13 @@ export async function exportEpub(options: {
 
   spin.start('Fetching EPUB');
   try {
-    const res = await fetch(exportUrl);
+    const headers: Record<string, string> = {};
+    const epubKey = process.env.EPUB_EXPORT_KEY;
+    if (epubKey) headers['x-epub-key'] = epubKey;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 120_000); // 2 min for heavy export
+    const res = await fetch(exportUrl, { headers, signal: controller.signal });
+    clearTimeout(timeoutId);
     if (!res.ok) {
       throw new Error(`Export failed: ${res.status} ${res.statusText}`);
     }

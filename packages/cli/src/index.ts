@@ -61,9 +61,14 @@ exportCmd
   .option('--port <number>', 'port for Next.js server', '3000')
   .option('--scaffold-only', 'only scaffold the API route, do not build and fetch')
   .action(async (options: { output?: string; port?: string; scaffoldOnly?: boolean }) => {
+    const port = options.port ? parseInt(options.port, 10) : undefined;
+    if (port !== undefined && (Number.isNaN(port) || !Number.isInteger(port) || port <= 0)) {
+      console.error(picocolors.red('Invalid --port: must be a positive integer.'));
+      process.exit(1);
+    }
     await exportEpub({
       output: options.output,
-      port: options.port ? parseInt(options.port, 10) : undefined,
+      port,
       scaffoldOnly: options.scaffoldOnly,
     });
   });
