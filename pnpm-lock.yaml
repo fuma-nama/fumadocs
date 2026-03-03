@@ -2559,6 +2559,9 @@ importers:
       tinyglobby:
         specifier: ^0.2.15
         version: 0.2.15
+      unrun:
+        specifier: ^0.2.28
+        version: 0.2.28
       vfile:
         specifier: ^6.0.3
         version: 6.0.3
@@ -2568,6 +2571,9 @@ importers:
       waku:
         specifier: 1.0.0-alpha.5
         version: 1.0.0-alpha.5(@types/node@25.3.3)(jiti@2.6.1)(lightningcss@1.31.1)(react-dom@19.2.4(react@19.2.4))(react-server-dom-webpack@19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(webpack@5.105.3))(react@19.2.4)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
+      zod:
+        specifier: ^4.3.6
+        version: 4.3.6
     devDependencies:
       '@tailwindcss/vite':
         specifier: ^4.2.1

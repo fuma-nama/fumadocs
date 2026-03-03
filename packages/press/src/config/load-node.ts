@@ -1,5 +1,6 @@
 import { glob } from 'tinyglobby';
-import type { FumapressConfig } from './global';
+import { configSchema, type FumapressConfig } from './global';
+import z from 'zod';
 
 /**
  * Default glob patterns for finding config file
@@ -15,10 +16,14 @@ export async function findConfigPath(): Promise<string | null> {
   return paths.length > 0 ? paths[0]! : null;
 }
 
-export function checkConfig(loaded: unknown): FumapressConfig {
-  if (typeof loaded !== 'object' || loaded === null) {
-    throw new Error(`Config file ${loaded} must export an object.`);
+export function checkConfig(file: string, loaded: unknown): FumapressConfig {
+  const result = configSchema.safeParse(loaded);
+
+  if (result.error) {
+    throw new Error(`The config file "${file}" is invalid:\n${z.prettifyError(result.error)}`, {
+      cause: result.error,
+    });
   }
 
-  return loaded as FumapressConfig;
+  return result.data;
 }

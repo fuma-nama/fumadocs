@@ -14,7 +14,7 @@ export async function loadConfig(): Promise<FumapressConfig> {
     const imported = await vite.runnerImport<{ default: FumapressConfig }>(
       pathToFileURL(configPath).href,
     );
-    return checkConfig(imported.module.default);
+    return checkConfig(configPath, imported.module.default);
   }
 
   return defineConfig();

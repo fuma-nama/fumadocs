@@ -7,16 +7,8 @@ import { getConfigRuntime } from '../config/load-runtime';
 import path from 'node:path';
 import { revalidable } from './revalidable';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
-
-export interface ContentConfig {
-  projects?: ContentProjectConfig[];
-}
-
-export interface ContentProjectConfig {
-  name: string;
-  dir: string;
-  include?: string[];
-}
+import type { ContentConfig, ProjectConfig } from '@/config/global';
+import { normalizeProjects } from './source/config';
 
 export interface RawPage {
   type: 'page';
@@ -29,7 +21,7 @@ export interface RawPage {
     content: string;
     frontmatter: Record<string, unknown>;
 
-    project: ContentProjectConfig;
+    project: ProjectConfig;
   };
 }
 
@@ -48,7 +40,7 @@ async function getPages(config: ContentConfig): Promise<{
   pages: RawPage[];
   metas: RawMeta[];
 }> {
-  async function md(project: ContentProjectConfig, file: string): Promise<RawPage> {
+  async function md(project: ProjectConfig, file: string): Promise<RawPage> {
     const absolutePath = path.resolve(project.dir, file);
     const content = (await fs.readFile(absolutePath)).toString();
     const parsed = grayMatter({ content });
@@ -70,7 +62,7 @@ async function getPages(config: ContentConfig): Promise<{
     };
   }
 
-  async function json(project: ContentProjectConfig, file: string): Promise<RawMeta | undefined> {
+  async function json(project: ProjectConfig, file: string): Promise<RawMeta | undefined> {
     const absolutePath = path.resolve(project.dir, file);
     const content = (await fs.readFile(absolutePath)).toString();
     const parsed = JSON.parse(content);
@@ -86,7 +78,7 @@ async function getPages(config: ContentConfig): Promise<{
     };
   }
 
-  async function project(project: ContentProjectConfig) {
+  async function project(project: ProjectConfig) {
     const files = await glob(
       project.include ?? ['**/*.{md,mdx}', '**/meta.json', '!node_modules'],
       {
@@ -113,9 +105,7 @@ async function getPages(config: ContentConfig): Promise<{
     );
   }
 
-  const projects = config.projects ?? [
-    { dir: process.env.PROJECT_DIR ?? process.cwd(), name: 'root' },
-  ];
+  const projects = normalizeProjects(config.projects ?? [{ dir: '', name: 'root' }]);
   const all = (await Promise.all(projects.map(project))).flat();
 
   return {

@@ -11,7 +11,7 @@ export default defineConfig({
       exclude: ['fumadocs-ui', 'fumadocs-core'],
     },
     ssr: {
-      external: ['@takumi-rs/image-response'],
+      external: ['@takumi-rs/image-response', 'unrun'],
     },
 
     plugins: [tailwindcss(), tsconfigPaths()],

@@ -1,6 +1,6 @@
 import { defineConfig, type FumapressConfig } from './global.js';
-import { pathToFileURL } from 'node:url';
 import { checkConfig, findConfigPath } from './load-node.js';
+import { unrun } from 'unrun';
 
 const DefaultConfig = defineConfig();
 
@@ -8,10 +8,15 @@ async function loadConfig(configPath: string | null): Promise<FumapressConfig> {
   if (configPath === null) return DefaultConfig;
 
   try {
-    // TODO: redesign config layer
-    const { default: userConfig } = await import(pathToFileURL(configPath).href);
+    const { module } = await unrun<{ default: unknown }>({
+      path: configPath,
+      inputOptions: {
+        cwd: process.env.PROJECT_DIR,
+        external: ['*'],
+      },
+    });
 
-    return checkConfig(userConfig);
+    return checkConfig(configPath, module.default ?? module);
   } catch (error) {
     console.error(
       `Failed to load config from ${configPath}:`,

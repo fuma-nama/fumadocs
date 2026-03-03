@@ -2,20 +2,20 @@ import type { FumapressConfig } from '@/config/global';
 import { getSource } from '@/lib/source';
 import type { DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
 import type { HomeLayoutProps } from 'fumadocs-ui/layouts/home';
-import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import { FumadocsLogo } from '@/components/logo';
-
-type Awaitable<T> = T | Promise<T>;
-
-export interface LayoutConfig {
-  base?: () => Awaitable<BaseLayoutProps>;
-}
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 
 export function layoutConfig(config: FumapressConfig) {
+  const { base } = config.layout ?? {};
+
   return {
     async base() {
-      if (config.layout?.base) return await config.layout.base();
+      let defaultConfig: BaseLayoutProps | undefined;
+      if (typeof base === 'function') defaultConfig = await base();
+      else if (typeof base === 'object') defaultConfig = base;
+
       return {
+        ...defaultConfig,
         nav: {
           title: (
             <>
@@ -23,6 +23,7 @@ export function layoutConfig(config: FumapressConfig) {
               Fumapress
             </>
           ),
+          ...defaultConfig?.nav,
         },
       };
     },

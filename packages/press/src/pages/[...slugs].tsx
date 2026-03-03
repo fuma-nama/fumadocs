@@ -1,8 +1,6 @@
 import type { PageProps } from 'waku/router';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
-import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
 import { getPageImage, getSource, SourcePage } from '@/lib/source';
-import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { layoutConfig } from '@/layouts/config';
 import { getConfigRuntime } from '@/config/load-runtime';
 import { Card, Cards } from 'fumadocs-ui/components/card';
@@ -41,19 +39,51 @@ const mdxComponents = {
   ...defaultMdxComponents,
 };
 
+interface MdPresetData {
+  layout: typeof import('fumadocs-ui/layouts/docs') | typeof import('fumadocs-ui/layouts/flux');
+  page:
+    | typeof import('fumadocs-ui/layouts/docs/page')
+    | typeof import('fumadocs-ui/layouts/flux/page');
+}
+
 export default async function DocPage({ slugs }: PageProps<'/docs/[...slugs]'>) {
   const source = await getSource();
-  const layout = layoutConfig(await getConfigRuntime());
+  const config = await getConfigRuntime();
+  const layout = layoutConfig(config);
   const page = source.getPage(slugs);
+  const mdPreset = config.layout?.presets?.md ?? 'docs';
+  let mdPresetData: MdPresetData;
 
+  if (mdPreset === 'docs') {
+    mdPresetData = {
+      layout: await import('fumadocs-ui/layouts/docs'),
+      page: await import('fumadocs-ui/layouts/docs/page'),
+    };
+  } else {
+    mdPresetData = {
+      layout: await import('fumadocs-ui/layouts/flux'),
+      page: await import('fumadocs-ui/layouts/flux/page'),
+    };
+  }
+
+  const { DocsLayout } = mdPresetData.layout;
   return (
     <DocsLayout {...await layout.docs()}>
-      <Content slugs={slugs} page={page} />
+      <MdContent slugs={slugs} page={page} data={mdPresetData} />
     </DocsLayout>
   );
 }
 
-async function Content({ slugs, page }: { slugs: string[]; page?: SourcePage }) {
+async function MdContent({
+  slugs,
+  page,
+  data,
+}: {
+  slugs: string[];
+  page?: SourcePage;
+  data: MdPresetData;
+}) {
+  const { DocsBody, DocsTitle, DocsPage, DocsDescription } = data.page;
   const source = await getSource();
 
   if (!page) {
