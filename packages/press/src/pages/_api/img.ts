@@ -19,7 +19,7 @@ export async function GET(request: Request) {
   const config = await getConfigRuntime();
   const projects = normalizeProjects(config.content?.projects);
   const project = projects.find((item) => item.dir === projectDir);
-  const possiblePaths = [path.join(pagePath, src)];
+  const possiblePaths = [path.join(path.dirname(pagePath), src)];
 
   if (project?.assetsDir) {
     possiblePaths.push(...project.assetsDir.map((dir) => path.join(dir, src)));
