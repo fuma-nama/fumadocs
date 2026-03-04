@@ -1,5 +1,7 @@
 import type { RootContent } from 'mdast';
 import { valueToEstree } from 'estree-util-value-to-estree';
+import type { Expression } from 'estree-jsx';
+import type { MdxjsEsm } from 'mdast-util-mdx';
 
 export function flattenNode(node: RootContent): string {
   if ('children' in node) return node.children.map((child) => flattenNode(child)).join('');
@@ -9,7 +11,11 @@ export function flattenNode(node: RootContent): string {
   return '';
 }
 
-export function toMdxExport(name: string, value: unknown): RootContent {
+export function toMdxExport(name: string, value: unknown): MdxjsEsm {
+  return toMdxExportRaw(name, valueToEstree(value));
+}
+
+export function toMdxExportRaw(name: string, expression: Expression): MdxjsEsm {
   return {
     type: 'mdxjsEsm',
     value: '',
@@ -22,7 +28,6 @@ export function toMdxExport(name: string, value: unknown): RootContent {
             type: 'ExportNamedDeclaration',
             attributes: [],
             specifiers: [],
-            source: null,
             declaration: {
               type: 'VariableDeclaration',
               kind: 'let',
@@ -33,7 +38,7 @@ export function toMdxExport(name: string, value: unknown): RootContent {
                     type: 'Identifier',
                     name,
                   },
-                  init: valueToEstree(value),
+                  init: expression,
                 },
               ],
             },

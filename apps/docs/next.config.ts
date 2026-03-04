@@ -39,18 +39,6 @@ const config: NextConfig = {
       },
     ];
   },
-  async rewrites() {
-    return [
-      {
-        source: '/docs/:path*.mdx',
-        destination: '/llms.mdx/:path*',
-      },
-      {
-        source: '/docs.mdx',
-        destination: '/llms.mdx',
-      },
-    ];
-  },
 };
 
 const withMDX = createMDX();

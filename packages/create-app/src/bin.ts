@@ -138,24 +138,23 @@ async function main(): Promise<void> {
       },
       ogImage: async ({ results }: { results: { template?: Template } }) => {
         if (config.ogImage !== undefined) return config.ogImage;
-        if (isCI) return 'takumi';
+        if (!results.template?.startsWith('+next')) return 'takumi';
+        if (isCI) return 'next/og';
 
         return select({
           message: 'Configure Open Graph Image generation?',
           options: [
             {
+              value: 'next-og',
+              label: 'next/og',
+              hint: 'Next.js built-in solution',
+            },
+            {
               value: 'takumi',
               label: 'Takumi',
               hint: 'Output WebP format, framework-agnostic',
             },
-            {
-              value: 'next-og',
-              label: 'next/og',
-              hint: 'Next.js built-in solution',
-              disabled: !results.template?.startsWith('+next'),
-            },
           ],
-          initialValue: 'takumi' as const,
         });
       },
       installDeps: async () => {
@@ -203,8 +202,8 @@ async function main(): Promise<void> {
   }
 
   if (options.ogImage) {
-    const { ogImage } = await import('./plugins/og-image');
-    plugins.push(ogImage(options.ogImage));
+    const { nextUseTakumi } = await import('./plugins/next-use-takumi');
+    plugins.push(nextUseTakumi());
   }
 
   await create({

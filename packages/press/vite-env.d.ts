@@ -1,6 +1,17 @@
-declare module 'virtual:app/routes' {
-  import type { RoutesConfig } from './config/routes';
+declare module 'process' {
+  global {
+    namespace NodeJS {
+      interface ProcessEnv {
+        /**
+         * the project directory (where fumapress is started)
+         */
+        PROJECT_DIR?: string;
 
-  const routes: RoutesConfig;
-  export = routes;
+        /**
+         * whether hot reload is enabled (e.g. local file watcher)
+         */
+        HOT_RELOAD?: '1';
+      }
+    }
+  }
 }

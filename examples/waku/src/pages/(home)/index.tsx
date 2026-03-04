@@ -14,8 +14,8 @@ export default function Home() {
   );
 }
 
-export const getConfig = async () => {
+export async function getConfig() {
   return {
     render: 'static',
   };
-};
+}

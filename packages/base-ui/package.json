@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/base-ui",
-  "version": "16.6.8",
+  "version": "16.6.9",
   "description": "The Base UI version of Fumadocs UI",
   "keywords": [
     "Docs",
@@ -135,7 +135,7 @@
     "unified": "^11.0.5"
   },
   "peerDependencies": {
-    "@takumi-rs/image-response": "^0.68.17",
+    "@takumi-rs/image-response": "*",
     "@types/react": "*",
     "fumadocs-core": "workspace:*",
     "next": "16.x.x",
