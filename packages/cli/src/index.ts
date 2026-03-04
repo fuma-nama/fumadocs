@@ -56,19 +56,14 @@ const exportCmd = program
 
 exportCmd
   .command('epub')
-  .description('export documentation to EPUB format')
+  .description('export documentation to EPUB format (run after production build)')
+  .requiredOption('--framework <name>', 'React framework: next, tanstack-start, react-router, waku')
   .option('--output <path>', 'output file path', 'docs.epub')
-  .option('--port <number>', 'port for Next.js server', '3000')
-  .option('--scaffold-only', 'only scaffold the API route, do not build and fetch')
-  .action(async (options: { output?: string; port?: string; scaffoldOnly?: boolean }) => {
-    const port = options.port ? parseInt(options.port, 10) : undefined;
-    if (port !== undefined && (Number.isNaN(port) || !Number.isInteger(port) || port <= 0)) {
-      console.error(picocolors.red('Invalid --port: must be a positive integer.'));
-      process.exit(1);
-    }
+  .option('--scaffold-only', 'only scaffold the EPUB route, do not copy')
+  .action(async (options: { output?: string; framework: string; scaffoldOnly?: boolean }) => {
     await exportEpub({
       output: options.output,
-      port,
+      framework: options.framework,
       scaffoldOnly: options.scaffoldOnly,
     });
   });

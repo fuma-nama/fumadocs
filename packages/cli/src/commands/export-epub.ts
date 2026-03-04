@@ -3,73 +3,27 @@ import path from 'node:path';
 import { exists } from '@/utils/fs';
 import picocolors from 'picocolors';
 import { spinner } from '@clack/prompts';
-import { exec, spawn } from 'node:child_process';
+import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
 
 const execAsync = promisify(exec);
 
+/** Path of pre-rendered EPUB, choose one according to your React framework */
+const EPUB_BUILD_PATHS: Record<string, string> = {
+  next: '.next/server/app/export/epub.body',
+  'tanstack-start': '.output/public/export/epub',
+  'tanstack-start-spa': 'dist/client/export/epub',
+  'react-router': 'build/client/export/epub',
+  'react-router-spa': 'build/client/export/epub',
+  waku: 'dist/public/export/epub',
+};
+
 const API_ROUTE_TEMPLATE = `import { source } from '@/lib/source';
 import { exportEpub } from 'fumadocs-epub';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = false;
 
-const RATE_LIMIT_WINDOW_MS = 60_000;
-const RATE_LIMIT_MAX_REQUESTS = 10;
-const MAX_RATE_LIMIT_ENTRIES = 10_000;
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-
-function getClientIp(request: Request): string {
-  return (
-    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-    request.headers.get('x-real-ip') ??
-    'unknown'
-  );
-}
-
-function pruneExpiredRateLimitEntries(): void {
-  const now = Date.now();
-  for (const [key, entry] of rateLimitMap.entries()) {
-    if (now > entry.resetAt) rateLimitMap.delete(key);
-  }
-}
-
-function evictOldestRateLimitEntries(): void {
-  if (rateLimitMap.size <= MAX_RATE_LIMIT_ENTRIES) return;
-  const entries = [...rateLimitMap.entries()].sort((a, b) => a[1].resetAt - b[1].resetAt);
-  const toRemove = entries.length - MAX_RATE_LIMIT_ENTRIES;
-  for (let i = 0; i < toRemove; i++) rateLimitMap.delete(entries[i][0]);
-}
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  pruneExpiredRateLimitEntries();
-  if (rateLimitMap.size >= MAX_RATE_LIMIT_ENTRIES) evictOldestRateLimitEntries();
-  const entry = rateLimitMap.get(ip);
-  if (!entry) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-    return true;
-  }
-  if (now > entry.resetAt) {
-    entry.count = 1;
-    entry.resetAt = now + RATE_LIMIT_WINDOW_MS;
-    return true;
-  }
-  entry.count++;
-  return entry.count <= RATE_LIMIT_MAX_REQUESTS;
-}
-
-export async function GET(request: Request) {
-  const ip = getClientIp(request);
-  if (!checkRateLimit(ip)) {
-    return new Response('Too Many Requests', { status: 429 });
-  }
-  const epubKey = process.env.EPUB_EXPORT_KEY;
-  if (epubKey) {
-    const authHeader = request.headers.get('x-epub-key') ?? request.headers.get('authorization')?.replace(/^Bearer\\s+/i, '');
-    if (authHeader !== epubKey) {
-      return new Response('Unauthorized', { status: 401 });
-    }
-  }
+export async function GET(): Promise<Response> {
   const buffer = await exportEpub({
     source,
     config: {
@@ -99,59 +53,44 @@ async function findAppDir(cwd: string): Promise<string | null> {
   return null;
 }
 
-async function scaffoldApiRoute(cwd: string): Promise<boolean> {
+async function scaffoldEpubRoute(cwd: string): Promise<boolean> {
   const appDir = await findAppDir(cwd);
   if (!appDir) {
     console.error(picocolors.red('Could not find app directory (app/ or src/app/)'));
     return false;
   }
 
-  const routePath = path.join(appDir, 'api', 'export', 'epub', 'route.ts');
+  const routePath = path.join(appDir, 'export', 'epub', 'route.ts');
   if (await exists(routePath)) {
-    console.log(picocolors.yellow('API route already exists at'), routePath);
+    console.log(picocolors.yellow('EPUB route already exists at'), routePath);
     return true;
   }
 
   await fs.mkdir(path.dirname(routePath), { recursive: true });
   await fs.writeFile(routePath, API_ROUTE_TEMPLATE);
-  console.log(picocolors.green('Created API route at'), routePath);
+  console.log(picocolors.green('Created EPUB route at'), routePath);
   return true;
-}
-
-const PROBE_TIMEOUT_MS = 2000;
-
-async function waitForServer(baseUrl: string, maxAttempts = 30): Promise<boolean> {
-  const healthUrl = `${baseUrl.replace(/\/$/, '')}/`;
-  for (let i = 0; i < maxAttempts; i++) {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), PROBE_TIMEOUT_MS);
-    try {
-      await fetch(healthUrl, { signal: controller.signal });
-      clearTimeout(timeoutId);
-      return true; // Any successful fetch = server is up (404/401 still means Next.js responded)
-    } catch {
-      clearTimeout(timeoutId);
-      // Server not ready yet
-    }
-    await new Promise((r) => setTimeout(r, 1000));
-  }
-  return false;
 }
 
 export async function exportEpub(options: {
   output?: string;
-  port?: number;
+  framework: string;
   scaffoldOnly?: boolean;
 }) {
   const cwd = process.cwd();
   const outputPath = path.resolve(cwd, options.output ?? 'docs.epub');
-  const port = options.port ?? 3000;
-  const baseUrl = `http://localhost:${port}`;
-  const exportUrl = `${baseUrl}/api/export/epub`;
+  const framework = options.framework;
 
   const spin = spinner();
 
-  // Check for Next.js: package.json deps or app/pages directories
+  const buildPath = EPUB_BUILD_PATHS[framework];
+  if (!buildPath) {
+    const valid = Object.keys(EPUB_BUILD_PATHS).join(', ');
+    console.error(picocolors.red(`Invalid --framework "${framework}". Must be one of: ${valid}`));
+    process.exit(1);
+  }
+
+  // Check for Next.js when scaffolding (only Next.js scaffold is implemented)
   const hasNextConfig =
     (await exists(path.join(cwd, 'next.config.js'))) ||
     (await exists(path.join(cwd, 'next.config.ts'))) ||
@@ -170,26 +109,32 @@ export async function exportEpub(options: {
     (await exists(path.join(cwd, 'src', 'app'))) ||
     (await exists(path.join(cwd, 'src', 'pages')));
   const hasNext = hasNextConfig || (hasNextInPkg && hasAppOrPages);
-  if (!hasNext) {
+
+  if (!hasNext && framework === 'next') {
     console.error(picocolors.red('Next.js project not found. Run this command from a Fumadocs Next.js project root.'));
     process.exit(1);
   }
 
-  // Scaffold API route
-  spin.start('Scaffolding API route');
-  const scaffolded = await scaffoldApiRoute(cwd);
-  spin.stop(scaffolded ? 'API route ready' : 'Scaffolding failed');
+  // Scaffold EPUB route (Next.js only for now)
+  if (framework === 'next') {
+    spin.start('Scaffolding EPUB route');
+    const scaffolded = await scaffoldEpubRoute(cwd);
+    spin.stop(scaffolded ? 'EPUB route ready' : 'Scaffolding failed');
 
-  if (!scaffolded) {
-    process.exit(1);
+    if (!scaffolded) {
+      process.exit(1);
+    }
   }
 
   if (options.scaffoldOnly) {
     console.log(picocolors.cyan('\nTo export:'));
     console.log('  1. Add fumadocs-epub to your dependencies: pnpm add fumadocs-epub');
     console.log('  2. Ensure includeProcessedMarkdown: true in your docs collection config');
-    console.log('  3. Run your dev server and visit', exportUrl);
-    console.log('  4. Or run: fumadocs export epub (without --scaffold-only) to build and fetch');
+    if (framework !== 'next') {
+      console.log(`  3. Add a prerender route that outputs EPUB to ${buildPath}`);
+    }
+    console.log(`  ${framework === 'next' ? '3' : '4'}. Run production build: pnpm build`);
+    console.log(`  ${framework === 'next' ? '4' : '5'}. Run: fumadocs export epub --framework ${framework}`);
     return;
   }
 
@@ -203,65 +148,14 @@ export async function exportEpub(options: {
     await execAsync(`${packageManager} add fumadocs-epub`, { cwd });
   }
 
-  // Build and start
-  spin.start('Building Next.js app');
-  try {
-    await execAsync('pnpm run build || npm run build || bun run build', { cwd });
-  } catch (e) {
-    spin.stop('Build failed');
-    console.error(e);
-    process.exit(1);
-  }
-  spin.stop('Build complete');
-
-  spin.start('Starting server');
-  const packageManager = process.env.npm_execpath?.includes('pnpm') ? 'pnpm' : process.env.npm_execpath?.includes('bun') ? 'bun' : 'npm';
-  const child = spawn(packageManager, ['run', 'start'], {
-    cwd,
-    env: { ...process.env, PORT: String(port) },
-    shell: true,
-  });
-
-  let serverReady = false;
-  child.stdout?.on('data', () => {});
-  child.stderr?.on('data', () => {});
-
-  try {
-    serverReady = await waitForServer(baseUrl);
-  } catch {
-    // ignore
-  }
-
-  if (!serverReady) {
-    spin.stop('Server failed to start');
-    child.kill();
+  const fullBuildPath = path.join(cwd, buildPath);
+  if (!(await exists(fullBuildPath))) {
+    console.error(picocolors.red(`EPUB not found at ${buildPath}. Run production build first (e.g. pnpm build).`));
     process.exit(1);
   }
 
-  spin.stop('Server ready');
-
-  spin.start('Fetching EPUB');
-  try {
-    const headers: Record<string, string> = {};
-    const epubKey = process.env.EPUB_EXPORT_KEY;
-    if (epubKey) headers['x-epub-key'] = epubKey;
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 120_000); // 2 min for heavy export
-    const res = await fetch(exportUrl, { headers, signal: controller.signal });
-    clearTimeout(timeoutId);
-    if (!res.ok) {
-      throw new Error(`Export failed: ${res.status} ${res.statusText}`);
-    }
-    const buffer = Buffer.from(await res.arrayBuffer());
-    await fs.mkdir(path.dirname(outputPath), { recursive: true });
-    await fs.writeFile(outputPath, buffer);
-    spin.stop(picocolors.green(`EPUB saved to ${outputPath}`));
-  } catch (e) {
-    spin.stop('Export failed');
-    console.error(e);
-    child.kill();
-    process.exit(1);
-  } finally {
-    child.kill();
-  }
+  spin.start('Copying EPUB');
+  await fs.mkdir(path.dirname(outputPath), { recursive: true });
+  await fs.copyFile(fullBuildPath, outputPath);
+  spin.stop(picocolors.green(`EPUB saved to ${outputPath}`));
 }
