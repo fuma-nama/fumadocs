@@ -49,7 +49,7 @@ export function resolveRequestData(pathname: string, { path, query }: RequestDat
   // Add new query parameters from the RequestData
   for (const key in query) {
     const param = query[key];
-    if (param.values.length === 0) continue;
+    if (!param || param.values.length === 0) continue;
 
     // Remove existing parameter first to avoid duplicates
     searchParams.delete(key);

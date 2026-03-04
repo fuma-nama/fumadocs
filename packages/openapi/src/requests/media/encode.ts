@@ -44,7 +44,8 @@ export function encodeRequestData(
 
       const encoder = getMediaEncoder(field, adapters);
       if (encoder) {
-        result[type][key] = { value: encoder(value) };
+        if (type === 'query') result[type][key] = { values: [encoder(value)] };
+        else result[type][key] = { value: encoder(value) };
         continue;
       }
 
