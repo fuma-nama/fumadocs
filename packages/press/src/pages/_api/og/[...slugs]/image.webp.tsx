@@ -1,10 +1,10 @@
 import { getConfigRuntime } from '@/config/load-runtime';
 import { getSource } from '@/lib/source';
-import { ImageResponse } from '@takumi-rs/image-response';
 import { generate as DefaultImage } from 'fumadocs-ui/og/takumi';
 import { ApiContext } from 'waku/router';
 
 export async function GET(_: Request, { params }: ApiContext<'/og/[...slugs]/image.webp'>) {
+  const { ImageResponse } = await import('@takumi-rs/image-response');
   const config = await getConfigRuntime();
   const page = (await getSource(config)).getPage(params.slugs);
 
@@ -21,13 +21,7 @@ export async function GET(_: Request, { params }: ApiContext<'/og/[...slugs]/ima
 }
 
 export async function getConfig() {
-  const config = await getConfigRuntime();
-  const pages = (await getSource(config))
-    .generateParams()
-    .map((item) => (item.lang ? [item.lang, ...item.slug] : item.slug));
-
   return {
-    render: 'static' as const,
-    staticPaths: pages,
+    render: 'dynamic' as const,
   } as const;
 }

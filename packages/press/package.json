@@ -70,6 +70,7 @@
     "remark": "^15.0.1",
     "remark-math": "^6.0.0",
     "remark-rehype": "^11.1.2",
+    "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.2.1",
     "tsdown": "0.20.3",
     "typescript": "^5.9.3",

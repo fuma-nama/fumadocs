@@ -1,6 +1,6 @@
 import type { PageProps } from 'waku/router';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
-import { getPageImage, getSource, SourcePage } from '@/lib/source';
+import { getPageImage, getSource, type SourcePage } from '@/lib/source';
 import { layoutConfig } from '@/layouts/config';
 import { getConfigRuntime } from '@/config/load-runtime';
 import { Card, Cards } from 'fumadocs-ui/components/card';
@@ -18,6 +18,8 @@ import rehypeKatex from 'rehype-katex';
 import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
 import { remarkMdxMermaid } from 'fumadocs-core/mdx-plugins/remark-mdx-mermaid';
 import { Mermaid } from '@/components/mermaid';
+import type { ComponentProps } from 'react';
+import { Image } from '@/components/image';
 
 const compiler = createMarkdownCompiler({
   remarkPlugins: [
@@ -38,10 +40,26 @@ const compiler = createMarkdownCompiler({
   ],
 });
 
-const mdxComponents = {
-  ...defaultMdxComponents,
-  Mermaid,
-};
+function useMdxComponents(page: SourcePage) {
+  function ServerImage({ src, ...rest }: ComponentProps<'img'>) {
+    // resolve non-absolute src
+    if (src && !URL.canParse(src)) {
+      const params = new URLSearchParams();
+      params.set('page', page.absolutePath!);
+      params.set('project', page.data.project.dir);
+      params.set('src', src);
+      src = `/img?${params}`;
+    }
+
+    return <Image src={src} {...rest} />;
+  }
+
+  return {
+    ...defaultMdxComponents,
+    Mermaid,
+    img: ServerImage,
+  };
+}
 
 interface MdPresetComponents {
   layout: typeof import('fumadocs-ui/layouts/docs') | typeof import('fumadocs-ui/layouts/flux');
@@ -147,6 +165,7 @@ async function MdContent({
     );
   }
 
+  const mdxComponents = useMdxComponents(page);
   const toc = compiled.file.data.rehypeToc?.map(
     (item): TOCItemType => ({
       ...item,
@@ -176,21 +195,7 @@ async function MdContent({
 }
 
 export async function getConfig() {
-  const config = await getConfigRuntime();
-  const source = await getSource(config);
-  const staticPaths: string[][] = [];
-  let hasIndex = false;
-
-  for (const item of source.generateParams()) {
-    const staticPath = item.lang ? [item.lang, ...item.slug] : item.slug;
-    staticPaths.push(staticPath);
-    if (staticPath.length === 0) hasIndex = true;
-  }
-
-  if (!hasIndex) staticPaths.push([]);
-
   return {
     render: 'dynamic',
-    staticPaths,
   } as const;
 }
