@@ -13,7 +13,13 @@ import { Input, labelVariants } from '@/ui/components/input';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { FormatFlags } from '@/utils/schema-to-string';
-import { anyFields, useFieldInfo, useSchemaUtils, useSchemaScope } from '@/playground/schema';
+import {
+  anyFields,
+  useFieldInfo,
+  useSchemaUtils,
+  useSchemaScope,
+  useResolvedSchema,
+} from '@/playground/schema';
 import type { ParsedSchema } from '@/utils/schema';
 import { stringifyFieldKey } from '@fumari/stf/lib/utils';
 import { cva } from 'class-variance-authority';
@@ -36,8 +42,8 @@ export function ObjectInput({
   field: Exclude<ParsedSchema, boolean>;
   fieldName: FieldKey;
 } & ComponentProps<'div'>) {
-  const { resolve, generateDefault } = useSchemaUtils();
-  const field = resolve(_field);
+  const { generateDefault } = useSchemaUtils();
+  const field = useResolvedSchema(_field);
   const schemaPropKeys = field.properties ? Object.keys(field.properties) : [];
   const {
     patternProperties = {},
@@ -299,8 +305,8 @@ export function FieldSet({
   collapsible?: boolean;
 }) {
   const { readOnly, writeOnly } = useSchemaScope();
-  const { resolve, generateDefault, schemaToString } = useSchemaUtils();
-  const field = resolve(_field);
+  const { generateDefault, schemaToString } = useSchemaUtils();
+  const field = useResolvedSchema(_field);
   const [show, setShow] = useState(!collapsible);
   const { info, updateInfo } = useFieldInfo(fieldName, field, depth);
   const id = stringifyFieldKey(fieldName);
@@ -443,8 +449,7 @@ export function FieldSet({
     );
   }
 
-  if (field.type === 'object' || info.intersection) {
-    const schema = info.intersection?.merged ?? field;
+  if (field.type === 'object') {
     return (
       <fieldset
         {...props}
@@ -452,14 +457,14 @@ export function FieldSet({
         className={cn('flex flex-col gap-1.5 col-span-full @container', props.className)}
       >
         <div className={fieldLabelVariants()}>
-          {renderLabelTrigger(schema)}
+          {renderLabelTrigger(field)}
           {slotType ?? <FieldLabelType>{schemaToString(field)}</FieldLabelType>}
           {toolbar}
           {!isRequired && isDefined && renderUnsetButton()}
         </div>
         {show && (
           <ObjectInput
-            field={schema}
+            field={field}
             fieldName={fieldName}
             className="rounded-lg border border-fd-primary/20 bg-fd-background/50 p-2 shadow-sm"
           />
