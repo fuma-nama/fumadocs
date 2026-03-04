@@ -16,11 +16,14 @@ import { Fragment } from 'react/jsx-runtime';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
+import { remarkMdxMermaid } from 'fumadocs-core/mdx-plugins/remark-mdx-mermaid';
+import { Mermaid } from '@/components/mermaid';
 
 const compiler = createMarkdownCompiler({
   remarkPlugins: [
     remarkGfm,
     remarkMath,
+    remarkMdxMermaid,
     plugin(remarkHeading, { generateToc: false }),
     plugin(remarkNpm, { persist: { id: 'package-manager' } }),
     remarkCodeTab,
@@ -37,9 +40,10 @@ const compiler = createMarkdownCompiler({
 
 const mdxComponents = {
   ...defaultMdxComponents,
+  Mermaid,
 };
 
-interface MdPresetData {
+interface MdPresetComponents {
   layout: typeof import('fumadocs-ui/layouts/docs') | typeof import('fumadocs-ui/layouts/flux');
   page:
     | typeof import('fumadocs-ui/layouts/docs/page')
@@ -47,29 +51,29 @@ interface MdPresetData {
 }
 
 export default async function DocPage({ slugs }: PageProps<'/docs/[...slugs]'>) {
-  const source = await getSource();
   const config = await getConfigRuntime();
+  const source = await getSource(config);
   const layout = layoutConfig(config);
   const page = source.getPage(slugs);
   const mdPreset = config.layout?.presets?.md ?? 'docs';
-  let mdPresetData: MdPresetData;
+  let mdPresetComponents: MdPresetComponents;
 
   if (mdPreset === 'docs') {
-    mdPresetData = {
+    mdPresetComponents = {
       layout: await import('fumadocs-ui/layouts/docs'),
       page: await import('fumadocs-ui/layouts/docs/page'),
     };
   } else {
-    mdPresetData = {
+    mdPresetComponents = {
       layout: await import('fumadocs-ui/layouts/flux'),
       page: await import('fumadocs-ui/layouts/flux/page'),
     };
   }
 
-  const { DocsLayout } = mdPresetData.layout;
+  const { DocsLayout } = mdPresetComponents.layout;
   return (
     <DocsLayout {...await layout.docs()}>
-      <MdContent slugs={slugs} page={page} data={mdPresetData} />
+      <MdContent slugs={slugs} page={page} components={mdPresetComponents} />
     </DocsLayout>
   );
 }
@@ -77,14 +81,15 @@ export default async function DocPage({ slugs }: PageProps<'/docs/[...slugs]'>) 
 async function MdContent({
   slugs,
   page,
-  data,
+  components,
 }: {
   slugs: string[];
   page?: SourcePage;
-  data: MdPresetData;
+  components: MdPresetComponents;
 }) {
-  const { DocsBody, DocsTitle, DocsPage, DocsDescription } = data.page;
-  const source = await getSource();
+  const config = await getConfigRuntime();
+  const source = await getSource(config);
+  const { DocsBody, DocsTitle, DocsPage, DocsDescription } = components.page;
 
   if (!page) {
     if (slugs.length === 0) {
@@ -171,10 +176,12 @@ async function MdContent({
 }
 
 export async function getConfig() {
+  const config = await getConfigRuntime();
+  const source = await getSource(config);
   const staticPaths: string[][] = [];
   let hasIndex = false;
 
-  for (const item of (await getSource()).generateParams()) {
+  for (const item of source.generateParams()) {
     const staticPath = item.lang ? [item.lang, ...item.slug] : item.slug;
     staticPaths.push(staticPath);
     if (staticPath.length === 0) hasIndex = true;

@@ -1,3 +1,4 @@
+import { revalidable } from '@/lib/revalidable.js';
 import { defineConfig, type FumapressConfig } from './global.js';
 import { checkConfig, findConfigPath } from './load-node.js';
 import { unrun } from 'unrun';
@@ -26,14 +27,9 @@ async function loadConfig(configPath: string | null): Promise<FumapressConfig> {
   }
 }
 
-let cached: Promise<FumapressConfig> | undefined;
-
-export function getConfigRuntime(): Promise<FumapressConfig> {
-  if (cached) return cached;
-
-  cached = (async () => {
+export const getConfigRuntime = revalidable({
+  async create() {
     const configPath = await findConfigPath();
     return await loadConfig(configPath);
-  })();
-  return cached;
-}
+  },
+});

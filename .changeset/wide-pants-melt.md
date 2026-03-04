@@ -1,0 +1,5 @@
+---
+'fumapress': patch
+---
+
+Support Mermaid

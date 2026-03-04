@@ -2453,12 +2453,6 @@ importers:
 
   packages/press:
     dependencies:
-      '@hono/node-server':
-        specifier: ^1.19.10
-        version: 1.19.10(hono@4.12.4)
-      '@hono/node-ws':
-        specifier: ^1.3.0
-        version: 1.3.0(@hono/node-server@1.19.10(hono@4.12.4))(hono@4.12.4)
       '@takumi-rs/image-response':
         specifier: ^0.69.5
         version: 0.69.5
@@ -2477,51 +2471,15 @@ importers:
       fumadocs-ui:
         specifier: workspace:*
         version: link:../radix-ui
-      gray-matter:
-        specifier: ^4.0.3
-        version: 4.0.3
-      hast-util-to-jsx-runtime:
-        specifier: ^2.3.6
-        version: 2.3.6
-      hono:
-        specifier: ^4.12.4
-        version: 4.12.4
-      lucide-react:
-        specifier: ^0.575.0
-        version: 0.575.0(react@19.2.4)
       picomatch:
         specifier: ^4.0.3
         version: 4.0.3
-      react:
-        specifier: ^19.2.4
-        version: 19.2.4
-      react-dom:
-        specifier: ^19.2.4
-        version: 19.2.4(react@19.2.4)
-      react-server-dom-webpack:
-        specifier: ^19.2.4
-        version: 19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(webpack@5.105.3)
-      rehype-katex:
-        specifier: ^7.0.1
-        version: 7.0.1
-      remark:
-        specifier: ^15.0.1
-        version: 15.0.1
-      remark-math:
-        specifier: ^6.0.0
-        version: 6.0.0
-      remark-rehype:
-        specifier: ^11.1.2
-        version: 11.1.2
       tinyglobby:
         specifier: ^0.2.15
         version: 0.2.15
       unrun:
         specifier: ^0.2.28
         version: 0.2.28
-      vfile:
-        specifier: ^6.0.3
-        version: 6.0.3
       waku:
         specifier: 1.0.0-alpha.5
         version: 1.0.0-alpha.5(@types/node@25.3.3)(jiti@2.6.1)(lightningcss@1.31.1)(react-dom@19.2.4(react@19.2.4))(react-server-dom-webpack@19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(webpack@5.105.3))(react@19.2.4)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
@@ -2529,6 +2487,12 @@ importers:
         specifier: ^4.3.6
         version: 4.3.6
     devDependencies:
+      '@hono/node-server':
+        specifier: ^1.19.10
+        version: 1.19.10(hono@4.12.4)
+      '@hono/node-ws':
+        specifier: ^1.3.0
+        version: 1.3.0(@hono/node-server@1.19.10(hono@4.12.4))(hono@4.12.4)
       '@tailwindcss/vite':
         specifier: ^4.2.1
         version: 4.2.1(vite@7.3.1(@types/node@25.3.3)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
@@ -2556,9 +2520,45 @@ importers:
       '@types/unist':
         specifier: ^3.0.3
         version: 3.0.3
+      beautiful-mermaid:
+        specifier: ^1.1.3
+        version: 1.1.3
+      gray-matter:
+        specifier: ^4.0.3
+        version: 4.0.3
+      hast-util-to-jsx-runtime:
+        specifier: ^2.3.6
+        version: 2.3.6
+      hono:
+        specifier: ^4.12.4
+        version: 4.12.4
       katex:
         specifier: ^0.16.33
         version: 0.16.33
+      lucide-react:
+        specifier: ^0.575.0
+        version: 0.575.0(react@19.2.4)
+      react:
+        specifier: ^19.2.4
+        version: 19.2.4
+      react-dom:
+        specifier: ^19.2.4
+        version: 19.2.4(react@19.2.4)
+      react-server-dom-webpack:
+        specifier: ^19.2.4
+        version: 19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(webpack@5.105.3)
+      rehype-katex:
+        specifier: ^7.0.1
+        version: 7.0.1
+      remark:
+        specifier: ^15.0.1
+        version: 15.0.1
+      remark-math:
+        specifier: ^6.0.0
+        version: 6.0.0
+      remark-rehype:
+        specifier: ^11.1.2
+        version: 11.1.2
       tailwindcss:
         specifier: ^4.2.1
         version: 4.2.1
@@ -2571,6 +2571,9 @@ importers:
       unified:
         specifier: ^11.0.5
         version: 11.0.5
+      vfile:
+        specifier: ^6.0.3
+        version: 6.0.3
       vite:
         specifier: ^7.3.1
         version: 7.3.1(@types/node@25.3.3)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
@@ -7579,6 +7582,9 @@ packages:
     resolution: {integrity: sha512-NF+epuEdnUYVlGuhaxbbq+dvJttwLnGY+YixlXlME5KpQ5W3CnXA5cVTneY3SPbPDRkcjMbifrwmFYcClgOZeg==}
     engines: {node: '>= 0.8'}
 
+  beautiful-mermaid@1.1.3:
+    resolution: {integrity: sha512-TItrtrAyHp1vwFfFVYauWGrquouk/6SS21Aq3RsxindSYZODcN4xYrPZD6BiZRU+o5mKJzDPz9MUSMvELdylyg==}
+
   before-after-hook@4.0.0:
     resolution: {integrity: sha512-q6tR3RPqIB1pMiTRMFcZwuG5T8vwp+vUvEG0vuI6B+Rikh5BfPp2fQ82c925FOs+b0lcFQ8CFrL+KbilfZFhOQ==}
 
@@ -8403,6 +8409,9 @@ packages:
 
   electron-to-chromium@1.5.267:
     resolution: {integrity: sha512-0Drusm6MVRXSOJpGbaSVgcQsuB4hEkMpHXaVstcPmhu5LIedxs1xNK/nIxmQIU/RPC0+1/o0AVZfBTkTNJOdUw==}
+
+  elkjs@0.11.1:
+    resolution: {integrity: sha512-zxxR9k+rx5ktMwT/FwyLdPCrq7xN6e4VGGHH8hA01vVYKjTFik7nHOxBnAYtrgYUB1RpAiLvA1/U2YraWxyKKg==}
 
   emoji-regex@10.6.0:
     resolution: {integrity: sha512-toUI84YS5YmxW219erniWD0CIVOo46xGKColeNQRgOzDorgBi1v4D71/OFzgD9GO2UGKIv1C3Sp8DAn0+j5w7A==}
@@ -17377,6 +17386,11 @@ snapshots:
     dependencies:
       safe-buffer: 5.1.2
 
+  beautiful-mermaid@1.1.3:
+    dependencies:
+      elkjs: 0.11.1
+      entities: 7.0.1
+
   before-after-hook@4.0.0: {}
 
   better-path-resolve@1.0.0:
@@ -18196,6 +18210,8 @@ snapshots:
   ee-first@1.1.1: {}
 
   electron-to-chromium@1.5.267: {}
+
+  elkjs@0.11.1: {}
 
   emoji-regex@10.6.0: {}
 

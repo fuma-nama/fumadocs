@@ -4,6 +4,7 @@ import type { DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
 import type { HomeLayoutProps } from 'fumadocs-ui/layouts/home';
 import { FumadocsLogo } from '@/components/logo';
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+import { getConfigRuntime } from '@/config/load-runtime';
 
 export function layoutConfig(config: FumapressConfig) {
   const { base } = config.layout ?? {};
@@ -28,7 +29,8 @@ export function layoutConfig(config: FumapressConfig) {
       };
     },
     async docs(): Promise<DocsLayoutProps> {
-      const source = await getSource();
+      const config = await getConfigRuntime();
+      const source = await getSource(config);
       return {
         tree: source.getPageTree(),
         ...(await this.base()),
