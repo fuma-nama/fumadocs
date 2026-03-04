@@ -39,13 +39,13 @@ import { exportEpub } from 'fumadocs-epub';
 export const revalidate = false;
 
 export async function GET(request: Request): Promise<Response> {
-  // Require EXPORT_SECRET to prevent unauthenticated abuse. Pass via Authorization: Bearer <secret> or ?token=<secret>
+  // Require EXPORT_SECRET to prevent unauthenticated abuse. Pass via Authorization: Bearer <secret>
   const secret = process.env.EXPORT_SECRET;
   if (!secret) {
     return new Response('EXPORT_SECRET is not configured. Set it in your environment to protect this endpoint.', { status: 503 });
   }
   const authHeader = request.headers.get('authorization');
-  const token = authHeader?.replace(/^Bearer\\s+/i, '') ?? new URL(request.url).searchParams.get('token') ?? '';
+  const token = authHeader?.replace(/^Bearer\\s+/i, '') ?? '';
   if (token !== secret) {
     return new Response('Unauthorized', { status: authHeader ? 403 : 401 });
   }
@@ -149,17 +149,16 @@ export async function exportEpub(options: {
   if (options.scaffoldOnly) {
     console.log(picocolors.cyan('\nTo export:'));
     console.log('  1. Add fumadocs-epub to your dependencies: pnpm add fumadocs-epub');
-    console.log('  2. Set EXPORT_SECRET in your environment to protect the /export/epub endpoint');
-    console.log('  3. Ensure includeProcessedMarkdown: true in your docs collection config');
-    if (framework !== 'next') {
-      console.log(`  4. Add a prerender route that outputs EPUB to ${buildPath}`);
-    }
-    console.log(`  ${framework === 'next' ? '4' : '5'}. Run production build: pnpm build`);
+    console.log('  2. Ensure includeProcessedMarkdown: true in your docs collection config');
     if (framework === 'next') {
+      console.log('  3. Set EXPORT_SECRET in your environment to protect the /export/epub endpoint');
+      console.log('  4. Run production build: pnpm build');
       console.log('  5. Start the server (e.g. pnpm start) and keep it running');
       console.log('  6. Run: fumadocs export epub --framework next');
     } else {
-      console.log(`  6. Run: fumadocs export epub --framework ${framework}`);
+      console.log(`  3. Add a prerender route that outputs EPUB to ${buildPath}`);
+      console.log('  4. Run production build: pnpm build');
+      console.log(`  5. Run: fumadocs export epub --framework ${framework}`);
     }
     return;
   }
@@ -191,10 +190,15 @@ export async function exportEpub(options: {
       process.exit(1);
     }
     const port = process.env.PORT || '3000';
-    const url = `http://localhost:${port}/export/epub?token=${encodeURIComponent(secret)}`;
+    const url = `http://localhost:${port}/export/epub`;
     spin.start('Fetching EPUB from server');
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30_000);
     try {
-      const res = await fetch(url);
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${secret}` },
+        signal: controller.signal,
+      });
       if (!res.ok) {
         if (res.status === 401 || res.status === 403) {
           console.error(picocolors.red('Auth failed. Check that EXPORT_SECRET matches the value in your app.'));
@@ -208,10 +212,16 @@ export async function exportEpub(options: {
       await fs.writeFile(outputPath, buffer);
       spin.stop(picocolors.green(`EPUB saved to ${outputPath}`));
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.error(picocolors.red(`Could not fetch EPUB: ${msg}`));
+      if (err instanceof Error && err.name === 'AbortError') {
+        console.error(picocolors.red('Request timed out after 30 seconds.'));
+      } else {
+        const msg = err instanceof Error ? err.message : String(err);
+        console.error(picocolors.red(`Could not fetch EPUB: ${msg}`));
+      }
       console.error(picocolors.yellow(`Ensure the server is running (e.g. pnpm start) on port ${port}.`));
       process.exit(1);
+    } finally {
+      clearTimeout(timeoutId);
     }
     return;
   }
