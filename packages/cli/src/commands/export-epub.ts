@@ -23,7 +23,17 @@ import { exportEpub } from 'fumadocs-epub';
 
 export const revalidate = false;
 
-export async function GET(): Promise<Response> {
+export async function GET(request: Request): Promise<Response> {
+  // Require EXPORT_SECRET to prevent unauthenticated abuse. Pass via Authorization: Bearer <secret> or ?token=<secret>
+  const secret = process.env.EXPORT_SECRET;
+  if (!secret) {
+    return new Response('EXPORT_SECRET is not configured. Set it in your environment to protect this endpoint.', { status: 503 });
+  }
+  const authHeader = request.headers.get('authorization');
+  const token = authHeader?.replace(/^Bearer\\s+/i, '') ?? new URL(request.url).searchParams.get('token') ?? '';
+  if (token !== secret) {
+    return new Response('Unauthorized', { status: authHeader ? 403 : 401 });
+  }
   const buffer = await exportEpub({
     source,
     config: {
@@ -129,23 +139,39 @@ export async function exportEpub(options: {
   if (options.scaffoldOnly) {
     console.log(picocolors.cyan('\nTo export:'));
     console.log('  1. Add fumadocs-epub to your dependencies: pnpm add fumadocs-epub');
-    console.log('  2. Ensure includeProcessedMarkdown: true in your docs collection config');
+    console.log('  2. Set EXPORT_SECRET in your environment to protect the /export/epub endpoint');
+    console.log('  3. Ensure includeProcessedMarkdown: true in your docs collection config');
     if (framework !== 'next') {
-      console.log(`  3. Add a prerender route that outputs EPUB to ${buildPath}`);
+      console.log(`  4. Add a prerender route that outputs EPUB to ${buildPath}`);
     }
-    console.log(`  ${framework === 'next' ? '3' : '4'}. Run production build: pnpm build`);
-    console.log(`  ${framework === 'next' ? '4' : '5'}. Run: fumadocs export epub --framework ${framework}`);
+    console.log(`  ${framework === 'next' ? '4' : '5'}. Run production build: pnpm build`);
+    console.log(`  ${framework === 'next' ? '5' : '6'}. Run: fumadocs export epub --framework ${framework}`);
     return;
   }
 
   // Check for fumadocs-epub dependency
   const pkgPath = path.join(cwd, 'package.json');
-  const pkg = JSON.parse(await fs.readFile(pkgPath, 'utf-8'));
+  let pkg: { dependencies?: Record<string, string>; devDependencies?: Record<string, string> };
+  try {
+    const raw = await fs.readFile(pkgPath, 'utf-8');
+    pkg = JSON.parse(raw);
+  } catch {
+    console.error(picocolors.red('Cannot read or parse package.json. Ensure it exists and is valid JSON.'));
+    process.exit(1);
+  }
   const deps = { ...pkg.dependencies, ...pkg.devDependencies };
   if (!deps['fumadocs-epub']) {
     console.log(picocolors.yellow('\nInstalling fumadocs-epub...'));
     const packageManager = process.env.npm_execpath?.includes('pnpm') ? 'pnpm' : process.env.npm_execpath?.includes('bun') ? 'bun' : 'npm';
-    await execAsync(`${packageManager} add fumadocs-epub`, { cwd });
+    const installCmd = `${packageManager} add fumadocs-epub`;
+    try {
+      await execAsync(installCmd, { cwd });
+    } catch (err: unknown) {
+      const stderr = err && typeof err === 'object' && 'stderr' in err ? String((err as { stderr?: string }).stderr) : '';
+      console.error(picocolors.red(`Failed to install fumadocs-epub. Command: ${installCmd}`));
+      if (stderr) console.error(stderr);
+      process.exit(1);
+    }
   }
 
   const fullBuildPath = path.join(cwd, buildPath);
