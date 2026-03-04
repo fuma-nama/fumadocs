@@ -32,7 +32,7 @@ export async function startWatcher(config: FumapressConfig) {
   };
 
   for (const project of projects) {
-    options = project.watchOptions(options);
+    if (project.watchOptions) options = project.watchOptions(options);
   }
 
   return watch(
