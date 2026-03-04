@@ -12,7 +12,8 @@ export function normalizeProjects(
 
   return projects.map((project) => ({
     ...project,
-    include: project.include ?? ['**/*.{md,mdx}', '**/meta.json', '!**/node_modules'],
+    include: project.include ?? ['**/*.{md,mdx}', '**/meta.json', '!**/node_modules/**/*'],
     dir: path.resolve(baseDir, project.dir),
+    watchOptions: (config) => config,
   }));
 }

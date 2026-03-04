@@ -2471,9 +2471,6 @@ importers:
       fumadocs-ui:
         specifier: workspace:*
         version: link:../radix-ui
-      picomatch:
-        specifier: ^4.0.3
-        version: 4.0.3
       tinyglobby:
         specifier: ^0.2.15
         version: 0.2.15
@@ -2532,6 +2529,9 @@ importers:
       hono:
         specifier: ^4.12.4
         version: 4.12.4
+      ignore:
+        specifier: ^7.0.5
+        version: 7.0.5
       katex:
         specifier: ^0.16.33
         version: 0.16.33
