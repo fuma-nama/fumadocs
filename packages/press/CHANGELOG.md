@@ -1,5 +1,13 @@
 # fumapress
 
+## 0.1.2
+
+### Patch Changes
+
+- 8ba351d: simplify watcher logic
+- f58fa57: implement asset resolution
+- b1ce779: Support Mermaid
+
 ## 0.1.1
 
 ### Patch Changes
