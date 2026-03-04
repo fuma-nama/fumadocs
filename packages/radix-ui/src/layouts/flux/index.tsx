@@ -6,7 +6,7 @@ import { getSidebarTabs, type GetSidebarTabsOptions } from '@/components/sidebar
 import type { SidebarPageTreeComponents } from '@/components/sidebar/page-tree';
 import { type ComponentProps, HTMLAttributes, type ReactNode, useMemo } from 'react';
 import { cn } from '@/utils/cn';
-import { SidebarViewport, useSidebar } from '@/components/sidebar/base';
+import { useSidebar } from '@/components/sidebar/base';
 import { SidebarTabsDropdown, type SidebarTabWithProps } from './tab-dropdown';
 import { Sidebar, SidebarContent, SidebarLinkItem, SidebarPageTree } from './sidebar';
 import { buttonVariants } from '@/components/ui/button';
@@ -19,6 +19,7 @@ import { LinkItem } from '@/utils/link-item';
 import { AnimatePresence, motion } from 'motion/react';
 import { RemoveScroll } from 'react-remove-scroll';
 import { useSearchContext } from '@/contexts/search';
+import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
@@ -90,18 +91,28 @@ export function DocsLayout({
     return (
       <SidebarContent {...rest}>
         <div className="flex flex-col gap-3 p-4 pb-2 empty:hidden">{banner}</div>
-        <SidebarViewport>
-          {menuItems
-            .filter((v) => v.type !== 'icon')
-            .map((item, i, list) => (
-              <SidebarLinkItem
-                key={i}
-                item={item}
-                className={cn(i === list.length - 1 && 'mb-4')}
-              />
-            ))}
-          <SidebarPageTree {...components} />
-        </SidebarViewport>
+        <ScrollArea className="min-h-0 flex-1">
+          <ScrollViewport
+            className="p-4 overscroll-contain"
+            style={
+              {
+                maskImage:
+                  'linear-gradient(to bottom, transparent, white 12px, white calc(100% - 12px), transparent)',
+              } as object
+            }
+          >
+            {menuItems
+              .filter((v) => v.type !== 'icon')
+              .map((item, i, list) => (
+                <SidebarLinkItem
+                  key={i}
+                  item={item}
+                  className={cn(i === list.length - 1 && 'mb-4')}
+                />
+              ))}
+            <SidebarPageTree {...components} />
+          </ScrollViewport>
+        </ScrollArea>
         {footer}
       </SidebarContent>
     );

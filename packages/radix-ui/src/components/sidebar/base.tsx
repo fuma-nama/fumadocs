@@ -15,7 +15,6 @@ import {
 import Link, { type LinkProps } from 'fumadocs-core/link';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { cn } from '@/utils/cn';
-import { ScrollArea, type ScrollAreaProps, ScrollViewport } from '@/components/ui/scroll-area';
 import {
   Collapsible,
   CollapsibleContent,
@@ -213,38 +212,8 @@ export function SidebarDrawerContent({ className, children, ...props }: Componen
   );
 }
 
-export function SidebarViewport(props: ScrollAreaProps) {
-  return (
-    <ScrollArea {...props} className={cn('min-h-0 flex-1', props.className)}>
-      <ScrollViewport
-        className="p-4 overscroll-contain"
-        style={
-          {
-            maskImage:
-              'linear-gradient(to bottom, transparent, white 12px, white calc(100% - 12px), transparent)',
-          } as object
-        }
-      >
-        {props.children}
-      </ScrollViewport>
-    </ScrollArea>
-  );
-}
-
 export function SidebarSeparator(props: ComponentProps<'p'>) {
-  const depth = useFolderDepth();
-  return (
-    <p
-      {...props}
-      className={cn(
-        'inline-flex items-center gap-2 mb-1.5 px-2 mt-6 empty:mb-0',
-        depth === 0 && 'first:mt-0',
-        props.className,
-      )}
-    >
-      {props.children}
-    </p>
-  );
+  return <p {...props} />;
 }
 
 export function SidebarItem({

@@ -9,6 +9,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { SearchToggle } from '@/layouts/shared/search-toggle';
 import { Sidebar as SidebarIcon } from 'lucide-react';
 import { mergeRefs } from '@/utils/merge-refs';
+import { ScrollArea, ScrollAreaProps, ScrollViewport } from '@/components/ui/scroll-area';
 
 const itemVariants = cva(
   'relative flex flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground wrap-anywhere [&_svg]:size-4 [&_svg]:shrink-0',
@@ -30,13 +31,39 @@ function getItemOffset(depth: number) {
   return `calc(${2 + 3 * depth} * var(--spacing))`;
 }
 
-export {
-  SidebarProvider as Sidebar,
-  SidebarFolder,
-  SidebarCollapseTrigger,
-  SidebarViewport,
-  SidebarTrigger,
-} from '@/components/sidebar/base';
+export function Sidebar(props: ComponentProps<typeof Base.SidebarProvider>) {
+  return <Base.SidebarProvider {...props} />;
+}
+
+export function SidebarFolder(props: ComponentProps<typeof Base.SidebarFolder>) {
+  return <Base.SidebarFolder {...props} />;
+}
+
+export function SidebarCollapseTrigger(props: ComponentProps<typeof Base.SidebarCollapseTrigger>) {
+  return <Base.SidebarCollapseTrigger {...props} />;
+}
+
+export function SidebarViewport(props: ScrollAreaProps) {
+  return (
+    <ScrollArea {...props} className={cn('min-h-0 flex-1', props.className)}>
+      <ScrollViewport
+        className="*:flex! *:flex-col! *:gap-0.5! p-4 overscroll-contain"
+        style={
+          {
+            maskImage:
+              'linear-gradient(to bottom, transparent, white 12px, white calc(100% - 12px), transparent)',
+          } as object
+        }
+      >
+        {props.children}
+      </ScrollViewport>
+    </ScrollArea>
+  );
+}
+
+export function SidebarTrigger(props: ComponentProps<typeof Base.SidebarTrigger>) {
+  return <Base.SidebarTrigger {...props} />;
+}
 
 export function SidebarContent({
   ref: refProp,
@@ -131,7 +158,11 @@ export function SidebarSeparator({ className, style, children, ...props }: Compo
 
   return (
     <Base.SidebarSeparator
-      className={cn('[&_svg]:size-4 [&_svg]:shrink-0', className)}
+      className={cn(
+        'inline-flex items-center gap-2 mb-1 px-2 mt-6 empty:mb-0 [&_svg]:size-4 [&_svg]:shrink-0',
+        depth === 0 && 'first:mt-0',
+        className,
+      )}
       style={{
         paddingInlineStart: getItemOffset(depth),
         ...style,
@@ -217,7 +248,7 @@ export function SidebarFolderContent({
   return (
     <Base.SidebarFolderContent
       className={cn(
-        'relative',
+        'relative flex flex-col gap-0.5 *:first:mt-0.5',
         depth === 1 &&
           "before:content-[''] before:absolute before:w-px before:inset-y-1 before:bg-fd-border before:start-2.5",
         className,
