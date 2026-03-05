@@ -1,7 +1,7 @@
 'use client';
 
 import { type ReactNode, useMemo } from 'react';
-import { Link as WakuLink, useRouter } from 'waku';
+import { Link, useRouter } from 'waku';
 import { type Framework, FrameworkProvider } from './index.js';
 
 const framework: Framework = {
@@ -38,9 +38,9 @@ const framework: Framework = {
   },
   Link({ href, prefetch = true, ...props }) {
     return (
-      <WakuLink to={href!} unstable_prefetchOnEnter={prefetch} {...props}>
+      <Link to={href!} unstable_prefetchOnEnter={prefetch} {...props}>
         {props.children}
-      </WakuLink>
+      </Link>
     );
   },
 };

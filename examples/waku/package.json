@@ -18,6 +18,7 @@
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-server-dom-webpack": "^19.2.4",
+    "tailwind-merge": "^3.5.0",
     "waku": "1.0.0-alpha.5"
   },
   "devDependencies": {

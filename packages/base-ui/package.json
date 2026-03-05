@@ -32,6 +32,10 @@
       "types": "./dist/layouts/home/index.d.ts",
       "import": "./dist/layouts/home/index.js"
     },
+    "./layouts/home/not-found": {
+      "types": "./dist/layouts/home/not-found.d.ts",
+      "import": "./dist/layouts/home/not-found.js"
+    },
     "./layouts/home/navbar": {
       "types": "./dist/layouts/home/navbar.d.ts",
       "import": "./dist/layouts/home/navbar.js"
