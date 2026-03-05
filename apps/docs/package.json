@@ -41,7 +41,7 @@
     "fumadocs-typescript": "workspace:^",
     "fumadocs-ui": "workspace:*",
     "hast-util-to-jsx-runtime": "^2.3.6",
-    "katex": "^0.16.34",
+    "katex": "0.16.33",
     "lucide-react": "^0.577.0",
     "mermaid": "^11.12.3",
     "motion": "^12.35.0",

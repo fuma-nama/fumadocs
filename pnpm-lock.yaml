@@ -138,8 +138,8 @@ importers:
         specifier: ^2.3.6
         version: 2.3.6
       katex:
-        specifier: ^0.16.34
-        version: 0.16.34
+        specifier: 0.16.33
+        version: 0.16.33
       lucide-react:
         specifier: ^0.577.0
         version: 0.577.0(react@19.2.4)
@@ -1568,7 +1568,7 @@ importers:
         specifier: ^19.2.3
         version: 19.2.3(@types/react@19.2.14)
       tailwindcss:
-        specifier: ^4.2.1
+        specifier: ^4 .2.1
         version: 4.2.1
       typescript:
         specifier: ^5.9.3
@@ -2536,8 +2536,8 @@ importers:
         specifier: ^7.0.5
         version: 7.0.5
       katex:
-        specifier: ^0.16.34
-        version: 0.16.34
+        specifier: 0.16.33
+        version: 0.16.33
       lucide-react:
         specifier: ^0.577.0
         version: 0.577.0(react@19.2.4)
@@ -9521,8 +9521,8 @@ packages:
     resolution: {integrity: sha512-4+5mNNf4vZDSwPhKprKwz3330iisPrb08JyMgbsdFrimBCKNHecua/WBwvVg3n7vwx0C1ARjfhwIpbrbd9n5wg==}
     engines: {node: '>=12'}
 
-  katex@0.16.34:
-    resolution: {integrity: sha512-z1RSvOYzV7dykg9Jwl3EfGhIfo9mrotTx1uuEXWpXRCBbX9eKVywxa60mvFYipjOSus5hzj+F7Kh2fmnjFwA5w==}
+  katex@0.16.33:
+    resolution: {integrity: sha512-q3N5u+1sY9Bu7T4nlXoiRBXWfwSefNGoKeOwekV+gw0cAXQlz2Ww6BLcmBxVDeXBMUDQv6fK5bcNaJLxob3ZQA==}
     hasBin: true
 
   keyv@4.5.4:
@@ -19595,7 +19595,7 @@ snapshots:
     dependencies:
       lodash-es: 4.17.23
 
-  katex@0.16.34:
+  katex@0.16.33:
     dependencies:
       commander: 8.3.0
 
@@ -20019,7 +20019,7 @@ snapshots:
       dagre-d3-es: 7.0.13
       dayjs: 1.11.19
       dompurify: 3.3.1
-      katex: 0.16.34
+      katex: 0.16.33
       khroma: 2.1.0
       lodash-es: 4.17.23
       marked: 16.4.2
@@ -20132,7 +20132,7 @@ snapshots:
     dependencies:
       '@types/katex': 0.16.7
       devlop: 1.1.0
-      katex: 0.16.34
+      katex: 0.16.33
       micromark-factory-space: 2.0.1
       micromark-util-character: 2.1.1
       micromark-util-symbol: 2.0.1
@@ -21447,7 +21447,7 @@ snapshots:
       '@types/katex': 0.16.7
       hast-util-from-html-isomorphic: 2.0.0
       hast-util-to-text: 4.0.2
-      katex: 0.16.34
+      katex: 0.16.33
       unist-util-visit-parents: 6.0.2
       vfile: 6.0.3
 

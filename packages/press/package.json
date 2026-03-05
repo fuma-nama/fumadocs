@@ -61,7 +61,7 @@
     "hast-util-to-jsx-runtime": "^2.3.6",
     "hono": "^4.12.5",
     "ignore": "^7.0.5",
-    "katex": "^0.16.34",
+    "katex": "0.16.33",
     "lucide-react": "^0.577.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
