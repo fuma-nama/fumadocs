@@ -218,6 +218,100 @@ describe('Merge object schemas', () => {
       }
     `);
   });
+
+  test('Production: `allOf`', () => {
+    const result = mergeAllOf({
+      type: 'object',
+      allOf: [
+        {
+          properties: {
+            name: { type: 'string' },
+          },
+        },
+        {
+          oneOf: [
+            {
+              type: 'object',
+              title: 'human',
+              required: ['human'],
+              properties: {
+                human: {
+                  type: 'object',
+                  properties: {
+                    givenName: { type: 'string' },
+                    familyName: { type: 'string' },
+                  },
+                },
+              },
+            },
+            {
+              type: 'object',
+              title: 'machine',
+              required: ['machine'],
+              properties: {
+                machine: {
+                  type: 'object',
+                  properties: {
+                    serialNumber: { type: 'string' },
+                  },
+                },
+              },
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(result).toMatchInlineSnapshot(`
+      {
+        "oneOf": [
+          {
+            "properties": {
+              "human": {
+                "properties": {
+                  "familyName": {
+                    "type": "string",
+                  },
+                  "givenName": {
+                    "type": "string",
+                  },
+                },
+                "type": "object",
+              },
+              "name": {
+                "type": "string",
+              },
+            },
+            "required": [
+              "human",
+            ],
+            "title": "human",
+            "type": "object",
+          },
+          {
+            "properties": {
+              "machine": {
+                "properties": {
+                  "serialNumber": {
+                    "type": "string",
+                  },
+                },
+                "type": "object",
+              },
+              "name": {
+                "type": "string",
+              },
+            },
+            "required": [
+              "machine",
+            ],
+            "title": "machine",
+            "type": "object",
+          },
+        ],
+      }
+    `);
+  });
 });
 
 describe('URL utilities', () => {

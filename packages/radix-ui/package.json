@@ -36,6 +36,10 @@
       "types": "./dist/layouts/home/index.d.ts",
       "import": "./dist/layouts/home/index.js"
     },
+    "./layouts/home/not-found": {
+      "types": "./dist/layouts/home/not-found.d.ts",
+      "import": "./dist/layouts/home/not-found.js"
+    },
     "./layouts/home/navbar": {
       "types": "./dist/layouts/home/navbar.d.ts",
       "import": "./dist/layouts/home/navbar.js"
@@ -127,8 +131,8 @@
     "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-tabs": "^1.1.13",
     "class-variance-authority": "^0.7.1",
-    "lucide-react": "^0.575.0",
-    "motion": "^12.34.3",
+    "lucide-react": "^0.577.0",
+    "motion": "^12.35.0",
     "next-themes": "^0.4.6",
     "react-medium-image-zoom": "^5.4.1",
     "react-remove-scroll": "^2.7.2",

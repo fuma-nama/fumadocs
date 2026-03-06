@@ -1,5 +1,6 @@
-import { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import z from 'zod';
+import type { ChokidarOptions } from 'chokidar';
 
 type Awaitable<T> = T | Promise<T>;
 
@@ -36,6 +37,14 @@ export const projectConfigSchema = z.object({
    * a list of glob patterns, customise the content files to be scanned.
    */
   include: z.array(z.string()).optional(),
+  /**
+   * directory to the static assets
+   */
+  assetsDir: z.array(z.string()).optional(),
+  /**
+   * customise chokidar, by default, file watcher will watch all files under the `dir` directory.
+   */
+  watchOptions: z.custom<(options: ChokidarOptions) => ChokidarOptions>().optional(),
 });
 
 export const contentConfigSchema = z.object({

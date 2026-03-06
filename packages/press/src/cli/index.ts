@@ -3,6 +3,7 @@ import { program } from 'commander';
 import { runStart } from './commands.js';
 import fs from 'node:fs/promises';
 import { findConfigPath } from '@/config/load-node.js';
+import { version } from 'package.json';
 
 program
   .command('init')
@@ -27,4 +28,4 @@ program
     await runStart(options);
   });
 
-void program.parseAsync(process.argv);
+void program.version(version).parseAsync(process.argv);

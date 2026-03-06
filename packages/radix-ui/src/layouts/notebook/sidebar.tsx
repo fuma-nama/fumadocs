@@ -7,6 +7,7 @@ import { LayoutContext } from './client';
 import { createPageTreeRenderer } from '@/components/sidebar/page-tree';
 import { createLinkItemRenderer } from '@/components/sidebar/link-item';
 import { mergeRefs } from '@/utils/merge-refs';
+import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
 
 const itemVariants = cva(
   'relative flex flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground wrap-anywhere [&_svg]:size-4 [&_svg]:shrink-0',
@@ -40,8 +41,22 @@ export function SidebarCollapseTrigger(props: ComponentProps<typeof Base.Sidebar
   return <Base.SidebarCollapseTrigger {...props} />;
 }
 
-export function SidebarViewport(props: ComponentProps<typeof Base.SidebarViewport>) {
-  return <Base.SidebarViewport {...props} />;
+export function SidebarViewport(props: ComponentProps<typeof ScrollArea>) {
+  return (
+    <ScrollArea {...props} className={cn('min-h-0 flex-1', props.className)}>
+      <ScrollViewport
+        className="p-4 overscroll-contain"
+        style={
+          {
+            maskImage:
+              'linear-gradient(to bottom, transparent, white 12px, white calc(100% - 12px), transparent)',
+          } as object
+        }
+      >
+        {props.children}
+      </ScrollViewport>
+    </ScrollArea>
+  );
 }
 
 export function SidebarTrigger(props: ComponentProps<typeof Base.SidebarTrigger>) {
@@ -126,7 +141,11 @@ export function SidebarSeparator({ className, style, children, ...props }: Compo
 
   return (
     <Base.SidebarSeparator
-      className={cn('[&_svg]:size-4 [&_svg]:shrink-0', className)}
+      className={cn(
+        'inline-flex items-center gap-2 mb-1.5 px-2 mt-6 empty:mb-0 [&_svg]:size-4 [&_svg]:shrink-0',
+        depth === 0 && 'first:mt-0',
+        className,
+      )}
       style={{
         paddingInlineStart: getItemOffset(depth),
         ...style,

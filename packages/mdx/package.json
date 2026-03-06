@@ -87,7 +87,7 @@
   },
   "devDependencies": {
     "@fumadocs/mdx-remote": "workspace:*",
-    "@types/bun": "^1.3.9",
+    "@types/bun": "^1.3.10",
     "@types/js-yaml": "^4.0.9",
     "@types/mdast": "^4.0.4",
     "@types/mdx": "^2.0.13",
@@ -106,7 +106,7 @@
     "tsconfig": "workspace:*",
     "tsdown": "0.20.3",
     "vite": "^7.3.1",
-    "webpack": "^5.105.3"
+    "webpack": "^5.105.4"
   },
   "peerDependencies": {
     "@fumadocs/mdx-remote": "^1.4.0",

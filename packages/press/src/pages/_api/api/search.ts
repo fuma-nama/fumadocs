@@ -1,11 +1,12 @@
-import { createFromSource, type SearchAPI } from 'fumadocs-core/search/server';
-import { getSource } from '@/lib/source';
+import { createFromSource } from 'fumadocs-core/search/server';
+import { getSource, Source } from '@/lib/source';
 import { revalidable } from '@/lib/revalidable';
 import { structure } from 'fumadocs-core/mdx-plugins/remark-structure';
+import { getConfigRuntime } from '@/config/load-runtime';
 
 const getServer = revalidable({
-  async create(): Promise<SearchAPI> {
-    return createFromSource(await getSource(), {
+  async create(source: Source) {
+    return createFromSource(source, {
       language: 'english',
       buildIndex(page) {
         return {
@@ -18,9 +19,11 @@ const getServer = revalidable({
       },
     });
   },
-  staleTime: 10 * 1000,
 });
 
 export async function GET(request: Request) {
-  return (await getServer()).GET(request);
+  const config = await getConfigRuntime();
+  const source = await getSource(config);
+  const server = await getServer(source);
+  return server.GET(request);
 }

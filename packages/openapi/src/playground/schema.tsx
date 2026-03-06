@@ -34,10 +34,6 @@ export interface FieldInfo {
    * The actual field that represents union members.
    */
   unionField?: UnionField;
-
-  intersection?: {
-    merged: Exclude<ParsedSchema, boolean>;
-  };
 }
 
 const SchemaContext = createContext<SchemaContextType | undefined>(undefined);
@@ -83,7 +79,7 @@ export function useSchemaScope(): SchemaScope {
  * A hook to store dynamic info of a field, such as selected schema of `oneOf`.
  *
  * @param fieldName - field name of form.
- * @param schema - The JSON Schema to generate initial values.
+ * @param schema - The **resolved** JSON Schema to generate initial values.
  * @param depth - The depth to avoid duplicated field name with same schema (e.g. nested `oneOf`).
  */
 export function useFieldInfo(
@@ -92,6 +88,7 @@ export function useFieldInfo(
   depth = 0,
 ): {
   info: FieldInfo;
+  schema: Exclude<ParsedSchema, boolean>;
   updateInfo: (value: Partial<FieldInfo>) => void;
 } {
   const { ajv, references } = use(SchemaContext)!;
@@ -124,18 +121,6 @@ export function useFieldInfo(
           }) ?? types[0];
       }
 
-      if (schema.allOf) {
-        const merged = mergeAllOf(schema, {
-          dereference(schema) {
-            return dereference(schema, references);
-          },
-        });
-
-        if (typeof merged !== 'boolean')
-          out.intersection = {
-            merged,
-          };
-      }
       return out;
     },
   });
@@ -145,6 +130,7 @@ export function useFieldInfo(
 
   return {
     info,
+    schema,
     updateInfo(value) {
       const updated = {
         ...info,
@@ -179,12 +165,6 @@ export function useSchemaUtils() {
         references,
       );
     },
-    /**
-     * Resolve `$ref` in the schema, **not recursive**.
-     */
-    resolve(schema: ParsedSchema): Exclude<ParsedSchema, boolean> {
-      return fallbackAny(dereference(schema, references));
-    },
     schemaToString(value: ResolvedSchema, flags?: FormatFlags) {
       return schemaToString(
         value,
@@ -193,6 +173,30 @@ export function useSchemaUtils() {
       );
     },
   };
+}
+
+/**
+ * resolve $ref & merge `allOf`.
+ */
+export function useResolvedSchema(raw: ParsedSchema): Exclude<ParsedSchema, boolean> {
+  const { references } = use(SchemaContext)!;
+
+  return useMemo(() => {
+    const schema = dereference(raw, references);
+    if (typeof schema === 'boolean') return anyFields;
+
+    if (schema.allOf) {
+      return fallbackAny(
+        mergeAllOf(schema, {
+          dereference(schema) {
+            return dereference(schema, references);
+          },
+        }),
+      );
+    }
+
+    return schema;
+  }, [raw, references]);
 }
 
 function dereference(schema: ParsedSchema, references: Record<string, ParsedSchema>): ParsedSchema {

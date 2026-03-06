@@ -104,7 +104,7 @@ export default createServerEntryAdapter(
 );
 
 async function initHotReload(clients: Set<WSContext>) {
-  const watcher = startWatcher(await getConfigRuntime());
+  const watcher = await startWatcher(await getConfigRuntime());
 
   function send(event: WebSocketEvent) {
     const encoded = encodeEvent(event);
@@ -113,6 +113,13 @@ async function initHotReload(clients: Set<WSContext>) {
   }
 
   watcher.on('all', (event, filePath) => {
+    switch (event) {
+      case 'change':
+      case 'unlink':
+        // if file wasn't parsed, no revalidation is needed
+        if (!filesCache.has(filePath)) return;
+    }
+
     if (event === 'change') {
       filesCache.delete(filePath);
       send({

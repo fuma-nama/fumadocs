@@ -46,10 +46,6 @@ export function SidebarCollapseTrigger(props: ComponentProps<typeof Base.Sidebar
   return <Base.SidebarCollapseTrigger {...props} />;
 }
 
-export function SidebarViewport(props: ComponentProps<typeof Base.SidebarViewport>) {
-  return <Base.SidebarViewport {...props} />;
-}
-
 export function SidebarTrigger(props: ComponentProps<typeof Base.SidebarTrigger>) {
   return <Base.SidebarTrigger {...props} />;
 }
@@ -141,7 +137,11 @@ export function SidebarSeparator({ className, style, children, ...props }: Compo
 
   return (
     <Base.SidebarSeparator
-      className={cn('[&_svg]:size-4 [&_svg]:shrink-0', className)}
+      className={cn(
+        'inline-flex items-center gap-2 mb-1.5 px-2 mt-6 empty:mb-0 [&_svg]:size-4 [&_svg]:shrink-0',
+        depth === 0 && 'first:mt-0',
+        className,
+      )}
       style={{
         paddingInlineStart: getItemOffset(depth),
         ...style,

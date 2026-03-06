@@ -1,5 +1,12 @@
 # @fuma-docs/openapi
 
+## 10.3.15
+
+### Patch Changes
+
+- 440a7ef: Fix intersection resolution
+- e68700e: fix parameter encoding
+
 ## 10.3.14
 
 ### Patch Changes

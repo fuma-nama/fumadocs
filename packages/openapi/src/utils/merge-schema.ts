@@ -33,6 +33,21 @@ function intersection(a: ParsedSchema, b: ParsedSchema, options: Options): Parse
   if (typeof a === 'boolean') return a;
   if (typeof b === 'boolean') return b;
 
+  for (const unionField of ['anyOf', 'oneOf'] as const) {
+    if (a[unionField] === undefined && b[unionField] !== undefined) {
+      return {
+        ...b,
+        [unionField]: b[unionField].map((item) => intersection(item, a, options)),
+      };
+    }
+    if (a[unionField] !== undefined && b[unionField] === undefined) {
+      return {
+        ...a,
+        [unionField]: a[unionField].map((item) => intersection(item, b, options)),
+      };
+    }
+  }
+
   const result: ParsedSchema = { ...a };
   for (const _k in b) {
     const key = _k as keyof typeof b;
@@ -41,7 +56,6 @@ function intersection(a: ParsedSchema, b: ParsedSchema, options: Options): Parse
       case '$id':
       case '$comment':
       case 'description':
-      case 'additionalItems':
       case 'examples':
       case 'allOf':
       case 'writeOnly':
@@ -80,14 +94,19 @@ function intersection(a: ParsedSchema, b: ParsedSchema, options: Options): Parse
         result[key] = result[key] === undefined ? value : Math.min(result[key], value);
         break;
       }
-      // intersection
-      case 'enum':
-      case 'anyOf':
-      case 'oneOf': {
+      case 'enum': {
         const value = b[key];
         if (value === undefined) break;
 
         result[key] = result[key] === undefined ? value : intersectArray(result[key], value);
+        break;
+      }
+      case 'anyOf':
+      case 'oneOf': {
+        const value = b[key];
+        if (value !== undefined && result[key] !== undefined) {
+          result[key] = intersectArray(result[key], value);
+        }
         break;
       }
       // require same
@@ -139,6 +158,7 @@ function intersection(a: ParsedSchema, b: ParsedSchema, options: Options): Parse
         break;
       }
       case 'additionalProperties':
+      case 'additionalItems':
       case 'contains':
       case 'items': {
         const value = b[key];
