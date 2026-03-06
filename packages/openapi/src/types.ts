@@ -37,7 +37,10 @@ type RequireKeys<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
 export interface RenderContext
   extends
     Pick<OpenAPIOptions, 'proxyUrl'>,
-    RequireKeys<CreateAPIPageOptions, 'generateTypeScriptDefinitions' | 'renderMarkdown'> {
+    Omit<
+      RequireKeys<CreateAPIPageOptions, 'generateTypeScriptDefinitions' | 'renderMarkdown'>,
+      'renderCodeBlock' | 'renderHeading'
+    > {
   slugger: Slugger;
 
   /**
