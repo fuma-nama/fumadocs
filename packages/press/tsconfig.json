@@ -3,7 +3,7 @@
     "target": "ES2022",
     "baseUrl": ".",
     "lib": ["dom", "dom.iterable", "ES2022"],
-    "types": ["vite", "vite/client"],
+    "types": ["vite", "vite/client", "./src/lib/env.d.ts"],
     "jsx": "react-jsx",
     "module": "ESNext",
     "moduleResolution": "bundler",

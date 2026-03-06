@@ -4,17 +4,25 @@ import { pathToFileURL } from 'node:url';
 import { loadEnv, overrideNodeEnv } from './loader';
 import { baseDir } from '@/constants';
 
-export async function runStart(flags: { host?: string; port?: string }) {
+export async function runStart({
+  host,
+  dirs = [''],
+  port: defaultPort = '8080',
+}: {
+  dirs?: string[];
+  host?: string;
+  port?: string;
+}) {
   loadEnv();
   overrideNodeEnv('production');
-  const host = flags.host;
-  const port = await getFreePort(parseInt(flags.port || '8080', 10));
+  const port = await getFreePort(parseInt(defaultPort, 10));
   const serveFileUrl = pathToFileURL(path.resolve(baseDir, 'dist', 'waku', 'serve-node.js')).href;
   if (host) {
     process.env.HOST = host;
   }
   process.env.PORT = String(port);
-  process.env.PROJECT_DIR = process.cwd();
+  process.env.ROOT_DIR = process.cwd();
+  process.env.DEFAULT_RPOJECT_DIR = JSON.stringify(dirs.map((v) => path.resolve(v)));
   process.env.HOT_RELOAD = '1';
   process.chdir(baseDir);
   await import(serveFileUrl);

@@ -3,14 +3,19 @@ declare module 'process' {
     namespace NodeJS {
       interface ProcessEnv {
         /**
-         * the project directory (where fumapress is started)
+         * the root directory (where fumapress is started)
          */
-        PROJECT_DIR?: string;
+        ROOT_DIR?: string;
 
         /**
          * whether hot reload is enabled (e.g. local file watcher)
          */
         HOT_RELOAD?: '1';
+
+        /**
+         * [JSON encoded] a list of default project directories (where Markdown files are located)
+         */
+        DEFAULT_RPOJECT_DIR?: string;
       }
     }
   }

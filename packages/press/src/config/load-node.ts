@@ -9,7 +9,7 @@ const DefaultConfigPatterns = ['fumapress.config.{js,jsx,ts,tsx}'];
 
 export async function findConfigPath(): Promise<string | null> {
   const paths = await glob(DefaultConfigPatterns, {
-    cwd: process.env.PROJECT_DIR,
+    cwd: process.env.ROOT_DIR,
     absolute: true,
   });
 
