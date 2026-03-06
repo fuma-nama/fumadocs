@@ -1,5 +1,11 @@
 # fumapress
 
+## 0.1.4
+
+### Patch Changes
+
+- 9a5d79f: support passing projects in CLI
+
 ## 0.1.3
 
 ### Patch Changes
