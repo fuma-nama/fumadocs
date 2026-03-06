@@ -3,14 +3,16 @@ title: Mermaid
 description: Rendering diagrams in your docs
 ---
 
+## Setup
+
 Fumadocs doesn't have a built-in Mermaid wrapper provided, we recommend using `mermaid` directly.
 
-## Setup
+### Official Renderer
 
 Install the required dependencies, `next-themes` is used with Fumadocs to manage the light/dark mode.
 
-```package-install
-mermaid next-themes
+```npm
+npm install mermaid next-themes
 ```
 
 Create the Mermaid component:
@@ -19,7 +21,39 @@ Create the Mermaid component:
   ./components/mdx/mermaid.tsx
 </include>
 
-> This is originally inspired by [remark-mermaid](https://github.com/the-guild-org/docs/blob/main/packages/remark-mermaid/src/mermaid.tsx).
+### Beautiful Mermaid
+
+[`beautiful-mermaid`](https://github.com/lukilabs/beautiful-mermaid) is a 3rd party Mermaid renderer.
+
+```npm
+npm install beautiful-mermaid
+```
+
+```tsx title="components/mdx/mermaid.tsx"
+import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
+import { renderMermaidSVG } from 'beautiful-mermaid';
+
+export async function Mermaid({ chart }: { chart: string }) {
+  try {
+    const svg = renderMermaidSVG(chart, {
+      bg: 'var(--color-fd-background)',
+      fg: 'var(--color-fd-foreground)',
+      interactive: true,
+      transparent: true,
+    });
+
+    return <div dangerouslySetInnerHTML={{ __html: svg }} />;
+  } catch {
+    return (
+      <CodeBlock title="Mermaid">
+        <Pre>{chart}</Pre>
+      </CodeBlock>
+    );
+  }
+}
+```
+
+## Usage
 
 Add the component as a MDX component:
 
@@ -37,9 +71,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
 }
 ```
 
-## Usage
-
-Use it in MDX files.
+Then, use it in MDX files.
 
 ```mdx
 <Mermaid
