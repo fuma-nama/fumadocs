@@ -144,6 +144,7 @@ export function UsageTab({
     removeListener,
   } = useExampleRequests();
   const { server } = useServerSelectContext();
+  const codegen = codeUsages.get(id);
   const [data, setData] = useState(
     () => examples.find((example) => example.id === selectedExampleId)?.encoded,
   );
@@ -176,13 +177,12 @@ export function UsageTab({
       });
     }
 
-    const codegen = codeUsages.get(id);
     if (!codegen) return;
     return codegen.generate(url, data, {
       mediaAdapters,
       server: null,
     });
-  }, [data, server, route, _client, codeUsages, id, mediaAdapters]);
+  }, [data, server, route, _client, codegen, mediaAdapters]);
 
   if (!code) return null;
 
