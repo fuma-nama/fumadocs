@@ -35,6 +35,7 @@
     "feed": "^5.2.0",
     "fumadocs-core": "workspace:*",
     "fumadocs-docgen": "workspace:^",
+    "fumadocs-epub": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-openapi": "workspace:^",
     "fumadocs-twoslash": "workspace:^",
