@@ -14,7 +14,9 @@ export type { EpubConfig, EpubExportOptions } from './types';
 /**
  * Check if a page has getText (MDX pages do, OpenAPI pages don't)
  */
-function hasGetText(page: Page): page is Page & { data: { getText: (type: string) => Promise<string> } } {
+function hasGetText(
+  page: Page,
+): page is Page & { data: { getText: (type: string) => Promise<string> } } {
   return typeof (page.data as { getText?: unknown }).getText === 'function';
 }
 
@@ -94,9 +96,9 @@ export async function exportEpub(options: EpubExportOptions): Promise<Buffer> {
 
   // Get pages in tree order (navigation order)
   const pageTree = source.getPageTree();
-  const orderedPages = getPagesInTreeOrder(pageTree, (node) =>
-    source.getNodePage?.(node),
-  ).filter((p): p is Page => p != null);
+  const orderedPages = getPagesInTreeOrder(pageTree, (node) => source.getNodePage?.(node)).filter(
+    (p): p is Page => p != null,
+  );
 
   // Fallback to getPages() if tree order yields no pages (e.g. i18n)
   const pages = orderedPages.length > 0 ? orderedPages : source.getPages();

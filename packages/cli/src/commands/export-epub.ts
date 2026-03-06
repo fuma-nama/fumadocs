@@ -121,7 +121,9 @@ export async function exportEpub(options: {
     (await exists(path.join(cwd, 'next.config.js'))) ||
     (await exists(path.join(cwd, 'next.config.ts'))) ||
     (await exists(path.join(cwd, 'next.config.mjs')));
-  const nextDeps = pkg ? { ...pkg.dependencies, ...pkg.devDependencies, ...pkg.peerDependencies } : {};
+  const nextDeps = pkg
+    ? { ...pkg.dependencies, ...pkg.devDependencies, ...pkg.peerDependencies }
+    : {};
   const hasNextInPkg = !!nextDeps?.next;
   const hasAppOrPages =
     (await exists(path.join(cwd, 'app'))) ||
@@ -131,7 +133,11 @@ export async function exportEpub(options: {
   const hasNext = hasNextConfig || (hasNextInPkg && hasAppOrPages);
 
   if (!hasNext && framework === 'next') {
-    console.error(picocolors.red('Next.js project not found. Run this command from a Fumadocs Next.js project root.'));
+    console.error(
+      picocolors.red(
+        'Next.js project not found. Run this command from a Fumadocs Next.js project root.',
+      ),
+    );
     process.exit(1);
   }
 
@@ -151,7 +157,9 @@ export async function exportEpub(options: {
     console.log('  1. Add fumadocs-epub to your dependencies: pnpm add fumadocs-epub');
     console.log('  2. Ensure includeProcessedMarkdown: true in your docs collection config');
     if (framework === 'next') {
-      console.log('  3. Set EXPORT_SECRET in your environment to protect the /export/epub endpoint');
+      console.log(
+        '  3. Set EXPORT_SECRET in your environment to protect the /export/epub endpoint',
+      );
       console.log('  4. Run production build: pnpm build');
       console.log('  5. Start the server (e.g. pnpm start) and keep it running');
       console.log('  6. Run: fumadocs export epub --framework next');
@@ -165,18 +173,27 @@ export async function exportEpub(options: {
 
   // Check for fumadocs-epub dependency
   if (!pkg) {
-    console.error(picocolors.red('Cannot read or parse package.json. Ensure it exists and is valid JSON.'));
+    console.error(
+      picocolors.red('Cannot read or parse package.json. Ensure it exists and is valid JSON.'),
+    );
     process.exit(1);
   }
   const deps = { ...pkg.dependencies, ...pkg.devDependencies };
   if (!deps['fumadocs-epub']) {
     console.log(picocolors.yellow('\nInstalling fumadocs-epub...'));
-    const packageManager = process.env.npm_execpath?.includes('pnpm') ? 'pnpm' : process.env.npm_execpath?.includes('bun') ? 'bun' : 'npm';
+    const packageManager = process.env.npm_execpath?.includes('pnpm')
+      ? 'pnpm'
+      : process.env.npm_execpath?.includes('bun')
+        ? 'bun'
+        : 'npm';
     const installCmd = `${packageManager} add fumadocs-epub`;
     try {
       await execAsync(installCmd, { cwd });
     } catch (err: unknown) {
-      const stderr = err && typeof err === 'object' && 'stderr' in err ? String((err as { stderr?: string }).stderr) : '';
+      const stderr =
+        err && typeof err === 'object' && 'stderr' in err
+          ? String((err as { stderr?: string }).stderr)
+          : '';
       console.error(picocolors.red(`Failed to install fumadocs-epub. Command: ${installCmd}`));
       if (stderr) console.error(stderr);
       process.exit(1);
@@ -186,7 +203,9 @@ export async function exportEpub(options: {
   if (framework === 'next') {
     const secret = process.env.EXPORT_SECRET;
     if (!secret) {
-      console.error(picocolors.red('EXPORT_SECRET is required for Next.js export. Set it in your environment.'));
+      console.error(
+        picocolors.red('EXPORT_SECRET is required for Next.js export. Set it in your environment.'),
+      );
       process.exit(1);
     }
     const port = process.env.PORT || '3000';
@@ -201,9 +220,15 @@ export async function exportEpub(options: {
       });
       if (!res.ok) {
         if (res.status === 401 || res.status === 403) {
-          console.error(picocolors.red('Auth failed. Check that EXPORT_SECRET matches the value in your app.'));
+          console.error(
+            picocolors.red('Auth failed. Check that EXPORT_SECRET matches the value in your app.'),
+          );
         } else {
-          console.error(picocolors.red(`Server returned ${res.status}. Ensure the app is running (e.g. pnpm start) on port ${port}.`));
+          console.error(
+            picocolors.red(
+              `Server returned ${res.status}. Ensure the app is running (e.g. pnpm start) on port ${port}.`,
+            ),
+          );
         }
         process.exit(1);
       }
@@ -218,7 +243,9 @@ export async function exportEpub(options: {
         const msg = err instanceof Error ? err.message : String(err);
         console.error(picocolors.red(`Could not fetch EPUB: ${msg}`));
       }
-      console.error(picocolors.yellow(`Ensure the server is running (e.g. pnpm start) on port ${port}.`));
+      console.error(
+        picocolors.yellow(`Ensure the server is running (e.g. pnpm start) on port ${port}.`),
+      );
       process.exit(1);
     } finally {
       clearTimeout(timeoutId);
@@ -228,7 +255,11 @@ export async function exportEpub(options: {
 
   const fullBuildPath = path.join(cwd, buildPath);
   if (!(await exists(fullBuildPath))) {
-    console.error(picocolors.red(`EPUB not found at ${buildPath}. Run production build first (e.g. pnpm build).`));
+    console.error(
+      picocolors.red(
+        `EPUB not found at ${buildPath}. Run production build first (e.g. pnpm build).`,
+      ),
+    );
     process.exit(1);
   }
 

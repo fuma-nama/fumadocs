@@ -50,9 +50,7 @@ program
     await add(input, client);
   });
 
-const exportCmd = program
-  .command('export')
-  .description('export documentation to various formats');
+const exportCmd = program.command('export').description('export documentation to various formats');
 
 exportCmd
   .command('epub')

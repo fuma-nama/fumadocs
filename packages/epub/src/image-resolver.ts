@@ -5,11 +5,7 @@ import { pathToFileURL } from 'node:url';
  * Resolve image src to file:// URL for epub-gen-memory to embed.
  * Handles relative paths (resolved from page dir), absolute paths, and remote URLs.
  */
-export function resolveImageSrc(
-  src: string,
-  pageDir: string,
-  publicDir?: string,
-): string {
+export function resolveImageSrc(src: string, pageDir: string, publicDir?: string): string {
   // Already a file:// URL
   if (src.startsWith('file://')) {
     return src;
@@ -50,18 +46,11 @@ export function resolveImageSrc(
 /**
  * Transform HTML content to replace image src attributes with file:// URLs.
  */
-export function resolveImagesInHtml(
-  html: string,
-  pageDir: string,
-  publicDir?: string,
-): string {
-  return html.replace(
-    /<img([^>]*?)src=["']([^"']+)["']([^>]*)>/gi,
-    (match, before, src, after) => {
-      const resolved = resolveImageSrc(src, pageDir, publicDir);
-      return `<img${before}src="${resolved}"${after}>`;
-    },
-  );
+export function resolveImagesInHtml(html: string, pageDir: string, publicDir?: string): string {
+  return html.replace(/<img([^>]*?)src=["']([^"']+)["']([^>]*)>/gi, (match, before, src, after) => {
+    const resolved = resolveImageSrc(src, pageDir, publicDir);
+    return `<img${before}src="${resolved}"${after}>`;
+  });
 }
 
 function pathToFileUrl(filePath: string): string {

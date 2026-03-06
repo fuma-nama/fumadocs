@@ -11,38 +11,11 @@ It converts your MDX content to HTML, resolves images, and produces a standards-
 
 ## Setup
 
-### Install
+### Installation
 
-<Tabs>
-  <TabItem value="npm" label="npm">
-  
-  ```bash
-  npm install fumadocs-epub
-  ```
-
-  </TabItem>
-  <TabItem value="pnpm" label="pnpm">
-  
-  ```bash
-  pnpm add fumadocs-epub
-  ```
-  
-  </TabItem>
-  <TabItem value="yarn" label="yarn">
-  
-  ```bash
-  yarn add fumadocs-epub
-  ```
-  
-  </TabItem>
-  <TabItem value="bun" label="bun">
-  
-  ```bash
-  bun add fumadocs-epub
-  ```
-
-  </TabItem>
-</Tabs>
+```npm
+npm install fumadocs-epub
+```
 
 ### Enable Processed Markdown
 
@@ -110,20 +83,20 @@ This fetches from your running server (Next.js) or copies from the build output 
 
 The `config` object passed to `exportEpub` supports these options:
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `title` | `string` | **Required.** Book title |
-| `author` | `string \| string[]` | Author name(s). Default: `'anonymous'` |
-| `description` | `string` | Book description |
-| `language` | `string` | Language code (e.g. `'en'`). Default: `'en'` |
-| `publisher` | `string` | Publisher name. Default: `'anonymous'` |
-| `isbn` | `string` | ISBN |
-| `cover` | `string` | Cover image. Supports `file://`, `http(s)://`, `/public/...`, or relative paths |
-| `outputPath` | `string` | If set, writes the EPUB to file in addition to returning the buffer |
-| `includePages` | `(page) => boolean` | Filter: include only pages where this returns `true` |
-| `excludePages` | `(page) => boolean` | Filter: exclude pages where this returns `true` |
-| `css` | `string` | Custom CSS for the EPUB. Uses `defaultEpubStyles` if omitted |
-| `publicDir` | `string` | Public directory for resolving `/public/...` image paths. Default: `./public` |
+| Option         | Type                 | Description                                                                     |
+| -------------- | -------------------- | ------------------------------------------------------------------------------- |
+| `title`        | `string`             | **Required.** Book title                                                        |
+| `author`       | `string \| string[]` | Author name(s). Default: `'anonymous'`                                          |
+| `description`  | `string`             | Book description                                                                |
+| `language`     | `string`             | Language code (e.g. `'en'`). Default: `'en'`                                    |
+| `publisher`    | `string`             | Publisher name. Default: `'anonymous'`                                          |
+| `isbn`         | `string`             | ISBN                                                                            |
+| `cover`        | `string`             | Cover image. Supports `file://`, `http(s)://`, `/public/...`, or relative paths |
+| `outputPath`   | `string`             | If set, writes the EPUB to file in addition to returning the buffer             |
+| `includePages` | `(page) => boolean`  | Filter: include only pages where this returns `true`                            |
+| `excludePages` | `(page) => boolean`  | Filter: exclude pages where this returns `true`                                 |
+| `css`          | `string`             | Custom CSS for the EPUB. Uses `defaultEpubStyles` if omitted                    |
+| `publicDir`    | `string`             | Public directory for resolving `/public/...` image paths. Default: `./public`   |
 
 ### Custom CSS
 

@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "EPUB export for Fumadocs documentation",
   "keywords": [
-    "fumadocs",
+    "documentation",
     "epub",
     "export",
-    "documentation"
+    "fumadocs"
   ],
   "homepage": "https://fumadocs.dev",
   "license": "MIT",
@@ -24,9 +24,6 @@
       "import": "./dist/index.js"
     }
   },
-  "engines": {
-    "node": ">=18"
-  },
   "publishConfig": {
     "access": "public"
   },
@@ -39,10 +36,10 @@
   },
   "dependencies": {
     "epub-gen-memory": "^1.1.2",
+    "rehype-stringify": "^10.0.1",
     "remark-gfm": "^4.0.1",
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.2",
-    "rehype-stringify": "^10.0.1",
     "unified": "^11.0.5"
   },
   "devDependencies": {
@@ -56,5 +53,8 @@
   },
   "peerDependencies": {
     "fumadocs-core": "^15.0.0 || ^16.0.0"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
