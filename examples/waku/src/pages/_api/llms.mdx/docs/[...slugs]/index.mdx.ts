@@ -2,7 +2,10 @@ import { getLLMText, source } from '@/lib/source';
 import { ApiContext } from 'waku/router';
 import { unstable_notFound } from 'waku/router/server';
 
-export async function GET(_: Request, { params }: ApiContext<'/llms.mdx/docs/[...slugs]'>) {
+export async function GET(
+  _: Request,
+  { params }: ApiContext<'/llms.mdx/docs/[...slugs]/index.mdx'>,
+) {
   const slugs = params.slugs;
   const page = source.getPage(slugs);
   if (!page) unstable_notFound();

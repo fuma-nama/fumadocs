@@ -12,7 +12,7 @@ export default function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
   if (!page) unstable_notFound();
 
   const MDX = page.data.body;
-  const markdownUrl = `/llms.mdx/docs/${page.slugs.join('/')}`;
+  const markdownUrl = `/llms.mdx/docs/${[...page.slugs, 'index.mdx'].join('/')}`;
   return (
     <DocsPage toc={page.data.toc}>
       <meta property="og:image" content={getPageImage(slugs).url} />
