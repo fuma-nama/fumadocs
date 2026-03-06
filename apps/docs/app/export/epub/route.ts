@@ -6,12 +6,13 @@ export const revalidate = false;
 export async function GET(): Promise<Response> {
   const buffer = await exportEpub({
     source,
-    config: {
-      title: 'Fumadocs Documentation',
-      author: 'Fuma Nama',
-      description: 'Documentation for Fumadocs - the documentation framework for Next.js',
-      cover: '/og.png',
+    getMarkdown(page) {
+      if (page.data.type === 'docs') return page.data.getText('raw');
     },
+    title: 'Fumadocs Documentation',
+    author: 'Fuma Nama',
+    description: 'Documentation for Fumadocs - the React.js documentation framework',
+    cover: '/og.png',
   });
   return new Response(new Uint8Array(buffer), {
     headers: {

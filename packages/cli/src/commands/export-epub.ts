@@ -51,12 +51,10 @@ export async function GET(request: Request): Promise<Response> {
   }
   const buffer = await exportEpub({
     source,
-    config: {
-      title: 'Documentation',
-      author: 'Your Team',
-      description: 'Exported documentation',
-      cover: '/cover.png',
-    },
+    title: 'Documentation',
+    author: 'Your Team',
+    description: 'Exported documentation',
+    cover: '/cover.png',
   });
   return new Response(new Uint8Array(buffer), {
     headers: {

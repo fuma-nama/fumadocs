@@ -1,10 +1,9 @@
-import epub from 'epub-gen-memory';
+import epub, { type Options } from 'epub-gen-memory';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import type { Page } from 'fumadocs-core/source';
+import type { LoaderConfig, Page } from 'fumadocs-core/source';
 import { getPagesInTreeOrder } from './toc-builder';
 import { markdownToHtml } from './markdown-to-html';
-import { resolveImagesInHtml } from './image-resolver';
 import { defaultEpubStyles } from './default-styles';
 import type { EpubExportOptions } from './types';
 
@@ -12,22 +11,11 @@ export { defaultEpubStyles } from './default-styles';
 export type { EpubConfig, EpubExportOptions } from './types';
 
 /**
- * Check if a page has getText (MDX pages do, OpenAPI pages don't)
- */
-function hasGetText(
-  page: Page,
-): page is Page & { data: { getText: (type: string) => Promise<string> } } {
-  return typeof (page.data as { getText?: unknown }).getText === 'function';
-}
-
-/**
  * Get page directory for resolving relative image paths
  */
 function getPageDir(page: Page, cwd: string): string {
-  const absolutePath =
-    page.absolutePath ?? (page.data as { info?: { fullPath?: string } }).info?.fullPath;
-  if (absolutePath) {
-    return path.dirname(absolutePath);
+  if (page.absolutePath) {
+    return path.dirname(page.absolutePath);
   }
   return path.resolve(cwd, path.dirname(page.path));
 }
@@ -67,32 +55,39 @@ function pathToFileUrl(filePath: string): string {
  *
  * const buffer = await exportEpub({
  *   source,
- *   config: {
- *     title: 'My Documentation',
- *     author: 'My Team',
- *     cover: '/cover.png',
- *   },
+ *   title: 'My Documentation',
+ *   author: 'My Team',
+ *   cover: '/cover.png',
  * });
  * ```
  */
-export async function exportEpub(options: EpubExportOptions): Promise<Buffer> {
-  const { source, config } = options;
+export async function exportEpub<C extends LoaderConfig>(
+  options: EpubExportOptions<C>,
+): Promise<Buffer> {
+  const cwd = process.cwd();
   const {
+    source,
+    getMarkdown = async (page) => {
+      try {
+        return await (page.data as { getText: (type: string) => Promise<string> }).getText('raw');
+      } catch {
+        console.warn(
+          `Failed to get processed markdown for page "${page.absolutePath ?? page.path}", please specify the "getMarkdown" option.`,
+        );
+      }
+    },
     title,
     author = 'anonymous',
     description,
     language = 'en',
     publisher = 'anonymous',
-    isbn,
     cover,
     outputPath,
     includePages,
     excludePages,
     css,
-    publicDir,
-  } = config;
-
-  const cwd = process.cwd();
+    publicDir = path.resolve('public'),
+  } = options;
 
   // Get pages in tree order (navigation order)
   const pageTree = source.getPageTree();
@@ -105,7 +100,6 @@ export async function exportEpub(options: EpubExportOptions): Promise<Buffer> {
 
   // Filter pages
   const filteredPages = pages.filter((page) => {
-    if (!hasGetText(page)) return false;
     if (includePages && !includePages(page)) return false;
     if (excludePages && excludePages(page)) return false;
     return true;
@@ -113,40 +107,27 @@ export async function exportEpub(options: EpubExportOptions): Promise<Buffer> {
 
   const chapters: { title: string; content: string }[] = [];
 
-  const resolvedPublicDir = publicDir ?? path.join(cwd, 'public');
-
   for (const page of filteredPages) {
-    let markdown: string;
-    try {
-      markdown = await (page.data as { getText: (type: string) => Promise<string> }).getText(
-        'processed',
-      );
-    } catch (err) {
-      const pageId = page.data.title ?? page.slugs?.slice(-1)[0] ?? page.path;
-      throw new Error(
-        `Failed to get processed markdown for page "${pageId}": ${err instanceof Error ? err.message : String(err)}. Ensure includeProcessedMarkdown: true in your docs collection config.`,
-      );
-    }
-    const html = await markdownToHtml(markdown);
-    const pageDir = getPageDir(page, cwd);
-    const resolvedHtml = resolveImagesInHtml(html, pageDir, resolvedPublicDir);
+    const markdown = await getMarkdown(page);
+    if (!markdown) continue;
 
-    const pageTitle = page.data.title ?? page.slugs?.slice(-1)[0] ?? 'Untitled';
+    const pageDir = getPageDir(page, cwd);
+    const html = await markdownToHtml(markdown, pageDir, publicDir);
+    const pageTitle = page.data.title ?? page.slugs[page.slugs.length - 1] ?? 'Untitled';
 
     chapters.push({
       title: pageTitle,
-      content: resolvedHtml,
+      content: html,
     });
   }
 
-  const epubOptions = {
+  const epubOptions: Options = {
     title,
     author: Array.isArray(author) ? author : [author],
     description,
     lang: language,
     publisher,
-    isbn,
-    cover: resolveCoverPath(cover, cwd, resolvedPublicDir) ?? cover,
+    cover: resolveCoverPath(cover, cwd, publicDir) ?? cover,
     css: css ?? defaultEpubStyles,
     prependChapterTitles: true,
     numberChaptersInTOC: true,

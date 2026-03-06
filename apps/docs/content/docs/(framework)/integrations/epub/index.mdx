@@ -47,12 +47,10 @@ export const revalidate = false;
 export async function GET(): Promise<Response> {
   const buffer = await exportEpub({
     source,
-    config: {
-      title: 'My Documentation',
-      author: 'My Team',
-      description: 'Documentation for my project',
-      cover: '/cover.png',
-    },
+    title: 'My Documentation',
+    author: 'My Team',
+    description: 'Documentation for my project',
+    cover: '/cover.png',
   });
   return new Response(new Uint8Array(buffer), {
     headers: {
@@ -81,7 +79,7 @@ This fetches from your running server (Next.js) or copies from the build output 
 
 ## Options
 
-The `config` object passed to `exportEpub` supports these options:
+The config passed to `exportEpub` supports these options:
 
 | Option         | Type                 | Description                                                                     |
 | -------------- | -------------------- | ------------------------------------------------------------------------------- |
@@ -107,14 +105,12 @@ import { exportEpub, defaultEpubStyles } from 'fumadocs-epub';
 
 const buffer = await exportEpub({
   source,
-  config: {
-    title: 'My Docs',
-    author: 'Me',
-    css: `${defaultEpubStyles}
+  title: 'My Docs',
+  author: 'Me',
+  css: `${defaultEpubStyles}
 /* Custom overrides */
 body { font-size: 1.1em; }
 `,
-  },
 });
 ```
 
@@ -125,14 +121,12 @@ Use `includePages` and `excludePages` to control which docs are exported:
 ```ts
 const buffer = await exportEpub({
   source,
-  config: {
-    title: 'My Docs',
-    author: 'Me',
-    // Only include docs under /docs/getting-started
-    includePages: (page) => page.path.startsWith('getting-started'),
-    // Exclude specific paths
-    excludePages: (page) => page.path === 'changelog',
-  },
+  title: 'My Docs',
+  author: 'Me',
+  // Only include docs under /docs/getting-started
+  includePages: (page) => page.path.startsWith('getting-started'),
+  // Exclude specific paths
+  excludePages: (page) => page.path === 'changelog',
 });
 ```
 

@@ -1,4 +1,4 @@
-import type { LoaderOutput, Page } from 'fumadocs-core/source';
+import type { LoaderConfig, LoaderOutput, Page } from 'fumadocs-core/source';
 
 export interface EpubConfig {
   /** Book title */
@@ -11,8 +11,6 @@ export interface EpubConfig {
   language?: string;
   /** Publisher name */
   publisher?: string;
-  /** ISBN */
-  isbn?: string;
   /** Cover image - URL, file path, or path relative to public dir */
   cover?: string;
   /** Output file path - if set, writes to file in addition to returning buffer */
@@ -27,9 +25,11 @@ export interface EpubConfig {
   publicDir?: string;
 }
 
-export interface EpubExportOptions {
+export interface EpubExportOptions<Config extends LoaderConfig = LoaderConfig> extends EpubConfig {
   /** Fumadocs source (from loader()) */
-  source: LoaderOutput;
-  /** EPUB configuration */
-  config: EpubConfig;
+  source: LoaderOutput<Config>;
+  /** fucntion to get page Markdown content */
+  getMarkdown?: (
+    page: Page<Config['source']['pageData']>,
+  ) => string | undefined | Promise<string | undefined>;
 }
