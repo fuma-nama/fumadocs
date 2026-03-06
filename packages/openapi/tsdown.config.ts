@@ -20,7 +20,7 @@ export default defineConfig({
   async onSuccess() {
     await compileInline();
   },
-  inlineOnly: ['dereference-json-schema'],
+  inlineOnly: [],
   exports: {
     enabled: true,
     customExports(v) {
