@@ -41,7 +41,7 @@ export interface ResolvedLoaderConfig {
   source: Source;
   url: (slugs: string[], locale?: string) => string;
 
-  plugins?: LoaderPlugin[];
+  plugins: LoaderPlugin[];
   pageTree?: Partial<PageTreeOptions>;
   i18n?: I18nConfig | undefined;
 }
@@ -307,7 +307,7 @@ export function loader(
   let pageTrees: Record<string, PageTree.Root> | PageTree.Root | undefined;
   function getPageTrees() {
     if (pageTrees) return pageTrees;
-    const { plugins = [], url, pageTree: pageTreeConfig } = loaderConfig;
+    const { plugins, url, pageTree: pageTreeConfig } = loaderConfig;
     const transformers: PageTreeTransformer[] = [];
 
     if (pageTreeConfig?.transformers) {
@@ -479,7 +479,7 @@ function resolveConfig(
     ]),
   };
 
-  for (const plugin of config.plugins ?? []) {
+  for (const plugin of config.plugins) {
     const result = plugin.config?.(config);
     if (result) config = result;
   }
@@ -546,3 +546,5 @@ export type InferPageType<Utils extends LoaderOutput<any>> =
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- infer types
 export type InferMetaType<Utils extends LoaderOutput<any>> =
   Utils extends LoaderOutput<infer Config> ? Meta<Config['source']['metaData']> : never;
+
+export * from './loader/llms';

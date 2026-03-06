@@ -19,12 +19,13 @@ export async function GET(request: Request) {
   const config = await getConfigRuntime();
   const projects = normalizeProjects(config.content?.projects);
   const project = projects.find((item) => item.dir === projectDir);
-  const possiblePaths = [path.join(pagePath, src)];
+  const possiblePaths = [path.join(path.dirname(pagePath), src)];
 
   if (project?.assetsDir) {
     possiblePaths.push(...project.assetsDir.map((dir) => path.join(dir, src)));
   } else {
-    possiblePaths.push(path.join(projectDir, src), path.join(projectDir, 'public', src));
+    const rootDir = process.env.ROOT_DIR ?? process.cwd();
+    possiblePaths.push(path.join(rootDir, src), path.join(rootDir, 'public', src));
   }
 
   const targetFile = possiblePaths.find((file) => existsSync(file));

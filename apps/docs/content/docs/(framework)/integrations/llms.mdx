@@ -39,6 +39,71 @@ export const docs = defineDocs({
 });
 ```
 
+### `llms.txt`
+
+You can generate it from page tree using Loader API.
+
+```ts tab="Next.js" title="app/llms.txt/route.ts"
+import { source } from '@/lib/source';
+import { llms } from 'fumadocs-core/source';
+
+// cached forever
+export const revalidate = false;
+
+export function GET() {
+  return new Response(llms(source).index());
+}
+```
+
+```ts tab="React Router" title="app/routes.ts"
+import { index, route, type RouteConfig } from '@react-router/dev/routes';
+
+export default [
+  // [!code ++]
+  route('llms.txt', 'routes/llms.ts'),
+] satisfies RouteConfig;
+```
+
+```ts tab="React Router" title="app/routes/llms.ts"
+import { source } from '@/lib/source';
+import { llms } from 'fumadocs-core/source';
+
+export function loader() {
+  return new Response(llms(source).index());
+}
+```
+
+```ts tab="Tanstack Start" title="src/routes/llms[.]txt.ts"
+import { createFileRoute } from '@tanstack/react-router';
+import { source } from '@/lib/source';
+import { llms } from 'fumadocs-core/source';
+
+export const Route = createFileRoute('/llms.txt')({
+  server: {
+    handlers: {
+      GET() {
+        return new Response(llms(source).index());
+      },
+    },
+  },
+});
+```
+
+```ts tab="Waku" title="pages/_api/llms.txt.ts"
+import { source } from '@/lib/source';
+import { llms } from 'fumadocs-core/source';
+
+export function GET() {
+  return new Response(llms(source).index());
+}
+
+export async function getConfig() {
+  return {
+    render: 'static' as const,
+  } as const;
+}
+```
+
 ### `llms-full.txt`
 
 A version of docs for AIs to read.
@@ -95,6 +160,24 @@ export const Route = createFileRoute('/llms-full.txt')({
     },
   },
 });
+```
+
+```ts tab="Waku" title="pages/_api/llms-full.txt.ts"
+import { source } from '@/lib/source';
+import { getLLMText } from '@/lib/get-llm-text';
+
+export async function GET() {
+  const scan = source.getPages().map(getLLMText);
+  const scanned = await Promise.all(scan);
+
+  return new Response(scanned.join('\n\n'));
+}
+
+export async function getConfig() {
+  return {
+    render: 'static' as const,
+  } as const;
+}
 ```
 
 ### `*.mdx` [#mdx-extension]
@@ -203,6 +286,7 @@ export default {
 ```ts tab="Tanstack Start" title="src/routes/llms[.]mdx.docs.$.ts"
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { source } from '@/lib/source';
+import { getLLMText } from '@/lib/get-llm-text';
 
 export const Route = createFileRoute('/llms.mdx/docs/$')({
   server: {
@@ -212,7 +296,7 @@ export const Route = createFileRoute('/llms.mdx/docs/$')({
         const page = source.getPage(slugs);
         if (!page) throw notFound();
 
-        return new Response(await page.data.getText('processed'), {
+        return new Response(await getLLMText(page), {
           headers: {
             'Content-Type': 'text/markdown',
           },

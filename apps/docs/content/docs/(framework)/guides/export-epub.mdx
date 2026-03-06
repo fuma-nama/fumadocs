@@ -1,0 +1,139 @@
+---
+title: Export EPUB
+description: Export your documentation to EPUB format for e-readers
+---
+
+## Introduction
+
+The EPUB integration lets you export your Fumadocs documentation as an EPUB file, making it easy for readers to download and read your docs on e-readers, tablets, or any EPUB-compatible app.
+
+It converts your MDX content to HTML, resolves images, and produces a standards-compliant EPUB with a table of contents.
+
+## Setup
+
+### Installation
+
+```npm
+npm install fumadocs-epub
+```
+
+### Enable Processed Markdown
+
+EPUB export requires `includeProcessedMarkdown` in your docs collection config:
+
+```ts title="source.config.ts"
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  docs: {
+    postprocess: {
+      // [!code ++]
+      includeProcessedMarkdown: true,
+    },
+  },
+});
+```
+
+### Create Export Route
+
+Create a route handler to serve the EPUB. For Next.js:
+
+```ts title="app/export/epub/route.ts"
+import { source } from '@/lib/source';
+import { exportEpub } from 'fumadocs-epub';
+
+export const revalidate = false;
+
+export async function GET(): Promise<Response> {
+  const buffer = await exportEpub({
+    source,
+    title: 'My Documentation',
+    author: 'My Team',
+    description: 'Documentation for my project',
+    cover: '/cover.png',
+  });
+  return new Response(new Uint8Array(buffer), {
+    headers: {
+      'Content-Type': 'application/epub+zip',
+      'Content-Disposition': 'attachment; filename="docs.epub"',
+    },
+  });
+}
+```
+
+<Callout type="warning" title="Protect the endpoint">
+
+Consider protecting `/export/epub` in production. For example, require an `Authorization: Bearer <secret>` header and set `EXPORT_SECRET` in your environment. The Fumadocs CLI scaffolds a route with this protection when you run `fumadocs export epub --scaffold-only`.
+
+</Callout>
+
+### Using the CLI
+
+You can also export EPUB via the Fumadocs CLI:
+
+```bash
+fumadocs export epub --framework next
+```
+
+This fetches from your running server (Next.js) or copies from the build output (other frameworks). Run a production build first for non-Next.js frameworks.
+
+## Options
+
+The config passed to `exportEpub` supports these options:
+
+| Option         | Type                 | Description                                                                     |
+| -------------- | -------------------- | ------------------------------------------------------------------------------- |
+| `title`        | `string`             | **Required.** Book title                                                        |
+| `author`       | `string \| string[]` | Author name(s). Default: `'anonymous'`                                          |
+| `description`  | `string`             | Book description                                                                |
+| `language`     | `string`             | Language code (e.g. `'en'`). Default: `'en'`                                    |
+| `publisher`    | `string`             | Publisher name. Default: `'anonymous'`                                          |
+| `isbn`         | `string`             | ISBN                                                                            |
+| `cover`        | `string`             | Cover image. Supports `file://`, `http(s)://`, `/public/...`, or relative paths |
+| `outputPath`   | `string`             | If set, writes the EPUB to file in addition to returning the buffer             |
+| `includePages` | `(page) => boolean`  | Filter: include only pages where this returns `true`                            |
+| `excludePages` | `(page) => boolean`  | Filter: exclude pages where this returns `true`                                 |
+| `css`          | `string`             | Custom CSS for the EPUB. Uses `defaultEpubStyles` if omitted                    |
+| `publicDir`    | `string`             | Public directory for resolving `/public/...` image paths. Default: `./public`   |
+
+### Custom CSS
+
+You can override the default EPUB styles:
+
+```ts
+import { exportEpub, defaultEpubStyles } from 'fumadocs-epub';
+
+const buffer = await exportEpub({
+  source,
+  title: 'My Docs',
+  author: 'Me',
+  css: `${defaultEpubStyles}
+/* Custom overrides */
+body { font-size: 1.1em; }
+`,
+});
+```
+
+### Filtering Pages
+
+Use `includePages` and `excludePages` to control which docs are exported:
+
+```ts
+const buffer = await exportEpub({
+  source,
+  title: 'My Docs',
+  author: 'Me',
+  // Only include docs under /docs/getting-started
+  includePages: (page) => page.path.startsWith('getting-started'),
+  // Exclude specific paths
+  excludePages: (page) => page.path === 'changelog',
+});
+```
+
+### Image Resolution
+
+Images in your MDX are resolved automatically:
+
+- **Relative paths** (e.g. `./image.png`) — resolved relative to the page file
+- **Public paths** (e.g. `/og.png`) — resolved from the `public` directory
+- **Remote URLs** (e.g. `https://...`) — embedded as-is

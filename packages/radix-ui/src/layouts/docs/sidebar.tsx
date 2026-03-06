@@ -261,7 +261,7 @@ export function SidebarFolderContent({
 }
 
 export const SidebarPageTree = createPageTreeRenderer({
-  SidebarFolder: Base.SidebarFolder,
+  SidebarFolder,
   SidebarFolderContent,
   SidebarFolderLink,
   SidebarFolderTrigger,
@@ -270,7 +270,7 @@ export const SidebarPageTree = createPageTreeRenderer({
 });
 
 export const SidebarLinkItem = createLinkItemRenderer({
-  SidebarFolder: Base.SidebarFolder,
+  SidebarFolder,
   SidebarFolderContent,
   SidebarFolderLink,
   SidebarFolderTrigger,

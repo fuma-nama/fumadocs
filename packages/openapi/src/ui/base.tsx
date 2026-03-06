@@ -4,7 +4,7 @@ import type { Awaitable, DistributiveOmit, MethodInformation, RenderContext } fr
 import type { NoReference } from '@/utils/schema';
 import type { ProcessedDocument } from '@/utils/process-document';
 import { defaultAdapters, MediaAdapter } from '@/requests/media/adapter';
-import type { FC, ReactNode } from 'react';
+import type { FC, HTMLAttributes, ReactNode } from 'react';
 import { highlight, type CoreHighlightOptions } from 'fumadocs-core/highlight/core';
 import type { OpenAPIServer } from '@/server';
 import type { APIPageClientOptions } from './client';
@@ -66,12 +66,12 @@ export interface CreateAPIPageOptions {
   ) => Awaitable<string | undefined>;
 
   /**
-   * Generate example code usage for endpoints.
+   * Generate example code usage for all endpoints.
    */
   codeUsages?: CodeUsageGeneratorRegistry;
 
   /**
-   * Generate example code usage for endpoints.
+   * Generate example code usage for each endpoint.
    */
   generateCodeSamples?: (method: MethodInformation) => Awaitable<InlineCodeUsageGenerator[]>;
 
@@ -200,6 +200,12 @@ export interface CreateAPIPageOptions {
     }) => Awaitable<ReactNode>;
   };
 
+  renderHeading?: (
+    props: HTMLAttributes<HTMLHeadingElement>,
+    depth: number,
+  ) => Awaitable<ReactNode>;
+  renderCodeBlock?: (props: { lang: string; code: string }) => Awaitable<ReactNode>;
+
   client?: APIPageClientOptions;
 }
 
@@ -250,8 +256,12 @@ export function createAPIPage(
         ...options.mediaAdapters,
       },
       slugger,
-      renderHeading(depth, text, props) {
+      async renderHeading(depth, text, props) {
         const id = slugger.slug(text);
+
+        if (options.renderHeading) {
+          return options.renderHeading({ id, children: text, ...props }, depth);
+        }
 
         return (
           <Heading id={id} key={id} as={`h${depth}` as `h1`} {...props}>
@@ -279,12 +289,16 @@ export function createAPIPage(
         return out.result as ReactNode;
       },
       async renderCodeBlock(lang, code) {
+        if (options.renderCodeBlock) {
+          return options.renderCodeBlock({ lang, code });
+        }
+
         const rendered = await highlight(code, {
           lang,
           ...options.shikiOptions,
           config: options.shiki,
           components: {
-            pre: (props) => <Pre {...props} />,
+            pre: Pre,
           },
         });
 

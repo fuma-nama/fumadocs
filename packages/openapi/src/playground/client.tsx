@@ -12,7 +12,7 @@ import {
 } from 'react';
 import { useApiContext, useServerContext } from '@/ui/contexts/api';
 import type { FetchResult } from '@/playground/fetcher';
-import type { ParameterField, SecurityEntry } from '@/playground/index';
+import type { SecurityEntry } from '@/playground/index';
 import { getStatusInfo } from './status-info';
 import { joinURL, resolveRequestData, resolveServerUrl, withBase } from '@/utils/url';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock.core';
@@ -51,6 +51,7 @@ import {
 } from '@fumari/stf';
 import { objectGet, objectSet, stringifyFieldKey } from '@fumari/stf/lib/utils';
 import { FieldInput, FieldSet, JsonInput, ObjectInput } from './components/inputs';
+import type { ParameterObject } from '@/types';
 
 export interface FormValues extends Record<string, unknown> {
   path: Record<string, unknown>;
@@ -63,7 +64,7 @@ export interface FormValues extends Record<string, unknown> {
 export interface PlaygroundClientProps extends ComponentProps<'form'>, SchemaScope {
   route: string;
   method: string;
-  parameters?: ParameterField[];
+  parameters?: ParameterObject[];
   securities: SecurityEntry[][];
   body?: {
     schema: ParsedSchema;
@@ -99,7 +100,7 @@ export interface PlaygroundClientOptions {
    *
    * Recommended types packages: `json-schema-typed`, `openapi-types`.
    */
-  renderParameterField?: (fieldName: FieldKey, param: ParameterField) => ReactNode;
+  renderParameterField?: (fieldName: FieldKey, param: ParameterObject) => ReactNode;
 
   /**
    * render the input for API endpoint body.

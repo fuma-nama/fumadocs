@@ -22,10 +22,11 @@ program
 program
   .command('start', { isDefault: true })
   .description('start Fumapress')
+  .argument('[dirs...]', 'a list of content directories to view')
   .option('-p, --port <PORT>')
   .option('-h, --host <HOST>')
-  .action(async (options: { port?: string; host?: string }) => {
-    await runStart(options);
+  .action(async (dirs: string[] | undefined, options: { port?: string; host?: string }) => {
+    await runStart({ ...options, dirs });
   });
 
 void program.version(version).parseAsync(process.argv);

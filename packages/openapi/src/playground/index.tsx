@@ -1,17 +1,13 @@
 import type {
+  MediaTypeObject,
   MethodInformation,
   ParameterObject,
   RenderContext,
   SecuritySchemeObject,
 } from '@/types';
-import { getPreferredType, type NoReference, type ParsedSchema } from '@/utils/schema';
+import { getPreferredType, NoReference, type ParsedSchema } from '@/utils/schema';
 import { type PlaygroundClientProps } from './client';
 import { ClientLazy } from './lazy';
-
-export type ParameterField = NoReference<ParameterObject> & {
-  schema: ParsedSchema;
-  in: 'cookie' | 'header' | 'query' | 'path';
-};
 
 interface Context {
   references: Record<string, ParsedSchema>;
@@ -59,7 +55,35 @@ export async function APIPlayground({ path, method, ctx }: APIPlaygroundProps) {
     securities: parseSecurities(method, ctx),
     method: method.method,
     route: path,
-    parameters: method.parameters as ParameterField[],
+    parameters: method.parameters?.map((param: NoReference<ParameterObject>): ParameterObject => {
+      if (param.schema !== undefined) {
+        return {
+          ...param,
+          schema: writeReferences(param.schema, context),
+        } as ParameterObject;
+      }
+
+      if (param.content !== undefined) {
+        const content: Record<string, MediaTypeObject> = {};
+
+        for (const k in param.content) {
+          const original = param.content[k] as NoReference<MediaTypeObject>;
+          if (!original || original.schema === undefined) continue;
+
+          content[k] = {
+            ...original,
+            schema: writeReferences(original.schema, context),
+          } as MediaTypeObject;
+        }
+
+        return {
+          ...param,
+          content,
+        } as ParameterObject;
+      }
+
+      return param;
+    }),
     body:
       bodyContent && mediaType
         ? ({

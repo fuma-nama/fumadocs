@@ -12,7 +12,7 @@ async function loadConfig(configPath: string | null): Promise<FumapressConfig> {
     const { module } = await unrun<{ default: unknown }>({
       path: configPath,
       inputOptions: {
-        cwd: process.env.PROJECT_DIR,
+        cwd: process.env.ROOT_DIR,
         external: ['*'],
       },
     });
