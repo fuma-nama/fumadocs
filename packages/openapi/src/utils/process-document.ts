@@ -4,7 +4,7 @@ import { bundle } from '@scalar/json-magic/bundle';
 import { upgrade } from '@scalar/openapi-upgrader';
 import { fetchUrls, readFiles } from '@scalar/json-magic/bundle/plugins/node';
 import type { JSONSchema } from 'json-schema-typed/draft-2020-12';
-import { resolveRefSync } from 'dereference-json-schema';
+import dereference from 'dereference-json-schema';
 
 export interface ProcessedDocument {
   /**
@@ -84,7 +84,7 @@ function dereferenceSync(
         // object
         if ('$ref' in current && typeof current['$ref'] === 'string') {
           const ref = current['$ref'];
-          const out = resolveRefSync(cloned as never, ref) as JSONSchema;
+          const out = dereference.resolveRefSync(cloned as never, ref) as JSONSchema;
           onDereference(ref, out);
           return out;
         }
