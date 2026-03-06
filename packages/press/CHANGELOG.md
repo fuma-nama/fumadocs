@@ -1,5 +1,14 @@
 # fumapress
 
+## 0.1.3
+
+### Patch Changes
+
+- 5cc497e: fix image path
+- Updated dependencies [9b5c2dd]
+  - fumadocs-core@16.6.10
+  - fumadocs-ui@16.6.10
+
 ## 0.1.2
 
 ### Patch Changes

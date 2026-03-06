@@ -1,5 +1,14 @@
 # @fuma-docs/openapi
 
+## 10.3.16
+
+### Patch Changes
+
+- 1f4ccb4: expose heading & codeblock renderer
+- Updated dependencies [9b5c2dd]
+  - fumadocs-core@16.6.10
+  - fumadocs-ui@16.6.10
+
 ## 10.3.15
 
 ### Patch Changes
