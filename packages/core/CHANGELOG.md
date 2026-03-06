@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 16.6.10
+
+### Patch Changes
+
+- 9b5c2dd: Support `llms` API in Loader API
+
 ## 16.6.9
 
 ### Patch Changes
