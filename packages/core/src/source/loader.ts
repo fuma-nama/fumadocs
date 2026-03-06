@@ -41,7 +41,7 @@ export interface ResolvedLoaderConfig {
   source: Source;
   url: (slugs: string[], locale?: string) => string;
 
-  plugins?: LoaderPlugin[];
+  plugins: LoaderPlugin[];
   pageTree?: Partial<PageTreeOptions>;
   i18n?: I18nConfig | undefined;
 }
@@ -307,7 +307,7 @@ export function loader(
   let pageTrees: Record<string, PageTree.Root> | PageTree.Root | undefined;
   function getPageTrees() {
     if (pageTrees) return pageTrees;
-    const { plugins = [], url, pageTree: pageTreeConfig } = loaderConfig;
+    const { plugins, url, pageTree: pageTreeConfig } = loaderConfig;
     const transformers: PageTreeTransformer[] = [];
 
     if (pageTreeConfig?.transformers) {
@@ -479,7 +479,7 @@ function resolveConfig(
     ]),
   };
 
-  for (const plugin of config.plugins ?? []) {
+  for (const plugin of config.plugins) {
     const result = plugin.config?.(config);
     if (result) config = result;
   }
@@ -539,71 +539,6 @@ function buildPlugins(plugins: LoaderPluginOption[], sort = true): LoaderPlugin[
   return flatten;
 }
 
-export interface LLMsConfig {
-  TAB?: string;
-  renderName?: (item: PageTree.Node | PageTree.Root) => string;
-  renderDescription?: (item: PageTree.Item | PageTree.Folder) => string;
-}
-
-export function llms<C extends LoaderConfig>(loader: LoaderOutput<C>, config: LLMsConfig = {}) {
-  const {
-    TAB = '  ',
-    renderName = (node) => (node.name ? String(node.name) : ''),
-    renderDescription = (node) => (node.description ? String(node.description) : ''),
-  } = config;
-
-  function index(lang?: string): string {
-    if (loader._i18n && lang === undefined) {
-      const { languages } = loader._i18n;
-      return languages.map((lang) => index(lang)).join('\n\n');
-    }
-
-    const pageTree = loader.getPageTree(lang);
-    const out: string[] = [];
-
-    out.push(`# ${renderName(pageTree)}`);
-    out.push('');
-
-    function item(name: string, description: string, indent: number) {
-      const prefix = TAB.repeat(indent);
-
-      description = description.trim();
-      if (description.length > 0) return `${prefix}- ${name}: ${description}`;
-      return `${prefix}- ${name}`;
-    }
-
-    function onNode(node: PageTree.Node, indent: number) {
-      switch (node.type) {
-        case 'page': {
-          out.push(item(`[${renderName(node)}](${node.url})`, renderDescription(node), indent));
-          break;
-        }
-        case 'folder': {
-          out.push(item(renderName(node), renderDescription(node), indent));
-          if (node.index) onNode(node.index, indent + 1);
-          for (const child of node.children) onNode(child, indent + 1);
-          break;
-        }
-        case 'separator': {
-          if (node.name) out.push(item(`**${renderName(node)}**`, '', indent));
-          out.push('');
-          break;
-        }
-      }
-    }
-
-    for (const child of pageTree.children) onNode(child, 0);
-    return out.join('\n');
-  }
-
-  return {
-    /**
-     * generate `llms.txt` content in Markdown format.
-     */
-    index,
-  };
-}
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- infer types
 export type InferPageType<Utils extends LoaderOutput<any>> =
   Utils extends LoaderOutput<infer Config> ? Page<Config['source']['pageData']> : never;
@@ -611,3 +546,5 @@ export type InferPageType<Utils extends LoaderOutput<any>> =
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- infer types
 export type InferMetaType<Utils extends LoaderOutput<any>> =
   Utils extends LoaderOutput<infer Config> ? Meta<Config['source']['metaData']> : never;
+
+export * from './loader/llms';

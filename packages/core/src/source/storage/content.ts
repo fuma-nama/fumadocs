@@ -64,7 +64,7 @@ const EmptyLang = Symbol();
  * in the storage, locale codes are removed from file paths, hence the same file will have same file paths in every storage.
  */
 export function createContentStorageBuilder(loaderConfig: ResolvedLoaderConfig) {
-  const { source, plugins = [], i18n } = loaderConfig;
+  const { source, plugins, i18n } = loaderConfig;
 
   const parser = i18n ? parsers[i18n.parser ?? 'dot'] : parsers.none;
   const normalized = new Map<
@@ -96,12 +96,16 @@ export function createContentStorageBuilder(loaderConfig: ResolvedLoaderConfig) 
     }
 
     const [pathWithoutLocale, locale = i18n ? i18n.defaultLanguage : EmptyLang] = parser(file.path);
-    const list = normalized.get(locale) ?? [];
+    let list = normalized.get(locale);
+    if (!list) {
+      list = [];
+      normalized.set(locale, list);
+    }
+
     list.push({
       pathWithoutLocale,
       file,
     });
-    normalized.set(locale, list);
   }
 
   function makeStorage(locale: string | typeof EmptyLang, inherit?: ContentStorage) {

@@ -70,14 +70,15 @@ export class FileSystem<File> {
   }
 
   makeDir(path: string): void {
-    const segments = splitPath(path);
+    const cur: string[] = [];
 
-    for (let i = 0; i < segments.length; i++) {
-      const segment = segments.slice(0, i + 1).join('/');
-      if (this.folders.has(segment)) continue;
+    for (const seg of splitPath(path)) {
+      cur.push(seg);
+      const curPath = cur.join('/');
+      if (this.folders.has(curPath)) continue;
 
-      this.folders.set(segment, []);
-      this.folders.get(dirname(segment))!.push(segment);
+      this.folders.set(curPath, []);
+      this.folders.get(dirname(curPath))!.push(curPath);
     }
   }
 }
