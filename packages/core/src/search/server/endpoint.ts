@@ -1,4 +1,4 @@
-import { type SearchAPI, type SearchServer } from '@/search/server';
+import type { SearchAPI, SearchServer } from './types';
 
 export function createEndpoint(server: SearchServer): SearchAPI {
   const { search } = server;

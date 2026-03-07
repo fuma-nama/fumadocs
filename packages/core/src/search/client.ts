@@ -2,7 +2,7 @@ import { type DependencyList, useRef, useState } from 'react';
 import { useDebounce } from '@/utils/use-debounce';
 import { type FetchOptions } from '@/search/client/fetch';
 import { useOnChange } from '@/utils/use-on-change';
-import { type StaticOptions } from '@/search/client/static';
+import { type StaticOptions } from '@/search/client/orama-static';
 import { type AlgoliaOptions } from '@/search/client/algolia';
 import { type OramaCloudOptions } from '@/search/client/orama-cloud';
 import { type OramaCloudLegacyOptions } from '@/search/client/orama-cloud-legacy';
@@ -132,7 +132,7 @@ export function useDocsSearch(
             return search(debouncedValue, client);
           }
           case 'static': {
-            const { search } = await import('./client/static');
+            const { search } = await import('./client/orama-static');
             return search(debouncedValue, client);
           }
           default:

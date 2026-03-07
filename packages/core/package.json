@@ -154,6 +154,7 @@
     "@oramacloud/client": "^2.1.4",
     "@tanstack/react-router": "1.166.2",
     "@types/estree-jsx": "^1.0.5",
+    "@types/flexsearch": "^0.7.42",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
     "@types/negotiator": "^0.6.4",
@@ -162,6 +163,7 @@
     "@types/react-dom": "^19.2.3",
     "algoliasearch": "5.49.1",
     "eslint-config-custom": "workspace:*",
+    "flexsearch": "^0.8.212",
     "lucide-react": "^0.577.0",
     "next": "16.1.6",
     "react-router": "^7.13.1",
@@ -185,6 +187,7 @@
     "@types/mdast": "*",
     "@types/react": "*",
     "algoliasearch": "5.x.x",
+    "flexsearch": "*",
     "lucide-react": "*",
     "next": "16.x.x",
     "react": "^19.2.0",
@@ -194,6 +197,9 @@
     "zod": "4.x.x"
   },
   "peerDependenciesMeta": {
+    "flexsearch": {
+      "optional": true
+    },
     "@mdx-js/mdx": {
       "optional": true
     },

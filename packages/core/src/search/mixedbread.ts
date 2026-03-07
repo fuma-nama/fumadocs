@@ -3,7 +3,7 @@ import type Mixedbread from '@mixedbread/sdk';
 import type { StoreSearchParams, StoreSearchResponse } from '@mixedbread/sdk/resources/stores';
 import removeMd from 'remove-markdown';
 import Slugger from 'github-slugger';
-import { createEndpoint } from '@/search/orama/create-endpoint';
+import { createEndpoint } from '@/search/server/endpoint';
 import type { SearchAPI } from '@/search/server';
 
 export interface SearchMetadata {
