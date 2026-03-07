@@ -1,5 +1,14 @@
 # @fuma-docs/openapi
 
+## 10.3.17
+
+### Patch Changes
+
+- e2e0782: Fix broken `dereference-json-schema` import in built output caused by `unbundle + inlineOnly` producing hardcoded `.pnpm/` paths
+- Updated dependencies [ae3e742]
+  - fumadocs-core@16.6.11
+  - fumadocs-ui@16.6.11
+
 ## 10.3.16
 
 ### Patch Changes

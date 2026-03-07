@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 16.6.11
+
+### Patch Changes
+
+- ae3e742: Support flexsearch server & client
+
 ## 16.6.10
 
 ### Patch Changes
