@@ -8,6 +8,7 @@ import {
   FileTextIcon,
   Heart,
   SearchIcon,
+  TerminalIcon,
   TimerIcon,
 } from 'lucide-react';
 import { Marquee } from '@/app/(home)/marquee';
@@ -18,12 +19,13 @@ import {
   CreateAppAnimation,
   PreviewImages,
   Writing,
-  ContentAdoptionBackground,
 } from '@/app/(home)/page.client';
 import ShadcnImage from './shadcn.png';
 import ContributorCounter from '@/components/contributor-count';
 import { owner, repo } from '@/lib/github';
 import StoryImage from './story.png';
+import CLIImage from './cli.png';
+import Bg2Image from './bg-2.png';
 import { story } from '@/content/docs/(framework)/integrations/story';
 
 const headingVariants = cva('font-medium tracking-tight', {
@@ -92,7 +94,7 @@ export default function Page() {
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-1 gap-10 mt-12 px-6 mx-auto w-full max-w-[1400px] md:px-12 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-10 mt-12 px-6 mx-auto w-full max-w-[1400px] md:px-12 lg:grid-cols-2 lg:mt-20">
         <p className="text-2xl tracking-tight leading-snug font-light col-span-full md:text-3xl xl:text-4xl">
           Fumadocs is a <span className="text-brand font-medium">React.js</span> documentation
           framework for <span className="text-brand font-medium">Developers</span>, beautifully
@@ -100,24 +102,40 @@ export default function Page() {
           features for your docs workflows, with high customizability to fit your preferences, works
           seamlessly with any React.js framework, CMS — anything.
         </p>
-        <div className="p-8 bg-radial-[circle_at_top_center] from-25% to-brand-secondary/50 rounded-xl col-span-full">
-          <h2 className="text-xl text-center text-brand font-mono font-bold uppercase mb-2">
-            Try it out.
-          </h2>
-          <CodeBlock
-            code="pnpm create fumadocs-app"
-            lang="bash"
-            wrapper={{
-              className: 'mx-auto w-full max-w-[800px]',
-            }}
+        <div className="relative p-4 rounded-2xl col-span-full z-2 overflow-hidden md:p-8">
+          <Image
+            src={CLIImage}
+            alt=""
+            className="absolute inset-0 size-full object-top object-cover -z-1"
           />
-          <CreateAppAnimation />
+          <div className="mx-auto w-full max-w-[800px] p-2 bg-fd-card text-fd-card-foreground border rounded-2xl shadow-lg">
+            <div className="flex flex-row gap-2">
+              <h2 className="text-brand content-center font-mono font-bold uppercase border-2 border-brand/50 px-2 rounded-xl">
+                Try it out
+              </h2>
+              <CodeBlock
+                code="pnpm create fumadocs-app"
+                lang="bash"
+                wrapper={{ className: 'bg-fd-secondary flex-1' }}
+              />
+            </div>
+
+            <div className="relative bg-fd-secondary rounded-xl mt-2 border shadow-md">
+              <div className="flex flex-row items-center gap-2 border-b p-2 text-fd-muted-foreground">
+                <TerminalIcon className="size-4" />
+                <span className="text-xs font-medium">Terminal</span>
+                <div className="ms-auto me-2 size-2 rounded-full bg-red-400" />
+              </div>
+
+              <CreateAppAnimation className="p-2 text-fd-secondary-foreground/80" />
+            </div>
+          </div>
         </div>
         <Feedback />
         <Aesthetics />
-        <Story />
 
         <AnybodyCanWrite />
+
         <ForEngineers />
         <OpenSource />
       </div>
@@ -420,6 +438,7 @@ function ForEngineers() {
       >
         Docs For Engineers.
       </h2>
+      <Story />
 
       <div className={cn(cardVariants(), 'relative flex flex-col overflow-hidden z-2')}>
         <h3
@@ -566,8 +585,14 @@ export const source = loader({
           lang="ts"
         />
       </div>
-      <div className={cn(cardVariants({ className: 'relative overflow-hidden min-h-[400px]' }))}>
-        <ContentAdoptionBackground className="absolute inset-0" />
+      <div
+        className={cn(cardVariants({ className: 'relative overflow-hidden min-h-[400px] z-2' }))}
+      >
+        <Image
+          src={Bg2Image}
+          alt=""
+          className="absolute inset-0 size-full object-cover object-top -z-1"
+        />
         <div className="absolute top-8 left-4 w-[70%] flex flex-col bg-neutral-50/80 backdrop-blur-lg border text-neutral-800 p-2 rounded-xl shadow-lg shadow-black dark:bg-neutral-900/80 dark:text-neutral-200">
           <p className="px-2 pb-2 font-medium border-b mb-2 text-neutral-500 dark:text-neutral-400">
             My CMS

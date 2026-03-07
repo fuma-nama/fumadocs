@@ -11,7 +11,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { ArrowRight, TerminalIcon } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import Image from 'next/image';
 import MainImg from './main.png';
@@ -101,7 +101,7 @@ export function Hero() {
   );
 }
 
-export function CreateAppAnimation() {
+export function CreateAppAnimation(props: ComponentProps<'div'>) {
   const installCmd = 'pnpm create fumadocs-app';
   const tickTime = 100;
   const timeCommandEnter = installCmd.length;
@@ -127,7 +127,9 @@ export function CreateAppAnimation() {
   lines.push(
     <span key="command_type">
       {installCmd.substring(0, tick)}
-      {tick < timeCommandEnter && <div className="inline-block h-3 w-1 animate-pulse bg-white" />}
+      {tick < timeCommandEnter && (
+        <div className="inline-block h-3 w-1 animate-pulse bg-fd-foreground" />
+      )}
     </span>,
   );
 
@@ -140,19 +142,20 @@ export function CreateAppAnimation() {
       <Fragment key="command_response">
         {tick > timeCommandRun + 1 && (
           <>
-            <span className="font-bold">◇ Project name</span>
+            <span className="font-medium">◇ Project name</span>
             <span>│ my-app</span>
           </>
         )}
         {tick > timeCommandRun + 2 && (
           <>
             <span>│</span>
-            <span className="font-bold">◆ Choose a framework</span>
+            <span className="font-medium">◆ Choose a framework</span>
           </>
         )}
         {tick > timeCommandRun + 3 && (
           <>
             <span>│ ● Next.js</span>
+            <span>│ ○ Waku</span>
             <span>│ ○ Tanstack Start</span>
             <span>│ ○ React Router</span>
           </>
@@ -162,7 +165,7 @@ export function CreateAppAnimation() {
 
   return (
     <div
-      className="relative mt-4 w-full mx-auto max-w-[800px]"
+      {...props}
       onMouseEnter={() => {
         if (tick >= timeEnd) {
           setTick(0);
@@ -172,15 +175,8 @@ export function CreateAppAnimation() {
       {tick > timeWindowOpen && (
         <LaunchAppWindow className="absolute bottom-5 right-4 z-10 animate-in fade-in slide-in-from-top-10" />
       )}
-      <pre className="overflow-hidden rounded-xl border text-sm shadow-lg bg-fd-card">
-        <div className="flex flex-row items-center gap-2 border-b px-4 py-2">
-          <TerminalIcon className="size-4" /> <span className="font-bold">Terminal</span>
-          <div className="grow" />
-          <div className="size-2 rounded-full bg-red-400" />
-        </div>
-        <div className="min-h-[208px]">
-          <code className="grid p-4">{lines}</code>
-        </div>
+      <pre className="font-mono text-sm min-h-[240px]">
+        <code className="grid">{lines}</code>
       </pre>
     </div>
   );
@@ -190,15 +186,12 @@ function LaunchAppWindow(props: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       {...props}
-      className={cn(
-        'overflow-hidden rounded-md border bg-fd-background shadow-xl',
-        props.className,
-      )}
+      className={cn('overflow-hidden rounded-md border bg-fd-popover shadow-lg', props.className)}
     >
-      <div className="relative flex h-6 flex-row items-center border-b bg-fd-muted px-4 text-xs text-fd-muted-foreground">
-        <p className="absolute inset-x-0 text-center">localhost:3000</p>
-      </div>
-      <div className="p-4 text-sm">New App launched!</div>
+      <p className="text-xs text-fd-muted-foreground text-center px-4 py-2 border-b">
+        localhost:3000
+      </p>
+      <p className="text-sm px-4 py-2">New App launched!</p>
     </div>
   );
 }
@@ -343,24 +336,6 @@ export function AgnosticBackground() {
         minPixelRatio={1}
       />
     </div>
-  );
-}
-
-export function ContentAdoptionBackground(props: ComponentProps<typeof GrainGradient>) {
-  const { resolvedTheme } = useTheme();
-
-  return (
-    <GrainGradient
-      colors={
-        resolvedTheme === 'dark'
-          ? ['#39BE1C', '#9c2f05', '#7A2A0000']
-          : ['#DF3F00', '#fcfc51', '#ffa057', '#7A2A0020']
-      }
-      speed={0}
-      colorBack="#1D1004"
-      shape="sphere"
-      {...props}
-    />
   );
 }
 
