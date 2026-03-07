@@ -9,28 +9,28 @@
     "types:check": "react-router typegen && fumadocs-mdx && tsc --noEmit"
   },
   "dependencies": {
-    "@react-router/node": "^7.13.0",
-    "@react-router/serve": "^7.13.0",
-    "@takumi-rs/image-response": "^0.68.17",
+    "@react-router/node": "^7.13.1",
+    "@react-router/serve": "^7.13.1",
+    "@takumi-rs/image-response": "^0.70.4",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "isbot": "^5.1.35",
-    "lucide-react": "^0.570.0",
+    "lucide-react": "^0.577.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "react-router": "^7.13.0",
-    "tailwind-merge": "^3.4.1"
+    "react-router": "^7.13.1",
+    "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
-    "@react-router/dev": "^7.13.0",
-    "@tailwindcss/vite": "^4.1.18",
+    "@react-router/dev": "^7.13.1",
+    "@tailwindcss/vite": "^4.2.1",
     "@types/mdx": "^2.0.13",
-    "@types/node": "^25.2.3",
+    "@types/node": "^25.3.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "react-router-devtools": "^6.2.0",
-    "tailwindcss": "^4.1.18",
+    "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
     "vite-tsconfig-paths": "^6.1.1"

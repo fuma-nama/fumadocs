@@ -59,6 +59,7 @@
     "@scalar/openapi-upgrader": "^0.2.0",
     "ajv": "^8.18.0",
     "class-variance-authority": "^0.7.1",
+    "dereference-json-schema": "^0.2.1",
     "github-slugger": "^2.0.0",
     "hast-util-to-jsx-runtime": "^2.3.6",
     "js-yaml": "^4.1.1",
@@ -69,8 +70,7 @@
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
     "tailwind-merge": "^3.5.0",
-    "xml-js": "^1.6.11",
-    "dereference-json-schema": "^0.2.1"
+    "xml-js": "^1.6.11"
   },
   "devDependencies": {
     "@fumadocs/tailwind": "workspace:*",
