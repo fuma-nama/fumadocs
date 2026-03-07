@@ -2,8 +2,8 @@ import type { SearchAPI } from './server';
 import Search, { type DocumentData } from 'flexsearch';
 import { createEndpoint } from './server/endpoint';
 import { buildBreadcrumbsDefault, buildIndexDefault, type SharedIndex } from './server/build-index';
-import { buildDocuments, SharedDocument } from './server/build-doc';
-import type { SortedResult } from '.';
+import { buildDocuments, type SharedDocument } from './server/build-doc';
+import { createContentHighlighter, type SortedResult } from '.';
 import type { LoaderConfig, LoaderOutput, Page } from '@/source';
 import type { Awaitable } from '@/types';
 
@@ -55,13 +55,13 @@ export function flexsearch(options: Options): SearchAPI {
       if (arr.length === 0) return out;
 
       const results = arr[0].result;
+      const highlighter = createContentHighlighter(query);
       // page id -> heading/content item
       const grouped = new Map<string, Doc[]>();
 
       for (const id of results) {
         const doc = index.get(id);
         if (!doc) continue;
-
         let list = grouped.get(doc.page_id);
         if (!list) {
           list = [];
@@ -80,7 +80,7 @@ export function flexsearch(options: Options): SearchAPI {
         out.push({
           id: page_id,
           type: 'page',
-          content: page.content,
+          content: highlighter.highlightMarkdown(page.content),
           breadcrumbs: page.breadcrumbs,
           url: page.url,
         });
@@ -88,7 +88,7 @@ export function flexsearch(options: Options): SearchAPI {
         for (const item of items) {
           out.push({
             id: item.id,
-            content: item.content,
+            content: highlighter.highlightMarkdown(item.content),
             breadcrumbs: item.breadcrumbs,
             type: item.type,
             url: item.url,

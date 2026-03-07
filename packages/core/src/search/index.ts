@@ -37,14 +37,7 @@ function escapeRegExp(input: string): string {
 function buildRegexFromQuery(q: string): RegExp | null {
   const trimmed = q.trim();
   if (trimmed.length === 0) return null;
-  const terms = Array.from(
-    new Set(
-      trimmed
-        .split(/\s+/)
-        .map((t) => t.trim())
-        .filter(Boolean),
-    ),
-  );
+  const terms = Array.from(new Set(trimmed.split(/\s+/).filter(Boolean)));
   if (terms.length === 0) return null;
   const escaped = terms.map(escapeRegExp).join('|');
   return new RegExp(`(${escaped})`, 'gi');
