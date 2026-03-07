@@ -45,14 +45,14 @@
   },
   "devDependencies": {
     "@types/mdx": "^2.0.13",
-    "@types/node": "25.3.3",
+    "@types/node": "25.3.5",
     "@types/react": "^19.2.14",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "react": "^19.2.4",
     "tinyglobby": "^0.2.15",
     "tsconfig": "workspace:*",
-    "tsdown": "0.20.3"
+    "tsdown": "0.21.0"
   },
   "peerDependencies": {
     "@types/mdx": "*",

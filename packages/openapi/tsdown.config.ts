@@ -20,7 +20,9 @@ export default defineConfig({
   async onSuccess() {
     await compileInline();
   },
-  inlineOnly: [],
+  deps: {
+    onlyAllowBundle: [],
+  },
   exports: {
     enabled: true,
     customExports(v) {

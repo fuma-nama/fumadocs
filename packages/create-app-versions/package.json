@@ -7,7 +7,7 @@
     "@biomejs/biome": "^2.4.6",
     "@orama/core": "^1.2.19",
     "@takumi-rs/image-response": "^0.70.4",
-    "eslint": "^10.0.2",
+    "eslint": "^10.0.3",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*"

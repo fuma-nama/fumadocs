@@ -8,6 +8,8 @@ export default defineConfig({
   dts: {
     sourcemap: false,
   },
-  inlineOnly: [],
+  deps: {
+    onlyAllowBundle: [],
+  },
   exports: true,
 });

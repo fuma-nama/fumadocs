@@ -6,5 +6,7 @@ export default defineConfig({
   target: 'node22',
   format: 'esm',
   entry: ['src/{index,configuration}.ts'],
-  inlineOnly: [],
+  deps: {
+    onlyAllowBundle: [],
+  },
 });

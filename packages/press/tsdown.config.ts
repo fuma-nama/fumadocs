@@ -6,5 +6,7 @@ export default defineConfig({
   entry: ['src/config/index.ts', 'src/cli/index.ts'],
   outDir: 'dist/lib',
   dts: true,
-  inlineOnly: [],
+  deps: {
+    onlyAllowBundle: [],
+  },
 });

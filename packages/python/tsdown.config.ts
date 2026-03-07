@@ -8,5 +8,7 @@ export default defineConfig({
   },
   fixedExtension: false,
   target: 'es2023',
-  inlineOnly: [],
+  deps: {
+    onlyAllowBundle: [],
+  },
 });

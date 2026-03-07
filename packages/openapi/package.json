@@ -76,7 +76,7 @@
     "@fumadocs/tailwind": "workspace:*",
     "@scalar/api-client-react": "^1.4.1",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "25.3.3",
+    "@types/node": "25.3.5",
     "@types/openapi-sampler": "^1.0.3",
     "@types/react": "^19.2.14",
     "eslint-config-custom": "workspace:*",
@@ -85,7 +85,7 @@
     "json-schema-typed": "^8.0.2",
     "tailwindcss": "^4.2.1",
     "tsconfig": "workspace:*",
-    "tsdown": "0.20.3"
+    "tsdown": "0.21.0"
   },
   "peerDependencies": {
     "@scalar/api-client-react": "*",
