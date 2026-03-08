@@ -29,7 +29,7 @@ export function fetchClient({
   locale,
   tag,
   cache = globalCache,
-}: FetchOptions): SearchClient {
+}: FetchOptions = {}): SearchClient {
   return {
     deps: [api, locale, tag],
     async search(query) {

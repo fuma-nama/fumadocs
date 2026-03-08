@@ -1,0 +1,40 @@
+---
+title: FlexSearch
+description: A fast & minimal search engine.
+---
+
+## Overview
+
+For the setup guide, see [Integrate FlexSearch](/docs/headless/search/flexsearch).
+
+It works through a API endpoint (running on server), or a statically cached JSON file for static websites.
+
+## Setup
+
+Create a search dialog.
+
+<Tabs items={['fetch (default)', 'static']}>
+
+    <Tab>
+
+<include meta='title="components/search.tsx"'>fetch.tsx</include>
+
+    </Tab>
+
+    <Tab id='static'>
+
+For Static Export, you can configure [static mode](/docs/headless/search/flexsearch#static-export) on search server, and change the search client:
+
+<include meta='title="components/search.tsx"'>flexsearch.tsx</include>
+
+    </Tab>
+
+</Tabs>
+
+<include>.shared.mdx</include>
+
+### Tag Filter
+
+Optionally, you can add UI for filtering results by tags. Configure [Tag Filter](/docs/headless/search/flexsearch#tag-filter) on search server and add the following:
+
+<include>.tag-filter.mdx</include>

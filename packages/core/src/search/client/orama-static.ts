@@ -40,7 +40,7 @@ type Database = Map<
 async function loadDB({
   from = '/api/search',
   initOrama = (locale) => create({ schema: { _: 'string' }, language: locale }),
-}: StaticOptions): Promise<Database> {
+}: StaticOptions = {}): Promise<Database> {
   const cacheKey = from;
   const cached = cache.get(cacheKey);
   if (cached) return cached;

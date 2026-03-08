@@ -20,7 +20,7 @@ function initDocument(data: Record<string, string>) {
 
 const cacheMap = new Map<string, Promise<Map<string, Document<Doc>>>>();
 
-export function flexsearchStaticClient(options: FlexsearchStaticOptions): SearchClient {
+export function flexsearchStaticClient(options: FlexsearchStaticOptions = {}): SearchClient {
   const { from = '/api/search', locale = '', tag } = options;
 
   let dbs = cacheMap.get(from);
