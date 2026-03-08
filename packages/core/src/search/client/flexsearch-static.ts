@@ -9,6 +9,7 @@ export interface FlexsearchStaticOptions {
    */
   from?: string;
   locale?: string;
+  tag?: string | string[];
 }
 
 function initDocument(data: Record<string, string>) {
@@ -20,7 +21,7 @@ function initDocument(data: Record<string, string>) {
 const cacheMap = new Map<string, Promise<Map<string, Document<Doc>>>>();
 
 export function flexsearchStaticClient(options: FlexsearchStaticOptions): SearchClient {
-  const { from = '/api/search', locale = '' } = options;
+  const { from = '/api/search', locale = '', tag } = options;
 
   let dbs = cacheMap.get(from);
   if (!dbs) {
@@ -29,12 +30,12 @@ export function flexsearchStaticClient(options: FlexsearchStaticOptions): Search
   }
 
   return {
-    deps: [from, locale],
+    deps: [from, locale, tag],
     async search(query) {
       const loaded = await dbs;
       const db = loaded.get(locale);
       if (!db) return [];
-      return search(db, query);
+      return search(db, query, tag);
     },
   };
 }

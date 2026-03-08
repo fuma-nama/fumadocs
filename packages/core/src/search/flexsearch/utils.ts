@@ -4,10 +4,15 @@ import type { SharedDocument } from '../server/build-doc';
 
 export type Doc = SharedDocument & DocumentData;
 
-export async function search(index: Document<Doc>, query: string) {
+export async function search(index: Document<Doc>, query: string, tag?: string | string[]) {
   const arr = await index.searchAsync(query, {
     index: 'content',
     limit: 60,
+    tag: tag
+      ? ({
+          tags: tag,
+        } as Record<string, string>)
+      : undefined,
   });
   const out: SortedResult[] = [];
   if (arr.length === 0) return out;
@@ -64,6 +69,7 @@ export function createDocument(options?: DocumentOptions<Doc>) {
     document: {
       id: 'id',
       index: ['content'],
+      tag: ['tags'],
       store: true,
       ...options?.document,
     },
