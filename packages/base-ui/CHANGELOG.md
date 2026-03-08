@@ -1,5 +1,14 @@
 # @fumadocs/base-ui
 
+## 16.6.11
+
+### Patch Changes
+
+- Updated dependencies [d35f30c]
+- Updated dependencies [ae3e742]
+- Updated dependencies [269dfb3]
+  - fumadocs-core@16.6.11
+
 ## 16.6.10
 
 ### Patch Changes
