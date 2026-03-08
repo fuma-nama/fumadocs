@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 16.6.12
+
+### Patch Changes
+
+- ddb0f81: require explicit import for new search clients
+
 ## 16.6.11
 
 ### Patch Changes
