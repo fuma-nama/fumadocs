@@ -1,14 +1,12 @@
 import type { SortedResult } from '..';
 
-export interface SearchServer {
-  search: (
-    query: string,
-    options?: {
-      locale?: string;
-      tag?: string | string[];
-      mode?: 'vector' | 'full';
-    },
-  ) => Promise<SortedResult[]>;
+export interface QueryOptions {
+  locale?: string | null;
+  tag?: string | string[];
+}
+
+export interface SearchServer<Q extends QueryOptions = QueryOptions> {
+  search: (query: string, options?: Q) => Promise<SortedResult[]>;
 
   /**
    * Export the database
@@ -18,7 +16,7 @@ export interface SearchServer {
   export: () => Promise<unknown>;
 }
 
-export interface SearchAPI extends SearchServer {
+export interface SearchAPI<Q extends QueryOptions = QueryOptions> extends SearchServer<Q> {
   GET: (request: Request) => Promise<Response>;
 
   /**

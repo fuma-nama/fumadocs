@@ -15,8 +15,9 @@ export async function searchAdvanced(
   if (typeof tag === 'string') tag = [tag];
 
   const params = {
-    ...override,
+    limit: 60,
     mode,
+    ...override,
     where: removeUndefined({
       tags:
         tag.length > 0
@@ -26,7 +27,6 @@ export async function searchAdvanced(
           : undefined,
       ...override.where,
     }),
-    limit: 10,
     groupBy: {
       properties: ['page_id'],
       maxResult: 8,

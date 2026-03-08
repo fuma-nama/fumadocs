@@ -1,7 +1,22 @@
-import type { SearchAPI, SearchServer } from './types';
+import type { QueryOptions, SearchAPI, SearchServer } from './types';
 
-export function createEndpoint(server: SearchServer): SearchAPI {
+export interface EndpointOptions<Q extends QueryOptions> {
+  readOptions?: (url: URL, request: Request) => Q;
+}
+
+export function createEndpoint<Q extends QueryOptions>(
+  server: SearchServer<Q>,
+  options: EndpointOptions<NoInfer<Q>> = {},
+): SearchAPI<Q> {
   const { search } = server;
+  const {
+    readOptions = (url) => {
+      return {
+        tag: url.searchParams.get('tag')?.split(','),
+        locale: url.searchParams.get('locale'),
+      } as Q;
+    },
+  } = options;
 
   return {
     ...server,
@@ -13,13 +28,7 @@ export function createEndpoint(server: SearchServer): SearchAPI {
       const query = url.searchParams.get('query');
       if (!query) return Response.json([]);
 
-      return Response.json(
-        await search(query, {
-          tag: url.searchParams.get('tag')?.split(',') ?? undefined,
-          locale: url.searchParams.get('locale') ?? undefined,
-          mode: url.searchParams.get('mode') === 'vector' ? 'vector' : 'full',
-        }),
-      );
+      return Response.json(await search(query, readOptions(url, request)));
     },
   };
 }

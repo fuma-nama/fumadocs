@@ -1,30 +1,46 @@
-import type { SearchAPI } from './server';
-import Search, { type DocumentData } from 'flexsearch';
+import type { SearchAPI, SearchServer } from './server';
+import Search, { type DocumentOptions } from 'flexsearch';
 import { createEndpoint } from './server/endpoint';
-import { buildBreadcrumbsDefault, buildIndexDefault, type SharedIndex } from './server/build-index';
-import { buildDocuments, type SharedDocument } from './server/build-doc';
-import { createContentHighlighter, type SortedResult } from '.';
+import { buildBreadcrumbs, buildIndexDefault, type SharedIndex } from './server/build-index';
+import { buildDocuments } from './server/build-doc';
 import type { LoaderConfig, LoaderOutput, Page } from '@/source';
 import type { Awaitable } from '@/types';
+import type { I18nConfig } from '@/i18n';
+import { createDocument, search, type Doc } from './flexsearch/utils';
 
 export type Index = SharedIndex;
-
-type Doc = SharedDocument & DocumentData;
+export interface IndexWithLocale extends Index {
+  locale: string;
+}
 
 export interface Options {
   indexes: Index[] | (() => Awaitable<Index[]>);
+  document?: DocumentOptions<Doc>;
 }
 
-export function flexsearch(options: Options): SearchAPI {
+export type ExportedData =
+  | {
+      type: 'default';
+      raw: Record<string, string>;
+    }
+  | {
+      type: 'i18n';
+      raw: Record<string, Record<string, string>>;
+    };
+
+export interface I18nOptions extends Omit<Options, 'indexes'> {
+  i18n: I18nConfig;
+  indexes: IndexWithLocale[] | (() => Awaitable<IndexWithLocale[]>);
+
+  /**
+   * options for each locale, see https://github.com/nextapps-de/flexsearch/blob/master/doc/encoder.md.
+   */
+  localeMap?: Record<string, Partial<DocumentOptions<Doc>> | 'cjk'>;
+}
+
+function server(options: Options): SearchServer {
   function initIndex(indexes: Index[]) {
-    const index = new Search.Document<Doc>({
-      tokenize: 'full',
-      document: {
-        id: 'id',
-        index: ['content'],
-        store: true,
-      },
-    });
+    const index = createDocument(options.document);
 
     for (const doc of buildDocuments(indexes)) {
       index.add(doc.id, doc as Doc);
@@ -38,70 +54,88 @@ export function flexsearch(options: Options): SearchAPI {
       ? Promise.resolve(options.indexes()).then(initIndex)
       : initIndex(options.indexes);
 
-  return createEndpoint({
-    async export() {
-      const map = new Map<string, unknown>();
-      (await indexPromise).export((key, data) => {
-        map.set(key, data);
+  return {
+    async export(): Promise<ExportedData> {
+      const index = await indexPromise;
+      const raw: Record<string, string> = {};
+      index.export((key, data) => {
+        raw[key] = data;
       });
-      return map;
+      return { type: 'default', raw };
     },
     async search(query) {
-      const index = await indexPromise;
-      const arr = await index.searchAsync(query, {
-        index: 'content',
+      return search(await indexPromise, query);
+    },
+  };
+}
+
+export function flexsearch(options: Options): SearchAPI {
+  return createEndpoint(server(options));
+}
+
+export function flexsearchI18n(options: I18nOptions): SearchAPI {
+  const { indexes: inputIndexes, localeMap } = options;
+
+  async function initSearchServers() {
+    const map = new Map<string, SearchServer>();
+    const indexMap = new Map<string, IndexWithLocale[]>();
+    const indexes = typeof inputIndexes === 'function' ? await inputIndexes() : inputIndexes;
+
+    for (const index of indexes) {
+      let list = indexMap.get(index.locale);
+      if (!list) {
+        list = [];
+        indexMap.set(index.locale, list);
+      }
+      list.push(index);
+    }
+
+    for (const [locale, list] of indexMap) {
+      const override = localeMap?.[locale];
+
+      map.set(
+        locale,
+        server({
+          indexes: list,
+          document:
+            override === 'cjk'
+              ? { ...options.document, encoder: Search.Charset.CJK }
+              : { ...options.document, ...override },
+        }),
+      );
+    }
+
+    return map;
+  }
+
+  const get = initSearchServers();
+  return createEndpoint({
+    async export(): Promise<ExportedData> {
+      const map = await get;
+      const entries = Array.from(map.entries()).map(async ([k, v]) => {
+        const data = (await v.export()) as Extract<ExportedData, { type: 'default' }>;
+        return [k, data.raw];
       });
-      const out: SortedResult[] = [];
-      if (arr.length === 0) return out;
 
-      const results = arr[0].result;
-      const highlighter = createContentHighlighter(query);
-      // page id -> heading/content item
-      const grouped = new Map<string, Doc[]>();
+      return {
+        type: 'i18n',
+        raw: Object.fromEntries(await Promise.all(entries)),
+      };
+    },
+    async search(query, searchOptions) {
+      const map = await get;
+      const handler = map.get(searchOptions?.locale ?? options.i18n.defaultLanguage);
 
-      for (const id of results) {
-        const doc = index.get(id);
-        if (!doc) continue;
-        let list = grouped.get(doc.page_id);
-        if (!list) {
-          list = [];
-          grouped.set(doc.page_id, list);
-        }
-
-        if (doc.type !== 'page') {
-          list.push(doc);
-        }
-      }
-
-      for (const [page_id, items] of grouped) {
-        const page = index.get(page_id);
-        if (!page) continue;
-
-        out.push({
-          id: page_id,
-          type: 'page',
-          content: highlighter.highlightMarkdown(page.content),
-          breadcrumbs: page.breadcrumbs,
-          url: page.url,
-        });
-
-        for (const item of items) {
-          out.push({
-            id: item.id,
-            content: highlighter.highlightMarkdown(item.content),
-            breadcrumbs: item.breadcrumbs,
-            type: item.type,
-            url: item.url,
-          });
-        }
-      }
-
-      return out;
+      if (handler) return handler.search(query, searchOptions);
+      return [];
     },
   });
 }
 
-export interface FromSourceOptions<C extends LoaderConfig> {
+export interface FromSourceOptions<C extends LoaderConfig> extends Pick<
+  I18nOptions,
+  'localeMap' | 'document'
+> {
   buildIndex?: (page: Page<C['source']['pageData']>) => Awaitable<Index>;
 }
 
@@ -109,17 +143,30 @@ export function flexsearchFromSource<C extends LoaderConfig>(
   loader: LoaderOutput<C>,
   options: FromSourceOptions<NoInfer<C>> = {},
 ) {
-  const { buildIndex = buildIndexDefault } = options;
+  const { buildIndex = buildIndexDefault, ...rest } = options;
+  function indexes(): Promise<IndexWithLocale[]> {
+    return Promise.all(
+      loader.getPages().map(async (page) => {
+        const index = await buildIndex(page);
+        return {
+          ...index,
+          locale: page.locale!,
+          breadcrumbs: index.breadcrumbs ?? buildBreadcrumbs(loader, page),
+        };
+      }),
+    );
+  }
+
+  if (loader._i18n) {
+    return flexsearchI18n({
+      indexes,
+      i18n: loader._i18n,
+      ...rest,
+    });
+  }
 
   return flexsearch({
-    indexes() {
-      return Promise.all(
-        loader.getPages().map(async (page) => {
-          const index = await buildIndex(page);
-          if (index.breadcrumbs) return index;
-          return { ...index, breadcrumbs: buildBreadcrumbsDefault(loader, page) };
-        }),
-      );
-    },
+    indexes,
+    ...rest,
   });
 }

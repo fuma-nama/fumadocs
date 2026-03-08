@@ -51,7 +51,7 @@ function isBreadcrumbItem(item: unknown): item is string {
   return typeof item === 'string' && item.length > 0;
 }
 
-export function buildBreadcrumbsDefault<C extends LoaderConfig>(
+export function buildBreadcrumbs<C extends LoaderConfig>(
   source: LoaderOutput<C>,
   page: Page<C['source']['pageData']>,
 ): string[] | undefined {

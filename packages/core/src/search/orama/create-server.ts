@@ -7,7 +7,7 @@ import {
   type Language,
   type Tokenizer,
 } from '@orama/orama';
-import type { SearchAPI, SearchServer } from '@/search/server';
+import type { QueryOptions, SearchAPI, SearchServer } from '@/search/server';
 import type { I18nConfig } from '@/i18n';
 import { STEMMERS } from '@/search/orama/_stemmers';
 import { createEndpoint } from '../server/endpoint';
@@ -21,19 +21,25 @@ import {
 } from './create-db';
 import { searchSimple } from './search/simple';
 import { searchAdvanced } from './search/advanced';
-import type { SharedIndex } from '../server/build-index';
+import { buildBreadcrumbs, buildIndexDefault, type SharedIndex } from '../server/build-index';
+import type { LoaderConfig, LoaderOutput, Page } from '@/source/loader';
+import type { Awaitable } from '@/types';
 
 type OramaInput = Parameters<typeof create>[0];
 
-type SharedOptions = Pick<OramaInput, 'sort' | 'components' | 'plugins'> & {
+interface SharedOptions extends Pick<OramaInput, 'sort' | 'components' | 'plugins'> {
   language?: string;
   tokenizer?: Required<OramaInput>['components']['tokenizer'];
-};
+}
+
+interface OramaQueryOptions extends QueryOptions {
+  mode?: 'full' | 'vector';
+}
 
 /**
  * Resolve indexes dynamically
  */
-export type Dynamic<T> = () => T[] | Promise<T[]>;
+type Dynamic<T> = () => Awaitable<T[]>;
 
 export interface SimpleOptions extends SharedOptions {
   indexes: Index[] | Dynamic<Index>;
@@ -69,7 +75,7 @@ export type ExportedData =
       data: Record<string, RawData & { type: 'simple' | 'advanced' }>;
     };
 
-export function initSimpleSearch(options: SimpleOptions): SearchServer {
+export function initSimpleSearch(options: SimpleOptions): SearchServer<OramaQueryOptions> {
   const doc = createDBSimple(options);
 
   return {
@@ -89,7 +95,7 @@ export function initSimpleSearch(options: SimpleOptions): SearchServer {
 
 export type AdvancedIndex = SharedIndex;
 
-export function initAdvancedSearch(options: AdvancedOptions): SearchServer {
+export function initAdvancedSearch(options: AdvancedOptions): SearchServer<OramaQueryOptions> {
   const get = createDB(options);
 
   return {
@@ -122,17 +128,19 @@ export function initAdvancedSearch(options: AdvancedOptions): SearchServer {
   };
 }
 
-export function createSearchAPI(type: 'simple', options: SimpleOptions): SearchAPI;
-export function createSearchAPI(type: 'advanced', options: AdvancedOptions): SearchAPI;
+export function createSearchAPI(
+  type: 'simple',
+  options: SimpleOptions,
+): SearchAPI<OramaQueryOptions>;
+export function createSearchAPI(
+  type: 'advanced',
+  options: AdvancedOptions,
+): SearchAPI<OramaQueryOptions>;
 
 export function createSearchAPI(
   ...args: ['simple', SimpleOptions] | ['advanced', AdvancedOptions]
-): SearchAPI {
-  if (args[0] === 'simple') {
-    return createEndpoint(initSimpleSearch(args[1]));
-  }
-
-  return createEndpoint(initAdvancedSearch(args[1]));
+): SearchAPI<OramaQueryOptions> {
+  return toAPI(args[0] === 'simple' ? initSimpleSearch(args[1]) : initAdvancedSearch(args[1]));
 }
 
 type I18nOptions<O extends SimpleOptions | AdvancedOptions, Idx> = Omit<
@@ -162,12 +170,18 @@ function getTokenizer(locale: string): { language: string } | { tokenizer: Token
   };
 }
 
-export function createI18nSearchAPI(type: 'simple', options: I18nSimpleOptions): SearchAPI;
-export function createI18nSearchAPI(type: 'advanced', options: I18nAdvancedOptions): SearchAPI;
+export function createI18nSearchAPI(
+  type: 'simple',
+  options: I18nSimpleOptions,
+): SearchAPI<OramaQueryOptions>;
+export function createI18nSearchAPI(
+  type: 'advanced',
+  options: I18nAdvancedOptions,
+): SearchAPI<OramaQueryOptions>;
 
 export function createI18nSearchAPI(
   ...[type, options]: ['simple', I18nSimpleOptions] | ['advanced', I18nAdvancedOptions]
-): SearchAPI {
+): SearchAPI<OramaQueryOptions> {
   async function initSearchServers() {
     const map = new Map<string, SearchServer>();
     if (options.i18n.languages.length === 0) {
@@ -216,8 +230,9 @@ export function createI18nSearchAPI(
 
     return map;
   }
+
   const get = initSearchServers();
-  return createEndpoint({
+  return toAPI({
     async export() {
       const map = await get;
       const entries = Array.from(map.entries()).map(async ([k, v]) => [k, await v.export()]);
@@ -234,6 +249,75 @@ export function createI18nSearchAPI(
 
       if (handler) return handler.search(query, searchOptions);
       return [];
+    },
+  });
+}
+
+interface Options<C extends LoaderConfig> extends Omit<AdvancedOptions, 'indexes'> {
+  localeMap?: {
+    [K in C['i18n'] extends I18nConfig<infer Languages> ? Languages : string]?:
+      | Partial<AdvancedOptions>
+      | Language;
+  };
+  buildIndex?: (page: Page<C['source']['pageData']>) => Awaitable<AdvancedIndex>;
+}
+
+export function createFromSource<C extends LoaderConfig>(
+  source: LoaderOutput<C>,
+  options?: Options<C>,
+): SearchAPI<OramaQueryOptions>;
+
+export function createFromSource<C extends LoaderConfig>(
+  source: LoaderOutput<C>,
+  options: Options<C> = {},
+): SearchAPI<OramaQueryOptions> {
+  const { buildIndex = buildIndexDefault } = options;
+
+  if (source._i18n) {
+    return createI18nSearchAPI('advanced', {
+      ...options,
+      i18n: source._i18n,
+      async indexes() {
+        const indexes = source.getLanguages().flatMap((entry) => {
+          return entry.pages.map(async (page) => {
+            const index = await buildIndex(page);
+            return {
+              ...index,
+              breadcrumbs: index.breadcrumbs ?? buildBreadcrumbs(source, page),
+              locale: entry.language,
+            };
+          });
+        });
+
+        return Promise.all(indexes);
+      },
+    });
+  }
+
+  return toAPI(
+    initAdvancedSearch({
+      ...options,
+      async indexes() {
+        const indexes = source.getPages().map(async (page) => {
+          const index = await buildIndex(page);
+          if (index.breadcrumbs) return index;
+          return { ...index, breadcrumbs: buildBreadcrumbs(source, page) };
+        });
+
+        return Promise.all(indexes);
+      },
+    }),
+  );
+}
+
+function toAPI(server: SearchServer<OramaQueryOptions>): SearchAPI<OramaQueryOptions> {
+  return createEndpoint(server, {
+    readOptions(url) {
+      return {
+        tag: url.searchParams.get('tag')?.split(','),
+        locale: url.searchParams.get('locale'),
+        mode: url.searchParams.get('mode') === 'vector' ? 'vector' : 'full',
+      };
     },
   });
 }
