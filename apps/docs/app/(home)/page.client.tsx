@@ -317,7 +317,6 @@ export function Writing({
 }
 
 export function AgnosticBackground() {
-  const { resolvedTheme } = useTheme();
   const ref = useRef<HTMLDivElement>(null);
   const visible = useIsVisible(ref);
 
@@ -328,7 +327,7 @@ export function AgnosticBackground() {
     >
       <Dithering
         colorBack="#00000000"
-        colorFront={resolvedTheme === 'dark' ? '#fc7744' : '#c6bb58'}
+        colorFront="#c6bb58"
         shape="warp"
         type="4x4"
         speed={visible ? 0.4 : 0}

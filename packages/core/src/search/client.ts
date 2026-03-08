@@ -143,15 +143,6 @@ export function useDocsSearch(
         client = oramaStaticClient(clientRest);
         break;
       }
-      case 'flexsearch-static': {
-        const res = (promiseMap[clientRest.type] ??=
-          import('./client/flexsearch-static')) as Promise<
-          typeof import('./client/flexsearch-static')
-        >;
-        const { flexsearchStaticClient } = use(res);
-        client = flexsearchStaticClient(clientRest);
-        break;
-      }
       default:
         throw new Error('unknown search client');
     }
