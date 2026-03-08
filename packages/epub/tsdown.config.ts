@@ -6,5 +6,7 @@ export default defineConfig({
   dts: true,
   fixedExtension: false,
   target: 'node20',
-  inlineOnly: [],
+  deps: {
+    onlyAllowBundle: [],
+  },
 });

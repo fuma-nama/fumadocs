@@ -8,6 +8,8 @@ export default defineConfig({
   dts: {
     sourcemap: false,
   },
-  external: ['@tailwindcss/oxide'],
-  inlineOnly: ['lodash.merge'],
+  deps: {
+    onlyAllowBundle: ['lodash.merge'],
+    neverBundle: ['@tailwindcss/oxide'],
+  },
 });

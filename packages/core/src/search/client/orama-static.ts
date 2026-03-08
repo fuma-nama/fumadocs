@@ -3,6 +3,7 @@ import { searchSimple } from '@/search/orama/search/simple';
 import { searchAdvanced } from '@/search/orama/search/advanced';
 import { type advancedSchema, type simpleSchema } from '@/search/orama/create-db';
 import type { ExportedData } from '@/search/server';
+import type { SearchClient } from '../client';
 
 export interface StaticOptions {
   /**
@@ -39,7 +40,7 @@ type Database = Map<
 async function loadDB({
   from = '/api/search',
   initOrama = (locale) => create({ schema: { _: 'string' }, language: locale }),
-}: StaticOptions): Promise<Database> {
+}: StaticOptions = {}): Promise<Database> {
   const cacheKey = from;
   const cached = cache.get(cacheKey);
   if (cached) return cached;
@@ -85,13 +86,19 @@ async function loadDB({
   return result;
 }
 
-export async function search(query: string, options: StaticOptions) {
+export function oramaStaticClient(options: StaticOptions): SearchClient {
   const { tag, locale } = options;
 
-  const db = (await loadDB(options)).get(locale ?? '');
+  return {
+    deps: [tag, locale],
+    async search(query) {
+      const db = (await loadDB(options)).get(locale ?? '');
 
-  if (!db) return [];
-  if (db.type === 'simple') return searchSimple(db as unknown as Orama<typeof simpleSchema>, query);
+      if (!db) return [];
+      if (db.type === 'simple')
+        return searchSimple(db as unknown as Orama<typeof simpleSchema>, query);
 
-  return searchAdvanced(db.db as Orama<typeof advancedSchema>, query, tag);
+      return searchAdvanced(db.db as Orama<typeof advancedSchema>, query, tag);
+    },
+  };
 }

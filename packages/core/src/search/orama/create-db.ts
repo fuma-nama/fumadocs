@@ -6,6 +6,7 @@ import {
   type TypedDocument,
 } from '@orama/orama';
 import { type AdvancedOptions, type SimpleOptions } from '@/search/server';
+import { buildDocuments } from '../server/build-doc';
 
 export type SimpleDocument = TypedDocument<Orama<typeof simpleSchema>>;
 export const simpleSchema = {
@@ -45,59 +46,7 @@ export async function createDB({
     },
   }) as Orama<typeof advancedSchema>;
 
-  const mapTo: PartialSchemaDeep<AdvancedDocument>[] = [];
-  items.forEach((page) => {
-    const pageTag = page.tag ?? [];
-    const tags = Array.isArray(pageTag) ? pageTag : [pageTag];
-    const data = page.structuredData;
-    let id = 0;
-
-    mapTo.push({
-      id: page.id,
-      page_id: page.id,
-      type: 'page',
-      content: page.title,
-      breadcrumbs: page.breadcrumbs,
-      tags,
-      url: page.url,
-    });
-
-    const nextId = () => `${page.id}-${id++}`;
-
-    if (page.description) {
-      mapTo.push({
-        id: nextId(),
-        page_id: page.id,
-        tags,
-        type: 'text',
-        url: page.url,
-        content: page.description,
-      });
-    }
-
-    for (const heading of data.headings) {
-      mapTo.push({
-        id: nextId(),
-        page_id: page.id,
-        type: 'heading',
-        tags,
-        url: `${page.url}#${heading.id}`,
-        content: heading.content,
-      });
-    }
-
-    for (const content of data.contents) {
-      mapTo.push({
-        id: nextId(),
-        page_id: page.id,
-        tags,
-        type: 'text',
-        url: content.heading ? `${page.url}#${content.heading}` : page.url,
-        content: content.content,
-      });
-    }
-  });
-
+  const mapTo: PartialSchemaDeep<AdvancedDocument>[] = buildDocuments(items);
   await insertMultiple(db, mapTo);
   return db;
 }

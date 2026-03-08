@@ -1,0 +1,186 @@
+---
+title: FlexSearch
+description: Fast & minimal document search
+---
+
+## Setup
+
+```npm
+npm install flexsearch
+```
+
+```npm
+npm install @types/flexsearch -D
+```
+
+### From Source
+
+Create the server from source object.
+
+```ts title="app/api/search/route.ts (Next.js)"
+import { source } from '@/lib/source';
+import { flexsearchFromSource } from 'fumadocs-core/search/flexsearch';
+
+export const { GET } = flexsearchFromSource(source);
+```
+
+### From Search Indexes
+
+Create the server from search indexes, each index needs a `structuredData` field.
+
+Usually, it is provided by your content source (e.g. Fumadocs MDX). You can also extract it from Markdown/MDX document using the [Remark Structure](/docs/headless/mdx/structure) plugin.
+
+```ts title="app/api/search/route.ts (Next.js)"
+import { source } from '@/lib/source';
+import { flexsearch } from 'fumadocs-core/search/flexsearch';
+
+export const { GET } = flexsearch({
+  indexes: source.getPages().map((page) => ({
+    title: page.data.title!,
+    description: page.data.description,
+    url: page.url,
+    id: page.url,
+    structuredData: page.data.structuredData,
+  })),
+});
+```
+
+### Searching Documents
+
+You can search documents using:
+
+- **Fumadocs UI**: Supported out-of-the-box, see [Search UI](/docs/search/flexsearch) for details.
+- **Search Client**:
+
+```ts twoslash
+import { useDocsSearch } from 'fumadocs-core/search/client';
+
+const client = useDocsSearch({
+  type: 'fetch',
+});
+```
+
+<auto-type-table type='Extract<import("fumadocs-core/search/client").ClientPreset, { type: "fetch" }>' />
+
+## Configurations
+
+### Tag Filter
+
+Support filtering results by tag, it's useful for implementing multi-docs similar to this documentation.
+
+```ts
+import { source } from '@/lib/source';
+import { flexsearchFromSource } from 'fumadocs-core/search/flexsearch';
+
+const server = flexsearchFromSource(source, {
+  buildIndex(page) {
+    return {
+      title: page.data.title!,
+      description: page.data.description,
+      url: page.url,
+      id: page.url,
+      structuredData: page.data.structuredData,
+      // use your desired value, like page.slugs[0] [!code ++]
+      tag: '<value>',
+    };
+  },
+});
+```
+
+and update your search client:
+
+- **Fumadocs UI**: Configure [Tag Filter](/docs/search/flexsearch#tag-filter) on Search UI.
+- **Search Client**: pass a tag to the hook.
+
+```ts
+import { useDocsSearch } from 'fumadocs-core/search/client';
+
+const client = useDocsSearch({
+  type: 'fetch',
+  tag: '<value>', // [!code ++]
+});
+```
+
+### Static Mode [#static-export]
+
+To support usage with static site, use `staticGET` from search server and make the route static or pre-rendered.
+
+```ts title="app/api/search/route.ts (Next.js)"
+import { source } from '@/lib/source';
+import { flexsearchFromSource } from 'fumadocs-core/search/flexsearch';
+
+// statically cached [!code highlight:2]
+export const revalidate = false;
+export const { staticGET: GET } = flexsearchFromSource(source);
+```
+
+> `staticGET` is also available on `flexsearch()`.
+
+and update your search clients:
+
+- **Fumadocs UI**: use [static client](/docs/search/flexsearch#static) on Search UI.
+
+- **Search Client**: change your client adapter.
+
+  ```ts
+  import { useDocsSearch } from 'fumadocs-core/search/client';
+  import { flexsearchStaticClient } from 'fumadocs-core/search/client/flexsearch-static';
+
+  const client = useDocsSearch({
+    client: flexsearchStaticClient({
+      // optional: pass tag & locale
+      tag,
+    }),
+  });
+  ```
+
+  <auto-type-table type='import("fumadocs-core/search/client/flexsearch-static").FlexsearchStaticOptions' />
+
+<Callout type='warn' title="Be Careful">
+
+    Static Search requires clients to download the exported search indexes.
+    For large docs sites, it can be expensive.
+
+    You should use cloud solutions like Orama Cloud or Algolia for these cases.
+
+</Callout>
+
+## Internationalization
+
+Flexsearch doesn't require configurations to work for other languages, but you can improve the results by specifying Flexsearch options for each locale.
+
+```ts title="app/api/search/route.ts" tab="From Source"
+import { source } from '@/lib/source';
+import { flexsearchFromSource } from 'fumadocs-core/search/flexsearch';
+import { Charset } from 'flexsearch';
+
+const server = flexsearchFromSource(source, {
+  localeMap: {
+    // [locale]: Flexsearch options [!code ++]
+    jp: { encoder: Charset.CJK },
+  },
+});
+```
+
+```ts tab="From Search Indexes"
+import { source } from '@/lib/source';
+import { flexsearchI18n } from 'fumadocs-core/search/flexsearch';
+import { i18n } from '@/lib/i18n';
+import { Charset } from 'flexsearch';
+
+const server = flexsearchI18n({
+  i18n, // [!code ++]
+  localeMap: {
+    // [locale]: Flexsearch options [!code ++]
+    jp: { encoder: Charset.CJK },
+  },
+  indexes: source.getPages().map((page) => ({
+    title: page.data.title!,
+    description: page.data.description,
+    structuredData: page.data.structuredData,
+    id: page.url,
+    url: page.url,
+    locale: page.locale!,
+  })),
+});
+```

@@ -1,5 +1,29 @@
 # fumapress
 
+## 0.1.6
+
+### Patch Changes
+
+- Updated dependencies [ddb0f81]
+  - fumadocs-core@16.6.12
+  - fumadocs-ui@16.6.12
+
+## 0.1.5
+
+### Patch Changes
+
+- Updated dependencies [d35f30c]
+- Updated dependencies [ae3e742]
+- Updated dependencies [269dfb3]
+  - fumadocs-core@16.6.11
+  - fumadocs-ui@16.6.11
+
+## 0.1.4
+
+### Patch Changes
+
+- 9a5d79f: support passing projects in CLI
+
 ## 0.1.3
 
 ### Patch Changes

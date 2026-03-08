@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-openapi",
-  "version": "10.3.16",
+  "version": "10.3.17",
   "description": "Generate MDX docs for your OpenAPI spec",
   "keywords": [
     "Docs",
@@ -59,6 +59,7 @@
     "@scalar/openapi-upgrader": "^0.2.0",
     "ajv": "^8.18.0",
     "class-variance-authority": "^0.7.1",
+    "dereference-json-schema": "^0.2.1",
     "github-slugger": "^2.0.0",
     "hast-util-to-jsx-runtime": "^2.3.6",
     "js-yaml": "^4.1.1",
@@ -69,14 +70,13 @@
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
     "tailwind-merge": "^3.5.0",
-    "xml-js": "^1.6.11",
-    "dereference-json-schema": "^0.2.1"
+    "xml-js": "^1.6.11"
   },
   "devDependencies": {
     "@fumadocs/tailwind": "workspace:*",
     "@scalar/api-client-react": "^1.4.1",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "25.3.3",
+    "@types/node": "25.3.5",
     "@types/openapi-sampler": "^1.0.3",
     "@types/react": "^19.2.14",
     "eslint-config-custom": "workspace:*",
@@ -85,7 +85,7 @@
     "json-schema-typed": "^8.0.2",
     "tailwindcss": "^4.2.1",
     "tsconfig": "workspace:*",
-    "tsdown": "0.20.3"
+    "tsdown": "0.21.0"
   },
   "peerDependencies": {
     "@scalar/api-client-react": "*",

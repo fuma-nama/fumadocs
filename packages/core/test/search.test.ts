@@ -1,4 +1,4 @@
-import { createI18nSearchAPI, createSearchAPI } from '@/search/server';
+import { createI18nSearchAPI, createSearchAPI, type ExportedData } from '@/search/server';
 import { expect, test } from 'vitest';
 import { structure } from '@/mdx-plugins';
 
@@ -101,7 +101,7 @@ test('Search API I18n', async () => {
   expect(await api.search('English', { locale: 'en' })).toHaveLength(1);
   expect(await api.search('amico', { locale: 'italian' })).toHaveLength(1);
   expect(await api.search('italian', { locale: 'en' })).toHaveLength(0);
-  const exported = await api.export();
+  const exported = (await api.export()) as ExportedData;
   expect(exported.type).toBe('i18n');
 
   if (exported.type === 'i18n')

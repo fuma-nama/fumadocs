@@ -1,5 +1,19 @@
 # next-docs-zeta
 
+## 16.6.12
+
+### Patch Changes
+
+- ddb0f81: require explicit import for new search clients
+
+## 16.6.11
+
+### Patch Changes
+
+- d35f30c: deprecate `highlight` on content highlighter
+- ae3e742: Support flexsearch server & client
+- 269dfb3: Redesign search client adapter interface
+
 ## 16.6.10
 
 ### Patch Changes

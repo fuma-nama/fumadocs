@@ -18,12 +18,14 @@ export default defineConfig([
       './src/plugins/*.ts',
     ],
     format: 'esm',
-    noExternal,
-    external,
     dts: true,
     fixedExtension: false,
     target: 'node22',
-    inlineOnly: [],
+    deps: {
+      onlyAllowBundle: [],
+      alwaysBundle: noExternal,
+      neverBundle: external,
+    },
   },
   {
     outDir: 'dist/next',
@@ -31,11 +33,13 @@ export default defineConfig([
     // because next.config.ts by default uses CJS
     entry: ['./src/next/index.ts'],
     format: 'cjs',
-    noExternal,
-    external,
     dts: false,
     fixedExtension: false,
     target: 'node22',
-    inlineOnly: [],
+    deps: {
+      onlyAllowBundle: [],
+      alwaysBundle: noExternal,
+      neverBundle: external,
+    },
   },
 ]);

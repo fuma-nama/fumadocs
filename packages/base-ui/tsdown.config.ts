@@ -21,5 +21,7 @@ export default defineConfig({
     await fs.writeFile('dist/components/image-zoom.js', content);
     console.log('CSS import updated');
   },
-  inlineOnly: [],
+  deps: {
+    onlyAllowBundle: [],
+  },
 });

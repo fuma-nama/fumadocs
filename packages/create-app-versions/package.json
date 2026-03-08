@@ -1,13 +1,13 @@
 {
   "name": "create-fumadocs-versions",
-  "version": "16.0.65",
+  "version": "16.0.67",
   "private": true,
   "description": "Used to track dependency versions in create-fumadocs-app",
   "dependencies": {
     "@biomejs/biome": "^2.4.6",
     "@orama/core": "^1.2.19",
     "@takumi-rs/image-response": "^0.70.4",
-    "eslint": "^10.0.2",
+    "eslint": "^10.0.3",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*"

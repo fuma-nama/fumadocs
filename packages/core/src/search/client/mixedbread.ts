@@ -3,12 +3,8 @@ import type Mixedbread from '@mixedbread/sdk';
 import removeMd from 'remove-markdown';
 import Slugger from 'github-slugger';
 import type { StoreSearchResponse } from '@mixedbread/sdk/resources/stores';
+import type { SearchClient } from '../client';
 
-/**
- * @deprecated Use `createMixedbreadSearchAPI` from `fumadocs-core/search/mixedbread` instead.
- * This client-side approach exposes your API key in the browser.
- * The server-side approach keeps the key secure and uses `type: 'fetch'` on the client.
- */
 export interface MixedbreadOptions {
   /**
    * The identifier of the store to search in
@@ -69,55 +65,61 @@ function extractHeadingTitle(text: string): string {
  * This client-side approach exposes your API key in the browser.
  * The server-side approach keeps the key secure and uses `type: 'fetch'` on the client.
  */
-export async function search(query: string, options: MixedbreadOptions): Promise<SortedResult[]> {
+export function mixedbreadClient(options: MixedbreadOptions): SearchClient {
   const { client, storeIdentifier, tag } = options;
 
-  if (!query.trim()) {
-    return [];
-  }
+  return {
+    deps: [client, storeIdentifier, tag],
+    async search(query) {
+      if (!query.trim()) {
+        return [];
+      }
 
-  const res = await client.stores.search({
-    query,
-    store_identifiers: [storeIdentifier],
-    top_k: 10,
-    filters: {
-      key: 'generated_metadata.tag',
-      operator: 'eq',
-      value: tag,
-    },
-    search_options: {
-      return_metadata: true,
-    },
-  });
-
-  return (res.data as StoreSearchResult[]).flatMap((item) => {
-    const metadata = item.generated_metadata;
-
-    const url = metadata.url || '#';
-    const title = metadata.title || 'Untitled';
-
-    const chunkResults: SortedResult[] = [
-      {
-        id: `${item.file_id}-${item.chunk_index}-page`,
-        type: 'page',
-        content: title,
-        url,
-      },
-    ];
-
-    const headingTitle = item.type === 'text' && item.text ? extractHeadingTitle(item.text) : '';
-
-    if (headingTitle) {
-      slugger.reset();
-
-      chunkResults.push({
-        id: `${item.file_id}-${item.chunk_index}-heading`,
-        type: 'heading',
-        content: headingTitle,
-        url: `${url}#${slugger.slug(headingTitle)}`,
+      const res = await client.stores.search({
+        query,
+        store_identifiers: [storeIdentifier],
+        top_k: 10,
+        filters: {
+          key: 'generated_metadata.tag',
+          operator: 'eq',
+          value: tag,
+        },
+        search_options: {
+          return_metadata: true,
+        },
       });
-    }
 
-    return chunkResults;
-  });
+      return (res.data as StoreSearchResult[]).flatMap((item) => {
+        const metadata = item.generated_metadata;
+
+        const url = metadata.url || '#';
+        const title = metadata.title || 'Untitled';
+
+        const chunkResults: SortedResult[] = [
+          {
+            id: `${item.file_id}-${item.chunk_index}-page`,
+            type: 'page',
+            content: title,
+            url,
+          },
+        ];
+
+        const headingTitle =
+          item.type === 'text' && item.text ? extractHeadingTitle(item.text) : '';
+
+        if (headingTitle) {
+          slugger.reset();
+
+          chunkResults.push({
+            id: `${item.file_id}-${item.chunk_index}-heading`,
+            type: 'heading',
+            content: headingTitle,
+            url: `${url}#${slugger.slug(headingTitle)}`,
+          });
+        }
+
+        return chunkResults;
+      });
+    },
+  };
 }
