@@ -1,7 +1,6 @@
 import type { Root } from 'mdast';
 import type { ReactNode } from 'react';
 import { remark } from 'remark';
-import type { Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
 
 export interface SortedResult<Content = string> {
@@ -43,14 +42,15 @@ function buildRegexFromQuery(q: string): RegExp | null {
   return new RegExp(`(${escaped})`, 'gi');
 }
 
+const processor = remark();
+
 export function createContentHighlighter(query: string | RegExp) {
-  let processor = remark();
   const regex = typeof query === 'string' ? buildRegexFromQuery(query) : query;
-  if (regex) {
-    processor = processor.use(remarkHighlight, regex) as never;
-  }
 
   return {
+    /**
+     * @deprecated use `highlightMarkdown()` instead.
+     */
     highlight(content: string): HighlightedText[] {
       if (!regex) return [{ type: 'text', content }];
       const out: HighlightedText[] = [];
@@ -89,34 +89,33 @@ export function createContentHighlighter(query: string | RegExp) {
      */
     highlightMarkdown(content: string): string {
       if (!regex) return content;
-
-      return String(processor.processSync(content).value);
+      const tree = processor.parse(content);
+      highlightInTree(tree, regex);
+      return processor.stringify(tree);
     },
   };
 }
 
-function remarkHighlight(regex: RegExp): Transformer<Root, Root> {
-  return (tree) => {
-    visit(tree, 'text', (node) => {
-      let out = '';
-      const content = node.value;
+function highlightInTree(tree: Root, regex: RegExp) {
+  visit(tree, 'text', (node) => {
+    let out = '';
+    const content = node.value;
 
-      let i = 0;
-      for (const match of content.matchAll(regex)) {
-        if (i < match.index) {
-          out += content.substring(i, match.index);
-        }
-
-        out += `<mark>${match[0]}</mark>`;
-        i = match.index + match[0].length;
+    let i = 0;
+    for (const match of content.matchAll(regex)) {
+      if (i < match.index) {
+        out += content.substring(i, match.index);
       }
 
-      if (i < content.length) {
-        out += content.substring(i);
-      }
+      out += `<mark>${match[0]}</mark>`;
+      i = match.index + match[0].length;
+    }
 
-      node.type = 'html' as never;
-      node.value = out;
-    });
-  };
+    if (i < content.length) {
+      out += content.substring(i);
+    }
+
+    node.type = 'html' as never;
+    node.value = out;
+  });
 }

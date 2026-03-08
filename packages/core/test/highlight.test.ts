@@ -4,96 +4,17 @@ import { createContentHighlighter } from '@/search';
 test('highlight search results', () => {
   const highlighter = createContentHighlighter('hello world helloworld');
 
-  expect(highlighter.highlight('oops hello, world hello! worldhello')).toMatchInlineSnapshot(`
-      [
-        {
-          "content": "oops ",
-          "type": "text",
-        },
-        {
-          "content": "hello",
-          "styles": {
-            "highlight": true,
-          },
-          "type": "text",
-        },
-        {
-          "content": ", ",
-          "type": "text",
-        },
-        {
-          "content": "world",
-          "styles": {
-            "highlight": true,
-          },
-          "type": "text",
-        },
-        {
-          "content": " ",
-          "type": "text",
-        },
-        {
-          "content": "hello",
-          "styles": {
-            "highlight": true,
-          },
-          "type": "text",
-        },
-        {
-          "content": "! ",
-          "type": "text",
-        },
-        {
-          "content": "world",
-          "styles": {
-            "highlight": true,
-          },
-          "type": "text",
-        },
-        {
-          "content": "hello",
-          "styles": {
-            "highlight": true,
-          },
-          "type": "text",
-        },
-      ]
+  expect(highlighter.highlightMarkdown('oops hello, world hello! worldhello'))
+    .toMatchInlineSnapshot(`
+      "oops <mark>hello</mark>, <mark>world</mark> <mark>hello</mark>! <mark>world</mark><mark>hello</mark>
+      "
     `);
-  expect(highlighter.highlight('helloworld!!!')).toMatchInlineSnapshot(`
-    [
-      {
-        "content": "hello",
-        "styles": {
-          "highlight": true,
-        },
-        "type": "text",
-      },
-      {
-        "content": "world",
-        "styles": {
-          "highlight": true,
-        },
-        "type": "text",
-      },
-      {
-        "content": "!!!",
-        "type": "text",
-      },
-    ]
+  expect(highlighter.highlightMarkdown('helloworld!!!')).toMatchInlineSnapshot(`
+    "<mark>hello</mark><mark>world</mark>!!!
+    "
   `);
-  expect(highlighter.highlight('wor ld hello')).toMatchInlineSnapshot(`
-    [
-      {
-        "content": "wor ld ",
-        "type": "text",
-      },
-      {
-        "content": "hello",
-        "styles": {
-          "highlight": true,
-        },
-        "type": "text",
-      },
-    ]
+  expect(highlighter.highlightMarkdown('wor ld hello')).toMatchInlineSnapshot(`
+    "wor ld <mark>hello</mark>
+    "
   `);
 });
