@@ -258,7 +258,7 @@ describe('Merge object schemas', () => {
       ],
     });
     // Should produce cross-product: A&X, A&Y, B&X, B&Y
-    expect(result.oneOf).toHaveLength(4);
+    expect(typeof result !== 'boolean' && result.oneOf).toHaveLength(4);
   });
 
   test('Production: `allOf`', () => {
