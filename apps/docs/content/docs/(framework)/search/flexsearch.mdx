@@ -37,4 +37,45 @@ For Static Export, you can configure [static mode](/docs/headless/search/flexsea
 
 Optionally, you can add UI for filtering results by tags. Configure [Tag Filter](/docs/headless/search/flexsearch#tag-filter) on search server and add the following:
 
-<include>.tag-filter.mdx</include>
+```tsx
+'use client';
+
+import {
+  SearchDialog,
+  SearchDialogContent,
+  SearchDialogFooter,
+  SearchDialogOverlay,
+  type SharedProps,
+  TagsList,
+  TagsListItem,
+} from 'fumadocs-ui/components/dialog/search';
+import { useState } from 'react';
+import { useDocsSearch } from 'fumadocs-core/search/client';
+import { flexsearchStaticClient } from 'fumadocs-core/search/client/flexsearch-static';
+
+export default function CustomSearchDialog(props: SharedProps) {
+  // [!code ++]
+  const [tag, setTag] = useState<string | undefined>();
+  const { search, setSearch, query } = useDocsSearch({
+    client: flexsearchStaticClient({
+      // [!code ++]
+      tag,
+    }),
+  });
+
+  return (
+    <SearchDialog>
+      <SearchDialogOverlay />
+      <SearchDialogContent>
+        ...
+        <SearchDialogFooter className="flex flex-row">
+          {/* [!code ++:3] */}
+          <TagsList tag={tag} onTagChange={setTag}>
+            <TagsListItem value="my-value">My Value</TagsListItem>
+          </TagsList>
+        </SearchDialogFooter>
+      </SearchDialogContent>
+    </SearchDialog>
+  );
+}
+```
