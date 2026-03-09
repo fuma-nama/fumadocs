@@ -1,7 +1,6 @@
 import type { APIRoute } from 'astro';
 import { createFromSource } from 'fumadocs-core/search/server';
 import { getFullExport, source } from '@/lib/source';
-import { getBreadcrumbItems } from 'fumadocs-core/breadcrumb';
 
 const server = createFromSource(source, {
   async buildIndex(page) {
@@ -13,9 +12,6 @@ const server = createFromSource(source, {
       description: page.data.description,
       structuredData,
       url: page.url,
-      breadcrumbs: getBreadcrumbItems(page.url, source.getPageTree()).map((item) =>
-        String(item.name),
-      ),
     };
   },
 });
