@@ -1,5 +1,14 @@
 # fumapress
 
+## 0.1.7
+
+### Patch Changes
+
+- 282320c: batch file reads for perf
+- Updated dependencies [2702b28]
+  - fumadocs-ui@16.6.13
+  - fumadocs-core@16.6.13
+
 ## 0.1.6
 
 ### Patch Changes
