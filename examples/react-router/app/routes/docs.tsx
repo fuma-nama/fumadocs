@@ -1,12 +1,18 @@
 import type { Route } from './+types/docs';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+import {
+  DocsBody,
+  DocsDescription,
+  DocsPage,
+  DocsTitle,
+  MarkdownCopyButton,
+  ViewOptionsPopover,
+} from 'fumadocs-ui/layouts/docs/page';
 import { source } from '@/lib/source';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import browserCollections from 'fumadocs-mdx:collections/browser';
 import { baseOptions, gitConfig } from '@/lib/layout.shared';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
-import { LLMCopyButton, ViewOptions } from '@/components/ai/page-actions';
 import { getPageImagePath } from '@/lib/og';
 
 export async function loader({ params }: Route.LoaderArgs) {
@@ -15,8 +21,8 @@ export async function loader({ params }: Route.LoaderArgs) {
   if (!page) throw new Response('Not found', { status: 404 });
 
   return {
+    slugs: page.slugs,
     path: page.path,
-    url: page.url,
     pageTree: await source.serializePageTree(source.getPageTree()),
     imagePath: getPageImagePath(slugs),
   };
@@ -27,12 +33,12 @@ const clientLoader = browserCollections.docs.createClientLoader({
     { toc, frontmatter, default: Mdx },
     // you can define props for the `<Content />` component
     {
+      markdownUrl,
       path,
-      url,
       imagePath,
     }: {
+      markdownUrl: string;
       path: string;
-      url: string;
       imagePath: string;
     },
   ) {
@@ -44,9 +50,9 @@ const clientLoader = browserCollections.docs.createClientLoader({
         <DocsTitle>{frontmatter.title}</DocsTitle>
         <DocsDescription>{frontmatter.description}</DocsDescription>
         <div className="flex flex-row gap-2 items-center border-b -mt-4 pb-6">
-          <LLMCopyButton markdownUrl={`${url}.mdx`} />
-          <ViewOptions
-            markdownUrl={`${url}.mdx`}
+          <MarkdownCopyButton markdownUrl={markdownUrl} />
+          <ViewOptionsPopover
+            markdownUrl={markdownUrl}
             githubUrl={`https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/content/docs/${path}`}
           />
         </div>
@@ -59,11 +65,12 @@ const clientLoader = browserCollections.docs.createClientLoader({
 });
 
 export default function Page({ loaderData }: Route.ComponentProps) {
-  const { path, url, pageTree, imagePath } = useFumadocsLoader(loaderData);
+  const { slugs, path, pageTree, imagePath } = useFumadocsLoader(loaderData);
+  const markdownUrl = `/llms.mdx/docs/${slugs.join('/')}`;
 
   return (
     <DocsLayout {...baseOptions()} tree={pageTree}>
-      {clientLoader.useContent(path, { path, url, imagePath })}
+      {clientLoader.useContent(path, { markdownUrl, path, imagePath })}
     </DocsLayout>
   );
 }

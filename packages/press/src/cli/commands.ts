@@ -6,7 +6,7 @@ import { baseDir } from '@/constants';
 
 export async function runStart({
   host,
-  dirs = [''],
+  dirs,
   port: defaultPort = '8080',
 }: {
   dirs?: string[];
@@ -22,6 +22,9 @@ export async function runStart({
   }
   process.env.PORT = String(port);
   process.env.ROOT_DIR = process.cwd();
+  if (!dirs || dirs.length === 0) {
+    dirs = [''];
+  }
   process.env.DEFAULT_RPOJECT_DIR = JSON.stringify(dirs.map((v) => path.resolve(v)));
   process.env.HOT_RELOAD = '1';
   process.chdir(baseDir);

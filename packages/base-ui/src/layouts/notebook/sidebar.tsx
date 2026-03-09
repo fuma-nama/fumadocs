@@ -1,9 +1,9 @@
 'use client';
 import * as Base from '@/components/sidebar/base';
 import { cn } from '@/utils/cn';
-import { type ComponentProps, use, useRef } from 'react';
+import { type ComponentProps, useRef } from 'react';
 import { cva } from 'class-variance-authority';
-import { LayoutContext } from './client';
+import { useNotebookLayout } from './client';
 import { createPageTreeRenderer } from '@/components/sidebar/page-tree';
 import { createLinkItemRenderer } from '@/components/sidebar/link-item';
 import { mergeRefs } from '@/utils/merge-refs';
@@ -42,7 +42,7 @@ export function SidebarContent({
   children,
   ...props
 }: ComponentProps<'aside'>) {
-  const { navMode } = use(LayoutContext)!;
+  const { navMode } = useNotebookLayout();
   const ref = useRef<HTMLElement>(null);
 
   return (

@@ -1,37 +1,35 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { type ComponentProps, useMemo, useState } from 'react';
 import { Check, ChevronDown, Copy, ExternalLinkIcon, TextIcon } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
+import { Popover, PopoverTrigger, PopoverContent } from 'fumadocs-ui/components/ui/popover';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from 'fumadocs-ui/components/ui/popover';
 
-const cache = new Map<string, string>();
+const cache = new Map<string, Promise<string>>();
 
-export function LLMCopyButton({
+export function MarkdownCopyButton({
+  markdownUrl,
+  ...props
+}: ComponentProps<'button'> & {
   /**
    * A URL to fetch the raw Markdown/MDX content of page
    */
-  markdownUrl,
-}: {
   markdownUrl: string;
 }) {
   const [isLoading, setLoading] = useState(false);
   const [checked, onClick] = useCopyButton(async () => {
     const cached = cache.get(markdownUrl);
-    if (cached) return navigator.clipboard.writeText(cached);
+    if (cached) return navigator.clipboard.writeText(await cached);
 
     setLoading(true);
 
     try {
+      const promise = fetch(markdownUrl).then((res) => res.text());
+      cache.set(markdownUrl, promise);
       await navigator.clipboard.write([
         new ClipboardItem({
-          'text/plain': fetch(markdownUrl).then(async (res) => {
-            const content = await res.text();
-            cache.set(markdownUrl, content);
-
-            return content;
-          }),
+          'text/plain': promise,
         }),
       ]);
     } finally {
@@ -42,14 +40,16 @@ export function LLMCopyButton({
   return (
     <button
       disabled={isLoading}
+      onClick={onClick}
+      {...props}
       className={cn(
         buttonVariants({
-          color: 'secondary',
+          variant: 'secondary',
           size: 'sm',
           className: 'gap-2 [&_svg]:size-3.5 [&_svg]:text-fd-muted-foreground',
         }),
+        props.className,
       )}
-      onClick={onClick}
     >
       {checked ? <Check /> : <Copy />}
       Copy Markdown
@@ -57,10 +57,11 @@ export function LLMCopyButton({
   );
 }
 
-export function ViewOptions({
+export function ViewOptionsPopover({
   markdownUrl,
   githubUrl,
-}: {
+  ...props
+}: ComponentProps<typeof PopoverTrigger> & {
   /**
    * A URL to the raw Markdown/MDX content of page
    */
@@ -213,12 +214,14 @@ export function ViewOptions({
   return (
     <Popover>
       <PopoverTrigger
+        {...props}
         className={cn(
           buttonVariants({
-            color: 'secondary',
+            variant: 'secondary',
             size: 'sm',
-            className: 'gap-2',
           }),
+          'gap-2 data-[state=open]:bg-fd-accent data-[state=open]:text-fd-accent-foreground',
+          props.className,
         )}
       >
         Open

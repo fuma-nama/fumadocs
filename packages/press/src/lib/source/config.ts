@@ -7,7 +7,10 @@ export type NormalizedProjectConfig = Pick<Required<ProjectConfig>, 'include' | 
 
 export function normalizeProjects(projects?: ProjectConfig[]): NormalizedProjectConfig[] {
   const baseDir = process.env.ROOT_DIR ?? process.cwd();
-  projects ??= getDefaultProjectDirectories().map((dir) => ({ dir, name: path.basename(dir) }));
+
+  if (!projects || projects.length === 0) {
+    projects = getDefaultProjectDirectories().map((dir) => ({ dir, name: path.basename(dir) }));
+  }
 
   return projects.map((project) => ({
     ...project,

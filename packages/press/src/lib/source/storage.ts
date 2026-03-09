@@ -32,7 +32,83 @@ export interface RawMeta {
   } & Record<string, unknown>;
 }
 
+type BuildFileOutput = RawPage | RawMeta | undefined;
+
+const CHUNK_SIZE = 100;
 export const filesCache = new Map<string, RawPage | RawMeta>();
+
+export async function getPages(config: ContentConfig): Promise<{
+  pages: RawPage[];
+  metas: RawMeta[];
+}> {
+  const projects = normalizeProjects(config.projects);
+  return (await Promise.all(projects.map(buildProject))).reduce(
+    (a, b) => {
+      a.metas.push(...b.metas);
+      a.pages.push(...b.pages);
+      return a;
+    },
+    { pages: [], metas: [] },
+  );
+}
+
+async function buildFile(project: NormalizedProjectConfig, file: string): Promise<BuildFileOutput> {
+  const absolutePath = path.resolve(project.dir, file);
+  const cached = filesCache.get(absolutePath);
+  if (cached) return cached;
+
+  const ext = path.extname(file);
+
+  try {
+    let out: BuildFileOutput;
+    switch (ext) {
+      case '.json':
+        out = await json(project, absolutePath, file);
+        break;
+      case '.mdx':
+      case '.md':
+        out = await md(project, absolutePath, file);
+        break;
+    }
+
+    if (out === undefined) filesCache.delete(absolutePath);
+    else filesCache.set(absolutePath, out);
+
+    return out;
+  } catch (e) {
+    console.error(`error when parsing ${file}`, e);
+    filesCache.delete(absolutePath);
+  }
+}
+
+async function buildProject(project: NormalizedProjectConfig) {
+  const files = await glob(project.include, {
+    cwd: project.dir,
+  });
+  const chunks: Promise<BuildFileOutput[]>[] = [];
+
+  for (let i = 0; i < files.length; i += CHUNK_SIZE) {
+    const promises: Promise<BuildFileOutput>[] = [];
+    const L = Math.min(files.length, i + CHUNK_SIZE);
+
+    for (let j = i; j < L; j++) {
+      promises.push(buildFile(project, files[j]!));
+    }
+
+    chunks.push(Promise.all(promises));
+  }
+
+  const pages: RawPage[] = [];
+  const metas: RawMeta[] = [];
+  for await (const chunk of chunks) {
+    for (const item of chunk) {
+      if (!item) continue;
+      if (item.type === 'page') pages.push(item);
+      else if (item.type === 'meta') metas.push(item);
+    }
+  }
+  return { pages, metas };
+}
 
 async function md(
   project: NormalizedProjectConfig,
@@ -75,55 +151,5 @@ async function json(
     path: file,
     absolutePath,
     data: result.data,
-  };
-}
-
-export async function getPages(config: ContentConfig): Promise<{
-  pages: RawPage[];
-  metas: RawMeta[];
-}> {
-  async function project(project: NormalizedProjectConfig) {
-    const files = await glob(project.include, {
-      cwd: project.dir,
-    });
-
-    return await Promise.all(
-      files.map(async (file) => {
-        const absolutePath = path.resolve(project.dir, file);
-        const cached = filesCache.get(absolutePath);
-        if (cached) return cached;
-
-        const ext = path.extname(file);
-
-        try {
-          let out: RawMeta | RawPage | undefined;
-          switch (ext) {
-            case '.json':
-              out = await json(project, absolutePath, file);
-              break;
-            case '.mdx':
-            case '.md':
-              out = await md(project, absolutePath, file);
-              break;
-          }
-
-          if (out === undefined) filesCache.delete(absolutePath);
-          else filesCache.set(absolutePath, out);
-
-          return out;
-        } catch (e) {
-          console.error(`error when parsing ${file}`, e);
-          filesCache.delete(absolutePath);
-        }
-      }),
-    );
-  }
-
-  const projects = normalizeProjects(config.projects);
-  const all = (await Promise.all(projects.map(project))).flat();
-
-  return {
-    metas: all.filter((item) => item?.type === 'meta'),
-    pages: all.filter((item) => item?.type === 'page'),
   };
 }

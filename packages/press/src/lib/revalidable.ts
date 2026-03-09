@@ -1,4 +1,5 @@
 import { hash } from './hash';
+import { cache } from 'react';
 
 export interface RevalidableConfig<Args extends unknown[], O> {
   staleTime?: number;
@@ -24,7 +25,7 @@ export function revalidable<Args extends unknown[], O>(
       revalidating: boolean;
     }
   >();
-  const out: WithRevalidate<Args, O> = function (...args: Args) {
+  const out = cache((...args: Args) => {
     const key = cacheKey(...args);
     const cache = cacheMap.get(key);
 
@@ -60,9 +61,9 @@ export function revalidable<Args extends unknown[], O>(
     }
 
     return cache.lastResult;
-  };
+  }) as WithRevalidate<Args, O>;
 
-  out.revalidate = (keepStale = true) => {
+  out.revalidate = function revalidate(keepStale = true) {
     if (keepStale) {
       for (const value of cacheMap.values()) {
         value.lastValidated = 0;

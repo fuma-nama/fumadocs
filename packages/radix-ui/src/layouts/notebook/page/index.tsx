@@ -226,3 +226,4 @@ export function DocsTitle({ children, className, ...props }: ComponentProps<'h1'
 }
 
 export { PageLastUpdate, PageBreadcrumb } from './client';
+export { MarkdownCopyButton, ViewOptionsPopover } from '@/layouts/shared/page-actions';

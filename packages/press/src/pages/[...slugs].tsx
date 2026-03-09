@@ -4,7 +4,7 @@ import { getPageImage, getSource, type SourcePage } from '@/lib/source';
 import { layoutConfig } from '@/layouts/config';
 import { getConfigRuntime } from '@/config/load-runtime';
 import { Card, Cards } from 'fumadocs-ui/components/card';
-import { CompileResult, createMarkdownCompiler, plugin } from '@/lib/md';
+import { type CompileResult, createMarkdownCompiler, plugin } from '@/lib/md';
 import { remarkHeading } from 'fumadocs-core/mdx-plugins/remark-heading';
 import { remarkGfm } from 'fumadocs-core/mdx-plugins/remark-gfm';
 import { remarkCodeTab } from 'fumadocs-core/mdx-plugins/remark-code-tab';
@@ -18,7 +18,7 @@ import rehypeKatex from 'rehype-katex';
 import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
 import { remarkMdxMermaid } from 'fumadocs-core/mdx-plugins/remark-mdx-mermaid';
 import { Mermaid } from '@/components/mermaid';
-import type { ComponentProps } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 import { Image } from '@/components/image';
 
 const compiler = createMarkdownCompiler({
@@ -71,7 +71,6 @@ interface MdPresetComponents {
 export default async function DocPage({ slugs }: PageProps<'/docs/[...slugs]'>) {
   const config = await getConfigRuntime();
   const source = await getSource(config);
-  const layout = layoutConfig(config);
   const page = source.getPage(slugs);
   const mdPreset = config.layout?.presets?.md ?? 'docs';
   let mdPresetComponents: MdPresetComponents;
@@ -88,12 +87,7 @@ export default async function DocPage({ slugs }: PageProps<'/docs/[...slugs]'>) 
     };
   }
 
-  const { DocsLayout } = mdPresetComponents.layout;
-  return (
-    <DocsLayout {...await layout.docs()}>
-      <MdContent slugs={slugs} page={page} components={mdPresetComponents} />
-    </DocsLayout>
-  );
+  return <MdContent slugs={slugs} page={page} components={mdPresetComponents} />;
 }
 
 async function MdContent({
@@ -107,11 +101,17 @@ async function MdContent({
 }) {
   const config = await getConfigRuntime();
   const source = await getSource(config);
+  const layout = layoutConfig(config);
+  const { DocsLayout } = components.layout;
   const { DocsBody, DocsTitle, DocsPage, DocsDescription } = components.page;
+
+  async function renderContainer(children: ReactNode) {
+    return <DocsLayout {...await layout.docs()}>{children}</DocsLayout>;
+  }
 
   if (!page) {
     if (slugs.length === 0) {
-      return (
+      return renderContainer(
         <DocsPage>
           <DocsTitle>Home</DocsTitle>
           <DocsDescription>
@@ -126,15 +126,15 @@ async function MdContent({
               );
             })}
           </Cards>
-        </DocsPage>
+        </DocsPage>,
       );
     }
 
-    return (
+    return renderContainer(
       <DocsPage>
         <DocsTitle>Not Found</DocsTitle>
         <DocsDescription>The page you are looking for does not exist.</DocsDescription>
-      </DocsPage>
+      </DocsPage>,
     );
   }
 
@@ -146,7 +146,7 @@ async function MdContent({
       value: page.data.content,
     });
   } catch (e) {
-    return (
+    return renderContainer(
       <DocsPage>
         <DocsTitle>Failed to Compile</DocsTitle>
         {e instanceof Error ? (
@@ -161,7 +161,7 @@ async function MdContent({
         ) : (
           <DocsDescription>{String(e)}</DocsDescription>
         )}
-      </DocsPage>
+      </DocsPage>,
     );
   }
 
@@ -180,7 +180,7 @@ async function MdContent({
     }),
   );
 
-  return (
+  return renderContainer(
     <DocsPage toc={toc}>
       <title>{page.data.title}</title>
       <meta property="og:image" content={getPageImage(slugs).url} />
@@ -190,7 +190,7 @@ async function MdContent({
       <DocsBody>
         <Fragment key={page.absolutePath}>{compiled.render(mdxComponents)}</Fragment>
       </DocsBody>
-    </DocsPage>
+    </DocsPage>,
   );
 }
 

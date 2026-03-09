@@ -35,6 +35,11 @@ export const registry: Registry = {
         },
         {
           type: 'components',
+          path: 'layouts/shared/page-actions.tsx',
+          target: '<dir>/layout/page-actions.tsx',
+        },
+        {
+          type: 'components',
           path: 'layouts/shared/search-toggle.tsx',
           target: '<dir>/layout/search-toggle.tsx',
         },

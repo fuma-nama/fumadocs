@@ -363,7 +363,7 @@ export function FieldSet({
     );
   }
 
-  if (info.unionField && field[info.unionField]) {
+  if (info.unionField && field[info.unionField] && field[info.unionField]!.length > 0) {
     const union = field[info.unionField]!;
     const showSelect = union.length > 1;
 
