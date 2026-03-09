@@ -4,7 +4,7 @@ import { Check, ChevronDown, Copy, ExternalLinkIcon, TextIcon } from 'lucide-rea
 import { cn } from '@/lib/cn';
 import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 import { Popover, PopoverTrigger, PopoverContent } from 'fumadocs-ui/components/ui/popover';
-import { buttonVariants } from '@/components/ui/button';
+import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 
 const cache = new Map<string, Promise<string>>();
 
