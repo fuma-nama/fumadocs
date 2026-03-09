@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 16.6.13
+
+### Patch Changes
+
+- 2702b28: Bundle page actions into UI
+  - fumadocs-core@16.6.13
+
 ## 16.6.12
 
 ### Patch Changes
