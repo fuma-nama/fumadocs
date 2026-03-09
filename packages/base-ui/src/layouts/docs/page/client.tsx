@@ -23,7 +23,7 @@ import { isActive } from '@/utils/urls';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useTOCItems } from '@/components/toc';
 import { useActiveAnchor } from 'fumadocs-core/toc';
-import { LayoutContext } from '../client';
+import { useDocsLayout } from '../client';
 import { useFooterItems } from '@/utils/use-footer-items';
 
 const TocPopoverContext = createContext<{
@@ -34,7 +34,7 @@ const TocPopoverContext = createContext<{
 export function PageTOCPopover({ className, children, ...rest }: ComponentProps<'div'>) {
   const ref = useRef<HTMLElement>(null);
   const [open, setOpen] = useState(false);
-  const { isNavTransparent } = use(LayoutContext)!;
+  const { isNavTransparent } = useDocsLayout();
 
   const onClick = useEffectEvent((e: Event) => {
     if (!open) return;

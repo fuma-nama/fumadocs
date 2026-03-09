@@ -13,6 +13,15 @@ export const LayoutContext = createContext<{
   isNavTransparent: boolean;
 } | null>(null);
 
+export function useDocsLayout() {
+  const context = use(LayoutContext);
+  if (!context)
+    throw new Error(
+      'Please use <DocsPage /> (`fumadocs-ui/layouts/docs/page`) under <DocsLayout /> (`fumadocs-ui/layouts/docs`).',
+    );
+  return context;
+}
+
 export function LayoutContextProvider({
   navTransparentMode = 'none',
   children,
@@ -38,7 +47,7 @@ export function LayoutContextProvider({
 }
 
 export function LayoutHeader(props: ComponentProps<'header'>) {
-  const { isNavTransparent } = use(LayoutContext)!;
+  const { isNavTransparent } = useDocsLayout();
 
   return (
     <header data-transparent={isNavTransparent} {...props}>

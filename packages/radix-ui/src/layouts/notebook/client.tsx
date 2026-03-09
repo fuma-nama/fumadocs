@@ -21,12 +21,21 @@ import { LinkItem, type LinkItemType, type MenuItemType } from '@/utils/link-ite
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { isTabActive, type SidebarTabWithProps } from '@/components/sidebar/tabs/dropdown';
 
-export const LayoutContext = createContext<
+const LayoutContext = createContext<
   | (LayoutInfo & {
       isNavTransparent: boolean;
     })
   | null
 >(null);
+
+export function useNotebookLayout() {
+  const context = use(LayoutContext);
+  if (!context)
+    throw new Error(
+      'Please use <DocsPage /> (`fumadocs-ui/layouts/notebook/page`) under <DocsLayout /> (`fumadocs-ui/layouts/notebook`).',
+    );
+  return context;
+}
 
 export interface LayoutInfo {
   tabMode: 'sidebar' | 'navbar';
@@ -63,7 +72,7 @@ export function LayoutContextProvider({
 
 export function LayoutHeader(props: ComponentProps<'header'>) {
   const { open } = useSidebar();
-  const { isNavTransparent } = use(LayoutContext)!;
+  const { isNavTransparent } = useNotebookLayout();
 
   return (
     <header data-transparent={isNavTransparent && !open} {...props}>
@@ -73,7 +82,7 @@ export function LayoutHeader(props: ComponentProps<'header'>) {
 }
 
 export function LayoutBody({ className, style, children, ...props }: ComponentProps<'div'>) {
-  const { navMode } = use(LayoutContext)!;
+  const { navMode } = useNotebookLayout();
   const { collapsed } = useSidebar();
   const pageCol =
     'calc(var(--fd-layout-width,97rem) - var(--fd-sidebar-col) - var(--fd-toc-width))';

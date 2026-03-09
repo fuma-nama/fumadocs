@@ -1,13 +1,16 @@
 'use client';
 import { type ComponentProps, useMemo, useState } from 'react';
 import { Check, ChevronDown, Copy, ExternalLinkIcon, TextIcon } from 'lucide-react';
-import { cn } from '@/lib/cn';
-import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
-import { Popover, PopoverTrigger, PopoverContent } from 'fumadocs-ui/components/ui/popover';
+import { cn } from '@/utils/cn';
+import { useCopyButton } from '@/utils/use-copy-button';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { buttonVariants } from '@/components/ui/button';
 
 const cache = new Map<string, Promise<string>>();
 
+/**
+ * see https://fumadocs.dev/docs/integrations/llms#page-actions to customise.
+ */
 export function MarkdownCopyButton({
   markdownUrl,
   ...props
@@ -44,7 +47,7 @@ export function MarkdownCopyButton({
       {...props}
       className={cn(
         buttonVariants({
-          variant: 'secondary',
+          color: 'secondary',
           size: 'sm',
           className: 'gap-2 [&_svg]:size-3.5 [&_svg]:text-fd-muted-foreground',
         }),
@@ -57,6 +60,9 @@ export function MarkdownCopyButton({
   );
 }
 
+/**
+ * see https://fumadocs.dev/docs/integrations/llms#page-actions to customise.
+ */
 export function ViewOptionsPopover({
   markdownUrl,
   githubUrl,
@@ -217,7 +223,7 @@ export function ViewOptionsPopover({
         {...props}
         className={cn(
           buttonVariants({
-            variant: 'secondary',
+            color: 'secondary',
             size: 'sm',
           }),
           'gap-2 data-[state=open]:bg-fd-accent data-[state=open]:text-fd-accent-foreground',
