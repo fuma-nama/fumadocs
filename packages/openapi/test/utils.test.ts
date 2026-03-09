@@ -219,6 +219,28 @@ describe('Merge object schemas', () => {
     `);
   });
 
+  test('Production: `allOf` with multiple `oneOf`', () => {
+    const result = mergeAllOf({
+      type: 'object',
+      allOf: [
+        {
+          oneOf: [
+            { type: 'object', title: 'optionA', properties: { a: { type: 'string' } }, required: ['a'] },
+            { type: 'object', title: 'optionB', properties: { b: { type: 'string' } }, required: ['b'] },
+          ],
+        },
+        {
+          oneOf: [
+            { type: 'object', title: 'optionX', properties: { x: { type: 'number' } }, required: ['x'] },
+            { type: 'object', title: 'optionY', properties: { y: { type: 'number' } }, required: ['y'] },
+          ],
+        },
+      ],
+    });
+    // Should produce cross-product: A&X, A&Y, B&X, B&Y
+    expect(result.oneOf).toHaveLength(4);
+  });
+
   test('Production: `allOf`', () => {
     const result = mergeAllOf({
       type: 'object',

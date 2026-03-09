@@ -1,0 +1,98 @@
+openapi: 3.1.0
+info:
+  title: Double oneOf Test
+  description: Minimal spec to reproduce allOf with multiple oneOf arrays.
+  version: 1.0.0
+
+paths:
+  /users/{id}:
+    patch:
+      summary: Update user
+      operationId: updateUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUser'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+
+components:
+  schemas:
+    UpdateUser:
+      type: object
+      allOf:
+        - properties:
+            username:
+              type: string
+        - oneOf:
+            - type: object
+              title: human
+              required: [human]
+              properties:
+                human:
+                  type: object
+                  properties:
+                    givenName:
+                      type: string
+                    familyName:
+                      type: string
+            - type: object
+              title: machine
+              required: [machine]
+              properties:
+                machine:
+                  type: object
+                  properties:
+                    serialNumber:
+                      type: string
+
+    SetPassword:
+      type: object
+      allOf:
+        - oneOf:
+            - type: object
+              title: password
+              required: [password]
+              properties:
+                password:
+                  type: string
+            - type: object
+              title: hashedPassword
+              required: [hashedPassword]
+              properties:
+                hashedPassword:
+                  type: object
+                  properties:
+                    hash:
+                      type: string
+                    algorithm:
+                      type: string
+        - oneOf:
+            - type: object
+              title: sendNotification
+              required: [sendNotification]
+              properties:
+                sendNotification:
+                  type: boolean
+            - type: object
+              title: returnCode
+              required: [returnCode]
+              properties:
+                returnCode:
+                  type: boolean
