@@ -109,7 +109,8 @@ function intersection(a: ParsedSchema, b: ParsedSchema, options: Options): Parse
           const product: ParsedSchema[] = [];
           for (const aItem of result[key]) {
             for (const bItem of value) {
-              product.push(intersection(aItem, bItem, options));
+              const merged = intersection(aItem, bItem, options);
+              if (merged !== false) product.push(merged);
             }
           }
           result[key] = product;
