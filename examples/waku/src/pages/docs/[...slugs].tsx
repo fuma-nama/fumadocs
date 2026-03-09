@@ -1,10 +1,16 @@
 import { source } from '@/lib/source';
 import { PageProps } from 'waku/router';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
-import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+import {
+  DocsBody,
+  DocsDescription,
+  DocsPage,
+  DocsTitle,
+  MarkdownCopyButton,
+  ViewOptionsPopover,
+} from 'fumadocs-ui/layouts/docs/page';
 import { getPageImage } from '@/lib/source';
 import { unstable_notFound } from 'waku/router/server';
-import { LLMCopyButton, ViewOptions } from '@/components/ai/page-actions';
 import { gitConfig } from '@/lib/layout.shared';
 
 export default function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
@@ -19,8 +25,8 @@ export default function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription className="mb-0">{page.data.description}</DocsDescription>
       <div className="flex flex-row gap-2 items-center border-b pt-2 pb-6">
-        <LLMCopyButton markdownUrl={markdownUrl} />
-        <ViewOptions
+        <MarkdownCopyButton markdownUrl={markdownUrl} />
+        <ViewOptionsPopover
           markdownUrl={markdownUrl}
           githubUrl={`https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/content/docs/${page.path}`}
         />
