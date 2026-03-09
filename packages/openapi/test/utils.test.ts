@@ -225,14 +225,34 @@ describe('Merge object schemas', () => {
       allOf: [
         {
           oneOf: [
-            { type: 'object', title: 'optionA', properties: { a: { type: 'string' } }, required: ['a'] },
-            { type: 'object', title: 'optionB', properties: { b: { type: 'string' } }, required: ['b'] },
+            {
+              type: 'object',
+              title: 'optionA',
+              properties: { a: { type: 'string' } },
+              required: ['a'],
+            },
+            {
+              type: 'object',
+              title: 'optionB',
+              properties: { b: { type: 'string' } },
+              required: ['b'],
+            },
           ],
         },
         {
           oneOf: [
-            { type: 'object', title: 'optionX', properties: { x: { type: 'number' } }, required: ['x'] },
-            { type: 'object', title: 'optionY', properties: { y: { type: 'number' } }, required: ['y'] },
+            {
+              type: 'object',
+              title: 'optionX',
+              properties: { x: { type: 'number' } },
+              required: ['x'],
+            },
+            {
+              type: 'object',
+              title: 'optionY',
+              properties: { y: { type: 'number' } },
+              required: ['y'],
+            },
           ],
         },
       ],
