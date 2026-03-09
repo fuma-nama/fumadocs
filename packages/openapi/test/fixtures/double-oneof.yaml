@@ -61,28 +61,6 @@ components:
                   properties:
                     serialNumber:
                       type: string
-
-    SetPassword:
-      type: object
-      allOf:
-        - oneOf:
-            - type: object
-              title: password
-              required: [password]
-              properties:
-                password:
-                  type: string
-            - type: object
-              title: hashedPassword
-              required: [hashedPassword]
-              properties:
-                hashedPassword:
-                  type: object
-                  properties:
-                    hash:
-                      type: string
-                    algorithm:
-                      type: string
         - oneOf:
             - type: object
               title: sendNotification

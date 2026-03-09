@@ -10,16 +10,16 @@ const cwd = fileURLToPath(new URL('./', import.meta.url));
 test('double-oneOf in allOf does not crash', async () => {
   const ctx = await renderContextFrom(path.join(cwd, './fixtures/double-oneof.yaml'));
 
-  const setPassword = ctx.schema.dereferenced.components!.schemas!.SetPassword as ResolvedSchema;
+  const updateUser = ctx.schema.dereferenced.components!.schemas!.UpdateUser as ResolvedSchema;
   const out = generateSchemaUI(
     {
       client: { name: 'test' },
-      root: setPassword,
+      root: updateUser,
     },
     ctx,
   );
 
-  // Should produce a cross-product of 4 oneOf variants, not crash
+  // Should produce a cross-product of oneOf variants, not crash
   expect(out).toBeDefined();
   expect(out.refs).toBeDefined();
 });
