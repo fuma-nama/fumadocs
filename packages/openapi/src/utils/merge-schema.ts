@@ -105,7 +105,15 @@ function intersection(a: ParsedSchema, b: ParsedSchema, options: Options): Parse
       case 'oneOf': {
         const value = b[key];
         if (value !== undefined && result[key] !== undefined) {
-          result[key] = intersectArray(result[key], value);
+          // Cross-product: each combination of items from both arrays
+          const product: ParsedSchema[] = [];
+          for (const aItem of result[key]) {
+            for (const bItem of value) {
+              const merged = intersection(aItem, bItem, options);
+              if (merged !== false) product.push(merged);
+            }
+          }
+          result[key] = product;
         }
         break;
       }

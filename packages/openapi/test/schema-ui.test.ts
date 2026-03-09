@@ -7,6 +7,23 @@ import type { ResolvedSchema } from '@/utils/schema';
 
 const cwd = fileURLToPath(new URL('./', import.meta.url));
 
+test('double-oneOf in allOf does not crash', async () => {
+  const ctx = await renderContextFrom(path.join(cwd, './fixtures/double-oneof.yaml'));
+
+  const createItem = ctx.schema.dereferenced.components!.schemas!.CreateItem as ResolvedSchema;
+  const out = generateSchemaUI(
+    {
+      client: { name: 'test' },
+      root: createItem,
+    },
+    ctx,
+  );
+
+  // Should produce a cross-product of 4 oneOf variants, not crash
+  expect(out).toBeDefined();
+  expect(out.refs).toBeDefined();
+});
+
 test('test', async () => {
   const ctx = await renderContextFrom(path.join(cwd, './fixtures/unkey.json'));
 
