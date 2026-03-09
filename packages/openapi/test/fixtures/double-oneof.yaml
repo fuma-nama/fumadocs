@@ -5,72 +5,50 @@ info:
   version: 1.0.0
 
 paths:
-  /users/{id}:
-    patch:
-      summary: Update user
-      operationId: updateUser
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
+  /items:
+    post:
+      summary: Create item
+      operationId: createItem
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateUser'
+              $ref: '#/components/schemas/CreateItem'
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: string
 
 components:
   schemas:
-    UpdateUser:
+    CreateItem:
       type: object
       allOf:
-        - properties:
-            username:
-              type: string
         - oneOf:
             - type: object
-              title: human
-              required: [human]
+              title: color
+              required: [color]
               properties:
-                human:
-                  type: object
-                  properties:
-                    givenName:
-                      type: string
-                    familyName:
-                      type: string
+                color:
+                  type: string
             - type: object
-              title: machine
-              required: [machine]
+              title: pattern
+              required: [pattern]
               properties:
-                machine:
-                  type: object
-                  properties:
-                    serialNumber:
-                      type: string
+                pattern:
+                  type: string
         - oneOf:
             - type: object
-              title: sendNotification
-              required: [sendNotification]
+              title: small
+              required: [size]
               properties:
-                sendNotification:
-                  type: boolean
+                size:
+                  type: string
+                  enum: [S, M]
             - type: object
-              title: returnCode
-              required: [returnCode]
+              title: large
+              required: [size]
               properties:
-                returnCode:
-                  type: boolean
+                size:
+                  type: string
+                  enum: [L, XL]
