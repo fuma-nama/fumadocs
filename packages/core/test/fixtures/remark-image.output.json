@@ -83,11 +83,6 @@
                 "value": "__img0",
               },
             },
-            {
-              "name": "placeholder",
-              "type": "mdxJsxAttribute",
-              "value": "blur",
-            },
           ],
           "children": [],
           "name": "img",
