@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 16.6.14
+
+### Patch Changes
+
+- 8382363: [Remark Image] set `placeholder` to `none` by default
+
 ## 16.6.13
 
 ## 16.6.12
