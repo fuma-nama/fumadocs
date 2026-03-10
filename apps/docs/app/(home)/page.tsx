@@ -12,7 +12,7 @@ import {
   TimerIcon,
 } from 'lucide-react';
 import { Marquee } from '@/app/(home)/marquee';
-import { CodeBlock } from '@/components/code-block';
+import { ServerCodeBlock } from 'fumadocs-ui/components/codeblock.rsc';
 import {
   Hero,
   AgnosticBackground,
@@ -113,10 +113,12 @@ export default function Page() {
               <h2 className="text-brand content-center font-mono font-bold uppercase border-2 border-brand/50 px-2 rounded-xl">
                 Try it out
               </h2>
-              <CodeBlock
+              <ServerCodeBlock
                 code="pnpm create fumadocs-app"
                 lang="bash"
-                wrapper={{ className: 'bg-fd-secondary flex-1' }}
+                codeblock={{
+                  className: 'bg-fd-secondary flex-1',
+                }}
               />
             </div>
 
@@ -202,7 +204,7 @@ function Aesthetics() {
           Fumadocs offer well-designed themes, with a headless mode to plug your own UI.
         </p>
         <p className="mb-4">Pro designer? Customise the theme using Fumadocs CLI.</p>
-        <CodeBlock
+        <ServerCodeBlock
           code={`pnpm dlx @fumadocs/cli customise\n\n> Choose a layout to customise...`}
           lang="bash"
         />
@@ -217,7 +219,7 @@ function AnybodyCanWrite() {
       tabs={{
         writer: (
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-            <CodeBlock
+            <ServerCodeBlock
               code={`---
 title: Hello World
 ---
@@ -256,7 +258,7 @@ return 0;
         ),
         developer: (
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-            <CodeBlock
+            <ServerCodeBlock
               code={`---
 title: Hello World
 ---
@@ -300,7 +302,7 @@ And re-use content:
         ),
         automation: (
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-            <CodeBlock
+            <ServerCodeBlock
               code={`---
 title: Hello World
 ---
@@ -570,13 +572,13 @@ function ForEngineers() {
             </a>
           ))}
         </div>
-        <CodeBlock
-          wrapper={{
+        <ServerCodeBlock
+          codeblock={{
             title: 'Fumadocs MDX',
           }}
           code={`
 import { loader } from 'fumadocs-core/source';
-import { docs } from 'fumadocs-mdx:collections/server';
+import { docs } from 'collections/server';
 
 export const source = loader({
   source: docs.toFumadocsSource(),

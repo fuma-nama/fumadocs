@@ -68,7 +68,7 @@ bun ./scripts/export-pdf.ts
 
 For invisible contents in accordions/tabs, you may need to temporarily override the MDX components. For example:
 
-```tsx title="mdx-components.tsx"
+```tsx title="components/mdx.tsx"
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import type { MDXComponents } from 'mdx/types';
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
@@ -76,19 +76,25 @@ import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 // you may use environment variable here [!code highlight]
 const isPrinting = true;
 
-export function getMDXComponents(components?: MDXComponents) {
-  const PrintingAccordion: typeof Accordion = (props) => (
+function PrintingAccordion(props: React.ComponentProps<typeof Accordion>) {
+  return (
     <div>
       <h3>{props.title}</h3>
       {props.children}
     </div>
   );
+}
 
+function PrintingAccordions(props: React.ComponentProps<typeof Accordions>) {
+  return <div>{props.children}</div>;
+}
+
+export function getMDXComponents(components?: MDXComponents) {
   return {
     ...defaultMdxComponents,
     // updated accordions:
     Accordion: isPrinting ? PrintingAccordion : Accordion,
-    Accordions: isPrinting ? 'div' : Accordions,
+    Accordions: isPrinting ? PrintingAccordions : Accordions,
     ...components,
   } satisfies MDXComponents;
 }

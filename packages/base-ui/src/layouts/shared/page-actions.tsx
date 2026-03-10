@@ -55,7 +55,7 @@ export function MarkdownCopyButton({
       )}
     >
       {checked ? <Check /> : <Copy />}
-      Copy Markdown
+      {props.children ?? 'Copy Markdown'}
     </button>
   );
 }
@@ -233,7 +233,7 @@ export function ViewOptionsPopover({
           )
         }
       >
-        Open
+        {props.children ?? 'Open'}
         <ChevronDown className="size-3.5 text-fd-muted-foreground" />
       </PopoverTrigger>
       <PopoverContent className="flex flex-col">

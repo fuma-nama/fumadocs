@@ -1,4 +1,5 @@
 import Link from 'fumadocs-core/link';
+import type React from 'react';
 import type {
   AnchorHTMLAttributes,
   FC,
@@ -20,6 +21,20 @@ import {
   Pre,
 } from '@/components/codeblock';
 
+/**
+ * global types for MDX.js
+ */
+declare module 'mdx/types.js' {
+  // Augment the MDX types to make it understand React.
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace JSX {
+    type Element = React.JSX.Element;
+    type ElementClass = React.JSX.ElementClass;
+    type ElementType = React.JSX.ElementType;
+    type IntrinsicElements = React.JSX.IntrinsicElements;
+  }
+}
+
 function Image(
   props: ImgHTMLAttributes<HTMLImageElement> & {
     sizes?: string;
@@ -29,7 +44,6 @@ function Image(
     <FrameworkImage
       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 900px"
       {...props}
-      src={props.src as unknown as string}
       className={cn('rounded-lg', props.className)}
     />
   );

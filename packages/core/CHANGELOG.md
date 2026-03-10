@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 16.6.14
+
+### Patch Changes
+
+- 8382363: [Remark Image] set `placeholder` to `none` by default
+
 ## 16.6.13
 
 ## 16.6.12
@@ -220,7 +226,7 @@
 
   ```ts
   import { loader } from "fumadocs-core/source";
-  import { docs } from "fumadocs-mdx:collections/server";
+  import { docs } from "collections/
   import { lucideIconsPlugin } from "fumadocs-core/source/lucide-icons";
 
   export const source = loader(docs.toFumadocsSource(), {

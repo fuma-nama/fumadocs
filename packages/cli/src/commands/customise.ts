@@ -48,7 +48,7 @@ export async function customise(client: RegistryClient) {
               label: 'Start from minimal styles',
               hint: 'for those who want to build their own variant from ground up.',
               value: {
-                target: ['fumadocs/ui/layouts/docs-min'],
+                target: ['layouts/docs-min'],
                 replace: [
                   ['fumadocs-ui/layouts/docs', '@/components/layout/docs'],
                   ['fumadocs-ui/layouts/docs/page', '@/components/layout/docs/page'],

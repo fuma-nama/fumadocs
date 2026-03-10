@@ -1,7 +1,7 @@
 import { source } from '@/lib/source';
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/notebook/page';
 import { notFound } from 'next/navigation';
-import { getMDXComponents } from '@/mdx-components';
+import { getMDXComponents } from '@/components/mdx';
 import type { Metadata } from 'next';
 import { APIPage } from '@/components/api-page';
 

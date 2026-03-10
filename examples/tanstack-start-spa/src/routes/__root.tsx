@@ -25,20 +25,14 @@ export const Route = createRootRoute({
 
 function RootComponent() {
   return (
-    <RootDocument>
-      <Outlet />
-    </RootDocument>
-  );
-}
-
-function RootDocument({ children }: { children: React.ReactNode }) {
-  return (
     <html suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
       <body className="flex flex-col min-h-screen">
-        <RootProvider search={{ SearchDialog }}>{children}</RootProvider>
+        <RootProvider search={{ SearchDialog }}>
+          <Outlet />
+        </RootProvider>
         <Scripts />
       </body>
     </html>

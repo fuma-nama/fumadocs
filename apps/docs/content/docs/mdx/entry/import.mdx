@@ -19,7 +19,7 @@ You can import them as a component:
 
 ```tsx title="app/my-page.tsx"
 import MyPage from '@/content/page.mdx';
-import { getMDXComponents } from '@/mdx-components';
+import { getMDXComponents } from '@/components/mdx';
 
 export default function Page() {
   return (
@@ -61,15 +61,15 @@ export default function Content(props: ComponentProps<'main'>) {
 
 It doesn't have **MDX components** by default, you have to provide them:
 
-```tsx tab="mdx-components.tsx"
+```tsx tab="components/mdx.tsx"
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import type { MDXComponents } from 'mdx/types';
 
-export function getMDXComponents(components?: MDXComponents): MDXComponents {
+export function getMDXComponents(components?: MDXComponents) {
   return {
     ...defaultMdxComponents, // for Fumadocs UI
     ...components,
-  };
+  } satisfies MDXComponents;
 }
 
 // export a `useMDXComponents()` that returns MDX components
@@ -81,8 +81,8 @@ import { defineConfig } from 'fumadocs-mdx/config';
 
 export default defineConfig({
   mdxOptions: {
-    // Path to import your `mdx-components.tsx` above. [!code ++]
-    providerImportSource: '@/mdx-components',
+    // Path to import your `components/mdx.tsx` above. [!code ++]
+    providerImportSource: '@/components/mdx',
   },
 });
 ```

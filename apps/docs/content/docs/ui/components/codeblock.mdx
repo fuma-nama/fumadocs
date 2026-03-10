@@ -40,12 +40,12 @@ Supported features:
 
 Wrap the pre element in `<CodeBlock />`, which acts as the wrapper of code block.
 
-```tsx title="mdx-components.tsx"
+```tsx title="components/mdx.tsx"
 import defaultComponents from 'fumadocs-ui/mdx';
 import type { MDXComponents } from 'mdx/types';
 import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
 
-export function getMDXComponents(components?: MDXComponents): MDXComponents {
+export function getMDXComponents(components?: MDXComponents) {
   return {
     ...defaultComponents,
     // HTML `ref` attribute conflicts with `forwardRef`
@@ -55,7 +55,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
       </CodeBlock>
     ),
     ...components,
-  };
+  } satisfies MDXComponents;
 }
 ```
 

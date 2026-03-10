@@ -10,7 +10,7 @@ The generated outputs are optimized using async imports to optimize for browser 
 Only doc/docs collections are accessible on browser.
 
 ```tsx
-import browserCollections from 'fumadocs-mdx:collections/browser';
+import browserCollections from 'collections/browser';
 
 // unloaded entries
 console.log(browserCollections['collection name'].raw);
@@ -63,7 +63,7 @@ The examples are for non-RSC usage, we recommend using RSC whenever possible for
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
 import { source } from '@/lib/source';
-import browserCollections from 'fumadocs-mdx:collections/browser';
+import browserCollections from 'collections/browser';
 
 export const Route = createFileRoute('/docs/$')({
   component: Page,
@@ -110,7 +110,7 @@ function Page() {
 ```tsx
 import type { Route } from './+types/docs';
 import { source } from '@/lib/source';
-import browserCollections from 'fumadocs-mdx:collections/browser';
+import browserCollections from 'collections/browser';
 
 export async function loader({ params }: Route.LoaderArgs) {
   const slugs = params['*'].split('/').filter((v) => v.length > 0);

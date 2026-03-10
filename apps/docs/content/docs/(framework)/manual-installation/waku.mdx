@@ -31,29 +31,32 @@ Add the following to your Tailwind CSS file:
 
 Create a file for sharing layout props:
 
-<include cwd meta='title="src/lib/layout.shared.tsx"'>
+<include cwd meta='title="lib/layout.shared.tsx"'>
   ../../examples/waku/src/lib/layout.shared.tsx
 </include>
 
-Create the following routes:
+Create the following files:
 
-<include cwd meta='tab="src/pages/docs/_layout.tsx"'>
+<include cwd meta='tab="components/mdx.tsx"'>
+  ../../examples/waku/src/components/mdx.tsx
+</include>
+<include cwd meta='tab="pages/docs/_layout.tsx"'>
   ../../examples/waku/src/pages/docs/_layout.tsx
 </include>
-<include cwd meta='tab="src/pages/docs/[...slugs].tsx"'>
+<include cwd meta='tab="pages/docs/[...slugs].tsx"'>
   ../../examples/waku/src/pages/docs/[...slugs].tsx
 </include>
-<include cwd meta='tab="src/pages/_api/api/search.ts"'>
+<include cwd meta='tab="pages/_api/api/search.ts"'>
   ../../examples/waku/src/pages/_api/api/search.ts
 </include>
 
 Finally, wrap your entire app under Fumadocs providers:
 
-<include cwd meta='tab="src/components/provider.tsx"'>
+<include cwd meta='tab="components/provider.tsx"'>
   ../../examples/waku/src/components/provider.tsx
 </include>
 
-```tsx tab="src/pages/_layout.tsx"
+```tsx tab="pages/_layout.tsx"
 import '@/styles/globals.css';
 import type { ReactNode } from 'react';
 import { Provider } from '@/components/provider';

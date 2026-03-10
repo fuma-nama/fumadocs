@@ -9,10 +9,10 @@ import {
   ViewOptionsPopover,
 } from 'fumadocs-ui/layouts/docs/page';
 import { source } from '@/lib/source';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
-import browserCollections from 'fumadocs-mdx:collections/browser';
+import browserCollections from 'collections/browser';
 import { baseOptions, gitConfig } from '@/lib/layout.shared';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
+import { useMDXComponents } from '@/components/mdx';
 
 export async function loader({ params }: Route.LoaderArgs) {
   const slugs = params['*'].split('/').filter((v) => v.length > 0);
@@ -52,7 +52,7 @@ const clientLoader = browserCollections.docs.createClientLoader({
           />
         </div>
         <DocsBody>
-          <Mdx components={{ ...defaultMdxComponents }} />
+          <Mdx components={useMDXComponents()} />
         </DocsBody>
       </DocsPage>
     );

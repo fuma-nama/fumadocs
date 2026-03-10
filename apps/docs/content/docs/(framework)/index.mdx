@@ -4,6 +4,8 @@ description: Getting Started with Fumadocs
 icon: Rocket
 ---
 
+import { CpuIcon, PanelsTopLeftIcon, DatabaseIcon, TerminalIcon } from 'lucide-react';
+
 ## Introduction
 
 Fumadocs <span className='text-fd-muted-foreground text-sm'>(Foo-ma docs)</span> is a **documentation framework**, designed to be fast, flexible,
@@ -19,19 +21,19 @@ Handles most of the logic, including document search, content source adapters, a
 
 </Card>
 
-<Card icon={<PanelsTopLeft className="text-blue-300" />} title='Fumadocs UI'  href='/docs/ui'>
+<Card icon={<PanelsTopLeftIcon className="text-blue-300" />} title='Fumadocs UI'  href='/docs/ui'>
 
 The default theme of Fumadocs offers a beautiful look for documentation sites and interactive components.
 
 </Card>
 
-<Card icon={<Database />} title='Content Source'>
+<Card icon={<DatabaseIcon />} title='Content Source'>
 
 The source of your content, can be a CMS or local data layers like [Fumadocs MDX](/docs/mdx) (the official content source).
 
 </Card>
 
-<Card icon={<Terminal />} title='Fumadocs CLI' href='/docs/cli'>
+<Card icon={<TerminalIcon />} title='Fumadocs CLI' href='/docs/cli'>
 
 A command line tool to install UI components and automate things, useful for customizing layouts.
 
@@ -186,31 +188,6 @@ export default defineConfig({
     You can [enable Static Exports](/docs/deploying/static) on Next.js to get a static build output.
 
   </Accordion>
-  <Accordion id='webpack' title='Reading from "fumadocs-mdx:collections/server" is not handled by plugins'>
-
-Webpack resolves import namespace **before** your import aliases in `tsconfig.json`. When using Fumadocs MDX, you have to rename your import alias to `collections/*` instead.
-
-```json title="tsconfig.json"
-{
-  "compilerOptions": {
-    "paths": {
-      // [!code ++]
-      "collections/*": [".source/*"]
-    }
-  }
-}
-```
-
-Make sure to update the references as well.
-
-```ts title="lib/source.ts"
-// [!code --]
-import { docs } from 'fumadocs-mdx:collections/server';
-// [!code ++]
-import { docs } from 'collections/server';
-```
-
-</Accordion>
   <Accordion id='custom-layout-docs-page' title='How to create a page in /docs without docs layout?'>
 
     Same as managing layouts in Next.js App Router, remove the original MDX file from content directory (`/content/docs`).

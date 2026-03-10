@@ -11,7 +11,7 @@ It offers the same output as `server` entry, while compiled properties have to b
 
 ```ts tab="Docs (Meta + Doc)"
 // [!code highlight]
-import { docs } from 'fumadocs-mdx:collections/dynamic';
+import { docs } from 'collections/dynamic';
 import { loader } from 'fumadocs-core/source';
 
 export const source = loader({
@@ -22,7 +22,7 @@ export const source = loader({
 
 ```ts tab="Doc"
 // [!code highlight]
-import { blogPosts } from 'fumadocs-mdx:collections/dynamic';
+import { blogPosts } from 'collections/dynamic';
 import { toFumadocsSource } from 'fumadocs-mdx/runtime/server';
 import { loader } from 'fumadocs-core/source';
 

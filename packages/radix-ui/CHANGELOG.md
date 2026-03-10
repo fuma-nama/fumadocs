@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 16.6.14
+
+### Patch Changes
+
+- a02048c: UI: override MDX types by default
+- 02201df: Simplify i18n setup
+- Updated dependencies [8382363]
+  - fumadocs-core@16.6.14
+
 ## 16.6.13
 
 ### Patch Changes

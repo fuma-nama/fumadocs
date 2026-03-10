@@ -6,7 +6,7 @@ import {
   multiple,
 } from 'fumadocs-core/source';
 import { openapiPlugin, openapiSource } from 'fumadocs-openapi/server';
-import { blog as blogPosts, docs } from 'fumadocs-mdx:collections/server';
+import { blog as blogPosts, docs } from 'collections/server';
 import { toFumadocsSource } from 'fumadocs-mdx/runtime/server';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 import { openapi } from '@/lib/openapi';

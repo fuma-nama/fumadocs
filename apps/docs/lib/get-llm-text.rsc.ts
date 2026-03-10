@@ -1,7 +1,7 @@
 import { type Page } from '@/lib/source';
 import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import { visit } from 'unist-util-visit';
-import { getMDXComponents } from '@/mdx-components';
+import { getMDXComponents } from '@/components/mdx';
 import * as JsxRuntime from 'react/jsx-runtime';
 
 import { toJs } from 'estree-util-to-js';

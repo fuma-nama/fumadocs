@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/base-ui",
-  "version": "16.6.13",
+  "version": "16.6.14",
   "description": "The Base UI version of Fumadocs UI",
   "keywords": [
     "Docs",
@@ -128,6 +128,7 @@
     "@fumadocs/cli": "workspace:*",
     "@tailwindcss/cli": "^4.2.1",
     "@types/hast": "^3.0.4",
+    "@types/mdx": "^2.0.13",
     "@types/node": "^25.3.5",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
@@ -140,12 +141,12 @@
   },
   "peerDependencies": {
     "@takumi-rs/image-response": "*",
+    "@types/mdx": "*",
     "@types/react": "*",
     "fumadocs-core": "workspace:*",
     "next": "16.x.x",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "tailwindcss": "^4.0.0"
+    "react-dom": "^19.2.0"
   },
   "peerDependenciesMeta": {
     "next": {
@@ -154,10 +155,10 @@
     "@takumi-rs/image-response": {
       "optional": true
     },
-    "@types/react": {
+    "@types/mdx": {
       "optional": true
     },
-    "tailwindcss": {
+    "@types/react": {
       "optional": true
     }
   }

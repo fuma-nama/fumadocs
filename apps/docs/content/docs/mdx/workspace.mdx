@@ -56,7 +56,7 @@ By running dev or build server, you should see collection entries from all works
 You can access the generated files of a workspace at `.source/{workspace}/*`. For example:
 
 ```ts title="lib/source.ts"
-import { docs } from 'fumadocs-mdx:collections/my-workspace/server';
+import { docs } from 'collections/my-workspace/server';
 ```
 
 > The output location of root workspace is not changed.
@@ -65,8 +65,8 @@ To integrate multiple sources in Fumadocs, use [`multiple`](/docs/headless/sourc
 
 ```ts title="lib/source.ts"
 import { loader, multiple } from 'fumadocs-core/source';
-import { docs } from 'fumadocs-mdx:collections/server';
-import * as MyWorkspace from 'fumadocs-mdx:collections/my-workspace/server';
+import { docs } from 'collections/server';
+import * as MyWorkspace from 'collections/my-workspace/server';
 
 export const source = loader(
   multiple({
@@ -94,5 +94,5 @@ This is crucial for use cases like storing content across multiple repos, a simp
   - when a commit is made to the content in $T_n$, it triggers a GitHub action (or CI), which creates a new deployment on $A$.
 - when a deployment is triggered on $A$:
   - Fumadocs MDX handles each $T_n$ as a workspace.
-  - each workspace generates its own collection entries, e.g. `fumadocs-mdx:collections/{repo}/server`.
+  - each workspace generates its own collection entries, e.g. `collections/{repo}/server`.
   - Fumadocs `loader()` integrate multiple sources into one.

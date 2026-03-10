@@ -108,20 +108,20 @@ Generate docs with the script:
 bun ./scripts/generate-docs.ts
 ```
 
-Add the `APIPage` component to your MDX Components.
+Add the `APIPage` component to your MDX components.
 
-```tsx title="mdx-components.tsx"
+```tsx title="components/mdx.tsx"
 import defaultComponents from 'fumadocs-ui/mdx';
 import { APIPage } from '@/components/api-page';
 import type { MDXComponents } from 'mdx/types';
 
-// make sure you can use it in MDX files
-export function getMDXComponents(components?: MDXComponents): MDXComponents {
+export function getMDXComponents(components?: MDXComponents) {
   return {
     ...defaultComponents,
+    // should be available in MDX files [!code ++]
     APIPage,
     ...components,
-  };
+  } satisfies MDXComponents;
 }
 ```
 
@@ -133,7 +133,7 @@ You can also use it without generating real files by integrating into [Loader AP
 ```ts title="lib/source.ts"
 import { loader, multiple } from 'fumadocs-core/source';
 import { openapiPlugin, openapiSource } from 'fumadocs-openapi/server';
-import { docs } from 'fumadocs-mdx:collections/server';
+import { docs } from 'collections/server';
 import { openapi } from '@/lib/openapi';
 
 export const source = loader(

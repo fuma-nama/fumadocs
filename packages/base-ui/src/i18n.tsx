@@ -1,8 +1,14 @@
 import type { I18nProviderProps, Translations } from '@/contexts/i18n';
 import type { I18nConfig } from 'fumadocs-core/i18n';
 
-export type { I18nProviderProps, Translations };
-export { defaultTranslations } from './contexts/i18n';
+export { defaultTranslations, type I18nProviderProps, type Translations } from '@/contexts/i18n';
+
+export interface I18nUIConfig<Languages extends string> extends I18nConfig<Languages> {
+  /**
+   * get i18n config for Fumadocs UI `<RootProvider i18n={config} />`.
+   */
+  provider: (locale?: string) => I18nProviderProps;
+}
 
 export function defineI18nUI<Languages extends string>(
   config: I18nConfig<Languages>,
@@ -11,11 +17,12 @@ export function defineI18nUI<Languages extends string>(
       [K in Languages]?: Partial<Translations> & { displayName?: string };
     };
   },
-) {
+): I18nUIConfig<Languages> {
   const { translations } = options;
 
   return {
-    provider(locale: string = config.defaultLanguage): I18nProviderProps {
+    ...config,
+    provider(locale = config.defaultLanguage) {
       return {
         locale,
         translations: translations[locale as Languages],

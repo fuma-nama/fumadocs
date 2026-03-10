@@ -2,12 +2,12 @@ import { createFileRoute, notFound } from '@tanstack/react-router';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { createServerFn } from '@tanstack/react-start';
 import { source } from '@/lib/source';
-import browserCollections from 'fumadocs-mdx:collections/browser';
+import browserCollections from 'collections/browser';
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { baseOptions } from '@/lib/layout.shared';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { Suspense } from 'react';
+import { useMDXComponents } from '@/components/mdx';
 
 export const Route = createFileRoute('/docs/$')({
   component: Page,
@@ -44,11 +44,7 @@ const clientLoader = browserCollections.docs.createClientLoader({
         <DocsTitle>{frontmatter.title}</DocsTitle>
         <DocsDescription>{frontmatter.description}</DocsDescription>
         <DocsBody>
-          <MDX
-            components={{
-              ...defaultMdxComponents,
-            }}
-          />
+          <MDX components={useMDXComponents()} />
         </DocsBody>
       </DocsPage>
     );
