@@ -133,7 +133,7 @@ You can also use it without generating real files by integrating into [Loader AP
 ```ts title="lib/source.ts"
 import { loader, multiple } from 'fumadocs-core/source';
 import { openapiPlugin, openapiSource } from 'fumadocs-openapi/server';
-import { docs } from 'fumadocs-mdx:collections/server';
+import { docs } from 'collections/server';
 import { openapi } from '@/lib/openapi';
 
 export const source = loader(

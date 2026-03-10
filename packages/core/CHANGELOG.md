@@ -220,7 +220,7 @@
 
   ```ts
   import { loader } from "fumadocs-core/source";
-  import { docs } from "fumadocs-mdx:collections/server";
+  import { docs } from "collections/
   import { lucideIconsPlugin } from "fumadocs-core/source/lucide-icons";
 
   export const source = loader(docs.toFumadocsSource(), {

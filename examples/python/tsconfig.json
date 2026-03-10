@@ -16,7 +16,7 @@
     "jsx": "preserve",
     "incremental": true,
     "paths": {
-      "fumadocs-mdx:collections/*": [".source/*"],
+      "collections/*": [".source/*"],
       "@/*": ["./*"]
     },
     "plugins": [

@@ -2,7 +2,7 @@ import { createFileRoute, notFound } from '@tanstack/react-router';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { createServerFn } from '@tanstack/react-start';
 import { source } from '@/lib/source';
-import browserCollections from 'fumadocs-mdx:collections/browser';
+import browserCollections from 'collections/browser';
 import {
   DocsBody,
   DocsDescription,

@@ -63,7 +63,7 @@ For TypeScript config file, it requires Native Node.js TypeScript Resolver, you 
 You can create a `lib/source.ts` file and obtain Fumadocs source from the `docs` collection output.
 
 ```ts title="lib/source.ts"
-import { docs } from 'fumadocs-mdx:collections/server';
+import { docs } from 'collections/server';
 import { loader } from 'fumadocs-core/source';
 
 export const source = loader({

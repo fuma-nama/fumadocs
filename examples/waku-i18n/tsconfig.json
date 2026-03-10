@@ -17,7 +17,7 @@
     "noEmit": true,
     "paths": {
       "@/*": ["./src/*"],
-      "fumadocs-mdx:collections/*": [".source/*"]
+      "collections/*": [".source/*"]
     }
   },
   "exclude": ["node_modules", "dist"]

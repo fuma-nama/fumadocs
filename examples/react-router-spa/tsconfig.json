@@ -11,7 +11,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./app/*"],
-      "fumadocs-mdx:collections/*": [".source/*"]
+      "collections/*": [".source/*"]
     },
     "esModuleInterop": true,
     "verbatimModuleSyntax": true,

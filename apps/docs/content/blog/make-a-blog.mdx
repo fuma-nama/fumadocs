@@ -38,7 +38,7 @@ Parse the output collection in `source.ts`:
 ```ts title="lib/source.ts"
 import { loader } from 'fumadocs-core/source';
 import { toFumadocsSource } from 'fumadocs-mdx/runtime/server';
-import { blogPosts } from 'fumadocs-mdx:collections/server';
+import { blogPosts } from 'collections/server';
 
 export const blog = loader({
   baseUrl: '/blog',

@@ -576,7 +576,7 @@ function ForEngineers() {
           }}
           code={`
 import { loader } from 'fumadocs-core/source';
-import { docs } from 'fumadocs-mdx:collections/server';
+import { docs } from 'collections/server';
 
 export const source = loader({
   source: docs.toFumadocsSource(),

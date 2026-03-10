@@ -32,7 +32,7 @@ To migrate, add/update the path aliases in `tsconfig.json` for new entry files.
   "compilerOptions": {
     "paths": {
       // [!code ++]
-      "fumadocs-mdx:collections/*": [".source/*"]
+      "collections/*": [".source/*"]
     }
   }
 }
@@ -44,7 +44,7 @@ Import your collections from the entry files instead of `@/.source`:
 // [!code --]
 import { docs } from '@/.source';
 // [!code ++]
-import { docs } from 'fumadocs-mdx:collections/server';
+import { docs } from 'collections/server';
 
 // access collections on server-side, e.g.
 import { loader } from 'fumadocs-core/source';
@@ -79,7 +79,7 @@ const clientLoader = createClientLoader(docs.doc, {
 });
 
 // [!code ++:20]
-import browserCollections from 'fumadocs-mdx:collections/browser';
+import browserCollections from 'collections/browser';
 
 const clientLoader = browserCollections.docs.createClientLoader({
   component({ frontmatter, default: MDX }) {
@@ -115,7 +115,7 @@ The adapter for `loader()` API is also changed.
 For `docs` collection, `create.sourceAsync()` (Vite) is now consistent with Next.js:
 
 ```ts
-import { docs } from 'fumadocs-mdx:collections/server';
+import { docs } from 'collections/server';
 import { loader } from 'fumadocs-core/source';
 
 export const source = loader({
@@ -132,7 +132,7 @@ For `doc` collections, `createMDXSource()` (Next.js) is renamed to `toFumadocsSo
 If you use `create.sourceAsync()` (Vite) for `doc` collections, you should also switch to `toFumadocsSource()`.
 
 ```ts
-import { blogPosts } from 'fumadocs-mdx:collections/server';
+import { blogPosts } from 'collections/server';
 import { toFumadocsSource } from 'fumadocs-mdx/runtime/server';
 import { loader } from 'fumadocs-core/source';
 

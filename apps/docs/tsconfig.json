@@ -4,7 +4,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"],
-      "fumadocs-mdx:collections/*": [".source/*"]
+      "collections/*": [".source/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "content/**/*.mdx", "**/*.tsx", ".next/types/**/*.ts"],
