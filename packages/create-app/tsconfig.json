@@ -6,7 +6,8 @@
     "moduleResolution": "bundler",
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "noEmit": true
   },
   "include": ["scripts", "src", "test"],
   "exclude": ["node_modules", "template", "dist", "eslint.config.mjs"]

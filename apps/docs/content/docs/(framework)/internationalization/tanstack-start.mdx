@@ -18,6 +18,69 @@ export const i18n = defineI18n({
 
 > See [available options](/docs/headless/internationalization/config) for i18n config.
 
+### Translations
+
+Define your translations in a file (e.g. `lib/layout.shared.tsx`), the English translations are used when `translations` is not specified.
+
+You can also add `locale` parameter to `baseOptions()` for localized layout options:
+
+```tsx title="lib/layout.shared.tsx"
+import { i18n } from '@/lib/i18n';
+import { defineI18nUI } from 'fumadocs-ui/i18n';
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+// [!code ++:11]
+export const i18nUI = defineI18nUI(i18n, {
+  translations: {
+    en: {
+      displayName: 'English',
+    },
+    cn: {
+      displayName: 'Chinese',
+      search: '搜尋文檔',
+    },
+  },
+});
+
+// [!code highlight]
+export function baseOptions(locale: string): BaseLayoutProps {
+  return {
+    i18n, // required for i18n [!code ++]
+    // different props based on `locale`
+  };
+}
+```
+
+Pass translations to `<RootProvider />`:
+
+```tsx title="src/routes/__root.tsx"
+import { HeadContent, Scripts, useParams } from '@tanstack/react-router';
+import * as React from 'react';
+import { RootProvider } from 'fumadocs-ui/provider/tanstack';
+import { i18nUI } from '@/lib/layout.shared';
+
+function RootDocument({ children }: { children: React.ReactNode }) {
+  const { lang } = useParams({ strict: false });
+
+  return (
+    <html suppressHydrationWarning>
+      <head>
+        <HeadContent />
+      </head>
+      <body className="flex flex-col min-h-screen">
+        <RootProvider
+          // [!code ++]
+          i18n={i18nUI.provider(lang)}
+        >
+          {children}
+        </RootProvider>
+        <Scripts />
+      </body>
+    </html>
+  );
+}
+```
+
 ### Routing
 
 Create a `$lang` directory under `routes`, and move all pages into it.
@@ -34,68 +97,7 @@ Create a `$lang` directory under `routes`, and move all pages into it.
   </Folder>
 </Files>
 
-Provide UI translations and other config to `<RootProvider />`, the English translations are used as fallbacks.
-
-```tsx title="src/routes/__root.tsx"
-import { HeadContent, Scripts, useParams } from '@tanstack/react-router';
-import * as React from 'react';
-import { RootProvider } from 'fumadocs-ui/provider/base';
-import { TanstackProvider } from 'fumadocs-core/framework/tanstack';
-import { defineI18nUI } from 'fumadocs-ui/i18n';
-import { i18n } from '@/lib/i18n';
-
-// [!code ++:11]
-const { provider } = defineI18nUI(i18n, {
-  translations: {
-    cn: {
-      displayName: 'Chinese',
-      search: 'Translated Content',
-    },
-    en: {
-      displayName: 'English',
-    },
-  },
-});
-
-function RootDocument({ children }: { children: React.ReactNode }) {
-  const { lang } = useParams({ strict: false });
-
-  return (
-    <html suppressHydrationWarning>
-      <head>
-        <HeadContent />
-      </head>
-      <body className="flex flex-col min-h-screen">
-        <TanstackProvider>
-          <RootProvider
-            // [!code ++]
-            i18n={provider(lang)}
-          >
-            {children}
-          </RootProvider>
-        </TanstackProvider>
-        <Scripts />
-      </body>
-    </html>
-  );
-}
-```
-
 ### Pass Locale
-
-Add `locale` parameter to `baseOptions()` and include `i18n` in props:
-
-```tsx title="src/lib/layout.shared.tsx"
-import { i18n } from '@/lib/i18n';
-import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
-
-export function baseOptions(locale: string): BaseLayoutProps {
-  return {
-    i18n, // [!code ++]
-    // different props based on `locale`
-  };
-}
-```
 
 Pass the locale to Fumadocs in your pages and layouts.
 
