@@ -14,7 +14,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/h
 import Link from 'fumadocs-core/link';
 import { findSiblings } from 'fumadocs-core/page-tree';
 import { Card, Cards } from 'fumadocs-ui/components/card';
-import { getMDXComponents } from '@/mdx-components';
+import { getMDXComponents } from '@/components/mdx';
 import { MarkdownCopyButton, ViewOptionsPopover } from '@/components/ai/page-actions';
 import { Banner } from 'fumadocs-ui/components/banner';
 import { Installation } from '@/components/preview/installation';
@@ -82,7 +82,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
         <Mdx
           components={getMDXComponents({
             ...Twoslash,
-            a: ({ href, ...props }) => {
+            a({ href, ...props }) {
               const found = source.getPageByHref(href ?? '', {
                 dir: PathUtils.dirname(page.path),
               });

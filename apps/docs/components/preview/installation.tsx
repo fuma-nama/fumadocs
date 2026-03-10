@@ -1,5 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from 'fumadocs-ui/components/ui/tabs';
-import { CodeBlock } from '@/components/code-block';
+import { ServerCodeBlock } from 'fumadocs-ui/components/codeblock.rsc';
 
 export function Installation({ name }: { name: string }) {
   const tabs = [{ name: 'Fumadocs CLI', value: 'fumadocs-cli' }];
@@ -23,7 +23,7 @@ export function Installation({ name }: { name: string }) {
       </TabsList>
 
       <TabsContent value="fumadocs-cli">
-        <CodeBlock code={`npx @fumadocs/cli@latest add ${name}`} lang="bash" />
+        <ServerCodeBlock code={`npx @fumadocs/cli@latest add ${name}`} lang="bash" />
       </TabsContent>
     </Tabs>
   );

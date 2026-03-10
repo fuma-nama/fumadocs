@@ -6,13 +6,14 @@ import { blog } from '@/lib/source';
 import { createMetadata } from '@/lib/metadata';
 import { buttonVariants } from '@/components/ui/button';
 import { ShareButton } from '@/app/(home)/blog/[slug]/page.client';
-import { getMDXComponents } from '@/mdx-components';
+import { getMDXComponents } from '@/components/mdx';
 import path from 'node:path';
 import { cn } from '@/lib/cn';
 
 export default async function Page(props: PageProps<'/blog/[slug]'>) {
   const params = await props.params;
   const page = blog.getPage([params.slug]);
+  const components = getMDXComponents();
 
   if (!page) notFound();
   const { body: Mdx, toc } = await page.data.load();
@@ -54,7 +55,7 @@ export default async function Page(props: PageProps<'/blog/[slug]'>) {
         </div>
 
         <InlineTOC items={toc} />
-        <Mdx components={getMDXComponents()} />
+        <Mdx components={components} />
       </div>
     </article>
   );

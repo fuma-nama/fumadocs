@@ -145,6 +145,7 @@
     "@fumadocs/cli": "workspace:*",
     "@tailwindcss/cli": "^4.2.1",
     "@types/hast": "^3.0.4",
+    "@types/mdx": "^2.0.13",
     "@types/node": "^25.3.5",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
@@ -157,6 +158,7 @@
   },
   "peerDependencies": {
     "@takumi-rs/image-response": "*",
+    "@types/mdx": "*",
     "@types/react": "*",
     "fumadocs-core": "workspace:*",
     "next": "16.x.x",
@@ -171,6 +173,9 @@
       "optional": true
     },
     "@types/react": {
+      "optional": true
+    },
+    "@types/mdx": {
       "optional": true
     }
   }
