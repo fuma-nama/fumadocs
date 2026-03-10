@@ -59,17 +59,17 @@ export async function Mermaid({ chart }: { chart: string }) {
 
 Add the component as a MDX component:
 
-```tsx title="mdx-components.tsx"
+```tsx title="components/mdx.tsx"
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { Mermaid } from '@/components/mdx/mermaid'; // [!code ++]
 import type { MDXComponents } from 'mdx/types';
 
-export function getMDXComponents(components?: MDXComponents): MDXComponents {
+export function getMDXComponents(components?: MDXComponents) {
   return {
     ...defaultMdxComponents,
     Mermaid, // [!code ++]
     ...components,
-  };
+  } satisfies MDXComponents;
 }
 ```
 

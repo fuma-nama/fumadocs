@@ -24,20 +24,14 @@ export const Route = createRootRoute({
 
 function RootComponent() {
   return (
-    <RootDocument>
-      <Outlet />
-    </RootDocument>
-  );
-}
-
-function RootDocument({ children }: { children: React.ReactNode }) {
-  return (
     <html suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
       <body className="flex flex-col min-h-screen">
-        <RootProvider>{children}</RootProvider>
+        <RootProvider>
+          <Outlet />
+        </RootProvider>
         <Scripts />
       </body>
     </html>

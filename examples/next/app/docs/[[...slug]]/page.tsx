@@ -8,7 +8,7 @@ import {
   ViewOptionsPopover,
 } from 'fumadocs-ui/layouts/docs/page';
 import { notFound } from 'next/navigation';
-import { getMDXComponents } from '@/mdx-components';
+import { getMDXComponents } from '@/components/mdx';
 import type { Metadata } from 'next';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
 import { gitConfig } from '@/lib/layout.shared';

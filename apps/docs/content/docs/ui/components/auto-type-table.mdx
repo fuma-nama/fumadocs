@@ -50,24 +50,26 @@ npm i fumadocs-typescript
 
 Initialize the TypeScript compiler and add it as a MDX component.
 
-```tsx title="mdx-components.tsx"
+```tsx title="components/mdx.tsx"
 import defaultComponents from 'fumadocs-ui/mdx';
 import type { MDXComponents } from 'mdx/types';
 import { createGenerator, createFileSystemGeneratorCache } from 'fumadocs-typescript';
-import { AutoTypeTable } from 'fumadocs-typescript/ui';
+import { AutoTypeTable, type AutoTypeTableProps } from 'fumadocs-typescript/ui';
 
 const generator = createGenerator({
   // set a cache, necessary for serverless platform like Vercel
   cache: createFileSystemGeneratorCache('.next/fumadocs-typescript'),
 });
 
-export function getMDXComponents(components?: MDXComponents): MDXComponents {
+export function getMDXComponents(components?: MDXComponents) {
   return {
     ...defaultComponents,
-    // [!code ++:3]
-    AutoTypeTable: (props) => <AutoTypeTable {...props} generator={generator} />,
+    // [!code ++]
+    AutoTypeTable: (props: Partial<AutoTypeTableProps>) => (
+      <AutoTypeTable {...props} generator={generator} />
+    ),
     ...components,
-  };
+  } satisfies MDXComponents;
 }
 ```
 

@@ -11,10 +11,10 @@ import {
   MarkdownCopyButton,
   ViewOptionsPopover,
 } from 'fumadocs-ui/layouts/docs/page';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { baseOptions, gitConfig } from '@/lib/layout.shared';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { Suspense } from 'react';
+import { useMDXComponents } from '@/components/mdx';
 
 export const Route = createFileRoute('/docs/$')({
   component: Page,
@@ -65,11 +65,7 @@ const clientLoader = browserCollections.docs.createClientLoader({
           />
         </div>
         <DocsBody>
-          <MDX
-            components={{
-              ...defaultMdxComponents,
-            }}
-          />
+          <MDX components={useMDXComponents()} />
         </DocsBody>
       </DocsPage>
     );

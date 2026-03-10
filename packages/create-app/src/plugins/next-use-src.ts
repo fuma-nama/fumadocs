@@ -15,7 +15,6 @@ export function nextUseSrc(): TemplatePlugin {
         appDir: 'src',
         rename: (file) => {
           if (
-            path.basename(file) === 'mdx-components.tsx' ||
             isRelative(path.join(this.dest, 'app'), file) ||
             isRelative(path.join(this.dest, 'lib'), file) ||
             isRelative(path.join(this.dest, 'components'), file)

@@ -76,12 +76,12 @@ export default defineConfig({
 
 Then, define the `FeedbackBlock` MDX component:
 
-```tsx title="mdx-components.tsx"
+```tsx title="components/mdx.tsx"
 import { FeedbackBlock } from '@/components/feedback/client';
 import defaultComponents from 'fumadocs-ui/mdx';
 import type { MDXComponents } from 'mdx/types';
 
-export function getMDXComponents(components?: MDXComponents): MDXComponents {
+export function getMDXComponents(components?: MDXComponents) {
   return {
     ...defaultComponents,
     FeedbackBlock: ({ children, ...rest }) => (
@@ -90,7 +90,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
       </FeedbackBlock>
     ),
     ...components,
-  };
+  } satisfies MDXComponents;
 }
 ```
 

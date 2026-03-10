@@ -10,18 +10,18 @@ preview: zoomImage
 
 Replace `img` with `ImageZoom` in your MDX components.
 
-```tsx title="mdx-components.tsx"
+```tsx title="components/mdx.tsx"
 import { ImageZoom } from 'fumadocs-ui/components/image-zoom';
 import defaultComponents from 'fumadocs-ui/mdx';
 import type { MDXComponents } from 'mdx/types';
 
-export function getMDXComponents(components?: MDXComponents): MDXComponents {
+export function getMDXComponents(components?: MDXComponents) {
   return {
     ...defaultComponents,
     // [!code ++]
     img: (props) => <ImageZoom {...(props as any)} />,
     ...components,
-  };
+  } satisfies MDXComponents;
 }
 ```
 

@@ -53,18 +53,18 @@ Add styles, Tailwind CSS v4 is required.
 
 Add MDX components.
 
-```tsx title="mdx-components.tsx"
+```tsx title="components/mdx.tsx"
 import * as Twoslash from 'fumadocs-twoslash/ui'; // [!code ++]
 import defaultComponents from 'fumadocs-ui/mdx';
 import type { MDXComponents } from 'mdx/types';
 
-export function getMDXComponents(components?: MDXComponents): MDXComponents {
+export function getMDXComponents(components?: MDXComponents) {
   return {
     ...defaultComponents,
     // [!code ++]
     ...Twoslash,
     ...components,
-  };
+  } satisfies MDXComponents;
 }
 ```
 
