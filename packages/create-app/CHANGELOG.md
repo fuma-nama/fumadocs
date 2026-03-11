@@ -1,5 +1,16 @@
 # create-next-docs-app
 
+## 16.0.71
+
+### Patch Changes
+
+- e7ab329: Add AI chat option for Next.js
+- Updated dependencies [42e17a4]
+- Updated dependencies [b2191f5]
+  - @fumadocs/cli@1.2.6
+
+## 16.0.70
+
 ## 16.0.69
 
 ### Patch Changes

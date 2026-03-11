@@ -3,6 +3,7 @@ import type { SortedResult } from '..';
 export interface QueryOptions {
   locale?: string | null;
   tag?: string | string[];
+  limit?: number;
 }
 
 export interface SearchServer<Q extends QueryOptions = QueryOptions> {

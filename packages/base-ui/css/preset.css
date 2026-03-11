@@ -1,4 +1,7 @@
 @import './lib/base.css';
+@import './lib/shiki.css';
+
+@plugin '../dist/tailwind/typography.js';
 
 /* TODO: remove them on next major */
 @import './generated/flux.css';

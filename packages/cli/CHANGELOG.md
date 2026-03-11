@@ -1,5 +1,12 @@
 # fumadocs
 
+## 1.2.6
+
+### Patch Changes
+
+- 42e17a4: Support `cwd` in installer
+- b2191f5: Expose installer
+
 ## 1.2.5
 
 ### Patch Changes

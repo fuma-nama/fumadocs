@@ -1,5 +1,19 @@
 # @fumadocs/base-ui
 
+## 16.6.16
+
+### Patch Changes
+
+- Updated dependencies [054da73]
+  - fumadocs-core@16.6.16
+
+## 16.6.15
+
+### Patch Changes
+
+- 86d3abb: fix broken tsdown CSS logic
+  - fumadocs-core@16.6.15
+
 ## 16.6.14
 
 ### Patch Changes

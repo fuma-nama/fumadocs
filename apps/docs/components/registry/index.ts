@@ -90,37 +90,66 @@ export const registry: Registry = {
       ],
     },
     {
-      name: 'ai/search',
-      title: 'AI Search (Next.js Only)',
-      description: 'Ask AI dialog for your docs, you need to configure Inkeep first',
+      name: 'ai/openrouter',
+      title: 'AI Chat (Next.js + OpenRouter)',
+      description: 'Ask AI dialog for your docs, requires OPENROUTER_API_KEY',
       files: [
         {
           type: 'components',
-          path: 'components/ai/search.tsx',
-        },
-        {
-          type: 'components',
-          path: 'components/ai/markdown.tsx',
+          path: 'components/openrouter/search.tsx',
+          target: '<dir>/ai/search.tsx',
         },
         {
           type: 'route',
-          path: 'app/api/chat/route.ts',
+          path: 'lib/openrouter/server.ts',
+          target: 'app/api/chat/route.ts',
+        },
+      ],
+      dependencies: {
+        flexsearch: '^0.8.212',
+      },
+    },
+    {
+      name: 'markdown',
+      unlisted: true,
+      files: [
+        {
+          type: 'components',
+          path: 'components/markdown.tsx',
+        },
+      ],
+    },
+    {
+      name: 'ai/inkeep',
+      title: 'AI Chat (Next.js + Inkeep AI)',
+      description: 'Ask AI dialog for your docs, requires Inkeep AI',
+      files: [
+        {
+          type: 'components',
+          path: 'components/inkeep/search.tsx',
+          target: '<dir>/ai/search.tsx',
+        },
+        {
+          type: 'route',
+          path: 'lib/inkeep/server.ts',
           target: 'app/api/chat/route.ts',
         },
         {
           type: 'lib',
-          path: 'lib/chat/inkeep-qa-schema.ts',
+          path: 'lib/inkeep/inkeep-qa-schema.ts',
+          target: '<dir>/ai/inkeep-qa-schema.ts',
         },
       ],
     },
     {
       name: 'ai/page-actions',
-      title: 'AI Page Actions',
-      description: 'Common page actions for AI',
+      title: 'Page Actions',
+      description: 'Common page actions',
       files: [
         {
           type: 'components',
-          path: 'components/ai/page-actions.tsx',
+          path: 'components/layouts/page-actions.tsx',
+          target: '<dir>/ai/page-actions.tsx',
         },
       ],
     },
@@ -131,14 +160,17 @@ export const registry: Registry = {
         {
           type: 'lib',
           path: 'lib/og/mono.tsx',
+          target: '<dir>/og/mono.tsx',
         },
         {
           type: 'lib',
           path: 'lib/og/JetBrainsMono-Bold.ttf',
+          target: '<dir>/og/JetBrainsMono-Bold.ttf',
         },
         {
           type: 'lib',
           path: 'lib/og/JetBrainsMono-Regular.ttf',
+          target: '<dir>/og/JetBrainsMono-Regular.ttf',
         },
       ],
     },

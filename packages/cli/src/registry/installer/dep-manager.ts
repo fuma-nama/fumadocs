@@ -1,7 +1,12 @@
-import { exists } from '@/utils/fs';
 import fs from 'node:fs/promises';
 import { getPackageManager, PackageManager } from '@/utils/get-package-manager';
 import { x } from 'tinyexec';
+import path from 'node:path';
+
+interface PackageJsonType {
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+}
 
 export class DependencyManager {
   private installedDeps = new Map<string, string>();
@@ -9,26 +14,25 @@ export class DependencyManager {
   devDependencies: string[] = [];
   packageManager: PackageManager = 'npm';
 
+  constructor(private readonly cwd: string) {}
+
   async init(deps: Record<string, string | null>, devDeps: Record<string, string | null>) {
     this.installedDeps.clear();
-    if (await exists('package.json')) {
-      const content = await fs.readFile('package.json');
-      const parsed = JSON.parse(content.toString()) as object;
+    const packageJsonPath = path.join(this.cwd, 'package.json');
+    const content = await fs
+      .readFile(packageJsonPath)
+      .then((res) => res.toString())
+      .catch(() => null);
 
-      if ('dependencies' in parsed && typeof parsed.dependencies === 'object') {
-        const records = parsed.dependencies as Record<string, string>;
+    if (content !== null) {
+      const parsed = JSON.parse(content) as PackageJsonType;
 
-        for (const [k, v] of Object.entries(records)) {
-          this.installedDeps.set(k, v);
-        }
+      for (const [k, v] of Object.entries(parsed?.dependencies ?? {})) {
+        this.installedDeps.set(k, v);
       }
 
-      if ('devDependencies' in parsed && typeof parsed.devDependencies === 'object') {
-        const records = parsed.devDependencies as Record<string, string>;
-
-        for (const [k, v] of Object.entries(records)) {
-          this.installedDeps.set(k, v);
-        }
+      for (const [k, v] of Object.entries(parsed?.devDependencies ?? {})) {
+        this.installedDeps.set(k, v);
       }
     }
 
@@ -47,10 +51,42 @@ export class DependencyManager {
     return this.dependencies.length > 0 || this.devDependencies.length > 0;
   }
 
+  async writeRequired() {
+    const packageJsonPath = path.join(this.cwd, 'package.json');
+    const content = await fs.readFile(packageJsonPath).catch(() => null);
+    if (content === null) return false;
+
+    const parsed = JSON.parse(content.toString()) as PackageJsonType;
+    if (!parsed) return false;
+
+    for (const dep of this.dependencies) {
+      const { name, version } = parseDep(dep);
+      parsed.dependencies ??= {};
+      parsed.dependencies[name] ??= version;
+    }
+
+    for (const dep of this.devDependencies) {
+      const { name, version } = parseDep(dep);
+      parsed.devDependencies ??= {};
+      parsed.devDependencies[name] ??= version;
+    }
+
+    await fs.writeFile(packageJsonPath, JSON.stringify(parsed, null, 2));
+  }
+
   async installRequired() {
     if (this.dependencies.length > 0)
       await x(this.packageManager, ['install', ...this.dependencies]);
     if (this.devDependencies.length > 0)
       await x(this.packageManager, ['install', ...this.devDependencies, '-D']);
+  }
+}
+
+function parseDep(dep: string) {
+  const idx = dep.indexOf('@', 1);
+  if (idx === -1) {
+    return { name: dep, version: 'latest' };
+  } else {
+    return { name: dep.slice(0, idx), version: dep.slice(idx + 1) };
   }
 }

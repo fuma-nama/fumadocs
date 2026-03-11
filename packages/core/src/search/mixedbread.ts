@@ -122,13 +122,12 @@ export function createMixedbreadSearchAPI(options: MixedbreadSearchOptions): Sea
   } = options;
 
   return createEndpoint({
-    async search(query, searchOptions) {
+    async search(query, searchOptions = {}) {
       if (!query.trim()) {
         return [];
       }
 
-      const tag = searchOptions?.tag;
-
+      const { tag, limit } = searchOptions;
       let filters: StoreSearchParams['filters'] | undefined;
       if (Array.isArray(tag) && tag.length > 0) {
         filters = {
@@ -147,7 +146,7 @@ export function createMixedbreadSearchAPI(options: MixedbreadSearchOptions): Sea
       const res = await client.stores.search({
         query,
         store_identifiers: [storeIdentifier],
-        top_k: topK,
+        top_k: limit ?? topK,
         filters,
         search_options: {
           return_metadata: true,

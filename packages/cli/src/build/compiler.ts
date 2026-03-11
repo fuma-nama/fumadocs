@@ -12,8 +12,12 @@ import { parse } from 'oxc-parser';
 import { ResolverFactory } from 'oxc-resolver';
 import MagicString from 'magic-string';
 import { transformSpecifiers } from '@/utils/ast';
+import { isRelative } from '@/utils/fs';
 
-export type OnResolve = (reference: SourceReference) => Reference;
+export type OnResolve = (
+  reference: SourceReference,
+  from: { component: Component; file: ComponentFile },
+) => Reference;
 
 export interface CompiledRegistry {
   name: string;
@@ -32,6 +36,8 @@ export interface Component {
   title?: string;
   description?: string;
   files: ComponentFile[];
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
 
   /**
    * Don't list the component in registry index file
@@ -281,14 +287,27 @@ export class ComponentCompiler {
   }
 
   async build(): Promise<CompiledComponent> {
+    const files = (
+      await Promise.all(this.component.files.map((file) => this.onBuildFile(file)))
+    ).flat();
+    const dependencies = Object.fromEntries(this.dependencies);
+    const devDependencies = Object.fromEntries(this.devDependencies);
+
+    if (this.component.dependencies) {
+      Object.assign(dependencies, this.component.dependencies);
+    }
+    if (this.component.devDependencies) {
+      Object.assign(devDependencies, this.component.devDependencies);
+    }
+
     return {
       name: this.component.name,
       title: this.component.title,
       description: this.component.description,
-      files: (await Promise.all(this.component.files.map((file) => this.onBuildFile(file)))).flat(),
+      files,
       subComponents: Array.from(this.subComponents.values()),
-      dependencies: Object.fromEntries(this.dependencies),
-      devDependencies: Object.fromEntries(this.devDependencies),
+      dependencies,
+      devDependencies,
     };
   }
 
@@ -389,9 +408,8 @@ export class ComponentCompiler {
     }
 
     const s = new MagicString(content);
-    /**
-     * Process import paths
-     */
+    const ctx = { component: this.component, file };
+    // Process import paths
     transformSpecifiers(ast.program, s, (specifier) => {
       let resolved: Reference = {
         type: 'unknown-specifier',
@@ -400,7 +418,7 @@ export class ComponentCompiler {
       const onResolve = this.component.onResolve ?? this.registry.onResolve;
       const resolvedSpecifier = resolver.oxc.resolveFileSync(sourceFilePath, specifier);
       if (resolvedSpecifier.error || !resolvedSpecifier.path) {
-        return writeReference(onResolve ? onResolve(resolved) : resolved);
+        return writeReference(onResolve ? onResolve(resolved, ctx) : resolved);
       }
 
       resolved = {
@@ -409,7 +427,7 @@ export class ComponentCompiler {
       };
 
       // outside of registry dir
-      if (path.relative(this.registry.dir, resolvedSpecifier.path).startsWith('../')) {
+      if (!isRelative(this.registry.dir, resolvedSpecifier.path)) {
         resolved = {
           type: 'dependency',
           dep: resolver.getDepFromSpecifier(specifier),
@@ -429,7 +447,7 @@ export class ComponentCompiler {
         }
       }
 
-      return writeReference(onResolve ? onResolve(resolved) : resolved);
+      return writeReference(onResolve ? onResolve(resolved, ctx) : resolved);
     });
 
     return {

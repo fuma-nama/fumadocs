@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/cli",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "The CLI tool for Fumadocs",
   "keywords": [
     "Docs",
@@ -17,12 +17,13 @@
     "dist/*"
   ],
   "type": "module",
-  "main": "./dist/index.js",
   "exports": {
-    "./build": {
-      "types": "./dist/build/index.d.ts",
-      "import": "./dist/build/index.js"
-    }
+    "./build": "./dist/build/index.js",
+    "./config": "./dist/config.js",
+    "./registry/client": "./dist/registry/client.js",
+    "./registry/installer": "./dist/registry/installer/index.js",
+    "./registry/schema": "./dist/registry/schema.js",
+    "./package.json": "./package.json"
   },
   "publishConfig": {
     "access": "public"
@@ -38,7 +39,7 @@
     "@clack/prompts": "^1.1.0",
     "commander": "^14.0.3",
     "magic-string": "^0.30.21",
-    "oxc-parser": "^0.116.0",
+    "oxc-parser": "^0.117.0",
     "oxc-resolver": "^11.19.1",
     "package-manager-detector": "^1.6.0",
     "picocolors": "^1.1.1",
@@ -46,11 +47,11 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@oxc-project/types": "^0.116.0",
-    "@types/node": "25.3.5",
+    "@oxc-project/types": "^0.117.0",
+    "@types/node": "25.4.0",
     "eslint-config-custom": "workspace:*",
-    "shadcn": "4.0.0",
+    "shadcn": "4.0.5",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.0"
+    "tsdown": "0.21.1"
   }
 }

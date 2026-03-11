@@ -58,16 +58,14 @@ something`,
     [
       {
         "breadcrumbs": undefined,
-        "content": "Index
-    ",
+        "content": "Index",
         "id": "1",
         "type": "page",
         "url": "/",
       },
       {
         "breadcrumbs": undefined,
-        "content": "<mark>Hello</mark> World
-    ",
+        "content": "<mark>Hello</mark> World",
         "id": "1-0",
         "type": "heading",
         "url": "/#hello-world",

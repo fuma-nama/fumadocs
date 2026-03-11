@@ -16,10 +16,10 @@ import { cn } from '@/lib/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import Link from 'fumadocs-core/link';
 import { type UIMessage, useChat, type UseChatHelpers } from '@ai-sdk/react';
-import type { ProvideLinksToolSchema } from '@/lib/chat/inkeep-qa-schema';
+import type { ProvideLinksToolSchema } from '@/lib/inkeep/inkeep-qa-schema';
 import type { z } from 'zod';
 import { DefaultChatTransport } from 'ai';
-import { Markdown } from './markdown';
+import { Markdown } from '../markdown';
 import { Presence } from '@radix-ui/react-presence';
 
 const Context = createContext<{

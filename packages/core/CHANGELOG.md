@@ -1,5 +1,13 @@
 # next-docs-zeta
 
+## 16.6.16
+
+### Patch Changes
+
+- 054da73: Implement `limit` option on search servers
+
+## 16.6.15
+
 ## 16.6.14
 
 ### Patch Changes

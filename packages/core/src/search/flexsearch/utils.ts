@@ -4,10 +4,15 @@ import type { SharedDocument } from '../server/build-doc';
 
 export type Doc = SharedDocument & DocumentData;
 
-export async function search(index: Document<Doc>, query: string, tag?: string | string[]) {
+export async function search(
+  index: Document<Doc>,
+  query: string,
+  tag?: string | string[],
+  limit = 60,
+) {
   const arr = await index.searchAsync(query, {
     index: 'content',
-    limit: 60,
+    limit,
     tag: tag
       ? ({
           tags: tag,
