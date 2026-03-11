@@ -10,7 +10,7 @@ import {
 import type { QueryOptions, SearchAPI, SearchServer } from '@/search/server';
 import type { I18nConfig } from '@/i18n';
 import { STEMMERS } from '@/search/orama/_stemmers';
-import { createEndpoint } from '../server/endpoint';
+import { createEndpoint, defaultReadOptions } from '../server/endpoint';
 import {
   AdvancedDocument,
   advancedSchema,
@@ -85,10 +85,14 @@ export function initSimpleSearch(options: SimpleOptions): SearchServer<OramaQuer
         ...save(await doc),
       };
     },
-    async search(query) {
+    async search(query, searchOptions = {}) {
       const db = await doc;
+      const { limit } = searchOptions;
 
-      return searchSimple(db, query, options.search);
+      return searchSimple(db, query, {
+        limit,
+        ...options.search,
+      });
     },
   };
 }
@@ -105,12 +109,13 @@ export function initAdvancedSearch(options: AdvancedOptions): SearchServer<Orama
         ...save(await get),
       };
     },
-    async search(query, searchOptions) {
+    async search(query, searchOptions = {}) {
       const db = await get;
-      const mode = searchOptions?.mode;
+      const { limit, tag, mode } = searchOptions;
 
-      return searchAdvanced(db, query, searchOptions?.tag, {
+      return searchAdvanced(db, query, tag, {
         ...options.search,
+        limit,
         mode: mode === 'vector' ? 'vector' : 'fulltext',
       }).catch((err) => {
         if (mode === 'vector') {
@@ -314,8 +319,7 @@ function toAPI(server: SearchServer<OramaQueryOptions>): SearchAPI<OramaQueryOpt
   return createEndpoint(server, {
     readOptions(url) {
       return {
-        tag: url.searchParams.get('tag')?.split(','),
-        locale: url.searchParams.get('locale'),
+        ...defaultReadOptions(url),
         mode: url.searchParams.get('mode') === 'vector' ? 'vector' : 'full',
       };
     },

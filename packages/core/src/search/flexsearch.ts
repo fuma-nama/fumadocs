@@ -64,7 +64,7 @@ function server(options: Options): SearchServer {
       return { type: 'default', raw };
     },
     async search(query, searchOptions) {
-      return search(await indexPromise, query, searchOptions?.tag);
+      return search(await indexPromise, query, searchOptions?.tag, searchOptions?.limit);
     },
   };
 }

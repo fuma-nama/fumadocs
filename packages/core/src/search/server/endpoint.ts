@@ -9,14 +9,7 @@ export function createEndpoint<Q extends QueryOptions>(
   options: EndpointOptions<NoInfer<Q>> = {},
 ): SearchAPI<Q> {
   const { search } = server;
-  const {
-    readOptions = (url) => {
-      return {
-        tag: url.searchParams.get('tag')?.split(','),
-        locale: url.searchParams.get('locale'),
-      } as Q;
-    },
-  } = options;
+  const { readOptions = defaultReadOptions } = options;
 
   return {
     ...server,
@@ -31,4 +24,15 @@ export function createEndpoint<Q extends QueryOptions>(
       return Response.json(await search(query, readOptions(url, request)));
     },
   };
+}
+
+export function defaultReadOptions<Q extends QueryOptions>(url: URL): Q {
+  const params = url.searchParams;
+  const limit = params.has('limit') ? Number(params.get('limit')) : undefined;
+
+  return {
+    tag: params.get('tag')?.split(','),
+    locale: params.get('locale'),
+    limit: Number.isInteger(limit) ? limit : undefined,
+  } as Q;
 }
