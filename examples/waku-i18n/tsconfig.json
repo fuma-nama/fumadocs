@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "baseUrl": ".",
+
     "lib": ["dom", "dom.iterable", "ES2022"],
     "jsx": "react-jsx",
     "module": "ESNext",
