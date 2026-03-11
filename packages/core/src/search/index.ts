@@ -91,7 +91,7 @@ export function createContentHighlighter(query: string | RegExp) {
       if (!regex) return content;
       const tree = processor.parse(content);
       highlightInTree(tree, regex);
-      return processor.stringify(tree);
+      return processor.stringify(tree).trim();
     },
   };
 }

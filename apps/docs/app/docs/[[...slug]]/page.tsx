@@ -15,7 +15,7 @@ import Link from 'fumadocs-core/link';
 import { findSiblings } from 'fumadocs-core/page-tree';
 import { Card, Cards } from 'fumadocs-ui/components/card';
 import { getMDXComponents } from '@/components/mdx';
-import { MarkdownCopyButton, ViewOptionsPopover } from '@/components/ai/page-actions';
+import { MarkdownCopyButton, ViewOptionsPopover } from '@/components/layouts/page-actions';
 import { Banner } from 'fumadocs-ui/components/banner';
 import { Installation } from '@/components/preview/installation';
 import { Customisation } from '@/components/preview/customisation';

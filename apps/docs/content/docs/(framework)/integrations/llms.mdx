@@ -368,11 +368,14 @@ npx @fumadocs/cli add ai/page-actions
 Use it in your docs page like:
 
 ```tsx title="app/docs/[[...slug]]/page.tsx"
+// URL to fetch Markdown content, only need to append .mdx to URL if you have `*.mdx` configured.
+const markdownUrl = `${page.url}.mdx`
+
 <div className="flex flex-row gap-2 items-center border-b pt-2 pb-6">
-  <LLMCopyButton markdownUrl={`${page.url}.mdx`} />
+  <LLMCopyButton markdownUrl={markdownUrl} />
   <ViewOptions
-    markdownUrl={`${page.url}.mdx`}
-    githubUrl={`https://github.com/${owner}/${repo}/blob/dev/apps/docs/content/docs/${page.path}`}
+    markdownUrl={markdownUrl}
+    githubUrl={`https://github.com/${owner}/${repo}/blob/main/content/docs/${page.path}`}
   />
 </div>
 ```
@@ -381,56 +384,70 @@ Use it in your docs page like:
 
 ![AI Search](/docs/ai-search.png)
 
-You can install the AI search dialog using Fumadocs CLI:
+You can install the AI chat dialog using Fumadocs CLI.
+
+<Tabs items={['OpenRouter', 'Inkeep AI']}>
+<Tab>
 
 ```npm
-npx @fumadocs/cli add ai/search
+npx @fumadocs/cli add ai/openrouter
 ```
 
-By default, it's configured for [Inkeep AI](https://inkeep.com) using Vercel AI SDK.
+It's automatically configured for [OpenRouter](https://openrouter.ai) using Vercel AI SDK, with a `/search` tool for AI.
 
-To setup for Inkeep AI:
+</Tab>
+<Tab>
 
-1. Add your Inkeep API key to environment variables:
+```npm
+npx @fumadocs/cli add ai/inkeep
+```
 
-   ```dotenv
-   INKEEP_API_KEY="..."
-   ```
+It's automatically configured for [Inkeep AI](https://inkeep.com) using Vercel AI SDK.
 
-2. Add the component & trigger to root layout (or anywhere you prefer):
+Add your Inkeep API key to environment variables:
 
-   ```tsx
-   import { AISearch, AISearchPanel, AISearchTrigger } from '@/components/ai/search';
-   import { MessageCircleIcon } from 'lucide-react';
-   import { buttonVariants } from '@/components/button';
+```dotenv
+INKEEP_API_KEY="..."
+```
 
-   export default function RootLayout({ children }: { children: React.ReactNode }) {
-     return (
-       <html lang="en">
-         <body>
-           {/* [!code ++:17] */}
-           <AISearch>
-             <AISearchPanel />
-             <AISearchTrigger
-               position="float"
-               className={cn(
-                 buttonVariants({
-                   variant: 'secondary',
-                   className: 'text-fd-muted-foreground rounded-2xl',
-                 }),
-               )}
-             >
-               <MessageCircleIcon className="size-4.5" />
-               Ask AI
-             </AISearchTrigger>
-           </AISearch>
+</Tab>
+</Tabs>
 
-           {children}
-         </body>
-       </html>
-     );
-   }
-   ```
+Add the component & trigger to root layout (or anywhere you prefer):
+
+```tsx
+import { AISearch, AISearchPanel, AISearchTrigger } from '@/components/ai/search';
+import { MessageCircleIcon } from 'lucide-react';
+// or import your own button styles
+import { buttonVariants } from 'fumadocs-ui/components/ui/button';
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        {/* [!code ++:17] */}
+        <AISearch>
+          <AISearchPanel />
+          <AISearchTrigger
+            position="float"
+            className={cn(
+              buttonVariants({
+                variant: 'secondary',
+                className: 'text-fd-muted-foreground rounded-2xl',
+              }),
+            )}
+          >
+            <MessageCircleIcon className="size-4.5" />
+            Ask AI
+          </AISearchTrigger>
+        </AISearch>
+
+        {children}
+      </body>
+    </html>
+  );
+}
+```
 
 To use your own AI models, update the configurations in `useChat` and `/api/chat` route.
 

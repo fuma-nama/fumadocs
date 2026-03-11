@@ -1,7 +1,7 @@
 import { DataSourceId, orama } from '@/lib/orama/client';
 import { createMcpHandler } from 'mcp-handler';
 import { z } from 'zod';
-import { ProvideLinksToolSchema } from '@/lib/chat/inkeep-qa-schema';
+import { ProvideLinksToolSchema } from '@/lib/inkeep/inkeep-qa-schema';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import { generateText } from 'ai';
 

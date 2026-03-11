@@ -14,7 +14,7 @@ import {
   AISearchPanelList,
   useAISearchContext,
   useHotKey,
-} from '@/components/ai/search';
+} from '@/components/inkeep/search';
 import { MessageCircleIcon } from 'lucide-react';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from '@/lib/cn';
