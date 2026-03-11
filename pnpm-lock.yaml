@@ -1085,7 +1085,7 @@ importers:
         version: 19.2.3(@types/react@19.2.14)
       '@vitejs/plugin-rsc':
         specifier: ^0.5.21
-        version: 0.5.21(react-dom@19.2.4(react@19.2.4))(react-server-dom-webpack@19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(vite@7.3.1(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
+        version: 0.5.21(react-dom@19.2.4(react@19.2.4))(react-server-dom-webpack@19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(webpack@5.105.4))(react@19.2.4)(vite@7.3.1(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
       react-router-devtools:
         specifier: ^6.2.0
         version: 6.2.0(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(csstype@3.2.3)(react-dom@19.2.4(react@19.2.4))(react-router@7.13.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(solid-js@1.9.11)(vite@7.3.1(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
@@ -1185,7 +1185,7 @@ importers:
         version: 1.166.7(@tanstack/react-router@1.166.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@tanstack/router-core@1.166.7)(csstype@3.2.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@tanstack/react-start':
         specifier: 1.166.7
-        version: 1.166.7(crossws@0.4.4)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(vite@7.3.1(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(webpack@5.105.4)
+        version: 1.166.7(crossws@0.4.4(srvx@0.11.9))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(vite@7.3.1(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(webpack@5.105.4)
       fumadocs-core:
         specifier: workspace:*
         version: link:../../packages/core
@@ -1322,7 +1322,7 @@ importers:
         version: 1.166.7(@tanstack/react-router@1.166.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@tanstack/router-core@1.166.7)(csstype@3.2.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@tanstack/react-start':
         specifier: 1.166.7
-        version: 1.166.7(crossws@0.4.4)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(vite@7.3.1(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(webpack@5.105.4)
+        version: 1.166.7(crossws@0.4.4(srvx@0.11.9))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(vite@7.3.1(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(webpack@5.105.4)
       fumadocs-core:
         specifier: workspace:*
         version: link:../../packages/core
@@ -1392,7 +1392,7 @@ importers:
         version: 1.166.7(@tanstack/react-router@1.166.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@tanstack/router-core@1.166.7)(csstype@3.2.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@tanstack/react-start':
         specifier: 1.166.7
-        version: 1.166.7(crossws@0.4.4)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(vite@7.3.1(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(webpack@5.105.4)
+        version: 1.166.7(crossws@0.4.4(srvx@0.11.9))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(vite@7.3.1(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(webpack@5.105.4)
       '@tanstack/start-static-server-functions':
         specifier: 1.166.7
         version: 1.166.7(@tanstack/react-start@1.166.7(crossws@0.4.4(srvx@0.11.9))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(vite@7.3.1(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(webpack@5.105.4))
@@ -1654,7 +1654,7 @@ importers:
         version: link:../tailwind
       '@takumi-rs/image-response':
         specifier: '*'
-        version: 0.70.4
+        version: 0.71.7
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -1980,6 +1980,9 @@ importers:
       '@commander-js/extra-typings':
         specifier: ^14.0.0
         version: 14.0.0(commander@14.0.3)
+      '@fumadocs/cli':
+        specifier: workspace:*
+        version: link:../cli
       commander:
         specifier: ^14.0.3
         version: 14.0.3
@@ -2734,7 +2737,7 @@ importers:
         version: 1.1.13(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@takumi-rs/image-response':
         specifier: '*'
-        version: 0.70.4
+        version: 0.71.7
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -3994,14 +3997,8 @@ packages:
   '@fastify/deepmerge@3.2.1':
     resolution: {integrity: sha512-N5Oqvltoa2r9z1tbx4xjky0oRR60v+T47Ic4J1ukoVQcptLOrIdRnCSdTGmOmajZuHVKlTnfcmrjyqsGEW1ztA==}
 
-  '@floating-ui/core@1.7.4':
-    resolution: {integrity: sha512-C3HlIdsBxszvm5McXlB8PeOEWfBhcGBTZGkGlWc2U0KFY5IwG5OQEuQ8rq52DZmcHDlPLd+YFBK+cZcytwIFWg==}
-
   '@floating-ui/core@1.7.5':
     resolution: {integrity: sha512-1Ih4WTWyw0+lKyFMcBHGbb5U5FtuHJuujoyyr5zTaWS5EYMeT6Jb2AuDeftsCsEuchO+mM2ij5+q9crhydzLhQ==}
-
-  '@floating-ui/dom@1.7.5':
-    resolution: {integrity: sha512-N0bD2kIPInNHUHehXhMke1rBGs1dwqvC9O9KYMyyjK7iXt7GAhnro7UlcuYcGdS/yYOlq0MAVgrow8IbWJwyqg==}
 
   '@floating-ui/dom@1.7.6':
     resolution: {integrity: sha512-9gZSAI5XM36880PPMm//9dfiEngYoC6Am2izES1FF406YFsjvyBMmeJ2g4SAju3xWwtuynNRFL2s9hgxpLI5SQ==}
@@ -6489,22 +6486,10 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7
 
-  '@takumi-rs/core-darwin-arm64@0.70.4':
-    resolution: {integrity: sha512-rl/iZMZTL4oCV4/AYUWapfGd+/UNENMt5BOtXrIwxwsVswS5LgZVDxqD0/ngApCxhvcK0oHCDBQWUqRAzO17TA==}
-    engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
-    cpu: [arm64]
-    os: [darwin]
-
   '@takumi-rs/core-darwin-arm64@0.71.7':
     resolution: {integrity: sha512-mcW/ikpqj4QToZfvC6JY1nxnCpnvioOUm9QsXiGnjmr7z/zei1Xf4GKl67P/3dEXU6bi7gqsmEf+XOc66E6taQ==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [arm64]
-    os: [darwin]
-
-  '@takumi-rs/core-darwin-x64@0.70.4':
-    resolution: {integrity: sha512-d7PUmO9X0LWDtCqvHBA7xWEDcb97oW17FnCxQzP45fXNJ3kiDeHR7MKEgLA/iFWVuCiqwtoo/4IkJplS47VlZA==}
-    engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
-    cpu: [x64]
     os: [darwin]
 
   '@takumi-rs/core-darwin-x64@0.71.7':
@@ -6513,20 +6498,8 @@ packages:
     cpu: [x64]
     os: [darwin]
 
-  '@takumi-rs/core-linux-arm64-gnu@0.70.4':
-    resolution: {integrity: sha512-a80EcGlsLggK9H/XsD+TGIIcSA/mGn/EP/k7XcVjV+R80cjr60NrDSTwtqKfsC9bg5AQG2wcGjoh5j18TYRrxQ==}
-    engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
-    cpu: [arm64]
-    os: [linux]
-
   '@takumi-rs/core-linux-arm64-gnu@0.71.7':
     resolution: {integrity: sha512-H3JBWt0DlfCMinAMvQyaG3cUF1hI6/f+tSzgXSezg/J8f+vYJaOBOBAE8YXLtBb/+VZe5RzyvMgNsT1+6LNrMw==}
-    engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
-    cpu: [arm64]
-    os: [linux]
-
-  '@takumi-rs/core-linux-arm64-musl@0.70.4':
-    resolution: {integrity: sha512-8EXmcU9H3I9eydxhK8ZxtmyZa6lWaKuxz223kxBqUTQ7Zg9H7yBcGG5JKxQGt/QS0olANjSfXv1f28dYJF9pAw==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [arm64]
     os: [linux]
@@ -6537,20 +6510,8 @@ packages:
     cpu: [arm64]
     os: [linux]
 
-  '@takumi-rs/core-linux-x64-gnu@0.70.4':
-    resolution: {integrity: sha512-A32LzsEyXwdaLUCfxLK73F5OUYHbbAbDel1ACzkdsmE7clOQFKuP6pW3lXI9OuTUl5r7cpBAhcK2ObzqrTdoIA==}
-    engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
-    cpu: [x64]
-    os: [linux]
-
   '@takumi-rs/core-linux-x64-gnu@0.71.7':
     resolution: {integrity: sha512-CNSR1x2OPjlnpqY6nksTsp0bTp+41IbXE85TwippLST5NrRokL9xKJ6EM+AFaSfLH/0gy+XMgtOQoD1C+TFDUA==}
-    engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
-    cpu: [x64]
-    os: [linux]
-
-  '@takumi-rs/core-linux-x64-musl@0.70.4':
-    resolution: {integrity: sha512-OLrZXkz9/H37vuHihmQlrJBgsNd0vXbGMFc+Vec+mZoIB3oF9WShI9nyAULUldF+vM6Z+OrXm23dGB/DOoDykg==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [x64]
     os: [linux]
@@ -6561,22 +6522,10 @@ packages:
     cpu: [x64]
     os: [linux]
 
-  '@takumi-rs/core-win32-arm64-msvc@0.70.4':
-    resolution: {integrity: sha512-Bgc0VGbg+V0B7RNo08A9sikFfbD7bwPiLKoWlGeSr4Vr/95u/UyF+l/mozN75PRWAGPdNE2v2h6IzV1FEMXK7w==}
-    engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
-    cpu: [arm64]
-    os: [win32]
-
   '@takumi-rs/core-win32-arm64-msvc@0.71.7':
     resolution: {integrity: sha512-2AhdKHby2Hor+d3yrhiZNpght7YXItWN1WXNiK/m/uqKKlmrq7oqgUmdn0/5ks5cZ/JaLjfsLFlgIB2uPReFYA==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
     cpu: [arm64]
-    os: [win32]
-
-  '@takumi-rs/core-win32-x64-msvc@0.70.4':
-    resolution: {integrity: sha512-Iah4b4XLbiehplyITYJ5oaikefVp16rpvpWiwgmItT82oUZfnomQKj1x1ojjAKgRCZ/5M2DV4+4cf/KFFosrew==}
-    engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
-    cpu: [x64]
     os: [win32]
 
   '@takumi-rs/core-win32-x64-msvc@0.71.7':
@@ -6585,28 +6534,15 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@takumi-rs/core@0.70.4':
-    resolution: {integrity: sha512-wedpLgaeuJWZfahBOGdo8RV0MtKc8WFaD2YbozlnRcw0ehooI2xupuFlhWpKyKkFjb/REIqnEJRiiTkMqGG3/Q==}
-    engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
-
   '@takumi-rs/core@0.71.7':
     resolution: {integrity: sha512-5wWs4GNMOcHsJQ6dhpAe0Fk/2mUy40AL2cETSqrt/H21xsGGSsCacGpPpPoIqK4DwdoJyFxoxLwhDGId8WrzOA==}
     engines: {node: '>= 12.22.0 < 13 || >= 14.17.0 < 15 || >= 15.12.0 < 16 || >= 16.0.0'}
 
-  '@takumi-rs/helpers@0.70.4':
-    resolution: {integrity: sha512-kzxCcsNHMziZKHBw4Zu8ceiBwYcUzVt4s0vxpDVMNknSgBd09yZnJG3U1OiSSjoI94f5AcF6i/qgr7wq4dgaaQ==}
-
   '@takumi-rs/helpers@0.71.7':
     resolution: {integrity: sha512-OipwcnYZjfZz6OJ/sUdvUDkVfe/n5TksdB4sBuSmN+qoCpu42usdd3VPOHHdARZyHgbahxaNmnPSqfE5HGI47w==}
 
-  '@takumi-rs/image-response@0.70.4':
-    resolution: {integrity: sha512-h0nyKvU4470STunToY+uA2OFbVIFZiHDwPj9qZWUKf5BspXnZuXaaCnhMitORSKhqI9LxWjS3DpuE30yaYBuJw==}
-
   '@takumi-rs/image-response@0.71.7':
     resolution: {integrity: sha512-CRdhVEJqKse9+eovVc8CGHisCAXxPNRuZZJ2tUHzrDBFGaNp99+tX6hAim7wUWbo+NEXN7KOkaESqp/MCrhUbw==}
-
-  '@takumi-rs/wasm@0.70.4':
-    resolution: {integrity: sha512-gl5JQv1MCgKkndxqZf7H/SBvuezZCg4n74CXBVcjP2eXC+ZGtStM4J6KMQYdP8mCF3Y9cD2Fdfezyx9KfJsOOg==}
 
   '@takumi-rs/wasm@0.71.7':
     resolution: {integrity: sha512-yoau96mSOvG4kSSdypWfpvAacjK4r5tHlg90kOkAcXDp/UFe3npEwNsGe5DzHdKqTpHWsr2tzmEdhjnZW4v2VQ==}
@@ -8830,9 +8766,6 @@ packages:
     resolution: {integrity: sha512-f7ccFPK3SXFHpx15UIGyRJ/FJQctuKZ0zVuN3frBo4HnK3cay9VEW0R6yPYFHC0AgqhukPzKjq22t5DmAyqGyw==}
     engines: {node: '>=16'}
 
-  flatted@3.3.4:
-    resolution: {integrity: sha512-3+mMldrTAPdta5kjX2G2J7iX4zxtnwpdA8Tr2ZSjkyPSanvbZAcy6flmtnXbEybHrDcU9641lxrMfFuUxVz9vA==}
-
   flatted@3.4.1:
     resolution: {integrity: sha512-IxfVbRFVlV8V/yRaGzk0UVIcsKKHMSfYw66T/u4nTwlWteQePsxe//LjudR1AMX4tZW3WFCh3Zqa/sjlqpbURQ==}
 
@@ -8879,20 +8812,6 @@ packages:
   forwarded@0.2.0:
     resolution: {integrity: sha512-buRG0fpBtRHSTCOASe6hD258tEubFoRLb4ZNA6NxMVHNw2gOcwHo9wyablzMzOA5z9xA9L1KNjk/Nt6MT9aYow==}
     engines: {node: '>= 0.6'}
-
-  framer-motion@12.35.0:
-    resolution: {integrity: sha512-w8hghCMQ4oq10j6aZh3U2yeEQv5K69O/seDI/41PK4HtgkLrcBovUNc0ayBC3UyyU7V1mrY2yLzvYdWJX9pGZQ==}
-    peerDependencies:
-      '@emotion/is-prop-valid': '*'
-      react: ^18.0.0 || ^19.0.0
-      react-dom: ^18.0.0 || ^19.0.0
-    peerDependenciesMeta:
-      '@emotion/is-prop-valid':
-        optional: true
-      react:
-        optional: true
-      react-dom:
-        optional: true
 
   framer-motion@12.35.2:
     resolution: {integrity: sha512-dhfuEMaNo0hc+AEqyHiIfiJRNb9U9UQutE9FoKm5pjf7CMitp9xPEF1iWZihR1q86LBmo6EJ7S8cN8QXEy49AA==}
@@ -9064,16 +8983,6 @@ packages:
   h3@1.15.6:
     resolution: {integrity: sha512-oi15ESLW5LRthZ+qPCi5GNasY/gvynSKUQxgiovrY63bPAtG59wtM+LSrlcwvOHAXzGrXVLnI97brbkdPF9WoQ==}
 
-  h3@2.0.1-rc.14:
-    resolution: {integrity: sha512-163qbGmTr/9rqQRNuqMqtgXnOUAkE4KTdauiC9y0E5iG1I65kte9NyfWvZw5RTDMt6eY+DtyoNzrQ9wA2BfvGQ==}
-    engines: {node: '>=20.11.1'}
-    hasBin: true
-    peerDependencies:
-      crossws: ^0.4.1
-    peerDependenciesMeta:
-      crossws:
-        optional: true
-
   h3@2.0.1-rc.16:
     resolution: {integrity: sha512-h+pjvyujdo9way8qj6FUbhaQcHlR8FEq65EhTX9ViT5pK8aLj68uFl4hBkF+hsTJAH+H1END2Yv6hTIsabGfag==}
     engines: {node: '>=20.11.1'}
@@ -9195,10 +9104,6 @@ packages:
 
   highlightjs-curl@1.3.0:
     resolution: {integrity: sha512-50UEfZq1KR0Lfk2Tr6xb/MUIZH3h10oNC0OTy9g7WELcs5Fgy/mKN1vEhuKTkKbdo8vr5F9GXstu2eLhApfQ3A==}
-
-  hono@4.12.5:
-    resolution: {integrity: sha512-3qq+FUBtlTHhtYxbxheZgY8NIFnkkC/MR8u5TTsr7YZ3wixryQ3cCwn3iZbg8p8B88iDBBAYSfZDS75t8MN7Vg==}
-    engines: {node: '>=16.9.0'}
 
   hono@4.12.7:
     resolution: {integrity: sha512-jq9l1DM0zVIvsm3lv9Nw9nlJnMNPOcAtsbsgiUhWcFzPE99Gvo6yRTlszSLLYacMeQ6quHD6hMfId8crVHvexw==}
@@ -10291,9 +10196,6 @@ packages:
     resolution: {integrity: sha512-223dMRJtI/l25dJKWpgij2cMtywuG/WiUKXdvwfbhGKBhy1puASqXwFzmWZ7+K73vUPoR7SS2Qz2cI/g9MKw0A==}
     engines: {node: '>= 0.8.0'}
 
-  motion-dom@12.35.0:
-    resolution: {integrity: sha512-FFMLEnIejK/zDABn+vqGVAUN4T0+3fw+cVAY8MMT65yR+j5uMuvWdd4npACWhh94OVWQs79CrBBuwOwGRZAQiA==}
-
   motion-dom@12.35.2:
     resolution: {integrity: sha512-pWXFMTwvGDbx1Fe9YL5HZebv2NhvGBzRtiNUv58aoK7+XrsuaydQ0JGRKK2r+bTKlwgSWwWxHbP5249Qr/BNpg==}
 
@@ -11293,9 +11195,6 @@ packages:
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
     hasBin: true
 
-  rou3@0.7.12:
-    resolution: {integrity: sha512-iFE4hLDuloSWcD7mjdCDhx2bKcIsYbtOTpfH5MHHLSKMOUyjqQXTeZVa289uuwEGEKFoE/BAPbhaU4B774nceg==}
-
   rou3@0.8.1:
     resolution: {integrity: sha512-ePa+XGk00/3HuCqrEnK3LxJW7I0SdNg6EFzKUJG73hMAdDcOUC/i/aSz7LSDwLrGr33kal/rqOGydzwl6U7zBA==}
 
@@ -11342,10 +11241,6 @@ packages:
 
   safer-buffer@2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
-
-  sax@1.4.4:
-    resolution: {integrity: sha512-1n3r/tGXO6b6VXMdFT54SHzT9ytu9yr7TaELowdYpMqY/Ao7EnlQGmAQ1+RatX7Tkkdm6hONI2owqNx2aZj5Sw==}
-    engines: {node: '>=11.0.0'}
 
   sax@1.5.0:
     resolution: {integrity: sha512-21IYA3Q5cQf089Z6tgaUTr7lDAyzoTPx5HRtbhsME8Udispad8dC/+sziTNugOEx54ilvatQ9YCzl4KQLPcRHA==}
@@ -11531,11 +11426,6 @@ packages:
 
   srvx@0.10.1:
     resolution: {integrity: sha512-A//xtfak4eESMWWydSRFUVvCTQbSwivnGCEf8YGPe2eHU0+Z6znfUTCPF0a7oV3sObSOcrXHlL6Bs9vVctfXdg==}
-    engines: {node: '>=20.16.0'}
-    hasBin: true
-
-  srvx@0.11.8:
-    resolution: {integrity: sha512-2n9t0YnAXPJjinytvxccNgs7rOA5gmE7Wowt/8Dy2dx2fDC6sBhfBpbrCvjYKALlVukPS/Uq3QwkolKNa7P/2Q==}
     engines: {node: '>=20.16.0'}
     hasBin: true
 
@@ -13150,7 +13040,7 @@ snapshots:
       '@babel/runtime': 7.28.6
       '@base-ui/utils': 0.2.5(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@floating-ui/react-dom': 2.1.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      '@floating-ui/utils': 0.2.10
+      '@floating-ui/utils': 0.2.11
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
       tabbable: 6.4.0
@@ -13161,7 +13051,7 @@ snapshots:
   '@base-ui/utils@0.2.5(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
       '@babel/runtime': 7.28.6
-      '@floating-ui/utils': 0.2.10
+      '@floating-ui/utils': 0.2.11
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
       reselect: 5.1.1
@@ -13764,18 +13654,9 @@ snapshots:
 
   '@fastify/deepmerge@3.2.1': {}
 
-  '@floating-ui/core@1.7.4':
-    dependencies:
-      '@floating-ui/utils': 0.2.10
-
   '@floating-ui/core@1.7.5':
     dependencies:
       '@floating-ui/utils': 0.2.11
-
-  '@floating-ui/dom@1.7.5':
-    dependencies:
-      '@floating-ui/core': 1.7.4
-      '@floating-ui/utils': 0.2.10
 
   '@floating-ui/dom@1.7.6':
     dependencies:
@@ -13784,7 +13665,7 @@ snapshots:
 
   '@floating-ui/react-dom@2.1.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
-      '@floating-ui/dom': 1.7.5
+      '@floating-ui/dom': 1.7.6
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
 
@@ -13795,7 +13676,7 @@ snapshots:
   '@floating-ui/vue@1.1.9(vue@3.5.30(typescript@5.9.3))':
     dependencies:
       '@floating-ui/dom': 1.7.6
-      '@floating-ui/utils': 0.2.10
+      '@floating-ui/utils': 0.2.11
       vue-demi: 0.14.10(vue@3.5.30(typescript@5.9.3))
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -13824,10 +13705,6 @@ snapshots:
     dependencies:
       '@tanstack/vue-virtual': 3.13.21(vue@3.5.30(typescript@5.9.3))
       vue: 3.5.30(typescript@5.9.3)
-
-  '@hono/node-server@1.19.11(hono@4.12.5)':
-    dependencies:
-      hono: 4.12.5
 
   '@hono/node-server@1.19.11(hono@4.12.7)':
     dependencies:
@@ -15399,7 +15276,7 @@ snapshots:
       vite-node: 3.2.4(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
     optionalDependencies:
       '@react-router/serve': 7.13.1(react-router@7.13.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(typescript@5.9.3)
-      '@vitejs/plugin-rsc': 0.5.21(react-dom@19.2.4(react@19.2.4))(react-server-dom-webpack@19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(vite@7.3.1(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
+      '@vitejs/plugin-rsc': 0.5.21(react-dom@19.2.4(react@19.2.4))(react-server-dom-webpack@19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(webpack@5.105.4))(react@19.2.4)(vite@7.3.1(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
       react-server-dom-webpack: 19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(webpack@5.105.4)
       typescript: 5.9.3
     transitivePeerDependencies:
@@ -16119,64 +15996,29 @@ snapshots:
       tailwindcss: 4.2.1
       vite: 7.3.1(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
 
-  '@takumi-rs/core-darwin-arm64@0.70.4':
-    optional: true
-
   '@takumi-rs/core-darwin-arm64@0.71.7':
-    optional: true
-
-  '@takumi-rs/core-darwin-x64@0.70.4':
     optional: true
 
   '@takumi-rs/core-darwin-x64@0.71.7':
     optional: true
 
-  '@takumi-rs/core-linux-arm64-gnu@0.70.4':
-    optional: true
-
   '@takumi-rs/core-linux-arm64-gnu@0.71.7':
-    optional: true
-
-  '@takumi-rs/core-linux-arm64-musl@0.70.4':
     optional: true
 
   '@takumi-rs/core-linux-arm64-musl@0.71.7':
     optional: true
 
-  '@takumi-rs/core-linux-x64-gnu@0.70.4':
-    optional: true
-
   '@takumi-rs/core-linux-x64-gnu@0.71.7':
-    optional: true
-
-  '@takumi-rs/core-linux-x64-musl@0.70.4':
     optional: true
 
   '@takumi-rs/core-linux-x64-musl@0.71.7':
     optional: true
 
-  '@takumi-rs/core-win32-arm64-msvc@0.70.4':
-    optional: true
-
   '@takumi-rs/core-win32-arm64-msvc@0.71.7':
-    optional: true
-
-  '@takumi-rs/core-win32-x64-msvc@0.70.4':
     optional: true
 
   '@takumi-rs/core-win32-x64-msvc@0.71.7':
     optional: true
-
-  '@takumi-rs/core@0.70.4':
-    optionalDependencies:
-      '@takumi-rs/core-darwin-arm64': 0.70.4
-      '@takumi-rs/core-darwin-x64': 0.70.4
-      '@takumi-rs/core-linux-arm64-gnu': 0.70.4
-      '@takumi-rs/core-linux-arm64-musl': 0.70.4
-      '@takumi-rs/core-linux-x64-gnu': 0.70.4
-      '@takumi-rs/core-linux-x64-musl': 0.70.4
-      '@takumi-rs/core-win32-arm64-msvc': 0.70.4
-      '@takumi-rs/core-win32-x64-msvc': 0.70.4
 
   '@takumi-rs/core@0.71.7':
     optionalDependencies:
@@ -16189,23 +16031,13 @@ snapshots:
       '@takumi-rs/core-win32-arm64-msvc': 0.71.7
       '@takumi-rs/core-win32-x64-msvc': 0.71.7
 
-  '@takumi-rs/helpers@0.70.4': {}
-
   '@takumi-rs/helpers@0.71.7': {}
-
-  '@takumi-rs/image-response@0.70.4':
-    dependencies:
-      '@takumi-rs/core': 0.70.4
-      '@takumi-rs/helpers': 0.70.4
-      '@takumi-rs/wasm': 0.70.4
 
   '@takumi-rs/image-response@0.71.7':
     dependencies:
       '@takumi-rs/core': 0.71.7
       '@takumi-rs/helpers': 0.71.7
       '@takumi-rs/wasm': 0.71.7
-
-  '@takumi-rs/wasm@0.70.4': {}
 
   '@takumi-rs/wasm@0.71.7': {}
 
@@ -16311,6 +16143,18 @@ snapshots:
       tiny-invariant: 1.3.3
       tiny-warning: 1.0.3
 
+  '@tanstack/react-start-server@1.166.7(crossws@0.4.4(srvx@0.11.9))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+    dependencies:
+      '@tanstack/history': 1.161.4
+      '@tanstack/react-router': 1.166.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@tanstack/router-core': 1.166.7
+      '@tanstack/start-client-core': 1.166.7
+      '@tanstack/start-server-core': 1.166.7(crossws@0.4.4(srvx@0.11.9))
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
+    transitivePeerDependencies:
+      - crossws
+
   '@tanstack/react-start-server@1.166.7(crossws@0.4.4)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
       '@tanstack/history': 1.161.4
@@ -16322,6 +16166,26 @@ snapshots:
       react-dom: 19.2.4(react@19.2.4)
     transitivePeerDependencies:
       - crossws
+
+  '@tanstack/react-start@1.166.7(crossws@0.4.4(srvx@0.11.9))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(vite@7.3.1(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(webpack@5.105.4)':
+    dependencies:
+      '@tanstack/react-router': 1.166.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@tanstack/react-start-client': 1.166.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@tanstack/react-start-server': 1.166.7(crossws@0.4.4(srvx@0.11.9))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@tanstack/router-utils': 1.161.4
+      '@tanstack/start-client-core': 1.166.7
+      '@tanstack/start-plugin-core': 1.166.7(@tanstack/react-router@1.166.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(crossws@0.4.4(srvx@0.11.9))(vite@7.3.1(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(webpack@5.105.4)
+      '@tanstack/start-server-core': 1.166.7(crossws@0.4.4(srvx@0.11.9))
+      pathe: 2.0.3
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
+      vite: 7.3.1(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
+    transitivePeerDependencies:
+      - '@rsbuild/core'
+      - crossws
+      - supports-color
+      - vite-plugin-solid
+      - webpack
 
   '@tanstack/react-start@1.166.7(crossws@0.4.4)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(vite@7.3.1(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(webpack@5.105.4)':
     dependencies:
@@ -16429,6 +16293,38 @@ snapshots:
 
   '@tanstack/start-fn-stubs@1.161.4': {}
 
+  '@tanstack/start-plugin-core@1.166.7(@tanstack/react-router@1.166.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(crossws@0.4.4(srvx@0.11.9))(vite@7.3.1(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(webpack@5.105.4)':
+    dependencies:
+      '@babel/code-frame': 7.27.1
+      '@babel/core': 7.29.0
+      '@babel/types': 7.29.0
+      '@rolldown/pluginutils': 1.0.0-beta.40
+      '@tanstack/router-core': 1.166.7
+      '@tanstack/router-generator': 1.166.7
+      '@tanstack/router-plugin': 1.166.7(@tanstack/react-router@1.166.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(vite@7.3.1(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(webpack@5.105.4)
+      '@tanstack/router-utils': 1.161.4
+      '@tanstack/start-client-core': 1.166.7
+      '@tanstack/start-server-core': 1.166.7(crossws@0.4.4(srvx@0.11.9))
+      cheerio: 1.2.0
+      exsolve: 1.0.8
+      pathe: 2.0.3
+      picomatch: 4.0.3
+      source-map: 0.7.6
+      srvx: 0.11.9
+      tinyglobby: 0.2.15
+      ufo: 1.6.3
+      vite: 7.3.1(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
+      vitefu: 1.1.2(vite@7.3.1(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
+      xmlbuilder2: 4.0.3
+      zod: 3.25.76
+    transitivePeerDependencies:
+      - '@rsbuild/core'
+      - '@tanstack/react-router'
+      - crossws
+      - supports-color
+      - vite-plugin-solid
+      - webpack
+
   '@tanstack/start-plugin-core@1.166.7(@tanstack/react-router@1.166.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(crossws@0.4.4)(vite@7.3.1(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(webpack@5.105.4)':
     dependencies:
       '@babel/code-frame': 7.27.1
@@ -16461,6 +16357,18 @@ snapshots:
       - vite-plugin-solid
       - webpack
 
+  '@tanstack/start-server-core@1.166.7(crossws@0.4.4(srvx@0.11.9))':
+    dependencies:
+      '@tanstack/history': 1.161.4
+      '@tanstack/router-core': 1.166.7
+      '@tanstack/start-client-core': 1.166.7
+      '@tanstack/start-storage-context': 1.166.7
+      h3-v2: h3@2.0.1-rc.16(crossws@0.4.4(srvx@0.10.1))
+      seroval: 1.5.1
+      tiny-invariant: 1.3.3
+    transitivePeerDependencies:
+      - crossws
+
   '@tanstack/start-server-core@1.166.7(crossws@0.4.4)':
     dependencies:
       '@tanstack/history': 1.161.4
@@ -16478,7 +16386,7 @@ snapshots:
       '@tanstack/start-client-core': 1.166.7
       seroval: 1.5.1
     optionalDependencies:
-      '@tanstack/react-start': 1.166.7(crossws@0.4.4)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(vite@7.3.1(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(webpack@5.105.4)
+      '@tanstack/react-start': 1.166.7(crossws@0.4.4(srvx@0.11.9))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(vite@7.3.1(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(webpack@5.105.4)
 
   '@tanstack/start-storage-context@1.166.7':
     dependencies:
@@ -16920,7 +16828,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitejs/plugin-rsc@0.5.21(react-dom@19.2.4(react@19.2.4))(react-server-dom-webpack@19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(vite@7.3.1(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))':
+  '@vitejs/plugin-rsc@0.5.21(react-dom@19.2.4(react@19.2.4))(react-server-dom-webpack@19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(webpack@5.105.4))(react@19.2.4)(vite@7.3.1(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))':
     dependencies:
       '@rolldown/pluginutils': 1.0.0-rc.5
       es-module-lexer: 2.0.0
@@ -16929,7 +16837,7 @@ snapshots:
       periscopic: 4.0.2
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
-      srvx: 0.11.8
+      srvx: 0.11.9
       strip-literal: 3.1.0
       turbo-stream: 3.2.0
       vite: 7.3.1(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
@@ -18988,10 +18896,8 @@ snapshots:
 
   flat-cache@4.0.1:
     dependencies:
-      flatted: 3.3.4
+      flatted: 3.4.1
       keyv: 4.5.4
-
-  flatted@3.3.4: {}
 
   flatted@3.4.1: {}
 
@@ -19048,15 +18954,6 @@ snapshots:
       fetch-blob: 3.2.0
 
   forwarded@0.2.0: {}
-
-  framer-motion@12.35.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
-    dependencies:
-      motion-dom: 12.35.0
-      motion-utils: 12.29.2
-      tslib: 2.8.1
-    optionalDependencies:
-      react: 19.2.4
-      react-dom: 19.2.4(react@19.2.4)
 
   framer-motion@12.35.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
     dependencies:
@@ -19229,9 +19126,9 @@ snapshots:
       ufo: 1.6.3
       uncrypto: 0.1.3
 
-  h3@2.0.1-rc.14(crossws@0.4.4(srvx@0.10.1)):
+  h3@2.0.1-rc.16(crossws@0.4.4(srvx@0.10.1)):
     dependencies:
-      rou3: 0.7.12
+      rou3: 0.8.1
       srvx: 0.11.9
     optionalDependencies:
       crossws: 0.4.4(srvx@0.10.1)
@@ -19468,8 +19365,6 @@ snapshots:
   highlight.js@11.11.1: {}
 
   highlightjs-curl@1.3.0: {}
-
-  hono@4.12.5: {}
 
   hono@4.12.7: {}
 
@@ -20782,10 +20677,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  motion-dom@12.35.0:
-    dependencies:
-      motion-utils: 12.29.2
-
   motion-dom@12.35.2:
     dependencies:
       motion-utils: 12.29.2
@@ -20900,7 +20791,7 @@ snapshots:
       consola: 3.4.2
       crossws: 0.4.4(srvx@0.10.1)
       db0: 0.3.4
-      h3: 2.0.1-rc.14(crossws@0.4.4(srvx@0.10.1))
+      h3: 2.0.1-rc.16(crossws@0.4.4(srvx@0.10.1))
       jiti: 2.6.1
       nf3: 0.3.7
       ofetch: 2.0.0-alpha.3
@@ -21674,7 +21565,7 @@ snapshots:
       '@types/react-dom': 19.2.3(@types/react@19.2.14)
       chalk: 5.6.2
       clsx: 2.1.1
-      framer-motion: 12.35.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      framer-motion: 12.35.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       goober: 2.1.18(csstype@3.2.3)
       react: 19.2.4
       react-d3-tree: 3.6.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -21722,7 +21613,7 @@ snapshots:
 
   react-tooltip@5.30.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
     dependencies:
-      '@floating-ui/dom': 1.7.5
+      '@floating-ui/dom': 1.7.6
       classnames: 2.5.1
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
@@ -22132,8 +22023,6 @@ snapshots:
       '@rollup/rollup-win32-x64-msvc': 4.59.0
       fsevents: 2.3.3
 
-  rou3@0.7.12: {}
-
   rou3@0.8.1: {}
 
   roughjs@4.6.6:
@@ -22191,8 +22080,6 @@ snapshots:
       is-regex: 1.2.1
 
   safer-buffer@2.1.2: {}
-
-  sax@1.4.4: {}
 
   sax@1.5.0: {}
 
@@ -22501,8 +22388,6 @@ snapshots:
   sprintf-js@1.0.3: {}
 
   srvx@0.10.1: {}
-
-  srvx@0.11.8: {}
 
   srvx@0.11.9: {}
 
@@ -23289,11 +23174,11 @@ snapshots:
 
   waku@1.0.0-alpha.5(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.32.0)(react-dom@19.2.4(react@19.2.4))(react-server-dom-webpack@19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(webpack@5.105.4))(react@19.2.4)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2):
     dependencies:
-      '@hono/node-server': 1.19.11(hono@4.12.5)
+      '@hono/node-server': 1.19.11(hono@4.12.7)
       '@vitejs/plugin-react': 5.1.4(vite@7.3.1(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
-      '@vitejs/plugin-rsc': 0.5.21(react-dom@19.2.4(react@19.2.4))(react-server-dom-webpack@19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(vite@7.3.1(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
+      '@vitejs/plugin-rsc': 0.5.21(react-dom@19.2.4(react@19.2.4))(react-server-dom-webpack@19.2.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(webpack@5.105.4))(react@19.2.4)(vite@7.3.1(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
       dotenv: 17.3.1
-      hono: 4.12.5
+      hono: 4.12.7
       magic-string: 0.30.21
       picocolors: 1.1.1
       react: 19.2.4
@@ -23523,7 +23408,7 @@ snapshots:
 
   xml-js@1.6.11:
     dependencies:
-      sax: 1.4.4
+      sax: 1.5.0
 
   xmlbuilder2@4.0.3:
     dependencies:

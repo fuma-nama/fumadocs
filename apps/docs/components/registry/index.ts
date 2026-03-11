@@ -100,10 +100,6 @@ export const registry: Registry = {
           target: '<dir>/ai/search.tsx',
         },
         {
-          type: 'components',
-          path: 'components/markdown.tsx',
-        },
-        {
           type: 'route',
           path: 'lib/openrouter/server.ts',
           target: 'app/api/chat/route.ts',
@@ -114,6 +110,16 @@ export const registry: Registry = {
       },
     },
     {
+      name: 'markdown',
+      unlisted: true,
+      files: [
+        {
+          type: 'components',
+          path: 'components/markdown.tsx',
+        },
+      ],
+    },
+    {
       name: 'ai/inkeep',
       title: 'AI Chat (Next.js + Inkeep AI)',
       description: 'Ask AI dialog for your docs, requires Inkeep AI',
@@ -122,10 +128,6 @@ export const registry: Registry = {
           type: 'components',
           path: 'components/inkeep/search.tsx',
           target: '<dir>/ai/search.tsx',
-        },
-        {
-          type: 'components',
-          path: 'components/markdown.tsx',
         },
         {
           type: 'route',

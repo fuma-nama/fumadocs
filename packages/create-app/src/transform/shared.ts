@@ -2,6 +2,8 @@ import { IndentationText, Project, QuoteKind } from 'ts-morph';
 import fs from 'node:fs/promises';
 
 const project = new Project({
+  skipAddingFilesFromTsConfig: true,
+  skipLoadingLibFiles: true,
   manipulationSettings: {
     indentationText: IndentationText.TwoSpaces,
     quoteKind: QuoteKind.Single,

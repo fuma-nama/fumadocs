@@ -36,6 +36,12 @@ const command = program
     new Option('--og-image <name>', 'configure OG image generation').choices(['next-og', 'takumi']),
   )
   .addOption(
+    new Option('--ai-chat <name>', 'configure AI chat (Next.js only)').choices([
+      'openrouter',
+      'inkeep',
+    ]),
+  )
+  .addOption(
     new Option('--template <name>', 'choose a template').choices(
       templates.map((item) => item.value),
     ),
@@ -157,6 +163,31 @@ async function main(): Promise<void> {
           ],
         });
       },
+      aiChat: async ({ results }: { results: { template?: Template } }) => {
+        if (config.aiChat !== undefined) return config.aiChat;
+        if (results.template !== '+next+fuma-docs-mdx') return false;
+        if (isCI) return false;
+
+        return select<false | 'openrouter' | 'inkeep'>({
+          message: 'Configure AI Chat?',
+          options: [
+            {
+              value: false,
+              label: 'No',
+            },
+            {
+              value: 'openrouter',
+              label: 'OpenRouter',
+              hint: 'API key required',
+            },
+            {
+              value: 'inkeep',
+              label: 'Inkeep AI',
+              hint: 'API key required',
+            },
+          ],
+        });
+      },
       installDeps: async () => {
         if (config.install !== undefined) return config.install;
         if (isCI) return false;
@@ -204,6 +235,12 @@ async function main(): Promise<void> {
   if (options.ogImage) {
     const { nextUseTakumi } = await import('./plugins/next-use-takumi');
     plugins.push(nextUseTakumi());
+  }
+
+  if (options.aiChat) {
+    const { nextUseAi } = await import('./plugins/next-use-ai');
+
+    plugins.push(nextUseAi(options.aiChat));
   }
 
   await create({

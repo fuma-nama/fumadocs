@@ -44,6 +44,7 @@
   "dependencies": {
     "@clack/prompts": "^1.1.0",
     "@commander-js/extra-typings": "^14.0.0",
+    "@fumadocs/cli": "workspace:*",
     "commander": "^14.0.3",
     "picocolors": "^1.1.1",
     "tinyexec": "^1.0.2",
