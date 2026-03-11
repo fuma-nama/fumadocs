@@ -32,6 +32,8 @@ export interface Component {
   title?: string;
   description?: string;
   files: ComponentFile[];
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
 
   /**
    * Don't list the component in registry index file
@@ -281,14 +283,27 @@ export class ComponentCompiler {
   }
 
   async build(): Promise<CompiledComponent> {
+    const files = (
+      await Promise.all(this.component.files.map((file) => this.onBuildFile(file)))
+    ).flat();
+    const dependencies = Object.fromEntries(this.dependencies);
+    const devDependencies = Object.fromEntries(this.devDependencies);
+
+    if (this.component.dependencies) {
+      Object.assign(dependencies, this.component.dependencies);
+    }
+    if (this.component.devDependencies) {
+      Object.assign(devDependencies, this.component.devDependencies);
+    }
+
     return {
       name: this.component.name,
       title: this.component.title,
       description: this.component.description,
-      files: (await Promise.all(this.component.files.map((file) => this.onBuildFile(file)))).flat(),
+      files,
       subComponents: Array.from(this.subComponents.values()),
-      dependencies: Object.fromEntries(this.dependencies),
-      devDependencies: Object.fromEntries(this.devDependencies),
+      dependencies,
+      devDependencies,
     };
   }
 
