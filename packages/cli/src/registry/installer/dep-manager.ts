@@ -2,6 +2,7 @@ import { exists } from '@/utils/fs';
 import fs from 'node:fs/promises';
 import { getPackageManager, PackageManager } from '@/utils/get-package-manager';
 import { x } from 'tinyexec';
+import path from 'node:path';
 
 export class DependencyManager {
   private installedDeps = new Map<string, string>();
@@ -9,10 +10,13 @@ export class DependencyManager {
   devDependencies: string[] = [];
   packageManager: PackageManager = 'npm';
 
+  constructor(private readonly cwd: string) {}
+
   async init(deps: Record<string, string | null>, devDeps: Record<string, string | null>) {
     this.installedDeps.clear();
-    if (await exists('package.json')) {
-      const content = await fs.readFile('package.json');
+    const packageJsonPath = path.join(this.cwd, 'package.json');
+    if (await exists(packageJsonPath)) {
+      const content = await fs.readFile(packageJsonPath);
       const parsed = JSON.parse(content.toString()) as object;
 
       if ('dependencies' in parsed && typeof parsed.dependencies === 'object') {

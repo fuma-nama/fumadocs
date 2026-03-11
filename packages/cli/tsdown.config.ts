@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 export default defineConfig({
   entry: [
-    './src/index.ts',
+    './src/{index,config}.ts',
     './src/registry/{client,schema}.ts',
     './src/registry/installer/index.ts',
     './src/build/index.ts',

@@ -78,7 +78,11 @@ export async function initConfig(
     return;
   }
 
-  const defaultConfig = createConfigSchema(src ?? (await isSrc())).parse({} satisfies ConfigInput);
+  const defaultConfig = await getDefaultConfig(src);
   await fs.writeFile(file, JSON.stringify(defaultConfig, null, 2));
   return defaultConfig;
+}
+
+export async function getDefaultConfig(src?: boolean) {
+  return createConfigSchema(src ?? (await isSrc())).parse({} satisfies ConfigInput);
 }

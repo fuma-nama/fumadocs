@@ -19,6 +19,7 @@
   "type": "module",
   "exports": {
     "./build": "./dist/build/index.js",
+    "./config": "./dist/config.js",
     "./registry/client": "./dist/registry/client.js",
     "./registry/installer": "./dist/registry/installer/index.js",
     "./registry/schema": "./dist/registry/schema.js",

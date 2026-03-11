@@ -33,16 +33,26 @@ export interface IOInterface {
   onFileDownloaded: (options: { path: string; file: File; component: DownloadedComponent }) => void;
 }
 
+export interface ComponentInstallerOptions {
+  plugins?: ComponentInstallerPlugin[];
+  cwd?: string;
+}
+
 export class ComponentInstaller {
   private readonly installedFiles = new Set<string>();
   private readonly downloadCache = createCache<DownloadedComponent[]>();
+  private readonly cwd: string;
+  private readonly plugins: ComponentInstallerPlugin[];
   readonly dependencies: Record<string, string | null> = {};
   readonly devDependencies: Record<string, string | null> = {};
 
   constructor(
     private readonly rootClient: RegistryClient,
-    private readonly plugins: ComponentInstallerPlugin[] = [],
-  ) {}
+    options: ComponentInstallerOptions = {},
+  ) {
+    this.cwd = options.cwd ?? process.cwd();
+    this.plugins = options.plugins ?? [];
+  }
 
   async install(name: string, io: IOInterface) {
     let downloaded: DownloadedComponent[];
@@ -79,7 +89,7 @@ export class ComponentInstaller {
         const status = await fs
           .readFile(outPath)
           .then((res) => {
-            if (res.toString() === output) return 'ignore';
+            if (res.toString().trim() === output.trim()) return 'ignore';
             return 'need-update';
           })
           .catch(() => 'write');
@@ -99,7 +109,7 @@ export class ComponentInstaller {
   }
 
   async deps() {
-    const manager = new DependencyManager();
+    const manager = new DependencyManager(this.cwd);
     await manager.init(this.dependencies, this.devDependencies);
     return manager;
   }
@@ -221,9 +231,9 @@ export class ComponentInstaller {
       } as const
     )[file.type];
     if (file.target) {
-      return path.join(config.baseDir, file.target.replace('<dir>', dir));
+      return path.resolve(this.cwd, config.baseDir, file.target.replace('<dir>', dir));
     }
 
-    return path.join(config.baseDir, dir, path.basename(file.path));
+    return path.resolve(this.cwd, config.baseDir, dir, path.basename(file.path));
   }
 }
