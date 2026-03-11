@@ -17,12 +17,12 @@
     "dist/*"
   ],
   "type": "module",
-  "main": "./dist/index.js",
   "exports": {
-    "./build": {
-      "types": "./dist/build/index.d.ts",
-      "import": "./dist/build/index.js"
-    }
+    "./build": "./dist/build/index.js",
+    "./registry/client": "./dist/registry/client.js",
+    "./registry/installer": "./dist/registry/installer/index.js",
+    "./registry/schema": "./dist/registry/schema.js",
+    "./package.json": "./package.json"
   },
   "publishConfig": {
     "access": "public"
