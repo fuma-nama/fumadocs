@@ -43,7 +43,7 @@ async function install(target: string, installer: ComponentInstaller) {
   }
 
   const deps = await installer.deps();
-  if (deps.hasRequired()) await deps.installRequired();
+  if (deps.hasRequired()) await deps.writeRequired();
   await installer.onEnd();
 }
 
