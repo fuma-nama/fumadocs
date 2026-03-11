@@ -1,5 +1,14 @@
 # @fuma-docs/openapi
 
+## 10.3.18
+
+### Patch Changes
+
+- c1c954d: fix schema intersection
+- Updated dependencies [86d3abb]
+  - fumadocs-ui@16.6.15
+  - fumadocs-core@16.6.15
+
 ## 10.3.17
 
 ### Patch Changes
