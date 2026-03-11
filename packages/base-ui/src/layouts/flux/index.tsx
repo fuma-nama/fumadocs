@@ -122,6 +122,7 @@ export function DocsLayout({
           {children}
         </div>
         {renderNavigationPanel({
+          className: cn(nav.className),
           head: renderTitleNav(nav, {
             className: 'inline-flex items-center gap-2.5 text-sm font-semibold',
           }),
@@ -136,14 +137,20 @@ export function DocsLayout({
 
               {searchToggle.enabled !== false &&
                 (searchToggle.components?.sm ?? (
-                  <SearchToggle className="rounded-lg" hideIfDisabled />
+                  <SearchToggle
+                    className={cn('rounded-lg', searchToggle.smClassName)}
+                    hideIfDisabled
+                  />
                 ))}
 
               <NavigationSidebarTrigger />
               {themeSwitch.enabled !== false &&
                 (themeSwitch.component ?? (
                   <ThemeToggle
-                    className="px-1 py-0 h-full ms-1 rounded-xl bg-fd-muted *:rounded-lg"
+                    className={cn(
+                      'px-1 py-0 h-full ms-1 rounded-xl bg-fd-muted *:rounded-lg',
+                      themeSwitch.className,
+                    )}
                     mode={themeSwitch.mode}
                   />
                 ))}
@@ -207,6 +214,7 @@ export interface NavigationPanelProps {
   tabDropdown: ReactNode;
   tool: ReactNode;
   link: ReactNode;
+  className?: string;
 }
 
 export function NavigationPanel({

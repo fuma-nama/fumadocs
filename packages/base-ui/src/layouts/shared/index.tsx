@@ -22,6 +22,8 @@ export interface NavOptions {
    */
   transparentMode?: 'always' | 'top' | 'none';
 
+  className?: string;
+
   children?: ReactNode;
 }
 
@@ -29,11 +31,14 @@ export interface BaseLayoutProps {
   themeSwitch?: {
     enabled?: boolean;
     component?: ReactNode;
+    className?: string;
     mode?: 'light-dark' | 'light-dark-system';
   };
 
   searchToggle?: Partial<{
     enabled: boolean;
+    smClassName?: string;
+    lgClassName?: string;
     components: Partial<{
       sm: ReactNode;
       lg: ReactNode;

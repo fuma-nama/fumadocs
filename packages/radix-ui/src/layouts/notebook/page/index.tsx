@@ -72,6 +72,7 @@ type TableOfContentOptions = Pick<AnchorProviderProps, 'single'> & {
 
   enabled: boolean;
   component: ReactNode;
+  className?: string;
 
   /**
    * @defaultValue 'normal'
@@ -118,7 +119,7 @@ export function DocsPage({
     <>
       {tocPopoverEnabled &&
         (tocPopover ?? (
-          <PageTOCPopover>
+          <PageTOCPopover className={cn(tocPopoverOptions.className)}>
             <PageTOCPopoverTrigger />
             <PageTOCPopoverContent>
               {tocPopoverOptions.header}
@@ -150,7 +151,10 @@ export function DocsPage({
         (tocReplace ?? (
           <div
             id="nd-toc"
-            className="sticky top-(--fd-docs-row-3) [grid-area:toc] h-[calc(var(--fd-docs-height)-var(--fd-docs-row-3))] flex flex-col w-(--fd-toc-width) pt-12 pe-4 pb-2 xl:layout:[--fd-toc-width:268px] max-xl:hidden"
+            className={cn(
+              'sticky top-(--fd-docs-row-3) [grid-area:toc] h-[calc(var(--fd-docs-height)-var(--fd-docs-row-3))] flex flex-col w-(--fd-toc-width) pt-12 pe-4 pb-2 xl:layout:[--fd-toc-width:268px] max-xl:hidden',
+              tocOptions.className,
+            )}
           >
             {tocOptions.header}
             <h3

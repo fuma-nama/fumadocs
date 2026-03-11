@@ -132,7 +132,9 @@ export function DocsLayout({
               )}
             </div>
             {searchToggle.enabled !== false &&
-              (searchToggle.components?.lg ?? <LargeSearchToggle hideIfDisabled />)}
+              (searchToggle.components?.lg ?? (
+                <LargeSearchToggle className={cn(searchToggle.lgClassName)} hideIfDisabled />
+              ))}
             {tabs.length > 0 && tabMode === 'auto' && <SidebarTabsDropdown options={tabs} />}
             {banner}
           </div>
@@ -157,7 +159,10 @@ export function DocsLayout({
                 ))}
                 {themeSwitch.enabled !== false &&
                   (themeSwitch.component ?? (
-                    <ThemeToggle className="ms-auto p-0" mode={themeSwitch.mode} />
+                    <ThemeToggle
+                      className={cn('ms-auto p-0', themeSwitch.className)}
+                      mode={themeSwitch.mode}
+                    />
                   ))}
               </div>
               {footer}
@@ -192,7 +197,12 @@ export function DocsLayout({
                 </LanguageToggle>
               )}
               {themeSwitch.enabled !== false &&
-                (themeSwitch.component ?? <ThemeToggle className="p-0" mode={themeSwitch.mode} />)}
+                (themeSwitch.component ?? (
+                  <ThemeToggle
+                    className={cn('p-0', themeSwitch.className)}
+                    mode={themeSwitch.mode}
+                  />
+                ))}
               <SidebarTrigger
                 className={cn(
                   buttonVariants({
@@ -224,7 +234,10 @@ export function DocsLayout({
               (nav.component ?? (
                 <LayoutHeader
                   id="nd-subnav"
-                  className="[grid-area:header] sticky top-(--fd-docs-row-1) z-30 flex items-center ps-4 pe-2.5 border-b transition-colors backdrop-blur-sm h-(--fd-header-height) md:hidden max-md:layout:[--fd-header-height:--spacing(14)] data-[transparent=false]:bg-fd-background/80"
+                  className={cn(
+                    '[grid-area:header] sticky top-(--fd-docs-row-1) z-30 flex items-center ps-4 pe-2.5 border-b transition-colors backdrop-blur-sm h-(--fd-header-height) md:hidden max-md:layout:[--fd-header-height:--spacing(14)] data-[transparent=false]:bg-fd-background/80',
+                    nav.className,
+                  )}
                 >
                   {renderTitleNav(nav, {
                     className: 'inline-flex items-center gap-2.5 font-semibold',
@@ -232,7 +245,10 @@ export function DocsLayout({
                   <div className="flex-1">{nav.children}</div>
                   {searchToggle.enabled !== false &&
                     (searchToggle.components?.sm ?? (
-                      <SearchToggle className="p-2" hideIfDisabled />
+                      <SearchToggle
+                        className={cn('p-2', searchToggle.smClassName)}
+                        hideIfDisabled
+                      />
                     ))}
                   {sidebarEnabled && (
                     <SidebarTrigger

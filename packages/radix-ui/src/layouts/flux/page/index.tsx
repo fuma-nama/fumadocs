@@ -71,6 +71,7 @@ interface TableOfContentOptions extends Pick<AnchorProviderProps, 'single'> {
 
   enabled: boolean;
   component: ReactNode;
+  className?: string;
 
   /**
    * @defaultValue 'normal'
@@ -104,7 +105,7 @@ export function DocsPage({
     <>
       {tocPopoverEnabled &&
         (tocPopover ?? (
-          <PageTOCPopover>
+          <PageTOCPopover className={cn(tocOptions.className)}>
             <PageTOCPopoverContent>
               {tocOptions.header}
               <TOCScrollArea>

@@ -236,7 +236,10 @@ export function DocsLayout(props: DocsLayoutProps) {
             )}
             {themeSwitch.enabled !== false &&
               (themeSwitch.component ?? (
-                <ThemeToggle mode={themeSwitch.mode ?? 'light-dark-system'} />
+                <ThemeToggle
+                  className={cn(themeSwitch.className)}
+                  mode={themeSwitch.mode ?? 'light-dark-system'}
+                />
               ))}
           </Footer>
         </SidebarDrawer>
@@ -285,6 +288,7 @@ function DocsNavbar({
       className={cn(
         'sticky [grid-area:header] flex flex-col top-(--fd-docs-row-1) z-10 backdrop-blur-sm transition-colors data-[transparent=false]:bg-fd-background/80 layout:[--fd-header-height:--spacing(14)]',
         showLayoutTabs && 'lg:layout:[--fd-header-height:--spacing(24)]',
+        nav.className,
       )}
     >
       <div data-header-body="" className="flex border-b px-4 gap-2 h-14 md:px-6">
@@ -332,6 +336,7 @@ function DocsNavbar({
               className={cn(
                 'w-full my-auto max-md:hidden',
                 navMode === 'top' ? 'rounded-xl max-w-sm ps-2.5' : 'max-w-[240px]',
+                searchToggle.lgClassName,
               )}
             />
           ))}
@@ -361,7 +366,9 @@ function DocsNavbar({
 
           <div className="flex items-center md:hidden">
             {searchToggle.enabled !== false &&
-              (searchToggle.components?.sm ?? <SearchToggle hideIfDisabled className="p-2" />)}
+              (searchToggle.components?.sm ?? (
+                <SearchToggle hideIfDisabled className={cn('p-2', searchToggle.smClassName)} />
+              ))}
             <SidebarTrigger
               className={cn(
                 buttonVariants({
@@ -383,7 +390,10 @@ function DocsNavbar({
             )}
             {themeSwitch.enabled !== false &&
               (themeSwitch.component ?? (
-                <ThemeToggle mode={themeSwitch.mode ?? 'light-dark-system'} />
+                <ThemeToggle
+                  className={cn(themeSwitch.className)}
+                  mode={themeSwitch.mode ?? 'light-dark-system'}
+                />
               ))}
             {sidebarCollapsible && navMode === 'top' && (
               <SidebarCollapseTrigger
