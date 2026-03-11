@@ -1,6 +1,5 @@
 @import './lib/base.css';
 @import './lib/shiki.css';
-@import './lib/image-zoom.css';
 
 @plugin '../dist/tailwind/typography.js';
 
