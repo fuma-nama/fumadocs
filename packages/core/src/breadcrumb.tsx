@@ -73,8 +73,14 @@ export function getBreadcrumbItemsFromPath(
           });
         break;
       case 'folder':
-        if (item.root && !includeRoot) {
+        if (item.root) {
           items = [];
+          if (includeRoot) {
+            items.push({
+              name: tree.name,
+              url: typeof includeRoot === 'object' ? includeRoot.url : undefined,
+            });
+          }
           break;
         }
 
@@ -93,13 +99,6 @@ export function getBreadcrumbItemsFromPath(
           });
         break;
     }
-  }
-
-  if (includeRoot) {
-    items.unshift({
-      name: tree.name,
-      url: typeof includeRoot === 'object' ? includeRoot.url : undefined,
-    });
   }
 
   return items;
