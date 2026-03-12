@@ -142,6 +142,17 @@ test('Breadcrumbs', () => {
     { name: 'Guides', url: '/docs/guides' },
     { name: 'Getting Started', url: '/docs/guides/getting-started' },
   ]);
+
+  expect(
+    getBreadcrumbItems('/docs/guides/getting-started', treeWithRoot, {
+      includeRoot: { url: '/custom-root' },
+      includePage: true,
+    }),
+  ).toStrictEqual([
+    { name: 'Docs', url: '/custom-root' },
+    { name: 'Guides', url: '/docs/guides' },
+    { name: 'Getting Started', url: '/docs/guides/getting-started' },
+  ]);
 });
 
 test('I18n: Format URL', () => {
