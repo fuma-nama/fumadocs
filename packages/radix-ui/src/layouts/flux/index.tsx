@@ -148,10 +148,7 @@ export function DocsLayout({
 
               {searchToggle.enabled !== false &&
                 (searchToggle.components?.sm ?? (
-                  <SearchToggle
-                    className={cn('rounded-lg', searchToggle.smClassName)}
-                    hideIfDisabled
-                  />
+                  <SearchToggle className={cn("rounded-lg", searchToggle.smProps?.className)} hideIfDisabled {...searchToggle.smProps} />
                 ))}
 
               <NavigationSidebarTrigger />
@@ -160,9 +157,10 @@ export function DocsLayout({
                   <ThemeToggle
                     className={cn(
                       'p-1 h-full ms-1 rounded-xl bg-fd-muted *:rounded-lg',
-                      themeSwitch.className,
+                      themeSwitch.props?.className,
                     )}
                     mode={themeSwitch.mode}
+                    {...themeSwitch.props}
                   />
                 ))}
             </>

@@ -68,12 +68,18 @@ export function Header({
         {searchToggle.enabled !== false &&
           (searchToggle.components?.lg ?? (
             <LargeSearchToggle
-              className="w-full rounded-full ps-2.5 max-w-[240px]"
+              className={cn("w-full rounded-full ps-2.5 max-w-[240px]", searchToggle.lgProps?.className)}
               hideIfDisabled
+              {...searchToggle.lgProps}
             />
           ))}
         {themeSwitch.enabled !== false &&
-          (themeSwitch.component ?? <ThemeToggle mode={themeSwitch?.mode} />)}
+          (themeSwitch.component ?? (
+            <ThemeToggle
+              mode={themeSwitch?.mode}
+              {...themeSwitch.props}
+            />
+          ))}
         {i18n && (
           <LanguageToggle>
             <Languages className="size-5" />
@@ -91,7 +97,9 @@ export function Header({
       </div>
       <div className="flex flex-row items-center ms-auto -me-1.5 lg:hidden">
         {searchToggle.enabled !== false &&
-          (searchToggle.components?.sm ?? <SearchToggle className="p-2" hideIfDisabled />)}
+          (searchToggle.components?.sm ?? (
+            <SearchToggle className={cn("p-2", searchToggle.smProps?.className)} hideIfDisabled {...searchToggle.smProps} />
+          ))}
         <NavigationMenuItem asChild>
           <div>
             <NavigationMenuTrigger

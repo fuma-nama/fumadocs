@@ -1,9 +1,10 @@
 import { useMemo, type ComponentProps, type ReactNode } from 'react';
 import type { I18nConfig } from 'fumadocs-core/i18n';
 import type { LinkItemType } from '@/utils/link-item';
+import { type ButtonProps } from '@/components/ui/button';
 import Link from 'fumadocs-core/link';
 
-export interface NavOptions {
+export interface NavOptions extends Omit<ComponentProps<'header'>, 'title'> {
   enabled: boolean;
   component: ReactNode;
 
@@ -21,28 +22,32 @@ export interface NavOptions {
    * @defaultValue none
    */
   transparentMode?: 'always' | 'top' | 'none';
-
-  className?: string;
-
-  children?: ReactNode;
 }
 
 export interface BaseLayoutProps {
   themeSwitch?: {
     enabled?: boolean;
     component?: ReactNode;
-    className?: string;
     mode?: 'light-dark' | 'light-dark-system';
+    props?: ComponentProps<'div'>
   };
 
   searchToggle?: Partial<{
     enabled: boolean;
-    smClassName?: string;
-    lgClassName?: string;
     components: Partial<{
       sm: ReactNode;
       lg: ReactNode;
     }>;
+
+    /**
+     * Props for the default 'sm' search toggle button
+     */
+    smProps?: Omit<ComponentProps<'button'>, 'color'> & ButtonProps;
+
+    /**
+     * Props for the default 'lg' search toggle button
+     */
+    lgProps?: ComponentProps<'button'>;
   }>;
 
   /**

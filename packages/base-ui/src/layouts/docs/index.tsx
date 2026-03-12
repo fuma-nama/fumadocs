@@ -133,7 +133,7 @@ export function DocsLayout({
             </div>
             {searchToggle.enabled !== false &&
               (searchToggle.components?.lg ?? (
-                <LargeSearchToggle className={cn(searchToggle.lgClassName)} hideIfDisabled />
+                <LargeSearchToggle hideIfDisabled {...searchToggle.lgProps} />
               ))}
             {tabs.length > 0 && tabMode === 'auto' && <SidebarTabsDropdown options={tabs} />}
             {banner}
@@ -160,8 +160,9 @@ export function DocsLayout({
                 {themeSwitch.enabled !== false &&
                   (themeSwitch.component ?? (
                     <ThemeToggle
-                      className={cn('ms-auto p-0', themeSwitch.className)}
+                      className={cn('ms-auto p-0', themeSwitch.props?.className)}
                       mode={themeSwitch.mode}
+                      {...themeSwitch.props}
                     />
                   ))}
               </div>
@@ -199,8 +200,9 @@ export function DocsLayout({
               {themeSwitch.enabled !== false &&
                 (themeSwitch.component ?? (
                   <ThemeToggle
-                    className={cn('p-0', themeSwitch.className)}
+                    className={cn('p-0', themeSwitch.props?.className)}
                     mode={themeSwitch.mode}
+                    {...themeSwitch.props}
                   />
                 ))}
               <SidebarTrigger
@@ -246,8 +248,9 @@ export function DocsLayout({
                   {searchToggle.enabled !== false &&
                     (searchToggle.components?.sm ?? (
                       <SearchToggle
-                        className={cn('p-2', searchToggle.smClassName)}
+                        className={cn('p-2', searchToggle.smProps?.className)}
                         hideIfDisabled
+                        {...searchToggle.smProps}
                       />
                     ))}
                   {sidebarEnabled && (

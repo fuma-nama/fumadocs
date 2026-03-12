@@ -3,6 +3,7 @@ import * as Base from '@/components/sidebar/base';
 import { cn } from '@/utils/cn';
 import { type ComponentProps, useRef } from 'react';
 import { cva } from 'class-variance-authority';
+import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
 import { createPageTreeRenderer } from '@/components/sidebar/page-tree';
 import { createLinkItemRenderer } from '@/components/sidebar/link-item';
 import { buttonVariants } from '@/components/ui/button';
@@ -42,8 +43,22 @@ export function SidebarCollapseTrigger(props: ComponentProps<typeof Base.Sidebar
   return <Base.SidebarCollapseTrigger {...props} />;
 }
 
-export function SidebarViewport(props: ComponentProps<typeof Base.SidebarViewport>) {
-  return <Base.SidebarViewport {...props} />;
+export function SidebarViewport(props: ComponentProps<typeof ScrollArea>) {
+  return (
+    <ScrollArea {...props} className={cn('min-h-0 flex-1', props.className)}>
+      <ScrollViewport
+        className="*:flex! *:flex-col! *:gap-0.5! p-4 overscroll-contain"
+        style={
+          {
+            maskImage:
+              'linear-gradient(to bottom, transparent, white 12px, white calc(100% - 12px), transparent)',
+          } as object
+        }
+      >
+        {props.children}
+      </ScrollViewport>
+    </ScrollArea>
+  );
 }
 
 export function SidebarTrigger(props: ComponentProps<typeof Base.SidebarTrigger>) {

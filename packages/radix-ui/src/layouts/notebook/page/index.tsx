@@ -18,13 +18,13 @@ import * as TocClerk from '@/components/toc/clerk';
 import { TOCProvider, TOCScrollArea } from '@/components/toc';
 
 interface BreadcrumbOptions extends BreadcrumbProps {
-  enabled: boolean;
-  component: ReactNode;
+  enabled?: boolean;
+  component?: ReactNode;
 }
 
 interface FooterOptions extends FooterProps {
-  enabled: boolean;
-  component: ReactNode;
+  enabled?: boolean;
+  component?: ReactNode;
 }
 
 export interface DocsPageProps {

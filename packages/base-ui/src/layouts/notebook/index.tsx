@@ -237,8 +237,8 @@ export function DocsLayout(props: DocsLayoutProps) {
             {themeSwitch.enabled !== false &&
               (themeSwitch.component ?? (
                 <ThemeToggle
-                  className={cn(themeSwitch.className)}
                   mode={themeSwitch.mode ?? 'light-dark-system'}
+                  {...themeSwitch.props}
                 />
               ))}
           </Footer>
@@ -336,8 +336,9 @@ function DocsNavbar({
               className={cn(
                 'w-full my-auto max-md:hidden',
                 navMode === 'top' ? 'rounded-xl max-w-sm ps-2.5' : 'max-w-[240px]',
-                searchToggle.lgClassName,
+                searchToggle.lgProps?.className,
               )}
+              {...searchToggle.lgProps}
             />
           ))}
         <div className="flex flex-1 items-center justify-end md:gap-2">
@@ -367,7 +368,7 @@ function DocsNavbar({
           <div className="flex items-center md:hidden">
             {searchToggle.enabled !== false &&
               (searchToggle.components?.sm ?? (
-                <SearchToggle hideIfDisabled className={cn('p-2', searchToggle.smClassName)} />
+                <SearchToggle hideIfDisabled className={cn("p-2", searchToggle.smProps?.className)} {...searchToggle.smProps} />
               ))}
             <SidebarTrigger
               className={cn(
@@ -391,8 +392,8 @@ function DocsNavbar({
             {themeSwitch.enabled !== false &&
               (themeSwitch.component ?? (
                 <ThemeToggle
-                  className={cn(themeSwitch.className)}
                   mode={themeSwitch.mode ?? 'light-dark-system'}
+                  {...themeSwitch.props}
                 />
               ))}
             {sidebarCollapsible && navMode === 'top' && (
