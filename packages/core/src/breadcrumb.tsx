@@ -73,12 +73,12 @@ export function getBreadcrumbItemsFromPath(
           });
         break;
       case 'folder':
-        if (item.root) {
+        if (item.root) {g
           items = [];
           if (includeRoot) {
             items.push({
               name: tree.name,
-              url: typeof includeRoot === 'object' ? includeRoot.url : undefined,
+              url: typeof includeRoot === 'object' ? includeRoot.url : item.index?.url,
             });
           }
           break;
