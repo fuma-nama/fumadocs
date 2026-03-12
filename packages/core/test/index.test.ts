@@ -96,6 +96,48 @@ test('Breadcrumbs', () => {
   ]);
 
   expect(getBreadcrumbItems('/invalid', tree)).toMatchInlineSnapshot(`[]`);
+
+  const treeWithRoot: Root = {
+    name: 'Docs',
+    children: [
+      {
+        type: 'folder',
+        name: 'Docs',
+        root: true,
+        index: { type: 'page', name: 'Introduction', url: '/docs' },
+        children: [
+          {
+            type: 'folder',
+            name: 'Guides',
+            index: { type: 'page', name: 'Guides', url: '/docs/guides' },
+            children: [
+              {
+                type: 'page',
+                name: 'Getting Started',
+                url: '/docs/guides/getting-started',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+  expect(getBreadcrumbItems('/docs/guides/getting-started', treeWithRoot, {
+    includeRoot: true,
+    includePage: true,
+  })).toStrictEqual([
+    { name: 'Docs', url: '/docs' },
+    { name: 'Guides', url: '/docs/guides' },
+    { name: 'Getting Started', url: '/docs/guides/getting-started' },
+  ]);
+
+  expect(getBreadcrumbItems('/docs/guides/getting-started', treeWithRoot, {
+    includeRoot: false,
+    includePage: true,
+  })).toStrictEqual([
+    { name: 'Guides', url: '/docs/guides' },
+    { name: 'Getting Started', url: '/docs/guides/getting-started' },
+  ]);
 });
 
 test('I18n: Format URL', () => {
