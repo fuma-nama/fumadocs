@@ -122,19 +122,23 @@ test('Breadcrumbs', () => {
       },
     ],
   };
-  expect(getBreadcrumbItems('/docs/guides/getting-started', treeWithRoot, {
-    includeRoot: true,
-    includePage: true,
-  })).toStrictEqual([
+  expect(
+    getBreadcrumbItems('/docs/guides/getting-started', treeWithRoot, {
+      includeRoot: true,
+      includePage: true,
+    }),
+  ).toStrictEqual([
     { name: 'Docs', url: '/docs' },
     { name: 'Guides', url: '/docs/guides' },
     { name: 'Getting Started', url: '/docs/guides/getting-started' },
   ]);
 
-  expect(getBreadcrumbItems('/docs/guides/getting-started', treeWithRoot, {
-    includeRoot: false,
-    includePage: true,
-  })).toStrictEqual([
+  expect(
+    getBreadcrumbItems('/docs/guides/getting-started', treeWithRoot, {
+      includeRoot: false,
+      includePage: true,
+    }),
+  ).toStrictEqual([
     { name: 'Guides', url: '/docs/guides' },
     { name: 'Getting Started', url: '/docs/guides/getting-started' },
   ]);

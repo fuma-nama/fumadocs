@@ -73,7 +73,7 @@ export function getBreadcrumbItemsFromPath(
           });
         break;
       case 'folder':
-        if (item.root) {g
+        if (item.root) {
           items = [];
           if (includeRoot) {
             items.push({
