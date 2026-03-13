@@ -16,6 +16,7 @@
   "type": "module",
   "exports": {
     ".": "./dist/index.js",
+    "./runtime": "./dist/runtime.js",
     "./package.json": "./package.json"
   },
   "publishConfig": {
@@ -34,13 +35,13 @@
   "devDependencies": {
     "@types/node": "^25.4.0",
     "eslint-config-custom": "workspace:*",
-    "fuma-content": "^1.2.0",
+    "fuma-content": "^1.2.3",
     "fumadocs-core": "workspace:*",
     "tsconfig": "workspace:*",
     "tsdown": "0.21.1"
   },
   "peerDependencies": {
-    "fuma-content": "^1.2.0",
+    "fuma-content": "^1.2.3",
     "fumadocs-core": "^16.6.17"
   }
 }
