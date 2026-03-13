@@ -9,8 +9,8 @@ import type {
   LanguageRegistration,
 } from 'shiki';
 import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
-import { Fragment, type ReactNode } from 'react';
-import { jsx, jsxs } from 'react/jsx-runtime';
+import type { ReactNode } from 'react';
+import * as JsxRuntime from 'react/jsx-runtime';
 import type { Root } from 'hast';
 import type { ResolvedShikiConfig } from '../config';
 import type { DistributiveOmit } from '@/types';
@@ -119,10 +119,8 @@ export async function getHighlighter(
 
 export async function highlight(code: string, options: CoreHighlightOptions): Promise<ReactNode> {
   return toJsxRuntime(await highlightHast(code, options), {
-    jsx,
-    jsxs,
+    ...JsxRuntime,
     development: false,
-    Fragment,
     components: options.components,
   });
 }
