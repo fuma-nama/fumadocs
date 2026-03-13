@@ -29,6 +29,6 @@ export default defineConfig({
     'src/framework/*',
   ],
   deps: {
-    onlyAllowBundle: ['remove-markdown'],
+    onlyBundle: ['remove-markdown'],
   },
 });

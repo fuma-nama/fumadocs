@@ -7,6 +7,6 @@ export default defineConfig({
   format: 'esm',
   entry: ['src/{index,configuration}.ts'],
   deps: {
-    onlyAllowBundle: [],
+    onlyBundle: [],
   },
 });

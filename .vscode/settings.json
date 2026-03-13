@@ -15,5 +15,6 @@
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "oxc.oxc-vscode",
   "oxc.fmt.configPath": ".oxfmtrc.jsonc",
-  "terminal.integrated.scrollback": 10000
+  "terminal.integrated.scrollback": 10000,
+  "typescript.tsdk": "node_modules/typescript/lib"
 }

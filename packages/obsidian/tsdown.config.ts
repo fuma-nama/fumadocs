@@ -7,6 +7,6 @@ export default defineConfig({
   dts: true,
   entry: ['src/index.ts', 'src/ui/index.tsx', 'src/mdx/index.ts'],
   deps: {
-    onlyAllowBundle: [],
+    onlyBundle: [],
   },
 });

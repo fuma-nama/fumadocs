@@ -5,6 +5,8 @@ const external = ['next', 'typescript', 'webpack', 'bun', 'mdx/types'];
 const noExternal = [
   // TODO: remove this when the min `fumadocs-core` version is above 16.2.3
   'fumadocs-core/source/schema',
+  // TODO: remove this when the min `fumadocs-core` version is above 16.6.17
+  'fumadocs-core/mdx-plugins/remark-llms',
 ];
 
 export default defineConfig([
@@ -22,7 +24,7 @@ export default defineConfig([
     fixedExtension: false,
     target: 'node22',
     deps: {
-      onlyAllowBundle: [],
+      onlyBundle: [],
       alwaysBundle: noExternal,
       neverBundle: external,
     },
@@ -37,7 +39,7 @@ export default defineConfig([
     fixedExtension: false,
     target: 'node22',
     deps: {
-      onlyAllowBundle: [],
+      onlyBundle: [],
       alwaysBundle: noExternal,
       neverBundle: external,
     },

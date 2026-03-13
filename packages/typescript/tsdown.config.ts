@@ -9,7 +9,7 @@ export default defineConfig({
   format: 'esm',
   entry: ['src/index.ts', 'src/ui/index.ts'],
   deps: {
-    onlyAllowBundle: [],
+    onlyBundle: [],
     neverBundle: ['server-only'],
   },
 });

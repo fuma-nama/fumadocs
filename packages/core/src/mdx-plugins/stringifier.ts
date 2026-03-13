@@ -12,9 +12,12 @@ import type { Processor } from 'unified';
 declare module 'mdast' {
   interface Data {
     /**
-     * [Fumadocs: stringify] The stringified form of node, used for generating search index, `llms.txt`, etc.
+     * [Fumadocs: stringify] Extra info for stringifying the node:
+     * - `children-only`: only stringify its children.
+     * - `{ node }`: stringify as another node.
+     * - `{ text }`: the stringified form of node.
      */
-    _string?: string | (() => string);
+    _stringify?: 'children-only' | { node: Nodes } | { text: string };
   }
 }
 
@@ -61,6 +64,9 @@ export interface StringifyOptions<Context = undefined> extends Options {
     attribute: MdxJsxAttribute | MdxJsxExpressionAttribute,
   ) => boolean;
 
+  /**
+   * run before stringifying any nodes
+   */
   onStringify?: (node: Nodes, ctx: Context) => void;
 }
 
@@ -97,22 +103,39 @@ export function defaultStringifier<Context>(
 
   function modHandler(handler: Handle, ctx: Context): Handle {
     return function (node: Nodes, parent, state, info) {
-      if (onStringify) onStringify(node, ctx);
-      if (node.data?._string)
-        return typeof node.data._string === 'function' ? node.data._string() : node.data._string;
-      const visibility = filterElement(node);
-
+      let visibility = filterElement(node);
       if (visibility === false) return '';
+
+      if (onStringify) onStringify(node, ctx);
+
+      const extraInfo = node.data?._stringify;
+      if (extraInfo) {
+        if (extraInfo === 'children-only') {
+          visibility = 'children-only';
+        } else if ('text' in extraInfo) {
+          return extraInfo.text;
+        } else {
+          node = extraInfo.node;
+        }
+      }
+
+      if (visibility === 'children-only') {
+        if (!('children' in node)) return '';
+
+        switch (node.type) {
+          case 'mdxJsxTextElement':
+          case 'paragraph':
+            return state.containerPhrasing(node, info);
+          case 'mdxJsxFlowElement':
+            return state.containerFlow(node, info);
+          default:
+            return state.containerFlow({ type: 'root', children: node.children }, info);
+        }
+      }
 
       switch (node.type) {
         case 'mdxJsxFlowElement':
         case 'mdxJsxTextElement': {
-          if (visibility === 'children-only') {
-            return node.type === 'mdxJsxTextElement'
-              ? state.containerPhrasing(node, info)
-              : state.containerFlow(node, info);
-          }
-
           const stringifiedAttributes: MdxJsxAttribute[] = [];
           for (const attr of node.attributes) {
             if (attr.type === 'mdxJsxExpressionAttribute') continue;
@@ -121,23 +144,15 @@ export function defaultStringifier<Context>(
             if (!str) continue;
 
             stringifiedAttributes.push({
-              ...attr,
+              type: 'mdxJsxAttribute',
+              name: attr.name,
               value: str,
             });
           }
 
-          const temp = node.attributes;
-          node.attributes = stringifiedAttributes;
-          const s = handler(node, parent, state, info);
-          node.attributes = temp;
-          return s;
+          return handler({ ...node, attributes: stringifiedAttributes }, parent, state, info);
         }
         default:
-          if (visibility === 'children-only')
-            return 'children' in node
-              ? state.containerFlow({ type: 'root', children: node.children }, info)
-              : '';
-
           return handler(node, parent, state, info);
       }
     };

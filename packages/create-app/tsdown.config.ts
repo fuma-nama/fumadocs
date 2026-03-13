@@ -7,6 +7,6 @@ export default defineConfig({
   dts: true,
   fixedExtension: false,
   deps: {
-    onlyAllowBundle: [],
+    onlyBundle: [],
   },
 });

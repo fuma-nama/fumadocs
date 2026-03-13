@@ -9,6 +9,6 @@ export default defineConfig({
     sourcemap: false,
   },
   deps: {
-    onlyAllowBundle: [],
+    onlyBundle: [],
   },
 });

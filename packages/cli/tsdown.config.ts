@@ -15,7 +15,7 @@ export default defineConfig({
   fixedExtension: false,
   target: 'node22',
   deps: {
-    onlyAllowBundle: [],
+    onlyBundle: [],
   },
   exports: {
     enabled: true,

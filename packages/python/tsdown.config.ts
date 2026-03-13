@@ -9,6 +9,6 @@ export default defineConfig({
   fixedExtension: false,
   target: 'es2023',
   deps: {
-    onlyAllowBundle: [],
+    onlyBundle: [],
   },
 });

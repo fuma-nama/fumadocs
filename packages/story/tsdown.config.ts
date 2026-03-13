@@ -14,6 +14,6 @@ export default defineConfig({
     sourcemap: false,
   },
   deps: {
-    onlyAllowBundle: ['@fastify/deepmerge', '@ungap/structured-clone'],
+    onlyBundle: ['@fastify/deepmerge', '@ungap/structured-clone'],
   },
 });

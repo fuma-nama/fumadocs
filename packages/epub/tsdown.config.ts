@@ -7,6 +7,6 @@ export default defineConfig({
   fixedExtension: false,
   target: 'node20',
   deps: {
-    onlyAllowBundle: [],
+    onlyBundle: [],
   },
 });
