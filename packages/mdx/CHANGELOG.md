@@ -1,5 +1,16 @@
 # next-docs-mdx
 
+## 14.2.10
+
+### Patch Changes
+
+- c2678c0: Improve `llms.txt` generation via `remark-llms` plugin
+- Updated dependencies [c2678c0]
+- Updated dependencies [417f07a]
+- Updated dependencies [bb07706]
+- Updated dependencies [f065406]
+  - fumadocs-core@16.6.17
+
 ## 14.2.9
 
 ### Patch Changes
