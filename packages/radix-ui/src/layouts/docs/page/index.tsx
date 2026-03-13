@@ -56,7 +56,7 @@ export interface DocsPageProps {
   /**
    * Apply props to the `#nd-page` container.
    */
-  props: ComponentProps<'article'>;
+  props?: ComponentPropsWithoutRef<'article'>;
 }
 
 type TableOfContentOptions = Pick<AnchorProviderProps, 'single'> & {
