@@ -1,0 +1,15 @@
+{
+  "extends": "tsconfig/base.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "types": ["@types/node"],
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "lib": ["ESNext"],
+    "module": "ESNext",
+    "target": "ES2020"
+  },
+  "exclude": ["node_modules", "eslint.config.mjs", "dist"]
+}

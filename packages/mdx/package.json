@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-mdx",
-  "version": "14.2.9",
+  "version": "14.2.10",
   "description": "The built-in source for Fumadocs",
   "keywords": [
     "Docs",
@@ -91,7 +91,7 @@
     "@types/js-yaml": "^4.0.9",
     "@types/mdast": "^4.0.4",
     "@types/mdx": "^2.0.13",
-    "@types/node": "^25.4.0",
+    "@types/node": "^25.5.0",
     "@types/picomatch": "^4.0.2",
     "@types/react": "^19.2.14",
     "eslint-config-custom": "workspace:*",
@@ -102,10 +102,10 @@
     "remark": "^15.0.1",
     "remark-directive": "^4.0.0",
     "remark-mdx": "^3.1.1",
-    "rollup": "^4.59.0",
+    "rolldown": "1.0.0-rc.9",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.1",
-    "vite": "^7.3.1",
+    "tsdown": "0.21.2",
+    "vite": "^8.0.0",
     "webpack": "^5.105.4"
   },
   "peerDependencies": {
@@ -117,7 +117,7 @@
     "mdast-util-directive": "*",
     "next": "^15.3.0 || ^16.0.0",
     "react": "*",
-    "vite": "6.x.x || 7.x.x"
+    "vite": "6.x.x || 7.x.x || 8.x.x"
   },
   "peerDependenciesMeta": {
     "mdast-util-directive": {

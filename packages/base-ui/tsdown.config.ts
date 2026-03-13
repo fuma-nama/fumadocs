@@ -24,6 +24,6 @@ export default defineConfig({
     console.log('CSS import updated');
   },
   deps: {
-    onlyAllowBundle: [],
+    onlyBundle: [],
   },
 });

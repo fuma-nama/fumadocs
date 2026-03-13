@@ -1,5 +1,17 @@
 # next-docs-zeta
 
+## 16.6.17
+
+### Patch Changes
+
+- c2678c0: Improve `llms.txt` generation via `remark-llms` plugin
+- 417f07a: Expose Markdown stringifier
+- bb07706: Include root items only once in Breadcrumb.
+
+  Previously, when `includeRoot` was set to `true`, the root item was added twice to breadcrumbs.
+
+- f065406: Support fuma-content integration
+
 ## 16.6.16
 
 ### Patch Changes

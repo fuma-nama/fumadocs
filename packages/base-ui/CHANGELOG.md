@@ -1,5 +1,16 @@
 # @fumadocs/base-ui
 
+## 16.6.17
+
+### Patch Changes
+
+- c3a723e: fix codeblock RSC highlighting
+- Updated dependencies [c2678c0]
+- Updated dependencies [417f07a]
+- Updated dependencies [bb07706]
+- Updated dependencies [f065406]
+  - fumadocs-core@16.6.17
+
 ## 16.6.16
 
 ### Patch Changes

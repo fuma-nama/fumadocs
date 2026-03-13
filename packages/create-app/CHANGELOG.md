@@ -1,5 +1,13 @@
 # create-next-docs-app
 
+## 16.0.73
+
+## 16.0.72
+
+### Patch Changes
+
+- a52d30f: fix default template
+
 ## 16.0.71
 
 ### Patch Changes

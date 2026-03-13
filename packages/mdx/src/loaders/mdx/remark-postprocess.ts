@@ -1,11 +1,10 @@
 import type { Processor, Transformer } from 'unified';
-import type { Heading, Root, RootContent } from 'mdast';
+import type { Root, RootContent } from 'mdast';
 import { visit } from 'unist-util-visit';
-import { toMarkdown } from 'mdast-util-to-markdown';
 import { valueToEstree } from 'estree-util-value-to-estree';
 import { removePosition } from 'unist-util-remove-position';
 import { flattenNode } from './mdast-utils';
-import { mdxToMarkdown } from 'mdast-util-mdx';
+import { remarkLLMs, type LLMsOptions } from 'fumadocs-core/mdx-plugins/remark-llms';
 
 export interface ExtractedReference {
   href: string;
@@ -22,14 +21,7 @@ export interface PostprocessOptions {
   /**
    * stringify MDAST and export via `_markdown`.
    */
-  includeProcessedMarkdown?:
-    | boolean
-    | {
-        /**
-         * include heading IDs into the processed markdown.
-         */
-        headingIds?: boolean;
-      };
+  includeProcessedMarkdown?: boolean | LLMsOptions;
 
   /**
    * extract link references, export via `extractedReferences`.
@@ -53,7 +45,6 @@ export interface PostprocessOptions {
 export function remarkPostprocess(
   this: Processor,
   {
-    _format,
     includeProcessedMarkdown = false,
     includeMDAST = false,
     extractLinkReferences = false,
@@ -94,28 +85,11 @@ export function remarkPostprocess(
     }
 
     if (includeProcessedMarkdown) {
-      const { headingIds = true } =
-        typeof includeProcessedMarkdown === 'object' ? includeProcessedMarkdown : {};
-      const defaultExtensions = this.data('toMarkdownExtensions');
-      const extensions = defaultExtensions ? [...defaultExtensions] : [];
-      if (_format === 'md') extensions.push(mdxToMarkdown());
-
-      const markdown = toMarkdown(tree, {
-        ...this.data('settings'),
-        extensions,
-        handlers: {
-          heading(node: Heading) {
-            const id = node.data?.hProperties?.id;
-            const content = flattenNode(node);
-            return headingIds && id ? `${content} [#${id}]` : content;
-          },
-        },
-      });
-
-      file.data['mdx-export'].push({
-        name: '_markdown',
-        value: markdown,
-      });
+      const llms = remarkLLMs.call(
+        this,
+        typeof includeProcessedMarkdown === 'object' ? includeProcessedMarkdown : undefined,
+      );
+      llms(tree, file, () => undefined);
     }
 
     if (includeMDAST) {

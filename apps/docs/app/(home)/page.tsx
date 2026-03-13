@@ -317,7 +317,7 @@ export async function DataView() {
 <DataView />
 
 <auto-type-table path='./my-file.ts' name='CardProps' />`}
-              lang="mdx"
+              lang="tsx"
             />
 
             <div className="max-lg:row-start-1">

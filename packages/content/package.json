@@ -1,0 +1,47 @@
+{
+  "name": "@fumadocs/content",
+  "version": "0.0.1",
+  "description": "The Fuma Content adapter for Fumadocs",
+  "keywords": [
+    "Docs",
+    "Fumadocs"
+  ],
+  "homepage": "https://fumadocs.dev",
+  "license": "MIT",
+  "author": "Fuma Nama",
+  "repository": "github:fuma-nama/fumadocs",
+  "files": [
+    "dist/*"
+  ],
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.js",
+    "./runtime": "./dist/runtime.js",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "clean": "rimraf dist",
+    "dev": "tsdown --watch",
+    "lint": "eslint .",
+    "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@standard-schema/spec": "^1.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "eslint-config-custom": "workspace:*",
+    "fuma-content": "^1.2.3",
+    "fumadocs-core": "workspace:*",
+    "tsconfig": "workspace:*",
+    "tsdown": "0.21.2"
+  },
+  "peerDependencies": {
+    "fuma-content": "^1.2.3",
+    "fumadocs-core": "^16.6.17"
+  }
+}

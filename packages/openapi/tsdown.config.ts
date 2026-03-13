@@ -21,7 +21,7 @@ export default defineConfig({
     await compileInline();
   },
   deps: {
-    onlyAllowBundle: [],
+    onlyBundle: [],
   },
   exports: {
     enabled: true,

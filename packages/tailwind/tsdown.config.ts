@@ -9,7 +9,7 @@ export default defineConfig({
     sourcemap: false,
   },
   deps: {
-    onlyAllowBundle: ['lodash.merge'],
+    onlyBundle: ['lodash.merge'],
     neverBundle: ['@tailwindcss/oxide'],
   },
 });

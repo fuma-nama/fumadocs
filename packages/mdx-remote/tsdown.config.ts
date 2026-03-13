@@ -7,7 +7,7 @@ export default defineConfig({
   entry: ['./src/index.ts', './src/client/index.ts'],
   format: 'esm',
   deps: {
-    onlyAllowBundle: [],
+    onlyBundle: [],
     neverBundle: ['mdx/types'],
   },
 });

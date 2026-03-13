@@ -48,7 +48,7 @@ async function install(target: string, installer: ComponentInstaller) {
 }
 
 async function addAIChat({ appDir }: TemplatePluginContext) {
-  const file = await createSourceFile(path.join(appDir, 'app/layout.tsx'));
+  const file = await createSourceFile(path.join(appDir, 'app/docs/layout.tsx'));
   const elements = file.getDescendantsOfKind(SyntaxKind.JsxElement);
   const code = `<AISearch>
   <AISearchPanel />
@@ -68,7 +68,7 @@ async function addAIChat({ appDir }: TemplatePluginContext) {
 
   for (const element of elements) {
     const opening = element.getFirstChildByKind(SyntaxKind.JsxOpeningElement);
-    if (opening?.getTagNameNode().getText() !== 'body') continue;
+    if (opening?.getTagNameNode().getText() !== 'DocsLayout') continue;
 
     const prior = element
       .getJsxChildren()
@@ -78,18 +78,24 @@ async function addAIChat({ appDir }: TemplatePluginContext) {
     break;
   }
 
-  file.addImportDeclaration({
-    moduleSpecifier: '@/components/ai/search',
-    namedImports: ['AISearch', 'AISearchPanel', 'AISearchTrigger'],
-  });
-  file.addImportDeclaration({
-    moduleSpecifier: 'lucide-react',
-    namedImports: ['MessageCircleIcon'],
-  });
-  file.addImportDeclaration({
-    moduleSpecifier: 'fumadocs-ui/components/ui/button',
-    namedImports: ['buttonVariants'],
-  });
+  file.addImportDeclarations([
+    {
+      moduleSpecifier: '@/components/ai/search',
+      namedImports: ['AISearch', 'AISearchPanel', 'AISearchTrigger'],
+    },
+    {
+      moduleSpecifier: 'lucide-react',
+      namedImports: ['MessageCircleIcon'],
+    },
+    {
+      moduleSpecifier: '@/lib/cn',
+      namedImports: ['cn'],
+    },
+    {
+      moduleSpecifier: 'fumadocs-ui/components/ui/button',
+      namedImports: ['buttonVariants'],
+    },
+  ]);
 
   await file.save();
 }

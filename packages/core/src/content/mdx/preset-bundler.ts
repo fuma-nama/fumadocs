@@ -1,6 +1,7 @@
 import type { ProcessorOptions } from '@mdx-js/mdx';
 import type * as Plugins from '@/mdx-plugins';
 import { resolvePlugins, type ResolvePlugins } from '@/content/mdx/util';
+import type { Pluggable } from 'unified';
 
 export type MDXBundlerPresetOptions = Omit<
   NonNullable<ProcessorOptions>,
@@ -9,6 +10,8 @@ export type MDXBundlerPresetOptions = Omit<
   rehypePlugins?: ResolvePlugins;
   remarkPlugins?: ResolvePlugins;
 
+  /** @private for `remark-include` */
+  _include?: Pluggable;
   remarkStructureOptions?: Plugins.StructureOptions | false;
   remarkHeadingOptions?: Plugins.RemarkHeadingOptions | false;
   remarkImageOptions?: Plugins.RemarkImageOptions | false;
@@ -28,6 +31,7 @@ export async function mdxPreset(options: MDXBundlerPresetOptions = {}): Promise<
     remarkStructureOptions,
     remarkCodeTabOptions,
     remarkNpmOptions,
+    _include,
     ...mdxOptions
   } = options;
 
@@ -42,6 +46,7 @@ export async function mdxPreset(options: MDXBundlerPresetOptions = {}): Promise<
             ...remarkHeadingOptions,
           },
         ]),
+      _include ?? false,
       remarkImageOptions !== false &&
         import('@/mdx-plugins/remark-image').then((mod) => [
           mod.remarkImage,

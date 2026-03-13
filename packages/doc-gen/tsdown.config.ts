@@ -7,6 +7,6 @@ export default defineConfig({
   format: 'esm',
   entry: ['src/index.ts', 'src/remark-ts2js.ts'],
   deps: {
-    onlyAllowBundle: [],
+    onlyBundle: [],
   },
 });

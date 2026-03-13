@@ -39,7 +39,7 @@
     "@clack/prompts": "^1.1.0",
     "commander": "^14.0.3",
     "magic-string": "^0.30.21",
-    "oxc-parser": "^0.117.0",
+    "oxc-parser": "^0.118.0",
     "oxc-resolver": "^11.19.1",
     "package-manager-detector": "^1.6.0",
     "picocolors": "^1.1.1",
@@ -47,11 +47,11 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@oxc-project/types": "^0.117.0",
-    "@types/node": "25.4.0",
+    "@oxc-project/types": "^0.118.0",
+    "@types/node": "25.5.0",
     "eslint-config-custom": "workspace:*",
-    "shadcn": "4.0.5",
+    "shadcn": "4.0.6",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.1"
+    "tsdown": "0.21.2"
   }
 }

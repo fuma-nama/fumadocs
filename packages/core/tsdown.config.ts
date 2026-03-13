@@ -25,9 +25,10 @@ export default defineConfig({
     'src/mdx-plugins/{index,codeblock-utils}.ts',
     'src/mdx-plugins/remark-*.ts',
     'src/mdx-plugins/rehype-*.ts',
+    'src/mdx-plugins/stringifier.ts',
     'src/framework/*',
   ],
   deps: {
-    onlyAllowBundle: ['remove-markdown'],
+    onlyBundle: ['remove-markdown'],
   },
 });
