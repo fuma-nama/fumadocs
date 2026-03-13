@@ -33,12 +33,12 @@
     "@standard-schema/spec": "^1.1.0"
   },
   "devDependencies": {
-    "@types/node": "^25.4.0",
+    "@types/node": "^25.5.0",
     "eslint-config-custom": "workspace:*",
     "fuma-content": "^1.2.3",
     "fumadocs-core": "workspace:*",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.1"
+    "tsdown": "0.21.2"
   },
   "peerDependencies": {
     "fuma-content": "^1.2.3",

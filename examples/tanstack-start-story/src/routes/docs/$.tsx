@@ -9,7 +9,7 @@ import { baseOptions } from '@/lib/layout.shared';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { Suspense } from 'react';
 import { story as calloutStory } from '@/components/callout/story';
-import { storyClient as calloutStoryClient } from '@/components/callout/story.client';
+import { storyClient as calloutStoryClient } from '@/components/callout/story-client';
 import { StoryPayloadProvider } from '@fumadocs/story/client';
 import { getStoryPayloads } from '@/lib/story';
 

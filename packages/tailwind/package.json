@@ -40,12 +40,12 @@
   "devDependencies": {
     "@tailwindcss/oxide": "^4.2.1",
     "@types/lodash.merge": "^4.6.9",
-    "@types/node": "^25.4.0",
+    "@types/node": "^25.5.0",
     "eslint-config-custom": "workspace:*",
     "lodash.merge": "^4.6.2",
     "tailwindcss": "^4.2.1",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.1"
+    "tsdown": "0.21.2"
   },
   "peerDependencies": {
     "tailwindcss": "^4.0.0"

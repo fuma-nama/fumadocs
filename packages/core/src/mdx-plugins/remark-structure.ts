@@ -1,4 +1,4 @@
-import type { Nodes, Root } from 'mdast';
+import type { Heading, Link, Nodes, Root } from 'mdast';
 import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
 import type { PluggableList, Processor, Transformer } from 'unified';
@@ -237,6 +237,18 @@ export type StringifyOptions = BaseStringifyOptions<StringifierContext>;
 export function defaultStringifier(config: StringifyOptions): Stringifier {
   return defaultBaseStringifier<StringifierContext>({
     ...config,
+    handlers: {
+      link(node: Link, _, state, info) {
+        return state.containerPhrasing(node, info);
+      },
+      heading(node: Heading, _, state, info) {
+        return state.containerPhrasing(node, info);
+      },
+      image() {
+        return '';
+      },
+      ...config.handlers,
+    },
     onStringify(node, ctx) {
       if (node.data?.structuredData) ctx.addContent(...node.data.structuredData.contents);
       config.onStringify?.(node, ctx);

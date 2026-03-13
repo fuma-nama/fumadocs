@@ -1,4 +1,4 @@
-import type { Nodes, Link, Heading } from 'mdast';
+import type { Nodes } from 'mdast';
 import {
   type MdxJsxFlowElement,
   type MdxJsxTextElement,
@@ -145,15 +145,6 @@ export function defaultStringifier<Context>(
 
   const customToMarkdown: Options = {
     handlers: {
-      link(node: Link, _, state, info) {
-        return state.containerPhrasing(node, info);
-      },
-      heading(node: Heading, _, state, info) {
-        return state.containerPhrasing(node, info);
-      },
-      image() {
-        return '';
-      },
       _custom(node: CustomRootNode<Context>, _, state, info) {
         const handlers: Record<string, Handle> = state.handlers;
         for (const k in handlers) {

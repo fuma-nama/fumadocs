@@ -40,7 +40,7 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "tinyglobby": "^0.2.15",
-    "unrun": "^0.2.31",
+    "unrun": "^0.2.32",
     "waku": "1.0.0-alpha.5",
     "zod": "^4.3.6"
   },
@@ -51,7 +51,7 @@
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
     "@types/mdx": "^2.0.13",
-    "@types/node": "^25.4.0",
+    "@types/node": "^25.5.0",
     "@types/picomatch": "^4.0.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
@@ -72,11 +72,11 @@
     "remark-rehype": "^11.1.2",
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.2.1",
-    "tsdown": "0.21.1",
+    "tsdown": "0.21.2",
     "typescript": "^5.9.3",
     "unified": "^11.0.5",
     "vfile": "^6.0.3",
-    "vite": "^7.3.1",
+    "vite": "^8.0.0",
     "vite-tsconfig-paths": "^6.1.1"
   }
 }

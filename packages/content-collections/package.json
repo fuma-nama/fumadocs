@@ -44,11 +44,11 @@
   "devDependencies": {
     "@content-collections/core": "^0.14.2",
     "@content-collections/mdx": "^0.2.2",
-    "@types/node": "25.4.0",
+    "@types/node": "25.5.0",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.1"
+    "tsdown": "0.21.2"
   },
   "peerDependencies": {
     "@content-collections/core": "0.x.x",

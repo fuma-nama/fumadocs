@@ -43,7 +43,6 @@ export default defineConfig({
 import { type Config, defineConfig } from 'waku/config';
 import mdx from 'fumadocs-mdx/vite';
 import * as MdxConfig from './source.config.js';
-import tsconfigPaths from 'vite-tsconfig-paths';
 import type { UserConfig } from 'vite';
 
 export default defineConfig({
@@ -53,13 +52,14 @@ export default defineConfig({
       mdx(MdxConfig),
       tsconfigPaths(),
     ],
+    resolve: {
+      tsconfigPaths: true,
+    },
   } satisfies UserConfig as Config['vite'],
 });
 ```
 
 <include>./.shared.mdx</include>
-
-> You might need to configure [`vite-tsconfig-paths`](https://github.com/aleclarson/vite-tsconfig-paths) plugin for path alias.
 
 ### Integrate with Fumadocs
 

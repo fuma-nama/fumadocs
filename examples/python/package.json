@@ -6,7 +6,7 @@
     "build": "pnpm build:docs && next build",
     "dev": "next dev",
     "start": "next start",
-    "build:docs": "node ./scripts/generate-docs.mjs",
+    "build:docs": "pnpm python:generate && node ./scripts/generate-docs.mjs",
     "python:generate": "pip3 install ./node_modules/fumadocs-python && fumapy-generate httpx",
     "types:check": "fumadocs-mdx && tsc --noEmit"
   },
@@ -22,7 +22,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.2.1",
     "@types/mdx": "^2.0.13",
-    "@types/node": "25.4.0",
+    "@types/node": "25.5.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "postcss": "^8.5.8",

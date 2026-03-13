@@ -26,11 +26,11 @@
     "types:check": "tsc --noEmit"
   },
   "devDependencies": {
-    "@types/node": "25.4.0",
+    "@types/node": "25.5.0",
     "@types/react": "^19.2.14",
     "eslint-config-custom": "workspace:*",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.1"
+    "tsdown": "0.21.2"
   },
   "peerDependencies": {
     "@types/react": "*",
