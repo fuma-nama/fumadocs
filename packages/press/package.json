@@ -33,7 +33,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@takumi-rs/image-response": "^0.71.7",
+    "@takumi-rs/image-response": "^0.72.0",
     "chokidar": "^5.0.0",
     "commander": "^14.0.3",
     "dotenv": "^17.3.1",

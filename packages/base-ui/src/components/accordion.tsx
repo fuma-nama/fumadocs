@@ -22,7 +22,7 @@ export function Accordions({
 }: ComponentProps<typeof Root>) {
   const rootRef = useRef<HTMLDivElement>(null);
   const composedRef = mergeRefs(ref, rootRef);
-  const [value, setValue] = useState<string[]>(defaultValue ?? []);
+  const [value, setValue] = useState<unknown[]>(defaultValue ?? []);
 
   useEffect(() => {
     const id = window.location.hash.substring(1);

@@ -31,7 +31,7 @@
     "@types/node": "^25.5.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.0",
+    "@vitejs/plugin-react": "^6.0.1",
     "nitro": "^3.0.260311-beta",
     "serve": "^14.2.6",
     "srvx": "^0.11.9",

@@ -102,7 +102,7 @@
     "remark": "^15.0.1",
     "remark-directive": "^4.0.0",
     "remark-mdx": "^3.1.1",
-    "rollup": "^4.59.0",
+    "rolldown": "1.0.0-rc.9",
     "tsconfig": "workspace:*",
     "tsdown": "0.21.2",
     "vite": "^8.0.0",
