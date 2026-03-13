@@ -53,9 +53,9 @@ export interface DocsPageProps {
   children?: ReactNode;
 
   /**
-   * Apply class names to the `#nd-page` container.
+   * Apply props to the `#nd-page` container.
    */
-  className?: string;
+  props: ComponentProps<'article'>;
 }
 
 interface TableOfContentOptions extends Pick<AnchorProviderProps, 'single'> {
@@ -76,16 +76,26 @@ interface TableOfContentOptions extends Pick<AnchorProviderProps, 'single'> {
    * @defaultValue 'normal'
    */
   style?: 'normal' | 'clerk';
+
+  /**
+   * Apply props to the TOC popover container.
+   */
+  props?: ComponentProps<'div'>;
 }
 
 export function DocsPage({
   breadcrumb: { enabled: breadcrumbEnabled = true, component: breadcrumb, ...breadcrumbProps } = {},
   footer: { enabled: footerEnabled, component: footerReplace, ...footerProps } = {},
   full = false,
-  tableOfContent: { enabled: tocPopoverEnabled, component: tocPopover, ...tocOptions } = {},
+  tableOfContent: {
+    enabled: tocPopoverEnabled,
+    component: tocPopover,
+    props: tocPopoverProps,
+    ...tocOptions
+  } = {},
   toc = [],
   children,
-  className,
+  props,
 }: DocsPageProps) {
   tocPopoverEnabled ??=
     toc.length > 0 || tocOptions.header !== undefined || tocOptions.footer !== undefined;
@@ -104,7 +114,7 @@ export function DocsPage({
     <>
       {tocPopoverEnabled &&
         (tocPopover ?? (
-          <PageTOCPopover>
+          <PageTOCPopover {...tocPopoverProps}>
             <PageTOCPopoverContent>
               {tocOptions.header}
               <TOCScrollArea>
@@ -121,8 +131,9 @@ export function DocsPage({
         className={cn(
           'flex flex-col w-full max-w-[900px] mx-auto [grid-area:main] px-4 py-6 gap-4 md:px-6 md:pt-8 xl:px-8 xl:pt-14',
           full ? 'max-w-[1200px]' : 'xl:layout:[--fd-toc-width:268px]',
-          className,
+          props?.className,
         )}
+        {...props}
       >
         {breadcrumbEnabled && (breadcrumb ?? <PageBreadcrumb {...breadcrumbProps} />)}
         {children}

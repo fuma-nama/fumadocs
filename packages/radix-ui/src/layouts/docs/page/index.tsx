@@ -1,4 +1,4 @@
-import type { ComponentProps, ReactNode } from 'react';
+import type { ComponentProps, ComponentPropsWithoutRef, ReactNode } from 'react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { Edit, Text } from 'lucide-react';
@@ -54,9 +54,9 @@ export interface DocsPageProps {
   children?: ReactNode;
 
   /**
-   * Apply class names to the `#nd-page` container.
+   * Apply props to the `#nd-page` container.
    */
-  className?: string;
+  props: ComponentProps<'article'>;
 }
 
 type TableOfContentOptions = Pick<AnchorProviderProps, 'single'> & {
@@ -77,6 +77,11 @@ type TableOfContentOptions = Pick<AnchorProviderProps, 'single'> & {
    * @defaultValue 'normal'
    */
   style?: 'normal' | 'clerk';
+
+  /**
+   * Apply props to the `#nd-toc` container
+   */
+  props?: ComponentPropsWithoutRef<'div'>;
 };
 
 type TableOfContentPopoverOptions = Omit<TableOfContentOptions, 'single'>;
@@ -88,12 +93,18 @@ export function DocsPage({
   tableOfContentPopover: {
     enabled: tocPopoverEnabled,
     component: tocPopover,
+    props: tocPopoverProps,
     ...tocPopoverOptions
   } = {},
-  tableOfContent: { enabled: tocEnabled, component: tocReplace, ...tocOptions } = {},
+  tableOfContent: {
+    enabled: tocEnabled,
+    component: tocReplace,
+    props: tocProps,
+    ...tocOptions
+  } = {},
   toc = [],
   children,
-  className,
+  props,
 }: DocsPageProps) {
   // disable TOC on full mode, you can still enable it with `enabled` option.
   tocEnabled ??=
@@ -118,7 +129,7 @@ export function DocsPage({
     <>
       {tocPopoverEnabled &&
         (tocPopover ?? (
-          <PageTOCPopover>
+          <PageTOCPopover {...tocPopoverProps}>
             <PageTOCPopoverTrigger />
             <PageTOCPopoverContent>
               {tocPopoverOptions.header}
@@ -139,8 +150,9 @@ export function DocsPage({
         className={cn(
           'flex flex-col w-full max-w-[900px] mx-auto [grid-area:main] px-4 py-6 gap-4 md:px-6 md:pt-8 xl:px-8 xl:pt-14',
           full ? 'max-w-[1168px]' : 'xl:layout:[--fd-toc-width:268px]',
-          className,
+          props?.className,
         )}
+        {...props}
       >
         {breadcrumbEnabled && (breadcrumb ?? <PageBreadcrumb {...breadcrumbProps} />)}
         {children}
@@ -150,7 +162,11 @@ export function DocsPage({
         (tocReplace ?? (
           <div
             id="nd-toc"
-            className="sticky top-(--fd-docs-row-1) h-[calc(var(--fd-docs-height)-var(--fd-docs-row-1))] flex flex-col [grid-area:toc] w-(--fd-toc-width) pt-12 pe-4 pb-2 max-xl:hidden"
+            className={cn(
+              'sticky top-(--fd-docs-row-1) h-[calc(var(--fd-docs-height)-var(--fd-docs-row-1))] flex flex-col [grid-area:toc] w-(--fd-toc-width) pt-12 pe-4 pb-2 max-xl:hidden',
+              tocProps?.className,
+            )}
+            {...tocProps}
           >
             {tocOptions.header}
             <h3

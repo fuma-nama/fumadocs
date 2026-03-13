@@ -284,8 +284,10 @@ function DocsNavbar({
       id="nd-subnav"
       className={cn(
         'sticky [grid-area:header] flex flex-col top-(--fd-docs-row-1) z-10 backdrop-blur-sm transition-colors data-[transparent=false]:bg-fd-background/80 layout:[--fd-header-height:--spacing(14)]',
+        nav.navProps?.className,
         showLayoutTabs && 'lg:layout:[--fd-header-height:--spacing(24)]',
       )}
+      {...nav.navProps}
     >
       <div data-header-body="" className="flex border-b px-4 gap-2 h-14 md:px-6">
         <div
@@ -332,7 +334,9 @@ function DocsNavbar({
               className={cn(
                 'w-full my-auto max-md:hidden',
                 navMode === 'top' ? 'rounded-xl max-w-sm ps-2.5' : 'max-w-[240px]',
+                searchToggle.lgProps?.className,
               )}
+              {...searchToggle.lgProps}
             />
           ))}
         <div className="flex flex-1 items-center justify-end md:gap-2">
@@ -361,7 +365,13 @@ function DocsNavbar({
 
           <div className="flex items-center md:hidden">
             {searchToggle.enabled !== false &&
-              (searchToggle.components?.sm ?? <SearchToggle hideIfDisabled className="p-2" />)}
+              (searchToggle.components?.sm ?? (
+                <SearchToggle
+                  hideIfDisabled
+                  className={cn('p-2', searchToggle.smProps?.className)}
+                  {...searchToggle.smProps}
+                />
+              ))}
             <SidebarTrigger
               className={cn(
                 buttonVariants({
@@ -383,7 +393,11 @@ function DocsNavbar({
             )}
             {themeSwitch.enabled !== false &&
               (themeSwitch.component ?? (
-                <ThemeToggle mode={themeSwitch.mode ?? 'light-dark-system'} />
+                <ThemeToggle
+                  mode={themeSwitch.mode ?? 'light-dark-system'}
+                  className={themeSwitch.props?.className}
+                  {...themeSwitch.props}
+                />
               ))}
             {sidebarCollapsible && navMode === 'top' && (
               <SidebarCollapseTrigger
