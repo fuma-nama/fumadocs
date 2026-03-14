@@ -1,6 +1,6 @@
 import { type ParameterNode, type TypeNode, TypeTable } from 'fumadocs-ui/components/type-table';
-import { type Jsx, toJsxRuntime } from 'hast-util-to-jsx-runtime';
-import * as runtime from 'react/jsx-runtime';
+import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
+import * as JsxRuntime from 'react/jsx-runtime';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import 'server-only';
 import type { ComponentProps, ReactNode } from 'react';
@@ -8,14 +8,13 @@ import { type BaseTypeTableProps, type GenerateTypeTableOptions } from '@/lib/ty
 import { type Generator } from '@/lib/base';
 import type { Nodes } from 'hast';
 import { parseTags } from '@/lib/parse-tags';
-import type { ResolvedShikiConfig } from 'fumadocs-core/highlight/config';
-import { markdownRenderer } from '@/markdown';
+import { markdownRenderer, type ShikiOptions } from '@/markdown';
 
 export interface AutoTypeTableProps extends BaseTypeTableProps, ComponentProps<'div'> {
   generator: Generator;
 
   /** Shiki configuration when using default `renderMarkdown` & `renderType` */
-  shiki?: ResolvedShikiConfig;
+  shiki?: ShikiOptions;
   options?: GenerateTypeTableOptions;
 
   renderMarkdown?: (md: string) => Promise<ReactNode>;
@@ -82,9 +81,7 @@ export async function AutoTypeTable({
 
 function toJsx(hast: Nodes) {
   return toJsxRuntime(hast, {
-    Fragment: runtime.Fragment,
-    jsx: runtime.jsx as Jsx,
-    jsxs: runtime.jsxs as Jsx,
+    ...JsxRuntime,
     components: { ...defaultMdxComponents, img: undefined },
   });
 }

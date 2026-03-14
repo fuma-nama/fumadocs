@@ -83,6 +83,7 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "json-schema-typed": "^8.0.2",
+    "shiki": "^4.0.2",
     "tailwindcss": "^4.2.1",
     "tsconfig": "workspace:*",
     "tsdown": "0.21.2"
@@ -90,13 +91,17 @@
   "peerDependencies": {
     "@scalar/api-client-react": "*",
     "@types/react": "*",
-    "fumadocs-core": "^16.5.0",
-    "fumadocs-ui": "^16.5.0",
+    "fumadocs-core": "^16.7.0",
+    "fumadocs-ui": "^16.7.0",
     "json-schema-typed": "*",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "shiki": "*"
   },
   "peerDependenciesMeta": {
+    "shiki": {
+      "optional": true
+    },
     "json-schema-typed": {
       "optional": true
     },

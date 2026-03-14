@@ -3,13 +3,12 @@ import type { Nodes } from 'hast';
 import type { Transformer } from 'unified';
 import type { Expression, ExpressionStatement, ObjectExpression } from 'estree';
 import { createGenerator, type DocEntry, type Generator } from '@/lib/base';
-import { type MarkdownRenderer, markdownRenderer } from '@/markdown';
+import { type MarkdownRenderer, markdownRenderer, type ShikiOptions } from '@/markdown';
 import { valueToEstree } from 'estree-util-value-to-estree';
 import { visit } from 'unist-util-visit';
 import { type BaseTypeTableProps, type GenerateTypeTableOptions } from '@/lib/type-table';
 import { toEstree } from 'hast-util-to-estree';
 import { type ParameterTag, parseTags } from '@/lib/parse-tags';
-import type { ResolvedShikiConfig } from 'fumadocs-core/highlight/config';
 import type { MdxJsxAttribute, MdxJsxExpressionAttribute, MdxJsxFlowElement } from 'mdast-util-mdx';
 import type { VFile } from 'vfile';
 
@@ -118,7 +117,7 @@ export interface RemarkAutoTypeTableOptions {
   /**
    * config for Shiki when using default `renderMarkdown` & `renderType`.
    */
-  shiki?: ResolvedShikiConfig;
+  shiki?: ShikiOptions;
   renderMarkdown?: MarkdownRenderer['renderMarkdownToHast'];
   renderType?: MarkdownRenderer['renderTypeToHast'];
 

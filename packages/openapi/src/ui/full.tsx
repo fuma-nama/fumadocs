@@ -1,14 +1,15 @@
 import type { OpenAPIServer } from '@/server';
 import * as base from './base';
-import { configDefault } from 'fumadocs-core/highlight';
-import { ApiPageProps } from './api-page';
-import { ShikiConfigProvider } from './full.client';
+import type { ApiPageProps } from './api-page';
+import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
+import { FullProvider } from './full.client';
 
 export type CreateAPIPageOptions = Partial<base.CreateAPIPageOptions>;
 
 export function createAPIPage(server: OpenAPIServer, options: CreateAPIPageOptions = {}) {
   const APIPage = base.createAPIPage(server, {
-    shiki: configDefault,
+    shiki: defaultShikiFactory,
+    shikiOptions: { themes: { light: 'github-light', dark: 'github-dark' } },
     async generateTypeScriptDefinitions(schema, ctx) {
       if (typeof schema !== 'object') return;
       const { compile } = await import('@fumari/json-schema-ts');
@@ -29,9 +30,9 @@ export function createAPIPage(server: OpenAPIServer, options: CreateAPIPageOptio
 
   return function APIPageFull(props: ApiPageProps) {
     return (
-      <ShikiConfigProvider>
+      <FullProvider>
         <APIPage {...props} />
-      </ShikiConfigProvider>
+      </FullProvider>
     );
   };
 }

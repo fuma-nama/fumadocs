@@ -59,6 +59,7 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "mdast-util-mdx": "^3.0.0",
+    "shiki": "^4.0.2",
     "tsconfig": "workspace:*",
     "tsdown": "0.21.2",
     "typescript": "^5.9.3",
@@ -69,12 +70,16 @@
     "@types/hast": "*",
     "@types/mdast": "*",
     "@types/react": "*",
-    "fumadocs-core": "^16.5.0",
-    "fumadocs-ui": "^16.5.0",
+    "fumadocs-core": "^16.7.0",
+    "fumadocs-ui": "^16.7.0",
     "react": "*",
+    "shiki": "*",
     "typescript": "*"
   },
   "peerDependenciesMeta": {
+    "shiki": {
+      "optional": true
+    },
     "@types/estree": {
       "optional": true
     },

@@ -15,7 +15,6 @@ import type { FetchResult } from '@/playground/fetcher';
 import type { SecurityEntry } from '@/playground/index';
 import { getStatusInfo } from './status-info';
 import { joinURL, resolveRequestData, resolveServerUrl, withBase } from '@/utils/url';
-import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock.core';
 import { MethodLabel } from '@/ui/components/method-label';
 import { useQuery } from '@/utils/use-query';
 import {
@@ -52,6 +51,7 @@ import {
 import { objectGet, objectSet, stringifyFieldKey } from '@fumari/stf/lib/utils';
 import { FieldInput, FieldSet, JsonInput, ObjectInput } from './components/inputs';
 import type { ParameterObject } from '@/types';
+import { ClientCodeBlock } from '@/ui/components/codeblock';
 
 export interface FormValues extends Record<string, unknown> {
   path: Record<string, unknown>;
@@ -696,7 +696,6 @@ function Route({ route, ...props }: ComponentProps<'div'> & { route: string }) {
 
 function DefaultResultDisplay({ data, reset }: { data: FetchResult; reset: () => void }) {
   const statusInfo = useMemo(() => getStatusInfo(data.status), [data.status]);
-  const { shikiOptions } = useApiContext();
 
   return (
     <div className="flex flex-col gap-3 mt-2 px-3 py-2 border-y bg-fd-secondary text-fd-secondary-foreground">
@@ -715,10 +714,9 @@ function DefaultResultDisplay({ data, reset }: { data: FetchResult; reset: () =>
       </div>
       <p className="text-sm text-fd-muted-foreground">{data.status}</p>
       {data.data !== undefined && (
-        <DynamicCodeBlock
+        <ClientCodeBlock
           lang={typeof data.data === 'string' && data.data.length > 50000 ? 'text' : data.type}
           code={typeof data.data === 'string' ? data.data : JSON.stringify(data.data, null, 2)}
-          options={shikiOptions}
         />
       )}
     </div>

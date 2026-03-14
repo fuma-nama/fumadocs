@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- rehype-react without types */
 import Slugger from 'github-slugger';
-import type { Awaitable, DistributiveOmit, MethodInformation, RenderContext } from '@/types';
+import type { Awaitable, MethodInformation, RenderContext } from '@/types';
 import type { NoReference } from '@/utils/schema';
 import type { ProcessedDocument } from '@/utils/process-document';
 import { defaultAdapters, MediaAdapter } from '@/requests/media/adapter';
 import type { FC, HTMLAttributes, ReactNode } from 'react';
-import { highlight, type CoreHighlightOptions } from 'fumadocs-core/highlight/core';
 import type { OpenAPIServer } from '@/server';
 import type { APIPageClientOptions } from './client';
 import { Heading } from 'fumadocs-ui/components/heading';
@@ -20,10 +19,11 @@ import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
 import type { SchemaUIOptions } from './schema';
 import type { ResponseTab } from './operation/response-tabs';
 import type { ExampleRequestItem } from './operation/request-tabs';
-import type { ResolvedShikiConfig } from 'fumadocs-core/highlight/config';
 import { APIPage, type ApiPageProps, type OperationItem, type WebhookItem } from './api-page';
 import type { CodeUsageGeneratorRegistry, InlineCodeUsageGenerator } from '@/requests/generators';
 import type { JSONSchema } from 'json-schema-typed';
+import type { BundledTheme, CodeOptionsThemes, CodeToHastOptionsCommon } from 'shiki';
+import { highlightHast, type ShikiFactory } from 'fumadocs-core/highlight/shiki';
 
 export interface GenerateTypeScriptDefinitionsContext extends RenderContext {
   operation: NoReference<MethodInformation>;
@@ -75,9 +75,9 @@ export interface CreateAPIPageOptions {
    */
   generateCodeSamples?: (method: MethodInformation) => Awaitable<InlineCodeUsageGenerator[]>;
 
-  shiki: ResolvedShikiConfig;
+  shiki: ShikiFactory;
   renderMarkdown?: (md: string) => ReactNode;
-  shikiOptions?: DistributiveOmit<CoreHighlightOptions, 'config' | 'lang' | 'components'>;
+  shikiOptions: Omit<CodeToHastOptionsCommon, 'lang'> & CodeOptionsThemes<BundledTheme>;
 
   /**
    * Show full response schema instead of only example response & Typescript definitions.
@@ -233,6 +233,8 @@ export function createAPIPage(
       .use(createRehypeCode(options.shiki), {
         langs: [],
         lazy: true,
+        defaultColor: false,
+        ...options.shikiOptions,
       })
       .use(rehypeReact);
   }
@@ -293,10 +295,13 @@ export function createAPIPage(
           return options.renderCodeBlock({ lang, code });
         }
 
-        const rendered = await highlight(code, {
+        const hast = await highlightHast(await options.shiki.getOrInit(), code, {
           lang,
+          defaultColor: false,
           ...options.shikiOptions,
-          config: options.shiki,
+        });
+        const rendered = toJsxRuntime(hast, {
+          ...JsxRuntime,
           components: {
             pre: Pre,
           },

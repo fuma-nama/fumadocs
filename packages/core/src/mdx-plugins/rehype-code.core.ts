@@ -93,13 +93,19 @@ export function createRehypeCode<
       }>),
 ) {
   async function initTransformer(_options?: Options) {
-    const { highlighter, options } =
-      typeof highlighterFactory === 'function'
-        ? await highlighterFactory(_options)
-        : {
-            highlighter: await highlighterFactory.getOrInit(),
-            options: (_options ?? {}) as RehypeCodeOptionsCommon,
-          };
+    let highlighter: HighlighterCore;
+    let options: RehypeCodeOptionsCommon;
+    if (typeof highlighterFactory === 'function') {
+      const out = await highlighterFactory(_options);
+      highlighter = out.highlighter;
+      options = out.options;
+    } else {
+      // TODO: When newer Shiki supported it, register lang alias dynamically instead of creating new instance
+      highlighter = _options?.langAlias
+        ? await highlighterFactory.init(_options)
+        : await highlighterFactory.getOrInit();
+      options = (_options ?? {}) as RehypeCodeOptionsCommon;
+    }
 
     const transformers = options.transformers ? [...options.transformers] : [];
     transformers.unshift({
