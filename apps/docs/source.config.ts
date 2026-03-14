@@ -5,7 +5,7 @@ import jsonSchema from 'fumadocs-mdx/plugins/json-schema';
 import lastModified from 'fumadocs-mdx/plugins/last-modified';
 import type { ShikiTransformer } from 'shiki';
 import type { RemarkAutoTypeTableOptions } from 'fumadocs-typescript';
-import { shikiConfig } from './lib/shiki';
+import { defaultShikiOptions } from './lib/shiki';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
 import { visit } from 'unist-util-visit';
 import type { Transformer } from 'unified';
@@ -46,7 +46,7 @@ export const docs = defineDocs({
         generator: createGenerator({
           cache: createFileSystemGeneratorCache('.next/fumadocs-typescript'),
         }),
-        shiki: shikiConfig,
+        shiki: defaultShikiOptions,
       };
       return applyMdxPreset({
         rehypeCodeOptions: isLint

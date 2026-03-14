@@ -95,9 +95,9 @@
       "types": "./dist/highlight/index.d.ts",
       "import": "./dist/highlight/index.js"
     },
-    "./highlight/core": {
-      "types": "./dist/highlight/core/index.d.ts",
-      "import": "./dist/highlight/core/index.js"
+    "./highlight/shiki": {
+      "types": "./dist/highlight/shiki/index.d.ts",
+      "import": "./dist/highlight/shiki/index.js"
     },
     "./highlight/*": {
       "types": "./dist/highlight/*.d.ts",

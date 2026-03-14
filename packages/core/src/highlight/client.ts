@@ -1,7 +1,9 @@
 'use client';
 import type { DependencyList, ReactNode } from 'react';
-import { configDefault, type HighlightOptions } from '.';
-import { useShiki as useShikiBase } from './core/client';
+import type { HighlightOptions } from '.';
+import { useShiki as useShikiBase } from './shiki/react';
+import { defaultShikiFactory } from './shiki/full';
+import { applyDefaultThemes } from './utils';
 
 /**
  * get highlighted results, should be used with React Suspense API.
@@ -14,11 +16,9 @@ export function useShiki(
   deps?: DependencyList,
 ): ReactNode {
   return useShikiBase(
+    () => defaultShikiFactory.getOrInit(),
     code,
-    {
-      config: configDefault,
-      ...options,
-    },
+    applyDefaultThemes(options),
     deps,
   );
 }

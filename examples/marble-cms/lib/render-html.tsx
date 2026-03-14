@@ -2,7 +2,7 @@ import type { TOCItemType } from 'fumadocs-core/toc';
 import Slugger from 'github-slugger';
 import parse, { type DOMNode, domToReact } from 'html-react-parser';
 import { Heading } from 'fumadocs-ui/components/heading';
-import { CodeBlock } from '@/components/code-block';
+import { ServerCodeBlock } from 'fumadocs-ui/components/codeblock.rsc';
 
 export function renderFromHtml(content: string) {
   const toc: TOCItemType[] = [];
@@ -32,7 +32,7 @@ export function renderFromHtml(content: string) {
       }
 
       if (node.name === 'pre') {
-        return <CodeBlock lang="tsx" code={stringify(node)} />;
+        return <ServerCodeBlock lang="tsx" code={stringify(node)} />;
       }
     },
   });

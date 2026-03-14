@@ -8,19 +8,19 @@ import {
   transformerNotationWordHighlight,
 } from '@shikijs/transformers';
 import type { Processor, Transformer } from 'unified';
-import type { Highlighter, ShikiTransformer } from 'shiki';
+import type { Highlighter, HighlighterCore, ShikiTransformer } from 'shiki';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx';
 import type { CodeBlockIcon, IconOptions } from './transformer-icon';
 import { transformerIcon } from './transformer-icon';
 import { parseCodeBlockAttributes } from '@/mdx-plugins/codeblock-utils';
-import type { DistributiveOmit } from '@/types';
-import type { ResolvedShikiConfig } from '@/highlight/config';
+import type { Awaitable, DistributiveOmit } from '@/types';
+import type { ShikiFactory } from '@/highlight/shiki';
+import { defaultThemes, getRequiredThemes } from '@/highlight/utils';
 
-export function rehypeCodeDefaultOptions(config: ResolvedShikiConfig): RehypeCodeOptionsCommon {
+export function rehypeCodeDefaultOptions(): RehypeCodeOptionsCommon {
   return {
     lazy: true,
-    ...config.defaultThemes,
-    defaultColor: false,
+    ...defaultThemes,
     defaultLanguage: 'plaintext',
     transformers: [
       transformerNotationHighlight({
@@ -85,26 +85,20 @@ export type RehypeCodeOptionsCommon = DistributiveOmit<RehypeShikiOptions, 'lazy
 export function createRehypeCode<
   Options extends Partial<RehypeCodeOptionsCommon> = Partial<RehypeCodeOptionsCommon>,
 >(
-  configFactory:
-    | ResolvedShikiConfig
-    | ((options?: Options) => {
-        config: ResolvedShikiConfig;
+  highlighterFactory:
+    | ShikiFactory
+    | ((options?: Options) => Awaitable<{
+        highlighter: HighlighterCore;
         options: RehypeCodeOptionsCommon;
-      }),
+      }>),
 ) {
-  return function rehypeCode(
-    this: Processor,
-    _options: Options | undefined,
-  ): Transformer<Root, Root> {
-    const { config, options } =
-      typeof configFactory === 'function'
-        ? configFactory(_options)
+  async function initTransformer(_options?: Options) {
+    const { highlighter, options } =
+      typeof highlighterFactory === 'function'
+        ? await highlighterFactory(_options)
         : {
-            config: configFactory,
-            options: {
-              ...rehypeCodeDefaultOptions(configFactory),
-              ..._options,
-            },
+            highlighter: await highlighterFactory.getOrInit(),
+            options: (_options ?? {}) as RehypeCodeOptionsCommon,
           };
 
     const transformers = options.transformers ? [...options.transformers] : [];
@@ -133,32 +127,27 @@ export function createRehypeCode<
       transformers.push(transformerTab());
     }
 
-    const transformer = Promise.resolve(config.createHighlighter()).then(async (highlighter) => {
-      if ('themes' in options) {
-        await highlighter.loadTheme(...(Object.values(options.themes).filter(Boolean) as never[]));
-      } else {
-        await highlighter.loadTheme(options.theme as never);
-      }
+    const langs =
+      options.langs ??
+      (options.lazy ? ['js', 'jsx', 'ts', 'tsx'] : Object.keys(highlighter.getBundledLanguages()));
 
-      const langs =
-        options.langs ??
-        (options.lazy
-          ? ['js', 'jsx', 'ts', 'tsx']
-          : Object.keys(highlighter.getBundledLanguages()));
-
-      await highlighter.loadLanguage(...(langs as never[]));
-      return rehypeShikiFromHighlighter(highlighter as Highlighter, {
-        ...options,
-        transformers,
-      });
+    await Promise.all([
+      highlighter.loadTheme(...(getRequiredThemes(options) as never[])),
+      highlighter.loadLanguage(...(langs as never[])),
+    ]);
+    return rehypeShikiFromHighlighter(highlighter as Highlighter, {
+      ...options,
+      transformers,
     });
+  }
+
+  return function rehypeCode(this: Processor, _options?: Options): Transformer<Root, Root> {
+    const transformer = initTransformer(_options);
 
     return async (tree, file) => {
       await (
         await transformer
-      )(tree, file, () => {
-        // nothing
-      });
+      )(tree, file, () => undefined);
     };
   };
 }

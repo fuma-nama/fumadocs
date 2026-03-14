@@ -135,6 +135,7 @@
     "@types/react-dom": "^19.2.3",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
+    "shiki": "^4.0.2",
     "tailwindcss": "^4.2.1",
     "tsconfig": "workspace:*",
     "tsdown": "0.21.2",
@@ -147,9 +148,13 @@
     "fumadocs-core": "workspace:*",
     "next": "16.x.x",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "shiki": "*"
   },
   "peerDependenciesMeta": {
+    "shiki": {
+      "optional": true
+    },
     "next": {
       "optional": true
     },

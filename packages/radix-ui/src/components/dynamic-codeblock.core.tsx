@@ -1,10 +1,12 @@
 'use client';
 import { CodeBlock, type CodeBlockProps, Pre } from '@/components/codeblock';
-import { useShikiDynamic, type UseShikiOptions } from 'fumadocs-core/highlight/core/client';
+import { useShikiDynamic, type UseShikiOptions } from 'fumadocs-core/highlight/shiki/react';
 import { cn } from '@/utils/cn';
 import { type ComponentProps, createContext, type FC, use, useId } from 'react';
+import type { HighlighterCore } from 'shiki';
 
 export interface DynamicCodeblockProps {
+  highlighter: HighlighterCore | (() => HighlighterCore | PromiseLike<HighlighterCore>);
   lang: string;
   code: string;
   /**
@@ -19,7 +21,7 @@ export interface DynamicCodeblockProps {
    * @defaultValue true
    */
   wrapInSuspense?: boolean;
-  options?: DistributiveOmit<UseShikiOptions, 'lang'>;
+  options: DistributiveOmit<UseShikiOptions, 'lang'>;
 }
 
 type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
@@ -46,17 +48,19 @@ export function DynamicCodeBlock({
   codeblock,
   options,
   wrapInSuspense = true,
+  highlighter,
 }: DynamicCodeblockProps) {
   const id = useId();
   const shikiOptions: UseShikiOptions = {
     lang,
+    defaultColor: false,
     ...options,
     components: {
       pre: DefaultPre,
-      ...options?.components,
+      ...options.components,
     },
   };
-  let node = useShikiDynamic(code, shikiOptions, [id, lang, code]);
+  let node = useShikiDynamic(highlighter, code, shikiOptions, [id, lang, code]);
   if (wrapInSuspense) node ??= <Placeholder code={code} components={shikiOptions.components} />;
 
   return <PropsContext value={codeblock}>{node}</PropsContext>;

@@ -1,18 +1,12 @@
 'use client';
 import { CodeBlock, type CodeBlockProps, Pre } from '@/components/codeblock';
-import { useShiki, type UseShikiOptions } from 'fumadocs-core/highlight/core/client';
+import { useShikiDynamic, type UseShikiOptions } from 'fumadocs-core/highlight/shiki/react';
 import { cn } from '@/utils/cn';
-import {
-  type ComponentProps,
-  createContext,
-  type FC,
-  Suspense,
-  use,
-  useDeferredValue,
-  useId,
-} from 'react';
+import { type ComponentProps, createContext, type FC, use, useId } from 'react';
+import type { HighlighterCore } from 'shiki';
 
 export interface DynamicCodeblockProps {
+  highlighter: HighlighterCore | (() => HighlighterCore | PromiseLike<HighlighterCore>);
   lang: string;
   code: string;
   /**
@@ -27,7 +21,7 @@ export interface DynamicCodeblockProps {
    * @defaultValue true
    */
   wrapInSuspense?: boolean;
-  options?: DistributiveOmit<UseShikiOptions, 'lang'>;
+  options: DistributiveOmit<UseShikiOptions, 'lang'>;
 }
 
 type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
@@ -54,31 +48,22 @@ export function DynamicCodeBlock({
   codeblock,
   options,
   wrapInSuspense = true,
+  highlighter,
 }: DynamicCodeblockProps) {
   const id = useId();
   const shikiOptions: UseShikiOptions = {
     lang,
+    defaultColor: false,
     ...options,
     components: {
       pre: DefaultPre,
-      ...options?.components,
+      ...options.components,
     },
   };
+  let node = useShikiDynamic(highlighter, code, shikiOptions, [id, lang, code]);
+  if (wrapInSuspense) node ??= <Placeholder code={code} components={shikiOptions.components} />;
 
-  const children = (
-    <PropsContext value={codeblock}>
-      <Internal id={id} {...useDeferredValue({ code, options: shikiOptions })} />
-    </PropsContext>
-  );
-
-  if (wrapInSuspense)
-    return (
-      <Suspense fallback={<Placeholder code={code} components={shikiOptions.components} />}>
-        {children}
-      </Suspense>
-    );
-
-  return children;
+  return <PropsContext value={codeblock}>{node}</PropsContext>;
 }
 
 function Placeholder({
@@ -101,8 +86,4 @@ function Placeholder({
       </Code>
     </Pre>
   );
-}
-
-function Internal({ id, code, options }: { id: string; code: string; options: UseShikiOptions }) {
-  return useShiki(code, options, [id, options.lang, code]);
 }
