@@ -58,7 +58,7 @@ This repository uses Turborepo, so development servers should be started using t
 Before running any app, build all shared packages:
 
 ```bash
-pnpm run build --filter=./packages/*
+pnpm run build --filter='./packages/*'
 ```
 
 Then, start docs site in dev mode.
@@ -92,6 +92,6 @@ You may start with contributing to the docs,
 it is located in `/apps/docs/content/docs`.
 
 To run the docs site in dev mode,
-build the dependencies with `pnpm run build --filter=./packages/*` and run `pnpm run dev --filter=docs` to start the dev server.
+build the dependencies with `pnpm run build --filter='./packages/*'` and run `pnpm run dev --filter=docs` to start the dev server.
 
 You don't need any extra environment variables to run this project.
