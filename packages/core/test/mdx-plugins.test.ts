@@ -4,6 +4,7 @@ import path from 'node:path';
 import { remark } from 'remark';
 import {
   parseCodeBlockAttributes,
+  rehypeCode,
   rehypeToc,
   remarkDirectiveAdmonition,
   remarkHeading,
@@ -149,6 +150,53 @@ test('Rehype Toc', async () => {
   await expect(result.value).toMatchFileSnapshot(
     path.resolve(cwd, './fixtures/rehype-toc.output.js'),
   );
+});
+
+test.only('Rehype Code: langAlias', async () => {
+  const processor = createProcessor({
+    rehypePlugins: [
+      [
+        rehypeCode,
+        {
+          lazy: false,
+          langs: ['shellscript'],
+          langAlias: {
+            Shell: "shellscript",
+          },
+        },
+      ],
+    ],
+  });
+  const result = await processor.process({
+    value: '```Shell\nif true; then echo hi; fi\n```',
+  });
+
+  expect(result.value).toMatchInlineSnapshot(`
+    "import {jsx as _jsx} from "react/jsx-runtime";
+    function _createMdxContent(props) {
+      const _components = {
+        code: "code",
+        pre: "pre",
+        ...props.components
+      };
+      return _jsx(_components.pre, {
+        children: _jsx(_components.code, {
+          className: "language-Shell",
+          children: "if true; then echo hi; fi\\n"
+        })
+      });
+    }
+    export default function MDXContent(props = {}) {
+      const {wrapper: MDXLayout} = props.components || ({});
+      return MDXLayout ? _jsx(MDXLayout, {
+        ...props,
+        children: _jsx(_createMdxContent, {
+          ...props
+        })
+      }) : _createMdxContent(props);
+    }
+    "
+  `)
 });
 
 test('parse meta strings', () => {
