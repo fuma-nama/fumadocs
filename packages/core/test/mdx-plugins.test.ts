@@ -18,6 +18,8 @@ import remarkGfm from 'remark-gfm';
 import { createProcessor } from '@mdx-js/mdx';
 import { remarkSteps } from '@/mdx-plugins/remark-steps';
 import remarkDirective from 'remark-directive';
+import { placeholder, remarkLLMs } from '@/mdx-plugins/remark-llms';
+import { renderPlaceholder } from '@/mdx-plugins/remark-llms.runtime';
 
 const cwd = path.dirname(fileURLToPath(import.meta.url));
 
@@ -165,4 +167,29 @@ test('parse meta strings', () => {
       "rest": "   :invalid="" 'invalid'name="test"",
     }
   `);
+});
+
+test('Remark LLMs: placeholder', async () => {
+  const file = path.resolve(cwd, './fixtures/remark-llms.mdx');
+  const content = await fs.readFile(file);
+  const result = await remark()
+    .use(remarkMdx)
+    .use(remarkLLMs, {
+      _data: true,
+      stringify(node, parent, state, info) {
+        if (node.type === 'mdxJsxFlowElement' && node.name === 'MyPage')
+          return placeholder(node, parent, state, info);
+      },
+    })
+    .process(content);
+
+  const markdown = result.data.markdown as string;
+  const rendered = await renderPlaceholder(markdown, {
+    async MyPage({ attributes, children }) {
+      return `title: ${attributes.title}, children: ${children}`;
+    },
+  });
+  await expect(
+    `\`\`\`md\n${markdown}\n\`\`\`\n\n\`\`\`md\n${rendered}\n\`\`\``,
+  ).toMatchFileSnapshot(path.resolve(cwd, './fixtures/remark-llms.output.md'));
 });

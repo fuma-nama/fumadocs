@@ -1,7 +1,10 @@
 import type { Processor, Transformer } from 'unified';
 import { toMdxExport } from './mdast-utils';
-import type { Heading, Root } from 'mdast';
+import type { Heading, Parents, Root } from 'mdast';
 import { defaultStringifier, type StringifyOptions } from './stringifier';
+import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';
+import type { Info, State } from 'mdast-util-to-markdown';
+import type { PlaceholderData } from './remark-llms.runtime';
 
 export interface LLMsOptions extends StringifyOptions {
   /**
@@ -39,6 +42,11 @@ export interface LLMsOptions extends StringifyOptions {
    * ```
    */
   filterElement?: StringifyOptions['filterElement'];
+
+  /**
+   * @private output in file data
+   */
+  _data?: boolean;
 }
 
 /**
@@ -46,7 +54,7 @@ export interface LLMsOptions extends StringifyOptions {
  */
 export function remarkLLMs(
   this: Processor,
-  { as = '_markdown', headingIds = true, ...stringify }: LLMsOptions = {},
+  { as = '_markdown', headingIds = true, _data = false, ...stringify }: LLMsOptions = {},
 ): Transformer<Root, Root> {
   const stringifier = defaultStringifier({
     ...stringify,
@@ -68,7 +76,28 @@ export function remarkLLMs(
     },
   });
 
-  return (node) => {
-    node.children.unshift(toMdxExport(as, stringifier.call(this, node, undefined)));
+  return (node, file) => {
+    const value = stringifier.call(this, node, undefined);
+    node.children.unshift(toMdxExport(as, value));
+    if (_data) file.data.markdown = value;
   };
+}
+
+export function placeholder(
+  node: MdxJsxTextElement | MdxJsxFlowElement,
+  _parent: Parents | undefined,
+  state: State,
+  info: Info,
+) {
+  const attributes: Record<string, unknown> = {};
+  for (const attr of node.attributes) {
+    if (attr.type === 'mdxJsxExpressionAttribute') continue;
+    attributes[attr.name] = attr.value;
+  }
+
+  return `\0${JSON.stringify({
+    name: node.name,
+    children: state.containerPhrasing(node, info),
+    attributes,
+  } satisfies PlaceholderData)}\0`;
 }

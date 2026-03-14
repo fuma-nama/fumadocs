@@ -314,3 +314,5 @@ export function createAPIPage(
     return <APIPage {...props} ctx={ctx} />;
   };
 }
+
+export { ClientCodeBlockProvider } from './components/codeblock';
