@@ -88,7 +88,7 @@ interface CustomRootNode<Context> {
   ctx: Context;
 }
 
-export function defaultStringifier<Context>(
+export function defaultStringifier<Context = undefined>(
   config: StringifyOptions<Context> = {},
 ): Stringifier<Context> {
   const {

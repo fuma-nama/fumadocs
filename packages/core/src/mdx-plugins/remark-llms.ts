@@ -44,6 +44,11 @@ export interface LLMsOptions extends StringifyOptions {
   filterElement?: StringifyOptions['filterElement'];
 
   /**
+   * Tag names of MDX components to be stringified as `placeholder()`, you can also use `placeholder()` directly in `stringify` callback.
+   */
+  mdxAsPlaceholder?: string[];
+
+  /**
    * @private output in file data
    */
   _data?: boolean;
@@ -54,10 +59,16 @@ export interface LLMsOptions extends StringifyOptions {
  */
 export function remarkLLMs(
   this: Processor,
-  { as = '_markdown', headingIds = true, _data = false, ...stringify }: LLMsOptions = {},
+  {
+    as = '_markdown',
+    headingIds = true,
+    _data = false,
+    mdxAsPlaceholder,
+    ...rest
+  }: LLMsOptions = {},
 ): Transformer<Root, Root> {
   const stringifier = defaultStringifier({
-    ...stringify,
+    ...rest,
     filterElement(node) {
       switch (node.type) {
         case 'mdxjsEsm':
@@ -66,13 +77,25 @@ export function remarkLLMs(
           return true;
       }
     },
+    stringify(node, parent, state, info, ctx) {
+      if (mdxAsPlaceholder) {
+        switch (node.type) {
+          case 'mdxJsxFlowElement':
+          case 'mdxJsxTextElement':
+            if (node.name && mdxAsPlaceholder.includes(node.name))
+              return placeholder(node, parent, state, info);
+        }
+      }
+
+      return rest.stringify?.(node, parent, state, info, ctx);
+    },
     handlers: {
       heading(node: Heading, _p, state, info) {
         const id = node.data?.hProperties?.id;
         const content = state.containerPhrasing(node, info);
         return headingIds && id ? `${content} [#${id}]` : content;
       },
-      ...stringify.handlers,
+      ...rest.handlers,
     },
   });
 
@@ -83,6 +106,9 @@ export function remarkLLMs(
   };
 }
 
+/**
+ * Preserve AST data to render the MDX component at runtime, use `renderPlaceholder()` to render the placeholders.
+ */
 export function placeholder(
   node: MdxJsxTextElement | MdxJsxFlowElement,
   _parent: Parents | undefined,
