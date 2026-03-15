@@ -1,5 +1,15 @@
 # next-docs-zeta
 
+## 17.0.0
+
+### Minor Changes
+
+- f45d703: stablize Shiki factory API
+
+### Patch Changes
+
+- 45aa454: Support `placeholder()` API in llms.txt generation
+
 ## 16.6.17
 
 ### Patch Changes

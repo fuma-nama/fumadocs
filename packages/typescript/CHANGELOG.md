@@ -1,5 +1,18 @@
 # fumadocs-typescript
 
+## 5.2.0
+
+### Minor Changes
+
+- 1fc5549: Bump deps
+
+### Patch Changes
+
+- Updated dependencies [f45d703]
+- Updated dependencies [45aa454]
+  - fumadocs-ui@17.0.0
+  - fumadocs-core@17.0.0
+
 ## 5.1.5
 
 ### Patch Changes
