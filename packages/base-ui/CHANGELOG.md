@@ -1,5 +1,17 @@
 # @fumadocs/base-ui
 
+## 17.0.0
+
+### Minor Changes
+
+- f45d703: stablize Shiki factory API
+
+### Patch Changes
+
+- Updated dependencies [f45d703]
+- Updated dependencies [45aa454]
+  - fumadocs-core@17.0.0
+
 ## 16.6.17
 
 ### Patch Changes
