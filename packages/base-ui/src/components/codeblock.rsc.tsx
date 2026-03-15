@@ -15,6 +15,7 @@ export type ServerCodeBlockProps = HighlightOptions & {
 
 export async function ServerCodeBlock({ code, codeblock, ...options }: ServerCodeBlockProps) {
   return await highlight(code, {
+    defaultColor: false,
     ...options,
     components: {
       pre: (props) => (

@@ -7,7 +7,7 @@ export interface I18nUIConfig<Languages extends string> extends I18nConfig<Langu
   /**
    * get i18n config for Fumadocs UI `<RootProvider i18n={config} />`.
    */
-  provider: (locale?: string) => I18nProviderProps;
+  provider: (locale?: Languages | (string & {})) => I18nProviderProps;
 }
 
 export function defineI18nUI<Languages extends string>(

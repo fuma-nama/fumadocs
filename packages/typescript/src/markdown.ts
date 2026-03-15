@@ -29,6 +29,7 @@ export function markdownRenderer(options?: ShikiOptions): MarkdownRenderer {
       const nodes = await highlightHast(type, {
         lang: 'ts',
         structure: 'inline',
+        defaultColor: false,
         ...options,
       });
 

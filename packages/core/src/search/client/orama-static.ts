@@ -1,7 +1,7 @@
-import { type AnyOrama, create, load, type Orama } from '@orama/orama';
+import { type AnyOrama, create, load, type Orama, type SearchParams } from '@orama/orama';
 import { searchSimple } from '@/search/orama/search/simple';
 import { searchAdvanced } from '@/search/orama/search/advanced';
-import { type advancedSchema, type simpleSchema } from '@/search/orama/create-db';
+import type { advancedSchema, simpleSchema } from '@/search/orama/create-db';
 import type { ExportedData } from '@/search/server';
 import type { SearchClient } from '../client';
 
@@ -24,6 +24,11 @@ export interface StaticOptions {
    * Filter by locale (unsupported at the moment)
    */
   locale?: string;
+
+  /**
+   * extra options for search
+   */
+  search?: Partial<SearchParams<Orama<unknown>>>;
 }
 
 const cache = new Map<string, Promise<Database>>();
@@ -87,7 +92,7 @@ async function loadDB({
 }
 
 export function oramaStaticClient(options: StaticOptions): SearchClient {
-  const { tag, locale } = options;
+  const { tag, locale, search } = options;
 
   return {
     deps: [tag, locale],
@@ -96,9 +101,9 @@ export function oramaStaticClient(options: StaticOptions): SearchClient {
 
       if (!db) return [];
       if (db.type === 'simple')
-        return searchSimple(db as unknown as Orama<typeof simpleSchema>, query);
+        return searchSimple(db as unknown as Orama<typeof simpleSchema>, query, search as never);
 
-      return searchAdvanced(db.db as Orama<typeof advancedSchema>, query, tag);
+      return searchAdvanced(db.db as Orama<typeof advancedSchema>, query, tag, search as never);
     },
   };
 }
