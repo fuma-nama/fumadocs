@@ -71,7 +71,8 @@ export function Header({
       render={(_, s) => (
         <HeaderRoot
           transparentMode={nav.transparentMode}
-          className={cn(s.open && 'shadow-lg rounded-b-2xl')}
+          className={cn(nav.navProps?.className, s.open && 'shadow-lg rounded-b-2xl')}
+          {...nav.navProps}
         >
           <div className="flex h-14 w-full items-center px-4 mx-auto max-w-(--fd-layout-width)">
             {renderTitleNav(nav, {
@@ -89,12 +90,22 @@ export function Header({
               {searchToggle.enabled !== false &&
                 (searchToggle.components?.lg ?? (
                   <LargeSearchToggle
-                    className="w-full rounded-full ps-2.5 max-w-[240px]"
+                    className={cn(
+                      'w-full rounded-full ps-2.5 max-w-[240px]',
+                      searchToggle.lgProps?.className,
+                    )}
                     hideIfDisabled
+                    {...searchToggle.lgProps}
                   />
                 ))}
               {themeSwitch.enabled !== false &&
-                (themeSwitch.component ?? <ThemeToggle mode={themeSwitch?.mode} />)}
+                (themeSwitch.component ?? (
+                  <ThemeToggle
+                    mode={themeSwitch?.mode}
+                    className={themeSwitch.props?.className}
+                    {...themeSwitch.props}
+                  />
+                ))}
               {i18n && (
                 <LanguageToggle>
                   <Languages className="size-5" />
@@ -112,7 +123,13 @@ export function Header({
             </div>
             <div className="flex flex-row items-center ms-auto -me-1.5 lg:hidden">
               {searchToggle.enabled !== false &&
-                (searchToggle.components?.sm ?? <SearchToggle className="p-2" hideIfDisabled />)}
+                (searchToggle.components?.sm ?? (
+                  <SearchToggle
+                    className={cn('p-2', searchToggle.smProps?.className)}
+                    hideIfDisabled
+                    {...searchToggle.smProps}
+                  />
+                ))}
               <CollapsibleTrigger
                 aria-label="Toggle Menu"
                 className={cn(
@@ -150,7 +167,13 @@ export function Header({
                 </LanguageToggle>
               )}
               {themeSwitch.enabled !== false &&
-                (themeSwitch.component ?? <ThemeToggle mode={themeSwitch?.mode} />)}
+                (themeSwitch.component ?? (
+                  <ThemeToggle
+                    mode={themeSwitch?.mode}
+                    className={themeSwitch.props?.className}
+                    {...themeSwitch.props}
+                  />
+                ))}
             </div>
           </CollapsibleContent>
           <NavigationMenu.Portal>

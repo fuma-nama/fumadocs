@@ -2,6 +2,7 @@ import { useMemo, type ComponentProps, type ReactNode } from 'react';
 import type { I18nConfig } from 'fumadocs-core/i18n';
 import type { LinkItemType } from '@/utils/link-item';
 import Link from 'fumadocs-core/link';
+import { ButtonProps } from '@/components/ui/button';
 
 export interface NavOptions {
   enabled: boolean;
@@ -23,6 +24,11 @@ export interface NavOptions {
   transparentMode?: 'always' | 'top' | 'none';
 
   children?: ReactNode;
+
+  /**
+   * Props for the `#nd-subnav` element
+   */
+  navProps?: ComponentProps<'header'>;
 }
 
 export interface BaseLayoutProps {
@@ -30,10 +36,26 @@ export interface BaseLayoutProps {
     enabled?: boolean;
     component?: ReactNode;
     mode?: 'light-dark' | 'light-dark-system';
+
+    /**
+     * Props for the theme switch button
+     */
+    props?: ComponentProps<'div'>;
   };
 
   searchToggle?: Partial<{
     enabled: boolean;
+
+    /**
+     * Props for the default `sm` search toggle button
+     */
+    smProps: Omit<ComponentProps<'button'>, 'color'> & ButtonProps;
+
+    /**
+     * Props for the default `lg` search toggle button
+     */
+    lgProps: ComponentProps<'button'>;
+
     components: Partial<{
       sm: ReactNode;
       lg: ReactNode;
