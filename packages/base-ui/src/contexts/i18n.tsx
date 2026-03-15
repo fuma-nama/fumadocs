@@ -17,15 +17,19 @@ export interface Translations {
   editOnGithub: string;
 }
 
-export interface LocaleItem {
+export type TranslationsOption = {
+  [key: string]: string | TranslationsOption;
+};
+
+interface LocaleItem {
   name: string;
   locale: string;
 }
 
 interface I18nContextType {
+  text: Translations & TranslationsOption;
   locale?: string;
   onChange?: (v: string) => void;
-  text: Translations;
   locales?: LocaleItem[];
 }
 
@@ -43,12 +47,11 @@ export const defaultTranslations: Translations = {
 };
 
 const I18nContext = createContext<I18nContextType>({
-  text: defaultTranslations,
+  text: { ...defaultTranslations },
 });
 
 export function I18nLabel(props: { label: keyof Translations }): string {
-  const { text } = useI18n();
-
+  const text = useI18n().text;
   return text[props.label];
 }
 
@@ -60,7 +63,7 @@ export interface I18nProviderProps {
   /**
    * Current locale
    */
-  locale: string;
+  locale?: string;
 
   /**
    * Handle changes to the locale, redirect user when not specified.
@@ -70,7 +73,7 @@ export interface I18nProviderProps {
   /**
    * Translations of current locale
    */
-  translations?: Partial<Translations>;
+  translations?: TranslationsOption;
 
   /**
    * Available languages

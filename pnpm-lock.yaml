@@ -2409,6 +2409,9 @@ importers:
 
   packages/openapi:
     dependencies:
+      '@fastify/deepmerge':
+        specifier: ^3.2.1
+        version: 3.2.1
       '@fumari/json-schema-ts':
         specifier: ^0.0.2
         version: 0.0.2(json-schema-typed@8.0.2)

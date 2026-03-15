@@ -20,6 +20,7 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": "./dist/index.js",
+    "./i18n": "./dist/i18n.js",
     "./playground": "./dist/playground/index.js",
     "./playground/client": "./dist/playground/client.js",
     "./requests/generators": "./dist/requests/generators/index.js",
@@ -49,6 +50,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "@fastify/deepmerge": "^3.2.1",
     "@fumari/json-schema-ts": "^0.0.2",
     "@fumari/stf": "workspace:*",
     "@radix-ui/react-accordion": "^1.2.12",

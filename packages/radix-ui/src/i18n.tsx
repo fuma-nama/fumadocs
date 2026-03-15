@@ -10,15 +10,22 @@ export interface I18nUIConfig<Languages extends string> extends I18nConfig<Langu
   provider: (locale?: Languages | (string & {})) => I18nProviderProps;
 }
 
+type TranslationsConfig<Languages extends string> = {
+  [K in Languages]?: Partial<Translations> & { displayName?: string };
+};
+
 export function defineI18nUI<Languages extends string>(
   config: I18nConfig<Languages>,
-  options: {
-    translations: {
-      [K in Languages]?: Partial<Translations> & { displayName?: string };
-    };
-  },
+  options:
+    | {
+        /**
+         * @deprecated you can directly define the translations in outer scope (the parent object of `translations`)
+         */
+        translations: TranslationsConfig<Languages>;
+      }
+    | TranslationsConfig<Languages> = {},
 ): I18nUIConfig<Languages> {
-  const { translations } = options;
+  const translations = 'translations' in options ? options.translations : options;
 
   return {
     ...config,

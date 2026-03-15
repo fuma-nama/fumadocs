@@ -98,6 +98,31 @@ paths:
             planter.list({ unwatered: true });
 ```
 
+### Internationalization
+
+Assuming you have configured [Internationalization](/docs/internationalization) at UI level:
+
+```tsx title="layout.shared.tsx"
+import { defineI18n } from 'fumadocs-core/i18n';
+import { defineI18nUI } from 'fumadocs-ui/i18n';
+import { defineI18nOpenAPI } from 'fumadocs-openapi/i18n';
+
+const i18n = defineI18n({
+  languages: ['en', 'cn'],
+  defaultLanguage: 'en',
+});
+
+export let i18nUI = defineI18nUI(i18n, {
+  cn: { displayName: 'Chinese' },
+});
+
+i18nUI = defineI18nOpenAPI(i18nUI, {
+  cn: {
+    titleRequestBody: '請求正文',
+  },
+});
+```
+
 ## Media Adapters
 
 You can create a media adapter to support other media types in API pages, a media adapter implements:

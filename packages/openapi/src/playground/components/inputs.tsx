@@ -23,6 +23,7 @@ import {
 import type { ParsedSchema } from '@/utils/schema';
 import { stringifyFieldKey } from '@fumari/stf/lib/utils';
 import { cva } from 'class-variance-authority';
+import { useTranslations } from '@/ui/client/i18n';
 
 const fieldLabelVariants = cva('w-full inline-flex items-center gap-0.5');
 
@@ -62,6 +63,7 @@ export function ObjectInput({
   });
 
   const hiddenProperties = isLazy ? schemaPropKeys.filter((key) => !_objectKeys.includes(key)) : [];
+  const t = useTranslations();
 
   return (
     <div
@@ -74,7 +76,7 @@ export function ObjectInput({
       {isLazy && hiddenProperties.length > 0 && (
         <Select value="" onValueChange={onAppend}>
           <SelectTrigger className="col-span-full">
-            <SelectValue placeholder="Show Property" />
+            <SelectValue placeholder={t.playgroundShowProperty} />
           </SelectTrigger>
           <SelectContent>
             {hiddenProperties.map((key) => (
@@ -92,7 +94,7 @@ export function ObjectInput({
           toolbar = (
             <button
               type="button"
-              aria-label="Remove Item"
+              aria-label={t.playgroundRemoveItem}
               className={cn(
                 buttonVariants({
                   color: 'outline',
@@ -123,7 +125,7 @@ export function ObjectInput({
         <div className="flex gap-2 order-last col-span-full">
           <Input
             value={nextName}
-            placeholder="Enter Property Name"
+            placeholder={t.playgroundPropertyPlaceholder}
             onChange={(e) => setNextName(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
@@ -141,7 +143,7 @@ export function ObjectInput({
               setNextName('');
             }}
           >
-            New
+            {t.playgroundNewProperty}
           </button>
         </div>
       )}
@@ -186,6 +188,7 @@ export function FieldInput({
 }) {
   const [value, setValue] = useFieldValue(fieldName);
   const id = stringifyFieldKey(fieldName);
+  const t = useTranslations();
   if (field.type === 'null') return;
 
   if (field.type === 'string' && field.format === 'binary') {
@@ -202,11 +205,11 @@ export function FieldInput({
         >
           {value instanceof File ? (
             <>
-              <span className="text-fd-muted-foreground text-xs">Selected</span>
+              <span className="text-fd-muted-foreground text-xs">{t.playgroundSelected}</span>
               <span className="truncate w-0 flex-1 text-end">{value.name}</span>
             </>
           ) : (
-            <span className="text-fd-muted-foreground">Upload</span>
+            <span className="text-fd-muted-foreground">{t.playgroundInputUpload}</span>
           )}
         </label>
         <input
@@ -232,7 +235,7 @@ export function FieldInput({
         onValueChange={(v) => setValue(field.enum![Number(v)])}
       >
         <SelectTrigger id={id} {...props}>
-          <SelectValue placeholder="Select" />
+          <SelectValue placeholder={t.playgroundSelectPlaceholder} />
         </SelectTrigger>
         <SelectContent>
           {field.enum.map((item, i) => (
@@ -240,7 +243,7 @@ export function FieldInput({
               {typeof item === 'string' ? item : JSON.stringify(item, null, 2)}
             </SelectItem>
           ))}
-          {!isRequired && <SelectItem value="-1">Unset</SelectItem>}
+          {!isRequired && <SelectItem value="-1">{t.playgroundInputUnset}</SelectItem>}
         </SelectContent>
       </Select>
     );
@@ -258,7 +261,7 @@ export function FieldInput({
         <SelectContent>
           <SelectItem value="true">True</SelectItem>
           <SelectItem value="false">False</SelectItem>
-          {!isRequired && <SelectItem value="undefined">Unset</SelectItem>}
+          {!isRequired && <SelectItem value="undefined">{t.playgroundInputUnset}</SelectItem>}
         </SelectContent>
       </Select>
     );
@@ -268,7 +271,7 @@ export function FieldInput({
   return (
     <Input
       id={id}
-      placeholder="Enter value"
+      placeholder={t.inputPlaceholder}
       type={isNumber ? 'number' : 'text'}
       step={field.type === 'integer' ? 1 : undefined}
       value={String(value ?? '')}
@@ -521,6 +524,7 @@ function ArrayInput({
   const name = fieldName.at(-1) ?? '';
   const { generateDefault } = useSchemaUtils();
   const { items, insertItem, removeItem } = useArray(fieldName);
+  const t = useTranslations();
 
   return (
     <div {...props} className={cn('flex flex-col gap-2', props.className)}>
@@ -538,7 +542,7 @@ function ArrayInput({
           toolbar={
             <button
               type="button"
-              aria-label="Remove Item"
+              aria-label={t.playgroundRemoveItem}
               className={cn(
                 buttonVariants({
                   color: 'outline',
@@ -566,7 +570,7 @@ function ArrayInput({
         }}
       >
         <Plus className="size-4" />
-        New Item
+        {t.playgroundNewItem}
       </button>
     </div>
   );

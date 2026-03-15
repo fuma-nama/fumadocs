@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/ui/components/select';
+import { useTranslations } from '@/ui/client/i18n';
 
 export function CopyTypeScriptPanel({
   name,
@@ -25,6 +26,8 @@ export function CopyTypeScriptPanel({
   const [isChecked, onCopy] = useCopyButton(() => {
     void navigator.clipboard.writeText(code);
   });
+  const t = useTranslations();
+  const useTypeText = t.useTypeInTypeScript.replace('{name}', name);
 
   return (
     <div
@@ -34,8 +37,8 @@ export function CopyTypeScriptPanel({
       )}
     >
       <div>
-        <p className="font-medium text-sm mb-2">TypeScript Definitions</p>
-        <p className="text-xs text-fd-muted-foreground">Use the {name} type in TypeScript.</p>
+        <p className="font-medium text-sm mb-2">{t.typeScriptDefinitions}</p>
+        <p className="text-xs text-fd-muted-foreground">{useTypeText}</p>
       </div>
       <button
         onClick={onCopy}
@@ -48,7 +51,7 @@ export function CopyTypeScriptPanel({
         )}
       >
         {isChecked ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-        Copy
+        {t.copy}
       </button>
     </div>
   );

@@ -259,7 +259,8 @@ export function createAPIPage(
       },
       slugger,
       async renderHeading(depth, text, props) {
-        const id = slugger.slug(text);
+        const id = typeof text === 'string' ? slugger.slug(text) : props?.id;
+        if (!id) throw new Error("missing 'id' for non-string children");
 
         if (options.renderHeading) {
           return options.renderHeading({ id, children: text, ...props }, depth);

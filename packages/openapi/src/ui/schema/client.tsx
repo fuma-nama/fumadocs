@@ -16,7 +16,13 @@ import {
   useState,
 } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from 'fumadocs-ui/components/tabs';
-import type { InfoTag, SchemaDataObjectProperty, SchemaUIGeneratedData } from '@/ui/schema';
+import { useTranslations } from '@/ui/client/i18n';
+import type {
+  InfoTag,
+  SchemaData,
+  SchemaDataObjectProperty,
+  SchemaUIGeneratedData,
+} from '@/ui/schema';
 import {
   Collapsible,
   CollapsibleContent,
@@ -139,23 +145,7 @@ function SchemaUIProperty({
       $ref: $type,
     });
   } else if (schema.type === 'array') {
-    if (variant === 'expand')
-      return (
-        <Collapsible className="my-2">
-          <CollapsibleTrigger
-            className={cn(
-              buttonVariants({ color: 'secondary', size: 'sm' }),
-              'group px-3 py-2 data-[state=open]:rounded-b-none',
-            )}
-          >
-            Array Item
-            <ChevronDown className="size-4 text-fd-muted-foreground group-data-[state=open]:rotate-180" />
-          </CollapsibleTrigger>
-          <CollapsibleContent className="-mt-px bg-fd-card px-3 rounded-lg rounded-tl-none border shadow-sm">
-            <SchemaUIProperty name="" $type={schema.item.$type} variant="expand" />
-          </CollapsibleContent>
-        </Collapsible>
-      );
+    if (variant === 'expand') return <ArrayItemCollapsible schema={schema} />;
 
     type = renderRef({
       pathName: name,
@@ -168,8 +158,8 @@ function SchemaUIProperty({
       {schema.description}
       {schema.infoTags && schema.infoTags.length > 0 && (
         <div className="flex flex-row gap-2 flex-wrap my-2 not-prose empty:hidden">
-          {schema.infoTags.map((tag) => (
-            <InfoTag key={tag.label} tag={tag} />
+          {schema.infoTags.map((tag, i) => (
+            <InfoTag key={i} tag={tag} />
           ))}
         </div>
       )}
@@ -180,6 +170,28 @@ function SchemaUIProperty({
     <Property name={name} type={type} deprecated={schema.deprecated} {...overrides}>
       {child}
     </Property>
+  );
+}
+
+function ArrayItemCollapsible({ schema }: { schema: Extract<SchemaData, { type: 'array' }> }) {
+  const [open, setOpen] = useState(false);
+  const t = useTranslations();
+
+  return (
+    <Collapsible className="my-2" open={open} onOpenChange={setOpen}>
+      <CollapsibleTrigger
+        className={cn(
+          buttonVariants({ color: 'secondary', size: 'sm' }),
+          'group px-3 py-2 data-[state=open]:rounded-b-none',
+        )}
+      >
+        {open ? t.schemaHideArray : t.schemaShowArray}
+        <ChevronDown className="size-4 text-fd-muted-foreground group-data-[state=open]:rotate-180" />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="-mt-px bg-fd-card px-3 rounded-lg rounded-tl-none border shadow-sm">
+        <SchemaUIProperty name="" $type={schema.item.$type} variant="expand" />
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
 
@@ -194,6 +206,7 @@ function ObjectSearch({ properties, container, open }: ObjectSearchProps) {
   const deferredValue = useDeferredValue(search);
   const firstItemRef = useRef<SchemaDataObjectProperty>(null);
   const prevProperties = useRef(properties);
+  const t = useTranslations();
 
   if (prevProperties.current !== properties) {
     prevProperties.current = properties;
@@ -214,7 +227,7 @@ function ObjectSearch({ properties, container, open }: ObjectSearchProps) {
           value={search}
           data-object-search-input=""
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Filter Properties"
+          placeholder={t.schemaFilterPropertiesPlaceholder}
           className="text-sm ps-2 py-2 flex-1 outline-none placeholder:text-fd-muted-foreground"
           onKeyDown={(e) => {
             if (e.key === 'Enter' && open) {
@@ -244,6 +257,7 @@ function ObjectSearchContent({
   firstItemRef: RefObject<SchemaDataObjectProperty | null>;
   properties: SchemaDataObjectProperty[];
 }) {
+  const t = useTranslations();
   const filtered = useMemo(() => {
     const search = rawSearch.trim().toLowerCase();
     return search.length > 0
@@ -256,7 +270,7 @@ function ObjectSearchContent({
   if (filtered.length === 0)
     return (
       <p className="text-fd-muted-foreground text-sm px-2">
-        No property matching{' '}
+        {t.schemaFilterPropertiesEmpty}{' '}
         <span className="text-fd-foreground font-medium">{`"${rawSearch}"`}</span>
       </p>
     );
@@ -504,6 +518,7 @@ function Property({
   className,
   ...props
 }: PropertyProps) {
+  const t = useTranslations();
   return (
     <div
       className={cn(
@@ -530,7 +545,7 @@ function Property({
         )}
         {deprecated && (
           <Badge color="yellow" className="ms-auto text-xs">
-            Deprecated
+            {t.deprecated}
           </Badge>
         )}
       </div>

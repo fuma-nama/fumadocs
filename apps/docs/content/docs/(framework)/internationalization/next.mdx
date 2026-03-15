@@ -45,16 +45,14 @@ import { i18n } from '@/lib/i18n';
 import { defineI18nUI } from 'fumadocs-ui/i18n';
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 
-// [!code ++:11]
+// [!code ++:9]
 export const i18nUI = defineI18nUI(i18n, {
-  translations: {
-    en: {
-      displayName: 'English',
-    },
-    cn: {
-      displayName: 'Chinese',
-      search: '搜尋文檔',
-    },
+  en: {
+    displayName: 'English',
+  },
+  cn: {
+    displayName: 'Chinese',
+    search: '搜尋文檔',
   },
 });
 
@@ -71,7 +69,6 @@ Pass translations to `<RootProvider />`:
 
 ```tsx title="app/[lang]/layout.tsx"
 import { RootProvider } from 'fumadocs-ui/provider/next';
-import { defineI18nUI } from 'fumadocs-ui/i18n';
 import { i18nUI } from '@/lib/layout.shared';
 
 export default async function RootLayout({

@@ -5,6 +5,7 @@ import { FormatFlags, schemaToString } from '@/utils/schema-to-string';
 import { mergeAllOf } from '@/utils/merge-schema';
 import type { SchemaUIProps } from '@/ui/schema/client';
 import { SchemaUILazy } from '@/ui/schema/lazy';
+import { I18nLabel } from '../client/i18n';
 
 export interface FieldBase {
   description?: ReactNode;
@@ -17,7 +18,7 @@ export interface FieldBase {
 }
 
 export interface InfoTag {
-  label: string;
+  label: ReactNode;
   value: string;
 }
 
@@ -101,19 +102,25 @@ export function generateSchemaUI(
     const fields: InfoTag[] = [];
 
     if (schema.default !== undefined) {
-      fields.push({ label: 'Default', value: JSON.stringify(schema.default) });
+      fields.push({
+        label: <I18nLabel label="schemaDefault" />,
+        value: JSON.stringify(schema.default),
+      });
     }
 
     if (schema.pattern) {
-      fields.push({ label: 'Match', value: schema.pattern });
+      fields.push({ label: <I18nLabel label="schemaMatch" />, value: schema.pattern });
     }
 
     if (schema.format) {
-      fields.push({ label: 'Format', value: schema.format });
+      fields.push({ label: <I18nLabel label="schemaFormat" />, value: schema.format });
     }
 
     if (schema.multipleOf) {
-      fields.push({ label: 'Multiple Of', value: schema.multipleOf.toString() });
+      fields.push({
+        label: <I18nLabel label="schemaMultipleOf" />,
+        value: schema.multipleOf.toString(),
+      });
     }
 
     let range = formatRange(
@@ -123,10 +130,10 @@ export function generateSchemaUI(
       schema.maximum,
       schema.exclusiveMaximum,
     );
-    if (range) fields.push({ label: 'Range', value: range });
+    if (range) fields.push({ label: <I18nLabel label="schemaRange" />, value: range });
 
     range = formatRange('length', schema.minLength, undefined, schema.maxLength, undefined);
-    if (range) fields.push({ label: 'Length', value: range });
+    if (range) fields.push({ label: <I18nLabel label="schemaLength" />, value: range });
 
     range = formatRange(
       'properties',
@@ -135,21 +142,24 @@ export function generateSchemaUI(
       schema.maxProperties,
       undefined,
     );
-    if (range) fields.push({ label: 'Properties', value: range });
+    if (range) fields.push({ label: <I18nLabel label="schemaProperties" />, value: range });
 
     range = formatRange('items', schema.minItems, undefined, schema.maxItems, undefined);
-    if (range) fields.push({ label: 'Items', value: range });
+    if (range) fields.push({ label: <I18nLabel label="schemaItems" />, value: range });
 
     if (schema.enum) {
       fields.push({
-        label: 'Value in',
+        label: <I18nLabel label="schemaValueIn" />,
         value: schema.enum.map((value) => JSON.stringify(value)).join(' | '),
       });
     }
 
     if (showExample && schema.examples) {
       for (const example of schema.examples) {
-        fields.push({ label: 'Example', value: JSON.stringify(example, null, 2) });
+        fields.push({
+          label: <I18nLabel label="schemaExample" />,
+          value: JSON.stringify(example, null, 2),
+        });
       }
     }
 

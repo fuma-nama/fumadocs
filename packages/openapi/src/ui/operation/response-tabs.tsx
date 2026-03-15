@@ -10,6 +10,7 @@ import {
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import { sample } from 'openapi-sampler';
 import type { ReactNode } from 'react';
+import { I18nLabel } from '@/ui/client/i18n';
 
 export interface ResponseTab {
   /**
@@ -32,7 +33,7 @@ interface ResponseExample {
    */
   sample: unknown;
 
-  label: string;
+  label: ReactNode;
 
   /**
    * description (in Markdown)
@@ -64,10 +65,8 @@ export function ResponseTabs({
       tab.examples ??= [];
 
       for (const [key, sample] of Object.entries(responseOfType.examples)) {
-        const title = sample?.summary || `Example ${key}`;
-
         tab.examples.push({
-          label: title,
+          label: sample?.summary ?? <I18nLabel label="responseTabName" replacements={{ key }} />,
           sample: sample.value,
           description: sample?.description,
         });
@@ -75,7 +74,7 @@ export function ResponseTabs({
     } else if (responseOfType?.example || responseOfType?.schema) {
       tab.examples ??= [];
       tab.examples.push({
-        label: 'Example',
+        label: <I18nLabel label="responseTabNameDefault" />,
         sample: responseOfType.example ?? sample(responseOfType.schema as object),
       });
     }
@@ -103,12 +102,12 @@ function renderResponseTabsDefault(
   async function renderResponse(tab: ResponseTab) {
     const { examples = [] } = tab;
 
-    let slot: ReactNode = 'Empty';
+    let slot: ReactNode = <I18nLabel label="empty" />;
     if (examples.length > 1) {
       slot = (
-        <Accordions type="single" className="pt-2" defaultValue={examples[0].label}>
+        <Accordions type="single" className="pt-2" defaultValue="0">
           {examples.map((example, i) => (
-            <AccordionItem key={i} value={example.label}>
+            <AccordionItem key={i} value={i.toString()}>
               <AccordionHeader>
                 <AccordionTrigger>{example.label}</AccordionTrigger>
               </AccordionHeader>

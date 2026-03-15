@@ -1,4 +1,5 @@
 import { CircleCheck, CircleX } from 'lucide-react';
+import type { Translations } from '@/i18n';
 
 interface StatusInfo {
   description: string;
@@ -6,45 +7,37 @@ interface StatusInfo {
   icon: React.ElementType;
 }
 
-const statusMap: Record<number, StatusInfo> = {
-  400: { description: 'Bad Request', color: 'text-red-500', icon: CircleX },
-  401: {
-    description: 'Unauthorized',
-    color: 'text-red-500',
-    icon: CircleX,
-  },
-  403: { description: 'Forbidden', color: 'text-red-500', icon: CircleX },
-  404: {
-    description: 'Not Found',
-    color: 'text-fd-muted-foreground',
-    icon: CircleX,
-  },
-  500: {
-    description: 'Internal Server Error',
-    color: 'text-red-500',
-    icon: CircleX,
-  },
+const statusKeys: Record<
+  number,
+  { key: keyof Translations; color: string; icon: React.ElementType }
+> = {
+  400: { key: 'statusBadRequest', color: 'text-red-500', icon: CircleX },
+  401: { key: 'statusUnauthorized', color: 'text-red-500', icon: CircleX },
+  403: { key: 'statusForbidden', color: 'text-red-500', icon: CircleX },
+  404: { key: 'statusNotFound', color: 'text-fd-muted-foreground', icon: CircleX },
+  500: { key: 'statusInternalServerError', color: 'text-red-500', icon: CircleX },
 };
 
-export function getStatusInfo(status: number): StatusInfo {
-  if (status in statusMap) {
-    return statusMap[status];
+export function getStatusInfo(status: number, t: Translations): StatusInfo {
+  if (status in statusKeys) {
+    const { key, color, icon } = statusKeys[status];
+    return { description: t[key], color, icon };
   }
 
   if (status >= 200 && status < 300) {
     return {
-      description: 'Successful',
+      description: t.statusSuccessful,
       color: 'text-green-500',
       icon: CircleCheck,
     };
   }
 
   if (status >= 400) {
-    return { description: 'Error', color: 'text-red-500', icon: CircleX };
+    return { description: t.statusError, color: 'text-red-500', icon: CircleX };
   }
 
   return {
-    description: 'No Description',
+    description: t.statusNoDescription,
     color: 'text-fd-muted-foreground',
     icon: CircleX,
   };
