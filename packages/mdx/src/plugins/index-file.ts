@@ -236,6 +236,7 @@ async function generateDynamicIndexFile(ctx: FileGenContext) {
   };
   codegen.lines.push(
     `import { dynamic } from 'fumadocs-mdx/runtime/dynamic';`,
+    `import path from 'node:path';`,
     `import * as Config from '${codegen.formatImportPath(configPath)}';`,
     '',
     `const create = await dynamic<typeof Config, ${tc}>(Config, ${JSON.stringify(partialOptions)}, ${JSON.stringify(serverOptions)});`,
@@ -295,10 +296,10 @@ async function generateDynamicIndexFile(ctx: FileGenContext) {
       case 'docs': {
         const metaGlob = await generateMetaCollectionGlob(ctx, parent.meta, true);
 
-        return `await create.docs("${parent.name}", "${getBase(parent)}", ${metaGlob}, ${entries.join(', ')})`;
+        return `await create.docs("${parent.name}", "${getBase(parent)}", ${metaGlob}, [${entries.join(', ')}])`;
       }
       case 'doc':
-        return `await create.doc("${collection.name}", "${getBase(collection)}", ${entries.join(', ')})`;
+        return `await create.doc("${collection.name}", "${getBase(collection)}", [${entries.join(', ')}])`;
     }
   }
 

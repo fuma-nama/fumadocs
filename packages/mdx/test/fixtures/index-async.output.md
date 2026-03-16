@@ -26,6 +26,7 @@ export const blogs = await create.docLazy("blogs", "packages/mdx/test/fixtures/g
 ```ts title="dynamic.ts"
 // @ts-nocheck
 import { dynamic } from 'fumadocs-mdx/runtime/dynamic';
+import path from 'node:path';
 import * as Config from './config';
 
 const create = await dynamic<typeof Config, import("fumadocs-mdx/runtime/types").InternalTypeConfig & {

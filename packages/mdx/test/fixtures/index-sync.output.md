@@ -43,6 +43,7 @@ export const blogs = await create.doc("blogs", "packages/mdx/test/fixtures/gener
 ```ts title="dynamic.ts"
 // @ts-nocheck
 import { dynamic } from 'fumadocs-mdx/runtime/dynamic';
+import path from 'node:path';
 import * as Config from './config';
 
 const create = await dynamic<typeof Config, import("fumadocs-mdx/runtime/types").InternalTypeConfig & {
