@@ -20,7 +20,7 @@ export const i18nUI = defineI18nUI(i18n, {
 
 export function baseOptions(locale: string): BaseLayoutProps {
   return {
-    i18n: i18nUI,
+    LanguageSwitch: true,
     nav: {
       title: locale === 'cn' ? 'Chinese Docs' : 'English Docs',
       url: `/${locale}`,

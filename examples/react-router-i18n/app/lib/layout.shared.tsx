@@ -3,7 +3,7 @@ import { i18n } from '@/lib/i18n';
 
 export function baseOptions(locale = i18n.defaultLanguage): BaseLayoutProps {
   return {
-    i18n,
+    LanguageSwitch: true,
     nav: {
       title: `React Router ${locale}`,
     },
