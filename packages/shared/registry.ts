@@ -43,6 +43,16 @@ export const commonComponents: Component[] = [
     ],
   },
   {
+    name: 'renderer',
+    unlisted: true,
+    files: [
+      {
+        type: 'lib',
+        path: 'utils/renderer.ts',
+      },
+    ],
+  },
+  {
     name: 'merge-refs',
     unlisted: true,
     files: [

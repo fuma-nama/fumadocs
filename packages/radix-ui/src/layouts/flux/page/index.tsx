@@ -212,5 +212,6 @@ export function TOC({ container, trigger, content, header, footer, style }: TOCP
   );
 }
 
-export { PageLastUpdate, PageBreadcrumb } from './client';
+export { PageLastUpdate, PageBreadcrumb, PageFooter } from './client';
+export type { FooterProps, BreadcrumbProps } from './client';
 export { MarkdownCopyButton, ViewOptionsPopover } from '@/layouts/shared/page-actions';

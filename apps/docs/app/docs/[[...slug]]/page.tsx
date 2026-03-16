@@ -64,7 +64,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   return (
     <DocsPage
       toc={toc}
-      tableOfContent={{
+      TOC={{
         style: 'clerk',
       }}
     >

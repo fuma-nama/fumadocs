@@ -275,5 +275,11 @@ export function TOCPopover({
   );
 }
 
-export { PageLastUpdate, PageBreadcrumb } from './client';
+export {
+  PageLastUpdate,
+  PageBreadcrumb,
+  PageFooter,
+  type BreadcrumbProps,
+  type FooterProps,
+} from './client';
 export { MarkdownCopyButton, ViewOptionsPopover } from '@/layouts/shared/page-actions';

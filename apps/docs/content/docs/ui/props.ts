@@ -6,7 +6,13 @@ import type { TypeTable } from 'fumadocs-ui/components/type-table';
 import type { Card } from 'fumadocs-ui/components/card';
 import type { DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
 import type { ComponentProps, ComponentPropsWithoutRef } from 'react';
-import type { DocsPageProps } from 'fumadocs-ui/layouts/docs/page';
+import type {
+  DocsPageProps,
+  TOCMainProps,
+  TOCPopoverProps,
+  FooterProps,
+  BreadcrumbProps,
+} from 'fumadocs-ui/layouts/docs/page';
 import type { AutoTypeTable } from 'fumadocs-typescript/ui';
 import type { RootProviderProps } from 'fumadocs-ui/provider/base';
 
@@ -63,15 +69,7 @@ export type SidebarProps = Omit<
 
 export type PageProps = DocsPageProps;
 
-export type TOCProps = NonNullable<DocsPageProps['tableOfContent']>;
-export type TOCPopoverProps = NonNullable<DocsPageProps['tableOfContentPopover']>;
-
-export type BreadcrumbProps = Omit<
-  NonNullable<DocsPageProps['breadcrumb']>,
-  keyof ComponentProps<'div'>
->;
-
-export type FooterProps = Omit<NonNullable<DocsPageProps['footer']>, keyof ComponentProps<'div'>>;
+export type { TOCMainProps as TOCProps, TOCPopoverProps, BreadcrumbProps, FooterProps };
 
 export type AutoTypeTableProps = Omit<
   ComponentPropsWithoutRef<typeof AutoTypeTable>,
