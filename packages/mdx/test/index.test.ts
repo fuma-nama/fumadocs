@@ -3,7 +3,7 @@ import * as path from 'node:path';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 import { ValidationError } from '@/utils/validation';
-import { defineCollections, defineConfig } from '@/config';
+import { defineCollections, defineConfig, defineDocs } from '@/config';
 import { fumaMatter } from '@/utils/fuma-matter';
 import { buildConfig } from '@/config/build';
 import { createCore } from '@/core';
@@ -115,6 +115,17 @@ const cases: {
     },
   },
   {
+    name: 'dynamic-docs',
+    config: {
+      docs: defineDocs({
+        dir: path.join(baseDir, './fixtures/generate-index-docs'),
+        docs: {
+          dynamic: true,
+        },
+      }),
+    },
+  },
+  {
     name: 'workspace',
     config: {
       docs: defineCollections({
@@ -162,6 +173,23 @@ for (const { name, config } of cases) {
     const markdown = entries
       .map((entry) => `\`\`\`ts title="${entry.path}"\n${entry.content}\n\`\`\``)
       .join('\n\n');
+
+    if (name === 'dynamic') {
+      expect(markdown).toContain(`import path from 'node:path';`);
+      expect(markdown).toContain(
+        'create.doc("docs", "packages/mdx/test/fixtures/generate-index", [',
+      );
+      expect(markdown).toContain(
+        'create.doc("blogs", "packages/mdx/test/fixtures/generate-index", [',
+      );
+    }
+
+    if (name === 'dynamic-docs') {
+      expect(markdown).toContain(`import path from 'node:path';`);
+      expect(markdown).toMatch(
+        /create\.docs\("docs", "packages\/mdx\/test\/fixtures\/generate-index-docs", [\s\S]+, \[/,
+      );
+    }
 
     await expect(markdown).toMatchFileSnapshot(`./fixtures/index-${name}.output.md`);
   });
