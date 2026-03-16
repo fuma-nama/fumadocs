@@ -16,7 +16,6 @@ export const docs = await create.doc("docs", "packages/mdx/test/fixtures/generat
 ```ts title="dynamic.ts"
 // @ts-nocheck
 import { dynamic } from 'fumadocs-mdx/runtime/dynamic';
-import path from 'node:path';
 import * as Config from './config';
 
 const create = await dynamic<typeof Config, import("fumadocs-mdx/runtime/types").InternalTypeConfig & {
@@ -58,7 +57,6 @@ export const docs = await create.docLazy("docs", "packages/mdx/test/fixtures/gen
 ```ts title="test/dynamic.ts"
 // @ts-nocheck
 import { dynamic } from 'fumadocs-mdx/runtime/dynamic';
-import path from 'node:path';
 import * as Config from '../config';
 
 const create = await dynamic<typeof Config, import("fumadocs-mdx/runtime/types").InternalTypeConfig & {

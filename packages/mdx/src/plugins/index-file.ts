@@ -234,14 +234,6 @@ async function generateDynamicIndexFile(ctx: FileGenContext) {
     environment,
     outDir,
   };
-  codegen.lines.push(
-    `import { dynamic } from 'fumadocs-mdx/runtime/dynamic';`,
-    `import path from 'node:path';`,
-    `import * as Config from '${codegen.formatImportPath(configPath)}';`,
-    '',
-    `const create = await dynamic<typeof Config, ${tc}>(Config, ${JSON.stringify(partialOptions)}, ${JSON.stringify(serverOptions)});`,
-  );
-
   async function generateCollectionObjectEntry(
     collection: DocCollectionItem,
     absolutePath: string,
@@ -303,7 +295,7 @@ async function generateDynamicIndexFile(ctx: FileGenContext) {
     }
   }
 
-  await codegen.pushAsync(
+  const objects = await Promise.all(
     core.getCollections().map(async (collection) => {
       const obj = await generateCollectionObject(collection);
       if (!obj) return;
@@ -311,6 +303,17 @@ async function generateDynamicIndexFile(ctx: FileGenContext) {
       return `\nexport const ${collection.name} = ${obj};`;
     }),
   );
+  const hasDynamicCollection = objects.some(Boolean);
+
+  codegen.lines.push(
+    `import { dynamic } from 'fumadocs-mdx/runtime/dynamic';`,
+    ...(hasDynamicCollection ? [`import path from 'node:path';`] : []),
+    `import * as Config from '${codegen.formatImportPath(configPath)}';`,
+    '',
+    `const create = await dynamic<typeof Config, ${tc}>(Config, ${JSON.stringify(partialOptions)}, ${JSON.stringify(serverOptions)});`,
+  );
+
+  codegen.lines.push(...objects.filter((obj): obj is string => obj !== undefined));
 }
 
 async function generateBrowserIndexFile(ctx: FileGenContext) {

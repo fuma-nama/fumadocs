@@ -15,7 +15,6 @@ export const docs = await create.meta("docs", "packages/mdx/test/fixtures/genera
 ```ts title="dynamic.ts"
 // @ts-nocheck
 import { dynamic } from 'fumadocs-mdx/runtime/dynamic';
-import path from 'node:path';
 import * as Config from './config';
 
 const create = await dynamic<typeof Config, import("fumadocs-mdx/runtime/types").InternalTypeConfig & {
