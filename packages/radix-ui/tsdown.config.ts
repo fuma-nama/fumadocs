@@ -9,6 +9,7 @@ export default defineConfig({
     './src/*.{ts,tsx}',
     './src/{components,contexts,layouts,provider,tailwind,og}/**/*.{ts,tsx}',
     './src/utils/use-*.{ts,tsx}',
+    './src/utils/renderer.ts',
   ],
   fixedExtension: false,
   unbundle: true,
