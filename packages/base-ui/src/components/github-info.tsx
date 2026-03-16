@@ -1,28 +1,42 @@
 import { cn } from '@/utils/cn';
-import { Star } from 'lucide-react';
-import { type AnchorHTMLAttributes } from 'react';
+import { GitFork, Star } from 'lucide-react';
+import { type ComponentProps, use } from 'react';
 
-async function getRepoStarsAndForks(
-  owner: string,
-  repo: string,
-  token?: string,
-  baseUrl: string = 'https://api.github.com',
-): Promise<{
+export interface FetchRepositoryInfoOptions {
+  owner: string;
+  repo: string;
+
+  baseUrl?: string;
+  token?: string;
+  fetchOptions?: RequestInit;
+}
+
+export interface RepositoryInfo {
   stars: number;
   forks: number;
-}> {
-  const endpoint = `${baseUrl}/repos/${owner}/${repo}`;
-  const headers = new Headers({
-    'Content-Type': 'application/json',
-  });
+}
 
-  if (token) headers.set('Authorization', `Bearer ${token}`);
-
-  const response = await fetch(endpoint, {
-    headers,
+export async function fetchRepositoryInfo({
+  owner,
+  repo,
+  token,
+  baseUrl = 'https://api.github.com',
+  fetchOptions = {
+    // default revalidate options for Next.js (optional)
     next: {
       revalidate: 60,
     },
+  } as RequestInit,
+}: FetchRepositoryInfoOptions): Promise<RepositoryInfo> {
+  const endpoint = `${baseUrl}/repos/${owner}/${repo}`;
+  const headers = new Headers(fetchOptions.headers);
+
+  headers.set('Content-Type', 'application/json');
+  if (token) headers.set('Authorization', `Bearer ${token}`);
+
+  const response = await fetch(endpoint, {
+    ...fetchOptions,
+    headers,
   } as RequestInit);
 
   if (!response.ok) {
@@ -38,20 +52,34 @@ async function getRepoStarsAndForks(
   };
 }
 
-export async function GithubInfo({
+/**
+ * Uses compact notation (e.g., 1.5K, 2.3M).
+ */
+const defaultFormatter = new Intl.NumberFormat('en', {
+  notation: 'compact',
+  maximumFractionDigits: 1,
+});
+
+const promises: Record<string, Promise<RepositoryInfo>> = {};
+
+export function GithubInfo({
   repo,
   owner,
   token,
   baseUrl,
+  fetchOptions,
   ...props
-}: AnchorHTMLAttributes<HTMLAnchorElement> & {
-  owner: string;
-  repo: string;
-  token?: string;
-  baseUrl?: string;
-}) {
-  const { stars } = await getRepoStarsAndForks(owner, repo, token, baseUrl);
-  const humanizedStars = humanizeNumber(stars);
+}: ComponentProps<'a'> & FetchRepositoryInfoOptions) {
+  const options: FetchRepositoryInfoOptions = {
+    repo,
+    owner,
+    token,
+    baseUrl,
+    fetchOptions,
+  };
+  const { stars, forks } = use(
+    (promises[JSON.stringify(options)] ??= fetchRepositoryInfo(options)),
+  );
 
   return (
     <a
@@ -60,7 +88,7 @@ export async function GithubInfo({
       target="_blank"
       {...props}
       className={cn(
-        'flex flex-col gap-1.5 p-2 rounded-lg text-sm text-fd-foreground/80 transition-colors lg:flex-row lg:items-center hover:text-fd-accent-foreground hover:bg-fd-accent',
+        'flex flex-col gap-1.5 p-2 rounded-lg text-sm text-fd-foreground/80 transition-colors hover:text-fd-accent-foreground hover:bg-fd-accent',
         props.className,
       )}
     >
@@ -71,37 +99,12 @@ export async function GithubInfo({
         </svg>
         {owner}/{repo}
       </p>
-      <p className="flex text-xs items-center gap-1 text-fd-muted-foreground">
+      <div className="flex text-xs items-center gap-1 text-fd-muted-foreground">
         <Star className="size-3" />
-        {humanizedStars}
-      </p>
+        <span>{defaultFormatter.format(stars)}</span>
+        <GitFork className="size-3 ms-2" />
+        <span>{defaultFormatter.format(forks)}</span>
+      </div>
     </a>
   );
-}
-
-/**
- * Converts a number to a human-readable string with K suffix for thousands
- * @example 1500 -> "1.5K", 1000000 -> "1000000"
- */
-function humanizeNumber(num: number): string {
-  if (num < 1000) {
-    return num.toString();
-  }
-
-  if (num < 100000) {
-    // For numbers between 1,000 and 99,999, show with one decimal (e.g., 1.5K)
-    const value = (num / 1000).toFixed(1);
-    // Remove trailing .0 if present
-    const formattedValue = value.endsWith('.0') ? value.slice(0, -2) : value;
-
-    return `${formattedValue}K`;
-  }
-
-  if (num < 1000000) {
-    // For numbers between 10,000 and 999,999, show as whole K (e.g., 10K, 999K)
-    return `${Math.floor(num / 1000)}K`;
-  }
-
-  // For 1,000,000 and above, just return the number
-  return num.toString();
 }

@@ -79,8 +79,7 @@ export function ViewOptionsPopover({
   githubUrl: string;
 }) {
   const items = useMemo(() => {
-    const pageUrl = typeof window !== 'undefined' ? window.location.href : 'loading';
-    const q = `Read ${pageUrl}, I want to ask questions about it.`;
+    const q = `Read ${markdownUrl}, I want to ask questions about it.`;
 
     return [
       {
