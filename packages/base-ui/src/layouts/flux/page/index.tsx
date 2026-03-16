@@ -18,16 +18,6 @@ import * as TocClerk from '@/components/toc/clerk';
 import { TOCProvider, TOCScrollArea } from '@/components/toc';
 import { ChildrenRenderer, renderer, type Renderer } from '@/utils/renderer';
 
-interface BreadcrumbOptions extends BreadcrumbProps {
-  enabled?: boolean;
-  component?: ReactNode;
-}
-
-interface FooterOptions extends FooterProps {
-  enabled?: boolean;
-  component?: ReactNode;
-}
-
 export interface DocsPageProps {
   toc?: TOCItemType[];
   /**
@@ -64,7 +54,21 @@ interface TableOfContentOptions extends Pick<AnchorProviderProps, 'single'>, TOC
   component?: ReactNode;
 }
 
-interface TOCProps {
+interface BreadcrumbOptions extends BreadcrumbProps {
+  enabled?: boolean;
+  component?: ReactNode;
+}
+
+interface FooterOptions extends FooterProps {
+  enabled?: boolean;
+  component?: ReactNode;
+}
+
+export interface TOCProps {
+  container?: ComponentProps<typeof PageTOCPopover>;
+  trigger?: ComponentProps<typeof PageTOCPopoverTrigger>;
+  content?: ComponentProps<typeof PageTOCPopoverContent>;
+
   /**
    * Custom content in TOC container, before the main TOC
    */
@@ -83,7 +87,7 @@ interface TOCProps {
 
 export function DocsPage({
   tableOfContent: tocProps = {},
-  TOC,
+  TOC: TOCRenderer,
   footer = {},
   Footer = footer.enabled === false
     ? false
@@ -104,15 +108,15 @@ export function DocsPage({
   children,
 }: DocsPageProps) {
   if (tocProps.enabled ?? (toc.length > 0 || !!tocProps.header || !!tocProps.footer)) {
-    TOC ??= tocProps.component ? new ChildrenRenderer(tocProps.component) : tocProps;
+    TOCRenderer ??= tocProps.component ? new ChildrenRenderer(tocProps.component) : tocProps;
   } else {
-    TOC ??= false;
+    TOCRenderer ??= false;
   }
 
   const renderBreadcrumb = renderer(Breadcrumb, PageBreadcrumb);
   const renderFooter = renderer(Footer, PageFooter);
   const renderContainer = renderer(Container, 'article');
-  const renderToc = renderer(TOC, DefaultTOC);
+  const renderToc = renderer(TOCRenderer, TOC);
 
   return (
     <TOCProvider single={tocMode === 'single'} toc={renderToc ? toc : []}>
@@ -193,17 +197,17 @@ export function DocsTitle({ children, className, ...props }: ComponentProps<'h1'
   );
 }
 
-function DefaultTOC({ header, footer, style }: TOCProps) {
+export function TOC({ container, trigger, content, header, footer, style }: TOCProps) {
   return (
-    <PageTOCPopover>
-      <PageTOCPopoverContent>
+    <PageTOCPopover {...container}>
+      <PageTOCPopoverContent {...content}>
         {header}
         <TOCScrollArea>
           {style === 'clerk' ? <TocClerk.TOCItems /> : <TocDefault.TOCItems />}
         </TOCScrollArea>
         {footer}
       </PageTOCPopoverContent>
-      <PageTOCPopoverTrigger />
+      <PageTOCPopoverTrigger {...trigger} />
     </PageTOCPopover>
   );
 }

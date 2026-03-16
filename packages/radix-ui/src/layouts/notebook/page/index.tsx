@@ -72,13 +72,13 @@ interface TableOfContentPopoverOptions extends TOCProps {
   component?: ReactNode;
 }
 
-interface TOCPopoverProps extends TOCProps {
+export interface TOCPopoverProps extends TOCProps {
   container?: ComponentProps<typeof PageTOCPopover>;
   trigger?: ComponentProps<typeof PageTOCPopoverTrigger>;
   content?: ComponentProps<typeof PageTOCPopoverContent>;
 }
 
-interface TOCMainProps extends TOCProps {
+export interface TOCMainProps extends TOCProps {
   container?: ComponentProps<typeof PageTOCPopover>;
 }
 
@@ -101,9 +101,9 @@ interface TOCProps {
 
 export function DocsPage({
   tableOfContent: tocProps = {},
-  TOC,
+  TOC: TOCRenderer,
   tableOfContentPopover: tocPopoverProps = {},
-  TOCPopover,
+  TOCPopover: TOCPopoverRenderer,
   footer = {},
   Footer = footer.enabled === false
     ? false
@@ -125,29 +125,29 @@ export function DocsPage({
 }: DocsPageProps) {
   // force disable toc in full mode
   if (full) {
-    TOC = false;
+    TOCRenderer = false;
   } else if (tocProps.enabled ?? (toc.length > 0 || !!tocProps.footer || !!tocProps.header)) {
-    TOC ??= tocProps.component ? new ChildrenRenderer(tocProps.component) : tocProps;
+    TOCRenderer ??= tocProps.component ? new ChildrenRenderer(tocProps.component) : tocProps;
   } else {
-    TOC ??= false;
+    TOCRenderer ??= false;
   }
 
   if (
     tocPopoverProps.enabled ??
     (toc.length > 0 || !!tocPopoverProps.header || !!tocPopoverProps.footer)
   ) {
-    TOCPopover ??= tocPopoverProps.component
+    TOCPopoverRenderer ??= tocPopoverProps.component
       ? new ChildrenRenderer(tocPopoverProps.component)
       : tocPopoverProps;
   } else {
-    TOCPopover ??= false;
+    TOCPopoverRenderer ??= false;
   }
 
   const renderBreadcrumb = renderer(Breadcrumb, PageBreadcrumb);
   const renderFooter = renderer(Footer, PageFooter);
   const renderContainer = renderer(Container, 'article');
-  const renderToc = renderer(TOC, DefaultTOCMain);
-  const renderTocPopover = renderer(TOCPopover, DefaultTOCPopover);
+  const renderToc = renderer(TOCRenderer, TOC);
+  const renderTocPopover = renderer(TOCPopoverRenderer, TOCPopover);
 
   return (
     <TOCProvider single={tocMode === 'single'} toc={renderToc || renderTocPopover ? toc : []}>
@@ -229,7 +229,7 @@ export function DocsTitle({ children, className, ...props }: ComponentProps<'h1'
   );
 }
 
-function DefaultTOCMain({ container, header, footer, style }: TOCMainProps) {
+export function TOC({ container, header, footer, style }: TOCMainProps) {
   return (
     <div
       id="nd-toc"
@@ -255,7 +255,7 @@ function DefaultTOCMain({ container, header, footer, style }: TOCMainProps) {
   );
 }
 
-function DefaultTOCPopover({
+export function TOCPopover({
   container,
   trigger,
   content,
