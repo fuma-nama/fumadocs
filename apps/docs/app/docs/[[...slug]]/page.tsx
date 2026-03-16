@@ -15,11 +15,16 @@ import Link from 'fumadocs-core/link';
 import { findSiblings } from 'fumadocs-core/page-tree';
 import { Card, Cards } from 'fumadocs-ui/components/card';
 import { getMDXComponents } from '@/components/mdx';
-import { MarkdownCopyButton, ViewOptionsPopover } from '@/components/layouts/page-actions';
 import { Banner } from 'fumadocs-ui/components/banner';
 import { Installation } from '@/components/preview/installation';
 import { Customisation } from '@/components/preview/customisation';
-import { DocsBody, DocsPage, PageLastUpdate } from 'fumadocs-ui/layouts/docs/page';
+import {
+  DocsBody,
+  DocsPage,
+  PageLastUpdate,
+  MarkdownCopyButton,
+  ViewOptionsPopover,
+} from 'fumadocs-ui/layouts/docs/page';
 import { NotFound } from '@/components/layouts/not-found';
 import { getSuggestions } from './suggestions';
 import { PathUtils } from 'fumadocs-core/source';

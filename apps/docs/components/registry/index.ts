@@ -142,18 +142,6 @@ export const registry: Registry = {
       ],
     },
     {
-      name: 'ai/page-actions',
-      title: 'Page Actions',
-      description: 'Common page actions',
-      files: [
-        {
-          type: 'components',
-          path: 'components/layouts/page-actions.tsx',
-          target: '<dir>/ai/page-actions.tsx',
-        },
-      ],
-    },
-    {
       name: 'og/mono',
       description: 'Open graph image generation (mono-style)',
       files: [

@@ -359,6 +359,18 @@ export const registry: Registry = {
         },
       ],
     },
+    {
+      name: 'ai/page-actions',
+      title: 'Page Actions',
+      description: 'Common page actions',
+      files: [
+        {
+          type: 'components',
+          path: 'layouts/shared/page-actions.tsx',
+          target: '<dir>/ai/page-actions.tsx',
+        },
+      ],
+    },
   ],
   dependencies: {
     'fumadocs-core': null,
