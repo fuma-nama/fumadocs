@@ -3,7 +3,13 @@ import { type ComponentProps, Fragment, useState } from 'react';
 import { cva } from 'class-variance-authority';
 import Link from 'fumadocs-core/link';
 import { cn } from '@/utils/cn';
-import { type LinkItemType, type NavOptions, renderTitleNav, useLinkItems } from '@/layouts/shared';
+import {
+  type LinkItemType,
+  type NavOptions,
+  parseLayoutProps,
+  renderTitleNav,
+  useLinkItems,
+} from '@/layouts/shared';
 import { LinkItem } from '@/utils/link-item';
 import {
   NavigationMenu,
@@ -21,6 +27,7 @@ import { ThemeToggle } from '@/layouts/shared/theme-toggle';
 import { LanguageToggle, LanguageToggleText } from '@/layouts/shared/language-toggle';
 import { ChevronDown, Languages } from 'lucide-react';
 import { useIsScrollTop } from '@/utils/use-is-scroll-top';
+import { renderer } from '@/utils/renderer';
 
 export const navItemVariants = cva('[&_svg]:size-4', {
   variants: {
@@ -41,14 +48,21 @@ export const navItemVariants = cva('[&_svg]:size-4', {
   },
 });
 
-export function Header({
-  nav = {},
-  i18n = false,
-  links,
-  githubUrl,
-  themeSwitch = {},
-  searchToggle = {},
-}: HomeLayoutProps) {
+export function Header(props: HomeLayoutProps) {
+  const {
+    nav = {},
+    LanguageSwitch,
+    links,
+    githubUrl,
+    SearchToggle: SearchToggleRenderer,
+    LargeSearchToggle: LargeSearchToggleRenderer,
+    ThemeSwitch,
+  } = parseLayoutProps(props);
+
+  const renderSearchToggle = renderer(SearchToggleRenderer, SearchToggle);
+  const renderLargeSearchToggle = renderer(LargeSearchToggleRenderer, LargeSearchToggle);
+  const renderThemeSwitch = renderer(ThemeSwitch, ThemeToggle);
+  const renderLanguageSwitch = renderer(LanguageSwitch, LanguageToggle);
   const { navItems, menuItems } = useLinkItems({ links, githubUrl });
 
   return (
@@ -65,20 +79,16 @@ export function Header({
           ))}
       </ul>
       <div className="flex flex-row items-center justify-end gap-1.5 flex-1 max-lg:hidden">
-        {searchToggle.enabled !== false &&
-          (searchToggle.components?.lg ?? (
-            <LargeSearchToggle
-              className="w-full rounded-full ps-2.5 max-w-[240px]"
-              hideIfDisabled
-            />
-          ))}
-        {themeSwitch.enabled !== false &&
-          (themeSwitch.component ?? <ThemeToggle mode={themeSwitch?.mode} />)}
-        {i18n && (
-          <LanguageToggle>
-            <Languages className="size-5" />
-          </LanguageToggle>
-        )}
+        {renderLargeSearchToggle?.((o) => ({
+          hideIfDisabled: true,
+          ...o,
+          className: cn('w-full rounded-full ps-2.5 max-w-[240px]', o?.className),
+        }))}
+        {renderThemeSwitch?.((t) => t ?? {})}
+        {renderLanguageSwitch?.((o) => ({
+          children: <Languages className="size-5" />,
+          ...o,
+        }))}
         <ul className="flex flex-row gap-2 items-center empty:hidden">
           {navItems.filter(isSecondary).map((item, i) => (
             <NavigationMenuLinkItem
@@ -90,8 +100,11 @@ export function Header({
         </ul>
       </div>
       <div className="flex flex-row items-center ms-auto -me-1.5 lg:hidden">
-        {searchToggle.enabled !== false &&
-          (searchToggle.components?.sm ?? <SearchToggle className="p-2" hideIfDisabled />)}
+        {renderSearchToggle?.((o) => ({
+          hideIfDisabled: true,
+          ...o,
+          className: cn('p-2', o?.className),
+        }))}
         <NavigationMenuItem asChild>
           <div>
             <NavigationMenuTrigger
@@ -122,15 +135,17 @@ export function Header({
                   />
                 ))}
                 <div role="separator" className="flex-1" />
-                {i18n && (
-                  <LanguageToggle>
-                    <Languages className="size-5" />
-                    <LanguageToggleText />
-                    <ChevronDown className="size-3 text-fd-muted-foreground" />
-                  </LanguageToggle>
-                )}
-                {themeSwitch.enabled !== false &&
-                  (themeSwitch.component ?? <ThemeToggle mode={themeSwitch?.mode} />)}
+                {renderLanguageSwitch?.((o) => ({
+                  children: (
+                    <>
+                      <Languages className="size-5" />
+                      <LanguageToggleText />
+                      <ChevronDown className="size-3 text-fd-muted-foreground" />
+                    </>
+                  ),
+                  ...o,
+                }))}
+                {renderThemeSwitch?.((t) => t ?? {})}
               </div>
             </NavigationMenuContent>
           </div>

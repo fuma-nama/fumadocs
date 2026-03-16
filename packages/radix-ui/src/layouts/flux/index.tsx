@@ -4,14 +4,14 @@ import type { BaseLayoutProps } from '@/layouts/shared';
 import { TreeContextProvider } from '@/contexts/tree';
 import { getSidebarTabs, type GetSidebarTabsOptions } from '@/components/sidebar/tabs';
 import type { SidebarPageTreeComponents } from '@/components/sidebar/page-tree';
-import { type ComponentProps, HTMLAttributes, type ReactNode, useMemo } from 'react';
+import { type ComponentProps, type ReactNode, useMemo } from 'react';
 import { cn } from '@/utils/cn';
 import { useSidebar } from '@/components/sidebar/base';
 import { SidebarTabsDropdown, type SidebarTabWithProps } from './tab-dropdown';
 import { Sidebar, SidebarContent, SidebarLinkItem, SidebarPageTree } from './sidebar';
 import { buttonVariants } from '@/components/ui/button';
 import { Languages, SidebarIcon, XIcon } from 'lucide-react';
-import { renderTitleNav, useLinkItems } from '../shared';
+import { parseLayoutProps, renderTitleNav, useLinkItems } from '../shared';
 import { LanguageToggle } from '../shared/language-toggle';
 import { SearchToggle } from '../shared/search-toggle';
 import { ThemeToggle } from '../shared/theme-toggle';
@@ -20,18 +20,18 @@ import { AnimatePresence, motion } from 'motion/react';
 import { RemoveScroll } from 'react-remove-scroll';
 import { useSearchContext } from '@/contexts/search';
 import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
+import { renderer, type Renderer } from '@/utils/renderer';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
-
   sidebar?: SidebarOptions;
+  Container?: Renderer<ComponentProps<'div'>>;
+  renderNavigationPanel?: (props: NavigationPanelProps) => ReactNode;
 
   /**
-   * Props for the `div` container
+   * @deprecated use `Container` instead.
    */
-  containerProps?: HTMLAttributes<HTMLDivElement>;
-
-  renderNavigationPanel?: (props: NavigationPanelProps) => ReactNode;
+  containerProps?: ComponentProps<'div'>;
 }
 
 interface SidebarOptions
@@ -51,24 +51,32 @@ interface SidebarOptions
   footer?: ReactNode;
 }
 
-export function DocsLayout({
-  tree,
-  nav = {},
-  sidebar: {
-    enabled: sidebarEnabled = true,
-    tabs: sidebarTabs,
-    defaultOpenLevel,
-    prefetch,
-    ...sidebarProps
-  } = {},
-  searchToggle = {},
-  themeSwitch = {},
-  i18n = false,
-  children,
-  containerProps,
-  renderNavigationPanel = (props) => <NavigationPanel {...props} />,
-  ...props
-}: DocsLayoutProps) {
+export function DocsLayout(_: DocsLayoutProps) {
+  const {
+    tree,
+    nav = {},
+    sidebar: {
+      enabled: sidebarEnabled = true,
+      tabs: sidebarTabs,
+      defaultOpenLevel,
+      prefetch,
+      ...sidebarProps
+    } = {},
+    children,
+    containerProps,
+    Container = containerProps ?? true,
+    LanguageSwitch,
+    SearchToggle: SearchToggleRenderer,
+    ThemeSwitch,
+    renderNavigationPanel = (props) => <NavigationPanel {...props} />,
+    ...props
+  } = parseLayoutProps<DocsLayoutProps>(_);
+  const { menuItems } = useLinkItems(props);
+  const renderContainer = renderer(Container, 'div');
+  const renderLanguageSwitch = renderer(LanguageSwitch, LanguageToggle);
+  const renderThemeSwitch = renderer(ThemeSwitch, ThemeToggle);
+  const renderSearchToggle = renderer(SearchToggleRenderer, SearchToggle);
+
   const tabs = useMemo(() => {
     if (Array.isArray(sidebarTabs)) {
       return sidebarTabs;
@@ -81,7 +89,6 @@ export function DocsLayout({
     }
     return [];
   }, [tree, sidebarTabs]);
-  const { menuItems } = useLinkItems(props);
   const iconLinks = menuItems.filter((item) => item.type === 'icon');
 
   function sidebar() {
@@ -121,17 +128,17 @@ export function DocsLayout({
   return (
     <TreeContextProvider tree={tree}>
       <Sidebar defaultOpenLevel={defaultOpenLevel} prefetch={prefetch}>
-        <div
-          id="nd-flux-layout"
-          {...containerProps}
-          className={cn(
-            'flex flex-col items-center pb-24 overflow-x-clip',
-            containerProps?.className,
-          )}
-        >
-          {sidebarEnabled && sidebar()}
-          {children}
-        </div>
+        {renderContainer?.((t) => ({
+          id: 'nd-flux-layout',
+          children: (
+            <>
+              {sidebarEnabled && sidebar()}
+              {children}
+            </>
+          ),
+          ...t,
+          className: cn('flex flex-col items-center pb-24 overflow-x-clip', t?.className),
+        }))}
         {renderNavigationPanel({
           head: renderTitleNav(nav, {
             className: 'inline-flex items-center gap-2.5 text-sm font-semibold',
@@ -139,25 +146,21 @@ export function DocsLayout({
           tabDropdown: tabs.length > 0 && <SidebarTabsDropdown className="flex-1" options={tabs} />,
           tool: (
             <>
-              {i18n && (
-                <LanguageToggle>
-                  <Languages className="size-4.5" />
-                </LanguageToggle>
-              )}
-
-              {searchToggle.enabled !== false &&
-                (searchToggle.components?.sm ?? (
-                  <SearchToggle className="rounded-lg" hideIfDisabled />
-                ))}
+              {renderLanguageSwitch?.((t) => ({
+                children: <Languages className="size-4.5" />,
+                ...t,
+              }))}
+              {renderSearchToggle?.((t) => ({
+                hideIfDisabled: true,
+                ...t,
+                className: cn('rounded-lg', t?.className),
+              }))}
 
               <NavigationSidebarTrigger />
-              {themeSwitch.enabled !== false &&
-                (themeSwitch.component ?? (
-                  <ThemeToggle
-                    className="p-1 h-full ms-1 rounded-xl bg-fd-muted *:rounded-lg"
-                    mode={themeSwitch.mode}
-                  />
-                ))}
+              {renderThemeSwitch?.((t) => ({
+                ...t,
+                className: cn('p-1 h-full ms-1 rounded-xl bg-fd-muted *:rounded-lg', t?.className),
+              }))}
             </>
           ),
           link: iconLinks.map((item, i) => (

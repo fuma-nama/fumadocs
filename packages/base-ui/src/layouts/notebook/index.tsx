@@ -1,5 +1,17 @@
-import { type ComponentProps, type FC, type HTMLAttributes, type ReactNode, useMemo } from 'react';
-import { type BaseLayoutProps, renderTitleNav, useLinkItems } from '@/layouts/shared';
+import {
+  type ComponentProps,
+  createElement,
+  type FC,
+  type HTMLAttributes,
+  type ReactNode,
+  useMemo,
+} from 'react';
+import {
+  type BaseLayoutProps,
+  parseLayoutProps,
+  renderTitleNav,
+  useLinkItems,
+} from '@/layouts/shared';
 import {
   Sidebar,
   SidebarCollapseTrigger,
@@ -25,10 +37,11 @@ import {
   NavbarLinkItem,
 } from '@/layouts/notebook/client';
 import { LargeSearchToggle, SearchToggle } from '@/layouts/shared/search-toggle';
-import { LinkItem, type LinkItemType } from '@/utils/link-item';
+import { LinkItem } from '@/utils/link-item';
 import type { SidebarPageTreeComponents } from '@/components/sidebar/page-tree';
 import { getSidebarTabs, type GetSidebarTabsOptions } from '@/components/sidebar/tabs';
 import { SidebarTabsDropdown, type SidebarTabWithProps } from '@/components/sidebar/tabs/dropdown';
+import { type Renderer, renderer } from '@/utils/renderer';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
@@ -40,6 +53,12 @@ export interface DocsLayoutProps extends BaseLayoutProps {
 
   sidebar?: SidebarOptions;
 
+  SidebarTrigger?: Renderer<ComponentProps<'button'>>;
+  Container?: Renderer<ComponentProps<'div'>>;
+
+  /**
+   * @deprecated use `Container` instead.
+   */
   containerProps?: HTMLAttributes<HTMLDivElement>;
 }
 
@@ -70,13 +89,23 @@ export function DocsLayout(props: DocsLayoutProps) {
     tabMode = 'sidebar',
     nav = {},
     sidebar: { tabs: tabOptions, defaultOpenLevel, prefetch, ...sidebarProps } = {},
-    i18n = false,
-    themeSwitch = {},
+    LanguageSwitch,
+    SearchToggle: searchToggleRenderer,
+    LargeSearchToggle: largeSearchToggleRenderer,
+    ThemeSwitch,
+    SidebarTrigger: SidebarTriggerRenderer = true,
+    containerProps,
+    Container = containerProps ?? true,
     tree,
-  } = props;
-
+  } = parseLayoutProps(props);
   const navMode = nav.mode ?? 'auto';
   const { menuItems, navItems } = useLinkItems(props);
+  const renderSearchToggle = renderer(searchToggleRenderer, SearchToggle);
+  const renderLargeSearchToggle = renderer(largeSearchToggleRenderer, LargeSearchToggle);
+  const renderThemeSwitch = renderer(ThemeSwitch, ThemeToggle);
+  const renderLanguageSwitch = renderer(LanguageSwitch, LanguageToggle);
+  const renderSidebarTrigger = renderer(SidebarTriggerRenderer, SidebarTrigger);
+
   const tabs = useMemo(() => {
     if (Array.isArray(tabOptions)) {
       return tabOptions;
@@ -95,33 +124,40 @@ export function DocsLayout(props: DocsLayoutProps) {
 
   function sidebar() {
     const { banner, footer, components, collapsible = true, ...rest } = sidebarProps;
-
     const iconLinks = menuItems.filter((item) => item.type === 'icon');
-    const Header =
-      typeof banner === 'function'
-        ? banner
-        : ({ className, ...props }: ComponentProps<'div'>) => (
-            <div className={cn('flex flex-col gap-3 p-4 pb-2 empty:hidden', className)} {...props}>
-              {props.children}
-              {banner}
-            </div>
-          );
-    const Footer =
-      typeof footer === 'function'
-        ? footer
-        : ({ className, ...props }: ComponentProps<'div'>) => (
-            <div
-              className={cn(
-                'hidden flex-row text-fd-muted-foreground items-center border-t p-4 pt-2',
-                iconLinks.length > 0 && 'max-lg:flex',
-                className,
-              )}
-              {...props}
-            >
-              {props.children}
-              {footer}
-            </div>
-          );
+
+    function renderHeader(props: ComponentProps<'div'>) {
+      if (typeof banner === 'function') return createElement(banner, props);
+
+      return (
+        <div
+          {...props}
+          className={cn('flex flex-col gap-3 p-4 pb-2 empty:hidden', props.className)}
+        >
+          {props.children}
+          {banner}
+        </div>
+      );
+    }
+
+    function renderFooter(props: ComponentProps<'div'>) {
+      if (typeof footer === 'function') return createElement(footer, props);
+
+      return (
+        <div
+          {...props}
+          className={cn(
+            'hidden flex-row text-fd-muted-foreground items-center border-t p-4 pt-2',
+            iconLinks.length > 0 && 'max-lg:flex',
+            props.className,
+          )}
+        >
+          {props.children}
+          {footer}
+        </div>
+      );
+    }
+
     const viewport = (
       <SidebarViewport>
         {menuItems
@@ -141,37 +177,41 @@ export function DocsLayout(props: DocsLayoutProps) {
     return (
       <>
         <SidebarContent {...rest}>
-          <Header>
-            {navMode === 'auto' && (
-              <div className="flex justify-between">
-                {renderTitleNav(nav, {
-                  className: 'inline-flex items-center gap-2.5 font-medium',
-                })}
-                {collapsible && (
-                  <SidebarCollapseTrigger
-                    className={cn(
-                      buttonVariants({
-                        color: 'ghost',
-                        size: 'icon-sm',
-                        className: 'mt-px mb-auto text-fd-muted-foreground',
-                      }),
+          {renderHeader({
+            children: (
+              <>
+                {navMode === 'auto' && (
+                  <div className="flex justify-between">
+                    {renderTitleNav(nav, {
+                      className: 'inline-flex items-center gap-2.5 font-medium',
+                    })}
+                    {collapsible && (
+                      <SidebarCollapseTrigger
+                        className={cn(
+                          buttonVariants({
+                            color: 'ghost',
+                            size: 'icon-sm',
+                            className: 'mt-px mb-auto text-fd-muted-foreground',
+                          }),
+                        )}
+                      >
+                        <SidebarIcon />
+                      </SidebarCollapseTrigger>
                     )}
-                  >
-                    <SidebarIcon />
-                  </SidebarCollapseTrigger>
+                  </div>
                 )}
-              </div>
-            )}
-            {tabs.length > 0 && (
-              <SidebarTabsDropdown
-                options={tabs}
-                className={cn(tabMode === 'navbar' && 'lg:hidden')}
-              />
-            )}
-          </Header>
+                {tabs.length > 0 && (
+                  <SidebarTabsDropdown
+                    options={tabs}
+                    className={cn(tabMode === 'navbar' && 'lg:hidden')}
+                  />
+                )}
+              </>
+            ),
+          })}
           {viewport}
-          <Footer>
-            {iconLinks.map((item, i) => (
+          {renderFooter({
+            children: iconLinks.map((item, i) => (
               <LinkItem
                 key={i}
                 item={item}
@@ -186,228 +226,209 @@ export function DocsLayout(props: DocsLayoutProps) {
               >
                 {item.icon}
               </LinkItem>
-            ))}
-          </Footer>
+            )),
+          })}
         </SidebarContent>
         <SidebarDrawer {...rest}>
-          <Header>
-            <SidebarTrigger
-              className={cn(
-                buttonVariants({
-                  size: 'icon-sm',
-                  color: 'ghost',
-                  className: 'ms-auto text-fd-muted-foreground',
-                }),
-              )}
-            >
-              <X />
-            </SidebarTrigger>
-            {tabs.length > 0 && <SidebarTabsDropdown options={tabs} />}
-          </Header>
+          {renderHeader({
+            children: (
+              <>
+                <SidebarTrigger
+                  className={cn(
+                    buttonVariants({
+                      size: 'icon-sm',
+                      color: 'ghost',
+                      className: 'ms-auto text-fd-muted-foreground',
+                    }),
+                  )}
+                >
+                  <X />
+                </SidebarTrigger>
+                {tabs.length > 0 && <SidebarTabsDropdown options={tabs} />}
+              </>
+            ),
+          })}
           {viewport}
-          <Footer
-            className={cn(
+          {renderFooter({
+            className: cn(
               'hidden flex-row items-center justify-end',
-              (i18n || themeSwitch.enabled !== false) && 'flex',
+              (renderLanguageSwitch || renderThemeSwitch) && 'flex',
               iconLinks.length > 0 && 'max-lg:flex',
-            )}
-          >
-            {iconLinks.map((item, i) => (
-              <LinkItem
-                key={i}
-                item={item}
-                className={cn(
-                  buttonVariants({
-                    size: 'icon-sm',
-                    color: 'ghost',
-                  }),
-                  'text-fd-muted-foreground lg:hidden',
-                  i === iconLinks.length - 1 && 'me-auto',
-                )}
-                aria-label={item.label}
-              >
-                {item.icon}
-              </LinkItem>
-            ))}
-            {i18n && (
-              <LanguageToggle>
-                <Languages className="size-4.5 text-fd-muted-foreground" />
-              </LanguageToggle>
-            )}
-            {themeSwitch.enabled !== false &&
-              (themeSwitch.component ?? (
-                <ThemeToggle mode={themeSwitch.mode ?? 'light-dark-system'} />
-              ))}
-          </Footer>
+            ),
+            children: (
+              <>
+                {iconLinks.map((item, i) => (
+                  <LinkItem
+                    key={i}
+                    item={item}
+                    className={cn(
+                      buttonVariants({
+                        size: 'icon-sm',
+                        color: 'ghost',
+                      }),
+                      'text-fd-muted-foreground lg:hidden',
+                      i === iconLinks.length - 1 && 'me-auto',
+                    )}
+                    aria-label={item.label}
+                  >
+                    {item.icon}
+                  </LinkItem>
+                ))}
+                {renderLanguageSwitch?.((o) => ({
+                  children: <Languages className="size-4.5 text-fd-muted-foreground" />,
+                  ...o,
+                }))}
+                {renderThemeSwitch?.((t) => t ?? {})}
+              </>
+            ),
+          })}
         </SidebarDrawer>
       </>
+    );
+  }
+
+  function header() {
+    const sidebarCollapsible = sidebarProps.collapsible ?? true;
+    const showLayoutTabs = tabMode === 'navbar' && tabs.length > 0;
+
+    return (
+      <LayoutHeader
+        id="nd-subnav"
+        className={cn(
+          'sticky [grid-area:header] flex flex-col top-(--fd-docs-row-1) z-10 backdrop-blur-sm transition-colors data-[transparent=false]:bg-fd-background/80 layout:[--fd-header-height:--spacing(14)]',
+          showLayoutTabs && 'lg:layout:[--fd-header-height:--spacing(24)]',
+        )}
+      >
+        <div data-header-body="" className="flex border-b px-4 gap-2 h-14 md:px-6">
+          <div
+            className={cn(
+              'items-center',
+              navMode === 'top' && 'flex flex-1',
+              navMode === 'auto' && 'hidden has-data-[collapsed=true]:md:flex max-md:flex',
+            )}
+          >
+            {sidebarCollapsible && navMode === 'auto' && (
+              <SidebarCollapseTrigger
+                className={cn(
+                  buttonVariants({
+                    color: 'ghost',
+                    size: 'icon-sm',
+                  }),
+                  'text-fd-muted-foreground data-[collapsed=false]:hidden max-md:hidden',
+                )}
+              >
+                <SidebarIcon />
+              </SidebarCollapseTrigger>
+            )}
+            {renderTitleNav(nav, {
+              className: cn(
+                'inline-flex items-center gap-2.5 font-semibold',
+                navMode === 'auto' && 'md:hidden',
+              ),
+            })}
+            {nav.children}
+          </div>
+          {renderLargeSearchToggle?.((o) => ({
+            hideIfDisabled: true,
+            ...o,
+            className: cn(
+              'w-full my-auto max-md:hidden',
+              navMode === 'top' ? 'ps-2.5 rounded-xl max-w-sm' : 'max-w-[240px]',
+              o?.className,
+            ),
+          }))}
+          <div className="flex flex-1 items-center justify-end md:gap-2">
+            <div className="flex items-center gap-6 empty:hidden max-lg:hidden">
+              {navItems
+                .filter((item) => item.type !== 'icon')
+                .map((item, i) => (
+                  <NavbarLinkItem key={i} item={item} />
+                ))}
+            </div>
+            {navItems
+              .filter((item) => item.type === 'icon')
+              .map((item, i) => (
+                <LinkItem
+                  key={i}
+                  item={item}
+                  className={cn(
+                    buttonVariants({ size: 'icon-sm', color: 'ghost' }),
+                    'text-fd-muted-foreground max-lg:hidden',
+                  )}
+                  aria-label={item.label}
+                >
+                  {item.icon}
+                </LinkItem>
+              ))}
+
+            <div className="flex items-center md:hidden">
+              {renderSearchToggle?.((o) => ({
+                hideIfDisabled: true,
+                ...o,
+                className: cn('p-2', o?.className),
+              }))}
+              {renderSidebarTrigger?.((t) => ({
+                children: <SidebarIcon />,
+                ...t,
+                className: cn(
+                  buttonVariants({
+                    color: 'ghost',
+                    size: 'icon-sm',
+                  }),
+                  'p-2 -me-1.5',
+                  t?.className,
+                ),
+              }))}
+            </div>
+
+            <div className="flex items-center gap-2 max-md:hidden">
+              {renderLanguageSwitch?.((o) => ({
+                children: <Languages className="size-4.5 text-fd-muted-foreground" />,
+                ...o,
+              }))}
+              {renderThemeSwitch?.((t) => t ?? {})}
+              {sidebarCollapsible && navMode === 'top' && (
+                <SidebarCollapseTrigger
+                  className={cn(
+                    buttonVariants({
+                      color: 'secondary',
+                      size: 'icon-sm',
+                    }),
+                    'text-fd-muted-foreground rounded-full -me-1.5',
+                  )}
+                >
+                  <SidebarIcon />
+                </SidebarCollapseTrigger>
+              )}
+            </div>
+          </div>
+        </div>
+        {showLayoutTabs && (
+          <LayoutHeaderTabs
+            data-header-tabs=""
+            className="overflow-x-auto border-b px-6 h-10 max-lg:hidden"
+            options={tabs}
+          />
+        )}
+      </LayoutHeader>
     );
   }
 
   return (
     <TreeContextProvider tree={tree}>
       <LayoutContextProvider
-        navMode={nav.mode ?? 'auto'}
+        navMode={navMode}
         tabMode={tabMode}
         navTransparentMode={nav.transparentMode}
       >
         <Sidebar defaultOpenLevel={defaultOpenLevel} prefetch={prefetch}>
-          <LayoutBody {...props.containerProps}>
+          <LayoutBody _={Container}>
             {sidebar()}
-            <DocsNavbar {...props} links={navItems} tabs={tabs} />
+            {header()}
             {props.children}
           </LayoutBody>
         </Sidebar>
       </LayoutContextProvider>
     </TreeContextProvider>
-  );
-}
-
-function DocsNavbar({
-  links,
-  tabs,
-  tabMode = 'sidebar',
-  sidebar: { collapsible: sidebarCollapsible = true } = {},
-  searchToggle = {},
-  themeSwitch = {},
-  nav = {},
-  i18n,
-}: DocsLayoutProps & {
-  links: LinkItemType[];
-  tabs: SidebarTabWithProps[];
-}) {
-  const navMode = nav.mode ?? 'auto';
-  const showLayoutTabs = tabMode === 'navbar' && tabs.length > 0;
-
-  return (
-    <LayoutHeader
-      id="nd-subnav"
-      className={cn(
-        'sticky [grid-area:header] flex flex-col top-(--fd-docs-row-1) z-10 backdrop-blur-sm transition-colors data-[transparent=false]:bg-fd-background/80 layout:[--fd-header-height:--spacing(14)]',
-        showLayoutTabs && 'lg:layout:[--fd-header-height:--spacing(24)]',
-      )}
-    >
-      <div data-header-body="" className="flex border-b px-4 gap-2 h-14 md:px-6">
-        <div
-          className={cn(
-            'items-center',
-            navMode === 'top' && 'flex flex-1',
-            navMode === 'auto' && 'hidden has-data-[collapsed=true]:md:flex max-md:flex',
-          )}
-        >
-          {sidebarCollapsible && navMode === 'auto' && (
-            <SidebarCollapseTrigger
-              className={cn(
-                buttonVariants({
-                  color: 'ghost',
-                  size: 'icon-sm',
-                }),
-                'text-fd-muted-foreground data-[collapsed=false]:hidden max-md:hidden',
-              )}
-            >
-              <SidebarIcon />
-            </SidebarCollapseTrigger>
-          )}
-          {renderTitleNav(nav, {
-            className: cn(
-              'inline-flex items-center gap-2.5 font-semibold',
-              navMode === 'auto' && 'md:hidden',
-            ),
-          })}
-          {nav.children}
-        </div>
-        {searchToggle.enabled !== false &&
-          (searchToggle.components?.lg ? (
-            <div
-              className={cn(
-                'w-full my-auto max-md:hidden',
-                navMode === 'top' ? 'rounded-xl max-w-sm' : 'max-w-[240px]',
-              )}
-            >
-              {searchToggle.components.lg}
-            </div>
-          ) : (
-            <LargeSearchToggle
-              hideIfDisabled
-              className={cn(
-                'w-full my-auto max-md:hidden',
-                navMode === 'top' ? 'rounded-xl max-w-sm ps-2.5' : 'max-w-[240px]',
-              )}
-            />
-          ))}
-        <div className="flex flex-1 items-center justify-end md:gap-2">
-          <div className="flex items-center gap-6 empty:hidden max-lg:hidden">
-            {links
-              .filter((item) => item.type !== 'icon')
-              .map((item, i) => (
-                <NavbarLinkItem key={i} item={item} />
-              ))}
-          </div>
-          {links
-            .filter((item) => item.type === 'icon')
-            .map((item, i) => (
-              <LinkItem
-                key={i}
-                item={item}
-                className={cn(
-                  buttonVariants({ size: 'icon-sm', color: 'ghost' }),
-                  'text-fd-muted-foreground max-lg:hidden',
-                )}
-                aria-label={item.label}
-              >
-                {item.icon}
-              </LinkItem>
-            ))}
-
-          <div className="flex items-center md:hidden">
-            {searchToggle.enabled !== false &&
-              (searchToggle.components?.sm ?? <SearchToggle hideIfDisabled className="p-2" />)}
-            <SidebarTrigger
-              className={cn(
-                buttonVariants({
-                  color: 'ghost',
-                  size: 'icon-sm',
-                  className: 'p-2 -me-1.5',
-                }),
-              )}
-            >
-              <SidebarIcon />
-            </SidebarTrigger>
-          </div>
-
-          <div className="flex items-center gap-2 max-md:hidden">
-            {i18n && (
-              <LanguageToggle>
-                <Languages className="size-4.5 text-fd-muted-foreground" />
-              </LanguageToggle>
-            )}
-            {themeSwitch.enabled !== false &&
-              (themeSwitch.component ?? (
-                <ThemeToggle mode={themeSwitch.mode ?? 'light-dark-system'} />
-              ))}
-            {sidebarCollapsible && navMode === 'top' && (
-              <SidebarCollapseTrigger
-                className={cn(
-                  buttonVariants({
-                    color: 'secondary',
-                    size: 'icon-sm',
-                  }),
-                  'text-fd-muted-foreground rounded-full -me-1.5',
-                )}
-              >
-                <SidebarIcon />
-              </SidebarCollapseTrigger>
-            )}
-          </div>
-        </div>
-      </div>
-      {showLayoutTabs && (
-        <LayoutHeaderTabs
-          data-header-tabs=""
-          className="overflow-x-auto border-b px-6 h-10 max-lg:hidden"
-          options={tabs}
-        />
-      )}
-    </LayoutHeader>
   );
 }

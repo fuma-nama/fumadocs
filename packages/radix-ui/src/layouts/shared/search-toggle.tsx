@@ -6,7 +6,7 @@ import { useI18n } from '@/contexts/i18n';
 import { cn } from '@/utils/cn';
 import { type ButtonProps, buttonVariants } from '@/components/ui/button';
 
-interface SearchToggleProps extends Omit<ComponentProps<'button'>, 'color'>, ButtonProps {
+export interface SearchToggleProps extends Omit<ComponentProps<'button'>, 'color'>, ButtonProps {
   hideIfDisabled?: boolean;
 }
 
@@ -40,12 +40,11 @@ export function SearchToggle({
   );
 }
 
-export function LargeSearchToggle({
-  hideIfDisabled,
-  ...props
-}: ComponentProps<'button'> & {
+export interface LargeSearchToggleProps extends ComponentProps<'button'> {
   hideIfDisabled?: boolean;
-}) {
+}
+
+export function LargeSearchToggle({ hideIfDisabled, ...props }: LargeSearchToggleProps) {
   const { enabled, hotKey, setOpenSearch } = useSearchContext();
   const { text } = useI18n();
   if (hideIfDisabled && !enabled) return null;
