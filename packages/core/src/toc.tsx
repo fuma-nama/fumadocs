@@ -7,13 +7,13 @@ import {
   useContext,
   useEffect,
   useEffectEvent,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
 import scrollIntoView from 'scroll-into-view-if-needed';
 import { mergeRefs } from '@/utils/merge-refs';
+import { useOnChange } from './utils/use-on-change';
 
 export interface TOCItemType {
   title: ReactNode;
@@ -86,29 +86,28 @@ export interface TOCItemProps extends Omit<ComponentProps<'a'>, 'href'> {
 
 export function TOCItem({ ref, onActiveChange = () => null, ...props }: TOCItemProps) {
   const containerRef = useContext(ScrollContext);
+  const firstMountRef = useRef(true);
   const anchorRef = useRef<HTMLAnchorElement>(null);
   const activeOrder = useActiveAnchors().indexOf(props.href.slice(1));
   const isActive = activeOrder !== -1;
   const shouldScroll = activeOrder === 0;
-  const onActiveChangeEvent = useEffectEvent(onActiveChange);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const anchor = anchorRef.current;
     const container = containerRef.current;
 
     if (container && anchor && shouldScroll)
       scrollIntoView(anchor, {
-        behavior: 'smooth',
+        behavior: firstMountRef.current ? 'instant' : 'smooth',
         block: 'center',
         inline: 'center',
         scrollMode: 'always',
         boundary: container,
       });
+    firstMountRef.current = false;
   }, [containerRef, shouldScroll]);
 
-  useEffect(() => {
-    return () => onActiveChangeEvent(isActive);
-  }, [isActive]);
+  useOnChange(isActive, onActiveChange);
 
   return (
     <a ref={mergeRefs(anchorRef, ref)} data-active={isActive} {...props}>
@@ -171,21 +170,17 @@ function useAnchorObserver(watch: string[], single: boolean): string[] {
   });
 
   useEffect(() => {
-    if (observerRef.current) return;
-    observerRef.current = new IntersectionObserver(onChange, {
-      rootMargin: '0px',
-      threshold: 0.98,
-    });
+    // disabled
+    if (watch.length === 0) return;
 
-    return () => {
-      observerRef.current?.disconnect();
-      observerRef.current = null;
-    };
-  }, []);
+    if (!observerRef.current) {
+      observerRef.current = new IntersectionObserver(onChange, {
+        rootMargin: '0px',
+        threshold: 0.98,
+      });
+    }
 
-  useEffect(() => {
     const observer = observerRef.current;
-    if (!observer) return;
     const elements = watch.flatMap((heading) => document.getElementById(heading) ?? []);
 
     for (const element of elements) observer.observe(element);
@@ -193,6 +188,13 @@ function useAnchorObserver(watch: string[], single: boolean): string[] {
       for (const element of elements) observer.unobserve(element);
     };
   }, [watch]);
+
+  useEffect(() => {
+    return () => {
+      observerRef.current?.disconnect();
+      observerRef.current = null;
+    };
+  }, []);
 
   return activeAnchor;
 }

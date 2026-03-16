@@ -46,11 +46,9 @@ import { type Renderer, renderer } from '@/utils/renderer';
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
   tabMode?: 'sidebar' | 'navbar';
-
   nav?: BaseLayoutProps['nav'] & {
     mode?: 'top' | 'auto';
   };
-
   sidebar?: SidebarOptions;
 
   SidebarTrigger?: Renderer<ComponentProps<'button'>>;
@@ -97,6 +95,7 @@ export function DocsLayout(props: DocsLayoutProps) {
     containerProps,
     Container = containerProps ?? true,
     tree,
+    children,
   } = parseLayoutProps(props);
   const navMode = nav.mode ?? 'auto';
   const { menuItems, navItems } = useLinkItems(props);
@@ -425,7 +424,7 @@ export function DocsLayout(props: DocsLayoutProps) {
           <LayoutBody _={Container}>
             {sidebar()}
             {header()}
-            {props.children}
+            {children}
           </LayoutBody>
         </Sidebar>
       </LayoutContextProvider>

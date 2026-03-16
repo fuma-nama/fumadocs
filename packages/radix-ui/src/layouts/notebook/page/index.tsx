@@ -16,21 +16,31 @@ import type { AnchorProviderProps, TOCItemType } from 'fumadocs-core/toc';
 import * as TocDefault from '@/components/toc/default';
 import * as TocClerk from '@/components/toc/clerk';
 import { TOCProvider, TOCScrollArea } from '@/components/toc';
+import { ChildrenRenderer, renderer, type Renderer } from '@/utils/renderer';
 
 interface BreadcrumbOptions extends BreadcrumbProps {
-  enabled: boolean;
-  component: ReactNode;
+  enabled?: boolean;
+  component?: ReactNode;
 }
 
 interface FooterOptions extends FooterProps {
-  enabled: boolean;
-  component: ReactNode;
+  enabled?: boolean;
+  component?: ReactNode;
 }
 
 export interface DocsPageProps {
   toc?: TOCItemType[];
-  tableOfContent?: Partial<TableOfContentOptions>;
-  tableOfContentPopover?: Partial<TableOfContentPopoverOptions>;
+  /**
+   * - `multiple` (default): Accept multiple active items
+   * - `single`: Only accept one active item at most
+   * */
+  tocMode?: 'single' | 'multiple';
+  TOC?: Renderer<TOCMainProps>;
+  TOCPopover?: Renderer<TOCPopoverProps>;
+  /** Footer navigation, located under the page body. */
+  Footer?: Renderer<FooterProps>;
+  Container?: Renderer<ComponentProps<'div'>>;
+  Breadcrumb?: Renderer<BreadcrumbProps>;
 
   /**
    * Extend the page to fill all available space
@@ -38,28 +48,41 @@ export interface DocsPageProps {
    * @defaultValue false
    */
   full?: boolean;
-
-  /**
-   * Replace or disable breadcrumb
-   */
-  breadcrumb?: Partial<BreadcrumbOptions>;
-
-  /**
-   * Footer navigation, located under the page body.
-   *
-   * You can specify `footer.children` to add extra components under the footer.
-   */
-  footer?: Partial<FooterOptions>;
-
   children?: ReactNode;
 
-  /**
-   * Apply class names to the `#nd-page` container.
-   */
+  /** @deprecated use `Footer` instead. */
+  footer?: FooterOptions;
+  /** @deprecated use `Container` instead. */
   className?: string;
+  /** @deprecated use `Breadcrumb` instead. */
+  breadcrumb?: BreadcrumbOptions;
+  /** @deprecated use `TOC` instead, or `tocMode` for enabling `single`. */
+  tableOfContent?: TableOfContentOptions;
+  /** @deprecated use `TOCPopover` instead. */
+  tableOfContentPopover?: TableOfContentPopoverOptions;
 }
 
-type TableOfContentOptions = Pick<AnchorProviderProps, 'single'> & {
+interface TableOfContentOptions extends Pick<AnchorProviderProps, 'single'>, TOCProps {
+  enabled?: boolean;
+  component?: ReactNode;
+}
+
+interface TableOfContentPopoverOptions extends TOCProps {
+  enabled?: boolean;
+  component?: ReactNode;
+}
+
+interface TOCPopoverProps extends TOCProps {
+  container?: ComponentProps<typeof PageTOCPopover>;
+  trigger?: ComponentProps<typeof PageTOCPopoverTrigger>;
+  content?: ComponentProps<typeof PageTOCPopoverContent>;
+}
+
+interface TOCMainProps extends TOCProps {
+  container?: ComponentProps<typeof PageTOCPopover>;
+}
+
+interface TOCProps {
   /**
    * Custom content in TOC container, before the main TOC
    */
@@ -70,103 +93,84 @@ type TableOfContentOptions = Pick<AnchorProviderProps, 'single'> & {
    */
   footer?: ReactNode;
 
-  enabled: boolean;
-  component: ReactNode;
-
   /**
    * @defaultValue 'normal'
    */
   style?: 'normal' | 'clerk';
-};
-
-type TableOfContentPopoverOptions = Omit<TableOfContentOptions, 'single'>;
+}
 
 export function DocsPage({
-  breadcrumb: { enabled: breadcrumbEnabled = true, component: breadcrumb, ...breadcrumbProps } = {},
-  footer: { enabled: footerEnabled, component: footerReplace, ...footerProps } = {},
-  full = false,
-  tableOfContentPopover: {
-    enabled: tocPopoverEnabled,
-    component: tocPopover,
-    ...tocPopoverOptions
-  } = {},
-  tableOfContent: { enabled: tocEnabled, component: tocReplace, ...tocOptions } = {},
-  toc = [],
-  children,
+  tableOfContent: tocProps = {},
+  TOC,
+  tableOfContentPopover: tocPopoverProps = {},
+  TOCPopover,
+  footer = {},
+  Footer = footer.enabled === false
+    ? false
+    : footer.component
+      ? new ChildrenRenderer(footer.component)
+      : footer,
   className,
+  Container = { className },
+  breadcrumb = {},
+  Breadcrumb = breadcrumb.enabled === false
+    ? false
+    : breadcrumb.component
+      ? new ChildrenRenderer(breadcrumb.component)
+      : breadcrumb,
+  full = false,
+  toc = [],
+  tocMode = tocProps.single ? 'single' : 'multiple',
+  children,
 }: DocsPageProps) {
-  // disable TOC on full mode, you can still enable it with `enabled` option.
-  tocEnabled ??=
-    !full && (toc.length > 0 || tocOptions.footer !== undefined || tocOptions.header !== undefined);
-
-  tocPopoverEnabled ??=
-    toc.length > 0 ||
-    tocPopoverOptions.header !== undefined ||
-    tocPopoverOptions.footer !== undefined;
-
-  let wrapper = (children: ReactNode) => children;
-
-  if (tocEnabled || tocPopoverEnabled) {
-    wrapper = (children) => (
-      <TOCProvider single={tocOptions.single} toc={toc}>
-        {children}
-      </TOCProvider>
-    );
+  // force disable toc in full mode
+  if (full) {
+    TOC = false;
+  } else if (tocProps.enabled ?? (toc.length > 0 || !!tocProps.footer || !!tocProps.header)) {
+    TOC ??= tocProps.component ? new ChildrenRenderer(tocProps.component) : tocProps;
+  } else {
+    TOC ??= false;
   }
 
-  return wrapper(
-    <>
-      {tocPopoverEnabled &&
-        (tocPopover ?? (
-          <PageTOCPopover>
-            <PageTOCPopoverTrigger />
-            <PageTOCPopoverContent>
-              {tocPopoverOptions.header}
-              <TOCScrollArea>
-                {tocPopoverOptions.style === 'clerk' ? (
-                  <TocClerk.TOCItems />
-                ) : (
-                  <TocDefault.TOCItems />
-                )}
-              </TOCScrollArea>
-              {tocPopoverOptions.footer}
-            </PageTOCPopoverContent>
-          </PageTOCPopover>
-        ))}
-      <article
-        id="nd-page"
-        data-full={full}
-        className={cn(
+  if (
+    tocPopoverProps.enabled ??
+    (toc.length > 0 || !!tocPopoverProps.header || !!tocPopoverProps.footer)
+  ) {
+    TOCPopover ??= tocPopoverProps.component
+      ? new ChildrenRenderer(tocPopoverProps.component)
+      : tocPopoverProps;
+  } else {
+    TOCPopover ??= false;
+  }
+
+  const renderBreadcrumb = renderer(Breadcrumb, PageBreadcrumb);
+  const renderFooter = renderer(Footer, PageFooter);
+  const renderContainer = renderer(Container, 'article');
+  const renderToc = renderer(TOC, DefaultTOCMain);
+  const renderTocPopover = renderer(TOCPopover, DefaultTOCPopover);
+
+  return (
+    <TOCProvider single={tocMode === 'single'} toc={renderToc || renderTocPopover ? toc : []}>
+      {renderTocPopover?.((t) => t ?? {})}
+      {renderContainer?.((t) => ({
+        id: 'nd-page',
+        'data-full': full,
+        children: (
+          <>
+            {renderBreadcrumb?.((t) => t ?? {})}
+            {children}
+            {renderFooter?.((t) => t ?? {})}
+          </>
+        ),
+        ...t,
+        className: cn(
           'flex flex-col [grid-area:main] px-4 py-6 gap-4 md:px-6 md:pt-8 xl:px-8 xl:pt-14 *:max-w-[900px]',
           full && '*:max-w-[1285px]',
-          className,
-        )}
-      >
-        {breadcrumbEnabled && (breadcrumb ?? <PageBreadcrumb {...breadcrumbProps} />)}
-        {children}
-        {footerEnabled !== false && (footerReplace ?? <PageFooter {...footerProps} />)}
-      </article>
-      {tocEnabled &&
-        (tocReplace ?? (
-          <div
-            id="nd-toc"
-            className="sticky top-(--fd-docs-row-3) [grid-area:toc] h-[calc(var(--fd-docs-height)-var(--fd-docs-row-3))] flex flex-col w-(--fd-toc-width) pt-12 pe-4 pb-2 xl:layout:[--fd-toc-width:268px] max-xl:hidden"
-          >
-            {tocOptions.header}
-            <h3
-              id="toc-title"
-              className="inline-flex items-center gap-1.5 text-sm text-fd-muted-foreground"
-            >
-              <Text className="size-4" />
-              <I18nLabel label="toc" />
-            </h3>
-            <TOCScrollArea>
-              {tocOptions.style === 'clerk' ? <TocClerk.TOCItems /> : <TocDefault.TOCItems />}
-            </TOCScrollArea>
-            {tocOptions.footer}
-          </div>
-        ))}
-    </>,
+          t?.className,
+        ),
+      }))}
+      {renderToc?.((t) => t ?? {})}
+    </TOCProvider>
   );
 }
 
@@ -222,6 +226,54 @@ export function DocsTitle({ children, className, ...props }: ComponentProps<'h1'
     <h1 {...props} className={cn('text-[1.75em] font-semibold', className)}>
       {children}
     </h1>
+  );
+}
+
+function DefaultTOCMain({ container, header, footer, style }: TOCMainProps) {
+  return (
+    <div
+      id="nd-toc"
+      {...container}
+      className={cn(
+        'sticky top-(--fd-docs-row-3) [grid-area:toc] h-[calc(var(--fd-docs-height)-var(--fd-docs-row-3))] flex flex-col w-(--fd-toc-width) pt-12 pe-4 pb-2 xl:layout:[--fd-toc-width:268px] max-xl:hidden',
+        container?.className,
+      )}
+    >
+      {header}
+      <h3
+        id="toc-title"
+        className="inline-flex items-center gap-1.5 text-sm text-fd-muted-foreground"
+      >
+        <Text className="size-4" />
+        <I18nLabel label="toc" />
+      </h3>
+      <TOCScrollArea>
+        {style === 'clerk' ? <TocClerk.TOCItems /> : <TocDefault.TOCItems />}
+      </TOCScrollArea>
+      {footer}
+    </div>
+  );
+}
+
+function DefaultTOCPopover({
+  container,
+  trigger,
+  content,
+  header,
+  footer,
+  style,
+}: TOCPopoverProps) {
+  return (
+    <PageTOCPopover {...container}>
+      <PageTOCPopoverTrigger {...trigger} />
+      <PageTOCPopoverContent {...content}>
+        {header}
+        <TOCScrollArea>
+          {style === 'clerk' ? <TocClerk.TOCItems /> : <TocDefault.TOCItems />}
+        </TOCScrollArea>
+        {footer}
+      </PageTOCPopoverContent>
+    </PageTOCPopover>
   );
 }
 
