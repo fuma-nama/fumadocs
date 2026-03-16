@@ -107,10 +107,10 @@ export function DocsPage({
   tocMode = tocProps.single ? 'single' : 'multiple',
   children,
 }: DocsPageProps) {
-  if (tocProps.enabled ?? (toc.length > 0 || !!tocProps.header || !!tocProps.footer)) {
+  if (tocProps.enabled ?? (toc.length > 0 || tocProps.header || tocProps.footer)) {
     TOCRenderer ??= tocProps.component ? new ChildrenRenderer(tocProps.component) : tocProps;
   } else {
-    TOCRenderer ??= false;
+    TOCRenderer = false;
   }
 
   const renderBreadcrumb = renderer(Breadcrumb, PageBreadcrumb);

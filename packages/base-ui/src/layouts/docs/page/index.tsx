@@ -96,24 +96,22 @@ export function DocsPage({
   tocMode = tocProps.single ? 'single' : 'multiple',
   children,
 }: DocsPageProps) {
-  // force disable toc in full mode
-  if (full) {
-    TOCRenderer = false;
-  } else if (tocProps.enabled ?? (toc.length > 0 || !!tocProps.footer || !!tocProps.header)) {
+  if (!full && (tocProps.enabled ?? (toc.length > 0 || tocProps.footer || tocProps.header))) {
     TOCRenderer ??= tocProps.component ? new ChildrenRenderer(tocProps.component) : tocProps;
   } else {
-    TOCRenderer ??= false;
+    // force disable toc in full mode or when no content
+    TOCRenderer = false;
   }
 
   if (
     tocPopoverProps.enabled ??
-    (toc.length > 0 || !!tocPopoverProps.header || !!tocPopoverProps.footer)
+    (toc.length > 0 || tocPopoverProps.header || tocPopoverProps.footer)
   ) {
     TOCPopoverRenderer ??= tocPopoverProps.component
       ? new ChildrenRenderer(tocPopoverProps.component)
       : tocPopoverProps;
   } else {
-    TOCPopoverRenderer ??= false;
+    TOCPopoverRenderer = false;
   }
 
   const renderBreadcrumb = renderer(Breadcrumb, PageBreadcrumb);
