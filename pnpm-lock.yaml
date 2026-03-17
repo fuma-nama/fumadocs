@@ -2530,27 +2530,51 @@ importers:
 
   packages/press:
     dependencies:
+      '@ai-sdk/react':
+        specifier: ^3.0.118
+        version: 3.0.118(react@19.2.4)(zod@4.3.6)
+      '@openrouter/ai-sdk-provider':
+        specifier: ^2.3.0
+        version: 2.3.0(ai@6.0.116(zod@4.3.6))(zod@4.3.6)
+      '@radix-ui/react-presence':
+        specifier: ^1.1.5
+        version: 1.1.5(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@takumi-rs/image-response':
         specifier: ^0.72.0
         version: 0.72.0
+      ai:
+        specifier: ^6.0.116
+        version: 6.0.116(zod@4.3.6)
       chokidar:
         specifier: ^5.0.0
         version: 5.0.0
+      class-variance-authority:
+        specifier: ^0.7.1
+        version: 0.7.1
       commander:
         specifier: ^14.0.3
         version: 14.0.3
       dotenv:
         specifier: ^17.3.1
         version: 17.3.1
+      flexsearch:
+        specifier: ^0.8.212
+        version: 0.8.212
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
       fumadocs-ui:
         specifier: workspace:*
         version: link:../radix-ui
+      remark-gfm:
+        specifier: ^4.0.1
+        version: 4.0.1
       tinyglobby:
         specifier: ^0.2.15
         version: 0.2.15
+      unist-util-visit:
+        specifier: ^5.1.0
+        version: 5.1.0
       unrun:
         specifier: ^0.2.32
         version: 0.2.32
@@ -7459,6 +7483,7 @@ packages:
 
   bun@1.3.10:
     resolution: {integrity: sha512-S/CXaXXIyA4CMjdMkYQ4T2YMqnAn4s0ysD3mlsY4bUiOCqGlv28zck4Wd4H4kpvbekx15S9mUeLQ7Uxd0tYTLA==}
+    cpu: [arm64, x64]
     os: [darwin, linux, win32]
     hasBin: true
 

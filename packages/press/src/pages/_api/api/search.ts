@@ -1,4 +1,4 @@
-import { createFromSource } from 'fumadocs-core/search/server';
+import { flexsearchFromSource } from 'fumadocs-core/search/flexsearch';
 import { getSource, Source } from '@/lib/source';
 import { revalidable } from '@/lib/revalidable';
 import { structure } from 'fumadocs-core/mdx-plugins/remark-structure';
@@ -6,8 +6,7 @@ import { getConfigRuntime } from '@/config/load-runtime';
 
 const getServer = revalidable({
   async create(source: Source) {
-    return createFromSource(source, {
-      language: 'english',
+    return flexsearchFromSource(source, {
       buildIndex(page) {
         return {
           id: page.absolutePath!,

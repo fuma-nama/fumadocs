@@ -1,6 +1,7 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import z from 'zod';
 import type { ChokidarOptions } from 'chokidar';
+import type { LanguageModel } from 'ai';
 
 type Awaitable<T> = T | Promise<T>;
 
@@ -54,9 +55,17 @@ export const contentConfigSchema = z.object({
   projects: z.array(projectConfigSchema).optional(),
 });
 
+export const aiConfigSchema = z.object({
+  /**
+   * a function to create model interface for AI SDK
+   */
+  createModel: z.custom<() => Awaitable<LanguageModel>>((t) => typeof t === 'function').optional(),
+});
+
 export const configSchema = z.object({
   layout: layoutConfigSchema.optional(),
   content: contentConfigSchema.optional(),
+  ai: aiConfigSchema.optional(),
 });
 
 export type LayoutConfig = z.infer<typeof layoutConfigSchema>;
