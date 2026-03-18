@@ -4,32 +4,24 @@ import { type ComponentProps, type ReactNode, useMemo, useState } from 'react';
 import Link from 'fumadocs-core/link';
 import { usePathname } from 'fumadocs-core/framework';
 import { cn } from '@/utils/cn';
-import { isActive, normalize } from '@/utils/urls';
 import { useSidebar } from '@/components/sidebar/base';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import type { SidebarTab } from '@/components/sidebar/tabs';
 import { AnimatePresence, motion } from 'motion/react';
+import { isLayoutTabActive, type LayoutTab } from '../../shared';
 
-export interface SidebarTabWithProps extends SidebarTab {
-  props?: ComponentProps<'a'>;
+export interface TabDropdownProps extends ComponentProps<'button'> {
+  placeholder?: ReactNode;
+  tabs: LayoutTab[];
 }
 
-export function SidebarTabsDropdown({
-  options,
-  placeholder,
-  className,
-  ...props
-}: {
-  placeholder?: ReactNode;
-  options: SidebarTabWithProps[];
-} & ComponentProps<'button'>) {
+export function TabDropdown({ tabs, placeholder, className, ...props }: TabDropdownProps) {
   const [open, setOpen] = useState(false);
   const { closeOnRedirect } = useSidebar();
   const pathname = usePathname();
   const selectedIdx = useMemo(() => {
-    return options.findLastIndex((item) => isTabActive(item, pathname));
-  }, [options, pathname]);
-  const selected = selectedIdx !== -1 ? options[selectedIdx] : undefined;
+    return tabs.findLastIndex((item) => isLayoutTabActive(item, pathname));
+  }, [tabs, pathname]);
+  const selected = selectedIdx !== -1 ? tabs[selectedIdx] : undefined;
 
   const onClick = () => {
     closeOnRedirect.current = false;
@@ -83,7 +75,7 @@ export function SidebarTabsDropdown({
         align="start"
         className="flex flex-col gap-1 max-w-svw p-1 fd-scroll-container"
       >
-        {options.map((item, i) => {
+        {tabs.map((item, i) => {
           const isActive = i === selectedIdx;
           if (!isActive && item.unlisted) return;
 
@@ -118,10 +110,4 @@ export function SidebarTabsDropdown({
       </PopoverContent>
     </Popover>
   );
-}
-
-export function isTabActive(tab: SidebarTab, pathname: string) {
-  if (tab.urls) return tab.urls.has(normalize(pathname));
-
-  return isActive(tab.url, pathname, true);
 }

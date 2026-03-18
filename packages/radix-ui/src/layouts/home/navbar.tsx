@@ -9,7 +9,7 @@ import {
   NavigationMenuTrigger,
   type NavigationMenuTriggerProps,
 } from '@/components/ui/navigation-menu';
-import { navItemVariants } from './client';
+import { navItemVariants } from './slots/header';
 
 export const NavbarMenu = NavigationMenuItem;
 

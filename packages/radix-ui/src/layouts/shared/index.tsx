@@ -1,15 +1,27 @@
-import { type HTMLAttributes, useMemo, type ComponentProps, type ReactNode } from 'react';
+import { useMemo, type ComponentProps, type ReactNode, type FC } from 'react';
 import type { I18nConfig } from 'fumadocs-core/i18n';
 import type { LinkItemType } from '@/utils/link-item';
-import Link from 'fumadocs-core/link';
-import type { LargeSearchToggleProps, SearchToggleProps } from './search-toggle';
-import type { ThemeToggleProps } from './theme-toggle';
-import { ChildrenRenderer, type Renderer } from '@/utils/renderer';
+import {
+  FullSearchTrigger,
+  SearchTrigger,
+  type FullSearchTriggeProps,
+  type SearchTriggerProps,
+} from '../slots/search-toggle';
+import { ThemeSwitch, type ThemeSwitchProps } from '../slots/theme-toggle';
+import {
+  LanguageSelect,
+  LanguageSelectText,
+  type LanguageSelectProps,
+  type LanguageSelectTextProps,
+} from '../slots/language-toggle';
+import { useI18n } from '@/contexts/i18n';
+import { NavTitle } from '../slots/nav-title';
+import * as PageTree from 'fumadocs-core/page-tree';
+import { isActive, normalize } from '@/utils/urls';
 
 export interface NavOptions {
-  enabled: boolean;
-  component: ReactNode;
-
+  enabled?: boolean;
+  children?: ReactNode;
   title?: ReactNode | ((props: ComponentProps<'a'>) => ReactNode);
 
   /**
@@ -25,75 +37,211 @@ export interface NavOptions {
    */
   transparentMode?: 'always' | 'top' | 'none';
 
-  children?: ReactNode;
+  /**
+   * @deprecated use `slots.header` instead.
+   */
+  component?: ReactNode;
 }
 
 export interface BaseLayoutProps {
-  ThemeSwitch?: Renderer<ThemeToggleProps>;
-  SearchToggle?: Renderer<SearchToggleProps>;
-  LargeSearchToggle?: Renderer<LargeSearchToggleProps>;
-  LanguageSwitch?: Renderer<HTMLAttributes<HTMLElement>>;
   /**
    * GitHub url
    */
   githubUrl?: string;
-
   links?: LinkItemType[];
   /**
-   * Replace or disable navbar
+   * navigation config
    */
-  nav?: Partial<NavOptions>;
-
+  nav?: NavOptions;
+  slots?: BaseSlots;
   children?: ReactNode;
-
-  /**
-   * @deprecated use `LanguageSwitch` instead, this is now optional for i18n setups.
-   * @defaultValue false
-   */
-  i18n?: boolean | I18nConfig;
-  /** @deprecated use `ThemeSwitch` instead */
   themeSwitch?: {
     enabled?: boolean;
-    component?: ReactNode;
     mode?: 'light-dark' | 'light-dark-system';
+
+    /** @deprecated use `slots.themeSwitch` instead */
+    component?: ReactNode;
   };
-  /** @deprecated use `SearchToggle` & `LargeSearchToggle` instead */
+
   searchToggle?: {
     enabled?: boolean;
+    /** @deprecated use `slots.searchTrigger` instead */
     components?: {
       sm?: ReactNode;
       lg?: ReactNode;
     };
   };
+
+  /**
+   * @deprecated this is now optional for i18n setups, you can still customise language switch from `slots`.
+   */
+  i18n?: boolean | I18nConfig;
 }
 
-export function parseLayoutProps<T extends BaseLayoutProps>({
-  i18n = false,
-  themeSwitch = {},
-  searchToggle = {},
-  ...rest
-}: T) {
-  rest.LanguageSwitch ??= !!i18n;
+export interface BaseSlots {
+  navTitle?: FC<ComponentProps<'a'>>;
+  searchTrigger?: {
+    sm: FC<SearchTriggerProps>;
+    full: FC<FullSearchTriggeProps>;
+  };
+  languageSelect?: {
+    root: FC<LanguageSelectProps>;
+    text: FC<LanguageSelectTextProps>;
+  };
+  themeSwitch?: FC<ThemeSwitchProps>;
+}
 
-  if (themeSwitch.enabled === false) {
-    rest.ThemeSwitch ??= false;
-  } else if (themeSwitch.component) {
-    rest.ThemeSwitch ??= new ChildrenRenderer(themeSwitch.component);
-  } else {
-    rest.ThemeSwitch ??= { mode: themeSwitch.mode };
+export type BaseSlotsProps<P extends BaseLayoutProps = BaseLayoutProps> = Pick<
+  P,
+  'themeSwitch' | 'searchToggle' | 'nav'
+>;
+
+export function baseSlots({ useProps }: { useProps: () => BaseSlotsProps }) {
+  function InlineThemeSwitch(props: ThemeSwitchProps) {
+    const { mode = props.mode, component } = useProps().themeSwitch ?? {};
+    if (component) return component;
+    return <ThemeSwitch {...props} mode={mode} />;
   }
 
-  if (searchToggle.enabled === false) {
-    rest.SearchToggle ??= false;
-    rest.LargeSearchToggle ??= false;
-  } else {
-    const { sm, lg } = searchToggle.components ?? {};
-    rest.SearchToggle ??= sm ? new ChildrenRenderer(sm) : true;
-    rest.LargeSearchToggle ??= lg ? new ChildrenRenderer(lg) : true;
+  function InlineSearchTrigger(props: SearchTriggerProps) {
+    const { components } = useProps().searchToggle ?? {};
+    if (components?.sm) return components.sm;
+    return <SearchTrigger {...props} />;
   }
 
-  return rest as Omit<T, 'themeSwitch' | 'i18n' | 'searchToggle'> &
-    Pick<Required<T>, 'LanguageSwitch' | 'SearchToggle' | 'LargeSearchToggle' | 'ThemeSwitch'>;
+  function InlineSearchTriggerFull(props: FullSearchTriggeProps) {
+    const { components } = useProps().searchToggle ?? {};
+    if (components?.lg) return components.lg;
+    return <FullSearchTrigger {...props} />;
+  }
+
+  function InlineNavTitle(props: ComponentProps<'a'>) {
+    const { url = props.href ?? '/', title } = useProps().nav ?? {};
+
+    if (typeof title === 'function') return title(props);
+    return (
+      <NavTitle {...props} href={url}>
+        {title}
+      </NavTitle>
+    );
+  }
+
+  return {
+    useProvider(options: BaseLayoutProps): {
+      baseSlots: BaseSlots;
+      baseProps: BaseSlotsProps;
+    } {
+      const { locales = [] } = useI18n();
+      const {
+        nav,
+        slots = {},
+        i18n = locales.length > 1,
+        searchToggle = {},
+        themeSwitch = {},
+      } = options;
+
+      return {
+        baseSlots: {
+          navTitle: slots.navTitle ?? InlineNavTitle,
+          themeSwitch:
+            themeSwitch.enabled !== false ? (slots.themeSwitch ?? InlineThemeSwitch) : undefined,
+          languageSelect: i18n
+            ? (slots.languageSelect ?? {
+                root: LanguageSelect,
+                text: LanguageSelectText,
+              })
+            : undefined,
+          searchTrigger:
+            searchToggle.enabled !== false
+              ? (slots.searchTrigger ?? {
+                  sm: InlineSearchTrigger,
+                  full: InlineSearchTriggerFull,
+                })
+              : undefined,
+        },
+        baseProps: {
+          nav,
+          searchToggle,
+          themeSwitch,
+        },
+      };
+    },
+  };
+}
+
+export interface LayoutTab {
+  /**
+   * Redirect URL of the folder, usually the index page
+   */
+  url: string;
+  icon?: ReactNode;
+  title: ReactNode;
+  description?: ReactNode;
+  unlisted?: boolean;
+  props?: ComponentProps<'a'>;
+
+  /**
+   * bind to a page tree node.
+   */
+  $folder?: PageTree.Folder;
+
+  /**
+   * Detect from a list of urls (when not binded to page tree).
+   */
+  urls?: Set<string>;
+}
+
+export interface GetLayoutTabsOptions {
+  transform?: (option: LayoutTab, node: PageTree.Folder) => LayoutTab | null;
+}
+
+const defaultTransform: GetLayoutTabsOptions['transform'] = (option, node) => {
+  if (!node.icon) return option;
+
+  return {
+    ...option,
+    icon: (
+      <div className="size-full [&_svg]:size-full max-md:p-1.5 max-md:rounded-md max-md:border max-md:bg-fd-secondary">
+        {node.icon}
+      </div>
+    ),
+  };
+};
+
+export function getLayoutTabs(
+  tree: PageTree.Root,
+  { transform = defaultTransform }: GetLayoutTabsOptions = {},
+): LayoutTab[] {
+  const results: LayoutTab[] = [];
+
+  function next(node: PageTree.Root | PageTree.Folder, unlisted?: boolean) {
+    if ('root' in node && node.root) {
+      const url = node.index?.url ?? node.children.find((node) => node.type === 'page')?.url;
+
+      if (url) {
+        const option: LayoutTab = {
+          title: node.name,
+          icon: node.icon,
+          description: node.description,
+          url,
+          unlisted,
+          $folder: node,
+        };
+
+        const mapped = transform ? transform(option, node) : option;
+        if (mapped) results.push(mapped);
+      }
+    }
+
+    for (const child of node.children) {
+      if (child.type === 'folder') next(child, unlisted);
+    }
+  }
+
+  next(tree);
+  if (tree.fallback) next(tree.fallback, true);
+
+  return results;
 }
 
 /**
@@ -122,18 +270,6 @@ export function resolveLinkItems({
   return result;
 }
 
-export function renderTitleNav(
-  { title, url = '/' }: Partial<NavOptions>,
-  props: ComponentProps<'a'>,
-) {
-  if (typeof title === 'function') return title({ href: url, ...props });
-  return (
-    <Link href={url} {...props}>
-      {title}
-    </Link>
-  );
-}
-
 export function useLinkItems({ githubUrl, links }: Pick<BaseLayoutProps, 'links' | 'githubUrl'>) {
   return useMemo(() => {
     const all = resolveLinkItems({ links, githubUrl });
@@ -156,6 +292,23 @@ export function useLinkItems({ githubUrl, links }: Pick<BaseLayoutProps, 'links'
 
     return { navItems, menuItems, all };
   }, [links, githubUrl]);
+}
+
+export function isLayoutTabActive(tab: LayoutTab, pathname: string) {
+  if (tab.$folder) {
+    return (
+      PageTree.findPath(
+        tab.$folder.children,
+        (node) => node.type === 'page' && isActive(node.url, pathname),
+      ) !== null
+    );
+  }
+
+  if (tab.urls) {
+    return tab.urls.has(normalize(pathname));
+  }
+
+  return isActive(tab.url, pathname, true);
 }
 
 export type * from '@/utils/link-item';

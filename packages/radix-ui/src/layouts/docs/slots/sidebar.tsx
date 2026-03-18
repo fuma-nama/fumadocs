@@ -1,15 +1,18 @@
 'use client';
 import * as Base from '@/components/sidebar/base';
 import { cn } from '@/utils/cn';
-import { type ComponentProps, useRef } from 'react';
+import { type ComponentProps, ReactNode, useRef } from 'react';
 import { cva } from 'class-variance-authority';
-import { createPageTreeRenderer } from '@/components/sidebar/page-tree';
+import { createPageTreeRenderer, SidebarPageTreeComponents } from '@/components/sidebar/page-tree';
 import { createLinkItemRenderer } from '@/components/sidebar/link-item';
 import { buttonVariants } from '@/components/ui/button';
-import { SearchToggle } from '@/layouts/shared/search-toggle';
-import { Sidebar as SidebarIcon } from 'lucide-react';
+import { SearchTrigger } from '@/layouts/slots/search-toggle';
+import { Languages, Sidebar as SidebarIcon } from 'lucide-react';
 import { mergeRefs } from '@/utils/merge-refs';
 import { ScrollArea, ScrollAreaProps, ScrollViewport } from '@/components/ui/scroll-area';
+import { SidebarTabsDropdown } from '@/components/sidebar/tabs/dropdown';
+import { useDocsLayout } from '../client';
+import { LinkItem } from '@/utils/link-item';
 
 const itemVariants = cva(
   'relative flex flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground wrap-anywhere [&_svg]:size-4 [&_svg]:shrink-0',
@@ -27,23 +30,159 @@ const itemVariants = cva(
   },
 );
 
+export interface SidebarProps extends ComponentProps<'aside'> {
+  components?: Partial<SidebarPageTreeComponents>;
+  banner?: ReactNode;
+  footer?: ReactNode;
+
+  /**
+   * Support collapsing the sidebar on desktop mode
+   *
+   * @defaultValue true
+   */
+  collapsible?: boolean;
+}
+
+export type SidebarProviderProps = Base.SidebarProviderProps;
+
 function getItemOffset(depth: number) {
   return `calc(${2 + 3 * depth} * var(--spacing))`;
 }
 
-export function Sidebar(props: ComponentProps<typeof Base.SidebarProvider>) {
+export function SidebarProvider(props: SidebarProviderProps) {
   return <Base.SidebarProvider {...props} />;
 }
 
-export function SidebarFolder(props: ComponentProps<typeof Base.SidebarFolder>) {
+export function Sidebar({ footer, banner, collapsible = true, components, ...rest }: SidebarProps) {
+  const {
+    tabs,
+    menuItems,
+    slots,
+    props: { nav, tabMode = 'auto' },
+  } = useDocsLayout();
+  const iconLinks = menuItems.filter((item) => item.type === 'icon');
+  const viewport = (
+    <SidebarViewport>
+      {menuItems
+        .filter((v) => v.type !== 'icon')
+        .map((item, i, list) => (
+          <SidebarLinkItem key={i} item={item} className={cn(i === list.length - 1 && 'mb-4')} />
+        ))}
+      <SidebarPageTree {...components} />
+    </SidebarViewport>
+  );
+
+  return (
+    <>
+      <SidebarContent {...rest}>
+        <div className="flex flex-col gap-3 p-4 pb-2">
+          <div className="flex">
+            {slots.navTitle && (
+              <slots.navTitle className="inline-flex text-[0.9375rem] items-center gap-2.5 font-medium me-auto" />
+            )}
+            {nav?.children}
+            {collapsible && (
+              <SidebarCollapseTrigger
+                className={cn(
+                  buttonVariants({
+                    color: 'ghost',
+                    size: 'icon-sm',
+                    className: 'mb-auto text-fd-muted-foreground',
+                  }),
+                )}
+              >
+                <SidebarIcon />
+              </SidebarCollapseTrigger>
+            )}
+          </div>
+          {slots.searchTrigger && <slots.searchTrigger.full hideIfDisabled />}
+          {tabs.length > 0 && tabMode === 'auto' && <SidebarTabsDropdown options={tabs} />}
+          {banner}
+        </div>
+        {viewport}
+        {(slots.languageSelect || iconLinks.length > 0 || slots.themeSwitch || footer) && (
+          <div className="flex flex-col border-t p-4 pt-2 empty:hidden">
+            <div className="flex text-fd-muted-foreground items-center empty:hidden">
+              {slots.languageSelect && (
+                <slots.languageSelect.root>
+                  <Languages className="size-4.5" />
+                </slots.languageSelect.root>
+              )}
+              {iconLinks.map((item, i) => (
+                <LinkItem
+                  key={i}
+                  item={item}
+                  className={cn(buttonVariants({ size: 'icon-sm', color: 'ghost' }))}
+                  aria-label={item.label}
+                >
+                  {item.icon}
+                </LinkItem>
+              ))}
+              {slots.themeSwitch && <slots.themeSwitch className="ms-auto p-0" />}
+            </div>
+            {footer}
+          </div>
+        )}
+      </SidebarContent>
+      <SidebarDrawer>
+        <div className="flex flex-col gap-3 p-4 pb-2">
+          <div className="flex text-fd-muted-foreground items-center gap-1.5">
+            <div className="flex flex-1">
+              {iconLinks.map((item, i) => (
+                <LinkItem
+                  key={i}
+                  item={item}
+                  className={cn(
+                    buttonVariants({
+                      size: 'icon-sm',
+                      color: 'ghost',
+                      className: 'p-2',
+                    }),
+                  )}
+                  aria-label={item.label}
+                >
+                  {item.icon}
+                </LinkItem>
+              ))}
+            </div>
+            {slots.languageSelect && (
+              <slots.languageSelect.root>
+                <Languages className="size-4.5" />
+                <slots.languageSelect.text />
+              </slots.languageSelect.root>
+            )}
+            {slots.themeSwitch && <slots.themeSwitch className="p-0" />}
+            <SidebarTrigger
+              className={cn(
+                buttonVariants({
+                  color: 'ghost',
+                  size: 'icon-sm',
+                  className: 'p-2',
+                }),
+              )}
+            >
+              <SidebarIcon />
+            </SidebarTrigger>
+          </div>
+          {tabs.length > 0 && <SidebarTabsDropdown options={tabs} />}
+          {banner}
+        </div>
+        {viewport}
+        <div className="flex flex-col border-t p-4 pt-2 empty:hidden">{footer}</div>
+      </SidebarDrawer>
+    </>
+  );
+}
+
+function SidebarFolder(props: ComponentProps<typeof Base.SidebarFolder>) {
   return <Base.SidebarFolder {...props} />;
 }
 
-export function SidebarCollapseTrigger(props: ComponentProps<typeof Base.SidebarCollapseTrigger>) {
+function SidebarCollapseTrigger(props: ComponentProps<typeof Base.SidebarCollapseTrigger>) {
   return <Base.SidebarCollapseTrigger {...props} />;
 }
 
-export function SidebarViewport(props: ScrollAreaProps) {
+function SidebarViewport(props: ScrollAreaProps) {
   return (
     <ScrollArea {...props} className={cn('min-h-0 flex-1', props.className)}>
       <ScrollViewport
@@ -61,16 +200,11 @@ export function SidebarViewport(props: ScrollAreaProps) {
   );
 }
 
-export function SidebarTrigger(props: ComponentProps<typeof Base.SidebarTrigger>) {
+export function SidebarTrigger(props: ComponentProps<'button'>) {
   return <Base.SidebarTrigger {...props} />;
 }
 
-export function SidebarContent({
-  ref: refProp,
-  className,
-  children,
-  ...props
-}: ComponentProps<'aside'>) {
+function SidebarContent({ ref: refProp, className, children, ...props }: ComponentProps<'aside'>) {
   const ref = useRef<HTMLElement>(null);
 
   return (
@@ -124,7 +258,7 @@ export function SidebarContent({
             >
               <SidebarIcon />
             </Base.SidebarCollapseTrigger>
-            <SearchToggle className="rounded-lg" hideIfDisabled />
+            <SearchTrigger className="rounded-lg" hideIfDisabled />
           </div>
         </>
       )}
@@ -132,7 +266,7 @@ export function SidebarContent({
   );
 }
 
-export function SidebarDrawer({
+function SidebarDrawer({
   children,
   className,
   ...props
@@ -153,7 +287,7 @@ export function SidebarDrawer({
   );
 }
 
-export function SidebarSeparator({ className, style, children, ...props }: ComponentProps<'p'>) {
+function SidebarSeparator({ className, style, children, ...props }: ComponentProps<'p'>) {
   const depth = Base.useFolderDepth();
 
   return (
@@ -174,7 +308,7 @@ export function SidebarSeparator({ className, style, children, ...props }: Compo
   );
 }
 
-export function SidebarItem({
+function SidebarItem({
   className,
   style,
   children,
@@ -196,7 +330,7 @@ export function SidebarItem({
   );
 }
 
-export function SidebarFolderTrigger({
+function SidebarFolderTrigger({
   className,
   style,
   ...props
@@ -217,7 +351,7 @@ export function SidebarFolderTrigger({
   );
 }
 
-export function SidebarFolderLink({
+function SidebarFolderLink({
   className,
   style,
   ...props
@@ -238,7 +372,7 @@ export function SidebarFolderLink({
   );
 }
 
-export function SidebarFolderContent({
+function SidebarFolderContent({
   className,
   children,
   ...props
@@ -260,7 +394,7 @@ export function SidebarFolderContent({
   );
 }
 
-export const SidebarPageTree = createPageTreeRenderer({
+const SidebarPageTree = createPageTreeRenderer({
   SidebarFolder,
   SidebarFolderContent,
   SidebarFolderLink,
@@ -269,7 +403,7 @@ export const SidebarPageTree = createPageTreeRenderer({
   SidebarSeparator,
 });
 
-export const SidebarLinkItem = createLinkItemRenderer({
+const SidebarLinkItem = createLinkItemRenderer({
   SidebarFolder,
   SidebarFolderContent,
   SidebarFolderLink,

@@ -1,26 +1,8 @@
+import type { LayoutTab, GetLayoutTabsOptions } from '@/layouts/shared';
 import type * as PageTree from 'fumadocs-core/page-tree';
-import type { ReactNode } from 'react';
 
-export interface SidebarTab {
-  /**
-   * Redirect URL of the folder, usually the index page
-   */
-  url: string;
-
-  icon?: ReactNode;
-  title: ReactNode;
-  description?: ReactNode;
-
-  /**
-   * Detect from a list of urls
-   */
-  urls?: Set<string>;
-  unlisted?: boolean;
-}
-
-export interface GetSidebarTabsOptions {
-  transform?: (option: SidebarTab, node: PageTree.Folder) => SidebarTab | null;
-}
+export type SidebarTab = LayoutTab;
+export type GetSidebarTabsOptions = GetLayoutTabsOptions;
 
 const defaultTransform: GetSidebarTabsOptions['transform'] = (option, node) => {
   if (!node.icon) return option;

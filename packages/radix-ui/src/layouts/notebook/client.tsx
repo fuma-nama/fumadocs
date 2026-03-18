@@ -1,33 +1,51 @@
 'use client';
-import { cn } from '@/utils/cn';
-import {
-  type ComponentProps,
-  createContext,
-  Fragment,
-  type HTMLAttributes,
-  type PointerEvent,
-  type ReactNode,
-  use,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-import { useSidebar } from '@/components/sidebar/base';
-import { ChevronDown } from 'lucide-react';
-import Link from 'fumadocs-core/link';
-import { usePathname } from 'fumadocs-core/framework';
+import { type ComponentProps, createContext, type FC, use } from 'react';
+import { type DocsLayoutProps } from '.';
 import { useIsScrollTop } from '@/utils/use-is-scroll-top';
-import { LinkItem, type LinkItemType, type MenuItemType } from '@/utils/link-item';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { isTabActive, type SidebarTabWithProps } from '@/components/sidebar/tabs/dropdown';
-import { renderer, type Renderer } from '@/utils/renderer';
+import { type LinkItemType } from '@/utils/link-item';
+import { baseSlots, type BaseSlots, type BaseSlotsProps, LayoutTab, useLinkItems } from '../shared';
+import { TreeContextProvider } from '@/contexts/tree';
+import { Container } from './slots/container';
+import {
+  Sidebar,
+  SidebarCollapseTrigger,
+  SidebarProvider,
+  SidebarTrigger,
+  type SidebarProps,
+  type SidebarProviderProps,
+} from './slots/sidebar';
+import { Header } from './slots/header';
 
-const LayoutContext = createContext<
-  | (LayoutInfo & {
-      isNavTransparent: boolean;
-    })
-  | null
->(null);
+export interface DocsSlots extends BaseSlots {
+  container?: FC<ComponentProps<'div'>>;
+  header?: FC<ComponentProps<'header'>>;
+  sidebar?: {
+    provider: FC<SidebarProviderProps>;
+    root: FC<SidebarProps>;
+    trigger: FC<ComponentProps<'button'>>;
+    collapseTrigger: FC<ComponentProps<'button'>>;
+  };
+}
+
+const { useProvider } = baseSlots({
+  useProps() {
+    return useNotebookLayout().props;
+  },
+});
+
+type SlotsProps = BaseSlotsProps;
+
+const LayoutContext = createContext<{
+  props: SlotsProps;
+  tabs: LayoutTab[];
+  sidebarCollapsible: boolean;
+  isNavTransparent: boolean;
+  navItems: LinkItemType[];
+  menuItems: LinkItemType[];
+  slots: DocsSlots;
+  tabMode: 'sidebar' | 'navbar';
+  navMode: 'top' | 'auto';
+} | null>(null);
 
 export function useNotebookLayout() {
   const context = use(LayoutContext);
@@ -38,230 +56,77 @@ export function useNotebookLayout() {
   return context;
 }
 
-export interface LayoutInfo {
-  tabMode: 'sidebar' | 'navbar';
-  navMode: 'top' | 'auto';
-}
-
-export function LayoutContextProvider({
-  navTransparentMode = 'none',
-  navMode,
-  tabMode,
-  children,
-}: LayoutInfo & {
-  navTransparentMode?: 'always' | 'top' | 'none';
-  children: ReactNode;
-}) {
+export function LayoutBody(
+  props: Omit<DocsLayoutProps, 'tabs'> & {
+    tabs: LayoutTab[];
+  },
+) {
+  const {
+    nav: {
+      enabled: navEnabled = true,
+      mode: navMode = 'auto',
+      transparentMode: navTransparentMode = 'none',
+    } = {},
+    sidebar: { defaultOpenLevel, prefetch, ...sidebarProps } = {},
+    slots: defaultSlots,
+    tabMode = 'sidebar',
+    tabs,
+    tree,
+    containerProps,
+    children,
+  } = props;
   const isTop = useIsScrollTop({ enabled: navTransparentMode === 'top' }) ?? true;
   const isNavTransparent = navTransparentMode === 'top' ? isTop : navTransparentMode === 'always';
+  const { baseSlots, baseProps } = useProvider(props);
+  const linkItems = useLinkItems(props);
+  const slots: DocsSlots = {
+    ...baseSlots,
+    header: navEnabled ? (defaultSlots?.header ?? Header) : undefined,
+    container: defaultSlots?.container ?? Container,
+    sidebar: defaultSlots?.sidebar ?? {
+      provider: SidebarProvider,
+      root: Sidebar,
+      trigger: SidebarTrigger,
+      collapseTrigger: SidebarCollapseTrigger,
+    },
+  };
 
-  return (
-    <LayoutContext
-      value={useMemo(
-        () => ({
-          isNavTransparent,
-          navMode,
-          tabMode,
-        }),
-        [isNavTransparent, navMode, tabMode],
-      )}
-    >
+  let content = (
+    <>
+      {slots.header && <slots.header />}
+      {slots.sidebar && <slots.sidebar.root {...sidebarProps} />}
       {children}
-    </LayoutContext>
+    </>
   );
-}
 
-export function LayoutHeader(props: ComponentProps<'header'>) {
-  const { open } = useSidebar();
-  const { isNavTransparent } = useNotebookLayout();
+  if (slots.container) {
+    content = <slots.container {...containerProps}>{content}</slots.container>;
+  }
 
-  return (
-    <header data-transparent={isNavTransparent && !open} {...props}>
-      {props.children}
-    </header>
-  );
-}
-
-export function LayoutBody({
-  _,
-  children,
-}: {
-  _: Renderer<ComponentProps<'div'>>;
-  children: ReactNode;
-}) {
-  const { navMode } = useNotebookLayout();
-  const { collapsed } = useSidebar();
-  const pageCol =
-    'calc(var(--fd-layout-width,97rem) - var(--fd-sidebar-col) - var(--fd-toc-width))';
-  const render = renderer(_, 'div');
-
-  return render?.(
-    (t) =>
-      ({
-        id: 'nd-notebook-layout',
-        children,
-        ...t,
-        className: cn(
-          'grid overflow-x-clip min-h-(--fd-docs-height) transition-[grid-template-columns] auto-cols-auto auto-rows-auto [--fd-docs-height:100dvh] [--fd-header-height:0px] [--fd-toc-popover-height:0px] [--fd-sidebar-width:0px] [--fd-toc-width:0px]',
-          t?.className,
-        ),
-        style: {
-          gridTemplate:
-            navMode === 'top'
-              ? `". header header header ."
-"sidebar sidebar toc-popover toc-popover ."
-"sidebar sidebar main toc ." 1fr / minmax(min-content, 1fr) var(--fd-sidebar-col) minmax(0, ${pageCol}) var(--fd-toc-width) minmax(min-content, 1fr)`
-              : `"sidebar sidebar header header ."
-"sidebar sidebar toc-popover toc-popover ."
-"sidebar sidebar main toc ." 1fr / minmax(min-content, 1fr) var(--fd-sidebar-col) minmax(0, ${pageCol}) var(--fd-toc-width) minmax(min-content, 1fr)`,
-          '--fd-docs-row-1': 'var(--fd-banner-height, 0px)',
-          '--fd-docs-row-2': 'calc(var(--fd-docs-row-1) + var(--fd-header-height))',
-          '--fd-docs-row-3': 'calc(var(--fd-docs-row-2) + var(--fd-toc-popover-height))',
-          '--fd-sidebar-col': collapsed ? '0px' : 'var(--fd-sidebar-width)',
-          ...t?.style,
-        },
-      }) as ComponentProps<'div'>,
-  );
-}
-
-export function LayoutHeaderTabs({
-  options,
-  className,
-  ...props
-}: ComponentProps<'div'> & {
-  options: SidebarTabWithProps[];
-}) {
-  const pathname = usePathname();
-  const selectedIdx = useMemo(() => {
-    return options.findLastIndex((option) => isTabActive(option, pathname));
-  }, [options, pathname]);
-
-  return (
-    <div className={cn('flex flex-row items-end gap-6', className)} {...props}>
-      {options.map((option, i) => {
-        const { title, url, unlisted, props: { className, ...rest } = {} } = option;
-        const isSelected = selectedIdx === i;
-
-        return (
-          <Link
-            key={i}
-            href={url}
-            className={cn(
-              'inline-flex border-b-2 border-transparent transition-colors items-center pb-1.5 font-medium gap-2 text-fd-muted-foreground text-sm text-nowrap hover:text-fd-accent-foreground',
-              unlisted && !isSelected && 'hidden',
-              isSelected && 'border-fd-primary text-fd-primary',
-              className,
-            )}
-            {...rest}
-          >
-            {title}
-          </Link>
-        );
-      })}
-    </div>
-  );
-}
-
-export function NavbarLinkItem({
-  item,
-  className,
-  ...props
-}: { item: LinkItemType } & HTMLAttributes<HTMLElement>) {
-  if (item.type === 'custom') return item.children;
-
-  if (item.type === 'menu') {
-    return <NavbarLinkItemMenu item={item} className={className} {...props} />;
+  if (slots.sidebar) {
+    content = (
+      <slots.sidebar.provider defaultOpenLevel={defaultOpenLevel} prefetch={prefetch}>
+        {content}
+      </slots.sidebar.provider>
+    );
   }
 
   return (
-    <LinkItem
-      item={item}
-      className={cn(
-        'text-sm text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground data-[active=true]:text-fd-primary',
-        className,
-      )}
-      {...props}
-    >
-      {item.text}
-    </LinkItem>
-  );
-}
-
-function NavbarLinkItemMenu({
-  item,
-  hoverDelay = 50,
-  className,
-  ...props
-}: { item: MenuItemType; hoverDelay?: number } & HTMLAttributes<HTMLElement>) {
-  const [open, setOpen] = useState(false);
-  const timeoutRef = useRef<number>(null);
-  const freezeUntil = useRef<number>(null);
-
-  const delaySetOpen = (value: boolean) => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
-
-    timeoutRef.current = window.setTimeout(() => {
-      setOpen(value);
-      freezeUntil.current = Date.now() + 300;
-    }, hoverDelay);
-  };
-  const onPointerEnter = (e: PointerEvent) => {
-    if (e.pointerType === 'touch') return;
-    delaySetOpen(true);
-  };
-  const onPointerLeave = (e: PointerEvent) => {
-    if (e.pointerType === 'touch') return;
-    delaySetOpen(false);
-  };
-  function isTouchDevice() {
-    return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-  }
-
-  return (
-    <Popover
-      open={open}
-      onOpenChange={(value) => {
-        if (freezeUntil.current === null || Date.now() >= freezeUntil.current) setOpen(value);
-      }}
-    >
-      <PopoverTrigger
-        className={cn(
-          'inline-flex items-center gap-1.5 p-1 text-sm text-fd-muted-foreground transition-colors has-data-[active=true]:text-fd-primary data-[state=open]:text-fd-accent-foreground focus-visible:outline-none',
-          className,
-        )}
-        onPointerEnter={onPointerEnter}
-        onPointerLeave={onPointerLeave}
-        {...props}
+    <TreeContextProvider tree={tree}>
+      <LayoutContext
+        value={{
+          sidebarCollapsible: sidebarProps.collapsible ?? true,
+          props: baseProps,
+          tabMode,
+          navMode,
+          tabs,
+          isNavTransparent,
+          slots,
+          ...linkItems,
+        }}
       >
-        {item.url ? <LinkItem item={item as never}>{item.text}</LinkItem> : item.text}
-        <ChevronDown className="size-3" />
-      </PopoverTrigger>
-      <PopoverContent
-        className="flex flex-col p-1 text-fd-muted-foreground text-start"
-        onPointerEnter={onPointerEnter}
-        onPointerLeave={onPointerLeave}
-      >
-        {item.items.map((child, i) => {
-          if (child.type === 'custom') return <Fragment key={i}>{child.children}</Fragment>;
-
-          return (
-            <LinkItem
-              key={i}
-              item={child}
-              className="inline-flex items-center gap-2 rounded-md p-2 transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground data-[active=true]:text-fd-primary [&_svg]:size-4"
-              onClick={() => {
-                if (isTouchDevice()) setOpen(false);
-              }}
-            >
-              {child.icon}
-              {child.text}
-            </LinkItem>
-          );
-        })}
-      </PopoverContent>
-    </Popover>
+        {content}
+      </LayoutContext>
+    </TreeContextProvider>
   );
 }

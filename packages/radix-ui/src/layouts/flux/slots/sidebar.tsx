@@ -1,13 +1,27 @@
 'use client';
+
 import * as Base from '@/components/sidebar/base';
 import { cn } from '@/utils/cn';
-import { type ComponentProps, useEffect, useEffectEvent, useRef, useState } from 'react';
+import {
+  type ComponentProps,
+  type ReactNode,
+  useEffect,
+  useEffectEvent,
+  useRef,
+  useState,
+} from 'react';
 import { cva } from 'class-variance-authority';
-import { createPageTreeRenderer } from '@/components/sidebar/page-tree';
+import {
+  createPageTreeRenderer,
+  type SidebarPageTreeComponents,
+} from '@/components/sidebar/page-tree';
 import { createLinkItemRenderer } from '@/components/sidebar/link-item';
 import { mergeRefs } from '@/utils/merge-refs';
-import { motion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import { RemoveScroll } from 'react-remove-scroll';
+import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
+import { useFluxLayout } from '..';
+import { XIcon, SidebarIcon } from 'lucide-react';
 
 const MotionSidebarItem = motion.create(Base.SidebarItem);
 const MotionSidebarFolderTrigger = motion.create(Base.SidebarFolderTrigger);
@@ -34,28 +48,80 @@ function getItemOffset(depth: number) {
   return `calc(${2 + 3 * depth} * var(--spacing))`;
 }
 
-export function Sidebar(props: ComponentProps<typeof Base.SidebarProvider>) {
+export interface SidebarProps extends ComponentProps<'aside'> {
+  components?: Partial<SidebarPageTreeComponents>;
+  banner?: ReactNode;
+  footer?: ReactNode;
+}
+
+export type SidebarProviderProps = Base.SidebarProviderProps;
+
+export function SidebarProvider(props: SidebarProviderProps) {
   return <Base.SidebarProvider {...props} />;
 }
 
-export function SidebarFolder(props: ComponentProps<typeof Base.SidebarFolder>) {
-  return <Base.SidebarFolder {...props} />;
+export function SidebarRoot({ footer, banner, components, ...rest }: SidebarProps) {
+  const { menuItems } = useFluxLayout();
+
+  return (
+    <SidebarContent {...rest}>
+      <div className="flex flex-col gap-3 p-4 pb-2 empty:hidden">{banner}</div>
+      <ScrollArea className="min-h-0 flex-1">
+        <ScrollViewport
+          className="p-4 overscroll-contain"
+          style={
+            {
+              maskImage:
+                'linear-gradient(to bottom, transparent, white 12px, white calc(100% - 12px), transparent)',
+            } as object
+          }
+        >
+          {menuItems
+            .filter((v) => v.type !== 'icon')
+            .map((item, i, list) => (
+              <SidebarLinkItem
+                key={i}
+                item={item}
+                className={cn(i === list.length - 1 && 'mb-4')}
+              />
+            ))}
+          <SidebarPageTree {...components} />
+        </ScrollViewport>
+      </ScrollArea>
+      {footer}
+    </SidebarContent>
+  );
 }
 
-export function SidebarCollapseTrigger(props: ComponentProps<typeof Base.SidebarCollapseTrigger>) {
-  return <Base.SidebarCollapseTrigger {...props} />;
+export function SidebarTrigger(props: ComponentProps<'button'>) {
+  const { open, setOpen } = Base.useSidebar();
+  return (
+    <button onClick={() => setOpen((prev) => !prev)} {...props}>
+      <AnimatePresence mode="wait">
+        <motion.span
+          key={open ? 'open' : 'closed'}
+          transition={{ duration: 0.2 }}
+          initial={{
+            y: '100%',
+            opacity: 0,
+          }}
+          animate={{
+            y: 0,
+            opacity: 1,
+          }}
+          exit={{
+            y: '100%',
+            opacity: 0,
+          }}
+        >
+          {open ? <XIcon /> : <SidebarIcon />}
+        </motion.span>
+      </AnimatePresence>
+    </button>
+  );
 }
 
-export function SidebarTrigger(props: ComponentProps<typeof Base.SidebarTrigger>) {
-  return <Base.SidebarTrigger {...props} />;
-}
-
-export function SidebarContent({
-  ref: refProp,
-  className,
-  children,
-  ...props
-}: ComponentProps<'aside'>) {
+function SidebarContent({ ref: refProp, className, children, ...props }: ComponentProps<'aside'>) {
   const ref = useRef<HTMLElement>(null);
   const [blockScroll, setBlockScroll] = useState(false);
   const { open, setOpen } = Base.useSidebar();
@@ -132,7 +198,11 @@ export function SidebarContent({
   );
 }
 
-export function SidebarSeparator({ className, style, children, ...props }: ComponentProps<'p'>) {
+function SidebarFolder(props: ComponentProps<typeof Base.SidebarFolder>) {
+  return <Base.SidebarFolder {...props} />;
+}
+
+function SidebarSeparator({ className, style, children, ...props }: ComponentProps<'p'>) {
   const depth = Base.useFolderDepth();
 
   return (
@@ -153,7 +223,7 @@ export function SidebarSeparator({ className, style, children, ...props }: Compo
   );
 }
 
-export function SidebarItem({
+function SidebarItem({
   className,
   style,
   children,
@@ -175,7 +245,7 @@ export function SidebarItem({
   );
 }
 
-export function SidebarFolderTrigger({
+function SidebarFolderTrigger({
   className,
   style,
   ...props
@@ -196,7 +266,7 @@ export function SidebarFolderTrigger({
   );
 }
 
-export function SidebarFolderLink({
+function SidebarFolderLink({
   className,
   style,
   ...props
@@ -217,7 +287,7 @@ export function SidebarFolderLink({
   );
 }
 
-export function SidebarFolderContent({
+function SidebarFolderContent({
   className,
   children,
   ...props
@@ -254,7 +324,7 @@ export function SidebarFolderContent({
   );
 }
 
-export const SidebarPageTree = createPageTreeRenderer({
+const SidebarPageTree = createPageTreeRenderer({
   SidebarFolder,
   SidebarFolderContent,
   SidebarSeparator,
@@ -263,7 +333,7 @@ export const SidebarPageTree = createPageTreeRenderer({
   SidebarItem,
 });
 
-export const SidebarLinkItem = createLinkItemRenderer({
+const SidebarLinkItem = createLinkItemRenderer({
   SidebarFolder,
   SidebarFolderContent,
   SidebarFolderLink,

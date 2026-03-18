@@ -1,13 +1,18 @@
 'use client';
+
 import * as Base from '@/components/sidebar/base';
 import { cn } from '@/utils/cn';
-import { type ComponentProps, useRef } from 'react';
+import { type ComponentProps, createElement, type FC, type ReactNode, useRef } from 'react';
 import { cva } from 'class-variance-authority';
-import { useNotebookLayout } from './client';
-import { createPageTreeRenderer } from '@/components/sidebar/page-tree';
+import { createPageTreeRenderer, type SidebarPageTreeComponents } from '@/components/sidebar/page-tree';
 import { createLinkItemRenderer } from '@/components/sidebar/link-item';
+import { buttonVariants } from '@/components/ui/button';
 import { mergeRefs } from '@/utils/merge-refs';
 import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
+import { SidebarTabsDropdown } from '@/components/sidebar/tabs/dropdown';
+import { LinkItem } from '@/utils/link-item';
+import { Languages, Sidebar as SidebarIcon, X } from 'lucide-react';
+import { useNotebookLayout } from '../client';
 
 const itemVariants = cva(
   'relative flex flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground wrap-anywhere [&_svg]:size-4 [&_svg]:shrink-0',
@@ -29,19 +34,33 @@ function getItemOffset(depth: number) {
   return `calc(${2 + 3 * depth} * var(--spacing))`;
 }
 
-export function Sidebar(props: ComponentProps<typeof Base.SidebarProvider>) {
+export interface SidebarProps extends ComponentProps<'aside'> {
+  components?: Partial<SidebarPageTreeComponents>;
+  banner?: ReactNode | FC<ComponentProps<'div'>>;
+  footer?: ReactNode | FC<ComponentProps<'div'>>;
+  /**
+   * Support collapsing the sidebar on desktop mode
+   *
+   * @defaultValue true
+   */
+  collapsible?: boolean;
+}
+
+export type SidebarProviderProps = Base.SidebarProviderProps;
+
+export function SidebarProvider(props: SidebarProviderProps) {
   return <Base.SidebarProvider {...props} />;
 }
 
-export function SidebarFolder(props: ComponentProps<typeof Base.SidebarFolder>) {
-  return <Base.SidebarFolder {...props} />;
+export function SidebarTrigger(props: ComponentProps<'button'>) {
+  return <Base.SidebarTrigger {...props} />;
 }
 
-export function SidebarCollapseTrigger(props: ComponentProps<typeof Base.SidebarCollapseTrigger>) {
+export function SidebarCollapseTrigger(props: ComponentProps<'button'>) {
   return <Base.SidebarCollapseTrigger {...props} />;
 }
 
-export function SidebarViewport(props: ComponentProps<typeof ScrollArea>) {
+function SidebarViewport(props: ComponentProps<typeof ScrollArea>) {
   return (
     <ScrollArea {...props} className={cn('min-h-0 flex-1', props.className)}>
       <ScrollViewport
@@ -59,11 +78,7 @@ export function SidebarViewport(props: ComponentProps<typeof ScrollArea>) {
   );
 }
 
-export function SidebarTrigger(props: ComponentProps<typeof Base.SidebarTrigger>) {
-  return <Base.SidebarTrigger {...props} />;
-}
-
-export function SidebarContent({
+function SidebarContent({
   ref: refProp,
   className,
   children,
@@ -115,7 +130,7 @@ export function SidebarContent({
   );
 }
 
-export function SidebarDrawer({
+function SidebarDrawer({
   children,
   className,
   ...props
@@ -136,7 +151,11 @@ export function SidebarDrawer({
   );
 }
 
-export function SidebarSeparator({ className, style, children, ...props }: ComponentProps<'p'>) {
+function SidebarFolder(props: ComponentProps<typeof Base.SidebarFolder>) {
+  return <Base.SidebarFolder {...props} />;
+}
+
+function SidebarSeparator({ className, style, children, ...props }: ComponentProps<'p'>) {
   const depth = Base.useFolderDepth();
 
   return (
@@ -157,12 +176,7 @@ export function SidebarSeparator({ className, style, children, ...props }: Compo
   );
 }
 
-export function SidebarItem({
-  className,
-  style,
-  children,
-  ...props
-}: ComponentProps<typeof Base.SidebarItem>) {
+function SidebarItem({ className, style, children, ...props }: ComponentProps<typeof Base.SidebarItem>) {
   const depth = Base.useFolderDepth();
 
   return (
@@ -179,7 +193,7 @@ export function SidebarItem({
   );
 }
 
-export function SidebarFolderTrigger({
+function SidebarFolderTrigger({
   className,
   style,
   ...props
@@ -200,7 +214,7 @@ export function SidebarFolderTrigger({
   );
 }
 
-export function SidebarFolderLink({
+function SidebarFolderLink({
   className,
   style,
   ...props
@@ -221,7 +235,7 @@ export function SidebarFolderLink({
   );
 }
 
-export function SidebarFolderContent({
+function SidebarFolderContent({
   className,
   children,
   ...props
@@ -242,7 +256,8 @@ export function SidebarFolderContent({
     </Base.SidebarFolderContent>
   );
 }
-export const SidebarPageTree = createPageTreeRenderer({
+
+const SidebarPageTree = createPageTreeRenderer({
   SidebarFolder,
   SidebarFolderContent,
   SidebarFolderLink,
@@ -251,10 +266,183 @@ export const SidebarPageTree = createPageTreeRenderer({
   SidebarSeparator,
 });
 
-export const SidebarLinkItem = createLinkItemRenderer({
+const SidebarLinkItem = createLinkItemRenderer({
   SidebarFolder,
   SidebarFolderContent,
   SidebarFolderLink,
   SidebarFolderTrigger,
   SidebarItem,
 });
+
+export function Sidebar({
+  banner,
+  footer,
+  components,
+  collapsible = true,
+  ...rest
+}: SidebarProps) {
+  const {
+    tabs,
+    menuItems,
+    slots,
+    tabMode,
+    navMode,
+    props: { nav },
+  } = useNotebookLayout();
+  const iconLinks = menuItems.filter((item) => item.type === 'icon');
+
+  function renderHeader(props: ComponentProps<'div'>) {
+    if (typeof banner === 'function') return createElement(banner, props);
+
+    return (
+      <div {...props} className={cn('flex flex-col gap-3 p-4 pb-2 empty:hidden', props.className)}>
+        {props.children}
+        {banner}
+      </div>
+    );
+  }
+
+  function renderFooter(props: ComponentProps<'div'>) {
+    if (typeof footer === 'function') return createElement(footer, props);
+
+    return (
+      <div
+        {...props}
+        className={cn(
+          'hidden flex-row text-fd-muted-foreground items-center border-t p-4 pt-2',
+          iconLinks.length > 0 && 'max-lg:flex',
+          props.className,
+        )}
+      >
+        {props.children}
+        {footer}
+      </div>
+    );
+  }
+
+  const viewport = (
+    <SidebarViewport>
+      {menuItems
+        .filter((item) => item.type !== 'icon')
+        .map((item, i, arr) => (
+          <SidebarLinkItem
+            key={i}
+            item={item}
+            className={cn('lg:hidden', i === arr.length - 1 && 'mb-4')}
+          />
+        ))}
+      <SidebarPageTree {...components} />
+    </SidebarViewport>
+  );
+
+  return (
+    <>
+      <SidebarContent {...rest}>
+        {renderHeader({
+          children: (
+            <>
+              {navMode === 'auto' && (
+                <div className="flex justify-between">
+                  {slots.navTitle && (
+                    <slots.navTitle className="inline-flex items-center gap-2.5 font-medium" />
+                  )}
+                  {nav?.children}
+                  {collapsible && (
+                    <SidebarCollapseTrigger
+                      className={cn(
+                        buttonVariants({
+                          color: 'ghost',
+                          size: 'icon-sm',
+                          className: 'mt-px mb-auto text-fd-muted-foreground',
+                        }),
+                      )}
+                    >
+                      <SidebarIcon />
+                    </SidebarCollapseTrigger>
+                  )}
+                </div>
+              )}
+              {tabs.length > 0 && (
+                <SidebarTabsDropdown options={tabs} className={cn(tabMode === 'navbar' && 'lg:hidden')} />
+              )}
+            </>
+          ),
+        })}
+        {viewport}
+        {renderFooter({
+          children: iconLinks.map((item, i) => (
+            <LinkItem
+              key={i}
+              item={item}
+              className={cn(
+                buttonVariants({
+                  size: 'icon-sm',
+                  color: 'ghost',
+                  className: 'lg:hidden',
+                }),
+              )}
+              aria-label={item.label}
+            >
+              {item.icon}
+            </LinkItem>
+          )),
+        })}
+      </SidebarContent>
+      <SidebarDrawer {...rest}>
+        {renderHeader({
+          children: (
+            <>
+              <SidebarTrigger
+                className={cn(
+                  buttonVariants({
+                    size: 'icon-sm',
+                    color: 'ghost',
+                    className: 'ms-auto text-fd-muted-foreground',
+                  }),
+                )}
+              >
+                <X />
+              </SidebarTrigger>
+              {tabs.length > 0 && <SidebarTabsDropdown options={tabs} />}
+            </>
+          ),
+        })}
+        {viewport}
+        {renderFooter({
+          className: cn(
+            'hidden flex-row items-center justify-end',
+            (slots.languageSelect || slots.themeSwitch) && 'flex',
+            iconLinks.length > 0 && 'max-lg:flex',
+          ),
+          children: (
+            <>
+              {iconLinks.map((item, i) => (
+                <LinkItem
+                  key={i}
+                  item={item}
+                  className={cn(
+                    buttonVariants({
+                      size: 'icon-sm',
+                      color: 'ghost',
+                    }),
+                    'text-fd-muted-foreground lg:hidden',
+                    i === iconLinks.length - 1 && 'me-auto',
+                  )}
+                  aria-label={item.label}
+                >
+                  {item.icon}
+                </LinkItem>
+              ))}
+              {slots.languageSelect && (
+                <slots.languageSelect.root>
+                  <Languages className="size-4.5 text-fd-muted-foreground" />
+                </slots.languageSelect.root>
+              )}
+              {slots.themeSwitch && <slots.themeSwitch />}
+            </>
+          ),
+        })}
+      </SidebarDrawer>
+    </>
+  );
+}
