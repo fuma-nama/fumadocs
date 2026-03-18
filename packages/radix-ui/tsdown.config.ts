@@ -7,7 +7,10 @@ export default defineConfig({
   target: 'es2023',
   entry: [
     './src/*.{ts,tsx}',
-    './src/{components,contexts,layouts,provider,tailwind,og}/**/*.{ts,tsx}',
+    './src/{components,contexts,provider,tailwind,og}/**/*.{ts,tsx}',
+    './src/layouts/*/{index,client}.tsx',
+    './src/layouts/*/page/{index,client}.tsx',
+    './src/layouts/home/{navbar,not-found}.tsx',
     './src/utils/use-*.{ts,tsx}',
     './src/utils/renderer.ts',
   ],

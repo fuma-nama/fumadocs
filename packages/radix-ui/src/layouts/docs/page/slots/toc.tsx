@@ -7,7 +7,7 @@ import { cn } from '@/utils/cn';
 import { Text } from 'lucide-react';
 import type { ComponentProps, ReactNode } from 'react';
 
-export interface TOCMainProps {
+export interface TOCProps {
   container?: ComponentProps<'div'>;
   /**
    * Custom content in TOC container, before the main TOC
@@ -25,7 +25,7 @@ export interface TOCMainProps {
   style?: 'normal' | 'clerk';
 }
 
-export function TOC({ container, header, footer, style }: TOCMainProps) {
+export function TOC({ container, header, footer, style }: TOCProps) {
   return (
     <div
       id="nd-toc"

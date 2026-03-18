@@ -1,13 +1,12 @@
-import { useSidebar } from '@/components/sidebar/base';
 import { cn } from '@/utils/cn';
 import type { ComponentProps } from 'react';
 import { useNotebookLayout } from '../client';
 
 export function Container(props: ComponentProps<'div'>) {
-  const { collapsed } = useSidebar();
-  const { navMode } = useNotebookLayout();
+  const { navMode, slots } = useNotebookLayout();
   const pageCol =
     'calc(var(--fd-layout-width,97rem) - var(--fd-sidebar-col) - var(--fd-toc-width))';
+  const { collapsed } = slots.sidebar?.useSidebar?.() ?? {};
 
   return (
     <div

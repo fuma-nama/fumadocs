@@ -4,7 +4,10 @@ import * as Base from '@/components/sidebar/base';
 import { cn } from '@/utils/cn';
 import { type ComponentProps, createElement, type FC, type ReactNode, useRef } from 'react';
 import { cva } from 'class-variance-authority';
-import { createPageTreeRenderer, type SidebarPageTreeComponents } from '@/components/sidebar/page-tree';
+import {
+  createPageTreeRenderer,
+  type SidebarPageTreeComponents,
+} from '@/components/sidebar/page-tree';
 import { createLinkItemRenderer } from '@/components/sidebar/link-item';
 import { buttonVariants } from '@/components/ui/button';
 import { mergeRefs } from '@/utils/merge-refs';
@@ -48,6 +51,8 @@ export interface SidebarProps extends ComponentProps<'aside'> {
 
 export type SidebarProviderProps = Base.SidebarProviderProps;
 
+export const { useSidebar } = Base;
+
 export function SidebarProvider(props: SidebarProviderProps) {
   return <Base.SidebarProvider {...props} />;
 }
@@ -78,12 +83,7 @@ function SidebarViewport(props: ComponentProps<typeof ScrollArea>) {
   );
 }
 
-function SidebarContent({
-  ref: refProp,
-  className,
-  children,
-  ...props
-}: ComponentProps<'aside'>) {
+function SidebarContent({ ref: refProp, className, children, ...props }: ComponentProps<'aside'>) {
   const { navMode } = useNotebookLayout();
   const ref = useRef<HTMLElement>(null);
 
@@ -176,7 +176,12 @@ function SidebarSeparator({ className, style, children, ...props }: ComponentPro
   );
 }
 
-function SidebarItem({ className, style, children, ...props }: ComponentProps<typeof Base.SidebarItem>) {
+function SidebarItem({
+  className,
+  style,
+  children,
+  ...props
+}: ComponentProps<typeof Base.SidebarItem>) {
   const depth = Base.useFolderDepth();
 
   return (
@@ -274,13 +279,7 @@ const SidebarLinkItem = createLinkItemRenderer({
   SidebarItem,
 });
 
-export function Sidebar({
-  banner,
-  footer,
-  components,
-  collapsible = true,
-  ...rest
-}: SidebarProps) {
+export function Sidebar({ banner, footer, components, collapsible = true, ...rest }: SidebarProps) {
   const {
     tabs,
     menuItems,
@@ -363,7 +362,10 @@ export function Sidebar({
                 </div>
               )}
               {tabs.length > 0 && (
-                <SidebarTabsDropdown options={tabs} className={cn(tabMode === 'navbar' && 'lg:hidden')} />
+                <SidebarTabsDropdown
+                  options={tabs}
+                  className={cn(tabMode === 'navbar' && 'lg:hidden')}
+                />
               )}
             </>
           ),

@@ -22,20 +22,22 @@ import { RemoveScroll } from 'react-remove-scroll';
 import { useSearchContext } from '@/contexts/search';
 import {
   SidebarProvider,
-  SidebarRoot,
+  Sidebar,
   SidebarTrigger,
+  useSidebar,
   type SidebarProviderProps,
   type SidebarProps,
 } from './slots/sidebar';
 import { Container } from './slots/container';
 
-interface DocsSlots extends BaseSlots {
+export interface DocsSlots extends BaseSlots {
   container?: FC<ComponentProps<'div'>>;
   tabDropdown?: FC<TabDropdownProps>;
   sidebar?: {
     provider: FC<SidebarProviderProps>;
     trigger: FC<ComponentProps<'button'>>;
     root: FC<SidebarProps>;
+    useSidebar: () => { collapsed: boolean; open: boolean; setOpen: (v: boolean) => void };
   };
 }
 
@@ -117,9 +119,10 @@ export function DocsLayout(props: DocsLayoutProps) {
     container: defaultSlots.container ?? Container,
     tabDropdown: defaultSlots.tabDropdown ?? TabDropdown,
     sidebar: defaultSlots.sidebar ?? {
-      root: SidebarRoot,
+      root: Sidebar,
       provider: SidebarProvider,
       trigger: SidebarTrigger,
+      useSidebar,
     },
   };
 

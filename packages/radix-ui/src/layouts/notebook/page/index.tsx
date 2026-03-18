@@ -5,7 +5,7 @@ import { Edit } from 'lucide-react';
 import { I18nLabel } from '@/contexts/i18n';
 import type { AnchorProviderProps, TOCItemType } from 'fumadocs-core/toc';
 import type { DocsPageSlots } from './client';
-import type { TOCMainProps } from './slots/toc';
+import type { TOCProps } from './slots/toc';
 import type { TOCPopoverProps } from './slots/toc-popover';
 import type { BreadcrumbProps } from './slots/breadcrumb';
 import type { FooterProps } from './slots/footer';
@@ -42,7 +42,7 @@ interface FooterOptions extends FooterProps {
   component?: ReactNode;
 }
 
-interface TableOfContentOptions extends Pick<AnchorProviderProps, 'single'>, TOCMainProps {
+interface TableOfContentOptions extends Pick<AnchorProviderProps, 'single'>, TOCProps {
   enabled?: boolean;
   /**
    * @deprecated use `slots.toc` instead.
@@ -113,9 +113,9 @@ export function DocsTitle({ children, className, ...props }: ComponentProps<'h1'
   );
 }
 
-export { PageLastUpdate, DocsPage, useDocsPage } from './client';
-export * from './slots/toc';
-export * from './slots/toc-popover';
+export { DocsPage, type DocsPageSlots, PageLastUpdate, useDocsPage } from './client';
+export { TOC, type TOCProps } from './slots/toc';
+export { TOCPopover, type TOCPopoverProps } from './slots/toc-popover';
 export { type BreadcrumbProps, Breadcrumb as PageBreadcrumb } from './slots/breadcrumb';
 export { type FooterProps, Footer as PageFooter } from './slots/footer';
 export { MarkdownCopyButton, ViewOptionsPopover } from '@/layouts/slots/page-actions';

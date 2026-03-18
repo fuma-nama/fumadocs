@@ -1,9 +1,12 @@
 'use client';
 import * as Base from '@/components/sidebar/base';
 import { cn } from '@/utils/cn';
-import { type ComponentProps, ReactNode, useRef } from 'react';
+import { type ComponentProps, type ReactNode, useRef } from 'react';
 import { cva } from 'class-variance-authority';
-import { createPageTreeRenderer, SidebarPageTreeComponents } from '@/components/sidebar/page-tree';
+import {
+  createPageTreeRenderer,
+  type SidebarPageTreeComponents,
+} from '@/components/sidebar/page-tree';
 import { createLinkItemRenderer } from '@/components/sidebar/link-item';
 import { buttonVariants } from '@/components/ui/button';
 import { SearchTrigger } from '@/layouts/slots/search-toggle';
@@ -45,9 +48,7 @@ export interface SidebarProps extends ComponentProps<'aside'> {
 
 export type SidebarProviderProps = Base.SidebarProviderProps;
 
-function getItemOffset(depth: number) {
-  return `calc(${2 + 3 * depth} * var(--spacing))`;
-}
+export const { useSidebar } = Base;
 
 export function SidebarProvider(props: SidebarProviderProps) {
   return <Base.SidebarProvider {...props} />;
@@ -392,6 +393,10 @@ function SidebarFolderContent({
       {children}
     </Base.SidebarFolderContent>
   );
+}
+
+function getItemOffset(depth: number) {
+  return `calc(${2 + 3 * depth} * var(--spacing))`;
 }
 
 const SidebarPageTree = createPageTreeRenderer({

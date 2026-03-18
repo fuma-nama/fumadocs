@@ -1,3 +1,4 @@
+'use client';
 import Link from 'fumadocs-core/link';
 import type { ComponentProps } from 'react';
 

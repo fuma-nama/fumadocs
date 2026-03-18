@@ -61,3 +61,5 @@ export function DocsLayout({
     </LayoutBody>
   );
 }
+
+export { type DocsSlots, useDocsLayout } from './client';

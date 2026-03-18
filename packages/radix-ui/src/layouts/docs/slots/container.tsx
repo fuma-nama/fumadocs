@@ -1,9 +1,10 @@
-import { useSidebar } from '@/components/sidebar/base';
 import { cn } from '@/utils/cn';
 import type { ComponentProps } from 'react';
+import { useDocsLayout } from '..';
 
 export function Container(props: ComponentProps<'div'>) {
-  const { collapsed } = useSidebar();
+  const { slots } = useDocsLayout();
+  const { collapsed } = slots.sidebar?.useSidebar?.() ?? {};
 
   return (
     <div

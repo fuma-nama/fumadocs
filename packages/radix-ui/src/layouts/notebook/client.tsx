@@ -11,6 +11,7 @@ import {
   SidebarCollapseTrigger,
   SidebarProvider,
   SidebarTrigger,
+  useSidebar,
   type SidebarProps,
   type SidebarProviderProps,
 } from './slots/sidebar';
@@ -24,6 +25,7 @@ export interface DocsSlots extends BaseSlots {
     root: FC<SidebarProps>;
     trigger: FC<ComponentProps<'button'>>;
     collapseTrigger: FC<ComponentProps<'button'>>;
+    useSidebar: () => { collapsed: boolean; open: boolean; setOpen: (V: boolean) => void };
   };
 }
 
@@ -88,6 +90,7 @@ export function LayoutBody(
       root: Sidebar,
       trigger: SidebarTrigger,
       collapseTrigger: SidebarCollapseTrigger,
+      useSidebar,
     },
   };
 

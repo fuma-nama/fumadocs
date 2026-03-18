@@ -1,4 +1,5 @@
 import type { Component, Reference, SourceReference } from '@fumadocs/cli/build';
+import { glob } from 'node:fs/promises';
 import path from 'node:path';
 
 /**
@@ -9,16 +10,75 @@ export function resolveExternal(
   toPackageName: string,
   toRegistryDir: string,
 ): Reference | undefined {
-  if (ref.type !== 'file') return;
+  // TODO: this will cause the installed slots to reference `fumadocs-ui` even if the layout & context itself are already installed locally.
+  // need change from CLI side.
+  if (ref.type === 'sub-component' && ref.resolved.type === 'local') {
+    let specifier: string | undefined;
+    switch (ref.resolved.component.name) {
+      case 'layouts/home':
+        specifier = '/layouts/home';
+        break;
+      case 'layouts/docs':
+        specifier = ref.resolved.file.path.includes('page')
+          ? '/layouts/docs/page'
+          : '/layouts/docs';
+        break;
+      case 'layouts/notebook':
+        specifier = ref.resolved.file.path.includes('page')
+          ? '/layouts/notebook/page'
+          : '/layouts/notebook';
+        break;
+      case 'layouts/flux':
+        specifier = ref.resolved.file.path.includes('page')
+          ? '/layouts/flux/page'
+          : '/layouts/flux';
+        break;
+      case 'layouts/shared':
+        specifier = '/layouts/shared';
+        break;
+    }
 
-  const file = path.relative(toRegistryDir, ref.file);
-  if (file.startsWith('contexts/') || /^utils\/use-/.test(file) || file === 'utils/renderer.ts') {
-    return {
-      dep: toPackageName,
-      type: 'dependency',
-      specifier: `${toPackageName}/${removeExtname(file)}`,
-    };
+    if (specifier)
+      return {
+        type: 'dependency',
+        dep: toPackageName,
+        specifier: toPackageName + specifier,
+      };
   }
+
+  if (ref.type === 'file') {
+    const file = path.relative(toRegistryDir, ref.file).replaceAll(path.sep, '/');
+
+    if (file === 'utils/renderer.ts' || /^contexts\//.test(file) || /^utils\/use-/.test(file)) {
+      return {
+        dep: toPackageName,
+        type: 'dependency',
+        specifier: `${toPackageName}/${removeExtname(file)}`,
+      };
+    }
+  }
+}
+
+export async function findSlotComponents(dir: string): Promise<Component[]> {
+  const slots: Component[] = [];
+
+  for await (const file of glob('**/slots/*.tsx', { cwd: dir })) {
+    const name = path.relative('layouts', file);
+    if (name.startsWith('..')) continue;
+    slots.push({
+      name: name.slice(0, -path.extname(name).length),
+      unlisted: true,
+      files: [
+        {
+          path: file,
+          type: 'components',
+          target: path.join('<dir>/layout', file),
+        },
+      ],
+    });
+  }
+
+  return slots;
 }
 
 export const commonComponents: Component[] = [

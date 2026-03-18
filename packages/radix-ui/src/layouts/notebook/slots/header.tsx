@@ -9,7 +9,6 @@ import {
   useState,
   type ComponentProps,
 } from 'react';
-import { useSidebar } from '@/components/sidebar/base';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/utils/cn';
 import { LinkItem, type LinkItemType, type MenuItemType } from '@/utils/link-item';
@@ -20,7 +19,6 @@ import { usePathname } from 'fumadocs-core/framework';
 import Link from 'fumadocs-core/link';
 
 export function Header(props: ComponentProps<'header'>) {
-  const { open } = useSidebar();
   const {
     slots,
     tabs,
@@ -31,6 +29,7 @@ export function Header(props: ComponentProps<'header'>) {
     navMode,
     props: { nav },
   } = useNotebookLayout();
+  const { open } = slots.sidebar?.useSidebar?.() ?? {};
   const showLayoutTabs = tabMode === 'navbar' && tabs.length > 0;
 
   if (nav?.component) return nav.component;

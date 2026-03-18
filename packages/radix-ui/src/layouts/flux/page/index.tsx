@@ -105,8 +105,8 @@ export function DocsTitle({ children, className, ...props }: ComponentProps<'h1'
   );
 }
 
-export { PageLastUpdate, DocsPage } from './client';
-export * from './slots/toc';
+export { DocsPage, type DocsPageSlots, PageLastUpdate, useDocsPage } from './client';
+export { TOC, type TOCProps } from './slots/toc';
 export { type FooterProps, Footer as PageFooter } from './slots/footer';
 export { type BreadcrumbProps, Breadcrumb as PageBreadcrumb } from './slots/breadcrumb';
 export { MarkdownCopyButton, ViewOptionsPopover } from '@/layouts/slots/page-actions';

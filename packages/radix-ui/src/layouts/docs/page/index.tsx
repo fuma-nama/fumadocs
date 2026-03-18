@@ -1,63 +1,8 @@
-import type { ComponentProps, ReactNode } from 'react';
+import type { ComponentProps } from 'react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { Edit } from 'lucide-react';
 import { I18nLabel } from '@/contexts/i18n';
-import { DocsPageSlots } from './client';
-import type { AnchorProviderProps, TOCItemType } from 'fumadocs-core/toc';
-import { TOCMainProps } from './slots/toc';
-import { TOCPopoverProps } from './slots/toc-popover';
-import { BreadcrumbProps } from './slots/breadcrumb';
-import { FooterProps } from './slots/footer';
-
-export interface DocsPageProps extends ComponentProps<'article'> {
-  toc?: TOCItemType[];
-
-  /**
-   * Extend the page to fill all available space
-   *
-   * @defaultValue false
-   */
-  full?: boolean;
-  slots?: DocsPageSlots;
-
-  footer?: FooterOptions;
-  breadcrumb?: BreadcrumbOptions;
-  tableOfContent?: TableOfContentOptions;
-  tableOfContentPopover?: TableOfContentPopoverOptions;
-}
-
-interface BreadcrumbOptions extends BreadcrumbProps {
-  enabled?: boolean;
-  /**
-   * @deprecated use `slots.breadcrumb` instead.
-   */
-  component?: ReactNode;
-}
-
-interface FooterOptions extends FooterProps {
-  enabled?: boolean;
-  /**
-   * @deprecated use `slots.footer` instead.
-   */
-  component?: ReactNode;
-}
-
-interface TableOfContentOptions extends Pick<AnchorProviderProps, 'single'>, TOCMainProps {
-  enabled?: boolean;
-  /**
-   * @deprecated use `slots.toc` instead.
-   */
-  component?: ReactNode;
-}
-
-interface TableOfContentPopoverOptions extends TOCPopoverProps {
-  enabled?: boolean;
-  /**
-   * @deprecated use `slots.tocPopover` instead.
-   */
-  component?: ReactNode;
-}
 
 export function EditOnGitHub(props: ComponentProps<'a'>) {
   return (
@@ -114,9 +59,15 @@ export function DocsTitle({ children, className, ...props }: ComponentProps<'h1'
   );
 }
 
-export { PageLastUpdate, DocsPage, useDocsPage } from './client';
-export * from './slots/toc';
-export * from './slots/toc-popover';
+export {
+  DocsPage,
+  type DocsPageSlots,
+  type DocsPageProps,
+  PageLastUpdate,
+  useDocsPage,
+} from './client';
+export { TOC, type TOCProps } from './slots/toc';
+export { TOCPopover, type TOCPopoverProps } from './slots/toc-popover';
 export { type BreadcrumbProps, Breadcrumb as PageBreadcrumb } from './slots/breadcrumb';
 export { type FooterProps, Footer as PageFooter } from './slots/footer';
 export { MarkdownCopyButton, ViewOptionsPopover } from '@/layouts/slots/page-actions';

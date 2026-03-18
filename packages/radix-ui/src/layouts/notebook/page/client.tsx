@@ -3,7 +3,7 @@
 import { type ComponentProps, createContext, type FC, use, useEffect, useState } from 'react';
 import { cn } from '@/utils/cn';
 import { useI18n } from '@/contexts/i18n';
-import { TOC, type TOCMainProps } from './slots/toc';
+import { TOC, type TOCProps } from './slots/toc';
 import { TOCPopover, type TOCPopoverProps } from './slots/toc-popover';
 import { Footer, type FooterProps } from './slots/footer';
 import { Breadcrumb, type BreadcrumbProps } from './slots/breadcrumb';
@@ -12,7 +12,7 @@ import { TOCProvider, type TOCProviderProps } from '@/components/toc';
 import { Container } from './slots/container';
 
 export interface DocsPageSlots {
-  toc?: FC<TOCMainProps>;
+  toc?: FC<TOCProps>;
   container?: FC<ComponentProps<'article'>>;
   tocPopover?: FC<TOCPopoverProps>;
   tocProvider?: FC<TOCProviderProps>;
@@ -82,8 +82,8 @@ export function DocsPage({
       value={{
         props: {
           full,
-          tableOfContent: { enabled: tocEnabled, ...tocProps },
-          tableOfContentPopover: { enabled: tocPopoverEnabled, ...tocPopoverProps },
+          tableOfContent: tocProps,
+          tableOfContentPopover: tocPopoverProps,
           footer,
           breadcrumb,
         },
@@ -113,7 +113,7 @@ function InlineTOCPopover(props: TOCPopoverProps) {
   return <TOCPopover {...props} {...rest} />;
 }
 
-function InlineTOC(props: TOCMainProps) {
+function InlineTOC(props: TOCProps) {
   const { component, enabled: _, ...rest } = useDocsPage().props?.tableOfContent ?? {};
   if (component) return component;
   return <TOC {...props} {...rest} />;

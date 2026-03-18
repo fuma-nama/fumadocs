@@ -58,3 +58,5 @@ export function DocsLayout({
     </LayoutBody>
   );
 }
+
+export { useNotebookLayout, type DocsSlots } from './client';

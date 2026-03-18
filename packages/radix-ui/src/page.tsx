@@ -1,9 +1,9 @@
 'use client';
-import { type ComponentProps, use } from 'react';
+import type { ComponentProps } from 'react';
 import { cn } from '@/utils/cn';
 import * as Docs from './layouts/docs/page';
 import * as Notebook from './layouts/notebook/page';
-import { LayoutContext } from './layouts/docs/client';
+import { useIsDocsLayout } from './layouts/docs/client';
 
 // TODO: remove this compat layer on v17
 
@@ -50,8 +50,7 @@ export function withArticle(props: ComponentProps<'main'>) {
 }
 
 export function DocsPage({ lastUpdate, editOnGithub, children, ...props }: DocsPageProps) {
-  const docsLayoutCtx = use(LayoutContext);
-  const { DocsPage, EditOnGitHub, PageLastUpdate } = docsLayoutCtx ? Docs : Notebook;
+  const { DocsPage, EditOnGitHub, PageLastUpdate } = useIsDocsLayout() ? Docs : Notebook;
 
   return (
     <DocsPage {...props}>

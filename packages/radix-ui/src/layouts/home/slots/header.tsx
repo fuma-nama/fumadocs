@@ -17,8 +17,8 @@ import {
 import { buttonVariants } from '@/components/ui/button';
 import { ChevronDown, Languages } from 'lucide-react';
 import { useIsScrollTop } from '@/utils/use-is-scroll-top';
+import { useHomeLayout } from '..';
 import type { NavOptions } from '@/layouts/shared';
-import { useHomeLayout } from '../client';
 
 export const navItemVariants = cva('[&_svg]:size-4', {
   variants: {

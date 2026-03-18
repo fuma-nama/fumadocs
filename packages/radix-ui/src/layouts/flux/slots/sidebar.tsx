@@ -56,11 +56,13 @@ export interface SidebarProps extends ComponentProps<'aside'> {
 
 export type SidebarProviderProps = Base.SidebarProviderProps;
 
+export const { useSidebar } = Base;
+
 export function SidebarProvider(props: SidebarProviderProps) {
   return <Base.SidebarProvider {...props} />;
 }
 
-export function SidebarRoot({ footer, banner, components, ...rest }: SidebarProps) {
+export function Sidebar({ footer, banner, components, ...rest }: SidebarProps) {
   const { menuItems } = useFluxLayout();
 
   return (
@@ -94,7 +96,7 @@ export function SidebarRoot({ footer, banner, components, ...rest }: SidebarProp
 }
 
 export function SidebarTrigger(props: ComponentProps<'button'>) {
-  const { open, setOpen } = Base.useSidebar();
+  const { open, setOpen } = useSidebar();
   return (
     <button onClick={() => setOpen((prev) => !prev)} {...props}>
       <AnimatePresence mode="wait">
@@ -124,7 +126,7 @@ export function SidebarTrigger(props: ComponentProps<'button'>) {
 function SidebarContent({ ref: refProp, className, children, ...props }: ComponentProps<'aside'>) {
   const ref = useRef<HTMLElement>(null);
   const [blockScroll, setBlockScroll] = useState(false);
-  const { open, setOpen } = Base.useSidebar();
+  const { open, setOpen } = useSidebar();
 
   const listener = useEffectEvent((e: KeyboardEvent) => {
     if (open && e.key === 'Escape') {

@@ -1,18 +1,75 @@
 'use client';
 
-import { type ComponentProps, createContext, type FC, use, useEffect, useState } from 'react';
+import {
+  type ComponentProps,
+  createContext,
+  type FC,
+  type ReactNode,
+  use,
+  useEffect,
+  useState,
+} from 'react';
 import { cn } from '@/utils/cn';
 import { useI18n } from '@/contexts/i18n';
-import { TOC, type TOCMainProps } from './slots/toc';
+import { TOC, type TOCProps } from './slots/toc';
 import { TOCPopover, type TOCPopoverProps } from './slots/toc-popover';
 import { Footer, type FooterProps } from './slots/footer';
 import { Breadcrumb, type BreadcrumbProps } from './slots/breadcrumb';
-import type { DocsPageProps } from '.';
 import { TOCProvider, type TOCProviderProps } from '@/components/toc';
 import { Container } from './slots/container';
+import type { TOCItemType } from 'fumadocs-core/toc';
+
+export interface DocsPageProps extends ComponentProps<'article'> {
+  toc?: TOCItemType[];
+
+  /**
+   * Extend the page to fill all available space
+   *
+   * @defaultValue false
+   */
+  full?: boolean;
+  slots?: DocsPageSlots;
+
+  footer?: FooterOptions;
+  breadcrumb?: BreadcrumbOptions;
+  tableOfContent?: TableOfContentOptions;
+  tableOfContentPopover?: TableOfContentPopoverOptions;
+}
+
+interface BreadcrumbOptions extends BreadcrumbProps {
+  enabled?: boolean;
+  /**
+   * @deprecated use `slots.breadcrumb` instead.
+   */
+  component?: ReactNode;
+}
+
+interface FooterOptions extends FooterProps {
+  enabled?: boolean;
+  /**
+   * @deprecated use `slots.footer` instead.
+   */
+  component?: ReactNode;
+}
+
+interface TableOfContentOptions extends Pick<TOCProviderProps, 'single'>, TOCProps {
+  enabled?: boolean;
+  /**
+   * @deprecated use `slots.toc` instead.
+   */
+  component?: ReactNode;
+}
+
+interface TableOfContentPopoverOptions extends TOCPopoverProps {
+  enabled?: boolean;
+  /**
+   * @deprecated use `slots.tocPopover` instead.
+   */
+  component?: ReactNode;
+}
 
 export interface DocsPageSlots {
-  toc?: FC<TOCMainProps>;
+  toc?: FC<TOCProps>;
   container?: FC<ComponentProps<'article'>>;
   tocPopover?: FC<TOCPopoverProps>;
   tocProvider?: FC<TOCProviderProps>;
@@ -113,7 +170,7 @@ function InlineTOCPopover(props: TOCPopoverProps) {
   return <TOCPopover {...props} {...rest} />;
 }
 
-function InlineTOC(props: TOCMainProps) {
+function InlineTOC(props: TOCProps) {
   const { component, enabled: _, ...rest } = useDocsPage().props?.tableOfContent ?? {};
   if (component) return component;
   return <TOC {...props} {...rest} />;

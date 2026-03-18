@@ -10,6 +10,7 @@ import {
   Sidebar,
   SidebarProvider,
   SidebarTrigger,
+  useSidebar,
   type SidebarProps,
   type SidebarProviderProps,
 } from './slots/sidebar';
@@ -32,6 +33,7 @@ export interface DocsSlots extends BaseSlots {
     provider: FC<SidebarProviderProps>;
     root: FC<SidebarProps>;
     trigger: FC<ComponentProps<'button'>>;
+    useSidebar: () => { collapsed: boolean; open: boolean; setOpen: (v: boolean) => void };
   };
   header?: FC<ComponentProps<'header'>>;
 }
@@ -44,7 +46,7 @@ const { useProvider } = baseSlots({
 
 type SlotsProps = BaseSlotsProps & Pick<DocsLayoutProps, 'tabMode'>;
 
-export const LayoutContext = createContext<{
+const LayoutContext = createContext<{
   props: SlotsProps;
   tabs: LayoutTab[];
   isNavTransparent: boolean;
@@ -52,6 +54,10 @@ export const LayoutContext = createContext<{
   menuItems: LinkItemType[];
   slots: DocsSlots;
 } | null>(null);
+
+export function useIsDocsLayout() {
+  return use(LayoutContext) !== null;
+}
 
 export function useDocsLayout() {
   const context = use(LayoutContext);
@@ -89,6 +95,7 @@ export function LayoutBody(
       provider: SidebarProvider,
       root: Sidebar,
       trigger: SidebarTrigger,
+      useSidebar: useSidebar,
     },
   };
 

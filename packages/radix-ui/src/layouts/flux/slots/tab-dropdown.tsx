@@ -4,7 +4,6 @@ import { type ComponentProps, type ReactNode, useMemo, useState } from 'react';
 import Link from 'fumadocs-core/link';
 import { usePathname } from 'fumadocs-core/framework';
 import { cn } from '@/utils/cn';
-import { useSidebar } from '@/components/sidebar/base';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { AnimatePresence, motion } from 'motion/react';
 import { isLayoutTabActive, type LayoutTab } from '../../shared';
@@ -16,7 +15,6 @@ export interface TabDropdownProps extends ComponentProps<'button'> {
 
 export function TabDropdown({ tabs, placeholder, className, ...props }: TabDropdownProps) {
   const [open, setOpen] = useState(false);
-  const { closeOnRedirect } = useSidebar();
   const pathname = usePathname();
   const selectedIdx = useMemo(() => {
     return tabs.findLastIndex((item) => isLayoutTabActive(item, pathname));
@@ -24,7 +22,6 @@ export function TabDropdown({ tabs, placeholder, className, ...props }: TabDropd
   const selected = selectedIdx !== -1 ? tabs[selectedIdx] : undefined;
 
   const onClick = () => {
-    closeOnRedirect.current = false;
     setOpen(false);
   };
 
