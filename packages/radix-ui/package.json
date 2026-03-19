@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-ui",
-  "version": "16.6.17",
+  "version": "16.7.0",
   "description": "The Radix UI version of Fumadocs UI",
   "keywords": [
     "Docs",
@@ -16,94 +16,109 @@
   ],
   "type": "module",
   "exports": {
-    "./style.css": "./dist/style.css",
-    "./css/*": "./css/*",
-    "./image-zoom.css": "./dist/image-zoom.css",
-    "./components/tabs.unstyled": {
-      "types": "./dist/components/ui/tabs.d.ts",
-      "import": "./dist/components/ui/tabs.js"
-    },
-    "./components/*": {
-      "types": "./dist/components/*.d.ts",
-      "import": "./dist/components/*.js",
-      "default": "./dist/components/*.js"
-    },
-    "./i18n": {
-      "types": "./dist/i18n.d.ts",
-      "import": "./dist/i18n.js"
-    },
-    "./layouts/home": {
-      "types": "./dist/layouts/home/index.d.ts",
-      "import": "./dist/layouts/home/index.js"
-    },
-    "./layouts/home/not-found": {
-      "types": "./dist/layouts/home/not-found.d.ts",
-      "import": "./dist/layouts/home/not-found.js"
-    },
-    "./layouts/home/navbar": {
-      "types": "./dist/layouts/home/navbar.d.ts",
-      "import": "./dist/layouts/home/navbar.js"
-    },
-    "./layouts/docs": {
-      "types": "./dist/layouts/docs/index.d.ts",
-      "import": "./dist/layouts/docs/index.js"
-    },
-    "./layouts/docs/page": {
-      "types": "./dist/layouts/docs/page/index.d.ts",
-      "import": "./dist/layouts/docs/page/index.js"
-    },
-    "./layouts/flux": {
-      "types": "./dist/layouts/flux/index.d.ts",
-      "import": "./dist/layouts/flux/index.js"
-    },
-    "./layouts/flux/page": {
-      "types": "./dist/layouts/flux/page/index.d.ts",
-      "import": "./dist/layouts/flux/page/index.js"
-    },
-    "./layouts/notebook": {
-      "types": "./dist/layouts/notebook/index.d.ts",
-      "import": "./dist/layouts/notebook/index.js"
-    },
-    "./layouts/notebook/page": {
-      "types": "./dist/layouts/notebook/page/index.d.ts",
-      "import": "./dist/layouts/notebook/page/index.js"
-    },
-    "./layouts/shared": {
-      "types": "./dist/layouts/shared/index.d.ts",
-      "import": "./dist/layouts/shared/index.js"
-    },
-    "./page": {
-      "types": "./dist/page.d.ts",
-      "import": "./dist/page.js"
-    },
-    "./provider/*": {
-      "types": "./dist/provider/*.d.ts",
-      "import": "./dist/provider/*.js"
-    },
-    "./contexts/*": {
-      "types": "./dist/contexts/*.d.ts",
-      "import": "./dist/contexts/*.js"
-    },
+    "./components/accordion": "./dist/components/accordion.js",
+    "./components/banner": "./dist/components/banner.js",
+    "./components/callout": "./dist/components/callout.js",
+    "./components/card": "./dist/components/card.js",
+    "./components/codeblock": "./dist/components/codeblock.js",
+    "./components/codeblock.rsc": "./dist/components/codeblock.rsc.js",
+    "./components/dialog/search": "./dist/components/dialog/search.js",
+    "./components/dialog/search-algolia": "./dist/components/dialog/search-algolia.js",
+    "./components/dialog/search-default": "./dist/components/dialog/search-default.js",
+    "./components/dialog/search-orama": "./dist/components/dialog/search-orama.js",
+    "./components/dynamic-codeblock": "./dist/components/dynamic-codeblock.js",
+    "./components/dynamic-codeblock.core": "./dist/components/dynamic-codeblock.core.js",
+    "./components/files": "./dist/components/files.js",
+    "./components/github-info": "./dist/components/github-info.js",
+    "./components/heading": "./dist/components/heading.js",
+    "./components/image-zoom": "./dist/components/image-zoom.js",
+    "./components/inline-toc": "./dist/components/inline-toc.js",
+    "./components/sidebar/base": "./dist/components/sidebar/base.js",
+    "./components/sidebar/link-item": "./dist/components/sidebar/link-item.js",
+    "./components/sidebar/page-tree": "./dist/components/sidebar/page-tree.js",
+    "./components/sidebar/tabs": "./dist/components/sidebar/tabs/index.js",
+    "./components/sidebar/tabs/dropdown": "./dist/components/sidebar/tabs/dropdown.js",
+    "./components/steps": "./dist/components/steps.js",
+    "./components/tabs": "./dist/components/tabs.js",
+    "./components/toc": "./dist/components/toc/index.js",
+    "./components/toc/clerk": "./dist/components/toc/clerk.js",
+    "./components/toc/default": "./dist/components/toc/default.js",
+    "./components/type-table": "./dist/components/type-table.js",
+    "./components/ui/accordion": "./dist/components/ui/accordion.js",
+    "./components/ui/button": "./dist/components/ui/button.js",
+    "./components/ui/collapsible": "./dist/components/ui/collapsible.js",
+    "./components/ui/navigation-menu": "./dist/components/ui/navigation-menu.js",
+    "./components/ui/popover": "./dist/components/ui/popover.js",
+    "./components/ui/scroll-area": "./dist/components/ui/scroll-area.js",
+    "./components/ui/tabs": "./dist/components/ui/tabs.js",
+    "./contexts/i18n": "./dist/contexts/i18n.js",
+    "./contexts/search": "./dist/contexts/search.js",
+    "./contexts/tree": "./dist/contexts/tree.js",
+    "./i18n": "./dist/i18n.js",
+    "./layouts/docs": "./dist/layouts/docs/index.js",
+    "./layouts/docs/page": "./dist/layouts/docs/page/index.js",
+    "./layouts/docs/page/slots/breadcrumb": "./dist/layouts/docs/page/slots/breadcrumb.js",
+    "./layouts/docs/page/slots/container": "./dist/layouts/docs/page/slots/container.js",
+    "./layouts/docs/page/slots/footer": "./dist/layouts/docs/page/slots/footer.js",
+    "./layouts/docs/page/slots/toc": "./dist/layouts/docs/page/slots/toc.js",
+    "./layouts/docs/page/slots/toc-popover": "./dist/layouts/docs/page/slots/toc-popover.js",
+    "./layouts/docs/slots/container": "./dist/layouts/docs/slots/container.js",
+    "./layouts/docs/slots/header": "./dist/layouts/docs/slots/header.js",
+    "./layouts/docs/slots/sidebar": "./dist/layouts/docs/slots/sidebar.js",
+    "./layouts/flux": "./dist/layouts/flux/index.js",
+    "./layouts/flux/page": "./dist/layouts/flux/page/index.js",
+    "./layouts/flux/page/slots/breadcrumb": "./dist/layouts/flux/page/slots/breadcrumb.js",
+    "./layouts/flux/page/slots/container": "./dist/layouts/flux/page/slots/container.js",
+    "./layouts/flux/page/slots/footer": "./dist/layouts/flux/page/slots/footer.js",
+    "./layouts/flux/page/slots/toc": "./dist/layouts/flux/page/slots/toc.js",
+    "./layouts/flux/slots/container": "./dist/layouts/flux/slots/container.js",
+    "./layouts/flux/slots/sidebar": "./dist/layouts/flux/slots/sidebar.js",
+    "./layouts/flux/slots/tab-dropdown": "./dist/layouts/flux/slots/tab-dropdown.js",
+    "./layouts/home": "./dist/layouts/home/index.js",
+    "./layouts/home/navbar": "./dist/layouts/home/navbar.js",
+    "./layouts/home/not-found": "./dist/layouts/home/not-found.js",
+    "./layouts/home/slots/container": "./dist/layouts/home/slots/container.js",
+    "./layouts/home/slots/header": "./dist/layouts/home/slots/header.js",
+    "./layouts/notebook": "./dist/layouts/notebook/index.js",
+    "./layouts/notebook/page": "./dist/layouts/notebook/page/index.js",
+    "./layouts/notebook/page/slots/breadcrumb": "./dist/layouts/notebook/page/slots/breadcrumb.js",
+    "./layouts/notebook/page/slots/container": "./dist/layouts/notebook/page/slots/container.js",
+    "./layouts/notebook/page/slots/footer": "./dist/layouts/notebook/page/slots/footer.js",
+    "./layouts/notebook/page/slots/toc": "./dist/layouts/notebook/page/slots/toc.js",
+    "./layouts/notebook/page/slots/toc-popover": "./dist/layouts/notebook/page/slots/toc-popover.js",
+    "./layouts/notebook/slots/container": "./dist/layouts/notebook/slots/container.js",
+    "./layouts/notebook/slots/header": "./dist/layouts/notebook/slots/header.js",
+    "./layouts/notebook/slots/sidebar": "./dist/layouts/notebook/slots/sidebar.js",
+    "./layouts/shared": "./dist/layouts/shared/index.js",
+    "./layouts/shared/slots/language-select": "./dist/layouts/shared/slots/language-select.js",
+    "./layouts/shared/slots/search-trigger": "./dist/layouts/shared/slots/search-trigger.js",
+    "./layouts/shared/slots/theme-switch": "./dist/layouts/shared/slots/theme-switch.js",
     "./mdx": {
       "types": "./dist/mdx.d.ts",
       "node": "./dist/mdx.server.js",
       "import": "./dist/mdx.js"
     },
-    "./og": {
-      "types": "./dist/og.d.ts",
-      "import": "./dist/og.js"
-    },
-    "./og/*": {
-      "types": "./dist/og/*.d.ts",
-      "import": "./dist/og/*.js"
-    },
+    "./og": "./dist/og.js",
+    "./og/takumi": "./dist/og/takumi.js",
+    "./page": "./dist/page.js",
+    "./provider/base": "./dist/provider/base.js",
+    "./provider/next": "./dist/provider/next.js",
+    "./provider/react-router": "./dist/provider/react-router.js",
+    "./provider/tanstack": "./dist/provider/tanstack.js",
+    "./provider/waku": "./dist/provider/waku.js",
+    "./utils/use-copy-button": "./dist/utils/use-copy-button.js",
+    "./utils/use-footer-items": "./dist/utils/use-footer-items.js",
+    "./utils/use-is-scroll-top": "./dist/utils/use-is-scroll-top.js",
+    "./package.json": "./package.json",
+    "./style.css": "./dist/style.css",
+    "./css/*": "./css/*",
     "./utils/get-sidebar-tabs": {
       "types": "./dist/components/sidebar/tabs/index.d.ts",
       "import": "./dist/components/sidebar/tabs/index.js"
     },
-    "./utils/*": {
-      "types": "./dist/utils/*.d.ts",
-      "import": "./dist/utils/*.js"
+    "./components/tabs.unstyled": {
+      "types": "./dist/components/ui/tabs.d.ts",
+      "import": "./dist/components/ui/tabs.js"
     }
   },
   "publishConfig": {
@@ -132,7 +147,7 @@
     "@radix-ui/react-tabs": "^1.1.13",
     "class-variance-authority": "^0.7.1",
     "lucide-react": "^0.577.0",
-    "motion": "^12.36.0",
+    "motion": "^12.38.0",
     "next-themes": "^0.4.6",
     "react-medium-image-zoom": "^5.4.1",
     "react-remove-scroll": "^2.7.2",
@@ -143,8 +158,8 @@
   },
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",
-    "@tailwindcss/cli": "^4.2.1",
-    "@tsdown/css": "^0.21.2",
+    "@tailwindcss/cli": "^4.2.2",
+    "@tsdown/css": "^0.21.4",
     "@types/hast": "^3.0.4",
     "@types/mdx": "^2.0.13",
     "@types/node": "^25.5.0",
@@ -152,9 +167,10 @@
     "@types/react-dom": "^19.2.3",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
-    "tailwindcss": "^4.2.1",
+    "shiki": "^4.0.2",
+    "tailwindcss": "^4.2.2",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.2",
+    "tsdown": "0.21.4",
     "unified": "^11.0.5"
   },
   "peerDependencies": {
@@ -164,10 +180,14 @@
     "fumadocs-core": "workspace:*",
     "next": "16.x.x",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "shiki": "*"
   },
   "peerDependenciesMeta": {
     "next": {
+      "optional": true
+    },
+    "shiki": {
       "optional": true
     },
     "@takumi-rs/image-response": {

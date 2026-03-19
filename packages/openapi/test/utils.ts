@@ -1,6 +1,6 @@
 import { RenderContext } from '@/types';
 import { processDocument } from '@/utils/process-document';
-import { configDefault } from 'fumadocs-core/highlight';
+import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
 import Slugger from 'github-slugger';
 
 export async function renderContextFrom(input: string): Promise<RenderContext> {
@@ -11,7 +11,8 @@ export async function renderContextFrom(input: string): Promise<RenderContext> {
     generateTypeScriptDefinitions() {
       return '';
     },
-    shiki: configDefault,
+    shiki: defaultShikiFactory,
+    shikiOptions: { theme: 'github-light' },
     renderCodeBlock(_lang, code) {
       return code;
     },

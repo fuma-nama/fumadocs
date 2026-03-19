@@ -4,14 +4,11 @@ import { type ComponentProps, type ReactNode, useMemo, useState } from 'react';
 import Link from 'fumadocs-core/link';
 import { usePathname } from 'fumadocs-core/framework';
 import { cn } from '@/utils/cn';
-import { normalize, isActive } from '@/utils/urls';
 import { useSidebar } from '@/components/sidebar/base';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import type { SidebarTab } from '.';
+import { isLayoutTabActive, type LayoutTab } from '@/layouts/shared';
 
-export interface SidebarTabWithProps extends SidebarTab {
-  props?: ComponentProps<'a'>;
-}
+export type SidebarTabWithProps = LayoutTab;
 
 export function SidebarTabsDropdown({
   options,
@@ -100,8 +97,4 @@ export function SidebarTabsDropdown({
   );
 }
 
-export function isTabActive(tab: SidebarTab, pathname: string) {
-  if (tab.urls) return tab.urls.has(normalize(pathname));
-
-  return isActive(tab.url, pathname, true);
-}
+export const isTabActive = isLayoutTabActive;

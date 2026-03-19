@@ -5,6 +5,7 @@ import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
+import { useTranslations } from '@/ui/client/i18n';
 
 const Dialog = DialogPrimitive.Root;
 
@@ -32,30 +33,33 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 const DialogContent = React.forwardRef<
   React.ComponentRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, ...props }, ref) => (
-  <DialogPortal>
-    <DialogOverlay />
-    <DialogPrimitive.Content
-      ref={ref}
-      className={cn(
-        'fixed left-1/2 top-1/2 z-50 flex flex-col gap-4 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 border bg-fd-popover p-4 shadow-lg rounded-xl duration-200 data-[state=open]:animate-fd-dialog-in data-[state=closed]:animate-fd-dialog-out focus-visible:outline-none',
-        className,
-      )}
-      {...props}
-    >
-      {children}
-      <DialogPrimitive.Close
-        aria-label="Close"
+>(({ className, children, ...props }, ref) => {
+  const t = useTranslations();
+  return (
+    <DialogPortal>
+      <DialogOverlay />
+      <DialogPrimitive.Content
+        ref={ref}
         className={cn(
-          buttonVariants({ size: 'icon-sm', color: 'ghost' }),
-          'absolute end-2 top-2 text-fd-muted-foreground/70',
+          'fixed left-1/2 top-1/2 z-50 flex flex-col gap-4 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 border bg-fd-popover p-4 shadow-lg rounded-xl duration-200 data-[state=open]:animate-fd-dialog-in data-[state=closed]:animate-fd-dialog-out focus-visible:outline-none',
+          className,
         )}
+        {...props}
       >
-        <X />
-      </DialogPrimitive.Close>
-    </DialogPrimitive.Content>
-  </DialogPortal>
-));
+        {children}
+        <DialogPrimitive.Close
+          aria-label={t.close}
+          className={cn(
+            buttonVariants({ size: 'icon-sm', color: 'ghost' }),
+            'absolute end-2 top-2 text-fd-muted-foreground/70',
+          )}
+        >
+          <X />
+        </DialogPrimitive.Close>
+      </DialogPrimitive.Content>
+    </DialogPortal>
+  );
+});
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
 const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (

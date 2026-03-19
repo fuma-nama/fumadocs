@@ -5,7 +5,7 @@ export default defineConfig({
   format: 'esm',
   target: 'es2023',
   entry: [
-    './src/index.ts',
+    './src/{index,i18n}.ts',
     './src/ui/index.ts',
     './src/ui/base.tsx',
     './src/ui/client/index.tsx',

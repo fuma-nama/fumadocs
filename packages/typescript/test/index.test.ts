@@ -123,7 +123,7 @@ function getSimpleForms(fileName: string, sourceCode: string) {
       const type = checker.getTypeAtLocation(node);
 
       out.push(`Raw: ${node.getText()}
-Simplified: ${getSimpleForm(type, checker)}`);
+Simplified: ${getSimpleForm({ type, checker })}`);
     }
 
     node.forEachChild(visit);
@@ -147,21 +147,21 @@ test('get simple forms', async () => {
 
   expect(getSimpleForms('example.ts', sourceCode)).toMatchInlineSnapshot(`
     "Raw: x: string | number | null
-    Simplified: number | string | null
+    Simplified: union
 
     Raw: y: { a: number } | (() => void)
-    Simplified: function | object
+    Simplified: union
 
     Raw: z: Array<string>
     Simplified: array
 
     Raw: w: [string, number, "test", false]
-    Simplified: [string, number, "test", false]
+    Simplified: turple
 
     Raw: v: any
     Simplified: any
 
     Raw: r: MyClass | undefined | null
-    Simplified: object | null | undefined"
+    Simplified: union"
   `);
 });

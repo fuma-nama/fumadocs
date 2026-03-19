@@ -156,7 +156,7 @@ You can pass build-time information to runtime using the `postprocess` API.
   });
   ```
 
-  You can obtain the included content with `getText()` (e.g. in Fumadocs):
+  You can obtain the included content with `getText()` (e.g. with `loader()`):
 
   ```ts
   import { source } from '@/lib/source';
@@ -164,6 +164,8 @@ You can pass build-time information to runtime using the `postprocess` API.
   const page = source.getPage('...');
   console.log(await page.data.getText('processed'));
   ```
+
+  See [available options](/docs/headless/mdx/remark-llms).
 
 - #### `valueToExport`
 

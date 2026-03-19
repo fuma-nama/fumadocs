@@ -1,17 +1,65 @@
 'use client';
 
-import { type ComponentProps, createContext, type ReactNode, use, useMemo } from 'react';
+import { type ComponentProps, createContext, type FC, use, useMemo } from 'react';
 import { cn } from '@/utils/cn';
-import { useSidebar } from '@/components/sidebar/base';
 import { usePathname } from 'fumadocs-core/framework';
 import Link from 'fumadocs-core/link';
-import type { SidebarTab } from '@/components/sidebar/tabs';
-import { isTabActive } from '@/components/sidebar/tabs/dropdown';
 import { useIsScrollTop } from '@/utils/use-is-scroll-top';
+import type { LinkItemType } from '@/layouts/shared';
+import {
+  Sidebar,
+  SidebarProvider,
+  SidebarTrigger,
+  useSidebar,
+  type SidebarProps,
+  type SidebarProviderProps,
+} from './slots/sidebar';
+import type { DocsLayoutProps } from '.';
+import {
+  baseSlots,
+  isLayoutTabActive,
+  useLinkItems,
+  type LayoutTab,
+  type BaseSlots,
+  type BaseSlotsProps,
+} from '../shared';
+import { TreeContextProvider } from '@/contexts/tree';
+import { Header } from './slots/header';
+import { Container } from './slots/container';
 
-export const LayoutContext = createContext<{
+export interface DocsSlots extends BaseSlots {
+  container?: FC<ComponentProps<'div'>>;
+  sidebar?: {
+    provider: FC<SidebarProviderProps>;
+    root: FC<SidebarProps>;
+    trigger: FC<ComponentProps<'button'>>;
+    useSidebar: () => { collapsed: boolean; open: boolean; setOpen: (v: boolean) => void };
+  };
+  header?: FC<ComponentProps<'header'>>;
+}
+
+const { useProvider } = baseSlots({
+  useProps() {
+    return useDocsLayout().props;
+  },
+});
+
+interface SlotsProps extends BaseSlotsProps<DocsLayoutProps> {
+  tabs: LayoutTab[];
+  tabMode: NonNullable<DocsLayoutProps['tabMode']>;
+}
+
+const LayoutContext = createContext<{
+  props: SlotsProps;
   isNavTransparent: boolean;
+  navItems: LinkItemType[];
+  menuItems: LinkItemType[];
+  slots: DocsSlots;
 } | null>(null);
+
+export function useIsDocsLayout() {
+  return use(LayoutContext) !== null;
+}
 
 export function useDocsLayout() {
   const context = use(LayoutContext);
@@ -22,80 +70,93 @@ export function useDocsLayout() {
   return context;
 }
 
-export function LayoutContextProvider({
-  navTransparentMode = 'none',
-  children,
-}: {
-  navTransparentMode?: 'always' | 'top' | 'none';
-  children: ReactNode;
-}) {
+export function LayoutBody(
+  props: Omit<DocsLayoutProps, 'tabs'> & {
+    tabs: LayoutTab[];
+  },
+) {
+  const {
+    nav: { enabled: navEnabled = true, transparentMode: navTransparentMode = 'none' } = {},
+    sidebar: { defaultOpenLevel, prefetch, ...sidebarProps } = {},
+    slots: defaultSlots,
+    tabs,
+    tabMode = 'auto',
+    tree,
+    containerProps,
+    children,
+  } = props;
   const isTop = useIsScrollTop({ enabled: navTransparentMode === 'top' }) ?? true;
   const isNavTransparent = navTransparentMode === 'top' ? isTop : navTransparentMode === 'always';
+  const { baseSlots, baseProps } = useProvider(props);
+  const linkItems = useLinkItems(props);
+  const slots: DocsSlots = {
+    ...baseSlots,
+    header: navEnabled ? (defaultSlots?.header ?? Header) : undefined,
+    container: defaultSlots?.container ?? Container,
+    sidebar: defaultSlots?.sidebar ?? {
+      provider: SidebarProvider,
+      root: Sidebar,
+      trigger: SidebarTrigger,
+      useSidebar: useSidebar,
+    },
+  };
+
+  let content = (
+    <>
+      {slots.header && <slots.header />}
+      {slots.sidebar && <slots.sidebar.root {...sidebarProps} />}
+      {tabMode === 'top' && tabs.length > 0 && (
+        <LayoutTabs
+          tabs={tabs}
+          className="z-10 bg-fd-background border-b px-6 pt-3 xl:px-8 max-md:hidden"
+        />
+      )}
+      {children}
+    </>
+  );
+
+  if (slots.container) {
+    content = <slots.container {...containerProps}>{content}</slots.container>;
+  }
+
+  if (slots.sidebar) {
+    content = (
+      <slots.sidebar.provider defaultOpenLevel={defaultOpenLevel} prefetch={prefetch}>
+        {content}
+      </slots.sidebar.provider>
+    );
+  }
 
   return (
-    <LayoutContext
-      value={useMemo(
-        () => ({
+    <TreeContextProvider tree={tree}>
+      <LayoutContext
+        value={{
+          props: {
+            tabMode,
+            tabs,
+            ...baseProps,
+          },
           isNavTransparent,
-        }),
-        [isNavTransparent],
-      )}
-    >
-      {children}
-    </LayoutContext>
+          slots,
+          ...linkItems,
+        }}
+      >
+        {content}
+      </LayoutContext>
+    </TreeContextProvider>
   );
 }
 
-export function LayoutHeader(props: ComponentProps<'header'>) {
-  const { isNavTransparent } = useDocsLayout();
-
-  return (
-    <header data-transparent={isNavTransparent} {...props}>
-      {props.children}
-    </header>
-  );
-}
-
-export function LayoutBody({ className, style, children, ...props }: ComponentProps<'div'>) {
-  const { collapsed } = useSidebar();
-
-  return (
-    <div
-      id="nd-docs-layout"
-      className={cn(
-        'grid transition-[grid-template-columns] overflow-x-clip min-h-(--fd-docs-height) [--fd-docs-height:100dvh] [--fd-header-height:0px] [--fd-toc-popover-height:0px] [--fd-sidebar-width:0px] [--fd-toc-width:0px]',
-        className,
-      )}
-      data-sidebar-collapsed={collapsed}
-      style={
-        {
-          gridTemplate: `"sidebar sidebar header toc toc"
-        "sidebar sidebar toc-popover toc toc"
-        "sidebar sidebar main toc toc" 1fr / minmax(min-content, 1fr) var(--fd-sidebar-col) minmax(0, calc(var(--fd-layout-width,97rem) - var(--fd-sidebar-width) - var(--fd-toc-width))) var(--fd-toc-width) minmax(min-content, 1fr)`,
-          '--fd-docs-row-1': 'var(--fd-banner-height, 0px)',
-          '--fd-docs-row-2': 'calc(var(--fd-docs-row-1) + var(--fd-header-height))',
-          '--fd-docs-row-3': 'calc(var(--fd-docs-row-2) + var(--fd-toc-popover-height))',
-          '--fd-sidebar-col': collapsed ? '0px' : 'var(--fd-sidebar-width)',
-          ...style,
-        } as object
-      }
-      {...props}
-    >
-      {children}
-    </div>
-  );
-}
-
-export function LayoutTabs({
-  options,
+function LayoutTabs({
+  tabs,
   ...props
 }: ComponentProps<'div'> & {
-  options: SidebarTab[];
+  tabs: LayoutTab[];
 }) {
   const pathname = usePathname();
   const selected = useMemo(() => {
-    return options.findLast((option) => isTabActive(option, pathname));
-  }, [options, pathname]);
+    return tabs.findLast((option) => isLayoutTabActive(option, pathname));
+  }, [tabs, pathname]);
 
   return (
     <div
@@ -105,17 +166,17 @@ export function LayoutTabs({
         props.className,
       )}
     >
-      {options.map((option, i) => (
+      {tabs.map((tab, i) => (
         <Link
           key={i}
-          href={option.url}
+          href={tab.url}
           className={cn(
             'inline-flex border-b-2 border-transparent transition-colors items-center pb-1.5 font-medium gap-2 text-fd-muted-foreground text-sm text-nowrap hover:text-fd-accent-foreground',
-            option.unlisted && selected !== option && 'hidden',
-            selected === option && 'border-fd-primary text-fd-primary',
+            tab.unlisted && selected !== tab && 'hidden',
+            selected === tab && 'border-fd-primary text-fd-primary',
           )}
         >
-          {option.title}
+          {tab.title}
         </Link>
       ))}
     </div>

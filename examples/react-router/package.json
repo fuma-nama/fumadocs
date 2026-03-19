@@ -11,7 +11,7 @@
   "dependencies": {
     "@react-router/node": "^7.13.1",
     "@react-router/serve": "^7.13.1",
-    "@takumi-rs/image-response": "^0.72.0",
+    "@takumi-rs/image-response": "^0.73.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
@@ -24,14 +24,14 @@
   },
   "devDependencies": {
     "@react-router/dev": "^7.13.1",
-    "@tailwindcss/vite": "^4.2.1",
+    "@tailwindcss/vite": "^4.2.2",
     "@types/mdx": "^2.0.13",
     "@types/node": "^25.5.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "react-router-devtools": "^6.2.0",
-    "tailwindcss": "^4.2.1",
+    "tailwindcss": "^4.2.2",
     "typescript": "^5.9.3",
-    "vite": "^8.0.0"
+    "vite": "^8.0.1"
   }
 }

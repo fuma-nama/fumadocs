@@ -23,12 +23,14 @@ import type { ServerVariableObject } from '@/types';
 import type { NoReference } from '@/utils/schema';
 import { StfProvider, useFieldValue, useListener, useStf } from '@fumari/stf';
 import { EditIcon } from 'lucide-react';
+import { useTranslations } from '@/ui/client/i18n';
 
 export default function ServerSelect(props: ComponentProps<typeof DialogTrigger>) {
   const { servers } = useServerContext();
   const { server, setServer, setServerVariables } = useServerSelectContext();
   const [open, setOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const t = useTranslations();
 
   useEffect(() => {
     setIsMounted(true);
@@ -47,7 +49,7 @@ export default function ServerSelect(props: ComponentProps<typeof DialogTrigger>
         )}
       >
         <span className="px-2 py-0.5 -ms-2 font-medium rounded-lg border bg-fd-secondary text-fd-secondary-foreground shadow-sm">
-          {server?.name ?? 'Server URL'}
+          {server?.name ?? t.serverUrl}
         </span>
         <code className="truncate min-w-0 flex-1">
           {isMounted
@@ -55,14 +57,14 @@ export default function ServerSelect(props: ComponentProps<typeof DialogTrigger>
                 server ? resolveServerUrl(server.url, server.variables) : '/',
                 window.location.origin,
               )
-            : 'loading...'}
+            : t.loading}
         </code>
         <EditIcon className="size-4" />
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Server URL</DialogTitle>
-          <DialogDescription>The base URL of your API endpoint.</DialogDescription>
+          <DialogTitle>{t.serverUrl}</DialogTitle>
+          <DialogDescription>{t.serverUrlDescription}</DialogDescription>
         </DialogHeader>
         <Select value={server?.url} onValueChange={setServer}>
           <SelectTrigger>
@@ -143,6 +145,7 @@ function Field({
   variable: NoReference<ServerVariableObject>;
   fieldName: string;
 }) {
+  const t = useTranslations();
   const [value, setValue] = useFieldValue([fieldName], {
     compute(currentValue) {
       return typeof currentValue === 'string' ? currentValue : undefined;
@@ -171,7 +174,7 @@ function Field({
       id={fieldName}
       value={value}
       onChange={(e) => setValue(e.target.value)}
-      placeholder="Enter Value"
+      placeholder={t.serverUrlFieldPlaceholder}
     />
   );
 }

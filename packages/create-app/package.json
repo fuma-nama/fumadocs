@@ -1,6 +1,6 @@
 {
   "name": "create-fumadocs-app",
-  "version": "16.0.73",
+  "version": "16.0.74",
   "description": "Create a new documentation site with Fumadocs",
   "keywords": [
     "Docs",
@@ -47,7 +47,7 @@
     "@fumadocs/cli": "workspace:*",
     "commander": "^14.0.3",
     "picocolors": "^1.1.1",
-    "tinyexec": "^1.0.2",
+    "tinyexec": "^1.0.4",
     "ts-morph": "^27.0.2"
   },
   "devDependencies": {
@@ -56,7 +56,7 @@
     "eslint-config-custom": "workspace:*",
     "tinyglobby": "^0.2.15",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.2",
+    "tsdown": "0.21.4",
     "typescript": "^5.9.3"
   },
   "engines": {

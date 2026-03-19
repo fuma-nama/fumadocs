@@ -149,7 +149,9 @@ test('test', async () => {
     ",
           "infoTags": [
             {
-              "label": "Value in",
+              "label": <I18nLabel
+                label="schemaValueIn"
+              />,
               "value": ""NOT_FOUND" | "FORBIDDEN" | "USAGE_EXCEEDED" | "RATE_LIMITED" | "UNAUTHORIZED" | "DISABLED" | "INSUFFICIENT_PERMISSIONS"",
             },
           ],

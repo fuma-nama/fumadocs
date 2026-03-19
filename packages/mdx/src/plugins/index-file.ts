@@ -234,13 +234,6 @@ async function generateDynamicIndexFile(ctx: FileGenContext) {
     environment,
     outDir,
   };
-  codegen.lines.push(
-    `import { dynamic } from 'fumadocs-mdx/runtime/dynamic';`,
-    `import * as Config from '${codegen.formatImportPath(configPath)}';`,
-    '',
-    `const create = await dynamic<typeof Config, ${tc}>(Config, ${JSON.stringify(partialOptions)}, ${JSON.stringify(serverOptions)});`,
-  );
-
   async function generateCollectionObjectEntry(
     collection: DocCollectionItem,
     absolutePath: string,
@@ -295,14 +288,14 @@ async function generateDynamicIndexFile(ctx: FileGenContext) {
       case 'docs': {
         const metaGlob = await generateMetaCollectionGlob(ctx, parent.meta, true);
 
-        return `await create.docs("${parent.name}", "${getBase(parent)}", ${metaGlob}, ${entries.join(', ')})`;
+        return `await create.docs("${parent.name}", "${getBase(parent)}", ${metaGlob}, [${entries.join(', ')}])`;
       }
       case 'doc':
-        return `await create.doc("${collection.name}", "${getBase(collection)}", ${entries.join(', ')})`;
+        return `await create.doc("${collection.name}", "${getBase(collection)}", [${entries.join(', ')}])`;
     }
   }
 
-  await codegen.pushAsync(
+  const objects = await Promise.all(
     core.getCollections().map(async (collection) => {
       const obj = await generateCollectionObject(collection);
       if (!obj) return;
@@ -310,6 +303,17 @@ async function generateDynamicIndexFile(ctx: FileGenContext) {
       return `\nexport const ${collection.name} = ${obj};`;
     }),
   );
+  const hasDynamicCollection = objects.some(Boolean);
+
+  codegen.lines.push(
+    `import { dynamic } from 'fumadocs-mdx/runtime/dynamic';`,
+    ...(hasDynamicCollection ? [`import path from 'node:path';`] : []),
+    `import * as Config from '${codegen.formatImportPath(configPath)}';`,
+    '',
+    `const create = await dynamic<typeof Config, ${tc}>(Config, ${JSON.stringify(partialOptions)}, ${JSON.stringify(serverOptions)});`,
+  );
+
+  codegen.lines.push(...objects.filter((obj): obj is string => obj !== undefined));
 }
 
 async function generateBrowserIndexFile(ctx: FileGenContext) {

@@ -249,9 +249,9 @@ export function defaultStringifier(config: StringifyOptions): Stringifier {
       },
       ...config.handlers,
     },
-    onStringify(node, ctx) {
+    stringify(node, parent, state, info, ctx) {
       if (node.data?.structuredData) ctx.addContent(...node.data.structuredData.contents);
-      config.onStringify?.(node, ctx);
+      return config.stringify?.(node, parent, state, info, ctx);
     },
   });
 }

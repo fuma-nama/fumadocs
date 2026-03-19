@@ -10,27 +10,70 @@ import { createCache } from '@/utils/cache';
 import { parse, type ParseResult } from 'oxc-parser';
 import MagicString from 'magic-string';
 
-interface DownloadedComponent extends Omit<Component, 'subComponents'> {
-  variables?: Record<string, unknown>;
+interface PluginContext {
+  installer: ComponentInstaller;
 }
+
+interface TransformContext extends PluginContext, InstallContext {
+  s: MagicString;
+  parsed: ParseResult;
+  file: File;
+  component: DownloadedComponent;
+}
+
+interface InstallContext {
+  pathToFile: Map<string, File>;
+  io: IOInterface;
+  /** full variables of the current component. */
+  $variables: Record<string, unknown>;
+  /** the last item is always the current component. */
+  stack: DownloadedComponent[];
+}
+
+interface DownloadedComponent extends Component {
+  $subComponents: DownloadedComponent[];
+  $registry: RegistryClient;
+}
+
+type Awaitable<T> = T | Promise<T>;
 
 export interface ComponentInstallerPlugin {
   /**
-   * transform file downloaded from components
+   * transform file before writing (before default transformation)
    */
-  transformFile?: (context: {
-    s: MagicString;
-    parsed: ParseResult;
+  beforeTransform?: (context: TransformContext) => Awaitable<void>;
 
-    file: File;
-    component: DownloadedComponent;
-  }) => void | Promise<void>;
+  /**
+   * transform file before writing (after default transformation)
+   */
+  afterTransform?: (context: TransformContext) => Awaitable<void>;
+
+  /**
+   * transform component before install
+   */
+  beforeInstall?: (
+    comp: DownloadedComponent,
+    context: InstallContext & PluginContext,
+  ) => Awaitable<DownloadedComponent | undefined>;
+
+  beforeDownload?: (
+    context: PluginContext & {
+      name: string;
+    },
+  ) => void | Promise<void>;
+
+  afterDownload?: (
+    context: PluginContext & {
+      name: string;
+      result: DownloadedComponent;
+    },
+  ) => void | Promise<void>;
 }
 
 export interface IOInterface {
   onWarn: (message: string) => void;
   confirmFileOverride: (options: { path: string }) => Promise<boolean>;
-  onFileDownloaded: (options: { path: string; file: File; component: DownloadedComponent }) => void;
+  onFileDownloaded: (options: { path: string; file: File; component: Component }) => void;
 }
 
 export interface ComponentInstallerOptions {
@@ -40,7 +83,7 @@ export interface ComponentInstallerOptions {
 
 export class ComponentInstaller {
   private readonly installedFiles = new Set<string>();
-  private readonly downloadCache = createCache<DownloadedComponent[]>();
+  private readonly downloadCache = createCache<DownloadedComponent>();
   private readonly cwd: string;
   private readonly plugins: ComponentInstallerPlugin[];
   readonly dependencies: Record<string, string | null> = {};
@@ -54,58 +97,97 @@ export class ComponentInstaller {
     this.plugins = options.plugins ?? [];
   }
 
+  private async installComponent(comp: DownloadedComponent, ctx: InstallContext) {
+    // avoid circular refs
+    if (ctx.stack.indexOf(comp) !== ctx.stack.length - 1) return;
+
+    const pluginCtx = { installer: this, ...ctx };
+    for (const plugin of this.plugins) {
+      comp = (await plugin.beforeInstall?.(comp, pluginCtx)) ?? comp;
+    }
+
+    Object.assign(this.dependencies, comp.dependencies);
+    Object.assign(this.devDependencies, comp.devDependencies);
+
+    for (const file of comp.files) {
+      const outPath = this.resolveOutputPath(file);
+      if (this.installedFiles.has(outPath)) continue;
+      this.installedFiles.add(outPath);
+
+      const output = typescriptExtensions.includes(path.extname(outPath))
+        ? await this.transform(file, comp, ctx)
+        : file.content;
+
+      const status = await fs
+        .readFile(outPath)
+        .then((res) => {
+          if (res.toString().trim() === output.trim()) return 'ignore';
+          return 'need-update';
+        })
+        .catch(() => 'write');
+
+      if (status === 'ignore') continue;
+
+      if (status === 'need-update') {
+        const override = await ctx.io.confirmFileOverride({ path: outPath });
+        if (!override) continue;
+      }
+
+      await fs.mkdir(path.dirname(outPath), { recursive: true });
+      await fs.writeFile(outPath, output);
+      ctx.io.onFileDownloaded({ path: outPath, file, component: comp });
+    }
+
+    for (const child of comp.$subComponents) {
+      const stack = [...ctx.stack, child];
+      const variables = { ...ctx.$variables };
+      if (child.$registry.registryId !== comp.$registry.registryId) {
+        const info = await child.$registry.fetchRegistryInfo();
+        Object.assign(variables, info.variables);
+      }
+      Object.assign(variables, child.variables);
+
+      await this.installComponent(child, { ...ctx, stack, $variables: variables });
+    }
+  }
+
   async install(name: string, io: IOInterface) {
-    let downloaded: DownloadedComponent[];
+    let downloaded: DownloadedComponent;
     // detect linked registry
-    const info = await this.rootClient.fetchRegistryInfo();
+    const rootInfo = await this.rootClient.fetchRegistryInfo();
+    const registry = rootInfo.registries?.find((registry) => name.startsWith(`${registry}/`));
 
-    for (const registry of info.registries ?? []) {
-      if (name.startsWith(`${registry}/`)) {
-        downloaded = await this.download(
-          name.slice(registry.length + 1),
-          this.rootClient.createLinkedRegistryClient(registry),
-        );
-        break;
-      }
+    if (registry) {
+      downloaded = await this.download(
+        name.slice(registry.length + 1),
+        this.rootClient.createLinkedRegistryClient(registry),
+      );
+    } else {
+      downloaded = await this.download(name, this.rootClient);
     }
 
-    downloaded ??= await this.download(name, this.rootClient);
+    const allComponents = new Set<DownloadedComponent>();
+    function scan(comp: DownloadedComponent) {
+      if (allComponents.has(comp)) return;
 
-    for (const item of downloaded) {
-      Object.assign(this.dependencies, item.dependencies);
-      Object.assign(this.devDependencies, item.devDependencies);
+      allComponents.add(comp);
+      for (const child of comp.$subComponents) scan(child);
     }
 
-    for (const comp of downloaded) {
-      for (const file of comp.files) {
-        const outPath = this.resolveOutputPath(file);
-        if (this.installedFiles.has(outPath)) continue;
-        this.installedFiles.add(outPath);
+    scan(downloaded);
 
-        const output = typescriptExtensions.includes(path.extname(outPath))
-          ? await this.transform(io, name, file, comp, downloaded)
-          : file.content;
-
-        const status = await fs
-          .readFile(outPath)
-          .then((res) => {
-            if (res.toString().trim() === output.trim()) return 'ignore';
-            return 'need-update';
-          })
-          .catch(() => 'write');
-
-        if (status === 'ignore') continue;
-
-        if (status === 'need-update') {
-          const override = await io.confirmFileOverride({ path: outPath });
-          if (!override) continue;
-        }
-
-        await fs.mkdir(path.dirname(outPath), { recursive: true });
-        await fs.writeFile(outPath, output);
-        io.onFileDownloaded({ path: outPath, file, component: comp });
-      }
+    const pathToFile = new Map<string, File>();
+    for (const comp of allComponents) {
+      for (const file of comp.files) pathToFile.set(file.target ?? file.path, file);
     }
+
+    const info = await downloaded.$registry.fetchRegistryInfo();
+    await this.installComponent(downloaded, {
+      pathToFile,
+      io,
+      $variables: { ...info.env, ...downloaded.variables },
+      stack: [downloaded],
+    });
   }
 
   async deps() {
@@ -122,84 +204,90 @@ export class ComponentInstaller {
   }
 
   /**
-   * return a list of components, merged with child components & variables.
+   * download component & its sub components
    */
-  private async download(
-    name: string,
-    client: RegistryClient,
-    contextVariables?: Record<string, unknown>,
-  ): Promise<DownloadedComponent[]> {
-    const hash = `${client.registryId} ${name}`;
-    const info = await client.fetchRegistryInfo();
-    const variables = { ...contextVariables, ...info.env };
-    for (const [k, v] of Object.entries(info.variables ?? {})) {
-      variables[k] ??= v.default;
-    }
+  private async download(name: string, client: RegistryClient): Promise<DownloadedComponent> {
+    return this.downloadCache.cached(
+      JSON.stringify([client.registryId, name]),
+      async (presolve) => {
+        for (const plugin of this.plugins) {
+          await plugin.beforeDownload?.({
+            installer: this,
+            name,
+          });
+        }
 
-    const out = await this.downloadCache.cached(hash, async (presolve) => {
-      const comp = await client.fetchComponent(name);
-      const result: DownloadedComponent[] = [comp];
-      // place it before downloading child components to avoid recursive downloads
-      presolve(result);
+        const comp = await client.fetchComponent(name);
+        const result: DownloadedComponent = {
+          ...comp,
+          $registry: client,
+          $subComponents: [],
+        };
+        // place it before downloading child components to avoid recursive downloads
+        presolve(result);
 
-      const child = await Promise.all(
-        comp.subComponents.map((sub) => {
-          if (typeof sub === 'string') return this.download(sub, client);
-          const baseUrl =
-            this.rootClient instanceof HttpRegistryClient
-              ? new URL(sub.baseUrl, `${this.rootClient.baseUrl}/`).href
-              : sub.baseUrl;
+        result.$subComponents = await Promise.all(
+          comp.subComponents.map((sub) => {
+            if (typeof sub === 'string') return this.download(sub, client);
 
-          return this.download(
-            sub.component,
-            new HttpRegistryClient(baseUrl, client.config),
-            variables,
-          );
-        }),
-      );
-      for (const sub of child) result.push(...sub);
-      return result;
-    });
+            let subClient: RegistryClient;
+            if (this.rootClient instanceof HttpRegistryClient) {
+              const baseUrl = new URL(sub.baseUrl, `${this.rootClient.baseUrl}/`).href;
+              subClient =
+                client instanceof HttpRegistryClient && client.baseUrl === baseUrl
+                  ? client
+                  : new HttpRegistryClient(baseUrl, client.config);
+            } else {
+              subClient = new HttpRegistryClient(sub.baseUrl, client.config);
+            }
 
-    return out.map((file) => ({ ...file, variables }));
+            return this.download(sub.component, subClient);
+          }),
+        );
+
+        for (const plugin of this.plugins) {
+          await plugin.afterDownload?.({
+            installer: this,
+            name,
+            result,
+          });
+        }
+
+        return result;
+      },
+    );
   }
 
-  private readonly pathToFileCache = createCache<Map<string, File>>();
   private async transform(
-    io: IOInterface,
-    taskId: string,
     file: File,
     component: DownloadedComponent,
-    allComponents: DownloadedComponent[],
+    ctx: InstallContext,
   ): Promise<string> {
     const filePath = this.resolveOutputPath(file);
     const parsed = await parse(filePath, file.content);
     const s = new MagicString(file.content);
+    const transformCtx: TransformContext = { installer: this, s, file, component, parsed, ...ctx };
+
+    for (const plugin of this.plugins) {
+      await plugin.beforeTransform?.(transformCtx);
+    }
 
     // transform alias
     const prefix = '@/';
-    const variables = Object.entries(component.variables ?? {});
-    const pathToFile = await this.pathToFileCache.cached(taskId, () => {
-      const map = new Map<string, File>();
-      for (const comp of allComponents) {
-        for (const file of comp.files) map.set(file.target ?? file.path, file);
-      }
-      return map;
-    });
 
     transformSpecifiers(parsed.program, s, (specifier) => {
-      for (const [k, v] of variables) {
-        specifier = specifier.replaceAll(`<${k}>`, v as string);
+      for (const [k, v] of Object.entries(ctx.$variables)) {
+        if (typeof v === 'string') specifier = specifier.replaceAll(`<${k}>`, v);
       }
 
       if (specifier.startsWith(prefix)) {
         const lookup = specifier.substring(prefix.length);
-        const target = pathToFile.get(lookup);
+        const target = ctx.pathToFile.get(lookup);
 
         if (target) {
           specifier = toImportSpecifier(filePath, this.resolveOutputPath(target));
         } else {
-          io.onWarn(`cannot find the referenced file of ${specifier}`);
+          ctx.io.onWarn(`cannot find the referenced file of ${specifier}`);
         }
       }
 
@@ -207,12 +295,7 @@ export class ComponentInstaller {
     });
 
     for (const plugin of this.plugins) {
-      await plugin.transformFile?.({
-        s,
-        parsed,
-        file,
-        component,
-      });
+      await plugin.afterTransform?.(transformCtx);
     }
 
     return s.toString();

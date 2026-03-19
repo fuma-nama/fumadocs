@@ -1,4 +1,4 @@
-import type { Nodes } from 'mdast';
+import type { Nodes, Parents } from 'mdast';
 import {
   type MdxJsxFlowElement,
   type MdxJsxTextElement,
@@ -6,7 +6,13 @@ import {
   type MdxJsxExpressionAttribute,
   mdxToMarkdown,
 } from 'mdast-util-mdx';
-import { type Handle, type Options, toMarkdown } from 'mdast-util-to-markdown';
+import {
+  type Handle,
+  type Options,
+  toMarkdown,
+  type Info,
+  type State,
+} from 'mdast-util-to-markdown';
 import type { Processor } from 'unified';
 
 declare module 'mdast' {
@@ -65,9 +71,15 @@ export interface StringifyOptions<Context = undefined> extends Options {
   ) => boolean;
 
   /**
-   * run before stringifying any nodes
+   * override default stringifier
    */
-  onStringify?: (node: Nodes, ctx: Context) => void;
+  stringify?: (
+    node: Nodes,
+    parent: Parents | undefined,
+    state: State,
+    info: Info,
+    ctx: Context,
+  ) => string | undefined;
 }
 
 interface CustomRootNode<Context> {
@@ -76,7 +88,7 @@ interface CustomRootNode<Context> {
   ctx: Context;
 }
 
-export function defaultStringifier<Context>(
+export function defaultStringifier<Context = undefined>(
   config: StringifyOptions<Context> = {},
 ): Stringifier<Context> {
   const {
@@ -97,7 +109,7 @@ export function defaultStringifier<Context>(
 
       return true;
     },
-    onStringify,
+    stringify,
     ...customExtension
   } = config;
 
@@ -106,7 +118,10 @@ export function defaultStringifier<Context>(
       let visibility = filterElement(node);
       if (visibility === false) return '';
 
-      if (onStringify) onStringify(node, ctx);
+      if (stringify) {
+        const v = stringify(node, parent, state, info, ctx);
+        if (v) return v;
+      }
 
       const extraInfo = node.data?._stringify;
       if (extraInfo) {

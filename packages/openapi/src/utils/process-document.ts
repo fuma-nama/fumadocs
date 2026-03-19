@@ -13,7 +13,7 @@ export interface ProcessedDocument {
   dereferenced: NoReference<Document>;
 
   /**
-   * Get raw object from dereferenced object
+   * Get raw $ref from dereferenced object
    */
   getRawRef: (obj: object) => string | undefined;
 
@@ -43,10 +43,10 @@ export async function processDocument(input: string | Document): Promise<Process
   /**
    * Dereferenced value and its original `$ref` value
    */
-  const dereferenceMap = new WeakMap<object, string>();
+  const dereferenceMap = new Map<object, string>();
 
   return {
-    dereferenced: dereferenceSync(bundled as JSONSchema, (ref, schema) => {
+    dereferenced: dereferenceSync(bundled as JSONSchema, (schema, ref) => {
       dereferenceMap.set(schema as object, ref);
     }) as NoReference<Document>,
     getRawRef(obj) {
@@ -61,13 +61,13 @@ export async function processDocument(input: string | Document): Promise<Process
  */
 function dereferenceSync(
   schema: JSONSchema,
-  onDereference: (ref: string, schema: JSONSchema) => void,
+  setOriginalRef: (schema: JSONSchema, ref: string) => void,
 ): JSONSchema {
   if (typeof schema === 'boolean') return schema;
   const visitedNodes = new Set<unknown>();
   const cloned = structuredClone(schema);
 
-  function resolve(current: unknown, path: string): JSONSchema {
+  function resolve(current: unknown): JSONSchema {
     if (typeof current === 'object' && current !== null) {
       // make sure we don't visit the same node twice
       if (visitedNodes.has(current)) {
@@ -78,26 +78,37 @@ function dereferenceSync(
       if (Array.isArray(current)) {
         // array
         for (let index = 0; index < current.length; index++) {
-          current[index] = resolve(current[index], `${path}/${index}`);
-        }
-      } else {
-        // object
-        if ('$ref' in current && typeof current['$ref'] === 'string') {
-          const ref = current['$ref'];
-          const out = dereference.resolveRefSync(cloned as never, ref) as JSONSchema;
-          onDereference(ref, out);
-          return out;
+          current[index] = resolve(current[index]);
         }
 
-        const obj = current as Record<string, unknown>;
-        for (const key in current) {
-          obj[key] = resolve(obj[key], `${path}/${key}`);
+        return current as JSONSchema;
+      }
+
+      const obj = current as Record<string, unknown>;
+
+      // object
+      if ('$ref' in current && typeof current['$ref'] === 'string') {
+        const ref = current['$ref'];
+        delete current['$ref'];
+        const resolved = resolve(dereference.resolveRefSync(cloned as never, ref) as JSONSchema);
+        setOriginalRef(resolved, ref);
+        setOriginalRef(current as JSONSchema, ref);
+
+        if (typeof resolved === 'boolean') throw new Error('invalid schema');
+        for (const k in resolved) {
+          if (!(k in current)) {
+            obj[k] = resolved[k as never];
+          }
         }
+      }
+
+      for (const key in current) {
+        obj[key] = resolve(obj[key]);
       }
     }
 
     return current as JSONSchema;
   }
 
-  return resolve(cloned, '#');
+  return resolve(cloned);
 }

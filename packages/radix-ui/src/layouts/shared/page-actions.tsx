@@ -5,6 +5,7 @@ import { cn } from '@/utils/cn';
 import { useCopyButton } from '@/utils/use-copy-button';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { buttonVariants } from '@/components/ui/button';
+import { usePathname } from 'fumadocs-core/framework';
 
 const cache = new Map<string, Promise<string>>();
 
@@ -78,8 +79,10 @@ export function ViewOptionsPopover({
    */
   githubUrl: string;
 }) {
+  const pathname = usePathname();
   const items = useMemo(() => {
-    const pageUrl = typeof window !== 'undefined' ? window.location.href : 'loading';
+    const pageUrl =
+      typeof window === 'undefined' ? pathname : new URL(pathname, window.location.origin);
     const q = `Read ${pageUrl}, I want to ask questions about it.`;
 
     return [
@@ -215,7 +218,7 @@ export function ViewOptionsPopover({
         })}`,
       },
     ];
-  }, [githubUrl, markdownUrl]);
+  }, [githubUrl, markdownUrl, pathname]);
 
   return (
     <Popover>

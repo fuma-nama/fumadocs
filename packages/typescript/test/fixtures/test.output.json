@@ -23,7 +23,7 @@
           }
         ],
         "type": "number | undefined",
-        "simplifiedType": "number",
+        "simplifiedType": "union",
         "required": false,
         "deprecated": false
       }
@@ -53,7 +53,7 @@
           }
         ],
         "type": "number | undefined",
-        "simplifiedType": "number",
+        "simplifiedType": "union",
         "required": false,
         "deprecated": false
       },
@@ -148,7 +148,7 @@
         "description": "",
         "tags": [],
         "type": "string | number | bigint | boolean | { type: string | JSXElementConstructor<any>; props: unknown; key: string | null; } | {} | { children: ReactNode; type: string | JSXElementConstructor<any>; props: unknown; key: string | null; } | { then: <TResult1 = AwaitedReactNode, TResult2 = never>(onfulfilled?: ((value: AwaitedReactNode) => TResult1 | PromiseLike<TResult1>) | null | undefined, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null | undefined) => Promise<TResult1 | TResult2>; catch: <TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | null | undefined) => Promise<AwaitedReactNode | TResult>; finally: (onfinally?: (() => void) | null | undefined) => Promise<AwaitedReactNode>; } | null | undefined",
-        "simplifiedType": "object | boolean | bigint | number | string | null | undefined",
+        "simplifiedType": "union",
         "required": true,
         "deprecated": false
       }

@@ -9,7 +9,7 @@ import {
 import { useForm } from 'react-hook-form';
 import { Input, labelVariants } from '@/ui/components/input';
 import { useQuery } from '@/utils/use-query';
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import {
@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from '@/ui/components/select';
 import type { OAuth2SecurityScheme } from '@/types';
+import { useTranslations } from '@/ui/client/i18n';
 
 type FlowType = keyof NonNullable<OAuth2SecurityScheme['flows']>;
 
@@ -51,33 +52,11 @@ interface ImplicitState {
   client_id: string;
 }
 
-const FlowTypes = {
-  password: {
-    name: 'Resource Owner Password Flow',
-    description: 'Authenticate using username and password.',
-    supported: true,
-  },
-  clientCredentials: {
-    name: 'Client Credentials',
-    description: 'Intended for the server-to-server authentication.',
-    supported: true,
-  },
-  authorizationCode: {
-    name: 'Authorization code',
-    description: 'Authenticate with 3rd party services',
-    supported: true,
-  },
-  implicit: {
-    name: 'Implicit',
-    description: 'Retrieve the access token directly.',
-    supported: true,
-  },
-  deviceAuthorization: {
-    name: 'Device Authorization',
-    description: 'Authenticate with device.',
-    supported: false,
-  },
-} as const;
+interface FlowInfo {
+  name: ReactNode;
+  description: ReactNode;
+  supported: boolean;
+}
 
 export function OauthDialog({
   scheme,
@@ -90,7 +69,38 @@ export function OauthDialog({
   const [type, setType] = useState(() => {
     return Object.keys(scheme.flows!)[0] as FlowType;
   });
-  const { supported } = FlowTypes[type];
+  const t = useTranslations();
+  const allFlows: Record<FlowType, FlowInfo> = useMemo(
+    () => ({
+      password: {
+        name: t.resourceOwnerPassword,
+        description: t.resourceOwnerPasswordDesc,
+        supported: true,
+      },
+      clientCredentials: {
+        name: t.clientCredentials,
+        description: t.clientCredentialsDesc,
+        supported: true,
+      },
+      authorizationCode: {
+        name: t.authorizationCode,
+        description: t.authorizationCodeDesc,
+        supported: true,
+      },
+      implicit: {
+        name: t.implicit,
+        description: t.implicitDesc,
+        supported: true,
+      },
+      deviceAuthorization: {
+        name: t.deviceAuthorization,
+        description: t.deviceAuthorizationDesc,
+        supported: false,
+      },
+    }),
+    [t],
+  );
+
   const form = useForm<FormValues>({
     defaultValues: {
       clientId: '',
@@ -264,8 +274,8 @@ export function OauthDialog({
       {children}
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Authorization</DialogTitle>
-          <DialogDescription>Obtain the access token for API.</DialogDescription>
+          <DialogTitle>{t.authorization}</DialogTitle>
+          <DialogDescription>{t.obtainAccessToken}</DialogDescription>
         </DialogHeader>
         <form
           className="flex flex-col gap-6"
@@ -280,7 +290,7 @@ export function OauthDialog({
             </SelectTrigger>
             <SelectContent>
               {Object.keys(scheme.flows!).map((key) => {
-                const { name, description } = FlowTypes[key as FlowType];
+                const { name, description } = allFlows[key as FlowType];
 
                 return (
                   <SelectItem key={key} value={key}>
@@ -297,14 +307,12 @@ export function OauthDialog({
             type === 'implicit') && (
             <fieldset className="flex flex-col gap-1.5">
               <label htmlFor="client_id" className={cn(labelVariants())}>
-                Client ID
+                {t.clientId}
               </label>
-              <p className="text-fd-muted-foreground text-sm">
-                The client ID of your OAuth application.
-              </p>
+              <p className="text-fd-muted-foreground text-sm">{t.clientIdHint}</p>
               <Input
                 id="client_id"
-                placeholder="Enter value"
+                placeholder={t.inputPlaceholder}
                 type="text"
                 autoComplete="off"
                 disabled={isLoading}
@@ -315,14 +323,12 @@ export function OauthDialog({
           {(type === 'authorizationCode' || type === 'clientCredentials') && (
             <fieldset className="flex flex-col gap-1.5">
               <label htmlFor="client_secret" className={cn(labelVariants())}>
-                Client Secret
+                {t.clientSecret}
               </label>
-              <p className="text-fd-muted-foreground text-sm">
-                The client secret of your OAuth application.
-              </p>
+              <p className="text-fd-muted-foreground text-sm">{t.clientSecretHint}</p>
               <Input
                 id="client_secret"
-                placeholder="Enter value"
+                placeholder={t.inputPlaceholder}
                 type="password"
                 autoComplete="off"
                 disabled={isLoading}
@@ -334,11 +340,11 @@ export function OauthDialog({
             <>
               <fieldset className="flex flex-col gap-1.5">
                 <label htmlFor="username" className={cn(labelVariants())}>
-                  Username
+                  {t.usernameField}
                 </label>
                 <Input
                   id="username"
-                  placeholder="Enter value"
+                  placeholder={t.inputPlaceholder}
                   type="text"
                   disabled={isLoading}
                   autoComplete="off"
@@ -347,11 +353,11 @@ export function OauthDialog({
               </fieldset>
               <fieldset className="flex flex-col gap-1.5">
                 <label htmlFor="password" className={cn(labelVariants())}>
-                  Client Secret
+                  {t.clientSecret}
                 </label>
                 <Input
                   id="password"
-                  placeholder="Enter value"
+                  placeholder={t.inputPlaceholder}
                   type="password"
                   autoComplete="off"
                   disabled={isLoading}
@@ -360,7 +366,7 @@ export function OauthDialog({
               </fieldset>
             </>
           )}
-          {supported ? (
+          {allFlows[type].supported ? (
             <>
               {error ? <p className="text-red-400 font-medium text-sm">{String(error)}</p> : null}
               <button
@@ -372,12 +378,12 @@ export function OauthDialog({
                   }),
                 )}
               >
-                {authCodeCallback.isLoading ? 'Fetching token...' : 'Submit'}
+                {authCodeCallback.isLoading ? t.fetchingToken : t.submit}
               </button>
             </>
           ) : (
             <p className="text-fd-muted-foreground bg-fd-muted p-2 rounded-lg border">
-              Unsupported
+              {t.unsupported}
             </p>
           )}
         </form>

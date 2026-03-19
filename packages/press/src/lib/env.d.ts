@@ -16,6 +16,11 @@ declare module 'process' {
          * [JSON encoded] a list of default project directories (where Markdown files are located)
          */
         DEFAULT_RPOJECT_DIR?: string;
+
+        /**
+         * OpenRouter API key to enable AI chat
+         */
+        OPENROUTER_API_KEY?: string;
       }
     }
   }

@@ -9,35 +9,37 @@ import {
   NavigationMenuTrigger,
   type NavigationMenuTriggerProps,
 } from '@/components/ui/navigation-menu';
-import { navItemVariants } from './client';
+import { navItemVariants } from './slots/header';
 
 export const NavbarMenu = NavigationMenuItem;
 
-export function NavbarMenuContent({ className, ...props }: NavigationMenuContentProps) {
+export function NavbarMenuContent(props: NavigationMenuContentProps) {
+  const { className, ...rest } = props;
   return (
     <NavigationMenuContent
-      className={(s) =>
+      {...rest}
+      className={(state) =>
         cn(
           'grid grid-cols-1 gap-2 p-4 md:grid-cols-2 lg:grid-cols-3',
-          typeof className === 'function' ? className(s) : className,
+          typeof className === 'function' ? className(state) : className,
         )
       }
-      {...props}
     >
       {props.children}
     </NavigationMenuContent>
   );
 }
 
-export function NavbarMenuTrigger({ className, ...props }: NavigationMenuTriggerProps) {
+export function NavbarMenuTrigger(props: NavigationMenuTriggerProps) {
+  const { className, ...rest } = props;
   return (
     <NavigationMenuTrigger
-      {...props}
-      className={(s) =>
+      {...rest}
+      className={(state) =>
         cn(
           navItemVariants(),
           'text-sm rounded-md',
-          typeof className === 'function' ? className(s) : className,
+          typeof className === 'function' ? className(state) : className,
         )
       }
     >
@@ -48,18 +50,16 @@ export function NavbarMenuTrigger({ className, ...props }: NavigationMenuTrigger
 
 export function NavbarMenuLink(props: LinkProps) {
   return (
-    <NavigationMenuLink
-      render={
-        <Link
-          {...props}
-          className={cn(
-            'flex flex-col gap-2 rounded-lg border bg-fd-card p-3 transition-colors hover:bg-fd-accent/80 hover:text-fd-accent-foreground',
-            props.className,
-          )}
-        >
-          {props.children}
-        </Link>
-      }
-    />
+    <NavigationMenuLink asChild>
+      <Link
+        {...props}
+        className={cn(
+          'flex flex-col gap-2 rounded-lg border bg-fd-card p-3 transition-colors hover:bg-fd-accent/80 hover:text-fd-accent-foreground',
+          props.className,
+        )}
+      >
+        {props.children}
+      </Link>
+    </NavigationMenuLink>
   );
 }

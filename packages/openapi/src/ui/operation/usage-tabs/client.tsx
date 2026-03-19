@@ -8,11 +8,11 @@ import {
   SelectContent,
   SelectItem,
 } from '@/ui/components/select';
-import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock.core';
 import { useState, useEffect, useMemo, createContext, ReactNode, useRef, use } from 'react';
 import type { ExampleRequestItem } from '../request-tabs';
 import type { RawRequestData, RequestData } from '@/requests/types';
 import type { CodeUsageGenerator } from '@/requests/generators';
+import { ClientCodeBlock } from '@/ui/components/codeblock';
 
 export type ExampleUpdateListener = (data: RawRequestData, encoded: RequestData) => void;
 
@@ -135,7 +135,7 @@ export function UsageTab({
   lang,
   _client,
 }: Pick<CodeUsageGenerator, 'lang' | '_client'> & { id: string }) {
-  const { shikiOptions, mediaAdapters, codeUsages } = useApiContext();
+  const { mediaAdapters, codeUsages } = useApiContext();
   const {
     examples,
     example: selectedExampleId,
@@ -186,5 +186,5 @@ export function UsageTab({
 
   if (!code) return null;
 
-  return <DynamicCodeBlock lang={lang} code={code} options={shikiOptions} />;
+  return <ClientCodeBlock lang={lang} code={code} />;
 }

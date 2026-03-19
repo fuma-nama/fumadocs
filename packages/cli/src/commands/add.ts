@@ -11,11 +11,14 @@ import picocolors from 'picocolors';
 import { ComponentInstaller } from '@/registry/installer';
 import type { RegistryClient } from '@/registry/client';
 import { UIRegistries } from '@/commands/shared';
+import { pluginPreserveLayouts } from '@/registry/plugins/preserve';
 
 export async function add(input: string[], client: RegistryClient) {
   const config = client.config;
   let target: string[];
-  const installer = new ComponentInstaller(client);
+  const installer = new ComponentInstaller(client, {
+    plugins: [pluginPreserveLayouts()],
+  });
   const registry = UIRegistries[config.uiLibrary];
 
   if (input.length === 0) {

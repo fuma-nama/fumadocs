@@ -50,10 +50,7 @@ This will render the title in the MDX body.
 Link to the original GitHub file with your component.
 
 ```tsx
-// docs layout:
-import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
-// notebook layout:
-import { DocsPage } from 'fumadocs-ui/layouts/notebook/page';
+import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
 
 <DocsPage>
   <a
@@ -72,10 +69,7 @@ import { DocsPage } from 'fumadocs-ui/layouts/notebook/page';
 Display last updated time of the page.
 
 ```tsx
-// docs layout:
-import { DocsPage, PageLastUpdate } from 'fumadocs-ui/layouts/docs/page';
-// notebook layout:
-import { DocsPage, PageLastUpdate } from 'fumadocs-ui/layouts/notebook/page';
+import { DocsPage, PageLastUpdate } from 'fumadocs-ui/layouts/<layout>/page';
 
 const lastModifiedTime: Date | undefined;
 
@@ -130,10 +124,7 @@ To extend the page to fill up all available space, pass `full` to the page compo
 This will force TOC to be shown as a popover.
 
 ```tsx
-// docs layout:
-import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
-// notebook layout:
-import { DocsPage } from 'fumadocs-ui/layouts/notebook/page';
+import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
 
 <DocsPage full>...</DocsPage>;
 ```
@@ -146,38 +137,45 @@ For Markdown and MDX documents, You can obtain it using the
 [TOC Utility](/docs/headless/utils/get-toc). Content sources like Fumadocs MDX offer this out-of-the-box.
 
 ```tsx
-// docs layout:
-import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
-// notebook layout:
-import { DocsPage } from 'fumadocs-ui/layouts/notebook/page';
+import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
 
 <DocsPage toc={headings}>...</DocsPage>;
 ```
 
-You can customise or disable it with the `tableOfContent` option, or with `tableOfContentPopover` on smaller devices.
+You can customise or disable it with `tableOfContent`, or with `tableOfContentPopover` on smaller devices.
 
-```tsx
-// docs layout:
-import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
-// notebook layout:
-import { DocsPage } from 'fumadocs-ui/layouts/notebook/page';
+```tsx tab="Options"
+import { DocsPage, type TOCMainProps } from 'fumadocs-ui/layouts/<layout>/page';
 
-<DocsPage tableOfContent={options} tableOfContentPopover={options}>
-  ...
-</DocsPage>;
+return (
+  <DocsPage tableOfContent={options} tableOfContentPopover={options}>
+    ...
+  </DocsPage>
+);
 ```
 
-<auto-type-table cwd path="content/docs/ui/props.ts" name="TOCProps" />
+```tsx tab="Replace Component" title="page.tsx"
+import { TOC } from './my-toc';
+return <DocsPage slots={{ toc: TOC }}>...</DocsPage>;
+```
+
+```tsx tab="Replace Component" title="my-toc.tsx"
+'use client';
+import type { TOCProps } from 'fumadocs-ui/layouts/<layout>/page/slots/toc';
+
+function TOC(props: TOCProps) {
+  return <div>Hello World</div>;
+}
+```
+
+<auto-type-table type="import('fumadocs-ui/layouts/docs/page').TOCMainProps" />
 
 #### Style
 
 You can choose another style for TOC, like `clerk` inspired by https://clerk.com:
 
 ```tsx
-// docs layout:
-import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
-// notebook layout:
-import { DocsPage } from 'fumadocs-ui/layouts/notebook/page';
+import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
 
 <DocsPage
   tableOfContent={{
@@ -194,21 +192,18 @@ You can also style the TOC title with the `toc-title` ID.
 
 Footer is a navigation element that has two buttons to jump to the next and previous pages. When not specified, it shows the neighbour pages found from page tree.
 
-Customise the footer with the `footer` option.
+Customise the footer with the `Footer` prop.
 
 ```tsx
-// docs layout:
-import { DocsPage } from 'fumadocs-ui/layouts/docs/page';
-// notebook layout:
-import { DocsPage } from 'fumadocs-ui/layouts/notebook/page';
+import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
 
 <DocsPage footer={options}>...</DocsPage>;
 ```
 
-<auto-type-table cwd path="content/docs/ui/props.ts" name="FooterProps" />
+<auto-type-table type="Omit<import('fumadocs-ui/layouts/docs/page').FooterProps, keyof React.ComponentProps<'div'>>" />
 
 ### Breadcrumb
 
 A navigation element, shown only when user is navigating in folders.
 
-<auto-type-table cwd path="content/docs/ui/props.ts" name="BreadcrumbProps" />
+<auto-type-table type="Omit<import('fumadocs-ui/layouts/docs/page').BreadcrumbProps, keyof React.ComponentProps<'div'>>" />

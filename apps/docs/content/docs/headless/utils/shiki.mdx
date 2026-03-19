@@ -1,0 +1,46 @@
+---
+title: Shiki (Internal)
+description: Manage the Shiki instances.
+---
+
+## Overview
+
+Fumadocs use its own Shiki factory API to manage internal Shiki instances.
+
+You can customise it for special purposes like using fine-grained bundles, for example:
+
+```ts
+import { createShikiFactory } from 'fumadocs-core/highlight/shiki';
+
+export const myShikiFactory = createShikiFactory({
+  async init(options) {
+    const { createHighlighter, createJavaScriptRegexEngine } = await import('shiki');
+
+    return createHighlighter({
+      langs: [],
+      themes: [],
+      langAlias: options?.langAlias,
+      engine: createJavaScriptRegexEngine(),
+    });
+  },
+});
+```
+
+Then pass it to different modules/features:
+
+```tsx tab="Dynamic CodeBlock (UI)"
+'use client';
+import * as Base from 'fumadocs-ui/dynamic-codeblock.core';
+
+export type DynamicCodeblockProps = Omit<Base.DynamicCodeblockProps, 'highlighter'>;
+
+export function DynamicCodeBlock(props: DynamicCodeblockProps) {
+  return <Base.DynamicCodeBlock highlighter={() => myShikiFactory.getOrInit()} {...props} />;
+}
+```
+
+```ts tab="Rehype Code (Core)"
+import { createRehypeCode } from 'fumadocs-core/mdx-plugins/rehype-code.core';
+
+const rehypeCode = createRehypeCode(myShikiFactory);
+```

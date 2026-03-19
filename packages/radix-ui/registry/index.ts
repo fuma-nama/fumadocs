@@ -1,7 +1,7 @@
 import { fileURLToPath } from 'node:url';
 import type { Registry } from '@fumadocs/cli/build';
 import * as path from 'node:path';
-import { commonComponents, resolveExternal } from '../../shared/registry';
+import { commonComponents, findSlotComponents, resolveExternal } from '../../shared/registry';
 
 const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../src');
 
@@ -19,35 +19,11 @@ export const registry: Registry = {
   },
   components: [
     ...commonComponents,
+    ...(await findSlotComponents(dir)),
     {
-      name: 'layouts/shared',
+      name: 'layouts/sidebar',
       unlisted: true,
       files: [
-        {
-          type: 'components',
-          path: 'layouts/shared/index.tsx',
-          target: '<dir>/layout/shared.tsx',
-        },
-        {
-          type: 'components',
-          path: 'layouts/shared/language-toggle.tsx',
-          target: '<dir>/layout/language-toggle.tsx',
-        },
-        {
-          type: 'components',
-          path: 'layouts/shared/page-actions.tsx',
-          target: '<dir>/layout/page-actions.tsx',
-        },
-        {
-          type: 'components',
-          path: 'layouts/shared/search-toggle.tsx',
-          target: '<dir>/layout/search-toggle.tsx',
-        },
-        {
-          type: 'components',
-          path: 'layouts/shared/theme-toggle.tsx',
-          target: '<dir>/layout/theme-toggle.tsx',
-        },
         {
           type: 'components',
           path: 'components/sidebar/base.tsx',
@@ -63,15 +39,21 @@ export const registry: Registry = {
           path: 'components/sidebar/link-item.tsx',
           target: '<dir>/layout/sidebar/link-item.tsx',
         },
+      ],
+    },
+    {
+      name: 'layouts/shared',
+      unlisted: true,
+      files: [
         {
           type: 'components',
-          path: 'components/sidebar/tabs/index.tsx',
-          target: '<dir>/layout/sidebar/tabs/index.tsx',
+          path: 'layouts/shared/index.tsx',
+          target: '<dir>/layout/shared/index.tsx',
         },
         {
           type: 'components',
-          path: 'components/sidebar/tabs/dropdown.tsx',
-          target: '<dir>/layout/sidebar/tabs/dropdown.tsx',
+          path: 'layouts/shared/client.tsx',
+          target: '<dir>/layout/shared/client.tsx',
         },
       ],
     },
@@ -87,11 +69,6 @@ export const registry: Registry = {
           type: 'components',
           path: 'layouts/docs/client.tsx',
           target: '<dir>/layout/docs/client.tsx',
-        },
-        {
-          type: 'components',
-          path: 'layouts/docs/sidebar.tsx',
-          target: '<dir>/layout/docs/sidebar.tsx',
         },
         {
           type: 'components',
@@ -113,16 +90,6 @@ export const registry: Registry = {
           type: 'components',
           path: 'layouts/flux/index.tsx',
           target: '<dir>/layout/flux/index.tsx',
-        },
-        {
-          type: 'components',
-          path: 'layouts/flux/tab-dropdown.tsx',
-          target: '<dir>/layout/flux/tab-dropdown.tsx',
-        },
-        {
-          type: 'components',
-          path: 'layouts/flux/sidebar.tsx',
-          target: '<dir>/layout/flux/sidebar.tsx',
         },
         {
           type: 'components',
@@ -152,11 +119,6 @@ export const registry: Registry = {
         },
         {
           type: 'components',
-          path: 'layouts/notebook/sidebar.tsx',
-          target: '<dir>/layout/notebook/sidebar.tsx',
-        },
-        {
-          type: 'components',
           path: 'layouts/notebook/page/index.tsx',
           target: '<dir>/layout/notebook/page/index.tsx',
         },
@@ -175,11 +137,6 @@ export const registry: Registry = {
           type: 'components',
           path: 'layouts/home/index.tsx',
           target: '<dir>/layout/home/index.tsx',
-        },
-        {
-          type: 'components',
-          path: 'layouts/home/client.tsx',
-          target: '<dir>/layout/home/client.tsx',
         },
         {
           type: 'ui',
@@ -356,6 +313,18 @@ export const registry: Registry = {
         {
           type: 'ui',
           path: 'components/ui/collapsible.tsx',
+        },
+      ],
+    },
+    {
+      name: 'ai/page-actions',
+      title: 'Page Actions',
+      description: 'Common page actions',
+      files: [
+        {
+          type: 'components',
+          path: 'layouts/shared/page-actions.tsx',
+          target: '<dir>/ai/page-actions.tsx',
         },
       ],
     },

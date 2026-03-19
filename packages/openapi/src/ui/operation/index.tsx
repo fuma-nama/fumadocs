@@ -1,4 +1,4 @@
-import { type ComponentProps, Fragment, type ReactNode } from 'react';
+import { ComponentProps, Fragment, type ReactNode } from 'react';
 import type {
   CallbackObject,
   MethodInformation,
@@ -11,6 +11,7 @@ import { Schema } from '../schema';
 import { UsageTabs } from '@/ui/operation/usage-tabs';
 import { Badge, MethodLabel } from '@/ui/components/method-label';
 import { CopyTypeScriptPanel, SelectTab, SelectTabs, SelectTabTrigger } from './client';
+import { I18nLabel } from '@/ui/client/i18n';
 import {
   AccordionContent,
   AccordionHeader,
@@ -19,18 +20,13 @@ import {
   AccordionTrigger,
 } from '@/ui/components/accordion';
 import { isMediaTypeSupported } from '@/requests/media/adapter';
-import { cn } from '@/utils/cn';
 import { APIPlayground } from '@/playground';
 import { getExampleRequests, RequestTabs } from './request-tabs';
 import { UsageTabsProviderLazy } from './usage-tabs/lazy';
 import { ServerProviderLazy } from '../contexts/api.lazy';
+import { cn } from '@/utils/cn';
 
-const ParamTypes = {
-  path: 'Path Parameters',
-  query: 'Query Parameters',
-  header: 'Header Parameters',
-  cookie: 'Cookie Parameters',
-};
+const paramTypeKeys = ['path', 'query', 'header', 'cookie'] as const;
 
 export async function Operation({
   type = 'operation',
@@ -80,7 +76,8 @@ export async function Operation({
     bodyNode = (
       <SelectTabs defaultValue={items[0].value}>
         <div className="flex gap-2 items-center justify-between mt-10">
-          {ctx.renderHeading(headingLevel, 'Request Body', {
+          {ctx.renderHeading(headingLevel, <I18nLabel label="titleRequestBody" />, {
+            id: 'request-body',
             className: 'my-0!',
           })}
           {contentTypes.length > 1 ? (
@@ -130,7 +127,9 @@ export async function Operation({
 
     responseNode = (
       <>
-        {ctx.renderHeading(headingLevel, 'Response Body')}
+        {ctx.renderHeading(headingLevel, <I18nLabel label="titleResponseBody" />, {
+          id: 'response-body',
+        })}
 
         <Accordions type="multiple">
           {statuses.map((status) => (
@@ -141,13 +140,15 @@ export async function Operation({
     );
   }
 
-  const parameterNode = Object.entries(ParamTypes).map(([type, title]) => {
+  const parameterNode = paramTypeKeys.map((type) => {
     const params = method.parameters?.filter((param) => param.in === type);
     if (!params || params.length === 0) return;
 
     return (
       <Fragment key={type}>
-        {ctx.renderHeading(headingLevel, title)}
+        {ctx.renderHeading(headingLevel, <I18nLabel label={`${type}Parameters`} />, {
+          id: `parameters-${type}`,
+        })}
         <div className="flex flex-col">
           {params.map(
             (param) =>
@@ -206,7 +207,8 @@ export async function Operation({
     authNode = (
       <SelectTabs defaultValue={items[0].value}>
         <div className="flex items-start justify-between gap-2 mt-10">
-          {ctx.renderHeading(headingLevel, 'Authorization', {
+          {ctx.renderHeading(headingLevel, <I18nLabel label="authorization" />, {
+            id: 'authorization',
             className: 'my-0!',
           })}
           {items.length > 1 ? (
@@ -239,7 +241,8 @@ export async function Operation({
     callbacksNode = (
       <SelectTabs defaultValue={items[0].value}>
         <div className="flex justify-between gap-2 items-end mt-10">
-          {ctx.renderHeading(headingLevel, 'Callbacks', {
+          {ctx.renderHeading(headingLevel, <I18nLabel label="titleCallbacks" />, {
+            id: 'callbacks',
             className: 'my-0!',
           })}
           {callbacks.length > 1 ? (
@@ -483,16 +486,20 @@ function AuthScheme({
   if (scheme.type === 'http' || scheme.type === 'oauth2') {
     return (
       <AuthProperty
-        name="Authorization"
+        name={<I18nLabel label="authorization" />}
         type={
-          scheme.type === 'http' && scheme.scheme === 'basic' ? `Basic <token>` : 'Bearer <token>'
+          scheme.type === 'http' && scheme.scheme === 'basic' ? (
+            <I18nLabel label="authBasicTokenExample" />
+          ) : (
+            <I18nLabel label="authBearerTokenExample" />
+          )
         }
         deprecated={scheme.deprecated}
         scopes={scopes}
       >
         {scheme.description && ctx.renderMarkdown(scheme.description)}
         <p>
-          In: <code>header</code>
+          <I18nLabel label="authTokenIn" />: <code>header</code>
         </p>
       </AuthProperty>
     );
@@ -508,7 +515,7 @@ function AuthScheme({
       >
         {scheme.description && ctx.renderMarkdown(scheme.description)}
         <p>
-          In: <code>{scheme.in}</code>
+          <I18nLabel label="authTokenIn" />: <code>{scheme.in}</code>
         </p>
       </AuthProperty>
     );
@@ -517,7 +524,7 @@ function AuthScheme({
   if (scheme.type === 'openIdConnect') {
     return (
       <AuthProperty
-        name="OpenID Connect"
+        name={<I18nLabel label="openIdConnect" />}
         type="<token>"
         deprecated={scheme.deprecated}
         scopes={scopes}
@@ -536,23 +543,28 @@ function AuthProperty({
   className,
   ...props
 }: ComponentProps<'div'> & {
-  name: string;
-  type: string;
+  name: ReactNode;
+  type: ReactNode;
   deprecated?: boolean;
   scopes?: string[];
+  children?: ReactNode;
 }) {
   return (
     <div className={cn('text-sm border-t my-4 first:border-t-0', className)}>
       <div className="flex flex-wrap items-center gap-3 not-prose">
         <span className="font-medium font-mono text-fd-primary">{name}</span>
         <span className="text-sm font-mono text-fd-muted-foreground">{type}</span>
-        {deprecated && <Badge color="red">Deprecated</Badge>}
+        {deprecated && (
+          <Badge color="red" className="text-xs">
+            <I18nLabel label="deprecated" />
+          </Badge>
+        )}
       </div>
       <div className="prose-no-margin pt-2.5 empty:hidden">
         {props.children}
         {scopes.length > 0 && (
           <p>
-            Scope: <code>{scopes.join(', ')}</code>
+            <I18nLabel label="authScope" />: <code>{scopes.join(', ')}</code>
           </p>
         )}
       </div>

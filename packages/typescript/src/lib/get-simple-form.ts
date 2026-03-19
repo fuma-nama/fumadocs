@@ -1,38 +1,53 @@
 import { Node, Type, TypeChecker, TypeFormatFlags } from 'ts-morph';
 
+interface TypeSimplifierContext {
+  type: Type;
+  checker: TypeChecker;
+  location?: Node;
+}
+
+export interface TypeSimplifierOptions {
+  /**
+   * whether the simplifed names should be preferred over the type names.
+   *
+   * Default: always prefer simpliied ones.
+   */
+  shouldSimplify?: (ctx: TypeSimplifierContext) => boolean;
+  override?: (ctx: TypeSimplifierContext) => string | undefined;
+  noUndefined?: boolean;
+}
+
 export function getSimpleForm(
-  type: Type,
-  checker: TypeChecker,
-  noUndefined = false,
-  location?: Node,
+  ctx: TypeSimplifierContext,
+  options: TypeSimplifierOptions = {},
 ): string {
+  const { type } = ctx;
+  const { override, shouldSimplify, noUndefined = false } = options;
+
   if (type.isUndefined() && noUndefined) return '';
+
+  const overriden = override?.(ctx);
+  if (overriden) return overriden;
+
+  if (shouldSimplify && !shouldSimplify(ctx)) {
+    return type.getText(ctx.location, TypeFormatFlags.UseAliasDefinedOutsideCurrentScope);
+  }
 
   const alias = type.getAliasSymbol();
   if (alias) {
     const args = type.getAliasTypeArguments();
     if (args.length === 0) return alias.getName();
 
-    return `${alias.getName()}<${args.map((arg) => getSimpleForm(arg, checker)).join(', ')}>`;
+    const nextOptions = { ...options, noUndefined: false };
+    return `${alias.getName()}<${args.map((arg) => getSimpleForm({ ...ctx, type: arg }, nextOptions)).join(', ')}>`;
   }
 
-  if (type.isUnion()) {
-    const types: string[] = [];
-    for (const t of type.getUnionTypes()) {
-      const str = getSimpleForm(t, checker, noUndefined);
-      if (str.length > 0 && str !== 'never') types.unshift(str);
-    }
-
-    return types.length > 0
-      ? // boolean | null will become true | false | null, need to ensure it's still returned as boolean
-        dedupe(types).join(' | ').replace('true | false', 'boolean')
-      : 'never';
-  }
+  if (type.isUnion()) return 'union';
 
   if (type.isIntersection()) {
     const types: string[] = [];
     for (const t of type.getIntersectionTypes()) {
-      const str = getSimpleForm(t, checker, noUndefined);
+      const str = getSimpleForm({ ...ctx, type: t }, options);
       if (str.length > 0 && str !== 'never') types.unshift(str);
     }
 
@@ -40,12 +55,7 @@ export function getSimpleForm(
   }
 
   if (type.isTuple()) {
-    const elements = type
-      .getTupleElements()
-      .map((t) => getSimpleForm(t, checker))
-      .join(', ');
-
-    return `[${elements}]`;
+    return 'turple';
   }
 
   if (type.isArray() || type.isReadonlyArray()) {
@@ -60,7 +70,7 @@ export function getSimpleForm(
     return 'object';
   }
 
-  return type.getText(location, TypeFormatFlags.UseAliasDefinedOutsideCurrentScope);
+  return type.getText(ctx.location, TypeFormatFlags.UseAliasDefinedOutsideCurrentScope);
 }
 
 function dedupe<T>(arr: T[]): T[] {

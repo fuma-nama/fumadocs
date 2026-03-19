@@ -33,14 +33,12 @@ function RootComponent() {
 }
 
 const { provider } = defineI18nUI(i18n, {
-  translations: {
-    cn: {
-      displayName: 'Chinese',
-      search: 'Translated Content',
-    },
-    en: {
-      displayName: 'English',
-    },
+  cn: {
+    displayName: 'Chinese',
+    search: 'Translated Content',
+  },
+  en: {
+    displayName: 'English',
   },
 });
 

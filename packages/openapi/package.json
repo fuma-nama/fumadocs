@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-openapi",
-  "version": "10.3.18",
+  "version": "10.4.0",
   "description": "Generate MDX docs for your OpenAPI spec",
   "keywords": [
     "Docs",
@@ -20,6 +20,7 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": "./dist/index.js",
+    "./i18n": "./dist/i18n.js",
     "./playground": "./dist/playground/index.js",
     "./playground/client": "./dist/playground/client.js",
     "./requests/generators": "./dist/requests/generators/index.js",
@@ -49,14 +50,15 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "@fastify/deepmerge": "^3.2.1",
     "@fumari/json-schema-ts": "^0.0.2",
     "@fumari/stf": "workspace:*",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-slot": "^1.2.4",
-    "@scalar/json-magic": "^0.12.2",
-    "@scalar/openapi-upgrader": "^0.2.0",
+    "@scalar/json-magic": "^0.12.4",
+    "@scalar/openapi-upgrader": "^0.2.1",
     "ajv": "^8.18.0",
     "class-variance-authority": "^0.7.1",
     "dereference-json-schema": "^0.2.2",
@@ -74,7 +76,7 @@
   },
   "devDependencies": {
     "@fumadocs/tailwind": "workspace:*",
-    "@scalar/api-client-react": "^1.4.5",
+    "@scalar/api-client-react": "^1.4.11",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "25.5.0",
     "@types/openapi-sampler": "^1.0.3",
@@ -83,20 +85,25 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "json-schema-typed": "^8.0.2",
-    "tailwindcss": "^4.2.1",
+    "shiki": "^4.0.2",
+    "tailwindcss": "^4.2.2",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.2"
+    "tsdown": "0.21.4"
   },
   "peerDependencies": {
     "@scalar/api-client-react": "*",
     "@types/react": "*",
-    "fumadocs-core": "^16.5.0",
-    "fumadocs-ui": "^16.5.0",
+    "fumadocs-core": "^16.7.0",
+    "fumadocs-ui": "^16.7.0",
     "json-schema-typed": "*",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "shiki": "*"
   },
   "peerDependenciesMeta": {
+    "shiki": {
+      "optional": true
+    },
     "json-schema-typed": {
       "optional": true
     },

@@ -8,6 +8,7 @@ import {
 import path from 'node:path';
 import { generateHash, type Cache } from '@/cache';
 import { version as packageVersion } from '../../package.json';
+import type { TypeSimplifierOptions } from '@/lib/get-simple-form';
 
 export interface GeneratedDoc {
   /**
@@ -61,6 +62,8 @@ export interface GenerateOptions {
    * Modify output property entry
    */
   transform?: Transformer;
+
+  typeSimplifer?: TypeSimplifierOptions;
 }
 
 export type Generator = ReturnType<typeof createGenerator>;
@@ -218,10 +221,15 @@ async function getDocEntry(prop: TsSymbol, context: EntryContext): Promise<DocEn
       ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope | ts.TypeFormatFlags.NoTruncation,
     ),
     simplifiedType: getSimpleForm(
-      subType,
-      program.getTypeChecker(),
-      isOptional,
-      context.declaration,
+      {
+        type: subType,
+        checker: program.getTypeChecker(),
+        location: context.declaration,
+      },
+      {
+        ...context.typeSimplifer,
+        noUndefined: isOptional,
+      },
     ),
     required: !isOptional,
     deprecated: false,

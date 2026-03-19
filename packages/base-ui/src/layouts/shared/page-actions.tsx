@@ -5,6 +5,7 @@ import { cn } from '@/utils/cn';
 import { useCopyButton } from '@/utils/use-copy-button';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { buttonVariants } from '@/components/ui/button';
+import { usePathname } from 'fumadocs-core/framework';
 
 const cache = new Map<string, Promise<string>>();
 
@@ -78,8 +79,10 @@ export function ViewOptionsPopover({
    */
   githubUrl: string;
 }) {
+  const pathname = usePathname();
   const items = useMemo(() => {
-    const pageUrl = typeof window !== 'undefined' ? window.location.href : 'loading';
+    const pageUrl =
+      typeof window === 'undefined' ? pathname : new URL(pathname, window.location.origin);
     const q = `Read ${pageUrl}, I want to ask questions about it.`;
 
     return [
@@ -215,21 +218,20 @@ export function ViewOptionsPopover({
         })}`,
       },
     ];
-  }, [githubUrl, markdownUrl]);
+  }, [githubUrl, markdownUrl, pathname]);
 
   return (
     <Popover>
       <PopoverTrigger
         {...props}
-        className={(s) =>
+        className={(state) =>
           cn(
             buttonVariants({
               color: 'secondary',
               size: 'sm',
             }),
-            'gap-2',
-            s.open && 'bg-fd-accent text-fd-accent-foreground',
-            typeof props.className === 'function' ? props.className(s) : props.className,
+            'gap-2 data-[state=open]:bg-fd-accent data-[state=open]:text-fd-accent-foreground',
+            typeof props.className === 'function' ? props.className(state) : props.className,
           )
         }
       >

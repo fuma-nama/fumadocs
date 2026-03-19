@@ -15,7 +15,6 @@ import type { FetchResult } from '@/playground/fetcher';
 import type { SecurityEntry } from '@/playground/index';
 import { getStatusInfo } from './status-info';
 import { joinURL, resolveRequestData, resolveServerUrl, withBase } from '@/utils/url';
-import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock.core';
 import { MethodLabel } from '@/ui/components/method-label';
 import { useQuery } from '@/utils/use-query';
 import {
@@ -52,6 +51,8 @@ import {
 import { objectGet, objectSet, stringifyFieldKey } from '@fumari/stf/lib/utils';
 import { FieldInput, FieldSet, JsonInput, ObjectInput } from './components/inputs';
 import type { ParameterObject } from '@/types';
+import { ClientCodeBlock } from '@/ui/components/codeblock';
+import { useTranslations } from '@/ui/client/i18n';
 
 export interface FormValues extends Record<string, unknown> {
   path: Record<string, unknown>;
@@ -139,6 +140,7 @@ export default function PlaygroundClient({
   readOnly,
   ...rest
 }: PlaygroundClientProps) {
+  const t = useTranslations();
   const { example: exampleId, examples, setExampleData } = useExampleRequests();
   const storageKeys = useStorageKey();
   const {
@@ -268,7 +270,7 @@ export default function PlaygroundClient({
               className={cn(buttonVariants({ color: 'primary', size: 'sm' }), 'w-14 py-1.5')}
               disabled={testQuery.isLoading}
             >
-              {testQuery.isLoading ? <LoaderCircle className="size-4 animate-spin" /> : 'Send'}
+              {testQuery.isLoading ? <LoaderCircle className="size-4 animate-spin" /> : t.send}
             </button>
           </div>
           {testQuery.data ? <ResultDisplay data={testQuery.data} reset={testQuery.reset} /> : null}
@@ -304,9 +306,10 @@ function SecurityTabs({
 }) {
   const [open, setOpen] = useState(false);
   const engine = useDataEngine();
+  const t = useTranslations();
 
   const result = (
-    <CollapsiblePanel title="Authorization">
+    <CollapsiblePanel title={t.authorization}>
       <Select value={securityId.toString()} onValueChange={(v) => setSecurityId(Number(v))}>
         <SelectTrigger>
           <SelectValue />
@@ -367,6 +370,7 @@ const ParamTypes = ['path', 'header', 'cookie', 'query'] as const;
 
 function FormBody({ parameters = [], body }: Pick<PlaygroundClientProps, 'parameters' | 'body'>) {
   const { renderParameterField, renderBodyField } = useApiContext().client.playground ?? {};
+  const t = useTranslations();
   const panels = useMemo(() => {
     return ParamTypes.map((type) => {
       const items = parameters.filter((v) => v.in === type);
@@ -377,10 +381,10 @@ function FormBody({ parameters = [], body }: Pick<PlaygroundClientProps, 'parame
           key={type}
           title={
             {
-              header: 'Header',
-              cookie: 'Cookies',
-              query: 'Query',
-              path: 'Path',
+              header: t.header,
+              cookie: t.cookies,
+              query: t.query,
+              path: t.path,
             }[type]
           }
         >
@@ -410,13 +414,13 @@ function FormBody({ parameters = [], body }: Pick<PlaygroundClientProps, 'parame
         </CollapsiblePanel>
       );
     });
-  }, [parameters, renderParameterField]);
+  }, [parameters, renderParameterField, t]);
 
   return (
     <>
       {panels}
       {body && (
-        <CollapsiblePanel title="Body">
+        <CollapsiblePanel title={t.body}>
           {renderBodyField ? renderBodyField('body', body) : <BodyInput field={body.schema} />}
         </CollapsiblePanel>
       )}
@@ -427,6 +431,7 @@ function FormBody({ parameters = [], body }: Pick<PlaygroundClientProps, 'parame
 function BodyInput({ field: _field }: { field: ParsedSchema }) {
   const field = useResolvedSchema(_field);
   const [isJson, setIsJson] = useState(false);
+  const t = useTranslations();
 
   if (field.format === 'binary') return <FieldSet field={field} fieldName={['body']} isRequired />;
 
@@ -444,7 +449,7 @@ function BodyInput({ field: _field }: { field: ParsedSchema }) {
           onClick={() => setIsJson(false)}
           type="button"
         >
-          Close JSON Editor
+          {t.closeJsonEditor}
         </button>
         <JsonInput fieldName={['body']} />
       </>
@@ -468,7 +473,7 @@ function BodyInput({ field: _field }: { field: ParsedSchema }) {
           )}
           onClick={() => setIsJson(true)}
         >
-          Open JSON Editor
+          {t.openJsonEditor}
         </button>
       }
     />
@@ -490,6 +495,7 @@ function useAuthInputs(
   transform?: (fields: AuthField[]) => AuthField[],
 ) {
   const storageKeys = useStorageKey();
+  const t = useTranslations();
   const inputs = useMemo(() => {
     const result: AuthField[] = [];
     if (!securities) return result;
@@ -540,7 +546,7 @@ function useAuthInputs(
           children: (
             <fieldset className="flex flex-col gap-2">
               <label htmlFor={stringifyFieldKey(fieldName)} className={cn(labelVariants())}>
-                Access Token
+                {t.accessToken}
               </label>
               <div className="flex gap-2">
                 <FieldInput
@@ -561,7 +567,7 @@ function useAuthInputs(
                     }),
                   )}
                 >
-                  Authorize
+                  {t.authorize}
                 </OauthDialogTrigger>
               </div>
             </fieldset>
@@ -576,7 +582,7 @@ function useAuthInputs(
           defaultValue: 'Bearer ',
           children: (
             <FieldSet
-              name="Authorization (header)"
+              name={`${t.authorization} (${t.header})`}
               fieldName={fieldName}
               isRequired
               field={{
@@ -613,17 +619,14 @@ function useAuthInputs(
           children: (
             <>
               <FieldSet
-                name="Authorization (header)"
+                name={`${t.authorization} (${t.header})`}
                 isRequired
                 fieldName={fieldName}
                 field={{
                   type: 'string',
                 }}
               />
-              <p className="text-fd-muted-foreground text-xs">
-                OpenID Connect is not supported at the moment, you can still set an access token
-                here.
-              </p>
+              <p className="text-fd-muted-foreground text-xs">{t.openIdUnsupported}</p>
             </>
           ),
         });
@@ -631,7 +634,7 @@ function useAuthInputs(
     }
 
     return transform ? transform(result) : result;
-  }, [securities, transform]);
+  }, [securities, transform, t]);
 
   const mapInputs = (values: FormValues) => {
     const cloned = structuredClone(values);
@@ -695,8 +698,8 @@ function Route({ route, ...props }: ComponentProps<'div'> & { route: string }) {
 }
 
 function DefaultResultDisplay({ data, reset }: { data: FetchResult; reset: () => void }) {
-  const statusInfo = useMemo(() => getStatusInfo(data.status), [data.status]);
-  const { shikiOptions } = useApiContext();
+  const t = useTranslations();
+  const statusInfo = useMemo(() => getStatusInfo(data.status, t), [data.status, t]);
 
   return (
     <div className="flex flex-col gap-3 mt-2 px-3 py-2 border-y bg-fd-secondary text-fd-secondary-foreground">
@@ -710,15 +713,14 @@ function DefaultResultDisplay({ data, reset }: { data: FetchResult; reset: () =>
           className={cn(buttonVariants({ size: 'sm', variant: 'outline' }))}
           onClick={() => reset()}
         >
-          Close
+          {t.close}
         </button>
       </div>
       <p className="text-sm text-fd-muted-foreground">{data.status}</p>
       {data.data !== undefined && (
-        <DynamicCodeBlock
+        <ClientCodeBlock
           lang={typeof data.data === 'string' && data.data.length > 50000 ? 'text' : data.type}
           code={typeof data.data === 'string' ? data.data : JSON.stringify(data.data, null, 2)}
-          options={shikiOptions}
         />
       )}
     </div>

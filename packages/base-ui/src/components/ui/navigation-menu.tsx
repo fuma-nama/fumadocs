@@ -58,13 +58,31 @@ const NavigationMenuContent = React.forwardRef<
 ));
 NavigationMenuContent.displayName = Primitive.Content.displayName;
 
-const NavigationMenuLink = Primitive.Link;
+const NavigationMenuLink = React.forwardRef<
+  React.ComponentRef<typeof Primitive.Link>,
+  React.ComponentPropsWithoutRef<typeof Primitive.Link> & { asChild?: boolean }
+>(({ asChild, children, ...props }, ref) => {
+  if (asChild) return children;
+
+  return (
+    <Primitive.Link ref={ref} {...props}>
+      {children}
+    </Primitive.Link>
+  );
+});
+NavigationMenuLink.displayName = Primitive.Link.displayName;
+
+function NavigationMenuViewport() {
+  return null;
+}
 
 export {
+  NavigationMenuRoot as NavigationMenu,
   NavigationMenuRoot,
   NavigationMenuList,
   NavigationMenuItem,
   NavigationMenuContent,
   NavigationMenuTrigger,
   NavigationMenuLink,
+  NavigationMenuViewport,
 };

@@ -4,6 +4,7 @@ import { install } from '@/commands/add';
 import type { RegistryClient } from '@/registry/client';
 import { ComponentInstaller } from '@/registry/installer';
 import { UIRegistries } from '@/commands/shared';
+import { pluginPreserveLayouts } from '@/registry/plugins/preserve';
 
 interface TargetInfo {
   target: string[];
@@ -13,7 +14,9 @@ interface TargetInfo {
 export async function customise(client: RegistryClient) {
   intro(picocolors.bgBlack(picocolors.whiteBright('Customise Fumadocs UI')));
   const config = client.config;
-  const installer = new ComponentInstaller(client);
+  const installer = new ComponentInstaller(client, {
+    plugins: [pluginPreserveLayouts()],
+  });
   const registry = UIRegistries[config.uiLibrary];
 
   const result = await group(

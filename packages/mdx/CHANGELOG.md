@@ -1,5 +1,14 @@
 # next-docs-mdx
 
+## 14.2.11
+
+### Patch Changes
+
+- 3144149: Fix dynamic index generation so generated `dynamic.ts` imports `node:path` and passes lazy entries to `create.doc()` / `create.docs()` as arrays.
+- Updated dependencies [f45d703]
+- Updated dependencies [45aa454]
+  - fumadocs-core@16.7.0
+
 ## 14.2.10
 
 ### Patch Changes
@@ -299,10 +308,12 @@
 - 3caa5cd: **Vite: move `source.generated.ts` to `.source/index.ts`**
 
   **Why:**
+
   - with Fumadocs MDX Plugins, we want to unify the output directory across Vite & Next.js.
   - `source.generated.ts` looks ugly compared by `.source`.
 
   **Migrate:**
+
   - run dev server/typegen to generate a `.source` folder.
   - import it over the original `source.generated.ts`.
   - note that both docs and `create-fumadocs-app` are updated to `.source` folder.
@@ -316,6 +327,7 @@
 
   With Fumadocs MDX Plugins, you can extend Fumadocs MDX without worrying the underlying bundler.
   It is designed for:
+
   - Generate files from config (e.g. types, index files, JSON schemas)
   - Modify received config
 
@@ -378,6 +390,7 @@
 - f11f89d: **[Next.js] Rename APIS**
 
   On page data:
+
   - `_file` -> `info`.
   - `_file.absolutePath` -> `info.fullPath`.
 
