@@ -40,11 +40,11 @@ export function SearchTrigger({
   );
 }
 
-export interface FullSearchTriggeProps extends ComponentProps<'button'> {
+export interface FullSearchTriggerProps extends ComponentProps<'button'> {
   hideIfDisabled?: boolean;
 }
 
-export function FullSearchTrigger({ hideIfDisabled, ...props }: FullSearchTriggeProps) {
+export function FullSearchTrigger({ hideIfDisabled, ...props }: FullSearchTriggerProps) {
   const { enabled, hotKey, setOpenSearch } = useSearchContext();
   const { text } = useI18n();
   if (hideIfDisabled && !enabled) return null;
