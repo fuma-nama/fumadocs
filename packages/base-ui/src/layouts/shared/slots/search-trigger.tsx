@@ -6,16 +6,16 @@ import { useI18n } from '@/contexts/i18n';
 import { cn } from '@/utils/cn';
 import { type ButtonProps, buttonVariants } from '@/components/ui/button';
 
-interface SearchToggleProps extends Omit<ComponentProps<'button'>, 'color'>, ButtonProps {
+export interface SearchTriggerProps extends Omit<ComponentProps<'button'>, 'color'>, ButtonProps {
   hideIfDisabled?: boolean;
 }
 
-export function SearchToggle({
+export function SearchTrigger({
   hideIfDisabled,
   size = 'icon-sm',
   color = 'ghost',
   ...props
-}: SearchToggleProps) {
+}: SearchTriggerProps) {
   const { setOpenSearch, enabled } = useSearchContext();
   if (hideIfDisabled && !enabled) return null;
 
@@ -40,12 +40,11 @@ export function SearchToggle({
   );
 }
 
-export function LargeSearchToggle({
-  hideIfDisabled,
-  ...props
-}: ComponentProps<'button'> & {
+export interface FullSearchTriggeProps extends ComponentProps<'button'> {
   hideIfDisabled?: boolean;
-}) {
+}
+
+export function FullSearchTrigger({ hideIfDisabled, ...props }: FullSearchTriggeProps) {
   const { enabled, hotKey, setOpenSearch } = useSearchContext();
   const { text } = useI18n();
   if (hideIfDisabled && !enabled) return null;
@@ -56,7 +55,7 @@ export function LargeSearchToggle({
       data-search-full=""
       {...props}
       className={cn(
-        'inline-flex items-center gap-2 rounded-lg border bg-fd-secondary/50 p-1.5 ps-2 text-sm text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring',
+        'inline-flex items-center gap-2 rounded-lg border bg-fd-secondary/50 p-1.5 ps-2 text-sm text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground',
         props.className,
       )}
       onClick={() => {

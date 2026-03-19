@@ -2,7 +2,7 @@
 import { cva } from 'class-variance-authority';
 import { Airplay, Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { ComponentProps, useEffect, useState } from 'react';
+import { type ComponentProps, useEffect, useState } from 'react';
 import { cn } from '@/utils/cn';
 
 const itemVariants = cva('size-6.5 p-1.5 text-fd-muted-foreground', {
@@ -16,13 +16,11 @@ const itemVariants = cva('size-6.5 p-1.5 text-fd-muted-foreground', {
 
 const full = [['light', Sun] as const, ['dark', Moon] as const, ['system', Airplay] as const];
 
-export function ThemeToggle({
-  className,
-  mode = 'light-dark',
-  ...props
-}: ComponentProps<'div'> & {
+export interface ThemeSwitchProps extends ComponentProps<'div'> {
   mode?: 'light-dark' | 'light-dark-system';
-}) {
+}
+
+export function ThemeSwitch({ className, mode = 'light-dark', ...props }: ThemeSwitchProps) {
   const { setTheme, theme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 

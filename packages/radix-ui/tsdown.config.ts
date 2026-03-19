@@ -37,7 +37,6 @@ export default defineConfig({
     customExports: {
       './style.css': './dist/style.css',
       './css/*': './css/*',
-      './image-zoom.css': './dist/image-zoom.css',
       './utils/get-sidebar-tabs': {
         types: './dist/components/sidebar/tabs/index.d.ts',
         import: './dist/components/sidebar/tabs/index.js',

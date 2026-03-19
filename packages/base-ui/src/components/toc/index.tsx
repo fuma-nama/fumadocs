@@ -19,11 +19,13 @@ export function useTOCItems(): Primitive.TOCItemType[] {
   return use(TOCContext);
 }
 
+export type TOCProviderProps = ComponentProps<typeof Primitive.AnchorProvider>;
+
 export function TOCProvider({
   toc,
   children,
   ...props
-}: ComponentProps<typeof Primitive.AnchorProvider>) {
+}: TOCProviderProps) {
   return (
     <TOCContext value={toc}>
       <Primitive.AnchorProvider toc={toc} {...props}>

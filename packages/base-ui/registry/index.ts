@@ -1,64 +1,29 @@
 import { fileURLToPath } from 'node:url';
 import type { Registry } from '@fumadocs/cli/build';
 import * as path from 'node:path';
-import { commonComponents, resolveExternal } from '../../shared/registry';
+import { commonComponents, findSlotComponents, resolveExternal } from '../../shared/registry';
 
-const srcDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../src');
+const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../src');
 
 // in shadcn cli, the order of files matters when writing import paths on consumer's codebase
 export const registry: Registry = {
   name: 'fumadocs/base-ui',
-  dir: srcDir,
+  dir,
   tsconfigPath: '../tsconfig.json',
   packageJson: '../package.json',
   env: {
     ui: '@fumadocs/base-ui',
   },
   onResolve(ref) {
-    return resolveExternal(ref, 'fumadocs-ui', srcDir) ?? ref;
+    return resolveExternal(ref, 'fumadocs-ui', dir) ?? ref;
   },
   components: [
     ...commonComponents,
+    ...(await findSlotComponents(dir)),
     {
-      name: 'link-item',
+      name: 'layouts/sidebar',
       unlisted: true,
       files: [
-        {
-          type: 'components',
-          path: 'utils/link-item.tsx',
-          target: '<dir>/layout/link-item.tsx',
-        },
-      ],
-    },
-    {
-      name: 'layouts/shared',
-      unlisted: true,
-      files: [
-        {
-          type: 'components',
-          path: 'layouts/shared/index.tsx',
-          target: '<dir>/layout/shared.tsx',
-        },
-        {
-          type: 'components',
-          path: 'layouts/shared/language-toggle.tsx',
-          target: '<dir>/layout/language-toggle.tsx',
-        },
-        {
-          type: 'components',
-          path: 'layouts/shared/page-actions.tsx',
-          target: '<dir>/layout/page-actions.tsx',
-        },
-        {
-          type: 'components',
-          path: 'layouts/shared/search-toggle.tsx',
-          target: '<dir>/layout/search-toggle.tsx',
-        },
-        {
-          type: 'components',
-          path: 'layouts/shared/theme-toggle.tsx',
-          target: '<dir>/layout/theme-toggle.tsx',
-        },
         {
           type: 'components',
           path: 'components/sidebar/base.tsx',
@@ -87,6 +52,22 @@ export const registry: Registry = {
       ],
     },
     {
+      name: 'layouts/shared',
+      unlisted: true,
+      files: [
+        {
+          type: 'components',
+          path: 'layouts/shared/index.tsx',
+          target: '<dir>/layout/shared/index.tsx',
+        },
+        {
+          type: 'components',
+          path: 'layouts/shared/client.tsx',
+          target: '<dir>/layout/shared/client.tsx',
+        },
+      ],
+    },
+    {
       name: 'layouts/docs',
       files: [
         {
@@ -98,11 +79,6 @@ export const registry: Registry = {
           type: 'components',
           path: 'layouts/docs/client.tsx',
           target: '<dir>/layout/docs/client.tsx',
-        },
-        {
-          type: 'components',
-          path: 'layouts/docs/sidebar.tsx',
-          target: '<dir>/layout/docs/sidebar.tsx',
         },
         {
           type: 'components',
@@ -124,16 +100,6 @@ export const registry: Registry = {
           type: 'components',
           path: 'layouts/flux/index.tsx',
           target: '<dir>/layout/flux/index.tsx',
-        },
-        {
-          type: 'components',
-          path: 'layouts/flux/tab-dropdown.tsx',
-          target: '<dir>/layout/flux/tab-dropdown.tsx',
-        },
-        {
-          type: 'components',
-          path: 'layouts/flux/sidebar.tsx',
-          target: '<dir>/layout/flux/sidebar.tsx',
         },
         {
           type: 'components',
@@ -163,11 +129,6 @@ export const registry: Registry = {
         },
         {
           type: 'components',
-          path: 'layouts/notebook/sidebar.tsx',
-          target: '<dir>/layout/notebook/sidebar.tsx',
-        },
-        {
-          type: 'components',
           path: 'layouts/notebook/page/index.tsx',
           target: '<dir>/layout/notebook/page/index.tsx',
         },
@@ -186,11 +147,6 @@ export const registry: Registry = {
           type: 'components',
           path: 'layouts/home/index.tsx',
           target: '<dir>/layout/home/index.tsx',
-        },
-        {
-          type: 'components',
-          path: 'layouts/home/client.tsx',
-          target: '<dir>/layout/home/client.tsx',
         },
         {
           type: 'ui',

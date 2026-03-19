@@ -7,7 +7,7 @@ import { buttonVariants } from '@/components/ui/button';
 
 export type LanguageSelectProps = ComponentProps<'button'>;
 
-export function LanguageToggle(props: LanguageSelectProps): React.ReactElement {
+export function LanguageSelect(props: LanguageSelectProps): React.ReactElement {
   const context = useI18n();
   if (!context.locales) throw new Error('Missing `<I18nProvider />`');
 
@@ -52,9 +52,11 @@ export function LanguageToggle(props: LanguageSelectProps): React.ReactElement {
   );
 }
 
-export function LanguageToggleText(props: ComponentProps<'span'>) {
-  const context = useI18n();
-  const text = context.locales?.find((item) => item.locale === context.locale)?.name;
+export type LanguageSelectTextProps = ComponentProps<'span'>;
+
+export function LanguageSelectText(props: LanguageSelectTextProps) {
+  const { locales, locale } = useI18n();
+  const text = locales?.find((item) => item.locale === locale)?.name;
 
   return <span {...props}>{text}</span>;
 }

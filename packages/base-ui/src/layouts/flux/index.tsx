@@ -1,204 +1,212 @@
 'use client';
 import type * as PageTree from 'fumadocs-core/page-tree';
-import type { BaseLayoutProps } from '@/layouts/shared';
+import {
+  type BaseLayoutProps,
+  baseSlots,
+  type BaseSlots,
+  type BaseSlotsProps,
+  getLayoutTabs,
+  type GetLayoutTabsOptions,
+  type LayoutTab,
+  useLinkItems,
+} from '@/layouts/shared';
 import { TreeContextProvider } from '@/contexts/tree';
-import { getSidebarTabs, type GetSidebarTabsOptions } from '@/components/sidebar/tabs';
-import type { SidebarPageTreeComponents } from '@/components/sidebar/page-tree';
-import { type ComponentProps, HTMLAttributes, type ReactNode, useMemo } from 'react';
+import { type ComponentProps, createContext, type FC, type ReactNode, use, useMemo } from 'react';
 import { cn } from '@/utils/cn';
-import { SidebarViewport, useSidebar } from '@/components/sidebar/base';
-import { SidebarTabsDropdown, type SidebarTabWithProps } from './tab-dropdown';
-import { Sidebar, SidebarContent, SidebarLinkItem, SidebarPageTree } from './sidebar';
+import { TabDropdown, type TabDropdownProps } from './slots/tab-dropdown';
 import { buttonVariants } from '@/components/ui/button';
-import { Languages, SidebarIcon, XIcon } from 'lucide-react';
-import { renderTitleNav, useLinkItems } from '../shared';
-import { LanguageToggle } from '../shared/language-toggle';
-import { SearchToggle } from '../shared/search-toggle';
-import { ThemeToggle } from '../shared/theme-toggle';
-import { LinkItem } from '@/utils/link-item';
-import { AnimatePresence, motion } from 'motion/react';
+import { Languages } from 'lucide-react';
+import { LinkItem, type LinkItemType } from '@/layouts/shared';
+import { motion } from 'motion/react';
 import { RemoveScroll } from 'react-remove-scroll';
 import { useSearchContext } from '@/contexts/search';
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarTrigger,
+  useSidebar,
+  type SidebarProviderProps,
+  type SidebarProps,
+} from './slots/sidebar';
+import { Container } from './slots/container';
+
+export interface DocsSlots extends BaseSlots {
+  container?: FC<ComponentProps<'div'>>;
+  tabDropdown?: FC<TabDropdownProps>;
+  sidebar?: {
+    provider: FC<SidebarProviderProps>;
+    trigger: FC<ComponentProps<'button'>>;
+    root: FC<SidebarProps>;
+    useSidebar: () => { collapsed: boolean; open: boolean; setOpen: (v: boolean) => void };
+  };
+}
 
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
-
   sidebar?: SidebarOptions;
-
-  /**
-   * Props for the `div` container
-   */
-  containerProps?: HTMLAttributes<HTMLDivElement>;
-
+  tabs?: LayoutTab[] | GetLayoutTabsOptions | false;
+  slots?: DocsSlots;
   renderNavigationPanel?: (props: NavigationPanelProps) => ReactNode;
+
+  containerProps?: ComponentProps<'div'>;
 }
 
-interface SidebarOptions
-  extends
-    ComponentProps<'aside'>,
-    Pick<ComponentProps<typeof Sidebar>, 'defaultOpenLevel' | 'prefetch'> {
+interface SidebarOptions extends SidebarProps, SidebarProviderProps {
   enabled?: boolean;
-  component?: ReactNode;
-  components?: Partial<SidebarPageTreeComponents>;
-
   /**
-   * Root Toggle options
+   * @deprecated use layout-level `tabs` instead.
    */
-  tabs?: SidebarTabWithProps[] | GetSidebarTabsOptions | false;
-
-  banner?: ReactNode;
-  footer?: ReactNode;
+  tabs?: LayoutTab[] | GetLayoutTabsOptions | false;
 }
 
-export function DocsLayout({
-  tree,
-  nav = {},
-  sidebar: {
-    enabled: sidebarEnabled = true,
-    tabs: sidebarTabs,
-    defaultOpenLevel,
-    prefetch,
-    ...sidebarProps
-  } = {},
-  searchToggle = {},
-  themeSwitch = {},
-  i18n = false,
-  children,
-  containerProps,
-  renderNavigationPanel = (props) => <NavigationPanel {...props} />,
-  ...props
-}: DocsLayoutProps) {
+const LayoutContext = createContext<{
+  props: BaseSlotsProps;
+  menuItems: LinkItemType[];
+  navItems: LinkItemType[];
+  slots: DocsSlots;
+} | null>(null);
+
+export function useFluxLayout() {
+  const context = use(LayoutContext);
+  if (!context)
+    throw new Error(
+      'Please use Flux layout components under <DocsLayout /> (`fumadocs-ui/layouts/flux`).',
+    );
+  return context;
+}
+
+const { useProvider } = baseSlots({
+  useProps() {
+    return useFluxLayout().props;
+  },
+});
+
+export function DocsLayout(props: DocsLayoutProps) {
+  const {
+    tree,
+    nav = {},
+    sidebar: {
+      enabled: sidebarEnabled = true,
+      tabs: _tabs,
+      defaultOpenLevel,
+      prefetch,
+      ...sidebarProps
+    } = {},
+    tabs: defaultTabs = _tabs,
+    children,
+    containerProps,
+    renderNavigationPanel = (props) => <NavigationPanel {...props} />,
+    slots: defaultSlots = {},
+  } = props;
+  const linkItems = useLinkItems(props);
+  const { baseSlots, baseProps } = useProvider(props);
+
   const tabs = useMemo(() => {
-    if (Array.isArray(sidebarTabs)) {
-      return sidebarTabs;
+    if (Array.isArray(defaultTabs)) {
+      return defaultTabs;
     }
-    if (typeof sidebarTabs === 'object') {
-      return getSidebarTabs(tree, sidebarTabs);
+    if (typeof defaultTabs === 'object') {
+      return getLayoutTabs(tree, defaultTabs);
     }
-    if (sidebarTabs !== false) {
-      return getSidebarTabs(tree);
+    if (defaultTabs !== false) {
+      return getLayoutTabs(tree);
     }
     return [];
-  }, [tree, sidebarTabs]);
-  const { menuItems } = useLinkItems(props);
-  const iconLinks = menuItems.filter((item) => item.type === 'icon');
+  }, [tree, defaultTabs]);
+  const slots: DocsSlots = {
+    ...baseSlots,
+    container: defaultSlots.container ?? Container,
+    tabDropdown: defaultSlots.tabDropdown ?? TabDropdown,
+    sidebar: defaultSlots.sidebar ?? {
+      root: Sidebar,
+      provider: SidebarProvider,
+      trigger: SidebarTrigger,
+      useSidebar,
+    },
+  };
 
-  function sidebar() {
-    const { footer, banner, component, components, ...rest } = sidebarProps;
-    if (component) return component;
+  let content = (
+    <>
+      {sidebarEnabled && slots.sidebar && <slots.sidebar.root {...sidebarProps} />}
+      {children}
+    </>
+  );
 
-    return (
-      <SidebarContent {...rest}>
-        <div className="flex flex-col gap-3 p-4 pb-2 empty:hidden">{banner}</div>
-        <SidebarViewport>
-          {menuItems
-            .filter((v) => v.type !== 'icon')
-            .map((item, i, list) => (
-              <SidebarLinkItem
-                key={i}
-                item={item}
-                className={cn(i === list.length - 1 && 'mb-4')}
-              />
-            ))}
-          <SidebarPageTree {...components} />
-        </SidebarViewport>
-        {footer}
-      </SidebarContent>
+  if (slots.container) {
+    content = <slots.container {...containerProps}>{content}</slots.container>;
+  }
+
+  if (slots.sidebar) {
+    content = (
+      <slots.sidebar.provider defaultOpenLevel={defaultOpenLevel} prefetch={prefetch}>
+        {content}
+      </slots.sidebar.provider>
     );
   }
 
   return (
-    <TreeContextProvider tree={tree}>
-      <Sidebar defaultOpenLevel={defaultOpenLevel} prefetch={prefetch}>
-        <div
-          id="nd-flux-layout"
-          {...containerProps}
-          className={cn(
-            'flex flex-col items-center pb-24 overflow-x-clip',
-            containerProps?.className,
-          )}
-        >
-          {sidebarEnabled && sidebar()}
-          {children}
-        </div>
+    <LayoutContext
+      value={{
+        props: baseProps,
+        slots,
+        ...linkItems,
+      }}
+    >
+      <TreeContextProvider tree={tree}>
+        {content}
         {renderNavigationPanel({
-          head: renderTitleNav(nav, {
-            className: 'inline-flex items-center gap-2.5 text-sm font-semibold',
-          }),
-          tabDropdown: tabs.length > 0 && <SidebarTabsDropdown className="flex-1" options={tabs} />,
-          tool: (
+          head: (
             <>
-              {i18n && (
-                <LanguageToggle>
-                  <Languages className="size-4.5" />
-                </LanguageToggle>
+              {slots.navTitle && (
+                <slots.navTitle className="inline-flex items-center gap-2.5 text-sm font-semibold" />
               )}
-
-              {searchToggle.enabled !== false &&
-                (searchToggle.components?.sm ?? (
-                  <SearchToggle className="rounded-lg" hideIfDisabled />
-                ))}
-
-              <NavigationSidebarTrigger />
-              {themeSwitch.enabled !== false &&
-                (themeSwitch.component ?? (
-                  <ThemeToggle
-                    className="px-1 py-0 h-full ms-1 rounded-xl bg-fd-muted *:rounded-lg"
-                    mode={themeSwitch.mode}
-                  />
-                ))}
+              {nav.children}
             </>
           ),
-          link: iconLinks.map((item, i) => (
-            <LinkItem
-              key={i}
-              item={item}
-              className={cn(buttonVariants({ size: 'icon-sm', color: 'ghost' }))}
-              aria-label={item.label}
-            >
-              {item.icon}
-            </LinkItem>
-          )),
+          tabDropdown: slots.tabDropdown && tabs.length > 0 && (
+            <slots.tabDropdown className="flex-1" tabs={tabs} />
+          ),
+          tool: (
+            <>
+              {slots.languageSelect && (
+                <slots.languageSelect.root>
+                  <Languages className="size-4.5" />
+                </slots.languageSelect.root>
+              )}
+              {slots.searchTrigger && (
+                <slots.searchTrigger.sm hideIfDisabled className="rounded-lg" />
+              )}
+              {slots.sidebar && (
+                <slots.sidebar.trigger
+                  className={cn(
+                    buttonVariants({
+                      variant: 'ghost',
+                      size: 'icon-sm',
+                      className: 'overflow-hidden',
+                    }),
+                  )}
+                />
+              )}
+              {slots.themeSwitch && (
+                <slots.themeSwitch className="p-1 h-full ms-1 rounded-xl bg-fd-muted *:rounded-lg" />
+              )}
+            </>
+          ),
+          link: linkItems.menuItems
+            .filter((item) => item.type === 'icon')
+            .map((item, i) => (
+              <LinkItem
+                key={i}
+                item={item}
+                className={cn(buttonVariants({ size: 'icon-sm', color: 'ghost' }))}
+                aria-label={item.label}
+              >
+                {item.icon}
+              </LinkItem>
+            )),
         })}
-      </Sidebar>
-    </TreeContextProvider>
-  );
-}
-
-function NavigationSidebarTrigger() {
-  const { open, setOpen } = useSidebar();
-  return (
-    <button
-      className={cn(
-        buttonVariants({
-          variant: 'ghost',
-          size: 'icon-sm',
-          className: 'overflow-hidden',
-        }),
-      )}
-      onClick={() => setOpen((prev) => !prev)}
-    >
-      <AnimatePresence mode="wait">
-        <motion.span
-          key={open ? 'open' : 'closed'}
-          transition={{ duration: 0.2 }}
-          initial={{
-            y: '100%',
-            opacity: 0,
-          }}
-          animate={{
-            y: 0,
-            opacity: 1,
-          }}
-          exit={{
-            y: '100%',
-            opacity: 0,
-          }}
-        >
-          {open ? <XIcon /> : <SidebarIcon />}
-        </motion.span>
-      </AnimatePresence>
-    </button>
+      </TreeContextProvider>
+    </LayoutContext>
   );
 }
 

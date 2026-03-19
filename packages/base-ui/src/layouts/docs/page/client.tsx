@@ -3,205 +3,184 @@
 import {
   type ComponentProps,
   createContext,
-  Fragment,
+  type FC,
+  type ReactNode,
   use,
   useEffect,
-  useEffectEvent,
-  useMemo,
-  useRef,
   useState,
 } from 'react';
-import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
-import Link from 'fumadocs-core/link';
 import { cn } from '@/utils/cn';
 import { useI18n } from '@/contexts/i18n';
-import { useTreeContext, useTreePath } from '@/contexts/tree';
-import type * as PageTree from 'fumadocs-core/page-tree';
-import { usePathname } from 'fumadocs-core/framework';
-import { type BreadcrumbOptions, getBreadcrumbItemsFromPath } from 'fumadocs-core/breadcrumb';
-import { isActive } from '@/utils/urls';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { useTOCItems } from '@/components/toc';
-import { useActiveAnchor } from 'fumadocs-core/toc';
-import { useDocsLayout } from '../client';
-import { useFooterItems } from '@/utils/use-footer-items';
+import { TOC, type TOCProps } from './slots/toc';
+import { TOCPopover, type TOCPopoverProps } from './slots/toc-popover';
+import { Footer, type FooterProps } from './slots/footer';
+import { Breadcrumb, type BreadcrumbProps } from './slots/breadcrumb';
+import { TOCProvider, type TOCProviderProps } from '@/components/toc';
+import { Container } from './slots/container';
+import type { TOCItemType } from 'fumadocs-core/toc';
 
-const TocPopoverContext = createContext<{
-  open: boolean;
-  setOpen: (open: boolean) => void;
+export interface DocsPageProps extends ComponentProps<'article'> {
+  toc?: TOCItemType[];
+
+  /**
+   * Extend the page to fill all available space
+   *
+   * @defaultValue false
+   */
+  full?: boolean;
+  slots?: DocsPageSlots;
+
+  footer?: FooterOptions;
+  breadcrumb?: BreadcrumbOptions;
+  tableOfContent?: TableOfContentOptions;
+  tableOfContentPopover?: TableOfContentPopoverOptions;
+}
+
+interface BreadcrumbOptions extends BreadcrumbProps {
+  enabled?: boolean;
+  /**
+   * @deprecated use `slots.breadcrumb` instead.
+   */
+  component?: ReactNode;
+}
+
+interface FooterOptions extends FooterProps {
+  enabled?: boolean;
+  /**
+   * @deprecated use `slots.footer` instead.
+   */
+  component?: ReactNode;
+}
+
+interface TableOfContentOptions extends Pick<TOCProviderProps, 'single'>, TOCProps {
+  enabled?: boolean;
+  /**
+   * @deprecated use `slots.toc` instead.
+   */
+  component?: ReactNode;
+}
+
+interface TableOfContentPopoverOptions extends TOCPopoverProps {
+  enabled?: boolean;
+  /**
+   * @deprecated use `slots.tocPopover` instead.
+   */
+  component?: ReactNode;
+}
+
+export interface DocsPageSlots {
+  toc?: FC<TOCProps>;
+  container?: FC<ComponentProps<'article'>>;
+  tocPopover?: FC<TOCPopoverProps>;
+  tocProvider?: FC<TOCProviderProps>;
+  footer?: FC<FooterProps>;
+  breadcrumb?: FC<BreadcrumbProps>;
+}
+
+interface PageSlotsProps extends Pick<DocsPageProps, 'full' | 'breadcrumb' | 'footer'> {
+  tableOfContent: TOCProps & { component?: ReactNode };
+  tableOfContentPopover: TOCPopoverProps & { component?: ReactNode };
+}
+
+const PageContext = createContext<{
+  props: PageSlotsProps;
+  slots: DocsPageSlots;
 } | null>(null);
 
-export function PageTOCPopover({ className, children, ...rest }: ComponentProps<'div'>) {
-  const ref = useRef<HTMLElement>(null);
-  const [open, setOpen] = useState(false);
-  const { isNavTransparent } = useDocsLayout();
-
-  const onClick = useEffectEvent((e: Event) => {
-    if (!open) return;
-
-    if (ref.current && !ref.current.contains(e.target as HTMLElement)) setOpen(false);
-  });
-
-  useEffect(() => {
-    window.addEventListener('click', onClick);
-
-    return () => {
-      window.removeEventListener('click', onClick);
-    };
-  }, []);
-
-  return (
-    <TocPopoverContext
-      value={useMemo(
-        () => ({
-          open,
-          setOpen,
-        }),
-        [setOpen, open],
-      )}
-    >
-      <Collapsible
-        open={open}
-        onOpenChange={setOpen}
-        data-toc-popover=""
-        className={cn(
-          'sticky top-(--fd-docs-row-2) z-10 [grid-area:toc-popover] h-(--fd-toc-popover-height) xl:hidden max-xl:layout:[--fd-toc-popover-height:--spacing(10)]',
-          className,
-        )}
-        {...rest}
-      >
-        <header
-          ref={ref}
-          className={cn(
-            'border-b backdrop-blur-sm transition-colors',
-            (!isNavTransparent || open) && 'bg-fd-background/80',
-            open && 'shadow-lg',
-          )}
-        >
-          {children}
-        </header>
-      </Collapsible>
-    </TocPopoverContext>
-  );
+export function useDocsPage() {
+  const context = use(PageContext);
+  if (!context)
+    throw new Error(
+      'Please use page components under <DocsPage /> (`fumadocs-ui/layouts/docs/page`).',
+    );
+  return context;
 }
 
-export function PageTOCPopoverTrigger({ className, ...props }: ComponentProps<'button'>) {
-  const { text } = useI18n();
-  const { open } = use(TocPopoverContext)!;
-  const items = useTOCItems();
-  const active = useActiveAnchor();
-  const selected = useMemo(
-    () => items.findIndex((item) => active === item.url.slice(1)),
-    [items, active],
-  );
-  const path = useTreePath().at(-1);
-  const showItem = selected !== -1 && !open;
+export function DocsPage({
+  tableOfContent: { enabled: tocEnabled, single = false, ...tocProps } = {},
+  tableOfContentPopover: { enabled: tocPopoverEnabled, ...tocPopoverProps } = {},
+  footer = {},
+  breadcrumb = {},
+  full = false,
+  toc = [],
+  slots: defaultSlots = {},
+  children,
+  ...containerProps
+}: DocsPageProps) {
+  tocEnabled ??= Boolean(!full && (toc.length > 0 || tocProps.footer || tocProps.header));
+  tocPopoverEnabled ??= Boolean(toc.length > 0 || tocPopoverProps.header || tocPopoverProps.footer);
 
-  return (
-    <CollapsibleTrigger
-      className={cn(
-        'flex w-full h-10 items-center text-sm text-fd-muted-foreground gap-2.5 px-4 py-2.5 text-start focus-visible:outline-none [&_svg]:size-4 md:px-6',
-        className,
-      )}
-      data-toc-popover-trigger=""
-      {...props}
-    >
-      <ProgressCircle
-        value={(selected + 1) / Math.max(1, items.length)}
-        max={1}
-        className={cn('shrink-0', open && 'text-fd-primary')}
-      />
-      <span className="grid flex-1 *:my-auto *:row-start-1 *:col-start-1">
-        <span
-          className={cn(
-            'truncate transition-all',
-            open && 'text-fd-foreground',
-            showItem && 'opacity-0 -translate-y-full pointer-events-none',
-          )}
-        >
-          {path?.name ?? text.toc}
-        </span>
-        <span
-          className={cn(
-            'truncate transition-all',
-            !showItem && 'opacity-0 translate-y-full pointer-events-none',
-          )}
-        >
-          {items[selected]?.title}
-        </span>
-      </span>
-      <ChevronDown className={cn('shrink-0 transition-transform mx-0.5', open && 'rotate-180')} />
-    </CollapsibleTrigger>
-  );
-}
-
-interface ProgressCircleProps extends Omit<React.ComponentProps<'svg'>, 'strokeWidth'> {
-  value: number;
-  strokeWidth?: number;
-  size?: number;
-  min?: number;
-  max?: number;
-}
-
-function clamp(input: number, min: number, max: number): number {
-  if (input < min) return min;
-  if (input > max) return max;
-  return input;
-}
-
-function ProgressCircle({
-  value,
-  strokeWidth = 2,
-  size = 24,
-  min = 0,
-  max = 100,
-  ...restSvgProps
-}: ProgressCircleProps) {
-  const normalizedValue = clamp(value, min, max);
-  const radius = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const progress = (normalizedValue / max) * circumference;
-  const circleProps = {
-    cx: size / 2,
-    cy: size / 2,
-    r: radius,
-    fill: 'none',
-    strokeWidth,
+  const slots: DocsPageSlots = {
+    breadcrumb:
+      breadcrumb.enabled !== false ? (defaultSlots.breadcrumb ?? InlineBreadcrumb) : undefined,
+    footer: footer.enabled !== false ? (defaultSlots.footer ?? InlineFooter) : undefined,
+    toc: tocEnabled ? (defaultSlots.toc ?? InlineTOC) : undefined,
+    tocPopover: tocPopoverEnabled ? (defaultSlots.tocPopover ?? InlineTOCPopover) : undefined,
+    tocProvider: defaultSlots.tocProvider ?? TOCProvider,
+    container: defaultSlots.container ?? Container,
   };
 
+  let content = (
+    <>
+      {slots.tocPopover && <slots.tocPopover />}
+      {slots.container && (
+        <slots.container {...containerProps}>
+          {slots.breadcrumb && <slots.breadcrumb />}
+          {children}
+          {slots.footer && <slots.footer />}
+        </slots.container>
+      )}
+      {slots.toc && <slots.toc />}
+    </>
+  );
+
+  if (slots.tocProvider)
+    content = (
+      <slots.tocProvider single={single} toc={tocEnabled || tocPopoverEnabled ? toc : []}>
+        {content}
+      </slots.tocProvider>
+    );
+
   return (
-    <svg
-      role="progressbar"
-      viewBox={`0 0 ${size} ${size}`}
-      aria-valuenow={normalizedValue}
-      aria-valuemin={min}
-      aria-valuemax={max}
-      {...restSvgProps}
+    <PageContext
+      value={{
+        props: {
+          full,
+          tableOfContent: tocProps,
+          tableOfContentPopover: tocPopoverProps,
+          footer,
+          breadcrumb,
+        },
+        slots,
+      }}
     >
-      <circle {...circleProps} className="stroke-current/25" />
-      <circle
-        {...circleProps}
-        stroke="currentColor"
-        strokeDasharray={circumference}
-        strokeDashoffset={circumference - progress}
-        strokeLinecap="round"
-        transform={`rotate(-90 ${size / 2} ${size / 2})`}
-        className="transition-all"
-      />
-    </svg>
+      {content}
+    </PageContext>
   );
 }
 
-export function PageTOCPopoverContent(props: ComponentProps<'div'>) {
-  return (
-    <CollapsibleContent
-      data-toc-popover-content=""
-      {...props}
-      className={cn('flex flex-col px-4 max-h-[50vh] md:px-6', props.className)}
-    >
-      <div>{props.children}</div>
-    </CollapsibleContent>
-  );
+function InlineBreadcrumb(props: BreadcrumbProps) {
+  const { component, enabled: _, ...rest } = useDocsPage().props.breadcrumb ?? {};
+  if (component) return component;
+  return <Breadcrumb {...props} {...rest} />;
+}
+
+function InlineFooter(props: FooterProps) {
+  const { component, enabled: _, ...rest } = useDocsPage().props.footer ?? {};
+  if (component) return component;
+  return <Footer {...props} {...rest} />;
+}
+
+function InlineTOCPopover(props: TOCPopoverProps) {
+  const { tableOfContentPopover } = useDocsPage().props;
+  if (tableOfContentPopover.component) return tableOfContentPopover.component;
+  return <TOCPopover {...props} {...tableOfContentPopover} />;
+}
+
+function InlineTOC(props: TOCProps) {
+  const { tableOfContent } = useDocsPage().props;
+  if (tableOfContent.component) return tableOfContent.component;
+  return <TOC {...props} {...tableOfContent} />;
 }
 
 export function PageLastUpdate({
@@ -220,126 +199,5 @@ export function PageLastUpdate({
     <p {...props} className={cn('text-sm text-fd-muted-foreground', props.className)}>
       {text.lastUpdate} {date}
     </p>
-  );
-}
-
-type Item = Pick<PageTree.Item, 'name' | 'description' | 'url'>;
-export interface FooterProps extends ComponentProps<'div'> {
-  /**
-   * Items including information for the next and previous page
-   */
-  items?: {
-    previous?: Item;
-    next?: Item;
-  };
-}
-
-export function PageFooter({ items, children, className, ...props }: FooterProps) {
-  const footerList = useFooterItems();
-  const pathname = usePathname();
-
-  const { previous, next } = useMemo(() => {
-    if (items) return items;
-
-    const idx = footerList.findIndex((item) => isActive(item.url, pathname));
-
-    if (idx === -1) return {};
-    return {
-      previous: footerList[idx - 1],
-      next: footerList[idx + 1],
-    };
-  }, [footerList, items, pathname]);
-
-  return (
-    <>
-      <div
-        className={cn(
-          '@container grid gap-4',
-          previous && next ? 'grid-cols-2' : 'grid-cols-1',
-          className,
-        )}
-        {...props}
-      >
-        {previous && <FooterItem item={previous} index={0} />}
-        {next && <FooterItem item={next} index={1} />}
-      </div>
-      {children}
-    </>
-  );
-}
-
-function FooterItem({ item, index }: { item: Item; index: 0 | 1 }) {
-  const { text } = useI18n();
-  const Icon = index === 0 ? ChevronLeft : ChevronRight;
-
-  return (
-    <Link
-      href={item.url}
-      className={cn(
-        'flex flex-col gap-2 rounded-lg border p-4 text-sm transition-colors hover:bg-fd-accent/80 hover:text-fd-accent-foreground @max-lg:col-span-full',
-        index === 1 && 'text-end',
-      )}
-    >
-      <div
-        className={cn(
-          'inline-flex items-center gap-1.5 font-medium',
-          index === 1 && 'flex-row-reverse',
-        )}
-      >
-        <Icon className="-mx-1 size-4 shrink-0 rtl:rotate-180" />
-        <p>{item.name}</p>
-      </div>
-      <p className="text-fd-muted-foreground truncate">
-        {item.description ?? (index === 0 ? text.previousPage : text.nextPage)}
-      </p>
-    </Link>
-  );
-}
-
-export type BreadcrumbProps = BreadcrumbOptions & ComponentProps<'div'>;
-
-export function PageBreadcrumb({
-  includeRoot,
-  includeSeparator,
-  includePage,
-  ...props
-}: BreadcrumbProps) {
-  const path = useTreePath();
-  const { root } = useTreeContext();
-  const items = useMemo(() => {
-    return getBreadcrumbItemsFromPath(root, path, {
-      includePage,
-      includeSeparator,
-      includeRoot,
-    });
-  }, [includePage, includeRoot, includeSeparator, path, root]);
-
-  if (items.length === 0) return null;
-
-  return (
-    <div
-      {...props}
-      className={cn('flex items-center gap-1.5 text-sm text-fd-muted-foreground', props.className)}
-    >
-      {items.map((item, i) => {
-        const className = cn('truncate', i === items.length - 1 && 'text-fd-primary font-medium');
-
-        return (
-          <Fragment key={i}>
-            {i !== 0 && <ChevronRight className="size-3.5 shrink-0" />}
-            {item.url ? (
-              <Link
-                href={item.url}
-                className={cn(className, 'transition-opacity hover:opacity-80')}
-              >
-                {item.name}
-              </Link>
-            ) : (
-              <span className={className}>{item.name}</span>
-            )}
-          </Fragment>
-        );
-      })}
-    </div>
   );
 }
