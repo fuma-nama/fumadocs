@@ -85,7 +85,7 @@ export interface LayoutTab {
   $folder?: PageTree.Folder;
 
   /**
-   * Detect from a list of urls (when not binded to page tree).
+   * Detect from a list of urls (when not bound to page tree).
    */
   urls?: Set<string>;
 }
