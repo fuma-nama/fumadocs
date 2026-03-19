@@ -1,5 +1,18 @@
 # fumapress
 
+## 0.1.12
+
+### Patch Changes
+
+- aa7e96a: Support AI Chat via `OPENROUTER_API_KEY` or custom `ai.createModel` config
+- Updated dependencies [8bdee70]
+- Updated dependencies [bdffeba]
+- Updated dependencies [3d17757]
+- Updated dependencies [f45d703]
+- Updated dependencies [45aa454]
+  - fumadocs-ui@16.7.0
+  - fumadocs-core@16.7.0
+
 ## 0.1.11
 
 ### Patch Changes

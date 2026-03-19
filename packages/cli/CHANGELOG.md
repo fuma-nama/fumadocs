@@ -1,5 +1,11 @@
 # fumadocs
 
+## 1.3.0
+
+### Minor Changes
+
+- 0ddaa8a: Preserve layout imports for slots
+
 ## 1.2.6
 
 ### Patch Changes

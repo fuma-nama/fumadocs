@@ -1,5 +1,20 @@
 # @fumadocs/base-ui
 
+## 16.7.0
+
+### Minor Changes
+
+- 8bdee70: Implement renderer API for replacing layout components, deprecate old options
+- bdffeba: Improved `defineI18nUI()` usage: allow language translations to be defined at root config.
+- f45d703: stablize Shiki factory API
+
+### Patch Changes
+
+- 3d17757: Improve `<GithubInfo />` component
+- Updated dependencies [f45d703]
+- Updated dependencies [45aa454]
+  - fumadocs-core@16.7.0
+
 ## 16.6.17
 
 ### Patch Changes
