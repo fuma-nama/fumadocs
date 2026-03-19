@@ -13,3 +13,4 @@ export * from './codeblock-utils';
 export { remarkMdxFiles, type RemarkMdxFilesOptions } from './remark-mdx-files';
 export * from './remark-mdx-mermaid';
 export * from './remark-feedback-block';
+export type { LLMsOptions } from './remark-llms';

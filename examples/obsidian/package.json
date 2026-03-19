@@ -13,17 +13,17 @@
     "fumadocs-mdx": "workspace:*",
     "fumadocs-obsidian": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "next": "16.1.6",
+    "next": "16.2.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.2.1",
+    "@tailwindcss/postcss": "^4.2.2",
     "@types/mdx": "^2.0.13",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "postcss": "^8.5.8",
-    "tailwindcss": "^4.2.1",
+    "tailwindcss": "^4.2.2",
     "typescript": "^5.9.3"
   }
 }

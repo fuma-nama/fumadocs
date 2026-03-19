@@ -24,7 +24,7 @@ export default defineConfig([
     fixedExtension: false,
     target: 'node22',
     deps: {
-      onlyBundle: [],
+      onlyBundle: noExternal,
       alwaysBundle: noExternal,
       neverBundle: external,
     },
@@ -39,7 +39,7 @@ export default defineConfig([
     fixedExtension: false,
     target: 'node22',
     deps: {
-      onlyBundle: [],
+      onlyBundle: noExternal,
       alwaysBundle: noExternal,
       neverBundle: external,
     },
