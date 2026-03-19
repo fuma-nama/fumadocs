@@ -25,7 +25,7 @@ export async function runStart({
   if (!dirs || dirs.length === 0) {
     dirs = [''];
   }
-  process.env.DEFAULT_RPOJECT_DIR = JSON.stringify(dirs.map((v) => path.resolve(v)));
+  process.env.DEFAULT_PROJECT_DIR = JSON.stringify(dirs.map((v) => path.resolve(v)));
   process.env.HOT_RELOAD = '1';
   process.chdir(baseDir);
   await import(serveFileUrl);
