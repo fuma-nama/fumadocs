@@ -2,7 +2,7 @@ import { transformSpecifiers } from '@/utils/ast';
 import type { ComponentInstallerPlugin } from '../installer';
 
 /**
- * keep references to `fumadocs-ui/layouts/*` components as original, unless the user is installing them direclty.
+ * keep references to `fumadocs-ui/layouts/*` components as original, unless the user is installing them directly.
  */
 export function pluginPreserveLayouts(): ComponentInstallerPlugin {
   const layoutNames = [

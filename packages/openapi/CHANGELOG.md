@@ -479,7 +479,7 @@
       renderWebhookLayout: ({
         header,
         authSchemes,
-        paremeters,
+        parameters,
         body,
         responses,
         callbacks,

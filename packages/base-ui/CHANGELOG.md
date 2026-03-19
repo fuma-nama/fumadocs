@@ -6,7 +6,7 @@
 
 - 8bdee70: Implement renderer API for replacing layout components, deprecate old options
 - bdffeba: Improved `defineI18nUI()` usage: allow language translations to be defined at root config.
-- f45d703: stablize Shiki factory API
+- f45d703: stabilize Shiki factory API
 
 ### Patch Changes
 

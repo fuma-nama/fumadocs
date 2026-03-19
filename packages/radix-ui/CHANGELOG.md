@@ -6,7 +6,7 @@
 
 - 8bdee70: Implement renderer API for replacing layout components, deprecate old options
 - bdffeba: Improved `defineI18nUI()` usage: allow language translations to be defined at root config.
-- f45d703: stablize Shiki factory API
+- f45d703: stabilize Shiki factory API
 
 ### Patch Changes
 
@@ -2458,7 +2458,7 @@
 
 ### Patch Changes
 
-- 503e8e9: Improve Object Collaspible
+- 503e8e9: Improve Object Collapsible
 - Updated dependencies [503e8e9]
   - fumadocs-core@12.4.2
 
@@ -3876,7 +3876,7 @@
 
 - e6ebf6a: Rename `sidebarContent` to `sidebarFooter`
 - e01bf3a: Allow `true` to keep default
-- e6ebf6a: Imrove sidebar banner
+- e6ebf6a: Improve sidebar banner
   - next-docs-zeta@1.6.4
 
 ## 1.6.3

@@ -12,7 +12,7 @@ export interface CodeGenOptions {
   target: 'default' | 'vite';
   outDir: string;
   /**
-   * add .js extenstion to imports
+   * add .js extension to imports
    */
   jsExtension: boolean;
   globCache: Map<string, Promise<string[]>>;

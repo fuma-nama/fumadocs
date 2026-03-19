@@ -63,7 +63,7 @@ export interface GenerateOptions {
    */
   transform?: Transformer;
 
-  typeSimplifer?: TypeSimplifierOptions;
+  typeSimplifier?: TypeSimplifierOptions;
 }
 
 export type Generator = ReturnType<typeof createGenerator>;
@@ -227,7 +227,7 @@ async function getDocEntry(prop: TsSymbol, context: EntryContext): Promise<DocEn
         location: context.declaration,
       },
       {
-        ...context.typeSimplifer,
+        ...context.typeSimplifier,
         noUndefined: isOptional,
       },
     ),

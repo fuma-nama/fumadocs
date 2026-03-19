@@ -60,7 +60,7 @@
 
 ### Minor Changes
 
-- f6cecbf: Use Universal Shiki configuartion for Markdown renderer
+- f6cecbf: Use Universal Shiki configuration for Markdown renderer
 
 ### Patch Changes
 

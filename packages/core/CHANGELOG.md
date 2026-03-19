@@ -4,7 +4,7 @@
 
 ### Minor Changes
 
-- f45d703: stablize Shiki factory API
+- f45d703: stabilize Shiki factory API
 
 ### Patch Changes
 
@@ -341,7 +341,7 @@
 
 ### Patch Changes
 
-- 8221785: hotfix i18n middleware URL formating
+- 8221785: hotfix i18n middleware URL formatting
 
 ## 16.0.4
 

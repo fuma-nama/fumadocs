@@ -8,7 +8,7 @@ interface TypeSimplifierContext {
 
 export interface TypeSimplifierOptions {
   /**
-   * whether the simplifed names should be preferred over the type names.
+   * whether the simplified names should be preferred over the type names.
    *
    * Default: always prefer simpliied ones.
    */
@@ -26,8 +26,8 @@ export function getSimpleForm(
 
   if (type.isUndefined() && noUndefined) return '';
 
-  const overriden = override?.(ctx);
-  if (overriden) return overriden;
+  const overridden = override?.(ctx);
+  if (overridden) return overridden;
 
   if (shouldSimplify && !shouldSimplify(ctx)) {
     return type.getText(ctx.location, TypeFormatFlags.UseAliasDefinedOutsideCurrentScope);
