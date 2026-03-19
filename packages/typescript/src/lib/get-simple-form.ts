@@ -10,7 +10,7 @@ export interface TypeSimplifierOptions {
   /**
    * whether the simplified names should be preferred over the type names.
    *
-   * Default: always prefer simpliied ones.
+   * Default: always prefer simplified ones.
    */
   shouldSimplify?: (ctx: TypeSimplifierContext) => boolean;
   override?: (ctx: TypeSimplifierContext) => string | undefined;
@@ -55,7 +55,7 @@ export function getSimpleForm(
   }
 
   if (type.isTuple()) {
-    return 'turple';
+    return 'tuple';
   }
 
   if (type.isArray() || type.isReadonlyArray()) {
