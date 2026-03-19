@@ -1,5 +1,14 @@
 # next-docs-mdx
 
+## 14.2.11
+
+### Patch Changes
+
+- 3144149: Fix dynamic index generation so generated `dynamic.ts` imports `node:path` and passes lazy entries to `create.doc()` / `create.docs()` as arrays.
+- Updated dependencies [f45d703]
+- Updated dependencies [45aa454]
+  - fumadocs-core@17.0.0
+
 ## 14.2.10
 
 ### Patch Changes

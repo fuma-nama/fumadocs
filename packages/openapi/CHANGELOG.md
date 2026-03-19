@@ -1,5 +1,23 @@
 # @fuma-docs/openapi
 
+## 10.4.0
+
+### Minor Changes
+
+- bdffeba: Implement i18n
+- 1fc5549: Bump deps
+
+### Patch Changes
+
+- 42bf43e: Implement newer JSON Schema spec `$ref` resolution behaviour
+- Updated dependencies [8bdee70]
+- Updated dependencies [bdffeba]
+- Updated dependencies [3d17757]
+- Updated dependencies [f45d703]
+- Updated dependencies [45aa454]
+  - fumadocs-ui@17.0.0
+  - fumadocs-core@17.0.0
+
 ## 10.3.18
 
 ### Patch Changes
