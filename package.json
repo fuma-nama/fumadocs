@@ -13,7 +13,7 @@
     "format": "oxfmt",
     "release": "turbo run build --filter=./packages/* && changeset publish && pnpm -r run postpublish",
     "test": "vitest",
-    "types:check": "turbo run types:check",
+    "types:check": "turbo run types:check --continue",
     "version": "changeset version && pnpm install --lockfile-only"
   },
   "devDependencies": {

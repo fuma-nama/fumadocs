@@ -6,6 +6,5 @@ export function baseOptions(locale: string): BaseLayoutProps {
       title: 'Waku',
       url: `/${locale}`,
     },
-    LanguageSwitch: true,
   };
 }

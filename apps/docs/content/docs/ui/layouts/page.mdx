@@ -142,24 +142,30 @@ import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
 <DocsPage toc={headings}>...</DocsPage>;
 ```
 
-You can customise or disable it with the `TOC` prop, or with `TOCPopover` on smaller devices.
+You can customise or disable it with `tableOfContent`, or with `tableOfContentPopover` on smaller devices.
 
-```tsx
+```tsx tab="Options"
 import { DocsPage, type TOCMainProps } from 'fumadocs-ui/layouts/<layout>/page';
 
-// pass options:
 return (
-  <DocsPage TOC={options} TOCPopover={options}>
+  <DocsPage tableOfContent={options} tableOfContentPopover={options}>
     ...
   </DocsPage>
 );
+```
 
-// or to replace renderer:
-function TOC(props: TOCMainProps) {
-  return <div />;
+```tsx tab="Replace Component" title="page.tsx"
+import { TOC } from './my-toc';
+return <DocsPage slots={{ toc: TOC }}>...</DocsPage>;
+```
+
+```tsx tab="Replace Component" title="my-toc.tsx"
+'use client';
+import type { TOCProps } from 'fumadocs-ui/layouts/<layout>/page/slots/toc';
+
+function TOC(props: TOCProps) {
+  return <div>Hello World</div>;
 }
-
-return <DocsPage TOC={TOC}>...</DocsPage>;
 ```
 
 <auto-type-table type="import('fumadocs-ui/layouts/docs/page').TOCMainProps" />
@@ -172,7 +178,7 @@ You can choose another style for TOC, like `clerk` inspired by https://clerk.com
 import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
 
 <DocsPage
-  TOC={{
+  tableOfContent={{
     style: 'clerk',
   }}
 >
@@ -191,7 +197,7 @@ Customise the footer with the `Footer` prop.
 ```tsx
 import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
 
-<DocsPage Footer={options}>...</DocsPage>;
+<DocsPage footer={options}>...</DocsPage>;
 ```
 
 <auto-type-table type="Omit<import('fumadocs-ui/layouts/docs/page').FooterProps, keyof React.ComponentProps<'div'>>" />
