@@ -16,7 +16,7 @@ import { cn } from '@/utils/cn';
 import { TabDropdown, type TabDropdownProps } from './slots/tab-dropdown';
 import { buttonVariants } from '@/components/ui/button';
 import { Languages } from 'lucide-react';
-import { LinkItem, type LinkItemType } from '@/utils/link-item';
+import { LinkItem, type LinkItemType } from '@/layouts/shared';
 import { motion } from 'motion/react';
 import { RemoveScroll } from 'react-remove-scroll';
 import { useSearchContext } from '@/contexts/search';
@@ -87,12 +87,12 @@ export function DocsLayout(props: DocsLayoutProps) {
     nav = {},
     sidebar: {
       enabled: sidebarEnabled = true,
-      tabs: sidebarTabs,
+      tabs: _tabs,
       defaultOpenLevel,
       prefetch,
       ...sidebarProps
     } = {},
-    tabs: defaultTabs = sidebarTabs,
+    tabs: defaultTabs = _tabs,
     children,
     containerProps,
     renderNavigationPanel = (props) => <NavigationPanel {...props} />,
@@ -113,7 +113,6 @@ export function DocsLayout(props: DocsLayoutProps) {
     }
     return [];
   }, [tree, defaultTabs]);
-  const iconLinks = linkItems.menuItems.filter((item) => item.type === 'icon');
   const slots: DocsSlots = {
     ...baseSlots,
     container: defaultSlots.container ?? Container,
@@ -193,16 +192,18 @@ export function DocsLayout(props: DocsLayoutProps) {
               )}
             </>
           ),
-          link: iconLinks.map((item, i) => (
-            <LinkItem
-              key={i}
-              item={item}
-              className={cn(buttonVariants({ size: 'icon-sm', color: 'ghost' }))}
-              aria-label={item.label}
-            >
-              {item.icon}
-            </LinkItem>
-          )),
+          link: linkItems.menuItems
+            .filter((item) => item.type === 'icon')
+            .map((item, i) => (
+              <LinkItem
+                key={i}
+                item={item}
+                className={cn(buttonVariants({ size: 'icon-sm', color: 'ghost' }))}
+                aria-label={item.label}
+              >
+                {item.icon}
+              </LinkItem>
+            )),
         })}
       </TreeContextProvider>
     </LayoutContext>

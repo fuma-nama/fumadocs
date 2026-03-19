@@ -66,8 +66,6 @@ export {
   PageLastUpdate,
   useDocsPage,
 } from './client';
-export { TOC, type TOCProps } from './slots/toc';
-export { TOCPopover, type TOCPopoverProps } from './slots/toc-popover';
 export { type BreadcrumbProps, Breadcrumb as PageBreadcrumb } from './slots/breadcrumb';
 export { type FooterProps, Footer as PageFooter } from './slots/footer';
-export { MarkdownCopyButton, ViewOptionsPopover } from '@/layouts/slots/page-actions';
+export { MarkdownCopyButton, ViewOptionsPopover } from '@/layouts/shared/page-actions';

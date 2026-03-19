@@ -5,7 +5,7 @@ import { cn } from '@/utils/cn';
 import { usePathname } from 'fumadocs-core/framework';
 import Link from 'fumadocs-core/link';
 import { useIsScrollTop } from '@/utils/use-is-scroll-top';
-import type { LinkItemType } from '@/utils/link-item';
+import type { LinkItemType } from '@/layouts/shared';
 import {
   Sidebar,
   SidebarProvider,
@@ -44,11 +44,13 @@ const { useProvider } = baseSlots({
   },
 });
 
-type SlotsProps = BaseSlotsProps & Pick<DocsLayoutProps, 'tabMode'>;
+interface SlotsProps extends BaseSlotsProps<DocsLayoutProps> {
+  tabs: LayoutTab[];
+  tabMode: NonNullable<DocsLayoutProps['tabMode']>;
+}
 
 const LayoutContext = createContext<{
   props: SlotsProps;
-  tabs: LayoutTab[];
   isNavTransparent: boolean;
   navItems: LinkItemType[];
   menuItems: LinkItemType[];
@@ -131,9 +133,9 @@ export function LayoutBody(
         value={{
           props: {
             tabMode,
+            tabs,
             ...baseProps,
           },
-          tabs,
           isNavTransparent,
           slots,
           ...linkItems,

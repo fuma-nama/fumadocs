@@ -13,12 +13,7 @@ import {
   SidebarTrigger,
   SidebarViewport,
 } from './sidebar';
-import {
-  type BaseLayoutProps,
-  parseLayoutProps,
-  renderTitleNav,
-  useLinkItems,
-} from '@/layouts/shared';
+import { type BaseLayoutProps, renderTitleNav, useLinkItems } from '@/layouts/shared';
 import { LinkItem } from '@/utils/link-item';
 import { LanguageToggle, LanguageToggleText } from '@/layouts/shared/language-toggle';
 import { LayoutBody, LayoutContextProvider, LayoutHeader, LayoutTabs } from './client';
@@ -28,18 +23,16 @@ import { LargeSearchToggle, SearchToggle } from '@/layouts/shared/search-toggle'
 import { getSidebarTabs, type GetSidebarTabsOptions } from '@/components/sidebar/tabs';
 import type { SidebarPageTreeComponents } from '@/components/sidebar/page-tree';
 import { SidebarTabsDropdown, type SidebarTabWithProps } from '@/components/sidebar/tabs/dropdown';
-import { type Renderer, renderer } from '@/utils/renderer';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
+
   sidebar?: SidebarOptions;
 
   tabMode?: 'top' | 'auto';
-  SidebarTrigger?: Renderer<ComponentProps<'button'>>;
-  Container?: Renderer<ComponentProps<'div'>>;
 
   /**
-   * @deprecated use `Container` instead.
+   * Props for the `div` container
    */
   containerProps?: HTMLAttributes<HTMLDivElement>;
 }
@@ -68,35 +61,23 @@ interface SidebarOptions
   collapsible?: boolean;
 }
 
-export function DocsLayout(_: DocsLayoutProps) {
-  const {
-    nav: { transparentMode, ...nav } = {},
-    sidebar: {
-      tabs: sidebarTabs,
-      enabled: sidebarEnabled = true,
-      defaultOpenLevel,
-      prefetch,
-      ...sidebarProps
-    } = {},
-    SearchToggle: SearchToggleRenderer,
-    LargeSearchToggle: LargeSearchToggleRenderer,
-    ThemeSwitch,
-    containerProps,
-    Container = containerProps ?? true,
-    tabMode = 'auto',
-    LanguageSwitch,
-    SidebarTrigger: SidebarTriggerRenderer = sidebarEnabled,
-    children,
-    tree,
-    ...props
-  } = parseLayoutProps<DocsLayoutProps>(_);
-
-  const renderSearchToggle = renderer(SearchToggleRenderer, SearchToggle);
-  const renderLargeSearchToggle = renderer(LargeSearchToggleRenderer, LargeSearchToggle);
-  const renderThemeSwitch = renderer(ThemeSwitch, ThemeToggle);
-  const renderLanguageSwitch = renderer(LanguageSwitch, LanguageToggle);
-  const renderSidebarTrigger = renderer(SidebarTriggerRenderer, SidebarTrigger);
-
+export function DocsLayout({
+  nav: { transparentMode, ...nav } = {},
+  sidebar: {
+    tabs: sidebarTabs,
+    enabled: sidebarEnabled = true,
+    defaultOpenLevel,
+    prefetch,
+    ...sidebarProps
+  } = {},
+  searchToggle = {},
+  themeSwitch = {},
+  tabMode = 'auto',
+  i18n = false,
+  children,
+  tree,
+  ...props
+}: DocsLayoutProps) {
   const tabs = useMemo(() => {
     if (Array.isArray(sidebarTabs)) {
       return sidebarTabs;
@@ -150,21 +131,20 @@ export function DocsLayout(_: DocsLayoutProps) {
                 </SidebarCollapseTrigger>
               )}
             </div>
-            {renderLargeSearchToggle?.((o) => ({
-              hideIfDisabled: true,
-              ...o,
-            }))}
+            {searchToggle.enabled !== false &&
+              (searchToggle.components?.lg ?? <LargeSearchToggle hideIfDisabled />)}
             {tabs.length > 0 && tabMode === 'auto' && <SidebarTabsDropdown options={tabs} />}
             {banner}
           </div>
           {viewport}
-          {(renderLanguageSwitch || iconLinks.length > 0 || renderThemeSwitch || footer) && (
+          {(i18n || iconLinks.length > 0 || themeSwitch?.enabled !== false || footer) && (
             <div className="flex flex-col border-t p-4 pt-2 empty:hidden">
               <div className="flex text-fd-muted-foreground items-center empty:hidden">
-                {renderLanguageSwitch?.((o) => ({
-                  children: <Languages className="size-4.5" />,
-                  ...o,
-                }))}
+                {i18n && (
+                  <LanguageToggle>
+                    <Languages className="size-4.5" />
+                  </LanguageToggle>
+                )}
                 {iconLinks.map((item, i) => (
                   <LinkItem
                     key={i}
@@ -175,7 +155,10 @@ export function DocsLayout(_: DocsLayoutProps) {
                     {item.icon}
                   </LinkItem>
                 ))}
-                {renderThemeSwitch?.((t) => ({ ...t, className: cn('ms-auto p-0', t?.className) }))}
+                {themeSwitch.enabled !== false &&
+                  (themeSwitch.component ?? (
+                    <ThemeToggle className="ms-auto p-0" mode={themeSwitch.mode} />
+                  ))}
               </div>
               {footer}
             </div>
@@ -202,28 +185,25 @@ export function DocsLayout(_: DocsLayoutProps) {
                   </LinkItem>
                 ))}
               </div>
-              {renderLanguageSwitch?.((o) => ({
-                children: (
-                  <>
-                    <Languages className="size-4.5" />
-                    <LanguageToggleText />
-                  </>
-                ),
-                ...o,
-              }))}
-              {renderThemeSwitch?.((t) => ({ ...t, className: cn('p-0', t?.className) }))}
-              {renderSidebarTrigger?.((t) => ({
-                children: <SidebarIcon />,
-                ...t,
-                className: cn(
+              {i18n && (
+                <LanguageToggle>
+                  <Languages className="size-4.5" />
+                  <LanguageToggleText />
+                </LanguageToggle>
+              )}
+              {themeSwitch.enabled !== false &&
+                (themeSwitch.component ?? <ThemeToggle className="p-0" mode={themeSwitch.mode} />)}
+              <SidebarTrigger
+                className={cn(
                   buttonVariants({
                     color: 'ghost',
                     size: 'icon-sm',
+                    className: 'p-2',
                   }),
-                  'p-2',
-                  t?.className,
-                ),
-              }))}
+                )}
+              >
+                <SidebarIcon />
+              </SidebarTrigger>
             </div>
             {tabs.length > 0 && <SidebarTabsDropdown options={tabs} />}
             {banner}
@@ -239,7 +219,7 @@ export function DocsLayout(_: DocsLayoutProps) {
     <TreeContextProvider tree={tree}>
       <LayoutContextProvider navTransparentMode={transparentMode}>
         <Sidebar defaultOpenLevel={defaultOpenLevel} prefetch={prefetch}>
-          <LayoutBody _={Container}>
+          <LayoutBody {...props.containerProps}>
             {nav.enabled !== false &&
               (nav.component ?? (
                 <LayoutHeader
@@ -250,23 +230,23 @@ export function DocsLayout(_: DocsLayoutProps) {
                     className: 'inline-flex items-center gap-2.5 font-semibold',
                   })}
                   <div className="flex-1">{nav.children}</div>
-                  {renderSearchToggle?.((o) => ({
-                    hideIfDisabled: true,
-                    ...o,
-                    className: cn('p-2', o?.className),
-                  }))}
-                  {renderSidebarTrigger?.((t) => ({
-                    children: <SidebarIcon />,
-                    ...t,
-                    className: cn(
-                      buttonVariants({
-                        color: 'ghost',
-                        size: 'icon-sm',
-                      }),
-                      'p-2',
-                      t?.className,
-                    ),
-                  }))}
+                  {searchToggle.enabled !== false &&
+                    (searchToggle.components?.sm ?? (
+                      <SearchToggle className="p-2" hideIfDisabled />
+                    ))}
+                  {sidebarEnabled && (
+                    <SidebarTrigger
+                      className={cn(
+                        buttonVariants({
+                          color: 'ghost',
+                          size: 'icon-sm',
+                          className: 'p-2',
+                        }),
+                      )}
+                    >
+                      <SidebarIcon />
+                    </SidebarTrigger>
+                  )}
                 </LayoutHeader>
               ))}
             {sidebarEnabled && sidebar()}

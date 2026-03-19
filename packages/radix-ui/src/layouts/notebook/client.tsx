@@ -2,8 +2,14 @@
 import { type ComponentProps, createContext, type FC, use } from 'react';
 import { type DocsLayoutProps } from '.';
 import { useIsScrollTop } from '@/utils/use-is-scroll-top';
-import { type LinkItemType } from '@/utils/link-item';
-import { baseSlots, type BaseSlots, type BaseSlotsProps, LayoutTab, useLinkItems } from '../shared';
+import { type LinkItemType } from '@/layouts/shared';
+import {
+  baseSlots,
+  type BaseSlots,
+  type BaseSlotsProps,
+  type LayoutTab,
+  useLinkItems,
+} from '../shared';
 import { TreeContextProvider } from '@/contexts/tree';
 import { Container } from './slots/container';
 import {
@@ -35,18 +41,18 @@ const { useProvider } = baseSlots({
   },
 });
 
-type SlotsProps = BaseSlotsProps;
+interface SlotsProps extends BaseSlotsProps<DocsLayoutProps> {
+  sidebar: SidebarProps;
+  tabMode: NonNullable<DocsLayoutProps['tabMode']>;
+  tabs: LayoutTab[];
+}
 
 const LayoutContext = createContext<{
   props: SlotsProps;
-  tabs: LayoutTab[];
-  sidebarCollapsible: boolean;
   isNavTransparent: boolean;
   navItems: LinkItemType[];
   menuItems: LinkItemType[];
   slots: DocsSlots;
-  tabMode: 'sidebar' | 'navbar';
-  navMode: 'top' | 'auto';
 } | null>(null);
 
 export function useNotebookLayout() {
@@ -64,11 +70,7 @@ export function LayoutBody(
   },
 ) {
   const {
-    nav: {
-      enabled: navEnabled = true,
-      mode: navMode = 'auto',
-      transparentMode: navTransparentMode = 'none',
-    } = {},
+    nav: { enabled: navEnabled = true, transparentMode: navTransparentMode = 'none' } = {},
     sidebar: { defaultOpenLevel, prefetch, ...sidebarProps } = {},
     slots: defaultSlots,
     tabMode = 'sidebar',
@@ -118,11 +120,12 @@ export function LayoutBody(
     <TreeContextProvider tree={tree}>
       <LayoutContext
         value={{
-          sidebarCollapsible: sidebarProps.collapsible ?? true,
-          props: baseProps,
-          tabMode,
-          navMode,
-          tabs,
+          props: {
+            tabs,
+            tabMode,
+            sidebar: sidebarProps,
+            ...baseProps,
+          },
           isNavTransparent,
           slots,
           ...linkItems,

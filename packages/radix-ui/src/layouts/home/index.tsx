@@ -3,7 +3,7 @@
 import type { BaseLayoutProps, NavOptions } from '@/layouts/shared';
 import { type ComponentProps, createContext, type FC, use } from 'react';
 import { baseSlots, useLinkItems, type BaseSlots, type BaseSlotsProps } from '@/layouts/shared';
-import type { LinkItemType } from '@/utils/link-item';
+import type { LinkItemType } from '@/layouts/shared';
 import { Container } from './slots/container';
 import { Header } from './slots/header';
 

@@ -4,14 +4,14 @@ import type { BaseLayoutProps } from '@/layouts/shared';
 import { TreeContextProvider } from '@/contexts/tree';
 import { getSidebarTabs, type GetSidebarTabsOptions } from '@/components/sidebar/tabs';
 import type { SidebarPageTreeComponents } from '@/components/sidebar/page-tree';
-import { type ComponentProps, type ReactNode, useMemo } from 'react';
+import { type ComponentProps, HTMLAttributes, type ReactNode, useMemo } from 'react';
 import { cn } from '@/utils/cn';
-import { useSidebar } from '@/components/sidebar/base';
+import { SidebarViewport, useSidebar } from '@/components/sidebar/base';
 import { SidebarTabsDropdown, type SidebarTabWithProps } from './tab-dropdown';
 import { Sidebar, SidebarContent, SidebarLinkItem, SidebarPageTree } from './sidebar';
 import { buttonVariants } from '@/components/ui/button';
 import { Languages, SidebarIcon, XIcon } from 'lucide-react';
-import { parseLayoutProps, renderTitleNav, useLinkItems } from '../shared';
+import { renderTitleNav, useLinkItems } from '../shared';
 import { LanguageToggle } from '../shared/language-toggle';
 import { SearchToggle } from '../shared/search-toggle';
 import { ThemeToggle } from '../shared/theme-toggle';
@@ -19,19 +19,18 @@ import { LinkItem } from '@/utils/link-item';
 import { AnimatePresence, motion } from 'motion/react';
 import { RemoveScroll } from 'react-remove-scroll';
 import { useSearchContext } from '@/contexts/search';
-import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
-import { renderer, type Renderer } from '@/utils/renderer';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
+
   sidebar?: SidebarOptions;
-  Container?: Renderer<ComponentProps<'div'>>;
-  renderNavigationPanel?: (props: NavigationPanelProps) => ReactNode;
 
   /**
-   * @deprecated use `Container` instead.
+   * Props for the `div` container
    */
-  containerProps?: ComponentProps<'div'>;
+  containerProps?: HTMLAttributes<HTMLDivElement>;
+
+  renderNavigationPanel?: (props: NavigationPanelProps) => ReactNode;
 }
 
 interface SidebarOptions
@@ -51,32 +50,24 @@ interface SidebarOptions
   footer?: ReactNode;
 }
 
-export function DocsLayout(_: DocsLayoutProps) {
-  const {
-    tree,
-    nav = {},
-    sidebar: {
-      enabled: sidebarEnabled = true,
-      tabs: sidebarTabs,
-      defaultOpenLevel,
-      prefetch,
-      ...sidebarProps
-    } = {},
-    children,
-    containerProps,
-    Container = containerProps ?? true,
-    LanguageSwitch,
-    SearchToggle: SearchToggleRenderer,
-    ThemeSwitch,
-    renderNavigationPanel = (props) => <NavigationPanel {...props} />,
-    ...props
-  } = parseLayoutProps<DocsLayoutProps>(_);
-  const { menuItems } = useLinkItems(props);
-  const renderContainer = renderer(Container, 'div');
-  const renderLanguageSwitch = renderer(LanguageSwitch, LanguageToggle);
-  const renderThemeSwitch = renderer(ThemeSwitch, ThemeToggle);
-  const renderSearchToggle = renderer(SearchToggleRenderer, SearchToggle);
-
+export function DocsLayout({
+  tree,
+  nav = {},
+  sidebar: {
+    enabled: sidebarEnabled = true,
+    tabs: sidebarTabs,
+    defaultOpenLevel,
+    prefetch,
+    ...sidebarProps
+  } = {},
+  searchToggle = {},
+  themeSwitch = {},
+  i18n = false,
+  children,
+  containerProps,
+  renderNavigationPanel = (props) => <NavigationPanel {...props} />,
+  ...props
+}: DocsLayoutProps) {
   const tabs = useMemo(() => {
     if (Array.isArray(sidebarTabs)) {
       return sidebarTabs;
@@ -89,6 +80,7 @@ export function DocsLayout(_: DocsLayoutProps) {
     }
     return [];
   }, [tree, sidebarTabs]);
+  const { menuItems } = useLinkItems(props);
   const iconLinks = menuItems.filter((item) => item.type === 'icon');
 
   function sidebar() {
@@ -98,28 +90,18 @@ export function DocsLayout(_: DocsLayoutProps) {
     return (
       <SidebarContent {...rest}>
         <div className="flex flex-col gap-3 p-4 pb-2 empty:hidden">{banner}</div>
-        <ScrollArea className="min-h-0 flex-1">
-          <ScrollViewport
-            className="p-4 overscroll-contain"
-            style={
-              {
-                maskImage:
-                  'linear-gradient(to bottom, transparent, white 12px, white calc(100% - 12px), transparent)',
-              } as object
-            }
-          >
-            {menuItems
-              .filter((v) => v.type !== 'icon')
-              .map((item, i, list) => (
-                <SidebarLinkItem
-                  key={i}
-                  item={item}
-                  className={cn(i === list.length - 1 && 'mb-4')}
-                />
-              ))}
-            <SidebarPageTree {...components} />
-          </ScrollViewport>
-        </ScrollArea>
+        <SidebarViewport>
+          {menuItems
+            .filter((v) => v.type !== 'icon')
+            .map((item, i, list) => (
+              <SidebarLinkItem
+                key={i}
+                item={item}
+                className={cn(i === list.length - 1 && 'mb-4')}
+              />
+            ))}
+          <SidebarPageTree {...components} />
+        </SidebarViewport>
         {footer}
       </SidebarContent>
     );
@@ -128,17 +110,17 @@ export function DocsLayout(_: DocsLayoutProps) {
   return (
     <TreeContextProvider tree={tree}>
       <Sidebar defaultOpenLevel={defaultOpenLevel} prefetch={prefetch}>
-        {renderContainer?.((t) => ({
-          id: 'nd-flux-layout',
-          children: (
-            <>
-              {sidebarEnabled && sidebar()}
-              {children}
-            </>
-          ),
-          ...t,
-          className: cn('flex flex-col items-center pb-24 overflow-x-clip', t?.className),
-        }))}
+        <div
+          id="nd-flux-layout"
+          {...containerProps}
+          className={cn(
+            'flex flex-col items-center pb-24 overflow-x-clip',
+            containerProps?.className,
+          )}
+        >
+          {sidebarEnabled && sidebar()}
+          {children}
+        </div>
         {renderNavigationPanel({
           head: renderTitleNav(nav, {
             className: 'inline-flex items-center gap-2.5 text-sm font-semibold',
@@ -146,21 +128,25 @@ export function DocsLayout(_: DocsLayoutProps) {
           tabDropdown: tabs.length > 0 && <SidebarTabsDropdown className="flex-1" options={tabs} />,
           tool: (
             <>
-              {renderLanguageSwitch?.((t) => ({
-                children: <Languages className="size-4.5" />,
-                ...t,
-              }))}
-              {renderSearchToggle?.((t) => ({
-                hideIfDisabled: true,
-                ...t,
-                className: cn('rounded-lg', t?.className),
-              }))}
+              {i18n && (
+                <LanguageToggle>
+                  <Languages className="size-4.5" />
+                </LanguageToggle>
+              )}
+
+              {searchToggle.enabled !== false &&
+                (searchToggle.components?.sm ?? (
+                  <SearchToggle className="rounded-lg" hideIfDisabled />
+                ))}
 
               <NavigationSidebarTrigger />
-              {renderThemeSwitch?.((t) => ({
-                ...t,
-                className: cn('p-1 h-full ms-1 rounded-xl bg-fd-muted *:rounded-lg', t?.className),
-              }))}
+              {themeSwitch.enabled !== false &&
+                (themeSwitch.component ?? (
+                  <ThemeToggle
+                    className="px-1 py-0 h-full ms-1 rounded-xl bg-fd-muted *:rounded-lg"
+                    mode={themeSwitch.mode}
+                  />
+                ))}
             </>
           ),
           link: iconLinks.map((item, i) => (

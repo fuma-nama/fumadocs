@@ -1,7 +1,8 @@
 'use client';
 import type { HTMLAttributes } from 'react';
 import type * as Base from './base';
-import { useLinkItemActive, type LinkItemType } from '@/utils/link-item';
+import { isLinkItemActive, type LinkItemType } from '@/layouts/shared';
+import { usePathname } from 'fumadocs-core/framework';
 
 type InternalComponents = Pick<
   typeof Base,
@@ -28,7 +29,8 @@ export function createLinkItemRenderer({
   }: HTMLAttributes<HTMLElement> & {
     item: Exclude<LinkItemType, { type: 'icon' }>;
   }) {
-    const active = useLinkItemActive(item);
+    const pathname = usePathname();
+    const active = isLinkItemActive(item, pathname);
     if (item.type === 'custom') return <div {...props}>{item.children}</div>;
 
     if (item.type === 'menu')

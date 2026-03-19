@@ -49,7 +49,7 @@ export function resolveExternal(
   if (ref.type === 'file') {
     const file = path.relative(toRegistryDir, ref.file).replaceAll(path.sep, '/');
 
-    if (file === 'utils/renderer.ts' || /^contexts\//.test(file) || /^utils\/use-/.test(file)) {
+    if (/^contexts\//.test(file) || /^utils\/use-/.test(file)) {
       return {
         dep: toPackageName,
         type: 'dependency',
@@ -62,9 +62,9 @@ export function resolveExternal(
 export async function findSlotComponents(dir: string): Promise<Component[]> {
   const slots: Component[] = [];
 
-  for await (const file of glob('**/slots/*.tsx', { cwd: dir })) {
+  for await (const file of glob('layouts/**/slots/*', { cwd: dir })) {
     const name = path.relative('layouts', file);
-    if (name.startsWith('..')) continue;
+
     slots.push({
       name: name.slice(0, -path.extname(name).length),
       unlisted: true,
@@ -109,17 +109,6 @@ export const commonComponents: Component[] = [
       {
         type: 'lib',
         path: 'utils/merge-refs.ts',
-      },
-    ],
-  },
-  {
-    name: 'link-item',
-    unlisted: true,
-    files: [
-      {
-        type: 'components',
-        path: 'utils/link-item.tsx',
-        target: '<dir>/layout/link-item.tsx',
       },
     ],
   },

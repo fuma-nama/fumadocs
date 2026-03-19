@@ -22,6 +22,7 @@ export const registry: Registry = {
     ...(await findSlotComponents(dir)),
     {
       name: 'layouts/sidebar',
+      unlisted: true,
       files: [
         {
           type: 'components',
@@ -57,7 +58,12 @@ export const registry: Registry = {
         {
           type: 'components',
           path: 'layouts/shared/index.tsx',
-          target: '<dir>/layout/shared.tsx',
+          target: '<dir>/layout/shared/index.tsx',
+        },
+        {
+          type: 'components',
+          path: 'layouts/shared/client.tsx',
+          target: '<dir>/layout/shared/client.tsx',
         },
       ],
     },
@@ -327,7 +333,7 @@ export const registry: Registry = {
       files: [
         {
           type: 'components',
-          path: 'layouts/slots/page-actions.tsx',
+          path: 'layouts/shared/page-actions.tsx',
           target: '<dir>/ai/page-actions.tsx',
         },
       ],

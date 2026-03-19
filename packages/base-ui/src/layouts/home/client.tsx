@@ -12,13 +12,7 @@ import {
 import { cva } from 'class-variance-authority';
 import Link from 'fumadocs-core/link';
 import { cn } from '@/utils/cn';
-import {
-  type LinkItemType,
-  type NavOptions,
-  parseLayoutProps,
-  renderTitleNav,
-  useLinkItems,
-} from '@/layouts/shared';
+import { type LinkItemType, type NavOptions, renderTitleNav, useLinkItems } from '@/layouts/shared';
 import { LinkItem } from '@/utils/link-item';
 import {
   NavigationMenuRoot,
@@ -37,7 +31,6 @@ import { ChevronDown, Languages } from 'lucide-react';
 import { useIsScrollTop } from '@/utils/use-is-scroll-top';
 import { NavigationMenu } from '@base-ui/react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { renderer } from '@/utils/renderer';
 
 const MobileMenuContext = createContext<{
   open: boolean;
@@ -63,21 +56,14 @@ export const navItemVariants = cva('[&_svg]:size-4', {
   },
 });
 
-export function Header(props: HomeLayoutProps) {
-  const {
-    nav = {},
-    LanguageSwitch,
-    links,
-    githubUrl,
-    SearchToggle: SearchToggleRenderer,
-    LargeSearchToggle: LargeSearchToggleRenderer,
-    ThemeSwitch,
-  } = parseLayoutProps(props);
-
-  const renderSearchToggle = renderer(SearchToggleRenderer, SearchToggle);
-  const renderLargeSearchToggle = renderer(LargeSearchToggleRenderer, LargeSearchToggle);
-  const renderThemeSwitch = renderer(ThemeSwitch, ThemeToggle);
-  const renderLanguageSwitch = renderer(LanguageSwitch, LanguageToggle);
+export function Header({
+  nav = {},
+  i18n = false,
+  links,
+  githubUrl,
+  themeSwitch = {},
+  searchToggle = {},
+}: HomeLayoutProps) {
   const { menuItems, navItems } = useLinkItems({ links, githubUrl });
 
   return (
@@ -100,16 +86,20 @@ export function Header(props: HomeLayoutProps) {
                 ))}
             </NavigationMenuList>
             <div className="flex flex-row items-center justify-end gap-1.5 flex-1 max-lg:hidden">
-              {renderLargeSearchToggle?.((o) => ({
-                hideIfDisabled: true,
-                ...o,
-                className: cn('w-full rounded-full ps-2.5 max-w-[240px]', o?.className),
-              }))}
-              {renderThemeSwitch?.((t) => t ?? {})}
-              {renderLanguageSwitch?.((o) => ({
-                children: <Languages className="size-5" />,
-                ...o,
-              }))}
+              {searchToggle.enabled !== false &&
+                (searchToggle.components?.lg ?? (
+                  <LargeSearchToggle
+                    className="w-full rounded-full ps-2.5 max-w-[240px]"
+                    hideIfDisabled
+                  />
+                ))}
+              {themeSwitch.enabled !== false &&
+                (themeSwitch.component ?? <ThemeToggle mode={themeSwitch?.mode} />)}
+              {i18n && (
+                <LanguageToggle>
+                  <Languages className="size-5" />
+                </LanguageToggle>
+              )}
               <NavigationMenuList className="flex flex-row gap-2 items-center empty:hidden">
                 {navItems.filter(isSecondary).map((item, i) => (
                   <NavigationMenuLinkItem
@@ -121,11 +111,8 @@ export function Header(props: HomeLayoutProps) {
               </NavigationMenuList>
             </div>
             <div className="flex flex-row items-center ms-auto -me-1.5 lg:hidden">
-              {renderSearchToggle?.((o) => ({
-                hideIfDisabled: true,
-                ...o,
-                className: cn('p-2', o?.className),
-              }))}
+              {searchToggle.enabled !== false &&
+                (searchToggle.components?.sm ?? <SearchToggle className="p-2" hideIfDisabled />)}
               <CollapsibleTrigger
                 aria-label="Toggle Menu"
                 className={cn(
@@ -155,17 +142,15 @@ export function Header(props: HomeLayoutProps) {
                 />
               ))}
               <div role="separator" className="flex-1 sm:hidden" />
-              {renderLanguageSwitch?.((o) => ({
-                children: (
-                  <>
-                    <Languages className="size-5" />
-                    <LanguageToggleText />
-                    <ChevronDown className="size-3 text-fd-muted-foreground" />
-                  </>
-                ),
-                ...o,
-              }))}
-              {renderThemeSwitch?.((t) => t ?? {})}
+              {i18n && (
+                <LanguageToggle>
+                  <Languages className="size-5" />
+                  <LanguageToggleText />
+                  <ChevronDown className="size-3 text-fd-muted-foreground" />
+                </LanguageToggle>
+              )}
+              {themeSwitch.enabled !== false &&
+                (themeSwitch.component ?? <ThemeToggle mode={themeSwitch?.mode} />)}
             </div>
           </CollapsibleContent>
           <NavigationMenu.Portal>

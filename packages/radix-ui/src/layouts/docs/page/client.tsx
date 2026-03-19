@@ -77,10 +77,11 @@ export interface DocsPageSlots {
   breadcrumb?: FC<BreadcrumbProps>;
 }
 
-type PageSlotsProps = Pick<
-  DocsPageProps,
-  'full' | 'breadcrumb' | 'footer' | 'tableOfContent' | 'tableOfContentPopover'
->;
+interface PageSlotsProps extends Pick<DocsPageProps, 'full' | 'breadcrumb' | 'footer'> {
+  tableOfContent: TOCProps & { component?: ReactNode };
+  tableOfContentPopover: TOCPopoverProps & { component?: ReactNode };
+}
+
 const PageContext = createContext<{
   props: PageSlotsProps;
   slots: DocsPageSlots;
@@ -122,7 +123,13 @@ export function DocsPage({
   let content = (
     <>
       {slots.tocPopover && <slots.tocPopover />}
-      {slots.container && <slots.container {...containerProps}>{children}</slots.container>}
+      {slots.container && (
+        <slots.container {...containerProps}>
+          {slots.breadcrumb && <slots.breadcrumb />}
+          {children}
+          {slots.footer && <slots.footer />}
+        </slots.container>
+      )}
       {slots.toc && <slots.toc />}
     </>
   );
@@ -153,27 +160,27 @@ export function DocsPage({
 }
 
 function InlineBreadcrumb(props: BreadcrumbProps) {
-  const { component, enabled: _, ...rest } = useDocsPage().props?.breadcrumb ?? {};
+  const { component, enabled: _, ...rest } = useDocsPage().props.breadcrumb ?? {};
   if (component) return component;
   return <Breadcrumb {...props} {...rest} />;
 }
 
 function InlineFooter(props: FooterProps) {
-  const { component, enabled: _, ...rest } = useDocsPage().props?.footer ?? {};
+  const { component, enabled: _, ...rest } = useDocsPage().props.footer ?? {};
   if (component) return component;
   return <Footer {...props} {...rest} />;
 }
 
 function InlineTOCPopover(props: TOCPopoverProps) {
-  const { component, enabled: _, ...rest } = useDocsPage().props?.tableOfContentPopover ?? {};
-  if (component) return component;
-  return <TOCPopover {...props} {...rest} />;
+  const { tableOfContentPopover } = useDocsPage().props;
+  if (tableOfContentPopover.component) return tableOfContentPopover.component;
+  return <TOCPopover {...props} {...tableOfContentPopover} />;
 }
 
 function InlineTOC(props: TOCProps) {
-  const { component, enabled: _, ...rest } = useDocsPage().props?.tableOfContent ?? {};
-  if (component) return component;
-  return <TOC {...props} {...rest} />;
+  const { tableOfContent } = useDocsPage().props;
+  if (tableOfContent.component) return tableOfContent.component;
+  return <TOC {...props} {...tableOfContent} />;
 }
 
 export function PageLastUpdate({

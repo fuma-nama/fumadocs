@@ -11,7 +11,7 @@ import {
 } from 'react';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/utils/cn';
-import { LinkItem, type LinkItemType, type MenuItemType } from '@/utils/link-item';
+import { LinkItem, type LinkItemType, type MenuItemType } from '@/layouts/shared';
 import { useNotebookLayout } from '../client';
 import { type LayoutTab, isLayoutTabActive } from '@/layouts/shared';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
@@ -21,15 +21,13 @@ import Link from 'fumadocs-core/link';
 export function Header(props: ComponentProps<'header'>) {
   const {
     slots,
-    tabs,
     navItems,
     isNavTransparent,
-    sidebarCollapsible,
-    tabMode,
-    navMode,
-    props: { nav },
+    props: { tabMode, nav, tabs, sidebar },
   } = useNotebookLayout();
   const { open } = slots.sidebar?.useSidebar?.() ?? {};
+  const navMode = nav?.mode ?? 'auto';
+  const sidebarCollapsible = sidebar.collapsible ?? true;
   const showLayoutTabs = tabMode === 'navbar' && tabs.length > 0;
 
   if (nav?.component) return nav.component;

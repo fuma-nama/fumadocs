@@ -16,11 +16,13 @@ const itemVariants = cva('size-6.5 p-1.5 text-fd-muted-foreground', {
 
 const full = [['light', Sun] as const, ['dark', Moon] as const, ['system', Airplay] as const];
 
-export interface ThemeToggleProps extends ComponentProps<'div'> {
+export function ThemeToggle({
+  className,
+  mode = 'light-dark',
+  ...props
+}: ComponentProps<'div'> & {
   mode?: 'light-dark' | 'light-dark-system';
-}
-
-export function ThemeToggle({ className, mode = 'light-dark', ...props }: ThemeToggleProps) {
+}) {
   const { setTheme, theme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 

@@ -1,14 +1,22 @@
 'use client';
 
-import { type ComponentProps, createContext, type FC, use, useEffect, useState } from 'react';
+import {
+  type ComponentProps,
+  createContext,
+  type FC,
+  type ReactNode,
+  use,
+  useEffect,
+  useState,
+} from 'react';
 import { cn } from '@/utils/cn';
 import { useI18n } from '@/contexts/i18n';
 import { TOC, type TOCProps } from './slots/toc';
 import { Footer, type FooterProps } from './slots/footer';
 import { Breadcrumb, type BreadcrumbProps } from './slots/breadcrumb';
-import type { DocsPageProps } from '.';
 import { TOCProvider, type TOCProviderProps } from '@/components/toc';
 import { Container } from './slots/container';
+import type { TOCItemType } from 'fumadocs-core/toc';
 
 export interface DocsPageSlots {
   toc?: FC<TOCProps>;
@@ -18,7 +26,51 @@ export interface DocsPageSlots {
   breadcrumb?: FC<BreadcrumbProps>;
 }
 
-type PageSlotsProps = Pick<DocsPageProps, 'full' | 'breadcrumb' | 'footer' | 'tableOfContent'>;
+export interface DocsPageProps extends ComponentProps<'article'> {
+  toc?: TOCItemType[];
+
+  /**
+   * Extend the page to fill all available space
+   *
+   * @defaultValue false
+   */
+  full?: boolean;
+  children?: ReactNode;
+  slots?: DocsPageSlots;
+
+  footer?: FooterOptions;
+  breadcrumb?: BreadcrumbOptions;
+  tableOfContent?: TableOfContentOptions;
+}
+
+interface TableOfContentOptions extends Pick<TOCProviderProps, 'single'>, TOCProps {
+  enabled?: boolean;
+  /**
+   * @deprecated use `slots.toc` instead.
+   */
+  component?: ReactNode;
+}
+
+interface BreadcrumbOptions extends BreadcrumbProps {
+  enabled?: boolean;
+  /**
+   * @deprecated use `slots.breadcrumb` instead.
+   */
+  component?: ReactNode;
+}
+
+interface FooterOptions extends FooterProps {
+  enabled?: boolean;
+  /**
+   * @deprecated use `slots.footer` instead.
+   */
+  component?: ReactNode;
+}
+
+interface PageSlotsProps extends Pick<DocsPageProps, 'full' | 'footer' | 'breadcrumb'> {
+  tableOfContent: TOCProps & { component?: ReactNode };
+}
+
 const PageContext = createContext<{
   props: PageSlotsProps;
   slots: DocsPageSlots;
@@ -57,7 +109,13 @@ export function DocsPage({
   let content = (
     <>
       {slots.toc && <slots.toc />}
-      {slots.container && <slots.container {...containerProps}>{children}</slots.container>}
+      {slots.container && (
+        <slots.container {...containerProps}>
+          {slots.breadcrumb && <slots.breadcrumb />}
+          {children}
+          {slots.footer && <slots.footer />}
+        </slots.container>
+      )}
     </>
   );
 
@@ -86,21 +144,21 @@ export function DocsPage({
 }
 
 function InlineBreadcrumb(props: BreadcrumbProps) {
-  const { component, enabled: _, ...rest } = useDocsPage().props?.breadcrumb ?? {};
+  const { component, enabled: _, ...rest } = useDocsPage().props.breadcrumb ?? {};
   if (component) return component;
   return <Breadcrumb {...props} {...rest} />;
 }
 
 function InlineFooter(props: FooterProps) {
-  const { component, enabled: _, ...rest } = useDocsPage().props?.footer ?? {};
+  const { component, enabled: _, ...rest } = useDocsPage().props.footer ?? {};
   if (component) return component;
   return <Footer {...props} {...rest} />;
 }
 
 function InlineTOC(props: TOCProps) {
-  const { component, enabled: _, ...rest } = useDocsPage().props?.tableOfContent ?? {};
-  if (component) return component;
-  return <TOC {...props} {...rest} />;
+  const { tableOfContent } = useDocsPage().props;
+  if (tableOfContent.component) return tableOfContent.component;
+  return <TOC {...props} {...tableOfContent} />;
 }
 
 export function PageLastUpdate({

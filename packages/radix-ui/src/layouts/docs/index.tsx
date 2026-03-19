@@ -36,9 +36,9 @@ interface SidebarOptions extends SidebarProps, SidebarProviderProps {
 
 export function DocsLayout({
   tree,
-  sidebar: { tabs: defaultTabs, tabMode: defaultTabMode, ...sidebarProps } = {},
-  tabs: layoutTabs = defaultTabs,
-  tabMode = defaultTabMode,
+  sidebar: { tabs: _tabs, tabMode: _tabMode, ...sidebarProps } = {},
+  tabs: layoutTabs = _tabs,
+  tabMode = _tabMode,
   children,
   ...props
 }: DocsLayoutProps) {

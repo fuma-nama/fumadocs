@@ -1,10 +1,7 @@
-import { type HTMLAttributes, useMemo, type ComponentProps, type ReactNode } from 'react';
+import { useMemo, type ComponentProps, type ReactNode } from 'react';
 import type { I18nConfig } from 'fumadocs-core/i18n';
 import type { LinkItemType } from '@/utils/link-item';
 import Link from 'fumadocs-core/link';
-import type { LargeSearchToggleProps, SearchToggleProps } from './search-toggle';
-import type { ThemeToggleProps } from './theme-toggle';
-import { ChildrenRenderer, type Renderer } from '@/utils/renderer';
 
 export interface NavOptions {
   enabled: boolean;
@@ -29,10 +26,27 @@ export interface NavOptions {
 }
 
 export interface BaseLayoutProps {
-  ThemeSwitch?: Renderer<ThemeToggleProps>;
-  SearchToggle?: Renderer<SearchToggleProps>;
-  LargeSearchToggle?: Renderer<LargeSearchToggleProps>;
-  LanguageSwitch?: Renderer<HTMLAttributes<HTMLElement>>;
+  themeSwitch?: {
+    enabled?: boolean;
+    component?: ReactNode;
+    mode?: 'light-dark' | 'light-dark-system';
+  };
+
+  searchToggle?: Partial<{
+    enabled: boolean;
+    components: Partial<{
+      sm: ReactNode;
+      lg: ReactNode;
+    }>;
+  }>;
+
+  /**
+   * I18n options
+   *
+   * @defaultValue false
+   */
+  i18n?: boolean | I18nConfig;
+
   /**
    * GitHub url
    */
@@ -45,55 +59,6 @@ export interface BaseLayoutProps {
   nav?: Partial<NavOptions>;
 
   children?: ReactNode;
-
-  /**
-   * @deprecated use `LanguageSwitch` instead, this is now optional for i18n setups.
-   * @defaultValue false
-   */
-  i18n?: boolean | I18nConfig;
-  /** @deprecated use `ThemeSwitch` instead */
-  themeSwitch?: {
-    enabled?: boolean;
-    component?: ReactNode;
-    mode?: 'light-dark' | 'light-dark-system';
-  };
-  /** @deprecated use `SearchToggle` & `LargeSearchToggle` instead */
-  searchToggle?: {
-    enabled?: boolean;
-    components?: {
-      sm?: ReactNode;
-      lg?: ReactNode;
-    };
-  };
-}
-
-export function parseLayoutProps<T extends BaseLayoutProps>({
-  i18n = false,
-  themeSwitch = {},
-  searchToggle = {},
-  ...rest
-}: T) {
-  rest.LanguageSwitch ??= !!i18n;
-
-  if (themeSwitch.enabled === false) {
-    rest.ThemeSwitch ??= false;
-  } else if (themeSwitch.component) {
-    rest.ThemeSwitch ??= new ChildrenRenderer(themeSwitch.component);
-  } else {
-    rest.ThemeSwitch ??= { mode: themeSwitch.mode };
-  }
-
-  if (searchToggle.enabled === false) {
-    rest.SearchToggle ??= false;
-    rest.LargeSearchToggle ??= false;
-  } else {
-    const { sm, lg } = searchToggle.components ?? {};
-    rest.SearchToggle ??= sm ? new ChildrenRenderer(sm) : true;
-    rest.LargeSearchToggle ??= lg ? new ChildrenRenderer(lg) : true;
-  }
-
-  return rest as Omit<T, 'themeSwitch' | 'i18n' | 'searchToggle'> &
-    Pick<Required<T>, 'LanguageSwitch' | 'SearchToggle' | 'LargeSearchToggle' | 'ThemeSwitch'>;
 }
 
 /**
@@ -141,7 +106,7 @@ export function useLinkItems({ githubUrl, links }: Pick<BaseLayoutProps, 'links'
     const menuItems: LinkItemType[] = [];
 
     for (const item of all) {
-      switch (item.on) {
+      switch (item.on ?? 'all') {
         case 'menu':
           menuItems.push(item);
           break;

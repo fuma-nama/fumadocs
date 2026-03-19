@@ -3,7 +3,10 @@ import type { ComponentProps } from 'react';
 import { useNotebookLayout } from '../client';
 
 export function Container(props: ComponentProps<'div'>) {
-  const { navMode, slots } = useNotebookLayout();
+  const {
+    props: { nav },
+    slots,
+  } = useNotebookLayout();
   const pageCol =
     'calc(var(--fd-layout-width,97rem) - var(--fd-sidebar-col) - var(--fd-toc-width))';
   const { collapsed } = slots.sidebar?.useSidebar?.() ?? {};
@@ -16,7 +19,7 @@ export function Container(props: ComponentProps<'div'>) {
       style={
         {
           gridTemplate:
-            navMode === 'top'
+            nav?.mode === 'top'
               ? `". header header header ."
 "sidebar sidebar toc-popover toc-popover ."
 "sidebar sidebar main toc ." 1fr / minmax(min-content, 1fr) var(--fd-sidebar-col) minmax(0, ${pageCol}) var(--fd-toc-width) minmax(min-content, 1fr)`

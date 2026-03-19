@@ -4,7 +4,6 @@ import { useDocsPage } from '../client';
 
 export function Container(props: ComponentProps<'article'>) {
   const {
-    slots,
     props: { full },
   } = useDocsPage();
 
@@ -19,9 +18,7 @@ export function Container(props: ComponentProps<'article'>) {
         props.className,
       )}
     >
-      {slots.breadcrumb && <slots.breadcrumb />}
       {props.children}
-      {slots.footer && <slots.footer />}
     </article>
   );
 }

@@ -20,6 +20,17 @@ export const registry: Registry = {
   components: [
     ...commonComponents,
     {
+      name: 'link-item',
+      unlisted: true,
+      files: [
+        {
+          type: 'components',
+          path: 'utils/link-item.tsx',
+          target: '<dir>/layout/link-item.tsx',
+        },
+      ],
+    },
+    {
       name: 'layouts/shared',
       unlisted: true,
       files: [

@@ -1,54 +1,8 @@
-import type { ComponentProps, ReactNode } from 'react';
+import type { ComponentProps } from 'react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { Edit } from 'lucide-react';
 import { I18nLabel } from '@/contexts/i18n';
-import type { AnchorProviderProps, TOCItemType } from 'fumadocs-core/toc';
-import type { DocsPageSlots } from './client';
-import type { TOCProps } from './slots/toc';
-import type { BreadcrumbProps } from './slots/breadcrumb';
-import type { FooterProps } from './slots/footer';
-
-export interface DocsPageProps extends ComponentProps<'article'> {
-  toc?: TOCItemType[];
-
-  /**
-   * Extend the page to fill all available space
-   *
-   * @defaultValue false
-   */
-  full?: boolean;
-  children?: ReactNode;
-  slots?: DocsPageSlots;
-
-  footer?: FooterOptions;
-  breadcrumb?: BreadcrumbOptions;
-  tableOfContent?: TableOfContentOptions;
-}
-
-interface TableOfContentOptions extends Pick<AnchorProviderProps, 'single'>, TOCProps {
-  enabled?: boolean;
-  /**
-   * @deprecated use `slots.toc` instead.
-   */
-  component?: ReactNode;
-}
-
-interface BreadcrumbOptions extends BreadcrumbProps {
-  enabled?: boolean;
-  /**
-   * @deprecated use `slots.breadcrumb` instead.
-   */
-  component?: ReactNode;
-}
-
-interface FooterOptions extends FooterProps {
-  enabled?: boolean;
-  /**
-   * @deprecated use `slots.footer` instead.
-   */
-  component?: ReactNode;
-}
 
 export function EditOnGitHub(props: ComponentProps<'a'>) {
   return (
@@ -105,8 +59,13 @@ export function DocsTitle({ children, className, ...props }: ComponentProps<'h1'
   );
 }
 
-export { DocsPage, type DocsPageSlots, PageLastUpdate, useDocsPage } from './client';
-export { TOC, type TOCProps } from './slots/toc';
+export {
+  DocsPage,
+  type DocsPageSlots,
+  type DocsPageProps,
+  PageLastUpdate,
+  useDocsPage,
+} from './client';
 export { type FooterProps, Footer as PageFooter } from './slots/footer';
 export { type BreadcrumbProps, Breadcrumb as PageBreadcrumb } from './slots/breadcrumb';
-export { MarkdownCopyButton, ViewOptionsPopover } from '@/layouts/slots/page-actions';
+export { MarkdownCopyButton, ViewOptionsPopover } from '@/layouts/shared/page-actions';
