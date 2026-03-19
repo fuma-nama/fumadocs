@@ -1,5 +1,5 @@
 import type { StructuredData } from '@/mdx-plugins';
-import { type AnyObject, type OramaCloud } from '@orama/core';
+import type { AnyObject, OramaCloud } from '@orama/core';
 
 export interface SyncOptions {
   /**
@@ -129,7 +129,6 @@ function toIndex(page: OramaDocument): OramaIndex[] {
       id: `${page.id}-${(id++).toString()}`,
       title: page.title,
       url: page.url,
-      // TODO: explicit declare enums
       page_id: page.id,
       tag: page.tag,
       section,

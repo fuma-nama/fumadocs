@@ -40,23 +40,29 @@ export const componentSchema = z.object({
    * list of sub components, either local (component name) or remote (registry info & component name)
    */
   subComponents: z.array(z.string().or(httpSubComponent)).default([]),
+
+  /**
+   * override variables for the current component & its sub components.
+   *
+   * this is powerful to customise how sub components are installed vs. installing them directly.
+   */
+  variables: z.record(z.string(), z.unknown()).optional(),
 });
 
 export const registryInfoSchema = z.object({
   /**
-   * define used variables, variables can be referenced in the import specifiers of component files.
+   * define metadata for variables, variables can be referenced in the target path of component files, or in plugins.
    */
   variables: z
     .record(
       z.string(),
       z.object({
         description: z.string().optional(),
-        default: z.unknown().optional(),
       }),
     )
     .optional(),
   /**
-   * provide variables to sub components
+   * override variables for all components.
    */
   env: z.record(z.string(), z.unknown()).optional(),
   indexes: z.array(indexSchema).default([]),

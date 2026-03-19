@@ -10,42 +10,6 @@ export function resolveExternal(
   toPackageName: string,
   toRegistryDir: string,
 ): Reference | undefined {
-  // TODO: this will cause the installed slots to reference `fumadocs-ui` even if the layout & context itself are already installed locally.
-  // need change from CLI side.
-  if (ref.type === 'sub-component' && ref.resolved.type === 'local') {
-    let specifier: string | undefined;
-    switch (ref.resolved.component.name) {
-      case 'layouts/home':
-        specifier = '/layouts/home';
-        break;
-      case 'layouts/docs':
-        specifier = ref.resolved.file.path.includes('page')
-          ? '/layouts/docs/page'
-          : '/layouts/docs';
-        break;
-      case 'layouts/notebook':
-        specifier = ref.resolved.file.path.includes('page')
-          ? '/layouts/notebook/page'
-          : '/layouts/notebook';
-        break;
-      case 'layouts/flux':
-        specifier = ref.resolved.file.path.includes('page')
-          ? '/layouts/flux/page'
-          : '/layouts/flux';
-        break;
-      case 'layouts/shared':
-        specifier = '/layouts/shared';
-        break;
-    }
-
-    if (specifier)
-      return {
-        type: 'dependency',
-        dep: toPackageName,
-        specifier: toPackageName + specifier,
-      };
-  }
-
   if (ref.type === 'file') {
     const file = path.relative(toRegistryDir, ref.file).replaceAll(path.sep, '/');
 
@@ -72,7 +36,7 @@ export async function findSlotComponents(dir: string): Promise<Component[]> {
         {
           path: file,
           type: 'components',
-          target: path.join('<dir>/layout', file),
+          target: path.join('<dir>/layout', name),
         },
       ],
     });
