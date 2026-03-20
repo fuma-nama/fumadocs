@@ -62,14 +62,14 @@ export function Header(props: ComponentProps<'header'>) {
           ))}
       </ul>
       <div className="flex flex-row items-center justify-end gap-1.5 flex-1 max-lg:hidden">
-        {slots.searchTrigger?.full && (
+        {slots.searchTrigger && (
           <slots.searchTrigger.full
             hideIfDisabled
             className="w-full rounded-full ps-2.5 max-w-[240px]"
           />
         )}
         {slots.themeSwitch && <slots.themeSwitch />}
-        {slots.languageSelect?.root && (
+        {slots.languageSelect && (
           <slots.languageSelect.root>
             <Languages className="size-5" />
           </slots.languageSelect.root>
@@ -85,7 +85,7 @@ export function Header(props: ComponentProps<'header'>) {
         </ul>
       </div>
       <div className="flex flex-row items-center ms-auto -me-1.5 lg:hidden">
-        {slots.searchTrigger?.sm && <slots.searchTrigger.sm hideIfDisabled className="p-2" />}
+        {slots.searchTrigger && <slots.searchTrigger.sm hideIfDisabled className="p-2" />}
         <NavigationMenuItem asChild>
           <div>
             <NavigationMenuTrigger
@@ -116,7 +116,7 @@ export function Header(props: ComponentProps<'header'>) {
                   />
                 ))}
                 <div role="separator" className="flex-1" />
-                {slots.languageSelect?.root && (
+                {slots.languageSelect && (
                   <slots.languageSelect.root>
                     <Languages className="size-5" />
                     {slots.languageSelect.text && <slots.languageSelect.text />}

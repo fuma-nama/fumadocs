@@ -1,3 +1,5 @@
+'use client';
+
 import { useI18n } from '@/contexts/i18n';
 import { cn } from '@/utils/cn';
 import { isActive } from '@/utils/urls';

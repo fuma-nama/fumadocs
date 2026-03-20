@@ -24,9 +24,9 @@ import {
 import { Header } from './slots/header';
 
 export interface DocsSlots extends BaseSlots {
-  container?: FC<ComponentProps<'div'>>;
-  header?: FC<ComponentProps<'header'>>;
-  sidebar?: {
+  container: FC<ComponentProps<'div'>>;
+  header: FC<ComponentProps<'header'>>;
+  sidebar: {
     provider: FC<SidebarProviderProps>;
     root: FC<SidebarProps>;
     trigger: FC<ComponentProps<'button'>>;
@@ -85,7 +85,7 @@ export function LayoutBody(
   const linkItems = useLinkItems(props);
   const slots: DocsSlots = {
     ...baseSlots,
-    header: navEnabled ? (defaultSlots?.header ?? Header) : undefined,
+    header: defaultSlots?.header ?? Header,
     container: defaultSlots?.container ?? Container,
     sidebar: defaultSlots?.sidebar ?? {
       provider: SidebarProvider,
@@ -95,26 +95,6 @@ export function LayoutBody(
       useSidebar,
     },
   };
-
-  let content = (
-    <>
-      {slots.header && <slots.header />}
-      {slots.sidebar && <slots.sidebar.root {...sidebarProps} />}
-      {children}
-    </>
-  );
-
-  if (slots.container) {
-    content = <slots.container {...containerProps}>{content}</slots.container>;
-  }
-
-  if (slots.sidebar) {
-    content = (
-      <slots.sidebar.provider defaultOpenLevel={defaultOpenLevel} prefetch={prefetch}>
-        {content}
-      </slots.sidebar.provider>
-    );
-  }
 
   return (
     <TreeContextProvider tree={tree}>
@@ -131,7 +111,13 @@ export function LayoutBody(
           ...linkItems,
         }}
       >
-        {content}
+        <slots.sidebar.provider defaultOpenLevel={defaultOpenLevel} prefetch={prefetch}>
+          <slots.container {...containerProps}>
+            {navEnabled && <slots.header />}
+            <slots.sidebar.root {...sidebarProps} />
+            {children}
+          </slots.container>
+        </slots.sidebar.provider>
       </LayoutContext>
     </TreeContextProvider>
   );

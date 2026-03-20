@@ -15,7 +15,7 @@ export interface DocsLayoutProps extends BaseLayoutProps {
   tabMode?: 'top' | 'auto';
   tabs?: LayoutTab[] | GetLayoutTabsOptions | false;
   containerProps?: HTMLAttributes<HTMLDivElement>;
-  slots?: DocsSlots;
+  slots?: Partial<DocsSlots>;
 }
 
 interface SidebarOptions extends SidebarProps, SidebarProviderProps {

@@ -1,4 +1,4 @@
-import { useMemo, type ComponentProps, type ReactNode } from 'react';
+import { type FC, useMemo, type ComponentProps, type ReactNode } from 'react';
 import type { I18nConfig } from 'fumadocs-core/i18n';
 import * as PageTree from 'fumadocs-core/page-tree';
 import { isActive, normalize } from '@/utils/urls';
@@ -9,7 +9,7 @@ import type { FullSearchTriggerProps, SearchTriggerProps } from './slots/search-
 export interface NavOptions {
   enabled?: boolean;
   children?: ReactNode;
-  title?: ReactNode | ((props: ComponentProps<'a'>) => ReactNode);
+  title?: ReactNode | FC<ComponentProps<'a'>>;
 
   /**
    * Redirect url of title
@@ -40,7 +40,7 @@ export interface BaseLayoutProps {
    * navigation config
    */
   nav?: NavOptions;
-  slots?: BaseSlots;
+  slots?: Partial<BaseSlots>;
   children?: ReactNode;
   themeSwitch?: ThemeSwitchOptions;
   searchToggle?: SearchToggleOptions;

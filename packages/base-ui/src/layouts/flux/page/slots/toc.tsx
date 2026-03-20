@@ -1,6 +1,6 @@
 'use client';
 
-import { TOCScrollArea, useTOCItems } from '@/components/toc';
+import * as Base from '@/components/toc';
 import { useI18n } from '@/contexts/i18n';
 import { useTreePath } from '@/contexts/tree';
 import { cn } from '@/utils/cn';
@@ -28,6 +28,10 @@ const TocPopoverContext = createContext<{
   setOpen: (open: boolean) => void;
 } | null>(null);
 
+export type TOCProviderProps = Base.TOCProviderProps;
+
+export const { TOCProvider } = Base;
+
 export interface TOCProps {
   container?: ComponentProps<'div'>;
   trigger?: ComponentProps<'button'>;
@@ -54,9 +58,9 @@ export function TOC({ container, trigger, content, header, footer, style }: TOCP
     <PageTOCPopover {...container}>
       <PageTOCPopoverContent {...content}>
         {header}
-        <TOCScrollArea>
+        <Base.TOCScrollArea>
           {style === 'clerk' ? <TocClerk.TOCItems /> : <TocDefault.TOCItems />}
-        </TOCScrollArea>
+        </Base.TOCScrollArea>
         {footer}
       </PageTOCPopoverContent>
       <PageTOCPopoverTrigger {...trigger} />
@@ -129,7 +133,7 @@ function PageTOCPopoverPhysical({ className, children, ...rest }: ComponentProps
 function PageTOCPopoverTrigger({ className, ...props }: ComponentProps<'button'>) {
   const { text } = useI18n();
   const { open } = use(TocPopoverContext)!;
-  const items = useTOCItems();
+  const items = Base.useTOCItems();
   const active = useActiveAnchor();
   const selected = useMemo(
     () => items.findIndex((item) => active === item.url.slice(1)),

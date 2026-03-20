@@ -1,3 +1,5 @@
+'use client';
+
 import { cn } from '@/utils/cn';
 import type { ComponentProps } from 'react';
 import { useNotebookLayout } from '../client';

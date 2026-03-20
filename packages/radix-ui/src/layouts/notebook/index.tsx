@@ -17,7 +17,7 @@ export interface DocsLayoutProps extends BaseLayoutProps {
   sidebar?: SidebarOptions;
   nav?: Nav;
   containerProps?: HTMLAttributes<HTMLDivElement>;
-  slots?: DocsSlots;
+  slots?: Partial<DocsSlots>;
 }
 
 interface Nav extends NavOptions {

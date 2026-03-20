@@ -31,9 +31,9 @@ import {
 import { Container } from './slots/container';
 
 export interface DocsSlots extends BaseSlots {
-  container?: FC<ComponentProps<'div'>>;
-  tabDropdown?: FC<TabDropdownProps>;
-  sidebar?: {
+  container: FC<ComponentProps<'div'>>;
+  tabDropdown: FC<TabDropdownProps>;
+  sidebar: {
     provider: FC<SidebarProviderProps>;
     trigger: FC<ComponentProps<'button'>>;
     root: FC<SidebarProps>;
@@ -45,7 +45,7 @@ export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
   sidebar?: SidebarOptions;
   tabs?: LayoutTab[] | GetLayoutTabsOptions | false;
-  slots?: DocsSlots;
+  slots?: Partial<DocsSlots>;
   renderNavigationPanel?: (props: NavigationPanelProps) => ReactNode;
 
   containerProps?: ComponentProps<'div'>;
@@ -125,25 +125,6 @@ export function DocsLayout(props: DocsLayoutProps) {
     },
   };
 
-  let content = (
-    <>
-      {sidebarEnabled && slots.sidebar && <slots.sidebar.root {...sidebarProps} />}
-      {children}
-    </>
-  );
-
-  if (slots.container) {
-    content = <slots.container {...containerProps}>{content}</slots.container>;
-  }
-
-  if (slots.sidebar) {
-    content = (
-      <slots.sidebar.provider defaultOpenLevel={defaultOpenLevel} prefetch={prefetch}>
-        {content}
-      </slots.sidebar.provider>
-    );
-  }
-
   return (
     <LayoutContext
       value={{
@@ -153,7 +134,12 @@ export function DocsLayout(props: DocsLayoutProps) {
       }}
     >
       <TreeContextProvider tree={tree}>
-        {content}
+        <slots.sidebar.provider defaultOpenLevel={defaultOpenLevel} prefetch={prefetch}>
+          <slots.container {...containerProps}>
+            {sidebarEnabled && <slots.sidebar.root {...sidebarProps} />}
+            {children}
+          </slots.container>
+        </slots.sidebar.provider>
         {renderNavigationPanel({
           head: (
             <>
