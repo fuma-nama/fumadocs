@@ -72,12 +72,12 @@ export function ViewOptionsPopover({
   /**
    * A URL to the raw Markdown/MDX content of page
    */
-  markdownUrl: string;
+  markdownUrl?: string;
 
   /**
    * Source file URL on GitHub
    */
-  githubUrl: string;
+  githubUrl?: string;
 }) {
   const pathname = usePathname();
   const items = useMemo(() => {
@@ -86,7 +86,7 @@ export function ViewOptionsPopover({
     const q = `Read ${pageUrl}, I want to ask questions about it.`;
 
     return [
-      {
+      githubUrl && {
         title: 'Open in GitHub',
         href: githubUrl,
         icon: (
@@ -96,7 +96,7 @@ export function ViewOptionsPopover({
           </svg>
         ),
       },
-      {
+      markdownUrl && {
         title: 'View as Markdown',
         href: markdownUrl,
         icon: <TextIcon />,
@@ -217,7 +217,7 @@ export function ViewOptionsPopover({
           text: q,
         })}`,
       },
-    ];
+    ].filter((v) => !!v);
   }, [githubUrl, markdownUrl, pathname]);
 
   return (

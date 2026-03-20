@@ -45,22 +45,17 @@ This will render the title in the MDX body.
 
 </Callout>
 
-### Edit on GitHub
+### Page Actions
 
-Link to the original GitHub file with your component.
+Show GitHub link, and shortcut links for AIs.
 
 ```tsx
-import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
+import { DocsPage, ViewOptionsPopover } from 'fumadocs-ui/layouts/<layout>/page';
+
+const githubUrl = `https://github.com/fuma-nama/fumadocs/blob/main/content/docs/${page.path}`
 
 <DocsPage>
-  <a
-    href={`https://github.com/fuma-nama/fumadocs/blob/main/content/docs/${page.path}`}
-    rel="noreferrer noopener"
-    target="_blank"
-    className="w-fit border rounded-xl p-2 font-medium text-sm text-fd-secondary-foreground bg-fd-secondary transition-colors hover:text-fd-accent-foreground hover:bg-fd-accent"
-  >
-    Edit on GitHub
-  </a>
+  <ViewOptionsPopover githubUrl={githubUrl} />
 </DocsPage>;
 ```
 
@@ -142,10 +137,10 @@ import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
 <DocsPage toc={headings}>...</DocsPage>;
 ```
 
-You can customise or disable it with `tableOfContent`, or with `tableOfContentPopover` on smaller devices.
+You can customise it with `tableOfContent`, or with `tableOfContentPopover` on smaller devices.
 
-```tsx tab="Options"
-import { DocsPage, type TOCMainProps } from 'fumadocs-ui/layouts/<layout>/page';
+```tsx title="page.tsx"
+import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
 
 return (
   <DocsPage tableOfContent={options} tableOfContentPopover={options}>
@@ -154,7 +149,29 @@ return (
 );
 ```
 
-```tsx tab="Replace Component" title="page.tsx"
+<auto-type-table type="import('fumadocs-ui/layouts/docs/page/slots/toc').TOCProps" />
+
+#### Style
+
+You can choose another style for TOC, like `clerk` inspired by https://clerk.com:
+
+```tsx
+import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
+
+<DocsPage
+  tableOfContent={{
+    style: 'clerk',
+  }}
+>
+  ...
+</DocsPage>;
+```
+
+#### Replace TOC
+
+To replace the component:
+
+```tsx tab="page.tsx"
 import { TOCProvider, TOC, TOCPopover } from './my-toc';
 
 return (
@@ -172,7 +189,7 @@ return (
 );
 ```
 
-```tsx tab="Replace Component" title="my-toc.tsx"
+```tsx tab="my-toc.tsx"
 'use client';
 import type {
   TOCProps,
@@ -195,31 +212,25 @@ export function TOCPopover(props: TOCPopoverProps) {
 }
 ```
 
-<auto-type-table type="import('fumadocs-ui/layouts/docs/page').TOCMainProps" />
+You can start from the default implementation with Fumadocs CLI:
 
-#### Style
-
-You can choose another style for TOC, like `clerk` inspired by https://clerk.com:
-
-```tsx
-import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
-
-<DocsPage
-  tableOfContent={{
-    style: 'clerk',
-  }}
->
-  ...
-</DocsPage>;
+```bash tab="Docs Layout"
+npx @fumadocs/cli add slots/docs/page/toc
 ```
 
-You can also style the TOC title with the `toc-title` ID.
+```bash tab="Notebook Layout"
+npx @fumadocs/cli add slots/notebook/page/toc
+```
+
+```bash tab="Flux Layout"
+npx @fumadocs/cli add slots/flux/page/toc
+```
 
 ### Footer
 
 Footer is a navigation element that has two buttons to jump to the next and previous pages. When not specified, it shows the neighbour pages found from page tree.
 
-Customise the footer with the `Footer` prop.
+Customise the footer with the `footer` prop:
 
 ```tsx
 import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
@@ -229,8 +240,131 @@ import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
 
 <auto-type-table type="Omit<import('fumadocs-ui/layouts/docs/page').FooterProps, keyof React.ComponentProps<'div'>>" />
 
+#### Replace Footer
+
+To replace the component:
+
+```tsx tab="page.tsx"
+import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
+import { Footer } from './my-footer';
+
+<DocsPage
+  slots={{
+    footer: Footer,
+  }}
+/>;
+```
+
+```tsx tab="my-footer.tsx"
+'use client';
+import type { FooterProps } from 'fumadocs-ui/layouts/<layout>/page/slots/footer';
+
+export function Footer(props: FooterProps) {
+  return <div>Hello World</div>;
+}
+```
+
+You can start from the default implementation with Fumadocs CLI:
+
+```bash tab="Docs Layout"
+npx @fumadocs/cli add slots/docs/page/footer
+```
+
+```bash tab="Notebook Layout"
+npx @fumadocs/cli add slots/notebook/page/footer
+```
+
+```bash tab="Flux Layout"
+npx @fumadocs/cli add slots/flux/page/footer
+```
+
 ### Breadcrumb
 
 A navigation element, shown only when user is navigating in folders.
 
+Customise the breadcrumb with the `breadcrumb` option:
+
+```tsx
+import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
+
+<DocsPage breadcrumb={options}>...</DocsPage>;
+```
+
 <auto-type-table type="Omit<import('fumadocs-ui/layouts/docs/page').BreadcrumbProps, keyof React.ComponentProps<'div'>>" />
+
+#### Replace Breadcrumb
+
+To replace the component:
+
+```tsx tab="page.tsx"
+import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
+import { Breadcrumb } from './my-breadcrumb';
+
+<DocsPage
+  slots={{
+    breadcrumb: Breadcrumb,
+  }}
+/>;
+```
+
+```tsx tab="my-breadcrumb.tsx"
+'use client';
+import type { BreadcrumbProps } from 'fumadocs-ui/layouts/<layout>/page/slots/breadcrumb';
+
+export function Breadcrumb(props: BreadcrumbProps) {
+  return <div>Hello World</div>;
+}
+```
+
+You can start from the default implementation with Fumadocs CLI:
+
+```bash tab="Docs Layout"
+npx @fumadocs/cli add slots/docs/page/breadcrumb
+```
+
+```bash tab="Notebook Layout"
+npx @fumadocs/cli add slots/notebook/page/breadcrumb
+```
+
+```bash tab="Flux Layout"
+npx @fumadocs/cli add slots/flux/page/breadcrumb
+```
+
+### Container
+
+Container controls the article wrapper around breadcrumb, body, and footer.
+
+To replace the page container:
+
+```tsx tab="page.tsx"
+import { DocsPage } from 'fumadocs-ui/layouts/<layout>/page';
+import { Container } from './my-container';
+
+<DocsPage
+  slots={{
+    container: Container,
+  }}
+/>;
+```
+
+```tsx tab="my-container.tsx"
+'use client';
+
+export function Container(props: React.ComponentProps<'article'>) {
+  return <div />;
+}
+```
+
+You can start from the default implementation with Fumadocs CLI:
+
+```bash tab="Docs Layout"
+npx @fumadocs/cli add slots/docs/page/container
+```
+
+```bash tab="Notebook Layout"
+npx @fumadocs/cli add slots/notebook/page/container
+```
+
+```bash tab="Flux Layout"
+npx @fumadocs/cli add slots/flux/page/container
+```
