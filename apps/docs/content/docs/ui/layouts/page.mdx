@@ -155,17 +155,43 @@ return (
 ```
 
 ```tsx tab="Replace Component" title="page.tsx"
-import { TOC } from './my-toc';
+import { TOCProvider, TOC, TOCPopover } from './my-toc';
 
-return <DocsPage slots={{ toc: TOC }}>...</DocsPage>;
+return (
+  <DocsPage
+    slots={{
+      toc: {
+        provider: TOCProvider,
+        main: TOC,
+        popover: TOCPopover,
+      },
+    }}
+  >
+    ...
+  </DocsPage>
+);
 ```
 
 ```tsx tab="Replace Component" title="my-toc.tsx"
 'use client';
-import type { TOCProps } from 'fumadocs-ui/layouts/<layout>/page/slots/toc';
+import type {
+  TOCProps,
+  TOCPopoverProps,
+  TOCProviderProps,
+} from 'fumadocs-ui/layouts/<layout>/page/slots/toc';
+
+export function TOCProvider({ toc, children }: TOCProviderProps) {
+  // receive TOC items, you can pass it down via React contexts
+  console.log(toc);
+  return children;
+}
 
 export function TOC(props: TOCProps) {
   return <div>Hello World</div>;
+}
+
+export function TOCPopover(props: TOCPopoverProps) {
+  return <div>Popover</div>;
 }
 ```
 

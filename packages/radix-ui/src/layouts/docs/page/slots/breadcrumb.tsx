@@ -1,3 +1,5 @@
+'use client';
+
 import { useTreePath, useTreeContext } from '@/contexts/tree';
 import { cn } from '@/utils/cn';
 import { type BreadcrumbOptions, getBreadcrumbItemsFromPath } from 'fumadocs-core/breadcrumb';
