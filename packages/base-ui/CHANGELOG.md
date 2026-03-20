@@ -1,5 +1,13 @@
 # @fumadocs/base-ui
 
+## 16.7.1
+
+### Patch Changes
+
+- 11b8691: hotfix
+- 75b0b94: Refactor TOC slot
+  - fumadocs-core@16.7.1
+
 ## 16.7.0
 
 ### Minor Changes
