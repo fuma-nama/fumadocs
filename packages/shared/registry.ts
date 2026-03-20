@@ -27,16 +27,21 @@ export async function findSlotComponents(dir: string): Promise<Component[]> {
   const slots: Component[] = [];
 
   for await (const file of glob('layouts/**/slots/*', { cwd: dir })) {
-    const name = path.relative('layouts', file);
+    const relativePath = path.relative('layouts', file);
+    const name = relativePath
+      .split(path.sep)
+      .filter((v) => v !== 'slots')
+      .join('/')
+      .slice(0, -path.extname(relativePath).length);
 
     slots.push({
-      name: name.slice(0, -path.extname(name).length),
+      name: `slots/${name}`,
       unlisted: true,
       files: [
         {
           path: file,
-          type: 'components',
-          target: path.join('<dir>/layout', name),
+          type: 'layout',
+          target: path.join('<dir>', relativePath),
         },
       ],
     });

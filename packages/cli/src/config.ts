@@ -6,7 +6,7 @@ export function createConfigSchema(isSrc: boolean) {
   const defaultAliases = {
     uiDir: './components/ui',
     componentsDir: './components',
-    blockDir: './components',
+    layoutDir: './layouts',
     cssDir: './styles',
     libDir: './lib',
   };
@@ -24,7 +24,7 @@ export function createConfigSchema(isSrc: boolean) {
       .object({
         uiDir: z.string().default(defaultAliases.uiDir),
         componentsDir: z.string().default(defaultAliases.uiDir),
-        blockDir: z.string().default(defaultAliases.blockDir),
+        layoutDir: z.string().default(defaultAliases.layoutDir),
         cssDir: z.string().default(defaultAliases.componentsDir),
         libDir: z.string().default(defaultAliases.libDir),
       })

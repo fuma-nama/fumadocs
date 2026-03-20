@@ -27,17 +27,17 @@ export const registry: Registry = {
         {
           type: 'components',
           path: 'components/sidebar/base.tsx',
-          target: '<dir>/layout/sidebar/base.tsx',
+          target: '<dir>/docs-sidebar/base.tsx',
         },
         {
           type: 'components',
           path: 'components/sidebar/page-tree.tsx',
-          target: '<dir>/layout/sidebar/page-tree.tsx',
+          target: '<dir>/docs-sidebar/page-tree.tsx',
         },
         {
           type: 'components',
           path: 'components/sidebar/link-item.tsx',
-          target: '<dir>/layout/sidebar/link-item.tsx',
+          target: '<dir>/docs-sidebar/link-item.tsx',
         },
       ],
     },
@@ -46,14 +46,14 @@ export const registry: Registry = {
       unlisted: true,
       files: [
         {
-          type: 'components',
+          type: 'layout',
           path: 'layouts/shared/index.tsx',
-          target: '<dir>/layout/shared/index.tsx',
+          target: '<dir>/shared/index.tsx',
         },
         {
-          type: 'components',
+          type: 'layout',
           path: 'layouts/shared/client.tsx',
-          target: '<dir>/layout/shared/client.tsx',
+          target: '<dir>/shared/client.tsx',
         },
       ],
     },
@@ -61,24 +61,24 @@ export const registry: Registry = {
       name: 'layouts/docs',
       files: [
         {
-          type: 'components',
+          type: 'layout',
           path: 'layouts/docs/index.tsx',
-          target: '<dir>/layout/docs/index.tsx',
+          target: '<dir>/docs/index.tsx',
         },
         {
-          type: 'components',
+          type: 'layout',
           path: 'layouts/docs/client.tsx',
-          target: '<dir>/layout/docs/client.tsx',
+          target: '<dir>/docs/client.tsx',
         },
         {
-          type: 'components',
+          type: 'layout',
           path: 'layouts/docs/page/index.tsx',
-          target: '<dir>/layout/docs/page/index.tsx',
+          target: '<dir>/docs/page/index.tsx',
         },
         {
-          type: 'components',
+          type: 'layout',
           path: 'layouts/docs/page/client.tsx',
-          target: '<dir>/layout/docs/page/client.tsx',
+          target: '<dir>/docs/page/client.tsx',
         },
       ],
       unlisted: true,
@@ -87,19 +87,19 @@ export const registry: Registry = {
       name: 'layouts/flux',
       files: [
         {
-          type: 'components',
+          type: 'layout',
           path: 'layouts/flux/index.tsx',
-          target: '<dir>/layout/flux/index.tsx',
+          target: '<dir>/flux/index.tsx',
         },
         {
-          type: 'components',
+          type: 'layout',
           path: 'layouts/flux/page/index.tsx',
-          target: '<dir>/layout/flux/page/index.tsx',
+          target: '<dir>/flux/page/index.tsx',
         },
         {
-          type: 'components',
+          type: 'layout',
           path: 'layouts/flux/page/client.tsx',
-          target: '<dir>/layout/flux/page/client.tsx',
+          target: '<dir>/flux/page/client.tsx',
         },
       ],
       unlisted: true,
@@ -108,24 +108,24 @@ export const registry: Registry = {
       name: 'layouts/notebook',
       files: [
         {
-          type: 'components',
+          type: 'layout',
           path: 'layouts/notebook/index.tsx',
-          target: '<dir>/layout/notebook/index.tsx',
+          target: '<dir>/notebook/index.tsx',
         },
         {
-          type: 'components',
+          type: 'layout',
           path: 'layouts/notebook/client.tsx',
-          target: '<dir>/layout/notebook/client.tsx',
+          target: '<dir>/notebook/client.tsx',
         },
         {
-          type: 'components',
+          type: 'layout',
           path: 'layouts/notebook/page/index.tsx',
-          target: '<dir>/layout/notebook/page/index.tsx',
+          target: '<dir>/notebook/page/index.tsx',
         },
         {
-          type: 'components',
+          type: 'layout',
           path: 'layouts/notebook/page/client.tsx',
-          target: '<dir>/layout/notebook/page/client.tsx',
+          target: '<dir>/notebook/page/client.tsx',
         },
       ],
       unlisted: true,
@@ -134,9 +134,9 @@ export const registry: Registry = {
       name: 'layouts/home',
       files: [
         {
-          type: 'components',
+          type: 'layout',
           path: 'layouts/home/index.tsx',
-          target: '<dir>/layout/home/index.tsx',
+          target: '<dir>/home/index.tsx',
         },
         {
           type: 'ui',

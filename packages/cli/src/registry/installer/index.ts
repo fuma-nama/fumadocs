@@ -306,10 +306,10 @@ export class ComponentInstaller {
     const dir = (
       {
         components: config.aliases.componentsDir,
-        block: config.aliases.blockDir,
         ui: config.aliases.uiDir,
         css: config.aliases.cssDir,
         lib: config.aliases.libDir,
+        layout: config.aliases.layoutDir,
         route: './',
       } as const
     )[file.type];
