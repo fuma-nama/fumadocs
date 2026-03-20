@@ -28,14 +28,14 @@ import { Header } from './slots/header';
 import { Container } from './slots/container';
 
 export interface DocsSlots extends BaseSlots {
-  container?: FC<ComponentProps<'div'>>;
-  sidebar?: {
+  container: FC<ComponentProps<'div'>>;
+  header: FC<ComponentProps<'header'>>;
+  sidebar: {
     provider: FC<SidebarProviderProps>;
     root: FC<SidebarProps>;
     trigger: FC<ComponentProps<'button'>>;
     useSidebar: () => { collapsed: boolean; open: boolean; setOpen: (v: boolean) => void };
   };
-  header?: FC<ComponentProps<'header'>>;
 }
 
 const { useProvider } = baseSlots({
@@ -77,7 +77,7 @@ export function LayoutBody(
 ) {
   const {
     nav: { enabled: navEnabled = true, transparentMode: navTransparentMode = 'none' } = {},
-    sidebar: { defaultOpenLevel, prefetch, ...sidebarProps } = {},
+    sidebar: { enabled: sidebarEnabled = true, defaultOpenLevel, prefetch, ...sidebarProps } = {},
     slots: defaultSlots,
     tabs,
     tabMode = 'auto',
@@ -91,7 +91,7 @@ export function LayoutBody(
   const linkItems = useLinkItems(props);
   const slots: DocsSlots = {
     ...baseSlots,
-    header: navEnabled ? (defaultSlots?.header ?? Header) : undefined,
+    header: defaultSlots?.header ?? Header,
     container: defaultSlots?.container ?? Container,
     sidebar: defaultSlots?.sidebar ?? {
       provider: SidebarProvider,
@@ -100,32 +100,6 @@ export function LayoutBody(
       useSidebar: useSidebar,
     },
   };
-
-  let content = (
-    <>
-      {slots.header && <slots.header />}
-      {slots.sidebar && <slots.sidebar.root {...sidebarProps} />}
-      {tabMode === 'top' && tabs.length > 0 && (
-        <LayoutTabs
-          tabs={tabs}
-          className="z-10 bg-fd-background border-b px-6 pt-3 xl:px-8 max-md:hidden"
-        />
-      )}
-      {children}
-    </>
-  );
-
-  if (slots.container) {
-    content = <slots.container {...containerProps}>{content}</slots.container>;
-  }
-
-  if (slots.sidebar) {
-    content = (
-      <slots.sidebar.provider defaultOpenLevel={defaultOpenLevel} prefetch={prefetch}>
-        {content}
-      </slots.sidebar.provider>
-    );
-  }
 
   return (
     <TreeContextProvider tree={tree}>
@@ -141,7 +115,19 @@ export function LayoutBody(
           ...linkItems,
         }}
       >
-        {content}
+        <slots.sidebar.provider defaultOpenLevel={defaultOpenLevel} prefetch={prefetch}>
+          <slots.container {...containerProps}>
+            {navEnabled && <slots.header />}
+            {sidebarEnabled && <slots.sidebar.root {...sidebarProps} />}
+            {tabMode === 'top' && tabs.length > 0 && (
+              <LayoutTabs
+                tabs={tabs}
+                className="z-10 bg-fd-background border-b px-6 pt-3 xl:px-8 max-md:hidden"
+              />
+            )}
+            {children}
+          </slots.container>
+        </slots.sidebar.provider>
       </LayoutContext>
     </TreeContextProvider>
   );

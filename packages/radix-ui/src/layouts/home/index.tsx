@@ -9,7 +9,7 @@ import { Header } from './slots/header';
 
 export interface HomeLayoutProps extends BaseLayoutProps, ComponentProps<'main'> {
   nav?: Nav;
-  slots?: HomeSlots;
+  slots?: Partial<HomeSlots>;
 }
 
 interface Nav extends NavOptions {
@@ -20,8 +20,8 @@ interface Nav extends NavOptions {
 }
 
 export interface HomeSlots extends BaseSlots {
-  header?: FC<ComponentProps<'header'>>;
-  container?: FC<ComponentProps<'main'>>;
+  header: FC<ComponentProps<'header'>>;
+  container: FC<ComponentProps<'main'>>;
 }
 
 const LayoutContext = createContext<{
@@ -60,20 +60,9 @@ export function HomeLayout(props: HomeLayoutProps) {
   const linkItems = useLinkItems(props);
   const slots: HomeSlots = {
     ...baseSlots,
-    header: navEnabled ? (defaultSlots?.header ?? Header) : undefined,
+    header: defaultSlots?.header ?? Header,
     container: defaultSlots?.container ?? Container,
   };
-
-  let content = (
-    <>
-      {slots.header && <slots.header />}
-      {children}
-    </>
-  );
-
-  if (slots.container) {
-    content = <slots.container {...rest}>{content}</slots.container>;
-  }
 
   return (
     <LayoutContext
@@ -83,7 +72,10 @@ export function HomeLayout(props: HomeLayoutProps) {
         ...linkItems,
       }}
     >
-      {content}
+      <slots.container {...rest}>
+        {navEnabled && <slots.header />}
+        {children}
+      </slots.container>
     </LayoutContext>
   );
 }

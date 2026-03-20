@@ -34,16 +34,20 @@ export function LinkItem({
 }
 
 export interface BaseSlots {
-  navTitle?: FC<ComponentProps<'a'>>;
-  searchTrigger?: {
-    sm: FC<SearchTriggerProps>;
-    full: FC<FullSearchTriggerProps>;
-  };
-  languageSelect?: {
-    root: FC<LanguageSelectProps>;
-    text: FC<LanguageSelectTextProps>;
-  };
-  themeSwitch?: FC<ThemeSwitchProps>;
+  navTitle: FC<ComponentProps<'a'>>;
+  themeSwitch: FC<ThemeSwitchProps> | false;
+  searchTrigger:
+    | {
+        sm: FC<SearchTriggerProps>;
+        full: FC<FullSearchTriggerProps>;
+      }
+    | false;
+  languageSelect:
+    | {
+        root: FC<LanguageSelectProps>;
+        text: FC<LanguageSelectTextProps>;
+      }
+    | false;
 }
 
 export interface BaseSlotsProps<P extends BaseLayoutProps = BaseLayoutProps> extends Pick<
@@ -101,19 +105,19 @@ export function baseSlots({ useProps }: { useProps: () => BaseSlotsProps }) {
       return {
         baseSlots: {
           navTitle: slots.navTitle ?? InlineNavTitle,
-          themeSwitch: themeSwitchEnabled ? (slots.themeSwitch ?? InlineThemeSwitch) : undefined,
+          themeSwitch: themeSwitchEnabled && (slots.themeSwitch ?? InlineThemeSwitch),
           languageSelect: i18n
             ? (slots.languageSelect ?? {
                 root: LanguageSelect,
                 text: LanguageSelectText,
               })
-            : undefined,
-          searchTrigger: searchToggleEnabled
-            ? (slots.searchTrigger ?? {
-                sm: InlineSearchTrigger,
-                full: InlineSearchTriggerFull,
-              })
-            : undefined,
+            : false,
+          searchTrigger:
+            searchToggleEnabled &&
+            (slots.searchTrigger ?? {
+              sm: InlineSearchTrigger,
+              full: InlineSearchTriggerFull,
+            }),
         },
         baseProps: {
           nav,
