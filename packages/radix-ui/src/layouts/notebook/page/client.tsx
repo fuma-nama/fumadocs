@@ -11,19 +11,26 @@ import {
 } from 'react';
 import { cn } from '@/utils/cn';
 import { useI18n } from '@/contexts/i18n';
-import { TOC, type TOCProps } from './slots/toc';
-import { TOCPopover, type TOCPopoverProps } from './slots/toc-popover';
+import {
+  TOC,
+  TOCPopover,
+  TOCProvider,
+  type TOCProviderProps,
+  type TOCPopoverProps,
+  type TOCProps,
+} from './slots/toc';
 import { Footer, type FooterProps } from './slots/footer';
 import { Breadcrumb, type BreadcrumbProps } from './slots/breadcrumb';
-import { TOCProvider, type TOCProviderProps } from '@/components/toc';
 import { Container } from './slots/container';
 import type { TOCItemType } from 'fumadocs-core/toc';
 
 export interface DocsPageSlots {
-  toc?: FC<TOCProps>;
+  toc?: {
+    provider: FC<TOCProviderProps>;
+    main?: FC<TOCProps>;
+    popover?: FC<TOCPopoverProps>;
+  };
   container?: FC<ComponentProps<'article'>>;
-  tocPopover?: FC<TOCPopoverProps>;
-  tocProvider?: FC<TOCProviderProps>;
   footer?: FC<FooterProps>;
   breadcrumb?: FC<BreadcrumbProps>;
 }
@@ -113,15 +120,17 @@ export function DocsPage({
     breadcrumb:
       breadcrumb.enabled !== false ? (defaultSlots.breadcrumb ?? InlineBreadcrumb) : undefined,
     footer: footer.enabled !== false ? (defaultSlots.footer ?? InlineFooter) : undefined,
-    toc: tocEnabled ? (defaultSlots.toc ?? InlineTOC) : undefined,
-    tocPopover: tocPopoverEnabled ? (defaultSlots.tocPopover ?? InlineTOCPopover) : undefined,
-    tocProvider: defaultSlots.tocProvider ?? TOCProvider,
+    toc: defaultSlots.toc ?? {
+      provider: TOCProvider,
+      main: tocEnabled ? InlineTOC : undefined,
+      popover: tocPopoverEnabled ? InlineTOCPopover : undefined,
+    },
     container: defaultSlots.container ?? Container,
   };
 
   let content = (
     <>
-      {slots.tocPopover && <slots.tocPopover />}
+      {slots.toc?.popover && <slots.toc.popover />}
       {slots.container && (
         <slots.container {...containerProps}>
           {slots.breadcrumb && <slots.breadcrumb />}
@@ -129,15 +138,15 @@ export function DocsPage({
           {slots.footer && <slots.footer />}
         </slots.container>
       )}
-      {slots.toc && <slots.toc />}
+      {slots.toc?.main && <slots.toc.main />}
     </>
   );
 
-  if (slots.tocProvider)
+  if (slots.toc)
     content = (
-      <slots.tocProvider single={single} toc={tocEnabled || tocPopoverEnabled ? toc : []}>
+      <slots.toc.provider single={single} toc={tocEnabled || tocPopoverEnabled ? toc : []}>
         {content}
-      </slots.tocProvider>
+      </slots.toc.provider>
     );
 
   return (

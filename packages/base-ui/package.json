@@ -61,7 +61,6 @@
     "./layouts/docs/page/slots/container": "./dist/layouts/docs/page/slots/container.js",
     "./layouts/docs/page/slots/footer": "./dist/layouts/docs/page/slots/footer.js",
     "./layouts/docs/page/slots/toc": "./dist/layouts/docs/page/slots/toc.js",
-    "./layouts/docs/page/slots/toc-popover": "./dist/layouts/docs/page/slots/toc-popover.js",
     "./layouts/docs/slots/container": "./dist/layouts/docs/slots/container.js",
     "./layouts/docs/slots/header": "./dist/layouts/docs/slots/header.js",
     "./layouts/docs/slots/sidebar": "./dist/layouts/docs/slots/sidebar.js",
@@ -85,7 +84,6 @@
     "./layouts/notebook/page/slots/container": "./dist/layouts/notebook/page/slots/container.js",
     "./layouts/notebook/page/slots/footer": "./dist/layouts/notebook/page/slots/footer.js",
     "./layouts/notebook/page/slots/toc": "./dist/layouts/notebook/page/slots/toc.js",
-    "./layouts/notebook/page/slots/toc-popover": "./dist/layouts/notebook/page/slots/toc-popover.js",
     "./layouts/notebook/slots/container": "./dist/layouts/notebook/slots/container.js",
     "./layouts/notebook/slots/header": "./dist/layouts/notebook/slots/header.js",
     "./layouts/notebook/slots/sidebar": "./dist/layouts/notebook/slots/sidebar.js",
@@ -111,8 +109,7 @@
     "./utils/use-is-scroll-top": "./dist/utils/use-is-scroll-top.js",
     "./package.json": "./package.json",
     "./style.css": "./dist/style.css",
-    "./css/*": "./css/*",
-    "./image-zoom.css": "./dist/image-zoom.css"
+    "./css/*": "./css/*"
   },
   "publishConfig": {
     "access": "public"
