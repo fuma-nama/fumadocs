@@ -94,7 +94,7 @@ export interface PlaygroundClientOptions {
   }>;
 
   /**
-   * render the paremeter inputs of API endpoint.
+   * render the parameter inputs of API endpoint.
    *
    * for updating values, use:
    * - the `Custom.useController()` from `fumadocs-openapi/playground/client`.
@@ -513,7 +513,8 @@ function useAuthInputs(
           },
           mapOutput(out) {
             if (out && typeof out === 'object') {
-              return `Basic ${btoa(`${'username' in out ? out.username : ''}:${'password' in out ? out.password : ''}`)}`;
+              const obj = out as Record<string, unknown>;
+              return `Basic ${btoa(`${obj.username ?? ''}:${obj.password ?? ''}`)}`;
             }
 
             return out;
@@ -530,7 +531,6 @@ function useAuthInputs(
                     type: 'string',
                   },
                 },
-                required: ['username', 'password'],
               }}
               fieldName={fieldName}
             />
@@ -551,7 +551,6 @@ function useAuthInputs(
               <div className="flex gap-2">
                 <FieldInput
                   fieldName={fieldName}
-                  isRequired
                   field={{
                     type: 'string',
                   }}
@@ -584,7 +583,6 @@ function useAuthInputs(
             <FieldSet
               name={`${t.authorization} (${t.header})`}
               fieldName={fieldName}
-              isRequired
               field={{
                 type: 'string',
               }}
@@ -602,7 +600,6 @@ function useAuthInputs(
             <FieldSet
               fieldName={fieldName}
               name={`${security.name} (${security.in})`}
-              isRequired
               field={{
                 type: 'string',
               }}
@@ -620,7 +617,6 @@ function useAuthInputs(
             <>
               <FieldSet
                 name={`${t.authorization} (${t.header})`}
-                isRequired
                 fieldName={fieldName}
                 field={{
                   type: 'string',

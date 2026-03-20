@@ -143,7 +143,7 @@ async function MdContent({
         <DocsPage>
           <DocsTitle>Home</DocsTitle>
           <DocsDescription>
-            You can see all Mardkwon files under the project directory.
+            You can see all Markdown files under the project directory.
           </DocsDescription>
           <Cards>
             {source.getPages().map((page) => {

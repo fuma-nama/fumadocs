@@ -156,6 +156,7 @@ return (
 
 ```tsx tab="Replace Component" title="page.tsx"
 import { TOC } from './my-toc';
+
 return <DocsPage slots={{ toc: TOC }}>...</DocsPage>;
 ```
 
@@ -163,7 +164,7 @@ return <DocsPage slots={{ toc: TOC }}>...</DocsPage>;
 'use client';
 import type { TOCProps } from 'fumadocs-ui/layouts/<layout>/page/slots/toc';
 
-function TOC(props: TOCProps) {
+export function TOC(props: TOCProps) {
   return <div>Hello World</div>;
 }
 ```

@@ -1,7 +1,8 @@
 import { useTreePath, useTreeContext } from '@/contexts/tree';
 import { cn } from '@/utils/cn';
 import { type BreadcrumbOptions, getBreadcrumbItemsFromPath } from 'fumadocs-core/breadcrumb';
-import { ChevronRight, Link } from 'lucide-react';
+import Link from 'fumadocs-core/link';
+import { ChevronRight } from 'lucide-react';
 import { type ComponentProps, useMemo, Fragment } from 'react';
 
 export type BreadcrumbProps = BreadcrumbOptions & ComponentProps<'div'>;

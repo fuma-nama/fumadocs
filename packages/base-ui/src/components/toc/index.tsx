@@ -19,7 +19,9 @@ export function useTOCItems(): Primitive.TOCItemType[] {
   return use(TOCContext);
 }
 
-export type TOCProviderProps = ComponentProps<typeof Primitive.AnchorProvider>;
+export type TOCProviderProps = Primitive.AnchorProviderProps;
+
+export const { useActiveAnchor, useActiveAnchors } = Primitive;
 
 export function TOCProvider({ toc, children, ...props }: TOCProviderProps) {
   return (
@@ -56,7 +58,7 @@ interface RefProps {
 
 export function TocThumb({ containerRef, ...props }: ComponentProps<'div'> & RefProps) {
   const thumbRef = useRef<HTMLDivElement>(null);
-  const active = Primitive.useActiveAnchors();
+  const active = useActiveAnchors();
   function update(info: TocThumbType): void {
     const element = thumbRef.current;
     if (!element) return;

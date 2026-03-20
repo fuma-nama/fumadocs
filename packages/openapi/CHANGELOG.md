@@ -1,5 +1,15 @@
 # @fuma-docs/openapi
 
+## 10.4.1
+
+### Patch Changes
+
+- 440b954: support unsetting auth fields in playground
+- Updated dependencies [11b8691]
+- Updated dependencies [75b0b94]
+  - fumadocs-ui@16.7.1
+  - fumadocs-core@16.7.1
+
 ## 10.4.0
 
 ### Minor Changes
@@ -212,7 +222,7 @@
 
 ### Patch Changes
 
-- 8d1362e: Fixed a performance issue where getSchema() would bypass the internal cache and re-parse the OpenAPI spec on every call. This was caused by calling the internal getSchemas() function instead of the cached method.
+- 8d1362e: Fixed a performance issue where getSchema() would bypass the internal cache and reparse the OpenAPI spec on every call. This was caused by calling the internal getSchemas() function instead of the cached method.
 
 ## 10.2.5
 
@@ -479,7 +489,7 @@
       renderWebhookLayout: ({
         header,
         authSchemes,
-        paremeters,
+        parameters,
         body,
         responses,
         callbacks,
@@ -516,7 +526,6 @@
   ```
 
 - aa4e1ad: **Redesign `createOpenAPI` usage**
-
   1. Isolate API page and API server.
 
   Before:
@@ -1325,12 +1334,11 @@
 - bdef238: **Redesign `generateFiles`**
 
   This redesign will finalize the behaviour of `generateFiles` to make it simpler, consistent across different versions of Fumadocs OpenAPI.
-
   - Abandoned `groupByFolder`, it's deprecated long time ago and can be replaced with `groupBy`.
   - Improved type safety, `groupBy` is now only available with `per` set to `operation`.
   - `name` usage changed (see below).
 
-  The `name` option was supposed to designate a output path for generated page. Since `groupBy` was introduced, `name` became somehow useless because its design doesn't work well with `groupBy`.
+  The `name` option was supposed to designate an output path for generated page. Since `groupBy` was introduced, `name` became somehow useless because its design doesn't work well with `groupBy`.
 
   **New `name` Design**:
 
@@ -1377,7 +1385,6 @@
   ```
 
   With `per: operation`, you can use `groupBy` to group pages:
-
   - tag: `{tag}/{file}`
   - route: `{endpoint}/{method}` (it will ignore the `name` option)
   - none: `{file}` (default)
@@ -2952,7 +2959,6 @@
   **migrate:**
 
   Changed the output of MDX files, the new structure requires components:
-
   - Root
   - API
   - APIInfo

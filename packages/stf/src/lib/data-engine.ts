@@ -181,7 +181,7 @@ export class DataEngine {
           parentKey.push(key);
           this.listeners.onUpdate(parentKey, parentUpdateCtx);
           console.warn(
-            `the original value of field ${parentKey.join('.')} is overidden, this might be unexpected.`,
+            `the original value of field ${parentKey.join('.')} is overridden, this might be unexpected.`,
           );
         }
       }

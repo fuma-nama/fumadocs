@@ -1,7 +1,7 @@
 'use client';
 
-import { Check, Link as LinkIcon } from 'lucide-react';
-import { ComponentProps, type ReactNode, useEffect, useRef, useState } from 'react';
+import { Check, LinkIcon } from 'lucide-react';
+import { type ComponentProps, type ReactNode, useEffect, useRef, useState } from 'react';
 import { cn } from '@/utils/cn';
 import { useCopyButton } from '@/utils/use-copy-button';
 import { buttonVariants } from '@/components/ui/button';

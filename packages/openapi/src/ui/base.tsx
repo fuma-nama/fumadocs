@@ -147,7 +147,7 @@ export interface CreateAPIPageOptions {
         apiPlayground: ReactNode;
 
         authSchemes: ReactNode;
-        paremeters: ReactNode;
+        parameters: ReactNode;
         body: ReactNode;
         responses: ReactNode;
         callbacks: ReactNode;
@@ -160,7 +160,7 @@ export interface CreateAPIPageOptions {
       header: ReactNode;
       description: ReactNode;
       authSchemes: ReactNode;
-      paremeters: ReactNode;
+      parameters: ReactNode;
       body: ReactNode;
       requests: ReactNode;
       responses: ReactNode;

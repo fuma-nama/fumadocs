@@ -46,7 +46,7 @@ export default function Layout({ children }: LayoutProps<'/'>) {
                   <div className="-mx-3 -mt-3">
                     <Image
                       src={Preview}
-                      alt="Perview"
+                      alt="Preview"
                       className="rounded-t-lg object-cover"
                       style={{
                         maskImage: 'linear-gradient(to bottom,white 60%,transparent)',

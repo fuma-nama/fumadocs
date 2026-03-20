@@ -1,12 +1,20 @@
 # @fumadocs/base-ui
 
+## 16.7.1
+
+### Patch Changes
+
+- 11b8691: hotfix
+- 75b0b94: Refactor TOC slot
+  - fumadocs-core@16.7.1
+
 ## 16.7.0
 
 ### Minor Changes
 
 - 8bdee70: Implement renderer API for replacing layout components, deprecate old options
 - bdffeba: Improved `defineI18nUI()` usage: allow language translations to be defined at root config.
-- f45d703: stablize Shiki factory API
+- f45d703: stabilize Shiki factory API
 
 ### Patch Changes
 

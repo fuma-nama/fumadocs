@@ -2,7 +2,7 @@ import { transformSpecifiers } from '@/utils/ast';
 import type { ComponentInstallerPlugin } from '../installer';
 
 /**
- * keep references to `fumadocs-ui/layouts/*` components as original, unless the user is installing them direclty.
+ * keep references to `fumadocs-ui/layouts/*` components as original, unless the user is installing them directly.
  */
 export function pluginPreserveLayouts(): ComponentInstallerPlugin {
   const layoutNames = [
@@ -14,20 +14,20 @@ export function pluginPreserveLayouts(): ComponentInstallerPlugin {
   ];
   // original specifier -> new specifier
   const layoutComps: Record<string, string> = {
-    '@/<dir>/layout/home/index.tsx': 'layouts/home',
-    '@/<dir>/layout/shared/index.tsx': 'layouts/shared',
-    '@/<dir>/layout/shared/client.tsx': 'layouts/shared',
-    '@/<dir>/layout/notebook/index.tsx': 'layouts/notebook',
-    '@/<dir>/layout/notebook/client.tsx': 'layouts/notebook',
-    '@/<dir>/layout/notebook/page/index.tsx': 'layouts/notebook/page',
-    '@/<dir>/layout/notebook/page/client.tsx': 'layouts/notebook/page',
-    '@/<dir>/layout/docs/index.tsx': 'layouts/docs',
-    '@/<dir>/layout/docs/client.tsx': 'layouts/docs',
-    '@/<dir>/layout/docs/page/index.tsx': 'layouts/docs/page',
-    '@/<dir>/layout/docs/page/client.tsx': 'layouts/docs/page',
-    '@/<dir>/layout/flux/index.tsx': 'layouts/flux',
-    '@/<dir>/layout/flux/page/index.tsx': 'layouts/flux/page',
-    '@/<dir>/layout/flux/page/client.tsx': 'layouts/flux/page',
+    '@/<dir>/home/index.tsx': 'layouts/home',
+    '@/<dir>/shared/index.tsx': 'layouts/shared',
+    '@/<dir>/shared/client.tsx': 'layouts/shared',
+    '@/<dir>/notebook/index.tsx': 'layouts/notebook',
+    '@/<dir>/notebook/client.tsx': 'layouts/notebook',
+    '@/<dir>/notebook/page/index.tsx': 'layouts/notebook/page',
+    '@/<dir>/notebook/page/client.tsx': 'layouts/notebook/page',
+    '@/<dir>/docs/index.tsx': 'layouts/docs',
+    '@/<dir>/docs/client.tsx': 'layouts/docs',
+    '@/<dir>/docs/page/index.tsx': 'layouts/docs/page',
+    '@/<dir>/docs/page/client.tsx': 'layouts/docs/page',
+    '@/<dir>/flux/index.tsx': 'layouts/flux',
+    '@/<dir>/flux/page/index.tsx': 'layouts/flux/page',
+    '@/<dir>/flux/page/client.tsx': 'layouts/flux/page',
   };
   const layoutNameSet = new Set(layoutNames);
 

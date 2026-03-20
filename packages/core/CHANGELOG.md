@@ -1,10 +1,12 @@
 # fumadocs-core
 
+## 16.7.1
+
 ## 16.7.0
 
 ### Minor Changes
 
-- f45d703: stablize Shiki factory API
+- f45d703: stabilize Shiki factory API
 
 ### Patch Changes
 
@@ -341,7 +343,7 @@
 
 ### Patch Changes
 
-- 8221785: hotfix i18n middleware URL formating
+- 8221785: hotfix i18n middleware URL formatting
 
 ## 16.0.4
 
@@ -374,7 +376,6 @@
   migrate: The original component is mostly a wrapper of `react-remove-scroll`, you can use Shadcn UI for pre-built sidebars.
 
 - 4049ccc: **Remove `fumadocs-core/server` export**
-
   - **`getGithubLastEdit`:** Moved to `fumadocs-core/content/github`.
   - **`getTableOfContents`:** Moved to `fumadocs-core/content/toc`.
   - **`PageTree` and page tree utilities:** Moved to `fumadocs-core/page-tree`.
@@ -384,18 +385,16 @@
 - 429c41a: **Switch to Shiki JavaScript Regex engine by default**
 
   This is important for Cloudflare Worker compatibility, JavaScript engine is the new default over Oniguruma (WASM).
-
   - `rehype-code`: replaced the `experimentalJSEngine` option with `engine: js | oniguruma`.
   - `fumadocs-core/highlight`: use JS engine by default, drop custom engine support, use Shiki directly instead.
 
 - 5210f18: **Set minimal React.js version to 19.2.0**
 
-  19.2 has multiple crucial updates that can improve Fumadocs' performance, and it should works seamlessly on mainstream React.js frameworks.
+  19.2 has multiple crucial updates that can improve Fumadocs' performance, and it should work seamlessly on mainstream React.js frameworks.
 
   As a consequence, Next.js 16 is now the minimal version when using Fumadocs UI because Next.js always uses the internal canary version of React.js.
 
 - 42f09c3: **Remove deprecated APIs**
-
   - `fumadocs-ui/page`:
     - removed `<DocsCategory />`.
     - removed `breadcrumbs.full` option from `<DocsPage />`.
@@ -406,7 +405,7 @@
       export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
         source: S,
         pageToIndexFn?: (page: InferPageType<S>) => Awaitable<AdvancedIndex>,
-        options?: Omit<Options<S>, "buildIndex">
+        options?: Omit<Options<S>, "buildIndex">,
       ): SearchAPI;
       ```
     - remove deprecated parameters in `useSearch()`, pass them in the client object instead.
@@ -469,7 +468,6 @@
   It will be removed on Fumadocs 16, as some APIs under the `/server` export are actually available (and even used) under browser environment.
 
   A more modularized design will be introduced over the original naming.
-
   - **`getGithubLastEdit`:** Moved to `fumadocs-core/content/github`.
   - **`getTableOfContents`:** Moved to `fumadocs-core/content/toc`.
   - **`PageTree` and page tree utilities:** Moved to `fumadocs-core/page-tree`.
@@ -984,7 +982,7 @@
     }),
     {
       // options
-    }
+    },
   );
 
   // to
@@ -1750,9 +1748,9 @@
   <Pre icon={<svg />}>...</Pre>
   ```
 
-  As Shiki outputs hast elements, we have to convert the output of Shiki to a MDX flow element so that we can pass the `icon` property.
+  As Shiki outputs hast elements, we have to convert the output of Shiki to an MDX flow element so that we can pass the `icon` property.
 
-  Now, `rehype-code` passes a HTML string instead of JSX, and render it with `dangerouslySetInnerHTML`:
+  Now, `rehype-code` passes an HTML string instead of JSX, and render it with `dangerouslySetInnerHTML`:
 
   ```mdx
   <Pre icon="<svg />">...</Pre>
@@ -1917,7 +1915,6 @@
 - f75287d: **Introduce `fumadocs-docgen` package.**
 
   Offer a better authoring experience for advanced use cases.
-
   - Move `remark-dynamic-content` and `remark-install` plugins to the new package `fumadocs-docgen`.
   - Support Typescript generator by default
 
@@ -2069,7 +2066,6 @@
 ### Major Changes
 
 - 2ea9437: **Migrate to rehype-shikiji**
-
   - Dropped support for inline code syntax highlighting
   - Use notation-based word/line highlighting instead of meta string
 
@@ -2271,7 +2267,7 @@
 
   This means you don't need `getPageUrl` anymore for built-in adapters, including `next-docs-mdx` and Contentlayer. It is now replaced by the `url` property from the pages array provided by your adapter.
 
-  Due to this change, your old configuration might not continues to work.
+  Due to this change, your old configuration might not continue to work.
 
   ```diff
   import { fromMap } from 'next-docs-mdx/map'
@@ -2357,7 +2353,7 @@
   they have referenced ESM modules in the code. For instance,
   `next-docs-zeta/middleware` is now a CommonJS file. However, some modules,
   such as `next-docs-zeta/server` requires ESM-only package, hence, they remain
-  a ESM file.
+  an ESM file.
 
   Notice that the extension of client-side files is now `.js` instead of `.mjs`,
   but they're still ESM.
@@ -2395,7 +2391,7 @@
   they have referenced ESM modules in the code. For instance,
   `next-docs-zeta/middleware` is now a CommonJS file. However, some modules,
   such as `next-docs-zeta/server` requires ESM-only package, hence, they remain
-  a ESM file.
+  an ESM file.
 
   Notice that the extension of client-side files is now `.js` instead of `.mjs`,
   but they're still ESM.

@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronRight, Hash, Search as SearchIcon } from 'lucide-react';
+import { ChevronRight, Hash, SearchIcon } from 'lucide-react';
 import {
   type ComponentProps,
   createContext,

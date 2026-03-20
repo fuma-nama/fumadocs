@@ -4,7 +4,7 @@ import * as PageTree from 'fumadocs-core/page-tree';
 import { isActive, normalize } from '@/utils/urls';
 import type { BaseSlots } from './client';
 import type { ThemeSwitchProps } from './slots/theme-switch';
-import type { FullSearchTriggeProps, SearchTriggerProps } from './slots/search-trigger';
+import type { FullSearchTriggerProps, SearchTriggerProps } from './slots/search-trigger';
 
 export interface NavOptions {
   enabled?: boolean;
@@ -54,7 +54,7 @@ export interface BaseLayoutProps {
 interface SearchToggleOptions {
   enabled?: boolean;
   sm?: SearchTriggerProps;
-  full?: FullSearchTriggeProps;
+  full?: FullSearchTriggerProps;
   /** @deprecated use `slots.searchTrigger` instead */
   components?: {
     sm?: ReactNode;

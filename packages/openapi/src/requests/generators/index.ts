@@ -51,9 +51,9 @@ export interface InlineCodeUsageGenerator<T = unknown> {
 }
 
 export function createCodeUsageGeneratorRegistry(
-  ihherit?: CodeUsageGeneratorRegistry,
+  inherit?: CodeUsageGeneratorRegistry,
 ): CodeUsageGeneratorRegistry {
-  const registry = new Map<string, CodeUsageGenerator>(ihherit?.map());
+  const registry = new Map<string, CodeUsageGenerator>(inherit?.map());
 
   return {
     add(id, generator) {

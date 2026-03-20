@@ -1,5 +1,11 @@
 # fumadocs
 
+## 1.3.1
+
+### Patch Changes
+
+- e201942: support layout type
+
 ## 1.3.0
 
 ### Minor Changes
