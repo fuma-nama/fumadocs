@@ -4,7 +4,7 @@
 
 ### Minor Changes
 
-- f45d703: stablize Shiki factory API
+- f45d703: stabilize Shiki factory API
 
 ### Patch Changes
 
@@ -341,7 +341,7 @@
 
 ### Patch Changes
 
-- 8221785: hotfix i18n middleware URL formating
+- 8221785: hotfix i18n middleware URL formatting
 
 ## 16.0.4
 
@@ -390,7 +390,7 @@
 
 - 5210f18: **Set minimal React.js version to 19.2.0**
 
-  19.2 has multiple crucial updates that can improve Fumadocs' performance, and it should works seamlessly on mainstream React.js frameworks.
+  19.2 has multiple crucial updates that can improve Fumadocs' performance, and it should work seamlessly on mainstream React.js frameworks.
 
   As a consequence, Next.js 16 is now the minimal version when using Fumadocs UI because Next.js always uses the internal canary version of React.js.
 
@@ -1750,9 +1750,9 @@
   <Pre icon={<svg />}>...</Pre>
   ```
 
-  As Shiki outputs hast elements, we have to convert the output of Shiki to a MDX flow element so that we can pass the `icon` property.
+  As Shiki outputs hast elements, we have to convert the output of Shiki to an MDX flow element so that we can pass the `icon` property.
 
-  Now, `rehype-code` passes a HTML string instead of JSX, and render it with `dangerouslySetInnerHTML`:
+  Now, `rehype-code` passes an HTML string instead of JSX, and render it with `dangerouslySetInnerHTML`:
 
   ```mdx
   <Pre icon="<svg />">...</Pre>
@@ -2271,7 +2271,7 @@
 
   This means you don't need `getPageUrl` anymore for built-in adapters, including `next-docs-mdx` and Contentlayer. It is now replaced by the `url` property from the pages array provided by your adapter.
 
-  Due to this change, your old configuration might not continues to work.
+  Due to this change, your old configuration might not continue to work.
 
   ```diff
   import { fromMap } from 'next-docs-mdx/map'
@@ -2357,7 +2357,7 @@
   they have referenced ESM modules in the code. For instance,
   `next-docs-zeta/middleware` is now a CommonJS file. However, some modules,
   such as `next-docs-zeta/server` requires ESM-only package, hence, they remain
-  a ESM file.
+  an ESM file.
 
   Notice that the extension of client-side files is now `.js` instead of `.mjs`,
   but they're still ESM.
@@ -2395,7 +2395,7 @@
   they have referenced ESM modules in the code. For instance,
   `next-docs-zeta/middleware` is now a CommonJS file. However, some modules,
   such as `next-docs-zeta/server` requires ESM-only package, hence, they remain
-  a ESM file.
+  an ESM file.
 
   Notice that the extension of client-side files is now `.js` instead of `.mjs`,
   but they're still ESM.

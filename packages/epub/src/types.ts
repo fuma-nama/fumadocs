@@ -28,7 +28,7 @@ export interface EpubConfig {
 export interface EpubExportOptions<Config extends LoaderConfig = LoaderConfig> extends EpubConfig {
   /** Fumadocs source (from loader()) */
   source: LoaderOutput<Config>;
-  /** fucntion to get page Markdown content */
+  /** function to get page Markdown content */
   getMarkdown?: (
     page: Page<Config['source']['pageData']>,
   ) => string | undefined | Promise<string | undefined>;

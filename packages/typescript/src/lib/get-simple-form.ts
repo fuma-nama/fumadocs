@@ -8,9 +8,9 @@ interface TypeSimplifierContext {
 
 export interface TypeSimplifierOptions {
   /**
-   * whether the simplifed names should be preferred over the type names.
+   * whether the simplified names should be preferred over the type names.
    *
-   * Default: always prefer simpliied ones.
+   * Default: always prefer simplified ones.
    */
   shouldSimplify?: (ctx: TypeSimplifierContext) => boolean;
   override?: (ctx: TypeSimplifierContext) => string | undefined;
@@ -26,8 +26,8 @@ export function getSimpleForm(
 
   if (type.isUndefined() && noUndefined) return '';
 
-  const overriden = override?.(ctx);
-  if (overriden) return overriden;
+  const overridden = override?.(ctx);
+  if (overridden) return overridden;
 
   if (shouldSimplify && !shouldSimplify(ctx)) {
     return type.getText(ctx.location, TypeFormatFlags.UseAliasDefinedOutsideCurrentScope);
@@ -55,7 +55,7 @@ export function getSimpleForm(
   }
 
   if (type.isTuple()) {
-    return 'turple';
+    return 'tuple';
   }
 
   if (type.isArray() || type.isReadonlyArray()) {

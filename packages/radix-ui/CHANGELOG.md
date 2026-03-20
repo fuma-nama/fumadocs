@@ -6,7 +6,7 @@
 
 - 8bdee70: Implement renderer API for replacing layout components, deprecate old options
 - bdffeba: Improved `defineI18nUI()` usage: allow language translations to be defined at root config.
-- f45d703: stablize Shiki factory API
+- f45d703: stabilize Shiki factory API
 
 ### Patch Changes
 
@@ -580,7 +580,7 @@
 
 - 5210f18: **Set minimal React.js version to 19.2.0**
 
-  19.2 has multiple crucial updates that can improve Fumadocs' performance, and it should works seamlessly on mainstream React.js frameworks.
+  19.2 has multiple crucial updates that can improve Fumadocs' performance, and it should work seamlessly on mainstream React.js frameworks.
 
   As a consequence, Next.js 16 is now the minimal version when using Fumadocs UI because Next.js always uses the internal canary version of React.js.
 
@@ -2458,7 +2458,7 @@
 
 ### Patch Changes
 
-- 503e8e9: Improve Object Collaspible
+- 503e8e9: Improve Object Collapsible
 - Updated dependencies [503e8e9]
   - fumadocs-core@12.4.2
 
@@ -2625,9 +2625,9 @@
   <Pre icon={<svg />}>...</Pre>
   ```
 
-  As Shiki outputs hast elements, we have to convert the output of Shiki to a MDX flow element so that we can pass the `icon` property.
+  As Shiki outputs hast elements, we have to convert the output of Shiki to an MDX flow element so that we can pass the `icon` property.
 
-  Now, `rehype-code` passes a HTML string instead of JSX, and render it with `dangerouslySetInnerHTML`:
+  Now, `rehype-code` passes an HTML string instead of JSX, and render it with `dangerouslySetInnerHTML`:
 
   ```mdx
   <Pre icon="<svg />">...</Pre>
@@ -3287,7 +3287,7 @@
 
 - f995ad9: **Page Footer is now a client component**
 
-  This allows the footer component to find items within the current page tree, which fixes the problem where a item from another page tree is appeared.
+  This allows the footer component to find items within the current page tree, which fixes the problem where an item from another page tree is appeared.
 
   Also removed the `url` and `tree` properties from `DocsPage` since we can pass them via React Context API.
 
@@ -3876,7 +3876,7 @@
 
 - e6ebf6a: Rename `sidebarContent` to `sidebarFooter`
 - e01bf3a: Allow `true` to keep default
-- e6ebf6a: Imrove sidebar banner
+- e6ebf6a: Improve sidebar banner
   - next-docs-zeta@1.6.4
 
 ## 1.6.3

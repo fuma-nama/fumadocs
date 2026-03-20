@@ -21,8 +21,8 @@ test('class members', async () => {
         #name: string;
         private test: string;
         age: number;
-        
-        constructor(name: string) { 
+
+        constructor(name: string) {
             this.#name = name;
         }
     }
@@ -136,7 +136,7 @@ Simplified: ${getSimpleForm({ type, checker })}`);
 test('get simple forms', async () => {
   const sourceCode = `
   class MyClass {}
-  
+
   let x: string | number | null;
   let y: { a: number } | (() => void);
   let z: Array<string>;
@@ -156,7 +156,7 @@ test('get simple forms', async () => {
     Simplified: array
 
     Raw: w: [string, number, "test", false]
-    Simplified: turple
+    Simplified: tuple
 
     Raw: v: any
     Simplified: any

@@ -58,7 +58,7 @@ paths:
             examples:
               default_example:
                 $ref: '#/components/examples/CreateSpecialEventRequestExample'
-              seconday_example:
+              secondary_example:
                 $ref: '#/components/examples/SecondaryCreateSpecialEventRequestExample'
       responses:
         '200':

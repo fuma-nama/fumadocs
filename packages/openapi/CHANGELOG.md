@@ -212,7 +212,7 @@
 
 ### Patch Changes
 
-- 8d1362e: Fixed a performance issue where getSchema() would bypass the internal cache and re-parse the OpenAPI spec on every call. This was caused by calling the internal getSchemas() function instead of the cached method.
+- 8d1362e: Fixed a performance issue where getSchema() would bypass the internal cache and reparse the OpenAPI spec on every call. This was caused by calling the internal getSchemas() function instead of the cached method.
 
 ## 10.2.5
 
@@ -479,7 +479,7 @@
       renderWebhookLayout: ({
         header,
         authSchemes,
-        paremeters,
+        parameters,
         body,
         responses,
         callbacks,
@@ -1330,7 +1330,7 @@
   - Improved type safety, `groupBy` is now only available with `per` set to `operation`.
   - `name` usage changed (see below).
 
-  The `name` option was supposed to designate a output path for generated page. Since `groupBy` was introduced, `name` became somehow useless because its design doesn't work well with `groupBy`.
+  The `name` option was supposed to designate an output path for generated page. Since `groupBy` was introduced, `name` became somehow useless because its design doesn't work well with `groupBy`.
 
   **New `name` Design**:
 

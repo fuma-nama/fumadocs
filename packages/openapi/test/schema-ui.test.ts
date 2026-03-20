@@ -169,7 +169,7 @@ test('test', async () => {
         "__2": {
           "aliasName": "string",
           "deprecated": undefined,
-          "description": "The name of the key, give keys a name to easily identifiy their purpose",
+          "description": "The name of the key, give keys a name to easily identify their purpose",
           "infoTags": [],
           "type": "primitive",
           "typeName": "string",

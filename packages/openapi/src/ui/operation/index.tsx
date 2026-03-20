@@ -270,7 +270,7 @@ export async function Operation({
             {slots.apiPlayground}
             {slots.description}
             {slots.authSchemes}
-            {slots.paremeters}
+            {slots.parameters}
             {slots.body}
             {slots.responses}
             {slots.callbacks}
@@ -290,7 +290,7 @@ export async function Operation({
         authSchemes: authNode,
         body: bodyNode,
         callbacks: callbacksNode,
-        paremeters: parameterNode,
+        parameters: parameterNode,
         responses: responseNode,
         apiPlayground: playgroundEnabled ? (
           <APIPlayground path={path} method={method} ctx={ctx} />
@@ -329,7 +329,7 @@ export async function Operation({
           {slots.header}
           {slots.description}
           {slots.authSchemes}
-          {slots.paremeters}
+          {slots.parameters}
           {slots.body}
           {slots.responses}
           {slots.callbacks}
@@ -345,7 +345,7 @@ export async function Operation({
       authSchemes: authNode,
       body: bodyNode,
       callbacks: callbacksNode,
-      paremeters: parameterNode,
+      parameters: parameterNode,
       responses: responseNode,
       requests: <RequestTabs path={path} operation={method} ctx={ctx} />,
     });

@@ -12,7 +12,7 @@ import {
 } from './slots/language-select';
 import {
   type SearchTriggerProps,
-  type FullSearchTriggeProps,
+  type FullSearchTriggerProps,
   SearchTrigger,
   FullSearchTrigger,
 } from './slots/search-trigger';
@@ -37,7 +37,7 @@ export interface BaseSlots {
   navTitle?: FC<ComponentProps<'a'>>;
   searchTrigger?: {
     sm: FC<SearchTriggerProps>;
-    full: FC<FullSearchTriggeProps>;
+    full: FC<FullSearchTriggerProps>;
   };
   languageSelect?: {
     root: FC<LanguageSelectProps>;
@@ -67,7 +67,7 @@ export function baseSlots({ useProps }: { useProps: () => BaseSlotsProps }) {
     return <SearchTrigger {...props} {...searchToggle.sm} />;
   }
 
-  function InlineSearchTriggerFull(props: FullSearchTriggeProps) {
+  function InlineSearchTriggerFull(props: FullSearchTriggerProps) {
     const { searchToggle } = useProps();
     if (searchToggle.components?.lg) return searchToggle.components.lg;
     return <FullSearchTrigger {...props} {...searchToggle.full} />;
