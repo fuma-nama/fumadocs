@@ -1,5 +1,12 @@
 # @fumadocs/base-ui
 
+## 16.7.2
+
+### Patch Changes
+
+- 652c725: Simplify internal types
+  - fumadocs-core@16.7.2
+
 ## 16.7.1
 
 ### Patch Changes
