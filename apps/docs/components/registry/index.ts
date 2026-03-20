@@ -45,14 +45,14 @@ export const registry: Registry = {
       description: 'Replace Docs Layout (Minimal)',
       files: [
         {
-          type: 'block',
+          type: 'layout',
           path: 'components/registry/layout/docs-min.tsx',
-          target: 'components/layout/docs/index.tsx',
+          target: '<dir>/docs/index.tsx',
         },
         {
-          type: 'block',
+          type: 'layout',
           path: 'components/registry/layout/page-min.tsx',
-          target: 'components/layout/docs/page.tsx',
+          target: '<dir>/docs/page.tsx',
         },
       ],
       unlisted: true,
