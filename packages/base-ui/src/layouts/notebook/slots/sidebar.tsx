@@ -21,7 +21,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { mergeRefs } from '@/utils/merge-refs';
 import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
 import { LinkItem } from '@/layouts/shared';
-import { Check, ChevronsUpDown, Languages, Sidebar as SidebarIcon, X } from 'lucide-react';
+import { Check, ChevronsUpDown, Languages, SidebarIcon, X } from 'lucide-react';
 import { useNotebookLayout } from '../client';
 import { isLayoutTabActive, type LayoutTab } from '@/layouts/shared';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';

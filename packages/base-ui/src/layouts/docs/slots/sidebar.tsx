@@ -10,7 +10,7 @@ import {
 import { createLinkItemRenderer } from '@/components/sidebar/link-item';
 import { buttonVariants } from '@/components/ui/button';
 import { SearchTrigger } from '@/layouts/shared/slots/search-trigger';
-import { Check, ChevronsUpDown, Languages, Sidebar as SidebarIcon } from 'lucide-react';
+import { Check, ChevronsUpDown, Languages, SidebarIcon } from 'lucide-react';
 import { mergeRefs } from '@/utils/merge-refs';
 import { ScrollArea, ScrollAreaProps, ScrollViewport } from '@/components/ui/scroll-area';
 import { useDocsLayout } from '../client';
