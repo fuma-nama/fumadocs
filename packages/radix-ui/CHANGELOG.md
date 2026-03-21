@@ -1,5 +1,12 @@
 # fumadocs-ui
 
+## 16.7.4
+
+### Patch Changes
+
+- 58c191d: fix toc
+  - fumadocs-core@16.7.4
+
 ## 16.7.3
 
 ### Patch Changes
