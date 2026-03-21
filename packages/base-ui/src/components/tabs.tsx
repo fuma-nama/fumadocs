@@ -49,39 +49,39 @@ function useTabContext() {
   return ctx;
 }
 
-export const TabsList = React.forwardRef<
-  React.ComponentRef<typeof Unstyled.TabsList>,
-  React.ComponentPropsWithoutRef<typeof Unstyled.TabsList>
->(({ className, ...props }, ref) => (
-  <Unstyled.TabsList
-    ref={ref}
-    {...props}
-    className={(s) =>
-      cn(
-        'flex gap-3.5 text-fd-secondary-foreground overflow-x-auto px-4 not-prose',
-        typeof className === 'function' ? className(s) : className,
-      )
-    }
-  />
-));
-TabsList.displayName = 'TabsList';
+export function TabsList({
+  className,
+  ...props
+}: React.ComponentPropsWithRef<typeof Unstyled.TabsList>) {
+  return (
+    <Unstyled.TabsList
+      {...props}
+      className={(s) =>
+        cn(
+          'flex gap-3.5 text-fd-secondary-foreground overflow-x-auto px-4 not-prose',
+          typeof className === 'function' ? className(s) : className,
+        )
+      }
+    />
+  );
+}
 
-export const TabsTrigger = React.forwardRef<
-  React.ComponentRef<typeof Unstyled.TabsTrigger>,
-  React.ComponentPropsWithoutRef<typeof Unstyled.TabsTrigger>
->(({ className, ...props }, ref) => (
-  <Unstyled.TabsTrigger
-    ref={ref}
-    {...props}
-    className={(s) =>
-      cn(
-        'inline-flex items-center gap-2 whitespace-nowrap text-fd-muted-foreground border-b border-transparent py-2 text-sm font-medium transition-colors [&_svg]:size-4 hover:text-fd-accent-foreground disabled:pointer-events-none disabled:opacity-50 data-[active]:border-fd-primary data-[active]:text-fd-primary',
-        typeof className === 'function' ? className(s) : className,
-      )
-    }
-  />
-));
-TabsTrigger.displayName = 'TabsTrigger';
+export function TabsTrigger({
+  className,
+  ...props
+}: React.ComponentPropsWithRef<typeof Unstyled.TabsTrigger>) {
+  return (
+    <Unstyled.TabsTrigger
+      {...props}
+      className={(s) =>
+        cn(
+          'inline-flex items-center gap-2 whitespace-nowrap text-fd-muted-foreground border-b border-transparent py-2 text-sm font-medium transition-colors [&_svg]:size-4 hover:text-fd-accent-foreground disabled:pointer-events-none disabled:opacity-50 data-[active]:border-fd-primary data-[active]:text-fd-primary',
+          typeof className === 'function' ? className(s) : className,
+        )
+      }
+    />
+  );
+}
 
 export function Tabs({
   ref,

@@ -20,7 +20,7 @@ export function NavbarMenuContent(props: NavigationMenuContentProps) {
       {...rest}
       className={(state) =>
         cn(
-          'grid grid-cols-1 gap-2 p-4 md:grid-cols-2 lg:grid-cols-3',
+          'grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3',
           typeof className === 'function' ? className(state) : className,
         )
       }
@@ -50,16 +50,18 @@ export function NavbarMenuTrigger(props: NavigationMenuTriggerProps) {
 
 export function NavbarMenuLink(props: LinkProps) {
   return (
-    <NavigationMenuLink asChild>
-      <Link
-        {...props}
-        className={cn(
-          'flex flex-col gap-2 rounded-lg border bg-fd-card p-3 transition-colors hover:bg-fd-accent/80 hover:text-fd-accent-foreground',
-          props.className,
-        )}
-      >
-        {props.children}
-      </Link>
-    </NavigationMenuLink>
+    <NavigationMenuLink
+      render={
+        <Link
+          {...props}
+          className={cn(
+            'flex flex-col gap-2 rounded-lg border bg-fd-card p-3 transition-colors hover:bg-fd-accent/80 hover:text-fd-accent-foreground',
+            props.className,
+          )}
+        >
+          {props.children}
+        </Link>
+      }
+    />
   );
 }
