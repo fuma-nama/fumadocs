@@ -6,16 +6,18 @@ import { TocThumb, useTOCItems } from '.';
 import { mergeRefs } from '@/utils/merge-refs';
 import { useI18n } from '@/contexts/i18n';
 
+interface ComputedSVG {
+  d: string;
+  width: number;
+  height: number;
+}
+
 export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
   const containerRef = useRef<HTMLDivElement>(null);
   const items = useTOCItems();
   const { text } = useI18n();
-
-  const [svg, setSvg] = useState<{
-    path: string;
-    width: number;
-    height: number;
-  }>();
+  const svgRef = useRef<ComputedSVG | null>(null);
+  const [svg, setSvg] = useState<ComputedSVG>();
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -24,8 +26,10 @@ export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
     function onResize(): void {
       if (container.clientHeight === 0) return;
       let w = 0,
-        h = 0;
-      const d: string[] = [];
+        h = 0,
+        b1 = 0,
+        d = '';
+
       for (let i = 0; i < items.length; i++) {
         const element: HTMLElement | null = container.querySelector(
           `a[href="#${items[i].url.slice(1)}"]`,
@@ -34,21 +38,31 @@ export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
 
         const styles = getComputedStyle(element);
         const offset = getLineOffset(items[i].depth) + 1,
-          top = element.offsetTop + parseFloat(styles.paddingTop),
-          bottom = element.offsetTop + element.clientHeight - parseFloat(styles.paddingBottom);
+          t2 = element.offsetTop + parseFloat(styles.paddingTop),
+          b2 = element.offsetTop + element.clientHeight - parseFloat(styles.paddingBottom);
 
         w = Math.max(offset, w);
-        h = Math.max(h, bottom);
+        h = Math.max(h, b2);
 
-        d.push(`${i === 0 ? 'M' : 'L'}${offset} ${top}`);
-        d.push(`L${offset} ${bottom}`);
+        if (i === 0) {
+          d += ` M${offset} ${t2} L${offset} ${b2}`;
+        } else {
+          const pOffset = getLineOffset(items[i - 1].depth) + 1;
+          d += ` C ${pOffset} ${t2 - 4} ${offset} ${b1! + 4} ${offset} ${t2} L${offset} ${b2}`;
+        }
+
+        b1 = b2;
       }
 
-      setSvg({
-        path: d.join(' '),
-        width: w + 1,
-        height: h,
-      });
+      w += 1;
+      if (!svgRef.current || svgRef.current.d !== d) {
+        svgRef.current = {
+          d,
+          width: w,
+          height: h,
+        };
+        setSvg(svgRef.current);
+      }
     }
 
     const observer = new ResizeObserver(onResize);
@@ -70,24 +84,28 @@ export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
   return (
     <>
       {svg && (
-        <div
-          className="absolute start-0 top-0 rtl:-scale-x-100"
+        <TocThumb
+          containerRef={containerRef}
+          className="absolute top-0 inset-s-0"
           style={{
             width: svg.width,
             height: svg.height,
-            maskImage: `url("data:image/svg+xml,${
-              // Inline SVG
-              encodeURIComponent(
-                `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${svg.width} ${svg.height}"><path d="${svg.path}" stroke="black" stroke-width="1" fill="none" /></svg>`,
-              )
-            }")`,
           }}
         >
-          <TocThumb
-            containerRef={containerRef}
-            className="absolute w-full top-(--fd-top) h-(--fd-height) bg-fd-primary transition-[top,height]"
-          />
-        </div>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox={`0 0 ${svg.width} ${svg.height}`}
+            className="absolute inset-0 transition-[clip-path] delay-25"
+            style={{
+              width: svg.width,
+              height: svg.height,
+              clipPath: `polygon(0 var(--fd-top), 100% var(--fd-top), 100% calc(var(--fd-top) + var(--fd-height)), 0 calc(var(--fd-top) + var(--fd-height)))`,
+            }}
+          >
+            <path d={svg.d} className="stroke-fd-primary" strokeWidth="1" fill="none" />
+          </svg>
+          <ThumbBox />
+        </TocThumb>
       )}
       <div ref={mergeRefs(containerRef, ref)} className={cn('flex flex-col', className)} {...props}>
         {items.map((item, i) => (
@@ -103,6 +121,23 @@ export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
   );
 }
 
+function ThumbBox() {
+  const items = useTOCItems();
+  const ids = Primitive.useActiveAnchors();
+
+  const item = items.findLast((item) => ids.includes(item.url.slice(1)));
+  if (!item) return;
+
+  return (
+    <div
+      className="absolute size-1 bg-fd-primary rounded-full delay-25 transition-transform"
+      style={{
+        translate: `calc(${getLineOffset(item.depth)}px - 1.25px) calc(var(--fd-top) + var(--fd-height))`,
+      }}
+    />
+  );
+}
+
 function getItemOffset(depth: number): number {
   if (depth <= 2) return 14;
   if (depth === 3) return 26;
@@ -110,7 +145,9 @@ function getItemOffset(depth: number): number {
 }
 
 function getLineOffset(depth: number): number {
-  return depth >= 3 ? 10 : 0;
+  if (depth <= 2) return 2;
+  if (depth === 3) return 10;
+  return 20;
 }
 
 function TOCItem({
@@ -137,16 +174,20 @@ function TOCItem({
       {offset !== upperOffset && (
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 16 16"
-          className="absolute -top-1.5 start-0 size-4 rtl:-scale-x-100"
+          viewBox={`${Math.min(offset, upperOffset)} 0 ${Math.abs(upperOffset - offset)} 12`}
+          className="absolute -top-1.5"
+          style={{
+            width: Math.abs(upperOffset - offset) + 1,
+            height: 12,
+            insetInlineStart: Math.min(offset, upperOffset),
+          }}
         >
-          <line
-            x1={upperOffset}
-            y1="0"
-            x2={offset}
-            y2="12"
-            className="stroke-fd-foreground/10"
+          <path
+            d={`M ${upperOffset} 0 C ${upperOffset} 8 ${offset} 4 ${offset} 12`}
+            stroke="black"
             strokeWidth="1"
+            fill="none"
+            className="stroke-fd-foreground/10"
           />
         </svg>
       )}

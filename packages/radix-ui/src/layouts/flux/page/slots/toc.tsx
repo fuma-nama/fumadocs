@@ -56,11 +56,13 @@ export function TOC({ container, trigger, content, header, footer, style }: TOCP
   return (
     <PageTOCPopover {...container}>
       <PageTOCPopoverContent {...content}>
-        {header}
-        <Base.TOCScrollArea>
-          {style === 'clerk' ? <TocClerk.TOCItems /> : <TocDefault.TOCItems />}
-        </Base.TOCScrollArea>
-        {footer}
+        <div>
+          {header}
+          <Base.TOCScrollArea>
+            {style === 'clerk' ? <TocClerk.TOCItems /> : <TocDefault.TOCItems />}
+          </Base.TOCScrollArea>
+          {footer}
+        </div>
       </PageTOCPopoverContent>
       <PageTOCPopoverTrigger {...trigger} />
     </PageTOCPopover>
