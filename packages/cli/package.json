@@ -50,7 +50,7 @@
     "@oxc-project/types": "^0.121.0",
     "@types/node": "25.5.0",
     "eslint-config-custom": "workspace:*",
-    "shadcn": "4.0.8",
+    "shadcn": "4.1.0",
     "tsconfig": "workspace:*",
     "tsdown": "0.21.4"
   }
