@@ -253,12 +253,8 @@ function ProgressCircle({
 
 function PageTOCPopoverContent(props: ComponentProps<'div'>) {
   return (
-    <CollapsibleContent
-      data-toc-popover-content=""
-      {...props}
-      className={cn('flex flex-col px-2 max-h-[50vh]', props.className)}
-    >
-      {props.children}
+    <CollapsibleContent data-toc-popover-content="" {...props}>
+      <div className="flex flex-col px-2 max-h-[50vh]">{props.children}</div>
     </CollapsibleContent>
   );
 }

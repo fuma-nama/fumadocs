@@ -1,6 +1,6 @@
 'use client';
 
-import { type ComponentProps, Fragment, useState } from 'react';
+import { type ComponentProps, Fragment, useEffect, useEffectEvent, useRef, useState } from 'react';
 import { cva } from 'class-variance-authority';
 import Link from 'fumadocs-core/link';
 import { cn } from '@/utils/cn';
@@ -18,7 +18,8 @@ import { buttonVariants } from '@/components/ui/button';
 import { ChevronDown, Languages } from 'lucide-react';
 import { useIsScrollTop } from '@/utils/use-is-scroll-top';
 import { useHomeLayout } from '..';
-import type { NavOptions } from '@/layouts/shared';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { mergeRefs } from '@/utils/merge-refs';
 
 export const navItemVariants = cva('[&_svg]:size-4', {
   variants: {
@@ -46,10 +47,34 @@ export function Header(props: ComponentProps<'header'>) {
     slots,
     props: { nav },
   } = useHomeLayout();
-  if (nav?.component) return nav.component;
+  const headerRef = useRef<HTMLElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
+  const [open, setOpen] = useState(false);
+  const transparentMode = nav?.transparentMode ?? 'none';
+  const isTop = useIsScrollTop({ enabled: transparentMode === 'top' }) ?? true;
+  const isNavTransparent = transparentMode === 'top' ? isTop : transparentMode === 'always';
 
-  return (
-    <HeaderNavigationMenu transparentMode={nav?.transparentMode} {...props}>
+  const onClick = useEffectEvent((e: Event) => {
+    const element = headerRef.current;
+    if (!open || !element) return;
+    if (element !== e.target && !element.contains(e.target as HTMLElement)) {
+      setOpen(false);
+    }
+  });
+
+  useEffect(() => {
+    window.addEventListener('click', onClick);
+
+    return () => {
+      window.removeEventListener('click', onClick);
+    };
+  }, []);
+
+  const list = (
+    <NavigationMenuList
+      ref={listRef}
+      className="flex h-14 w-full mx-auto max-w-(--fd-layout-width) items-center px-4"
+    >
       {slots.navTitle && (
         <slots.navTitle className="inline-flex items-center gap-2.5 font-semibold" />
       )}
@@ -86,50 +111,81 @@ export function Header(props: ComponentProps<'header'>) {
       </div>
       <div className="flex flex-row items-center ms-auto -me-1.5 lg:hidden">
         {slots.searchTrigger && <slots.searchTrigger.sm hideIfDisabled className="p-2" />}
-        <NavigationMenuItem>
-          <div>
-            <NavigationMenuTrigger
-              aria-label="Toggle Menu"
-              className={cn(
-                buttonVariants({
-                  size: 'icon',
-                  color: 'ghost',
-                  className: 'group [&_svg]:size-5.5',
-                }),
-              )}
-              onPointerMove={nav?.enableHoverToOpen ? undefined : (e) => e.preventDefault()}
-            >
-              <ChevronDown className="transition-transform duration-300 group-data-[state=open]:rotate-180" />
-            </NavigationMenuTrigger>
-            <NavigationMenuContent className="flex flex-col p-4 sm:flex-row sm:items-center sm:justify-end">
-              {menuItems
-                .filter((item) => !isSecondary(item))
-                .map((item, i) => (
-                  <MobileNavigationMenuLinkItem key={i} item={item} className="sm:hidden" />
-                ))}
-              <div className="-ms-1.5 flex flex-row items-center gap-2 max-sm:mt-2">
-                {menuItems.filter(isSecondary).map((item, i) => (
-                  <MobileNavigationMenuLinkItem
-                    key={i}
-                    item={item}
-                    className={cn(item.type === 'icon' && '-mx-1 first:ms-0')}
-                  />
-                ))}
-                <div role="separator" className="flex-1" />
-                {slots.languageSelect && (
-                  <slots.languageSelect.root>
-                    <Languages className="size-5" />
-                    {slots.languageSelect.text && <slots.languageSelect.text />}
-                    <ChevronDown className="size-3 text-fd-muted-foreground" />
-                  </slots.languageSelect.root>
-                )}
-                {slots.themeSwitch && <slots.themeSwitch />}
-              </div>
-            </NavigationMenuContent>
-          </div>
-        </NavigationMenuItem>
+        <CollapsibleTrigger
+          aria-label="Toggle Menu"
+          className={cn(
+            buttonVariants({
+              size: 'icon',
+              color: 'ghost',
+            }),
+          )}
+          onPointerEnter={
+            nav?.enableHoverToOpen
+              ? () => {
+                  setOpen(true);
+                }
+              : undefined
+          }
+        >
+          <ChevronDown className={cn('transition-transform', open && 'rotate-180')} />
+        </CollapsibleTrigger>
       </div>
-    </HeaderNavigationMenu>
+    </NavigationMenuList>
+  );
+
+  return (
+    <Collapsible
+      open={open}
+      onOpenChange={setOpen}
+      render={
+        <header
+          id="nd-nav"
+          {...props}
+          ref={mergeRefs(headerRef, props.ref)}
+          className={cn('sticky h-14 top-0 z-40', props.className)}
+        >
+          <NavigationMenu
+            className={(s) =>
+              cn(
+                'backdrop-blur-lg border-b transition-[box-shadow,background-color,border-radius]',
+                open && 'max-lg:shadow-lg max-lg:rounded-b-2xl',
+                (open || !isNavTransparent || s.open) && 'bg-fd-background/80',
+              )
+            }
+          >
+            {list}
+            <CollapsibleContent className="mx-auto max-w-(--fd-layout-width) lg:hidden">
+              <div className="flex flex-col pt-2 p-4 sm:flex-row sm:items-center sm:justify-end">
+                {menuItems
+                  .filter((item) => !isSecondary(item))
+                  .map((item, i) => (
+                    <MobileNavigationMenuLinkItem key={i} item={item} className="sm:hidden" />
+                  ))}
+                <div className="-ms-1.5 flex flex-row items-center gap-2 max-sm:mt-2">
+                  {menuItems.filter(isSecondary).map((item, i) => (
+                    <MobileNavigationMenuLinkItem
+                      key={i}
+                      item={item}
+                      className={cn(item.type === 'icon' && '-mx-1 first:ms-0')}
+                    />
+                  ))}
+                  <div role="separator" className="flex-1" />
+                  {slots.languageSelect && (
+                    <slots.languageSelect.root>
+                      <Languages className="size-5" />
+                      {slots.languageSelect.text && <slots.languageSelect.text />}
+                      <ChevronDown className="size-3 text-fd-muted-foreground" />
+                    </slots.languageSelect.root>
+                  )}
+                  {slots.themeSwitch && <slots.themeSwitch />}
+                </div>
+              </div>
+            </CollapsibleContent>
+            <NavigationMenuViewport side="bottom" anchor={listRef} />
+          </NavigationMenu>
+        </header>
+      }
+    />
   );
 }
 
@@ -137,36 +193,6 @@ function isSecondary(item: LinkItemType): boolean {
   if ('secondary' in item && item.secondary != null) return item.secondary;
 
   return item.type === 'icon';
-}
-
-function HeaderNavigationMenu({
-  transparentMode = 'none',
-  ...props
-}: ComponentProps<'header'> & {
-  transparentMode?: NavOptions['transparentMode'];
-}) {
-  const [value, setValue] = useState('');
-  const isTop = useIsScrollTop({ enabled: transparentMode === 'top' }) ?? true;
-  const isTransparent = transparentMode === 'top' ? isTop : transparentMode === 'always';
-
-  return (
-    <header id="nd-nav" {...props} className={cn('sticky h-14 top-0 z-40', props.className)}>
-      <NavigationMenu value={value} onValueChange={setValue}>
-        <div
-          className={cn(
-            'backdrop-blur-lg border-b transition-colors *:mx-auto *:max-w-(--fd-layout-width)',
-            value.length > 0 && 'max-lg:shadow-lg max-lg:rounded-b-2xl',
-            (!isTransparent || value.length > 0) && 'bg-fd-background/80',
-          )}
-        >
-          <NavigationMenuList className="flex h-14 w-full items-center px-4">
-            {props.children}
-          </NavigationMenuList>
-          <NavigationMenuViewport />
-        </div>
-      </NavigationMenu>
-    </header>
-  );
 }
 
 function NavigationMenuLinkItem({ item, ...props }: { item: LinkItemType; className?: string }) {
@@ -186,25 +212,30 @@ function NavigationMenuLinkItem({ item, ...props }: { item: LinkItemType; classN
       } = child.menu ?? {};
 
       return (
-        <NavigationMenuLink key={`${j}-${child.url}`} asChild>
-          <Link
-            href={child.url}
-            external={child.external}
-            {...rest}
-            className={cn(
-              'flex flex-col gap-2 rounded-lg border bg-fd-card p-3 transition-colors hover:bg-fd-accent/80 hover:text-fd-accent-foreground',
-              rest.className,
-            )}
-          >
-            {rest.children ?? (
-              <>
-                {banner}
-                <p className="text-base font-medium">{child.text}</p>
-                <p className="text-sm text-fd-muted-foreground empty:hidden">{child.description}</p>
-              </>
-            )}
-          </Link>
-        </NavigationMenuLink>
+        <NavigationMenuLink
+          key={`${j}-${child.url}`}
+          render={
+            <Link
+              href={child.url}
+              external={child.external}
+              {...rest}
+              className={cn(
+                'flex flex-col gap-2 rounded-lg border bg-fd-card p-3 transition-colors hover:bg-fd-accent/80 hover:text-fd-accent-foreground',
+                rest.className,
+              )}
+            >
+              {rest.children ?? (
+                <>
+                  {banner}
+                  <p className="text-base font-medium">{child.text}</p>
+                  <p className="text-sm text-fd-muted-foreground empty:hidden">
+                    {child.description}
+                  </p>
+                </>
+              )}
+            </Link>
+          }
+        />
       );
     });
 
@@ -219,7 +250,7 @@ function NavigationMenuLinkItem({ item, ...props }: { item: LinkItemType; classN
             item.text
           )}
         </NavigationMenuTrigger>
-        <NavigationMenuContent className="grid grid-cols-1 gap-2 p-4 md:grid-cols-2 lg:grid-cols-3">
+        <NavigationMenuContent className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
           {children}
         </NavigationMenuContent>
       </NavigationMenuItem>
@@ -228,15 +259,17 @@ function NavigationMenuLinkItem({ item, ...props }: { item: LinkItemType; classN
 
   return (
     <NavigationMenuItem {...props}>
-      <NavigationMenuLink asChild>
-        <LinkItem
-          item={item}
-          aria-label={item.type === 'icon' ? item.label : undefined}
-          className={cn(navItemVariants({ variant: item.type }))}
-        >
-          {item.type === 'icon' ? item.icon : item.text}
-        </LinkItem>
-      </NavigationMenuLink>
+      <NavigationMenuLink
+        render={
+          <LinkItem
+            item={item}
+            aria-label={item.type === 'icon' ? item.label : undefined}
+            className={cn(navItemVariants({ variant: item.type }))}
+          >
+            {item.type === 'icon' ? item.icon : item.text}
+          </LinkItem>
+        }
+      />
     </NavigationMenuItem>
   );
 }
@@ -263,11 +296,9 @@ function MobileNavigationMenuLinkItem({
       <div className={cn('mb-4 flex flex-col', props.className)}>
         <p className="mb-1 text-sm text-fd-muted-foreground">
           {item.url ? (
-            <NavigationMenuLink asChild>
-              <Link href={item.url} external={item.external}>
-                {header}
-              </Link>
-            </NavigationMenuLink>
+            <Link href={item.url} external={item.external}>
+              {header}
+            </Link>
           ) : (
             header
           )}
@@ -280,28 +311,26 @@ function MobileNavigationMenuLinkItem({
   }
 
   return (
-    <NavigationMenuLink asChild>
-      <LinkItem
-        item={item}
-        className={cn(
-          {
-            main: 'inline-flex items-center gap-2 py-1.5 transition-colors hover:text-fd-popover-foreground/50 data-[active=true]:font-medium data-[active=true]:text-fd-primary [&_svg]:size-4',
-            icon: buttonVariants({
-              size: 'icon',
-              color: 'ghost',
-            }),
-            button: buttonVariants({
-              color: 'secondary',
-              className: 'gap-1.5 [&_svg]:size-4',
-            }),
-          }[item.type ?? 'main'],
-          props.className,
-        )}
-        aria-label={item.type === 'icon' ? item.label : undefined}
-      >
-        {item.icon}
-        {item.type === 'icon' ? undefined : item.text}
-      </LinkItem>
-    </NavigationMenuLink>
+    <LinkItem
+      item={item}
+      className={cn(
+        {
+          main: 'inline-flex items-center gap-2 py-1.5 transition-colors hover:text-fd-popover-foreground/50 data-[active=true]:font-medium data-[active=true]:text-fd-primary [&_svg]:size-4',
+          icon: buttonVariants({
+            size: 'icon',
+            color: 'ghost',
+          }),
+          button: buttonVariants({
+            color: 'secondary',
+            className: 'gap-1.5 [&_svg]:size-4',
+          }),
+        }[item.type ?? 'main'],
+        props.className,
+      )}
+      aria-label={item.type === 'icon' ? item.label : undefined}
+    >
+      {item.icon}
+      {item.type === 'icon' ? undefined : item.text}
+    </LinkItem>
   );
 }

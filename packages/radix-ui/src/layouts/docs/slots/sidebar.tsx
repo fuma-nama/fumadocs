@@ -12,7 +12,6 @@ import { buttonVariants } from '@/components/ui/button';
 import { SearchTrigger } from '@/layouts/shared/slots/search-trigger';
 import { Check, ChevronsUpDown, Languages, SidebarIcon } from 'lucide-react';
 import { mergeRefs } from '@/utils/merge-refs';
-import { ScrollArea, ScrollAreaProps, ScrollViewport } from '@/components/ui/scroll-area';
 import { useDocsLayout } from '../client';
 import { LinkItem } from '@/layouts/shared';
 import { isLayoutTabActive, type LayoutTab } from '@/layouts/shared';
@@ -65,14 +64,14 @@ export function Sidebar({ footer, banner, collapsible = true, components, ...res
   } = useDocsLayout();
   const iconLinks = menuItems.filter((item) => item.type === 'icon');
   const viewport = (
-    <SidebarViewport>
+    <Base.SidebarViewport>
       {menuItems
         .filter((v) => v.type !== 'icon')
         .map((item, i, list) => (
           <SidebarLinkItem key={i} item={item} className={cn(i === list.length - 1 && 'mb-4')} />
         ))}
       <SidebarPageTree {...components} />
-    </SidebarViewport>
+    </Base.SidebarViewport>
   );
 
   return (
@@ -183,24 +182,6 @@ function SidebarFolder(props: ComponentProps<typeof Base.SidebarFolder>) {
 
 function SidebarCollapseTrigger(props: ComponentProps<typeof Base.SidebarCollapseTrigger>) {
   return <Base.SidebarCollapseTrigger {...props} />;
-}
-
-function SidebarViewport(props: ScrollAreaProps) {
-  return (
-    <ScrollArea {...props} className={cn('min-h-0 flex-1', props.className)}>
-      <ScrollViewport
-        className="*:flex! *:flex-col! *:gap-0.5! p-4 overscroll-contain"
-        style={
-          {
-            maskImage:
-              'linear-gradient(to bottom, transparent, white 12px, white calc(100% - 12px), transparent)',
-          } as object
-        }
-      >
-        {props.children}
-      </ScrollViewport>
-    </ScrollArea>
-  );
 }
 
 export function SidebarTrigger(props: ComponentProps<'button'>) {
@@ -385,14 +366,14 @@ function SidebarFolderContent({
   return (
     <Base.SidebarFolderContent
       className={cn(
-        'relative flex flex-col gap-0.5 *:first:mt-0.5',
+        'relative',
         depth === 1 &&
           "before:content-[''] before:absolute before:w-px before:inset-y-1 before:bg-fd-border before:start-2.5",
         className,
       )}
       {...props}
     >
-      {children}
+      <div className="flex flex-col gap-0.5 pt-0.5">{children}</div>
     </Base.SidebarFolderContent>
   );
 }

@@ -50,26 +50,65 @@ export function TOCScrollArea({ ref, className, ...props }: ComponentProps<'div'
   );
 }
 
-type TocThumbType = [top: number, height: number];
-
-interface RefProps {
-  containerRef: RefObject<HTMLElement | null>;
+interface TocThumbInfo {
+  top: number;
+  height: number;
 }
 
-export function TocThumb({ containerRef, ...props }: ComponentProps<'div'> & RefProps) {
+interface TocThumbProps extends ComponentProps<'div'> {
+  containerRef: RefObject<HTMLElement | null>;
+  align?: 'center' | 'end';
+}
+
+export function TocThumb({ containerRef, align = 'end', ...props }: TocThumbProps) {
   const thumbRef = useRef<HTMLDivElement>(null);
   const active = useActiveAnchors();
-  function update(info: TocThumbType): void {
+
+  function update(info: TocThumbInfo): void {
     const element = thumbRef.current;
-    if (!element) return;
-    element.style.setProperty('--fd-top', `${info[0]}px`);
-    element.style.setProperty('--fd-height', `${info[1]}px`);
+    const container = containerRef.current;
+    if (!element || !container) return;
+
+    element.style.setProperty('--fd-top', `${info.top}px`);
+    element.style.setProperty('--fd-height', `${info.height}px`);
+  }
+
+  function calc(active: string[]): TocThumbInfo | null {
+    const container = containerRef.current;
+    if (!container || container.clientHeight === 0) return null;
+    if (active.length === 0) return { height: 0, top: 0 };
+
+    let upper = Number.MAX_VALUE;
+    let lower = 0;
+
+    for (const item of active) {
+      const element = container.querySelector<HTMLElement>(`a[href="#${item}"]`);
+      if (!element) continue;
+
+      if (align === 'center') {
+        const y = element.offsetTop + element.clientHeight / 2;
+        upper = Math.min(upper, y);
+        lower = Math.max(lower, y);
+      } else {
+        const styles = getComputedStyle(element);
+
+        upper = Math.min(upper, element.offsetTop + parseFloat(styles.paddingTop));
+        lower = Math.max(
+          lower,
+          element.offsetTop + element.clientHeight - parseFloat(styles.paddingBottom),
+        );
+      }
+    }
+
+    return {
+      top: upper,
+      height: lower - upper,
+    };
   }
 
   const onPrint = useEffectEvent(() => {
-    if (containerRef.current) {
-      update(calc(containerRef.current, active));
-    }
+    const result = calc(active);
+    if (result) update(result);
   });
 
   useEffect(() => {
@@ -85,33 +124,9 @@ export function TocThumb({ containerRef, ...props }: ComponentProps<'div'> & Ref
   }, [containerRef]);
 
   useOnChange(active, () => {
-    if (containerRef.current) {
-      update(calc(containerRef.current, active));
-    }
+    const result = calc(active);
+    if (result) update(result);
   });
 
   return <div ref={thumbRef} data-hidden={active.length === 0} {...props} />;
-}
-
-function calc(container: HTMLElement, active: string[]): TocThumbType {
-  if (active.length === 0 || container.clientHeight === 0) {
-    return [0, 0];
-  }
-
-  let upper = Number.MAX_VALUE,
-    lower = 0;
-
-  for (const item of active) {
-    const element = container.querySelector<HTMLElement>(`a[href="#${item}"]`);
-    if (!element) continue;
-
-    const styles = getComputedStyle(element);
-    upper = Math.min(upper, element.offsetTop + parseFloat(styles.paddingTop));
-    lower = Math.max(
-      lower,
-      element.offsetTop + element.clientHeight - parseFloat(styles.paddingBottom),
-    );
-  }
-
-  return [upper, lower - upper];
 }

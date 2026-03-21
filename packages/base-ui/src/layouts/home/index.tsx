@@ -60,7 +60,7 @@ export function HomeLayout(props: HomeLayoutProps) {
   const linkItems = useLinkItems(props);
   const slots: HomeSlots = {
     ...baseSlots,
-    header: defaultSlots?.header ?? Header,
+    header: defaultSlots?.header ?? InlineHeader,
     container: defaultSlots?.container ?? Container,
   };
 
@@ -78,4 +78,10 @@ export function HomeLayout(props: HomeLayoutProps) {
       </slots.container>
     </LayoutContext>
   );
+}
+
+function InlineHeader(props: ComponentProps<'header'>) {
+  const { nav } = useHomeLayout().props;
+  if (nav?.component) return nav.component;
+  return <Header {...props} />;
 }

@@ -19,7 +19,6 @@ import {
 import { createLinkItemRenderer } from '@/components/sidebar/link-item';
 import { buttonVariants } from '@/components/ui/button';
 import { mergeRefs } from '@/utils/merge-refs';
-import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
 import { LinkItem } from '@/layouts/shared';
 import { Check, ChevronsUpDown, Languages, SidebarIcon, X } from 'lucide-react';
 import { useNotebookLayout } from '../client';
@@ -74,24 +73,6 @@ export function SidebarTrigger(props: ComponentProps<'button'>) {
 
 export function SidebarCollapseTrigger(props: ComponentProps<'button'>) {
   return <Base.SidebarCollapseTrigger {...props} />;
-}
-
-function SidebarViewport(props: ComponentProps<typeof ScrollArea>) {
-  return (
-    <ScrollArea {...props} className={cn('min-h-0 flex-1', props.className)}>
-      <ScrollViewport
-        className="p-4 overscroll-contain"
-        style={
-          {
-            maskImage:
-              'linear-gradient(to bottom, transparent, white 12px, white calc(100% - 12px), transparent)',
-          } as object
-        }
-      >
-        {props.children}
-      </ScrollViewport>
-    </ScrollArea>
-  );
 }
 
 function SidebarContent({ ref: refProp, className, children, ...props }: ComponentProps<'aside'>) {
@@ -271,7 +252,7 @@ function SidebarFolderContent({
       )}
       {...props}
     >
-      {children}
+      <div className="flex flex-col gap-0.5 pt-0.5">{children}</div>
     </Base.SidebarFolderContent>
   );
 }
@@ -332,18 +313,18 @@ export function Sidebar({ banner, footer, components, collapsible = true, ...res
   }
 
   const viewport = (
-    <SidebarViewport>
+    <Base.SidebarViewport>
       {menuItems
         .filter((item) => item.type !== 'icon')
         .map((item, i, arr) => (
           <SidebarLinkItem
             key={i}
             item={item}
-            className={cn('lg:hidden', i === arr.length - 1 && 'mb-4')}
+            className={cn('lg:hidden', i === arr.length - 1 && 'mb-3')}
           />
         ))}
       <SidebarPageTree {...components} />
-    </SidebarViewport>
+    </Base.SidebarViewport>
   );
 
   return (
@@ -461,7 +442,7 @@ export function Sidebar({ banner, footer, components, collapsible = true, ...res
   );
 }
 
-export function SidebarTabsDropdown({
+function SidebarTabsDropdown({
   options,
   placeholder,
   ...props
