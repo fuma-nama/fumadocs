@@ -1,5 +1,12 @@
 # create-fumadocs-versions
 
+## 16.0.77
+
+### Patch Changes
+
+- fumadocs-core@16.7.3
+- fumadocs-ui@16.7.3
+
 ## 16.0.76
 
 ### Patch Changes

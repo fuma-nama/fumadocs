@@ -1,5 +1,13 @@
 # @fumadocs/base-ui
 
+## 16.7.3
+
+### Patch Changes
+
+- 9580621: fix sidebar scroll area
+- 7aa66f2: Redesign home layout navigation menu
+  - fumadocs-core@16.7.3
+
 ## 16.7.2
 
 ### Patch Changes
