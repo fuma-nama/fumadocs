@@ -104,6 +104,7 @@ export class RegistryCompiler {
       name: registry.name,
       info: {
         indexes: [],
+        unlistedIndexes: [],
         env: registry.env,
         variables: registry.variables,
       },
@@ -119,14 +120,13 @@ export class RegistryCompiler {
     );
 
     for (const [input, comp] of builtComps) {
-      if (!input.unlisted) {
-        output.info.indexes.push({
-          name: input.name,
-          title: input.title,
-          description: input.description,
-        });
-      }
+      const arr = input.unlisted ? output.info.unlistedIndexes : output.info.indexes;
 
+      arr.push({
+        name: input.name,
+        title: input.title,
+        description: input.description,
+      });
       output.components.push(comp);
     }
 
