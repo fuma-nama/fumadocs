@@ -19,7 +19,6 @@ import { createLinkItemRenderer } from '@/components/sidebar/link-item';
 import { mergeRefs } from '@/utils/merge-refs';
 import { AnimatePresence, motion } from 'motion/react';
 import { RemoveScroll } from 'react-remove-scroll';
-import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
 import { useFluxLayout } from '..';
 import { XIcon, SidebarIcon } from 'lucide-react';
 
@@ -68,16 +67,8 @@ export function Sidebar({ footer, banner, components, ...rest }: SidebarProps) {
   return (
     <SidebarContent {...rest}>
       <div className="flex flex-col gap-3 p-4 pb-2 empty:hidden">{banner}</div>
-      <ScrollArea className="min-h-0 flex-1">
-        <ScrollViewport
-          className="p-4 overscroll-contain"
-          style={
-            {
-              maskImage:
-                'linear-gradient(to bottom, transparent, white 12px, white calc(100% - 12px), transparent)',
-            } as object
-          }
-        >
+      <Base.SidebarViewport>
+        <div className="flex flex-col">
           {menuItems
             .filter((v) => v.type !== 'icon')
             .map((item, i, list) => (
@@ -88,8 +79,8 @@ export function Sidebar({ footer, banner, components, ...rest }: SidebarProps) {
               />
             ))}
           <SidebarPageTree {...components} />
-        </ScrollViewport>
-      </ScrollArea>
+        </div>
+      </Base.SidebarViewport>
       {footer}
     </SidebarContent>
   );

@@ -5,14 +5,8 @@ import { cn } from '@/utils/cn';
 const ScrollArea = React.forwardRef<
   React.ComponentRef<typeof Primitive.Root>,
   React.ComponentPropsWithoutRef<typeof Primitive.Root>
->(({ className, children, ...props }, ref) => (
-  <Primitive.Root
-    ref={ref}
-    className={(s) =>
-      cn('overflow-hidden', typeof className === 'function' ? className(s) : className)
-    }
-    {...props}
-  >
+>(({ children, ...props }, ref) => (
+  <Primitive.Root ref={ref} {...props}>
     {children}
     <Primitive.Corner />
     <ScrollBar orientation="vertical" />

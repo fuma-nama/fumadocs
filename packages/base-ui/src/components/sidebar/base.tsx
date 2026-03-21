@@ -226,15 +226,7 @@ export function SidebarViewport({ className, ...props }: ScrollAreaProps) {
       }
       {...props}
     >
-      <ScrollViewport
-        className="p-4 overscroll-contain"
-        style={
-          {
-            maskImage:
-              'linear-gradient(to bottom, transparent, white 12px, white calc(100% - 12px), transparent)',
-          } as object
-        }
-      >
+      <ScrollViewport className="p-4 overscroll-contain mask-[linear-gradient(to_bottom,transparent,white_12px,white_calc(100%-12px),transparent)]">
         {props.children}
       </ScrollViewport>
     </ScrollArea>

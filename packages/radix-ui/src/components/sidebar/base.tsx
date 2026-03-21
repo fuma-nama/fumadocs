@@ -26,6 +26,7 @@ import { useMediaQuery } from 'fumadocs-core/utils/use-media-query';
 import { Presence } from '@radix-ui/react-presence';
 import scrollIntoView from 'scroll-into-view-if-needed';
 import { usePathname } from 'fumadocs-core/framework';
+import { ScrollArea, ScrollViewport } from '../ui/scroll-area';
 
 interface SidebarContext {
   open: boolean;
@@ -178,6 +179,30 @@ export function SidebarContent({
       );
     },
   });
+}
+
+export function SidebarViewport({
+  area,
+  viewport,
+  children,
+}: {
+  area?: ComponentProps<typeof ScrollArea>;
+  viewport?: ComponentProps<typeof ScrollViewport>;
+  children: ReactNode;
+}) {
+  return (
+    <ScrollArea {...area} className={cn('min-h-0 flex-1', area?.className)}>
+      <ScrollViewport
+        {...viewport}
+        className={cn(
+          '*:flex! *:flex-col! *:gap-0.5! p-4 overscroll-contain mask-[linear-gradient(to_bottom,transparent,white_12px,white_calc(100%-12px),transparent)]',
+          viewport?.className,
+        )}
+      >
+        {children}
+      </ScrollViewport>
+    </ScrollArea>
+  );
 }
 
 export function SidebarDrawerOverlay(props: ComponentProps<'div'>) {

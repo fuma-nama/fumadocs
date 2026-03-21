@@ -19,7 +19,6 @@ import {
 import { createLinkItemRenderer } from '@/components/sidebar/link-item';
 import { buttonVariants } from '@/components/ui/button';
 import { mergeRefs } from '@/utils/merge-refs';
-import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
 import { LinkItem } from '@/layouts/shared';
 import { Check, ChevronsUpDown, Languages, SidebarIcon, X } from 'lucide-react';
 import { useNotebookLayout } from '../client';
@@ -74,30 +73,6 @@ export function SidebarTrigger(props: ComponentProps<'button'>) {
 
 export function SidebarCollapseTrigger(props: ComponentProps<'button'>) {
   return <Base.SidebarCollapseTrigger {...props} />;
-}
-
-function SidebarViewport(props: ComponentProps<typeof ScrollArea>) {
-  const { className, ...rest } = props;
-  return (
-    <ScrollArea
-      {...rest}
-      className={(state) =>
-        cn('min-h-0 flex-1', typeof className === 'function' ? className(state) : className)
-      }
-    >
-      <ScrollViewport
-        className="p-4 overscroll-contain"
-        style={
-          {
-            maskImage:
-              'linear-gradient(to bottom, transparent, white 12px, white calc(100% - 12px), transparent)',
-          } as object
-        }
-      >
-        {props.children}
-      </ScrollViewport>
-    </ScrollArea>
-  );
 }
 
 function SidebarContent({ ref: refProp, className, children, ...props }: ComponentProps<'aside'>) {
@@ -277,7 +252,7 @@ function SidebarFolderContent({
     <Base.SidebarFolderContent
       className={(state) =>
         cn(
-          'relative',
+          'relative flex flex-col gap-0.5 pt-0.5',
           depth === 1 &&
             "before:content-[''] before:absolute before:w-px before:inset-y-1 before:bg-fd-border before:start-2.5",
           typeof className === 'function' ? className(state) : className,
@@ -346,18 +321,20 @@ export function Sidebar({ banner, footer, components, collapsible = true, ...res
   }
 
   const viewport = (
-    <SidebarViewport>
-      {menuItems
-        .filter((item) => item.type !== 'icon')
-        .map((item, i, arr) => (
-          <SidebarLinkItem
-            key={i}
-            item={item}
-            className={cn('lg:hidden', i === arr.length - 1 && 'mb-4')}
-          />
-        ))}
-      <SidebarPageTree {...components} />
-    </SidebarViewport>
+    <Base.SidebarViewport>
+      <div className="flex flex-col gap-0.5">
+        {menuItems
+          .filter((item) => item.type !== 'icon')
+          .map((item, i, arr) => (
+            <SidebarLinkItem
+              key={i}
+              item={item}
+              className={cn('lg:hidden', i === arr.length - 1 && 'mb-4')}
+            />
+          ))}
+        <SidebarPageTree {...components} />
+      </div>
+    </Base.SidebarViewport>
   );
 
   return (
