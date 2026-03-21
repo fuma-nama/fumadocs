@@ -108,13 +108,11 @@ export function TOCPopover({
     <PageTOCPopover {...container}>
       <PageTOCPopoverTrigger {...trigger} />
       <PageTOCPopoverContent {...content}>
-        <div>
-          {header}
-          <Base.TOCScrollArea>
-            {style === 'clerk' ? <TocClerk.TOCItems /> : <TocDefault.TOCItems />}
-          </Base.TOCScrollArea>
-          {footer}
-        </div>
+        {header}
+        <Base.TOCScrollArea>
+          {style === 'clerk' ? <TocClerk.TOCItems /> : <TocDefault.TOCItems />}
+        </Base.TOCScrollArea>
+        {footer}
       </PageTOCPopoverContent>
     </PageTOCPopover>
   );
@@ -283,12 +281,8 @@ function ProgressCircle({
 
 function PageTOCPopoverContent(props: ComponentProps<'div'>) {
   return (
-    <CollapsibleContent
-      data-toc-popover-content=""
-      {...props}
-      className={cn('flex flex-col px-4 max-h-[50vh] md:px-6', props.className)}
-    >
-      {props.children}
+    <CollapsibleContent data-toc-popover-content="" {...props}>
+      <div className="flex flex-col px-4 max-h-[50vh] md:px-6">{props.children}</div>
     </CollapsibleContent>
   );
 }

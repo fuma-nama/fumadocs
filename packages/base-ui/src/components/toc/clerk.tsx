@@ -95,7 +95,7 @@ export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox={`0 0 ${svg.width} ${svg.height}`}
-            className="absolute inset-0 transition-[clip-path] delay-25"
+            className="absolute transition-[clip-path]"
             style={{
               width: svg.width,
               height: svg.height,
@@ -130,7 +130,7 @@ function ThumbBox() {
 
   return (
     <div
-      className="absolute size-1 bg-fd-primary rounded-full delay-25 transition-transform"
+      className="absolute size-1 bg-fd-primary rounded-full transition-transform"
       style={{
         translate: `calc(${getLineOffset(item.depth)}px - 1.25px) calc(var(--fd-top) + var(--fd-height))`,
       }}
@@ -169,7 +169,7 @@ function TOCItem({
       style={{
         paddingInlineStart: getItemOffset(item.depth),
       }}
-      className="prose relative py-1.5 text-sm text-fd-muted-foreground hover:text-fd-accent-foreground transition-colors wrap-anywhere first:pt-0 last:pb-0 data-[active=true]:text-fd-primary"
+      className="prose relative py-1.5 text-sm scroll-m-4 text-fd-muted-foreground hover:text-fd-accent-foreground transition-colors wrap-anywhere first:pt-0 last:pb-0 data-[active=true]:text-fd-primary"
     >
       {offset !== upperOffset && (
         <svg

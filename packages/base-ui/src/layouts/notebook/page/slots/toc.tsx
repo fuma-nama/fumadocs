@@ -108,13 +108,11 @@ export function TOCPopover({
     <PageTOCPopover {...container}>
       <PageTOCPopoverTrigger {...trigger} />
       <PageTOCPopoverContent {...content}>
-        <div>
-          {header}
-          <Base.TOCScrollArea>
-            {style === 'clerk' ? <TocClerk.TOCItems /> : <TocDefault.TOCItems />}
-          </Base.TOCScrollArea>
-          {footer}
-        </div>
+        {header}
+        <Base.TOCScrollArea>
+          {style === 'clerk' ? <TocClerk.TOCItems /> : <TocDefault.TOCItems />}
+        </Base.TOCScrollArea>
+        {footer}
       </PageTOCPopoverContent>
     </PageTOCPopover>
   );

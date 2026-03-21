@@ -33,11 +33,11 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@ai-sdk/react": "^3.0.118",
+    "@ai-sdk/react": "^3.0.136",
     "@openrouter/ai-sdk-provider": "^2.3.3",
     "@radix-ui/react-presence": "^1.1.5",
     "@takumi-rs/image-response": "^0.73.1",
-    "ai": "^6.0.116",
+    "ai": "^6.0.134",
     "chokidar": "^5.0.0",
     "class-variance-authority": "^0.7.1",
     "commander": "^14.0.3",
@@ -69,7 +69,7 @@
     "hast-util-to-jsx-runtime": "^2.3.6",
     "hono": "^4.12.8",
     "ignore": "^7.0.5",
-    "katex": "0.16.39",
+    "katex": "0.16.40",
     "lucide-react": "^0.577.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
