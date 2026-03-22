@@ -132,12 +132,8 @@ function PageTOCPopoverPhysical({ className, children, ...rest }: ComponentProps
 function PageTOCPopoverTrigger({ className, ...props }: ComponentProps<'button'>) {
   const { text } = useI18n();
   const { open } = use(TocPopoverContext)!;
-  const items = Base.useTOCItems();
-  const active = Base.useActiveAnchor();
-  const selected = useMemo(
-    () => items.findIndex((item) => active === item.url.slice(1)),
-    [items, active],
-  );
+  const items = Base.useItems();
+  const selectedIdx = items.findIndex((item) => item.active);
   const path = useTreePath().at(-1);
   const spanProps = {
     transition: {
@@ -168,14 +164,14 @@ function PageTOCPopoverTrigger({ className, ...props }: ComponentProps<'button'>
       {...props}
     >
       <ProgressCircle
-        value={(selected + 1) / Math.max(1, items.length)}
+        value={(selectedIdx + 1) / Math.max(1, items.length)}
         max={1}
         className={cn('shrink-0', open && 'text-fd-primary')}
       />
       <AnimatePresence mode="wait">
-        {items[selected] && selected !== -1 && !open ? (
-          <motion.span key={selected} {...spanProps}>
-            {items[selected].title}
+        {items[selectedIdx] && !open ? (
+          <motion.span key={selectedIdx} {...spanProps}>
+            {items[selectedIdx].original.title}
           </motion.span>
         ) : path ? (
           <motion.span key={path.$id ?? ':pathId'} {...spanProps}>

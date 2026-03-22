@@ -1,6 +1,6 @@
 'use client';
 import * as Primitive from 'fumadocs-core/toc';
-import { type ComponentProps, useEffect, useRef, useState } from 'react';
+import { type ComponentProps, useEffect, useEffectEvent, useRef, useState } from 'react';
 import { cn } from '@/utils/cn';
 import { TocThumb, useTOCItems } from '.';
 import { mergeRefs } from '@/utils/merge-refs';
@@ -16,63 +16,58 @@ export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
   const containerRef = useRef<HTMLDivElement>(null);
   const items = useTOCItems();
   const { text } = useI18n();
-  const svgRef = useRef<ComputedSVG | null>(null);
   const [svg, setSvg] = useState<ComputedSVG>();
+
+  const onResize = useEffectEvent(() => {
+    const container = containerRef.current;
+    if (!container || container.clientHeight === 0) return;
+    let w = 0;
+    let h = 0;
+    let b0 = 0;
+    let d = '';
+
+    for (let i = 0; i < items.length; i++) {
+      const element: HTMLElement | null = container.querySelector(
+        `a[href="#${items[i].url.slice(1)}"]`,
+      );
+      if (!element) continue;
+
+      const styles = getComputedStyle(element);
+      const offset = getLineOffset(items[i].depth) + 1,
+        top = element.offsetTop + parseFloat(styles.paddingTop),
+        bottom = element.offsetTop + element.clientHeight - parseFloat(styles.paddingBottom);
+
+      w = Math.max(offset, w);
+      h = Math.max(h, bottom);
+
+      if (i === 0) {
+        d += ` M${offset} ${top} L${offset} ${bottom}`;
+      } else {
+        const pOffset = getLineOffset(items[i - 1].depth) + 1;
+        d += ` C ${pOffset} ${top - 4} ${offset} ${b0! + 4} ${offset} ${top} L${offset} ${bottom}`;
+      }
+
+      b0 = bottom;
+    }
+
+    w += 1;
+    setSvg({
+      d,
+      width: w,
+      height: h,
+    });
+  });
 
   useEffect(() => {
     if (!containerRef.current) return;
-    const container = containerRef.current;
-
-    function onResize(): void {
-      if (container.clientHeight === 0) return;
-      let w = 0,
-        h = 0,
-        b1 = 0,
-        d = '';
-
-      for (let i = 0; i < items.length; i++) {
-        const element: HTMLElement | null = container.querySelector(
-          `a[href="#${items[i].url.slice(1)}"]`,
-        );
-        if (!element) continue;
-
-        const styles = getComputedStyle(element);
-        const offset = getLineOffset(items[i].depth) + 1,
-          t2 = element.offsetTop + parseFloat(styles.paddingTop),
-          b2 = element.offsetTop + element.clientHeight - parseFloat(styles.paddingBottom);
-
-        w = Math.max(offset, w);
-        h = Math.max(h, b2);
-
-        if (i === 0) {
-          d += ` M${offset} ${t2} L${offset} ${b2}`;
-        } else {
-          const pOffset = getLineOffset(items[i - 1].depth) + 1;
-          d += ` C ${pOffset} ${t2 - 4} ${offset} ${b1! + 4} ${offset} ${t2} L${offset} ${b2}`;
-        }
-
-        b1 = b2;
-      }
-
-      w += 1;
-      if (!svgRef.current || svgRef.current.d !== d) {
-        svgRef.current = {
-          d,
-          width: w,
-          height: h,
-        };
-        setSvg(svgRef.current);
-      }
-    }
-
     const observer = new ResizeObserver(onResize);
     onResize();
 
-    observer.observe(container);
+    observer.observe(containerRef.current);
     return () => {
       observer.disconnect();
     };
-  }, [items]);
+  }, []);
 
   if (items.length === 0)
     return (
@@ -122,17 +117,33 @@ export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
 }
 
 function ThumbBox() {
-  const items = useTOCItems();
-  const ids = Primitive.useActiveAnchors();
+  const itemInfos = Primitive.useItems();
+  const startIdx = itemInfos.findIndex((info) => info.active);
+  const endIdx = itemInfos.findLastIndex((info) => info.active);
+  if (startIdx === -1) return;
 
-  const item = items.findLast((item) => ids.includes(item.url.slice(1)));
-  if (!item) return;
+  let isStart: boolean;
+  if (startIdx === endIdx) {
+    let lastInactiveIdx = -1;
+    for (let i = 0; i < itemInfos.length; i++) {
+      const item = itemInfos[i];
+      if (item.active) continue;
+      if (lastInactiveIdx === -1 || itemInfos[lastInactiveIdx].t < item.t) {
+        lastInactiveIdx = i;
+      }
+    }
+    isStart = startIdx < lastInactiveIdx;
+  } else {
+    isStart = itemInfos[startIdx].t > itemInfos[endIdx].t;
+  }
 
   return (
     <div
       className="absolute size-1 bg-fd-primary rounded-full transition-transform"
       style={{
-        translate: `calc(${getLineOffset(item.depth)}px - 1.25px) calc(var(--fd-top) + var(--fd-height))`,
+        translate: `calc(${getLineOffset(itemInfos[isStart ? startIdx : endIdx].original.depth)}px - 1.25px) ${
+          isStart ? 'var(--fd-top)' : 'calc(var(--fd-top) + var(--fd-height))'
+        }`,
       }}
     />
   );

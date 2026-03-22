@@ -175,14 +175,10 @@ function PageTOCPopover({ className, children, ...rest }: ComponentProps<'div'>)
 function PageTOCPopoverTrigger({ className, ...props }: ComponentProps<'button'>) {
   const { text } = useI18n();
   const { open } = use(TocPopoverContext)!;
-  const items = Base.useTOCItems();
-  const active = Base.useActiveAnchor();
-  const selected = useMemo(
-    () => items.findIndex((item) => active === item.url.slice(1)),
-    [items, active],
-  );
+  const items = Base.useItems();
+  const selectedIdx = items.findIndex((item) => item.active);
   const path = useTreePath().at(-1);
-  const showItem = selected !== -1 && !open;
+  const showItem = selectedIdx !== -1 && !open;
 
   return (
     <CollapsibleTrigger
@@ -194,7 +190,7 @@ function PageTOCPopoverTrigger({ className, ...props }: ComponentProps<'button'>
       {...props}
     >
       <ProgressCircle
-        value={(selected + 1) / Math.max(1, items.length)}
+        value={(selectedIdx + 1) / Math.max(1, items.length)}
         max={1}
         className={cn('shrink-0', open && 'text-fd-primary')}
       />
@@ -214,7 +210,7 @@ function PageTOCPopoverTrigger({ className, ...props }: ComponentProps<'button'>
             !showItem && 'opacity-0 translate-y-full pointer-events-none',
           )}
         >
-          {items[selected]?.title}
+          {items[selectedIdx]?.original.title}
         </span>
       </span>
       <ChevronDown className={cn('shrink-0 transition-transform mx-0.5', open && 'rotate-180')} />

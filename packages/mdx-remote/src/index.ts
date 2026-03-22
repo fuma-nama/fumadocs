@@ -1,4 +1,4 @@
-import type { TableOfContents } from 'fumadocs-core/toc';
+import type { TOCItemType } from 'fumadocs-core/toc';
 import type { MdxContent } from '@/render';
 
 export * from './compile';
@@ -31,6 +31,6 @@ export async function executeMdx(compiled: string, scope: object, baseUrl?: stri
 
   return (await hydrateFn.apply(hydrateFn, values)) as {
     default: MdxContent;
-    toc?: TableOfContents;
+    toc?: TOCItemType[];
   };
 }

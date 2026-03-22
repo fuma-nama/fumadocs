@@ -1,5 +1,5 @@
 import type { MDXComponents } from 'mdx/types';
-import type { TableOfContents } from 'fumadocs-core/toc';
+import type { TOCItemType } from 'fumadocs-core/toc';
 import type { FC } from 'react';
 import jsxRuntimeDefault from 'react/jsx-runtime';
 
@@ -28,7 +28,7 @@ export async function executeMdx(compiled: string, options: Options = {}) {
   const hydrateFn = new AsyncFunction(...Object.keys(fullScope), compiled);
   return (await hydrateFn.apply(hydrateFn, Object.values(fullScope))) as {
     default: MdxContent;
-    toc?: TableOfContents;
+    toc?: TOCItemType[];
   };
 }
 
@@ -47,6 +47,6 @@ export function executeMdxSync(compiled: string, options: Options = {}) {
 
   return hydrateFn.apply(hydrateFn, Object.values(fullScope)) as {
     default: MdxContent;
-    toc?: TableOfContents;
+    toc?: TOCItemType[];
   };
 }

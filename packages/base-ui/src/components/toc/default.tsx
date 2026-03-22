@@ -19,21 +19,23 @@ export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
     );
 
   return (
-    <>
+    <div
+      ref={mergeRefs(ref, containerRef)}
+      className={cn('relative flex flex-col border-s border-fd-foreground/10', className)}
+      {...props}
+    >
       <TocThumb
         containerRef={containerRef}
-        className="absolute top-(--fd-top) inset-s-0 w-0.5 h-(--fd-height) rounded-e-full bg-fd-primary transition-[top,height]"
+        className="absolute inset-y-0 inset-s-0 bg-fd-primary w-px transition-[clip-path]"
+        style={{
+          clipPath:
+            'polygon(0 var(--fd-top), 100% var(--fd-top), 100% calc(var(--fd-top) + var(--fd-height)), 0 calc(var(--fd-top) + var(--fd-height)))',
+        }}
       />
-      <div
-        ref={mergeRefs(ref, containerRef)}
-        className={cn('flex flex-col border-s border-fd-foreground/10', className)}
-        {...props}
-      >
-        {items.map((item) => (
-          <TOCItem key={item.url} item={item} />
-        ))}
-      </div>
-    </>
+      {items.map((item) => (
+        <TOCItem key={item.url} item={item} />
+      ))}
+    </div>
   );
 }
 

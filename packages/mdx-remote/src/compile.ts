@@ -3,7 +3,7 @@ import { type CompileOptions, createProcessor } from '@mdx-js/mdx';
 import type { MDXComponents } from 'mdx/types';
 import { parseFrontmatter, pluginOption, type ResolvePlugins } from './utils';
 import type { Compatible, VFile } from 'vfile';
-import type { TableOfContents } from 'fumadocs-core/toc';
+import type { TOCItemType } from 'fumadocs-core/toc';
 import { executeMdx, type MdxContent } from '@/render';
 import { pathToFileURL } from 'node:url';
 
@@ -50,7 +50,7 @@ export interface CompileMDXOptions {
 export interface CompileMDXResult<TFrontmatter = Record<string, unknown>> {
   body: MdxContent;
   frontmatter: TFrontmatter;
-  toc: TableOfContents;
+  toc: TOCItemType[];
   vfile: VFile;
 
   compiled: string;
@@ -113,7 +113,7 @@ export function createCompiler(mdxOptions?: CompilerOptions) {
             components: { ...options.components, ...props.components },
           });
         },
-        toc: exports?.toc ?? (file.data.toc as TableOfContents),
+        toc: exports?.toc ?? file.data.toc!,
         exports,
       };
     },
