@@ -122,20 +122,15 @@ function ThumbBox() {
   const endIdx = itemInfos.findLastIndex((info) => info.active);
   if (startIdx === -1) return;
 
-  let isStart: boolean;
-  if (startIdx === endIdx) {
-    let lastInactiveIdx = -1;
-    for (let i = 0; i < itemInfos.length; i++) {
-      const item = itemInfos[i];
-      if (item.active) continue;
-      if (lastInactiveIdx === -1 || itemInfos[lastInactiveIdx].t < item.t) {
-        lastInactiveIdx = i;
-      }
+  let lastInactiveIdx = -1;
+  for (let i = 0; i < itemInfos.length; i++) {
+    const item = itemInfos[i];
+    if (item.active) continue;
+    if (lastInactiveIdx === -1 || itemInfos[lastInactiveIdx].t < item.t) {
+      lastInactiveIdx = i;
     }
-    isStart = startIdx < lastInactiveIdx;
-  } else {
-    isStart = itemInfos[startIdx].t > itemInfos[endIdx].t;
   }
+  const isStart = endIdx < lastInactiveIdx;
 
   return (
     <div
