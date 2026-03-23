@@ -1,5 +1,14 @@
 # @fumadocs/base-ui
 
+## 16.7.5
+
+### Patch Changes
+
+- 55479b3: Improve TOC detection logic
+- f9e6367: auto-close TOC popover
+- Updated dependencies [55479b3]
+  - fumadocs-core@16.7.5
+
 ## 16.7.4
 
 ### Patch Changes
