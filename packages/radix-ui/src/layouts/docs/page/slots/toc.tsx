@@ -44,7 +44,10 @@ export interface TOCProps {
   style?: 'normal' | 'clerk';
 }
 
-export function TOC({ container, header, footer, style }: TOCProps) {
+export function TOC({ container, header, footer, style = 'normal' }: TOCProps) {
+  const items = Base.useTOCItems();
+  const { TOCItems, TOCEmpty, TOCItem } = style === 'clerk' ? TocClerk : TocDefault;
+
   return (
     <div
       id="nd-toc"
@@ -63,7 +66,12 @@ export function TOC({ container, header, footer, style }: TOCProps) {
         <I18nLabel label="toc" />
       </h3>
       <Base.TOCScrollArea>
-        {style === 'clerk' ? <TocClerk.TOCItems /> : <TocDefault.TOCItems />}
+        <TOCItems>
+          {items.length === 0 && <TOCEmpty />}
+          {items.map((item) => (
+            <TOCItem key={item.url} item={item} />
+          ))}
+        </TOCItems>
       </Base.TOCScrollArea>
       {footer}
     </div>
@@ -102,38 +110,29 @@ export function TOCPopover({
   content,
   header,
   footer,
-  style,
+  style = 'normal',
 }: TOCPopoverProps) {
-  return (
-    <PageTOCPopover {...container}>
-      <PageTOCPopoverTrigger {...trigger} />
-      <PageTOCPopoverContent {...content}>
-        {header}
-        <Base.TOCScrollArea>
-          {style === 'clerk' ? <TocClerk.TOCItems /> : <TocDefault.TOCItems />}
-        </Base.TOCScrollArea>
-        {footer}
-      </PageTOCPopoverContent>
-    </PageTOCPopover>
-  );
-}
-
-function PageTOCPopover({ className, children, ...rest }: ComponentProps<'div'>) {
+  const items = Base.useTOCItems();
   const ref = useRef<HTMLElement>(null);
   const [open, setOpen] = useState(false);
   const { isNavTransparent } = useDocsLayout();
+  const { TOCItems, TOCItem, TOCEmpty } = style === 'clerk' ? TocClerk : TocDefault;
 
-  const onClick = useEffectEvent((e: Event) => {
-    if (!open) return;
+  const onClickOutside = useEffectEvent((e: Event) => {
+    if (!open || !(e.target instanceof HTMLElement)) return;
 
-    if (ref.current && !ref.current.contains(e.target as HTMLElement)) setOpen(false);
+    if (ref.current && !ref.current.contains(e.target)) setOpen(false);
   });
 
+  const onClickItem = () => {
+    setOpen(false);
+  };
+
   useEffect(() => {
-    window.addEventListener('click', onClick);
+    window.addEventListener('click', onClickOutside);
 
     return () => {
-      window.removeEventListener('click', onClick);
+      window.removeEventListener('click', onClickOutside);
     };
   }, []);
 
@@ -151,11 +150,11 @@ function PageTOCPopover({ className, children, ...rest }: ComponentProps<'div'>)
         open={open}
         onOpenChange={setOpen}
         data-toc-popover=""
+        {...container}
         className={cn(
           'sticky top-(--fd-docs-row-2) z-10 [grid-area:toc-popover] h-(--fd-toc-popover-height) xl:hidden max-xl:layout:[--fd-toc-popover-height:--spacing(10)]',
-          className,
+          container?.className,
         )}
-        {...rest}
       >
         <header
           ref={ref}
@@ -165,7 +164,19 @@ function PageTOCPopover({ className, children, ...rest }: ComponentProps<'div'>)
             open && 'shadow-lg',
           )}
         >
-          {children}
+          <PageTOCPopoverTrigger {...trigger} />
+          <PageTOCPopoverContent {...content}>
+            {header}
+            <Base.TOCScrollArea>
+              <TOCItems>
+                {items.length === 0 && <TOCEmpty />}
+                {items.map((item) => (
+                  <TOCItem key={item.url} item={item} onClick={onClickItem} />
+                ))}
+              </TOCItems>
+            </Base.TOCScrollArea>
+            {footer}
+          </PageTOCPopoverContent>
         </header>
       </Collapsible>
     </TocPopoverContext>

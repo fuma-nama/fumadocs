@@ -1,6 +1,6 @@
 'use client';
 import * as Primitive from 'fumadocs-core/toc';
-import { type ComponentProps, useEffect, useEffectEvent, useRef, useState } from 'react';
+import { type ComponentProps, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react';
 import { cn } from '@/utils/cn';
 import { TocThumb, useTOCItems } from '.';
 import { mergeRefs } from '@/utils/merge-refs';
@@ -15,7 +15,6 @@ interface ComputedSVG {
 export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
   const containerRef = useRef<HTMLDivElement>(null);
   const items = useTOCItems();
-  const { text } = useI18n();
   const [svg, setSvg] = useState<ComputedSVG>();
 
   const onResize = useEffectEvent(() => {
@@ -50,10 +49,9 @@ export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
       b0 = bottom;
     }
 
-    w += 1;
     setSvg({
       d,
-      width: w,
+      width: w + 1,
       height: h,
     });
   });
@@ -68,13 +66,6 @@ export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
       observer.disconnect();
     };
   }, []);
-
-  if (items.length === 0)
-    return (
-      <div className="rounded-lg border bg-fd-card p-3 text-xs text-fd-muted-foreground">
-        {text.tocNoHeadings}
-      </div>
-    );
 
   return (
     <>
@@ -102,41 +93,48 @@ export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
           <ThumbBox />
         </TocThumb>
       )}
-      <div ref={mergeRefs(containerRef, ref)} className={cn('flex flex-col', className)} {...props}>
-        {items.map((item, i) => (
-          <TOCItem
-            key={item.url}
-            item={item}
-            upper={items[i - 1]?.depth}
-            lower={items[i + 1]?.depth}
-          />
-        ))}
-      </div>
+      <div
+        ref={mergeRefs(containerRef, ref)}
+        className={cn('flex flex-col', className)}
+        {...props}
+      />
     </>
   );
 }
 
-function ThumbBox() {
-  const itemInfos = Primitive.useItems();
-  const startIdx = itemInfos.findIndex((info) => info.active);
-  const endIdx = itemInfos.findLastIndex((info) => info.active);
-  if (startIdx === -1) return;
+export function TOCEmpty() {
+  const { text } = useI18n();
 
+  return (
+    <div className="rounded-lg border bg-fd-card p-3 text-xs text-fd-muted-foreground">
+      {text.tocNoHeadings}
+    </div>
+  );
+}
+
+function ThumbBox() {
+  const items = Primitive.useItems();
+  let startIdx = -1;
+  let endIdx = -1;
   let lastInactiveIdx = -1;
-  for (let i = 0; i < itemInfos.length; i++) {
-    const item = itemInfos[i];
-    if (item.active) continue;
-    if (lastInactiveIdx === -1 || itemInfos[lastInactiveIdx].t < item.t) {
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+
+    if (item.active) {
+      if (startIdx === -1) startIdx = i;
+      endIdx = i;
+    } else if (lastInactiveIdx === -1 || items[lastInactiveIdx].t < item.t) {
       lastInactiveIdx = i;
     }
   }
-  const isStart = endIdx < lastInactiveIdx;
 
+  if (startIdx === -1) return;
+  const isStart = endIdx < lastInactiveIdx;
   return (
     <div
       className="absolute size-1 bg-fd-primary rounded-full transition-transform"
       style={{
-        translate: `calc(${getLineOffset(itemInfos[isStart ? startIdx : endIdx].original.depth)}px - 1.25px) ${
+        translate: `calc(${getLineOffset(items[isStart ? startIdx : endIdx].original.depth)}px - 1.25px) ${
           isStart ? 'var(--fd-top)' : 'calc(var(--fd-top) + var(--fd-height))'
         }`,
       }}
@@ -156,26 +154,33 @@ function getLineOffset(depth: number): number {
   return 20;
 }
 
-function TOCItem({
+export function TOCItem({
   item,
-  upper = item.depth,
-  lower = item.depth,
-}: {
-  item: Primitive.TOCItemType;
-  upper?: number;
-  lower?: number;
-}) {
-  const offset = getLineOffset(item.depth),
-    upperOffset = getLineOffset(upper),
-    lowerOffset = getLineOffset(lower);
+  ...props
+}: Primitive.TOCItemProps & { item: Primitive.TOCItemType }) {
+  const items = useTOCItems();
+  const { lowerOffset, offset, upperOffset } = useMemo(() => {
+    const index = items.indexOf(item);
+    const offset = getLineOffset(item.depth);
+    return {
+      offset,
+      upperOffset: index > 0 ? getLineOffset(items[index - 1].depth) : offset,
+      lowerOffset: index + 1 < items.length ? getLineOffset(items[index + 1].depth) : offset,
+    };
+  }, [items, item]);
 
   return (
     <Primitive.TOCItem
       href={item.url}
+      {...props}
+      className={cn(
+        'prose relative py-1.5 text-sm scroll-m-4 text-fd-muted-foreground hover:text-fd-accent-foreground transition-colors wrap-anywhere first:pt-0 last:pb-0 data-[active=true]:text-fd-primary',
+        props.className,
+      )}
       style={{
         paddingInlineStart: getItemOffset(item.depth),
+        ...props.style,
       }}
-      className="prose relative py-1.5 text-sm scroll-m-4 text-fd-muted-foreground hover:text-fd-accent-foreground transition-colors wrap-anywhere first:pt-0 last:pb-0 data-[active=true]:text-fd-primary"
     >
       {offset !== upperOffset && (
         <svg

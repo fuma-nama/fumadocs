@@ -52,13 +52,21 @@ export interface TOCProps {
   style?: 'normal' | 'clerk';
 }
 
-export function TOC({ container, trigger, content, header, footer, style }: TOCProps) {
+export function TOC({ container, trigger, content, header, footer, style = 'normal' }: TOCProps) {
+  const items = Base.useTOCItems();
+  const { TOCItems, TOCEmpty, TOCItem } = style === 'clerk' ? TocClerk : TocDefault;
+
   return (
     <PageTOCPopover {...container}>
       <PageTOCPopoverContent {...content}>
         {header}
         <Base.TOCScrollArea>
-          {style === 'clerk' ? <TocClerk.TOCItems /> : <TocDefault.TOCItems />}
+          <TOCItems>
+            {items.length === 0 && <TOCEmpty />}
+            {items.map((item) => (
+              <TOCItem key={item.url} item={item} />
+            ))}
+          </TOCItems>
         </Base.TOCScrollArea>
         {footer}
       </PageTOCPopoverContent>
