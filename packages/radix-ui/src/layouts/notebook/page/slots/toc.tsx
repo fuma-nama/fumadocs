@@ -276,8 +276,18 @@ function ProgressCircle({
 }
 
 function PageTOCPopoverContent(props: ComponentProps<'div'>) {
+  const { setOpen } = use(TocPopoverContext)!;
+
   return (
-    <CollapsibleContent data-toc-popover-content="" {...props}>
+    <CollapsibleContent
+      data-toc-popover-content=""
+      {...props}
+      onClick={(e) => {
+        if ((e.target as HTMLElement).closest('a')) {
+          setOpen(false);
+        }
+      }}
+    >
       <div className="flex flex-col px-4 max-h-[50vh] md:px-6">{props.children}</div>
     </CollapsibleContent>
   );
