@@ -11,6 +11,15 @@ interface CustomDocument extends DocumentData {
   content: string;
 }
 
+export type ChatUIMessage = UIMessage<
+  never,
+  {
+    client: {
+      location: string;
+    };
+  }
+>;
+
 const searchServer = createSearchServer();
 
 async function createSearchServer() {
@@ -55,6 +64,7 @@ const openrouter = createOpenRouter({
   apiKey: process.env.OPENROUTER_API_KEY,
 });
 
+/** System prompt, you can update it to provide more specific information */
 const systemPrompt = [
   'You are an AI assistant for a documentation site.',
   'Use the `search` tool to retrieve relevant docs context before answering when needed.',
@@ -63,7 +73,7 @@ const systemPrompt = [
 ].join('\n');
 
 export async function POST(req: Request) {
-  const reqJson: { messages?: UIMessage[] } = await req.json();
+  const reqJson = await req.json();
 
   const result = streamText({
     model: openrouter.chat(process.env.OPENROUTER_MODEL ?? 'anthropic/claude-3.5-sonnet'),
@@ -73,13 +83,23 @@ export async function POST(req: Request) {
     },
     messages: [
       { role: 'system', content: systemPrompt },
-      ...(await convertToModelMessages(reqJson.messages ?? [])),
+      ...(await convertToModelMessages<ChatUIMessage>(reqJson.messages ?? [], {
+        convertDataPart(part) {
+          if (part.type === 'data-client')
+            return {
+              type: 'text',
+              text: `[Client Context: ${JSON.stringify(part.data)}]`,
+            };
+        },
+      })),
     ],
     toolChoice: 'auto',
   });
 
   return result.toUIMessageStreamResponse();
 }
+
+export type SearchTool = typeof searchTool;
 
 const searchTool = tool({
   description: 'Search the docs content and return raw JSON results.',
@@ -92,5 +112,3 @@ const searchTool = tool({
     return await search.searchAsync(query, { limit, merge: true, enrich: true });
   },
 });
-
-export type SearchTool = typeof searchTool;

@@ -15,17 +15,18 @@ import { Loader2, MessageCircleIcon, RefreshCw, Send, X } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import Link from 'fumadocs-core/link';
-import { type UIMessage, useChat, type UseChatHelpers } from '@ai-sdk/react';
+import { useChat, type UseChatHelpers } from '@ai-sdk/react';
 import type { ProvideLinksToolSchema } from '@/lib/inkeep/inkeep-qa-schema';
 import type { z } from 'zod';
 import { DefaultChatTransport } from 'ai';
 import { Markdown } from '../markdown';
 import { Presence } from '@radix-ui/react-presence';
+import type { InkeepUIMessage } from '@/lib/inkeep/server';
 
 const Context = createContext<{
   open: boolean;
   setOpen: (open: boolean) => void;
-  chat: UseChatHelpers<UIMessage>;
+  chat: UseChatHelpers<InkeepUIMessage>;
 } | null>(null);
 
 export function AISearchPanelHeader({ className, ...props }: ComponentProps<'div'>) {
@@ -115,11 +116,27 @@ export function AISearchInput(props: ComponentProps<'form'>) {
   const isLoading = status === 'streaming' || status === 'submitted';
   const onStart = (e?: SyntheticEvent) => {
     e?.preventDefault();
-    void sendMessage({ text: input });
-    setInput('');
-  };
+    const message = input.trim();
+    if (message.length === 0) return;
 
-  localStorage.setItem(StorageKeyInput, input);
+    void sendMessage({
+      role: 'user',
+      parts: [
+        {
+          type: 'data-client',
+          data: {
+            location: location.href,
+          },
+        },
+        {
+          type: 'text',
+          text: message,
+        },
+      ],
+    });
+    setInput('');
+    localStorage.removeItem(StorageKeyInput);
+  };
 
   useEffect(() => {
     if (isLoading) document.getElementById('nd-ai-input')?.focus();
@@ -135,6 +152,7 @@ export function AISearchInput(props: ComponentProps<'form'>) {
         disabled={status === 'streaming' || status === 'submitted'}
         onChange={(e) => {
           setInput(e.target.value);
+          localStorage.setItem(StorageKeyInput, e.target.value);
         }}
         onKeyDown={(event) => {
           if (!event.shiftKey && event.key === 'Enter') {
@@ -242,7 +260,7 @@ const roleName: Record<string, string> = {
   assistant: 'fumadocs',
 };
 
-function Message({ message, ...props }: { message: UIMessage } & ComponentProps<'div'>) {
+function Message({ message, ...props }: { message: InkeepUIMessage } & ComponentProps<'div'>) {
   let markdown = '';
   let links: z.infer<typeof ProvideLinksToolSchema>['links'] = [];
 
@@ -290,7 +308,7 @@ function Message({ message, ...props }: { message: UIMessage } & ComponentProps<
 
 export function AISearch({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
-  const chat = useChat({
+  const chat = useChat<InkeepUIMessage>({
     id: 'search',
     transport: new DefaultChatTransport({
       api: '/api/chat',
@@ -314,7 +332,7 @@ export function AISearchTrigger({
       data-state={open ? 'open' : 'closed'}
       className={cn(
         position === 'float' && [
-          'fixed bottom-4 gap-3 w-24 end-[calc(--spacing(4)+var(--removed-body-scroll-bar-size,0px))] shadow-lg z-20 transition-[translate,opacity]',
+          'fixed bottom-4 gap-3 w-24 inset-e-[calc(--spacing(4)+var(--removed-body-scroll-bar-size,0px))] shadow-lg z-20 transition-[translate,opacity]',
           open && 'translate-y-10 opacity-0',
         ],
         className,
