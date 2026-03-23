@@ -4,9 +4,8 @@ import {
   createContext,
   type ReactNode,
   type RefObject,
-  useContext,
+  use,
   useEffect,
-  useEffectEvent,
   useMemo,
   useRef,
   useState,
@@ -23,28 +22,21 @@ export interface TOCItemType {
 
 export type TableOfContents = TOCItemType[];
 
-const ActiveAnchorContext = createContext<string[]>([]);
-
-const ScrollContext = createContext<RefObject<HTMLElement | null>>({
-  current: null,
-});
-
-/**
- * The estimated active heading ID
- */
-export function useActiveAnchor(): string | undefined {
-  return useContext(ActiveAnchorContext)[0];
+export interface TOCItemInfo {
+  id: string;
+  active: boolean;
+  /** last time the item is updated */
+  t: number;
+  /** currently active but not intersecting in viewport */
+  fallback: boolean;
+  original: TOCItemType;
 }
 
-/**
- * The id of visible anchors
- */
-export function useActiveAnchors(): string[] {
-  return useContext(ActiveAnchorContext);
-}
+const ItemsContext = createContext<TOCItemInfo[] | null>(null);
+const ScrollContext = createContext<RefObject<HTMLElement | null> | null>(null);
 
 export interface AnchorProviderProps {
-  toc: TableOfContents;
+  toc: TOCItemType[];
   /**
    * Only accept one active item at most
    *
@@ -63,138 +55,240 @@ export interface ScrollProviderProps {
   children?: ReactNode;
 }
 
+/** Optional: add auto-scroll to TOC items. */
 export function ScrollProvider({ containerRef, children }: ScrollProviderProps) {
-  return <ScrollContext.Provider value={containerRef}>{children}</ScrollContext.Provider>;
+  return <ScrollContext value={containerRef}>{children}</ScrollContext>;
 }
 
 export function AnchorProvider({ toc, single = false, children }: AnchorProviderProps) {
-  const headings = useMemo(() => {
-    return toc.map((item) => item.url.split('#')[1]);
-  }, [toc]);
+  const observer = useMemo(() => new Observer(), []);
+  const [items, setItems] = useState<TOCItemInfo[]>(observer.items);
 
-  return (
-    <ActiveAnchorContext.Provider value={useAnchorObserver(headings, single)}>
-      {children}
-    </ActiveAnchorContext.Provider>
-  );
+  observer.single = single;
+  useEffect(() => {
+    observer.setItems(toc);
+  }, [observer, toc]);
+
+  useEffect(() => {
+    observer.watch({
+      rootMargin: '0px',
+      threshold: 0.98,
+    });
+    observer.onChange = () => setItems(observer.items);
+
+    return () => {
+      observer.unwatch();
+    };
+  }, [observer]);
+
+  return <ItemsContext value={items}>{children}</ItemsContext>;
 }
 
-export interface TOCItemProps extends Omit<ComponentProps<'a'>, 'href'> {
-  href: string;
+export interface TOCItemProps extends ComponentProps<'a'> {
   onActiveChange?: (v: boolean) => void;
 }
 
 export function TOCItem({ ref, onActiveChange = () => null, ...props }: TOCItemProps) {
-  const containerRef = useContext(ScrollContext);
-  const firstMountRef = useRef(true);
+  const items = useItems();
+  const containerRef = use(ScrollContext);
+  const id = props.href ? getItemId(props.href) : null;
   const anchorRef = useRef<HTMLAnchorElement>(null);
-  const activeOrder = useActiveAnchors().indexOf(props.href.slice(1));
-  const isActive = activeOrder !== -1;
-  const shouldScroll = activeOrder === 0;
+  const [active, setActive] = useState(
+    () => id && items.some((item) => item.active && item.id === id),
+  );
+  const initialShouldScroll = useMemo(() => {
+    const lastActive = items.findLast((item) => item.active);
+    return lastActive && lastActive.id === id;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  useEffect(() => {
+  useOnChange(items, () => {
+    if (id === null) return;
+    const currentItem = items.find((item) => item.id === id);
+    if (!currentItem || currentItem.active === active) return;
+
     const anchor = anchorRef.current;
-    const container = containerRef.current;
-
-    if (container && anchor && shouldScroll)
+    const container = containerRef?.current;
+    const isLatestActive =
+      currentItem.active && items.every((item) => !item.active || item.t <= currentItem.t);
+    if (isLatestActive && container && anchor) {
       scrollIntoView(anchor, {
-        behavior: firstMountRef.current ? 'instant' : 'smooth',
+        behavior: 'smooth',
         block: 'center',
         inline: 'center',
         scrollMode: 'always',
         boundary: container,
       });
-    firstMountRef.current = false;
-  }, [containerRef, shouldScroll]);
+    }
 
-  useOnChange(isActive, onActiveChange);
+    setActive(currentItem.active);
+    onActiveChange(currentItem.active);
+  });
 
-  return (
-    <a ref={mergeRefs(anchorRef, ref)} data-active={isActive} {...props}>
-      {props.children}
-    </a>
-  );
+  useEffect(() => {
+    const anchor = anchorRef.current;
+    const container = containerRef?.current;
+
+    if (initialShouldScroll && container && anchor) {
+      scrollIntoView(anchor, {
+        behavior: 'instant',
+        block: 'center',
+        inline: 'center',
+        scrollMode: 'always',
+        boundary: container,
+      });
+    }
+  }, [containerRef, initialShouldScroll]);
+
+  return <a ref={mergeRefs(anchorRef, ref)} data-active={active} {...props} />;
 }
 
 /**
- * Find the active heading of page
- *
- * It selects the top heading by default, and the last item when reached the bottom of page.
- *
- * @param watch - An array of element ids to watch
- * @param single - only one active item at most
- * @returns Active anchor
+ * The estimated active heading ID
  */
-function useAnchorObserver(watch: string[], single: boolean): string[] {
-  const observerRef = useRef<IntersectionObserver>(null);
-  const [activeAnchor, setActiveAnchor] = useState<string[]>(() => []);
-  const stateRef = useRef<{
-    visible: Set<string>;
-  }>(null);
+export function useActiveAnchor(): string | undefined {
+  const items = useItems();
 
-  const onChange = useEffectEvent((entries: IntersectionObserverEntry[]) => {
-    stateRef.current ??= {
-      visible: new Set(),
-    };
-    const state = stateRef.current;
+  return useMemo(() => {
+    let out: TOCItemInfo | undefined;
+    for (const item of items) {
+      if (!item.active) continue;
 
-    for (const entry of entries) {
-      if (entry.isIntersecting) {
-        state.visible.add(entry.target.id);
-      } else {
-        state.visible.delete(entry.target.id);
+      if (!out || item.t > out.t) {
+        out = item;
       }
     }
 
-    if (state.visible.size === 0) {
-      const viewTop = entries.length > 0 ? (entries[0]?.rootBounds?.top ?? 0) : 0;
-      let fallback: Element | undefined;
-      let min = -1;
+    return out?.id;
+  }, [items]);
+}
 
-      for (const id of watch) {
-        const element = document.getElementById(id);
+/**
+ * The id of visible anchors
+ */
+export function useActiveAnchors(): string[] {
+  const items = useItems();
+  return useMemo(() => {
+    const out: string[] = [];
+    for (const item of items) {
+      if (item.active) out.push(item.id);
+    }
+    return out;
+  }, [items]);
+}
+
+export function useItems() {
+  const ctx = use(ItemsContext);
+  if (!ctx) throw new Error(`Component must be used under the <AnchorProvider /> component.`);
+  return ctx;
+}
+
+function getItemId(url: string) {
+  if (url.startsWith('#')) return url.slice(1);
+  return null;
+}
+
+class Observer {
+  items: TOCItemInfo[] = [];
+  single = false;
+  private observer: IntersectionObserver | null = null;
+  onChange?: () => void;
+
+  private callback(entries: IntersectionObserverEntry[]) {
+    if (entries.length === 0) return;
+
+    let hasActive = false;
+    this.items = this.items.map((item) => {
+      const entry = entries.find((entry) => entry.target.id === item.id);
+      let active = entry ? entry.isIntersecting : item.active && !item.fallback;
+      if (this.single && hasActive) active = false;
+
+      if (item.active !== active) {
+        item = {
+          ...item,
+          t: Date.now(),
+          active,
+          fallback: false,
+        };
+      }
+
+      if (active) hasActive = true;
+      return item;
+    });
+
+    if (!hasActive && entries[0].rootBounds) {
+      const viewTop = entries[0].rootBounds.top;
+      let min = Number.MAX_VALUE;
+      let fallbackIdx = -1;
+
+      for (let i = 0; i < this.items.length; i++) {
+        const element = document.getElementById(this.items[i].id);
         if (!element) continue;
 
         const d = Math.abs(viewTop - element.getBoundingClientRect().top);
-        if (min === -1 || d < min) {
-          fallback = element;
+        if (d < min) {
+          fallbackIdx = i;
           min = d;
         }
       }
 
-      setActiveAnchor(fallback ? [fallback.id] : []);
-    } else {
-      const items = watch.filter((item) => state.visible.has(item));
-      setActiveAnchor(single ? items.slice(0, 1) : items);
+      if (fallbackIdx !== -1) {
+        this.items[fallbackIdx] = {
+          ...this.items[fallbackIdx],
+          active: true,
+          fallback: true,
+          t: Date.now(),
+        };
+      }
     }
-  });
 
-  useEffect(() => {
-    // disabled
-    if (watch.length === 0) return;
+    this.onChange?.();
+  }
 
-    if (!observerRef.current) {
-      observerRef.current = new IntersectionObserver(onChange, {
-        rootMargin: '0px',
-        threshold: 0.98,
+  setItems(newItems: TOCItemType[]) {
+    const observer = this.observer;
+    if (observer) {
+      for (const item of this.items) {
+        const element = document.getElementById(item.id);
+        if (!element) continue;
+        observer.unobserve(element);
+      }
+    }
+
+    this.items = [];
+    for (const item of newItems) {
+      const id = getItemId(item.url);
+      if (!id) continue;
+
+      this.items.push({
+        id,
+        active: false,
+        fallback: false,
+        t: 0,
+        original: item,
       });
     }
+    this.watchItems();
+  }
 
-    const observer = observerRef.current;
-    const elements = watch.flatMap((heading) => document.getElementById(heading) ?? []);
+  watch(options?: IntersectionObserverInit) {
+    if (this.observer) return;
 
-    for (const element of elements) observer.observe(element);
-    return () => {
-      for (const element of elements) observer.unobserve(element);
-    };
-  }, [watch]);
+    this.observer = new IntersectionObserver(this.callback.bind(this), options);
+    this.watchItems();
+  }
 
-  useEffect(() => {
-    return () => {
-      observerRef.current?.disconnect();
-      observerRef.current = null;
-    };
-  }, []);
+  private watchItems() {
+    if (!this.observer) return;
+    for (const item of this.items) {
+      const element = document.getElementById(item.id);
+      if (!element) continue;
+      this.observer.observe(element);
+    }
+  }
 
-  return activeAnchor;
+  unwatch() {
+    this.observer?.disconnect();
+    this.observer = null;
+  }
 }

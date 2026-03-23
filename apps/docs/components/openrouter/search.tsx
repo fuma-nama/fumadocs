@@ -14,16 +14,16 @@ import {
 import { Loader2, MessageCircleIcon, RefreshCw, SearchIcon, Send, X } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { type UIMessage, useChat, type UseChatHelpers } from '@ai-sdk/react';
+import { useChat, type UseChatHelpers } from '@ai-sdk/react';
 import { DefaultChatTransport, type Tool, type UIToolInvocation } from 'ai';
 import { Markdown } from '../markdown';
 import { Presence } from '@radix-ui/react-presence';
-import type { SearchTool } from '@/lib/openrouter/server';
+import type { ChatUIMessage, SearchTool } from '@/lib/openrouter/server';
 
 const Context = createContext<{
   open: boolean;
   setOpen: (open: boolean) => void;
-  chat: UseChatHelpers<UIMessage>;
+  chat: UseChatHelpers<ChatUIMessage>;
 } | null>(null);
 
 export function AISearchPanelHeader({ className, ...props }: ComponentProps<'div'>) {
@@ -110,7 +110,24 @@ export function AISearchInput(props: ComponentProps<'form'>) {
   const isLoading = status === 'streaming' || status === 'submitted';
   const onStart = (e?: SyntheticEvent) => {
     e?.preventDefault();
-    void sendMessage({ text: input });
+    const message = input.trim();
+    if (message.length === 0) return;
+
+    void sendMessage({
+      role: 'user',
+      parts: [
+        {
+          type: 'data-client',
+          data: {
+            location: location.href,
+          },
+        },
+        {
+          type: 'text',
+          text: message,
+        },
+      ],
+    });
     setInput('');
     localStorage.removeItem(StorageKeyInput);
   };
@@ -237,7 +254,7 @@ const roleName: Record<string, string> = {
   assistant: 'fumadocs',
 };
 
-function Message({ message, ...props }: { message: UIMessage } & ComponentProps<'div'>) {
+function Message({ message, ...props }: { message: ChatUIMessage } & ComponentProps<'div'>) {
   let markdown = '';
   const searchCalls: UIToolInvocation<SearchTool>[] = [];
 
@@ -291,7 +308,7 @@ function Message({ message, ...props }: { message: UIMessage } & ComponentProps<
 
 export function AISearch({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
-  const chat = useChat({
+  const chat = useChat<ChatUIMessage>({
     id: 'search',
     transport: new DefaultChatTransport({
       api: '/api/chat',
@@ -315,7 +332,7 @@ export function AISearchTrigger({
       data-state={open ? 'open' : 'closed'}
       className={cn(
         position === 'float' && [
-          'fixed bottom-4 gap-3 w-24 end-[calc(--spacing(4)+var(--removed-body-scroll-bar-size,0px))] shadow-lg z-20 transition-[translate,opacity]',
+          'fixed bottom-4 gap-3 w-24 inset-e-[calc(--spacing(4)+var(--removed-body-scroll-bar-size,0px))] shadow-lg z-20 transition-[translate,opacity]',
           open && 'translate-y-10 opacity-0',
         ],
         className,

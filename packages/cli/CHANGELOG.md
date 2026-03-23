@@ -1,5 +1,11 @@
 # fumadocs
 
+## 1.3.2
+
+### Patch Changes
+
+- 823d880: Support slot in customise command
+
 ## 1.3.1
 
 ### Patch Changes

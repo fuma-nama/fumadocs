@@ -5,7 +5,6 @@ import { useI18n } from '@/contexts/i18n';
 import { useTreePath } from '@/contexts/tree';
 import { cn } from '@/utils/cn';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { useActiveAnchor } from 'fumadocs-core/toc';
 import { ChevronDown } from 'lucide-react';
 import {
   type ComponentProps,
@@ -53,13 +52,21 @@ export interface TOCProps {
   style?: 'normal' | 'clerk';
 }
 
-export function TOC({ container, trigger, content, header, footer, style }: TOCProps) {
+export function TOC({ container, trigger, content, header, footer, style = 'normal' }: TOCProps) {
+  const items = Base.useTOCItems();
+  const { TOCItems, TOCEmpty, TOCItem } = style === 'clerk' ? TocClerk : TocDefault;
+
   return (
     <PageTOCPopover {...container}>
       <PageTOCPopoverContent {...content}>
         {header}
         <Base.TOCScrollArea>
-          {style === 'clerk' ? <TocClerk.TOCItems /> : <TocDefault.TOCItems />}
+          <TOCItems>
+            {items.length === 0 && <TOCEmpty />}
+            {items.map((item) => (
+              <TOCItem key={item.url} item={item} />
+            ))}
+          </TOCItems>
         </Base.TOCScrollArea>
         {footer}
       </PageTOCPopoverContent>
@@ -133,12 +140,8 @@ function PageTOCPopoverPhysical({ className, children, ...rest }: ComponentProps
 function PageTOCPopoverTrigger({ className, ...props }: ComponentProps<'button'>) {
   const { text } = useI18n();
   const { open } = use(TocPopoverContext)!;
-  const items = Base.useTOCItems();
-  const active = useActiveAnchor();
-  const selected = useMemo(
-    () => items.findIndex((item) => active === item.url.slice(1)),
-    [items, active],
-  );
+  const items = Base.useItems();
+  const selectedIdx = items.findIndex((item) => item.active);
   const path = useTreePath().at(-1);
   const spanProps = {
     transition: {
@@ -169,14 +172,14 @@ function PageTOCPopoverTrigger({ className, ...props }: ComponentProps<'button'>
       {...props}
     >
       <ProgressCircle
-        value={(selected + 1) / Math.max(1, items.length)}
+        value={(selectedIdx + 1) / Math.max(1, items.length)}
         max={1}
         className={cn('shrink-0', open && 'text-fd-primary')}
       />
       <AnimatePresence mode="wait">
-        {items[selected] && selected !== -1 && !open ? (
-          <motion.span key={selected} {...spanProps}>
-            {items[selected].title}
+        {items[selectedIdx] && !open ? (
+          <motion.span key={selectedIdx} {...spanProps}>
+            {items[selectedIdx].original.title}
           </motion.span>
         ) : path ? (
           <motion.span key={path.$id ?? ':pathId'} {...spanProps}>

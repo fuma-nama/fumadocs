@@ -66,6 +66,7 @@ export const registryInfoSchema = z.object({
    */
   env: z.record(z.string(), z.unknown()).optional(),
   indexes: z.array(indexSchema).default([]),
+  unlistedIndexes: z.array(indexSchema).default([]),
 
   registries: z.array(z.string()).optional(),
 });
