@@ -6,7 +6,7 @@ export const Route = createFileRoute('/llms.mdx/docs/$')({
     handlers: {
       GET: async ({ params }) => {
         const slugs = (params._splat ?? '').split('/');
-        // remove the appended "index.mdx" to avoid build issues
+        // remove the appended "content.md"
         slugs.pop();
         const page = source.getPage(slugs);
         if (!page) throw notFound();

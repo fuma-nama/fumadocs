@@ -4,7 +4,7 @@ import { unstable_notFound } from 'waku/router/server';
 
 export async function GET(
   _: Request,
-  { params }: ApiContext<'/llms.mdx/docs/[...slugs]/index.mdx'>,
+  { params }: ApiContext<'/llms.mdx/docs/[...slugs]/content.md'>,
 ) {
   const slugs = params.slugs;
   const page = source.getPage(slugs);

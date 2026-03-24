@@ -8,9 +8,10 @@ import {
   MarkdownCopyButton,
   ViewOptionsPopover,
 } from 'fumadocs-ui/layouts/docs/page';
-import { source } from '@/lib/source';
+import { getPageMarkdownUrl, source } from '@/lib/source';
 import browserCollections from 'collections/browser';
-import { baseOptions, gitConfig } from '@/lib/layout.shared';
+import { baseOptions } from '@/lib/layout.shared';
+import { gitConfig } from '@/lib/shared';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { useMDXComponents } from '@/components/mdx';
 
@@ -20,8 +21,8 @@ export async function loader({ params }: Route.LoaderArgs) {
   if (!page) throw new Response('Not found', { status: 404 });
 
   return {
-    slugs: page.slugs,
     path: page.path,
+    markdownUrl: getPageMarkdownUrl(page).url,
     pageTree: await source.serializePageTree(source.getPageTree()),
   };
 }
@@ -60,8 +61,7 @@ const clientLoader = browserCollections.docs.createClientLoader({
 });
 
 export default function Page({ loaderData }: Route.ComponentProps) {
-  const { pageTree, slugs, path } = useFumadocsLoader(loaderData);
-  const markdownUrl = `/llms.mdx/docs/${[...slugs, 'index.mdx'].join('/')}`;
+  const { pageTree, path, markdownUrl } = useFumadocsLoader(loaderData);
 
   return (
     <DocsLayout {...baseOptions()} tree={pageTree}>

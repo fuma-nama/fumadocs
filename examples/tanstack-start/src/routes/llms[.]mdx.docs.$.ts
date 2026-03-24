@@ -6,6 +6,7 @@ export const Route = createFileRoute('/llms.mdx/docs/$')({
     handlers: {
       GET: async ({ params }) => {
         const slugs = params._splat?.split('/') ?? [];
+        slugs.pop();
         const page = source.getPage(slugs);
         if (!page) throw notFound();
 

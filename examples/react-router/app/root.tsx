@@ -9,8 +9,9 @@ import {
 import { RootProvider } from 'fumadocs-ui/provider/react-router';
 import type { Route } from './+types/root';
 import './app.css';
-import { rewritePath } from 'fumadocs-core/negotiation';
+import { isMarkdownPreferred, rewritePath } from 'fumadocs-core/negotiation';
 import NotFound from './routes/not-found';
+import { docsContentRoute, docsRoute } from '@/lib/shared';
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -74,11 +75,24 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   );
 }
 
-const { rewrite: rewriteLLM } = rewritePath('/docs{/*path}.mdx', '/llms.mdx/docs{/*path}');
+const { rewrite: rewriteDocs } = rewritePath(
+  `${docsRoute}{/*path}`,
+  `${docsContentRoute}{/*path}/content.md`,
+);
+const { rewrite: rewriteSuffix } = rewritePath(
+  `${docsRoute}{/*path}.mdx`,
+  `${docsContentRoute}{/*path}/content.md`,
+);
 const serverMiddleware: Route.MiddlewareFunction = async ({ request }, next) => {
   const url = new URL(request.url);
-  const path = rewriteLLM(url.pathname);
-  if (path) return Response.redirect(new URL(path, url));
+  const suffixPath = rewriteSuffix(url.pathname);
+  if (suffixPath) return Response.redirect(new URL(suffixPath, url));
+
+  if (isMarkdownPreferred(request)) {
+    const docsPath = rewriteDocs(url.pathname);
+    if (docsPath) return Response.redirect(new URL(docsPath, url));
+  }
+
   return next();
 };
 export const middleware = [serverMiddleware];
