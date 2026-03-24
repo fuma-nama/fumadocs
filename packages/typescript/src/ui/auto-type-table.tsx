@@ -2,7 +2,6 @@ import { type ParameterNode, type TypeNode, TypeTable } from 'fumadocs-ui/compon
 import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import * as JsxRuntime from 'react/jsx-runtime';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
-import 'server-only';
 import type { ComponentProps, ReactNode } from 'react';
 import { type BaseTypeTableProps, type GenerateTypeTableOptions } from '@/lib/type-table';
 import { type Generator } from '@/lib/base';

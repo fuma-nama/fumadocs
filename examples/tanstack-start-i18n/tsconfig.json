@@ -13,11 +13,10 @@
     "target": "ES2022",
     "allowJs": true,
     "forceConsistentCasingInFileNames": true,
-    "baseUrl": ".",
     "types": ["vite/client"],
     "paths": {
       "@/*": ["./src/*"],
-      "collections/*": [".source/*"]
+      "collections/*": ["./.source/*"]
     },
     "noEmit": true
   }

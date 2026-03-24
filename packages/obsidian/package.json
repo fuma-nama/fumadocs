@@ -69,7 +69,7 @@
     "mdast-util-mdx": "^3.0.0",
     "tsconfig": "workspace:*",
     "tsdown": "0.21.4",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.2"
   },
   "peerDependencies": {
     "@types/react": "*",

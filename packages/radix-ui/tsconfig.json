@@ -2,8 +2,9 @@
   "extends": "tsconfig/react-library.json",
   "compilerOptions": {
     "paths": {
-      "@/*": ["./src/*"]
-    }
+      "@/*": ["./src/*"],
+    },
+    "types": ["@types/mdx"],
   },
-  "exclude": ["node_modules", "dist", "eslint.config.mjs"]
+  "exclude": ["node_modules", "dist", "eslint.config.mjs"],
 }
