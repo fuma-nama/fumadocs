@@ -1,10 +1,12 @@
 import { MethodLabel } from '@/ui/components/method-label';
-import type {
-  LoaderPlugin,
-  PageData,
-  PageTreeTransformer,
-  Source,
-  VirtualFile,
+import {
+  PathUtils,
+  type LoaderPlugin,
+  type MetaData,
+  type PageData,
+  type PageTreeTransformer,
+  type Source,
+  type VirtualFile,
 } from 'fumadocs-core/source';
 import type { OpenAPIServer } from '@/server/create';
 import type { SchemaToPagesOptions } from '@/utils/pages/preset-auto';
@@ -12,6 +14,13 @@ import type { ApiPageProps } from '@/ui/api-page';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { ProcessedDocument } from '@/utils/process-document';
+import type {
+  OperationOutput,
+  OutputEntry,
+  PageOutput,
+  WebhookOutput,
+} from '@/utils/pages/builder';
+import path from 'node:path';
 
 declare module 'fumadocs-core/source' {
   export interface PageData {
@@ -76,6 +85,10 @@ interface OpenAPIPageData extends PageData {
   toc: TOCItemType[];
 }
 
+interface MetaOptions {
+  folderStyle?: 'folder' | 'separator';
+}
+
 /**
  * Generate virtual pages for Fumadocs Source API
  */
@@ -83,29 +96,30 @@ export async function openapiSource(
   server: OpenAPIServer,
   options: SchemaToPagesOptions & {
     baseDir?: string;
+    /** Generate `meta.json` files */
+    meta?: boolean | MetaOptions;
   } = {},
 ): Promise<
   Source<{
-    metaData: never;
+    metaData: MetaData;
     pageData: OpenAPIPageData;
   }>
 > {
-  const { baseDir = '' } = options;
+  const { baseDir = '', meta = false } = options;
   const { createAutoPreset } = await import('@/utils/pages/preset-auto');
   const { fromServer } = await import('@/utils/pages/builder');
-  const { toBody } = await import('@/utils/pages/to-body');
   const { toStaticData } = await import('@/utils/pages/to-static-data');
   const files: VirtualFile<{
     pageData: OpenAPIPageData;
-    metaData: never;
+    metaData: MetaData;
   }>[] = [];
 
   const entries = await fromServer(server, createAutoPreset(options));
   for (const [schemaId, list] of Object.entries(entries)) {
     const processed = await server.getSchema(schemaId);
-    for (const entry of list) {
-      const props = toBody(entry);
-      props.showDescription ??= true;
+
+    function onEntry(entry: PageOutput | OperationOutput | WebhookOutput) {
+      const props = getProps(entry);
 
       files.push({
         type: 'page',
@@ -132,10 +146,81 @@ export async function openapiSource(
         },
       });
     }
+
+    function onEntries(entries: OutputEntry[], parent?: OutputEntry) {
+      if (!meta) {
+        for (const entry of entries) {
+          if (entry.type === 'group') {
+            onEntries(entry.entries, entry);
+          } else {
+            onEntry(entry);
+          }
+        }
+
+        return;
+      }
+
+      const { folderStyle = 'folder' } = meta === true ? {} : meta;
+      const pages: string[] = [];
+
+      for (const entry of entries) {
+        const relativePath = PathUtils.slash(
+          parent ? path.relative(parent.path, entry.path) : entry.path,
+        );
+
+        if (entry.type === 'group') {
+          onEntries(entry.entries, entry);
+          if (folderStyle === 'folder') {
+            pages.push(relativePath);
+          } else {
+            pages.push(`---${entry.info.title}---`, `...${relativePath}`);
+          }
+        } else {
+          onEntry(entry);
+          pages.push(relativePath.slice(0, -path.extname(entry.path).length));
+        }
+      }
+
+      if (pages.length === 0) return;
+      files.push({
+        type: 'meta',
+        path: path.join(baseDir, parent?.path ?? '', 'meta.json'),
+        data: {
+          title: parent?.info.title,
+          description: parent?.info.description,
+          pages,
+        },
+      });
+    }
+
+    onEntries(list);
   }
 
   return {
     files,
+  };
+}
+
+function getProps(entry: PageOutput | OperationOutput | WebhookOutput): ApiPageProps {
+  if (entry.type === 'operation')
+    return {
+      document: entry.schemaId,
+      operations: [entry.item],
+      showDescription: true,
+    };
+  if (entry.type === 'webhook')
+    return {
+      document: entry.schemaId,
+      webhooks: [entry.item],
+      showDescription: true,
+    };
+
+  return {
+    showTitle: true,
+    showDescription: true,
+    document: entry.schemaId,
+    operations: entry.operations,
+    webhooks: entry.webhooks,
   };
 }
 

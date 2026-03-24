@@ -1,7 +1,7 @@
 import type { ProcessedDocument } from '@/utils/process-document';
 import type { OpenAPIServer } from '@/server';
 import type { OperationItem, WebhookItem } from '@/ui/api-page';
-import type { Document, OperationObject, PathItemObject, TagObject } from '@/types';
+import type { OperationObject, PathItemObject, TagObject } from '@/types';
 import { getTagDisplayName, methodKeys, type NoReference } from '@/utils/schema';
 import { idToTitle } from '@/utils/id-to-title';
 
@@ -24,21 +24,22 @@ export interface WebhookOutput extends BaseEntry {
   item: WebhookItem;
 }
 
-export interface TagOutput extends BaseEntry {
-  type: 'tag';
-  tag: string;
-  rawTag: TagObject;
+export interface PageOutput extends BaseEntry {
+  type: 'page';
   operations: OperationItem[];
   webhooks: WebhookItem[];
+  /** tag info if the page is generated from a tag. */
+  tag?: TagObject;
 }
 
 export interface OutputGroup extends BaseEntry {
   type: 'group';
-  operations: OperationItem[];
-  webhooks: WebhookItem[];
+  entries: OutputEntry[];
+  /** tag info if the group is generated from a tag. */
+  tag?: TagObject;
 }
 
-export type OutputEntry = TagOutput | OperationOutput | WebhookOutput | OutputGroup;
+export type OutputEntry = PageOutput | OperationOutput | WebhookOutput | OutputGroup;
 
 export interface PagesBuilderConfig {
   toPages: (builder: PagesBuilder) => void;
@@ -52,8 +53,6 @@ export interface PagesBuilder {
   document: ProcessedDocument;
   /**
    * add output entry.
-   *
-   * When the `path` property is unspecified, it will generate one.
    */
   create: (entry: OutputEntry) => void;
 
@@ -132,7 +131,39 @@ export function fromSchema(
     create(entry) {
       files.push(entry);
     },
-    extract: () => extractInfo(dereferenced),
+    extract() {
+      const result: ExtractedInfo = { webhooks: [], operations: [] };
+
+      for (const [path, pathItem] of Object.entries(dereferenced.paths ?? {})) {
+        if (!pathItem) continue;
+
+        for (const methodKey of methodKeys) {
+          if (!pathItem[methodKey]) continue;
+
+          result.operations.push({
+            method: methodKey,
+            path,
+            tags: pathItem[methodKey]?.tags,
+          });
+        }
+      }
+
+      for (const [name, pathItem] of Object.entries(dereferenced.webhooks ?? {})) {
+        if (!pathItem) continue;
+
+        for (const methodKey of methodKeys) {
+          if (!pathItem[methodKey]) continue;
+
+          result.webhooks.push({
+            method: methodKey,
+            name,
+            tags: pathItem[methodKey]?.tags,
+          });
+        }
+      }
+
+      return result;
+    },
     routePathToFilePath(path) {
       return path
         .toLowerCase()
@@ -194,38 +225,4 @@ export function fromSchema(
   });
 
   return files;
-}
-
-function extractInfo(document: NoReference<Document>): ExtractedInfo {
-  const result: ExtractedInfo = { webhooks: [], operations: [] };
-
-  for (const [path, pathItem] of Object.entries(document.paths ?? {})) {
-    if (!pathItem) continue;
-
-    for (const methodKey of methodKeys) {
-      if (!pathItem[methodKey]) continue;
-
-      result.operations.push({
-        method: methodKey,
-        path,
-        tags: pathItem[methodKey]?.tags,
-      });
-    }
-  }
-
-  for (const [name, pathItem] of Object.entries(document.webhooks ?? {})) {
-    if (!pathItem) continue;
-
-    for (const methodKey of methodKeys) {
-      if (!pathItem[methodKey]) continue;
-
-      result.webhooks.push({
-        method: methodKey,
-        name,
-        tags: pathItem[methodKey]?.tags,
-      });
-    }
-  }
-
-  return result;
 }

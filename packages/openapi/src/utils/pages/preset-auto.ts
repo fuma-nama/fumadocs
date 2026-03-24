@@ -4,12 +4,13 @@ import type {
   OperationOutput,
   OutputEntry,
   OutputGroup,
+  PageOutput,
   PagesBuilder,
   PagesBuilderConfig,
-  TagOutput,
   WebhookOutput,
 } from '@/utils/pages/builder';
 import { isUrl } from '@/utils/url';
+import type { DistributiveOmit } from '@/types';
 
 interface OperationConfig extends BaseConfig {
   /**
@@ -26,7 +27,11 @@ interface OperationConfig extends BaseConfig {
    *
    * @defaultValue 'none'
    */
-  groupBy?: 'tag' | 'route' | 'none' | ((entry: OperationOutput | WebhookOutput) => string);
+  groupBy?:
+    | 'tag'
+    | 'route'
+    | 'none'
+    | ((entry: DistributiveOmit<OperationOutput | WebhookOutput, 'path'>) => string);
 
   /**
    * Specify name for output file
@@ -43,7 +48,7 @@ interface TagConfig extends BaseConfig {
   /**
    * Specify name for output file
    */
-  name?: NameFn<TagOutput> | NameFnOptions;
+  name?: NameFn<PageOutput> | NameFnOptions;
 }
 
 interface SchemaConfig extends BaseConfig {
@@ -55,7 +60,7 @@ interface SchemaConfig extends BaseConfig {
   /**
    * Specify name for output file
    */
-  name?: NameFn<OutputGroup> | NameFnOptions;
+  name?: NameFn<PageOutput> | NameFnOptions;
 }
 
 export type SchemaToPagesOptions =
@@ -66,9 +71,14 @@ export type SchemaToPagesOptions =
       per: 'custom';
     } & PagesBuilderConfig);
 
-type NameFn<Entry> = (
+type NameFn<
+  Entry extends OperationOutput | WebhookOutput | PageOutput =
+    | OperationOutput
+    | WebhookOutput
+    | PageOutput,
+> = (
   this: PagesBuilder,
-  output: Entry,
+  output: DistributiveOmit<Entry, 'path'>,
   document: ProcessedDocument['dereferenced'],
 ) => string;
 
@@ -100,19 +110,16 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
       return s.replace(/\s+/g, '-').toLowerCase();
     },
   } = options;
-  let nameFn: NameFn<OutputEntry>;
+  let nameFn: NameFn;
 
   if (typeof options.name === 'function') {
-    nameFn = options.name as NameFn<OutputEntry>;
+    nameFn = options.name as NameFn;
   } else {
     const { algorithm = 'v2' } = options.name ?? {};
 
     nameFn = function (result, document) {
-      if (result.type === 'tag') {
-        return slugify(result.tag);
-      }
-
-      if (result.type === 'group') {
+      if (result.type === 'page') {
+        if (result.tag) return slugify(result.tag.name!);
         const schemaId = result.schemaId;
 
         return isUrl(schemaId) ? 'index' : path.basename(schemaId, path.extname(schemaId));
@@ -141,44 +148,114 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
     };
   }
 
-  function groupOutput(builder: PagesBuilder, entry: OperationOutput | WebhookOutput): string[] {
+  function group(
+    builder: PagesBuilder,
+    entries: DistributiveOmit<OperationOutput | WebhookOutput, 'path'>[],
+  ): OutputEntry[] {
+    const groups = new Map<string, OutputGroup>();
+    const rest: OutputEntry[] = [];
     const { dereferenced } = builder.document;
     const { groupBy = 'none' } = options as OperationConfig;
 
-    if (groupBy === 'route') {
-      return [
-        path.join(
-          builder.routePathToFilePath(
+    for (const entry of entries) {
+      switch (groupBy) {
+        case 'route': {
+          const groupName = builder.routePathToFilePath(
             entry.type === 'operation' ? entry.item.path : entry.item.name,
-          ),
-          `${entry.item.method.toLowerCase()}.mdx`,
-        ),
-      ];
-    }
+          );
 
-    const file = nameFn.call(builder, entry, dereferenced);
-    if (groupBy === 'tag') {
-      let tags =
-        entry.type === 'operation'
-          ? dereferenced.paths![entry.item.path]![entry.item.method]!.tags
-          : dereferenced.webhooks![entry.item.name][entry.item.method]!.tags;
+          let group = groups.get(groupName);
+          if (!group) {
+            group = {
+              type: 'group',
+              info: { title: groupName },
+              entries: [],
+              schemaId: builder.id,
+              path: groupName,
+            };
+            groups.set(groupName, group);
+          }
 
-      if (!tags || tags.length === 0) {
-        console.warn(
-          'When `groupBy` is set to `tag`, make sure a `tags` is defined for every operation schema.',
-        );
+          group.entries.push({
+            ...entry,
+            path: path.join(groupName, `${entry.item.method.toLowerCase()}.mdx`),
+          });
+          break;
+        }
+        case 'tag': {
+          let tags =
+            entry.type === 'operation'
+              ? dereferenced.paths![entry.item.path]![entry.item.method]!.tags
+              : dereferenced.webhooks![entry.item.name][entry.item.method]!.tags;
 
-        tags = ['unknown'];
+          if (!tags || tags.length === 0) {
+            console.warn(
+              'When `groupBy` is set to `tag`, make sure a `tags` is defined for every operation schema.',
+            );
+
+            tags = ['unknown'];
+          }
+
+          for (const tag of tags) {
+            const groupName = slugify(tag);
+            const { displayName, info } = builder.fromTagName(tag)!;
+            let group = groups.get(groupName);
+            if (!group) {
+              group = {
+                type: 'group',
+                info: { title: displayName, description: info.description },
+                tag: info,
+                entries: [],
+                schemaId: builder.id,
+                path: groupName,
+              };
+              groups.set(groupName, group);
+            }
+
+            group.entries.push({
+              ...entry,
+              path: path.join(groupName, `${nameFn.call(builder, entry, dereferenced)}.mdx`),
+            });
+          }
+
+          break;
+        }
+        default: {
+          const fileName = `${nameFn.call(builder, entry, dereferenced)}.mdx`;
+
+          if (typeof groupBy === 'function') {
+            const groupDisplayName = groupBy(entry);
+            const groupName = slugify(groupDisplayName);
+
+            let group = groups.get(groupName);
+            if (!group) {
+              group = {
+                type: 'group',
+                info: { title: groupDisplayName },
+                entries: [],
+                schemaId: builder.id,
+                path: groupName,
+              };
+              groups.set(groupName, group);
+            }
+
+            group.entries.push({
+              ...entry,
+              path: path.join(groupName, fileName),
+            });
+            break;
+          }
+
+          rest.push({
+            ...entry,
+            path: fileName,
+          });
+        }
       }
-
-      return tags.map((tag) => path.join(slugify(tag), `${file}.mdx`));
     }
 
-    if (typeof groupBy === 'function') {
-      return [path.join(slugify(groupBy(entry)), `${file}.mdx`)];
-    }
-
-    return [`${file}.mdx`];
+    rest.push(...groups.values());
+    return rest;
   }
 
   return {
@@ -187,8 +264,8 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
       const items = builder.extract();
 
       if (options.per === 'file') {
-        const entry: OutputGroup = {
-          type: 'group',
+        const entry: PageOutput = {
+          type: 'page',
           schemaId: builder.id,
           path: '',
           info: {
@@ -197,17 +274,18 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
           },
           ...items,
         };
-        entry.path = nameFn.call(builder, entry, dereferenced) + '.mdx';
+        entry.path = `${nameFn.call(builder, entry, dereferenced)}.mdx`;
         builder.create(entry);
         return;
       }
 
       if (options.per === 'tag') {
         const tags = dereferenced.tags ?? [];
+
         for (const tag of tags) {
           const { displayName } = builder.fromTag(tag);
-          const entry: TagOutput = {
-            type: 'tag',
+          const entry: PageOutput = {
+            type: 'page',
             path: '',
             schemaId: builder.id,
             info: {
@@ -216,40 +294,35 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
             },
             webhooks: items.webhooks.filter((webhook) => webhook.tags?.includes(tag.name!)),
             operations: items.operations.filter((op) => op.tags?.includes(tag.name!)),
-            tag: tag.name!,
-            rawTag: tag,
+            tag,
           };
 
-          entry.path = nameFn.call(builder, entry, dereferenced) + '.mdx';
+          entry.path = `${nameFn.call(builder, entry, dereferenced)}.mdx`;
           builder.create(entry);
         }
 
         return;
       }
 
+      const entries: DistributiveOmit<OperationOutput | WebhookOutput, 'path'>[] = [];
       for (const op of items.operations) {
         const { pathItem, operation, displayName } = builder.fromExtractedOperation(op)!;
 
-        const entry: OperationOutput = {
+        entries.push({
           type: 'operation',
           schemaId: builder.id,
           item: op,
-          path: '',
           info: {
             title: displayName,
             description: operation.description ?? pathItem.description,
           },
-        };
-
-        for (const outputPath of groupOutput(builder, entry)) {
-          builder.create({ ...entry, path: outputPath });
-        }
+        });
       }
 
       for (const webhook of items.webhooks) {
         const { pathItem, operation, displayName } = builder.fromExtractedWebhook(webhook)!;
 
-        const entry: WebhookOutput = {
+        entries.push({
           type: 'webhook',
           schemaId: builder.id,
           info: {
@@ -257,12 +330,11 @@ export function createAutoPreset(options: SchemaToPagesOptions): PagesBuilderCon
             description: operation.description ?? pathItem.description,
           },
           item: webhook,
-          path: '',
-        };
+        });
+      }
 
-        for (const outputPath of groupOutput(builder, entry)) {
-          builder.create({ ...entry, path: outputPath });
-        }
+      for (const entry of group(builder, entries)) {
+        builder.create(entry);
       }
     },
   };

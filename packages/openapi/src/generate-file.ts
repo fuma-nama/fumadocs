@@ -3,9 +3,9 @@ import * as path from 'node:path';
 import { generateDocument, type PagesToTextOptions, toText } from './utils/pages/to-text';
 import type { ProcessedDocument } from '@/utils/process-document';
 import type { OpenAPIServer } from '@/server';
-import { createGetUrl, getSlugs } from 'fumadocs-core/source';
+import { createGetUrl, getSlugs, PathUtils } from 'fumadocs-core/source';
 import { createAutoPreset, type SchemaToPagesOptions } from '@/utils/pages/preset-auto';
-import { fromSchema, type OutputEntry } from '@/utils/pages/builder';
+import { fromSchema, type OutputGroup, type OutputEntry } from '@/utils/pages/builder';
 
 export interface OutputFile {
   path: string;
@@ -30,6 +30,7 @@ interface IndexConfig {
 }
 
 interface IndexItem {
+  /** output path of index page */
   path: string;
   title?: string;
   description?: string;
@@ -37,7 +38,7 @@ interface IndexItem {
   /**
    * Specify linked pages:
    * - items in `inputs` to include all generated pages of a specific schema.
-   * - specific Markdown/MDX files.
+   * - file paths (using forward slash).
    */
   only?: string[];
 }
@@ -59,9 +60,20 @@ interface GenerateFilesConfig extends PagesToTextOptions {
   index?: IndexConfig;
 
   /**
+   * Generate `meta.json` files.
+   *
+   * Note: for flexibility, it's recommended to define them on your own.
+   */
+  meta?: boolean | MetaOptions;
+
+  /**
    * Can add/change/remove output files before writing to file system
    **/
   beforeWrite?: (this: BeforeWriteContext, files: OutputFile[]) => void | Promise<void>;
+}
+
+interface MetaOptions {
+  groupStyle?: 'folder' | 'separator';
 }
 
 export type Config = SchemaToPagesOptions & GenerateFilesConfig;
@@ -106,15 +118,20 @@ export async function generateFilesOnly(
     const schemaFiles = (generated[id] ??= []);
 
     generatedEntries[id] = entries;
-    for (const entry of entries) {
-      const file: OutputFile = {
+    function scan(entry: OutputEntry) {
+      if (entry.type === 'group') {
+        for (const child of entry.entries) scan(child);
+        return;
+      }
+
+      schemaFiles.push({
         path: entry.path,
         content: toText(entry, schema, options),
-      };
-
-      schemaFiles.push(file);
-      files.push(file);
+      });
     }
+
+    for (const entry of entries) scan(entry);
+    files.push(...schemaFiles);
   }
 
   const context: BeforeWriteContext = {
@@ -124,20 +141,81 @@ export async function generateFilesOnly(
   };
 
   if (options.index) {
-    writeIndexFiles(files, context, options);
+    files.push(...writeIndexFiles(context, options));
+  }
+
+  if (options.meta) {
+    files.push(...generateMeta(context, options.meta === true ? {} : options.meta));
   }
 
   await options.beforeWrite?.call(context, files);
   return files;
 }
 
+function generateMeta(context: BeforeWriteContext, options: MetaOptions): OutputFile[] {
+  const files: OutputFile[] = [];
+  const { groupStyle = 'folder' } = options;
+
+  function scan(entries: OutputEntry[], parent?: OutputGroup) {
+    const pages: string[] = [];
+
+    for (const entry of entries) {
+      const relativePath = PathUtils.slash(
+        parent ? path.relative(parent.path, entry.path) : entry.path,
+      );
+
+      if (entry.type === 'group') {
+        scan(entry.entries, entry);
+
+        if (groupStyle === 'folder') {
+          pages.push(relativePath);
+        } else {
+          pages.push(`---${entry.info.title}---`, `...${relativePath}`);
+        }
+      } else {
+        pages.push(relativePath.slice(0, -path.extname(entry.path).length));
+      }
+    }
+
+    if (pages.length === 0) return;
+    files.push({
+      path: parent ? path.join(parent.path, 'meta.json') : 'meta.json',
+      content: JSON.stringify(
+        {
+          title: parent?.info.title,
+          description: parent?.info.description,
+          pages,
+        },
+        null,
+        2,
+      ),
+    });
+  }
+
+  for (const entries of Object.values(context.generatedEntries)) {
+    scan(entries);
+  }
+
+  return files;
+}
+
 function writeIndexFiles(
-  files: OutputFile[],
   context: BeforeWriteContext,
   options: SchemaToPagesOptions & Omit<GenerateFilesConfig, 'output'>,
-) {
+): OutputFile[] {
+  const files: OutputFile[] = [];
   const { generatedEntries } = context;
+  const pathToEntry = new Map<string, OutputEntry>();
   const { items, url } = options.index!;
+
+  function indexEntry(entry: OutputEntry) {
+    pathToEntry.set(PathUtils.slash(entry.path), entry);
+    if (entry.type === 'group') {
+      for (const child of entry.entries) {
+        indexEntry(child);
+      }
+    }
+  }
 
   let urlFn: (path: string) => string;
   if (typeof url === 'object') {
@@ -148,43 +226,37 @@ function writeIndexFiles(
     urlFn = url;
   }
 
-  function findEntryByPath(path: string) {
-    for (const entries of Object.values(generatedEntries)) {
-      const match = entries.find((entry) => entry.path === path);
-
-      if (match) return match;
-    }
-  }
-
   function fileContent(index: IndexItem): string {
     const content: string[] = [];
     content.push('<Cards>');
-    const pathToEntry = new Map<string, OutputEntry>();
+    const outputEntries: OutputEntry[] = [];
     const only = index.only ?? Object.keys(context.generated);
 
     for (const item of only) {
       if (generatedEntries[item]) {
         for (const entry of generatedEntries[item]) {
-          pathToEntry.set(entry.path, entry);
+          outputEntries.push(entry);
         }
       } else {
-        const match = findEntryByPath(item);
+        const match = pathToEntry.get(item);
         if (!match) {
           throw new Error(
             `${item} does not exist on "input", available: ${Object.keys(generatedEntries).join(', ')}.`,
           );
         }
 
-        pathToEntry.set(match.path, match);
+        outputEntries.push(match);
       }
     }
 
-    for (const file of pathToEntry.values()) {
-      const descriptionAttr = file.info.description
-        ? `description=${JSON.stringify(file.info.description)} `
+    for (const entry of outputEntries) {
+      // cannot link to groups
+      if (entry.type === 'group') continue;
+      const descriptionAttr = entry.info.description
+        ? `description=${JSON.stringify(entry.info.description)} `
         : '';
       content.push(
-        `<Card href="${urlFn(file.path)}" title=${JSON.stringify(file.info.title)} ${descriptionAttr}/>`,
+        `<Card href="${urlFn(entry.path)}" title=${JSON.stringify(entry.info.title)} ${descriptionAttr}/>`,
       );
     }
 
@@ -199,10 +271,16 @@ function writeIndexFiles(
     );
   }
 
+  for (const list of Object.values(context.generatedEntries)) {
+    for (const item of list) indexEntry(item);
+  }
+
   for (const item of typeof items === 'function' ? items(context) : items) {
     files.push({
       path: path.extname(item.path).length === 0 ? `${item.path}.mdx` : item.path,
       content: fileContent(item),
     });
   }
+
+  return files;
 }

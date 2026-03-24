@@ -129,6 +129,35 @@ describe('Generate documents', () => {
 
     await expect(stringifyOutput(out)).toMatchFileSnapshot('./out/products-with-index.md');
   });
+
+  test('Generate Files - with meta', async () => {
+    const out = await generateFilesOnly({
+      input: createOpenAPI({
+        input: () => ({
+          products: path.join(cwd, './fixtures/products.yaml'),
+        }),
+      }),
+      per: 'operation',
+      meta: true,
+    });
+
+    await expect(stringifyOutput(out)).toMatchFileSnapshot('./out/products-with-meta.md');
+  });
+
+  test('Generate Files - with meta + groupBy', async () => {
+    const out = await generateFilesOnly({
+      input: createOpenAPI({
+        input: () => ({
+          products: path.join(cwd, './fixtures/products.yaml'),
+        }),
+      }),
+      per: 'operation',
+      groupBy: 'tag',
+      meta: true,
+    });
+
+    await expect(stringifyOutput(out)).toMatchFileSnapshot('./out/products-with-meta+groupby.md');
+  });
 });
 
 function stringifyOutput(output: OutputFile[]) {
