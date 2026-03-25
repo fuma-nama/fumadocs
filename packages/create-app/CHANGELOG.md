@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 16.0.81
+
+### Patch Changes
+
+- d050370: include shared.ts in all templates
+
 ## 16.0.80
 
 ## 16.0.79
