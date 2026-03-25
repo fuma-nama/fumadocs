@@ -22,7 +22,7 @@ export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
     if (!container || container.clientHeight === 0) return;
     let w = 0;
     let h = 0;
-    let b0 = 0;
+    let upperBottom = 0;
     let d = '';
 
     for (let i = 0; i < items.length; i++) {
@@ -32,26 +32,26 @@ export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
       if (!element) continue;
 
       const styles = getComputedStyle(element);
-      const offset = getLineOffset(items[i].depth) + 1,
+      const x = getLineOffset(items[i].depth) + 0.5,
         top = element.offsetTop + parseFloat(styles.paddingTop),
         bottom = element.offsetTop + element.clientHeight - parseFloat(styles.paddingBottom);
 
-      w = Math.max(offset, w);
+      w = Math.max(x + 0.5, w);
       h = Math.max(h, bottom);
 
       if (i === 0) {
-        d += ` M${offset} ${top} L${offset} ${bottom}`;
+        d += ` M${x} ${top} L${x} ${bottom}`;
       } else {
-        const pOffset = getLineOffset(items[i - 1].depth) + 1;
-        d += ` C ${pOffset} ${top - 4} ${offset} ${b0! + 4} ${offset} ${top} L${offset} ${bottom}`;
+        const upperX = getLineOffset(items[i - 1].depth) + 0.5;
+        d += ` C ${upperX} ${top - 4} ${x} ${upperBottom + 4} ${x} ${top} L${x} ${bottom}`;
       }
 
-      b0 = bottom;
+      upperBottom = bottom;
     }
 
     setSvg({
       d,
-      width: w + 1,
+      width: w,
       height: h,
     });
   });
@@ -112,31 +112,37 @@ export function TOCEmpty() {
   );
 }
 
+interface ThumbBoxInfo {
+  startIdx: number;
+  endIdx: number;
+  isUp: boolean;
+}
+
 function ThumbBox() {
   const items = Primitive.useItems();
-  let startIdx = -1;
-  let endIdx = -1;
-  let lastInactiveIdx = -1;
-  for (let i = 0; i < items.length; i++) {
-    const item = items[i];
-
-    if (item.active) {
-      if (startIdx === -1) startIdx = i;
-      endIdx = i;
-    } else if (lastInactiveIdx === -1 || items[lastInactiveIdx].t < item.t) {
-      lastInactiveIdx = i;
-    }
-  }
-
+  const previousRef = useRef<ThumbBoxInfo>({
+    startIdx: -1,
+    endIdx: -1,
+    isUp: false,
+  });
+  const startIdx = items.findIndex((item) => item.active);
+  const endIdx = items.findLastIndex((item) => item.active);
   if (startIdx === -1) return;
-  const isStart = endIdx < lastInactiveIdx;
+
+  const prev = previousRef.current;
+  const isUp =
+    prev.startIdx > startIdx ||
+    prev.endIdx > endIdx ||
+    (prev.startIdx === startIdx && prev.endIdx === endIdx && prev.isUp);
+  previousRef.current = { startIdx, endIdx, isUp };
+
   return (
     <div
       className="absolute size-1 bg-fd-primary rounded-full transition-transform"
       style={{
-        translate: `calc(${getLineOffset(items[isStart ? startIdx : endIdx].original.depth)}px - 1.25px) ${
-          isStart ? 'var(--fd-top)' : 'calc(var(--fd-top) + var(--fd-height))'
-        }`,
+        translate: `calc(${getLineOffset(items[isUp ? startIdx : endIdx].original.depth)}px - 1.5px) calc(${
+          isUp ? 'var(--fd-top)' : 'var(--fd-top) + var(--fd-height)'
+        } - 1.5px)`,
       }}
     />
   );
