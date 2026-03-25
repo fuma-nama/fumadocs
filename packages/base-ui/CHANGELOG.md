@@ -1,5 +1,12 @@
 # @fumadocs/base-ui
 
+## 16.7.6
+
+### Patch Changes
+
+- 6849807: Fix `shiki.css` padding
+  - fumadocs-core@16.7.6
+
 ## 16.7.5
 
 ### Patch Changes
