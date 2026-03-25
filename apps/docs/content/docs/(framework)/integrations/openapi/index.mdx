@@ -5,9 +5,7 @@ description: Generating docs for OpenAPI schema
 
 <Callout type="warning" title="Before Reading">
 
-- Only OpenAPI 3.0 and 3.1 are supported.
-- It only works under RSC
-  environments.
+It only works under RSC environments.
 
 </Callout>
 
@@ -58,6 +56,8 @@ export const source = loader({
   plugins: [openapiPlugin()],
 });
 ```
+
+See [`createOpenAPI()`](/docs/integrations/openapi/server) for available options.
 
 Create a `APIPage` component:
 

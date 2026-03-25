@@ -76,7 +76,7 @@
     "mdast-util-mdx": "^3.0.0",
     "mdast-util-to-markdown": "^2.1.2",
     "picocolors": "^1.1.1",
-    "picomatch": "^4.0.3",
+    "picomatch": "^4.0.4",
     "tinyexec": "^1.0.4",
     "tinyglobby": "^0.2.15",
     "unified": "^11.0.5",
@@ -102,10 +102,10 @@
     "remark": "^15.0.1",
     "remark-directive": "^4.0.0",
     "remark-mdx": "^3.1.1",
-    "rolldown": "1.0.0-rc.10",
+    "rolldown": "1.0.0-rc.11",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.4",
-    "vite": "^8.0.1",
+    "tsdown": "0.21.5",
+    "vite": "^8.0.2",
     "webpack": "^5.105.4"
   },
   "peerDependencies": {

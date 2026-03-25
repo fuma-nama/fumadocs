@@ -3,7 +3,7 @@ import { getLLMText, source } from '@/lib/source';
 
 export async function loader({ params }: Route.LoaderArgs) {
   const slugs = params['*'].split('/').filter((v) => v.length > 0);
-  // remove the appended "index.mdx" that's added to avoid React Router issues
+  // remove the appended "content.md"
   slugs.pop();
   const page = source.getPage(slugs);
   if (!page) {

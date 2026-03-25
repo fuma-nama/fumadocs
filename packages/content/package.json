@@ -37,8 +37,9 @@
     "eslint-config-custom": "workspace:*",
     "fuma-content": "^1.2.3",
     "fumadocs-core": "workspace:*",
+    "react-dom": "^19.2.4",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.4"
+    "tsdown": "0.21.5"
   },
   "peerDependencies": {
     "fuma-content": "^1.2.3",

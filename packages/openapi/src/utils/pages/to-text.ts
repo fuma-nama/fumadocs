@@ -3,7 +3,7 @@ import type { ProcessedDocument } from '@/utils/process-document';
 import type { TagObject } from '@/types';
 import { dump } from 'js-yaml';
 import { removeUndefined } from '@/utils/remove-undefined';
-import type { OutputEntry } from '@/utils/pages/builder';
+import type { OperationOutput, PageOutput, WebhookOutput } from '@/utils/pages/builder';
 import type { InternalOpenAPIMeta } from '@/server/source-api';
 import { toStaticData } from '@/utils/pages/to-static-data';
 
@@ -48,7 +48,7 @@ export interface PagesToTextOptions {
 }
 
 export function toText(
-  entry: OutputEntry,
+  entry: PageOutput | OperationOutput | WebhookOutput,
   processed: ProcessedDocument,
   options: PagesToTextOptions = {},
 ) {
@@ -68,7 +68,7 @@ export function toText(
           type: 'operation',
         },
       );
-    case 'group':
+    case 'page':
       return generatePage(
         entry.schemaId,
         processed,
@@ -81,27 +81,14 @@ export function toText(
           ...options,
           ...entry.info,
         },
-        {
-          type: 'file',
-        },
-      );
-    case 'tag':
-      return generatePage(
-        entry.schemaId,
-        processed,
-        {
-          operations: entry.operations,
-          webhooks: entry.webhooks,
-          showTitle: true,
-        },
-        {
-          ...options,
-          ...entry.info,
-        },
-        {
-          type: 'tag',
-          tag: entry.rawTag,
-        },
+        entry.tag
+          ? {
+              type: 'tag',
+              tag: entry.tag,
+            }
+          : {
+              type: 'file',
+            },
       );
     case 'webhook':
       return generatePage(

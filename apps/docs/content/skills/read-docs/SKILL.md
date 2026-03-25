@@ -11,12 +11,12 @@ Fumadocs-powered sites typically expose three LLM-friendly features:
    The site provides a plain-text file at the root URL: `/llms.txt`.  
    This file contains a complete list of crawlable routes (one per line), often with comments or metadata indicating which paths are documentation pages.
 
-2. **Raw MDX Content for Docs Pages**  
-   Any documentation page under `/docs/` (or similar documentation root) can be retrieved in its raw MDX source format by appending `.mdx` to the path.  
+2. **Processed Markdown for Docs Pages**  
+   Fumadocs templates often expose **processed Markdown** (plain Markdown derived from MDX) at `/llms.mdx/docs/<path>/content.md` for each page. Some sites also rewrite `/docs/.../page.mdx` or negotiate `Accept: text/markdown` to that URL via middleware.  
    Example:
    - Rendered page: https://example.com/docs/installation
-   - Raw MDX: https://example.com/docs/installation.mdx  
-     This returns clean Markdown/MDX without navigation, headers, footers, or client-side HTML noise.
+   - Markdown for LLMs: https://example.com/llms.mdx/docs/installation/content.md  
+     Prefer this over scraping HTML when the site exposes it.
 
 3. **Search API**  
    The site exposes a JSON search endpoint:  
@@ -27,7 +27,7 @@ When a user query involves a library, tool, framework, or project whose official
 
 - First, confirm it is Fumadocs-powered (user confirmation, known projects, or successfully fetching `/llms.txt`).
 - Fetch `/llms.txt` to obtain the full list of available pages.
-- When retrieving the content of a specific docs page, always prefer the `.mdx` version.
+- When retrieving the content of a specific docs page, prefer the markdown endpoint (often `.../content.md` under `/llms.mdx/docs/`) or a `.mdx` suffix on the docs path if the site uses that pattern.
 - When the user needs to find something (keyword, feature, concept), use the `/api/search` endpoint with a precise query.
 - Parse and reason over the raw MDX or JSON results to provide accurate, up-to-date answers.
 - Cite the exact source URL (prefer the original rendered URL for user readability, but base your understanding on the raw version).

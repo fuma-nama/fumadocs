@@ -1,5 +1,17 @@
 # @fuma-docs/openapi
 
+## 10.5.0
+
+### Minor Changes
+
+- 0edf9ce: Support `meta.json` file generation
+
+### Patch Changes
+
+- Updated dependencies [6849807]
+  - fumadocs-ui@16.7.6
+  - fumadocs-core@16.7.6
+
 ## 10.4.1
 
 ### Patch Changes

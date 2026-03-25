@@ -3,7 +3,7 @@ import { program } from 'commander';
 import { runStart } from './commands.js';
 import fs from 'node:fs/promises';
 import { findConfigPath } from '@/config/load-node.js';
-import { version } from 'package.json';
+import { version } from '../../package.json' with { type: 'json' };
 
 program
   .command('init')

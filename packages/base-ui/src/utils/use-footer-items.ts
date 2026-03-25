@@ -2,14 +2,14 @@
 import { useTreeContext } from '@/contexts/tree';
 import type * as PageTree from 'fumadocs-core/page-tree';
 
-const footerCache = new Map<string, PageTree.Item[]>();
+const footerCache = new WeakMap<PageTree.Root, PageTree.Item[]>();
 
 /**
  * @returns a list of page tree items (linear), that you can obtain footer items
  */
 export function useFooterItems(): PageTree.Item[] {
   const { root } = useTreeContext();
-  const cached = footerCache.get(root.$id);
+  const cached = footerCache.get(root);
   if (cached) return cached;
 
   const list: PageTree.Item[] = [];
@@ -23,6 +23,6 @@ export function useFooterItems(): PageTree.Item[] {
   }
 
   for (const child of root.children) onNode(child);
-  footerCache.set(root.$id, list);
+  footerCache.set(root, list);
   return list;
 }

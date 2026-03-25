@@ -1,10 +1,10 @@
 {
   "extends": "tsconfig/react-library.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "types": ["@types/node"]
   },
   "exclude": ["node_modules", "dist", "eslint.config.mjs"]
 }

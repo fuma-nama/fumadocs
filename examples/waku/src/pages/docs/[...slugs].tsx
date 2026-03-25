@@ -1,4 +1,4 @@
-import { source } from '@/lib/source';
+import { getPageImage, getPageMarkdownUrl, source } from '@/lib/source';
 import { PageProps } from 'waku/router';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
 import {
@@ -9,9 +9,8 @@ import {
   MarkdownCopyButton,
   ViewOptionsPopover,
 } from 'fumadocs-ui/layouts/docs/page';
-import { getPageImage } from '@/lib/source';
 import { unstable_notFound } from 'waku/router/server';
-import { gitConfig } from '@/lib/layout.shared';
+import { gitConfig } from '@/lib/shared';
 import { getMDXComponents } from '@/components/mdx';
 
 export default function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
@@ -19,7 +18,7 @@ export default function Page({ slugs }: PageProps<'/docs/[...slugs]'>) {
   if (!page) unstable_notFound();
 
   const MDX = page.data.body;
-  const markdownUrl = `/llms.mdx/docs/${[...page.slugs, 'index.mdx'].join('/')}`;
+  const markdownUrl = getPageMarkdownUrl(page).url;
   return (
     <DocsPage toc={page.data.toc}>
       <meta property="og:image" content={getPageImage(slugs).url} />

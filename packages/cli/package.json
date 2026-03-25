@@ -47,11 +47,11 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@oxc-project/types": "^0.121.0",
+    "@oxc-project/types": "^0.122.0",
     "@types/node": "25.5.0",
     "eslint-config-custom": "workspace:*",
     "shadcn": "4.1.0",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.4"
+    "tsdown": "0.21.5"
   }
 }
