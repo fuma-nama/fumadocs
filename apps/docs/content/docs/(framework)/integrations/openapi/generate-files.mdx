@@ -118,6 +118,7 @@ void generateFiles({
     },
     items: [
       {
+        // output path
         path: 'index.mdx',
         // optional: restrict the input files (identical to the `input` field in server)
         only: ['petstore.yaml'],
@@ -125,6 +126,25 @@ void generateFiles({
         description: 'All available pages',
       },
     ],
+  },
+});
+```
+
+### `meta`
+
+Generate [`meta.json`](/docs/page-conventions#meta) files automatically.
+
+You can always define the `meta.json` files manually for maximal flexibility.
+
+```ts
+import { generateFiles } from 'fumadocs-openapi';
+
+void generateFiles({
+  meta: true,
+
+  // or customise how folders are represented:
+  meta: {
+    folderStyle: 'separator',
   },
 });
 ```
