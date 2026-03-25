@@ -68,7 +68,7 @@
     "fumadocs-core": "workspace:*",
     "mdast-util-mdx": "^3.0.0",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.4",
+    "tsdown": "0.21.5",
     "typescript": "^6.0.2"
   },
   "peerDependencies": {

@@ -30,7 +30,7 @@
     "@types/react": "^19.2.14",
     "eslint-config-custom": "workspace:*",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.4"
+    "tsdown": "0.21.5"
   },
   "peerDependencies": {
     "@types/react": "*",

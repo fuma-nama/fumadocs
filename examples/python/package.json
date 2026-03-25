@@ -8,7 +8,7 @@
     "start": "next start",
     "build:docs": "pnpm python:generate && node ./scripts/generate-docs.mjs",
     "python:generate": "pip3 install ./node_modules/fumadocs-python && fumapy-generate httpx",
-    "types:check": "fumadocs-mdx && tsc --noEmit"
+    "types:check": "fumadocs-mdx && next typegen && tsc --noEmit"
   },
   "dependencies": {
     "fumadocs-core": "workspace:*",
