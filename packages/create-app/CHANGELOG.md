@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 16.0.82
+
+### Patch Changes
+
+- 3d4bc07: fix templates
+
 ## 16.0.81
 
 ### Patch Changes
