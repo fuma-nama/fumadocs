@@ -54,7 +54,6 @@
 
   .highlighted {
     --fd-counter-color: var(--color-fd-primary);
-    padding-left: calc(var(--padding-left) - 2px);
     @apply bg-fd-primary/10;
   }
 
