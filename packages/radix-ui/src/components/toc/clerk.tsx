@@ -72,7 +72,7 @@ export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
       {svg && (
         <TocThumb
           containerRef={containerRef}
-          className="absolute top-0 inset-s-0"
+          className="absolute top-0 -inset-s-px"
           style={{
             width: svg.width,
             height: svg.height,
@@ -134,7 +134,7 @@ function ThumbBox() {
     <div
       className="absolute size-1 bg-fd-primary rounded-full transition-transform"
       style={{
-        translate: `calc(${getLineOffset(items[isStart ? startIdx : endIdx].original.depth)}px - 1.25px) ${
+        translate: `calc(${getLineOffset(items[isStart ? startIdx : endIdx].original.depth)}px - 2px) ${
           isStart ? 'var(--fd-top)' : 'calc(var(--fd-top) + var(--fd-height))'
         }`,
       }}
