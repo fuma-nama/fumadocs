@@ -1,5 +1,5 @@
 import type { Processor, Transformer } from 'unified';
-import { toMdxExport } from './mdast-utils';
+import { toMdxExport } from './utils';
 import type { Heading, Parents, Root } from 'mdast';
 import { defaultStringifier, type StringifyOptions } from './stringifier';
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';

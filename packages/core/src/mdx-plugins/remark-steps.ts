@@ -2,6 +2,7 @@ import type { Transformer } from 'unified';
 import type { BlockContent, Heading, Root, RootContent } from 'mdast';
 import { visit } from 'unist-util-visit';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx';
+import { handleTag } from './utils';
 
 export interface RemarkStepsOptions {
   /**
@@ -20,6 +21,7 @@ export interface RemarkStepsOptions {
 }
 
 const StepRegex = /^(\d+)\.\s(.+)$/;
+const StepTag = '[step]';
 
 /**
  * Convert headings in the format of `1. Hello World` into steps.
@@ -68,6 +70,28 @@ export function remarkSteps({
     };
   }
 
+  function handleHeadingStep(node: Heading): boolean {
+    const head = node.children[0];
+    if (head && head.type === 'text') {
+      const match = StepRegex.exec(head.value);
+      if (match) {
+        head.value = match[2];
+        return true;
+      }
+    }
+
+    const tail = node.children[node.children.length - 1];
+    if (tail && tail.type === 'text') {
+      const step = handleTag(tail.value, StepTag);
+      if (step !== false) {
+        tail.value = step;
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   return (tree) => {
     visit(tree, (parent) => {
       if (!('children' in parent) || parent.type === 'heading') return;
@@ -75,15 +99,16 @@ export function remarkSteps({
 
       let startIdx = -1;
       let i = 0;
+      let currentStep = 1;
 
       const onEnd = () => {
         if (startIdx === -1) return;
-        // range: start index to i - 1
         const item = {};
         const nodes = parent.children.splice(startIdx, i - startIdx, item as RootContent);
         Object.assign(item, convertToSteps(nodes));
         i = startIdx + 1;
         startIdx = -1;
+        currentStep = 1;
       };
 
       for (; i < parent.children.length; i++) {
@@ -97,19 +122,14 @@ export function remarkSteps({
           else if (node.depth < startDepth) onEnd();
         }
 
-        const head = node.children.filter((c) => c.type === 'text').at(0);
-        if (!head) {
+        if (!handleHeadingStep(node)) {
           onEnd();
           continue;
         }
 
-        const match = StepRegex.exec(head.value);
-        if (!match) {
-          onEnd();
-          continue;
-        }
-
-        head.value = match[2];
+        node.data ??= {};
+        node.data.hProperties ??= {};
+        node.data.hProperties['data-fd-step'] = currentStep++;
         if (startIdx === -1) startIdx = i;
       }
 

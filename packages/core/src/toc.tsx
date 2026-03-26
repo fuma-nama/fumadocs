@@ -18,6 +18,8 @@ export interface TOCItemType {
   title: ReactNode;
   url: string;
   depth: number;
+  /** [remark-steps] the step number */
+  _step?: number;
 }
 
 export type TableOfContents = TOCItemType[];
@@ -96,11 +98,11 @@ export function TOCItem({ ref, onActiveChange = () => null, ...props }: TOCItemP
   const [active, setActive] = useState(
     () => id && items.some((item) => item.active && item.id === id),
   );
-  const initialShouldScroll = useMemo(() => {
+  const initialShouldScrollRef = useRef<boolean>(null);
+  if (initialShouldScrollRef.current === null) {
     const lastActive = items.findLast((item) => item.active);
-    return lastActive && lastActive.id === id;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    initialShouldScrollRef.current = lastActive !== undefined && lastActive.id === id;
+  }
 
   useOnChange(items, () => {
     if (id === null) return;
@@ -129,7 +131,7 @@ export function TOCItem({ ref, onActiveChange = () => null, ...props }: TOCItemP
     const anchor = anchorRef.current;
     const container = containerRef?.current;
 
-    if (initialShouldScroll && container && anchor) {
+    if (initialShouldScrollRef.current && container && anchor) {
       scrollIntoView(anchor, {
         behavior: 'instant',
         block: 'center',
@@ -138,7 +140,7 @@ export function TOCItem({ ref, onActiveChange = () => null, ...props }: TOCItemP
         boundary: container,
       });
     }
-  }, [containerRef, initialShouldScroll]);
+  }, [containerRef]);
 
   return <a ref={mergeRefs(anchorRef, ref)} data-active={active} {...props} />;
 }

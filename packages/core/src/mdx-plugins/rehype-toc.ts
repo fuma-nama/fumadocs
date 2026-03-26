@@ -1,9 +1,9 @@
 import type { Processor, Transformer } from 'unified';
 import type { Root, Element } from 'hast';
 import { toEstree } from 'hast-util-to-estree';
-import type { JSXElement } from 'estree-jsx';
+import type { JSXElement, ObjectExpression } from 'estree-jsx';
 import { visit } from 'unist-util-visit';
-import { toMdxExportRaw } from './mdast-utils';
+import { handleTag, toMdxExportRaw } from './utils';
 
 export interface RehypeTocOptions {
   /**
@@ -45,6 +45,7 @@ export interface RehypeTOCItemType {
   title: Element;
   url: string;
   depth: number;
+  _step?: number;
 }
 
 const TocOnlyTag = '[toc]';
@@ -75,14 +76,17 @@ export function rehypeToc(
 
       const last = element.children[element.children.length - 1];
       if (last.type === 'text') {
-        if (last.value.endsWith(NoTocTag)) {
-          last.value = last.value.substring(0, last.value.length - NoTocTag.length).trimEnd();
+        const noToc = handleTag(last.value, NoTocTag);
+
+        if (noToc !== false) {
+          last.value = noToc;
           return 'skip';
         }
 
-        if (last.value.endsWith(TocOnlyTag)) {
+        const tocOnly = handleTag(last.value, TocOnlyTag);
+        if (tocOnly !== false) {
           isTocOnly = true;
-          last.value = last.value.substring(0, last.value.length - TocOnlyTag.length).trimEnd();
+          last.value = tocOnly;
         }
       }
 
@@ -90,6 +94,10 @@ export function rehypeToc(
         title: element,
         depth: Number(element.tagName[1]),
         url: `#${id}`,
+        _step:
+          typeof element.properties['data-fd-step'] === 'number'
+            ? element.properties['data-fd-step']
+            : undefined,
       });
 
       if (isTocOnly && parent && typeof idx === 'number') {
@@ -104,6 +112,7 @@ export function rehypeToc(
         title: JSXElement;
         url: string;
         depth: number;
+        _step?: number;
       }[] = [];
       for (const item of items) {
         const root = toEstree(item.title, {
@@ -122,58 +131,80 @@ export function rehypeToc(
       tree.children.push(
         toMdxExportRaw(exportToc.name, {
           type: 'ArrayExpression',
-          elements: esmItems.map((item) => ({
-            type: 'ObjectExpression',
-            properties: [
-              {
+          elements: esmItems.map((item) => {
+            const obj: ObjectExpression = {
+              type: 'ObjectExpression',
+              properties: [
+                {
+                  type: 'Property',
+                  method: false,
+                  shorthand: false,
+                  computed: false,
+                  key: {
+                    type: 'Identifier',
+                    name: 'depth',
+                  },
+                  value: {
+                    type: 'Literal',
+                    value: item.depth,
+                  },
+                  kind: 'init',
+                },
+                {
+                  type: 'Property',
+                  method: false,
+                  shorthand: false,
+                  computed: false,
+                  key: {
+                    type: 'Identifier',
+                    name: 'url',
+                  },
+                  value: {
+                    type: 'Literal',
+                    value: item.url,
+                  },
+                  kind: 'init',
+                },
+                {
+                  type: 'Property',
+                  method: false,
+                  shorthand: false,
+                  computed: false,
+                  key: {
+                    type: 'Identifier',
+                    name: 'title',
+                  },
+                  value: {
+                    type: 'JSXFragment',
+                    openingFragment: { type: 'JSXOpeningFragment' },
+                    closingFragment: { type: 'JSXClosingFragment' },
+                    children: item.title.children,
+                  },
+                  kind: 'init',
+                },
+              ],
+            };
+
+            if (typeof item._step === 'number') {
+              obj.properties.push({
                 type: 'Property',
                 method: false,
                 shorthand: false,
                 computed: false,
                 key: {
                   type: 'Identifier',
-                  name: 'depth',
+                  name: '_step',
                 },
                 value: {
                   type: 'Literal',
-                  value: item.depth,
+                  value: item._step,
                 },
                 kind: 'init',
-              },
-              {
-                type: 'Property',
-                method: false,
-                shorthand: false,
-                computed: false,
-                key: {
-                  type: 'Identifier',
-                  name: 'url',
-                },
-                value: {
-                  type: 'Literal',
-                  value: item.url,
-                },
-                kind: 'init',
-              },
-              {
-                type: 'Property',
-                method: false,
-                shorthand: false,
-                computed: false,
-                key: {
-                  type: 'Identifier',
-                  name: 'title',
-                },
-                value: {
-                  type: 'JSXFragment',
-                  openingFragment: { type: 'JSXOpeningFragment' },
-                  closingFragment: { type: 'JSXClosingFragment' },
-                  children: item.title.children,
-                },
-                kind: 'init',
-              },
-            ],
-          })),
+              });
+            }
+
+            return obj;
+          }),
         }),
       );
     } else {

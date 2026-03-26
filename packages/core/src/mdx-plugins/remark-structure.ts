@@ -3,7 +3,7 @@ import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
 import type { PluggableList, Processor, Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
-import { toMdxExport } from './mdast-utils';
+import { toMdxExport } from './utils';
 import {
   type MdxJsxAttribute,
   type MdxJsxExpressionAttribute,

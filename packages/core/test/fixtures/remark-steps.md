@@ -24,6 +24,6 @@ content
 
 content
 
-# 2. Big: Second
+# Big: Second [step]
 
 content

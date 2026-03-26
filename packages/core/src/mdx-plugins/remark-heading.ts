@@ -3,13 +3,13 @@ import type { Heading, Root } from 'mdast';
 import type { Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
 import type { TOCItemType } from '@/toc';
-import { flattenNode } from '@/mdx-plugins/mdast-utils';
+import { flattenNode } from '@/mdx-plugins/utils';
 
 declare module 'mdast' {
   export interface HeadingData extends Data {
     hProperties?: {
       id?: string;
-    };
+    } & Record<string, unknown>;
   }
 }
 
