@@ -1,0 +1,39 @@
+{
+  "name": "tanstack-start-openapi",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "start": "node .output/server/index.mjs",
+    "preview": "vite preview",
+    "types:check": "fumadocs-mdx && tsc --noEmit",
+    "postinstall": "fumadocs-mdx"
+  },
+  "dependencies": {
+    "@tanstack/react-router": "1.168.3",
+    "@tanstack/react-router-devtools": "1.166.11",
+    "@tanstack/react-start": "1.167.6",
+    "fumadocs-core": "workspace:*",
+    "fumadocs-mdx": "workspace:*",
+    "fumadocs-openapi": "workspace:*",
+    "fumadocs-ui": "workspace:*",
+    "lucide-react": "^1.6.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "tailwind-merge": "^3.5.0",
+    "vite": "^8.0.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.2.2",
+    "@types/mdx": "^2.0.13",
+    "@types/node": "^25.5.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "nitro": "^3.0.260311-beta",
+    "tailwindcss": "^4.2.2",
+    "typescript": "^6.0.2"
+  }
+}

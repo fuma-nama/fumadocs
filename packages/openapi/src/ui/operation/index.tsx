@@ -422,7 +422,13 @@ function ResponseAccordion({
         )}
         {contentTypes.map(([type, item]) => (
           <SelectTab key={type} value={type} className="mb-2">
-            <RepsonseAccordionItem type={type} item={item} operation={operation} ctx={ctx} />
+            <RepsonseAccordionItem
+              type={type}
+              status={status}
+              item={item}
+              operation={operation}
+              ctx={ctx}
+            />
           </SelectTab>
         ))}
       </AccordionContent>
@@ -432,11 +438,13 @@ function ResponseAccordion({
 
 function RepsonseAccordionItem({
   type,
+  status,
   operation,
   item: { schema },
   ctx,
 }: {
   type: string;
+  status: string;
   operation: MethodInformation;
   item: NoReference<MediaTypeObject>;
   ctx: RenderContext;
@@ -453,7 +461,7 @@ function RepsonseAccordionItem({
       },
       ...ctx,
     });
-  }, [ctx, operation, schema, type]);
+  }, [ctx, operation, schema, status, type]);
   // assume it is on server component when returned async
   if (ts instanceof Promise) ts = use(ts);
 
