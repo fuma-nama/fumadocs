@@ -8,8 +8,7 @@
     "build": "vite build",
     "start": "node .output/server/index.mjs",
     "preview": "vite preview",
-    "types:check": "fumadocs-mdx && tsc --noEmit",
-    "postinstall": "fumadocs-mdx"
+    "types:check": "fumadocs-mdx && tsc --noEmit"
   },
   "dependencies": {
     "@tanstack/react-router": "1.168.3",
