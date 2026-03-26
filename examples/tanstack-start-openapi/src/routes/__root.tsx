@@ -28,7 +28,7 @@ function RootComponent() {
       <head>
         <HeadContent />
       </head>
-      <body className="flex flex-col min-h-screen">
+      <body className="flex flex-col min-h-screen [scrollbar-gutter:stable]">
         <RootProvider>
           <Outlet />
         </RootProvider>
