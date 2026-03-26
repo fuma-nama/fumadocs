@@ -187,13 +187,13 @@ export function useResolvedSchema(raw: ParsedSchema): Exclude<ParsedSchema, bool
     if (typeof schema === 'boolean') return anyFields;
 
     if (schema.allOf) {
-      return fallbackAny(
-        mergeAllOf(schema, {
-          dereference(schema) {
-            return dereference(schema, references);
-          },
-        }),
-      );
+      const merged = mergeAllOf(schema, {
+        dereference(schema) {
+          return dereference(schema, references);
+        },
+      });
+      if (typeof merged === 'boolean') return anyFields;
+      return merged;
     }
 
     return schema;
@@ -207,10 +207,6 @@ function dereference(schema: ParsedSchema, references: Record<string, ParsedSche
   }
 
   return schema;
-}
-
-function fallbackAny(schema: ParsedSchema): Exclude<ParsedSchema, boolean> {
-  return typeof schema === 'boolean' ? anyFields : schema;
 }
 
 function getUnion(

@@ -24,6 +24,7 @@ import type { JSONSchema } from 'json-schema-typed';
 import type { BundledTheme, CodeOptionsThemes, CodeToHastOptionsCommon } from 'shiki';
 import { highlightHast, type ShikiFactory } from 'fumadocs-core/highlight/shiki';
 import type { ExampleRequestItem } from './operation/get-example-requests';
+import { compile } from '@fumari/json-schema-ts';
 
 export interface GenerateTypeScriptDefinitionsContext extends RenderContext {
   operation: NoReference<MethodInformation>;
@@ -60,10 +61,12 @@ export interface CreateAPIPageOptions {
    *
    * Pass `false` to disable it.
    */
-  generateTypeScriptDefinitions?: (
-    schema: JSONSchema,
-    ctx: GenerateTypeScriptDefinitionsContext,
-  ) => Awaitable<string | undefined>;
+  generateTypeScriptDefinitions?:
+    | ((
+        schema: JSONSchema,
+        ctx: GenerateTypeScriptDefinitionsContext,
+      ) => Awaitable<string | undefined>)
+    | false;
 
   /**
    * Generate example code usage for all endpoints.
@@ -73,7 +76,7 @@ export interface CreateAPIPageOptions {
   /**
    * Generate example code usage for each endpoint.
    */
-  generateCodeSamples?: (method: MethodInformation) => Awaitable<InlineCodeUsageGenerator[]>;
+  generateCodeSamples?: (method: MethodInformation) => InlineCodeUsageGenerator[];
 
   shiki: ShikiFactory;
   renderMarkdown?: (md: string) => ReactNode;
@@ -172,7 +175,7 @@ export interface CreateAPIPageOptions {
    * Info UI for JSON schemas
    */
   schemaUI?: {
-    render?: (options: SchemaUIOptions, ctx: RenderContext) => Awaitable<ReactNode>;
+    render?: (options: SchemaUIOptions, ctx: RenderContext) => ReactNode;
 
     /**
      * Show examples under the generated content of JSON schemas.
@@ -201,15 +204,19 @@ export interface CreateAPIPageOptions {
   };
 
   renderHeading?: (props: HTMLAttributes<HTMLHeadingElement>, depth: number) => ReactNode;
-  renderCodeBlock?: (props: { lang: string; code: string }) => Awaitable<ReactNode>;
+  renderCodeBlock?: (props: { lang: string; code: string }) => ReactNode;
 
   client?: APIPageClientOptions;
+}
+
+export interface ServerApiPageProps extends Omit<ApiPageProps, 'document'> {
+  document: string | ProcessedDocument;
 }
 
 export function createAPIPage(
   server: OpenAPIServer,
   options: CreateAPIPageOptions,
-): FC<ApiPageProps> {
+): FC<ServerApiPageProps> {
   let processor: ReturnType<typeof createMarkdownProcessor>;
 
   function createMarkdownProcessor() {
@@ -241,7 +248,7 @@ export function createAPIPage(
     if (typeof document === 'string') {
       processed = await server.getSchema(document);
     } else {
-      processed = await document;
+      processed = document;
     }
 
     const slugger = new Slugger();
@@ -254,7 +261,6 @@ export function createAPIPage(
         ...defaultAdapters,
         ...options.mediaAdapters,
       },
-      slugger,
       renderHeading(depth, text, props) {
         const id = typeof text === 'string' ? slugger.slug(text) : props?.id;
         if (!id) throw new Error("missing 'id' for non-string children");
@@ -269,15 +275,26 @@ export function createAPIPage(
           </Heading>
         );
       },
-      generateTypeScriptDefinitions(schema, ctx) {
-        const { generateTypeScriptSchema, generateTypeScriptDefinitions } = options;
-        if (generateTypeScriptSchema && ctx._internal_legacy) {
-          const { statusCode, contentType } = ctx._internal_legacy;
-          return generateTypeScriptSchema(ctx.operation, statusCode, contentType, ctx);
-        }
+      generateTypeScriptDefinitions:
+        options.generateTypeScriptDefinitions ??
+        ((schema, ctx) => {
+          if (options.generateTypeScriptSchema && ctx._internal_legacy) {
+            const { statusCode, contentType } = ctx._internal_legacy;
+            return options.generateTypeScriptSchema(ctx.operation, statusCode, contentType, ctx);
+          }
 
-        return generateTypeScriptDefinitions?.(schema, ctx);
-      },
+          if (typeof schema !== 'object') return;
+          try {
+            return compile(schema, {
+              name: 'Response',
+              readOnly: ctx.readOnly,
+              writeOnly: ctx.writeOnly,
+              getSchemaId: ctx.schema.getRawRef,
+            });
+          } catch (e) {
+            console.warn('Failed to generate typescript schema:', e);
+          }
+        }),
       async renderMarkdown(text) {
         if (options.renderMarkdown) return options.renderMarkdown(text);
         processor ??= createMarkdownProcessor();

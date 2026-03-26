@@ -1,5 +1,4 @@
 import type { OpenAPIV3_2, OpenAPIV3 } from './_openapi/types';
-import type { default as Slugger } from 'github-slugger';
 import type { NoReference } from '@/utils/schema';
 import type { ProcessedDocument } from '@/utils/process-document';
 import type { MediaAdapter } from '@/requests/media/adapter';
@@ -38,11 +37,9 @@ export interface RenderContext
   extends
     Pick<OpenAPIOptions, 'proxyUrl'>,
     Omit<
-      RequireKeys<CreateAPIPageOptions, 'generateTypeScriptDefinitions' | 'renderMarkdown'>,
-      'renderCodeBlock' | 'renderHeading'
+      RequireKeys<CreateAPIPageOptions, 'renderMarkdown' | 'generateTypeScriptDefinitions'>,
+      'renderCodeBlock' | 'renderHeading' | 'generateTypeScriptSchema'
     > {
-  slugger: Slugger;
-
   /**
    * dereferenced schema
    */

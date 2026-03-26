@@ -1,11 +1,10 @@
 import { Operation } from '@/ui/operation';
 import type { HttpMethods, RenderContext, ServerObject } from '@/types';
 import { createMethod } from '@/utils/schema';
-import type { ProcessedDocument } from '@/utils/process-document';
 import { ApiProviderLazy, ServerProviderLazy } from './contexts/api.lazy';
 
 export interface ApiPageProps {
-  document: Promise<ProcessedDocument> | string | ProcessedDocument;
+  document: string;
   showTitle?: boolean;
   showDescription?: boolean;
 

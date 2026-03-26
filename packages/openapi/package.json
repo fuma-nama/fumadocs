@@ -36,6 +36,7 @@
     "./ui": "./dist/ui/index.js",
     "./ui/base": "./dist/ui/base.js",
     "./ui/client": "./dist/ui/client/index.js",
+    "./ui/create-client": "./dist/ui/create-client.js",
     "./package.json": "./package.json",
     "./css/*": "./css/*"
   },
