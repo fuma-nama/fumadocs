@@ -21,7 +21,8 @@ import type {
   WebhookOutput,
 } from '@/utils/pages/builder';
 import path from 'node:path';
-import { ClientApiPagePayload } from '@/ui/create-client';
+import type { ClientApiPageProps } from '@/ui/create-client';
+import { toStaticData } from '@/utils/pages/to-static-data';
 
 declare module 'fumadocs-core/source' {
   export interface PageData {
@@ -82,7 +83,7 @@ export function openapiPlugin(): LoaderPlugin {
 interface OpenAPIPageData extends PageData {
   getAPIPageProps: () => ApiPageProps;
   getSchema: () => { id: string } & ProcessedDocument;
-  getClientPayload: () => Promise<ClientApiPagePayload>;
+  getClientAPIPageProps: () => Promise<ClientApiPageProps>;
   structuredData: StructuredData;
   toc: TOCItemType[];
 }
@@ -110,7 +111,6 @@ export async function openapiSource(
   const { baseDir = '', meta = false } = options;
   const { createAutoPreset } = await import('@/utils/pages/preset-auto');
   const { fromServer } = await import('@/utils/pages/builder');
-  const { toStaticData } = await import('@/utils/pages/to-static-data');
   const files: VirtualFile<{
     pageData: OpenAPIPageData;
     metaData: MetaData;
@@ -131,10 +131,13 @@ export async function openapiSource(
           getAPIPageProps() {
             return props;
           },
-          async getClientPayload() {
+          async getClientAPIPageProps() {
             return {
-              bundled: processed.bundled,
-              proxyUrl: server.options.proxyUrl,
+              payload: {
+                bundled: processed.bundled,
+                proxyUrl: server.options.proxyUrl,
+              },
+              ...props,
             };
           },
           getSchema() {

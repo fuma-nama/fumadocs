@@ -1,0 +1,194 @@
+---
+title: Without RSC
+descirption: Setup guide for non-RSC environments.
+---
+
+## Setup
+
+Install the required packages.
+
+```npm
+npm i fumadocs-openapi shiki
+```
+
+### Generate Styles
+
+Add the following line:
+
+```css title="Tailwind CSS"
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+/* [!code ++] */
+@import 'fumadocs-openapi/css/preset.css';
+```
+
+### Configure Plugin
+
+Create the OpenAPI server instance & `<APIPage />` component.
+
+```ts tab="lib/openapi.ts"
+import { createOpenAPI } from 'fumadocs-openapi/server';
+
+export const openapi = createOpenAPI({
+  // the OpenAPI schema, you can also give it an external URL.
+  input: ['./openapi.json'],
+});
+```
+
+```tsx tab="components/api-page.tsx"
+import { openapi } from '@/lib/openapi';
+import { createClientAPIPage } from 'fumadocs-openapi/ui/create-client';
+
+export const ClientAPIPage = createClientAPIPage(openapi);
+```
+
+```ts tab="lib/source.ts"
+import { openapiPlugin } from 'fumadocs-openapi/server';
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  // [!code ++] optional: adds a badge to each page item in page tree
+  plugins: [openapiPlugin()],
+});
+```
+
+See [`createOpenAPI()`](/docs/integrations/openapi/server) & [`<APIPage />`](/docs/integrations/openapi/api-page) for available options.
+
+### Generate Pages
+
+You can generate pages dynamically by integrating into [Loader API](/docs/headless/source-api/source).
+
+```ts title="lib/source.ts"
+import { loader, multiple } from 'fumadocs-core/source';
+import { openapiPlugin, openapiSource } from 'fumadocs-openapi/server';
+import { docs } from 'collections/server';
+import { openapi } from '@/lib/openapi';
+
+export const source = loader(
+  // [!code ++:6]
+  multiple({
+    docs: docs.toFumadocsSource(),
+    openapi: await openapiSource(openapi, {
+      baseDir: 'openapi',
+    }),
+  }),
+  {
+    baseUrl: '/docs',
+    plugins: [openapiPlugin()],
+    // ...
+  },
+);
+```
+
+`openapiSource()` is a server-side API that generates pages directly to your `loader()`, hence allowing dynamic generation (e.g. different page tree as schema changes).
+
+It shares a different type from your original source, explicit handling of OpenAPI pages is necessary (e.g. where you return text for LLM).
+
+```ts
+import { source } from '@/lib/source';
+import type { InferPageType } from 'fumadocs-core/source';
+
+export async function getLLMText(page: InferPageType<typeof source>) {
+  // [!code ++:4]
+  if (page.data.type === 'openapi') {
+    // e.g. return the stringified OpenAPI schema
+    return JSON.stringify(page.data.getSchema().bundled, null, 2);
+  }
+
+  // your original flow below...
+}
+```
+
+### Render Page
+
+Pass a client payload from server, then render the page using the `<ClientAPIPage />` component you created above.
+
+For example, in Tanstack Start:
+
+```tsx title="routes/docs/$.tsx"
+import { createFileRoute, notFound } from '@tanstack/react-router';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { createServerFn } from '@tanstack/react-start';
+import { source } from '@/lib/source';
+import browserCollections from 'collections/browser';
+import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+import { useFumadocsLoader } from 'fumadocs-core/source/client';
+import { type ReactNode, Suspense } from 'react';
+import { ClientAPIPage } from '@/components/api-page';
+
+export const Route = createFileRoute('/docs/$')({
+  component: Page,
+  loader: async ({ params }) => {
+    const slugs = params._splat?.split('/') ?? [];
+    const data = await serverLoader({ data: slugs });
+
+    // Fumadocs MDX: only preload content for normal pages [!code highlight:3]
+    if (data.type === 'docs') {
+      await clientLoader.preload(data.path);
+    }
+    return data;
+  },
+});
+
+const serverLoader = createServerFn({
+  method: 'GET',
+})
+  .inputValidator((slugs: string[]) => slugs)
+  .handler(async ({ data: slugs }) => {
+    const page = source.getPage(slugs);
+    if (!page) throw notFound();
+
+    const pageTree = await source.serializePageTree(source.getPageTree());
+    // different result for OpenAPI pages [!code ++:12]
+    if (page.data.type === 'openapi') {
+      return {
+        type: 'openapi',
+        title: page.data.title,
+        description: page.data.description,
+        pageTree,
+        props: await page.data.getClientAPIPageProps(),
+      };
+    }
+
+    return {
+      type: 'docs',
+      path: page.path,
+      markdownUrl: getPageMarkdownUrl(page).url,
+      pageTree,
+    };
+  });
+
+const clientLoader = browserCollections.docs.createClientLoader({
+  component(pageData, props) {
+    // ...
+  },
+});
+
+function Page() {
+  const page = useFumadocsLoader(Route.useLoaderData());
+  let content: ReactNode;
+
+  // render OpenAPI page content [!code ++:11]
+  if (page.type === 'openapi') {
+    content = (
+      <DocsPage full>
+        <DocsTitle>{page.title}</DocsTitle>
+        <DocsDescription>{page.description}</DocsDescription>
+        <DocsBody>
+          {/* pass the payload data */}
+          <ClientAPIPage {...page.props} />
+        </DocsBody>
+      </DocsPage>
+    );
+  } else {
+    content = <Suspense>{clientLoader.useContent(page.path, page)}</Suspense>;
+  }
+
+  return <DocsLayout tree={page.pageTree}>{content}</DocsLayout>;
+}
+```
+
+You can see the full [Tanstack Start example](https://github.com/fuma-nama/fumadocs/blob/dev/examples/tanstack-start-openapi).
+
+After configurating Fumadocs OpenAPI, you should be able to view the generated API pages after starting your app.

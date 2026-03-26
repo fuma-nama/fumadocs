@@ -24,7 +24,7 @@ export const Route = createFileRoute('/docs/$')({
     const slugs = params._splat?.split('/') ?? [];
     const data = await serverLoader({ data: slugs });
 
-    if (data.type === 'page') {
+    if (data.type === 'docs') {
       await clientLoader.preload(data.path);
     }
     return data;
@@ -46,15 +46,12 @@ const serverLoader = createServerFn({
         title: page.data.title,
         description: page.data.description,
         pageTree,
-        data: {
-          payload: await page.data.getClientPayload(),
-          ...page.data.getAPIPageProps(),
-        },
+        props: await page.data.getClientAPIPageProps(),
       };
     }
 
     return {
-      type: 'page',
+      type: 'docs',
       path: page.path,
       markdownUrl: getPageMarkdownUrl(page).url,
       pageTree,
@@ -95,7 +92,6 @@ const clientLoader = browserCollections.docs.createClientLoader({
 function Page() {
   const page = useFumadocsLoader(Route.useLoaderData());
   let content: ReactNode;
-  ``;
 
   if (page.type === 'openapi') {
     content = (
@@ -103,7 +99,7 @@ function Page() {
         <DocsTitle>{page.title}</DocsTitle>
         <DocsDescription>{page.description}</DocsDescription>
         <DocsBody>
-          <ClientAPIPage {...page.data} />
+          <ClientAPIPage {...page.props} />
         </DocsBody>
       </DocsPage>
     );
