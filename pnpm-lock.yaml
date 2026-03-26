@@ -2445,9 +2445,6 @@ importers:
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
-      dereference-json-schema:
-        specifier: ^0.2.2
-        version: 0.2.2
       github-slugger:
         specifier: ^2.0.0
         version: 2.0.0
@@ -7562,7 +7559,6 @@ packages:
 
   bun@1.3.11:
     resolution: {integrity: sha512-AvXWYFO6j/ZQ7bhGm4X6eilq2JHsDVC90ZM32k2B7/srhC2gs3Sdki1QTbwrdRCo8o7eT+167vcB1yzOvPdbjA==}
-    cpu: [arm64, x64]
     os: [darwin, linux, win32]
     hasBin: true
 
@@ -8229,9 +8225,6 @@ packages:
   dequal@2.0.3:
     resolution: {integrity: sha512-0je+qPKHEMohvfRTCEo3CrPG6cAzAYgmzKyxRiYSSDkS6eGJdyVJm7WaYA5ECaAD9wLB2T4EEeymA5aFVcYXCA==}
     engines: {node: '>=6'}
-
-  dereference-json-schema@0.2.2:
-    resolution: {integrity: sha512-w8dUsJyrzH4Zsj8W/tKcjLsmcTKXfdNf+n3BBm1SAfnqpaCodgEUWqQGJ+pNb9NOqPwYMGvUnZZ8nQfeFjJlbQ==}
 
   destr@2.0.5:
     resolution: {integrity: sha512-ugFTXCtDZunbzasqBxrK93Ik/DRYsO6S/fedkWEMKqt04xZ4csmnmwGDBAb07QWNaGMAmnTIemsYZCksjATwsA==}
@@ -18104,8 +18097,6 @@ snapshots:
   depd@2.0.0: {}
 
   dequal@2.0.3: {}
-
-  dereference-json-schema@0.2.2: {}
 
   destr@2.0.5: {}
 

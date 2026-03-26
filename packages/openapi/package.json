@@ -61,7 +61,6 @@
     "@scalar/openapi-upgrader": "^0.2.2",
     "ajv": "^8.18.0",
     "class-variance-authority": "^0.7.1",
-    "dereference-json-schema": "^0.2.2",
     "github-slugger": "^2.0.0",
     "hast-util-to-jsx-runtime": "^2.3.6",
     "js-yaml": "^4.1.1",

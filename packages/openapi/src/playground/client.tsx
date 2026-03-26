@@ -38,7 +38,6 @@ import { labelVariants } from '@/ui/components/input';
 import type { ParsedSchema } from '@/utils/schema';
 import ServerSelect from './components/server-select';
 import { useStorageKey } from '@/ui/client/storage-key';
-import { useExampleRequests } from '@/ui/operation/usage-tabs/client';
 import {
   FieldKey,
   Stf,
@@ -53,6 +52,7 @@ import { FieldInput, FieldSet, JsonInput, ObjectInput } from './components/input
 import type { ParameterObject } from '@/types';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
 import { useTranslations } from '@/ui/client/i18n';
+import { useOperationContext } from '@/ui/operation/client';
 
 export interface FormValues extends Record<string, unknown> {
   path: Record<string, unknown>;
@@ -141,7 +141,8 @@ export default function PlaygroundClient({
   ...rest
 }: PlaygroundClientProps) {
   const t = useTranslations();
-  const { example: exampleId, examples, setExampleData } = useExampleRequests();
+  const { example: exampleId, examples, setExampleData } = useOperationContext();
+  const { server } = useServerContext();
   const storageKeys = useStorageKey();
   const {
     mediaAdapters,
@@ -153,7 +154,6 @@ export default function PlaygroundClient({
       } = {},
     },
   } = useApiContext();
-  const { serverRef } = useServerContext();
   const [securityId, setSecurityId] = useState(() => {
     const idx = securities.findIndex((s) => s.every((entry) => !entry.deprecated));
     return idx === -1 ? 0 : idx;
@@ -182,7 +182,6 @@ export default function PlaygroundClient({
   });
 
   const testQuery = useQuery(async (input: FormValues) => {
-    const targetServer = serverRef.current;
     const fetcher = await import('./fetcher').then((mod) =>
       mod.createBrowserFetcher(mediaAdapters, requestTimeout),
     );
@@ -194,7 +193,7 @@ export default function PlaygroundClient({
     return fetcher.fetch(
       joinURL(
         withBase(
-          targetServer ? resolveServerUrl(targetServer.url, targetServer.variables) : '/',
+          server ? resolveServerUrl(server.url, server.variables) : '/',
           window.location.origin,
         ),
         resolveRequestData(route, encoded),

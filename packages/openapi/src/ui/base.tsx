@@ -18,12 +18,12 @@ import * as JsxRuntime from 'react/jsx-runtime';
 import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
 import type { SchemaUIOptions } from './schema';
 import type { ResponseTab } from './operation/response-tabs';
-import type { ExampleRequestItem } from './operation/request-tabs';
 import { APIPage, type ApiPageProps, type OperationItem, type WebhookItem } from './api-page';
 import type { CodeUsageGeneratorRegistry, InlineCodeUsageGenerator } from '@/requests/generators';
 import type { JSONSchema } from 'json-schema-typed';
 import type { BundledTheme, CodeOptionsThemes, CodeToHastOptionsCommon } from 'shiki';
 import { highlightHast, type ShikiFactory } from 'fumadocs-core/highlight/shiki';
+import type { ExampleRequestItem } from './operation/get-example-requests';
 
 export interface GenerateTypeScriptDefinitionsContext extends RenderContext {
   operation: NoReference<MethodInformation>;
@@ -95,7 +95,7 @@ export interface CreateAPIPageOptions {
    * Customise page content
    */
   content?: {
-    renderResponseTabs?: (tabs: ResponseTab[], ctx: RenderContext) => Awaitable<ReactNode>;
+    renderResponseTabs?: (tabs: ResponseTab[], ctx: RenderContext) => ReactNode;
 
     renderRequestTabs?: (
       items: ExampleRequestItem[],
@@ -103,7 +103,7 @@ export interface CreateAPIPageOptions {
         route: string;
         operation: NoReference<MethodInformation>;
       },
-    ) => Awaitable<ReactNode>;
+    ) => ReactNode;
 
     renderAPIExampleLayout?: (
       slots: {
@@ -112,7 +112,7 @@ export interface CreateAPIPageOptions {
         responseTabs: ReactNode;
       },
       ctx: RenderContext,
-    ) => Awaitable<ReactNode>;
+    ) => ReactNode;
 
     /**
      * @param generators - codegens for API example usages
@@ -120,7 +120,7 @@ export interface CreateAPIPageOptions {
     renderAPIExampleUsageTabs?: (
       generators: CodeUsageGeneratorRegistry,
       ctx: RenderContext,
-    ) => Awaitable<ReactNode>;
+    ) => ReactNode;
 
     /**
      * renderer of the entire page's layout (containing all operations & webhooks UI)
@@ -137,7 +137,7 @@ export interface CreateAPIPageOptions {
         }[];
       },
       ctx: RenderContext,
-    ) => Awaitable<ReactNode>;
+    ) => ReactNode;
 
     renderOperationLayout?: (
       slots: {
@@ -154,7 +154,7 @@ export interface CreateAPIPageOptions {
       },
       ctx: RenderContext,
       method: NoReference<MethodInformation>,
-    ) => Awaitable<ReactNode>;
+    ) => ReactNode;
 
     renderWebhookLayout?: (slots: {
       header: ReactNode;
@@ -165,7 +165,7 @@ export interface CreateAPIPageOptions {
       requests: ReactNode;
       responses: ReactNode;
       callbacks: ReactNode;
-    }) => Awaitable<ReactNode>;
+    }) => ReactNode;
   };
 
   /**
@@ -200,10 +200,7 @@ export interface CreateAPIPageOptions {
     }) => Awaitable<ReactNode>;
   };
 
-  renderHeading?: (
-    props: HTMLAttributes<HTMLHeadingElement>,
-    depth: number,
-  ) => Awaitable<ReactNode>;
+  renderHeading?: (props: HTMLAttributes<HTMLHeadingElement>, depth: number) => ReactNode;
   renderCodeBlock?: (props: { lang: string; code: string }) => Awaitable<ReactNode>;
 
   client?: APIPageClientOptions;
@@ -258,7 +255,7 @@ export function createAPIPage(
         ...options.mediaAdapters,
       },
       slugger,
-      async renderHeading(depth, text, props) {
+      renderHeading(depth, text, props) {
         const id = typeof text === 'string' ? slugger.slug(text) : props?.id;
         if (!id) throw new Error("missing 'id' for non-string children");
 

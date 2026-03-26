@@ -1,5 +1,4 @@
 import type { MethodInformation, RenderContext } from '@/types';
-import type { CodeUsageGeneratorFn } from '@/requests/generators';
 import {
   type CodeUsageGeneratorRegistry,
   createCodeUsageGeneratorRegistry,
@@ -13,27 +12,6 @@ import {
 import { UsageTabsSelectorLazy, UsageTabLazy } from './lazy';
 import { ResponseTabs } from '../response-tabs';
 import { registerDefault } from '@/requests/generators/all';
-
-/**
- * Generate code example for given programming language
- */
-export interface CodeUsageGenerator<T = unknown> {
-  id: string;
-  lang: string;
-  label?: string;
-  /**
-   * either:
-   * - code
-   * - a function imported from a file with "use client" directive
-   * - false (disabled)
-   */
-  source?: string | CodeUsageGeneratorFn<T> | false;
-
-  /**
-   * Pass extra context to client-side source generator
-   */
-  serverContext?: T;
-}
 
 export async function UsageTabs({
   method,
@@ -97,7 +75,7 @@ export async function UsageTabs({
   return renderAPIExampleLayout(
     {
       selector: method['x-exclusiveCodeSample'] ? null : <UsageTabsSelectorLazy />,
-      usageTabs: await renderAPIExampleUsageTabs(registry, ctx),
+      usageTabs: renderAPIExampleUsageTabs(registry, ctx),
       responseTabs: <ResponseTabs operation={method} ctx={ctx} />,
     },
     ctx,

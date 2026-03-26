@@ -1,5 +1,5 @@
 'use client';
-import { useApiContext, useServerSelectContext } from '@/ui/contexts/api';
+import { useApiContext, useServerContext } from '@/ui/contexts/api';
 import { joinURL, withBase, resolveServerUrl, resolveRequestData } from '@/utils/url';
 import {
   Select,
@@ -8,95 +8,14 @@ import {
   SelectContent,
   SelectItem,
 } from '@/ui/components/select';
-import { useState, useEffect, useMemo, createContext, ReactNode, useRef, use } from 'react';
-import type { ExampleRequestItem } from '../request-tabs';
-import type { RawRequestData, RequestData } from '@/requests/types';
+import { useState, useEffect, useMemo } from 'react';
 import type { CodeUsageGenerator } from '@/requests/generators';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
-
-export type ExampleUpdateListener = (data: RawRequestData, encoded: RequestData) => void;
-
-const Context = createContext<{
-  route: string;
-  examples: ExampleRequestItem[];
-  example: string | undefined;
-  setExample: (id: string) => void;
-  setExampleData: (data: RawRequestData, encoded: RequestData) => void;
-
-  addListener: (listener: ExampleUpdateListener) => void;
-  removeListener: (listener: ExampleUpdateListener) => void;
-} | null>(null);
-
-export function UsageTabsProvider({
-  route,
-  examples,
-  defaultExampleId,
-  children,
-}: {
-  route: string;
-  examples: ExampleRequestItem[];
-  defaultExampleId?: string;
-  children: ReactNode;
-}) {
-  const [example, setExample] = useState(() => defaultExampleId ?? examples.at(0)?.id);
-  const listeners = useRef<ExampleUpdateListener[]>([]);
-
-  return (
-    <Context
-      value={useMemo(
-        () => ({
-          example,
-          route,
-          setExample(newKey: string) {
-            const example = examples.find((example) => example.id === newKey);
-            if (!example) return;
-
-            setExample(newKey);
-            for (const listener of listeners.current) {
-              listener(example.data, example.encoded);
-            }
-          },
-          examples,
-          setExampleData(data, encoded) {
-            for (const item of examples) {
-              if (item.id === example) {
-                // persistent changes
-                item.data = data;
-                item.encoded = encoded;
-                break;
-              }
-            }
-
-            for (const listener of listeners.current) {
-              listener(data, encoded);
-            }
-          },
-          removeListener(listener) {
-            listeners.current = listeners.current.filter((item) => item !== listener);
-          },
-          addListener(listener) {
-            // initial call to listeners to ensure their data is the latest
-            // this is necessary to avoid race conditions between `useEffect()`
-            const active = examples.find((item) => item.id === example)!;
-
-            listener(active.data, active.encoded);
-            listeners.current.push(listener);
-          },
-        }),
-        [example, route, examples],
-      )}
-    >
-      {children}
-    </Context>
-  );
-}
-
-export function useExampleRequests() {
-  return use(Context)!;
-}
+import { type ExampleUpdateListener, useOperationContext } from '../client';
+import type { ExampleRequestItem } from '../get-example-requests';
 
 export function UsageTabsSelector() {
-  const { example: key, setExample: setKey, examples } = useExampleRequests();
+  const { example: key, setExample: setKey, examples } = useOperationContext();
   const { APIExampleSelector: Override } = useApiContext().client.operation ?? {};
 
   if (Override) {
@@ -142,8 +61,8 @@ export function UsageTab({
     route,
     addListener,
     removeListener,
-  } = useExampleRequests();
-  const { server } = useServerSelectContext();
+  } = useOperationContext();
+  const { server } = useServerContext();
   const codegen = codeUsages.get(id);
   const [data, setData] = useState(
     () => examples.find((example) => example.id === selectedExampleId)?.encoded,

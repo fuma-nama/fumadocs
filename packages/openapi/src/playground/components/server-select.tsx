@@ -1,5 +1,5 @@
 'use client';
-import { useServerContext, useServerSelectContext } from '@/ui/contexts/api';
+import { useServerContext } from '@/ui/contexts/api';
 import {
   Select,
   SelectContent,
@@ -26,8 +26,7 @@ import { EditIcon } from 'lucide-react';
 import { useTranslations } from '@/ui/client/i18n';
 
 export default function ServerSelect(props: ComponentProps<typeof DialogTrigger>) {
-  const { servers } = useServerContext();
-  const { server, setServer, setServerVariables } = useServerSelectContext();
+  const { servers, server, setServer, setServerVariables } = useServerContext();
   const [open, setOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const t = useTranslations();
@@ -36,7 +35,7 @@ export default function ServerSelect(props: ComponentProps<typeof DialogTrigger>
     setIsMounted(true);
   }, []);
 
-  if (servers.length <= 0) return;
+  if (!servers || servers.length <= 0) return;
   const serverSchema = server ? servers.find((obj) => obj.url === server.url) : null;
 
   return (

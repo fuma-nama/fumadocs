@@ -4,13 +4,14 @@ import type {
   MethodInformation,
   RenderContext,
   SecuritySchemeObject,
+  ServerObject,
 } from '@/types';
 import { createMethod, methodKeys, type NoReference, type ResolvedSchema } from '@/utils/schema';
 import { idToTitle } from '@/utils/id-to-title';
 import { Schema } from '../schema';
 import { UsageTabs } from '@/ui/operation/usage-tabs';
 import { Badge, MethodLabel } from '@/ui/components/method-label';
-import { CopyTypeScriptPanel, SelectTab, SelectTabs, SelectTabTrigger } from './client';
+import { CopyTypeScriptPanel, OperationProvider } from './client';
 import { I18nLabel } from '@/ui/client/i18n';
 import {
   AccordionContent,
@@ -21,14 +22,15 @@ import {
 } from '@/ui/components/accordion';
 import { isMediaTypeSupported } from '@/requests/media/adapter';
 import { APIPlayground } from '@/playground';
-import { getExampleRequests, RequestTabs } from './request-tabs';
-import { UsageTabsProviderLazy } from './usage-tabs/lazy';
+import { RequestTabs } from './request-tabs';
 import { ServerProviderLazy } from '../contexts/api.lazy';
 import { cn } from '@/utils/cn';
+import { getExampleRequests } from './get-example-requests';
+import { SelectTabs, SelectTabTrigger, SelectTab } from '../components/server-tab';
 
 const paramTypeKeys = ['path', 'query', 'header', 'cookie'] as const;
 
-export async function Operation({
+export function Operation({
   type = 'operation',
   path,
   method,
@@ -261,6 +263,8 @@ export async function Operation({
   }
 
   let { renderOperationLayout, renderWebhookLayout } = ctx.content ?? {};
+  const exampleRequests = getExampleRequests(path, method, ctx);
+
   if (type === 'operation') {
     renderOperationLayout ??= (slots) => {
       return (
@@ -283,7 +287,7 @@ export async function Operation({
     };
 
     const playgroundEnabled = ctx.playground?.enabled ?? true;
-    let content = await renderOperationLayout(
+    let content = renderOperationLayout(
       {
         header: headNode,
         description: descriptionNode,
@@ -309,16 +313,20 @@ export async function Operation({
     );
 
     content = (
-      <UsageTabsProviderLazy
+      <OperationProvider
         defaultExampleId={method['x-exclusiveCodeSample'] ?? method['x-selectedCodeSample']}
         route={path}
-        examples={getExampleRequests(path, method, ctx)}
+        examples={exampleRequests}
       >
         {content}
-      </UsageTabsProviderLazy>
+      </OperationProvider>
     );
     if (method.servers) {
-      content = <ServerProviderLazy servers={method.servers}>{content}</ServerProviderLazy>;
+      content = (
+        <ServerProviderLazy servers={method.servers as ServerObject[]}>
+          {content}
+        </ServerProviderLazy>
+      );
     }
 
     return content;
@@ -347,12 +355,12 @@ export async function Operation({
       callbacks: callbacksNode,
       parameters: parameterNode,
       responses: responseNode,
-      requests: <RequestTabs path={path} operation={method} ctx={ctx} />,
+      requests: <RequestTabs examples={exampleRequests} path={path} operation={method} ctx={ctx} />,
     });
   }
 }
 
-async function ResponseAccordion({
+function ResponseAccordion({
   status,
   operation,
   ctx,

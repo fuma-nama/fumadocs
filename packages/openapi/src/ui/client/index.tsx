@@ -2,8 +2,8 @@
 import type { PlaygroundClientOptions } from '@/playground/client';
 import type { MediaAdapter } from '@/requests/media/adapter';
 import type { FC } from 'react';
-import type { ExampleRequestItem } from '../operation/request-tabs';
 import type { CodeUsageGeneratorRegistry } from '@/requests/generators';
+import type { ExampleRequestItem } from '../operation/get-example-requests';
 
 export interface APIPageClientOptions {
   playground?: PlaygroundClientOptions;

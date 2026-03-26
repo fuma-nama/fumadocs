@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import type { ResolvedSchema } from '@/utils/schema';
 import type { RenderContext } from '@/types';
-import { FormatFlags, schemaToString } from '@/utils/schema-to-string';
+import { FormatFlags, schemaToString } from '@/utils/schema/to-string';
 import { mergeAllOf } from '@/utils/merge-schema';
 import type { SchemaUIProps } from '@/ui/schema/client';
 import { SchemaUILazy } from '@/ui/schema/lazy';

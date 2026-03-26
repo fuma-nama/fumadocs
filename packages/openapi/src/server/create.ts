@@ -37,24 +37,18 @@ export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
   const { input = [], disableCache = false } = options;
   let schemas: Promise<ProcessedSchemaMap> | undefined;
 
-  async function getSchemas() {
-    const out: ProcessedSchemaMap = {};
-
+  async function getSchemas(): Promise<ProcessedSchemaMap> {
     if (Array.isArray(input)) {
-      await Promise.all(
-        input.map(async (item) => {
-          out[item] = await processDocument(item);
-        }),
+      const entries = await Promise.all(
+        input.map(async (item) => [item, await processDocument(item)]),
       );
+      return Object.fromEntries(entries);
     } else {
-      await Promise.all(
-        Object.entries(await input()).map(async ([k, v]) => {
-          out[k] = await processDocument(v);
-        }),
+      const entries = await Promise.all(
+        Object.entries(await input()).map(async ([k, v]) => [k, await processDocument(v)]),
       );
+      return Object.fromEntries(entries);
     }
-
-    return out;
   }
 
   return {
