@@ -1,7 +1,7 @@
 import { type Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
 import { type Root, type RootContent } from 'mdast';
-import { flattenNode } from '@/mdx-plugins/mdast-utils';
+import { flattenNode } from '@/mdx-plugins/utils';
 
 export interface RemarkAdmonitionOptions {
   tag?: string;

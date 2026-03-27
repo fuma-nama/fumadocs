@@ -4,15 +4,91 @@ import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from '@/utils/cn';
 import { Check, Copy } from 'lucide-react';
-import { type ComponentProps, createContext, type ReactNode, use, useMemo, useState } from 'react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/ui/components/select';
+import { createContext, type ReactNode, use, useMemo, useRef, useState } from 'react';
 import { useTranslations } from '@/ui/client/i18n';
+import type { ExampleRequestItem } from './get-example-requests';
+import type { RawRequestData, RequestData } from '@/requests/types';
+
+export type ExampleUpdateListener = (data: RawRequestData, encoded: RequestData) => void;
+
+const OperationContext = createContext<{
+  route: string;
+  examples: ExampleRequestItem[];
+  example: string | undefined;
+  setExample: (id: string) => void;
+  setExampleData: (data: RawRequestData, encoded: RequestData) => void;
+
+  addListener: (listener: ExampleUpdateListener) => void;
+  removeListener: (listener: ExampleUpdateListener) => void;
+} | null>(null);
+
+export function OperationProvider({
+  route,
+  examples,
+  defaultExampleId,
+  children,
+}: {
+  route: string;
+  examples: ExampleRequestItem[];
+  defaultExampleId?: string;
+  children: ReactNode;
+}) {
+  const [example, setExample] = useState(() => defaultExampleId ?? examples.at(0)?.id);
+  const listeners = useRef<ExampleUpdateListener[]>([]);
+
+  return (
+    <OperationContext
+      value={useMemo(
+        () => ({
+          example,
+          route,
+          setExample(newKey: string) {
+            const example = examples.find((example) => example.id === newKey);
+            if (!example) return;
+
+            setExample(newKey);
+            for (const listener of listeners.current) {
+              listener(example.data, example.encoded);
+            }
+          },
+          examples,
+          setExampleData(data, encoded) {
+            for (const item of examples) {
+              if (item.id === example) {
+                // persistent changes
+                item.data = data;
+                item.encoded = encoded;
+                break;
+              }
+            }
+
+            for (const listener of listeners.current) {
+              listener(data, encoded);
+            }
+          },
+          removeListener(listener) {
+            listeners.current = listeners.current.filter((item) => item !== listener);
+          },
+          addListener(listener) {
+            // initial call to listeners to ensure their data is the latest
+            // this is necessary to avoid race conditions between `useEffect()`
+            const active = examples.find((item) => item.id === example)!;
+
+            listener(active.data, active.encoded);
+            listeners.current.push(listener);
+          },
+        }),
+        [example, route, examples],
+      )}
+    >
+      {children}
+    </OperationContext>
+  );
+}
+
+export function useOperationContext() {
+  return use(OperationContext)!;
+}
 
 export function CopyTypeScriptPanel({
   name,
@@ -54,62 +130,5 @@ export function CopyTypeScriptPanel({
         {t.copy}
       </button>
     </div>
-  );
-}
-
-const Context = createContext<{
-  type: string | null;
-  setType: (type: string) => void;
-} | null>(null);
-
-export function SelectTabs({
-  defaultValue,
-  children,
-}: {
-  defaultValue?: string;
-  children: ReactNode;
-}) {
-  const [type, setType] = useState<string | null>(defaultValue ?? null);
-
-  return <Context value={useMemo(() => ({ type, setType }), [type])}>{children}</Context>;
-}
-
-export function SelectTab({
-  value,
-  ...props
-}: ComponentProps<'div'> & {
-  value: string;
-}) {
-  const ctx = use(Context);
-  if (value !== ctx?.type) return;
-
-  return <div {...props}>{props.children}</div>;
-}
-
-export function SelectTabTrigger({
-  items,
-  className,
-  ...props
-}: ComponentProps<typeof SelectTrigger> & {
-  items: {
-    label: ReactNode;
-    value: string;
-  }[];
-}) {
-  const { type, setType } = use(Context)!;
-
-  return (
-    <Select value={type ?? ''} onValueChange={setType}>
-      <SelectTrigger className={cn('not-prose w-fit min-w-0 *:min-w-0', className)} {...props}>
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        {items.map(({ label, value }) => (
-          <SelectItem key={value} value={value}>
-            {label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
   );
 }

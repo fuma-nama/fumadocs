@@ -6,8 +6,9 @@ export default defineConfig({
   target: 'es2023',
   entry: [
     './src/{index,i18n}.ts',
-    './src/ui/index.ts',
+    './src/ui/index.tsx',
     './src/ui/base.tsx',
+    './src/ui/create-client.tsx',
     './src/ui/client/index.tsx',
     './src/playground/{index,client}.tsx',
     './src/scalar/index.tsx',

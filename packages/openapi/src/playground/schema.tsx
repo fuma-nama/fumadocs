@@ -5,7 +5,8 @@ import { mergeAllOf } from '@/utils/merge-schema';
 import { FieldKey, useDataEngine, useFieldValue, useNamespace } from '@fumari/stf';
 import { stringifyFieldKey } from '@fumari/stf/lib/utils';
 import { sample } from 'openapi-sampler';
-import { FormatFlags, schemaToString } from '@/utils/schema-to-string';
+import { FormatFlags, schemaToString } from '@/utils/schema/to-string';
+import { resolveRefSync } from '@/utils/schema/resolve-ref';
 
 interface SchemaContextType extends SchemaScope {
   references: Record<string, ParsedSchema>;
@@ -186,13 +187,13 @@ export function useResolvedSchema(raw: ParsedSchema): Exclude<ParsedSchema, bool
     if (typeof schema === 'boolean') return anyFields;
 
     if (schema.allOf) {
-      return fallbackAny(
-        mergeAllOf(schema, {
-          dereference(schema) {
-            return dereference(schema, references);
-          },
-        }),
-      );
+      const merged = mergeAllOf(schema, {
+        dereference(schema) {
+          return dereference(schema, references);
+        },
+      });
+      if (typeof merged === 'boolean') return anyFields;
+      return merged;
     }
 
     return schema;
@@ -201,20 +202,11 @@ export function useResolvedSchema(raw: ParsedSchema): Exclude<ParsedSchema, bool
 
 function dereference(schema: ParsedSchema, references: Record<string, ParsedSchema>): ParsedSchema {
   if (typeof schema === 'boolean') return schema;
-
-  let ref = schema.$ref;
-  if (ref) {
-    // use swallow resolution as it is already preprocessed in `playground/index.tsx`
-    const prefix = '#/';
-    if (ref.startsWith(prefix)) ref = ref.slice(prefix.length);
-    if (ref in references) return references[ref];
+  if (schema.$ref) {
+    return resolveRefSync(schema.$ref, references) as ParsedSchema;
   }
 
   return schema;
-}
-
-function fallbackAny(schema: ParsedSchema): Exclude<ParsedSchema, boolean> {
-  return typeof schema === 'boolean' ? anyFields : schema;
 }
 
 function getUnion(

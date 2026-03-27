@@ -1,11 +1,10 @@
 import { Operation } from '@/ui/operation';
-import type { HttpMethods, RenderContext } from '@/types';
+import type { HttpMethods, RenderContext, ServerObject } from '@/types';
 import { createMethod } from '@/utils/schema';
-import type { ProcessedDocument } from '@/utils/process-document';
 import { ApiProviderLazy, ServerProviderLazy } from './contexts/api.lazy';
 
 export interface ApiPageProps {
-  document: Promise<ProcessedDocument> | string | ProcessedDocument;
+  document: string;
   showTitle?: boolean;
   showDescription?: boolean;
 
@@ -36,7 +35,7 @@ export interface OperationItem {
   method: HttpMethods;
 }
 
-export async function APIPage({
+export function APIPage({
   showTitle: hasHead = false,
   showDescription,
   operations,
@@ -54,7 +53,7 @@ export async function APIPage({
     </div>
   );
 
-  const content = await renderPageLayout(
+  const content = renderPageLayout(
     {
       operations: operations?.map((item) => {
         const pathItem = dereferenced.paths?.[item.path];
@@ -112,12 +111,12 @@ export async function APIPage({
     },
     ctx,
   );
-  let servers = ctx.schema.dereferenced.servers;
-  if (!servers || servers.length === 0) servers = [{ url: '/' }];
 
   return (
     <ApiProviderLazy shikiOptions={ctx.shikiOptions} client={ctx.client ?? {}}>
-      <ServerProviderLazy servers={servers}>{content}</ServerProviderLazy>
+      <ServerProviderLazy servers={dereferenced.servers as ServerObject[]}>
+        {content}
+      </ServerProviderLazy>
     </ApiProviderLazy>
   );
 }

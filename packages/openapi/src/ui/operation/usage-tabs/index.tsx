@@ -1,5 +1,4 @@
 import type { MethodInformation, RenderContext } from '@/types';
-import type { CodeUsageGeneratorFn } from '@/requests/generators';
 import {
   type CodeUsageGeneratorRegistry,
   createCodeUsageGeneratorRegistry,
@@ -13,35 +12,9 @@ import {
 import { UsageTabsSelectorLazy, UsageTabLazy } from './lazy';
 import { ResponseTabs } from '../response-tabs';
 import { registerDefault } from '@/requests/generators/all';
+import { useMemo } from 'react';
 
-/**
- * Generate code example for given programming language
- */
-export interface CodeUsageGenerator<T = unknown> {
-  id: string;
-  lang: string;
-  label?: string;
-  /**
-   * either:
-   * - code
-   * - a function imported from a file with "use client" directive
-   * - false (disabled)
-   */
-  source?: string | CodeUsageGeneratorFn<T> | false;
-
-  /**
-   * Pass extra context to client-side source generator
-   */
-  serverContext?: T;
-}
-
-export async function UsageTabs({
-  method,
-  ctx,
-}: {
-  method: MethodInformation;
-  ctx: RenderContext;
-}) {
+export function UsageTabs({ method, ctx }: { method: MethodInformation; ctx: RenderContext }) {
   let { renderAPIExampleUsageTabs, renderAPIExampleLayout } = ctx.content ?? {};
 
   renderAPIExampleLayout ??= (slots) => {
@@ -76,28 +49,33 @@ export async function UsageTabs({
     );
   };
 
-  let registry: CodeUsageGeneratorRegistry;
-  if (ctx.codeUsages) {
-    registry = createCodeUsageGeneratorRegistry(ctx.codeUsages);
-  } else {
-    registry = createCodeUsageGeneratorRegistry();
-    registerDefault(registry);
-  }
+  const registry = useMemo(() => {
+    let registry: CodeUsageGeneratorRegistry;
 
-  for (const gen of (await ctx.generateCodeSamples?.(method)) ?? []) {
-    registry.addInline(gen);
-  }
-
-  if (method['x-codeSamples']) {
-    for (const sample of method['x-codeSamples']) {
-      registry.addInline(sample);
+    if (ctx.codeUsages) {
+      registry = createCodeUsageGeneratorRegistry(ctx.codeUsages);
+    } else {
+      registry = createCodeUsageGeneratorRegistry();
+      registerDefault(registry);
     }
-  }
+
+    for (const gen of ctx.generateCodeSamples?.(method) ?? []) {
+      registry.addInline(gen);
+    }
+
+    if (method['x-codeSamples']) {
+      for (const sample of method['x-codeSamples']) {
+        registry.addInline(sample);
+      }
+    }
+
+    return registry;
+  }, [ctx, method]);
 
   return renderAPIExampleLayout(
     {
       selector: method['x-exclusiveCodeSample'] ? null : <UsageTabsSelectorLazy />,
-      usageTabs: await renderAPIExampleUsageTabs(registry, ctx),
+      usageTabs: renderAPIExampleUsageTabs(registry, ctx),
       responseTabs: <ResponseTabs operation={method} ctx={ctx} />,
     },
     ctx,

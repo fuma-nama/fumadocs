@@ -3,7 +3,7 @@ import type { BlockContent, Root, RootContent } from 'mdast';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx';
 import { visit } from 'unist-util-visit';
 import { createHash } from 'node:crypto';
-import { flattenNode } from './mdast-utils';
+import { flattenNode } from './utils';
 
 export interface RemarkFeedbackBlockOptions {
   /**

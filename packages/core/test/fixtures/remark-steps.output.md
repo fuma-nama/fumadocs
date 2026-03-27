@@ -1,42 +1,44 @@
-# Hello
-
 <div className="fd-steps">
   <div className="fd-step">
-    ## First
+    # Hello
 
-    content
+    <div className="fd-steps">
+      <div className="fd-step">
+        ## First
 
-    ### Little Tip
+        content
+
+        ### Little Tip
+
+        content
+      </div>
+
+      <div className="fd-step">
+        ## Second
+
+        content
+      </div>
+
+      <div className="fd-step">
+        ## Third
+
+        content
+      </div>
+    </div>
+
+    ## Ended
 
     content
   </div>
 
   <div className="fd-step">
-    ## Second
+    # World
 
     content
   </div>
 
   <div className="fd-step">
-    ## Third
-
-    content
-  </div>
-</div>
-
-## Ended
-
-content
-
-<div className="fd-steps">
-  <div className="fd-step">
-    # Big: First
-
-    content
-  </div>
-
-  <div className="fd-step">
-    # Big: Second
+    # Bye
 
     content
   </div>

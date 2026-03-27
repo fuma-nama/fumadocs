@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-openapi",
-  "version": "10.5.0",
+  "version": "10.6.0",
   "description": "Generate MDX docs for your OpenAPI spec",
   "keywords": [
     "Docs",
@@ -36,6 +36,7 @@
     "./ui": "./dist/ui/index.js",
     "./ui/base": "./dist/ui/base.js",
     "./ui/client": "./dist/ui/client/index.js",
+    "./ui/create-client": "./dist/ui/create-client.js",
     "./package.json": "./package.json",
     "./css/*": "./css/*"
   },
@@ -60,8 +61,8 @@
     "@scalar/json-magic": "^0.12.4",
     "@scalar/openapi-upgrader": "^0.2.2",
     "ajv": "^8.18.0",
+    "chokidar": "^5.0.0",
     "class-variance-authority": "^0.7.1",
-    "dereference-json-schema": "^0.2.2",
     "github-slugger": "^2.0.0",
     "hast-util-to-jsx-runtime": "^2.3.6",
     "js-yaml": "^4.1.1",

@@ -18,12 +18,13 @@ import * as JsxRuntime from 'react/jsx-runtime';
 import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
 import type { SchemaUIOptions } from './schema';
 import type { ResponseTab } from './operation/response-tabs';
-import type { ExampleRequestItem } from './operation/request-tabs';
 import { APIPage, type ApiPageProps, type OperationItem, type WebhookItem } from './api-page';
 import type { CodeUsageGeneratorRegistry, InlineCodeUsageGenerator } from '@/requests/generators';
 import type { JSONSchema } from 'json-schema-typed';
 import type { BundledTheme, CodeOptionsThemes, CodeToHastOptionsCommon } from 'shiki';
 import { highlightHast, type ShikiFactory } from 'fumadocs-core/highlight/shiki';
+import type { ExampleRequestItem } from './operation/get-example-requests';
+import { compile } from '@fumari/json-schema-ts';
 
 export interface GenerateTypeScriptDefinitionsContext extends RenderContext {
   operation: NoReference<MethodInformation>;
@@ -60,10 +61,12 @@ export interface CreateAPIPageOptions {
    *
    * Pass `false` to disable it.
    */
-  generateTypeScriptDefinitions?: (
-    schema: JSONSchema,
-    ctx: GenerateTypeScriptDefinitionsContext,
-  ) => Awaitable<string | undefined>;
+  generateTypeScriptDefinitions?:
+    | ((
+        schema: JSONSchema,
+        ctx: GenerateTypeScriptDefinitionsContext,
+      ) => Awaitable<string | undefined>)
+    | false;
 
   /**
    * Generate example code usage for all endpoints.
@@ -73,7 +76,7 @@ export interface CreateAPIPageOptions {
   /**
    * Generate example code usage for each endpoint.
    */
-  generateCodeSamples?: (method: MethodInformation) => Awaitable<InlineCodeUsageGenerator[]>;
+  generateCodeSamples?: (method: MethodInformation) => InlineCodeUsageGenerator[];
 
   shiki: ShikiFactory;
   renderMarkdown?: (md: string) => ReactNode;
@@ -95,7 +98,7 @@ export interface CreateAPIPageOptions {
    * Customise page content
    */
   content?: {
-    renderResponseTabs?: (tabs: ResponseTab[], ctx: RenderContext) => Awaitable<ReactNode>;
+    renderResponseTabs?: (tabs: ResponseTab[], ctx: RenderContext) => ReactNode;
 
     renderRequestTabs?: (
       items: ExampleRequestItem[],
@@ -103,7 +106,7 @@ export interface CreateAPIPageOptions {
         route: string;
         operation: NoReference<MethodInformation>;
       },
-    ) => Awaitable<ReactNode>;
+    ) => ReactNode;
 
     renderAPIExampleLayout?: (
       slots: {
@@ -112,7 +115,7 @@ export interface CreateAPIPageOptions {
         responseTabs: ReactNode;
       },
       ctx: RenderContext,
-    ) => Awaitable<ReactNode>;
+    ) => ReactNode;
 
     /**
      * @param generators - codegens for API example usages
@@ -120,7 +123,7 @@ export interface CreateAPIPageOptions {
     renderAPIExampleUsageTabs?: (
       generators: CodeUsageGeneratorRegistry,
       ctx: RenderContext,
-    ) => Awaitable<ReactNode>;
+    ) => ReactNode;
 
     /**
      * renderer of the entire page's layout (containing all operations & webhooks UI)
@@ -137,7 +140,7 @@ export interface CreateAPIPageOptions {
         }[];
       },
       ctx: RenderContext,
-    ) => Awaitable<ReactNode>;
+    ) => ReactNode;
 
     renderOperationLayout?: (
       slots: {
@@ -154,7 +157,7 @@ export interface CreateAPIPageOptions {
       },
       ctx: RenderContext,
       method: NoReference<MethodInformation>,
-    ) => Awaitable<ReactNode>;
+    ) => ReactNode;
 
     renderWebhookLayout?: (slots: {
       header: ReactNode;
@@ -165,14 +168,14 @@ export interface CreateAPIPageOptions {
       requests: ReactNode;
       responses: ReactNode;
       callbacks: ReactNode;
-    }) => Awaitable<ReactNode>;
+    }) => ReactNode;
   };
 
   /**
    * Info UI for JSON schemas
    */
   schemaUI?: {
-    render?: (options: SchemaUIOptions, ctx: RenderContext) => Awaitable<ReactNode>;
+    render?: (options: SchemaUIOptions, ctx: RenderContext) => ReactNode;
 
     /**
      * Show examples under the generated content of JSON schemas.
@@ -200,19 +203,20 @@ export interface CreateAPIPageOptions {
     }) => Awaitable<ReactNode>;
   };
 
-  renderHeading?: (
-    props: HTMLAttributes<HTMLHeadingElement>,
-    depth: number,
-  ) => Awaitable<ReactNode>;
-  renderCodeBlock?: (props: { lang: string; code: string }) => Awaitable<ReactNode>;
+  renderHeading?: (props: HTMLAttributes<HTMLHeadingElement>, depth: number) => ReactNode;
+  renderCodeBlock?: (props: { lang: string; code: string }) => ReactNode;
 
   client?: APIPageClientOptions;
+}
+
+export interface ServerApiPageProps extends Omit<ApiPageProps, 'document'> {
+  document: string | ProcessedDocument;
 }
 
 export function createAPIPage(
   server: OpenAPIServer,
   options: CreateAPIPageOptions,
-): FC<ApiPageProps> {
+): FC<ServerApiPageProps> {
   let processor: ReturnType<typeof createMarkdownProcessor>;
 
   function createMarkdownProcessor() {
@@ -244,7 +248,7 @@ export function createAPIPage(
     if (typeof document === 'string') {
       processed = await server.getSchema(document);
     } else {
-      processed = await document;
+      processed = document;
     }
 
     const slugger = new Slugger();
@@ -257,8 +261,7 @@ export function createAPIPage(
         ...defaultAdapters,
         ...options.mediaAdapters,
       },
-      slugger,
-      async renderHeading(depth, text, props) {
+      renderHeading(depth, text, props) {
         const id = typeof text === 'string' ? slugger.slug(text) : props?.id;
         if (!id) throw new Error("missing 'id' for non-string children");
 
@@ -272,15 +275,26 @@ export function createAPIPage(
           </Heading>
         );
       },
-      generateTypeScriptDefinitions(schema, ctx) {
-        const { generateTypeScriptSchema, generateTypeScriptDefinitions } = options;
-        if (generateTypeScriptSchema && ctx._internal_legacy) {
-          const { statusCode, contentType } = ctx._internal_legacy;
-          return generateTypeScriptSchema(ctx.operation, statusCode, contentType, ctx);
-        }
+      generateTypeScriptDefinitions:
+        options.generateTypeScriptDefinitions ??
+        ((schema, ctx) => {
+          if (options.generateTypeScriptSchema && ctx._internal_legacy) {
+            const { statusCode, contentType } = ctx._internal_legacy;
+            return options.generateTypeScriptSchema(ctx.operation, statusCode, contentType, ctx);
+          }
 
-        return generateTypeScriptDefinitions?.(schema, ctx);
-      },
+          if (typeof schema !== 'object') return;
+          try {
+            return compile(schema, {
+              name: 'Response',
+              readOnly: ctx.readOnly,
+              writeOnly: ctx.writeOnly,
+              getSchemaId: ctx.schema.getRawRef,
+            });
+          } catch (e) {
+            console.warn('Failed to generate typescript schema:', e);
+          }
+        }),
       async renderMarkdown(text) {
         if (options.renderMarkdown) return options.renderMarkdown(text);
         processor ??= createMarkdownProcessor();

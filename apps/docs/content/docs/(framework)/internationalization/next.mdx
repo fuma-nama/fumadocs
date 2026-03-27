@@ -8,7 +8,7 @@ description: Support i18n routing on your Next.js + Fumadocs app
   Next.js](https://nextjs.org/docs/app/building-your-application/routing/internationalization).
 </Callout>
 
-## Setup
+## Setup [step]
 
 Define the i18n configurations in a file, we will import it with `@/lib/i18n` in this guide.
 
@@ -18,7 +18,7 @@ Define the i18n configurations in a file, we will import it with `@/lib/i18n` in
 
 > See [available options](/docs/headless/internationalization/config) for i18n config.
 
-### Middleware
+### Middleware [step]
 
 Create a middleware that redirects users to appropriate locale.
 
@@ -34,7 +34,7 @@ Make sure its behaviour aligns with the [`hidePrefix`](/docs/headless/internatio
 
 </Callout>
 
-### Translations
+### Translations [step]
 
 Define your translations in a file (e.g. `lib/layout.shared.tsx`), the English translations are used when `translations` is not specified.
 
@@ -94,7 +94,7 @@ export default async function RootLayout({
 }
 ```
 
-### Routing
+### Routing [step]
 
 Create a `/app/[lang]` folder, and move your pages/layouts into it, except route handlers.
 
@@ -114,7 +114,7 @@ Create a `/app/[lang]` folder, and move your pages/layouts into it, except route
   correct!
 </Callout>
 
-### Pass Locale
+### Pass Locale [step]
 
 Pass the locale to Fumadocs in your pages and layouts.
 
@@ -202,18 +202,18 @@ export function generateStaticParams() {
 
 </Callout>
 
-### Search
+### Search [step]
 
 Configure i18n on your search solution.
 
 - **Built-in Search (Orama):** See [Internationalization](/docs/headless/search/orama#internationalization).
 - **Cloud Solutions (e.g. Algolia):** They usually have official support for multilingual.
 
-## Writing Documents
+### Writing Documents [step]
 
 See [i18n routing](/docs/page-conventions#i18n-routing) to learn how to create pages for specific locales.
 
-### Navigation
+### Navigation [step]
 
 Fumadocs only handles navigation for its own layouts (e.g. sidebar).
 For other places, you can use the `useParams` hook to get the locale from url, and prepend it to `href`.

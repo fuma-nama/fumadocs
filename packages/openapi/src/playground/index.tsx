@@ -26,7 +26,7 @@ export type SecurityEntry = SecuritySchemeObject & {
   id: string;
 };
 
-export async function APIPlayground({ path, method, ctx }: APIPlaygroundProps) {
+export function APIPlayground({ path, method, ctx }: APIPlaygroundProps) {
   if (ctx.playground?.render) {
     return ctx.playground.render({ path, method, ctx });
   }

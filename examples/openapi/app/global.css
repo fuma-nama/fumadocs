@@ -3,6 +3,14 @@
 @import 'fumadocs-ui/css/preset.css';
 @import 'fumadocs-openapi/css/preset.css';
 
+html {
+  scrollbar-gutter: stable;
+}
+
+html:has(body[data-scroll-locked]) {
+  scrollbar-gutter: auto;
+}
+
 :root {
   --fd-layout-width: 1600px;
 }

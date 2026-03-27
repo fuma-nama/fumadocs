@@ -57,10 +57,9 @@ interface TocThumbInfo {
 
 interface TocThumbProps extends ComponentProps<'div'> {
   containerRef: RefObject<HTMLElement | null>;
-  align?: 'center' | 'end';
 }
 
-export function TocThumb({ containerRef, align = 'end', ...props }: TocThumbProps) {
+export function TocThumb({ containerRef, ...props }: TocThumbProps) {
   const thumbRef = useRef<HTMLDivElement>(null);
   const active = useActiveAnchors();
 
@@ -85,19 +84,13 @@ export function TocThumb({ containerRef, align = 'end', ...props }: TocThumbProp
       const element = container.querySelector<HTMLElement>(`a[href="#${item}"]`);
       if (!element) continue;
 
-      if (align === 'center') {
-        const y = element.offsetTop + element.clientHeight / 2;
-        upper = Math.min(upper, y);
-        lower = Math.max(lower, y);
-      } else {
-        const styles = getComputedStyle(element);
+      const styles = getComputedStyle(element);
 
-        upper = Math.min(upper, element.offsetTop + parseFloat(styles.paddingTop));
-        lower = Math.max(
-          lower,
-          element.offsetTop + element.clientHeight - parseFloat(styles.paddingBottom),
-        );
-      }
+      upper = Math.min(upper, element.offsetTop + parseFloat(styles.paddingTop));
+      lower = Math.max(
+        lower,
+        element.offsetTop + element.clientHeight - parseFloat(styles.paddingBottom),
+      );
     }
 
     return {

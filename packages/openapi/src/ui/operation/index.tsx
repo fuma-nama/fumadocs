@@ -1,16 +1,18 @@
-import { ComponentProps, Fragment, type ReactNode } from 'react';
+import { type ComponentProps, Fragment, use, useMemo, type ReactNode } from 'react';
 import type {
   CallbackObject,
+  MediaTypeObject,
   MethodInformation,
   RenderContext,
   SecuritySchemeObject,
+  ServerObject,
 } from '@/types';
-import { createMethod, methodKeys, type NoReference, type ResolvedSchema } from '@/utils/schema';
+import { createMethod, methodKeys, type NoReference } from '@/utils/schema';
 import { idToTitle } from '@/utils/id-to-title';
 import { Schema } from '../schema';
 import { UsageTabs } from '@/ui/operation/usage-tabs';
 import { Badge, MethodLabel } from '@/ui/components/method-label';
-import { CopyTypeScriptPanel, SelectTab, SelectTabs, SelectTabTrigger } from './client';
+import { CopyTypeScriptPanel, OperationProvider } from './client';
 import { I18nLabel } from '@/ui/client/i18n';
 import {
   AccordionContent,
@@ -21,14 +23,15 @@ import {
 } from '@/ui/components/accordion';
 import { isMediaTypeSupported } from '@/requests/media/adapter';
 import { APIPlayground } from '@/playground';
-import { getExampleRequests, RequestTabs } from './request-tabs';
-import { UsageTabsProviderLazy } from './usage-tabs/lazy';
+import { RequestTabs } from './request-tabs';
 import { ServerProviderLazy } from '../contexts/api.lazy';
 import { cn } from '@/utils/cn';
+import { getExampleRequests } from './get-example-requests';
+import { SelectTabs, SelectTabTrigger, SelectTab } from '../components/server-tab';
 
 const paramTypeKeys = ['path', 'query', 'header', 'cookie'] as const;
 
-export async function Operation({
+export function Operation({
   type = 'operation',
   path,
   method,
@@ -57,6 +60,7 @@ export async function Operation({
   let authNode: ReactNode = null;
   let responseNode: ReactNode = null;
   let callbacksNode: ReactNode = null;
+  const exampleRequests = useMemo(() => getExampleRequests(path, method, ctx), [ctx, method, path]);
 
   if (showTitle) {
     const title = method.summary || (method.operationId ? idToTitle(method.operationId) : path);
@@ -87,34 +91,14 @@ export async function Operation({
           )}
         </div>
         {body.description && ctx.renderMarkdown(body.description)}
-        {contentTypes.map(async ([type, content]) => {
+        {contentTypes.map(([type, content]) => {
           if (!isMediaTypeSupported(type, ctx.mediaAdapters)) {
             throw new Error(`Media type ${type} is not supported (in ${path})`);
           }
 
-          const ts = content.schema
-            ? await ctx.generateTypeScriptDefinitions(content.schema, {
-                operation: method,
-                readOnly: false,
-                writeOnly: true,
-                ...ctx,
-              })
-            : undefined;
-
           return (
             <SelectTab key={type} value={type}>
-              {ts && <CopyTypeScriptPanel name="request body" code={ts} className="mt-4" />}
-              <Schema
-                client={{
-                  name: 'body',
-                  as: 'body',
-                  required: body.required,
-                }}
-                root={(content.schema ?? {}) as ResolvedSchema}
-                readOnly={method.method === 'GET'}
-                writeOnly={method.method !== 'GET'}
-                ctx={ctx}
-              />
+              <RequestBodyContentItem content={content} method={method} ctx={ctx} />
             </SelectTab>
           );
         })}
@@ -261,6 +245,7 @@ export async function Operation({
   }
 
   let { renderOperationLayout, renderWebhookLayout } = ctx.content ?? {};
+
   if (type === 'operation') {
     renderOperationLayout ??= (slots) => {
       return (
@@ -283,7 +268,7 @@ export async function Operation({
     };
 
     const playgroundEnabled = ctx.playground?.enabled ?? true;
-    let content = await renderOperationLayout(
+    let content = renderOperationLayout(
       {
         header: headNode,
         description: descriptionNode,
@@ -309,16 +294,20 @@ export async function Operation({
     );
 
     content = (
-      <UsageTabsProviderLazy
+      <OperationProvider
         defaultExampleId={method['x-exclusiveCodeSample'] ?? method['x-selectedCodeSample']}
         route={path}
-        examples={getExampleRequests(path, method, ctx)}
+        examples={exampleRequests}
       >
         {content}
-      </UsageTabsProviderLazy>
+      </OperationProvider>
     );
     if (method.servers) {
-      content = <ServerProviderLazy servers={method.servers}>{content}</ServerProviderLazy>;
+      content = (
+        <ServerProviderLazy servers={method.servers as ServerObject[]}>
+          {content}
+        </ServerProviderLazy>
+      );
     }
 
     return content;
@@ -347,12 +336,52 @@ export async function Operation({
       callbacks: callbacksNode,
       parameters: parameterNode,
       responses: responseNode,
-      requests: <RequestTabs path={path} operation={method} ctx={ctx} />,
+      requests: <RequestTabs examples={exampleRequests} path={path} operation={method} ctx={ctx} />,
     });
   }
 }
 
-async function ResponseAccordion({
+function RequestBodyContentItem({
+  content,
+  method,
+  ctx,
+}: {
+  content: NoReference<MediaTypeObject>;
+  method: MethodInformation;
+  ctx: RenderContext;
+}) {
+  let ts = useMemo(() => {
+    if (!content.schema || !ctx.generateTypeScriptDefinitions) return;
+    return ctx.generateTypeScriptDefinitions(content.schema, {
+      operation: method,
+      readOnly: false,
+      writeOnly: true,
+      ...ctx,
+    });
+  }, [content.schema, ctx, method]);
+  if (ts instanceof Promise) ts = use(ts);
+
+  return (
+    <>
+      {ts && <CopyTypeScriptPanel name="request body" code={ts} className="mt-4" />}
+      {content.schema && (
+        <Schema
+          client={{
+            name: 'body',
+            as: 'body',
+            required: method.requestBody?.required,
+          }}
+          root={content.schema}
+          readOnly={method.method === 'GET'}
+          writeOnly={method.method !== 'GET'}
+          ctx={ctx}
+        />
+      )}
+    </>
+  );
+}
+
+function ResponseAccordion({
   status,
   operation,
   ctx,
@@ -391,42 +420,68 @@ async function ResponseAccordion({
         {response.description && (
           <div className="prose-no-margin mb-2">{ctx.renderMarkdown(response.description)}</div>
         )}
-        {contentTypes.map(async ([type, resType]) => {
-          const schema = resType.schema;
-          const ts = schema
-            ? await ctx.generateTypeScriptDefinitions(schema, {
-                readOnly: true,
-                writeOnly: false,
-                operation,
-                _internal_legacy: {
-                  statusCode: status,
-                  contentType: type,
-                },
-                ...ctx,
-              })
-            : undefined;
-
-          return (
-            <SelectTab key={type} value={type} className="mb-2">
-              {ts && <CopyTypeScriptPanel name="response body" code={ts} />}
-              {schema && (
-                <div className="border px-3 py-2 rounded-lg">
-                  <Schema
-                    client={{
-                      name: 'response',
-                      as: 'body',
-                    }}
-                    root={schema}
-                    readOnly
-                    ctx={ctx}
-                  />
-                </div>
-              )}
-            </SelectTab>
-          );
-        })}
+        {contentTypes.map(([type, item]) => (
+          <SelectTab key={type} value={type} className="mb-2">
+            <RepsonseAccordionItem
+              type={type}
+              status={status}
+              item={item}
+              operation={operation}
+              ctx={ctx}
+            />
+          </SelectTab>
+        ))}
       </AccordionContent>
     </AccordionItem>,
+  );
+}
+
+function RepsonseAccordionItem({
+  type,
+  status,
+  operation,
+  item: { schema },
+  ctx,
+}: {
+  type: string;
+  status: string;
+  operation: MethodInformation;
+  item: NoReference<MediaTypeObject>;
+  ctx: RenderContext;
+}) {
+  let ts = useMemo(() => {
+    if (!schema || !ctx.generateTypeScriptDefinitions) return;
+    return ctx.generateTypeScriptDefinitions(schema, {
+      readOnly: true,
+      writeOnly: false,
+      operation,
+      _internal_legacy: {
+        statusCode: status,
+        contentType: type,
+      },
+      ...ctx,
+    });
+  }, [ctx, operation, schema, status, type]);
+  // assume it is on server component when returned async
+  if (ts instanceof Promise) ts = use(ts);
+
+  return (
+    <>
+      {ts && <CopyTypeScriptPanel name="response body" code={ts} />}
+      {schema && (
+        <div className="border px-3 py-2 rounded-lg">
+          <Schema
+            client={{
+              name: 'response',
+              as: 'body',
+            }}
+            root={schema}
+            readOnly
+            ctx={ctx}
+          />
+        </div>
+      )}
+    </>
   );
 }
 
@@ -439,11 +494,9 @@ function WebhookCallback({
   ctx: RenderContext;
   headingLevel: number;
 }) {
-  const pathItems = Object.entries(callback);
-
   return (
     <Accordions type="single" collapsible>
-      {pathItems.map(([path, pathItem]) => {
+      {Object.entries(callback).map(([path, pathItem]) => {
         const pathNodes = methodKeys.map((method) => {
           const operation = pathItem[method];
           if (!operation) return null;
@@ -547,7 +600,6 @@ function AuthProperty({
   type: ReactNode;
   deprecated?: boolean;
   scopes?: string[];
-  children?: ReactNode;
 }) {
   return (
     <div className={cn('text-sm border-t my-4 first:border-t-0', className)}>

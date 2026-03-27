@@ -12,7 +12,7 @@ import {
 import { Input, labelVariants } from '@/ui/components/input';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { FormatFlags } from '@/utils/schema-to-string';
+import { FormatFlags } from '@/utils/schema/to-string';
 import {
   anyFields,
   useFieldInfo,

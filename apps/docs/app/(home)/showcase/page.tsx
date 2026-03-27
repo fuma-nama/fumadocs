@@ -89,6 +89,11 @@ const showcases: ShowcaseObject[] = [
     url: 'https://docs.octarine.app',
   },
   {
+    image: '/showcases/cossistant',
+    name: 'Cossistant',
+    url: 'https://cossistant.com',
+  },
+  {
     image: '/showcases/llm-gateway.png',
     name: 'LLM Gateway',
     url: 'https://llmgateway.io',

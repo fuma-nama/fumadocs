@@ -6,6 +6,7 @@ import type { OpenAPIServer } from '@/server';
 import { createGetUrl, getSlugs, PathUtils } from 'fumadocs-core/source';
 import { createAutoPreset, type SchemaToPagesOptions } from '@/utils/pages/preset-auto';
 import { fromSchema, type OutputGroup, type OutputEntry } from '@/utils/pages/builder';
+import type { DistributiveOmit } from './types';
 
 export interface OutputFile {
   path: string;
@@ -76,7 +77,15 @@ interface MetaOptions {
   groupStyle?: 'folder' | 'separator';
 }
 
-export type Config = SchemaToPagesOptions & GenerateFilesConfig;
+export type Config = SchemaToPagesOptions &
+  GenerateFilesConfig & {
+    /**
+     * Re-generate when **schema files are changed**, ignores custom input functions & URLs.
+     *
+     * Note: it is recommended to configure & use `chokidar` on your own, this is only for simple cases.
+     */
+    watch?: boolean;
+  };
 
 interface BeforeWriteContext {
   readonly generated: Record<string, OutputFile[]>;
@@ -85,12 +94,24 @@ interface BeforeWriteContext {
 }
 
 export async function generateFiles(options: Config): Promise<void> {
+  if (options.watch) {
+    const { watch } = await import('chokidar');
+    const subOptions: Config = { ...options, watch: false };
+
+    await generateFiles(subOptions);
+    const targets = options.input._getWatchPaths();
+    console.log(`[Fumadocs OpenAPI] watching ${targets.join(', ')}`);
+    watch(targets, {
+      ignoreInitial: true,
+    }).on('all', () => generateFiles(subOptions));
+    return;
+  }
+
   const files = await generateFilesOnly(options);
-  const { output } = options;
 
   await Promise.all(
     files.map(async (file) => {
-      const filePath = path.join(output, file.path);
+      const filePath = path.join(options.output, file.path);
 
       await mkdir(path.dirname(filePath), { recursive: true });
       await writeFile(filePath, file.content);
@@ -100,7 +121,7 @@ export async function generateFiles(options: Config): Promise<void> {
 }
 
 export async function generateFilesOnly(
-  options: SchemaToPagesOptions & Omit<GenerateFilesConfig, 'output'>,
+  options: DistributiveOmit<Config, 'output'>,
 ): Promise<OutputFile[]> {
   const schemas = await options.input.getSchemas();
 
@@ -115,7 +136,7 @@ export async function generateFilesOnly(
   const preset = createAutoPreset(options);
   for (const [id, schema] of entries) {
     const entries = fromSchema(id, schema, preset);
-    const schemaFiles = (generated[id] ??= []);
+    const schemaFiles: OutputFile[] = [];
 
     generatedEntries[id] = entries;
     function scan(entry: OutputEntry) {
@@ -131,6 +152,7 @@ export async function generateFilesOnly(
     }
 
     for (const entry of entries) scan(entry);
+    generated[id] = schemaFiles;
     files.push(...schemaFiles);
   }
 

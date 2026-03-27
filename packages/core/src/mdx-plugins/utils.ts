@@ -48,3 +48,12 @@ export function toMdxExportRaw(name: string, expression: Expression): MdxjsEsm {
     },
   };
 }
+
+export function handleTag(value: string, tag: string): string | false {
+  const idx = value.indexOf(tag);
+  if (idx !== -1) {
+    return value.slice(0, idx).trimEnd() + value.slice(idx + tag.length);
+  }
+
+  return false;
+}

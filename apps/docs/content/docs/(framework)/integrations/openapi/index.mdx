@@ -3,24 +3,21 @@ title: OpenAPI
 description: Generating docs for OpenAPI schema
 ---
 
-<Callout type="warning" title="Before Reading">
+<Callout type="warning" title="This guide is for RSC environment">
 
-It only works under RSC environments.
+React Server Component (RSC) offered good primitive for Fumadocs OpenAPI to build upon.
+
+If your framework doesn't support RSC, you can see [Usage without RSC](/docs/integrations/openapi/without-rsc) instead.
 
 </Callout>
 
-## Manual Setup
+## Setup
 
 Install the required packages.
 
 ```npm
 npm i fumadocs-openapi shiki
 ```
-
-<Callout title="For Bun PM" type="warning">
-  If you encountered any issues, please check
-  [#2223](https://github.com/fuma-nama/fumadocs/issues/2223).
-</Callout>
 
 ### Generate Styles
 
@@ -36,15 +33,22 @@ Add the following line:
 
 ### Configure Plugin
 
-Create an OpenAPI instance on the server.
+Create the OpenAPI server instance & `<APIPage />` component.
 
 ```ts tab="lib/openapi.ts"
 import { createOpenAPI } from 'fumadocs-openapi/server';
 
 export const openapi = createOpenAPI({
   // the OpenAPI schema, you can also give it an external URL.
-  input: ['./unkey.json'],
+  input: ['./openapi.json'],
 });
+```
+
+```tsx tab="components/api-page.tsx"
+import { openapi } from '@/lib/openapi';
+import { createAPIPage } from 'fumadocs-openapi/ui';
+
+export const APIPage = createAPIPage(openapi);
 ```
 
 ```ts tab="lib/source.ts"
@@ -57,28 +61,7 @@ export const source = loader({
 });
 ```
 
-See [`createOpenAPI()`](/docs/integrations/openapi/server) for available options.
-
-Create a `APIPage` component:
-
-```tsx tab="components/api-page.tsx"
-import { openapi } from '@/lib/openapi';
-import { createAPIPage } from 'fumadocs-openapi/ui';
-import client from './api-page.client';
-
-export const APIPage = createAPIPage(openapi, {
-  client,
-});
-```
-
-```tsx tab="components/api-page.client.tsx"
-'use client';
-import { defineClientConfig } from 'fumadocs-openapi/ui/client';
-
-export default defineClientConfig({
-  // client-side config
-});
-```
+See [`createOpenAPI()`](/docs/integrations/openapi/server) & [`<APIPage />`](/docs/integrations/openapi/api-page) for available options.
 
 ### Generate Pages
 

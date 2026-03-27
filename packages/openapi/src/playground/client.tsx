@@ -26,7 +26,7 @@ import { ChevronDown, LoaderCircle } from 'lucide-react';
 import { encodeRequestData } from '@/requests/media/encode';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { cn } from '@/utils/cn';
-import { SchemaProvider, SchemaScope, useResolvedSchema } from '@/playground/schema';
+import { anyFields, SchemaProvider, SchemaScope, useResolvedSchema } from '@/playground/schema';
 import {
   Select,
   SelectContent,
@@ -38,7 +38,6 @@ import { labelVariants } from '@/ui/components/input';
 import type { ParsedSchema } from '@/utils/schema';
 import ServerSelect from './components/server-select';
 import { useStorageKey } from '@/ui/client/storage-key';
-import { useExampleRequests } from '@/ui/operation/usage-tabs/client';
 import {
   FieldKey,
   Stf,
@@ -53,6 +52,7 @@ import { FieldInput, FieldSet, JsonInput, ObjectInput } from './components/input
 import type { ParameterObject } from '@/types';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
 import { useTranslations } from '@/ui/client/i18n';
+import { useOperationContext } from '@/ui/operation/client';
 
 export interface FormValues extends Record<string, unknown> {
   path: Record<string, unknown>;
@@ -78,6 +78,16 @@ export interface PlaygroundClientProps extends ComponentProps<'form'>, SchemaSco
   proxyUrl?: string;
 }
 
+export interface ResultDisplayProps extends ComponentProps<'div'> {
+  data: FetchResult;
+  reset: () => void;
+}
+
+export interface CollapsiblePanelProps extends Omit<ComponentProps<typeof Collapsible>, 'title'> {
+  'data-type': 'authorization' | 'body' | ParamType;
+  title: ReactNode;
+}
+
 export interface PlaygroundClientOptions {
   /**
    * transform fields for auth-specific parameters (e.g. header)
@@ -89,9 +99,10 @@ export interface PlaygroundClientOptions {
    */
   requestTimeout?: number;
 
-  components?: Partial<{
-    ResultDisplay: FC<{ data: FetchResult }>;
-  }>;
+  components?: {
+    ResultDisplay?: FC<ResultDisplayProps>;
+    CollapsiblePanel?: FC<CollapsiblePanelProps>;
+  };
 
   /**
    * render the parameter inputs of API endpoint.
@@ -141,7 +152,8 @@ export default function PlaygroundClient({
   ...rest
 }: PlaygroundClientProps) {
   const t = useTranslations();
-  const { example: exampleId, examples, setExampleData } = useExampleRequests();
+  const { example: exampleId, examples, setExampleData } = useOperationContext();
+  const { server } = useServerContext();
   const storageKeys = useStorageKey();
   const {
     mediaAdapters,
@@ -153,7 +165,6 @@ export default function PlaygroundClient({
       } = {},
     },
   } = useApiContext();
-  const { serverRef } = useServerContext();
   const [securityId, setSecurityId] = useState(() => {
     const idx = securities.findIndex((s) => s.every((entry) => !entry.deprecated));
     return idx === -1 ? 0 : idx;
@@ -182,7 +193,6 @@ export default function PlaygroundClient({
   });
 
   const testQuery = useQuery(async (input: FormValues) => {
-    const targetServer = serverRef.current;
     const fetcher = await import('./fetcher').then((mod) =>
       mod.createBrowserFetcher(mediaAdapters, requestTimeout),
     );
@@ -194,7 +204,7 @@ export default function PlaygroundClient({
     return fetcher.fetch(
       joinURL(
         withBase(
-          targetServer ? resolveServerUrl(targetServer.url, targetServer.variables) : '/',
+          server ? resolveServerUrl(server.url, server.variables) : '/',
           window.location.origin,
         ),
         resolveRequestData(route, encoded),
@@ -307,9 +317,11 @@ function SecurityTabs({
   const [open, setOpen] = useState(false);
   const engine = useDataEngine();
   const t = useTranslations();
+  const { CollapsiblePanel = DefaultCollapsiblePanel } =
+    useApiContext().client.playground?.components ?? {};
 
   const result = (
-    <CollapsiblePanel title={t.authorization}>
+    <CollapsiblePanel title={t.authorization} data-type="authorization">
       <Select value={securityId.toString()} onValueChange={(v) => setSecurityId(Number(v))}>
         <SelectTrigger>
           <SelectValue />
@@ -367,60 +379,60 @@ function SecurityTabs({
 }
 
 const ParamTypes = ['path', 'header', 'cookie', 'query'] as const;
+type ParamType = (typeof ParamTypes)[number];
+
+function FormBodyItem({ type, parameters }: { type: ParamType; parameters: ParameterObject[] }) {
+  const { renderParameterField } = useApiContext().client.playground ?? {};
+
+  return parameters.map((field) => {
+    const fieldName: FieldKey = [type, field.name!];
+    if (renderParameterField) {
+      return renderParameterField(fieldName, field);
+    }
+
+    const contentTypes = field.content && Object.keys(field.content);
+    const schema =
+      field.content && contentTypes && contentTypes.length > 0
+        ? field.content[contentTypes[0]].schema
+        : field.schema;
+
+    return (
+      <FieldSet
+        key={stringifyFieldKey(fieldName)}
+        name={field.name}
+        fieldName={fieldName}
+        field={(schema ?? anyFields) as ParsedSchema}
+        isRequired={field.required}
+      />
+    );
+  });
+}
 
 function FormBody({ parameters = [], body }: Pick<PlaygroundClientProps, 'parameters' | 'body'>) {
-  const { renderParameterField, renderBodyField } = useApiContext().client.playground ?? {};
+  const { renderBodyField, components: { CollapsiblePanel = DefaultCollapsiblePanel } = {} } =
+    useApiContext().client.playground ?? {};
   const t = useTranslations();
-  const panels = useMemo(() => {
-    return ParamTypes.map((type) => {
-      const items = parameters.filter((v) => v.in === type);
-      if (items.length === 0) return;
-
-      return (
-        <CollapsiblePanel
-          key={type}
-          title={
-            {
-              header: t.header,
-              cookie: t.cookies,
-              query: t.query,
-              path: t.path,
-            }[type]
-          }
-        >
-          {items.map((field) => {
-            const fieldName: FieldKey = [type, field.name!];
-            if (renderParameterField) {
-              return renderParameterField(fieldName, field);
-            }
-
-            const contentTypes = field.content && Object.keys(field.content);
-            const schema = (
-              field.content && contentTypes && contentTypes.length > 0
-                ? field.content[contentTypes[0]].schema
-                : field.schema
-            ) as ParsedSchema;
-
-            return (
-              <FieldSet
-                key={stringifyFieldKey(fieldName)}
-                name={field.name}
-                fieldName={fieldName}
-                field={schema}
-                isRequired={field.required}
-              />
-            );
-          })}
-        </CollapsiblePanel>
-      );
-    });
-  }, [parameters, renderParameterField, t]);
+  const displayNames = {
+    header: t.header,
+    cookie: t.cookies,
+    query: t.query,
+    path: t.path,
+  };
 
   return (
     <>
-      {panels}
+      {ParamTypes.map((type) => {
+        const items = parameters.filter((v) => v.in === type);
+        if (items.length === 0) return;
+
+        return (
+          <CollapsiblePanel key={type} data-type={type} title={displayNames[type]}>
+            <FormBodyItem parameters={items} type={type} />
+          </CollapsiblePanel>
+        );
+      })}
       {body && (
-        <CollapsiblePanel title={t.body}>
+        <CollapsiblePanel data-type="body" title={t.body}>
           {renderBodyField ? renderBodyField('body', body) : <BodyInput field={body.schema} />}
         </CollapsiblePanel>
       )}
@@ -693,12 +705,18 @@ function Route({ route, ...props }: ComponentProps<'div'> & { route: string }) {
   );
 }
 
-function DefaultResultDisplay({ data, reset }: { data: FetchResult; reset: () => void }) {
+export function DefaultResultDisplay({ data, reset, ...rest }: ResultDisplayProps) {
   const t = useTranslations();
   const statusInfo = useMemo(() => getStatusInfo(data.status, t), [data.status, t]);
 
   return (
-    <div className="flex flex-col gap-3 mt-2 px-3 py-2 border-y bg-fd-secondary text-fd-secondary-foreground">
+    <div
+      {...rest}
+      className={cn(
+        'flex flex-col gap-3 mt-2 px-3 py-2 border-y bg-fd-secondary text-fd-secondary-foreground',
+        rest.className,
+      )}
+    >
       <div className="flex justify-between items-center">
         <div className="inline-flex items-center gap-1.5 text-sm font-medium">
           <statusInfo.icon className={cn('size-4', statusInfo.color)} />
@@ -723,15 +741,9 @@ function DefaultResultDisplay({ data, reset }: { data: FetchResult; reset: () =>
   );
 }
 
-function CollapsiblePanel({
-  title,
-  children,
-  ...props
-}: Omit<ComponentProps<'div'>, 'title'> & {
-  title: ReactNode;
-}) {
+export function DefaultCollapsiblePanel({ title, children, ...props }: CollapsiblePanelProps) {
   return (
-    <Collapsible {...props} className="border-b last:border-b-0">
+    <Collapsible {...props} className={cn('border-b last:border-b-0', props.className)}>
       <CollapsibleTrigger className="group w-full flex items-center gap-2 p-3 text-sm font-medium">
         {title}
         <ChevronDown className="ms-auto size-3.5 text-fd-muted-foreground group-data-[state=open]:rotate-180" />

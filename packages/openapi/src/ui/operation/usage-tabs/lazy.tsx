@@ -8,7 +8,3 @@ export const UsageTabsSelectorLazy = wrapLazy(() =>
 export const UsageTabLazy = wrapLazy(() =>
   import('./client').then((mod) => ({ default: mod.UsageTab })),
 );
-
-export const UsageTabsProviderLazy = wrapLazy(() =>
-  import('./client').then((mod) => ({ default: mod.UsageTabsProvider })),
-);

@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/utils/cn';
-import type { ComponentProps } from 'react';
+import { useEffect, useState, type ComponentProps } from 'react';
 import { useNotebookLayout } from '../client';
 
 export function Container(props: ComponentProps<'div'>) {
@@ -12,11 +12,19 @@ export function Container(props: ComponentProps<'div'>) {
   const pageCol =
     'calc(var(--fd-layout-width,97rem) - var(--fd-sidebar-col) - var(--fd-toc-width))';
   const { collapsed } = slots.sidebar?.useSidebar?.() ?? {};
+  const [previousCollapsed, setPreviousCollapsed] = useState(collapsed);
+  const isCollapseChanged = previousCollapsed !== collapsed;
+
+  // will only set data attribute for an instant
+  useEffect(() => {
+    if (isCollapseChanged) setPreviousCollapsed(collapsed);
+  }, [collapsed, isCollapseChanged]);
 
   return (
     <div
       id="nd-notebook-layout"
       data-sidebar-collapsed={collapsed}
+      data-column-changed={isCollapseChanged}
       {...props}
       style={
         {
@@ -36,7 +44,7 @@ export function Container(props: ComponentProps<'div'>) {
         } as object
       }
       className={cn(
-        'grid overflow-x-clip min-h-(--fd-docs-height) transition-[grid-template-columns] auto-cols-auto auto-rows-auto [--fd-docs-height:100dvh] [--fd-header-height:0px] [--fd-toc-popover-height:0px] [--fd-sidebar-width:0px] [--fd-toc-width:0px]',
+        'grid overflow-x-clip min-h-(--fd-docs-height) auto-cols-auto auto-rows-auto [--fd-docs-height:100dvh] [--fd-header-height:0px] [--fd-toc-popover-height:0px] [--fd-sidebar-width:0px] [--fd-toc-width:0px] data-[column-changed=true]:transition-[grid-template-columns]',
         props.className,
       )}
     >
