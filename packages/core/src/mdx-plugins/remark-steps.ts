@@ -63,9 +63,6 @@ export function remarkSteps({
           value: steps,
         },
       ],
-      data: {
-        _fd_step: true,
-      } as object,
       children,
     };
   }
@@ -94,8 +91,7 @@ export function remarkSteps({
 
   return (tree) => {
     visit(tree, (parent) => {
-      if (!('children' in parent) || parent.type === 'heading') return;
-      if (parent.data && '_fd_step' in parent.data) return 'skip';
+      if (!('children' in parent) || parent.type === 'heading') return 'skip';
 
       let startIdx = -1;
       let i = 0;
@@ -114,12 +110,15 @@ export function remarkSteps({
       for (; i < parent.children.length; i++) {
         const node = parent.children[i];
 
-        if (node.type !== 'heading') continue;
+        if (node.type !== 'heading' || node.data?.hProperties?.['data-fd-step'] !== undefined)
+          continue;
         if (startIdx !== -1) {
           const startDepth = (parent.children[startIdx] as Heading).depth;
 
-          if (node.depth > startDepth) continue;
-          else if (node.depth < startDepth) onEnd();
+          if (node.depth !== startDepth) {
+            if (node.depth < startDepth) onEnd();
+            continue;
+          }
         }
 
         if (!handleHeadingStep(node)) {
