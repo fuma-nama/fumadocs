@@ -32,7 +32,7 @@
     "@fumari/stf": "workspace:*",
     "@radix-ui/react-select": "^2.2.6",
     "class-variance-authority": "^0.7.1",
-    "lucide-react": "^1.6.0",
+    "lucide-react": "^1.7.0",
     "react-error-boundary": "^6.1.1",
     "tailwind-merge": "^3.5.0",
     "ts-morph": "^27.0.2"
@@ -46,7 +46,7 @@
     "fumadocs-ui": "workspace:*",
     "tailwindcss": "^4.2.2",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.5"
+    "tsdown": "0.21.6"
   },
   "peerDependencies": {
     "@types/react": "*",

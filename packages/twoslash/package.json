@@ -60,7 +60,7 @@
     "@types/react": "^19.2.14",
     "fumadocs-ui": "workspace:*",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.5"
+    "tsdown": "0.21.6"
   },
   "peerDependencies": {
     "@types/react": "*",

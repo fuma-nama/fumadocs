@@ -44,7 +44,7 @@
     "lodash.merge": "^4.6.2",
     "tailwindcss": "^4.2.2",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.5"
+    "tsdown": "0.21.6"
   },
   "peerDependencies": {
     "tailwindcss": "^4.0.0"

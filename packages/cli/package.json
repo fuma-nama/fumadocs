@@ -49,8 +49,8 @@
   "devDependencies": {
     "@oxc-project/types": "^0.122.0",
     "@types/node": "25.5.0",
-    "shadcn": "4.1.0",
+    "shadcn": "4.1.1",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.5"
+    "tsdown": "0.21.6"
   }
 }
