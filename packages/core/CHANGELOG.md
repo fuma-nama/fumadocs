@@ -1,5 +1,11 @@
 # fumadocs-core
 
+## 16.7.7
+
+### Patch Changes
+
+- 0a6507b: Improve `remarkSteps()` integration & support tag usage
+
 ## 16.7.6
 
 ## 16.7.5

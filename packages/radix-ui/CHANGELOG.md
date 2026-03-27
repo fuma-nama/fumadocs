@@ -1,5 +1,14 @@
 # fumadocs-ui
 
+## 16.7.7
+
+### Patch Changes
+
+- 9eb3c84: fix TOC line offset
+- 0f39a9f: Improve TOC rendering for steps
+- Updated dependencies [0a6507b]
+  - fumadocs-core@16.7.7
+
 ## 16.7.6
 
 ### Patch Changes
