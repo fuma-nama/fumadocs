@@ -1,5 +1,21 @@
 # @fuma-docs/openapi
 
+## 10.6.0
+
+### Minor Changes
+
+- 9b7b5b5: Support non-RSC environment via `createClientAPIPage()`
+
+### Patch Changes
+
+- b8a95e8: Improve performance
+- a5186a7: Support `watch` option
+- Updated dependencies [9eb3c84]
+- Updated dependencies [0f39a9f]
+- Updated dependencies [0a6507b]
+  - fumadocs-ui@16.7.7
+  - fumadocs-core@16.7.7
+
 ## 10.5.0
 
 ### Minor Changes
