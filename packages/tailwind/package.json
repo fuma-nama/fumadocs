@@ -31,7 +31,7 @@
     "build": "tsdown",
     "clean": "rimraf dist",
     "dev": "tsdown --watch",
-    "lint": "eslint .",
+    "lint": "oxlint .",
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
@@ -41,7 +41,6 @@
     "@tailwindcss/oxide": "^4.2.2",
     "@types/lodash.merge": "^4.6.9",
     "@types/node": "^25.5.0",
-    "eslint-config-custom": "workspace:*",
     "lodash.merge": "^4.6.2",
     "tailwindcss": "^4.2.2",
     "tsconfig": "workspace:*",

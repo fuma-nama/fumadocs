@@ -22,13 +22,12 @@
     "build": "tsdown",
     "clean": "rimraf dist",
     "dev": "tsdown --watch",
-    "lint": "eslint .",
+    "lint": "oxlint .",
     "types:check": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/node": "25.5.0",
     "@types/react": "^19.2.14",
-    "eslint-config-custom": "workspace:*",
     "tsconfig": "workspace:*",
     "tsdown": "0.21.5"
   },

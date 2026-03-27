@@ -47,7 +47,7 @@
     "build": "tsdown --config-loader unrun",
     "clean": "rimraf dist",
     "dev": "tsdown --watch --clean false",
-    "lint": "eslint .",
+    "lint": "oxlint .",
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
@@ -82,7 +82,6 @@
     "@types/node": "25.5.0",
     "@types/openapi-sampler": "^1.0.3",
     "@types/react": "^19.2.14",
-    "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "json-schema-typed": "^8.0.2",

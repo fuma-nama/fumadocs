@@ -119,7 +119,7 @@
     "build": "tsdown",
     "clean": "rimraf dist",
     "dev": "tsdown --watch --clean false",
-    "lint": "eslint .",
+    "lint": "oxlint .",
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
@@ -161,7 +161,6 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "algoliasearch": "5.50.0",
-    "eslint-config-custom": "workspace:*",
     "flexsearch": "^0.8.212",
     "lucide-react": "^1.6.0",
     "next": "16.2.1",

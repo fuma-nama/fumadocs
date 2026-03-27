@@ -39,7 +39,7 @@
     "build": "tsdown",
     "clean": "rimraf dist",
     "dev": "tsdown --watch",
-    "lint": "eslint .",
+    "lint": "oxlint .",
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
@@ -64,7 +64,6 @@
     "@types/node": "25.5.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "mdast-util-mdx": "^3.0.0",
     "tsconfig": "workspace:*",

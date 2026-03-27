@@ -9,7 +9,7 @@
     "types:check": "fumadocs-mdx && next typegen && tsc --noEmit",
     "clean": "rimraf .next",
     "dev": "next dev",
-    "lint": "fumadocs-mdx && bun ./scripts/lint.ts && eslint .",
+    "lint": "fumadocs-mdx && bun ./scripts/lint.ts",
     "start": "next start"
   },
   "dependencies": {
@@ -72,7 +72,6 @@
     "@fumadocs/cli": "workspace:*",
     "@next/bundle-analyzer": "16.2.1",
     "@next/env": "16.2.1",
-    "@next/eslint-plugin-next": "16.2.1",
     "@tailwindcss/postcss": "^4.2.2",
     "@types/d3-force": "^3.0.10",
     "@types/estree": "^1.0.8",
@@ -85,7 +84,6 @@
     "@types/three": "^0.183.1",
     "algoliasearch": "5.50.0",
     "browserslist-config-baseline": "^0.5.0",
-    "eslint-config-custom": "workspace:*",
     "gray-matter": "^4.0.3",
     "mcp-handler": "^1.1.0",
     "next-validate-link": "^1.6.4",

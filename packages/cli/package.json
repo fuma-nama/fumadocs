@@ -32,7 +32,7 @@
     "build": "tsdown --config-loader unrun",
     "clean": "rimraf dist",
     "dev": "tsdown --watch --config-loader unrun",
-    "lint": "eslint .",
+    "lint": "oxlint .",
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
@@ -49,7 +49,6 @@
   "devDependencies": {
     "@oxc-project/types": "^0.122.0",
     "@types/node": "25.5.0",
-    "eslint-config-custom": "workspace:*",
     "shadcn": "4.1.0",
     "tsconfig": "workspace:*",
     "tsdown": "0.21.5"

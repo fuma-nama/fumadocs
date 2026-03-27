@@ -128,7 +128,7 @@
     "build:tailwind": "tailwindcss -i css/style.css -o ./dist/style.css && tailwindcss -i src/components/image-zoom.css -o ./dist/components/image-zoom.css",
     "clean": "rimraf dist",
     "dev": "concurrently \"tsdown --watch --clean false\" \"tailwindcss -i css/style.css -o ./dist/style.css -w\" \"tailwindcss -i src/components/image-zoom.css -o ./dist/components/image-zoom.css -w\"",
-    "lint": "eslint .",
+    "lint": "oxlint .",
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
@@ -163,7 +163,6 @@
     "@types/node": "^25.5.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "shiki": "^4.0.2",
     "tailwindcss": "^4.2.2",
