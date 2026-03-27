@@ -61,6 +61,7 @@
     "@scalar/json-magic": "^0.12.4",
     "@scalar/openapi-upgrader": "^0.2.2",
     "ajv": "^8.18.0",
+    "chokidar": "^5.0.0",
     "class-variance-authority": "^0.7.1",
     "github-slugger": "^2.0.0",
     "hast-util-to-jsx-runtime": "^2.3.6",
