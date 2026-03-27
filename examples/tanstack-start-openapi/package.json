@@ -1,5 +1,5 @@
 {
-  "name": "tanstack-start-openapi",
+  "name": "example-tanstack-start-openapi",
   "private": true,
   "type": "module",
   "sideEffects": false,
