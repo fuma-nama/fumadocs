@@ -1,11 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": [
-    "typescript",
-    "react",
-    "import",
-    "nextjs"
-  ],
+  "plugins": ["typescript", "react", "import", "nextjs"],
   "categories": {
     "correctness": "off"
   },
@@ -18,18 +13,10 @@
     },
     "tailwindcss": {
       "config": "./tailwind.config.js",
-      "callees": [
-        "clsx",
-        "cva",
-        "cn"
-      ]
+      "callees": ["clsx", "cva", "cn"]
     }
   },
-  "ignorePatterns": [
-    "dist/",
-    "node_modules/",
-    "test/out/"
-  ],
+  "ignorePatterns": ["dist/", "node_modules/", "test/out/"],
   "rules": {
     "constructor-super": "error",
     "for-direction": "error",
@@ -135,12 +122,7 @@
   },
   "overrides": [
     {
-      "files": [
-        "**/*.ts",
-        "**/*.tsx",
-        "**/*.mts",
-        "**/*.cts"
-      ],
+      "files": ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"],
       "rules": {
         "constructor-super": "off",
         "no-class-assign": "off",
