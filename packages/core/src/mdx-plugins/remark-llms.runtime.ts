@@ -6,6 +6,7 @@ export interface PlaceholderData {
   children: string;
 }
 
+// oxlint-disable-next-line no-control-regex -- by design
 const regex = /\0(.+?)\0/gs;
 
 export async function renderPlaceholder(

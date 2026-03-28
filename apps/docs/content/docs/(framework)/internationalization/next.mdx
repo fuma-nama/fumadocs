@@ -8,7 +8,7 @@ description: Support i18n routing on your Next.js + Fumadocs app
   Next.js](https://nextjs.org/docs/app/building-your-application/routing/internationalization).
 </Callout>
 
-## Setup [step]
+## Setup
 
 Define the i18n configurations in a file, we will import it with `@/lib/i18n` in this guide.
 
@@ -209,11 +209,11 @@ Configure i18n on your search solution.
 - **Built-in Search (Orama):** See [Internationalization](/docs/headless/search/orama#internationalization).
 - **Cloud Solutions (e.g. Algolia):** They usually have official support for multilingual.
 
-### Writing Documents [step]
+## Writing Documents
 
 See [i18n routing](/docs/page-conventions#i18n-routing) to learn how to create pages for specific locales.
 
-### Navigation [step]
+### Navigation
 
 Fumadocs only handles navigation for its own layouts (e.g. sidebar).
 For other places, you can use the `useParams` hook to get the locale from url, and prepend it to `href`.

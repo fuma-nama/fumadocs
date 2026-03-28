@@ -47,7 +47,7 @@
     "build": "tsdown --config-loader unrun",
     "clean": "rimraf dist",
     "dev": "tsdown --watch --clean false",
-    "lint": "eslint .",
+    "lint": "oxlint .",
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
@@ -66,7 +66,7 @@
     "github-slugger": "^2.0.0",
     "hast-util-to-jsx-runtime": "^2.3.6",
     "js-yaml": "^4.1.1",
-    "lucide-react": "^1.6.0",
+    "lucide-react": "^1.7.0",
     "next-themes": "^0.4.6",
     "openapi-sampler": "^1.7.2",
     "react-hook-form": "^7.72.0",
@@ -77,19 +77,18 @@
   },
   "devDependencies": {
     "@fumadocs/tailwind": "workspace:*",
-    "@scalar/api-client-react": "^1.4.14",
+    "@scalar/api-client-react": "^1.4.15",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "25.5.0",
     "@types/openapi-sampler": "^1.0.3",
     "@types/react": "^19.2.14",
-    "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "json-schema-typed": "^8.0.2",
     "shiki": "^4.0.2",
     "tailwindcss": "^4.2.2",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.5"
+    "tsdown": "0.21.6"
   },
   "peerDependencies": {
     "@scalar/api-client-react": "*",

@@ -108,6 +108,7 @@
     "./utils/use-footer-items": "./dist/utils/use-footer-items.js",
     "./utils/use-is-scroll-top": "./dist/utils/use-is-scroll-top.js",
     "./package.json": "./package.json",
+    "./components/image-zoom2.css": "./dist/components/image-zoom2.css",
     "./style.css": "./dist/style.css",
     "./css/*": "./css/*",
     "./utils/get-sidebar-tabs": {
@@ -125,10 +126,10 @@
   "scripts": {
     "build": "pnpm build:layout && pnpm build:tailwind",
     "build:layout": "tsdown --config-loader unrun",
-    "build:tailwind": "tailwindcss -i css/style.css -o ./dist/style.css && tailwindcss -i src/components/image-zoom.css -o ./dist/components/image-zoom.css",
+    "build:tailwind": "tailwindcss -i css/style.css -o ./dist/style.css",
     "clean": "rimraf dist",
-    "dev": "concurrently \"tsdown --watch --clean false\" \"tailwindcss -i css/style.css -o ./dist/style.css -w\" \"tailwindcss -i src/components/image-zoom.css -o ./dist/components/image-zoom.css -w\"",
-    "lint": "eslint .",
+    "dev": "concurrently \"tsdown --watch --clean false\" \"tailwindcss -i css/style.css -o ./dist/style.css -w\"",
+    "lint": "oxlint .",
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
@@ -144,7 +145,7 @@
     "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-tabs": "^1.1.13",
     "class-variance-authority": "^0.7.1",
-    "lucide-react": "^1.6.0",
+    "lucide-react": "^1.7.0",
     "motion": "^12.38.0",
     "next-themes": "^0.4.6",
     "react-medium-image-zoom": "^5.4.1",
@@ -157,18 +158,17 @@
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",
     "@tailwindcss/cli": "^4.2.2",
-    "@tsdown/css": "^0.21.5",
+    "@tsdown/css": "^0.21.6",
     "@types/hast": "^3.0.4",
     "@types/mdx": "^2.0.13",
     "@types/node": "^25.5.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "shiki": "^4.0.2",
     "tailwindcss": "^4.2.2",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.5",
+    "tsdown": "0.21.6",
     "unified": "^11.0.5"
   },
   "peerDependencies": {

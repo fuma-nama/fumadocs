@@ -4,7 +4,6 @@
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",
     "@types/node": "^25.5.0",
-    "eslint-config-custom": "workspace:*",
     "tsconfig": "workspace:*"
   }
 }

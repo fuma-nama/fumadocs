@@ -36,7 +36,7 @@
     "build": "pnpm run sync && tsdown",
     "clean": "rimraf dist",
     "dev": "tsdown --watch",
-    "lint": "eslint .",
+    "lint": "oxlint .",
     "postpublish": "echo \"Updating template repo\" && bash ./scripts/update-git-repo.sh",
     "types:check": "tsc --noEmit",
     "sync": "bun ./scripts/sync.ts"
@@ -53,10 +53,9 @@
   "devDependencies": {
     "@types/cross-spawn": "^6.0.6",
     "@types/node": "25.5.0",
-    "eslint-config-custom": "workspace:*",
     "tinyglobby": "^0.2.15",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.5",
+    "tsdown": "0.21.6",
     "typescript": "^6.0.2"
   },
   "engines": {
