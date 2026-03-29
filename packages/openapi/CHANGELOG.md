@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 10.6.1
+
+### Patch Changes
+
+- d38e641: Support forwarding pure playground cookies with proxy
+
 ## 10.6.0
 
 ### Minor Changes
