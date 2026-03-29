@@ -304,6 +304,26 @@ export default function PlaygroundClient({
   );
 }
 
+function SecurityTabsSelectItem({ security }: { security: SecurityEntry[] }) {
+  return (
+    <div className="flex flex-col gap-2 max-w-[600px]">
+      {security.map((item) => (
+        <div key={item.id}>
+          <p
+            className={cn(
+              'font-mono font-medium',
+              item.deprecated && 'text-fd-muted-foreground line-through',
+            )}
+          >
+            {item.id}
+          </p>
+          <p className="text-fd-muted-foreground whitespace-pre-wrap">{item.description}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function SecurityTabs({
   securities,
   setSecurityId,
@@ -325,24 +345,14 @@ function SecurityTabs({
     <CollapsiblePanel title={t.authorization} data-type="authorization">
       <Select value={securityId.toString()} onValueChange={(v) => setSecurityId(Number(v))}>
         <SelectTrigger>
-          <SelectValue />
+          <SelectValue>
+            <SecurityTabsSelectItem security={securities[securityId]} />
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           {securities.map((security, i) => (
             <SelectItem key={i} value={i.toString()}>
-              {security.map((item) => (
-                <div key={item.id} className="max-w-[600px]">
-                  <p
-                    className={cn(
-                      'font-mono font-medium',
-                      item.deprecated && 'text-fd-muted-foreground line-through',
-                    )}
-                  >
-                    {item.id}
-                  </p>
-                  <p className="text-fd-muted-foreground whitespace-pre-wrap">{item.description}</p>
-                </div>
-              ))}
+              <SecurityTabsSelectItem security={security} />
             </SelectItem>
           ))}
         </SelectContent>
