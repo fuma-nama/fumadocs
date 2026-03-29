@@ -11,7 +11,7 @@ import {
   useRef,
 } from 'react';
 import { useApiContext, useServerContext } from '@/ui/contexts/api';
-import type { FetchResult } from '@/playground/fetcher';
+import type { BrowserFetcherOptions, FetchResult } from '@/playground/fetcher';
 import type { SecurityEntry } from '@/playground/index';
 import { getStatusInfo } from './status-info';
 import { joinURL, resolveRequestData, resolveServerUrl, withBase } from '@/utils/url';
@@ -94,8 +94,11 @@ export interface PlaygroundClientOptions {
    */
   transformAuthInputs?: (fields: AuthField[]) => AuthField[];
 
+  fetchOptions?: BrowserFetcherOptions;
+
   /**
    * Request timeout in seconds (default: 10s)
+   * @deprecated use `fetchOptions.requestTimeout` instead.
    */
   requestTimeout?: number;
 
@@ -160,7 +163,8 @@ export default function PlaygroundClient({
     client: {
       playground: {
         components: { ResultDisplay = DefaultResultDisplay } = {},
-        requestTimeout = 10,
+        requestTimeout,
+        fetchOptions = { requestTimeout },
         transformAuthInputs,
       } = {},
     },
@@ -194,7 +198,7 @@ export default function PlaygroundClient({
 
   const testQuery = useQuery(async (input: FormValues) => {
     const fetcher = await import('./fetcher').then((mod) =>
-      mod.createBrowserFetcher(mediaAdapters, requestTimeout),
+      mod.createBrowserFetcher(mediaAdapters, { proxyUrl, ...fetchOptions }),
     );
     const encoded = encodeRequestData(
       { ...mapInputs(input), method, bodyMediaType: body?.mediaType },
@@ -209,10 +213,7 @@ export default function PlaygroundClient({
         ),
         resolveRequestData(route, encoded),
       ),
-      {
-        proxyUrl,
-        ...encoded,
-      },
+      encoded,
     );
   });
 
