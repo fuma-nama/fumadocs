@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 16.0.84
+
+### Patch Changes
+
+- 43cd8db: Support Oxlint as linter
+
 ## 16.0.83
 
 ## 16.0.82

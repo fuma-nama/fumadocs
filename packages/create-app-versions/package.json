@@ -1,6 +1,6 @@
 {
   "name": "create-fumadocs-versions",
-  "version": "16.0.83",
+  "version": "16.0.84",
   "private": true,
   "description": "Used to track dependency versions in create-fumadocs-app",
   "dependencies": {
