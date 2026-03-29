@@ -109,6 +109,10 @@ async function main(): Promise<void> {
                   value: 'biome',
                   label: 'Biome',
                 },
+                {
+                  value: 'oxlint',
+                  label: 'Oxlint',
+                },
               ]
             : [
                 {
@@ -118,6 +122,10 @@ async function main(): Promise<void> {
                 {
                   value: 'biome',
                   label: 'Biome',
+                },
+                {
+                  value: 'oxlint',
+                  label: 'Oxlint',
                 },
               ],
         });
@@ -151,7 +159,7 @@ async function main(): Promise<void> {
           message: 'Configure Open Graph Image generation?',
           options: [
             {
-              value: 'next-og',
+              value: 'next/og',
               label: 'next/og',
               hint: 'Next.js built-in solution',
             },
@@ -222,17 +230,25 @@ async function main(): Promise<void> {
     plugins.push(oramaCloud());
   }
 
-  if (options.lint === 'eslint') {
-    const { eslint } = await import('./plugins/eslint');
-    plugins.push(eslint());
+  switch (options.lint) {
+    case 'eslint': {
+      const { eslint } = await import('./plugins/eslint');
+      plugins.push(eslint());
+      break;
+    }
+    case 'biome': {
+      const { biome } = await import('./plugins/biome');
+      plugins.push(biome());
+      break;
+    }
+    case 'oxlint': {
+      const { oxlint } = await import('./plugins/oxlint');
+      plugins.push(oxlint());
+      break;
+    }
   }
 
-  if (options.lint === 'biome') {
-    const { biome } = await import('./plugins/biome');
-    plugins.push(biome());
-  }
-
-  if (options.ogImage) {
+  if (options.ogImage === 'takumi') {
     const { nextUseTakumi } = await import('./plugins/next-use-takumi');
     plugins.push(nextUseTakumi());
   }

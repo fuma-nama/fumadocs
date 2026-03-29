@@ -1,23 +1,13 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": [
-    "typescript",
-    "import"
-  ],
+  "plugins": ["typescript", "import"],
   "categories": {
     "correctness": "off"
   },
   "env": {
     "builtin": true
   },
-  "ignorePatterns": [
-    "dist",
-    "node_modules",
-    "test/repo",
-    "test/repo-2",
-    "node_modules/",
-    "dist/"
-  ],
+  "ignorePatterns": ["dist", "node_modules", "test/repo", "test/repo-2", "node_modules/", "dist/"],
   "rules": {
     "constructor-super": "error",
     "for-direction": "error",
@@ -106,12 +96,7 @@
   },
   "overrides": [
     {
-      "files": [
-        "**/*.ts",
-        "**/*.tsx",
-        "**/*.mts",
-        "**/*.cts"
-      ],
+      "files": ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"],
       "rules": {
         "constructor-super": "off",
         "no-class-assign": "off",

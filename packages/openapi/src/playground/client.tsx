@@ -11,7 +11,7 @@ import {
   useRef,
 } from 'react';
 import { useApiContext, useServerContext } from '@/ui/contexts/api';
-import type { FetchResult } from '@/playground/fetcher';
+import type { BrowserFetcherOptions, FetchResult } from '@/playground/fetcher';
 import type { SecurityEntry } from '@/playground/index';
 import { getStatusInfo } from './status-info';
 import { joinURL, resolveRequestData, resolveServerUrl, withBase } from '@/utils/url';
@@ -94,8 +94,11 @@ export interface PlaygroundClientOptions {
    */
   transformAuthInputs?: (fields: AuthField[]) => AuthField[];
 
+  fetchOptions?: BrowserFetcherOptions;
+
   /**
    * Request timeout in seconds (default: 10s)
+   * @deprecated use `fetchOptions.requestTimeout` instead.
    */
   requestTimeout?: number;
 
@@ -160,7 +163,8 @@ export default function PlaygroundClient({
     client: {
       playground: {
         components: { ResultDisplay = DefaultResultDisplay } = {},
-        requestTimeout = 10,
+        requestTimeout,
+        fetchOptions = { requestTimeout },
         transformAuthInputs,
       } = {},
     },
@@ -194,7 +198,7 @@ export default function PlaygroundClient({
 
   const testQuery = useQuery(async (input: FormValues) => {
     const fetcher = await import('./fetcher').then((mod) =>
-      mod.createBrowserFetcher(mediaAdapters, requestTimeout),
+      mod.createBrowserFetcher(mediaAdapters, { proxyUrl, ...fetchOptions }),
     );
     const encoded = encodeRequestData(
       { ...mapInputs(input), method, bodyMediaType: body?.mediaType },
@@ -209,10 +213,7 @@ export default function PlaygroundClient({
         ),
         resolveRequestData(route, encoded),
       ),
-      {
-        proxyUrl,
-        ...encoded,
-      },
+      encoded,
     );
   });
 
@@ -303,6 +304,26 @@ export default function PlaygroundClient({
   );
 }
 
+function SecurityTabsSelectItem({ security }: { security: SecurityEntry[] }) {
+  return (
+    <div className="flex flex-col gap-2 max-w-[600px]">
+      {security.map((item) => (
+        <div key={item.id}>
+          <p
+            className={cn(
+              'font-mono font-medium',
+              item.deprecated && 'text-fd-muted-foreground line-through',
+            )}
+          >
+            {item.id}
+          </p>
+          <p className="text-fd-muted-foreground whitespace-pre-wrap">{item.description}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function SecurityTabs({
   securities,
   setSecurityId,
@@ -324,24 +345,14 @@ function SecurityTabs({
     <CollapsiblePanel title={t.authorization} data-type="authorization">
       <Select value={securityId.toString()} onValueChange={(v) => setSecurityId(Number(v))}>
         <SelectTrigger>
-          <SelectValue />
+          <SelectValue>
+            <SecurityTabsSelectItem security={securities[securityId]} />
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           {securities.map((security, i) => (
             <SelectItem key={i} value={i.toString()}>
-              {security.map((item) => (
-                <div key={item.id} className="max-w-[600px]">
-                  <p
-                    className={cn(
-                      'font-mono font-medium',
-                      item.deprecated && 'text-fd-muted-foreground line-through',
-                    )}
-                  >
-                    {item.id}
-                  </p>
-                  <p className="text-fd-muted-foreground whitespace-pre-wrap">{item.description}</p>
-                </div>
-              ))}
+              <SecurityTabsSelectItem security={security} />
             </SelectItem>
           ))}
         </SelectContent>

@@ -9,10 +9,9 @@
   },
   "settings": {
     "react": {
-      "version": "18.3.1"
+      "version": "19.2.4"
     },
     "tailwindcss": {
-      "config": "./tailwind.config.js",
       "callees": ["clsx", "cva", "cn"]
     }
   },

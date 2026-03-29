@@ -83,12 +83,17 @@ export const source = loader(
 
 `openapiSource()` is a server-side API that generates pages directly to your `loader()`, hence allowing dynamic generation (e.g. different page tree as schema changes).
 
-It shares a different type from your original source, explicit handling of OpenAPI pages is necessary (e.g. where you return text for LLM).
+It shares a different type from your original source, explicit handling of OpenAPI pages is necessary.
+
+For example, update all references to `source`'s pages, including utils like `getLLMText()`:
 
 ```ts
 import { source } from '@/lib/source';
 import type { InferPageType } from 'fumadocs-core/source';
 
+/**
+ * return page Markdown for LLMs
+ */
 export async function getLLMText(page: InferPageType<typeof source>) {
   // [!code ++:4]
   if (page.data.type === 'openapi') {
@@ -99,6 +104,12 @@ export async function getLLMText(page: InferPageType<typeof source>) {
   // your original flow below...
 }
 ```
+
+<Callout type='warn'>
+
+Make sure to check the types before continuing.
+
+</Callout>
 
 ### Render Page
 
