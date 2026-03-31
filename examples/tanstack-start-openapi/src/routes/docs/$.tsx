@@ -14,7 +14,7 @@ import {
 import { baseOptions } from '@/lib/layout.shared';
 import { gitConfig } from '@/lib/shared';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
-import { ReactNode, Suspense } from 'react';
+import { Suspense, type ReactNode } from 'react';
 import { useMDXComponents } from '@/components/mdx';
 import { ClientAPIPage } from '@/components/api-page';
 
@@ -104,12 +104,12 @@ function Page() {
       </DocsPage>
     );
   } else {
-    content = <Suspense>{clientLoader.useContent(page.path, page)}</Suspense>;
+    content = clientLoader.useContent(page.path, page);
   }
 
   return (
     <DocsLayout {...baseOptions()} tree={page.pageTree}>
-      {content}
+      <Suspense>{content}</Suspense>
     </DocsLayout>
   );
 }
