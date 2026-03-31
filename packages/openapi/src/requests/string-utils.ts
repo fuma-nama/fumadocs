@@ -47,9 +47,10 @@ export function escapeString(str: string, delimit?: string): string {
   return `${delimit}${str.replaceAll(delimit, `\\${delimit}`)}${delimit}`;
 }
 
-export function ident(code: string, tab: number = 1) {
+export function indent(code: string, tab: number = 1) {
+  const p = '  '.repeat(tab);
   return code
     .split('\n')
-    .map((v) => '  '.repeat(tab) + v)
+    .map((v) => (v.length === 0 ? v : p + v))
     .join('\n');
 }

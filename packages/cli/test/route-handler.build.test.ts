@@ -47,8 +47,7 @@ test('next: native verb exports, inlined body, params from ctx', () => {
     compiledContent: sample,
   });
   expect(out).toMatchInlineSnapshot(`
-    "
-    export async function GET(req: Request, ctx: RouteContext<"/api/posts/[id]">) {
+    "export async function GET(req: Request, ctx: RouteContext<"/api/posts/[id]">) {
       const p = {
         id: (await ctx.params).id
       };
@@ -60,8 +59,7 @@ test('next: native verb exports, inlined body, params from ctx', () => {
         id: (await ctx.params).id
       };
       return Response.json({ id: p.id });
-    }
-    "
+    }"
   `);
 });
 
@@ -85,8 +83,7 @@ export const h = $routeHandler(
         rest: (await ctx.params).rest
       };
       return Response.json({ request, p });
-    }
-    "
+    }"
   `);
 });
 
@@ -119,9 +116,7 @@ test('tanstack-start: createFileRoute + per-verb handlers with ctx.request alias
           },
         },
       },
-    });
-
-    "
+    });"
   `);
 });
 
@@ -149,9 +144,7 @@ test('react-router: async loader + action, args.request alias', () => {
         id: args.params.id
       };
       return Response.json({ id: p.id });
-    }
-
-    "
+    }"
   `);
 });
 
@@ -175,9 +168,7 @@ export const handler = $routeHandler(
     export async function loader(args: Route.LoaderArgs) {
       const request = args.request;
       return new Response('ok');
-    }
-
-    "
+    }"
   `);
 });
 

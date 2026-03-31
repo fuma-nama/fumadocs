@@ -7,8 +7,6 @@ import type {
   Expression,
   Function as AstFunction,
   ImportDeclaration,
-  ImportDeclarationSpecifier,
-  ModuleExportName,
   ObjectExpression,
   ParamPattern,
   Program,
@@ -16,59 +14,13 @@ import type {
 } from '@oxc-project/types';
 import type { Framework } from '@/config';
 import type { RouteHandlerHttpMethod, StaticInfo } from './route-handler';
+import { dedent, indent } from '@/utils/format';
+import { collectMacroBindings } from '@/utils/ast';
 
 const reactRouterLoaderMethods = new Set(['GET', 'HEAD', 'OPTIONS']);
 const reactRouterActionMethods = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
 export type ParsedRouteInfo = StaticInfo<string, string | undefined>;
-
-function moduleExportNameString(name: ModuleExportName): string {
-  if (name.type === 'Identifier') return name.name;
-  if (name.type === 'Literal') return String(name.value);
-  return '';
-}
-
-function getImportedBinding(
-  spec: ImportDeclarationSpecifier,
-): { imported: string; local: string } | null {
-  if (spec.type === 'ImportSpecifier') {
-    return {
-      imported: moduleExportNameString(spec.imported),
-      local: spec.local.name,
-    };
-  }
-  if (spec.type === 'ImportDefaultSpecifier') {
-    return { imported: 'default', local: spec.local.name };
-  }
-  return null;
-}
-
-function collectMacroBindings(
-  program: Program,
-): { importDecls: ImportDeclaration[]; locals: Set<string> } | null {
-  const locals = new Set<string>();
-  const importDecls: ImportDeclaration[] = [];
-  const seenDecl = new Set<ImportDeclaration>();
-
-  new Visitor({
-    ImportDeclaration(node: ImportDeclaration) {
-      for (const spec of node.specifiers) {
-        const b = getImportedBinding(spec);
-        if (!b) continue;
-        if (b.imported === '$routeHandler' || b.imported === 'default') {
-          locals.add(b.local);
-          if (!seenDecl.has(node)) {
-            seenDecl.add(node);
-            importDecls.push(node);
-          }
-        }
-      }
-    },
-  }).visit(program);
-
-  if (locals.size === 0) return null;
-  return { importDecls, locals };
-}
 
 function collectRouteHandlerCalls(program: Program, locals: Set<string>): CallExpression[] {
   const calls: CallExpression[] = [];
@@ -207,10 +159,13 @@ function bindingNameFromParam(p: ParamPattern): string | null {
   return null;
 }
 
-function parseHandlerFromAst(
-  s: MagicString,
-  expr: Expression,
-): { requestName: string; paramsName: string | null; bodyText: string } {
+interface HandlerInfo {
+  requestName: string;
+  paramsName: string | null;
+  bodyText: string;
+}
+
+function parseHandlerFromAst(s: MagicString, expr: Expression): HandlerInfo {
   const isFn = expr.type === 'FunctionExpression';
   const isArrow = expr.type === 'ArrowFunctionExpression';
   if (!isFn && !isArrow) {
@@ -246,9 +201,12 @@ function parseHandlerFromAst(
   if (body == null) {
     throw new Error('route-handler.build: handler has no body');
   } else if (body.type === 'BlockStatement') {
-    bodyText = s.slice(body.start + 1, body.end - 1).trim();
+    bodyText = s.original
+      .slice(body.start + 1, body.end - 1)
+      .replace(/^\s*?\n/, '')
+      .replace(/\n\s*?$/, '');
   } else if (fn.type === 'ArrowFunctionExpression') {
-    const expr = s.slice(body.start, body.end);
+    const expr = s.original.slice(body.start, body.end);
     bodyText = `return ${expr};`;
   } else {
     throw new Error('route-handler.build: could not extract handler body');
@@ -283,35 +241,34 @@ function buildParamsObjectLiteral(
     parts.push(`${encodeKey(info.catchAll)}: ${value}`);
   }
 
-  return `{\n${indentBlock(parts.join(',\n'), 2)}\n}`;
+  return `{\n${indent(parts.join(',\n'))}\n}`;
 }
 
-function requestAliasPrefix(framework: Framework, handler: { requestName: string }): string {
+function generateRequestDeclaration(framework: Framework, binding: string): string {
   if (framework === 'tanstack-start') {
-    if (handler.requestName === 'ctx') {
+    if (binding === 'ctx') {
       throw new Error(
         'route-handler.build: name the request parameter something other than `ctx` for TanStack file routes',
       );
     }
-    return `const ${handler.requestName} = ctx.request;\n`;
+    return `const ${binding} = ctx.request;\n`;
   }
   if (framework === 'react-router') {
-    if (handler.requestName === 'args') {
+    if (binding === 'args') {
       throw new Error(
         'route-handler.build: name the request parameter something other than `args` for React Router resource routes',
       );
     }
-    return `const ${handler.requestName} = args.request;\n`;
+    return `const ${binding} = args.request;\n`;
   }
   return '';
 }
 
-function buildRouteSetupBlock(
+function generateParamsDeclaration(
   framework: Framework,
   info: ParsedRouteInfo,
   paramsBinding: string,
 ): string {
-  if (!needsRouteParams(info)) return '';
   let paramsIdentifier: string;
   switch (framework) {
     case 'next':
@@ -337,14 +294,23 @@ function resolveParamsBindingName(info: ParsedRouteInfo, userSecond: string | nu
 }
 
 function registryRouteToTanStackCreateFileRoutePath(route: string): string {
-  const trimmed = route.replace(/^\/+/, '').replace(/\/+$/, '');
-  const segments = trimmed.split('/');
-  const parts = segments.map((seg) => {
-    if (/^\[\[\.\.\.[^/\]]+\]\]$/.test(seg) || /^\[\.\.\.[^/\]]+\]$/.test(seg)) return '$';
+  const segments = route.split('/');
+  const parts: string[] = [];
+
+  for (const seg of segments) {
+    if (/^\[\[\.\.\.[^/\]]+\]\]$/.test(seg) || /^\[\.\.\.[^/\]]+\]$/.test(seg)) {
+      parts.push('$');
+      continue;
+    }
+
     const m = /^\[([^/\]]+)\]$/.exec(seg);
-    if (m) return `$${m[1]}`;
-    return seg;
-  });
+    if (m) {
+      parts.push(`$${m[1]}`);
+    } else {
+      parts.push(seg);
+    }
+  }
+
   return `/${parts.join('/')}`;
 }
 
@@ -370,7 +336,7 @@ function computeReactRouterTypesSpecifier(routeFilePath: string): string {
   return `./+types/${base}`;
 }
 
-function frameworkGeneratedImports(framework: Framework, routeFilePath: string): string {
+function generateImports(framework: Framework, routeFilePath: string): string {
   const lines: string[] = [];
   if (framework === 'tanstack-start') {
     lines.push(`import { createFileRoute } from '@tanstack/react-router';`);
@@ -384,26 +350,19 @@ function frameworkGeneratedImports(framework: Framework, routeFilePath: string):
   return lines.length ? `${lines.join('\n')}\n` : '';
 }
 
-function indentBlock(text: string, spaces: number): string {
-  const pad = ' '.repeat(spaces);
-  return text
-    .split('\n')
-    .map((line) => (line.length ? pad + line : line))
-    .join('\n');
-}
-
 function generateDeclaration(
   framework: Framework,
   route: string,
   parsedInfo: ParsedRouteInfo,
-  handler: { requestName: string; paramsName: string | null; bodyText: string },
+  handler: HandlerInfo,
 ): string {
   const paramsBinding = resolveParamsBindingName(parsedInfo, handler.paramsName);
-  const alias = requestAliasPrefix(framework, handler);
-  const setupBlock =
-    paramsBinding != null ? buildRouteSetupBlock(framework, parsedInfo, paramsBinding) : '';
-  const inner = alias + setupBlock + handler.bodyText;
-  const bodyIndented = indentBlock(inner, 2);
+  let inner = dedent(handler.bodyText);
+  if (paramsBinding) {
+    inner = generateParamsDeclaration(framework, parsedInfo, paramsBinding) + inner;
+  }
+  inner = generateRequestDeclaration(framework, handler.requestName) + inner;
+
   const urlPath = registryRouteToUrlPath(route);
   const urlPathLiteral = JSON.stringify(urlPath);
 
@@ -414,7 +373,7 @@ function generateDeclaration(
       return parsedInfo.methods
         .map(
           (m) =>
-            `export async function ${m}(${handler.requestName}: Request, ctx: ${ctxType}) {\n${bodyIndented}\n}`,
+            `export async function ${m}(${handler.requestName}: Request, ctx: ${ctxType}) {\n${indent(inner)}\n}`,
         )
         .join('\n\n');
     }
@@ -423,14 +382,14 @@ function generateDeclaration(
       return parsedInfo.methods
         .map(
           (m) =>
-            `export async function ${m}(${handler.requestName}: Request, context: ${ctxType}) {\n${bodyIndented}\n}`,
+            `export async function ${m}(${handler.requestName}: Request, context: ${ctxType}) {\n${indent(inner)}\n}`,
         )
         .join('\n\n');
     }
     case 'tanstack-start': {
       const fileRoutePath = JSON.stringify(registryRouteToTanStackCreateFileRoutePath(route));
       const entries = parsedInfo.methods
-        .map((m) => `      ${m}: async (ctx) => {\n${indentBlock(inner, 8)}\n      },`)
+        .map((m) => `      ${m}: async (ctx) => {\n${indent(inner, 4)}\n      },`)
         .join('\n');
       return `export const Route = createFileRoute(${fileRoutePath})({\n  server: {\n    handlers: {\n${entries}\n    },\n  },\n});\n`;
     }
@@ -444,16 +403,12 @@ function generateDeclaration(
       }
       const parts: string[] = [];
       if (includeLoader) {
-        parts.push(`export async function loader(args: Route.LoaderArgs) {\n${bodyIndented}\n}`);
+        parts.push(`export async function loader(args: Route.LoaderArgs) {\n${indent(inner)}\n}`);
       }
       if (includeAction) {
-        parts.push(`export async function action(args: Route.ActionArgs) {\n${bodyIndented}\n}`);
+        parts.push(`export async function action(args: Route.ActionArgs) {\n${indent(inner)}\n}`);
       }
       return `${parts.join('\n\n')}\n`;
-    }
-    default: {
-      const _exhaustive: never = framework;
-      return _exhaustive;
     }
   }
 }
@@ -480,7 +435,7 @@ export function buildRouteHandlerFile(
   program: Program,
   s: MagicString,
 ) {
-  const macro = collectMacroBindings(program);
+  const macro = collectMacroBindings(program, '$routeHandler');
   if (!macro) return;
 
   const calls = collectRouteHandlerCalls(program, macro.locals);
@@ -512,9 +467,13 @@ export function buildRouteHandlerFile(
     );
   }
 
-  const extraImports = frameworkGeneratedImports(framework, routeFilePath);
+  for (const decl of macro.importDecls) {
+    removeMacroImport(s, decl);
+  }
+
+  const extraImports = generateImports(framework, routeFilePath);
   if (extraImports) {
-    const insertPos = findInsertPositionForNewImports(program, macro.importDecls);
+    const insertPos = findInsertPositionForNewImports(program);
     if (insertPos === 0) {
       s.prepend(extraImports);
     } else {
@@ -522,24 +481,20 @@ export function buildRouteHandlerFile(
     }
   }
 
-  for (const decl of [...macro.importDecls].sort((a, b) => b.start - a.start)) {
-    removeMacroImport(s, decl);
-  }
   s.overwrite(
     stmtSpan.start,
     stmtSpan.end,
     generateDeclaration(framework, route, parsedInfo, handler),
   );
+
+  s.trim();
 }
 
-function findInsertPositionForNewImports(
-  program: Program,
-  skipImports: readonly ImportDeclaration[],
-): number {
-  const skip = new Set(skipImports);
-  const others = program.body.filter(
-    (stmt): stmt is ImportDeclaration => stmt.type === 'ImportDeclaration' && !skip.has(stmt),
+function findInsertPositionForNewImports(program: Program): number {
+  const last = program.body.findLast(
+    (stmt): stmt is ImportDeclaration => stmt.type === 'ImportDeclaration',
   );
-  if (others.length === 0) return 0;
-  return others[others.length - 1]!.end;
+
+  if (last) return last.end;
+  return 0;
 }

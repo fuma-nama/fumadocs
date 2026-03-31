@@ -307,6 +307,12 @@ export class ComponentCompiler {
 
     const queue: ComponentFile[] = [];
     const result = await this.buildFile(file, (reference) => {
+      const external = reference.type === 'dependency' && reference.dep === '@fumadocs/cli';
+
+      if (external) {
+        return reference.specifier;
+      }
+
       if (reference.type === 'unknown-specifier') {
         if (!reference.specifier.startsWith('node:')) {
           console.warn(`Unknown specifier ${reference.specifier}, skipping for now`);

@@ -1,4 +1,4 @@
-import { ident } from '@/requests/string-utils';
+import { indent } from '@/requests/string-utils';
 import type { CodeUsageGenerator } from '@/requests/generators';
 import { resolveMediaAdapter } from '@/requests/media/adapter';
 
@@ -47,7 +47,7 @@ export const javascript: CodeUsageGenerator = {
     const params = [JSON.stringify(url)];
     if (options.size > 0) {
       const str = Array.from(options.entries())
-        .map(([k, v]) => ident(k === v ? k : `${k}: ${v}`))
+        .map(([k, v]) => indent(k === v ? k : `${k}: ${v}`))
         .join(',\n');
 
       params.push(`{\n${str}\n}`);

@@ -1,4 +1,4 @@
-import { ident } from '@/requests/string-utils';
+import { indent } from '@/requests/string-utils';
 import type { CodeUsageGenerator } from '@/requests/generators';
 import { resolveMediaAdapter } from '@/requests/media/adapter';
 
@@ -39,16 +39,16 @@ export const go: CodeUsageGenerator = {
     return `package main
 
 import (
-${ident(imports.map((v) => `"${v}"`).join('\n'))}
+${indent(imports.map((v) => `"${v}"`).join('\n'))}
 )
 
 func main() {
 ${Array.from(variables.entries())
-  .map(([k, v]) => ident(`${k} := ${v}`))
+  .map(([k, v]) => indent(`${k} := ${v}`))
   .join('\n')}
-${body ? ident(body) : ''}
+${body ? indent(body) : ''}
   req, _ := http.NewRequest("${data.method}", url, ${body ? 'body' : 'nil'})
-${ident(
+${indent(
   Array.from(headers.entries())
     .map(([key, value]) => `req.Header.Add("${key}", ${value})`)
     .join('\n'),

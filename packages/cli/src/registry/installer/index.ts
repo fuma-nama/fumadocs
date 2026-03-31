@@ -276,16 +276,6 @@ export class ComponentInstaller {
       await plugin.beforeTransform?.(transformCtx);
     }
 
-    if (file.type === 'route-handler') {
-      buildRouteHandlerFile(
-        file.route,
-        filePath,
-        this.rootClient.config.framework,
-        parsed.program,
-        s,
-      );
-    }
-
     transformSpecifiers(parsed.program, s, (specifier) => {
       if (ctx.importLookup.has(specifier)) {
         let outputPath = this.resolveOutputPath(ctx.importLookup.get(specifier)!);
@@ -305,6 +295,16 @@ export class ComponentInstaller {
       ctx.io.onWarn(`cannot find the referenced file of ${specifier}`);
       return specifier;
     });
+
+    if (file.type === 'route-handler') {
+      buildRouteHandlerFile(
+        file.route,
+        filePath,
+        this.rootClient.config.framework,
+        parsed.program,
+        s,
+      );
+    }
 
     for (const plugin of this.plugins) {
       await plugin.afterTransform?.(transformCtx);

@@ -1,4 +1,4 @@
-import { escapeString, ident, inputToString } from '@/requests/string-utils';
+import { escapeString, indent, inputToString } from '@/requests/string-utils';
 import type { CodeUsageGenerator } from '@/requests/generators';
 
 export const curl: CodeUsageGenerator = {
@@ -40,6 +40,6 @@ export const curl: CodeUsageGenerator = {
       s.push(`-d ${escaped}`);
     }
 
-    return s.flatMap((v, i) => ident(v, i > 0 ? 1 : 0)).join(' \\\n');
+    return s.flatMap((v, i) => indent(v, i > 0 ? 1 : 0)).join(' \\\n');
   },
 };

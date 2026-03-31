@@ -1,16 +1,13 @@
 import type { Awaitable } from '@/types';
 
-const routeHandlerHttpMethods = [
-  'GET',
-  'HEAD',
-  'POST',
-  'PUT',
-  'PATCH',
-  'DELETE',
-  'OPTIONS',
-] as const;
-
-export type RouteHandlerHttpMethod = (typeof routeHandlerHttpMethods)[number];
+export type RouteHandlerHttpMethod =
+  | 'GET'
+  | 'HEAD'
+  | 'POST'
+  | 'PUT'
+  | 'PATCH'
+  | 'DELETE'
+  | 'OPTIONS';
 
 export interface StaticInfo<Params extends string, CatchAll extends string | undefined> {
   params: Params[];
@@ -21,12 +18,12 @@ export interface StaticInfo<Params extends string, CatchAll extends string | und
   methods: readonly RouteHandlerHttpMethod[];
 }
 
-export type RouteHandler<Params extends string, CatchAll extends string | undefined> = (
+type RouteHandler<Params extends string, CatchAll extends string | undefined> = (
   request: Request,
   params: RouteHandlerParams<Params, CatchAll>,
 ) => Awaitable<Response>;
 
-export type RouteHandlerParams<Params extends string, CatchAll extends string | undefined> = Record<
+type RouteHandlerParams<Params extends string, CatchAll extends string | undefined> = Record<
   Params,
   string
 > &
