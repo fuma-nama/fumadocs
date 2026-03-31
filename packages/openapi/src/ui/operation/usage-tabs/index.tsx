@@ -9,7 +9,6 @@ import {
   CodeBlockTabsList,
   CodeBlockTabsTrigger,
 } from 'fumadocs-ui/components/codeblock';
-import { UsageTabsSelectorLazy, UsageTabLazy } from './lazy';
 import { ResponseTabs } from '../response-tabs';
 import { registerDefault } from '@/requests/generators/all';
 import { useMemo } from 'react';
@@ -42,7 +41,7 @@ export function UsageTabs({ method, ctx }: { method: MethodInformation; ctx: Ren
         </CodeBlockTabsList>
         {map.map(([id, item]) => (
           <CodeBlockTab key={id} value={id}>
-            <UsageTabLazy id={id} lang={item.lang} _client={item._client} />
+            <ctx.clientBoundary.UsageTab id={id} lang={item.lang} _client={item._client} />
           </CodeBlockTab>
         ))}
       </CodeBlockTabs>
@@ -74,7 +73,7 @@ export function UsageTabs({ method, ctx }: { method: MethodInformation; ctx: Ren
 
   return renderAPIExampleLayout(
     {
-      selector: method['x-exclusiveCodeSample'] ? null : <UsageTabsSelectorLazy />,
+      selector: method['x-exclusiveCodeSample'] ? null : <ctx.clientBoundary.UsageTabsSelector />,
       usageTabs: renderAPIExampleUsageTabs(registry, ctx),
       responseTabs: <ResponseTabs operation={method} ctx={ctx} />,
     },

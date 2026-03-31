@@ -104,12 +104,12 @@ function Page() {
       </DocsPage>
     );
   } else {
-    content = clientLoader.useContent(page.path, page);
+    content = <Suspense>{clientLoader.useContent(page.path, page)}</Suspense>;
   }
 
   return (
     <DocsLayout {...baseOptions()} tree={page.pageTree}>
-      <Suspense>{content}</Suspense>
+      {content}
     </DocsLayout>
   );
 }

@@ -4,7 +4,6 @@ import type { RenderContext } from '@/types';
 import { FormatFlags, schemaToString } from '@/utils/schema/to-string';
 import { mergeAllOf } from '@/utils/merge-schema';
 import type { SchemaUIProps } from '@/ui/schema/client';
-import { SchemaUILazy } from '@/ui/schema/lazy';
 import { I18nLabel } from '../client/i18n';
 
 export interface FieldBase {
@@ -80,21 +79,29 @@ export interface SchemaUIGeneratedData {
 
 export function Schema({
   ctx,
-  ...options
+  client,
+  root,
+  readOnly,
+  writeOnly,
 }: SchemaUIOptions & {
   ctx: RenderContext;
 }) {
+  const generated = useMemo(
+    () => generateSchemaUI(root, readOnly, writeOnly, ctx),
+    [root, readOnly, writeOnly, ctx],
+  );
+
   if (ctx.schemaUI?.render) {
-    return ctx.schemaUI.render(options, ctx);
+    return ctx.schemaUI.render({ client, root, readOnly, writeOnly }, ctx);
   }
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks -- assume options unchanged
-  const generated = useMemo(() => generateSchemaUI(options, ctx), [ctx, options]);
-  return <SchemaUILazy {...options.client} generated={generated} />;
+  return <ctx.clientBoundary.SchemaUI {...client} generated={generated} />;
 }
 
 export function generateSchemaUI(
-  { root, readOnly, writeOnly }: SchemaUIOptions,
+  root: ResolvedSchema,
+  readOnly = false,
+  writeOnly = false,
   ctx: RenderContext,
 ): SchemaUIGeneratedData {
   const refs: Record<string, SchemaData> = {};
@@ -185,8 +192,8 @@ export function generateSchemaUI(
 
   function isVisible(schema: ResolvedSchema): boolean {
     if (typeof schema === 'boolean') return true;
-    if (schema.writeOnly) return writeOnly ?? false;
-    if (schema.readOnly) return readOnly ?? false;
+    if (schema.writeOnly) return writeOnly;
+    if (schema.readOnly) return readOnly;
     return true;
   }
 
