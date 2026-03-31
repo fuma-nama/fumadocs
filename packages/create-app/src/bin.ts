@@ -252,9 +252,9 @@ async function main(): Promise<void> {
   }
 
   if (options.aiChat) {
-    const { nextUseAi } = await import('./plugins/next-use-ai');
+    const { ai } = await import('./plugins/ai');
 
-    plugins.push(nextUseAi(options.aiChat));
+    plugins.push(ai(options.aiChat));
   }
 
   await create({

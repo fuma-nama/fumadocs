@@ -2,10 +2,9 @@ import path from 'node:path';
 import MagicString from 'magic-string';
 import { Visitor } from 'oxc-parser';
 import type {
-  ArrowFunctionExpression,
+  Argument,
   CallExpression,
   Expression,
-  Function as AstFunction,
   ImportDeclaration,
   ObjectExpression,
   ParamPattern,
@@ -165,7 +164,7 @@ interface HandlerInfo {
   bodyText: string;
 }
 
-function parseHandlerFromAst(s: MagicString, expr: Expression): HandlerInfo {
+function parseHandlerFromAst(s: MagicString, expr: Argument): HandlerInfo {
   const isFn = expr.type === 'FunctionExpression';
   const isArrow = expr.type === 'ArrowFunctionExpression';
   if (!isFn && !isArrow) {
@@ -173,7 +172,7 @@ function parseHandlerFromAst(s: MagicString, expr: Expression): HandlerInfo {
       'route-handler.build: second argument to $routeHandler must be a function or async arrow function',
     );
   }
-  const fn = expr as ArrowFunctionExpression | (AstFunction & { type: 'FunctionExpression' });
+  const fn = expr;
   if (!fn.async) {
     throw new Error('route-handler.build: route handler must be async');
   }
@@ -440,8 +439,8 @@ export function buildRouteHandlerFile(
     throw new Error('route-handler.build: $routeHandler must be called with (info, handler)');
   }
 
-  const arg0 = call.arguments[0] as Expression;
-  const arg1 = call.arguments[1] as Expression;
+  const arg0 = call.arguments[0];
+  const arg1 = call.arguments[1];
   if (arg0.type !== 'ObjectExpression') {
     throw new Error(
       'route-handler.build: first argument to $routeHandler must be an object literal',

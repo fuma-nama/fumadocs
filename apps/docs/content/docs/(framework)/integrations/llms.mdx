@@ -386,7 +386,7 @@ const markdownUrl = `${page.url}.mdx`
 
 You can install the AI chat dialog using Fumadocs CLI.
 
-<Tabs items={['OpenRouter', 'Inkeep AI']}>
+<Tabs items={['AI SDK', 'Inkeep AI']}>
 <Tab>
 
 ```npm
@@ -394,6 +394,12 @@ npx @fumadocs/cli add ai/openrouter
 ```
 
 It's automatically configured for [OpenRouter](https://openrouter.ai) using Vercel AI SDK, with a `/search` tool for AI.
+
+You can use other models by updating the `/api/chat` route.
+
+> Fumadocs doesn't provide the AI model, it's up to you.
+>
+> Your AI model can use the `llms-full.txt` file generated above, or more diversified sources of information when combined with 3rd party solutions.
 
 </Tab>
 <Tab>
@@ -413,43 +419,37 @@ INKEEP_API_KEY="..."
 </Tab>
 </Tabs>
 
-Add the component & trigger to root layout (or anywhere you prefer):
+Add the component & trigger to docs layout:
 
 ```tsx
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { AISearch, AISearchPanel, AISearchTrigger } from '@/components/ai/search';
 import { MessageCircleIcon } from 'lucide-react';
 // or import your own button styles
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body>
-        {/* [!code ++:17] */}
-        <AISearch>
-          <AISearchPanel />
-          <AISearchTrigger
-            position="float"
-            className={cn(
-              buttonVariants({
-                variant: 'secondary',
-                className: 'text-fd-muted-foreground rounded-2xl',
-              }),
-            )}
-          >
-            <MessageCircleIcon className="size-4.5" />
-            Ask AI
-          </AISearchTrigger>
-        </AISearch>
+    <DocsLayout>
+      {/* [!code ++:17] */}
+      <AISearch>
+        <AISearchPanel />
+        <AISearchTrigger
+          position="float"
+          className={cn(
+            buttonVariants({
+              variant: 'secondary',
+              className: 'text-fd-muted-foreground rounded-2xl',
+            }),
+          )}
+        >
+          <MessageCircleIcon className="size-4.5" />
+          Ask AI
+        </AISearchTrigger>
+      </AISearch>
 
-        {children}
-      </body>
-    </html>
+      {children}
+    </DocsLayout>
   );
 }
 ```
-
-To use your own AI models, update the configurations in `useChat` and `/api/chat` route.
-
-Note that Fumadocs doesn't provide the AI model, it's up to you.
-Your AI model can use the `llms-full.txt` file generated above, or more diversified sources of information when combined with 3rd party solutions.
