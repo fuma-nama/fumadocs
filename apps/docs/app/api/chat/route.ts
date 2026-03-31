@@ -1,3 +1,5 @@
-export const runtime = 'edge';
+import { handler } from '@/lib/inkeep/route';
 
-export { POST } from '@/lib/inkeep/server';
+export function POST(req: Request) {
+  return handler.handler(req, {});
+}

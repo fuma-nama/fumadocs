@@ -1,8 +1,11 @@
 import fs from 'node:fs/promises';
-import { isSrc } from '@/utils/is-src';
 import { z } from 'zod';
+import { existsSync, readFileSync } from 'node:fs';
 
-export function createConfigSchema(isSrc: boolean) {
+const frameworks = ['next', 'waku', 'react-router', 'tanstack-start'] as const;
+export type Framework = (typeof frameworks)[number];
+
+export function createConfigSchema() {
   const defaultAliases = {
     uiDir: './components/ui',
     componentsDir: './components',
@@ -12,14 +15,7 @@ export function createConfigSchema(isSrc: boolean) {
   };
 
   return z.object({
-    $schema: z
-      .string()
-      .default(
-        isSrc
-          ? 'node_modules/@fumadocs/cli/dist/schema/src.json'
-          : 'node_modules/@fumadocs/cli/dist/schema/default.json',
-      )
-      .optional(),
+    $schema: z.string().default('node_modules/@fumadocs/cli/dist/schema.json').optional(),
     aliases: z
       .object({
         uiDir: z.string().default(defaultAliases.uiDir),
@@ -30,8 +26,11 @@ export function createConfigSchema(isSrc: boolean) {
       })
       .default(defaultAliases),
 
-    baseDir: z.string().default(isSrc ? 'src' : ''),
+    baseDir: z.string().default(() => (existsSync('./src') ? 'src' : '')),
     uiLibrary: z.enum(['radix-ui', 'base-ui']).default('radix-ui'),
+    framework: z.literal(frameworks).default(() => {
+      return detectFrameworkFromPackageJson() ?? 'next';
+    }),
 
     commands: z
       .object({
@@ -44,6 +43,25 @@ export function createConfigSchema(isSrc: boolean) {
   });
 }
 
+function detectFrameworkFromPackageJson(pkgPath = './package.json'): Framework | undefined {
+  try {
+    const pkgRaw = readFileSync(pkgPath, 'utf-8');
+    const pkg = JSON.parse(pkgRaw);
+
+    const deps = {
+      ...pkg.dependencies,
+      ...pkg.devDependencies,
+    };
+
+    if (deps['next']) return 'next';
+    if (deps['waku']) return 'waku';
+    if (deps['react-router'] || deps['react-router-dom']) return 'react-router';
+    if (deps['@tanstack/react-start']) return 'tanstack-start';
+  } catch {
+    return;
+  }
+}
+
 type ConfigSchema = ReturnType<typeof createConfigSchema>;
 
 export type ConfigInput = z.input<ConfigSchema>;
@@ -54,8 +72,7 @@ export async function createOrLoadConfig(file = './cli.json'): Promise<LoadedCon
   if (inited) return inited;
 
   const content = (await fs.readFile(file)).toString();
-  const src = await isSrc();
-  const configSchema = createConfigSchema(src);
+  const configSchema = createConfigSchema();
 
   return configSchema.parse(JSON.parse(content));
 }
@@ -65,10 +82,7 @@ export async function createOrLoadConfig(file = './cli.json'): Promise<LoadedCon
  *
  * @returns the created config, `undefined` if not created
  */
-export async function initConfig(
-  file = './cli.json',
-  src?: boolean,
-): Promise<LoadedConfig | undefined> {
+export async function initConfig(file = './cli.json'): Promise<LoadedConfig | undefined> {
   if (
     await fs
       .stat(file)
@@ -78,11 +92,11 @@ export async function initConfig(
     return;
   }
 
-  const defaultConfig = await getDefaultConfig(src);
+  const defaultConfig = await getDefaultConfig();
   await fs.writeFile(file, JSON.stringify(defaultConfig, null, 2));
   return defaultConfig;
 }
 
-export async function getDefaultConfig(src?: boolean) {
-  return createConfigSchema(src ?? (await isSrc())).parse({} satisfies ConfigInput);
+export async function getDefaultConfig() {
+  return createConfigSchema().parse({} satisfies ConfigInput);
 }

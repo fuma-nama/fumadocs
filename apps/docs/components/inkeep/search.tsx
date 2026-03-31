@@ -21,7 +21,7 @@ import type { z } from 'zod';
 import { DefaultChatTransport } from 'ai';
 import { Markdown } from '../markdown';
 import { Presence } from '@radix-ui/react-presence';
-import type { InkeepUIMessage } from '@/lib/inkeep/server';
+import type { InkeepUIMessage } from '@/lib/inkeep/route';
 
 const Context = createContext<{
   open: boolean;

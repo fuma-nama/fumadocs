@@ -100,9 +100,9 @@ export const registry: Registry = {
           target: '<dir>/ai/search.tsx',
         },
         {
-          type: 'route',
-          path: 'lib/openrouter/server.ts',
-          target: 'app/api/chat/route.ts',
+          type: 'route-handler',
+          route: 'api/chat',
+          path: 'lib/openrouter/route.ts',
         },
       ],
       dependencies: {
@@ -130,9 +130,9 @@ export const registry: Registry = {
           target: '<dir>/ai/search.tsx',
         },
         {
-          type: 'route',
-          path: 'lib/inkeep/server.ts',
-          target: 'app/api/chat/route.ts',
+          type: 'route-handler',
+          route: 'api/chat',
+          path: 'lib/inkeep/route.ts',
         },
         {
           type: 'lib',

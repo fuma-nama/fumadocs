@@ -9,6 +9,10 @@ import { DependencyManager } from '@/registry/installer/dep-manager';
 import { createCache } from '@/utils/cache';
 import { parse, type ParseResult } from 'oxc-parser';
 import MagicString from 'magic-string';
+import { decodeImport, encodeImport } from '../protocols/import';
+import type { Awaitable } from '@/types';
+import { buildRouteHandlerFile } from '@/registry/macros/route-handler.build';
+import { resolveRouteFilePath } from '@/utils/framework';
 
 interface PluginContext {
   installer: ComponentInstaller;
@@ -22,8 +26,8 @@ interface TransformContext extends PluginContext, InstallContext {
 }
 
 interface InstallContext {
-  pathToFile: Map<string, File>;
   io: IOInterface;
+  importLookup: Map<string, File>;
   /** full variables of the current component. */
   $variables: Record<string, unknown>;
   /** the last item is always the current component. */
@@ -34,8 +38,6 @@ interface DownloadedComponent extends Component {
   $subComponents: DownloadedComponent[];
   $registry: RegistryClient;
 }
-
-type Awaitable<T> = T | Promise<T>;
 
 export interface ComponentInstallerPlugin {
   /**
@@ -176,14 +178,16 @@ export class ComponentInstaller {
 
     scan(downloaded);
 
-    const pathToFile = new Map<string, File>();
+    const importLookup = new Map<string, File>();
     for (const comp of allComponents) {
-      for (const file of comp.files) pathToFile.set(file.target ?? file.path, file);
+      for (const file of comp.files) {
+        importLookup.set(encodeImport(file), file);
+      }
     }
 
     const info = await downloaded.$registry.fetchRegistryInfo();
     await this.installComponent(downloaded, {
-      pathToFile,
+      importLookup,
       io,
       $variables: { ...info.env, ...downloaded.variables },
       stack: [downloaded],
@@ -272,25 +276,33 @@ export class ComponentInstaller {
       await plugin.beforeTransform?.(transformCtx);
     }
 
-    // transform alias
-    const prefix = '@/';
+    if (file.type === 'route-handler') {
+      buildRouteHandlerFile(
+        file.route,
+        filePath,
+        this.rootClient.config.framework,
+        parsed.program,
+        s,
+      );
+    }
 
     transformSpecifiers(parsed.program, s, (specifier) => {
-      for (const [k, v] of Object.entries(ctx.$variables)) {
-        if (typeof v === 'string') specifier = specifier.replaceAll(`<${k}>`, v);
-      }
+      if (ctx.importLookup.has(specifier)) {
+        let outputPath = this.resolveOutputPath(ctx.importLookup.get(specifier)!);
 
-      if (specifier.startsWith(prefix)) {
-        const lookup = specifier.substring(prefix.length);
-        const target = ctx.pathToFile.get(lookup);
-
-        if (target) {
-          specifier = toImportSpecifier(filePath, this.resolveOutputPath(target));
-        } else {
-          ctx.io.onWarn(`cannot find the referenced file of ${specifier}`);
+        for (const [k, v] of Object.entries(ctx.$variables)) {
+          if (typeof v === 'string') outputPath = outputPath.replaceAll(`<${k}>`, v);
         }
+
+        return toImportSpecifier(filePath, outputPath);
       }
 
+      const decoded = decodeImport(specifier);
+      if ('raw' in decoded) {
+        return decoded.raw;
+      }
+
+      ctx.io.onWarn(`cannot find the referenced file of ${specifier}`);
       return specifier;
     });
 
@@ -303,6 +315,11 @@ export class ComponentInstaller {
 
   private resolveOutputPath(file: File): string {
     const config = this.rootClient.config;
+    if (file.type === 'route-handler') {
+      const rel = resolveRouteFilePath(file.route, config.framework, 'ts');
+      return path.resolve(this.cwd, config.baseDir, rel);
+    }
+
     const dir = (
       {
         components: config.aliases.componentsDir,
@@ -310,7 +327,6 @@ export class ComponentInstaller {
         css: config.aliases.cssDir,
         lib: config.aliases.libDir,
         layout: config.aliases.layoutDir,
-        route: './',
       } as const
     )[file.type];
     if (file.target) {
