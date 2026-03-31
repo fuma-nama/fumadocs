@@ -25,7 +25,6 @@ import type { BundledTheme, CodeOptionsThemes, CodeToHastOptionsCommon } from 's
 import { highlightHast, type ShikiFactory } from 'fumadocs-core/highlight/shiki';
 import type { ExampleRequestItem } from './operation/get-example-requests';
 import { compile } from '@fumari/json-schema-ts';
-import * as ClientBoundary from '@/ui/client/boundary.lazy';
 
 export interface GenerateTypeScriptDefinitionsContext extends RenderContext {
   operation: NoReference<MethodInformation>;
@@ -253,11 +252,20 @@ export function createAPIPage(
     }
 
     const slugger = new Slugger();
+    const { ApiProvider, PlaygroundClient, SchemaUI, ServerProvider, UsageTab, UsageTabsSelector } =
+      await import('@/ui/client/boundary.lazy');
 
     const ctx: RenderContext = {
       schema: processed,
       proxyUrl: server.options.proxyUrl,
-      clientBoundary: ClientBoundary,
+      clientBoundary: {
+        ApiProvider,
+        PlaygroundClient,
+        SchemaUI,
+        ServerProvider,
+        UsageTab,
+        UsageTabsSelector,
+      },
       ...options,
       mediaAdapters: {
         ...defaultAdapters,
