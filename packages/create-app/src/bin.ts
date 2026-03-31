@@ -184,7 +184,8 @@ async function main(): Promise<void> {
             },
             {
               value: 'openrouter',
-              label: 'AI SDK (default: OpenRouter)',
+              label: 'AI SDK',
+              hint: 'default to OpenRouter',
             },
             {
               value: 'inkeep',
