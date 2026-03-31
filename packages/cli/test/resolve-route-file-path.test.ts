@@ -26,12 +26,12 @@ test('tanstack-start: routes/ + flattened $ / splat filenames', () => {
 
 test('react-router: routes/ + nested path ($ dynamic, $ splat)', () => {
   const fw = 'react-router' as const satisfies Framework;
-  expect(resolveRouteFilePath('api/handler', fw)).toBe('routes/api/handler.ts');
-  expect(resolveRouteFilePath('/api/foo/', fw)).toBe('routes/api/foo.ts');
-  expect(resolveRouteFilePath('api/posts/[id]', fw)).toBe('routes/api/posts/$id.ts');
-  expect(resolveRouteFilePath('api/foo/[[...slug]]', fw)).toBe('routes/api/foo/$.ts');
-  expect(resolveRouteFilePath('api/foo/[...slug]', fw)).toBe('routes/api/foo/$.ts');
-  expect(resolveRouteFilePath('posts/[slug]/edit', fw)).toBe('routes/posts/$slug/edit.ts');
+  expect(resolveRouteFilePath('api/handler', fw)).toBe('app/routes/api/handler.ts');
+  expect(resolveRouteFilePath('/api/foo/', fw)).toBe('app/routes/api/foo.ts');
+  expect(resolveRouteFilePath('api/posts/[id]', fw)).toBe('app/routes/api/posts/$id.ts');
+  expect(resolveRouteFilePath('api/foo/[[...slug]]', fw)).toBe('app/routes/api/foo/all.ts');
+  expect(resolveRouteFilePath('api/foo/[...slug]', fw)).toBe('app/routes/api/foo/all.ts');
+  expect(resolveRouteFilePath('posts/[slug]/edit', fw)).toBe('app/routes/posts/$slug/edit.ts');
 });
 
 test('waku: pages/_api/ + [...] catch-all normalization', () => {

@@ -78,7 +78,7 @@ function objectPropertyKeyName(key: ObjectExpression['properties'][number]): str
 /**
  * Read `methods`, `params`, and optional `catchAll` from the `$routeHandler` info object literal (AST).
  */
-export function parseRouteInfoFromAst(info: ObjectExpression): ParsedRouteInfo {
+function parseRouteInfoFromAst(info: ObjectExpression): ParsedRouteInfo {
   let methods: string[] | undefined;
   let params: string[] | undefined;
   let catchAll: string | undefined;
@@ -324,16 +324,7 @@ function registryRouteToUrlPath(route: string): string {
  * React Router typegen: `./+types/<segments>` relative to the route file (see `+types` next to `routes/`).
  */
 function computeReactRouterTypesSpecifier(routeFilePath: string): string {
-  const normalized = routeFilePath.replace(/\\/g, '/');
-  const parts = normalized.split('/');
-  const routesIdx = parts.lastIndexOf('routes');
-  const ext = path.extname(routeFilePath);
-  const base = path.basename(routeFilePath, ext);
-  if (routesIdx >= 0) {
-    const dirSegments = parts.slice(routesIdx + 1, -1);
-    return `./+types/${[...dirSegments, base].join('.')}`;
-  }
-  return `./+types/${base}`;
+  return `./+types/${path.basename(routeFilePath, path.extname(routeFilePath))}`;
 }
 
 function generateImports(framework: Framework, routeFilePath: string): string {

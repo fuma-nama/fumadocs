@@ -7,21 +7,24 @@ import { HttpRegistryClient, type RegistryClient } from '@/registry/client';
 import { x } from 'tinyexec';
 import { DependencyManager } from '@/registry/installer/dep-manager';
 import { createCache } from '@/utils/cache';
-import { parse, type ParseResult } from 'oxc-parser';
+import { parse } from 'oxc-parser';
 import MagicString from 'magic-string';
 import { decodeImport, encodeImport } from '../protocols/import';
 import type { Awaitable } from '@/types';
 import { buildRouteHandlerFile } from '@/registry/macros/route-handler.build';
-import { resolveRouteFilePath } from '@/utils/framework';
+import {
+  addReactRouterRouteToFile,
+  resolveReactRouterRoute,
+  resolveRouteFilePath,
+} from '@/utils/framework';
 
 interface PluginContext {
   installer: ComponentInstaller;
 }
 
 interface TransformContext extends PluginContext, InstallContext {
-  s: MagicString;
-  parsed: ParseResult;
   file: File;
+  filePath: string;
   component: DownloadedComponent;
 }
 
@@ -40,15 +43,7 @@ interface DownloadedComponent extends Component {
 }
 
 export interface ComponentInstallerPlugin {
-  /**
-   * transform file before writing (before default transformation)
-   */
-  beforeTransform?: (context: TransformContext) => Awaitable<void>;
-
-  /**
-   * transform file before writing (after default transformation)
-   */
-  afterTransform?: (context: TransformContext) => Awaitable<void>;
+  transform?: (file: string, context: TransformContext) => Awaitable<string>;
 
   /**
    * transform component before install
@@ -268,19 +263,30 @@ export class ComponentInstaller {
     ctx: InstallContext,
   ): Promise<string> {
     const filePath = this.resolveOutputPath(file);
-    const parsed = await parse(filePath, file.content);
-    const s = new MagicString(file.content);
-    const transformCtx: TransformContext = { installer: this, s, file, component, parsed, ...ctx };
+    const transformCtx: TransformContext = { installer: this, file, filePath, component, ...ctx };
+    let transformed = await this.defaultTransform(file.content, transformCtx);
 
     for (const plugin of this.plugins) {
-      await plugin.beforeTransform?.(transformCtx);
+      const v = await plugin.transform?.(transformed, transformCtx);
+      if (v) transformed = v;
     }
 
-    transformSpecifiers(parsed.program, s, (specifier) => {
-      if (ctx.importLookup.has(specifier)) {
-        let outputPath = this.resolveOutputPath(ctx.importLookup.get(specifier)!);
+    return transformed;
+  }
 
-        for (const [k, v] of Object.entries(ctx.$variables)) {
+  private async defaultTransform(
+    content: string,
+    { file, importLookup, filePath, $variables, io }: TransformContext,
+  ) {
+    const config = this.rootClient.config;
+    const parsed = await parse(filePath, content);
+    const s = new MagicString(content);
+
+    transformSpecifiers(parsed.program, s, (specifier) => {
+      if (importLookup.has(specifier)) {
+        let outputPath = this.resolveOutputPath(importLookup.get(specifier)!);
+
+        for (const [k, v] of Object.entries($variables)) {
           if (typeof v === 'string') outputPath = outputPath.replaceAll(`<${k}>`, v);
         }
 
@@ -292,22 +298,26 @@ export class ComponentInstaller {
         return decoded.raw;
       }
 
-      ctx.io.onWarn(`cannot find the referenced file of ${specifier}`);
+      io.onWarn(`cannot find the referenced file of ${specifier}`);
       return specifier;
     });
 
     if (file.type === 'route-handler') {
-      buildRouteHandlerFile(
-        file.route,
-        filePath,
-        this.rootClient.config.framework,
-        parsed.program,
-        s,
-      );
-    }
+      buildRouteHandlerFile(file.route, filePath, config.framework, parsed.program, s);
 
-    for (const plugin of this.plugins) {
-      await plugin.afterTransform?.(transformCtx);
+      if (config.framework === 'react-router') {
+        const routesFile = path.join(this.cwd, 'app/routes.ts');
+        const content = await fs
+          .readFile(routesFile, 'utf-8')
+          .then((res) => res.toString())
+          .catch(() => null);
+
+        if (content)
+          await addReactRouterRouteToFile(routesFile, content, {
+            path: resolveReactRouterRoute(file.route),
+            module: path.relative(path.dirname(routesFile), filePath),
+          });
+      }
     }
 
     return s.toString();

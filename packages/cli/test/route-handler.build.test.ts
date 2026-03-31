@@ -128,7 +128,7 @@ test('react-router: async loader + action, args.request alias', () => {
     compiledContent: sample,
   });
   expect(out).toMatchInlineSnapshot(`
-    "import type { Route } from './+types/api.posts.$id';
+    "import type { Route } from './+types/$id';
 
     export async function loader(args: Route.LoaderArgs) {
       const req = args.request;
@@ -163,7 +163,7 @@ export const handler = $routeHandler(
     compiledContent: getOnly,
   });
   expect(out).toMatchInlineSnapshot(`
-    "import type { Route } from './+types/api.x';
+    "import type { Route } from './+types/x';
 
     export async function loader(args: Route.LoaderArgs) {
       const request = args.request;
