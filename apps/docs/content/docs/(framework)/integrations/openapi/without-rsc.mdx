@@ -1,6 +1,6 @@
 ---
 title: Without RSC
-descirption: Setup guide for non-RSC environments.
+description: Setup guide for non-RSC environments.
 ---
 
 ## Setup
@@ -11,7 +11,9 @@ Install the required packages.
 npm i fumadocs-openapi shiki
 ```
 
-### Generate Styles
+> `shiki` must be installed, otherwise Vite will have bundling problem with Shiki's WASM regex engine.
+
+### Generate Styles [step]
 
 Add the following line:
 
@@ -23,9 +25,9 @@ Add the following line:
 @import 'fumadocs-openapi/css/preset.css';
 ```
 
-### Configure Plugin
+### Configure Plugin [step]
 
-Create the OpenAPI server instance & `<APIPage />` component.
+Create the OpenAPI server instance & `<ClientAPIPage />` component.
 
 ```ts tab="lib/openapi.ts"
 import { createOpenAPI } from 'fumadocs-openapi/server';
@@ -55,7 +57,7 @@ export const source = loader({
 
 See [`createOpenAPI()`](/docs/integrations/openapi/server) & [`<APIPage />`](/docs/integrations/openapi/api-page) for available options.
 
-### Generate Pages
+### Generate Pages [step]
 
 You can generate pages dynamically by integrating into [Loader API](/docs/headless/source-api/source).
 
@@ -81,18 +83,32 @@ export const source = loader(
 );
 ```
 
+### Update References to `source` [step]
+
 `openapiSource()` is a server-side API that generates pages directly to your `loader()`, hence allowing dynamic generation (e.g. different page tree as schema changes).
 
-It shares a different type from your original source, explicit handling of OpenAPI pages is necessary.
-
-For example, update all references to `source`'s pages, including utils like `getLLMText()`:
+But **it will change the type of your pages**, explicit handling of OpenAPI pages is necessary.
 
 ```ts
 import { source } from '@/lib/source';
+
+const page = source.getPage(['...']);
+
+if (page.data.type === 'openapi') {
+  // page data for generated OpenAPI pages
+  console.log(page.data);
+} else {
+  // original flow...
+}
+```
+
+Update all references to the pages of `source`, for example:
+
+```ts title="lib/source.ts"
 import type { InferPageType } from 'fumadocs-core/source';
 
 /**
- * return page Markdown for LLMs
+ * return page content for LLMs
  */
 export async function getLLMText(page: InferPageType<typeof source>) {
   // [!code ++:4]
@@ -105,13 +121,17 @@ export async function getLLMText(page: InferPageType<typeof source>) {
 }
 ```
 
-<Callout type='warn'>
+<Callout type='warn' title="Ensure the migration is complete!">
 
-Make sure to check the types before continuing.
+Run a type check to verify before continuing, e.g.
+
+```npm
+npm run types:check
+```
 
 </Callout>
 
-### Render Page
+### Render Page [step]
 
 Pass a client payload from server, then render the page using the `<ClientAPIPage />` component you created above.
 
@@ -151,7 +171,7 @@ const serverLoader = createServerFn({
     if (!page) throw notFound();
 
     const pageTree = await source.serializePageTree(source.getPageTree());
-    // different result for OpenAPI pages [!code ++:12]
+    // different result for OpenAPI pages [!code ++:9]
     if (page.data.type === 'openapi') {
       return {
         type: 'openapi',
@@ -193,10 +213,14 @@ function Page() {
       </DocsPage>
     );
   } else {
-    content = <Suspense>{clientLoader.useContent(page.path, page)}</Suspense>;
+    content = clientLoader.useContent(page.path, page);
   }
 
-  return <DocsLayout tree={page.pageTree}>{content}</DocsLayout>;
+  return (
+    <DocsLayout tree={page.pageTree}>
+      <Suspense>{content}</Suspense>
+    </DocsLayout>
+  );
 }
 ```
 

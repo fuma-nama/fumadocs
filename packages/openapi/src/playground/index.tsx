@@ -7,7 +7,6 @@ import type {
 } from '@/types';
 import { getPreferredType, NoReference, type ParsedSchema } from '@/utils/schema';
 import { type PlaygroundClientProps } from './client';
-import { ClientLazy } from './lazy';
 
 interface Context {
   references: Record<string, ParsedSchema>;
@@ -97,7 +96,7 @@ export function APIPlayground({ path, method, ctx }: APIPlaygroundProps) {
     readOnly: false,
   };
 
-  return <ClientLazy {...props} />;
+  return <ctx.clientBoundary.PlaygroundClient {...props} />;
 }
 
 function writeReferences(

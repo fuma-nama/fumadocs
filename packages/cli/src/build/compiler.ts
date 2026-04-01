@@ -4,7 +4,6 @@ import type {
   CompiledComponent,
   CompiledFile,
   httpSubComponent,
-  NamespaceType,
   registryInfoSchema,
 } from '@/registry/schema';
 import type { z } from 'zod';
@@ -13,6 +12,8 @@ import { ResolverFactory } from 'oxc-resolver';
 import MagicString from 'magic-string';
 import { transformSpecifiers } from '@/utils/ast';
 import { isRelative } from '@/utils/fs';
+import type { DistributiveOmit } from '@/types';
+import { encodeImport } from '@/registry/protocols/import';
 
 export type OnResolve = (
   reference: SourceReference,
@@ -25,11 +26,9 @@ export interface CompiledRegistry {
   info: z.output<typeof registryInfoSchema>;
 }
 
-export interface ComponentFile {
-  type: NamespaceType;
+export type ComponentFile = DistributiveOmit<CompiledFile, 'content'> & {
   path: string;
-  target?: string;
-}
+};
 
 export interface Component {
   name: string;
@@ -276,14 +275,6 @@ export class ComponentCompiler {
     this.registry = compiler.raw;
   }
 
-  private toImportPath(file: ComponentFile): string {
-    let filePath = file.target ?? file.path;
-
-    if (filePath.startsWith('./')) filePath = filePath.slice(2);
-
-    return `@/${filePath.replaceAll(path.sep, '/')}`;
-  }
-
   async build(): Promise<CompiledComponent> {
     const files = (
       await Promise.all(this.component.files.map((file) => this.onBuildFile(file)))
@@ -316,6 +307,12 @@ export class ComponentCompiler {
 
     const queue: ComponentFile[] = [];
     const result = await this.buildFile(file, (reference) => {
+      const external = reference.type === 'dependency' && reference.dep === '@fumadocs/cli';
+
+      if (external) {
+        return reference.specifier;
+      }
+
       if (reference.type === 'unknown-specifier') {
         if (!reference.specifier.startsWith('node:')) {
           console.warn(`Unknown specifier ${reference.specifier}, skipping for now`);
@@ -330,7 +327,7 @@ export class ComponentCompiler {
         const refFile = this.registry.onUnknownFile?.(reference.file);
         if (refFile) {
           queue.push(refFile);
-          return this.toImportPath(refFile);
+          return encodeImport(refFile);
         }
 
         if (refFile === false) return;
@@ -340,8 +337,7 @@ export class ComponentCompiler {
 
       if (reference.type === 'sub-component') {
         const resolved = reference.resolved;
-        if (resolved.component.name === this.component.name)
-          return this.toImportPath(resolved.file);
+        if (resolved.component.name === this.component.name) return encodeImport(resolved.file);
 
         if (resolved.type === 'remote') {
           this.subComponents.set(`${resolved.registryName}:${resolved.component.name}`, {
@@ -353,7 +349,7 @@ export class ComponentCompiler {
           this.subComponents.set(resolved.component.name, resolved.component.name);
         }
 
-        return this.toImportPath(resolved.file);
+        return encodeImport(resolved.file);
       }
 
       const dep = resolver.getDepInfo(reference.dep);
@@ -387,13 +383,12 @@ export class ComponentCompiler {
     const astType = astTypes[path.extname(file.path)];
     const content = (await fs.readFile(sourceFilePath)).toString();
 
-    if (!astType)
+    if (!astType) {
       return {
+        ...file,
         content,
-        path: file.path,
-        type: file.type,
-        target: file.target,
       };
+    }
 
     const resolver = this.compiler.resolver;
 
@@ -449,10 +444,8 @@ export class ComponentCompiler {
     });
 
     return {
+      ...file,
       content: s.toString(),
-      type: file.type,
-      path: file.path,
-      target: file.target,
     };
   }
 }

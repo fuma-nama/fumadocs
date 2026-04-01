@@ -1,4 +1,4 @@
-import { ident } from '@/requests/string-utils';
+import { indent } from '@/requests/string-utils';
 import type { CodeUsageGenerator } from '@/requests/generators';
 import { resolveMediaAdapter } from '@/requests/media/adapter';
 
@@ -40,21 +40,21 @@ export const java: CodeUsageGenerator = {
 
     // Create HttpClient
     s.push('HttpClient client = HttpClient.newBuilder()');
-    s.push(ident('.connectTimeout(Duration.ofSeconds(10))'));
-    s.push(ident('.build();'));
+    s.push(indent('.connectTimeout(Duration.ofSeconds(10))'));
+    s.push(indent('.build();'));
     s.push('');
 
     // Build request
     s.push('HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()');
-    s.push(ident(`.uri(URI.create(${JSON.stringify(url)}))`));
+    s.push(indent(`.uri(URI.create(${JSON.stringify(url)}))`));
 
     // Add headers
     for (const [key, param] of Object.entries(headers)) {
-      s.push(ident(`.header(${JSON.stringify(key)}, ${JSON.stringify(param.value)})`));
+      s.push(indent(`.header(${JSON.stringify(key)}, ${JSON.stringify(param.value)})`));
     }
 
     if (data.bodyMediaType) {
-      s.push(ident(`.header("Content-Type", "${data.bodyMediaType}")`));
+      s.push(indent(`.header("Content-Type", "${data.bodyMediaType}")`));
     }
 
     // Add cookies if present
@@ -63,25 +63,25 @@ export const java: CodeUsageGenerator = {
     if (cookies.length > 0) {
       const cookieString = cookies.map(([key, param]) => `${key}=${param.value}`).join('; ');
 
-      s.push(ident(`.header("Cookie", ${JSON.stringify(cookieString)})`));
+      s.push(indent(`.header("Cookie", ${JSON.stringify(cookieString)})`));
     }
 
     const arg = body ? 'body' : '';
-    s.push(ident(`.${data.method.toUpperCase()}(${arg})`));
-    s.push(ident('.build();'));
+    s.push(indent(`.${data.method.toUpperCase()}(${arg})`));
+    s.push(indent('.build();'));
     s.push('');
 
     // Add response handling
     s.push('try {');
     s.push(
-      ident(
+      indent(
         'HttpResponse<String> response = client.send(requestBuilder.build(), BodyHandlers.ofString());',
       ),
     );
-    s.push(ident('System.out.println("Status code: " + response.statusCode());'));
-    s.push(ident('System.out.println("Response body: " + response.body());'));
+    s.push(indent('System.out.println("Status code: " + response.statusCode());'));
+    s.push(indent('System.out.println("Response body: " + response.body());'));
     s.push('} catch (Exception e) {');
-    s.push(ident('e.printStackTrace();'));
+    s.push(indent('e.printStackTrace();'));
     s.push('}');
 
     return s.join('\n');

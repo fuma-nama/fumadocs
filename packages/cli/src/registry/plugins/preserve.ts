@@ -1,4 +1,3 @@
-import { transformSpecifiers } from '@/utils/ast';
 import type { ComponentInstallerPlugin } from '../installer';
 
 /**
@@ -41,16 +40,12 @@ export function pluginPreserveLayouts(): ComponentInstallerPlugin {
         $subComponents: comp.$subComponents.filter((child) => !layoutNameSet.has(child.name)),
       };
     },
-    beforeTransform({ parsed, s, stack }) {
+    transformImport(specifier, { stack }) {
       const isDirectInstall = layoutNameSet.has(stack[0].name);
-      if (isDirectInstall) return;
+      // skip if direct install or unrelated to layout component
+      if (isDirectInstall || !(specifier in layoutComps)) return specifier;
 
-      transformSpecifiers(parsed.program, s, (specifier) => {
-        // skip if unrelated to layout component
-        if (!(specifier in layoutComps)) return specifier;
-
-        return `fumadocs-ui/${layoutComps[specifier]}`;
-      });
+      return `fumadocs-ui/${layoutComps[specifier]}`;
     },
   };
 }

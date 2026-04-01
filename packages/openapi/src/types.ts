@@ -44,6 +44,7 @@ export interface RenderContext
    * dereferenced schema
    */
   schema: ProcessedDocument;
+  clientBoundary: typeof import('@/ui/client/boundary');
 
   mediaAdapters: Record<string, MediaAdapter>;
 

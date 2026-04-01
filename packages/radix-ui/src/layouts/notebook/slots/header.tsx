@@ -58,7 +58,7 @@ export function Header(props: ComponentProps<'header'>) {
                   color: 'ghost',
                   size: 'icon-sm',
                 }),
-                'text-fd-muted-foreground data-[collapsed=false]:hidden max-md:hidden',
+                '-ms-1.5 text-fd-muted-foreground data-[collapsed=false]:hidden max-md:hidden',
               )}
             >
               <SidebarIcon />

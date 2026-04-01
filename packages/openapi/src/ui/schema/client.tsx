@@ -107,7 +107,7 @@ function SchemaUIProperty({
   const { refs } = useData();
   const schema = refs[$type];
   const renderRef = useRenderRef();
-  let type: ReactNode = schema.typeName;
+  let type: ReactNode = schema.aliasName;
 
   if ((schema.type === 'or' || schema.type === 'and') && schema.items.length > 0) {
     if (variant === 'expand')
@@ -121,12 +121,7 @@ function SchemaUIProperty({
             ))}
           </TabsList>
           {schema.items.map((item) => (
-            <TabsContent
-              key={item.$type}
-              value={item.$type}
-              forceMount={undefined}
-              className="pt-2 pb-0"
-            >
+            <TabsContent key={item.$type} value={item.$type} className="pt-2 pb-0">
               <SchemaUIProperty {...item} variant="expand" />
             </TabsContent>
           ))}
@@ -135,6 +130,7 @@ function SchemaUIProperty({
     type = renderRef({
       pathName: name,
       $ref: $type,
+      text: schema.aliasName,
     });
   } else if (schema.type === 'object' && schema.props.length > 0) {
     if (variant === 'expand')
@@ -143,6 +139,7 @@ function SchemaUIProperty({
     type = renderRef({
       pathName: name,
       $ref: $type,
+      text: schema.aliasName,
     });
   } else if (schema.type === 'array') {
     if (variant === 'expand') return <ArrayItemCollapsible schema={schema} />;
@@ -150,6 +147,7 @@ function SchemaUIProperty({
     type = renderRef({
       pathName: name,
       $ref: $type,
+      text: schema.aliasName,
     });
   }
 
@@ -419,9 +417,13 @@ function useRenderRef() {
   }: {
     pathName: ReactNode;
     $ref: string;
-    text?: ReactNode;
+    text: ReactNode;
   }) {
     const schema = refs[$ref];
+
+    if (!isExpandable(schema)) {
+      return <span className={cn(typeVariants())}>{text}</span>;
+    }
 
     if (schema.type === 'and' || schema.type === 'or') {
       const sep = schema.type === 'and' ? '&' : '|';
@@ -441,13 +443,17 @@ function useRenderRef() {
       return (
         <span className={cn(typeVariants(), 'flex flex-row items-center flex-wrap')}>
           {'array<'}
-          {renderRef({ pathName: <>{pathName}[]</>, $ref: schema.item.$type })}
+          {renderRef({
+            pathName: <>{pathName}[]</>,
+            text: refs[schema.item.$type].aliasName,
+            $ref: schema.item.$type,
+          })}
           {'>'}
         </span>
       );
     }
 
-    return renderTrigger({ $ref, pathName, children: text ?? schema.aliasName });
+    return renderTrigger({ $ref, pathName, children: text });
   };
 }
 
@@ -552,4 +558,9 @@ function Property({
       <div className="prose-no-margin pt-2.5 empty:hidden">{props.children}</div>
     </div>
   );
+}
+
+function isExpandable(data: SchemaData): boolean {
+  if (data.type !== 'primitive') return true;
+  return Boolean(data.description || (data.infoTags && data.infoTags.length > 0));
 }

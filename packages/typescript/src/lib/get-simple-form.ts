@@ -18,19 +18,20 @@ export interface TypeSimplifierOptions {
 }
 
 export function getSimpleForm(
-  ctx: TypeSimplifierContext,
+  type: Type,
+  checker: TypeChecker,
+  location?: Node,
   options: TypeSimplifierOptions = {},
 ): string {
-  const { type } = ctx;
   const { override, shouldSimplify, noUndefined = false } = options;
 
   if (type.isUndefined() && noUndefined) return '';
 
-  const overridden = override?.(ctx);
+  const overridden = override?.({ checker, type, location });
   if (overridden) return overridden;
 
-  if (shouldSimplify && !shouldSimplify(ctx)) {
-    return type.getText(ctx.location, TypeFormatFlags.UseAliasDefinedOutsideCurrentScope);
+  if (shouldSimplify && !shouldSimplify({ checker, type, location })) {
+    return type.getText(location, TypeFormatFlags.UseAliasDefinedOutsideCurrentScope);
   }
 
   const alias = type.getAliasSymbol();
@@ -39,15 +40,23 @@ export function getSimpleForm(
     if (args.length === 0) return alias.getName();
 
     const nextOptions = { ...options, noUndefined: false };
-    return `${alias.getName()}<${args.map((arg) => getSimpleForm({ ...ctx, type: arg }, nextOptions)).join(', ')}>`;
+    return `${alias.getName()}<${args.map((arg) => getSimpleForm(arg, checker, location, nextOptions)).join(', ')}>`;
   }
 
-  if (type.isUnion()) return 'union';
+  if (type.isUnion()) {
+    if (noUndefined) {
+      const members = type.getUnionTypes().filter((t) => !t.isUndefined());
+      if (members.length === 0) return 'undefined';
+      if (members.length === 1) return getSimpleForm(members[0], checker, location, options);
+    }
+
+    return 'union';
+  }
 
   if (type.isIntersection()) {
     const types: string[] = [];
     for (const t of type.getIntersectionTypes()) {
-      const str = getSimpleForm({ ...ctx, type: t }, options);
+      const str = getSimpleForm(t, checker, location, options);
       if (str.length > 0 && str !== 'never') types.unshift(str);
     }
 
@@ -70,7 +79,7 @@ export function getSimpleForm(
     return 'object';
   }
 
-  return type.getText(ctx.location, TypeFormatFlags.UseAliasDefinedOutsideCurrentScope);
+  return type.getText(location, TypeFormatFlags.UseAliasDefinedOutsideCurrentScope);
 }
 
 function dedupe<T>(arr: T[]): T[] {

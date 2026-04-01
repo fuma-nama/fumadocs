@@ -24,7 +24,6 @@ import {
 import { isMediaTypeSupported } from '@/requests/media/adapter';
 import { APIPlayground } from '@/playground';
 import { RequestTabs } from './request-tabs';
-import { ServerProviderLazy } from '../contexts/api.lazy';
 import { cn } from '@/utils/cn';
 import { getExampleRequests } from './get-example-requests';
 import { SelectTabs, SelectTabTrigger, SelectTab } from '../components/server-tab';
@@ -304,9 +303,9 @@ export function Operation({
     );
     if (method.servers) {
       content = (
-        <ServerProviderLazy servers={method.servers as ServerObject[]}>
+        <ctx.clientBoundary.ServerProvider servers={method.servers as ServerObject[]}>
           {content}
-        </ServerProviderLazy>
+        </ctx.clientBoundary.ServerProvider>
       );
     }
 

@@ -252,10 +252,20 @@ export function createAPIPage(
     }
 
     const slugger = new Slugger();
+    const { ApiProvider, PlaygroundClient, SchemaUI, ServerProvider, UsageTab, UsageTabsSelector } =
+      await import('@/ui/client/boundary.lazy');
 
     const ctx: RenderContext = {
       schema: processed,
       proxyUrl: server.options.proxyUrl,
+      clientBoundary: {
+        ApiProvider,
+        PlaygroundClient,
+        SchemaUI,
+        ServerProvider,
+        UsageTab,
+        UsageTabsSelector,
+      },
       ...options,
       mediaAdapters: {
         ...defaultAdapters,

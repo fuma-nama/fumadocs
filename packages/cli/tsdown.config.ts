@@ -8,6 +8,7 @@ export default defineConfig({
     './src/{index,config}.ts',
     './src/registry/{client,schema}.ts',
     './src/registry/installer/index.ts',
+    './src/registry/macros/route-handler.ts',
     './src/build/index.ts',
   ],
   format: 'esm',
@@ -25,17 +26,9 @@ export default defineConfig({
     console.log('JSON schema generated');
     await fs.mkdir('dist/schema', { recursive: true });
     await fs.writeFile(
-      'dist/schema/src.json',
+      'dist/schema.json',
       JSON.stringify(
-        z.toJSONSchema(createConfigSchema(true), {
-          io: 'input',
-        }),
-      ),
-    );
-    await fs.writeFile(
-      'dist/schema/default.json',
-      JSON.stringify(
-        z.toJSONSchema(createConfigSchema(false), {
+        z.toJSONSchema(createConfigSchema(), {
           io: 'input',
         }),
       ),

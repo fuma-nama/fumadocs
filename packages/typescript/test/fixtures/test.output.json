@@ -23,7 +23,7 @@
           }
         ],
         "type": "number | undefined",
-        "simplifiedType": "union",
+        "simplifiedType": "number",
         "required": false,
         "deprecated": false
       }
@@ -53,7 +53,7 @@
           }
         ],
         "type": "number | undefined",
-        "simplifiedType": "union",
+        "simplifiedType": "number",
         "required": false,
         "deprecated": false
       },

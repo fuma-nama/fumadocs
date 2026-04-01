@@ -32,7 +32,7 @@ export interface ClientLoader<Doc, Props> {
    */
   getComponent: (path: string) => FC<Props>;
   /**
-   * Get react nodes that renders content, wraps `<Suspense>` by default.
+   * Get react nodes that renders content.
    */
   useContent: undefined extends Props
     ? (path: string, props?: Props) => ReactNode

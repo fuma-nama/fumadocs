@@ -1,5 +1,13 @@
 # create-next-docs-app
 
+## 16.0.85
+
+### Patch Changes
+
+- a77a4ad: Support other React.js frameworks for AI chat
+- Updated dependencies [3ff78c9]
+  - @fumadocs/cli@1.3.3
+
 ## 16.0.84
 
 ### Patch Changes

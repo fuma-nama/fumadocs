@@ -7,23 +7,21 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import { SyntaxKind } from 'ts-morph';
 
-export function nextUseAi(provider: 'openrouter' | 'inkeep'): TemplatePlugin {
+export function ai(provider: 'openrouter' | 'inkeep'): TemplatePlugin {
   return {
     async afterWrite() {
-      if (this.template.value === '+next+fuma-docs-mdx') {
-        const config = await getDefaultConfig();
-        await install(
-          `ai/${provider}`,
-          new ComponentInstaller(new HttpRegistryClient('https://fumadocs.dev/registry', config), {
-            cwd: this.dest,
-          }),
-        );
-        await addAIChat(this);
-        await fs.writeFile(
-          path.join(this.dest, '.env.local'),
-          provider === 'openrouter' ? 'OPENROUTER_API_KEY=' : 'INKEEP_API_KEY=',
-        );
-      }
+      const config = await getDefaultConfig();
+      await install(
+        `ai/${provider}`,
+        new ComponentInstaller(new HttpRegistryClient('https://fumadocs.dev/registry', config), {
+          cwd: this.dest,
+        }),
+      );
+      await addAIChat(this);
+      await fs.writeFile(
+        path.join(this.dest, '.env.local'),
+        provider === 'openrouter' ? 'OPENROUTER_API_KEY=' : 'INKEEP_API_KEY=',
+      );
     },
   };
 }
@@ -47,8 +45,27 @@ async function install(target: string, installer: ComponentInstaller) {
   await installer.onEnd();
 }
 
-async function addAIChat({ appDir }: TemplatePluginContext) {
-  const file = await createSourceFile(path.join(appDir, 'app/docs/layout.tsx'));
+async function addAIChat({ template, appDir }: TemplatePluginContext) {
+  let filePath: string;
+  switch (template.value) {
+    case '+next+fuma-docs-mdx':
+    case '+next+fuma-docs-mdx+static':
+      filePath = path.join(appDir, 'app/docs/layout.tsx');
+      break;
+    case 'waku':
+      filePath = path.join(appDir, 'pages/docs/_layout.tsx');
+      break;
+    case 'react-router':
+    case 'react-router-spa':
+      filePath = path.join(appDir, 'routes/docs.tsx');
+      break;
+    case 'tanstack-start':
+    case 'tanstack-start-spa':
+      filePath = path.join(appDir, 'routes/docs/$.tsx');
+      break;
+  }
+
+  const file = await createSourceFile(filePath);
   const elements = file.getDescendantsOfKind(SyntaxKind.JsxElement);
   const code = `<AISearch>
   <AISearchPanel />

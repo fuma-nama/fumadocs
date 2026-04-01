@@ -18,7 +18,7 @@ import { useChat, type UseChatHelpers } from '@ai-sdk/react';
 import { DefaultChatTransport, type Tool, type UIToolInvocation } from 'ai';
 import { Markdown } from '../markdown';
 import { Presence } from '@radix-ui/react-presence';
-import type { ChatUIMessage, SearchTool } from '@/lib/openrouter/server';
+import type { ChatUIMessage, SearchTool } from '@/lib/openrouter/route';
 
 const Context = createContext<{
   open: boolean;

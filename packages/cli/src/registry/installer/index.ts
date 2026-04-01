@@ -5,25 +5,32 @@ import { toImportSpecifier, transformSpecifiers } from '@/utils/ast';
 import type { Component, File } from '@/registry/schema';
 import { HttpRegistryClient, type RegistryClient } from '@/registry/client';
 import { x } from 'tinyexec';
-import { DependencyManager } from '@/registry/installer/dep-manager';
+import { createDeps } from '@/registry/installer/dep-manager';
 import { createCache } from '@/utils/cache';
-import { parse, type ParseResult } from 'oxc-parser';
+import { parse } from 'oxc-parser';
 import MagicString from 'magic-string';
+import { decodeImport, encodeImport } from '../protocols/import';
+import type { Awaitable } from '@/types';
+import { transformRouteHandler } from '@/registry/macros/route-handler.build';
+import {
+  addReactRouterRouteToFile,
+  resolveReactRouterRoute,
+  resolveRouteFilePath,
+} from '@/utils/framework';
 
 interface PluginContext {
   installer: ComponentInstaller;
 }
 
 interface TransformContext extends PluginContext, InstallContext {
-  s: MagicString;
-  parsed: ParseResult;
   file: File;
+  filePath: string;
   component: DownloadedComponent;
 }
 
 interface InstallContext {
-  pathToFile: Map<string, File>;
   io: IOInterface;
+  importLookup: Map<string, File>;
   /** full variables of the current component. */
   $variables: Record<string, unknown>;
   /** the last item is always the current component. */
@@ -35,18 +42,9 @@ interface DownloadedComponent extends Component {
   $registry: RegistryClient;
 }
 
-type Awaitable<T> = T | Promise<T>;
-
 export interface ComponentInstallerPlugin {
-  /**
-   * transform file before writing (before default transformation)
-   */
-  beforeTransform?: (context: TransformContext) => Awaitable<void>;
-
-  /**
-   * transform file before writing (after default transformation)
-   */
-  afterTransform?: (context: TransformContext) => Awaitable<void>;
+  transform?: (file: string, context: TransformContext) => Awaitable<string>;
+  transformImport?: (specifier: string, context: TransformContext) => string;
 
   /**
    * transform component before install
@@ -176,24 +174,24 @@ export class ComponentInstaller {
 
     scan(downloaded);
 
-    const pathToFile = new Map<string, File>();
+    const importLookup = new Map<string, File>();
     for (const comp of allComponents) {
-      for (const file of comp.files) pathToFile.set(file.target ?? file.path, file);
+      for (const file of comp.files) {
+        importLookup.set(encodeImport(file), file);
+      }
     }
 
     const info = await downloaded.$registry.fetchRegistryInfo();
     await this.installComponent(downloaded, {
-      pathToFile,
+      importLookup,
       io,
       $variables: { ...info.env, ...downloaded.variables },
       stack: [downloaded],
     });
   }
 
-  async deps() {
-    const manager = new DependencyManager(this.cwd);
-    await manager.init(this.dependencies, this.devDependencies);
-    return manager;
+  deps() {
+    return createDeps(this.cwd, this.dependencies, this.devDependencies);
   }
 
   async onEnd() {
@@ -264,38 +262,65 @@ export class ComponentInstaller {
     ctx: InstallContext,
   ): Promise<string> {
     const filePath = this.resolveOutputPath(file);
-    const parsed = await parse(filePath, file.content);
-    const s = new MagicString(file.content);
-    const transformCtx: TransformContext = { installer: this, s, file, component, parsed, ...ctx };
+    const transformCtx: TransformContext = { installer: this, file, filePath, component, ...ctx };
+    let transformed = await this.defaultTransform(file.content, transformCtx);
 
     for (const plugin of this.plugins) {
-      await plugin.beforeTransform?.(transformCtx);
+      if (!plugin.transform) continue;
+      transformed = await plugin.transform(transformed, transformCtx);
     }
 
-    // transform alias
-    const prefix = '@/';
+    return transformed;
+  }
+
+  private async defaultTransform(content: string, ctx: TransformContext) {
+    const { file, importLookup, filePath, $variables, io } = ctx;
+    const config = this.rootClient.config;
+    const parsed = await parse(filePath, content);
+    const s = new MagicString(content);
 
     transformSpecifiers(parsed.program, s, (specifier) => {
-      for (const [k, v] of Object.entries(ctx.$variables)) {
-        if (typeof v === 'string') specifier = specifier.replaceAll(`<${k}>`, v);
-      }
-
-      if (specifier.startsWith(prefix)) {
-        const lookup = specifier.substring(prefix.length);
-        const target = ctx.pathToFile.get(lookup);
-
-        if (target) {
-          specifier = toImportSpecifier(filePath, this.resolveOutputPath(target));
-        } else {
-          ctx.io.onWarn(`cannot find the referenced file of ${specifier}`);
+      for (const plugin of this.plugins) {
+        if (plugin.transformImport) {
+          specifier = plugin.transformImport(specifier, ctx);
         }
       }
 
+      if (importLookup.has(specifier)) {
+        let outputPath = this.resolveOutputPath(importLookup.get(specifier)!);
+
+        for (const [k, v] of Object.entries($variables)) {
+          if (typeof v === 'string') outputPath = outputPath.replaceAll(`<${k}>`, v);
+        }
+
+        return toImportSpecifier(filePath, outputPath);
+      }
+
+      const decoded = decodeImport(specifier);
+      if ('raw' in decoded) {
+        return decoded.raw;
+      }
+
+      io.onWarn(`cannot find the referenced file of ${specifier}`);
       return specifier;
     });
 
-    for (const plugin of this.plugins) {
-      await plugin.afterTransform?.(transformCtx);
+    if (file.type === 'route-handler') {
+      transformRouteHandler(file.route, filePath, config.framework, parsed.program, s);
+
+      if (config.framework === 'react-router') {
+        const routesFile = path.join(this.cwd, 'app/routes.ts');
+        const content = await fs
+          .readFile(routesFile, 'utf-8')
+          .then((res) => res.toString())
+          .catch(() => null);
+
+        if (content)
+          await addReactRouterRouteToFile(routesFile, content, {
+            path: resolveReactRouterRoute(file.route),
+            module: path.relative(path.dirname(routesFile), filePath),
+          });
+      }
     }
 
     return s.toString();
@@ -303,6 +328,11 @@ export class ComponentInstaller {
 
   private resolveOutputPath(file: File): string {
     const config = this.rootClient.config;
+    if (file.type === 'route-handler') {
+      const rel = resolveRouteFilePath(file.route, config.framework, 'ts');
+      return path.resolve(this.cwd, config.baseDir, rel);
+    }
+
     const dir = (
       {
         components: config.aliases.componentsDir,
@@ -310,7 +340,6 @@ export class ComponentInstaller {
         css: config.aliases.cssDir,
         lib: config.aliases.libDir,
         layout: config.aliases.layoutDir,
-        route: './',
       } as const
     )[file.type];
     if (file.target) {

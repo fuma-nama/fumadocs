@@ -220,17 +220,10 @@ async function getDocEntry(prop: TsSymbol, context: EntryContext): Promise<DocEn
       context.declaration,
       ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope | ts.TypeFormatFlags.NoTruncation,
     ),
-    simplifiedType: getSimpleForm(
-      {
-        type: subType,
-        checker: program.getTypeChecker(),
-        location: context.declaration,
-      },
-      {
-        ...context.typeSimplifier,
-        noUndefined: isOptional,
-      },
-    ),
+    simplifiedType: getSimpleForm(subType, program.getTypeChecker(), context.declaration, {
+      ...context.typeSimplifier,
+      noUndefined: isOptional,
+    }),
     required: !isOptional,
     deprecated: false,
   };

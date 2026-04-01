@@ -3,6 +3,7 @@ import { convertToModelMessages, stepCountIs, streamText, tool, type UIMessage }
 import { z } from 'zod';
 import { source } from '@/lib/source';
 import { Document, type DocumentData } from 'flexsearch';
+import { $routeHandler } from '@fumadocs/cli/registry/macros/route-handler';
 
 interface CustomDocument extends DocumentData {
   url: string;
@@ -72,32 +73,38 @@ const systemPrompt = [
   'If you cannot find the answer in search results, say you do not know and suggest a better search query.',
 ].join('\n');
 
-export async function POST(req: Request) {
-  const reqJson = await req.json();
+export const handler = $routeHandler(
+  {
+    methods: ['POST'],
+    params: [],
+  },
+  async (req) => {
+    const reqJson = await req.json();
 
-  const result = streamText({
-    model: openrouter.chat(process.env.OPENROUTER_MODEL ?? 'anthropic/claude-3.5-sonnet'),
-    stopWhen: stepCountIs(5),
-    tools: {
-      search: searchTool,
-    },
-    messages: [
-      { role: 'system', content: systemPrompt },
-      ...(await convertToModelMessages<ChatUIMessage>(reqJson.messages ?? [], {
-        convertDataPart(part) {
-          if (part.type === 'data-client')
-            return {
-              type: 'text',
-              text: `[Client Context: ${JSON.stringify(part.data)}]`,
-            };
-        },
-      })),
-    ],
-    toolChoice: 'auto',
-  });
+    const result = streamText({
+      model: openrouter.chat(process.env.OPENROUTER_MODEL ?? 'anthropic/claude-3.5-sonnet'),
+      stopWhen: stepCountIs(5),
+      tools: {
+        search: searchTool,
+      },
+      messages: [
+        { role: 'system', content: systemPrompt },
+        ...(await convertToModelMessages<ChatUIMessage>(reqJson.messages ?? [], {
+          convertDataPart(part) {
+            if (part.type === 'data-client')
+              return {
+                type: 'text',
+                text: `[Client Context: ${JSON.stringify(part.data)}]`,
+              };
+          },
+        })),
+      ],
+      toolChoice: 'auto',
+    });
 
-  return result.toUIMessageStreamResponse();
-}
+    return result.toUIMessageStreamResponse();
+  },
+);
 
 export type SearchTool = typeof searchTool;
 

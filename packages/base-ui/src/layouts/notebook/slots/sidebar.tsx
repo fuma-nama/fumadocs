@@ -306,14 +306,7 @@ export function Sidebar({ banner, footer, components, collapsible = true, ...res
     if (typeof footer === 'function') return createElement(footer, props);
 
     return (
-      <div
-        {...props}
-        className={cn(
-          'hidden flex-row text-fd-muted-foreground items-center border-t p-4 pt-2',
-          iconLinks.length > 0 && 'max-lg:flex',
-          props.className,
-        )}
-      >
+      <div {...props}>
         {props.children}
         {footer}
       </div>
@@ -375,6 +368,10 @@ export function Sidebar({ banner, footer, components, collapsible = true, ...res
         })}
         {viewport}
         {renderFooter({
+          className: cn(
+            'hidden flex-row text-fd-muted-foreground items-center border-t px-4 py-2.5',
+            iconLinks.length > 0 && 'max-lg:flex',
+          ),
           children: iconLinks.map((item, i) => (
             <LinkItem
               key={i}
@@ -415,7 +412,7 @@ export function Sidebar({ banner, footer, components, collapsible = true, ...res
         {viewport}
         {renderFooter({
           className: cn(
-            'hidden flex-row items-center justify-end',
+            'hidden flex-row text-fd-muted-foreground items-center border-t p-4 pt-2 justify-end',
             (slots.languageSelect || slots.themeSwitch) && 'flex',
             iconLinks.length > 0 && 'max-lg:flex',
           ),

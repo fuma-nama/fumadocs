@@ -18,6 +18,14 @@ export const registry: Registry = {
     if (filePath.startsWith('lib/source/')) return false;
   },
   onResolve(ref) {
+    if (ref.type === 'unknown-specifier' && ref.specifier === 'hast') {
+      return {
+        type: 'dependency',
+        dep: '@types/hast',
+        specifier: 'hast',
+      };
+    }
+
     if (ref.type === 'file') {
       const file = path.relative(baseDir, ref.file);
 
@@ -100,9 +108,9 @@ export const registry: Registry = {
           target: '<dir>/ai/search.tsx',
         },
         {
-          type: 'route',
-          path: 'lib/openrouter/server.ts',
-          target: 'app/api/chat/route.ts',
+          type: 'route-handler',
+          route: 'api/chat',
+          path: 'lib/openrouter/route.ts',
         },
       ],
       dependencies: {
@@ -130,9 +138,9 @@ export const registry: Registry = {
           target: '<dir>/ai/search.tsx',
         },
         {
-          type: 'route',
-          path: 'lib/inkeep/server.ts',
-          target: 'app/api/chat/route.ts',
+          type: 'route-handler',
+          route: 'api/chat',
+          path: 'lib/inkeep/route.ts',
         },
         {
           type: 'lib',

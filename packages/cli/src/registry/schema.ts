@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-export type NamespaceType = (typeof namespaces)[number];
 export type CompiledFile = z.input<typeof fileSchema>;
 export type CompiledComponent = z.input<typeof componentSchema>;
 export type CompiledRegistryInfo = z.input<typeof registryInfoSchema>;
@@ -8,20 +7,26 @@ export type DownloadedRegistryInfo = z.output<typeof registryInfoSchema>;
 export type File = z.output<typeof fileSchema>;
 export type Component = z.output<typeof componentSchema>;
 
-export const namespaces = ['components', 'lib', 'css', 'route', 'ui', 'layout'] as const;
-
 export const indexSchema = z.object({
   name: z.string(),
   title: z.string().optional(),
   description: z.string().optional(),
 });
 
-export const fileSchema = z.object({
-  type: z.literal(namespaces),
-  path: z.string(),
-  target: z.string().optional(),
+export const routeFileSchema = z.object({
+  type: z.literal('route-handler'),
+  route: z.string(),
   content: z.string(),
 });
+
+export const fileSchema = z
+  .object({
+    type: z.literal(['components', 'lib', 'css', 'ui', 'layout']),
+    path: z.string(),
+    target: z.string().optional(),
+    content: z.string(),
+  })
+  .or(routeFileSchema);
 
 export const httpSubComponent = z.object({
   type: z.literal('http'),

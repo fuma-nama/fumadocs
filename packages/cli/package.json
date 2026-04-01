@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/cli",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "The CLI tool for Fumadocs",
   "keywords": [
     "Docs",
@@ -22,6 +22,7 @@
     "./config": "./dist/config.js",
     "./registry/client": "./dist/registry/client.js",
     "./registry/installer": "./dist/registry/installer/index.js",
+    "./registry/macros/route-handler": "./dist/registry/macros/route-handler.js",
     "./registry/schema": "./dist/registry/schema.js",
     "./package.json": "./package.json"
   },

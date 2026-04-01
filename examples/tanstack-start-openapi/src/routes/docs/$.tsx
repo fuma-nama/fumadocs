@@ -14,7 +14,7 @@ import {
 import { baseOptions } from '@/lib/layout.shared';
 import { gitConfig } from '@/lib/shared';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
-import { ReactNode, Suspense } from 'react';
+import { Suspense, type ReactNode } from 'react';
 import { useMDXComponents } from '@/components/mdx';
 import { ClientAPIPage } from '@/components/api-page';
 

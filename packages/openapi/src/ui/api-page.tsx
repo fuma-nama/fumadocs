@@ -1,7 +1,6 @@
 import { Operation } from '@/ui/operation';
 import type { HttpMethods, RenderContext, ServerObject } from '@/types';
 import { createMethod } from '@/utils/schema';
-import { ApiProviderLazy, ServerProviderLazy } from './contexts/api.lazy';
 
 export interface ApiPageProps {
   document: string;
@@ -113,10 +112,10 @@ export function APIPage({
   );
 
   return (
-    <ApiProviderLazy shikiOptions={ctx.shikiOptions} client={ctx.client ?? {}}>
-      <ServerProviderLazy servers={dereferenced.servers as ServerObject[]}>
+    <ctx.clientBoundary.ApiProvider shikiOptions={ctx.shikiOptions} client={ctx.client ?? {}}>
+      <ctx.clientBoundary.ServerProvider servers={dereferenced.servers as ServerObject[]}>
         {content}
-      </ServerProviderLazy>
-    </ApiProviderLazy>
+      </ctx.clientBoundary.ServerProvider>
+    </ctx.clientBoundary.ApiProvider>
   );
 }

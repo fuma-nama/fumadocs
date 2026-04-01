@@ -26,6 +26,7 @@ import { ClientCodeBlock, ClientCodeBlockProvider } from './components/codeblock
 import { dereferenceSync } from '@/utils/schema/dereference';
 import type { JSONSchema } from 'json-schema-typed/draft-2020-12';
 import { slug } from 'github-slugger';
+import * as ClientBoundary from '@/ui/client/boundary';
 
 export interface ClientApiPageProps extends Omit<ApiPageProps, 'document'> {
   payload: ClientApiPagePayload;
@@ -107,6 +108,7 @@ export function createClientAPIPage({
         shiki,
         shikiOptions,
         generateTypeScriptDefinitions,
+        clientBoundary: ClientBoundary,
         ...options,
         mediaAdapters: {
           ...defaultAdapters,

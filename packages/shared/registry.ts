@@ -13,7 +13,7 @@ export function resolveExternal(
   if (ref.type === 'file') {
     const file = path.relative(toRegistryDir, ref.file).replaceAll(path.sep, '/');
 
-    if (/^contexts\//.test(file) || /^utils\/use-/.test(file)) {
+    if (file.startsWith('contexts/') || file.startsWith('utils/use-')) {
       return {
         dep: toPackageName,
         type: 'dependency',

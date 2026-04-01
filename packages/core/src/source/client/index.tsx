@@ -14,6 +14,12 @@ export type Serialized<Data> = {
 function deserializeHTML(html: string) {
   return (
     <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '4px',
+        width: '100%',
+      }}
       dangerouslySetInnerHTML={{
         __html: html,
       }}

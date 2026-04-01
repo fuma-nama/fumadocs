@@ -35,12 +35,7 @@ const command = program
   .addOption(
     new Option('--og-image <name>', 'configure OG image generation').choices(['next-og', 'takumi']),
   )
-  .addOption(
-    new Option('--ai-chat <name>', 'configure AI chat (Next.js only)').choices([
-      'openrouter',
-      'inkeep',
-    ]),
-  )
+  .addOption(new Option('--ai-chat <name>', 'configure AI chat').choices(['openrouter', 'inkeep']))
   .addOption(
     new Option('--template <name>', 'choose a template').choices(
       templates.map((item) => item.value),
@@ -173,8 +168,12 @@ async function main(): Promise<void> {
       },
       aiChat: async ({ results }: { results: { template?: Template } }) => {
         if (config.aiChat !== undefined) return config.aiChat;
-        if (results.template !== '+next+fuma-docs-mdx') return false;
-        if (isCI) return false;
+        if (
+          isCI ||
+          results.template === '+next+fuma-docs-mdx+static' ||
+          results.template!.endsWith('-spa')
+        )
+          return false;
 
         return select<false | 'openrouter' | 'inkeep'>({
           message: 'Configure AI Chat?',
@@ -185,8 +184,8 @@ async function main(): Promise<void> {
             },
             {
               value: 'openrouter',
-              label: 'OpenRouter',
-              hint: 'API key required',
+              label: 'AI SDK',
+              hint: 'default to OpenRouter',
             },
             {
               value: 'inkeep',
@@ -254,9 +253,9 @@ async function main(): Promise<void> {
   }
 
   if (options.aiChat) {
-    const { nextUseAi } = await import('./plugins/next-use-ai');
+    const { ai } = await import('./plugins/ai');
 
-    plugins.push(nextUseAi(options.aiChat));
+    plugins.push(ai(options.aiChat));
   }
 
   await create({

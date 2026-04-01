@@ -2,7 +2,6 @@
 import {
   type FC,
   Fragment,
-  lazy,
   type ReactNode,
   useEffect,
   useMemo,
@@ -53,6 +52,7 @@ import type { ParameterObject } from '@/types';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
 import { useTranslations } from '@/ui/client/i18n';
 import { useOperationContext } from '@/ui/operation/client';
+import { OauthDialog, OauthDialogTrigger } from './components/oauth-dialog';
 
 export interface FormValues extends Record<string, unknown> {
   path: Record<string, unknown>;
@@ -130,17 +130,6 @@ export interface PlaygroundClientOptions {
     },
   ) => ReactNode;
 }
-
-const OauthDialog = lazy(() =>
-  import('./components/oauth-dialog').then((mod) => ({
-    default: mod.OauthDialog,
-  })),
-);
-const OauthDialogTrigger = lazy(() =>
-  import('./components/oauth-dialog').then((mod) => ({
-    default: mod.OauthDialogTrigger,
-  })),
-);
 
 export default function PlaygroundClient({
   route,
