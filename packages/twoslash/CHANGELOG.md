@@ -1,5 +1,11 @@
 # fumadocs-twoslash
 
+## 3.1.15
+
+### Patch Changes
+
+- da50bc3: Force default options for TypeScript 6
+
 ## 3.1.14
 
 ### Patch Changes
