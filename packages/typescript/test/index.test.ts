@@ -123,7 +123,7 @@ function getSimpleForms(fileName: string, sourceCode: string) {
       const type = checker.getTypeAtLocation(node);
 
       out.push(`Raw: ${node.getText()}
-Simplified: ${getSimpleForm({ type, checker })}`);
+Simplified: ${getSimpleForm(type, checker)}`);
     }
 
     node.forEachChild(visit);
