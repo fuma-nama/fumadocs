@@ -5,8 +5,8 @@ import { SelectTrigger, Select, SelectValue, SelectContent, SelectItem } from '.
 import { type ReactNode, useState, useMemo, type ComponentProps, createContext, use } from 'react';
 
 const Context = createContext<{
-  type: string | null;
-  setType: (type: string) => void;
+  value: string | null;
+  setValue: (type: string) => void;
 } | null>(null);
 
 export function SelectTabs({
@@ -16,9 +16,9 @@ export function SelectTabs({
   defaultValue?: string;
   children: ReactNode;
 }) {
-  const [type, setType] = useState<string | null>(defaultValue ?? null);
+  const [value, setValue] = useState<string | null>(defaultValue ?? null);
 
-  return <Context value={useMemo(() => ({ type, setType }), [type])}>{children}</Context>;
+  return <Context value={useMemo(() => ({ value, setValue }), [value])}>{children}</Context>;
 }
 
 export function SelectTab({
@@ -28,7 +28,7 @@ export function SelectTab({
   value: string;
 }) {
   const ctx = use(Context);
-  if (value !== ctx?.type) return;
+  if (value !== ctx?.value) return;
 
   return <div {...props}>{props.children}</div>;
 }
@@ -43,12 +43,12 @@ export function SelectTabTrigger({
     value: string;
   }[];
 }) {
-  const { type, setType } = use(Context)!;
+  const { value, setValue } = use(Context)!;
 
   return (
-    <Select value={type ?? ''} onValueChange={setType}>
+    <Select value={value ?? ''} onValueChange={setValue}>
       <SelectTrigger className={cn('not-prose w-fit min-w-0 *:min-w-0', className)} {...props}>
-        <SelectValue />
+        <SelectValue>{value && items.find((item) => item.value === value)?.label}</SelectValue>
       </SelectTrigger>
       <SelectContent>
         {items.map(({ label, value }) => (

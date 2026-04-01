@@ -1,11 +1,14 @@
 import fs from 'node:fs/promises';
 import { z } from 'zod';
 import { existsSync, readFileSync } from 'node:fs';
+import path from 'node:path';
 
 const frameworks = ['next', 'waku', 'react-router', 'tanstack-start'] as const;
 export type Framework = (typeof frameworks)[number];
 
-export function createConfigSchema() {
+export function createConfigSchema(cwd = process.cwd()) {
+  const srcDir = path.resolve(cwd, 'src');
+  const packageJsonPath = path.resolve(cwd, 'package.json');
   const defaultAliases = {
     uiDir: './components/ui',
     componentsDir: './components',
@@ -26,10 +29,10 @@ export function createConfigSchema() {
       })
       .default(defaultAliases),
 
-    baseDir: z.string().default(() => (existsSync('./src') ? 'src' : '')),
+    baseDir: z.string().default(() => (existsSync(srcDir) ? 'src' : '')),
     uiLibrary: z.enum(['radix-ui', 'base-ui']).default('radix-ui'),
     framework: z.literal(frameworks).default(() => {
-      return detectFrameworkFromPackageJson() ?? 'next';
+      return detectFrameworkFromPackageJson(packageJsonPath) ?? 'next';
     }),
 
     commands: z
@@ -43,7 +46,7 @@ export function createConfigSchema() {
   });
 }
 
-function detectFrameworkFromPackageJson(pkgPath = './package.json'): Framework | undefined {
+function detectFrameworkFromPackageJson(pkgPath: string): Framework | undefined {
   try {
     const pkgRaw = readFileSync(pkgPath, 'utf-8');
     const pkg = JSON.parse(pkgRaw);
@@ -97,6 +100,6 @@ export async function initConfig(file = './cli.json'): Promise<LoadedConfig | un
   return defaultConfig;
 }
 
-export async function getDefaultConfig() {
-  return createConfigSchema().parse({} satisfies ConfigInput);
+export async function getDefaultConfig(cwd?: string) {
+  return createConfigSchema(cwd).parse({} satisfies ConfigInput);
 }

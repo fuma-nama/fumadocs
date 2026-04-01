@@ -1,5 +1,14 @@
 # @fuma-docs/openapi
 
+## 10.6.3
+
+### Patch Changes
+
+- b9dd611: Improve pre-render layout shift
+- Updated dependencies [f580ef6]
+  - fumadocs-ui@16.7.9
+  - fumadocs-core@16.7.9
+
 ## 10.6.2
 
 ### Patch Changes

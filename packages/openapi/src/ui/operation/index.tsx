@@ -26,7 +26,7 @@ import { APIPlayground } from '@/playground';
 import { RequestTabs } from './request-tabs';
 import { cn } from '@/utils/cn';
 import { getExampleRequests } from './get-example-requests';
-import { SelectTabs, SelectTabTrigger, SelectTab } from '../components/server-tab';
+import { SelectTabs, SelectTabTrigger, SelectTab } from '../components/select-tab';
 
 const paramTypeKeys = ['path', 'query', 'header', 'cookie'] as const;
 
