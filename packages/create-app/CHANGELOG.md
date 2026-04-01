@@ -1,5 +1,13 @@
 # create-next-docs-app
 
+## 16.0.86
+
+### Patch Changes
+
+- 1a84b96: hotfix cwd for default config
+- Updated dependencies [1a84b96]
+  - @fumadocs/cli@1.3.4
+
 ## 16.0.85
 
 ### Patch Changes
