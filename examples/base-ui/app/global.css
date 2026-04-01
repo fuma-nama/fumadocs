@@ -6,6 +6,6 @@ html {
   scrollbar-gutter: stable;
 }
 
-html:has(body[data-scroll-locked]) {
-  scrollbar-gutter: auto;
+html > body[data-scroll-locked] {
+  margin-right: 0px !important;
 }
