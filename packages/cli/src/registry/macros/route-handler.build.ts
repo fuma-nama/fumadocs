@@ -214,35 +214,6 @@ function parseHandlerFromAst(s: MagicString, expr: Argument): HandlerInfo {
   return { requestName, paramsName, bodyText };
 }
 
-function buildParamsObjectLiteral(
-  framework: Framework,
-  info: ParsedRouteInfo,
-  paramsIdentifier: string,
-): string {
-  const parts: string[] = [];
-  for (const k of info.params) {
-    parts.push(`${encodeKey(k)}: ${paramsIdentifier}.${k}`);
-  }
-
-  if (info.catchAll) {
-    let value: string;
-    switch (framework) {
-      case 'react-router':
-        value = `${paramsIdentifier}['*']`;
-        break;
-      case 'tanstack-start':
-        value = `${paramsIdentifier}._splat`;
-        break;
-      default:
-        value = `${paramsIdentifier}.${info.catchAll}`;
-    }
-
-    parts.push(`${encodeKey(info.catchAll)}: ${value}`);
-  }
-
-  return `{\n${indent(parts.join(',\n'))}\n}`;
-}
-
 function generateRequestDeclaration(framework: Framework, binding: string): string {
   if (framework === 'tanstack-start') {
     if (binding === 'ctx') {
@@ -269,22 +240,33 @@ function generateParamsDeclaration(
   paramsBinding: string,
 ): string {
   let paramsIdentifier: string;
+  let paramsCatchAllIdentifier: string;
   switch (framework) {
+    // no renames
     case 'next':
-      paramsIdentifier = '(await ctx.params)';
-      break;
+      return `const ${paramsBinding} = await ctx.params;\n`;
+    case 'waku':
+      return `const ${paramsBinding} = context.params;\n`;
     case 'react-router':
       paramsIdentifier = 'args.params';
+      paramsCatchAllIdentifier = "args.params['*']";
       break;
     case 'tanstack-start':
       paramsIdentifier = 'ctx.params';
-      break;
-    case 'waku':
-      paramsIdentifier = 'context.params';
+      paramsCatchAllIdentifier = 'ctx.params._splat';
       break;
   }
 
-  return `const ${paramsBinding} = ${buildParamsObjectLiteral(framework, info, paramsIdentifier)};\n`;
+  const parts: string[] = [];
+  for (const k of info.params) {
+    parts.push(`${encodeKey(k)}: ${paramsIdentifier}.${k}`);
+  }
+
+  if (info.catchAll) {
+    parts.push(`${encodeKey(info.catchAll)}: ${paramsCatchAllIdentifier}`);
+  }
+
+  return `const ${paramsBinding} = {\n${indent(parts.join(',\n'))}\n};\n`;
 }
 
 function resolveParamsBindingName(info: ParsedRouteInfo, userSecond: string | null): string | null {
@@ -418,7 +400,7 @@ function removeMacroImport(s: MagicString, importDecl: ImportDeclaration): void 
  * Uses framework typegen where applicable: global `RouteContext` (Next typed routes), `ApiContext` (Waku),
  * inferred handler `ctx` (TanStack `createFileRoute`), `Route.LoaderArgs` / `Route.ActionArgs` (React Router `+types`).
  */
-export function buildRouteHandlerFile(
+export function transformRouteHandler(
   route: string,
   routeFilePath: string,
   framework: Framework,

@@ -5,13 +5,13 @@ import { toImportSpecifier, transformSpecifiers } from '@/utils/ast';
 import type { Component, File } from '@/registry/schema';
 import { HttpRegistryClient, type RegistryClient } from '@/registry/client';
 import { x } from 'tinyexec';
-import { DependencyManager } from '@/registry/installer/dep-manager';
+import { createDeps } from '@/registry/installer/dep-manager';
 import { createCache } from '@/utils/cache';
 import { parse } from 'oxc-parser';
 import MagicString from 'magic-string';
 import { decodeImport, encodeImport } from '../protocols/import';
 import type { Awaitable } from '@/types';
-import { buildRouteHandlerFile } from '@/registry/macros/route-handler.build';
+import { transformRouteHandler } from '@/registry/macros/route-handler.build';
 import {
   addReactRouterRouteToFile,
   resolveReactRouterRoute,
@@ -44,6 +44,7 @@ interface DownloadedComponent extends Component {
 
 export interface ComponentInstallerPlugin {
   transform?: (file: string, context: TransformContext) => Awaitable<string>;
+  transformImport?: (specifier: string, context: TransformContext) => string;
 
   /**
    * transform component before install
@@ -189,10 +190,8 @@ export class ComponentInstaller {
     });
   }
 
-  async deps() {
-    const manager = new DependencyManager(this.cwd);
-    await manager.init(this.dependencies, this.devDependencies);
-    return manager;
+  deps() {
+    return createDeps(this.cwd, this.dependencies, this.devDependencies);
   }
 
   async onEnd() {
@@ -267,22 +266,26 @@ export class ComponentInstaller {
     let transformed = await this.defaultTransform(file.content, transformCtx);
 
     for (const plugin of this.plugins) {
-      const v = await plugin.transform?.(transformed, transformCtx);
-      if (v) transformed = v;
+      if (!plugin.transform) continue;
+      transformed = await plugin.transform(transformed, transformCtx);
     }
 
     return transformed;
   }
 
-  private async defaultTransform(
-    content: string,
-    { file, importLookup, filePath, $variables, io }: TransformContext,
-  ) {
+  private async defaultTransform(content: string, ctx: TransformContext) {
+    const { file, importLookup, filePath, $variables, io } = ctx;
     const config = this.rootClient.config;
     const parsed = await parse(filePath, content);
     const s = new MagicString(content);
 
     transformSpecifiers(parsed.program, s, (specifier) => {
+      for (const plugin of this.plugins) {
+        if (plugin.transformImport) {
+          specifier = plugin.transformImport(specifier, ctx);
+        }
+      }
+
       if (importLookup.has(specifier)) {
         let outputPath = this.resolveOutputPath(importLookup.get(specifier)!);
 
@@ -303,7 +306,7 @@ export class ComponentInstaller {
     });
 
     if (file.type === 'route-handler') {
-      buildRouteHandlerFile(file.route, filePath, config.framework, parsed.program, s);
+      transformRouteHandler(file.route, filePath, config.framework, parsed.program, s);
 
       if (config.framework === 'react-router') {
         const routesFile = path.join(this.cwd, 'app/routes.ts');

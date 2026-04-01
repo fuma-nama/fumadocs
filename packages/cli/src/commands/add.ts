@@ -12,6 +12,7 @@ import { ComponentInstaller } from '@/registry/installer';
 import type { RegistryClient } from '@/registry/client';
 import { UIRegistries } from '@/commands/shared';
 import { pluginPreserveLayouts } from '@/registry/plugins/preserve';
+import { detect } from 'package-manager-detector';
 
 export async function add(input: string[], client: RegistryClient) {
   const config = client.config;
@@ -107,8 +108,9 @@ export async function install(target: string[], installer: ComponentInstaller) {
   if (deps.hasRequired()) {
     log.message();
     box([...deps.dependencies, ...deps.devDependencies].join('\n'), 'New Dependencies');
+    const pm = (await detect())?.name ?? 'npm';
     const value = await confirm({
-      message: `Do you want to install with ${deps.packageManager}?`,
+      message: `Do you want to install with ${pm}?`,
     });
 
     if (isCancel(value)) {
@@ -121,8 +123,10 @@ export async function install(target: string[], installer: ComponentInstaller) {
         errorMessage: 'Failed to install dependencies',
       });
       spin.start('Installing dependencies');
-      await deps.installRequired();
+      await deps.installRequired(pm);
       spin.stop('Dependencies installed');
+    } else {
+      await deps.writeRequired();
     }
   }
 

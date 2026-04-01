@@ -1,5 +1,5 @@
 import type { Framework } from '@/config';
-import { buildRouteHandlerFile } from '@/registry/macros/route-handler.build';
+import { transformRouteHandler } from '@/registry/macros/route-handler.build';
 import MagicString from 'magic-string';
 import path from 'node:path';
 import { parseSync } from 'oxc-parser';
@@ -27,7 +27,7 @@ export function buildRouteHandlerFromString(options: BuildRouteHandlerFileOption
 
   const program = result.program;
   const s = new MagicString(options.compiledContent);
-  buildRouteHandlerFile(route, routeFilePath, framework, program, s);
+  transformRouteHandler(route, routeFilePath, framework, program, s);
   return s.toString();
 }
 
@@ -48,16 +48,12 @@ test('next: native verb exports, inlined body, params from ctx', () => {
   });
   expect(out).toMatchInlineSnapshot(`
     "export async function GET(req: Request, ctx: RouteContext<"/api/posts/[id]">) {
-      const p = {
-        id: (await ctx.params).id
-      };
+      const p = await ctx.params;
       return Response.json({ id: p.id });
     }
 
     export async function POST(req: Request, ctx: RouteContext<"/api/posts/[id]">) {
-      const p = {
-        id: (await ctx.params).id
-      };
+      const p = await ctx.params;
       return Response.json({ id: p.id });
     }"
   `);
@@ -78,10 +74,7 @@ export const h = $routeHandler(
   });
   expect(out).toMatchInlineSnapshot(`
     "export async function GET(request: Request, ctx: RouteContext<"/api/items/[id]/[...rest]">) {
-      const p = {
-        id: (await ctx.params).id,
-        rest: (await ctx.params).rest
-      };
+      const p = await ctx.params;
       return Response.json({ request, p });
     }"
   `);
