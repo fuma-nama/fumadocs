@@ -1,5 +1,14 @@
 # fumadocs-typescript
 
+## 5.2.1
+
+### Patch Changes
+
+- c64e406: fix `noUndefined` for union types in `getSimpleForm()`
+- Updated dependencies [f7e69a6]
+  - fumadocs-ui@16.7.8
+  - fumadocs-core@16.7.8
+
 ## 5.2.0
 
 ### Minor Changes
@@ -90,7 +99,6 @@
   This is necessary to support async cache adapter.
 
 - 9a3e2e8: **Remove deprecated APIs**
-
   - removed standalone `generateDocumentation()` function, create a generator instead.
   - removed `generateFiles` & MDX generation APIs, use `remarkAutoTypeTable` instead.
 
@@ -373,7 +381,6 @@
 - f75287d: **Introduce `fumadocs-docgen` package.**
 
   Offer a better authoring experience for advanced use cases.
-
   - Move `remark-dynamic-content` and `remark-install` plugins to the new package `fumadocs-docgen`.
   - Support Typescript generator by default
 

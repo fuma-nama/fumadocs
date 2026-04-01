@@ -1,5 +1,12 @@
 # fumadocs-ui
 
+## 16.7.8
+
+### Patch Changes
+
+- f7e69a6: Redesign sidebar footer
+  - fumadocs-core@16.7.8
+
 ## 16.7.7
 
 ### Patch Changes
