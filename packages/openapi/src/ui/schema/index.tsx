@@ -207,7 +207,7 @@ export function generateSchemaUI(
     }
 
     return {
-      description: schema.description && ctx.renderMarkdown(schema.description),
+      description: schema.description ? ctx.renderMarkdown(schema.description) : undefined,
       infoTags: generateInfoTags(schema),
       typeName: schemaToString(schema, ctx.schema),
       aliasName: schemaToString(schema, ctx.schema, FormatFlags.UseAlias),
