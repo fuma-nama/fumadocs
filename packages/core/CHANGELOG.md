@@ -1,5 +1,11 @@
 # fumadocs-core
 
+## 16.7.9
+
+### Patch Changes
+
+- f580ef6: Fix deserialized page tree item name styles
+
 ## 16.7.8
 
 ## 16.7.7
