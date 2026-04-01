@@ -11,30 +11,27 @@ export type Serialized<Data> = {
   [K in keyof Data]: Data[K] extends SerializedPageTree ? PageTree.Root : Data[K];
 };
 
-function deserializeHTML(html: string) {
-  return (
-    <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '4px',
-        width: '100%',
-      }}
-      dangerouslySetInnerHTML={{
-        __html: html,
-      }}
-    />
-  );
-}
-
 export function deserializePageTree(serialized: SerializedPageTree): PageTree.Root {
   const root = serialized.data as PageTree.Root;
   visit(root, (item) => {
     if ('icon' in item && typeof item.icon === 'string') {
-      item.icon = deserializeHTML(item.icon);
+      item.icon = (
+        <span
+          dangerouslySetInnerHTML={{
+            __html: item.icon,
+          }}
+        />
+      );
     }
     if (typeof item.name === 'string') {
-      item.name = deserializeHTML(item.name);
+      item.name = (
+        <span
+          className="fd-page-tree-item-name"
+          dangerouslySetInnerHTML={{
+            __html: item.name,
+          }}
+        />
+      );
     }
   });
 
