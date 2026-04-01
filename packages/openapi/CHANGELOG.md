@@ -1,5 +1,15 @@
 # @fuma-docs/openapi
 
+## 10.6.2
+
+### Patch Changes
+
+- 9b350d7: Support sync loading components on client mode
+- f1962ec: [Schema UI] prefer alias name for display names
+- Updated dependencies [f7e69a6]
+  - fumadocs-ui@16.7.8
+  - fumadocs-core@16.7.8
+
 ## 10.6.1
 
 ### Patch Changes

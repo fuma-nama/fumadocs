@@ -1,5 +1,11 @@
 # fumadocs
 
+## 1.3.3
+
+### Patch Changes
+
+- 3ff78c9: Support framework-agnostic route handler
+
 ## 1.3.2
 
 ### Patch Changes
