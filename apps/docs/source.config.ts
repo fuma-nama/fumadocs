@@ -62,6 +62,11 @@ export const docs = defineDocs({
                 ...(rehypeCodeDefaultOptions.transformers ?? []),
                 transformerTwoslash({
                   typesCache: createFileSystemTypesCache(),
+                  twoslashOptions: {
+                    compilerOptions: {
+                      types: ['@types/node'],
+                    },
+                  },
                 }),
                 transformerEscape(),
               ],

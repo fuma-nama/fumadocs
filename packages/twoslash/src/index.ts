@@ -16,6 +16,7 @@ import {
   type TwoslashTypesCache,
 } from '@shikijs/twoslash';
 import { createTwoslasher, type TwoslashInstance } from 'twoslash';
+import type { ModuleResolutionKind } from 'typescript';
 
 export type { TwoslashTypesCache };
 
@@ -29,8 +30,16 @@ export function transformerTwoslash(options: TransformerTwoslashOptions = {}): S
 
   // lazy load Twoslash instance so it works on serverless platforms
   function lazyInstance(): TwoslashInstance {
+    const { twoslashOptions = {} } = options;
     function get() {
-      return (cachedInstance ??= createTwoslasher(options.twoslashOptions));
+      return (cachedInstance ??= createTwoslasher({
+        ...twoslashOptions,
+        compilerOptions: {
+          moduleResolution: 100 satisfies ModuleResolutionKind.Bundler,
+          baseUrl: undefined,
+          ...twoslashOptions.compilerOptions,
+        },
+      }));
     }
 
     const wrapper: TwoslashInstance = (...args) => get()(...args);

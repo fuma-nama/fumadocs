@@ -425,6 +425,14 @@ export function AISearchPanelList({ className, style, ...props }: ComponentProps
         </div>
       ) : (
         <div className="flex flex-col px-3 gap-4">
+          {chat.error && (
+            <div className="p-2 bg-fd-secondary text-fd-secondary-foreground border rounded-lg">
+              <p className="text-xs text-fd-muted-foreground mb-1">
+                Request Failed: {chat.error.name}
+              </p>
+              <p className="text-sm">{chat.error.message}</p>
+            </div>
+          )}
           {messages.map((item) => (
             <Message key={item.id} message={item} />
           ))}
