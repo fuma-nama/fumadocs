@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-twoslash",
-  "version": "3.1.14",
+  "version": "3.1.15",
   "description": "Typescript Twoslash Integration for Fumadocs",
   "keywords": [
     "Docs",
@@ -60,7 +60,8 @@
     "@types/react": "^19.2.14",
     "fumadocs-ui": "workspace:*",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.6"
+    "tsdown": "0.21.6",
+    "typescript": "^6.0.2"
   },
   "peerDependencies": {
     "@types/react": "*",

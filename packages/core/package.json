@@ -163,7 +163,7 @@
     "algoliasearch": "5.50.0",
     "flexsearch": "^0.8.212",
     "lucide-react": "^1.7.0",
-    "next": "16.2.1",
+    "next": "16.2.2",
     "react-router": "^7.13.2",
     "remark-directive": "^4.0.0",
     "remark-mdx": "^3.1.1",

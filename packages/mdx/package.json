@@ -96,7 +96,7 @@
     "@types/react": "^19.2.14",
     "fumadocs-core": "workspace:*",
     "mdast-util-directive": "^3.1.0",
-    "next": "16.2.1",
+    "next": "16.2.2",
     "react": "^19.2.4",
     "remark": "^15.0.1",
     "remark-directive": "^4.0.0",
