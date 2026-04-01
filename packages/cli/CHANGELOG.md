@@ -1,5 +1,11 @@
 # fumadocs
 
+## 1.3.4
+
+### Patch Changes
+
+- 1a84b96: hotfix cwd for default config
+
 ## 1.3.3
 
 ### Patch Changes
