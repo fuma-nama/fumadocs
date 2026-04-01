@@ -10,7 +10,7 @@ import { SyntaxKind } from 'ts-morph';
 export function ai(provider: 'openrouter' | 'inkeep'): TemplatePlugin {
   return {
     async afterWrite() {
-      const config = await getDefaultConfig();
+      const config = await getDefaultConfig(this.dest);
       await install(
         `ai/${provider}`,
         new ComponentInstaller(new HttpRegistryClient('https://fumadocs.dev/registry', config), {
