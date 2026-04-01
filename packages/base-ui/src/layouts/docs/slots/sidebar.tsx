@@ -10,7 +10,7 @@ import {
 import { createLinkItemRenderer } from '@/components/sidebar/link-item';
 import { buttonVariants } from '@/components/ui/button';
 import { SearchTrigger } from '@/layouts/shared/slots/search-trigger';
-import { Check, ChevronsUpDown, Languages, SidebarIcon } from 'lucide-react';
+import { Check, ChevronDown, ChevronsUpDown, Languages, SidebarIcon } from 'lucide-react';
 import { mergeRefs } from '@/utils/merge-refs';
 import { useDocsLayout } from '../client';
 import { LinkItem } from '@/layouts/shared';
@@ -29,7 +29,7 @@ const itemVariants = cva(
           'transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none',
       },
       highlight: {
-        true: "data-[active=true]:before:content-[''] data-[active=true]:before:bg-fd-primary data-[active=true]:before:absolute data-[active=true]:before:w-px data-[active=true]:before:inset-y-2.5 data-[active=true]:before:start-2.5",
+        true: "data-[active=true]:before:content-[''] data-[active=true]:before:bg-fd-primary data-[active=true]:before:absolute data-[active=true]:before:w-px data-[active=true]:before:inset-y-2.5 data-[active=true]:before:inset-s-2.5",
       },
     },
   },
@@ -105,13 +105,18 @@ export function Sidebar({ footer, banner, collapsible = true, components, ...res
         </div>
         {viewport}
         {(slots.languageSelect || iconLinks.length > 0 || slots.themeSwitch || footer) && (
-          <div className="flex flex-col border-t p-4 pt-2 empty:hidden">
-            <div className="flex text-fd-muted-foreground items-center empty:hidden">
-              {slots.languageSelect && (
-                <slots.languageSelect.root>
-                  <Languages className="size-4.5" />
-                </slots.languageSelect.root>
-              )}
+          <div className="flex flex-col p-4 pt-2">
+            {slots.languageSelect && (
+              <slots.languageSelect.root
+                variant="secondary"
+                className="text-fd-muted-foreground text-start justify-start bg-fd-secondary/50 mb-2"
+              >
+                <Languages className="size-4.5" />
+                <slots.languageSelect.text />
+                <ChevronDown className="ms-auto size-3.5" />
+              </slots.languageSelect.root>
+            )}
+            <div className="flex text-fd-muted-foreground items-center border bg-fd-secondary/50 p-0.5 pe-0 rounded-lg empty:hidden">
               {iconLinks.map((item, i) => (
                 <LinkItem
                   key={i}
@@ -122,7 +127,9 @@ export function Sidebar({ footer, banner, collapsible = true, components, ...res
                   {item.icon}
                 </LinkItem>
               ))}
-              {slots.themeSwitch && <slots.themeSwitch className="ms-auto p-0" />}
+              {slots.themeSwitch && (
+                <slots.themeSwitch className="px-1 py-0 border-y-0 border-e-0 rounded-none ms-auto *:rounded-md" />
+              )}
             </div>
             {footer}
           </div>
@@ -201,14 +208,14 @@ function SidebarContent({ ref: refProp, className, children, ...props }: Compone
             data-sidebar-placeholder=""
             className="sticky top-(--fd-docs-row-1) z-20 [grid-area:sidebar] pointer-events-none *:pointer-events-auto h-[calc(var(--fd-docs-height)-var(--fd-docs-row-1))] md:layout:[--fd-sidebar-width:268px] max-md:hidden"
           >
-            {collapsed && <div className="absolute start-0 inset-y-0 w-4" {...rest} />}
+            {collapsed && <div className="absolute inset-s-0 inset-y-0 w-4" {...rest} />}
             <aside
               id="nd-sidebar"
               ref={mergeRefs(ref, refProp, asideRef)}
               data-collapsed={collapsed}
               data-hovered={collapsed && hovered}
               className={cn(
-                'absolute flex flex-col w-full start-0 inset-y-0 items-end bg-fd-card text-sm border-e duration-250 *:w-(--fd-sidebar-width)',
+                'absolute flex flex-col w-full inset-s-0 inset-y-0 items-end bg-fd-card text-sm border-e duration-250 *:w-(--fd-sidebar-width)',
                 collapsed && [
                   'inset-y-2 rounded-xl transition-transform border w-(--fd-sidebar-width)',
                   hovered
@@ -229,7 +236,7 @@ function SidebarContent({ ref: refProp, className, children, ...props }: Compone
           <div
             data-sidebar-panel=""
             className={cn(
-              'fixed flex top-[calc(--spacing(4)+var(--fd-docs-row-3))] start-4 shadow-lg transition-opacity rounded-xl p-0.5 border bg-fd-muted text-fd-muted-foreground z-10',
+              'fixed flex top-[calc(--spacing(4)+var(--fd-docs-row-3))] inset-s-4 shadow-lg transition-opacity rounded-xl p-0.5 border bg-fd-muted text-fd-muted-foreground z-10',
               (!collapsed || hovered) && 'pointer-events-none opacity-0',
             )}
           >
@@ -262,7 +269,7 @@ function SidebarDrawer({
       <Base.SidebarDrawerOverlay className="fixed z-40 inset-0 backdrop-blur-xs data-[state=open]:animate-fd-fade-in data-[state=closed]:animate-fd-fade-out" />
       <Base.SidebarDrawerContent
         className={cn(
-          'fixed text-[0.9375rem] flex flex-col shadow-lg border-s end-0 inset-y-0 w-[85%] max-w-[380px] z-40 bg-fd-background data-[state=open]:animate-fd-sidebar-in data-[state=closed]:animate-fd-sidebar-out',
+          'fixed text-[0.9375rem] flex flex-col shadow-lg border-s inset-e-0 inset-y-0 w-[85%] max-w-[380px] z-40 bg-fd-background data-[state=open]:animate-fd-sidebar-in data-[state=closed]:animate-fd-sidebar-out',
           className,
         )}
         {...props}
@@ -377,7 +384,7 @@ function SidebarFolderContent({
         cn(
           'relative flex flex-col gap-0.5 pt-0.5',
           depth === 1 &&
-            "before:content-[''] before:absolute before:w-px before:inset-y-1 before:bg-fd-border before:start-2.5",
+            "before:content-[''] before:absolute before:w-px before:inset-y-1 before:bg-fd-border before:inset-s-2.5",
           typeof className === 'function' ? className(state) : className,
         )
       }

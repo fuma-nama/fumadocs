@@ -4,10 +4,18 @@ import { useI18n } from '@/contexts/i18n';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
+import type { VariantProps } from 'class-variance-authority';
 
-export type LanguageSelectProps = ComponentProps<'button'>;
+export interface LanguageSelectProps extends ComponentProps<'button'> {
+  variant?: VariantProps<typeof buttonVariants>['variant'];
+}
 
-export function LanguageSelect(props: LanguageSelectProps): React.ReactElement {
+export function LanguageSelect({
+  className,
+  variant = 'ghost',
+  children,
+  ...rest
+}: LanguageSelectProps): React.ReactElement {
   const context = useI18n();
   if (!context.locales) throw new Error('Missing `<I18nProvider />`');
 
@@ -15,19 +23,15 @@ export function LanguageSelect(props: LanguageSelectProps): React.ReactElement {
     <Popover>
       <PopoverTrigger
         aria-label={context.text.chooseLanguage}
-        {...props}
-        className={cn(
-          buttonVariants({
-            color: 'ghost',
-            className: 'gap-1.5 p-1.5',
-          }),
-          props.className,
-        )}
+        className={(s) =>
+          cn(buttonVariants({ variant }), 'gap-1.5 p-1.5', s.open && 'bg-fd-accent', className)
+        }
+        {...rest}
       >
-        {props.children}
+        {children}
       </PopoverTrigger>
-      <PopoverContent className="flex flex-col overflow-x-hidden p-0">
-        <p className="mb-1 p-2 text-xs font-medium text-fd-muted-foreground">
+      <PopoverContent className="flex flex-col gap-0.5 p-1">
+        <p className="p-2 text-xs font-medium text-fd-muted-foreground">
           {context.text.chooseLanguage}
         </p>
         {context.locales.map((item) => (
@@ -35,10 +39,10 @@ export function LanguageSelect(props: LanguageSelectProps): React.ReactElement {
             key={item.locale}
             type="button"
             className={cn(
-              'p-2 text-start text-sm',
+              'px-2 py-1.5 text-start text-sm rounded-lg transition-colors',
               item.locale === context.locale
-                ? 'bg-fd-primary/10 font-medium text-fd-primary'
-                : 'hover:bg-fd-accent hover:text-fd-accent-foreground',
+                ? 'bg-fd-primary/10 text-fd-primary'
+                : 'text-fd-muted-foreground hover:bg-fd-accent hover:text-fd-accent-foreground',
             )}
             onClick={() => {
               context.onChange?.(item.locale);
