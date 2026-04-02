@@ -348,7 +348,7 @@ export function loader(
       const [value, hash] = href.split('#', 2);
       let target;
 
-      if (value.startsWith('./')) {
+      if (value.startsWith('./') || value.startsWith('../')) {
         const path = joinPath(dir, value);
 
         target = indexer.getPage(path, language);
