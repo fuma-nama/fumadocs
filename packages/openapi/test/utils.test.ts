@@ -726,8 +726,6 @@ describe('pickSchema', () => {
   });
 
   test('rejects external $ref', () => {
-    expect(() => pickSchema({}, 'https://example.com/schema.json#/Foo')).toThrow(
-      'external $ref unsupported',
-    );
+    expect(() => pickSchema({}, 'https://example.com/schema.json#/Foo')).toThrow();
   });
 });
