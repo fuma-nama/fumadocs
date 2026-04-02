@@ -363,7 +363,7 @@ export function loader(
         };
     },
     resolveHref(href, parent) {
-      if (href.startsWith('./')) {
+      if (href.startsWith('./') || href.startsWith('../')) {
         const target = this.getPageByHref(href, {
           dir: path.dirname(parent.path),
           language: parent.locale,
