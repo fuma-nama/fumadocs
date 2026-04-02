@@ -1,4 +1,4 @@
-import { processDocument } from '@/utils/process-document';
+import { processDocument } from '@/utils/document/process';
 import { expect, test } from 'vitest';
 
 test('merges $ref target into local schema for sibling keywords', async () => {

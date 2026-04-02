@@ -1,5 +1,5 @@
 import type { ParsedSchema, ResolvedSchema } from '@/utils/schema';
-import type { ProcessedDocument } from '@/utils/process-document';
+import type { DereferencedDocument } from '@/utils/document/dereference';
 
 export enum FormatFlags {
   None = 0,
@@ -13,7 +13,7 @@ type Resolver = (schema: ResolvedSchema) => {
 
 export function schemaToString(
   value: ResolvedSchema,
-  _resolver?: ProcessedDocument | Resolver,
+  _resolver?: DereferencedDocument | Resolver,
   flags: FormatFlags = FormatFlags.None,
 ): string {
   const resolver: Resolver =

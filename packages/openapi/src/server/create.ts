@@ -1,5 +1,5 @@
 import { createProxy } from '@/server/proxy';
-import { processDocument, type ProcessedDocument } from '@/utils/process-document';
+import { processDocument, type ProcessedDocument } from '@/utils/document/process';
 import type { Document } from '@/types';
 import type { InlineCodeUsageGenerator } from '@/requests/generators';
 import fs from 'node:fs';

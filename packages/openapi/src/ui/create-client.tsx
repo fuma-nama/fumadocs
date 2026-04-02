@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- rehype-react without types */
 import type { Document, RenderContext } from '@/types';
-import type { NoReference } from '@/utils/schema';
-import type { ProcessedDocument } from '@/utils/process-document';
 import { defaultAdapters } from '@/requests/media/adapter';
 import {
   Children,
@@ -19,14 +17,14 @@ import remarkRehype from 'remark-rehype';
 import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import * as JsxRuntime from 'react/jsx-runtime';
 import { APIPage, type ApiPageProps } from './api-page';
-import type { CreateAPIPageOptions } from './base';
+import type { APIPlaygroundProps, CreateAPIPageOptions } from './base';
 import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
 import { compile } from '@fumari/json-schema-ts';
 import { ClientCodeBlock, ClientCodeBlockProvider } from './components/codeblock';
-import { dereferenceSync } from '@/utils/schema/dereference';
-import type { JSONSchema } from 'json-schema-typed/draft-2020-12';
 import { slug } from 'github-slugger';
 import * as ClientBoundary from '@/ui/client/boundary';
+import { dereferenceDocument } from '@/utils/document/dereference';
+import { parseSecurities } from '@/utils/schema';
 
 export interface ClientApiPageProps extends Omit<ApiPageProps, 'document'> {
   payload: ClientApiPagePayload;
@@ -86,20 +84,22 @@ export function createClientAPIPage({
     return remark().use(remarkGfm).use(remarkRehype).use(rehypeReact);
   }
 
-  return function ClientAPIPage({ payload, ...props }) {
-    const processed = useMemo<ProcessedDocument>(() => {
-      const dereferenceMap = new Map<object, string>();
+  function renderPlaygroundDefault({ method, path, ctx }: APIPlaygroundProps) {
+    return (
+      <ctx.clientBoundary.PlaygroundClient
+        route={path}
+        securities={parseSecurities(method, ctx.schema.dereferenced)}
+        method={method.method}
+        doc={{ processed: ctx.schema }}
+        proxyUrl={ctx.proxyUrl}
+        writeOnly
+        readOnly={false}
+      />
+    );
+  }
 
-      return {
-        bundled: payload.bundled,
-        dereferenced: dereferenceSync(payload.bundled as JSONSchema, (schema, ref) => {
-          dereferenceMap.set(schema as object, ref);
-        }) as NoReference<Document>,
-        getRawRef(obj) {
-          return dereferenceMap.get(obj);
-        },
-      };
-    }, [payload.bundled]);
+  return function ClientAPIPage({ payload, ...props }) {
+    const processed = useMemo(() => dereferenceDocument(payload.bundled), [payload.bundled]);
 
     const ctx: RenderContext = useMemo(
       () => ({
@@ -113,6 +113,10 @@ export function createClientAPIPage({
         mediaAdapters: {
           ...defaultAdapters,
           ...options.mediaAdapters,
+        },
+        playground: {
+          ...options.playground,
+          render: options.playground?.render ?? renderPlaygroundDefault,
         },
         renderHeading(depth, text, props) {
           const id = typeof text === 'string' ? slug(text) : props?.id;

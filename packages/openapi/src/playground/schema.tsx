@@ -6,10 +6,10 @@ import { FieldKey, useDataEngine, useFieldValue, useNamespace } from '@fumari/st
 import { stringifyFieldKey } from '@fumari/stf/lib/utils';
 import { sample } from 'openapi-sampler';
 import { FormatFlags, schemaToString } from '@/utils/schema/to-string';
-import { resolveRefSync } from '@/utils/schema/resolve-ref';
+import { DereferencedDocument } from '@/utils/document/dereference';
 
 interface SchemaContextType extends SchemaScope {
-  references: Record<string, ParsedSchema>;
+  schema: DereferencedDocument;
   ajv: Ajv2020;
 }
 
@@ -45,7 +45,7 @@ export const anyFields = {
 } satisfies ParsedSchema;
 
 export function SchemaProvider({
-  references,
+  schema,
   readOnly,
   writeOnly,
   children,
@@ -63,8 +63,8 @@ export function SchemaProvider({
   return (
     <SchemaContext.Provider
       value={useMemo(
-        () => ({ references, ajv, readOnly, writeOnly }),
-        [references, ajv, readOnly, writeOnly],
+        () => ({ schema, ajv, readOnly, writeOnly }),
+        [schema, ajv, readOnly, writeOnly],
       )}
     >
       {children}
@@ -92,7 +92,7 @@ export function useFieldInfo(
   schema: Exclude<ParsedSchema, boolean>;
   updateInfo: (value: Partial<FieldInfo>) => void;
 } {
-  const { ajv, references } = use(SchemaContext)!;
+  const { ajv } = use(SchemaContext)!;
   const engine = useDataEngine();
   const { generateDefault } = useSchemaUtils();
   const fieldData = useNamespace({
@@ -106,9 +106,7 @@ export function useFieldInfo(
       if (union) {
         const [members, field] = union;
 
-        out.oneOf = members.findIndex((item) =>
-          ajv.validate(typeof item === 'object' ? { ...item, ...references } : item, value),
-        );
+        out.oneOf = members.findIndex((item) => ajv.validate(item, value));
         if (out.oneOf === -1) out.oneOf = 0;
         out.unionField = field;
       }
@@ -118,7 +116,7 @@ export function useFieldInfo(
 
         out.selectedType =
           types.find((type) => {
-            return ajv.validate({ ...schema, ...references, type }, value);
+            return ajv.validate({ ...schema, type }, value);
           }) ?? types[0];
       }
 
@@ -156,57 +154,35 @@ export function useFieldInfo(
 }
 
 export function useSchemaUtils() {
-  const { references } = use(SchemaContext)!;
+  const { schema, readOnly } = use(SchemaContext)!;
 
   return {
     generateDefault(schema: ParsedSchema): unknown {
-      return sample(
-        schema as never,
-        { skipNonRequired: true, skipReadOnly: true, quiet: true },
-        references,
-      );
+      return sample(schema as never, {
+        skipNonRequired: true,
+        skipReadOnly: !readOnly,
+        quiet: true,
+      });
     },
     schemaToString(value: ResolvedSchema, flags?: FormatFlags) {
-      return schemaToString(
-        value,
-        (s) => ({ dereferenced: dereference(s, references), raw: s }),
-        flags,
-      );
+      return schemaToString(value, schema, flags);
     },
   };
 }
 
 /**
- * resolve $ref & merge `allOf`.
+ * merge `allOf`.
  */
 export function useResolvedSchema(raw: ParsedSchema): Exclude<ParsedSchema, boolean> {
-  const { references } = use(SchemaContext)!;
-
   return useMemo(() => {
-    const schema = dereference(raw, references);
-    if (typeof schema === 'boolean') return anyFields;
+    let out = raw;
 
-    if (schema.allOf) {
-      const merged = mergeAllOf(schema, {
-        dereference(schema) {
-          return dereference(schema, references);
-        },
-      });
-      if (typeof merged === 'boolean') return anyFields;
-      return merged;
+    if (typeof out === 'object' && out.allOf) {
+      out = mergeAllOf(out);
     }
 
-    return schema;
-  }, [raw, references]);
-}
-
-function dereference(schema: ParsedSchema, references: Record<string, ParsedSchema>): ParsedSchema {
-  if (typeof schema === 'boolean') return schema;
-  if (schema.$ref) {
-    return resolveRefSync(schema.$ref, references) as ParsedSchema;
-  }
-
-  return schema;
+    return typeof out === 'boolean' ? anyFields : out;
+  }, [raw]);
 }
 
 function getUnion(

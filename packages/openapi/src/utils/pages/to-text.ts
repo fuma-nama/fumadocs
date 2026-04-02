@@ -1,5 +1,5 @@
 import type { ApiPageProps, OperationItem, WebhookItem } from '@/ui/api-page';
-import type { ProcessedDocument } from '@/utils/process-document';
+import type { DereferencedDocument } from '@/utils/document/dereference';
 import type { TagObject } from '@/types';
 import { dump } from 'js-yaml';
 import { removeUndefined } from '@/utils/remove-undefined';
@@ -49,7 +49,7 @@ export interface PagesToTextOptions {
 
 export function toText(
   entry: PageOutput | OperationOutput | WebhookOutput,
-  processed: ProcessedDocument,
+  processed: DereferencedDocument,
   options: PagesToTextOptions = {},
 ) {
   switch (entry.type) {
@@ -156,7 +156,7 @@ export type DocumentContext =
 
 function generatePage(
   schemaId: string,
-  processed: ProcessedDocument,
+  processed: DereferencedDocument,
   pageProps: Omit<ApiPageProps, 'document'>,
   options: PagesToTextOptions & {
     title: string;

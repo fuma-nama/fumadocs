@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { mergeAllOf } from '@/utils/merge-schema';
+import { pickSchema } from '@/utils/schema/pick';
 import { joinURL, resolveRequestData, resolveServerUrl, withBase } from '@/utils/url';
 import type { RequestData } from '@/requests/types';
 
@@ -646,5 +647,87 @@ describe('URL utilities', () => {
         '/api/orgs/acme/projects/web-app?version=latest&archived=false&include=members&include=settings&format=json&debug=true',
       );
     });
+  });
+});
+
+describe('pickSchema', () => {
+  test('places resolved schema at JSON Pointer path', () => {
+    const pet = {
+      type: 'object',
+      properties: { name: { type: 'string' } },
+    };
+    const root = {
+      components: {
+        schemas: {
+          Pet: pet,
+        },
+      },
+    };
+
+    expect(pickSchema(root, '#/components/schemas/Pet')).toEqual({
+      components: {
+        schemas: {
+          Pet: pet,
+        },
+      },
+    });
+  });
+
+  test('follows nested $ref and includes referenced definitions', () => {
+    const address = {
+      type: 'object',
+      properties: { street: { type: 'string' } },
+    };
+    const person = {
+      type: 'object',
+      properties: {
+        home: { $ref: '#/components/schemas/Address' },
+      },
+    };
+    const root = {
+      components: {
+        schemas: {
+          Address: address,
+          Person: person,
+        },
+      },
+    };
+
+    expect(pickSchema(root, '#/components/schemas/Person')).toEqual({
+      components: {
+        schemas: {
+          Address: address,
+          Person: person,
+        },
+      },
+    });
+  });
+
+  test('does not revisit the same $ref', () => {
+    const shared = { type: 'string' };
+    const root = {
+      components: {
+        schemas: {
+          Shared: shared,
+          A: { $ref: '#/components/schemas/Shared' },
+          B: { $ref: '#/components/schemas/Shared' },
+        },
+      },
+    };
+
+    expect(pickSchema(root, '#/components/schemas/A')).toEqual({
+      components: {
+        schemas: {
+          Shared: shared,
+          A: { $ref: '#/components/schemas/Shared' },
+        },
+      },
+    });
+  });
+
+  test('rejects external $ref', () => {
+    expect(() => pickSchema({}, 'https://example.com/schema.json#/Foo')).toThrow(
+      'external $ref unsupported',
+    );
   });
 });

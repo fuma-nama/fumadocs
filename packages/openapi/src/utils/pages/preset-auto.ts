@@ -1,5 +1,5 @@
 import * as path from 'node:path';
-import type { ProcessedDocument } from '@/utils/process-document';
+import type { DereferencedDocument } from '@/utils/document/dereference';
 import type {
   OperationOutput,
   OutputEntry,
@@ -79,7 +79,7 @@ type NameFn<
 > = (
   this: PagesBuilder,
   output: DistributiveOmit<Entry, 'path'>,
-  document: ProcessedDocument['dereferenced'],
+  document: DereferencedDocument['dereferenced'],
 ) => string;
 
 interface NameFnOptions {

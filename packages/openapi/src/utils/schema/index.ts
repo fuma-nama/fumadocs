@@ -1,11 +1,14 @@
 import type { JSONSchema } from 'json-schema-typed/draft-2020-12';
 import type {
+  Document,
   ExampleObject,
+  HttpMethods,
   MediaTypeObject,
   MethodInformation,
   OperationObject,
   PathItemObject,
   ReferenceObject,
+  SecuritySchemeObject,
   TagObject,
 } from '@/types';
 import { idToTitle } from '@/utils/id-to-title';
@@ -53,7 +56,7 @@ export function getTagDisplayName(tag: TagObject): string {
  * Summarize method endpoint information
  */
 export function createMethod(
-  method: string,
+  method: HttpMethods,
   path: NoReference<PathItemObject>,
   operation: NoReference<OperationObject>,
 ): MethodInformation {
@@ -63,7 +66,7 @@ export function createMethod(
     ...operation,
     servers: operation.servers ?? path.servers,
     parameters: [...(operation.parameters ?? []), ...(path.parameters ?? [])],
-    method: method.toUpperCase(),
+    method,
   };
 }
 
@@ -96,4 +99,38 @@ export function pickExample(value: ExampleLike): unknown | undefined {
     const examples = Object.values(value.examples);
     if (examples.length > 0) return examples[0].value;
   }
+}
+
+/** parsed security scheme objects */
+export type SecurityEntry = SecuritySchemeObject & {
+  scopes: string[];
+  id: string;
+};
+
+export function parseSecurities(
+  method: MethodInformation,
+  dereferenced: NoReference<Document>,
+): SecurityEntry[][] {
+  const result: SecurityEntry[][] = [];
+  const security = method.security ?? dereferenced.security ?? [];
+  if (security.length === 0) return result;
+
+  for (const map of security) {
+    const list: SecurityEntry[] = [];
+
+    for (const [key, scopes] of Object.entries(map)) {
+      const scheme = dereferenced.components?.securitySchemes?.[key];
+      if (!scheme) continue;
+
+      list.push({
+        ...scheme,
+        scopes,
+        id: key,
+      });
+    }
+
+    if (list.length > 0) result.push(list);
+  }
+
+  return result;
 }

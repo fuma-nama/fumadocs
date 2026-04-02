@@ -11,7 +11,6 @@ import {
 } from 'react';
 import { useApiContext, useServerContext } from '@/ui/contexts/api';
 import type { BrowserFetcherOptions, FetchResult } from '@/playground/fetcher';
-import type { SecurityEntry } from '@/playground/index';
 import { getStatusInfo } from './status-info';
 import { joinURL, resolveRequestData, resolveServerUrl, withBase } from '@/utils/url';
 import { MethodLabel } from '@/ui/components/method-label';
@@ -34,7 +33,12 @@ import {
   SelectValue,
 } from '@/ui/components/select';
 import { labelVariants } from '@/ui/components/input';
-import type { ParsedSchema } from '@/utils/schema';
+import {
+  getPreferredType,
+  type SecurityEntry,
+  type NoReference,
+  type ParsedSchema,
+} from '@/utils/schema';
 import ServerSelect from './components/server-select';
 import { useStorageKey } from '@/ui/client/storage-key';
 import {
@@ -48,11 +52,13 @@ import {
 } from '@fumari/stf';
 import { objectGet, objectSet, stringifyFieldKey } from '@fumari/stf/lib/utils';
 import { FieldInput, FieldSet, JsonInput, ObjectInput } from './components/inputs';
-import type { ParameterObject } from '@/types';
+import type { Document, HttpMethods, OperationObject, ParameterObject } from '@/types';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
 import { useTranslations } from '@/ui/client/i18n';
 import { useOperationContext } from '@/ui/operation/client';
 import { OauthDialog, OauthDialogTrigger } from './components/oauth-dialog';
+import { dereferenceDocument } from '@/utils/document/dereference';
+import type { ProcessedDocument } from '@/utils/document/process';
 
 export interface FormValues extends Record<string, unknown> {
   path: Record<string, unknown>;
@@ -64,17 +70,16 @@ export interface FormValues extends Record<string, unknown> {
 
 export interface PlaygroundClientProps extends ComponentProps<'form'>, SchemaScope {
   route: string;
-  method: string;
-  parameters?: ParameterObject[];
+  method: HttpMethods;
   securities: SecurityEntry[][];
-  body?: {
-    schema: ParsedSchema;
-    mediaType: string;
-  };
-  /**
-   * Resolver for $ref schemas you've passed
-   */
-  references: Record<string, ParsedSchema>;
+  /** the OpenAPI document */
+  doc:
+    | {
+        bundled: Document;
+      }
+    | {
+        processed: ProcessedDocument;
+      };
   proxyUrl?: string;
 }
 
@@ -122,28 +127,46 @@ export interface PlaygroundClientOptions {
    *
    * @see renderParameterField for customisation tips
    */
-  renderBodyField?: (
-    fieldName: 'body',
-    info: {
-      schema: ParsedSchema;
-      mediaType: string;
-    },
-  ) => ReactNode;
+  renderBodyField?: (fieldName: 'body', info: RequestBodyInfo) => ReactNode;
+}
+
+interface RequestBodyInfo {
+  schema: ParsedSchema;
+  mediaType: string;
+}
+
+function getBodyInfo(operation: NoReference<OperationObject>): RequestBodyInfo | undefined {
+  const content = operation.requestBody?.content;
+  if (!content) return;
+  const mediaType = getPreferredType(content);
+
+  if (mediaType) {
+    return {
+      mediaType,
+      schema: content[mediaType].schema ?? true,
+    };
+  }
 }
 
 export default function PlaygroundClient({
   route,
-  method = 'GET',
+  method,
   securities,
-  parameters = [],
-  body,
-  references,
+  doc,
   proxyUrl,
   writeOnly,
   readOnly,
   ...rest
 }: PlaygroundClientProps) {
   const t = useTranslations();
+  const schema =
+    'processed' in doc
+      ? doc.processed
+      : // oxlint-disable-next-line eslint-plugin-react-hooks/rules-of-hooks -- assume unchanged
+        useMemo(() => dereferenceDocument(doc.bundled), [doc.bundled]);
+  const operation: NoReference<OperationObject> = schema.dereferenced.paths![route]![method]!;
+  const body = getBodyInfo(operation);
+
   const { example: exampleId, examples, setExampleData } = useOperationContext();
   const { server } = useServerContext();
   const storageKeys = useStorageKey();
@@ -151,10 +174,14 @@ export default function PlaygroundClient({
     mediaAdapters,
     client: {
       playground: {
-        components: { ResultDisplay = DefaultResultDisplay } = {},
+        components: {
+          ResultDisplay = DefaultResultDisplay,
+          CollapsiblePanel = DefaultCollapsiblePanel,
+        } = {},
         requestTimeout,
         fetchOptions = { requestTimeout },
         transformAuthInputs,
+        renderBodyField,
       } = {},
     },
   } = useApiContext();
@@ -189,10 +216,11 @@ export default function PlaygroundClient({
     const fetcher = await import('./fetcher').then((mod) =>
       mod.createBrowserFetcher(mediaAdapters, { proxyUrl, ...fetchOptions }),
     );
+
     const encoded = encodeRequestData(
       { ...mapInputs(input), method, bodyMediaType: body?.mediaType },
       mediaAdapters,
-      parameters,
+      operation.parameters,
     );
     return fetcher.fetch(
       joinURL(
@@ -227,7 +255,7 @@ export default function PlaygroundClient({
             method,
             bodyMediaType: body?.mediaType,
           };
-          setExampleData(data, encodeRequestData(data, mediaAdapters, parameters));
+          setExampleData(data, encodeRequestData(data, mediaAdapters, operation.parameters));
         },
         timerRef.current ? 400 : 0,
       );
@@ -249,7 +277,7 @@ export default function PlaygroundClient({
 
   return (
     <StfProvider value={stf}>
-      <SchemaProvider references={references} writeOnly={writeOnly} readOnly={readOnly}>
+      <SchemaProvider schema={schema} writeOnly={writeOnly} readOnly={readOnly}>
         <form
           {...rest}
           className={cn(
@@ -286,7 +314,12 @@ export default function PlaygroundClient({
               ))}
             </SecurityTabs>
           )}
-          <FormBody body={body} parameters={parameters} />
+          <ParametersForm parameters={operation.parameters} />
+          {body && (
+            <CollapsiblePanel data-type="body" title={t.body}>
+              {renderBodyField ? renderBodyField('body', body) : <BodyInput field={body.schema} />}
+            </CollapsiblePanel>
+          )}
         </form>
       </SchemaProvider>
     </StfProvider>
@@ -381,7 +414,7 @@ function SecurityTabs({
 const ParamTypes = ['path', 'header', 'cookie', 'query'] as const;
 type ParamType = (typeof ParamTypes)[number];
 
-function FormBodyItem({ type, parameters }: { type: ParamType; parameters: ParameterObject[] }) {
+function ParameterItem({ type, parameters }: { type: ParamType; parameters: ParameterObject[] }) {
   const { renderParameterField } = useApiContext().client.playground ?? {};
 
   return parameters.map((field) => {
@@ -408,8 +441,8 @@ function FormBodyItem({ type, parameters }: { type: ParamType; parameters: Param
   });
 }
 
-function FormBody({ parameters = [], body }: Pick<PlaygroundClientProps, 'parameters' | 'body'>) {
-  const { renderBodyField, components: { CollapsiblePanel = DefaultCollapsiblePanel } = {} } =
+function ParametersForm({ parameters = [] }: { parameters?: ParameterObject[] }) {
+  const { components: { CollapsiblePanel = DefaultCollapsiblePanel } = {} } =
     useApiContext().client.playground ?? {};
   const t = useTranslations();
   const displayNames = {
@@ -419,25 +452,16 @@ function FormBody({ parameters = [], body }: Pick<PlaygroundClientProps, 'parame
     path: t.path,
   };
 
-  return (
-    <>
-      {ParamTypes.map((type) => {
-        const items = parameters.filter((v) => v.in === type);
-        if (items.length === 0) return;
+  return ParamTypes.map((type) => {
+    const items = parameters.filter((v) => v.in === type);
+    if (items.length === 0) return;
 
-        return (
-          <CollapsiblePanel key={type} data-type={type} title={displayNames[type]}>
-            <FormBodyItem parameters={items} type={type} />
-          </CollapsiblePanel>
-        );
-      })}
-      {body && (
-        <CollapsiblePanel data-type="body" title={t.body}>
-          {renderBodyField ? renderBodyField('body', body) : <BodyInput field={body.schema} />}
-        </CollapsiblePanel>
-      )}
-    </>
-  );
+    return (
+      <CollapsiblePanel key={type} data-type={type} title={displayNames[type]}>
+        <ParameterItem parameters={items} type={type} />
+      </CollapsiblePanel>
+    );
+  });
 }
 
 function BodyInput({ field: _field }: { field: ParsedSchema }) {

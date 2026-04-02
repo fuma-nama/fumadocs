@@ -113,8 +113,8 @@ function getRequestData(
       result.body = bodyOfType.example;
     } else {
       result.body = sample((bodyOfType?.schema ?? {}) as object, {
-        skipReadOnly: method.method !== 'GET',
-        skipWriteOnly: method.method === 'GET',
+        skipReadOnly: method.method !== 'get',
+        skipWriteOnly: method.method === 'get',
         skipNonRequired: true,
       });
     }

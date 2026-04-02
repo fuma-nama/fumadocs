@@ -13,7 +13,7 @@ import type { SchemaToPagesOptions } from '@/utils/pages/preset-auto';
 import type { ApiPageProps } from '@/ui/api-page';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { TOCItemType } from 'fumadocs-core/toc';
-import type { ProcessedDocument } from '@/utils/process-document';
+import type { DereferencedDocument } from '@/utils/document/dereference';
 import type {
   OperationOutput,
   OutputEntry,
@@ -82,7 +82,7 @@ export function openapiPlugin(): LoaderPlugin {
 
 interface OpenAPIPageData extends PageData {
   getAPIPageProps: () => ApiPageProps;
-  getSchema: () => { id: string } & ProcessedDocument;
+  getSchema: () => { id: string } & DereferencedDocument;
   getClientAPIPageProps: () => Promise<ClientApiPageProps>;
   structuredData: StructuredData;
   toc: TOCItemType[];

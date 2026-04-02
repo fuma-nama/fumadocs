@@ -1,4 +1,4 @@
-import type { ProcessedDocument } from '@/utils/process-document';
+import type { DereferencedDocument } from '@/utils/document/dereference';
 import type { OpenAPIServer } from '@/server';
 import type { OperationItem, WebhookItem } from '@/ui/api-page';
 import type { OperationObject, PathItemObject, TagObject } from '@/types';
@@ -50,7 +50,7 @@ export interface PagesBuilder {
    * the input ID in OpenAPI server
    */
   id: string;
-  document: ProcessedDocument;
+  document: DereferencedDocument;
   /**
    * add output entry.
    */
@@ -118,7 +118,7 @@ export async function fromServer(
 
 export function fromSchema(
   schemaId: string,
-  processed: ProcessedDocument,
+  processed: DereferencedDocument,
   config: PagesBuilderConfig,
 ): OutputEntry[] {
   const files: OutputEntry[] = [];

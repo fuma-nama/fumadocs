@@ -10,7 +10,7 @@ export default defineConfig({
     './src/ui/base.tsx',
     './src/ui/create-client.tsx',
     './src/ui/client/index.tsx',
-    './src/playground/{index,client}.tsx',
+    './src/playground/client.tsx',
     './src/scalar/index.tsx',
     './src/server/index.ts',
     './src/requests/generators/*.ts',
