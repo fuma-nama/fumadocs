@@ -1,5 +1,12 @@
 # @fumadocs/base-ui
 
+## 16.7.10
+
+### Patch Changes
+
+- 1473bee: fix: allow internal link resolver to resolve for "../" links
+  - fumadocs-core@16.7.10
+
 ## 16.7.9
 
 ### Patch Changes
