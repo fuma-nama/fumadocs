@@ -17,7 +17,10 @@ export default defineConfig({
   ],
   fixedExtension: false,
   unbundle: true,
-  dts: true,
+  dts: {
+    sourcemap: false,
+  },
+  sourcemap: false,
   async onSuccess() {
     await compileInline();
   },
