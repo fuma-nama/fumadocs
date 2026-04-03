@@ -8,43 +8,52 @@ import { resolveRefSync } from './resolve-ref';
 export function pickSchema(root: object, $ref: string): object {
   const out: object = {};
   const scanned = new Set<string>();
-  const queue: unknown[] = [{ $ref }];
 
-  for (const next of queue) {
+  function scan(next: unknown) {
     if (isPlainObject(next)) {
       if (typeof next.$ref === 'string') {
-        if (scanned.has(next.$ref)) continue;
+        if (scanned.has(next.$ref)) return;
 
         const resolved = resolveRefSync(next.$ref, root);
         scanned.add(next.$ref);
-        queue.push(resolved);
+        scan(resolved);
         setField(out, decodeInternalRef(next.$ref), resolved);
       }
 
-      for (const k in next) queue.push(next[k]);
-      continue;
+      for (const k in next) scan(next[k]);
+      return;
     }
 
     if (Array.isArray(next)) {
-      queue.push(...next);
+      for (const item of next) scan(item);
+    }
+  }
+
+  scan({ $ref });
+  return out;
+}
+
+function setField(obj: unknown, field: string[], value: unknown): unknown {
+  if (field.length === 0) return value;
+
+  const out: Record<string, unknown> = isPlainObject(obj) ? obj : {};
+  let current = out;
+
+  for (let i = 0; i < field.length; i++) {
+    const k = field[i];
+
+    if (i === field.length - 1) {
+      current[k] = value;
+    } else {
+      const v = current[k];
+
+      if (isPlainObject(v)) {
+        current = v;
+      } else {
+        current = current[k] = {};
+      }
     }
   }
 
   return out;
-}
-
-function setField(obj: unknown, field: string[], value: unknown, i = 0): unknown {
-  if (i >= field.length) return value;
-
-  const k = field[i];
-  if (k.length === 0) return setField(obj, field, value, i + 1);
-
-  if (isPlainObject(obj)) {
-    obj[k] = setField(obj[k], field, value, i + 1);
-    return obj;
-  } else {
-    return {
-      [k]: setField(null, field, value, i + 1),
-    };
-  }
 }
