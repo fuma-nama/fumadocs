@@ -1,5 +1,12 @@
 # fumapress
 
+## 0.1.22
+
+### Patch Changes
+
+- fumadocs-core@16.7.10
+- fumadocs-ui@16.7.10
+
 ## 0.1.21
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # @fuma-docs/openapi
 
+## 10.6.4
+
+### Patch Changes
+
+- 9b88a56: Avoid re-serialization on non-RSC mode
+  - fumadocs-core@16.7.10
+  - fumadocs-ui@16.7.10
+
 ## 10.6.3
 
 ### Patch Changes
