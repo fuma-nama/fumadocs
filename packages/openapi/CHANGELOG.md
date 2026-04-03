@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 10.6.5
+
+### Patch Changes
+
+- 94a45da: workaround ajv limitations
+
 ## 10.6.4
 
 ### Patch Changes
