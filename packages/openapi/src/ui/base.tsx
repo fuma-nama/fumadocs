@@ -253,12 +253,7 @@ export function createAPIPage(
         route={path}
         securities={parseSecurities(method, ctx.schema.dereferenced)}
         method={method.method}
-        doc={{
-          bundled: pickSchema(
-            ctx.schema.bundled,
-            encodeInternalRef(['paths', path, method.method]),
-          ),
-        }}
+        doc={pickSchema(ctx.schema.bundled, encodeInternalRef(['paths', path, method.method]))}
         proxyUrl={ctx.proxyUrl}
         writeOnly
         readOnly={false}

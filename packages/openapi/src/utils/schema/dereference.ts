@@ -1,5 +1,7 @@
 import type { JSONSchema } from 'json-schema-typed/draft-2020-12';
 import { resolveRefSync } from './resolve-ref';
+import type { NoReferenceSwallow } from '.';
+import { isPlainObject } from '../is-plain-object';
 
 /**
  * Resolves all $ref pointers in a schema and returns a new schema without any $ref pointers.
@@ -13,26 +15,18 @@ export function dereferenceSync(
   const cloned = structuredClone(schema);
 
   function resolve(current: unknown): JSONSchema {
-    if (typeof current === 'object' && current !== null) {
-      // make sure we don't visit the same node twice
-      if (visitedNodes.has(current)) {
-        return current;
+    // make sure we don't visit the same node twice
+    if (visitedNodes.has(current)) {
+      return current as never;
+    }
+    visitedNodes.add(current);
+
+    if (Array.isArray(current)) {
+      for (let index = 0; index < current.length; index++) {
+        current[index] = resolve(current[index]);
       }
-      visitedNodes.add(current);
-
-      if (Array.isArray(current)) {
-        // array
-        for (let index = 0; index < current.length; index++) {
-          current[index] = resolve(current[index]);
-        }
-
-        return current as JSONSchema;
-      }
-
-      const obj = current as Record<string, unknown>;
-
-      // object
-      if ('$ref' in current && typeof current['$ref'] === 'string') {
+    } else if (isPlainObject(current)) {
+      if (typeof current.$ref === 'string') {
         const ref = current['$ref'];
         delete current['$ref'];
         const resolved = resolve(resolveRefSync(ref, cloned) as JSONSchema);
@@ -42,13 +36,13 @@ export function dereferenceSync(
         if (typeof resolved === 'boolean') throw new Error('invalid schema');
         for (const k in resolved) {
           if (!(k in current)) {
-            obj[k] = resolved[k as never];
+            current[k] = resolved[k as never];
           }
         }
       }
 
       for (const key in current) {
-        obj[key] = resolve(obj[key]);
+        current[key] = resolve(current[key]);
       }
     }
 
@@ -56,4 +50,18 @@ export function dereferenceSync(
   }
 
   return resolve(cloned);
+}
+
+export function dereferenceSwallow<T>(schema: T, full: unknown): NoReferenceSwallow<T> {
+  if (isPlainObject(schema)) {
+    if (typeof schema.$ref !== 'string') return schema as never;
+
+    const { $ref, ...rest } = schema;
+    const resolved = dereferenceSwallow(resolveRefSync($ref, full), full);
+
+    if (typeof resolved !== 'object') throw new Error(`invalid schema referenced via "${$ref}"`);
+    return { ...resolved, ...rest } as never;
+  }
+
+  return schema as never;
 }

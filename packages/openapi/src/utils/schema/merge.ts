@@ -1,5 +1,5 @@
 import { type ParsedSchema } from '@/utils/schema';
-import { deepEqual } from './deep-equal';
+import { deepEqual } from '../deep-equal';
 
 interface Options {
   dereference?: (schema: ParsedSchema) => ParsedSchema | undefined;

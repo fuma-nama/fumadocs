@@ -90,7 +90,7 @@ export function createClientAPIPage({
         route={path}
         securities={parseSecurities(method, ctx.schema.dereferenced)}
         method={method.method}
-        doc={{ processed: ctx.schema }}
+        doc={ctx.schema.bundled}
         proxyUrl={ctx.proxyUrl}
         writeOnly
         readOnly={false}

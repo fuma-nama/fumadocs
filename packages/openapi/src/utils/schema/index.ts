@@ -25,18 +25,13 @@ export type NoReference<T> = T extends (infer I)[]
         }
       : T;
 
-type NoReferenceJSONSchema<T> = T extends (infer I)[]
-  ? NoReference<I>[]
-  : T extends { $ref?: string }
-    ? Omit<T, '$ref'>
-    : T;
+export type NoReferenceSwallow<T> = T extends ReferenceObject ? Exclude<T, ReferenceObject> : T;
 
 export type ParsedSchema =
   | (JSONSchema & {
       'x-playground-lazy'?: boolean;
     })
   | boolean;
-export type ResolvedSchema = NoReferenceJSONSchema<ParsedSchema>;
 
 export function getPreferredType(body: Record<string, unknown>): string | undefined {
   if ('application/json' in body) return 'application/json';

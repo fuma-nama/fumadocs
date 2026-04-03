@@ -33,12 +33,7 @@ import {
   SelectValue,
 } from '@/ui/components/select';
 import { labelVariants } from '@/ui/components/input';
-import {
-  getPreferredType,
-  type SecurityEntry,
-  type NoReference,
-  type ParsedSchema,
-} from '@/utils/schema';
+import { getPreferredType, type SecurityEntry, type ParsedSchema } from '@/utils/schema';
 import ServerSelect from './components/server-select';
 import { useStorageKey } from '@/ui/client/storage-key';
 import {
@@ -52,13 +47,12 @@ import {
 } from '@fumari/stf';
 import { objectGet, objectSet, stringifyFieldKey } from '@fumari/stf/lib/utils';
 import { FieldInput, FieldSet, JsonInput, ObjectInput } from './components/inputs';
-import type { Document, HttpMethods, OperationObject, ParameterObject } from '@/types';
+import type { Document, HttpMethods, ParameterObject } from '@/types';
 import { ClientCodeBlock } from '@/ui/components/codeblock';
 import { useTranslations } from '@/ui/client/i18n';
 import { useOperationContext } from '@/ui/operation/client';
 import { OauthDialog, OauthDialogTrigger } from './components/oauth-dialog';
-import { dereferenceDocument } from '@/utils/document/dereference';
-import type { ProcessedDocument } from '@/utils/document/process';
+import { dereferenceSwallow } from '@/utils/schema/dereference';
 
 export interface FormValues extends Record<string, unknown> {
   path: Record<string, unknown>;
@@ -72,14 +66,8 @@ export interface PlaygroundClientProps extends ComponentProps<'form'>, SchemaSco
   route: string;
   method: HttpMethods;
   securities: SecurityEntry[][];
-  /** the OpenAPI document */
-  doc:
-    | {
-        bundled: Document;
-      }
-    | {
-        processed: ProcessedDocument;
-      };
+  /** the OpenAPI document (not dereferenced) */
+  doc: Document;
   proxyUrl?: string;
 }
 
@@ -135,19 +123,6 @@ interface RequestBodyInfo {
   mediaType: string;
 }
 
-function getBodyInfo(operation: NoReference<OperationObject>): RequestBodyInfo | undefined {
-  const content = operation.requestBody?.content;
-  if (!content) return;
-  const mediaType = getPreferredType(content);
-
-  if (mediaType) {
-    return {
-      mediaType,
-      schema: content[mediaType].schema ?? true,
-    };
-  }
-}
-
 export default function PlaygroundClient({
   route,
   method,
@@ -159,13 +134,29 @@ export default function PlaygroundClient({
   ...rest
 }: PlaygroundClientProps) {
   const t = useTranslations();
-  const schema =
-    'processed' in doc
-      ? doc.processed
-      : // oxlint-disable-next-line eslint-plugin-react-hooks/rules-of-hooks -- assume unchanged
-        useMemo(() => dereferenceDocument(doc.bundled), [doc.bundled]);
-  const operation: NoReference<OperationObject> = schema.dereferenced.paths![route]![method]!;
-  const body = getBodyInfo(operation);
+  const { parameters, body } = useMemo(() => {
+    const operation = doc.paths![route]![method]!;
+    const parameters: ParameterObject[] =
+      operation.parameters?.map((param) => dereferenceSwallow(param, doc)) ?? [];
+    let body: RequestBodyInfo | undefined;
+
+    if (operation.requestBody) {
+      const content = dereferenceSwallow(operation.requestBody, doc).content;
+      const mediaType = content ? getPreferredType(content) : undefined;
+
+      if (content && mediaType) {
+        body = {
+          mediaType,
+          schema: dereferenceSwallow(content[mediaType], doc).schema ?? true,
+        };
+      }
+    }
+
+    return {
+      body,
+      parameters,
+    };
+  }, [doc, route, method]);
 
   const { example: exampleId, examples, setExampleData } = useOperationContext();
   const { server } = useServerContext();
@@ -220,7 +211,7 @@ export default function PlaygroundClient({
     const encoded = encodeRequestData(
       { ...mapInputs(input), method, bodyMediaType: body?.mediaType },
       mediaAdapters,
-      operation.parameters,
+      parameters,
     );
     return fetcher.fetch(
       joinURL(
@@ -255,7 +246,7 @@ export default function PlaygroundClient({
             method,
             bodyMediaType: body?.mediaType,
           };
-          setExampleData(data, encodeRequestData(data, mediaAdapters, operation.parameters));
+          setExampleData(data, encodeRequestData(data, mediaAdapters, parameters));
         },
         timerRef.current ? 400 : 0,
       );
@@ -277,7 +268,7 @@ export default function PlaygroundClient({
 
   return (
     <StfProvider value={stf}>
-      <SchemaProvider schema={schema} writeOnly={writeOnly} readOnly={readOnly}>
+      <SchemaProvider doc={doc} writeOnly={writeOnly} readOnly={readOnly}>
         <form
           {...rest}
           className={cn(
@@ -314,7 +305,7 @@ export default function PlaygroundClient({
               ))}
             </SecurityTabs>
           )}
-          <ParametersForm parameters={operation.parameters} />
+          <ParametersForm parameters={parameters} />
           {body && (
             <CollapsiblePanel data-type="body" title={t.body}>
               {renderBodyField ? renderBodyField('body', body) : <BodyInput field={body.schema} />}
@@ -441,7 +432,7 @@ function ParameterItem({ type, parameters }: { type: ParamType; parameters: Para
   });
 }
 
-function ParametersForm({ parameters = [] }: { parameters?: ParameterObject[] }) {
+function ParametersForm({ parameters }: { parameters: ParameterObject[] }) {
   const { components: { CollapsiblePanel = DefaultCollapsiblePanel } = {} } =
     useApiContext().client.playground ?? {};
   const t = useTranslations();

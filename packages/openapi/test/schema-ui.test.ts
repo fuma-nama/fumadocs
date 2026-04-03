@@ -3,14 +3,13 @@ import { expect, test } from 'vitest';
 import { renderContextFrom } from './utils';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import type { ResolvedSchema } from '@/utils/schema';
 
 const cwd = fileURLToPath(new URL('./', import.meta.url));
 
 test('double-oneOf in allOf does not crash', async () => {
   const ctx = await renderContextFrom(path.join(cwd, './fixtures/double-oneof.yaml'));
 
-  const createItem = ctx.schema.dereferenced.components!.schemas!.CreateItem as ResolvedSchema;
+  const createItem = ctx.schema.dereferenced.components!.schemas!.CreateItem;
   const out = generateSchemaUI(createItem, undefined, undefined, ctx);
 
   // Should produce a cross-product of 4 oneOf variants, not crash
@@ -22,7 +21,7 @@ test('test', async () => {
   const ctx = await renderContextFrom(path.join(cwd, './fixtures/unkey.json'));
 
   const out = generateSchemaUI(
-    ctx.schema.dereferenced.components!.schemas!.V1KeysVerifyKeyResponse as ResolvedSchema,
+    ctx.schema.dereferenced.components!.schemas!.V1KeysVerifyKeyResponse,
     undefined,
     undefined,
     ctx,

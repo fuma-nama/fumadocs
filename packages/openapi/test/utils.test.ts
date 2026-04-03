@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { mergeAllOf } from '@/utils/merge-schema';
+import { mergeAllOf } from '@/utils/schema/merge';
 import { pickSchema } from '@/utils/schema/pick';
 import { joinURL, resolveRequestData, resolveServerUrl, withBase } from '@/utils/url';
 import type { RequestData } from '@/requests/types';
