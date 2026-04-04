@@ -1,5 +1,11 @@
 # @fumari/stf
 
+## 1.0.4
+
+### Patch Changes
+
+- f15e322: Expose more utils
+
 ## 1.0.3
 
 ### Patch Changes

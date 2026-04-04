@@ -1,5 +1,13 @@
 # @fuma-docs/openapi
 
+## 10.6.6
+
+### Patch Changes
+
+- f15e322: Improve auth UI for playground
+- Updated dependencies [f15e322]
+  - @fumari/stf@1.0.4
+
 ## 10.6.5
 
 ### Patch Changes
