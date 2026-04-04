@@ -1,6 +1,6 @@
 'use client';
 import { createContext, type ReactNode, use, useEffect, useMemo, useState } from 'react';
-import type { RenderContext, ServerObject } from '@/types';
+import type { RenderContext, SecuritySchemeObject, ServerObject } from '@/types';
 import { defaultAdapters, type MediaAdapter } from '@/requests/media/adapter';
 import { useStorageKey } from '../client/storage-key';
 import type { APIPageClientOptions } from '../client';
@@ -21,7 +21,9 @@ interface ServerContextType {
   setServerVariables: (value: Record<string, string>) => void;
 }
 
-export type ApiProviderProps = InheritFromContext;
+export interface ApiProviderProps extends InheritFromContext {
+  schemes: Record<string, SecuritySchemeObject>;
+}
 
 export interface SelectedServer {
   url: string;
@@ -32,6 +34,7 @@ export interface SelectedServer {
 interface ApiContextType extends InheritFromContext {
   mediaAdapters: Record<string, MediaAdapter>;
   codeUsages: CodeUsageGeneratorRegistry;
+  schemes: Record<string, SecuritySchemeObject>;
 }
 
 const ApiContext = createContext<ApiContextType | null>(null);
@@ -55,6 +58,7 @@ export function ApiProvider({
   children,
   shikiOptions,
   client,
+  schemes,
 }: ApiProviderProps & { children: ReactNode }) {
   return (
     <ApiContext
@@ -71,12 +75,13 @@ export function ApiProvider({
           shikiOptions,
           client,
           codeUsages,
+          schemes,
           mediaAdapters: {
             ...defaultAdapters,
             ...client.mediaAdapters,
           },
         };
-      }, [client, shikiOptions])}
+      }, [client, schemes, shikiOptions])}
     >
       {children}
     </ApiContext>

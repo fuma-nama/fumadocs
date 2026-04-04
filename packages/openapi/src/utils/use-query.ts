@@ -3,7 +3,7 @@ import { useMemo, useRef, useState } from 'react';
 export function useQuery<I extends unknown[], T>(
   fn: (...input: I) => Promise<T>,
 ): {
-  start: (...input: I) => void;
+  start: (...input: I) => Promise<T | void>;
   reset: () => void;
   data?: T;
   error?: unknown;
@@ -23,11 +23,12 @@ export function useQuery<I extends unknown[], T>(
       start(...input) {
         setLoading(true);
 
-        void fnRef
+        return fnRef
           .current(...input)
           .then((res) => {
             setData(res);
             setError(undefined);
+            return res;
           })
           .catch((err) => {
             setData(undefined);

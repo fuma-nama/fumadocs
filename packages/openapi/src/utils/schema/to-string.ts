@@ -1,19 +1,20 @@
-import type { ParsedSchema, ResolvedSchema } from '@/utils/schema';
-import type { ProcessedDocument } from '@/utils/process-document';
+import type { ParsedSchema } from '@/utils/schema';
+import type { DereferencedDocument } from '@/utils/document/dereference';
 
 export enum FormatFlags {
   None = 0,
   UseAlias = 1 << 0,
 }
 
-type Resolver = (schema: ResolvedSchema) => {
-  dereferenced: ResolvedSchema;
+type Resolver = (schema: ParsedSchema) => {
+  /** swallowly dereferenced schema */
+  dereferenced: ParsedSchema;
   raw?: ParsedSchema;
 };
 
 export function schemaToString(
-  value: ResolvedSchema,
-  _resolver?: ProcessedDocument | Resolver,
+  value: ParsedSchema,
+  _resolver?: DereferencedDocument | Resolver,
   flags: FormatFlags = FormatFlags.None,
 ): string {
   const resolver: Resolver =
@@ -28,7 +29,7 @@ export function schemaToString(
             raw: ref ? { $ref: ref } : undefined,
           };
         };
-  function union(union: readonly ResolvedSchema[], sep: string, flags: FormatFlags) {
+  function union(union: readonly ParsedSchema[], sep: string, flags: FormatFlags) {
     const members = new Set();
     let nullable = false;
 
@@ -46,9 +47,8 @@ export function schemaToString(
     return nullable ? `${result} | null` : result;
   }
 
-  function run(schema: ResolvedSchema, flags: FormatFlags): string {
-    const resolved = resolver(schema);
-    schema = resolved.dereferenced;
+  function run(input: ParsedSchema, flags: FormatFlags): string {
+    const { dereferenced: schema, raw } = resolver(input);
 
     if (schema === true) return 'any';
     else if (schema === false) return 'never';
@@ -56,8 +56,8 @@ export function schemaToString(
     if ((flags & FormatFlags.UseAlias) === FormatFlags.UseAlias) {
       if (schema.title) return schema.title;
 
-      if (typeof resolved.raw === 'object' && resolved.raw.$ref) {
-        const ref = resolved.raw.$ref.split('/');
+      if (typeof raw === 'object' && raw.$ref) {
+        const ref = raw.$ref.split('/');
         if (ref.length > 0) return ref[ref.length - 1];
       }
     }

@@ -1,6 +1,6 @@
 import type { OpenAPIV3_2, OpenAPIV3 } from './_openapi/types';
 import type { NoReference } from '@/utils/schema';
-import type { ProcessedDocument } from '@/utils/process-document';
+import type { DereferencedDocument } from '@/utils/document/dereference';
 import type { MediaAdapter } from '@/requests/media/adapter';
 import type { OpenAPIOptions } from '@/server';
 import type { CreateAPIPageOptions } from './ui/base';
@@ -25,7 +25,7 @@ export type MediaTypeObject = OpenAPIV3_2.MediaTypeObject;
 export type RequestBodyObject = OpenAPIV3_2.RequestBodyObject;
 
 export type MethodInformation = NoReference<OperationObject> & {
-  method: string;
+  method: HttpMethods;
   'x-codeSamples'?: InlineCodeUsageGenerator[];
   'x-selectedCodeSample'?: string;
   'x-exclusiveCodeSample'?: string;
@@ -43,7 +43,7 @@ export interface RenderContext
   /**
    * dereferenced schema
    */
-  schema: ProcessedDocument;
+  schema: DereferencedDocument;
   clientBoundary: typeof import('@/ui/client/boundary');
 
   mediaAdapters: Record<string, MediaAdapter>;

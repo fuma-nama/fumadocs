@@ -1,5 +1,6 @@
 import type { CodeUsageGenerator } from '@/requests/generators';
 import { resolveMediaAdapter } from '@/requests/media/adapter';
+import { doubleQuote } from '../string-utils';
 
 export const csharp: CodeUsageGenerator = {
   label: 'C#',
@@ -35,7 +36,7 @@ export const csharp: CodeUsageGenerator = {
     const headerLines: string[] = [];
 
     function addHeader(key: string, value: string) {
-      headerLines.push(`client.DefaultRequestHeaders.Add("${key}", ${JSON.stringify(value)});`);
+      headerLines.push(`client.DefaultRequestHeaders.Add("${key}", ${doubleQuote(value)});`);
     }
     for (const k in headers) {
       addHeader(k, headers[k].value);

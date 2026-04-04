@@ -9,7 +9,7 @@ import {
 import { useForm } from 'react-hook-form';
 import { Input, labelVariants } from '@/ui/components/input';
 import { useQuery } from '@/utils/use-query';
-import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import { type ReactNode, useMemo, useState } from 'react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import {
@@ -21,17 +21,17 @@ import {
 } from '@/ui/components/select';
 import type { OAuth2SecurityScheme } from '@/types';
 import { useTranslations } from '@/ui/client/i18n';
+import { useAuth } from '../auth';
+import { useApiContext } from '@/ui/contexts/api';
 
 type FlowType = keyof NonNullable<OAuth2SecurityScheme['flows']>;
 
-export interface AuthDialogProps {
-  scheme: OAuth2SecurityScheme;
+export interface AuthDialogContentProps {
+  schemeId: string;
   scopes: string[];
 
-  open: boolean;
   setOpen: (v: boolean) => void;
   setToken: (token: string) => void;
-  children: ReactNode;
 }
 
 interface FormValues {
@@ -41,15 +41,19 @@ interface FormValues {
   password: string;
 }
 
-interface AuthCodeState {
+export interface AuthCodeState {
   redirect_uri: string;
   client_id: string;
   client_secret: string;
+  /** name of the source security scheme */
+  scheme: string;
 }
 
-interface ImplicitState {
+export interface ImplicitState {
   redirect_uri: string;
   client_id: string;
+  /** name of the source security scheme */
+  scheme: string;
 }
 
 interface FlowInfo {
@@ -58,17 +62,33 @@ interface FlowInfo {
   supported: boolean;
 }
 
-export function OauthDialog({
-  scheme,
-  scopes,
-  setToken,
-  children,
-  open,
-  setOpen,
-}: AuthDialogProps) {
-  const [type, setType] = useState(() => {
+export const OAuthDialog = Dialog;
+
+export function OAuthDialogContent(props: AuthDialogContentProps) {
+  const t = useTranslations();
+
+  return (
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>{t.authorization}</DialogTitle>
+        <DialogDescription>{t.obtainAccessToken}</DialogDescription>
+      </DialogHeader>
+      <Content {...props} />
+    </DialogContent>
+  );
+}
+
+function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps) {
+  const { schemes } = useApiContext();
+  const tokenInfo = useAuth().store[schemeId];
+  const scheme = schemes[schemeId];
+  if (!scheme || scheme.type !== 'oauth2')
+    throw new Error('unexpected schemaId: must be type oauth2');
+
+  const [type, setType] = useState<FlowType | null>(() => {
     return Object.keys(scheme.flows!)[0] as FlowType;
   });
+
   const t = useTranslations();
   const allFlows: Record<FlowType, FlowInfo> = useMemo(
     () => ({
@@ -101,77 +121,18 @@ export function OauthDialog({
     [t],
   );
 
-  const form = useForm<FormValues>({
-    defaultValues: {
-      clientId: '',
-      clientSecret: '',
+  const defaultValues = useMemo<FormValues>(() => {
+    return {
+      clientId: tokenInfo?.client_id ?? '',
+      clientSecret: tokenInfo?.type === 'authorization_code' ? tokenInfo.client_secret : '',
       username: '',
       password: '',
-    },
-  });
-
-  const authCodeCallback = useQuery(async (code: string, state: AuthCodeState) => {
-    const value = scheme.flows!.authorizationCode!;
-
-    const res = await fetch(value.tokenUrl!, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        grant_type: 'authorization_code',
-        code,
-        // note: `state` could be invalid, but server will check it
-        redirect_uri: state.redirect_uri,
-        client_id: state.client_id,
-        client_secret: state.client_secret,
-      }),
-    });
-
-    if (!res.ok) throw new Error(await res.text());
-    const { access_token, token_type = 'Bearer' } = (await res.json()) as {
-      access_token: string;
-      token_type?: string;
     };
+  }, [tokenInfo]);
 
-    setToken(`${token_type} ${access_token}`);
-    setOpen(false);
+  const form = useForm<FormValues>({
+    defaultValues,
   });
-
-  useEffect(() => {
-    if (scheme.flows!.authorizationCode) {
-      const params = new URLSearchParams(window.location.search);
-      const state = params.get('state');
-      const code = params.get('code');
-
-      if (state && code) {
-        const parsedState = JSON.parse(state) as AuthCodeState;
-        setOpen(true);
-
-        form.setValue('clientId', parsedState.client_id);
-        form.setValue('clientSecret', parsedState.client_secret);
-        authCodeCallback.start(code, parsedState);
-        window.history.replaceState(null, '', window.location.pathname);
-        return;
-      }
-    }
-
-    if (scheme.flows!.implicit && window.location.hash.length > 1) {
-      const params = new URLSearchParams(window.location.hash.slice(1));
-      const state = params.get('state');
-      const token = params.get('access_token');
-      const type = params.get('token_type') ?? 'Bearer';
-
-      if (state && token) {
-        const parsedState = JSON.parse(state) as ImplicitState;
-
-        form.setValue('clientId', parsedState.client_id);
-        setToken(`${type} ${token}`);
-        window.history.replaceState(null, '', window.location.pathname);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- first page load only
-  }, []);
 
   const authorize = useQuery(async (values: FormValues) => {
     if (type === 'implicit') {
@@ -185,6 +146,7 @@ export function OauthDialog({
       params.set(
         'state',
         JSON.stringify({
+          scheme: schemeId,
           client_id: values.clientId,
           redirect_uri: window.location.href,
         } satisfies ImplicitState),
@@ -207,6 +169,7 @@ export function OauthDialog({
           client_id: values.clientId,
           client_secret: values.clientSecret,
           redirect_uri: window.location.href,
+          scheme: schemeId,
         } satisfies AuthCodeState),
       );
 
@@ -262,134 +225,122 @@ export function OauthDialog({
     }
   });
 
+  const isLoading = authorize.isLoading;
   const onSubmit = form.handleSubmit((values) => {
     return authorize.start(values);
   });
 
-  const isLoading = authorize.isLoading || authCodeCallback.isLoading;
-  const error = authCodeCallback.error ?? authorize.error;
-
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      {children}
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t.authorization}</DialogTitle>
-          <DialogDescription>{t.obtainAccessToken}</DialogDescription>
-        </DialogHeader>
-        <form
-          className="flex flex-col gap-6"
-          onSubmit={(e) => {
-            void onSubmit(e);
-            e.stopPropagation();
-          }}
-        >
-          <Select value={type} onValueChange={setType as (s: string) => void}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.keys(scheme.flows!).map((key) => {
-                const { name, description } = allFlows[key as FlowType];
+    <form
+      className="flex flex-col gap-6"
+      onSubmit={(e) => {
+        void onSubmit(e);
+        e.stopPropagation();
+      }}
+    >
+      <Select value={type ?? ''} onValueChange={setType as (s: string) => void}>
+        <SelectTrigger>
+          <SelectValue placeholder="Select a flow" />
+        </SelectTrigger>
+        <SelectContent>
+          {Object.keys(scheme.flows!).map((key) => {
+            const { name, description } = allFlows[key as FlowType];
 
-                return (
-                  <SelectItem key={key} value={key}>
-                    <p className="font-medium">{name}</p>
-                    <p className="text-fd-muted-foreground">{description}</p>
-                  </SelectItem>
-                );
-              })}
-            </SelectContent>
-          </Select>
+            return (
+              <SelectItem key={key} value={key}>
+                <p className="font-medium">{name}</p>
+                <p className="text-fd-muted-foreground">{description}</p>
+              </SelectItem>
+            );
+          })}
+        </SelectContent>
+      </Select>
 
-          {(type === 'authorizationCode' ||
-            type === 'clientCredentials' ||
-            type === 'implicit') && (
-            <fieldset className="flex flex-col gap-1.5">
-              <label htmlFor="client_id" className={cn(labelVariants())}>
-                {t.clientId}
-              </label>
-              <p className="text-fd-muted-foreground text-sm">{t.clientIdHint}</p>
-              <Input
-                id="client_id"
-                placeholder={t.inputPlaceholder}
-                type="text"
-                autoComplete="off"
-                disabled={isLoading}
-                {...form.register('clientId', { required: true })}
-              />
-            </fieldset>
-          )}
-          {(type === 'authorizationCode' || type === 'clientCredentials') && (
-            <fieldset className="flex flex-col gap-1.5">
-              <label htmlFor="client_secret" className={cn(labelVariants())}>
-                {t.clientSecret}
-              </label>
-              <p className="text-fd-muted-foreground text-sm">{t.clientSecretHint}</p>
-              <Input
-                id="client_secret"
-                placeholder={t.inputPlaceholder}
-                type="password"
-                autoComplete="off"
-                disabled={isLoading}
-                {...form.register('clientSecret', { required: true })}
-              />
-            </fieldset>
-          )}
-          {type === 'password' && (
-            <>
-              <fieldset className="flex flex-col gap-1.5">
-                <label htmlFor="username" className={cn(labelVariants())}>
-                  {t.usernameField}
-                </label>
-                <Input
-                  id="username"
-                  placeholder={t.inputPlaceholder}
-                  type="text"
-                  disabled={isLoading}
-                  autoComplete="off"
-                  {...form.register('username', { required: true })}
-                />
-              </fieldset>
-              <fieldset className="flex flex-col gap-1.5">
-                <label htmlFor="password" className={cn(labelVariants())}>
-                  {t.clientSecret}
-                </label>
-                <Input
-                  id="password"
-                  placeholder={t.inputPlaceholder}
-                  type="password"
-                  autoComplete="off"
-                  disabled={isLoading}
-                  {...form.register('password', { required: true })}
-                />
-              </fieldset>
-            </>
-          )}
-          {allFlows[type].supported ? (
-            <>
-              {error ? <p className="text-red-400 font-medium text-sm">{String(error)}</p> : null}
-              <button
-                type="submit"
-                disabled={isLoading}
-                className={cn(
-                  buttonVariants({
-                    color: 'primary',
-                  }),
-                )}
-              >
-                {authCodeCallback.isLoading ? t.fetchingToken : t.submit}
-              </button>
-            </>
-          ) : (
-            <p className="text-fd-muted-foreground bg-fd-muted p-2 rounded-lg border">
-              {t.unsupported}
-            </p>
-          )}
-        </form>
-      </DialogContent>
-    </Dialog>
+      {(type === 'authorizationCode' || type === 'clientCredentials' || type === 'implicit') && (
+        <fieldset className="flex flex-col gap-1.5">
+          <label htmlFor="client_id" className={cn(labelVariants())}>
+            {t.clientId}
+          </label>
+          <p className="text-fd-muted-foreground text-sm">{t.clientIdHint}</p>
+          <Input
+            id="client_id"
+            placeholder={t.inputPlaceholder}
+            type="text"
+            autoComplete="off"
+            disabled={isLoading}
+            {...form.register('clientId', { required: true })}
+          />
+        </fieldset>
+      )}
+      {(type === 'authorizationCode' || type === 'clientCredentials') && (
+        <fieldset className="flex flex-col gap-1.5">
+          <label htmlFor="client_secret" className={cn(labelVariants())}>
+            {t.clientSecret}
+          </label>
+          <p className="text-fd-muted-foreground text-sm">{t.clientSecretHint}</p>
+          <Input
+            id="client_secret"
+            placeholder={t.inputPlaceholder}
+            type="password"
+            autoComplete="off"
+            disabled={isLoading}
+            {...form.register('clientSecret', { required: true })}
+          />
+        </fieldset>
+      )}
+      {type === 'password' && (
+        <>
+          <fieldset className="flex flex-col gap-1.5">
+            <label htmlFor="username" className={cn(labelVariants())}>
+              {t.usernameField}
+            </label>
+            <Input
+              id="username"
+              placeholder={t.inputPlaceholder}
+              type="text"
+              autoComplete="off"
+              disabled={isLoading}
+              {...form.register('username', { required: true })}
+            />
+          </fieldset>
+          <fieldset className="flex flex-col gap-1.5">
+            <label htmlFor="password" className={cn(labelVariants())}>
+              {t.clientSecret}
+            </label>
+            <Input
+              id="password"
+              placeholder={t.inputPlaceholder}
+              type="password"
+              autoComplete="off"
+              disabled={isLoading}
+              {...form.register('password', { required: true })}
+            />
+          </fieldset>
+        </>
+      )}
+      {type && allFlows[type].supported ? (
+        <>
+          {authorize.error ? (
+            <p className="text-red-400 font-medium text-sm">{String(authorize.error)}</p>
+          ) : null}
+          <button
+            type="submit"
+            className={cn(
+              buttonVariants({
+                color: 'primary',
+              }),
+            )}
+          >
+            {t.submit}
+          </button>
+        </>
+      ) : (
+        <p className="text-fd-muted-foreground bg-fd-muted p-2 rounded-lg border">
+          {t.unsupported}
+        </p>
+      )}
+    </form>
   );
 }
 
-export const OauthDialogTrigger = DialogTrigger;
+export const OAuthDialogTrigger = DialogTrigger;

@@ -348,7 +348,7 @@ export function loader(
       const [value, hash] = href.split('#', 2);
       let target;
 
-      if (value.startsWith('./')) {
+      if (value.startsWith('./') || value.startsWith('../')) {
         const path = joinPath(dir, value);
 
         target = indexer.getPage(path, language);
@@ -363,7 +363,7 @@ export function loader(
         };
     },
     resolveHref(href, parent) {
-      if (href.startsWith('./')) {
+      if (href.startsWith('./') || href.startsWith('../')) {
         const target = this.getPageByHref(href, {
           dir: path.dirname(parent.path),
           language: parent.locale,

@@ -1,5 +1,5 @@
 import { RenderContext } from '@/types';
-import { processDocument } from '@/utils/process-document';
+import { processDocument } from '@/utils/document/process';
 import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
 import * as ClientBoundary from '@/ui/client/boundary.lazy';
 

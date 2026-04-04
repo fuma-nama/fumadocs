@@ -26,6 +26,10 @@ export const SchemaUI = wrapLazy(() =>
 
 export const PlaygroundClient = wrapLazy(() => import('@/playground/client'));
 
+export const PlaygroundAuthProvider = wrapLazy(() =>
+  import('@/playground/auth').then((mod) => ({ default: mod.AuthProvider })),
+);
+
 // Waku wraps all export functions of a "use client" file in `React.lazy`, but `lazy(lazy(() => ...))` causes error.
 // we wrap another layer of component such that it is valid
 // TODO: perhaps we can remove it once Waku migrated to vite-rsc

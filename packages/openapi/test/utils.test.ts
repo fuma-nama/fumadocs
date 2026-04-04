@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
-import { mergeAllOf } from '@/utils/merge-schema';
+import { mergeAllOf } from '@/utils/schema/merge';
+import { pickSchema } from '@/utils/schema/pick';
 import { joinURL, resolveRequestData, resolveServerUrl, withBase } from '@/utils/url';
 import type { RequestData } from '@/requests/types';
 
@@ -418,7 +419,7 @@ describe('URL utilities', () => {
   describe('resolveRequestData', () => {
     test('basic path parameter substitution', () => {
       const requestData: RequestData = {
-        method: 'GET',
+        method: 'get',
         path: {
           id: { value: '123' },
         },
@@ -432,7 +433,7 @@ describe('URL utilities', () => {
 
     test('multiple path parameters', () => {
       const requestData: RequestData = {
-        method: 'GET',
+        method: 'get',
         path: {
           userId: { value: '123' },
           postId: { value: '456' },
@@ -449,7 +450,7 @@ describe('URL utilities', () => {
 
     test('array path parameter', () => {
       const requestData: RequestData = {
-        method: 'GET',
+        method: 'get',
         path: {
           segments: { value: 'api/v1/users' },
         },
@@ -463,7 +464,7 @@ describe('URL utilities', () => {
 
     test('adds query parameters to clean path', () => {
       const requestData: RequestData = {
-        method: 'GET',
+        method: 'get',
         path: {},
         query: {
           limit: { values: ['10'] },
@@ -478,7 +479,7 @@ describe('URL utilities', () => {
 
     test('handles array query parameters', () => {
       const requestData: RequestData = {
-        method: 'GET',
+        method: 'get',
         path: {},
         query: {
           tags: { values: ['javascript', 'typescript'] },
@@ -495,7 +496,7 @@ describe('URL utilities', () => {
     // Core test cases for paths with existing query parameters (legacy API support)
     test('path with existing query parameter - verbose example', () => {
       const requestData: RequestData = {
-        method: 'GET',
+        method: 'get',
         path: {},
         query: {
           limit: { values: ['5'] },
@@ -511,7 +512,7 @@ describe('URL utilities', () => {
 
     test('path with existing query parameter - search example', () => {
       const requestData: RequestData = {
-        method: 'GET',
+        method: 'get',
         path: {},
         query: {
           limit: { values: ['10'] },
@@ -528,7 +529,7 @@ describe('URL utilities', () => {
 
     test('path with existing query parameters and path parameters', () => {
       const requestData: RequestData = {
-        method: 'GET',
+        method: 'get',
         path: {
           userId: { value: '123' },
         },
@@ -546,7 +547,7 @@ describe('URL utilities', () => {
 
     test('overrides existing query parameter with new value', () => {
       const requestData: RequestData = {
-        method: 'GET',
+        method: 'get',
         path: {},
         query: {
           verbose: { values: ['false'] },
@@ -562,7 +563,7 @@ describe('URL utilities', () => {
 
     test('handles multiple existing query parameters', () => {
       const requestData: RequestData = {
-        method: 'GET',
+        method: 'get',
         path: {},
         query: {
           newParam: { values: ['value'] },
@@ -578,7 +579,7 @@ describe('URL utilities', () => {
 
     test('handles array parameters with existing query string', () => {
       const requestData: RequestData = {
-        method: 'GET',
+        method: 'get',
         path: {},
         query: {
           categories: { values: ['tech', 'science'] },
@@ -594,7 +595,7 @@ describe('URL utilities', () => {
 
     test('replaces existing array parameter', () => {
       const requestData: RequestData = {
-        method: 'GET',
+        method: 'get',
         path: {},
         query: {
           tags: { values: ['new', 'updated'] },
@@ -610,7 +611,7 @@ describe('URL utilities', () => {
 
     test('handles empty query parameters object', () => {
       const requestData: RequestData = {
-        method: 'GET',
+        method: 'get',
         path: {},
         query: {},
         header: {},
@@ -624,7 +625,7 @@ describe('URL utilities', () => {
 
     test('complex scenario with path params, existing query, and new query params', () => {
       const requestData: RequestData = {
-        method: 'GET',
+        method: 'get',
         path: {
           orgId: { value: 'acme' },
           projectId: { value: 'web-app' },
@@ -646,5 +647,85 @@ describe('URL utilities', () => {
         '/api/orgs/acme/projects/web-app?version=latest&archived=false&include=members&include=settings&format=json&debug=true',
       );
     });
+  });
+});
+
+describe('pickSchema', () => {
+  test('places resolved schema at JSON Pointer path', () => {
+    const pet = {
+      type: 'object',
+      properties: { name: { type: 'string' } },
+    };
+    const root = {
+      components: {
+        schemas: {
+          Pet: pet,
+        },
+      },
+    };
+
+    expect(pickSchema(root, '#/components/schemas/Pet')).toEqual({
+      components: {
+        schemas: {
+          Pet: pet,
+        },
+      },
+    });
+  });
+
+  test('follows nested $ref and includes referenced definitions', () => {
+    const address = {
+      type: 'object',
+      properties: { street: { type: 'string' } },
+    };
+    const person = {
+      type: 'object',
+      properties: {
+        home: { $ref: '#/components/schemas/Address' },
+      },
+    };
+    const root = {
+      components: {
+        schemas: {
+          Address: address,
+          Person: person,
+        },
+      },
+    };
+
+    expect(pickSchema(root, '#/components/schemas/Person')).toEqual({
+      components: {
+        schemas: {
+          Address: address,
+          Person: person,
+        },
+      },
+    });
+  });
+
+  test('does not revisit the same $ref', () => {
+    const shared = { type: 'string' };
+    const root = {
+      components: {
+        schemas: {
+          Shared: shared,
+          A: { $ref: '#/components/schemas/Shared' },
+          B: { $ref: '#/components/schemas/Shared' },
+        },
+      },
+    };
+
+    expect(pickSchema(root, '#/components/schemas/A')).toEqual({
+      components: {
+        schemas: {
+          Shared: shared,
+          A: { $ref: '#/components/schemas/Shared' },
+        },
+      },
+    });
+  });
+
+  test('rejects external $ref', () => {
+    expect(() => pickSchema({}, 'https://example.com/schema.json#/Foo')).toThrow();
   });
 });

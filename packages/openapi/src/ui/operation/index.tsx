@@ -22,7 +22,6 @@ import {
   AccordionTrigger,
 } from '@/ui/components/accordion';
 import { isMediaTypeSupported } from '@/requests/media/adapter';
-import { APIPlayground } from '@/playground';
 import { RequestTabs } from './request-tabs';
 import { cn } from '@/utils/cn';
 import { getExampleRequests } from './get-example-requests';
@@ -152,8 +151,8 @@ export function Operation({
                         }
                       : param.schema
                   }
-                  readOnly={method.method === 'GET'}
-                  writeOnly={method.method !== 'GET'}
+                  readOnly={method.method === 'get'}
+                  writeOnly={method.method !== 'get'}
                   ctx={ctx}
                 />
               ),
@@ -277,7 +276,7 @@ export function Operation({
         parameters: parameterNode,
         responses: responseNode,
         apiPlayground: playgroundEnabled ? (
-          <APIPlayground path={path} method={method} ctx={ctx} />
+          ctx.playground?.render?.({ path, method, ctx })
         ) : (
           <div className="flex flex-row items-center gap-2.5 p-3 rounded-xl border bg-fd-card text-fd-card-foreground not-prose">
             <MethodLabel className="text-xs">{method.method}</MethodLabel>
@@ -371,8 +370,8 @@ function RequestBodyContentItem({
             required: method.requestBody?.required,
           }}
           root={content.schema}
-          readOnly={method.method === 'GET'}
-          writeOnly={method.method !== 'GET'}
+          readOnly={method.method === 'get'}
+          writeOnly={method.method !== 'get'}
           ctx={ctx}
         />
       )}

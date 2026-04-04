@@ -1,7 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&family=Geist:wght@100..900&display=swap');
 @import 'tailwindcss';
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
 @import 'fumadocs-openapi/css/preset.css';
+
+@theme {
+  --default-font-family: 'Geist';
+  --default-mono-font-family: 'Geist Mono';
+}
 
 html {
   scrollbar-gutter: stable;

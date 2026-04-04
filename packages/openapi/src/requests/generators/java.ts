@@ -1,4 +1,4 @@
-import { indent } from '@/requests/string-utils';
+import { doubleQuote, indent } from '@/requests/string-utils';
 import type { CodeUsageGenerator } from '@/requests/generators';
 import { resolveMediaAdapter } from '@/requests/media/adapter';
 
@@ -46,11 +46,11 @@ export const java: CodeUsageGenerator = {
 
     // Build request
     s.push('HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()');
-    s.push(indent(`.uri(URI.create(${JSON.stringify(url)}))`));
+    s.push(indent(`.uri(URI.create(${doubleQuote(url)}))`));
 
     // Add headers
     for (const [key, param] of Object.entries(headers)) {
-      s.push(indent(`.header(${JSON.stringify(key)}, ${JSON.stringify(param.value)})`));
+      s.push(indent(`.header(${doubleQuote(key)}, ${doubleQuote(param.value)})`));
     }
 
     if (data.bodyMediaType) {
@@ -63,7 +63,7 @@ export const java: CodeUsageGenerator = {
     if (cookies.length > 0) {
       const cookieString = cookies.map(([key, param]) => `${key}=${param.value}`).join('; ');
 
-      s.push(indent(`.header("Cookie", ${JSON.stringify(cookieString)})`));
+      s.push(indent(`.header("Cookie", ${doubleQuote(cookieString)})`));
     }
 
     const arg = body ? 'body' : '';

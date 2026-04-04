@@ -1,11 +1,12 @@
 import type { ApiPageProps, OperationItem, WebhookItem } from '@/ui/api-page';
-import type { ProcessedDocument } from '@/utils/process-document';
+import type { DereferencedDocument } from '@/utils/document/dereference';
 import type { TagObject } from '@/types';
 import { dump } from 'js-yaml';
 import { removeUndefined } from '@/utils/remove-undefined';
 import type { OperationOutput, PageOutput, WebhookOutput } from '@/utils/pages/builder';
 import type { InternalOpenAPIMeta } from '@/server/source-api';
 import { toStaticData } from '@/utils/pages/to-static-data';
+import { doubleQuote } from '@/requests/string-utils';
 
 export interface PagesToTextOptions {
   /**
@@ -49,7 +50,7 @@ export interface PagesToTextOptions {
 
 export function toText(
   entry: PageOutput | OperationOutput | WebhookOutput,
-  processed: ProcessedDocument,
+  processed: DereferencedDocument,
   options: PagesToTextOptions = {},
 ) {
   switch (entry.type) {
@@ -133,7 +134,7 @@ export function generateDocument(
   if (imports) {
     out.push(
       ...imports
-        .map((item) => `import { ${item.names.join(', ')} } from ${JSON.stringify(item.from)};`)
+        .map((item) => `import { ${item.names.join(', ')} } from ${doubleQuote(item.from)};`)
         .join('\n'),
     );
   }
@@ -156,7 +157,7 @@ export type DocumentContext =
 
 function generatePage(
   schemaId: string,
-  processed: ProcessedDocument,
+  processed: DereferencedDocument,
   pageProps: Omit<ApiPageProps, 'document'>,
   options: PagesToTextOptions & {
     title: string;
@@ -217,7 +218,7 @@ function pageContent({
   webhooks,
   operations,
 }: ApiPageProps): string {
-  const propStrs: string[] = [`document={${JSON.stringify(document)}}`];
+  const propStrs: string[] = [`document={${doubleQuote(document)}}`];
 
   // filter extra properties in props
   if (webhooks) {
@@ -247,10 +248,10 @@ function pageContent({
     );
   }
   if (showTitle) {
-    propStrs.push(`showTitle={${JSON.stringify(showTitle)}}`);
+    propStrs.push(`showTitle`);
   }
   if (showDescription) {
-    propStrs.push(`showDescription={${JSON.stringify(showDescription)}}`);
+    propStrs.push(`showDescription`);
   }
 
   return `<APIPage ${propStrs.join(' ')} />`;

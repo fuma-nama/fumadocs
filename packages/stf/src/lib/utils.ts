@@ -89,6 +89,18 @@ export function fieldKeyStartsWith(a: string, b: string): boolean {
   return b.length === 0 || a === b || a.startsWith(b + '.');
 }
 
+/**
+ * @returns if `a` starts with `b`.
+ */
+export function arrayStartsWith(a: FieldKey, b: FieldKey): boolean {
+  if (b.length === 0) return true;
+  if (a.length < b.length) return false;
+  for (let i = 0; i < b.length; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
 export function isPlainObject(value: unknown): value is Record<string, unknown> {
   if (typeof value !== 'object' || value === null) {
     return false;

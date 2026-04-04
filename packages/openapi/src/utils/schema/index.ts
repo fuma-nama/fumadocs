@@ -1,6 +1,8 @@
 import type { JSONSchema } from 'json-schema-typed/draft-2020-12';
 import type {
+  Document,
   ExampleObject,
+  HttpMethods,
   MediaTypeObject,
   MethodInformation,
   OperationObject,
@@ -22,18 +24,13 @@ export type NoReference<T> = T extends (infer I)[]
         }
       : T;
 
-type NoReferenceJSONSchema<T> = T extends (infer I)[]
-  ? NoReference<I>[]
-  : T extends { $ref?: string }
-    ? Omit<T, '$ref'>
-    : T;
+export type NoReferenceSwallow<T> = T extends ReferenceObject ? Exclude<T, ReferenceObject> : T;
 
 export type ParsedSchema =
   | (JSONSchema & {
       'x-playground-lazy'?: boolean;
     })
   | boolean;
-export type ResolvedSchema = NoReferenceJSONSchema<ParsedSchema>;
 
 export function getPreferredType(body: Record<string, unknown>): string | undefined {
   if ('application/json' in body) return 'application/json';
@@ -53,7 +50,7 @@ export function getTagDisplayName(tag: TagObject): string {
  * Summarize method endpoint information
  */
 export function createMethod(
-  method: string,
+  method: HttpMethods,
   path: NoReference<PathItemObject>,
   operation: NoReference<OperationObject>,
 ): MethodInformation {
@@ -63,7 +60,7 @@ export function createMethod(
     ...operation,
     servers: operation.servers ?? path.servers,
     parameters: [...(operation.parameters ?? []), ...(path.parameters ?? [])],
-    method: method.toUpperCase(),
+    method,
   };
 }
 
@@ -96,4 +93,33 @@ export function pickExample(value: ExampleLike): unknown | undefined {
     const examples = Object.values(value.examples);
     if (examples.length > 0) return examples[0].value;
   }
+}
+
+export interface SecurityEntry {
+  scopes: string[];
+  id: string;
+}
+
+export function parseSecurities(
+  method: MethodInformation,
+  dereferenced: NoReference<Document>,
+): SecurityEntry[][] {
+  const result: SecurityEntry[][] = [];
+  const security = method.security ?? dereferenced.security ?? [];
+  if (security.length === 0) return result;
+
+  for (const map of security) {
+    const list: SecurityEntry[] = [];
+
+    for (const [key, scopes] of Object.entries(map)) {
+      list.push({
+        id: key,
+        scopes,
+      });
+    }
+
+    if (list.length > 0) result.push(list);
+  }
+
+  return result;
 }

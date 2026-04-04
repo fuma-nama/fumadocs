@@ -1,24 +1,10 @@
 import type { Document } from '@/types';
-import type { NoReference } from '@/utils/schema';
 import { bundle } from '@scalar/json-magic/bundle';
 import { upgrade } from '@scalar/openapi-upgrader';
 import { fetchUrls, readFiles } from '@scalar/json-magic/bundle/plugins/node';
-import type { JSONSchema } from 'json-schema-typed/draft-2020-12';
-import { dereferenceSync } from './schema/dereference';
+import { dereferenceDocument, type DereferencedDocument } from './dereference';
 
-export interface ProcessedDocument {
-  /**
-   * dereferenced document
-   */
-  dereferenced: NoReference<Document>;
-
-  /**
-   * Get raw $ref from dereferenced object
-   */
-  getRawRef: (obj: object) => string | undefined;
-
-  bundled: Document;
-}
+export type ProcessedDocument = DereferencedDocument;
 
 /**
  * process & reference input document to a Fumadocs OpenAPI compatible format
@@ -39,19 +25,5 @@ export async function processDocument(input: string | Document): Promise<Process
         cause: e,
       });
     });
-
-  /**
-   * Dereferenced value and its original `$ref` value
-   */
-  const dereferenceMap = new Map<object, string>();
-
-  return {
-    dereferenced: dereferenceSync(bundled as JSONSchema, (schema, ref) => {
-      dereferenceMap.set(schema as object, ref);
-    }) as NoReference<Document>,
-    getRawRef(obj) {
-      return dereferenceMap.get(obj);
-    },
-    bundled,
-  };
+  return dereferenceDocument(bundled);
 }

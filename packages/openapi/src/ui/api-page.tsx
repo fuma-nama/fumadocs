@@ -52,7 +52,7 @@ export function APIPage({
     </div>
   );
 
-  const content = renderPageLayout(
+  let content = renderPageLayout(
     {
       operations: operations?.map((item) => {
         const pathItem = dereferenced.paths?.[item.path];
@@ -111,8 +111,16 @@ export function APIPage({
     ctx,
   );
 
+  if (ctx.playground?.enabled !== false && ctx.playground?.provider) {
+    content = ctx.playground.provider({ children: content });
+  }
+
   return (
-    <ctx.clientBoundary.ApiProvider shikiOptions={ctx.shikiOptions} client={ctx.client ?? {}}>
+    <ctx.clientBoundary.ApiProvider
+      schemes={dereferenced.components?.securitySchemes ?? {}}
+      shikiOptions={ctx.shikiOptions}
+      client={ctx.client ?? {}}
+    >
       <ctx.clientBoundary.ServerProvider servers={dereferenced.servers as ServerObject[]}>
         {content}
       </ctx.clientBoundary.ServerProvider>

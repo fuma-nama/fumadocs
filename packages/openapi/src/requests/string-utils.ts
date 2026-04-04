@@ -41,10 +41,34 @@ export function inputToString(
   return js2xml(value, { compact: true, spaces: 2 });
 }
 
-export function escapeString(str: string, delimit?: string): string {
-  if (!delimit) return JSON.stringify(str);
+/**
+ * Returns the input string wrapped in single quotes, escaping internal single quotes and backslashes.
+ */
+export function singleQuote(str: string): string {
+  return `'${str.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
+}
 
-  return `${delimit}${str.replaceAll(delimit, `\\${delimit}`)}${delimit}`;
+/**
+ * Returns the input string wrapped in double quotes, escaping internal double quotes and backslashes.
+ */
+export function doubleQuote(str: string): string {
+  return `"${str.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+}
+
+/**
+ * Returns the input string wrapped in Python triple double-quotes,
+ * escaping embedded triple quotes and backslashes.
+ */
+export function tripleDoubleQuote(str: string): string {
+  // Escape \ first, then triple double quotes
+  return `"""${str.replace(/\\/g, '\\\\').replace(/"""/g, '\\"\\"\\"')}"""`;
+}
+
+/**
+ * Returns the input string wrapped in backticks, escaping internal backticks and backslashes.
+ */
+export function backtickQuote(str: string): string {
+  return `\`${str.replace(/\\/g, '\\\\').replace(/`/g, '\\`')}\``;
 }
 
 export function indent(code: string, tab: number = 1) {

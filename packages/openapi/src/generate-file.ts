@@ -1,12 +1,13 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
 import { generateDocument, type PagesToTextOptions, toText } from './utils/pages/to-text';
-import type { ProcessedDocument } from '@/utils/process-document';
+import type { DereferencedDocument } from '@/utils/document/dereference';
 import type { OpenAPIServer } from '@/server';
 import { createGetUrl, getSlugs, PathUtils } from 'fumadocs-core/source';
 import { createAutoPreset, type SchemaToPagesOptions } from '@/utils/pages/preset-auto';
 import { fromSchema, type OutputGroup, type OutputEntry } from '@/utils/pages/builder';
 import type { DistributiveOmit } from './types';
+import { doubleQuote } from './requests/string-utils';
 
 export interface OutputFile {
   path: string;
@@ -90,7 +91,7 @@ export type Config = SchemaToPagesOptions &
 interface BeforeWriteContext {
   readonly generated: Record<string, OutputFile[]>;
   readonly generatedEntries: Record<string, OutputEntry[]>;
-  readonly documents: Record<string, ProcessedDocument>;
+  readonly documents: Record<string, DereferencedDocument>;
 }
 
 export async function generateFiles(options: Config): Promise<void> {
@@ -275,10 +276,10 @@ function writeIndexFiles(
       // cannot link to groups
       if (entry.type === 'group') continue;
       const descriptionAttr = entry.info.description
-        ? `description=${JSON.stringify(entry.info.description)} `
+        ? `description=${doubleQuote(entry.info.description)} `
         : '';
       content.push(
-        `<Card href="${urlFn(entry.path)}" title=${JSON.stringify(entry.info.title)} ${descriptionAttr}/>`,
+        `<Card href="${urlFn(entry.path)}" title=${doubleQuote(entry.info.title)} ${descriptionAttr}/>`,
       );
     }
 

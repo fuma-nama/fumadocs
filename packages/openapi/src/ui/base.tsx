@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- rehype-react without types */
 import Slugger from 'github-slugger';
 import type { Awaitable, MethodInformation, RenderContext } from '@/types';
-import type { NoReference } from '@/utils/schema';
-import type { ProcessedDocument } from '@/utils/process-document';
+import { parseSecurities, type NoReference } from '@/utils/schema';
+import type { DereferencedDocument } from '@/utils/document/dereference';
 import { defaultAdapters, MediaAdapter } from '@/requests/media/adapter';
 import type { FC, HTMLAttributes, ReactNode } from 'react';
 import type { OpenAPIServer } from '@/server';
@@ -25,6 +25,10 @@ import type { BundledTheme, CodeOptionsThemes, CodeToHastOptionsCommon } from 's
 import { highlightHast, type ShikiFactory } from 'fumadocs-core/highlight/shiki';
 import type { ExampleRequestItem } from './operation/get-example-requests';
 import { compile } from '@fumari/json-schema-ts';
+import { pickSchema } from '@/utils/schema/pick';
+import { encodeInternalRef } from '@/utils/schema/ref';
+import type { RequestTabsRenderContext } from './operation/request-tabs';
+import { PlaygroundAuthProvider } from '@/ui/client/boundary.lazy';
 
 export interface GenerateTypeScriptDefinitionsContext extends RenderContext {
   operation: NoReference<MethodInformation>;
@@ -35,6 +39,12 @@ export interface GenerateTypeScriptDefinitionsContext extends RenderContext {
     statusCode: string;
     contentType: string;
   };
+}
+
+export interface APIPlaygroundProps {
+  path: string;
+  method: MethodInformation;
+  ctx: RenderContext;
 }
 
 export interface CreateAPIPageOptions {
@@ -100,13 +110,7 @@ export interface CreateAPIPageOptions {
   content?: {
     renderResponseTabs?: (tabs: ResponseTab[], ctx: RenderContext) => ReactNode;
 
-    renderRequestTabs?: (
-      items: ExampleRequestItem[],
-      ctx: RenderContext & {
-        route: string;
-        operation: NoReference<MethodInformation>;
-      },
-    ) => ReactNode;
+    renderRequestTabs?: (items: ExampleRequestItem[], ctx: RequestTabsRenderContext) => ReactNode;
 
     renderAPIExampleLayout?: (
       slots: {
@@ -193,14 +197,15 @@ export interface CreateAPIPageOptions {
      * @defaultValue true
      */
     enabled?: boolean;
+
+    /**
+     * render a page-level provider (useful for handling auth)
+     */
+    provider?: (props: { children: ReactNode }) => ReactNode;
     /**
      * replace the server-side renderer
      */
-    render?: (props: {
-      path: string;
-      method: MethodInformation;
-      ctx: RenderContext;
-    }) => Awaitable<ReactNode>;
+    render?: (props: APIPlaygroundProps) => ReactNode;
   };
 
   renderHeading?: (props: HTMLAttributes<HTMLHeadingElement>, depth: number) => ReactNode;
@@ -210,7 +215,7 @@ export interface CreateAPIPageOptions {
 }
 
 export interface ServerApiPageProps extends Omit<ApiPageProps, 'document'> {
-  document: string | ProcessedDocument;
+  document: string | DereferencedDocument;
 }
 
 export function createAPIPage(
@@ -243,8 +248,26 @@ export function createAPIPage(
       .use(rehypeReact);
   }
 
+  function renderPlaygroundProviderDefault({ children }: { children: ReactNode }) {
+    return <PlaygroundAuthProvider>{children}</PlaygroundAuthProvider>;
+  }
+
+  function renderPlaygroundDefault({ path, method, ctx }: APIPlaygroundProps) {
+    return (
+      <ctx.clientBoundary.PlaygroundClient
+        route={path}
+        securities={parseSecurities(method, ctx.schema.dereferenced)}
+        method={method.method}
+        doc={pickSchema(ctx.schema.bundled, encodeInternalRef(['paths', path, method.method]))}
+        proxyUrl={ctx.proxyUrl}
+        writeOnly
+        readOnly={false}
+      />
+    );
+  }
+
   return async function APIPageWrapper({ document, ...props }) {
-    let processed: ProcessedDocument;
+    let processed: DereferencedDocument;
     if (typeof document === 'string') {
       processed = await server.getSchema(document);
     } else {
@@ -270,6 +293,11 @@ export function createAPIPage(
       mediaAdapters: {
         ...defaultAdapters,
         ...options.mediaAdapters,
+      },
+      playground: {
+        ...options.playground,
+        provider: options.playground?.provider ?? renderPlaygroundProviderDefault,
+        render: options.playground?.render ?? renderPlaygroundDefault,
       },
       renderHeading(depth, text, props) {
         const id = typeof text === 'string' ? slugger.slug(text) : props?.id;

@@ -1,8 +1,8 @@
 import { useMemo, type ReactNode } from 'react';
-import type { ResolvedSchema } from '@/utils/schema';
+import type { ParsedSchema } from '@/utils/schema';
 import type { RenderContext } from '@/types';
 import { FormatFlags, schemaToString } from '@/utils/schema/to-string';
-import { mergeAllOf } from '@/utils/merge-schema';
+import { mergeAllOf } from '@/utils/schema/merge';
 import type { SchemaUIProps } from '@/ui/schema/client';
 import { I18nLabel } from '../client/i18n';
 
@@ -59,7 +59,7 @@ export type SchemaData = FieldBase &
   );
 
 export interface SchemaUIOptions {
-  root: ResolvedSchema;
+  root: ParsedSchema;
   client: Omit<SchemaUIProps, 'generated'>;
 
   /**
@@ -99,7 +99,7 @@ export function Schema({
 }
 
 export function generateSchemaUI(
-  root: ResolvedSchema,
+  root: ParsedSchema,
   readOnly = false,
   writeOnly = false,
   ctx: RenderContext,
@@ -107,7 +107,7 @@ export function generateSchemaUI(
   const refs: Record<string, SchemaData> = {};
   const { showExample = false } = ctx.schemaUI ?? {};
 
-  function generateInfoTags(schema: Exclude<ResolvedSchema, boolean>) {
+  function generateInfoTags(schema: Exclude<ParsedSchema, boolean>) {
     const fields: InfoTag[] = [];
 
     if (schema.default !== undefined) {
@@ -176,8 +176,8 @@ export function generateSchemaUI(
   }
 
   let _counter = 0;
-  const autoIds = new WeakMap<Exclude<ResolvedSchema, boolean>, string>();
-  function getSchemaId(schema: ResolvedSchema): string {
+  const autoIds = new WeakMap<Exclude<ParsedSchema, boolean>, string>();
+  function getSchemaId(schema: ParsedSchema): string {
     if (typeof schema === 'boolean') return String(schema);
     const raw = ctx.schema.getRawRef(schema);
     if (raw) return raw;
@@ -190,14 +190,14 @@ export function generateSchemaUI(
     return generated;
   }
 
-  function isVisible(schema: ResolvedSchema): boolean {
+  function isVisible(schema: ParsedSchema): boolean {
     if (typeof schema === 'boolean') return true;
     if (schema.writeOnly) return writeOnly;
     if (schema.readOnly) return readOnly;
     return true;
   }
 
-  function base(schema: ResolvedSchema): FieldBase {
+  function base(schema: ParsedSchema): FieldBase {
     if (typeof schema === 'boolean') {
       const name = schema ? 'any' : 'never';
       return {
@@ -215,7 +215,7 @@ export function generateSchemaUI(
     };
   }
 
-  function scanRefs(id: string, schema: ResolvedSchema) {
+  function scanRefs(id: string, schema: ParsedSchema) {
     if (id in refs) return;
     if (typeof schema === 'boolean') {
       refs[id] = {
