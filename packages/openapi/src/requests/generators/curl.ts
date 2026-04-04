@@ -1,4 +1,4 @@
-import { escapeString, indent, inputToString } from '@/requests/string-utils';
+import { doubleQuote, indent, inputToString, singleQuote } from '@/requests/string-utils';
 import type { CodeUsageGenerator } from '@/requests/generators';
 
 export const curl: CodeUsageGenerator = {
@@ -6,7 +6,7 @@ export const curl: CodeUsageGenerator = {
   lang: 'bash',
   generate(url, data) {
     const s: string[] = [];
-    s.push(`curl -X ${data.method} "${url}"`);
+    s.push(`curl -X ${data.method.toUpperCase()} "${url}"`);
 
     for (const header in data.header) {
       const value = `${header}: ${data.header[header].value}`;
@@ -17,23 +17,22 @@ export const curl: CodeUsageGenerator = {
     for (const k in data.cookie) {
       const param = data.cookie[k];
 
-      s.push(`--cookie ${JSON.stringify(`${k}=${param.value}`)}`);
+      s.push(`--cookie ${doubleQuote(`${k}=${param.value}`)}`);
     }
 
     if (data.body && data.bodyMediaType === 'multipart/form-data') {
       if (typeof data.body !== 'object') throw new Error('[CURL] request body must be an object.');
 
       for (const [key, value] of Object.entries(data.body)) {
-        s.push(`-F ${key}=${JSON.stringify(inputToString(value))}`);
+        s.push(`-F ${key}=${doubleQuote(inputToString(value))}`);
       }
     } else if (data.body && data.bodyMediaType) {
-      const escaped = escapeString(
+      const escaped = singleQuote(
         inputToString(
           data.body,
           // @ts-expect-error -- assume the body media type is supported
           data.bodyMediaType,
         ),
-        "'",
       );
 
       s.push(`-H "Content-Type: ${data.bodyMediaType}"`);

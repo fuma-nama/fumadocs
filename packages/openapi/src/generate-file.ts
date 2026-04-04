@@ -7,6 +7,7 @@ import { createGetUrl, getSlugs, PathUtils } from 'fumadocs-core/source';
 import { createAutoPreset, type SchemaToPagesOptions } from '@/utils/pages/preset-auto';
 import { fromSchema, type OutputGroup, type OutputEntry } from '@/utils/pages/builder';
 import type { DistributiveOmit } from './types';
+import { doubleQuote } from './requests/string-utils';
 
 export interface OutputFile {
   path: string;
@@ -275,10 +276,10 @@ function writeIndexFiles(
       // cannot link to groups
       if (entry.type === 'group') continue;
       const descriptionAttr = entry.info.description
-        ? `description=${JSON.stringify(entry.info.description)} `
+        ? `description=${doubleQuote(entry.info.description)} `
         : '';
       content.push(
-        `<Card href="${urlFn(entry.path)}" title=${JSON.stringify(entry.info.title)} ${descriptionAttr}/>`,
+        `<Card href="${urlFn(entry.path)}" title=${doubleQuote(entry.info.title)} ${descriptionAttr}/>`,
       );
     }
 

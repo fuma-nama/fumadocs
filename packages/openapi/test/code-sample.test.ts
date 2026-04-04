@@ -17,7 +17,7 @@ describe('Code Sample Generators', () => {
       id: 'id',
     },
     bodyMediaType: 'application/json',
-    method: 'GET',
+    method: 'get',
     cookie: {
       mode: { value: 'light' },
     },

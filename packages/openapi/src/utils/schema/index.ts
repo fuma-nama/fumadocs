@@ -8,7 +8,6 @@ import type {
   OperationObject,
   PathItemObject,
   ReferenceObject,
-  SecuritySchemeObject,
   TagObject,
 } from '@/types';
 import { idToTitle } from '@/utils/id-to-title';
@@ -96,11 +95,10 @@ export function pickExample(value: ExampleLike): unknown | undefined {
   }
 }
 
-/** parsed security scheme objects */
-export type SecurityEntry = SecuritySchemeObject & {
+export interface SecurityEntry {
   scopes: string[];
   id: string;
-};
+}
 
 export function parseSecurities(
   method: MethodInformation,
@@ -114,13 +112,9 @@ export function parseSecurities(
     const list: SecurityEntry[] = [];
 
     for (const [key, scopes] of Object.entries(map)) {
-      const scheme = dereferenced.components?.securitySchemes?.[key];
-      if (!scheme) continue;
-
       list.push({
-        ...scheme,
-        scopes,
         id: key,
+        scopes,
       });
     }
 

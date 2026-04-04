@@ -1,4 +1,3 @@
-import type { AuthField } from '@/playground/client';
 import { useApiContext } from '../contexts/api';
 import { useMemo } from 'react';
 
@@ -10,8 +9,7 @@ export function useStorageKey() {
   return useMemo(
     () => ({
       of: (name: KeyName) => getStorageKey(storageKeyPrefix, name),
-      AuthField: (field: AuthField) =>
-        getStorageKey(storageKeyPrefix, `auth-${field.original?.id ?? field.fieldName}`),
+      AuthField: (schemeId: string) => getStorageKey(storageKeyPrefix, `auth-${schemeId}`),
     }),
     [storageKeyPrefix],
   );

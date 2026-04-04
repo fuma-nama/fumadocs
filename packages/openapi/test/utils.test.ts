@@ -419,7 +419,7 @@ describe('URL utilities', () => {
   describe('resolveRequestData', () => {
     test('basic path parameter substitution', () => {
       const requestData: RequestData = {
-        method: 'GET',
+        method: 'get',
         path: {
           id: { value: '123' },
         },
@@ -433,7 +433,7 @@ describe('URL utilities', () => {
 
     test('multiple path parameters', () => {
       const requestData: RequestData = {
-        method: 'GET',
+        method: 'get',
         path: {
           userId: { value: '123' },
           postId: { value: '456' },
@@ -450,7 +450,7 @@ describe('URL utilities', () => {
 
     test('array path parameter', () => {
       const requestData: RequestData = {
-        method: 'GET',
+        method: 'get',
         path: {
           segments: { value: 'api/v1/users' },
         },
@@ -464,7 +464,7 @@ describe('URL utilities', () => {
 
     test('adds query parameters to clean path', () => {
       const requestData: RequestData = {
-        method: 'GET',
+        method: 'get',
         path: {},
         query: {
           limit: { values: ['10'] },
@@ -479,7 +479,7 @@ describe('URL utilities', () => {
 
     test('handles array query parameters', () => {
       const requestData: RequestData = {
-        method: 'GET',
+        method: 'get',
         path: {},
         query: {
           tags: { values: ['javascript', 'typescript'] },
@@ -496,7 +496,7 @@ describe('URL utilities', () => {
     // Core test cases for paths with existing query parameters (legacy API support)
     test('path with existing query parameter - verbose example', () => {
       const requestData: RequestData = {
-        method: 'GET',
+        method: 'get',
         path: {},
         query: {
           limit: { values: ['5'] },
@@ -512,7 +512,7 @@ describe('URL utilities', () => {
 
     test('path with existing query parameter - search example', () => {
       const requestData: RequestData = {
-        method: 'GET',
+        method: 'get',
         path: {},
         query: {
           limit: { values: ['10'] },
@@ -529,7 +529,7 @@ describe('URL utilities', () => {
 
     test('path with existing query parameters and path parameters', () => {
       const requestData: RequestData = {
-        method: 'GET',
+        method: 'get',
         path: {
           userId: { value: '123' },
         },
@@ -547,7 +547,7 @@ describe('URL utilities', () => {
 
     test('overrides existing query parameter with new value', () => {
       const requestData: RequestData = {
-        method: 'GET',
+        method: 'get',
         path: {},
         query: {
           verbose: { values: ['false'] },
@@ -563,7 +563,7 @@ describe('URL utilities', () => {
 
     test('handles multiple existing query parameters', () => {
       const requestData: RequestData = {
-        method: 'GET',
+        method: 'get',
         path: {},
         query: {
           newParam: { values: ['value'] },
@@ -579,7 +579,7 @@ describe('URL utilities', () => {
 
     test('handles array parameters with existing query string', () => {
       const requestData: RequestData = {
-        method: 'GET',
+        method: 'get',
         path: {},
         query: {
           categories: { values: ['tech', 'science'] },
@@ -595,7 +595,7 @@ describe('URL utilities', () => {
 
     test('replaces existing array parameter', () => {
       const requestData: RequestData = {
-        method: 'GET',
+        method: 'get',
         path: {},
         query: {
           tags: { values: ['new', 'updated'] },
@@ -611,7 +611,7 @@ describe('URL utilities', () => {
 
     test('handles empty query parameters object', () => {
       const requestData: RequestData = {
-        method: 'GET',
+        method: 'get',
         path: {},
         query: {},
         header: {},
@@ -625,7 +625,7 @@ describe('URL utilities', () => {
 
     test('complex scenario with path params, existing query, and new query params', () => {
       const requestData: RequestData = {
-        method: 'GET',
+        method: 'get',
         path: {
           orgId: { value: 'acme' },
           projectId: { value: 'web-app' },

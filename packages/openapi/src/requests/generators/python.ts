@@ -1,5 +1,6 @@
 import type { CodeUsageGenerator } from '@/requests/generators';
 import { resolveMediaAdapter } from '@/requests/media/adapter';
+import { doubleQuote } from '../string-utils';
 
 export const python: CodeUsageGenerator = {
   label: 'Python',
@@ -7,7 +8,7 @@ export const python: CodeUsageGenerator = {
   generate(url, data, { mediaAdapters }) {
     const headers: Record<string, string> = {};
     const imports = new Set<string>();
-    const params = [`"${data.method}"`, 'url'];
+    const params = [`"${data.method.toUpperCase()}"`, 'url'];
     let body: string | undefined;
 
     imports.add('requests');
@@ -48,7 +49,7 @@ export const python: CodeUsageGenerator = {
       .map((name) => 'import ' + name)
       .join('\n')}
 
-url = ${JSON.stringify(url)}
+url = ${doubleQuote(url)}
 ${body ?? ''}
 response = requests.request(${params.join(', ')})
 
@@ -62,7 +63,7 @@ export function generatePythonObject(v: unknown, imports: Set<string>): string {
   } else if (typeof v === 'boolean') {
     return v ? 'True' : 'False';
   } else if (typeof v === 'string') {
-    return JSON.stringify(v);
+    return doubleQuote(v);
   } else if (typeof v === 'number') {
     return v.toString();
   } else if (Array.isArray(v)) {
@@ -73,7 +74,7 @@ export function generatePythonObject(v: unknown, imports: Set<string>): string {
     return `datetime.datetime(${v.getFullYear()}, ${v.getMonth() + 1}, ${v.getDate()}, ${v.getHours()}, ${v.getMinutes()}, ${v.getSeconds()}, ${v.getMilliseconds()})`;
   } else if (typeof v === 'object') {
     const entries = Object.entries(v).map(
-      ([key, value]) => `  ${JSON.stringify(key)}: ${generatePythonObject(value, imports)}`,
+      ([key, value]) => `  ${doubleQuote(key)}: ${generatePythonObject(value, imports)}`,
     );
     return `{\n${entries.join(', \n')}\n}`;
   } else {

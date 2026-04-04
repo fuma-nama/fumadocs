@@ -97,6 +97,7 @@ export const defaultTranslations = {
   usernameField: 'Username',
   passwordField: 'Password',
   fetchingToken: 'Fetching token...',
+  fetchTokenError: 'Failed to fetch token',
 
   // Server select
   serverUrl: 'Server URL',

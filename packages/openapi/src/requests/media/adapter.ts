@@ -1,4 +1,4 @@
-import { escapeString, inputToString } from '@/requests/string-utils';
+import { backtickQuote, inputToString, tripleDoubleQuote } from '@/requests/string-utils';
 export { resolveMediaAdapter, isMediaTypeSupported } from './resolve-adapter';
 // @ts-expect-error -- untyped
 import js2xml from 'xml-js/lib/js2xml';
@@ -187,7 +187,7 @@ export const defaultAdapters = {
         for (const [key, value] of Object.entries(data.body as object)) {
           if (!value) continue;
 
-          const escaped = escapeString(inputToString(value, 'application/json'), '`');
+          const escaped = backtickQuote(inputToString(value, 'application/json'));
 
           s.push(`mp.WriteField("${key}", ${escaped})`);
         }
@@ -231,28 +231,28 @@ function str(
     if (mediaType === 'application/json') {
       return `const body = JSON.stringify(${JSON.stringify(init, null, 2)})`;
     }
-    return `const body = ${escapeString(inputToString(init, mediaType), '`')}`;
+    return `const body = ${backtickQuote(inputToString(init, mediaType))}`;
   }
 
   if (ctx.lang === 'python') {
-    return `body = ${escapeString(inputToString(init, mediaType), '"""')}`;
+    return `body = ${tripleDoubleQuote(inputToString(init, mediaType))}`;
   }
 
   if (ctx.lang === 'go') {
     const { addImport } = ctx as GoContext;
     addImport('strings');
-    return `body := strings.NewReader(${escapeString(inputToString(init, mediaType), '`')})`;
+    return `body := strings.NewReader(${backtickQuote(inputToString(init, mediaType))})`;
   }
 
   if (ctx.lang === 'java') {
     const { addImport } = ctx as JavaContext;
     addImport('java.net.http.HttpRequest.BodyPublishers');
-    return `var body = BodyPublishers.ofString(${escapeString(inputToString(init, mediaType), '"""')});`;
+    return `var body = BodyPublishers.ofString(${tripleDoubleQuote(inputToString(init, mediaType))});`;
   }
 
   if (ctx.lang === 'csharp') {
     const input = `\n${inputToString(init, mediaType)}\n`;
 
-    return `var body = new StringContent(${escapeString(input, '"""')}, Encoding.UTF8, "${mediaType}");`;
+    return `var body = new StringContent(${tripleDoubleQuote(input)}, Encoding.UTF8, "${mediaType}");`;
   }
 }

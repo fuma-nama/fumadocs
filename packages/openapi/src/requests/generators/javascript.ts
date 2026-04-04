@@ -1,4 +1,4 @@
-import { indent } from '@/requests/string-utils';
+import { doubleQuote, indent } from '@/requests/string-utils';
 import type { CodeUsageGenerator } from '@/requests/generators';
 import { resolveMediaAdapter } from '@/requests/media/adapter';
 
@@ -10,7 +10,7 @@ export const javascript: CodeUsageGenerator = {
     const options = new Map<string, string>();
     const headers: Record<string, string> = {};
 
-    options.set('method', JSON.stringify(data.method));
+    options.set('method', `"${data.method.toUpperCase()}"`);
     if (data.bodyMediaType) {
       headers['Content-Type'] = data.bodyMediaType;
     }
@@ -44,7 +44,7 @@ export const javascript: CodeUsageGenerator = {
       options.set('body', 'body');
     }
 
-    const params = [JSON.stringify(url)];
+    const params = [doubleQuote(url)];
     if (options.size > 0) {
       const str = Array.from(options.entries())
         .map(([k, v]) => indent(k === v ? k : `${k}: ${v}`))

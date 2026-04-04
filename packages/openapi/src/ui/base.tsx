@@ -27,6 +27,8 @@ import type { ExampleRequestItem } from './operation/get-example-requests';
 import { compile } from '@fumari/json-schema-ts';
 import { pickSchema } from '@/utils/schema/pick';
 import { encodeInternalRef } from '@/utils/schema/ref';
+import type { RequestTabsRenderContext } from './operation/request-tabs';
+import { PlaygroundAuthProvider } from '@/ui/client/boundary.lazy';
 
 export interface GenerateTypeScriptDefinitionsContext extends RenderContext {
   operation: NoReference<MethodInformation>;
@@ -108,13 +110,7 @@ export interface CreateAPIPageOptions {
   content?: {
     renderResponseTabs?: (tabs: ResponseTab[], ctx: RenderContext) => ReactNode;
 
-    renderRequestTabs?: (
-      items: ExampleRequestItem[],
-      ctx: RenderContext & {
-        route: string;
-        operation: NoReference<MethodInformation>;
-      },
-    ) => ReactNode;
+    renderRequestTabs?: (items: ExampleRequestItem[], ctx: RequestTabsRenderContext) => ReactNode;
 
     renderAPIExampleLayout?: (
       slots: {
@@ -201,6 +197,11 @@ export interface CreateAPIPageOptions {
      * @defaultValue true
      */
     enabled?: boolean;
+
+    /**
+     * render a page-level provider (useful for handling auth)
+     */
+    provider?: (props: { children: ReactNode }) => ReactNode;
     /**
      * replace the server-side renderer
      */
@@ -247,6 +248,10 @@ export function createAPIPage(
       .use(rehypeReact);
   }
 
+  function renderPlaygroundProviderDefault({ children }: { children: ReactNode }) {
+    return <PlaygroundAuthProvider>{children}</PlaygroundAuthProvider>;
+  }
+
   function renderPlaygroundDefault({ path, method, ctx }: APIPlaygroundProps) {
     return (
       <ctx.clientBoundary.PlaygroundClient
@@ -291,6 +296,7 @@ export function createAPIPage(
       },
       playground: {
         ...options.playground,
+        provider: options.playground?.provider ?? renderPlaygroundProviderDefault,
         render: options.playground?.render ?? renderPlaygroundDefault,
       },
       renderHeading(depth, text, props) {

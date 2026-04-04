@@ -25,6 +25,7 @@ import { slug } from 'github-slugger';
 import * as ClientBoundary from '@/ui/client/boundary';
 import { dereferenceDocument } from '@/utils/document/dereference';
 import { parseSecurities } from '@/utils/schema';
+import { AuthProvider } from '@/playground/auth';
 
 export interface ClientApiPageProps extends Omit<ApiPageProps, 'document'> {
   payload: ClientApiPagePayload;
@@ -98,6 +99,10 @@ export function createClientAPIPage({
     );
   }
 
+  function renderPlaygroundProviderDefault({ children }: { children: ReactNode }) {
+    return <AuthProvider>{children}</AuthProvider>;
+  }
+
   return function ClientAPIPage({ payload, ...props }) {
     const processed = useMemo(() => dereferenceDocument(payload.bundled), [payload.bundled]);
 
@@ -116,6 +121,7 @@ export function createClientAPIPage({
         },
         playground: {
           ...options.playground,
+          provider: options.playground?.provider ?? renderPlaygroundProviderDefault,
           render: options.playground?.render ?? renderPlaygroundDefault,
         },
         renderHeading(depth, text, props) {

@@ -15,6 +15,11 @@ import { resolveRequestData } from '@/utils/url';
 import { MethodLabel } from '../components/method-label';
 import type { ExampleRequestItem } from './get-example-requests';
 
+export interface RequestTabsRenderContext extends RenderContext {
+  route: string;
+  operation: NoReference<MethodInformation>;
+}
+
 export function RequestTabs({
   path,
   operation,
@@ -36,59 +41,7 @@ export function RequestTabs({
   });
 }
 
-function renderRequestTabsDefault(
-  items: ExampleRequestItem[],
-  ctx: RenderContext & {
-    route: string;
-    operation: NoReference<MethodInformation>;
-  },
-) {
-  function renderItem(item: ExampleRequestItem) {
-    const requestData = item.data;
-    const displayNames: Partial<Record<keyof RawRequestData, ReactNode>> = {
-      body: (
-        <>
-          <I18nLabel label="titleRequestBody" />
-          <code className="text-xs text-fd-muted-foreground ms-auto">
-            {requestData.bodyMediaType}
-          </code>
-        </>
-      ),
-      cookie: <I18nLabel label="cookieParameters" />,
-      header: <I18nLabel label="headerParameters" />,
-      query: <I18nLabel label="queryParameters" />,
-      path: <I18nLabel label="pathParameters" />,
-    };
-
-    return (
-      <>
-        {item.description && ctx.renderMarkdown(item.description)}
-        <div className="flex flex-row gap-2 items-center justify-between">
-          <MethodLabel>{requestData.method}</MethodLabel>
-          <code>{resolveRequestData(ctx.route, item.encoded)}</code>
-        </div>
-
-        <Accordions type="multiple" className="mt-2">
-          {Object.entries(displayNames).map(([k, v]) => {
-            const data = requestData[k as keyof RawRequestData];
-            if (!data || Object.keys(data).length === 0) return;
-
-            return (
-              <AccordionItem key={k} value={k}>
-                <AccordionHeader>
-                  <AccordionTrigger>{v}</AccordionTrigger>
-                </AccordionHeader>
-                <AccordionContent className="prose-no-margin">
-                  {ctx.renderCodeBlock('json', JSON.stringify(data, null, 2))}
-                </AccordionContent>
-              </AccordionItem>
-            );
-          })}
-        </Accordions>
-      </>
-    );
-  }
-
+function renderRequestTabsDefault(items: ExampleRequestItem[], ctx: RequestTabsRenderContext) {
   let children: ReactNode;
   if (items.length > 1) {
     children = (
@@ -102,13 +55,13 @@ function renderRequestTabsDefault(
         </TabsList>
         {items.map((item) => (
           <TabsContent key={item.id} value={item.id}>
-            {renderItem(item)}
+            <RequestTabsItem item={item} ctx={ctx} />
           </TabsContent>
         ))}
       </Tabs>
     );
   } else if (items.length === 1) {
-    children = renderItem(items[0]);
+    children = <RequestTabsItem item={items[0]} ctx={ctx} />;
   } else {
     children = (
       <p className="text-fd-muted-foreground text-xs">
@@ -124,5 +77,57 @@ function renderRequestTabsDefault(
       </p>
       {children}
     </div>
+  );
+}
+
+function RequestTabsItem({
+  item,
+  ctx,
+}: {
+  item: ExampleRequestItem;
+  ctx: RequestTabsRenderContext;
+}) {
+  const requestData = item.data;
+  const displayNames: Partial<Record<keyof RawRequestData, ReactNode>> = {
+    body: (
+      <>
+        <I18nLabel label="titleRequestBody" />
+        <code className="text-xs text-fd-muted-foreground ms-auto">
+          {requestData.bodyMediaType}
+        </code>
+      </>
+    ),
+    cookie: <I18nLabel label="cookieParameters" />,
+    header: <I18nLabel label="headerParameters" />,
+    query: <I18nLabel label="queryParameters" />,
+    path: <I18nLabel label="pathParameters" />,
+  };
+
+  return (
+    <>
+      {item.description && ctx.renderMarkdown(item.description)}
+      <div className="flex flex-row gap-2 items-center justify-between">
+        <MethodLabel>{requestData.method}</MethodLabel>
+        <code>{resolveRequestData(ctx.route, item.encoded)}</code>
+      </div>
+
+      <Accordions type="multiple" className="mt-2">
+        {Object.entries(displayNames).map(([k, v]) => {
+          const data = requestData[k as keyof RawRequestData];
+          if (!data || Object.keys(data).length === 0) return;
+
+          return (
+            <AccordionItem key={k} value={k}>
+              <AccordionHeader>
+                <AccordionTrigger>{v}</AccordionTrigger>
+              </AccordionHeader>
+              <AccordionContent className="prose-no-margin">
+                {ctx.renderCodeBlock('json', JSON.stringify(data, null, 2))}
+              </AccordionContent>
+            </AccordionItem>
+          );
+        })}
+      </Accordions>
+    </>
   );
 }

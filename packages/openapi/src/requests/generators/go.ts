@@ -1,4 +1,4 @@
-import { indent } from '@/requests/string-utils';
+import { doubleQuote, indent } from '@/requests/string-utils';
 import type { CodeUsageGenerator } from '@/requests/generators';
 import { resolveMediaAdapter } from '@/requests/media/adapter';
 
@@ -9,17 +9,17 @@ export const go: CodeUsageGenerator = {
     const imports = ['fmt', 'net/http', 'io/ioutil'];
     const headers = new Map<string, string>();
     const variables = new Map<string, string>();
-    variables.set('url', JSON.stringify(url));
+    variables.set('url', doubleQuote(url));
 
     for (const header in data.header) {
-      headers.set(header, JSON.stringify(data.header[header].value));
+      headers.set(header, doubleQuote(data.header[header].value));
     }
 
     const cookies = Object.entries(data.cookie);
     if (cookies.length > 0) {
       headers.set(
         'Cookie',
-        JSON.stringify(cookies.map(([k, param]) => `${k}=${param.value}`).join('; ')),
+        doubleQuote(cookies.map(([k, param]) => `${k}=${param.value}`).join('; ')),
       );
     }
 
@@ -47,7 +47,7 @@ ${Array.from(variables.entries())
   .map(([k, v]) => indent(`${k} := ${v}`))
   .join('\n')}
 ${body ? indent(body) : ''}
-  req, _ := http.NewRequest("${data.method}", url, ${body ? 'body' : 'nil'})
+  req, _ := http.NewRequest("${data.method.toUpperCase()}", url, ${body ? 'body' : 'nil'})
 ${indent(
   Array.from(headers.entries())
     .map(([key, value]) => `req.Header.Add("${key}", ${value})`)
