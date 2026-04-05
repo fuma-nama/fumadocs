@@ -9,6 +9,28 @@ export interface LLMsConfig {
   TAB?: string;
   renderName?: (item: PageTree.Node | PageTree.Root, ctx: Context) => string;
   renderDescription?: (item: PageTree.Item | PageTree.Folder, ctx: Context) => string;
+  /**
+   * Post-process the rendered `llms.txt` output before it is returned.
+   * Receives the default auto-generated content and the render context;
+   * return the final string.
+   *
+   * Useful for injecting the description blockquote mandated by the
+   * llms.txt spec, custom sections (access patterns, license notes),
+   * or any other site-specific content the default generator doesn't
+   * produce.
+   *
+   * @example
+   * ```ts
+   * llms(source, {
+   *   transform: (output) =>
+   *     output.replace(
+   *       /^# (.+)\n/m,
+   *       '# $1\n\n> A knowledge base for humans and AI agents.\n',
+   *     ),
+   * }).index();
+   * ```
+   */
+  transform?: (output: string, ctx: Context) => string;
 }
 
 export function llms<C extends LoaderConfig>(loader: LoaderOutput<C>, config: LLMsConfig = {}) {
@@ -32,6 +54,7 @@ export function llms<C extends LoaderConfig>(loader: LoaderOutput<C>, config: LL
 
       return String(node.description);
     },
+    transform,
   } = config;
 
   function index(lang?: string): string {
@@ -81,7 +104,8 @@ export function llms<C extends LoaderConfig>(loader: LoaderOutput<C>, config: LL
     }
 
     for (const child of pageTree.children) onNode(child, 0);
-    return out.join('\n');
+    const output = out.join('\n');
+    return transform ? transform(output, ctx) : output;
   }
 
   return {
