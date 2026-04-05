@@ -5,10 +5,38 @@ interface Context {
   lang?: string;
 }
 
+export interface LLMsSection {
+  /**
+   * Heading text rendered as `## {heading}`.
+   */
+  heading: string;
+  /**
+   * Raw markdown content rendered under the heading.
+   */
+  content: string;
+  /**
+   * Where the section is inserted relative to the auto-generated page tree.
+   *
+   * @default 'before-index'
+   */
+  position?: 'before-index' | 'after-index';
+}
+
 export interface LLMsConfig {
   TAB?: string;
   renderName?: (item: PageTree.Node | PageTree.Root, ctx: Context) => string;
   renderDescription?: (item: PageTree.Item | PageTree.Folder, ctx: Context) => string;
+  /**
+   * Description blockquote rendered after the H1 title, per the llms.txt
+   * specification (https://llmstxt.org/).
+   */
+  description?: string;
+  /**
+   * Custom H2 sections inserted before or after the auto-generated page tree.
+   * Use for site-specific prose — access patterns, license notes, contact
+   * info, etc.
+   */
+  sections?: LLMsSection[];
 }
 
 export function llms<C extends LoaderConfig>(loader: LoaderOutput<C>, config: LLMsConfig = {}) {
@@ -32,7 +60,13 @@ export function llms<C extends LoaderConfig>(loader: LoaderOutput<C>, config: LL
 
       return String(node.description);
     },
+    description,
+    sections = [],
   } = config;
+
+  function renderSection(section: LLMsSection): string[] {
+    return ['', `## ${section.heading}`, '', section.content.trimEnd()];
+  }
 
   function index(lang?: string): string {
     if (loader._i18n && lang === undefined) {
@@ -45,6 +79,18 @@ export function llms<C extends LoaderConfig>(loader: LoaderOutput<C>, config: LL
     const ctx: Context = { lang };
     out.push(`# ${renderName(pageTree, ctx)}`);
     out.push('');
+
+    if (description) {
+      out.push(`> ${description}`);
+      out.push('');
+    }
+
+    for (const section of sections) {
+      if ((section.position ?? 'before-index') === 'before-index') {
+        out.push(...renderSection(section));
+        out.push('');
+      }
+    }
 
     function item(name: string, description: string, indent: number) {
       const prefix = TAB.repeat(indent);
@@ -81,6 +127,13 @@ export function llms<C extends LoaderConfig>(loader: LoaderOutput<C>, config: LL
     }
 
     for (const child of pageTree.children) onNode(child, 0);
+
+    for (const section of sections) {
+      if (section.position === 'after-index') {
+        out.push(...renderSection(section));
+      }
+    }
+
     return out.join('\n');
   }
 
