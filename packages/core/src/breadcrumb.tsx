@@ -40,7 +40,7 @@ export interface BreadcrumbOptions {
 
 export function useBreadcrumb(
   url: string,
-  tree: PageTree.Root,
+  tree: PageTree.Root | PageTree.Folder,
   options?: BreadcrumbOptions,
 ): BreadcrumbItem[] {
   return useMemo(() => getBreadcrumbItems(url, tree, options), [tree, url, options]);
@@ -48,14 +48,14 @@ export function useBreadcrumb(
 
 export function getBreadcrumbItems(
   url: string,
-  tree: PageTree.Root,
+  tree: PageTree.Root | PageTree.Folder,
   options: BreadcrumbOptions = {},
 ): BreadcrumbItem[] {
   return getBreadcrumbItemsFromPath(tree, searchPath(tree.children, url) ?? [], options);
 }
 
 export function getBreadcrumbItemsFromPath(
-  tree: PageTree.Root,
+  tree: PageTree.Root | PageTree.Folder,
   path: PageTree.Node[],
   options: BreadcrumbOptions,
 ): BreadcrumbItem[] {

@@ -2,7 +2,7 @@
 import { useTreeContext } from '@/contexts/tree';
 import type * as PageTree from 'fumadocs-core/page-tree';
 
-const footerCache = new WeakMap<PageTree.Root, PageTree.Item[]>();
+const footerCache = new WeakMap<PageTree.Root | PageTree.Folder, PageTree.Item[]>();
 
 /**
  * @returns a list of page tree items (linear), that you can obtain footer items
