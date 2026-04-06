@@ -1,9 +1,9 @@
-import type { ComponentInstallerPlugin } from '../installer';
+import type { InstallerPlugin } from 'fuma-cli/registry/installer';
 
 /**
  * keep references to `fumadocs-ui/layouts/*` components as original, unless the user is installing them directly.
  */
-export function pluginPreserveLayouts(): ComponentInstallerPlugin {
+export function pluginPreserveLayouts(): InstallerPlugin {
   const layoutNames = [
     'layouts/home',
     'layouts/flux',

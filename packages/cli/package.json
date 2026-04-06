@@ -18,12 +18,7 @@
   ],
   "type": "module",
   "exports": {
-    "./build": "./dist/build/index.js",
-    "./config": "./dist/config.js",
-    "./registry/client": "./dist/registry/client.js",
-    "./registry/installer": "./dist/registry/installer/index.js",
-    "./registry/macros/route-handler": "./dist/registry/macros/route-handler.js",
-    "./registry/schema": "./dist/registry/schema.js",
+    ".": "./dist/config.js",
     "./package.json": "./package.json"
   },
   "publishConfig": {
@@ -39,6 +34,7 @@
   "dependencies": {
     "@clack/prompts": "^1.1.0",
     "commander": "^14.0.3",
+    "fuma-cli": "link:../../../fuma-cli/packages/core",
     "magic-string": "^0.30.21",
     "oxc-parser": "^0.121.0",
     "oxc-resolver": "^11.19.1",
