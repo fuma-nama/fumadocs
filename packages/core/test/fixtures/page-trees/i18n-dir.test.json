@@ -23,6 +23,7 @@
       },
     ],
     "name": "Docs Chinese",
+    "type": "root",
   },
   "en": {
     "$id": "en:root",
@@ -48,5 +49,6 @@
       },
     ],
     "name": "Docs English",
+    "type": "root",
   },
 }

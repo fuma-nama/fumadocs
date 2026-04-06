@@ -318,12 +318,7 @@ export class PageTreeBuilder {
       collapsible: metadata.collapsible,
       children: [],
       $id: this.generateId(folderPath),
-      $ref:
-        !this.ctx.noRef && meta
-          ? {
-              metaFile: metaPath,
-            }
-          : undefined,
+      $ref: !this.ctx.noRef && meta ? metaPath : undefined,
     };
     this.pathToNode.set(folderPath, node);
     this.unfinished.add(node);
@@ -400,11 +395,7 @@ export class PageTreeBuilder {
       description,
       icon,
       url: this.ctx.getUrl(page.slugs, this.ctx.locale),
-      $ref: !this.ctx.noRef
-        ? {
-            file: path,
-          }
-        : undefined,
+      $ref: !this.ctx.noRef ? path : undefined,
     };
     for (const transformer of this.transformers) {
       if (!transformer.file) continue;
@@ -418,8 +409,11 @@ export class PageTreeBuilder {
   root(id = 'root', path = ''): PageTree.Root {
     const folder = this.folder(path);
     let root: PageTree.Root = {
+      type: 'root',
+      $ref: folder?.$ref,
       $id: this.generateId(id),
       name: folder?.name || 'Docs',
+      description: folder?.description,
       children: folder ? folder.children : [],
     };
 

@@ -77,6 +77,8 @@
       },
     ],
     "name": "Docs",
+    "type": "root",
   },
   "name": "Docs",
+  "type": "root",
 }

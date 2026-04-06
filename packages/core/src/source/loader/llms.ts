@@ -8,29 +8,38 @@ interface Context {
 export interface LLMsConfig {
   TAB?: string;
   renderName?: (item: PageTree.Node | PageTree.Root, ctx: Context) => string;
-  renderDescription?: (item: PageTree.Item | PageTree.Folder, ctx: Context) => string;
+  renderDescription?: (
+    item: PageTree.Root | PageTree.Item | PageTree.Folder,
+    ctx: Context,
+  ) => string;
 }
 
 export function llms<C extends LoaderConfig>(loader: LoaderOutput<C>, config: LLMsConfig = {}) {
   const {
     TAB = '  ',
     renderName = (node, ctx): string => {
-      if (typeof node.name === 'string') return node.name;
-      if ('type' in node && node.type === 'page') {
+      if (node.type === 'page') {
         const page = loader.getNodePage(node, ctx.lang);
         if (page) return page.data.title ?? '';
+      } else if (node.type === 'separator') {
+        return String(node.name);
+      } else {
+        const meta = loader.getNodeMeta(node, ctx.lang);
+        if (meta) return meta?.data.title ?? '';
       }
 
-      return String(node.name);
+      return typeof node.name === 'string' ? node.name : '';
     },
     renderDescription = (node, ctx): string => {
-      if (typeof node.description === 'string') return node.description;
-      if ('type' in node && node.type === 'page') {
+      if (node.type === 'page') {
         const page = loader.getNodePage(node, ctx.lang);
         if (page) return page.data.description ?? '';
+      } else {
+        const meta = loader.getNodeMeta(node, ctx.lang);
+        if (meta) return meta?.data.description ?? '';
       }
 
-      return String(node.description);
+      return typeof node.description === 'string' ? node.description : '';
     },
   } = config;
 
@@ -44,6 +53,8 @@ export function llms<C extends LoaderConfig>(loader: LoaderOutput<C>, config: LL
     const out: string[] = [];
     const ctx: Context = { lang };
     out.push(`# ${renderName(pageTree, ctx)}`);
+    const description = renderDescription(pageTree, ctx);
+    if (description) out.push('', `> ${description}`);
     out.push('');
 
     function item(name: string, description: string, indent: number) {

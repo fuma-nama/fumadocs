@@ -60,7 +60,7 @@ export function getPageTreeRoots(
     return roots;
   });
 
-  if (!('type' in pageTree)) result.push(pageTree);
+  if (!pageTree.type || pageTree.type === 'root') result.push(pageTree);
   return result;
 }
 
@@ -109,7 +109,7 @@ export function findParent(
   let result: PageTree.Root | PageTree.Folder | undefined;
 
   visit(from, (node, parent) => {
-    if ('type' in node && node.type === 'page' && node.url === url) {
+    if (node.type === 'page' && node.url === url) {
       result = parent;
       return 'break';
     }

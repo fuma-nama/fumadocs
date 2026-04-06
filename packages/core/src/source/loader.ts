@@ -141,7 +141,7 @@ export interface LoaderOutput<Config extends LoaderConfig> {
   ) => Page<Config['source']['pageData']> | undefined;
 
   getNodeMeta: (
-    node: PageTree.Folder,
+    node: PageTree.Folder | PageTree.Root,
     language?: string,
   ) => Meta<Config['source']['metaData']> | undefined;
 
@@ -401,13 +401,13 @@ export function loader(
       return indexer.getPageBySlugs(slugs, language);
     },
     getNodeMeta(node, language = i18n?.defaultLanguage) {
-      const ref = node.$ref?.metaFile;
+      const ref = node.$ref;
       if (!ref) return;
 
       return indexer.getMeta(ref, language);
     },
     getNodePage(node, language = i18n?.defaultLanguage) {
-      const ref = node.$ref?.file;
+      const ref = node.$ref;
       if (!ref) return;
 
       return indexer.getPage(ref, language);

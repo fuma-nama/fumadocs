@@ -346,6 +346,7 @@ test('Loader: No duplicate pages when referencing subfolder items and folder', (
         },
       ],
       "name": "Docs",
+      "type": "root",
     }
   `);
 });
@@ -423,6 +424,7 @@ test('Loader: Serialize data', async () => {
           },
         ],
         "name": "Docs",
+        "type": "root",
       },
     }
   `);
