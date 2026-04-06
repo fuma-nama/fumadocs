@@ -40,7 +40,7 @@ async function createSearchServer() {
         title: page.data.title,
         description: page.data.description,
         url: page.url,
-        content: await page.data.getText('raw'),
+        content: await page.data.getText('processed'),
       } as CustomDocument;
     }),
   );

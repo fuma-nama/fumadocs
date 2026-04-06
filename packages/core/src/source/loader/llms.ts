@@ -20,12 +20,10 @@ export function llms<C extends LoaderConfig>(loader: LoaderOutput<C>, config: LL
     renderName = (node, ctx): string => {
       if (node.type === 'page') {
         const page = loader.getNodePage(node, ctx.lang);
-        if (page) return page.data.title ?? '';
-      } else if (node.type === 'separator') {
-        return String(node.name);
-      } else {
+        if (page?.data.title) return page.data.title;
+      } else if (node.type !== 'separator') {
         const meta = loader.getNodeMeta(node, ctx.lang);
-        if (meta) return meta?.data.title ?? '';
+        if (meta?.data.title) return meta.data.title;
       }
 
       return typeof node.name === 'string' ? node.name : '';
@@ -33,15 +31,50 @@ export function llms<C extends LoaderConfig>(loader: LoaderOutput<C>, config: LL
     renderDescription = (node, ctx): string => {
       if (node.type === 'page') {
         const page = loader.getNodePage(node, ctx.lang);
-        if (page) return page.data.description ?? '';
+        if (page?.data.description) return page.data.description;
       } else {
         const meta = loader.getNodeMeta(node, ctx.lang);
-        if (meta) return meta?.data.description ?? '';
+        if (meta?.data.description) return meta.data.description;
       }
 
       return typeof node.description === 'string' ? node.description : '';
     },
   } = config;
+
+  function formatListItem(name: string, description: string, indent: number) {
+    const prefix = TAB.repeat(indent);
+
+    description = description.trim();
+    if (description.length > 0) return `${prefix}- ${name}: ${description}`;
+    return `${prefix}- ${name}`;
+  }
+
+  function formatNode(node: PageTree.Node, indent: number, ctx: Context): string {
+    switch (node.type) {
+      case 'page': {
+        return formatListItem(
+          formatMarkdownLink(renderName(node, ctx), node.url),
+          renderDescription(node, ctx),
+          indent,
+        );
+      }
+      case 'folder': {
+        const out: string[] = [];
+        out.push(formatListItem(renderName(node, ctx), renderDescription(node, ctx), indent));
+        if (node.index) {
+          out.push(formatNode(node.index, indent + 1, ctx));
+        }
+        for (const child of node.children) {
+          out.push(formatNode(child, indent + 1, ctx));
+        }
+        return out.join('\n');
+      }
+      case 'separator': {
+        const name = renderName(node, ctx) || 'Separator';
+        return '\n' + formatListItem(`**${name}**`, '', indent);
+      }
+    }
+  }
 
   function index(lang?: string): string {
     if (loader._i18n && lang === undefined) {
@@ -52,46 +85,11 @@ export function llms<C extends LoaderConfig>(loader: LoaderOutput<C>, config: LL
     const pageTree = loader.getPageTree(lang);
     const out: string[] = [];
     const ctx: Context = { lang };
-    out.push(`# ${renderName(pageTree, ctx)}`);
+    out.push(`# ${renderName(pageTree, ctx)}`, '');
     const description = renderDescription(pageTree, ctx);
-    if (description) out.push('', `> ${description}`);
-    out.push('');
+    if (description) out.push(`> ${description}`, '');
 
-    function item(name: string, description: string, indent: number) {
-      const prefix = TAB.repeat(indent);
-
-      description = description.trim();
-      if (description.length > 0) return `${prefix}- ${name}: ${description}`;
-      return `${prefix}- ${name}`;
-    }
-
-    function onNode(node: PageTree.Node, indent: number) {
-      switch (node.type) {
-        case 'page': {
-          out.push(
-            item(
-              formatMarkdownLink(renderName(node, ctx), node.url),
-              renderDescription(node, ctx),
-              indent,
-            ),
-          );
-          break;
-        }
-        case 'folder': {
-          out.push(item(renderName(node, ctx), renderDescription(node, ctx), indent));
-          if (node.index) onNode(node.index, indent + 1);
-          for (const child of node.children) onNode(child, indent + 1);
-          break;
-        }
-        case 'separator': {
-          if (node.name) out.push(item(`**${renderName(node, ctx)}**`, '', indent));
-          out.push('');
-          break;
-        }
-      }
-    }
-
-    for (const child of pageTree.children) onNode(child, 0);
+    for (const child of pageTree.children) out.push(formatNode(child, 0, ctx));
     return out.join('\n');
   }
 
@@ -100,6 +98,12 @@ export function llms<C extends LoaderConfig>(loader: LoaderOutput<C>, config: LL
      * generate `llms.txt` content in Markdown format.
      */
     index,
+    /**
+     * generate `llms.txt` content for a single page tree node.
+     */
+    indexNode(node: PageTree.Node, lang?: string): string {
+      return formatNode(node, 0, { lang });
+    },
   };
 }
 
