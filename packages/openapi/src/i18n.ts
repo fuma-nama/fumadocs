@@ -76,7 +76,8 @@ export const defaultTranslations = {
   statusInternalServerError: 'Internal Server Error',
   statusSuccessful: 'Successful',
   statusError: 'Error',
-  statusNoDescription: 'No Description',
+  statusClientError: 'Client Error',
+  statusBinaryBody: 'Binary response body, {length} bytes',
 
   // OAuth dialog
   obtainAccessToken: 'Obtain the access token for API.',

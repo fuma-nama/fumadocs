@@ -1,8 +1,10 @@
 import { CircleCheck, CircleX } from 'lucide-react';
 import type { Translations } from '@/i18n';
+import { useTranslations } from '@/ui/client/i18n';
+import { useMemo } from 'react';
 
 interface StatusInfo {
-  description: string;
+  description?: string;
   color: string;
   icon: React.ElementType;
 }
@@ -18,27 +20,30 @@ const statusKeys: Record<
   500: { key: 'statusInternalServerError', color: 'text-red-500', icon: CircleX },
 };
 
-export function getStatusInfo(status: number, t: Translations): StatusInfo {
-  if (status in statusKeys) {
-    const { key, color, icon } = statusKeys[status];
-    return { description: t[key], color, icon };
-  }
+export function useStatusInfo(status: number): StatusInfo {
+  const t = useTranslations();
 
-  if (status >= 200 && status < 300) {
+  return useMemo(() => {
+    if (status in statusKeys) {
+      const { key, color, icon } = statusKeys[status];
+      return { description: t[key], color, icon };
+    }
+
+    if (status >= 200 && status < 300) {
+      return {
+        description: t.statusSuccessful,
+        color: 'text-green-500',
+        icon: CircleCheck,
+      };
+    }
+
+    if (status >= 400) {
+      return { description: t.statusError, color: 'text-red-500', icon: CircleX };
+    }
+
     return {
-      description: t.statusSuccessful,
-      color: 'text-green-500',
-      icon: CircleCheck,
+      color: 'text-fd-muted-foreground',
+      icon: CircleX,
     };
-  }
-
-  if (status >= 400) {
-    return { description: t.statusError, color: 'text-red-500', icon: CircleX };
-  }
-
-  return {
-    description: t.statusNoDescription,
-    color: 'text-fd-muted-foreground',
-    icon: CircleX,
-  };
+  }, [t, status]);
 }

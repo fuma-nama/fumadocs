@@ -10,8 +10,8 @@ import {
   useRef,
 } from 'react';
 import { useApiContext, useServerContext } from '@/ui/contexts/api';
-import type { BrowserFetcherOptions, FetchResult } from '@/playground/fetcher';
-import { getStatusInfo } from './status-info';
+import type { BrowserFetcherOptions } from '@/playground/fetcher';
+import { DefaultResultDisplay, type ResultDisplayProps } from './components/result-display';
 import { joinURL, resolveRequestData, resolveServerUrl, withBase } from '@/utils/url';
 import { MethodLabel } from '@/ui/components/method-label';
 import { useQuery } from '@/utils/use-query';
@@ -48,7 +48,6 @@ import {
 import { arrayStartsWith, objectGet, objectSet, stringifyFieldKey } from '@fumari/stf/lib/utils';
 import { FieldInput, FieldSet, JsonInput, ObjectInput } from './components/inputs';
 import type { Document, HttpMethods, ParameterObject } from '@/types';
-import { ClientCodeBlock } from '@/ui/components/codeblock';
 import { useTranslations } from '@/ui/client/i18n';
 import { useOperationContext } from '@/ui/operation/client';
 import { OAuthDialog, OAuthDialogContent, OAuthDialogTrigger } from './components/oauth-dialog';
@@ -74,10 +73,8 @@ export interface PlaygroundClientProps extends ComponentProps<'form'>, SchemaSco
   proxyUrl?: string;
 }
 
-export interface ResultDisplayProps extends ComponentProps<'div'> {
-  data: FetchResult;
-  reset: () => void;
-}
+export type { ResultDisplayProps };
+export { DefaultResultDisplay };
 
 export interface CollapsiblePanelProps extends Omit<ComponentProps<typeof Collapsible>, 'title'> {
   'data-type': 'authorization' | 'body' | ParamType;
@@ -784,42 +781,6 @@ function Route({ route, ...props }: ComponentProps<'div'> & { route: string }) {
           )}
         </Fragment>
       ))}
-    </div>
-  );
-}
-
-export function DefaultResultDisplay({ data, reset, ...rest }: ResultDisplayProps) {
-  const t = useTranslations();
-  const statusInfo = useMemo(() => getStatusInfo(data.status, t), [data.status, t]);
-
-  return (
-    <div
-      {...rest}
-      className={cn(
-        'flex flex-col gap-3 mt-2 px-3 py-2 border-y bg-fd-secondary text-fd-secondary-foreground',
-        rest.className,
-      )}
-    >
-      <div className="flex justify-between items-center">
-        <div className="inline-flex items-center gap-1.5 text-sm font-medium">
-          <statusInfo.icon className={cn('size-4', statusInfo.color)} />
-          {statusInfo.description}
-        </div>
-        <button
-          type="button"
-          className={cn(buttonVariants({ size: 'sm', variant: 'outline' }))}
-          onClick={() => reset()}
-        >
-          {t.close}
-        </button>
-      </div>
-      <p className="text-sm text-fd-muted-foreground">{data.status}</p>
-      {data.data !== undefined && (
-        <ClientCodeBlock
-          lang={typeof data.data === 'string' && data.data.length > 50000 ? 'text' : data.type}
-          code={typeof data.data === 'string' ? data.data : JSON.stringify(data.data, null, 2)}
-        />
-      )}
     </div>
   );
 }

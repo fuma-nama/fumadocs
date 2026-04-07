@@ -17,9 +17,12 @@ export interface OpenAPII18nLabelProps {
  */
 export function I18nLabel({ label, replacements = {} }: OpenAPII18nLabelProps): string {
   const text = useTranslations();
-  let value = text[label];
+  return withReplacements(text[label], replacements);
+}
+
+export function withReplacements(t: string, replacements: Record<string, string>) {
   for (const [k, v] of Object.entries(replacements)) {
-    value = value.replaceAll(`{${k}}`, v);
+    t = t.replaceAll(`{${k}}`, v);
   }
-  return value;
+  return t;
 }

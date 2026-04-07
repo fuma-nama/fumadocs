@@ -3,10 +3,18 @@ import type { MediaAdapter } from '@/requests/media/adapter';
 import { resolveMediaAdapter } from '@/requests/media/adapter';
 import type { Awaitable } from '@/types';
 
-export interface FetchResult {
+export type FetchResult = FetchResponseResult | FetchErrorResult;
+
+export interface FetchErrorResult {
+  type: 'client_error';
+  message: string;
+}
+
+export interface FetchResponseResult {
+  type: 'response';
   status: number;
-  type: 'json' | 'html' | 'text';
-  data: unknown;
+  headers: Headers;
+  body: ArrayBuffer;
 }
 
 export interface Fetcher {
@@ -75,9 +83,8 @@ export function createBrowserFetcher(
         const adapter = resolveMediaAdapter(data.bodyMediaType, adapters);
         if (!adapter)
           return {
-            status: 400,
-            type: 'text',
-            data: `[Fumadocs] No adapter for ${data.bodyMediaType}, you need to specify one from 'createOpenAPI()'.`,
+            type: 'client_error',
+            message: `[Fumadocs] No adapter for ${data.bodyMediaType}, you need to specify one from 'createOpenAPI()'.`,
           };
 
         if (data.bodyMediaType !== 'multipart/form-data') {
@@ -110,28 +117,20 @@ export function createBrowserFetcher(
       if (onRequestInit) requestInit = await onRequestInit(requestInit);
 
       return fetch(requestUrl, requestInit)
-        .then(async (res) => {
-          const contentType = res.headers.get('Content-Type') ?? '';
-          let type: FetchResult['type'];
-          let data: unknown;
-
-          if (contentType.startsWith('application/json')) {
-            type = 'json';
-            data = await res.json();
-          } else {
-            type = contentType.startsWith('text/html') ? 'html' : 'text';
-            data = await res.text();
-          }
-
-          return { status: res.status, type, data };
+        .then(async (res): Promise<FetchResult> => {
+          return {
+            type: 'response',
+            status: res.status,
+            headers: res.headers,
+            body: await res.arrayBuffer(),
+          };
         })
-        .catch((e) => {
+        .catch((e): FetchResult => {
           const message = e instanceof Error ? `[${e.name}] ${e.message}` : e.toString();
 
           return {
-            status: 400,
-            type: 'text',
-            data: `Client side error: ${message}`,
+            type: 'client_error',
+            message: `Client side error: ${message}`,
           };
         });
     },
