@@ -12,10 +12,10 @@
   },
   "dependencies": {
     "@orama/orama": "^3.1.18",
-    "@tanstack/react-router": "1.168.7",
+    "@tanstack/react-router": "1.168.10",
     "@tanstack/react-router-devtools": "1.166.11",
-    "@tanstack/react-start": "1.167.12",
-    "@tanstack/start-static-server-functions": "1.166.22",
+    "@tanstack/react-start": "1.167.16",
+    "@tanstack/start-static-server-functions": "1.166.25",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
@@ -23,18 +23,18 @@
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "tailwind-merge": "^3.5.0",
-    "vite": "^8.0.3"
+    "vite": "^8.0.5"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.2",
     "@types/mdx": "^2.0.13",
-    "@types/node": "^25.5.0",
+    "@types/node": "^25.5.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
     "nitro": "^3.0.260311-beta",
     "serve": "^14.2.6",
-    "srvx": "^0.11.13",
+    "srvx": "^0.11.15",
     "tailwindcss": "^4.2.2",
     "typescript": "^6.0.2"
   }

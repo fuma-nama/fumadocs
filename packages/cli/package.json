@@ -32,11 +32,11 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@clack/prompts": "^1.1.0",
+    "@clack/prompts": "^1.2.0",
     "commander": "^14.0.3",
-    "fuma-cli": "^0.0.1",
+    "fuma-cli": "^0.0.2",
     "magic-string": "^0.30.21",
-    "oxc-parser": "^0.121.0",
+    "oxc-parser": "^0.124.0",
     "oxc-resolver": "^11.19.1",
     "package-manager-detector": "^1.6.0",
     "picocolors": "^1.1.1",
@@ -44,10 +44,10 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@oxc-project/types": "^0.122.0",
-    "@types/node": "25.5.0",
-    "shadcn": "4.1.1",
+    "@oxc-project/types": "^0.124.0",
+    "@types/node": "25.5.2",
+    "shadcn": "4.1.2",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.6"
+    "tsdown": "0.21.7"
   }
 }

@@ -40,11 +40,11 @@
   "devDependencies": {
     "@tailwindcss/oxide": "^4.2.2",
     "@types/lodash.merge": "^4.6.9",
-    "@types/node": "^25.5.0",
+    "@types/node": "^25.5.2",
     "lodash.merge": "^4.6.2",
     "tailwindcss": "^4.2.2",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.6"
+    "tsdown": "0.21.7"
   },
   "peerDependencies": {
     "tailwindcss": "^4.0.0"

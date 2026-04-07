@@ -61,13 +61,13 @@
     "@types/estree": "^1.0.8",
     "@types/js-yaml": "^4.0.9",
     "@types/mdast": "^4.0.4",
-    "@types/node": "25.5.0",
+    "@types/node": "25.5.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "fumadocs-core": "workspace:*",
     "mdast-util-mdx": "^3.0.0",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.6",
+    "tsdown": "0.21.7",
     "typescript": "^6.0.2"
   },
   "peerDependencies": {
