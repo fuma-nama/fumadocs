@@ -3,7 +3,7 @@ import type { LoadFnOutput, LoadHook } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs/promises';
 import type { TransformPluginContext } from 'rolldown';
-import type { TransformResult } from 'vite';
+import type { Environment, TransformResult } from 'vite';
 import { parse } from 'node:querystring';
 import { ValidationError } from '@/utils/validation';
 import type { LoaderContext } from 'webpack';
@@ -93,7 +93,7 @@ export interface ViteLoader {
   filter: (id: string) => boolean;
 
   transform: (
-    this: TransformPluginContext,
+    this: TransformPluginContext & { environment: Environment },
     value: string,
     id: string,
   ) => Promise<TransformResult | null>;
@@ -105,7 +105,6 @@ export function toVite(loader: Loader): ViteLoader {
       return !loader.test || loader.test.test(id);
     },
     async transform(value, id) {
-      // Vite doesn't expose the real context types
       const environment = this.environment;
       const [file, query = ''] = id.split('?', 2);
 
