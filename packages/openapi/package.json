@@ -57,8 +57,8 @@
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-slot": "^1.2.4",
-    "@scalar/json-magic": "^0.12.4",
-    "@scalar/openapi-upgrader": "^0.2.2",
+    "@scalar/json-magic": "^0.12.5",
+    "@scalar/openapi-upgrader": "^0.2.4",
     "ajv": "^8.18.0",
     "chokidar": "^5.0.0",
     "class-variance-authority": "^0.7.1",
@@ -69,7 +69,7 @@
     "lucide-react": "^1.7.0",
     "next-themes": "^0.4.6",
     "openapi-sampler": "^1.7.2",
-    "react-hook-form": "^7.72.0",
+    "react-hook-form": "^7.72.1",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
     "tailwind-merge": "^3.5.0",
@@ -77,9 +77,9 @@
   },
   "devDependencies": {
     "@fumadocs/tailwind": "workspace:*",
-    "@scalar/api-client-react": "^1.4.15",
+    "@scalar/api-client-react": "^1.4.20",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "25.5.0",
+    "@types/node": "25.5.2",
     "@types/openapi-sampler": "^1.0.3",
     "@types/react": "^19.2.14",
     "fumadocs-core": "workspace:*",
@@ -88,7 +88,7 @@
     "shiki": "^4.0.2",
     "tailwindcss": "^4.2.2",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.6"
+    "tsdown": "0.21.7"
   },
   "peerDependencies": {
     "@scalar/api-client-react": "*",

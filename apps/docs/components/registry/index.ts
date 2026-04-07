@@ -1,24 +1,20 @@
-import { type Registry } from '@fumadocs/cli/build';
 import * as radixUi from '../../../../packages/radix-ui/registry';
+import * as baseUi from '../../../../packages/base-ui/registry';
 import { fileURLToPath } from 'node:url';
 import * as path from 'node:path';
-import { resolveFromRemote } from '@fumadocs/cli/build';
+import type { CompileOptions, Registry } from 'fuma-cli/compiler';
 
 const baseDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../../');
 
-export const registry: Registry = {
-  dir: baseDir,
-  name: 'fumadocs',
-  packageJson: './package.json',
-  tsconfigPath: './tsconfig.json',
+export const compileOptions: Partial<CompileOptions> = {
   onUnknownFile(absolutePath) {
     const filePath = path.relative(baseDir, absolutePath);
 
     // source object is external
     if (filePath.startsWith('lib/source/')) return false;
   },
-  onResolve(ref) {
-    if (ref.type === 'unknown-specifier' && ref.specifier === 'hast') {
+  onParseReference(ref) {
+    if (ref.type === 'unknown' && ref.specifier === 'hast') {
       return {
         type: 'dependency',
         dep: '@types/hast',
@@ -27,26 +23,57 @@ export const registry: Registry = {
     }
 
     if (ref.type === 'file') {
-      const file = path.relative(baseDir, ref.file);
+      let file = path.relative(baseDir, ref.file);
 
       if (file === 'lib/cn.ts') {
-        return resolveFromRemote(radixUi.registry, 'cn', () => true)!;
+        return {
+          type: 'file',
+          file: path.join(radixUi.registry.dir, 'utils/cn.ts'),
+        };
+      }
+
+      file = path.relative(radixUi.registry.dir, ref.file);
+      if (file.startsWith('contexts/') || file.startsWith('utils/use-')) {
+        return {
+          dep: 'fumadocs-ui',
+          type: 'dependency',
+          specifier: `fumadocs-ui/${removeExtname(file)}`,
+        };
+      }
+
+      file = path.relative(baseUi.registry.dir, ref.file);
+      if (file.startsWith('contexts/') || file.startsWith('utils/use-')) {
+        return {
+          dep: '@fumadocs/base-ui',
+          type: 'dependency',
+          specifier: `@fumadocs/base-ui/${removeExtname(file)}`,
+        };
       }
     }
 
+    // map dep imports to actual components
     if (ref.type === 'dependency' && ref.dep === 'fumadocs-ui') {
       const match = /fumadocs-ui\/components\/ui\/(.*)/.exec(ref.specifier);
+
       if (match) {
-        return resolveFromRemote(
-          radixUi.registry,
-          match[1],
-          (file) => path.basename(file.path, path.extname(file.path)) === match[1],
-        )!;
+        return {
+          type: 'file',
+          file: path.join(radixUi.registry.dir, `components/ui/${match[1]}.tsx`),
+        };
       }
     }
 
     return ref;
   },
+};
+
+export const registry: Registry = {
+  dir: baseDir,
+  name: 'fumadocs',
+  packageJson: './package.json',
+  tsconfigPath: './tsconfig.json',
+  subRegistries: [radixUi.registry, baseUi.registry],
+
   components: [
     {
       name: 'layouts/docs-min',
@@ -174,8 +201,9 @@ export const registry: Registry = {
   dependencies: {
     'fumadocs-core': null,
     'fumadocs-ui': null,
-    'lucide-react': null,
-    next: null,
-    react: null,
   },
 };
+
+function removeExtname(file: string) {
+  return file.slice(0, -path.extname(file).length);
+}

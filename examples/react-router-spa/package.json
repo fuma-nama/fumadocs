@@ -10,28 +10,28 @@
   },
   "dependencies": {
     "@orama/orama": "^3.1.18",
-    "@react-router/node": "^7.13.2",
+    "@react-router/node": "^7.14.0",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "isbot": "^5.1.36",
+    "isbot": "^5.1.37",
     "lucide-react": "^1.7.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "react-router": "^7.13.2",
+    "react-router": "^7.14.0",
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
-    "@react-router/dev": "^7.13.2",
+    "@react-router/dev": "^7.14.0",
     "@tailwindcss/vite": "^4.2.2",
     "@types/mdx": "^2.0.13",
-    "@types/node": "^25.5.0",
+    "@types/node": "^25.5.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "react-router-devtools": "^6.2.0",
     "serve": "^14.2.6",
     "tailwindcss": "^4.2.2",
     "typescript": "^6.0.2",
-    "vite": "^8.0.3"
+    "vite": "^8.0.5"
   }
 }

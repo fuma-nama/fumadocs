@@ -1,32 +1,11 @@
-import type { Component, Reference, SourceReference } from '@fumadocs/cli/build';
-import { glob } from 'node:fs/promises';
+import { glob } from 'tinyglobby';
 import path from 'node:path';
-
-/**
- * externalize some contexts & hooks
- */
-export function resolveExternal(
-  ref: SourceReference,
-  toPackageName: string,
-  toRegistryDir: string,
-): Reference | undefined {
-  if (ref.type === 'file') {
-    const file = path.relative(toRegistryDir, ref.file).replaceAll(path.sep, '/');
-
-    if (file.startsWith('contexts/') || file.startsWith('utils/use-')) {
-      return {
-        dep: toPackageName,
-        type: 'dependency',
-        specifier: `${toPackageName}/${removeExtname(file)}`,
-      };
-    }
-  }
-}
+import type { Component } from 'fuma-cli/compiler';
 
 export async function findSlotComponents(dir: string): Promise<Component[]> {
   const slots: Component[] = [];
 
-  for await (const file of glob('layouts/**/slots/*', { cwd: dir })) {
+  for (const file of await glob('layouts/**/slots/*', { cwd: dir })) {
     const relativePath = path.relative('layouts', file);
     const name = relativePath
       .split(path.sep)
@@ -103,7 +82,3 @@ export const commonComponents: Component[] = [
     ],
   },
 ];
-
-function removeExtname(file: string) {
-  return file.slice(0, -path.extname(file).length);
-}

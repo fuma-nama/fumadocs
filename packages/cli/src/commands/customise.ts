@@ -1,13 +1,13 @@
 import { cancel, group, intro, log, outro, select } from '@clack/prompts';
 import picocolors from 'picocolors';
-import { install } from '@/commands/add';
-import type { RegistryClient } from '@/registry/client';
-import { ComponentInstaller } from '@/registry/installer';
+import { install, Target } from '@/commands/add';
 import { UIRegistries } from '@/commands/shared';
-import { pluginPreserveLayouts } from '@/registry/plugins/preserve';
+import { LoadedConfig } from '@/config';
+import { RegistryConnector } from 'fuma-cli/registry/connector';
+import { FumadocsComponentInstaller } from '@/registry/utils';
 
 interface TargetInfo {
-  target: string[];
+  targets: Target[];
   id: string;
   print?: () => void;
 }
@@ -19,14 +19,12 @@ interface SlotPrintInfo {
   isPage: boolean;
 }
 
-export async function customise(client: RegistryClient) {
+export async function customise(config: LoadedConfig, connector: RegistryConnector) {
   intro(picocolors.bgBlack(picocolors.whiteBright('Customise Fumadocs UI')));
-  const config = client.config;
-  const installer = new ComponentInstaller(client, {
-    plugins: [pluginPreserveLayouts()],
-  });
-  const registry = UIRegistries[config.uiLibrary];
-  const info = await client.createLinkedRegistryClient(registry).fetchRegistryInfo();
+
+  const installer = new FumadocsComponentInstaller(connector, config);
+  const subRegistry = UIRegistries[config.uiLibrary];
+  const info = await connector.fetchRegistryInfo(subRegistry);
 
   const result = await group(
     {
@@ -38,7 +36,7 @@ export async function customise(client: RegistryClient) {
               label: 'Docs Layout',
               value: {
                 id: 'docs',
-                target: [`${registry}/layouts/docs`],
+                targets: [{ subRegistry, name: 'layouts/docs' }],
                 print() {
                   printLayout(
                     ['fumadocs-ui/layouts/docs', '@/layouts/docs'],
@@ -52,7 +50,7 @@ export async function customise(client: RegistryClient) {
               label: 'Notebook Layout',
               value: {
                 id: 'notebook',
-                target: [`${registry}/layouts/notebook`],
+                targets: [{ subRegistry, name: 'layouts/notebook' }],
                 print() {
                   printLayout(
                     ['fumadocs-ui/layouts/notebook', '@/layouts/notebook'],
@@ -66,7 +64,7 @@ export async function customise(client: RegistryClient) {
               label: 'Flux Layout',
               value: {
                 id: 'flux',
-                target: [`${registry}/layouts/flux`],
+                targets: [{ subRegistry, name: 'layouts/flux' }],
                 print() {
                   printLayout(
                     ['fumadocs-ui/layouts/flux', '@/layouts/flux'],
@@ -80,7 +78,7 @@ export async function customise(client: RegistryClient) {
               label: 'Home Layout',
               value: {
                 id: 'home',
-                target: [`${registry}/layouts/home`],
+                targets: [{ subRegistry, name: 'layouts/home' }],
                 print() {
                   printLayout(['fumadocs-ui/layouts/home', `@/layouts/home`]);
                 },
@@ -106,7 +104,7 @@ export async function customise(client: RegistryClient) {
               hint: 'for those who want to build their own UI from ground up',
               value: {
                 id: 'docs-min',
-                target: ['layouts/docs-min'],
+                targets: [{ name: 'layouts/docs-min' }],
                 print() {
                   printLayout(
                     ['fumadocs-ui/layouts/docs', '@/layouts/docs'],
@@ -128,7 +126,7 @@ export async function customise(client: RegistryClient) {
                   hint: "only replace a part of layout's page, useful for adjusting details",
                   value: {
                     id: index.name,
-                    target: [`${registry}/${index.name}`],
+                    targets: [{ subRegistry, name: index.name }],
                     print() {
                       printSlot({
                         at: `@/layouts/${selected.id}/page/slots/${name}`,
@@ -146,7 +144,7 @@ export async function customise(client: RegistryClient) {
                 hint: 'only replace a part of layout, useful for adjusting details',
                 value: {
                   id: index.name,
-                  target: [`${registry}/${index.name}`],
+                  targets: [{ subRegistry, name: index.name }],
                   print() {
                     printSlot({
                       at: `@/layouts/${selected.id}/slots/${name}`,
@@ -171,7 +169,7 @@ export async function customise(client: RegistryClient) {
   );
 
   const target = result.target as TargetInfo;
-  await install(target.target, installer);
+  await install(target.targets, installer);
   target.print?.();
 
   outro(picocolors.bold('Have fun!'));

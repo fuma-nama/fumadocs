@@ -3,7 +3,7 @@ import { convertToModelMessages, stepCountIs, streamText, tool, type UIMessage }
 import { z } from 'zod';
 import { source } from '@/lib/source';
 import { Document, type DocumentData } from 'flexsearch';
-import { $routeHandler } from '@fumadocs/cli/registry/macros/route-handler';
+import { $routeHandler } from 'fuma-cli/macros/route-handler';
 
 interface CustomDocument extends DocumentData {
   url: string;

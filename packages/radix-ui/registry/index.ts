@@ -1,7 +1,7 @@
 import { fileURLToPath } from 'node:url';
-import type { Registry } from '@fumadocs/cli/build';
 import * as path from 'node:path';
-import { commonComponents, findSlotComponents, resolveExternal } from '../../shared/registry';
+import { commonComponents, findSlotComponents } from '../../shared/registry';
+import type { Registry } from 'fuma-cli/compiler';
 
 const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../src');
 
@@ -13,9 +13,6 @@ export const registry: Registry = {
   packageJson: '../package.json',
   env: {
     ui: 'fumadocs-ui',
-  },
-  onResolve(ref) {
-    return resolveExternal(ref, 'fumadocs-ui', dir) ?? ref;
   },
   components: [
     ...commonComponents,

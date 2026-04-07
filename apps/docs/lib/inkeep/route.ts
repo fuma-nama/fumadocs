@@ -1,6 +1,6 @@
 import { ProvideLinksToolSchema } from '@/lib/inkeep/inkeep-qa-schema';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
-import { $routeHandler } from '@fumadocs/cli/registry/macros/route-handler';
+import { $routeHandler } from 'fuma-cli/macros/route-handler';
 import { convertToModelMessages, streamText, type UIMessage } from 'ai';
 
 export type InkeepUIMessage = UIMessage<

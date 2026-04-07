@@ -4,13 +4,7 @@ import { createConfigSchema } from './src/config';
 import { z } from 'zod';
 
 export default defineConfig({
-  entry: [
-    './src/{index,config}.ts',
-    './src/registry/{client,schema}.ts',
-    './src/registry/installer/index.ts',
-    './src/registry/macros/route-handler.ts',
-    './src/build/index.ts',
-  ],
+  entry: ['./src/{index,config}.ts'],
   format: 'esm',
   dts: true,
   fixedExtension: false,

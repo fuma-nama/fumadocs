@@ -22,12 +22,12 @@
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.2",
     "@types/mdx": "^2.0.13",
-    "@types/node": "^25.5.0",
+    "@types/node": "^25.5.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "tailwindcss": "^4.2.2",
     "typescript": "^6.0.2",
-    "vite": "^8.0.3",
+    "vite": "^8.0.5",
     "vite-tsconfig-paths": "^6.1.1"
   }
 }
