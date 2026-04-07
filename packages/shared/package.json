@@ -1,13 +1,13 @@
 {
   "name": "shared",
   "private": true,
+  "dependencies": {
+    "fuma-cli": "^0.0.1",
+    "tinyglobby": "^0.2.15"
+  },
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",
     "@types/node": "^25.5.0",
     "tsconfig": "workspace:*"
-  },
-  "dependencies": {
-    "fuma-cli": "link:../../../fuma-cli/packages/core",
-    "tinyglobby": "^0.2.15"
   }
 }

@@ -34,7 +34,7 @@
   "dependencies": {
     "@clack/prompts": "^1.1.0",
     "commander": "^14.0.3",
-    "fuma-cli": "link:../../../fuma-cli/packages/core",
+    "fuma-cli": "^0.0.1",
     "magic-string": "^0.30.21",
     "oxc-parser": "^0.121.0",
     "oxc-resolver": "^11.19.1",

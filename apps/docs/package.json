@@ -35,7 +35,7 @@
     "estree-util-to-js": "^2.0.0",
     "feed": "^5.2.0",
     "flexsearch": "^0.8.212",
-    "fuma-cli": "link:../../../fuma-cli/packages/core",
+    "fuma-cli": "^0.0.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-docgen": "workspace:^",
     "fumadocs-epub": "workspace:*",

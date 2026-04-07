@@ -77,6 +77,7 @@ export async function install(targets: Target[], installer: FumadocsComponentIns
       const deps = await installer
         .install(target.name, target.subRegistry)
         .then((res) => res.deps());
+      spin.stop(picocolors.bold(picocolors.greenBright(`${target.name} installed`)));
 
       if (deps.hasRequired()) {
         log.message();
@@ -102,8 +103,6 @@ export async function install(targets: Target[], installer: FumadocsComponentIns
           await deps.writeRequired();
         }
       }
-
-      spin.stop(picocolors.bold(picocolors.greenBright(`${target.name} installed`)));
     } catch (e) {
       spin.error(e instanceof Error ? e.message : String(e));
       process.exit(-1);
