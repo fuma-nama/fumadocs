@@ -18,7 +18,8 @@
   ],
   "type": "module",
   "exports": {
-    ".": "./dist/config.js",
+    "./config": "./dist/config.js",
+    "./registry/installer": "./dist/registry/installer.js",
     "./package.json": "./package.json"
   },
   "publishConfig": {

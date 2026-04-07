@@ -1,48 +1,36 @@
 import { TemplatePlugin, TemplatePluginContext } from '@/index';
-import { ComponentInstaller } from '@fumadocs/cli/registry/installer';
-import { getDefaultConfig } from '@fumadocs/cli/config';
-import { HttpRegistryClient } from '@fumadocs/cli/registry/client';
 import { createSourceFile } from '@/transform/shared';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import { SyntaxKind } from 'ts-morph';
+import { FumadocsComponentInstaller } from '@fumadocs/cli/registry/installer';
+import { HttpRegistryConnector } from 'fuma-cli/registry/connector';
+import { getDefaultConfig } from '@fumadocs/cli/config';
 
 export function ai(provider: 'openrouter' | 'inkeep'): TemplatePlugin {
   return {
     async afterWrite() {
       const config = await getDefaultConfig(this.dest);
-      await install(
-        `ai/${provider}`,
-        new ComponentInstaller(new HttpRegistryClient('https://fumadocs.dev/registry', config), {
-          cwd: this.dest,
-        }),
+      const installer = new FumadocsComponentInstaller(
+        new HttpRegistryConnector('https://fumadocs.dev/registry'),
+        config,
+        this.dest,
       );
-      await addAIChat(this);
-      await fs.writeFile(
-        path.join(this.dest, '.env.local'),
-        provider === 'openrouter' ? 'OPENROUTER_API_KEY=' : 'INKEEP_API_KEY=',
-      );
+
+      try {
+        const deps = await installer.install(`ai/${provider}`).then((res) => res.deps());
+        if (deps.hasRequired()) await deps.writeRequired();
+
+        await addAIChat(this);
+        await fs.writeFile(
+          path.join(this.dest, '.env.local'),
+          provider === 'openrouter' ? 'OPENROUTER_API_KEY=' : 'INKEEP_API_KEY=',
+        );
+      } catch (e) {
+        console.error(e);
+      }
     },
   };
-}
-
-async function install(target: string, installer: ComponentInstaller) {
-  try {
-    await installer.install(target, {
-      onWarn() {},
-      async confirmFileOverride() {
-        return true;
-      },
-      onFileDownloaded() {},
-    });
-  } catch (e) {
-    console.error(e instanceof Error ? e.message : String(e));
-    process.exit(-1);
-  }
-
-  const deps = await installer.deps();
-  if (deps.hasRequired()) await deps.writeRequired();
-  await installer.onEnd();
 }
 
 async function addAIChat({ template, appDir }: TemplatePluginContext) {

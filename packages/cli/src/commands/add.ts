@@ -1,18 +1,9 @@
-import {
-  isCancel,
-  autocompleteMultiselect,
-  outro,
-  spinner,
-  confirm,
-  box,
-  log,
-} from '@clack/prompts';
+import { isCancel, autocompleteMultiselect, outro, spinner } from '@clack/prompts';
 import picocolors from 'picocolors';
 import { UIRegistries } from '@/commands/shared';
-import { detect } from 'package-manager-detector';
 import { RegistryConnector } from 'fuma-cli/registry/connector';
 import { LoadedConfig } from '@/config';
-import { FumadocsComponentInstaller } from '@/registry/utils';
+import { FumadocsComponentInstaller } from '@/registry/installer';
 
 interface AddOption {
   label: string;
@@ -64,49 +55,8 @@ export async function add(input: string[], connector: RegistryConnector, config:
     );
   }
 
-  await install(targets, installer);
-}
-
-export async function install(targets: Target[], installer: FumadocsComponentInstaller) {
   for (const target of targets) {
-    const spin = spinner();
-    spin.start(picocolors.bold(picocolors.cyanBright(`Installing ${target.name}`)));
-
-    try {
-      installer.installing = { name: target.name, spin };
-      const deps = await installer
-        .install(target.name, target.subRegistry)
-        .then((res) => res.deps());
-      spin.stop(picocolors.bold(picocolors.greenBright(`${target.name} installed`)));
-
-      if (deps.hasRequired()) {
-        log.message();
-        box([...deps.dependencies, ...deps.devDependencies].join('\n'), 'New Dependencies');
-        const pm = (await detect())?.name ?? 'npm';
-        const value = await confirm({
-          message: `Do you want to install with ${pm}?`,
-        });
-
-        if (isCancel(value)) {
-          outro('Installation terminated');
-          process.exit(0);
-        }
-
-        if (value) {
-          const spin = spinner({
-            errorMessage: 'Failed to install dependencies',
-          });
-          spin.start('Installing dependencies');
-          await deps.installRequired(pm);
-          spin.stop('Dependencies installed');
-        } else {
-          await deps.writeRequired();
-        }
-      }
-    } catch (e) {
-      spin.error(e instanceof Error ? e.message : String(e));
-      process.exit(-1);
-    }
+    await installer.installInteractive(target.name, target.subRegistry);
   }
 
   outro(picocolors.bold(picocolors.greenBright('Successful')));

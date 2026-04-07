@@ -1,10 +1,10 @@
 import { cancel, group, intro, log, outro, select } from '@clack/prompts';
 import picocolors from 'picocolors';
-import { install, Target } from '@/commands/add';
+import type { Target } from '@/commands/add';
 import { UIRegistries } from '@/commands/shared';
 import { LoadedConfig } from '@/config';
 import { RegistryConnector } from 'fuma-cli/registry/connector';
-import { FumadocsComponentInstaller } from '@/registry/utils';
+import { FumadocsComponentInstaller } from '@/registry/installer';
 
 interface TargetInfo {
   targets: Target[];
@@ -168,9 +168,12 @@ export async function customise(config: LoadedConfig, connector: RegistryConnect
     },
   );
 
-  const target = result.target as TargetInfo;
-  await install(target.targets, installer);
-  target.print?.();
+  const targetInfo = result.target as TargetInfo;
+  for (const target of targetInfo.targets) {
+    await installer.installInteractive(target.name, target.subRegistry);
+  }
+
+  targetInfo.print?.();
 
   outro(picocolors.bold('Have fun!'));
 }
