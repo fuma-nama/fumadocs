@@ -96,6 +96,8 @@ export function llms<C extends LoaderConfig>(loader: LoaderOutput<C>, config: LL
   return {
     /**
      * generate `llms.txt` content in Markdown format.
+     *
+     * use `indexNode(node)` instead for more control (e.g. add extra sections to output).
      */
     index,
     /**

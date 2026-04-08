@@ -1,3 +1,4 @@
+import { appName } from '@/lib/shared';
 import { source } from '@/lib/source';
 import { ImageResponse } from '@takumi-rs/image-response';
 import { generate as DefaultImage } from 'fumadocs-ui/og/takumi';
@@ -9,7 +10,7 @@ export async function GET(_: Request, { params }: ApiContext<'/og/docs/[...slugs
   if (!page) return new Response(undefined, { status: 404 });
 
   return new ImageResponse(
-    <DefaultImage title={page.data.title} description={page.data.description} site="My App" />,
+    <DefaultImage title={page.data.title} description={page.data.description} site={appName} />,
     {
       width: 1200,
       height: 630,
