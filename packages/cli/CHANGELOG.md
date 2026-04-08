@@ -1,5 +1,11 @@
 # fumadocs
 
+## 1.3.5
+
+### Patch Changes
+
+- 7c59264: Adopt Fuma CLI
+
 ## 1.3.4
 
 ### Patch Changes

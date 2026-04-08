@@ -1,5 +1,15 @@
 # fumadocs-typescript
 
+## 5.2.2
+
+### Patch Changes
+
+- a070650: fix `remarkAutoTypeTable` not serializing `deprecated` field to MDX output
+- Updated dependencies [5524927]
+- Updated dependencies [d47c4f1]
+  - fumadocs-core@16.7.11
+  - fumadocs-ui@16.7.11
+
 ## 5.2.1
 
 ### Patch Changes

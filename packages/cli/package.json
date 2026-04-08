@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/cli",
-  "version": "1.3.4",
+  "version": "1.3.5",
   "description": "The CLI tool for Fumadocs",
   "keywords": [
     "Docs",
