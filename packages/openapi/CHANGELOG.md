@@ -1,5 +1,15 @@
 # @fuma-docs/openapi
 
+## 10.6.7
+
+### Patch Changes
+
+- 8462aa6: Support displaying response results of different mime types
+- Updated dependencies [5524927]
+- Updated dependencies [d47c4f1]
+  - fumadocs-core@16.7.11
+  - fumadocs-ui@16.7.11
+
 ## 10.6.6
 
 ### Patch Changes

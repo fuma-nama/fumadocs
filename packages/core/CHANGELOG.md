@@ -1,5 +1,12 @@
 # fumadocs-core
 
+## 16.7.11
+
+### Patch Changes
+
+- 5524927: extend page tree root scope
+- d47c4f1: LLMs: support generating section for a specific page tree node
+
 ## 16.7.10
 
 ## 16.7.9

@@ -1,5 +1,13 @@
 # create-next-docs-app
 
+## 16.0.89
+
+### Patch Changes
+
+- 7c59264: Adopt Fuma CLI
+- Updated dependencies [7c59264]
+  - @fumadocs/cli@1.3.5
+
 ## 16.0.88
 
 ## 16.0.87
