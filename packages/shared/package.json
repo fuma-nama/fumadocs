@@ -2,8 +2,8 @@
   "name": "shared",
   "private": true,
   "dependencies": {
-    "fuma-cli": "^0.0.2",
-    "tinyglobby": "^0.2.15"
+    "fuma-cli": "^0.0.3",
+    "tinyglobby": "^0.2.16"
   },
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",

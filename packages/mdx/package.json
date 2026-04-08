@@ -77,8 +77,8 @@
     "mdast-util-to-markdown": "^2.1.2",
     "picocolors": "^1.1.1",
     "picomatch": "^4.0.4",
-    "tinyexec": "^1.0.4",
-    "tinyglobby": "^0.2.15",
+    "tinyexec": "^1.1.1",
+    "tinyglobby": "^0.2.16",
     "unified": "^11.0.5",
     "unist-util-remove-position": "^5.0.0",
     "unist-util-visit": "^5.1.0",
@@ -104,7 +104,7 @@
     "rolldown": "1.0.0-rc.13",
     "tsconfig": "workspace:*",
     "tsdown": "0.21.7",
-    "vite": "^8.0.5",
+    "vite": "^8.0.7",
     "webpack": "^5.105.4"
   },
   "peerDependencies": {

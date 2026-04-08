@@ -46,15 +46,15 @@
     "@commander-js/extra-typings": "^14.0.0",
     "@fumadocs/cli": "workspace:*",
     "commander": "^14.0.3",
-    "fuma-cli": "^0.0.2",
+    "fuma-cli": "^0.0.3",
     "picocolors": "^1.1.1",
-    "tinyexec": "^1.0.4",
+    "tinyexec": "^1.1.1",
     "ts-morph": "^27.0.2"
   },
   "devDependencies": {
     "@types/cross-spawn": "^6.0.6",
     "@types/node": "25.5.2",
-    "tinyglobby": "^0.2.15",
+    "tinyglobby": "^0.2.16",
     "tsconfig": "workspace:*",
     "tsdown": "0.21.7",
     "typescript": "^6.0.2"

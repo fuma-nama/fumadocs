@@ -1,5 +1,4 @@
 import fs from 'node:fs/promises';
-import path from 'node:path';
 
 export async function exists(pathLike: string): Promise<boolean> {
   try {
@@ -8,8 +7,4 @@ export async function exists(pathLike: string): Promise<boolean> {
   } catch {
     return false;
   }
-}
-
-export function isRelative(from: string, to: string): boolean {
-  return !path.relative(from, to).startsWith(`..${path.sep}`);
 }

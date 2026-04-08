@@ -20,7 +20,7 @@
     "lucide-react": "^1.7.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "vite": "^8.0.5"
+    "vite": "^8.0.7"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.2",

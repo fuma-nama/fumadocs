@@ -22,7 +22,7 @@
     "@types/mdx": "^2.0.13",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "postcss": "^8.5.8",
+    "postcss": "^8.5.9",
     "tailwindcss": "^4.2.2",
     "typescript": "^6.0.2"
   }
