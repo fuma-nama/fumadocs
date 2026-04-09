@@ -18,7 +18,7 @@ const project = new Project({
 });
 
 async function createSourceFile(templatePath: string) {
-  const content = (await fs.readFile(path.join(__dirname, templatePath))).toString();
+  const content = await fs.readFile(path.join(__dirname, templatePath), 'utf-8');
 
   return project.createSourceFile('temp.ts', content, {
     overwrite: true,

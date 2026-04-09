@@ -272,7 +272,7 @@ function createDocMethods(
       if (type === 'raw') {
         const fs = await import('node:fs/promises');
 
-        return (await fs.readFile(info.fullPath)).toString();
+        return await fs.readFile(info.fullPath, 'utf-8');
       }
 
       const data = await load();

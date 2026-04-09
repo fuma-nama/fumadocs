@@ -16,7 +16,7 @@ export function createFileSystemCache(dir: string): Cache {
     },
     async read(key) {
       try {
-        return (await fs.readFile(path.join(dir, `${key}.json`))).toString();
+        return await fs.readFile(path.join(dir, `${key}.json`), 'utf-8');
       } catch {
         return;
       }

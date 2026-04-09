@@ -68,7 +68,7 @@ export function toNode(loader: Loader): LoadHook {
         filePath,
         query: Object.fromEntries(parsedUrl.searchParams.entries()),
         async getSource() {
-          return (await fs.readFile(filePath)).toString();
+          return await fs.readFile(filePath, 'utf-8');
         },
         development: false,
         compiler: {
@@ -198,7 +198,7 @@ export function toBun(loader: Loader) {
       };
 
       if (loader.bun?.load) {
-        return loader.bun.load(readFileSync(filePath).toString(), input);
+        return loader.bun.load(readFileSync(filePath, 'utf-8'), input);
       }
 
       const result = loader.load(input);

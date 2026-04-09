@@ -10,7 +10,7 @@ export function createFSCache() {
       const cached = map.get(fullPath);
       if (cached) return cached;
 
-      const read = fs.readFile(fullPath).then((s) => s.toString());
+      const read = fs.readFile(fullPath, 'utf-8');
       map.set(fullPath, read);
       return read;
     },

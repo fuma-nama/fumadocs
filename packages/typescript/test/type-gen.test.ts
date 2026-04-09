@@ -41,7 +41,7 @@ test('Run on MDX files', async () => {
 
   const output = await processor.process({
     path: file,
-    value: (await fs.readFile(file)).toString(),
+    value: await fs.readFile(file, 'utf-8'),
   });
   await expect(String(output.value)).toMatchFileSnapshot('./fixtures/test.output.js');
 });

@@ -55,7 +55,7 @@ export async function getTypeTableOutput(
   let content = '';
 
   if (file) {
-    content = (await fs.readFile(file)).toString();
+    content = await fs.readFile(file, 'utf-8');
   }
 
   if (type && type.split('\n').length > 1) {

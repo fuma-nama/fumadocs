@@ -46,7 +46,7 @@ export default function jsonSchema({ insert = false }: JSONSchemaOptions = {}): 
         if (!match) return;
         let obj: object;
         try {
-          const content = (await fs.readFile(file)).toString();
+          const content = await fs.readFile(file, 'utf-8');
           obj = content.length > 0 ? JSON.parse(content) : {};
         } catch {
           return;

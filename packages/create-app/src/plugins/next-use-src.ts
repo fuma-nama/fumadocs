@@ -31,7 +31,7 @@ export function nextUseSrc(): TemplatePlugin {
       if (!this.template.value.startsWith('+next')) return;
 
       const tsconfigPath = path.join(this.dest, 'tsconfig.json');
-      const content = (await fs.readFile(tsconfigPath)).toString();
+      const content = await fs.readFile(tsconfigPath, 'utf-8');
       const config = JSON.parse(content);
 
       if (config.compilerOptions?.paths) {

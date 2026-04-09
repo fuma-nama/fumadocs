@@ -115,7 +115,7 @@ async function md(
   absolutePath: string,
   file: string,
 ): Promise<RawPage> {
-  const content = (await fs.readFile(absolutePath)).toString();
+  const content = await fs.readFile(absolutePath, 'utf-8');
   const parsed = grayMatter({ content });
 
   // use default frontmatter if invalid in Fumadocs' spec
@@ -140,7 +140,7 @@ async function json(
   absolutePath: string,
   file: string,
 ): Promise<RawMeta | undefined> {
-  const content = (await fs.readFile(absolutePath)).toString();
+  const content = await fs.readFile(absolutePath, 'utf-8');
   const parsed = JSON.parse(content);
   const result = metaSchema.loose().safeParse(parsed);
 

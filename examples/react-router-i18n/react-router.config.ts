@@ -5,7 +5,7 @@ import type { Info } from './scripts/generate-info';
 export default {
   ssr: true,
   async prerender({ getStaticPaths }) {
-    const info: Info = JSON.parse((await fs.readFile('.react-router/_info')).toString());
+    const info: Info = JSON.parse(await fs.readFile('.react-router/_info', 'utf-8'));
 
     const paths: string[] = [];
     for (const path of getStaticPaths()) {

@@ -16,7 +16,7 @@ export function createFileSystemGeneratorCache(dir: string): Cache {
     },
     async read(hash) {
       try {
-        return JSON.parse((await fs.readFile(path.join(dir, `${hash}.json`))).toString());
+        return JSON.parse(await fs.readFile(path.join(dir, `${hash}.json`), 'utf-8'));
       } catch {
         return;
       }

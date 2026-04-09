@@ -34,7 +34,7 @@ const compilerProduction = createCompiler({
 });
 
 for (const file of files) {
-  const raw = (await fs.readFile(path.join(dir, file))).toString();
+  const raw = await fs.readFile(path.join(dir, file), 'utf-8');
   const { frontmatter, content } = parseFrontmatter(raw);
 
   test(`compile: ${file}`, async () => {

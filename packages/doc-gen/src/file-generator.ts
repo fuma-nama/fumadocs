@@ -49,7 +49,7 @@ export function fileGenerator({
       const dest = relative
         ? path.resolve(ctx.cwd, path.dirname(ctx.path), file)
         : path.resolve(ctx.cwd, file);
-      let value = await fs.readFile(dest).then((res) => res.toString());
+      let value = await fs.readFile(dest, 'utf-8');
       if (trim) value = value.trim();
 
       if (codeblock === false) {

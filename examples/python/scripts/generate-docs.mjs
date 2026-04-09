@@ -6,7 +6,7 @@ async function generate() {
   const out = 'content/docs/httpx';
   await rimraf(out);
 
-  const content = JSON.parse((await fs.readFile('./httpx.json')).toString());
+  const content = JSON.parse(await fs.readFile('./httpx.json', 'utf-8'));
   const converted = Python.convert(content, {
     baseUrl: '/docs',
   }).filter((file) => !file.path.startsWith('httpx/_transports'));

@@ -74,7 +74,7 @@ export async function createOrLoadConfig(file = './cli.json'): Promise<LoadedCon
   const inited = await initConfig(file);
   if (inited) return inited;
 
-  const content = (await fs.readFile(file)).toString();
+  const content = await fs.readFile(file, 'utf-8');
   const configSchema = createConfigSchema();
 
   return configSchema.parse(JSON.parse(content));

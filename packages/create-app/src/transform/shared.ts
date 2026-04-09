@@ -11,7 +11,7 @@ const project = new Project({
 });
 
 export async function createSourceFile(path: string) {
-  return project.createSourceFile(path, (await fs.readFile(path)).toString(), {
+  return project.createSourceFile(path, await fs.readFile(path, 'utf-8'), {
     overwrite: true,
   });
 }

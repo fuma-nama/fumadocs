@@ -44,7 +44,7 @@ export async function dynamic<Config, TC extends InternalTypeConfig>(
     const body: Record<string, () => Promise<unknown>> = {};
 
     async function compile({ info, data }: LazyEntry<unknown>) {
-      let content = (await fs.readFile(info.fullPath)).toString();
+      let content = await fs.readFile(info.fullPath, 'utf-8');
       content = fumaMatter(content).content;
 
       const compiled = await buildMDX(core, collection, {
