@@ -1,7 +1,7 @@
 'use client';
 import { cn } from '@/lib/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { CornerDownRightIcon, MessageSquare, ThumbsDown, ThumbsUp } from 'lucide-react';
+import { CornerDownRightIcon, MessageSquare, ThumbsDown, ThumbsUp, X } from 'lucide-react';
 import {
   ReactNode,
   type SyntheticEvent,
@@ -12,9 +12,8 @@ import {
 } from 'react';
 import { Collapsible, CollapsibleContent } from 'fumadocs-ui/components/ui/collapsible';
 import { cva } from 'class-variance-authority';
-import { usePathname } from 'next/navigation';
 import { Popover, PopoverContent, PopoverTrigger } from 'fumadocs-ui/components/ui/popover';
-import type { FeedbackBlockProps } from 'fumadocs-core/mdx-plugins/remark-feedback-block';
+import type * as Remark from 'fumadocs-core/mdx-plugins/remark-feedback-block';
 import {
   actionResponse,
   blockFeedback,
@@ -24,6 +23,7 @@ import {
   type PageFeedback,
 } from './schema';
 import { z } from 'zod/mini';
+import { usePathname } from 'fumadocs-core/framework';
 
 const rateButtonVariants = cva(
   'inline-flex items-center gap-2 px-3 py-2 rounded-full font-medium border text-sm [&_svg]:size-4 disabled:cursor-not-allowed',
@@ -189,20 +189,62 @@ export function Feedback({
   );
 }
 
+export interface FeedbackBlockProps extends Remark.FeedbackBlockProps {
+  onSendAction: (feedback: BlockFeedback) => Promise<ActionResponse>;
+  children?: ReactNode;
+}
+
 /**
  * A feedback component for each content block in page, should be used with `remark-feedback-block`.
  *
  * See https://fumadocs.dev/docs/integrations/feedback.
  */
-export function FeedbackBlock({
-  id,
-  body,
-  onSendAction,
-  children,
-}: FeedbackBlockProps & {
-  onSendAction: (feedback: BlockFeedback) => Promise<ActionResponse>;
-  children: ReactNode;
-}) {
+export function FeedbackBlock({ children, ...rest }: FeedbackBlockProps) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <div className="relative group/feedback">
+        <div
+          className={cn(
+            'absolute -inset-1 rounded-sm pointer-events-none transition-colors duration-100 -z-1',
+            open
+              ? 'bg-fd-accent'
+              : 'group-hover/feedback:bg-fd-accent group-hover/feedback:delay-100',
+          )}
+        />
+        <PopoverTrigger
+          className={cn(
+            buttonVariants({ variant: 'secondary', size: 'sm' }),
+            'absolute -top-7 inset-e-0 min-w-[94px] backdrop-blur-sm text-fd-muted-foreground gap-1.5 transition-all duration-100 data-[state=open]:bg-fd-accent data-[state=open]:text-fd-accent-foreground',
+            !open &&
+              'opacity-0 pointer-events-none group-hover/feedback:pointer-events-auto group-hover/feedback:opacity-100 group-hover/feedback:delay-100 hover:pointer-events-auto hover:opacity-100 hover:delay-100',
+          )}
+        >
+          {open ? (
+            <>
+              <X className="size-3.5" />
+              Close
+            </>
+          ) : (
+            <>
+              <MessageSquare className="size-3.5" />
+              Feedback
+            </>
+          )}
+        </PopoverTrigger>
+
+        <div className="in-[.prose-no-margin]:prose-no-margin">{children}</div>
+      </div>
+
+      <PopoverContent className="min-w-[300px] bg-fd-card text-fd-card-foreground">
+        <FeedbackBlockContent {...rest} />
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function FeedbackBlockContent({ id, body, onSendAction }: FeedbackBlockProps) {
   const url = usePathname();
   const blockId = `${url}-${id}`;
   const { previous, setPrevious } = useSubmissionStorage(blockId, (v) => {
@@ -212,7 +254,6 @@ export function FeedbackBlock({
   });
   const [message, setMessage] = useState('');
   const [isPending, startTransition] = useTransition();
-  const [open, setOpen] = useState(false);
 
   function submit(e?: SyntheticEvent) {
     startTransition(async () => {
@@ -234,98 +275,65 @@ export function FeedbackBlock({
     e?.preventDefault();
   }
 
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <div className="relative group/feedback">
-        <div
-          className={cn(
-            'absolute -inset-1 rounded-sm pointer-events-none transition-colors duration-100 z-[-1]',
-            open
-              ? 'bg-fd-accent'
-              : 'group-hover/feedback:bg-fd-accent group-hover/feedback:delay-100',
-          )}
-        />
-        <PopoverTrigger
-          className={cn(
-            buttonVariants({ variant: 'secondary', size: 'sm' }),
-            'absolute -top-7 end-0 backdrop-blur-sm text-fd-muted-foreground gap-1.5 transition-all duration-100 data-[state=open]:bg-fd-accent data-[state=open]:text-fd-accent-foreground',
-            !open &&
-              'opacity-0 pointer-events-none group-hover/feedback:pointer-events-auto group-hover/feedback:opacity-100 group-hover/feedback:delay-100 hover:pointer-events-auto hover:opacity-100 hover:delay-100',
-          )}
-          onClick={(e) => {
-            setOpen((prev) => !prev);
-            e.stopPropagation();
-            e.preventDefault();
-          }}
-        >
-          <MessageSquare className="size-3.5" />
-          Feedback
-        </PopoverTrigger>
+  if (previous)
+    return (
+      <div className="flex flex-col items-center py-2 gap-2 text-fd-muted-foreground text-sm text-center rounded-xl">
+        <p>Thank you for your feedback!</p>
+        <div className="flex flex-row items-center gap-2">
+          <a
+            href={previous.response?.githubUrl}
+            rel="noreferrer noopener"
+            target="_blank"
+            className={cn(
+              buttonVariants({
+                color: 'primary',
+              }),
+              'text-xs',
+            )}
+          >
+            View on GitHub
+          </a>
 
-        <div className="in-[.prose-no-margin]:prose-no-margin">{children}</div>
+          <button
+            className={cn(
+              buttonVariants({
+                color: 'secondary',
+              }),
+              'text-xs',
+            )}
+            onClick={() => {
+              setPrevious(null);
+            }}
+          >
+            Submit Again
+          </button>
+        </div>
       </div>
-
-      <PopoverContent className="min-w-[300px] bg-fd-card text-fd-card-foreground">
-        {previous ? (
-          <div className="flex flex-col items-center py-2 gap-2 text-fd-muted-foreground text-sm text-center rounded-xl">
-            <p>Thank you for your feedback!</p>
-            <div className="flex flex-row items-center gap-2">
-              <a
-                href={previous.response?.githubUrl}
-                rel="noreferrer noopener"
-                target="_blank"
-                className={cn(
-                  buttonVariants({
-                    color: 'primary',
-                  }),
-                  'text-xs',
-                )}
-              >
-                View on GitHub
-              </a>
-
-              <button
-                className={cn(
-                  buttonVariants({
-                    color: 'secondary',
-                  }),
-                  'text-xs',
-                )}
-                onClick={() => {
-                  setPrevious(null);
-                }}
-              >
-                Submit Again
-              </button>
-            </div>
-          </div>
-        ) : (
-          <form className="flex flex-col gap-2" onSubmit={submit}>
-            <textarea
-              autoFocus
-              required
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              className="border rounded-lg bg-fd-secondary text-fd-secondary-foreground p-3 resize-none focus-visible:outline-none placeholder:text-fd-muted-foreground"
-              placeholder="Leave your feedback..."
-              onKeyDown={(e) => {
-                if (!e.shiftKey && e.key === 'Enter') {
-                  submit(e);
-                }
-              }}
-            />
-            <button
-              type="submit"
-              className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'gap-1.5')}
-              disabled={isPending}
-            >
-              <CornerDownRightIcon className="text-fd-muted-foreground size-4" />
-              Submit
-            </button>
-          </form>
-        )}
-      </PopoverContent>
-    </Popover>
+    );
+  return (
+    <form className="flex flex-col gap-2" onSubmit={submit}>
+      <textarea
+        autoFocus
+        required
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        className="border rounded-lg bg-fd-secondary text-fd-secondary-foreground p-3 resize-none focus-visible:outline-none placeholder:text-fd-muted-foreground"
+        placeholder="Leave your feedback..."
+        onKeyDown={(e) => {
+          if (!e.shiftKey && e.key === 'Enter') {
+            submit(e);
+          }
+        }}
+      />
+      <button
+        type="submit"
+        className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'gap-1.5')}
+        disabled={isPending}
+      >
+        <CornerDownRightIcon className="text-fd-muted-foreground size-4" />
+        Submit
+      </button>
+    </form>
   );
 }
 
