@@ -27,7 +27,6 @@ export interface DocsPageProps extends ComponentProps<'article'> {
    * @defaultValue false
    */
   full?: boolean;
-  children?: ReactNode;
   slots?: Partial<DocsPageSlots>;
 
   footer?: FooterOptions;
@@ -35,13 +34,14 @@ export interface DocsPageProps extends ComponentProps<'article'> {
   tableOfContent?: TableOfContentOptions;
 }
 
-interface TableOfContentOptions extends Pick<TOCProviderProps, 'single'>, TOCProps {
-  enabled?: boolean;
-  /**
-   * @deprecated use `slots.toc` instead.
-   */
-  component?: ReactNode;
-}
+type TableOfContentOptions = Pick<TOCProviderProps, 'single'> &
+  TOCProps & {
+    enabled?: boolean;
+    /**
+     * @deprecated use `slots.toc` instead.
+     */
+    component?: ReactNode;
+  };
 
 interface BreadcrumbOptions extends BreadcrumbProps {
   enabled?: boolean;

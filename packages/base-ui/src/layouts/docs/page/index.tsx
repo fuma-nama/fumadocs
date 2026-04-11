@@ -58,21 +58,22 @@ interface FooterOptions extends FooterProps {
   component?: ReactNode;
 }
 
-interface TableOfContentOptions extends Pick<TOCProviderProps, 'single'>, TOCProps {
-  enabled?: boolean;
-  /**
-   * @deprecated use `slots.toc` instead.
-   */
-  component?: ReactNode;
-}
+type TableOfContentOptions = Pick<TOCProviderProps, 'single'> &
+  TOCProps & {
+    enabled?: boolean;
+    /**
+     * @deprecated use `slots.toc` instead.
+     */
+    component?: ReactNode;
+  };
 
-interface TableOfContentPopoverOptions extends TOCPopoverProps {
+type TableOfContentPopoverOptions = TOCPopoverProps & {
   enabled?: boolean;
   /**
    * @deprecated use `slots.tocPopover` instead.
    */
   component?: ReactNode;
-}
+};
 
 interface DocsPageSlots {
   toc: {

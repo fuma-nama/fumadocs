@@ -31,7 +31,7 @@ export type TOCProviderProps = Base.TOCProviderProps;
 
 export const { TOCProvider } = Base;
 
-export interface TOCProps {
+export type TOCProps = {
   container?: ComponentProps<'div'>;
   trigger?: ComponentProps<'button'>;
   content?: ComponentProps<'div'>;
@@ -45,14 +45,26 @@ export interface TOCProps {
    * Custom content in TOC container, after the main TOC
    */
   footer?: ReactNode;
+} & (
+  | {
+      style?: 'normal';
+      list?: TocDefault.TOCItemsProps;
+    }
+  | {
+      style: 'clerk';
+      list?: TocClerk.TOCItemsProps;
+    }
+);
 
-  /**
-   * @defaultValue 'normal'
-   */
-  style?: 'normal' | 'clerk';
-}
-
-export function TOC({ container, trigger, content, header, footer, style = 'normal' }: TOCProps) {
+export function TOC({
+  container,
+  trigger,
+  content,
+  header,
+  footer,
+  style = 'normal',
+  list,
+}: TOCProps) {
   const items = Base.useTOCItems();
   const { TOCItems, TOCEmpty, TOCItem } = style === 'clerk' ? TocClerk : TocDefault;
 
@@ -61,7 +73,7 @@ export function TOC({ container, trigger, content, header, footer, style = 'norm
       <PageTOCPopoverContent {...content}>
         {header}
         <Base.TOCScrollArea>
-          <TOCItems>
+          <TOCItems {...list}>
             {items.length === 0 && <TOCEmpty />}
             {items.map((item) => (
               <TOCItem key={item.url} item={item} />

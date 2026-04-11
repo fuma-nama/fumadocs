@@ -22,14 +22,22 @@ interface ComputedSVG {
   itemLineLengths: [top: number, bottom: number][];
 }
 
-export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
+export interface TOCItemsProps extends ComponentProps<'div'> {
+  thumbBox?: boolean;
+}
+
+export function TOCItems({ ref, className, thumbBox = true, ...props }: TOCItemsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const items = useTOCItems();
-  const [svg, setSvg] = useState<ComputedSVG>();
+  const [svg, setSvg] = useState<ComputedSVG | null>(null);
 
   const onPrint = useCallback(() => {
     const container = containerRef.current;
     if (!container || container.clientHeight === 0) return;
+    if (items.length === 0) {
+      setSvg(null);
+      return;
+    }
     let w = 0;
     let h = 0;
     let d = '';
@@ -89,18 +97,19 @@ export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
       <path key="path" d={d} className="stroke-fd-primary" strokeWidth="1" fill="none" />,
     );
 
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     const itemLineLengths: [top: number, bottom: number][] = [];
-    path.setAttribute('d', d);
-    let l = 0;
-    for (let i = 0; i < items.length; i++) {
-      const [top, bottom] = positions[i];
 
-      while (path.getPointAtLength(l).y < top) l++;
-      const topL = l;
-      while (path.getPointAtLength(l).y < bottom) l++;
+    if (thumbBox) {
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', d);
+      let l = 0;
+      for (const [top, bottom] of positions) {
+        while (path.getPointAtLength(l).y < top) l++;
+        const topL = l;
+        while (path.getPointAtLength(l).y < bottom) l++;
 
-      itemLineLengths.push([topL, l]);
+        itemLineLengths.push([topL, l]);
+      }
     }
 
     setSvg({
@@ -110,7 +119,7 @@ export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
       d,
       itemLineLengths,
     });
-  }, [items]);
+  }, [items, thumbBox]);
 
   useEffect(() => {
     onPrint();
@@ -140,7 +149,7 @@ export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
           >
             {svg.content}
           </svg>
-          <ThumbBox computed={svg} />
+          {thumbBox && <ThumbBox computed={svg} />}
         </TocThumb>
       )}
       <div

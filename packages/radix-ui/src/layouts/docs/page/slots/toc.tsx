@@ -26,7 +26,7 @@ export function TOCProvider(props: TOCProviderProps) {
   return <Base.TOCProvider {...props} />;
 }
 
-export interface TOCProps {
+export type TOCProps = {
   container?: ComponentProps<'div'>;
   /**
    * Custom content in TOC container, before the main TOC
@@ -37,14 +37,18 @@ export interface TOCProps {
    * Custom content in TOC container, after the main TOC
    */
   footer?: ReactNode;
+} & (
+  | {
+      style?: 'normal';
+      list?: TocDefault.TOCItemsProps;
+    }
+  | {
+      style: 'clerk';
+      list?: TocClerk.TOCItemsProps;
+    }
+);
 
-  /**
-   * @defaultValue 'normal'
-   */
-  style?: 'normal' | 'clerk';
-}
-
-export function TOC({ container, header, footer, style = 'normal' }: TOCProps) {
+export function TOC({ container, header, footer, style = 'normal', list }: TOCProps) {
   const items = Base.useTOCItems();
   const { TOCItems, TOCEmpty, TOCItem } = style === 'clerk' ? TocClerk : TocDefault;
 
@@ -66,7 +70,7 @@ export function TOC({ container, header, footer, style = 'normal' }: TOCProps) {
         <I18nLabel label="toc" />
       </h3>
       <Base.TOCScrollArea>
-        <TOCItems>
+        <TOCItems {...list}>
           {items.length === 0 && <TOCEmpty />}
           {items.map((item) => (
             <TOCItem key={item.url} item={item} />
@@ -83,7 +87,7 @@ const TocPopoverContext = createContext<{
   setOpen: (open: boolean) => void;
 } | null>(null);
 
-export interface TOCPopoverProps {
+export type TOCPopoverProps = {
   container?: ComponentProps<'div'>;
   trigger?: ComponentProps<'button'>;
   content?: ComponentProps<'div'>;
@@ -97,12 +101,16 @@ export interface TOCPopoverProps {
    * Custom content in TOC container, after the main TOC
    */
   footer?: ReactNode;
-
-  /**
-   * @defaultValue 'normal'
-   */
-  style?: 'normal' | 'clerk';
-}
+} & (
+  | {
+      style?: 'normal';
+      list?: TocDefault.TOCItemsProps;
+    }
+  | {
+      style: 'clerk';
+      list?: TocClerk.TOCItemsProps;
+    }
+);
 
 export function TOCPopover({
   container,
@@ -111,6 +119,7 @@ export function TOCPopover({
   header,
   footer,
   style = 'normal',
+  list,
 }: TOCPopoverProps) {
   const items = Base.useTOCItems();
   const ref = useRef<HTMLElement>(null);
@@ -168,7 +177,7 @@ export function TOCPopover({
           <PageTOCPopoverContent {...content}>
             {header}
             <Base.TOCScrollArea>
-              <TOCItems>
+              <TOCItems {...list}>
                 {items.length === 0 && <TOCEmpty />}
                 {items.map((item) => (
                   <TOCItem key={item.url} item={item} onClick={onClickItem} />

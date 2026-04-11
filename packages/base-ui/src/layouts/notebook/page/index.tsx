@@ -57,21 +57,22 @@ interface FooterOptions extends FooterProps {
   component?: ReactNode;
 }
 
-interface TableOfContentOptions extends Pick<TOCProviderProps, 'single'>, TOCProps {
-  enabled?: boolean;
-  /**
-   * @deprecated use `slots.toc` instead.
-   */
-  component?: ReactNode;
-}
+type TableOfContentOptions = Pick<TOCProviderProps, 'single'> &
+  TOCProps & {
+    enabled?: boolean;
+    /**
+     * @deprecated use `slots.toc` instead.
+     */
+    component?: ReactNode;
+  };
 
-interface TableOfContentPopoverOptions extends TOCPopoverProps {
+type TableOfContentPopoverOptions = TOCPopoverProps & {
   enabled?: boolean;
   /**
    * @deprecated use `slots.tocPopover` instead.
    */
   component?: ReactNode;
-}
+};
 
 interface DocsPageSlots {
   toc: {
@@ -201,10 +202,6 @@ export function DocsTitle({ children, className, ...props }: ComponentProps<'h1'
   );
 }
 
-export { type BreadcrumbProps, Breadcrumb as PageBreadcrumb } from './slots/breadcrumb';
-export { type FooterProps, Footer as PageFooter } from './slots/footer';
-export { MarkdownCopyButton, ViewOptionsPopover } from '@/layouts/shared/page-actions';
-
 export function PageLastUpdate({
   date: value,
   ...props
@@ -223,3 +220,7 @@ export function PageLastUpdate({
     </p>
   );
 }
+
+export { type BreadcrumbProps, Breadcrumb as PageBreadcrumb } from './slots/breadcrumb';
+export { type FooterProps, Footer as PageFooter } from './slots/footer';
+export { MarkdownCopyButton, ViewOptionsPopover } from '@/layouts/shared/page-actions';
