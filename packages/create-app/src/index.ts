@@ -139,9 +139,7 @@ async function initPackageJson(
     return deps;
   }
 
-  const packageJson: PackageJsonType = JSON.parse(
-    await fs.readFile(packageJsonPath, 'utf-8'),
-  );
+  const packageJson: PackageJsonType = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
 
   return {
     ...packageJson,

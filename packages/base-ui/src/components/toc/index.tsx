@@ -57,9 +57,10 @@ interface TocThumbInfo {
 
 interface TocThumbProps extends ComponentProps<'div'> {
   containerRef: RefObject<HTMLElement | null>;
+  onContainerResize?: () => void;
 }
 
-export function TocThumb({ containerRef, ...props }: TocThumbProps) {
+export function TocThumb({ containerRef, onContainerResize, ...props }: TocThumbProps) {
   const thumbRef = useRef<HTMLDivElement>(null);
   const active = useActiveAnchors();
 
@@ -99,16 +100,17 @@ export function TocThumb({ containerRef, ...props }: TocThumbProps) {
     };
   }
 
-  const onPrint = useEffectEvent(() => {
+  const onResize = useEffectEvent(() => {
     const result = calc(active);
     if (result) update(result);
+    onContainerResize?.();
   });
 
   useEffect(() => {
     if (!containerRef.current) return;
     const container = containerRef.current;
 
-    const observer = new ResizeObserver(onPrint);
+    const observer = new ResizeObserver(onResize);
     observer.observe(container);
 
     return () => {

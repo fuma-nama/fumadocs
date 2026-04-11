@@ -3,8 +3,8 @@ import * as Primitive from 'fumadocs-core/toc';
 import {
   type ComponentProps,
   type ReactNode,
+  useCallback,
   useEffect,
-  useEffectEvent,
   useMemo,
   useRef,
   useState,
@@ -18,6 +18,8 @@ interface ComputedSVG {
   width: number;
   height: number;
   content: ReactNode;
+  d: string;
+  itemLineLengths: [top: number, bottom: number][];
 }
 
 export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
@@ -25,14 +27,13 @@ export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
   const items = useTOCItems();
   const [svg, setSvg] = useState<ComputedSVG>();
 
-  const onResize = useEffectEvent(() => {
+  const onPrint = useCallback(() => {
     const container = containerRef.current;
     if (!container || container.clientHeight === 0) return;
     let w = 0;
     let h = 0;
-    let upperBottom = 0;
-    let upperX = 0;
     let d = '';
+    const positions: [top: number, bottom: number, x: number][] = [];
     const output: ReactNode[] = [];
 
     for (let i = 0; i < items.length; i++) {
@@ -43,9 +44,9 @@ export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
       if (!element) continue;
 
       const styles = getComputedStyle(element);
-      const x = getLineOffset(item.depth) + 0.5,
-        top = element.offsetTop + parseFloat(styles.paddingTop),
-        bottom = element.offsetTop + element.clientHeight - parseFloat(styles.paddingBottom);
+      const x = getLineOffset(item.depth) + 0.5;
+      const top = element.offsetTop + parseFloat(styles.paddingTop);
+      const bottom = element.offsetTop + element.clientHeight - parseFloat(styles.paddingBottom);
 
       w = Math.max(x + 8, w);
       h = Math.max(h, bottom);
@@ -53,6 +54,8 @@ export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
       if (i === 0) {
         d += ` M${x} ${top} L${x} ${bottom}`;
       } else {
+        const [, upperBottom, upperX] = i > 0 ? positions[i - 1] : [0, 0, 0];
+
         d += ` C ${upperX} ${top - 4} ${x} ${upperBottom + 4} ${x} ${top} L${x} ${bottom}`;
       }
 
@@ -79,36 +82,46 @@ export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
         );
       }
 
-      upperX = x;
-      upperBottom = bottom;
+      positions.push([top, bottom, x]);
     }
 
     output.unshift(
       <path key="path" d={d} className="stroke-fd-primary" strokeWidth="1" fill="none" />,
     );
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const itemLineLengths: [top: number, bottom: number][] = [];
+    path.setAttribute('d', d);
+    let l = 0;
+    for (let i = 0; i < items.length; i++) {
+      const [top, bottom] = positions[i];
+
+      while (path.getPointAtLength(l).y < top) l++;
+      const topL = l;
+      while (path.getPointAtLength(l).y < bottom) l++;
+
+      itemLineLengths.push([topL, l]);
+    }
+
     setSvg({
       content: output,
       width: w,
       height: h,
+      d,
+      itemLineLengths,
     });
-  });
+  }, [items]);
 
   useEffect(() => {
-    if (!containerRef.current) return;
-    const observer = new ResizeObserver(onResize);
-    onResize();
-
-    observer.observe(containerRef.current);
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
+    onPrint();
+  }, [onPrint]);
 
   return (
     <>
       {svg && (
         <TocThumb
           containerRef={containerRef}
+          onContainerResize={onPrint}
           className="absolute top-0 inset-s-0"
           style={{
             width: svg.width,
@@ -127,7 +140,7 @@ export function TOCItems({ ref, className, ...props }: ComponentProps<'div'>) {
           >
             {svg.content}
           </svg>
-          <ThumbBox />
+          <ThumbBox computed={svg} />
         </TocThumb>
       )}
       <div
@@ -155,12 +168,12 @@ interface ThumbBoxInfo {
   isUp: boolean;
 }
 
-function ThumbBox() {
+function ThumbBox({ computed }: { computed: ComputedSVG }) {
   const items = Primitive.useItems();
   const previousRef = useRef<ThumbBoxInfo>(null);
   const startIdx = items.findIndex((item) => item.active);
-  const endIdx = items.findLastIndex((item) => item.active);
   if (startIdx === -1) return;
+  const endIdx = items.findLastIndex((item) => item.active);
 
   let isUp = false;
   if (previousRef.current) {
@@ -172,16 +185,16 @@ function ThumbBox() {
   }
 
   previousRef.current = { startIdx, endIdx, isUp };
-  const original = items[isUp ? startIdx : endIdx].original;
 
   return (
     <div
-      className="absolute size-1 bg-fd-primary rounded-full transition-transform"
+      className="absolute size-1 bg-fd-primary rounded-full transition-[offset-distance]"
       style={{
-        translate: `${getLineOffset(original.depth) - 1.5}px calc(${
-          isUp ? 'var(--fd-top)' : 'var(--fd-top) + var(--fd-height)'
-        } - 1.5px)`,
-        scale: original._step !== undefined ? '0' : '1',
+        offsetPath: `path("${computed.d}")`,
+        offsetDistance: isUp
+          ? computed.itemLineLengths[startIdx][0]
+          : computed.itemLineLengths[endIdx][1],
+        scale: items[isUp ? startIdx : endIdx].original._step !== undefined ? '0' : '1',
       }}
     />
   );
