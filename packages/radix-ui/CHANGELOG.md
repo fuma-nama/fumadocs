@@ -1,5 +1,13 @@
 # fumadocs-ui
 
+## 16.7.12
+
+### Patch Changes
+
+- a5dcc11: allow to specify `<TOCItems />` props
+- 56f7e5b: Improve TOC thumb box
+  - fumadocs-core@16.7.12
+
 ## 16.7.11
 
 ### Patch Changes
