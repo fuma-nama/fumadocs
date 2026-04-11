@@ -1,0 +1,37 @@
+---
+title: Translations
+description: Adding Translations to UI
+---
+
+## Overview
+
+> This introduction is only for UI translations, you may be interested in the full [Internationalization](/docs/internationalization) guide instead.
+
+To add translations for only one language:
+
+```ts title="lib/layout.shared.tsx"
+import type { Translations } from 'fumadocs-ui/i18n';
+
+// organize your translations:
+export const translations: Partial<Translations> = {
+  search: '搜尋文檔',
+};
+```
+
+Pass the translations via `i18n.translations` to `<RootProvider />`.
+
+```tsx
+import { RootProvider } from 'fumadocs-ui/provider/<framework>';
+import { translations } from '@/lib/layout.shared';
+
+export function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <RootProvider
+      // [!code ++]
+      i18n={{ translations }}
+    >
+      {children}
+    </RootProvider>
+  );
+}
+```
