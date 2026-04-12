@@ -1,5 +1,11 @@
 # fumadocs-core
 
+## 16.7.14
+
+### Patch Changes
+
+- 2d8f596: fix `npm pack` skipping nested `node_modules`
+
 ## 16.7.13
 
 ### Patch Changes

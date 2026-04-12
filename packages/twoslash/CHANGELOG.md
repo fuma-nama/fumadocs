@@ -1,5 +1,13 @@
 # fumadocs-twoslash
 
+## 3.1.17
+
+### Patch Changes
+
+- 2d8f596: fix `npm pack` skipping nested `node_modules`
+- Updated dependencies [2d8f596]
+  - fumadocs-ui@16.7.14
+
 ## 3.1.16
 
 ### Patch Changes

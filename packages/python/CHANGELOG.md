@@ -1,5 +1,14 @@
 # fumadocs-python
 
+## 0.0.11
+
+### Patch Changes
+
+- 2d8f596: fix `npm pack` skipping nested `node_modules`
+- Updated dependencies [2d8f596]
+  - fumadocs-ui@16.7.14
+  - fumadocs-core@16.7.14
+
 ## 0.0.10
 
 ### Patch Changes

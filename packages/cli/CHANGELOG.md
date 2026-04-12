@@ -1,5 +1,11 @@
 # fumadocs
 
+## 1.3.7
+
+### Patch Changes
+
+- 2d8f596: fix `npm pack` skipping nested `node_modules`
+
 ## 1.3.6
 
 ### Patch Changes

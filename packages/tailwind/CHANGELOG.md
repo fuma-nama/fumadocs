@@ -1,5 +1,11 @@
 # @fumadocs/tailwind
 
+## 0.0.5
+
+### Patch Changes
+
+- 2d8f596: fix `npm pack` skipping nested `node_modules`
+
 ## 0.0.4
 
 ### Patch Changes
