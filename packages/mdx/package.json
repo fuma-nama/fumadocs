@@ -14,7 +14,7 @@
   "files": [
     "loader-mdx.cjs",
     "loader-meta.cjs",
-    "dist/*"
+    "dist"
   ],
   "type": "module",
   "main": "./dist/index.js",

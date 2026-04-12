@@ -13,8 +13,8 @@
   "repository": "github:fuma-nama/fumadocs",
   "bin": "./dist/bin.js",
   "files": [
-    "dist/*",
-    "template/*"
+    "dist",
+    "template"
   ],
   "type": "module",
   "module": "./dist/index.js",

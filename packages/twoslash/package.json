@@ -12,8 +12,8 @@
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/fumadocs",
   "files": [
-    "dist/*",
-    "styles/*"
+    "dist",
+    "styles"
   ],
   "type": "module",
   "main": "./dist/index.js",

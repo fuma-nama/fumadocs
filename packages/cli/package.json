@@ -14,7 +14,7 @@
     "fumadocs": "./dist/index.js"
   },
   "files": [
-    "dist/*"
+    "dist"
   ],
   "type": "module",
   "exports": {

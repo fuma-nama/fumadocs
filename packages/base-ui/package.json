@@ -11,8 +11,8 @@
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/fumadocs",
   "files": [
-    "css/*",
-    "dist/*"
+    "css",
+    "dist"
   ],
   "type": "module",
   "exports": {

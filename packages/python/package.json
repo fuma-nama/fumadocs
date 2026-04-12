@@ -15,7 +15,7 @@
     "fumapy",
     "pyproject.toml",
     "styles",
-    "dist/*"
+    "dist"
   ],
   "type": "module",
   "module": "./dist/index.js",
