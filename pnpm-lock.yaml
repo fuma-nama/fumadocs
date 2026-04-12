@@ -1765,9 +1765,6 @@ importers:
       fuma-cli:
         specifier: ^0.0.5
         version: 0.0.5(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)
-      package-manager-detector:
-        specifier: ^1.6.0
-        version: 1.6.0
       picocolors:
         specifier: ^1.1.1
         version: 1.1.1
@@ -2423,9 +2420,6 @@ importers:
 
   packages/openapi:
     dependencies:
-      '@fastify/deepmerge':
-        specifier: ^3.2.1
-        version: 3.2.1
       '@fumari/json-schema-ts':
         specifier: ^0.0.2
         version: 0.0.2(json-schema-typed@8.0.2)
@@ -2459,9 +2453,6 @@ importers:
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
-      fast-content-type-parse:
-        specifier: ^3.0.0
-        version: 3.0.0
       github-slugger:
         specifier: ^2.0.0
         version: 2.0.0
@@ -2477,18 +2468,12 @@ importers:
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
-      openapi-sampler:
-        specifier: ^1.7.2
-        version: 1.7.2
       react:
         specifier: ^19.2.0
         version: 19.2.5
       react-dom:
         specifier: ^19.2.0
         version: 19.2.5(react@19.2.5)
-      react-hook-form:
-        specifier: ^7.72.1
-        version: 7.72.1(react@19.2.5)
       remark:
         specifier: ^15.0.1
         version: 15.0.1
@@ -2502,6 +2487,9 @@ importers:
         specifier: ^1.6.11
         version: 1.6.11
     devDependencies:
+      '@fastify/deepmerge':
+        specifier: ^3.2.1
+        version: 3.2.1
       '@fumadocs/tailwind':
         specifier: workspace:*
         version: link:../tailwind
@@ -2520,6 +2508,9 @@ importers:
       '@types/react':
         specifier: ^19.2.14
         version: 19.2.14
+      fast-content-type-parse:
+        specifier: ^3.0.0
+        version: 3.0.0
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
@@ -2529,6 +2520,9 @@ importers:
       json-schema-typed:
         specifier: ^8.0.2
         version: 8.0.2
+      openapi-sampler:
+        specifier: ^1.7.2
+        version: 1.7.2
       shiki:
         specifier: ^4.0.2
         version: 4.0.2
@@ -2921,9 +2915,6 @@ importers:
       react-dom:
         specifier: ^19.2.0
         version: 19.2.5(react@19.2.5)
-      react-error-boundary:
-        specifier: ^6.1.1
-        version: 6.1.1(react@19.2.5)
       tailwind-merge:
         specifier: ^3.5.0
         version: 3.5.0
@@ -2949,6 +2940,9 @@ importers:
       fumadocs-ui:
         specifier: workspace:*
         version: link:../radix-ui
+      react-error-boundary:
+        specifier: ^6.1.1
+        version: 6.1.1(react@19.2.5)
       tailwindcss:
         specifier: ^4.2.2
         version: 4.2.2
@@ -2961,18 +2955,15 @@ importers:
 
   packages/tailwind:
     devDependencies:
+      '@fastify/deepmerge':
+        specifier: ^3.2.1
+        version: 3.2.1
       '@tailwindcss/oxide':
         specifier: ^4.2.2
         version: 4.2.2
-      '@types/lodash.merge':
-        specifier: ^4.6.9
-        version: 4.6.9
       '@types/node':
         specifier: ^25.6.0
         version: 25.6.0
-      lodash.merge:
-        specifier: ^4.6.2
-        version: 4.6.2
       postcss-selector-parser:
         specifier: ^7.1.1
         version: 7.1.1
@@ -7477,12 +7468,6 @@ packages:
   '@types/katex@0.16.7':
     resolution: {integrity: sha512-HMwFiRujE5PjrgwHQ25+bsLJgowjGjm5Z8FVSf0N6PwgJrwxH0QxzHYDcKsTfV3wva0vzrpqMTJS2jXPr5BMEQ==}
 
-  '@types/lodash.merge@4.6.9':
-    resolution: {integrity: sha512-23sHDPmzd59kUgWyKGiOMO2Qb9YtqRO/x4IhkgNUiPQ1+5MUVqi6bCZeq9nBJ17msjIMbEIO5u+XW4Kz6aGUhQ==}
-
-  '@types/lodash@4.17.16':
-    resolution: {integrity: sha512-HX7Em5NYQAXKW+1T+FiuG27NGwzJfCX3s1GjOa7ujxZa52kjJLOr4FUxT+giF6Tgxv1e+/czV/iTtBw27WTU9g==}
-
   '@types/mdast@4.0.4':
     resolution: {integrity: sha512-kGaNbPh1k7AFzgpud/gMdvIm5xuECykRR+JnWKQno9TAXVa6WIVCGTPvYGekIDL4uwCZQSYbUxNBSb1aUo79oA==}
 
@@ -10102,9 +10087,6 @@ packages:
     resolution: {integrity: sha512-pDo3lu8Jhfjqls6GkMgpahsF9kCyayhgykjyLMNFTKWrpVdAQtYyB4muAMWozBB4ig/dtWAmsMxLEI8wuz+DYQ==}
     deprecated: This package is deprecated. Use require('node:util').isDeepStrictEqual instead.
 
-  lodash.merge@4.6.2:
-    resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
-
   lodash.startcase@4.4.0:
     resolution: {integrity: sha512-+WKqsK294HMSc2jEbNgpHpd0JfIBhp7rEV4aqXWqFr6AlXov+SlcgB1Fv01y2kGe3Gc8nMW7VA0SrGuSkRfIEg==}
 
@@ -11198,12 +11180,6 @@ packages:
     engines: {node: '>=12'}
     peerDependencies:
       react: '*'
-
-  react-hook-form@7.72.1:
-    resolution: {integrity: sha512-RhwBoy2ygeVZje+C+bwJ8g0NjTdBmDlJvAUHTxRjTmSUKPYsKfMphkS2sgEMotsY03bP358yEYlnUeZy//D9Ig==}
-    engines: {node: '>=18.0.0'}
-    peerDependencies:
-      react: ^16.8.0 || ^17 || ^18 || ^19
 
   react-hotkeys-hook@5.2.3:
     resolution: {integrity: sha512-Q27F8EuImYJOVSXAjSQrQPj9cx4GSNY+WdSdk5tSNN085H8/a00W6LZp0PrytEDwF6iT0pGTJeVEDKPRpEK2Bg==}
@@ -17363,12 +17339,6 @@ snapshots:
 
   '@types/katex@0.16.7': {}
 
-  '@types/lodash.merge@4.6.9':
-    dependencies:
-      '@types/lodash': 4.17.16
-
-  '@types/lodash@4.17.16': {}
-
   '@types/mdast@4.0.4':
     dependencies:
       '@types/unist': 3.0.3
@@ -20289,8 +20259,6 @@ snapshots:
 
   lodash.isequal@4.5.0: {}
 
-  lodash.merge@4.6.2: {}
-
   lodash.startcase@4.4.0: {}
 
   lodash@4.18.1: {}
@@ -21878,10 +21846,6 @@ snapshots:
       prop-types: 15.8.1
       react: 19.2.5
       react-kapsule: 2.5.7(react@19.2.5)
-
-  react-hook-form@7.72.1(react@19.2.5):
-    dependencies:
-      react: 19.2.5
 
   react-hotkeys-hook@5.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5):
     dependencies:

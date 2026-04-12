@@ -4,6 +4,7 @@ import { compileInline } from './scripts/compile-inline.utils';
 export default defineConfig({
   format: 'esm',
   target: 'es2023',
+  platform: 'browser',
   entry: [
     './src/*.{ts,tsx}',
     './src/{components,contexts,provider,tailwind,og}/**/*.{ts,tsx}',

@@ -8,7 +8,7 @@ export default defineConfig({
     sourcemap: false,
   },
   deps: {
-    onlyBundle: ['lodash.merge', 'postcss-selector-parser', 'cssesc', 'util-deprecate'],
+    onlyBundle: ['@fastify/deepmerge', 'postcss-selector-parser', 'cssesc', 'util-deprecate'],
   },
   exports: true,
 });

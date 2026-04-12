@@ -4,7 +4,7 @@ import { RegistryConnector } from 'fuma-cli/registry/connector';
 import type { LoadedConfig } from '@/config';
 import { box, confirm, isCancel, log, outro, spinner, SpinnerResult } from '@clack/prompts';
 import picocolors from 'picocolors';
-import { detect } from 'package-manager-detector';
+import { detectPackageManager } from 'fuma-cli/detect';
 
 export class FumadocsComponentInstaller extends ComponentInstaller {
   private interactive: {
@@ -67,7 +67,7 @@ export class FumadocsComponentInstaller extends ComponentInstaller {
       if (deps.hasRequired()) {
         log.message();
         box([...deps.dependencies, ...deps.devDependencies].join('\n'), 'New Dependencies');
-        const pm = (await detect())?.name ?? 'npm';
+        const pm = (await detectPackageManager())?.name ?? 'npm';
         const value = await confirm({
           message: `Do you want to install with ${pm}?`,
         });

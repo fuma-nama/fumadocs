@@ -24,8 +24,18 @@ export default defineConfig({
   async onSuccess() {
     await compileInline();
   },
+  platform: 'browser',
   deps: {
-    onlyBundle: [],
+    onlyBundle: [
+      'fast-content-type-parse',
+      'openapi-sampler',
+      'fast-xml-builder',
+      'fast-xml-parser',
+      'foreach',
+      'json-pointer',
+      'path-expression-matcher',
+      '@fastify/deepmerge',
+    ],
   },
   exports: {
     enabled: true,

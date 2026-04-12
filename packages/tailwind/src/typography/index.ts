@@ -1,6 +1,6 @@
 import * as styles from './styles';
 import plugin from 'tailwindcss/plugin';
-import merge from 'lodash.merge';
+import { deepmerge } from '@fastify/deepmerge';
 import parser, { type Pseudo } from 'postcss-selector-parser';
 import type { Config } from './styles';
 
@@ -57,13 +57,12 @@ function configToCss(config: Config = {}, { className, modifier, prefix }: Optio
   }
 
   const css = config.css ?? [];
-  return Object.fromEntries(
-    Object.entries(merge({}, ...(Array.isArray(css) ? css : [css]))).map(([k, v]) =>
-      updateSelector(k, v),
-    ),
-  );
+  const mergedCss = Array.isArray(css) ? dm(...css) : css;
+
+  return Object.fromEntries(Object.entries(mergedCss).map(([k, v]) => updateSelector(k, v)));
 }
 
+const dm = deepmerge({ all: true });
 const parseSelector = parser();
 
 function commonTrailingPseudos(selector: string) {

@@ -6,7 +6,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/ui/components/dialog';
-import { useForm } from 'react-hook-form';
 import { Input, labelVariants } from '@/ui/components/input';
 import { useQuery } from '@/utils/use-query';
 import { type ReactNode, useMemo, useState } from 'react';
@@ -121,7 +120,7 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
     [t],
   );
 
-  const defaultValues = useMemo<FormValues>(() => {
+  const defaultValues = useMemo((): FormValues => {
     return {
       clientId: tokenInfo?.client_id ?? '',
       clientSecret: tokenInfo?.type === 'authorization_code' ? tokenInfo.client_secret : '',
@@ -129,10 +128,6 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
       password: '',
     };
   }, [tokenInfo]);
-
-  const form = useForm<FormValues>({
-    defaultValues,
-  });
 
   const authorize = useQuery(async (values: FormValues) => {
     if (type === 'implicit') {
@@ -226,15 +221,15 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
   });
 
   const isLoading = authorize.isLoading;
-  const onSubmit = form.handleSubmit((values) => {
-    return authorize.start(values);
-  });
 
   return (
     <form
       className="flex flex-col gap-6"
       onSubmit={(e) => {
-        void onSubmit(e);
+        const formData = new FormData(e.target);
+
+        void authorize.start(Object.fromEntries(formData.entries()) as unknown as FormValues);
+        e.preventDefault();
         e.stopPropagation();
       }}
     >
@@ -264,11 +259,13 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
           <p className="text-fd-muted-foreground text-sm">{t.clientIdHint}</p>
           <Input
             id="client_id"
+            name="clientId"
             placeholder={t.inputPlaceholder}
             type="text"
             autoComplete="off"
             disabled={isLoading}
-            {...form.register('clientId', { required: true })}
+            defaultValue={defaultValues.clientId}
+            required
           />
         </fieldset>
       )}
@@ -280,11 +277,13 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
           <p className="text-fd-muted-foreground text-sm">{t.clientSecretHint}</p>
           <Input
             id="client_secret"
+            name="clientSecret"
             placeholder={t.inputPlaceholder}
             type="password"
             autoComplete="off"
             disabled={isLoading}
-            {...form.register('clientSecret', { required: true })}
+            defaultValue={defaultValues.clientSecret}
+            required
           />
         </fieldset>
       )}
@@ -296,11 +295,13 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
             </label>
             <Input
               id="username"
+              name="username"
               placeholder={t.inputPlaceholder}
               type="text"
               autoComplete="off"
               disabled={isLoading}
-              {...form.register('username', { required: true })}
+              defaultValue={defaultValues.username}
+              required
             />
           </fieldset>
           <fieldset className="flex flex-col gap-1.5">
@@ -309,11 +310,13 @@ function Content({ schemeId, scopes, setToken, setOpen }: AuthDialogContentProps
             </label>
             <Input
               id="password"
+              name="password"
               placeholder={t.inputPlaceholder}
               type="password"
               autoComplete="off"
               disabled={isLoading}
-              {...form.register('password', { required: true })}
+              defaultValue={defaultValues.password}
+              required
             />
           </fieldset>
         </>

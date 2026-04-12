@@ -30,10 +30,9 @@
     "types:check": "tsc --noEmit"
   },
   "devDependencies": {
+    "@fastify/deepmerge": "^3.2.1",
     "@tailwindcss/oxide": "^4.2.2",
-    "@types/lodash.merge": "^4.6.9",
     "@types/node": "^25.6.0",
-    "lodash.merge": "^4.6.2",
     "postcss-selector-parser": "^7.1.1",
     "tailwindcss": "^4.2.2",
     "tsconfig": "workspace:*",
@@ -52,8 +51,8 @@
     }
   },
   "inlinedDependencies": {
+    "@fastify/deepmerge": "3.2.1",
     "cssesc": "3.0.0",
-    "lodash.merge": "4.6.2",
     "postcss-selector-parser": "7.1.1",
     "util-deprecate": "1.0.2"
   }
