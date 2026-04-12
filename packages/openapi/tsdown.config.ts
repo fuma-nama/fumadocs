@@ -26,16 +26,7 @@ export default defineConfig({
   },
   platform: 'browser',
   deps: {
-    onlyBundle: [
-      'fast-content-type-parse',
-      'openapi-sampler',
-      'fast-xml-builder',
-      'fast-xml-parser',
-      'foreach',
-      'json-pointer',
-      'path-expression-matcher',
-      '@fastify/deepmerge',
-    ],
+    onlyBundle: ['fast-content-type-parse', '@fastify/deepmerge'],
   },
   exports: {
     enabled: true,

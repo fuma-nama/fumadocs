@@ -4,7 +4,7 @@ import type { ParsedSchema } from '@/utils/schema';
 import { mergeAllOf } from '@/utils/schema/merge';
 import { FieldKey, useDataEngine, useFieldValue, useNamespace } from '@fumari/stf';
 import { stringifyFieldKey } from '@fumari/stf/lib/utils';
-import { sample } from 'openapi-sampler';
+import { sample } from '@/utils/schema/sample';
 import { FormatFlags, schemaToString } from '@/utils/schema/to-string';
 import { dereferenceSwallow } from '@/utils/schema/dereference';
 import type { Document } from '@/types';

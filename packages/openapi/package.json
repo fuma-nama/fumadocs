@@ -77,13 +77,11 @@
     "@scalar/api-client-react": "^2.0.1",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "25.6.0",
-    "@types/openapi-sampler": "^1.0.3",
     "@types/react": "^19.2.14",
     "fast-content-type-parse": "^3.0.0",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "json-schema-typed": "^8.0.2",
-    "openapi-sampler": "^1.7.2",
     "shiki": "^4.0.2",
     "tailwindcss": "^4.2.2",
     "tsconfig": "workspace:*",
@@ -115,12 +113,6 @@
   },
   "inlinedDependencies": {
     "@fastify/deepmerge": "3.2.1",
-    "fast-content-type-parse": "3.0.0",
-    "fast-xml-builder": "1.1.0",
-    "fast-xml-parser": "5.5.1",
-    "foreach": "2.0.6",
-    "json-pointer": "0.6.2",
-    "openapi-sampler": "1.7.2",
-    "path-expression-matcher": "1.1.2"
+    "fast-content-type-parse": "3.0.0"
   }
 }

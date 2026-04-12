@@ -2,7 +2,7 @@ import { encodeRequestData } from '@/requests/media/encode';
 import type { RawRequestData, RequestData } from '@/requests/types';
 import type { MethodInformation, RenderContext } from '@/types';
 import { type NoReference, getPreferredType, pickExample } from '@/utils/schema';
-import { sample } from 'openapi-sampler';
+import { sample } from '@/utils/schema/sample';
 
 export interface ExampleRequestItem {
   id: string;
