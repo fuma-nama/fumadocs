@@ -1,5 +1,14 @@
 # next-docs-mdx
 
+## 14.2.13
+
+### Patch Changes
+
+- 2d8f596: fix `npm pack` skipping nested `node_modules`
+- Updated dependencies [2d8f596]
+  - @fumadocs/mdx-remote@1.4.8
+  - fumadocs-core@16.7.14
+
 ## 14.2.12
 
 ### Patch Changes

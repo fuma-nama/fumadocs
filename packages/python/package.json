@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-python",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "The built-in Python docgen for Fumadocs",
   "keywords": [
     "Docs",
