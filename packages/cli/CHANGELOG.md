@@ -1,5 +1,11 @@
 # fumadocs
 
+## 1.3.6
+
+### Patch Changes
+
+- 690ddb9: bundle more deps
+
 ## 1.3.5
 
 ### Patch Changes

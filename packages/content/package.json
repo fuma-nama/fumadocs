@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/content",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "The Fuma Content adapter for Fumadocs",
   "keywords": [
     "Docs",

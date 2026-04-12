@@ -1,5 +1,16 @@
 # @fuma-docs/openapi
 
+## 10.6.8
+
+### Patch Changes
+
+- 9518cc8: Reduce deps
+- 690ddb9: bundle more deps
+- Updated dependencies [690ddb9]
+  - fumadocs-ui@16.7.13
+  - fumadocs-core@16.7.13
+  - @fumari/stf@1.0.5
+
 ## 10.6.7
 
 ### Patch Changes

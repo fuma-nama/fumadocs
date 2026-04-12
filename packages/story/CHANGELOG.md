@@ -1,5 +1,14 @@
 # @fumadocs/story
 
+## 0.0.13
+
+### Patch Changes
+
+- 690ddb9: bundle more deps
+- Updated dependencies [690ddb9]
+  - fumadocs-ui@16.7.13
+  - @fumari/stf@1.0.5
+
 ## 0.0.12
 
 ### Patch Changes

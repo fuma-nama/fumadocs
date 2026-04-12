@@ -1,5 +1,14 @@
 # @fumadocs/base-ui
 
+## 16.7.13
+
+### Patch Changes
+
+- 690ddb9: bundle more deps
+- Updated dependencies [690ddb9]
+  - @fumadocs/tailwind@0.0.4
+  - fumadocs-core@16.7.13
+
 ## 16.7.12
 
 ### Patch Changes

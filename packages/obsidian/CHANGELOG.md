@@ -1,5 +1,13 @@
 # fumadocs-obsidian
 
+## 0.0.14
+
+### Patch Changes
+
+- 690ddb9: bundle more deps
+- Updated dependencies [690ddb9]
+  - fumadocs-core@16.7.13
+
 ## 0.0.13
 
 ### Patch Changes

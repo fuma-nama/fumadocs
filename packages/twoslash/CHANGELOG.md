@@ -1,5 +1,13 @@
 # fumadocs-twoslash
 
+## 3.1.16
+
+### Patch Changes
+
+- 690ddb9: bundle more deps
+- Updated dependencies [690ddb9]
+  - fumadocs-ui@16.7.13
+
 ## 3.1.15
 
 ### Patch Changes

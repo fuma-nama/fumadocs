@@ -1,5 +1,14 @@
 # next-docs-mdx
 
+## 14.2.12
+
+### Patch Changes
+
+- 690ddb9: bundle more deps
+- Updated dependencies [690ddb9]
+  - @fumadocs/mdx-remote@1.4.7
+  - fumadocs-core@16.7.13
+
 ## 14.2.11
 
 ### Patch Changes
@@ -308,12 +317,10 @@
 - 3caa5cd: **Vite: move `source.generated.ts` to `.source/index.ts`**
 
   **Why:**
-
   - with Fumadocs MDX Plugins, we want to unify the output directory across Vite & Next.js.
   - `source.generated.ts` looks ugly compared by `.source`.
 
   **Migrate:**
-
   - run dev server/typegen to generate a `.source` folder.
   - import it over the original `source.generated.ts`.
   - note that both docs and `create-fumadocs-app` are updated to `.source` folder.
@@ -327,7 +334,6 @@
 
   With Fumadocs MDX Plugins, you can extend Fumadocs MDX without worrying the underlying bundler.
   It is designed for:
-
   - Generate files from config (e.g. types, index files, JSON schemas)
   - Modify received config
 
@@ -390,7 +396,6 @@
 - f11f89d: **[Next.js] Rename APIS**
 
   On page data:
-
   - `_file` -> `info`.
   - `_file.absolutePath` -> `info.fullPath`.
 

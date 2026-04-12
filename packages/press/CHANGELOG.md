@@ -1,5 +1,14 @@
 # fumapress
 
+## 0.1.25
+
+### Patch Changes
+
+- 690ddb9: bundle more deps
+- Updated dependencies [690ddb9]
+  - fumadocs-ui@16.7.13
+  - fumadocs-core@16.7.13
+
 ## 0.1.24
 
 ### Patch Changes
