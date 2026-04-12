@@ -25,7 +25,7 @@ export default defineConfig({
     await compileInline();
   },
   deps: {
-    onlyBundle: [],
+    onlyBundle: ['react-medium-image-zoom'],
   },
   exports: {
     exclude: ['mdx.server', 'tailwind/typography'],

@@ -51,12 +51,12 @@
     "mdast-util-to-hast": "^13.2.1",
     "shiki": "^4.0.2",
     "tailwind-merge": "^3.5.0",
-    "twoslash": "^0.3.6"
+    "twoslash": "^0.3.7"
   },
   "devDependencies": {
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
-    "@types/node": "25.5.2",
+    "@types/node": "25.6.0",
     "@types/react": "^19.2.14",
     "fumadocs-ui": "workspace:*",
     "tsconfig": "workspace:*",
@@ -66,7 +66,8 @@
   "peerDependencies": {
     "@types/react": "*",
     "fumadocs-ui": "^15.0.0 || ^16.0.0",
-    "react": "18.x.x || 19.x.x"
+    "react": "18.x.x || 19.x.x",
+    "react-dom": "18.x.x || 19.x.x"
   },
   "peerDependenciesMeta": {
     "@types/react": {

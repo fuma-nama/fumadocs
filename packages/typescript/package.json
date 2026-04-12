@@ -52,7 +52,7 @@
     "@types/estree": "^1.0.8",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
-    "@types/node": "25.5.2",
+    "@types/node": "25.6.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "fumadocs-core": "workspace:*",
@@ -71,7 +71,8 @@
     "@types/react": "*",
     "fumadocs-core": "^16.7.0",
     "fumadocs-ui": "^16.7.0",
-    "react": "*",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
     "shiki": "*",
     "typescript": "*"
   },

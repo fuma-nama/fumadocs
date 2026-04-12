@@ -44,7 +44,7 @@
   "devDependencies": {
     "@content-collections/core": "^0.14.3",
     "@content-collections/mdx": "^0.2.2",
-    "@types/node": "25.5.2",
+    "@types/node": "25.6.0",
     "fumadocs-core": "workspace:*",
     "tsconfig": "workspace:*",
     "tsdown": "0.21.7"

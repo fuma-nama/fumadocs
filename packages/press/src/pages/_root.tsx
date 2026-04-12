@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Provider } from '@/components/provider';
 import '@/styles/globals.css';
+import 'katex/dist/katex.min.css';
 import { HotReload } from '@/components/hot-reload';
 
 export default async function RootElement({ children }: { children: ReactNode }) {

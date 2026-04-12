@@ -35,14 +35,14 @@
   "dependencies": {
     "@clack/prompts": "^1.2.0",
     "commander": "^14.0.3",
-    "fuma-cli": "^0.0.3",
+    "fuma-cli": "^0.0.5",
     "package-manager-detector": "^1.6.0",
     "picocolors": "^1.1.1",
     "tinyexec": "^1.1.1",
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@types/node": "25.5.2",
+    "@types/node": "25.6.0",
     "tsconfig": "workspace:*",
     "tsdown": "0.21.7"
   }

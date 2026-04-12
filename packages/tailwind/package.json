@@ -15,14 +15,9 @@
   ],
   "type": "module",
   "exports": {
-    "./compile": {
-      "types": "./dist/compile.d.ts",
-      "import": "./dist/compile.js"
-    },
-    "./typography": {
-      "types": "./dist/typography/index.d.ts",
-      "import": "./dist/typography/index.js"
-    }
+    "./compile": "./dist/compile.mjs",
+    "./typography": "./dist/typography/index.mjs",
+    "./package.json": "./package.json"
   },
   "publishConfig": {
     "access": "public"
@@ -34,24 +29,32 @@
     "lint": "oxlint .",
     "types:check": "tsc --noEmit"
   },
-  "dependencies": {
-    "postcss-selector-parser": "^7.1.1"
-  },
   "devDependencies": {
     "@tailwindcss/oxide": "^4.2.2",
     "@types/lodash.merge": "^4.6.9",
-    "@types/node": "^25.5.2",
+    "@types/node": "^25.6.0",
     "lodash.merge": "^4.6.2",
+    "postcss-selector-parser": "^7.1.1",
     "tailwindcss": "^4.2.2",
     "tsconfig": "workspace:*",
     "tsdown": "0.21.7"
   },
   "peerDependencies": {
+    "@tailwindcss/oxide": "^4.0.0",
     "tailwindcss": "^4.0.0"
   },
   "peerDependenciesMeta": {
     "tailwindcss": {
       "optional": true
+    },
+    "@tailwindcss/oxide": {
+      "optional": true
     }
+  },
+  "inlinedDependencies": {
+    "cssesc": "3.0.0",
+    "lodash.merge": "4.6.2",
+    "postcss-selector-parser": "7.1.1",
+    "util-deprecate": "1.0.2"
   }
 }

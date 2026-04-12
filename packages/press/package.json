@@ -33,11 +33,11 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@ai-sdk/react": "^3.0.155",
-    "@openrouter/ai-sdk-provider": "^2.5.0",
+    "@ai-sdk/react": "^3.0.160",
+    "@openrouter/ai-sdk-provider": "^2.5.1",
     "@radix-ui/react-presence": "^1.1.5",
-    "@takumi-rs/image-response": "^0.73.1",
-    "ai": "^6.0.153",
+    "@takumi-rs/image-response": "^1.0.4",
+    "ai": "^6.0.158",
     "chokidar": "^5.0.0",
     "class-variance-authority": "^0.7.1",
     "commander": "^14.0.3",
@@ -49,7 +49,7 @@
     "tinyglobby": "^0.2.16",
     "unist-util-visit": "^5.1.0",
     "unrun": "^0.2.34",
-    "waku": "1.0.0-alpha.6",
+    "waku": "1.0.0-alpha.7",
     "zod": "^4.3.6"
   },
   "devDependencies": {
@@ -59,7 +59,7 @@
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
     "@types/mdx": "^2.0.13",
-    "@types/node": "^25.5.2",
+    "@types/node": "^25.6.0",
     "@types/picomatch": "^4.0.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
@@ -70,10 +70,10 @@
     "hono": "^4.12.12",
     "ignore": "^7.0.5",
     "katex": "0.16.45",
-    "lucide-react": "^1.7.0",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "react-server-dom-webpack": "^19.2.4",
+    "lucide-react": "^1.8.0",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "react-server-dom-webpack": "^19.2.5",
     "rehype-katex": "^7.0.1",
     "remark": "^15.0.1",
     "remark-math": "^6.0.0",
@@ -84,7 +84,6 @@
     "typescript": "^6.0.2",
     "unified": "^11.0.5",
     "vfile": "^6.0.3",
-    "vite": "^8.0.7",
-    "vite-tsconfig-paths": "^6.1.1"
+    "vite": "^8.0.8"
   }
 }

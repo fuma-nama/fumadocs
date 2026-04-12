@@ -15,101 +15,76 @@
   ],
   "type": "module",
   "exports": {
-    "./breadcrumb": {
-      "types": "./dist/breadcrumb.d.ts",
-      "import": "./dist/breadcrumb.js"
-    },
-    "./toc": {
-      "types": "./dist/toc.d.ts",
-      "import": "./dist/toc.js"
-    },
-    "./content": {
-      "types": "./dist/content/md.d.ts",
-      "import": "./dist/content/md.js"
-    },
-    "./content/*": {
-      "types": "./dist/content/*.d.ts",
-      "import": "./dist/content/*.js"
-    },
-    "./negotiation": {
-      "types": "./dist/negotiation/index.d.ts",
-      "import": "./dist/negotiation/index.js"
-    },
-    "./page-tree": {
-      "types": "./dist/page-tree/index.d.ts",
-      "import": "./dist/page-tree/index.js"
-    },
-    "./search": {
-      "types": "./dist/search/index.d.ts",
-      "import": "./dist/search/index.js"
-    },
-    "./search/*": {
-      "types": "./dist/search/*.d.ts",
-      "import": "./dist/search/*.js"
-    },
-    "./source": {
-      "types": "./dist/source/index.d.ts",
-      "import": "./dist/source/index.js"
-    },
-    "./source/client": {
-      "types": "./dist/source/client/index.d.ts",
-      "import": "./dist/source/client/index.js"
-    },
-    "./source/schema": {
-      "types": "./dist/source/schema.d.ts",
-      "import": "./dist/source/schema.js"
-    },
+    "./breadcrumb": "./dist/breadcrumb.js",
+    "./content/github": "./dist/content/github.js",
+    "./content/md": "./dist/content/md.js",
+    "./content/mdx/preset-bundler": "./dist/content/mdx/preset-bundler.js",
+    "./content/mdx/preset-runtime": "./dist/content/mdx/preset-runtime.js",
+    "./content/toc": "./dist/content/toc.js",
+    "./dynamic-link": "./dist/dynamic-link.js",
+    "./framework": "./dist/framework/index.js",
+    "./framework/next": "./dist/framework/next.js",
+    "./framework/react-router": "./dist/framework/react-router.js",
+    "./framework/tanstack": "./dist/framework/tanstack.js",
+    "./framework/waku": "./dist/framework/waku.js",
+    "./highlight": "./dist/highlight/index.js",
+    "./highlight/client": "./dist/highlight/client.js",
+    "./highlight/shiki": "./dist/highlight/shiki/index.js",
+    "./highlight/shiki/full": "./dist/highlight/shiki/full.js",
+    "./highlight/shiki/react": "./dist/highlight/shiki/react.js",
+    "./i18n": "./dist/i18n/index.js",
+    "./i18n/middleware": "./dist/i18n/middleware.js",
+    "./link": "./dist/link.js",
+    "./mdx-plugins": "./dist/mdx-plugins/index.js",
+    "./mdx-plugins/codeblock-utils": "./dist/mdx-plugins/codeblock-utils.js",
+    "./mdx-plugins/rehype-code": "./dist/mdx-plugins/rehype-code.js",
+    "./mdx-plugins/rehype-code.core": "./dist/mdx-plugins/rehype-code.core.js",
+    "./mdx-plugins/rehype-toc": "./dist/mdx-plugins/rehype-toc.js",
+    "./mdx-plugins/remark-admonition": "./dist/mdx-plugins/remark-admonition.js",
+    "./mdx-plugins/remark-code-tab": "./dist/mdx-plugins/remark-code-tab.js",
+    "./mdx-plugins/remark-directive-admonition": "./dist/mdx-plugins/remark-directive-admonition.js",
+    "./mdx-plugins/remark-feedback-block": "./dist/mdx-plugins/remark-feedback-block.js",
+    "./mdx-plugins/remark-gfm": "./dist/mdx-plugins/remark-gfm.js",
+    "./mdx-plugins/remark-heading": "./dist/mdx-plugins/remark-heading.js",
+    "./mdx-plugins/remark-image": "./dist/mdx-plugins/remark-image.js",
+    "./mdx-plugins/remark-llms": "./dist/mdx-plugins/remark-llms.js",
+    "./mdx-plugins/remark-llms.runtime": "./dist/mdx-plugins/remark-llms.runtime.js",
+    "./mdx-plugins/remark-mdx-files": "./dist/mdx-plugins/remark-mdx-files.js",
+    "./mdx-plugins/remark-mdx-mermaid": "./dist/mdx-plugins/remark-mdx-mermaid.js",
+    "./mdx-plugins/remark-npm": "./dist/mdx-plugins/remark-npm.js",
+    "./mdx-plugins/remark-steps": "./dist/mdx-plugins/remark-steps.js",
+    "./mdx-plugins/remark-structure": "./dist/mdx-plugins/remark-structure.js",
+    "./mdx-plugins/stringifier": "./dist/mdx-plugins/stringifier.js",
+    "./negotiation": "./dist/negotiation/index.js",
+    "./page-tree": "./dist/page-tree/index.js",
+    "./search": "./dist/search/index.js",
+    "./search/algolia": "./dist/search/algolia.js",
+    "./search/client": "./dist/search/client.js",
+    "./search/client/algolia": "./dist/search/client/algolia.js",
+    "./search/client/fetch": "./dist/search/client/fetch.js",
+    "./search/client/flexsearch-static": "./dist/search/client/flexsearch-static.js",
+    "./search/client/mixedbread": "./dist/search/client/mixedbread.js",
+    "./search/client/orama-cloud": "./dist/search/client/orama-cloud.js",
+    "./search/client/orama-cloud-legacy": "./dist/search/client/orama-cloud-legacy.js",
+    "./search/client/orama-static": "./dist/search/client/orama-static.js",
+    "./search/flexsearch": "./dist/search/flexsearch.js",
+    "./search/mixedbread": "./dist/search/mixedbread.js",
+    "./search/orama-cloud": "./dist/search/orama-cloud.js",
+    "./search/orama-cloud-legacy": "./dist/search/orama-cloud-legacy.js",
+    "./search/server": "./dist/search/server.js",
+    "./source": "./dist/source/index.js",
+    "./source/client": "./dist/source/client/index.js",
+    "./source/plugins/lucide-icons": "./dist/source/plugins/lucide-icons.js",
+    "./source/plugins/slugs": "./dist/source/plugins/slugs.js",
+    "./source/plugins/status-badges": "./dist/source/plugins/status-badges.js",
+    "./source/schema": "./dist/source/schema.js",
+    "./toc": "./dist/toc.js",
+    "./utils/use-media-query": "./dist/utils/use-media-query.js",
+    "./utils/use-on-change": "./dist/utils/use-on-change.js",
+    "./package.json": "./package.json",
     "./source/*": {
       "types": "./dist/source/plugins/*.d.ts",
       "import": "./dist/source/plugins/*.js"
-    },
-    "./utils/*": {
-      "types": "./dist/utils/*.d.ts",
-      "import": "./dist/utils/*.js"
-    },
-    "./link": {
-      "types": "./dist/link.d.ts",
-      "import": "./dist/link.js"
-    },
-    "./dynamic-link": {
-      "types": "./dist/dynamic-link.d.ts",
-      "import": "./dist/dynamic-link.js"
-    },
-    "./mdx-plugins": {
-      "types": "./dist/mdx-plugins/index.d.ts",
-      "import": "./dist/mdx-plugins/index.js"
-    },
-    "./mdx-plugins/*": {
-      "types": "./dist/mdx-plugins/*.d.ts",
-      "import": "./dist/mdx-plugins/*.js"
-    },
-    "./i18n": {
-      "types": "./dist/i18n/index.d.ts",
-      "import": "./dist/i18n/index.js"
-    },
-    "./i18n/middleware": {
-      "types": "./dist/i18n/middleware.d.ts",
-      "import": "./dist/i18n/middleware.js"
-    },
-    "./highlight": {
-      "types": "./dist/highlight/index.d.ts",
-      "import": "./dist/highlight/index.js"
-    },
-    "./highlight/shiki": {
-      "types": "./dist/highlight/shiki/index.d.ts",
-      "import": "./dist/highlight/shiki/index.js"
-    },
-    "./highlight/*": {
-      "types": "./dist/highlight/*.d.ts",
-      "import": "./dist/highlight/*.js"
-    },
-    "./framework": {
-      "types": "./dist/framework/index.d.ts",
-      "import": "./dist/framework/index.js"
-    },
-    "./framework/*": {
-      "types": "./dist/framework/*.d.ts",
-      "import": "./dist/framework/*.js"
     }
   },
   "publishConfig": {
@@ -123,7 +98,6 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@formatjs/intl-localematcher": "^0.8.2",
     "@orama/orama": "^3.1.18",
     "@shikijs/rehype": "^4.0.2",
     "@shikijs/transformers": "^4.0.2",
@@ -131,12 +105,8 @@
     "github-slugger": "^2.0.0",
     "hast-util-to-estree": "^3.1.3",
     "hast-util-to-jsx-runtime": "^2.3.6",
-    "image-size": "^2.0.2",
     "mdast-util-mdx": "^3.0.0",
     "mdast-util-to-markdown": "^2.1.2",
-    "negotiator": "^1.0.0",
-    "npm-to-yarn": "^3.0.1",
-    "path-to-regexp": "^8.4.2",
     "remark": "^15.0.1",
     "remark-gfm": "^4.0.1",
     "remark-rehype": "^11.1.2",
@@ -148,22 +118,27 @@
     "vfile": "^6.0.3"
   },
   "devDependencies": {
+    "@formatjs/intl-localematcher": "^0.8.2",
     "@mdx-js/mdx": "^3.1.1",
     "@mixedbread/sdk": "^0.61.0",
     "@orama/core": "^1.2.19",
     "@oramacloud/client": "^2.1.4",
-    "@tanstack/react-router": "1.168.10",
+    "@tanstack/react-router": "1.168.18",
     "@types/estree-jsx": "^1.0.5",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.4",
     "@types/negotiator": "^0.6.4",
-    "@types/node": "25.5.2",
+    "@types/node": "25.6.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "algoliasearch": "5.50.1",
     "flexsearch": "^0.8.212",
-    "lucide-react": "^1.7.0",
-    "next": "16.2.2",
+    "image-size": "^2.0.2",
+    "lucide-react": "^1.8.0",
+    "negotiator": "^1.0.0",
+    "next": "16.2.3",
+    "npm-to-yarn": "^3.0.1",
+    "path-to-regexp": "^8.4.2",
     "react-router": "^7.14.0",
     "remark-directive": "^4.0.0",
     "remark-mdx": "^3.1.1",
@@ -171,7 +146,7 @@
     "tsconfig": "workspace:*",
     "tsdown": "0.21.7",
     "typescript": "^6.0.2",
-    "waku": "1.0.0-alpha.6",
+    "waku": "1.0.0-alpha.7",
     "zod": "^4.3.6"
   },
   "peerDependencies": {
@@ -249,5 +224,14 @@
     "zod": {
       "optional": true
     }
+  },
+  "inlinedDependencies": {
+    "@formatjs/fast-memoize": "3.1.1",
+    "@formatjs/intl-localematcher": "0.8.2",
+    "image-size": "2.0.2",
+    "negotiator": "1.0.0",
+    "npm-to-yarn": "3.0.1",
+    "path-to-regexp": "8.4.2",
+    "remove-markdown": "0.6.3"
   }
 }

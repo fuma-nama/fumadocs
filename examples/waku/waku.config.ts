@@ -2,7 +2,6 @@ import { type Config, defineConfig } from 'waku/config';
 import mdx from 'fumadocs-mdx/vite';
 import * as MdxConfig from './source.config.js';
 import tailwindcss from '@tailwindcss/vite';
-import tsconfigPaths from 'vite-tsconfig-paths';
 import type { UserConfig } from 'vite';
 
 export default defineConfig({
@@ -14,7 +13,10 @@ export default defineConfig({
     ssr: {
       external: ['@takumi-rs/image-response'],
     },
+    resolve: {
+      tsconfigPaths: true,
+    },
 
-    plugins: [tailwindcss(), mdx(MdxConfig), tsconfigPaths()],
+    plugins: [tailwindcss(), mdx(MdxConfig)],
   } satisfies UserConfig as Config['vite'],
 });

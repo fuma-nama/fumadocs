@@ -29,6 +29,22 @@ export default defineConfig({
     'src/framework/*',
   ],
   deps: {
-    onlyBundle: ['remove-markdown'],
+    onlyBundle: [
+      'remove-markdown',
+      '@formatjs/intl-localematcher',
+      'image-size',
+      'path-to-regexp',
+      'negotiator',
+      'npm-to-yarn',
+      '@formatjs/fast-memoize',
+    ],
+  },
+  exports: {
+    customExports: {
+      './source/*': {
+        types: './dist/source/plugins/*.d.ts',
+        import: './dist/source/plugins/*.js',
+      },
+    },
   },
 });

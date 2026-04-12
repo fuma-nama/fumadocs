@@ -1,6 +1,5 @@
 import { type Config, defineConfig } from 'waku/config';
 import tailwindcss from '@tailwindcss/vite';
-import tsconfigPaths from 'vite-tsconfig-paths';
 import type { UserConfig } from 'vite';
 
 export default defineConfig({
@@ -13,8 +12,9 @@ export default defineConfig({
     },
     resolve: {
       external: ['@takumi-rs/image-response', 'unrun', 'chokidar'],
+      tsconfigPaths: true,
     },
 
-    plugins: [tailwindcss(), tsconfigPaths()],
+    plugins: [tailwindcss()],
   } satisfies UserConfig as Config['vite'],
 });
