@@ -47,9 +47,7 @@ export function TOCItems({ ref, className, thumbBox = true, ...props }: TOCItems
 
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
-      const element: HTMLElement | null = container.querySelector(
-        `a[href="#${item.url.slice(1)}"]`,
-      );
+      const element: HTMLElement | null = container.querySelector(`a[href="${item.url}"]`);
       if (!element) continue;
 
       const styles = getComputedStyle(element);

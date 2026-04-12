@@ -1,32 +1,86 @@
 'use client';
 import { useI18n } from '@/contexts/i18n';
 import { cn } from '@/utils/cn';
-import { type ComponentProps, useRef } from 'react';
+import { type ComponentProps, useCallback, useEffect, useRef, useState } from 'react';
 import { mergeRefs } from '@/utils/merge-refs';
-import { TocThumb } from '.';
 import * as Primitive from 'fumadocs-core/toc';
+import { useTOCItems } from '.';
 
 export type TOCItemsProps = ComponentProps<'div'>;
 
+interface ComputedData {
+  positions: [top: number, bottom: number][];
+}
+
 export function TOCItems({ ref, className, ...props }: TOCItemsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const items = useTOCItems();
+  const [computed, setComputed] = useState<ComputedData | null>(null);
+
+  const onCompute = useCallback(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    if (items.length === 0) {
+      setComputed(null);
+      return;
+    }
+
+    const positions: [top: number, bottom: number][] = [];
+
+    for (const item of items) {
+      const element = container.querySelector<HTMLElement>(`a[href="${item.url}"]`);
+      if (!element) continue;
+
+      const styles = getComputedStyle(element);
+      positions.push([
+        element.offsetTop + parseFloat(styles.paddingTop),
+        element.offsetTop + element.clientHeight - parseFloat(styles.paddingBottom),
+      ]);
+    }
+
+    setComputed({ positions });
+  }, [items]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const observer = new ResizeObserver(onCompute);
+    observer.observe(container);
+    onCompute();
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [onCompute]);
 
   return (
     <div className="relative">
-      <TocThumb
-        containerRef={containerRef}
-        className="absolute inset-y-0 inset-s-0 bg-fd-primary w-px transition-[clip-path]"
-        style={{
-          clipPath:
-            'polygon(0 var(--fd-top), 100% var(--fd-top), 100% calc(var(--fd-top) + var(--fd-height)), 0 calc(var(--fd-top) + var(--fd-height)))',
-        }}
-      />
+      {computed && <TocThumb computed={computed} />}
       <div
         ref={mergeRefs(ref, containerRef)}
         className={cn('flex flex-col border-s border-fd-foreground/10', className)}
         {...props}
       />
     </div>
+  );
+}
+
+function TocThumb({ computed }: { computed: ComputedData }) {
+  const items = Primitive.useItems();
+  const startIdx = items.findIndex((item) => item.active);
+  if (startIdx === -1) return;
+  const endIdx = items.findLastIndex((item) => item.active);
+  const top = `${computed.positions[startIdx][0]}px`;
+  const bottom = `${computed.positions[endIdx][1]}px`;
+
+  return (
+    <div
+      className="absolute inset-y-0 inset-s-0 bg-fd-primary w-px transition-[clip-path]"
+      style={{
+        clipPath: `polygon(0 ${top}, 100% ${top}, 100% ${bottom}, 0 ${bottom})`,
+      }}
+    />
   );
 }
 

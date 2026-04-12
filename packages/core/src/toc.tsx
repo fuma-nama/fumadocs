@@ -12,7 +12,6 @@ import {
 } from 'react';
 import scrollIntoView from 'scroll-into-view-if-needed';
 import { mergeRefs } from '@/utils/merge-refs';
-import { useOnChange } from './utils/use-on-change';
 
 export interface TOCItemType {
   title: ReactNode;
@@ -91,56 +90,38 @@ export interface TOCItemProps extends ComponentProps<'a'> {
 }
 
 export function TOCItem({ ref, onActiveChange = () => null, ...props }: TOCItemProps) {
-  const items = useItems();
-  const containerRef = use(ScrollContext);
   const id = props.href ? getItemId(props.href) : null;
+  const items = useItems();
+  const itemData = id ? items.find((item) => item.id === id) : null;
+
+  const containerRef = use(ScrollContext);
+  const isInitialMountRef = useRef(true);
   const anchorRef = useRef<HTMLAnchorElement>(null);
-  const [active, setActive] = useState(
-    () => id && items.some((item) => item.active && item.id === id),
-  );
-  const initialShouldScrollRef = useRef<boolean>(null);
-  if (initialShouldScrollRef.current === null) {
-    const lastActive = items.findLast((item) => item.active);
-    initialShouldScrollRef.current = lastActive !== undefined && lastActive.id === id;
+  const [active, setActive] = useState(() => itemData != null && itemData.active);
+
+  if (itemData && itemData.active !== active) {
+    setActive(itemData.active);
+    onActiveChange(itemData.active);
   }
 
-  useOnChange(items, () => {
-    if (id === null) return;
-    const currentItem = items.find((item) => item.id === id);
-    if (!currentItem || currentItem.active === active) return;
-
-    const anchor = anchorRef.current;
-    const container = containerRef?.current;
-    const isLatestActive =
-      currentItem.active && items.every((item) => !item.active || item.t <= currentItem.t);
-    if (isLatestActive && container && anchor) {
-      scrollIntoView(anchor, {
-        behavior: 'smooth',
-        block: 'center',
-        inline: 'center',
-        scrollMode: 'always',
-        boundary: container,
-      });
-    }
-
-    setActive(currentItem.active);
-    onActiveChange(currentItem.active);
-  });
-
+  const shouldScroll =
+    itemData?.active && items.every((item) => !item.active || item.t <= itemData.t);
   useEffect(() => {
     const anchor = anchorRef.current;
     const container = containerRef?.current;
 
-    if (initialShouldScrollRef.current && container && anchor) {
+    if (shouldScroll && container && anchor) {
       scrollIntoView(anchor, {
-        behavior: 'instant',
+        behavior: isInitialMountRef.current ? 'instant' : 'smooth',
         block: 'center',
         inline: 'center',
         scrollMode: 'always',
         boundary: container,
       });
     }
-  }, [containerRef]);
+
+    isInitialMountRef.current = false;
+  }, [shouldScroll, containerRef]);
 
   return <a ref={mergeRefs(anchorRef, ref)} data-active={active} {...props} />;
 }
