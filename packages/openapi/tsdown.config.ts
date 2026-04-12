@@ -27,6 +27,7 @@ export default defineConfig({
   platform: 'browser',
   deps: {
     onlyBundle: ['fast-content-type-parse', '@fastify/deepmerge'],
+    neverBundle: [/^node:/],
   },
   exports: {
     enabled: true,
