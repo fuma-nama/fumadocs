@@ -1,5 +1,15 @@
 # create-fumadocs-versions
 
+## 16.0.91
+
+### Patch Changes
+
+- 690ddb9: bundle more deps
+- Updated dependencies [690ddb9]
+  - fumadocs-ui@16.7.13
+  - fumadocs-core@16.7.13
+  - fumadocs-mdx@14.2.12
+
 ## 16.0.90
 
 ### Patch Changes

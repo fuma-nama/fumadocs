@@ -1,5 +1,14 @@
 # fumadocs-python
 
+## 0.0.10
+
+### Patch Changes
+
+- 690ddb9: bundle more deps
+- Updated dependencies [690ddb9]
+  - fumadocs-ui@16.7.13
+  - fumadocs-core@16.7.13
+
 ## 0.0.9
 
 ### Patch Changes

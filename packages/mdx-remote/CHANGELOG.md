@@ -1,5 +1,13 @@
 # @fumadocs/mdx-remote
 
+## 1.4.7
+
+### Patch Changes
+
+- 690ddb9: bundle more deps
+- Updated dependencies [690ddb9]
+  - fumadocs-core@16.7.13
+
 ## 1.4.6
 
 ### Patch Changes

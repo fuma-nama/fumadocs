@@ -1,5 +1,11 @@
 # fumadocs-core
 
+## 16.7.13
+
+### Patch Changes
+
+- 690ddb9: bundle more deps
+
 ## 16.7.12
 
 ## 16.7.11
