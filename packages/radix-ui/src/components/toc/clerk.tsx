@@ -10,7 +10,7 @@ import {
   useState,
 } from 'react';
 import { cn } from '@/utils/cn';
-import { TocThumb, useTOCItems } from '.';
+import { useTOCItems } from '.';
 import { mergeRefs } from '@/utils/merge-refs';
 import { useI18n } from '@/contexts/i18n';
 
@@ -19,6 +19,7 @@ interface ComputedSVG {
   height: number;
   content: ReactNode;
   d: string;
+  positions: [top: number, bottom: number, x: number][];
   itemLineLengths: [top: number, bottom: number][];
 }
 
@@ -118,39 +119,35 @@ export function TOCItems({ ref, className, thumbBox = true, ...props }: TOCItems
       height: h,
       d,
       itemLineLengths,
+      positions,
     });
   }, [items, thumbBox]);
 
   useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const observer = new ResizeObserver(onPrint);
+    observer.observe(container);
     onPrint();
+    return () => {
+      observer.unobserve(container);
+    };
   }, [onPrint]);
 
   return (
     <>
       {svg && (
-        <TocThumb
-          containerRef={containerRef}
-          onContainerResize={onPrint}
+        <div
           className="absolute top-0 inset-s-0"
           style={{
             width: svg.width,
             height: svg.height,
           }}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox={`0 0 ${svg.width} ${svg.height}`}
-            className="absolute transition-[clip-path]"
-            style={{
-              width: svg.width,
-              height: svg.height,
-              clipPath: `polygon(0 var(--fd-top), 100% var(--fd-top), 100% calc(var(--fd-top) + var(--fd-height)), 0 calc(var(--fd-top) + var(--fd-height)))`,
-            }}
-          >
-            {svg.content}
-          </svg>
+          <ThumbTrack computed={svg} />
           {thumbBox && <ThumbBox computed={svg} />}
-        </TocThumb>
+        </div>
       )}
       <div
         ref={mergeRefs(containerRef, ref)}
@@ -175,6 +172,30 @@ interface ThumbBoxInfo {
   startIdx: number;
   endIdx: number;
   isUp: boolean;
+}
+
+function ThumbTrack({ computed }: { computed: ComputedSVG }) {
+  const items = Primitive.useItems();
+  const startIdx = items.findIndex((item) => item.active);
+  if (startIdx === -1) return;
+  const endIdx = items.findLastIndex((item) => item.active);
+  const top = `${computed.positions[startIdx][0]}px`;
+  const bottom = `${computed.positions[endIdx][1]}px`;
+
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox={`0 0 ${computed.width} ${computed.height}`}
+      className="absolute transition-[clip-path]"
+      style={{
+        width: computed.width,
+        height: computed.height,
+        clipPath: `polygon(0 ${top}, 100% ${top}, 100% ${bottom}, 0 ${bottom})`,
+      }}
+    >
+      {computed.content}
+    </svg>
+  );
 }
 
 function ThumbBox({ computed }: { computed: ComputedSVG }) {
