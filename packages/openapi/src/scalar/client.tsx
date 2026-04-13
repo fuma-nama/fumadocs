@@ -3,7 +3,7 @@ import { cn } from '@/utils/cn';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { useApiClient } from '@scalar/api-client-react';
 import { MethodLabel } from '@/ui/components/method-label';
-import { useTheme } from 'next-themes';
+import { useTheme } from 'fumadocs-ui/provider/base';
 import { useEffect, useState } from 'react';
 import type { HttpMethods } from '@/types';
 import '@scalar/api-client-react/style.css';

@@ -115,7 +115,7 @@
     "fumadocs-core": "^15.0.0 || ^16.0.0",
     "mdast-util-directive": "*",
     "next": "^15.3.0 || ^16.0.0",
-    "react": "*",
+    "react": "^19.2.0",
     "vite": "6.x.x || 7.x.x || 8.x.x"
   },
   "peerDependenciesMeta": {
