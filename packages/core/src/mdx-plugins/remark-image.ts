@@ -1,10 +1,10 @@
 import * as path from 'node:path';
-import type { Image, Root } from 'mdast';
+import type { Image, Root, RootContent } from 'mdast';
 import type { Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
 import type { MdxjsEsm } from 'mdast-util-mdx';
 import type { ISizeCalculationResult } from 'image-size/types/interface';
-import type { MdxJsxAttribute, MdxJsxFlowElement } from 'mdast-util-mdx';
+import type { MdxJsxFlowElement } from 'mdast-util-mdx';
 import { fileURLToPath } from 'node:url';
 
 const VALID_BLUR_EXT = ['.jpeg', '.png', '.webp', '.avif', '.jpg'];
@@ -90,23 +90,7 @@ export function remarkImage({
     const importsToInject: { variableName: string; importPath: string }[] = [];
     const promises: Promise<void>[] = [];
 
-    async function onImage(src: Source, node: Image): Promise<MdxJsxFlowElement | undefined> {
-      const attributes: MdxJsxAttribute[] = [
-        {
-          type: 'mdxJsxAttribute',
-          name: 'alt',
-          value: node.alt ?? 'image',
-        },
-      ];
-
-      if (node.title) {
-        attributes.push({
-          type: 'mdxJsxAttribute',
-          name: 'title',
-          value: node.title,
-        });
-      }
-
+    async function updateImage(src: Source, node: Image): Promise<RootContent | undefined> {
       if (src.type === 'file' && useImport) {
         // Unique variable name for the given static image URL
         const variableName = `__img${importsToInject.length}`;
@@ -124,33 +108,46 @@ export function remarkImage({
           importPath: getImportPath(src.file, file.dirname),
         });
 
-        attributes.push({
-          type: 'mdxJsxAttribute',
-          name: 'src',
-          value: {
-            type: 'mdxJsxAttributeValueExpression',
-            value: variableName,
-            data: {
-              estree: {
-                body: [
-                  {
-                    type: 'ExpressionStatement',
-                    expression: { type: 'Identifier', name: variableName },
-                  },
-                ],
-                type: 'Program',
-                sourceType: 'script',
-              },
-            },
-          },
-        });
-
         const out: MdxJsxFlowElement = {
           children: [],
           type: 'mdxJsxFlowElement',
           name: 'img',
-          attributes,
+          attributes: [
+            {
+              type: 'mdxJsxAttribute',
+              name: 'alt',
+              value: node.alt ?? 'image',
+            },
+            {
+              type: 'mdxJsxAttribute',
+              name: 'src',
+              value: {
+                type: 'mdxJsxAttributeValueExpression',
+                value: variableName,
+                data: {
+                  estree: {
+                    body: [
+                      {
+                        type: 'ExpressionStatement',
+                        expression: { type: 'Identifier', name: variableName },
+                      },
+                    ],
+                    type: 'Program',
+                    sourceType: 'script',
+                  },
+                },
+              },
+            },
+          ],
         };
+
+        if (node.title) {
+          out.attributes.push({
+            type: 'mdxJsxAttribute',
+            name: 'title',
+            value: node.title,
+          });
+        }
 
         if (hasBlur) {
           out.attributes.push({
@@ -173,39 +170,20 @@ export function remarkImage({
       });
 
       if (!size) return;
-
-      attributes.push(
-        {
-          type: 'mdxJsxAttribute',
-          name: 'src',
-          // `src` doesn't support file paths, we can use `node.url` for files and let the underlying framework handle it
-          value: src.type === 'url' ? src.url.toString() : node.url,
-        },
-        {
-          type: 'mdxJsxAttribute',
-          name: 'width',
-          value: size.width.toString(),
-        },
-        {
-          type: 'mdxJsxAttribute',
-          name: 'height',
-          value: size.height.toString(),
-        },
-      );
-
-      return {
-        type: 'mdxJsxFlowElement',
-        name: 'img',
-        attributes,
-        children: [],
-      };
+      node.data ??= {};
+      node.data.hProperties ??= {};
+      // `src` doesn't support file paths, we can use `node.url` for files and let the underlying framework handle it
+      node.data.hProperties.src = src.type === 'url' ? src.url.href : node.url;
+      node.data.hProperties.width = size.width.toString();
+      node.data.hProperties.height = size.height.toString();
     }
 
-    visit(tree, 'image', (node) => {
+    visit(tree, 'image', (node, idx, parent) => {
+      if (typeof idx !== 'number' || !parent) return;
       const src = parseSrc(decodeURI(node.url), publicDir, file.dirname);
       if (!src) return;
 
-      const task = onImage(src, node)
+      const task = updateImage(src, node)
         .catch((e) => {
           // ignore SVG as it is not always needed
           if (onError === 'ignore' || node.url.endsWith('.svg')) {
@@ -213,19 +191,17 @@ export function remarkImage({
           }
 
           if (onError === 'hide') {
-            return {
-              type: 'mdxJsxFlowElement',
-              name: null,
-              attributes: [],
-              children: [],
-            } satisfies MdxJsxFlowElement;
+            parent.children.splice(idx, 1);
+            return;
           }
 
           if (onError === 'error') throw e;
           onError(e);
         })
         .then((res) => {
-          if (res) Object.assign(node, res);
+          if (res) {
+            parent.children[idx] = res;
+          }
         });
 
       promises.push(task);

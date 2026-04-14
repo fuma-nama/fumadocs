@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-ui",
-  "version": "16.7.13",
+  "version": "16.7.15",
   "description": "The Radix UI version of Fumadocs UI",
   "keywords": [
     "Docs",
@@ -11,8 +11,8 @@
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/fumadocs",
   "files": [
-    "css/*",
-    "dist/*"
+    "css",
+    "dist"
   ],
   "type": "module",
   "exports": {
@@ -151,6 +151,7 @@
     "react-remove-scroll": "^2.7.2",
     "rehype-raw": "^7.0.0",
     "scroll-into-view-if-needed": "^3.1.0",
+    "shiki": "^4.0.2",
     "tailwind-merge": "^3.5.0",
     "unist-util-visit": "^5.1.0"
   },
@@ -166,7 +167,6 @@
     "fuma-cli": "^0.0.5",
     "fumadocs-core": "workspace:*",
     "react-medium-image-zoom": "^5.4.3",
-    "shiki": "^4.0.2",
     "tailwindcss": "^4.2.2",
     "tsconfig": "workspace:*",
     "tsdown": "0.21.7",
@@ -179,14 +179,10 @@
     "fumadocs-core": "workspace:*",
     "next": "16.x.x",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "shiki": "*"
+    "react-dom": "^19.2.0"
   },
   "peerDependenciesMeta": {
     "next": {
-      "optional": true
-    },
-    "shiki": {
       "optional": true
     },
     "@takumi-rs/image-response": {

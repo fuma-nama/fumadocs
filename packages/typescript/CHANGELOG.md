@@ -1,5 +1,27 @@
 # fumadocs-typescript
 
+## 5.2.5
+
+### Patch Changes
+
+- ccad791: update peer deps
+- Updated dependencies [e1567e2]
+- Updated dependencies [9a200c8]
+- Updated dependencies [c731a92]
+- Updated dependencies [ccad791]
+- Updated dependencies [a4189ce]
+  - fumadocs-core@16.7.15
+  - fumadocs-ui@16.7.15
+
+## 5.2.4
+
+### Patch Changes
+
+- 2d8f596: fix `npm pack` skipping nested `node_modules`
+- Updated dependencies [2d8f596]
+  - fumadocs-ui@16.7.14
+  - fumadocs-core@16.7.14
+
 ## 5.2.3
 
 ### Patch Changes

@@ -33,7 +33,12 @@ export interface RemarkNpmOptions {
   packageManagers?: PackageManager[];
 }
 
-const aliases = ['npm', 'package-install'];
+function convertLines(cmd: string, to: 'yarn' | 'pnpm' | 'bun') {
+  return cmd
+    .split('\n')
+    .map((l) => convert(l, to))
+    .join('\n');
+}
 
 /**
  * It generates multiple tabs of codeblocks for different package managers from a npm command codeblock.
@@ -41,20 +46,32 @@ const aliases = ['npm', 'package-install'];
 export function remarkNpm({
   persist = false,
   packageManagers = [
-    { command: (cmd) => convert(cmd, 'npm'), name: 'npm' },
-    { command: (cmd) => convert(cmd, 'pnpm'), name: 'pnpm' },
-    { command: (cmd) => convert(cmd, 'yarn'), name: 'yarn' },
-    { command: (cmd) => convert(cmd, 'bun'), name: 'bun' },
+    { command: (cmd) => cmd, name: 'npm' },
+    { command: (cmd) => convertLines(cmd, 'pnpm'), name: 'pnpm' },
+    { command: (cmd) => convertLines(cmd, 'yarn'), name: 'yarn' },
+    { command: (cmd) => convertLines(cmd, 'bun'), name: 'bun' },
   ],
 }: RemarkNpmOptions = {}): Transformer<Root, Root> {
   return (tree) => {
-    visit(tree, 'code', (node) => {
-      if (!node.lang || !aliases.includes(node.lang)) return;
-      let code = node.value;
+    visit(tree, 'code', (node, idx, parent) => {
+      if (typeof idx !== 'number' || !parent) return;
+      let code: string;
 
-      if (node.lang === 'package-install' && !code.startsWith('npm') && !code.startsWith('npx')) {
-        code = `npm install ${code}`;
+      switch (node.lang) {
+        case 'package-install':
+          code = node.value;
+
+          if (!code.startsWith('npm') && !code.startsWith('npx')) {
+            code = `npm install ${code}`;
+          }
+          break;
+        case 'npm':
+          code = node.value;
+          break;
+        default:
+          return;
       }
+
       const options: CodeBlockTabsOptions = {
         persist,
         tabs: [],
@@ -84,7 +101,7 @@ export function remarkNpm({
         });
       }
 
-      Object.assign(node, generateCodeBlockTabs(options));
+      parent.children[idx] = generateCodeBlockTabs(options);
       return 'skip';
     });
   };

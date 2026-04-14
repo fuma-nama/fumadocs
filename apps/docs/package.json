@@ -25,7 +25,6 @@
     "@radix-ui/react-hover-card": "^1.1.15",
     "@radix-ui/react-presence": "^1.1.5",
     "@radix-ui/react-tooltip": "^1.2.8",
-    "@shikijs/rehype": "^4.0.2",
     "@shikijs/transformers": "^4.0.2",
     "@takumi-rs/image-response": "^1.0.4",
     "ai": "^6.0.158",

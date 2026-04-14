@@ -2,13 +2,21 @@ import type { RootContent } from 'mdast';
 import { valueToEstree } from 'estree-util-value-to-estree';
 import type { Expression } from 'estree-jsx';
 import type { MdxjsEsm } from 'mdast-util-mdx';
+import type Hast from 'hast';
 
 export function flattenNode(node: RootContent): string {
-  if ('children' in node) return node.children.map((child) => flattenNode(child)).join('');
+  if ('children' in node) return node.children.map(flattenNode).join('');
 
   if ('value' in node && typeof node.value === 'string') return node.value;
 
   return '';
+}
+export function flattenNodeHast(node: Hast.RootContent): string {
+  if ('children' in node) {
+    return node.children.map(flattenNodeHast).join('');
+  }
+
+  return 'value' in node && typeof node.value === 'string' ? node.value : '';
 }
 
 export function toMdxExport(name: string, value: unknown): MdxjsEsm {

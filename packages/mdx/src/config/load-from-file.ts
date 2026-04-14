@@ -11,7 +11,7 @@ async function compileConfig(core: Core) {
     entryPoints: [{ in: configPath, out: 'source.config' }],
     bundle: true,
     outdir: outDir,
-    target: 'node20',
+    target: 'node22',
     write: true,
     platform: 'node',
     format: 'esm',

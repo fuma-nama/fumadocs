@@ -1,6 +1,6 @@
 {
   "name": "create-fumadocs-app",
-  "version": "16.0.91",
+  "version": "16.0.93",
   "description": "Create a new documentation site with Fumadocs",
   "keywords": [
     "Docs",
@@ -13,8 +13,8 @@
   "repository": "github:fuma-nama/fumadocs",
   "bin": "./dist/bin.js",
   "files": [
-    "dist/*",
-    "template/*"
+    "dist",
+    "template"
   ],
   "type": "module",
   "module": "./dist/index.js",

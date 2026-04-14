@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/tailwind",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "The Tailwind CSS utils for Fumadocs UI.",
   "keywords": [
     "Docs",
@@ -11,7 +11,7 @@
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/fumadocs",
   "files": [
-    "dist/*"
+    "dist"
   ],
   "type": "module",
   "exports": {

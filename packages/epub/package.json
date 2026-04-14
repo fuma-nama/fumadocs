@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-epub",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "EPUB export for Fumadocs documentation",
   "keywords": [
     "documentation",
@@ -13,7 +13,7 @@
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/fumadocs",
   "files": [
-    "dist/*"
+    "dist"
   ],
   "type": "module",
   "main": "./dist/index.js",

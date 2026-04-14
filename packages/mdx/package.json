@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-mdx",
-  "version": "14.2.12",
+  "version": "14.2.14",
   "description": "The built-in source for Fumadocs",
   "keywords": [
     "Docs",
@@ -14,7 +14,7 @@
   "files": [
     "loader-mdx.cjs",
     "loader-meta.cjs",
-    "dist/*"
+    "dist"
   ],
   "type": "module",
   "main": "./dist/index.js",
@@ -86,7 +86,6 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@fumadocs/mdx-remote": "workspace:*",
     "@types/bun": "^1.3.12",
     "@types/js-yaml": "^4.0.9",
     "@types/mdast": "^4.0.4",
@@ -108,14 +107,13 @@
     "webpack": "^5.106.1"
   },
   "peerDependencies": {
-    "@fumadocs/mdx-remote": "^1.4.0",
     "@types/mdast": "*",
     "@types/mdx": "*",
     "@types/react": "*",
     "fumadocs-core": "^15.0.0 || ^16.0.0",
     "mdast-util-directive": "*",
     "next": "^15.3.0 || ^16.0.0",
-    "react": "*",
+    "react": "^19.2.0",
     "vite": "6.x.x || 7.x.x || 8.x.x"
   },
   "peerDependenciesMeta": {
@@ -138,9 +136,6 @@
       "optional": true
     },
     "vite": {
-      "optional": true
-    },
-    "@fumadocs/mdx-remote": {
       "optional": true
     }
   }

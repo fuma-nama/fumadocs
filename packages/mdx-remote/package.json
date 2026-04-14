@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/mdx-remote",
-  "version": "1.4.7",
+  "version": "1.4.8",
   "description": "The remote MDX files adapter for Fumadocs",
   "keywords": [
     "Docs",
@@ -11,7 +11,7 @@
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/fumadocs",
   "files": [
-    "dist/*"
+    "dist"
   ],
   "type": "module",
   "module": "./dist/index.js",

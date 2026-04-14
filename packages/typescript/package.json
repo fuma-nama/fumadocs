@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-typescript",
-  "version": "5.2.3",
+  "version": "5.2.5",
   "description": "Typescript Integration for Fumadocs",
   "keywords": [
     "Docs",
@@ -12,7 +12,7 @@
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/fumadocs",
   "files": [
-    "dist/*"
+    "dist"
   ],
   "type": "module",
   "main": "./dist/index.js",
@@ -43,6 +43,7 @@
     "hast-util-to-jsx-runtime": "^2.3.6",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
+    "shiki": "^4.0.2",
     "ts-morph": "^27.0.2",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.1.0"
@@ -58,7 +59,6 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "mdast-util-mdx": "^3.0.0",
-    "shiki": "^4.0.2",
     "tsconfig": "workspace:*",
     "tsdown": "0.21.7",
     "typescript": "^6.0.2",
@@ -72,14 +72,9 @@
     "fumadocs-core": "^16.7.0",
     "fumadocs-ui": "^16.7.0",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "shiki": "*",
-    "typescript": "*"
+    "react-dom": "^19.2.0"
   },
   "peerDependenciesMeta": {
-    "shiki": {
-      "optional": true
-    },
     "@types/estree": {
       "optional": true
     },

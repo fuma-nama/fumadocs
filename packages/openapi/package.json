@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-openapi",
-  "version": "10.6.8",
+  "version": "10.7.0",
   "description": "Generate MDX docs for your OpenAPI spec",
   "keywords": [
     "Docs",
@@ -56,8 +56,6 @@
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-slot": "^1.2.4",
-    "@scalar/json-magic": "^0.12.5",
-    "@scalar/openapi-upgrader": "^0.2.4",
     "ajv": "^8.18.0",
     "chokidar": "^5.0.0",
     "class-variance-authority": "^0.7.1",
@@ -65,9 +63,9 @@
     "hast-util-to-jsx-runtime": "^2.3.6",
     "js-yaml": "^4.1.1",
     "lucide-react": "^1.8.0",
-    "next-themes": "^0.4.6",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
+    "shiki": "^4.0.2",
     "tailwind-merge": "^3.5.0",
     "xml-js": "^1.6.11"
   },
@@ -75,6 +73,8 @@
     "@fastify/deepmerge": "^3.2.1",
     "@fumadocs/tailwind": "workspace:*",
     "@scalar/api-client-react": "^2.0.1",
+    "@scalar/json-magic": "^0.12.5",
+    "@scalar/openapi-upgrader": "^0.2.4",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "25.6.0",
     "@types/react": "^19.2.14",
@@ -82,7 +82,6 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "json-schema-typed": "^8.0.2",
-    "shiki": "^4.0.2",
     "tailwindcss": "^4.2.2",
     "tsconfig": "workspace:*",
     "tsdown": "0.21.7"
@@ -90,17 +89,13 @@
   "peerDependencies": {
     "@scalar/api-client-react": "2.x.x",
     "@types/react": "*",
-    "fumadocs-core": "^16.7.0",
-    "fumadocs-ui": "^16.7.0",
+    "fumadocs-core": "^16.7.15",
+    "fumadocs-ui": "^16.7.15",
     "json-schema-typed": "*",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "shiki": "*"
+    "react-dom": "^19.2.0"
   },
   "peerDependenciesMeta": {
-    "shiki": {
-      "optional": true
-    },
     "json-schema-typed": {
       "optional": true
     },
@@ -113,6 +108,11 @@
   },
   "inlinedDependencies": {
     "@fastify/deepmerge": "3.2.1",
-    "fast-content-type-parse": "3.0.0"
+    "@scalar/helpers": "0.4.3",
+    "@scalar/json-magic": "0.12.5",
+    "@scalar/openapi-upgrader": "0.2.4",
+    "fast-content-type-parse": "3.0.0",
+    "pathe": "2.0.3",
+    "yaml": "2.8.3"
   }
 }

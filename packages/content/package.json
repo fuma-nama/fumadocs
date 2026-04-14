@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/content",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "The Fuma Content adapter for Fumadocs",
   "keywords": [
     "Docs",
@@ -11,7 +11,7 @@
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/fumadocs",
   "files": [
-    "dist/*"
+    "dist"
   ],
   "type": "module",
   "exports": {

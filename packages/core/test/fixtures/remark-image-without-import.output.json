@@ -1,0 +1,129 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "alt": "Test",
+          "position": {
+            "end": {
+              "column": 20,
+              "line": 1,
+              "offset": 19,
+            },
+            "start": {
+              "column": 1,
+              "line": 1,
+              "offset": 0,
+            },
+          },
+          "title": null,
+          "type": "image",
+          "url": "./test.png",
+        },
+      ],
+      "position": {
+        "end": {
+          "column": 20,
+          "line": 1,
+          "offset": 19,
+        },
+        "start": {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "paragraph",
+    },
+    {
+      "children": [
+        {
+          "alt": "External",
+          "data": {
+            "hProperties": {
+              "height": "630",
+              "src": "https://fumadocs.dev/banner.png",
+              "width": "1200",
+            },
+          },
+          "position": {
+            "end": {
+              "column": 45,
+              "line": 3,
+              "offset": 65,
+            },
+            "start": {
+              "column": 1,
+              "line": 3,
+              "offset": 21,
+            },
+          },
+          "title": null,
+          "type": "image",
+          "url": "https://fumadocs.dev/banner.png",
+        },
+      ],
+      "position": {
+        "end": {
+          "column": 45,
+          "line": 3,
+          "offset": 65,
+        },
+        "start": {
+          "column": 1,
+          "line": 3,
+          "offset": 21,
+        },
+      },
+      "type": "paragraph",
+    },
+    {
+      "children": [
+        {
+          "alt": "Inline",
+          "position": {
+            "end": {
+              "column": 30,
+              "line": 5,
+              "offset": 96,
+            },
+            "start": {
+              "column": 1,
+              "line": 5,
+              "offset": 67,
+            },
+          },
+          "title": null,
+          "type": "image",
+          "url": "./remark-image.svg",
+        },
+      ],
+      "position": {
+        "end": {
+          "column": 30,
+          "line": 5,
+          "offset": 96,
+        },
+        "start": {
+          "column": 1,
+          "line": 5,
+          "offset": 67,
+        },
+      },
+      "type": "paragraph",
+    },
+  ],
+  "position": {
+    "end": {
+      "column": 1,
+      "line": 6,
+      "offset": 97,
+    },
+    "start": {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}

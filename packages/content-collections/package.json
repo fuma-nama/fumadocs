@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/content-collections",
-  "version": "1.2.8",
+  "version": "1.2.9",
   "description": "The Content Collections adapter for Fumadocs",
   "keywords": [
     "Content Collections",
@@ -12,7 +12,7 @@
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/fumadocs",
   "files": [
-    "dist/*"
+    "dist"
   ],
   "type": "module",
   "main": "./dist/index.js",

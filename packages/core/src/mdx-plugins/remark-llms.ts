@@ -3,7 +3,7 @@ import { toMdxExport } from './utils';
 import type { Heading, Parents, Root } from 'mdast';
 import { defaultStringifier, type StringifyOptions } from './stringifier';
 import type { MdxJsxFlowElement, MdxJsxTextElement } from 'mdast-util-mdx';
-import type { Info, State } from 'mdast-util-to-markdown';
+import { defaultHandlers, type Info, type State } from 'mdast-util-to-markdown';
 import type { PlaceholderData } from './remark-llms.runtime';
 
 export interface LLMsOptions extends StringifyOptions {
@@ -92,8 +92,8 @@ export function remarkLLMs(
     handlers: {
       heading(node: Heading, _p, state, info) {
         const id = node.data?.hProperties?.id;
-        const content = state.containerPhrasing(node, info);
-        return headingIds && id ? `${content} [#${id}]` : content;
+        const defaultValue = defaultHandlers.heading(node, _p, state, info);
+        return headingIds && id ? `${defaultValue} [#${id}]` : defaultValue;
       },
       ...rest.handlers,
     },

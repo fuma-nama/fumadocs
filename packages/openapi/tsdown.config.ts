@@ -26,7 +26,16 @@ export default defineConfig({
   },
   platform: 'browser',
   deps: {
-    onlyBundle: ['fast-content-type-parse', '@fastify/deepmerge'],
+    onlyBundle: [
+      'fast-content-type-parse',
+      '@fastify/deepmerge',
+
+      '@scalar/json-magic',
+      'pathe',
+      'yaml',
+      '@scalar/helpers',
+      '@scalar/openapi-upgrader',
+    ],
     neverBundle: [/^node:/],
   },
   exports: {

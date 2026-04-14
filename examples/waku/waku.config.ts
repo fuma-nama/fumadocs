@@ -15,6 +15,7 @@ export default defineConfig({
     },
     resolve: {
       tsconfigPaths: true,
+      external: ['@orama/orama'],
     },
 
     plugins: [tailwindcss(), mdx(MdxConfig)],

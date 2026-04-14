@@ -67,18 +67,34 @@ export function TOCItems({ ref, className, ...props }: TOCItemsProps) {
 }
 
 function TocThumb({ computed }: { computed: ComputedData }) {
-  const items = Primitive.useItems();
-  const startIdx = items.findIndex((item) => item.active);
-  if (startIdx === -1) return;
-  const endIdx = items.findLastIndex((item) => item.active);
-  const top = `${computed.positions[startIdx][0]}px`;
-  const bottom = `${computed.positions[endIdx][1]}px`;
+  const ref = useRef<HTMLDivElement>(null);
+  const tocInfo = Primitive.useTOC();
+  const onUpdate = useCallback(
+    (items: Primitive.TOCItemInfo[]) => {
+      const element = ref.current;
+      if (!element) return;
+
+      const startIdx = items.findIndex((item) => item.active);
+      if (startIdx === -1) return;
+      const endIdx = items.findLastIndex((item) => item.active);
+
+      element.style.setProperty('--track-top', `${computed.positions[startIdx][0]}px`);
+      element.style.setProperty('--track-bottom', `${computed.positions[endIdx][1]}px`);
+    },
+    [computed],
+  );
+  Primitive.useTOCListener(onUpdate);
+
+  useEffect(() => {
+    onUpdate(tocInfo.get());
+  }, [onUpdate, tocInfo]);
 
   return (
     <div
+      ref={ref}
       className="absolute inset-y-0 inset-s-0 bg-fd-primary w-px transition-[clip-path]"
       style={{
-        clipPath: `polygon(0 ${top}, 100% ${top}, 100% ${bottom}, 0 ${bottom})`,
+        clipPath: `polygon(0 var(--track-top,0), 100% var(--track-top,0), 100% var(--track-bottom,0), 0 var(--track-bottom,0))`,
       }}
     />
   );

@@ -1,5 +1,13 @@
 # fumadocs-obsidian
 
+## 0.0.15
+
+### Patch Changes
+
+- 2d8f596: fix `npm pack` skipping nested `node_modules`
+- Updated dependencies [2d8f596]
+  - fumadocs-core@16.7.14
+
 ## 0.0.14
 
 ### Patch Changes

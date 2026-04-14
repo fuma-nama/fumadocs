@@ -45,13 +45,15 @@ Depending on your bundler, this may reduce compilation time significantly on dev
 
 ## Dynamic Mode
 
-Dynamic mode works by performing on-demand compilation with MDX Remote.
+Dynamic mode works by performing **on-demand compilation**, then execute the output on runtime.
 
-You need to install extra dependencies:
+It is recommended to install & externalize `shiki`:
 
 ```npm
-npm i @fumadocs/mdx-remote shiki
+npm i shiki
 ```
+
+Enable dynamic mode in collections like:
 
 ```ts tab="Docs Collection"
 import { defineDocs } from 'fumadocs-mdx/config';

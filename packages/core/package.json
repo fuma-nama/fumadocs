@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-core",
-  "version": "16.7.13",
+  "version": "16.7.15",
   "description": "The React.js library for building a documentation website",
   "keywords": [
     "Docs",
@@ -11,7 +11,7 @@
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/fumadocs",
   "files": [
-    "dist/*"
+    "dist"
   ],
   "type": "module",
   "exports": {
@@ -99,7 +99,6 @@
   },
   "dependencies": {
     "@orama/orama": "^3.1.18",
-    "@shikijs/rehype": "^4.0.2",
     "@shikijs/transformers": "^4.0.2",
     "estree-util-value-to-estree": "^3.5.0",
     "github-slugger": "^2.0.0",

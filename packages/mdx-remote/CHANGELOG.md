@@ -1,5 +1,13 @@
 # @fumadocs/mdx-remote
 
+## 1.4.8
+
+### Patch Changes
+
+- 2d8f596: fix `npm pack` skipping nested `node_modules`
+- Updated dependencies [2d8f596]
+  - fumadocs-core@16.7.14
+
 ## 1.4.7
 
 ### Patch Changes

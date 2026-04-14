@@ -1,0 +1,59 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "alt": "External",
+          "data": {
+            "hProperties": {
+              "height": "630",
+              "src": "https://fumadocs.dev/banner.png",
+              "width": "1200",
+            },
+          },
+          "position": {
+            "end": {
+              "column": 25,
+              "line": 1,
+              "offset": 24,
+            },
+            "start": {
+              "column": 1,
+              "line": 1,
+              "offset": 0,
+            },
+          },
+          "title": null,
+          "type": "image",
+          "url": "/banner.png",
+        },
+      ],
+      "position": {
+        "end": {
+          "column": 25,
+          "line": 1,
+          "offset": 24,
+        },
+        "start": {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "paragraph",
+    },
+  ],
+  "position": {
+    "end": {
+      "column": 1,
+      "line": 2,
+      "offset": 25,
+    },
+    "start": {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}

@@ -1,5 +1,21 @@
 # @fuma-docs/openapi
 
+## 10.7.0
+
+### Minor Changes
+
+- ccad791: Update min Fumadocs versions requirements
+
+### Patch Changes
+
+- Updated dependencies [e1567e2]
+- Updated dependencies [9a200c8]
+- Updated dependencies [c731a92]
+- Updated dependencies [ccad791]
+- Updated dependencies [a4189ce]
+  - fumadocs-core@16.7.15
+  - fumadocs-ui@16.7.15
+
 ## 10.6.8
 
 ### Patch Changes

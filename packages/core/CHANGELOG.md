@@ -1,5 +1,20 @@
 # fumadocs-core
 
+## 16.7.15
+
+### Patch Changes
+
+- e1567e2: use local fork of Shiki rehype integration
+- 9a200c8: fix multi-line in remark-npm
+- c731a92: Implement selective re-render for TOC
+- a4189ce: Improve AST plugins
+
+## 16.7.14
+
+### Patch Changes
+
+- 2d8f596: fix `npm pack` skipping nested `node_modules`
+
 ## 16.7.13
 
 ### Patch Changes

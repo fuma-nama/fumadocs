@@ -85,9 +85,7 @@ test('Remark Steps', async () => {
 test('Remark Image: With Path', async () => {
   const file = path.resolve(cwd, './fixtures/remark-image.md');
   const content = await fs.readFile(file);
-  const processor = remark()
-    .use(remarkImage, { publicDir: path.resolve(cwd, './fixtures') })
-    .use(remarkMdx);
+  const processor = remark().use(remarkImage, { publicDir: path.resolve(cwd, './fixtures') });
 
   const result = await processor.run(processor.parse(content), {
     path: file,
@@ -100,31 +98,27 @@ test('Remark Image: With Path', async () => {
 
 test('Remark Image: Without Import', async () => {
   const content = await fs.readFile(path.resolve(cwd, './fixtures/remark-image.md'));
-  const result = await remark()
-    .use(remarkImage, {
-      publicDir: path.resolve(cwd, './fixtures'),
-      useImport: false,
-    })
-    .use(remarkMdx)
-    .process(content);
+  const processor = remark().use(remarkImage, {
+    publicDir: path.resolve(cwd, './fixtures'),
+    useImport: false,
+  });
 
-  await expect(result.value).toMatchFileSnapshot(
-    path.resolve(cwd, './fixtures/remark-image-without-import.output.mdx'),
+  const result = await processor.run(processor.parse(content));
+  await expect(result).toMatchFileSnapshot(
+    path.resolve(cwd, './fixtures/remark-image-without-import.output.json'),
   );
 });
 
 test('Remark Image: `publicDir` with URL', async () => {
   const content = await fs.readFile(path.resolve(cwd, './fixtures/remark-image-public-dir.md'));
-  const result = await remark()
-    .use(remarkImage, {
-      publicDir: 'https://fumadocs.dev',
-      useImport: false,
-    })
-    .use(remarkMdx)
-    .process(content);
+  const processor = remark().use(remarkImage, {
+    publicDir: 'https://fumadocs.dev',
+    useImport: false,
+  });
 
-  await expect(result.value).toMatchFileSnapshot(
-    path.resolve(cwd, './fixtures/remark-image-public-dir.output.mdx'),
+  const result = await processor.run(processor.parse(content));
+  await expect(result).toMatchFileSnapshot(
+    path.resolve(cwd, './fixtures/remark-image-public-dir.output.json'),
   );
 });
 

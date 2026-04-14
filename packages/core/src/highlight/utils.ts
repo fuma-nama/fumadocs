@@ -10,10 +10,10 @@ export async function loadMissingTheme(
   highlighter: HighlighterCore,
   themes: (ThemeRegistrationAny | string)[],
 ) {
-  const { isSpecialTheme } = await import('shiki/core');
-
+  const bundled = highlighter.getBundledThemes();
   const missingThemes = themes.filter((theme) => {
-    if (isSpecialTheme(theme)) return false;
+    if (typeof theme === 'string' && !(theme in bundled)) return false;
+
     try {
       highlighter.getTheme(theme);
       return false;
@@ -29,10 +29,10 @@ export async function loadMissingLanguage(
   highlighter: HighlighterCore,
   langs: (LanguageRegistration | string)[],
 ) {
-  const { isSpecialLang } = await import('shiki/core');
-
+  const bundled = highlighter.getBundledLanguages();
   const missingLangs = langs.filter((lang) => {
-    if (isSpecialLang(lang)) return false;
+    if (typeof lang === 'string' && !(lang in bundled)) return false;
+
     try {
       highlighter.getLanguage(lang);
       return false;

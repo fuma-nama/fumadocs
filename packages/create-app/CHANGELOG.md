@@ -1,5 +1,15 @@
 # create-next-docs-app
 
+## 16.0.93
+
+## 16.0.92
+
+### Patch Changes
+
+- 2d8f596: fix `npm pack` skipping nested `node_modules`
+- Updated dependencies [2d8f596]
+  - @fumadocs/cli@1.3.7
+
 ## 16.0.91
 
 ### Patch Changes
