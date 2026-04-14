@@ -33,16 +33,23 @@ export interface RemarkNpmOptions {
   packageManagers?: PackageManager[];
 }
 
+function convertLines(cmd: string, to: 'yarn' | 'pnpm' | 'bun') {
+  return cmd
+    .split('\n')
+    .map((l) => convert(l, to))
+    .join('\n');
+}
+
 /**
  * It generates multiple tabs of codeblocks for different package managers from a npm command codeblock.
  */
 export function remarkNpm({
   persist = false,
   packageManagers = [
-    { command: (cmd) => convert(cmd, 'npm'), name: 'npm' },
-    { command: (cmd) => convert(cmd, 'pnpm'), name: 'pnpm' },
-    { command: (cmd) => convert(cmd, 'yarn'), name: 'yarn' },
-    { command: (cmd) => convert(cmd, 'bun'), name: 'bun' },
+    { command: (cmd) => cmd, name: 'npm' },
+    { command: (cmd) => convertLines(cmd, 'pnpm'), name: 'pnpm' },
+    { command: (cmd) => convertLines(cmd, 'yarn'), name: 'yarn' },
+    { command: (cmd) => convertLines(cmd, 'bun'), name: 'bun' },
   ],
 }: RemarkNpmOptions = {}): Transformer<Root, Root> {
   return (tree) => {
