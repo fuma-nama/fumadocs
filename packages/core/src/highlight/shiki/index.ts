@@ -7,8 +7,8 @@ import type {
   CodeToHastOptionsCommon,
   HighlighterCore,
 } from 'shiki';
-import { loadMissingTheme, getRequiredThemes } from '../utils';
 import type { Awaitable } from '@/types';
+import { loadMissingTheme, getRequiredThemes } from '../utils';
 
 interface InitOptions {
   langAlias?: Record<string, string>;

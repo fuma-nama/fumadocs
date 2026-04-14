@@ -10,10 +10,10 @@ import type {
 import type { ReactNode } from 'react';
 import type { Root } from 'hast';
 import { defaultShikiFactory, wasmShikiFactory } from './shiki/full';
-import { loadMissingLanguage, loadMissingTheme, applyDefaultThemes } from './utils';
 import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import * as JsxRuntime from 'react/jsx-runtime';
 import { highlightHast as highlightHastBase } from './shiki';
+import { applyDefaultThemes, loadMissingLanguage, loadMissingTheme } from './utils';
 
 export type HighlightOptions = HighlightHastOptions & {
   components?: Partial<Components>;
@@ -53,6 +53,7 @@ export async function getHighlighter(
 ) {
   const factory = engineType === 'js' ? defaultShikiFactory : wasmShikiFactory;
   const instance = await factory.getOrInit();
+
   await Promise.all([
     options.langs && loadMissingLanguage(instance, options.langs),
     options.themes && loadMissingTheme(instance, options.themes),
