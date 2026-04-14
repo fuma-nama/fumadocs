@@ -135,18 +135,7 @@ export function TOCItems({ ref, className, thumbBox = true, ...props }: TOCItems
 
   return (
     <>
-      {svg && (
-        <div
-          className="absolute top-0 inset-s-0"
-          style={{
-            width: svg.width,
-            height: svg.height,
-          }}
-        >
-          <ThumbTrack computed={svg} />
-          {thumbBox && <ThumbBox computed={svg} />}
-        </div>
-      )}
+      {svg && <ThumbTrack computed={svg} thumbBox={thumbBox} />}
       <div
         ref={mergeRefs(containerRef, ref)}
         className={cn('flex flex-col', className)}
@@ -172,59 +161,87 @@ interface ThumbBoxInfo {
   isUp: boolean;
 }
 
-function ThumbTrack({ computed }: { computed: ComputedSVG }) {
-  const items = Primitive.useItems();
-  const startIdx = items.findIndex((item) => item.active);
-  if (startIdx === -1) return;
-  const endIdx = items.findLastIndex((item) => item.active);
-  const top = `${computed.positions[startIdx][0]}px`;
-  const bottom = `${computed.positions[endIdx][1]}px`;
-
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox={`0 0 ${computed.width} ${computed.height}`}
-      className="absolute transition-[clip-path]"
-      style={{
-        width: computed.width,
-        height: computed.height,
-        clipPath: `polygon(0 ${top}, 100% ${top}, 100% ${bottom}, 0 ${bottom})`,
-      }}
-    >
-      {computed.content}
-    </svg>
-  );
-}
-
-function ThumbBox({ computed }: { computed: ComputedSVG }) {
-  const items = Primitive.useItems();
+function ThumbTrack({ computed, thumbBox }: { computed: ComputedSVG; thumbBox: boolean }) {
+  const svgRef = useRef<SVGSVGElement>(null);
+  const boxRef = useRef<HTMLDivElement>(null);
   const previousRef = useRef<ThumbBoxInfo>(null);
-  const startIdx = items.findIndex((item) => item.active);
-  if (startIdx === -1) return;
-  const endIdx = items.findLastIndex((item) => item.active);
+  const tocInfo = Primitive.useTOC();
+  const onUpdate = useCallback(
+    (items: Primitive.TOCItemInfo[]) => {
+      const svg = svgRef.current;
+      if (!svg) return;
 
-  let isUp = false;
-  if (previousRef.current) {
-    const prev = previousRef.current;
-    isUp =
-      prev.startIdx > startIdx ||
-      prev.endIdx > endIdx ||
-      (prev.startIdx === startIdx && prev.endIdx === endIdx && prev.isUp);
-  }
+      const startIdx = items.findIndex((item) => item.active);
+      if (startIdx === -1) return;
 
-  previousRef.current = { startIdx, endIdx, isUp };
+      const endIdx = items.findLastIndex((item) => item.active);
+      svg.style.setProperty('--track-top', `${computed.positions[startIdx][0]}px`);
+      svg.style.setProperty('--track-bottom', `${computed.positions[endIdx][1]}px`);
+
+      const box = boxRef.current;
+      if (box) {
+        let isUp = false;
+        if (previousRef.current) {
+          const prev = previousRef.current;
+          isUp =
+            prev.startIdx > startIdx ||
+            prev.endIdx > endIdx ||
+            (prev.startIdx === startIdx && prev.endIdx === endIdx && prev.isUp);
+        }
+
+        previousRef.current = { startIdx, endIdx, isUp };
+
+        box.style.setProperty(
+          '--offset-distance',
+          isUp
+            ? `${computed.itemLineLengths[startIdx][0]}px`
+            : `${computed.itemLineLengths[endIdx][1]}px`,
+        );
+        box.style.setProperty(
+          '--opacity',
+          items[isUp ? startIdx : endIdx].original._step !== undefined ? '0' : '1',
+        );
+      }
+    },
+    [computed],
+  );
+  Primitive.useTOCListener(onUpdate);
+
+  useEffect(() => {
+    onUpdate(tocInfo.get());
+  }, [onUpdate, tocInfo]);
 
   return (
     <div
-      className="absolute size-1 bg-fd-primary rounded-full transition-[offset-distance]"
+      className="absolute top-0 inset-s-0"
       style={{
-        offsetPath: `path("${computed.d}")`,
-        offsetDistance: isUp
-          ? computed.itemLineLengths[startIdx][0]
-          : computed.itemLineLengths[endIdx][1],
-        scale: items[isUp ? startIdx : endIdx].original._step !== undefined ? '0' : '1',
+        width: computed.width,
+        height: computed.height,
       }}
-    />
+    >
+      <svg
+        ref={svgRef}
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox={`0 0 ${computed.width} ${computed.height}`}
+        className="absolute transition-[clip-path]"
+        style={{
+          width: computed.width,
+          height: computed.height,
+          clipPath: `polygon(0 var(--track-top,0), 100% var(--track-top,0), 100% var(--track-bottom,0), 0 var(--track-bottom,0))`,
+        }}
+      >
+        {computed.content}
+      </svg>
+      {thumbBox && (
+        <div
+          ref={boxRef}
+          className="absolute size-1 bg-fd-primary rounded-full [offset-distance:var(--offset-distance,0)] opacity-(--opacity,0) transition-[opacity,offset-distance]"
+          style={{
+            offsetPath: `path("${computed.d}")`,
+          }}
+        />
+      )}
+    </div>
   );
 }
 
