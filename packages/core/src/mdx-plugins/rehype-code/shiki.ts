@@ -176,17 +176,23 @@ function rehypeShikiFromHighlighter(
     }
   }
 
+  function isLanguageLoaded(lang: string) {
+    return isSpecialLang(lang) || highlighter.getLoadedLanguages().includes(lang);
+  }
+
   async function onNode(tree: Root, node: Element, parsed: ShikiParsedData) {
     let lang = parsed.lang ?? defaultLanguage;
     if (!lang) return;
 
-    const isLoaded = isSpecialLang(lang) || highlighter.getLoadedLanguages().includes(lang);
+    if (!isLanguageLoaded(lang)) {
+      if (lazy && lang in highlighter.getBundledLanguages()) {
+        await highlighter.loadLanguage(lang as never);
+      } else if (fallbackLanguage) {
+        lang = fallbackLanguage;
 
-    if (lazy && !isLoaded && lang in highlighter.getBundledLanguages()) {
-      await highlighter.loadLanguage(lang as never);
-    } else if (!isLoaded && fallbackLanguage) {
-      lang = fallbackLanguage;
-      await highlighter.loadLanguage(fallbackLanguage as never);
+        if (!isLanguageLoaded(fallbackLanguage))
+          await highlighter.loadLanguage(fallbackLanguage as never);
+      }
     }
 
     const fragment = highlight(lang, parsed.code, parsed.meta, tree, node);
