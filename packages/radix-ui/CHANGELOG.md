@@ -1,5 +1,17 @@
 # fumadocs-ui
 
+## 16.7.15
+
+### Patch Changes
+
+- c731a92: Implement selective re-render for TOC
+- ccad791: Expose `next-themes`
+- Updated dependencies [e1567e2]
+- Updated dependencies [9a200c8]
+- Updated dependencies [c731a92]
+- Updated dependencies [a4189ce]
+  - fumadocs-core@16.7.15
+
 ## 16.7.14
 
 ### Patch Changes

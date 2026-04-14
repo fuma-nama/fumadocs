@@ -1,5 +1,16 @@
 # next-docs-mdx
 
+## 14.2.14
+
+### Patch Changes
+
+- eb62304: Make `mdx-remote` optional for dynamic mode
+- Updated dependencies [e1567e2]
+- Updated dependencies [9a200c8]
+- Updated dependencies [c731a92]
+- Updated dependencies [a4189ce]
+  - fumadocs-core@16.7.15
+
 ## 14.2.13
 
 ### Patch Changes
