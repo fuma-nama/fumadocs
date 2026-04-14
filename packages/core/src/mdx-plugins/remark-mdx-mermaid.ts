@@ -32,10 +32,10 @@ export function remarkMdxMermaid(options: RemarkMdxMermaidOptions = {}): Transfo
   const { lang = 'mermaid' } = options;
 
   return (tree) => {
-    visit(tree, 'code', (node) => {
-      if (node.lang !== lang || !node.value) return;
+    visit(tree, 'code', (node, idx, parent) => {
+      if (node.lang !== lang || !node.value || typeof idx !== 'number' || !parent) return;
 
-      Object.assign(node, toMDX(node.value));
+      parent.children[idx] = toMDX(node.value);
     });
   };
 }

@@ -33,8 +33,6 @@ export interface RemarkNpmOptions {
   packageManagers?: PackageManager[];
 }
 
-const aliases = ['npm', 'package-install'];
-
 /**
  * It generates multiple tabs of codeblocks for different package managers from a npm command codeblock.
  */
@@ -48,13 +46,25 @@ export function remarkNpm({
   ],
 }: RemarkNpmOptions = {}): Transformer<Root, Root> {
   return (tree) => {
-    visit(tree, 'code', (node) => {
-      if (!node.lang || !aliases.includes(node.lang)) return;
-      let code = node.value;
+    visit(tree, 'code', (node, idx, parent) => {
+      if (typeof idx !== 'number' || !parent) return;
+      let code: string;
 
-      if (node.lang === 'package-install' && !code.startsWith('npm') && !code.startsWith('npx')) {
-        code = `npm install ${code}`;
+      switch (node.lang) {
+        case 'package-install':
+          code = node.value;
+
+          if (!code.startsWith('npm') && !code.startsWith('npx')) {
+            code = `npm install ${code}`;
+          }
+          break;
+        case 'npm':
+          code = node.value;
+          break;
+        default:
+          return;
       }
+
       const options: CodeBlockTabsOptions = {
         persist,
         tabs: [],
@@ -84,7 +94,7 @@ export function remarkNpm({
         });
       }
 
-      Object.assign(node, generateCodeBlockTabs(options));
+      parent.children[idx] = generateCodeBlockTabs(options);
       return 'skip';
     });
   };

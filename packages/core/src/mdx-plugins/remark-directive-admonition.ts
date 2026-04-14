@@ -1,6 +1,6 @@
 import type { BlockContent, DefinitionContent, PhrasingContent, Root } from 'mdast';
 import type { MdxJsxAttribute, MdxJsxFlowElement } from 'mdast-util-mdx';
-import { Transformer } from 'unified';
+import type { Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
 
 export interface RemarkDirectiveAdmonitionOptions {
