@@ -1,5 +1,11 @@
 # @fumadocs/story
 
+## 0.0.14
+
+### Patch Changes
+
+- 64d6b10: Bump `ts-morph`
+
 ## 0.0.13
 
 ### Patch Changes

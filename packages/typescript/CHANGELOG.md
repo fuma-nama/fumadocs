@@ -1,5 +1,11 @@
 # fumadocs-typescript
 
+## 5.2.6
+
+### Patch Changes
+
+- 64d6b10: Bump `ts-morph`
+
 ## 5.2.5
 
 ### Patch Changes
