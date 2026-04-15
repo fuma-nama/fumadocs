@@ -225,8 +225,8 @@
     }
   },
   "inlinedDependencies": {
-    "@formatjs/fast-memoize": "3.1.1",
-    "@formatjs/intl-localematcher": "0.8.2",
+    "@formatjs/fast-memoize": "3.1.2",
+    "@formatjs/intl-localematcher": "0.8.3",
     "image-size": "2.0.2",
     "negotiator": "1.0.0",
     "npm-to-yarn": "3.0.1",
