@@ -27,7 +27,7 @@ export interface TOCItemsProps extends ComponentProps<'div'> {
   thumbBox?: boolean;
 }
 
-export function TOCItems({ ref, className, thumbBox = true, ...props }: TOCItemsProps) {
+export function TOCItems({ ref, className, thumbBox = true, children, ...props }: TOCItemsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const items = useTOCItems();
   const [svg, setSvg] = useState<ComputedSVG | null>(null);
@@ -101,13 +101,15 @@ export function TOCItems({ ref, className, thumbBox = true, ...props }: TOCItems
     if (thumbBox) {
       const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       path.setAttribute('d', d);
-      let l = 0;
-      for (const [top, bottom] of positions) {
-        while (path.getPointAtLength(l).y < top) l++;
-        const topL = l;
-        while (path.getPointAtLength(l).y < bottom) l++;
 
-        itemLineLengths.push([topL, l]);
+      const n = path.getTotalLength();
+      for (let i = 0; i < positions.length; i++) {
+        const [top, bottom] = positions[i];
+        let l = i > 0 ? itemLineLengths[i - 1][1] + (top - positions[i - 1][1]) : top;
+        while (l < n && path.getPointAtLength(l).y < top) l++;
+
+        // vertical line distance = bottom - top
+        itemLineLengths.push([l, l + bottom - top]);
       }
     }
 
@@ -134,14 +136,14 @@ export function TOCItems({ ref, className, thumbBox = true, ...props }: TOCItems
   }, [onPrint]);
 
   return (
-    <>
+    <div
+      ref={mergeRefs(containerRef, ref)}
+      className={cn('relative flex flex-col', className)}
+      {...props}
+    >
       {svg && <ThumbTrack computed={svg} thumbBox={thumbBox} />}
-      <div
-        ref={mergeRefs(containerRef, ref)}
-        className={cn('flex flex-col', className)}
-        {...props}
-      />
-    </>
+      {children}
+    </div>
   );
 }
 
@@ -162,65 +164,59 @@ interface ThumbBoxInfo {
 }
 
 function ThumbTrack({ computed, thumbBox }: { computed: ComputedSVG; thumbBox: boolean }) {
-  const svgRef = useRef<SVGSVGElement>(null);
-  const boxRef = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
   const previousRef = useRef<ThumbBoxInfo>(null);
   const tocInfo = Primitive.useTOC();
-  const onUpdate = useCallback(
-    (items: Primitive.TOCItemInfo[]) => {
-      const svg = svgRef.current;
-      if (!svg) return;
 
-      const startIdx = items.findIndex((item) => item.active);
-      if (startIdx === -1) return;
+  function calculate(items: Primitive.TOCItemInfo[]) {
+    const out: Record<string, string> = {};
+    const startIdx = items.findIndex((item) => item.active);
+    if (startIdx === -1) return out;
 
-      const endIdx = items.findLastIndex((item) => item.active);
-      svg.style.setProperty('--track-top', `${computed.positions[startIdx][0]}px`);
-      svg.style.setProperty('--track-bottom', `${computed.positions[endIdx][1]}px`);
+    const endIdx = items.findLastIndex((item) => item.active);
+    out['--track-top'] = `${computed.positions[startIdx][0]}px`;
+    out['--track-bottom'] = `${computed.positions[endIdx][1]}px`;
 
-      const box = boxRef.current;
-      if (box) {
-        let isUp = false;
-        if (previousRef.current) {
-          const prev = previousRef.current;
-          isUp =
-            prev.startIdx > startIdx ||
-            prev.endIdx > endIdx ||
-            (prev.startIdx === startIdx && prev.endIdx === endIdx && prev.isUp);
-        }
-
-        previousRef.current = { startIdx, endIdx, isUp };
-
-        box.style.setProperty(
-          '--offset-distance',
-          isUp
-            ? `${computed.itemLineLengths[startIdx][0]}px`
-            : `${computed.itemLineLengths[endIdx][1]}px`,
-        );
-        box.style.setProperty(
-          '--opacity',
-          items[isUp ? startIdx : endIdx].original._step !== undefined ? '0' : '1',
-        );
+    if (thumbBox) {
+      let isUp = false;
+      if (previousRef.current) {
+        const prev = previousRef.current;
+        isUp =
+          prev.startIdx > startIdx ||
+          prev.endIdx > endIdx ||
+          (prev.startIdx === startIdx && prev.endIdx === endIdx && prev.isUp);
       }
-    },
-    [computed],
-  );
-  Primitive.useTOCListener(onUpdate);
 
-  useEffect(() => {
-    onUpdate(tocInfo.get());
-  }, [onUpdate, tocInfo]);
+      previousRef.current = { startIdx, endIdx, isUp };
+      out['--offset-distance'] = isUp
+        ? `${computed.itemLineLengths[startIdx][0]}px`
+        : `${computed.itemLineLengths[endIdx][1]}px`;
+      out['--opacity'] = items[isUp ? startIdx : endIdx].original._step !== undefined ? '0' : '1';
+    }
+
+    return out;
+  }
+
+  Primitive.useTOCListener((items) => {
+    const element = ref.current;
+    if (!element) return;
+
+    for (const [k, v] of Object.entries(calculate(items))) {
+      element.style.setProperty(k, v);
+    }
+  });
 
   return (
     <div
+      ref={ref}
       className="absolute top-0 inset-s-0"
       style={{
         width: computed.width,
         height: computed.height,
+        ...calculate(tocInfo.get()),
       }}
     >
       <svg
-        ref={svgRef}
         xmlns="http://www.w3.org/2000/svg"
         viewBox={`0 0 ${computed.width} ${computed.height}`}
         className="absolute transition-[clip-path]"
@@ -234,7 +230,6 @@ function ThumbTrack({ computed, thumbBox }: { computed: ComputedSVG; thumbBox: b
       </svg>
       {thumbBox && (
         <div
-          ref={boxRef}
           className="absolute size-1 bg-fd-primary rounded-full [offset-distance:var(--offset-distance,0)] opacity-(--opacity,0) transition-[opacity,offset-distance]"
           style={{
             offsetPath: `path("${computed.d}")`,
@@ -264,11 +259,13 @@ export function TOCItem({
   ...props
 }: Primitive.TOCItemProps & { item: Primitive.TOCItemType }) {
   const items = useTOCItems();
-  const { lowerOffset, offset, upperOffset } = useMemo(() => {
+  const { lowerOffset, offset, upperOffset, isFirst, isLast } = useMemo(() => {
     const index = items.indexOf(item);
     const offset = getLineOffset(item.depth);
     return {
       offset,
+      isFirst: index === 0,
+      isLast: index === items.length - 1,
       upperOffset: index > 0 ? getLineOffset(items[index - 1].depth) : offset,
       lowerOffset: index + 1 < items.length ? getLineOffset(items[index + 1].depth) : offset,
     };
@@ -279,7 +276,9 @@ export function TOCItem({
       href={item.url}
       {...props}
       className={cn(
-        'group prose relative py-1.5 text-sm scroll-m-4 text-fd-muted-foreground hover:text-fd-accent-foreground transition-colors wrap-anywhere first:pt-0 last:pb-0 data-[active=true]:text-fd-primary',
+        'prose relative py-1.5 text-sm scroll-m-4 text-fd-muted-foreground hover:text-fd-accent-foreground transition-colors wrap-anywhere data-[active=true]:text-fd-primary',
+        isFirst && 'pt-0',
+        isLast && 'pb-0',
         props.className,
       )}
       style={{
@@ -319,8 +318,9 @@ export function TOCItem({
       />
       {item._step !== undefined && (
         <div
-          className="absolute flex items-center justify-center -translate-1/2 -z-1 top-[calc(50%-var(--t,0px)+var(--b,0px))] size-4 font-mono font-medium text-xs bg-fd-muted text-fd-muted-foreground rounded-full leading-none group-first:[--t:--spacing(0.75)] group-last:[--b:--spacing(0.75)]"
+          className="absolute flex items-center justify-center -translate-1/2 -z-1 size-4 font-mono font-medium text-xs bg-fd-muted text-fd-muted-foreground rounded-full leading-none"
           style={{
+            top: `calc(50% + ${(isFirst ? -0.75 : 0) + (isLast ? 0.75 : 0)} * var(--spacing))`,
             insetInlineStart: offset,
           }}
         >

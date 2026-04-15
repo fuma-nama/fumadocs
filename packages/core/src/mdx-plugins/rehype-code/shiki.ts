@@ -1,4 +1,4 @@
-import type { Root, Element } from 'hast';
+import type { Root, Element, ElementContent } from 'hast';
 import type { Transformer } from 'unified';
 import { isSpecialLang } from 'shiki/core';
 import { visit } from 'unist-util-visit';
@@ -15,6 +15,8 @@ import type {
   CodeToHastOptions,
   CodeToHastOptionsCommon,
   HighlighterCore,
+  ShikiTransformer,
+  ShikiTransformerContextMeta,
   TransformerOptions,
 } from 'shiki';
 
@@ -104,7 +106,14 @@ export type RehypeShikiCoreOptions = CodeOptionsThemes<BuiltinTheme> &
   RehypeShikiExtraOptions &
   Omit<CodeToHastOptionsCommon, 'lang'>;
 
-function rehypeShikiFromHighlighter(
+declare module 'shiki' {
+  interface ShikiTransformerContextMeta {
+    /** [Fumadocs: rehype-code] run async tasks after process */
+    _fd_postprocess?: ((ctx: { highlighter: HighlighterCore }) => Promise<void>)[];
+  }
+}
+
+export default function rehypeShikiFromHighlighter(
   highlighter: HighlighterCore,
   options: RehypeShikiCoreOptions,
 ): Transformer<Root, Root> {
@@ -118,70 +127,20 @@ function rehypeShikiFromHighlighter(
     onError,
     stripEndNewline = true,
     inline = false,
-    lazy = false,
+    lazy = true,
     ...rest
   } = options;
-
-  function highlight(
-    lang: string,
-    code: string,
-    metaString = '',
-    tree: Root,
-    node: Element,
-  ): Root | undefined {
-    if (filterMetaString) {
-      metaString = filterMetaString(metaString);
-    }
-
-    const cacheKey = `${lang}:${metaString}:${code}`;
-    const cachedValue = cache?.get(cacheKey);
-
-    if (cachedValue) {
-      return cachedValue;
-    }
-
-    const codeOptions: CodeToHastOptions = {
-      ...rest,
-      lang,
-      meta: {
-        ...rest.meta,
-        __raw: metaString,
-        ...parseMetaString?.(metaString, node, tree),
-      },
-    };
-
-    if (addLanguageClass) {
-      // always construct a new array, avoid adding the transformer repeatedly
-      codeOptions.transformers = [
-        ...(codeOptions.transformers ?? []),
-        {
-          name: 'rehype-shiki:code-language-class',
-          code(node) {
-            this.addClassToHast(node, `language-${lang}`);
-            return node;
-          },
-        },
-      ];
-    }
-
-    if (stripEndNewline && code.endsWith('\n')) code = code.slice(0, -1);
-
-    try {
-      const fragment = highlighter.codeToHast(code, codeOptions);
-      cache?.set(cacheKey, fragment);
-      return fragment;
-    } catch (error) {
-      if (onError) onError(error);
-      else throw error;
-    }
-  }
 
   function isLanguageLoaded(lang: string) {
     return isSpecialLang(lang) || highlighter.getLoadedLanguages().includes(lang);
   }
 
-  async function onNode(tree: Root, node: Element, parsed: ShikiParsedData) {
-    let lang = parsed.lang ?? defaultLanguage;
+  async function onNode(
+    tree: Root,
+    node: Element,
+    parsed: ShikiParsedData,
+  ): Promise<Root | Element | undefined> {
+    let { meta: metaString = '', lang = defaultLanguage, code } = parsed;
     if (!lang) return;
 
     if (!isLanguageLoaded(lang)) {
@@ -195,17 +154,57 @@ function rehypeShikiFromHighlighter(
       }
     }
 
-    const fragment = highlight(lang, parsed.code, parsed.meta, tree, node);
-    if (!fragment) return;
-
-    if (parsed.type === 'inline') {
-      const head = fragment.children[0];
-      if (head.type === 'element' && head.tagName === 'pre') {
-        head.tagName = 'span';
-      }
+    if (filterMetaString) {
+      metaString = filterMetaString(metaString);
     }
 
-    return fragment;
+    const cacheKey = `${lang}:${metaString}:${code}`;
+    const cachedValue = cache?.get(cacheKey);
+
+    if (cachedValue) {
+      return cachedValue;
+    }
+    const transformers = rest.transformers ? [...rest.transformers] : [];
+    let _fd_postprocess: ShikiTransformerContextMeta['_fd_postprocess'];
+    transformers.push({
+      enforce: 'post',
+      root() {
+        _fd_postprocess = this.meta._fd_postprocess;
+      },
+    });
+    if (addLanguageClass) transformers.push(transformerAddLanguage(lang));
+
+    const codeOptions: CodeToHastOptions = {
+      ...rest,
+      lang,
+      structure: parsed.structure,
+      transformers,
+      meta: {
+        ...rest.meta,
+        __raw: metaString,
+        ...parseMetaString?.(metaString, node, tree),
+      },
+    };
+
+    if (stripEndNewline && code.endsWith('\n')) code = code.slice(0, -1);
+
+    const fragment = highlighter.codeToHast(code, codeOptions);
+    if (_fd_postprocess && _fd_postprocess.length > 0) {
+      const ctx = { highlighter };
+      await Promise.all(_fd_postprocess.map((v) => v(ctx)));
+    }
+
+    cache?.set(cacheKey, fragment);
+
+    if (parsed.structure === 'classic') return fragment;
+    return {
+      type: 'element',
+      tagName: 'code',
+      properties: {
+        class: 'shiki',
+      },
+      children: fragment.children as ElementContent[],
+    };
   }
 
   return async (tree) => {
@@ -221,6 +220,8 @@ function rehypeShikiFromHighlighter(
         parsed = PreParser(tree, node);
       } else if (node.tagName === 'code' && inline) {
         parsed = InlineCodeParsers[inline](tree, node);
+      } else {
+        return;
       }
 
       if (!parsed) return 'skip';
@@ -248,4 +249,12 @@ function rehypeShikiFromHighlighter(
   };
 }
 
-export default rehypeShikiFromHighlighter;
+function transformerAddLanguage(lang: string): ShikiTransformer {
+  return {
+    name: 'rehype-shiki:code-language-class',
+    code(node) {
+      this.addClassToHast(node, `language-${lang}`);
+      return node;
+    },
+  };
+}

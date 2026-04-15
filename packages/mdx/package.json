@@ -102,7 +102,7 @@
     "remark-mdx": "^3.1.1",
     "rolldown": "1.0.0-rc.15",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.7",
+    "tsdown": "0.21.8",
     "vite": "^8.0.8",
     "webpack": "^5.106.1"
   },

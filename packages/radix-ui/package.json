@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-ui",
-  "version": "16.7.15",
+  "version": "16.7.16",
   "description": "The Radix UI version of Fumadocs UI",
   "keywords": [
     "Docs",
@@ -158,7 +158,7 @@
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",
     "@tailwindcss/cli": "^4.2.2",
-    "@tsdown/css": "^0.21.6",
+    "@tsdown/css": "^0.21.8",
     "@types/hast": "^3.0.4",
     "@types/mdx": "^2.0.13",
     "@types/node": "^25.6.0",
@@ -169,7 +169,7 @@
     "react-medium-image-zoom": "^5.4.3",
     "tailwindcss": "^4.2.2",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.7",
+    "tsdown": "0.21.8",
     "unified": "^11.0.5"
   },
   "peerDependencies": {

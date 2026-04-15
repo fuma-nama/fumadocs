@@ -69,25 +69,25 @@ export function TOCItems({ ref, className, ...props }: TOCItemsProps) {
 function TocThumb({ computed }: { computed: ComputedData }) {
   const ref = useRef<HTMLDivElement>(null);
   const tocInfo = Primitive.useTOC();
-  const onUpdate = useCallback(
-    (items: Primitive.TOCItemInfo[]) => {
-      const element = ref.current;
-      if (!element) return;
+  function calculate(items: Primitive.TOCItemInfo[]) {
+    const out: Record<string, string> = {};
+    const startIdx = items.findIndex((item) => item.active);
+    if (startIdx === -1) return out;
+    const endIdx = items.findLastIndex((item) => item.active);
 
-      const startIdx = items.findIndex((item) => item.active);
-      if (startIdx === -1) return;
-      const endIdx = items.findLastIndex((item) => item.active);
+    out['--track-top'] = `${computed.positions[startIdx][0]}px`;
+    out['--track-bottom'] = `${computed.positions[endIdx][1]}px`;
+    return out;
+  }
 
-      element.style.setProperty('--track-top', `${computed.positions[startIdx][0]}px`);
-      element.style.setProperty('--track-bottom', `${computed.positions[endIdx][1]}px`);
-    },
-    [computed],
-  );
-  Primitive.useTOCListener(onUpdate);
+  Primitive.useTOCListener((items) => {
+    const element = ref.current;
+    if (!element) return;
 
-  useEffect(() => {
-    onUpdate(tocInfo.get());
-  }, [onUpdate, tocInfo]);
+    for (const [k, v] of Object.entries(calculate(items))) {
+      element.style.setProperty(k, v);
+    }
+  });
 
   return (
     <div
@@ -95,6 +95,7 @@ function TocThumb({ computed }: { computed: ComputedData }) {
       className="absolute inset-y-0 inset-s-0 bg-fd-primary w-px transition-[clip-path]"
       style={{
         clipPath: `polygon(0 var(--track-top,0), 100% var(--track-top,0), 100% var(--track-bottom,0), 0 var(--track-bottom,0))`,
+        ...calculate(tocInfo.get()),
       }}
     />
   );

@@ -95,3 +95,14 @@
     font-style: var(--shiki-dark-font-style);
   }
 }
+
+/* inline code */
+code.shiki span {
+  color: var(--shiki-light);
+  font-style: var(--shiki-light-font-style);
+}
+
+.dark code.shiki span {
+  color: var(--shiki-dark);
+  font-style: var(--shiki-dark-font-style);
+}

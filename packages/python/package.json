@@ -54,7 +54,7 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.7"
+    "tsdown": "0.21.8"
   },
   "peerDependencies": {
     "@types/react": "*",
