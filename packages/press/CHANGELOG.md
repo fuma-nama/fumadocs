@@ -1,5 +1,15 @@
 # fumapress
 
+## 0.1.28
+
+### Patch Changes
+
+- Updated dependencies [f2c6e59]
+- Updated dependencies [9cf33e9]
+- Updated dependencies [9cf33e9]
+  - fumadocs-ui@16.7.16
+  - fumadocs-core@16.7.16
+
 ## 0.1.27
 
 ### Patch Changes

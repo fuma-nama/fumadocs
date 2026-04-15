@@ -1,5 +1,12 @@
 # fumadocs-core
 
+## 16.7.16
+
+### Patch Changes
+
+- 9cf33e9: Improve inline code output
+- 9cf33e9: Support async hooks in Shiki transformers
+
 ## 16.7.15
 
 ### Patch Changes
