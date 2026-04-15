@@ -1,5 +1,19 @@
 # fumadocs-twoslash
 
+## 3.2.0
+
+### Minor Changes
+
+- 9cf33e9: Support lazy loading with `rehype-code`
+
+### Patch Changes
+
+- Updated dependencies [f2c6e59]
+- Updated dependencies [9cf33e9]
+- Updated dependencies [9cf33e9]
+  - fumadocs-ui@16.7.16
+  - fumadocs-core@16.7.16
+
 ## 3.1.17
 
 ### Patch Changes

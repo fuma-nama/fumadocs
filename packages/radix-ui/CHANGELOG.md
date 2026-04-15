@@ -1,5 +1,16 @@
 # fumadocs-ui
 
+## 16.7.16
+
+### Patch Changes
+
+- f2c6e59: Reduce iterations for calculating TOC track
+- 9cf33e9: Improve inline code output
+- 9cf33e9: Support async hooks in Shiki transformers
+- Updated dependencies [9cf33e9]
+- Updated dependencies [9cf33e9]
+  - fumadocs-core@16.7.16
+
 ## 16.7.15
 
 ### Patch Changes
