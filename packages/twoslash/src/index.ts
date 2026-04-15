@@ -25,12 +25,15 @@ export type TransformerTwoslashOptions = TransformerTwoslashIndexOptions;
 let cachedInstance: TwoslashInstance | undefined;
 
 // This is highly inspired by https://github.com/shikijs/shiki/blob/main/packages/vitepress-twoslash
-export function transformerTwoslash(options: TransformerTwoslashOptions = {}): ShikiTransformer {
+/**
+ * This transformer **must** be used with the `rehype-code` plugin of Fumadocs.
+ */
+export function transformerTwoslash(_options: TransformerTwoslashOptions = {}): ShikiTransformer {
   const ignoreClass = 'nd-copy-ignore';
+  const { twoslashOptions = {}, rendererRich: rendererOptions, ...rest } = _options;
 
   // lazy load Twoslash instance so it works on serverless platforms
   function lazyInstance(): TwoslashInstance {
-    const { twoslashOptions = {} } = options;
     function get() {
       return (cachedInstance ??= createTwoslasher({
         ...twoslashOptions,
@@ -53,7 +56,7 @@ export function transformerTwoslash(options: TransformerTwoslashOptions = {}): S
     queryRendering: 'line',
     renderMarkdown,
     renderMarkdownInline,
-    ...options?.rendererRich,
+    ...rendererOptions,
     hast: {
       hoverToken: {
         tagName: 'Popup',
@@ -100,7 +103,7 @@ export function transformerTwoslash(options: TransformerTwoslashOptions = {}): S
       nodesHighlight: {
         class: 'highlighted-word twoslash-highlighted',
       },
-      ...options?.rendererRich?.hast,
+      ...rendererOptions?.hast,
     },
   });
 
@@ -123,7 +126,7 @@ export function transformerTwoslash(options: TransformerTwoslashOptions = {}): S
     renderer,
   )({
     explicitTrigger: true,
-    ...options,
+    ...rest,
   });
 }
 
@@ -133,35 +136,46 @@ function renderMarkdown(this: ShikiTransformerContextCommon, md: string): Elemen
     { mdastExtensions: [gfmFromMarkdown()] },
   );
 
+  const onCode = (lang: string, node: Code) => {
+    return this.codeToHast(node.value, {
+      ...this.options,
+      transformers: [],
+      meta: {
+        __raw: node.meta ?? undefined,
+      },
+      lang,
+    }).children[0] as Element;
+  };
+
   return (
     toHast(mdast, {
       handlers: {
         code: (state, node: Code) => {
-          if (!node.lang) return defaultHandlers.code(state, node);
+          const lang = node.lang;
+          if (!lang) return defaultHandlers.code(state, node);
 
           try {
-            return this.codeToHast(node.value, {
-              ...this.options,
-              transformers: [],
-              meta: {
-                __raw: node.meta ?? undefined,
-              },
-              lang: node.lang,
-            }).children[0] as Element;
+            return onCode(lang, node);
           } catch (e) {
+            const def = defaultHandlers.code(state, node);
+
+            if (e instanceof ShikiError) {
+              this.meta._fd_postprocess ??= [];
+              this.meta._fd_postprocess.push(async ({ highlighter }) => {
+                await highlighter.loadLanguage(lang as never);
+                Object.assign(def, onCode(lang, node));
+              });
+
+              return def;
+            }
+
             if (e instanceof Error) {
               console.error(
                 `[fumadocs-twoslash] encountered an error when highlighting codeblock in a Twoslash popup: ${e.message}`,
               );
             }
 
-            if (e instanceof ShikiError) {
-              console.error(
-                `[fumadocs-twoslash] if language "${node.lang}" is not found, you may have enabled lazy loading which is not compatible with Twoslash, please consider to define "${node.lang}" in the "langs" option first.`,
-              );
-            }
-
-            return defaultHandlers.code(state, node);
+            return def;
           }
         },
       },

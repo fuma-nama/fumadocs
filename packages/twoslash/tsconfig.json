@@ -4,7 +4,7 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "types": ["@types/node"]
+    "types": ["@types/node", "fumadocs-core/mdx-plugins/rehype-code.core"]
   },
   "exclude": ["node_modules", "dist", "eslint.config.mjs"]
 }

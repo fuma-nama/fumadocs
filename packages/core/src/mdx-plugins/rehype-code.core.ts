@@ -18,7 +18,6 @@ import { defaultThemes, getRequiredThemes } from '@/highlight/utils';
 
 export function rehypeCodeDefaultOptions(): RehypeCodeOptionsCommon {
   return {
-    lazy: true,
     ...defaultThemes,
     defaultLanguage: 'plaintext',
     transformers: [
@@ -58,9 +57,7 @@ function parseLineNumber(str: string, data: Record<string, unknown>) {
 
 export type RehypeCodeOptionsCommon = RehypeShikiCoreOptions & {
   /**
-   * Language names to include.
-   *
-   * @default Object.keys(bundledLanguages)
+   * Language names to include & preload.
    */
   langs?: Array<LanguageInput | BuiltinLanguage>;
   /**
@@ -107,7 +104,7 @@ export function createRehypeCode<
       options = (_options ?? {}) as RehypeCodeOptionsCommon;
     }
 
-    const transformers = options.transformers ? [...options.transformers] : [];
+    const transformers: ShikiTransformer[] = options.transformers ? [...options.transformers] : [];
 
     if (options.icon !== false) {
       transformers.push(transformerIcon(options.icon));
@@ -117,13 +114,13 @@ export function createRehypeCode<
       transformers.push(transformerTab());
     }
 
-    const langs =
-      options.langs ??
-      (options.lazy ? ['js', 'jsx', 'ts', 'tsx'] : Object.keys(highlighter.getBundledLanguages()));
-
+    const lazy = options.lazy ?? true;
     await Promise.all([
       highlighter.loadTheme(...(getRequiredThemes(options) as never[])),
-      highlighter.loadLanguage(...(langs as never[])),
+      !lazy &&
+        highlighter.loadLanguage(
+          ...((options.langs ?? Object.keys(highlighter.getBundledLanguages())) as never[]),
+        ),
     ]);
     return rehypeShikiFromHighlighter(highlighter, {
       ...options,

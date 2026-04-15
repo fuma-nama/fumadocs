@@ -93,10 +93,14 @@ transformerTwoslash({
 
 Learn more about [Twoslash notations](https://twoslash.netlify.app/refs/notations).
 
-```ts twoslash title="Test" lineNumbers
+````ts twoslash title="Test" lineNumbers
 type Player = {
   /**
    * The player name
+   * ```php
+   * $a = "60"
+   * ```
+   *
    * @default 'user'
    */
   name: string;
@@ -109,7 +113,9 @@ console.g;
 
 const player: Player = { name: 'Hello World' };
 //    ^?
-```
+````
+
+Test `console.log("Hello World"){:js}`
 
 ```ts twoslash
 const a = '123';

@@ -4,10 +4,10 @@ import { flattenNodeHast } from '../utils';
 const RE_TAILING_CURLY_COLON = /(.+)\{:([\w-]+)\}$/;
 
 export interface ShikiParsedData {
-  type: 'inline' | 'pre';
   meta?: string;
   lang?: string;
   code: string;
+  structure: 'inline' | 'classic';
 }
 
 export type ShikiParser = (tree: Root, node: Element) => ShikiParsedData | undefined;
@@ -21,7 +21,7 @@ export const InlineCodeParsers: Record<InlineCodeParser, ShikiParser> = {
     if (!match) return;
 
     return {
-      type: 'inline',
+      structure: 'inline',
       code: match[1] ?? raw,
       lang: match.at(2),
     };
@@ -43,7 +43,7 @@ export const PreParser: ShikiParser = (_tree, node) => {
     : undefined;
 
   return {
-    type: 'pre',
+    structure: 'classic',
     lang:
       typeof languageClass === 'string' ? languageClass.slice(languagePrefix.length) : undefined,
     code: flattenNodeHast(head),

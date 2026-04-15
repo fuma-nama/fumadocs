@@ -52,7 +52,6 @@ export const docs = defineDocs({
         rehypeCodeOptions: isLint
           ? false
           : {
-              langs: ['ts', 'js', 'html', 'tsx', 'mdx'],
               inline: 'tailing-curly-colon',
               themes: {
                 light: 'catppuccin-latte',
