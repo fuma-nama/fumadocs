@@ -44,7 +44,7 @@
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
     "shiki": "^4.0.2",
-    "ts-morph": "^27.0.2",
+    "ts-morph": "^28.0.0",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.1.0"
   },
@@ -60,7 +60,7 @@
     "fumadocs-ui": "workspace:*",
     "mdast-util-mdx": "^3.0.0",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.7",
+    "tsdown": "0.21.8",
     "typescript": "^6.0.2",
     "vfile": "^6.0.3"
   },

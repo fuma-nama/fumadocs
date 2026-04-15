@@ -84,7 +84,7 @@
     "json-schema-typed": "^8.0.2",
     "tailwindcss": "^4.2.2",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.7"
+    "tsdown": "0.21.8"
   },
   "peerDependencies": {
     "@scalar/api-client-react": "2.x.x",

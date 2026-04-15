@@ -11,9 +11,9 @@
   },
   "dependencies": {
     "@fumadocs/story": "workspace:*",
-    "@tanstack/react-router": "1.168.18",
+    "@tanstack/react-router": "1.168.22",
     "@tanstack/react-router-devtools": "1.166.13",
-    "@tanstack/react-start": "1.167.32",
+    "@tanstack/react-start": "1.167.41",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
@@ -21,7 +21,7 @@
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "tailwind-merge": "^3.5.0",
-    "ts-morph": "^27.0.2",
+    "ts-morph": "^28.0.0",
     "vite": "^8.0.8"
   },
   "devDependencies": {

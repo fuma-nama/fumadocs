@@ -36,7 +36,7 @@
     "postcss-selector-parser": "^7.1.1",
     "tailwindcss": "^4.2.2",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.7"
+    "tsdown": "0.21.8"
   },
   "peerDependencies": {
     "@tailwindcss/oxide": "^4.0.0",
