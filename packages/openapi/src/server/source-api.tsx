@@ -80,7 +80,7 @@ export function openapiPlugin(): LoaderPlugin {
   };
 }
 
-interface OpenAPIPageData extends PageData {
+export interface OpenAPIPageData extends PageData {
   getAPIPageProps: () => ApiPageProps;
   getSchema: () => { id: string } & DereferencedDocument;
   getClientAPIPageProps: () => Promise<ClientApiPageProps>;
@@ -88,20 +88,18 @@ interface OpenAPIPageData extends PageData {
   toc: TOCItemType[];
 }
 
-interface MetaOptions {
-  folderStyle?: 'folder' | 'separator';
-}
+export type OpenAPISourceOptions = SchemaToPagesOptions & {
+  baseDir?: string;
+  /** Generate `meta.json` files */
+  meta?: boolean | { folderStyle?: 'folder' | 'separator' };
+};
 
 /**
  * Generate virtual pages for Fumadocs Source API
  */
 export async function openapiSource(
   server: OpenAPIServer,
-  options: SchemaToPagesOptions & {
-    baseDir?: string;
-    /** Generate `meta.json` files */
-    meta?: boolean | MetaOptions;
-  } = {},
+  options: OpenAPISourceOptions = {},
 ): Promise<
   Source<{
     metaData: MetaData;
@@ -188,7 +186,7 @@ export async function openapiSource(
           }
         } else {
           onEntry(entry);
-          pages.push(relativePath.slice(0, -path.extname(entry.path).length));
+          pages.push(relativePath.slice(0, -PathUtils.extname(entry.path).length));
         }
       }
 
