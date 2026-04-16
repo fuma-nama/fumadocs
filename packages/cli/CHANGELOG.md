@@ -1,5 +1,11 @@
 # fumadocs
 
+## 1.3.8
+
+### Patch Changes
+
+- 71c15fd: fix base dir detection for React Router
+
 ## 1.3.7
 
 ### Patch Changes

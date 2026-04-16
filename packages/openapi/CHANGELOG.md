@@ -1,5 +1,12 @@
 # @fuma-docs/openapi
 
+## 10.7.1
+
+### Patch Changes
+
+- 1ecb7ae: expose more types
+  - fumadocs-ui@16.7.16
+
 ## 10.7.0
 
 ### Minor Changes
