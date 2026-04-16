@@ -22,7 +22,7 @@ export default defineConfig({
     await fs.writeFile(
       'dist/schema.json',
       JSON.stringify(
-        z.toJSONSchema(createConfigSchema(), {
+        z.toJSONSchema(await createConfigSchema(), {
           io: 'input',
         }),
       ),
