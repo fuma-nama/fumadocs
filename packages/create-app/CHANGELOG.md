@@ -1,5 +1,13 @@
 # create-next-docs-app
 
+## 16.0.95
+
+### Patch Changes
+
+- f51b849: update Waku template
+- Updated dependencies [71c15fd]
+  - @fumadocs/cli@1.3.8
+
 ## 16.0.94
 
 ## 16.0.93
