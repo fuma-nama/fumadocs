@@ -9,39 +9,28 @@ const noExternal = [
   'fumadocs-core/mdx-plugins/remark-llms',
 ];
 
-export default defineConfig([
-  {
-    entry: [
-      './src/{index,bin}.ts',
-      './src/{config,next,vite,bun}/index.ts',
-      './src/webpack/{mdx,meta}.ts',
-      './src/node/loader.ts',
-      './src/runtime/*.{ts,tsx}',
-      './src/plugins/*.ts',
-    ],
-    format: 'esm',
-    dts: true,
-    fixedExtension: false,
-    target: 'node22',
-    deps: {
-      onlyBundle: noExternal,
-      alwaysBundle: noExternal,
-      neverBundle: external,
+export default defineConfig({
+  entry: [
+    './src/{index,bin}.ts',
+    './src/{config,next,vite,bun}/index.ts',
+    './src/webpack/{mdx,meta}.ts',
+    './src/node/loader.ts',
+    './src/runtime/*.{ts,tsx}',
+    './src/plugins/*.ts',
+  ],
+  format: 'esm',
+  dts: true,
+  fixedExtension: false,
+  target: 'node22',
+  exports: {
+    customExports: {
+      './loader-mdx': './loader-mdx.cjs',
+      './loader-meta': './loader-meta.cjs',
     },
   },
-  {
-    outDir: 'dist/next',
-    // ensure Next.js CJS config compatibility
-    // because next.config.ts by default uses CJS
-    entry: ['./src/next/index.ts'],
-    format: 'cjs',
-    dts: false,
-    fixedExtension: false,
-    target: 'node22',
-    deps: {
-      onlyBundle: noExternal,
-      alwaysBundle: noExternal,
-      neverBundle: external,
-    },
+  deps: {
+    onlyBundle: noExternal,
+    alwaysBundle: noExternal,
+    neverBundle: external,
   },
-]);
+});

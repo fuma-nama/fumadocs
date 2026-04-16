@@ -17,44 +17,27 @@
     "dist"
   ],
   "type": "module",
-  "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
+    ".": "./dist/index.js",
+    "./bin": "./dist/bin.js",
+    "./bun": "./dist/bun/index.js",
+    "./config": "./dist/config/index.js",
+    "./next": "./dist/next/index.js",
+    "./node/loader": "./dist/node/loader.js",
+    "./plugins/index-file": "./dist/plugins/index-file.js",
+    "./plugins/json-schema": "./dist/plugins/json-schema.js",
+    "./plugins/last-modified": "./dist/plugins/last-modified.js",
+    "./runtime/browser": "./dist/runtime/browser.js",
+    "./runtime/dynamic": "./dist/runtime/dynamic.js",
+    "./runtime/server": "./dist/runtime/server.js",
+    "./runtime/types": "./dist/runtime/types.js",
+    "./vite": "./dist/vite/index.js",
+    "./webpack/mdx": "./dist/webpack/mdx.js",
+    "./webpack/meta": "./dist/webpack/meta.js",
+    "./package.json": "./package.json",
     "./loader-mdx": "./loader-mdx.cjs",
-    "./loader-meta": "./loader-meta.cjs",
-    "./config": {
-      "types": "./dist/config/index.d.ts",
-      "import": "./dist/config/index.js"
-    },
-    "./next": {
-      "types": "./dist/next/index.d.ts",
-      "import": "./dist/next/index.js",
-      "require": "./dist/next/index.cjs"
-    },
-    "./vite": {
-      "types": "./dist/vite/index.d.ts",
-      "import": "./dist/vite/index.js"
-    },
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    },
-    "./runtime/*": {
-      "types": "./dist/runtime/*.d.ts",
-      "import": "./dist/runtime/*.js"
-    },
-    "./node/loader": {
-      "types": "./dist/node/loader.d.ts",
-      "import": "./dist/node/loader.js"
-    },
-    "./bun": {
-      "types": "./dist/bun/index.d.ts",
-      "import": "./dist/bun/index.js"
-    },
-    "./plugins/*": {
-      "types": "./dist/plugins/*.d.ts",
-      "import": "./dist/plugins/*.js"
-    }
+    "./loader-meta": "./loader-meta.cjs"
   },
   "publishConfig": {
     "access": "public"
