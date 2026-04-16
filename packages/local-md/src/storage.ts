@@ -5,20 +5,15 @@ import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
 import { LocalMarkdownConfig } from '.';
 import { frontmatter as parseFrontmatter } from 'fumadocs-core/content/md/frontmatter';
 
-export interface RawPage {
+export interface Page {
   type: 'page';
   path: string;
   absolutePath: string;
 
-  data: {
-    title: string;
-    description?: string;
-    content: string;
-    frontmatter: Record<string, unknown>;
-  };
+  data: PageData;
 }
 
-export interface RawMeta {
+export interface Meta {
   type: 'meta';
   path: string;
   absolutePath: string;
@@ -29,10 +24,17 @@ export interface RawMeta {
   } & Record<string, unknown>;
 }
 
-type BuildFileOutput = RawPage | RawMeta | undefined;
+export interface PageData {
+  title: string;
+  description?: string;
+  content: string;
+  frontmatter: Record<string, unknown>;
+}
+
+type BuildFileOutput = Page | Meta | undefined;
 
 const CHUNK_SIZE = 100;
-export const filesCache = new Map<string, RawPage | RawMeta>();
+export const filesCache = new Map<string, Page | Meta>();
 
 async function buildFile(config: LocalMarkdownConfig, file: string): Promise<BuildFileOutput> {
   const absolutePath = path.resolve(config.dir, file);
@@ -80,8 +82,8 @@ export async function getPages(config: LocalMarkdownConfig) {
     chunks.push(Promise.all(promises));
   }
 
-  const pages: RawPage[] = [];
-  const metas: RawMeta[] = [];
+  const pages: Page[] = [];
+  const metas: Meta[] = [];
   for await (const chunk of chunks) {
     for (const item of chunk) {
       if (!item) continue;
@@ -92,7 +94,7 @@ export async function getPages(config: LocalMarkdownConfig) {
   return { pages, metas };
 }
 
-async function md(absolutePath: string, file: string): Promise<RawPage> {
+async function md(absolutePath: string, file: string): Promise<Page> {
   const content = await fs.readFile(absolutePath, 'utf-8');
   const parsed = parseFrontmatter(content);
 
@@ -112,7 +114,7 @@ async function md(absolutePath: string, file: string): Promise<RawPage> {
   };
 }
 
-async function json(absolutePath: string, file: string): Promise<RawMeta | undefined> {
+async function json(absolutePath: string, file: string): Promise<Meta | undefined> {
   const content = await fs.readFile(absolutePath, 'utf-8');
   const parsed = JSON.parse(content);
   const result = metaSchema.loose().safeParse(parsed);

@@ -14,6 +14,11 @@
     "dist"
   ],
   "type": "module",
+  "exports": {
+    ".": "./dist/index.js",
+    "./dev": "./dist/dev/index.js",
+    "./package.json": "./package.json"
+  },
   "publishConfig": {
     "access": "public"
   },
@@ -27,14 +32,21 @@
   "dependencies": {
     "chokidar": "^5.0.0",
     "eval-estree-expression": "^3.0.1",
-    "ignore": "^7.0.5",
-    "tinyglobby": "^0.2.16"
+    "hast-util-to-jsx-runtime": "^2.3.6",
+    "remark": "^15.0.1",
+    "remark-rehype": "^11.1.2",
+    "tinyglobby": "^0.2.16",
+    "unified": "^11.0.5",
+    "vfile": "^6.0.3"
   },
   "devDependencies": {
+    "@types/hast": "^3.0.4",
     "@types/mdx": "^2.0.13",
     "@types/node": "25.6.0",
     "@types/react": "^19.2.14",
+    "@types/unist": "^3.0.3",
     "fumadocs-core": "workspace:*",
+    "ignore": "^7.0.5",
     "react": "^19.2.5",
     "tsconfig": "workspace:*",
     "tsdown": "0.21.8"

@@ -2,7 +2,7 @@ import { type ChokidarOptions, type Matcher, watch } from 'chokidar';
 import ignore, { type Ignore } from 'ignore';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { LocalMarkdownConfig } from '.';
+import type { LocalMarkdownConfig } from '..';
 
 export async function startWatcher(config: LocalMarkdownConfig) {
   // init .gitignore

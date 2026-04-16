@@ -2186,13 +2186,28 @@ importers:
       eval-estree-expression:
         specifier: ^3.0.1
         version: 3.0.1
-      ignore:
-        specifier: ^7.0.5
-        version: 7.0.5
+      hast-util-to-jsx-runtime:
+        specifier: ^2.3.6
+        version: 2.3.6
+      remark:
+        specifier: ^15.0.1
+        version: 15.0.1
+      remark-rehype:
+        specifier: ^11.1.2
+        version: 11.1.2
       tinyglobby:
         specifier: ^0.2.16
         version: 0.2.16
+      unified:
+        specifier: ^11.0.5
+        version: 11.0.5
+      vfile:
+        specifier: ^6.0.3
+        version: 6.0.3
     devDependencies:
+      '@types/hast':
+        specifier: ^3.0.4
+        version: 3.0.4
       '@types/mdx':
         specifier: ^2.0.13
         version: 2.0.13
@@ -2202,9 +2217,15 @@ importers:
       '@types/react':
         specifier: ^19.2.14
         version: 19.2.14
+      '@types/unist':
+        specifier: ^3.0.3
+        version: 3.0.3
       fumadocs-core:
         specifier: workspace:*
         version: link:../core
+      ignore:
+        specifier: ^7.0.5
+        version: 7.0.5
       react:
         specifier: ^19.2.5
         version: 19.2.5

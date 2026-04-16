@@ -24,3 +24,6 @@ export interface LocalMarkdownConfig {
 export async function localMd(config: LocalMarkdownConfig) {
   return source(await getPages(config));
 }
+
+export type { Meta, Page } from './storage';
+export * from './md';

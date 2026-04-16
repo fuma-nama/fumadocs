@@ -4,10 +4,11 @@ export default defineConfig({
   dts: true,
   fixedExtension: false,
   target: 'es2023',
-  entry: ['./src/index.ts', './src/client/index.ts'],
+  entry: ['./src/index.ts', './src/dev/index.ts'],
   format: 'esm',
+  exports: true,
   deps: {
-    onlyBundle: [],
+    onlyBundle: ['ignore'],
     neverBundle: ['mdx/types'],
   },
 });
