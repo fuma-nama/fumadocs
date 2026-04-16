@@ -1,14 +1,17 @@
 import fs from 'node:fs/promises';
 import { z } from 'zod';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import path from 'node:path';
+import { detectFramework } from 'fuma-cli/detect';
 
 const frameworks = ['next', 'waku', 'react-router', 'tanstack-start'] as const;
 export type Framework = (typeof frameworks)[number];
 
-export function createConfigSchema(cwd = process.cwd()) {
-  const srcDir = path.resolve(cwd, 'src');
-  const packageJsonPath = path.resolve(cwd, 'package.json');
+function isSupportedFramework(v: string): v is Framework {
+  return frameworks.includes(v as Framework);
+}
+
+export async function createConfigSchema(cwd = process.cwd()) {
   const defaultAliases = {
     uiDir: './components/ui',
     componentsDir: './components',
@@ -16,6 +19,9 @@ export function createConfigSchema(cwd = process.cwd()) {
     cssDir: './styles',
     libDir: './lib',
   };
+
+  let framework = await detectFramework(cwd);
+  if (!isSupportedFramework(framework)) framework = 'next';
 
   return z.object({
     $schema: z.string().default('node_modules/@fumadocs/cli/dist/schema.json').optional(),
@@ -29,11 +35,13 @@ export function createConfigSchema(cwd = process.cwd()) {
       })
       .default(defaultAliases),
 
-    baseDir: z.string().default(() => (existsSync(srcDir) ? 'src' : '')),
-    uiLibrary: z.enum(['radix-ui', 'base-ui']).default('radix-ui'),
-    framework: z.literal(frameworks).default(() => {
-      return detectFrameworkFromPackageJson(packageJsonPath) ?? 'next';
+    baseDir: z.string().default(() => {
+      if (framework === 'react-router' && existsSync(path.resolve(cwd, 'app'))) return 'app';
+      if (existsSync(path.resolve(cwd, 'src'))) return 'src';
+      return '';
     }),
+    uiLibrary: z.enum(['radix-ui', 'base-ui']).default('radix-ui'),
+    framework: z.literal(frameworks).default(framework),
 
     commands: z
       .object({
@@ -46,26 +54,7 @@ export function createConfigSchema(cwd = process.cwd()) {
   });
 }
 
-function detectFrameworkFromPackageJson(pkgPath: string): Framework | undefined {
-  try {
-    const pkgRaw = readFileSync(pkgPath, 'utf-8');
-    const pkg = JSON.parse(pkgRaw);
-
-    const deps = {
-      ...pkg.dependencies,
-      ...pkg.devDependencies,
-    };
-
-    if (deps['next']) return 'next';
-    if (deps['waku']) return 'waku';
-    if (deps['react-router'] || deps['react-router-dom']) return 'react-router';
-    if (deps['@tanstack/react-start']) return 'tanstack-start';
-  } catch {
-    return;
-  }
-}
-
-type ConfigSchema = ReturnType<typeof createConfigSchema>;
+type ConfigSchema = Awaited<ReturnType<typeof createConfigSchema>>;
 
 export type ConfigInput = z.input<ConfigSchema>;
 export type LoadedConfig = z.output<ConfigSchema>;
@@ -75,7 +64,7 @@ export async function createOrLoadConfig(file = './cli.json'): Promise<LoadedCon
   if (inited) return inited;
 
   const content = await fs.readFile(file, 'utf-8');
-  const configSchema = createConfigSchema();
+  const configSchema = await createConfigSchema();
 
   return configSchema.parse(JSON.parse(content));
 }
@@ -101,5 +90,6 @@ export async function initConfig(file = './cli.json'): Promise<LoadedConfig | un
 }
 
 export async function getDefaultConfig(cwd?: string) {
-  return createConfigSchema(cwd).parse({} satisfies ConfigInput);
+  const schema = await createConfigSchema(cwd);
+  return schema.parse({} satisfies ConfigInput);
 }

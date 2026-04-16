@@ -9,13 +9,15 @@ export default defineConfig({
     // we do this to avoid Vite from bundling React contexts and cause duplicated contexts conflicts.
     optimizeDeps: {
       exclude: ['fumadocs-ui', 'fumadocs-core'],
-    },
-    ssr: {
-      external: ['@takumi-rs/image-response'],
+      include: [
+        'fumadocs-ui > unified',
+        'fumadocs-core > remark',
+        'fumadocs-core > hast-util-to-jsx-runtime',
+      ],
     },
     resolve: {
       tsconfigPaths: true,
-      external: ['@orama/orama'],
+      external: ['@takumi-rs/image-response'],
     },
 
     plugins: [tailwindcss(), mdx(MdxConfig)],

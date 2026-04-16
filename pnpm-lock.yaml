@@ -1546,9 +1546,6 @@ importers:
 
   examples/waku:
     dependencies:
-      '@orama/orama':
-        specifier: ^3.1.18
-        version: 3.1.18
       '@takumi-rs/image-response':
         specifier: ^1.0.9
         version: 1.0.9(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -7707,7 +7704,6 @@ packages:
 
   bun@1.3.12:
     resolution: {integrity: sha512-KLwDUqs5WIny/94F4xZ4QfaAE6YWyjR+s79pt/ItQhk2CG+PJQ5xL6VuOWhiyN2eP3fryZK95vog9CTLCaYV2Q==}
-    cpu: [arm64, x64]
     os: [darwin, linux, win32]
     hasBin: true
 
