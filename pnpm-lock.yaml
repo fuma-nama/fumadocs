@@ -1746,7 +1746,7 @@ importers:
         version: link:../tsconfig
       tsdown:
         specifier: 0.21.8
-        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1)(typescript@6.0.2)
+        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(typescript@6.0.2)
       unified:
         specifier: ^11.0.5
         version: 11.0.5
@@ -1780,7 +1780,7 @@ importers:
         version: link:../tsconfig
       tsdown:
         specifier: 0.21.8
-        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1)(typescript@6.0.2)
+        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(typescript@6.0.2)
 
   packages/content:
     dependencies:
@@ -1805,7 +1805,7 @@ importers:
         version: link:../tsconfig
       tsdown:
         specifier: 0.21.8
-        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1)(typescript@6.0.2)
+        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(typescript@6.0.2)
 
   packages/content-collections:
     dependencies:
@@ -1833,16 +1833,13 @@ importers:
         version: link:../tsconfig
       tsdown:
         specifier: 0.21.8
-        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1)(typescript@6.0.2)
+        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(typescript@6.0.2)
 
   packages/core:
     dependencies:
       '@orama/orama':
         specifier: ^3.1.18
         version: 3.1.18
-      '@shikijs/transformers':
-        specifier: ^4.0.2
-        version: 4.0.2
       estree-util-value-to-estree:
         specifier: ^3.5.0
         version: 3.5.0
@@ -1855,6 +1852,9 @@ importers:
       hast-util-to-jsx-runtime:
         specifier: ^2.3.6
         version: 2.3.6
+      js-yaml:
+        specifier: ^4.1.1
+        version: 4.1.1
       mdast-util-mdx:
         specifier: ^3.0.0
         version: 3.0.0
@@ -1910,6 +1910,9 @@ importers:
       '@oramacloud/client':
         specifier: ^2.1.4
         version: 2.1.4
+      '@shikijs/transformers':
+        specifier: ^4.0.2
+        version: 4.0.2
       '@tanstack/react-router':
         specifier: 1.168.22
         version: 1.168.22(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -1919,6 +1922,9 @@ importers:
       '@types/hast':
         specifier: ^3.0.4
         version: 3.0.4
+      '@types/js-yaml':
+        specifier: ^4.0.9
+        version: 4.0.9
       '@types/mdast':
         specifier: ^4.0.4
         version: 4.0.4
@@ -1975,7 +1981,7 @@ importers:
         version: link:../tsconfig
       tsdown:
         specifier: 0.21.8
-        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1)(typescript@6.0.2)
+        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(typescript@6.0.2)
       typescript:
         specifier: ^6.0.2
         version: 6.0.2
@@ -2027,7 +2033,7 @@ importers:
         version: link:../tsconfig
       tsdown:
         specifier: 0.21.8
-        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1)(typescript@6.0.2)
+        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(typescript@6.0.2)
       typescript:
         specifier: ^6.0.2
         version: 6.0.2
@@ -2118,7 +2124,7 @@ importers:
         version: link:../tsconfig
       tsdown:
         specifier: 0.21.8
-        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1)(typescript@6.0.2)
+        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(typescript@6.0.2)
       typescript:
         specifier: ^6.0.2
         version: 6.0.2
@@ -2164,13 +2170,50 @@ importers:
         version: link:../tsconfig
       tsdown:
         specifier: 0.21.8
-        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1)(typescript@6.0.2)
+        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(typescript@6.0.2)
       typescript:
         specifier: ^6.0.2
         version: 6.0.2
       vfile:
         specifier: ^6.0.3
         version: 6.0.3
+
+  packages/local-md:
+    dependencies:
+      chokidar:
+        specifier: ^5.0.0
+        version: 5.0.0
+      eval-estree-expression:
+        specifier: ^3.0.1
+        version: 3.0.1
+      ignore:
+        specifier: ^7.0.5
+        version: 7.0.5
+      tinyglobby:
+        specifier: ^0.2.16
+        version: 0.2.16
+    devDependencies:
+      '@types/mdx':
+        specifier: ^2.0.13
+        version: 2.0.13
+      '@types/node':
+        specifier: 25.6.0
+        version: 25.6.0
+      '@types/react':
+        specifier: ^19.2.14
+        version: 19.2.14
+      fumadocs-core:
+        specifier: workspace:*
+        version: link:../core
+      react:
+        specifier: ^19.2.5
+        version: 19.2.5
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      tsdown:
+        specifier: 0.21.8
+        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(typescript@6.0.2)
 
   packages/mdx:
     dependencies:
@@ -2276,7 +2319,7 @@ importers:
         version: link:../tsconfig
       tsdown:
         specifier: 0.21.8
-        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1)(typescript@6.0.2)
+        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(typescript@6.0.2)
       vite:
         specifier: ^8.0.8
         version: 8.0.8(@types/node@25.6.0)(esbuild@0.28.0)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
@@ -2289,9 +2332,9 @@ importers:
       '@mdx-js/mdx':
         specifier: ^3.1.1
         version: 3.1.1
-      gray-matter:
-        specifier: ^4.0.3
-        version: 4.0.3
+      js-yaml:
+        specifier: ^4.1.1
+        version: 4.1.1
       unified:
         specifier: ^11.0.5
         version: 11.0.5
@@ -2325,24 +2368,21 @@ importers:
         version: link:../tsconfig
       tsdown:
         specifier: 0.21.8
-        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1)(typescript@6.0.2)
+        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(typescript@6.0.2)
 
   packages/obsidian:
     dependencies:
       github-slugger:
         specifier: ^2.0.0
         version: 2.0.0
-      gray-matter:
-        specifier: ^4.0.3
-        version: 4.0.3
       js-yaml:
         specifier: ^4.1.1
         version: 4.1.1
       react:
-        specifier: '*'
+        specifier: ^19.2.0
         version: 19.2.5
       react-dom:
-        specifier: '*'
+        specifier: ^19.2.0
         version: 19.2.5(react@19.2.5)
       remark-math:
         specifier: ^6.0.0
@@ -2404,7 +2444,7 @@ importers:
         version: link:../tsconfig
       tsdown:
         specifier: 0.21.8
-        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1)(typescript@6.0.2)
+        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(typescript@6.0.2)
       typescript:
         specifier: ^6.0.2
         version: 6.0.2
@@ -2516,7 +2556,7 @@ importers:
         version: link:../tsconfig
       tsdown:
         specifier: 0.21.8
-        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1)(typescript@6.0.2)
+        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(typescript@6.0.2)
 
   packages/press:
     dependencies:
@@ -2611,9 +2651,6 @@ importers:
       beautiful-mermaid:
         specifier: ^1.1.3
         version: 1.1.3
-      gray-matter:
-        specifier: ^4.0.3
-        version: 4.0.3
       hast-util-to-jsx-runtime:
         specifier: ^2.3.6
         version: 2.3.6
@@ -2658,7 +2695,7 @@ importers:
         version: 4.2.2
       tsdown:
         specifier: 0.21.8
-        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1)(typescript@6.0.2)
+        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(typescript@6.0.2)
       typescript:
         specifier: ^6.0.2
         version: 6.0.2
@@ -2710,7 +2747,7 @@ importers:
         version: link:../tsconfig
       tsdown:
         specifier: 0.21.8
-        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1)(typescript@6.0.2)
+        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(typescript@6.0.2)
 
   packages/radix-ui:
     dependencies:
@@ -2831,7 +2868,7 @@ importers:
         version: link:../tsconfig
       tsdown:
         specifier: 0.21.8
-        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1)(typescript@6.0.2)
+        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(typescript@6.0.2)
       unified:
         specifier: ^11.0.5
         version: 11.0.5
@@ -2875,7 +2912,7 @@ importers:
         version: link:../tsconfig
       tsdown:
         specifier: 0.21.8
-        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1)(typescript@6.0.2)
+        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(typescript@6.0.2)
 
   packages/story:
     dependencies:
@@ -2933,7 +2970,7 @@ importers:
         version: link:../tsconfig
       tsdown:
         specifier: 0.21.8
-        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1)(typescript@6.0.2)
+        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(typescript@6.0.2)
 
   packages/tailwind:
     devDependencies:
@@ -2957,7 +2994,7 @@ importers:
         version: link:../tsconfig
       tsdown:
         specifier: 0.21.8
-        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1)(typescript@6.0.2)
+        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(typescript@6.0.2)
 
   packages/tsconfig: {}
 
@@ -3017,7 +3054,7 @@ importers:
         version: link:../tsconfig
       tsdown:
         specifier: 0.21.8
-        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1)(typescript@6.0.2)
+        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(typescript@6.0.2)
       typescript:
         specifier: ^6.0.2
         version: 6.0.2
@@ -3093,7 +3130,7 @@ importers:
         version: link:../tsconfig
       tsdown:
         specifier: 0.21.8
-        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1)(typescript@6.0.2)
+        version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(typescript@6.0.2)
       typescript:
         specifier: ^6.0.2
         version: 6.0.2
@@ -7704,6 +7741,7 @@ packages:
 
   bun@1.3.12:
     resolution: {integrity: sha512-KLwDUqs5WIny/94F4xZ4QfaAE6YWyjR+s79pt/ItQhk2CG+PJQ5xL6VuOWhiyN2eP3fryZK95vog9CTLCaYV2Q==}
+    cpu: [arm64, x64]
     os: [darwin, linux, win32]
     hasBin: true
 
@@ -8699,6 +8737,9 @@ packages:
   etag@1.8.1:
     resolution: {integrity: sha512-aIL5Fx7mawVa300al2BnEE4iNvo1qETxLrPI/o05L7z6go7fCw1J6EQmbK4FmJ2AS7kgVF/KEZWufBfdClMcPg==}
     engines: {node: '>= 0.6'}
+
+  eval-estree-expression@3.0.1:
+    resolution: {integrity: sha512-zTLKGbiVdQYp4rQkSoXPibrFf5ZoPn6jzExegRLEQ13F+FSxu5iLgaRH6hlDs2kWSUa6vp8yD20cdJi0me6pEw==}
 
   event-target-shim@5.0.1:
     resolution: {integrity: sha512-i/2XbnSz/uxRCU6+NdVJgKWDTM427+MqYbkQzD321DuCQJUqOuJKIA0IM2+W2xtYHdKOmZ4dR6fExsd4SXL+WQ==}
@@ -16065,7 +16106,7 @@ snapshots:
       react: 19.2.5
       react-dom: 19.2.5(react@19.2.5)
     optionalDependencies:
-      '@vitejs/plugin-rsc': 0.5.24(react-dom@19.2.5(react@19.2.5))(react-server-dom-webpack@19.2.5(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(webpack@5.106.1(esbuild@0.28.0)))(react@19.2.5)(vite@8.0.8(@types/node@25.6.0)(esbuild@0.28.0)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+      '@vitejs/plugin-rsc': 0.5.24(react-dom@19.2.5(react@19.2.5))(react-server-dom-webpack@19.2.5(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react@19.2.5)(vite@8.0.8(@types/node@25.6.0)(esbuild@0.28.0)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
     transitivePeerDependencies:
       - '@rsbuild/core'
       - crossws
@@ -16101,7 +16142,7 @@ snapshots:
       react-dom: 19.2.5(react@19.2.5)
       vite: 8.0.8(@types/node@25.6.0)(esbuild@0.28.0)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
     optionalDependencies:
-      '@vitejs/plugin-rsc': 0.5.24(react-dom@19.2.5(react@19.2.5))(react-server-dom-webpack@19.2.5(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(webpack@5.106.1(esbuild@0.28.0)))(react@19.2.5)(vite@8.0.8(@types/node@25.6.0)(esbuild@0.28.0)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
+      '@vitejs/plugin-rsc': 0.5.24(react-dom@19.2.5(react@19.2.5))(react-server-dom-webpack@19.2.5(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react@19.2.5)(vite@8.0.8(@types/node@25.6.0)(esbuild@0.28.0)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
     transitivePeerDependencies:
       - '@rsbuild/core'
       - crossws
@@ -16272,7 +16313,7 @@ snapshots:
       lightningcss: 1.32.0
       postcss-load-config: 6.0.1(jiti@2.6.1)(postcss@8.5.9)(tsx@4.21.0)(yaml@2.8.3)
       rolldown: 1.0.0-rc.15
-      tsdown: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1)(typescript@6.0.2)
+      tsdown: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(typescript@6.0.2)
     optionalDependencies:
       postcss: 8.5.9
     transitivePeerDependencies:
@@ -17938,7 +17979,7 @@ snapshots:
 
   dset@3.1.4: {}
 
-  dts-resolver@2.1.3(oxc-resolver@11.19.1):
+  dts-resolver@2.1.3(oxc-resolver@11.19.1(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)):
     optionalDependencies:
       oxc-resolver: 11.19.1(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)
 
@@ -18276,6 +18317,8 @@ snapshots:
   esutils@2.0.3: {}
 
   etag@1.8.1: {}
+
+  eval-estree-expression@3.0.1: {}
 
   event-target-shim@5.0.1: {}
 
@@ -21316,7 +21359,7 @@ snapshots:
 
   robust-predicates@3.0.3: {}
 
-  rolldown-plugin-dts@0.23.2(oxc-resolver@11.19.1)(rolldown@1.0.0-rc.15)(typescript@6.0.2):
+  rolldown-plugin-dts@0.23.2(oxc-resolver@11.19.1(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rolldown@1.0.0-rc.15)(typescript@6.0.2):
     dependencies:
       '@babel/generator': 8.0.0-rc.3
       '@babel/helper-validator-identifier': 8.0.0-rc.3
@@ -21324,7 +21367,7 @@ snapshots:
       '@babel/types': 8.0.0-rc.3
       ast-kit: 3.0.0-beta.1
       birpc: 4.0.0
-      dts-resolver: 2.1.3(oxc-resolver@11.19.1)
+      dts-resolver: 2.1.3(oxc-resolver@11.19.1(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))
       get-tsconfig: 4.14.0
       obug: 2.1.1
       picomatch: 4.0.4
@@ -21961,7 +22004,7 @@ snapshots:
       minimist: 1.2.8
       strip-bom: 3.0.0
 
-  tsdown@0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1)(typescript@6.0.2):
+  tsdown@0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(typescript@6.0.2):
     dependencies:
       ansis: 4.2.0
       cac: 7.0.0
@@ -21972,7 +22015,7 @@ snapshots:
       obug: 2.1.1
       picomatch: 4.0.4
       rolldown: 1.0.0-rc.15
-      rolldown-plugin-dts: 0.23.2(oxc-resolver@11.19.1)(rolldown@1.0.0-rc.15)(typescript@6.0.2)
+      rolldown-plugin-dts: 0.23.2(oxc-resolver@11.19.1(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rolldown@1.0.0-rc.15)(typescript@6.0.2)
       semver: 7.7.4
       tinyexec: 1.1.1
       tinyglobby: 0.2.16

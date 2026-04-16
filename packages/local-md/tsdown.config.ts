@@ -8,7 +8,6 @@ export default defineConfig({
   format: 'esm',
   deps: {
     onlyBundle: [],
-    alwaysBundle: ['fumadocs-core/content/md/frontmatter'],
     neverBundle: ['mdx/types'],
   },
 });

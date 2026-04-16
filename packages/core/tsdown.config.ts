@@ -11,6 +11,7 @@ export default defineConfig({
     'src/{toc,link,breadcrumb,dynamic-link}.tsx',
     'src/page-tree/index.ts',
     'src/{negotiation,content}/*',
+    'src/content/md/*.ts',
     'src/content/mdx/preset-*.ts',
     'src/source/{index,schema}.ts',
     'src/source/client/*.{ts,tsx}',
@@ -37,6 +38,7 @@ export default defineConfig({
       'negotiator',
       'npm-to-yarn',
       '@formatjs/fast-memoize',
+      '@shikijs/transformers',
     ],
   },
   exports: {

@@ -1,10 +1,9 @@
-import type { ContentConfig } from '@/config/global';
 import fs from 'node:fs/promises';
 import { glob } from 'tinyglobby';
 import path from 'node:path';
-import { frontmatter as parseFrontmatter } from 'fumadocs-core/content/md/frontmatter';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
-import { type NormalizedProjectConfig, normalizeProjects } from './config';
+import { LocalMarkdownConfig } from '.';
+import { frontmatter as parseFrontmatter } from 'fumadocs-core/content/md/frontmatter';
 
 export interface RawPage {
   type: 'page';
@@ -16,8 +15,6 @@ export interface RawPage {
     description?: string;
     content: string;
     frontmatter: Record<string, unknown>;
-
-    project: NormalizedProjectConfig;
   };
 }
 
@@ -37,23 +34,8 @@ type BuildFileOutput = RawPage | RawMeta | undefined;
 const CHUNK_SIZE = 100;
 export const filesCache = new Map<string, RawPage | RawMeta>();
 
-export async function getPages(config: ContentConfig): Promise<{
-  pages: RawPage[];
-  metas: RawMeta[];
-}> {
-  const projects = normalizeProjects(config.projects);
-  return (await Promise.all(projects.map(buildProject))).reduce(
-    (a, b) => {
-      a.metas.push(...b.metas);
-      a.pages.push(...b.pages);
-      return a;
-    },
-    { pages: [], metas: [] },
-  );
-}
-
-async function buildFile(project: NormalizedProjectConfig, file: string): Promise<BuildFileOutput> {
-  const absolutePath = path.resolve(project.dir, file);
+async function buildFile(config: LocalMarkdownConfig, file: string): Promise<BuildFileOutput> {
+  const absolutePath = path.resolve(config.dir, file);
   const cached = filesCache.get(absolutePath);
   if (cached) return cached;
 
@@ -63,11 +45,11 @@ async function buildFile(project: NormalizedProjectConfig, file: string): Promis
     let out: BuildFileOutput;
     switch (ext) {
       case '.json':
-        out = await json(project, absolutePath, file);
+        out = await json(absolutePath, file);
         break;
       case '.mdx':
       case '.md':
-        out = await md(project, absolutePath, file);
+        out = await md(absolutePath, file);
         break;
     }
 
@@ -81,9 +63,9 @@ async function buildFile(project: NormalizedProjectConfig, file: string): Promis
   }
 }
 
-async function buildProject(project: NormalizedProjectConfig) {
-  const files = await glob(project.include, {
-    cwd: project.dir,
+export async function getPages(config: LocalMarkdownConfig) {
+  const files = await glob(config.include, {
+    cwd: config.dir,
   });
   const chunks: Promise<BuildFileOutput[]>[] = [];
 
@@ -92,7 +74,7 @@ async function buildProject(project: NormalizedProjectConfig) {
     const L = Math.min(files.length, i + CHUNK_SIZE);
 
     for (let j = i; j < L; j++) {
-      promises.push(buildFile(project, files[j]!));
+      promises.push(buildFile(config, files[j]!));
     }
 
     chunks.push(Promise.all(promises));
@@ -110,11 +92,7 @@ async function buildProject(project: NormalizedProjectConfig) {
   return { pages, metas };
 }
 
-async function md(
-  project: NormalizedProjectConfig,
-  absolutePath: string,
-  file: string,
-): Promise<RawPage> {
+async function md(absolutePath: string, file: string): Promise<RawPage> {
   const content = await fs.readFile(absolutePath, 'utf-8');
   const parsed = parseFrontmatter(content);
 
@@ -130,16 +108,11 @@ async function md(
       description: frontmatter.description,
       content: parsed.content,
       frontmatter,
-      project,
     },
   };
 }
 
-async function json(
-  _project: NormalizedProjectConfig,
-  absolutePath: string,
-  file: string,
-): Promise<RawMeta | undefined> {
+async function json(absolutePath: string, file: string): Promise<RawMeta | undefined> {
   const content = await fs.readFile(absolutePath, 'utf-8');
   const parsed = JSON.parse(content);
   const result = metaSchema.loose().safeParse(parsed);

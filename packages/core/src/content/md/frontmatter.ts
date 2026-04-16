@@ -17,7 +17,7 @@ const regex = /^---\r?\n(.+?)\r?\n---\r?\n?/s;
 /**
  * parse frontmatter, it supports only yaml format
  */
-export function fumaMatter(input: string): Output {
+export function frontmatter(input: string): Output {
   const output: Output = { matter: '', data: {}, content: input };
   const match = regex.exec(input);
   if (!match) {

@@ -4,7 +4,6 @@ import { expect, test } from 'vitest';
 import { z } from 'zod';
 import { ValidationError } from '@/utils/validation';
 import { defineCollections, defineConfig, defineDocs } from '@/config';
-import { fumaMatter } from '@/utils/fuma-matter';
 import { buildConfig } from '@/config/build';
 import { createCore } from '@/core';
 import indexFile from '@/plugins/index-file';
@@ -194,51 +193,3 @@ for (const { name, config } of cases) {
     await expect(markdown).toMatchFileSnapshot(`./fixtures/index-${name}.output.md`);
   });
 }
-
-test('parse frontmatter', () => {
-  expect(fumaMatter('---\ntitle: hello world\ndescription: I love Fumadocs\n---\nwow looks cool.'))
-    .toMatchInlineSnapshot(`
-    {
-      "content": "wow looks cool.",
-      "data": {
-        "description": "I love Fumadocs",
-        "title": "hello world",
-      },
-      "matter": "---
-    title: hello world
-    description: I love Fumadocs
-    ---
-    ",
-    }
-  `);
-
-  expect(
-    fumaMatter(
-      '---\r\ntitle: hello world\r\ndescription: I love Fumadocs\r\n---\r\nwow looks cool.',
-    ),
-  ).toMatchInlineSnapshot(`
-    {
-      "content": "wow looks cool.",
-      "data": {
-        "description": "I love Fumadocs",
-        "title": "hello world",
-      },
-      "matter": "---
-    title: hello world
-    description: I love Fumadocs
-    ---
-    ",
-    }
-  `);
-
-  expect(fumaMatter('--- \ntitle: hello world\r\n---\r\nwow looks cool.')).toMatchInlineSnapshot(`
-    {
-      "content": "--- 
-    title: hello world
-    ---
-    wow looks cool.",
-      "data": {},
-      "matter": "",
-    }
-  `);
-});
