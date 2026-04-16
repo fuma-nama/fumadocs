@@ -52,12 +52,20 @@
     "tsdown": "0.21.8"
   },
   "peerDependencies": {
+    "@types/hast": "*",
     "@types/mdx": "*",
     "@types/react": "*",
+    "@types/unist": "*",
     "fumadocs-core": "^16.7.17",
     "react": "^19.2.0"
   },
   "peerDependenciesMeta": {
+    "@types/hast": {
+      "optional": true
+    },
+    "@types/unist": {
+      "optional": true
+    },
     "@types/mdx": {
       "optional": true
     },
