@@ -9,12 +9,14 @@ import { Root } from 'hast';
 import { VFile } from 'vfile';
 import type { JSExecutor, JSExecutorConfig } from '@/js/executor';
 import type { CompileResult, MarkdownCompiler } from './compiler';
-import { executeMdx } from './execute-js';
 import { pathToFileURL } from 'node:url';
 
 export interface PageRenderer {
   structuredData: StructuredData;
-  render: (components?: Components) => Promise<{
+  render: (
+    components?: Components,
+    context?: Record<string, unknown>,
+  ) => Promise<{
     exports: Record<string, unknown>;
     toc: TOCItemType[];
     body: ReactNode;
@@ -91,14 +93,14 @@ export function createMarkdownRenderer(
             }
           );
         },
-        async render(components?: Components) {
-          const executor = await getExecutor({
-            jsx: JsxRuntime,
-            filePath: page.absolutePath,
-          });
-
+        async render(components, userContext) {
           if (compiled.type === 'ast') {
-            const context: Record<string, unknown> = { ...components };
+            const executor = await getExecutor({
+              jsx: JsxRuntime,
+              filePath: page.absolutePath,
+            });
+
+            const context = { ...components, ...userContext };
             const toc =
               compiled.file.data.rehypeToc?.map(
                 (item): TOCItemType => ({
@@ -123,10 +125,11 @@ export function createMarkdownRenderer(
             };
           }
 
-          const _out = await executeMdx(compiled.code, {
-            baseUrl: pathToFileURL(page.absolutePath),
-            jsxRuntime: JsxRuntime,
-          });
+          const _out = await executeMdx(
+            compiled.code,
+            pathToFileURL(page.absolutePath).href,
+            userContext,
+          );
           const out = _out as {
             toc: TOCItemType[];
             default: (props: { components?: Components }) => ReactNode;
@@ -141,4 +144,23 @@ export function createMarkdownRenderer(
       };
     },
   };
+}
+
+const AsyncFunction: new (...args: string[]) => (...args: unknown[]) => Promise<unknown> =
+  Object.getPrototypeOf(executeMdx).constructor;
+
+/**
+ * Note: unsafe by design
+ */
+async function executeMdx(compiled: string, baseUrl: string, scope?: object) {
+  const fullScope = {
+    ...scope,
+    opts: {
+      ...JsxRuntime,
+      baseUrl,
+    },
+  };
+
+  const hydrateFn = new AsyncFunction(...Object.keys(fullScope), compiled);
+  return await hydrateFn.apply(hydrateFn, Object.values(fullScope));
 }
