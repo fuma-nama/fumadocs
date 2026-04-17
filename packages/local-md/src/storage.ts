@@ -1,130 +1,143 @@
 import fs from 'node:fs/promises';
 import { glob } from 'tinyglobby';
 import path from 'node:path';
-import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
 import { LocalMarkdownConfig } from '.';
 import { frontmatter as parseFrontmatter } from 'fumadocs-core/content/md/frontmatter';
+import { StandardSchemaV1 } from '@standard-schema/spec';
+import { PageData } from 'fumadocs-core/source';
+import * as defaultSchemas from 'fumadocs-core/source/schema';
 
-export interface Page {
-  type: 'page';
+export interface RawPage<Frontmatter> {
   path: string;
   absolutePath: string;
 
-  data: PageData;
-}
-
-export interface Meta {
-  type: 'meta';
-  path: string;
-  absolutePath: string;
-
-  data: {
-    title?: string;
-    description?: string;
-  } & Record<string, unknown>;
-}
-
-export interface PageData {
   title: string;
   description?: string;
   content: string;
-  frontmatter: Record<string, unknown>;
+  frontmatter: Frontmatter;
 }
 
-type BuildFileOutput = Page | Meta | undefined;
+export interface RawMeta<Data> {
+  path: string;
+  absolutePath: string;
+  data: Data;
+}
 
 const CHUNK_SIZE = 100;
-export const filesCache = new Map<string, Page | Meta>();
 
-async function buildFile(config: LocalMarkdownConfig, file: string): Promise<BuildFileOutput> {
-  const absolutePath = path.resolve(config.dir, file);
-  const cached = filesCache.get(absolutePath);
-  if (cached) return cached;
+export function createStorage<
+  FrontmatterSchema extends StandardSchemaV1 = typeof defaultSchemas.pageSchema,
+  MetaSchema extends StandardSchemaV1 = typeof defaultSchemas.metaSchema,
+>(config: LocalMarkdownConfig<FrontmatterSchema, MetaSchema>) {
+  type $Page = RawPage<StandardSchemaV1.InferOutput<FrontmatterSchema>>;
+  type $Meta = RawMeta<StandardSchemaV1.InferOutput<MetaSchema>>;
+  const filesCache = new Map<string, $Page | $Meta>();
+  const {
+    include = ['**/*.{md,mdx,json}'],
+    dir,
+    frontmatterSchema = defaultSchemas.pageSchema,
+    metaSchema = defaultSchemas.metaSchema,
+  } = config;
 
-  const ext = path.extname(file);
+  async function buildFile(file: string): Promise<$Page | $Meta | undefined> {
+    const absolutePath = path.resolve(dir, file);
+    const cached = filesCache.get(absolutePath);
+    if (cached) return cached;
 
-  try {
-    let out: BuildFileOutput;
-    switch (ext) {
-      case '.json':
-        out = await json(absolutePath, file);
-        break;
-      case '.mdx':
-      case '.md':
-        out = await md(absolutePath, file);
-        break;
-    }
+    const ext = path.extname(file);
 
-    if (out === undefined) filesCache.delete(absolutePath);
-    else filesCache.set(absolutePath, out);
+    try {
+      let out: $Page | $Meta | undefined;
+      switch (ext) {
+        case '.json':
+          out = await json(absolutePath, file);
+          break;
+        case '.mdx':
+        case '.md':
+          out = await md(absolutePath, file);
+          break;
+      }
 
-    return out;
-  } catch (e) {
-    console.error(`error when parsing ${file}`, e);
-    filesCache.delete(absolutePath);
-  }
-}
+      if (out === undefined) filesCache.delete(absolutePath);
+      else filesCache.set(absolutePath, out);
 
-export async function getPages(config: LocalMarkdownConfig) {
-  const files = await glob(config.include, {
-    cwd: config.dir,
-  });
-  const chunks: Promise<BuildFileOutput[]>[] = [];
-
-  for (let i = 0; i < files.length; i += CHUNK_SIZE) {
-    const promises: Promise<BuildFileOutput>[] = [];
-    const L = Math.min(files.length, i + CHUNK_SIZE);
-
-    for (let j = i; j < L; j++) {
-      promises.push(buildFile(config, files[j]!));
-    }
-
-    chunks.push(Promise.all(promises));
-  }
-
-  const pages: Page[] = [];
-  const metas: Meta[] = [];
-  for await (const chunk of chunks) {
-    for (const item of chunk) {
-      if (!item) continue;
-      if (item.type === 'page') pages.push(item);
-      else if (item.type === 'meta') metas.push(item);
+      return out;
+    } catch (e) {
+      console.error(`error when parsing ${file}`, e);
+      filesCache.delete(absolutePath);
     }
   }
-  return { pages, metas };
-}
 
-async function md(absolutePath: string, file: string): Promise<Page> {
-  const content = await fs.readFile(absolutePath, 'utf-8');
-  const parsed = parseFrontmatter(content);
+  async function md(absolutePath: string, file: string): Promise<$Page> {
+    const content = await fs.readFile(absolutePath, 'utf-8');
+    const parsed = parseFrontmatter(content);
 
-  // use default frontmatter if invalid in Fumadocs' spec
-  const { data: frontmatter = {} } = pageSchema.partial().loose().safeParse(parsed.data);
+    const frontmatterResult = await frontmatterSchema['~standard'].validate(parsed.data);
+    if (frontmatterResult.issues) {
+      const message = frontmatterResult.issues
+        .map((issue) => (issue.path ? `${issue.path}: ${issue.message}` : issue.message))
+        .join('\n');
+      throw new Error(`invalid frontmatter in "${absolutePath}": ${message}`);
+    }
 
-  return {
-    type: 'page',
-    path: file,
-    absolutePath,
-    data: {
+    const frontmatter = frontmatterResult.value as PageData;
+    return {
+      path: file,
+      absolutePath,
       title: frontmatter.title ?? path.basename(file, path.extname(file)),
       description: frontmatter.description,
       content: parsed.content,
       frontmatter,
-    },
-  };
-}
+    };
+  }
 
-async function json(absolutePath: string, file: string): Promise<Meta | undefined> {
-  const content = await fs.readFile(absolutePath, 'utf-8');
-  const parsed = JSON.parse(content);
-  const result = metaSchema.loose().safeParse(parsed);
+  async function json(absolutePath: string, file: string): Promise<$Meta | undefined> {
+    const content = await fs.readFile(absolutePath, 'utf-8');
+    const parsed = JSON.parse(content);
+    const result = await metaSchema['~standard'].validate(parsed);
+    if (result.issues) {
+      const message = result.issues
+        .map((issue) => (issue.path ? `${issue.path}: ${issue.message}` : issue.message))
+        .join('\n');
+      throw new Error(`invalid data in "${absolutePath}": ${message}`);
+    }
 
-  // ignore if it is not `meta.json` for Fumadocs
-  if (result.error) return;
+    return {
+      path: file,
+      absolutePath,
+      data: result.value,
+    };
+  }
+
   return {
-    type: 'meta',
-    path: file,
-    absolutePath,
-    data: result.data,
+    async getPages() {
+      const files = await glob(include, {
+        cwd: dir,
+      });
+      const chunks: Promise<($Page | $Meta | undefined)[]>[] = [];
+
+      for (let i = 0; i < files.length; i += CHUNK_SIZE) {
+        const promises: Promise<$Page | $Meta | undefined>[] = [];
+        const L = Math.min(files.length, i + CHUNK_SIZE);
+
+        for (let j = i; j < L; j++) {
+          promises.push(buildFile(files[j]));
+        }
+
+        chunks.push(Promise.all(promises));
+      }
+
+      const pages: $Page[] = [];
+      const metas: $Meta[] = [];
+      for await (const chunk of chunks) {
+        for (const item of chunk) {
+          if (!item) continue;
+          if ('frontmatter' in item) pages.push(item);
+          else metas.push(item);
+        }
+      }
+
+      return { pages, metas };
+    },
   };
 }

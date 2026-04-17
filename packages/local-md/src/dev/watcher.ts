@@ -3,8 +3,11 @@ import ignore, { type Ignore } from 'ignore';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import type { LocalMarkdownConfig } from '..';
+import type { StandardSchemaV1 } from '@standard-schema/spec';
 
-export async function startWatcher(config: LocalMarkdownConfig) {
+export async function startWatcher(
+  config: LocalMarkdownConfig<StandardSchemaV1, StandardSchemaV1>,
+) {
   // init .gitignore
   const ignored = await Promise.all([
     fromGitIgnore(process.cwd(), 'node_modules\ndist\nbuild'),

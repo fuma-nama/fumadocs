@@ -1,8 +1,15 @@
-import { source } from 'fumadocs-core/source';
-import { getPages } from './storage';
+import type { MetaData, Source, VirtualFile } from 'fumadocs-core/source';
 import type { ChokidarOptions } from 'chokidar';
+import type { StandardSchemaV1 } from '@standard-schema/spec';
+import { createStorage } from './storage';
+import type * as defaultSchemas from 'fumadocs-core/source/schema';
+import { createMarkdownRenderer, PageRenderer } from './md/renderer';
+import { createMarkdownCompiler, MarkdownCompilerOptions } from './md/compiler-full';
 
-export interface LocalMarkdownConfig {
+export interface LocalMarkdownConfig<
+  FrontmatterSchema extends StandardSchemaV1,
+  MetaSchema extends StandardSchemaV1,
+> {
   /**
    * root directory for content files.
    */
@@ -10,20 +17,85 @@ export interface LocalMarkdownConfig {
   /**
    * a list of glob patterns, customise the content files to be scanned.
    */
-  include: string[];
-  /**
-   * directories to the static assets
-   */
-  assetsDir?: string[];
+  include?: string[];
   /**
    * customise chokidar, by default, file watcher will watch all files under the `dir` directory.
    */
   watchOptions?: (options: ChokidarOptions) => ChokidarOptions;
+  mdxOptions?: MarkdownCompilerOptions;
+
+  frontmatterSchema?: FrontmatterSchema;
+  metaSchema?: MetaSchema;
 }
 
-export async function localMd(config: LocalMarkdownConfig) {
-  return source(await getPages(config));
+export interface LocalMarkdown<
+  FrontmatterSchema extends StandardSchemaV1,
+  MetaSchema extends StandardSchemaV1,
+> {
+  toSource: () => Promise<
+    Source<{
+      pageData: LocalMarkdownPage<StandardSchemaV1.InferOutput<FrontmatterSchema>>;
+      metaData: StandardSchemaV1.InferOutput<MetaSchema> & MetaData;
+    }>
+  >;
 }
 
-export type { Meta, Page } from './storage';
-export * from './md';
+export interface LocalMarkdownPage<Frontmatter> {
+  title: string;
+  description?: string;
+  content: string;
+  frontmatter: Frontmatter;
+
+  load: () => Promise<PageRenderer>;
+}
+
+export function localMd<
+  FrontmatterSchema extends StandardSchemaV1 = typeof defaultSchemas.pageSchema,
+  MetaSchema extends StandardSchemaV1 = typeof defaultSchemas.metaSchema,
+>(
+  config: LocalMarkdownConfig<FrontmatterSchema, MetaSchema>,
+): LocalMarkdown<FrontmatterSchema, MetaSchema> {
+  const storage = createStorage(config);
+  const compiler = createMarkdownCompiler(config.mdxOptions);
+  const renderer = createMarkdownRenderer(compiler);
+
+  return {
+    async toSource() {
+      const { metas, pages } = await storage.getPages();
+      const files: VirtualFile<{
+        pageData: LocalMarkdownPage<StandardSchemaV1.InferOutput<FrontmatterSchema>>;
+        metaData: StandardSchemaV1.InferOutput<MetaSchema> & MetaData;
+      }>[] = [];
+
+      for (const page of pages) {
+        files.push({
+          type: 'page',
+          path: page.path,
+          absolutePath: page.absolutePath,
+          data: {
+            title: page.title,
+            description: page.description,
+            content: page.content,
+            frontmatter: page.frontmatter,
+            load() {
+              return renderer.compile(page);
+            },
+          },
+        });
+      }
+
+      for (const meta of metas) {
+        files.push({
+          type: 'meta',
+          path: meta.path,
+          absolutePath: meta.absolutePath,
+          data: meta.data!,
+        });
+      }
+
+      return { files };
+    },
+  };
+}
+
+export type { RawMeta, RawPage } from './storage';

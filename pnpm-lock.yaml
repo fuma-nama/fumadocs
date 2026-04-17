@@ -2180,6 +2180,9 @@ importers:
 
   packages/local-md:
     dependencies:
+      '@standard-schema/spec':
+        specifier: ^1.1.0
+        version: 1.1.0
       chokidar:
         specifier: ^5.0.0
         version: 5.0.0
@@ -2192,6 +2195,9 @@ importers:
       remark:
         specifier: ^15.0.1
         version: 15.0.1
+      remark-mdx:
+        specifier: ^3.1.1
+        version: 3.1.1
       remark-rehype:
         specifier: ^11.1.2
         version: 11.1.2
@@ -2217,6 +2223,9 @@ importers:
       '@types/react':
         specifier: ^19.2.14
         version: 19.2.14
+      '@types/react-dom':
+        specifier: ^19.2.3
+        version: 19.2.3(@types/react@19.2.14)
       '@types/unist':
         specifier: ^3.0.3
         version: 3.0.3
@@ -2229,6 +2238,12 @@ importers:
       react:
         specifier: ^19.2.5
         version: 19.2.5
+      react-dom:
+        specifier: ^19.2.5
+        version: 19.2.5(react@19.2.5)
+      stable-hash:
+        specifier: ^0.0.6
+        version: 0.0.6
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
@@ -11332,6 +11347,9 @@ packages:
     resolution: {integrity: sha512-iXsux0UcOjdvs0LCMa2Ws3WwcDUozA3JN3BquNXkaFPP7TpRqgunKdEgoZ/uwb1J6xaYHfxtz9Twlh6yzwM6Tg==}
     engines: {node: '>=20.16.0'}
     hasBin: true
+
+  stable-hash@0.0.6:
+    resolution: {integrity: sha512-0afH4mobqTybYZsXImQRLOjHV4gvOW+92HdUIax9t7a8d9v54KWykEuMVIcXhD9BCi+w3kS4x7O6fmZQ3JlG/g==}
 
   stackback@0.0.2:
     resolution: {integrity: sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==}
@@ -21775,6 +21793,8 @@ snapshots:
   sprintf-js@1.0.3: {}
 
   srvx@0.11.15: {}
+
+  stable-hash@0.0.6: {}
 
   stackback@0.0.2: {}
 

@@ -8,7 +8,7 @@ export default defineConfig({
   format: 'esm',
   exports: true,
   deps: {
-    onlyBundle: ['ignore'],
+    onlyBundle: ['ignore', 'stable-hash'],
     neverBundle: ['mdx/types'],
   },
 });
