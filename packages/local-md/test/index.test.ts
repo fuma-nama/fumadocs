@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { createMarkdownCompiler, MarkdownCompiler } from '@/md/compiler-full';
+import { createMarkdownCompiler, MarkdownCompiler } from '@/md/compiler';
 import { createMarkdownRenderer } from '@/md/renderer';
 import type { RawPage } from '@/storage';
 import type { TOCItemType } from 'fumadocs-core/toc';
@@ -43,15 +43,18 @@ for (const { name, file } of cases) {
   test(`compiler: ${name}`, async () => {
     const { filePath, content } = await readFixture(file);
     const compiler = createMarkdownCompiler();
-    const { tree, file: vfile } = await compiler.compile({ path: filePath, value: content });
+    const out = await compiler.compile({ path: filePath, value: content });
 
-    const payload = {
-      tree,
-      data: {
-        structuredData: vfile.data.structuredData,
-        rehypeToc: vfile.data.rehypeToc,
-      },
-    };
+    const payload =
+      out.type === 'ast'
+        ? {
+            tree: out.tree,
+            data: out.file.data,
+          }
+        : {
+            code: out.code,
+            data: out.file.data,
+          };
 
     await expect(JSON.stringify(payload, null, 2)).toMatchFileSnapshot(
       path.join(fixturesDir, `${name}.compiler.json`),

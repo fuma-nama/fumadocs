@@ -1,3 +1,4 @@
+import type * as JsxRuntime from 'react/jsx-runtime';
 import type { Expression, Program } from 'estree-jsx';
 
 export interface JSExecutor {
@@ -7,4 +8,9 @@ export interface JSExecutor {
    * get all exports in executed program/statements
    */
   getExports: () => Record<string, unknown>;
+}
+
+export interface JSExecutorConfig {
+  jsx: typeof JsxRuntime;
+  filePath: string;
 }

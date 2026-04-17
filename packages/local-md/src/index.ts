@@ -3,7 +3,7 @@ import type { StandardSchemaV1 } from '@standard-schema/spec';
 import { createStorage } from './storage';
 import type * as defaultSchemas from 'fumadocs-core/source/schema';
 import { createMarkdownRenderer, MarkdownRendererOptions, PageRenderer } from './md/renderer';
-import { createMarkdownCompiler, MarkdownCompilerOptions } from './md/compiler-full';
+import { createMarkdownCompiler, MarkdownCompilerOptions } from './md/compiler';
 
 export interface LocalMarkdownConfig<
   FrontmatterSchema extends StandardSchemaV1,

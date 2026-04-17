@@ -1,4 +1,3 @@
-import type { CompileResult, BaseCompiler } from './compiler';
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { ReactNode } from 'react';
@@ -8,27 +7,39 @@ import * as JsxRuntime from 'react/jsx-runtime';
 import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import { Root } from 'hast';
 import { VFile } from 'vfile';
-import type { JSExecutor } from '@/js/executor';
-import { executorVirtual } from '@/js/executor-virtual';
+import type { JSExecutor, JSExecutorConfig } from '@/js/executor';
+import type { CompileResult, MarkdownCompiler } from './compiler';
+import { executeMdx } from './execute-js';
+import { pathToFileURL } from 'node:url';
 
 export interface PageRenderer {
   structuredData: StructuredData;
   render: (components?: Components) => Promise<{
     exports: Record<string, unknown>;
-    toc?: TOCItemType[];
+    toc: TOCItemType[];
     body: ReactNode;
   }>;
 }
 
 export interface MarkdownRendererOptions {
-  executor?: (ctx: { jsx: typeof JsxRuntime }) => JSExecutor;
+  /**
+   * the engine to execute JavaScript (given estree with JSX)
+   *
+   * by default, it uses a virtual JS engine with limited
+   */
+  executor?: (ctx: JSExecutorConfig) => JSExecutor | Promise<JSExecutor>;
 }
 
 export function createMarkdownRenderer(
-  compiler: BaseCompiler,
+  compiler: MarkdownCompiler,
   options: MarkdownRendererOptions = {},
 ) {
-  const { executor: getExecutor = executorVirtual } = options;
+  const {
+    executor: getExecutor = async (config) => {
+      const { executorVirtual } = await import('@/js/executor-virtual');
+      return executorVirtual(config);
+    },
+  } = options;
   const cache = new Map<string, Promise<CompileResult>>();
 
   function render(
@@ -56,26 +67,16 @@ export function createMarkdownRenderer(
     });
   }
 
-  function getExports(
-    tree: Root,
-    sync: JSExecutor,
-    context: Record<string, unknown>,
-  ): Record<string, unknown> {
-    for (const node of tree.children) {
-      if (node.type !== 'mdxjsEsm' || !node.data?.estree) continue;
-
-      sync.program(node.data.estree, context);
-    }
-
-    return sync.getExports();
-  }
-
   return {
     async compile<V>(page: RawPage<V>): Promise<PageRenderer> {
-      const cacheKey = stableHash({ path: page.absolutePath, value: page.content, compiler });
+      const cacheKey = stableHash([page.absolutePath, page.content, page.frontmatter, compiler]);
       let promise = cache.get(cacheKey);
       if (!promise) {
-        promise = compiler.compile({ path: page.absolutePath, value: page.content });
+        promise = compiler.compile({
+          path: page.absolutePath,
+          value: page.content,
+          data: { frontmatter: page.frontmatter },
+        });
         cache.set(cacheKey, promise);
       }
 
@@ -91,30 +92,50 @@ export function createMarkdownRenderer(
           );
         },
         async render(components?: Components) {
-          const executor = getExecutor({ jsx: JsxRuntime });
-          const context: Record<string, unknown> = { ...components };
-          const exports = getExports(compiled.tree, executor, context);
+          const executor = await getExecutor({
+            jsx: JsxRuntime,
+            filePath: page.absolutePath,
+          });
 
-          const toc = compiled.file.data.rehypeToc?.map(
-            (item): TOCItemType => ({
-              ...item,
-              title: render(
-                {
-                  type: 'root',
-                  children: item.title.children,
-                },
-                compiled.file,
-                executor,
-                components,
-                context,
-              ),
-            }),
-          );
+          if (compiled.type === 'ast') {
+            const context: Record<string, unknown> = { ...components };
+            const toc =
+              compiled.file.data.rehypeToc?.map(
+                (item): TOCItemType => ({
+                  ...item,
+                  title: render(
+                    {
+                      type: 'root',
+                      children: item.title.children,
+                    },
+                    compiled.file,
+                    executor,
+                    components,
+                    context,
+                  ),
+                }),
+              ) ?? [];
+
+            return {
+              toc,
+              body: render(compiled.tree, compiled.file, executor, components, context),
+              exports: executor.getExports(),
+            };
+          }
+
+          const _out = await executeMdx(compiled.code, {
+            baseUrl: pathToFileURL(page.absolutePath),
+            jsxRuntime: JsxRuntime,
+          });
+          const out = _out as {
+            toc: TOCItemType[];
+            default: (props: { components?: Components }) => ReactNode;
+          };
 
           return {
-            toc,
-            body: render(compiled.tree, compiled.file, executor, components, context),
-            exports,
+            toc: out.toc,
+            body: JsxRuntime.jsx(out.default, { components }),
+            exports: out,
           };
         },
       };

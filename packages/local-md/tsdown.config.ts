@@ -4,7 +4,7 @@ export default defineConfig({
   dts: true,
   fixedExtension: false,
   target: 'es2023',
-  entry: ['./src/index.ts', './src/dev/index.ts'],
+  entry: ['./src/index.ts', './src/js/*', './src/dev/index.ts'],
   format: 'esm',
   exports: true,
   deps: {

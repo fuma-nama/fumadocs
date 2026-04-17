@@ -11,24 +11,22 @@ import type {
   JSXSpreadAttribute,
   JSXSpreadChild,
   JSXText,
+  Pattern,
   Program,
+  Statement,
 } from 'estree-jsx';
 import type { Handler, Handlers, State } from 'estree-util-to-js';
 import { toJs } from 'estree-util-to-js';
-import type * as JsxRuntime from 'react/jsx-runtime';
-import { JSExecutor } from './executor';
+import type { JSExecutor, JSExecutorConfig } from './executor';
 
-const JSX_VAR_NAMES = {
+const INTERNAL_VAR_NAMES = {
   jsx: '__fumadocs_jsx',
   jsxs: '__fumadocs_jsxs',
   fragment: '__fumadocs_fragment',
+  exports: '__fumadocs_exports',
 } as const;
 
 type Generator = ThisParameterType<Handler>;
-
-interface NativeExecutorOptions {
-  jsx: typeof JsxRuntime;
-}
 
 const jsxHandlers: Handlers = {
   JSXElement(node, state) {
@@ -39,50 +37,159 @@ const jsxHandlers: Handlers = {
   },
 };
 
-export function executorNative(options?: NativeExecutorOptions): JSExecutor {
-  const jsxContext = options?.jsx
-    ? {
-        [JSX_VAR_NAMES.jsx]: options.jsx.jsx,
-        [JSX_VAR_NAMES.jsxs]: options.jsx.jsxs,
-        [JSX_VAR_NAMES.fragment]: options.jsx.Fragment,
+/**
+ * Execute JavaScript with `new Function()`, this is unsafe.
+ */
+export function executorNative(options: JSExecutorConfig): JSExecutor {
+  const { filePath, jsx } = options;
+  const exports: Record<string, unknown> = {};
+  const globalContext: Record<string, unknown> = {
+    [INTERNAL_VAR_NAMES.exports]: exports,
+  };
+
+  if (jsx) {
+    Object.assign(globalContext, {
+      [INTERNAL_VAR_NAMES.jsx]: jsx.jsx,
+      [INTERNAL_VAR_NAMES.jsxs]: jsx.jsxs,
+      [INTERNAL_VAR_NAMES.fragment]: jsx.Fragment,
+    });
+  }
+
+  function generateExportAssign(name: string, expression: Expression): ExpressionStatement {
+    return {
+      type: 'ExpressionStatement',
+      expression: {
+        type: 'AssignmentExpression',
+        left: {
+          type: 'MemberExpression',
+          object: { type: 'Identifier', name: INTERNAL_VAR_NAMES.exports },
+          property: { type: 'Identifier', name },
+          computed: false,
+          optional: false,
+        },
+        right: expression,
+        operator: '=',
+      },
+    };
+  }
+
+  function allNames(pattern: Pattern): string[] {
+    switch (pattern.type) {
+      case 'Identifier':
+        return [pattern.name];
+      case 'ArrayPattern': {
+        const out: string[] = [];
+        for (const element of pattern.elements) {
+          if (element) out.push(...allNames(element));
+        }
+        return out;
       }
-    : {};
+      case 'AssignmentPattern':
+        return allNames(pattern.left);
+      case 'MemberExpression':
+        return [];
+      case 'ObjectPattern': {
+        const out: string[] = [];
+        for (const prop of pattern.properties) {
+          if (prop.type === 'Property') {
+            if ('value' in prop && typeof prop.value === 'string') out.push(prop.value);
+            else if ('name' in prop && typeof prop.name === 'string') out.push(prop.name);
+          } else {
+            out.push(...allNames(prop.argument));
+          }
+        }
+        return out;
+      }
+      case 'RestElement':
+        return allNames(pattern.argument);
+    }
+  }
 
   return {
     expression(expression, context) {
-      const code = serializeExpression(expression);
-      return executeExpression(code, { ...context, ...jsxContext });
+      const code = toJs(
+        {
+          type: 'Program',
+          sourceType: 'module',
+          body: [
+            {
+              type: 'ReturnStatement',
+              argument: expression,
+            },
+          ],
+        },
+        { filePath, handlers: jsxHandlers },
+      ).value;
+      return execute(code, { ...globalContext, ...context });
     },
     program(program, context) {
-      const code = serializeProgram(program);
-      return execute(code, { ...context, ...jsxContext });
+      const cloned: Program = { ...program };
+      cloned.body = cloned.body.flatMap((statement) => {
+        if (statement.type === 'ExportAllDeclaration') {
+          throw new Error(`${statement.type} is not supported`);
+        }
+
+        if (statement.type === 'ExportDefaultDeclaration') {
+          if (!statement.declaration) {
+            throw new Error(`${statement.type} is not supported without an initializer`);
+          }
+
+          let right: Expression;
+          switch (statement.declaration.type) {
+            case 'ClassDeclaration':
+              right = {
+                ...statement.declaration,
+                type: 'ClassExpression',
+              };
+              break;
+            case 'FunctionDeclaration':
+              right = {
+                ...statement.declaration,
+                type: 'FunctionExpression',
+              };
+              break;
+            default:
+              right = statement.declaration;
+          }
+          return generateExportAssign('default', right);
+        }
+
+        if (statement.type === 'ExportNamedDeclaration') {
+          if (!statement.declaration) {
+            throw new Error(`${statement.type} is not supported without an initializer`);
+          }
+
+          switch (statement.declaration.type) {
+            case 'ClassDeclaration':
+            case 'FunctionDeclaration':
+              return [
+                statement.declaration,
+                generateExportAssign(statement.declaration.id.name, statement.declaration.id),
+              ];
+            case 'VariableDeclaration': {
+              const out: Statement[] = [statement.declaration];
+              for (const d of statement.declaration.declarations) {
+                for (const name of allNames(d.id)) {
+                  out.push(generateExportAssign(name, { type: 'Identifier', name }));
+                }
+              }
+              return out;
+            }
+          }
+        }
+
+        return statement;
+      });
+
+      return execute(toJs(cloned, { filePath, handlers: jsxHandlers }).value, {
+        ...globalContext,
+        ...context,
+      });
     },
     getExports() {
-      return {};
+      return exports;
     },
   };
-}
-
-function serializeExpression(expression: Expression): string {
-  const code = toJs(
-    {
-      type: 'Program',
-      sourceType: 'module',
-      body: [
-        {
-          type: 'ExpressionStatement',
-          expression,
-        } satisfies ExpressionStatement,
-      ],
-    },
-    { handlers: jsxHandlers },
-  ).value;
-
-  return code.replace(/;\s*$/, '');
-}
-
-function serializeProgram(program: Program): string {
-  return toJs(program, { handlers: jsxHandlers }).value;
 }
 
 function execute(code: string, context: Record<string, unknown>) {
@@ -92,15 +199,11 @@ function execute(code: string, context: Record<string, unknown>) {
   return evaluator(...argValues);
 }
 
-function executeExpression(code: string, context: Record<string, unknown>) {
-  return execute(`return (${code});`, context);
-}
-
 function writeJsxElement(this: Generator, node: JSXElement, state: State) {
   const children = normalizeJsxChildren(node.children);
   const hasArrayChildren =
     children.length > 1 || children.some((child) => child.type === 'JSXSpreadChild');
-  const runtime = hasArrayChildren ? JSX_VAR_NAMES.jsxs : JSX_VAR_NAMES.jsx;
+  const runtime = hasArrayChildren ? INTERNAL_VAR_NAMES.jsxs : INTERNAL_VAR_NAMES.jsx;
 
   state.write(`${runtime}(`, node);
   writeJsxType.call(this, node.openingElement.name, state);
@@ -113,9 +216,9 @@ function writeJsxFragment(this: Generator, node: JSXFragment, state: State) {
   const children = normalizeJsxChildren(node.children);
   const hasArrayChildren =
     children.length > 1 || children.some((child) => child.type === 'JSXSpreadChild');
-  const runtime = hasArrayChildren ? JSX_VAR_NAMES.jsxs : JSX_VAR_NAMES.jsx;
+  const runtime = hasArrayChildren ? INTERNAL_VAR_NAMES.jsxs : INTERNAL_VAR_NAMES.jsx;
 
-  state.write(`${runtime}(${JSX_VAR_NAMES.fragment}, `, node);
+  state.write(`${runtime}(${INTERNAL_VAR_NAMES.fragment}, `, node);
   writeJsxProps.call(this, [], children, state);
   state.write(')');
 }
@@ -127,12 +230,7 @@ function writeJsxType(
 ) {
   switch (node.type) {
     case 'JSXIdentifier':
-      if (/^[a-z]/.test(node.name) || node.name.includes('-')) {
-        state.write(JSON.stringify(node.name), node);
-        return;
-      }
-
-      state.write(node.name, node);
+      state.write(JSON.stringify(node.name), node);
       return;
 
     case 'JSXMemberExpression':
@@ -210,11 +308,7 @@ function writeJsxProps(
 
 function writeObjectKey(node: JSXAttribute['name'], state: State) {
   if (node.type === 'JSXIdentifier') {
-    if (/^[A-Za-z_$][\w$]*$/.test(node.name)) {
-      state.write(node.name, node);
-    } else {
-      state.write(JSON.stringify(node.name), node);
-    }
+    state.write(JSON.stringify(node.name), node);
     return;
   }
 
