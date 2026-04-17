@@ -562,6 +562,58 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2
 
+  examples/next-local-md:
+    dependencies:
+      '@fumadocs/local-md':
+        specifier: workspace:*
+        version: link:../../packages/local-md
+      fumadocs-core:
+        specifier: workspace:*
+        version: link:../../packages/core
+      fumadocs-ui:
+        specifier: workspace:*
+        version: link:../../packages/radix-ui
+      lucide-react:
+        specifier: ^1.8.0
+        version: 1.8.0(react@19.2.5)
+      next:
+        specifier: 16.2.3
+        version: 16.2.3(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(babel-plugin-macros@3.1.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      react:
+        specifier: ^19.2.5
+        version: 19.2.5
+      react-dom:
+        specifier: ^19.2.5
+        version: 19.2.5(react@19.2.5)
+      tailwind-merge:
+        specifier: ^3.5.0
+        version: 3.5.0
+    devDependencies:
+      '@tailwindcss/postcss':
+        specifier: ^4.2.2
+        version: 4.2.2
+      '@types/mdx':
+        specifier: ^2.0.13
+        version: 2.0.13
+      '@types/node':
+        specifier: ^25.6.0
+        version: 25.6.0
+      '@types/react':
+        specifier: ^19.2.14
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: ^19.2.3
+        version: 19.2.3(@types/react@19.2.14)
+      postcss:
+        specifier: ^8.5.9
+        version: 8.5.9
+      tailwindcss:
+        specifier: ^4.2.2
+        version: 4.2.2
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.2
+
   examples/next-min:
     dependencies:
       fumadocs-core:
@@ -2186,9 +2238,9 @@ importers:
       chokidar:
         specifier: ^5.0.0
         version: 5.0.0
-      eval-estree-expression:
-        specifier: ^3.0.1
-        version: 3.0.1
+      estree-util-to-js:
+        specifier: ^2.0.0
+        version: 2.0.0
       hast-util-to-jsx-runtime:
         specifier: ^2.3.6
         version: 2.3.6
@@ -2211,6 +2263,12 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
     devDependencies:
+      '@types/estree':
+        specifier: ^1.0.8
+        version: 1.0.8
+      '@types/estree-jsx':
+        specifier: ^1.0.5
+        version: 1.0.5
       '@types/hast':
         specifier: ^3.0.4
         version: 3.0.4
@@ -8773,9 +8831,6 @@ packages:
   etag@1.8.1:
     resolution: {integrity: sha512-aIL5Fx7mawVa300al2BnEE4iNvo1qETxLrPI/o05L7z6go7fCw1J6EQmbK4FmJ2AS7kgVF/KEZWufBfdClMcPg==}
     engines: {node: '>= 0.6'}
-
-  eval-estree-expression@3.0.1:
-    resolution: {integrity: sha512-zTLKGbiVdQYp4rQkSoXPibrFf5ZoPn6jzExegRLEQ13F+FSxu5iLgaRH6hlDs2kWSUa6vp8yD20cdJi0me6pEw==}
 
   event-target-shim@5.0.1:
     resolution: {integrity: sha512-i/2XbnSz/uxRCU6+NdVJgKWDTM427+MqYbkQzD321DuCQJUqOuJKIA0IM2+W2xtYHdKOmZ4dR6fExsd4SXL+WQ==}
@@ -18356,8 +18411,6 @@ snapshots:
   esutils@2.0.3: {}
 
   etag@1.8.1: {}
-
-  eval-estree-expression@3.0.1: {}
 
   event-target-shim@5.0.1: {}
 
