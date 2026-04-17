@@ -1,9 +1,11 @@
 import type { MetaData, Source, VirtualFile } from 'fumadocs-core/source';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
+import path from 'node:path';
 import { createStorage } from './storage';
 import type * as defaultSchemas from 'fumadocs-core/source/schema';
 import { createMarkdownRenderer, MarkdownRendererOptions, PageRenderer } from './md/renderer';
 import { createMarkdownCompiler, MarkdownCompilerOptions } from './md/compiler';
+import { getDevServerPort } from './dev/shared';
 
 export interface LocalMarkdownConfig<
   FrontmatterSchema extends StandardSchemaV1,
@@ -29,6 +31,8 @@ export interface LocalMarkdown<
   MetaSchema extends StandardSchemaV1,
 > {
   config: LocalMarkdownConfig<FrontmatterSchema, MetaSchema>;
+  /** connect to dev server, required for hot reload */
+  devServer: (port?: number) => Promise<void>;
   toSource: () => Promise<
     Source<{
       pageData: LocalMarkdownPage<StandardSchemaV1.InferOutput<FrontmatterSchema>>;
@@ -58,6 +62,20 @@ export function localMd<
 
   return {
     config,
+    async devServer(port) {
+      const { connectDevServer } = await import('@/dev/client');
+      const resolvedPort = port ?? getDevServerPort();
+      if (!resolvedPort) return;
+
+      const conn = connectDevServer(resolvedPort);
+      conn.watchDir(path.resolve(config.dir));
+
+      conn.subscribe((event) => {
+        if (event.type === 'change') {
+          storage.invalidateCache(event.absolutePath);
+        }
+      });
+    },
     async toSource() {
       const { metas, pages } = await storage.getPages();
       const files: VirtualFile<{

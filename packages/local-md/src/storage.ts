@@ -110,6 +110,9 @@ export function createStorage<
   }
 
   return {
+    invalidateCache(absolutePath: string) {
+      filesCache.delete(absolutePath);
+    },
     async getPages() {
       const files = await glob(include, {
         cwd: dir,

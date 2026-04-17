@@ -7,6 +7,10 @@ export const docs = localMd({
   dir: 'content/docs',
 });
 
+if (process.env.NODE_ENV === 'development') {
+  void docs.devServer();
+}
+
 // See https://fumadocs.dev/docs/headless/source-api for more info
 export const source = loader({
   baseUrl: docsRoute,

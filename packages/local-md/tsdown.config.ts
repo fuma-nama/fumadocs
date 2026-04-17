@@ -4,9 +4,14 @@ export default defineConfig({
   dts: true,
   fixedExtension: false,
   target: 'es2023',
-  entry: ['./src/index.ts', './src/js/*', './src/dev/index.ts'],
+  entry: ['./src/index.ts', './src/bin.ts', './src/js/*', './src/dev/{server,client}.ts'],
   format: 'esm',
-  exports: true,
+  exports: {
+    bin: {
+      'local-md': './src/bin.ts',
+    },
+    exclude: ['bin'],
+  },
   deps: {
     onlyBundle: ['ignore', 'stable-hash'],
     neverBundle: ['mdx/types'],

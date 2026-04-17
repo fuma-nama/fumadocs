@@ -10,13 +10,17 @@
   "license": "MIT",
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/fumadocs",
+  "bin": {
+    "local-md": "./dist/bin.js"
+  },
   "files": [
     "dist"
   ],
   "type": "module",
   "exports": {
     ".": "./dist/index.js",
-    "./dev": "./dist/dev/index.js",
+    "./dev/client": "./dist/dev/client.js",
+    "./dev/server": "./dist/dev/server.js",
     "./js/executor": "./dist/js/executor.js",
     "./js/executor-native": "./dist/js/executor-native.js",
     "./js/executor-virtual": "./dist/js/executor-virtual.js",
@@ -36,15 +40,19 @@
     "@mdx-js/mdx": "^3.1.1",
     "@standard-schema/spec": "^1.1.0",
     "chokidar": "^5.0.0",
+    "commander": "^14.0.3",
+    "cross-spawn": "^7.0.6",
     "estree-util-to-js": "^2.0.0",
     "hast-util-to-jsx-runtime": "^2.3.6",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.2",
     "tinyglobby": "^0.2.16",
     "unified": "^11.0.5",
-    "vfile": "^6.0.3"
+    "vfile": "^6.0.3",
+    "ws": "^8.20.0"
   },
   "devDependencies": {
+    "@types/cross-spawn": "^6.0.6",
     "@types/estree": "^1.0.8",
     "@types/estree-jsx": "^1.0.5",
     "@types/hast": "^3.0.4",
@@ -52,6 +60,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@types/unist": "^3.0.3",
+    "@types/ws": "^8.18.1",
     "fumadocs-core": "workspace:*",
     "ignore": "^7.0.5",
     "react": "^19.2.5",
