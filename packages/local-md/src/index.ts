@@ -1,9 +1,8 @@
 import type { MetaData, Source, VirtualFile } from 'fumadocs-core/source';
-import type { ChokidarOptions } from 'chokidar';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import { createStorage } from './storage';
 import type * as defaultSchemas from 'fumadocs-core/source/schema';
-import { createMarkdownRenderer, PageRenderer } from './md/renderer';
+import { createMarkdownRenderer, MarkdownRendererOptions, PageRenderer } from './md/renderer';
 import { createMarkdownCompiler, MarkdownCompilerOptions } from './md/compiler-full';
 
 export interface LocalMarkdownConfig<
@@ -18,11 +17,8 @@ export interface LocalMarkdownConfig<
    * a list of glob patterns, customise the content files to be scanned.
    */
   include?: string[];
-  /**
-   * customise chokidar, by default, file watcher will watch all files under the `dir` directory.
-   */
-  watchOptions?: (options: ChokidarOptions) => ChokidarOptions;
   mdxOptions?: MarkdownCompilerOptions;
+  rendererOptions?: MarkdownRendererOptions;
 
   frontmatterSchema?: FrontmatterSchema;
   metaSchema?: MetaSchema;
@@ -32,6 +28,7 @@ export interface LocalMarkdown<
   FrontmatterSchema extends StandardSchemaV1,
   MetaSchema extends StandardSchemaV1,
 > {
+  config: LocalMarkdownConfig<FrontmatterSchema, MetaSchema>;
   toSource: () => Promise<
     Source<{
       pageData: LocalMarkdownPage<StandardSchemaV1.InferOutput<FrontmatterSchema>>;
@@ -57,9 +54,10 @@ export function localMd<
 ): LocalMarkdown<FrontmatterSchema, MetaSchema> {
   const storage = createStorage(config);
   const compiler = createMarkdownCompiler(config.mdxOptions);
-  const renderer = createMarkdownRenderer(compiler);
+  const renderer = createMarkdownRenderer(compiler, config.rendererOptions);
 
   return {
+    config,
     async toSource() {
       const { metas, pages } = await storage.getPages();
       const files: VirtualFile<{

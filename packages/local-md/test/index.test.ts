@@ -36,6 +36,7 @@ const cases = [
   { name: 'simple', file: 'simple.md' },
   { name: 'rich', file: 'rich.md' },
   { name: 'expressions', file: 'expressions.mdx' },
+  { name: 'jsx', file: 'jsx.mdx' },
 ] as const;
 
 for (const { name, file } of cases) {
@@ -71,7 +72,7 @@ for (const { name, file } of cases) {
       compiler,
     );
 
-    const { body, toc } = pageRenderer.render();
+    const { body, toc } = await pageRenderer.render();
     const payload = {
       structuredData: pageRenderer.structuredData,
       bodyHtml: renderToStaticMarkup(body),

@@ -5,24 +5,39 @@ import type { ReactNode } from 'react';
 import { stableHash } from 'stable-hash';
 import { RawPage } from '@/storage';
 import * as JsxRuntime from 'react/jsx-runtime';
-// @ts-expect-error -- untyped
-import { evaluate } from 'eval-estree-expression';
 import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import { Root } from 'hast';
 import { VFile } from 'vfile';
+import type { JSExecutor } from '@/js/executor';
+import { executorVirtual } from '@/js/executor-virtual';
 
 export interface PageRenderer {
   structuredData: StructuredData;
-  render: () => {
+  render: (components?: Components) => Promise<{
+    exports: Record<string, unknown>;
     toc?: TOCItemType[];
     body: ReactNode;
-  };
+  }>;
 }
 
-export function createMarkdownRenderer(compiler: BaseCompiler) {
+export interface MarkdownRendererOptions {
+  executor?: (ctx: { jsx: typeof JsxRuntime }) => JSExecutor;
+}
+
+export function createMarkdownRenderer(
+  compiler: BaseCompiler,
+  options: MarkdownRendererOptions = {},
+) {
+  const { executor: getExecutor = executorVirtual } = options;
   const cache = new Map<string, Promise<CompileResult>>();
 
-  function render(tree: Root, file: VFile, components?: Components) {
+  function render(
+    tree: Root,
+    file: VFile,
+    executor: JSExecutor,
+    components: Components | undefined,
+    context: Record<string, unknown>,
+  ): ReactNode {
     return toJsxRuntime(tree, {
       filePath: file.path,
       components,
@@ -30,10 +45,10 @@ export function createMarkdownRenderer(compiler: BaseCompiler) {
       createEvaluater() {
         return {
           evaluateProgram(program) {
-            return evaluate.sync(program, { ...components }, { functions: true });
+            return executor.program(program, context);
           },
           evaluateExpression(node) {
-            return evaluate.sync(node, { ...components }, { functions: true });
+            return executor.expression(node, context);
           },
         };
       },
@@ -41,8 +56,21 @@ export function createMarkdownRenderer(compiler: BaseCompiler) {
     });
   }
 
+  function getExports(
+    tree: Root,
+    sync: JSExecutor,
+    context: Record<string, unknown>,
+  ): Record<string, unknown> {
+    for (const node of tree.children) {
+      if (node.type !== 'mdxjsEsm' || !node.data?.estree) continue;
+
+      sync.program(node.data.estree, context);
+    }
+
+    return sync.getExports();
+  }
+
   return {
-    render,
     async compile<V>(page: RawPage<V>): Promise<PageRenderer> {
       const cacheKey = stableHash({ path: page.absolutePath, value: page.content, compiler });
       let promise = cache.get(cacheKey);
@@ -62,7 +90,11 @@ export function createMarkdownRenderer(compiler: BaseCompiler) {
             }
           );
         },
-        render(mdxComponents?: Components) {
+        async render(components?: Components) {
+          const executor = getExecutor({ jsx: JsxRuntime });
+          const context: Record<string, unknown> = { ...components };
+          const exports = getExports(compiled.tree, executor, context);
+
           const toc = compiled.file.data.rehypeToc?.map(
             (item): TOCItemType => ({
               ...item,
@@ -72,14 +104,18 @@ export function createMarkdownRenderer(compiler: BaseCompiler) {
                   children: item.title.children,
                 },
                 compiled.file,
-                mdxComponents,
+                executor,
+                components,
+                context,
               ),
             }),
           );
 
-          const body = render(compiled.tree, compiled.file, mdxComponents);
-
-          return { toc, body };
+          return {
+            toc,
+            body: render(compiled.tree, compiled.file, executor, components, context),
+            exports,
+          };
         },
       };
     },

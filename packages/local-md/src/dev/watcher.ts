@@ -2,16 +2,21 @@ import { type ChokidarOptions, type Matcher, watch } from 'chokidar';
 import ignore, { type Ignore } from 'ignore';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import type { LocalMarkdownConfig } from '..';
+import type { LocalMarkdown } from '..';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 
 export async function startWatcher(
-  config: LocalMarkdownConfig<StandardSchemaV1, StandardSchemaV1>,
+  instance: LocalMarkdown<StandardSchemaV1, StandardSchemaV1>,
+  /**
+   * customise chokidar, by default, file watcher will watch all files under the `dir` directory.
+   */
+  watchOptions?: (options: ChokidarOptions) => ChokidarOptions,
 ) {
+  const dir = instance.config.dir;
   // init .gitignore
   const ignored = await Promise.all([
     fromGitIgnore(process.cwd(), 'node_modules\ndist\nbuild'),
-    fromGitIgnore(config.dir),
+    fromGitIgnore(dir),
   ]);
 
   let options: ChokidarOptions = {
@@ -20,9 +25,9 @@ export async function startWatcher(
     ignored: ignored.filter((v) => v !== undefined),
   };
 
-  if (config.watchOptions) options = config.watchOptions(options);
+  if (watchOptions) options = watchOptions(options);
 
-  return watch(config.dir, options);
+  return watch(dir, options);
 }
 
 async function fromGitIgnore(dir: string, defaultValue?: string) {

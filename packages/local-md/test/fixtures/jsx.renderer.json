@@ -1,0 +1,24 @@
+{
+  "structuredData": {
+    "contents": [
+      {
+        "heading": "jsx-expressions",
+        "content": "A\nB"
+      }
+    ],
+    "headings": [
+      {
+        "id": "jsx-expressions",
+        "content": "JSX expressions"
+      }
+    ]
+  },
+  "bodyHtml": "<h1 id=\"jsx-expressions\">JSX expressions</h1>\nexport const ignored = &lt;span&gt;Ignored export&lt;/span&gt;\n&lt;div id=&quot;native-jsx&quot;&gt;Native JSX child&lt;/div&gt;\n<p><span data-inline=\"one\">A</span>\n<span data-inline=\"two\">B</span></p>",
+  "toc": [
+    {
+      "url": "#jsx-expressions",
+      "depth": 1,
+      "titleHtml": "JSX expressions"
+    }
+  ]
+}

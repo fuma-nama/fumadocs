@@ -3,8 +3,8 @@ import { glob } from 'tinyglobby';
 import path from 'node:path';
 import { LocalMarkdownConfig } from '.';
 import { frontmatter as parseFrontmatter } from 'fumadocs-core/content/md/frontmatter';
-import { StandardSchemaV1 } from '@standard-schema/spec';
-import { PageData } from 'fumadocs-core/source';
+import type { StandardSchemaV1 } from '@standard-schema/spec';
+import type { PageData } from 'fumadocs-core/source';
 import * as defaultSchemas from 'fumadocs-core/source/schema';
 
 export interface RawPage<Frontmatter> {

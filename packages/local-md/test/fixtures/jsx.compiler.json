@@ -1,0 +1,319 @@
+{
+  "tree": {
+    "type": "root",
+    "children": [
+      {
+        "type": "element",
+        "tagName": "h1",
+        "properties": {
+          "id": "jsx-expressions"
+        },
+        "children": [
+          {
+            "type": "text",
+            "value": "JSX expressions",
+            "position": {
+              "start": {
+                "line": 1,
+                "column": 3,
+                "offset": 2
+              },
+              "end": {
+                "line": 1,
+                "column": 18,
+                "offset": 17
+              }
+            }
+          }
+        ],
+        "position": {
+          "start": {
+            "line": 1,
+            "column": 1,
+            "offset": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 18,
+            "offset": 17
+          }
+        }
+      },
+      {
+        "type": "text",
+        "value": "\n"
+      },
+      {
+        "type": "text",
+        "value": "export const ignored = <span>Ignored export</span>",
+        "position": {
+          "start": {
+            "line": 3,
+            "column": 1,
+            "offset": 19
+          },
+          "end": {
+            "line": 3,
+            "column": 51,
+            "offset": 69
+          }
+        }
+      },
+      {
+        "type": "text",
+        "value": "\n"
+      },
+      {
+        "type": "text",
+        "value": "<div id=\"native-jsx\">Native JSX child</div>",
+        "position": {
+          "start": {
+            "line": 5,
+            "column": 1,
+            "offset": 71
+          },
+          "end": {
+            "line": 5,
+            "column": 46,
+            "offset": 116
+          }
+        }
+      },
+      {
+        "type": "text",
+        "value": "\n"
+      },
+      {
+        "type": "mdxJsxFlowElement",
+        "name": null,
+        "attributes": [],
+        "position": {
+          "start": {
+            "line": 7,
+            "column": 1,
+            "offset": 118
+          },
+          "end": {
+            "line": 10,
+            "column": 4,
+            "offset": 194
+          }
+        },
+        "children": [
+          {
+            "type": "element",
+            "tagName": "p",
+            "properties": {},
+            "children": [
+              {
+                "type": "mdxJsxTextElement",
+                "name": "span",
+                "attributes": [
+                  {
+                    "type": "mdxJsxAttribute",
+                    "name": "data-inline",
+                    "value": "one",
+                    "position": {
+                      "start": {
+                        "line": 8,
+                        "column": 9,
+                        "offset": 129
+                      },
+                      "end": {
+                        "line": 8,
+                        "column": 26,
+                        "offset": 146
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 8,
+                    "column": 3,
+                    "offset": 123
+                  },
+                  "end": {
+                    "line": 8,
+                    "column": 35,
+                    "offset": 155
+                  }
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "A",
+                    "position": {
+                      "start": {
+                        "line": 8,
+                        "column": 27,
+                        "offset": 147
+                      },
+                      "end": {
+                        "line": 8,
+                        "column": 28,
+                        "offset": 148
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "text",
+                "value": "\n",
+                "position": {
+                  "start": {
+                    "line": 8,
+                    "column": 35,
+                    "offset": 155
+                  },
+                  "end": {
+                    "line": 9,
+                    "column": 1,
+                    "offset": 156
+                  }
+                }
+              },
+              {
+                "type": "mdxJsxTextElement",
+                "name": "span",
+                "attributes": [
+                  {
+                    "type": "mdxJsxAttribute",
+                    "name": "data-inline",
+                    "value": "two",
+                    "position": {
+                      "start": {
+                        "line": 9,
+                        "column": 9,
+                        "offset": 164
+                      },
+                      "end": {
+                        "line": 9,
+                        "column": 26,
+                        "offset": 181
+                      }
+                    }
+                  }
+                ],
+                "position": {
+                  "start": {
+                    "line": 9,
+                    "column": 3,
+                    "offset": 158
+                  },
+                  "end": {
+                    "line": 9,
+                    "column": 35,
+                    "offset": 190
+                  }
+                },
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "B",
+                    "position": {
+                      "start": {
+                        "line": 9,
+                        "column": 27,
+                        "offset": 182
+                      },
+                      "end": {
+                        "line": 9,
+                        "column": 28,
+                        "offset": 183
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "position": {
+              "start": {
+                "line": 8,
+                "column": 3,
+                "offset": 123
+              },
+              "end": {
+                "line": 9,
+                "column": 35,
+                "offset": 190
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "position": {
+      "start": {
+        "line": 1,
+        "column": 1,
+        "offset": 0
+      },
+      "end": {
+        "line": 11,
+        "column": 1,
+        "offset": 195
+      }
+    }
+  },
+  "data": {
+    "structuredData": {
+      "contents": [
+        {
+          "heading": "jsx-expressions",
+          "content": "A\nB"
+        }
+      ],
+      "headings": [
+        {
+          "id": "jsx-expressions",
+          "content": "JSX expressions"
+        }
+      ]
+    },
+    "rehypeToc": [
+      {
+        "title": {
+          "type": "element",
+          "tagName": "h1",
+          "properties": {
+            "id": "jsx-expressions"
+          },
+          "children": [
+            {
+              "type": "text",
+              "value": "JSX expressions",
+              "position": {
+                "start": {
+                  "line": 1,
+                  "column": 3,
+                  "offset": 2
+                },
+                "end": {
+                  "line": 1,
+                  "column": 18,
+                  "offset": 17
+                }
+              }
+            }
+          ],
+          "position": {
+            "start": {
+              "line": 1,
+              "column": 1,
+              "offset": 0
+            },
+            "end": {
+              "line": 1,
+              "column": 18,
+              "offset": 17
+            }
+          }
+        },
+        "depth": 1,
+        "url": "#jsx-expressions"
+      }
+    ]
+  }
+}
