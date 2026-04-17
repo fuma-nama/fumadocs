@@ -1,0 +1,28 @@
+{
+  "structuredData": {
+    "contents": [
+      {
+        "heading": "mdx-expressions",
+        "content": "Static body"
+      },
+      {
+        "heading": "mdx-expressions",
+        "content": "Joined"
+      }
+    ],
+    "headings": [
+      {
+        "id": "mdx-expressions",
+        "content": "MDX expressions"
+      }
+    ]
+  },
+  "bodyHtml": "<h1 id=\"mdx-expressions\">MDX expressions</h1>\n<div data-sum=\"3\" data-product=\"6\" id=\"sum-box\"><p>Static body</p></div>\n<p><abbr title=\"a-b\">Joined</abbr></p>",
+  "toc": [
+    {
+      "url": "#mdx-expressions",
+      "depth": 1,
+      "titleHtml": "MDX expressions"
+    }
+  ]
+}
