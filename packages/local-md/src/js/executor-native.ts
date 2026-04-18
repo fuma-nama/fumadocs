@@ -200,26 +200,24 @@ function execute(code: string, context: Record<string, unknown>) {
 }
 
 function writeJsxElement(this: Generator, node: JSXElement, state: State) {
-  const children = normalizeJsxChildren(node.children);
   const hasArrayChildren =
-    children.length > 1 || children.some((child) => child.type === 'JSXSpreadChild');
+    node.children.length > 1 || node.children.some((child) => child.type === 'JSXSpreadChild');
   const runtime = hasArrayChildren ? INTERNAL_VAR_NAMES.jsxs : INTERNAL_VAR_NAMES.jsx;
 
   state.write(`${runtime}(`, node);
   writeJsxType.call(this, node.openingElement.name, state);
   state.write(', ');
-  writeJsxProps.call(this, node.openingElement.attributes, children, state);
+  writeJsxProps.call(this, node.openingElement.attributes, node.children, state);
   state.write(')');
 }
 
 function writeJsxFragment(this: Generator, node: JSXFragment, state: State) {
-  const children = normalizeJsxChildren(node.children);
   const hasArrayChildren =
-    children.length > 1 || children.some((child) => child.type === 'JSXSpreadChild');
+    node.children.length > 1 || node.children.some((child) => child.type === 'JSXSpreadChild');
   const runtime = hasArrayChildren ? INTERNAL_VAR_NAMES.jsxs : INTERNAL_VAR_NAMES.jsx;
 
   state.write(`${runtime}(${INTERNAL_VAR_NAMES.fragment}, `, node);
-  writeJsxProps.call(this, [], children, state);
+  writeJsxProps.call(this, [], node.children, state);
   state.write(')');
 }
 
@@ -367,29 +365,4 @@ function writeJsxChild(
       writeJsxFragment.call(this, node, state);
       return;
   }
-}
-
-function normalizeJsxChildren(
-  children: Array<JSXText | JSXExpressionContainer | JSXSpreadChild | JSXElement | JSXFragment>,
-) {
-  const result: Array<
-    JSXText | JSXExpressionContainer | JSXSpreadChild | JSXElement | JSXFragment
-  > = [];
-
-  for (const child of children) {
-    if (child.type === 'JSXText') {
-      const value = child.value.replace(/\s+/g, ' ').trim();
-      if (value.length === 0) continue;
-      result.push({ ...child, value });
-      continue;
-    }
-
-    if (child.type === 'JSXExpressionContainer' && child.expression.type === 'JSXEmptyExpression') {
-      continue;
-    }
-
-    result.push(child);
-  }
-
-  return result;
 }

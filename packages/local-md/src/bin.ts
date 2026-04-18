@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
-import spawn from 'cross-spawn';
+import { spawn } from 'node:child_process';
 import packageJson from '../package.json';
-import { startDevServer } from './dev/server';
-import { LOCAL_MD_DEV_PORT_ENV } from './dev/shared';
+import { startDevServer } from './dev/node-server';
+import { setDevServerUrlInEnv } from './dev/shared';
 
 const program = new Command()
   .name('local-md')
@@ -23,13 +23,11 @@ program
       port: options.port,
     });
 
+    setDevServerUrlInEnv(handle.url);
     const child = spawn(command[0], command.slice(1), {
       stdio: 'inherit',
       shell: true,
-      env: {
-        ...process.env,
-        [LOCAL_MD_DEV_PORT_ENV]: String(handle.port),
-      },
+      env: process.env,
     });
 
     const forwardSignal = (signal: NodeJS.Signals) => {

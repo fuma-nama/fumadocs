@@ -1,5 +1,4 @@
 export const LOCAL_MD_DEV_PATH = '/_fumadocs_local_md';
-export const LOCAL_MD_DEV_PORT_ENV = 'FUMADOCS_LOCAL_MD_DEV_SERVER_PORT';
 
 export type DevWatchEvent = 'add' | 'addDir' | 'change' | 'unlink' | 'unlinkDir';
 
@@ -49,15 +48,28 @@ export function decodeDevEvent(value: string): DevServerEvent | undefined {
   }
 }
 
-export function getDevServerPort(port = process.env[LOCAL_MD_DEV_PORT_ENV]): number | undefined {
-  if (!port) return undefined;
+const publicEnvNames = [
+  'FD_LOCAL_MD_DEV_SERVER_URL',
+  'NEXT_PUBLIC_FD_LOCAL_MD_DEV_SERVER_URL',
+  'VITE_FD_LOCAL_MD_DEV_SERVER_URL',
+];
 
-  const value = Number.parseInt(port, 10);
-  if (!Number.isFinite(value) || value <= 0) return undefined;
+export function getDevServerUrlFromEnv(): string | undefined {
+  if (typeof process === 'object' && 'env' in process) {
+    for (const name of publicEnvNames) {
+      if (process.env[name]) return process.env[name];
+    }
+  }
 
-  return value;
+  if (import.meta.env) {
+    for (const name of publicEnvNames) {
+      if (import.meta.env[name]) return import.meta.env[name];
+    }
+  }
 }
 
-export function getDevServerUrl(port: number, host = '127.0.0.1'): string {
-  return `ws://${host}:${port}${LOCAL_MD_DEV_PATH}`;
+export function setDevServerUrlInEnv(url: string) {
+  for (const name of publicEnvNames) {
+    process.env[name] = url;
+  }
 }

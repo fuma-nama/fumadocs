@@ -5,7 +5,6 @@ import path from 'node:path';
 import {
   decodeDevClientEvent,
   encodeDevEvent,
-  getDevServerUrl,
   LOCAL_MD_DEV_PATH,
   type DevServerEvent,
   type DevWatchEvent,
@@ -25,25 +24,21 @@ export interface DevServerOptions {
 }
 
 export interface DevServerHandle {
+  url: string;
   port: number;
   host: string;
   watcher: FSWatcher;
-  watchDir: (dir: string) => Promise<void>;
   close: () => Promise<void>;
 }
 
 export async function startDevServer(options: DevServerOptions): Promise<DevServerHandle> {
-  const host = options.host ?? '127.0.0.1';
-  const port = options.port;
-  const rootIgnored = await fromGitIgnore(process.cwd(), 'node_modules\ndist\nbuild');
+  const { host = '127.0.0.1', port } = options;
+  const url = `ws://${host}:${port}${LOCAL_MD_DEV_PATH}`;
 
   let watchOptions: ChokidarOptions = {
     ignoreInitial: true,
     followSymlinks: false,
-    ignored: (value) => {
-      if (rootIgnored?.(value)) return true;
-      return false;
-    },
+    ignored: await fromGitIgnore(process.cwd(), 'node_modules\ndist\nbuild'),
   };
   if (options.watchOptions) {
     watchOptions = options.watchOptions(watchOptions);
@@ -51,8 +46,8 @@ export async function startDevServer(options: DevServerOptions): Promise<DevServ
 
   const watcher = watch([], watchOptions);
   const clients = new Map<WebSocket, Set<string>>();
-  const watchedDirs = new Map<string, number>();
-  const wsServer = new WebSocketServer({
+  const watchingDirs = new Map<string, number>();
+  const wss = new WebSocketServer({
     path: LOCAL_MD_DEV_PATH,
     port,
     host,
@@ -71,7 +66,7 @@ export async function startDevServer(options: DevServerOptions): Promise<DevServ
     }
   }
 
-  wsServer.on('connection', (client) => {
+  wss.on('connection', (client) => {
     clients.set(client, new Set());
     client.send(
       encodeDevEvent({
@@ -85,22 +80,21 @@ export async function startDevServer(options: DevServerOptions): Promise<DevServ
       if (!decoded) return;
 
       if (decoded.type === 'watch') {
-        try {
-          await addClientDir(client, decoded.absolutePath);
-        } catch (error) {
-          client.send(
-            encodeDevEvent({
-              type: 'error',
-              message: error instanceof Error ? error.message : String(error),
-              timestamp: Date.now(),
-            }),
-          );
+        const absolutePath = decoded.absolutePath;
+        const dirs = clients.get(client);
+
+        if (dirs && !dirs.has(absolutePath)) {
+          dirs.add(absolutePath);
+          addWatchDir(absolutePath);
         }
       }
     });
 
     client.on('close', () => {
-      void removeClientDirs(client);
+      const dirs = clients.get(client);
+      if (!dirs) return;
+
+      for (const dir of dirs) removeWatchDir(dir);
       clients.delete(client);
     });
   });
@@ -125,29 +119,29 @@ export async function startDevServer(options: DevServerOptions): Promise<DevServ
   });
 
   await new Promise<void>((resolve, reject) => {
-    wsServer.once('error', reject);
-    wsServer.on('listening', () => {
-      wsServer.off('error', reject);
-      console.log(`[@fumadocs/local-md] dev server is ready at ${getDevServerUrl(port, host)}`);
+    wss.once('error', reject);
+    wss.on('listening', () => {
+      wss.off('error', reject);
+      console.log(`[@fumadocs/local-md] dev server is ready at ${url}`);
       resolve();
     });
   });
 
   return {
+    url,
     port,
     host,
     watcher,
-    watchDir: addWatchDir,
     async close() {
       for (const client of clients.keys()) {
         client.close();
       }
       clients.clear();
-      wsServer.close();
+      wss.close();
 
       await watcher.close();
       await new Promise<void>((resolve, reject) => {
-        wsServer.close((error) => {
+        wss.close((error) => {
           if (error) reject(error);
           else resolve();
         });
@@ -155,43 +149,24 @@ export async function startDevServer(options: DevServerOptions): Promise<DevServ
     },
   };
 
-  async function addClientDir(client: WebSocket, dir: string) {
-    const absolutePath = path.resolve(dir);
-    const dirs = clients.get(client);
-    if (!dirs || dirs.has(absolutePath)) return;
-
-    dirs.add(absolutePath);
-    await addWatchDir(absolutePath);
-  }
-
-  async function addWatchDir(dir: string) {
-    const absolutePath = path.resolve(dir);
-    const count = watchedDirs.get(absolutePath) ?? 0;
+  function addWatchDir(absolutePath: string) {
+    const count = watchingDirs.get(absolutePath) ?? 0;
     if (count === 0) watcher.add(absolutePath);
 
-    watchedDirs.set(absolutePath, count + 1);
+    watchingDirs.set(absolutePath, count + 1);
   }
 
-  async function removeClientDirs(client: WebSocket) {
-    const dirs = clients.get(client);
-    if (!dirs) return;
-
-    for (const dir of dirs) removeWatchDir(dir);
-    dirs.clear();
-  }
-
-  function removeWatchDir(dir: string) {
-    const absolutePath = path.resolve(dir);
-    const count = watchedDirs.get(absolutePath);
+  function removeWatchDir(absolutePath: string) {
+    const count = watchingDirs.get(absolutePath);
     if (!count) return;
 
     if (count === 1) {
-      watchedDirs.delete(absolutePath);
+      watchingDirs.delete(absolutePath);
       watcher.unwatch(absolutePath);
       return;
     }
 
-    watchedDirs.set(absolutePath, count - 1);
+    watchingDirs.set(absolutePath, count - 1);
   }
 }
 

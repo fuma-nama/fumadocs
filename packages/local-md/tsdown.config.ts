@@ -4,7 +4,12 @@ export default defineConfig({
   dts: true,
   fixedExtension: false,
   target: 'es2023',
-  entry: ['./src/index.ts', './src/bin.ts', './src/js/*', './src/dev/{server,client}.ts'],
+  entry: [
+    './src/index.ts',
+    './src/bin.ts',
+    './src/js/*',
+    './src/dev/{node-server,node-client,react-client}.ts',
+  ],
   format: 'esm',
   exports: {
     bin: {

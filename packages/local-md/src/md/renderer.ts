@@ -71,7 +71,7 @@ export function createMarkdownRenderer(
 
   return {
     async compile<V>(page: RawPage<V>): Promise<PageRenderer> {
-      const cacheKey = stableHash([page.absolutePath, page.content, page.frontmatter, compiler]);
+      const cacheKey = stableHash([page, compiler]);
       let promise = cache.get(cacheKey);
       if (!promise) {
         promise = compiler.compile({
