@@ -69,11 +69,7 @@ function server(options: Options): SearchServer {
   };
 }
 
-export function flexsearch(options: Options): SearchAPI {
-  return createEndpoint(server(options));
-}
-
-export function flexsearchI18n(options: I18nOptions): SearchAPI {
+function serverI18n(options: I18nOptions): SearchServer {
   const { indexes: inputIndexes, localeMap } = options;
 
   async function initSearchServers() {
@@ -109,7 +105,7 @@ export function flexsearchI18n(options: I18nOptions): SearchAPI {
   }
 
   const get = initSearchServers();
-  return createEndpoint({
+  return {
     async export(): Promise<ExportedData> {
       const map = await get;
       const entries = Array.from(map.entries()).map(async ([k, v]) => {
@@ -129,7 +125,15 @@ export function flexsearchI18n(options: I18nOptions): SearchAPI {
       if (handler) return handler.search(query, searchOptions);
       return [];
     },
-  });
+  };
+}
+
+export function flexsearch(options: Options): SearchAPI {
+  return createEndpoint(server(options));
+}
+
+export function flexsearchI18n(options: I18nOptions): SearchAPI {
+  return createEndpoint(serverI18n(options));
 }
 
 export interface FromSourceOptions<C extends LoaderConfig> extends Pick<
@@ -139,14 +143,19 @@ export interface FromSourceOptions<C extends LoaderConfig> extends Pick<
   buildIndex?: (page: Page<C['source']['pageData']>) => Awaitable<Index>;
 }
 
+/**
+ * create server from loader, if passed as function, the server will re-index all records once a different instance of loader is returned.
+ */
 export function flexsearchFromSource<C extends LoaderConfig>(
-  loader: LoaderOutput<C>,
+  loader: LoaderOutput<C> | (() => Awaitable<LoaderOutput<C>>),
   options: FromSourceOptions<NoInfer<C>> = {},
 ) {
+  const cache = new WeakMap<LoaderOutput<C>, Promise<SearchServer>>();
   const { buildIndex = buildIndexDefault, ...rest } = options;
-  function indexes(): Promise<IndexWithLocale[]> {
-    return Promise.all(
-      loader.getPages().map(async (page) => {
+
+  async function initServer(loader: LoaderOutput<C>): Promise<SearchServer> {
+    const indexes = await Promise.all(
+      loader.getPages().map(async (page): Promise<IndexWithLocale> => {
         const index = await buildIndex(page);
         return {
           ...index,
@@ -155,18 +164,33 @@ export function flexsearchFromSource<C extends LoaderConfig>(
         };
       }),
     );
+
+    if (loader._i18n)
+      return serverI18n({
+        indexes,
+        i18n: loader._i18n,
+        ...rest,
+      });
+
+    return server({ indexes, ...rest });
   }
 
-  if (loader._i18n) {
-    return flexsearchI18n({
-      indexes,
-      i18n: loader._i18n,
-      ...rest,
-    });
+  async function getCurrentServer() {
+    const l = typeof loader === 'function' ? await loader() : loader;
+    let server = cache.get(l);
+    if (!server) {
+      server = initServer(l);
+      cache.set(l, server);
+    }
+    return await server;
   }
 
-  return flexsearch({
-    indexes,
-    ...rest,
+  return createEndpoint({
+    async export() {
+      return (await getCurrentServer()).export();
+    },
+    async search(query, options) {
+      return (await getCurrentServer()).search(query, options);
+    },
   });
 }
