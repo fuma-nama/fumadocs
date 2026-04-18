@@ -1,4 +1,4 @@
-import type { LoaderConfig, LoaderOutput } from '../loader';
+import type { LoaderConfig, LoaderOutput } from './loader';
 import type * as PageTree from '@/page-tree';
 
 interface Context {

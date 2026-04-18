@@ -2,7 +2,6 @@ import { type InferPageType, loader } from 'fumadocs-core/source';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 import { docsContentRoute, docsImageRoute, docsRoute } from './shared';
 import { localMd } from '@fumadocs/local-md';
-import { cache } from 'react';
 
 const docs = localMd({
   dir: 'content/docs',
@@ -13,8 +12,8 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // See https://fumadocs.dev/docs/headless/source-api for more info
-export const getSource = cache(async () => {
-  return loader(await docs.toSource(), {
+export const getSource = docs.toSourceFactory((source) => {
+  return loader(source, {
     baseUrl: docsRoute,
     plugins: [lucideIconsPlugin()],
   });

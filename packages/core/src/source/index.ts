@@ -16,3 +16,6 @@ export type {
   ContentStorageMetaFile,
   ContentStoragePageFile,
 } from './storage/content';
+
+// TODO: remove this on next major
+export * from './llms';
