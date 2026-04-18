@@ -6,7 +6,6 @@ import { RawPage } from '@/storage';
 import * as JsxRuntime from 'react/jsx-runtime';
 import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import { Root } from 'hast';
-import { VFile } from 'vfile';
 import type { JSExecutor, JSExecutorConfig } from '@/js/executor';
 import type { CompileResult, MarkdownCompiler } from './compiler';
 import { pathToFileURL } from 'node:url';
@@ -25,9 +24,9 @@ export interface PageRenderer {
 
 export interface MarkdownRendererOptions {
   /**
-   * the engine to execute JavaScript (given estree with JSX)
+   * the engine to execute JavaScript in Markdown, **not used for MDX files, MDX will always use native JS engine.**
    *
-   * by default, it uses a virtual JS engine with limited
+   * by default, it uses a virtual JS engine with limited features.
    */
   executor?: (ctx: JSExecutorConfig) => JSExecutor | Promise<JSExecutor>;
 }
@@ -43,31 +42,6 @@ export function createMarkdownRenderer(
     },
   } = options;
   const cache = new Map<string, Promise<CompileResult>>();
-
-  function render(
-    tree: Root,
-    file: VFile,
-    executor: JSExecutor,
-    components: Components | undefined,
-    context: Record<string, unknown>,
-  ): ReactNode {
-    return toJsxRuntime(tree, {
-      filePath: file.path,
-      components,
-      development: false,
-      createEvaluater() {
-        return {
-          evaluateProgram(program) {
-            return executor.program(program, context);
-          },
-          evaluateExpression(node) {
-            return executor.expression(node, context);
-          },
-        };
-      },
-      ...JsxRuntime,
-    });
-  }
 
   return {
     async compile<V>(page: RawPage<V>): Promise<PageRenderer> {
@@ -101,26 +75,40 @@ export function createMarkdownRenderer(
             });
 
             const context = { ...components, ...userContext };
+
+            function render(tree: Root): ReactNode {
+              return toJsxRuntime(tree, {
+                filePath: page.absolutePath,
+                components,
+                development: false,
+                createEvaluater() {
+                  return {
+                    evaluateProgram(program) {
+                      return executor.program(program, context);
+                    },
+                    evaluateExpression(node) {
+                      return executor.expression(node, context);
+                    },
+                  };
+                },
+                ...JsxRuntime,
+              });
+            }
+
             const toc =
               compiled.file.data.rehypeToc?.map(
                 (item): TOCItemType => ({
                   ...item,
-                  title: render(
-                    {
-                      type: 'root',
-                      children: item.title.children,
-                    },
-                    compiled.file,
-                    executor,
-                    components,
-                    context,
-                  ),
+                  title: render({
+                    type: 'root',
+                    children: item.title.children,
+                  }),
                 }),
               ) ?? [];
 
             return {
               toc,
-              body: render(compiled.tree, compiled.file, executor, components, context),
+              body: render(compiled.tree),
               exports: executor.getExports(),
             };
           }
@@ -131,12 +119,12 @@ export function createMarkdownRenderer(
             userContext,
           );
           const out = _out as {
-            toc: TOCItemType[];
+            toc?: TOCItemType[];
             default: (props: { components?: Components }) => ReactNode;
           };
 
           return {
-            toc: out.toc,
+            toc: out.toc ?? [],
             body: JsxRuntime.jsx(out.default, { components }),
             exports: out,
           };

@@ -1,4 +1,4 @@
-import { getPageImage, source } from '@/lib/source';
+import { getPageImage, getSource } from '@/lib/source';
 import { notFound } from 'next/navigation';
 import { ImageResponse } from 'next/og';
 import { generate as DefaultImage } from 'fumadocs-ui/og';
@@ -8,7 +8,7 @@ export const revalidate = false;
 
 export async function GET(_req: Request, { params }: RouteContext<'/og/docs/[...slug]'>) {
   const { slug } = await params;
-  const page = source.getPage(slug.slice(0, -1));
+  const page = (await getSource()).getPage(slug.slice(0, -1));
   if (!page) notFound();
 
   return new ImageResponse(
@@ -20,8 +20,8 @@ export async function GET(_req: Request, { params }: RouteContext<'/og/docs/[...
   );
 }
 
-export function generateStaticParams() {
-  return source.getPages().map((page) => ({
+export async function generateStaticParams() {
+  return (await getSource()).getPages().map((page) => ({
     lang: page.locale,
     slug: getPageImage(page).segments,
   }));

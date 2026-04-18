@@ -19,8 +19,9 @@
   "type": "module",
   "exports": {
     ".": "./dist/index.js",
-    "./dev/client": "./dist/dev/client.js",
-    "./dev/server": "./dist/dev/server.js",
+    "./dev/node-client": "./dist/dev/node-client.js",
+    "./dev/node-server": "./dist/dev/node-server.js",
+    "./dev/react-client": "./dist/dev/react-client.js",
     "./js/executor": "./dist/js/executor.js",
     "./js/executor-native": "./dist/js/executor-native.js",
     "./js/executor-virtual": "./dist/js/executor-virtual.js",
@@ -41,7 +42,6 @@
     "@standard-schema/spec": "^1.1.0",
     "chokidar": "^5.0.0",
     "commander": "^14.0.3",
-    "cross-spawn": "^7.0.6",
     "estree-util-to-js": "^2.0.0",
     "hast-util-to-jsx-runtime": "^2.3.6",
     "remark": "^15.0.1",
@@ -52,7 +52,6 @@
     "ws": "^8.20.0"
   },
   "devDependencies": {
-    "@types/cross-spawn": "^6.0.6",
     "@types/estree": "^1.0.8",
     "@types/estree-jsx": "^1.0.5",
     "@types/hast": "^3.0.4",
@@ -67,7 +66,8 @@
     "react-dom": "^19.2.5",
     "stable-hash": "^0.0.6",
     "tsconfig": "workspace:*",
-    "tsdown": "0.21.8"
+    "tsdown": "0.21.8",
+    "vite": "^8.0.8"
   },
   "peerDependencies": {
     "@types/estree": "*",

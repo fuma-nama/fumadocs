@@ -55,16 +55,21 @@ const publicEnvNames = [
 ];
 
 export function getDevServerUrlFromEnv(): string | undefined {
+  // must hardcode to allow bundlers to inline env variables
   if (typeof process === 'object' && 'env' in process) {
-    for (const name of publicEnvNames) {
-      if (process.env[name]) return process.env[name];
-    }
+    return (
+      process.env.FD_LOCAL_MD_DEV_SERVER_URL ??
+      process.env.NEXT_PUBLIC_FD_LOCAL_MD_DEV_SERVER_URL ??
+      process.env.VITE_FD_LOCAL_MD_DEV_SERVER_URL
+    );
   }
 
   if (import.meta.env) {
-    for (const name of publicEnvNames) {
-      if (import.meta.env[name]) return import.meta.env[name];
-    }
+    return (
+      import.meta.env.FD_LOCAL_MD_DEV_SERVER_URL ??
+      import.meta.env.NEXT_PUBLIC_FD_LOCAL_MD_DEV_SERVER_URL ??
+      import.meta.env.VITE_FD_LOCAL_MD_DEV_SERVER_URL
+    );
   }
 }
 

@@ -6,6 +6,7 @@
     },
     "noEmit": true,
     "lib": ["ESNext", "DOM"],
+    "types": ["vite/client"],
     "module": "ESNext",
     "target": "ES2020"
   },

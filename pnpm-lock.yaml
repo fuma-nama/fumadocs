@@ -2244,9 +2244,6 @@ importers:
       commander:
         specifier: ^14.0.3
         version: 14.0.3
-      cross-spawn:
-        specifier: ^7.0.6
-        version: 7.0.6
       estree-util-to-js:
         specifier: ^2.0.0
         version: 2.0.0
@@ -2272,9 +2269,6 @@ importers:
         specifier: ^8.20.0
         version: 8.20.0
     devDependencies:
-      '@types/cross-spawn':
-        specifier: ^6.0.6
-        version: 6.0.6
       '@types/estree':
         specifier: ^1.0.8
         version: 1.0.8
@@ -2320,6 +2314,9 @@ importers:
       tsdown:
         specifier: 0.21.8
         version: 0.21.8(@tsdown/css@0.21.8)(oxc-resolver@11.19.1(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(typescript@6.0.2)
+      vite:
+        specifier: ^8.0.8
+        version: 8.0.8(@types/node@25.6.0)(esbuild@0.28.0)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/mdx:
     dependencies:
