@@ -1,5 +1,11 @@
 # @fumadocs/mdx-remote
 
+## 1.4.9
+
+### Patch Changes
+
+- a744f9f: Support frontmatter parsing at core-level
+
 ## 1.4.8
 
 ### Patch Changes

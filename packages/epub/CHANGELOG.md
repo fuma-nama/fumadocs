@@ -1,5 +1,15 @@
 # fumadocs-epub
 
+## 1.1.0
+
+### Minor Changes
+
+- cf0ec91: Update min Fumadocs version
+
+### Patch Changes
+
+- Updated dependencies [68c2b49]
+
 ## 1.0.2
 
 ### Patch Changes
