@@ -1,5 +1,20 @@
 # fumadocs-obsidian
 
+## 0.1.0
+
+### Minor Changes
+
+- a744f9f: Update min Fumadocs version
+
+### Patch Changes
+
+- a744f9f: Support frontmatter parsing at core-level
+- Updated dependencies [68c2b49]
+- Updated dependencies [b60fa32]
+- Updated dependencies [a744f9f]
+- Updated dependencies [92a1204]
+  - fumadocs-core@17.0.0
+
 ## 0.0.15
 
 ### Patch Changes

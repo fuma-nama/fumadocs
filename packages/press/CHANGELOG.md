@@ -1,5 +1,17 @@
 # fumapress
 
+## 0.1.29
+
+### Patch Changes
+
+- a744f9f: Support frontmatter parsing at core-level
+- Updated dependencies [68c2b49]
+- Updated dependencies [b60fa32]
+- Updated dependencies [a744f9f]
+- Updated dependencies [92a1204]
+  - fumadocs-core@17.0.0
+  - fumadocs-ui@17.0.0
+
 ## 0.1.28
 
 ### Patch Changes

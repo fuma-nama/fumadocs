@@ -1,5 +1,17 @@
 # fumadocs-core
 
+## 17.0.0
+
+### Minor Changes
+
+- 68c2b49: Support multi-source natively in `loader()` API
+- 92a1204: Introduce `dynamicLoader()` API, `loader()` with revalidation supported out-of-the-box
+
+### Patch Changes
+
+- b60fa32: Support function for loader option in Search API
+- a744f9f: Support frontmatter parsing at core-level
+
 ## 16.7.16
 
 ### Patch Changes
