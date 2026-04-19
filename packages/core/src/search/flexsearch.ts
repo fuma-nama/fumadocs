@@ -3,7 +3,7 @@ import Search, { type DocumentOptions } from 'flexsearch';
 import { createEndpoint } from './server/endpoint';
 import { buildBreadcrumbs, buildIndexDefault, type SharedIndex } from './server/build-index';
 import { buildDocuments } from './server/build-doc';
-import type { LoaderConfig, LoaderOutput, Page } from '@/source';
+import type { LoaderConfig, LoaderOutput } from '@/source';
 import type { Awaitable } from '@/types';
 import type { I18nConfig } from '@/i18n';
 import { createDocument, search, type Doc } from './flexsearch/utils';
@@ -140,7 +140,7 @@ export interface FromSourceOptions<C extends LoaderConfig> extends Pick<
   I18nOptions,
   'localeMap' | 'document'
 > {
-  buildIndex?: (page: Page<C['source']['pageData']>) => Awaitable<Index>;
+  buildIndex?: (page: C['page']) => Awaitable<Index>;
 }
 
 /**

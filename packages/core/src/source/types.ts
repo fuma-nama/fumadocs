@@ -11,7 +11,7 @@ export type AnyInput = SourceUnion | Record<string, SourceUnion>;
 export type GeneratePage<T extends AnyInput> =
   T extends Record<infer K extends string, SourceUnion>
     ? {
-        [k in K]: T[K] extends SourceUnion<infer D> ? Page<K, D['pageData']> : never;
+        [k in K]: T[k] extends SourceUnion<infer D> ? Page<k, D['pageData']> : never;
       }[K]
     : T extends SourceUnion<infer D>
       ? Page<undefined, D['pageData']>
@@ -20,7 +20,7 @@ export type GeneratePage<T extends AnyInput> =
 export type GenerateMeta<T extends AnyInput> =
   T extends Record<infer K extends string, SourceUnion>
     ? {
-        [k in K]: T[K] extends SourceUnion<infer D> ? Meta<K, D['metaData']> : never;
+        [k in K]: T[k] extends SourceUnion<infer D> ? Meta<k, D['metaData']> : never;
       }[K]
     : T extends SourceUnion<infer D>
       ? Meta<undefined, D['metaData']>
@@ -29,8 +29,8 @@ export type GenerateMeta<T extends AnyInput> =
 export type GeneratePageFile<T extends AnyInput> =
   T extends Record<infer K extends string, SourceUnion>
     ? {
-        [k in K]: T[K] extends SourceUnion<infer D>
-          ? ContentStoragePageFile<K, D['pageData']>
+        [k in K]: T[k] extends SourceUnion<infer D>
+          ? ContentStoragePageFile<k, D['pageData']>
           : never;
       }[K]
     : T extends SourceUnion<infer D>
@@ -40,8 +40,8 @@ export type GeneratePageFile<T extends AnyInput> =
 export type GenerateMetaFile<T extends AnyInput> =
   T extends Record<infer K extends string, SourceUnion>
     ? {
-        [k in K]: T[K] extends SourceUnion<infer D>
-          ? ContentStorageMetaFile<K, D['metaData']>
+        [k in K]: T[k] extends SourceUnion<infer D>
+          ? ContentStorageMetaFile<k, D['metaData']>
           : never;
       }[K]
     : T extends SourceUnion<infer D>

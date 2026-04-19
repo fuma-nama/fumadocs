@@ -6,7 +6,7 @@ import { joinPath } from './path';
 import { normalizeUrl } from '@/utils/normalize-url';
 import { SlugFn, slugsPlugin } from '@/source/plugins/slugs';
 import { iconPlugin, type IconResolver } from '@/source/plugins/icon';
-import type { MetaData, PageData, SourceConfig, StaticSource } from './source';
+import type { MetaData, PageData, StaticSource } from './source';
 import { visit } from '@/page-tree/utils';
 import path from 'node:path';
 import type { PageTreeTransformer } from '@/source/page-tree/builder';
@@ -69,7 +69,7 @@ interface SharedFileInfo {
 
 export interface Page<
   Type extends string | undefined = string | undefined,
-  Data = PageData,
+  Data extends PageData = PageData,
 > extends SharedFileInfo {
   type: Type;
   slugs: string[];
@@ -81,7 +81,7 @@ export interface Page<
 
 export interface Meta<
   Type extends string | undefined = string | undefined,
-  Data = MetaData,
+  Data extends MetaData = MetaData,
 > extends SharedFileInfo {
   type: Type;
   data: Data;
@@ -268,8 +268,8 @@ export function loader<I extends ResolvedInput, I18n extends I18nConfig | undefi
   source: I,
   options: LoaderOptions<NoInfer<GenerateStorage<I>>, I18n>,
 ): LoaderOutput<{
-  meta: NoInfer<GenerateMeta<I>>;
-  page: NoInfer<GeneratePage<I>>;
+  meta: GenerateMeta<I>;
+  page: GeneratePage<I>;
   i18n: I18n;
 }>;
 
@@ -278,12 +278,12 @@ export function loader<I extends ResolvedInput, I18n extends I18nConfig | undefi
     source: I;
   },
 ): LoaderOutput<{
-  meta: NoInfer<GenerateMeta<I>>;
-  page: NoInfer<GeneratePage<I>>;
+  meta: GenerateMeta<I>;
+  page: GeneratePage<I>;
   i18n: I18n;
 }>;
 
-export function loader<I extends ResolvedInput>(
+export function loader<I extends ResolvedInput, I18n extends I18nConfig | undefined = undefined>(
   ...args:
     | [
         LoaderOptions & {
@@ -291,7 +291,11 @@ export function loader<I extends ResolvedInput>(
         },
       ]
     | [I, LoaderOptions]
-): LoaderOutput<LoaderConfig> {
+): LoaderOutput<{
+  meta: GenerateMeta<I>;
+  page: GeneratePage<I>;
+  i18n: I18n;
+}> {
   const loaderConfig =
     args.length === 2 ? resolveConfig(args[0], args[1]) : resolveConfig(args[0].source, args[0]);
   const { i18n } = loaderConfig;
@@ -340,10 +344,10 @@ export function loader<I extends ResolvedInput>(
     }
   }
 
-  return {
+  const out: LoaderOutput = {
     _i18n: i18n,
     get pageTree() {
-      return getPageTrees() as unknown as LoaderOutput<LoaderConfig>['pageTree'];
+      return getPageTrees() as never;
     },
     set pageTree(v) {
       pageTrees = v;
@@ -462,6 +466,8 @@ export function loader<I extends ResolvedInput>(
       };
     },
   };
+
+  return out as never;
 }
 
 function resolveConfig(

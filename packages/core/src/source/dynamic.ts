@@ -77,7 +77,7 @@ export function dynamicLoader<I extends Input, I18n extends I18nConfig | undefin
       }
 
       loaderCacheKey = resolved;
-      loaderCache = loader(resolved, options as never);
+      loaderCache = loader(resolved, options as never) as LoaderOutput;
       return loaderCache as LoaderOutput<any>;
     }),
     $inferPage: undefined as never,

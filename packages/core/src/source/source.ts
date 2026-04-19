@@ -76,8 +76,25 @@ interface VirtualMeta<Data extends MetaData> extends BaseVirtualFile {
 /**
  * @deprecated you can directly pass a record of source objects to `loader()`.
  */
-export function multiple<T extends Record<string, StaticSource>>(sources: T): T {
-  return sources;
+export function multiple<T extends Record<string, StaticSource>>(
+  sources: T,
+): T extends Record<infer K extends string, StaticSource>
+  ? {
+      [k in K]: T[k] extends StaticSource<infer C>
+        ? StaticSource<{
+            metaData: C['metaData'] & { type: k };
+            pageData: C['pageData'] & { type: k };
+          }>
+        : never;
+    }
+  : never {
+  const out: Record<string, StaticSource> = {};
+  for (const k in sources) {
+    out[k] = {
+      files: sources[k].files.map((file) => ({ ...file, data: { ...file.data, type: k } })),
+    };
+  }
+  return out as never;
 }
 
 export function source<Page extends PageData, Meta extends MetaData>(config: {

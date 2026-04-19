@@ -54,7 +54,7 @@
     "vfile": "^6.0.3"
   },
   "peerDependencies": {
-    "fumadocs-core": "^15.0.0 || ^16.0.0"
+    "fumadocs-core": "^16.8.0"
   },
   "engines": {
     "node": ">=18"

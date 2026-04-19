@@ -22,7 +22,7 @@ import {
 import { searchSimple } from './search/simple';
 import { searchAdvanced } from './search/advanced';
 import { buildBreadcrumbs, buildIndexDefault, type SharedIndex } from '../server/build-index';
-import type { LoaderConfig, LoaderOutput, Page } from '@/source/loader';
+import type { LoaderConfig, LoaderOutput } from '@/source/loader';
 import type { Awaitable } from '@/types';
 
 type OramaInput = Parameters<typeof create>[0];
@@ -264,13 +264,13 @@ interface Options<C extends LoaderConfig> extends Omit<AdvancedOptions, 'indexes
       | Partial<AdvancedOptions>
       | Language;
   };
-  buildIndex?: (page: Page<C['source']['pageData']>) => Awaitable<AdvancedIndex>;
+  buildIndex?: (page: C['page']) => Awaitable<AdvancedIndex>;
 }
 
 /**
  * create server from loader, if passed as function, the server will re-index all records once a different instance of loader is returned.
  */
-export function createFromSource<C extends LoaderConfig>(
+export function createFromSource<C extends LoaderConfig = LoaderConfig>(
   loader: LoaderOutput<C> | (() => Awaitable<LoaderOutput<C>>),
   options: Options<C> = {},
 ): SearchAPI<OramaQueryOptions> {
