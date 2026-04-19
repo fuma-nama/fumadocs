@@ -114,19 +114,19 @@ export function getMDXComponents(components?: MDXComponents) {
 You can also use it without generating real files by integrating into [Loader API](/docs/headless/source-api/source).
 
 ```ts title="lib/source.ts"
-import { loader, multiple } from 'fumadocs-core/source';
+import { loader } from 'fumadocs-core/source';
 import { openapiPlugin, openapiSource } from 'fumadocs-openapi/server';
 import { docs } from 'collections/server';
 import { openapi } from '@/lib/openapi';
 
 export const source = loader(
   // [!code ++:6]
-  multiple({
+  {
     docs: docs.toFumadocsSource(),
     openapi: await openapiSource(openapi, {
       baseDir: 'openapi',
     }),
-  }),
+  },
   {
     baseUrl: '/docs',
     plugins: [openapiPlugin()],
@@ -135,9 +135,9 @@ export const source = loader(
 );
 ```
 
-`openapiSource()` is a server-side API that generates pages directly to your `loader()`, hence allowing dynamic generation (e.g. different page tree as schema changes).
+`openapiSource()` is a server-side API that generates pages directly to your `loader()`, hence it allows dynamic content generation, such as re-generating page tree as schema changes.
 
-It shares a different type from your original source, explicit handling of OpenAPI pages might be necessary (e.g. in your page component).
+**It will change the type of your pages**, make sure to update all references to your `source`. For example, in your page component:
 
 ```tsx title="docs/[[...slug]]/page.tsx"
 import { APIPage } from '@/components/api-page';
@@ -146,7 +146,7 @@ function Page() {
   const page = source.getPage('...');
 
   // for OpenAPI pages
-  if (page.data.type === 'openapi') {
+  if (page.type === 'openapi') {
     return (
       <DocsPage full>
         <h1 className="text-[1.75em] font-semibold">{page.data.title}</h1>
@@ -165,11 +165,10 @@ Or where you return text for LLM:
 
 ```ts
 import { source } from '@/lib/source';
-import type { InferPageType } from 'fumadocs-core/source';
 
-export async function getLLMText(page: InferPageType<typeof source>) {
+export async function getLLMText(page: (typeof source)['$inferPage']) {
   // [!code ++:4]
-  if (page.data.type === 'openapi') {
+  if (page.type === 'openapi') {
     // e.g. return the stringified OpenAPI schema
     return JSON.stringify(page.data.getSchema().bundled, null, 2);
   }
@@ -177,6 +176,16 @@ export async function getLLMText(page: InferPageType<typeof source>) {
   // your original flow below...
 }
 ```
+
+<Callout type='warn' title="Ensure the migration is complete!">
+
+Run a type check to verify before continuing, e.g.
+
+```npm
+npm run types:check
+```
+
+</Callout>
 
 </Tab>
 </Tabs>

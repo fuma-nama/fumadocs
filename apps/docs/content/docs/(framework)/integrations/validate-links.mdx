@@ -13,7 +13,6 @@ Create a script:
 
 ```ts title="scripts/lint.ts"
 import { type FileObject, printErrors, scanURLs, validateFiles } from 'next-validate-link';
-import type { InferPageType } from 'fumadocs-core/source';
 import { source } from '@/lib/source';
 
 async function checkLinks() {
@@ -48,7 +47,7 @@ async function checkLinks() {
   );
 }
 
-function getHeadings({ data }: InferPageType<typeof source>): string[] {
+function getHeadings({ data }: (typeof source)['$inferPage']): string[] {
   return data.toc.map((item) => item.url.slice(1));
 }
 

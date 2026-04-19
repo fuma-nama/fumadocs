@@ -1,5 +1,5 @@
 import { docs } from 'collections/server';
-import { type InferPageType, loader } from 'fumadocs-core/source';
+import { loader } from 'fumadocs-core/source';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 import { docsContentRoute, docsImageRoute, docsRoute } from './shared';
 
@@ -10,7 +10,7 @@ export const source = loader({
   plugins: [lucideIconsPlugin()],
 });
 
-export function getPageImage(page: InferPageType<typeof source>) {
+export function getPageImage(page: (typeof source)['$inferPage']) {
   const segments = [...page.slugs, 'image.png'];
 
   return {
@@ -19,7 +19,7 @@ export function getPageImage(page: InferPageType<typeof source>) {
   };
 }
 
-export function getPageMarkdownUrl(page: InferPageType<typeof source>) {
+export function getPageMarkdownUrl(page: (typeof source)['$inferPage']) {
   const segments = [...page.slugs, 'content.md'];
 
   return {
@@ -28,7 +28,7 @@ export function getPageMarkdownUrl(page: InferPageType<typeof source>) {
   };
 }
 
-export async function getLLMText(page: InferPageType<typeof source>) {
+export async function getLLMText(page: (typeof source)['$inferPage']) {
   const processed = await page.data.getText('processed');
 
   return `# ${page.data.title} (${page.url})

@@ -61,18 +61,18 @@ import { docs } from 'collections/my-workspace/server';
 
 > The output location of root workspace is not changed.
 
-To integrate multiple sources in Fumadocs, use [`multiple`](/docs/headless/source-api/source#multiple-sources):
+To integrate [multi-source](/docs/headless/source-api/source#multiple-sources) in Fumadocs:
 
 ```ts title="lib/source.ts"
-import { loader, multiple } from 'fumadocs-core/source';
+import { loader } from 'fumadocs-core/source';
 import { docs } from 'collections/server';
 import * as MyWorkspace from 'collections/my-workspace/server';
 
 export const source = loader(
-  multiple({
+  {
     root: docs.toFumadocsSource(),
     'my-workspace': MyWorkspace.docs.toFumadocsSource(),
-  }),
+  },
   {
     baseUrl: '/docs',
   },

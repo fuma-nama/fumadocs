@@ -40,7 +40,7 @@ export function createMarkdownRenderer(
       return executorVirtual(config);
     },
   } = options;
-  const cache = new WeakMap<RawPage<any>, Promise<CompileResult>>();
+  const cache = new WeakMap<RawPage<unknown>, Promise<CompileResult>>();
 
   return {
     async compile<V>(page: RawPage<V>): Promise<PageRenderer> {
