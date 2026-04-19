@@ -1,4 +1,4 @@
-import type { MetaData, Source, VirtualFile } from 'fumadocs-core/source';
+import type { DynamicSource, MetaData, StaticSource, VirtualFile } from 'fumadocs-core/source';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import path from 'node:path';
 import { createStorage } from './storage';
@@ -6,7 +6,7 @@ import type * as defaultSchemas from 'fumadocs-core/source/schema';
 import { createMarkdownRenderer, MarkdownRendererOptions, PageRenderer } from './md/renderer';
 import { createMarkdownCompiler, MarkdownCompilerOptions } from './md/compiler';
 import { getDevServerUrlFromEnv } from './dev/shared';
-import { cache } from 'react';
+import type { DynamicLoader } from 'fumadocs-core/source/dynamic';
 
 export interface LocalMarkdownConfig<
   FrontmatterSchema extends StandardSchemaV1,
@@ -30,23 +30,26 @@ export interface LocalMarkdown<
   FrontmatterSchema extends StandardSchemaV1,
   MetaSchema extends StandardSchemaV1,
 > {
-  config: LocalMarkdownConfig<FrontmatterSchema, MetaSchema>;
   /** connect to dev server, required for hot reload */
   devServer: (url?: string) => Promise<void>;
-  toSource: () => Promise<GetSource<FrontmatterSchema, MetaSchema>>;
+  staticSource: () => Promise<GetSourceStatic<FrontmatterSchema, MetaSchema>>;
+  dynamicSource: () => GetSourceDynamic<FrontmatterSchema, MetaSchema>;
 
-  /**
-   * return a cached version of `fn`, the cache will revalidate when the source object (content) is changed.
-   */
-  toSourceFactory: <R>(
-    fn: (source: GetSource<FrontmatterSchema, MetaSchema>) => R,
-  ) => () => Promise<R>;
+  invalidateFile: (file: string) => void;
 }
 
-type GetSource<
+type GetSourceStatic<
   FrontmatterSchema extends StandardSchemaV1,
   MetaSchema extends StandardSchemaV1,
-> = Source<{
+> = StaticSource<{
+  pageData: LocalMarkdownPage<StandardSchemaV1.InferOutput<FrontmatterSchema>>;
+  metaData: StandardSchemaV1.InferOutput<MetaSchema> & MetaData;
+}>;
+
+type GetSourceDynamic<
+  FrontmatterSchema extends StandardSchemaV1,
+  MetaSchema extends StandardSchemaV1,
+> = DynamicSource<{
   pageData: LocalMarkdownPage<StandardSchemaV1.InferOutput<FrontmatterSchema>>;
   metaData: StandardSchemaV1.InferOutput<MetaSchema> & MetaData;
 }>;
@@ -69,10 +72,10 @@ export function localMd<
   const storage = createStorage(config);
   const compiler = createMarkdownCompiler(config);
   const renderer = createMarkdownRenderer(compiler, config.rendererOptions);
+  const registeredLoaders = new Set<DynamicLoader>();
+  let cachedStaticSource: Promise<GetSourceStatic<FrontmatterSchema, MetaSchema>> | null = null;
 
-  let cachedSource: Promise<GetSource<FrontmatterSchema, MetaSchema>> | null = null;
-
-  async function createSource() {
+  async function createFiles() {
     const { metas, pages } = await storage.getPages();
     const files: VirtualFile<{
       pageData: LocalMarkdownPage<StandardSchemaV1.InferOutput<FrontmatterSchema>>;
@@ -105,11 +108,20 @@ export function localMd<
       });
     }
 
-    return { files };
+    return files;
+  }
+
+  async function createSource() {
+    return { files: await createFiles() };
   }
 
   return {
-    config,
+    invalidateFile(file) {
+      const absolutePath = path.resolve(file);
+      cachedStaticSource = null;
+      storage.invalidateCache(absolutePath);
+      for (const v of registeredLoaders) v.revalidate();
+    },
     async devServer(url = getDevServerUrlFromEnv()) {
       if (!url) {
         console.warn(
@@ -124,27 +136,20 @@ export function localMd<
 
       conn.subscribe((event) => {
         if (event.type === 'change') {
-          cachedSource = null;
-          storage.invalidateCache(event.absolutePath);
+          this.invalidateFile(event.absolutePath);
         }
       });
     },
-    toSourceFactory<R>(
-      fn: (source: GetSource<FrontmatterSchema, MetaSchema>) => R,
-    ): () => Promise<R> {
-      let k: GetSource<FrontmatterSchema, MetaSchema> | undefined;
-      let v: R | undefined;
-
-      return cache(async () => {
-        const source = await this.toSource();
-        if (k === source) return v!;
-
-        k = source;
-        return (v = fn(source));
-      });
+    dynamicSource() {
+      return {
+        files: createFiles,
+        configure(loader) {
+          registeredLoaders.add(loader);
+        },
+      };
     },
-    toSource() {
-      return (cachedSource ??= createSource());
+    staticSource() {
+      return (cachedStaticSource ??= createSource());
     },
   };
 }

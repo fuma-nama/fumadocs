@@ -1,8 +1,7 @@
 import type { TOCItemType } from 'fumadocs-core/toc';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { ReactNode } from 'react';
-import { stableHash } from 'stable-hash';
-import { RawPage } from '@/storage';
+import type { RawPage } from '@/storage';
 import * as JsxRuntime from 'react/jsx-runtime';
 import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import { Root } from 'hast';
@@ -41,19 +40,18 @@ export function createMarkdownRenderer(
       return executorVirtual(config);
     },
   } = options;
-  const cache = new Map<string, Promise<CompileResult>>();
+  const cache = new WeakMap<RawPage<any>, Promise<CompileResult>>();
 
   return {
     async compile<V>(page: RawPage<V>): Promise<PageRenderer> {
-      const cacheKey = stableHash([page, compiler]);
-      let promise = cache.get(cacheKey);
+      let promise = cache.get(page);
       if (!promise) {
         promise = compiler.compile({
           path: page.absolutePath,
           value: page.content,
           data: { frontmatter: page.frontmatter },
         });
-        cache.set(cacheKey, promise);
+        cache.set(page, promise);
       }
 
       const compiled = await promise;

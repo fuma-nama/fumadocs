@@ -16,7 +16,7 @@ export interface StaticSource<Config extends SourceConfig = SourceConfig> {
 
 export interface DynamicSource<Config extends SourceConfig = SourceConfig> {
   files: () => Awaitable<VirtualFile<Config>[]>;
-  configure: (loader: DynamicLoader) => void;
+  configure?: (loader: DynamicLoader) => void;
 }
 
 export interface SourceConfig {
@@ -150,4 +150,8 @@ export function update<Config extends SourceConfig>(
 
 export function isStaticSource(s: object): s is StaticSource {
   return 'files' in s && Array.isArray(s.files);
+}
+
+export function isDynamicSource(s: object): s is DynamicSource {
+  return 'files' in s && typeof s.files === 'function';
 }

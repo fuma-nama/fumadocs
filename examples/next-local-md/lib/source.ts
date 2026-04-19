@@ -1,27 +1,23 @@
-import { type InferPageType, loader } from 'fumadocs-core/source';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 import { docsContentRoute, docsImageRoute, docsRoute } from './shared';
 import { localMd } from '@fumadocs/local-md';
+import { dynamicLoader } from 'fumadocs-core/source/dynamic';
 
 const docs = localMd({
   dir: 'content/docs',
 });
 
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === 'development' && import.meta.turbopackHot) {
   void docs.devServer();
 }
 
 // See https://fumadocs.dev/docs/headless/source-api for more info
-export const getSource = docs.toSourceFactory((source) => {
-  return loader(source, {
-    baseUrl: docsRoute,
-    plugins: [lucideIconsPlugin()],
-  });
+export const source = dynamicLoader(docs.dynamicSource(), {
+  baseUrl: docsRoute,
+  plugins: [lucideIconsPlugin()],
 });
 
-type Source = Awaited<ReturnType<typeof getSource>>;
-
-export function getPageImage(page: InferPageType<Source>) {
+export function getPageImage(page: (typeof source)['$inferPage']) {
   const segments = [...page.slugs, 'image.png'];
 
   return {
@@ -30,7 +26,7 @@ export function getPageImage(page: InferPageType<Source>) {
   };
 }
 
-export function getPageMarkdownUrl(page: InferPageType<Source>) {
+export function getPageMarkdownUrl(page: (typeof source)['$inferPage']) {
   const segments = [...page.slugs, 'content.md'];
 
   return {
@@ -39,7 +35,7 @@ export function getPageMarkdownUrl(page: InferPageType<Source>) {
   };
 }
 
-export async function getLLMText(page: InferPageType<Source>) {
+export async function getLLMText(page: (typeof source)['$inferPage']) {
   return `# ${page.data.title} (${page.url})
 
 ${page.data.content}`;

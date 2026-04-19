@@ -87,7 +87,7 @@ export interface Meta<
   data: Data;
 }
 
-export interface LoaderOutput<Config extends LoaderConfig> {
+export interface LoaderOutput<Config extends LoaderConfig = LoaderConfig> {
   pageTree: Config['i18n'] extends I18nConfig ? Record<string, PageTree.Root> : PageTree.Root;
 
   getPageTree: (locale?: string) => PageTree.Root;

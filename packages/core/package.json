@@ -75,6 +75,7 @@
     "./search/server": "./dist/search/server.js",
     "./source": "./dist/source/index.js",
     "./source/client": "./dist/source/client/index.js",
+    "./source/dynamic": "./dist/source/dynamic.js",
     "./source/llms": "./dist/source/llms.js",
     "./source/plugins/lucide-icons": "./dist/source/plugins/lucide-icons.js",
     "./source/plugins/slugs": "./dist/source/plugins/slugs.js",

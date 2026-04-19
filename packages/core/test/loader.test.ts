@@ -36,7 +36,7 @@ const pageTreeTests: {
   title: string;
   output: string;
   source: StaticSource;
-  loader?: Partial<LoaderOptions>;
+  loader?: Pick<Partial<LoaderOptions>, 'i18n'>;
 }[] = [
   {
     title: 'Basic',

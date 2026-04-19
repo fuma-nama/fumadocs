@@ -13,7 +13,7 @@ export default defineConfig({
     'src/{negotiation,content}/*',
     'src/content/md/*.ts',
     'src/content/mdx/preset-*.ts',
-    'src/source/{index,llms,schema}.ts',
+    'src/source/{index,llms,dynamic,schema}.ts',
     'src/source/client/*.{ts,tsx}',
     'src/source/plugins/{lucide-icons,slugs,status-badges}.{ts,tsx}',
     'src/search/{index,client,server,algolia,orama-cloud,orama-cloud-legacy,mixedbread,flexsearch}.ts',
